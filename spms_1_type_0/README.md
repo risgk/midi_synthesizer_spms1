@@ -1,4 +1,4 @@
-Music Synth SPMS-1 (type-0) v0.0.0
+Music Synth SPMS-1 (type-0) v0.0.1
 ==================================
 
 - Monophonic Music Synthesizer built with Spinel (Ruby AOT Compiler) by ISGK Instruments (Ryo Ishigaki)
@@ -95,12 +95,6 @@ Usage
 
 - Speed: 115200 bps
 - GP0 and GP1 pins are used by UART0 TX and UART0 RX
-
-
-Change History
---------------
-
-- Version 0.0.0 (2026-08-12): TODO
 
 
 SPMS-1 (type-0) Licence
