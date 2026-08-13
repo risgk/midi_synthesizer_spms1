@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SPMS-1 (type-0) Editor</title>
+  <style>
+    body {
+      font-family: monospace;
+      background: #121212;
+      color: #e0e0e0;
+      margin: 40px;
+      /* 画面全体のテキスト選択を完全に禁止してドラッグ操作を最優先化 */
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      user-select: none;
+    }
+    h1 { font-size: 1.5rem; letter-spacing: 2px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 30px; margin-top: 30px; }
+    .section { border: 1px solid #333; padding: 20px; background: #1a1a1a; }
+    .section-title { font-weight: bold; color: #ff5500; margin-bottom: 15px; text-transform: uppercase; }
+    .control { margin-bottom: 15px; }
+    label { display: block; font-size: 0.8rem; margin-bottom: 5px; color: #888; }
+    .label-row { display: flex; justify-content: space-between; align-items: center; }
+    .value-display { font-size: 0.9rem; color: #ff5500; font-weight: bold; }
+    select { width: 100%; background: #2a2a2a; color: #fff; border: 1px solid #444; padding: 5px; box-sizing: border-box; }
+    .midi-select-container { display: flex; gap: 20px; margin-bottom: 30px; padding: 15px; background: #222; border: 1px solid #333; align-items: flex-end; }
+    .midi-select { flex: 1; }
+    
+    .init-button {
+      background: #ff5500;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      font-family: monospace;
+      font-weight: bold;
+      cursor: pointer;
+      height: 34px;
+      letter-spacing: 1px;
+      transition: background 0.2s;
+    }
+    .init-button:hover { background: #ff7733; }
+    .init-button:active { background: #cc4400; }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      background: #2a2a2a;
+      border: 1px solid #444;
+      outline: none;
+      margin: 12px 0;
+      padding: 0;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      background: #ff5500;
+      border-radius: 0;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      background: #ff5500;
+      border-radius: 0;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>SPMS-1 (type-0) Editor v0.0.0</h1>
+
+  <!-- MIDI Device Selectors & Controls -->
+  <div class="midi-select-container">
+    <div class="midi-select">
+      <label for="midi-in">MIDI IN DEVICE (KEYBOARD / CONTROLLER)</label>
+      <select id="midi-in"><option value="">Select MIDI Input Device...</option></select>
+    </div>
+    <div class="midi-select">
+      <label for="midi-out">MIDI OUT DEVICE (SPMS-1 SYNTH)</label>
+      <select id="midi-out"><option value="">Select SPMS-1 Device...</option></select>
+    </div>
+    <button class="init-button" onclick="initializeAndSendAll()">INITIALIZE & SEND ALL</button>
+  </div>
+
+  <div class="grid">
+    <!-- OSCILLATOR SECTION -->
+    <div class="section">
+      <div class="section-title">Oscillator</div>
+      <div class="control">
+        <label>Waveform (CC 20)</label>
+        <select id="ctrl-20" onchange="sendCC(20, this.value)">
+          <option value="0">Sawtooth</option>
+          <option value="127">Square</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- FILTER SECTION -->
+    <div class="section">
+      <div class="section-title">Filter</div>
+      <div class="control">
+        <div class="label-row">
+          <label>Cutoff (CC 74)</label>
+          <span class="value-display" id="val-74">127</span>
+        </div>
+        <input type="range" id="ctrl-74" min="0" max="127" value="127" oninput="updateValue(74, this.value)">
+      </div>
+      <div class="control">
+        <div class="label-row">
+          <label>Resonance (CC 71)</label>
+          <span class="value-display" id="val-71">80</span>
+        </div>
+        <input type="range" id="ctrl-71" min="0" max="127" value="80" oninput="updateValue(71, this.value)">
+      </div>
+      <div class="control">
+        <div class="label-row">
+          <label>EG Amount (CC 24)</label>
+          <span class="value-display" id="val-24">48</span>
+        </div>
+        <input type="range" id="ctrl-24" min="0" max="127" value="48" oninput="updateValue(24, this.value)">
+      </div>
+    </div>
+
+    <!-- EG SECTION -->
+    <div class="section">
+      <div class="section-title">EG</div>
+      <div class="control">
+        <div class="label-row">
+          <label>Attack Time (CC 73)</label>
+          <span class="value-display" id="val-73">32</span>
+        </div>
+        <input type="range" id="ctrl-73" min="0" max="127" value="32" oninput="updateValue(73, this.value)">
+      </div>
+      <div class="control">
+        <div class="label-row">
+          <label>Decay Time (CC 75)</label>
+          <span class="value-display" id="val-75">96</span>
+         </div>
+        <input type="range" id="ctrl-75" min="0" max="127" value="96" oninput="updateValue(75, this.value)">
+      </div>
+      <div class="control">
+        <div class="label-row">
+          <label>Sustain Level (CC 30)</label>
+          <span class="value-display" id="val-30">0</span>
+        </div>
+        <input type="range" id="ctrl-30" min="0" max="127" value="0" oninput="updateValue(30, this.value)">
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let midiInput = null;
+    let midiOutput = null;
+
+    const factoryDefaults = { 20: 0, 74: 127, 71: 80, 24: 48, 73: 32, 75: 96, 30: 0 };
+
+    window.addEventListener('DOMContentLoaded', () => {
+      resetUItoDefaults();
+    });
+
+    if (navigator.requestMIDIAccess) {
+      navigator.requestMIDIAccess().then(onMIDISuccess, () => console.log('MIDI Access Denied'));
+    }
+
+    function onMIDISuccess(midiAccess) {
+      const inputs = midiAccess.inputs.values();
+      const outputs = midiAccess.outputs.values();
+      
+      const selectIn = document.getElementById('midi-in');
+      const selectOut = document.getElementById('midi-out');
+      
+      for (let input of inputs) {
+        let option = document.createElement('option');
+        option.value = input.id;
+        option.text = input.name;
+        selectIn.add(option);
+      }
+
+      for (let output of outputs) {
+        let option = document.createElement('option');
+        option.value = output.id;
+        option.text = output.name;
+        selectOut.add(option);
+      }
+
+      selectIn.onchange = (e) => {
+        if (midiInput) midiInput.onmidimessage = null;
+        midiInput = midiAccess.inputs.get(e.target.value);
+        if (midiInput) midiInput.onmidimessage = handleMIDIMessage;
+      };
+
+      selectOut.onchange = (e) => {
+        midiOutput = midiAccess.outputs.get(e.target.value);
+      };
+    }
+
+    function handleMIDIMessage(event) {
+      if (!midiOutput) return;
+
+      midiOutput.send(event.data);
+
+      const status = event.data & 0xF0;
+      if (status === 0xB0) {
+        const ccNumber = event.data;
+        const value = event.data;
+        
+        const ctrlElement = document.getElementById('ctrl-' + ccNumber);
+        if (ctrlElement) ctrlElement.value = value;
+
+        const valElement = document.getElementById('val-' + ccNumber);
+        if (valElement) valElement.textContent = value;
+      }
+    }
+
+    function resetUItoDefaults() {
+      Object.keys(factoryDefaults).forEach(cc => {
+        const val = factoryDefaults[cc];
+        document.getElementById('ctrl-' + cc).value = val;
+        
+        const valDisplay = document.getElementById('val-' + cc);
+        if (valDisplay) valDisplay.textContent = val;
+      });
+    }
+
+    function initializeAndSendAll() {
+      resetUItoDefaults();
+      if (!midiOutput) {
+        alert("Please select a MIDI OUT device first.");
+        return;
+      }
+      
+      Object.keys(factoryDefaults).forEach(cc => {
+        sendCC(parseInt(cc), factoryDefaults[cc]);
+      });
+    }
+
+    function updateValue(ccNumber, value) {
+      document.getElementById('val-' + ccNumber).textContent = value;
+      sendCC(ccNumber, value);
+    }
+
+    function sendCC(ccNumber, value) {
+      if (midiOutput) {
+        midiOutput.send([0xB0, ccNumber, parseInt(value)]);
+      }
+    }
+  </script>
+</body>
+</html>
