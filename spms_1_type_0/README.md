@@ -3,7 +3,7 @@ Music Synth SPMS-1 (type-0) v0.0.0
 
 - Monophonic Music Synthesizer built with Spinel (Ruby AOT Compiler) by ISGK Instruments (Ryo Ishigaki)
 - Controlled by MIDI -- SPMS-1 (type-0) is a MIDI sound module
-- Project URL: <https://github.com/risgk/music-synth-spms-1/spms_1_type_0>
+- Project URL: <https://github.com/risgk/music-synth-spms-1>
 
 
 Required Hardware
