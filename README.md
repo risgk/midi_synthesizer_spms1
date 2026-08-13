@@ -1,8 +1,9 @@
 Music Synth SPMS-1
 ==================
 
-- Music Synthesizer built with Spinel (Ruby AOT Compiler) by ISGK Instruments (Ryo Ishigaki)
-- Project URL: <https://github.com/risgk/music-synth-spms-1>
+- Music Synthesizer built with Spinel (Ruby AOT Compiler)
+- Developed by ISGK Instruments (Ryo Ishigaki)
+- <https://github.com/risgk/music-synth-spms-1>
 
 
 SPMS-1 (type-0)
