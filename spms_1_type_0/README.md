@@ -1,4 +1,4 @@
-Music Synth SPMS-1 (type-0) v0.0.1
+Music Synth SPMS-1 (type-0) v0.0.2
 ==================================
 
 - Monophonic Music Synthesizer for Raspberry Pi Pico 2, built with Spinel (Ruby AOT Compiler)
