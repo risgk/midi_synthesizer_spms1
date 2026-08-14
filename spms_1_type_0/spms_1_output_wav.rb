@@ -10,7 +10,7 @@ FILENAME = "spms_1_output.wav"
 
 oscillator = Spms1::Oscillator.new
 oscillator.set_sample_rate(SAMPLE_RATE)
-oscillator.set_waveform(0.0 * (1.0 / 127.0))
+oscillator.set_waveform(64.0 * (1.0 / 128.0))
 
 filter = Spms1::Filter.new
 filter.set_sample_rate(SAMPLE_RATE)
