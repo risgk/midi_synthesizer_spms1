@@ -1,6 +1,6 @@
 ```
   [Music Synthesizer]                                             Date: 2026-08-14                      
-  Model: Music Synth SPMS-1 (type-0)  MIDI Implementation Chart   Version: 0.0.3                        
+  Model: Music Synth SPMS-1 (type-0)  MIDI Implementation Chart   Version: 0.0.4                        
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Function...                   | Transmitted   | Recognized    | Remarks                              |
 +-------------------------------+---------------+---------------+--------------------------------------+
@@ -22,7 +22,7 @@
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Pitch Bend                    | x             | x             |                                      |
 +-------------------------------+---------------+---------------+--------------------------------------+
-| Control                    20 | x             | o             | Osc Wave (0-63: Saw, 64-127: Square) |
+| Control                    20 | x             | o             | Oscillator Waveform (Saw to Square)  |
 | Change                     74 | x             | o             | Filter Cutoff                        |
 |                            71 | x             | o             | Filter Resonance                     |
 |                            24 | x             | o             | Filter EG Amount                     |

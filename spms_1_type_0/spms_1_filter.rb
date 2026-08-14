@@ -6,8 +6,8 @@ module Spms1
     SOFT_CLIP_CEILING = 8.0
 
     # Smoothing coefficient optimized for the 8-sample gated control rate grid
-    # to maintain a steady ~4.1ms parameter tracking lag time
-    SMOOTHING_TARGET_BLEND = 0.04
+    # to maintain a steady ~5.3ms parameter tracking lag time (95% settled)
+    SMOOTHING_TARGET_BLEND = 0.0625
 
     def initialize
       @sample_rate = 48000.0

@@ -103,8 +103,10 @@ module Spms1
 
         when STATE_SUSTAIN
           if @was_gate_on
-            # Note On: Smoothly chases the sustain level via the decay coefficient
-            @current_level += (@sustain - @current_level) * @decay_coef
+            # Note On: Only allowed to chase downwards. Preventing volume swells when sustain is increased.
+            if @sustain < @current_level
+              @current_level += (@sustain - @current_level) * @decay_coef
+            end
           else
             # Note Off: Smoothly chases absolute zero using the identical decay coefficient
             @current_level += (0.0 - @current_level) * @decay_coef

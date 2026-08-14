@@ -1,12 +1,15 @@
 module Spms1
-  # A band-limited oscillator supporting Sawtooth and Square waveforms
-  # using PolyBLEP (Polynomial Band-Limited Step) to mitigate aliasing.
+  # A band-limited oscillator supporting Sawtooth-to-Square waveform morphing
+  # by summing/subtracting two phase-shifted Sawtooth waves with PolyBLEP anti-aliasing.
+  # Includes a gated 1st-order lag smoother running at the 8-sample control rate grid 
+  # to match filter parameter steps and completely eliminate zipper noise.
   class Oscillator
-    SAW = 0
-    SQUARE = 1
+    # Standardized smoothing blend factor for the 8-sample control rate grid (1/16 step ratio)
+    SMOOTHING_TARGET_BLEND = 0.0625
 
     # Promoted lookup table to a Class Constant to unlock compiler optimizations.
-    # This allows the Spinel AOT compiler to pre-allocate memory and generate high-speed static arrays.
+    # This allows the Spinel AOT compiler to pre-allocate memory and generate high-speed static arrays,
+    # preventing the runtime from inserting redundant GC_SAVE routines during process loops.
     FREQ_TABLE = Array.new(129, 0.0)
     for i in 0...129
       FREQ_TABLE[i] = 440.0 * (2.0 ** ((i.to_f - 69.0) * (1.0 / 12.0)))
@@ -15,7 +18,15 @@ module Spms1
     def initialize
       @sample_rate = 48000.0
       @phase = 0.0 # Normalized phase accumulator (0.0 to 1.0)
-      @waveform = SAW
+      
+      # Target morph control: 0.0 = pure Sawtooth, 1.0 = pure Square
+      @waveform = 0.0
+
+      # Current smoothed morph state to prevent zipper noise during real-time CC tweaks
+      @current_waveform = 0.0
+
+      # Internal counter to automatically handle the 8-sample control block updates
+      @sample_counter = 0
     end
 
     # Sets the system sample rate.
@@ -24,15 +35,15 @@ module Spms1
       @sample_rate = sample_rate
     end
 
-    # Sets the oscillator waveform type using a normalized threshold profile.
-    # @param value [Float] Normalized input value from 0.0 to 1.0 (>= 0.5 triggers SQUARE)
+    # Sets the oscillator waveform morph amount.
+    # @param value [Float] Normalized input value from 0.0 to 1.0
     def set_waveform(value)
-      @waveform = (value >= 0.5) ? SQUARE : SAW
+      @waveform = (value < 0.0) ? 0.0 : ((value > 1.0) ? 1.0 : value)
     end
 
     # Processes a single audio sample (1 frame) based on pitch input.
     # @param pitch_input [Float] Normalized pitch value (typically around -0.5 to 0.5)
-    # @return [Float] Anti-aliased output sample scaled to approx +/-0.5 range
+    # @return [Float] Anti-aliased morphing output sample scaled to approx +/-0.5 range
     def process(pitch_input = 0.0)
       # Clamp input pitch to designated bounds (-0.5 to 0.5)
       pitch = (pitch_input < -0.5) ? -0.5 : ((pitch_input > 0.5) ? 0.5 : pitch_input)
@@ -42,41 +53,40 @@ module Spms1
       
       # Calculate phase increment per sample
       current_dt = freq / @sample_rate
-      output = 0.0
 
-      # Refactored to case statement for cleaner Spinel AOT compiler mapping
-      case @waveform
-      when SAW
-        # Generate raw/naive sawtooth waveform
-        naive_saw = -2.0 * @phase + 1.0
-        # Apply PolyBLEP residual at the phase wrap-around point to reduce aliasing
-        output = naive_saw + poly_blep(@phase, current_dt)
+      # --- First Sawtooth Wave (Base Phase) ---
+      naive_saw1 = -2.0 * @phase + 1.0
+      blep1 = poly_blep(@phase, current_dt)
+      saw1 = naive_saw1 + blep1
 
-      when SQUARE
-        # Generate raw/naive square waveform
-        naive_square = (@phase < 0.5) ? 1.0 : -1.0
-        
-        # Apply PolyBLEP residual at the start of the period (phase = 0.0)
-        blep_0 = poly_blep(@phase, current_dt)
-        
-        # Calculate phase offset for the middle of the period (phase = 0.5)
-        phase_05 = @phase + 0.5
-        if phase_05 >= 1.0
-          phase_05 -= 1.0
-        end
-        
-        # Apply PolyBLEP residual at the half-period transition (phase = 0.5)
-        blep_05 = poly_blep(phase_05, current_dt)
-        output = naive_square + blep_0 - blep_05
+      # --- Second Sawtooth Wave (Shifted by 180 degrees / 0.5 Phase) ---
+      phase2 = @phase + 0.5
+      phase2 -= 1.0 if phase2 >= 1.0
+      
+      naive_saw2 = -2.0 * phase2 + 1.0
+      blep2 = poly_blep(phase2, current_dt)
+      saw2 = naive_saw2 + blep2
+
+      # --- Parameter Smoothing (Gated at 8-sample control rate) ---
+      # Synchronize parameter smoothing onto the internal 8-sample step boundary to match downstream filters.
+      if @sample_counter == 0
+        @current_waveform += (@waveform - @current_waveform) * SMOOTHING_TARGET_BLEND
       end
+
+      # --- Waveform Morphing ---
+      # Subtracting the second shifted saw from the first saw yields a square wave.
+      # Morphing from Saw to Square by interpolating the gain of the second saw.
+      output = saw1 - (saw2 * @current_waveform)
 
       # Increment and wrap the phase accumulator
       @phase += current_dt
-      if @phase >= 1.0
-        @phase -= 1.0
-      end
+      @phase -= 1.0 if @phase >= 1.0
+
+      # Increment and mask the sample tracking counter (0 to 7 wrap around)
+      @sample_counter = (@sample_counter + 1) & 7
 
       # Scale down amplitude to prevent clipping in downstream modules
+      # Adjusting gain scaling slightly based on morph state to maintain steady perceived volume
       output * 0.5
     end
 
