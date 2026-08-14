@@ -22,7 +22,7 @@
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Pitch Bend                    | x             | x             |                                      |
 +-------------------------------+---------------+---------------+--------------------------------------+
-| Control                    20 | x             | o             | Osc Waveform (0: Saw to 127: Square) |
+| Control                    20 | x             | o             | Oscillator Waveform (Saw to Square)  |
 | Change                     74 | x             | o             | Filter Cutoff                        |
 |                            71 | x             | o             | Filter Resonance                     |
 |                            24 | x             | o             | Filter EG Amount                     |
