@@ -229,7 +229,7 @@
 
 <div class="editor-container">
   <header>
-    <h1>SPMS-1 (type-0) Editor<span class="version">v0.0.4</span></h1>
+    <h1>SPMS-1 (type-0) Editor<span class="version">v0.0.5</span></h1>
   </header>
 
   <div class="editor-grid">
@@ -429,7 +429,7 @@
     const data = event.data;
     const cmd = data[0] & 0xF0;
     
-    if (midiOutput && (cmd === 0x90 || cmd === 0x80)) {
+    if (midiOutput) {
       midiOutput.send(data);
     }
 
@@ -439,6 +439,26 @@
     } else if (cmd === 0x80 || (cmd === 0x90 && data[2] === 0)) {
       const key = document.querySelector(`.key[data-note="${data[1]}"]`);
       if (key) key.classList.remove('active');
+    } else if (cmd === 0xB0) {
+      const ccNumber = data[1];
+      const ccValue = data[2];
+      let elementId = "";
+      switch (ccNumber) {
+        case 20: elementId = "waveform"; break;
+        case 74: elementId = "cutoff"; break;
+        case 71: elementId = "resonance"; break;
+        case 24: elementId = "eg-amount"; break;
+        case 73: elementId = "attack"; break;
+        case 75: elementId = "decay-release"; break;
+        case 30: elementId = "sustain"; break;
+      }
+      if (elementId) {
+        const slider = document.getElementById(elementId);
+        if (slider) {
+          slider.value = ccValue;
+          slider.dispatchEvent(new Event('input'));
+        }
+      }
     }
   }
 
