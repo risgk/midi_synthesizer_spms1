@@ -1084,7 +1084,7 @@ int Spms1_main(int argc,char**argv){
 #line 6 "spms_1_filter.rb"
   cst_SOFT_CLIP_CEILING = 8.0;
 #line 10 "spms_1_filter.rb"
-  cst_SMOOTHING_TARGET_BLEND = 0.040000000000000001;
+  cst_SMOOTHING_TARGET_BLEND = 0.0625;
 #line 1 "spms_1_amp.rb"
 #line 4 "spms_1_amp.rb"
 #line 1 "spms_1_env_gen.rb"
