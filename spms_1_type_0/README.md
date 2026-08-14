@@ -12,7 +12,7 @@ Required Hardware
 
 - [Raspberry Pi Pico 2](https://www.raspberrypi.com/products/raspberry-pi-pico-2/)
 - Pimoroni [Pico Audio Pack](https://shop.pimoroni.com/products/pico-audio-pack) (PIM544)
-    - The following I2S DAC hardware can also be used:
+    - The following I2S DAC hardware (48 kHz/24 bit) can also be used:
         - [Adafruit PCM5102 I2S DAC](https://www.adafruit.com/product/6250) (Product ID: 6250)
         - GY-PCM5102 (PCM5102A I2S DAC Module)
 
@@ -44,6 +44,7 @@ Usage
 ### Web Editor
 
 - Cross-platform web-based parameter controller via Web MIDI API: `spms_1_editor.html`
+- Built-in software keyboard for note input and testing
 
 
 ### MIDI Settings
@@ -79,23 +80,18 @@ Usage
         - necobit電子 [MIDI Unit Mini for GROVE](https://necobit.com/denshi/midi-unit-mini-for-grove/) (Shipping to Japan only)
 
 
-### Control Change (CC) Maps
-
-| CC Number | Parameter | Remarks |
-|-----------|-----------|---------|
-| CC 20 | Oscillator Waveform | 0-63: Saw, 64-127: Square |
-| CC 74 | Filter Cutoff |  |
-| CC 71 | Filter Resonance |  |
-| CC 24 | Filter EG Amount |  |
-| CC 73 | EG Attack | Attack Time |
-| CC 75 | EG Decay/Release | Decay/Release Time |
-| CC 30 | EG Sustain | Sustain Level |
+### [MIDI Implementation Chart](./spms_1_midi_chart.md)
 
 
 ### Debug UART
 
 - Speed: 115200 bps
 - GP0 and GP1 pins are used by UART0 TX and UART0 RX
+
+
+### Test Script
+
+- Output WAV File: `spms_1_output_wav.rb`
 
 
 SPMS-1 (type-0) Licence
