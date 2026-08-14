@@ -45,7 +45,7 @@ loop do
   filter.set_modulation_amount(C::get_midi_cc_value(24).to_f * (1.0 / 127.0))
   env_gen.set_attack(C::get_midi_cc_value(73).to_f * (1.0 / 127.0))
   env_gen.set_decay(C::get_midi_cc_value(75).to_f * (1.0 / 127.0))
-  env_gen.set_sustain((((C::get_midi_cc_value(30) + 1) >> 1).to_f) * (1.0 / 64.0))
+  env_gen.set_sustain((((value = C::get_midi_cc_value(30)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0))
 
   BUFFER_WORDS.times do |i|
     env_gen_output = env_gen.process(gate)
