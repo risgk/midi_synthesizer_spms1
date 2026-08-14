@@ -1,9 +1,15 @@
 module Spms1
   # A band-limited oscillator supporting Sawtooth-to-Square waveform morphing
   # by summing/subtracting two phase-shifted Sawtooth waves with PolyBLEP anti-aliasing.
+  # Includes a gated 1st-order lag smoother running at the 8-sample control rate grid 
+  # to match filter parameter steps and completely eliminate zipper noise.
   class Oscillator
+    # Standardized smoothing blend factor for the 8-sample control rate grid (1/16 step ratio)
+    SMOOTHING_TARGET_BLEND = 0.0625
+
     # Promoted lookup table to a Class Constant to unlock compiler optimizations.
-    # This allows the Spinel AOT compiler to pre-allocate memory and generate high-speed static arrays.
+    # This allows the Spinel AOT compiler to pre-allocate memory and generate high-speed static arrays,
+    # preventing the runtime from inserting redundant GC_SAVE routines during process loops.
     FREQ_TABLE = Array.new(129, 0.0)
     for i in 0...129
       FREQ_TABLE[i] = 440.0 * (2.0 ** ((i.to_f - 69.0) * (1.0 / 12.0)))
@@ -13,8 +19,14 @@ module Spms1
       @sample_rate = 48000.0
       @phase = 0.0 # Normalized phase accumulator (0.0 to 1.0)
       
-      # Continuous morph control: 0.0 = pure Sawtooth, 1.0 = pure Square
+      # Target morph control: 0.0 = pure Sawtooth, 1.0 = pure Square
       @waveform = 0.0
+
+      # Current smoothed morph state to prevent zipper noise during real-time CC tweaks
+      @current_waveform = 0.0
+
+      # Internal counter to automatically handle the 8-sample control block updates
+      @sample_counter = 0
     end
 
     # Sets the system sample rate.
@@ -55,14 +67,23 @@ module Spms1
       blep2 = poly_blep(phase2, current_dt)
       saw2 = naive_saw2 + blep2
 
+      # --- Parameter Smoothing (Gated at 8-sample control rate) ---
+      # Synchronize parameter smoothing onto the internal 8-sample step boundary to match downstream filters.
+      if @sample_counter == 0
+        @current_waveform += (@waveform - @current_waveform) * SMOOTHING_TARGET_BLEND
+      end
+
       # --- Waveform Morphing ---
       # Subtracting the second shifted saw from the first saw yields a square wave.
       # Morphing from Saw to Square by interpolating the gain of the second saw.
-      output = saw1 - (saw2 * @waveform)
+      output = saw1 - (saw2 * @current_waveform)
 
       # Increment and wrap the phase accumulator
       @phase += current_dt
       @phase -= 1.0 if @phase >= 1.0
+
+      # Increment and mask the sample tracking counter (0 to 7 wrap around)
+      @sample_counter = (@sample_counter + 1) & 7
 
       # Scale down amplitude to prevent clipping in downstream modules
       # Adjusting gain scaling slightly based on morph state to maintain steady perceived volume
