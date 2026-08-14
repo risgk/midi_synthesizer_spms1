@@ -1,257 +1,531 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
   <meta charset="UTF-8">
   <title>SPMS-1 (type-0) Editor</title>
   <style>
-    body {
-      font-family: monospace;
-      background: #121212;
-      color: #e0e0e0;
-      margin: 40px;
-      /* 画面全体のテキスト選択を完全に禁止してドラッグ操作を最優先化 */
+    :root {
+      --primary-color: #9B111E;
+      --primary-hover: #7A0D17;
+      --bg-color: #f7f9fa;
+      --panel-bg: #ffffff;
+      --border-color: #e1e4e6;
+      --text-color: #2c3e50;
+      --text-muted: #7f8c8d;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
       -webkit-user-select: none;
       -moz-user-select: none;
-      user-select: none;
+      -ms-user-select: none;
     }
-    h1 { font-size: 1.5rem; letter-spacing: 2px; border-bottom: 1px solid #333; padding-bottom: 10px; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 30px; margin-top: 30px; }
-    .section { border: 1px solid #333; padding: 20px; background: #1a1a1a; }
-    .section-title { font-weight: bold; color: #ff5500; margin-bottom: 15px; text-transform: uppercase; }
-    .control { margin-bottom: 15px; }
-    label { display: block; font-size: 0.8rem; margin-bottom: 5px; color: #888; }
-    .label-row { display: flex; justify-content: space-between; align-items: center; }
-    .value-display { font-size: 0.9rem; color: #ff5500; font-weight: bold; }
-    select { width: 100%; background: #2a2a2a; color: #fff; border: 1px solid #444; padding: 5px; box-sizing: border-box; }
-    .midi-select-container { display: flex; gap: 20px; margin-bottom: 30px; padding: 15px; background: #222; border: 1px solid #333; align-items: flex-end; }
-    .midi-select { flex: 1; }
-    
-    .init-button {
-      background: #ff5500;
-      color: #fff;
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      padding: 20px;
+    }
+    .editor-container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    header {
+      margin-bottom: 24px;
+      border-bottom: 3px solid var(--primary-color);
+      padding-bottom: 12px;
+    }
+    header h1 {
+      font-size: 1.8rem;
+      color: var(--primary-color);
+    }
+    header .version {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: normal;
+      margin-left: 10px;
+    }
+    .editor-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 768px) {
+      .editor-grid { grid-template-columns: 1fr; }
+    }
+    .panel {
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .panel h2 {
+      font-size: 1.2rem;
+      margin-bottom: 16px;
+      color: var(--primary-color);
+      border-left: 4px solid var(--primary-color);
+      padding-left: 8px;
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: #fff;
+      font-size: 0.95rem;
+      color: var(--text-color);
+      outline: none;
+    }
+    select:focus {
+      border-color: var(--primary-color);
+    }
+    .btn-main {
+      width: 100%;
+      padding: 12px;
+      background-color: var(--primary-color);
+      color: white;
       border: none;
-      padding: 10px 20px;
-      font-family: monospace;
+      border-radius: 6px;
       font-weight: bold;
+      font-size: 1rem;
       cursor: pointer;
-      height: 34px;
-      letter-spacing: 1px;
-      transition: background 0.2s;
+      transition: background-color 0.2s;
+      margin-top: 8px;
     }
-    .init-button:hover { background: #ff7733; }
-    .init-button:active { background: #cc4400; }
-
+    .btn-main:hover {
+      background-color: var(--primary-hover);
+    }
+    .control-row {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .slider-knob-zone {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .slider-label {
+      min-width: 140px;
+      font-size: 0.9rem;
+    }
+    .slider-label .cc-num {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: block;
+    }
+    .slider-input-wrapper {
+      flex-grow: 1;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
     input[type="range"] {
+      flex-grow: 1;
       -webkit-appearance: none;
       appearance: none;
-      width: 100%;
       height: 6px;
-      background: #2a2a2a;
-      border: 1px solid #444;
+      background: var(--border-color);
+      border-radius: 3px;
       outline: none;
-      margin: 12px 0;
-      padding: 0;
     }
-
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
       appearance: none;
-      width: 14px;
-      height: 14px;
-      background: #ff5500;
-      border-radius: 0;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--primary-color);
       cursor: pointer;
     }
-
-    input[type="range"]::-moz-range-thumb {
-      width: 14px;
-      height: 14px;
-      background: #ff5500;
-      border-radius: 0;
-      border: none;
+    .slider-value {
+      min-width: 32px;
+      text-align: right;
+      font-family: monospace;
+      font-size: 0.95rem;
+      font-weight: bold;
+    }
+    .keyboard-panel {
+      width: 100%;
+    }
+    .keyboard-scroll-container {
+      width: 100%;
+      overflow-x: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background: #222;
+      padding: 10px 5px 15px 5px;
+    }
+    .keyboard-scroll-container::-webkit-scrollbar {
+      height: 10px;
+    }
+    .keyboard-scroll-container::-webkit-scrollbar-track {
+      background: #222;
+      border-radius: 5px;
+    }
+    .keyboard-scroll-container::-webkit-scrollbar-thumb {
+      background: var(--primary-color);
+      border-radius: 5px;
+    }
+    .keyboard-wrapper {
+      position: relative;
+      width: 1224px;
+      height: 140px;
+      margin: 0 auto;
+    }
+    .key {
+      position: absolute;
       cursor: pointer;
+    }
+    .key.white {
+      width: 34px;
+      height: 140px;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 0 0 4px 4px;
+      z-index: 1;
+    }
+    .key.white:active, .key.white.active {
+      background: #f0f0f0;
+      border-bottom: 4px solid var(--primary-color);
+    }
+    .key.black {
+      width: 22px;
+      height: 85px;
+      background: #111;
+      border-radius: 0 0 3px 3px;
+      z-index: 2;
+    }
+    .key.black:active, .key.black.active {
+      background: var(--primary-color);
+    }
+    .key-label {
+      position: absolute;
+      bottom: 5px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      pointer-events: none;
     }
   </style>
 </head>
 <body>
 
-  <h1>SPMS-1 (type-0) Editor v0.0.1</h1>
+<div class="editor-container">
+  <header>
+    <h1>SPMS-1 (type-0) Editor<span class="version">v0.0.2</span></h1>
+  </header>
 
-  <!-- MIDI Device Selectors & Controls -->
-  <div class="midi-select-container">
-    <div class="midi-select">
-      <label for="midi-in">MIDI IN DEVICE (KEYBOARD / CONTROLLER)</label>
-      <select id="midi-in"><option value="">Select MIDI Input Device...</option></select>
+  <div class="editor-grid">
+    <div class="left-column" style="display: flex; flex-direction: column; gap: 20px;">
+      <div class="panel">
+        <h2>MIDI Device Settings</h2>
+        <div class="form-group">
+          <label>MIDI In Device (Keyboard / Controller)</label>
+          <select id="midi-in">
+            <option>Select MIDI Input Device...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>MIDI Out Device (SPMS-1 Synth)</label>
+          <select id="midi-out">
+            <option>Select SPMS-1 Device...</option>
+          </select>
+        </div>
+        <button class="btn-main" id="init-all">Initialize & Send All</button>
+      </div>
+
+      <div class="panel">
+        <h2>Oscillator</h2>
+        <div class="control-row">
+          <div class="slider-knob-zone">
+            <div class="slider-label">Waveform <span class="cc-num">(CC 20)</span></div>
+            <div class="slider-input-wrapper">
+              <input type="range" id="waveform" min="0" max="127" value="0">
+              <span class="slider-value" id="waveform-val">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="midi-select">
-      <label for="midi-out">MIDI OUT DEVICE (SPMS-1 SYNTH)</label>
-      <select id="midi-out"><option value="">Select SPMS-1 Device...</option></select>
+
+    <div class="right-column" style="display: flex; flex-direction: column; gap: 20px;">
+      <div class="panel">
+        <h2>Filter</h2>
+        <div class="control-row">
+          <div class="slider-knob-zone">
+            <div class="slider-label">Cutoff <span class="cc-num">(CC 74)</span></div>
+            <div class="slider-input-wrapper">
+              <input type="range" id="cutoff" min="0" max="127" value="127">
+              <span class="slider-value" id="cutoff-val">127</span>
+            </div>
+          </div>
+          <div class="slider-knob-zone">
+            <div class="slider-label">Resonance <span class="cc-num">(CC 71)</span></div>
+            <div class="slider-input-wrapper">
+              <input type="range" id="resonance" min="0" max="127" value="80">
+              <span class="slider-value" id="resonance-val">80</span>
+            </div>
+          </div>
+          <div class="slider-knob-zone">
+            <div class="slider-label">EG Amount <span class="cc-num">(CC 24)</span></div>
+            <div class="slider-input-wrapper">
+              <input type="range" id="eg-amount" min="0" max="127" value="48">
+              <span class="slider-value" id="eg-amount-val">48</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>EG</h2>
+        <div class="control-row">
+          <div class="slider-knob-zone">
+            <div class="slider-label">Attack <span class="cc-num">(CC 73)</span></div>
+            <div class="slider-input-wrapper">
+              <input type="range" id="attack" min="0" max="127" value="32">
+              <span class="slider-value" id="attack-val">32</span>
+            </div>
+          </div>
+          <div class="slider-knob-zone">
+            <div class="slider-label">Decay/Release <span class="cc-num">(CC 75)</span></div>
+            <div class="slider-input-wrapper">
+              <input type="range" id="decay" min="0" max="127" value="96">
+              <span class="slider-value" id="decay-val">96</span>
+            </div>
+          </div>
+          <div class="slider-knob-zone">
+            <div class="slider-label">Sustain <span class="cc-num">(CC 30)</span></div>
+            <div class="slider-input-wrapper">
+              <input type="range" id="sustain" min="0" max="127" value="0">
+              <span class="slider-value" id="sustain-val">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <button class="init-button" onclick="initializeAndSendAll()">INITIALIZE & SEND ALL</button>
   </div>
 
-  <div class="grid">
-    <!-- OSCILLATOR SECTION -->
-    <div class="section">
-      <div class="section-title">Oscillator</div>
-      <div class="control">
-        <label>Waveform (CC 20)</label>
-        <select id="ctrl-20" onchange="sendCC(20, this.value)">
-          <option value="0">Sawtooth</option>
-          <option value="127">Square</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- FILTER SECTION -->
-    <div class="section">
-      <div class="section-title">Filter</div>
-      <div class="control">
-        <div class="label-row">
-          <label>Cutoff (CC 74)</label>
-          <span class="value-display" id="val-74">127</span>
-        </div>
-        <input type="range" id="ctrl-74" min="0" max="127" value="127" oninput="updateValue(74, this.value)">
-      </div>
-      <div class="control">
-        <div class="label-row">
-          <label>Resonance (CC 71)</label>
-          <span class="value-display" id="val-71">80</span>
-        </div>
-        <input type="range" id="ctrl-71" min="0" max="127" value="80" oninput="updateValue(71, this.value)">
-      </div>
-      <div class="control">
-        <div class="label-row">
-          <label>EG Amount (CC 24)</label>
-          <span class="value-display" id="val-24">48</span>
-        </div>
-        <input type="range" id="ctrl-24" min="0" max="127" value="48" oninput="updateValue(24, this.value)">
-      </div>
-    </div>
-
-    <!-- EG SECTION -->
-    <div class="section">
-      <div class="section-title">EG</div>
-      <div class="control">
-        <div class="label-row">
-          <label>Attack Time (CC 73)</label>
-          <span class="value-display" id="val-73">32</span>
-        </div>
-        <input type="range" id="ctrl-73" min="0" max="127" value="32" oninput="updateValue(73, this.value)">
-      </div>
-      <div class="control">
-        <div class="label-row">
-          <label>Decay Time (CC 75)</label>
-          <span class="value-display" id="val-75">96</span>
-         </div>
-        <input type="range" id="ctrl-75" min="0" max="127" value="96" oninput="updateValue(75, this.value)">
-      </div>
-      <div class="control">
-        <div class="label-row">
-          <label>Sustain Level (CC 30)</label>
-          <span class="value-display" id="val-30">0</span>
-        </div>
-        <input type="range" id="ctrl-30" min="0" max="127" value="0" oninput="updateValue(30, this.value)">
-      </div>
+  <div class="panel keyboard-panel">
+    <h2>Soft Keyboard (5 Octaves: C2 - C7)</h2>
+    <div class="keyboard-scroll-container" id="kb-scroll">
+      <div class="keyboard-wrapper" id="keyboard"></div>
     </div>
   </div>
+</div>
 
-  <script>
-    let midiInput = null;
-    let midiOutput = null;
+<script>
+  let midiAccess = null;
+  let midiInput = null;
+  let midiOutput = null;
 
-    const factoryDefaults = { 20: 0, 74: 127, 71: 80, 24: 48, 73: 32, 75: 96, 30: 0 };
+  const ccMap = {
+    'waveform': 20,
+    'cutoff': 74,
+    'resonance': 71,
+    'eg-amount': 24,
+    'attack': 73,
+    'decay': 75,
+    'sustain': 30
+  };
 
-    window.addEventListener('DOMContentLoaded', () => {
-      resetUItoDefaults();
+  const defaultValues = {
+    'waveform': 0,
+    'cutoff': 127,
+    'resonance': 80,
+    'eg-amount': 48,
+    'attack': 32,
+    'decay': 104,
+    'sustain': 0
+  };
+
+  function initMIDI() {
+    if (navigator.requestMIDIAccess) {
+      navigator.requestMIDIAccess().then(onMIDISuccess, onMIDIFailure);
+    }
+  }
+
+  function onMIDISuccess(access) {
+    midiAccess = access;
+    updateDeviceLists();
+    midiAccess.onstatechange = updateDeviceLists;
+  }
+
+  function onMIDIFailure(msg) {
+    console.error("Failed to get MIDI access - " + msg);
+  }
+
+  function updateDeviceLists() {
+    const inSelect = document.getElementById('midi-in');
+    const outSelect = document.getElementById('midi-out');
+    
+    const currentIn = inSelect.value;
+    const currentOut = outSelect.value;
+
+    inSelect.innerHTML = '<option value="">Select MIDI Input Device...</option>';
+    outSelect.innerHTML = '<option value="">Select SPMS-1 Device...</option>';
+
+    midiAccess.inputs.forEach(input => {
+      const opt = document.createElement('option');
+      opt.value = input.id;
+      opt.textContent = input.name;
+      if (input.id === currentIn) opt.selected = true;
+      inSelect.appendChild(opt);
     });
 
-    if (navigator.requestMIDIAccess) {
-      navigator.requestMIDIAccess().then(onMIDISuccess, () => console.log('MIDI Access Denied'));
+    midiAccess.outputs.forEach(output => {
+      const opt = document.createElement('option');
+      opt.value = output.id;
+      opt.textContent = output.name;
+      if (output.id === currentOut) opt.selected = true;
+      outSelect.appendChild(opt);
+    });
+
+    handleDeviceChange();
+  }
+
+  function handleDeviceChange() {
+    const inId = document.getElementById('midi-in').value;
+    const outId = document.getElementById('midi-out').value;
+
+    if (midiInput) midiInput.onmidimessage = null;
+    midiInput = midiAccess.inputs.get(inId) || null;
+    midiOutput = midiAccess.outputs.get(outId) || null;
+
+    if (midiInput) {
+      midiInput.onmidimessage = onMIDIMessage;
+    }
+  }
+
+  function sendCC(cc, value) {
+    if (midiOutput) {
+      midiOutput.send([0xB0, cc, value]);
+    }
+  }
+
+  function sendNote(status, note, velocity) {
+    if (midiOutput) {
+      midiOutput.send([status, note, velocity]);
+    }
+  }
+
+  function onMIDIMessage(event) {
+    const data = event.data;
+    const cmd = data[0] & 0xF0;
+    
+    if (midiOutput && (cmd === 0x90 || cmd === 0x80)) {
+      midiOutput.send(data);
     }
 
-    function onMIDISuccess(midiAccess) {
-      const inputs = midiAccess.inputs.values();
-      const outputs = midiAccess.outputs.values();
-      
-      const selectIn = document.getElementById('midi-in');
-      const selectOut = document.getElementById('midi-out');
-      
-      for (let input of inputs) {
-        let option = document.createElement('option');
-        option.value = input.id;
-        option.text = input.name;
-        selectIn.add(option);
-      }
-
-      for (let output of outputs) {
-        let option = document.createElement('option');
-        option.value = output.id;
-        option.text = output.name;
-        selectOut.add(option);
-      }
-
-      selectIn.onchange = (e) => {
-        if (midiInput) midiInput.onmidimessage = null;
-        midiInput = midiAccess.inputs.get(e.target.value);
-        if (midiInput) midiInput.onmidimessage = handleMIDIMessage;
-      };
-
-      selectOut.onchange = (e) => {
-        midiOutput = midiAccess.outputs.get(e.target.value);
-      };
+    if (cmd === 0x90 && data[2] > 0) {
+      const key = document.querySelector(`.key[data-note="${data[1]}"]`);
+      if (key) key.classList.add('active');
+    } else if (cmd === 0x80 || (cmd === 0x90 && data[2] === 0)) {
+      const key = document.querySelector(`.key[data-note="${data[1]}"]`);
+      if (key) key.classList.remove('active');
     }
+  }
 
-    function handleMIDIMessage(event) {
-      if (!midiOutput) return;
-
-      midiOutput.send(event.data);
-
-      const status = event.data & 0xF0;
-      if (status === 0xB0) {
-        const ccNumber = event.data;
-        const value = event.data;
-        
-        const ctrlElement = document.getElementById('ctrl-' + ccNumber);
-        if (ctrlElement) ctrlElement.value = value;
-
-        const valElement = document.getElementById('val-' + ccNumber);
-        if (valElement) valElement.textContent = value;
-      }
-    }
-
-    function resetUItoDefaults() {
-      Object.keys(factoryDefaults).forEach(cc => {
-        const val = factoryDefaults[cc];
-        document.getElementById('ctrl-' + cc).value = val;
-        
-        const valDisplay = document.getElementById('val-' + cc);
-        if (valDisplay) valDisplay.textContent = val;
+  Object.keys(ccMap).forEach(id => {
+    const input = document.getElementById(id);
+    const valSpan = document.getElementById(id + '-val');
+    if (input && valSpan) {
+      input.addEventListener('input', (e) => {
+        valSpan.textContent = e.target.value;
+        sendCC(ccMap[id], parseInt(e.target.value));
       });
     }
+  });
 
-    function initializeAndSendAll() {
-      resetUItoDefaults();
-      if (!midiOutput) {
-        alert("Please select a MIDI OUT device first.");
-        return;
+  document.getElementById('init-all').addEventListener('click', () => {
+    Object.keys(defaultValues).forEach(id => {
+      const input = document.getElementById(id);
+      const valSpan = document.getElementById(id + '-val');
+      if (input && valSpan) {
+        input.value = defaultValues[id];
+        valSpan.textContent = defaultValues[id];
+        sendCC(ccMap[id], defaultValues[id]);
       }
-      
-      Object.keys(factoryDefaults).forEach(cc => {
-        sendCC(parseInt(cc), factoryDefaults[cc]);
+    });
+  });
+
+  document.getElementById('midi-in').addEventListener('change', handleDeviceChange);
+  document.getElementById('midi-out').addEventListener('change', handleDeviceChange);
+
+  function createKeyboard() {
+    const kb = document.getElementById('keyboard');
+    const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    let whiteKeyIndex = 0;
+    const whiteKeyWidth = 34;
+
+    for (let noteNum = 36; noteNum <= 96; noteNum++) {
+      const noteIndex = noteNum % 12;
+      const noteName = notes[noteIndex];
+      const octave = Math.floor(noteNum / 12) - 1;
+      const isBlack = noteName.includes('#');
+
+      const keyEl = document.createElement('div');
+      keyEl.dataset.note = noteNum;
+
+      if (!isBlack) {
+        keyEl.className = 'key white';
+        keyEl.style.left = (whiteKeyIndex * whiteKeyWidth) + 'px';
+        if (noteName === 'C') {
+          const label = document.createElement('span');
+          label.className = 'key-label';
+          label.innerText = 'C' + octave;
+          keyEl.appendChild(label);
+        }
+        whiteKeyIndex++;
+      } else {
+        keyEl.className = 'key black';
+        keyEl.style.left = ((whiteKeyIndex - 1) * whiteKeyWidth + (whiteKeyWidth - 11)) + 'px';
+      }
+
+      keyEl.addEventListener('mousedown', () => {
+        keyEl.classList.add('active');
+        sendNote(0x90, noteNum, 127);
       });
-    }
+      keyEl.addEventListener('mouseup', () => {
+        keyEl.classList.remove('active');
+        sendNote(0x80, noteNum, 0);
+      });
+      keyEl.addEventListener('mouseleave', () => {
+        if (keyEl.classList.contains('active')) {
+          keyEl.classList.remove('active');
+          sendNote(0x80, noteNum, 0);
+        }
+      });
 
-    function updateValue(ccNumber, value) {
-      document.getElementById('val-' + ccNumber).textContent = value;
-      sendCC(ccNumber, value);
+      kb.appendChild(keyEl);
     }
+    
+    setTimeout(() => {
+      const scrollCont = document.getElementById('kb-scroll');
+      scrollCont.scrollLeft = (scrollCont.scrollWidth - scrollCont.clientWidth) / 2;
+    }, 100);
+  }
 
-    function sendCC(ccNumber, value) {
-      if (midiOutput) {
-        midiOutput.send([0xB0, ccNumber, parseInt(value)]);
-      }
-    }
-  </script>
+  window.addEventListener('DOMContentLoaded', () => {
+    createKeyboard();
+    initMIDI();
+  });
+</script>
 </body>
 </html>

@@ -132,9 +132,9 @@ void setup1() {
   g_midi_cc_values[74] = 127; // Filter Cutoff
   g_midi_cc_values[71] = 80;  // Filter Resonance
   g_midi_cc_values[24] = 48;  // Filter EG Amt
-  g_midi_cc_values[73] = 32;  // EG Attack Time
-  g_midi_cc_values[75] = 96;  // EG Decay/Release Time
-  g_midi_cc_values[30] = 0;   // EG Sustain Level
+  g_midi_cc_values[73] = 32;  // EG Attack
+  g_midi_cc_values[75] = 104; // EG Decay/Release
+  g_midi_cc_values[30] = 0;   // EG Sustain
 }
 
 void loop1() {
