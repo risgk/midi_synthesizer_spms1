@@ -87,9 +87,9 @@ Usage
 | CC 74 | Filter Cutoff |  |
 | CC 71 | Filter Resonance |  |
 | CC 24 | Filter EG Amount |  |
-| CC 73 | EG Attack Time |  |
-| CC 75 | EG Decay/Release Time |  |
-| CC 30 | EG Sustain Level |  |
+| CC 73 | EG Attack | Attack Time |
+| CC 75 | EG Decay/Release | Decay/Release Time |
+| CC 30 | EG Sustain | Sustain Level |
 
 
 ### Debug UART
