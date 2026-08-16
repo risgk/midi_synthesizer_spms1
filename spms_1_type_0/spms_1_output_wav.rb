@@ -14,7 +14,7 @@ oscillator.set_waveform(64.0 * (1.0 / 128.0))
 
 filter = Spms1::Filter.new
 filter.set_sample_rate(SAMPLE_RATE)
-filter.set_cutoff(64.0 * (1.0 / 127.0))
+filter.set_cutoff((67.0 - 7.0) * (1.0 / 120.0))
 filter.set_resonance(80.0 * (1.0 / 127.0))
 filter.set_modulation_amount(48.0 * (1.0 / 127.0))
 
