@@ -103,11 +103,17 @@ module Spms1
     def update_coefficients_interleaved
       case @interleave_state
       when 0
-        # Map normalized cutoff (0.0 - 1.0) to MIDI cutoff value range (0.0 - 127.0)
-        @step_midi_cutoff = @current_cutoff * 127.0
+        # Map normalized cutoff (0.0 - 1.0) to 10-octave range scaled to MIDI values (7.0 - 127.0)
+        @step_midi_cutoff = @current_cutoff * 120.0 + 7.0
       when 1
-        # Convert MIDI cutoff value to frequency in Hz (A440 tuning reference)
-        cutoff_freq = 440.0 * (2.0 ** ((@step_midi_cutoff - 63.0) * (1.0 / 12.0)))
+        # Convert internal scale value to frequency in Hz (A440 tuning reference at value 61)
+        # 12 steps per octave ideal equal-tempered scale. Tuning profile:
+        # - MIDI CC value 7   : ~19.5 Hz
+        # - MIDI CC value 61  : ~440.0 Hz
+        # - MIDI CC value 64  : ~523.3 Hz
+        # - MIDI CC value 127 : ~19912.1 Hz
+        cutoff_freq = 440.0 * (2.0 ** ((@step_midi_cutoff - 61.0) * (1.0 / 12.0)))
+        
         # Calculate angular frequency (omega)
         @step_omega = 2.0 * Math::PI * cutoff_freq / @sample_rate
       when 2
