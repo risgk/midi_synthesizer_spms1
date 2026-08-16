@@ -39,13 +39,13 @@ loop do
   pitch = Spms1::C.get_midi_note_on_pitch.to_f * (1.0 / 120.0) - 0.5
   gate = Spms1::C.get_midi_note_on_state.to_f
   
-  oscillator.set_waveform((((value = C::get_midi_cc_value(20)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0))
-  filter.set_cutoff((C::get_midi_cc_value(74).to_f - 7.0) * (1.0 / 120.0))
-  filter.set_resonance(C::get_midi_cc_value(71).to_f * (1.0 / 127.0))
-  filter.set_modulation_amount(C::get_midi_cc_value(24).to_f * (1.0 / 127.0))
-  env_gen.set_attack(C::get_midi_cc_value(73).to_f * (1.0 / 127.0))
-  env_gen.set_decay(C::get_midi_cc_value(75).to_f * (1.0 / 127.0))
-  env_gen.set_sustain((((value = C::get_midi_cc_value(30)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0))
+  oscillator.set_waveform((((value = Spms1::C::get_midi_cc_value(20)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0))
+  filter.set_cutoff((Spms1::C::get_midi_cc_value(74).to_f - 7.0) * (1.0 / 120.0))
+  filter.set_resonance(Spms1::C::get_midi_cc_value(71).to_f * (1.0 / 127.0))
+  filter.set_modulation_amount(Spms1::C::get_midi_cc_value(24).to_f * (1.0 / 127.0))
+  env_gen.set_attack(Spms1::C::get_midi_cc_value(73).to_f * (1.0 / 127.0))
+  env_gen.set_decay(Spms1::C::get_midi_cc_value(75).to_f * (1.0 / 127.0))
+  env_gen.set_sustain((((value = Spms1::C::get_midi_cc_value(30)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0))
 
   BUFFER_WORDS.times do |i|
     env_gen_output = env_gen.process(gate)
