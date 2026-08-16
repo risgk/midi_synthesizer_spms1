@@ -111,6 +111,7 @@ module Spms1
         # - MIDI CC value 7   : ~19.5 Hz
         # - MIDI CC value 61  : ~440.0 Hz
         # - MIDI CC value 64  : ~523.3 Hz
+        # - MIDI CC value 67  : ~622.3 Hz
         # - MIDI CC value 127 : ~19912.1 Hz
         cutoff_freq = 440.0 * (2.0 ** ((@step_midi_cutoff - 61.0) * (1.0 / 12.0)))
         
