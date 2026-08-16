@@ -120,6 +120,14 @@ module Spms1
       when 2
         # Map resonance to Q factor scale (base Q is 1 / sqrt(2) approx 0.707)
         midi_resonance = @current_resonance * 127.0
+        
+        # Convert internal scale value to Q factor.
+        # 32 steps per octave ideal scaling profile:
+        # - MIDI CC value 0   : ~0.707 (Butterworth filter alignment)
+        # - MIDI CC value 32  : ~1.414 (+6dB resonance peak)
+        # - MIDI CC value 64  : ~2.828 (+12dB resonance peak)
+        # - MIDI CC value 96  : ~5.657 (+18dB resonance peak)
+        # - MIDI CC value 127 : ~11.311 (approx +24dB resonance peak)
         base_q = 0.7071067811865476
         @step_q = base_q * (2.0 ** (midi_resonance * (1.0 / 32.0)))
       when 3
