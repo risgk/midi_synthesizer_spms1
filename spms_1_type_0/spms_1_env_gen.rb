@@ -144,18 +144,18 @@ module Spms1
 
       # Attack Coefficient Evaluation Profile
       # Time ranges (0% to 100% target):
-      # - Min (MIDI CC value 0)   : ~0.65 ms
-      # - Mid (MIDI CC value 64)  : ~65.0 ms
-      # - Max (MIDI CC value 127) : ~6.22 seconds
-      attack_time = 0.09377 * calculate_exp_fast(@attack)
+      # - Min (MIDI CC value 0)   : ~0.633 ms
+      # - Mid (MIDI CC value 64)  : ~63.3 ms
+      # - Max (MIDI CC value 127) : ~5.92 s
+      attack_time = 0.09133 * calculate_exp_fast(@attack)
       @attack_coef = 1.0 / (attack_time * effective_rate)
       @attack_coef = 1.0 if @attack_coef > 1.0
 
       # Unified Decay/Release Coefficient Evaluation Profile
       # Time ranges (Audible fade down to 1/1024 level, approx. -60dB):
-      # - Min (MIDI CC value 0)   : ~2.00 ms
-      # - Mid (MIDI CC value 64)  : ~200.0 ms
-      # - Max (MIDI CC value 127) : ~19.14 seconds
+      # - Min (MIDI CC value 0)   : ~2 ms
+      # - Mid (MIDI CC value 64)  : ~200 ms
+      # - Max (MIDI CC value 127) : ~18.6 s
       decay_time = 0.02885 * calculate_exp_fast(@decay)
       @decay_coef = 1.0 / (decay_time * effective_rate)
       @decay_coef = 1.0 if @decay_coef > 1.0

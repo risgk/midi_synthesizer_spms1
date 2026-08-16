@@ -1006,7 +1006,7 @@ static sp_RbVal sp_EnvGen_update_coefficients_full(sp_EnvGen *self) {
   lv_effective_rate = (self->iv_sample_rate * ((1.0 / 8.0)));
 #line 150 "spms_1_env_gen.rb"
   mrb_float _t12 = self->iv_attack;
-  lv_attack_time = (0.093770000000000006 * sp_EnvGen_calculate_exp_fast((sp_EnvGen *)self, _t12));
+  lv_attack_time = (0.091329999999999995 * sp_EnvGen_calculate_exp_fast((sp_EnvGen *)self, _t12));
 #line 151 "spms_1_env_gen.rb"
   self->iv_attack_coef = (1.0 / ((lv_attack_time * lv_effective_rate)));
 #line 152 "spms_1_env_gen.rb"
