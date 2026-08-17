@@ -95,10 +95,10 @@ module Spms1
     # Performs high-speed conversion from normalized pitch to frequency
     # using linear interpolation between precomputed table indices.
     def pitch_to_freq_fast(pitch)
-      # Map [-0.5, 0.5] range to MIDI note range [0.0, 120.0]
-      midi_pitch = (pitch + 0.5) * 120.0
-      index = midi_pitch.to_i
-      fraction = midi_pitch - index.to_f
+      # Map [-0.5, 0.5] range to note numbers [0, 120]
+      internal_pitch = (pitch + 0.5) * 120.0
+      index = internal_pitch.to_i
+      fraction = internal_pitch - index.to_f
       
       f0 = FREQ_TABLE[index]
       f1 = FREQ_TABLE[index + 1]
