@@ -9,12 +9,14 @@ module Spms1
     STATE_SUSTAIN = 1
     STATE_IDLE = 2
 
-    # Promoted lookup table to a Class Constant to unlock compiler optimizations.
-    # This prevents the AOT compiler from inserting redundant GC_SAVE routines during process loops.
-    EXP_TABLE = Array.new(129, 0.0)
+    # Expanded lookup table size to 130 to completely eliminate branching overhead 
+    # in the inner calculation loop. Indicies 128 and 129 hold the exact same maximum 
+    # value to provide a safe flat-line interpolation buffer when input value clears 1.0.
+    EXP_TABLE = Array.new(130, 0.0)
     for i in 0...129
       EXP_TABLE[i] = 10.0 ** ((i.to_f - 64.0) * (1.0 / 32.0))
     end
+    EXP_TABLE[129] = EXP_TABLE[128] # Safe boundary padding for index + 1 lookups
 
     def initialize
       @sample_rate = 48000.0
@@ -149,6 +151,8 @@ module Spms1
       # - Mid (0.50) : 100 ms
       # - Q3  (0.75) : 1.00 s
       # - Max (1.00) : 10.0 s
+      # Factor (0.1443) accounts for the logarithmic trajectory required to clear the 1.0 threshold 
+      # while continuously chasing the virtual attack_target of 2.0 (ln(2) time-scaling factor).
       attack_time = 0.1443 * calculate_exp_fast(@attack)
       @attack_coef = 1.0 / (attack_time * effective_rate)
       @attack_coef = 1.0 if @attack_coef > 1.0
@@ -167,13 +171,14 @@ module Spms1
 
     # High-speed conversion from normalized input to exponential multiplier
     # via linear interpolation across the precomputed constant table indices.
+    # Branchless design ensures maximum execution velocity in static AOT loops.
     def calculate_exp_fast(value)
       v_scale = value * 128.0
       index = v_scale.to_i
       fraction = v_scale - index.to_f
       
       e0 = EXP_TABLE[index]
-      e1 = EXP_TABLE[index + 1]
+      e1 = EXP_TABLE[index + 1] # Guaranteed safe up to index 129
       
       e0 + fraction * (e1 - e0)
     end
