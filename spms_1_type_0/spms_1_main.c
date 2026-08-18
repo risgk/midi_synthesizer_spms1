@@ -1044,7 +1044,7 @@ static sp_RbVal sp_EnvGen_update_coefficients_full(sp_EnvGen *self) {
   }
 #line 167 "spms_1_env_gen.rb"
   mrb_float _t13 = self->iv_decay;
-  lv_decay_time = (0.028850000000000001 * sp_EnvGen_calculate_exp_fast((sp_EnvGen *)self, _t13));
+  lv_decay_time = (0.043281 * sp_EnvGen_calculate_exp_fast((sp_EnvGen *)self, _t13));
 #line 168 "spms_1_env_gen.rb"
   self->iv_decay_coef = (1.0 / ((lv_decay_time * lv_effective_rate)));
 #line 169 "spms_1_env_gen.rb"
