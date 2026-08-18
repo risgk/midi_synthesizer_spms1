@@ -40,7 +40,7 @@ loop do
   gate = Spms1::C.get_midi_note_on_state.to_f
   
   oscillator.set_waveform((((value = Spms1::C::get_midi_cc_value(20)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0))
-  filter.set_cutoff((Spms1::C::get_midi_cc_value(74).to_f - 7.0) * (1.0 / 120.0))
+  filter.set_cutoff((Spms1::C::get_midi_cc_value(74).to_f - 4.0) * (1.0 / 120.0))
   filter.set_resonance((((value = Spms1::C::get_midi_cc_value(71)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0))
   filter.set_modulation_amount((((value = Spms1::C::get_midi_cc_value(24)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0))
   env_gen.set_attack((((value = Spms1::C::get_midi_cc_value(73)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0))

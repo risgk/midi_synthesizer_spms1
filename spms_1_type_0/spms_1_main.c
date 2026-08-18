@@ -1176,7 +1176,7 @@ int Spms1_main(int argc,char**argv){
       mrb_float _t45 = ((((((({ lv_value = ((mrb_int)(get_midi_cc_value(((uint8_t)(20LL))))); lv_value; })) == 127LL)) ? 128.0 : ((mrb_float)(lv_value)))) * ((1.0 / 128.0)));
       sp_Oscillator_set_waveform((sp_Oscillator *)lv_oscillator, _t45);
 #line 43 "spms_1_main.rb"
-      mrb_float _t47 = (((((mrb_float)(((mrb_int)(get_midi_cc_value(((uint8_t)(74LL))))))) - 7.0)) * ((1.0 / 120.0)));
+      mrb_float _t47 = (((((mrb_float)(((mrb_int)(get_midi_cc_value(((uint8_t)(74LL))))))) - 4.0)) * ((1.0 / 120.0)));
       sp_Filter_set_cutoff((sp_Filter *)lv_filter, _t47);
 #line 44 "spms_1_main.rb"
       mrb_float _t49 = ((((((({ lv_value = ((mrb_int)(get_midi_cc_value(((uint8_t)(71LL))))); lv_value; })) == 127LL)) ? 128.0 : ((mrb_float)(lv_value)))) * ((1.0 / 128.0)));
