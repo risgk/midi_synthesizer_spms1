@@ -43,6 +43,7 @@ loop do
   filter.set_cutoff((Spms1::C::get_midi_cc_value(74).to_f - 4.0) * (1.0 / 120.0))
   filter.set_resonance((((value = Spms1::C::get_midi_cc_value(71)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0))
   filter.set_modulation_amount((((value = Spms1::C::get_midi_cc_value(24)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0))
+  amp.set_gain(((value = Spms1::C.get_midi_cc_value(15)).to_f * value.to_f) * (1.0 / (127.0 * 127.0)))
   env_gen.set_attack((((value = Spms1::C::get_midi_cc_value(73)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0))
   env_gen.set_decay((((value = Spms1::C::get_midi_cc_value(75)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0))
   env_gen.set_sustain((((value = Spms1::C::get_midi_cc_value(30)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0))

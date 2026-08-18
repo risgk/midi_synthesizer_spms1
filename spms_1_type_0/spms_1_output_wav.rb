@@ -20,6 +20,7 @@ filter.set_modulation_amount(48.0 * (1.0 / 128.0))
 
 amp = Spms1::Amp.new
 amp.set_sample_rate(SAMPLE_RATE)
+amp.set_gain((100.0 * 100.0) * (1.0 / (127.0 * 127.0)))
 
 env_gen = Spms1::EnvGen.new
 env_gen.set_sample_rate(SAMPLE_RATE)
