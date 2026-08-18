@@ -1,6 +1,6 @@
 ```
-  [Music Synthesizer]                                             Date: 2026-08-14                      
-  Model: Music Synth SPMS-1 (type-0)  MIDI Implementation Chart   Version: 0.0.5                        
+  [Music Synthesizer]                                             Date: 2026-08-18                      
+  Model: Music Synth SPMS-1 (type-0)  MIDI Implementation Chart   Version: 0.0.6                        
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Function...                   | Transmitted   | Recognized    | Remarks                              |
 +-------------------------------+---------------+---------------+--------------------------------------+
@@ -26,6 +26,7 @@
 | Change                     74 | x             | o             | Filter Cutoff                        |
 |                            71 | x             | o             | Filter Resonance                     |
 |                            24 | x             | o             | Filter EG Amount                     |
+|                            15 | x             | o             | Amp Gain                             |
 |                            73 | x             | o             | EG Attack (Time)                     |
 |                            75 | x             | o             | EG Decay/Release (Time)              |
 |                            30 | x             | o             | EG Sustain (Level)                   |

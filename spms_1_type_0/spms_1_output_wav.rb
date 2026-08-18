@@ -14,18 +14,19 @@ oscillator.set_waveform(64.0 * (1.0 / 128.0))
 
 filter = Spms1::Filter.new
 filter.set_sample_rate(SAMPLE_RATE)
-filter.set_cutoff(64.0 * (1.0 / 127.0))
-filter.set_resonance(80.0 * (1.0 / 127.0))
-filter.set_modulation_amount(48.0 * (1.0 / 127.0))
+filter.set_cutoff(60.0 * (1.0 / 120.0))
+filter.set_resonance(80.0 * (1.0 / 128.0))
+filter.set_modulation_amount(48.0 * (1.0 / 128.0))
 
 amp = Spms1::Amp.new
 amp.set_sample_rate(SAMPLE_RATE)
+amp.set_gain((100.0 * 100.0) * (1.0 / (127.0 * 127.0)))
 
 env_gen = Spms1::EnvGen.new
 env_gen.set_sample_rate(SAMPLE_RATE)
 
-env_gen.set_attack(0.0 * (1.0 / 127.0))
-env_gen.set_decay(127.0 * (1.0 / 127.0))
+env_gen.set_attack(0.0 * (1.0 / 128.0))
+env_gen.set_decay(128.0 * (1.0 / 128.0))
 env_gen.set_sustain(64.0 * (1.0 / 128.0))
 
 puts "Generating stereo waveform data..."

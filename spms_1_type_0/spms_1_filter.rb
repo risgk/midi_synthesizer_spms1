@@ -103,18 +103,32 @@ module Spms1
     def update_coefficients_interleaved
       case @interleave_state
       when 0
-        # Map normalized cutoff (0.0 - 1.0) to MIDI cutoff value range (0.0 - 127.0)
-        @step_midi_cutoff = @current_cutoff * 127.0
+        # Map normalized cutoff (0.00 - 1.00) to 10-octave pitch range scaled to absolute note numbers (15 - 135)
+        @internal_cutoff = @current_cutoff * 120.0 + 15.0
       when 1
-        # Convert MIDI cutoff value to frequency in Hz (A440 tuning reference)
-        cutoff_freq = 440.0 * (2.0 ** ((@step_midi_cutoff - 63.0) * (1.0 / 12.0)))
+        # Convert internal log scale value to frequency in Hz using a standard 12-steps-per-octave reference
+        # (where internal note number 69 maps exactly to 440 Hz). Tuning profile:
+        # - Min (0.00) : ~19.5 Hz  (equiv. to note number 15)
+        # - Mid (0.50) : ~622 Hz   (equiv. to note number 75)
+        # - Max (1.00) : ~19.9 kHz (equiv. to note number 135)
+        cutoff_freq = 440.0 * (2.0 ** ((@internal_cutoff - 69.0) * (1.0 / 12.0)))
+        
         # Calculate angular frequency (omega)
         @step_omega = 2.0 * Math::PI * cutoff_freq / @sample_rate
       when 2
         # Map resonance to Q factor scale (base Q is 1 / sqrt(2) approx 0.707)
-        midi_resonance = @current_resonance * 127.0
+        # Scale adjusted to 128.0 to maintain original maximum peak at CC 127 input (127/128 * 128 = 127.0)
+        @internal_resonance = @current_resonance * 128.0
+        
+        # Convert internal log scale value to Q factor.
+        # 32 steps per octave ideal scaling profile:
+        # - Min (0.00) : ~0.707 (Butterworth filter alignment)
+        # - Q1  (0.25) : ~1.414 (+6dB resonance peak)
+        # - Mid (0.50) : ~2.828 (+12dB resonance peak)
+        # - Q3  (0.75) : ~5.657 (+18dB resonance peak)
+        # - Max (1.00) : ~11.311 (approx +24dB resonance peak)
         base_q = 0.7071067811865476
-        @step_q = base_q * (2.0 ** (midi_resonance * (1.0 / 32.0)))
+        @step_q = base_q * (2.0 ** (@internal_resonance * (1.0 / 32.0)))
       when 3
         # Precompute trigonometric components
         @step_sin_w = Math.sin(@step_omega)

@@ -229,7 +229,7 @@
 
 <div class="editor-container">
   <header>
-    <h1>SPMS-1 (type-0) Editor<span class="version">v0.0.5</span></h1>
+    <h1>SPMS-1 (type-0) Editor<span class="version">v0.0.6</span></h1>
   </header>
 
   <div class="editor-grid">
@@ -239,13 +239,13 @@
         <div class="form-group">
           <label>MIDI In Device (Keyboard / Controller)</label>
           <select id="midi-in">
-            <option>Select MIDI Input Device...</option>
+            <option value="">Select MIDI Input Device...</option>
           </select>
         </div>
         <div class="form-group">
           <label>MIDI Out Device (SPMS-1 Synth)</label>
           <select id="midi-out">
-            <option>Select SPMS-1 Device...</option>
+            <option value="">Select SPMS-1 Device...</option>
           </select>
         </div>
         <button class="btn-main" id="init-all">Initialize & Send All</button>
@@ -263,9 +263,7 @@
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="right-column" style="display: flex; flex-direction: column; gap: 20px;">
       <div class="panel">
         <h2>Filter</h2>
         <div class="control-row">
@@ -288,6 +286,21 @@
             <div class="slider-input-wrapper">
               <input type="range" id="eg-amount" min="0" max="127" value="48">
               <span class="slider-value" id="eg-amount-val">48</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="right-column" style="display: flex; flex-direction: column; gap: 20px;">
+      <div class="panel">
+        <h2>Amp</h2>
+        <div class="control-row">
+          <div class="slider-knob-zone">
+            <div class="slider-label">Amp Gain <span class="cc-num">(CC 15)</span></div>
+            <div class="slider-input-wrapper">
+              <input type="range" id="amp-gain" min="0" max="127" value="100">
+              <span class="slider-value" id="amp-gain-val">100</span>
             </div>
           </div>
         </div>
@@ -337,6 +350,7 @@
 
   const ccMap = {
     'waveform': 20,
+    'amp-gain': 15,
     'cutoff': 74,
     'resonance': 71,
     'eg-amount': 24,
@@ -347,6 +361,7 @@
 
   const defaultValues = {
     'waveform': 0,
+    'amp-gain': 100,
     'cutoff': 127,
     'resonance': 80,
     'eg-amount': 48,
@@ -445,11 +460,12 @@
       let elementId = "";
       switch (ccNumber) {
         case 20: elementId = "waveform"; break;
+        case 15: elementId = "amp-gain"; break;
         case 74: elementId = "cutoff"; break;
         case 71: elementId = "resonance"; break;
         case 24: elementId = "eg-amount"; break;
         case 73: elementId = "attack"; break;
-        case 75: elementId = "decay-release"; break;
+        case 75: elementId = "decay"; break;
         case 30: elementId = "sustain"; break;
       }
       if (elementId) {
