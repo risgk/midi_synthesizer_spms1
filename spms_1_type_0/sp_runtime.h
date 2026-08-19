@@ -2,15 +2,7 @@
 #ifndef SP_RUNTIME_H
 #define SP_RUNTIME_H
 
-#pragma GCC optimize ("O3")
-#pragma GCC target ("thumb")
 #pragma GCC section text=".time_critical"
-
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wunused-function"
-#pragma GCC diagnostic ignored "-Wconversion"
-#pragma GCC diagnostic ignored "-Wall"
-#pragma GCC diagnostic ignored "-Wextra"
 
 /* Platform feature-test macros (_DARWIN_C_SOURCE for MAP_ANON) live at the top
    of sp_types.h so every translation unit that includes it defines them before

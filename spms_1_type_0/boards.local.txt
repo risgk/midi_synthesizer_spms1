@@ -1,0 +1,2 @@
+pico.build.extra_flags=-fshort-double -fsingle-precision-constant -fno-math-errno -funsafe-math-optimizations -O3 -mthumb -Wno-unused-parameter -Wno-unused-function -Wno-conversion -w
+rp2040.build.extra_flags=-fshort-double -fsingle-precision-constant -fno-math-errno -funsafe-math-optimizations -O3 -mthumb -Wno-unused-parameter -Wno-unused-function -Wno-conversion -w
