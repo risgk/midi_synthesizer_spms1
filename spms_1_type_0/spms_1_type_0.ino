@@ -29,6 +29,7 @@
 ////////////////////////////////////////////////////////////////
 
 #include <algorithm>
+#include <cmath>
 
 #include <MIDI.h>
 struct MySettings : public midi::DefaultSettings {
@@ -88,15 +89,15 @@ uint8_t get_midi_cc_value(uint8_t cc_number) {
   const int32_t length = static_cast<int32_t>(sizeof(g_midi_cc_values) / sizeof(g_midi_cc_values[0]));
 
   if (cc_number < 0 || cc_number >= length) { 
-    return 0.0; 
+    return 0; 
   }
 
   return g_midi_cc_values[cc_number];
 }
 
 void audio_out_write(float l, float r) {
-  int32_t clamped_l = static_cast<int32_t>(std::lround(l * 0.5f * 8388607.0f));
-  int32_t clamped_r = static_cast<int32_t>(std::lround(r * 0.5f * 8388607.0f));
+  int32_t clamped_l = static_cast<int32_t>(std::lroundf(l * 0.5f * 8388607.0f));
+  int32_t clamped_r = static_cast<int32_t>(std::lroundf(r * 0.5f * 8388607.0f));
   clamped_l = std::clamp(clamped_l, static_cast<int32_t>(-8388608), static_cast<int32_t>(8388607));
   clamped_r = std::clamp(clamped_r, static_cast<int32_t>(-8388608), static_cast<int32_t>(8388607));
   g_i2s_output.write24(clamped_l << 8, clamped_r << 8);
