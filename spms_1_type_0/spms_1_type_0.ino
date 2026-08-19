@@ -2,6 +2,12 @@
  * Music Synth SPMS-1 (type-0)
  */
 
+#pragma GCC optimize ("O3")
+#pragma GCC target ("thumb")
+#pragma GCC section text=".time_critical"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-function"
+
 #define SPMS_1_USE_DEBUG_PRINT
 #define SPMS_1_USE_USB_MIDI                 // Select USB Stack: "Adafruit TinyUSB" in the Arduino IDE "Tools" menu
 #define SPMS_1_USE_UART_MIDI
