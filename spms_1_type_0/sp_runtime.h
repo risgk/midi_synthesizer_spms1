@@ -2,15 +2,13 @@
 #ifndef SP_RUNTIME_H
 #define SP_RUNTIME_H
 
+#define main Spms1_main
+#pragma GCC optimize("single-precision-constant")
 #pragma GCC optimize ("O3")
 #pragma GCC target ("thumb")
 #pragma GCC section text=".time_critical"
-
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-function"
-#pragma GCC diagnostic ignored "-Wconversion"
-#pragma GCC diagnostic ignored "-Wall"
-#pragma GCC diagnostic ignored "-Wextra"
 
 /* Platform feature-test macros (_DARWIN_C_SOURCE for MAP_ANON) live at the top
    of sp_types.h so every translation unit that includes it defines them before
@@ -30,6 +28,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#define double float
+#define sin(x) sinf(x)
+#define cos(x) cosf(x)
+#define tan(x) tanf(x)
+#define atan2(y,x) atan2f(y,x)
+#define sqrt(x) sqrtf(x)
+#define fabs(x) fabsf(x)
+#define pow(x,y) powf(x,y)
+#define exp(x) expf(x)
+#define log(x) logf(x)
 #include <stdbool.h>
 #include <stdint.h>
 #include <ctype.h>

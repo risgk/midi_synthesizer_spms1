@@ -9,7 +9,7 @@
 /* Must match sp_types.h: mrb_int is pointer-width (int64 on 64-bit,
    int32 on 32-bit) so this TU's helper ABI agrees with the generated TU. */
 typedef intptr_t mrb_int;
-typedef float  mrb_float;
+typedef double  mrb_float;
 /* 10^p fits mrb_int only up to this exponent (p>= it collapses to 0):
    10^19 > INT64_MAX, 10^10 > INT32_MAX. */
 #if INTPTR_MAX == INT32_MAX

@@ -2,6 +2,12 @@
  * Music Synth SPMS-1 (type-0)
  */
 
+#pragma GCC optimize ("O3")
+#pragma GCC target ("thumb")
+#pragma GCC section text=".time_critical"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-function"
+
 #define SPMS_1_USE_DEBUG_PRINT
 #define SPMS_1_USE_USB_MIDI                 // Select USB Stack: "Adafruit TinyUSB" in the Arduino IDE "Tools" menu
 #define SPMS_1_USE_UART_MIDI
@@ -29,6 +35,7 @@
 ////////////////////////////////////////////////////////////////
 
 #include <algorithm>
+#include <cmath>
 
 #include <MIDI.h>
 struct MySettings : public midi::DefaultSettings {
@@ -88,15 +95,15 @@ uint8_t get_midi_cc_value(uint8_t cc_number) {
   const int32_t length = static_cast<int32_t>(sizeof(g_midi_cc_values) / sizeof(g_midi_cc_values[0]));
 
   if (cc_number < 0 || cc_number >= length) { 
-    return 0.0; 
+    return 0; 
   }
 
   return g_midi_cc_values[cc_number];
 }
 
 void audio_out_write(float l, float r) {
-  int32_t clamped_l = static_cast<int32_t>(std::lround(l * 0.5f * 8388607.0f));
-  int32_t clamped_r = static_cast<int32_t>(std::lround(r * 0.5f * 8388607.0f));
+  int32_t clamped_l = static_cast<int32_t>(std::lroundf(l * 0.5f * 8388607.0f));
+  int32_t clamped_r = static_cast<int32_t>(std::lroundf(r * 0.5f * 8388607.0f));
   clamped_l = std::clamp(clamped_l, static_cast<int32_t>(-8388608), static_cast<int32_t>(8388607));
   clamped_r = std::clamp(clamped_r, static_cast<int32_t>(-8388608), static_cast<int32_t>(8388607));
   g_i2s_output.write24(clamped_l << 8, clamped_r << 8);
@@ -134,7 +141,7 @@ void setup1() {
   g_midi_cc_values[24] = 48;  // Filter EG Amt
   g_midi_cc_values[15] = 100; // Amp Gain
   g_midi_cc_values[73] = 32;  // EG Attack
-  g_midi_cc_values[75] = 104; // EG Decay/Release
+  g_midi_cc_values[75] = 96;  // EG Decay/Release
   g_midi_cc_values[30] = 0;   // EG Sustain
 }
 

@@ -22,7 +22,7 @@
 /* Basic mruby types */
 typedef int64_t mrb_int;
 typedef uint64_t mrb_uint;
-typedef float mrb_float;
+typedef double mrb_float;
 typedef int mrb_bool;
 #define TRUE 1
 #define FALSE 0

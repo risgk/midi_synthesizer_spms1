@@ -14,7 +14,6 @@
 #include <stdio.h>
 #include <math.h>
 #include <float.h>
-#define double float
 #include <stdint.h>
 #include "sp_array.h"
 #include "sp_random.h"  /* sp_krand_below for shuffle/sample */

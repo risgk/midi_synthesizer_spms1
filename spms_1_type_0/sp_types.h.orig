@@ -75,7 +75,7 @@
 #error "spinel: unsupported intptr_t width (need 32- or 64-bit)"
 #endif
 typedef intptr_t mrb_int;
-typedef float mrb_float;
+typedef double mrb_float;
 typedef bool mrb_bool;
 
 /* Sentinel value reserved by the int? (scalar-nullable int) type. An

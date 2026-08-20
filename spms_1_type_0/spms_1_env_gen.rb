@@ -159,12 +159,12 @@ module Spms1
 
       # Unified Decay/Release Coefficient Evaluation Profile
       # Time ranges (Audible fade down to 1/1024 level, approx. -60dB):
-      # - Min (0.00) : 2.00 ms
-      # - Q1  (0.25) : 20.0 ms
-      # - Mid (0.50) : 200 ms
-      # - Q3  (0.75) : 2.00 s
-      # - Max (1.00) : 20.0 s
-      decay_time = 0.02885 * calculate_exp_fast(@decay)
+      # - Min (0.00) : 3.00 ms
+      # - Q1  (0.25) : 30.0 ms
+      # - Mid (0.50) : 300 ms
+      # - Q3  (0.75) : 3.00 s
+      # - Max (1.00) : 30.0 s
+      decay_time = 0.043281 * calculate_exp_fast(@decay)
       @decay_coef = 1.0 / (decay_time * effective_rate)
       @decay_coef = 1.0 if @decay_coef > 1.0
     end
