@@ -130,8 +130,8 @@ module Spms1
         end
       end
 
-      # Increment and mask the sample tracking counter (0 to 7 wrap around)
-      @sample_counter = (@sample_counter + 1) & 7
+      # Increment and mask the sample tracking counter (0 to 3 wrap around for 4-sample grid)
+      @sample_counter = (@sample_counter + 1) & 3
 
       # Always return the evaluated level (holds perfectly stable across intermediate frames)
       @current_level
@@ -142,7 +142,8 @@ module Spms1
     # Unifies the mathematical recalculations safely inside the 8-sample step boundary.
     # Completely eliminates the interleaved switch/case loop to optimize instruction size.
     def update_coefficients_full
-      effective_rate = @sample_rate * (1.0 / 8.0)
+      # Adjusted to 4-sample rate grid
+      effective_rate = @sample_rate * (1.0 / 4.0)
 
       # Attack Coefficient Evaluation Profile
       # Time ranges (0% to 100% target):

@@ -4,8 +4,8 @@ module Spms1
   # Includes a gated 1st-order lag smoother running at the 8-sample control rate grid 
   # to match filter parameter steps and completely eliminate zipper noise.
   class Oscillator
-    # Standardized smoothing blend factor for the 8-sample control rate grid (1/16 step ratio)
-    SMOOTHING_TARGET_BLEND = 0.0625
+    # A 4-sample grid implementation to maintain the original time constant
+    SMOOTHING_TARGET_BLEND = 0.125
 
     # Promoted lookup table to a Class Constant to unlock compiler optimizations.
     # This allows the Spinel AOT compiler to pre-allocate memory and generate high-speed static arrays,
@@ -82,8 +82,8 @@ module Spms1
       @phase += current_dt
       @phase -= 1.0 if @phase >= 1.0
 
-      # Increment and mask the sample tracking counter (0 to 7 wrap around)
-      @sample_counter = (@sample_counter + 1) & 7
+      # Increment and mask the sample tracking counter (0 to 3 wrap around for 4-sample grid)
+      @sample_counter = (@sample_counter + 1) & 3
 
       # Scale down amplitude to prevent clipping in downstream modules
       # Adjusting gain scaling slightly based on morph state to maintain steady perceived volume

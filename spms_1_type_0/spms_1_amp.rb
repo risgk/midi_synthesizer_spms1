@@ -2,8 +2,8 @@ module Spms1
   # An Amplifier module that controls audio volume using a modulation input 
   # (typically driven by an Envelope Generator output) with parameter smoothing.
   class Amp
-    # Smoothing coefficient optimized for the 8-sample gated control rate grid
-    SMOOTHING_TARGET_BLEND = 0.0625
+    # A 4-sample grid implementation to maintain the original time constant
+    SMOOTHING_TARGET_BLEND = 0.125
 
     def initialize
       @sample_rate = 48000.0
@@ -37,8 +37,8 @@ module Spms1
         @current_gain += (@gain - @current_gain) * SMOOTHING_TARGET_BLEND
       end
 
-      # Increment and mask the sample tracking counter (0 to 7 wrap around)
-      @sample_counter = (@sample_counter + 1) & 7
+      # Increment and mask the sample tracking counter (0 to 3 wrap around for 4-sample grid)
+      @sample_counter = (@sample_counter + 1) & 3
 
       # Clamp modulation input to safe normalized bounds (-1.0 to 1.0)
       mod = (modulation_input < -1.0) ? -1.0 : ((modulation_input > 1.0) ? 1.0 : modulation_input)

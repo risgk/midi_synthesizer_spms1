@@ -5,9 +5,8 @@ module Spms1
     # Configurable soft-clipping headroom ceiling
     SOFT_CLIP_CEILING = 8.0
 
-    # Smoothing coefficient optimized for the 8-sample gated control rate grid
-    # to maintain a steady ~5.3ms parameter tracking lag time (95% settled)
-    SMOOTHING_TARGET_BLEND = 0.0625
+    # A 4-sample grid implementation to maintain the original time constant
+    SMOOTHING_TARGET_BLEND = 0.125
 
     def initialize
       @sample_rate = 48000.0
@@ -33,7 +32,7 @@ module Spms1
       @next_a1 = 0.0
       @next_a2 = 0.0
 
-      # Internal counter to automatically handle the 8-sample control block updates
+      # Internal counter to automatically handle the control block updates
       @sample_counter = 0
 
       update_coefficients_interleaved
@@ -69,23 +68,15 @@ module Spms1
     # @param modulation_input [Float] Control signal from an EG or LFO (typically 0.0 to 1.0)
     # @return [Float] Filtered and soft-clipped output sample
     def process(audio_input = 0.0, modulation_input = 0.0)
-      # Synchronize parameter smoothing routines onto the internal 8-sample step boundary
+      # Execute one step of the reconstructed 4-step interleaved coefficient calculation
       if @sample_counter == 0
-        # Calculate the dynamic combined cutoff value using base cutoff and scaled modulation input
-        mod = (modulation_input < 0.0) ? 0.0 : ((modulation_input > 1.0) ? 1.0 : modulation_input)
-        total_cutoff = @cutoff + (mod * @modulation_amount)
-        clamped_cutoff = (total_cutoff < 0.0) ? 0.0 : ((total_cutoff > 1.0) ? 1.0 : total_cutoff)
-
-        # Smooth parameters over time to prevent audible zipper noise
-        @current_cutoff += (clamped_cutoff - @current_cutoff) * SMOOTHING_TARGET_BLEND
-        @current_resonance += (@resonance - @current_resonance) * SMOOTHING_TARGET_BLEND
-
-        # Execute one step of the interleaved coefficient calculation
+        # Pass variables required for State 0 computation internally
+        @current_modulation_input = modulation_input
         update_coefficients_interleaved
       end
 
-      # Increment and mask the sample tracking counter (0 to 7 wrap around)
-      @sample_counter = (@sample_counter + 1) & 7
+      # Increment and mask the sample tracking counter (0 to 3 wrap around for 4-sample grid)
+      @sample_counter = (@sample_counter + 1) & 3
 
       # Difference equation calculation (Transposed Direct Form II implementation)
       audio_output = @z1 + @b0 * audio_input
@@ -97,57 +88,52 @@ module Spms1
 
     private
 
-    # Distributes the heavy math of coefficient calculation over 8 sample frames.
-    # This process is internally gated to run once every 8 frames to prevent CPU spikes 
-    # caused by calling Math.sin, Math.cos, or 2.0 ** x on every consecutive frame.
+    # Distributes the math of coefficient calculation over 4 sample frames to align perfectly 
+    # with the 4-sample control grid and maintain steady processing scaling.
     def update_coefficients_interleaved
       case @interleave_state
       when 0
+        # Calculate the dynamic combined cutoff value using base cutoff and scaled modulation input
+        mod = (@current_modulation_input < 0.0) ? 0.0 : ((@current_modulation_input > 1.0) ? 1.0 : @current_modulation_input)
+        total_cutoff = @cutoff + (mod * @modulation_amount)
+        clamped_cutoff = (total_cutoff < 0.0) ? 0.0 : ((total_cutoff > 1.0) ? 1.0 : total_cutoff)
+
+        # Smooth parameters over time to prevent audible zipper noise
+        @current_cutoff += (clamped_cutoff - @current_cutoff) * SMOOTHING_TARGET_BLEND
+        @current_resonance += (@resonance - @current_resonance) * SMOOTHING_TARGET_BLEND
+
         # Map normalized cutoff (0.00 - 1.00) to 10-octave pitch range scaled to absolute note numbers (15 - 135)
-        @internal_cutoff = @current_cutoff * 120.0 + 15.0
-      when 1
+        internal_cutoff = @current_cutoff * 120.0 + 15.0
+
         # Convert internal log scale value to frequency in Hz using a standard 12-steps-per-octave reference
-        # (where internal note number 69 maps exactly to 440 Hz). Tuning profile:
-        # - Min (0.00) : ~19.5 Hz  (equiv. to note number 15)
-        # - Mid (0.50) : ~622 Hz   (equiv. to note number 75)
-        # - Max (1.00) : ~19.9 kHz (equiv. to note number 135)
-        cutoff_freq = 440.0 * (2.0 ** ((@internal_cutoff - 69.0) * (1.0 / 12.0)))
+        cutoff_freq = 440.0 * (2.0 ** ((internal_cutoff - 69.0) * (1.0 / 12.0)))
         
         # Calculate angular frequency (omega)
         @step_omega = 2.0 * Math::PI * cutoff_freq / @sample_rate
-      when 2
+      when 1
         # Map resonance to Q factor scale (base Q is 1 / sqrt(2) approx 0.707)
-        # Scale adjusted to 128.0 to maintain original maximum peak at CC 127 input (127/128 * 128 = 127.0)
-        @internal_resonance = @current_resonance * 128.0
+        internal_resonance = @current_resonance * 128.0
         
         # Convert internal log scale value to Q factor.
-        # 32 steps per octave ideal scaling profile:
-        # - Min (0.00) : ~0.707 (Butterworth filter alignment)
-        # - Q1  (0.25) : ~1.414 (+6dB resonance peak)
-        # - Mid (0.50) : ~2.828 (+12dB resonance peak)
-        # - Q3  (0.75) : ~5.657 (+18dB resonance peak)
-        # - Max (1.00) : ~11.311 (approx +24dB resonance peak)
         base_q = 0.7071067811865476
-        @step_q = base_q * (2.0 ** (@internal_resonance * (1.0 / 32.0)))
-      when 3
-        # Precompute trigonometric components
+        @step_q = base_q * (2.0 ** (internal_resonance * (1.0 / 32.0)))
+
+        # Precompute trigonometric components simultaneously to prevent instruction drifting
         @step_sin_w = Math.sin(@step_omega)
         @step_cos_w = Math.cos(@step_omega)
-      when 4
+      when 2
         # Calculate reciprocal of the denominator for division optimization
-        @step_inv_denom = 1.0 / ((2.0 * @step_q) + @step_sin_w)
-      when 5
+        step_inv_denom = 1.0 / ((2.0 * @step_q) + @step_sin_w)
+
         # Calculate b0 coefficient into the double-buffer
         @step_two_q = 2.0 * @step_q
         raw_b0 = (1.0 - @step_cos_w) * 0.5 * @step_two_q
-        @next_b0 = raw_b0 * @step_inv_denom
-      when 6
-        # Calculate b1, a1, and a2 coefficients into the double-buffer
-        @next_b1 = (1.0 - @step_cos_w) * @step_two_q * @step_inv_denom
-        @next_a1 = -4.0 * @step_cos_w * @step_q * @step_inv_denom
-        @next_a2 = (@step_two_q - @step_sin_w) * @step_inv_denom
+        @next_b0 = raw_b0 * step_inv_denom
+        @next_b1 = (1.0 - @step_cos_w) * @step_two_q * step_inv_denom
+        @next_a1 = -4.0 * @step_cos_w * @step_q * step_inv_denom
+        @next_a2 = (@step_two_q - @step_sin_w) * step_inv_denom
       else
-        # State 7: Atomically swap active coefficients with the newly calculated ones
+        # State 3: Atomically swap active coefficients with the newly calculated ones
         @b0 = @next_b0
         @b1 = @next_b1
         @b2 = @next_b0 # Low-pass Biquad assumes b2 equals b0
@@ -155,8 +141,8 @@ module Spms1
         @a2 = @next_a2
       end
 
-      # Increment state and wrap around using bitwise AND (0 to 7)
-      @interleave_state = (@interleave_state + 1) & 7
+      # Increment state and wrap around using bitwise AND (0 to 3 for 4-step sequence)
+      @interleave_state = (@interleave_state + 1) & 3
     end
 
     # Applies a cubic non-linear soft-clipping function tailored for a configurable range.
