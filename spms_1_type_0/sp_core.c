@@ -67,7 +67,7 @@ else {
    separator (CRuby's `"1_000.5".to_f == 1000.5`), returning 0.0 when no
    number leads. Underscores are stripped into a small scratch buffer before
    strtod so the C parser (which stops at `_`) sees clean digits. */
-float sp_str_to_f_cruby(const char *s) {
+double sp_str_to_f_cruby(const char *s) {
   if (!s) return 0.0;
   const char *p = s;
   while (isspace((unsigned char)*p)) p++;
@@ -327,7 +327,7 @@ mrb_float sp_str_to_f_strict(const char *s) {
     buf[o] = '\0';
     {
       char *endptr;
-      float v = strtod(buf, &endptr);
+      double v = strtod(buf, &endptr);
       if (endptr == buf || *endptr != '\0') goto bad;
       if (buf != sbuf) free(buf);
       return (mrb_float)v;
