@@ -1075,7 +1075,7 @@ static mrb_float sp_EnvGen_calculate_exp_fast(sp_EnvGen *self, mrb_float lv_valu
   return (lv_e0 + (lv_fraction * ((lv_e1 - lv_e0))));
   return 0.0;
 }
-int Spms1_main(int argc,char**argv){
+int main(int argc,char**argv){
     SP_GC_SAVE();
     sp_re_init();
     mrb_int lv_i = 0;

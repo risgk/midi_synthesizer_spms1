@@ -14,11 +14,11 @@
 
 /* String -> number parsers (cold, I/O-boundary). */
 intptr_t sp_str_to_i_cruby(const char *s);
-float sp_str_to_f_cruby(const char *s);
+double sp_str_to_f_cruby(const char *s);
 intptr_t sp_str_to_i_base(const char *s, intptr_t base);
 intptr_t sp_str_to_i_strict(const char *s);
 intptr_t sp_str_to_i_strict_base(const char *s, intptr_t base);
-float  sp_str_to_f_strict(const char *s);
+double  sp_str_to_f_strict(const char *s);
 
 /* Cold integer-math + String#oct helpers. */
 intptr_t sp_gcd(intptr_t a, intptr_t b);
@@ -26,7 +26,7 @@ intptr_t sp_lcm(intptr_t a, intptr_t b);
 intptr_t sp_powmod(intptr_t base, intptr_t exp, intptr_t mod);
 intptr_t sp_ceildiv(intptr_t a, intptr_t b);
 intptr_t sp_int_clamp(intptr_t v, intptr_t lo, intptr_t hi);
-float sp_float_clamp(float v, float lo, float hi);
+double sp_float_clamp(double v, double lo, double hi);
 intptr_t sp_int_sqrt(intptr_t n);
 intptr_t sp_ipow10(intptr_t p);
 intptr_t sp_int_round(intptr_t v, intptr_t nd);

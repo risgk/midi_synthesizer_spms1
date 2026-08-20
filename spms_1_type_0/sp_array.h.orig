@@ -221,7 +221,7 @@ sp_RbVal sp_StrArray_rindex_poly(sp_StrArray *a, const char *v);
 mrb_int sp_IntArray_index_opt(sp_IntArray *a, mrb_int v);
 mrb_int sp_IntArray_rindex_opt(sp_IntArray *a, mrb_int v);
 const int64_t *sp_IntArray_ffi_data(sp_IntArray *a);
-const float *sp_FloatArray_ffi_data(sp_FloatArray *a);
+const double *sp_FloatArray_ffi_data(sp_FloatArray *a);
 sp_IntArray *sp_IntArray_concat(sp_IntArray *a, sp_IntArray *b);
 sp_StrArray *sp_StrArray_concat(sp_StrArray *a, sp_StrArray *b);
 sp_FloatArray *sp_FloatArray_concat(sp_FloatArray *a, sp_FloatArray *b);

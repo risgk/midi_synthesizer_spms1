@@ -2,6 +2,7 @@
 #ifndef SP_RUNTIME_H
 #define SP_RUNTIME_H
 
+#pragma GCC optimize("single-precision-constant")
 #pragma GCC optimize ("O3")
 #pragma GCC target ("thumb")
 #pragma GCC section text=".time_critical"
@@ -36,6 +37,18 @@
 //#include <sys/stat.h>
 //#include <dirent.h>
 //#include <pwd.h>
+
+#define main Spms1_main
+#define double float
+#define sin(x) sinf(x)
+#define cos(x) cosf(x)
+#define tan(x) tanf(x)
+#define atan2(y,x) atan2f(y,x)
+#define sqrt(x) sqrtf(x)
+#define fabs(x) fabsf(x)
+#define pow(x,y) powf(x,y)
+#define exp(x) expf(x)
+#define log(x) logf(x)
 
 /* Opt-in native backtrace (spinel --debug). In a -g, non-inlined build the
    sp_<method> symbols are present, so sp_raise_cls can snapshot the live C
