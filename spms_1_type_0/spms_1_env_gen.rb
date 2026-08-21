@@ -1,8 +1,8 @@
 module Spms1
   # An ADS (Attack, Decay, Sustain) Envelope Generator where Release matches Decay.
-  # Optimized down to an 8-sample control rate grid. FSM state changes, levels, 
-  # and heavy coefficient calculations are internally gated to run once every 8 frames 
-  # to completely eliminate continuous tracking overhead within the inner sample loop.
+  # Optimized down to a 4-sample control rate grid to match downstream filters perfectly.
+  # FSM state changes, levels, and coefficient calculations are internally gated 
+  # to run once every 4 frames to completely eliminate redundant loop overhead.
   class EnvGen
     # Streamlined 3-state machine definitions
     STATE_ATTACK = 0
@@ -19,7 +19,7 @@ module Spms1
     EXP_TABLE[129] = EXP_TABLE[128] # Safe boundary padding for index + 1 lookups
 
     def initialize
-      @sample_rate = 48000.0
+      @sample_rate = 96000.0
       @state = STATE_IDLE
       @current_level = 0.0
 
@@ -38,7 +38,7 @@ module Spms1
       @attack_coef = 1.0
       @decay_coef = 1.0
 
-      # Internal counter to automatically handle the 8-sample control block updates
+      # Internal counter to automatically handle the 4-sample control block updates
       @sample_counter = 0
 
       # Force initial immediate full calculations
@@ -46,9 +46,10 @@ module Spms1
     end
 
     # Sets the system sample rate.
-    # @param sample_rate [Float] The sample rate in Hz (e.g., 48000.0)
+    # @param sample_rate [Float] The sample rate in Hz (e.g., 96000.0)
     def set_sample_rate(sample_rate)
       @sample_rate = sample_rate
+      update_coefficients_full
     end
 
     # Sets the attack time parameter.
@@ -73,7 +74,7 @@ module Spms1
     # @param gate_input [Float] Value >= 0.5 sets Gate On, < 0.5 triggers Release
     # @return [Float] Current envelope value (0.0 to 1.0)
     def process(gate_input = 0.0)
-      # Synchronize parameter routines onto the internal 8-sample step boundary
+      # Synchronize all FSM logic and level tracking onto the 4-sample grid to match Filter sync perfectly
       if @sample_counter == 0
         is_gate_on = gate_input >= 0.5
 
@@ -89,7 +90,7 @@ module Spms1
         # Periodically refresh the target coefficients inside the control window bounds
         update_coefficients_full
 
-        # Execute Finite State Machine progression logic step at the control rate
+        # Execute Finite State Machine progression logic step at the 4-sample control rate
         case @state
         when STATE_ATTACK
           @current_level += (@attack_target - @current_level) * @attack_coef
@@ -139,40 +140,23 @@ module Spms1
 
     private
 
-    # Unifies the mathematical recalculations safely inside the 8-sample step boundary.
-    # Completely eliminates the interleaved switch/case loop to optimize instruction size.
+    # Unifies the mathematical recalculations safely inside the 4-sample step boundary.
     def update_coefficients_full
-      # Adjusted to 4-sample rate grid
+      # 4-sample rate grid matches the update interval perfectly, restoring original time metrics
       effective_rate = @sample_rate * (1.0 / 4.0)
 
-      # Attack Coefficient Evaluation Profile
-      # Time ranges (0% to 100% target):
-      # - Min (0.00) : 1.00 ms
-      # - Q1  (0.25) : 10.0 ms
-      # - Mid (0.50) : 100 ms
-      # - Q3  (0.75) : 1.00 s
-      # - Max (1.00) : 10.0 s
-      # Factor (0.1443) accounts for the logarithmic trajectory required to clear the 1.0 threshold 
-      # while continuously chasing the virtual attack_target of 2.0 (ln(2) time-scaling factor).
+      # Attack Coefficient Evaluation Profile (1.00 ms to 10.0 s)
       attack_time = 0.1443 * calculate_exp_fast(@attack)
       @attack_coef = 1.0 / (attack_time * effective_rate)
       @attack_coef = 1.0 if @attack_coef > 1.0
 
-      # Unified Decay/Release Coefficient Evaluation Profile
-      # Time ranges (Audible fade down to 1/1024 level, approx. -60dB):
-      # - Min (0.00) : 3.00 ms
-      # - Q1  (0.25) : 30.0 ms
-      # - Mid (0.50) : 300 ms
-      # - Q3  (0.75) : 3.00 s
-      # - Max (1.00) : 30.0 s
+      # Unified Decay/Release Coefficient Evaluation Profile (3.00 ms to 30.0 s)
       decay_time = 0.043281 * calculate_exp_fast(@decay)
       @decay_coef = 1.0 / (decay_time * effective_rate)
       @decay_coef = 1.0 if @decay_coef > 1.0
     end
 
     # High-speed conversion from normalized input to exponential multiplier
-    # via linear interpolation across the precomputed constant table indices.
-    # Branchless design ensures maximum execution velocity in static AOT loops.
     def calculate_exp_fast(value)
       v_scale = value * 128.0
       index = v_scale.to_i

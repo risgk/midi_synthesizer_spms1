@@ -6,10 +6,12 @@ module Spms1
     SOFT_CLIP_CEILING = 8.0
 
     # A 4-sample grid implementation to maintain the original time constant
-    SMOOTHING_TARGET_BLEND = 0.125
+    # yielding a perfect ~2.65ms time constant (95% settling time of ~7.93ms)
+    SMOOTHING_TARGET_BLEND_BASE = 0.015625
 
     def initialize
-      @sample_rate = 48000.0
+      @sample_rate = 96000.0
+      @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE
       @cutoff = 1.0
       @resonance = 0.0
 
@@ -35,14 +37,19 @@ module Spms1
       # Internal counter to automatically handle the control block updates
       @sample_counter = 0
 
-      update_coefficients_interleaved
+      set_sample_rate(@sample_rate)
     end
 
     # Sets the system sample rate and forces a coefficient recalculation.
-    # @param sample_rate [Float] The sample rate in Hz (e.g., 48000.0)
+    # @param sample_rate [Float] The sample rate in Hz (e.g., 96000.0)
     def set_sample_rate(sample_rate)
       @sample_rate = sample_rate
-      update_coefficients_interleaved
+      @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (96000.0 / @sample_rate)
+
+      @interleave_state = 0
+      4.times do
+        update_coefficients_interleaved
+      end
     end
 
     # Sets the target base cutoff frequency.
@@ -68,12 +75,9 @@ module Spms1
     # @param modulation_input [Float] Control signal from an EG or LFO (typically 0.0 to 1.0)
     # @return [Float] Filtered and soft-clipped output sample
     def process(audio_input = 0.0, modulation_input = 0.0)
-      # Execute one step of the reconstructed 4-step interleaved coefficient calculation
-      if @sample_counter == 0
-        # Pass variables required for State 0 computation internally
-        @current_modulation_input = modulation_input
-        update_coefficients_interleaved
-      end
+      # Execute one step of the reconstructed 4-step interleaved coefficient calculation every sample
+      @current_modulation_input = modulation_input
+      update_coefficients_interleaved
 
       # Increment and mask the sample tracking counter (0 to 3 wrap around for 4-sample grid)
       @sample_counter = (@sample_counter + 1) & 3
@@ -93,17 +97,18 @@ module Spms1
     def update_coefficients_interleaved
       case @interleave_state
       when 0
-        # Calculate the dynamic combined cutoff value using base cutoff and scaled modulation input
+        # Smooth manual knob parameters over time to prevent audible zipper noise
+        @current_cutoff += (@cutoff - @current_cutoff) * @smoothing_target_blend
+        @current_resonance += (@resonance - @current_resonance) * @smoothing_target_blend
+
+        # Clamp modulation input and apply EG modulation *after* the knob smoothing filter
+        # to ensure ultra-fast envelope transients bypass the parameter lag entirely.
         mod = (@current_modulation_input < 0.0) ? 0.0 : ((@current_modulation_input > 1.0) ? 1.0 : @current_modulation_input)
-        total_cutoff = @cutoff + (mod * @modulation_amount)
+        total_cutoff = @current_cutoff + (mod * @modulation_amount)
         clamped_cutoff = (total_cutoff < 0.0) ? 0.0 : ((total_cutoff > 1.0) ? 1.0 : total_cutoff)
 
-        # Smooth parameters over time to prevent audible zipper noise
-        @current_cutoff += (clamped_cutoff - @current_cutoff) * SMOOTHING_TARGET_BLEND
-        @current_resonance += (@resonance - @current_resonance) * SMOOTHING_TARGET_BLEND
-
         # Map normalized cutoff (0.00 - 1.00) to 10-octave pitch range scaled to absolute note numbers (15 - 135)
-        internal_cutoff = @current_cutoff * 120.0 + 15.0
+        internal_cutoff = clamped_cutoff * 120.0 + 15.0
 
         # Convert internal log scale value to frequency in Hz using a standard 12-steps-per-octave reference
         cutoff_freq = 440.0 * (2.0 ** ((internal_cutoff - 69.0) * (1.0 / 12.0)))
@@ -147,8 +152,6 @@ module Spms1
 
     # Applies a cubic non-linear soft-clipping function tailored for a configurable range.
     # Adds warm analog-like saturation and prevents internal state blow-ups.
-    # Note: No oversampling is performed here; however, as long as the inputs are well-behaved,
-    # aliasing noise remains minimal within the dynamic range of the synthesis core.
     # @param sample [Float] Internal state or feedback signal
     # @return [Float] Saturated signal
     def soft_clip(sample)

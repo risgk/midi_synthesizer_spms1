@@ -1,11 +1,11 @@
 module Spms1
   # A band-limited oscillator supporting Sawtooth-to-Square waveform morphing
   # by summing/subtracting two phase-shifted Sawtooth waves with PolyBLEP anti-aliasing.
-  # Includes a gated 1st-order lag smoother running at the 8-sample control rate grid 
+  # Includes a gated 1st-order lag smoother running at the 4-sample control rate grid 
   # to match filter parameter steps and completely eliminate zipper noise.
   class Oscillator
     # A 4-sample grid implementation to maintain the original time constant
-    SMOOTHING_TARGET_BLEND = 0.125
+    SMOOTHING_TARGET_BLEND_BASE = 0.015625
 
     # Promoted lookup table to a Class Constant to unlock compiler optimizations.
     # This allows the Spinel AOT compiler to pre-allocate memory and generate high-speed static arrays,
@@ -16,7 +16,8 @@ module Spms1
     end
 
     def initialize
-      @sample_rate = 48000.0
+      @sample_rate = 96000.0
+      @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE
       @phase = 0.0 # Normalized phase accumulator (0.0 to 1.0)
       
       # Target morph control: 0.0 = pure Sawtooth, 1.0 = pure Square
@@ -25,14 +26,15 @@ module Spms1
       # Current smoothed morph state to prevent zipper noise during real-time CC tweaks
       @current_waveform = 0.0
 
-      # Internal counter to automatically handle the 8-sample control block updates
+      # Internal counter to automatically handle the 4-sample control block updates
       @sample_counter = 0
     end
 
     # Sets the system sample rate.
-    # @param sample_rate [Float] The sample rate in Hz (e.g., 48000.0)
+    # @param sample_rate [Float] The sample rate in Hz (e.g., 96000.0)
     def set_sample_rate(sample_rate)
       @sample_rate = sample_rate
+      @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (96000.0 / @sample_rate)
     end
 
     # Sets the oscillator waveform morph amount.
@@ -67,10 +69,10 @@ module Spms1
       blep2 = poly_blep(phase2, current_dt)
       saw2 = naive_saw2 + blep2
 
-      # --- Parameter Smoothing (Gated at 8-sample control rate) ---
-      # Synchronize parameter smoothing onto the internal 8-sample step boundary to match downstream filters.
+      # --- Parameter Smoothing (Gated at 4-sample control rate) ---
+      # Synchronize parameter smoothing onto the internal 4-sample step boundary to match downstream filters.
       if @sample_counter == 0
-        @current_waveform += (@waveform - @current_waveform) * SMOOTHING_TARGET_BLEND
+        @current_waveform += (@waveform - @current_waveform) * @smoothing_target_blend
       end
 
       # --- Waveform Morphing ---

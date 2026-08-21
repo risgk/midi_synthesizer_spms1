@@ -3,22 +3,24 @@ module Spms1
   # (typically driven by an Envelope Generator output) with parameter smoothing.
   class Amp
     # A 4-sample grid implementation to maintain the original time constant
-    SMOOTHING_TARGET_BLEND = 0.125
+    SMOOTHING_TARGET_BLEND_BASE = 0.015625
 
     def initialize
-      @sample_rate = 48000.0
+      @sample_rate = 96000.0
+      @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE
       # Configurable base gain coefficient (1.0 = unity gain)
       @gain = 1.0
       # Current smoothed gain state to prevent zipper noise
       @current_gain = 1.0
-      # Internal counter to automatically handle the 8-sample control block updates
+      # Internal counter to automatically handle the 4-sample control block updates
       @sample_counter = 0
     end
 
     # Sets the system sample rate.
-    # @param sample_rate [Float] The sample rate in Hz (e.g., 48000.0)
+    # @param sample_rate [Float] The sample rate in Hz (e.g., 96000.0)
     def set_sample_rate(sample_rate)
       @sample_rate = sample_rate
+      @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (96000.0 / @sample_rate)
     end
 
     # Sets the target base gain of the amplifier.
@@ -34,7 +36,7 @@ module Spms1
     def process(audio_input = 0.0, modulation_input = 1.0)
       # Synchronize parameter smoothing routines onto the internal 8-sample step boundary
       if @sample_counter == 0
-        @current_gain += (@gain - @current_gain) * SMOOTHING_TARGET_BLEND
+        @current_gain += (@gain - @current_gain) * @smoothing_target_blend
       end
 
       # Increment and mask the sample tracking counter (0 to 3 wrap around for 4-sample grid)
