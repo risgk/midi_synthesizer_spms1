@@ -28,9 +28,9 @@
 #define SPMS_1_I2S_BCLK_PIN                 (10)
 #define SPMS_1_I2S_SWAP_LEFT_AND_RIGHT      (false)
 
-#define SPMS_1_SAMPLE_RATE                  (48000)
+#define SPMS_1_SAMPLE_RATE                  (96000)
 #define SPMS_1_I2S_BUFFERS                  (4)
-#define SPMS_1_I2S_BUFFER_WORDS             (64)
+#define SPMS_1_I2S_BUFFER_WORDS             (32)
 
 ////////////////////////////////////////////////////////////////
 
@@ -127,12 +127,12 @@ void debug_measure_end(void) {
 }
 
 void setup1() {
-  g_i2s_output.setSysClk(SPMS_1_SAMPLE_RATE);
-  g_i2s_output.setFrequency(SPMS_1_SAMPLE_RATE);
+  g_i2s_output.setSysClk(g_sample_rate);
+  g_i2s_output.setFrequency(g_sample_rate);
   g_i2s_output.setDATA(SPMS_1_I2S_DATA_PIN);
   g_i2s_output.setBCLK(SPMS_1_I2S_BCLK_PIN);
   g_i2s_output.setBitsPerSample(24);
-  g_i2s_output.setBuffers(SPMS_1_I2S_BUFFERS, SPMS_1_I2S_BUFFER_WORDS);
+  g_i2s_output.setBuffers(SPMS_1_I2S_BUFFERS, g_audio_buffer_words);
   g_i2s_output.begin();
 
   g_midi_cc_values[20] = 0;   // Oscillator Waveform
