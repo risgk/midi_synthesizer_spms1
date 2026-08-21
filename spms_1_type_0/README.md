@@ -12,7 +12,7 @@ Required Hardware
 
 - [Raspberry Pi Pico 2](https://www.raspberrypi.com/products/raspberry-pi-pico-2/)
 - Pimoroni [Pico Audio Pack](https://shop.pimoroni.com/products/pico-audio-pack) (PIM544)
-    - The following I2S DAC hardware (48 kHz/24 bit) can also be used:
+    - The following I2S DAC hardware (96 kHz/24 bit) can also be used:
         - [Adafruit PCM5102 I2S DAC](https://www.adafruit.com/product/6250) (Product ID: 6250)
         - GY-PCM5102 (PCM5102A I2S DAC Module)
 
