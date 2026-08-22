@@ -21,6 +21,7 @@ module Spms1
       # Target values for parameter smoothing (One-pole low-pass filter)
       @current_cutoff = 1.0
       @current_resonance = 0.0
+      @current_modulation_amount = 0.0
 
       # Filter coefficients and internal state variables (Transposed Direct Form II)
       @b0 = 1.0; @b1 = 0.0; @b2 = 0.0
@@ -100,11 +101,12 @@ module Spms1
         # Smooth manual knob parameters over time to prevent audible zipper noise
         @current_cutoff += (@cutoff - @current_cutoff) * @smoothing_target_blend
         @current_resonance += (@resonance - @current_resonance) * @smoothing_target_blend
+        @current_modulation_amount += (@modulation_amount - @current_modulation_amount) * @smoothing_target_blend
 
         # Clamp modulation input and apply EG modulation *after* the knob smoothing filter
         # to ensure ultra-fast envelope transients bypass the parameter lag entirely.
         mod = (@current_modulation_input < 0.0) ? 0.0 : ((@current_modulation_input > 1.0) ? 1.0 : @current_modulation_input)
-        total_cutoff = @current_cutoff + (mod * @modulation_amount)
+        total_cutoff = @current_cutoff + (mod * @current_modulation_amount)
         clamped_cutoff = (total_cutoff < 0.0) ? 0.0 : ((total_cutoff > 1.0) ? 1.0 : total_cutoff)
 
         # Map normalized cutoff (0.00 - 1.00) to 10-octave pitch range scaled to absolute note numbers (15 - 135)
