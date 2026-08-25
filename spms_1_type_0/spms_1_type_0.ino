@@ -29,8 +29,8 @@
 #define SPMS_1_I2S_SWAP_LEFT_AND_RIGHT      (false)
 
 #define SPMS_1_SAMPLE_RATE                  (96000)
-#define SPMS_1_I2S_BUFFERS                  (4)
-#define SPMS_1_I2S_BUFFER_WORDS             (32)
+#define SPMS_1_I2S_BUFFERS                  (2)
+#define SPMS_1_I2S_BUFFER_WORDS             (64)
 
 ////////////////////////////////////////////////////////////////
 
