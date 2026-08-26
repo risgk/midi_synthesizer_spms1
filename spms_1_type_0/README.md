@@ -1,10 +1,10 @@
-Music Synth SPMS-1 (type-0) v0.0.10
-===================================
+MIDI Synth SPMS-1 (type-0) v0.0.11
+==================================
 
-- Monophonic Music Synthesizer for Raspberry Pi Pico 2, built with Spinel (Ruby AOT Compiler)
+- Monophonic MIDI Synthesizer for Raspberry Pi Pico 2, built with Spinel (Ruby AOT Compiler)
 - Controlled by MIDI as a sound module
 - Developed by ISGK Instruments (Ryo Ishigaki)
-- <https://github.com/risgk/music-synth-spms-1>
+- <https://github.com/risgk/midi-synth-spms-1>
 
 
 Required Hardware
@@ -98,7 +98,7 @@ SPMS-1 (type-0) Licence
 -----------------------
 
 ```
-Music Synth SPMS-1 (type-0) by ISGK Instruments (Ryo Ishigaki) is marked with CC0 1.0.
+MIDI Synth SPMS-1 (type-0) by ISGK Instruments (Ryo Ishigaki) is marked with CC0 1.0.
 To view a copy of this license, visit https://creativecommons.org/publicdomain/zero/1.0/
 ```
 
