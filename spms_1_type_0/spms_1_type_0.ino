@@ -1,5 +1,5 @@
 /*
- * Music Synth SPMS-1 (type-0)
+ * MIDI Synth SPMS-1 (type-0)
  */
 
 #pragma GCC optimize ("O3")
