@@ -38,7 +38,7 @@ Usage
 
 ### Prebuilt Binary
 
-- "spms1_type_0.ino.uf2" (in the "bin" folder) is for Raspberry Pi Pico 2 and Pimoroni Pico Audio Pack
+- "spms1_type0.ino.uf2" (in the "bin" folder) is for Raspberry Pi Pico 2 and Pimoroni Pico Audio Pack
 
 
 ### Web Editor
