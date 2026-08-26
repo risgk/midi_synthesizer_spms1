@@ -1,12 +1,12 @@
-require_relative 'spms_1_oscillator'
-require_relative 'spms_1_filter'
-require_relative 'spms_1_amp'
-require_relative 'spms_1_env_gen'
+require_relative 'spms1_oscillator'
+require_relative 'spms1_filter'
+require_relative 'spms1_amp'
+require_relative 'spms1_env_gen'
 
 SAMPLE_RATE = 48000.0
 DURATION_SEC = 10.0
 NUM_SAMPLES = (SAMPLE_RATE * DURATION_SEC).to_i
-FILENAME = "spms_1_output.wav"
+FILENAME = "spms1_output.wav"
 
 oscillator = Spms1::Oscillator.new
 oscillator.set_sample_rate(SAMPLE_RATE)
