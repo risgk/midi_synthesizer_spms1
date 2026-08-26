@@ -43,7 +43,7 @@ Usage
 
 ### Web Editor
 
-- Cross-platform web-based parameter controller via Web MIDI API: `spms1_editor.html`
+- Cross-platform web-based parameter controller via Web MIDI API: "spms1_editor.html"
 - Built-in software keyboard for note input and testing
 
 
@@ -51,8 +51,8 @@ Usage
 
 - MIDI Channel: Channel 1
 - USB MIDI Input
-    - Manufacturer Descriptor: `ISGK Instruments`
-    - Device Name: `SPMS-1 (type-0)`
+    - Manufacturer Descriptor: "ISGK Instruments"
+    - Device Name: "SPMS-1 (type-0)"
 - UART MIDI Input
     - Speed: 31250 bps
     - GP4 and GP5 pins are used by UART1 TX and UART1 RX
@@ -91,7 +91,7 @@ Usage
 
 ### Test Script
 
-- Output WAV File: `spms1_output_wav.rb`
+- Output WAV File: "spms1_output_wav.rb"
 
 
 SPMS-1 (type-0) Licence
