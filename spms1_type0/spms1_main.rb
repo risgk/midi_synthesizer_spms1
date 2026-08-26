@@ -1,7 +1,7 @@
-require_relative 'spms_1_oscillator'
-require_relative 'spms_1_filter'
-require_relative 'spms_1_amp'
-require_relative 'spms_1_env_gen'
+require_relative 'spms1_oscillator'
+require_relative 'spms1_filter'
+require_relative 'spms1_amp'
+require_relative 'spms1_env_gen'
 
 module Spms1
   module C

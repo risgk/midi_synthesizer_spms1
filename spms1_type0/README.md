@@ -1,10 +1,10 @@
-MIDI Synth SPMS-1 (type-0) v0.0.11
-==================================
+MIDI Synthesizer SPMS-1 (type-0) v0.0.12
+========================================
 
 - Monophonic MIDI Synthesizer for Raspberry Pi Pico 2, built with Spinel (Ruby AOT Compiler)
 - Controlled by MIDI as a sound module
 - Developed by ISGK Instruments (Ryo Ishigaki)
-- <https://github.com/risgk/midi-synth-spms-1>
+- <https://github.com/risgk/midi_synthesizer_spms1>
 
 
 Required Hardware
@@ -30,7 +30,7 @@ Required Software for Modification
     - Info: <https://github.com/FortySevenEffects/arduino_midi_library>
 - Spinel
     - Commit: <https://github.com/matz/spinel/tree/5af61ae7d53e36ca59a8de5870f532360d88fd7c>
-    - Please modify `int main(int argc,char**argv){` to `int Spms1_main(int argc,char**argv){` in the Spinel output file "spms_1_main.c"
+    - Please modify `int main(int argc,char**argv){` to `int Spms1_main(int argc,char**argv){` in the Spinel output file "spms1_main.c"
 
 
 Usage
@@ -38,12 +38,12 @@ Usage
 
 ### Prebuilt Binary
 
-- "spms_1_type_0.ino.uf2" (in the "bin" folder) is for Raspberry Pi Pico 2 and Pimoroni Pico Audio Pack
+- "spms1_type_0.ino.uf2" (in the "bin" folder) is for Raspberry Pi Pico 2 and Pimoroni Pico Audio Pack
 
 
 ### Web Editor
 
-- Cross-platform web-based parameter controller via Web MIDI API: `spms_1_editor.html`
+- Cross-platform web-based parameter controller via Web MIDI API: `spms1_editor.html`
 - Built-in software keyboard for note input and testing
 
 
@@ -60,15 +60,15 @@ Usage
 
         ```cpp
         #include <SoftwareSerial.h>
-        #define SPMS_1_UART_MIDI_TX_PIN             (4)
-        #define SPMS_1_UART_MIDI_RX_PIN             (5)
-        SoftwareSerial mySerial(SPMS_1_UART_MIDI_RX_PIN, SPMS_1_UART_MIDI_TX_PIN);
-        #define SPMS_1_UART_MIDI_SERIAL             mySerial
+        #define SPMS1_UART_MIDI_TX_PIN              (4)
+        #define SPMS1_UART_MIDI_RX_PIN              (5)
+        SoftwareSerial mySerial(SPMS1_UART_MIDI_RX_PIN, SPMS1_UART_MIDI_TX_PIN);
+        #define SPMS1_UART_MIDI_SERIAL              mySerial
         ```
 
         ```cpp
-        //  SPMS_1_UART_MIDI_SERIAL.setTX(SPMS_1_UART_MIDI_TX_PIN);
-        //  SPMS_1_UART_MIDI_SERIAL.setRX(SPMS_1_UART_MIDI_RX_PIN);
+        //  SPMS1_UART_MIDI_SERIAL.setTX(SPMS1_UART_MIDI_TX_PIN);
+        //  SPMS1_UART_MIDI_SERIAL.setRX(SPMS1_UART_MIDI_RX_PIN);
         ```
 
     - DIN/TRS MIDI is available by using (and modifying) Adafruit MIDI FeatherWing Kit, for example
@@ -80,7 +80,7 @@ Usage
         - necobit電子 [MIDI Unit Mini for GROVE](https://necobit.com/denshi/midi-unit-mini-for-grove/) (Shipping to Japan only)
 
 
-### [MIDI Implementation Chart](./spms_1_midi_chart.md)
+### [MIDI Implementation Chart](./spms1_midi_chart.md)
 
 
 ### Debug UART
@@ -91,18 +91,18 @@ Usage
 
 ### Test Script
 
-- Output WAV File: `spms_1_output_wav.rb`
+- Output WAV File: `spms1_output_wav.rb`
 
 
 SPMS-1 (type-0) Licence
 -----------------------
 
 ```
-MIDI Synth SPMS-1 (type-0) by ISGK Instruments (Ryo Ishigaki) is marked with CC0 1.0.
+MIDI Synthesizer SPMS-1 (type-0) by ISGK Instruments (Ryo Ishigaki) is marked with CC0 1.0.
 To view a copy of this license, visit https://creativecommons.org/publicdomain/zero/1.0/
 ```
 
-- Target files: `spms_1_*.*`
+- Target files: `spms1_*.*`
 
 
 Spinel Licence

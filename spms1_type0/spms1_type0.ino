@@ -1,5 +1,5 @@
 /*
- * MIDI Synth SPMS-1 (type-0)
+ * MIDI Synthesizer SPMS-1 (type-0)
  */
 
 #pragma GCC optimize ("O3")
@@ -8,29 +8,29 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-function"
 
-#define SPMS_1_USE_DEBUG_PRINT
-#define SPMS_1_USE_USB_MIDI                 // Select USB Stack: "Adafruit TinyUSB" in the Arduino IDE "Tools" menu
-#define SPMS_1_USE_UART_MIDI
+#define SPMS1_USE_DEBUG_PRINT
+#define SPMS1_USE_USB_MIDI                  // Select USB Stack: "Adafruit TinyUSB" in the Arduino IDE "Tools" menu
+#define SPMS1_USE_UART_MIDI
 
-#define SPMS_1_MIDI_BASIC_CH_0_BASED        (0)
+#define SPMS1_MIDI_BASIC_CH_0_BASED         (0)
 
-#define SPMS_1_DEBUG_PRINT_SERIAL           Serial1
-#define SPMS_1_DEBUG_PRINT_TX_PIN           (0)
-#define SPMS_1_DEBUG_PRINT_RX_PIN           (1)
+#define SPMS1_DEBUG_PRINT_SERIAL            Serial1
+#define SPMS1_DEBUG_PRINT_TX_PIN            (0)
+#define SPMS1_DEBUG_PRINT_RX_PIN            (1)
 
-#define SPMS_1_UART_MIDI_SPEED              (31250)
-#define SPMS_1_UART_MIDI_SERIAL             Serial2
-#define SPMS_1_UART_MIDI_TX_PIN             (4)
-#define SPMS_1_UART_MIDI_RX_PIN             (5)
+#define SPMS1_UART_MIDI_SPEED               (31250)
+#define SPMS1_UART_MIDI_SERIAL              Serial2
+#define SPMS1_UART_MIDI_TX_PIN              (4)
+#define SPMS1_UART_MIDI_RX_PIN              (5)
 
 // for Pimoroni Pico Audio Pack (PIM544)
-#define SPMS_1_I2S_DATA_PIN                 (9)
-#define SPMS_1_I2S_BCLK_PIN                 (10)
-#define SPMS_1_I2S_SWAP_LEFT_AND_RIGHT      (false)
+#define SPMS1_I2S_DATA_PIN                  (9)
+#define SPMS1_I2S_BCLK_PIN                  (10)
+#define SPMS1_I2S_SWAP_LEFT_AND_RIGHT       (false)
 
-#define SPMS_1_SAMPLE_RATE                  (96000)
-#define SPMS_1_I2S_BUFFERS                  (2)
-#define SPMS_1_I2S_BUFFER_WORDS             (64)
+#define SPMS1_SAMPLE_RATE                   (96000)
+#define SPMS1_I2S_BUFFERS                   (2)
+#define SPMS1_I2S_BUFFER_WORDS              (64)
 
 ////////////////////////////////////////////////////////////////
 
@@ -39,18 +39,18 @@
 
 #include <MIDI.h>
 struct MySettings : public midi::DefaultSettings {
-  static const long BaudRate = SPMS_1_UART_MIDI_SPEED;
+  static const long BaudRate = SPMS1_UART_MIDI_SPEED;
   static const bool HandleNullVelocityNoteOnAsNoteOff = false;
 };
 
-#if defined(SPMS_1_USE_USB_MIDI)
+#if defined(SPMS1_USE_USB_MIDI)
 #include <Adafruit_TinyUSB.h>
 Adafruit_USBD_MIDI usbd_midi;
 MIDI_CREATE_CUSTOM_INSTANCE(Adafruit_USBD_MIDI, usbd_midi, USB_MIDI, MySettings);
-#endif  // defined(SPMS_1_USE_USB_MIDI)
+#endif  // defined(SPMS1_USE_USB_MIDI)
 
-#if defined(SPMS_1_USE_UART_MIDI)
-MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, SPMS_1_UART_MIDI_SERIAL, UART_MIDI, MySettings);
+#if defined(SPMS1_USE_UART_MIDI)
+MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, SPMS1_UART_MIDI_SERIAL, UART_MIDI, MySettings);
 #endif
 
 #include <I2S.h>
@@ -68,9 +68,9 @@ extern "C" {
 
 extern int Spms1_main(int argc, char **argv);
 
-int32_t g_sample_rate           = SPMS_1_SAMPLE_RATE;
-int32_t g_audio_buffer_words    = SPMS_1_I2S_BUFFER_WORDS;
-uint8_t g_midi_basic_ch_0_based = SPMS_1_MIDI_BASIC_CH_0_BASED;
+int32_t g_sample_rate           = SPMS1_SAMPLE_RATE;
+int32_t g_audio_buffer_words    = SPMS1_I2S_BUFFER_WORDS;
+uint8_t g_midi_basic_ch_0_based = SPMS1_MIDI_BASIC_CH_0_BASED;
 uint8_t g_midi_note_on_pitch    = 60;
 uint8_t g_midi_note_on_state    = 0;
 uint8_t g_midi_cc_values[128]   = {};
@@ -110,18 +110,18 @@ void audio_out_write(float l, float r) {
 }
 
 void debug_measure_begin(void) {
-#if defined(SPMS_1_USE_DEBUG_PRINT)
+#if defined(SPMS1_USE_DEBUG_PRINT)
   g_debug_measurement_start_us = micros();
-#endif  // defined(SPMS_1_USE_DEBUG_PRINT)
+#endif  // defined(SPMS1_USE_DEBUG_PRINT)
 }
 
 void debug_measure_end(void) {
-#if defined(SPMS_1_USE_DEBUG_PRINT)
+#if defined(SPMS1_USE_DEBUG_PRINT)
   uint32_t debug_measurement_end_us = micros();
   g_debug_measurement_elapsed_us = debug_measurement_end_us - g_debug_measurement_start_us;
   g_debug_measurement_max_us += (g_debug_measurement_elapsed_us > g_debug_measurement_max_us) *
                                 (g_debug_measurement_elapsed_us - g_debug_measurement_max_us);
-#endif  // defined(SPMS_1_USE_DEBUG_PRINT)
+#endif  // defined(SPMS1_USE_DEBUG_PRINT)
 }
 
 }
@@ -129,10 +129,10 @@ void debug_measure_end(void) {
 void setup1() {
   g_i2s_output.setSysClk(g_sample_rate);
   g_i2s_output.setFrequency(g_sample_rate);
-  g_i2s_output.setDATA(SPMS_1_I2S_DATA_PIN);
-  g_i2s_output.setBCLK(SPMS_1_I2S_BCLK_PIN);
+  g_i2s_output.setDATA(SPMS1_I2S_DATA_PIN);
+  g_i2s_output.setBCLK(SPMS1_I2S_BCLK_PIN);
   g_i2s_output.setBitsPerSample(24);
-  g_i2s_output.setBuffers(SPMS_1_I2S_BUFFERS, g_audio_buffer_words);
+  g_i2s_output.setBuffers(SPMS1_I2S_BUFFERS, g_audio_buffer_words);
   g_i2s_output.begin();
 
   g_midi_cc_values[20] = 0;   // Oscillator Waveform
@@ -152,14 +152,14 @@ void loop1() {
 void setup() {
   delay(100);
 
-#if defined(SPMS_1_USE_DEBUG_PRINT)
-  pinMode(SPMS_1_DEBUG_PRINT_RX_PIN, INPUT_PULLUP);
-  SPMS_1_DEBUG_PRINT_SERIAL.setTX(SPMS_1_DEBUG_PRINT_TX_PIN);
-  SPMS_1_DEBUG_PRINT_SERIAL.setRX(SPMS_1_DEBUG_PRINT_RX_PIN);
-  SPMS_1_DEBUG_PRINT_SERIAL.begin(115200);
-#endif  // defined(SPMS_1_USE_DEBUG_PRINT)
+#if defined(SPMS1_USE_DEBUG_PRINT)
+  pinMode(SPMS1_DEBUG_PRINT_RX_PIN, INPUT_PULLUP);
+  SPMS1_DEBUG_PRINT_SERIAL.setTX(SPMS1_DEBUG_PRINT_TX_PIN);
+  SPMS1_DEBUG_PRINT_SERIAL.setRX(SPMS1_DEBUG_PRINT_RX_PIN);
+  SPMS1_DEBUG_PRINT_SERIAL.begin(115200);
+#endif  // defined(SPMS1_USE_DEBUG_PRINT)
 
-#if defined(SPMS_1_USE_USB_MIDI)
+#if defined(SPMS1_USE_USB_MIDI)
   TinyUSB_Device_Init(0);
   USBDevice.setManufacturerDescriptor("ISGK Instruments");
   USBDevice.setProductDescriptor("SPMS-1 (type-0)");
@@ -168,19 +168,19 @@ void setup() {
   USB_MIDI.setHandleControlChange(handleControlChange);
   USB_MIDI.begin(MIDI_CHANNEL_OMNI);
   USB_MIDI.turnThruOff();
-#endif  // defined(SPMS_1_USE_USB_MIDI)
+#endif  // defined(SPMS1_USE_USB_MIDI)
 
-#if defined(SPMS_1_USE_UART_MIDI)
-  pinMode(SPMS_1_UART_MIDI_RX_PIN, INPUT_PULLUP);
-  SPMS_1_UART_MIDI_SERIAL.setTX(SPMS_1_UART_MIDI_TX_PIN);
-  SPMS_1_UART_MIDI_SERIAL.setRX(SPMS_1_UART_MIDI_RX_PIN);
+#if defined(SPMS1_USE_UART_MIDI)
+  pinMode(SPMS1_UART_MIDI_RX_PIN, INPUT_PULLUP);
+  SPMS1_UART_MIDI_SERIAL.setTX(SPMS1_UART_MIDI_TX_PIN);
+  SPMS1_UART_MIDI_SERIAL.setRX(SPMS1_UART_MIDI_RX_PIN);
   UART_MIDI.setHandleNoteOn(handleNoteOn);
   UART_MIDI.setHandleNoteOff(handleNoteOff);
   UART_MIDI.setHandleControlChange(handleControlChange);
   UART_MIDI.begin(MIDI_CHANNEL_OMNI);
   UART_MIDI.turnThruOff();
-  SPMS_1_UART_MIDI_SERIAL.begin(SPMS_1_UART_MIDI_SPEED);
-#endif  // defined(SPMS_1_USE_UART_MIDI)
+  SPMS1_UART_MIDI_SERIAL.begin(SPMS1_UART_MIDI_SPEED);
+#endif  // defined(SPMS1_USE_UART_MIDI)
 
 #if defined(ARDUINO_RASPBERRY_PI_PICO) || defined(ARDUINO_RASPBERRY_PI_PICO_2)
   pinMode(LED_BUILTIN, OUTPUT);
@@ -192,20 +192,20 @@ void setup() {
 }
 
 void loop() {
-#if defined(SPMS_1_USE_USB_MIDI)
+#if defined(SPMS1_USE_USB_MIDI)
   USB_MIDI.read();
-#endif  // defined(SPMS_1_USE_USB_MIDI)
+#endif  // defined(SPMS1_USE_USB_MIDI)
 
-#if defined(SPMS_1_USE_UART_MIDI)
+#if defined(SPMS1_USE_UART_MIDI)
   UART_MIDI.read();
 #endif
 
   static uint8_t s_loop_counter = 0;
   if (++s_loop_counter == 0) {
-    SPMS_1_DEBUG_PRINT_SERIAL.print("\e[1;1H\e[K");
-    SPMS_1_DEBUG_PRINT_SERIAL.print(g_debug_measurement_elapsed_us);
-    SPMS_1_DEBUG_PRINT_SERIAL.print("\e[2;1H\e[K");
-    SPMS_1_DEBUG_PRINT_SERIAL.print(g_debug_measurement_max_us);
+    SPMS1_DEBUG_PRINT_SERIAL.print("\e[1;1H\e[K");
+    SPMS1_DEBUG_PRINT_SERIAL.print(g_debug_measurement_elapsed_us);
+    SPMS1_DEBUG_PRINT_SERIAL.print("\e[2;1H\e[K");
+    SPMS1_DEBUG_PRINT_SERIAL.print(g_debug_measurement_max_us);
   }
 
   delay(1);
