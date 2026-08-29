@@ -25,6 +25,7 @@ module Spms1
     end
 
     # Waveform morph is normalized to [0.0, 1.0].
+    # 0.0 = sawtooth, 0.5 = 50% morph, 1.0 = square.
     def set_waveform(value)
       @waveform = (value < 0.0) ? 0.0 : ((value > 1.0) ? 1.0 : value)
     end

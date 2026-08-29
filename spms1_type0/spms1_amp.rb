@@ -1,6 +1,6 @@
 module Spms1
-  # Gain stage with a slow smoothing ramp to avoid zipper noise.
-  # Gain is applied as modulation control rather than a separate audio path.
+  # Amplifier that smooths the gain parameter to avoid zipper noise.
+  # Modulation input is applied directly without smoothing.
   class Amp
     SMOOTHING_TARGET_BLEND_BASE = 0.015625
 
@@ -18,12 +18,13 @@ module Spms1
     end
 
     # Gain is normalized to [0.0, 1.0].
+    # Range: -∞ dB (0.0), -6 dB (0.5), 0 dB (1.0).
     def set_gain(gain)
       @gain = (gain < 0.0) ? 0.0 : ((gain > 1.0) ? 1.0 : gain)
     end
 
     def process(audio_input = 0.0, modulation_input = 1.0)
-      # Envelope modulation is applied as gain control, with a slow ramp to avoid zipper noise.
+      # Gain parameter is smoothed at control rate to avoid zipper noise.
       if @sample_counter == 0
         @current_gain += (@gain - @current_gain) * @smoothing_target_blend
       end

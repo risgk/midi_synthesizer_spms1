@@ -1,5 +1,5 @@
 module Spms1
-  # ADS envelope with a 4-sample control-rate update.
+  # ADS envelope updated at 4-sample control-rate grid.
   class EnvGen
     STATE_ATTACK = 0
     STATE_SUSTAIN = 1
@@ -37,16 +37,20 @@ module Spms1
       update_coefficients_full
     end
 
-    # Attack, decay, and sustain are normalized to [0.0, 1.0].
+    # Attack time is normalized to [0.0, 1.0].
+    # Range: 1 ms (0.0), 100 ms (0.5), 10 s (1.0).
     def set_attack(value)
       @attack = (value < 0.0) ? 0.0 : ((value > 1.0) ? 1.0 : value)
     end
 
     def set_decay(value)
+      # Decay time is normalized to [0.0, 1.0].
+      # Range: 3 ms (0.0), 300 ms (0.5), 30 s (1.0).
       @decay = (value < 0.0) ? 0.0 : ((value > 1.0) ? 1.0 : value)
     end
 
     def set_sustain(value)
+      # Sustain level is normalized to [0.0, 1.0].
       @sustain = (value < 0.0) ? 0.0 : ((value > 1.0) ? 1.0 : value)
     end
 
@@ -106,13 +110,14 @@ module Spms1
     private
 
     def update_coefficients_full
+      # Attack and decay times are calculated from exponential lookup.
       effective_rate = @sample_rate * (1.0 / 4.0)
 
-      attack_time = 0.1443 * calculate_exp_fast(@attack)
+      attack_time = 0.1 * calculate_exp_fast(@attack)
       @attack_coef = 1.0 / (attack_time * effective_rate)
       @attack_coef = 1.0 if @attack_coef > 1.0
 
-      decay_time = 0.043281 * calculate_exp_fast(@decay)
+      decay_time = 0.3 * calculate_exp_fast(@decay)
       @decay_coef = 1.0 / (decay_time * effective_rate)
       @decay_coef = 1.0 if @decay_coef > 1.0
     end

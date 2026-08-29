@@ -53,6 +53,7 @@ module Spms1
     end
 
     # Cutoff and resonance use normalized values in [0.0, 1.0].
+    # Cutoff range: MIDI note 15 (19 Hz) at 0.0, MIDI note 75 (622 Hz) at 0.5, MIDI note 135 (20 kHz) at 1.0.
     def set_cutoff(cutoff)
       @cutoff = (cutoff < 0.0) ? 0.0 : ((cutoff > 1.0) ? 1.0 : cutoff)
     end
@@ -63,6 +64,7 @@ module Spms1
     end
 
     def set_resonance(resonance)
+      # Q range: ~0.7 (0.0), ~2.83 (0.5), ~11.3 (1.0).
       @resonance = (resonance < 0.0) ? 0.0 : ((resonance > 1.0) ? 1.0 : resonance)
     end
 
