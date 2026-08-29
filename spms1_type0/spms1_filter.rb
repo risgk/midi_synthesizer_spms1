@@ -1,5 +1,6 @@
 module Spms1
   # Nonlinear biquad low-pass filter with modulation and soft clipping.
+  # This implementation is not oversampled; the nonlinear behavior is kept intentionally simple.
   # Reference: https://jatinchowdhury18.medium.com/complex-nonlinearities-episode-4-nonlinear-biquad-filters-ae6b3f23cb0e
   class Filter
     SOFT_CLIP_CEILING = 8.0
@@ -65,7 +66,6 @@ module Spms1
     end
 
     def process(audio_input = 0.0, modulation_input = 0.0)
-      # The cutoff is modulated by the envelope while the filter remains stable and softly clipped.
       @current_modulation_input = modulation_input
       update_coefficients_interleaved
 
@@ -127,6 +127,8 @@ module Spms1
       @interleave_state = (@interleave_state + 1) & 3
     end
 
+    # Applies a cubic non-linear soft-clipping function tailored for a configurable range.
+    # Adds warm analog-like saturation and prevents internal state blow-ups.
     def soft_clip(sample)
       if sample > SOFT_CLIP_CEILING
         (2.0 / 3.0) * SOFT_CLIP_CEILING
