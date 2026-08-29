@@ -2,6 +2,7 @@ module Spms1
   # Nonlinear biquad low-pass filter with modulation and soft clipping.
   # This implementation is not oversampled; the nonlinear behavior is kept intentionally simple.
   # Reference: https://jatinchowdhury18.medium.com/complex-nonlinearities-episode-4-nonlinear-biquad-filters-ae6b3f23cb0e
+  # Coefficient updates are distributed across a 4-sample grid to preserve stability without a full oversampling path.
   class Filter
     SOFT_CLIP_CEILING = 8.0
     SMOOTHING_TARGET_BLEND_BASE = 0.015625

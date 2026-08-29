@@ -1,5 +1,6 @@
 module Spms1
   # Gain stage with a slow smoothing ramp to avoid zipper noise.
+  # Gain is applied as modulation control rather than a separate audio path.
   class Amp
     SMOOTHING_TARGET_BLEND_BASE = 0.015625
 
