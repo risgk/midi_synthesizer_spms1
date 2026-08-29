@@ -110,15 +110,16 @@ module Spms1
     private
 
     def update_coefficients_full
-      # Attack and decay times are calculated from exponential lookup.
+      # Attack time: time for level to reach 1.0 while targeting 2.0 (half the approach time).
+      # Decay time: time to reach 1/1024 (approximately -60 dB).
       effective_rate = @sample_rate * (1.0 / 4.0)
 
       attack_time = 0.1 * calculate_exp_fast(@attack)
-      @attack_coef = 1.0 / (attack_time * effective_rate)
+      @attack_coef = 2.0 ** (-1.0 / (attack_time * effective_rate))
       @attack_coef = 1.0 if @attack_coef > 1.0
 
       decay_time = 0.3 * calculate_exp_fast(@decay)
-      @decay_coef = 1.0 / (decay_time * effective_rate)
+      @decay_coef = 2.0 ** (-10.0 / (decay_time * effective_rate))
       @decay_coef = 1.0 if @decay_coef > 1.0
     end
 
