@@ -9,6 +9,16 @@ module Spms1
     # yielding a perfect ~2.65ms time constant (95% settling time of ~7.93ms)
     SMOOTHING_TARGET_BLEND_BASE = 0.015625
 
+    # Promoted Q-factor lookup table to a Class Constant to unlock compiler optimizations.
+    # Maps internal log scale resonance values to absolute Q factors without dynamic pow/exponential math.
+    # Table size is 130 to allow safe flat-line interpolation when internal_resonance hits exactly 128.0.
+    Q_TABLE = Array.new(130, 0.0)
+    BASE_Q = 0.7071067811865476
+    for i in 0...129
+      Q_TABLE[i] = BASE_Q * (2.0 ** (i.to_f * (1.0 / 32.0)))
+    end
+    Q_TABLE[129] = Q_TABLE[128] # Safe boundary padding for index + 1 lookups
+
     def initialize
       @sample_rate = 96000.0
       @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE
@@ -121,9 +131,14 @@ module Spms1
         # Map resonance to Q factor scale (base Q is 1 / sqrt(2) approx 0.707)
         internal_resonance = @current_resonance * 128.0
         
-        # Convert internal log scale value to Q factor.
-        base_q = 0.7071067811865476
-        @step_q = base_q * (2.0 ** (internal_resonance * (1.0 / 32.0)))
+        # High-speed conversion from internal log scale to Q factor via table lookup interpolation
+        index = internal_resonance.to_i
+        fraction = internal_resonance - index.to_f
+        
+        q0 = Q_TABLE[index]
+        q1 = Q_TABLE[index + 1] # Guaranteed safe up to index 129
+        
+        @step_q = q0 + fraction * (q1 - q0)
 
         # Precompute trigonometric components simultaneously to prevent instruction drifting
         @step_sin_w = Math.sin(@step_omega)
