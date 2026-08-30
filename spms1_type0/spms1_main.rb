@@ -39,10 +39,10 @@ audio_buffer = Array.new(AUDIO_BUFFER_WORDS, 0.0)
 
 Spms1::C.set_midi_cc_value(MIDI_CH, 20 , 0  ) # Oscillator Waveform
 Spms1::C.set_midi_cc_value(MIDI_CH, 74 , 127) # Filter Cutoff
-Spms1::C.set_midi_cc_value(MIDI_CH, 71 , 80 ) # Filter Resonance
-Spms1::C.set_midi_cc_value(MIDI_CH, 24 , 48 ) # Filter EG Amt
+Spms1::C.set_midi_cc_value(MIDI_CH, 71 , 64 ) # Filter Resonance
+Spms1::C.set_midi_cc_value(MIDI_CH, 24 , 64 ) # Filter EG Amt
 Spms1::C.set_midi_cc_value(MIDI_CH, 15 , 100) # Amp Gain
-Spms1::C.set_midi_cc_value(MIDI_CH, 73 , 32 ) # EG Attack
+Spms1::C.set_midi_cc_value(MIDI_CH, 73 , 0  ) # EG Attack
 Spms1::C.set_midi_cc_value(MIDI_CH, 75 , 96 ) # EG Decay/Release
 Spms1::C.set_midi_cc_value(MIDI_CH, 30 , 0  ) # EG Sustain
 
