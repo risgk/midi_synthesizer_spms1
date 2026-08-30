@@ -237,6 +237,27 @@
       <div class="panel">
         <h2>MIDI Device Settings</h2>
         <div class="form-group">
+          <label>MIDI Channel</label>
+          <select id="midi-ch">
+            <option value="0">1</option>
+            <option value="1">2</option>
+            <option value="2">3</option>
+            <option value="3">4</option>
+            <option value="4">5</option>
+            <option value="5">6</option>
+            <option value="6">7</option>
+            <option value="7">8</option>
+            <option value="8">9</option>
+            <option value="9">10</option>
+            <option value="10">11</option>
+            <option value="11">12</option>
+            <option value="12">13</option>
+            <option value="13">14</option>
+            <option value="14">15</option>
+            <option value="15">16</option>
+          </select>
+        </div>
+        <div class="form-group">
           <label>MIDI In Device (Keyboard / Controller)</label>
           <select id="midi-in">
             <option value="">Select MIDI Input Device...</option>
@@ -347,6 +368,7 @@
   let midiAccess = null;
   let midiInput = null;
   let midiOutput = null;
+  let midi_ch = 0;
 
   const ccMap = {
     'waveform': 20,
@@ -428,25 +450,32 @@
     }
   }
 
+  function onChangeMIDICh() {
+    midi_ch = parseInt(document.getElementById('midi-ch').value);
+  }
+
   function sendCC(cc, value) {
     if (midiOutput) {
-      midiOutput.send([0xB0, cc, value]);
+      midiOutput.send([0xB0 | midi_ch, cc, value]);
     }
   }
 
   function sendNote(status, note, velocity) {
     if (midiOutput) {
-      midiOutput.send([status, note, velocity]);
+      midiOutput.send([(status & 0xF0) | midi_ch, note, velocity]);
     }
   }
 
   function onMIDIMessage(event) {
     const data = event.data;
     const cmd = data[0] & 0xF0;
-    
+    const ch  = data[0] & 0x0F;
+
     if (midiOutput) {
       midiOutput.send(data);
     }
+
+    if (ch !== midi_ch) return;
 
     if (cmd === 0x90 && data[2] > 0) {
       const key = document.querySelector(`.key[data-note="${data[1]}"]`);
@@ -501,6 +530,7 @@
     });
   });
 
+  document.getElementById('midi-ch').addEventListener('change', onChangeMIDICh);
   document.getElementById('midi-in').addEventListener('change', handleDeviceChange);
   document.getElementById('midi-out').addEventListener('change', handleDeviceChange);
 
