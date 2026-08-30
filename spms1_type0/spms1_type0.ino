@@ -164,8 +164,8 @@ void stop_audio() {
 }
 
 void write_to_audio_buffer(float l, float r) {
-  int32_t clamped_l = static_cast<int32_t>(std::lroundf(l * 0.5f * 8388607.0f));
-  int32_t clamped_r = static_cast<int32_t>(std::lroundf(r * 0.5f * 8388607.0f));
+  int32_t clamped_l = static_cast<int32_t>(std::lroundf(l * 8388607.0f));
+  int32_t clamped_r = static_cast<int32_t>(std::lroundf(r * 8388607.0f));
   clamped_l = std::clamp(clamped_l, static_cast<int32_t>(-8388608), static_cast<int32_t>(8388607));
   clamped_r = std::clamp(clamped_r, static_cast<int32_t>(-8388608), static_cast<int32_t>(8388607));
   g_i2s_output.write24(clamped_l << 8, clamped_r << 8);

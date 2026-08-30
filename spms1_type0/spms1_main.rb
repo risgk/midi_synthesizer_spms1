@@ -69,7 +69,7 @@ loop do
   AUDIO_BUFFER_WORDS.times do |i|
     env_gen_output = env_gen.process(gate)
     oscillator_output = oscillator.process(pitch)
-    filter_output = filter.process(oscillator_output, env_gen_output)
+    filter_output = filter.process(oscillator_output * 0.5, env_gen_output)
     amp_output = amp.process(filter_output, env_gen_output)
 
     audio_buffer[i] = amp_output
