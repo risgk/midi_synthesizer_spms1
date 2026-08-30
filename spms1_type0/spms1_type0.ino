@@ -8,8 +8,6 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-function"
 
-#define SPMS1_MIDI_BASIC_CH_0_BASED         (0)
-
 #define SPMS1_USE_DEBUG_PRINT
 #define SPMS1_USE_USB_MIDI                  // Select USB Stack: "Adafruit TinyUSB" in the Arduino IDE "Tools" menu
 #define SPMS1_USE_UART_MIDI
@@ -67,9 +65,9 @@ extern int Spms1_main(int argc, char **argv);
 uint8_t  g_midi_note_on_pitch[16]  = {60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60};
 uint8_t  g_midi_note_on_state[16]  = {};
 uint8_t  g_midi_cc_values[16][128] = {};
-uint32_t g_sample_rate             = 48000;
+uint32_t g_sample_rate             = 96000;
 uint32_t g_audio_buffers           = 2;
-uint32_t g_audio_buffer_words      = 128;
+uint32_t g_audio_buffer_words      = 64;
 
 void set_midi_note_on_pitch(uint8_t midi_ch, uint8_t midi_note_on_pitch) {
   if (midi_ch >= 16) {
