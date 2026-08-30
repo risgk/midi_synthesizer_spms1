@@ -69,26 +69,61 @@ extern "C" {
 extern int Spms1_main(int argc, char **argv);
 
 int32_t g_sample_rate           = SPMS1_SAMPLE_RATE;
+int32_t g_audio_buffers         = SPMS1_I2S_BUFFERS;
 int32_t g_audio_buffer_words    = SPMS1_I2S_BUFFER_WORDS;
 uint8_t g_midi_basic_ch_0_based = SPMS1_MIDI_BASIC_CH_0_BASED;
 uint8_t g_midi_note_on_pitch    = 60;
 uint8_t g_midi_note_on_state    = 0;
 uint8_t g_midi_cc_values[128]   = {};
 
+void set_sample_rate(int32_t sample_rate) {
+  g_sample_rate = sample_rate;
+}
+
 int32_t get_sample_rate() {
   return g_sample_rate;
+}
+
+void set_audio_buffers(int32_t audio_buffers) {
+  g_audio_buffers = audio_buffers;
+}
+
+int32_t get_audio_buffers() {
+  return g_audio_buffers;
+}
+
+void set_audio_buffer_words(int32_t audio_buffer_words) {
+  g_audio_buffer_words = audio_buffer_words;
 }
 
 int32_t get_audio_buffer_words() {
   return g_audio_buffer_words;
 }
 
+void set_midi_note_on_pitch(uint8_t midi_note_on_pitch) {
+  g_midi_note_on_pitch = midi_note_on_pitch;
+}
+
 uint8_t get_midi_note_on_pitch() {
   return g_midi_note_on_pitch;
 }
 
+void set_midi_note_on_state(uint8_t midi_note_on_state) {
+  g_midi_note_on_state = midi_note_on_state;
+}
+
 uint8_t get_midi_note_on_state() {
   return g_midi_note_on_state;
+}
+
+void set_midi_cc_value(uint8_t cc_number, uint8_t cc_value) {
+  const int32_t length = static_cast<int32_t>(sizeof(g_midi_cc_values) / sizeof(g_midi_cc_values[0]));
+
+  if (cc_number < 0 || cc_number >= length) { 
+    return; 
+  }
+
+  g_midi_cc_values[cc_number] = cc_value;
 }
 
 uint8_t get_midi_cc_value(uint8_t cc_number) {
@@ -124,25 +159,33 @@ void debug_measure_end(void) {
 #endif  // defined(SPMS1_USE_DEBUG_PRINT)
 }
 
-}
-
-void setup1() {
+void audio_start() {
   g_i2s_output.setSysClk(g_sample_rate);
   g_i2s_output.setFrequency(g_sample_rate);
   g_i2s_output.setDATA(SPMS1_I2S_DATA_PIN);
   g_i2s_output.setBCLK(SPMS1_I2S_BCLK_PIN);
   g_i2s_output.setBitsPerSample(24);
-  g_i2s_output.setBuffers(SPMS1_I2S_BUFFERS, g_audio_buffer_words);
+  g_i2s_output.setBuffers(g_audio_buffers, g_audio_buffer_words);
   g_i2s_output.begin();
+}
 
-  g_midi_cc_values[20] = 0;   // Oscillator Waveform
-  g_midi_cc_values[74] = 127; // Filter Cutoff
-  g_midi_cc_values[71] = 80;  // Filter Resonance
-  g_midi_cc_values[24] = 48;  // Filter EG Amt
-  g_midi_cc_values[15] = 100; // Amp Gain
-  g_midi_cc_values[73] = 32;  // EG Attack
-  g_midi_cc_values[75] = 96;  // EG Decay/Release
-  g_midi_cc_values[30] = 0;   // EG Sustain
+void audio_stop() {
+  g_i2s_output.end();
+}
+
+}
+
+void setup1() {
+  set_midi_cc_value(20 , 0  ); // Oscillator Waveform
+  set_midi_cc_value(74 , 127); // Filter Cutoff
+  set_midi_cc_value(71 , 80 ); // Filter Resonance
+  set_midi_cc_value(24 , 48 ); // Filter EG Amt
+  set_midi_cc_value(15 , 100); // Amp Gain
+  set_midi_cc_value(73 , 32 ); // EG Attack
+  set_midi_cc_value(75 , 96 ); // EG Decay/Release
+  set_midi_cc_value(30 , 0  ); // EG Sustain
+
+  audio_start();
 }
 
 void loop1() {
@@ -214,8 +257,8 @@ void loop() {
 void handleNoteOn(byte channel, byte pitch, byte velocity)
 {
   if (channel == g_midi_basic_ch_0_based + 1) {
-    g_midi_note_on_pitch = pitch;
-    g_midi_note_on_state = 1;
+    set_midi_note_on_pitch(pitch);
+    set_midi_note_on_state(1);
   }
 }
 
@@ -223,7 +266,7 @@ void handleNoteOff(byte channel, byte pitch, byte velocity)
 {
   if (channel == g_midi_basic_ch_0_based + 1) {
     if (pitch == g_midi_note_on_pitch) {
-      g_midi_note_on_state = 0;
+      set_midi_note_on_state(0);
     }
   }
 }
@@ -231,6 +274,6 @@ void handleNoteOff(byte channel, byte pitch, byte velocity)
 void handleControlChange(byte channel, byte number, byte value)
 {
   if (channel == g_midi_basic_ch_0_based + 1) {
-    g_midi_cc_values[number] = value;
+    set_midi_cc_value(number, value);
   }
 }
