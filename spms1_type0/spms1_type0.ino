@@ -8,6 +8,8 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-function"
 
+#define SPMS1_MIDI_BASIC_CH_0_BASED         (0)
+
 #define SPMS1_USE_DEBUG_PRINT
 #define SPMS1_USE_USB_MIDI                  // Select USB Stack: "Adafruit TinyUSB" in the Arduino IDE "Tools" menu
 #define SPMS1_USE_UART_MIDI
@@ -62,44 +64,67 @@ extern "C" {
 
 extern int Spms1_main(int argc, char **argv);
 
-uint8_t  g_midi_basic_ch_0_based = 0;
-uint8_t  g_midi_note_on_pitch    = 60;
-uint8_t  g_midi_note_on_state    = 0;
-uint8_t  g_midi_cc_values[128]   = {};
-uint32_t g_sample_rate           = 48000;
-uint32_t g_audio_buffers         = 2;
-uint32_t g_audio_buffer_words    = 128;
+uint8_t  g_midi_note_on_pitch[16]  = {60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60};
+uint8_t  g_midi_note_on_state[16]  = {};
+uint8_t  g_midi_cc_values[16][128] = {};
+uint32_t g_sample_rate             = 48000;
+uint32_t g_audio_buffers           = 2;
+uint32_t g_audio_buffer_words      = 128;
 
-void set_midi_note_on_pitch(uint8_t midi_note_on_pitch) {
-  g_midi_note_on_pitch = midi_note_on_pitch;
+void set_midi_note_on_pitch(uint8_t midi_ch, uint8_t midi_note_on_pitch) {
+  if (midi_ch >= 16) {
+    return;
+  }
+
+  g_midi_note_on_pitch[midi_ch] = midi_note_on_pitch;
 }
 
-uint8_t get_midi_note_on_pitch() {
-  return g_midi_note_on_pitch;
+uint8_t get_midi_note_on_pitch(uint8_t midi_ch) {
+  if (midi_ch >= 16) {
+    return 0;
+  }
+
+  return g_midi_note_on_pitch[midi_ch];
 }
 
-void set_midi_note_on_state(uint8_t midi_note_on_state) {
-  g_midi_note_on_state = midi_note_on_state;
+void set_midi_note_on_state(uint8_t midi_ch, uint8_t midi_note_on_state) {
+  if (midi_ch >= 16) {
+    return;
+  }
+
+  g_midi_note_on_state[midi_ch] = midi_note_on_state;
 }
 
-uint8_t get_midi_note_on_state() {
-  return g_midi_note_on_state;
+uint8_t get_midi_note_on_state(uint8_t midi_ch) {
+  if (midi_ch >= 16) {
+    return 0;
+  }
+
+  return g_midi_note_on_state[midi_ch];
 }
 
-void set_midi_cc_value(uint8_t cc_number, uint8_t cc_value) {
+void set_midi_cc_value(uint8_t midi_ch, uint8_t cc_number, uint8_t cc_value) {
+  if (midi_ch >= 16) {
+    return;
+  }
+
   if (cc_number >= 128) {
     return;
   }
 
-  g_midi_cc_values[cc_number] = cc_value;
+  g_midi_cc_values[midi_ch][cc_number] = cc_value;
 }
 
-uint8_t get_midi_cc_value(uint8_t cc_number) {
+uint8_t get_midi_cc_value(uint8_t midi_ch, uint8_t cc_number) {
+  if (midi_ch >= 16) {
+    return 0;
+  }
+
   if (cc_number >= 128) {
     return 0;
   }
 
-  return g_midi_cc_values[cc_number];
+  return g_midi_cc_values[midi_ch][cc_number];
 }
 
 void set_sample_rate(uint32_t sample_rate) {
@@ -236,24 +261,18 @@ void loop() {
 
 void handleNoteOn(byte channel, byte pitch, byte velocity)
 {
-  if (channel == g_midi_basic_ch_0_based + 1) {
-    set_midi_note_on_pitch(pitch);
-    set_midi_note_on_state(1);
-  }
+  set_midi_note_on_pitch(channel - 1, pitch);
+  set_midi_note_on_state(channel - 1, 1);
 }
 
 void handleNoteOff(byte channel, byte pitch, byte velocity)
 {
-  if (channel == g_midi_basic_ch_0_based + 1) {
-    if (pitch == g_midi_note_on_pitch) {
-      set_midi_note_on_state(0);
-    }
+  if (pitch == g_midi_note_on_pitch[channel - 1]) {
+    set_midi_note_on_state(channel - 1, 0);
   }
 }
 
 void handleControlChange(byte channel, byte number, byte value)
 {
-  if (channel == g_midi_basic_ch_0_based + 1) {
-    set_midi_cc_value(number, value);
-  }
+  set_midi_cc_value(channel - 1, number, value);
 }
