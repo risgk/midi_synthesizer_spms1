@@ -4,7 +4,7 @@ module Spms1
   # Reference: https://jatinchowdhury18.medium.com/complex-nonlinearities-episode-4-nonlinear-biquad-filters-ae6b3f23cb0e
   # Coefficient updates are distributed across a 4-sample grid to preserve stability without a full oversampling path.
   class Filter
-    SOFT_CLIP_CEILING = 3.0
+    SOFT_CLIP_CEILING = 1.5
     SMOOTHING_TARGET_BLEND_BASE = 0.015625
 
     # Resonance-to-Q lookup for fast filter coefficient updates.
