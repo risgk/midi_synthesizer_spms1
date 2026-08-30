@@ -12,8 +12,6 @@
 #define SPMS1_USE_USB_MIDI                  // Select USB Stack: "Adafruit TinyUSB" in the Arduino IDE "Tools" menu
 #define SPMS1_USE_UART_MIDI
 
-#define SPMS1_MIDI_BASIC_CH_0_BASED         (0)
-
 #define SPMS1_DEBUG_PRINT_SERIAL            Serial1
 #define SPMS1_DEBUG_PRINT_TX_PIN            (0)
 #define SPMS1_DEBUG_PRINT_RX_PIN            (1)
@@ -27,10 +25,6 @@
 #define SPMS1_I2S_DATA_PIN                  (9)
 #define SPMS1_I2S_BCLK_PIN                  (10)
 #define SPMS1_I2S_SWAP_LEFT_AND_RIGHT       (false)
-
-#define SPMS1_SAMPLE_RATE                   (96000)
-#define SPMS1_I2S_BUFFERS                   (2)
-#define SPMS1_I2S_BUFFER_WORDS              (64)
 
 ////////////////////////////////////////////////////////////////
 
@@ -68,40 +62,108 @@ extern "C" {
 
 extern int Spms1_main(int argc, char **argv);
 
-int32_t g_sample_rate           = SPMS1_SAMPLE_RATE;
-int32_t g_audio_buffer_words    = SPMS1_I2S_BUFFER_WORDS;
-uint8_t g_midi_basic_ch_0_based = SPMS1_MIDI_BASIC_CH_0_BASED;
-uint8_t g_midi_note_on_pitch    = 60;
-uint8_t g_midi_note_on_state    = 0;
-uint8_t g_midi_cc_values[128]   = {};
+uint8_t  g_midi_note_on_pitch[16]  = {60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60};
+uint8_t  g_midi_note_on_state[16]  = {};
+uint8_t  g_midi_cc_values[16][128] = {};
+uint32_t g_sample_rate             = 96000;
+uint32_t g_audio_buffers           = 2;
+uint32_t g_audio_buffer_words      = 64;
 
-int32_t get_sample_rate() {
+void set_midi_note_on_pitch(uint8_t midi_ch, uint8_t midi_note_on_pitch) {
+  if (midi_ch >= 16) {
+    return;
+  }
+
+  g_midi_note_on_pitch[midi_ch] = midi_note_on_pitch;
+}
+
+uint8_t get_midi_note_on_pitch(uint8_t midi_ch) {
+  if (midi_ch >= 16) {
+    return 0;
+  }
+
+  return g_midi_note_on_pitch[midi_ch];
+}
+
+void set_midi_note_on_state(uint8_t midi_ch, uint8_t midi_note_on_state) {
+  if (midi_ch >= 16) {
+    return;
+  }
+
+  g_midi_note_on_state[midi_ch] = midi_note_on_state;
+}
+
+uint8_t get_midi_note_on_state(uint8_t midi_ch) {
+  if (midi_ch >= 16) {
+    return 0;
+  }
+
+  return g_midi_note_on_state[midi_ch];
+}
+
+void set_midi_cc_value(uint8_t midi_ch, uint8_t cc_number, uint8_t cc_value) {
+  if (midi_ch >= 16) {
+    return;
+  }
+
+  if (cc_number >= 128) {
+    return;
+  }
+
+  g_midi_cc_values[midi_ch][cc_number] = cc_value;
+}
+
+uint8_t get_midi_cc_value(uint8_t midi_ch, uint8_t cc_number) {
+  if (midi_ch >= 16) {
+    return 0;
+  }
+
+  if (cc_number >= 128) {
+    return 0;
+  }
+
+  return g_midi_cc_values[midi_ch][cc_number];
+}
+
+void set_sample_rate(uint32_t sample_rate) {
+  g_sample_rate = sample_rate;
+}
+
+uint32_t get_sample_rate() {
   return g_sample_rate;
 }
 
-int32_t get_audio_buffer_words() {
+void set_audio_buffers(uint32_t audio_buffers) {
+  g_audio_buffers = audio_buffers;
+}
+
+uint32_t get_audio_buffers() {
+  return g_audio_buffers;
+}
+
+void set_audio_buffer_words(uint32_t audio_buffer_words) {
+  g_audio_buffer_words = audio_buffer_words;
+}
+
+uint32_t get_audio_buffer_words() {
   return g_audio_buffer_words;
 }
 
-uint8_t get_midi_note_on_pitch() {
-  return g_midi_note_on_pitch;
+void start_audio() {
+  g_i2s_output.setSysClk(g_sample_rate);
+  g_i2s_output.setFrequency(g_sample_rate);
+  g_i2s_output.setDATA(SPMS1_I2S_DATA_PIN);
+  g_i2s_output.setBCLK(SPMS1_I2S_BCLK_PIN);
+  g_i2s_output.setBitsPerSample(24);
+  g_i2s_output.setBuffers(g_audio_buffers, g_audio_buffer_words);
+  g_i2s_output.begin();
 }
 
-uint8_t get_midi_note_on_state() {
-  return g_midi_note_on_state;
+void stop_audio() {
+  g_i2s_output.end();
 }
 
-uint8_t get_midi_cc_value(uint8_t cc_number) {
-  const int32_t length = static_cast<int32_t>(sizeof(g_midi_cc_values) / sizeof(g_midi_cc_values[0]));
-
-  if (cc_number < 0 || cc_number >= length) { 
-    return 0; 
-  }
-
-  return g_midi_cc_values[cc_number];
-}
-
-void audio_out_write(float l, float r) {
+void write_to_audio_buffer(float l, float r) {
   int32_t clamped_l = static_cast<int32_t>(std::lroundf(l * 0.5f * 8388607.0f));
   int32_t clamped_r = static_cast<int32_t>(std::lroundf(r * 0.5f * 8388607.0f));
   clamped_l = std::clamp(clamped_l, static_cast<int32_t>(-8388608), static_cast<int32_t>(8388607));
@@ -127,22 +189,6 @@ void debug_measure_end(void) {
 }
 
 void setup1() {
-  g_i2s_output.setSysClk(g_sample_rate);
-  g_i2s_output.setFrequency(g_sample_rate);
-  g_i2s_output.setDATA(SPMS1_I2S_DATA_PIN);
-  g_i2s_output.setBCLK(SPMS1_I2S_BCLK_PIN);
-  g_i2s_output.setBitsPerSample(24);
-  g_i2s_output.setBuffers(SPMS1_I2S_BUFFERS, g_audio_buffer_words);
-  g_i2s_output.begin();
-
-  g_midi_cc_values[20] = 0;   // Oscillator Waveform
-  g_midi_cc_values[74] = 127; // Filter Cutoff
-  g_midi_cc_values[71] = 80;  // Filter Resonance
-  g_midi_cc_values[24] = 48;  // Filter EG Amt
-  g_midi_cc_values[15] = 100; // Amp Gain
-  g_midi_cc_values[73] = 32;  // EG Attack
-  g_midi_cc_values[75] = 96;  // EG Decay/Release
-  g_midi_cc_values[30] = 0;   // EG Sustain
 }
 
 void loop1() {
@@ -213,24 +259,18 @@ void loop() {
 
 void handleNoteOn(byte channel, byte pitch, byte velocity)
 {
-  if (channel == g_midi_basic_ch_0_based + 1) {
-    g_midi_note_on_pitch = pitch;
-    g_midi_note_on_state = 1;
-  }
+  set_midi_note_on_pitch(channel - 1, pitch);
+  set_midi_note_on_state(channel - 1, 1);
 }
 
 void handleNoteOff(byte channel, byte pitch, byte velocity)
 {
-  if (channel == g_midi_basic_ch_0_based + 1) {
-    if (pitch == g_midi_note_on_pitch) {
-      g_midi_note_on_state = 0;
-    }
+  if (pitch == g_midi_note_on_pitch[channel - 1]) {
+    set_midi_note_on_state(channel - 1, 0);
   }
 }
 
 void handleControlChange(byte channel, byte number, byte value)
 {
-  if (channel == g_midi_basic_ch_0_based + 1) {
-    g_midi_cc_values[number] = value;
-  }
+  set_midi_cc_value(channel - 1, number, value);
 }

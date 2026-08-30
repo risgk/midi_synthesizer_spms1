@@ -1,7 +1,7 @@
 MIDI Synthesizer SPMS-1
 =======================
 
-- MIDI Synthesizer built with Spinel (Ruby AOT Compiler)
+- MIDI Synthesizer made with Spinel (Ruby AOT Compiler)
 - Developed by ISGK Instruments (Ryo Ishigaki)
 - <https://github.com/risgk/midi_synthesizer_spms1>
 

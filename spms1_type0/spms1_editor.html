@@ -229,13 +229,34 @@
 
 <div class="editor-container">
   <header>
-    <h1>SPMS-1 (type-0) Editor<span class="version">v0.0.12</span></h1>
+    <h1>SPMS-1 (type-0) Editor<span class="version">v0.0.15</span></h1>
   </header>
 
   <div class="editor-grid">
     <div class="left-column" style="display: flex; flex-direction: column; gap: 20px;">
       <div class="panel">
         <h2>MIDI Device Settings</h2>
+        <div class="form-group">
+          <label>MIDI Channel</label>
+          <select id="midi-ch">
+            <option value="0">1</option>
+            <option value="1">2</option>
+            <option value="2">3</option>
+            <option value="3">4</option>
+            <option value="4">5</option>
+            <option value="5">6</option>
+            <option value="6">7</option>
+            <option value="7">8</option>
+            <option value="8">9</option>
+            <option value="9">10</option>
+            <option value="10">11</option>
+            <option value="11">12</option>
+            <option value="12">13</option>
+            <option value="13">14</option>
+            <option value="14">15</option>
+            <option value="15">16</option>
+          </select>
+        </div>
         <div class="form-group">
           <label>MIDI In Device (Keyboard / Controller)</label>
           <select id="midi-in">
@@ -277,15 +298,15 @@
           <div class="slider-knob-zone">
             <div class="slider-label">Resonance <span class="cc-num">(CC 71)</span></div>
             <div class="slider-input-wrapper">
-              <input type="range" id="resonance" min="0" max="127" value="80">
-              <span class="slider-value" id="resonance-val">80</span>
+              <input type="range" id="resonance" min="0" max="127" value="64">
+              <span class="slider-value" id="resonance-val">64</span>
             </div>
           </div>
           <div class="slider-knob-zone">
             <div class="slider-label">EG Amount <span class="cc-num">(CC 24)</span></div>
             <div class="slider-input-wrapper">
-              <input type="range" id="eg-amount" min="0" max="127" value="48">
-              <span class="slider-value" id="eg-amount-val">48</span>
+              <input type="range" id="eg-amount" min="0" max="127" value="64">
+              <span class="slider-value" id="eg-amount-val">64</span>
             </div>
           </div>
         </div>
@@ -312,8 +333,8 @@
           <div class="slider-knob-zone">
             <div class="slider-label">Attack <span class="cc-num">(CC 73)</span></div>
             <div class="slider-input-wrapper">
-              <input type="range" id="attack" min="0" max="127" value="32">
-              <span class="slider-value" id="attack-val">32</span>
+              <input type="range" id="attack" min="0" max="127" value="0">
+              <span class="slider-value" id="attack-val">0</span>
             </div>
           </div>
           <div class="slider-knob-zone">
@@ -347,6 +368,7 @@
   let midiAccess = null;
   let midiInput = null;
   let midiOutput = null;
+  let midi_ch = 0;
 
   const ccMap = {
     'waveform': 20,
@@ -363,9 +385,9 @@
     'waveform': 0,
     'amp-gain': 100,
     'cutoff': 127,
-    'resonance': 80,
-    'eg-amount': 48,
-    'attack': 32,
+    'resonance': 64,
+    'eg-amount': 64,
+    'attack': 0,
     'decay': 96,
     'sustain': 0
   };
@@ -428,25 +450,32 @@
     }
   }
 
+  function onChangeMIDICh() {
+    midi_ch = parseInt(document.getElementById('midi-ch').value);
+  }
+
   function sendCC(cc, value) {
     if (midiOutput) {
-      midiOutput.send([0xB0, cc, value]);
+      midiOutput.send([0xB0 | midi_ch, cc, value]);
     }
   }
 
   function sendNote(status, note, velocity) {
     if (midiOutput) {
-      midiOutput.send([status, note, velocity]);
+      midiOutput.send([(status & 0xF0) | midi_ch, note, velocity]);
     }
   }
 
   function onMIDIMessage(event) {
     const data = event.data;
     const cmd = data[0] & 0xF0;
-    
+    const ch  = data[0] & 0x0F;
+
     if (midiOutput) {
       midiOutput.send(data);
     }
+
+    if (ch !== midi_ch) return;
 
     if (cmd === 0x90 && data[2] > 0) {
       const key = document.querySelector(`.key[data-note="${data[1]}"]`);
@@ -501,6 +530,7 @@
     });
   });
 
+  document.getElementById('midi-ch').addEventListener('change', onChangeMIDICh);
   document.getElementById('midi-in').addEventListener('change', handleDeviceChange);
   document.getElementById('midi-out').addEventListener('change', handleDeviceChange);
 
