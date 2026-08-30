@@ -5,26 +5,50 @@ require_relative 'spms1_env_gen'
 
 module Spms1
   module C
-    ffi_func :get_sample_rate,        [],                 :int32
-    ffi_func :get_audio_buffer_words, [],                 :int32
+    ffi_func :set_midi_note_on_pitch, [:uint8],           :void
     ffi_func :get_midi_note_on_pitch, [],                 :uint8
+    ffi_func :set_midi_note_on_state, [:uint8],           :void
     ffi_func :get_midi_note_on_state, [],                 :uint8
+    ffi_func :set_midi_cc_value,      [:uint8, :uint8],   :void
     ffi_func :get_midi_cc_value,      [:uint8],           :uint8
+    ffi_func :set_sample_rate,        [:int32],           :void
+    ffi_func :get_sample_rate,        [],                 :int32
+    ffi_func :set_audio_buffers,      [:int32],           :void
+    ffi_func :get_audio_buffers,      [],                 :int32
+    ffi_func :set_audio_buffer_words, [:int32],           :void
+    ffi_func :get_audio_buffer_words, [],                 :int32
     ffi_func :audio_out_write,        [:float, :float],   :void
+    ffi_func :audio_start,            [],                 :void
+    ffi_func :audio_stop,             [],                 :void
     ffi_func :debug_measure_begin,    [],                 :void
     ffi_func :debug_measure_end,      [],                 :void
   end
 end
 
-SAMPLE_RATE = Spms1::C.get_sample_rate.to_f
-BUFFER_WORDS = Spms1::C.get_audio_buffer_words
+SAMPLE_RATE        = 96000
+AUDIO_BUFFERS      = 2
+AUDIO_BUFFER_WORDS = 64
 
 oscillator = Spms1::Oscillator.new(SAMPLE_RATE)
 filter = Spms1::Filter.new(SAMPLE_RATE)
 amp = Spms1::Amp.new(SAMPLE_RATE)
 env_gen = Spms1::EnvGen.new(SAMPLE_RATE)
 
-audio_buffer = Array.new(BUFFER_WORDS, 0.0)
+audio_buffer = Array.new(AUDIO_BUFFER_WORDS, 0.0)
+
+Spms1::C.set_midi_cc_value(20 , 0  ) # Oscillator Waveform
+Spms1::C.set_midi_cc_value(74 , 127) # Filter Cutoff
+Spms1::C.set_midi_cc_value(71 , 80 ) # Filter Resonance
+Spms1::C.set_midi_cc_value(24 , 48 ) # Filter EG Amt
+Spms1::C.set_midi_cc_value(15 , 100) # Amp Gain
+Spms1::C.set_midi_cc_value(73 , 32 ) # EG Attack
+Spms1::C.set_midi_cc_value(75 , 96 ) # EG Decay/Release
+Spms1::C.set_midi_cc_value(30 , 0  ) # EG Sustain
+
+Spms1::C.set_sample_rate(SAMPLE_RATE)
+Spms1::C.set_audio_buffers(AUDIO_BUFFERS)
+Spms1::C.set_audio_buffer_words(AUDIO_BUFFER_WORDS)
+Spms1::C.audio_start
 
 loop do
   Spms1::C.debug_measure_begin
@@ -41,7 +65,7 @@ loop do
   env_gen.set_decay((((value = Spms1::C::get_midi_cc_value(75)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0))
   env_gen.set_sustain((((value = Spms1::C::get_midi_cc_value(30)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0))
 
-  BUFFER_WORDS.times do |i|
+  AUDIO_BUFFER_WORDS.times do |i|
     env_gen_output = env_gen.process(gate)
     oscillator_output = oscillator.process(pitch)
     filter_output = filter.process(oscillator_output, env_gen_output)
@@ -52,7 +76,7 @@ loop do
 
   Spms1::C.debug_measure_end
 
-  BUFFER_WORDS.times do |i|
+  AUDIO_BUFFER_WORDS.times do |i|
     Spms1::C.audio_out_write(audio_buffer[i], audio_buffer[i])
   end
 end

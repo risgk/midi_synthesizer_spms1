@@ -28,10 +28,6 @@
 #define SPMS1_I2S_BCLK_PIN                  (10)
 #define SPMS1_I2S_SWAP_LEFT_AND_RIGHT       (false)
 
-#define SPMS1_SAMPLE_RATE                   (96000)
-#define SPMS1_I2S_BUFFERS                   (2)
-#define SPMS1_I2S_BUFFER_WORDS              (64)
-
 ////////////////////////////////////////////////////////////////
 
 #include <algorithm>
@@ -68,37 +64,13 @@ extern "C" {
 
 extern int Spms1_main(int argc, char **argv);
 
-int32_t g_sample_rate           = SPMS1_SAMPLE_RATE;
-int32_t g_audio_buffers         = SPMS1_I2S_BUFFERS;
-int32_t g_audio_buffer_words    = SPMS1_I2S_BUFFER_WORDS;
-uint8_t g_midi_basic_ch_0_based = SPMS1_MIDI_BASIC_CH_0_BASED;
-uint8_t g_midi_note_on_pitch    = 60;
-uint8_t g_midi_note_on_state    = 0;
-uint8_t g_midi_cc_values[128]   = {};
-
-void set_sample_rate(int32_t sample_rate) {
-  g_sample_rate = sample_rate;
-}
-
-int32_t get_sample_rate() {
-  return g_sample_rate;
-}
-
-void set_audio_buffers(int32_t audio_buffers) {
-  g_audio_buffers = audio_buffers;
-}
-
-int32_t get_audio_buffers() {
-  return g_audio_buffers;
-}
-
-void set_audio_buffer_words(int32_t audio_buffer_words) {
-  g_audio_buffer_words = audio_buffer_words;
-}
-
-int32_t get_audio_buffer_words() {
-  return g_audio_buffer_words;
-}
+uint32_t g_sample_rate           = 48000;
+uint32_t g_audio_buffers         = 2;
+uint32_t g_audio_buffer_words    = 128;
+uint8_t  g_midi_basic_ch_0_based = SPMS1_MIDI_BASIC_CH_0_BASED;
+uint8_t  g_midi_note_on_pitch    = 60;
+uint8_t  g_midi_note_on_state    = 0;
+uint8_t  g_midi_cc_values[128]   = {};
 
 void set_midi_note_on_pitch(uint8_t midi_note_on_pitch) {
   g_midi_note_on_pitch = midi_note_on_pitch;
@@ -117,23 +89,43 @@ uint8_t get_midi_note_on_state() {
 }
 
 void set_midi_cc_value(uint8_t cc_number, uint8_t cc_value) {
-  const int32_t length = static_cast<int32_t>(sizeof(g_midi_cc_values) / sizeof(g_midi_cc_values[0]));
-
-  if (cc_number < 0 || cc_number >= length) { 
-    return; 
+  if (cc_number >= 128) {
+    return;
   }
 
   g_midi_cc_values[cc_number] = cc_value;
 }
 
 uint8_t get_midi_cc_value(uint8_t cc_number) {
-  const int32_t length = static_cast<int32_t>(sizeof(g_midi_cc_values) / sizeof(g_midi_cc_values[0]));
-
-  if (cc_number < 0 || cc_number >= length) { 
-    return 0; 
+  if (cc_number >= 128) {
+    return 0;
   }
 
   return g_midi_cc_values[cc_number];
+}
+
+void set_sample_rate(uint32_t sample_rate) {
+  g_sample_rate = sample_rate;
+}
+
+uint32_t get_sample_rate() {
+  return g_sample_rate;
+}
+
+void set_audio_buffers(uint32_t audio_buffers) {
+  g_audio_buffers = audio_buffers;
+}
+
+uint32_t get_audio_buffers() {
+  return g_audio_buffers;
+}
+
+void set_audio_buffer_words(uint32_t audio_buffer_words) {
+  g_audio_buffer_words = audio_buffer_words;
+}
+
+uint32_t get_audio_buffer_words() {
+  return g_audio_buffer_words;
 }
 
 void audio_out_write(float l, float r) {
@@ -142,6 +134,20 @@ void audio_out_write(float l, float r) {
   clamped_l = std::clamp(clamped_l, static_cast<int32_t>(-8388608), static_cast<int32_t>(8388607));
   clamped_r = std::clamp(clamped_r, static_cast<int32_t>(-8388608), static_cast<int32_t>(8388607));
   g_i2s_output.write24(clamped_l << 8, clamped_r << 8);
+}
+
+void audio_start() {
+  g_i2s_output.setSysClk(g_sample_rate);
+  g_i2s_output.setFrequency(g_sample_rate);
+  g_i2s_output.setDATA(SPMS1_I2S_DATA_PIN);
+  g_i2s_output.setBCLK(SPMS1_I2S_BCLK_PIN);
+  g_i2s_output.setBitsPerSample(24);
+  g_i2s_output.setBuffers(g_audio_buffers, g_audio_buffer_words);
+  g_i2s_output.begin();
+}
+
+void audio_stop() {
+  g_i2s_output.end();
 }
 
 void debug_measure_begin(void) {
@@ -159,33 +165,9 @@ void debug_measure_end(void) {
 #endif  // defined(SPMS1_USE_DEBUG_PRINT)
 }
 
-void audio_start() {
-  g_i2s_output.setSysClk(g_sample_rate);
-  g_i2s_output.setFrequency(g_sample_rate);
-  g_i2s_output.setDATA(SPMS1_I2S_DATA_PIN);
-  g_i2s_output.setBCLK(SPMS1_I2S_BCLK_PIN);
-  g_i2s_output.setBitsPerSample(24);
-  g_i2s_output.setBuffers(g_audio_buffers, g_audio_buffer_words);
-  g_i2s_output.begin();
-}
-
-void audio_stop() {
-  g_i2s_output.end();
-}
-
 }
 
 void setup1() {
-  set_midi_cc_value(20 , 0  ); // Oscillator Waveform
-  set_midi_cc_value(74 , 127); // Filter Cutoff
-  set_midi_cc_value(71 , 80 ); // Filter Resonance
-  set_midi_cc_value(24 , 48 ); // Filter EG Amt
-  set_midi_cc_value(15 , 100); // Amp Gain
-  set_midi_cc_value(73 , 32 ); // EG Attack
-  set_midi_cc_value(75 , 96 ); // EG Decay/Release
-  set_midi_cc_value(30 , 0  ); // EG Sustain
-
-  audio_start();
 }
 
 void loop1() {
