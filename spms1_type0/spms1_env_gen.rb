@@ -12,6 +12,10 @@ module Spms1
     end
     EXP_TABLE[129] = EXP_TABLE[128]
 
+    # Time scaling constants for attack and decay.
+    ATTACK_BASE = 0.1
+    DECAY_BASE = 0.3
+
     def initialize
       @sample_rate = 96000.0
       @state = STATE_IDLE
@@ -29,11 +33,29 @@ module Spms1
 
       @sample_counter = 0
 
-      update_coefficients_full
+      # Precomputed coefficient tables for fast lookup with linear interpolation.
+      @attack_coef_table = Array.new(130, 0.0)
+      @decay_coef_table = Array.new(130, 0.0)
+
+      set_sample_rate(@sample_rate)
     end
 
     def set_sample_rate(sample_rate)
       @sample_rate = sample_rate
+      effective_rate = @sample_rate * (1.0 / 4.0)
+
+      # Precompute coefficient tables based on sample rate.
+      for i in 0...130
+        exp_val = EXP_TABLE[i]
+        attack_time = ATTACK_BASE * exp_val
+        @attack_coef_table[i] = 2.0 ** (-1.0 / (attack_time * effective_rate))
+        @attack_coef_table[i] = 1.0 if @attack_coef_table[i] > 1.0
+
+        decay_time = DECAY_BASE * exp_val
+        @decay_coef_table[i] = 2.0 ** (-10.0 / (decay_time * effective_rate))
+        @decay_coef_table[i] = 1.0 if @decay_coef_table[i] > 1.0
+      end
+
       update_coefficients_full
     end
 
@@ -110,28 +132,20 @@ module Spms1
     private
 
     def update_coefficients_full
-      # Attack time: time for level to reach 1.0 while targeting 2.0 (half the approach time).
-      # Decay time: time to reach 1/1024 (approximately -60 dB).
-      effective_rate = @sample_rate * (1.0 / 4.0)
+      # Interpolate coefficient from precomputed table for fast lookup.
+      attack_v = @attack * 128.0
+      attack_index = attack_v.to_i
+      attack_fraction = attack_v - attack_index.to_f
+      c0 = @attack_coef_table[attack_index]
+      c1 = @attack_coef_table[attack_index + 1]
+      @attack_coef = c0 + attack_fraction * (c1 - c0)
 
-      attack_time = 0.1 * calculate_exp_fast(@attack)
-      @attack_coef = 2.0 ** (-1.0 / (attack_time * effective_rate))
-      @attack_coef = 1.0 if @attack_coef > 1.0
-
-      decay_time = 0.3 * calculate_exp_fast(@decay)
-      @decay_coef = 2.0 ** (-10.0 / (decay_time * effective_rate))
-      @decay_coef = 1.0 if @decay_coef > 1.0
-    end
-
-    def calculate_exp_fast(value)
-      v_scale = value * 128.0
-      index = v_scale.to_i
-      fraction = v_scale - index.to_f
-
-      e0 = EXP_TABLE[index]
-      e1 = EXP_TABLE[index + 1]
-
-      e0 + fraction * (e1 - e0)
+      decay_v = @decay * 128.0
+      decay_index = decay_v.to_i
+      decay_fraction = decay_v - decay_index.to_f
+      c0 = @decay_coef_table[decay_index]
+      c1 = @decay_coef_table[decay_index + 1]
+      @decay_coef = c0 + decay_fraction * (c1 - c0)
     end
   end
 end
