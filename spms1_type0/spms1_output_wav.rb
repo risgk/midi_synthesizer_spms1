@@ -27,7 +27,7 @@ env_gen.set_sample_rate(SAMPLE_RATE)
 
 env_gen.set_attack(0.0 * (1.0 / 128.0))
 env_gen.set_decay(128.0 * (1.0 / 128.0))
-env_gen.set_sustain(64.0 * (1.0 / 128.0))
+env_gen.set_sustain(0.0 * (1.0 / 128.0))
 
 puts "Generating stereo waveform data..."
 
