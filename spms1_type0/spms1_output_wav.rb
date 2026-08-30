@@ -4,17 +4,17 @@ require_relative 'spms1_amp'
 require_relative 'spms1_env_gen'
 
 SAMPLE_RATE = 48000.0
-DURATION_SEC = 10.0
+DURATION_SEC = 30.0
 NUM_SAMPLES = (SAMPLE_RATE * DURATION_SEC).to_i
 FILENAME = "spms1_output.wav"
 
 oscillator = Spms1::Oscillator.new(SAMPLE_RATE)
-oscillator.set_waveform(64.0 * (1.0 / 128.0))
+oscillator.set_waveform(0.0 * (1.0 / 128.0))
 
 filter = Spms1::Filter.new(SAMPLE_RATE)
-filter.set_cutoff(60.0 * (1.0 / 120.0))
-filter.set_resonance(80.0 * (1.0 / 128.0))
-filter.set_modulation_amount(48.0 * (1.0 / 128.0))
+filter.set_cutoff(64.0 * (1.0 / 120.0))
+filter.set_resonance(64.0 * (1.0 / 128.0))
+filter.set_modulation_amount(64.0 * (1.0 / 128.0))
 
 amp = Spms1::Amp.new(SAMPLE_RATE)
 amp.set_gain((100.0 * 100.0) * (1.0 / (127.0 * 127.0)))
