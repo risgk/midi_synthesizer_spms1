@@ -25,6 +25,7 @@ module Spms1
       @waveform = (value < 0.0) ? 0.0 : ((value > 1.0) ? 1.0 : value)
     end
 
+    # Pitch input is normalized to [-0.5, 0.5], corresponding to MIDI notes 0 to 120.
     def process(pitch_input = 0.0)
       pitch = (pitch_input < -0.5) ? -0.5 : ((pitch_input > 0.5) ? 0.5 : pitch_input)
 
