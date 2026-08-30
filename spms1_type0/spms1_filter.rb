@@ -20,7 +20,6 @@ module Spms1
       @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE
       @cutoff = 1.0
       @resonance = 0.0
-
       @modulation_amount = 0.0
 
       @current_cutoff = 1.0
@@ -37,6 +36,7 @@ module Spms1
       @next_a1 = 0.0
       @next_a2 = 0.0
 
+      @current_modulation_input = 0.0
       @sample_counter = 0
 
       set_sample_rate(@sample_rate)

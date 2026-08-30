@@ -202,8 +202,8 @@ struct sp_Filter_s {
   mrb_float iv_next_b1;
   mrb_float iv_next_a1;
   mrb_float iv_next_a2;
-  mrb_int iv_sample_counter;
   mrb_float iv_current_modulation_input;
+  mrb_int iv_sample_counter;
   mrb_float iv_step_omega;
   mrb_float iv_step_q;
   mrb_float iv_step_sin_w;
@@ -262,8 +262,8 @@ static mrb_float civ_Filter_next_b0 = 0.0;
 static mrb_float civ_Filter_next_b1 = 0.0;
 static mrb_float civ_Filter_next_a1 = 0.0;
 static mrb_float civ_Filter_next_a2 = 0.0;
-static mrb_int civ_Filter_sample_counter = SP_INT_NIL;
 static mrb_float civ_Filter_current_modulation_input = 0.0;
+static mrb_int civ_Filter_sample_counter = SP_INT_NIL;
 static mrb_float civ_Filter_step_omega = 0.0;
 static mrb_float civ_Filter_step_q = 0.0;
 static mrb_float civ_Filter_step_sin_w = 0.0;
@@ -460,8 +460,8 @@ static const char *sp_obj_inspect_sw(int cls_id, void *p) {
       sp_String_append(_s, ", @next_b1="); sp_String_append(_s, sp_poly_inspect(sp_box_float(o->iv_next_b1)));
       sp_String_append(_s, ", @next_a1="); sp_String_append(_s, sp_poly_inspect(sp_box_float(o->iv_next_a1)));
       sp_String_append(_s, ", @next_a2="); sp_String_append(_s, sp_poly_inspect(sp_box_float(o->iv_next_a2)));
-      sp_String_append(_s, ", @sample_counter="); sp_String_append(_s, sp_poly_inspect((o->iv_sample_counter == SP_INT_NIL ? sp_box_nil() : sp_box_int(o->iv_sample_counter))));
       sp_String_append(_s, ", @current_modulation_input="); sp_String_append(_s, sp_poly_inspect(sp_box_float(o->iv_current_modulation_input)));
+      sp_String_append(_s, ", @sample_counter="); sp_String_append(_s, sp_poly_inspect((o->iv_sample_counter == SP_INT_NIL ? sp_box_nil() : sp_box_int(o->iv_sample_counter))));
       sp_String_append(_s, ", @step_omega="); sp_String_append(_s, sp_poly_inspect(sp_box_float(o->iv_step_omega)));
       sp_String_append(_s, ", @step_q="); sp_String_append(_s, sp_poly_inspect(sp_box_float(o->iv_step_q)));
       sp_String_append(_s, ", @step_sin_w="); sp_String_append(_s, sp_poly_inspect(sp_box_float(o->iv_step_sin_w)));
@@ -659,34 +659,36 @@ static void sp_Filter_initialize(sp_Filter *self) {
   self->iv_cutoff = 1.0;
 #line 22 "spms1_filter.rb"
   self->iv_resonance = 0.0;
-#line 24 "spms1_filter.rb"
+#line 23 "spms1_filter.rb"
   self->iv_modulation_amount = 0.0;
-#line 26 "spms1_filter.rb"
+#line 25 "spms1_filter.rb"
   self->iv_current_cutoff = 1.0;
-#line 27 "spms1_filter.rb"
+#line 26 "spms1_filter.rb"
   self->iv_current_resonance = 0.0;
-#line 28 "spms1_filter.rb"
+#line 27 "spms1_filter.rb"
   self->iv_current_modulation_amount = 0.0;
-#line 30 "spms1_filter.rb"
+#line 29 "spms1_filter.rb"
   self->iv_b0 = 1.0;
   self->iv_b1 = 0.0;
   self->iv_b2 = 0.0;
-#line 31 "spms1_filter.rb"
+#line 30 "spms1_filter.rb"
   self->iv_a1 = 0.0;
   self->iv_a2 = 0.0;
-#line 32 "spms1_filter.rb"
+#line 31 "spms1_filter.rb"
   self->iv_z1 = 0.0;
   self->iv_z2 = 0.0;
-#line 34 "spms1_filter.rb"
+#line 33 "spms1_filter.rb"
   self->iv_interleave_state = 0LL;
-#line 35 "spms1_filter.rb"
+#line 34 "spms1_filter.rb"
   self->iv_next_b0 = 1.0;
-#line 36 "spms1_filter.rb"
+#line 35 "spms1_filter.rb"
   self->iv_next_b1 = 0.0;
-#line 37 "spms1_filter.rb"
+#line 36 "spms1_filter.rb"
   self->iv_next_a1 = 0.0;
-#line 38 "spms1_filter.rb"
+#line 37 "spms1_filter.rb"
   self->iv_next_a2 = 0.0;
+#line 39 "spms1_filter.rb"
+  self->iv_current_modulation_input = 0.0;
 #line 40 "spms1_filter.rb"
   self->iv_sample_counter = 0LL;
 #line 42 "spms1_filter.rb"
@@ -1112,8 +1114,8 @@ int main(int argc,char**argv){
     volatile mrb_float lv_oscillator_output = 0.0;
     volatile mrb_float lv_filter_output = 0.0;
     volatile mrb_float lv_amp_output = 0.0;
-    mrb_int lv_i__bp1957 = 0;
-    mrb_int lv_i__bp1994 = 0;
+    mrb_int lv_i__bp1959 = 0;
+    mrb_int lv_i__bp1996 = 0;
 
 #line 1 "spms1_oscillator.rb"
 #line 3 "spms1_oscillator.rb"
@@ -1266,7 +1268,7 @@ int main(int argc,char**argv){
       sp_EnvGen_set_sustain((sp_EnvGen *)lv_env_gen, _t69);
 #line 51 "spms1_main.rb"
       for (mrb_int _t71 = 0; _t71 < cst_BUFFER_WORDS; _t71++) {
-        lv_i__bp1957 = _t71;
+        lv_i__bp1959 = _t71;
         lv_env_gen_output = sp_float_nil();
         lv_oscillator_output = sp_float_nil();
         lv_filter_output = sp_float_nil();
@@ -1286,15 +1288,15 @@ int main(int argc,char**argv){
         mrb_float _t77 = lv_env_gen_output;
         lv_amp_output = sp_Amp_process((sp_Amp *)lv_amp, _t76, _t77);
 #line 57 "spms1_main.rb"
-        sp_FloatArray_set(lv_audio_buffer, lv_i__bp1957, lv_amp_output);
+        sp_FloatArray_set(lv_audio_buffer, lv_i__bp1959, lv_amp_output);
       }
 #line 60 "spms1_main.rb"
       (debug_measure_end(), (mrb_int)0);
 #line 62 "spms1_main.rb"
       for (mrb_int _t79 = 0; _t79 < cst_BUFFER_WORDS; _t79++) {
-        lv_i__bp1994 = _t79;
+        lv_i__bp1996 = _t79;
 #line 63 "spms1_main.rb"
-        (audio_out_write(((float)(sp_FloatArray_get(lv_audio_buffer, lv_i__bp1994))), ((float)(sp_FloatArray_get(lv_audio_buffer, lv_i__bp1994)))), (mrb_int)0);
+        (audio_out_write(((float)(sp_FloatArray_get(lv_audio_buffer, lv_i__bp1996))), ((float)(sp_FloatArray_get(lv_audio_buffer, lv_i__bp1996)))), (mrb_int)0);
       }
     }
     sp_exc_top--;
