@@ -1111,7 +1111,7 @@ int main(int argc,char**argv){
 #line 1 "spms1_filter.rb"
 #line 6 "spms1_filter.rb"
 #line 7 "spms1_filter.rb"
-  cst_SOFT_CLIP_CEILING = 4.0;
+  cst_SOFT_CLIP_CEILING = 3.0;
 #line 8 "spms1_filter.rb"
   cst_Spms1__Filter__SMOOTHING_TARGET_BLEND_BASE = 0.015625;
 #line 11 "spms1_filter.rb"
