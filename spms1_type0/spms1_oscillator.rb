@@ -9,19 +9,14 @@ module Spms1
       FREQ_TABLE[i] = 440.0 * (2.0 ** ((i.to_f - 69.0) * (1.0 / 12.0)))
     end
 
-    def initialize
-      @sample_rate = 96000.0
-      @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE
+    def initialize(sample_rate)
+      @sample_rate = sample_rate
+      @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (96000.0 / @sample_rate)
       @phase = 0.0
 
       @waveform = 0.0
       @current_waveform = 0.0
       @sample_counter = 0
-    end
-
-    def set_sample_rate(sample_rate)
-      @sample_rate = sample_rate
-      @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (96000.0 / @sample_rate)
     end
 
     # Waveform morph is normalized to [0.0, 1.0].

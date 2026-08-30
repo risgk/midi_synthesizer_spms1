@@ -15,9 +15,9 @@ module Spms1
     end
     Q_TABLE[129] = Q_TABLE[128]
 
-    def initialize
-      @sample_rate = 96000.0
-      @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE
+    def initialize(sample_rate)
+      @sample_rate = sample_rate
+      @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (96000.0 / @sample_rate)
       @cutoff = 1.0
       @resonance = 0.0
       @modulation_amount = 0.0
@@ -38,13 +38,6 @@ module Spms1
 
       @current_modulation_input = 0.0
       @sample_counter = 0
-
-      set_sample_rate(@sample_rate)
-    end
-
-    def set_sample_rate(sample_rate)
-      @sample_rate = sample_rate
-      @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (96000.0 / @sample_rate)
 
       @interleave_state = 0
       4.times do

@@ -8,22 +8,18 @@ DURATION_SEC = 10.0
 NUM_SAMPLES = (SAMPLE_RATE * DURATION_SEC).to_i
 FILENAME = "spms1_output.wav"
 
-oscillator = Spms1::Oscillator.new
-oscillator.set_sample_rate(SAMPLE_RATE)
+oscillator = Spms1::Oscillator.new(SAMPLE_RATE)
 oscillator.set_waveform(64.0 * (1.0 / 128.0))
 
-filter = Spms1::Filter.new
-filter.set_sample_rate(SAMPLE_RATE)
+filter = Spms1::Filter.new(SAMPLE_RATE)
 filter.set_cutoff(60.0 * (1.0 / 120.0))
 filter.set_resonance(80.0 * (1.0 / 128.0))
 filter.set_modulation_amount(48.0 * (1.0 / 128.0))
 
-amp = Spms1::Amp.new
-amp.set_sample_rate(SAMPLE_RATE)
+amp = Spms1::Amp.new(SAMPLE_RATE)
 amp.set_gain((100.0 * 100.0) * (1.0 / (127.0 * 127.0)))
 
-env_gen = Spms1::EnvGen.new
-env_gen.set_sample_rate(SAMPLE_RATE)
+env_gen = Spms1::EnvGen.new(SAMPLE_RATE)
 
 env_gen.set_attack(0.0 * (1.0 / 128.0))
 env_gen.set_decay(128.0 * (1.0 / 128.0))

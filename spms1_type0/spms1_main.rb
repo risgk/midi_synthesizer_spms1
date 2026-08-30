@@ -19,17 +19,10 @@ end
 SAMPLE_RATE = Spms1::C.get_sample_rate.to_f
 BUFFER_WORDS = Spms1::C.get_audio_buffer_words
 
-oscillator = Spms1::Oscillator.new
-oscillator.set_sample_rate(SAMPLE_RATE)
-
-filter = Spms1::Filter.new
-filter.set_sample_rate(SAMPLE_RATE)
-
-env_gen = Spms1::EnvGen.new
-env_gen.set_sample_rate(SAMPLE_RATE)
-
-amp = Spms1::Amp.new
-amp.set_sample_rate(SAMPLE_RATE)
+oscillator = Spms1::Oscillator.new(SAMPLE_RATE)
+filter = Spms1::Filter.new(SAMPLE_RATE)
+amp = Spms1::Amp.new(SAMPLE_RATE)
+env_gen = Spms1::EnvGen.new(SAMPLE_RATE)
 
 audio_buffer = Array.new(BUFFER_WORDS, 0.0)
 

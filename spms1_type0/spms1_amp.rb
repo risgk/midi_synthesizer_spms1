@@ -4,17 +4,12 @@ module Spms1
   class Amp
     SMOOTHING_TARGET_BLEND_BASE = 0.015625
 
-    def initialize
-      @sample_rate = 96000.0
-      @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE
+    def initialize(sample_rate)
+      @sample_rate = sample_rate
+      @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (96000.0 / @sample_rate)
       @gain = 1.0
       @current_gain = 1.0
       @sample_counter = 0
-    end
-
-    def set_sample_rate(sample_rate)
-      @sample_rate = sample_rate
-      @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (96000.0 / @sample_rate)
     end
 
     # Gain is normalized to [0.0, 1.0].

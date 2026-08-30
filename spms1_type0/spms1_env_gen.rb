@@ -16,8 +16,8 @@ module Spms1
     ATTACK_BASE = 0.001 / (0.01 * Math::log(2))       # 1 ms at 0.0, 10 s at 1.0
     DECAY_BASE  = 0.003 / (0.01 * 10 * Math::log(2))  # 3 ms at 0.0, 30 s at 1.0
 
-    def initialize
-      @sample_rate = 96000.0
+    def initialize(sample_rate)
+      @sample_rate = sample_rate
       @state = STATE_IDLE
       @current_level = 0.0
 
@@ -33,11 +33,6 @@ module Spms1
 
       @sample_counter = 0
 
-      update_coefficients_full
-    end
-
-    def set_sample_rate(sample_rate)
-      @sample_rate = sample_rate
       update_coefficients_full
     end
 
