@@ -32,11 +32,11 @@ pcm_bytes = []
 NUM_SAMPLES.times do |i|
   env_gen_output = env_gen.process(1.0)
   oscillator_output = oscillator.process(60.0 * (1.0 / 120.0) - 0.5)
-  filter_output = filter.process(oscillator_output, env_gen_output)
+  filter_output = filter.process(oscillator_output * 0.5, env_gen_output)
   amp_output = amp.process(filter_output, env_gen_output)
 
   [amp_output, amp_output].each do |ch_sample|
-    clamped_sample = (ch_sample * 0.5 * 8388607.0).round
+    clamped_sample = (ch_sample * 8388607.0).round
     clamped_sample = [8388607, [clamped_sample, -8388608].max].min
 
     pcm_bytes << (clamped_sample & 0xFF)

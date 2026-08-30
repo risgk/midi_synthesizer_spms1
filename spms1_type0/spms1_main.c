@@ -1087,7 +1087,7 @@ int main(int argc,char**argv){
     volatile mrb_float lv_filter_output = 0.0;
     volatile mrb_float lv_amp_output = 0.0;
     mrb_int lv_i__bp2068 = 0;
-    mrb_int lv_i__bp2105 = 0;
+    mrb_int lv_i__bp2108 = 0;
 
 #line 1 "spms1_oscillator.rb"
 #line 3 "spms1_oscillator.rb"
@@ -1111,7 +1111,7 @@ int main(int argc,char**argv){
 #line 1 "spms1_filter.rb"
 #line 6 "spms1_filter.rb"
 #line 7 "spms1_filter.rb"
-  cst_SOFT_CLIP_CEILING = 8.0;
+  cst_SOFT_CLIP_CEILING = 4.0;
 #line 8 "spms1_filter.rb"
   cst_Spms1__Filter__SMOOTHING_TARGET_BLEND_BASE = 0.015625;
 #line 11 "spms1_filter.rb"
@@ -1268,7 +1268,7 @@ int main(int argc,char**argv){
         mrb_float _t78 = lv_pitch;
         lv_oscillator_output = sp_Oscillator_process((sp_Oscillator *)lv_oscillator, _t78);
 #line 72 "spms1_main.rb"
-        mrb_float _t79 = lv_oscillator_output;
+        mrb_float _t79 = (lv_oscillator_output * 0.5);
         mrb_float _t80 = lv_env_gen_output;
         lv_filter_output = sp_Filter_process((sp_Filter *)lv_filter, _t79, _t80);
 #line 73 "spms1_main.rb"
@@ -1282,9 +1282,9 @@ int main(int argc,char**argv){
       (debug_measure_end(), (mrb_int)0);
 #line 80 "spms1_main.rb"
       for (mrb_int _t84 = 0; _t84 < cst_AUDIO_BUFFER_WORDS; _t84++) {
-        lv_i__bp2105 = _t84;
+        lv_i__bp2108 = _t84;
 #line 81 "spms1_main.rb"
-        (write_to_audio_buffer(((float)(sp_FloatArray_get(lv_audio_buffer, lv_i__bp2105))), ((float)(sp_FloatArray_get(lv_audio_buffer, lv_i__bp2105)))), (mrb_int)0);
+        (write_to_audio_buffer(((float)(sp_FloatArray_get(lv_audio_buffer, lv_i__bp2108))), ((float)(sp_FloatArray_get(lv_audio_buffer, lv_i__bp2108)))), (mrb_int)0);
       }
     }
     sp_exc_top--;
