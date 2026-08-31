@@ -7,6 +7,13 @@ module Spms1
     SOFT_CLIP_CEILING = 4.0
     SMOOTHING_TARGET_BLEND_BASE = 0.015625
 
+    # Pitch lookup table for note-to-frequency conversion.
+    FREQ_TABLE = Array.new(137, 0.0)
+    for i in 0...136
+      FREQ_TABLE[i] = 440.0 * (2.0 ** ((i.to_f - 69.0) * (1.0 / 12.0)))
+    end
+    FREQ_TABLE[136] = FREQ_TABLE[135]
+
     # Resonance-to-Q lookup for fast filter coefficient updates.
     Q_TABLE = Array.new(130, 0.0)
     BASE_Q = 0.7071067811865476
@@ -67,6 +74,7 @@ module Spms1
 
       @sample_counter = (@sample_counter + 1) & 3
 
+      # Transposed Direct Form II (TDF-II) biquad implementation with soft clipping.
       audio_output = @z1 + @b0 * audio_input
       @z1 = soft_clip(@z2 + @b1 * audio_input - @a1 * audio_output)
       @z2 = soft_clip(@b2 * audio_input - @a2 * audio_output)
@@ -75,6 +83,17 @@ module Spms1
     end
 
     private
+
+    def cutoff_to_freq_fast(clamped_cutoff)
+      internal_cutoff = clamped_cutoff * 120.0 + 15.0
+      index = internal_cutoff.to_i
+      fraction = internal_cutoff - index.to_f
+
+      f0 = FREQ_TABLE[index]
+      f1 = FREQ_TABLE[index + 1]
+
+      f0 + fraction * (f1 - f0)
+    end
 
     # Split coefficient updates across four samples to keep the control-rate grid stable.
     def update_coefficients_interleaved
@@ -88,8 +107,7 @@ module Spms1
         total_cutoff = @current_cutoff + (mod * @current_modulation_amount)
         clamped_cutoff = (total_cutoff < 0.0) ? 0.0 : ((total_cutoff > 1.0) ? 1.0 : total_cutoff)
 
-        internal_cutoff = clamped_cutoff * 120.0 + 15.0
-        cutoff_freq = 440.0 * (2.0 ** ((internal_cutoff - 69.0) * (1.0 / 12.0)))
+        cutoff_freq = cutoff_to_freq_fast(clamped_cutoff)
         @step_omega = 2.0 * Math::PI * cutoff_freq / @sample_rate
       when 1
         internal_resonance = @current_resonance * 128.0
