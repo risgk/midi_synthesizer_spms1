@@ -171,13 +171,13 @@ void write_to_audio_buffer(float l, float r) {
   g_i2s_output.write24(clamped_l << 8, clamped_r << 8);
 }
 
-void debug_measure_begin(void) {
+void start_debug_measure(void) {
 #if defined(SPMS1_USE_DEBUG_PRINT)
   g_debug_measurement_start_us = micros();
 #endif  // defined(SPMS1_USE_DEBUG_PRINT)
 }
 
-void debug_measure_end(void) {
+void stop_debug_measure(void) {
 #if defined(SPMS1_USE_DEBUG_PRINT)
   uint32_t debug_measurement_end_us = micros();
   g_debug_measurement_elapsed_us = debug_measurement_end_us - g_debug_measurement_start_us;

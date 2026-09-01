@@ -20,8 +20,8 @@ module Spms1
     ffi_func :start_audio,            [],                       :void
     ffi_func :stop_audio,             [],                       :void
     ffi_func :write_to_audio_buffer,  [:float, :float],         :void
-    ffi_func :debug_measure_begin,    [],                       :void
-    ffi_func :debug_measure_end,      [],                       :void
+    ffi_func :start_debug_measure,    [],                       :void
+    ffi_func :stop_debug_measure,     [],                       :void
   end
 end
 
@@ -52,7 +52,7 @@ Spms1::C.set_audio_buffer_words(AUDIO_BUFFER_WORDS)
 Spms1::C.start_audio
 
 loop do
-  Spms1::C.debug_measure_begin
+  Spms1::C.start_debug_measure
 
   pitch = Spms1::C.get_midi_note_on_pitch(MIDI_CH).to_f * (1.0 / 120.0) - 0.5
   gate = Spms1::C.get_midi_note_on_state(MIDI_CH).to_f
@@ -75,7 +75,7 @@ loop do
     audio_buffer[i] = amp_output
   end
 
-  Spms1::C.debug_measure_end
+  Spms1::C.stop_debug_measure
 
   AUDIO_BUFFER_WORDS.times do |i|
     Spms1::C.write_to_audio_buffer(audio_buffer[i], audio_buffer[i])
