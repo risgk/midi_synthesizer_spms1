@@ -4,7 +4,7 @@ module Spms1
     STATE_ATTACK = 0
     STATE_SUSTAIN = 1
     STATE_IDLE = 2
-    # Number of samples between control-rate updates; envelope timing is kept constant if this is changed.
+    # Number of samples between control-rate updates; envelope timing is kept approximately constant if this is changed.
     CONTROL_RATE_DIVISOR = 4
 
     # Lookup table for exponential time mapping.
@@ -14,10 +14,12 @@ module Spms1
     end
     EXP_TABLE[129] = EXP_TABLE[128]
 
-    # Time scaling constants: value at 0.0 / (EXP_TABLE min * ln(2)).
-    ATTACK_BASE = 0.001 / (0.01 * Math::log(2))       # 1 ms at 0.0, 10 s at 1.0
+    # Time scaling constants (value at 0.0 / (EXP_TABLE min * ln(2))).
+    # Attack range: 1 ms at 0.0, 100 ms at 0.5, 10 s at 1.0.
+    ATTACK_BASE = 0.001 / (0.01 * Math::log(2))
+    # Decay range:  3 ms at 0.0, 300 ms at 0.5, 30 s at 1.0.
     # Decay time is defined as the time until the level reaches 1/1024 (approx. -60 dB).
-    DECAY_BASE  = 0.003 / (0.01 * 10 * Math::log(2))  # 3 ms at 0.0, 30 s at 1.0
+    DECAY_BASE  = 0.003 / (0.01 * 10 * Math::log(2))
 
     # Overshoot target so the attack ramp reaches 1.0 in finite time.
     ATTACK_TARGET = 2.0
@@ -39,21 +41,19 @@ module Spms1
       update_coefficients_full
     end
 
-    # Attack time is normalized to [0.0, 1.0].
-    # Range: 1 ms (0.0), 100 ms (0.5), 10 s (1.0).
-    def set_attack(value)
-      @attack = (value < 0.0) ? 0.0 : ((value > 1.0) ? 1.0 : value)
+    # Attack time is normalized to [0.0, 1.0] (see ATTACK_BASE for scaling details).
+    def set_attack(attack)
+      @attack = (attack < 0.0) ? 0.0 : ((attack > 1.0) ? 1.0 : attack)
     end
 
-    # Decay time is normalized to [0.0, 1.0].
-    # Range: 3 ms (0.0), 300 ms (0.5), 30 s (1.0).
-    def set_decay(value)
-      @decay = (value < 0.0) ? 0.0 : ((value > 1.0) ? 1.0 : value)
+    # Decay time is normalized to [0.0, 1.0] (see DECAY_BASE for scaling details).
+    def set_decay(decay)
+      @decay = (decay < 0.0) ? 0.0 : ((decay > 1.0) ? 1.0 : decay)
     end
 
     # Sustain level is normalized to [0.0, 1.0].
-    def set_sustain(value)
-      @sustain = (value < 0.0) ? 0.0 : ((value > 1.0) ? 1.0 : value)
+    def set_sustain(sustain)
+      @sustain = (sustain < 0.0) ? 0.0 : ((sustain > 1.0) ? 1.0 : sustain)
     end
 
     def process(gate_input = 0.0)
