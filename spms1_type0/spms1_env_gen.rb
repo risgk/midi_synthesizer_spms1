@@ -37,14 +37,14 @@ module Spms1
       @attack = (value < 0.0) ? 0.0 : ((value > 1.0) ? 1.0 : value)
     end
 
+    # Decay time is normalized to [0.0, 1.0].
+    # Range: 3 ms (0.0), 300 ms (0.5), 30 s (1.0).
     def set_decay(value)
-      # Decay time is normalized to [0.0, 1.0].
-      # Range: 3 ms (0.0), 300 ms (0.5), 30 s (1.0).
       @decay = (value < 0.0) ? 0.0 : ((value > 1.0) ? 1.0 : value)
     end
 
+    # Sustain level is normalized to [0.0, 1.0].
     def set_sustain(value)
-      # Sustain level is normalized to [0.0, 1.0].
       @sustain = (value < 0.0) ? 0.0 : ((value > 1.0) ? 1.0 : value)
     end
 
