@@ -183,7 +183,7 @@
     }
     .keyboard-wrapper {
       position: relative;
-      width: 1224px;
+      width: 2414px;
       height: 140px;
       margin: 0 auto;
     }
@@ -229,7 +229,7 @@
 
 <div class="editor-container">
   <header>
-    <h1>SPMS-1 (type-0) Editor<span class="version">v0.0.21</span></h1>
+    <h1>SPMS-1 (type-0) Editor<span class="version">v0.0.22</span></h1>
   </header>
 
   <div class="editor-grid">
@@ -357,7 +357,7 @@
   </div>
 
   <div class="panel keyboard-panel">
-    <h2>Soft Keyboard (5 Octaves: C2 - C7)</h2>
+    <h2>Soft Keyboard (10 Octaves: C-1 - C9)</h2>
     <div class="keyboard-scroll-container" id="kb-scroll">
       <div class="keyboard-wrapper" id="keyboard"></div>
     </div>
@@ -540,7 +540,7 @@
     let whiteKeyIndex = 0;
     const whiteKeyWidth = 34;
 
-    for (let noteNum = 36; noteNum <= 96; noteNum++) {
+    for (let noteNum = 0; noteNum <= 120; noteNum++) {
       const noteIndex = noteNum % 12;
       const noteName = notes[noteIndex];
       const octave = Math.floor(noteNum / 12) - 1;

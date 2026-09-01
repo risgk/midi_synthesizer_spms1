@@ -2,6 +2,8 @@ module Spms1
   # PolyBLEP-based saw/square morph oscillator for anti-aliased waveform transitions.
   class Oscillator
     SMOOTHING_TARGET_BLEND_BASE = 0.015625
+    # Number of samples between control-rate updates; smoothing speed is kept constant if this is changed.
+    CONTROL_RATE_DIVISOR = 4
 
     # Pitch lookup table for note-to-frequency conversion.
     FREQ_TABLE = Array.new(129, 0.0)
@@ -11,7 +13,7 @@ module Spms1
 
     def initialize(sample_rate)
       @sample_rate = sample_rate
-      @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (96000.0 / @sample_rate)
+      @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (96000.0 / @sample_rate) * (CONTROL_RATE_DIVISOR / 4.0)
       @phase = 0.0
       @waveform = 0.0
       @current_waveform = 0.0
@@ -49,7 +51,7 @@ module Spms1
       output = saw1 - (saw2 * @current_waveform)
       @phase += current_dt
       @phase -= (@phase < 1.0) ? 0.0 : 1.0
-      @sample_counter = (@sample_counter + 1) & 3
+      @sample_counter = (@sample_counter + 1) % CONTROL_RATE_DIVISOR
 
       output * 0.5
     end

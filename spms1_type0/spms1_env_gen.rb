@@ -4,6 +4,8 @@ module Spms1
     STATE_ATTACK = 0
     STATE_SUSTAIN = 1
     STATE_IDLE = 2
+    # Number of samples between control-rate updates; envelope timing is kept constant if this is changed.
+    CONTROL_RATE_DIVISOR = 4
 
     # Lookup table for exponential time mapping.
     EXP_TABLE = Array.new(130, 0.0)
@@ -14,7 +16,11 @@ module Spms1
 
     # Time scaling constants: value at 0.0 / (EXP_TABLE min * ln(2)).
     ATTACK_BASE = 0.001 / (0.01 * Math::log(2))       # 1 ms at 0.0, 10 s at 1.0
+    # Decay time is defined as the time until the level reaches 1/1024 (approx. -60 dB).
     DECAY_BASE  = 0.003 / (0.01 * 10 * Math::log(2))  # 3 ms at 0.0, 30 s at 1.0
+
+    # Overshoot target so the attack ramp reaches 1.0 in finite time.
+    ATTACK_TARGET = 2.0
 
     def initialize(sample_rate)
       @sample_rate = sample_rate
@@ -24,7 +30,6 @@ module Spms1
       @attack = 0.0
       @decay = 0.0
       @sustain = 1.0
-      @attack_target = 2.0
 
       @was_gate_on = false
       @attack_coef = 1.0
@@ -63,7 +68,7 @@ module Spms1
 
         update_coefficients_full
 
-        target = (@state == STATE_ATTACK) ? @attack_target : (((@state == STATE_SUSTAIN) && is_gate_on) ? @sustain : 0.0)
+        target = (@state == STATE_ATTACK) ? ATTACK_TARGET : (((@state == STATE_SUSTAIN) && is_gate_on) ? @sustain : 0.0)
         coef = (@state == STATE_ATTACK) ? @attack_coef : ((@state == STATE_SUSTAIN) ? @decay_coef : 0.0)
 
         apply_step = (@state != STATE_SUSTAIN) || !is_gate_on || (@sustain < @current_level)
@@ -81,14 +86,14 @@ module Spms1
         @current_level = 0.0 if is_idle_reached || (@state == STATE_IDLE && !@was_gate_on)
       end
 
-      @sample_counter = (@sample_counter + 1) & 3
+      @sample_counter = (@sample_counter + 1) % CONTROL_RATE_DIVISOR
       @current_level
     end
 
     private
 
     def update_coefficients_full
-      effective_rate = @sample_rate * (1.0 / 4.0)
+      effective_rate = @sample_rate * (1.0 / CONTROL_RATE_DIVISOR)
 
       @attack_coef = 1.0 / (ATTACK_BASE * calculate_exp_fast(@attack) * effective_rate)
       @decay_coef  = 1.0 / (DECAY_BASE  * calculate_exp_fast(@decay)  * effective_rate)
