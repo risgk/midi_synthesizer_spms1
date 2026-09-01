@@ -16,7 +16,11 @@ module Spms1
 
     # Time scaling constants: value at 0.0 / (EXP_TABLE min * ln(2)).
     ATTACK_BASE = 0.001 / (0.01 * Math::log(2))       # 1 ms at 0.0, 10 s at 1.0
+    # Decay time is defined as the time until the level reaches 1/1024 (approx. -60 dB).
     DECAY_BASE  = 0.003 / (0.01 * 10 * Math::log(2))  # 3 ms at 0.0, 30 s at 1.0
+
+    # Overshoot target so the attack ramp reaches 1.0 in finite time.
+    ATTACK_TARGET = 2.0
 
     def initialize(sample_rate)
       @sample_rate = sample_rate
@@ -26,7 +30,6 @@ module Spms1
       @attack = 0.0
       @decay = 0.0
       @sustain = 1.0
-      @attack_target = 2.0
 
       @was_gate_on = false
       @attack_coef = 1.0
@@ -65,7 +68,7 @@ module Spms1
 
         update_coefficients_full
 
-        target = (@state == STATE_ATTACK) ? @attack_target : (((@state == STATE_SUSTAIN) && is_gate_on) ? @sustain : 0.0)
+        target = (@state == STATE_ATTACK) ? ATTACK_TARGET : (((@state == STATE_SUSTAIN) && is_gate_on) ? @sustain : 0.0)
         coef = (@state == STATE_ATTACK) ? @attack_coef : ((@state == STATE_SUSTAIN) ? @decay_coef : 0.0)
 
         apply_step = (@state != STATE_SUSTAIN) || !is_gate_on || (@sustain < @current_level)
