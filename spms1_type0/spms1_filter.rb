@@ -2,11 +2,11 @@ module Spms1
   # Nonlinear biquad low-pass filter with modulation and soft clipping.
   # This implementation is not oversampled; the nonlinear behavior is kept intentionally simple.
   # Reference: https://jatinchowdhury18.medium.com/complex-nonlinearities-episode-4-nonlinear-biquad-filters-ae6b3f23cb0e
-  # Coefficient updates are distributed across a 4-sample grid to preserve stability without a full oversampling path.
+  # Coefficient updates are performed at 4-sample control-rate updates to preserve stability without a full oversampling path.
   class Filter
     SOFT_CLIP_CEILING = 4.0
     SMOOTHING_TARGET_BLEND_BASE = 0.015625
-    # Number of samples between control-rate updates; smoothing speed is kept constant if this is changed.
+    # Number of samples between control-rate updates; smoothing speed is kept approximately constant if this is changed.
     CONTROL_RATE_DIVISOR = 4
 
     # Pitch lookup table for note-to-frequency conversion.
@@ -61,8 +61,8 @@ module Spms1
       @modulation_amount = (amount < -1.0) ? -1.0 : ((amount > 1.0) ? 1.0 : amount)
     end
 
+    # Q range: ~0.7 (0.0), ~2.83 (0.5), ~11.3 (1.0).
     def set_resonance(resonance)
-      # Q range: ~0.7 (0.0), ~2.83 (0.5), ~11.3 (1.0).
       @resonance = (resonance < 0.0) ? 0.0 : ((resonance > 1.0) ? 1.0 : resonance)
     end
 
@@ -96,7 +96,7 @@ module Spms1
       f0 + fraction * (f1 - f0)
     end
 
-    # Split coefficient updates across four samples to keep the control-rate grid stable.
+    # Update all coefficients at once at the 4-sample control-rate to keep the grid stable.
     def update_coefficients_interleaved
       @current_cutoff += (@cutoff - @current_cutoff) * @smoothing_target_blend
       @current_resonance += (@resonance - @current_resonance) * @smoothing_target_blend

@@ -293,7 +293,7 @@ static mrb_int civ_EnvGen_sample_counter = SP_INT_NIL;
 static const char *sp_obj_inspect_sw(int cls_id, void *p) __attribute__((cold, noinline));
 static const char *sp_obj_to_s_sw(int cls_id, void *p) __attribute__((cold, noinline));
 static void sp_Oscillator_initialize(sp_Oscillator *self, mrb_int lv_sample_rate);
-static mrb_float sp_Oscillator_set_waveform(sp_Oscillator *self, mrb_float lv_value);
+static mrb_float sp_Oscillator_set_waveform(sp_Oscillator *self, mrb_float lv_waveform);
 static mrb_float sp_Oscillator_process(sp_Oscillator *self, mrb_float lv_pitch_input);
 static mrb_float sp_Oscillator_pitch_to_freq_fast(sp_Oscillator *self, mrb_float lv_pitch);
 static mrb_float sp_Oscillator_poly_blep(sp_Oscillator *self, mrb_float lv_t, mrb_float lv_dt);
@@ -309,9 +309,9 @@ static void sp_Amp_initialize(sp_Amp *self, mrb_int lv_sample_rate);
 static mrb_float sp_Amp_set_gain(sp_Amp *self, mrb_float lv_gain);
 static mrb_float sp_Amp_process(sp_Amp *self, mrb_float lv_audio_input, mrb_float lv_modulation_input);
 static void sp_EnvGen_initialize(sp_EnvGen *self, mrb_int lv_sample_rate);
-static mrb_float sp_EnvGen_set_attack(sp_EnvGen *self, mrb_float lv_value);
-static mrb_float sp_EnvGen_set_decay(sp_EnvGen *self, mrb_float lv_value);
-static mrb_float sp_EnvGen_set_sustain(sp_EnvGen *self, mrb_float lv_value);
+static mrb_float sp_EnvGen_set_attack(sp_EnvGen *self, mrb_float lv_attack);
+static mrb_float sp_EnvGen_set_decay(sp_EnvGen *self, mrb_float lv_decay);
+static mrb_float sp_EnvGen_set_sustain(sp_EnvGen *self, mrb_float lv_sustain);
 static mrb_float sp_EnvGen_process(sp_EnvGen *self, mrb_float lv_gate_input);
 static mrb_float sp_EnvGen_update_coefficients_full(sp_EnvGen *self);
 static mrb_float sp_EnvGen_calculate_exp_fast(sp_EnvGen *self, mrb_float lv_value);
@@ -536,10 +536,10 @@ static void sp_Oscillator_initialize(sp_Oscillator *self, mrb_int lv_sample_rate
   self->iv_sample_counter = 0LL;
 }
 #line 25 "spms1_oscillator.rb"
-static mrb_float sp_Oscillator_set_waveform(sp_Oscillator *self, mrb_float lv_value) {
+static mrb_float sp_Oscillator_set_waveform(sp_Oscillator *self, mrb_float lv_waveform) {
     SP_GC_SAVE();
 #line 26 "spms1_oscillator.rb"
-  self->iv_waveform = (((lv_value < 0.0)) ? 0.0 : ((((lv_value > 1.0)) ? 1.0 : lv_value)));
+  self->iv_waveform = (((lv_waveform < 0.0)) ? 0.0 : ((((lv_waveform > 1.0)) ? 1.0 : lv_waveform)));
   return 0.0;
 }
 #line 30 "spms1_oscillator.rb"
@@ -707,7 +707,7 @@ static mrb_float sp_Filter_set_modulation_amount(sp_Filter *self, mrb_float lv_a
   self->iv_modulation_amount = (((lv_amount < -1.0)) ? -1.0 : ((((lv_amount > 1.0)) ? 1.0 : lv_amount)));
   return 0.0;
 }
-#line 64 "spms1_filter.rb"
+#line 65 "spms1_filter.rb"
 static mrb_float sp_Filter_set_resonance(sp_Filter *self, mrb_float lv_resonance) {
     SP_GC_SAVE();
 #line 66 "spms1_filter.rb"
@@ -895,51 +895,51 @@ static mrb_float sp_Amp_process(sp_Amp *self, mrb_float lv_audio_input, mrb_floa
   return (lv_audio_input * lv_total_gain);
   return 0.0;
 }
-#line 25 "spms1_env_gen.rb"
+#line 27 "spms1_env_gen.rb"
 static void sp_EnvGen_initialize(sp_EnvGen *self, mrb_int lv_sample_rate) {
     SP_GC_SAVE();
-#line 26 "spms1_env_gen.rb"
-  self->iv_sample_rate = lv_sample_rate;
-#line 27 "spms1_env_gen.rb"
-  self->iv_state = cst_STATE_IDLE;
 #line 28 "spms1_env_gen.rb"
-  self->iv_current_level = 0.0;
+  self->iv_sample_rate = lv_sample_rate;
+#line 29 "spms1_env_gen.rb"
+  self->iv_state = cst_STATE_IDLE;
 #line 30 "spms1_env_gen.rb"
-  self->iv_attack = 0.0;
-#line 31 "spms1_env_gen.rb"
-  self->iv_decay = 0.0;
+  self->iv_current_level = 0.0;
 #line 32 "spms1_env_gen.rb"
-  self->iv_sustain = 1.0;
+  self->iv_attack = 0.0;
+#line 33 "spms1_env_gen.rb"
+  self->iv_decay = 0.0;
 #line 34 "spms1_env_gen.rb"
-  self->iv_was_gate_on = 0;
-#line 35 "spms1_env_gen.rb"
-  self->iv_attack_coef = 1.0;
+  self->iv_sustain = 1.0;
 #line 36 "spms1_env_gen.rb"
-  self->iv_decay_coef = 1.0;
+  self->iv_was_gate_on = 0;
 #line 37 "spms1_env_gen.rb"
-  self->iv_sample_counter = 0LL;
+  self->iv_attack_coef = 1.0;
+#line 38 "spms1_env_gen.rb"
+  self->iv_decay_coef = 1.0;
 #line 39 "spms1_env_gen.rb"
+  self->iv_sample_counter = 0LL;
+#line 41 "spms1_env_gen.rb"
   sp_EnvGen_update_coefficients_full((sp_EnvGen *)self);
 }
-#line 44 "spms1_env_gen.rb"
-static mrb_float sp_EnvGen_set_attack(sp_EnvGen *self, mrb_float lv_value) {
-    SP_GC_SAVE();
 #line 45 "spms1_env_gen.rb"
-  self->iv_attack = (((lv_value < 0.0)) ? 0.0 : ((((lv_value > 1.0)) ? 1.0 : lv_value)));
+static mrb_float sp_EnvGen_set_attack(sp_EnvGen *self, mrb_float lv_attack) {
+    SP_GC_SAVE();
+#line 46 "spms1_env_gen.rb"
+  self->iv_attack = (((lv_attack < 0.0)) ? 0.0 : ((((lv_attack > 1.0)) ? 1.0 : lv_attack)));
   return 0.0;
 }
 #line 50 "spms1_env_gen.rb"
-static mrb_float sp_EnvGen_set_decay(sp_EnvGen *self, mrb_float lv_value) {
+static mrb_float sp_EnvGen_set_decay(sp_EnvGen *self, mrb_float lv_decay) {
     SP_GC_SAVE();
 #line 51 "spms1_env_gen.rb"
-  self->iv_decay = (((lv_value < 0.0)) ? 0.0 : ((((lv_value > 1.0)) ? 1.0 : lv_value)));
+  self->iv_decay = (((lv_decay < 0.0)) ? 0.0 : ((((lv_decay > 1.0)) ? 1.0 : lv_decay)));
   return 0.0;
 }
 #line 55 "spms1_env_gen.rb"
-static mrb_float sp_EnvGen_set_sustain(sp_EnvGen *self, mrb_float lv_value) {
+static mrb_float sp_EnvGen_set_sustain(sp_EnvGen *self, mrb_float lv_sustain) {
     SP_GC_SAVE();
 #line 56 "spms1_env_gen.rb"
-  self->iv_sustain = (((lv_value < 0.0)) ? 0.0 : ((((lv_value > 1.0)) ? 1.0 : lv_value)));
+  self->iv_sustain = (((lv_sustain < 0.0)) ? 0.0 : ((((lv_sustain > 1.0)) ? 1.0 : lv_sustain)));
   return 0.0;
 }
 #line 59 "spms1_env_gen.rb"
@@ -1160,11 +1160,11 @@ int main(int argc,char**argv){
   }
 #line 15 "spms1_env_gen.rb"
   sp_FloatArray_set(cst_EXP_TABLE, 129LL, sp_FloatArray_get(cst_EXP_TABLE, 128LL));
-#line 18 "spms1_env_gen.rb"
+#line 19 "spms1_env_gen.rb"
   cst_ATTACK_BASE = (0.001 / ((0.01 * sp_math_log((mrb_float)(2LL)))));
-#line 20 "spms1_env_gen.rb"
+#line 22 "spms1_env_gen.rb"
   cst_DECAY_BASE = (0.0030000000000000001 / (((0.01 * 10LL) * sp_math_log((mrb_float)(2LL)))));
-#line 23 "spms1_env_gen.rb"
+#line 25 "spms1_env_gen.rb"
   cst_ATTACK_TARGET = 2.0;
 #line 6 "spms1_main.rb"
 #line 7 "spms1_main.rb"
