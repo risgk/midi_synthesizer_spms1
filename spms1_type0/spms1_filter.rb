@@ -6,6 +6,8 @@ module Spms1
   class Filter
     SOFT_CLIP_CEILING = 4.0
     SMOOTHING_TARGET_BLEND_BASE = 0.015625
+    # Number of samples between control-rate updates; smoothing speed is kept constant if this is changed.
+    CONTROL_RATE_DIVISOR = 4
 
     # Pitch lookup table for note-to-frequency conversion.
     FREQ_TABLE = Array.new(137, 0.0)
@@ -24,7 +26,7 @@ module Spms1
 
     def initialize(sample_rate)
       @sample_rate = sample_rate
-      @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (96000.0 / @sample_rate)
+      @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (96000.0 / @sample_rate) * (CONTROL_RATE_DIVISOR / 4.0)
       @cutoff = 1.0
       @resonance = 0.0
       @modulation_amount = 0.0
@@ -76,7 +78,7 @@ module Spms1
       @z1 = soft_clip(@z2 + @b1 * audio_input - @a1 * audio_output)
       @z2 = soft_clip(@b2 * audio_input - @a2 * audio_output)
 
-      @sample_counter = (@sample_counter + 1) & 3
+      @sample_counter = (@sample_counter + 1) % CONTROL_RATE_DIVISOR
 
       audio_output
     end

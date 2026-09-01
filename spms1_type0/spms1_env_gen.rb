@@ -4,6 +4,8 @@ module Spms1
     STATE_ATTACK = 0
     STATE_SUSTAIN = 1
     STATE_IDLE = 2
+    # Number of samples between control-rate updates; envelope timing is kept constant if this is changed.
+    CONTROL_RATE_DIVISOR = 4
 
     # Lookup table for exponential time mapping.
     EXP_TABLE = Array.new(130, 0.0)
@@ -81,14 +83,14 @@ module Spms1
         @current_level = 0.0 if is_idle_reached || (@state == STATE_IDLE && !@was_gate_on)
       end
 
-      @sample_counter = (@sample_counter + 1) & 3
+      @sample_counter = (@sample_counter + 1) % CONTROL_RATE_DIVISOR
       @current_level
     end
 
     private
 
     def update_coefficients_full
-      effective_rate = @sample_rate * (1.0 / 4.0)
+      effective_rate = @sample_rate * (1.0 / CONTROL_RATE_DIVISOR)
 
       @attack_coef = 1.0 / (ATTACK_BASE * calculate_exp_fast(@attack) * effective_rate)
       @decay_coef  = 1.0 / (DECAY_BASE  * calculate_exp_fast(@decay)  * effective_rate)

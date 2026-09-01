@@ -3,10 +3,12 @@ module Spms1
   # Modulation input is applied directly without smoothing.
   class Amp
     SMOOTHING_TARGET_BLEND_BASE = 0.015625
+    # Number of samples between control-rate updates; smoothing speed is kept constant if this is changed.
+    CONTROL_RATE_DIVISOR = 4
 
     def initialize(sample_rate)
       @sample_rate = sample_rate
-      @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (96000.0 / @sample_rate)
+      @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (96000.0 / @sample_rate) * (CONTROL_RATE_DIVISOR / 4.0)
       @gain = 1.0
       @current_gain = 1.0
       @sample_counter = 0
@@ -24,7 +26,7 @@ module Spms1
         @current_gain += (@gain - @current_gain) * @smoothing_target_blend
       end
 
-      @sample_counter = (@sample_counter + 1) & 3
+      @sample_counter = (@sample_counter + 1) % CONTROL_RATE_DIVISOR
 
       mod = (modulation_input < -1.0) ? -1.0 : ((modulation_input > 1.0) ? 1.0 : modulation_input)
       total_gain = @current_gain * mod
