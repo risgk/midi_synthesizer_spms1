@@ -42,21 +42,13 @@ module Spms1
     end
 
     # Attack time is normalized to [0.0, 1.0] (see ATTACK_BASE for scaling details).
-    def set_attack(attack)
-      @attack = (attack < 0.0) ? 0.0 : ((attack > 1.0) ? 1.0 : attack)
-    end
-
     # Decay time is normalized to [0.0, 1.0] (see DECAY_BASE for scaling details).
-    def set_decay(decay)
-      @decay = (decay < 0.0) ? 0.0 : ((decay > 1.0) ? 1.0 : decay)
-    end
-
     # Sustain level is normalized to [0.0, 1.0].
-    def set_sustain(sustain)
+    def process(gate_input = 0.0, attack = 0.0, decay = 0.0, sustain = 1.0)
+      @attack = (attack < 0.0) ? 0.0 : ((attack > 1.0) ? 1.0 : attack)
+      @decay = (decay < 0.0) ? 0.0 : ((decay > 1.0) ? 1.0 : decay)
       @sustain = (sustain < 0.0) ? 0.0 : ((sustain > 1.0) ? 1.0 : sustain)
-    end
 
-    def process(gate_input = 0.0)
       # Gate transitions drive the ADS state machine; level changes are stepped at the control rate.
       if @sample_counter == 0
         is_gate_on = gate_input >= 0.5

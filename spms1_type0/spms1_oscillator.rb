@@ -20,15 +20,12 @@ module Spms1
       @sample_counter = 0
     end
 
+    # Pitch input is normalized to [-0.5, 0.5], corresponding to MIDI notes 0 to 120.
     # Waveform morph is normalized to [0.0, 1.0].
     # 0.0 = sawtooth, 0.5 = 50% morph, 1.0 = square.
-    def set_waveform(waveform)
-      @waveform = (waveform < 0.0) ? 0.0 : ((waveform > 1.0) ? 1.0 : waveform)
-    end
-
-    # Pitch input is normalized to [-0.5, 0.5], corresponding to MIDI notes 0 to 120.
-    def process(pitch_input = 0.0)
+    def process(pitch_input = 0.0, waveform = 0.0)
       pitch = (pitch_input < -0.5) ? -0.5 : ((pitch_input > 0.5) ? 0.5 : pitch_input)
+      @waveform = (waveform < 0.0) ? 0.0 : ((waveform > 1.0) ? 1.0 : waveform)
       freq = pitch_to_freq_fast(pitch)
       current_dt = freq / @sample_rate
 

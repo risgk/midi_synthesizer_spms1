@@ -57,20 +57,20 @@ loop do
   pitch = Spms1::C.get_midi_note_on_pitch(MIDI_CH).to_f * (1.0 / 120.0) - 0.5
   gate = Spms1::C.get_midi_note_on_state(MIDI_CH).to_f
 
-  oscillator.set_waveform((((value = Spms1::C::get_midi_cc_value(MIDI_CH, 20)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0))
-  filter.set_cutoff((Spms1::C::get_midi_cc_value(MIDI_CH, 74).to_f - 4.0) * (1.0 / 120.0))
-  filter.set_resonance((((value = Spms1::C::get_midi_cc_value(MIDI_CH, 71)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0))
-  filter.set_modulation_amount((((value = Spms1::C::get_midi_cc_value(MIDI_CH, 24)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0))
-  amp.set_gain(((value = Spms1::C.get_midi_cc_value(MIDI_CH, 15)).to_f * value.to_f) * (1.0 / (127.0 * 127.0)))
-  env_gen.set_attack((((value = Spms1::C::get_midi_cc_value(MIDI_CH, 73)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0))
-  env_gen.set_decay((((value = Spms1::C::get_midi_cc_value(MIDI_CH, 75)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0))
-  env_gen.set_sustain((((value = Spms1::C::get_midi_cc_value(MIDI_CH, 30)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0))
+  waveform = (((value = Spms1::C::get_midi_cc_value(MIDI_CH, 20)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0)
+  cutoff = (Spms1::C::get_midi_cc_value(MIDI_CH, 74).to_f - 4.0) * (1.0 / 120.0)
+  resonance = (((value = Spms1::C::get_midi_cc_value(MIDI_CH, 71)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0)
+  modulation_amount = (((value = Spms1::C::get_midi_cc_value(MIDI_CH, 24)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0)
+  gain = ((value = Spms1::C.get_midi_cc_value(MIDI_CH, 15)).to_f * value.to_f) * (1.0 / (127.0 * 127.0))
+  attack = (((value = Spms1::C::get_midi_cc_value(MIDI_CH, 73)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0)
+  decay = (((value = Spms1::C::get_midi_cc_value(MIDI_CH, 75)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0)
+  sustain = (((value = Spms1::C::get_midi_cc_value(MIDI_CH, 30)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0)
 
   AUDIO_BUFFER_WORDS.times do |i|
-    env_gen_output = env_gen.process(gate)
-    oscillator_output = oscillator.process(pitch)
-    filter_output = filter.process(oscillator_output * 0.5, env_gen_output)
-    amp_output = amp.process(filter_output, env_gen_output)
+    env_gen_output = env_gen.process(gate, attack, decay, sustain)
+    oscillator_output = oscillator.process(pitch, waveform)
+    filter_output = filter.process(oscillator_output * 0.5, env_gen_output, cutoff, resonance, modulation_amount)
+    amp_output = amp.process(filter_output, env_gen_output, gain)
 
     audio_buffer[i] = amp_output
   end
