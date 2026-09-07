@@ -44,7 +44,7 @@ module Spms1
       update_coefficients_interleaved
     end
 
-    # Cutoff and resonance use normalized values in [0.0, 1.0] (already-smoothed values from a Smoother are expected).
+    # Cutoff and resonance use normalized values in [0.0, 1.0] (already-smoothed values from a ControlValueSmoother are expected).
     # Cutoff range: MIDI note 15 (19 Hz) at 0.0, MIDI note 75 (622 Hz) at 0.5, MIDI note 135 (20 kHz) at 1.0.
     # Modulation depth is normalized to [-1.0, 1.0].
     # Q range: ~0.7 (0.0), ~2.83 (0.5), ~11.3 (1.0).

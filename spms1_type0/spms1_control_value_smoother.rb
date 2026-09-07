@@ -2,7 +2,7 @@ module Spms1
   # Synthesizer-knob-like parameter: holds a target value and smooths the current value toward it
   # at the control rate, to avoid sudden jumps and zipper noise. Owned and stepped by the caller
   # (e.g. main.rb), independently of the module that ends up consuming the smoothed value.
-  class Smoother
+  class ControlValueSmoother
     SMOOTHING_TARGET_BLEND_BASE = 0.015625
     # Number of samples between control-rate updates; smoothing speed is kept approximately constant if this is changed.
     CONTROL_RATE_DIVISOR = 4

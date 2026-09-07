@@ -13,7 +13,7 @@ module Spms1
     end
 
     # Pitch input is normalized to [-0.5, 0.5], corresponding to MIDI notes 0 to 120.
-    # Waveform morph is normalized to [0.0, 1.0] (already-smoothed values from a Smoother are expected).
+    # Waveform morph is normalized to [0.0, 1.0] (already-smoothed values from a ControlValueSmoother are expected).
     # 0.0 = sawtooth, 0.5 = 50% morph, 1.0 = square.
     def process(pitch_input = 0.0, waveform = 0.0)
       pitch = (pitch_input < -0.5) ? -0.5 : ((pitch_input > 0.5) ? 0.5 : pitch_input)

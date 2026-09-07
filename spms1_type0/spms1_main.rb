@@ -2,7 +2,7 @@ require_relative 'spms1_oscillator'
 require_relative 'spms1_filter'
 require_relative 'spms1_amp'
 require_relative 'spms1_env_gen'
-require_relative 'spms1_smoother'
+require_relative 'spms1_control_value_smoother'
 
 module Spms1
   module C
@@ -36,13 +36,16 @@ filter = Spms1::Filter.new(SAMPLE_RATE)
 amp = Spms1::Amp.new
 env_gen = Spms1::EnvGen.new(SAMPLE_RATE)
 
-# Smoothers act as the knobs for their module's parameter: main sets the target from MIDI CC,
-# and reads back the smoothed current value to feed into the module's process().
-waveform_smoother = Spms1::Smoother.new(SAMPLE_RATE, 0.0)
-cutoff_smoother = Spms1::Smoother.new(SAMPLE_RATE, 1.0)
-resonance_smoother = Spms1::Smoother.new(SAMPLE_RATE, 0.0)
-modulation_amount_smoother = Spms1::Smoother.new(SAMPLE_RATE, 0.0)
-gain_smoother = Spms1::Smoother.new(SAMPLE_RATE, 1.0)
+# ControlValueSmoothers act as the knobs for their module's parameter: main sets the target from
+# MIDI CC, and reads back the smoothed current value to feed into the module's process().
+oscillator_waveform_smoother = Spms1::ControlValueSmoother.new(SAMPLE_RATE, 0.0)
+filter_cutoff_smoother = Spms1::ControlValueSmoother.new(SAMPLE_RATE, 1.0)
+filter_resonance_smoother = Spms1::ControlValueSmoother.new(SAMPLE_RATE, 0.0)
+filter_modulation_amount_smoother = Spms1::ControlValueSmoother.new(SAMPLE_RATE, 0.0)
+amp_gain_smoother = Spms1::ControlValueSmoother.new(SAMPLE_RATE, 1.0)
+env_gen_attack_smoother = Spms1::ControlValueSmoother.new(SAMPLE_RATE, 0.0)
+env_gen_decay_smoother = Spms1::ControlValueSmoother.new(SAMPLE_RATE, 0.0)
+env_gen_sustain_smoother = Spms1::ControlValueSmoother.new(SAMPLE_RATE, 1.0)
 
 audio_buffer = Array.new(AUDIO_BUFFER_WORDS, 0.0)
 
@@ -66,27 +69,29 @@ loop do
   pitch = Spms1::C.get_midi_note_on_pitch(MIDI_CH).to_f * (1.0 / 120.0) - 0.5
   gate = Spms1::C.get_midi_note_on_state(MIDI_CH).to_f
 
-  waveform_target = (((value = Spms1::C::get_midi_cc_value(MIDI_CH, 20)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0)
-  cutoff_target = (Spms1::C::get_midi_cc_value(MIDI_CH, 74).to_f - 4.0) * (1.0 / 120.0)
-  cutoff_target = (cutoff_target < 0.0) ? 0.0 : ((cutoff_target > 1.0) ? 1.0 : cutoff_target)
-  resonance_target = (((value = Spms1::C::get_midi_cc_value(MIDI_CH, 71)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0)
-  modulation_amount_target = (((value = Spms1::C::get_midi_cc_value(MIDI_CH, 24)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0)
-  gain_target = ((value = Spms1::C.get_midi_cc_value(MIDI_CH, 15)).to_f * value.to_f) * (1.0 / (127.0 * 127.0))
-  attack = (((value = Spms1::C::get_midi_cc_value(MIDI_CH, 73)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0)
-  decay = (((value = Spms1::C::get_midi_cc_value(MIDI_CH, 75)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0)
-  sustain = (((value = Spms1::C::get_midi_cc_value(MIDI_CH, 30)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0)
+  oscillator_waveform_target = (((value = Spms1::C::get_midi_cc_value(MIDI_CH, 20)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0)
+  filter_cutoff_target = (Spms1::C::get_midi_cc_value(MIDI_CH, 74).to_f - 4.0) * (1.0 / 120.0)
+  filter_resonance_target = (((value = Spms1::C::get_midi_cc_value(MIDI_CH, 71)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0)
+  filter_modulation_amount_target = (((value = Spms1::C::get_midi_cc_value(MIDI_CH, 24)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0)
+  amp_gain_target = ((value = Spms1::C.get_midi_cc_value(MIDI_CH, 15)).to_f * value.to_f) * (1.0 / (127.0 * 127.0))
+  env_gen_attack_target = (((value = Spms1::C::get_midi_cc_value(MIDI_CH, 73)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0)
+  env_gen_decay_target = (((value = Spms1::C::get_midi_cc_value(MIDI_CH, 75)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0)
+  env_gen_sustain_target = (((value = Spms1::C::get_midi_cc_value(MIDI_CH, 30)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0)
 
   AUDIO_BUFFER_WORDS.times do |i|
-    waveform = waveform_smoother.process(waveform_target)
-    cutoff = cutoff_smoother.process(cutoff_target)
-    resonance = resonance_smoother.process(resonance_target)
-    modulation_amount = modulation_amount_smoother.process(modulation_amount_target)
-    gain = gain_smoother.process(gain_target)
+    oscillator_waveform = oscillator_waveform_smoother.process(oscillator_waveform_target)
+    filter_cutoff = filter_cutoff_smoother.process(filter_cutoff_target)
+    filter_resonance = filter_resonance_smoother.process(filter_resonance_target)
+    filter_modulation_amount = filter_modulation_amount_smoother.process(filter_modulation_amount_target)
+    amp_gain = amp_gain_smoother.process(amp_gain_target)
+    env_gen_attack = env_gen_attack_smoother.process(env_gen_attack_target)
+    env_gen_decay = env_gen_decay_smoother.process(env_gen_decay_target)
+    env_gen_sustain = env_gen_sustain_smoother.process(env_gen_sustain_target)
 
-    env_gen_output = env_gen.process(gate, attack, decay, sustain)
-    oscillator_output = oscillator.process(pitch, waveform)
-    filter_output = filter.process(oscillator_output * 0.5, env_gen_output, cutoff, resonance, modulation_amount)
-    amp_output = amp.process(filter_output, env_gen_output, gain)
+    env_gen_output = env_gen.process(gate, env_gen_attack, env_gen_decay, env_gen_sustain)
+    oscillator_output = oscillator.process(pitch, oscillator_waveform)
+    filter_output = filter.process(oscillator_output * 0.5, env_gen_output, filter_cutoff, filter_resonance, filter_modulation_amount)
+    amp_output = amp.process(filter_output, env_gen_output, amp_gain)
 
     audio_buffer[i] = amp_output
   end

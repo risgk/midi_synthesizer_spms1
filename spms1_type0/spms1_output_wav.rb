@@ -2,7 +2,7 @@ require_relative 'spms1_oscillator'
 require_relative 'spms1_filter'
 require_relative 'spms1_amp'
 require_relative 'spms1_env_gen'
-require_relative 'spms1_smoother'
+require_relative 'spms1_control_value_smoother'
 
 SAMPLE_RATE = 48000.0
 DURATION_SEC = 30.0
@@ -10,42 +10,48 @@ NUM_SAMPLES = (SAMPLE_RATE * DURATION_SEC).to_i
 FILENAME = "spms1_output.wav"
 
 oscillator = Spms1::Oscillator.new(SAMPLE_RATE)
-waveform_target = 0.0 * (1.0 / 128.0)
-waveform_smoother = Spms1::Smoother.new(SAMPLE_RATE, 0.0)
+oscillator_waveform_target = 0.0 * (1.0 / 128.0)
+oscillator_waveform_smoother = Spms1::ControlValueSmoother.new(SAMPLE_RATE, 0.0)
 
 filter = Spms1::Filter.new(SAMPLE_RATE)
-cutoff_target = 64.0 * (1.0 / 120.0)
-resonance_target = 64.0 * (1.0 / 128.0)
-modulation_amount_target = 64.0 * (1.0 / 128.0)
-cutoff_smoother = Spms1::Smoother.new(SAMPLE_RATE, 1.0)
-resonance_smoother = Spms1::Smoother.new(SAMPLE_RATE, 0.0)
-modulation_amount_smoother = Spms1::Smoother.new(SAMPLE_RATE, 0.0)
+filter_cutoff_target = 64.0 * (1.0 / 120.0)
+filter_resonance_target = 64.0 * (1.0 / 128.0)
+filter_modulation_amount_target = 64.0 * (1.0 / 128.0)
+filter_cutoff_smoother = Spms1::ControlValueSmoother.new(SAMPLE_RATE, 1.0)
+filter_resonance_smoother = Spms1::ControlValueSmoother.new(SAMPLE_RATE, 0.0)
+filter_modulation_amount_smoother = Spms1::ControlValueSmoother.new(SAMPLE_RATE, 0.0)
 
 amp = Spms1::Amp.new
-gain_target = (100.0 * 100.0) * (1.0 / (127.0 * 127.0))
-gain_smoother = Spms1::Smoother.new(SAMPLE_RATE, 1.0)
+amp_gain_target = (100.0 * 100.0) * (1.0 / (127.0 * 127.0))
+amp_gain_smoother = Spms1::ControlValueSmoother.new(SAMPLE_RATE, 1.0)
 
 env_gen = Spms1::EnvGen.new(SAMPLE_RATE)
 
-attack = 0.0 * (1.0 / 128.0)
-decay = 128.0 * (1.0 / 128.0)
-sustain = 0.0 * (1.0 / 128.0)
+env_gen_attack_target = 0.0 * (1.0 / 128.0)
+env_gen_decay_target = 128.0 * (1.0 / 128.0)
+env_gen_sustain_target = 0.0 * (1.0 / 128.0)
+env_gen_attack_smoother = Spms1::ControlValueSmoother.new(SAMPLE_RATE, 0.0)
+env_gen_decay_smoother = Spms1::ControlValueSmoother.new(SAMPLE_RATE, 0.0)
+env_gen_sustain_smoother = Spms1::ControlValueSmoother.new(SAMPLE_RATE, 1.0)
 
 puts "Generating stereo waveform data..."
 
 pcm_bytes = []
 
 NUM_SAMPLES.times do |i|
-  waveform = waveform_smoother.process(waveform_target)
-  cutoff = cutoff_smoother.process(cutoff_target)
-  resonance = resonance_smoother.process(resonance_target)
-  modulation_amount = modulation_amount_smoother.process(modulation_amount_target)
-  gain = gain_smoother.process(gain_target)
+  oscillator_waveform = oscillator_waveform_smoother.process(oscillator_waveform_target)
+  filter_cutoff = filter_cutoff_smoother.process(filter_cutoff_target)
+  filter_resonance = filter_resonance_smoother.process(filter_resonance_target)
+  filter_modulation_amount = filter_modulation_amount_smoother.process(filter_modulation_amount_target)
+  amp_gain = amp_gain_smoother.process(amp_gain_target)
+  env_gen_attack = env_gen_attack_smoother.process(env_gen_attack_target)
+  env_gen_decay = env_gen_decay_smoother.process(env_gen_decay_target)
+  env_gen_sustain = env_gen_sustain_smoother.process(env_gen_sustain_target)
 
-  env_gen_output = env_gen.process(1.0, attack, decay, sustain)
-  oscillator_output = oscillator.process(60.0 * (1.0 / 120.0) - 0.5, waveform)
-  filter_output = filter.process(oscillator_output * 0.5, env_gen_output, cutoff, resonance, modulation_amount)
-  amp_output = amp.process(filter_output, env_gen_output, gain)
+  env_gen_output = env_gen.process(1.0, env_gen_attack, env_gen_decay, env_gen_sustain)
+  oscillator_output = oscillator.process(60.0 * (1.0 / 120.0) - 0.5, oscillator_waveform)
+  filter_output = filter.process(oscillator_output * 0.5, env_gen_output, filter_cutoff, filter_resonance, filter_modulation_amount)
+  amp_output = amp.process(filter_output, env_gen_output, amp_gain)
 
   [amp_output, amp_output].each do |ch_sample|
     clamped_sample = (ch_sample * 8388607.0).round
