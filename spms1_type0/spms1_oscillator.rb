@@ -1,6 +1,10 @@
 module Spms1
   # PolyBLEP-based saw/square morph oscillator for anti-aliased waveform transitions.
   class Oscillator
+    SMOOTHING_TARGET_BLEND_BASE = 0.015625
+    # Number of samples between control-rate updates; smoothing speed is kept approximately constant if this is changed.
+    CONTROL_RATE_DIVISOR = 4
+
     # Pitch lookup table for note-to-frequency conversion.
     FREQ_TABLE = Array.new(129, 0.0)
     for i in 0...129
@@ -9,15 +13,19 @@ module Spms1
 
     def initialize(sample_rate)
       @sample_rate = sample_rate
+      @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (96000.0 / @sample_rate) * (CONTROL_RATE_DIVISOR / 4.0)
       @phase = 0.0
+      @waveform = 0.0
+      @current_waveform = 0.0
+      @sample_counter = 0
     end
 
     # Pitch input is normalized to [-0.5, 0.5], corresponding to MIDI notes 0 to 120.
-    # Waveform morph is normalized to [0.0, 1.0] (already-smoothed values from a ControlValueSmoother are expected).
+    # Waveform morph is normalized to [0.0, 1.0].
     # 0.0 = sawtooth, 0.5 = 50% morph, 1.0 = square.
     def process(pitch_input = 0.0, waveform = 0.0)
       pitch = (pitch_input < -0.5) ? -0.5 : ((pitch_input > 0.5) ? 0.5 : pitch_input)
-      clamped_waveform = (waveform < 0.0) ? 0.0 : ((waveform > 1.0) ? 1.0 : waveform)
+      @waveform = (waveform < 0.0) ? 0.0 : ((waveform > 1.0) ? 1.0 : waveform)
       freq = pitch_to_freq_fast(pitch)
       current_dt = freq / @sample_rate
 
@@ -32,9 +40,15 @@ module Spms1
       blep2 = poly_blep(phase2, current_dt)
       saw2 = naive_saw2 + blep2
 
-      output = saw1 - (saw2 * clamped_waveform)
+      if @sample_counter == 0
+        # Morph is smoothed at the control rate to avoid sudden waveform jumps.
+        @current_waveform += (@waveform - @current_waveform) * @smoothing_target_blend
+      end
+
+      output = saw1 - (saw2 * @current_waveform)
       @phase += current_dt
       @phase -= (@phase < 1.0) ? 0.0 : 1.0
+      @sample_counter = (@sample_counter + 1) % CONTROL_RATE_DIVISOR
 
       output * 0.5
     end

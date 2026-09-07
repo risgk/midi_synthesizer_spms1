@@ -5,6 +5,7 @@ module Spms1
   # Coefficient updates are performed at 4-sample control-rate updates to preserve stability without a full oversampling path.
   class Filter
     SOFT_CLIP_CEILING = 4.0
+    SMOOTHING_TARGET_BLEND_BASE = 0.015625
     # Number of samples between control-rate updates; smoothing speed is kept approximately constant if this is changed.
     CONTROL_RATE_DIVISOR = 4
 
@@ -25,9 +26,14 @@ module Spms1
 
     def initialize(sample_rate)
       @sample_rate = sample_rate
+      @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (96000.0 / @sample_rate) * (CONTROL_RATE_DIVISOR / 4.0)
       @cutoff = 1.0
       @resonance = 0.0
       @modulation_amount = 0.0
+
+      @current_cutoff = 1.0
+      @current_resonance = 0.0
+      @current_modulation_amount = 0.0
 
       @b0 = 1.0; @b1 = 0.0; @b2 = 0.0
       @a1 = 0.0; @a2 = 0.0
@@ -44,7 +50,7 @@ module Spms1
       update_coefficients_interleaved
     end
 
-    # Cutoff and resonance use normalized values in [0.0, 1.0] (already-smoothed values from a ControlValueSmoother are expected).
+    # Cutoff and resonance use normalized values in [0.0, 1.0].
     # Cutoff range: MIDI note 15 (19 Hz) at 0.0, MIDI note 75 (622 Hz) at 0.5, MIDI note 135 (20 kHz) at 1.0.
     # Modulation depth is normalized to [-1.0, 1.0].
     # Q range: ~0.7 (0.0), ~2.83 (0.5), ~11.3 (1.0).
@@ -83,14 +89,18 @@ module Spms1
 
     # Update all coefficients at once at the 4-sample control-rate to keep the grid stable.
     def update_coefficients_interleaved
+      @current_cutoff += (@cutoff - @current_cutoff) * @smoothing_target_blend
+      @current_resonance += (@resonance - @current_resonance) * @smoothing_target_blend
+      @current_modulation_amount += (@modulation_amount - @current_modulation_amount) * @smoothing_target_blend
+
       mod = (@current_modulation_input < 0.0) ? 0.0 : ((@current_modulation_input > 1.0) ? 1.0 : @current_modulation_input)
-      total_cutoff = @cutoff + (mod * @modulation_amount)
+      total_cutoff = @current_cutoff + (mod * @current_modulation_amount)
       clamped_cutoff = (total_cutoff < 0.0) ? 0.0 : ((total_cutoff > 1.0) ? 1.0 : total_cutoff)
 
       cutoff_freq = cutoff_to_freq_fast(clamped_cutoff)
       @step_omega = 2.0 * Math::PI * cutoff_freq / @sample_rate
 
-      internal_resonance = @resonance * 128.0
+      internal_resonance = @current_resonance * 128.0
 
       index = internal_resonance.to_i
       fraction = internal_resonance - index.to_f
