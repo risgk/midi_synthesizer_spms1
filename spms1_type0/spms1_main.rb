@@ -2,6 +2,7 @@ require_relative 'spms1_oscillator'
 require_relative 'spms1_filter'
 require_relative 'spms1_amp'
 require_relative 'spms1_env_gen'
+require_relative 'spms1_smoother'
 
 module Spms1
   module C
@@ -32,8 +33,16 @@ AUDIO_BUFFER_WORDS = 64
 
 oscillator = Spms1::Oscillator.new(SAMPLE_RATE)
 filter = Spms1::Filter.new(SAMPLE_RATE)
-amp = Spms1::Amp.new(SAMPLE_RATE)
+amp = Spms1::Amp.new
 env_gen = Spms1::EnvGen.new(SAMPLE_RATE)
+
+# Smoothers act as the knobs for their module's parameter: main sets the target from MIDI CC,
+# and reads back the smoothed current value to feed into the module's process().
+waveform_smoother = Spms1::Smoother.new(SAMPLE_RATE, 0.0)
+cutoff_smoother = Spms1::Smoother.new(SAMPLE_RATE, 1.0)
+resonance_smoother = Spms1::Smoother.new(SAMPLE_RATE, 0.0)
+modulation_amount_smoother = Spms1::Smoother.new(SAMPLE_RATE, 0.0)
+gain_smoother = Spms1::Smoother.new(SAMPLE_RATE, 1.0)
 
 audio_buffer = Array.new(AUDIO_BUFFER_WORDS, 0.0)
 
@@ -57,16 +66,23 @@ loop do
   pitch = Spms1::C.get_midi_note_on_pitch(MIDI_CH).to_f * (1.0 / 120.0) - 0.5
   gate = Spms1::C.get_midi_note_on_state(MIDI_CH).to_f
 
-  waveform = (((value = Spms1::C::get_midi_cc_value(MIDI_CH, 20)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0)
-  cutoff = (Spms1::C::get_midi_cc_value(MIDI_CH, 74).to_f - 4.0) * (1.0 / 120.0)
-  resonance = (((value = Spms1::C::get_midi_cc_value(MIDI_CH, 71)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0)
-  modulation_amount = (((value = Spms1::C::get_midi_cc_value(MIDI_CH, 24)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0)
-  gain = ((value = Spms1::C.get_midi_cc_value(MIDI_CH, 15)).to_f * value.to_f) * (1.0 / (127.0 * 127.0))
+  waveform_target = (((value = Spms1::C::get_midi_cc_value(MIDI_CH, 20)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0)
+  cutoff_target = (Spms1::C::get_midi_cc_value(MIDI_CH, 74).to_f - 4.0) * (1.0 / 120.0)
+  cutoff_target = (cutoff_target < 0.0) ? 0.0 : ((cutoff_target > 1.0) ? 1.0 : cutoff_target)
+  resonance_target = (((value = Spms1::C::get_midi_cc_value(MIDI_CH, 71)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0)
+  modulation_amount_target = (((value = Spms1::C::get_midi_cc_value(MIDI_CH, 24)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0)
+  gain_target = ((value = Spms1::C.get_midi_cc_value(MIDI_CH, 15)).to_f * value.to_f) * (1.0 / (127.0 * 127.0))
   attack = (((value = Spms1::C::get_midi_cc_value(MIDI_CH, 73)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0)
   decay = (((value = Spms1::C::get_midi_cc_value(MIDI_CH, 75)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0)
   sustain = (((value = Spms1::C::get_midi_cc_value(MIDI_CH, 30)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0)
 
   AUDIO_BUFFER_WORDS.times do |i|
+    waveform = waveform_smoother.process(waveform_target)
+    cutoff = cutoff_smoother.process(cutoff_target)
+    resonance = resonance_smoother.process(resonance_target)
+    modulation_amount = modulation_amount_smoother.process(modulation_amount_target)
+    gain = gain_smoother.process(gain_target)
+
     env_gen_output = env_gen.process(gate, attack, decay, sustain)
     oscillator_output = oscillator.process(pitch, waveform)
     filter_output = filter.process(oscillator_output * 0.5, env_gen_output, cutoff, resonance, modulation_amount)
