@@ -1,14 +1,15 @@
 module Spms1
   # Indices into signals, the shared bus of audio-rate and control-rate signal values that main
-  # wires modules together through. Assignment is static for now (each signal always lives at the
-  # same index), but the indirection leaves room to make the wiring MIDI-assignable later without
-  # changing how modules themselves are called.
+  # wires modules together through. NONE (0) is reserved as the sentinel for "no signal", so
+  # per-module wiring tables (see main) can reference it without relying on nil.
   module SignalIndex
     SIGNALS_SIZE = 128
 
+    NONE = 0
+
     # Updated once per audio buffer.
-    PITCH = 0
-    GATE  = 1
+    PITCH = 1
+    GATE  = 2
 
     # Audio-rate signals: updated once per sample. Starts at 32 to leave room in the block above.
     OSCILLATOR_WAVEFORM       = 32
