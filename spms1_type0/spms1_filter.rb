@@ -52,14 +52,23 @@ module Spms1
 
     # Cutoff and resonance use normalized values in [0.0, 1.0].
     # Cutoff range: MIDI note 15 (19 Hz) at 0.0, MIDI note 75 (622 Hz) at 0.5, MIDI note 135 (20 kHz) at 1.0.
-    # Modulation depth is normalized to [-1.0, 1.0].
-    # Q range: ~0.7 (0.0), ~2.83 (0.5), ~11.3 (1.0).
-    def process(audio_input = 0.0, modulation_input = 0.0, cutoff = 1.0, resonance = 0.0, modulation_amount = 0.0)
+    def set_cutoff(cutoff)
       @cutoff = (cutoff < 0.0) ? 0.0 : ((cutoff > 1.0) ? 1.0 : cutoff)
-      @resonance = (resonance < 0.0) ? 0.0 : ((resonance > 1.0) ? 1.0 : resonance)
-      @modulation_amount = (modulation_amount < -1.0) ? -1.0 : ((modulation_amount > 1.0) ? 1.0 : modulation_amount)
-      @current_modulation_input = modulation_input
+    end
 
+    # Modulation depth is normalized to [-1.0, 1.0].
+    def set_modulation_amount(amount)
+      @modulation_amount = (amount < -1.0) ? -1.0 : ((amount > 1.0) ? 1.0 : amount)
+    end
+
+    # Q range: ~0.7 (0.0), ~2.83 (0.5), ~11.3 (1.0).
+    def set_resonance(resonance)
+      @resonance = (resonance < 0.0) ? 0.0 : ((resonance > 1.0) ? 1.0 : resonance)
+    end
+
+    def process(audio_input = 0.0, modulation_input = 0.0)
+      @current_modulation_input = modulation_input
+      
       if @sample_counter == 0
         update_coefficients_interleaved
       end
