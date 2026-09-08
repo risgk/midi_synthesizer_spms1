@@ -169,7 +169,7 @@ loop do
       when MODULE_FILTER
         filter_audio_input = pick_source(filter_audio_source, env_gen_output, oscillator_output, filter_output, amp_output)
         filter_mod_input   = pick_source(filter_mod_source, env_gen_output, oscillator_output, filter_output, amp_output)
-        filter_output = filter.process(filter_audio_input * 0.5, filter_mod_input)
+        filter_output = filter.process(filter_audio_input, filter_mod_input)
       when MODULE_AMP
         amp_audio_input = pick_source(amp_audio_source, env_gen_output, oscillator_output, filter_output, amp_output)
         amp_mod_input   = pick_source(amp_mod_source, env_gen_output, oscillator_output, filter_output, amp_output)

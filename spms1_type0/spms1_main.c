@@ -325,6 +325,7 @@ static sp_C *sp_C_new(void);
 
 static mrb_float cst_Spms1__Oscillator__SMOOTHING_TARGET_BLEND_BASE = 0.0;
 static mrb_int cst_Spms1__Oscillator__CONTROL_RATE_DIVISOR = 0;
+static mrb_float cst_OUTPUT_LEVEL = 0.0;
 static sp_FloatArray * cst_Spms1__Oscillator__FREQ_TABLE = NULL;
 static mrb_float cst_SOFT_CLIP_CEILING = 0.0;
 static mrb_float cst_Spms1__Filter__SMOOTHING_TARGET_BLEND_BASE = 0.0;
@@ -530,30 +531,30 @@ static const char *sp_obj_inspect_sw(int cls_id, void *p) {
     default: return "#<Object>";
   }
 }
-#line 14 "spms1_oscillator.rb"
+#line 18 "spms1_oscillator.rb"
 static void sp_Oscillator_initialize(sp_Oscillator *self, mrb_int lv_sample_rate) {
     SP_GC_SAVE();
-#line 15 "spms1_oscillator.rb"
-  self->iv_sample_rate = lv_sample_rate;
-#line 16 "spms1_oscillator.rb"
-  self->iv_smoothing_target_blend = ((cst_Spms1__Oscillator__SMOOTHING_TARGET_BLEND_BASE * ((96000.0 / self->iv_sample_rate))) * ((cst_Spms1__Oscillator__CONTROL_RATE_DIVISOR / 4.0)));
-#line 17 "spms1_oscillator.rb"
-  self->iv_phase = 0.0;
-#line 18 "spms1_oscillator.rb"
-  self->iv_waveform = 0.0;
 #line 19 "spms1_oscillator.rb"
-  self->iv_current_waveform = 0.0;
+  self->iv_sample_rate = lv_sample_rate;
 #line 20 "spms1_oscillator.rb"
+  self->iv_smoothing_target_blend = ((cst_Spms1__Oscillator__SMOOTHING_TARGET_BLEND_BASE * ((96000.0 / self->iv_sample_rate))) * ((cst_Spms1__Oscillator__CONTROL_RATE_DIVISOR / 4.0)));
+#line 21 "spms1_oscillator.rb"
+  self->iv_phase = 0.0;
+#line 22 "spms1_oscillator.rb"
+  self->iv_waveform = 0.0;
+#line 23 "spms1_oscillator.rb"
+  self->iv_current_waveform = 0.0;
+#line 24 "spms1_oscillator.rb"
   self->iv_sample_counter = 0LL;
 }
-#line 25 "spms1_oscillator.rb"
+#line 29 "spms1_oscillator.rb"
 static mrb_float sp_Oscillator_set_waveform(sp_Oscillator *self, mrb_float lv_waveform) {
     SP_GC_SAVE();
-#line 26 "spms1_oscillator.rb"
+#line 30 "spms1_oscillator.rb"
   self->iv_waveform = (((lv_waveform < 0.0)) ? 0.0 : ((((lv_waveform > 1.0)) ? 1.0 : lv_waveform)));
   return 0.0;
 }
-#line 30 "spms1_oscillator.rb"
+#line 34 "spms1_oscillator.rb"
 static mrb_float sp_Oscillator_process(sp_Oscillator *self, mrb_float lv_pitch_input) {
     SP_GC_SAVE();
     mrb_float lv_pitch = 0.0;
@@ -567,51 +568,51 @@ static mrb_float sp_Oscillator_process(sp_Oscillator *self, mrb_float lv_pitch_i
     mrb_float lv_blep2 = 0.0;
     mrb_float lv_saw2 = 0.0;
     mrb_float lv_output = 0.0;
-#line 31 "spms1_oscillator.rb"
+#line 35 "spms1_oscillator.rb"
   lv_pitch = (((lv_pitch_input < -0.5)) ? -0.5 : ((((lv_pitch_input > 0.5)) ? 0.5 : lv_pitch_input)));
-#line 32 "spms1_oscillator.rb"
+#line 36 "spms1_oscillator.rb"
   mrb_float _t1 = lv_pitch;
   lv_freq = sp_Oscillator_pitch_to_freq_fast((sp_Oscillator *)self, _t1);
-#line 33 "spms1_oscillator.rb"
+#line 37 "spms1_oscillator.rb"
   lv_current_dt = (lv_freq / self->iv_sample_rate);
-#line 35 "spms1_oscillator.rb"
+#line 39 "spms1_oscillator.rb"
   lv_naive_saw1 = ((-2.0 * self->iv_phase) + 1.0);
-#line 36 "spms1_oscillator.rb"
+#line 40 "spms1_oscillator.rb"
   mrb_float _t2 = self->iv_phase;
   mrb_float _t3 = lv_current_dt;
   lv_blep1 = sp_Oscillator_poly_blep((sp_Oscillator *)self, _t2, _t3);
-#line 37 "spms1_oscillator.rb"
+#line 41 "spms1_oscillator.rb"
   lv_saw1 = (lv_naive_saw1 + lv_blep1);
-#line 39 "spms1_oscillator.rb"
-  lv_phase2 = (self->iv_phase + 0.5);
-#line 40 "spms1_oscillator.rb"
-  lv_phase2 -= (((lv_phase2 < 1.0)) ? 0.0 : 1.0);
-#line 42 "spms1_oscillator.rb"
-  lv_naive_saw2 = ((-2.0 * lv_phase2) + 1.0);
 #line 43 "spms1_oscillator.rb"
+  lv_phase2 = (self->iv_phase + 0.5);
+#line 44 "spms1_oscillator.rb"
+  lv_phase2 -= (((lv_phase2 < 1.0)) ? 0.0 : 1.0);
+#line 46 "spms1_oscillator.rb"
+  lv_naive_saw2 = ((-2.0 * lv_phase2) + 1.0);
+#line 47 "spms1_oscillator.rb"
   mrb_float _t4 = lv_phase2;
   mrb_float _t5 = lv_current_dt;
   lv_blep2 = sp_Oscillator_poly_blep((sp_Oscillator *)self, _t4, _t5);
-#line 44 "spms1_oscillator.rb"
-  lv_saw2 = (lv_naive_saw2 + lv_blep2);
-#line 46 "spms1_oscillator.rb"
-  if ((self->iv_sample_counter == 0LL)) {
 #line 48 "spms1_oscillator.rb"
+  lv_saw2 = (lv_naive_saw2 + lv_blep2);
+#line 50 "spms1_oscillator.rb"
+  if ((self->iv_sample_counter == 0LL)) {
+#line 52 "spms1_oscillator.rb"
     self->iv_current_waveform += (((self->iv_waveform - self->iv_current_waveform)) * self->iv_smoothing_target_blend);
   }
-#line 51 "spms1_oscillator.rb"
+#line 55 "spms1_oscillator.rb"
   lv_output = (lv_saw1 - ((lv_saw2 * self->iv_current_waveform)));
-#line 52 "spms1_oscillator.rb"
-  self->iv_phase += lv_current_dt;
-#line 53 "spms1_oscillator.rb"
-  self->iv_phase -= (((self->iv_phase < 1.0)) ? 0.0 : 1.0);
-#line 54 "spms1_oscillator.rb"
-  self->iv_sample_counter = sp_imod((sp_int_add(self->iv_sample_counter, 1LL)), 4LL);
 #line 56 "spms1_oscillator.rb"
-  return (lv_output * 0.5);
+  self->iv_phase += lv_current_dt;
+#line 57 "spms1_oscillator.rb"
+  self->iv_phase -= (((self->iv_phase < 1.0)) ? 0.0 : 1.0);
+#line 58 "spms1_oscillator.rb"
+  self->iv_sample_counter = sp_imod((sp_int_add(self->iv_sample_counter, 1LL)), 4LL);
+#line 60 "spms1_oscillator.rb"
+  return ((lv_output * 0.5) * cst_OUTPUT_LEVEL);
   return 0.0;
 }
-#line 61 "spms1_oscillator.rb"
+#line 65 "spms1_oscillator.rb"
 static mrb_float sp_Oscillator_pitch_to_freq_fast(sp_Oscillator *self, mrb_float lv_pitch) {
     SP_GC_SAVE();
     mrb_float lv_internal_pitch = 0.0;
@@ -619,21 +620,21 @@ static mrb_float sp_Oscillator_pitch_to_freq_fast(sp_Oscillator *self, mrb_float
     mrb_float lv_fraction = 0.0;
     mrb_float lv_f0 = 0.0;
     mrb_float lv_f1 = 0.0;
-#line 62 "spms1_oscillator.rb"
-  lv_internal_pitch = (((lv_pitch + 0.5)) * 120.0);
-#line 63 "spms1_oscillator.rb"
-  lv_index = sp_float_to_i_checked(lv_internal_pitch);
-#line 64 "spms1_oscillator.rb"
-  lv_fraction = (lv_internal_pitch - ((mrb_float)(lv_index)));
-#line 65 "spms1_oscillator.rb"
-  lv_f0 = sp_FloatArray_get(cst_Spms1__Oscillator__FREQ_TABLE, lv_index);
 #line 66 "spms1_oscillator.rb"
-  lv_f1 = sp_FloatArray_get(cst_Spms1__Oscillator__FREQ_TABLE, sp_int_add(lv_index, 1LL));
+  lv_internal_pitch = (((lv_pitch + 0.5)) * 120.0);
 #line 67 "spms1_oscillator.rb"
+  lv_index = sp_float_to_i_checked(lv_internal_pitch);
+#line 68 "spms1_oscillator.rb"
+  lv_fraction = (lv_internal_pitch - ((mrb_float)(lv_index)));
+#line 69 "spms1_oscillator.rb"
+  lv_f0 = sp_FloatArray_get(cst_Spms1__Oscillator__FREQ_TABLE, lv_index);
+#line 70 "spms1_oscillator.rb"
+  lv_f1 = sp_FloatArray_get(cst_Spms1__Oscillator__FREQ_TABLE, sp_int_add(lv_index, 1LL));
+#line 71 "spms1_oscillator.rb"
   return (lv_f0 + (lv_fraction * ((lv_f1 - lv_f0))));
   return 0.0;
 }
-#line 71 "spms1_oscillator.rb"
+#line 75 "spms1_oscillator.rb"
 static mrb_float sp_Oscillator_poly_blep(sp_Oscillator *self, mrb_float lv_t, mrb_float lv_dt) {
     SP_GC_SAVE();
     mrb_float lv_num_start = 0.0;
@@ -641,17 +642,17 @@ static mrb_float sp_Oscillator_poly_blep(sp_Oscillator *self, mrb_float lv_t, mr
     mrb_float lv_num_end = 0.0;
     mrb_float lv_blep_end = 0.0;
     mrb_float lv_val = 0.0;
-#line 72 "spms1_oscillator.rb"
-  lv_num_start = (lv_t / lv_dt);
-#line 73 "spms1_oscillator.rb"
-  lv_blep_start = (((lv_num_start + lv_num_start) - (lv_num_start * lv_num_start)) - 1.0);
-#line 74 "spms1_oscillator.rb"
-  lv_num_end = (((lv_t - 1.0)) / lv_dt);
-#line 75 "spms1_oscillator.rb"
-  lv_blep_end = ((((lv_num_end * lv_num_end) + lv_num_end) + lv_num_end) + 1.0);
 #line 76 "spms1_oscillator.rb"
-  lv_val = (((lv_t < lv_dt)) ? lv_blep_start : 0.0);
+  lv_num_start = (lv_t / lv_dt);
 #line 77 "spms1_oscillator.rb"
+  lv_blep_start = (((lv_num_start + lv_num_start) - (lv_num_start * lv_num_start)) - 1.0);
+#line 78 "spms1_oscillator.rb"
+  lv_num_end = (((lv_t - 1.0)) / lv_dt);
+#line 79 "spms1_oscillator.rb"
+  lv_blep_end = ((((lv_num_end * lv_num_end) + lv_num_end) + lv_num_end) + 1.0);
+#line 80 "spms1_oscillator.rb"
+  lv_val = (((lv_t < lv_dt)) ? lv_blep_start : 0.0);
+#line 81 "spms1_oscillator.rb"
   if (((lv_t > (1.0 - lv_dt)))) {
     return lv_blep_end;
   }
@@ -1110,8 +1111,8 @@ int main(int argc,char**argv){
     volatile mrb_float lv_filter_mod_input = 0.0;
     volatile mrb_float lv_amp_audio_input = 0.0;
     volatile mrb_float lv_amp_mod_input = 0.0;
-    mrb_int lv_i__bp2337 = 0;
-    mrb_int lv_i__bp2444 = 0;
+    mrb_int lv_i__bp2342 = 0;
+    mrb_int lv_i__bp2446 = 0;
 
 #line 1 "spms1_oscillator.rb"
 #line 3 "spms1_oscillator.rb"
@@ -1119,7 +1120,9 @@ int main(int argc,char**argv){
   cst_Spms1__Oscillator__SMOOTHING_TARGET_BLEND_BASE = 0.015625;
 #line 6 "spms1_oscillator.rb"
   cst_Spms1__Oscillator__CONTROL_RATE_DIVISOR = 4LL;
-#line 9 "spms1_oscillator.rb"
+#line 10 "spms1_oscillator.rb"
+  cst_OUTPUT_LEVEL = 0.5;
+#line 13 "spms1_oscillator.rb"
   mrb_int _t15 = 129LL;
   if (_t15 < 0) sp_raise_cls("ArgumentError", "negative array size");
   mrb_float _t16 = 0.0;
@@ -1127,10 +1130,10 @@ int main(int argc,char**argv){
   SP_GC_ROOT(_t17);
   for (mrb_int _t18 = 0; _t18 < _t15; _t18++) sp_FloatArray_push(_t17, _t16);
   cst_Spms1__Oscillator__FREQ_TABLE = _t17;
-#line 10 "spms1_oscillator.rb"
+#line 14 "spms1_oscillator.rb"
   { mrb_int _t19 = 129LL;
     for (lv_i = 0LL; lv_i < _t19; lv_i++) {
-#line 11 "spms1_oscillator.rb"
+#line 15 "spms1_oscillator.rb"
       sp_FloatArray_set(cst_Spms1__Oscillator__FREQ_TABLE, lv_i, (440.0 * (sp_float_pow(2.0, ((((((mrb_float)(lv_i)) - 69.0)) * ((1.0 / 12.0))))))));
     }
   }
@@ -1361,7 +1364,7 @@ int main(int argc,char**argv){
       sp_EnvGen_set_sustain((sp_EnvGen *)lv_env_gen, _t84);
 #line 156 "spms1_main.rb"
       for (mrb_int _t86 = 0; _t86 < cst_AUDIO_BUFFER_WORDS; _t86++) {
-        lv_i__bp2337 = _t86;
+        lv_i__bp2342 = _t86;
         lv_slot = SP_INT_NIL;
         lv_module_id = SP_INT_NIL;
         lv_filter_audio_input = sp_float_nil();
@@ -1396,7 +1399,7 @@ int main(int argc,char**argv){
 #line 171 "spms1_main.rb"
             lv_filter_mod_input = sp_pick_source(lv_filter_mod_source, lv_env_gen_output, lv_oscillator_output, lv_filter_output, lv_amp_output);
 #line 172 "spms1_main.rb"
-            mrb_float _t90 = (lv_filter_audio_input * 0.5);
+            mrb_float _t90 = lv_filter_audio_input;
             mrb_float _t91 = lv_filter_mod_input;
             lv_filter_output = sp_Filter_process((sp_Filter *)lv_filter, _t90, _t91);
           }
@@ -1414,15 +1417,15 @@ int main(int argc,char**argv){
           lv_slot = sp_int_add(lv_slot, 1LL);
         }
 #line 182 "spms1_main.rb"
-        sp_FloatArray_set(lv_audio_buffer, lv_i__bp2337, lv_amp_output);
+        sp_FloatArray_set(lv_audio_buffer, lv_i__bp2342, lv_amp_output);
       }
 #line 185 "spms1_main.rb"
       (stop_debug_measure(), (mrb_int)0);
 #line 187 "spms1_main.rb"
       for (mrb_int _t95 = 0; _t95 < cst_AUDIO_BUFFER_WORDS; _t95++) {
-        lv_i__bp2444 = _t95;
+        lv_i__bp2446 = _t95;
 #line 188 "spms1_main.rb"
-        (write_to_audio_buffer(((float)(sp_FloatArray_get(lv_audio_buffer, lv_i__bp2444))), ((float)(sp_FloatArray_get(lv_audio_buffer, lv_i__bp2444)))), (mrb_int)0);
+        (write_to_audio_buffer(((float)(sp_FloatArray_get(lv_audio_buffer, lv_i__bp2446))), ((float)(sp_FloatArray_get(lv_audio_buffer, lv_i__bp2446)))), (mrb_int)0);
       }
     }
     sp_exc_top--;

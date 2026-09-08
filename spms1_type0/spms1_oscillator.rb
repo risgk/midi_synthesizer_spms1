@@ -4,6 +4,10 @@ module Spms1
     SMOOTHING_TARGET_BLEND_BASE = 0.015625
     # Number of samples between control-rate updates; smoothing speed is kept approximately constant if this is changed.
     CONTROL_RATE_DIVISOR = 4
+    # Level this oscillator's output is mixed in at. Kept here so the level stays tied to this
+    # oscillator specifically, not to whichever module happens to read its output. May move to a
+    # dedicated oscillator mixer later.
+    OUTPUT_LEVEL = 0.5
 
     # Pitch lookup table for note-to-frequency conversion.
     FREQ_TABLE = Array.new(129, 0.0)
@@ -53,7 +57,7 @@ module Spms1
       @phase -= (@phase < 1.0) ? 0.0 : 1.0
       @sample_counter = (@sample_counter + 1) % CONTROL_RATE_DIVISOR
 
-      output * 0.5
+      output * 0.5 * OUTPUT_LEVEL
     end
 
     private
