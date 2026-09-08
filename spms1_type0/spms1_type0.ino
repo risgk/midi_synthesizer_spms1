@@ -50,10 +50,10 @@ MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, SPMS1_UART_MIDI_SERIAL, UART_MIDI, M
 #include <I2S.h>
 I2S g_i2s_output(OUTPUT);
 
-uint32_t g_debug_measurement_start_us   = 0;
-uint32_t g_debug_measurement_elapsed_us = 0;
-uint32_t g_debug_measurement_max_us     = 0;
-uint32_t g_debug_measurement_counted    = 0;  // 0 until the first buffer has been measured
+uint32_t g_debug_measurement_start_us = 0;
+uint32_t g_debug_measurement_min_us   = UINT32_MAX;
+uint32_t g_debug_measurement_max_us   = 0;
+uint32_t g_debug_measurement_counted  = 0;  // 0 until the first buffer has been measured
 
 void handleNoteOn(byte channel, byte pitch, byte velocity);
 void handleNoteOff(byte channel, byte pitch, byte velocity);
@@ -181,12 +181,15 @@ void start_debug_measure(void) {
 void stop_debug_measure(void) {
 #if defined(SPMS1_USE_DEBUG_PRINT)
   uint32_t debug_measurement_end_us = micros();
-  g_debug_measurement_elapsed_us = debug_measurement_end_us - g_debug_measurement_start_us;
-  // The first buffer runs cold and would set a maximum that never comes down again, so it is
-  // multiplied out rather than skipped, keeping this branchless.
+  uint32_t debug_measurement_elapsed_us = debug_measurement_end_us - g_debug_measurement_start_us;
+  // The first buffer runs cold and would fix a maximum that never comes down again, so it is
+  // multiplied out rather than skipped, keeping both updates branchless.
+  g_debug_measurement_min_us -= g_debug_measurement_counted *
+                                (debug_measurement_elapsed_us < g_debug_measurement_min_us) *
+                                (g_debug_measurement_min_us - debug_measurement_elapsed_us);
   g_debug_measurement_max_us += g_debug_measurement_counted *
-                                (g_debug_measurement_elapsed_us > g_debug_measurement_max_us) *
-                                (g_debug_measurement_elapsed_us - g_debug_measurement_max_us);
+                                (debug_measurement_elapsed_us > g_debug_measurement_max_us) *
+                                (debug_measurement_elapsed_us - g_debug_measurement_max_us);
   g_debug_measurement_counted = 1;
 #endif  // defined(SPMS1_USE_DEBUG_PRINT)
 }
@@ -254,11 +257,13 @@ void loop() {
   static uint8_t s_loop_counter = 0;
   if (++s_loop_counter == 0) {
     SPMS1_DEBUG_PRINT_SERIAL.print("\e[1;1H\e[K");
-    SPMS1_DEBUG_PRINT_SERIAL.print(g_debug_measurement_elapsed_us);
+    SPMS1_DEBUG_PRINT_SERIAL.print(g_debug_measurement_min_us);
     SPMS1_DEBUG_PRINT_SERIAL.print("\e[2;1H\e[K");
     SPMS1_DEBUG_PRINT_SERIAL.print(g_debug_measurement_max_us);
-    // Cleared on every report, so the figure is the worst buffer since the last one rather than
-    // since boot -- a single outlier would otherwise sit there for the rest of the run.
+    // Both cleared on every report, so the pair brackets the buffers since the last one rather
+    // than since boot. min is the uncontended compute time, max is what the deadline is about,
+    // and the gap between them is interference from core0 and interrupts.
+    g_debug_measurement_min_us = UINT32_MAX;
     g_debug_measurement_max_us = 0;
   }
 
