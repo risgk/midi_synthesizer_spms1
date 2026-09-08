@@ -109,13 +109,15 @@ active_modules[1] = MODULE_OSCILLATOR
 active_modules[2] = MODULE_FILTER
 active_modules[3] = MODULE_AMP
 
-# Which module output feeds Filter's and Amp's audio/modulation inputs. Fixed here to reproduce
-# the original patch exactly, but these are plain Integer locals -- reassignable later (e.g. from
-# MIDI, once per audio buffer) without touching the per-sample dispatch below.
+# Which module output feeds Filter's and Amp's audio/modulation inputs, and which module output
+# is the final (mono, for now) audio output. Fixed here to reproduce the original patch exactly,
+# but these are plain Integer locals -- reassignable later (e.g. from MIDI, once per audio buffer)
+# without touching the per-sample dispatch below.
 filter_audio_source = SRC_OSCILLATOR_OUTPUT
 filter_mod_source   = SRC_ENV_GEN_OUTPUT
 amp_audio_source    = SRC_FILTER_OUTPUT
 amp_mod_source      = SRC_ENV_GEN_OUTPUT
+output_source       = SRC_AMP_OUTPUT
 
 audio_buffer = Array.new(AUDIO_BUFFER_WORDS, 0.0)
 
@@ -179,7 +181,7 @@ loop do
       slot += 1
     end
 
-    audio_buffer[i] = amp_output
+    audio_buffer[i] = pick_source(output_source, env_gen_output, oscillator_output, filter_output, amp_output)
   end
 
   C.stop_debug_measure
