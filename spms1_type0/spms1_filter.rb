@@ -5,6 +5,13 @@ module Spms1
   # Coefficient updates are performed at 4-sample control-rate updates to preserve stability without a full oversampling path.
   class Filter
     SOFT_CLIP_CEILING = 4.0
+    # Everything soft_clip needs derived from the ceiling once, at startup. Spinel emits Float
+    # constants as runtime globals rather than compile-time literals, so writing these expressions
+    # inline in soft_clip would leave a real division and two extra multiplies in a method that
+    # runs twice per sample.
+    SOFT_CLIP_INV_CEILING = 1.0 / SOFT_CLIP_CEILING
+    SOFT_CLIP_LIMIT       = (2.0 / 3.0) * SOFT_CLIP_CEILING
+    SOFT_CLIP_CUBIC_SCALE = (1.0 / 3.0) * SOFT_CLIP_CEILING
     SMOOTHING_TARGET_BLEND_BASE = 0.015625
     # Number of samples between control-rate updates; smoothing speed is kept approximately constant if this is changed.
     CONTROL_RATE_DIVISOR = 4
@@ -26,6 +33,8 @@ module Spms1
 
     def initialize(sample_rate)
       @sample_rate = sample_rate
+      # See Oscillator#initialize: reciprocal kept so the control-rate update multiplies.
+      @inv_sample_rate = 1.0 / sample_rate
       @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (96000.0 / @sample_rate) * (CONTROL_RATE_DIVISOR / 4.0)
       @cutoff = 1.0
       @resonance = 0.0
@@ -107,7 +116,7 @@ module Spms1
       clamped_cutoff = (total_cutoff < 0.0) ? 0.0 : ((total_cutoff > 1.0) ? 1.0 : total_cutoff)
 
       cutoff_freq = cutoff_to_freq_fast(clamped_cutoff)
-      @step_omega = 2.0 * Math::PI * cutoff_freq / @sample_rate
+      @step_omega = 2.0 * Math::PI * cutoff_freq * @inv_sample_rate
 
       internal_resonance = @current_resonance * 128.0
 
@@ -141,14 +150,12 @@ module Spms1
     # Adds warm analog-like saturation and prevents internal state blow-ups.
     def soft_clip(sample)
       if sample > SOFT_CLIP_CEILING
-        (2.0 / 3.0) * SOFT_CLIP_CEILING
+        SOFT_CLIP_LIMIT
       elsif sample < -SOFT_CLIP_CEILING
-        -(2.0 / 3.0) * SOFT_CLIP_CEILING
+        -SOFT_CLIP_LIMIT
       else
-        sample -
-          ((sample * (1.0 / SOFT_CLIP_CEILING)) *
-           (sample * (1.0 / SOFT_CLIP_CEILING)) *
-           (sample * (1.0 / SOFT_CLIP_CEILING))) * (1.0 / 3.0) * SOFT_CLIP_CEILING
+        scaled = sample * SOFT_CLIP_INV_CEILING
+        sample - (scaled * scaled * scaled) * SOFT_CLIP_CUBIC_SCALE
       end
     end
   end

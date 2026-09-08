@@ -17,6 +17,10 @@ module Spms1
 
     def initialize(sample_rate)
       @sample_rate = sample_rate
+      # Reciprocal kept alongside the rate so process multiplies rather than divides. @sample_rate
+      # is an Integer, so dividing by it in the per-sample path also costs an int-to-float
+      # conversion on top of the division.
+      @inv_sample_rate = 1.0 / sample_rate
       @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (96000.0 / @sample_rate) * (CONTROL_RATE_DIVISOR / 4.0)
       @phase = 0.0
       @waveform = 0.0
@@ -34,17 +38,21 @@ module Spms1
     def process(pitch_input = 0.0)
       pitch = (pitch_input < -0.5) ? -0.5 : ((pitch_input > 0.5) ? 0.5 : pitch_input)
       freq = pitch_to_freq_fast(pitch)
-      current_dt = freq / @sample_rate
+      current_dt = freq * @inv_sample_rate
+      # Both poly_blep calls below work against this same dt, so its reciprocal is taken once here
+      # and passed in. Division is much more expensive than multiplication on this core, and
+      # poly_blep needs two of them per call.
+      current_dt_inv = 1.0 / current_dt
 
       naive_saw1 = -2.0 * @phase + 1.0
-      blep1 = poly_blep(@phase, current_dt)
+      blep1 = poly_blep(@phase, current_dt, current_dt_inv)
       saw1 = naive_saw1 + blep1
 
       phase2 = @phase + 0.5
       phase2 -= (phase2 < 1.0) ? 0.0 : 1.0
 
       naive_saw2 = -2.0 * phase2 + 1.0
-      blep2 = poly_blep(phase2, current_dt)
+      blep2 = poly_blep(phase2, current_dt, current_dt_inv)
       saw2 = naive_saw2 + blep2
 
       if @sample_counter == 0
@@ -72,10 +80,13 @@ module Spms1
     end
 
     # PolyBLEP correction for discontinuity smoothing at the waveform wrap point.
-    def poly_blep(t, dt)
-      num_start = t / dt
+    # dt_inv (1.0 / dt) comes from the caller so this multiplies instead of dividing; see process.
+    # Both corrections are still evaluated unconditionally -- the comparisons only select between
+    # them -- so the cost per sample stays the same whether or not the phase is near a wrap.
+    def poly_blep(t, dt, dt_inv)
+      num_start = t * dt_inv
       blep_start = num_start + num_start - num_start * num_start - 1.0
-      num_end = (t - 1.0) / dt
+      num_end = (t - 1.0) * dt_inv
       blep_end = num_end * num_end + num_end + num_end + 1.0
       val = (t < dt) ? blep_start : 0.0
       (t > 1.0 - dt) ? blep_end : val
