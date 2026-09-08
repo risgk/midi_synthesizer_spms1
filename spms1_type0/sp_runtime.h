@@ -2,11 +2,11 @@
 #ifndef SP_RUNTIME_H
 #define SP_RUNTIME_H
 
-#define main Spms1_main
+/* Puts the synth core in RAM. */
+#define main __attribute__((section(".time_critical"))) Spms1_main
 #pragma GCC optimize("single-precision-constant")
 #pragma GCC optimize ("O3")
 #pragma GCC target ("thumb")
-#pragma GCC section text=".time_critical"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-function"
 
