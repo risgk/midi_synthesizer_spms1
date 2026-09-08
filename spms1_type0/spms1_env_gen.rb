@@ -8,11 +8,11 @@ module Spms1
     CONTROL_RATE_DIVISOR = 4
 
     # Lookup table for exponential time mapping.
-    EXP_TABLE = Array.new(130, 0.0)
-    for i in 0...129
-      EXP_TABLE[i] = 10.0 ** ((i.to_f - 64.0) * (1.0 / 32.0))
+    EXP_TABLE = Array.new(122, 0.0)
+    for i in 0...121
+      EXP_TABLE[i] = 10.0 ** ((i.to_f - 60.0) * (1.0 / 30.0))
     end
-    EXP_TABLE[129] = EXP_TABLE[128]
+    EXP_TABLE[121] = EXP_TABLE[120]
 
     # Time scaling constants (value at 0.0 / (EXP_TABLE min * ln(2))).
     # Attack range: 1 ms at 0.0, 100 ms at 0.5, 10 s at 1.0.
@@ -102,7 +102,7 @@ module Spms1
     end
 
     def calculate_exp_fast(value)
-      v_scale = value * 128.0
+      v_scale = value * 120.0
       index = v_scale.to_i
       fraction = v_scale - index.to_f
 

@@ -23,9 +23,9 @@
 | Pitch Bend                    | x             | x             |                                      |
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Control                    20 | x             | o             | Oscillator Waveform (Saw to Square)  |
-| Change                     74 | x             | o             | Filter Cutoff (0-120)                |
+| Change                     74 | x             | o             | Filter Cutoff                        |
 |                            71 | x             | o             | Filter Resonance                     |
-|                            24 | x             | o             | Filter EG Amount (0-120)             |
+|                            24 | x             | o             | Filter EG Amount                     |
 |                            15 | x             | o             | Amp Gain                             |
 |                            73 | x             | o             | EG Attack (Time)                     |
 |                            75 | x             | o             | EG Decay/Release (Time)              |
@@ -50,7 +50,7 @@
 |              : Active Sense   | x             | x             |                                      |
 |              : Reset          | x             | x             |                                      |
 +-------------------------------+---------------+---------------+--------------------------------------+
-| Notes                         |                                                                      |
+| Notes                         | Control Change: 0-120 is the full range; 121-127 clamp.              |
 +-------------------------------+----------------------------------------------------------------------+
   Mode 1: Omni On,  Poly          Mode 2: Omni On,  Mono          o: Yes                                
   Mode 3: Omni Off, Poly          Mode 4: Omni Off, Mono          x: No                                 

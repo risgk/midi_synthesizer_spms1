@@ -24,12 +24,12 @@ module Spms1
     FREQ_TABLE[136] = FREQ_TABLE[135]
 
     # Resonance-to-Q lookup for fast filter coefficient updates.
-    Q_TABLE = Array.new(130, 0.0)
+    Q_TABLE = Array.new(122, 0.0)
     BASE_Q = 0.7071067811865476
-    for i in 0...129
-      Q_TABLE[i] = BASE_Q * (2.0 ** (i.to_f * (1.0 / 32.0)))
+    for i in 0...121
+      Q_TABLE[i] = BASE_Q * (2.0 ** (i.to_f * (1.0 / 30.0)))
     end
-    Q_TABLE[129] = Q_TABLE[128]
+    Q_TABLE[121] = Q_TABLE[120]
 
     def initialize(sample_rate)
       @sample_rate = sample_rate
@@ -118,7 +118,7 @@ module Spms1
       cutoff_freq = cutoff_to_freq_fast(clamped_cutoff)
       @step_omega = 2.0 * Math::PI * cutoff_freq * @inv_sample_rate
 
-      internal_resonance = @current_resonance * 128.0
+      internal_resonance = @current_resonance * 120.0
 
       index = internal_resonance.to_i
       fraction = internal_resonance - index.to_f

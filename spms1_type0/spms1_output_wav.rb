@@ -9,21 +9,21 @@ NUM_SAMPLES = (SAMPLE_RATE * DURATION_SEC).to_i
 FILENAME = "spms1_output.wav"
 
 oscillator = Spms1::Oscillator.new(SAMPLE_RATE)
-oscillator.set_waveform(0.0 * (1.0 / 128.0))
+oscillator.set_waveform(0.0 * (1.0 / 120.0))
 
 filter = Spms1::Filter.new(SAMPLE_RATE)
 filter.set_cutoff(64.0 * (1.0 / 120.0))
-filter.set_resonance(64.0 * (1.0 / 128.0))
+filter.set_resonance(60.0 * (1.0 / 120.0))
 filter.set_modulation_amount(60.0 * (1.0 / 120.0))
 
 amp = Spms1::Amp.new(SAMPLE_RATE)
-amp.set_gain(100.0 * (1.0 / 128.0))  # set_gain squares internally now
+amp.set_gain(90.0 * (1.0 / 120.0))  # set_gain squares internally
 
 env_gen = Spms1::EnvGen.new(SAMPLE_RATE)
 
-env_gen.set_attack(0.0 * (1.0 / 128.0))
-env_gen.set_decay(128.0 * (1.0 / 128.0))
-env_gen.set_sustain(0.0 * (1.0 / 128.0))
+env_gen.set_attack(0.0 * (1.0 / 120.0))
+env_gen.set_decay(120.0 * (1.0 / 120.0))
+env_gen.set_sustain(0.0 * (1.0 / 120.0))
 
 puts "Generating stereo waveform data..."
 

@@ -80,22 +80,17 @@ SRC_AMP_OUTPUT        = 3
 
 SIGNALS_SIZE = 4
 
-# CC value normalization. Two converters, because the destinations have two domains:
-#   ratio -- dimensionless [0.0, 1.0]. 127 reads as 128 so a full CC is exactly full scale.
-#   pitch -- 1.0 spans 120 semitones, matching FREQ_TABLE's semitone spacing, so CC 0..120 maps to
-#            0.0..1.0 with one CC step landing on exactly one semitone, on an integer table index.
-#            The same 121 steps the note range has; CC 121..127 clamp at the destination. Cutoff
-#            and the envelope depth added to it share this scale. A bipolar form would be
-#            `(v - 64) / 120`, centred on the detent a MIDI controller puts at 64 rather than on
-#            the middle of 0..120, so -0.5..+0.5 over CC 4..124; nothing needs it yet.
-# Which converter a parameter uses follows from the destination, so it stays at the call site.
-# A later NRPN layer reassigns the CC number only -- the converter never becomes data, so no
-# reassignment can put a ratio value into a pitch parameter.
-def cc_to_ratio(value)
-  ((value == 127) ? 128.0 : value.to_f) * (1.0 / 128.0)
-end
-
-def cc_to_pitch(value)
+# CC value normalization. One window for every parameter: CC 0..120 maps to 0.0..1.0, and
+# CC 121..127 clamp at the destination. Every lookup table in the synth is spaced to match --
+# FREQ_TABLE is semitone-spaced across 120, and EXP_TABLE and Q_TABLE are re-spaced to 121 entries
+# over their unchanged ranges -- so a CC value lands on an integer table index with no
+# interpolation error, and CC 60 is the exact mid-value of each. That match is also why no
+# 127-reads-as-128 fixup is needed: 120 / 120 is already exactly 1.0.
+# The bipolar form is `(v - 64) / 120`: -0.5..+0.5 over CC 4..124, centred on the detent a MIDI
+# controller puts at 64. Nothing needs it yet, so it is not written.
+# What a value means -- dimensionless or semitones -- stays a property of the destination, so a
+# later NRPN layer reassigns the CC number only, never the meaning.
+def cc_to_unipolar(value)
   value.to_f * (1.0 / 120.0)
 end
 
@@ -201,11 +196,11 @@ signals = Array.new(SIGNALS_SIZE, 0.0)
 
 C.set_midi_cc_value(MIDI_CH, 20 , 0  ) # Oscillator Waveform
 C.set_midi_cc_value(MIDI_CH, 74 , 120) # Filter Cutoff
-C.set_midi_cc_value(MIDI_CH, 71 , 64 ) # Filter Resonance
+C.set_midi_cc_value(MIDI_CH, 71 , 60 ) # Filter Resonance
 C.set_midi_cc_value(MIDI_CH, 24 , 60 ) # Filter EG Amt
-C.set_midi_cc_value(MIDI_CH, 15 , 100) # Amp Gain
+C.set_midi_cc_value(MIDI_CH, 15 , 90 ) # Amp Gain
 C.set_midi_cc_value(MIDI_CH, 73 , 0  ) # EG Attack
-C.set_midi_cc_value(MIDI_CH, 75 , 96 ) # EG Decay/Release
+C.set_midi_cc_value(MIDI_CH, 75 , 90 ) # EG Decay/Release
 C.set_midi_cc_value(MIDI_CH, 30 , 0  ) # EG Sustain
 
 C.set_sample_rate(SAMPLE_RATE)
@@ -219,14 +214,14 @@ loop do
   pitch = C.get_midi_note_on_pitch(MIDI_CH).to_f * (1.0 / 120.0) - 0.5
   gate = C.get_midi_note_on_state(MIDI_CH).to_f
 
-  oscillator.set_waveform(cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_oscillator_waveform)))
-  filter.set_cutoff(cc_to_pitch(C.get_midi_cc_value(MIDI_CH, cc_filter_cutoff)))
-  filter.set_resonance(cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_filter_resonance)))
-  filter.set_modulation_amount(cc_to_pitch(C.get_midi_cc_value(MIDI_CH, cc_filter_mod_amount)))
-  amp.set_gain(cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_amp_gain)))
-  env_gen.set_attack(cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_env_gen_attack)))
-  env_gen.set_decay(cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_env_gen_decay)))
-  env_gen.set_sustain(cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_env_gen_sustain)))
+  oscillator.set_waveform(cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_oscillator_waveform)))
+  filter.set_cutoff(cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_cutoff)))
+  filter.set_resonance(cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_resonance)))
+  filter.set_modulation_amount(cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_mod_amount)))
+  amp.set_gain(cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_amp_gain)))
+  env_gen.set_attack(cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_env_gen_attack)))
+  env_gen.set_decay(cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_env_gen_decay)))
+  env_gen.set_sustain(cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_env_gen_sustain)))
 
   render_audio_buffer(env_gen, oscillator, filter, amp,
                       active_modules, audio_buffer, signals,
