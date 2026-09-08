@@ -14,10 +14,10 @@ oscillator.set_waveform(0.0 * (1.0 / 128.0))
 filter = Spms1::Filter.new(SAMPLE_RATE)
 filter.set_cutoff(64.0 * (1.0 / 120.0))
 filter.set_resonance(64.0 * (1.0 / 128.0))
-filter.set_modulation_amount(64.0 * (1.0 / 128.0))
+filter.set_modulation_amount(60.0 * (1.0 / 120.0))
 
 amp = Spms1::Amp.new(SAMPLE_RATE)
-amp.set_gain((100.0 * 100.0) * (1.0 / (127.0 * 127.0)))
+amp.set_gain(100.0 * (1.0 / 128.0))  # set_gain squares internally now
 
 env_gen = Spms1::EnvGen.new(SAMPLE_RATE)
 

@@ -23,9 +23,9 @@
 | Pitch Bend                    | x             | x             |                                      |
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Control                    20 | x             | o             | Oscillator Waveform (Saw to Square)  |
-| Change                     74 | x             | o             | Filter Cutoff                        |
+| Change                     74 | x             | o             | Filter Cutoff (0-120)                |
 |                            71 | x             | o             | Filter Resonance                     |
-|                            24 | x             | o             | Filter EG Amount                     |
+|                            24 | x             | o             | Filter EG Amount (0-120)             |
 |                            15 | x             | o             | Amp Gain                             |
 |                            73 | x             | o             | EG Attack (Time)                     |
 |                            75 | x             | o             | EG Decay/Release (Time)              |

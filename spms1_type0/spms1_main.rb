@@ -80,6 +80,25 @@ SRC_AMP_OUTPUT        = 3
 
 SIGNALS_SIZE = 4
 
+# CC value normalization. Two converters, because the destinations have two domains:
+#   ratio -- dimensionless [0.0, 1.0]. 127 reads as 128 so a full CC is exactly full scale.
+#   pitch -- 1.0 spans 120 semitones, matching FREQ_TABLE's semitone spacing, so CC 0..120 maps to
+#            0.0..1.0 with one CC step landing on exactly one semitone, on an integer table index.
+#            The same 121 steps the note range has; CC 121..127 clamp at the destination. Cutoff
+#            and the envelope depth added to it share this scale. A bipolar form would be
+#            `(v - 64) / 120`, centred on the detent a MIDI controller puts at 64 rather than on
+#            the middle of 0..120, so -0.5..+0.5 over CC 4..124; nothing needs it yet.
+# Which converter a parameter uses follows from the destination, so it stays at the call site.
+# A later NRPN layer reassigns the CC number only -- the converter never becomes data, so no
+# reassignment can put a ratio value into a pitch parameter.
+def cc_to_ratio(value)
+  ((value == 127) ? 128.0 : value.to_f) * (1.0 / 128.0)
+end
+
+def cc_to_pitch(value)
+  value.to_f * (1.0 / 120.0)
+end
+
 # Picks one of the four module outputs by source id. The case/when is a statement, with each
 # branch assigning `result` -- not an expression capturing the case's own value. As an expression
 # Spinel infers a boxed sp_RbVal even with float-only branches, and that boxing lands on every
@@ -164,15 +183,26 @@ amp_audio_source    = SRC_FILTER_OUTPUT
 amp_mod_source      = SRC_ENV_GEN_OUTPUT
 output_source       = SRC_AMP_OUTPUT
 
+# Which CC each parameter reads. Plain Integer locals like the routing above, so a later NRPN
+# layer can reassign them once per buffer without touching the per-sample path.
+cc_oscillator_waveform = 20
+cc_filter_cutoff       = 74
+cc_filter_resonance    = 71
+cc_filter_mod_amount   = 24
+cc_amp_gain            = 15
+cc_env_gen_attack      = 73
+cc_env_gen_decay       = 75
+cc_env_gen_sustain     = 30
+
 audio_buffer = Array.new(AUDIO_BUFFER_WORDS, 0.0)
 
 # Module outputs carried across buffer boundaries. Touched twice per buffer, never per sample.
 signals = Array.new(SIGNALS_SIZE, 0.0)
 
 C.set_midi_cc_value(MIDI_CH, 20 , 0  ) # Oscillator Waveform
-C.set_midi_cc_value(MIDI_CH, 74 , 127) # Filter Cutoff
+C.set_midi_cc_value(MIDI_CH, 74 , 120) # Filter Cutoff
 C.set_midi_cc_value(MIDI_CH, 71 , 64 ) # Filter Resonance
-C.set_midi_cc_value(MIDI_CH, 24 , 64 ) # Filter EG Amt
+C.set_midi_cc_value(MIDI_CH, 24 , 60 ) # Filter EG Amt
 C.set_midi_cc_value(MIDI_CH, 15 , 100) # Amp Gain
 C.set_midi_cc_value(MIDI_CH, 73 , 0  ) # EG Attack
 C.set_midi_cc_value(MIDI_CH, 75 , 96 ) # EG Decay/Release
@@ -189,14 +219,14 @@ loop do
   pitch = C.get_midi_note_on_pitch(MIDI_CH).to_f * (1.0 / 120.0) - 0.5
   gate = C.get_midi_note_on_state(MIDI_CH).to_f
 
-  oscillator.set_waveform((((value = C::get_midi_cc_value(MIDI_CH, 20)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0))
-  filter.set_cutoff((C::get_midi_cc_value(MIDI_CH, 74).to_f - 4.0) * (1.0 / 120.0))
-  filter.set_resonance((((value = C::get_midi_cc_value(MIDI_CH, 71)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0))
-  filter.set_modulation_amount((((value = C::get_midi_cc_value(MIDI_CH, 24)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0))
-  amp.set_gain(((value = C.get_midi_cc_value(MIDI_CH, 15)).to_f * value.to_f) * (1.0 / (127.0 * 127.0)))
-  env_gen.set_attack((((value = C::get_midi_cc_value(MIDI_CH, 73)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0))
-  env_gen.set_decay((((value = C::get_midi_cc_value(MIDI_CH, 75)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0))
-  env_gen.set_sustain((((value = C::get_midi_cc_value(MIDI_CH, 30)) == 127) ? 128.0 : value.to_f) * (1.0 / 128.0))
+  oscillator.set_waveform(cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_oscillator_waveform)))
+  filter.set_cutoff(cc_to_pitch(C.get_midi_cc_value(MIDI_CH, cc_filter_cutoff)))
+  filter.set_resonance(cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_filter_resonance)))
+  filter.set_modulation_amount(cc_to_pitch(C.get_midi_cc_value(MIDI_CH, cc_filter_mod_amount)))
+  amp.set_gain(cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_amp_gain)))
+  env_gen.set_attack(cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_env_gen_attack)))
+  env_gen.set_decay(cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_env_gen_decay)))
+  env_gen.set_sustain(cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_env_gen_sustain)))
 
   render_audio_buffer(env_gen, oscillator, filter, amp,
                       active_modules, audio_buffer, signals,
