@@ -53,6 +53,7 @@ I2S g_i2s_output(OUTPUT);
 uint32_t g_debug_measurement_start_us   = 0;
 uint32_t g_debug_measurement_elapsed_us = 0;
 uint32_t g_debug_measurement_max_us     = 0;
+uint32_t g_debug_measurement_counted    = 0;  // 0 until the first buffer has been measured
 
 void handleNoteOn(byte channel, byte pitch, byte velocity);
 void handleNoteOff(byte channel, byte pitch, byte velocity);
@@ -181,8 +182,12 @@ void stop_debug_measure(void) {
 #if defined(SPMS1_USE_DEBUG_PRINT)
   uint32_t debug_measurement_end_us = micros();
   g_debug_measurement_elapsed_us = debug_measurement_end_us - g_debug_measurement_start_us;
-  g_debug_measurement_max_us += (g_debug_measurement_elapsed_us > g_debug_measurement_max_us) *
+  // The first buffer runs cold and would set a maximum that never comes down again, so it is
+  // multiplied out rather than skipped, keeping this branchless.
+  g_debug_measurement_max_us += g_debug_measurement_counted *
+                                (g_debug_measurement_elapsed_us > g_debug_measurement_max_us) *
                                 (g_debug_measurement_elapsed_us - g_debug_measurement_max_us);
+  g_debug_measurement_counted = 1;
 #endif  // defined(SPMS1_USE_DEBUG_PRINT)
 }
 
@@ -252,6 +257,9 @@ void loop() {
     SPMS1_DEBUG_PRINT_SERIAL.print(g_debug_measurement_elapsed_us);
     SPMS1_DEBUG_PRINT_SERIAL.print("\e[2;1H\e[K");
     SPMS1_DEBUG_PRINT_SERIAL.print(g_debug_measurement_max_us);
+    // Cleared on every report, so the figure is the worst buffer since the last one rather than
+    // since boot -- a single outlier would otherwise sit there for the rest of the run.
+    g_debug_measurement_max_us = 0;
   }
 
   delay(1);
