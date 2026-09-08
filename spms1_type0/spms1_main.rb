@@ -72,18 +72,27 @@ SRC_OSCILLATOR_OUTPUT = 1
 SRC_FILTER_OUTPUT     = 2
 SRC_AMP_OUTPUT        = 3
 
-# Picks one of the four module outputs by source id. The trailing .to_f forces the result back to
-# a plain float at this method's return boundary -- without it, a case/when whose branches are a
-# mix of "always-float" locals and locals that end up reused as source candidates elsewhere can
-# get its whole result (and, transitively, the underlying locals) inferred as a generic boxed
-# value by Spinel, which showed up on-device as major overhead (heavy GC activity from boxing).
+# NOTE: an earlier flash of this exact code crashed on-device almost immediately; a rebuild/
+# reflash of the identical source ran fine (~350us, no crash). Didn't reproduce on retry, so
+# most likely a one-off build/flash issue rather than a real bug in this rewrite -- but if a
+# similar crash shows up again, this is the first place to suspect and bisect against the boxed
+# expression form (case/when as an expression + .to_f) that measured ~360us and never crashed.
+#
+# Picks one of the four module outputs by source id. Uses case/when as a statement (assigning
+# result inside each branch) rather than as an expression (capturing the case's own value) --
+# a case/when used as an expression got inferred as a generic boxed value (sp_RbVal) by Spinel
+# even with float-only branches, which showed up on-device as major overhead (heavy GC activity
+# from boxing); as a statement, each branch's plain-float assignment stays a plain mrb_float,
+# matching how the module dispatch case (case module_id ... end) above stays unboxed too.
 def pick_source(source, env_gen_out, osc_out, filter_out, amp_out)
-  (case source
-   when SRC_ENV_GEN_OUTPUT    then env_gen_out
-   when SRC_OSCILLATOR_OUTPUT then osc_out
-   when SRC_FILTER_OUTPUT     then filter_out
-   when SRC_AMP_OUTPUT        then amp_out
-   end).to_f
+  result = 0.0
+  case source
+  when SRC_ENV_GEN_OUTPUT    then result = env_gen_out
+  when SRC_OSCILLATOR_OUTPUT then result = osc_out
+  when SRC_FILTER_OUTPUT     then result = filter_out
+  when SRC_AMP_OUTPUT        then result = amp_out
+  end
+  result
 end
 
 oscillator = Oscillator.new(SAMPLE_RATE)
