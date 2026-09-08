@@ -18,7 +18,7 @@ module Spms1
     # Range: -∞ dB (0.0), -12 dB (0.5), 0 dB (1.0).
     # Squared here rather than by the caller: the taper is part of what gain means, while the
     # caller's job is only to get a control value into [0.0, 1.0]. @gain therefore holds amplitude,
-    # so smoothing below stays in the amplitude domain as before.
+    # so the smoothing below works in the amplitude domain.
     def set_gain(gain)
       clamped_gain = (gain < 0.0) ? 0.0 : ((gain > 1.0) ? 1.0 : gain)
       @gain = clamped_gain * clamped_gain

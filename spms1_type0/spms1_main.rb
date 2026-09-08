@@ -3,36 +3,20 @@ require_relative 'spms1_filter'
 require_relative 'spms1_amp'
 require_relative 'spms1_env_gen'
 
-# PROTOTYPE / PERFORMANCE EXPERIMENT: three ideas, tested separately, combined here.
+# Three structural choices, referred to below as notes 1-3. What they say about the generated C
+# holds for the Spinel version vendored in sp_runtime.h; re-check on updating it.
 #
-# 1) Which modules run, and in what order, is data (active_modules): a fixed-length, all-Integer
-#    array (MODULE_NONE = no assignment) packed from the front, walked by a while loop that breaks
-#    at the first MODULE_NONE. A plain loop, so break compiles to a plain C break -- unlike
-#    breaking out of an .each block, which needs setjmp. sp_IntArray_get is inlined and cheap.
+# 1) active_modules is walked by a plain while loop, not .each: breaking out of a block needs
+#    setjmp, while a plain break compiles to a C break.
 #
-# 2) Which signal feeds each module's input is data too (SRC_* locals), but resolved by
-#    pick_source -- a case/when over plain locals -- rather than an array-based signal bus, which
-#    measured as the expensive part: array writes go through sp_FloatArray_set whether the index
-#    is constant or data-driven. Every module output stays a plain local, and every other
-#    parameter (cutoff, resonance, gain, attack, decay, sustain, waveform, gate, pitch) is its own
-#    dedicated knob, read directly, exactly as in the original patch.
+# 2) pick_source resolves routing over plain locals rather than an array signal bus, because
+#    sp_FloatArray_set costs the same whether the index is constant or data-driven.
 #
-# 3) The per-sample loop lives in render_audio_buffer, a plain method, rather than directly inside
-#    the top-level `loop do` block. `loop do` compiles to a setjmp region, so Spinel must mark
-#    every local assigned inside it `volatile` (a local modified between setjmp and longjmp is
-#    otherwise undefined) and the hot signal locals never reach a register. A `def` body has no
-#    setjmp in it, which is why the module process methods never had the problem.
-#
-#    `signals` carries the four module outputs across buffer boundaries: a routing with feedback
-#    reads last sample's value, and at a buffer edge that is the previous call's. Read into locals
-#    on entry, written back on exit, so four array accesses per buffer rather than per sample.
-#
-#    This depends on Spms1_main being in RAM. Freed from volatile, GCC inlines all four process
-#    bodies into the loop and duplicates it across the dispatch paths, and the result no longer
-#    fits the XIP cache that core0 shares. From flash this change is a large net loss; it only
-#    pays off with the `.time_critical` attribute in sp_runtime.h in place, so do not revert that.
-#
-# Restore the previous (reverted) main.rb with `git checkout 6746b36 -- spms1_main.rb`.
+# 3) The per-sample loop is a method, not the body of `loop do`: `loop do` compiles to a setjmp
+#    region, forcing every local assigned inside it to `volatile`, and `signals` carries the four
+#    module outputs across the call boundary. Freed from volatile GCC inlines the process bodies
+#    and the loop outgrows the XIP cache core0 shares, so this pays off only with the
+#    `.time_critical` attribute in sp_runtime.h -- do not remove it.
 
 module Spms1
   module C
@@ -84,12 +68,11 @@ SIGNALS_SIZE = 4
 # CC 121..127 clamp at the destination. Every lookup table in the synth is spaced to match --
 # FREQ_TABLE is semitone-spaced across 120, and EXP_TABLE and Q_TABLE are re-spaced to 121 entries
 # over their unchanged ranges -- so a CC value lands on an integer table index with no
-# interpolation error, and CC 60 is the exact mid-value of each. That match is also why no
-# 127-reads-as-128 fixup is needed: 120 / 120 is already exactly 1.0.
+# interpolation error, and CC 60 is the exact mid-value of each.
 # The bipolar form is `(v - 64) / 120`: -0.5..+0.5 over CC 4..124, centred on the detent a MIDI
 # controller puts at 64. Nothing needs it yet, so it is not written.
-# What a value means -- dimensionless or semitones -- stays a property of the destination, so a
-# later NRPN layer reassigns the CC number only, never the meaning.
+# What a value means -- dimensionless or semitones -- stays a property of the destination, so
+# reassigning which CC a parameter reads cannot change what the value means.
 def cc_to_unipolar(value)
   value.to_f * (1.0 / 120.0)
 end
@@ -169,17 +152,16 @@ active_modules[1] = MODULE_OSCILLATOR
 active_modules[2] = MODULE_FILTER
 active_modules[3] = MODULE_AMP
 
-# Signal routing, and which module output is the final (mono, for now) audio output. Fixed here to
-# reproduce the original patch, but these are plain Integer locals: reassignable later, e.g. from
-# MIDI once per buffer, without touching the per-sample dispatch.
+# Signal routing, and which module output is the final (mono, for now) audio output. Plain Integer
+# locals, so they can be reassigned once per buffer without touching the per-sample dispatch.
 filter_audio_source = SRC_OSCILLATOR_OUTPUT
 filter_mod_source   = SRC_ENV_GEN_OUTPUT
 amp_audio_source    = SRC_FILTER_OUTPUT
 amp_mod_source      = SRC_ENV_GEN_OUTPUT
 output_source       = SRC_AMP_OUTPUT
 
-# Which CC each parameter reads. Plain Integer locals like the routing above, so a later NRPN
-# layer can reassign them once per buffer without touching the per-sample path.
+# Which CC each parameter reads. Plain Integer locals like the routing above, so they can be
+# reassigned once per buffer without touching the per-sample path.
 cc_oscillator_waveform = 20
 cc_filter_cutoff       = 74
 cc_filter_resonance    = 71

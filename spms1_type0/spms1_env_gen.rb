@@ -27,8 +27,7 @@ module Spms1
     def initialize(sample_rate)
       @sample_rate = sample_rate
       # Rate the envelope actually steps at. Fixed once sample_rate is, so it is computed here
-      # rather than on every control-rate update, where it was costing an int-to-float conversion
-      # and a division each time.
+      # rather than on every control-rate update.
       @effective_rate = sample_rate * (1.0 / CONTROL_RATE_DIVISOR)
       @state = STATE_IDLE
       @current_level = 0.0

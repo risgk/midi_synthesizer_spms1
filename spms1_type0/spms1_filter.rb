@@ -2,13 +2,14 @@ module Spms1
   # Nonlinear biquad low-pass filter with modulation and soft clipping.
   # This implementation is not oversampled; the nonlinear behavior is kept intentionally simple.
   # Reference: https://jatinchowdhury18.medium.com/complex-nonlinearities-episode-4-nonlinear-biquad-filters-ae6b3f23cb0e
-  # Coefficient updates are performed at 4-sample control-rate updates to preserve stability without a full oversampling path.
+  # Coefficients are recomputed every 4 samples rather than every sample: the computation needs a
+  # sine, a cosine and a division, and the parameters feeding it are smoothed in the same place.
   class Filter
     SOFT_CLIP_CEILING = 4.0
-    # Everything soft_clip needs derived from the ceiling once, at startup. Spinel emits Float
-    # constants as runtime globals rather than compile-time literals, so writing these expressions
-    # inline in soft_clip would leave a real division and two extra multiplies in a method that
-    # runs twice per sample.
+    # Everything soft_clip needs derived from the ceiling once, at startup. The vendored Spinel
+    # emits Float constants as runtime globals rather than compile-time literals, so writing these
+    # expressions inline in soft_clip would leave a real division and two extra multiplies in a
+    # method that runs twice per sample.
     SOFT_CLIP_INV_CEILING = 1.0 / SOFT_CLIP_CEILING
     SOFT_CLIP_LIMIT       = (2.0 / 3.0) * SOFT_CLIP_CEILING
     SOFT_CLIP_CUBIC_SCALE = (1.0 / 3.0) * SOFT_CLIP_CEILING
@@ -33,7 +34,8 @@ module Spms1
 
     def initialize(sample_rate)
       @sample_rate = sample_rate
-      # See Oscillator#initialize: reciprocal kept so the control-rate update multiplies.
+      # Reciprocal kept alongside the rate so the control-rate update multiplies. @sample_rate is
+      # an Integer, so dividing by it would also cost an int-to-float conversion.
       @inv_sample_rate = 1.0 / sample_rate
       @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (96000.0 / @sample_rate) * (CONTROL_RATE_DIVISOR / 4.0)
       @cutoff = 1.0
@@ -56,7 +58,7 @@ module Spms1
       @current_modulation_input = 0.0
       @sample_counter = 0
 
-      update_coefficients_interleaved
+      update_coefficients
     end
 
     # Cutoff and resonance use normalized values in [0.0, 1.0].
@@ -79,7 +81,7 @@ module Spms1
       @current_modulation_input = modulation_input
       
       if @sample_counter == 0
-        update_coefficients_interleaved
+        update_coefficients
       end
 
       # Transposed Direct Form II (TDF-II) biquad implementation with soft clipping.
@@ -105,8 +107,9 @@ module Spms1
       f0 + fraction * (f1 - f0)
     end
 
-    # Update all coefficients at once at the 4-sample control-rate to keep the grid stable.
-    def update_coefficients_interleaved
+    # All five coefficients are replaced together. Updating only some of them would leave the
+    # biquad running on values from two different parameter settings, which can destabilise it.
+    def update_coefficients
       @current_cutoff += (@cutoff - @current_cutoff) * @smoothing_target_blend
       @current_resonance += (@resonance - @current_resonance) * @smoothing_target_blend
       @current_modulation_amount += (@modulation_amount - @current_modulation_amount) * @smoothing_target_blend

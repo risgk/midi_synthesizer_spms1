@@ -40,8 +40,7 @@ module Spms1
       freq = pitch_to_freq_fast(pitch)
       current_dt = freq * @inv_sample_rate
       # Both poly_blep calls below work against this same dt, so its reciprocal is taken once here
-      # and passed in. Division is much more expensive than multiplication on this core, and
-      # poly_blep needs two of them per call.
+      # and passed in, rather than dividing twice inside each call.
       current_dt_inv = 1.0 / current_dt
 
       naive_saw1 = -2.0 * @phase + 1.0
@@ -81,8 +80,8 @@ module Spms1
 
     # PolyBLEP correction for discontinuity smoothing at the waveform wrap point.
     # dt_inv (1.0 / dt) comes from the caller so this multiplies instead of dividing; see process.
-    # Both corrections are still evaluated unconditionally -- the comparisons only select between
-    # them -- so the cost per sample stays the same whether or not the phase is near a wrap.
+    # Both corrections are evaluated unconditionally -- the comparisons only select between them
+    # -- so the cost per sample is the same whether or not the phase is near a wrap.
     def poly_blep(t, dt, dt_inv)
       num_start = t * dt_inv
       blep_start = num_start + num_start - num_start * num_start - 1.0
