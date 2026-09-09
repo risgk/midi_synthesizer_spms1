@@ -137,14 +137,30 @@ loop do
   active_modules[1] = MODULE_OSCILLATOR
   active_modules[2] = MODULE_FILTER
   active_modules[3] = MODULE_AMP
+  # Terminator, written every buffer with the rest. Only the slots assigned here are updated, so
+  # a patch shorter than the last one would otherwise keep running what that one left behind.
+  active_modules[4] = MODULE_NONE
 
-  source_env_gen_gate     = SIGNAL_GATE
-  source_oscillator_pitch = SIGNAL_PITCH
-  source_filter_audio     = SIGNAL_OSCILLATOR_OUTPUT
-  source_filter_mod       = SIGNAL_ENV_GEN_OUTPUT
-  source_amp_audio        = SIGNAL_FILTER_OUTPUT
-  source_amp_mod          = SIGNAL_ENV_GEN_OUTPUT
-  source_output           = SIGNAL_AMP_OUTPUT
+  source_env_gen_gate       = SIGNAL_GATE
+  source_oscillator_pitch   = SIGNAL_PITCH
+  source_filter_audio       = SIGNAL_OSCILLATOR_OUTPUT
+  source_filter_mod         = SIGNAL_ENV_GEN_OUTPUT
+  source_amp_audio          = SIGNAL_FILTER_OUTPUT
+  source_amp_mod            = SIGNAL_ENV_GEN_OUTPUT
+  source_output             = SIGNAL_AMP_OUTPUT
+
+  # Parameter sources. Read once per buffer rather than per sample: each destination smooths at
+  # the control rate with a 2.67 ms time constant, which swallows the difference between feeding
+  # it at 96 kHz and at the 1.5 kHz buffer rate. Faster modulation goes through the module inputs
+  # above, which are read per sample and not smoothed.
+  source_oscillator_waveform = SIGNAL_OSCILLATOR_WAVEFORM
+  source_filter_cutoff       = SIGNAL_FILTER_CUTOFF
+  source_filter_resonance    = SIGNAL_FILTER_RESONANCE
+  source_filter_mod_amount   = SIGNAL_FILTER_MOD_AMOUNT
+  source_amp_gain            = SIGNAL_AMP_GAIN
+  source_env_gen_attack      = SIGNAL_ENV_GEN_ATTACK
+  source_env_gen_decay       = SIGNAL_ENV_GEN_DECAY
+  source_env_gen_sustain     = SIGNAL_ENV_GEN_SUSTAIN
 
   signals[SIGNAL_OSCILLATOR_WAVEFORM] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_oscillator_waveform))
   signals[SIGNAL_FILTER_CUTOFF]       = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_filter_cutoff))
@@ -155,14 +171,14 @@ loop do
   signals[SIGNAL_ENV_GEN_DECAY]       = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_env_gen_decay))
   signals[SIGNAL_ENV_GEN_SUSTAIN]     = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_env_gen_sustain))
 
-  oscillator.set_waveform(signals[SIGNAL_OSCILLATOR_WAVEFORM])
-  filter.set_cutoff(signals[SIGNAL_FILTER_CUTOFF])
-  filter.set_resonance(signals[SIGNAL_FILTER_RESONANCE])
-  filter.set_modulation_amount(signals[SIGNAL_FILTER_MOD_AMOUNT])
-  amp.set_gain(signals[SIGNAL_AMP_GAIN])
-  env_gen.set_attack(signals[SIGNAL_ENV_GEN_ATTACK])
-  env_gen.set_decay(signals[SIGNAL_ENV_GEN_DECAY])
-  env_gen.set_sustain(signals[SIGNAL_ENV_GEN_SUSTAIN])
+  oscillator.set_waveform(signals[source_oscillator_waveform])
+  filter.set_cutoff(signals[source_filter_cutoff])
+  filter.set_resonance(signals[source_filter_resonance])
+  filter.set_modulation_amount(signals[source_filter_mod_amount])
+  amp.set_gain(signals[source_amp_gain])
+  env_gen.set_attack(signals[source_env_gen_attack])
+  env_gen.set_decay(signals[source_env_gen_decay])
+  env_gen.set_sustain(signals[source_env_gen_sustain])
 
   i = 0
   while i < AUDIO_BUFFER_WORDS
