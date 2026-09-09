@@ -30,6 +30,10 @@
 |                            73 | x             | o             | EG Attack (Time)                     |
 |                            75 | x             | o             | EG Decay/Release (Time)              |
 |                            30 | x             | o             | EG Sustain (Level)                   |
+|                            99 | x             | o             | NRPN MSB                             |
+|                            98 | x             | o             | NRPN LSB                             |
+|                             6 | x             | o             | Data Entry MSB (NRPN value)          |
+|                       101,100 | x             | o             | RPN select: suspends NRPN data entry |
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Program                       | x             | x             |                                      |
 | Change       : True #         | ************* | ************* |                                      |
@@ -50,7 +54,7 @@
 |              : Active Sense   | x             | x             |                                      |
 |              : Reset          | x             | x             |                                      |
 +-------------------------------+---------------+---------------+--------------------------------------+
-| Notes                         | Control Change: full range is 4-124, centred on 64; outside clamps.  |
+| Notes                         | Control Change 4-124, centred on 64. NRPN is 7-bit, CC 6 only.       |
 +-------------------------------+----------------------------------------------------------------------+
   Mode 1: Omni On,  Poly          Mode 2: Omni On,  Mono          o: Yes                                
   Mode 3: Omni Off, Poly          Mode 4: Omni Off, Mono          x: No                                 

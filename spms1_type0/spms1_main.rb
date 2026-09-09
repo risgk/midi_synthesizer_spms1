@@ -21,6 +21,8 @@ module Spms1
     ffi_func :get_midi_note_on_state, [:uint8],                 :uint8
     ffi_func :set_midi_cc_value,      [:uint8, :uint8, :uint8], :void
     ffi_func :get_midi_cc_value,      [:uint8, :uint8],         :uint8
+    ffi_func :set_nrpn_value,         [:uint8, :int32, :uint8], :void
+    ffi_func :get_nrpn_value,         [:uint8, :int32],         :uint8
     ffi_func :set_sample_rate,        [:int32],                 :void
     ffi_func :get_sample_rate,        [],                       :int32
     ffi_func :set_audio_buffers,      [:int32],                 :void
@@ -69,7 +71,46 @@ SIGNAL_ENV_GEN_SUSTAIN     = 11
 SIGNAL_PITCH               = 12
 SIGNAL_GATE                = 13
 
-SIGNALS_SIZE = 14
+SIGNALS_SIZE = 128
+
+# Slots that NRPN can fill, plus the terminator written after them. A patch shorter than this
+# ends early on its own, since an unset NRPN entry reads 0, which is MODULE_NONE.
+ACTIVE_MODULES_EXPOSED = 16
+
+# NRPN parameter numbers: (MSB << 7) | LSB, where the MSB picks a category and the LSB an entry.
+# A CC 6 data byte is 0..127 and so is every value here -- a bus slot, a module id, a CC number --
+# so nothing read back needs range-checking.
+#   0..127   active_modules[slot]
+# 128..255   what feeds each module input
+# 256..383   where each parameter's value comes from
+# 384..511   which CC fills each control slot
+NRPN_ACTIVE_MODULE_BASE = 0
+
+NRPN_SOURCE_ENV_GEN_GATE        = 128
+NRPN_SOURCE_OSCILLATOR_PITCH    = 129
+NRPN_SOURCE_FILTER_AUDIO        = 130
+NRPN_SOURCE_FILTER_MOD          = 131
+NRPN_SOURCE_AMP_AUDIO           = 132
+NRPN_SOURCE_AMP_MOD             = 133
+NRPN_SOURCE_OUTPUT              = 134
+
+NRPN_SOURCE_OSCILLATOR_WAVEFORM = 256
+NRPN_SOURCE_FILTER_CUTOFF       = 257
+NRPN_SOURCE_FILTER_RESONANCE    = 258
+NRPN_SOURCE_FILTER_MOD_AMOUNT   = 259
+NRPN_SOURCE_AMP_GAIN            = 260
+NRPN_SOURCE_ENV_GEN_ATTACK      = 261
+NRPN_SOURCE_ENV_GEN_DECAY       = 262
+NRPN_SOURCE_ENV_GEN_SUSTAIN     = 263
+
+NRPN_CC_OSCILLATOR_WAVEFORM     = 384
+NRPN_CC_FILTER_CUTOFF           = 385
+NRPN_CC_FILTER_RESONANCE        = 386
+NRPN_CC_FILTER_MOD_AMOUNT       = 387
+NRPN_CC_AMP_GAIN                = 388
+NRPN_CC_ENV_GEN_ATTACK          = 389
+NRPN_CC_ENV_GEN_DECAY           = 390
+NRPN_CC_ENV_GEN_SUSTAIN         = 391
 
 # CC value normalization. Every parameter is a ratio in 0.0..1.0, so this is the only converter:
 # CC 4..124 maps to the full range, centred on CC 64 where a MIDI controller puts its detent, and
@@ -99,6 +140,39 @@ audio_buffer = Array.new(AUDIO_BUFFER_WORDS, 0.0)
 # edge that is the previous iteration's.
 signals = Array.new(SIGNALS_SIZE, 0.0)
 
+# The default patch, written into the NRPN table the loop reads it back from. Slots left at 0
+# read as MODULE_NONE, so active_modules needs only the four it uses.
+C.set_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 0, MODULE_ENV_GEN)
+C.set_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 1, MODULE_OSCILLATOR)
+C.set_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 2, MODULE_FILTER)
+C.set_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 3, MODULE_AMP)
+
+C.set_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_GATE       , SIGNAL_GATE)
+C.set_nrpn_value(MIDI_CH, NRPN_SOURCE_OSCILLATOR_PITCH   , SIGNAL_PITCH)
+C.set_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_AUDIO       , SIGNAL_OSCILLATOR_OUTPUT)
+C.set_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_MOD         , SIGNAL_ENV_GEN_OUTPUT)
+C.set_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_AUDIO          , SIGNAL_FILTER_OUTPUT)
+C.set_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_MOD            , SIGNAL_ENV_GEN_OUTPUT)
+C.set_nrpn_value(MIDI_CH, NRPN_SOURCE_OUTPUT             , SIGNAL_AMP_OUTPUT)
+
+C.set_nrpn_value(MIDI_CH, NRPN_SOURCE_OSCILLATOR_WAVEFORM, SIGNAL_OSCILLATOR_WAVEFORM)
+C.set_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_CUTOFF      , SIGNAL_FILTER_CUTOFF)
+C.set_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_RESONANCE   , SIGNAL_FILTER_RESONANCE)
+C.set_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_MOD_AMOUNT  , SIGNAL_FILTER_MOD_AMOUNT)
+C.set_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_GAIN           , SIGNAL_AMP_GAIN)
+C.set_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_ATTACK     , SIGNAL_ENV_GEN_ATTACK)
+C.set_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_DECAY      , SIGNAL_ENV_GEN_DECAY)
+C.set_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_SUSTAIN    , SIGNAL_ENV_GEN_SUSTAIN)
+
+C.set_nrpn_value(MIDI_CH, NRPN_CC_OSCILLATOR_WAVEFORM    , 20)
+C.set_nrpn_value(MIDI_CH, NRPN_CC_FILTER_CUTOFF          , 74)
+C.set_nrpn_value(MIDI_CH, NRPN_CC_FILTER_RESONANCE       , 71)
+C.set_nrpn_value(MIDI_CH, NRPN_CC_FILTER_MOD_AMOUNT      , 24)
+C.set_nrpn_value(MIDI_CH, NRPN_CC_AMP_GAIN               , 15)
+C.set_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_ATTACK         , 73)
+C.set_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_DECAY          , 75)
+C.set_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_SUSTAIN        , 30)
+
 C.set_midi_cc_value(MIDI_CH, 20 , 4  ) # Oscillator Waveform
 C.set_midi_cc_value(MIDI_CH, 74 , 124) # Filter Cutoff
 C.set_midi_cc_value(MIDI_CH, 71 , 64 ) # Filter Resonance
@@ -119,48 +193,51 @@ loop do
   signals[SIGNAL_PITCH] = C.get_midi_note_on_pitch(MIDI_CH).to_f * (1.0 / 120.0) - 0.5
   signals[SIGNAL_GATE]  = C.get_midi_note_on_state(MIDI_CH).to_f
 
-  # The patch -- which modules run and in what order, and what feeds each routed input -- is
-  # rebuilt every buffer so it can come from MIDI later. Constant for now. active_modules is
-  # packed from the front with no gaps, see note 1; source_* hold SIGNAL_* bus slots, see note 2.
-  active_modules[0] = MODULE_ENV_GEN
-  active_modules[1] = MODULE_OSCILLATOR
-  active_modules[2] = MODULE_FILTER
-  active_modules[3] = MODULE_AMP
-  # Terminator, written every buffer with the rest. Only the slots assigned here are updated, so
-  # a patch shorter than the last one would otherwise keep running what that one left behind.
-  active_modules[4] = MODULE_NONE
+  # The patch, read back from the NRPN table every buffer so a controller can change it while the
+  # synth runs. active_modules is packed from the front with no gaps, see note 1; source_* hold
+  # SIGNAL_* bus slots, see note 2. Every value is 7-bit and every 7-bit value is legal here, so
+  # nothing needs validating: an unknown module id falls through the dispatch, and any slot number
+  # is a real slot because the bus is 128 wide.
+  slot = 0
+  while slot < ACTIVE_MODULES_EXPOSED
+    active_modules[slot] = C.get_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + slot)
+    slot += 1
+  end
+  # Terminator. Only the slots assigned each buffer are updated, so a patch shorter than the last
+  # one would otherwise keep running what that one left behind.
+  active_modules[ACTIVE_MODULES_EXPOSED] = MODULE_NONE
 
-  source_env_gen_gate       = SIGNAL_GATE
-  source_oscillator_pitch   = SIGNAL_PITCH
-  source_filter_audio       = SIGNAL_OSCILLATOR_OUTPUT
-  source_filter_mod         = SIGNAL_ENV_GEN_OUTPUT
-  source_amp_audio          = SIGNAL_FILTER_OUTPUT
-  source_amp_mod            = SIGNAL_ENV_GEN_OUTPUT
-  source_output             = SIGNAL_AMP_OUTPUT
+  source_env_gen_gate       = C.get_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_GATE)
+  source_oscillator_pitch   = C.get_nrpn_value(MIDI_CH, NRPN_SOURCE_OSCILLATOR_PITCH)
+  source_filter_audio       = C.get_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_AUDIO)
+  source_filter_mod         = C.get_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_MOD)
+  source_amp_audio          = C.get_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_AUDIO)
+  source_amp_mod            = C.get_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_MOD)
+  source_output             = C.get_nrpn_value(MIDI_CH, NRPN_SOURCE_OUTPUT)
 
   # Parameter sources. Read once per buffer rather than per sample: each destination smooths at
   # the control rate with a 2.67 ms time constant, which swallows the difference between feeding
   # it at 96 kHz and at the 1.5 kHz buffer rate. Faster modulation goes through the module inputs
   # above, which are read per sample and not smoothed.
-  source_oscillator_waveform = SIGNAL_OSCILLATOR_WAVEFORM
-  source_filter_cutoff       = SIGNAL_FILTER_CUTOFF
-  source_filter_resonance    = SIGNAL_FILTER_RESONANCE
-  source_filter_mod_amount   = SIGNAL_FILTER_MOD_AMOUNT
-  source_amp_gain            = SIGNAL_AMP_GAIN
-  source_env_gen_attack      = SIGNAL_ENV_GEN_ATTACK
-  source_env_gen_decay       = SIGNAL_ENV_GEN_DECAY
-  source_env_gen_sustain     = SIGNAL_ENV_GEN_SUSTAIN
+  source_oscillator_waveform = C.get_nrpn_value(MIDI_CH, NRPN_SOURCE_OSCILLATOR_WAVEFORM)
+  source_filter_cutoff       = C.get_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_CUTOFF)
+  source_filter_resonance    = C.get_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_RESONANCE)
+  source_filter_mod_amount   = C.get_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_MOD_AMOUNT)
+  source_amp_gain            = C.get_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_GAIN)
+  source_env_gen_attack      = C.get_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_ATTACK)
+  source_env_gen_decay       = C.get_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_DECAY)
+  source_env_gen_sustain     = C.get_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_SUSTAIN)
 
   # Which CC fills each control slot. The bus is the only thing downstream reads, so this is
   # where MIDI enters and the only place a CC number appears.
-  cc_oscillator_waveform = 20
-  cc_filter_cutoff       = 74
-  cc_filter_resonance    = 71
-  cc_filter_mod_amount   = 24
-  cc_amp_gain            = 15
-  cc_env_gen_attack      = 73
-  cc_env_gen_decay       = 75
-  cc_env_gen_sustain     = 30
+  cc_oscillator_waveform = C.get_nrpn_value(MIDI_CH, NRPN_CC_OSCILLATOR_WAVEFORM)
+  cc_filter_cutoff       = C.get_nrpn_value(MIDI_CH, NRPN_CC_FILTER_CUTOFF)
+  cc_filter_resonance    = C.get_nrpn_value(MIDI_CH, NRPN_CC_FILTER_RESONANCE)
+  cc_filter_mod_amount   = C.get_nrpn_value(MIDI_CH, NRPN_CC_FILTER_MOD_AMOUNT)
+  cc_amp_gain            = C.get_nrpn_value(MIDI_CH, NRPN_CC_AMP_GAIN)
+  cc_env_gen_attack      = C.get_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_ATTACK)
+  cc_env_gen_decay       = C.get_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_DECAY)
+  cc_env_gen_sustain     = C.get_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_SUSTAIN)
 
   signals[SIGNAL_OSCILLATOR_WAVEFORM] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_oscillator_waveform))
   signals[SIGNAL_FILTER_CUTOFF]       = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_filter_cutoff))
