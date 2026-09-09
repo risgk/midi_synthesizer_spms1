@@ -9,8 +9,9 @@ require_relative 'spms1_env_gen'
 # 1) active_modules is walked by a plain while loop, not .each: breaking out of a block needs
 #    setjmp, while a plain break compiles to a C break.
 #
-# 2) pick_source_signal resolves routing over plain locals rather than an array signal bus,
-#    because sp_FloatArray_set costs the same whether the index is constant or data-driven.
+# 2) Module outputs live in the `signals` array and routing is an index into it, so a routed
+#    input costs one array read whatever the module count. Passing the candidates in as
+#    arguments instead costs picks x candidates per sample, which grows quadratically.
 
 module Spms1
   module C
@@ -49,12 +50,14 @@ MODULE_OSCILLATOR = 2
 MODULE_FILTER     = 3
 MODULE_AMP        = 4
 
-# Module-output signal IDs. Not array indices: pick_source_signal only ever compares against
-# them, so picking one costs a compare-chain rather than an array access.
+# Module-output signal IDs, which are the slots of the `signals` bus. A routing is one of these
+# stored in a source_* local, so resolving it is a single array read -- see note 2.
 SIGNAL_ENV_GEN_OUTPUT    = 0
 SIGNAL_OSCILLATOR_OUTPUT = 1
 SIGNAL_FILTER_OUTPUT     = 2
 SIGNAL_AMP_OUTPUT        = 3
+
+SIGNALS_SIZE = 4
 
 # CC value normalization. Every parameter is a ratio in 0.0..1.0, so this is the only converter:
 # CC 4..124 maps to the full range, centred on CC 64 where a MIDI controller puts its detent, and
@@ -67,21 +70,6 @@ SIGNAL_AMP_OUTPUT        = 3
 def cc_to_ratio(value)
   scaled = (value.to_f - 4.0) * (1.0 / 120.0)
   (scaled < 0.0) ? 0.0 : ((scaled > 1.0) ? 1.0 : scaled)
-end
-
-# Picks one of the four module outputs by source id. The case/when is a statement, with each
-# branch assigning `result` -- not an expression capturing the case's own value. As an expression
-# Spinel infers a boxed sp_RbVal even with float-only branches, and that boxing lands on every
-# sample. As a statement each branch stays a plain mrb_float, as the module dispatch case does.
-def pick_source_signal(source, env_gen_output, oscillator_output, filter_output, amp_output)
-  result = 0.0
-  case source
-  when SIGNAL_ENV_GEN_OUTPUT    then result = env_gen_output
-  when SIGNAL_OSCILLATOR_OUTPUT then result = oscillator_output
-  when SIGNAL_FILTER_OUTPUT     then result = filter_output
-  when SIGNAL_AMP_OUTPUT        then result = amp_output
-  end
-  result
 end
 
 oscillator = Oscillator.new(SAMPLE_RATE)
@@ -118,12 +106,10 @@ cc_env_gen_sustain     = 30
 
 audio_buffer = Array.new(AUDIO_BUFFER_WORDS, 0.0)
 
-# Module outputs. Declared out here so they carry across buffers: a routing with feedback reads
-# last sample's value, and at a buffer edge that is the previous iteration's.
-env_gen_output    = 0.0
-oscillator_output = 0.0
-filter_output     = 0.0
-amp_output        = 0.0
+# The signal bus: each module's latest output, in its SIGNAL_* slot. Declared out here so it
+# carries across buffers, since a routing with feedback reads last sample's value and at a buffer
+# edge that is the previous iteration's.
+signals = Array.new(SIGNALS_SIZE, 0.0)
 
 C.set_midi_cc_value(MIDI_CH, 20 , 4  ) # Oscillator Waveform
 C.set_midi_cc_value(MIDI_CH, 74 , 124) # Filter Cutoff
@@ -163,23 +149,19 @@ loop do
 
       case module_id
       when MODULE_ENV_GEN
-        env_gen_output = env_gen.process(gate)
+        signals[SIGNAL_ENV_GEN_OUTPUT] = env_gen.process(gate)
       when MODULE_OSCILLATOR
-        oscillator_output = oscillator.process(pitch)
+        signals[SIGNAL_OSCILLATOR_OUTPUT] = oscillator.process(pitch)
       when MODULE_FILTER
-        filter_audio_input = pick_source_signal(source_filter_audio, env_gen_output, oscillator_output, filter_output, amp_output)
-        filter_mod_input   = pick_source_signal(source_filter_mod, env_gen_output, oscillator_output, filter_output, amp_output)
-        filter_output = filter.process(filter_audio_input, filter_mod_input)
+        signals[SIGNAL_FILTER_OUTPUT] = filter.process(signals[source_filter_audio], signals[source_filter_mod])
       when MODULE_AMP
-        amp_audio_input = pick_source_signal(source_amp_audio, env_gen_output, oscillator_output, filter_output, amp_output)
-        amp_mod_input   = pick_source_signal(source_amp_mod, env_gen_output, oscillator_output, filter_output, amp_output)
-        amp_output = amp.process(amp_audio_input, amp_mod_input)
+        signals[SIGNAL_AMP_OUTPUT] = amp.process(signals[source_amp_audio], signals[source_amp_mod])
       end
 
       slot += 1
     end
 
-    audio_buffer[i] = pick_source_signal(source_output, env_gen_output, oscillator_output, filter_output, amp_output)
+    audio_buffer[i] = signals[source_output]
     i += 1
   end
 
