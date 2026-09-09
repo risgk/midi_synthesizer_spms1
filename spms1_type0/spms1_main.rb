@@ -50,14 +50,26 @@ MODULE_OSCILLATOR = 2
 MODULE_FILTER     = 3
 MODULE_AMP        = 4
 
-# Module-output signal IDs, which are the slots of the `signals` bus. A routing is one of these
-# stored in a source_* local, so resolving it is a single array read -- see note 2.
-SIGNAL_ENV_GEN_OUTPUT    = 0
-SIGNAL_OSCILLATOR_OUTPUT = 1
-SIGNAL_FILTER_OUTPUT     = 2
-SIGNAL_AMP_OUTPUT        = 3
+# Slots of the `signals` bus: module outputs, control values and the note inputs, in one
+# namespace, so a routing is just a slot number -- see note 2 -- and one source can feed as many
+# destinations as read its slot. A slot is a plain float; its range is whatever the destination
+# expects. Append new slots at the end: the numbers are arbitrary and nothing depends on order.
+SIGNAL_ENV_GEN_OUTPUT      = 0
+SIGNAL_OSCILLATOR_OUTPUT   = 1
+SIGNAL_FILTER_OUTPUT       = 2
+SIGNAL_AMP_OUTPUT          = 3
+SIGNAL_OSCILLATOR_WAVEFORM = 4
+SIGNAL_FILTER_CUTOFF       = 5
+SIGNAL_FILTER_RESONANCE    = 6
+SIGNAL_FILTER_MOD_AMOUNT   = 7
+SIGNAL_AMP_GAIN            = 8
+SIGNAL_ENV_GEN_ATTACK      = 9
+SIGNAL_ENV_GEN_DECAY       = 10
+SIGNAL_ENV_GEN_SUSTAIN     = 11
+SIGNAL_PITCH               = 12
+SIGNAL_GATE                = 13
 
-SIGNALS_SIZE = 4
+SIGNALS_SIZE = 14
 
 # CC value normalization. Every parameter is a ratio in 0.0..1.0, so this is the only converter:
 # CC 4..124 maps to the full range, centred on CC 64 where a MIDI controller puts its detent, and
@@ -115,8 +127,8 @@ C.start_audio
 loop do
   C.start_debug_measure
 
-  pitch = C.get_midi_note_on_pitch(MIDI_CH).to_f * (1.0 / 120.0) - 0.5
-  gate = C.get_midi_note_on_state(MIDI_CH).to_f
+  signals[SIGNAL_PITCH] = C.get_midi_note_on_pitch(MIDI_CH).to_f * (1.0 / 120.0) - 0.5
+  signals[SIGNAL_GATE]  = C.get_midi_note_on_state(MIDI_CH).to_f
 
   # The patch -- which modules run and in what order, and what feeds each routed input -- is
   # rebuilt every buffer so it can come from MIDI later. Constant for now. active_modules is
@@ -126,20 +138,31 @@ loop do
   active_modules[2] = MODULE_FILTER
   active_modules[3] = MODULE_AMP
 
-  source_filter_audio = SIGNAL_OSCILLATOR_OUTPUT
-  source_filter_mod   = SIGNAL_ENV_GEN_OUTPUT
-  source_amp_audio    = SIGNAL_FILTER_OUTPUT
-  source_amp_mod      = SIGNAL_ENV_GEN_OUTPUT
-  source_output       = SIGNAL_AMP_OUTPUT
+  source_env_gen_gate     = SIGNAL_GATE
+  source_oscillator_pitch = SIGNAL_PITCH
+  source_filter_audio     = SIGNAL_OSCILLATOR_OUTPUT
+  source_filter_mod       = SIGNAL_ENV_GEN_OUTPUT
+  source_amp_audio        = SIGNAL_FILTER_OUTPUT
+  source_amp_mod          = SIGNAL_ENV_GEN_OUTPUT
+  source_output           = SIGNAL_AMP_OUTPUT
 
-  oscillator.set_waveform(cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_oscillator_waveform)))
-  filter.set_cutoff(cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_filter_cutoff)))
-  filter.set_resonance(cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_filter_resonance)))
-  filter.set_modulation_amount(cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_filter_mod_amount)))
-  amp.set_gain(cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_amp_gain)))
-  env_gen.set_attack(cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_env_gen_attack)))
-  env_gen.set_decay(cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_env_gen_decay)))
-  env_gen.set_sustain(cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_env_gen_sustain)))
+  signals[SIGNAL_OSCILLATOR_WAVEFORM] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_oscillator_waveform))
+  signals[SIGNAL_FILTER_CUTOFF]       = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_filter_cutoff))
+  signals[SIGNAL_FILTER_RESONANCE]    = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_filter_resonance))
+  signals[SIGNAL_FILTER_MOD_AMOUNT]   = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_filter_mod_amount))
+  signals[SIGNAL_AMP_GAIN]            = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_amp_gain))
+  signals[SIGNAL_ENV_GEN_ATTACK]      = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_env_gen_attack))
+  signals[SIGNAL_ENV_GEN_DECAY]       = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_env_gen_decay))
+  signals[SIGNAL_ENV_GEN_SUSTAIN]     = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_env_gen_sustain))
+
+  oscillator.set_waveform(signals[SIGNAL_OSCILLATOR_WAVEFORM])
+  filter.set_cutoff(signals[SIGNAL_FILTER_CUTOFF])
+  filter.set_resonance(signals[SIGNAL_FILTER_RESONANCE])
+  filter.set_modulation_amount(signals[SIGNAL_FILTER_MOD_AMOUNT])
+  amp.set_gain(signals[SIGNAL_AMP_GAIN])
+  env_gen.set_attack(signals[SIGNAL_ENV_GEN_ATTACK])
+  env_gen.set_decay(signals[SIGNAL_ENV_GEN_DECAY])
+  env_gen.set_sustain(signals[SIGNAL_ENV_GEN_SUSTAIN])
 
   i = 0
   while i < AUDIO_BUFFER_WORDS
@@ -150,9 +173,9 @@ loop do
 
       case module_id
       when MODULE_ENV_GEN
-        signals[SIGNAL_ENV_GEN_OUTPUT] = env_gen.process(gate)
+        signals[SIGNAL_ENV_GEN_OUTPUT] = env_gen.process(signals[source_env_gen_gate])
       when MODULE_OSCILLATOR
-        signals[SIGNAL_OSCILLATOR_OUTPUT] = oscillator.process(pitch)
+        signals[SIGNAL_OSCILLATOR_OUTPUT] = oscillator.process(signals[source_oscillator_pitch])
       when MODULE_FILTER
         signals[SIGNAL_FILTER_OUTPUT] = filter.process(signals[source_filter_audio], signals[source_filter_mod])
       when MODULE_AMP
