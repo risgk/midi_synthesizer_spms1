@@ -77,21 +77,8 @@ filter = Filter.new(SAMPLE_RATE)
 amp = Amp.new(SAMPLE_RATE)
 env_gen = EnvGen.new(SAMPLE_RATE)
 
-# Which modules run each sample, in order. Packed from the front with no gaps -- see note 1.
+# Allocated once; which slots are filled is decided per buffer, inside the loop.
 active_modules = Array.new(MODULES_SIZE, MODULE_NONE)
-active_modules[0] = MODULE_ENV_GEN
-active_modules[1] = MODULE_OSCILLATOR
-active_modules[2] = MODULE_FILTER
-active_modules[3] = MODULE_AMP
-
-# Which module output feeds each routed input, and which one is the final (mono, for now) audio
-# output. Plain Integer locals, so they can be reassigned once per buffer without touching the
-# per-sample dispatch.
-source_filter_audio = SIGNAL_OSCILLATOR_OUTPUT
-source_filter_mod   = SIGNAL_ENV_GEN_OUTPUT
-source_amp_audio    = SIGNAL_FILTER_OUTPUT
-source_amp_mod      = SIGNAL_ENV_GEN_OUTPUT
-source_output       = SIGNAL_AMP_OUTPUT
 
 # Which CC each parameter reads. Plain Integer locals like the routing above, so they can be
 # reassigned once per buffer without touching the per-sample path.
@@ -130,6 +117,20 @@ loop do
 
   pitch = C.get_midi_note_on_pitch(MIDI_CH).to_f * (1.0 / 120.0) - 0.5
   gate = C.get_midi_note_on_state(MIDI_CH).to_f
+
+  # The patch -- which modules run and in what order, and what feeds each routed input -- is
+  # rebuilt every buffer so it can come from MIDI later. Constant for now. active_modules is
+  # packed from the front with no gaps, see note 1; source_* hold SIGNAL_* bus slots, see note 2.
+  active_modules[0] = MODULE_ENV_GEN
+  active_modules[1] = MODULE_OSCILLATOR
+  active_modules[2] = MODULE_FILTER
+  active_modules[3] = MODULE_AMP
+
+  source_filter_audio = SIGNAL_OSCILLATOR_OUTPUT
+  source_filter_mod   = SIGNAL_ENV_GEN_OUTPUT
+  source_amp_audio    = SIGNAL_FILTER_OUTPUT
+  source_amp_mod      = SIGNAL_ENV_GEN_OUTPUT
+  source_output       = SIGNAL_AMP_OUTPUT
 
   oscillator.set_waveform(cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_oscillator_waveform)))
   filter.set_cutoff(cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_filter_cutoff)))
