@@ -101,9 +101,9 @@ a matter of changing slot numbers.
 | CC 99 | CC 98 | Sets | CC 6 value |
 | ----- | ----- | ---- | ---------- |
 | 0 | 0-15 | Run order, slot by slot | Module ID |
-| 1 | 0-6 | What feeds a module input | Signal ID |
-| 2 | 0-7 | Where a parameter takes its value | Signal ID |
-| 3 | 0-7 | Which CC fills a control slot | CC number (0-127) |
+| 1 | 0-7 | What feeds a module input | Signal ID |
+| 2 | 0-8 | Where a parameter takes its value | Signal ID |
+| 3 | 0-8 | Which CC fills a control slot | CC number (0-127) |
 
 The run order is read from slot 0 upwards and stops at the first Module ID 0, so a patch shorter
 than 16 modules ends itself.
@@ -119,7 +119,8 @@ than 16 modules ends itself.
 | 4 | Amp Audio In | Amp Gain |
 | 5 | Amp Modulation In | EG Attack |
 | 6 | Final Output | EG Decay/Release |
-| 7 | -- | EG Sustain |
+| 7 | Oscillator Modulation In | EG Sustain |
+| 8 | -- | Oscillator Mod Amount |
 
 #### Module IDs
 
@@ -143,9 +144,10 @@ than 16 modules ends itself.
 | 5 | Amp Output | | 13 | EG Sustain |
 | 6 | Oscillator Waveform | | 14 | Note Pitch |
 | 7 | Filter Cutoff | | 15 | Note Gate |
+| | | | 16 | Oscillator Mod Amount |
 
-Slots 6-13 hold the values arriving from CC, so a parameter reads its own CC by default. Pointing
-it at another slot is what makes a modulation.
+Slots 6-13 and 16 hold the values arriving from CC, so a parameter reads its own CC by default.
+Pointing it at another slot is what makes a modulation.
 
 Slots 0 and 1 are constants that nothing writes. Signal 0 is also what an entry nobody has set
 reads as, so an unrouted input is silent rather than wired to whatever sits in the first slot.
@@ -159,6 +161,7 @@ the amp at full level.
 - Amp gain and filter cutoff share one CC: CC 99 = 3, CC 98 = 4, CC 6 = 74
 - Amp at full level with no envelope: CC 99 = 1, CC 98 = 5, CC 6 = 1
 - Disconnect the filter's modulation input: CC 99 = 1, CC 98 = 3, CC 6 = 0
+- Pitch swept by the envelope, one octave at full depth: CC 99 = 1, CC 98 = 7, CC 6 = 2
 - Take the filter out of the chain: CC 99 = 0, CC 98 = 2, CC 6 = 4, then CC 99 = 0, CC 98 = 3,
   CC 6 = 0 -- and point the amp's audio input at the oscillator: CC 99 = 1, CC 98 = 4, CC 6 = 3
 
@@ -167,7 +170,7 @@ the amp at full level.
 - Module inputs (category 1) are read every sample and are not smoothed; parameters (category 2)
   are read once per buffer and are smoothed by their destination. Route a fast source through a
   module input, a stepped one through a parameter
-- A parameter source may point at any of the 128 slots. Slots above 13 read 0 until something
+- A parameter source may point at any of the 128 slots. Slots above 16 read 0 until something
   writes them
 - The NRPN CCs are stored as ordinary controls too, so a parameter may be mapped to CC 6 -- which
   then moves it every time a patch edit is sent

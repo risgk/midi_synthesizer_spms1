@@ -8,6 +8,9 @@ module Spms1
     # oscillator specifically, not to whichever module happens to read its output. May move to a
     # dedicated oscillator mixer later.
     OUTPUT_LEVEL = 0.5
+    # What a modulation depth of 1.0 is worth: 60 of the 120 semitones the pitch domain spans, so a
+    # full-scale depth driven by a full-scale signal covers the domain exactly.
+    MODULATION_RANGE = 60.0 / 120.0
 
     # Pitch lookup table for note-to-frequency conversion.
     FREQ_TABLE = Array.new(129, 0.0)
@@ -25,6 +28,8 @@ module Spms1
       @phase = 0.0
       @waveform = 0.0
       @current_waveform = 0.0
+      @modulation_amount = 0.0
+      @current_modulation_amount = 0.0
       @sample_counter = 0
     end
 
@@ -34,10 +39,28 @@ module Spms1
       @waveform = (waveform < 0.0) ? 0.0 : ((waveform > 1.0) ? 1.0 : waveform)
     end
 
+    # Modulation depth is normalized to [0.0, 1.0]. Squared and scaled here rather than per sample,
+    # so the smoothed value is already in pitch units. Squared because the useful depths are the
+    # small ones: linear over 60 semitones would make a 7-bit step half a semitone, which is too
+    # coarse for vibrato.
+    def set_modulation_amount(amount)
+      clamped_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
+      @modulation_amount = clamped_amount * clamped_amount * MODULATION_RANGE
+    end
+
     # Pitch input is a signal in [-1.0, 1.0], of which [-0.5, 0.5] is the usable span: it covers
-    # MIDI notes 0 to 120, and anything beyond clamps to the ends.
-    def process(pitch_input = 0.0)
-      pitch = (pitch_input < -0.5) ? -0.5 : ((pitch_input > 0.5) ? 0.5 : pitch_input)
+    # MIDI notes 0 to 120, and anything beyond clamps to the ends. modulation_input is added to it
+    # per sample and is deliberately not smoothed, so a fast source reaches the pitch unslewed.
+    def process(pitch_input = 0.0, modulation_input = 0.0)
+      if @sample_counter == 0
+        # Morph and depth are smoothed at the control rate to avoid sudden jumps.
+        @current_waveform += (@waveform - @current_waveform) * @smoothing_target_blend
+        @current_modulation_amount += (@modulation_amount - @current_modulation_amount) * @smoothing_target_blend
+      end
+
+      mod = (modulation_input < -1.0) ? -1.0 : ((modulation_input > 1.0) ? 1.0 : modulation_input)
+      total_pitch = pitch_input + (mod * @current_modulation_amount)
+      pitch = (total_pitch < -0.5) ? -0.5 : ((total_pitch > 0.5) ? 0.5 : total_pitch)
       freq = pitch_to_freq_fast(pitch)
       current_dt = freq * @inv_sample_rate
       # Both poly_blep calls below work against this same dt, so its reciprocal is taken once here
@@ -54,11 +77,6 @@ module Spms1
       naive_saw2 = -2.0 * phase2 + 1.0
       blep2 = poly_blep(phase2, current_dt, current_dt_inv)
       saw2 = naive_saw2 + blep2
-
-      if @sample_counter == 0
-        # Morph is smoothed at the control rate to avoid sudden waveform jumps.
-        @current_waveform += (@waveform - @current_waveform) * @smoothing_target_blend
-      end
 
       output = saw1 - (saw2 * @current_waveform)
       @phase += current_dt

@@ -282,6 +282,13 @@
               <span class="slider-value" id="waveform-val">4</span>
             </div>
           </div>
+          <div class="slider-knob-zone">
+            <div class="slider-label">Mod Amount <span class="cc-num">(CC 89)</span></div>
+            <div class="slider-input-wrapper">
+              <input type="range" id="osc-mod-amount" min="0" max="127" value="4">
+              <span class="slider-value" id="osc-mod-amount-val">4</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -372,6 +379,7 @@
 
   const ccMap = {
     'waveform': 20,
+    'osc-mod-amount': 89,
     'amp-gain': 15,
     'cutoff': 74,
     'resonance': 71,
@@ -383,6 +391,7 @@
 
   const defaultValues = {
     'waveform': 4,
+    'osc-mod-amount': 4,
     'amp-gain': 94,
     'cutoff': 124,
     'resonance': 64,
@@ -489,6 +498,7 @@
       let elementId = "";
       switch (ccNumber) {
         case 20: elementId = "waveform"; break;
+        case 89: elementId = "osc-mod-amount"; break;
         case 15: elementId = "amp-gain"; break;
         case 74: elementId = "cutoff"; break;
         case 71: elementId = "resonance"; break;

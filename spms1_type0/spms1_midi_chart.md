@@ -30,6 +30,7 @@
 |                            73 | x             | o             | EG Attack (Time)                     |
 |                            75 | x             | o             | EG Decay/Release (Time)              |
 |                            30 | x             | o             | EG Sustain (Level)                   |
+|                            89 | x             | o             | Oscillator Mod Amount                |
 |                            99 | x             | o             | NRPN MSB                             |
 |                            98 | x             | o             | NRPN LSB                             |
 |                             6 | x             | o             | Data Entry MSB (NRPN value)          |
