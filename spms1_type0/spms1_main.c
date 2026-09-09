@@ -17,7 +17,7 @@ extern void stop_audio(void);
 extern void write_to_audio_buffer(float, float);
 extern void start_debug_measure(void);
 extern void stop_debug_measure(void);
-static const char *const sp_sym_names[40] = {(&("\xff" "initialize")[1]), (&("\xff" "set_waveform")[1]), (&("\xff" "process")[1]), (&("\xff" "pitch_to_freq_fast")[1]), (&("\xff" "poly_blep")[1]), (&("\xff" "set_cutoff")[1]), (&("\xff" "set_modulation_amount")[1]), (&("\xff" "set_resonance")[1]), (&("\xff" "cutoff_to_freq_fast")[1]), (&("\xff" "update_coefficients")[1]), (&("\xff" "soft_clip")[1]), (&("\xff" "set_gain")[1]), (&("\xff" "set_attack")[1]), (&("\xff" "set_decay")[1]), (&("\xff" "set_sustain")[1]), (&("\xff" "update_coefficients_full")[1]), (&("\xff" "calculate_exp_fast")[1]), (&("\xff" "set_midi_note_on_pitch")[1]), (&("\xff" "uint8")[1]), (&("\xff" "void")[1]), (&("\xff" "get_midi_note_on_pitch")[1]), (&("\xff" "set_midi_note_on_state")[1]), (&("\xff" "get_midi_note_on_state")[1]), (&("\xff" "set_midi_cc_value")[1]), (&("\xff" "get_midi_cc_value")[1]), (&("\xff" "set_sample_rate")[1]), (&("\xff" "int32")[1]), (&("\xff" "get_sample_rate")[1]), (&("\xff" "set_audio_buffers")[1]), (&("\xff" "get_audio_buffers")[1]), (&("\xff" "set_audio_buffer_words")[1]), (&("\xff" "get_audio_buffer_words")[1]), (&("\xff" "start_audio")[1]), (&("\xff" "stop_audio")[1]), (&("\xff" "write_to_audio_buffer")[1]), (&("\xff" "float")[1]), (&("\xff" "start_debug_measure")[1]), (&("\xff" "stop_debug_measure")[1]), (&("\xff" "cc_to_ratio")[1]), (&("\xff" "pick_source")[1])};
+static const char *const sp_sym_names[40] = {(&("\xff" "initialize")[1]), (&("\xff" "set_waveform")[1]), (&("\xff" "process")[1]), (&("\xff" "pitch_to_freq_fast")[1]), (&("\xff" "poly_blep")[1]), (&("\xff" "set_cutoff")[1]), (&("\xff" "set_modulation_amount")[1]), (&("\xff" "set_resonance")[1]), (&("\xff" "cutoff_to_freq_fast")[1]), (&("\xff" "update_coefficients")[1]), (&("\xff" "soft_clip")[1]), (&("\xff" "set_gain")[1]), (&("\xff" "set_attack")[1]), (&("\xff" "set_decay")[1]), (&("\xff" "set_sustain")[1]), (&("\xff" "update_coefficients_full")[1]), (&("\xff" "calculate_exp_fast")[1]), (&("\xff" "set_midi_note_on_pitch")[1]), (&("\xff" "uint8")[1]), (&("\xff" "void")[1]), (&("\xff" "get_midi_note_on_pitch")[1]), (&("\xff" "set_midi_note_on_state")[1]), (&("\xff" "get_midi_note_on_state")[1]), (&("\xff" "set_midi_cc_value")[1]), (&("\xff" "get_midi_cc_value")[1]), (&("\xff" "set_sample_rate")[1]), (&("\xff" "int32")[1]), (&("\xff" "get_sample_rate")[1]), (&("\xff" "set_audio_buffers")[1]), (&("\xff" "get_audio_buffers")[1]), (&("\xff" "set_audio_buffer_words")[1]), (&("\xff" "get_audio_buffer_words")[1]), (&("\xff" "start_audio")[1]), (&("\xff" "stop_audio")[1]), (&("\xff" "write_to_audio_buffer")[1]), (&("\xff" "float")[1]), (&("\xff" "start_debug_measure")[1]), (&("\xff" "stop_debug_measure")[1]), (&("\xff" "cc_to_ratio")[1]), (&("\xff" "pick_source_signal")[1])};
 static const char *sp_dyn_syms[SP_DYN_SYMS_MAX]; static int sp_ndyn = 0;
 static const char *sp_sym_to_s(sp_sym id){if(id>=0&&id<40)return sp_sym_names[id];if(id>=40&&id<40+sp_ndyn)return sp_dyn_syms[id-40];return "";}
 static sp_sym sp_sym_intern(const char *s){for(int i=0;i<40;i++)if(strcmp(sp_sym_names[i],s)==0)return (sp_sym)i;for(int i=0;i<sp_ndyn;i++)if(strcmp(sp_dyn_syms[i],s)==0)return (sp_sym)(40+i);if(sp_ndyn<SP_DYN_SYMS_MAX){sp_dyn_syms[sp_ndyn]=sp_str_dup_external(s);return (sp_sym)(40+sp_ndyn++);}return (sp_sym)0;}
@@ -322,7 +322,7 @@ static mrb_float sp_EnvGen_process(sp_EnvGen *self, mrb_float lv_gate_input);
 static mrb_float sp_EnvGen_update_coefficients_full(sp_EnvGen *self);
 static mrb_float sp_EnvGen_calculate_exp_fast(sp_EnvGen *self, mrb_float lv_value);
 static mrb_float sp_cc_to_ratio(mrb_int lv_value);
-static mrb_float sp_pick_source(mrb_int lv_source, mrb_float lv_env_gen_out, mrb_float lv_osc_out, mrb_float lv_filter_out, mrb_float lv_amp_out);
+static mrb_float sp_pick_source_signal(mrb_int lv_source, mrb_float lv_env_gen_output, mrb_float lv_oscillator_output, mrb_float lv_filter_output, mrb_float lv_amp_output);
 static sp_Spms1 *sp_Spms1_new(void);
 static sp_Oscillator *sp_Oscillator_new(mrb_int);
 static sp_Filter *sp_Filter_new(mrb_int);
@@ -363,10 +363,10 @@ static mrb_int cst_MODULE_ENV_GEN = 0;
 static mrb_int cst_MODULE_OSCILLATOR = 0;
 static mrb_int cst_MODULE_FILTER = 0;
 static mrb_int cst_MODULE_AMP = 0;
-static mrb_int cst_SRC_ENV_GEN_OUTPUT = 0;
-static mrb_int cst_SRC_OSCILLATOR_OUTPUT = 0;
-static mrb_int cst_SRC_FILTER_OUTPUT = 0;
-static mrb_int cst_SRC_AMP_OUTPUT = 0;
+static mrb_int cst_SIGNAL_ENV_GEN_OUTPUT = 0;
+static mrb_int cst_SIGNAL_OSCILLATOR_OUTPUT = 0;
+static mrb_int cst_SIGNAL_FILTER_OUTPUT = 0;
+static mrb_int cst_SIGNAL_AMP_OUTPUT = 0;
 
 static void sp_mark_user_globals(void) {
   sp_re_mark_globals();
@@ -1093,28 +1093,28 @@ static mrb_float sp_cc_to_ratio(mrb_int lv_value) {
   return 0.0;
 }
 #line 76 "spms1_main.rb"
-static mrb_float sp_pick_source(mrb_int lv_source, mrb_float lv_env_gen_out, mrb_float lv_osc_out, mrb_float lv_filter_out, mrb_float lv_amp_out) {
+static mrb_float sp_pick_source_signal(mrb_int lv_source, mrb_float lv_env_gen_output, mrb_float lv_oscillator_output, mrb_float lv_filter_output, mrb_float lv_amp_output) {
     SP_GC_SAVE();
     mrb_float lv_result = 0.0;
 #line 77 "spms1_main.rb"
   lv_result = 0.0;
 #line 78 "spms1_main.rb"
   mrb_int _t15 = lv_source;
-  if ((_t15 == cst_SRC_ENV_GEN_OUTPUT)) {
+  if ((_t15 == cst_SIGNAL_ENV_GEN_OUTPUT)) {
 #line 79 "spms1_main.rb"
-    lv_result = lv_env_gen_out;
+    lv_result = lv_env_gen_output;
   }
-  else if ((_t15 == cst_SRC_OSCILLATOR_OUTPUT)) {
+  else if ((_t15 == cst_SIGNAL_OSCILLATOR_OUTPUT)) {
 #line 80 "spms1_main.rb"
-    lv_result = lv_osc_out;
+    lv_result = lv_oscillator_output;
   }
-  else if ((_t15 == cst_SRC_FILTER_OUTPUT)) {
+  else if ((_t15 == cst_SIGNAL_FILTER_OUTPUT)) {
 #line 81 "spms1_main.rb"
-    lv_result = lv_filter_out;
+    lv_result = lv_filter_output;
   }
-  else if ((_t15 == cst_SRC_AMP_OUTPUT)) {
+  else if ((_t15 == cst_SIGNAL_AMP_OUTPUT)) {
 #line 82 "spms1_main.rb"
-    lv_result = lv_amp_out;
+    lv_result = lv_amp_output;
   }
 #line 84 "spms1_main.rb"
   return lv_result;
@@ -1134,11 +1134,11 @@ int main(int argc,char**argv){
     SP_GC_ROOT(lv_env_gen);
     sp_IntArray * lv_active_modules = NULL;
     SP_GC_ROOT(lv_active_modules);
-    mrb_int lv_filter_audio_source = 0;
-    mrb_int lv_filter_mod_source = 0;
-    mrb_int lv_amp_audio_source = 0;
-    mrb_int lv_amp_mod_source = 0;
-    mrb_int lv_output_source = 0;
+    mrb_int lv_source_filter_audio = 0;
+    mrb_int lv_source_filter_mod = 0;
+    mrb_int lv_source_amp_audio = 0;
+    mrb_int lv_source_amp_mod = 0;
+    mrb_int lv_source_output = 0;
     mrb_int lv_cc_oscillator_waveform = 0;
     mrb_int lv_cc_filter_cutoff = 0;
     mrb_int lv_cc_filter_resonance = 0;
@@ -1299,13 +1299,13 @@ int main(int argc,char**argv){
 #line 50 "spms1_main.rb"
   cst_MODULE_AMP = 4LL;
 #line 54 "spms1_main.rb"
-  cst_SRC_ENV_GEN_OUTPUT = 0LL;
+  cst_SIGNAL_ENV_GEN_OUTPUT = 0LL;
 #line 55 "spms1_main.rb"
-  cst_SRC_OSCILLATOR_OUTPUT = 1LL;
+  cst_SIGNAL_OSCILLATOR_OUTPUT = 1LL;
 #line 56 "spms1_main.rb"
-  cst_SRC_FILTER_OUTPUT = 2LL;
+  cst_SIGNAL_FILTER_OUTPUT = 2LL;
 #line 57 "spms1_main.rb"
-  cst_SRC_AMP_OUTPUT = 3LL;
+  cst_SIGNAL_AMP_OUTPUT = 3LL;
 #line 67 "spms1_main.rb"
 #line 76 "spms1_main.rb"
 #line 87 "spms1_main.rb"
@@ -1333,15 +1333,15 @@ int main(int argc,char**argv){
 #line 97 "spms1_main.rb"
   sp_IntArray_set(lv_active_modules, 3LL, cst_MODULE_AMP);
 #line 102 "spms1_main.rb"
-  lv_filter_audio_source = cst_SRC_OSCILLATOR_OUTPUT;
+  lv_source_filter_audio = cst_SIGNAL_OSCILLATOR_OUTPUT;
 #line 103 "spms1_main.rb"
-  lv_filter_mod_source = cst_SRC_ENV_GEN_OUTPUT;
+  lv_source_filter_mod = cst_SIGNAL_ENV_GEN_OUTPUT;
 #line 104 "spms1_main.rb"
-  lv_amp_audio_source = cst_SRC_FILTER_OUTPUT;
+  lv_source_amp_audio = cst_SIGNAL_FILTER_OUTPUT;
 #line 105 "spms1_main.rb"
-  lv_amp_mod_source = cst_SRC_ENV_GEN_OUTPUT;
+  lv_source_amp_mod = cst_SIGNAL_ENV_GEN_OUTPUT;
 #line 106 "spms1_main.rb"
-  lv_output_source = cst_SRC_AMP_OUTPUT;
+  lv_source_output = cst_SIGNAL_AMP_OUTPUT;
 #line 110 "spms1_main.rb"
   lv_cc_oscillator_waveform = 20LL;
 #line 111 "spms1_main.rb"
@@ -1470,9 +1470,9 @@ int main(int argc,char**argv){
           }
           else if ((_t88 == cst_MODULE_FILTER)) {
 #line 170 "spms1_main.rb"
-            lv_filter_audio_input = sp_pick_source(lv_filter_audio_source, lv_env_gen_output, lv_oscillator_output, lv_filter_output, lv_amp_output);
+            lv_filter_audio_input = sp_pick_source_signal(lv_source_filter_audio, lv_env_gen_output, lv_oscillator_output, lv_filter_output, lv_amp_output);
 #line 171 "spms1_main.rb"
-            lv_filter_mod_input = sp_pick_source(lv_filter_mod_source, lv_env_gen_output, lv_oscillator_output, lv_filter_output, lv_amp_output);
+            lv_filter_mod_input = sp_pick_source_signal(lv_source_filter_mod, lv_env_gen_output, lv_oscillator_output, lv_filter_output, lv_amp_output);
 #line 172 "spms1_main.rb"
             mrb_float _t91 = lv_filter_audio_input;
             mrb_float _t92 = lv_filter_mod_input;
@@ -1480,9 +1480,9 @@ int main(int argc,char**argv){
           }
           else if ((_t88 == cst_MODULE_AMP)) {
 #line 174 "spms1_main.rb"
-            lv_amp_audio_input = sp_pick_source(lv_amp_audio_source, lv_env_gen_output, lv_oscillator_output, lv_filter_output, lv_amp_output);
+            lv_amp_audio_input = sp_pick_source_signal(lv_source_amp_audio, lv_env_gen_output, lv_oscillator_output, lv_filter_output, lv_amp_output);
 #line 175 "spms1_main.rb"
-            lv_amp_mod_input = sp_pick_source(lv_amp_mod_source, lv_env_gen_output, lv_oscillator_output, lv_filter_output, lv_amp_output);
+            lv_amp_mod_input = sp_pick_source_signal(lv_source_amp_mod, lv_env_gen_output, lv_oscillator_output, lv_filter_output, lv_amp_output);
 #line 176 "spms1_main.rb"
             mrb_float _t93 = lv_amp_audio_input;
             mrb_float _t94 = lv_amp_mod_input;
@@ -1492,7 +1492,7 @@ int main(int argc,char**argv){
           lv_slot = sp_int_add(lv_slot, 1LL);
         }
 #line 182 "spms1_main.rb"
-        sp_FloatArray_set(lv_audio_buffer, lv_i, sp_pick_source(lv_output_source, lv_env_gen_output, lv_oscillator_output, lv_filter_output, lv_amp_output));
+        sp_FloatArray_set(lv_audio_buffer, lv_i, sp_pick_source_signal(lv_source_output, lv_env_gen_output, lv_oscillator_output, lv_filter_output, lv_amp_output));
 #line 183 "spms1_main.rb"
         lv_i = sp_int_add(lv_i, 1LL);
       }
