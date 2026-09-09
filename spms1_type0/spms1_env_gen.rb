@@ -18,7 +18,8 @@ module Spms1
     # Attack range: 1 ms at 0.0, 100 ms at 0.5, 10 s at 1.0.
     ATTACK_BASE = 0.001 / (0.01 * Math::log(2))
     # Decay range:  3 ms at 0.0, 300 ms at 0.5, 30 s at 1.0.
-    # Decay time is defined as the time until the level reaches 1/1024 (approx. -60 dB).
+    # Decay is measured to 1/1024 = 2^-10, which keeps the attack's base of 2 rather than landing
+    # on a round -60 dB. 1/1024 is -60.2 dB; the shared base is worth more than closing the 0.2.
     DECAY_BASE  = 0.003 / (0.01 * 10 * Math::log(2))
 
     # Overshoot target so the attack ramp reaches 1.0 in finite time.
