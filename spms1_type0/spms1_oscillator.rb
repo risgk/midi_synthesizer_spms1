@@ -34,7 +34,8 @@ module Spms1
       @waveform = (waveform < 0.0) ? 0.0 : ((waveform > 1.0) ? 1.0 : waveform)
     end
 
-    # Pitch input is normalized to [-0.5, 0.5], corresponding to MIDI notes 0 to 120.
+    # Pitch input is a signal in [-1.0, 1.0], of which [-0.5, 0.5] is the usable span: it covers
+    # MIDI notes 0 to 120, and anything beyond clamps to the ends.
     def process(pitch_input = 0.0)
       pitch = (pitch_input < -0.5) ? -0.5 : ((pitch_input > 0.5) ? 0.5 : pitch_input)
       freq = pitch_to_freq_fast(pitch)

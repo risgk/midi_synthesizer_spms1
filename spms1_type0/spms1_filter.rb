@@ -67,9 +67,9 @@ module Spms1
       @cutoff = (cutoff < 0.0) ? 0.0 : ((cutoff > 1.0) ? 1.0 : cutoff)
     end
 
-    # Modulation depth is normalized to [-1.0, 1.0].
+    # Modulation depth is normalized to [0.0, 1.0].
     def set_modulation_amount(amount)
-      @modulation_amount = (amount < -1.0) ? -1.0 : ((amount > 1.0) ? 1.0 : amount)
+      @modulation_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
     end
 
     # Q range: ~0.7 (0.0), ~2.83 (0.5), ~11.3 (1.0).
