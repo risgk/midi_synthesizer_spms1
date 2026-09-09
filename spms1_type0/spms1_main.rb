@@ -3,7 +3,7 @@ require_relative 'spms1_filter'
 require_relative 'spms1_amp'
 require_relative 'spms1_env_gen'
 
-# Three structural choices, referred to below as notes 1-3. What they say about the generated C
+# Two structural choices, referred to below as notes 1-2. What they say about the generated C
 # holds for the Spinel version vendored in sp_runtime.h; re-check on updating it.
 #
 # 1) active_modules is walked by a plain while loop, not .each: breaking out of a block needs
@@ -11,12 +11,6 @@ require_relative 'spms1_env_gen'
 #
 # 2) pick_source resolves routing over plain locals rather than an array signal bus, because
 #    sp_FloatArray_set costs the same whether the index is constant or data-driven.
-#
-# 3) The per-sample loop is a method, not the body of `loop do`: `loop do` compiles to a setjmp
-#    region, forcing every local assigned inside it to `volatile`, and `signals` carries the four
-#    module outputs across the call boundary. Freed from volatile GCC inlines the process bodies
-#    and the loop outgrows the XIP cache core0 shares, so this pays off only with the
-#    `.time_critical` attribute in sp_runtime.h -- do not remove it.
 
 module Spms1
   module C
@@ -62,8 +56,6 @@ SRC_OSCILLATOR_OUTPUT = 1
 SRC_FILTER_OUTPUT     = 2
 SRC_AMP_OUTPUT        = 3
 
-SIGNALS_SIZE = 4
-
 # CC value normalization. One window for every parameter: CC 0..120 maps to 0.0..1.0, and
 # CC 121..127 clamp at the destination. Every lookup table in the synth is spaced to match --
 # FREQ_TABLE is semitone-spaced across 120, and EXP_TABLE and Q_TABLE are re-spaced to 121 entries
@@ -92,54 +84,6 @@ def pick_source(source, env_gen_out, osc_out, filter_out, amp_out)
   result
 end
 
-# Renders one audio buffer. Everything the loop touches arrives as an argument -- once per buffer,
-# so the wide parameter list costs nothing per sample. See note 3 for why this is a method.
-def render_audio_buffer(env_gen, oscillator, filter, amp,
-                        active_modules, audio_buffer, signals,
-                        pitch, gate,
-                        filter_audio_source, filter_mod_source,
-                        amp_audio_source, amp_mod_source, output_source)
-  env_gen_output    = signals[0]
-  oscillator_output = signals[1]
-  filter_output     = signals[2]
-  amp_output        = signals[3]
-
-  i = 0
-  while i < AUDIO_BUFFER_WORDS
-    slot = 0
-    while slot < MODULES_SIZE
-      module_id = active_modules[slot]
-      break if module_id == MODULE_NONE
-
-      case module_id
-      when MODULE_ENV_GEN
-        env_gen_output = env_gen.process(gate)
-      when MODULE_OSCILLATOR
-        oscillator_output = oscillator.process(pitch)
-      when MODULE_FILTER
-        filter_audio_input = pick_source(filter_audio_source, env_gen_output, oscillator_output, filter_output, amp_output)
-        filter_mod_input   = pick_source(filter_mod_source, env_gen_output, oscillator_output, filter_output, amp_output)
-        filter_output = filter.process(filter_audio_input, filter_mod_input)
-      when MODULE_AMP
-        amp_audio_input = pick_source(amp_audio_source, env_gen_output, oscillator_output, filter_output, amp_output)
-        amp_mod_input   = pick_source(amp_mod_source, env_gen_output, oscillator_output, filter_output, amp_output)
-        amp_output = amp.process(amp_audio_input, amp_mod_input)
-      end
-
-      slot += 1
-    end
-
-    audio_buffer[i] = pick_source(output_source, env_gen_output, oscillator_output, filter_output, amp_output)
-    i += 1
-  end
-
-  # Ends on an assignment, not an explicit `nil`, so the inferred return type stays a plain float.
-  signals[0] = env_gen_output
-  signals[1] = oscillator_output
-  signals[2] = filter_output
-  signals[3] = amp_output
-end
-
 oscillator = Oscillator.new(SAMPLE_RATE)
 filter = Filter.new(SAMPLE_RATE)
 amp = Amp.new(SAMPLE_RATE)
@@ -152,8 +96,9 @@ active_modules[1] = MODULE_OSCILLATOR
 active_modules[2] = MODULE_FILTER
 active_modules[3] = MODULE_AMP
 
-# Signal routing, and which module output is the final (mono, for now) audio output. Plain Integer
-# locals, so they can be reassigned once per buffer without touching the per-sample dispatch.
+# Which module output feeds each routed input, and which one is the final (mono, for now) audio
+# output. Plain Integer locals, so they can be reassigned once per buffer without touching the
+# per-sample dispatch.
 filter_audio_source = SRC_OSCILLATOR_OUTPUT
 filter_mod_source   = SRC_ENV_GEN_OUTPUT
 amp_audio_source    = SRC_FILTER_OUTPUT
@@ -173,8 +118,12 @@ cc_env_gen_sustain     = 30
 
 audio_buffer = Array.new(AUDIO_BUFFER_WORDS, 0.0)
 
-# Module outputs carried across buffer boundaries. Touched twice per buffer, never per sample.
-signals = Array.new(SIGNALS_SIZE, 0.0)
+# Module outputs. Declared out here so they carry across buffers: a routing with feedback reads
+# last sample's value, and at a buffer edge that is the previous iteration's.
+env_gen_output    = 0.0
+oscillator_output = 0.0
+filter_output     = 0.0
+amp_output        = 0.0
 
 C.set_midi_cc_value(MIDI_CH, 20 , 0  ) # Oscillator Waveform
 C.set_midi_cc_value(MIDI_CH, 74 , 120) # Filter Cutoff
@@ -205,11 +154,34 @@ loop do
   env_gen.set_decay(cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_env_gen_decay)))
   env_gen.set_sustain(cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_env_gen_sustain)))
 
-  render_audio_buffer(env_gen, oscillator, filter, amp,
-                      active_modules, audio_buffer, signals,
-                      pitch, gate,
-                      filter_audio_source, filter_mod_source,
-                      amp_audio_source, amp_mod_source, output_source)
+  i = 0
+  while i < AUDIO_BUFFER_WORDS
+    slot = 0
+    while slot < MODULES_SIZE
+      module_id = active_modules[slot]
+      break if module_id == MODULE_NONE
+
+      case module_id
+      when MODULE_ENV_GEN
+        env_gen_output = env_gen.process(gate)
+      when MODULE_OSCILLATOR
+        oscillator_output = oscillator.process(pitch)
+      when MODULE_FILTER
+        filter_audio_input = pick_source(filter_audio_source, env_gen_output, oscillator_output, filter_output, amp_output)
+        filter_mod_input   = pick_source(filter_mod_source, env_gen_output, oscillator_output, filter_output, amp_output)
+        filter_output = filter.process(filter_audio_input, filter_mod_input)
+      when MODULE_AMP
+        amp_audio_input = pick_source(amp_audio_source, env_gen_output, oscillator_output, filter_output, amp_output)
+        amp_mod_input   = pick_source(amp_mod_source, env_gen_output, oscillator_output, filter_output, amp_output)
+        amp_output = amp.process(amp_audio_input, amp_mod_input)
+      end
+
+      slot += 1
+    end
+
+    audio_buffer[i] = pick_source(output_source, env_gen_output, oscillator_output, filter_output, amp_output)
+    i += 1
+  end
 
   C.stop_debug_measure
 
