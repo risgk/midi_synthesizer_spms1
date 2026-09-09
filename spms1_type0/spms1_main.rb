@@ -56,17 +56,19 @@ SRC_OSCILLATOR_OUTPUT = 1
 SRC_FILTER_OUTPUT     = 2
 SRC_AMP_OUTPUT        = 3
 
-# CC value normalization. One window for every parameter: CC 0..120 maps to 0.0..1.0, and
-# CC 121..127 clamp at the destination. Every lookup table in the synth is spaced to match --
-# FREQ_TABLE is semitone-spaced across 120, and EXP_TABLE and Q_TABLE are re-spaced to 121 entries
-# over their unchanged ranges -- so a CC value lands on an integer table index with no
-# interpolation error, and CC 60 is the exact mid-value of each.
-# The bipolar form is `(v - 64) / 120`: -0.5..+0.5 over CC 4..124, centred on the detent a MIDI
-# controller puts at 64. Nothing needs it yet, so it is not written.
+# CC value normalization. One window for every parameter: CC 4..124 maps to 0.0..1.0, centred on
+# CC 64 where a MIDI controller puts its detent; anything outside is clamped here, so a unipolar
+# parameter cannot reach a bipolar destination's negative half.
+# Every lookup table in the synth is spaced to match -- FREQ_TABLE is semitone-spaced across 120,
+# and EXP_TABLE and Q_TABLE are 121 entries over their ranges -- so a CC value lands on an integer
+# table index with no interpolation error, and CC 64 is the exact mid-value of each.
+# The bipolar form is `(v - 64) / 120` clamped to -0.5..+0.5: the same window and centre, offset
+# by a half. Nothing needs it yet, so it is not written.
 # What a value means -- dimensionless or semitones -- stays a property of the destination, so
 # reassigning which CC a parameter reads cannot change what the value means.
 def cc_to_unipolar(value)
-  value.to_f * (1.0 / 120.0)
+  scaled = (value.to_f - 4.0) * (1.0 / 120.0)
+  (scaled < 0.0) ? 0.0 : ((scaled > 1.0) ? 1.0 : scaled)
 end
 
 # Picks one of the four module outputs by source id. The case/when is a statement, with each
@@ -125,14 +127,14 @@ oscillator_output = 0.0
 filter_output     = 0.0
 amp_output        = 0.0
 
-C.set_midi_cc_value(MIDI_CH, 20 , 0  ) # Oscillator Waveform
-C.set_midi_cc_value(MIDI_CH, 74 , 120) # Filter Cutoff
-C.set_midi_cc_value(MIDI_CH, 71 , 60 ) # Filter Resonance
-C.set_midi_cc_value(MIDI_CH, 24 , 60 ) # Filter EG Amt
-C.set_midi_cc_value(MIDI_CH, 15 , 90 ) # Amp Gain
-C.set_midi_cc_value(MIDI_CH, 73 , 0  ) # EG Attack
-C.set_midi_cc_value(MIDI_CH, 75 , 90 ) # EG Decay/Release
-C.set_midi_cc_value(MIDI_CH, 30 , 0  ) # EG Sustain
+C.set_midi_cc_value(MIDI_CH, 20 , 4  ) # Oscillator Waveform
+C.set_midi_cc_value(MIDI_CH, 74 , 124) # Filter Cutoff
+C.set_midi_cc_value(MIDI_CH, 71 , 64 ) # Filter Resonance
+C.set_midi_cc_value(MIDI_CH, 24 , 64 ) # Filter EG Amt
+C.set_midi_cc_value(MIDI_CH, 15 , 94 ) # Amp Gain
+C.set_midi_cc_value(MIDI_CH, 73 , 4  ) # EG Attack
+C.set_midi_cc_value(MIDI_CH, 75 , 94 ) # EG Decay/Release
+C.set_midi_cc_value(MIDI_CH, 30 , 4  ) # EG Sustain
 
 C.set_sample_rate(SAMPLE_RATE)
 C.set_audio_buffers(AUDIO_BUFFERS)

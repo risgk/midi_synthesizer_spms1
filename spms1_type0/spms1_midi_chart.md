@@ -50,7 +50,7 @@
 |              : Active Sense   | x             | x             |                                      |
 |              : Reset          | x             | x             |                                      |
 +-------------------------------+---------------+---------------+--------------------------------------+
-| Notes                         | Control Change: 0-120 is the full range; 121-127 clamp.              |
+| Notes                         | Control Change: full range is 4-124, centred on 64; outside clamps.  |
 +-------------------------------+----------------------------------------------------------------------+
   Mode 1: Omni On,  Poly          Mode 2: Omni On,  Mono          o: Yes                                
   Mode 3: Omni Off, Poly          Mode 4: Omni Off, Mono          x: No                                 
