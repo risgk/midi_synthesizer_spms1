@@ -135,24 +135,32 @@ than 16 modules ends itself.
 
 | ID | Signal | | ID | Signal |
 | -- | ------ | - | -- | ------ |
-| 0 | EG Output | | 7 | Filter EG Amount |
-| 1 | Oscillator Output | | 8 | Amp Gain |
-| 2 | Filter Output | | 9 | EG Attack |
-| 3 | Amp Output | | 10 | EG Decay/Release |
-| 4 | Oscillator Waveform | | 11 | EG Sustain |
-| 5 | Filter Cutoff | | 12 | Note Pitch |
-| 6 | Filter Resonance | | 13 | Note Gate |
+| 0 | None (constant 0.0) | | 8 | Filter Resonance |
+| 1 | Constant 1.0 | | 9 | Filter EG Amount |
+| 2 | EG Output | | 10 | Amp Gain |
+| 3 | Oscillator Output | | 11 | EG Attack |
+| 4 | Filter Output | | 12 | EG Decay/Release |
+| 5 | Amp Output | | 13 | EG Sustain |
+| 6 | Oscillator Waveform | | 14 | Note Pitch |
+| 7 | Filter Cutoff | | 15 | Note Gate |
 
-Slots 4-11 hold the values arriving from CC, so a parameter reads its own CC by default. Pointing
+Slots 6-13 hold the values arriving from CC, so a parameter reads its own CC by default. Pointing
 it at another slot is what makes a modulation.
+
+Slots 0 and 1 are constants that nothing writes. Signal 0 is also what an entry nobody has set
+reads as, so an unrouted input is silent rather than wired to whatever sits in the first slot.
+Signal 1 is the value an unmodulated input wants: routing an amp's modulation input to it leaves
+the amp at full level.
 
 #### Examples
 
-- Filter cutoff follows note pitch (keyboard tracking): CC 99 = 2, CC 98 = 1, CC 6 = 12
-- Filter cutoff driven by the envelope instead of its CC: CC 99 = 2, CC 98 = 1, CC 6 = 0
+- Filter cutoff follows note pitch (keyboard tracking): CC 99 = 2, CC 98 = 1, CC 6 = 14
+- Filter cutoff driven by the envelope instead of its CC: CC 99 = 2, CC 98 = 1, CC 6 = 2
 - Amp gain and filter cutoff share one CC: CC 99 = 3, CC 98 = 4, CC 6 = 74
+- Amp at full level with no envelope: CC 99 = 1, CC 98 = 5, CC 6 = 1
+- Disconnect the filter's modulation input: CC 99 = 1, CC 98 = 3, CC 6 = 0
 - Take the filter out of the chain: CC 99 = 0, CC 98 = 2, CC 6 = 4, then CC 99 = 0, CC 98 = 3,
-  CC 6 = 0 -- and point the amp's audio input at the oscillator: CC 99 = 1, CC 98 = 4, CC 6 = 1
+  CC 6 = 0 -- and point the amp's audio input at the oscillator: CC 99 = 1, CC 98 = 4, CC 6 = 3
 
 #### Notes
 

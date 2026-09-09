@@ -70,10 +70,10 @@ uint8_t  g_midi_cc_values[16][128] = {};
 // NRPN parameter numbers are (MSB << 7) | LSB; the synth uses MSB 0-3 as categories, so 512
 // entries cover it. Values are 7-bit, filled from CC 6.
 #define SPMS1_NRPN_SIZE (512)
-uint8_t  g_nrpn_values[16][SPMS1_NRPN_SIZE] = {};
-uint8_t  g_nrpn_msb[16]            = {};
-uint8_t  g_nrpn_lsb[16]            = {};
-uint8_t  g_nrpn_selected[16]       = {};  // 0 until CC 99 or 98 arrives, and again after an RPN
+uint8_t  g_midi_nrpn_values[16][SPMS1_NRPN_SIZE] = {};
+uint8_t  g_midi_nrpn_msb[16]            = {};
+uint8_t  g_midi_nrpn_lsb[16]            = {};
+uint8_t  g_midi_nrpn_selected[16]       = {};  // 0 until CC 99 or 98 arrives, and again after an RPN
 
 uint32_t g_sample_rate             = 96000;
 uint32_t g_audio_buffers           = 2;
@@ -135,7 +135,7 @@ uint8_t get_midi_cc_value(uint8_t midi_ch, uint8_t cc_number) {
   return g_midi_cc_values[midi_ch][cc_number];
 }
 
-void set_nrpn_value(uint8_t midi_ch, int32_t index, uint8_t value) {
+void set_midi_nrpn_value(uint8_t midi_ch, int32_t index, uint8_t value) {
   if (midi_ch >= 16) {
     return;
   }
@@ -144,10 +144,10 @@ void set_nrpn_value(uint8_t midi_ch, int32_t index, uint8_t value) {
     return;
   }
 
-  g_nrpn_values[midi_ch][index] = value;
+  g_midi_nrpn_values[midi_ch][index] = value;
 }
 
-uint8_t get_nrpn_value(uint8_t midi_ch, int32_t index) {
+uint8_t get_midi_nrpn_value(uint8_t midi_ch, int32_t index) {
   if (midi_ch >= 16) {
     return 0;
   }
@@ -156,28 +156,28 @@ uint8_t get_nrpn_value(uint8_t midi_ch, int32_t index) {
     return 0;
   }
 
-  return g_nrpn_values[midi_ch][index];
+  return g_midi_nrpn_values[midi_ch][index];
 }
 
 // CC 99 and 98 select a parameter, in either order, and CC 6 commits a value to it. CC 38 is
 // ignored because every value here is 7-bit, and CC 96/97 are not implemented. CC 101 and 100
 // select an RPN instead, which must not leave a following CC 6 looking like NRPN data. The CCs
 // are still stored by set_midi_cc_value as well, so a patch may read them as ordinary controls.
-void handle_nrpn_cc(uint8_t midi_ch, uint8_t number, uint8_t value) {
+void handle_midi_nrpn_cc(uint8_t midi_ch, uint8_t number, uint8_t value) {
   if (midi_ch >= 16) {
     return;
   }
 
   if (number == 99) {
-    g_nrpn_msb[midi_ch] = value;
-    g_nrpn_selected[midi_ch] = 1;
+    g_midi_nrpn_msb[midi_ch] = value;
+    g_midi_nrpn_selected[midi_ch] = 1;
   } else if (number == 98) {
-    g_nrpn_lsb[midi_ch] = value;
-    g_nrpn_selected[midi_ch] = 1;
+    g_midi_nrpn_lsb[midi_ch] = value;
+    g_midi_nrpn_selected[midi_ch] = 1;
   } else if (number == 101 || number == 100) {
-    g_nrpn_selected[midi_ch] = 0;
-  } else if (number == 6 && g_nrpn_selected[midi_ch]) {
-    set_nrpn_value(midi_ch, (((int32_t)g_nrpn_msb[midi_ch]) << 7) | g_nrpn_lsb[midi_ch], value);
+    g_midi_nrpn_selected[midi_ch] = 0;
+  } else if (number == 6 && g_midi_nrpn_selected[midi_ch]) {
+    set_midi_nrpn_value(midi_ch, (((int32_t)g_midi_nrpn_msb[midi_ch]) << 7) | g_midi_nrpn_lsb[midi_ch], value);
   }
 }
 
@@ -341,5 +341,5 @@ void handleNoteOff(byte channel, byte pitch, byte velocity)
 void handleControlChange(byte channel, byte number, byte value)
 {
   set_midi_cc_value(channel - 1, number, value);
-  handle_nrpn_cc(channel - 1, number, value);
+  handle_midi_nrpn_cc(channel - 1, number, value);
 }
