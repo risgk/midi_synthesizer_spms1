@@ -1533,7 +1533,7 @@ int main(int argc,char**argv){
 #line 185 "spms1_main.rb"
   (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_ENV_GEN_SUSTAIN)), ((uint8_t)(30LL))), (mrb_int)0);
 #line 186 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_MOD_AMOUNT)), ((uint8_t)(89LL))), (mrb_int)0);
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_MOD_AMOUNT)), ((uint8_t)(13LL))), (mrb_int)0);
 #line 188 "spms1_main.rb"
   (set_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(20LL)), ((uint8_t)(4LL))), (mrb_int)0);
 #line 189 "spms1_main.rb"
@@ -1551,7 +1551,7 @@ int main(int argc,char**argv){
 #line 195 "spms1_main.rb"
   (set_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(30LL)), ((uint8_t)(4LL))), (mrb_int)0);
 #line 196 "spms1_main.rb"
-  (set_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(89LL)), ((uint8_t)(4LL))), (mrb_int)0);
+  (set_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(13LL)), ((uint8_t)(4LL))), (mrb_int)0);
 #line 198 "spms1_main.rb"
   (set_sample_rate(((int32_t)(cst_SAMPLE_RATE))), (mrb_int)0);
 #line 199 "spms1_main.rb"
