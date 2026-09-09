@@ -92,17 +92,6 @@ env_gen = EnvGen.new(SAMPLE_RATE)
 # Allocated once; which slots are filled is decided per buffer, inside the loop.
 active_modules = Array.new(MODULES_SIZE, MODULE_NONE)
 
-# Which CC each parameter reads. Plain Integer locals like the routing above, so they can be
-# reassigned once per buffer without touching the per-sample path.
-cc_oscillator_waveform = 20
-cc_filter_cutoff       = 74
-cc_filter_resonance    = 71
-cc_filter_mod_amount   = 24
-cc_amp_gain            = 15
-cc_env_gen_attack      = 73
-cc_env_gen_decay       = 75
-cc_env_gen_sustain     = 30
-
 audio_buffer = Array.new(AUDIO_BUFFER_WORDS, 0.0)
 
 # The signal bus: each module's latest output, in its SIGNAL_* slot. Declared out here so it
@@ -161,6 +150,17 @@ loop do
   source_env_gen_attack      = SIGNAL_ENV_GEN_ATTACK
   source_env_gen_decay       = SIGNAL_ENV_GEN_DECAY
   source_env_gen_sustain     = SIGNAL_ENV_GEN_SUSTAIN
+
+  # Which CC fills each control slot. The bus is the only thing downstream reads, so this is
+  # where MIDI enters and the only place a CC number appears.
+  cc_oscillator_waveform = 20
+  cc_filter_cutoff       = 74
+  cc_filter_resonance    = 71
+  cc_filter_mod_amount   = 24
+  cc_amp_gain            = 15
+  cc_env_gen_attack      = 73
+  cc_env_gen_decay       = 75
+  cc_env_gen_sustain     = 30
 
   signals[SIGNAL_OSCILLATOR_WAVEFORM] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_oscillator_waveform))
   signals[SIGNAL_FILTER_CUTOFF]       = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_filter_cutoff))
