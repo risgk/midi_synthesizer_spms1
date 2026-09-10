@@ -80,6 +80,41 @@ Usage
         - necobit電子 [MIDI Unit Mini for GROVE](https://necobit.com/denshi/midi-unit-mini-for-grove/) (Shipping to Japan only)
 
 
+### [MIDI Implementation Chart](./spms1_midi_chart.md)
+
+
+### Block Diagram
+
+The default patch. Solid arrows carry audio, dashed arrows carry control.
+
+```mermaid
+flowchart LR
+  NOTE([MIDI Note])
+  EG[EG]
+  LFO[LFO]
+  OSC[Osc]
+  FILTER[Filter]
+  AMP[Amp]
+  OUT([Audio Out])
+
+  OSC --> FILTER
+  FILTER --> AMP
+  AMP --> OUT
+
+  NOTE -. Gate .-> EG
+  NOTE -. Pitch .-> OSC
+  LFO -. Mod .-> OSC
+  EG -. Mod .-> FILTER
+  EG -. Mod .-> AMP
+```
+
+The modules run in the order EG, LFO, Osc, Filter, Amp, one sample at a time. Their parameters --
+waveform, cutoff, gain and the rest -- arrive from CC and are left out here.
+
+None of this is fixed. NRPN rewrites the run order, every arrow above, and which CC feeds each
+parameter.
+
+
 ### Patch Editing (NRPN)
 
 The patch is data, and NRPN rewrites it while the synth is running: which modules run and in what
@@ -185,9 +220,6 @@ module is allowed to regroup them.
   writes them
 - The NRPN CCs are stored as ordinary controls too, so a parameter may be mapped to CC 6 -- which
   then moves it every time a patch edit is sent
-
-### [MIDI Implementation Chart](./spms1_midi_chart.md)
-
 
 ### Debug UART
 
