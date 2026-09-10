@@ -1,4 +1,4 @@
-require_relative 'spms1_oscillator'
+require_relative 'spms1_osc'
 require_relative 'spms1_filter'
 require_relative 'spms1_amp'
 require_relative 'spms1_env_gen'
@@ -8,22 +8,22 @@ DURATION_SEC = 30.0
 NUM_SAMPLES = (SAMPLE_RATE * DURATION_SEC).to_i
 FILENAME = "spms1_output.wav"
 
-oscillator = Spms1::Oscillator.new(SAMPLE_RATE)
-oscillator.set_waveform(0.0 * (1.0 / 128.0))
+oscillator = Spms1::Osc.new(SAMPLE_RATE)
+oscillator.set_waveform(0.0 * (1.0 / 120.0))
 
 filter = Spms1::Filter.new(SAMPLE_RATE)
 filter.set_cutoff(64.0 * (1.0 / 120.0))
-filter.set_resonance(64.0 * (1.0 / 128.0))
-filter.set_modulation_amount(64.0 * (1.0 / 128.0))
+filter.set_resonance(60.0 * (1.0 / 120.0))
+filter.set_modulation_amount(60.0 * (1.0 / 120.0))
 
 amp = Spms1::Amp.new(SAMPLE_RATE)
-amp.set_gain((100.0 * 100.0) * (1.0 / (127.0 * 127.0)))
+amp.set_gain(90.0 * (1.0 / 120.0))  # set_gain squares internally
 
 env_gen = Spms1::EnvGen.new(SAMPLE_RATE)
 
-env_gen.set_attack(0.0 * (1.0 / 128.0))
-env_gen.set_decay(128.0 * (1.0 / 128.0))
-env_gen.set_sustain(0.0 * (1.0 / 128.0))
+env_gen.set_attack(0.0 * (1.0 / 120.0))
+env_gen.set_decay(120.0 * (1.0 / 120.0))
+env_gen.set_sustain(0.0 * (1.0 / 120.0))
 
 puts "Generating stereo waveform data..."
 
@@ -32,7 +32,7 @@ pcm_bytes = []
 NUM_SAMPLES.times do |i|
   env_gen_output = env_gen.process(1.0)
   oscillator_output = oscillator.process(60.0 * (1.0 / 120.0) - 0.5)
-  filter_output = filter.process(oscillator_output * 0.5, env_gen_output)
+  filter_output = filter.process(oscillator_output, env_gen_output)
   amp_output = amp.process(filter_output, env_gen_output)
 
   [amp_output, amp_output].each do |ch_sample|

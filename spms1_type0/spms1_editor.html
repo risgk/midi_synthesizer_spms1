@@ -229,7 +229,7 @@
 
 <div class="editor-container">
   <header>
-    <h1>SPMS-1 (type-0) Editor<span class="version">v0.0.23</span></h1>
+    <h1>SPMS-1 (type-0) Editor<span class="version">v0.0.24</span></h1>
   </header>
 
   <div class="editor-grid">
@@ -273,26 +273,35 @@
       </div>
 
       <div class="panel">
-        <h2>Oscillator</h2>
+        <h2>Osc</h2>
         <div class="control-row">
           <div class="slider-knob-zone">
             <div class="slider-label">Waveform <span class="cc-num">(CC 20)</span></div>
             <div class="slider-input-wrapper">
-              <input type="range" id="waveform" min="0" max="127" value="0">
-              <span class="slider-value" id="waveform-val">0</span>
+              <input type="range" id="waveform" min="0" max="127" value="4">
+              <span class="slider-value" id="waveform-val">4</span>
+            </div>
+          </div>
+          <div class="slider-knob-zone">
+            <div class="slider-label">Mod Amount <span class="cc-num">(CC 13)</span></div>
+            <div class="slider-input-wrapper">
+              <input type="range" id="osc-mod-amount" min="0" max="127" value="4">
+              <span class="slider-value" id="osc-mod-amount-val">4</span>
             </div>
           </div>
         </div>
       </div>
+    </div>
 
+    <div class="right-column" style="display: flex; flex-direction: column; gap: 20px;">
       <div class="panel">
         <h2>Filter</h2>
         <div class="control-row">
           <div class="slider-knob-zone">
             <div class="slider-label">Cutoff <span class="cc-num">(CC 74)</span></div>
             <div class="slider-input-wrapper">
-              <input type="range" id="cutoff" min="0" max="127" value="127">
-              <span class="slider-value" id="cutoff-val">127</span>
+              <input type="range" id="cutoff" min="0" max="127" value="124">
+              <span class="slider-value" id="cutoff-val">124</span>
             </div>
           </div>
           <div class="slider-knob-zone">
@@ -303,7 +312,7 @@
             </div>
           </div>
           <div class="slider-knob-zone">
-            <div class="slider-label">EG Amount <span class="cc-num">(CC 24)</span></div>
+            <div class="slider-label">Mod Amount <span class="cc-num">(CC 24)</span></div>
             <div class="slider-input-wrapper">
               <input type="range" id="eg-amount" min="0" max="127" value="64">
               <span class="slider-value" id="eg-amount-val">64</span>
@@ -311,17 +320,15 @@
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="right-column" style="display: flex; flex-direction: column; gap: 20px;">
       <div class="panel">
         <h2>Amp</h2>
         <div class="control-row">
           <div class="slider-knob-zone">
             <div class="slider-label">Amp Gain <span class="cc-num">(CC 15)</span></div>
             <div class="slider-input-wrapper">
-              <input type="range" id="amp-gain" min="0" max="127" value="100">
-              <span class="slider-value" id="amp-gain-val">100</span>
+              <input type="range" id="amp-gain" min="0" max="127" value="94">
+              <span class="slider-value" id="amp-gain-val">94</span>
             </div>
           </div>
         </div>
@@ -333,22 +340,35 @@
           <div class="slider-knob-zone">
             <div class="slider-label">Attack <span class="cc-num">(CC 73)</span></div>
             <div class="slider-input-wrapper">
-              <input type="range" id="attack" min="0" max="127" value="0">
-              <span class="slider-value" id="attack-val">0</span>
+              <input type="range" id="attack" min="0" max="127" value="4">
+              <span class="slider-value" id="attack-val">4</span>
             </div>
           </div>
           <div class="slider-knob-zone">
             <div class="slider-label">Decay/Release <span class="cc-num">(CC 75)</span></div>
             <div class="slider-input-wrapper">
-              <input type="range" id="decay" min="0" max="127" value="96">
-              <span class="slider-value" id="decay-val">96</span>
+              <input type="range" id="decay" min="0" max="127" value="94">
+              <span class="slider-value" id="decay-val">94</span>
             </div>
           </div>
           <div class="slider-knob-zone">
             <div class="slider-label">Sustain <span class="cc-num">(CC 30)</span></div>
             <div class="slider-input-wrapper">
-              <input type="range" id="sustain" min="0" max="127" value="0">
-              <span class="slider-value" id="sustain-val">0</span>
+              <input type="range" id="sustain" min="0" max="127" value="4">
+              <span class="slider-value" id="sustain-val">4</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>LFO</h2>
+        <div class="control-row">
+          <div class="slider-knob-zone">
+            <div class="slider-label">Rate <span class="cc-num">(CC 3)</span></div>
+            <div class="slider-input-wrapper">
+              <input type="range" id="lfo-rate" min="0" max="127" value="64">
+              <span class="slider-value" id="lfo-rate-val">64</span>
             </div>
           </div>
         </div>
@@ -372,24 +392,28 @@
 
   const ccMap = {
     'waveform': 20,
+    'osc-mod-amount': 13,
     'amp-gain': 15,
     'cutoff': 74,
     'resonance': 71,
     'eg-amount': 24,
     'attack': 73,
     'decay': 75,
-    'sustain': 30
+    'sustain': 30,
+    'lfo-rate': 3
   };
 
   const defaultValues = {
-    'waveform': 0,
-    'amp-gain': 100,
-    'cutoff': 127,
+    'waveform': 4,
+    'osc-mod-amount': 4,
+    'amp-gain': 94,
+    'cutoff': 124,
     'resonance': 64,
     'eg-amount': 64,
-    'attack': 0,
-    'decay': 96,
-    'sustain': 0
+    'attack': 4,
+    'decay': 94,
+    'sustain': 4,
+    'lfo-rate': 64
   };
 
   function initMIDI() {
@@ -489,6 +513,7 @@
       let elementId = "";
       switch (ccNumber) {
         case 20: elementId = "waveform"; break;
+        case 13: elementId = "osc-mod-amount"; break;
         case 15: elementId = "amp-gain"; break;
         case 74: elementId = "cutoff"; break;
         case 71: elementId = "resonance"; break;
@@ -496,6 +521,7 @@
         case 73: elementId = "attack"; break;
         case 75: elementId = "decay"; break;
         case 30: elementId = "sustain"; break;
+        case 3: elementId = "lfo-rate"; break;
       }
       if (elementId) {
         const slider = document.getElementById(elementId);

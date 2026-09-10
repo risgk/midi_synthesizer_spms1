@@ -1,6 +1,6 @@
 ```
-  [MIDI Synthesizer]                                              Date: 2026-09-02                      
-  Model: SPMS-1 (type-0)          MIDI Implementation Chart       Version: 0.0.23                       
+  [MIDI Synthesizer]                                              Date: 2026-09-10                      
+  Model: SPMS-1 (type-0)          MIDI Implementation Chart       Version: 0.0.24                       
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Function...                   | Transmitted   | Recognized    | Remarks                              |
 +-------------------------------+---------------+---------------+--------------------------------------+
@@ -22,14 +22,20 @@
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Pitch Bend                    | x             | x             |                                      |
 +-------------------------------+---------------+---------------+--------------------------------------+
-| Control                    20 | x             | o             | Oscillator Waveform (Saw to Square)  |
-| Change                     74 | x             | o             | Filter Cutoff                        |
+| Control                    20 | x             | o             | Osc Waveform (Saw to Square)         |
+| Change                     13 | x             | o             | Osc Mod Amount                       |
+|                            74 | x             | o             | Filter Cutoff                        |
 |                            71 | x             | o             | Filter Resonance                     |
-|                            24 | x             | o             | Filter EG Amount                     |
+|                            24 | x             | o             | Filter Mod Amount                    |
 |                            15 | x             | o             | Amp Gain                             |
 |                            73 | x             | o             | EG Attack (Time)                     |
 |                            75 | x             | o             | EG Decay/Release (Time)              |
 |                            30 | x             | o             | EG Sustain (Level)                   |
+|                             3 | x             | o             | LFO Rate                             |
+|                            99 | x             | o             | NRPN MSB                             |
+|                            98 | x             | o             | NRPN LSB                             |
+|                             6 | x             | o             | Data Entry MSB (NRPN value)          |
+|                       101,100 | x             | o             | RPN select: suspends NRPN data entry |
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Program                       | x             | x             |                                      |
 | Change       : True #         | ************* | ************* |                                      |
@@ -50,7 +56,7 @@
 |              : Active Sense   | x             | x             |                                      |
 |              : Reset          | x             | x             |                                      |
 +-------------------------------+---------------+---------------+--------------------------------------+
-| Notes                         |                                                                      |
+| Notes                         | Control Change 4-124, centred on 64. NRPN is 7-bit, CC 6 only.       |
 +-------------------------------+----------------------------------------------------------------------+
   Mode 1: Omni On,  Poly          Mode 2: Omni On,  Mono          o: Yes                                
   Mode 3: Omni Off, Poly          Mode 4: Omni Off, Mono          x: No                                 

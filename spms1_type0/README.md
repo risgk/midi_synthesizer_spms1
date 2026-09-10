@@ -1,4 +1,4 @@
-MIDI Synthesizer SPMS-1 (type-0) v0.0.23
+MIDI Synthesizer SPMS-1 (type-0) v0.0.24
 ========================================
 
 - Monophonic MIDI Synthesizer for Raspberry Pi Pico 2, made with Spinel (Ruby AOT Compiler)
@@ -82,6 +82,144 @@ Usage
 
 ### [MIDI Implementation Chart](./spms1_midi_chart.md)
 
+
+### Block Diagram
+
+The default patch. Solid arrows carry audio, dashed arrows carry control.
+
+```mermaid
+flowchart LR
+  NOTE([MIDI Note])
+  EG[EG]
+  LFO[LFO]
+  OSC[Osc]
+  FILTER[Filter]
+  AMP[Amp]
+  OUT([Audio Out])
+
+  OSC --> FILTER
+  FILTER --> AMP
+  AMP --> OUT
+
+  NOTE -. Gate .-> EG
+  NOTE -. Pitch .-> OSC
+  LFO -. Mod .-> OSC
+  EG -. Mod .-> FILTER
+  EG -. Mod .-> AMP
+```
+
+The modules run in the order EG, LFO, Osc, Filter, Amp, one sample at a time. Their parameters --
+waveform, cutoff, gain and the rest -- arrive from CC and are left out here.
+
+None of this is fixed. NRPN rewrites the run order, every arrow above, and which CC feeds each
+parameter.
+
+
+### Patch Editing (NRPN)
+
+The patch is data, and NRPN rewrites it while the synth is running: which modules run and in what
+order, what feeds each module input, where each parameter takes its value from, and which CC fills
+each control slot. Every module reads from a numbered signal slot and writes to one, so rewiring is
+a matter of changing slot numbers.
+
+#### Sending
+
+- CC 99 selects the category, CC 98 the entry within it, in either order
+- CC 6 (Data Entry MSB) commits the value, and takes effect on the next audio buffer
+- CC 38 (Data Entry LSB) is ignored: every value here is 7-bit
+- CC 101 and CC 100 (RPN select) suspend data entry, so an RPN is never taken as a patch edit.
+  Send CC 99 or CC 98 again to resume
+- Edits are not saved. The default patch is restored at power-on
+
+#### Categories (CC 99)
+
+| CC 99 | CC 98 | Sets | CC 6 value |
+| ----- | ----- | ---- | ---------- |
+| 0 | 0-15 | Run order, slot by slot | Module ID |
+| 1 | 0-7 | What feeds a module input | Signal ID |
+| 2 | 0-9 | Where a parameter takes its value | Signal ID |
+| 3 | 0-9 | Which CC fills a control slot | CC number (0-127) |
+
+The run order is read from slot 0 upwards and stops at the first Module ID 0, so a patch shorter
+than 16 modules ends itself.
+
+#### Entries (CC 98)
+
+| CC 98 | Category 1: module input | Categories 2 and 3: parameter |
+| ----- | ------------------------ | ----------------------------- |
+| 0 | EG Gate | Osc Waveform |
+| 1 | Osc Pitch | Osc Mod Amount |
+| 2 | Osc Modulation In | Filter Cutoff |
+| 3 | Filter Audio In | Filter Resonance |
+| 4 | Filter Modulation In | Filter Mod Amount |
+| 5 | Amp Audio In | Amp Gain |
+| 6 | Amp Modulation In | EG Attack |
+| 7 | Final Output | EG Decay/Release |
+| 8 | -- | EG Sustain |
+| 9 | -- | LFO Rate |
+
+#### Module IDs
+
+| ID | Module |
+| -- | ------ |
+| 0 | None (ends the run order) |
+| 1 | EG |
+| 2 | LFO |
+| 3 | Osc |
+| 4 | Filter |
+| 5 | Amp |
+
+#### Signal IDs
+
+| ID | Signal | | ID | Signal |
+| -- | ------ | - | -- | ------ |
+| 0 | None (constant 0.0) | | 10 | Filter Resonance |
+| 1 | Constant 1.0 | | 11 | Filter Mod Amount |
+| 2 | EG Output | | 12 | Amp Gain |
+| 3 | LFO Output | | 13 | EG Attack |
+| 4 | Osc Output | | 14 | EG Decay/Release |
+| 5 | Filter Output | | 15 | EG Sustain |
+| 6 | Amp Output | | 16 | LFO Rate |
+| 7 | Osc Waveform | | 17 | Note Pitch |
+| 8 | Osc Mod Amount | | 18 | Note Gate |
+| 9 | Filter Cutoff | | | |
+
+Slots 7-16 hold the values arriving from CC, so a parameter reads its own CC by default.
+Pointing it at another slot is what makes a modulation.
+
+Slots 0 and 1 are constants that nothing writes. Signal 0 is also what an entry nobody has set
+reads as, so an unrouted input is silent rather than wired to whatever sits in the first slot.
+Signal 1 is the value an unmodulated input wants: routing an amp's modulation input to it leaves
+the amp at full level.
+
+The ID numbers are not stable across firmware versions. A patch is never saved, so adding a
+module is allowed to regroup them.
+
+#### Examples
+
+- Vibrato is wired by default -- the LFO feeds the oscillator's modulation input -- so CC 13 sets
+  the depth and CC 3 the rate
+- Filter cutoff follows note pitch (keyboard tracking): CC 99 = 2, CC 98 = 2, CC 6 = 17
+- Filter cutoff driven by the envelope instead of its CC: CC 99 = 2, CC 98 = 2, CC 6 = 2
+- Filter cutoff swept by the LFO: CC 99 = 2, CC 98 = 2, CC 6 = 3 -- a parameter, so keep the rate
+  low
+- Amp gain and filter cutoff share one CC: CC 99 = 3, CC 98 = 5, CC 6 = 74
+- Amp at full level with no envelope: CC 99 = 1, CC 98 = 6, CC 6 = 1
+- Disconnect the filter's modulation input: CC 99 = 1, CC 98 = 4, CC 6 = 0
+- Pitch swept by the envelope instead of the LFO: CC 99 = 1, CC 98 = 2, CC 6 = 2, then set the
+  depth on CC 13 -- about a semitone at 15, an octave at 42, the whole range at 124
+- Take the filter out of the chain: CC 99 = 0, CC 98 = 3, CC 6 = 5, then CC 99 = 0, CC 98 = 4,
+  CC 6 = 0 -- and point the amp's audio input at the oscillator: CC 99 = 1, CC 98 = 5, CC 6 = 4
+
+#### Notes
+
+- Module inputs (category 1) are read every sample and are not smoothed; parameters (category 2)
+  are read once per buffer and are smoothed by their destination. Route a fast source through a
+  module input, a stepped one through a parameter
+- A parameter source may point at any of the 128 slots. Slots above 18 read 0 until something
+  writes them
+- The NRPN CCs are stored as ordinary controls too, so a parameter may be mapped to CC 6 -- which
+  then moves it every time a patch edit is sent
 
 ### Debug UART
 

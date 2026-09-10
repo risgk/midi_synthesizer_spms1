@@ -50,9 +50,10 @@ MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, SPMS1_UART_MIDI_SERIAL, UART_MIDI, M
 #include <I2S.h>
 I2S g_i2s_output(OUTPUT);
 
-uint32_t g_debug_measurement_start_us   = 0;
-uint32_t g_debug_measurement_elapsed_us = 0;
-uint32_t g_debug_measurement_max_us     = 0;
+uint32_t g_debug_measurement_start_us = 0;
+uint32_t g_debug_measurement_min_us   = UINT32_MAX;
+uint32_t g_debug_measurement_max_us   = 0;
+uint32_t g_debug_measurement_counted  = 0;  // 0 until the first buffer has been measured
 
 void handleNoteOn(byte channel, byte pitch, byte velocity);
 void handleNoteOff(byte channel, byte pitch, byte velocity);
@@ -65,6 +66,15 @@ extern int Spms1_main(int argc, char **argv);
 uint8_t  g_midi_note_on_pitch[16]  = {60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60};
 uint8_t  g_midi_note_on_state[16]  = {};
 uint8_t  g_midi_cc_values[16][128] = {};
+
+// NRPN parameter numbers are (MSB << 7) | LSB; the synth uses MSB 0-3 as categories, so 512
+// entries cover it. Values are 7-bit, filled from CC 6.
+#define SPMS1_NRPN_SIZE (512)
+uint8_t  g_midi_nrpn_values[16][SPMS1_NRPN_SIZE] = {};
+uint8_t  g_midi_nrpn_msb[16]            = {};
+uint8_t  g_midi_nrpn_lsb[16]            = {};
+uint8_t  g_midi_nrpn_selected[16]       = {};  // 0 until CC 99 or 98 arrives, and again after an RPN
+
 uint32_t g_sample_rate             = 96000;
 uint32_t g_audio_buffers           = 2;
 uint32_t g_audio_buffer_words      = 64;
@@ -125,6 +135,52 @@ uint8_t get_midi_cc_value(uint8_t midi_ch, uint8_t cc_number) {
   return g_midi_cc_values[midi_ch][cc_number];
 }
 
+void set_midi_nrpn_value(uint8_t midi_ch, int32_t index, uint8_t value) {
+  if (midi_ch >= 16) {
+    return;
+  }
+
+  if (index < 0 || index >= SPMS1_NRPN_SIZE) {
+    return;
+  }
+
+  g_midi_nrpn_values[midi_ch][index] = value;
+}
+
+uint8_t get_midi_nrpn_value(uint8_t midi_ch, int32_t index) {
+  if (midi_ch >= 16) {
+    return 0;
+  }
+
+  if (index < 0 || index >= SPMS1_NRPN_SIZE) {
+    return 0;
+  }
+
+  return g_midi_nrpn_values[midi_ch][index];
+}
+
+// CC 99 and 98 select a parameter, in either order, and CC 6 commits a value to it. CC 38 is
+// ignored because every value here is 7-bit, and CC 96/97 are not implemented. CC 101 and 100
+// select an RPN instead, which must not leave a following CC 6 looking like NRPN data. The CCs
+// are still stored by set_midi_cc_value as well, so a patch may read them as ordinary controls.
+void handle_midi_nrpn_cc(uint8_t midi_ch, uint8_t number, uint8_t value) {
+  if (midi_ch >= 16) {
+    return;
+  }
+
+  if (number == 99) {
+    g_midi_nrpn_msb[midi_ch] = value;
+    g_midi_nrpn_selected[midi_ch] = 1;
+  } else if (number == 98) {
+    g_midi_nrpn_lsb[midi_ch] = value;
+    g_midi_nrpn_selected[midi_ch] = 1;
+  } else if (number == 101 || number == 100) {
+    g_midi_nrpn_selected[midi_ch] = 0;
+  } else if (number == 6 && g_midi_nrpn_selected[midi_ch]) {
+    set_midi_nrpn_value(midi_ch, (((int32_t)g_midi_nrpn_msb[midi_ch]) << 7) | g_midi_nrpn_lsb[midi_ch], value);
+  }
+}
+
 void set_sample_rate(uint32_t sample_rate) {
   g_sample_rate = sample_rate;
 }
@@ -180,9 +236,16 @@ void start_debug_measure(void) {
 void stop_debug_measure(void) {
 #if defined(SPMS1_USE_DEBUG_PRINT)
   uint32_t debug_measurement_end_us = micros();
-  g_debug_measurement_elapsed_us = debug_measurement_end_us - g_debug_measurement_start_us;
-  g_debug_measurement_max_us += (g_debug_measurement_elapsed_us > g_debug_measurement_max_us) *
-                                (g_debug_measurement_elapsed_us - g_debug_measurement_max_us);
+  uint32_t debug_measurement_elapsed_us = debug_measurement_end_us - g_debug_measurement_start_us;
+  // The first buffer runs cold and would fix a maximum that never comes down again, so it is
+  // multiplied out rather than skipped, keeping both updates branchless.
+  g_debug_measurement_min_us -= g_debug_measurement_counted *
+                                (debug_measurement_elapsed_us < g_debug_measurement_min_us) *
+                                (g_debug_measurement_min_us - debug_measurement_elapsed_us);
+  g_debug_measurement_max_us += g_debug_measurement_counted *
+                                (debug_measurement_elapsed_us > g_debug_measurement_max_us) *
+                                (debug_measurement_elapsed_us - g_debug_measurement_max_us);
+  g_debug_measurement_counted = 1;
 #endif  // defined(SPMS1_USE_DEBUG_PRINT)
 }
 
@@ -249,9 +312,14 @@ void loop() {
   static uint8_t s_loop_counter = 0;
   if (++s_loop_counter == 0) {
     SPMS1_DEBUG_PRINT_SERIAL.print("\e[1;1H\e[K");
-    SPMS1_DEBUG_PRINT_SERIAL.print(g_debug_measurement_elapsed_us);
+    SPMS1_DEBUG_PRINT_SERIAL.print(g_debug_measurement_min_us);
     SPMS1_DEBUG_PRINT_SERIAL.print("\e[2;1H\e[K");
     SPMS1_DEBUG_PRINT_SERIAL.print(g_debug_measurement_max_us);
+    // Both cleared on every report, so the pair brackets the buffers since the last one rather
+    // than since boot. min is the uncontended compute time, max is what the deadline is about,
+    // and the gap between them is interference from core0 and interrupts.
+    g_debug_measurement_min_us = UINT32_MAX;
+    g_debug_measurement_max_us = 0;
   }
 
   delay(1);
@@ -273,4 +341,5 @@ void handleNoteOff(byte channel, byte pitch, byte velocity)
 void handleControlChange(byte channel, byte number, byte value)
 {
   set_midi_cc_value(channel - 1, number, value);
+  handle_midi_nrpn_cc(channel - 1, number, value);
 }

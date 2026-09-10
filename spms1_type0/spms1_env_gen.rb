@@ -8,17 +8,18 @@ module Spms1
     CONTROL_RATE_DIVISOR = 4
 
     # Lookup table for exponential time mapping.
-    EXP_TABLE = Array.new(130, 0.0)
-    for i in 0...129
-      EXP_TABLE[i] = 10.0 ** ((i.to_f - 64.0) * (1.0 / 32.0))
+    EXP_TABLE = Array.new(122, 0.0)
+    for i in 0...121
+      EXP_TABLE[i] = 10.0 ** ((i.to_f - 60.0) * (1.0 / 30.0))
     end
-    EXP_TABLE[129] = EXP_TABLE[128]
+    EXP_TABLE[121] = EXP_TABLE[120]
 
     # Time scaling constants (value at 0.0 / (EXP_TABLE min * ln(2))).
     # Attack range: 1 ms at 0.0, 100 ms at 0.5, 10 s at 1.0.
     ATTACK_BASE = 0.001 / (0.01 * Math::log(2))
     # Decay range:  3 ms at 0.0, 300 ms at 0.5, 30 s at 1.0.
-    # Decay time is defined as the time until the level reaches 1/1024 (approx. -60 dB).
+    # Decay is measured to 1/1024 = 2^-10, which keeps the attack's base of 2 rather than landing
+    # on a round -60 dB. 1/1024 is -60.2 dB; the shared base is worth more than closing the 0.2.
     DECAY_BASE  = 0.003 / (0.01 * 10 * Math::log(2))
 
     # Overshoot target so the attack ramp reaches 1.0 in finite time.
@@ -26,6 +27,9 @@ module Spms1
 
     def initialize(sample_rate)
       @sample_rate = sample_rate
+      # Rate the envelope actually steps at. Fixed once sample_rate is, so it is computed here
+      # rather than on every control-rate update.
+      @effective_rate = sample_rate * (1.0 / CONTROL_RATE_DIVISOR)
       @state = STATE_IDLE
       @current_level = 0.0
 
@@ -93,14 +97,12 @@ module Spms1
     private
 
     def update_coefficients_full
-      effective_rate = @sample_rate * (1.0 / CONTROL_RATE_DIVISOR)
-
-      @attack_coef = 1.0 / (ATTACK_BASE * calculate_exp_fast(@attack) * effective_rate)
-      @decay_coef  = 1.0 / (DECAY_BASE  * calculate_exp_fast(@decay)  * effective_rate)
+      @attack_coef = 1.0 / (ATTACK_BASE * calculate_exp_fast(@attack) * @effective_rate)
+      @decay_coef  = 1.0 / (DECAY_BASE  * calculate_exp_fast(@decay)  * @effective_rate)
     end
 
     def calculate_exp_fast(value)
-      v_scale = value * 128.0
+      v_scale = value * 120.0
       index = v_scale.to_i
       fraction = v_scale - index.to_f
 
