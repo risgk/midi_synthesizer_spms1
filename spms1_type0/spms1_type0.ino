@@ -75,7 +75,7 @@ uint8_t  g_midi_nrpn_msb[16]            = {};
 uint8_t  g_midi_nrpn_lsb[16]            = {};
 uint8_t  g_midi_nrpn_selected[16]       = {};  // 0 until CC 99 or 98 arrives, and again after an RPN
 
-uint32_t g_sample_rate             = 96000;
+uint32_t g_sample_rate             = 48000;
 uint32_t g_audio_buffers           = 2;
 uint32_t g_audio_buffer_words      = 64;
 

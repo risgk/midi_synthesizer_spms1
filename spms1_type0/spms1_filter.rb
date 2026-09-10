@@ -13,7 +13,9 @@ module Spms1
     SOFT_CLIP_INV_CEILING = 1.0 / SOFT_CLIP_CEILING
     SOFT_CLIP_LIMIT       = (2.0 / 3.0) * SOFT_CLIP_CEILING
     SOFT_CLIP_CUBIC_SCALE = (1.0 / 3.0) * SOFT_CLIP_CEILING
-    SMOOTHING_TARGET_BLEND_BASE = 0.015625
+    # Blend at the reference rate on the line below. The two move together: their product is what
+    # fixes the time constant, so changing one without the other changes how fast smoothing is.
+    SMOOTHING_TARGET_BLEND_BASE = 0.03125
     # Number of samples between control-rate updates; smoothing speed is kept approximately constant if this is changed.
     CONTROL_RATE_DIVISOR = 4
 
@@ -37,7 +39,7 @@ module Spms1
       # Reciprocal kept alongside the rate so the control-rate update multiplies. @sample_rate is
       # an Integer, so dividing by it would also cost an int-to-float conversion.
       @inv_sample_rate = 1.0 / sample_rate
-      @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (96000.0 / @sample_rate) * (CONTROL_RATE_DIVISOR / 4.0)
+      @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (48000.0 / @sample_rate) * (CONTROL_RATE_DIVISOR / 4.0)
       @cutoff = 1.0
       @resonance = 0.0
       @modulation_amount = 0.0

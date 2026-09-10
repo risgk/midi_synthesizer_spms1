@@ -46,7 +46,7 @@ end
 include Spms1
 
 MIDI_CH            = 0
-SAMPLE_RATE        = 96000
+SAMPLE_RATE        = 48000
 AUDIO_BUFFERS      = 2
 AUDIO_BUFFER_WORDS = 64
 
@@ -241,7 +241,7 @@ loop do
   source_output       = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OUTPUT)
 
   # Parameter sources. Once per buffer is enough: the destination's 2.67 ms smoothing swallows the
-  # difference between being fed at 96 kHz and at the 1.5 kHz buffer rate.
+  # difference between being fed at 48 kHz and at the 750 Hz buffer rate.
   source_osc_waveform      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_WAVEFORM)
   source_osc_mod_amount    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_MOD_AMOUNT)
   source_filter_cutoff     = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_CUTOFF)
