@@ -23,14 +23,15 @@
 | Pitch Bend                    | x             | x             |                                      |
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Control                    20 | x             | o             | Osc Waveform (Saw to Square)         |
-| Change                     74 | x             | o             | Filter Cutoff                        |
+| Change                     13 | x             | o             | Osc Mod Amount                       |
+|                            74 | x             | o             | Filter Cutoff                        |
 |                            71 | x             | o             | Filter Resonance                     |
 |                            24 | x             | o             | Filter Mod Amount                    |
 |                            15 | x             | o             | Amp Gain                             |
 |                            73 | x             | o             | EG Attack (Time)                     |
 |                            75 | x             | o             | EG Decay/Release (Time)              |
 |                            30 | x             | o             | EG Sustain (Level)                   |
-|                            13 | x             | o             | Osc Mod Amount                       |
+|                             3 | x             | o             | LFO Rate                             |
 |                            99 | x             | o             | NRPN MSB                             |
 |                            98 | x             | o             | NRPN LSB                             |
 |                             6 | x             | o             | Data Entry MSB (NRPN value)          |

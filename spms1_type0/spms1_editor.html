@@ -360,6 +360,19 @@
           </div>
         </div>
       </div>
+
+      <div class="panel">
+        <h2>LFO</h2>
+        <div class="control-row">
+          <div class="slider-knob-zone">
+            <div class="slider-label">Rate <span class="cc-num">(CC 3)</span></div>
+            <div class="slider-input-wrapper">
+              <input type="range" id="lfo-rate" min="0" max="127" value="64">
+              <span class="slider-value" id="lfo-rate-val">64</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -386,7 +399,8 @@
     'eg-amount': 24,
     'attack': 73,
     'decay': 75,
-    'sustain': 30
+    'sustain': 30,
+    'lfo-rate': 3
   };
 
   const defaultValues = {
@@ -398,7 +412,8 @@
     'eg-amount': 64,
     'attack': 4,
     'decay': 94,
-    'sustain': 4
+    'sustain': 4,
+    'lfo-rate': 64
   };
 
   function initMIDI() {
@@ -506,6 +521,7 @@
         case 73: elementId = "attack"; break;
         case 75: elementId = "decay"; break;
         case 30: elementId = "sustain"; break;
+        case 3: elementId = "lfo-rate"; break;
       }
       if (elementId) {
         const slider = document.getElementById(elementId);

@@ -1,7 +1,8 @@
-require_relative 'spms1_oscillator'
+require_relative 'spms1_osc'
 require_relative 'spms1_filter'
 require_relative 'spms1_amp'
 require_relative 'spms1_env_gen'
+require_relative 'spms1_lfo'
 
 # Two structural choices, referred to below as notes 1-2. What they say about the generated C
 # holds for the Spinel version vendored in sp_runtime.h; re-check on updating it.
@@ -51,34 +52,38 @@ MODULES_SIZE = 16
 
 MODULE_NONE    = 0
 MODULE_ENV_GEN = 1
-MODULE_OSC     = 2
-MODULE_FILTER  = 3
-MODULE_AMP     = 4
+MODULE_LFO     = 2
+MODULE_OSC     = 3
+MODULE_FILTER  = 4
+MODULE_AMP     = 5
 
 # Slots of the `signals` bus: module outputs, control values and the note inputs, in one
 # namespace, so a routing is just a slot number -- see note 2 -- and one source can feed as many
 # destinations as read its slot. A slot is a plain float; its range is whatever the destination
-# expects. Append new slots at the end: the numbers are arbitrary and nothing depends on order.
+# expects. Nothing in the code depends on the numbering and a patch is never saved, so the order
+# is for the reader alone and regrouping it costs only a documentation update.
 # The two constants come first so that SIGNAL_NONE is 0: an NRPN entry nobody has set reads 0, and
 # an unrouted input should be silent rather than wired to whatever happens to sit in slot 0.
 # Nothing ever writes these two, so they hold what the bus was filled with at startup.
 SIGNAL_NONE              = 0
 SIGNAL_ONE               = 1
 SIGNAL_ENV_GEN_OUTPUT    = 2
-SIGNAL_OSC_OUTPUT        = 3
-SIGNAL_FILTER_OUTPUT     = 4
-SIGNAL_AMP_OUTPUT        = 5
-SIGNAL_OSC_WAVEFORM      = 6
-SIGNAL_FILTER_CUTOFF     = 7
-SIGNAL_FILTER_RESONANCE  = 8
-SIGNAL_FILTER_MOD_AMOUNT = 9
-SIGNAL_AMP_GAIN          = 10
-SIGNAL_ENV_GEN_ATTACK    = 11
-SIGNAL_ENV_GEN_DECAY     = 12
-SIGNAL_ENV_GEN_SUSTAIN   = 13
-SIGNAL_PITCH             = 14
-SIGNAL_GATE              = 15
-SIGNAL_OSC_MOD_AMOUNT    = 16
+SIGNAL_LFO_OUTPUT        = 3
+SIGNAL_OSC_OUTPUT        = 4
+SIGNAL_FILTER_OUTPUT     = 5
+SIGNAL_AMP_OUTPUT        = 6
+SIGNAL_OSC_WAVEFORM      = 7
+SIGNAL_OSC_MOD_AMOUNT    = 8
+SIGNAL_FILTER_CUTOFF     = 9
+SIGNAL_FILTER_RESONANCE  = 10
+SIGNAL_FILTER_MOD_AMOUNT = 11
+SIGNAL_AMP_GAIN          = 12
+SIGNAL_ENV_GEN_ATTACK    = 13
+SIGNAL_ENV_GEN_DECAY     = 14
+SIGNAL_ENV_GEN_SUSTAIN   = 15
+SIGNAL_LFO_RATE          = 16
+SIGNAL_PITCH             = 17
+SIGNAL_GATE              = 18
 
 SIGNALS_SIZE = 128
 
@@ -93,32 +98,34 @@ NRPN_ACTIVE_MODULE_BASE = 0
 
 NRPN_SOURCE_ENV_GEN_GATE = 128
 NRPN_SOURCE_OSC_PITCH    = 129
-NRPN_SOURCE_FILTER_AUDIO = 130
-NRPN_SOURCE_FILTER_MOD   = 131
-NRPN_SOURCE_AMP_AUDIO    = 132
-NRPN_SOURCE_AMP_MOD      = 133
-NRPN_SOURCE_OUTPUT       = 134
-NRPN_SOURCE_OSC_MOD      = 135
+NRPN_SOURCE_OSC_MOD      = 130
+NRPN_SOURCE_FILTER_AUDIO = 131
+NRPN_SOURCE_FILTER_MOD   = 132
+NRPN_SOURCE_AMP_AUDIO    = 133
+NRPN_SOURCE_AMP_MOD      = 134
+NRPN_SOURCE_OUTPUT       = 135
 
 NRPN_SOURCE_OSC_WAVEFORM      = 256
-NRPN_SOURCE_FILTER_CUTOFF     = 257
-NRPN_SOURCE_FILTER_RESONANCE  = 258
-NRPN_SOURCE_FILTER_MOD_AMOUNT = 259
-NRPN_SOURCE_AMP_GAIN          = 260
-NRPN_SOURCE_ENV_GEN_ATTACK    = 261
-NRPN_SOURCE_ENV_GEN_DECAY     = 262
-NRPN_SOURCE_ENV_GEN_SUSTAIN   = 263
-NRPN_SOURCE_OSC_MOD_AMOUNT    = 264
+NRPN_SOURCE_OSC_MOD_AMOUNT    = 257
+NRPN_SOURCE_FILTER_CUTOFF     = 258
+NRPN_SOURCE_FILTER_RESONANCE  = 259
+NRPN_SOURCE_FILTER_MOD_AMOUNT = 260
+NRPN_SOURCE_AMP_GAIN          = 261
+NRPN_SOURCE_ENV_GEN_ATTACK    = 262
+NRPN_SOURCE_ENV_GEN_DECAY     = 263
+NRPN_SOURCE_ENV_GEN_SUSTAIN   = 264
+NRPN_SOURCE_LFO_RATE          = 265
 
 NRPN_CC_OSC_WAVEFORM      = 384
-NRPN_CC_FILTER_CUTOFF     = 385
-NRPN_CC_FILTER_RESONANCE  = 386
-NRPN_CC_FILTER_MOD_AMOUNT = 387
-NRPN_CC_AMP_GAIN          = 388
-NRPN_CC_ENV_GEN_ATTACK    = 389
-NRPN_CC_ENV_GEN_DECAY     = 390
-NRPN_CC_ENV_GEN_SUSTAIN   = 391
-NRPN_CC_OSC_MOD_AMOUNT    = 392
+NRPN_CC_OSC_MOD_AMOUNT    = 385
+NRPN_CC_FILTER_CUTOFF     = 386
+NRPN_CC_FILTER_RESONANCE  = 387
+NRPN_CC_FILTER_MOD_AMOUNT = 388
+NRPN_CC_AMP_GAIN          = 389
+NRPN_CC_ENV_GEN_ATTACK    = 390
+NRPN_CC_ENV_GEN_DECAY     = 391
+NRPN_CC_ENV_GEN_SUSTAIN   = 392
+NRPN_CC_LFO_RATE          = 393
 
 # CC value normalization. Every parameter is a ratio in 0.0..1.0, so this is the only converter:
 # CC 4..124 maps to the full range, centred on CC 64 where a MIDI controller puts its detent, and
@@ -133,10 +140,11 @@ def cc_to_ratio(value)
   (scaled < 0.0) ? 0.0 : ((scaled > 1.0) ? 1.0 : scaled)
 end
 
-osc     = Oscillator.new(SAMPLE_RATE)
+osc     = Osc.new(SAMPLE_RATE)
 filter  = Filter.new(SAMPLE_RATE)
 amp     = Amp.new(SAMPLE_RATE)
 env_gen = EnvGen.new(SAMPLE_RATE)
+lfo     = LFO.new(SAMPLE_RATE)
 
 # Allocated once; which slots are filled is decided per buffer, inside the loop.
 active_modules = Array.new(MODULES_SIZE, MODULE_NONE)
@@ -150,22 +158,24 @@ signals = Array.new(SIGNALS_SIZE, 0.0)
 signals[SIGNAL_ONE] = 1.0
 
 # The default patch, written into the NRPN table the loop reads it back from. Slots left at 0
-# read as MODULE_NONE, so active_modules needs only the four it uses.
+# read as MODULE_NONE, so active_modules needs only the five it uses.
 C.set_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 0, MODULE_ENV_GEN)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 1, MODULE_OSC)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 2, MODULE_FILTER)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 3, MODULE_AMP)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 1, MODULE_LFO)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 2, MODULE_OSC)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 3, MODULE_FILTER)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 4, MODULE_AMP)
 
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_GATE, SIGNAL_GATE)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_PITCH   , SIGNAL_PITCH)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_MOD     , SIGNAL_LFO_OUTPUT)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_AUDIO, SIGNAL_OSC_OUTPUT)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_MOD  , SIGNAL_ENV_GEN_OUTPUT)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_AUDIO   , SIGNAL_FILTER_OUTPUT)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_MOD     , SIGNAL_ENV_GEN_OUTPUT)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OUTPUT      , SIGNAL_AMP_OUTPUT)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_MOD     , SIGNAL_NONE)
 
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_WAVEFORM     , SIGNAL_OSC_WAVEFORM)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_MOD_AMOUNT   , SIGNAL_OSC_MOD_AMOUNT)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_CUTOFF    , SIGNAL_FILTER_CUTOFF)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_RESONANCE , SIGNAL_FILTER_RESONANCE)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_MOD_AMOUNT, SIGNAL_FILTER_MOD_AMOUNT)
@@ -173,9 +183,10 @@ C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_GAIN         , SIGNAL_AMP_GAIN)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_ATTACK   , SIGNAL_ENV_GEN_ATTACK)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_DECAY    , SIGNAL_ENV_GEN_DECAY)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_SUSTAIN  , SIGNAL_ENV_GEN_SUSTAIN)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_MOD_AMOUNT   , SIGNAL_OSC_MOD_AMOUNT)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_RATE         , SIGNAL_LFO_RATE)
 
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_WAVEFORM     , 20)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_MOD_AMOUNT   , 13)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_CUTOFF    , 74)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_RESONANCE , 71)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_MOD_AMOUNT, 24)
@@ -183,9 +194,10 @@ C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_AMP_GAIN         , 15)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_ATTACK   , 73)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_DECAY    , 75)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_SUSTAIN  , 30)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_MOD_AMOUNT   , 13)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_RATE         , 3)
 
 C.set_midi_cc_value(MIDI_CH, 20 , 4  ) # Osc Waveform
+C.set_midi_cc_value(MIDI_CH, 13 , 4  ) # Osc Mod Amount
 C.set_midi_cc_value(MIDI_CH, 74 , 124) # Filter Cutoff
 C.set_midi_cc_value(MIDI_CH, 71 , 64 ) # Filter Resonance
 C.set_midi_cc_value(MIDI_CH, 24 , 64 ) # Filter Mod Amount
@@ -193,7 +205,7 @@ C.set_midi_cc_value(MIDI_CH, 15 , 94 ) # Amp Gain
 C.set_midi_cc_value(MIDI_CH, 73 , 4  ) # EG Attack
 C.set_midi_cc_value(MIDI_CH, 75 , 94 ) # EG Decay/Release
 C.set_midi_cc_value(MIDI_CH, 30 , 4  ) # EG Sustain
-C.set_midi_cc_value(MIDI_CH, 13 , 4  ) # Osc Mod Amount
+C.set_midi_cc_value(MIDI_CH, 3  , 64 ) # LFO Rate
 
 C.set_sample_rate(SAMPLE_RATE)
 C.set_audio_buffers(AUDIO_BUFFERS)
@@ -219,11 +231,11 @@ loop do
 
   source_env_gen_gate = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_GATE)
   source_osc_pitch    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_PITCH)
+  source_osc_mod      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_MOD)
   source_filter_audio = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_AUDIO)
   source_filter_mod   = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_MOD)
   source_amp_audio    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_AUDIO)
   source_amp_mod      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_MOD)
-  source_osc_mod      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_MOD)
   source_output       = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OUTPUT)
 
   # Parameter sources. Read once per buffer rather than per sample: each destination smooths at
@@ -231,6 +243,7 @@ loop do
   # it at 96 kHz and at the 1.5 kHz buffer rate. Faster modulation goes through the module inputs
   # above, which are read per sample and not smoothed.
   source_osc_waveform      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_WAVEFORM)
+  source_osc_mod_amount    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_MOD_AMOUNT)
   source_filter_cutoff     = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_CUTOFF)
   source_filter_resonance  = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_RESONANCE)
   source_filter_mod_amount = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_MOD_AMOUNT)
@@ -238,11 +251,12 @@ loop do
   source_env_gen_attack    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_ATTACK)
   source_env_gen_decay     = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_DECAY)
   source_env_gen_sustain   = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_SUSTAIN)
-  source_osc_mod_amount    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_MOD_AMOUNT)
+  source_lfo_rate          = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_RATE)
 
   # Which CC fills each control slot. The bus is the only thing downstream reads, so this is
   # where MIDI enters and the only place a CC number appears.
   cc_osc_waveform      = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_WAVEFORM)
+  cc_osc_mod_amount    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_MOD_AMOUNT)
   cc_filter_cutoff     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_CUTOFF)
   cc_filter_resonance  = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_RESONANCE)
   cc_filter_mod_amount = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_MOD_AMOUNT)
@@ -250,9 +264,10 @@ loop do
   cc_env_gen_attack    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_ATTACK)
   cc_env_gen_decay     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_DECAY)
   cc_env_gen_sustain   = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_SUSTAIN)
-  cc_osc_mod_amount    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_MOD_AMOUNT)
+  cc_lfo_rate          = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_RATE)
 
   signals[SIGNAL_OSC_WAVEFORM]      = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_osc_waveform))
+  signals[SIGNAL_OSC_MOD_AMOUNT]    = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_osc_mod_amount))
   signals[SIGNAL_FILTER_CUTOFF]     = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_filter_cutoff))
   signals[SIGNAL_FILTER_RESONANCE]  = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_filter_resonance))
   signals[SIGNAL_FILTER_MOD_AMOUNT] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_filter_mod_amount))
@@ -260,7 +275,7 @@ loop do
   signals[SIGNAL_ENV_GEN_ATTACK]    = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_env_gen_attack))
   signals[SIGNAL_ENV_GEN_DECAY]     = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_env_gen_decay))
   signals[SIGNAL_ENV_GEN_SUSTAIN]   = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_env_gen_sustain))
-  signals[SIGNAL_OSC_MOD_AMOUNT]    = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_osc_mod_amount))
+  signals[SIGNAL_LFO_RATE]          = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_lfo_rate))
 
   osc.set_waveform(signals[source_osc_waveform])
   osc.set_modulation_amount(signals[source_osc_mod_amount])
@@ -271,6 +286,7 @@ loop do
   env_gen.set_attack(signals[source_env_gen_attack])
   env_gen.set_decay(signals[source_env_gen_decay])
   env_gen.set_sustain(signals[source_env_gen_sustain])
+  lfo.set_rate(signals[source_lfo_rate])
 
   i = 0
   while i < AUDIO_BUFFER_WORDS
@@ -282,6 +298,8 @@ loop do
       case module_id
       when MODULE_ENV_GEN
         signals[SIGNAL_ENV_GEN_OUTPUT] = env_gen.process(signals[source_env_gen_gate])
+      when MODULE_LFO
+        signals[SIGNAL_LFO_OUTPUT] = lfo.process
       when MODULE_OSC
         signals[SIGNAL_OSC_OUTPUT] = osc.process(signals[source_osc_pitch], signals[source_osc_mod])
       when MODULE_FILTER

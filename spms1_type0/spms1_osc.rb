@@ -1,6 +1,6 @@
 module Spms1
   # PolyBLEP-based saw/square morph oscillator for anti-aliased waveform transitions.
-  class Oscillator
+  class Osc
     SMOOTHING_TARGET_BLEND_BASE = 0.015625
     # Number of samples between control-rate updates; smoothing speed is kept approximately constant if this is changed.
     CONTROL_RATE_DIVISOR = 4
