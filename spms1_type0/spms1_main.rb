@@ -4,15 +4,20 @@ require_relative 'spms1_amp'
 require_relative 'spms1_env_gen'
 require_relative 'spms1_lfo'
 
-# Two structural choices, referred to below as notes 1-2. What they say about the generated C
-# holds for the Spinel version vendored in sp_runtime.h; re-check on updating it.
+# The patch is data: which modules run and in what order, what feeds each module input, where each
+# parameter takes its value, and which CC fills each control slot all live in the NRPN table, read
+# back every buffer so that MIDI can rewire the synth while it runs. README lists the numbers a
+# controller sends. Two invariants the code leans on:
 #
-# 1) active_modules is walked by a plain while loop, not .each: breaking out of a block needs
-#    setjmp, while a plain break compiles to a C break.
+# - Every entry is 7-bit and every 7-bit value is legal, so nothing read back is validated. An
+#   unknown module id falls through the dispatch, and any slot number is a real slot because the
+#   bus is 128 wide.
+# - Module inputs are read per sample and reach their module unsmoothed; parameters are read once
+#   per buffer and are smoothed by the module receiving them. Which of the two a signal arrives
+#   through is what decides how fast it is allowed to move.
 #
-# 2) Module outputs live in the `signals` array and routing is an index into it, so a routed
-#    input costs one array read whatever the module count. Passing the candidates in as
-#    arguments instead costs picks x candidates per sample, which grows quadratically.
+# Claims below about the generated C hold for the Spinel version vendored in sp_runtime.h.
+# Re-check them on updating it.
 
 module Spms1
   module C
@@ -57,11 +62,13 @@ MODULE_OSC     = 3
 MODULE_FILTER  = 4
 MODULE_AMP     = 5
 
-# Slots of the `signals` bus: module outputs, control values and the note inputs, in one
-# namespace, so a routing is just a slot number -- see note 2 -- and one source can feed as many
-# destinations as read its slot. A slot is a plain float; its range is whatever the destination
-# expects. Nothing in the code depends on the numbering and a patch is never saved, so the order
-# is for the reader alone and regrouping it costs only a documentation update.
+# Slots of the `signals` bus: module outputs, control values and the note inputs in one namespace,
+# so a routing is just a slot number and one source can feed as many destinations as read its
+# slot. A slot is a plain float; its range is whatever the destination expects. Indexing an array
+# is what holds a routed input to one read whatever the module count: passing the candidates in as
+# arguments instead costs picks x candidates per sample, which grows quadratically.
+# Nothing in the code depends on the numbering and a patch is never saved, so the order is for the
+# reader alone and regrouping it costs only a documentation update.
 # The two constants come first so that SIGNAL_NONE is 0: an NRPN entry nobody has set reads 0, and
 # an unrouted input should be silent rather than wired to whatever happens to sit in slot 0.
 # Nothing ever writes these two, so they hold what the bus was filled with at startup.
@@ -88,8 +95,6 @@ SIGNAL_GATE              = 18
 SIGNALS_SIZE = 128
 
 # NRPN parameter numbers: (MSB << 7) | LSB, where the MSB picks a category and the LSB an entry.
-# A CC 6 data byte is 0..127 and so is every value here -- a bus slot, a module id, a CC number --
-# so nothing read back needs range-checking.
 #   0..127   active_modules[slot]
 # 128..255   what feeds each module input
 # 256..383   where each parameter's value comes from
@@ -218,11 +223,8 @@ loop do
   signals[SIGNAL_PITCH] = C.get_midi_note_on_pitch(MIDI_CH).to_f * (1.0 / 120.0) - 0.5
   signals[SIGNAL_GATE]  = C.get_midi_note_on_state(MIDI_CH).to_f
 
-  # The patch, read back from the NRPN table every buffer so a controller can change it while the
-  # synth runs. active_modules is packed from the front with no gaps, see note 1; source_* hold
-  # SIGNAL_* bus slots, see note 2. Every value is 7-bit and every 7-bit value is legal here, so
-  # nothing needs validating: an unknown module id falls through the dispatch, and any slot number
-  # is a real slot because the bus is 128 wide.
+  # The patch, read back from the NRPN table. active_modules is packed from the front with no
+  # gaps; every source_* holds a SIGNAL_* bus slot.
   slot = 0
   while slot < MODULES_SIZE
     active_modules[slot] = C.get_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + slot)
@@ -238,10 +240,8 @@ loop do
   source_amp_mod      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_MOD)
   source_output       = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OUTPUT)
 
-  # Parameter sources. Read once per buffer rather than per sample: each destination smooths at
-  # the control rate with a 2.67 ms time constant, which swallows the difference between feeding
-  # it at 96 kHz and at the 1.5 kHz buffer rate. Faster modulation goes through the module inputs
-  # above, which are read per sample and not smoothed.
+  # Parameter sources. Once per buffer is enough: the destination's 2.67 ms smoothing swallows the
+  # difference between being fed at 96 kHz and at the 1.5 kHz buffer rate.
   source_osc_waveform      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_WAVEFORM)
   source_osc_mod_amount    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_MOD_AMOUNT)
   source_filter_cutoff     = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_CUTOFF)
@@ -290,6 +290,8 @@ loop do
 
   i = 0
   while i < AUDIO_BUFFER_WORDS
+    # A plain while loop, not .each: breaking out of a block needs setjmp, while a plain break
+    # compiles to a C break.
     slot = 0
     while slot < MODULES_SIZE
       module_id = active_modules[slot]
