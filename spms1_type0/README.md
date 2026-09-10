@@ -148,13 +148,13 @@ than 16 modules ends itself.
 
 | CC 98 | Category 1: module input | Categories 2 and 3: parameter |
 | ----- | ------------------------ | ----------------------------- |
-| 0 | EG Gate | Osc Waveform |
-| 1 | Osc Pitch | Osc Mod Amount |
-| 2 | Osc Modulation In | Filter Cutoff |
+| 0 | EG Gate | Osc Wave |
+| 1 | Osc Pitch | Osc Mod Amt (Modulation Amount) |
+| 2 | Osc Mod In | Filter Cutoff |
 | 3 | Filter Audio In | Filter Resonance |
-| 4 | Filter Modulation In | Filter Mod Amount |
+| 4 | Filter Mod In | Filter Mod Amt (Modulation Amount) |
 | 5 | Amp Audio In | Amp Gain |
-| 6 | Amp Modulation In | EG Attack |
+| 6 | Amp Mod In | EG Attack |
 | 7 | Final Output | EG Decay/Release |
 | 8 | -- | EG Sustain |
 | 9 | -- | LFO Rate |
@@ -164,25 +164,25 @@ than 16 modules ends itself.
 | ID | Module |
 | -- | ------ |
 | 0 | None (ends the run order) |
-| 1 | EG |
-| 2 | LFO |
-| 3 | Osc |
+| 1 | EG (Envelope Generator) |
+| 2 | LFO (Low Frequency Oscillator) |
+| 3 | Osc (Oscillator) |
 | 4 | Filter |
-| 5 | Amp |
+| 5 | Amp (Amplifier) |
 
 #### Signal IDs
 
 | ID | Signal | | ID | Signal |
 | -- | ------ | - | -- | ------ |
 | 0 | None (constant 0.0) | | 10 | Filter Resonance |
-| 1 | Constant 1.0 | | 11 | Filter Mod Amount |
+| 1 | Constant 1.0 | | 11 | Filter Mod Amt |
 | 2 | EG Output | | 12 | Amp Gain |
 | 3 | LFO Output | | 13 | EG Attack |
 | 4 | Osc Output | | 14 | EG Decay/Release |
 | 5 | Filter Output | | 15 | EG Sustain |
 | 6 | Amp Output | | 16 | LFO Rate |
-| 7 | Osc Waveform | | 17 | Note Pitch |
-| 8 | Osc Mod Amount | | 18 | Note Gate |
+| 7 | Osc Wave | | 17 | Note Pitch |
+| 8 | Osc Mod Amt | | 18 | Note Gate |
 | 9 | Filter Cutoff | | | |
 
 Slots 7-16 hold the values arriving from CC, so a parameter reads its own CC by default.

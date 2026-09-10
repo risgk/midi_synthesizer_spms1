@@ -22,11 +22,11 @@
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Pitch Bend                    | x             | x             |                                      |
 +-------------------------------+---------------+---------------+--------------------------------------+
-| Control                    20 | x             | o             | Osc Waveform (Saw to Square)         |
-| Change                     13 | x             | o             | Osc Mod Amount                       |
+| Control                    20 | x             | o             | Osc Wave (Saw to Square)             |
+| Change                     13 | x             | o             | Osc Mod Amt                          |
 |                            74 | x             | o             | Filter Cutoff                        |
 |                            71 | x             | o             | Filter Resonance                     |
-|                            24 | x             | o             | Filter Mod Amount                    |
+|                            24 | x             | o             | Filter Mod Amt                       |
 |                            15 | x             | o             | Amp Gain                             |
 |                            73 | x             | o             | EG Attack (Time)                     |
 |                            75 | x             | o             | EG Decay/Release (Time)              |
