@@ -8,9 +8,10 @@ module Spms1
     # oscillator specifically, not to whichever module happens to read its output. May move to a
     # dedicated oscillator mixer later.
     OUTPUT_LEVEL = 0.5
-    # What a modulation depth of 1.0 is worth: 60 of the 120 semitones the pitch domain spans, so a
-    # full-scale depth driven by a full-scale signal covers the domain exactly.
-    MODULATION_RANGE = 60.0 / 120.0
+    # What a modulation depth of 1.0 is worth: all 120 semitones the pitch domain spans, so a
+    # full-scale signal can drive the pitch from either end of the range to the other, whatever note
+    # it started from.
+    MODULATION_RANGE = 120.0 / 120.0
 
     # Pitch lookup table for note-to-frequency conversion.
     FREQ_TABLE = Array.new(129, 0.0)
@@ -41,8 +42,8 @@ module Spms1
 
     # Modulation depth is normalized to [0.0, 1.0]. Squared and scaled here rather than per sample,
     # so the smoothed value is already in pitch units. Squared because the useful depths are the
-    # small ones: linear over 60 semitones would make a 7-bit step half a semitone, which is too
-    # coarse for vibrato.
+    # small ones: linear across the range would make a 7-bit step a whole semitone, far too coarse
+    # for vibrato, where squared keeps the bottom of the dial under a fifth of one.
     def set_modulation_amount(amount)
       clamped_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
       @modulation_amount = clamped_amount * clamped_amount * MODULATION_RANGE

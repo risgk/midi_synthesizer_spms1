@@ -594,46 +594,46 @@ static const char *sp_obj_inspect_sw(int cls_id, void *p) {
     default: return "#<Object>";
   }
 }
-#line 21 "spms1_oscillator.rb"
+#line 22 "spms1_oscillator.rb"
 static void sp_Oscillator_initialize(sp_Oscillator *self, mrb_int lv_sample_rate) {
     SP_GC_SAVE();
-#line 22 "spms1_oscillator.rb"
+#line 23 "spms1_oscillator.rb"
   self->iv_sample_rate = lv_sample_rate;
-#line 26 "spms1_oscillator.rb"
-  self->iv_inv_sample_rate = (1.0 / lv_sample_rate);
 #line 27 "spms1_oscillator.rb"
-  self->iv_smoothing_target_blend = ((cst_Spms1__Oscillator__SMOOTHING_TARGET_BLEND_BASE * ((96000.0 / self->iv_sample_rate))) * ((cst_Spms1__Oscillator__CONTROL_RATE_DIVISOR / 4.0)));
+  self->iv_inv_sample_rate = (1.0 / lv_sample_rate);
 #line 28 "spms1_oscillator.rb"
-  self->iv_phase = 0.0;
+  self->iv_smoothing_target_blend = ((cst_Spms1__Oscillator__SMOOTHING_TARGET_BLEND_BASE * ((96000.0 / self->iv_sample_rate))) * ((cst_Spms1__Oscillator__CONTROL_RATE_DIVISOR / 4.0)));
 #line 29 "spms1_oscillator.rb"
-  self->iv_waveform = 0.0;
+  self->iv_phase = 0.0;
 #line 30 "spms1_oscillator.rb"
-  self->iv_current_waveform = 0.0;
+  self->iv_waveform = 0.0;
 #line 31 "spms1_oscillator.rb"
-  self->iv_modulation_amount = 0.0;
+  self->iv_current_waveform = 0.0;
 #line 32 "spms1_oscillator.rb"
-  self->iv_current_modulation_amount = 0.0;
+  self->iv_modulation_amount = 0.0;
 #line 33 "spms1_oscillator.rb"
+  self->iv_current_modulation_amount = 0.0;
+#line 34 "spms1_oscillator.rb"
   self->iv_sample_counter = 0LL;
 }
-#line 38 "spms1_oscillator.rb"
+#line 39 "spms1_oscillator.rb"
 static mrb_float sp_Oscillator_set_waveform(sp_Oscillator *self, mrb_float lv_waveform) {
     SP_GC_SAVE();
-#line 39 "spms1_oscillator.rb"
+#line 40 "spms1_oscillator.rb"
   self->iv_waveform = (((lv_waveform < 0.0)) ? 0.0 : ((((lv_waveform > 1.0)) ? 1.0 : lv_waveform)));
   return 0.0;
 }
-#line 46 "spms1_oscillator.rb"
+#line 47 "spms1_oscillator.rb"
 static mrb_float sp_Oscillator_set_modulation_amount(sp_Oscillator *self, mrb_float lv_amount) {
     SP_GC_SAVE();
     mrb_float lv_clamped_amount = 0.0;
-#line 47 "spms1_oscillator.rb"
-  lv_clamped_amount = (((lv_amount < 0.0)) ? 0.0 : ((((lv_amount > 1.0)) ? 1.0 : lv_amount)));
 #line 48 "spms1_oscillator.rb"
+  lv_clamped_amount = (((lv_amount < 0.0)) ? 0.0 : ((((lv_amount > 1.0)) ? 1.0 : lv_amount)));
+#line 49 "spms1_oscillator.rb"
   self->iv_modulation_amount = ((lv_clamped_amount * lv_clamped_amount) * cst_MODULATION_RANGE);
   return 0.0;
 }
-#line 54 "spms1_oscillator.rb"
+#line 55 "spms1_oscillator.rb"
 static mrb_float sp_Oscillator_process(sp_Oscillator *self, mrb_float lv_pitch_input, mrb_float lv_modulation_input) {
     SP_GC_SAVE();
     mrb_float lv_mod = 0.0;
@@ -650,61 +650,61 @@ static mrb_float sp_Oscillator_process(sp_Oscillator *self, mrb_float lv_pitch_i
     mrb_float lv_blep2 = 0.0;
     mrb_float lv_saw2 = 0.0;
     mrb_float lv_output = 0.0;
-#line 55 "spms1_oscillator.rb"
+#line 56 "spms1_oscillator.rb"
   if ((self->iv_sample_counter == 0LL)) {
-#line 57 "spms1_oscillator.rb"
-    self->iv_current_waveform += (((self->iv_waveform - self->iv_current_waveform)) * self->iv_smoothing_target_blend);
 #line 58 "spms1_oscillator.rb"
+    self->iv_current_waveform += (((self->iv_waveform - self->iv_current_waveform)) * self->iv_smoothing_target_blend);
+#line 59 "spms1_oscillator.rb"
     self->iv_current_modulation_amount += (((self->iv_modulation_amount - self->iv_current_modulation_amount)) * self->iv_smoothing_target_blend);
   }
-#line 61 "spms1_oscillator.rb"
-  lv_mod = (((lv_modulation_input < -1.0)) ? -1.0 : ((((lv_modulation_input > 1.0)) ? 1.0 : lv_modulation_input)));
 #line 62 "spms1_oscillator.rb"
-  lv_total_pitch = (lv_pitch_input + ((lv_mod * self->iv_current_modulation_amount)));
+  lv_mod = (((lv_modulation_input < -1.0)) ? -1.0 : ((((lv_modulation_input > 1.0)) ? 1.0 : lv_modulation_input)));
 #line 63 "spms1_oscillator.rb"
-  lv_pitch = (((lv_total_pitch < -0.5)) ? -0.5 : ((((lv_total_pitch > 0.5)) ? 0.5 : lv_total_pitch)));
+  lv_total_pitch = (lv_pitch_input + ((lv_mod * self->iv_current_modulation_amount)));
 #line 64 "spms1_oscillator.rb"
+  lv_pitch = (((lv_total_pitch < -0.5)) ? -0.5 : ((((lv_total_pitch > 0.5)) ? 0.5 : lv_total_pitch)));
+#line 65 "spms1_oscillator.rb"
   mrb_float _t1 = lv_pitch;
   lv_freq = sp_Oscillator_pitch_to_freq_fast((sp_Oscillator *)self, _t1);
-#line 65 "spms1_oscillator.rb"
+#line 66 "spms1_oscillator.rb"
   lv_current_dt = (lv_freq * self->iv_inv_sample_rate);
-#line 68 "spms1_oscillator.rb"
+#line 69 "spms1_oscillator.rb"
   lv_current_dt_inv = (1.0 / lv_current_dt);
-#line 70 "spms1_oscillator.rb"
-  lv_naive_saw1 = ((-2.0 * self->iv_phase) + 1.0);
 #line 71 "spms1_oscillator.rb"
+  lv_naive_saw1 = ((-2.0 * self->iv_phase) + 1.0);
+#line 72 "spms1_oscillator.rb"
   mrb_float _t2 = self->iv_phase;
   mrb_float _t3 = lv_current_dt;
   mrb_float _t4 = lv_current_dt_inv;
   lv_blep1 = sp_Oscillator_poly_blep((sp_Oscillator *)self, _t2, _t3, _t4);
-#line 72 "spms1_oscillator.rb"
+#line 73 "spms1_oscillator.rb"
   lv_saw1 = (lv_naive_saw1 + lv_blep1);
-#line 74 "spms1_oscillator.rb"
-  lv_phase2 = (self->iv_phase + 0.5);
 #line 75 "spms1_oscillator.rb"
+  lv_phase2 = (self->iv_phase + 0.5);
+#line 76 "spms1_oscillator.rb"
   lv_phase2 -= (((lv_phase2 < 1.0)) ? 0.0 : 1.0);
-#line 77 "spms1_oscillator.rb"
-  lv_naive_saw2 = ((-2.0 * lv_phase2) + 1.0);
 #line 78 "spms1_oscillator.rb"
+  lv_naive_saw2 = ((-2.0 * lv_phase2) + 1.0);
+#line 79 "spms1_oscillator.rb"
   mrb_float _t5 = lv_phase2;
   mrb_float _t6 = lv_current_dt;
   mrb_float _t7 = lv_current_dt_inv;
   lv_blep2 = sp_Oscillator_poly_blep((sp_Oscillator *)self, _t5, _t6, _t7);
-#line 79 "spms1_oscillator.rb"
+#line 80 "spms1_oscillator.rb"
   lv_saw2 = (lv_naive_saw2 + lv_blep2);
-#line 81 "spms1_oscillator.rb"
-  lv_output = (lv_saw1 - ((lv_saw2 * self->iv_current_waveform)));
 #line 82 "spms1_oscillator.rb"
-  self->iv_phase += lv_current_dt;
+  lv_output = (lv_saw1 - ((lv_saw2 * self->iv_current_waveform)));
 #line 83 "spms1_oscillator.rb"
-  self->iv_phase -= (((self->iv_phase < 1.0)) ? 0.0 : 1.0);
+  self->iv_phase += lv_current_dt;
 #line 84 "spms1_oscillator.rb"
+  self->iv_phase -= (((self->iv_phase < 1.0)) ? 0.0 : 1.0);
+#line 85 "spms1_oscillator.rb"
   self->iv_sample_counter = sp_imod((sp_int_add(self->iv_sample_counter, 1LL)), 4LL);
-#line 86 "spms1_oscillator.rb"
+#line 87 "spms1_oscillator.rb"
   return ((lv_output * 0.5) * cst_OUTPUT_LEVEL);
   return 0.0;
 }
-#line 91 "spms1_oscillator.rb"
+#line 92 "spms1_oscillator.rb"
 static mrb_float sp_Oscillator_pitch_to_freq_fast(sp_Oscillator *self, mrb_float lv_pitch) {
     SP_GC_SAVE();
     mrb_float lv_internal_pitch = 0.0;
@@ -712,21 +712,21 @@ static mrb_float sp_Oscillator_pitch_to_freq_fast(sp_Oscillator *self, mrb_float
     mrb_float lv_fraction = 0.0;
     mrb_float lv_f0 = 0.0;
     mrb_float lv_f1 = 0.0;
-#line 92 "spms1_oscillator.rb"
-  lv_internal_pitch = (((lv_pitch + 0.5)) * 120.0);
 #line 93 "spms1_oscillator.rb"
-  lv_index = sp_float_to_i_checked(lv_internal_pitch);
+  lv_internal_pitch = (((lv_pitch + 0.5)) * 120.0);
 #line 94 "spms1_oscillator.rb"
-  lv_fraction = (lv_internal_pitch - ((mrb_float)(lv_index)));
+  lv_index = sp_float_to_i_checked(lv_internal_pitch);
 #line 95 "spms1_oscillator.rb"
-  lv_f0 = sp_FloatArray_get(cst_Spms1__Oscillator__FREQ_TABLE, lv_index);
+  lv_fraction = (lv_internal_pitch - ((mrb_float)(lv_index)));
 #line 96 "spms1_oscillator.rb"
-  lv_f1 = sp_FloatArray_get(cst_Spms1__Oscillator__FREQ_TABLE, sp_int_add(lv_index, 1LL));
+  lv_f0 = sp_FloatArray_get(cst_Spms1__Oscillator__FREQ_TABLE, lv_index);
 #line 97 "spms1_oscillator.rb"
+  lv_f1 = sp_FloatArray_get(cst_Spms1__Oscillator__FREQ_TABLE, sp_int_add(lv_index, 1LL));
+#line 98 "spms1_oscillator.rb"
   return (lv_f0 + (lv_fraction * ((lv_f1 - lv_f0))));
   return 0.0;
 }
-#line 104 "spms1_oscillator.rb"
+#line 105 "spms1_oscillator.rb"
 static mrb_float sp_Oscillator_poly_blep(sp_Oscillator *self, mrb_float lv_t, mrb_float lv_dt, mrb_float lv_dt_inv) {
     SP_GC_SAVE();
     mrb_float lv_num_start = 0.0;
@@ -734,17 +734,17 @@ static mrb_float sp_Oscillator_poly_blep(sp_Oscillator *self, mrb_float lv_t, mr
     mrb_float lv_num_end = 0.0;
     mrb_float lv_blep_end = 0.0;
     mrb_float lv_val = 0.0;
-#line 105 "spms1_oscillator.rb"
-  lv_num_start = (lv_t * lv_dt_inv);
 #line 106 "spms1_oscillator.rb"
-  lv_blep_start = (((lv_num_start + lv_num_start) - (lv_num_start * lv_num_start)) - 1.0);
+  lv_num_start = (lv_t * lv_dt_inv);
 #line 107 "spms1_oscillator.rb"
-  lv_num_end = (((lv_t - 1.0)) * lv_dt_inv);
+  lv_blep_start = (((lv_num_start + lv_num_start) - (lv_num_start * lv_num_start)) - 1.0);
 #line 108 "spms1_oscillator.rb"
-  lv_blep_end = ((((lv_num_end * lv_num_end) + lv_num_end) + lv_num_end) + 1.0);
+  lv_num_end = (((lv_t - 1.0)) * lv_dt_inv);
 #line 109 "spms1_oscillator.rb"
-  lv_val = (((lv_t < lv_dt)) ? lv_blep_start : 0.0);
+  lv_blep_end = ((((lv_num_end * lv_num_end) + lv_num_end) + lv_num_end) + 1.0);
 #line 110 "spms1_oscillator.rb"
+  lv_val = (((lv_t < lv_dt)) ? lv_blep_start : 0.0);
+#line 111 "spms1_oscillator.rb"
   if (((lv_t > (1.0 - lv_dt)))) {
     return lv_blep_end;
   }
@@ -1220,9 +1220,9 @@ int main(int argc,char**argv){
   cst_Spms1__Oscillator__CONTROL_RATE_DIVISOR = 4LL;
 #line 10 "spms1_oscillator.rb"
   cst_OUTPUT_LEVEL = 0.5;
-#line 13 "spms1_oscillator.rb"
-  cst_MODULATION_RANGE = (60.0 / 120.0);
-#line 16 "spms1_oscillator.rb"
+#line 14 "spms1_oscillator.rb"
+  cst_MODULATION_RANGE = (120.0 / 120.0);
+#line 17 "spms1_oscillator.rb"
   mrb_int _t16 = 129LL;
   if (_t16 < 0) sp_raise_cls("ArgumentError", "negative array size");
   mrb_float _t17 = 0.0;
@@ -1230,10 +1230,10 @@ int main(int argc,char**argv){
   SP_GC_ROOT(_t18);
   for (mrb_int _t19 = 0; _t19 < _t16; _t19++) sp_FloatArray_push(_t18, _t17);
   cst_Spms1__Oscillator__FREQ_TABLE = _t18;
-#line 17 "spms1_oscillator.rb"
+#line 18 "spms1_oscillator.rb"
   { mrb_int _t20 = 129LL;
     for (lv_i = 0LL; lv_i < _t20; lv_i++) {
-#line 18 "spms1_oscillator.rb"
+#line 19 "spms1_oscillator.rb"
       sp_FloatArray_set(cst_Spms1__Oscillator__FREQ_TABLE, lv_i, (440.0 * (sp_float_pow(2.0, ((((((mrb_float)(lv_i)) - 69.0)) * ((1.0 / 12.0))))))));
     }
   }

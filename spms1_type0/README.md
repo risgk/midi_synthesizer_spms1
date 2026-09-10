@@ -161,7 +161,8 @@ the amp at full level.
 - Amp gain and filter cutoff share one CC: CC 99 = 3, CC 98 = 4, CC 6 = 74
 - Amp at full level with no envelope: CC 99 = 1, CC 98 = 5, CC 6 = 1
 - Disconnect the filter's modulation input: CC 99 = 1, CC 98 = 3, CC 6 = 0
-- Pitch swept by the envelope, one octave at full depth: CC 99 = 1, CC 98 = 7, CC 6 = 2
+- Pitch swept by the envelope: CC 99 = 1, CC 98 = 7, CC 6 = 2, then set the depth on CC 13 --
+  about a semitone at 15, an octave at 42, the whole range at 124
 - Take the filter out of the chain: CC 99 = 0, CC 98 = 2, CC 6 = 4, then CC 99 = 0, CC 98 = 3,
   CC 6 = 0 -- and point the amp's audio input at the oscillator: CC 99 = 1, CC 98 = 4, CC 6 = 3
 
