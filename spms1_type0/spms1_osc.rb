@@ -8,9 +8,9 @@ module Spms1
     # oscillator specifically, not to whichever module happens to read its output. May move to a
     # dedicated oscillator mixer later.
     OUTPUT_LEVEL = 0.5
-    # What a modulation depth of 1.0 is worth: all 120 semitones the pitch domain spans, so a
-    # full-scale signal can drive the pitch from either end of the range to the other, whatever note
-    # it started from.
+    # What a modulation depth of 1.0 is worth: 120 semitones per unit of modulation input. A
+    # bipolar source spans one unit peak to peak, so at full depth it sweeps the whole pitch range,
+    # 60 semitones either side of the note, and clamps where that runs past an end.
     MODULATION_RANGE = 120.0 / 120.0
 
     # Pitch lookup table for note-to-frequency conversion.
