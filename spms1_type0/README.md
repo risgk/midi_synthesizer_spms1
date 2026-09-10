@@ -112,15 +112,15 @@ than 16 modules ends itself.
 
 | CC 98 | Category 1: module input | Categories 2 and 3: parameter |
 | ----- | ------------------------ | ----------------------------- |
-| 0 | EG Gate | Oscillator Waveform |
-| 1 | Oscillator Pitch | Filter Cutoff |
+| 0 | EG Gate | Osc Waveform |
+| 1 | Osc Pitch | Filter Cutoff |
 | 2 | Filter Audio In | Filter Resonance |
-| 3 | Filter Modulation In | Filter EG Amount |
+| 3 | Filter Modulation In | Filter Mod Amount |
 | 4 | Amp Audio In | Amp Gain |
 | 5 | Amp Modulation In | EG Attack |
 | 6 | Final Output | EG Decay/Release |
-| 7 | Oscillator Modulation In | EG Sustain |
-| 8 | -- | Oscillator Mod Amount |
+| 7 | Osc Modulation In | EG Sustain |
+| 8 | -- | Osc Mod Amount |
 
 #### Module IDs
 
@@ -128,7 +128,7 @@ than 16 modules ends itself.
 | -- | ------ |
 | 0 | None (ends the run order) |
 | 1 | EG |
-| 2 | Oscillator |
+| 2 | Osc |
 | 3 | Filter |
 | 4 | Amp |
 
@@ -137,14 +137,14 @@ than 16 modules ends itself.
 | ID | Signal | | ID | Signal |
 | -- | ------ | - | -- | ------ |
 | 0 | None (constant 0.0) | | 8 | Filter Resonance |
-| 1 | Constant 1.0 | | 9 | Filter EG Amount |
+| 1 | Constant 1.0 | | 9 | Filter Mod Amount |
 | 2 | EG Output | | 10 | Amp Gain |
-| 3 | Oscillator Output | | 11 | EG Attack |
+| 3 | Osc Output | | 11 | EG Attack |
 | 4 | Filter Output | | 12 | EG Decay/Release |
 | 5 | Amp Output | | 13 | EG Sustain |
-| 6 | Oscillator Waveform | | 14 | Note Pitch |
+| 6 | Osc Waveform | | 14 | Note Pitch |
 | 7 | Filter Cutoff | | 15 | Note Gate |
-| | | | 16 | Oscillator Mod Amount |
+| | | | 16 | Osc Mod Amount |
 
 Slots 6-13 and 16 hold the values arriving from CC, so a parameter reads its own CC by default.
 Pointing it at another slot is what makes a modulation.

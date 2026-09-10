@@ -185,15 +185,15 @@ C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_DECAY    , 75)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_SUSTAIN  , 30)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_MOD_AMOUNT   , 13)
 
-C.set_midi_cc_value(MIDI_CH, 20 , 4  ) # Oscillator Waveform
+C.set_midi_cc_value(MIDI_CH, 20 , 4  ) # Osc Waveform
 C.set_midi_cc_value(MIDI_CH, 74 , 124) # Filter Cutoff
 C.set_midi_cc_value(MIDI_CH, 71 , 64 ) # Filter Resonance
-C.set_midi_cc_value(MIDI_CH, 24 , 64 ) # Filter EG Amt
+C.set_midi_cc_value(MIDI_CH, 24 , 64 ) # Filter Mod Amount
 C.set_midi_cc_value(MIDI_CH, 15 , 94 ) # Amp Gain
 C.set_midi_cc_value(MIDI_CH, 73 , 4  ) # EG Attack
 C.set_midi_cc_value(MIDI_CH, 75 , 94 ) # EG Decay/Release
 C.set_midi_cc_value(MIDI_CH, 30 , 4  ) # EG Sustain
-C.set_midi_cc_value(MIDI_CH, 13 , 4  ) # Oscillator Mod Amount
+C.set_midi_cc_value(MIDI_CH, 13 , 4  ) # Osc Mod Amount
 
 C.set_sample_rate(SAMPLE_RATE)
 C.set_audio_buffers(AUDIO_BUFFERS)
