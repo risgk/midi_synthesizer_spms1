@@ -1236,42 +1236,42 @@ static mrb_float sp_LFO_set_rate(sp_LFO *self, mrb_float lv_rate) {
   self->iv_rate = (((lv_rate < 0.0)) ? 0.0 : ((((lv_rate > 1.0)) ? 1.0 : lv_rate)));
   return 0.0;
 }
-#line 40 "spms1_lfo.rb"
+#line 42 "spms1_lfo.rb"
 static mrb_float sp_LFO_process(sp_LFO *self) {
     SP_GC_SAVE();
     mrb_float lv_shifted = 0.0;
     mrb_float lv_distance = 0.0;
     mrb_float lv_folded = 0.0;
     mrb_float lv_output = 0.0;
-#line 41 "spms1_lfo.rb"
+#line 43 "spms1_lfo.rb"
   if ((self->iv_sample_counter == 0LL)) {
-#line 45 "spms1_lfo.rb"
+#line 47 "spms1_lfo.rb"
     self->iv_current_rate += (((self->iv_rate - self->iv_current_rate)) * self->iv_smoothing_target_blend);
-#line 46 "spms1_lfo.rb"
+#line 48 "spms1_lfo.rb"
     mrb_float _t15 = self->iv_current_rate;
     self->iv_dt = (sp_LFO_rate_to_freq_fast((sp_LFO *)self, _t15) * self->iv_inv_sample_rate);
   }
-#line 49 "spms1_lfo.rb"
+#line 51 "spms1_lfo.rb"
   self->iv_sample_counter = sp_imod((sp_int_add(self->iv_sample_counter, 1LL)), 4LL);
-#line 53 "spms1_lfo.rb"
-  lv_shifted = (self->iv_phase + 0.25);
-#line 54 "spms1_lfo.rb"
-  lv_shifted -= (((lv_shifted < 1.0)) ? 0.0 : 1.0);
 #line 55 "spms1_lfo.rb"
-  lv_distance = (lv_shifted - 0.5);
+  lv_shifted = (self->iv_phase + 0.25);
 #line 56 "spms1_lfo.rb"
-  lv_folded = (((lv_distance < 0.0)) ? (-lv_distance) : lv_distance);
+  lv_shifted -= (((lv_shifted < 1.0)) ? 0.0 : 1.0);
 #line 57 "spms1_lfo.rb"
-  lv_output = (1.0 - ((4.0 * lv_folded)));
+  lv_distance = (lv_shifted - 0.5);
+#line 58 "spms1_lfo.rb"
+  lv_folded = (((lv_distance < 0.0)) ? (-lv_distance) : lv_distance);
 #line 59 "spms1_lfo.rb"
+  lv_output = (0.5 - ((2.0 * lv_folded)));
+#line 61 "spms1_lfo.rb"
   self->iv_phase += self->iv_dt;
-#line 60 "spms1_lfo.rb"
-  self->iv_phase -= (((self->iv_phase < 1.0)) ? 0.0 : 1.0);
 #line 62 "spms1_lfo.rb"
+  self->iv_phase -= (((self->iv_phase < 1.0)) ? 0.0 : 1.0);
+#line 64 "spms1_lfo.rb"
   return lv_output;
   return 0.0;
 }
-#line 67 "spms1_lfo.rb"
+#line 69 "spms1_lfo.rb"
 static mrb_float sp_LFO_rate_to_freq_fast(sp_LFO *self, mrb_float lv_rate) {
     SP_GC_SAVE();
     mrb_float lv_internal_rate = 0.0;
@@ -1279,17 +1279,17 @@ static mrb_float sp_LFO_rate_to_freq_fast(sp_LFO *self, mrb_float lv_rate) {
     mrb_float lv_fraction = 0.0;
     mrb_float lv_f0 = 0.0;
     mrb_float lv_f1 = 0.0;
-#line 68 "spms1_lfo.rb"
-  lv_internal_rate = (lv_rate * 120.0);
-#line 69 "spms1_lfo.rb"
-  lv_index = sp_float_to_i_checked(lv_internal_rate);
 #line 70 "spms1_lfo.rb"
-  lv_fraction = (lv_internal_rate - ((mrb_float)(lv_index)));
+  lv_internal_rate = (lv_rate * 120.0);
 #line 71 "spms1_lfo.rb"
-  lv_f0 = sp_FloatArray_get(cst_Spms1__LFO__FREQ_TABLE, lv_index);
+  lv_index = sp_float_to_i_checked(lv_internal_rate);
 #line 72 "spms1_lfo.rb"
-  lv_f1 = sp_FloatArray_get(cst_Spms1__LFO__FREQ_TABLE, sp_int_add(lv_index, 1LL));
+  lv_fraction = (lv_internal_rate - ((mrb_float)(lv_index)));
 #line 73 "spms1_lfo.rb"
+  lv_f0 = sp_FloatArray_get(cst_Spms1__LFO__FREQ_TABLE, lv_index);
+#line 74 "spms1_lfo.rb"
+  lv_f1 = sp_FloatArray_get(cst_Spms1__LFO__FREQ_TABLE, sp_int_add(lv_index, 1LL));
+#line 75 "spms1_lfo.rb"
   return (lv_f0 + (lv_fraction * ((lv_f1 - lv_f0))));
   return 0.0;
 }

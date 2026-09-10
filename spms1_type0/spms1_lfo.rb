@@ -36,7 +36,9 @@ module Spms1
       @rate = (rate < 0.0) ? 0.0 : ((rate > 1.0) ? 1.0 : rate)
     end
 
-    # Output is bipolar, [-1.0, 1.0], the range a modulation input expects.
+    # Output is bipolar and spans one unit peak to peak, [-0.5, 0.5], the same span as the pitch
+    # domain. Every bipolar signal on the bus is scaled that way, so a destination's amount control
+    # means the same thing whichever one is routed to it.
     def process
       if @sample_counter == 0
         # Rate is smoothed at the control rate to avoid sudden jumps, and the phase increment is
@@ -54,7 +56,7 @@ module Spms1
       shifted -= (shifted < 1.0) ? 0.0 : 1.0
       distance = shifted - 0.5
       folded = (distance < 0.0) ? -distance : distance
-      output = 1.0 - (4.0 * folded)
+      output = 0.5 - (2.0 * folded)
 
       @phase += @dt
       @phase -= (@phase < 1.0) ? 0.0 : 1.0
