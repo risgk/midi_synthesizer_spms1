@@ -137,100 +137,130 @@ a matter of changing slot numbers.
 | CC 99 | CC 98 | Sets | CC 6 value |
 | ----- | ----- | ---- | ---------- |
 | 0 | 0-31 | Run order, slot by slot | Module ID |
-| 1 | 0-14 | What feeds a module input | Signal ID |
-| 2 | 0-25 | Where a parameter takes its value | Signal ID |
-| 3 | 0-25 | Which CC fills a control slot | CC number, or 0 for none |
+| 1 | 0-24 | What feeds a module input | Signal ID |
+| 2 | 0-40 | Where a parameter takes its value | Signal ID |
+| 3 | 0-40 | Which CC fills a control slot | CC number, or 0 for none |
 
 The run order is read from slot 0 upwards and stops at the first Module ID 0, so a patch shorter
-than 32 modules ends itself.
+than 32 modules ends itself. It is separate from the module numbering: a module only sees the
+current sample's value from something listed before it, and last sample's from something after.
 
 In category 3, CC number 0 means the parameter has no CC. Its control slot then keeps whatever it
 already holds, so the parameter can be driven by routing alone.
 
-There are two of every module. **The second of each is not in the default run order**, has
-nothing routed to it, and carries no CC on any of its parameters, so it makes no sound and costs
-nothing per sample until a patch puts it in the run order. Its parameters are still read once a
-buffer either way. Its control slots are seeded with the values the first one's CCs default to,
-so wiring it in gives a module that behaves like the first rather than a silent one.
+There are two of every sound module and five mixers. **Only the first of each pair is in the
+default run order**, and the mixers are not in it at all. Everything left out has nothing routed
+to it and no CC on any of its parameters, so it makes no sound and costs nothing per sample until
+a patch puts it in the run order. Its parameters are still read once a buffer either way. Those
+control slots are seeded with the values the wired-up ones default to, so a module brought into a
+patch behaves like its twin rather than starting silent.
 
 #### Entries (CC 98)
 
 | CC 98 | Category 1: module input | Categories 2 and 3: parameter |
 | ----- | ------------------------ | ----------------------------- |
 | 0 | EG 1 Gate | Osc 1 Wave |
-| 1 | EG 2 Gate | Osc 1 Mod Amt (Modulation Amount) |
+| 1 | EG 2 Gate | Osc 1 Mod Amt |
 | 2 | Osc 1 Pitch | Osc 1 Coarse Tune |
 | 3 | Osc 1 Mod In | Osc 1 Fine Tune |
 | 4 | Osc 2 Pitch | Osc 2 Wave |
-| 5 | Osc 2 Mod In | Osc 2 Mod Amt (Modulation Amount) |
+| 5 | Osc 2 Mod In | Osc 2 Mod Amt |
 | 6 | Filter 1 Audio In | Osc 2 Coarse Tune |
 | 7 | Filter 1 Mod In | Osc 2 Fine Tune |
 | 8 | Filter 2 Audio In | Filter 1 Cutoff |
 | 9 | Filter 2 Mod In | Filter 1 Resonance |
-| 10 | Amp 1 Audio In | Filter 1 Mod Amt (Modulation Amount) |
+| 10 | Amp 1 Audio In | Filter 1 Mod Amt |
 | 11 | Amp 1 Mod In | Filter 1 Gain |
 | 12 | Amp 2 Audio In | Filter 2 Cutoff |
 | 13 | Amp 2 Mod In | Filter 2 Resonance |
-| 14 | Final Output | Filter 2 Mod Amt (Modulation Amount) |
-| 15 | -- | Filter 2 Gain |
-| 16 | -- | Amp 1 Gain |
-| 17 | -- | Amp 2 Gain |
-| 18 | -- | EG 1 Attack |
-| 19 | -- | EG 1 Decay |
-| 20 | -- | EG 1 Sustain |
-| 21 | -- | EG 2 Attack |
-| 22 | -- | EG 2 Decay |
-| 23 | -- | EG 2 Sustain |
-| 24 | -- | LFO 1 Rate |
+| 14 | Mixer 1 In 1 | Filter 2 Mod Amt |
+| 15 | Mixer 1 In 2 | Filter 2 Gain |
+| 16 | Mixer 2 In 1 | Amp 1 Gain |
+| 17 | Mixer 2 In 2 | Amp 2 Gain |
+| 18 | Mixer 3 In 1 | EG 1 Attack |
+| 19 | Mixer 3 In 2 | EG 1 Decay |
+| 20 | Mixer 4 In 1 | EG 1 Sustain |
+| 21 | Mixer 4 In 2 | EG 2 Attack |
+| 22 | Mixer 5 In 1 | EG 2 Decay |
+| 23 | Mixer 5 In 2 | EG 2 Sustain |
+| 24 | Final Output | LFO 1 Rate |
 | 25 | -- | LFO 2 Rate |
+| 26 | -- | Mixer 1 Level 1 |
+| 27 | -- | Mixer 1 Level 2 |
+| 28 | -- | Mixer 1 Invert |
+| 29 | -- | Mixer 2 Level 1 |
+| 30 | -- | Mixer 2 Level 2 |
+| 31 | -- | Mixer 2 Invert |
+| 32 | -- | Mixer 3 Level 1 |
+| 33 | -- | Mixer 3 Level 2 |
+| 34 | -- | Mixer 3 Invert |
+| 35 | -- | Mixer 4 Level 1 |
+| 36 | -- | Mixer 4 Level 2 |
+| 37 | -- | Mixer 4 Invert |
+| 38 | -- | Mixer 5 Level 1 |
+| 39 | -- | Mixer 5 Level 2 |
+| 40 | -- | Mixer 5 Invert |
 
 #### Module IDs
 
 | ID | Module | | ID | Module |
 | -- | ------ | - | -- | ------ |
-| 0 | None (ends the run order) | | 6 | Osc 2 |
-| 1 | EG 1 (Envelope Generator) | | 7 | Filter 1 |
-| 2 | EG 2 | | 8 | Filter 2 |
-| 3 | LFO 1 (Low Frequency Oscillator) | | 9 | Amp 1 (Amplifier) |
-| 4 | LFO 2 | | 10 | Amp 2 |
-| 5 | Osc 1 (Oscillator) | | | |
+| 0 | None (ends the run order) | | 8 | Filter 2 |
+| 1 | EG 1 | | 9 | Amp 1 |
+| 2 | EG 2 | | 10 | Amp 2 |
+| 3 | LFO 1 | | 11 | Mixer 1 |
+| 4 | LFO 2 | | 12 | Mixer 2 |
+| 5 | Osc 1 | | 13 | Mixer 3 |
+| 6 | Osc 2 | | 14 | Mixer 4 |
+| 7 | Filter 1 | | 15 | Mixer 5 |
 
 #### Signal IDs
 
 | ID | Signal | | ID | Signal |
 | -- | ------ | - | -- | ------ |
-| 0 | None (constant 0.0) | | 22 | Osc 2 Fine Tune |
-| 1 | Constant 1.0 | | 23 | Filter 1 Cutoff |
-| 2 | Constant 0.5 | | 24 | Filter 1 Resonance |
-| 3 | Constant -0.5 | | 25 | Filter 1 Mod Amt |
-| 4 | Constant -1.0 | | 26 | Filter 1 Gain |
-| 5 | EG 1 Output | | 27 | Filter 2 Cutoff |
-| 6 | EG 2 Output | | 28 | Filter 2 Resonance |
-| 7 | LFO 1 Output | | 29 | Filter 2 Mod Amt |
-| 8 | LFO 2 Output | | 30 | Filter 2 Gain |
-| 9 | Osc 1 Output | | 31 | Amp 1 Gain |
-| 10 | Osc 2 Output | | 32 | Amp 2 Gain |
-| 11 | Filter 1 Output | | 33 | EG 1 Attack |
-| 12 | Filter 2 Output | | 34 | EG 1 Decay |
-| 13 | Amp 1 Output | | 35 | EG 1 Sustain |
-| 14 | Amp 2 Output | | 36 | EG 2 Attack |
-| 15 | Osc 1 Wave | | 37 | EG 2 Decay |
-| 16 | Osc 1 Mod Amt | | 38 | EG 2 Sustain |
-| 17 | Osc 1 Coarse Tune | | 39 | LFO 1 Rate |
-| 18 | Osc 1 Fine Tune | | 40 | LFO 2 Rate |
-| 19 | Osc 2 Wave | | 41 | Note Pitch |
-| 20 | Osc 2 Mod Amt | | 42 | Note Gate |
-| 21 | Osc 2 Coarse Tune | | | |
+| 0 | None (constant 0.0) | | 32 | Filter 2 Cutoff |
+| 1 | Constant 1.0 | | 33 | Filter 2 Resonance |
+| 2 | Constant 0.5 | | 34 | Filter 2 Mod Amt |
+| 3 | Constant -0.5 | | 35 | Filter 2 Gain |
+| 4 | Constant -1.0 | | 36 | Amp 1 Gain |
+| 5 | EG 1 Output | | 37 | Amp 2 Gain |
+| 6 | EG 2 Output | | 38 | EG 1 Attack |
+| 7 | LFO 1 Output | | 39 | EG 1 Decay |
+| 8 | LFO 2 Output | | 40 | EG 1 Sustain |
+| 9 | Osc 1 Output | | 41 | EG 2 Attack |
+| 10 | Osc 2 Output | | 42 | EG 2 Decay |
+| 11 | Filter 1 Output | | 43 | EG 2 Sustain |
+| 12 | Filter 2 Output | | 44 | LFO 1 Rate |
+| 13 | Amp 1 Output | | 45 | LFO 2 Rate |
+| 14 | Amp 2 Output | | 46 | Mixer 1 Level 1 |
+| 15 | Mixer 1 Output | | 47 | Mixer 1 Level 2 |
+| 16 | Mixer 2 Output | | 48 | Mixer 1 Invert |
+| 17 | Mixer 3 Output | | 49 | Mixer 2 Level 1 |
+| 18 | Mixer 4 Output | | 50 | Mixer 2 Level 2 |
+| 19 | Mixer 5 Output | | 51 | Mixer 2 Invert |
+| 20 | Osc 1 Wave | | 52 | Mixer 3 Level 1 |
+| 21 | Osc 1 Mod Amt | | 53 | Mixer 3 Level 2 |
+| 22 | Osc 1 Coarse Tune | | 54 | Mixer 3 Invert |
+| 23 | Osc 1 Fine Tune | | 55 | Mixer 4 Level 1 |
+| 24 | Osc 2 Wave | | 56 | Mixer 4 Level 2 |
+| 25 | Osc 2 Mod Amt | | 57 | Mixer 4 Invert |
+| 26 | Osc 2 Coarse Tune | | 58 | Mixer 5 Level 1 |
+| 27 | Osc 2 Fine Tune | | 59 | Mixer 5 Level 2 |
+| 28 | Filter 1 Cutoff | | 60 | Mixer 5 Invert |
+| 29 | Filter 1 Resonance | | 61 | Note Pitch |
+| 30 | Filter 1 Mod Amt | | 62 | Note Gate |
+| 31 | Filter 1 Gain | |  |  |
 
-Slots 15-40 hold the values arriving from CC, so a parameter reads its own CC by default.
-Pointing it at another slot is what makes a modulation. The second instance of each module has no
-CC, so its slots sit at what they were seeded with until one is assigned.
+Slots 20-60 hold the values arriving from CC, so a parameter reads its own CC by default.
+Pointing it at another slot is what makes a modulation. Anything with no CC sits at what it was
+seeded with until one is assigned.
 
 Slots 0-4 are constants that nothing writes, for inputs that want a fixed value rather than a
 source. Signal 0 is also what an entry nobody has set reads as, so an unrouted input is silent
 rather than wired to whatever sits in the first slot. Signal 1 is the value an unmodulated input
 wants: routing an amp's modulation input to it leaves the amp at full level. The negative
-constants only do something on a module input, since a parameter clamps its value to 0.0-1.0.
+constants are for shifting a signal in a mixer, since a parameter clamps its own value to
+0.0-1.0 and cannot take one directly.
 
 Slot 127 is where a parameter with no CC sends its unused value. Nothing should read it.
 
@@ -250,11 +280,16 @@ Filter Gain sets how hard the audio input drives the filter, which is also what 
 the filter runs into its own saturation. Its default of CC 64 is the level the oscillator used to
 be scaled to on its own; above that the filter starts to compress the loud part of a note.
 
+A mixer sums its two inputs at their own levels and then scales the sum by Invert, which runs
+from unchanged at 0.0, through silence at 0.5, to negated at 1.0. Both levels default to full and
+Invert to zero, so a mixer with one input routed is a buffer, and one with Invert at the top is
+an inverter.
+
 #### Examples
 
 - Vibrato is wired by default -- LFO 1 feeds the oscillator's modulation input -- so CC 13 sets
   the depth and CC 3 the rate
-- Filter cutoff follows note pitch (keyboard tracking): CC 99 = 2, CC 98 = 8, CC 6 = 41
+- Filter cutoff follows note pitch (keyboard tracking): CC 99 = 2, CC 98 = 8, CC 6 = 61
 - Filter cutoff driven by the envelope instead of its CC: CC 99 = 2, CC 98 = 8, CC 6 = 5
 - Filter cutoff swept by the LFO: CC 99 = 2, CC 98 = 8, CC 6 = 7 -- a parameter, so keep the rate
   low
@@ -267,8 +302,18 @@ be scaled to on its own; above that the filter starts to compress the loud part 
 - Pitch swept by the envelope instead of the LFO: CC 99 = 1, CC 98 = 3, CC 6 = 5, then set the
   depth on CC 13 -- a semitone at 14, an octave at 124
 - A second envelope, so the filter and the amp stop sharing one: CC 99 = 0, CC 98 = 5, CC 6 = 2
-  puts EG 2 in the run order, CC 99 = 1, CC 98 = 1, CC 6 = 42 gates it from the keyboard, and
+  puts EG 2 in the run order, CC 99 = 1, CC 98 = 1, CC 6 = 62 gates it from the keyboard, and
   CC 99 = 1, CC 98 = 7, CC 6 = 6 hands the filter over to it
+- Both oscillators into the filter. Run order first, so that each module reads a value made this
+  sample: CC 99 = 0 with CC 98 = 3, 4, 5, 6 and CC 6 = 6, 11, 7, 9 leaves EG 1, LFO 1, Osc 1,
+  Osc 2, Mixer 1, Filter 1, Amp 1. Then CC 99 = 1, CC 98 = 4, CC 6 = 61 gives Osc 2 the note,
+  CC 99 = 1 with CC 98 = 14 and 15, CC 6 = 9 and 10 feeds both into Mixer 1, and CC 99 = 1,
+  CC 98 = 6, CC 6 = 15 sends the mix to the filter. Detune with Osc 2's Coarse or Fine Tune
+- A CC that bends pitch both ways, which no parameter can do on its own. CC 99 = 1, CC 98 = 14,
+  CC 6 = 28 puts the filter cutoff's control slot on Mixer 1's first input and CC 99 = 1,
+  CC 98 = 15, CC 6 = 3 puts the -0.5 constant on its second, so the mixer outputs the CC less a
+  half. Point Osc 1's modulation input at it with CC 99 = 1, CC 98 = 3, CC 6 = 15, put Mixer 1
+  ahead of Osc 1 in the run order, and CC 74 now bends the pitch down and up around the note
 - Take the filter out of the chain: CC 99 = 0, CC 98 = 3, CC 6 = 9, then CC 99 = 0, CC 98 = 4,
   CC 6 = 0 -- and point the amp's audio input at the oscillator: CC 99 = 1, CC 98 = 10, CC 6 = 9
 
@@ -277,10 +322,10 @@ be scaled to on its own; above that the filter starts to compress the loud part 
 - Module inputs (category 1) are read every sample and are not smoothed; parameters (category 2)
   are read once per buffer and are smoothed by their destination. Route a fast source through a
   module input, a stepped one through a parameter
-- A parameter source may point at any of the 128 slots. Slots above 42 read 0 until something
+- A parameter source may point at any of the 128 slots. Slots above 62 read 0 until something
   writes them
-- There is no mixer yet, so two modules of the same kind cannot be summed into one input. A
-  second oscillator is reachable as a modulator, not as a second voice
+- A parameter clamps its value to 0.0-1.0, so a mixer is the only way to give a module input a
+  bipolar signal built from a CC
 - The NRPN CCs are stored as ordinary controls too, so a parameter may be mapped to CC 6 -- which
   then moves it every time a patch edit is sent
 
