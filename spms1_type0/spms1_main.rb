@@ -101,6 +101,10 @@ SIGNAL_GATE              = 24
 
 SIGNALS_SIZE = 128
 
+# Where a control slot's value goes when its parameter has no CC assigned. Nothing reads this slot.
+# It exists so that filling the control slots is one array write either way: see cc_slot.
+SIGNAL_SINK = SIGNALS_SIZE - 1
+
 # NRPN parameter numbers: (MSB << 7) | LSB, where the MSB picks a category and the LSB an entry.
 #   0..127   active_modules[slot]
 # 128..255   what feeds each module input
@@ -131,6 +135,9 @@ NRPN_SOURCE_ENV_GEN_DECAY     = 266
 NRPN_SOURCE_ENV_GEN_SUSTAIN   = 267
 NRPN_SOURCE_LFO_RATE          = 268
 
+# A CC number of 0 means the parameter has no CC: its control slot keeps whatever it holds, so the
+# parameter can be driven by routing alone. A parameter shipped that way wants its slot seeded
+# below, unless 0.0 is the value it should rest at.
 NRPN_CC_OSC_WAVEFORM      = 384
 NRPN_CC_OSC_MOD_AMOUNT    = 385
 NRPN_CC_OSC_COARSE_TUNE   = 386
@@ -158,6 +165,13 @@ def cc_to_ratio(value)
   (scaled < 0.0) ? 0.0 : ((scaled > 1.0) ? 1.0 : scaled)
 end
 
+# Which slot a control value is written to. CC number 0 means no CC is assigned, and the value is
+# sent to SIGNAL_SINK so the parameter's own slot keeps what it already holds. Selecting the
+# destination rather than skipping the write keeps the cost the same whatever the patch says.
+def cc_slot(cc_number, slot)
+  (cc_number == 0) ? SIGNAL_SINK : slot
+end
+
 osc     = Osc.new(SAMPLE_RATE)
 filter  = Filter.new(SAMPLE_RATE)
 amp     = Amp.new(SAMPLE_RATE)
@@ -177,6 +191,12 @@ signals[SIGNAL_ONE]        =  1.0
 signals[SIGNAL_HALF]       =  0.5
 signals[SIGNAL_MINUS_HALF] = -0.5
 signals[SIGNAL_MINUS_ONE]  = -1.0
+
+# Control slots start at 0.0, which is where each parameter rests, except the two tune controls
+# whose resting value is the middle of their range. This only shows for a parameter with no CC
+# assigned, since every other slot is overwritten from MIDI on the first buffer.
+signals[SIGNAL_OSC_COARSE_TUNE] = 0.5
+signals[SIGNAL_OSC_FINE_TUNE]   = 0.5
 
 # The default patch, written into the NRPN table the loop reads it back from. Slots left at 0
 # read as MODULE_NONE, so active_modules needs only the five it uses.
@@ -297,19 +317,19 @@ loop do
   cc_env_gen_sustain   = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_SUSTAIN)
   cc_lfo_rate          = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_RATE)
 
-  signals[SIGNAL_OSC_WAVEFORM]      = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_osc_waveform))
-  signals[SIGNAL_OSC_MOD_AMOUNT]    = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_osc_mod_amount))
-  signals[SIGNAL_OSC_COARSE_TUNE]   = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_osc_coarse_tune))
-  signals[SIGNAL_OSC_FINE_TUNE]     = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_osc_fine_tune))
-  signals[SIGNAL_FILTER_CUTOFF]     = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_filter_cutoff))
-  signals[SIGNAL_FILTER_RESONANCE]  = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_filter_resonance))
-  signals[SIGNAL_FILTER_MOD_AMOUNT] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_filter_mod_amount))
-  signals[SIGNAL_FILTER_GAIN]       = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_filter_gain))
-  signals[SIGNAL_AMP_GAIN]          = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_amp_gain))
-  signals[SIGNAL_ENV_GEN_ATTACK]    = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_env_gen_attack))
-  signals[SIGNAL_ENV_GEN_DECAY]     = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_env_gen_decay))
-  signals[SIGNAL_ENV_GEN_SUSTAIN]   = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_env_gen_sustain))
-  signals[SIGNAL_LFO_RATE]          = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_lfo_rate))
+  signals[cc_slot(cc_osc_waveform, SIGNAL_OSC_WAVEFORM)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_osc_waveform))
+  signals[cc_slot(cc_osc_mod_amount, SIGNAL_OSC_MOD_AMOUNT)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_osc_mod_amount))
+  signals[cc_slot(cc_osc_coarse_tune, SIGNAL_OSC_COARSE_TUNE)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_osc_coarse_tune))
+  signals[cc_slot(cc_osc_fine_tune, SIGNAL_OSC_FINE_TUNE)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_osc_fine_tune))
+  signals[cc_slot(cc_filter_cutoff, SIGNAL_FILTER_CUTOFF)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_filter_cutoff))
+  signals[cc_slot(cc_filter_resonance, SIGNAL_FILTER_RESONANCE)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_filter_resonance))
+  signals[cc_slot(cc_filter_mod_amount, SIGNAL_FILTER_MOD_AMOUNT)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_filter_mod_amount))
+  signals[cc_slot(cc_filter_gain, SIGNAL_FILTER_GAIN)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_filter_gain))
+  signals[cc_slot(cc_amp_gain, SIGNAL_AMP_GAIN)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_amp_gain))
+  signals[cc_slot(cc_env_gen_attack, SIGNAL_ENV_GEN_ATTACK)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_env_gen_attack))
+  signals[cc_slot(cc_env_gen_decay, SIGNAL_ENV_GEN_DECAY)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_env_gen_decay))
+  signals[cc_slot(cc_env_gen_sustain, SIGNAL_ENV_GEN_SUSTAIN)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_env_gen_sustain))
+  signals[cc_slot(cc_lfo_rate, SIGNAL_LFO_RATE)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_lfo_rate))
 
   osc.set_waveform(signals[source_osc_waveform])
   osc.set_modulation_amount(signals[source_osc_mod_amount])

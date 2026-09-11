@@ -139,10 +139,13 @@ a matter of changing slot numbers.
 | 0 | 0-15 | Run order, slot by slot | Module ID |
 | 1 | 0-7 | What feeds a module input | Signal ID |
 | 2 | 0-12 | Where a parameter takes its value | Signal ID |
-| 3 | 0-12 | Which CC fills a control slot | CC number (0-127) |
+| 3 | 0-12 | Which CC fills a control slot | CC number, or 0 for none |
 
 The run order is read from slot 0 upwards and stops at the first Module ID 0, so a patch shorter
 than 16 modules ends itself.
+
+In category 3, CC number 0 means the parameter has no CC. Its control slot then keeps whatever it
+already holds, so the parameter can be driven by routing alone.
 
 #### Entries (CC 98)
 
@@ -199,6 +202,8 @@ source. Signal 0 is also what an entry nobody has set reads as, so an unrouted i
 rather than wired to whatever sits in the first slot. Signal 1 is the value an unmodulated input
 wants: routing an amp's modulation input to it leaves the amp at full level. The negative
 constants only do something on a module input, since a parameter clamps its value to 0.0-1.0.
+
+Slot 127 is where a parameter with no CC sends its unused value. Nothing should read it.
 
 The ID numbers are not stable across firmware versions. A patch is never saved, so adding a
 module is allowed to regroup them.
