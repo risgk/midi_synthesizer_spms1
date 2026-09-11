@@ -137,23 +137,28 @@ SIGNAL_ENV_GEN_2_SUSTAIN   = 43
 SIGNAL_LFO_1_RATE          = 44
 SIGNAL_LFO_2_RATE          = 45
 SIGNAL_MIXER_1_LEVEL_1     = 46
-SIGNAL_MIXER_1_LEVEL_2     = 47
-SIGNAL_MIXER_1_INVERT      = 48
-SIGNAL_MIXER_2_LEVEL_1     = 49
-SIGNAL_MIXER_2_LEVEL_2     = 50
-SIGNAL_MIXER_2_INVERT      = 51
-SIGNAL_MIXER_3_LEVEL_1     = 52
-SIGNAL_MIXER_3_LEVEL_2     = 53
-SIGNAL_MIXER_3_INVERT      = 54
-SIGNAL_MIXER_4_LEVEL_1     = 55
-SIGNAL_MIXER_4_LEVEL_2     = 56
-SIGNAL_MIXER_4_INVERT      = 57
-SIGNAL_MIXER_5_LEVEL_1     = 58
-SIGNAL_MIXER_5_LEVEL_2     = 59
-SIGNAL_MIXER_5_INVERT      = 60
+SIGNAL_MIXER_1_INVERT_1    = 47
+SIGNAL_MIXER_1_LEVEL_2     = 48
+SIGNAL_MIXER_1_INVERT_2    = 49
+SIGNAL_MIXER_2_LEVEL_1     = 50
+SIGNAL_MIXER_2_INVERT_1    = 51
+SIGNAL_MIXER_2_LEVEL_2     = 52
+SIGNAL_MIXER_2_INVERT_2    = 53
+SIGNAL_MIXER_3_LEVEL_1     = 54
+SIGNAL_MIXER_3_INVERT_1    = 55
+SIGNAL_MIXER_3_LEVEL_2     = 56
+SIGNAL_MIXER_3_INVERT_2    = 57
+SIGNAL_MIXER_4_LEVEL_1     = 58
+SIGNAL_MIXER_4_INVERT_1    = 59
+SIGNAL_MIXER_4_LEVEL_2     = 60
+SIGNAL_MIXER_4_INVERT_2    = 61
+SIGNAL_MIXER_5_LEVEL_1     = 62
+SIGNAL_MIXER_5_INVERT_1    = 63
+SIGNAL_MIXER_5_LEVEL_2     = 64
+SIGNAL_MIXER_5_INVERT_2    = 65
 
-SIGNAL_PITCH               = 61
-SIGNAL_GATE                = 62
+SIGNAL_PITCH               = 66
+SIGNAL_GATE                = 67
 
 SIGNALS_SIZE = 128
 
@@ -221,20 +226,25 @@ NRPN_SOURCE_ENV_GEN_2_SUSTAIN   = 279
 NRPN_SOURCE_LFO_1_RATE          = 280
 NRPN_SOURCE_LFO_2_RATE          = 281
 NRPN_SOURCE_MIXER_1_LEVEL_1     = 282
-NRPN_SOURCE_MIXER_1_LEVEL_2     = 283
-NRPN_SOURCE_MIXER_1_INVERT      = 284
-NRPN_SOURCE_MIXER_2_LEVEL_1     = 285
-NRPN_SOURCE_MIXER_2_LEVEL_2     = 286
-NRPN_SOURCE_MIXER_2_INVERT      = 287
-NRPN_SOURCE_MIXER_3_LEVEL_1     = 288
-NRPN_SOURCE_MIXER_3_LEVEL_2     = 289
-NRPN_SOURCE_MIXER_3_INVERT      = 290
-NRPN_SOURCE_MIXER_4_LEVEL_1     = 291
-NRPN_SOURCE_MIXER_4_LEVEL_2     = 292
-NRPN_SOURCE_MIXER_4_INVERT      = 293
-NRPN_SOURCE_MIXER_5_LEVEL_1     = 294
-NRPN_SOURCE_MIXER_5_LEVEL_2     = 295
-NRPN_SOURCE_MIXER_5_INVERT      = 296
+NRPN_SOURCE_MIXER_1_INVERT_1    = 283
+NRPN_SOURCE_MIXER_1_LEVEL_2     = 284
+NRPN_SOURCE_MIXER_1_INVERT_2    = 285
+NRPN_SOURCE_MIXER_2_LEVEL_1     = 286
+NRPN_SOURCE_MIXER_2_INVERT_1    = 287
+NRPN_SOURCE_MIXER_2_LEVEL_2     = 288
+NRPN_SOURCE_MIXER_2_INVERT_2    = 289
+NRPN_SOURCE_MIXER_3_LEVEL_1     = 290
+NRPN_SOURCE_MIXER_3_INVERT_1    = 291
+NRPN_SOURCE_MIXER_3_LEVEL_2     = 292
+NRPN_SOURCE_MIXER_3_INVERT_2    = 293
+NRPN_SOURCE_MIXER_4_LEVEL_1     = 294
+NRPN_SOURCE_MIXER_4_INVERT_1    = 295
+NRPN_SOURCE_MIXER_4_LEVEL_2     = 296
+NRPN_SOURCE_MIXER_4_INVERT_2    = 297
+NRPN_SOURCE_MIXER_5_LEVEL_1     = 298
+NRPN_SOURCE_MIXER_5_INVERT_1    = 299
+NRPN_SOURCE_MIXER_5_LEVEL_2     = 300
+NRPN_SOURCE_MIXER_5_INVERT_2    = 301
 
 # A CC number of 0 means the parameter has no CC: its control slot keeps whatever it holds, so the
 # parameter can be driven by routing alone. A parameter shipped that way wants its slot seeded
@@ -266,20 +276,25 @@ NRPN_CC_ENV_GEN_2_SUSTAIN   = 407
 NRPN_CC_LFO_1_RATE          = 408
 NRPN_CC_LFO_2_RATE          = 409
 NRPN_CC_MIXER_1_LEVEL_1     = 410
-NRPN_CC_MIXER_1_LEVEL_2     = 411
-NRPN_CC_MIXER_1_INVERT      = 412
-NRPN_CC_MIXER_2_LEVEL_1     = 413
-NRPN_CC_MIXER_2_LEVEL_2     = 414
-NRPN_CC_MIXER_2_INVERT      = 415
-NRPN_CC_MIXER_3_LEVEL_1     = 416
-NRPN_CC_MIXER_3_LEVEL_2     = 417
-NRPN_CC_MIXER_3_INVERT      = 418
-NRPN_CC_MIXER_4_LEVEL_1     = 419
-NRPN_CC_MIXER_4_LEVEL_2     = 420
-NRPN_CC_MIXER_4_INVERT      = 421
-NRPN_CC_MIXER_5_LEVEL_1     = 422
-NRPN_CC_MIXER_5_LEVEL_2     = 423
-NRPN_CC_MIXER_5_INVERT      = 424
+NRPN_CC_MIXER_1_INVERT_1    = 411
+NRPN_CC_MIXER_1_LEVEL_2     = 412
+NRPN_CC_MIXER_1_INVERT_2    = 413
+NRPN_CC_MIXER_2_LEVEL_1     = 414
+NRPN_CC_MIXER_2_INVERT_1    = 415
+NRPN_CC_MIXER_2_LEVEL_2     = 416
+NRPN_CC_MIXER_2_INVERT_2    = 417
+NRPN_CC_MIXER_3_LEVEL_1     = 418
+NRPN_CC_MIXER_3_INVERT_1    = 419
+NRPN_CC_MIXER_3_LEVEL_2     = 420
+NRPN_CC_MIXER_3_INVERT_2    = 421
+NRPN_CC_MIXER_4_LEVEL_1     = 422
+NRPN_CC_MIXER_4_INVERT_1    = 423
+NRPN_CC_MIXER_4_LEVEL_2     = 424
+NRPN_CC_MIXER_4_INVERT_2    = 425
+NRPN_CC_MIXER_5_LEVEL_1     = 426
+NRPN_CC_MIXER_5_INVERT_1    = 427
+NRPN_CC_MIXER_5_LEVEL_2     = 428
+NRPN_CC_MIXER_5_INVERT_2    = 429
 
 # CC value normalization. Every parameter is a ratio in 0.0..1.0, so this is the only converter:
 # CC 4..124 maps to the full range, centred on CC 64 where a MIDI controller puts its detent, and
@@ -349,20 +364,25 @@ signals[SIGNAL_ENV_GEN_2_DECAY]     = cc_to_ratio(94)
 signals[SIGNAL_ENV_GEN_2_SUSTAIN]   = cc_to_ratio(4)
 signals[SIGNAL_LFO_2_RATE]          = cc_to_ratio(64)
 signals[SIGNAL_MIXER_1_LEVEL_1]     = cc_to_ratio(124)
+signals[SIGNAL_MIXER_1_INVERT_1]    = cc_to_ratio(4)
 signals[SIGNAL_MIXER_1_LEVEL_2]     = cc_to_ratio(124)
-signals[SIGNAL_MIXER_1_INVERT]      = cc_to_ratio(4)
+signals[SIGNAL_MIXER_1_INVERT_2]    = cc_to_ratio(4)
 signals[SIGNAL_MIXER_2_LEVEL_1]     = cc_to_ratio(124)
+signals[SIGNAL_MIXER_2_INVERT_1]    = cc_to_ratio(4)
 signals[SIGNAL_MIXER_2_LEVEL_2]     = cc_to_ratio(124)
-signals[SIGNAL_MIXER_2_INVERT]      = cc_to_ratio(4)
+signals[SIGNAL_MIXER_2_INVERT_2]    = cc_to_ratio(4)
 signals[SIGNAL_MIXER_3_LEVEL_1]     = cc_to_ratio(124)
+signals[SIGNAL_MIXER_3_INVERT_1]    = cc_to_ratio(4)
 signals[SIGNAL_MIXER_3_LEVEL_2]     = cc_to_ratio(124)
-signals[SIGNAL_MIXER_3_INVERT]      = cc_to_ratio(4)
+signals[SIGNAL_MIXER_3_INVERT_2]    = cc_to_ratio(4)
 signals[SIGNAL_MIXER_4_LEVEL_1]     = cc_to_ratio(124)
+signals[SIGNAL_MIXER_4_INVERT_1]    = cc_to_ratio(4)
 signals[SIGNAL_MIXER_4_LEVEL_2]     = cc_to_ratio(124)
-signals[SIGNAL_MIXER_4_INVERT]      = cc_to_ratio(4)
+signals[SIGNAL_MIXER_4_INVERT_2]    = cc_to_ratio(4)
 signals[SIGNAL_MIXER_5_LEVEL_1]     = cc_to_ratio(124)
+signals[SIGNAL_MIXER_5_INVERT_1]    = cc_to_ratio(4)
 signals[SIGNAL_MIXER_5_LEVEL_2]     = cc_to_ratio(124)
-signals[SIGNAL_MIXER_5_INVERT]      = cc_to_ratio(4)
+signals[SIGNAL_MIXER_5_INVERT_2]    = cc_to_ratio(4)
 
 # The default patch, written into the NRPN table the loop reads it back from. Slots left at 0
 # read as MODULE_NONE, so active_modules needs only the five it uses. Instance 2 of every type is
@@ -409,20 +429,25 @@ C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_2_SUSTAIN  , SIGNAL_ENV_GEN_2
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_RATE         , SIGNAL_LFO_1_RATE)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_2_RATE         , SIGNAL_LFO_2_RATE)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_LEVEL_1    , SIGNAL_MIXER_1_LEVEL_1)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_INVERT_1   , SIGNAL_MIXER_1_INVERT_1)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_LEVEL_2    , SIGNAL_MIXER_1_LEVEL_2)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_INVERT     , SIGNAL_MIXER_1_INVERT)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_INVERT_2   , SIGNAL_MIXER_1_INVERT_2)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_LEVEL_1    , SIGNAL_MIXER_2_LEVEL_1)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_INVERT_1   , SIGNAL_MIXER_2_INVERT_1)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_LEVEL_2    , SIGNAL_MIXER_2_LEVEL_2)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_INVERT     , SIGNAL_MIXER_2_INVERT)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_INVERT_2   , SIGNAL_MIXER_2_INVERT_2)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_3_LEVEL_1    , SIGNAL_MIXER_3_LEVEL_1)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_3_INVERT_1   , SIGNAL_MIXER_3_INVERT_1)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_3_LEVEL_2    , SIGNAL_MIXER_3_LEVEL_2)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_3_INVERT     , SIGNAL_MIXER_3_INVERT)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_3_INVERT_2   , SIGNAL_MIXER_3_INVERT_2)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_4_LEVEL_1    , SIGNAL_MIXER_4_LEVEL_1)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_4_INVERT_1   , SIGNAL_MIXER_4_INVERT_1)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_4_LEVEL_2    , SIGNAL_MIXER_4_LEVEL_2)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_4_INVERT     , SIGNAL_MIXER_4_INVERT)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_4_INVERT_2   , SIGNAL_MIXER_4_INVERT_2)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_5_LEVEL_1    , SIGNAL_MIXER_5_LEVEL_1)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_5_INVERT_1   , SIGNAL_MIXER_5_INVERT_1)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_5_LEVEL_2    , SIGNAL_MIXER_5_LEVEL_2)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_5_INVERT     , SIGNAL_MIXER_5_INVERT)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_5_INVERT_2   , SIGNAL_MIXER_5_INVERT_2)
 
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_WAVEFORM     , 20)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_MOD_AMOUNT   , 13)
@@ -528,20 +553,25 @@ loop do
   source_lfo_1_rate          = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_RATE)
   source_lfo_2_rate          = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_2_RATE)
   source_mixer_1_level_1     = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_LEVEL_1)
+  source_mixer_1_invert_1    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_INVERT_1)
   source_mixer_1_level_2     = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_LEVEL_2)
-  source_mixer_1_invert      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_INVERT)
+  source_mixer_1_invert_2    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_INVERT_2)
   source_mixer_2_level_1     = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_LEVEL_1)
+  source_mixer_2_invert_1    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_INVERT_1)
   source_mixer_2_level_2     = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_LEVEL_2)
-  source_mixer_2_invert      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_INVERT)
+  source_mixer_2_invert_2    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_INVERT_2)
   source_mixer_3_level_1     = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_3_LEVEL_1)
+  source_mixer_3_invert_1    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_3_INVERT_1)
   source_mixer_3_level_2     = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_3_LEVEL_2)
-  source_mixer_3_invert      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_3_INVERT)
+  source_mixer_3_invert_2    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_3_INVERT_2)
   source_mixer_4_level_1     = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_4_LEVEL_1)
+  source_mixer_4_invert_1    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_4_INVERT_1)
   source_mixer_4_level_2     = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_4_LEVEL_2)
-  source_mixer_4_invert      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_4_INVERT)
+  source_mixer_4_invert_2    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_4_INVERT_2)
   source_mixer_5_level_1     = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_5_LEVEL_1)
+  source_mixer_5_invert_1    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_5_INVERT_1)
   source_mixer_5_level_2     = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_5_LEVEL_2)
-  source_mixer_5_invert      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_5_INVERT)
+  source_mixer_5_invert_2    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_5_INVERT_2)
 
   # Which CC fills each control slot. The bus is the only thing downstream reads, so this is
   # where MIDI enters and the only place a CC number appears.
@@ -572,20 +602,25 @@ loop do
   cc_lfo_1_rate          = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_RATE)
   cc_lfo_2_rate          = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_2_RATE)
   cc_mixer_1_level_1     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_1_LEVEL_1)
+  cc_mixer_1_invert_1    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_1_INVERT_1)
   cc_mixer_1_level_2     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_1_LEVEL_2)
-  cc_mixer_1_invert      = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_1_INVERT)
+  cc_mixer_1_invert_2    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_1_INVERT_2)
   cc_mixer_2_level_1     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_LEVEL_1)
+  cc_mixer_2_invert_1    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_INVERT_1)
   cc_mixer_2_level_2     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_LEVEL_2)
-  cc_mixer_2_invert      = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_INVERT)
+  cc_mixer_2_invert_2    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_INVERT_2)
   cc_mixer_3_level_1     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_3_LEVEL_1)
+  cc_mixer_3_invert_1    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_3_INVERT_1)
   cc_mixer_3_level_2     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_3_LEVEL_2)
-  cc_mixer_3_invert      = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_3_INVERT)
+  cc_mixer_3_invert_2    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_3_INVERT_2)
   cc_mixer_4_level_1     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_4_LEVEL_1)
+  cc_mixer_4_invert_1    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_4_INVERT_1)
   cc_mixer_4_level_2     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_4_LEVEL_2)
-  cc_mixer_4_invert      = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_4_INVERT)
+  cc_mixer_4_invert_2    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_4_INVERT_2)
   cc_mixer_5_level_1     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_5_LEVEL_1)
+  cc_mixer_5_invert_1    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_5_INVERT_1)
   cc_mixer_5_level_2     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_5_LEVEL_2)
-  cc_mixer_5_invert      = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_5_INVERT)
+  cc_mixer_5_invert_2    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_5_INVERT_2)
 
   signals[cc_slot(cc_osc_1_waveform, SIGNAL_OSC_1_WAVEFORM)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_osc_1_waveform))
   signals[cc_slot(cc_osc_1_mod_amount, SIGNAL_OSC_1_MOD_AMOUNT)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_osc_1_mod_amount))
@@ -614,20 +649,25 @@ loop do
   signals[cc_slot(cc_lfo_1_rate, SIGNAL_LFO_1_RATE)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_rate))
   signals[cc_slot(cc_lfo_2_rate, SIGNAL_LFO_2_RATE)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_lfo_2_rate))
   signals[cc_slot(cc_mixer_1_level_1, SIGNAL_MIXER_1_LEVEL_1)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_level_1))
+  signals[cc_slot(cc_mixer_1_invert_1, SIGNAL_MIXER_1_INVERT_1)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_invert_1))
   signals[cc_slot(cc_mixer_1_level_2, SIGNAL_MIXER_1_LEVEL_2)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_level_2))
-  signals[cc_slot(cc_mixer_1_invert, SIGNAL_MIXER_1_INVERT)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_invert))
+  signals[cc_slot(cc_mixer_1_invert_2, SIGNAL_MIXER_1_INVERT_2)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_invert_2))
   signals[cc_slot(cc_mixer_2_level_1, SIGNAL_MIXER_2_LEVEL_1)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_2_level_1))
+  signals[cc_slot(cc_mixer_2_invert_1, SIGNAL_MIXER_2_INVERT_1)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_2_invert_1))
   signals[cc_slot(cc_mixer_2_level_2, SIGNAL_MIXER_2_LEVEL_2)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_2_level_2))
-  signals[cc_slot(cc_mixer_2_invert, SIGNAL_MIXER_2_INVERT)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_2_invert))
+  signals[cc_slot(cc_mixer_2_invert_2, SIGNAL_MIXER_2_INVERT_2)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_2_invert_2))
   signals[cc_slot(cc_mixer_3_level_1, SIGNAL_MIXER_3_LEVEL_1)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_3_level_1))
+  signals[cc_slot(cc_mixer_3_invert_1, SIGNAL_MIXER_3_INVERT_1)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_3_invert_1))
   signals[cc_slot(cc_mixer_3_level_2, SIGNAL_MIXER_3_LEVEL_2)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_3_level_2))
-  signals[cc_slot(cc_mixer_3_invert, SIGNAL_MIXER_3_INVERT)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_3_invert))
+  signals[cc_slot(cc_mixer_3_invert_2, SIGNAL_MIXER_3_INVERT_2)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_3_invert_2))
   signals[cc_slot(cc_mixer_4_level_1, SIGNAL_MIXER_4_LEVEL_1)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_4_level_1))
+  signals[cc_slot(cc_mixer_4_invert_1, SIGNAL_MIXER_4_INVERT_1)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_4_invert_1))
   signals[cc_slot(cc_mixer_4_level_2, SIGNAL_MIXER_4_LEVEL_2)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_4_level_2))
-  signals[cc_slot(cc_mixer_4_invert, SIGNAL_MIXER_4_INVERT)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_4_invert))
+  signals[cc_slot(cc_mixer_4_invert_2, SIGNAL_MIXER_4_INVERT_2)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_4_invert_2))
   signals[cc_slot(cc_mixer_5_level_1, SIGNAL_MIXER_5_LEVEL_1)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_5_level_1))
+  signals[cc_slot(cc_mixer_5_invert_1, SIGNAL_MIXER_5_INVERT_1)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_5_invert_1))
   signals[cc_slot(cc_mixer_5_level_2, SIGNAL_MIXER_5_LEVEL_2)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_5_level_2))
-  signals[cc_slot(cc_mixer_5_invert, SIGNAL_MIXER_5_INVERT)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_5_invert))
+  signals[cc_slot(cc_mixer_5_invert_2, SIGNAL_MIXER_5_INVERT_2)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_5_invert_2))
 
   osc_1.set_waveform(signals[source_osc_1_waveform])
   osc_1.set_modulation_amount(signals[source_osc_1_mod_amount])
@@ -656,20 +696,25 @@ loop do
   lfo_1.set_rate(signals[source_lfo_1_rate])
   lfo_2.set_rate(signals[source_lfo_2_rate])
   mixer_1.set_level_1(signals[source_mixer_1_level_1])
+  mixer_1.set_invert_1(signals[source_mixer_1_invert_1])
   mixer_1.set_level_2(signals[source_mixer_1_level_2])
-  mixer_1.set_invert(signals[source_mixer_1_invert])
+  mixer_1.set_invert_2(signals[source_mixer_1_invert_2])
   mixer_2.set_level_1(signals[source_mixer_2_level_1])
+  mixer_2.set_invert_1(signals[source_mixer_2_invert_1])
   mixer_2.set_level_2(signals[source_mixer_2_level_2])
-  mixer_2.set_invert(signals[source_mixer_2_invert])
+  mixer_2.set_invert_2(signals[source_mixer_2_invert_2])
   mixer_3.set_level_1(signals[source_mixer_3_level_1])
+  mixer_3.set_invert_1(signals[source_mixer_3_invert_1])
   mixer_3.set_level_2(signals[source_mixer_3_level_2])
-  mixer_3.set_invert(signals[source_mixer_3_invert])
+  mixer_3.set_invert_2(signals[source_mixer_3_invert_2])
   mixer_4.set_level_1(signals[source_mixer_4_level_1])
+  mixer_4.set_invert_1(signals[source_mixer_4_invert_1])
   mixer_4.set_level_2(signals[source_mixer_4_level_2])
-  mixer_4.set_invert(signals[source_mixer_4_invert])
+  mixer_4.set_invert_2(signals[source_mixer_4_invert_2])
   mixer_5.set_level_1(signals[source_mixer_5_level_1])
+  mixer_5.set_invert_1(signals[source_mixer_5_invert_1])
   mixer_5.set_level_2(signals[source_mixer_5_level_2])
-  mixer_5.set_invert(signals[source_mixer_5_invert])
+  mixer_5.set_invert_2(signals[source_mixer_5_invert_2])
 
   i = 0
   while i < AUDIO_BUFFER_WORDS
