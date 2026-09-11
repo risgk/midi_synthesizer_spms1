@@ -91,30 +91,57 @@ The default patch. Solid arrows carry audio, dashed arrows carry control.
 ```mermaid
 flowchart LR
   NOTE([MIDI Note])
-  EG[EG]
-  LFO[LFO]
-  OSC[Osc]
-  FILTER[Filter]
-  AMP[Amp]
+  EG1[EG 1]
+  LFO1[LFO 1]
+  OSC1[Osc 1]
+  FILTER1[Filter 1]
+  AMP1[Amp 1]
   OUT([Audio Out])
 
-  OSC --> FILTER
-  FILTER --> AMP
-  AMP --> OUT
+  OSC1 --> FILTER1
+  FILTER1 --> AMP1
+  AMP1 --> OUT
 
-  NOTE -. Gate .-> EG
-  NOTE -. Pitch .-> OSC
-  LFO -. Mod .-> OSC
-  EG -. Mod .-> FILTER
-  EG -. Mod .-> AMP
+  NOTE -. Gate .-> EG1
+  NOTE -. Pitch .-> OSC1
+  LFO1 -. Mod .-> OSC1
+  EG1 -. Mod .-> FILTER1
+  EG1 -. Mod .-> AMP1
 ```
 
-The modules run in the order EG, LFO, Osc, Filter, Amp, one sample at a time. Their parameters --
-waveform, cutoff, gain and the rest -- arrive from CC and are left out here.
+The modules run in the order EG 1, LFO 1, Osc 1, Filter 1, Amp 1, one sample at a time. Their
+parameters -- waveform, cutoff, gain and the rest -- arrive from CC and are left out here.
 
 None of this is fixed. NRPN rewrites the run order, every arrow above, and which CC feeds each
 parameter.
 
+#### Everything on board
+
+The rest of the modules exist from power-on and wait for a patch to reach them. Nothing is routed
+to them and no CC touches them, so they make no sound until the run order names one.
+
+```mermaid
+flowchart TB
+  subgraph patched [In the default patch]
+    direction LR
+    NOTE([MIDI Note])
+    OSC1[Osc 1] --> FILTER1[Filter 1] --> AMP1[Amp 1] --> OUT([Audio Out])
+    NOTE -. Gate .-> EG1[EG 1]
+    NOTE -. Pitch .-> OSC1
+    LFO1[LFO 1] -. Mod .-> OSC1
+    EG1 -. Mod .-> FILTER1
+    EG1 -. Mod .-> AMP1
+  end
+  subgraph spare [Idle until a patch names them]
+    direction LR
+    EG2[EG 2] ~~~ LFO2[LFO 2] ~~~ OSC2[Osc 2] ~~~ FILTER2[Filter 2] ~~~ AMP2[Amp 2]
+    MIX1[Mixer 1] ~~~ MIX2[Mixer 2] ~~~ MIX3[Mixer 3] ~~~ MIX4[Mixer 4] ~~~ MIX5[Mixer 5]
+  end
+  patched ~~~ spare
+```
+
+A mixer is what lets two of anything meet, and it is the only way to hand a module input a signal
+that swings both ways. See the examples below.
 
 ### Patch Editing (NRPN)
 
