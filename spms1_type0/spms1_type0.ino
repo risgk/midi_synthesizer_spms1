@@ -318,8 +318,10 @@ void loop() {
   static uint8_t s_loop_counter = 0;
   if (++s_loop_counter == 0) {
     SPMS1_DEBUG_PRINT_SERIAL.print("\e[1;1H\e[K");
+    SPMS1_DEBUG_PRINT_SERIAL.print("min ");
     SPMS1_DEBUG_PRINT_SERIAL.print(g_debug_measurement_min_us);
     SPMS1_DEBUG_PRINT_SERIAL.print("\e[2;1H\e[K");
+    SPMS1_DEBUG_PRINT_SERIAL.print("max ");
     SPMS1_DEBUG_PRINT_SERIAL.print(g_debug_measurement_max_us);
 
     // Sampled rather than a true high-water mark: tracking the peak would mean a compare and a
