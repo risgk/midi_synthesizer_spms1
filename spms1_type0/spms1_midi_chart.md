@@ -32,7 +32,7 @@
 |                           112 | x             | o             | Filter Gain (Drive)                  |
 |                            15 | x             | o             | Amp Gain                             |
 |                            73 | x             | o             | EG Attack (Time)                     |
-|                            75 | x             | o             | EG Decay/Release (Time)              |
+|                            75 | x             | o             | EG Decay (Time)                      |
 |                            30 | x             | o             | EG Sustain (Level)                   |
 |                             3 | x             | o             | LFO Rate                             |
 |                            99 | x             | o             | NRPN MSB                             |

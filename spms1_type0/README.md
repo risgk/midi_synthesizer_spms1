@@ -176,10 +176,10 @@ so wiring it in gives a module that behaves like the first rather than a silent 
 | 16 | -- | Amp 1 Gain |
 | 17 | -- | Amp 2 Gain |
 | 18 | -- | EG 1 Attack |
-| 19 | -- | EG 1 Decay/Release |
+| 19 | -- | EG 1 Decay |
 | 20 | -- | EG 1 Sustain |
 | 21 | -- | EG 2 Attack |
-| 22 | -- | EG 2 Decay/Release |
+| 22 | -- | EG 2 Decay |
 | 23 | -- | EG 2 Sustain |
 | 24 | -- | LFO 1 Rate |
 | 25 | -- | LFO 2 Rate |
@@ -211,10 +211,10 @@ so wiring it in gives a module that behaves like the first rather than a silent 
 | 9 | Osc 1 Output | | 31 | Amp 1 Gain |
 | 10 | Osc 2 Output | | 32 | Amp 2 Gain |
 | 11 | Filter 1 Output | | 33 | EG 1 Attack |
-| 12 | Filter 2 Output | | 34 | EG 1 Decay/Release |
+| 12 | Filter 2 Output | | 34 | EG 1 Decay |
 | 13 | Amp 1 Output | | 35 | EG 1 Sustain |
 | 14 | Amp 2 Output | | 36 | EG 2 Attack |
-| 15 | Osc 1 Wave | | 37 | EG 2 Decay/Release |
+| 15 | Osc 1 Wave | | 37 | EG 2 Decay |
 | 16 | Osc 1 Mod Amt | | 38 | EG 2 Sustain |
 | 17 | Osc 1 Coarse Tune | | 39 | LFO 1 Rate |
 | 18 | Osc 1 Fine Tune | | 40 | LFO 2 Rate |

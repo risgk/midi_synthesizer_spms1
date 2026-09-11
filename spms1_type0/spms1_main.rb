@@ -347,7 +347,7 @@ C.set_midi_cc_value(MIDI_CH, 24 , 64 ) # Filter 1 Mod Amt
 C.set_midi_cc_value(MIDI_CH, 112, 64 ) # Filter 1 Gain
 C.set_midi_cc_value(MIDI_CH, 15 , 64 ) # Amp 1 Gain
 C.set_midi_cc_value(MIDI_CH, 73 , 4  ) # EG 1 Attack
-C.set_midi_cc_value(MIDI_CH, 75 , 94 ) # EG 1 Decay/Release
+C.set_midi_cc_value(MIDI_CH, 75 , 94 ) # EG 1 Decay
 C.set_midi_cc_value(MIDI_CH, 30 , 4  ) # EG 1 Sustain
 C.set_midi_cc_value(MIDI_CH, 3  , 64 ) # LFO 1 Rate
 
