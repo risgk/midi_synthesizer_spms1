@@ -63,6 +63,12 @@ extern "C" {
 
 extern int Spms1_main(int argc, char **argv);
 
+// How many GC roots the synth actually has pushed. sp_gc_roots is sized by SP_GC_STACK_MAX in
+// sp_gc.h and costs 4 bytes a slot whether used or not, so this says how much of it is real.
+// A plain global, not thread-local, because SP_THREADS is not defined: core 0 sees what core 1
+// writes. Diagnostic only.
+extern int sp_gc_nroots;
+
 uint8_t  g_midi_note_on_pitch[16]  = {60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60};
 uint8_t  g_midi_note_on_state[16]  = {};
 uint8_t  g_midi_cc_values[16][128] = {};
@@ -315,6 +321,17 @@ void loop() {
     SPMS1_DEBUG_PRINT_SERIAL.print(g_debug_measurement_min_us);
     SPMS1_DEBUG_PRINT_SERIAL.print("\e[2;1H\e[K");
     SPMS1_DEBUG_PRINT_SERIAL.print(g_debug_measurement_max_us);
+
+    // Sampled rather than a true high-water mark: tracking the peak would mean a compare and a
+    // store inside _sp_gc_root_push, which the module process methods sit on. The count is stable
+    // once the synth is running, so sampling it from here is enough to size sp_gc_roots.
+    static int s_gc_nroots_max = 0;
+    if (sp_gc_nroots > s_gc_nroots_max) { s_gc_nroots_max = sp_gc_nroots; }
+    SPMS1_DEBUG_PRINT_SERIAL.print("\e[3;1H\e[K");
+    SPMS1_DEBUG_PRINT_SERIAL.print("gc roots ");
+    SPMS1_DEBUG_PRINT_SERIAL.print(sp_gc_nroots);
+    SPMS1_DEBUG_PRINT_SERIAL.print(" peak ");
+    SPMS1_DEBUG_PRINT_SERIAL.print(s_gc_nroots_max);
     // Both cleared on every report, so the pair brackets the buffers since the last one rather
     // than since boot. min is the uncontended compute time, max is what the deadline is about,
     // and the gap between them is interference from core0 and interrupts.
