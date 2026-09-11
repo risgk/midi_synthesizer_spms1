@@ -256,8 +256,9 @@ constants are for shifting a signal in a mixer, since a parameter clamps its own
 
 Slot 127 is where a parameter with no CC sends its unused value. Nothing should read it.
 
-The ID numbers are not stable across firmware versions. A patch is never saved, so adding a
-module is allowed to regroup them.
+The ID numbers are not stable across firmware versions. A patch is never saved, so a new module
+type, another instance of one, or another signal may renumber everything after it. Read these
+tables again after an update.
 
 #### Ranges worth knowing
 
