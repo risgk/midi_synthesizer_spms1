@@ -26,6 +26,8 @@ module Spms1
     ffi_func :get_midi_note_on_pitch, [:uint8],                 :uint8
     ffi_func :set_midi_note_on_state, [:uint8, :uint8],         :void
     ffi_func :get_midi_note_on_state, [:uint8],                 :uint8
+    ffi_func :set_midi_pitch_bend,    [:uint8, :int32],         :void
+    ffi_func :get_midi_pitch_bend,    [:uint8],                 :int32
     ffi_func :set_midi_cc_value,      [:uint8, :uint8, :uint8], :void
     ffi_func :get_midi_cc_value,      [:uint8, :uint8],         :uint8
     ffi_func :set_midi_nrpn_value,    [:uint8, :int32, :uint8], :void
@@ -159,6 +161,7 @@ SIGNAL_MIXER_5_INVERT_2    = 65
 
 SIGNAL_PITCH               = 66
 SIGNAL_GATE                = 67
+SIGNAL_BEND                = 68
 
 SIGNALS_SIZE = 128
 
@@ -487,6 +490,10 @@ loop do
 
   signals[SIGNAL_PITCH] = C.get_midi_note_on_pitch(MIDI_CH).to_f * (1.0 / 120.0) - 0.5
   signals[SIGNAL_GATE]  = C.get_midi_note_on_state(MIDI_CH).to_f
+  # Pitch bend arrives 14-bit and signed, -8192 to 8191, so a whole turn of the wheel is one unit
+  # and half of it lands where the pitch domain's own half does. The top end is a step short of
+  # +0.5, which is how the MIDI range itself is shaped.
+  signals[SIGNAL_BEND]  = C.get_midi_pitch_bend(MIDI_CH).to_f * (1.0 / 16384.0)
 
   # The patch, read back from the NRPN table. active_modules is packed from the front with no
   # gaps; every source_* holds a SIGNAL_* bus slot.

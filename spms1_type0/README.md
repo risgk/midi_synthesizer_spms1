@@ -140,8 +140,8 @@ flowchart TB
   patched ~~~ spare
 ```
 
-A mixer is what lets two of anything meet, and it is the only way to hand a module input a signal
-that swings both ways. See the examples below.
+A mixer is what lets two of anything meet, and apart from Pitch Bend it is the only way to hand a
+module input a signal that swings both ways. See the examples below.
 
 ### Patch Editing (NRPN)
 
@@ -268,11 +268,15 @@ patch behaves like its twin rather than starting silent.
 | 19 | Mixer 5 Output | | 42 | EG 2 Decay | | 65 | Mixer 5 Invert 2 |
 | 20 | Osc 1 Wave | | 43 | EG 2 Sustain | | 66 | Note Pitch |
 | 21 | Osc 1 Mod Amt | | 44 | LFO 1 Rate | | 67 | Note Gate |
-| 22 | Osc 1 Coarse Tune | | 45 | LFO 2 Rate | |  |  |
+| 22 | Osc 1 Coarse Tune | | 45 | LFO 2 Rate | | 68 | Pitch Bend |
 
 Slots 20-65 hold the values arriving from CC, so a parameter reads its own CC by default.
 Pointing it at another slot is what makes a modulation. Anything with no CC sits at what it was
 seeded with until one is assigned.
+
+Note Pitch, Note Gate and Pitch Bend are what the keyboard puts on the bus. Pitch Bend is
+already bipolar, one unit across the whole wheel and zero at the centre, so it can feed a module
+input without a mixer to shift it. Nothing is routed to it by default.
 
 Slots 0-4 are constants that nothing writes, for inputs that want a fixed value rather than a
 source. Signal 0 is also what an entry nobody has set reads as, so an unrouted input is silent
@@ -348,10 +352,10 @@ inverter; and inverting only the second makes the mixer a subtractor.
 - Module inputs (category 1) are read every sample and are not smoothed; parameters (category 2)
   are read once per buffer and are smoothed by their destination. Route a fast source through a
   module input, a stepped one through a parameter
-- A parameter source may point at any of the 128 slots. Slots above 67 read 0 until something
+- A parameter source may point at any of the 128 slots. Slots above 68 read 0 until something
   writes them
-- A parameter clamps its value to 0.0-1.0, so a mixer is the only way to give a module input a
-  bipolar signal built from a CC
+- A parameter clamps its value to 0.0-1.0, so apart from Pitch Bend a mixer is the only way to
+  give a module input a signal that swings both ways
 - The NRPN CCs are stored as ordinary controls too, so a parameter may be mapped to CC 6 -- which
   then moves it every time a patch edit is sent
 

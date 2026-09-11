@@ -58,6 +58,7 @@ uint32_t g_debug_measurement_counted  = 0;  // 0 until the first buffer has been
 void handleNoteOn(byte channel, byte pitch, byte velocity);
 void handleNoteOff(byte channel, byte pitch, byte velocity);
 void handleControlChange(byte channel, byte number, byte value);
+void handlePitchBend(byte channel, int bend);
 
 extern "C" {
 
@@ -72,6 +73,9 @@ extern int sp_gc_nroots;
 uint8_t  g_midi_note_on_pitch[16]  = {60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60};
 uint8_t  g_midi_note_on_state[16]  = {};
 uint8_t  g_midi_cc_values[16][128] = {};
+// Pitch bend arrives 14-bit and centred, and the MIDI library hands it over already signed,
+// so it is kept that way rather than folded into the 7-bit tables above.
+int16_t  g_midi_pitch_bend[16]     = {};
 
 // NRPN parameter numbers are (MSB << 7) | LSB; the synth uses MSB 0-3 as categories, so 512
 // entries cover it. Values are 7-bit, filled from CC 6.
@@ -107,6 +111,22 @@ void set_midi_note_on_state(uint8_t midi_ch, uint8_t midi_note_on_state) {
   }
 
   g_midi_note_on_state[midi_ch] = midi_note_on_state;
+}
+
+void set_midi_pitch_bend(uint8_t midi_ch, int32_t midi_pitch_bend) {
+  if (midi_ch >= 16) {
+    return;
+  }
+
+  g_midi_pitch_bend[midi_ch] = static_cast<int16_t>(midi_pitch_bend);
+}
+
+int32_t get_midi_pitch_bend(uint8_t midi_ch) {
+  if (midi_ch >= 16) {
+    return 0;
+  }
+
+  return g_midi_pitch_bend[midi_ch];
 }
 
 uint8_t get_midi_note_on_state(uint8_t midi_ch) {
@@ -281,6 +301,7 @@ void setup() {
   USB_MIDI.setHandleNoteOn(handleNoteOn);
   USB_MIDI.setHandleNoteOff(handleNoteOff);
   USB_MIDI.setHandleControlChange(handleControlChange);
+  USB_MIDI.setHandlePitchBend(handlePitchBend);
   USB_MIDI.begin(MIDI_CHANNEL_OMNI);
   USB_MIDI.turnThruOff();
 #endif  // defined(SPMS1_USE_USB_MIDI)
@@ -292,6 +313,7 @@ void setup() {
   UART_MIDI.setHandleNoteOn(handleNoteOn);
   UART_MIDI.setHandleNoteOff(handleNoteOff);
   UART_MIDI.setHandleControlChange(handleControlChange);
+  UART_MIDI.setHandlePitchBend(handlePitchBend);
   UART_MIDI.begin(MIDI_CHANNEL_OMNI);
   UART_MIDI.turnThruOff();
   SPMS1_UART_MIDI_SERIAL.begin(SPMS1_UART_MIDI_SPEED);
@@ -361,4 +383,9 @@ void handleControlChange(byte channel, byte number, byte value)
 {
   set_midi_cc_value(channel - 1, number, value);
   handle_midi_nrpn_cc(channel - 1, number, value);
+}
+
+void handlePitchBend(byte channel, int bend)
+{
+  set_midi_pitch_bend(channel - 1, bend);
 }
