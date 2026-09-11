@@ -22,13 +22,14 @@
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Pitch Bend                    | x             | x             |                                      |
 +-------------------------------+---------------+---------------+--------------------------------------+
-| Control                    86 | x             | o             | Osc Coarse Tune (+-5 Octaves)        |
-| Change                     70 | x             | o             | Osc Fine Tune (+-60 Cents)           |
-|                            20 | x             | o             | Osc Wave (Saw to Square)             |
-|                            13 | x             | o             | Osc Mod Amt                          |
+| Control                    20 | x             | o             | Osc Wave (Saw to Square)             |
+| Change                     13 | x             | o             | Osc Mod Amt                          |
+|                            86 | x             | o             | Osc Coarse Tune (+-5 Octaves)        |
+|                            70 | x             | o             | Osc Fine Tune (+-60 Cents)           |
 |                            74 | x             | o             | Filter Cutoff                        |
 |                            71 | x             | o             | Filter Resonance                     |
 |                            24 | x             | o             | Filter Mod Amt                       |
+|                           116 | x             | o             | Filter Gain (Drive)                  |
 |                            15 | x             | o             | Amp Gain                             |
 |                            73 | x             | o             | EG Attack (Time)                     |
 |                            75 | x             | o             | EG Decay/Release (Time)              |

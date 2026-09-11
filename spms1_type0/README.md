@@ -138,8 +138,8 @@ a matter of changing slot numbers.
 | ----- | ----- | ---- | ---------- |
 | 0 | 0-15 | Run order, slot by slot | Module ID |
 | 1 | 0-7 | What feeds a module input | Signal ID |
-| 2 | 0-11 | Where a parameter takes its value | Signal ID |
-| 3 | 0-11 | Which CC fills a control slot | CC number (0-127) |
+| 2 | 0-12 | Where a parameter takes its value | Signal ID |
+| 3 | 0-12 | Which CC fills a control slot | CC number (0-127) |
 
 The run order is read from slot 0 upwards and stops at the first Module ID 0, so a patch shorter
 than 16 modules ends itself.
@@ -148,18 +148,19 @@ than 16 modules ends itself.
 
 | CC 98 | Category 1: module input | Categories 2 and 3: parameter |
 | ----- | ------------------------ | ----------------------------- |
-| 0 | EG Gate | Osc Coarse Tune |
-| 1 | Osc Pitch | Osc Fine Tune |
-| 2 | Osc Mod In | Osc Wave |
-| 3 | Filter Audio In | Osc Mod Amt (Modulation Amount) |
+| 0 | EG Gate | Osc Wave |
+| 1 | Osc Pitch | Osc Mod Amt (Modulation Amount) |
+| 2 | Osc Mod In | Osc Coarse Tune |
+| 3 | Filter Audio In | Osc Fine Tune |
 | 4 | Filter Mod In | Filter Cutoff |
 | 5 | Amp Audio In | Filter Resonance |
 | 6 | Amp Mod In | Filter Mod Amt (Modulation Amount) |
-| 7 | Final Output | Amp Gain |
-| 8 | -- | EG Attack |
-| 9 | -- | EG Decay/Release |
-| 10 | -- | EG Sustain |
-| 11 | -- | LFO Rate |
+| 7 | Final Output | Filter Gain |
+| 8 | -- | Amp Gain |
+| 9 | -- | EG Attack |
+| 10 | -- | EG Decay/Release |
+| 11 | -- | EG Sustain |
+| 12 | -- | LFO Rate |
 
 #### Module IDs
 
@@ -176,20 +177,21 @@ than 16 modules ends itself.
 
 | ID | Signal | | ID | Signal |
 | -- | ------ | - | -- | ------ |
-| 0 | None (constant 0.0) | | 12 | Osc Wave |
-| 1 | Constant 1.0 | | 13 | Osc Mod Amt |
-| 2 | Constant 0.5 | | 14 | Filter Cutoff |
-| 3 | Constant -0.5 | | 15 | Filter Resonance |
-| 4 | Constant -1.0 | | 16 | Filter Mod Amt |
-| 5 | EG Output | | 17 | Amp Gain |
-| 6 | LFO Output | | 18 | EG Attack |
-| 7 | Osc Output | | 19 | EG Decay/Release |
-| 8 | Filter Output | | 20 | EG Sustain |
-| 9 | Amp Output | | 21 | LFO Rate |
-| 10 | Osc Coarse Tune | | 22 | Note Pitch |
-| 11 | Osc Fine Tune | | 23 | Note Gate |
+| 0 | None (constant 0.0) | | 13 | Osc Fine Tune |
+| 1 | Constant 1.0 | | 14 | Filter Cutoff |
+| 2 | Constant 0.5 | | 15 | Filter Resonance |
+| 3 | Constant -0.5 | | 16 | Filter Mod Amt |
+| 4 | Constant -1.0 | | 17 | Filter Gain |
+| 5 | EG Output | | 18 | Amp Gain |
+| 6 | LFO Output | | 19 | EG Attack |
+| 7 | Osc Output | | 20 | EG Decay/Release |
+| 8 | Filter Output | | 21 | EG Sustain |
+| 9 | Amp Output | | 22 | LFO Rate |
+| 10 | Osc Wave | | 23 | Note Pitch |
+| 11 | Osc Mod Amt | | 24 | Note Gate |
+| 12 | Osc Coarse Tune | | | |
 
-Slots 10-21 hold the values arriving from CC, so a parameter reads its own CC by default.
+Slots 10-22 hold the values arriving from CC, so a parameter reads its own CC by default.
 Pointing it at another slot is what makes a modulation.
 
 Slots 0-4 are constants that nothing writes, for inputs that want a fixed value rather than a
@@ -210,19 +212,24 @@ are summed, so any pitch is reachable.
 Osc Mod Amt is a depth, not an offset: at its top a bipolar source swings the pitch an octave up
 and an octave down, and a semitone of vibrato sits at CC 14.
 
+Filter Gain sets how hard the audio input drives the filter, which is also what decides how far
+the filter runs into its own saturation. Its default of CC 64 is the level the oscillator used to
+be scaled to on its own; above that the filter starts to compress the loud part of a note.
+
 #### Examples
 
 - Vibrato is wired by default -- the LFO feeds the oscillator's modulation input -- so CC 13 sets
   the depth and CC 3 the rate
-- Filter cutoff follows note pitch (keyboard tracking): CC 99 = 2, CC 98 = 4, CC 6 = 22
+- Filter cutoff follows note pitch (keyboard tracking): CC 99 = 2, CC 98 = 4, CC 6 = 23
 - Filter cutoff driven by the envelope instead of its CC: CC 99 = 2, CC 98 = 4, CC 6 = 5
 - Filter cutoff swept by the LFO: CC 99 = 2, CC 98 = 4, CC 6 = 6 -- a parameter, so keep the rate
   low
-- Amp gain and filter cutoff share one CC: CC 99 = 3, CC 98 = 7, CC 6 = 74
+- Amp gain and filter cutoff share one CC: CC 99 = 3, CC 98 = 8, CC 6 = 74
 - Amp at full level with no envelope: CC 99 = 1, CC 98 = 6, CC 6 = 1
 - Disconnect the filter's modulation input: CC 99 = 1, CC 98 = 4, CC 6 = 0
-- A pitch envelope 60 cents deep: CC 99 = 2, CC 98 = 1, CC 6 = 5 points Osc Fine Tune at the
+- A pitch envelope 60 cents deep: CC 99 = 2, CC 98 = 3, CC 6 = 5 points Osc Fine Tune at the
   envelope, which then sweeps the tuning from 60 cents flat up to 60 cents sharp
+- The envelope drives the filter harder as a note starts: CC 99 = 2, CC 98 = 7, CC 6 = 5
 - Pitch swept by the envelope instead of the LFO: CC 99 = 1, CC 98 = 2, CC 6 = 5, then set the
   depth on CC 13 -- a semitone at 14, an octave at 124
 - Take the filter out of the chain: CC 99 = 0, CC 98 = 3, CC 6 = 5, then CC 99 = 0, CC 98 = 4,
@@ -233,7 +240,7 @@ and an octave down, and a semitone of vibrato sits at CC 14.
 - Module inputs (category 1) are read every sample and are not smoothed; parameters (category 2)
   are read once per buffer and are smoothed by their destination. Route a fast source through a
   module input, a stepped one through a parameter
-- A parameter source may point at any of the 128 slots. Slots above 23 read 0 until something
+- A parameter source may point at any of the 128 slots. Slots above 24 read 0 until something
   writes them
 - The NRPN CCs are stored as ordinary controls too, so a parameter may be mapped to CC 6 -- which
   then moves it every time a patch edit is sent

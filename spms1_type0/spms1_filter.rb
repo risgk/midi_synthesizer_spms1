@@ -43,10 +43,12 @@ module Spms1
       @cutoff = 1.0
       @resonance = 0.0
       @modulation_amount = 0.0
+      @gain = 0.5
 
       @current_cutoff = 1.0
       @current_resonance = 0.0
       @current_modulation_amount = 0.0
+      @current_gain = 0.5
 
       @b0 = 1.0; @b1 = 0.0; @b2 = 0.0
       @a1 = 0.0; @a2 = 0.0
@@ -74,6 +76,13 @@ module Spms1
       @modulation_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
     end
 
+    # How hard the audio input drives the filter, normalized to [0.0, 1.0] and used as a plain
+    # multiplier. It sits on the input rather than the output because that is what decides how far
+    # the state runs into soft_clip: past the middle of the dial the filter starts to saturate.
+    def set_gain(gain)
+      @gain = (gain < 0.0) ? 0.0 : ((gain > 1.0) ? 1.0 : gain)
+    end
+
     # Q range: ~0.7 (0.0), ~2.83 (0.5), ~11.3 (1.0).
     def set_resonance(resonance)
       @resonance = (resonance < 0.0) ? 0.0 : ((resonance > 1.0) ? 1.0 : resonance)
@@ -86,10 +95,12 @@ module Spms1
         update_coefficients
       end
 
+      driven_input = audio_input * @current_gain
+
       # Transposed Direct Form II (TDF-II) biquad implementation with soft clipping.
-      audio_output = @z1 + @b0 * audio_input
-      @z1 = soft_clip(@z2 + @b1 * audio_input - @a1 * audio_output)
-      @z2 = soft_clip(@b2 * audio_input - @a2 * audio_output)
+      audio_output = @z1 + @b0 * driven_input
+      @z1 = soft_clip(@z2 + @b1 * driven_input - @a1 * audio_output)
+      @z2 = soft_clip(@b2 * driven_input - @a2 * audio_output)
 
       @sample_counter = (@sample_counter + 1) % CONTROL_RATE_DIVISOR
 
@@ -115,6 +126,7 @@ module Spms1
       @current_cutoff += (@cutoff - @current_cutoff) * @smoothing_target_blend
       @current_resonance += (@resonance - @current_resonance) * @smoothing_target_blend
       @current_modulation_amount += (@modulation_amount - @current_modulation_amount) * @smoothing_target_blend
+      @current_gain += (@gain - @current_gain) * @smoothing_target_blend
 
       mod = (@current_modulation_input < 0.0) ? 0.0 : ((@current_modulation_input > 1.0) ? 1.0 : @current_modulation_input)
       total_cutoff = @current_cutoff + (mod * @current_modulation_amount)

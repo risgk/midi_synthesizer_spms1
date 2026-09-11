@@ -6,10 +6,6 @@ module Spms1
     SMOOTHING_TARGET_BLEND_BASE = 0.03125
     # Number of samples between control-rate updates; smoothing speed is kept approximately constant if this is changed.
     CONTROL_RATE_DIVISOR = 4
-    # Level this oscillator's output is mixed in at. Kept here so the level stays tied to this
-    # oscillator specifically, not to whichever module happens to read its output. May move to a
-    # dedicated oscillator mixer later.
-    OUTPUT_LEVEL = 0.5
     # What a modulation depth of 1.0 is worth: 24 semitones per unit of modulation input. A bipolar
     # source reaches half a unit either way, so at full depth it swings the pitch an octave up and
     # an octave down.
@@ -110,7 +106,10 @@ module Spms1
       @phase -= (@phase < 1.0) ? 0.0 : 1.0
       @sample_counter = (@sample_counter + 1) % CONTROL_RATE_DIVISOR
 
-      output * 0.5 * OUTPUT_LEVEL
+      # Halved so that both ends of the morph come out at one unit peak to peak, the same span
+      # as every other bipolar signal on the bus. How loudly it drives what comes next is the
+      # receiving module's business, not this one's.
+      output * 0.5
     end
 
     private

@@ -83,20 +83,21 @@ SIGNAL_LFO_OUTPUT        = 6
 SIGNAL_OSC_OUTPUT        = 7
 SIGNAL_FILTER_OUTPUT     = 8
 SIGNAL_AMP_OUTPUT        = 9
-SIGNAL_OSC_COARSE_TUNE   = 10
-SIGNAL_OSC_FINE_TUNE     = 11
-SIGNAL_OSC_WAVEFORM      = 12
-SIGNAL_OSC_MOD_AMOUNT    = 13
+SIGNAL_OSC_WAVEFORM      = 10
+SIGNAL_OSC_MOD_AMOUNT    = 11
+SIGNAL_OSC_COARSE_TUNE   = 12
+SIGNAL_OSC_FINE_TUNE     = 13
 SIGNAL_FILTER_CUTOFF     = 14
 SIGNAL_FILTER_RESONANCE  = 15
 SIGNAL_FILTER_MOD_AMOUNT = 16
-SIGNAL_AMP_GAIN          = 17
-SIGNAL_ENV_GEN_ATTACK    = 18
-SIGNAL_ENV_GEN_DECAY     = 19
-SIGNAL_ENV_GEN_SUSTAIN   = 20
-SIGNAL_LFO_RATE          = 21
-SIGNAL_PITCH             = 22
-SIGNAL_GATE              = 23
+SIGNAL_FILTER_GAIN       = 17
+SIGNAL_AMP_GAIN          = 18
+SIGNAL_ENV_GEN_ATTACK    = 19
+SIGNAL_ENV_GEN_DECAY     = 20
+SIGNAL_ENV_GEN_SUSTAIN   = 21
+SIGNAL_LFO_RATE          = 22
+SIGNAL_PITCH             = 23
+SIGNAL_GATE              = 24
 
 SIGNALS_SIZE = 128
 
@@ -116,31 +117,33 @@ NRPN_SOURCE_AMP_AUDIO    = 133
 NRPN_SOURCE_AMP_MOD      = 134
 NRPN_SOURCE_OUTPUT       = 135
 
-NRPN_SOURCE_OSC_COARSE_TUNE   = 256
-NRPN_SOURCE_OSC_FINE_TUNE     = 257
-NRPN_SOURCE_OSC_WAVEFORM      = 258
-NRPN_SOURCE_OSC_MOD_AMOUNT    = 259
+NRPN_SOURCE_OSC_WAVEFORM      = 256
+NRPN_SOURCE_OSC_MOD_AMOUNT    = 257
+NRPN_SOURCE_OSC_COARSE_TUNE   = 258
+NRPN_SOURCE_OSC_FINE_TUNE     = 259
 NRPN_SOURCE_FILTER_CUTOFF     = 260
 NRPN_SOURCE_FILTER_RESONANCE  = 261
 NRPN_SOURCE_FILTER_MOD_AMOUNT = 262
-NRPN_SOURCE_AMP_GAIN          = 263
-NRPN_SOURCE_ENV_GEN_ATTACK    = 264
-NRPN_SOURCE_ENV_GEN_DECAY     = 265
-NRPN_SOURCE_ENV_GEN_SUSTAIN   = 266
-NRPN_SOURCE_LFO_RATE          = 267
+NRPN_SOURCE_FILTER_GAIN       = 263
+NRPN_SOURCE_AMP_GAIN          = 264
+NRPN_SOURCE_ENV_GEN_ATTACK    = 265
+NRPN_SOURCE_ENV_GEN_DECAY     = 266
+NRPN_SOURCE_ENV_GEN_SUSTAIN   = 267
+NRPN_SOURCE_LFO_RATE          = 268
 
-NRPN_CC_OSC_COARSE_TUNE   = 384
-NRPN_CC_OSC_FINE_TUNE     = 385
-NRPN_CC_OSC_WAVEFORM      = 386
-NRPN_CC_OSC_MOD_AMOUNT    = 387
+NRPN_CC_OSC_WAVEFORM      = 384
+NRPN_CC_OSC_MOD_AMOUNT    = 385
+NRPN_CC_OSC_COARSE_TUNE   = 386
+NRPN_CC_OSC_FINE_TUNE     = 387
 NRPN_CC_FILTER_CUTOFF     = 388
 NRPN_CC_FILTER_RESONANCE  = 389
 NRPN_CC_FILTER_MOD_AMOUNT = 390
-NRPN_CC_AMP_GAIN          = 391
-NRPN_CC_ENV_GEN_ATTACK    = 392
-NRPN_CC_ENV_GEN_DECAY     = 393
-NRPN_CC_ENV_GEN_SUSTAIN   = 394
-NRPN_CC_LFO_RATE          = 395
+NRPN_CC_FILTER_GAIN       = 391
+NRPN_CC_AMP_GAIN          = 392
+NRPN_CC_ENV_GEN_ATTACK    = 393
+NRPN_CC_ENV_GEN_DECAY     = 394
+NRPN_CC_ENV_GEN_SUSTAIN   = 395
+NRPN_CC_LFO_RATE          = 396
 
 # CC value normalization. Every parameter is a ratio in 0.0..1.0, so this is the only converter:
 # CC 4..124 maps to the full range, centred on CC 64 where a MIDI controller puts its detent, and
@@ -192,39 +195,42 @@ C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_AUDIO   , SIGNAL_FILTER_OUTPUT)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_MOD     , SIGNAL_ENV_GEN_OUTPUT)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OUTPUT      , SIGNAL_AMP_OUTPUT)
 
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_COARSE_TUNE  , SIGNAL_OSC_COARSE_TUNE)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_FINE_TUNE    , SIGNAL_OSC_FINE_TUNE)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_WAVEFORM     , SIGNAL_OSC_WAVEFORM)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_MOD_AMOUNT   , SIGNAL_OSC_MOD_AMOUNT)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_COARSE_TUNE  , SIGNAL_OSC_COARSE_TUNE)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_FINE_TUNE    , SIGNAL_OSC_FINE_TUNE)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_CUTOFF    , SIGNAL_FILTER_CUTOFF)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_RESONANCE , SIGNAL_FILTER_RESONANCE)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_MOD_AMOUNT, SIGNAL_FILTER_MOD_AMOUNT)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_GAIN      , SIGNAL_FILTER_GAIN)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_GAIN         , SIGNAL_AMP_GAIN)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_ATTACK   , SIGNAL_ENV_GEN_ATTACK)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_DECAY    , SIGNAL_ENV_GEN_DECAY)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_SUSTAIN  , SIGNAL_ENV_GEN_SUSTAIN)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_RATE         , SIGNAL_LFO_RATE)
 
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_COARSE_TUNE  , 86)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_FINE_TUNE    , 70)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_WAVEFORM     , 20)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_MOD_AMOUNT   , 13)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_COARSE_TUNE  , 86)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_FINE_TUNE    , 70)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_CUTOFF    , 74)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_RESONANCE , 71)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_MOD_AMOUNT, 24)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_GAIN      , 116)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_AMP_GAIN         , 15)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_ATTACK   , 73)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_DECAY    , 75)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_SUSTAIN  , 30)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_RATE         , 3)
 
-C.set_midi_cc_value(MIDI_CH, 86 , 64 ) # Osc Coarse Tune
-C.set_midi_cc_value(MIDI_CH, 70 , 64 ) # Osc Fine Tune
 C.set_midi_cc_value(MIDI_CH, 20 , 4  ) # Osc Wave
 C.set_midi_cc_value(MIDI_CH, 13 , 4  ) # Osc Mod Amt
+C.set_midi_cc_value(MIDI_CH, 86 , 64 ) # Osc Coarse Tune
+C.set_midi_cc_value(MIDI_CH, 70 , 64 ) # Osc Fine Tune
 C.set_midi_cc_value(MIDI_CH, 74 , 124) # Filter Cutoff
 C.set_midi_cc_value(MIDI_CH, 71 , 64 ) # Filter Resonance
 C.set_midi_cc_value(MIDI_CH, 24 , 64 ) # Filter Mod Amt
+C.set_midi_cc_value(MIDI_CH, 116, 64 ) # Filter Gain
 C.set_midi_cc_value(MIDI_CH, 15 , 94 ) # Amp Gain
 C.set_midi_cc_value(MIDI_CH, 73 , 4  ) # EG Attack
 C.set_midi_cc_value(MIDI_CH, 75 , 94 ) # EG Decay/Release
@@ -261,13 +267,14 @@ loop do
 
   # Parameter sources. Once per buffer is enough: the destination's 2.67 ms smoothing swallows the
   # difference between being fed at 48 kHz and at the 750 Hz buffer rate.
-  source_osc_coarse_tune   = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_COARSE_TUNE)
-  source_osc_fine_tune     = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_FINE_TUNE)
   source_osc_waveform      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_WAVEFORM)
   source_osc_mod_amount    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_MOD_AMOUNT)
+  source_osc_coarse_tune   = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_COARSE_TUNE)
+  source_osc_fine_tune     = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_FINE_TUNE)
   source_filter_cutoff     = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_CUTOFF)
   source_filter_resonance  = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_RESONANCE)
   source_filter_mod_amount = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_MOD_AMOUNT)
+  source_filter_gain       = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_GAIN)
   source_amp_gain          = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_GAIN)
   source_env_gen_attack    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_ATTACK)
   source_env_gen_decay     = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_DECAY)
@@ -276,39 +283,42 @@ loop do
 
   # Which CC fills each control slot. The bus is the only thing downstream reads, so this is
   # where MIDI enters and the only place a CC number appears.
-  cc_osc_coarse_tune   = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_COARSE_TUNE)
-  cc_osc_fine_tune     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_FINE_TUNE)
   cc_osc_waveform      = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_WAVEFORM)
   cc_osc_mod_amount    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_MOD_AMOUNT)
+  cc_osc_coarse_tune   = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_COARSE_TUNE)
+  cc_osc_fine_tune     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_FINE_TUNE)
   cc_filter_cutoff     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_CUTOFF)
   cc_filter_resonance  = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_RESONANCE)
   cc_filter_mod_amount = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_MOD_AMOUNT)
+  cc_filter_gain       = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_GAIN)
   cc_amp_gain          = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_AMP_GAIN)
   cc_env_gen_attack    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_ATTACK)
   cc_env_gen_decay     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_DECAY)
   cc_env_gen_sustain   = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_SUSTAIN)
   cc_lfo_rate          = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_RATE)
 
-  signals[SIGNAL_OSC_COARSE_TUNE]   = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_osc_coarse_tune))
-  signals[SIGNAL_OSC_FINE_TUNE]     = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_osc_fine_tune))
   signals[SIGNAL_OSC_WAVEFORM]      = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_osc_waveform))
   signals[SIGNAL_OSC_MOD_AMOUNT]    = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_osc_mod_amount))
+  signals[SIGNAL_OSC_COARSE_TUNE]   = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_osc_coarse_tune))
+  signals[SIGNAL_OSC_FINE_TUNE]     = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_osc_fine_tune))
   signals[SIGNAL_FILTER_CUTOFF]     = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_filter_cutoff))
   signals[SIGNAL_FILTER_RESONANCE]  = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_filter_resonance))
   signals[SIGNAL_FILTER_MOD_AMOUNT] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_filter_mod_amount))
+  signals[SIGNAL_FILTER_GAIN]       = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_filter_gain))
   signals[SIGNAL_AMP_GAIN]          = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_amp_gain))
   signals[SIGNAL_ENV_GEN_ATTACK]    = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_env_gen_attack))
   signals[SIGNAL_ENV_GEN_DECAY]     = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_env_gen_decay))
   signals[SIGNAL_ENV_GEN_SUSTAIN]   = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_env_gen_sustain))
   signals[SIGNAL_LFO_RATE]          = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_lfo_rate))
 
-  osc.set_coarse_tune(signals[source_osc_coarse_tune])
-  osc.set_fine_tune(signals[source_osc_fine_tune])
   osc.set_waveform(signals[source_osc_waveform])
   osc.set_modulation_amount(signals[source_osc_mod_amount])
+  osc.set_coarse_tune(signals[source_osc_coarse_tune])
+  osc.set_fine_tune(signals[source_osc_fine_tune])
   filter.set_cutoff(signals[source_filter_cutoff])
   filter.set_resonance(signals[source_filter_resonance])
   filter.set_modulation_amount(signals[source_filter_mod_amount])
+  filter.set_gain(signals[source_filter_gain])
   amp.set_gain(signals[source_amp_gain])
   env_gen.set_attack(signals[source_env_gen_attack])
   env_gen.set_decay(signals[source_env_gen_decay])

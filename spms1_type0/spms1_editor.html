@@ -276,20 +276,6 @@
         <h2>Osc</h2>
         <div class="control-row">
           <div class="slider-knob-zone">
-            <div class="slider-label">Coarse Tune <span class="cc-num">(CC 86)</span></div>
-            <div class="slider-input-wrapper">
-              <input type="range" id="osc-coarse-tune" min="0" max="127" value="64">
-              <span class="slider-value" id="osc-coarse-tune-val">64</span>
-            </div>
-          </div>
-          <div class="slider-knob-zone">
-            <div class="slider-label">Fine Tune <span class="cc-num">(CC 70)</span></div>
-            <div class="slider-input-wrapper">
-              <input type="range" id="osc-fine-tune" min="0" max="127" value="64">
-              <span class="slider-value" id="osc-fine-tune-val">64</span>
-            </div>
-          </div>
-          <div class="slider-knob-zone">
             <div class="slider-label">Wave <span class="cc-num">(CC 20)</span></div>
             <div class="slider-input-wrapper">
               <input type="range" id="waveform" min="0" max="127" value="4">
@@ -301,6 +287,20 @@
             <div class="slider-input-wrapper">
               <input type="range" id="osc-mod-amount" min="0" max="127" value="4">
               <span class="slider-value" id="osc-mod-amount-val">4</span>
+            </div>
+          </div>
+          <div class="slider-knob-zone">
+            <div class="slider-label">Coarse Tune <span class="cc-num">(CC 86)</span></div>
+            <div class="slider-input-wrapper">
+              <input type="range" id="osc-coarse-tune" min="0" max="127" value="64">
+              <span class="slider-value" id="osc-coarse-tune-val">64</span>
+            </div>
+          </div>
+          <div class="slider-knob-zone">
+            <div class="slider-label">Fine Tune <span class="cc-num">(CC 70)</span></div>
+            <div class="slider-input-wrapper">
+              <input type="range" id="osc-fine-tune" min="0" max="127" value="64">
+              <span class="slider-value" id="osc-fine-tune-val">64</span>
             </div>
           </div>
         </div>
@@ -332,6 +332,13 @@
               <span class="slider-value" id="eg-amount-val">64</span>
             </div>
           </div>
+          <div class="slider-knob-zone">
+            <div class="slider-label">Gain <span class="cc-num">(CC 116)</span></div>
+            <div class="slider-input-wrapper">
+              <input type="range" id="filter-gain" min="0" max="127" value="64">
+              <span class="slider-value" id="filter-gain-val">64</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -339,7 +346,7 @@
         <h2>Amp</h2>
         <div class="control-row">
           <div class="slider-knob-zone">
-            <div class="slider-label">Amp Gain <span class="cc-num">(CC 15)</span></div>
+            <div class="slider-label">Gain <span class="cc-num">(CC 15)</span></div>
             <div class="slider-input-wrapper">
               <input type="range" id="amp-gain" min="0" max="127" value="94">
               <span class="slider-value" id="amp-gain-val">94</span>
@@ -405,14 +412,15 @@
   let midi_ch = 0;
 
   const ccMap = {
-    'osc-coarse-tune': 86,
-    'osc-fine-tune': 70,
     'waveform': 20,
     'osc-mod-amount': 13,
-    'amp-gain': 15,
+    'osc-coarse-tune': 86,
+    'osc-fine-tune': 70,
     'cutoff': 74,
     'resonance': 71,
     'eg-amount': 24,
+    'filter-gain': 116,
+    'amp-gain': 15,
     'attack': 73,
     'decay': 75,
     'sustain': 30,
@@ -420,14 +428,15 @@
   };
 
   const defaultValues = {
-    'osc-coarse-tune': 64,
-    'osc-fine-tune': 64,
     'waveform': 4,
     'osc-mod-amount': 4,
-    'amp-gain': 94,
+    'osc-coarse-tune': 64,
+    'osc-fine-tune': 64,
     'cutoff': 124,
     'resonance': 64,
     'eg-amount': 64,
+    'filter-gain': 64,
+    'amp-gain': 94,
     'attack': 4,
     'decay': 94,
     'sustain': 4,
@@ -530,14 +539,15 @@
       const ccValue = data[2];
       let elementId = "";
       switch (ccNumber) {
-        case 86: elementId = "osc-coarse-tune"; break;
-        case 70: elementId = "osc-fine-tune"; break;
         case 20: elementId = "waveform"; break;
         case 13: elementId = "osc-mod-amount"; break;
-        case 15: elementId = "amp-gain"; break;
+        case 86: elementId = "osc-coarse-tune"; break;
+        case 70: elementId = "osc-fine-tune"; break;
         case 74: elementId = "cutoff"; break;
         case 71: elementId = "resonance"; break;
         case 24: elementId = "eg-amount"; break;
+        case 116: elementId = "filter-gain"; break;
+        case 15: elementId = "amp-gain"; break;
         case 73: elementId = "attack"; break;
         case 75: elementId = "decay"; break;
         case 30: elementId = "sustain"; break;
