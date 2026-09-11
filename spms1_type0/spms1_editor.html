@@ -12,6 +12,12 @@
       --border-color: #e1e4e6;
       --text-color: #2c3e50;
       --text-muted: #7f8c8d;
+      /* Slider ticks. The thumb's centre travels from half a thumb in to half a thumb from the
+         far end, so a tick for CC n sits at that fraction of what is left of the track. */
+      --tick: linear-gradient(var(--text-muted), var(--text-muted));
+      --tick-4: calc(9px + (100% - 18px) * 0.031496 - 1px);
+      --tick-64: calc(9px + (100% - 18px) * 0.503937 - 1px);
+      --tick-124: calc(9px + (100% - 18px) * 0.976378 - 1px);
     }
     * {
       box-sizing: border-box;
@@ -139,15 +145,37 @@
       -webkit-appearance: none;
       appearance: none;
       height: 6px;
-      background: var(--border-color);
+      background-color: var(--border-color);
       border-radius: 3px;
       outline: none;
+      /* CC 4 and CC 124 are the ends of the range the synth uses: cc_to_ratio maps them to 0.0
+         and 1.0 and clamps anything past them, so the track outside the ticks does nothing. */
+      background-image: var(--tick), var(--tick);
+      background-size: 2px 100%, 2px 100%;
+      background-position: var(--tick-4) center, var(--tick-124) center;
+      background-repeat: no-repeat;
+    }
+    /* A third tick at CC 64 where the centre of the dial means no change. Drawn rather than
+       declared as a <datalist>, which some browsers turn into a snap point. */
+    input[type="range"].bipolar {
+      background-image: var(--tick), var(--tick), var(--tick);
+      background-size: 2px 100%, 2px 100%, 2px 100%;
+      background-position: var(--tick-4) center, var(--tick-64) center, var(--tick-124) center;
     }
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
       appearance: none;
       width: 18px;
       height: 18px;
+      border-radius: 50%;
+      background: var(--primary-color);
+      cursor: pointer;
+    }
+    /* Same size as the WebKit thumb above, so the tick positions line up here too. */
+    input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border: none;
       border-radius: 50%;
       background: var(--primary-color);
       cursor: pointer;
@@ -292,15 +320,15 @@
           <div class="slider-knob-zone">
             <div class="slider-label">Coarse Tune <span class="cc-num">(CC 86)</span></div>
             <div class="slider-input-wrapper">
-              <input type="range" id="osc-coarse-tune" min="0" max="127" value="64">
-              <span class="slider-value" id="osc-coarse-tune-val">64</span>
+              <input type="range" class="bipolar" id="osc-coarse-tune" min="0" max="127" value="64">
+              <span class="slider-value" id="osc-coarse-tune-val">+0</span>
             </div>
           </div>
           <div class="slider-knob-zone">
             <div class="slider-label">Fine Tune <span class="cc-num">(CC 70)</span></div>
             <div class="slider-input-wrapper">
-              <input type="range" id="osc-fine-tune" min="0" max="127" value="64">
-              <span class="slider-value" id="osc-fine-tune-val">64</span>
+              <input type="range" class="bipolar" id="osc-fine-tune" min="0" max="127" value="64">
+              <span class="slider-value" id="osc-fine-tune-val">+0</span>
             </div>
           </div>
         </div>
@@ -563,12 +591,20 @@
     }
   }
 
+  const bipolarIds = new Set(['osc-coarse-tune', 'osc-fine-tune']);
+
+  function displayValue(id, value) {
+    if (!bipolarIds.has(id)) return String(value);
+    const offset = value - 64;
+    return (offset < 0 ? '-' : '+') + Math.abs(offset);
+  }
+
   Object.keys(ccMap).forEach(id => {
     const input = document.getElementById(id);
     const valSpan = document.getElementById(id + '-val');
     if (input && valSpan) {
       input.addEventListener('input', (e) => {
-        valSpan.textContent = e.target.value;
+        valSpan.textContent = displayValue(id, parseInt(e.target.value));
         sendCC(ccMap[id], parseInt(e.target.value));
       });
     }
@@ -580,7 +616,7 @@
       const valSpan = document.getElementById(id + '-val');
       if (input && valSpan) {
         input.value = defaultValues[id];
-        valSpan.textContent = defaultValues[id];
+        valSpan.textContent = displayValue(id, defaultValues[id]);
         sendCC(ccMap[id], defaultValues[id]);
       }
     });
