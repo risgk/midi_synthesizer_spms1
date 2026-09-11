@@ -3,7 +3,10 @@
 #define SP_RUNTIME_H
 
 /* Puts the synth core in RAM. */
-#define main __attribute__((section(".time_critical"))) Spms1_main
+/* flatten pulls the module process methods into Spms1_main. Without it GCC stops inlining them
+   once a module type has two instances and so two call sites, and anything not inlined into main
+   runs from XIP flash, main being the only function that carries .time_critical. */
+#define main __attribute__((section(".time_critical"), flatten)) Spms1_main
 #pragma GCC optimize("single-precision-constant")
 #pragma GCC optimize ("O3")
 #pragma GCC target ("thumb")

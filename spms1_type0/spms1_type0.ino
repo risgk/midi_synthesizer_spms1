@@ -58,14 +58,24 @@ uint32_t g_debug_measurement_counted  = 0;  // 0 until the first buffer has been
 void handleNoteOn(byte channel, byte pitch, byte velocity);
 void handleNoteOff(byte channel, byte pitch, byte velocity);
 void handleControlChange(byte channel, byte number, byte value);
+void handlePitchBend(byte channel, int bend);
 
 extern "C" {
 
 extern int Spms1_main(int argc, char **argv);
 
+// How many GC roots the synth actually has pushed. sp_gc_roots is sized by SP_GC_STACK_MAX in
+// sp_gc.h and costs 4 bytes a slot whether used or not, so this says how much of it is real.
+// A plain global, not thread-local, because SP_THREADS is not defined: core 0 sees what core 1
+// writes. Diagnostic only.
+extern int sp_gc_nroots;
+
 uint8_t  g_midi_note_on_pitch[16]  = {60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60};
 uint8_t  g_midi_note_on_state[16]  = {};
 uint8_t  g_midi_cc_values[16][128] = {};
+// Pitch bend arrives 14-bit and centred, and the MIDI library hands it over already signed,
+// so it is kept that way rather than folded into the 7-bit tables above.
+int16_t  g_midi_pitch_bend[16]     = {};
 
 // NRPN parameter numbers are (MSB << 7) | LSB; the synth uses MSB 0-3 as categories, so 512
 // entries cover it. Values are 7-bit, filled from CC 6.
@@ -75,7 +85,7 @@ uint8_t  g_midi_nrpn_msb[16]            = {};
 uint8_t  g_midi_nrpn_lsb[16]            = {};
 uint8_t  g_midi_nrpn_selected[16]       = {};  // 0 until CC 99 or 98 arrives, and again after an RPN
 
-uint32_t g_sample_rate             = 96000;
+uint32_t g_sample_rate             = 48000;
 uint32_t g_audio_buffers           = 2;
 uint32_t g_audio_buffer_words      = 64;
 
@@ -101,6 +111,22 @@ void set_midi_note_on_state(uint8_t midi_ch, uint8_t midi_note_on_state) {
   }
 
   g_midi_note_on_state[midi_ch] = midi_note_on_state;
+}
+
+void set_midi_pitch_bend(uint8_t midi_ch, int32_t midi_pitch_bend) {
+  if (midi_ch >= 16) {
+    return;
+  }
+
+  g_midi_pitch_bend[midi_ch] = static_cast<int16_t>(midi_pitch_bend);
+}
+
+int32_t get_midi_pitch_bend(uint8_t midi_ch) {
+  if (midi_ch >= 16) {
+    return 0;
+  }
+
+  return g_midi_pitch_bend[midi_ch];
 }
 
 uint8_t get_midi_note_on_state(uint8_t midi_ch) {
@@ -275,6 +301,7 @@ void setup() {
   USB_MIDI.setHandleNoteOn(handleNoteOn);
   USB_MIDI.setHandleNoteOff(handleNoteOff);
   USB_MIDI.setHandleControlChange(handleControlChange);
+  USB_MIDI.setHandlePitchBend(handlePitchBend);
   USB_MIDI.begin(MIDI_CHANNEL_OMNI);
   USB_MIDI.turnThruOff();
 #endif  // defined(SPMS1_USE_USB_MIDI)
@@ -286,6 +313,7 @@ void setup() {
   UART_MIDI.setHandleNoteOn(handleNoteOn);
   UART_MIDI.setHandleNoteOff(handleNoteOff);
   UART_MIDI.setHandleControlChange(handleControlChange);
+  UART_MIDI.setHandlePitchBend(handlePitchBend);
   UART_MIDI.begin(MIDI_CHANNEL_OMNI);
   UART_MIDI.turnThruOff();
   SPMS1_UART_MIDI_SERIAL.begin(SPMS1_UART_MIDI_SPEED);
@@ -312,9 +340,22 @@ void loop() {
   static uint8_t s_loop_counter = 0;
   if (++s_loop_counter == 0) {
     SPMS1_DEBUG_PRINT_SERIAL.print("\e[1;1H\e[K");
+    SPMS1_DEBUG_PRINT_SERIAL.print("min ");
     SPMS1_DEBUG_PRINT_SERIAL.print(g_debug_measurement_min_us);
     SPMS1_DEBUG_PRINT_SERIAL.print("\e[2;1H\e[K");
+    SPMS1_DEBUG_PRINT_SERIAL.print("max ");
     SPMS1_DEBUG_PRINT_SERIAL.print(g_debug_measurement_max_us);
+
+    // Sampled rather than a true high-water mark: tracking the peak would mean a compare and a
+    // store inside _sp_gc_root_push, which the module process methods sit on. The count is stable
+    // once the synth is running, so sampling it from here is enough to size sp_gc_roots.
+    static int s_gc_nroots_max = 0;
+    if (sp_gc_nroots > s_gc_nroots_max) { s_gc_nroots_max = sp_gc_nroots; }
+    SPMS1_DEBUG_PRINT_SERIAL.print("\e[3;1H\e[K");
+    SPMS1_DEBUG_PRINT_SERIAL.print("gc roots ");
+    SPMS1_DEBUG_PRINT_SERIAL.print(sp_gc_nroots);
+    SPMS1_DEBUG_PRINT_SERIAL.print(" peak ");
+    SPMS1_DEBUG_PRINT_SERIAL.print(s_gc_nroots_max);
     // Both cleared on every report, so the pair brackets the buffers since the last one rather
     // than since boot. min is the uncontended compute time, max is what the deadline is about,
     // and the gap between them is interference from core0 and interrupts.
@@ -342,4 +383,9 @@ void handleControlChange(byte channel, byte number, byte value)
 {
   set_midi_cc_value(channel - 1, number, value);
   handle_midi_nrpn_cc(channel - 1, number, value);
+}
+
+void handlePitchBend(byte channel, int bend)
+{
+  set_midi_pitch_bend(channel - 1, bend);
 }

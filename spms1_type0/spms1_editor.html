@@ -12,6 +12,12 @@
       --border-color: #e1e4e6;
       --text-color: #2c3e50;
       --text-muted: #7f8c8d;
+      /* Slider ticks. The thumb's centre travels from half a thumb in to half a thumb from the
+         far end, so a tick for CC n sits at that fraction of what is left of the track. */
+      --tick: linear-gradient(var(--text-muted), var(--text-muted));
+      --tick-4: calc(9px + (100% - 18px) * 0.031496 - 1px);
+      --tick-64: calc(9px + (100% - 18px) * 0.503937 - 1px);
+      --tick-124: calc(9px + (100% - 18px) * 0.976378 - 1px);
     }
     * {
       box-sizing: border-box;
@@ -139,15 +145,37 @@
       -webkit-appearance: none;
       appearance: none;
       height: 6px;
-      background: var(--border-color);
+      background-color: var(--border-color);
       border-radius: 3px;
       outline: none;
+      /* CC 4 and CC 124 are the ends of the range the synth uses: cc_to_ratio maps them to 0.0
+         and 1.0 and clamps anything past them, so the track outside the ticks does nothing. */
+      background-image: var(--tick), var(--tick);
+      background-size: 2px 100%, 2px 100%;
+      background-position: var(--tick-4) center, var(--tick-124) center;
+      background-repeat: no-repeat;
+    }
+    /* A third tick at CC 64 where the centre of the dial means no change. Drawn rather than
+       declared as a <datalist>, which some browsers turn into a snap point. */
+    input[type="range"].bipolar {
+      background-image: var(--tick), var(--tick), var(--tick);
+      background-size: 2px 100%, 2px 100%, 2px 100%;
+      background-position: var(--tick-4) center, var(--tick-64) center, var(--tick-124) center;
     }
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
       appearance: none;
       width: 18px;
       height: 18px;
+      border-radius: 50%;
+      background: var(--primary-color);
+      cursor: pointer;
+    }
+    /* Same size as the WebKit thumb above, so the tick positions line up here too. */
+    input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border: none;
       border-radius: 50%;
       background: var(--primary-color);
       cursor: pointer;
@@ -229,7 +257,7 @@
 
 <div class="editor-container">
   <header>
-    <h1>SPMS-1 (type-0) Editor<span class="version">v0.0.25</span></h1>
+    <h1>SPMS-1 (type-0) Editor<span class="version">v0.0.26</span></h1>
   </header>
 
   <div class="editor-grid">
@@ -276,17 +304,31 @@
         <h2>Osc</h2>
         <div class="control-row">
           <div class="slider-knob-zone">
-            <div class="slider-label">Waveform <span class="cc-num">(CC 20)</span></div>
+            <div class="slider-label">Wave <span class="cc-num">(CC 20)</span></div>
             <div class="slider-input-wrapper">
               <input type="range" id="waveform" min="0" max="127" value="4">
               <span class="slider-value" id="waveform-val">4</span>
             </div>
           </div>
           <div class="slider-knob-zone">
-            <div class="slider-label">Mod Amount <span class="cc-num">(CC 13)</span></div>
+            <div class="slider-label">Mod Amt <span class="cc-num">(CC 13)</span></div>
             <div class="slider-input-wrapper">
               <input type="range" id="osc-mod-amount" min="0" max="127" value="4">
               <span class="slider-value" id="osc-mod-amount-val">4</span>
+            </div>
+          </div>
+          <div class="slider-knob-zone">
+            <div class="slider-label">Coarse Tune <span class="cc-num">(CC 86)</span></div>
+            <div class="slider-input-wrapper">
+              <input type="range" class="bipolar" id="osc-coarse-tune" min="0" max="127" value="64">
+              <span class="slider-value" id="osc-coarse-tune-val">+0</span>
+            </div>
+          </div>
+          <div class="slider-knob-zone">
+            <div class="slider-label">Fine Tune <span class="cc-num">(CC 70)</span></div>
+            <div class="slider-input-wrapper">
+              <input type="range" class="bipolar" id="osc-fine-tune" min="0" max="127" value="64">
+              <span class="slider-value" id="osc-fine-tune-val">+0</span>
             </div>
           </div>
         </div>
@@ -312,10 +354,17 @@
             </div>
           </div>
           <div class="slider-knob-zone">
-            <div class="slider-label">Mod Amount <span class="cc-num">(CC 24)</span></div>
+            <div class="slider-label">Mod Amt <span class="cc-num">(CC 24)</span></div>
             <div class="slider-input-wrapper">
               <input type="range" id="eg-amount" min="0" max="127" value="64">
               <span class="slider-value" id="eg-amount-val">64</span>
+            </div>
+          </div>
+          <div class="slider-knob-zone">
+            <div class="slider-label">Gain <span class="cc-num">(CC 112)</span></div>
+            <div class="slider-input-wrapper">
+              <input type="range" id="filter-gain" min="0" max="127" value="64">
+              <span class="slider-value" id="filter-gain-val">64</span>
             </div>
           </div>
         </div>
@@ -325,10 +374,10 @@
         <h2>Amp</h2>
         <div class="control-row">
           <div class="slider-knob-zone">
-            <div class="slider-label">Amp Gain <span class="cc-num">(CC 15)</span></div>
+            <div class="slider-label">Gain <span class="cc-num">(CC 15)</span></div>
             <div class="slider-input-wrapper">
-              <input type="range" id="amp-gain" min="0" max="127" value="94">
-              <span class="slider-value" id="amp-gain-val">94</span>
+              <input type="range" id="amp-gain" min="0" max="127" value="64">
+              <span class="slider-value" id="amp-gain-val">64</span>
             </div>
           </div>
         </div>
@@ -345,7 +394,7 @@
             </div>
           </div>
           <div class="slider-knob-zone">
-            <div class="slider-label">Decay/Release <span class="cc-num">(CC 75)</span></div>
+            <div class="slider-label">Decay <span class="cc-num">(CC 75)</span></div>
             <div class="slider-input-wrapper">
               <input type="range" id="decay" min="0" max="127" value="94">
               <span class="slider-value" id="decay-val">94</span>
@@ -393,10 +442,13 @@
   const ccMap = {
     'waveform': 20,
     'osc-mod-amount': 13,
-    'amp-gain': 15,
+    'osc-coarse-tune': 86,
+    'osc-fine-tune': 70,
     'cutoff': 74,
     'resonance': 71,
     'eg-amount': 24,
+    'filter-gain': 112,
+    'amp-gain': 15,
     'attack': 73,
     'decay': 75,
     'sustain': 30,
@@ -406,10 +458,13 @@
   const defaultValues = {
     'waveform': 4,
     'osc-mod-amount': 4,
-    'amp-gain': 94,
+    'osc-coarse-tune': 64,
+    'osc-fine-tune': 64,
     'cutoff': 124,
     'resonance': 64,
     'eg-amount': 64,
+    'filter-gain': 64,
+    'amp-gain': 64,
     'attack': 4,
     'decay': 94,
     'sustain': 4,
@@ -514,10 +569,13 @@
       switch (ccNumber) {
         case 20: elementId = "waveform"; break;
         case 13: elementId = "osc-mod-amount"; break;
-        case 15: elementId = "amp-gain"; break;
+        case 86: elementId = "osc-coarse-tune"; break;
+        case 70: elementId = "osc-fine-tune"; break;
         case 74: elementId = "cutoff"; break;
         case 71: elementId = "resonance"; break;
         case 24: elementId = "eg-amount"; break;
+        case 112: elementId = "filter-gain"; break;
+        case 15: elementId = "amp-gain"; break;
         case 73: elementId = "attack"; break;
         case 75: elementId = "decay"; break;
         case 30: elementId = "sustain"; break;
@@ -533,12 +591,20 @@
     }
   }
 
+  const bipolarIds = new Set(['osc-coarse-tune', 'osc-fine-tune']);
+
+  function displayValue(id, value) {
+    if (!bipolarIds.has(id)) return String(value);
+    const offset = value - 64;
+    return (offset < 0 ? '-' : '+') + Math.abs(offset);
+  }
+
   Object.keys(ccMap).forEach(id => {
     const input = document.getElementById(id);
     const valSpan = document.getElementById(id + '-val');
     if (input && valSpan) {
       input.addEventListener('input', (e) => {
-        valSpan.textContent = e.target.value;
+        valSpan.textContent = displayValue(id, parseInt(e.target.value));
         sendCC(ccMap[id], parseInt(e.target.value));
       });
     }
@@ -550,7 +616,7 @@
       const valSpan = document.getElementById(id + '-val');
       if (input && valSpan) {
         input.value = defaultValues[id];
-        valSpan.textContent = defaultValues[id];
+        valSpan.textContent = displayValue(id, defaultValues[id]);
         sendCC(ccMap[id], defaultValues[id]);
       }
     });

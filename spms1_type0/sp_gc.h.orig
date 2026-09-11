@@ -58,12 +58,8 @@ typedef struct { int tag; int cls_id; union { mrb_int i; const char *s; mrb_floa
    generated TU -- both consult this for the array and the SP_GC_ROOT bound).
    Too small overflows silently into a dropped root (UAF), so size it to the
    program's deepest live-root nesting. */
-/* Lowered from Spinel's 65536 for the MCU, where sp_gc_roots costs 4 bytes a slot of SRAM whether
-   the slot is used or not: 65536 of them is 262KB. SPMS-1 allocates nothing per sample and
-   measures 21 roots in use, and the sketch prints the live and peak counts to the debug UART so
-   that stays visible. Raise this before adding anything that nests roots deeply. */
 #ifndef SP_GC_STACK_MAX
-#define SP_GC_STACK_MAX 1024
+#define SP_GC_STACK_MAX 65536
 #endif
 #define SP_GC_FULL_INTERVAL 8
 /* Per-worker root stack (SP_TLS): each OS worker carries the active roots of

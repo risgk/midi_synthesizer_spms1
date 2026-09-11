@@ -2,7 +2,9 @@ module Spms1
   # Triangle LFO. Deliberately not band-limited: a triangle's harmonics fall off as 1/n^2, so even
   # at the top of the rate range what folds back stays far below the fundamental.
   class LFO
-    SMOOTHING_TARGET_BLEND_BASE = 0.015625
+    # Blend at the reference rate on the line below. The two move together: their product is what
+    # fixes the time constant, so changing one without the other changes how fast smoothing is.
+    SMOOTHING_TARGET_BLEND_BASE = 0.03125
     # Number of samples between control-rate updates; smoothing speed is kept approximately constant if this is changed.
     CONTROL_RATE_DIVISOR = 4
 
@@ -20,7 +22,7 @@ module Spms1
       # is an Integer, so dividing by it in the per-sample path also costs an int-to-float
       # conversion on top of the division.
       @inv_sample_rate = 1.0 / sample_rate
-      @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (96000.0 / @sample_rate) * (CONTROL_RATE_DIVISOR / 4.0)
+      @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (48000.0 / @sample_rate) * (CONTROL_RATE_DIVISOR / 4.0)
       @phase = 0.0
       # Middle of the range, so the LFO starts where its control does rather than sliding up to it.
       @rate = 0.5

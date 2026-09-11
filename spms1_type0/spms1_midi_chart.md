@@ -1,6 +1,6 @@
 ```
   [MIDI Synthesizer]                                              Date: 2026-09-10                      
-  Model: SPMS-1 (type-0)          MIDI Implementation Chart       Version: 0.0.25                       
+  Model: SPMS-1 (type-0)          MIDI Implementation Chart       Version: 0.0.26                       
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Function...                   | Transmitted   | Recognized    | Remarks                              |
 +-------------------------------+---------------+---------------+--------------------------------------+
@@ -20,16 +20,19 @@
 | After        Key's            | x             | x             |                                      |
 | Touch        Ch's             | x             | x             |                                      |
 +-------------------------------+---------------+---------------+--------------------------------------+
-| Pitch Bend                    | x             | x             |                                      |
+| Pitch Bend                    | x             | o             | Bipolar, routable as a signal        |
 +-------------------------------+---------------+---------------+--------------------------------------+
-| Control                    20 | x             | o             | Osc Waveform (Saw to Square)         |
-| Change                     13 | x             | o             | Osc Mod Amount                       |
+| Control                    20 | x             | o             | Osc Wave (Saw to Square)             |
+| Change                     13 | x             | o             | Osc Mod Amt                          |
+|                            86 | x             | o             | Osc Coarse Tune (+-5 Octaves)        |
+|                            70 | x             | o             | Osc Fine Tune (+-60 Cents)           |
 |                            74 | x             | o             | Filter Cutoff                        |
 |                            71 | x             | o             | Filter Resonance                     |
-|                            24 | x             | o             | Filter Mod Amount                    |
+|                            24 | x             | o             | Filter Mod Amt                       |
+|                           112 | x             | o             | Filter Gain (Drive)                  |
 |                            15 | x             | o             | Amp Gain                             |
 |                            73 | x             | o             | EG Attack (Time)                     |
-|                            75 | x             | o             | EG Decay/Release (Time)              |
+|                            75 | x             | o             | EG Decay (Time)                      |
 |                            30 | x             | o             | EG Sustain (Level)                   |
 |                             3 | x             | o             | LFO Rate                             |
 |                            99 | x             | o             | NRPN MSB                             |
