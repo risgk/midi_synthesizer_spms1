@@ -22,8 +22,10 @@
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Pitch Bend                    | x             | x             |                                      |
 +-------------------------------+---------------+---------------+--------------------------------------+
-| Control                    20 | x             | o             | Osc Wave (Saw to Square)             |
-| Change                     13 | x             | o             | Osc Mod Amt                          |
+| Control                    86 | x             | o             | Osc Coarse Tune (+-5 Octaves)        |
+| Change                     70 | x             | o             | Osc Fine Tune (+-60 Cents)           |
+|                            20 | x             | o             | Osc Wave (Saw to Square)             |
+|                            13 | x             | o             | Osc Mod Amt                          |
 |                            74 | x             | o             | Filter Cutoff                        |
 |                            71 | x             | o             | Filter Resonance                     |
 |                            24 | x             | o             | Filter Mod Amt                       |

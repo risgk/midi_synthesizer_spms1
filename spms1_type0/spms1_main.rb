@@ -69,28 +69,34 @@ MODULE_AMP     = 5
 # arguments instead costs picks x candidates per sample, which grows quadratically.
 # Nothing in the code depends on the numbering and a patch is never saved, so the order is for the
 # reader alone and regrouping it costs only a documentation update.
-# The two constants come first so that SIGNAL_NONE is 0: an NRPN entry nobody has set reads 0, and
-# an unrouted input should be silent rather than wired to whatever happens to sit in slot 0.
-# Nothing ever writes these two, so they hold what the bus was filled with at startup.
+# The constants come first so that SIGNAL_NONE is 0: an NRPN entry nobody has set reads 0, and an
+# unrouted input should be silent rather than wired to whatever happens to sit in slot 0. Nothing
+# ever writes them, so they hold what the bus was filled with at startup. They are what a routing
+# reaches for when an input wants a fixed value rather than a source.
 SIGNAL_NONE              = 0
 SIGNAL_ONE               = 1
-SIGNAL_ENV_GEN_OUTPUT    = 2
-SIGNAL_LFO_OUTPUT        = 3
-SIGNAL_OSC_OUTPUT        = 4
-SIGNAL_FILTER_OUTPUT     = 5
-SIGNAL_AMP_OUTPUT        = 6
-SIGNAL_OSC_WAVEFORM      = 7
-SIGNAL_OSC_MOD_AMOUNT    = 8
-SIGNAL_FILTER_CUTOFF     = 9
-SIGNAL_FILTER_RESONANCE  = 10
-SIGNAL_FILTER_MOD_AMOUNT = 11
-SIGNAL_AMP_GAIN          = 12
-SIGNAL_ENV_GEN_ATTACK    = 13
-SIGNAL_ENV_GEN_DECAY     = 14
-SIGNAL_ENV_GEN_SUSTAIN   = 15
-SIGNAL_LFO_RATE          = 16
-SIGNAL_PITCH             = 17
-SIGNAL_GATE              = 18
+SIGNAL_HALF              = 2
+SIGNAL_MINUS_HALF        = 3
+SIGNAL_MINUS_ONE         = 4
+SIGNAL_ENV_GEN_OUTPUT    = 5
+SIGNAL_LFO_OUTPUT        = 6
+SIGNAL_OSC_OUTPUT        = 7
+SIGNAL_FILTER_OUTPUT     = 8
+SIGNAL_AMP_OUTPUT        = 9
+SIGNAL_OSC_COARSE_TUNE   = 10
+SIGNAL_OSC_FINE_TUNE     = 11
+SIGNAL_OSC_WAVEFORM      = 12
+SIGNAL_OSC_MOD_AMOUNT    = 13
+SIGNAL_FILTER_CUTOFF     = 14
+SIGNAL_FILTER_RESONANCE  = 15
+SIGNAL_FILTER_MOD_AMOUNT = 16
+SIGNAL_AMP_GAIN          = 17
+SIGNAL_ENV_GEN_ATTACK    = 18
+SIGNAL_ENV_GEN_DECAY     = 19
+SIGNAL_ENV_GEN_SUSTAIN   = 20
+SIGNAL_LFO_RATE          = 21
+SIGNAL_PITCH             = 22
+SIGNAL_GATE              = 23
 
 SIGNALS_SIZE = 128
 
@@ -110,27 +116,31 @@ NRPN_SOURCE_AMP_AUDIO    = 133
 NRPN_SOURCE_AMP_MOD      = 134
 NRPN_SOURCE_OUTPUT       = 135
 
-NRPN_SOURCE_OSC_WAVEFORM      = 256
-NRPN_SOURCE_OSC_MOD_AMOUNT    = 257
-NRPN_SOURCE_FILTER_CUTOFF     = 258
-NRPN_SOURCE_FILTER_RESONANCE  = 259
-NRPN_SOURCE_FILTER_MOD_AMOUNT = 260
-NRPN_SOURCE_AMP_GAIN          = 261
-NRPN_SOURCE_ENV_GEN_ATTACK    = 262
-NRPN_SOURCE_ENV_GEN_DECAY     = 263
-NRPN_SOURCE_ENV_GEN_SUSTAIN   = 264
-NRPN_SOURCE_LFO_RATE          = 265
+NRPN_SOURCE_OSC_COARSE_TUNE   = 256
+NRPN_SOURCE_OSC_FINE_TUNE     = 257
+NRPN_SOURCE_OSC_WAVEFORM      = 258
+NRPN_SOURCE_OSC_MOD_AMOUNT    = 259
+NRPN_SOURCE_FILTER_CUTOFF     = 260
+NRPN_SOURCE_FILTER_RESONANCE  = 261
+NRPN_SOURCE_FILTER_MOD_AMOUNT = 262
+NRPN_SOURCE_AMP_GAIN          = 263
+NRPN_SOURCE_ENV_GEN_ATTACK    = 264
+NRPN_SOURCE_ENV_GEN_DECAY     = 265
+NRPN_SOURCE_ENV_GEN_SUSTAIN   = 266
+NRPN_SOURCE_LFO_RATE          = 267
 
-NRPN_CC_OSC_WAVEFORM      = 384
-NRPN_CC_OSC_MOD_AMOUNT    = 385
-NRPN_CC_FILTER_CUTOFF     = 386
-NRPN_CC_FILTER_RESONANCE  = 387
-NRPN_CC_FILTER_MOD_AMOUNT = 388
-NRPN_CC_AMP_GAIN          = 389
-NRPN_CC_ENV_GEN_ATTACK    = 390
-NRPN_CC_ENV_GEN_DECAY     = 391
-NRPN_CC_ENV_GEN_SUSTAIN   = 392
-NRPN_CC_LFO_RATE          = 393
+NRPN_CC_OSC_COARSE_TUNE   = 384
+NRPN_CC_OSC_FINE_TUNE     = 385
+NRPN_CC_OSC_WAVEFORM      = 386
+NRPN_CC_OSC_MOD_AMOUNT    = 387
+NRPN_CC_FILTER_CUTOFF     = 388
+NRPN_CC_FILTER_RESONANCE  = 389
+NRPN_CC_FILTER_MOD_AMOUNT = 390
+NRPN_CC_AMP_GAIN          = 391
+NRPN_CC_ENV_GEN_ATTACK    = 392
+NRPN_CC_ENV_GEN_DECAY     = 393
+NRPN_CC_ENV_GEN_SUSTAIN   = 394
+NRPN_CC_LFO_RATE          = 395
 
 # CC value normalization. Every parameter is a ratio in 0.0..1.0, so this is the only converter:
 # CC 4..124 maps to the full range, centred on CC 64 where a MIDI controller puts its detent, and
@@ -160,7 +170,10 @@ audio_buffer = Array.new(AUDIO_BUFFER_WORDS, 0.0)
 # carries across buffers, since a routing with feedback reads last sample's value and at a buffer
 # edge that is the previous iteration's.
 signals = Array.new(SIGNALS_SIZE, 0.0)
-signals[SIGNAL_ONE] = 1.0
+signals[SIGNAL_ONE]        =  1.0
+signals[SIGNAL_HALF]       =  0.5
+signals[SIGNAL_MINUS_HALF] = -0.5
+signals[SIGNAL_MINUS_ONE]  = -1.0
 
 # The default patch, written into the NRPN table the loop reads it back from. Slots left at 0
 # read as MODULE_NONE, so active_modules needs only the five it uses.
@@ -179,6 +192,8 @@ C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_AUDIO   , SIGNAL_FILTER_OUTPUT)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_MOD     , SIGNAL_ENV_GEN_OUTPUT)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OUTPUT      , SIGNAL_AMP_OUTPUT)
 
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_COARSE_TUNE  , SIGNAL_OSC_COARSE_TUNE)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_FINE_TUNE    , SIGNAL_OSC_FINE_TUNE)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_WAVEFORM     , SIGNAL_OSC_WAVEFORM)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_MOD_AMOUNT   , SIGNAL_OSC_MOD_AMOUNT)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_CUTOFF    , SIGNAL_FILTER_CUTOFF)
@@ -190,6 +205,8 @@ C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_DECAY    , SIGNAL_ENV_GEN_DEC
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_SUSTAIN  , SIGNAL_ENV_GEN_SUSTAIN)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_RATE         , SIGNAL_LFO_RATE)
 
+C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_COARSE_TUNE  , 86)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_FINE_TUNE    , 70)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_WAVEFORM     , 20)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_MOD_AMOUNT   , 13)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_CUTOFF    , 74)
@@ -201,6 +218,8 @@ C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_DECAY    , 75)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_SUSTAIN  , 30)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_RATE         , 3)
 
+C.set_midi_cc_value(MIDI_CH, 86 , 64 ) # Osc Coarse Tune
+C.set_midi_cc_value(MIDI_CH, 70 , 64 ) # Osc Fine Tune
 C.set_midi_cc_value(MIDI_CH, 20 , 4  ) # Osc Wave
 C.set_midi_cc_value(MIDI_CH, 13 , 4  ) # Osc Mod Amt
 C.set_midi_cc_value(MIDI_CH, 74 , 124) # Filter Cutoff
@@ -242,6 +261,8 @@ loop do
 
   # Parameter sources. Once per buffer is enough: the destination's 2.67 ms smoothing swallows the
   # difference between being fed at 48 kHz and at the 750 Hz buffer rate.
+  source_osc_coarse_tune   = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_COARSE_TUNE)
+  source_osc_fine_tune     = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_FINE_TUNE)
   source_osc_waveform      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_WAVEFORM)
   source_osc_mod_amount    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_MOD_AMOUNT)
   source_filter_cutoff     = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_CUTOFF)
@@ -255,6 +276,8 @@ loop do
 
   # Which CC fills each control slot. The bus is the only thing downstream reads, so this is
   # where MIDI enters and the only place a CC number appears.
+  cc_osc_coarse_tune   = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_COARSE_TUNE)
+  cc_osc_fine_tune     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_FINE_TUNE)
   cc_osc_waveform      = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_WAVEFORM)
   cc_osc_mod_amount    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_MOD_AMOUNT)
   cc_filter_cutoff     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_CUTOFF)
@@ -266,6 +289,8 @@ loop do
   cc_env_gen_sustain   = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_SUSTAIN)
   cc_lfo_rate          = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_RATE)
 
+  signals[SIGNAL_OSC_COARSE_TUNE]   = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_osc_coarse_tune))
+  signals[SIGNAL_OSC_FINE_TUNE]     = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_osc_fine_tune))
   signals[SIGNAL_OSC_WAVEFORM]      = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_osc_waveform))
   signals[SIGNAL_OSC_MOD_AMOUNT]    = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_osc_mod_amount))
   signals[SIGNAL_FILTER_CUTOFF]     = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_filter_cutoff))
@@ -277,6 +302,8 @@ loop do
   signals[SIGNAL_ENV_GEN_SUSTAIN]   = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_env_gen_sustain))
   signals[SIGNAL_LFO_RATE]          = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_lfo_rate))
 
+  osc.set_coarse_tune(signals[source_osc_coarse_tune])
+  osc.set_fine_tune(signals[source_osc_fine_tune])
   osc.set_waveform(signals[source_osc_waveform])
   osc.set_modulation_amount(signals[source_osc_mod_amount])
   filter.set_cutoff(signals[source_filter_cutoff])

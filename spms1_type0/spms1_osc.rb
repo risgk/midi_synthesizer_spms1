@@ -10,10 +10,14 @@ module Spms1
     # oscillator specifically, not to whichever module happens to read its output. May move to a
     # dedicated oscillator mixer later.
     OUTPUT_LEVEL = 0.5
-    # What a modulation depth of 1.0 is worth: 120 semitones per unit of modulation input. A
-    # bipolar source spans one unit peak to peak, so at full depth it sweeps the whole pitch range,
-    # 60 semitones either side of the note, and clamps where that runs past an end.
-    MODULATION_RANGE = 120.0 / 120.0
+    # What a modulation depth of 1.0 is worth: 24 semitones per unit of modulation input. A bipolar
+    # source reaches half a unit either way, so at full depth it swings the pitch an octave up and
+    # an octave down.
+    MODULATION_RANGE = 24.0 / 120.0
+    # How far each tune control reaches at either end of its dial. Both are spaced so that one step
+    # of a 7-bit control is one whole unit: a semitone for coarse, a cent for fine.
+    COARSE_TUNE_RANGE = 60.0 / 120.0
+    FINE_TUNE_RANGE   = 0.6 / 120.0
 
     # Pitch lookup table for note-to-frequency conversion.
     FREQ_TABLE = Array.new(129, 0.0)
@@ -33,6 +37,12 @@ module Spms1
       @current_waveform = 0.0
       @modulation_amount = 0.0
       @current_modulation_amount = 0.0
+      @coarse_tune = 0.0
+      @fine_tune = 0.0
+      # The two tune controls are summed before smoothing, so the per-sample path adds one offset
+      # rather than two and only one smoothing state has to be carried.
+      @tune = 0.0
+      @current_tune = 0.0
       @sample_counter = 0
     end
 
@@ -42,13 +52,26 @@ module Spms1
       @waveform = (waveform < 0.0) ? 0.0 : ((waveform > 1.0) ? 1.0 : waveform)
     end
 
-    # Modulation depth is normalized to [0.0, 1.0]. Squared and scaled here rather than per sample,
-    # so the smoothed value is already in pitch units. Squared because the useful depths are the
-    # small ones: linear across the range would make a 7-bit step a whole semitone, far too coarse
-    # for vibrato, where squared keeps the bottom of the dial under a fifth of one.
+    # Modulation depth is normalized to [0.0, 1.0], and scaled here rather than per sample so the
+    # smoothed value is already in pitch units.
     def set_modulation_amount(amount)
       clamped_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
-      @modulation_amount = clamped_amount * clamped_amount * MODULATION_RANGE
+      @modulation_amount = clamped_amount * MODULATION_RANGE
+    end
+
+    # Both tune controls are normalized to [0.0, 1.0] with 0.5 meaning no offset, so a controller's
+    # centre detent lands there. Linear about that centre, which is what puts every step on a whole
+    # semitone or a whole cent; a curve here would make exact intervals unreachable.
+    def set_coarse_tune(coarse_tune)
+      clamped = (coarse_tune < 0.0) ? 0.0 : ((coarse_tune > 1.0) ? 1.0 : coarse_tune)
+      @coarse_tune = (clamped + clamped - 1.0) * COARSE_TUNE_RANGE
+      @tune = @coarse_tune + @fine_tune
+    end
+
+    def set_fine_tune(fine_tune)
+      clamped = (fine_tune < 0.0) ? 0.0 : ((fine_tune > 1.0) ? 1.0 : fine_tune)
+      @fine_tune = (clamped + clamped - 1.0) * FINE_TUNE_RANGE
+      @tune = @coarse_tune + @fine_tune
     end
 
     # Pitch input is a signal in [-1.0, 1.0], of which [-0.5, 0.5] is the usable span: it covers
@@ -59,10 +82,11 @@ module Spms1
         # Morph and depth are smoothed at the control rate to avoid sudden jumps.
         @current_waveform += (@waveform - @current_waveform) * @smoothing_target_blend
         @current_modulation_amount += (@modulation_amount - @current_modulation_amount) * @smoothing_target_blend
+        @current_tune += (@tune - @current_tune) * @smoothing_target_blend
       end
 
       mod = (modulation_input < -1.0) ? -1.0 : ((modulation_input > 1.0) ? 1.0 : modulation_input)
-      total_pitch = pitch_input + (mod * @current_modulation_amount)
+      total_pitch = pitch_input + @current_tune + (mod * @current_modulation_amount)
       pitch = (total_pitch < -0.5) ? -0.5 : ((total_pitch > 0.5) ? 0.5 : total_pitch)
       freq = pitch_to_freq_fast(pitch)
       current_dt = freq * @inv_sample_rate
