@@ -93,6 +93,7 @@ flowchart LR
   NOTE([MIDI Note])
   EG1[EG 1]
   LFO1[LFO 1]
+  MIX1[Mixer 1]
   OSC1[Osc 1]
   FILTER1[Filter 1]
   AMP1[Amp 1]
@@ -104,13 +105,18 @@ flowchart LR
 
   NOTE -. Gate .-> EG1
   NOTE -. Pitch .-> OSC1
-  LFO1 -. Mod .-> OSC1
+  LFO1 -.-> MIX1
+  MIX1 -. Mod .-> OSC1
   EG1 -. Mod .-> FILTER1
   EG1 -. Mod .-> AMP1
 ```
 
-The modules run in the order EG 1, LFO 1, Osc 1, Filter 1, Amp 1, one sample at a time. Their
-parameters -- waveform, cutoff, gain and the rest -- arrive from CC and are left out here.
+The modules run in the order EG 1, LFO 1, Mixer 1, Osc 1, Filter 1, Amp 1, one sample at a time.
+Their parameters -- waveform, cutoff, gain and the rest -- arrive from CC and are left out here.
+
+Mixer 1 is in the vibrato path to scale the LFO down to 0.2. Osc Mod Amt spans the whole pitch
+range, as every modulation depth here does, so bringing a source down to a musical depth is left
+to a mixer rather than built into the oscillator.
 
 None of this is fixed. NRPN rewrites the run order, every arrow above, and which CC feeds each
 parameter.
@@ -128,14 +134,14 @@ flowchart TB
     OSC1[Osc 1] --> FILTER1[Filter 1] --> AMP1[Amp 1] --> OUT([Audio Out])
     NOTE -. Gate .-> EG1[EG 1]
     NOTE -. Pitch .-> OSC1
-    LFO1[LFO 1] -. Mod .-> OSC1
+    LFO1[LFO 1] -.-> MIX1[Mixer 1] -. Mod .-> OSC1
     EG1 -. Mod .-> FILTER1
     EG1 -. Mod .-> AMP1
   end
   subgraph spare [Idle until a patch names them]
     direction LR
     EG2[EG 2] ~~~ LFO2[LFO 2] ~~~ OSC2[Osc 2] ~~~ FILTER2[Filter 2] ~~~ AMP2[Amp 2]
-    MIX1[Mixer 1] ~~~ MIX2[Mixer 2] ~~~ MIX3[Mixer 3] ~~~ MIX4[Mixer 4] ~~~ MIX5[Mixer 5]
+    MIX2[Mixer 2] ~~~ MIX3[Mixer 3] ~~~ MIX4[Mixer 4] ~~~ MIX5[Mixer 5]
   end
   patched ~~~ spare
 ```
@@ -297,8 +303,10 @@ Both tune controls are centred on CC 64 and move one whole unit per CC step: Coa
 semitone, reaching 5 octaves either way, and Fine Tune a cent, reaching 60 either way. They are
 summed, so any pitch is reachable.
 
-Osc Mod Amt is a depth, not an offset: at its top a bipolar source swings the pitch an octave up
-and an octave down, and a semitone of vibrato sits at CC 14.
+Osc Mod Amt is a depth, not an offset, and it reaches the whole pitch range: at its top a bipolar
+source swings the pitch five octaves up and five down. That is a coarse dial for vibrato, half a
+semitone per CC step, which is why the default patch runs the LFO through Mixer 1 at 0.2 first. On
+that path a semitone of vibrato sits at CC 14 and an octave at the top of the dial.
 
 Filter Gain sets how hard the audio input drives the filter, which is also what decides how far
 the filter runs into its own saturation. Its default of CC 64 is the level the oscillator used to
@@ -307,12 +315,13 @@ be scaled to on its own; above that the filter starts to compress the loud part 
 A mixer takes each input at its own level and its own polarity, then adds them. Invert runs from
 unchanged at 0.0, through silence at 0.5, to negated at 1.0. Levels default to full and inverts
 to zero, so a mixer with one input routed is a buffer; inverting that one input makes it an
-inverter; and inverting only the second makes the mixer a subtractor.
+inverter; and inverting only the second makes the mixer a subtractor. Mixer 1 is the exception,
+seeded to 0.2 on both levels for the vibrato path it is wired into.
 
 #### Examples
 
-- Vibrato is wired by default -- LFO 1 feeds the oscillator's modulation input -- so CC 13 sets
-  the depth and CC 3 the rate
+- Vibrato is wired by default -- LFO 1 reaches the oscillator's modulation input through Mixer 1
+  -- so CC 13 sets the depth and CC 3 the rate
 - Filter cutoff follows note pitch (keyboard tracking): CC 99 = 2, CC 98 = 8, CC 6 = 66
 - Filter cutoff driven by the envelope instead of its CC: CC 99 = 2, CC 98 = 8, CC 6 = 5
 - Filter cutoff swept by the LFO: CC 99 = 2, CC 98 = 8, CC 6 = 7 -- a parameter, so keep the rate
@@ -323,27 +332,30 @@ inverter; and inverting only the second makes the mixer a subtractor.
 - A pitch envelope 60 cents deep: CC 99 = 2, CC 98 = 3, CC 6 = 5 points Osc 1 Fine Tune at the
   envelope, which then sweeps the tuning from 60 cents flat up to 60 cents sharp
 - The envelope drives the filter harder as a note starts: CC 99 = 2, CC 98 = 11, CC 6 = 5
-- Pitch swept by the envelope instead of the LFO: CC 99 = 1, CC 98 = 3, CC 6 = 5, then set the
-  depth on CC 13 -- a semitone at 14, an octave at 124
+- Pitch swept by the envelope instead of the LFO: CC 99 = 1, CC 98 = 14, CC 6 = 5 puts EG 1 on
+  Mixer 1's first input in the LFO's place, then set the depth on CC 13 -- a semitone at 14, an
+  octave at 124
 - A second envelope, so the filter and the amp stop sharing one: CC 99 = 0, CC 98 = 5, CC 6 = 2
   puts EG 2 in the run order, CC 99 = 1, CC 98 = 1, CC 6 = 67 gates it from the keyboard, and
   CC 99 = 1, CC 98 = 7, CC 6 = 6 hands the filter over to it
-- Both oscillators into the filter. Run order first, so that each module reads a value made this
-  sample: CC 99 = 0 with CC 98 = 3, 4, 5, 6 and CC 6 = 6, 11, 7, 9 leaves EG 1, LFO 1, Osc 1,
-  Osc 2, Mixer 1, Filter 1, Amp 1. Then CC 99 = 1, CC 98 = 4, CC 6 = 66 gives Osc 2 the note,
-  CC 99 = 1 with CC 98 = 14 and 15, CC 6 = 9 and 10 feeds both into Mixer 1, and CC 99 = 1,
-  CC 98 = 6, CC 6 = 15 sends the mix to the filter. Detune with Osc 2's Coarse or Fine Tune
-- A CC that bends pitch both ways, which no parameter can do on its own. CC 99 = 1, CC 98 = 14,
-  CC 6 = 28 puts the filter cutoff's control slot on Mixer 1's first input and CC 99 = 1,
-  CC 98 = 15, CC 6 = 3 puts the -0.5 constant on its second, so the mixer outputs the CC less a
-  half. Point Osc 1's modulation input at it with CC 99 = 1, CC 98 = 3, CC 6 = 15, put Mixer 1
-  ahead of Osc 1 in the run order, and CC 74 now bends the pitch down and up around the note
-- A CC that works backwards, which needs the mixer to subtract rather than add. CC 99 = 1,
-  CC 98 = 14, CC 6 = 1 puts the constant 1.0 on Mixer 1's first input, CC 99 = 1, CC 98 = 15,
-  CC 6 = 28 puts the cutoff's control slot on the second, and CC 99 = 2, CC 98 = 29, CC 6 = 1
-  inverts that second input alone, so the mixer outputs one minus the CC. Point the cutoff's own
-  source at the mixer with CC 99 = 2, CC 98 = 8, CC 6 = 15 and CC 74 now closes the filter as it
-  rises
+- Both oscillators into the filter, which takes a mixer of its own since Mixer 1 is spoken for.
+  Run order first, so that each module reads a value made this sample: CC 99 = 0 with
+  CC 98 = 4, 5, 6, 7 and CC 6 = 6, 12, 7, 9 leaves EG 1, LFO 1, Mixer 1, Osc 1, Osc 2, Mixer 2,
+  Filter 1, Amp 1. Then CC 99 = 1, CC 98 = 4, CC 6 = 66 gives Osc 2 the note, CC 99 = 1 with
+  CC 98 = 16 and 17, CC 6 = 9 and 10 feeds both into Mixer 2, and CC 99 = 1, CC 98 = 6,
+  CC 6 = 16 sends the mix to the filter. Detune with Osc 2's Coarse or Fine Tune
+- A CC that bends pitch both ways, which no parameter can do on its own. Mixer 1 already feeds
+  Osc 1's modulation input, so it only has to be given something else to mix: CC 99 = 1,
+  CC 98 = 14, CC 6 = 28 puts the filter cutoff's control slot on its first input in the LFO's
+  place, and CC 99 = 1, CC 98 = 15, CC 6 = 3 puts the -0.5 constant on its second. Both levels
+  are 0.2, so the mixer outputs the CC less a half at vibrato depth, and CC 74 now bends the
+  pitch down and up around the note
+- A CC that works backwards, which needs the mixer to subtract rather than add. CC 99 = 0,
+  CC 98 = 6, CC 6 = 12 puts Mixer 2 in the run order, CC 99 = 1, CC 98 = 16, CC 6 = 1 puts the
+  constant 1.0 on its first input, CC 99 = 1, CC 98 = 17, CC 6 = 28 puts the cutoff's control
+  slot on the second, and CC 99 = 2, CC 98 = 33, CC 6 = 1 inverts that second input alone, so the
+  mixer outputs one minus the CC. Point the cutoff's own source at the mixer with CC 99 = 2,
+  CC 98 = 8, CC 6 = 16 and CC 74 now closes the filter as it rises
 - Take the filter out of the chain: CC 99 = 0, CC 98 = 3, CC 6 = 9, then CC 99 = 0, CC 98 = 4,
   CC 6 = 0 -- and point the amp's audio input at the oscillator: CC 99 = 1, CC 98 = 10, CC 6 = 9
 

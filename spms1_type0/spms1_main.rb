@@ -352,7 +352,11 @@ signals[SIGNAL_MINUS_ONE]  = -1.0
 # Every parameter with no CC assigned keeps whatever is put here, since nothing ever writes its
 # slot. They are seeded with the values instance 1's CCs default to, so a second module wired
 # into a patch behaves like the first, and a mixer passes its input through rather than muting
-# it. Instance 1 of the original five needs none of this: MIDI overwrites those on buffer one.
+# it. Mixer 1 is the exception, at 0.2 on both inputs: it is what brings the LFO down to a
+# vibrato depth, so that Osc 1's Mod Amt can span the whole pitch range the way every other
+# modulation depth does. Both of its inputs are scaled alike, so a bipolar pair built there stays
+# centred. Instance 1 of the original five needs none of this: MIDI overwrites those on buffer
+# one.
 signals[SIGNAL_OSC_2_WAVEFORM]      = cc_to_ratio(4)
 signals[SIGNAL_OSC_2_MOD_AMOUNT]    = cc_to_ratio(4)
 signals[SIGNAL_OSC_2_COARSE_TUNE]   = cc_to_ratio(64)
@@ -366,9 +370,9 @@ signals[SIGNAL_ENV_GEN_2_ATTACK]    = cc_to_ratio(4)
 signals[SIGNAL_ENV_GEN_2_DECAY]     = cc_to_ratio(94)
 signals[SIGNAL_ENV_GEN_2_SUSTAIN]   = cc_to_ratio(4)
 signals[SIGNAL_LFO_2_RATE]          = cc_to_ratio(64)
-signals[SIGNAL_MIXER_1_LEVEL_1]     = cc_to_ratio(124)
+signals[SIGNAL_MIXER_1_LEVEL_1]     = cc_to_ratio(28)
 signals[SIGNAL_MIXER_1_INVERT_1]    = cc_to_ratio(4)
-signals[SIGNAL_MIXER_1_LEVEL_2]     = cc_to_ratio(124)
+signals[SIGNAL_MIXER_1_LEVEL_2]     = cc_to_ratio(28)
 signals[SIGNAL_MIXER_1_INVERT_2]    = cc_to_ratio(4)
 signals[SIGNAL_MIXER_2_LEVEL_1]     = cc_to_ratio(124)
 signals[SIGNAL_MIXER_2_INVERT_1]    = cc_to_ratio(4)
@@ -388,21 +392,25 @@ signals[SIGNAL_MIXER_5_LEVEL_2]     = cc_to_ratio(124)
 signals[SIGNAL_MIXER_5_INVERT_2]    = cc_to_ratio(4)
 
 # The default patch, written into the NRPN table the loop reads it back from. Slots left at 0
-# read as MODULE_NONE, so active_modules needs only the five it uses. Instance 2 of every type is
-# left out of the run order, with nothing routed to it and no CC on its parameters.
+# read as MODULE_NONE, so active_modules needs only the six it uses. Instance 2 of every type and
+# mixers 2 to 5 are left out of the run order, with nothing routed to them and no CC on their
+# parameters. Mixer 1 sits between the LFO and the oscillator, where it scales the LFO down to a
+# vibrato depth.
 C.set_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 0, MODULE_ENV_GEN_1)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 1, MODULE_LFO_1)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 2, MODULE_OSC_1)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 3, MODULE_FILTER_1)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 4, MODULE_AMP_1)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 2, MODULE_MIXER_1)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 3, MODULE_OSC_1)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 4, MODULE_FILTER_1)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 5, MODULE_AMP_1)
 
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_1_GATE , SIGNAL_GATE)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PITCH    , SIGNAL_PITCH)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_MOD      , SIGNAL_LFO_1_OUTPUT)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_MOD      , SIGNAL_MIXER_1_OUTPUT)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_AUDIO , SIGNAL_OSC_1_OUTPUT)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD   , SIGNAL_ENV_GEN_1_OUTPUT)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_AUDIO    , SIGNAL_FILTER_1_OUTPUT)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_MOD      , SIGNAL_ENV_GEN_1_OUTPUT)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_IN_1   , SIGNAL_LFO_1_OUTPUT)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OUTPUT         , SIGNAL_AMP_1_OUTPUT)
 
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_WAVEFORM     , SIGNAL_OSC_1_WAVEFORM)

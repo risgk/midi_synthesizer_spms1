@@ -6,10 +6,11 @@ module Spms1
     SMOOTHING_TARGET_BLEND_BASE = 0.03125
     # Number of samples between control-rate updates; smoothing speed is kept approximately constant if this is changed.
     CONTROL_RATE_DIVISOR = 4
-    # What a modulation depth of 1.0 is worth: 24 semitones per unit of modulation input. A bipolar
-    # source reaches half a unit either way, so at full depth it swings the pitch an octave up and
-    # an octave down.
-    MODULATION_RANGE = 24.0 / 120.0
+    # What a modulation depth of 1.0 is worth: 120 semitones per unit of modulation input, which is
+    # the whole pitch range. A bipolar source reaches half a unit either way, so at full depth it
+    # swings the pitch five octaves up and five down. Bringing a source down to a musical depth is
+    # a mixer's job, not this one's.
+    MODULATION_RANGE = 120.0 / 120.0
     # How far each tune control reaches at either end of its dial. Both are spaced so that one step
     # of a 7-bit control is one whole unit: a semitone for coarse, a cent for fine.
     COARSE_TUNE_RANGE = 60.0 / 120.0
