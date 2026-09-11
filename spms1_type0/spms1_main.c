@@ -1121,33 +1121,30 @@ static void sp_Amp_initialize(sp_Amp *self, mrb_int lv_sample_rate) {
 #line 16 "spms1_amp.rb"
   self->iv_sample_counter = 0LL;
 }
-#line 24 "spms1_amp.rb"
+#line 23 "spms1_amp.rb"
 static mrb_float sp_Amp_set_gain(sp_Amp *self, mrb_float lv_gain) {
     SP_GC_SAVE();
-    mrb_float lv_clamped_gain = 0.0;
-#line 25 "spms1_amp.rb"
-  lv_clamped_gain = (((lv_gain < 0.0)) ? 0.0 : ((((lv_gain > 1.0)) ? 1.0 : lv_gain)));
-#line 26 "spms1_amp.rb"
-  self->iv_gain = (lv_clamped_gain * lv_clamped_gain);
+#line 24 "spms1_amp.rb"
+  self->iv_gain = (((lv_gain < 0.0)) ? 0.0 : ((((lv_gain > 1.0)) ? 1.0 : lv_gain)));
   return 0.0;
 }
-#line 29 "spms1_amp.rb"
+#line 27 "spms1_amp.rb"
 static mrb_float sp_Amp_process(sp_Amp *self, mrb_float lv_audio_input, mrb_float lv_modulation_input) {
     SP_GC_SAVE();
     mrb_float lv_mod = 0.0;
     mrb_float lv_total_gain = 0.0;
-#line 31 "spms1_amp.rb"
+#line 29 "spms1_amp.rb"
   if ((self->iv_sample_counter == 0LL)) {
-#line 32 "spms1_amp.rb"
+#line 30 "spms1_amp.rb"
     self->iv_current_gain += (((self->iv_gain - self->iv_current_gain)) * self->iv_smoothing_target_blend);
   }
-#line 35 "spms1_amp.rb"
+#line 33 "spms1_amp.rb"
   self->iv_sample_counter = sp_imod((sp_int_add(self->iv_sample_counter, 1LL)), 4LL);
-#line 37 "spms1_amp.rb"
+#line 35 "spms1_amp.rb"
   lv_mod = (((lv_modulation_input < -1.0)) ? -1.0 : ((((lv_modulation_input > 1.0)) ? 1.0 : lv_modulation_input)));
-#line 38 "spms1_amp.rb"
+#line 36 "spms1_amp.rb"
   lv_total_gain = (self->iv_current_gain * lv_mod);
-#line 40 "spms1_amp.rb"
+#line 38 "spms1_amp.rb"
   return (lv_audio_input * lv_total_gain);
   return 0.0;
 }
@@ -1448,7 +1445,7 @@ int main(int argc,char**argv){
     volatile mrb_int lv_cc_env_gen_sustain = 0;
     volatile mrb_int lv_cc_lfo_rate = 0;
     volatile mrb_int lv_module_id = 0;
-    mrb_int lv_i__bp3619 = 0;
+    mrb_int lv_i__bp3614 = 0;
 
 #line 1 "spms1_osc.rb"
 #line 3 "spms1_osc.rb"
@@ -1844,7 +1841,7 @@ int main(int argc,char**argv){
 #line 218 "spms1_main.rb"
   (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_FILTER_MOD_AMOUNT)), ((uint8_t)(24LL))), (mrb_int)0);
 #line 219 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_FILTER_GAIN)), ((uint8_t)(116LL))), (mrb_int)0);
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_FILTER_GAIN)), ((uint8_t)(112LL))), (mrb_int)0);
 #line 220 "spms1_main.rb"
   (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_AMP_GAIN)), ((uint8_t)(15LL))), (mrb_int)0);
 #line 221 "spms1_main.rb"
@@ -1870,9 +1867,9 @@ int main(int argc,char**argv){
 #line 232 "spms1_main.rb"
   (set_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(24LL)), ((uint8_t)(64LL))), (mrb_int)0);
 #line 233 "spms1_main.rb"
-  (set_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(116LL)), ((uint8_t)(64LL))), (mrb_int)0);
+  (set_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(112LL)), ((uint8_t)(64LL))), (mrb_int)0);
 #line 234 "spms1_main.rb"
-  (set_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(15LL)), ((uint8_t)(94LL))), (mrb_int)0);
+  (set_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(15LL)), ((uint8_t)(64LL))), (mrb_int)0);
 #line 235 "spms1_main.rb"
   (set_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(73LL)), ((uint8_t)(4LL))), (mrb_int)0);
 #line 236 "spms1_main.rb"
@@ -2134,9 +2131,9 @@ int main(int argc,char**argv){
       (stop_debug_measure(), (mrb_int)0);
 #line 359 "spms1_main.rb"
       for (mrb_int _t198 = 0; _t198 < cst_AUDIO_BUFFER_WORDS; _t198++) {
-        lv_i__bp3619 = _t198;
+        lv_i__bp3614 = _t198;
 #line 360 "spms1_main.rb"
-        (write_to_audio_buffer(((float)(sp_FloatArray_get(lv_audio_buffer, lv_i__bp3619))), ((float)(sp_FloatArray_get(lv_audio_buffer, lv_i__bp3619)))), (mrb_int)0);
+        (write_to_audio_buffer(((float)(sp_FloatArray_get(lv_audio_buffer, lv_i__bp3614))), ((float)(sp_FloatArray_get(lv_audio_buffer, lv_i__bp3614)))), (mrb_int)0);
       }
     }
     sp_exc_top--;

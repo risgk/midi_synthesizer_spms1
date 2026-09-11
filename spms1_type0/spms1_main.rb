@@ -216,7 +216,7 @@ C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_FINE_TUNE    , 70)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_CUTOFF    , 74)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_RESONANCE , 71)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_MOD_AMOUNT, 24)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_GAIN      , 116)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_GAIN      , 112)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_AMP_GAIN         , 15)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_ATTACK   , 73)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_DECAY    , 75)
@@ -230,8 +230,8 @@ C.set_midi_cc_value(MIDI_CH, 70 , 64 ) # Osc Fine Tune
 C.set_midi_cc_value(MIDI_CH, 74 , 124) # Filter Cutoff
 C.set_midi_cc_value(MIDI_CH, 71 , 64 ) # Filter Resonance
 C.set_midi_cc_value(MIDI_CH, 24 , 64 ) # Filter Mod Amt
-C.set_midi_cc_value(MIDI_CH, 116, 64 ) # Filter Gain
-C.set_midi_cc_value(MIDI_CH, 15 , 94 ) # Amp Gain
+C.set_midi_cc_value(MIDI_CH, 112, 64 ) # Filter Gain
+C.set_midi_cc_value(MIDI_CH, 15 , 64 ) # Amp Gain
 C.set_midi_cc_value(MIDI_CH, 73 , 4  ) # EG Attack
 C.set_midi_cc_value(MIDI_CH, 75 , 94 ) # EG Decay/Release
 C.set_midi_cc_value(MIDI_CH, 30 , 4  ) # EG Sustain
