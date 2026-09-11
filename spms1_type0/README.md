@@ -6,6 +6,7 @@ MIDI Synthesizer SPMS-1 (type-0) v0.0.25
 - 48 kHz/24 bit audio output
 - Developed by ISGK Instruments (Ryo Ishigaki)
 - <https://github.com/risgk/midi_synthesizer_spms1>
+- [日本語版 README](./README.ja.md)
 
 
 Required Hardware
