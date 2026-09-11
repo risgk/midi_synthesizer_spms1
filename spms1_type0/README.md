@@ -182,11 +182,11 @@ In category 3, CC number 0 means the parameter has no CC. Its control slot then 
 already holds, so the parameter can be driven by routing alone.
 
 There are two of every sound module and five mixers. **Only the first of each pair is in the
-default run order**, and the mixers are not in it at all. Everything left out has nothing routed
-to it and no CC on any of its parameters, so it makes no sound and costs nothing per sample until
-a patch puts it in the run order. Its parameters are still read once a buffer either way. Those
-control slots are seeded with the values the wired-up ones default to, so a module brought into a
-patch behaves like its twin rather than starting silent.
+default run order**, along with Mixer 1; the other four mixers are not in it at all. Everything
+left out has nothing routed to it and no CC on any of its parameters, so it makes no sound and
+costs nothing per sample until a patch puts it in the run order. Its parameters are still read
+once a buffer either way. Those control slots are seeded with the values the wired-up ones
+default to, so a module brought into a patch behaves like its twin rather than starting silent.
 
 #### Entries (CC 98), category 1
 
