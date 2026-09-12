@@ -1,4 +1,4 @@
-MIDI Synthesizer SPMS-1 (type-0) v0.1.0
+MIDI Synthesizer SPMS-1 (type-0) v0.1.1
 =======================================
 
 - Spinel (Ruby AOT コンパイラ) で作った、Raspberry Pi Pico 2 用のモノフォニック・セミモジュラー MIDI シンセサイザー
@@ -32,7 +32,10 @@ MIDI Synthesizer SPMS-1 (type-0) v0.1.0
     - 情報: <https://github.com/FortySevenEffects/arduino_midi_library>
 - Spinel
     - コミット: <https://github.com/matz/spinel/tree/5af61ae7d53e36ca59a8de5870f532360d88fd7c>
-    - Spinel の出力ファイル "spms1_main.c" の `int main(int argc,char**argv){` を `int Spms1_main(int argc,char**argv){` に書き換えてください
+    - Spinel の出力ファイル "spms1_main.c" に手を入れる必要はありません。本スケッチの "sp_runtime.h" が
+      `#define main __attribute__((section(".time_critical"), flatten)) Spms1_main` を持っており、改名と
+      シンセ本体の RAM 配置を同時に行います。手で改名すると、このマクロが一致しなくなって属性が付かず、
+      本体が flash から実行されます
 
 
 使い方
@@ -362,7 +365,10 @@ Mixer 1 だけは例外で、結線されているビブラート経路に合わ
 
 ### テストスクリプト
 
-- WAV ファイルの出力: "spms1_output_wav.rb"
+- WAV ファイルの出力: "spms1_output_wav.rb" -- デフォルトのパッチをオフラインでレンダリングします。
+  同じモジュールを同じ順で、電源投入時の CC 値で鳴らします。ただし 2 つだけ変えてあり、Decay は音が
+  最後まで残るよう最大、Cutoff は EG が開く様子が聞こえるよう 4 分の 1 にしてあります。シグナルバスと
+  実行順は再現しないので、モジュール自体の変化は捉えますが、結線の間違いは捉えません
 
 
 SPMS-1 (type-0) のライセンス
