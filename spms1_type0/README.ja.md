@@ -142,7 +142,8 @@ flowchart TB
   subgraph spare [パッチが指名するまで待機]
     direction LR
     EG2[EG 2] ~~~ LFO2[LFO 2] ~~~ OSC2[Osc 2] ~~~ FILTER2[Filter 2] ~~~ AMP2[Amp 2]
-    MIX2[Mixer 2] ~~~ MIX3[Mixer 3] ~~~ MIX4[Mixer 4] ~~~ MIX5[Mixer 5]
+    MIX2[Mixer 2] ~~~ MIX3[Mixer 3] ~~~ MIX4[Mixer 4] ~~~ MIX5[Mixer 5] ~~~ MIX6[Mixer 6]
+    MIX7[Mixer 7] ~~~ MIX8[Mixer 8] ~~~ MIX9[Mixer 9] ~~~ MIX10[Mixer 10]
   end
   patched ~~~ spare
 ```
@@ -171,9 +172,9 @@ flowchart TB
 | CC 99 | CC 98 | 設定する対象 | CC 6 の値 |
 | ----- | ----- | ---- | ---------- |
 | 0 | 0-31 | 実行順、スロットごとに | モジュール ID |
-| 1 | 0-24 | モジュール入力に何を入れるか | シグナル ID |
-| 2 | 0-45 | パラメータがどこから値を取るか | シグナル ID |
-| 3 | 0-45 | どの CC がコントロールスロットを埋めるか | CC 番号、0 なら割り当てなし |
+| 1 | 0-34 | モジュール入力に何を入れるか | シグナル ID |
+| 2 | 0-65 | パラメータがどこから値を取るか | シグナル ID |
+| 3 | 0-65 | どの CC がコントロールスロットを埋めるか | CC 番号、0 なら割り当てなし |
 
 実行順はスロット 0 から上へ読まれ、最初に現れたモジュール ID 0 で止まります。32 個に満たないパッチは
 そこで自ら終わるわけです。実行順はモジュールの番号付けとは別物です。あるモジュールが今サンプルの値を
@@ -182,8 +183,8 @@ flowchart TB
 カテゴリ 3 で CC 番号 0 を指定すると、そのパラメータには CC がない状態になります。コントロールスロットは
 そのとき持っている値をそのまま保つので、パラメータをルーティングだけで動かせます。
 
-音を作るモジュールはそれぞれ 2 つずつ、ミキサーは 5 つあります。**デフォルトの実行順に入っているのは各
-ペアの 1 番目だけ**で、これに Mixer 1 が加わります。残り 4 つのミキサーは入っていません。外れているものに
+音を作るモジュールはそれぞれ 2 つずつ、ミキサーは 10 個あります。**デフォルトの実行順に入っているのは各
+ペアの 1 番目だけ**で、これに Mixer 1 が加わります。残り 9 つのミキサーは入っていません。外れているものに
 は何も結線されておらず、どのパラメータにも CC が付いていないので、パッチが実行順に加えるまで音を出さず、
 サンプルあたりのコストもかかりません。ただしパラメータはどちらにせよ 1 バッファに 1 回読まれます。それらの
 コントロールスロットには結線済みのモジュールのデフォルト値を入れてあるので、パッチに組み込まれたモジュール
@@ -191,93 +192,102 @@ flowchart TB
 
 #### エントリ (CC 98)、カテゴリ 1
 
-| CC 98 | モジュール入力 | | CC 98 | モジュール入力 |
-| ----- | ------ | - | ----- | ------ |
-| 0 | EG 1 Gate | | 13 | Amp 2 Mod In |
-| 1 | EG 2 Gate | | 14 | Mixer 1 In 1 |
-| 2 | Osc 1 Pitch | | 15 | Mixer 1 In 2 |
-| 3 | Osc 1 Mod In | | 16 | Mixer 2 In 1 |
-| 4 | Osc 2 Pitch | | 17 | Mixer 2 In 2 |
-| 5 | Osc 2 Mod In | | 18 | Mixer 3 In 1 |
-| 6 | Filter 1 Audio In | | 19 | Mixer 3 In 2 |
-| 7 | Filter 1 Mod In | | 20 | Mixer 4 In 1 |
-| 8 | Filter 2 Audio In | | 21 | Mixer 4 In 2 |
-| 9 | Filter 2 Mod In | | 22 | Mixer 5 In 1 |
-| 10 | Amp 1 Audio In | | 23 | Mixer 5 In 2 |
-| 11 | Amp 1 Mod In | | 24 | 最終出力 |
-| 12 | Amp 2 Audio In | |  |  |
+| CC 98 | モジュール入力 | | CC 98 | モジュール入力 | | CC 98 | モジュール入力 |
+| ----- | ------ | - | ----- | ------ | - | ----- | ------ |
+| 0 | EG 1 Gate | | 12 | Amp 2 Audio In | | 24 | Mixer 6 In 1 |
+| 1 | EG 2 Gate | | 13 | Amp 2 Mod In | | 25 | Mixer 6 In 2 |
+| 2 | Osc 1 Pitch | | 14 | Mixer 1 In 1 | | 26 | Mixer 7 In 1 |
+| 3 | Osc 1 Mod In | | 15 | Mixer 1 In 2 | | 27 | Mixer 7 In 2 |
+| 4 | Osc 2 Pitch | | 16 | Mixer 2 In 1 | | 28 | Mixer 8 In 1 |
+| 5 | Osc 2 Mod In | | 17 | Mixer 2 In 2 | | 29 | Mixer 8 In 2 |
+| 6 | Filter 1 Audio In | | 18 | Mixer 3 In 1 | | 30 | Mixer 9 In 1 |
+| 7 | Filter 1 Mod In | | 19 | Mixer 3 In 2 | | 31 | Mixer 9 In 2 |
+| 8 | Filter 2 Audio In | | 20 | Mixer 4 In 1 | | 32 | Mixer 10 In 1 |
+| 9 | Filter 2 Mod In | | 21 | Mixer 4 In 2 | | 33 | Mixer 10 In 2 |
+| 10 | Amp 1 Audio In | | 22 | Mixer 5 In 1 | | 34 | 最終出力 |
+| 11 | Amp 1 Mod In | | 23 | Mixer 5 In 2 | |  |  |
 
 #### エントリ (CC 98)、カテゴリ 2 と 3
 
 | CC 98 | パラメータ | | CC 98 | パラメータ | | CC 98 | パラメータ |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | Osc 1 Wave | | 16 | Amp 1 Gain | | 32 | Mixer 2 Level 2 |
-| 1 | Osc 1 Mod Amt | | 17 | Amp 2 Gain | | 33 | Mixer 2 Invert 2 |
-| 2 | Osc 1 Coarse Tune | | 18 | EG 1 Attack | | 34 | Mixer 3 Level 1 |
-| 3 | Osc 1 Fine Tune | | 19 | EG 1 Decay | | 35 | Mixer 3 Invert 1 |
-| 4 | Osc 2 Wave | | 20 | EG 1 Sustain | | 36 | Mixer 3 Level 2 |
-| 5 | Osc 2 Mod Amt | | 21 | EG 2 Attack | | 37 | Mixer 3 Invert 2 |
-| 6 | Osc 2 Coarse Tune | | 22 | EG 2 Decay | | 38 | Mixer 4 Level 1 |
-| 7 | Osc 2 Fine Tune | | 23 | EG 2 Sustain | | 39 | Mixer 4 Invert 1 |
-| 8 | Filter 1 Cutoff | | 24 | LFO 1 Rate | | 40 | Mixer 4 Level 2 |
-| 9 | Filter 1 Resonance | | 25 | LFO 2 Rate | | 41 | Mixer 4 Invert 2 |
-| 10 | Filter 1 Mod Amt | | 26 | Mixer 1 Level 1 | | 42 | Mixer 5 Level 1 |
-| 11 | Filter 1 Gain | | 27 | Mixer 1 Invert 1 | | 43 | Mixer 5 Invert 1 |
-| 12 | Filter 2 Cutoff | | 28 | Mixer 1 Level 2 | | 44 | Mixer 5 Level 2 |
-| 13 | Filter 2 Resonance | | 29 | Mixer 1 Invert 2 | | 45 | Mixer 5 Invert 2 |
-| 14 | Filter 2 Mod Amt | | 30 | Mixer 2 Level 1 | |  |  |
-| 15 | Filter 2 Gain | | 31 | Mixer 2 Invert 1 | |  |  |
+| 0 | Osc 1 Wave | | 22 | EG 2 Decay | | 44 | Mixer 5 Level 2 |
+| 1 | Osc 1 Mod Amt | | 23 | EG 2 Sustain | | 45 | Mixer 5 Invert 2 |
+| 2 | Osc 1 Coarse Tune | | 24 | LFO 1 Rate | | 46 | Mixer 6 Level 1 |
+| 3 | Osc 1 Fine Tune | | 25 | LFO 2 Rate | | 47 | Mixer 6 Invert 1 |
+| 4 | Osc 2 Wave | | 26 | Mixer 1 Level 1 | | 48 | Mixer 6 Level 2 |
+| 5 | Osc 2 Mod Amt | | 27 | Mixer 1 Invert 1 | | 49 | Mixer 6 Invert 2 |
+| 6 | Osc 2 Coarse Tune | | 28 | Mixer 1 Level 2 | | 50 | Mixer 7 Level 1 |
+| 7 | Osc 2 Fine Tune | | 29 | Mixer 1 Invert 2 | | 51 | Mixer 7 Invert 1 |
+| 8 | Filter 1 Cutoff | | 30 | Mixer 2 Level 1 | | 52 | Mixer 7 Level 2 |
+| 9 | Filter 1 Resonance | | 31 | Mixer 2 Invert 1 | | 53 | Mixer 7 Invert 2 |
+| 10 | Filter 1 Mod Amt | | 32 | Mixer 2 Level 2 | | 54 | Mixer 8 Level 1 |
+| 11 | Filter 1 Gain | | 33 | Mixer 2 Invert 2 | | 55 | Mixer 8 Invert 1 |
+| 12 | Filter 2 Cutoff | | 34 | Mixer 3 Level 1 | | 56 | Mixer 8 Level 2 |
+| 13 | Filter 2 Resonance | | 35 | Mixer 3 Invert 1 | | 57 | Mixer 8 Invert 2 |
+| 14 | Filter 2 Mod Amt | | 36 | Mixer 3 Level 2 | | 58 | Mixer 9 Level 1 |
+| 15 | Filter 2 Gain | | 37 | Mixer 3 Invert 2 | | 59 | Mixer 9 Invert 1 |
+| 16 | Amp 1 Gain | | 38 | Mixer 4 Level 1 | | 60 | Mixer 9 Level 2 |
+| 17 | Amp 2 Gain | | 39 | Mixer 4 Invert 1 | | 61 | Mixer 9 Invert 2 |
+| 18 | EG 1 Attack | | 40 | Mixer 4 Level 2 | | 62 | Mixer 10 Level 1 |
+| 19 | EG 1 Decay | | 41 | Mixer 4 Invert 2 | | 63 | Mixer 10 Invert 1 |
+| 20 | EG 1 Sustain | | 42 | Mixer 5 Level 1 | | 64 | Mixer 10 Level 2 |
+| 21 | EG 2 Attack | | 43 | Mixer 5 Invert 1 | | 65 | Mixer 10 Invert 2 |
 
 #### モジュール ID
 
-| ID | モジュール |
-| ----- | ------ |
-| 0 | なし（実行順の終端） |
-| 1 | EG 1 |
-| 2 | EG 2 |
-| 3 | LFO 1 |
-| 4 | LFO 2 |
-| 5 | Osc 1 |
-| 6 | Osc 2 |
-| 7 | Filter 1 |
-| 8 | Filter 2 |
-| 9 | Amp 1 |
-| 10 | Amp 2 |
-| 11 | Mixer 1 |
-| 12 | Mixer 2 |
-| 13 | Mixer 3 |
-| 14 | Mixer 4 |
-| 15 | Mixer 5 |
+| ID | モジュール | | ID | モジュール |
+| ----- | ------ | - | ----- | ------ |
+| 0 | なし（実行順の終端） | | 11 | Mixer 1 |
+| 1 | EG 1 | | 12 | Mixer 2 |
+| 2 | EG 2 | | 13 | Mixer 3 |
+| 3 | LFO 1 | | 14 | Mixer 4 |
+| 4 | LFO 2 | | 15 | Mixer 5 |
+| 5 | Osc 1 | | 16 | Mixer 6 |
+| 6 | Osc 2 | | 17 | Mixer 7 |
+| 7 | Filter 1 | | 18 | Mixer 8 |
+| 8 | Filter 2 | | 19 | Mixer 9 |
+| 9 | Amp 1 | | 20 | Mixer 10 |
+| 10 | Amp 2 | |  |  |
 
 #### シグナル ID
 
 | ID | シグナル | | ID | シグナル | | ID | シグナル |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | なし（定数 0.0） | | 23 | Osc 1 Fine Tune | | 46 | Mixer 1 Level 1 |
-| 1 | 定数 1.0 | | 24 | Osc 2 Wave | | 47 | Mixer 1 Invert 1 |
-| 2 | 定数 0.5 | | 25 | Osc 2 Mod Amt | | 48 | Mixer 1 Level 2 |
-| 3 | 定数 -0.5 | | 26 | Osc 2 Coarse Tune | | 49 | Mixer 1 Invert 2 |
-| 4 | 定数 -1.0 | | 27 | Osc 2 Fine Tune | | 50 | Mixer 2 Level 1 |
-| 5 | EG 1 Output | | 28 | Filter 1 Cutoff | | 51 | Mixer 2 Invert 1 |
-| 6 | EG 2 Output | | 29 | Filter 1 Resonance | | 52 | Mixer 2 Level 2 |
-| 7 | LFO 1 Output | | 30 | Filter 1 Mod Amt | | 53 | Mixer 2 Invert 2 |
-| 8 | LFO 2 Output | | 31 | Filter 1 Gain | | 54 | Mixer 3 Level 1 |
-| 9 | Osc 1 Output | | 32 | Filter 2 Cutoff | | 55 | Mixer 3 Invert 1 |
-| 10 | Osc 2 Output | | 33 | Filter 2 Resonance | | 56 | Mixer 3 Level 2 |
-| 11 | Filter 1 Output | | 34 | Filter 2 Mod Amt | | 57 | Mixer 3 Invert 2 |
-| 12 | Filter 2 Output | | 35 | Filter 2 Gain | | 58 | Mixer 4 Level 1 |
-| 13 | Amp 1 Output | | 36 | Amp 1 Gain | | 59 | Mixer 4 Invert 1 |
-| 14 | Amp 2 Output | | 37 | Amp 2 Gain | | 60 | Mixer 4 Level 2 |
-| 15 | Mixer 1 Output | | 38 | EG 1 Attack | | 61 | Mixer 4 Invert 2 |
-| 16 | Mixer 2 Output | | 39 | EG 1 Decay | | 62 | Mixer 5 Level 1 |
-| 17 | Mixer 3 Output | | 40 | EG 1 Sustain | | 63 | Mixer 5 Invert 1 |
-| 18 | Mixer 4 Output | | 41 | EG 2 Attack | | 64 | Mixer 5 Level 2 |
-| 19 | Mixer 5 Output | | 42 | EG 2 Decay | | 65 | Mixer 5 Invert 2 |
-| 20 | Osc 1 Wave | | 43 | EG 2 Sustain | | 66 | Note Pitch |
-| 21 | Osc 1 Mod Amt | | 44 | LFO 1 Rate | | 67 | Note Gate |
-| 22 | Osc 1 Coarse Tune | | 45 | LFO 2 Rate | | 68 | Pitch Bend |
+| 0 | なし（定数 0.0） | | 32 | Osc 2 Fine Tune | | 64 | Mixer 4 Invert 1 |
+| 1 | 定数 1.0 | | 33 | Filter 1 Cutoff | | 65 | Mixer 4 Level 2 |
+| 2 | 定数 0.5 | | 34 | Filter 1 Resonance | | 66 | Mixer 4 Invert 2 |
+| 3 | 定数 -0.5 | | 35 | Filter 1 Mod Amt | | 67 | Mixer 5 Level 1 |
+| 4 | 定数 -1.0 | | 36 | Filter 1 Gain | | 68 | Mixer 5 Invert 1 |
+| 5 | EG 1 Output | | 37 | Filter 2 Cutoff | | 69 | Mixer 5 Level 2 |
+| 6 | EG 2 Output | | 38 | Filter 2 Resonance | | 70 | Mixer 5 Invert 2 |
+| 7 | LFO 1 Output | | 39 | Filter 2 Mod Amt | | 71 | Mixer 6 Level 1 |
+| 8 | LFO 2 Output | | 40 | Filter 2 Gain | | 72 | Mixer 6 Invert 1 |
+| 9 | Osc 1 Output | | 41 | Amp 1 Gain | | 73 | Mixer 6 Level 2 |
+| 10 | Osc 2 Output | | 42 | Amp 2 Gain | | 74 | Mixer 6 Invert 2 |
+| 11 | Filter 1 Output | | 43 | EG 1 Attack | | 75 | Mixer 7 Level 1 |
+| 12 | Filter 2 Output | | 44 | EG 1 Decay | | 76 | Mixer 7 Invert 1 |
+| 13 | Amp 1 Output | | 45 | EG 1 Sustain | | 77 | Mixer 7 Level 2 |
+| 14 | Amp 2 Output | | 46 | EG 2 Attack | | 78 | Mixer 7 Invert 2 |
+| 15 | Mixer 1 Output | | 47 | EG 2 Decay | | 79 | Mixer 8 Level 1 |
+| 16 | Mixer 2 Output | | 48 | EG 2 Sustain | | 80 | Mixer 8 Invert 1 |
+| 17 | Mixer 3 Output | | 49 | LFO 1 Rate | | 81 | Mixer 8 Level 2 |
+| 18 | Mixer 4 Output | | 50 | LFO 2 Rate | | 82 | Mixer 8 Invert 2 |
+| 19 | Mixer 5 Output | | 51 | Mixer 1 Level 1 | | 83 | Mixer 9 Level 1 |
+| 20 | Mixer 6 Output | | 52 | Mixer 1 Invert 1 | | 84 | Mixer 9 Invert 1 |
+| 21 | Mixer 7 Output | | 53 | Mixer 1 Level 2 | | 85 | Mixer 9 Level 2 |
+| 22 | Mixer 8 Output | | 54 | Mixer 1 Invert 2 | | 86 | Mixer 9 Invert 2 |
+| 23 | Mixer 9 Output | | 55 | Mixer 2 Level 1 | | 87 | Mixer 10 Level 1 |
+| 24 | Mixer 10 Output | | 56 | Mixer 2 Invert 1 | | 88 | Mixer 10 Invert 1 |
+| 25 | Osc 1 Wave | | 57 | Mixer 2 Level 2 | | 89 | Mixer 10 Level 2 |
+| 26 | Osc 1 Mod Amt | | 58 | Mixer 2 Invert 2 | | 90 | Mixer 10 Invert 2 |
+| 27 | Osc 1 Coarse Tune | | 59 | Mixer 3 Level 1 | | 91 | Note Pitch |
+| 28 | Osc 1 Fine Tune | | 60 | Mixer 3 Invert 1 | | 92 | Note Gate |
+| 29 | Osc 2 Wave | | 61 | Mixer 3 Level 2 | | 93 | Pitch Bend |
+| 30 | Osc 2 Mod Amt | | 62 | Mixer 3 Invert 2 | |  |  |
+| 31 | Osc 2 Coarse Tune | | 63 | Mixer 4 Level 1 | |  |  |
 
-スロット 20〜65 には CC から届いた値が入ります。パラメータはデフォルトでは自分の CC を読んでいるわけです。
+スロット 25〜90 には CC から届いた値が入ります。パラメータはデフォルトでは自分の CC を読んでいるわけです。
 別のスロットを指させることがモジュレーションになります。CC のないものは、割り当てられるまで初期値のまま
 です。
 
@@ -322,7 +332,7 @@ Mixer 1 だけは例外で、結線されているビブラート経路に合わ
 - ビブラートはデフォルトで結線済みです。LFO 1 が Mixer 1 を経てオシレータのモジュレーション入力に届くので、
   CC 13 で深さ、CC 3 でレートを決められます
 - フィルタのカットオフをノートのピッチに追従させる（キーボードトラッキング）: CC 99 = 2, CC 98 = 8,
-  CC 6 = 66
+  CC 6 = 91
 - フィルタのカットオフを、自分の CC ではなくエンベロープで動かす: CC 99 = 2, CC 98 = 8, CC 6 = 5
 - フィルタのカットオフを LFO で揺らす: CC 99 = 2, CC 98 = 8, CC 6 = 7 -- パラメータなのでレートは低めに
 - アンプのゲインとフィルタのカットオフで 1 つの CC を共有する: CC 99 = 3, CC 98 = 16, CC 6 = 74
@@ -334,22 +344,22 @@ Mixer 1 だけは例外で、結線されているビブラート経路に合わ
 - ピッチを LFO ではなくエンベロープで動かす: CC 99 = 1, CC 98 = 14, CC 6 = 5 で LFO の代わりに EG 1 を
   Mixer 1 の 1 番目の入力に置き、あとは CC 13 で深さを決めます -- 14 で半音、124 で 1 オクターブです
 - 2 本目のエンベロープを足して、フィルタとアンプでの共有をやめる: CC 99 = 0, CC 98 = 5, CC 6 = 2 で EG 2 を
-  実行順に入れ、CC 99 = 1, CC 98 = 1, CC 6 = 67 で鍵盤からゲートをかけ、CC 99 = 1, CC 98 = 7, CC 6 = 6 で
+  実行順に入れ、CC 99 = 1, CC 98 = 1, CC 6 = 92 で鍵盤からゲートをかけ、CC 99 = 1, CC 98 = 7, CC 6 = 6 で
   フィルタを EG 2 に渡します
 - 2 つのオシレータをフィルタへ。Mixer 1 は塞がっているので、別のミキサーを使います。まず実行順から。
   各モジュールがこのサンプルで作られた値を読めるようにするためです: CC 99 = 0 で CC 98 = 4, 5, 6, 7 に
   CC 6 = 6, 12, 7, 9 を送ると EG 1, LFO 1, Mixer 1, Osc 1, Osc 2, Mixer 2, Filter 1, Amp 1 になります。
-  次に CC 99 = 1, CC 98 = 4, CC 6 = 66 で Osc 2 にノートを与え、CC 99 = 1 で CC 98 = 16 と 17 に
+  次に CC 99 = 1, CC 98 = 4, CC 6 = 91 で Osc 2 にノートを与え、CC 99 = 1 で CC 98 = 16 と 17 に
   CC 6 = 9 と 10 を送って両方を Mixer 2 に入れ、CC 99 = 1, CC 98 = 6, CC 6 = 16 でミックスをフィルタへ
   送ります。デチューンは Osc 2 の Coarse Tune か Fine Tune で
 - ピッチを両方向に曲げる CC。パラメータ単独ではできないことです。Mixer 1 はすでに Osc 1 のモジュレーション
-  入力に繋がっているので、あとは混ぜるものを与えるだけです: CC 99 = 1, CC 98 = 14, CC 6 = 28 で LFO の
+  入力に繋がっているので、あとは混ぜるものを与えるだけです: CC 99 = 1, CC 98 = 14, CC 6 = 33 で LFO の
   代わりにフィルタのカットオフのコントロールスロットを 1 番目の入力に置き、CC 99 = 1, CC 98 = 15, CC 6 = 3
   で -0.5 の定数を 2 番目に置きます。レベルはどちらも 0.2 なので、ミキサーは CC から 0.5 を引いたものを
   ビブラートの深さで出力し、CC 74 がノートの上下にピッチを曲げるようになります
 - 逆向きに効く CC。ミキサーに足し算ではなく引き算をさせます。CC 99 = 0, CC 98 = 6, CC 6 = 12 で Mixer 2 を
   実行順に入れ、CC 99 = 1, CC 98 = 16, CC 6 = 1 で定数 1.0 を 1 番目の入力に、CC 99 = 1, CC 98 = 17,
-  CC 6 = 28 でカットオフのコントロールスロットを 2 番目に置き、CC 99 = 2, CC 98 = 33, CC 6 = 1 でその
+  CC 6 = 33 でカットオフのコントロールスロットを 2 番目に置き、CC 99 = 2, CC 98 = 33, CC 6 = 1 でその
   2 番目だけを反転させると、ミキサーは 1 から CC を引いたものを出力します。CC 99 = 2, CC 98 = 8, CC 6 = 16
   でカットオフ自身のソースをそのミキサーに向ければ、CC 74 は上げるほどフィルタを閉じるようになります
 - フィルタを経路から外す: CC 99 = 0, CC 98 = 3, CC 6 = 9 のあと CC 99 = 0, CC 98 = 4, CC 6 = 0 -- そして
@@ -360,7 +370,7 @@ Mixer 1 だけは例外で、結線されているビブラート経路に合わ
 - モジュール入力（カテゴリ 1）は毎サンプル読まれ、スムージングされません。パラメータ（カテゴリ 2）は
   1 バッファに 1 回読まれ、受け取る側でスムージングされます。速いソースはモジュール入力へ、段階的なものは
   パラメータへ通してください
-- パラメータのソースは 128 のスロットのどれでも指せます。68 より上のスロットは、何かが書き込むまで 0 を
+- パラメータのソースは 128 のスロットのどれでも指せます。93 より上のスロットは、何かが書き込むまで 0 を
   返します
 - パラメータは自分の値を 0.0〜1.0 に丸めるので、Pitch Bend を除けば、正負どちらにも振れる信号をモジュール
   入力に渡す手段はミキサーだけです
