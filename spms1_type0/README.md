@@ -32,7 +32,10 @@ Required Software for Modification
     - Info: <https://github.com/FortySevenEffects/arduino_midi_library>
 - Spinel
     - Commit: <https://github.com/matz/spinel/tree/5af61ae7d53e36ca59a8de5870f532360d88fd7c>
-    - Please modify `int main(int argc,char**argv){` to `int Spms1_main(int argc,char**argv){` in the Spinel output file "spms1_main.c"
+    - The Spinel output file "spms1_main.c" needs no editing. "sp_runtime.h" in this sketch
+      carries `#define main __attribute__((section(".time_critical"), flatten)) Spms1_main`,
+      which renames it and puts the synth core in RAM at the same time. Renaming it by hand
+      instead leaves the macro with nothing to match, and the core runs from flash
 
 
 Usage
@@ -373,7 +376,11 @@ would fold high ones back down into the note.
 
 ### Test Script
 
-- Output WAV File: "spms1_output_wav.rb"
+- Output WAV File: "spms1_output_wav.rb" -- renders the default patch offline, the same modules
+  in the same order with the CC values the synth powers up with, save for two: Decay is at the top
+  of its dial so the note lasts the render, and Cutoff a quarter of the way up so the envelope
+  opening it is what you hear. It does not reproduce the signals bus or the run
+  order, so it catches a change in a module, not in a routing
 
 
 SPMS-1 (type-0) Licence
