@@ -1983,7 +1983,7 @@ int main(int argc,char**argv){
     volatile mrb_int lv_cc_mixer_10_level_2 = 0;
     volatile mrb_int lv_cc_mixer_10_invert_2 = 0;
     volatile mrb_int lv_module_id = 0;
-    mrb_int lv_i__bp7309 = 0;
+    mrb_int lv_i__bp7405 = 0;
 
 #line 1 "spms1_osc.rb"
 #line 3 "spms1_osc.rb"
@@ -3983,137 +3983,193 @@ int main(int argc,char**argv){
           if ((lv_module_id == cst_MODULE_NONE)) {
             break;
           }
-#line 960 "spms1_main.rb"
-          mrb_int _t499 = lv_module_id;
-          if ((_t499 == cst_MODULE_ENV_GEN_1)) {
-#line 962 "spms1_main.rb"
-            mrb_float _t500 = sp_FloatArray_get(lv_signals, lv_source_env_gen_1_gate);
-            sp_FloatArray_set(lv_signals, cst_SIGNAL_ENV_GEN_1_OUTPUT, sp_EnvGen_process((sp_EnvGen *)lv_env_gen_1, _t500));
-          }
-          else if ((_t499 == cst_MODULE_ENV_GEN_2)) {
-#line 964 "spms1_main.rb"
-            mrb_float _t501 = sp_FloatArray_get(lv_signals, lv_source_env_gen_2_gate);
-            sp_FloatArray_set(lv_signals, cst_SIGNAL_ENV_GEN_2_OUTPUT, sp_EnvGen_process((sp_EnvGen *)lv_env_gen_2, _t501));
-          }
-          else if ((_t499 == cst_MODULE_LFO_1)) {
 #line 966 "spms1_main.rb"
-            sp_FloatArray_set(lv_signals, cst_SIGNAL_LFO_1_OUTPUT, sp_LFO_process((sp_LFO *)lv_lfo_1));
-          }
-          else if ((_t499 == cst_MODULE_LFO_2)) {
+          if ((lv_module_id <= cst_MODULE_MIXER_10)) {
+#line 967 "spms1_main.rb"
+            if ((lv_module_id < cst_MODULE_MIXER_1)) {
 #line 968 "spms1_main.rb"
-            sp_FloatArray_set(lv_signals, cst_SIGNAL_LFO_2_OUTPUT, sp_LFO_process((sp_LFO *)lv_lfo_2));
-          }
-          else if ((_t499 == cst_MODULE_OSC_1)) {
+              if ((lv_module_id < cst_MODULE_OSC_2)) {
+#line 969 "spms1_main.rb"
+                if ((lv_module_id < cst_MODULE_LFO_1)) {
 #line 970 "spms1_main.rb"
-            mrb_float _t502 = sp_FloatArray_get(lv_signals, lv_source_osc_1_pitch);
-            mrb_float _t503 = sp_FloatArray_get(lv_signals, lv_source_osc_1_mod);
-            sp_FloatArray_set(lv_signals, cst_SIGNAL_OSC_1_OUTPUT, sp_Osc_process((sp_Osc *)lv_osc_1, _t502, _t503));
-          }
-          else if ((_t499 == cst_MODULE_OSC_2)) {
-#line 972 "spms1_main.rb"
-            mrb_float _t504 = sp_FloatArray_get(lv_signals, lv_source_osc_2_pitch);
-            mrb_float _t505 = sp_FloatArray_get(lv_signals, lv_source_osc_2_mod);
-            sp_FloatArray_set(lv_signals, cst_SIGNAL_OSC_2_OUTPUT, sp_Osc_process((sp_Osc *)lv_osc_2, _t504, _t505));
-          }
-          else if ((_t499 == cst_MODULE_FILTER_1)) {
-#line 974 "spms1_main.rb"
-            mrb_float _t506 = sp_FloatArray_get(lv_signals, lv_source_filter_1_audio);
-            mrb_float _t507 = sp_FloatArray_get(lv_signals, lv_source_filter_1_mod);
-            sp_FloatArray_set(lv_signals, cst_SIGNAL_FILTER_1_OUTPUT, sp_Filter_process((sp_Filter *)lv_filter_1, _t506, _t507));
-          }
-          else if ((_t499 == cst_MODULE_FILTER_2)) {
+                  if ((lv_module_id < cst_MODULE_ENV_GEN_2)) {
+#line 971 "spms1_main.rb"
+                    mrb_float _t499 = sp_FloatArray_get(lv_signals, lv_source_env_gen_1_gate);
+                    sp_FloatArray_set(lv_signals, cst_SIGNAL_ENV_GEN_1_OUTPUT, sp_EnvGen_process((sp_EnvGen *)lv_env_gen_1, _t499));
+                  }
+                  else {
+#line 973 "spms1_main.rb"
+                    mrb_float _t500 = sp_FloatArray_get(lv_signals, lv_source_env_gen_2_gate);
+                    sp_FloatArray_set(lv_signals, cst_SIGNAL_ENV_GEN_2_OUTPUT, sp_EnvGen_process((sp_EnvGen *)lv_env_gen_2, _t500));
+                  }
+                }
+                else {
 #line 976 "spms1_main.rb"
-            mrb_float _t508 = sp_FloatArray_get(lv_signals, lv_source_filter_2_audio);
-            mrb_float _t509 = sp_FloatArray_get(lv_signals, lv_source_filter_2_mod);
-            sp_FloatArray_set(lv_signals, cst_SIGNAL_FILTER_2_OUTPUT, sp_Filter_process((sp_Filter *)lv_filter_2, _t508, _t509));
-          }
-          else if ((_t499 == cst_MODULE_AMP_1)) {
-#line 978 "spms1_main.rb"
-            mrb_float _t510 = sp_FloatArray_get(lv_signals, lv_source_amp_1_audio);
-            mrb_float _t511 = sp_FloatArray_get(lv_signals, lv_source_amp_1_mod);
-            sp_FloatArray_set(lv_signals, cst_SIGNAL_AMP_1_OUTPUT, sp_Amp_process((sp_Amp *)lv_amp_1, _t510, _t511));
-          }
-          else if ((_t499 == cst_MODULE_AMP_2)) {
+                  if ((lv_module_id < cst_MODULE_LFO_2)) {
+#line 977 "spms1_main.rb"
+                    sp_FloatArray_set(lv_signals, cst_SIGNAL_LFO_1_OUTPUT, sp_LFO_process((sp_LFO *)lv_lfo_1));
+                  }
+                  else {
+#line 979 "spms1_main.rb"
+                    if ((lv_module_id < cst_MODULE_OSC_1)) {
 #line 980 "spms1_main.rb"
-            mrb_float _t512 = sp_FloatArray_get(lv_signals, lv_source_amp_2_audio);
-            mrb_float _t513 = sp_FloatArray_get(lv_signals, lv_source_amp_2_mod);
-            sp_FloatArray_set(lv_signals, cst_SIGNAL_AMP_2_OUTPUT, sp_Amp_process((sp_Amp *)lv_amp_2, _t512, _t513));
-          }
-          else if ((_t499 == cst_MODULE_MIXER_1)) {
+                      sp_FloatArray_set(lv_signals, cst_SIGNAL_LFO_2_OUTPUT, sp_LFO_process((sp_LFO *)lv_lfo_2));
+                    }
+                    else {
 #line 982 "spms1_main.rb"
-            mrb_float _t514 = sp_FloatArray_get(lv_signals, lv_source_mixer_1_in_1);
-            mrb_float _t515 = sp_FloatArray_get(lv_signals, lv_source_mixer_1_in_2);
-            sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_1_OUTPUT, sp_Mixer_process((sp_Mixer *)lv_mixer_1, _t514, _t515));
-          }
-          else if ((_t499 == cst_MODULE_MIXER_2)) {
-#line 984 "spms1_main.rb"
-            mrb_float _t516 = sp_FloatArray_get(lv_signals, lv_source_mixer_2_in_1);
-            mrb_float _t517 = sp_FloatArray_get(lv_signals, lv_source_mixer_2_in_2);
-            sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_2_OUTPUT, sp_Mixer_process((sp_Mixer *)lv_mixer_2, _t516, _t517));
-          }
-          else if ((_t499 == cst_MODULE_MIXER_3)) {
-#line 986 "spms1_main.rb"
-            mrb_float _t518 = sp_FloatArray_get(lv_signals, lv_source_mixer_3_in_1);
-            mrb_float _t519 = sp_FloatArray_get(lv_signals, lv_source_mixer_3_in_2);
-            sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_3_OUTPUT, sp_Mixer_process((sp_Mixer *)lv_mixer_3, _t518, _t519));
-          }
-          else if ((_t499 == cst_MODULE_MIXER_4)) {
+                      mrb_float _t501 = sp_FloatArray_get(lv_signals, lv_source_osc_1_pitch);
+                      mrb_float _t502 = sp_FloatArray_get(lv_signals, lv_source_osc_1_mod);
+                      sp_FloatArray_set(lv_signals, cst_SIGNAL_OSC_1_OUTPUT, sp_Osc_process((sp_Osc *)lv_osc_1, _t501, _t502));
+                    }
+                  }
+                }
+              }
+              else {
+#line 987 "spms1_main.rb"
+                if ((lv_module_id < cst_MODULE_FILTER_2)) {
 #line 988 "spms1_main.rb"
-            mrb_float _t520 = sp_FloatArray_get(lv_signals, lv_source_mixer_4_in_1);
-            mrb_float _t521 = sp_FloatArray_get(lv_signals, lv_source_mixer_4_in_2);
-            sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_4_OUTPUT, sp_Mixer_process((sp_Mixer *)lv_mixer_4, _t520, _t521));
-          }
-          else if ((_t499 == cst_MODULE_MIXER_5)) {
-#line 990 "spms1_main.rb"
-            mrb_float _t522 = sp_FloatArray_get(lv_signals, lv_source_mixer_5_in_1);
-            mrb_float _t523 = sp_FloatArray_get(lv_signals, lv_source_mixer_5_in_2);
-            sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_5_OUTPUT, sp_Mixer_process((sp_Mixer *)lv_mixer_5, _t522, _t523));
-          }
-          else if ((_t499 == cst_MODULE_MIXER_6)) {
-#line 992 "spms1_main.rb"
-            mrb_float _t524 = sp_FloatArray_get(lv_signals, lv_source_mixer_6_in_1);
-            mrb_float _t525 = sp_FloatArray_get(lv_signals, lv_source_mixer_6_in_2);
-            sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_6_OUTPUT, sp_Mixer_process((sp_Mixer *)lv_mixer_6, _t524, _t525));
-          }
-          else if ((_t499 == cst_MODULE_MIXER_7)) {
+                  if ((lv_module_id < cst_MODULE_FILTER_1)) {
+#line 989 "spms1_main.rb"
+                    mrb_float _t503 = sp_FloatArray_get(lv_signals, lv_source_osc_2_pitch);
+                    mrb_float _t504 = sp_FloatArray_get(lv_signals, lv_source_osc_2_mod);
+                    sp_FloatArray_set(lv_signals, cst_SIGNAL_OSC_2_OUTPUT, sp_Osc_process((sp_Osc *)lv_osc_2, _t503, _t504));
+                  }
+                  else {
+#line 991 "spms1_main.rb"
+                    mrb_float _t505 = sp_FloatArray_get(lv_signals, lv_source_filter_1_audio);
+                    mrb_float _t506 = sp_FloatArray_get(lv_signals, lv_source_filter_1_mod);
+                    sp_FloatArray_set(lv_signals, cst_SIGNAL_FILTER_1_OUTPUT, sp_Filter_process((sp_Filter *)lv_filter_1, _t505, _t506));
+                  }
+                }
+                else {
 #line 994 "spms1_main.rb"
-            mrb_float _t526 = sp_FloatArray_get(lv_signals, lv_source_mixer_7_in_1);
-            mrb_float _t527 = sp_FloatArray_get(lv_signals, lv_source_mixer_7_in_2);
-            sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_7_OUTPUT, sp_Mixer_process((sp_Mixer *)lv_mixer_7, _t526, _t527));
-          }
-          else if ((_t499 == cst_MODULE_MIXER_8)) {
-#line 996 "spms1_main.rb"
-            mrb_float _t528 = sp_FloatArray_get(lv_signals, lv_source_mixer_8_in_1);
-            mrb_float _t529 = sp_FloatArray_get(lv_signals, lv_source_mixer_8_in_2);
-            sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_8_OUTPUT, sp_Mixer_process((sp_Mixer *)lv_mixer_8, _t528, _t529));
-          }
-          else if ((_t499 == cst_MODULE_MIXER_9)) {
+                  if ((lv_module_id < cst_MODULE_AMP_1)) {
+#line 995 "spms1_main.rb"
+                    mrb_float _t507 = sp_FloatArray_get(lv_signals, lv_source_filter_2_audio);
+                    mrb_float _t508 = sp_FloatArray_get(lv_signals, lv_source_filter_2_mod);
+                    sp_FloatArray_set(lv_signals, cst_SIGNAL_FILTER_2_OUTPUT, sp_Filter_process((sp_Filter *)lv_filter_2, _t507, _t508));
+                  }
+                  else {
+#line 997 "spms1_main.rb"
+                    if ((lv_module_id < cst_MODULE_AMP_2)) {
 #line 998 "spms1_main.rb"
-            mrb_float _t530 = sp_FloatArray_get(lv_signals, lv_source_mixer_9_in_1);
-            mrb_float _t531 = sp_FloatArray_get(lv_signals, lv_source_mixer_9_in_2);
-            sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_9_OUTPUT, sp_Mixer_process((sp_Mixer *)lv_mixer_9, _t530, _t531));
-          }
-          else if ((_t499 == cst_MODULE_MIXER_10)) {
+                      mrb_float _t509 = sp_FloatArray_get(lv_signals, lv_source_amp_1_audio);
+                      mrb_float _t510 = sp_FloatArray_get(lv_signals, lv_source_amp_1_mod);
+                      sp_FloatArray_set(lv_signals, cst_SIGNAL_AMP_1_OUTPUT, sp_Amp_process((sp_Amp *)lv_amp_1, _t509, _t510));
+                    }
+                    else {
 #line 1000 "spms1_main.rb"
-            mrb_float _t532 = sp_FloatArray_get(lv_signals, lv_source_mixer_10_in_1);
-            mrb_float _t533 = sp_FloatArray_get(lv_signals, lv_source_mixer_10_in_2);
-            sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_10_OUTPUT, sp_Mixer_process((sp_Mixer *)lv_mixer_10, _t532, _t533));
+                      mrb_float _t511 = sp_FloatArray_get(lv_signals, lv_source_amp_2_audio);
+                      mrb_float _t512 = sp_FloatArray_get(lv_signals, lv_source_amp_2_mod);
+                      sp_FloatArray_set(lv_signals, cst_SIGNAL_AMP_2_OUTPUT, sp_Amp_process((sp_Amp *)lv_amp_2, _t511, _t512));
+                    }
+                  }
+                }
+              }
+            }
+            else {
+#line 1006 "spms1_main.rb"
+              if ((lv_module_id < cst_MODULE_MIXER_6)) {
+#line 1007 "spms1_main.rb"
+                if ((lv_module_id < cst_MODULE_MIXER_3)) {
+#line 1008 "spms1_main.rb"
+                  if ((lv_module_id < cst_MODULE_MIXER_2)) {
+#line 1009 "spms1_main.rb"
+                    mrb_float _t513 = sp_FloatArray_get(lv_signals, lv_source_mixer_1_in_1);
+                    mrb_float _t514 = sp_FloatArray_get(lv_signals, lv_source_mixer_1_in_2);
+                    sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_1_OUTPUT, sp_Mixer_process((sp_Mixer *)lv_mixer_1, _t513, _t514));
+                  }
+                  else {
+#line 1011 "spms1_main.rb"
+                    mrb_float _t515 = sp_FloatArray_get(lv_signals, lv_source_mixer_2_in_1);
+                    mrb_float _t516 = sp_FloatArray_get(lv_signals, lv_source_mixer_2_in_2);
+                    sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_2_OUTPUT, sp_Mixer_process((sp_Mixer *)lv_mixer_2, _t515, _t516));
+                  }
+                }
+                else {
+#line 1014 "spms1_main.rb"
+                  if ((lv_module_id < cst_MODULE_MIXER_4)) {
+#line 1015 "spms1_main.rb"
+                    mrb_float _t517 = sp_FloatArray_get(lv_signals, lv_source_mixer_3_in_1);
+                    mrb_float _t518 = sp_FloatArray_get(lv_signals, lv_source_mixer_3_in_2);
+                    sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_3_OUTPUT, sp_Mixer_process((sp_Mixer *)lv_mixer_3, _t517, _t518));
+                  }
+                  else {
+#line 1017 "spms1_main.rb"
+                    if ((lv_module_id < cst_MODULE_MIXER_5)) {
+#line 1018 "spms1_main.rb"
+                      mrb_float _t519 = sp_FloatArray_get(lv_signals, lv_source_mixer_4_in_1);
+                      mrb_float _t520 = sp_FloatArray_get(lv_signals, lv_source_mixer_4_in_2);
+                      sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_4_OUTPUT, sp_Mixer_process((sp_Mixer *)lv_mixer_4, _t519, _t520));
+                    }
+                    else {
+#line 1020 "spms1_main.rb"
+                      mrb_float _t521 = sp_FloatArray_get(lv_signals, lv_source_mixer_5_in_1);
+                      mrb_float _t522 = sp_FloatArray_get(lv_signals, lv_source_mixer_5_in_2);
+                      sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_5_OUTPUT, sp_Mixer_process((sp_Mixer *)lv_mixer_5, _t521, _t522));
+                    }
+                  }
+                }
+              }
+              else {
+#line 1025 "spms1_main.rb"
+                if ((lv_module_id < cst_MODULE_MIXER_8)) {
+#line 1026 "spms1_main.rb"
+                  if ((lv_module_id < cst_MODULE_MIXER_7)) {
+#line 1027 "spms1_main.rb"
+                    mrb_float _t523 = sp_FloatArray_get(lv_signals, lv_source_mixer_6_in_1);
+                    mrb_float _t524 = sp_FloatArray_get(lv_signals, lv_source_mixer_6_in_2);
+                    sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_6_OUTPUT, sp_Mixer_process((sp_Mixer *)lv_mixer_6, _t523, _t524));
+                  }
+                  else {
+#line 1029 "spms1_main.rb"
+                    mrb_float _t525 = sp_FloatArray_get(lv_signals, lv_source_mixer_7_in_1);
+                    mrb_float _t526 = sp_FloatArray_get(lv_signals, lv_source_mixer_7_in_2);
+                    sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_7_OUTPUT, sp_Mixer_process((sp_Mixer *)lv_mixer_7, _t525, _t526));
+                  }
+                }
+                else {
+#line 1032 "spms1_main.rb"
+                  if ((lv_module_id < cst_MODULE_MIXER_9)) {
+#line 1033 "spms1_main.rb"
+                    mrb_float _t527 = sp_FloatArray_get(lv_signals, lv_source_mixer_8_in_1);
+                    mrb_float _t528 = sp_FloatArray_get(lv_signals, lv_source_mixer_8_in_2);
+                    sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_8_OUTPUT, sp_Mixer_process((sp_Mixer *)lv_mixer_8, _t527, _t528));
+                  }
+                  else {
+#line 1035 "spms1_main.rb"
+                    if ((lv_module_id < cst_MODULE_MIXER_10)) {
+#line 1036 "spms1_main.rb"
+                      mrb_float _t529 = sp_FloatArray_get(lv_signals, lv_source_mixer_9_in_1);
+                      mrb_float _t530 = sp_FloatArray_get(lv_signals, lv_source_mixer_9_in_2);
+                      sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_9_OUTPUT, sp_Mixer_process((sp_Mixer *)lv_mixer_9, _t529, _t530));
+                    }
+                    else {
+#line 1038 "spms1_main.rb"
+                      mrb_float _t531 = sp_FloatArray_get(lv_signals, lv_source_mixer_10_in_1);
+                      mrb_float _t532 = sp_FloatArray_get(lv_signals, lv_source_mixer_10_in_2);
+                      sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_10_OUTPUT, sp_Mixer_process((sp_Mixer *)lv_mixer_10, _t531, _t532));
+                    }
+                  }
+                }
+              }
+            }
           }
-#line 1003 "spms1_main.rb"
+#line 1046 "spms1_main.rb"
           lv_slot = sp_int_add(lv_slot, 1LL);
         }
-#line 1006 "spms1_main.rb"
+#line 1049 "spms1_main.rb"
         sp_FloatArray_set(lv_audio_buffer, lv_i, sp_FloatArray_get(lv_signals, lv_source_output));
-#line 1007 "spms1_main.rb"
+#line 1050 "spms1_main.rb"
         lv_i = sp_int_add(lv_i, 1LL);
       }
-#line 1010 "spms1_main.rb"
+#line 1053 "spms1_main.rb"
       (stop_debug_measure(), (mrb_int)0);
-#line 1012 "spms1_main.rb"
-      for (mrb_int _t535 = 0; _t535 < cst_AUDIO_BUFFER_WORDS; _t535++) {
-        lv_i__bp7309 = _t535;
-#line 1013 "spms1_main.rb"
-        (write_to_audio_buffer(((float)(sp_FloatArray_get(lv_audio_buffer, lv_i__bp7309))), ((float)(sp_FloatArray_get(lv_audio_buffer, lv_i__bp7309)))), (mrb_int)0);
+#line 1055 "spms1_main.rb"
+      for (mrb_int _t534 = 0; _t534 < cst_AUDIO_BUFFER_WORDS; _t534++) {
+        lv_i__bp7405 = _t534;
+#line 1056 "spms1_main.rb"
+        (write_to_audio_buffer(((float)(sp_FloatArray_get(lv_audio_buffer, lv_i__bp7405))), ((float)(sp_FloatArray_get(lv_audio_buffer, lv_i__bp7405)))), (mrb_int)0);
       }
     }
     sp_exc_top--;

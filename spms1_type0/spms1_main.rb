@@ -957,47 +957,90 @@ loop do
       module_id = active_modules[slot]
       break if module_id == MODULE_NONE
 
-      case module_id
-      when MODULE_ENV_GEN_1
-        signals[SIGNAL_ENV_GEN_1_OUTPUT] = env_gen_1.process(signals[source_env_gen_1_gate])
-      when MODULE_ENV_GEN_2
-        signals[SIGNAL_ENV_GEN_2_OUTPUT] = env_gen_2.process(signals[source_env_gen_2_gate])
-      when MODULE_LFO_1
-        signals[SIGNAL_LFO_1_OUTPUT] = lfo_1.process
-      when MODULE_LFO_2
-        signals[SIGNAL_LFO_2_OUTPUT] = lfo_2.process
-      when MODULE_OSC_1
-        signals[SIGNAL_OSC_1_OUTPUT] = osc_1.process(signals[source_osc_1_pitch], signals[source_osc_1_mod])
-      when MODULE_OSC_2
-        signals[SIGNAL_OSC_2_OUTPUT] = osc_2.process(signals[source_osc_2_pitch], signals[source_osc_2_mod])
-      when MODULE_FILTER_1
-        signals[SIGNAL_FILTER_1_OUTPUT] = filter_1.process(signals[source_filter_1_audio], signals[source_filter_1_mod])
-      when MODULE_FILTER_2
-        signals[SIGNAL_FILTER_2_OUTPUT] = filter_2.process(signals[source_filter_2_audio], signals[source_filter_2_mod])
-      when MODULE_AMP_1
-        signals[SIGNAL_AMP_1_OUTPUT] = amp_1.process(signals[source_amp_1_audio], signals[source_amp_1_mod])
-      when MODULE_AMP_2
-        signals[SIGNAL_AMP_2_OUTPUT] = amp_2.process(signals[source_amp_2_audio], signals[source_amp_2_mod])
-      when MODULE_MIXER_1
-        signals[SIGNAL_MIXER_1_OUTPUT] = mixer_1.process(signals[source_mixer_1_in_1], signals[source_mixer_1_in_2])
-      when MODULE_MIXER_2
-        signals[SIGNAL_MIXER_2_OUTPUT] = mixer_2.process(signals[source_mixer_2_in_1], signals[source_mixer_2_in_2])
-      when MODULE_MIXER_3
-        signals[SIGNAL_MIXER_3_OUTPUT] = mixer_3.process(signals[source_mixer_3_in_1], signals[source_mixer_3_in_2])
-      when MODULE_MIXER_4
-        signals[SIGNAL_MIXER_4_OUTPUT] = mixer_4.process(signals[source_mixer_4_in_1], signals[source_mixer_4_in_2])
-      when MODULE_MIXER_5
-        signals[SIGNAL_MIXER_5_OUTPUT] = mixer_5.process(signals[source_mixer_5_in_1], signals[source_mixer_5_in_2])
-      when MODULE_MIXER_6
-        signals[SIGNAL_MIXER_6_OUTPUT] = mixer_6.process(signals[source_mixer_6_in_1], signals[source_mixer_6_in_2])
-      when MODULE_MIXER_7
-        signals[SIGNAL_MIXER_7_OUTPUT] = mixer_7.process(signals[source_mixer_7_in_1], signals[source_mixer_7_in_2])
-      when MODULE_MIXER_8
-        signals[SIGNAL_MIXER_8_OUTPUT] = mixer_8.process(signals[source_mixer_8_in_1], signals[source_mixer_8_in_2])
-      when MODULE_MIXER_9
-        signals[SIGNAL_MIXER_9_OUTPUT] = mixer_9.process(signals[source_mixer_9_in_1], signals[source_mixer_9_in_2])
-      when MODULE_MIXER_10
-        signals[SIGNAL_MIXER_10_OUTPUT] = mixer_10.process(signals[source_mixer_10_in_1], signals[source_mixer_10_in_2])
+      # A binary search over the module ids rather than a chain of equality tests. Spinel never emits
+      # a jump table however the Ruby is written, so the shape here is the shape the dispatch has:
+      # a chain costs one compare per id up to the one that matches, this costs the depth of the
+      # tree. Each compare is a load of a mutable global either way, so fewer of them is the whole
+      # point. The guard is what keeps an id nobody defined from landing in a leaf and running the
+      # wrong module, which is what the chain gave for free by falling off the end.
+      if module_id <= MODULE_MIXER_10
+        if module_id < MODULE_MIXER_1
+          if module_id < MODULE_OSC_2
+            if module_id < MODULE_LFO_1
+              if module_id < MODULE_ENV_GEN_2
+                signals[SIGNAL_ENV_GEN_1_OUTPUT] = env_gen_1.process(signals[source_env_gen_1_gate])
+              else
+                signals[SIGNAL_ENV_GEN_2_OUTPUT] = env_gen_2.process(signals[source_env_gen_2_gate])
+              end
+            else
+              if module_id < MODULE_LFO_2
+                signals[SIGNAL_LFO_1_OUTPUT] = lfo_1.process
+              else
+                if module_id < MODULE_OSC_1
+                  signals[SIGNAL_LFO_2_OUTPUT] = lfo_2.process
+                else
+                  signals[SIGNAL_OSC_1_OUTPUT] = osc_1.process(signals[source_osc_1_pitch], signals[source_osc_1_mod])
+                end
+              end
+            end
+          else
+            if module_id < MODULE_FILTER_2
+              if module_id < MODULE_FILTER_1
+                signals[SIGNAL_OSC_2_OUTPUT] = osc_2.process(signals[source_osc_2_pitch], signals[source_osc_2_mod])
+              else
+                signals[SIGNAL_FILTER_1_OUTPUT] = filter_1.process(signals[source_filter_1_audio], signals[source_filter_1_mod])
+              end
+            else
+              if module_id < MODULE_AMP_1
+                signals[SIGNAL_FILTER_2_OUTPUT] = filter_2.process(signals[source_filter_2_audio], signals[source_filter_2_mod])
+              else
+                if module_id < MODULE_AMP_2
+                  signals[SIGNAL_AMP_1_OUTPUT] = amp_1.process(signals[source_amp_1_audio], signals[source_amp_1_mod])
+                else
+                  signals[SIGNAL_AMP_2_OUTPUT] = amp_2.process(signals[source_amp_2_audio], signals[source_amp_2_mod])
+                end
+              end
+            end
+          end
+        else
+          if module_id < MODULE_MIXER_6
+            if module_id < MODULE_MIXER_3
+              if module_id < MODULE_MIXER_2
+                signals[SIGNAL_MIXER_1_OUTPUT] = mixer_1.process(signals[source_mixer_1_in_1], signals[source_mixer_1_in_2])
+              else
+                signals[SIGNAL_MIXER_2_OUTPUT] = mixer_2.process(signals[source_mixer_2_in_1], signals[source_mixer_2_in_2])
+              end
+            else
+              if module_id < MODULE_MIXER_4
+                signals[SIGNAL_MIXER_3_OUTPUT] = mixer_3.process(signals[source_mixer_3_in_1], signals[source_mixer_3_in_2])
+              else
+                if module_id < MODULE_MIXER_5
+                  signals[SIGNAL_MIXER_4_OUTPUT] = mixer_4.process(signals[source_mixer_4_in_1], signals[source_mixer_4_in_2])
+                else
+                  signals[SIGNAL_MIXER_5_OUTPUT] = mixer_5.process(signals[source_mixer_5_in_1], signals[source_mixer_5_in_2])
+                end
+              end
+            end
+          else
+            if module_id < MODULE_MIXER_8
+              if module_id < MODULE_MIXER_7
+                signals[SIGNAL_MIXER_6_OUTPUT] = mixer_6.process(signals[source_mixer_6_in_1], signals[source_mixer_6_in_2])
+              else
+                signals[SIGNAL_MIXER_7_OUTPUT] = mixer_7.process(signals[source_mixer_7_in_1], signals[source_mixer_7_in_2])
+              end
+            else
+              if module_id < MODULE_MIXER_9
+                signals[SIGNAL_MIXER_8_OUTPUT] = mixer_8.process(signals[source_mixer_8_in_1], signals[source_mixer_8_in_2])
+              else
+                if module_id < MODULE_MIXER_10
+                  signals[SIGNAL_MIXER_9_OUTPUT] = mixer_9.process(signals[source_mixer_9_in_1], signals[source_mixer_9_in_2])
+                else
+                  signals[SIGNAL_MIXER_10_OUTPUT] = mixer_10.process(signals[source_mixer_10_in_1], signals[source_mixer_10_in_2])
+                end
+              end
+            end
+          end
+        end
       end
 
       slot += 1
