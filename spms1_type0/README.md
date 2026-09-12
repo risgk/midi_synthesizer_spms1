@@ -258,7 +258,7 @@ but never up.
 | 16 | Osc 1 Mod Amt | | 33 | Mixer 2 Invert 1 | | 50 | Pitch Bend ± |
 
 A **±** marks a signal that swings both ways: a module output reaches -0.5 and +0.5 at full
-scale, and a mixer's output reaches whatever its two inputs add up to. Everything unmarked runs
+scale, and a mixer sums two of them and stops at one. Everything unmarked runs
 0.0 to 1.0 -- an envelope's output, Note Gate, and every control slot. The bus carries both
 kinds under one numbering, so the range belongs to the slot rather than to the sort of thing
 that wrote it.
@@ -307,6 +307,13 @@ unchanged at 0.0, through silence at 0.5, to negated at 1.0. Levels default to f
 to zero, so a mixer with one input routed is a buffer; inverting that one input makes it an
 inverter; and inverting only the second makes the mixer a subtractor. Mixer 1 is the exception,
 seeded to 0.2 on both levels for the vibrato path it is wired into.
+
+The sum is held to -1.0 and +1.0. Two full-scale signals reach exactly that, so nothing ordinary
+is cut; what it stops is a mixer wired back to its own input, which would otherwise double every
+sample until the number stopped being a number and took the oscillator or the filter with it.
+The filter is held to the same one unit, by a curve rather than a corner: its resonant peak can
+climb past one unit on a sweep, and rounding that off makes a third harmonic where a hard edge
+would fold high ones back down into the note.
 
 #### Examples
 

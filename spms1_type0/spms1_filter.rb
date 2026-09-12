@@ -5,6 +5,17 @@ module Spms1
   # Coefficients are recomputed every 4 samples rather than every sample: the computation needs a
   # sine, a cosine and a division, and the parameters feeding it are smoothed in the same place.
   class Filter
+    # What leaves the filter, as opposed to what circulates inside it. A cubic soft clip flattens at
+    # two thirds of its ceiling, so 1.5 lands the limit on exactly 1.0: one unit, the widest thing
+    # the bus carries. It sits outside the feedback path, so the resonance behaves as it did and only
+    # a peak that would have left above one unit is rounded off. A hard clamp here would fold high
+    # harmonics back below Nyquist; a cubic makes a third harmonic and nothing else, which stays in
+    # band for every note this oscillator plays.
+    OUTPUT_CEILING     = 1.5
+    OUTPUT_LIMIT       = (2.0 / 3.0) * OUTPUT_CEILING
+    OUTPUT_INV_CEILING = 1.0 / OUTPUT_CEILING
+    OUTPUT_CUBIC_SCALE = (1.0 / 3.0) * OUTPUT_CEILING
+
     SOFT_CLIP_CEILING = 4.0
     # Everything soft_clip needs derived from the ceiling once, at startup. The vendored Spinel
     # emits Float constants as runtime globals rather than compile-time literals, so writing these
@@ -104,7 +115,7 @@ module Spms1
 
       @sample_counter = (@sample_counter + 1) % CONTROL_RATE_DIVISOR
 
-      audio_output
+      clip_output(audio_output)
     end
 
     private
@@ -166,6 +177,19 @@ module Spms1
 
     # Applies a cubic non-linear soft-clipping function tailored for a configurable range.
     # Adds warm analog-like saturation and prevents internal state blow-ups.
+    # Bounds what the module hands to the bus. Separate from soft_clip, which bounds the state
+    # inside the loop at a much higher ceiling and has to stay where it is.
+    def clip_output(sample)
+      if sample > OUTPUT_CEILING
+        OUTPUT_LIMIT
+      elsif sample < -OUTPUT_CEILING
+        -OUTPUT_LIMIT
+      else
+        scaled = sample * OUTPUT_INV_CEILING
+        sample - (scaled * scaled * scaled) * OUTPUT_CUBIC_SCALE
+      end
+    end
+
     def soft_clip(sample)
       if sample > SOFT_CLIP_CEILING
         SOFT_CLIP_LIMIT
