@@ -32,6 +32,10 @@ module Spms1
 
       @sample_counter = (@sample_counter + 1) % CONTROL_RATE_DIVISOR
 
+      # The one modulation input in the synth that is clamped on the way in, because an amp is an
+      # attenuator: a modulation scales the gain down, and must not be able to scale it up however
+      # loud it arrives. Negative still inverts. @gain is already [0.0, 1.0], so the product needs
+      # no clamp of its own.
       mod = (modulation_input < -1.0) ? -1.0 : ((modulation_input > 1.0) ? 1.0 : modulation_input)
       total_gain = @current_gain * mod
 

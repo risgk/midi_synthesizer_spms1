@@ -71,9 +71,10 @@ module Spms1
       @tune = @coarse_tune + @fine_tune
     end
 
-    # Pitch input is a signal in [-1.0, 1.0], of which [-0.5, 0.5] is the usable span: it covers
-    # MIDI notes 0 to 120, and anything beyond clamps to the ends. modulation_input is added to it
-    # per sample and is deliberately not smoothed, so a fast source reaches the pitch unslewed.
+    # Both inputs are taken as they arrive; what is held to a range is the pitch they add up to.
+    # [-0.5, 0.5] is that range, covering MIDI notes 0 to 120, and it is what keeps the table
+    # lookup in bounds. modulation_input is deliberately not smoothed, so a fast source reaches
+    # the pitch unslewed.
     def process(pitch_input = 0.0, modulation_input = 0.0)
       if @sample_counter == 0
         # Morph and depth are smoothed at the control rate to avoid sudden jumps.
@@ -82,8 +83,7 @@ module Spms1
         @current_tune += (@tune - @current_tune) * @smoothing_target_blend
       end
 
-      mod = (modulation_input < -1.0) ? -1.0 : ((modulation_input > 1.0) ? 1.0 : modulation_input)
-      total_pitch = pitch_input + @current_tune + (mod * @current_modulation_amount)
+      total_pitch = pitch_input + @current_tune + (modulation_input * @current_modulation_amount)
       pitch = (total_pitch < -0.5) ? -0.5 : ((total_pitch > 0.5) ? 0.5 : total_pitch)
       freq = pitch_to_freq_fast(pitch)
       current_dt = freq * @inv_sample_rate
