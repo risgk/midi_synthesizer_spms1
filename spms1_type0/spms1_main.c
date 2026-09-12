@@ -450,77 +450,44 @@ static mrb_int cst_AUDIO_BUFFERS = 0;
 static mrb_int cst_AUDIO_BUFFER_WORDS = 0;
 static mrb_int cst_MODULES_SIZE = 0;
 static mrb_int cst_MODULE_NONE = 0;
-static mrb_int cst_MODULE_ENV_GEN_1 = 0;
-static mrb_int cst_MODULE_ENV_GEN_2 = 0;
-static mrb_int cst_MODULE_LFO_1 = 0;
-static mrb_int cst_MODULE_LFO_2 = 0;
-static mrb_int cst_MODULE_OSC_1 = 0;
-static mrb_int cst_MODULE_OSC_2 = 0;
-static mrb_int cst_MODULE_FILTER_1 = 0;
-static mrb_int cst_MODULE_FILTER_2 = 0;
-static mrb_int cst_MODULE_AMP_1 = 0;
-static mrb_int cst_MODULE_AMP_2 = 0;
+static mrb_int cst_MODULE_LFO = 0;
+static mrb_int cst_MODULE_ENV_GEN = 0;
+static mrb_int cst_MODULE_OSC = 0;
+static mrb_int cst_MODULE_FILTER = 0;
+static mrb_int cst_MODULE_AMP = 0;
 static mrb_int cst_MODULE_MIXER_1 = 0;
 static mrb_int cst_MODULE_MIXER_2 = 0;
 static mrb_int cst_MODULE_MIXER_3 = 0;
 static mrb_int cst_MODULE_MIXER_4 = 0;
 static mrb_int cst_MODULE_MIXER_5 = 0;
-static mrb_int cst_MODULE_MIXER_6 = 0;
-static mrb_int cst_MODULE_MIXER_7 = 0;
-static mrb_int cst_MODULE_MIXER_8 = 0;
-static mrb_int cst_MODULE_MIXER_9 = 0;
-static mrb_int cst_MODULE_MIXER_10 = 0;
 static mrb_int cst_SIGNAL_NONE = 0;
 static mrb_int cst_SIGNAL_ONE = 0;
 static mrb_int cst_SIGNAL_HALF = 0;
 static mrb_int cst_SIGNAL_MINUS_HALF = 0;
 static mrb_int cst_SIGNAL_MINUS_ONE = 0;
-static mrb_int cst_SIGNAL_ENV_GEN_1_OUTPUT = 0;
-static mrb_int cst_SIGNAL_ENV_GEN_2_OUTPUT = 0;
-static mrb_int cst_SIGNAL_LFO_1_OUTPUT = 0;
-static mrb_int cst_SIGNAL_LFO_2_OUTPUT = 0;
-static mrb_int cst_SIGNAL_OSC_1_OUTPUT = 0;
-static mrb_int cst_SIGNAL_OSC_2_OUTPUT = 0;
-static mrb_int cst_SIGNAL_FILTER_1_OUTPUT = 0;
-static mrb_int cst_SIGNAL_FILTER_2_OUTPUT = 0;
-static mrb_int cst_SIGNAL_AMP_1_OUTPUT = 0;
-static mrb_int cst_SIGNAL_AMP_2_OUTPUT = 0;
+static mrb_int cst_SIGNAL_LFO_OUTPUT = 0;
+static mrb_int cst_SIGNAL_ENV_GEN_OUTPUT = 0;
+static mrb_int cst_SIGNAL_OSC_OUTPUT = 0;
+static mrb_int cst_SIGNAL_FILTER_OUTPUT = 0;
+static mrb_int cst_SIGNAL_AMP_OUTPUT = 0;
 static mrb_int cst_SIGNAL_MIXER_1_OUTPUT = 0;
 static mrb_int cst_SIGNAL_MIXER_2_OUTPUT = 0;
 static mrb_int cst_SIGNAL_MIXER_3_OUTPUT = 0;
 static mrb_int cst_SIGNAL_MIXER_4_OUTPUT = 0;
 static mrb_int cst_SIGNAL_MIXER_5_OUTPUT = 0;
-static mrb_int cst_SIGNAL_MIXER_6_OUTPUT = 0;
-static mrb_int cst_SIGNAL_MIXER_7_OUTPUT = 0;
-static mrb_int cst_SIGNAL_MIXER_8_OUTPUT = 0;
-static mrb_int cst_SIGNAL_MIXER_9_OUTPUT = 0;
-static mrb_int cst_SIGNAL_MIXER_10_OUTPUT = 0;
-static mrb_int cst_SIGNAL_OSC_1_WAVEFORM = 0;
-static mrb_int cst_SIGNAL_OSC_1_MOD_AMOUNT = 0;
-static mrb_int cst_SIGNAL_OSC_1_COARSE_TUNE = 0;
-static mrb_int cst_SIGNAL_OSC_1_FINE_TUNE = 0;
-static mrb_int cst_SIGNAL_OSC_2_WAVEFORM = 0;
-static mrb_int cst_SIGNAL_OSC_2_MOD_AMOUNT = 0;
-static mrb_int cst_SIGNAL_OSC_2_COARSE_TUNE = 0;
-static mrb_int cst_SIGNAL_OSC_2_FINE_TUNE = 0;
-static mrb_int cst_SIGNAL_FILTER_1_CUTOFF = 0;
-static mrb_int cst_SIGNAL_FILTER_1_RESONANCE = 0;
-static mrb_int cst_SIGNAL_FILTER_1_MOD_AMOUNT = 0;
-static mrb_int cst_SIGNAL_FILTER_1_GAIN = 0;
-static mrb_int cst_SIGNAL_FILTER_2_CUTOFF = 0;
-static mrb_int cst_SIGNAL_FILTER_2_RESONANCE = 0;
-static mrb_int cst_SIGNAL_FILTER_2_MOD_AMOUNT = 0;
-static mrb_int cst_SIGNAL_FILTER_2_GAIN = 0;
-static mrb_int cst_SIGNAL_AMP_1_GAIN = 0;
-static mrb_int cst_SIGNAL_AMP_2_GAIN = 0;
-static mrb_int cst_SIGNAL_ENV_GEN_1_ATTACK = 0;
-static mrb_int cst_SIGNAL_ENV_GEN_1_DECAY = 0;
-static mrb_int cst_SIGNAL_ENV_GEN_1_SUSTAIN = 0;
-static mrb_int cst_SIGNAL_ENV_GEN_2_ATTACK = 0;
-static mrb_int cst_SIGNAL_ENV_GEN_2_DECAY = 0;
-static mrb_int cst_SIGNAL_ENV_GEN_2_SUSTAIN = 0;
-static mrb_int cst_SIGNAL_LFO_1_RATE = 0;
-static mrb_int cst_SIGNAL_LFO_2_RATE = 0;
+static mrb_int cst_SIGNAL_OSC_WAVEFORM = 0;
+static mrb_int cst_SIGNAL_OSC_MOD_AMOUNT = 0;
+static mrb_int cst_SIGNAL_OSC_COARSE_TUNE = 0;
+static mrb_int cst_SIGNAL_OSC_FINE_TUNE = 0;
+static mrb_int cst_SIGNAL_FILTER_CUTOFF = 0;
+static mrb_int cst_SIGNAL_FILTER_RESONANCE = 0;
+static mrb_int cst_SIGNAL_FILTER_MOD_AMOUNT = 0;
+static mrb_int cst_SIGNAL_FILTER_GAIN = 0;
+static mrb_int cst_SIGNAL_AMP_GAIN = 0;
+static mrb_int cst_SIGNAL_ENV_GEN_ATTACK = 0;
+static mrb_int cst_SIGNAL_ENV_GEN_DECAY = 0;
+static mrb_int cst_SIGNAL_ENV_GEN_SUSTAIN = 0;
+static mrb_int cst_SIGNAL_LFO_RATE = 0;
 static mrb_int cst_SIGNAL_MIXER_1_LEVEL_1 = 0;
 static mrb_int cst_SIGNAL_MIXER_1_INVERT_1 = 0;
 static mrb_int cst_SIGNAL_MIXER_1_LEVEL_2 = 0;
@@ -541,46 +508,19 @@ static mrb_int cst_SIGNAL_MIXER_5_LEVEL_1 = 0;
 static mrb_int cst_SIGNAL_MIXER_5_INVERT_1 = 0;
 static mrb_int cst_SIGNAL_MIXER_5_LEVEL_2 = 0;
 static mrb_int cst_SIGNAL_MIXER_5_INVERT_2 = 0;
-static mrb_int cst_SIGNAL_MIXER_6_LEVEL_1 = 0;
-static mrb_int cst_SIGNAL_MIXER_6_INVERT_1 = 0;
-static mrb_int cst_SIGNAL_MIXER_6_LEVEL_2 = 0;
-static mrb_int cst_SIGNAL_MIXER_6_INVERT_2 = 0;
-static mrb_int cst_SIGNAL_MIXER_7_LEVEL_1 = 0;
-static mrb_int cst_SIGNAL_MIXER_7_INVERT_1 = 0;
-static mrb_int cst_SIGNAL_MIXER_7_LEVEL_2 = 0;
-static mrb_int cst_SIGNAL_MIXER_7_INVERT_2 = 0;
-static mrb_int cst_SIGNAL_MIXER_8_LEVEL_1 = 0;
-static mrb_int cst_SIGNAL_MIXER_8_INVERT_1 = 0;
-static mrb_int cst_SIGNAL_MIXER_8_LEVEL_2 = 0;
-static mrb_int cst_SIGNAL_MIXER_8_INVERT_2 = 0;
-static mrb_int cst_SIGNAL_MIXER_9_LEVEL_1 = 0;
-static mrb_int cst_SIGNAL_MIXER_9_INVERT_1 = 0;
-static mrb_int cst_SIGNAL_MIXER_9_LEVEL_2 = 0;
-static mrb_int cst_SIGNAL_MIXER_9_INVERT_2 = 0;
-static mrb_int cst_SIGNAL_MIXER_10_LEVEL_1 = 0;
-static mrb_int cst_SIGNAL_MIXER_10_INVERT_1 = 0;
-static mrb_int cst_SIGNAL_MIXER_10_LEVEL_2 = 0;
-static mrb_int cst_SIGNAL_MIXER_10_INVERT_2 = 0;
 static mrb_int cst_SIGNAL_PITCH = 0;
 static mrb_int cst_SIGNAL_GATE = 0;
 static mrb_int cst_SIGNAL_BEND = 0;
 static mrb_int cst_SIGNALS_SIZE = 0;
 static mrb_int cst_SIGNAL_SINK = 0;
 static mrb_int cst_NRPN_ACTIVE_MODULE_BASE = 0;
-static mrb_int cst_NRPN_SOURCE_ENV_GEN_1_GATE = 0;
-static mrb_int cst_NRPN_SOURCE_ENV_GEN_2_GATE = 0;
-static mrb_int cst_NRPN_SOURCE_OSC_1_PITCH = 0;
-static mrb_int cst_NRPN_SOURCE_OSC_1_MOD = 0;
-static mrb_int cst_NRPN_SOURCE_OSC_2_PITCH = 0;
-static mrb_int cst_NRPN_SOURCE_OSC_2_MOD = 0;
-static mrb_int cst_NRPN_SOURCE_FILTER_1_AUDIO = 0;
-static mrb_int cst_NRPN_SOURCE_FILTER_1_MOD = 0;
-static mrb_int cst_NRPN_SOURCE_FILTER_2_AUDIO = 0;
-static mrb_int cst_NRPN_SOURCE_FILTER_2_MOD = 0;
-static mrb_int cst_NRPN_SOURCE_AMP_1_AUDIO = 0;
-static mrb_int cst_NRPN_SOURCE_AMP_1_MOD = 0;
-static mrb_int cst_NRPN_SOURCE_AMP_2_AUDIO = 0;
-static mrb_int cst_NRPN_SOURCE_AMP_2_MOD = 0;
+static mrb_int cst_NRPN_SOURCE_ENV_GEN_GATE = 0;
+static mrb_int cst_NRPN_SOURCE_OSC_PITCH = 0;
+static mrb_int cst_NRPN_SOURCE_OSC_MOD = 0;
+static mrb_int cst_NRPN_SOURCE_FILTER_AUDIO = 0;
+static mrb_int cst_NRPN_SOURCE_FILTER_MOD = 0;
+static mrb_int cst_NRPN_SOURCE_AMP_AUDIO = 0;
+static mrb_int cst_NRPN_SOURCE_AMP_MOD = 0;
 static mrb_int cst_NRPN_SOURCE_MIXER_1_IN_1 = 0;
 static mrb_int cst_NRPN_SOURCE_MIXER_1_IN_2 = 0;
 static mrb_int cst_NRPN_SOURCE_MIXER_2_IN_1 = 0;
@@ -591,43 +531,20 @@ static mrb_int cst_NRPN_SOURCE_MIXER_4_IN_1 = 0;
 static mrb_int cst_NRPN_SOURCE_MIXER_4_IN_2 = 0;
 static mrb_int cst_NRPN_SOURCE_MIXER_5_IN_1 = 0;
 static mrb_int cst_NRPN_SOURCE_MIXER_5_IN_2 = 0;
-static mrb_int cst_NRPN_SOURCE_MIXER_6_IN_1 = 0;
-static mrb_int cst_NRPN_SOURCE_MIXER_6_IN_2 = 0;
-static mrb_int cst_NRPN_SOURCE_MIXER_7_IN_1 = 0;
-static mrb_int cst_NRPN_SOURCE_MIXER_7_IN_2 = 0;
-static mrb_int cst_NRPN_SOURCE_MIXER_8_IN_1 = 0;
-static mrb_int cst_NRPN_SOURCE_MIXER_8_IN_2 = 0;
-static mrb_int cst_NRPN_SOURCE_MIXER_9_IN_1 = 0;
-static mrb_int cst_NRPN_SOURCE_MIXER_9_IN_2 = 0;
-static mrb_int cst_NRPN_SOURCE_MIXER_10_IN_1 = 0;
-static mrb_int cst_NRPN_SOURCE_MIXER_10_IN_2 = 0;
 static mrb_int cst_NRPN_SOURCE_OUTPUT = 0;
-static mrb_int cst_NRPN_SOURCE_OSC_1_WAVEFORM = 0;
-static mrb_int cst_NRPN_SOURCE_OSC_1_MOD_AMOUNT = 0;
-static mrb_int cst_NRPN_SOURCE_OSC_1_COARSE_TUNE = 0;
-static mrb_int cst_NRPN_SOURCE_OSC_1_FINE_TUNE = 0;
-static mrb_int cst_NRPN_SOURCE_OSC_2_WAVEFORM = 0;
-static mrb_int cst_NRPN_SOURCE_OSC_2_MOD_AMOUNT = 0;
-static mrb_int cst_NRPN_SOURCE_OSC_2_COARSE_TUNE = 0;
-static mrb_int cst_NRPN_SOURCE_OSC_2_FINE_TUNE = 0;
-static mrb_int cst_NRPN_SOURCE_FILTER_1_CUTOFF = 0;
-static mrb_int cst_NRPN_SOURCE_FILTER_1_RESONANCE = 0;
-static mrb_int cst_NRPN_SOURCE_FILTER_1_MOD_AMOUNT = 0;
-static mrb_int cst_NRPN_SOURCE_FILTER_1_GAIN = 0;
-static mrb_int cst_NRPN_SOURCE_FILTER_2_CUTOFF = 0;
-static mrb_int cst_NRPN_SOURCE_FILTER_2_RESONANCE = 0;
-static mrb_int cst_NRPN_SOURCE_FILTER_2_MOD_AMOUNT = 0;
-static mrb_int cst_NRPN_SOURCE_FILTER_2_GAIN = 0;
-static mrb_int cst_NRPN_SOURCE_AMP_1_GAIN = 0;
-static mrb_int cst_NRPN_SOURCE_AMP_2_GAIN = 0;
-static mrb_int cst_NRPN_SOURCE_ENV_GEN_1_ATTACK = 0;
-static mrb_int cst_NRPN_SOURCE_ENV_GEN_1_DECAY = 0;
-static mrb_int cst_NRPN_SOURCE_ENV_GEN_1_SUSTAIN = 0;
-static mrb_int cst_NRPN_SOURCE_ENV_GEN_2_ATTACK = 0;
-static mrb_int cst_NRPN_SOURCE_ENV_GEN_2_DECAY = 0;
-static mrb_int cst_NRPN_SOURCE_ENV_GEN_2_SUSTAIN = 0;
-static mrb_int cst_NRPN_SOURCE_LFO_1_RATE = 0;
-static mrb_int cst_NRPN_SOURCE_LFO_2_RATE = 0;
+static mrb_int cst_NRPN_SOURCE_OSC_WAVEFORM = 0;
+static mrb_int cst_NRPN_SOURCE_OSC_MOD_AMOUNT = 0;
+static mrb_int cst_NRPN_SOURCE_OSC_COARSE_TUNE = 0;
+static mrb_int cst_NRPN_SOURCE_OSC_FINE_TUNE = 0;
+static mrb_int cst_NRPN_SOURCE_FILTER_CUTOFF = 0;
+static mrb_int cst_NRPN_SOURCE_FILTER_RESONANCE = 0;
+static mrb_int cst_NRPN_SOURCE_FILTER_MOD_AMOUNT = 0;
+static mrb_int cst_NRPN_SOURCE_FILTER_GAIN = 0;
+static mrb_int cst_NRPN_SOURCE_AMP_GAIN = 0;
+static mrb_int cst_NRPN_SOURCE_ENV_GEN_ATTACK = 0;
+static mrb_int cst_NRPN_SOURCE_ENV_GEN_DECAY = 0;
+static mrb_int cst_NRPN_SOURCE_ENV_GEN_SUSTAIN = 0;
+static mrb_int cst_NRPN_SOURCE_LFO_RATE = 0;
 static mrb_int cst_NRPN_SOURCE_MIXER_1_LEVEL_1 = 0;
 static mrb_int cst_NRPN_SOURCE_MIXER_1_INVERT_1 = 0;
 static mrb_int cst_NRPN_SOURCE_MIXER_1_LEVEL_2 = 0;
@@ -648,52 +565,19 @@ static mrb_int cst_NRPN_SOURCE_MIXER_5_LEVEL_1 = 0;
 static mrb_int cst_NRPN_SOURCE_MIXER_5_INVERT_1 = 0;
 static mrb_int cst_NRPN_SOURCE_MIXER_5_LEVEL_2 = 0;
 static mrb_int cst_NRPN_SOURCE_MIXER_5_INVERT_2 = 0;
-static mrb_int cst_NRPN_SOURCE_MIXER_6_LEVEL_1 = 0;
-static mrb_int cst_NRPN_SOURCE_MIXER_6_INVERT_1 = 0;
-static mrb_int cst_NRPN_SOURCE_MIXER_6_LEVEL_2 = 0;
-static mrb_int cst_NRPN_SOURCE_MIXER_6_INVERT_2 = 0;
-static mrb_int cst_NRPN_SOURCE_MIXER_7_LEVEL_1 = 0;
-static mrb_int cst_NRPN_SOURCE_MIXER_7_INVERT_1 = 0;
-static mrb_int cst_NRPN_SOURCE_MIXER_7_LEVEL_2 = 0;
-static mrb_int cst_NRPN_SOURCE_MIXER_7_INVERT_2 = 0;
-static mrb_int cst_NRPN_SOURCE_MIXER_8_LEVEL_1 = 0;
-static mrb_int cst_NRPN_SOURCE_MIXER_8_INVERT_1 = 0;
-static mrb_int cst_NRPN_SOURCE_MIXER_8_LEVEL_2 = 0;
-static mrb_int cst_NRPN_SOURCE_MIXER_8_INVERT_2 = 0;
-static mrb_int cst_NRPN_SOURCE_MIXER_9_LEVEL_1 = 0;
-static mrb_int cst_NRPN_SOURCE_MIXER_9_INVERT_1 = 0;
-static mrb_int cst_NRPN_SOURCE_MIXER_9_LEVEL_2 = 0;
-static mrb_int cst_NRPN_SOURCE_MIXER_9_INVERT_2 = 0;
-static mrb_int cst_NRPN_SOURCE_MIXER_10_LEVEL_1 = 0;
-static mrb_int cst_NRPN_SOURCE_MIXER_10_INVERT_1 = 0;
-static mrb_int cst_NRPN_SOURCE_MIXER_10_LEVEL_2 = 0;
-static mrb_int cst_NRPN_SOURCE_MIXER_10_INVERT_2 = 0;
-static mrb_int cst_NRPN_CC_OSC_1_WAVEFORM = 0;
-static mrb_int cst_NRPN_CC_OSC_1_MOD_AMOUNT = 0;
-static mrb_int cst_NRPN_CC_OSC_1_COARSE_TUNE = 0;
-static mrb_int cst_NRPN_CC_OSC_1_FINE_TUNE = 0;
-static mrb_int cst_NRPN_CC_OSC_2_WAVEFORM = 0;
-static mrb_int cst_NRPN_CC_OSC_2_MOD_AMOUNT = 0;
-static mrb_int cst_NRPN_CC_OSC_2_COARSE_TUNE = 0;
-static mrb_int cst_NRPN_CC_OSC_2_FINE_TUNE = 0;
-static mrb_int cst_NRPN_CC_FILTER_1_CUTOFF = 0;
-static mrb_int cst_NRPN_CC_FILTER_1_RESONANCE = 0;
-static mrb_int cst_NRPN_CC_FILTER_1_MOD_AMOUNT = 0;
-static mrb_int cst_NRPN_CC_FILTER_1_GAIN = 0;
-static mrb_int cst_NRPN_CC_FILTER_2_CUTOFF = 0;
-static mrb_int cst_NRPN_CC_FILTER_2_RESONANCE = 0;
-static mrb_int cst_NRPN_CC_FILTER_2_MOD_AMOUNT = 0;
-static mrb_int cst_NRPN_CC_FILTER_2_GAIN = 0;
-static mrb_int cst_NRPN_CC_AMP_1_GAIN = 0;
-static mrb_int cst_NRPN_CC_AMP_2_GAIN = 0;
-static mrb_int cst_NRPN_CC_ENV_GEN_1_ATTACK = 0;
-static mrb_int cst_NRPN_CC_ENV_GEN_1_DECAY = 0;
-static mrb_int cst_NRPN_CC_ENV_GEN_1_SUSTAIN = 0;
-static mrb_int cst_NRPN_CC_ENV_GEN_2_ATTACK = 0;
-static mrb_int cst_NRPN_CC_ENV_GEN_2_DECAY = 0;
-static mrb_int cst_NRPN_CC_ENV_GEN_2_SUSTAIN = 0;
-static mrb_int cst_NRPN_CC_LFO_1_RATE = 0;
-static mrb_int cst_NRPN_CC_LFO_2_RATE = 0;
+static mrb_int cst_NRPN_CC_OSC_WAVEFORM = 0;
+static mrb_int cst_NRPN_CC_OSC_MOD_AMOUNT = 0;
+static mrb_int cst_NRPN_CC_OSC_COARSE_TUNE = 0;
+static mrb_int cst_NRPN_CC_OSC_FINE_TUNE = 0;
+static mrb_int cst_NRPN_CC_FILTER_CUTOFF = 0;
+static mrb_int cst_NRPN_CC_FILTER_RESONANCE = 0;
+static mrb_int cst_NRPN_CC_FILTER_MOD_AMOUNT = 0;
+static mrb_int cst_NRPN_CC_FILTER_GAIN = 0;
+static mrb_int cst_NRPN_CC_AMP_GAIN = 0;
+static mrb_int cst_NRPN_CC_ENV_GEN_ATTACK = 0;
+static mrb_int cst_NRPN_CC_ENV_GEN_DECAY = 0;
+static mrb_int cst_NRPN_CC_ENV_GEN_SUSTAIN = 0;
+static mrb_int cst_NRPN_CC_LFO_RATE = 0;
 static mrb_int cst_NRPN_CC_MIXER_1_LEVEL_1 = 0;
 static mrb_int cst_NRPN_CC_MIXER_1_INVERT_1 = 0;
 static mrb_int cst_NRPN_CC_MIXER_1_LEVEL_2 = 0;
@@ -714,26 +598,6 @@ static mrb_int cst_NRPN_CC_MIXER_5_LEVEL_1 = 0;
 static mrb_int cst_NRPN_CC_MIXER_5_INVERT_1 = 0;
 static mrb_int cst_NRPN_CC_MIXER_5_LEVEL_2 = 0;
 static mrb_int cst_NRPN_CC_MIXER_5_INVERT_2 = 0;
-static mrb_int cst_NRPN_CC_MIXER_6_LEVEL_1 = 0;
-static mrb_int cst_NRPN_CC_MIXER_6_INVERT_1 = 0;
-static mrb_int cst_NRPN_CC_MIXER_6_LEVEL_2 = 0;
-static mrb_int cst_NRPN_CC_MIXER_6_INVERT_2 = 0;
-static mrb_int cst_NRPN_CC_MIXER_7_LEVEL_1 = 0;
-static mrb_int cst_NRPN_CC_MIXER_7_INVERT_1 = 0;
-static mrb_int cst_NRPN_CC_MIXER_7_LEVEL_2 = 0;
-static mrb_int cst_NRPN_CC_MIXER_7_INVERT_2 = 0;
-static mrb_int cst_NRPN_CC_MIXER_8_LEVEL_1 = 0;
-static mrb_int cst_NRPN_CC_MIXER_8_INVERT_1 = 0;
-static mrb_int cst_NRPN_CC_MIXER_8_LEVEL_2 = 0;
-static mrb_int cst_NRPN_CC_MIXER_8_INVERT_2 = 0;
-static mrb_int cst_NRPN_CC_MIXER_9_LEVEL_1 = 0;
-static mrb_int cst_NRPN_CC_MIXER_9_INVERT_1 = 0;
-static mrb_int cst_NRPN_CC_MIXER_9_LEVEL_2 = 0;
-static mrb_int cst_NRPN_CC_MIXER_9_INVERT_2 = 0;
-static mrb_int cst_NRPN_CC_MIXER_10_LEVEL_1 = 0;
-static mrb_int cst_NRPN_CC_MIXER_10_INVERT_1 = 0;
-static mrb_int cst_NRPN_CC_MIXER_10_LEVEL_2 = 0;
-static mrb_int cst_NRPN_CC_MIXER_10_INVERT_2 = 0;
 
 static void sp_mark_user_globals(void) {
   sp_re_mark_globals();
@@ -1737,13 +1601,13 @@ static mrb_float sp_Mixer_process(sp_Mixer *self, mrb_float lv_input_1, mrb_floa
   return ((lv_input_1 * self->iv_current_1) + (lv_input_2 * self->iv_current_2));
   return 0.0;
 }
-#line 390 "spms1_main.rb"
+#line 255 "spms1_main.rb"
 static mrb_float sp_cc_to_ratio(mrb_int lv_value) {
     SP_GC_SAVE();
     mrb_float lv_scaled = 0.0;
-#line 391 "spms1_main.rb"
+#line 256 "spms1_main.rb"
   lv_scaled = (((((mrb_float)(lv_value)) - 4.0)) * ((1.0 / 120.0)));
-#line 392 "spms1_main.rb"
+#line 257 "spms1_main.rb"
   if (((lv_scaled < 0.0))) {
     return 0.0;
   }
@@ -1752,10 +1616,10 @@ static mrb_float sp_cc_to_ratio(mrb_int lv_value) {
   }
   return 0.0;
 }
-#line 398 "spms1_main.rb"
+#line 263 "spms1_main.rb"
 static mrb_int sp_cc_slot(mrb_int lv_cc_number, mrb_int lv_slot) {
     SP_GC_SAVE();
-#line 399 "spms1_main.rb"
+#line 264 "spms1_main.rb"
   if (((lv_cc_number == 0LL))) {
     return cst_SIGNAL_SINK;
   }
@@ -1768,26 +1632,16 @@ int main(int argc,char**argv){
     SP_GC_SAVE();
     sp_re_init();
     volatile mrb_int lv_i = 0;
-    sp_EnvGen * lv_env_gen_1 = NULL;
-    SP_GC_ROOT(lv_env_gen_1);
-    sp_EnvGen * lv_env_gen_2 = NULL;
-    SP_GC_ROOT(lv_env_gen_2);
-    sp_LFO * lv_lfo_1 = NULL;
-    SP_GC_ROOT(lv_lfo_1);
-    sp_LFO * lv_lfo_2 = NULL;
-    SP_GC_ROOT(lv_lfo_2);
-    sp_Osc * lv_osc_1 = NULL;
-    SP_GC_ROOT(lv_osc_1);
-    sp_Osc * lv_osc_2 = NULL;
-    SP_GC_ROOT(lv_osc_2);
-    sp_Filter * lv_filter_1 = NULL;
-    SP_GC_ROOT(lv_filter_1);
-    sp_Filter * lv_filter_2 = NULL;
-    SP_GC_ROOT(lv_filter_2);
-    sp_Amp * lv_amp_1 = NULL;
-    SP_GC_ROOT(lv_amp_1);
-    sp_Amp * lv_amp_2 = NULL;
-    SP_GC_ROOT(lv_amp_2);
+    sp_LFO * lv_lfo = NULL;
+    SP_GC_ROOT(lv_lfo);
+    sp_EnvGen * lv_env_gen = NULL;
+    SP_GC_ROOT(lv_env_gen);
+    sp_Osc * lv_osc = NULL;
+    SP_GC_ROOT(lv_osc);
+    sp_Filter * lv_filter = NULL;
+    SP_GC_ROOT(lv_filter);
+    sp_Amp * lv_amp = NULL;
+    SP_GC_ROOT(lv_amp);
     sp_Mixer * lv_mixer_1 = NULL;
     SP_GC_ROOT(lv_mixer_1);
     sp_Mixer * lv_mixer_2 = NULL;
@@ -1798,16 +1652,6 @@ int main(int argc,char**argv){
     SP_GC_ROOT(lv_mixer_4);
     sp_Mixer * lv_mixer_5 = NULL;
     SP_GC_ROOT(lv_mixer_5);
-    sp_Mixer * lv_mixer_6 = NULL;
-    SP_GC_ROOT(lv_mixer_6);
-    sp_Mixer * lv_mixer_7 = NULL;
-    SP_GC_ROOT(lv_mixer_7);
-    sp_Mixer * lv_mixer_8 = NULL;
-    SP_GC_ROOT(lv_mixer_8);
-    sp_Mixer * lv_mixer_9 = NULL;
-    SP_GC_ROOT(lv_mixer_9);
-    sp_Mixer * lv_mixer_10 = NULL;
-    SP_GC_ROOT(lv_mixer_10);
     sp_IntArray * lv_active_modules = NULL;
     SP_GC_ROOT(lv_active_modules);
     sp_FloatArray * lv_audio_buffer = NULL;
@@ -1815,20 +1659,13 @@ int main(int argc,char**argv){
     sp_FloatArray * lv_signals = NULL;
     SP_GC_ROOT(lv_signals);
     volatile mrb_int lv_slot = 0;
-    volatile mrb_int lv_source_env_gen_1_gate = 0;
-    volatile mrb_int lv_source_env_gen_2_gate = 0;
-    volatile mrb_int lv_source_osc_1_pitch = 0;
-    volatile mrb_int lv_source_osc_1_mod = 0;
-    volatile mrb_int lv_source_osc_2_pitch = 0;
-    volatile mrb_int lv_source_osc_2_mod = 0;
-    volatile mrb_int lv_source_filter_1_audio = 0;
-    volatile mrb_int lv_source_filter_1_mod = 0;
-    volatile mrb_int lv_source_filter_2_audio = 0;
-    volatile mrb_int lv_source_filter_2_mod = 0;
-    volatile mrb_int lv_source_amp_1_audio = 0;
-    volatile mrb_int lv_source_amp_1_mod = 0;
-    volatile mrb_int lv_source_amp_2_audio = 0;
-    volatile mrb_int lv_source_amp_2_mod = 0;
+    volatile mrb_int lv_source_env_gen_gate = 0;
+    volatile mrb_int lv_source_osc_pitch = 0;
+    volatile mrb_int lv_source_osc_mod = 0;
+    volatile mrb_int lv_source_filter_audio = 0;
+    volatile mrb_int lv_source_filter_mod = 0;
+    volatile mrb_int lv_source_amp_audio = 0;
+    volatile mrb_int lv_source_amp_mod = 0;
     volatile mrb_int lv_source_mixer_1_in_1 = 0;
     volatile mrb_int lv_source_mixer_1_in_2 = 0;
     volatile mrb_int lv_source_mixer_2_in_1 = 0;
@@ -1839,43 +1676,20 @@ int main(int argc,char**argv){
     volatile mrb_int lv_source_mixer_4_in_2 = 0;
     volatile mrb_int lv_source_mixer_5_in_1 = 0;
     volatile mrb_int lv_source_mixer_5_in_2 = 0;
-    volatile mrb_int lv_source_mixer_6_in_1 = 0;
-    volatile mrb_int lv_source_mixer_6_in_2 = 0;
-    volatile mrb_int lv_source_mixer_7_in_1 = 0;
-    volatile mrb_int lv_source_mixer_7_in_2 = 0;
-    volatile mrb_int lv_source_mixer_8_in_1 = 0;
-    volatile mrb_int lv_source_mixer_8_in_2 = 0;
-    volatile mrb_int lv_source_mixer_9_in_1 = 0;
-    volatile mrb_int lv_source_mixer_9_in_2 = 0;
-    volatile mrb_int lv_source_mixer_10_in_1 = 0;
-    volatile mrb_int lv_source_mixer_10_in_2 = 0;
     volatile mrb_int lv_source_output = 0;
-    volatile mrb_int lv_source_osc_1_waveform = 0;
-    volatile mrb_int lv_source_osc_1_mod_amount = 0;
-    volatile mrb_int lv_source_osc_1_coarse_tune = 0;
-    volatile mrb_int lv_source_osc_1_fine_tune = 0;
-    volatile mrb_int lv_source_osc_2_waveform = 0;
-    volatile mrb_int lv_source_osc_2_mod_amount = 0;
-    volatile mrb_int lv_source_osc_2_coarse_tune = 0;
-    volatile mrb_int lv_source_osc_2_fine_tune = 0;
-    volatile mrb_int lv_source_filter_1_cutoff = 0;
-    volatile mrb_int lv_source_filter_1_resonance = 0;
-    volatile mrb_int lv_source_filter_1_mod_amount = 0;
-    volatile mrb_int lv_source_filter_1_gain = 0;
-    volatile mrb_int lv_source_filter_2_cutoff = 0;
-    volatile mrb_int lv_source_filter_2_resonance = 0;
-    volatile mrb_int lv_source_filter_2_mod_amount = 0;
-    volatile mrb_int lv_source_filter_2_gain = 0;
-    volatile mrb_int lv_source_amp_1_gain = 0;
-    volatile mrb_int lv_source_amp_2_gain = 0;
-    volatile mrb_int lv_source_env_gen_1_attack = 0;
-    volatile mrb_int lv_source_env_gen_1_decay = 0;
-    volatile mrb_int lv_source_env_gen_1_sustain = 0;
-    volatile mrb_int lv_source_env_gen_2_attack = 0;
-    volatile mrb_int lv_source_env_gen_2_decay = 0;
-    volatile mrb_int lv_source_env_gen_2_sustain = 0;
-    volatile mrb_int lv_source_lfo_1_rate = 0;
-    volatile mrb_int lv_source_lfo_2_rate = 0;
+    volatile mrb_int lv_source_osc_waveform = 0;
+    volatile mrb_int lv_source_osc_mod_amount = 0;
+    volatile mrb_int lv_source_osc_coarse_tune = 0;
+    volatile mrb_int lv_source_osc_fine_tune = 0;
+    volatile mrb_int lv_source_filter_cutoff = 0;
+    volatile mrb_int lv_source_filter_resonance = 0;
+    volatile mrb_int lv_source_filter_mod_amount = 0;
+    volatile mrb_int lv_source_filter_gain = 0;
+    volatile mrb_int lv_source_amp_gain = 0;
+    volatile mrb_int lv_source_env_gen_attack = 0;
+    volatile mrb_int lv_source_env_gen_decay = 0;
+    volatile mrb_int lv_source_env_gen_sustain = 0;
+    volatile mrb_int lv_source_lfo_rate = 0;
     volatile mrb_int lv_source_mixer_1_level_1 = 0;
     volatile mrb_int lv_source_mixer_1_invert_1 = 0;
     volatile mrb_int lv_source_mixer_1_level_2 = 0;
@@ -1896,52 +1710,19 @@ int main(int argc,char**argv){
     volatile mrb_int lv_source_mixer_5_invert_1 = 0;
     volatile mrb_int lv_source_mixer_5_level_2 = 0;
     volatile mrb_int lv_source_mixer_5_invert_2 = 0;
-    volatile mrb_int lv_source_mixer_6_level_1 = 0;
-    volatile mrb_int lv_source_mixer_6_invert_1 = 0;
-    volatile mrb_int lv_source_mixer_6_level_2 = 0;
-    volatile mrb_int lv_source_mixer_6_invert_2 = 0;
-    volatile mrb_int lv_source_mixer_7_level_1 = 0;
-    volatile mrb_int lv_source_mixer_7_invert_1 = 0;
-    volatile mrb_int lv_source_mixer_7_level_2 = 0;
-    volatile mrb_int lv_source_mixer_7_invert_2 = 0;
-    volatile mrb_int lv_source_mixer_8_level_1 = 0;
-    volatile mrb_int lv_source_mixer_8_invert_1 = 0;
-    volatile mrb_int lv_source_mixer_8_level_2 = 0;
-    volatile mrb_int lv_source_mixer_8_invert_2 = 0;
-    volatile mrb_int lv_source_mixer_9_level_1 = 0;
-    volatile mrb_int lv_source_mixer_9_invert_1 = 0;
-    volatile mrb_int lv_source_mixer_9_level_2 = 0;
-    volatile mrb_int lv_source_mixer_9_invert_2 = 0;
-    volatile mrb_int lv_source_mixer_10_level_1 = 0;
-    volatile mrb_int lv_source_mixer_10_invert_1 = 0;
-    volatile mrb_int lv_source_mixer_10_level_2 = 0;
-    volatile mrb_int lv_source_mixer_10_invert_2 = 0;
-    volatile mrb_int lv_cc_osc_1_waveform = 0;
-    volatile mrb_int lv_cc_osc_1_mod_amount = 0;
-    volatile mrb_int lv_cc_osc_1_coarse_tune = 0;
-    volatile mrb_int lv_cc_osc_1_fine_tune = 0;
-    volatile mrb_int lv_cc_osc_2_waveform = 0;
-    volatile mrb_int lv_cc_osc_2_mod_amount = 0;
-    volatile mrb_int lv_cc_osc_2_coarse_tune = 0;
-    volatile mrb_int lv_cc_osc_2_fine_tune = 0;
-    volatile mrb_int lv_cc_filter_1_cutoff = 0;
-    volatile mrb_int lv_cc_filter_1_resonance = 0;
-    volatile mrb_int lv_cc_filter_1_mod_amount = 0;
-    volatile mrb_int lv_cc_filter_1_gain = 0;
-    volatile mrb_int lv_cc_filter_2_cutoff = 0;
-    volatile mrb_int lv_cc_filter_2_resonance = 0;
-    volatile mrb_int lv_cc_filter_2_mod_amount = 0;
-    volatile mrb_int lv_cc_filter_2_gain = 0;
-    volatile mrb_int lv_cc_amp_1_gain = 0;
-    volatile mrb_int lv_cc_amp_2_gain = 0;
-    volatile mrb_int lv_cc_env_gen_1_attack = 0;
-    volatile mrb_int lv_cc_env_gen_1_decay = 0;
-    volatile mrb_int lv_cc_env_gen_1_sustain = 0;
-    volatile mrb_int lv_cc_env_gen_2_attack = 0;
-    volatile mrb_int lv_cc_env_gen_2_decay = 0;
-    volatile mrb_int lv_cc_env_gen_2_sustain = 0;
-    volatile mrb_int lv_cc_lfo_1_rate = 0;
-    volatile mrb_int lv_cc_lfo_2_rate = 0;
+    volatile mrb_int lv_cc_osc_waveform = 0;
+    volatile mrb_int lv_cc_osc_mod_amount = 0;
+    volatile mrb_int lv_cc_osc_coarse_tune = 0;
+    volatile mrb_int lv_cc_osc_fine_tune = 0;
+    volatile mrb_int lv_cc_filter_cutoff = 0;
+    volatile mrb_int lv_cc_filter_resonance = 0;
+    volatile mrb_int lv_cc_filter_mod_amount = 0;
+    volatile mrb_int lv_cc_filter_gain = 0;
+    volatile mrb_int lv_cc_amp_gain = 0;
+    volatile mrb_int lv_cc_env_gen_attack = 0;
+    volatile mrb_int lv_cc_env_gen_decay = 0;
+    volatile mrb_int lv_cc_env_gen_sustain = 0;
+    volatile mrb_int lv_cc_lfo_rate = 0;
     volatile mrb_int lv_cc_mixer_1_level_1 = 0;
     volatile mrb_int lv_cc_mixer_1_invert_1 = 0;
     volatile mrb_int lv_cc_mixer_1_level_2 = 0;
@@ -1962,28 +1743,8 @@ int main(int argc,char**argv){
     volatile mrb_int lv_cc_mixer_5_invert_1 = 0;
     volatile mrb_int lv_cc_mixer_5_level_2 = 0;
     volatile mrb_int lv_cc_mixer_5_invert_2 = 0;
-    volatile mrb_int lv_cc_mixer_6_level_1 = 0;
-    volatile mrb_int lv_cc_mixer_6_invert_1 = 0;
-    volatile mrb_int lv_cc_mixer_6_level_2 = 0;
-    volatile mrb_int lv_cc_mixer_6_invert_2 = 0;
-    volatile mrb_int lv_cc_mixer_7_level_1 = 0;
-    volatile mrb_int lv_cc_mixer_7_invert_1 = 0;
-    volatile mrb_int lv_cc_mixer_7_level_2 = 0;
-    volatile mrb_int lv_cc_mixer_7_invert_2 = 0;
-    volatile mrb_int lv_cc_mixer_8_level_1 = 0;
-    volatile mrb_int lv_cc_mixer_8_invert_1 = 0;
-    volatile mrb_int lv_cc_mixer_8_level_2 = 0;
-    volatile mrb_int lv_cc_mixer_8_invert_2 = 0;
-    volatile mrb_int lv_cc_mixer_9_level_1 = 0;
-    volatile mrb_int lv_cc_mixer_9_invert_1 = 0;
-    volatile mrb_int lv_cc_mixer_9_level_2 = 0;
-    volatile mrb_int lv_cc_mixer_9_invert_2 = 0;
-    volatile mrb_int lv_cc_mixer_10_level_1 = 0;
-    volatile mrb_int lv_cc_mixer_10_invert_1 = 0;
-    volatile mrb_int lv_cc_mixer_10_level_2 = 0;
-    volatile mrb_int lv_cc_mixer_10_invert_2 = 0;
     volatile mrb_int lv_module_id = 0;
-    mrb_int lv_i__bp7405 = 0;
+    mrb_int lv_i__bp5236 = 0;
 
 #line 1 "spms1_osc.rb"
 #line 3 "spms1_osc.rb"
@@ -2141,998 +1902,575 @@ int main(int argc,char**argv){
   cst_AUDIO_BUFFER_WORDS = 64LL;
 #line 60 "spms1_main.rb"
   cst_MODULES_SIZE = 32LL;
-#line 65 "spms1_main.rb"
-  cst_MODULE_NONE = 0LL;
 #line 66 "spms1_main.rb"
-  cst_MODULE_ENV_GEN_1 = 1LL;
+  cst_MODULE_NONE = 0LL;
 #line 67 "spms1_main.rb"
-  cst_MODULE_ENV_GEN_2 = 2LL;
+  cst_MODULE_LFO = 1LL;
 #line 68 "spms1_main.rb"
-  cst_MODULE_LFO_1 = 3LL;
+  cst_MODULE_ENV_GEN = 2LL;
 #line 69 "spms1_main.rb"
-  cst_MODULE_LFO_2 = 4LL;
+  cst_MODULE_OSC = 3LL;
 #line 70 "spms1_main.rb"
-  cst_MODULE_OSC_1 = 5LL;
+  cst_MODULE_FILTER = 4LL;
 #line 71 "spms1_main.rb"
-  cst_MODULE_OSC_2 = 6LL;
+  cst_MODULE_AMP = 5LL;
 #line 72 "spms1_main.rb"
-  cst_MODULE_FILTER_1 = 7LL;
+  cst_MODULE_MIXER_1 = 6LL;
 #line 73 "spms1_main.rb"
-  cst_MODULE_FILTER_2 = 8LL;
+  cst_MODULE_MIXER_2 = 7LL;
 #line 74 "spms1_main.rb"
-  cst_MODULE_AMP_1 = 9LL;
+  cst_MODULE_MIXER_3 = 8LL;
 #line 75 "spms1_main.rb"
-  cst_MODULE_AMP_2 = 10LL;
+  cst_MODULE_MIXER_4 = 9LL;
 #line 76 "spms1_main.rb"
-  cst_MODULE_MIXER_1 = 11LL;
-#line 77 "spms1_main.rb"
-  cst_MODULE_MIXER_2 = 12LL;
-#line 78 "spms1_main.rb"
-  cst_MODULE_MIXER_3 = 13LL;
-#line 79 "spms1_main.rb"
-  cst_MODULE_MIXER_4 = 14LL;
-#line 80 "spms1_main.rb"
-  cst_MODULE_MIXER_5 = 15LL;
-#line 81 "spms1_main.rb"
-  cst_MODULE_MIXER_6 = 16LL;
-#line 82 "spms1_main.rb"
-  cst_MODULE_MIXER_7 = 17LL;
-#line 83 "spms1_main.rb"
-  cst_MODULE_MIXER_8 = 18LL;
-#line 84 "spms1_main.rb"
-  cst_MODULE_MIXER_9 = 19LL;
-#line 85 "spms1_main.rb"
-  cst_MODULE_MIXER_10 = 20LL;
-#line 98 "spms1_main.rb"
+  cst_MODULE_MIXER_5 = 10LL;
+#line 89 "spms1_main.rb"
   cst_SIGNAL_NONE = 0LL;
-#line 99 "spms1_main.rb"
+#line 90 "spms1_main.rb"
   cst_SIGNAL_ONE = 1LL;
-#line 100 "spms1_main.rb"
+#line 91 "spms1_main.rb"
   cst_SIGNAL_HALF = 2LL;
-#line 101 "spms1_main.rb"
+#line 92 "spms1_main.rb"
   cst_SIGNAL_MINUS_HALF = 3LL;
-#line 102 "spms1_main.rb"
+#line 93 "spms1_main.rb"
   cst_SIGNAL_MINUS_ONE = 4LL;
+#line 95 "spms1_main.rb"
+  cst_SIGNAL_LFO_OUTPUT = 5LL;
+#line 96 "spms1_main.rb"
+  cst_SIGNAL_ENV_GEN_OUTPUT = 6LL;
+#line 97 "spms1_main.rb"
+  cst_SIGNAL_OSC_OUTPUT = 7LL;
+#line 98 "spms1_main.rb"
+  cst_SIGNAL_FILTER_OUTPUT = 8LL;
+#line 99 "spms1_main.rb"
+  cst_SIGNAL_AMP_OUTPUT = 9LL;
+#line 100 "spms1_main.rb"
+  cst_SIGNAL_MIXER_1_OUTPUT = 10LL;
+#line 101 "spms1_main.rb"
+  cst_SIGNAL_MIXER_2_OUTPUT = 11LL;
+#line 102 "spms1_main.rb"
+  cst_SIGNAL_MIXER_3_OUTPUT = 12LL;
+#line 103 "spms1_main.rb"
+  cst_SIGNAL_MIXER_4_OUTPUT = 13LL;
 #line 104 "spms1_main.rb"
-  cst_SIGNAL_ENV_GEN_1_OUTPUT = 5LL;
-#line 105 "spms1_main.rb"
-  cst_SIGNAL_ENV_GEN_2_OUTPUT = 6LL;
+  cst_SIGNAL_MIXER_5_OUTPUT = 14LL;
 #line 106 "spms1_main.rb"
-  cst_SIGNAL_LFO_1_OUTPUT = 7LL;
+  cst_SIGNAL_OSC_WAVEFORM = 15LL;
 #line 107 "spms1_main.rb"
-  cst_SIGNAL_LFO_2_OUTPUT = 8LL;
+  cst_SIGNAL_OSC_MOD_AMOUNT = 16LL;
 #line 108 "spms1_main.rb"
-  cst_SIGNAL_OSC_1_OUTPUT = 9LL;
+  cst_SIGNAL_OSC_COARSE_TUNE = 17LL;
 #line 109 "spms1_main.rb"
-  cst_SIGNAL_OSC_2_OUTPUT = 10LL;
+  cst_SIGNAL_OSC_FINE_TUNE = 18LL;
 #line 110 "spms1_main.rb"
-  cst_SIGNAL_FILTER_1_OUTPUT = 11LL;
+  cst_SIGNAL_FILTER_CUTOFF = 19LL;
 #line 111 "spms1_main.rb"
-  cst_SIGNAL_FILTER_2_OUTPUT = 12LL;
+  cst_SIGNAL_FILTER_RESONANCE = 20LL;
 #line 112 "spms1_main.rb"
-  cst_SIGNAL_AMP_1_OUTPUT = 13LL;
+  cst_SIGNAL_FILTER_MOD_AMOUNT = 21LL;
 #line 113 "spms1_main.rb"
-  cst_SIGNAL_AMP_2_OUTPUT = 14LL;
+  cst_SIGNAL_FILTER_GAIN = 22LL;
 #line 114 "spms1_main.rb"
-  cst_SIGNAL_MIXER_1_OUTPUT = 15LL;
+  cst_SIGNAL_AMP_GAIN = 23LL;
 #line 115 "spms1_main.rb"
-  cst_SIGNAL_MIXER_2_OUTPUT = 16LL;
+  cst_SIGNAL_ENV_GEN_ATTACK = 24LL;
 #line 116 "spms1_main.rb"
-  cst_SIGNAL_MIXER_3_OUTPUT = 17LL;
+  cst_SIGNAL_ENV_GEN_DECAY = 25LL;
 #line 117 "spms1_main.rb"
-  cst_SIGNAL_MIXER_4_OUTPUT = 18LL;
+  cst_SIGNAL_ENV_GEN_SUSTAIN = 26LL;
 #line 118 "spms1_main.rb"
-  cst_SIGNAL_MIXER_5_OUTPUT = 19LL;
+  cst_SIGNAL_LFO_RATE = 27LL;
 #line 119 "spms1_main.rb"
-  cst_SIGNAL_MIXER_6_OUTPUT = 20LL;
+  cst_SIGNAL_MIXER_1_LEVEL_1 = 28LL;
 #line 120 "spms1_main.rb"
-  cst_SIGNAL_MIXER_7_OUTPUT = 21LL;
+  cst_SIGNAL_MIXER_1_INVERT_1 = 29LL;
 #line 121 "spms1_main.rb"
-  cst_SIGNAL_MIXER_8_OUTPUT = 22LL;
+  cst_SIGNAL_MIXER_1_LEVEL_2 = 30LL;
 #line 122 "spms1_main.rb"
-  cst_SIGNAL_MIXER_9_OUTPUT = 23LL;
+  cst_SIGNAL_MIXER_1_INVERT_2 = 31LL;
 #line 123 "spms1_main.rb"
-  cst_SIGNAL_MIXER_10_OUTPUT = 24LL;
+  cst_SIGNAL_MIXER_2_LEVEL_1 = 32LL;
+#line 124 "spms1_main.rb"
+  cst_SIGNAL_MIXER_2_INVERT_1 = 33LL;
 #line 125 "spms1_main.rb"
-  cst_SIGNAL_OSC_1_WAVEFORM = 25LL;
+  cst_SIGNAL_MIXER_2_LEVEL_2 = 34LL;
 #line 126 "spms1_main.rb"
-  cst_SIGNAL_OSC_1_MOD_AMOUNT = 26LL;
+  cst_SIGNAL_MIXER_2_INVERT_2 = 35LL;
 #line 127 "spms1_main.rb"
-  cst_SIGNAL_OSC_1_COARSE_TUNE = 27LL;
+  cst_SIGNAL_MIXER_3_LEVEL_1 = 36LL;
 #line 128 "spms1_main.rb"
-  cst_SIGNAL_OSC_1_FINE_TUNE = 28LL;
+  cst_SIGNAL_MIXER_3_INVERT_1 = 37LL;
 #line 129 "spms1_main.rb"
-  cst_SIGNAL_OSC_2_WAVEFORM = 29LL;
+  cst_SIGNAL_MIXER_3_LEVEL_2 = 38LL;
 #line 130 "spms1_main.rb"
-  cst_SIGNAL_OSC_2_MOD_AMOUNT = 30LL;
+  cst_SIGNAL_MIXER_3_INVERT_2 = 39LL;
 #line 131 "spms1_main.rb"
-  cst_SIGNAL_OSC_2_COARSE_TUNE = 31LL;
+  cst_SIGNAL_MIXER_4_LEVEL_1 = 40LL;
 #line 132 "spms1_main.rb"
-  cst_SIGNAL_OSC_2_FINE_TUNE = 32LL;
+  cst_SIGNAL_MIXER_4_INVERT_1 = 41LL;
 #line 133 "spms1_main.rb"
-  cst_SIGNAL_FILTER_1_CUTOFF = 33LL;
+  cst_SIGNAL_MIXER_4_LEVEL_2 = 42LL;
 #line 134 "spms1_main.rb"
-  cst_SIGNAL_FILTER_1_RESONANCE = 34LL;
+  cst_SIGNAL_MIXER_4_INVERT_2 = 43LL;
 #line 135 "spms1_main.rb"
-  cst_SIGNAL_FILTER_1_MOD_AMOUNT = 35LL;
+  cst_SIGNAL_MIXER_5_LEVEL_1 = 44LL;
 #line 136 "spms1_main.rb"
-  cst_SIGNAL_FILTER_1_GAIN = 36LL;
+  cst_SIGNAL_MIXER_5_INVERT_1 = 45LL;
 #line 137 "spms1_main.rb"
-  cst_SIGNAL_FILTER_2_CUTOFF = 37LL;
+  cst_SIGNAL_MIXER_5_LEVEL_2 = 46LL;
 #line 138 "spms1_main.rb"
-  cst_SIGNAL_FILTER_2_RESONANCE = 38LL;
-#line 139 "spms1_main.rb"
-  cst_SIGNAL_FILTER_2_MOD_AMOUNT = 39LL;
+  cst_SIGNAL_MIXER_5_INVERT_2 = 47LL;
 #line 140 "spms1_main.rb"
-  cst_SIGNAL_FILTER_2_GAIN = 40LL;
+  cst_SIGNAL_PITCH = 48LL;
 #line 141 "spms1_main.rb"
-  cst_SIGNAL_AMP_1_GAIN = 41LL;
+  cst_SIGNAL_GATE = 49LL;
 #line 142 "spms1_main.rb"
-  cst_SIGNAL_AMP_2_GAIN = 42LL;
-#line 143 "spms1_main.rb"
-  cst_SIGNAL_ENV_GEN_1_ATTACK = 43LL;
+  cst_SIGNAL_BEND = 50LL;
 #line 144 "spms1_main.rb"
-  cst_SIGNAL_ENV_GEN_1_DECAY = 44LL;
-#line 145 "spms1_main.rb"
-  cst_SIGNAL_ENV_GEN_1_SUSTAIN = 45LL;
-#line 146 "spms1_main.rb"
-  cst_SIGNAL_ENV_GEN_2_ATTACK = 46LL;
-#line 147 "spms1_main.rb"
-  cst_SIGNAL_ENV_GEN_2_DECAY = 47LL;
-#line 148 "spms1_main.rb"
-  cst_SIGNAL_ENV_GEN_2_SUSTAIN = 48LL;
-#line 149 "spms1_main.rb"
-  cst_SIGNAL_LFO_1_RATE = 49LL;
-#line 150 "spms1_main.rb"
-  cst_SIGNAL_LFO_2_RATE = 50LL;
-#line 151 "spms1_main.rb"
-  cst_SIGNAL_MIXER_1_LEVEL_1 = 51LL;
-#line 152 "spms1_main.rb"
-  cst_SIGNAL_MIXER_1_INVERT_1 = 52LL;
-#line 153 "spms1_main.rb"
-  cst_SIGNAL_MIXER_1_LEVEL_2 = 53LL;
-#line 154 "spms1_main.rb"
-  cst_SIGNAL_MIXER_1_INVERT_2 = 54LL;
-#line 155 "spms1_main.rb"
-  cst_SIGNAL_MIXER_2_LEVEL_1 = 55LL;
-#line 156 "spms1_main.rb"
-  cst_SIGNAL_MIXER_2_INVERT_1 = 56LL;
-#line 157 "spms1_main.rb"
-  cst_SIGNAL_MIXER_2_LEVEL_2 = 57LL;
-#line 158 "spms1_main.rb"
-  cst_SIGNAL_MIXER_2_INVERT_2 = 58LL;
-#line 159 "spms1_main.rb"
-  cst_SIGNAL_MIXER_3_LEVEL_1 = 59LL;
-#line 160 "spms1_main.rb"
-  cst_SIGNAL_MIXER_3_INVERT_1 = 60LL;
-#line 161 "spms1_main.rb"
-  cst_SIGNAL_MIXER_3_LEVEL_2 = 61LL;
-#line 162 "spms1_main.rb"
-  cst_SIGNAL_MIXER_3_INVERT_2 = 62LL;
-#line 163 "spms1_main.rb"
-  cst_SIGNAL_MIXER_4_LEVEL_1 = 63LL;
-#line 164 "spms1_main.rb"
-  cst_SIGNAL_MIXER_4_INVERT_1 = 64LL;
-#line 165 "spms1_main.rb"
-  cst_SIGNAL_MIXER_4_LEVEL_2 = 65LL;
-#line 166 "spms1_main.rb"
-  cst_SIGNAL_MIXER_4_INVERT_2 = 66LL;
-#line 167 "spms1_main.rb"
-  cst_SIGNAL_MIXER_5_LEVEL_1 = 67LL;
-#line 168 "spms1_main.rb"
-  cst_SIGNAL_MIXER_5_INVERT_1 = 68LL;
-#line 169 "spms1_main.rb"
-  cst_SIGNAL_MIXER_5_LEVEL_2 = 69LL;
-#line 170 "spms1_main.rb"
-  cst_SIGNAL_MIXER_5_INVERT_2 = 70LL;
-#line 171 "spms1_main.rb"
-  cst_SIGNAL_MIXER_6_LEVEL_1 = 71LL;
-#line 172 "spms1_main.rb"
-  cst_SIGNAL_MIXER_6_INVERT_1 = 72LL;
-#line 173 "spms1_main.rb"
-  cst_SIGNAL_MIXER_6_LEVEL_2 = 73LL;
-#line 174 "spms1_main.rb"
-  cst_SIGNAL_MIXER_6_INVERT_2 = 74LL;
-#line 175 "spms1_main.rb"
-  cst_SIGNAL_MIXER_7_LEVEL_1 = 75LL;
-#line 176 "spms1_main.rb"
-  cst_SIGNAL_MIXER_7_INVERT_1 = 76LL;
-#line 177 "spms1_main.rb"
-  cst_SIGNAL_MIXER_7_LEVEL_2 = 77LL;
-#line 178 "spms1_main.rb"
-  cst_SIGNAL_MIXER_7_INVERT_2 = 78LL;
-#line 179 "spms1_main.rb"
-  cst_SIGNAL_MIXER_8_LEVEL_1 = 79LL;
-#line 180 "spms1_main.rb"
-  cst_SIGNAL_MIXER_8_INVERT_1 = 80LL;
-#line 181 "spms1_main.rb"
-  cst_SIGNAL_MIXER_8_LEVEL_2 = 81LL;
-#line 182 "spms1_main.rb"
-  cst_SIGNAL_MIXER_8_INVERT_2 = 82LL;
-#line 183 "spms1_main.rb"
-  cst_SIGNAL_MIXER_9_LEVEL_1 = 83LL;
-#line 184 "spms1_main.rb"
-  cst_SIGNAL_MIXER_9_INVERT_1 = 84LL;
-#line 185 "spms1_main.rb"
-  cst_SIGNAL_MIXER_9_LEVEL_2 = 85LL;
-#line 186 "spms1_main.rb"
-  cst_SIGNAL_MIXER_9_INVERT_2 = 86LL;
-#line 187 "spms1_main.rb"
-  cst_SIGNAL_MIXER_10_LEVEL_1 = 87LL;
-#line 188 "spms1_main.rb"
-  cst_SIGNAL_MIXER_10_INVERT_1 = 88LL;
-#line 189 "spms1_main.rb"
-  cst_SIGNAL_MIXER_10_LEVEL_2 = 89LL;
-#line 190 "spms1_main.rb"
-  cst_SIGNAL_MIXER_10_INVERT_2 = 90LL;
-#line 192 "spms1_main.rb"
-  cst_SIGNAL_PITCH = 91LL;
-#line 193 "spms1_main.rb"
-  cst_SIGNAL_GATE = 92LL;
-#line 194 "spms1_main.rb"
-  cst_SIGNAL_BEND = 93LL;
-#line 196 "spms1_main.rb"
   cst_SIGNALS_SIZE = 128LL;
-#line 200 "spms1_main.rb"
+#line 148 "spms1_main.rb"
   cst_SIGNAL_SINK = sp_int_sub(cst_SIGNALS_SIZE, 1LL);
-#line 207 "spms1_main.rb"
+#line 155 "spms1_main.rb"
   cst_NRPN_ACTIVE_MODULE_BASE = 0LL;
-#line 209 "spms1_main.rb"
-  cst_NRPN_SOURCE_ENV_GEN_1_GATE = 128LL;
-#line 210 "spms1_main.rb"
-  cst_NRPN_SOURCE_ENV_GEN_2_GATE = 129LL;
-#line 211 "spms1_main.rb"
-  cst_NRPN_SOURCE_OSC_1_PITCH = 130LL;
-#line 212 "spms1_main.rb"
-  cst_NRPN_SOURCE_OSC_1_MOD = 131LL;
+#line 157 "spms1_main.rb"
+  cst_NRPN_SOURCE_ENV_GEN_GATE = 128LL;
+#line 158 "spms1_main.rb"
+  cst_NRPN_SOURCE_OSC_PITCH = 129LL;
+#line 159 "spms1_main.rb"
+  cst_NRPN_SOURCE_OSC_MOD = 130LL;
+#line 160 "spms1_main.rb"
+  cst_NRPN_SOURCE_FILTER_AUDIO = 131LL;
+#line 161 "spms1_main.rb"
+  cst_NRPN_SOURCE_FILTER_MOD = 132LL;
+#line 162 "spms1_main.rb"
+  cst_NRPN_SOURCE_AMP_AUDIO = 133LL;
+#line 163 "spms1_main.rb"
+  cst_NRPN_SOURCE_AMP_MOD = 134LL;
+#line 164 "spms1_main.rb"
+  cst_NRPN_SOURCE_MIXER_1_IN_1 = 135LL;
+#line 165 "spms1_main.rb"
+  cst_NRPN_SOURCE_MIXER_1_IN_2 = 136LL;
+#line 166 "spms1_main.rb"
+  cst_NRPN_SOURCE_MIXER_2_IN_1 = 137LL;
+#line 167 "spms1_main.rb"
+  cst_NRPN_SOURCE_MIXER_2_IN_2 = 138LL;
+#line 168 "spms1_main.rb"
+  cst_NRPN_SOURCE_MIXER_3_IN_1 = 139LL;
+#line 169 "spms1_main.rb"
+  cst_NRPN_SOURCE_MIXER_3_IN_2 = 140LL;
+#line 170 "spms1_main.rb"
+  cst_NRPN_SOURCE_MIXER_4_IN_1 = 141LL;
+#line 171 "spms1_main.rb"
+  cst_NRPN_SOURCE_MIXER_4_IN_2 = 142LL;
+#line 172 "spms1_main.rb"
+  cst_NRPN_SOURCE_MIXER_5_IN_1 = 143LL;
+#line 173 "spms1_main.rb"
+  cst_NRPN_SOURCE_MIXER_5_IN_2 = 144LL;
+#line 174 "spms1_main.rb"
+  cst_NRPN_SOURCE_OUTPUT = 145LL;
+#line 176 "spms1_main.rb"
+  cst_NRPN_SOURCE_OSC_WAVEFORM = 256LL;
+#line 177 "spms1_main.rb"
+  cst_NRPN_SOURCE_OSC_MOD_AMOUNT = 257LL;
+#line 178 "spms1_main.rb"
+  cst_NRPN_SOURCE_OSC_COARSE_TUNE = 258LL;
+#line 179 "spms1_main.rb"
+  cst_NRPN_SOURCE_OSC_FINE_TUNE = 259LL;
+#line 180 "spms1_main.rb"
+  cst_NRPN_SOURCE_FILTER_CUTOFF = 260LL;
+#line 181 "spms1_main.rb"
+  cst_NRPN_SOURCE_FILTER_RESONANCE = 261LL;
+#line 182 "spms1_main.rb"
+  cst_NRPN_SOURCE_FILTER_MOD_AMOUNT = 262LL;
+#line 183 "spms1_main.rb"
+  cst_NRPN_SOURCE_FILTER_GAIN = 263LL;
+#line 184 "spms1_main.rb"
+  cst_NRPN_SOURCE_AMP_GAIN = 264LL;
+#line 185 "spms1_main.rb"
+  cst_NRPN_SOURCE_ENV_GEN_ATTACK = 265LL;
+#line 186 "spms1_main.rb"
+  cst_NRPN_SOURCE_ENV_GEN_DECAY = 266LL;
+#line 187 "spms1_main.rb"
+  cst_NRPN_SOURCE_ENV_GEN_SUSTAIN = 267LL;
+#line 188 "spms1_main.rb"
+  cst_NRPN_SOURCE_LFO_RATE = 268LL;
+#line 189 "spms1_main.rb"
+  cst_NRPN_SOURCE_MIXER_1_LEVEL_1 = 269LL;
+#line 190 "spms1_main.rb"
+  cst_NRPN_SOURCE_MIXER_1_INVERT_1 = 270LL;
+#line 191 "spms1_main.rb"
+  cst_NRPN_SOURCE_MIXER_1_LEVEL_2 = 271LL;
+#line 192 "spms1_main.rb"
+  cst_NRPN_SOURCE_MIXER_1_INVERT_2 = 272LL;
+#line 193 "spms1_main.rb"
+  cst_NRPN_SOURCE_MIXER_2_LEVEL_1 = 273LL;
+#line 194 "spms1_main.rb"
+  cst_NRPN_SOURCE_MIXER_2_INVERT_1 = 274LL;
+#line 195 "spms1_main.rb"
+  cst_NRPN_SOURCE_MIXER_2_LEVEL_2 = 275LL;
+#line 196 "spms1_main.rb"
+  cst_NRPN_SOURCE_MIXER_2_INVERT_2 = 276LL;
+#line 197 "spms1_main.rb"
+  cst_NRPN_SOURCE_MIXER_3_LEVEL_1 = 277LL;
+#line 198 "spms1_main.rb"
+  cst_NRPN_SOURCE_MIXER_3_INVERT_1 = 278LL;
+#line 199 "spms1_main.rb"
+  cst_NRPN_SOURCE_MIXER_3_LEVEL_2 = 279LL;
+#line 200 "spms1_main.rb"
+  cst_NRPN_SOURCE_MIXER_3_INVERT_2 = 280LL;
+#line 201 "spms1_main.rb"
+  cst_NRPN_SOURCE_MIXER_4_LEVEL_1 = 281LL;
+#line 202 "spms1_main.rb"
+  cst_NRPN_SOURCE_MIXER_4_INVERT_1 = 282LL;
+#line 203 "spms1_main.rb"
+  cst_NRPN_SOURCE_MIXER_4_LEVEL_2 = 283LL;
+#line 204 "spms1_main.rb"
+  cst_NRPN_SOURCE_MIXER_4_INVERT_2 = 284LL;
+#line 205 "spms1_main.rb"
+  cst_NRPN_SOURCE_MIXER_5_LEVEL_1 = 285LL;
+#line 206 "spms1_main.rb"
+  cst_NRPN_SOURCE_MIXER_5_INVERT_1 = 286LL;
+#line 207 "spms1_main.rb"
+  cst_NRPN_SOURCE_MIXER_5_LEVEL_2 = 287LL;
+#line 208 "spms1_main.rb"
+  cst_NRPN_SOURCE_MIXER_5_INVERT_2 = 288LL;
 #line 213 "spms1_main.rb"
-  cst_NRPN_SOURCE_OSC_2_PITCH = 132LL;
+  cst_NRPN_CC_OSC_WAVEFORM = 384LL;
 #line 214 "spms1_main.rb"
-  cst_NRPN_SOURCE_OSC_2_MOD = 133LL;
+  cst_NRPN_CC_OSC_MOD_AMOUNT = 385LL;
 #line 215 "spms1_main.rb"
-  cst_NRPN_SOURCE_FILTER_1_AUDIO = 134LL;
+  cst_NRPN_CC_OSC_COARSE_TUNE = 386LL;
 #line 216 "spms1_main.rb"
-  cst_NRPN_SOURCE_FILTER_1_MOD = 135LL;
+  cst_NRPN_CC_OSC_FINE_TUNE = 387LL;
 #line 217 "spms1_main.rb"
-  cst_NRPN_SOURCE_FILTER_2_AUDIO = 136LL;
+  cst_NRPN_CC_FILTER_CUTOFF = 388LL;
 #line 218 "spms1_main.rb"
-  cst_NRPN_SOURCE_FILTER_2_MOD = 137LL;
+  cst_NRPN_CC_FILTER_RESONANCE = 389LL;
 #line 219 "spms1_main.rb"
-  cst_NRPN_SOURCE_AMP_1_AUDIO = 138LL;
+  cst_NRPN_CC_FILTER_MOD_AMOUNT = 390LL;
 #line 220 "spms1_main.rb"
-  cst_NRPN_SOURCE_AMP_1_MOD = 139LL;
+  cst_NRPN_CC_FILTER_GAIN = 391LL;
 #line 221 "spms1_main.rb"
-  cst_NRPN_SOURCE_AMP_2_AUDIO = 140LL;
+  cst_NRPN_CC_AMP_GAIN = 392LL;
 #line 222 "spms1_main.rb"
-  cst_NRPN_SOURCE_AMP_2_MOD = 141LL;
+  cst_NRPN_CC_ENV_GEN_ATTACK = 393LL;
 #line 223 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_1_IN_1 = 142LL;
+  cst_NRPN_CC_ENV_GEN_DECAY = 394LL;
 #line 224 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_1_IN_2 = 143LL;
+  cst_NRPN_CC_ENV_GEN_SUSTAIN = 395LL;
 #line 225 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_2_IN_1 = 144LL;
+  cst_NRPN_CC_LFO_RATE = 396LL;
 #line 226 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_2_IN_2 = 145LL;
+  cst_NRPN_CC_MIXER_1_LEVEL_1 = 397LL;
 #line 227 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_3_IN_1 = 146LL;
+  cst_NRPN_CC_MIXER_1_INVERT_1 = 398LL;
 #line 228 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_3_IN_2 = 147LL;
+  cst_NRPN_CC_MIXER_1_LEVEL_2 = 399LL;
 #line 229 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_4_IN_1 = 148LL;
+  cst_NRPN_CC_MIXER_1_INVERT_2 = 400LL;
 #line 230 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_4_IN_2 = 149LL;
+  cst_NRPN_CC_MIXER_2_LEVEL_1 = 401LL;
 #line 231 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_5_IN_1 = 150LL;
+  cst_NRPN_CC_MIXER_2_INVERT_1 = 402LL;
 #line 232 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_5_IN_2 = 151LL;
+  cst_NRPN_CC_MIXER_2_LEVEL_2 = 403LL;
 #line 233 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_6_IN_1 = 152LL;
+  cst_NRPN_CC_MIXER_2_INVERT_2 = 404LL;
 #line 234 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_6_IN_2 = 153LL;
+  cst_NRPN_CC_MIXER_3_LEVEL_1 = 405LL;
 #line 235 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_7_IN_1 = 154LL;
+  cst_NRPN_CC_MIXER_3_INVERT_1 = 406LL;
 #line 236 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_7_IN_2 = 155LL;
+  cst_NRPN_CC_MIXER_3_LEVEL_2 = 407LL;
 #line 237 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_8_IN_1 = 156LL;
+  cst_NRPN_CC_MIXER_3_INVERT_2 = 408LL;
 #line 238 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_8_IN_2 = 157LL;
+  cst_NRPN_CC_MIXER_4_LEVEL_1 = 409LL;
 #line 239 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_9_IN_1 = 158LL;
+  cst_NRPN_CC_MIXER_4_INVERT_1 = 410LL;
 #line 240 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_9_IN_2 = 159LL;
+  cst_NRPN_CC_MIXER_4_LEVEL_2 = 411LL;
 #line 241 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_10_IN_1 = 160LL;
+  cst_NRPN_CC_MIXER_4_INVERT_2 = 412LL;
 #line 242 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_10_IN_2 = 161LL;
+  cst_NRPN_CC_MIXER_5_LEVEL_1 = 413LL;
 #line 243 "spms1_main.rb"
-  cst_NRPN_SOURCE_OUTPUT = 162LL;
+  cst_NRPN_CC_MIXER_5_INVERT_1 = 414LL;
+#line 244 "spms1_main.rb"
+  cst_NRPN_CC_MIXER_5_LEVEL_2 = 415LL;
 #line 245 "spms1_main.rb"
-  cst_NRPN_SOURCE_OSC_1_WAVEFORM = 256LL;
-#line 246 "spms1_main.rb"
-  cst_NRPN_SOURCE_OSC_1_MOD_AMOUNT = 257LL;
-#line 247 "spms1_main.rb"
-  cst_NRPN_SOURCE_OSC_1_COARSE_TUNE = 258LL;
-#line 248 "spms1_main.rb"
-  cst_NRPN_SOURCE_OSC_1_FINE_TUNE = 259LL;
-#line 249 "spms1_main.rb"
-  cst_NRPN_SOURCE_OSC_2_WAVEFORM = 260LL;
-#line 250 "spms1_main.rb"
-  cst_NRPN_SOURCE_OSC_2_MOD_AMOUNT = 261LL;
-#line 251 "spms1_main.rb"
-  cst_NRPN_SOURCE_OSC_2_COARSE_TUNE = 262LL;
-#line 252 "spms1_main.rb"
-  cst_NRPN_SOURCE_OSC_2_FINE_TUNE = 263LL;
-#line 253 "spms1_main.rb"
-  cst_NRPN_SOURCE_FILTER_1_CUTOFF = 264LL;
-#line 254 "spms1_main.rb"
-  cst_NRPN_SOURCE_FILTER_1_RESONANCE = 265LL;
+  cst_NRPN_CC_MIXER_5_INVERT_2 = 416LL;
 #line 255 "spms1_main.rb"
-  cst_NRPN_SOURCE_FILTER_1_MOD_AMOUNT = 266LL;
-#line 256 "spms1_main.rb"
-  cst_NRPN_SOURCE_FILTER_1_GAIN = 267LL;
-#line 257 "spms1_main.rb"
-  cst_NRPN_SOURCE_FILTER_2_CUTOFF = 268LL;
-#line 258 "spms1_main.rb"
-  cst_NRPN_SOURCE_FILTER_2_RESONANCE = 269LL;
-#line 259 "spms1_main.rb"
-  cst_NRPN_SOURCE_FILTER_2_MOD_AMOUNT = 270LL;
-#line 260 "spms1_main.rb"
-  cst_NRPN_SOURCE_FILTER_2_GAIN = 271LL;
-#line 261 "spms1_main.rb"
-  cst_NRPN_SOURCE_AMP_1_GAIN = 272LL;
-#line 262 "spms1_main.rb"
-  cst_NRPN_SOURCE_AMP_2_GAIN = 273LL;
 #line 263 "spms1_main.rb"
-  cst_NRPN_SOURCE_ENV_GEN_1_ATTACK = 274LL;
-#line 264 "spms1_main.rb"
-  cst_NRPN_SOURCE_ENV_GEN_1_DECAY = 275LL;
-#line 265 "spms1_main.rb"
-  cst_NRPN_SOURCE_ENV_GEN_1_SUSTAIN = 276LL;
-#line 266 "spms1_main.rb"
-  cst_NRPN_SOURCE_ENV_GEN_2_ATTACK = 277LL;
 #line 267 "spms1_main.rb"
-  cst_NRPN_SOURCE_ENV_GEN_2_DECAY = 278LL;
+  lv_lfo = sp_LFO_new(cst_SAMPLE_RATE);
 #line 268 "spms1_main.rb"
-  cst_NRPN_SOURCE_ENV_GEN_2_SUSTAIN = 279LL;
+  lv_env_gen = sp_EnvGen_new(cst_SAMPLE_RATE);
 #line 269 "spms1_main.rb"
-  cst_NRPN_SOURCE_LFO_1_RATE = 280LL;
+  lv_osc = sp_Osc_new(cst_SAMPLE_RATE);
 #line 270 "spms1_main.rb"
-  cst_NRPN_SOURCE_LFO_2_RATE = 281LL;
+  lv_filter = sp_Filter_new(cst_SAMPLE_RATE);
 #line 271 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_1_LEVEL_1 = 282LL;
+  lv_amp = sp_Amp_new(cst_SAMPLE_RATE);
 #line 272 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_1_INVERT_1 = 283LL;
-#line 273 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_1_LEVEL_2 = 284LL;
-#line 274 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_1_INVERT_2 = 285LL;
-#line 275 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_2_LEVEL_1 = 286LL;
-#line 276 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_2_INVERT_1 = 287LL;
-#line 277 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_2_LEVEL_2 = 288LL;
-#line 278 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_2_INVERT_2 = 289LL;
-#line 279 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_3_LEVEL_1 = 290LL;
-#line 280 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_3_INVERT_1 = 291LL;
-#line 281 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_3_LEVEL_2 = 292LL;
-#line 282 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_3_INVERT_2 = 293LL;
-#line 283 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_4_LEVEL_1 = 294LL;
-#line 284 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_4_INVERT_1 = 295LL;
-#line 285 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_4_LEVEL_2 = 296LL;
-#line 286 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_4_INVERT_2 = 297LL;
-#line 287 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_5_LEVEL_1 = 298LL;
-#line 288 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_5_INVERT_1 = 299LL;
-#line 289 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_5_LEVEL_2 = 300LL;
-#line 290 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_5_INVERT_2 = 301LL;
-#line 291 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_6_LEVEL_1 = 302LL;
-#line 292 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_6_INVERT_1 = 303LL;
-#line 293 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_6_LEVEL_2 = 304LL;
-#line 294 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_6_INVERT_2 = 305LL;
-#line 295 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_7_LEVEL_1 = 306LL;
-#line 296 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_7_INVERT_1 = 307LL;
-#line 297 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_7_LEVEL_2 = 308LL;
-#line 298 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_7_INVERT_2 = 309LL;
-#line 299 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_8_LEVEL_1 = 310LL;
-#line 300 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_8_INVERT_1 = 311LL;
-#line 301 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_8_LEVEL_2 = 312LL;
-#line 302 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_8_INVERT_2 = 313LL;
-#line 303 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_9_LEVEL_1 = 314LL;
-#line 304 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_9_INVERT_1 = 315LL;
-#line 305 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_9_LEVEL_2 = 316LL;
-#line 306 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_9_INVERT_2 = 317LL;
-#line 307 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_10_LEVEL_1 = 318LL;
-#line 308 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_10_INVERT_1 = 319LL;
-#line 309 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_10_LEVEL_2 = 320LL;
-#line 310 "spms1_main.rb"
-  cst_NRPN_SOURCE_MIXER_10_INVERT_2 = 321LL;
-#line 315 "spms1_main.rb"
-  cst_NRPN_CC_OSC_1_WAVEFORM = 384LL;
-#line 316 "spms1_main.rb"
-  cst_NRPN_CC_OSC_1_MOD_AMOUNT = 385LL;
-#line 317 "spms1_main.rb"
-  cst_NRPN_CC_OSC_1_COARSE_TUNE = 386LL;
-#line 318 "spms1_main.rb"
-  cst_NRPN_CC_OSC_1_FINE_TUNE = 387LL;
-#line 319 "spms1_main.rb"
-  cst_NRPN_CC_OSC_2_WAVEFORM = 388LL;
-#line 320 "spms1_main.rb"
-  cst_NRPN_CC_OSC_2_MOD_AMOUNT = 389LL;
-#line 321 "spms1_main.rb"
-  cst_NRPN_CC_OSC_2_COARSE_TUNE = 390LL;
-#line 322 "spms1_main.rb"
-  cst_NRPN_CC_OSC_2_FINE_TUNE = 391LL;
-#line 323 "spms1_main.rb"
-  cst_NRPN_CC_FILTER_1_CUTOFF = 392LL;
-#line 324 "spms1_main.rb"
-  cst_NRPN_CC_FILTER_1_RESONANCE = 393LL;
-#line 325 "spms1_main.rb"
-  cst_NRPN_CC_FILTER_1_MOD_AMOUNT = 394LL;
-#line 326 "spms1_main.rb"
-  cst_NRPN_CC_FILTER_1_GAIN = 395LL;
-#line 327 "spms1_main.rb"
-  cst_NRPN_CC_FILTER_2_CUTOFF = 396LL;
-#line 328 "spms1_main.rb"
-  cst_NRPN_CC_FILTER_2_RESONANCE = 397LL;
-#line 329 "spms1_main.rb"
-  cst_NRPN_CC_FILTER_2_MOD_AMOUNT = 398LL;
-#line 330 "spms1_main.rb"
-  cst_NRPN_CC_FILTER_2_GAIN = 399LL;
-#line 331 "spms1_main.rb"
-  cst_NRPN_CC_AMP_1_GAIN = 400LL;
-#line 332 "spms1_main.rb"
-  cst_NRPN_CC_AMP_2_GAIN = 401LL;
-#line 333 "spms1_main.rb"
-  cst_NRPN_CC_ENV_GEN_1_ATTACK = 402LL;
-#line 334 "spms1_main.rb"
-  cst_NRPN_CC_ENV_GEN_1_DECAY = 403LL;
-#line 335 "spms1_main.rb"
-  cst_NRPN_CC_ENV_GEN_1_SUSTAIN = 404LL;
-#line 336 "spms1_main.rb"
-  cst_NRPN_CC_ENV_GEN_2_ATTACK = 405LL;
-#line 337 "spms1_main.rb"
-  cst_NRPN_CC_ENV_GEN_2_DECAY = 406LL;
-#line 338 "spms1_main.rb"
-  cst_NRPN_CC_ENV_GEN_2_SUSTAIN = 407LL;
-#line 339 "spms1_main.rb"
-  cst_NRPN_CC_LFO_1_RATE = 408LL;
-#line 340 "spms1_main.rb"
-  cst_NRPN_CC_LFO_2_RATE = 409LL;
-#line 341 "spms1_main.rb"
-  cst_NRPN_CC_MIXER_1_LEVEL_1 = 410LL;
-#line 342 "spms1_main.rb"
-  cst_NRPN_CC_MIXER_1_INVERT_1 = 411LL;
-#line 343 "spms1_main.rb"
-  cst_NRPN_CC_MIXER_1_LEVEL_2 = 412LL;
-#line 344 "spms1_main.rb"
-  cst_NRPN_CC_MIXER_1_INVERT_2 = 413LL;
-#line 345 "spms1_main.rb"
-  cst_NRPN_CC_MIXER_2_LEVEL_1 = 414LL;
-#line 346 "spms1_main.rb"
-  cst_NRPN_CC_MIXER_2_INVERT_1 = 415LL;
-#line 347 "spms1_main.rb"
-  cst_NRPN_CC_MIXER_2_LEVEL_2 = 416LL;
-#line 348 "spms1_main.rb"
-  cst_NRPN_CC_MIXER_2_INVERT_2 = 417LL;
-#line 349 "spms1_main.rb"
-  cst_NRPN_CC_MIXER_3_LEVEL_1 = 418LL;
-#line 350 "spms1_main.rb"
-  cst_NRPN_CC_MIXER_3_INVERT_1 = 419LL;
-#line 351 "spms1_main.rb"
-  cst_NRPN_CC_MIXER_3_LEVEL_2 = 420LL;
-#line 352 "spms1_main.rb"
-  cst_NRPN_CC_MIXER_3_INVERT_2 = 421LL;
-#line 353 "spms1_main.rb"
-  cst_NRPN_CC_MIXER_4_LEVEL_1 = 422LL;
-#line 354 "spms1_main.rb"
-  cst_NRPN_CC_MIXER_4_INVERT_1 = 423LL;
-#line 355 "spms1_main.rb"
-  cst_NRPN_CC_MIXER_4_LEVEL_2 = 424LL;
-#line 356 "spms1_main.rb"
-  cst_NRPN_CC_MIXER_4_INVERT_2 = 425LL;
-#line 357 "spms1_main.rb"
-  cst_NRPN_CC_MIXER_5_LEVEL_1 = 426LL;
-#line 358 "spms1_main.rb"
-  cst_NRPN_CC_MIXER_5_INVERT_1 = 427LL;
-#line 359 "spms1_main.rb"
-  cst_NRPN_CC_MIXER_5_LEVEL_2 = 428LL;
-#line 360 "spms1_main.rb"
-  cst_NRPN_CC_MIXER_5_INVERT_2 = 429LL;
-#line 361 "spms1_main.rb"
-  cst_NRPN_CC_MIXER_6_LEVEL_1 = 430LL;
-#line 362 "spms1_main.rb"
-  cst_NRPN_CC_MIXER_6_INVERT_1 = 431LL;
-#line 363 "spms1_main.rb"
-  cst_NRPN_CC_MIXER_6_LEVEL_2 = 432LL;
-#line 364 "spms1_main.rb"
-  cst_NRPN_CC_MIXER_6_INVERT_2 = 433LL;
-#line 365 "spms1_main.rb"
-  cst_NRPN_CC_MIXER_7_LEVEL_1 = 434LL;
-#line 366 "spms1_main.rb"
-  cst_NRPN_CC_MIXER_7_INVERT_1 = 435LL;
-#line 367 "spms1_main.rb"
-  cst_NRPN_CC_MIXER_7_LEVEL_2 = 436LL;
-#line 368 "spms1_main.rb"
-  cst_NRPN_CC_MIXER_7_INVERT_2 = 437LL;
-#line 369 "spms1_main.rb"
-  cst_NRPN_CC_MIXER_8_LEVEL_1 = 438LL;
-#line 370 "spms1_main.rb"
-  cst_NRPN_CC_MIXER_8_INVERT_1 = 439LL;
-#line 371 "spms1_main.rb"
-  cst_NRPN_CC_MIXER_8_LEVEL_2 = 440LL;
-#line 372 "spms1_main.rb"
-  cst_NRPN_CC_MIXER_8_INVERT_2 = 441LL;
-#line 373 "spms1_main.rb"
-  cst_NRPN_CC_MIXER_9_LEVEL_1 = 442LL;
-#line 374 "spms1_main.rb"
-  cst_NRPN_CC_MIXER_9_INVERT_1 = 443LL;
-#line 375 "spms1_main.rb"
-  cst_NRPN_CC_MIXER_9_LEVEL_2 = 444LL;
-#line 376 "spms1_main.rb"
-  cst_NRPN_CC_MIXER_9_INVERT_2 = 445LL;
-#line 377 "spms1_main.rb"
-  cst_NRPN_CC_MIXER_10_LEVEL_1 = 446LL;
-#line 378 "spms1_main.rb"
-  cst_NRPN_CC_MIXER_10_INVERT_1 = 447LL;
-#line 379 "spms1_main.rb"
-  cst_NRPN_CC_MIXER_10_LEVEL_2 = 448LL;
-#line 380 "spms1_main.rb"
-  cst_NRPN_CC_MIXER_10_INVERT_2 = 449LL;
-#line 390 "spms1_main.rb"
-#line 398 "spms1_main.rb"
-#line 402 "spms1_main.rb"
-  lv_env_gen_1 = sp_EnvGen_new(cst_SAMPLE_RATE);
-#line 403 "spms1_main.rb"
-  lv_env_gen_2 = sp_EnvGen_new(cst_SAMPLE_RATE);
-#line 404 "spms1_main.rb"
-  lv_lfo_1 = sp_LFO_new(cst_SAMPLE_RATE);
-#line 405 "spms1_main.rb"
-  lv_lfo_2 = sp_LFO_new(cst_SAMPLE_RATE);
-#line 406 "spms1_main.rb"
-  lv_osc_1 = sp_Osc_new(cst_SAMPLE_RATE);
-#line 407 "spms1_main.rb"
-  lv_osc_2 = sp_Osc_new(cst_SAMPLE_RATE);
-#line 408 "spms1_main.rb"
-  lv_filter_1 = sp_Filter_new(cst_SAMPLE_RATE);
-#line 409 "spms1_main.rb"
-  lv_filter_2 = sp_Filter_new(cst_SAMPLE_RATE);
-#line 410 "spms1_main.rb"
-  lv_amp_1 = sp_Amp_new(cst_SAMPLE_RATE);
-#line 411 "spms1_main.rb"
-  lv_amp_2 = sp_Amp_new(cst_SAMPLE_RATE);
-#line 412 "spms1_main.rb"
   lv_mixer_1 = sp_Mixer_new(cst_SAMPLE_RATE);
-#line 413 "spms1_main.rb"
+#line 273 "spms1_main.rb"
   lv_mixer_2 = sp_Mixer_new(cst_SAMPLE_RATE);
-#line 414 "spms1_main.rb"
+#line 274 "spms1_main.rb"
   lv_mixer_3 = sp_Mixer_new(cst_SAMPLE_RATE);
-#line 415 "spms1_main.rb"
+#line 275 "spms1_main.rb"
   lv_mixer_4 = sp_Mixer_new(cst_SAMPLE_RATE);
-#line 416 "spms1_main.rb"
+#line 276 "spms1_main.rb"
   lv_mixer_5 = sp_Mixer_new(cst_SAMPLE_RATE);
-#line 417 "spms1_main.rb"
-  lv_mixer_6 = sp_Mixer_new(cst_SAMPLE_RATE);
-#line 418 "spms1_main.rb"
-  lv_mixer_7 = sp_Mixer_new(cst_SAMPLE_RATE);
-#line 419 "spms1_main.rb"
-  lv_mixer_8 = sp_Mixer_new(cst_SAMPLE_RATE);
-#line 420 "spms1_main.rb"
-  lv_mixer_9 = sp_Mixer_new(cst_SAMPLE_RATE);
-#line 421 "spms1_main.rb"
-  lv_mixer_10 = sp_Mixer_new(cst_SAMPLE_RATE);
-#line 424 "spms1_main.rb"
-  mrb_int _t69 = cst_MODULES_SIZE;
+#line 279 "spms1_main.rb"
+  mrb_int _t59 = cst_MODULES_SIZE;
+  if (_t59 < 0) sp_raise_cls("ArgumentError", "negative array size");
+  mrb_int _t60 = cst_MODULE_NONE;
+  sp_IntArray *_t61 = sp_IntArray_new();
+  SP_GC_ROOT(_t61);
+  for (mrb_int _t62 = 0; _t62 < _t59; _t62++) sp_IntArray_push(_t61, _t60);
+  lv_active_modules = _t61;
+#line 281 "spms1_main.rb"
+  mrb_int _t64 = cst_AUDIO_BUFFER_WORDS;
+  if (_t64 < 0) sp_raise_cls("ArgumentError", "negative array size");
+  mrb_float _t65 = 0.0;
+  sp_FloatArray *_t66 = sp_FloatArray_new();
+  SP_GC_ROOT(_t66);
+  for (mrb_int _t67 = 0; _t67 < _t64; _t67++) sp_FloatArray_push(_t66, _t65);
+  lv_audio_buffer = _t66;
+#line 286 "spms1_main.rb"
+  mrb_int _t69 = cst_SIGNALS_SIZE;
   if (_t69 < 0) sp_raise_cls("ArgumentError", "negative array size");
-  mrb_int _t70 = cst_MODULE_NONE;
-  sp_IntArray *_t71 = sp_IntArray_new();
+  mrb_float _t70 = 0.0;
+  sp_FloatArray *_t71 = sp_FloatArray_new();
   SP_GC_ROOT(_t71);
-  for (mrb_int _t72 = 0; _t72 < _t69; _t72++) sp_IntArray_push(_t71, _t70);
-  lv_active_modules = _t71;
-#line 426 "spms1_main.rb"
-  mrb_int _t74 = cst_AUDIO_BUFFER_WORDS;
-  if (_t74 < 0) sp_raise_cls("ArgumentError", "negative array size");
-  mrb_float _t75 = 0.0;
-  sp_FloatArray *_t76 = sp_FloatArray_new();
-  SP_GC_ROOT(_t76);
-  for (mrb_int _t77 = 0; _t77 < _t74; _t77++) sp_FloatArray_push(_t76, _t75);
-  lv_audio_buffer = _t76;
-#line 431 "spms1_main.rb"
-  mrb_int _t79 = cst_SIGNALS_SIZE;
-  if (_t79 < 0) sp_raise_cls("ArgumentError", "negative array size");
-  mrb_float _t80 = 0.0;
-  sp_FloatArray *_t81 = sp_FloatArray_new();
-  SP_GC_ROOT(_t81);
-  for (mrb_int _t82 = 0; _t82 < _t79; _t82++) sp_FloatArray_push(_t81, _t80);
-  lv_signals = _t81;
-#line 432 "spms1_main.rb"
+  for (mrb_int _t72 = 0; _t72 < _t69; _t72++) sp_FloatArray_push(_t71, _t70);
+  lv_signals = _t71;
+#line 287 "spms1_main.rb"
   sp_FloatArray_set(lv_signals, cst_SIGNAL_ONE, 1.0);
-#line 433 "spms1_main.rb"
+#line 288 "spms1_main.rb"
   sp_FloatArray_set(lv_signals, cst_SIGNAL_HALF, 0.5);
-#line 434 "spms1_main.rb"
+#line 289 "spms1_main.rb"
   sp_FloatArray_set(lv_signals, cst_SIGNAL_MINUS_HALF, -0.5);
-#line 435 "spms1_main.rb"
+#line 290 "spms1_main.rb"
   sp_FloatArray_set(lv_signals, cst_SIGNAL_MINUS_ONE, -1.0);
-#line 445 "spms1_main.rb"
-  sp_FloatArray_set(lv_signals, cst_SIGNAL_OSC_2_WAVEFORM, sp_cc_to_ratio(4LL));
-#line 446 "spms1_main.rb"
-  sp_FloatArray_set(lv_signals, cst_SIGNAL_OSC_2_MOD_AMOUNT, sp_cc_to_ratio(4LL));
-#line 447 "spms1_main.rb"
-  sp_FloatArray_set(lv_signals, cst_SIGNAL_OSC_2_COARSE_TUNE, sp_cc_to_ratio(64LL));
-#line 448 "spms1_main.rb"
-  sp_FloatArray_set(lv_signals, cst_SIGNAL_OSC_2_FINE_TUNE, sp_cc_to_ratio(64LL));
-#line 449 "spms1_main.rb"
-  sp_FloatArray_set(lv_signals, cst_SIGNAL_FILTER_2_CUTOFF, sp_cc_to_ratio(124LL));
-#line 450 "spms1_main.rb"
-  sp_FloatArray_set(lv_signals, cst_SIGNAL_FILTER_2_RESONANCE, sp_cc_to_ratio(64LL));
-#line 451 "spms1_main.rb"
-  sp_FloatArray_set(lv_signals, cst_SIGNAL_FILTER_2_MOD_AMOUNT, sp_cc_to_ratio(64LL));
-#line 452 "spms1_main.rb"
-  sp_FloatArray_set(lv_signals, cst_SIGNAL_FILTER_2_GAIN, sp_cc_to_ratio(64LL));
-#line 453 "spms1_main.rb"
-  sp_FloatArray_set(lv_signals, cst_SIGNAL_AMP_2_GAIN, sp_cc_to_ratio(64LL));
-#line 454 "spms1_main.rb"
-  sp_FloatArray_set(lv_signals, cst_SIGNAL_ENV_GEN_2_ATTACK, sp_cc_to_ratio(4LL));
-#line 455 "spms1_main.rb"
-  sp_FloatArray_set(lv_signals, cst_SIGNAL_ENV_GEN_2_DECAY, sp_cc_to_ratio(94LL));
-#line 456 "spms1_main.rb"
-  sp_FloatArray_set(lv_signals, cst_SIGNAL_ENV_GEN_2_SUSTAIN, sp_cc_to_ratio(4LL));
-#line 457 "spms1_main.rb"
-  sp_FloatArray_set(lv_signals, cst_SIGNAL_LFO_2_RATE, sp_cc_to_ratio(64LL));
-#line 458 "spms1_main.rb"
+#line 298 "spms1_main.rb"
   sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_1_LEVEL_1, sp_cc_to_ratio(28LL));
-#line 459 "spms1_main.rb"
+#line 299 "spms1_main.rb"
   sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_1_INVERT_1, sp_cc_to_ratio(4LL));
-#line 460 "spms1_main.rb"
+#line 300 "spms1_main.rb"
   sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_1_LEVEL_2, sp_cc_to_ratio(28LL));
-#line 461 "spms1_main.rb"
+#line 301 "spms1_main.rb"
   sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_1_INVERT_2, sp_cc_to_ratio(4LL));
-#line 462 "spms1_main.rb"
+#line 302 "spms1_main.rb"
   sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_2_LEVEL_1, sp_cc_to_ratio(124LL));
-#line 463 "spms1_main.rb"
+#line 303 "spms1_main.rb"
   sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_2_INVERT_1, sp_cc_to_ratio(4LL));
-#line 464 "spms1_main.rb"
+#line 304 "spms1_main.rb"
   sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_2_LEVEL_2, sp_cc_to_ratio(124LL));
-#line 465 "spms1_main.rb"
+#line 305 "spms1_main.rb"
   sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_2_INVERT_2, sp_cc_to_ratio(4LL));
-#line 466 "spms1_main.rb"
+#line 306 "spms1_main.rb"
   sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_3_LEVEL_1, sp_cc_to_ratio(124LL));
-#line 467 "spms1_main.rb"
+#line 307 "spms1_main.rb"
   sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_3_INVERT_1, sp_cc_to_ratio(4LL));
-#line 468 "spms1_main.rb"
+#line 308 "spms1_main.rb"
   sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_3_LEVEL_2, sp_cc_to_ratio(124LL));
-#line 469 "spms1_main.rb"
+#line 309 "spms1_main.rb"
   sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_3_INVERT_2, sp_cc_to_ratio(4LL));
-#line 470 "spms1_main.rb"
+#line 310 "spms1_main.rb"
   sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_4_LEVEL_1, sp_cc_to_ratio(124LL));
-#line 471 "spms1_main.rb"
+#line 311 "spms1_main.rb"
   sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_4_INVERT_1, sp_cc_to_ratio(4LL));
-#line 472 "spms1_main.rb"
+#line 312 "spms1_main.rb"
   sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_4_LEVEL_2, sp_cc_to_ratio(124LL));
-#line 473 "spms1_main.rb"
+#line 313 "spms1_main.rb"
   sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_4_INVERT_2, sp_cc_to_ratio(4LL));
-#line 474 "spms1_main.rb"
+#line 314 "spms1_main.rb"
   sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_5_LEVEL_1, sp_cc_to_ratio(124LL));
-#line 475 "spms1_main.rb"
+#line 315 "spms1_main.rb"
   sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_5_INVERT_1, sp_cc_to_ratio(4LL));
-#line 476 "spms1_main.rb"
+#line 316 "spms1_main.rb"
   sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_5_LEVEL_2, sp_cc_to_ratio(124LL));
-#line 477 "spms1_main.rb"
+#line 317 "spms1_main.rb"
   sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_5_INVERT_2, sp_cc_to_ratio(4LL));
-#line 478 "spms1_main.rb"
-  sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_6_LEVEL_1, sp_cc_to_ratio(124LL));
-#line 479 "spms1_main.rb"
-  sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_6_INVERT_1, sp_cc_to_ratio(4LL));
-#line 480 "spms1_main.rb"
-  sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_6_LEVEL_2, sp_cc_to_ratio(124LL));
-#line 481 "spms1_main.rb"
-  sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_6_INVERT_2, sp_cc_to_ratio(4LL));
-#line 482 "spms1_main.rb"
-  sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_7_LEVEL_1, sp_cc_to_ratio(124LL));
-#line 483 "spms1_main.rb"
-  sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_7_INVERT_1, sp_cc_to_ratio(4LL));
-#line 484 "spms1_main.rb"
-  sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_7_LEVEL_2, sp_cc_to_ratio(124LL));
-#line 485 "spms1_main.rb"
-  sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_7_INVERT_2, sp_cc_to_ratio(4LL));
-#line 486 "spms1_main.rb"
-  sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_8_LEVEL_1, sp_cc_to_ratio(124LL));
-#line 487 "spms1_main.rb"
-  sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_8_INVERT_1, sp_cc_to_ratio(4LL));
-#line 488 "spms1_main.rb"
-  sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_8_LEVEL_2, sp_cc_to_ratio(124LL));
-#line 489 "spms1_main.rb"
-  sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_8_INVERT_2, sp_cc_to_ratio(4LL));
-#line 490 "spms1_main.rb"
-  sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_9_LEVEL_1, sp_cc_to_ratio(124LL));
-#line 491 "spms1_main.rb"
-  sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_9_INVERT_1, sp_cc_to_ratio(4LL));
-#line 492 "spms1_main.rb"
-  sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_9_LEVEL_2, sp_cc_to_ratio(124LL));
-#line 493 "spms1_main.rb"
-  sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_9_INVERT_2, sp_cc_to_ratio(4LL));
-#line 494 "spms1_main.rb"
-  sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_10_LEVEL_1, sp_cc_to_ratio(124LL));
-#line 495 "spms1_main.rb"
-  sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_10_INVERT_1, sp_cc_to_ratio(4LL));
-#line 496 "spms1_main.rb"
-  sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_10_LEVEL_2, sp_cc_to_ratio(124LL));
-#line 497 "spms1_main.rb"
-  sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_10_INVERT_2, sp_cc_to_ratio(4LL));
-#line 504 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(sp_int_add(cst_NRPN_ACTIVE_MODULE_BASE, 0LL))), ((uint8_t)(cst_MODULE_ENV_GEN_1))), (mrb_int)0);
-#line 505 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(sp_int_add(cst_NRPN_ACTIVE_MODULE_BASE, 1LL))), ((uint8_t)(cst_MODULE_LFO_1))), (mrb_int)0);
-#line 506 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(sp_int_add(cst_NRPN_ACTIVE_MODULE_BASE, 2LL))), ((uint8_t)(cst_MODULE_MIXER_1))), (mrb_int)0);
-#line 507 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(sp_int_add(cst_NRPN_ACTIVE_MODULE_BASE, 3LL))), ((uint8_t)(cst_MODULE_OSC_1))), (mrb_int)0);
-#line 508 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(sp_int_add(cst_NRPN_ACTIVE_MODULE_BASE, 4LL))), ((uint8_t)(cst_MODULE_FILTER_1))), (mrb_int)0);
-#line 509 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(sp_int_add(cst_NRPN_ACTIVE_MODULE_BASE, 5LL))), ((uint8_t)(cst_MODULE_AMP_1))), (mrb_int)0);
-#line 511 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_ENV_GEN_1_GATE)), ((uint8_t)(cst_SIGNAL_GATE))), (mrb_int)0);
-#line 512 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_PITCH)), ((uint8_t)(cst_SIGNAL_PITCH))), (mrb_int)0);
-#line 513 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_MOD)), ((uint8_t)(cst_SIGNAL_MIXER_1_OUTPUT))), (mrb_int)0);
-#line 514 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_1_AUDIO)), ((uint8_t)(cst_SIGNAL_OSC_1_OUTPUT))), (mrb_int)0);
-#line 515 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_1_MOD)), ((uint8_t)(cst_SIGNAL_ENV_GEN_1_OUTPUT))), (mrb_int)0);
-#line 516 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_AMP_1_AUDIO)), ((uint8_t)(cst_SIGNAL_FILTER_1_OUTPUT))), (mrb_int)0);
-#line 517 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_AMP_1_MOD)), ((uint8_t)(cst_SIGNAL_ENV_GEN_1_OUTPUT))), (mrb_int)0);
-#line 518 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_1_IN_1)), ((uint8_t)(cst_SIGNAL_LFO_1_OUTPUT))), (mrb_int)0);
-#line 519 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OUTPUT)), ((uint8_t)(cst_SIGNAL_AMP_1_OUTPUT))), (mrb_int)0);
-#line 521 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_WAVEFORM)), ((uint8_t)(cst_SIGNAL_OSC_1_WAVEFORM))), (mrb_int)0);
-#line 522 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_MOD_AMOUNT)), ((uint8_t)(cst_SIGNAL_OSC_1_MOD_AMOUNT))), (mrb_int)0);
-#line 523 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_COARSE_TUNE)), ((uint8_t)(cst_SIGNAL_OSC_1_COARSE_TUNE))), (mrb_int)0);
-#line 524 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_FINE_TUNE)), ((uint8_t)(cst_SIGNAL_OSC_1_FINE_TUNE))), (mrb_int)0);
-#line 525 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_WAVEFORM)), ((uint8_t)(cst_SIGNAL_OSC_2_WAVEFORM))), (mrb_int)0);
-#line 526 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_MOD_AMOUNT)), ((uint8_t)(cst_SIGNAL_OSC_2_MOD_AMOUNT))), (mrb_int)0);
-#line 527 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_COARSE_TUNE)), ((uint8_t)(cst_SIGNAL_OSC_2_COARSE_TUNE))), (mrb_int)0);
-#line 528 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_FINE_TUNE)), ((uint8_t)(cst_SIGNAL_OSC_2_FINE_TUNE))), (mrb_int)0);
-#line 529 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_1_CUTOFF)), ((uint8_t)(cst_SIGNAL_FILTER_1_CUTOFF))), (mrb_int)0);
-#line 530 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_1_RESONANCE)), ((uint8_t)(cst_SIGNAL_FILTER_1_RESONANCE))), (mrb_int)0);
-#line 531 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_1_MOD_AMOUNT)), ((uint8_t)(cst_SIGNAL_FILTER_1_MOD_AMOUNT))), (mrb_int)0);
-#line 532 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_1_GAIN)), ((uint8_t)(cst_SIGNAL_FILTER_1_GAIN))), (mrb_int)0);
-#line 533 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_2_CUTOFF)), ((uint8_t)(cst_SIGNAL_FILTER_2_CUTOFF))), (mrb_int)0);
-#line 534 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_2_RESONANCE)), ((uint8_t)(cst_SIGNAL_FILTER_2_RESONANCE))), (mrb_int)0);
-#line 535 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_2_MOD_AMOUNT)), ((uint8_t)(cst_SIGNAL_FILTER_2_MOD_AMOUNT))), (mrb_int)0);
-#line 536 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_2_GAIN)), ((uint8_t)(cst_SIGNAL_FILTER_2_GAIN))), (mrb_int)0);
-#line 537 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_AMP_1_GAIN)), ((uint8_t)(cst_SIGNAL_AMP_1_GAIN))), (mrb_int)0);
-#line 538 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_AMP_2_GAIN)), ((uint8_t)(cst_SIGNAL_AMP_2_GAIN))), (mrb_int)0);
-#line 539 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_ENV_GEN_1_ATTACK)), ((uint8_t)(cst_SIGNAL_ENV_GEN_1_ATTACK))), (mrb_int)0);
-#line 540 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_ENV_GEN_1_DECAY)), ((uint8_t)(cst_SIGNAL_ENV_GEN_1_DECAY))), (mrb_int)0);
-#line 541 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_ENV_GEN_1_SUSTAIN)), ((uint8_t)(cst_SIGNAL_ENV_GEN_1_SUSTAIN))), (mrb_int)0);
-#line 542 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_ENV_GEN_2_ATTACK)), ((uint8_t)(cst_SIGNAL_ENV_GEN_2_ATTACK))), (mrb_int)0);
-#line 543 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_ENV_GEN_2_DECAY)), ((uint8_t)(cst_SIGNAL_ENV_GEN_2_DECAY))), (mrb_int)0);
-#line 544 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_ENV_GEN_2_SUSTAIN)), ((uint8_t)(cst_SIGNAL_ENV_GEN_2_SUSTAIN))), (mrb_int)0);
-#line 545 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_LFO_1_RATE)), ((uint8_t)(cst_SIGNAL_LFO_1_RATE))), (mrb_int)0);
-#line 546 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_LFO_2_RATE)), ((uint8_t)(cst_SIGNAL_LFO_2_RATE))), (mrb_int)0);
-#line 547 "spms1_main.rb"
+#line 325 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(sp_int_add(cst_NRPN_ACTIVE_MODULE_BASE, 0LL))), ((uint8_t)(cst_MODULE_LFO))), (mrb_int)0);
+#line 326 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(sp_int_add(cst_NRPN_ACTIVE_MODULE_BASE, 1LL))), ((uint8_t)(cst_MODULE_MIXER_1))), (mrb_int)0);
+#line 327 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(sp_int_add(cst_NRPN_ACTIVE_MODULE_BASE, 2LL))), ((uint8_t)(cst_MODULE_ENV_GEN))), (mrb_int)0);
+#line 328 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(sp_int_add(cst_NRPN_ACTIVE_MODULE_BASE, 3LL))), ((uint8_t)(cst_MODULE_MIXER_2))), (mrb_int)0);
+#line 329 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(sp_int_add(cst_NRPN_ACTIVE_MODULE_BASE, 4LL))), ((uint8_t)(cst_MODULE_OSC))), (mrb_int)0);
+#line 330 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(sp_int_add(cst_NRPN_ACTIVE_MODULE_BASE, 5LL))), ((uint8_t)(cst_MODULE_MIXER_3))), (mrb_int)0);
+#line 331 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(sp_int_add(cst_NRPN_ACTIVE_MODULE_BASE, 6LL))), ((uint8_t)(cst_MODULE_FILTER))), (mrb_int)0);
+#line 332 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(sp_int_add(cst_NRPN_ACTIVE_MODULE_BASE, 7LL))), ((uint8_t)(cst_MODULE_MIXER_4))), (mrb_int)0);
+#line 333 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(sp_int_add(cst_NRPN_ACTIVE_MODULE_BASE, 8LL))), ((uint8_t)(cst_MODULE_AMP))), (mrb_int)0);
+#line 334 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(sp_int_add(cst_NRPN_ACTIVE_MODULE_BASE, 9LL))), ((uint8_t)(cst_MODULE_MIXER_5))), (mrb_int)0);
+#line 336 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_ENV_GEN_GATE)), ((uint8_t)(cst_SIGNAL_GATE))), (mrb_int)0);
+#line 337 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_PITCH)), ((uint8_t)(cst_SIGNAL_PITCH))), (mrb_int)0);
+#line 338 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_MOD)), ((uint8_t)(cst_SIGNAL_MIXER_1_OUTPUT))), (mrb_int)0);
+#line 339 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_AUDIO)), ((uint8_t)(cst_SIGNAL_OSC_OUTPUT))), (mrb_int)0);
+#line 340 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_MOD)), ((uint8_t)(cst_SIGNAL_ENV_GEN_OUTPUT))), (mrb_int)0);
+#line 341 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_AMP_AUDIO)), ((uint8_t)(cst_SIGNAL_FILTER_OUTPUT))), (mrb_int)0);
+#line 342 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_AMP_MOD)), ((uint8_t)(cst_SIGNAL_ENV_GEN_OUTPUT))), (mrb_int)0);
+#line 343 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_1_IN_1)), ((uint8_t)(cst_SIGNAL_LFO_OUTPUT))), (mrb_int)0);
+#line 344 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OUTPUT)), ((uint8_t)(cst_SIGNAL_AMP_OUTPUT))), (mrb_int)0);
+#line 346 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_WAVEFORM)), ((uint8_t)(cst_SIGNAL_OSC_WAVEFORM))), (mrb_int)0);
+#line 347 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_MOD_AMOUNT)), ((uint8_t)(cst_SIGNAL_OSC_MOD_AMOUNT))), (mrb_int)0);
+#line 348 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_COARSE_TUNE)), ((uint8_t)(cst_SIGNAL_OSC_COARSE_TUNE))), (mrb_int)0);
+#line 349 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_FINE_TUNE)), ((uint8_t)(cst_SIGNAL_OSC_FINE_TUNE))), (mrb_int)0);
+#line 350 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_CUTOFF)), ((uint8_t)(cst_SIGNAL_FILTER_CUTOFF))), (mrb_int)0);
+#line 351 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_RESONANCE)), ((uint8_t)(cst_SIGNAL_FILTER_RESONANCE))), (mrb_int)0);
+#line 352 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_MOD_AMOUNT)), ((uint8_t)(cst_SIGNAL_FILTER_MOD_AMOUNT))), (mrb_int)0);
+#line 353 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_GAIN)), ((uint8_t)(cst_SIGNAL_FILTER_GAIN))), (mrb_int)0);
+#line 354 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_AMP_GAIN)), ((uint8_t)(cst_SIGNAL_AMP_GAIN))), (mrb_int)0);
+#line 355 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_ENV_GEN_ATTACK)), ((uint8_t)(cst_SIGNAL_ENV_GEN_ATTACK))), (mrb_int)0);
+#line 356 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_ENV_GEN_DECAY)), ((uint8_t)(cst_SIGNAL_ENV_GEN_DECAY))), (mrb_int)0);
+#line 357 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_ENV_GEN_SUSTAIN)), ((uint8_t)(cst_SIGNAL_ENV_GEN_SUSTAIN))), (mrb_int)0);
+#line 358 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_LFO_RATE)), ((uint8_t)(cst_SIGNAL_LFO_RATE))), (mrb_int)0);
+#line 359 "spms1_main.rb"
   (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_1_LEVEL_1)), ((uint8_t)(cst_SIGNAL_MIXER_1_LEVEL_1))), (mrb_int)0);
-#line 548 "spms1_main.rb"
+#line 360 "spms1_main.rb"
   (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_1_INVERT_1)), ((uint8_t)(cst_SIGNAL_MIXER_1_INVERT_1))), (mrb_int)0);
-#line 549 "spms1_main.rb"
+#line 361 "spms1_main.rb"
   (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_1_LEVEL_2)), ((uint8_t)(cst_SIGNAL_MIXER_1_LEVEL_2))), (mrb_int)0);
-#line 550 "spms1_main.rb"
+#line 362 "spms1_main.rb"
   (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_1_INVERT_2)), ((uint8_t)(cst_SIGNAL_MIXER_1_INVERT_2))), (mrb_int)0);
-#line 551 "spms1_main.rb"
+#line 363 "spms1_main.rb"
   (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_2_LEVEL_1)), ((uint8_t)(cst_SIGNAL_MIXER_2_LEVEL_1))), (mrb_int)0);
-#line 552 "spms1_main.rb"
+#line 364 "spms1_main.rb"
   (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_2_INVERT_1)), ((uint8_t)(cst_SIGNAL_MIXER_2_INVERT_1))), (mrb_int)0);
-#line 553 "spms1_main.rb"
+#line 365 "spms1_main.rb"
   (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_2_LEVEL_2)), ((uint8_t)(cst_SIGNAL_MIXER_2_LEVEL_2))), (mrb_int)0);
-#line 554 "spms1_main.rb"
+#line 366 "spms1_main.rb"
   (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_2_INVERT_2)), ((uint8_t)(cst_SIGNAL_MIXER_2_INVERT_2))), (mrb_int)0);
-#line 555 "spms1_main.rb"
+#line 367 "spms1_main.rb"
   (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_3_LEVEL_1)), ((uint8_t)(cst_SIGNAL_MIXER_3_LEVEL_1))), (mrb_int)0);
-#line 556 "spms1_main.rb"
+#line 368 "spms1_main.rb"
   (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_3_INVERT_1)), ((uint8_t)(cst_SIGNAL_MIXER_3_INVERT_1))), (mrb_int)0);
-#line 557 "spms1_main.rb"
+#line 369 "spms1_main.rb"
   (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_3_LEVEL_2)), ((uint8_t)(cst_SIGNAL_MIXER_3_LEVEL_2))), (mrb_int)0);
-#line 558 "spms1_main.rb"
+#line 370 "spms1_main.rb"
   (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_3_INVERT_2)), ((uint8_t)(cst_SIGNAL_MIXER_3_INVERT_2))), (mrb_int)0);
-#line 559 "spms1_main.rb"
+#line 371 "spms1_main.rb"
   (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_4_LEVEL_1)), ((uint8_t)(cst_SIGNAL_MIXER_4_LEVEL_1))), (mrb_int)0);
-#line 560 "spms1_main.rb"
+#line 372 "spms1_main.rb"
   (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_4_INVERT_1)), ((uint8_t)(cst_SIGNAL_MIXER_4_INVERT_1))), (mrb_int)0);
-#line 561 "spms1_main.rb"
+#line 373 "spms1_main.rb"
   (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_4_LEVEL_2)), ((uint8_t)(cst_SIGNAL_MIXER_4_LEVEL_2))), (mrb_int)0);
-#line 562 "spms1_main.rb"
+#line 374 "spms1_main.rb"
   (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_4_INVERT_2)), ((uint8_t)(cst_SIGNAL_MIXER_4_INVERT_2))), (mrb_int)0);
-#line 563 "spms1_main.rb"
+#line 375 "spms1_main.rb"
   (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_5_LEVEL_1)), ((uint8_t)(cst_SIGNAL_MIXER_5_LEVEL_1))), (mrb_int)0);
-#line 564 "spms1_main.rb"
+#line 376 "spms1_main.rb"
   (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_5_INVERT_1)), ((uint8_t)(cst_SIGNAL_MIXER_5_INVERT_1))), (mrb_int)0);
-#line 565 "spms1_main.rb"
+#line 377 "spms1_main.rb"
   (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_5_LEVEL_2)), ((uint8_t)(cst_SIGNAL_MIXER_5_LEVEL_2))), (mrb_int)0);
-#line 566 "spms1_main.rb"
+#line 378 "spms1_main.rb"
   (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_5_INVERT_2)), ((uint8_t)(cst_SIGNAL_MIXER_5_INVERT_2))), (mrb_int)0);
-#line 567 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_6_LEVEL_1)), ((uint8_t)(cst_SIGNAL_MIXER_6_LEVEL_1))), (mrb_int)0);
-#line 568 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_6_INVERT_1)), ((uint8_t)(cst_SIGNAL_MIXER_6_INVERT_1))), (mrb_int)0);
-#line 569 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_6_LEVEL_2)), ((uint8_t)(cst_SIGNAL_MIXER_6_LEVEL_2))), (mrb_int)0);
-#line 570 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_6_INVERT_2)), ((uint8_t)(cst_SIGNAL_MIXER_6_INVERT_2))), (mrb_int)0);
-#line 571 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_7_LEVEL_1)), ((uint8_t)(cst_SIGNAL_MIXER_7_LEVEL_1))), (mrb_int)0);
-#line 572 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_7_INVERT_1)), ((uint8_t)(cst_SIGNAL_MIXER_7_INVERT_1))), (mrb_int)0);
-#line 573 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_7_LEVEL_2)), ((uint8_t)(cst_SIGNAL_MIXER_7_LEVEL_2))), (mrb_int)0);
-#line 574 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_7_INVERT_2)), ((uint8_t)(cst_SIGNAL_MIXER_7_INVERT_2))), (mrb_int)0);
-#line 575 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_8_LEVEL_1)), ((uint8_t)(cst_SIGNAL_MIXER_8_LEVEL_1))), (mrb_int)0);
-#line 576 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_8_INVERT_1)), ((uint8_t)(cst_SIGNAL_MIXER_8_INVERT_1))), (mrb_int)0);
-#line 577 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_8_LEVEL_2)), ((uint8_t)(cst_SIGNAL_MIXER_8_LEVEL_2))), (mrb_int)0);
-#line 578 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_8_INVERT_2)), ((uint8_t)(cst_SIGNAL_MIXER_8_INVERT_2))), (mrb_int)0);
-#line 579 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_9_LEVEL_1)), ((uint8_t)(cst_SIGNAL_MIXER_9_LEVEL_1))), (mrb_int)0);
-#line 580 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_9_INVERT_1)), ((uint8_t)(cst_SIGNAL_MIXER_9_INVERT_1))), (mrb_int)0);
-#line 581 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_9_LEVEL_2)), ((uint8_t)(cst_SIGNAL_MIXER_9_LEVEL_2))), (mrb_int)0);
-#line 582 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_9_INVERT_2)), ((uint8_t)(cst_SIGNAL_MIXER_9_INVERT_2))), (mrb_int)0);
-#line 583 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_10_LEVEL_1)), ((uint8_t)(cst_SIGNAL_MIXER_10_LEVEL_1))), (mrb_int)0);
-#line 584 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_10_INVERT_1)), ((uint8_t)(cst_SIGNAL_MIXER_10_INVERT_1))), (mrb_int)0);
-#line 585 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_10_LEVEL_2)), ((uint8_t)(cst_SIGNAL_MIXER_10_LEVEL_2))), (mrb_int)0);
-#line 586 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_10_INVERT_2)), ((uint8_t)(cst_SIGNAL_MIXER_10_INVERT_2))), (mrb_int)0);
-#line 588 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_WAVEFORM)), ((uint8_t)(20LL))), (mrb_int)0);
-#line 589 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_MOD_AMOUNT)), ((uint8_t)(13LL))), (mrb_int)0);
-#line 590 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_COARSE_TUNE)), ((uint8_t)(86LL))), (mrb_int)0);
-#line 591 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_FINE_TUNE)), ((uint8_t)(70LL))), (mrb_int)0);
-#line 592 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_FILTER_1_CUTOFF)), ((uint8_t)(74LL))), (mrb_int)0);
-#line 593 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_FILTER_1_RESONANCE)), ((uint8_t)(71LL))), (mrb_int)0);
-#line 594 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_FILTER_1_MOD_AMOUNT)), ((uint8_t)(24LL))), (mrb_int)0);
-#line 595 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_FILTER_1_GAIN)), ((uint8_t)(112LL))), (mrb_int)0);
-#line 596 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_AMP_1_GAIN)), ((uint8_t)(15LL))), (mrb_int)0);
-#line 597 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_ENV_GEN_1_ATTACK)), ((uint8_t)(73LL))), (mrb_int)0);
-#line 598 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_ENV_GEN_1_DECAY)), ((uint8_t)(75LL))), (mrb_int)0);
-#line 599 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_ENV_GEN_1_SUSTAIN)), ((uint8_t)(30LL))), (mrb_int)0);
-#line 600 "spms1_main.rb"
-  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_LFO_1_RATE)), ((uint8_t)(3LL))), (mrb_int)0);
-#line 602 "spms1_main.rb"
+#line 380 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_WAVEFORM)), ((uint8_t)(20LL))), (mrb_int)0);
+#line 381 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_MOD_AMOUNT)), ((uint8_t)(13LL))), (mrb_int)0);
+#line 382 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_COARSE_TUNE)), ((uint8_t)(86LL))), (mrb_int)0);
+#line 383 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_FINE_TUNE)), ((uint8_t)(70LL))), (mrb_int)0);
+#line 384 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_FILTER_CUTOFF)), ((uint8_t)(74LL))), (mrb_int)0);
+#line 385 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_FILTER_RESONANCE)), ((uint8_t)(71LL))), (mrb_int)0);
+#line 386 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_FILTER_MOD_AMOUNT)), ((uint8_t)(24LL))), (mrb_int)0);
+#line 387 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_FILTER_GAIN)), ((uint8_t)(112LL))), (mrb_int)0);
+#line 388 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_AMP_GAIN)), ((uint8_t)(15LL))), (mrb_int)0);
+#line 389 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_ENV_GEN_ATTACK)), ((uint8_t)(73LL))), (mrb_int)0);
+#line 390 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_ENV_GEN_DECAY)), ((uint8_t)(75LL))), (mrb_int)0);
+#line 391 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_ENV_GEN_SUSTAIN)), ((uint8_t)(30LL))), (mrb_int)0);
+#line 392 "spms1_main.rb"
+  (set_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_LFO_RATE)), ((uint8_t)(3LL))), (mrb_int)0);
+#line 394 "spms1_main.rb"
   (set_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(20LL)), ((uint8_t)(4LL))), (mrb_int)0);
-#line 603 "spms1_main.rb"
+#line 395 "spms1_main.rb"
   (set_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(13LL)), ((uint8_t)(4LL))), (mrb_int)0);
-#line 604 "spms1_main.rb"
+#line 396 "spms1_main.rb"
   (set_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(86LL)), ((uint8_t)(64LL))), (mrb_int)0);
-#line 605 "spms1_main.rb"
+#line 397 "spms1_main.rb"
   (set_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(70LL)), ((uint8_t)(64LL))), (mrb_int)0);
-#line 606 "spms1_main.rb"
+#line 398 "spms1_main.rb"
   (set_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(74LL)), ((uint8_t)(124LL))), (mrb_int)0);
-#line 607 "spms1_main.rb"
+#line 399 "spms1_main.rb"
   (set_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(71LL)), ((uint8_t)(64LL))), (mrb_int)0);
-#line 608 "spms1_main.rb"
+#line 400 "spms1_main.rb"
   (set_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(24LL)), ((uint8_t)(64LL))), (mrb_int)0);
-#line 609 "spms1_main.rb"
+#line 401 "spms1_main.rb"
   (set_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(112LL)), ((uint8_t)(64LL))), (mrb_int)0);
-#line 610 "spms1_main.rb"
+#line 402 "spms1_main.rb"
   (set_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(15LL)), ((uint8_t)(64LL))), (mrb_int)0);
-#line 611 "spms1_main.rb"
+#line 403 "spms1_main.rb"
   (set_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(73LL)), ((uint8_t)(4LL))), (mrb_int)0);
-#line 612 "spms1_main.rb"
+#line 404 "spms1_main.rb"
   (set_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(75LL)), ((uint8_t)(94LL))), (mrb_int)0);
-#line 613 "spms1_main.rb"
+#line 405 "spms1_main.rb"
   (set_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(30LL)), ((uint8_t)(4LL))), (mrb_int)0);
-#line 614 "spms1_main.rb"
+#line 406 "spms1_main.rb"
   (set_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(3LL)), ((uint8_t)(64LL))), (mrb_int)0);
-#line 616 "spms1_main.rb"
+#line 408 "spms1_main.rb"
   (set_sample_rate(((int32_t)(cst_SAMPLE_RATE))), (mrb_int)0);
-#line 617 "spms1_main.rb"
+#line 409 "spms1_main.rb"
   (set_audio_buffers(((int32_t)(cst_AUDIO_BUFFERS))), (mrb_int)0);
-#line 618 "spms1_main.rb"
+#line 410 "spms1_main.rb"
   (set_audio_buffer_words(((int32_t)(cst_AUDIO_BUFFER_WORDS))), (mrb_int)0);
-#line 619 "spms1_main.rb"
+#line 411 "spms1_main.rb"
   (start_audio(), (mrb_int)0);
-#line 621 "spms1_main.rb"
-  int _gcb194 = sp_gc_nroots; (void)_gcb194;
+#line 413 "spms1_main.rb"
+  int _gcb155 = sp_gc_nroots; (void)_gcb155;
   sp_exc_msg[sp_exc_top] = 0; sp_exc_obj[sp_exc_top] = 0; sp_exc_top++;
   if (setjmp(sp_exc_stack[sp_exc_top-1]) == 0) {
     for (;;) {
       lv_slot = SP_INT_NIL;
-      lv_source_env_gen_1_gate = SP_INT_NIL;
-      lv_source_env_gen_2_gate = SP_INT_NIL;
-      lv_source_osc_1_pitch = SP_INT_NIL;
-      lv_source_osc_1_mod = SP_INT_NIL;
-      lv_source_osc_2_pitch = SP_INT_NIL;
-      lv_source_osc_2_mod = SP_INT_NIL;
-      lv_source_filter_1_audio = SP_INT_NIL;
-      lv_source_filter_1_mod = SP_INT_NIL;
-      lv_source_filter_2_audio = SP_INT_NIL;
-      lv_source_filter_2_mod = SP_INT_NIL;
-      lv_source_amp_1_audio = SP_INT_NIL;
-      lv_source_amp_1_mod = SP_INT_NIL;
-      lv_source_amp_2_audio = SP_INT_NIL;
-      lv_source_amp_2_mod = SP_INT_NIL;
+      lv_source_env_gen_gate = SP_INT_NIL;
+      lv_source_osc_pitch = SP_INT_NIL;
+      lv_source_osc_mod = SP_INT_NIL;
+      lv_source_filter_audio = SP_INT_NIL;
+      lv_source_filter_mod = SP_INT_NIL;
+      lv_source_amp_audio = SP_INT_NIL;
+      lv_source_amp_mod = SP_INT_NIL;
       lv_source_mixer_1_in_1 = SP_INT_NIL;
       lv_source_mixer_1_in_2 = SP_INT_NIL;
       lv_source_mixer_2_in_1 = SP_INT_NIL;
@@ -3143,43 +2481,20 @@ int main(int argc,char**argv){
       lv_source_mixer_4_in_2 = SP_INT_NIL;
       lv_source_mixer_5_in_1 = SP_INT_NIL;
       lv_source_mixer_5_in_2 = SP_INT_NIL;
-      lv_source_mixer_6_in_1 = SP_INT_NIL;
-      lv_source_mixer_6_in_2 = SP_INT_NIL;
-      lv_source_mixer_7_in_1 = SP_INT_NIL;
-      lv_source_mixer_7_in_2 = SP_INT_NIL;
-      lv_source_mixer_8_in_1 = SP_INT_NIL;
-      lv_source_mixer_8_in_2 = SP_INT_NIL;
-      lv_source_mixer_9_in_1 = SP_INT_NIL;
-      lv_source_mixer_9_in_2 = SP_INT_NIL;
-      lv_source_mixer_10_in_1 = SP_INT_NIL;
-      lv_source_mixer_10_in_2 = SP_INT_NIL;
       lv_source_output = SP_INT_NIL;
-      lv_source_osc_1_waveform = SP_INT_NIL;
-      lv_source_osc_1_mod_amount = SP_INT_NIL;
-      lv_source_osc_1_coarse_tune = SP_INT_NIL;
-      lv_source_osc_1_fine_tune = SP_INT_NIL;
-      lv_source_osc_2_waveform = SP_INT_NIL;
-      lv_source_osc_2_mod_amount = SP_INT_NIL;
-      lv_source_osc_2_coarse_tune = SP_INT_NIL;
-      lv_source_osc_2_fine_tune = SP_INT_NIL;
-      lv_source_filter_1_cutoff = SP_INT_NIL;
-      lv_source_filter_1_resonance = SP_INT_NIL;
-      lv_source_filter_1_mod_amount = SP_INT_NIL;
-      lv_source_filter_1_gain = SP_INT_NIL;
-      lv_source_filter_2_cutoff = SP_INT_NIL;
-      lv_source_filter_2_resonance = SP_INT_NIL;
-      lv_source_filter_2_mod_amount = SP_INT_NIL;
-      lv_source_filter_2_gain = SP_INT_NIL;
-      lv_source_amp_1_gain = SP_INT_NIL;
-      lv_source_amp_2_gain = SP_INT_NIL;
-      lv_source_env_gen_1_attack = SP_INT_NIL;
-      lv_source_env_gen_1_decay = SP_INT_NIL;
-      lv_source_env_gen_1_sustain = SP_INT_NIL;
-      lv_source_env_gen_2_attack = SP_INT_NIL;
-      lv_source_env_gen_2_decay = SP_INT_NIL;
-      lv_source_env_gen_2_sustain = SP_INT_NIL;
-      lv_source_lfo_1_rate = SP_INT_NIL;
-      lv_source_lfo_2_rate = SP_INT_NIL;
+      lv_source_osc_waveform = SP_INT_NIL;
+      lv_source_osc_mod_amount = SP_INT_NIL;
+      lv_source_osc_coarse_tune = SP_INT_NIL;
+      lv_source_osc_fine_tune = SP_INT_NIL;
+      lv_source_filter_cutoff = SP_INT_NIL;
+      lv_source_filter_resonance = SP_INT_NIL;
+      lv_source_filter_mod_amount = SP_INT_NIL;
+      lv_source_filter_gain = SP_INT_NIL;
+      lv_source_amp_gain = SP_INT_NIL;
+      lv_source_env_gen_attack = SP_INT_NIL;
+      lv_source_env_gen_decay = SP_INT_NIL;
+      lv_source_env_gen_sustain = SP_INT_NIL;
+      lv_source_lfo_rate = SP_INT_NIL;
       lv_source_mixer_1_level_1 = SP_INT_NIL;
       lv_source_mixer_1_invert_1 = SP_INT_NIL;
       lv_source_mixer_1_level_2 = SP_INT_NIL;
@@ -3200,52 +2515,19 @@ int main(int argc,char**argv){
       lv_source_mixer_5_invert_1 = SP_INT_NIL;
       lv_source_mixer_5_level_2 = SP_INT_NIL;
       lv_source_mixer_5_invert_2 = SP_INT_NIL;
-      lv_source_mixer_6_level_1 = SP_INT_NIL;
-      lv_source_mixer_6_invert_1 = SP_INT_NIL;
-      lv_source_mixer_6_level_2 = SP_INT_NIL;
-      lv_source_mixer_6_invert_2 = SP_INT_NIL;
-      lv_source_mixer_7_level_1 = SP_INT_NIL;
-      lv_source_mixer_7_invert_1 = SP_INT_NIL;
-      lv_source_mixer_7_level_2 = SP_INT_NIL;
-      lv_source_mixer_7_invert_2 = SP_INT_NIL;
-      lv_source_mixer_8_level_1 = SP_INT_NIL;
-      lv_source_mixer_8_invert_1 = SP_INT_NIL;
-      lv_source_mixer_8_level_2 = SP_INT_NIL;
-      lv_source_mixer_8_invert_2 = SP_INT_NIL;
-      lv_source_mixer_9_level_1 = SP_INT_NIL;
-      lv_source_mixer_9_invert_1 = SP_INT_NIL;
-      lv_source_mixer_9_level_2 = SP_INT_NIL;
-      lv_source_mixer_9_invert_2 = SP_INT_NIL;
-      lv_source_mixer_10_level_1 = SP_INT_NIL;
-      lv_source_mixer_10_invert_1 = SP_INT_NIL;
-      lv_source_mixer_10_level_2 = SP_INT_NIL;
-      lv_source_mixer_10_invert_2 = SP_INT_NIL;
-      lv_cc_osc_1_waveform = SP_INT_NIL;
-      lv_cc_osc_1_mod_amount = SP_INT_NIL;
-      lv_cc_osc_1_coarse_tune = SP_INT_NIL;
-      lv_cc_osc_1_fine_tune = SP_INT_NIL;
-      lv_cc_osc_2_waveform = SP_INT_NIL;
-      lv_cc_osc_2_mod_amount = SP_INT_NIL;
-      lv_cc_osc_2_coarse_tune = SP_INT_NIL;
-      lv_cc_osc_2_fine_tune = SP_INT_NIL;
-      lv_cc_filter_1_cutoff = SP_INT_NIL;
-      lv_cc_filter_1_resonance = SP_INT_NIL;
-      lv_cc_filter_1_mod_amount = SP_INT_NIL;
-      lv_cc_filter_1_gain = SP_INT_NIL;
-      lv_cc_filter_2_cutoff = SP_INT_NIL;
-      lv_cc_filter_2_resonance = SP_INT_NIL;
-      lv_cc_filter_2_mod_amount = SP_INT_NIL;
-      lv_cc_filter_2_gain = SP_INT_NIL;
-      lv_cc_amp_1_gain = SP_INT_NIL;
-      lv_cc_amp_2_gain = SP_INT_NIL;
-      lv_cc_env_gen_1_attack = SP_INT_NIL;
-      lv_cc_env_gen_1_decay = SP_INT_NIL;
-      lv_cc_env_gen_1_sustain = SP_INT_NIL;
-      lv_cc_env_gen_2_attack = SP_INT_NIL;
-      lv_cc_env_gen_2_decay = SP_INT_NIL;
-      lv_cc_env_gen_2_sustain = SP_INT_NIL;
-      lv_cc_lfo_1_rate = SP_INT_NIL;
-      lv_cc_lfo_2_rate = SP_INT_NIL;
+      lv_cc_osc_waveform = SP_INT_NIL;
+      lv_cc_osc_mod_amount = SP_INT_NIL;
+      lv_cc_osc_coarse_tune = SP_INT_NIL;
+      lv_cc_osc_fine_tune = SP_INT_NIL;
+      lv_cc_filter_cutoff = SP_INT_NIL;
+      lv_cc_filter_resonance = SP_INT_NIL;
+      lv_cc_filter_mod_amount = SP_INT_NIL;
+      lv_cc_filter_gain = SP_INT_NIL;
+      lv_cc_amp_gain = SP_INT_NIL;
+      lv_cc_env_gen_attack = SP_INT_NIL;
+      lv_cc_env_gen_decay = SP_INT_NIL;
+      lv_cc_env_gen_sustain = SP_INT_NIL;
+      lv_cc_lfo_rate = SP_INT_NIL;
       lv_cc_mixer_1_level_1 = SP_INT_NIL;
       lv_cc_mixer_1_invert_1 = SP_INT_NIL;
       lv_cc_mixer_1_level_2 = SP_INT_NIL;
@@ -3266,917 +2548,453 @@ int main(int argc,char**argv){
       lv_cc_mixer_5_invert_1 = SP_INT_NIL;
       lv_cc_mixer_5_level_2 = SP_INT_NIL;
       lv_cc_mixer_5_invert_2 = SP_INT_NIL;
-      lv_cc_mixer_6_level_1 = SP_INT_NIL;
-      lv_cc_mixer_6_invert_1 = SP_INT_NIL;
-      lv_cc_mixer_6_level_2 = SP_INT_NIL;
-      lv_cc_mixer_6_invert_2 = SP_INT_NIL;
-      lv_cc_mixer_7_level_1 = SP_INT_NIL;
-      lv_cc_mixer_7_invert_1 = SP_INT_NIL;
-      lv_cc_mixer_7_level_2 = SP_INT_NIL;
-      lv_cc_mixer_7_invert_2 = SP_INT_NIL;
-      lv_cc_mixer_8_level_1 = SP_INT_NIL;
-      lv_cc_mixer_8_invert_1 = SP_INT_NIL;
-      lv_cc_mixer_8_level_2 = SP_INT_NIL;
-      lv_cc_mixer_8_invert_2 = SP_INT_NIL;
-      lv_cc_mixer_9_level_1 = SP_INT_NIL;
-      lv_cc_mixer_9_invert_1 = SP_INT_NIL;
-      lv_cc_mixer_9_level_2 = SP_INT_NIL;
-      lv_cc_mixer_9_invert_2 = SP_INT_NIL;
-      lv_cc_mixer_10_level_1 = SP_INT_NIL;
-      lv_cc_mixer_10_invert_1 = SP_INT_NIL;
-      lv_cc_mixer_10_level_2 = SP_INT_NIL;
-      lv_cc_mixer_10_invert_2 = SP_INT_NIL;
       lv_i = SP_INT_NIL;
       lv_module_id = SP_INT_NIL;
-#line 622 "spms1_main.rb"
+#line 414 "spms1_main.rb"
       (start_debug_measure(), (mrb_int)0);
-#line 624 "spms1_main.rb"
+#line 416 "spms1_main.rb"
       sp_FloatArray_set(lv_signals, cst_SIGNAL_PITCH, ((((mrb_float)(((mrb_int)(get_midi_note_on_pitch(((uint8_t)(cst_MIDI_CH))))))) * ((1.0 / 120.0))) - 0.5));
-#line 625 "spms1_main.rb"
+#line 417 "spms1_main.rb"
       sp_FloatArray_set(lv_signals, cst_SIGNAL_GATE, ((mrb_float)(((mrb_int)(get_midi_note_on_state(((uint8_t)(cst_MIDI_CH))))))));
-#line 633 "spms1_main.rb"
+#line 425 "spms1_main.rb"
       sp_FloatArray_set(lv_signals, cst_SIGNAL_BEND, (((mrb_float)((sp_idiv((sp_int_add(((mrb_int)(get_midi_pitch_bend(((uint8_t)(cst_MIDI_CH))))), 1LL)), 2LL)))) * ((1.0 / 8192.0))));
-#line 637 "spms1_main.rb"
+#line 429 "spms1_main.rb"
       lv_slot = 0LL;
-#line 638 "spms1_main.rb"
+#line 430 "spms1_main.rb"
       while ((lv_slot < cst_MODULES_SIZE)) {
-#line 639 "spms1_main.rb"
+#line 431 "spms1_main.rb"
         sp_IntArray_set(lv_active_modules, lv_slot, ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(sp_int_add(cst_NRPN_ACTIVE_MODULE_BASE, lv_slot)))))));
-#line 640 "spms1_main.rb"
+#line 432 "spms1_main.rb"
         lv_slot = sp_int_add(lv_slot, 1LL);
       }
-#line 643 "spms1_main.rb"
-      lv_source_env_gen_1_gate = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_ENV_GEN_1_GATE)))));
-#line 644 "spms1_main.rb"
-      lv_source_env_gen_2_gate = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_ENV_GEN_2_GATE)))));
-#line 645 "spms1_main.rb"
-      lv_source_osc_1_pitch = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_PITCH)))));
-#line 646 "spms1_main.rb"
-      lv_source_osc_1_mod = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_MOD)))));
-#line 647 "spms1_main.rb"
-      lv_source_osc_2_pitch = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_PITCH)))));
-#line 648 "spms1_main.rb"
-      lv_source_osc_2_mod = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_MOD)))));
-#line 649 "spms1_main.rb"
-      lv_source_filter_1_audio = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_1_AUDIO)))));
-#line 650 "spms1_main.rb"
-      lv_source_filter_1_mod = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_1_MOD)))));
-#line 651 "spms1_main.rb"
-      lv_source_filter_2_audio = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_2_AUDIO)))));
-#line 652 "spms1_main.rb"
-      lv_source_filter_2_mod = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_2_MOD)))));
-#line 653 "spms1_main.rb"
-      lv_source_amp_1_audio = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_AMP_1_AUDIO)))));
-#line 654 "spms1_main.rb"
-      lv_source_amp_1_mod = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_AMP_1_MOD)))));
-#line 655 "spms1_main.rb"
-      lv_source_amp_2_audio = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_AMP_2_AUDIO)))));
-#line 656 "spms1_main.rb"
-      lv_source_amp_2_mod = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_AMP_2_MOD)))));
-#line 657 "spms1_main.rb"
+#line 435 "spms1_main.rb"
+      lv_source_env_gen_gate = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_ENV_GEN_GATE)))));
+#line 436 "spms1_main.rb"
+      lv_source_osc_pitch = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_PITCH)))));
+#line 437 "spms1_main.rb"
+      lv_source_osc_mod = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_MOD)))));
+#line 438 "spms1_main.rb"
+      lv_source_filter_audio = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_AUDIO)))));
+#line 439 "spms1_main.rb"
+      lv_source_filter_mod = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_MOD)))));
+#line 440 "spms1_main.rb"
+      lv_source_amp_audio = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_AMP_AUDIO)))));
+#line 441 "spms1_main.rb"
+      lv_source_amp_mod = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_AMP_MOD)))));
+#line 442 "spms1_main.rb"
       lv_source_mixer_1_in_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_1_IN_1)))));
-#line 658 "spms1_main.rb"
+#line 443 "spms1_main.rb"
       lv_source_mixer_1_in_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_1_IN_2)))));
-#line 659 "spms1_main.rb"
+#line 444 "spms1_main.rb"
       lv_source_mixer_2_in_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_2_IN_1)))));
-#line 660 "spms1_main.rb"
+#line 445 "spms1_main.rb"
       lv_source_mixer_2_in_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_2_IN_2)))));
-#line 661 "spms1_main.rb"
+#line 446 "spms1_main.rb"
       lv_source_mixer_3_in_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_3_IN_1)))));
-#line 662 "spms1_main.rb"
+#line 447 "spms1_main.rb"
       lv_source_mixer_3_in_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_3_IN_2)))));
-#line 663 "spms1_main.rb"
+#line 448 "spms1_main.rb"
       lv_source_mixer_4_in_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_4_IN_1)))));
-#line 664 "spms1_main.rb"
+#line 449 "spms1_main.rb"
       lv_source_mixer_4_in_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_4_IN_2)))));
-#line 665 "spms1_main.rb"
+#line 450 "spms1_main.rb"
       lv_source_mixer_5_in_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_5_IN_1)))));
-#line 666 "spms1_main.rb"
+#line 451 "spms1_main.rb"
       lv_source_mixer_5_in_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_5_IN_2)))));
-#line 667 "spms1_main.rb"
-      lv_source_mixer_6_in_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_6_IN_1)))));
-#line 668 "spms1_main.rb"
-      lv_source_mixer_6_in_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_6_IN_2)))));
-#line 669 "spms1_main.rb"
-      lv_source_mixer_7_in_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_7_IN_1)))));
-#line 670 "spms1_main.rb"
-      lv_source_mixer_7_in_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_7_IN_2)))));
-#line 671 "spms1_main.rb"
-      lv_source_mixer_8_in_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_8_IN_1)))));
-#line 672 "spms1_main.rb"
-      lv_source_mixer_8_in_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_8_IN_2)))));
-#line 673 "spms1_main.rb"
-      lv_source_mixer_9_in_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_9_IN_1)))));
-#line 674 "spms1_main.rb"
-      lv_source_mixer_9_in_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_9_IN_2)))));
-#line 675 "spms1_main.rb"
-      lv_source_mixer_10_in_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_10_IN_1)))));
-#line 676 "spms1_main.rb"
-      lv_source_mixer_10_in_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_10_IN_2)))));
-#line 677 "spms1_main.rb"
+#line 452 "spms1_main.rb"
       lv_source_output = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OUTPUT)))));
-#line 683 "spms1_main.rb"
-      lv_source_osc_1_waveform = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_WAVEFORM)))));
-#line 684 "spms1_main.rb"
-      lv_source_osc_1_mod_amount = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_MOD_AMOUNT)))));
-#line 685 "spms1_main.rb"
-      lv_source_osc_1_coarse_tune = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_COARSE_TUNE)))));
-#line 686 "spms1_main.rb"
-      lv_source_osc_1_fine_tune = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_FINE_TUNE)))));
-#line 687 "spms1_main.rb"
-      lv_source_osc_2_waveform = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_WAVEFORM)))));
-#line 688 "spms1_main.rb"
-      lv_source_osc_2_mod_amount = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_MOD_AMOUNT)))));
-#line 689 "spms1_main.rb"
-      lv_source_osc_2_coarse_tune = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_COARSE_TUNE)))));
-#line 690 "spms1_main.rb"
-      lv_source_osc_2_fine_tune = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_FINE_TUNE)))));
-#line 691 "spms1_main.rb"
-      lv_source_filter_1_cutoff = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_1_CUTOFF)))));
-#line 692 "spms1_main.rb"
-      lv_source_filter_1_resonance = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_1_RESONANCE)))));
-#line 693 "spms1_main.rb"
-      lv_source_filter_1_mod_amount = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_1_MOD_AMOUNT)))));
-#line 694 "spms1_main.rb"
-      lv_source_filter_1_gain = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_1_GAIN)))));
-#line 695 "spms1_main.rb"
-      lv_source_filter_2_cutoff = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_2_CUTOFF)))));
-#line 696 "spms1_main.rb"
-      lv_source_filter_2_resonance = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_2_RESONANCE)))));
-#line 697 "spms1_main.rb"
-      lv_source_filter_2_mod_amount = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_2_MOD_AMOUNT)))));
-#line 698 "spms1_main.rb"
-      lv_source_filter_2_gain = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_2_GAIN)))));
-#line 699 "spms1_main.rb"
-      lv_source_amp_1_gain = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_AMP_1_GAIN)))));
-#line 700 "spms1_main.rb"
-      lv_source_amp_2_gain = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_AMP_2_GAIN)))));
-#line 701 "spms1_main.rb"
-      lv_source_env_gen_1_attack = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_ENV_GEN_1_ATTACK)))));
-#line 702 "spms1_main.rb"
-      lv_source_env_gen_1_decay = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_ENV_GEN_1_DECAY)))));
-#line 703 "spms1_main.rb"
-      lv_source_env_gen_1_sustain = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_ENV_GEN_1_SUSTAIN)))));
-#line 704 "spms1_main.rb"
-      lv_source_env_gen_2_attack = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_ENV_GEN_2_ATTACK)))));
-#line 705 "spms1_main.rb"
-      lv_source_env_gen_2_decay = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_ENV_GEN_2_DECAY)))));
-#line 706 "spms1_main.rb"
-      lv_source_env_gen_2_sustain = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_ENV_GEN_2_SUSTAIN)))));
-#line 707 "spms1_main.rb"
-      lv_source_lfo_1_rate = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_LFO_1_RATE)))));
-#line 708 "spms1_main.rb"
-      lv_source_lfo_2_rate = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_LFO_2_RATE)))));
-#line 709 "spms1_main.rb"
+#line 458 "spms1_main.rb"
+      lv_source_osc_waveform = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_WAVEFORM)))));
+#line 459 "spms1_main.rb"
+      lv_source_osc_mod_amount = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_MOD_AMOUNT)))));
+#line 460 "spms1_main.rb"
+      lv_source_osc_coarse_tune = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_COARSE_TUNE)))));
+#line 461 "spms1_main.rb"
+      lv_source_osc_fine_tune = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_FINE_TUNE)))));
+#line 462 "spms1_main.rb"
+      lv_source_filter_cutoff = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_CUTOFF)))));
+#line 463 "spms1_main.rb"
+      lv_source_filter_resonance = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_RESONANCE)))));
+#line 464 "spms1_main.rb"
+      lv_source_filter_mod_amount = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_MOD_AMOUNT)))));
+#line 465 "spms1_main.rb"
+      lv_source_filter_gain = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_GAIN)))));
+#line 466 "spms1_main.rb"
+      lv_source_amp_gain = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_AMP_GAIN)))));
+#line 467 "spms1_main.rb"
+      lv_source_env_gen_attack = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_ENV_GEN_ATTACK)))));
+#line 468 "spms1_main.rb"
+      lv_source_env_gen_decay = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_ENV_GEN_DECAY)))));
+#line 469 "spms1_main.rb"
+      lv_source_env_gen_sustain = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_ENV_GEN_SUSTAIN)))));
+#line 470 "spms1_main.rb"
+      lv_source_lfo_rate = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_LFO_RATE)))));
+#line 471 "spms1_main.rb"
       lv_source_mixer_1_level_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_1_LEVEL_1)))));
-#line 710 "spms1_main.rb"
+#line 472 "spms1_main.rb"
       lv_source_mixer_1_invert_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_1_INVERT_1)))));
-#line 711 "spms1_main.rb"
+#line 473 "spms1_main.rb"
       lv_source_mixer_1_level_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_1_LEVEL_2)))));
-#line 712 "spms1_main.rb"
+#line 474 "spms1_main.rb"
       lv_source_mixer_1_invert_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_1_INVERT_2)))));
-#line 713 "spms1_main.rb"
+#line 475 "spms1_main.rb"
       lv_source_mixer_2_level_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_2_LEVEL_1)))));
-#line 714 "spms1_main.rb"
+#line 476 "spms1_main.rb"
       lv_source_mixer_2_invert_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_2_INVERT_1)))));
-#line 715 "spms1_main.rb"
+#line 477 "spms1_main.rb"
       lv_source_mixer_2_level_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_2_LEVEL_2)))));
-#line 716 "spms1_main.rb"
+#line 478 "spms1_main.rb"
       lv_source_mixer_2_invert_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_2_INVERT_2)))));
-#line 717 "spms1_main.rb"
+#line 479 "spms1_main.rb"
       lv_source_mixer_3_level_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_3_LEVEL_1)))));
-#line 718 "spms1_main.rb"
+#line 480 "spms1_main.rb"
       lv_source_mixer_3_invert_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_3_INVERT_1)))));
-#line 719 "spms1_main.rb"
+#line 481 "spms1_main.rb"
       lv_source_mixer_3_level_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_3_LEVEL_2)))));
-#line 720 "spms1_main.rb"
+#line 482 "spms1_main.rb"
       lv_source_mixer_3_invert_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_3_INVERT_2)))));
-#line 721 "spms1_main.rb"
+#line 483 "spms1_main.rb"
       lv_source_mixer_4_level_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_4_LEVEL_1)))));
-#line 722 "spms1_main.rb"
+#line 484 "spms1_main.rb"
       lv_source_mixer_4_invert_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_4_INVERT_1)))));
-#line 723 "spms1_main.rb"
+#line 485 "spms1_main.rb"
       lv_source_mixer_4_level_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_4_LEVEL_2)))));
-#line 724 "spms1_main.rb"
+#line 486 "spms1_main.rb"
       lv_source_mixer_4_invert_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_4_INVERT_2)))));
-#line 725 "spms1_main.rb"
+#line 487 "spms1_main.rb"
       lv_source_mixer_5_level_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_5_LEVEL_1)))));
-#line 726 "spms1_main.rb"
+#line 488 "spms1_main.rb"
       lv_source_mixer_5_invert_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_5_INVERT_1)))));
-#line 727 "spms1_main.rb"
+#line 489 "spms1_main.rb"
       lv_source_mixer_5_level_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_5_LEVEL_2)))));
-#line 728 "spms1_main.rb"
+#line 490 "spms1_main.rb"
       lv_source_mixer_5_invert_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_5_INVERT_2)))));
-#line 729 "spms1_main.rb"
-      lv_source_mixer_6_level_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_6_LEVEL_1)))));
-#line 730 "spms1_main.rb"
-      lv_source_mixer_6_invert_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_6_INVERT_1)))));
-#line 731 "spms1_main.rb"
-      lv_source_mixer_6_level_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_6_LEVEL_2)))));
-#line 732 "spms1_main.rb"
-      lv_source_mixer_6_invert_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_6_INVERT_2)))));
-#line 733 "spms1_main.rb"
-      lv_source_mixer_7_level_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_7_LEVEL_1)))));
-#line 734 "spms1_main.rb"
-      lv_source_mixer_7_invert_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_7_INVERT_1)))));
-#line 735 "spms1_main.rb"
-      lv_source_mixer_7_level_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_7_LEVEL_2)))));
-#line 736 "spms1_main.rb"
-      lv_source_mixer_7_invert_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_7_INVERT_2)))));
-#line 737 "spms1_main.rb"
-      lv_source_mixer_8_level_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_8_LEVEL_1)))));
-#line 738 "spms1_main.rb"
-      lv_source_mixer_8_invert_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_8_INVERT_1)))));
-#line 739 "spms1_main.rb"
-      lv_source_mixer_8_level_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_8_LEVEL_2)))));
-#line 740 "spms1_main.rb"
-      lv_source_mixer_8_invert_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_8_INVERT_2)))));
-#line 741 "spms1_main.rb"
-      lv_source_mixer_9_level_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_9_LEVEL_1)))));
-#line 742 "spms1_main.rb"
-      lv_source_mixer_9_invert_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_9_INVERT_1)))));
-#line 743 "spms1_main.rb"
-      lv_source_mixer_9_level_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_9_LEVEL_2)))));
-#line 744 "spms1_main.rb"
-      lv_source_mixer_9_invert_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_9_INVERT_2)))));
-#line 745 "spms1_main.rb"
-      lv_source_mixer_10_level_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_10_LEVEL_1)))));
-#line 746 "spms1_main.rb"
-      lv_source_mixer_10_invert_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_10_INVERT_1)))));
-#line 747 "spms1_main.rb"
-      lv_source_mixer_10_level_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_10_LEVEL_2)))));
-#line 748 "spms1_main.rb"
-      lv_source_mixer_10_invert_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_10_INVERT_2)))));
-#line 752 "spms1_main.rb"
-      lv_cc_osc_1_waveform = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_WAVEFORM)))));
-#line 753 "spms1_main.rb"
-      lv_cc_osc_1_mod_amount = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_MOD_AMOUNT)))));
-#line 754 "spms1_main.rb"
-      lv_cc_osc_1_coarse_tune = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_COARSE_TUNE)))));
-#line 755 "spms1_main.rb"
-      lv_cc_osc_1_fine_tune = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_FINE_TUNE)))));
-#line 756 "spms1_main.rb"
-      lv_cc_osc_2_waveform = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_2_WAVEFORM)))));
-#line 757 "spms1_main.rb"
-      lv_cc_osc_2_mod_amount = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_2_MOD_AMOUNT)))));
-#line 758 "spms1_main.rb"
-      lv_cc_osc_2_coarse_tune = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_2_COARSE_TUNE)))));
-#line 759 "spms1_main.rb"
-      lv_cc_osc_2_fine_tune = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_2_FINE_TUNE)))));
-#line 760 "spms1_main.rb"
-      lv_cc_filter_1_cutoff = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_FILTER_1_CUTOFF)))));
-#line 761 "spms1_main.rb"
-      lv_cc_filter_1_resonance = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_FILTER_1_RESONANCE)))));
-#line 762 "spms1_main.rb"
-      lv_cc_filter_1_mod_amount = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_FILTER_1_MOD_AMOUNT)))));
-#line 763 "spms1_main.rb"
-      lv_cc_filter_1_gain = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_FILTER_1_GAIN)))));
-#line 764 "spms1_main.rb"
-      lv_cc_filter_2_cutoff = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_FILTER_2_CUTOFF)))));
-#line 765 "spms1_main.rb"
-      lv_cc_filter_2_resonance = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_FILTER_2_RESONANCE)))));
-#line 766 "spms1_main.rb"
-      lv_cc_filter_2_mod_amount = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_FILTER_2_MOD_AMOUNT)))));
-#line 767 "spms1_main.rb"
-      lv_cc_filter_2_gain = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_FILTER_2_GAIN)))));
-#line 768 "spms1_main.rb"
-      lv_cc_amp_1_gain = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_AMP_1_GAIN)))));
-#line 769 "spms1_main.rb"
-      lv_cc_amp_2_gain = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_AMP_2_GAIN)))));
-#line 770 "spms1_main.rb"
-      lv_cc_env_gen_1_attack = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_ENV_GEN_1_ATTACK)))));
-#line 771 "spms1_main.rb"
-      lv_cc_env_gen_1_decay = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_ENV_GEN_1_DECAY)))));
-#line 772 "spms1_main.rb"
-      lv_cc_env_gen_1_sustain = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_ENV_GEN_1_SUSTAIN)))));
-#line 773 "spms1_main.rb"
-      lv_cc_env_gen_2_attack = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_ENV_GEN_2_ATTACK)))));
-#line 774 "spms1_main.rb"
-      lv_cc_env_gen_2_decay = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_ENV_GEN_2_DECAY)))));
-#line 775 "spms1_main.rb"
-      lv_cc_env_gen_2_sustain = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_ENV_GEN_2_SUSTAIN)))));
-#line 776 "spms1_main.rb"
-      lv_cc_lfo_1_rate = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_LFO_1_RATE)))));
-#line 777 "spms1_main.rb"
-      lv_cc_lfo_2_rate = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_LFO_2_RATE)))));
-#line 778 "spms1_main.rb"
+#line 494 "spms1_main.rb"
+      lv_cc_osc_waveform = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_WAVEFORM)))));
+#line 495 "spms1_main.rb"
+      lv_cc_osc_mod_amount = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_MOD_AMOUNT)))));
+#line 496 "spms1_main.rb"
+      lv_cc_osc_coarse_tune = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_COARSE_TUNE)))));
+#line 497 "spms1_main.rb"
+      lv_cc_osc_fine_tune = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_FINE_TUNE)))));
+#line 498 "spms1_main.rb"
+      lv_cc_filter_cutoff = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_FILTER_CUTOFF)))));
+#line 499 "spms1_main.rb"
+      lv_cc_filter_resonance = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_FILTER_RESONANCE)))));
+#line 500 "spms1_main.rb"
+      lv_cc_filter_mod_amount = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_FILTER_MOD_AMOUNT)))));
+#line 501 "spms1_main.rb"
+      lv_cc_filter_gain = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_FILTER_GAIN)))));
+#line 502 "spms1_main.rb"
+      lv_cc_amp_gain = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_AMP_GAIN)))));
+#line 503 "spms1_main.rb"
+      lv_cc_env_gen_attack = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_ENV_GEN_ATTACK)))));
+#line 504 "spms1_main.rb"
+      lv_cc_env_gen_decay = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_ENV_GEN_DECAY)))));
+#line 505 "spms1_main.rb"
+      lv_cc_env_gen_sustain = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_ENV_GEN_SUSTAIN)))));
+#line 506 "spms1_main.rb"
+      lv_cc_lfo_rate = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_LFO_RATE)))));
+#line 507 "spms1_main.rb"
       lv_cc_mixer_1_level_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_1_LEVEL_1)))));
-#line 779 "spms1_main.rb"
+#line 508 "spms1_main.rb"
       lv_cc_mixer_1_invert_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_1_INVERT_1)))));
-#line 780 "spms1_main.rb"
+#line 509 "spms1_main.rb"
       lv_cc_mixer_1_level_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_1_LEVEL_2)))));
-#line 781 "spms1_main.rb"
+#line 510 "spms1_main.rb"
       lv_cc_mixer_1_invert_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_1_INVERT_2)))));
-#line 782 "spms1_main.rb"
+#line 511 "spms1_main.rb"
       lv_cc_mixer_2_level_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_2_LEVEL_1)))));
-#line 783 "spms1_main.rb"
+#line 512 "spms1_main.rb"
       lv_cc_mixer_2_invert_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_2_INVERT_1)))));
-#line 784 "spms1_main.rb"
+#line 513 "spms1_main.rb"
       lv_cc_mixer_2_level_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_2_LEVEL_2)))));
-#line 785 "spms1_main.rb"
+#line 514 "spms1_main.rb"
       lv_cc_mixer_2_invert_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_2_INVERT_2)))));
-#line 786 "spms1_main.rb"
+#line 515 "spms1_main.rb"
       lv_cc_mixer_3_level_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_3_LEVEL_1)))));
-#line 787 "spms1_main.rb"
+#line 516 "spms1_main.rb"
       lv_cc_mixer_3_invert_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_3_INVERT_1)))));
-#line 788 "spms1_main.rb"
+#line 517 "spms1_main.rb"
       lv_cc_mixer_3_level_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_3_LEVEL_2)))));
-#line 789 "spms1_main.rb"
+#line 518 "spms1_main.rb"
       lv_cc_mixer_3_invert_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_3_INVERT_2)))));
-#line 790 "spms1_main.rb"
+#line 519 "spms1_main.rb"
       lv_cc_mixer_4_level_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_4_LEVEL_1)))));
-#line 791 "spms1_main.rb"
+#line 520 "spms1_main.rb"
       lv_cc_mixer_4_invert_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_4_INVERT_1)))));
-#line 792 "spms1_main.rb"
+#line 521 "spms1_main.rb"
       lv_cc_mixer_4_level_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_4_LEVEL_2)))));
-#line 793 "spms1_main.rb"
+#line 522 "spms1_main.rb"
       lv_cc_mixer_4_invert_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_4_INVERT_2)))));
-#line 794 "spms1_main.rb"
+#line 523 "spms1_main.rb"
       lv_cc_mixer_5_level_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_5_LEVEL_1)))));
-#line 795 "spms1_main.rb"
+#line 524 "spms1_main.rb"
       lv_cc_mixer_5_invert_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_5_INVERT_1)))));
-#line 796 "spms1_main.rb"
+#line 525 "spms1_main.rb"
       lv_cc_mixer_5_level_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_5_LEVEL_2)))));
-#line 797 "spms1_main.rb"
+#line 526 "spms1_main.rb"
       lv_cc_mixer_5_invert_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_5_INVERT_2)))));
-#line 798 "spms1_main.rb"
-      lv_cc_mixer_6_level_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_6_LEVEL_1)))));
-#line 799 "spms1_main.rb"
-      lv_cc_mixer_6_invert_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_6_INVERT_1)))));
-#line 800 "spms1_main.rb"
-      lv_cc_mixer_6_level_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_6_LEVEL_2)))));
-#line 801 "spms1_main.rb"
-      lv_cc_mixer_6_invert_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_6_INVERT_2)))));
-#line 802 "spms1_main.rb"
-      lv_cc_mixer_7_level_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_7_LEVEL_1)))));
-#line 803 "spms1_main.rb"
-      lv_cc_mixer_7_invert_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_7_INVERT_1)))));
-#line 804 "spms1_main.rb"
-      lv_cc_mixer_7_level_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_7_LEVEL_2)))));
-#line 805 "spms1_main.rb"
-      lv_cc_mixer_7_invert_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_7_INVERT_2)))));
-#line 806 "spms1_main.rb"
-      lv_cc_mixer_8_level_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_8_LEVEL_1)))));
-#line 807 "spms1_main.rb"
-      lv_cc_mixer_8_invert_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_8_INVERT_1)))));
-#line 808 "spms1_main.rb"
-      lv_cc_mixer_8_level_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_8_LEVEL_2)))));
-#line 809 "spms1_main.rb"
-      lv_cc_mixer_8_invert_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_8_INVERT_2)))));
-#line 810 "spms1_main.rb"
-      lv_cc_mixer_9_level_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_9_LEVEL_1)))));
-#line 811 "spms1_main.rb"
-      lv_cc_mixer_9_invert_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_9_INVERT_1)))));
-#line 812 "spms1_main.rb"
-      lv_cc_mixer_9_level_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_9_LEVEL_2)))));
-#line 813 "spms1_main.rb"
-      lv_cc_mixer_9_invert_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_9_INVERT_2)))));
-#line 814 "spms1_main.rb"
-      lv_cc_mixer_10_level_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_10_LEVEL_1)))));
-#line 815 "spms1_main.rb"
-      lv_cc_mixer_10_invert_1 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_10_INVERT_1)))));
-#line 816 "spms1_main.rb"
-      lv_cc_mixer_10_level_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_10_LEVEL_2)))));
-#line 817 "spms1_main.rb"
-      lv_cc_mixer_10_invert_2 = ((mrb_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_10_INVERT_2)))));
-#line 819 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_osc_1_waveform, cst_SIGNAL_OSC_1_WAVEFORM), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_1_waveform)))))));
-#line 820 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_osc_1_mod_amount, cst_SIGNAL_OSC_1_MOD_AMOUNT), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_1_mod_amount)))))));
-#line 821 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_osc_1_coarse_tune, cst_SIGNAL_OSC_1_COARSE_TUNE), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_1_coarse_tune)))))));
-#line 822 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_osc_1_fine_tune, cst_SIGNAL_OSC_1_FINE_TUNE), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_1_fine_tune)))))));
-#line 823 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_osc_2_waveform, cst_SIGNAL_OSC_2_WAVEFORM), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_2_waveform)))))));
-#line 824 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_osc_2_mod_amount, cst_SIGNAL_OSC_2_MOD_AMOUNT), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_2_mod_amount)))))));
-#line 825 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_osc_2_coarse_tune, cst_SIGNAL_OSC_2_COARSE_TUNE), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_2_coarse_tune)))))));
-#line 826 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_osc_2_fine_tune, cst_SIGNAL_OSC_2_FINE_TUNE), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_2_fine_tune)))))));
-#line 827 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_filter_1_cutoff, cst_SIGNAL_FILTER_1_CUTOFF), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_filter_1_cutoff)))))));
-#line 828 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_filter_1_resonance, cst_SIGNAL_FILTER_1_RESONANCE), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_filter_1_resonance)))))));
-#line 829 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_filter_1_mod_amount, cst_SIGNAL_FILTER_1_MOD_AMOUNT), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_filter_1_mod_amount)))))));
-#line 830 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_filter_1_gain, cst_SIGNAL_FILTER_1_GAIN), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_filter_1_gain)))))));
-#line 831 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_filter_2_cutoff, cst_SIGNAL_FILTER_2_CUTOFF), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_filter_2_cutoff)))))));
-#line 832 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_filter_2_resonance, cst_SIGNAL_FILTER_2_RESONANCE), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_filter_2_resonance)))))));
-#line 833 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_filter_2_mod_amount, cst_SIGNAL_FILTER_2_MOD_AMOUNT), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_filter_2_mod_amount)))))));
-#line 834 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_filter_2_gain, cst_SIGNAL_FILTER_2_GAIN), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_filter_2_gain)))))));
-#line 835 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_amp_1_gain, cst_SIGNAL_AMP_1_GAIN), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_amp_1_gain)))))));
-#line 836 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_amp_2_gain, cst_SIGNAL_AMP_2_GAIN), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_amp_2_gain)))))));
-#line 837 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_env_gen_1_attack, cst_SIGNAL_ENV_GEN_1_ATTACK), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_env_gen_1_attack)))))));
-#line 838 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_env_gen_1_decay, cst_SIGNAL_ENV_GEN_1_DECAY), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_env_gen_1_decay)))))));
-#line 839 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_env_gen_1_sustain, cst_SIGNAL_ENV_GEN_1_SUSTAIN), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_env_gen_1_sustain)))))));
-#line 840 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_env_gen_2_attack, cst_SIGNAL_ENV_GEN_2_ATTACK), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_env_gen_2_attack)))))));
-#line 841 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_env_gen_2_decay, cst_SIGNAL_ENV_GEN_2_DECAY), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_env_gen_2_decay)))))));
-#line 842 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_env_gen_2_sustain, cst_SIGNAL_ENV_GEN_2_SUSTAIN), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_env_gen_2_sustain)))))));
-#line 843 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_lfo_1_rate, cst_SIGNAL_LFO_1_RATE), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_lfo_1_rate)))))));
-#line 844 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_lfo_2_rate, cst_SIGNAL_LFO_2_RATE), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_lfo_2_rate)))))));
-#line 845 "spms1_main.rb"
+#line 528 "spms1_main.rb"
+      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_osc_waveform, cst_SIGNAL_OSC_WAVEFORM), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_waveform)))))));
+#line 529 "spms1_main.rb"
+      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_osc_mod_amount, cst_SIGNAL_OSC_MOD_AMOUNT), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_mod_amount)))))));
+#line 530 "spms1_main.rb"
+      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_osc_coarse_tune, cst_SIGNAL_OSC_COARSE_TUNE), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_coarse_tune)))))));
+#line 531 "spms1_main.rb"
+      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_osc_fine_tune, cst_SIGNAL_OSC_FINE_TUNE), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_fine_tune)))))));
+#line 532 "spms1_main.rb"
+      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_filter_cutoff, cst_SIGNAL_FILTER_CUTOFF), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_filter_cutoff)))))));
+#line 533 "spms1_main.rb"
+      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_filter_resonance, cst_SIGNAL_FILTER_RESONANCE), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_filter_resonance)))))));
+#line 534 "spms1_main.rb"
+      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_filter_mod_amount, cst_SIGNAL_FILTER_MOD_AMOUNT), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_filter_mod_amount)))))));
+#line 535 "spms1_main.rb"
+      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_filter_gain, cst_SIGNAL_FILTER_GAIN), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_filter_gain)))))));
+#line 536 "spms1_main.rb"
+      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_amp_gain, cst_SIGNAL_AMP_GAIN), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_amp_gain)))))));
+#line 537 "spms1_main.rb"
+      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_env_gen_attack, cst_SIGNAL_ENV_GEN_ATTACK), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_env_gen_attack)))))));
+#line 538 "spms1_main.rb"
+      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_env_gen_decay, cst_SIGNAL_ENV_GEN_DECAY), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_env_gen_decay)))))));
+#line 539 "spms1_main.rb"
+      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_env_gen_sustain, cst_SIGNAL_ENV_GEN_SUSTAIN), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_env_gen_sustain)))))));
+#line 540 "spms1_main.rb"
+      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_lfo_rate, cst_SIGNAL_LFO_RATE), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_lfo_rate)))))));
+#line 541 "spms1_main.rb"
       sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_mixer_1_level_1, cst_SIGNAL_MIXER_1_LEVEL_1), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_1_level_1)))))));
-#line 846 "spms1_main.rb"
+#line 542 "spms1_main.rb"
       sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_mixer_1_invert_1, cst_SIGNAL_MIXER_1_INVERT_1), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_1_invert_1)))))));
-#line 847 "spms1_main.rb"
+#line 543 "spms1_main.rb"
       sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_mixer_1_level_2, cst_SIGNAL_MIXER_1_LEVEL_2), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_1_level_2)))))));
-#line 848 "spms1_main.rb"
+#line 544 "spms1_main.rb"
       sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_mixer_1_invert_2, cst_SIGNAL_MIXER_1_INVERT_2), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_1_invert_2)))))));
-#line 849 "spms1_main.rb"
+#line 545 "spms1_main.rb"
       sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_mixer_2_level_1, cst_SIGNAL_MIXER_2_LEVEL_1), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_2_level_1)))))));
-#line 850 "spms1_main.rb"
+#line 546 "spms1_main.rb"
       sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_mixer_2_invert_1, cst_SIGNAL_MIXER_2_INVERT_1), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_2_invert_1)))))));
-#line 851 "spms1_main.rb"
+#line 547 "spms1_main.rb"
       sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_mixer_2_level_2, cst_SIGNAL_MIXER_2_LEVEL_2), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_2_level_2)))))));
-#line 852 "spms1_main.rb"
+#line 548 "spms1_main.rb"
       sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_mixer_2_invert_2, cst_SIGNAL_MIXER_2_INVERT_2), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_2_invert_2)))))));
-#line 853 "spms1_main.rb"
+#line 549 "spms1_main.rb"
       sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_mixer_3_level_1, cst_SIGNAL_MIXER_3_LEVEL_1), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_3_level_1)))))));
-#line 854 "spms1_main.rb"
+#line 550 "spms1_main.rb"
       sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_mixer_3_invert_1, cst_SIGNAL_MIXER_3_INVERT_1), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_3_invert_1)))))));
-#line 855 "spms1_main.rb"
+#line 551 "spms1_main.rb"
       sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_mixer_3_level_2, cst_SIGNAL_MIXER_3_LEVEL_2), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_3_level_2)))))));
-#line 856 "spms1_main.rb"
+#line 552 "spms1_main.rb"
       sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_mixer_3_invert_2, cst_SIGNAL_MIXER_3_INVERT_2), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_3_invert_2)))))));
-#line 857 "spms1_main.rb"
+#line 553 "spms1_main.rb"
       sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_mixer_4_level_1, cst_SIGNAL_MIXER_4_LEVEL_1), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_4_level_1)))))));
-#line 858 "spms1_main.rb"
+#line 554 "spms1_main.rb"
       sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_mixer_4_invert_1, cst_SIGNAL_MIXER_4_INVERT_1), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_4_invert_1)))))));
-#line 859 "spms1_main.rb"
+#line 555 "spms1_main.rb"
       sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_mixer_4_level_2, cst_SIGNAL_MIXER_4_LEVEL_2), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_4_level_2)))))));
-#line 860 "spms1_main.rb"
+#line 556 "spms1_main.rb"
       sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_mixer_4_invert_2, cst_SIGNAL_MIXER_4_INVERT_2), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_4_invert_2)))))));
-#line 861 "spms1_main.rb"
+#line 557 "spms1_main.rb"
       sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_mixer_5_level_1, cst_SIGNAL_MIXER_5_LEVEL_1), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_5_level_1)))))));
-#line 862 "spms1_main.rb"
+#line 558 "spms1_main.rb"
       sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_mixer_5_invert_1, cst_SIGNAL_MIXER_5_INVERT_1), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_5_invert_1)))))));
-#line 863 "spms1_main.rb"
+#line 559 "spms1_main.rb"
       sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_mixer_5_level_2, cst_SIGNAL_MIXER_5_LEVEL_2), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_5_level_2)))))));
-#line 864 "spms1_main.rb"
+#line 560 "spms1_main.rb"
       sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_mixer_5_invert_2, cst_SIGNAL_MIXER_5_INVERT_2), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_5_invert_2)))))));
-#line 865 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_mixer_6_level_1, cst_SIGNAL_MIXER_6_LEVEL_1), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_6_level_1)))))));
-#line 866 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_mixer_6_invert_1, cst_SIGNAL_MIXER_6_INVERT_1), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_6_invert_1)))))));
-#line 867 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_mixer_6_level_2, cst_SIGNAL_MIXER_6_LEVEL_2), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_6_level_2)))))));
-#line 868 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_mixer_6_invert_2, cst_SIGNAL_MIXER_6_INVERT_2), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_6_invert_2)))))));
-#line 869 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_mixer_7_level_1, cst_SIGNAL_MIXER_7_LEVEL_1), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_7_level_1)))))));
-#line 870 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_mixer_7_invert_1, cst_SIGNAL_MIXER_7_INVERT_1), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_7_invert_1)))))));
-#line 871 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_mixer_7_level_2, cst_SIGNAL_MIXER_7_LEVEL_2), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_7_level_2)))))));
-#line 872 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_mixer_7_invert_2, cst_SIGNAL_MIXER_7_INVERT_2), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_7_invert_2)))))));
-#line 873 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_mixer_8_level_1, cst_SIGNAL_MIXER_8_LEVEL_1), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_8_level_1)))))));
-#line 874 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_mixer_8_invert_1, cst_SIGNAL_MIXER_8_INVERT_1), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_8_invert_1)))))));
-#line 875 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_mixer_8_level_2, cst_SIGNAL_MIXER_8_LEVEL_2), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_8_level_2)))))));
-#line 876 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_mixer_8_invert_2, cst_SIGNAL_MIXER_8_INVERT_2), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_8_invert_2)))))));
-#line 877 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_mixer_9_level_1, cst_SIGNAL_MIXER_9_LEVEL_1), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_9_level_1)))))));
-#line 878 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_mixer_9_invert_1, cst_SIGNAL_MIXER_9_INVERT_1), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_9_invert_1)))))));
-#line 879 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_mixer_9_level_2, cst_SIGNAL_MIXER_9_LEVEL_2), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_9_level_2)))))));
-#line 880 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_mixer_9_invert_2, cst_SIGNAL_MIXER_9_INVERT_2), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_9_invert_2)))))));
-#line 881 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_mixer_10_level_1, cst_SIGNAL_MIXER_10_LEVEL_1), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_10_level_1)))))));
-#line 882 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_mixer_10_invert_1, cst_SIGNAL_MIXER_10_INVERT_1), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_10_invert_1)))))));
-#line 883 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_mixer_10_level_2, cst_SIGNAL_MIXER_10_LEVEL_2), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_10_level_2)))))));
-#line 884 "spms1_main.rb"
-      sp_FloatArray_set(lv_signals, sp_cc_slot(lv_cc_mixer_10_invert_2, cst_SIGNAL_MIXER_10_INVERT_2), sp_cc_to_ratio(((mrb_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_10_invert_2)))))));
-#line 886 "spms1_main.rb"
-      mrb_float _t433 = sp_FloatArray_get(lv_signals, lv_source_osc_1_waveform);
-      sp_Osc_set_waveform((sp_Osc *)lv_osc_1, _t433);
-#line 887 "spms1_main.rb"
-      mrb_float _t434 = sp_FloatArray_get(lv_signals, lv_source_osc_1_mod_amount);
-      sp_Osc_set_modulation_amount((sp_Osc *)lv_osc_1, _t434);
-#line 888 "spms1_main.rb"
-      mrb_float _t435 = sp_FloatArray_get(lv_signals, lv_source_osc_1_coarse_tune);
-      sp_Osc_set_coarse_tune((sp_Osc *)lv_osc_1, _t435);
-#line 889 "spms1_main.rb"
-      mrb_float _t436 = sp_FloatArray_get(lv_signals, lv_source_osc_1_fine_tune);
-      sp_Osc_set_fine_tune((sp_Osc *)lv_osc_1, _t436);
-#line 890 "spms1_main.rb"
-      mrb_float _t437 = sp_FloatArray_get(lv_signals, lv_source_osc_2_waveform);
-      sp_Osc_set_waveform((sp_Osc *)lv_osc_2, _t437);
-#line 891 "spms1_main.rb"
-      mrb_float _t438 = sp_FloatArray_get(lv_signals, lv_source_osc_2_mod_amount);
-      sp_Osc_set_modulation_amount((sp_Osc *)lv_osc_2, _t438);
-#line 892 "spms1_main.rb"
-      mrb_float _t439 = sp_FloatArray_get(lv_signals, lv_source_osc_2_coarse_tune);
-      sp_Osc_set_coarse_tune((sp_Osc *)lv_osc_2, _t439);
-#line 893 "spms1_main.rb"
-      mrb_float _t440 = sp_FloatArray_get(lv_signals, lv_source_osc_2_fine_tune);
-      sp_Osc_set_fine_tune((sp_Osc *)lv_osc_2, _t440);
-#line 894 "spms1_main.rb"
-      mrb_float _t441 = sp_FloatArray_get(lv_signals, lv_source_filter_1_cutoff);
-      sp_Filter_set_cutoff((sp_Filter *)lv_filter_1, _t441);
-#line 895 "spms1_main.rb"
-      mrb_float _t442 = sp_FloatArray_get(lv_signals, lv_source_filter_1_resonance);
-      sp_Filter_set_resonance((sp_Filter *)lv_filter_1, _t442);
-#line 896 "spms1_main.rb"
-      mrb_float _t443 = sp_FloatArray_get(lv_signals, lv_source_filter_1_mod_amount);
-      sp_Filter_set_modulation_amount((sp_Filter *)lv_filter_1, _t443);
-#line 897 "spms1_main.rb"
-      mrb_float _t444 = sp_FloatArray_get(lv_signals, lv_source_filter_1_gain);
-      sp_Filter_set_gain((sp_Filter *)lv_filter_1, _t444);
-#line 898 "spms1_main.rb"
-      mrb_float _t445 = sp_FloatArray_get(lv_signals, lv_source_filter_2_cutoff);
-      sp_Filter_set_cutoff((sp_Filter *)lv_filter_2, _t445);
-#line 899 "spms1_main.rb"
-      mrb_float _t446 = sp_FloatArray_get(lv_signals, lv_source_filter_2_resonance);
-      sp_Filter_set_resonance((sp_Filter *)lv_filter_2, _t446);
-#line 900 "spms1_main.rb"
-      mrb_float _t447 = sp_FloatArray_get(lv_signals, lv_source_filter_2_mod_amount);
-      sp_Filter_set_modulation_amount((sp_Filter *)lv_filter_2, _t447);
-#line 901 "spms1_main.rb"
-      mrb_float _t448 = sp_FloatArray_get(lv_signals, lv_source_filter_2_gain);
-      sp_Filter_set_gain((sp_Filter *)lv_filter_2, _t448);
-#line 902 "spms1_main.rb"
-      mrb_float _t449 = sp_FloatArray_get(lv_signals, lv_source_amp_1_gain);
-      sp_Amp_set_gain((sp_Amp *)lv_amp_1, _t449);
-#line 903 "spms1_main.rb"
-      mrb_float _t450 = sp_FloatArray_get(lv_signals, lv_source_amp_2_gain);
-      sp_Amp_set_gain((sp_Amp *)lv_amp_2, _t450);
-#line 904 "spms1_main.rb"
-      mrb_float _t451 = sp_FloatArray_get(lv_signals, lv_source_env_gen_1_attack);
-      sp_EnvGen_set_attack((sp_EnvGen *)lv_env_gen_1, _t451);
-#line 905 "spms1_main.rb"
-      mrb_float _t452 = sp_FloatArray_get(lv_signals, lv_source_env_gen_1_decay);
-      sp_EnvGen_set_decay((sp_EnvGen *)lv_env_gen_1, _t452);
-#line 906 "spms1_main.rb"
-      mrb_float _t453 = sp_FloatArray_get(lv_signals, lv_source_env_gen_1_sustain);
-      sp_EnvGen_set_sustain((sp_EnvGen *)lv_env_gen_1, _t453);
-#line 907 "spms1_main.rb"
-      mrb_float _t454 = sp_FloatArray_get(lv_signals, lv_source_env_gen_2_attack);
-      sp_EnvGen_set_attack((sp_EnvGen *)lv_env_gen_2, _t454);
-#line 908 "spms1_main.rb"
-      mrb_float _t455 = sp_FloatArray_get(lv_signals, lv_source_env_gen_2_decay);
-      sp_EnvGen_set_decay((sp_EnvGen *)lv_env_gen_2, _t455);
-#line 909 "spms1_main.rb"
-      mrb_float _t456 = sp_FloatArray_get(lv_signals, lv_source_env_gen_2_sustain);
-      sp_EnvGen_set_sustain((sp_EnvGen *)lv_env_gen_2, _t456);
-#line 910 "spms1_main.rb"
-      mrb_float _t457 = sp_FloatArray_get(lv_signals, lv_source_lfo_1_rate);
-      sp_LFO_set_rate((sp_LFO *)lv_lfo_1, _t457);
-#line 911 "spms1_main.rb"
-      mrb_float _t458 = sp_FloatArray_get(lv_signals, lv_source_lfo_2_rate);
-      sp_LFO_set_rate((sp_LFO *)lv_lfo_2, _t458);
-#line 912 "spms1_main.rb"
-      mrb_float _t459 = sp_FloatArray_get(lv_signals, lv_source_mixer_1_level_1);
-      sp_Mixer_set_level_1((sp_Mixer *)lv_mixer_1, _t459);
-#line 913 "spms1_main.rb"
-      mrb_float _t460 = sp_FloatArray_get(lv_signals, lv_source_mixer_1_invert_1);
-      sp_Mixer_set_invert_1((sp_Mixer *)lv_mixer_1, _t460);
-#line 914 "spms1_main.rb"
-      mrb_float _t461 = sp_FloatArray_get(lv_signals, lv_source_mixer_1_level_2);
-      sp_Mixer_set_level_2((sp_Mixer *)lv_mixer_1, _t461);
-#line 915 "spms1_main.rb"
-      mrb_float _t462 = sp_FloatArray_get(lv_signals, lv_source_mixer_1_invert_2);
-      sp_Mixer_set_invert_2((sp_Mixer *)lv_mixer_1, _t462);
-#line 916 "spms1_main.rb"
-      mrb_float _t463 = sp_FloatArray_get(lv_signals, lv_source_mixer_2_level_1);
-      sp_Mixer_set_level_1((sp_Mixer *)lv_mixer_2, _t463);
-#line 917 "spms1_main.rb"
-      mrb_float _t464 = sp_FloatArray_get(lv_signals, lv_source_mixer_2_invert_1);
-      sp_Mixer_set_invert_1((sp_Mixer *)lv_mixer_2, _t464);
-#line 918 "spms1_main.rb"
-      mrb_float _t465 = sp_FloatArray_get(lv_signals, lv_source_mixer_2_level_2);
-      sp_Mixer_set_level_2((sp_Mixer *)lv_mixer_2, _t465);
-#line 919 "spms1_main.rb"
-      mrb_float _t466 = sp_FloatArray_get(lv_signals, lv_source_mixer_2_invert_2);
-      sp_Mixer_set_invert_2((sp_Mixer *)lv_mixer_2, _t466);
-#line 920 "spms1_main.rb"
-      mrb_float _t467 = sp_FloatArray_get(lv_signals, lv_source_mixer_3_level_1);
-      sp_Mixer_set_level_1((sp_Mixer *)lv_mixer_3, _t467);
-#line 921 "spms1_main.rb"
-      mrb_float _t468 = sp_FloatArray_get(lv_signals, lv_source_mixer_3_invert_1);
-      sp_Mixer_set_invert_1((sp_Mixer *)lv_mixer_3, _t468);
-#line 922 "spms1_main.rb"
-      mrb_float _t469 = sp_FloatArray_get(lv_signals, lv_source_mixer_3_level_2);
-      sp_Mixer_set_level_2((sp_Mixer *)lv_mixer_3, _t469);
-#line 923 "spms1_main.rb"
-      mrb_float _t470 = sp_FloatArray_get(lv_signals, lv_source_mixer_3_invert_2);
-      sp_Mixer_set_invert_2((sp_Mixer *)lv_mixer_3, _t470);
-#line 924 "spms1_main.rb"
-      mrb_float _t471 = sp_FloatArray_get(lv_signals, lv_source_mixer_4_level_1);
-      sp_Mixer_set_level_1((sp_Mixer *)lv_mixer_4, _t471);
-#line 925 "spms1_main.rb"
-      mrb_float _t472 = sp_FloatArray_get(lv_signals, lv_source_mixer_4_invert_1);
-      sp_Mixer_set_invert_1((sp_Mixer *)lv_mixer_4, _t472);
-#line 926 "spms1_main.rb"
-      mrb_float _t473 = sp_FloatArray_get(lv_signals, lv_source_mixer_4_level_2);
-      sp_Mixer_set_level_2((sp_Mixer *)lv_mixer_4, _t473);
-#line 927 "spms1_main.rb"
-      mrb_float _t474 = sp_FloatArray_get(lv_signals, lv_source_mixer_4_invert_2);
-      sp_Mixer_set_invert_2((sp_Mixer *)lv_mixer_4, _t474);
-#line 928 "spms1_main.rb"
-      mrb_float _t475 = sp_FloatArray_get(lv_signals, lv_source_mixer_5_level_1);
-      sp_Mixer_set_level_1((sp_Mixer *)lv_mixer_5, _t475);
-#line 929 "spms1_main.rb"
-      mrb_float _t476 = sp_FloatArray_get(lv_signals, lv_source_mixer_5_invert_1);
-      sp_Mixer_set_invert_1((sp_Mixer *)lv_mixer_5, _t476);
-#line 930 "spms1_main.rb"
-      mrb_float _t477 = sp_FloatArray_get(lv_signals, lv_source_mixer_5_level_2);
-      sp_Mixer_set_level_2((sp_Mixer *)lv_mixer_5, _t477);
-#line 931 "spms1_main.rb"
-      mrb_float _t478 = sp_FloatArray_get(lv_signals, lv_source_mixer_5_invert_2);
-      sp_Mixer_set_invert_2((sp_Mixer *)lv_mixer_5, _t478);
-#line 932 "spms1_main.rb"
-      mrb_float _t479 = sp_FloatArray_get(lv_signals, lv_source_mixer_6_level_1);
-      sp_Mixer_set_level_1((sp_Mixer *)lv_mixer_6, _t479);
-#line 933 "spms1_main.rb"
-      mrb_float _t480 = sp_FloatArray_get(lv_signals, lv_source_mixer_6_invert_1);
-      sp_Mixer_set_invert_1((sp_Mixer *)lv_mixer_6, _t480);
-#line 934 "spms1_main.rb"
-      mrb_float _t481 = sp_FloatArray_get(lv_signals, lv_source_mixer_6_level_2);
-      sp_Mixer_set_level_2((sp_Mixer *)lv_mixer_6, _t481);
-#line 935 "spms1_main.rb"
-      mrb_float _t482 = sp_FloatArray_get(lv_signals, lv_source_mixer_6_invert_2);
-      sp_Mixer_set_invert_2((sp_Mixer *)lv_mixer_6, _t482);
-#line 936 "spms1_main.rb"
-      mrb_float _t483 = sp_FloatArray_get(lv_signals, lv_source_mixer_7_level_1);
-      sp_Mixer_set_level_1((sp_Mixer *)lv_mixer_7, _t483);
-#line 937 "spms1_main.rb"
-      mrb_float _t484 = sp_FloatArray_get(lv_signals, lv_source_mixer_7_invert_1);
-      sp_Mixer_set_invert_1((sp_Mixer *)lv_mixer_7, _t484);
-#line 938 "spms1_main.rb"
-      mrb_float _t485 = sp_FloatArray_get(lv_signals, lv_source_mixer_7_level_2);
-      sp_Mixer_set_level_2((sp_Mixer *)lv_mixer_7, _t485);
-#line 939 "spms1_main.rb"
-      mrb_float _t486 = sp_FloatArray_get(lv_signals, lv_source_mixer_7_invert_2);
-      sp_Mixer_set_invert_2((sp_Mixer *)lv_mixer_7, _t486);
-#line 940 "spms1_main.rb"
-      mrb_float _t487 = sp_FloatArray_get(lv_signals, lv_source_mixer_8_level_1);
-      sp_Mixer_set_level_1((sp_Mixer *)lv_mixer_8, _t487);
-#line 941 "spms1_main.rb"
-      mrb_float _t488 = sp_FloatArray_get(lv_signals, lv_source_mixer_8_invert_1);
-      sp_Mixer_set_invert_1((sp_Mixer *)lv_mixer_8, _t488);
-#line 942 "spms1_main.rb"
-      mrb_float _t489 = sp_FloatArray_get(lv_signals, lv_source_mixer_8_level_2);
-      sp_Mixer_set_level_2((sp_Mixer *)lv_mixer_8, _t489);
-#line 943 "spms1_main.rb"
-      mrb_float _t490 = sp_FloatArray_get(lv_signals, lv_source_mixer_8_invert_2);
-      sp_Mixer_set_invert_2((sp_Mixer *)lv_mixer_8, _t490);
-#line 944 "spms1_main.rb"
-      mrb_float _t491 = sp_FloatArray_get(lv_signals, lv_source_mixer_9_level_1);
-      sp_Mixer_set_level_1((sp_Mixer *)lv_mixer_9, _t491);
-#line 945 "spms1_main.rb"
-      mrb_float _t492 = sp_FloatArray_get(lv_signals, lv_source_mixer_9_invert_1);
-      sp_Mixer_set_invert_1((sp_Mixer *)lv_mixer_9, _t492);
-#line 946 "spms1_main.rb"
-      mrb_float _t493 = sp_FloatArray_get(lv_signals, lv_source_mixer_9_level_2);
-      sp_Mixer_set_level_2((sp_Mixer *)lv_mixer_9, _t493);
-#line 947 "spms1_main.rb"
-      mrb_float _t494 = sp_FloatArray_get(lv_signals, lv_source_mixer_9_invert_2);
-      sp_Mixer_set_invert_2((sp_Mixer *)lv_mixer_9, _t494);
-#line 948 "spms1_main.rb"
-      mrb_float _t495 = sp_FloatArray_get(lv_signals, lv_source_mixer_10_level_1);
-      sp_Mixer_set_level_1((sp_Mixer *)lv_mixer_10, _t495);
-#line 949 "spms1_main.rb"
-      mrb_float _t496 = sp_FloatArray_get(lv_signals, lv_source_mixer_10_invert_1);
-      sp_Mixer_set_invert_1((sp_Mixer *)lv_mixer_10, _t496);
-#line 950 "spms1_main.rb"
-      mrb_float _t497 = sp_FloatArray_get(lv_signals, lv_source_mixer_10_level_2);
-      sp_Mixer_set_level_2((sp_Mixer *)lv_mixer_10, _t497);
-#line 951 "spms1_main.rb"
-      mrb_float _t498 = sp_FloatArray_get(lv_signals, lv_source_mixer_10_invert_2);
-      sp_Mixer_set_invert_2((sp_Mixer *)lv_mixer_10, _t498);
-#line 953 "spms1_main.rb"
+#line 562 "spms1_main.rb"
+      mrb_float _t278 = sp_FloatArray_get(lv_signals, lv_source_osc_waveform);
+      sp_Osc_set_waveform((sp_Osc *)lv_osc, _t278);
+#line 563 "spms1_main.rb"
+      mrb_float _t279 = sp_FloatArray_get(lv_signals, lv_source_osc_mod_amount);
+      sp_Osc_set_modulation_amount((sp_Osc *)lv_osc, _t279);
+#line 564 "spms1_main.rb"
+      mrb_float _t280 = sp_FloatArray_get(lv_signals, lv_source_osc_coarse_tune);
+      sp_Osc_set_coarse_tune((sp_Osc *)lv_osc, _t280);
+#line 565 "spms1_main.rb"
+      mrb_float _t281 = sp_FloatArray_get(lv_signals, lv_source_osc_fine_tune);
+      sp_Osc_set_fine_tune((sp_Osc *)lv_osc, _t281);
+#line 566 "spms1_main.rb"
+      mrb_float _t282 = sp_FloatArray_get(lv_signals, lv_source_filter_cutoff);
+      sp_Filter_set_cutoff((sp_Filter *)lv_filter, _t282);
+#line 567 "spms1_main.rb"
+      mrb_float _t283 = sp_FloatArray_get(lv_signals, lv_source_filter_resonance);
+      sp_Filter_set_resonance((sp_Filter *)lv_filter, _t283);
+#line 568 "spms1_main.rb"
+      mrb_float _t284 = sp_FloatArray_get(lv_signals, lv_source_filter_mod_amount);
+      sp_Filter_set_modulation_amount((sp_Filter *)lv_filter, _t284);
+#line 569 "spms1_main.rb"
+      mrb_float _t285 = sp_FloatArray_get(lv_signals, lv_source_filter_gain);
+      sp_Filter_set_gain((sp_Filter *)lv_filter, _t285);
+#line 570 "spms1_main.rb"
+      mrb_float _t286 = sp_FloatArray_get(lv_signals, lv_source_amp_gain);
+      sp_Amp_set_gain((sp_Amp *)lv_amp, _t286);
+#line 571 "spms1_main.rb"
+      mrb_float _t287 = sp_FloatArray_get(lv_signals, lv_source_env_gen_attack);
+      sp_EnvGen_set_attack((sp_EnvGen *)lv_env_gen, _t287);
+#line 572 "spms1_main.rb"
+      mrb_float _t288 = sp_FloatArray_get(lv_signals, lv_source_env_gen_decay);
+      sp_EnvGen_set_decay((sp_EnvGen *)lv_env_gen, _t288);
+#line 573 "spms1_main.rb"
+      mrb_float _t289 = sp_FloatArray_get(lv_signals, lv_source_env_gen_sustain);
+      sp_EnvGen_set_sustain((sp_EnvGen *)lv_env_gen, _t289);
+#line 574 "spms1_main.rb"
+      mrb_float _t290 = sp_FloatArray_get(lv_signals, lv_source_lfo_rate);
+      sp_LFO_set_rate((sp_LFO *)lv_lfo, _t290);
+#line 575 "spms1_main.rb"
+      mrb_float _t291 = sp_FloatArray_get(lv_signals, lv_source_mixer_1_level_1);
+      sp_Mixer_set_level_1((sp_Mixer *)lv_mixer_1, _t291);
+#line 576 "spms1_main.rb"
+      mrb_float _t292 = sp_FloatArray_get(lv_signals, lv_source_mixer_1_invert_1);
+      sp_Mixer_set_invert_1((sp_Mixer *)lv_mixer_1, _t292);
+#line 577 "spms1_main.rb"
+      mrb_float _t293 = sp_FloatArray_get(lv_signals, lv_source_mixer_1_level_2);
+      sp_Mixer_set_level_2((sp_Mixer *)lv_mixer_1, _t293);
+#line 578 "spms1_main.rb"
+      mrb_float _t294 = sp_FloatArray_get(lv_signals, lv_source_mixer_1_invert_2);
+      sp_Mixer_set_invert_2((sp_Mixer *)lv_mixer_1, _t294);
+#line 579 "spms1_main.rb"
+      mrb_float _t295 = sp_FloatArray_get(lv_signals, lv_source_mixer_2_level_1);
+      sp_Mixer_set_level_1((sp_Mixer *)lv_mixer_2, _t295);
+#line 580 "spms1_main.rb"
+      mrb_float _t296 = sp_FloatArray_get(lv_signals, lv_source_mixer_2_invert_1);
+      sp_Mixer_set_invert_1((sp_Mixer *)lv_mixer_2, _t296);
+#line 581 "spms1_main.rb"
+      mrb_float _t297 = sp_FloatArray_get(lv_signals, lv_source_mixer_2_level_2);
+      sp_Mixer_set_level_2((sp_Mixer *)lv_mixer_2, _t297);
+#line 582 "spms1_main.rb"
+      mrb_float _t298 = sp_FloatArray_get(lv_signals, lv_source_mixer_2_invert_2);
+      sp_Mixer_set_invert_2((sp_Mixer *)lv_mixer_2, _t298);
+#line 583 "spms1_main.rb"
+      mrb_float _t299 = sp_FloatArray_get(lv_signals, lv_source_mixer_3_level_1);
+      sp_Mixer_set_level_1((sp_Mixer *)lv_mixer_3, _t299);
+#line 584 "spms1_main.rb"
+      mrb_float _t300 = sp_FloatArray_get(lv_signals, lv_source_mixer_3_invert_1);
+      sp_Mixer_set_invert_1((sp_Mixer *)lv_mixer_3, _t300);
+#line 585 "spms1_main.rb"
+      mrb_float _t301 = sp_FloatArray_get(lv_signals, lv_source_mixer_3_level_2);
+      sp_Mixer_set_level_2((sp_Mixer *)lv_mixer_3, _t301);
+#line 586 "spms1_main.rb"
+      mrb_float _t302 = sp_FloatArray_get(lv_signals, lv_source_mixer_3_invert_2);
+      sp_Mixer_set_invert_2((sp_Mixer *)lv_mixer_3, _t302);
+#line 587 "spms1_main.rb"
+      mrb_float _t303 = sp_FloatArray_get(lv_signals, lv_source_mixer_4_level_1);
+      sp_Mixer_set_level_1((sp_Mixer *)lv_mixer_4, _t303);
+#line 588 "spms1_main.rb"
+      mrb_float _t304 = sp_FloatArray_get(lv_signals, lv_source_mixer_4_invert_1);
+      sp_Mixer_set_invert_1((sp_Mixer *)lv_mixer_4, _t304);
+#line 589 "spms1_main.rb"
+      mrb_float _t305 = sp_FloatArray_get(lv_signals, lv_source_mixer_4_level_2);
+      sp_Mixer_set_level_2((sp_Mixer *)lv_mixer_4, _t305);
+#line 590 "spms1_main.rb"
+      mrb_float _t306 = sp_FloatArray_get(lv_signals, lv_source_mixer_4_invert_2);
+      sp_Mixer_set_invert_2((sp_Mixer *)lv_mixer_4, _t306);
+#line 591 "spms1_main.rb"
+      mrb_float _t307 = sp_FloatArray_get(lv_signals, lv_source_mixer_5_level_1);
+      sp_Mixer_set_level_1((sp_Mixer *)lv_mixer_5, _t307);
+#line 592 "spms1_main.rb"
+      mrb_float _t308 = sp_FloatArray_get(lv_signals, lv_source_mixer_5_invert_1);
+      sp_Mixer_set_invert_1((sp_Mixer *)lv_mixer_5, _t308);
+#line 593 "spms1_main.rb"
+      mrb_float _t309 = sp_FloatArray_get(lv_signals, lv_source_mixer_5_level_2);
+      sp_Mixer_set_level_2((sp_Mixer *)lv_mixer_5, _t309);
+#line 594 "spms1_main.rb"
+      mrb_float _t310 = sp_FloatArray_get(lv_signals, lv_source_mixer_5_invert_2);
+      sp_Mixer_set_invert_2((sp_Mixer *)lv_mixer_5, _t310);
+#line 596 "spms1_main.rb"
       lv_i = 0LL;
-#line 954 "spms1_main.rb"
+#line 597 "spms1_main.rb"
       while ((lv_i < cst_AUDIO_BUFFER_WORDS)) {
-#line 955 "spms1_main.rb"
+#line 598 "spms1_main.rb"
         lv_slot = 0LL;
-#line 956 "spms1_main.rb"
+#line 599 "spms1_main.rb"
         while ((lv_slot < cst_MODULES_SIZE)) {
-#line 957 "spms1_main.rb"
+#line 600 "spms1_main.rb"
           lv_module_id = sp_IntArray_get(lv_active_modules, lv_slot);
-#line 958 "spms1_main.rb"
+#line 601 "spms1_main.rb"
           if ((lv_module_id == cst_MODULE_NONE)) {
             break;
           }
-#line 966 "spms1_main.rb"
-          if ((lv_module_id <= cst_MODULE_MIXER_10)) {
-#line 967 "spms1_main.rb"
-            if ((lv_module_id < cst_MODULE_MIXER_1)) {
-#line 968 "spms1_main.rb"
-              if ((lv_module_id < cst_MODULE_OSC_2)) {
-#line 969 "spms1_main.rb"
-                if ((lv_module_id < cst_MODULE_LFO_1)) {
-#line 970 "spms1_main.rb"
-                  if ((lv_module_id < cst_MODULE_ENV_GEN_2)) {
-#line 971 "spms1_main.rb"
-                    mrb_float _t499 = sp_FloatArray_get(lv_signals, lv_source_env_gen_1_gate);
-                    sp_FloatArray_set(lv_signals, cst_SIGNAL_ENV_GEN_1_OUTPUT, sp_EnvGen_process((sp_EnvGen *)lv_env_gen_1, _t499));
-                  }
-                  else {
-#line 973 "spms1_main.rb"
-                    mrb_float _t500 = sp_FloatArray_get(lv_signals, lv_source_env_gen_2_gate);
-                    sp_FloatArray_set(lv_signals, cst_SIGNAL_ENV_GEN_2_OUTPUT, sp_EnvGen_process((sp_EnvGen *)lv_env_gen_2, _t500));
-                  }
-                }
-                else {
-#line 976 "spms1_main.rb"
-                  if ((lv_module_id < cst_MODULE_LFO_2)) {
-#line 977 "spms1_main.rb"
-                    sp_FloatArray_set(lv_signals, cst_SIGNAL_LFO_1_OUTPUT, sp_LFO_process((sp_LFO *)lv_lfo_1));
-                  }
-                  else {
-#line 979 "spms1_main.rb"
-                    if ((lv_module_id < cst_MODULE_OSC_1)) {
-#line 980 "spms1_main.rb"
-                      sp_FloatArray_set(lv_signals, cst_SIGNAL_LFO_2_OUTPUT, sp_LFO_process((sp_LFO *)lv_lfo_2));
-                    }
-                    else {
-#line 982 "spms1_main.rb"
-                      mrb_float _t501 = sp_FloatArray_get(lv_signals, lv_source_osc_1_pitch);
-                      mrb_float _t502 = sp_FloatArray_get(lv_signals, lv_source_osc_1_mod);
-                      sp_FloatArray_set(lv_signals, cst_SIGNAL_OSC_1_OUTPUT, sp_Osc_process((sp_Osc *)lv_osc_1, _t501, _t502));
-                    }
-                  }
-                }
-              }
-              else {
-#line 987 "spms1_main.rb"
-                if ((lv_module_id < cst_MODULE_FILTER_2)) {
-#line 988 "spms1_main.rb"
-                  if ((lv_module_id < cst_MODULE_FILTER_1)) {
-#line 989 "spms1_main.rb"
-                    mrb_float _t503 = sp_FloatArray_get(lv_signals, lv_source_osc_2_pitch);
-                    mrb_float _t504 = sp_FloatArray_get(lv_signals, lv_source_osc_2_mod);
-                    sp_FloatArray_set(lv_signals, cst_SIGNAL_OSC_2_OUTPUT, sp_Osc_process((sp_Osc *)lv_osc_2, _t503, _t504));
-                  }
-                  else {
-#line 991 "spms1_main.rb"
-                    mrb_float _t505 = sp_FloatArray_get(lv_signals, lv_source_filter_1_audio);
-                    mrb_float _t506 = sp_FloatArray_get(lv_signals, lv_source_filter_1_mod);
-                    sp_FloatArray_set(lv_signals, cst_SIGNAL_FILTER_1_OUTPUT, sp_Filter_process((sp_Filter *)lv_filter_1, _t505, _t506));
-                  }
-                }
-                else {
-#line 994 "spms1_main.rb"
-                  if ((lv_module_id < cst_MODULE_AMP_1)) {
-#line 995 "spms1_main.rb"
-                    mrb_float _t507 = sp_FloatArray_get(lv_signals, lv_source_filter_2_audio);
-                    mrb_float _t508 = sp_FloatArray_get(lv_signals, lv_source_filter_2_mod);
-                    sp_FloatArray_set(lv_signals, cst_SIGNAL_FILTER_2_OUTPUT, sp_Filter_process((sp_Filter *)lv_filter_2, _t507, _t508));
-                  }
-                  else {
-#line 997 "spms1_main.rb"
-                    if ((lv_module_id < cst_MODULE_AMP_2)) {
-#line 998 "spms1_main.rb"
-                      mrb_float _t509 = sp_FloatArray_get(lv_signals, lv_source_amp_1_audio);
-                      mrb_float _t510 = sp_FloatArray_get(lv_signals, lv_source_amp_1_mod);
-                      sp_FloatArray_set(lv_signals, cst_SIGNAL_AMP_1_OUTPUT, sp_Amp_process((sp_Amp *)lv_amp_1, _t509, _t510));
-                    }
-                    else {
-#line 1000 "spms1_main.rb"
-                      mrb_float _t511 = sp_FloatArray_get(lv_signals, lv_source_amp_2_audio);
-                      mrb_float _t512 = sp_FloatArray_get(lv_signals, lv_source_amp_2_mod);
-                      sp_FloatArray_set(lv_signals, cst_SIGNAL_AMP_2_OUTPUT, sp_Amp_process((sp_Amp *)lv_amp_2, _t511, _t512));
-                    }
-                  }
-                }
-              }
-            }
-            else {
-#line 1006 "spms1_main.rb"
-              if ((lv_module_id < cst_MODULE_MIXER_6)) {
-#line 1007 "spms1_main.rb"
-                if ((lv_module_id < cst_MODULE_MIXER_3)) {
-#line 1008 "spms1_main.rb"
-                  if ((lv_module_id < cst_MODULE_MIXER_2)) {
-#line 1009 "spms1_main.rb"
-                    mrb_float _t513 = sp_FloatArray_get(lv_signals, lv_source_mixer_1_in_1);
-                    mrb_float _t514 = sp_FloatArray_get(lv_signals, lv_source_mixer_1_in_2);
-                    sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_1_OUTPUT, sp_Mixer_process((sp_Mixer *)lv_mixer_1, _t513, _t514));
-                  }
-                  else {
-#line 1011 "spms1_main.rb"
-                    mrb_float _t515 = sp_FloatArray_get(lv_signals, lv_source_mixer_2_in_1);
-                    mrb_float _t516 = sp_FloatArray_get(lv_signals, lv_source_mixer_2_in_2);
-                    sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_2_OUTPUT, sp_Mixer_process((sp_Mixer *)lv_mixer_2, _t515, _t516));
-                  }
-                }
-                else {
-#line 1014 "spms1_main.rb"
-                  if ((lv_module_id < cst_MODULE_MIXER_4)) {
-#line 1015 "spms1_main.rb"
-                    mrb_float _t517 = sp_FloatArray_get(lv_signals, lv_source_mixer_3_in_1);
-                    mrb_float _t518 = sp_FloatArray_get(lv_signals, lv_source_mixer_3_in_2);
-                    sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_3_OUTPUT, sp_Mixer_process((sp_Mixer *)lv_mixer_3, _t517, _t518));
-                  }
-                  else {
-#line 1017 "spms1_main.rb"
-                    if ((lv_module_id < cst_MODULE_MIXER_5)) {
-#line 1018 "spms1_main.rb"
-                      mrb_float _t519 = sp_FloatArray_get(lv_signals, lv_source_mixer_4_in_1);
-                      mrb_float _t520 = sp_FloatArray_get(lv_signals, lv_source_mixer_4_in_2);
-                      sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_4_OUTPUT, sp_Mixer_process((sp_Mixer *)lv_mixer_4, _t519, _t520));
-                    }
-                    else {
-#line 1020 "spms1_main.rb"
-                      mrb_float _t521 = sp_FloatArray_get(lv_signals, lv_source_mixer_5_in_1);
-                      mrb_float _t522 = sp_FloatArray_get(lv_signals, lv_source_mixer_5_in_2);
-                      sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_5_OUTPUT, sp_Mixer_process((sp_Mixer *)lv_mixer_5, _t521, _t522));
-                    }
-                  }
-                }
-              }
-              else {
-#line 1025 "spms1_main.rb"
-                if ((lv_module_id < cst_MODULE_MIXER_8)) {
-#line 1026 "spms1_main.rb"
-                  if ((lv_module_id < cst_MODULE_MIXER_7)) {
-#line 1027 "spms1_main.rb"
-                    mrb_float _t523 = sp_FloatArray_get(lv_signals, lv_source_mixer_6_in_1);
-                    mrb_float _t524 = sp_FloatArray_get(lv_signals, lv_source_mixer_6_in_2);
-                    sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_6_OUTPUT, sp_Mixer_process((sp_Mixer *)lv_mixer_6, _t523, _t524));
-                  }
-                  else {
-#line 1029 "spms1_main.rb"
-                    mrb_float _t525 = sp_FloatArray_get(lv_signals, lv_source_mixer_7_in_1);
-                    mrb_float _t526 = sp_FloatArray_get(lv_signals, lv_source_mixer_7_in_2);
-                    sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_7_OUTPUT, sp_Mixer_process((sp_Mixer *)lv_mixer_7, _t525, _t526));
-                  }
-                }
-                else {
-#line 1032 "spms1_main.rb"
-                  if ((lv_module_id < cst_MODULE_MIXER_9)) {
-#line 1033 "spms1_main.rb"
-                    mrb_float _t527 = sp_FloatArray_get(lv_signals, lv_source_mixer_8_in_1);
-                    mrb_float _t528 = sp_FloatArray_get(lv_signals, lv_source_mixer_8_in_2);
-                    sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_8_OUTPUT, sp_Mixer_process((sp_Mixer *)lv_mixer_8, _t527, _t528));
-                  }
-                  else {
-#line 1035 "spms1_main.rb"
-                    if ((lv_module_id < cst_MODULE_MIXER_10)) {
-#line 1036 "spms1_main.rb"
-                      mrb_float _t529 = sp_FloatArray_get(lv_signals, lv_source_mixer_9_in_1);
-                      mrb_float _t530 = sp_FloatArray_get(lv_signals, lv_source_mixer_9_in_2);
-                      sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_9_OUTPUT, sp_Mixer_process((sp_Mixer *)lv_mixer_9, _t529, _t530));
-                    }
-                    else {
-#line 1038 "spms1_main.rb"
-                      mrb_float _t531 = sp_FloatArray_get(lv_signals, lv_source_mixer_10_in_1);
-                      mrb_float _t532 = sp_FloatArray_get(lv_signals, lv_source_mixer_10_in_2);
-                      sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_10_OUTPUT, sp_Mixer_process((sp_Mixer *)lv_mixer_10, _t531, _t532));
-                    }
-                  }
-                }
-              }
-            }
+#line 603 "spms1_main.rb"
+          mrb_int _t311 = lv_module_id;
+          if ((_t311 == cst_MODULE_LFO)) {
+#line 605 "spms1_main.rb"
+            sp_FloatArray_set(lv_signals, cst_SIGNAL_LFO_OUTPUT, sp_LFO_process((sp_LFO *)lv_lfo));
           }
-#line 1046 "spms1_main.rb"
+          else if ((_t311 == cst_MODULE_ENV_GEN)) {
+#line 607 "spms1_main.rb"
+            mrb_float _t312 = sp_FloatArray_get(lv_signals, lv_source_env_gen_gate);
+            sp_FloatArray_set(lv_signals, cst_SIGNAL_ENV_GEN_OUTPUT, sp_EnvGen_process((sp_EnvGen *)lv_env_gen, _t312));
+          }
+          else if ((_t311 == cst_MODULE_OSC)) {
+#line 609 "spms1_main.rb"
+            mrb_float _t313 = sp_FloatArray_get(lv_signals, lv_source_osc_pitch);
+            mrb_float _t314 = sp_FloatArray_get(lv_signals, lv_source_osc_mod);
+            sp_FloatArray_set(lv_signals, cst_SIGNAL_OSC_OUTPUT, sp_Osc_process((sp_Osc *)lv_osc, _t313, _t314));
+          }
+          else if ((_t311 == cst_MODULE_FILTER)) {
+#line 611 "spms1_main.rb"
+            mrb_float _t315 = sp_FloatArray_get(lv_signals, lv_source_filter_audio);
+            mrb_float _t316 = sp_FloatArray_get(lv_signals, lv_source_filter_mod);
+            sp_FloatArray_set(lv_signals, cst_SIGNAL_FILTER_OUTPUT, sp_Filter_process((sp_Filter *)lv_filter, _t315, _t316));
+          }
+          else if ((_t311 == cst_MODULE_AMP)) {
+#line 613 "spms1_main.rb"
+            mrb_float _t317 = sp_FloatArray_get(lv_signals, lv_source_amp_audio);
+            mrb_float _t318 = sp_FloatArray_get(lv_signals, lv_source_amp_mod);
+            sp_FloatArray_set(lv_signals, cst_SIGNAL_AMP_OUTPUT, sp_Amp_process((sp_Amp *)lv_amp, _t317, _t318));
+          }
+          else if ((_t311 == cst_MODULE_MIXER_1)) {
+#line 615 "spms1_main.rb"
+            mrb_float _t319 = sp_FloatArray_get(lv_signals, lv_source_mixer_1_in_1);
+            mrb_float _t320 = sp_FloatArray_get(lv_signals, lv_source_mixer_1_in_2);
+            sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_1_OUTPUT, sp_Mixer_process((sp_Mixer *)lv_mixer_1, _t319, _t320));
+          }
+          else if ((_t311 == cst_MODULE_MIXER_2)) {
+#line 617 "spms1_main.rb"
+            mrb_float _t321 = sp_FloatArray_get(lv_signals, lv_source_mixer_2_in_1);
+            mrb_float _t322 = sp_FloatArray_get(lv_signals, lv_source_mixer_2_in_2);
+            sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_2_OUTPUT, sp_Mixer_process((sp_Mixer *)lv_mixer_2, _t321, _t322));
+          }
+          else if ((_t311 == cst_MODULE_MIXER_3)) {
+#line 619 "spms1_main.rb"
+            mrb_float _t323 = sp_FloatArray_get(lv_signals, lv_source_mixer_3_in_1);
+            mrb_float _t324 = sp_FloatArray_get(lv_signals, lv_source_mixer_3_in_2);
+            sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_3_OUTPUT, sp_Mixer_process((sp_Mixer *)lv_mixer_3, _t323, _t324));
+          }
+          else if ((_t311 == cst_MODULE_MIXER_4)) {
+#line 621 "spms1_main.rb"
+            mrb_float _t325 = sp_FloatArray_get(lv_signals, lv_source_mixer_4_in_1);
+            mrb_float _t326 = sp_FloatArray_get(lv_signals, lv_source_mixer_4_in_2);
+            sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_4_OUTPUT, sp_Mixer_process((sp_Mixer *)lv_mixer_4, _t325, _t326));
+          }
+          else if ((_t311 == cst_MODULE_MIXER_5)) {
+#line 623 "spms1_main.rb"
+            mrb_float _t327 = sp_FloatArray_get(lv_signals, lv_source_mixer_5_in_1);
+            mrb_float _t328 = sp_FloatArray_get(lv_signals, lv_source_mixer_5_in_2);
+            sp_FloatArray_set(lv_signals, cst_SIGNAL_MIXER_5_OUTPUT, sp_Mixer_process((sp_Mixer *)lv_mixer_5, _t327, _t328));
+          }
+#line 626 "spms1_main.rb"
           lv_slot = sp_int_add(lv_slot, 1LL);
         }
-#line 1049 "spms1_main.rb"
+#line 629 "spms1_main.rb"
         sp_FloatArray_set(lv_audio_buffer, lv_i, sp_FloatArray_get(lv_signals, lv_source_output));
-#line 1050 "spms1_main.rb"
+#line 630 "spms1_main.rb"
         lv_i = sp_int_add(lv_i, 1LL);
       }
-#line 1053 "spms1_main.rb"
+#line 633 "spms1_main.rb"
       (stop_debug_measure(), (mrb_int)0);
-#line 1055 "spms1_main.rb"
-      for (mrb_int _t534 = 0; _t534 < cst_AUDIO_BUFFER_WORDS; _t534++) {
-        lv_i__bp7405 = _t534;
-#line 1056 "spms1_main.rb"
-        (write_to_audio_buffer(((float)(sp_FloatArray_get(lv_audio_buffer, lv_i__bp7405))), ((float)(sp_FloatArray_get(lv_audio_buffer, lv_i__bp7405)))), (mrb_int)0);
+#line 635 "spms1_main.rb"
+      for (mrb_int _t330 = 0; _t330 < cst_AUDIO_BUFFER_WORDS; _t330++) {
+        lv_i__bp5236 = _t330;
+#line 636 "spms1_main.rb"
+        (write_to_audio_buffer(((float)(sp_FloatArray_get(lv_audio_buffer, lv_i__bp5236))), ((float)(sp_FloatArray_get(lv_audio_buffer, lv_i__bp5236)))), (mrb_int)0);
       }
     }
     sp_exc_top--;
   }
   else {
     sp_exc_top--;
-    sp_gc_nroots = _gcb194;
+    sp_gc_nroots = _gcb155;
     if (sp_unwind_kind != SP_UNWIND_NONE) sp_unwind_resume();
     if (!sp_exc_cls_matches((const char *)sp_last_exc_cls, "StopIteration")) sp_raise_cls(sp_exc_cls[sp_exc_top], sp_exc_msg[sp_exc_top]);
   }

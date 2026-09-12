@@ -29,7 +29,7 @@
 |                            74 | x             | o             | Filter Cutoff                        |
 |                            71 | x             | o             | Filter Resonance                     |
 |                            24 | x             | o             | Filter Mod Amt                       |
-|                           112 | x             | o             | Filter Gain (Drive)                  |
+|                           112 | x             | o             | Filter Gain                          |
 |                            15 | x             | o             | Amp Gain                             |
 |                            73 | x             | o             | EG Attack (Time)                     |
 |                            75 | x             | o             | EG Decay (Time)                      |
