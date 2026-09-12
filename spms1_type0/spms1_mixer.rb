@@ -53,8 +53,15 @@ module Spms1
       @target_2 = @level_2 * @polarity_2
     end
 
-    # Both inputs are taken as they are. Nothing is clamped here: a mixer carries audio as often as
-    # it carries control, and the destination is what decides the range it wants.
+    # Both inputs are taken as they are; only the sum is held to a range. A mixer is the one place on
+    # the bus where a value can come out bigger than what went in -- every other module is fixed at
+    # half a unit, or saturates, or only attenuates -- so this is what keeps every slot finite. That
+    # matters beyond tidiness: a comparison lets a NaN through any clamp, and the only way to make
+    # one here is to overflow to infinity first, which this makes impossible.
+    #
+    # One unit is the sum of two full-scale bipolar signals, as much as any destination can use.
+    # Written as a literal rather than a constant on purpose: Spinel emits a named Float as a mutable
+    # global, and five mixers loading one twice a sample is about 9us a buffer.
     def process(input_1 = 0.0, input_2 = 0.0)
       if @sample_counter == 0
         @current_1 += (@target_1 - @current_1) * @smoothing_target_blend
@@ -63,7 +70,8 @@ module Spms1
 
       @sample_counter = (@sample_counter + 1) % CONTROL_RATE_DIVISOR
 
-      input_1 * @current_1 + input_2 * @current_2
+      sum = input_1 * @current_1 + input_2 * @current_2
+      (sum < -1.0) ? -1.0 : ((sum > 1.0) ? 1.0 : sum)
     end
   end
 end
