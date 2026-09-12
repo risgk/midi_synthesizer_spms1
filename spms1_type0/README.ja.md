@@ -207,6 +207,14 @@ flowchart TB
 | 10 | Amp 1 Audio In | | 22 | Mixer 5 In 1 | | 34 | 最終出力 |
 | 11 | Amp 1 Mod In | | 23 | Mixer 5 In 2 | |  |  |
 
+ほとんどは名前のとおりのものを受け取りますが、3 つだけ名前からは分からない決まりがあります。Gate はレベル
+ではなく閾値で、信号が 0.5 を越えるとエンベロープがトリガし、下回るとリリースします。Pitch は MIDI ノート
+0〜120 を -0.5〜+0.5 で表すので、0.0 がノート 60、0.1 が 1 オクターブです。そして Mod In は届いたままの値を
+受け取ります。入口では何も制限せず、クランプされるのはモジュールが最終的に得た値のほうです。カットオフは
+0.0〜1.0、ピッチは -0.5〜+0.5 に収まります。ミキサーは上限なしで足し算をするので、大きすぎる変調は入口で
+削られるのではなく、行き先を端に貼り付かせます。アンプだけは例外で、Mod In を -1.0〜+1.0 でクランプします。
+アンプはアッテネーターなので、変調はゲインを下げられても上げられてはならないからです。
+
 #### エントリ (CC 98)、カテゴリ 2 と 3
 
 | CC 98 | パラメータ | | CC 98 | パラメータ | | CC 98 | パラメータ |
@@ -261,39 +269,46 @@ flowchart TB
 | 4 | 定数 -1.0 | | 36 | Filter 1 Gain | | 68 | Mixer 5 Invert 1 |
 | 5 | EG 1 Output | | 37 | Filter 2 Cutoff | | 69 | Mixer 5 Level 2 |
 | 6 | EG 2 Output | | 38 | Filter 2 Resonance | | 70 | Mixer 5 Invert 2 |
-| 7 | LFO 1 Output | | 39 | Filter 2 Mod Amt | | 71 | Mixer 6 Level 1 |
-| 8 | LFO 2 Output | | 40 | Filter 2 Gain | | 72 | Mixer 6 Invert 1 |
-| 9 | Osc 1 Output | | 41 | Amp 1 Gain | | 73 | Mixer 6 Level 2 |
-| 10 | Osc 2 Output | | 42 | Amp 2 Gain | | 74 | Mixer 6 Invert 2 |
-| 11 | Filter 1 Output | | 43 | EG 1 Attack | | 75 | Mixer 7 Level 1 |
-| 12 | Filter 2 Output | | 44 | EG 1 Decay | | 76 | Mixer 7 Invert 1 |
-| 13 | Amp 1 Output | | 45 | EG 1 Sustain | | 77 | Mixer 7 Level 2 |
-| 14 | Amp 2 Output | | 46 | EG 2 Attack | | 78 | Mixer 7 Invert 2 |
-| 15 | Mixer 1 Output | | 47 | EG 2 Decay | | 79 | Mixer 8 Level 1 |
-| 16 | Mixer 2 Output | | 48 | EG 2 Sustain | | 80 | Mixer 8 Invert 1 |
-| 17 | Mixer 3 Output | | 49 | LFO 1 Rate | | 81 | Mixer 8 Level 2 |
-| 18 | Mixer 4 Output | | 50 | LFO 2 Rate | | 82 | Mixer 8 Invert 2 |
-| 19 | Mixer 5 Output | | 51 | Mixer 1 Level 1 | | 83 | Mixer 9 Level 1 |
-| 20 | Mixer 6 Output | | 52 | Mixer 1 Invert 1 | | 84 | Mixer 9 Invert 1 |
-| 21 | Mixer 7 Output | | 53 | Mixer 1 Level 2 | | 85 | Mixer 9 Level 2 |
-| 22 | Mixer 8 Output | | 54 | Mixer 1 Invert 2 | | 86 | Mixer 9 Invert 2 |
-| 23 | Mixer 9 Output | | 55 | Mixer 2 Level 1 | | 87 | Mixer 10 Level 1 |
-| 24 | Mixer 10 Output | | 56 | Mixer 2 Invert 1 | | 88 | Mixer 10 Invert 1 |
+| 7 | LFO 1 Output ± | | 39 | Filter 2 Mod Amt | | 71 | Mixer 6 Level 1 |
+| 8 | LFO 2 Output ± | | 40 | Filter 2 Gain | | 72 | Mixer 6 Invert 1 |
+| 9 | Osc 1 Output ± | | 41 | Amp 1 Gain | | 73 | Mixer 6 Level 2 |
+| 10 | Osc 2 Output ± | | 42 | Amp 2 Gain | | 74 | Mixer 6 Invert 2 |
+| 11 | Filter 1 Output ± | | 43 | EG 1 Attack | | 75 | Mixer 7 Level 1 |
+| 12 | Filter 2 Output ± | | 44 | EG 1 Decay | | 76 | Mixer 7 Invert 1 |
+| 13 | Amp 1 Output ± | | 45 | EG 1 Sustain | | 77 | Mixer 7 Level 2 |
+| 14 | Amp 2 Output ± | | 46 | EG 2 Attack | | 78 | Mixer 7 Invert 2 |
+| 15 | Mixer 1 Output ± | | 47 | EG 2 Decay | | 79 | Mixer 8 Level 1 |
+| 16 | Mixer 2 Output ± | | 48 | EG 2 Sustain | | 80 | Mixer 8 Invert 1 |
+| 17 | Mixer 3 Output ± | | 49 | LFO 1 Rate | | 81 | Mixer 8 Level 2 |
+| 18 | Mixer 4 Output ± | | 50 | LFO 2 Rate | | 82 | Mixer 8 Invert 2 |
+| 19 | Mixer 5 Output ± | | 51 | Mixer 1 Level 1 | | 83 | Mixer 9 Level 1 |
+| 20 | Mixer 6 Output ± | | 52 | Mixer 1 Invert 1 | | 84 | Mixer 9 Invert 1 |
+| 21 | Mixer 7 Output ± | | 53 | Mixer 1 Level 2 | | 85 | Mixer 9 Level 2 |
+| 22 | Mixer 8 Output ± | | 54 | Mixer 1 Invert 2 | | 86 | Mixer 9 Invert 2 |
+| 23 | Mixer 9 Output ± | | 55 | Mixer 2 Level 1 | | 87 | Mixer 10 Level 1 |
+| 24 | Mixer 10 Output ± | | 56 | Mixer 2 Invert 1 | | 88 | Mixer 10 Invert 1 |
 | 25 | Osc 1 Wave | | 57 | Mixer 2 Level 2 | | 89 | Mixer 10 Level 2 |
 | 26 | Osc 1 Mod Amt | | 58 | Mixer 2 Invert 2 | | 90 | Mixer 10 Invert 2 |
-| 27 | Osc 1 Coarse Tune | | 59 | Mixer 3 Level 1 | | 91 | Note Pitch |
+| 27 | Osc 1 Coarse Tune | | 59 | Mixer 3 Level 1 | | 91 | Note Pitch ± |
 | 28 | Osc 1 Fine Tune | | 60 | Mixer 3 Invert 1 | | 92 | Note Gate |
-| 29 | Osc 2 Wave | | 61 | Mixer 3 Level 2 | | 93 | Pitch Bend |
+| 29 | Osc 2 Wave | | 61 | Mixer 3 Level 2 | | 93 | Pitch Bend ± |
 | 30 | Osc 2 Mod Amt | | 62 | Mixer 3 Invert 2 | |  |  |
 | 31 | Osc 2 Coarse Tune | | 63 | Mixer 4 Level 1 | |  |  |
 
-スロット 25〜90 には CC から届いた値が入ります。パラメータはデフォルトでは自分の CC を読んでいるわけです。
-別のスロットを指させることがモジュレーションになります。CC のないものは、割り当てられるまで初期値のまま
-です。
+**±** は、正負どちらにも振れるシグナルを表します。モジュール出力はフルスケールで -0.5 と +0.5 に届き、
+ミキサーの出力は 2 つの入力を足した値そのものです。印のないものは 0.0〜1.0 で、エンベロープの出力、
+Note Gate、そしてすべてのコントロールスロットがこれにあたります。バスは両方を 1 つの番号空間で運ぶので、
+レンジは「何が書いたか」ではなくスロットごとの性質です。
 
-Note Pitch、Note Gate、Pitch Bend の 3 つは鍵盤がバスに載せるものです。Pitch Bend は最初からバイポーラで、
-ホイールの端から端までがちょうど 1 単位、中央が 0 なので、ミキサーで下駄を履かせなくてもモジュール入力へ
-入れられます。デフォルトではどこにも結線されていません。
+スロット 25〜90 には CC から届いた 0.0〜1.0 の比率が入ります。パラメータはデフォルトでは自分の CC を読んで
+いるわけです。別のスロットを指させることがモジュレーションになります。CC のないものは、割り当てられるまで
+初期値のままです。
+
+Note Pitch、Note Gate、Pitch Bend の 3 つは鍵盤がバスに載せるものです。Note Pitch は MIDI ノート 0〜120 を
+-0.5〜+0.5 で運びます。オシレータがピッチの全域として読むのと同じ幅です。Pitch Bend も同じくバイポーラで、
+ホイールの端から端までがちょうど 1 単位で、両端がちょうど -0.5 と +0.5、中央のディテントがちょうど 0 に
+なるので、ミキサーで下駄を履かせなくてもモジュール入力へ入れられます。Note Gate は 0.0 か 1.0 で、
+エンベロープは 0.5 以上でトリガします。Pitch Bend はデフォルトではどこにも結線されていません。
 
 スロット 0〜4 は何も書き込まない定数で、ソースではなく固定値を入れたい入力のためにあります。シグナル 0 は
 誰も設定していないエントリが読む値でもあるので、未結線の入力は最初のスロットに入っているものに繋がるので

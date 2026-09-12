@@ -207,6 +207,16 @@ default to, so a module brought into a patch behaves like its twin rather than s
 | 10 | Amp 1 Audio In | | 22 | Mixer 5 In 1 | | 34 | Final Output |
 | 11 | Amp 1 Mod In | | 23 | Mixer 5 In 2 | |  |  |
 
+Most of these take what their name suggests, but three do not say it on their face. A Gate is a
+threshold rather than a level: an envelope triggers as the signal crosses 0.5 and releases as it
+falls back. A Pitch is -0.5 to +0.5 across MIDI notes 0 to 120, so 0.0 is note 60 and a tenth of
+a unit is an octave. And a Mod In is taken as it arrives: nothing is held to a range on the way
+in, and what gets clamped is the value the module ends up with -- cutoff to 0.0 and 1.0, pitch
+to -0.5 and +0.5. A mixer adds without a ceiling, so a loud modulation pins its destination at
+one end rather than being trimmed on the way in. The amp is the exception, and holds its
+modulation input to -1.0 and +1.0: it is an attenuator, so a modulation may scale its gain down
+but never up.
+
 #### Entries (CC 98), categories 2 and 3
 
 | CC 98 | Parameter | | CC 98 | Parameter | | CC 98 | Parameter |
@@ -261,39 +271,48 @@ default to, so a module brought into a patch behaves like its twin rather than s
 | 4 | Constant -1.0 | | 36 | Filter 1 Gain | | 68 | Mixer 5 Invert 1 |
 | 5 | EG 1 Output | | 37 | Filter 2 Cutoff | | 69 | Mixer 5 Level 2 |
 | 6 | EG 2 Output | | 38 | Filter 2 Resonance | | 70 | Mixer 5 Invert 2 |
-| 7 | LFO 1 Output | | 39 | Filter 2 Mod Amt | | 71 | Mixer 6 Level 1 |
-| 8 | LFO 2 Output | | 40 | Filter 2 Gain | | 72 | Mixer 6 Invert 1 |
-| 9 | Osc 1 Output | | 41 | Amp 1 Gain | | 73 | Mixer 6 Level 2 |
-| 10 | Osc 2 Output | | 42 | Amp 2 Gain | | 74 | Mixer 6 Invert 2 |
-| 11 | Filter 1 Output | | 43 | EG 1 Attack | | 75 | Mixer 7 Level 1 |
-| 12 | Filter 2 Output | | 44 | EG 1 Decay | | 76 | Mixer 7 Invert 1 |
-| 13 | Amp 1 Output | | 45 | EG 1 Sustain | | 77 | Mixer 7 Level 2 |
-| 14 | Amp 2 Output | | 46 | EG 2 Attack | | 78 | Mixer 7 Invert 2 |
-| 15 | Mixer 1 Output | | 47 | EG 2 Decay | | 79 | Mixer 8 Level 1 |
-| 16 | Mixer 2 Output | | 48 | EG 2 Sustain | | 80 | Mixer 8 Invert 1 |
-| 17 | Mixer 3 Output | | 49 | LFO 1 Rate | | 81 | Mixer 8 Level 2 |
-| 18 | Mixer 4 Output | | 50 | LFO 2 Rate | | 82 | Mixer 8 Invert 2 |
-| 19 | Mixer 5 Output | | 51 | Mixer 1 Level 1 | | 83 | Mixer 9 Level 1 |
-| 20 | Mixer 6 Output | | 52 | Mixer 1 Invert 1 | | 84 | Mixer 9 Invert 1 |
-| 21 | Mixer 7 Output | | 53 | Mixer 1 Level 2 | | 85 | Mixer 9 Level 2 |
-| 22 | Mixer 8 Output | | 54 | Mixer 1 Invert 2 | | 86 | Mixer 9 Invert 2 |
-| 23 | Mixer 9 Output | | 55 | Mixer 2 Level 1 | | 87 | Mixer 10 Level 1 |
-| 24 | Mixer 10 Output | | 56 | Mixer 2 Invert 1 | | 88 | Mixer 10 Invert 1 |
+| 7 | LFO 1 Output ± | | 39 | Filter 2 Mod Amt | | 71 | Mixer 6 Level 1 |
+| 8 | LFO 2 Output ± | | 40 | Filter 2 Gain | | 72 | Mixer 6 Invert 1 |
+| 9 | Osc 1 Output ± | | 41 | Amp 1 Gain | | 73 | Mixer 6 Level 2 |
+| 10 | Osc 2 Output ± | | 42 | Amp 2 Gain | | 74 | Mixer 6 Invert 2 |
+| 11 | Filter 1 Output ± | | 43 | EG 1 Attack | | 75 | Mixer 7 Level 1 |
+| 12 | Filter 2 Output ± | | 44 | EG 1 Decay | | 76 | Mixer 7 Invert 1 |
+| 13 | Amp 1 Output ± | | 45 | EG 1 Sustain | | 77 | Mixer 7 Level 2 |
+| 14 | Amp 2 Output ± | | 46 | EG 2 Attack | | 78 | Mixer 7 Invert 2 |
+| 15 | Mixer 1 Output ± | | 47 | EG 2 Decay | | 79 | Mixer 8 Level 1 |
+| 16 | Mixer 2 Output ± | | 48 | EG 2 Sustain | | 80 | Mixer 8 Invert 1 |
+| 17 | Mixer 3 Output ± | | 49 | LFO 1 Rate | | 81 | Mixer 8 Level 2 |
+| 18 | Mixer 4 Output ± | | 50 | LFO 2 Rate | | 82 | Mixer 8 Invert 2 |
+| 19 | Mixer 5 Output ± | | 51 | Mixer 1 Level 1 | | 83 | Mixer 9 Level 1 |
+| 20 | Mixer 6 Output ± | | 52 | Mixer 1 Invert 1 | | 84 | Mixer 9 Invert 1 |
+| 21 | Mixer 7 Output ± | | 53 | Mixer 1 Level 2 | | 85 | Mixer 9 Level 2 |
+| 22 | Mixer 8 Output ± | | 54 | Mixer 1 Invert 2 | | 86 | Mixer 9 Invert 2 |
+| 23 | Mixer 9 Output ± | | 55 | Mixer 2 Level 1 | | 87 | Mixer 10 Level 1 |
+| 24 | Mixer 10 Output ± | | 56 | Mixer 2 Invert 1 | | 88 | Mixer 10 Invert 1 |
 | 25 | Osc 1 Wave | | 57 | Mixer 2 Level 2 | | 89 | Mixer 10 Level 2 |
 | 26 | Osc 1 Mod Amt | | 58 | Mixer 2 Invert 2 | | 90 | Mixer 10 Invert 2 |
-| 27 | Osc 1 Coarse Tune | | 59 | Mixer 3 Level 1 | | 91 | Note Pitch |
+| 27 | Osc 1 Coarse Tune | | 59 | Mixer 3 Level 1 | | 91 | Note Pitch ± |
 | 28 | Osc 1 Fine Tune | | 60 | Mixer 3 Invert 1 | | 92 | Note Gate |
-| 29 | Osc 2 Wave | | 61 | Mixer 3 Level 2 | | 93 | Pitch Bend |
+| 29 | Osc 2 Wave | | 61 | Mixer 3 Level 2 | | 93 | Pitch Bend ± |
 | 30 | Osc 2 Mod Amt | | 62 | Mixer 3 Invert 2 | |  |  |
 | 31 | Osc 2 Coarse Tune | | 63 | Mixer 4 Level 1 | |  |  |
 
-Slots 25-90 hold the values arriving from CC, so a parameter reads its own CC by default.
-Pointing it at another slot is what makes a modulation. Anything with no CC sits at what it was
-seeded with until one is assigned.
+A **±** marks a signal that swings both ways: a module output reaches -0.5 and +0.5 at full
+scale, and a mixer's output reaches whatever its two inputs add up to. Everything unmarked runs
+0.0 to 1.0 -- an envelope's output, Note Gate, and every control slot. The bus carries both
+kinds under one numbering, so the range belongs to the slot rather than to the sort of thing
+that wrote it.
 
-Note Pitch, Note Gate and Pitch Bend are what the keyboard puts on the bus. Pitch Bend is
-already bipolar, one unit across the whole wheel and zero at the centre, so it can feed a module
-input without a mixer to shift it. Nothing is routed to it by default.
+Slots 25-90 hold the values arriving from CC, each a ratio in 0.0 to 1.0, so a parameter reads
+its own CC by default. Pointing it at another slot is what makes a modulation. Anything with no
+CC sits at what it was seeded with until one is assigned.
+
+Note Pitch, Note Gate and Pitch Bend are what the keyboard puts on the bus. Note Pitch carries
+MIDI notes 0 to 120 as -0.5 to +0.5, the same span the oscillator reads as its whole pitch
+range, and Pitch Bend is bipolar too, one unit across the whole wheel: exactly -0.5 and +0.5 at
+the ends of its travel and exactly zero at the centre detent, so it can feed a module input
+without a mixer to shift it. Note Gate is 0.0 or 1.0, and an envelope triggers at 0.5. Nothing
+is routed to Pitch Bend by default.
 
 Slots 0-4 are constants that nothing writes, for inputs that want a fixed value rather than a
 source. Signal 0 is also what an entry nobody has set reads as, so an unrouted input is silent
