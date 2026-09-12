@@ -128,8 +128,9 @@ module Spms1
       @current_modulation_amount += (@modulation_amount - @current_modulation_amount) * @smoothing_target_blend
       @current_gain += (@gain - @current_gain) * @smoothing_target_blend
 
-      mod = (@current_modulation_input < 0.0) ? 0.0 : ((@current_modulation_input > 1.0) ? 1.0 : @current_modulation_input)
-      total_cutoff = @current_cutoff + (mod * @current_modulation_amount)
+      # The modulation input arrives as it is; clamping total_cutoff below is what holds the
+      # table lookup in range, and a source that swings both ways moves the cutoff both ways.
+      total_cutoff = @current_cutoff + (@current_modulation_input * @current_modulation_amount)
       clamped_cutoff = (total_cutoff < 0.0) ? 0.0 : ((total_cutoff > 1.0) ? 1.0 : total_cutoff)
 
       cutoff_freq = cutoff_to_freq_fast(clamped_cutoff)
