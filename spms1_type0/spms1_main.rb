@@ -624,9 +624,13 @@ loop do
   signals[SIGNAL_PITCH] = C.get_midi_note_on_pitch(MIDI_CH).to_f * (1.0 / 120.0) - 0.5
   signals[SIGNAL_GATE]  = C.get_midi_note_on_state(MIDI_CH).to_f
   # Pitch bend arrives 14-bit and signed, -8192 to 8191, so a whole turn of the wheel is one unit
-  # and half of it lands where the pitch domain's own half does. The top end is a step short of
-  # +0.5, which is how the MIDI range itself is shaped.
-  signals[SIGNAL_BEND]  = C.get_midi_pitch_bend(MIDI_CH).to_f * (1.0 / 16384.0)
+  # and half of it lands where the pitch domain's own half does. The count of steps is even, so
+  # the middle of the range falls between -1 and 0 rather than on a value. Pairing the steps off
+  # in the integers first puts -1 and 0 on the same one, which costs half the resolution -- 8193
+  # steps, still far under a cent at any usable bend range -- and buys a centre that is exactly
+  # zero with both ends exactly on -0.5 and +0.5. The division must floor for the bottom end to
+  # land: Integer#/ does, and Spinel's sp_idiv implements it.
+  signals[SIGNAL_BEND]  = ((C.get_midi_pitch_bend(MIDI_CH) + 1) / 2).to_f * (1.0 / 8192.0)
 
   # The patch, read back from the NRPN table. active_modules is packed from the front with no
   # gaps; every source_* holds a SIGNAL_* bus slot.
