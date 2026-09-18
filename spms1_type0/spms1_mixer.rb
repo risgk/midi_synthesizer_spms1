@@ -71,6 +71,11 @@ module Spms1
       @sample_counter = (@sample_counter + 1) % CONTROL_RATE_DIVISOR
 
       sum = input_1 * @current_1 + input_2 * @current_2
+      # One nested ternary, not two statements. Split in two, each comparison compiles to a vsel
+      # when the method stands alone, which is not how it is built: inside the flattened
+      # Spms1_main the branch count does not move and the extra instructions cost 870/875us a
+      # buffer against 854/856. The same holds for the clamps in Amp#process and Osc#process.
+      # Measured on a Pico 2 at 48 kHz, 2026-09-18.
       (sum < -1.0) ? -1.0 : ((sum > 1.0) ? 1.0 : sum)
     end
   end

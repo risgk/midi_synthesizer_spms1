@@ -126,8 +126,14 @@ module Spms1
 
     # PolyBLEP correction for discontinuity smoothing at the waveform wrap point.
     # dt_inv (1.0 / dt) comes from the caller so this multiplies instead of dividing; see process.
-    # Both corrections are evaluated unconditionally -- the comparisons only select between them
-    # -- so the cost per sample is the same whether or not the phase is near a wrap.
+    # Both corrections are written as selects rather than conditionals, and this is the one place
+    # in the per-sample path where that does not survive the C compiler. Each correction is five
+    # or six operations, so GCC would rather branch around one than compute it and throw it away,
+    # and it does: in the sketch each call comes out as two branches with the arithmetic moved
+    # inside them. The cost here therefore does vary with the phase -- a sample next to a wrap
+    # pays for a correction, one away from both wraps skips them -- and no way of writing this in
+    # Ruby changes that, because the decision is the compiler's cost model, not the shape of the
+    # source. Only the two comparisons are unconditional.
     def poly_blep(t, dt, dt_inv)
       num_start = t * dt_inv
       blep_start = num_start + num_start - num_start * num_start - 1.0
