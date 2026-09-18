@@ -383,6 +383,40 @@ would fold high ones back down into the note.
   order, so it catches a change in a module, not in a routing
 
 
+### Checking the Generated Code
+
+What the compiler makes of a change to the per-sample path is worth looking at before flashing it,
+and "branchless in Ruby" does not mean branchless in the binary -- the decision is GCC's, and it
+depends on the whole function. Compile the Spinel output on its own, from the sketch folder:
+
+```
+arm-none-eabi-gcc -c -g -mcpu=cortex-m33 -mthumb -march=armv8-m.main+fp+dsp -mfloat-abi=softfp -mcmse -std=gnu23 -Os -I. -o out.o spms1_main.c
+```
+
+The compiler ships with the Arduino-Pico core, under `packages/rp2040/tools/pqt-gcc`. It takes
+about a minute. Then `arm-none-eabi-objdump -d out.o` and count the conditional branches inside
+`Spms1_main`, and `arm-none-eabi-objdump --dwarf=decodedline out.o` to map an address back to the
+line of Ruby it came from -- the generated C carries `#line` directives that point at the `.rb`
+files, so the mapping survives all the way down.
+
+Four things to know before reading the output:
+
+- The `-Os` above is not what the synth is built with. "sp_runtime.h" carries
+  `#pragma GCC optimize ("O3")`, which overrides whatever is on the command line for that
+  translation unit. Passing `-O3` instead changes nothing, and neither does passing `-Os`
+- The synth core is not in `.text`. The `#define main` in "sp_runtime.h" puts it in
+  `.time_critical`. To prove two builds are the same code,
+  `arm-none-eabi-objcopy -O binary --only-section=.time_critical` on each and compare the bytes.
+  A comment-only edit moves every `#line` in "spms1_main.c" and nothing else, and this is how to
+  confirm it
+- A standalone compile runs about 2000 instructions lighter than the linked firmware, because
+  `flatten` pulls the sketch's own functions into `Spms1_main` when it is built for real.
+  Differences between two standalone builds are reliable; absolute totals are not. Take those
+  from the `.elf` the Arduino build leaves in its sketch cache
+- A shape that compiles well in a test function may not survive inlining into `Spms1_main`, which
+  is about 30000 instructions. Measure the change in the real file, not in a small one
+
+
 SPMS-1 (type-0) Licence
 -----------------------
 
