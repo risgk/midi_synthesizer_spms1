@@ -12,9 +12,10 @@ module Spms1
     # Its own constant, not CONTROL_RATE_DIVISOR - 1 where it is used: Spinel emits an Integer
     # constant as a runtime global and does not fold arithmetic on one, so written that way the
     # subtraction survives into the per-sample path carrying an overflow check of its own, which
-    # measured far worse than the modulo it replaces. What the mask buys is size -- ten branches
-    # and 66 instructions across the six modules -- and not determinism: every branch it removes
-    # is one that could never be taken. The buffer time did not move (853/857us against 854/856).
+    # measured far worse than the modulo it replaces. What the mask buys is size, not
+    # determinism: the ten branches it removes, one per site, are ones that could never be taken.
+    # Together with the LFO's fold it took 11 branches and 60 instructions out of Spms1_main as
+    # linked, and the buffer time did not move (853/857us against 854/856).
     CONTROL_RATE_MASK = CONTROL_RATE_DIVISOR - 1
     # What a modulation depth of 1.0 is worth: 120 semitones per unit of modulation input, which is
     # the whole pitch range. A bipolar source reaches half a unit either way, so at full depth it

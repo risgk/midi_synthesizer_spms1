@@ -1,4 +1,4 @@
-MIDI Synthesizer SPMS-1 (type-0) v0.1.2
+MIDI Synthesizer SPMS-1 (type-0) v0.1.3
 =======================================
 
 - Spinel (Ruby AOT コンパイラ) で作った、Raspberry Pi Pico 2 用のモノフォニック・セミモジュラー MIDI シンセサイザー
@@ -369,6 +369,38 @@ Mixer 1 だけは例外で、結線されているビブラート経路に合わ
   同じモジュールを同じ順で、電源投入時の CC 値で鳴らします。ただし 2 つだけ変えてあり、Decay は音が
   最後まで残るよう最大、Cutoff は EG が開く様子が聞こえるよう 4 分の 1 にしてあります。シグナルバスと
   実行順は再現しないので、モジュール自体の変化は捉えますが、結線の間違いは捉えません
+
+
+### 生成コードの確認
+
+サンプル単位の処理に手を入れたら、書き込む前にコンパイラが何を吐いたか見る価値があります。
+Ruby でブランチレスに書いても、バイナリがブランチレスになるとは限りません。決めるのは GCC で、
+その判断は関数全体に依存します。スケッチのフォルダで、Spinel の出力を単体でコンパイルします。
+
+```
+arm-none-eabi-gcc -c -g -mcpu=cortex-m33 -mthumb -march=armv8-m.main+fp+dsp -mfloat-abi=softfp -mcmse -std=gnu23 -Os -I. -o out.o spms1_main.c
+```
+
+コンパイラは Arduino-Pico コアに同梱されており、`packages/rp2040/tools/pqt-gcc` の下にあります。
+1 分ほどかかります。あとは `arm-none-eabi-objdump -d out.o` で `Spms1_main` の中の条件分岐を数え、
+`arm-none-eabi-objdump --dwarf=decodedline out.o` でアドレスを元の Ruby の行に戻せます。生成された
+C が `.rb` を指す `#line` を持っているので、対応は最後まで残ります。
+
+読む前に知っておくべきことが 4 つあります。
+
+- 上の `-Os` は実際の設定ではありません。"sp_runtime.h" が `#pragma GCC optimize ("O3")` を
+  持っており、この翻訳単位ではコマンドラインの指定を上書きします。`-O3` を渡しても `-Os` を
+  渡しても結果は変わりません
+- シンセ本体は `.text` にありません。"sp_runtime.h" の `#define main` が `.time_critical` に
+  置きます。2 つのビルドが同じコードだと示すには、それぞれに
+  `arm-none-eabi-objcopy -O binary --only-section=.time_critical` をかけてバイト比較します。
+  コメントだけの変更は "spms1_main.c" の `#line` を全部動かして他は何も変えませんが、その確認も
+  この方法です
+- 単体コンパイルは実際の firmware より 2000 命令ほど軽く出ます。本番のビルドでは `flatten` が
+  スケッチ側の関数まで `Spms1_main` に取り込むからです。単体ビルド同士の差分は信用できますが、
+  絶対値は信用できません。絶対値は Arduino のビルドキャッシュに残る `.elf` から取ります
+- テスト用の小さな関数でうまくコンパイルされる書き方が、3 万命令の `Spms1_main` に
+  インライン展開されたあとも同じとは限りません。小さなファイルではなく、実物で測ります
 
 
 SPMS-1 (type-0) のライセンス
