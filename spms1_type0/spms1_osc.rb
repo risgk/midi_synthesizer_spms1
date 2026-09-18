@@ -4,8 +4,18 @@ module Spms1
     # Blend at the reference rate on the line below. The two move together: their product is what
     # fixes the time constant, so changing one without the other changes how fast smoothing is.
     SMOOTHING_TARGET_BLEND_BASE = 0.03125
-    # Number of samples between control-rate updates; smoothing speed is kept approximately constant if this is changed.
+    # Number of samples between control-rate updates; smoothing speed is kept approximately
+    # constant if this is changed. It has to stay a power of two: the counter below wraps with a
+    # mask, because Ruby's % is a floor-modulo and sp_imod carries a sign correction the counter
+    # can never need -- one branch a sample in each module, ten across the six of them.
     CONTROL_RATE_DIVISOR = 4
+    # Its own constant, not CONTROL_RATE_DIVISOR - 1 where it is used: Spinel emits an Integer
+    # constant as a runtime global and does not fold arithmetic on one, so written that way the
+    # subtraction survives into the per-sample path carrying an overflow check of its own, which
+    # measured far worse than the modulo it replaces. What the mask buys is size -- ten branches
+    # and 66 instructions across the six modules -- and not determinism: every branch it removes
+    # is one that could never be taken. The buffer time did not move (853/857us against 854/856).
+    CONTROL_RATE_MASK = CONTROL_RATE_DIVISOR - 1
     # What a modulation depth of 1.0 is worth: 120 semitones per unit of modulation input, which is
     # the whole pitch range. A bipolar source reaches half a unit either way, so at full depth it
     # swings the pitch five octaves up and five down. Bringing a source down to a musical depth is
@@ -105,7 +115,7 @@ module Spms1
       output = saw1 - (saw2 * @current_waveform)
       @phase += current_dt
       @phase -= (@phase < 1.0) ? 0.0 : 1.0
-      @sample_counter = (@sample_counter + 1) % CONTROL_RATE_DIVISOR
+      @sample_counter = (@sample_counter + 1) & CONTROL_RATE_MASK
 
       # Halved so that both ends of the morph come out at one unit peak to peak, the same span
       # as every other bipolar signal on the bus. How loudly it drives what comes next is the

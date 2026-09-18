@@ -5,7 +5,17 @@ module Spms1
     STATE_SUSTAIN = 1
     STATE_IDLE = 2
     # Number of samples between control-rate updates; envelope timing is kept approximately constant if this is changed.
+    # It has to stay a power of two: the counter below wraps with a mask, because Ruby's % is a
+    # floor-modulo and sp_imod carries a sign correction the counter can never need -- one branch
+    # a sample in each module, ten across the six of them.
     CONTROL_RATE_DIVISOR = 4
+    # Its own constant, not CONTROL_RATE_DIVISOR - 1 where it is used: Spinel emits an Integer
+    # constant as a runtime global and does not fold arithmetic on one, so written that way the
+    # subtraction survives into the per-sample path carrying an overflow check of its own, which
+    # measured far worse than the modulo it replaces. What the mask buys is size -- ten branches
+    # and 66 instructions across the six modules -- and not determinism: every branch it removes
+    # is one that could never be taken. The buffer time did not move (853/857us against 854/856).
+    CONTROL_RATE_MASK = CONTROL_RATE_DIVISOR - 1
 
     # Lookup table for exponential time mapping.
     EXP_TABLE = Array.new(122, 0.0)
@@ -90,7 +100,7 @@ module Spms1
         @current_level = 0.0 if is_idle_reached || (@state == STATE_IDLE && !@was_gate_on)
       end
 
-      @sample_counter = (@sample_counter + 1) % CONTROL_RATE_DIVISOR
+      @sample_counter = (@sample_counter + 1) & CONTROL_RATE_MASK
       @current_level
     end
 

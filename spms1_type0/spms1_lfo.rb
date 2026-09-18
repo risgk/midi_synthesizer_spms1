@@ -6,7 +6,17 @@ module Spms1
     # fixes the time constant, so changing one without the other changes how fast smoothing is.
     SMOOTHING_TARGET_BLEND_BASE = 0.03125
     # Number of samples between control-rate updates; smoothing speed is kept approximately constant if this is changed.
+    # It has to stay a power of two: the counter below wraps with a mask, because Ruby's % is a
+    # floor-modulo and sp_imod carries a sign correction the counter can never need -- one branch
+    # a sample in each module, ten across the six of them.
     CONTROL_RATE_DIVISOR = 4
+    # Its own constant, not CONTROL_RATE_DIVISOR - 1 where it is used: Spinel emits an Integer
+    # constant as a runtime global and does not fold arithmetic on one, so written that way the
+    # subtraction survives into the per-sample path carrying an overflow check of its own, which
+    # measured far worse than the modulo it replaces. What the mask buys is size -- ten branches
+    # and 66 instructions across the six modules -- and not determinism: every branch it removes
+    # is one that could never be taken. The buffer time did not move (853/857us against 854/856).
+    CONTROL_RATE_MASK = CONTROL_RATE_DIVISOR - 1
 
     # Rate lookup table, one entry per semitone of MIDI note -63 to 57, so 0.215 Hz to 220 Hz.
     # Its own table rather than the oscillator's, which starts at note 0 and cannot reach this low.
@@ -50,14 +60,17 @@ module Spms1
         @dt = rate_to_freq_fast(@current_rate) * @inv_sample_rate
       end
 
-      @sample_counter = (@sample_counter + 1) % CONTROL_RATE_DIVISOR
+      @sample_counter = (@sample_counter + 1) & CONTROL_RATE_MASK
 
       # Triangle folded out of the phase ramp. The quarter-turn shift puts 0.0 at the start of the
       # cycle, so a destination sees the LFO leave its unmodulated value rather than jump off it.
       shifted = @phase + 0.25
       shifted -= (shifted < 1.0) ? 0.0 : 1.0
       distance = shifted - 0.5
-      folded = (distance < 0.0) ? -distance : distance
+      # abs rather than a ternary: Spinel emits fabs, which is one vabs.f32 instruction, and the
+      # branch it replaces was the only one in the per-sample path that actually alternated --
+      # taken for half of every LFO cycle.
+      folded = distance.abs
       output = 0.5 - (2.0 * folded)
 
       @phase += @dt
