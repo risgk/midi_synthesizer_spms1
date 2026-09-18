@@ -422,12 +422,12 @@ static mrb_float cst_COARSE_TUNE_RANGE = 0.0;
 static mrb_float cst_FINE_TUNE_RANGE = 0.0;
 static sp_FloatArray * cst_Spms1__Osc__FREQ_TABLE = NULL;
 static mrb_float cst_OUTPUT_CEILING = 0.0;
-static mrb_float cst_OUTPUT_LIMIT = 0.0;
+static mrb_float cst_OUTPUT_FLOOR = 0.0;
 static mrb_float cst_OUTPUT_INV_CEILING = 0.0;
 static mrb_float cst_OUTPUT_CUBIC_SCALE = 0.0;
 static mrb_float cst_SOFT_CLIP_CEILING = 0.0;
 static mrb_float cst_SOFT_CLIP_INV_CEILING = 0.0;
-static mrb_float cst_SOFT_CLIP_LIMIT = 0.0;
+static mrb_float cst_SOFT_CLIP_FLOOR = 0.0;
 static mrb_float cst_SOFT_CLIP_CUBIC_SCALE = 0.0;
 static mrb_float cst_Spms1__Filter__SMOOTHING_TARGET_BLEND_BASE = 0.0;
 static mrb_int cst_Spms1__Filter__CONTROL_RATE_DIVISOR = 0;
@@ -1233,50 +1233,36 @@ static mrb_float sp_Filter_update_coefficients(sp_Filter *self) {
   self->iv_a2 = self->iv_next_a2;
   return 0.0;
 }
-#line 182 "spms1_filter.rb"
+#line 190 "spms1_filter.rb"
 static mrb_float sp_Filter_clip_output(sp_Filter *self, mrb_float lv_sample) {
     SP_GC_SAVE();
+    mrb_float lv_capped = 0.0;
+    mrb_float lv_clamped = 0.0;
     mrb_float lv_scaled = 0.0;
-#line 183 "spms1_filter.rb"
-  if ((lv_sample > cst_OUTPUT_CEILING)) {
-#line 184 "spms1_filter.rb"
-    return cst_OUTPUT_LIMIT;
-  }
-  else {
-    if ((lv_sample < (-cst_OUTPUT_CEILING))) {
-#line 186 "spms1_filter.rb"
-      return (-cst_OUTPUT_LIMIT);
-    }
-    else {
-#line 188 "spms1_filter.rb"
-      lv_scaled = (lv_sample * cst_OUTPUT_INV_CEILING);
-#line 189 "spms1_filter.rb"
-      return (lv_sample - ((((lv_scaled * lv_scaled) * lv_scaled)) * cst_OUTPUT_CUBIC_SCALE));
-    }
-  }
+#line 191 "spms1_filter.rb"
+  lv_capped = (((lv_sample > cst_OUTPUT_CEILING)) ? cst_OUTPUT_CEILING : lv_sample);
+#line 192 "spms1_filter.rb"
+  lv_clamped = (((lv_capped < cst_OUTPUT_FLOOR)) ? cst_OUTPUT_FLOOR : lv_capped);
+#line 193 "spms1_filter.rb"
+  lv_scaled = (lv_clamped * cst_OUTPUT_INV_CEILING);
+#line 194 "spms1_filter.rb"
+  return (lv_clamped - ((((lv_scaled * lv_scaled) * lv_scaled)) * cst_OUTPUT_CUBIC_SCALE));
   return 0.0;
 }
-#line 193 "spms1_filter.rb"
+#line 202 "spms1_filter.rb"
 static mrb_float sp_Filter_soft_clip(sp_Filter *self, mrb_float lv_sample) {
     SP_GC_SAVE();
+    mrb_float lv_capped = 0.0;
+    mrb_float lv_clamped = 0.0;
     mrb_float lv_scaled = 0.0;
-#line 194 "spms1_filter.rb"
-  if ((lv_sample > cst_SOFT_CLIP_CEILING)) {
-#line 195 "spms1_filter.rb"
-    return cst_SOFT_CLIP_LIMIT;
-  }
-  else {
-    if ((lv_sample < (-cst_SOFT_CLIP_CEILING))) {
-#line 197 "spms1_filter.rb"
-      return (-cst_SOFT_CLIP_LIMIT);
-    }
-    else {
-#line 199 "spms1_filter.rb"
-      lv_scaled = (lv_sample * cst_SOFT_CLIP_INV_CEILING);
-#line 200 "spms1_filter.rb"
-      return (lv_sample - ((((lv_scaled * lv_scaled) * lv_scaled)) * cst_SOFT_CLIP_CUBIC_SCALE));
-    }
-  }
+#line 203 "spms1_filter.rb"
+  lv_capped = (((lv_sample > cst_SOFT_CLIP_CEILING)) ? cst_SOFT_CLIP_CEILING : lv_sample);
+#line 204 "spms1_filter.rb"
+  lv_clamped = (((lv_capped < cst_SOFT_CLIP_FLOOR)) ? cst_SOFT_CLIP_FLOOR : lv_capped);
+#line 205 "spms1_filter.rb"
+  lv_scaled = (lv_clamped * cst_SOFT_CLIP_INV_CEILING);
+#line 206 "spms1_filter.rb"
+  return (lv_clamped - ((((lv_scaled * lv_scaled) * lv_scaled)) * cst_SOFT_CLIP_CUBIC_SCALE));
   return 0.0;
 }
 #line 11 "spms1_amp.rb"
@@ -1781,7 +1767,7 @@ int main(int argc,char**argv){
     volatile mrb_int lv_cc_mixer_5_level_2 = 0;
     volatile mrb_int lv_cc_mixer_5_invert_2 = 0;
     volatile mrb_int lv_module_id = 0;
-    mrb_int lv_i__bp5343 = 0;
+    mrb_int lv_i__bp5345 = 0;
 
 #line 1 "spms1_osc.rb"
 #line 3 "spms1_osc.rb"
@@ -1815,7 +1801,7 @@ int main(int argc,char**argv){
 #line 14 "spms1_filter.rb"
   cst_OUTPUT_CEILING = 1.5;
 #line 15 "spms1_filter.rb"
-  cst_OUTPUT_LIMIT = (((2.0 / 3.0)) * cst_OUTPUT_CEILING);
+  cst_OUTPUT_FLOOR = (-cst_OUTPUT_CEILING);
 #line 16 "spms1_filter.rb"
   cst_OUTPUT_INV_CEILING = (1.0 / cst_OUTPUT_CEILING);
 #line 17 "spms1_filter.rb"
@@ -1825,7 +1811,7 @@ int main(int argc,char**argv){
 #line 24 "spms1_filter.rb"
   cst_SOFT_CLIP_INV_CEILING = (1.0 / cst_SOFT_CLIP_CEILING);
 #line 25 "spms1_filter.rb"
-  cst_SOFT_CLIP_LIMIT = (((2.0 / 3.0)) * cst_SOFT_CLIP_CEILING);
+  cst_SOFT_CLIP_FLOOR = (-cst_SOFT_CLIP_CEILING);
 #line 26 "spms1_filter.rb"
   cst_SOFT_CLIP_CUBIC_SCALE = (((1.0 / 3.0)) * cst_SOFT_CLIP_CEILING);
 #line 29 "spms1_filter.rb"
@@ -3037,9 +3023,9 @@ int main(int argc,char**argv){
       (stop_debug_measure(), (mrb_int)0);
 #line 650 "spms1_main.rb"
       for (mrb_int _t332 = 0; _t332 < cst_AUDIO_BUFFER_WORDS; _t332++) {
-        lv_i__bp5343 = _t332;
+        lv_i__bp5345 = _t332;
 #line 651 "spms1_main.rb"
-        (write_to_audio_buffer(((float)(sp_FloatArray_get(lv_audio_buffer, lv_i__bp5343))), ((float)(sp_FloatArray_get(lv_audio_buffer, lv_i__bp5343)))), (mrb_int)0);
+        (write_to_audio_buffer(((float)(sp_FloatArray_get(lv_audio_buffer, lv_i__bp5345))), ((float)(sp_FloatArray_get(lv_audio_buffer, lv_i__bp5345)))), (mrb_int)0);
       }
     }
     sp_exc_top--;
