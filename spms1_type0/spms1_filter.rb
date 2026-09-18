@@ -12,7 +12,7 @@ module Spms1
     # harmonics back below Nyquist; a cubic makes a third harmonic and nothing else, which stays in
     # band for every note this oscillator plays.
     OUTPUT_CEILING     = 1.5
-    OUTPUT_LIMIT       = (2.0 / 3.0) * OUTPUT_CEILING
+    OUTPUT_FLOOR       = -OUTPUT_CEILING
     OUTPUT_INV_CEILING = 1.0 / OUTPUT_CEILING
     OUTPUT_CUBIC_SCALE = (1.0 / 3.0) * OUTPUT_CEILING
 
@@ -22,13 +22,23 @@ module Spms1
     # expressions inline in soft_clip would leave a real division and two extra multiplies in a
     # method that runs twice per sample.
     SOFT_CLIP_INV_CEILING = 1.0 / SOFT_CLIP_CEILING
-    SOFT_CLIP_LIMIT       = (2.0 / 3.0) * SOFT_CLIP_CEILING
+    SOFT_CLIP_FLOOR       = -SOFT_CLIP_CEILING
     SOFT_CLIP_CUBIC_SCALE = (1.0 / 3.0) * SOFT_CLIP_CEILING
     # Blend at the reference rate on the line below. The two move together: their product is what
     # fixes the time constant, so changing one without the other changes how fast smoothing is.
     SMOOTHING_TARGET_BLEND_BASE = 0.03125
-    # Number of samples between control-rate updates; smoothing speed is kept approximately constant if this is changed.
+    # Number of samples between control-rate updates; smoothing speed is kept approximately
+    # constant if this is changed. It has to stay a power of two: the counter below wraps with a
+    # mask, because Ruby's % is a floor-modulo and sp_imod carries a sign correction the counter
+    # can never need -- one branch a sample in each module, ten across the six of them.
     CONTROL_RATE_DIVISOR = 4
+    # Its own constant, not CONTROL_RATE_DIVISOR - 1 where it is used: Spinel emits an Integer
+    # constant as a runtime global and does not fold arithmetic on one, so written that way the
+    # subtraction survives into the per-sample path carrying an overflow check of its own, which
+    # measured far worse than the modulo it replaces. What the mask buys is size -- ten branches
+    # and 66 instructions across the six modules -- and not determinism: every branch it removes
+    # is one that could never be taken. The buffer time did not move (853/857us against 854/856).
+    CONTROL_RATE_MASK = CONTROL_RATE_DIVISOR - 1
 
     # Pitch lookup table for note-to-frequency conversion.
     FREQ_TABLE = Array.new(137, 0.0)
@@ -113,7 +123,7 @@ module Spms1
       @z1 = soft_clip(@z2 + @b1 * driven_input - @a1 * audio_output)
       @z2 = soft_clip(@b2 * driven_input - @a2 * audio_output)
 
-      @sample_counter = (@sample_counter + 1) % CONTROL_RATE_DIVISOR
+      @sample_counter = (@sample_counter + 1) & CONTROL_RATE_MASK
 
       clip_output(audio_output)
     end
@@ -179,26 +189,31 @@ module Spms1
     # Adds warm analog-like saturation and prevents internal state blow-ups.
     # Bounds what the module hands to the bus. Separate from soft_clip, which bounds the state
     # inside the loop at a much higher ceiling and has to stay where it is.
+    # Clamp first, then run the cubic on the clamped value. Fed the ceiling, the curve evaluates
+    # to two thirds of it, which is the constant the flat region returned when this was an
+    # if/elsif: the rail comes out of the arithmetic rather than out of a branch. At this ceiling
+    # it is exactly 1.0 in single precision either way, so nothing about the rail moves. Written
+    # this way the method is branchless -- Spinel emits a ternary assigned to a local as a C
+    # conditional expression, and the rest is straight-line arithmetic. Both clamps compare
+    # against a stored constant rather than a negated one, for the reason the constants above
+    # give.
     def clip_output(sample)
-      if sample > OUTPUT_CEILING
-        OUTPUT_LIMIT
-      elsif sample < -OUTPUT_CEILING
-        -OUTPUT_LIMIT
-      else
-        scaled = sample * OUTPUT_INV_CEILING
-        sample - (scaled * scaled * scaled) * OUTPUT_CUBIC_SCALE
-      end
+      capped  = (sample > OUTPUT_CEILING) ? OUTPUT_CEILING : sample
+      clamped = (capped < OUTPUT_FLOOR) ? OUTPUT_FLOOR : capped
+      scaled  = clamped * OUTPUT_INV_CEILING
+      clamped - (scaled * scaled * scaled) * OUTPUT_CUBIC_SCALE
     end
 
+    # Clamped before the cubic and branchless, for the reasons clip_output gives. It matters more
+    # here: this one runs twice per sample, on the state inside the feedback path. Below the
+    # ceiling the result is unchanged; above it the flat value is now a subtraction rather than a
+    # stored constant and lands one ULP away in single precision, on a state the next sample
+    # multiplies by a coefficient regardless.
     def soft_clip(sample)
-      if sample > SOFT_CLIP_CEILING
-        SOFT_CLIP_LIMIT
-      elsif sample < -SOFT_CLIP_CEILING
-        -SOFT_CLIP_LIMIT
-      else
-        scaled = sample * SOFT_CLIP_INV_CEILING
-        sample - (scaled * scaled * scaled) * SOFT_CLIP_CUBIC_SCALE
-      end
+      capped  = (sample > SOFT_CLIP_CEILING) ? SOFT_CLIP_CEILING : sample
+      clamped = (capped < SOFT_CLIP_FLOOR) ? SOFT_CLIP_FLOOR : capped
+      scaled  = clamped * SOFT_CLIP_INV_CEILING
+      clamped - (scaled * scaled * scaled) * SOFT_CLIP_CUBIC_SCALE
     end
   end
 end
