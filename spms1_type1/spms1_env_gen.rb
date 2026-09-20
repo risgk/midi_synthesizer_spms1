@@ -18,20 +18,21 @@ module Spms1
     # linked, and the buffer time did not move (853/857us against 854/856).
     CONTROL_RATE_MASK = CONTROL_RATE_DIVISOR - 1
 
-    # Lookup table for exponential time mapping.
+    # Lookup table for exponential time mapping. A twelfth of an octave per index, so one CC step
+    # of the 120-step control range moves a time by a semitone and the whole dial spans ten octaves.
     EXP_TABLE = Array.new(122, 0.0)
     for i in 0...121
-      EXP_TABLE[i] = 10.0 ** ((i.to_f - 60.0) * (1.0 / 30.0))
+      EXP_TABLE[i] = 2.0 ** ((i.to_f - 60.0) * (1.0 / 12.0))
     end
     EXP_TABLE[121] = EXP_TABLE[120]
 
     # Time scaling constants (value at 0.0 / (EXP_TABLE min * ln(2))).
-    # Attack range: 1 ms at 0.0, 100 ms at 0.5, 10 s at 1.0.
-    ATTACK_BASE = 0.001 / (0.01 * Math::log(2))
-    # Decay range:  3 ms at 0.0, 300 ms at 0.5, 30 s at 1.0.
+    # Attack range: 5 ms at 0.0, 160 ms at 0.5, 5.12 s at 1.0.
+    ATTACK_BASE = 0.005 / ((1.0 / 32.0) * Math::log(2))
+    # Decay range: 10 ms at 0.0, 320 ms at 0.5, 10.24 s at 1.0 -- twice the attack the whole way.
     # Decay is measured to 1/1024 = 2^-10, which keeps the attack's base of 2 rather than landing
     # on a round -60 dB. 1/1024 is -60.2 dB; the shared base is worth more than closing the 0.2.
-    DECAY_BASE  = 0.003 / (0.01 * 10 * Math::log(2))
+    DECAY_BASE  = 0.010 / ((1.0 / 32.0) * 10 * Math::log(2))
 
     # Overshoot target so the attack ramp reaches 1.0 in finite time.
     ATTACK_TARGET = 2.0

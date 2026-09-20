@@ -378,9 +378,9 @@ would fold high ones back down into the note.
 
 - Output WAV File: "spms1_output_wav.rb" -- renders the default patch offline, the same modules
   in the same order with the CC values the synth powers up with, save for two: Decay is at the top
-  of its dial so the note lasts the render, and Cutoff a quarter of the way up so the envelope
-  opening it is what you hear. It does not reproduce the signals bus or the run
-  order, so it catches a change in a module, not in a routing
+  of its dial so the note carries as far into the render as it can, and Cutoff a quarter of the
+  way up so the envelope opening it is what you hear. It does not reproduce the signals bus or
+  the run order, so it catches a change in a module, not in a routing
 
 
 ### Checking the Generated Code

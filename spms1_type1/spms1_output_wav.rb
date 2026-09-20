@@ -10,7 +10,7 @@ require_relative 'spms1_lfo'
 require_relative 'spms1_mixer'
 
 SAMPLE_RATE = 48000.0
-DURATION_SEC = 30.0
+DURATION_SEC = 15.0
 NUM_SAMPLES = (SAMPLE_RATE * DURATION_SEC).to_i
 FILENAME = "spms1_output.wav"
 NOTE = 60
@@ -41,8 +41,8 @@ amp.set_gain(cc_to_ratio(64))
 
 env_gen = Spms1::EnvGen.new(SAMPLE_RATE)
 env_gen.set_attack(cc_to_ratio(4))
-# Decay is held at the top of its dial so that the whole render has something in it: the gate
-# stays down throughout and Sustain is at its floor, so the note is only ever decaying.
+# Decay is held at the top of its dial so that the note carries as far into the render as it can:
+# the gate stays down throughout and Sustain is at its floor, so the note is only ever decaying.
 env_gen.set_decay(cc_to_ratio(124))
 env_gen.set_sustain(cc_to_ratio(4))
 
