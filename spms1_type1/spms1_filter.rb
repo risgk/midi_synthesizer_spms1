@@ -16,7 +16,13 @@ module Spms1
     OUTPUT_INV_CEILING = 1.0 / OUTPUT_CEILING
     OUTPUT_CUBIC_SCALE = (1.0 / 3.0) * OUTPUT_CEILING
 
-    SOFT_CLIP_CEILING = 4.0
+    # Twice OUTPUT_CEILING, so the state inside the loop rails at exactly twice what leaves the
+    # module. The cubic is self-similar: scaling the ceiling scales the flat value with it, and at
+    # this one the rail is 2.0 in single precision with nothing rounded off. The state does not
+    # reach it in play -- driven from the bus it peaks near 1.1 on a note and 2.0 on a full-scale
+    # square -- so what this value sets is how hard the curve bends below the rail, and that is
+    # what holds the resonant peak down.
+    SOFT_CLIP_CEILING = 3.0
     # Everything soft_clip needs derived from the ceiling once, at startup. The vendored Spinel
     # emits Float constants as runtime globals rather than compile-time literals, so writing these
     # expressions inline in soft_clip would leave a real division and two extra multiplies in a
