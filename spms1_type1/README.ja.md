@@ -85,6 +85,16 @@ MIDI Synthesizer SPMS-1 (type-1) v0.0.0
         - necobit電子 [MIDI Unit Mini for GROVE](https://necobit.com/denshi/midi-unit-mini-for-grove/) (日本国内発送のみ)
 
 
+### レイテンシ
+
+MIDI メッセージを受けてから音が出るまで、およそ 4 ms です。
+
+- 64 サンプルの出力バッファが 2 つ: 2.7 ms
+- MIDI はバッファごとに 1 回読むので、最大でもう 1 つ分待ちます: 1.3 ms
+
+これはシンセ自身の分で、MIDI の伝送と DAC の分はこの上に乗ります。
+
+
 ### [MIDI インプリメンテーション・チャート](./spms1_midi_chart.md)
 
 

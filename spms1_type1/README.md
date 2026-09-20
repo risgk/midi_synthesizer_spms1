@@ -85,6 +85,16 @@ Usage
         - necobit電子 [MIDI Unit Mini for GROVE](https://necobit.com/denshi/midi-unit-mini-for-grove/) (Shipping to Japan only)
 
 
+### Latency
+
+About 4 ms from a MIDI message to the sound that answers it:
+
+- Two output buffers of 64 samples each: 2.7 ms
+- MIDI is read once per buffer, so a message waits up to one more: 1.3 ms
+
+That is the synth's own; what the MIDI link and the DAC add sits on top of it.
+
+
 ### [MIDI Implementation Chart](./spms1_midi_chart.md)
 
 
