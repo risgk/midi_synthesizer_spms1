@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>SPMS-1 (type-1) Editor</title>
+  <style>
+    :root {
+      --primary-color: #9B111E;
+      --primary-hover: #7A0D17;
+      --bg-color: #f7f9fa;
+      --panel-bg: #ffffff;
+      --border-color: #e1e4e6;
+      --text-color: #2c3e50;
+      --text-muted: #7f8c8d;
+      /* Slider ticks. The thumb's centre travels from half a thumb in to half a thumb from the
+         far end, so a tick for CC n sits at that fraction of what is left of the track. */
+      --tick: linear-gradient(var(--text-muted), var(--text-muted));
+      --tick-4: calc(9px + (100% - 18px) * 0.031496 - 1px);
+      --tick-64: calc(9px + (100% - 18px) * 0.503937 - 1px);
+      --tick-124: calc(9px + (100% - 18px) * 0.976378 - 1px);
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      padding: 20px;
+    }
+    .editor-container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    header {
+      margin-bottom: 24px;
+      border-bottom: 3px solid var(--primary-color);
+      padding-bottom: 12px;
+    }
+    header h1 {
+      font-size: 1.8rem;
+      color: var(--primary-color);
+    }
+    header .version {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: normal;
+      margin-left: 10px;
+    }
+    .editor-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 768px) {
+      .editor-grid { grid-template-columns: 1fr; }
+    }
+    .panel {
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .panel h2 {
+      font-size: 1.2rem;
+      margin-bottom: 16px;
+      color: var(--primary-color);
+      border-left: 4px solid var(--primary-color);
+      padding-left: 8px;
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: #fff;
+      font-size: 0.95rem;
+      color: var(--text-color);
+      outline: none;
+    }
+    select:focus {
+      border-color: var(--primary-color);
+    }
+    .btn-main {
+      width: 100%;
+      padding: 12px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      margin-top: 8px;
+    }
+    .btn-main:hover {
+      background-color: var(--primary-hover);
+    }
+    .control-row {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .slider-knob-zone {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .slider-label {
+      min-width: 140px;
+      font-size: 0.9rem;
+    }
+    .slider-label .cc-num {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: block;
+    }
+    .slider-input-wrapper {
+      flex-grow: 1;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    input[type="range"] {
+      flex-grow: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 6px;
+      background-color: var(--border-color);
+      border-radius: 3px;
+      outline: none;
+      /* CC 4 and CC 124 are the ends of the range the synth uses: cc_to_ratio maps them to 0.0
+         and 1.0 and clamps anything past them, so the track outside the ticks does nothing. */
+      background-image: var(--tick), var(--tick);
+      background-size: 2px 100%, 2px 100%;
+      background-position: var(--tick-4) center, var(--tick-124) center;
+      background-repeat: no-repeat;
+    }
+    /* A third tick at CC 64 where the centre of the dial means no change. Drawn rather than
+       declared as a <datalist>, which some browsers turn into a snap point. */
+    input[type="range"].bipolar {
+      background-image: var(--tick), var(--tick), var(--tick);
+      background-size: 2px 100%, 2px 100%, 2px 100%;
+      background-position: var(--tick-4) center, var(--tick-64) center, var(--tick-124) center;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--primary-color);
+      cursor: pointer;
+    }
+    /* Same size as the WebKit thumb above, so the tick positions line up here too. */
+    input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border: none;
+      border-radius: 50%;
+      background: var(--primary-color);
+      cursor: pointer;
+    }
+    .slider-value {
+      min-width: 32px;
+      text-align: right;
+      font-family: monospace;
+      font-size: 0.95rem;
+      font-weight: bold;
+    }
+    .keyboard-panel {
+      width: 100%;
+    }
+    .keyboard-scroll-container {
+      width: 100%;
+      overflow-x: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background: #222;
+      padding: 10px 5px 15px 5px;
+    }
+    .keyboard-scroll-container::-webkit-scrollbar {
+      height: 10px;
+    }
+    .keyboard-scroll-container::-webkit-scrollbar-track {
+      background: #222;
+      border-radius: 5px;
+    }
+    .keyboard-scroll-container::-webkit-scrollbar-thumb {
+      background: var(--primary-color);
+      border-radius: 5px;
+    }
+    .keyboard-wrapper {
+      position: relative;
+      width: 2414px;
+      height: 140px;
+      margin: 0 auto;
+    }
+    .key {
+      position: absolute;
+      cursor: pointer;
+    }
+    .key.white {
+      width: 34px;
+      height: 140px;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 0 0 4px 4px;
+      z-index: 1;
+    }
+    .key.white:active, .key.white.active {
+      background: #f0f0f0;
+      border-bottom: 4px solid var(--primary-color);
+    }
+    .key.black {
+      width: 22px;
+      height: 85px;
+      background: #111;
+      border-radius: 0 0 3px 3px;
+      z-index: 2;
+    }
+    .key.black:active, .key.black.active {
+      background: var(--primary-color);
+    }
+    .key-label {
+      position: absolute;
+      bottom: 5px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="editor-container">
+  <header>
+    <h1>SPMS-1 (type-1) Editor<span class="version">v0.0.0</span></h1>
+  </header>
+
+  <div class="editor-grid">
+    <div class="left-column" style="display: flex; flex-direction: column; gap: 20px;">
+      <div class="panel">
+        <h2>MIDI Device Settings</h2>
+        <div class="form-group">
+          <label>MIDI Channel</label>
+          <select id="midi-ch">
+            <option value="0">1</option>
+            <option value="1">2</option>
+            <option value="2">3</option>
+            <option value="3">4</option>
+            <option value="4">5</option>
+            <option value="5">6</option>
+            <option value="6">7</option>
+            <option value="7">8</option>
+            <option value="8">9</option>
+            <option value="9">10</option>
+            <option value="10">11</option>
+            <option value="11">12</option>
+            <option value="12">13</option>
+            <option value="13">14</option>
+            <option value="14">15</option>
+            <option value="15">16</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>MIDI In Device (Keyboard / Controller)</label>
+          <select id="midi-in">
+            <option value="">Select MIDI Input Device...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>MIDI Out Device (SPMS-1 Synthesizer)</label>
+          <select id="midi-out">
+            <option value="">Select SPMS-1 Device...</option>
+          </select>
+        </div>
+        <button class="btn-main" id="init-all">Initialize & Send All</button>
+      </div>
+
+      <div class="panel">
+        <h2>Osc</h2>
+        <div class="control-row">
+          <div class="slider-knob-zone">
+            <div class="slider-label">Wave <span class="cc-num">(CC 20)</span></div>
+            <div class="slider-input-wrapper">
+              <input type="range" id="waveform" min="0" max="127" value="4">
+              <span class="slider-value" id="waveform-val">4</span>
+            </div>
+          </div>
+          <div class="slider-knob-zone">
+            <div class="slider-label">Mod Amt <span class="cc-num">(CC 13)</span></div>
+            <div class="slider-input-wrapper">
+              <input type="range" id="osc-mod-amount" min="0" max="127" value="4">
+              <span class="slider-value" id="osc-mod-amount-val">4</span>
+            </div>
+          </div>
+          <div class="slider-knob-zone">
+            <div class="slider-label">Coarse Tune <span class="cc-num">(CC 86)</span></div>
+            <div class="slider-input-wrapper">
+              <input type="range" class="bipolar" id="osc-coarse-tune" min="0" max="127" value="64">
+              <span class="slider-value" id="osc-coarse-tune-val">+0</span>
+            </div>
+          </div>
+          <div class="slider-knob-zone">
+            <div class="slider-label">Fine Tune <span class="cc-num">(CC 70)</span></div>
+            <div class="slider-input-wrapper">
+              <input type="range" class="bipolar" id="osc-fine-tune" min="0" max="127" value="64">
+              <span class="slider-value" id="osc-fine-tune-val">+0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="right-column" style="display: flex; flex-direction: column; gap: 20px;">
+      <div class="panel">
+        <h2>Filter</h2>
+        <div class="control-row">
+          <div class="slider-knob-zone">
+            <div class="slider-label">Cutoff <span class="cc-num">(CC 74)</span></div>
+            <div class="slider-input-wrapper">
+              <input type="range" id="cutoff" min="0" max="127" value="124">
+              <span class="slider-value" id="cutoff-val">124</span>
+            </div>
+          </div>
+          <div class="slider-knob-zone">
+            <div class="slider-label">Resonance <span class="cc-num">(CC 71)</span></div>
+            <div class="slider-input-wrapper">
+              <input type="range" id="resonance" min="0" max="127" value="64">
+              <span class="slider-value" id="resonance-val">64</span>
+            </div>
+          </div>
+          <div class="slider-knob-zone">
+            <div class="slider-label">Mod Amt <span class="cc-num">(CC 24)</span></div>
+            <div class="slider-input-wrapper">
+              <input type="range" id="eg-amount" min="0" max="127" value="64">
+              <span class="slider-value" id="eg-amount-val">64</span>
+            </div>
+          </div>
+          <div class="slider-knob-zone">
+            <div class="slider-label">Gain <span class="cc-num">(CC 112)</span></div>
+            <div class="slider-input-wrapper">
+              <input type="range" id="filter-gain" min="0" max="127" value="64">
+              <span class="slider-value" id="filter-gain-val">64</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Amp</h2>
+        <div class="control-row">
+          <div class="slider-knob-zone">
+            <div class="slider-label">Gain <span class="cc-num">(CC 15)</span></div>
+            <div class="slider-input-wrapper">
+              <input type="range" id="amp-gain" min="0" max="127" value="64">
+              <span class="slider-value" id="amp-gain-val">64</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>EG</h2>
+        <div class="control-row">
+          <div class="slider-knob-zone">
+            <div class="slider-label">Attack <span class="cc-num">(CC 73)</span></div>
+            <div class="slider-input-wrapper">
+              <input type="range" id="attack" min="0" max="127" value="4">
+              <span class="slider-value" id="attack-val">4</span>
+            </div>
+          </div>
+          <div class="slider-knob-zone">
+            <div class="slider-label">Decay <span class="cc-num">(CC 75)</span></div>
+            <div class="slider-input-wrapper">
+              <input type="range" id="decay" min="0" max="127" value="94">
+              <span class="slider-value" id="decay-val">94</span>
+            </div>
+          </div>
+          <div class="slider-knob-zone">
+            <div class="slider-label">Sustain <span class="cc-num">(CC 30)</span></div>
+            <div class="slider-input-wrapper">
+              <input type="range" id="sustain" min="0" max="127" value="4">
+              <span class="slider-value" id="sustain-val">4</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>LFO</h2>
+        <div class="control-row">
+          <div class="slider-knob-zone">
+            <div class="slider-label">Rate <span class="cc-num">(CC 3)</span></div>
+            <div class="slider-input-wrapper">
+              <input type="range" id="lfo-rate" min="0" max="127" value="64">
+              <span class="slider-value" id="lfo-rate-val">64</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel keyboard-panel">
+    <h2>Soft Keyboard (10 Octaves: C-1 - C9)</h2>
+    <div class="keyboard-scroll-container" id="kb-scroll">
+      <div class="keyboard-wrapper" id="keyboard"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let midiAccess = null;
+  let midiInput = null;
+  let midiOutput = null;
+  let midi_ch = 0;
+
+  const ccMap = {
+    'waveform': 20,
+    'osc-mod-amount': 13,
+    'osc-coarse-tune': 86,
+    'osc-fine-tune': 70,
+    'cutoff': 74,
+    'resonance': 71,
+    'eg-amount': 24,
+    'filter-gain': 112,
+    'amp-gain': 15,
+    'attack': 73,
+    'decay': 75,
+    'sustain': 30,
+    'lfo-rate': 3
+  };
+
+  const defaultValues = {
+    'waveform': 4,
+    'osc-mod-amount': 4,
+    'osc-coarse-tune': 64,
+    'osc-fine-tune': 64,
+    'cutoff': 124,
+    'resonance': 64,
+    'eg-amount': 64,
+    'filter-gain': 64,
+    'amp-gain': 64,
+    'attack': 4,
+    'decay': 94,
+    'sustain': 4,
+    'lfo-rate': 64
+  };
+
+  function initMIDI() {
+    if (navigator.requestMIDIAccess) {
+      navigator.requestMIDIAccess().then(onMIDISuccess, onMIDIFailure);
+    }
+  }
+
+  function onMIDISuccess(access) {
+    midiAccess = access;
+    updateDeviceLists();
+    midiAccess.onstatechange = updateDeviceLists;
+  }
+
+  function onMIDIFailure(msg) {
+    console.error("Failed to get MIDI access - " + msg);
+  }
+
+  function updateDeviceLists() {
+    const inSelect = document.getElementById('midi-in');
+    const outSelect = document.getElementById('midi-out');
+    
+    const currentIn = inSelect.value;
+    const currentOut = outSelect.value;
+
+    inSelect.innerHTML = '<option value="">Select MIDI Input Device...</option>';
+    outSelect.innerHTML = '<option value="">Select SPMS-1 Device...</option>';
+
+    midiAccess.inputs.forEach(input => {
+      const opt = document.createElement('option');
+      opt.value = input.id;
+      opt.textContent = input.name;
+      if (input.id === currentIn) opt.selected = true;
+      inSelect.appendChild(opt);
+    });
+
+    midiAccess.outputs.forEach(output => {
+      const opt = document.createElement('option');
+      opt.value = output.id;
+      opt.textContent = output.name;
+      if (output.id === currentOut) opt.selected = true;
+      outSelect.appendChild(opt);
+    });
+
+    handleDeviceChange();
+  }
+
+  function handleDeviceChange() {
+    const inId = document.getElementById('midi-in').value;
+    const outId = document.getElementById('midi-out').value;
+
+    if (midiInput) midiInput.onmidimessage = null;
+    midiInput = midiAccess.inputs.get(inId) || null;
+    midiOutput = midiAccess.outputs.get(outId) || null;
+
+    if (midiInput) {
+      midiInput.onmidimessage = onMIDIMessage;
+    }
+  }
+
+  function onChangeMIDICh() {
+    midi_ch = parseInt(document.getElementById('midi-ch').value);
+  }
+
+  function sendCC(cc, value) {
+    if (midiOutput) {
+      midiOutput.send([0xB0 | midi_ch, cc, value]);
+    }
+  }
+
+  function sendNote(status, note, velocity) {
+    if (midiOutput) {
+      midiOutput.send([(status & 0xF0) | midi_ch, note, velocity]);
+    }
+  }
+
+  function onMIDIMessage(event) {
+    const data = event.data;
+    const cmd = data[0] & 0xF0;
+    const ch  = data[0] & 0x0F;
+
+    if (midiOutput) {
+      midiOutput.send(data);
+    }
+
+    if (ch !== midi_ch) return;
+
+    if (cmd === 0x90 && data[2] > 0) {
+      const key = document.querySelector(`.key[data-note="${data[1]}"]`);
+      if (key) key.classList.add('active');
+    } else if (cmd === 0x80 || (cmd === 0x90 && data[2] === 0)) {
+      const key = document.querySelector(`.key[data-note="${data[1]}"]`);
+      if (key) key.classList.remove('active');
+    } else if (cmd === 0xB0) {
+      const ccNumber = data[1];
+      const ccValue = data[2];
+      let elementId = "";
+      switch (ccNumber) {
+        case 20: elementId = "waveform"; break;
+        case 13: elementId = "osc-mod-amount"; break;
+        case 86: elementId = "osc-coarse-tune"; break;
+        case 70: elementId = "osc-fine-tune"; break;
+        case 74: elementId = "cutoff"; break;
+        case 71: elementId = "resonance"; break;
+        case 24: elementId = "eg-amount"; break;
+        case 112: elementId = "filter-gain"; break;
+        case 15: elementId = "amp-gain"; break;
+        case 73: elementId = "attack"; break;
+        case 75: elementId = "decay"; break;
+        case 30: elementId = "sustain"; break;
+        case 3: elementId = "lfo-rate"; break;
+      }
+      if (elementId) {
+        const slider = document.getElementById(elementId);
+        if (slider) {
+          slider.value = ccValue;
+          slider.dispatchEvent(new Event('input'));
+        }
+      }
+    }
+  }
+
+  const bipolarIds = new Set(['osc-coarse-tune', 'osc-fine-tune']);
+
+  function displayValue(id, value) {
+    if (!bipolarIds.has(id)) return String(value);
+    const offset = value - 64;
+    return (offset < 0 ? '-' : '+') + Math.abs(offset);
+  }
+
+  Object.keys(ccMap).forEach(id => {
+    const input = document.getElementById(id);
+    const valSpan = document.getElementById(id + '-val');
+    if (input && valSpan) {
+      input.addEventListener('input', (e) => {
+        valSpan.textContent = displayValue(id, parseInt(e.target.value));
+        sendCC(ccMap[id], parseInt(e.target.value));
+      });
+    }
+  });
+
+  document.getElementById('init-all').addEventListener('click', () => {
+    Object.keys(defaultValues).forEach(id => {
+      const input = document.getElementById(id);
+      const valSpan = document.getElementById(id + '-val');
+      if (input && valSpan) {
+        input.value = defaultValues[id];
+        valSpan.textContent = displayValue(id, defaultValues[id]);
+        sendCC(ccMap[id], defaultValues[id]);
+      }
+    });
+  });
+
+  document.getElementById('midi-ch').addEventListener('change', onChangeMIDICh);
+  document.getElementById('midi-in').addEventListener('change', handleDeviceChange);
+  document.getElementById('midi-out').addEventListener('change', handleDeviceChange);
+
+  function createKeyboard() {
+    const kb = document.getElementById('keyboard');
+    const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    let whiteKeyIndex = 0;
+    const whiteKeyWidth = 34;
+
+    for (let noteNum = 0; noteNum <= 120; noteNum++) {
+      const noteIndex = noteNum % 12;
+      const noteName = notes[noteIndex];
+      const octave = Math.floor(noteNum / 12) - 1;
+      const isBlack = noteName.includes('#');
+
+      const keyEl = document.createElement('div');
+      keyEl.dataset.note = noteNum;
+
+      if (!isBlack) {
+        keyEl.className = 'key white';
+        keyEl.style.left = (whiteKeyIndex * whiteKeyWidth) + 'px';
+        if (noteName === 'C') {
+          const label = document.createElement('span');
+          label.className = 'key-label';
+          label.innerText = 'C' + octave;
+          keyEl.appendChild(label);
+        }
+        whiteKeyIndex++;
+      } else {
+        keyEl.className = 'key black';
+        keyEl.style.left = ((whiteKeyIndex - 1) * whiteKeyWidth + (whiteKeyWidth - 11)) + 'px';
+      }
+
+      keyEl.addEventListener('mousedown', () => {
+        keyEl.classList.add('active');
+        sendNote(0x90, noteNum, 127);
+      });
+      keyEl.addEventListener('mouseup', () => {
+        keyEl.classList.remove('active');
+        sendNote(0x80, noteNum, 0);
+      });
+      keyEl.addEventListener('mouseleave', () => {
+        if (keyEl.classList.contains('active')) {
+          keyEl.classList.remove('active');
+          sendNote(0x80, noteNum, 0);
+        }
+      });
+
+      kb.appendChild(keyEl);
+    }
+    
+    setTimeout(() => {
+      const scrollCont = document.getElementById('kb-scroll');
+      scrollCont.scrollLeft = (scrollCont.scrollWidth - scrollCont.clientWidth) / 2;
+    }, 100);
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    createKeyboard();
+    initMIDI();
+  });
+</script>
+</body>
+</html>

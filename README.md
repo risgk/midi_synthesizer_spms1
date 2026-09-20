@@ -15,3 +15,11 @@ SPMS-1 (type-0)
 - [README](./spms1_type0/README.md) / [日本語版](./spms1_type0/README.ja.md)
 
 ![SPMS-1 (type-0)](./midi_synthesizer_spms1_type0.jpg)
+
+
+SPMS-1 (type-1)
+---------------
+
+- Monophonic semi-modular MIDI Synthesizer for Raspberry Pi Pico 2
+- Required Hardware: Raspberry Pi Pico 2, Pimoroni Pico Audio Pack (or alternative I2S DAC hardware)
+- [README](./spms1_type1/README.md) / [日本語版](./spms1_type1/README.ja.md)

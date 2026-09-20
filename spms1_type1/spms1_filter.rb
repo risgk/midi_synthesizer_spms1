@@ -1,0 +1,220 @@
+module Spms1
+  # Nonlinear biquad low-pass filter with modulation and soft clipping.
+  # This implementation is not oversampled; the nonlinear behavior is kept intentionally simple.
+  # Reference: https://jatinchowdhury18.medium.com/complex-nonlinearities-episode-4-nonlinear-biquad-filters-ae6b3f23cb0e
+  # Coefficients are recomputed every 4 samples rather than every sample: the computation needs a
+  # sine, a cosine and a division, and the parameters feeding it are smoothed in the same place.
+  class Filter
+    # What leaves the filter, as opposed to what circulates inside it. A cubic soft clip flattens at
+    # two thirds of its ceiling, so 1.5 lands the limit on exactly 1.0: one unit, the widest thing
+    # the bus carries. It sits outside the feedback path, so the resonance behaves as it did and only
+    # a peak that would have left above one unit is rounded off. A hard clamp here would fold high
+    # harmonics back below Nyquist; a cubic makes a third harmonic and nothing else, which stays in
+    # band for every note this oscillator plays.
+    OUTPUT_CEILING     = 1.5
+    OUTPUT_FLOOR       = -OUTPUT_CEILING
+    OUTPUT_INV_CEILING = 1.0 / OUTPUT_CEILING
+    OUTPUT_CUBIC_SCALE = (1.0 / 3.0) * OUTPUT_CEILING
+
+    SOFT_CLIP_CEILING = 4.0
+    # Everything soft_clip needs derived from the ceiling once, at startup. The vendored Spinel
+    # emits Float constants as runtime globals rather than compile-time literals, so writing these
+    # expressions inline in soft_clip would leave a real division and two extra multiplies in a
+    # method that runs twice per sample.
+    SOFT_CLIP_INV_CEILING = 1.0 / SOFT_CLIP_CEILING
+    SOFT_CLIP_FLOOR       = -SOFT_CLIP_CEILING
+    SOFT_CLIP_CUBIC_SCALE = (1.0 / 3.0) * SOFT_CLIP_CEILING
+    # Blend at the reference rate on the line below. The two move together: their product is what
+    # fixes the time constant, so changing one without the other changes how fast smoothing is.
+    SMOOTHING_TARGET_BLEND_BASE = 0.03125
+    # Number of samples between control-rate updates; smoothing speed is kept approximately
+    # constant if this is changed. It has to stay a power of two: the counter below wraps with a
+    # mask, because Ruby's % is a floor-modulo and sp_imod carries a sign correction the counter
+    # can never need -- one branch a sample in each module, ten across the six of them.
+    CONTROL_RATE_DIVISOR = 4
+    # Its own constant, not CONTROL_RATE_DIVISOR - 1 where it is used: Spinel emits an Integer
+    # constant as a runtime global and does not fold arithmetic on one, so written that way the
+    # subtraction survives into the per-sample path carrying an overflow check of its own, which
+    # measured far worse than the modulo it replaces. What the mask buys is size, not
+    # determinism: the ten branches it removes, one per site, are ones that could never be taken.
+    # Together with the LFO's fold it took 11 branches and 60 instructions out of Spms1_main as
+    # linked, and the buffer time did not move (853/857us against 854/856).
+    CONTROL_RATE_MASK = CONTROL_RATE_DIVISOR - 1
+
+    # Pitch lookup table for note-to-frequency conversion.
+    FREQ_TABLE = Array.new(137, 0.0)
+    for i in 0...136
+      FREQ_TABLE[i] = 440.0 * (2.0 ** ((i.to_f - 69.0) * (1.0 / 12.0)))
+    end
+    FREQ_TABLE[136] = FREQ_TABLE[135]
+
+    # Resonance-to-Q lookup for fast filter coefficient updates.
+    Q_TABLE = Array.new(122, 0.0)
+    BASE_Q = 0.7071067811865476
+    for i in 0...121
+      Q_TABLE[i] = BASE_Q * (2.0 ** (i.to_f * (1.0 / 30.0)))
+    end
+    Q_TABLE[121] = Q_TABLE[120]
+
+    def initialize(sample_rate)
+      @sample_rate = sample_rate
+      # Reciprocal kept alongside the rate so the control-rate update multiplies. @sample_rate is
+      # an Integer, so dividing by it would also cost an int-to-float conversion.
+      @inv_sample_rate = 1.0 / sample_rate
+      @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (48000.0 / @sample_rate) * (CONTROL_RATE_DIVISOR / 4.0)
+      @cutoff = 1.0
+      @resonance = 0.0
+      @modulation_amount = 0.0
+      @gain = 0.5
+
+      @current_cutoff = 1.0
+      @current_resonance = 0.0
+      @current_modulation_amount = 0.0
+      @current_gain = 0.5
+
+      @b0 = 1.0; @b1 = 0.0; @b2 = 0.0
+      @a1 = 0.0; @a2 = 0.0
+      @z1 = 0.0; @z2 = 0.0
+
+      @next_b0 = 1.0
+      @next_b1 = 0.0
+      @next_a1 = 0.0
+      @next_a2 = 0.0
+
+      @current_modulation_input = 0.0
+      @sample_counter = 0
+
+      update_coefficients
+    end
+
+    # Cutoff and resonance use normalized values in [0.0, 1.0].
+    # Cutoff range: MIDI note 15 (19 Hz) at 0.0, MIDI note 75 (622 Hz) at 0.5, MIDI note 135 (20 kHz) at 1.0.
+    def set_cutoff(cutoff)
+      @cutoff = (cutoff < 0.0) ? 0.0 : ((cutoff > 1.0) ? 1.0 : cutoff)
+    end
+
+    # Modulation depth is normalized to [0.0, 1.0].
+    def set_modulation_amount(amount)
+      @modulation_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
+    end
+
+    # How hard the audio input drives the filter, normalized to [0.0, 1.0] and used as a plain
+    # multiplier. It sits on the input rather than the output because that is what decides how far
+    # the state runs into soft_clip: past the middle of the dial the filter starts to saturate.
+    def set_gain(gain)
+      @gain = (gain < 0.0) ? 0.0 : ((gain > 1.0) ? 1.0 : gain)
+    end
+
+    # Q range: ~0.7 (0.0), ~2.83 (0.5), ~11.3 (1.0).
+    def set_resonance(resonance)
+      @resonance = (resonance < 0.0) ? 0.0 : ((resonance > 1.0) ? 1.0 : resonance)
+    end
+
+    def process(audio_input = 0.0, modulation_input = 0.0)
+      @current_modulation_input = modulation_input
+      
+      if @sample_counter == 0
+        update_coefficients
+      end
+
+      driven_input = audio_input * @current_gain
+
+      # Transposed Direct Form II (TDF-II) biquad implementation with soft clipping.
+      audio_output = @z1 + @b0 * driven_input
+      @z1 = soft_clip(@z2 + @b1 * driven_input - @a1 * audio_output)
+      @z2 = soft_clip(@b2 * driven_input - @a2 * audio_output)
+
+      @sample_counter = (@sample_counter + 1) & CONTROL_RATE_MASK
+
+      clip_output(audio_output)
+    end
+
+    private
+
+    def cutoff_to_freq_fast(clamped_cutoff)
+      internal_cutoff = clamped_cutoff * 120.0 + 15.0
+      index = internal_cutoff.to_i
+      fraction = internal_cutoff - index.to_f
+
+      f0 = FREQ_TABLE[index]
+      f1 = FREQ_TABLE[index + 1]
+
+      f0 + fraction * (f1 - f0)
+    end
+
+    # All five coefficients are replaced together. Updating only some of them would leave the
+    # biquad running on values from two different parameter settings, which can destabilise it.
+    def update_coefficients
+      @current_cutoff += (@cutoff - @current_cutoff) * @smoothing_target_blend
+      @current_resonance += (@resonance - @current_resonance) * @smoothing_target_blend
+      @current_modulation_amount += (@modulation_amount - @current_modulation_amount) * @smoothing_target_blend
+      @current_gain += (@gain - @current_gain) * @smoothing_target_blend
+
+      # The modulation input arrives as it is; clamping total_cutoff below is what holds the
+      # table lookup in range, and a source that swings both ways moves the cutoff both ways.
+      total_cutoff = @current_cutoff + (@current_modulation_input * @current_modulation_amount)
+      clamped_cutoff = (total_cutoff < 0.0) ? 0.0 : ((total_cutoff > 1.0) ? 1.0 : total_cutoff)
+
+      cutoff_freq = cutoff_to_freq_fast(clamped_cutoff)
+      @step_omega = 2.0 * Math::PI * cutoff_freq * @inv_sample_rate
+
+      internal_resonance = @current_resonance * 120.0
+
+      index = internal_resonance.to_i
+      fraction = internal_resonance - index.to_f
+
+      q0 = Q_TABLE[index]
+      q1 = Q_TABLE[index + 1]
+
+      @step_q = q0 + fraction * (q1 - q0)
+      @step_sin_w = Math.sin(@step_omega)
+      @step_cos_w = Math.cos(@step_omega)
+
+      step_inv_denom = 1.0 / ((2.0 * @step_q) + @step_sin_w)
+
+      @step_two_q = 2.0 * @step_q
+      raw_b0 = (1.0 - @step_cos_w) * 0.5 * @step_two_q
+      @next_b0 = raw_b0 * step_inv_denom
+      @next_b1 = (1.0 - @step_cos_w) * @step_two_q * step_inv_denom
+      @next_a1 = -4.0 * @step_cos_w * @step_q * step_inv_denom
+      @next_a2 = (@step_two_q - @step_sin_w) * step_inv_denom
+
+      @b0 = @next_b0
+      @b1 = @next_b1
+      @b2 = @next_b0
+      @a1 = @next_a1
+      @a2 = @next_a2
+    end
+
+    # Applies a cubic non-linear soft-clipping function tailored for a configurable range.
+    # Adds warm analog-like saturation and prevents internal state blow-ups.
+    # Bounds what the module hands to the bus. Separate from soft_clip, which bounds the state
+    # inside the loop at a much higher ceiling and has to stay where it is.
+    # Clamp first, then run the cubic on the clamped value. Fed the ceiling, the curve evaluates
+    # to two thirds of it, which is the constant the flat region returned when this was an
+    # if/elsif: the rail comes out of the arithmetic rather than out of a branch. At this ceiling
+    # it is exactly 1.0 in single precision either way, so nothing about the rail moves. Written
+    # this way the method is branchless -- Spinel emits a ternary assigned to a local as a C
+    # conditional expression, and the rest is straight-line arithmetic. Both clamps compare
+    # against a stored constant rather than a negated one, for the reason the constants above
+    # give.
+    def clip_output(sample)
+      capped  = (sample > OUTPUT_CEILING) ? OUTPUT_CEILING : sample
+      clamped = (capped < OUTPUT_FLOOR) ? OUTPUT_FLOOR : capped
+      scaled  = clamped * OUTPUT_INV_CEILING
+      clamped - (scaled * scaled * scaled) * OUTPUT_CUBIC_SCALE
+    end
+
+    # Clamped before the cubic and branchless, for the reasons clip_output gives. It matters more
+    # here: this one runs twice per sample, on the state inside the feedback path. Below the
+    # ceiling the result is unchanged; above it the flat value is now a subtraction rather than a
+    # stored constant and lands one ULP away in single precision, on a state the next sample
+    # multiplies by a coefficient regardless.
+    def soft_clip(sample)
+      capped  = (sample > SOFT_CLIP_CEILING) ? SOFT_CLIP_CEILING : sample
+      clamped = (capped < SOFT_CLIP_FLOOR) ? SOFT_CLIP_FLOOR : capped
+      scaled  = clamped * SOFT_CLIP_INV_CEILING
+      clamped - (scaled * scaled * scaled) * SOFT_CLIP_CUBIC_SCALE
+    end
+  end
+end
