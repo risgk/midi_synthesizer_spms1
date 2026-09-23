@@ -63,6 +63,9 @@ MIDI Synthesizer SPMS-1 (type-1) v0.0.1
         esptool --chip esp32s3 --port COM7 write-flash 0x0 spms1_type1.ino.merged.bin
         ```
 
+    - 書き込んだら、USB ケーブルを抜き差しして起動してください。esptool が最後に行うリセットでは、
+      ダウンロードモードのままになります
+
 
 ### Web エディタ
 

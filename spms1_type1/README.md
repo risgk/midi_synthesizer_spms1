@@ -64,6 +64,9 @@ Usage
         esptool --chip esp32s3 --port COM7 write-flash 0x0 spms1_type1.ino.merged.bin
         ```
 
+    - Then unplug and replug the USB cable to start it; the reset esptool does at the end
+      leaves it in download mode
+
 
 ### Web Editor
 
