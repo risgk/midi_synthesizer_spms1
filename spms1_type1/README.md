@@ -64,8 +64,6 @@ Usage
         esptool --chip esp32s3 --port COM7 write-flash 0x0 spms1_type1.ino.merged.bin
         ```
 
-- "spms1_type1.ino.uf2" (in the "bin" folder) is for Raspberry Pi Pico 2 and Pimoroni Pico Audio Pack
-
 
 ### Web Editor
 

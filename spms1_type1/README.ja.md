@@ -63,8 +63,6 @@ MIDI Synthesizer SPMS-1 (type-1) v0.0.1
         esptool --chip esp32s3 --port COM7 write-flash 0x0 spms1_type1.ino.merged.bin
         ```
 
-- "bin" フォルダの "spms1_type1.ino.uf2" は Raspberry Pi Pico 2 と Pimoroni Pico Audio Pack 用です
-
 
 ### Web エディタ
 
