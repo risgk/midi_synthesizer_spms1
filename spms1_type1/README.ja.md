@@ -438,6 +438,10 @@ Filter 1 Gain はオーディオ入力がフィルタをどれだけ強く駆動
   `build/sim_spinel/spms1_sim --midi-in NAME` で起動します。`--list` で MIDI 入力の一覧を表示します。
   PortAudio は実行時に読み込み、そのパスは `SPMS1_PORTAUDIO_DLL` で指定できます
     - macOS では動作確認していません
+- CRuby: "sim_cruby" -- "spms1_main.rb" そのものを CRuby で動かします。PortAudio は ffi gem 経由、MIDI 入力は
+  unimidi gem で受けます: `ruby sim_cruby/spms1_sim.rb --midi-in NAME`。`SPMS1_PORTAUDIO_DLL`
+  は上と同じです。デフォルトのパッチはインタプリタではリアルタイムに間に合いません
+    - macOS では動作確認していません
 
 
 ### 生成コードの確認

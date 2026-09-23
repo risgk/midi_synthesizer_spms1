@@ -449,6 +449,11 @@ that off makes far weaker high harmonics than a hard edge would fold back down i
   Windows, clang on macOS), then run `build/sim_spinel/spms1_sim --midi-in NAME`; `--list` shows
   the MIDI inputs. PortAudio is loaded at run time; `SPMS1_PORTAUDIO_DLL` gives its path
     - Not tested on macOS
+- CRuby: "sim_cruby" -- runs "spms1_main.rb" itself on CRuby, with PortAudio through the ffi gem
+  and MIDI in through the unimidi gem: `ruby sim_cruby/spms1_sim.rb --midi-in NAME`, with
+  `SPMS1_PORTAUDIO_DLL` as above. The interpreter does not keep up with the default patch
+  in real time
+    - Not tested on macOS
 
 
 ### Checking the Generated Code
