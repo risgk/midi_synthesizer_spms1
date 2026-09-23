@@ -2512,7 +2512,7 @@ int main(int argc,char**argv){
 #line 399 "spms1_main.rb"
   (set_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(74LL)), ((uint8_t)(124LL))), (mrb_int)0);
 #line 400 "spms1_main.rb"
-  (set_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(71LL)), ((uint8_t)(64LL))), (mrb_int)0);
+  (set_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(71LL)), ((uint8_t)(94LL))), (mrb_int)0);
 #line 401 "spms1_main.rb"
   (set_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(24LL)), ((uint8_t)(64LL))), (mrb_int)0);
 #line 402 "spms1_main.rb"
