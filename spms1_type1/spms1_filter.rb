@@ -93,27 +93,32 @@ module Spms1
       update_coefficients
     end
 
-    # Cutoff and resonance use normalized values in [0.0, 1.0].
-    # Cutoff range: MIDI note 15 (19 Hz) at 0.0, MIDI note 75 (622 Hz) at 0.5, MIDI note 135 (20 kHz) at 1.0.
+    # Every parameter is normalized to [-0.5, 0.5] and held in [0.0, 1.0], which is what the
+    # smoothing, the modulation sum and the table lookups below are written against.
+    # Cutoff range: MIDI note 15 (19 Hz) at -0.5, MIDI note 75 (622 Hz) at 0.0, MIDI note 135 (20 kHz) at 0.5.
     def set_cutoff(cutoff)
-      @cutoff = (cutoff < 0.0) ? 0.0 : ((cutoff > 1.0) ? 1.0 : cutoff)
+      clamped = (cutoff < -0.5) ? -0.5 : ((cutoff > 0.5) ? 0.5 : cutoff)
+      @cutoff = clamped + 0.5
     end
 
-    # Modulation depth is normalized to [0.0, 1.0].
+    # Modulation depth, none at -0.5.
     def set_modulation_amount(amount)
-      @modulation_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
+      clamped = (amount < -0.5) ? -0.5 : ((amount > 0.5) ? 0.5 : amount)
+      @modulation_amount = clamped + 0.5
     end
 
-    # How hard the audio input drives the filter, normalized to [0.0, 1.0] and used as a plain
-    # multiplier. It sits on the input rather than the output because that is what decides how far
-    # the state runs into soft_clip: past the middle of the dial the filter starts to saturate.
+    # How hard the audio input drives the filter, used as a plain multiplier: 0.0 at -0.5, 1.0 at
+    # 0.5. It sits on the input rather than the output because that is what decides how far the
+    # state runs into soft_clip: past the middle of the dial the filter starts to saturate.
     def set_gain(gain)
-      @gain = (gain < 0.0) ? 0.0 : ((gain > 1.0) ? 1.0 : gain)
+      clamped = (gain < -0.5) ? -0.5 : ((gain > 0.5) ? 0.5 : gain)
+      @gain = clamped + 0.5
     end
 
-    # Q range: ~0.7 (0.0), ~2.83 (0.5), ~11.3 (1.0).
+    # Q range: ~0.7 (-0.5), ~2.83 (0.0), ~11.3 (0.5).
     def set_resonance(resonance)
-      @resonance = (resonance < 0.0) ? 0.0 : ((resonance > 1.0) ? 1.0 : resonance)
+      clamped = (resonance < -0.5) ? -0.5 : ((resonance > 0.5) ? 0.5 : resonance)
+      @resonance = clamped + 0.5
     end
 
     def process(audio_input = 0.0, modulation_input = 0.0)

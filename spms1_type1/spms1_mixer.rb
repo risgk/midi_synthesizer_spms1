@@ -1,8 +1,8 @@
 module Spms1
   # Sums two inputs, each at its own level and its own polarity. With one input left unrouted it
   # is a buffer, an attenuator or an inverter; inverting just one input subtracts it from the
-  # other; and a constant on the second input shifts a unipolar signal into a bipolar one, which
-  # is the only way to build a bipolar control out of a CC.
+  # other; and a constant on the second input shifts a unipolar signal, such as the envelope, into
+  # a bipolar one.
   class Mixer
     # Blend at the reference rate on the line below. The two move together: their product is what
     # fixes the time constant, so changing one without the other changes how fast smoothing is.
@@ -37,30 +37,33 @@ module Spms1
       @sample_counter = 0
     end
 
-    # Each level is normalized to [0.0, 1.0] and used as a plain multiplier on its own input.
+    # Each level is normalized to [-0.5, 0.5] and used as a plain multiplier on its own input, 0.0
+    # at -0.5 and 1.0 at 0.5.
     def set_level_1(level)
-      @level_1 = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
+      clamped_level = (level < -0.5) ? -0.5 : ((level > 0.5) ? 0.5 : level)
+      @level_1 = clamped_level + 0.5
       @target_1 = @level_1 * @polarity_1
     end
 
     def set_level_2(level)
-      @level_2 = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
+      clamped_level = (level < -0.5) ? -0.5 : ((level > 0.5) ? 0.5 : level)
+      @level_2 = clamped_level + 0.5
       @target_2 = @level_2 * @polarity_2
     end
 
-    # Each invert is normalized to [0.0, 1.0] and read as a polarity on its own input: 0.0 passes
-    # it through, 1.0 negates it, and the way between scales it, crossing silence at 0.5. Continuous
+    # Each invert is normalized to [-0.5, 0.5] and read as a polarity on its own input: -0.5 passes
+    # it through, 0.5 negates it, and the way between scales it, crossing silence at 0.0. Continuous
     # rather than a switch so that smoothing carries it across zero without a step. Inverting one
     # input is what makes a difference rather than a sum; inverting both negates the output.
     def set_invert_1(invert)
-      clamped_invert = (invert < 0.0) ? 0.0 : ((invert > 1.0) ? 1.0 : invert)
-      @polarity_1 = 1.0 - (clamped_invert + clamped_invert)
+      clamped_invert = (invert < -0.5) ? -0.5 : ((invert > 0.5) ? 0.5 : invert)
+      @polarity_1 = -(clamped_invert + clamped_invert)
       @target_1 = @level_1 * @polarity_1
     end
 
     def set_invert_2(invert)
-      clamped_invert = (invert < 0.0) ? 0.0 : ((invert > 1.0) ? 1.0 : invert)
-      @polarity_2 = 1.0 - (clamped_invert + clamped_invert)
+      clamped_invert = (invert < -0.5) ? -0.5 : ((invert > 0.5) ? 0.5 : invert)
+      @polarity_2 = -(clamped_invert + clamped_invert)
       @target_2 = @level_2 * @polarity_2
     end
 

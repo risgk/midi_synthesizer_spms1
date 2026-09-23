@@ -54,31 +54,32 @@ module Spms1
       @sample_counter = 0
     end
 
-    # Waveform morph is normalized to [0.0, 1.0].
-    # 0.0 = sawtooth, 0.5 = 50% morph, 1.0 = square.
+    # Waveform morph is normalized to [-0.5, 0.5] and held in [0.0, 1.0].
+    # -0.5 = sawtooth, 0.0 = 50% morph, 0.5 = square.
     def set_waveform(waveform)
-      @waveform = (waveform < 0.0) ? 0.0 : ((waveform > 1.0) ? 1.0 : waveform)
+      clamped = (waveform < -0.5) ? -0.5 : ((waveform > 0.5) ? 0.5 : waveform)
+      @waveform = clamped + 0.5
     end
 
-    # Modulation depth is normalized to [0.0, 1.0], and scaled here rather than per sample so the
-    # smoothed value is already in pitch units.
+    # Modulation depth is normalized to [-0.5, 0.5], none at -0.5, and scaled here rather than per
+    # sample so the smoothed value is already in pitch units.
     def set_modulation_amount(amount)
-      clamped_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
-      @modulation_amount = clamped_amount * MODULATION_RANGE
+      clamped_amount = (amount < -0.5) ? -0.5 : ((amount > 0.5) ? 0.5 : amount)
+      @modulation_amount = (clamped_amount + 0.5) * MODULATION_RANGE
     end
 
-    # Both tune controls are normalized to [0.0, 1.0] with 0.5 meaning no offset, so a controller's
+    # Both tune controls are normalized to [-0.5, 0.5] with 0.0 meaning no offset, so a controller's
     # centre detent lands there. Linear about that centre, which is what puts every step on a whole
     # semitone or a whole cent; a curve here would make exact intervals unreachable.
     def set_coarse_tune(coarse_tune)
-      clamped = (coarse_tune < 0.0) ? 0.0 : ((coarse_tune > 1.0) ? 1.0 : coarse_tune)
-      @coarse_tune = (clamped + clamped - 1.0) * COARSE_TUNE_RANGE
+      clamped = (coarse_tune < -0.5) ? -0.5 : ((coarse_tune > 0.5) ? 0.5 : coarse_tune)
+      @coarse_tune = (clamped + clamped) * COARSE_TUNE_RANGE
       @tune = @coarse_tune + @fine_tune
     end
 
     def set_fine_tune(fine_tune)
-      clamped = (fine_tune < 0.0) ? 0.0 : ((fine_tune > 1.0) ? 1.0 : fine_tune)
-      @fine_tune = (clamped + clamped - 1.0) * FINE_TUNE_RANGE
+      clamped = (fine_tune < -0.5) ? -0.5 : ((fine_tune > 0.5) ? 0.5 : fine_tune)
+      @fine_tune = (clamped + clamped) * FINE_TUNE_RANGE
       @tune = @coarse_tune + @fine_tune
     end
 

@@ -148,8 +148,8 @@
       background-color: var(--border-color);
       border-radius: 3px;
       outline: none;
-      /* CC 4 and CC 124 are the ends of the range the synth uses: cc_to_ratio maps them to 0.0
-         and 1.0 and clamps anything past them, so the track outside the ticks does nothing. */
+      /* CC 4 and CC 124 are the ends of the range the synth uses: cc_to_ratio maps them to -0.5
+         and 0.5 and clamps anything past them, so the track outside the ticks does nothing. */
       background-image: var(--tick), var(--tick);
       background-size: 2px 100%, 2px 100%;
       background-position: var(--tick-4) center, var(--tick-124) center;

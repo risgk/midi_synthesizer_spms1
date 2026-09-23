@@ -43,10 +43,11 @@ module Spms1
       @sample_counter = 0
     end
 
-    # Rate is normalized to [0.0, 1.0] and read as a note number, so the dial is linear in pitch:
-    # 0.215 Hz at 0.0, 6.875 Hz at 0.5, 220 Hz at 1.0.
+    # Rate is normalized to [-0.5, 0.5], held in [0.0, 1.0], and read as a note number, so the dial
+    # is linear in pitch: 0.215 Hz at -0.5, 6.875 Hz at 0.0, 220 Hz at 0.5.
     def set_rate(rate)
-      @rate = (rate < 0.0) ? 0.0 : ((rate > 1.0) ? 1.0 : rate)
+      clamped = (rate < -0.5) ? -0.5 : ((rate > 0.5) ? 0.5 : rate)
+      @rate = clamped + 0.5
     end
 
     # Output is bipolar and spans one unit peak to peak, [-0.5, 0.5], the same span as the pitch

@@ -26,10 +26,10 @@ module Spms1
     end
     EXP_TABLE[121] = EXP_TABLE[120]
 
-    # Time scaling constants (value at 0.0 / (EXP_TABLE min * ln(2))).
-    # Attack range: 2.5 ms at 0.0, 80 ms at 0.5, 2.56 s at 1.0.
+    # Time scaling constants (value at -0.5 / (EXP_TABLE min * ln(2))).
+    # Attack range: 2.5 ms at -0.5, 80 ms at 0.0, 2.56 s at 0.5.
     ATTACK_BASE = 0.0025 / ((1.0 / 32.0) * Math::log(2))
-    # Decay range: 10 ms at 0.0, 320 ms at 0.5, 10.24 s at 1.0 -- the attack times four throughout.
+    # Decay range: 10 ms at -0.5, 320 ms at 0.0, 10.24 s at 0.5 -- the attack times four throughout.
     # Decay is measured to 1/1024 = 2^-10, which keeps the attack's base of 2 rather than landing
     # on a round -60 dB. 1/1024 is -60.2 dB; the shared base is worth more than closing the 0.2.
     DECAY_BASE  = 0.010 / ((1.0 / 32.0) * 10 * Math::log(2))
@@ -57,19 +57,24 @@ module Spms1
       update_coefficients_full
     end
 
-    # Attack time is normalized to [0.0, 1.0] (see ATTACK_BASE for scaling details).
+    # Every parameter is normalized to [-0.5, 0.5] and held in [0.0, 1.0], which is what the table
+    # lookup and the level comparisons below are written against.
+    # Attack time: see ATTACK_BASE for scaling details.
     def set_attack(attack)
-      @attack = (attack < 0.0) ? 0.0 : ((attack > 1.0) ? 1.0 : attack)
+      clamped = (attack < -0.5) ? -0.5 : ((attack > 0.5) ? 0.5 : attack)
+      @attack = clamped + 0.5
     end
 
-    # Decay time is normalized to [0.0, 1.0] (see DECAY_BASE for scaling details).
+    # Decay time: see DECAY_BASE for scaling details.
     def set_decay(decay)
-      @decay = (decay < 0.0) ? 0.0 : ((decay > 1.0) ? 1.0 : decay)
+      clamped = (decay < -0.5) ? -0.5 : ((decay > 0.5) ? 0.5 : decay)
+      @decay = clamped + 0.5
     end
 
-    # Sustain level is normalized to [0.0, 1.0].
+    # Sustain level: silent at -0.5, full at 0.5.
     def set_sustain(sustain)
-      @sustain = (sustain < 0.0) ? 0.0 : ((sustain > 1.0) ? 1.0 : sustain)
+      clamped = (sustain < -0.5) ? -0.5 : ((sustain > 0.5) ? 0.5 : sustain)
+      @sustain = clamped + 0.5
     end
 
     def process(gate_input = 0.0)

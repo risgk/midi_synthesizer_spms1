@@ -209,7 +209,8 @@ NRPN_SOURCE_MIXER_5_INVERT_2    = 288
 
 # A CC number of 0 means the parameter has no CC: its control slot keeps whatever it holds, so the
 # parameter can be driven by routing alone. A parameter shipped that way wants its slot seeded
-# below, unless 0.0 is the value it should rest at. Every mixer parameter ships that way.
+# below, unless the middle of its dial, 0.0, is the value it should rest at. Every mixer parameter
+# ships that way.
 NRPN_CC_OSC_1_WAVEFORM      = 384
 NRPN_CC_OSC_1_MOD_AMOUNT    = 385
 NRPN_CC_OSC_1_COARSE_TUNE   = 386
@@ -244,17 +245,17 @@ NRPN_CC_MIXER_5_INVERT_1    = 414
 NRPN_CC_MIXER_5_LEVEL_2     = 415
 NRPN_CC_MIXER_5_INVERT_2    = 416
 
-# CC value normalization. Every parameter is a ratio in 0.0..1.0, so this is the only converter:
-# CC 4..124 maps to the full range, centred on CC 64 where a MIDI controller puts its detent, and
-# anything outside is clamped here. Every lookup table in the synth is spaced to match --
-# FREQ_TABLE is semitone-spaced across 120, and EXP_TABLE and Q_TABLE are 121 entries over their
-# ranges -- so a CC value lands on an integer table index with no interpolation error, and CC 64
-# is the exact mid-value of each.
+# CC value normalization. Every parameter is a ratio in -0.5..0.5, the same span as a bipolar
+# signal on the bus, so this is the only converter: CC 4..124 maps to the full range, CC 64 where
+# a MIDI controller puts its detent lands on 0.0, and anything outside is clamped here. Every
+# lookup table in the synth is spaced to match -- FREQ_TABLE is semitone-spaced across 120, and
+# EXP_TABLE and Q_TABLE are 121 entries over their ranges -- so a CC value lands on an integer
+# table index, and CC 64 is the exact mid-value of each.
 # What a ratio means -- dimensionless, semitones, seconds -- stays a property of the destination,
 # so reassigning which CC a parameter reads cannot change what the value means.
 def cc_to_ratio(value)
-  scaled = (value.to_f - 4.0) * (1.0 / 120.0)
-  (scaled < 0.0) ? 0.0 : ((scaled > 1.0) ? 1.0 : scaled)
+  scaled = (value.to_f - 64.0) * (1.0 / 120.0)
+  (scaled < -0.5) ? -0.5 : ((scaled > 0.5) ? 0.5 : scaled)
 end
 
 # Which slot a control value is written to. CC number 0 means no CC is assigned, and the value is

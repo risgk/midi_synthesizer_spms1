@@ -17,8 +17,8 @@ NOTE = 60
 
 # The same converter spms1_main.rb uses, so a number here means the CC value it looks like.
 def cc_to_ratio(value)
-  scaled = (value.to_f - 4.0) * (1.0 / 120.0)
-  (scaled < 0.0) ? 0.0 : ((scaled > 1.0) ? 1.0 : scaled)
+  scaled = (value.to_f - 64.0) * (1.0 / 120.0)
+  (scaled < -0.5) ? -0.5 : ((scaled > 0.5) ? 0.5 : scaled)
 end
 
 # The CC values the synth powers up with.
@@ -49,7 +49,8 @@ env_gen.set_sustain(cc_to_ratio(4))
 lfo = Spms1::LFO.new(SAMPLE_RATE)
 lfo.set_rate(cc_to_ratio(64))
 
-# Mixer 1 stands between the LFO and the oscillator, at the 0.2 its control slots are seeded with.
+# Mixer 1 stands between the LFO and the oscillator, at the level of 0.2 its control slots are
+# seeded with.
 mixer_1 = Spms1::Mixer.new(SAMPLE_RATE)
 mixer_1.set_level_1(cc_to_ratio(28))
 mixer_1.set_invert_1(cc_to_ratio(4))

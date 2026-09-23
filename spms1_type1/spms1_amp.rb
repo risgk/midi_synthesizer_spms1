@@ -27,12 +27,13 @@ module Spms1
       @sample_counter = 0
     end
 
-    # Gain is normalized to [0.0, 1.0].
-    # Range: -∞ dB (0.0), -6 dB (0.5), 0 dB (1.0).
-    # Used as a plain multiplier, so @gain is an amplitude and the smoothing below works in the
-    # amplitude domain.
+    # Gain is normalized to [-0.5, 0.5].
+    # Range: -∞ dB (-0.5), -6 dB (0.0), 0 dB (0.5).
+    # Used as a plain multiplier, so @gain is an amplitude in [0.0, 1.0] and the smoothing below
+    # works in the amplitude domain.
     def set_gain(gain)
-      @gain = (gain < 0.0) ? 0.0 : ((gain > 1.0) ? 1.0 : gain)
+      clamped = (gain < -0.5) ? -0.5 : ((gain > 0.5) ? 0.5 : gain)
+      @gain = clamped + 0.5
     end
 
     def process(audio_input = 0.0, modulation_input = 1.0)

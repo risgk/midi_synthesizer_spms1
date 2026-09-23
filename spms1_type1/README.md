@@ -150,8 +150,8 @@ nothing until a patch gives them something. Where each one sits is what it buys:
 the current sample's value only from something ahead of it in this line, and last sample's from
 anything behind. Mixer 1 can reach the LFO, Mixer 3 can reach the oscillator, and so on.
 
-A mixer is what lets two of anything meet, and apart from Pitch Bend it is the only way to hand a
-module input a signal that swings both ways. See the examples below.
+A mixer is what lets two of anything meet, and what makes a signal that runs one way, such as the
+envelope, swing both ways. See the examples below.
 
 ### Patch Editing (NRPN)
 
@@ -189,8 +189,8 @@ There is one of every module that makes a sound and there are five mixers, and *
 the default run order**, so a patch only ever has to route, never to switch something on first.
 A mixer is the only kind with no CC on any of its parameters: their control slots are seeded
 instead, at full level and no inversion, so a mixer with one input routed passes it through
-rather than muting it. Mixer 1 is seeded to 0.2 instead, because the default patch runs the
-LFO through it.
+rather than muting it. Mixer 1 is seeded to a level of 0.2 instead, because the default patch
+runs the LFO through it.
 
 #### Entries (CC 98), category 1
 
@@ -210,11 +210,11 @@ Most of these take what their name suggests, but three do not say it on their fa
 threshold rather than a level: an envelope triggers as the signal crosses 0.5 and releases as it
 falls back. A Pitch is -0.5 to +0.5 across MIDI notes 0 to 120, so 0.0 is note 60 and a tenth of
 a unit is an octave. And a Mod In is taken as it arrives: nothing is held to a range on the way
-in, and what gets clamped is the value the module ends up with -- cutoff to 0.0 and 1.0, pitch
-to -0.5 and +0.5. A mixer adds without a ceiling, so a loud modulation pins its destination at
-one end rather than being trimmed on the way in. The amp is the exception, and holds its
-modulation input to -1.0 and +1.0: it is an attenuator, so a modulation may scale its gain down
-but never up.
+in, and what gets clamped is the value the module ends up with -- cutoff to the ends of its dial,
+pitch to -0.5 and +0.5. A mixer adds without a ceiling, so a loud modulation pins its
+destination at one end rather than being trimmed on the way in. The amp is the exception, and
+holds its modulation input to -1.0 and +1.0: it is an attenuator, so a modulation may scale its
+gain down but never up.
 
 #### Entries (CC 98), categories 2 and 3
 
@@ -252,33 +252,35 @@ but never up.
 
 | ID | Signal | | ID | Signal | | ID | Signal |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | None (constant 0.0) | | 17 | Osc 1 Coarse Tune | | 34 | Mixer 2 Level 2 |
-| 1 | Constant 1.0 | | 18 | Osc 1 Fine Tune | | 35 | Mixer 2 Invert 2 |
-| 2 | Constant 0.5 | | 19 | Filter 1 Cutoff | | 36 | Mixer 3 Level 1 |
-| 3 | Constant -0.5 | | 20 | Filter 1 Resonance | | 37 | Mixer 3 Invert 1 |
-| 4 | Constant -1.0 | | 21 | Filter 1 Mod Amt | | 38 | Mixer 3 Level 2 |
-| 5 | LFO 1 Output ± | | 22 | Filter 1 Gain | | 39 | Mixer 3 Invert 2 |
-| 6 | EG 1 Output | | 23 | Amp 1 Gain | | 40 | Mixer 4 Level 1 |
-| 7 | Osc 1 Output ± | | 24 | EG 1 Attack | | 41 | Mixer 4 Invert 1 |
-| 8 | Filter 1 Output ± | | 25 | EG 1 Decay | | 42 | Mixer 4 Level 2 |
-| 9 | Amp 1 Output ± | | 26 | EG 1 Sustain | | 43 | Mixer 4 Invert 2 |
-| 10 | Mixer 1 Output ± | | 27 | LFO 1 Rate | | 44 | Mixer 5 Level 1 |
-| 11 | Mixer 2 Output ± | | 28 | Mixer 1 Level 1 | | 45 | Mixer 5 Invert 1 |
-| 12 | Mixer 3 Output ± | | 29 | Mixer 1 Invert 1 | | 46 | Mixer 5 Level 2 |
-| 13 | Mixer 4 Output ± | | 30 | Mixer 1 Level 2 | | 47 | Mixer 5 Invert 2 |
-| 14 | Mixer 5 Output ± | | 31 | Mixer 1 Invert 2 | | 48 | Note Pitch ± |
-| 15 | Osc 1 Wave | | 32 | Mixer 2 Level 1 | | 49 | Note Gate |
-| 16 | Osc 1 Mod Amt | | 33 | Mixer 2 Invert 1 | | 50 | Pitch Bend ± |
+| 0 | None (constant 0.0) | | 17 | Osc 1 Coarse Tune ± | | 34 | Mixer 2 Level 2 ± |
+| 1 | Constant 1.0 | | 18 | Osc 1 Fine Tune ± | | 35 | Mixer 2 Invert 2 ± |
+| 2 | Constant 0.5 | | 19 | Filter 1 Cutoff ± | | 36 | Mixer 3 Level 1 ± |
+| 3 | Constant -0.5 | | 20 | Filter 1 Resonance ± | | 37 | Mixer 3 Invert 1 ± |
+| 4 | Constant -1.0 | | 21 | Filter 1 Mod Amt ± | | 38 | Mixer 3 Level 2 ± |
+| 5 | LFO 1 Output ± | | 22 | Filter 1 Gain ± | | 39 | Mixer 3 Invert 2 ± |
+| 6 | EG 1 Output | | 23 | Amp 1 Gain ± | | 40 | Mixer 4 Level 1 ± |
+| 7 | Osc 1 Output ± | | 24 | EG 1 Attack ± | | 41 | Mixer 4 Invert 1 ± |
+| 8 | Filter 1 Output ± | | 25 | EG 1 Decay ± | | 42 | Mixer 4 Level 2 ± |
+| 9 | Amp 1 Output ± | | 26 | EG 1 Sustain ± | | 43 | Mixer 4 Invert 2 ± |
+| 10 | Mixer 1 Output ± | | 27 | LFO 1 Rate ± | | 44 | Mixer 5 Level 1 ± |
+| 11 | Mixer 2 Output ± | | 28 | Mixer 1 Level 1 ± | | 45 | Mixer 5 Invert 1 ± |
+| 12 | Mixer 3 Output ± | | 29 | Mixer 1 Invert 1 ± | | 46 | Mixer 5 Level 2 ± |
+| 13 | Mixer 4 Output ± | | 30 | Mixer 1 Level 2 ± | | 47 | Mixer 5 Invert 2 ± |
+| 14 | Mixer 5 Output ± | | 31 | Mixer 1 Invert 2 ± | | 48 | Note Pitch ± |
+| 15 | Osc 1 Wave ± | | 32 | Mixer 2 Level 1 ± | | 49 | Note Gate |
+| 16 | Osc 1 Mod Amt ± | | 33 | Mixer 2 Invert 1 ± | | 50 | Pitch Bend ± |
 
 A **±** marks a signal that swings both ways: a module output reaches -0.5 and +0.5 at full
-scale, and a mixer sums two of them and stops at one. Everything unmarked runs
-0.0 to 1.0 -- an envelope's output, Note Gate, and every control slot. The bus carries both
+scale, a control slot runs -0.5 to +0.5, and a mixer sums two of them and stops at one.
+Everything unmarked runs 0.0 to 1.0 -- an envelope's output and Note Gate. The bus carries both
 kinds under one numbering, so the range belongs to the slot rather than to the sort of thing
 that wrote it.
 
-Slots 15-47 hold the values arriving from CC, each a ratio in 0.0 to 1.0, so a parameter reads
-its own CC by default. Pointing it at another slot is what makes a modulation. Anything with no
-CC sits at what it was seeded with until one is assigned.
+Slots 15-47 hold the values arriving from CC, each a ratio in -0.5 to +0.5 with CC 64 at 0.0, so
+a parameter reads its own CC by default. Every parameter takes that same range, the one a
+bipolar module output spans, so a bipolar source pointed at one swings it about the middle of its
+dial. Pointing it at another slot is what makes a modulation. Anything with no CC sits at what it
+was seeded with until one is assigned.
 
 Note Pitch, Note Gate and Pitch Bend are what the keyboard puts on the bus. Note Pitch carries
 MIDI notes 0 to 120 as -0.5 to +0.5, the same span the oscillator reads as its whole pitch
@@ -290,9 +292,9 @@ is routed to Pitch Bend by default.
 Slots 0-4 are constants that nothing writes, for inputs that want a fixed value rather than a
 source. Signal 0 is also what an entry nobody has set reads as, so an unrouted input is silent
 rather than wired to whatever sits in the first slot. Signal 1 is the value an unmodulated input
-wants: routing an amp's modulation input to it leaves the amp at full level. The negative
-constants are for shifting a signal in a mixer, since a parameter clamps its own value to
-0.0-1.0 and cannot take one directly.
+wants: routing an amp's modulation input to it leaves the amp at full level. Signals 2 and 3 are
+the two ends of every parameter's range, for pinning one there, and a negative constant on a
+mixer's second input shifts a signal that runs one way into one that swings both.
 
 Slot 127 is where a parameter with no CC sends its unused value. Nothing should read it.
 
@@ -315,11 +317,12 @@ Filter 1 Gain sets how hard the audio input drives the filter, which is also wha
 the filter runs into its own saturation. Its default of CC 64 is the level the oscillator used to
 be scaled to on its own; above that the filter starts to compress the loud part of a note.
 
-A mixer takes each input at its own level and its own polarity, then adds them. Invert runs from
-unchanged at 0.0, through silence at 0.5, to negated at 1.0. Levels default to full and inverts
-to zero, so a mixer with one input routed is a buffer; inverting that one input makes it an
-inverter; and inverting only the second makes the mixer a subtractor. Mixer 1 is the exception,
-seeded to 0.2 on both levels for the vibrato path it is wired into.
+A mixer takes each input at its own level and its own polarity, then adds them. Level runs from
+silent at -0.5 (CC 4) to full at +0.5 (CC 124), and Invert from unchanged at -0.5, through
+silence at 0.0, to negated at +0.5. Levels default to full and inverts to unchanged, so a mixer
+with one input routed is a buffer; inverting that one input makes it an inverter; and inverting
+only the second makes the mixer a subtractor. Mixer 1 is the exception, seeded to a level of 0.2
+(CC 28) on both inputs for the vibrato path it is wired into.
 
 The sum is held to -1.0 and +1.0. Two full-scale signals reach exactly that, so nothing ordinary
 is cut; what it stops is a mixer wired back to its own input, which would otherwise double every
@@ -332,15 +335,18 @@ would fold high ones back down into the note.
 
 - Vibrato is wired by default -- the LFO reaches the oscillator's modulation input through
   Mixer 1 -- so CC 13 sets the depth and CC 3 the rate
-- Filter cutoff follows note pitch (keyboard tracking): CC 99 = 2, CC 98 = 4, CC 6 = 48
-- Filter cutoff driven by the envelope instead of its CC: CC 99 = 2, CC 98 = 4, CC 6 = 6
-- Filter cutoff swept by the LFO: CC 99 = 2, CC 98 = 4, CC 6 = 5 -- a parameter, so keep the rate
-  low
+- Filter cutoff follows note pitch (keyboard tracking): CC 99 = 2, CC 98 = 4, CC 6 = 48. Note 60
+  puts the cutoff at the middle of its dial, and each note moves it a semitone
+- Filter cutoff driven by the envelope instead of its CC: CC 99 = 2, CC 98 = 4, CC 6 = 6. The
+  envelope runs one way, so it opens the cutoff from the middle of its dial to the top
+- Filter cutoff swept by the LFO about the middle of its dial: CC 99 = 2, CC 98 = 4, CC 6 = 5 --
+  a parameter, so keep the rate low
 - Amp gain and filter cutoff share one CC: CC 99 = 3, CC 98 = 8, CC 6 = 74
 - Amp at full level with no envelope: CC 99 = 1, CC 98 = 6, CC 6 = 1
 - Disconnect the filter's modulation input: CC 99 = 1, CC 98 = 4, CC 6 = 0
 - A pitch envelope 60 cents deep: CC 99 = 2, CC 98 = 3, CC 6 = 6 points Osc 1 Fine Tune at the
-  envelope, which then sweeps the tuning from 60 cents flat up to 60 cents sharp
+  envelope, which then sweeps the tuning from in tune up to 60 cents sharp, reached at half the
+  envelope's peak
 - The envelope drives the filter harder as a note starts: CC 99 = 2, CC 98 = 7, CC 6 = 6
 - Pitch swept by the envelope instead of the LFO: CC 99 = 1, CC 98 = 7, CC 6 = 6 puts the
   envelope on Mixer 1's first input in the LFO's place, then set the depth on CC 13 -- a semitone
@@ -351,18 +357,17 @@ would fold high ones back down into the note.
   wheel moves the note in the same sample. Both levels are full, so the wheel reaches five
   octaves either way; CC 99 = 3, CC 98 = 19, CC 6 = 16 puts Mixer 2's second level on CC 16 to
   trim that down to a bend range worth playing
-- A CC that bends pitch both ways, which no parameter can do on its own. Mixer 1 already feeds
-  the oscillator's modulation input, so it only has to be given something else to mix:
-  CC 99 = 1, CC 98 = 7, CC 6 = 19 puts the filter cutoff's control slot on its first input in
-  the LFO's place, and CC 99 = 1, CC 98 = 8, CC 6 = 3 puts the -0.5 constant on its second. Both
-  levels are 0.2, so the mixer outputs the CC less a half at vibrato depth, and CC 74 now bends
-  the pitch down and up around the note
-- A CC that works backwards, which needs a mixer to subtract rather than add. Mixer 2 is already
-  running, so it only needs wiring: CC 99 = 1, CC 98 = 9, CC 6 = 1 puts the constant 1.0 on its
-  first input, CC 99 = 1, CC 98 = 10, CC 6 = 19 puts the cutoff's control slot on the second,
-  and CC 99 = 2, CC 98 = 20, CC 6 = 1 inverts that second input alone, so the mixer outputs one
-  minus the CC. Point the cutoff's own source at the mixer with CC 99 = 2, CC 98 = 4, CC 6 = 11
-  and CC 74 now closes the filter as it rises
+- A CC that bends pitch both ways through the modulation input. Mixer 1 already feeds the
+  oscillator's modulation input, so it only has to be given something else to mix: CC 99 = 1,
+  CC 98 = 7, CC 6 = 19 puts the filter cutoff's control slot on its first input in the LFO's
+  place. A control slot is centred on CC 64 as the LFO is on zero, and the level is 0.2, so CC 74
+  now bends the pitch down and up around the note at vibrato depth
+- A CC that works backwards, which needs a mixer to invert it. Mixer 2 is already running, so it
+  only needs wiring: CC 99 = 1, CC 98 = 9, CC 6 = 19 puts the cutoff's control slot on its first
+  input, and CC 99 = 2, CC 98 = 18, CC 6 = 2 pins that input's invert to the constant 0.5, the
+  negating end of its dial, so the mixer outputs the CC mirrored about CC 64. Point the cutoff's
+  own source at the mixer with CC 99 = 2, CC 98 = 4, CC 6 = 11 and CC 74 now closes the filter as
+  it rises
 - Take the filter out of the chain: CC 99 = 1, CC 98 = 5, CC 6 = 7 points the amp's audio input
   at the oscillator. The filter keeps running and keeps its slot; nothing reads it
 
@@ -372,9 +377,9 @@ would fold high ones back down into the note.
   are read once per buffer and are smoothed by their destination. Route a fast source through a
   module input, a stepped one through a parameter
 - A parameter source may point at any of the 128 slots. Slots above 50 read 0 until something
-  writes them
-- A parameter clamps its value to 0.0-1.0, so apart from Pitch Bend a mixer is the only way to
-  give a module input a signal that swings both ways
+  writes them, which leaves a parameter pointed at one in the middle of its dial
+- A parameter clamps its value to -0.5 to +0.5, the span of a bipolar module output, so a control
+  slot routed to a module input swings both ways about CC 64 with no mixer to shift it
 - The NRPN CCs are stored as ordinary controls too, so a parameter may be mapped to CC 6 -- which
   then moves it every time a patch edit is sent
 
