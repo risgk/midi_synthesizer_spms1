@@ -327,9 +327,10 @@ only the second makes the mixer a subtractor. Mixer 1 is the exception, seeded t
 The sum is held to -1.0 and +1.0. Two full-scale signals reach exactly that, so nothing ordinary
 is cut; what it stops is a mixer wired back to its own input, which would otherwise double every
 sample until the number stopped being a number and took the oscillator or the filter with it.
-The filter is held to the same one unit, by a curve rather than a corner: its resonant peak can
-climb past one unit on a sweep, and rounding that off makes a third harmonic where a hard edge
-would fold high ones back down into the note.
+The filter is held to the same one unit, by a curve rather than a corner: its output passes
+untouched up to half a unit, which is more than the default patch ever reaches, and above that
+bends smoothly onto the limit. Its resonant peak can climb past one unit on a sweep, and rounding
+that off makes far weaker high harmonics than a hard edge would fold back down into the note.
 
 #### Examples
 

@@ -5,16 +5,22 @@ module Spms1
   # Coefficients are recomputed every 4 samples rather than every sample: the computation needs a
   # sine, a cosine and a division, and the parameters feeding it are smoothed in the same place.
   class Filter
-    # What leaves the filter, as opposed to what circulates inside it. A cubic soft clip flattens at
-    # two thirds of its ceiling, so 1.5 lands the limit on exactly 1.0: one unit, the widest thing
-    # the bus carries. It sits outside the feedback path, so the resonance behaves as it did and only
-    # a peak that would have left above one unit is rounded off. A hard clamp here would fold high
-    # harmonics back below Nyquist; a cubic makes a third harmonic and nothing else, which stays in
-    # band for every note this oscillator plays.
-    OUTPUT_CEILING     = 1.5
+    # What leaves the filter, as opposed to what circulates inside it: exactly linear up to
+    # OUTPUT_KNEE, then a quadratic shoulder that reaches OUTPUT_LIMIT with zero slope at
+    # OUTPUT_CEILING. The limit is one unit, the widest thing the bus carries. A cubic here had no
+    # linear region and bent everything it passed -- 0.3 dB and a 1% third harmonic at half a unit
+    # -- which put the output clip ahead of the loop as the filter's main source of distortion. The
+    # default patch peaks near 0.3, under the knee, so it leaves untouched. The shoulder's curvature
+    # steps at the knee, so what crosses it gains odd harmonics of every order rather than just the
+    # third, falling as 1/n^3; a hard clamp, stepping in slope, falls as 1/n^2.
+    OUTPUT_LIMIT       = 1.0
+    OUTPUT_KNEE        = 0.5
+    OUTPUT_CEILING     = OUTPUT_LIMIT + OUTPUT_LIMIT - OUTPUT_KNEE
     OUTPUT_FLOOR       = -OUTPUT_CEILING
-    OUTPUT_INV_CEILING = 1.0 / OUTPUT_CEILING
-    OUTPUT_CUBIC_SCALE = (1.0 / 3.0) * OUTPUT_CEILING
+    OUTPUT_KNEE_FLOOR  = -OUTPUT_KNEE
+    # 1 / (4 * (limit - knee)) for the shoulder, and a further quarter because clip_output's
+    # excess is doubled.
+    OUTPUT_KNEE_SCALE  = 1.0 / (16.0 * (OUTPUT_LIMIT - OUTPUT_KNEE))
 
     # Twice OUTPUT_CEILING, so the state inside the loop rails at exactly twice what leaves the
     # module. The cubic is self-similar: scaling the ceiling scales the flat value with it, and at
@@ -197,30 +203,33 @@ module Spms1
       @a2 = @next_a2
     end
 
-    # Applies a cubic non-linear soft-clipping function tailored for a configurable range.
-    # Adds warm analog-like saturation and prevents internal state blow-ups.
     # Bounds what the module hands to the bus. Separate from soft_clip, which bounds the state
     # inside the loop at a much higher ceiling and has to stay where it is.
-    # Clamp first, then run the cubic on the clamped value. Fed the ceiling, the curve evaluates
-    # to two thirds of it, which is the constant the flat region returned when this was an
-    # if/elsif: the rail comes out of the arithmetic rather than out of a branch. At this ceiling
-    # it is exactly 1.0 in single precision either way, so nothing about the rail moves. Written
-    # this way the method is branchless -- Spinel emits a ternary assigned to a local as a C
-    # conditional expression, and the rest is straight-line arithmetic. Both clamps compare
-    # against a stored constant rather than a negated one, for the reason the constants above
-    # give.
+    # No comparisons, so nothing for the compiler to turn into a branch: Spinel emits abs as fabs,
+    # one vabs.f32, and a + |a| is twice a where a is positive and exactly zero where it is not.
+    # Each clamp and the knee are built from two of those, one per side, which is also what keeps
+    # the linear region bit-exact -- a sample inside it has nothing added to it or taken away.
+    # excess is twice the signed distance past the knee; excess * |excess| keeps the shoulder odd
+    # without a sign test. Every subtraction here is exact in single precision below 2^23, far
+    # past anything the filter can produce, so fed past the ceiling the curve lands on exactly
+    # OUTPUT_LIMIT. An infinity would come out as NaN where a comparison would have clamped it;
+    # the filter's input is a bus slot and its state is bounded, so none arrives. Both floors are
+    # stored constants rather than negated ones, for the reason the constants above give.
     def clip_output(sample)
-      capped  = (sample > OUTPUT_CEILING) ? OUTPUT_CEILING : sample
-      clamped = (capped < OUTPUT_FLOOR) ? OUTPUT_FLOOR : capped
-      scaled  = clamped * OUTPUT_INV_CEILING
-      clamped - (scaled * scaled * scaled) * OUTPUT_CUBIC_SCALE
+      over    = sample - OUTPUT_CEILING
+      under   = OUTPUT_FLOOR - sample
+      clamped = sample - ((over + over.abs) - (under + under.abs)) * 0.5
+      above   = clamped - OUTPUT_KNEE
+      below   = OUTPUT_KNEE_FLOOR - clamped
+      excess  = (above + above.abs) - (below + below.abs)
+      clamped - (excess * excess.abs) * OUTPUT_KNEE_SCALE
     end
 
-    # Clamped before the cubic and branchless, for the reasons clip_output gives. It matters more
-    # here: this one runs twice per sample, on the state inside the feedback path. Below the
-    # ceiling the result is unchanged; above it the flat value is now a subtraction rather than a
-    # stored constant and lands one ULP away in single precision, on a state the next sample
-    # multiplies by a coefficient regardless.
+    # Clamped before the cubic, by two ternaries that Spinel emits as C conditional expressions.
+    # Branchless matters more here than in clip_output: this one runs twice per sample, on the
+    # state inside the feedback path. Below the ceiling the result is unchanged; above it the flat
+    # value is a subtraction rather than a stored constant and lands one ULP away in single
+    # precision, on a state the next sample multiplies by a coefficient regardless.
     def soft_clip(sample)
       capped  = (sample > SOFT_CLIP_CEILING) ? SOFT_CLIP_CEILING : sample
       clamped = (capped < SOFT_CLIP_FLOOR) ? SOFT_CLIP_FLOOR : capped
