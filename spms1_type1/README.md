@@ -1,4 +1,4 @@
-MIDI Synthesizer SPMS-1 (type-1) v0.0.1
+MIDI Synthesizer SPMS-1 (type-1) v0.0.2
 =======================================
 
 - Monophonic semi-modular MIDI Synthesizer for M5Stack AtomS3 Lite and Raspberry Pi Pico 2, made with Spinel (Ruby AOT Compiler)
