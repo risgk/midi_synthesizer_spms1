@@ -1,0 +1,132 @@
+module Spms1
+  # ADS envelope updated at 4-sample control-rate grid.
+  class EnvGen
+    STATE_ATTACK = 0
+    STATE_SUSTAIN = 1
+    STATE_IDLE = 2
+    # Number of samples between control-rate updates; envelope timing is kept approximately constant if this is changed.
+    # It has to stay a power of two: the counter below wraps with a mask, because Ruby's % is a
+    # floor-modulo and sp_imod carries a sign correction the counter can never need -- one branch
+    # a sample in each module, ten across the six of them.
+    CONTROL_RATE_DIVISOR = 4
+    # Its own constant, not CONTROL_RATE_DIVISOR - 1 where it is used: Spinel emits an Integer
+    # constant as a runtime global and does not fold arithmetic on one, so written that way the
+    # subtraction survives into the per-sample path carrying an overflow check of its own, which
+    # measured far worse than the modulo it replaces. What the mask buys is size, not
+    # determinism: the ten branches it removes, one per site, are ones that could never be taken.
+    # Together with the LFO's fold it took 11 branches and 60 instructions out of Spms1_main as
+    # linked, and the buffer time did not move (853/857us against 854/856).
+    CONTROL_RATE_MASK = CONTROL_RATE_DIVISOR - 1
+
+    # Lookup table for exponential time mapping. A twelfth of an octave per index, so one CC step
+    # of the 120-step control range moves a time by a semitone and the whole dial spans ten octaves.
+    EXP_TABLE = Array.new(122, 0.0)
+    for i in 0...121
+      EXP_TABLE[i] = 2.0 ** ((i.to_f - 60.0) * (1.0 / 12.0))
+    end
+    EXP_TABLE[121] = EXP_TABLE[120]
+
+    # Time scaling constants (value at -0.5 / (EXP_TABLE min * ln(2))).
+    # Attack range: 2.5 ms at -0.5, 80 ms at 0.0, 2.56 s at 0.5.
+    ATTACK_BASE = 0.0025 / ((1.0 / 32.0) * Math::log(2))
+    # Decay range: 10 ms at -0.5, 320 ms at 0.0, 10.24 s at 0.5 -- the attack times four throughout.
+    # Decay is measured to 1/1024 = 2^-10, which keeps the attack's base of 2 rather than landing
+    # on a round -60 dB. 1/1024 is -60.2 dB; the shared base is worth more than closing the 0.2.
+    DECAY_BASE  = 0.010 / ((1.0 / 32.0) * 10 * Math::log(2))
+
+    # Overshoot target so the attack ramp reaches 1.0 in finite time.
+    ATTACK_TARGET = 2.0
+
+    def initialize(sample_rate)
+      @sample_rate = sample_rate
+      # Rate the envelope actually steps at. Fixed once sample_rate is, so it is computed here
+      # rather than on every control-rate update.
+      @effective_rate = sample_rate * (1.0 / CONTROL_RATE_DIVISOR)
+      @state = STATE_IDLE
+      @current_level = 0.0
+
+      @attack = 0.0
+      @decay = 0.0
+      @sustain = 1.0
+
+      @was_gate_on = false
+      @attack_coef = 1.0
+      @decay_coef = 1.0
+      @sample_counter = 0
+
+      update_coefficients_full
+    end
+
+    # Every parameter is normalized to [-0.5, 0.5] and held in [0.0, 1.0], which is what the table
+    # lookup and the level comparisons below are written against.
+    # Attack time: see ATTACK_BASE for scaling details.
+    def set_attack(attack)
+      clamped = (attack < -0.5) ? -0.5 : ((attack > 0.5) ? 0.5 : attack)
+      @attack = clamped + 0.5
+    end
+
+    # Decay time: see DECAY_BASE for scaling details.
+    def set_decay(decay)
+      clamped = (decay < -0.5) ? -0.5 : ((decay > 0.5) ? 0.5 : decay)
+      @decay = clamped + 0.5
+    end
+
+    # Sustain level: silent at -0.5, full at 0.5.
+    def set_sustain(sustain)
+      clamped = (sustain < -0.5) ? -0.5 : ((sustain > 0.5) ? 0.5 : sustain)
+      @sustain = clamped + 0.5
+    end
+
+    def process(gate_input = 0.0)
+      # Gate transitions drive the ADS state machine; level changes are stepped at the control rate.
+      if @sample_counter == 0
+        is_gate_on = gate_input >= 0.5
+        gate_rose = is_gate_on && !@was_gate_on
+        gate_fell = !is_gate_on && @was_gate_on
+
+        @state = gate_rose ? STATE_ATTACK : (gate_fell ? STATE_SUSTAIN : @state)
+        @was_gate_on = is_gate_on
+
+        update_coefficients_full
+
+        target = (@state == STATE_ATTACK) ? ATTACK_TARGET : (((@state == STATE_SUSTAIN) && is_gate_on) ? @sustain : 0.0)
+        coef = (@state == STATE_ATTACK) ? @attack_coef : ((@state == STATE_SUSTAIN) ? @decay_coef : 0.0)
+
+        apply_step = (@state != STATE_SUSTAIN) || !is_gate_on || (@sustain < @current_level)
+        coef_masked = apply_step ? coef : 0.0
+
+        @current_level += (target - @current_level) * coef_masked
+
+        is_attack_done = (@state == STATE_ATTACK) && (@current_level >= 1.0 || !@was_gate_on)
+        is_idle_reached = (@state == STATE_SUSTAIN) && !@was_gate_on && (@current_level < 1e-5)
+        is_forced_attack = (@state == STATE_IDLE) && @was_gate_on
+
+        @state = is_attack_done ? STATE_SUSTAIN : (is_idle_reached ? STATE_IDLE : (is_forced_attack ? STATE_ATTACK : @state))
+
+        @current_level = 1.0 if is_attack_done
+        @current_level = 0.0 if is_idle_reached || (@state == STATE_IDLE && !@was_gate_on)
+      end
+
+      @sample_counter = (@sample_counter + 1) & CONTROL_RATE_MASK
+      @current_level
+    end
+
+    private
+
+    def update_coefficients_full
+      @attack_coef = 1.0 / (ATTACK_BASE * calculate_exp_fast(@attack) * @effective_rate)
+      @decay_coef  = 1.0 / (DECAY_BASE  * calculate_exp_fast(@decay)  * @effective_rate)
+    end
+
+    def calculate_exp_fast(value)
+      v_scale = value * 120.0
+      index = v_scale.to_i
+      fraction = v_scale - index.to_f
+
+      e0 = EXP_TABLE[index]
+      e1 = EXP_TABLE[index + 1]
+
+      e0 + fraction * (e1 - e0)
+    end
+  end
+end
