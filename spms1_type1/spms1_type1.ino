@@ -21,9 +21,9 @@
 // for M5Stack AtomS3 Lite
 // The board "M5AtomS3" covers the AtomS3 too, which has no RGB LED, so the LED is switched here.
 #define SPMS1_M5STACK_ATOMS3_LITE
-#define SPMS1_LED_COLOR_R                   (0xCC)  // Ruby red, #CC342D
-#define SPMS1_LED_COLOR_G                   (0x34)
-#define SPMS1_LED_COLOR_B                   (0x2D)
+#define SPMS1_LED_COLOR_R                   (0xE0)  // Ruby, #E0115F
+#define SPMS1_LED_COLOR_G                   (0x11)
+#define SPMS1_LED_COLOR_B                   (0x5F)
 
 #define SPMS1_DEBUG_PRINT_SERIAL            Serial  // USB CDC, next to USB MIDI
 
