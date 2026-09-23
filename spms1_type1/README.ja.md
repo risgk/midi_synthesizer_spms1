@@ -63,7 +63,9 @@ MIDI Synthesizer SPMS-1 (type-1) v0.0.3
         esptool --chip esp32s3 --port COM7 write-flash 0x0 spms1_type1.ino.merged.bin
         ```
 
-    - 書き込んだら、USB ケーブルを抜き差しして起動してください。esptool が最後に行うリセットでは、
+    - インストール不要の方法として、Chrome か Edge で [esptool-js](https://espressif.github.io/esptool-js/)
+      を開き、AtomS3 Lite に "Connect" して、Flash Address 0x0 にファイルを "Program" することもできます
+    - 書き込んだら、USB ケーブルを抜き差しして起動してください。書き込みの最後に行われるリセットでは、
       ダウンロードモードのままになります
 
 
