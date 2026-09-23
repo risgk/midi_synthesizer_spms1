@@ -25,7 +25,7 @@ MIDI Synthesizer SPMS-1 (type-1) v0.0.0
 - [Arduino IDE](https://www.arduino.cc/en/software)
 - Arduino-Pico = Raspberry Pi Pico/RP2040/RP2350 (by Earle F. Philhower, III) コア
     - 追加のボードマネージャ URL: <https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json>
-    - このスケッチはバージョン 6.0.0 で動作確認しています: <https://github.com/earlephilhower/arduino-pico/releases/tag/6.0.0>
+    - このスケッチはバージョン 6.1.1 で動作確認しています: <https://github.com/earlephilhower/arduino-pico/releases/tag/6.1.1>
     - 情報: <https://github.com/earlephilhower/arduino-pico>
 - Arduino MIDI Library (by Francois Best, lathoub)
     - このスケッチはバージョン 5.0.2 で動作確認しています: <https://github.com/FortySevenEffects/arduino_midi_library/releases/tag/5.0.2>
