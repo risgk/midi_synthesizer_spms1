@@ -397,7 +397,7 @@ C.set_midi_cc_value(MIDI_CH, 13 , 4  ) # Osc 1 Mod Amt
 C.set_midi_cc_value(MIDI_CH, 86 , 64 ) # Osc 1 Coarse Tune
 C.set_midi_cc_value(MIDI_CH, 70 , 64 ) # Osc 1 Fine Tune
 C.set_midi_cc_value(MIDI_CH, 74 , 124) # Filter 1 Cutoff
-C.set_midi_cc_value(MIDI_CH, 71 , 64 ) # Filter 1 Resonance
+C.set_midi_cc_value(MIDI_CH, 71 , 94 ) # Filter 1 Resonance
 C.set_midi_cc_value(MIDI_CH, 24 , 64 ) # Filter 1 Mod Amt
 C.set_midi_cc_value(MIDI_CH, 112, 64 ) # Filter 1 Gain
 C.set_midi_cc_value(MIDI_CH, 15 , 64 ) # Amp 1 Gain

@@ -1,7 +1,7 @@
-MIDI Synthesizer SPMS-1 (type-1) v0.0.1
+MIDI Synthesizer SPMS-1 (type-1) v0.0.2
 =======================================
 
-- Monophonic semi-modular MIDI Synthesizer for Raspberry Pi Pico 2, made with Spinel (Ruby AOT Compiler)
+- Monophonic semi-modular MIDI Synthesizer for M5Stack AtomS3 Lite and Raspberry Pi Pico 2, made with Spinel (Ruby AOT Compiler)
 - Controlled by MIDI as a sound module
 - 48 kHz/24 bit audio output
 - Developed by ISGK Instruments (Ryo Ishigaki)
@@ -12,30 +12,42 @@ MIDI Synthesizer SPMS-1 (type-1) v0.0.1
 Required Hardware
 -----------------
 
-- [Raspberry Pi Pico 2](https://www.raspberrypi.com/products/raspberry-pi-pico-2/)
-- Pimoroni [Pico Audio Pack](https://shop.pimoroni.com/products/pico-audio-pack) (PIM544)
-    - The following I2S DAC hardware (48 kHz/24 bit) can also be used:
-        - [Adafruit PCM5102 I2S DAC](https://www.adafruit.com/product/6250) (Product ID: 6250)
-        - GY-PCM5102 (PCM5102A I2S DAC Module)
+- M5Stack AtomS3 Lite (ESP32-S3), recommended
+    - M5Stack [AtomS3 Lite](https://shop.m5stack.com/products/atoms3-lite-esp32s3-dev-kit) (SKU: C124)
+    - M5Stack [Atomic Audio-3.5 Base](https://shop.m5stack.com/products/atomic-audio-3-5-base) (SKU: A166)
+- Raspberry Pi Pico 2 (RP2350)
+    - [Raspberry Pi Pico 2](https://www.raspberrypi.com/products/raspberry-pi-pico-2/)
+    - Pimoroni [Pico Audio Pack](https://shop.pimoroni.com/products/pico-audio-pack) (PIM544)
+        - The following I2S DAC hardware (48 kHz/24 bit) can also be used:
+            - [Adafruit PCM5102 I2S DAC](https://www.adafruit.com/product/6250) (Product ID: 6250)
+            - GY-PCM5102 (PCM5102A I2S DAC Module)
 
 
 Required Software for Modification
 ----------------------------------
 
 - [Arduino IDE](https://www.arduino.cc/en/software)
-- Arduino-Pico = Raspberry Pi Pico/RP2040/RP2350 (by Earle F. Philhower, III) core
+- For M5Stack AtomS3 Lite: Arduino core for the ESP32 (by Espressif Systems)
+    - This sketch is tested with version 3.3.11: <https://github.com/espressif/arduino-esp32/releases/tag/3.3.11>
+    - Info: <https://github.com/espressif/arduino-esp32>
+    - Board: "M5AtomS3", with USB Mode: "USB-OTG (TinyUSB)" in the "Tools" menu. USB MIDI, I2S
+      and I2C all come from the core, so no library beyond the Arduino MIDI Library is needed
+- For Raspberry Pi Pico 2: Arduino-Pico = Raspberry Pi Pico/RP2040/RP2350 (by Earle F. Philhower, III) core
     - Additional Board Manager URL: <https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json>
     - This sketch is tested with version 6.1.1: <https://github.com/earlephilhower/arduino-pico/releases/tag/6.1.1>
     - Info: <https://github.com/earlephilhower/arduino-pico>
+    - Board: "Raspberry Pi Pico 2", with USB Stack: "Adafruit TinyUSB" in the "Tools" menu
 - Arduino MIDI Library (by Francois Best, lathoub)
     - This sketch is tested with version 5.0.2: <https://github.com/FortySevenEffects/arduino_midi_library/releases/tag/5.0.2>
     - Info: <https://github.com/FortySevenEffects/arduino_midi_library>
 - Spinel
     - Commit: <https://github.com/matz/spinel/tree/5af61ae7d53e36ca59a8de5870f532360d88fd7c>
     - The Spinel output file "spms1_main.c" needs no editing. "sp_runtime.h" in this sketch
-      carries `#define main __attribute__((section(".time_critical"), flatten)) Spms1_main`,
-      which renames it and puts the synth core in RAM at the same time. Renaming it by hand
-      instead leaves the macro with nothing to match, and the core runs from flash
+      carries `#define main IRAM_ATTR __attribute__((flatten)) Spms1_main` for the ESP32-S3 and
+      `#define main __attribute__((section(".time_critical"), flatten)) Spms1_main` for the
+      RP2350, which renames it and puts the synth core in RAM (IRAM on the ESP32-S3) at the same
+      time. Renaming it by hand instead leaves the macro with nothing to match, and the core runs
+      from flash
 
 
 Usage
@@ -43,7 +55,17 @@ Usage
 
 ### Prebuilt Binary
 
-- "spms1_type1.ino.uf2" (in the "bin" folder) is for Raspberry Pi Pico 2 and Pimoroni Pico Audio Pack
+- "spms1_type1.ino.merged.bin" (in the "bin" folder) is for M5Stack AtomS3 Lite and Atomic Audio-3.5 Base
+    - Hold the AtomS3 Lite's reset button for about 2 seconds, until the green LED inside lights,
+      to put it into download mode. Then write the file at address 0x0, with esptool (it ships
+      with the Arduino core for the ESP32), for example:
+
+        ```
+        esptool --chip esp32s3 --port COM7 write-flash 0x0 spms1_type1.ino.merged.bin
+        ```
+
+    - Then unplug and replug the USB cable to start it; the reset esptool does at the end
+      leaves it in download mode
 
 
 ### Web Editor
@@ -56,12 +78,28 @@ Usage
 
 - MIDI Channel: Channel 1
 - USB MIDI Input
-    - Manufacturer Descriptor: "ISGK Instruments"
+    - Manufacturer Descriptor: "ISGK Instruments" (Raspberry Pi Pico 2 only; the AtomS3 Lite
+      keeps the core's own, because USB CDC On Boot starts USB before the sketch can set it)
     - Device Name: "SPMS-1 (type-1)"
+    - On Windows, the AtomS3 Lite's MIDI interface can come up bound to the "USB JTAG debug unit"
+      driver (WinUSB), which some ESP32 tools install for the same VID/PID in the Hardware CDC
+      mode. It then does not show up as a MIDI device. Change its driver in the Device Manager
+      to "USB Audio Device"
 - UART MIDI Input
     - Speed: 31250 bps
-    - GP4 and GP5 pins are used by UART1 TX and UART1 RX
-    - You can also use `SoftwareSerial` by making the following changes:
+    - M5Stack AtomS3 Lite: G2 and G1 pins (Grove port) are used by UART2 TX and UART2 RX
+        - M5Stack [Unit MIDI](https://shop.m5stack.com/products/midi-unit-with-din-connector-sam2695)
+          (SKU: U187) plugs straight into the Grove port as the DIN MIDI interface, in Separate mode
+        - To use the AtomS3 Lite itself as a Grove unit, driven over the Grove port by another
+          M5Stack controller, swap the two pins:
+
+            ```cpp
+            #define SPMS1_UART_MIDI_TX_PIN              (1)     // Grove
+            #define SPMS1_UART_MIDI_RX_PIN              (2)     // Grove
+            ```
+
+    - Raspberry Pi Pico 2: GP4 and GP5 pins are used by UART1 TX and UART1 RX
+    - On the Raspberry Pi Pico 2, you can also use `SoftwareSerial` by making the following changes:
 
         ```cpp
         #include <SoftwareSerial.h>
@@ -386,8 +424,10 @@ that off makes far weaker high harmonics than a hard edge would fold back down i
 
 ### Debug UART
 
-- Speed: 115200 bps
-- GP0 and GP1 pins are used by UART0 TX and UART0 RX
+- M5Stack AtomS3 Lite: USB CDC (the serial port next to USB MIDI on the same cable)
+- Raspberry Pi Pico 2
+    - Speed: 115200 bps
+    - GP0 and GP1 pins are used by UART0 TX and UART0 RX
 
 
 ### Test Script
@@ -403,7 +443,8 @@ that off makes far weaker high harmonics than a hard edge would fold back down i
 
 What the compiler makes of a change to the per-sample path is worth looking at before flashing it,
 and "branchless in Ruby" does not mean branchless in the binary -- the decision is GCC's, and it
-depends on the whole function. Compile the Spinel output on its own, from the sketch folder:
+depends on the whole function. The steps below are for the Raspberry Pi Pico 2 build. Compile the
+Spinel output on its own, from the sketch folder:
 
 ```
 arm-none-eabi-gcc -c -g -mcpu=cortex-m33 -mthumb -march=armv8-m.main+fp+dsp -mfloat-abi=softfp -mcmse -std=gnu23 -Os -I. -o out.o spms1_main.c

@@ -1,7 +1,7 @@
-MIDI Synthesizer SPMS-1 (type-1) v0.0.1
+MIDI Synthesizer SPMS-1 (type-1) v0.0.2
 =======================================
 
-- Spinel (Ruby AOT コンパイラ) で作った、Raspberry Pi Pico 2 用のモノフォニック・セミモジュラー MIDI シンセサイザー
+- Spinel (Ruby AOT コンパイラ) で作った、M5Stack AtomS3 Lite と Raspberry Pi Pico 2 用のモノフォニック・セミモジュラー MIDI シンセサイザー
 - 音源モジュールとして MIDI で制御します
 - 48 kHz/24 bit オーディオ出力
 - 開発: ISGK Instruments (Ryo Ishigaki)
@@ -12,30 +12,41 @@ MIDI Synthesizer SPMS-1 (type-1) v0.0.1
 必要なハードウェア
 ------------------
 
-- [Raspberry Pi Pico 2](https://www.raspberrypi.com/products/raspberry-pi-pico-2/)
-- Pimoroni [Pico Audio Pack](https://shop.pimoroni.com/products/pico-audio-pack) (PIM544)
-    - 以下の I2S DAC ハードウェア (48 kHz/24 bit) も使えます:
-        - [Adafruit PCM5102 I2S DAC](https://www.adafruit.com/product/6250) (Product ID: 6250)
-        - GY-PCM5102 (PCM5102A I2S DAC モジュール)
+- M5Stack AtomS3 Lite (ESP32-S3)、推奨
+    - M5Stack [AtomS3 Lite](https://shop.m5stack.com/products/atoms3-lite-esp32s3-dev-kit) (SKU: C124)
+    - M5Stack [Atomic Audio-3.5 Base](https://shop.m5stack.com/products/atomic-audio-3-5-base) (SKU: A166)
+- Raspberry Pi Pico 2 (RP2350)
+    - [Raspberry Pi Pico 2](https://www.raspberrypi.com/products/raspberry-pi-pico-2/)
+    - Pimoroni [Pico Audio Pack](https://shop.pimoroni.com/products/pico-audio-pack) (PIM544)
+        - 以下の I2S DAC ハードウェア (48 kHz/24 bit) も使えます:
+            - [Adafruit PCM5102 I2S DAC](https://www.adafruit.com/product/6250) (Product ID: 6250)
+            - GY-PCM5102 (PCM5102A I2S DAC モジュール)
 
 
 改造に必要なソフトウェア
 ------------------------
 
 - [Arduino IDE](https://www.arduino.cc/en/software)
-- Arduino-Pico = Raspberry Pi Pico/RP2040/RP2350 (by Earle F. Philhower, III) コア
+- M5Stack AtomS3 Lite 用: Arduino core for the ESP32 (by Espressif Systems)
+    - このスケッチはバージョン 3.3.11 で動作確認しています: <https://github.com/espressif/arduino-esp32/releases/tag/3.3.11>
+    - 情報: <https://github.com/espressif/arduino-esp32>
+    - ボード: "M5AtomS3"、"ツール" メニューの USB Mode: "USB-OTG (TinyUSB)"。USB MIDI、I2S、I2C は
+      すべてコアのものを使うので、Arduino MIDI Library 以外のライブラリは要りません
+- Raspberry Pi Pico 2 用: Arduino-Pico = Raspberry Pi Pico/RP2040/RP2350 (by Earle F. Philhower, III) コア
     - 追加のボードマネージャ URL: <https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json>
     - このスケッチはバージョン 6.1.1 で動作確認しています: <https://github.com/earlephilhower/arduino-pico/releases/tag/6.1.1>
     - 情報: <https://github.com/earlephilhower/arduino-pico>
+    - ボード: "Raspberry Pi Pico 2"、"ツール" メニューの USB Stack: "Adafruit TinyUSB"
 - Arduino MIDI Library (by Francois Best, lathoub)
     - このスケッチはバージョン 5.0.2 で動作確認しています: <https://github.com/FortySevenEffects/arduino_midi_library/releases/tag/5.0.2>
     - 情報: <https://github.com/FortySevenEffects/arduino_midi_library>
 - Spinel
     - コミット: <https://github.com/matz/spinel/tree/5af61ae7d53e36ca59a8de5870f532360d88fd7c>
     - Spinel の出力ファイル "spms1_main.c" に手を入れる必要はありません。本スケッチの "sp_runtime.h" が
+      ESP32-S3 向けに `#define main IRAM_ATTR __attribute__((flatten)) Spms1_main`、RP2350 向けに
       `#define main __attribute__((section(".time_critical"), flatten)) Spms1_main` を持っており、改名と
-      シンセ本体の RAM 配置を同時に行います。手で改名すると、このマクロが一致しなくなって属性が付かず、
-      本体が flash から実行されます
+      シンセ本体の RAM 配置 (ESP32-S3 では IRAM) を同時に行います。手で改名すると、このマクロが一致しなく
+      なって属性が付かず、本体が flash から実行されます
 
 
 使い方
@@ -43,7 +54,17 @@ MIDI Synthesizer SPMS-1 (type-1) v0.0.1
 
 ### ビルド済みバイナリ
 
-- "bin" フォルダの "spms1_type1.ino.uf2" は Raspberry Pi Pico 2 と Pimoroni Pico Audio Pack 用です
+- "bin" フォルダの "spms1_type1.ino.merged.bin" は M5Stack AtomS3 Lite と Atomic Audio-3.5 Base 用です
+    - AtomS3 Lite のリセットボタンを、内部の緑色 LED が点くまで約 2 秒長押しして、ダウンロードモードに
+      します。そのうえで、たとえば esptool (Arduino core for the ESP32 に同梱) で、アドレス 0x0 に
+      書き込みます:
+
+        ```
+        esptool --chip esp32s3 --port COM7 write-flash 0x0 spms1_type1.ino.merged.bin
+        ```
+
+    - 書き込んだら、USB ケーブルを抜き差しして起動してください。esptool が最後に行うリセットでは、
+      ダウンロードモードのままになります
 
 
 ### Web エディタ
@@ -56,12 +77,28 @@ MIDI Synthesizer SPMS-1 (type-1) v0.0.1
 
 - MIDI チャンネル: チャンネル 1
 - USB MIDI 入力
-    - 製造者ディスクリプタ: "ISGK Instruments"
+    - 製造者ディスクリプタ: "ISGK Instruments" (Raspberry Pi Pico 2 のみ。AtomS3 Lite では USB CDC On Boot が
+      スケッチより先に USB を起動するので設定できず、コア既定のままです)
     - デバイス名: "SPMS-1 (type-1)"
+    - Windows では、AtomS3 Lite の MIDI インターフェースに "USB JTAG debug unit" ドライバ (WinUSB) が
+      割り当てられることがあります。ESP32 のツールによっては、Hardware CDC モードの同じ VID/PID 向けに
+      このドライバを入れるためです。その場合 MIDI デバイスとして現れないので、デバイスマネージャーで
+      ドライバを "USB オーディオ デバイス" に変更してください
 - UART MIDI 入力
     - 速度: 31250 bps
-    - GP4 ピンと GP5 ピンを UART1 TX と UART1 RX に使います
-    - 以下のように書き換えれば `SoftwareSerial` も使えます:
+    - M5Stack AtomS3 Lite: G2 ピンと G1 ピン (Grove ポート) を UART2 TX と UART2 RX に使います
+        - M5Stack [Unit MIDI](https://shop.m5stack.com/products/midi-unit-with-din-connector-sam2695)
+          (SKU: U187) を Grove ポートに直接つなげば、DIN MIDI インターフェースとして使えます (セパレートモード)
+        - AtomS3 Lite 自体を Grove ユニットとして、別の M5Stack コントローラから Grove ポート経由で
+          鳴らす場合は、2 つのピンを入れ替えてください:
+
+            ```cpp
+            #define SPMS1_UART_MIDI_TX_PIN              (1)     // Grove
+            #define SPMS1_UART_MIDI_RX_PIN              (2)     // Grove
+            ```
+
+    - Raspberry Pi Pico 2: GP4 ピンと GP5 ピンを UART1 TX と UART1 RX に使います
+    - Raspberry Pi Pico 2 では、以下のように書き換えれば `SoftwareSerial` も使えます:
 
         ```cpp
         #include <SoftwareSerial.h>
@@ -377,8 +414,10 @@ Filter 1 Gain はオーディオ入力がフィルタをどれだけ強く駆動
 
 ### デバッグ UART
 
-- 速度: 115200 bps
-- GP0 ピンと GP1 ピンを UART0 TX と UART0 RX に使います
+- M5Stack AtomS3 Lite: USB CDC (同じケーブルで USB MIDI と並ぶシリアルポート)
+- Raspberry Pi Pico 2
+    - 速度: 115200 bps
+    - GP0 ピンと GP1 ピンを UART0 TX と UART0 RX に使います
 
 
 ### テストスクリプト
@@ -393,7 +432,8 @@ Filter 1 Gain はオーディオ入力がフィルタをどれだけ強く駆動
 
 サンプル単位の処理に手を入れたら、書き込む前にコンパイラが何を吐いたか見る価値があります。
 Ruby でブランチレスに書いても、バイナリがブランチレスになるとは限りません。決めるのは GCC で、
-その判断は関数全体に依存します。スケッチのフォルダで、Spinel の出力を単体でコンパイルします。
+その判断は関数全体に依存します。以下の手順は Raspberry Pi Pico 2 のビルド向けです。スケッチのフォルダで、
+Spinel の出力を単体でコンパイルします。
 
 ```
 arm-none-eabi-gcc -c -g -mcpu=cortex-m33 -mthumb -march=armv8-m.main+fp+dsp -mfloat-abi=softfp -mcmse -std=gnu23 -Os -I. -o out.o spms1_main.c
