@@ -54,8 +54,16 @@ MIDI Synthesizer SPMS-1 (type-1) v0.0.1
 
 ### ビルド済みバイナリ
 
+- "bin" フォルダの "spms1_type1.ino.merged.bin" は M5Stack AtomS3 Lite と Atomic Audio-3.5 Base 用です
+    - AtomS3 Lite のリセットボタンを、内部の緑色 LED が点くまで約 2 秒長押しして、ダウンロードモードに
+      します。そのうえで、たとえば esptool (Arduino core for the ESP32 に同梱) で、アドレス 0x0 に
+      書き込みます:
+
+        ```
+        esptool --chip esp32s3 --port COM7 write-flash 0x0 spms1_type1.ino.merged.bin
+        ```
+
 - "bin" フォルダの "spms1_type1.ino.uf2" は Raspberry Pi Pico 2 と Pimoroni Pico Audio Pack 用です
-- M5Stack AtomS3 Lite 用のビルド済みバイナリはありません。Arduino IDE でスケッチをビルドしてください
 
 
 ### Web エディタ

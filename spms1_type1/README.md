@@ -55,8 +55,16 @@ Usage
 
 ### Prebuilt Binary
 
+- "spms1_type1.ino.merged.bin" (in the "bin" folder) is for M5Stack AtomS3 Lite and Atomic Audio-3.5 Base
+    - Hold the AtomS3 Lite's reset button for about 2 seconds, until the green LED inside lights,
+      to put it into download mode. Then write the file at address 0x0, with esptool (it ships
+      with the Arduino core for the ESP32), for example:
+
+        ```
+        esptool --chip esp32s3 --port COM7 write-flash 0x0 spms1_type1.ino.merged.bin
+        ```
+
 - "spms1_type1.ino.uf2" (in the "bin" folder) is for Raspberry Pi Pico 2 and Pimoroni Pico Audio Pack
-- There is no prebuilt binary for M5Stack AtomS3 Lite; build the sketch in the Arduino IDE
 
 
 ### Web Editor
