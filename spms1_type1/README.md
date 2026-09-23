@@ -1,4 +1,4 @@
-MIDI Synthesizer SPMS-1 (type-1) v0.0.0
+MIDI Synthesizer SPMS-1 (type-1) v0.0.1
 =======================================
 
 - Monophonic semi-modular MIDI Synthesizer for Raspberry Pi Pico 2, made with Spinel (Ruby AOT Compiler)
