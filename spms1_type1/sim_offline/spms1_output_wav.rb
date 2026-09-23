@@ -2,12 +2,12 @@
 # the way spms1_main.rb wires them, on the CC values it ships with, save for the two marked below.
 # What it does not reproduce is the layer above, the signals bus and the run order and the NRPN
 # table, so it will not catch a routing mistake, only a change in what the modules do themselves.
-require_relative 'spms1_osc'
-require_relative 'spms1_filter'
-require_relative 'spms1_amp'
-require_relative 'spms1_env_gen'
-require_relative 'spms1_lfo'
-require_relative 'spms1_mixer'
+require_relative '../spms1_osc'
+require_relative '../spms1_filter'
+require_relative '../spms1_amp'
+require_relative '../spms1_env_gen'
+require_relative '../spms1_lfo'
+require_relative '../spms1_mixer'
 
 SAMPLE_RATE = 48000.0
 DURATION_SEC = 15.0

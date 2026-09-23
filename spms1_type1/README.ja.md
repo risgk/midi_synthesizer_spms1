@@ -422,26 +422,22 @@ Filter 1 Gain はオーディオ入力がフィルタをどれだけ強く駆動
     - GP0 ピンと GP1 ピンを UART0 TX と UART0 RX に使います
 
 
-### テストスクリプト
+### PC シミュレーター
 
-- WAV ファイルの出力: "spms1_output_wav.rb" -- デフォルトのパッチをオフラインでレンダリングします。
-  同じモジュールを同じ順で、電源投入時の CC 値で鳴らします。ただし 2 つだけ変えてあり、Decay は音が
-  できるだけ長く残るよう最大、Cutoff は EG が開く様子が聞こえるよう 4 分の 1 にしてあります。シグナルバスと
-  実行順は再現しないので、モジュール自体の変化は捉えますが、結線の間違いは捉えません
-
-
-### PC シミュレーター (実験的)
-
-- Spinel 出力: "sim_spinel" -- このフォルダの "spms1_main.c" とランタイムを、変更せずに Windows か macOS
+- Spinel 出力 (実験的): "sim_spinel" -- このフォルダの "spms1_main.c" とランタイムを、変更せずに Windows か macOS
   向けにビルドし、リアルタイムで動かします。音声は PortAudio で出力し、MIDI は WinMM か CoreMIDI で
   受けます。`sh sim_spinel/build.sh` でビルドし (Windows は Git Bash 上の MinGW gcc、macOS は clang)、
   `build/sim_spinel/spms1_sim --midi-in NAME` で起動します。`--list` で MIDI 入力の一覧を表示します。
   PortAudio は実行時に読み込み、そのパスは `SPMS1_PORTAUDIO_DLL` で指定できます
     - macOS では動作確認していません
-- CRuby: "sim_cruby" -- "spms1_main.rb" そのものを CRuby で動かします。PortAudio は ffi gem 経由、MIDI 入力は
-  unimidi gem で受けます: `ruby sim_cruby/spms1_sim.rb --midi-in NAME`。`SPMS1_PORTAUDIO_DLL`
-  は上と同じです。デフォルトのパッチはインタプリタではリアルタイムに間に合いません
+- CRuby (実験的): "sim_cruby" -- "spms1_main.rb" そのものを CRuby で動かします。PortAudio は ffi gem 経由、
+  MIDI 入力は unimidi gem で受けます: `ruby sim_cruby/spms1_sim.rb --midi-in NAME`。
+  `SPMS1_PORTAUDIO_DLL` は上と同じです。デフォルトのパッチはインタプリタではリアルタイムに間に合いません
     - macOS では動作確認していません
+- オフライン WAV 出力: "sim_offline/spms1_output_wav.rb" -- デフォルトのパッチをオフラインで
+  レンダリングします。同じモジュールを同じ順で、電源投入時の CC 値で鳴らします。ただし 2 つだけ変えてあり、
+  Decay は音ができるだけ長く残るよう最大、Cutoff は EG が開く様子が聞こえるよう 4 分の 1 にしてあります。
+  シグナルバスと実行順は再現しないので、モジュール自体の変化は捉えますが、結線の間違いは捉えません
 
 
 ### 生成コードの確認
