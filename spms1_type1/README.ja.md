@@ -430,6 +430,16 @@ Filter 1 Gain はオーディオ入力がフィルタをどれだけ強く駆動
   実行順は再現しないので、モジュール自体の変化は捉えますが、結線の間違いは捉えません
 
 
+### PC シミュレーター (実験的)
+
+- Spinel 出力: "sim_spinel" -- このフォルダの "spms1_main.c" とランタイムを、変更せずに Windows か macOS
+  向けにビルドし、リアルタイムで動かします。音声は PortAudio で出力し、MIDI は WinMM か CoreMIDI で
+  受けます。`sh sim_spinel/build.sh` でビルドし (Windows は Git Bash 上の MinGW gcc、macOS は clang)、
+  `build/sim_spinel/spms1_sim --midi-in NAME` で起動します。`--list` で MIDI 入力の一覧を表示します。
+  PortAudio は実行時に読み込み、そのパスは `SPMS1_PORTAUDIO_DLL` で指定できます
+    - macOS では動作確認していません
+
+
 ### 生成コードの確認
 
 サンプル単位の処理に手を入れたら、書き込む前にコンパイラが何を吐いたか見る価値があります。
@@ -500,5 +510,5 @@ DEALINGS IN THE SOFTWARE.
 ```
 
 - ベースコミット: <https://github.com/matz/spinel/tree/5af61ae7d53e36ca59a8de5870f532360d88fd7c>
-- 対象ファイル: `sp_*.*`
+- 対象ファイル: `sp_*.*`, `re_*.*`
     - 注: ランタイムの一部のファイルは、MCU 向けに ISGK Instruments (Ryo Ishigaki) が変更しています

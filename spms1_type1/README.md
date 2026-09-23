@@ -441,6 +441,16 @@ that off makes far weaker high harmonics than a hard edge would fold back down i
   the run order, so it catches a change in a module, not in a routing
 
 
+### PC Simulator (Experimental)
+
+- Spinel output: "sim_spinel" -- builds "spms1_main.c" and the runtime in this folder, unmodified,
+  for Windows or macOS and runs it in real time, with audio out through PortAudio and MIDI in
+  through WinMM or CoreMIDI. Build with `sh sim_spinel/build.sh` (MinGW gcc in Git Bash on
+  Windows, clang on macOS), then run `build/sim_spinel/spms1_sim --midi-in NAME`; `--list` shows
+  the MIDI inputs. PortAudio is loaded at run time; `SPMS1_PORTAUDIO_DLL` gives its path
+    - Not tested on macOS
+
+
 ### Checking the Generated Code
 
 What the compiler makes of a change to the per-sample path is worth looking at before flashing it,
@@ -513,5 +523,5 @@ DEALINGS IN THE SOFTWARE.
 ```
 
 - Base Commit: <https://github.com/matz/spinel/tree/5af61ae7d53e36ca59a8de5870f532360d88fd7c>
-- Target files: `sp_*.*`
+- Target files: `sp_*.*`, `re_*.*`
     - Note: Some files for runtime are modified for MCU by ISGK Instruments (Ryo Ishigaki)
