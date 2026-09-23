@@ -1902,7 +1902,7 @@ int main(int argc,char**argv){
 #line 27 "spms1_env_gen.rb"
   sp_FloatArray_set(cst_EXP_TABLE, 121LL, sp_FloatArray_get(cst_EXP_TABLE, 120LL));
 #line 31 "spms1_env_gen.rb"
-  cst_ATTACK_BASE = (0.0050000000000000001 / ((((1.0 / 32.0)) * sp_math_log((mrb_float)(2LL)))));
+  cst_ATTACK_BASE = (0.0025000000000000001 / ((((1.0 / 32.0)) * sp_math_log((mrb_float)(2LL)))));
 #line 35 "spms1_env_gen.rb"
   cst_DECAY_BASE = (0.01 / (((((1.0 / 32.0)) * 10LL) * sp_math_log((mrb_float)(2LL)))));
 #line 38 "spms1_env_gen.rb"

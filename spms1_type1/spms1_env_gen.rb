@@ -27,9 +27,9 @@ module Spms1
     EXP_TABLE[121] = EXP_TABLE[120]
 
     # Time scaling constants (value at 0.0 / (EXP_TABLE min * ln(2))).
-    # Attack range: 5 ms at 0.0, 160 ms at 0.5, 5.12 s at 1.0.
-    ATTACK_BASE = 0.005 / ((1.0 / 32.0) * Math::log(2))
-    # Decay range: 10 ms at 0.0, 320 ms at 0.5, 10.24 s at 1.0 -- twice the attack the whole way.
+    # Attack range: 2.5 ms at 0.0, 80 ms at 0.5, 2.56 s at 1.0.
+    ATTACK_BASE = 0.0025 / ((1.0 / 32.0) * Math::log(2))
+    # Decay range: 10 ms at 0.0, 320 ms at 0.5, 10.24 s at 1.0 -- the attack times four throughout.
     # Decay is measured to 1/1024 = 2^-10, which keeps the attack's base of 2 rather than landing
     # on a round -60 dB. 1/1024 is -60.2 dB; the shared base is worth more than closing the 0.2.
     DECAY_BASE  = 0.010 / ((1.0 / 32.0) * 10 * Math::log(2))
