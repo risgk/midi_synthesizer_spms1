@@ -10,7 +10,9 @@ MIDI Synthesizer SPMS-1
 SPMS-1 (type-0)
 ---------------
 
+- See [Spinel x Raspberry Pi Pico 2でシンセサイザーを作ってみた #nagoyark05 - Speaker Deck](https://speakerdeck.com/risgk/spinel-x-raspberry-pi-pico-2-de-shinsesaiza-o-tsuku-te-mita-nagoyark05)
 - Monophonic semi-modular MIDI Synthesizer for Raspberry Pi Pico 2
+- Filter: Nonlinear biquad
 - Required Hardware: Raspberry Pi Pico 2, Pimoroni Pico Audio Pack (or alternative I2S DAC hardware)
 - [README](./spms1_type0/README.md) / [日本語版](./spms1_type0/README.ja.md)
 
@@ -21,5 +23,6 @@ SPMS-1 (type-1)
 ---------------
 
 - Monophonic semi-modular MIDI Synthesizer for Raspberry Pi Pico 2
+- Filter: ZDF/TPT SVF (zero-delay feedback, topology-preserving transform state variable filter)
 - Required Hardware: Raspberry Pi Pico 2, Pimoroni Pico Audio Pack (or alternative I2S DAC hardware)
 - [README](./spms1_type1/README.md) / [日本語版](./spms1_type1/README.ja.md)
