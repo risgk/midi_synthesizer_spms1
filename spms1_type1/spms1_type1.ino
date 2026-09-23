@@ -21,9 +21,11 @@
 // for M5Stack AtomS3 Lite
 // The board "M5AtomS3" covers the AtomS3 too, which has no RGB LED, so the LED is switched here.
 #define SPMS1_M5STACK_ATOMS3_LITE
-#define SPMS1_LED_COLOR_R                   (0xCC)  // Ruby red, #CC342D
-#define SPMS1_LED_COLOR_G                   (0x34)
-#define SPMS1_LED_COLOR_B                   (0x2D)
+// PWM levels, 0-255, picked by eye to read as Ruby, #E0115F. The LED's primaries are not sRGB's,
+// so converting the colour does not land on it.
+#define SPMS1_LED_LEVEL_R                   (48)
+#define SPMS1_LED_LEVEL_G                   (0)
+#define SPMS1_LED_LEVEL_B                   (16)
 
 #define SPMS1_DEBUG_PRINT_SERIAL            Serial  // USB CDC, next to USB MIDI
 
@@ -164,16 +166,6 @@ static void start_pi4ioe() {
   write_i2c_register(PI4IOE, 0x03, 0x6F);  // Directions
   write_i2c_register(PI4IOE, 0x05, 0xFF);  // Outputs high
 }
-
-#if defined(ARDUINO_M5STACK_ATOMS3) && defined(SPMS1_M5STACK_ATOMS3_LITE)
-// The colour is sRGB, gamma-encoded, and the LED's PWM is linear, so each component is decoded
-// before it is scaled.
-static uint8_t led_level(uint8_t srgb) {
-  float c = srgb / 255.0f;
-  float linear = (c <= 0.04045f) ? (c / 12.92f) : powf((c + 0.055f) / 1.055f, 2.4f);
-  return static_cast<uint8_t>(lroundf(linear * RGB_BRIGHTNESS));
-}
-#endif  // defined(ARDUINO_M5STACK_ATOMS3) && defined(SPMS1_M5STACK_ATOMS3_LITE)
 
 #endif  // defined(ARDUINO_ARCH_ESP32)
 
@@ -384,7 +376,7 @@ void start_audio() {
   start_pi4ioe();
 
 #if defined(ARDUINO_M5STACK_ATOMS3) && defined(SPMS1_M5STACK_ATOMS3_LITE)
-  rgbLedWrite(RGB_BUILTIN, led_level(SPMS1_LED_COLOR_R), led_level(SPMS1_LED_COLOR_G), led_level(SPMS1_LED_COLOR_B));
+  rgbLedWrite(RGB_BUILTIN, SPMS1_LED_LEVEL_R, SPMS1_LED_LEVEL_G, SPMS1_LED_LEVEL_B);
 #endif  // defined(ARDUINO_M5STACK_ATOMS3) && defined(SPMS1_M5STACK_ATOMS3_LITE)
 }
 
