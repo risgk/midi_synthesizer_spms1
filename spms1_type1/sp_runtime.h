@@ -6,10 +6,19 @@
 /* flatten pulls the module process methods into Spms1_main. Without it GCC stops inlining them
    once a module type has two instances and so two call sites, and anything not inlined into main
    runs from XIP flash, main being the only function that carries .time_critical. */
+#if defined(ESP_PLATFORM)
+/* IRAM_ATTR is the ESP32 counterpart of .time_critical. Dropping it runs the core from flash
+   through the 16 KB instruction cache, which the loop body does not fit in. */
+#include "esp_attr.h"
+#define main IRAM_ATTR __attribute__((flatten)) Spms1_main
+#else
 #define main __attribute__((section(".time_critical"), flatten)) Spms1_main
+#endif
 #pragma GCC optimize("single-precision-constant")
 #pragma GCC optimize ("O3")
+#if defined(__arm__)
 #pragma GCC target ("thumb")
+#endif
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-function"
 
