@@ -75,6 +75,10 @@ Usage
 
 - Cross-platform web-based parameter controller via Web MIDI API: "spms1_editor.html"
 - Built-in software keyboard for note input and testing
+- Graphical patch editor (experimental): "spms1_patch_editor.html"
+    - Wires module outputs to inputs and parameters, and sets the run order and CC assignments
+    - Saves and loads patches as JSON
+    - Copies the patch as MIDI bytes or as an NRPN list, or sends it through Web MIDI
 
 
 ### MIDI Settings

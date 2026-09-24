@@ -47,6 +47,21 @@
       font-size: 1.8rem;
       color: var(--primary-color);
     }
+    header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    header a {
+      color: var(--primary-color);
+      font-weight: 600;
+      text-decoration: none;
+    }
+    header a:hover {
+      text-decoration: underline;
+    }
     header .version {
       font-size: 0.9rem;
       color: var(--text-muted);
@@ -259,6 +274,7 @@
 <div class="editor-container">
   <header>
     <h1>SPMS-1 (type-1) Editor<span class="version">v0.0.3</span></h1>
+    <a href="spms1_patch_editor.html">Patch Editor &rarr;</a>
   </header>
 
   <div class="editor-grid">
