@@ -215,6 +215,13 @@
       font-size: 0.95rem;
       font-weight: bold;
     }
+    .slider-norm {
+      min-width: 48px;
+      text-align: right;
+      font-family: monospace;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
 
     /* Soft keyboard */
     .keyboard-scroll-container {
@@ -433,7 +440,7 @@
     }
     .node {
       position: absolute;
-      width: 260px;
+      width: 300px;
       background: #fff;
       border: 1px solid var(--border-color);
       border-radius: 8px;
@@ -445,7 +452,7 @@
       width: 200px;
     }
     .node.general {
-      width: 240px;
+      width: 280px;
     }
     .node.off {
       opacity: 0.55;
@@ -493,6 +500,14 @@
     .row .lbl.right {
       text-align: right;
     }
+    /* Short labels, so the source names line up in a column just after them. */
+    .row.input-row .lbl {
+      flex: 0 0 44px;
+    }
+    .row.input-row .src {
+      flex: 1;
+      max-width: none;
+    }
     .row .src {
       color: var(--text-muted);
       font-size: 0.7rem;
@@ -518,6 +533,15 @@
       border-color: var(--wire-feedback);
       background: #fdf2e3;
     }
+    /* A routed parameter reads its wire, but its CC still fills its own slot and so still feeds
+       the output port: the fields stay live, only set back. */
+    .row.routed input[type="number"] {
+      opacity: 0.55;
+    }
+    .slider-knob-zone.routed .slider-label {
+      color: var(--wire-param);
+      font-style: italic;
+    }
     .row.routed .lbl {
       color: var(--wire-param);
       font-style: italic;
@@ -538,6 +562,15 @@
     }
     .sep span:not(:first-child) {
       width: 46px;
+    }
+    .sep span.norm-head, .row .norm {
+      width: 40px;
+      text-align: right;
+    }
+    .row .norm {
+      font-family: monospace;
+      font-size: 0.72rem;
+      color: var(--text-muted);
     }
     .node .rows-end {
       height: 6px;
@@ -890,7 +923,7 @@
   const SIG = Object.fromEntries(SIGNAL_NAMES.map((n, i) => [n, i]));
 
   const SIGNAL_LABELS = {
-    NONE: 'None', ONE: '+1.0', HALF: '+0.5', MINUS_HALF: '-0.5', MINUS_ONE: '-1.0',
+    NONE: '0.0', ONE: '+1.0', HALF: '+0.5', MINUS_HALF: '-0.5', MINUS_ONE: '-1.0',
     PITCH: 'Note Pitch', GATE: 'Note Gate', BEND: 'Pitch Bend',
   };
   MODULES.forEach(m => { SIGNAL_LABELS[m.out] = `${m.label} Out`; });
@@ -903,17 +936,17 @@
     NOTE:      { x: 40,   y: 40 },
     CONST:     { x: 40,   y: 190 },
     GENERAL:   { x: 40,   y: 370 },
-    LFO_1:     { x: 340,  y: 40 },
-    MIXER_1:   { x: 340,  y: 180 },
-    ENV_GEN_1: { x: 340,  y: 460 },
-    MIXER_2:   { x: 340,  y: 690 },
-    OSC_1:     { x: 680,  y: 40 },
-    MIXER_3:   { x: 680,  y: 320 },
-    FILTER_1:  { x: 1020, y: 40 },
-    MIXER_4:   { x: 1020, y: 320 },
-    AMP_1:     { x: 1360, y: 40 },
-    MIXER_5:   { x: 1360, y: 240 },
-    OUT:       { x: 1700, y: 40 },
+    LFO_1:     { x: 360,  y: 40 },
+    MIXER_1:   { x: 360,  y: 180 },
+    ENV_GEN_1: { x: 360,  y: 460 },
+    MIXER_2:   { x: 360,  y: 690 },
+    OSC_1:     { x: 720,  y: 40 },
+    MIXER_3:   { x: 720,  y: 320 },
+    FILTER_1:  { x: 1080, y: 40 },
+    MIXER_4:   { x: 1080, y: 320 },
+    AMP_1:     { x: 1440, y: 40 },
+    MIXER_5:   { x: 1440, y: 240 },
+    OUT:       { x: 1440, y: 520 },
   };
 
   function defaultState() {
@@ -1220,7 +1253,7 @@
 
   const NODES = [
     { key: 'NOTE', label: 'Note', aux: true, outs: ['PITCH', 'GATE', 'BEND'] },
-    { key: 'CONST', label: 'Constants', aux: true, outs: ['ONE', 'HALF', 'MINUS_HALF', 'MINUS_ONE'] },
+    { key: 'CONST', label: 'Constants', aux: true, outs: ['ONE', 'HALF', 'NONE', 'MINUS_HALF', 'MINUS_ONE'] },
     { key: 'GENERAL', label: 'General Controls', aux: true, controls: CONTROL_ITEMS.slice(PARAMS.length) },
     ...MODULES.map(m => ({
       key: m.key, label: m.label, module: m,
@@ -1241,6 +1274,7 @@
       <span class="lbl" title="${tip}">${escapeHTML(c.label)}</span>
       <input type="number" class="cc" min="0" max="127" title="CC number, 0 for none">
       <input type="number" class="val" min="0" max="127" title="CC value">
+      <span class="norm" title="The value the synth sees in the slot"></span>
       <span class="port out param" data-src="${c.key}" title="${escapeHTML(c.full)} control slot"></span>
     </div>`;
   }
@@ -1256,10 +1290,10 @@
       h += `<div class="row"><span class="lbl right">${escapeHTML(sigLabel(o))}</span><span class="port out" data-src="${o}"></span></div>`;
     }
     for (const i of node.inputs || []) {
-      h += `<div class="row"><span class="port in" data-dst="IN:${i.key}" title="Read every sample"></span><span class="lbl">${escapeHTML(i.label)}</span><span class="src" data-src-of="IN:${i.key}"></span></div>`;
+      h += `<div class="row input-row"><span class="port in" data-dst="IN:${i.key}" title="Read every sample"></span><span class="lbl">${escapeHTML(i.label)}</span><span class="src" data-src-of="IN:${i.key}"></span></div>`;
     }
     if (node.controls && node.controls.length) {
-      h += `<div class="sep"><span>${node.module ? 'Parameters' : 'Slots'}</span><span>CC</span><span>Value</span></div>`;
+      h += `<div class="sep"><span>${node.module ? 'Parameters' : 'Slots'}</span><span>CC</span><span>Value</span><span class="norm-head">Norm</span></div>`;
       for (const c of node.controls) h += controlRowHTML(c, !!node.module);
     }
     return h + '<div class="rows-end"></div>';
@@ -1299,6 +1333,7 @@
       valIn.disabled = !cc;
       if (document.activeElement !== valIn) valIn.value = cc ? ccValue(cc) : '';
       valIn.placeholder = cc ? '' : '—';
+      row.querySelector('.norm').textContent = cc ? normalized(c, ccValue(cc)) : '—';
       valIn.title = cc
         ? `Value of CC ${cc}, shared by every slot on it`
         : 'No CC: the slot keeps what it holds (mixers are seeded at power-on)';
@@ -1351,7 +1386,7 @@
     if (!canvas.clientWidth) return;
     svg.querySelectorAll('path:not(.temp)').forEach(p => p.remove());
     world.querySelectorAll('.port.connected').forEach(p => p.classList.remove('connected'));
-    world.querySelectorAll('.row.routed').forEach(r => r.classList.remove('routed'));
+    world.querySelectorAll('.row.routed').forEach(r => { r.classList.remove('routed'); r.title = ''; });
     world.querySelectorAll('[data-src-of]').forEach(s => { s.textContent = ''; });
     const conns = connections();
     if (selectedWire && !conns.some(c => c.dst === selectedWire)) selectedWire = null;
@@ -1377,7 +1412,11 @@
       svg.appendChild(hit);
       from.classList.add('connected');
       to.classList.add('connected');
-      if (c.kind === 'param') to.closest('.row').classList.add('routed');
+      if (c.kind === 'param') {
+        const row = to.closest('.row');
+        row.classList.add('routed');
+        row.title = `Reads ${sigLabel(c.src)}. CC and value still set this slot, which the output port carries.`;
+      }
       const srcText = world.querySelector(`[data-src-of="${c.dst}"]`);
       if (srcText) srcText.textContent = '← ' + sigLabel(c.src);
     }
@@ -1940,10 +1979,13 @@
     return p.general ? CONTROL_ITEMS.slice(PARAMS.length) : PARAM_ITEMS.filter(c => c.module === p.module);
   }
 
-  function displayValue(c, value) {
-    if (!c.bipolar) return String(value);
-    const offset = value - 64;
-    return (offset < 0 ? '-' : '+') + Math.abs(offset);
+  // What the synth writes to the slot: cc_to_unipolar and cc_to_bipolar in spms1_main.rb.
+  function normalized(c, value) {
+    if (c.bipolar) {
+      const v = Math.max(-0.5, Math.min(0.5, (value - 64) / 120));
+      return (v < 0 ? '-' : '+') + Math.abs(v).toFixed(3);
+    }
+    return Math.max(0, Math.min(1, (value - 4) / 120)).toFixed(3);
   }
 
   let sliderBefore = null;
@@ -1967,6 +2009,7 @@
           <div class="slider-input-wrapper">
             <input type="range" min="0" max="127"${c.bipolar ? ' class="bipolar"' : ''}>
             <span class="slider-value"></span>
+            <span class="slider-norm" title="The value the synth sees in the slot"></span>
           </div>
         </div>`).join('') + '</div>';
       cols[p.col].appendChild(panel);
@@ -1995,12 +2038,18 @@
       const cc = state.cc[c.key];
       const slider = zone.querySelector('input');
       const usable = ccInUse(cc);
+      const src = state.params[c.key];
+      const routed = src !== undefined && src !== c.key;
+      zone.classList.toggle('routed', routed);
       zone.querySelector('.cc-num').textContent =
-        !cc ? '(no CC)' : RESERVED_CCS.has(cc) ? `(CC ${cc}, reserved)` : `(CC ${cc})`;
+        (!cc ? '(no CC)' : RESERVED_CCS.has(cc) ? `(CC ${cc}, reserved)` : `(CC ${cc})`) +
+        (routed ? ` ← ${sigLabel(src)}` : '');
+      zone.title = routed ? `${c.full} reads ${sigLabel(src)}. This slider sets only its own slot, which other wires may read.` : '';
       slider.disabled = !usable;
       const value = usable ? ccValue(cc) : 64;
       if (document.activeElement !== slider) slider.value = value;
-      zone.querySelector('.slider-value').textContent = usable ? displayValue(c, value) : '—';
+      zone.querySelector('.slider-value').textContent = usable ? String(value) : '—';
+      zone.querySelector('.slider-norm').textContent = usable ? normalized(c, value) : '';
     });
   }
 
