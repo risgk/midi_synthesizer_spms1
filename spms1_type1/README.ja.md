@@ -216,7 +216,7 @@ Mixer 2 から 5 には何も結線されていないので、毎サンプル自
 | 0 | 0-31 | 実行順、スロットごとに | モジュール ID |
 | 1 | 0-17 | モジュール入力に何を入れるか | シグナル ID |
 | 2 | 0-32 | パラメータがどこから値を取るか | シグナル ID |
-| 3 | 0-32 | どの CC がコントロールスロットを埋めるか | CC 番号、0 なら割り当てなし |
+| 3 | 0-40 | どの CC がコントロールスロットを埋めるか | CC 番号、0 なら割り当てなし |
 
 実行順はスロット 0 から上へ読まれ、最初に現れたモジュール ID 0 で止まります。32 個に満たないパッチは
 そこで自ら終わるわけです。実行順はモジュールの番号付けとは別物です。あるモジュールが今サンプルの値を
@@ -269,6 +269,18 @@ LFO をそこに通すからです。
 | 9 | EG 1 Attack | | 20 | Mixer 2 Invert 2 | | 31 | Mixer 5 Level 2 |
 | 10 | EG 1 Decay | | 21 | Mixer 3 Level 1 | | 32 | Mixer 5 Invert 2 |
 
+#### エントリ (CC 98)、カテゴリ 3 のみ
+
+これらのスロットはどのパラメータにも属さないので、カテゴリ 2 には対応するエントリがありません。後述の
+General スロットを参照してください。
+
+| CC 98 | コントロールスロット | | CC 98 | コントロールスロット |
+| ----- | ------ | - | ----- | ------ |
+| 33 | General Unipolar 1 | | 37 | General Bipolar 1 |
+| 34 | General Unipolar 2 | | 38 | General Bipolar 2 |
+| 35 | General Unipolar 3 | | 39 | General Bipolar 3 |
+| 36 | General Unipolar 4 | | 40 | General Bipolar 4 |
+
 #### モジュール ID
 
 | ID | モジュール |
@@ -289,23 +301,26 @@ LFO をそこに通すからです。
 
 | ID | シグナル | | ID | シグナル | | ID | シグナル |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | なし（定数 0.0） | | 17 | Osc 1 Coarse Tune ± | | 34 | Mixer 2 Level 2 |
-| 1 | 定数 1.0 | | 18 | Osc 1 Fine Tune ± | | 35 | Mixer 2 Invert 2 |
-| 2 | 定数 0.5 | | 19 | Filter 1 Cutoff | | 36 | Mixer 3 Level 1 |
-| 3 | 定数 -0.5 | | 20 | Filter 1 Resonance | | 37 | Mixer 3 Invert 1 |
-| 4 | 定数 -1.0 | | 21 | Filter 1 Mod Amt | | 38 | Mixer 3 Level 2 |
-| 5 | LFO 1 Output ± | | 22 | Filter 1 Gain | | 39 | Mixer 3 Invert 2 |
-| 6 | EG 1 Output | | 23 | Amp 1 Gain | | 40 | Mixer 4 Level 1 |
-| 7 | Osc 1 Output ± | | 24 | EG 1 Attack | | 41 | Mixer 4 Invert 1 |
-| 8 | Filter 1 Output ± | | 25 | EG 1 Decay | | 42 | Mixer 4 Level 2 |
-| 9 | Amp 1 Output ± | | 26 | EG 1 Sustain | | 43 | Mixer 4 Invert 2 |
-| 10 | Mixer 1 Output ± | | 27 | LFO 1 Rate | | 44 | Mixer 5 Level 1 |
-| 11 | Mixer 2 Output ± | | 28 | Mixer 1 Level 1 | | 45 | Mixer 5 Invert 1 |
-| 12 | Mixer 3 Output ± | | 29 | Mixer 1 Invert 1 | | 46 | Mixer 5 Level 2 |
-| 13 | Mixer 4 Output ± | | 30 | Mixer 1 Level 2 | | 47 | Mixer 5 Invert 2 |
-| 14 | Mixer 5 Output ± | | 31 | Mixer 1 Invert 2 | | 48 | Note Pitch ± |
-| 15 | Osc 1 Wave | | 32 | Mixer 2 Level 1 | | 49 | Note Gate |
-| 16 | Osc 1 Mod Amt | | 33 | Mixer 2 Invert 1 | | 50 | Pitch Bend ± |
+| 0 | なし（定数 0.0） | | 20 | Filter 1 Resonance | | 40 | Mixer 4 Level 1 |
+| 1 | 定数 1.0 | | 21 | Filter 1 Mod Amt | | 41 | Mixer 4 Invert 1 |
+| 2 | 定数 0.5 | | 22 | Filter 1 Gain | | 42 | Mixer 4 Level 2 |
+| 3 | 定数 -0.5 | | 23 | Amp 1 Gain | | 43 | Mixer 4 Invert 2 |
+| 4 | 定数 -1.0 | | 24 | EG 1 Attack | | 44 | Mixer 5 Level 1 |
+| 5 | LFO 1 Output ± | | 25 | EG 1 Decay | | 45 | Mixer 5 Invert 1 |
+| 6 | EG 1 Output | | 26 | EG 1 Sustain | | 46 | Mixer 5 Level 2 |
+| 7 | Osc 1 Output ± | | 27 | LFO 1 Rate | | 47 | Mixer 5 Invert 2 |
+| 8 | Filter 1 Output ± | | 28 | Mixer 1 Level 1 | | 48 | Note Pitch ± |
+| 9 | Amp 1 Output ± | | 29 | Mixer 1 Invert 1 | | 49 | Note Gate |
+| 10 | Mixer 1 Output ± | | 30 | Mixer 1 Level 2 | | 50 | Pitch Bend ± |
+| 11 | Mixer 2 Output ± | | 31 | Mixer 1 Invert 2 | | 51 | General Unipolar 1 |
+| 12 | Mixer 3 Output ± | | 32 | Mixer 2 Level 1 | | 52 | General Unipolar 2 |
+| 13 | Mixer 4 Output ± | | 33 | Mixer 2 Invert 1 | | 53 | General Unipolar 3 |
+| 14 | Mixer 5 Output ± | | 34 | Mixer 2 Level 2 | | 54 | General Unipolar 4 |
+| 15 | Osc 1 Wave | | 35 | Mixer 2 Invert 2 | | 55 | General Bipolar 1 ± |
+| 16 | Osc 1 Mod Amt | | 36 | Mixer 3 Level 1 | | 56 | General Bipolar 2 ± |
+| 17 | Osc 1 Coarse Tune ± | | 37 | Mixer 3 Invert 1 | | 57 | General Bipolar 3 ± |
+| 18 | Osc 1 Fine Tune ± | | 38 | Mixer 3 Level 2 | | 58 | General Bipolar 4 ± |
+| 19 | Filter 1 Cutoff | | 39 | Mixer 3 Invert 2 | |  |  |
 
 **±** は、正負どちらにも振れるシグナルを表します。モジュール出力はフルスケールで -0.5 と +0.5 に届き、
 バイポーラのコントロールスロットは -0.5〜+0.5 で、ミキサーはそれを 2 つ足して 1.0 で止まります。印のない
@@ -318,6 +333,11 @@ LFO をそこに通すからです。
 CC 64 を 0.0 とする -0.5〜+0.5 と、LFO と同じ幅なので、バイポーラのソースを向ければ中央を挟んで上下に
 振れます。バイポーラなのは 2 つのチューンだけで、中央が「変化なし」を意味するからです。パラメータに別の
 スロットを指させることがモジュレーションになります。CC のないものは、割り当てられるまで初期値のままです。
+
+スロット 51〜58 の General スロットは、どのパラメータにも属さないコントロールスロットです。CC をバスに
+載せるだけで、どのモジュール入力やパラメータからも読めます。General Unipolar 1〜4 は 0.0〜1.0、General
+Bipolar 1〜4 は -0.5〜+0.5 です。どちらもデフォルトでは CC 16〜19 を読むので、それぞれの CC が両方の形で
+同時に届きます。起動時はどちらも CC 64 で、ユニポーラは 0.5、バイポーラは 0.0 です。
 
 Note Pitch、Note Gate、Pitch Bend の 3 つは鍵盤がバスに載せるものです。Note Pitch は MIDI ノート 0〜120 を
 -0.5〜+0.5 で運びます。オシレータがピッチの全域として読むのと同じ幅です。Pitch Bend も同じくバイポーラで、
@@ -392,8 +412,8 @@ Filter 1 Gain はオーディオ入力がフィルタをどれだけ強く駆動
   を送ると Note Pitch と Pitch Bend が Mixer 2 の 2 つの入力に入り、CC 99 = 1, CC 98 = 1, CC 6 = 11 で
   その和がオシレータのピッチになります。Mixer 2 はオシレータより前を走るので、ホイールは同じサンプルで
   音程を動かします。レベルはどちらも最大なので、そのままではホイールが上下 5 オクターブ振ります。
-  CC 99 = 3, CC 98 = 19, CC 6 = 16 で Mixer 2 の 2 番目のレベルを CC 16 に割り当てれば、演奏できる
-  ベンドレンジまで絞れます
+  CC 99 = 2, CC 98 = 19, CC 6 = 51 で Mixer 2 の 2 番目のレベルを General Unipolar 1 から取るように
+  すれば、CC 16 で演奏できるベンドレンジまで絞れます
 - モジュレーション入力を通して、ピッチを両方向に曲げる CC。Mixer 1 はすでにオシレータのモジュレーション
   入力に繋がっているので、あとは混ぜるものを与えるだけです: CC 99 = 1, CC 98 = 7, CC 6 = 19 で LFO の
   代わりにフィルタのカットオフのコントロールスロットを 1 番目の入力に置き、CC 98 = 8, CC 6 = 3 で定数
@@ -414,7 +434,7 @@ Filter 1 Gain はオーディオ入力がフィルタをどれだけ強く駆動
 - モジュール入力（カテゴリ 1）は毎サンプル読まれ、スムージングされません。パラメータ（カテゴリ 2）は
   1 バッファに 1 回読まれ、受け取る側でスムージングされます。速いソースはモジュール入力へ、段階的なものは
   パラメータへ通してください
-- パラメータのソースは 128 のスロットのどれでも指せます。50 より上のスロットは、何かが書き込むまで 0 を
+- パラメータのソースは 128 のスロットのどれでも指せます。58 より上のスロットは、何かが書き込むまで 0 を
   返すので、そこを指したパラメータはユニポーラならつまみの下端、バイポーラなら中央に留まります
 - パラメータは自分の値を自分のレンジ、0.0〜1.0 か -0.5〜+0.5 に丸め、コントロールスロットも同じレンジを
   バスに載せます。ユニポーラのスロットをモジュール入力に結線するとエンベロープと同じく片側にしか振れず、
