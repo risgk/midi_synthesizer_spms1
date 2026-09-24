@@ -634,8 +634,15 @@ void loop() {
   delay(1);
 }
 
+// A note on at velocity 0 is a note off. Handled here rather than by the MIDI library's setting,
+// since read_usb_midi calls this directly.
 void handleNoteOn(byte channel, byte pitch, byte velocity)
 {
+  if (velocity == 0) {
+    handleNoteOff(channel, pitch, velocity);
+    return;
+  }
+
   set_midi_note_on_pitch(channel - 1, pitch);
   set_midi_note_on_state(channel - 1, 1);
 }
