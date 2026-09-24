@@ -570,6 +570,10 @@
     .row input.nv {
       width: 58px;
     }
+    .row.pending input.nv, .row.pending .norm {
+      font-style: italic;
+      color: var(--wire-feedback);
+    }
     .row .norm {
       font-family: monospace;
       font-size: 0.72rem;
@@ -1881,7 +1885,9 @@
   // What the synth holds for each channel, kept by the same rules as spms1_type1.ino: a note on
   // takes the pitch and opens the gate, a note off -- or a note on at velocity 0 -- closes the gate
   // only for the pitch that last came on, and pitch bend is kept signed, -8192 to 8191.
-  const noteStates = Array.from({ length: 16 }, () => ({ pitch: 60, gate: 0, bend: 0 }));
+  // pending is a pitch typed while the gate was shut, sent with the next gate on: MIDI can set the
+  // pitch only by a note on, which would open the gate for as long as the synth took to read it.
+  const noteStates = Array.from({ length: 16 }, () => ({ pitch: 60, gate: 0, bend: 0, pending: null }));
 
   function trackNote(ch, status, data1, data2) {
     const n = noteStates[ch];
@@ -1889,6 +1895,7 @@
     if (cmd === 0x90 && data2 > 0) {
       n.pitch = data1;
       n.gate = 1;
+      n.pending = null;
     } else if (cmd === 0x80 || cmd === 0x90) {
       if (data1 === n.pitch) n.gate = 0;
     } else if (cmd === 0xE0) {
@@ -1903,8 +1910,9 @@
   function refreshNoteNode() {
     const n = noteStates[exportOptions().ch];
     const signed = v => (v < 0 ? '-' : '+') + Math.abs(v).toFixed(3);
+    const pitch = n.pending ?? n.pitch;
     const shown = {
-      PITCH: [n.pitch, signed(n.pitch / 120 - 0.5)],
+      PITCH: [pitch, signed(pitch / 120 - 0.5)],
       GATE: [n.gate, n.gate.toFixed(3)],
       BEND: [n.bend, signed(Math.floor((n.bend + 1) / 2) / 8192)],
     };
@@ -1913,6 +1921,11 @@
       const input = row.querySelector('.nv');
       if (document.activeElement !== input) input.value = value;
       row.querySelector('.norm').textContent = norm;
+      if (row.dataset.noteSig === 'PITCH') {
+        const pending = n.pending !== null;
+        row.classList.toggle('pending', pending);
+        row.title = pending ? `Sent with the next Gate on. The synth still holds ${n.pitch}.` : '';
+      }
     });
   }
 
@@ -1925,18 +1938,18 @@
         const v = Math.max(+input.min, Math.min(+input.max, Math.round(Number(input.value) || 0)));
         const n = noteStates[exportOptions().ch];
         switch (row.dataset.noteSig) {
-        case 'PITCH': {
-          if (v === n.pitch) break;
-          // A note on is the only way to set the pitch. With the gate shut, a note off straight after
-          // shuts it again, before the synth is likely to read it.
-          const wasOpen = n.gate;
-          sendNote(0x90, v, 100);
-          if (!wasOpen) sendNote(0x80, v, 0);
+        case 'PITCH':
+          if (n.gate) {
+            if (v !== n.pitch) sendNote(0x90, v, 100);
+          } else {
+            n.pending = (v === n.pitch) ? null : v;
+            refreshNoteNode();
+          }
           break;
-        }
         case 'GATE':
           if (v === n.gate) break;
-          sendNote(v ? 0x90 : 0x80, n.pitch, v ? 100 : 0);
+          if (v) sendNote(0x90, n.pending ?? n.pitch, 100);
+          else sendNote(0x80, n.pitch, 0);
           break;
         case 'BEND':
           sendBend(v);
