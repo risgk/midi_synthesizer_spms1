@@ -34,7 +34,7 @@
 #include <MIDI.h>
 struct MySettings : public midi::DefaultSettings {
   static const long BaudRate = SPMS1_UART_MIDI_SPEED;
-  static const bool HandleNullVelocityNoteOnAsNoteOff = false;
+  static const bool HandleNullVelocityNoteOnAsNoteOff = true;
 };
 
 #if defined(SPMS1_USE_USB_MIDI)
