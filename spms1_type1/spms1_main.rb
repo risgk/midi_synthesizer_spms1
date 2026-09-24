@@ -209,8 +209,8 @@ NRPN_SOURCE_MIXER_5_INVERT_2    = 288
 
 # A CC number of 0 means the parameter has no CC: its control slot keeps whatever it holds, so the
 # parameter can be driven by routing alone. A parameter shipped that way wants its slot seeded
-# below, unless the middle of its dial, 0.0, is the value it should rest at. Every mixer parameter
-# ships that way.
+# below, unless 0.0 -- the bottom of a unipolar dial, the middle of a bipolar one -- is the value
+# it should rest at. Every mixer parameter ships that way.
 NRPN_CC_OSC_1_WAVEFORM      = 384
 NRPN_CC_OSC_1_MOD_AMOUNT    = 385
 NRPN_CC_OSC_1_COARSE_TUNE   = 386
@@ -245,15 +245,22 @@ NRPN_CC_MIXER_5_INVERT_1    = 414
 NRPN_CC_MIXER_5_LEVEL_2     = 415
 NRPN_CC_MIXER_5_INVERT_2    = 416
 
-# CC value normalization. Every parameter is a ratio in -0.5..0.5, the same span as a bipolar
-# signal on the bus, so this is the only converter: CC 4..124 maps to the full range, CC 64 where
-# a MIDI controller puts its detent lands on 0.0, and anything outside is clamped here. Every
-# lookup table in the synth is spaced to match -- FREQ_TABLE is semitone-spaced across 120, and
-# EXP_TABLE and Q_TABLE are 121 entries over their ranges -- so a CC value lands on an integer
-# table index, and CC 64 is the exact mid-value of each.
-# What a ratio means -- dimensionless, semitones, seconds -- stays a property of the destination,
+# CC value normalization. Each control slot is unipolar or bipolar, matching the range its
+# parameter clamps to, and takes the converter of its kind: unipolar is 0.0..1.0, the span of an
+# envelope, and bipolar is -0.5..0.5, the span of an LFO, with 0.0 at CC 64 where a MIDI
+# controller puts its detent. Only the tune controls are bipolar, being offsets about that
+# detent. Both map CC 4..124 to the full range and clamp anything outside. Every lookup table in
+# the synth is spaced to match -- FREQ_TABLE is semitone-spaced across 120, and EXP_TABLE and
+# Q_TABLE are 121 entries over their ranges -- so a CC value lands on an integer table index, and
+# CC 64 is the exact mid-value of each.
+# What a value means -- dimensionless, semitones, seconds -- stays a property of the destination,
 # so reassigning which CC a parameter reads cannot change what the value means.
-def cc_to_ratio(value)
+def cc_to_unipolar(value)
+  scaled = (value.to_f - 4.0) * (1.0 / 120.0)
+  (scaled < 0.0) ? 0.0 : ((scaled > 1.0) ? 1.0 : scaled)
+end
+
+def cc_to_bipolar(value)
   scaled = (value.to_f - 64.0) * (1.0 / 120.0)
   (scaled < -0.5) ? -0.5 : ((scaled > 0.5) ? 0.5 : scaled)
 end
@@ -296,26 +303,26 @@ signals[SIGNAL_MINUS_ONE]  = -1.0
 # down to a vibrato depth, so that Osc Mod Amt can span the whole pitch range the way every other
 # modulation depth does. Both of its inputs are scaled alike, so a bipolar pair built there stays
 # centred. Everything else takes its value from MIDI on buffer one and needs no seed.
-signals[SIGNAL_MIXER_1_LEVEL_1]  = cc_to_ratio(28)
-signals[SIGNAL_MIXER_1_INVERT_1] = cc_to_ratio(4)
-signals[SIGNAL_MIXER_1_LEVEL_2]  = cc_to_ratio(28)
-signals[SIGNAL_MIXER_1_INVERT_2] = cc_to_ratio(4)
-signals[SIGNAL_MIXER_2_LEVEL_1]  = cc_to_ratio(124)
-signals[SIGNAL_MIXER_2_INVERT_1] = cc_to_ratio(4)
-signals[SIGNAL_MIXER_2_LEVEL_2]  = cc_to_ratio(124)
-signals[SIGNAL_MIXER_2_INVERT_2] = cc_to_ratio(4)
-signals[SIGNAL_MIXER_3_LEVEL_1]  = cc_to_ratio(124)
-signals[SIGNAL_MIXER_3_INVERT_1] = cc_to_ratio(4)
-signals[SIGNAL_MIXER_3_LEVEL_2]  = cc_to_ratio(124)
-signals[SIGNAL_MIXER_3_INVERT_2] = cc_to_ratio(4)
-signals[SIGNAL_MIXER_4_LEVEL_1]  = cc_to_ratio(124)
-signals[SIGNAL_MIXER_4_INVERT_1] = cc_to_ratio(4)
-signals[SIGNAL_MIXER_4_LEVEL_2]  = cc_to_ratio(124)
-signals[SIGNAL_MIXER_4_INVERT_2] = cc_to_ratio(4)
-signals[SIGNAL_MIXER_5_LEVEL_1]  = cc_to_ratio(124)
-signals[SIGNAL_MIXER_5_INVERT_1] = cc_to_ratio(4)
-signals[SIGNAL_MIXER_5_LEVEL_2]  = cc_to_ratio(124)
-signals[SIGNAL_MIXER_5_INVERT_2] = cc_to_ratio(4)
+signals[SIGNAL_MIXER_1_LEVEL_1]  = cc_to_unipolar(28)
+signals[SIGNAL_MIXER_1_INVERT_1] = cc_to_unipolar(4)
+signals[SIGNAL_MIXER_1_LEVEL_2]  = cc_to_unipolar(28)
+signals[SIGNAL_MIXER_1_INVERT_2] = cc_to_unipolar(4)
+signals[SIGNAL_MIXER_2_LEVEL_1]  = cc_to_unipolar(124)
+signals[SIGNAL_MIXER_2_INVERT_1] = cc_to_unipolar(4)
+signals[SIGNAL_MIXER_2_LEVEL_2]  = cc_to_unipolar(124)
+signals[SIGNAL_MIXER_2_INVERT_2] = cc_to_unipolar(4)
+signals[SIGNAL_MIXER_3_LEVEL_1]  = cc_to_unipolar(124)
+signals[SIGNAL_MIXER_3_INVERT_1] = cc_to_unipolar(4)
+signals[SIGNAL_MIXER_3_LEVEL_2]  = cc_to_unipolar(124)
+signals[SIGNAL_MIXER_3_INVERT_2] = cc_to_unipolar(4)
+signals[SIGNAL_MIXER_4_LEVEL_1]  = cc_to_unipolar(124)
+signals[SIGNAL_MIXER_4_INVERT_1] = cc_to_unipolar(4)
+signals[SIGNAL_MIXER_4_LEVEL_2]  = cc_to_unipolar(124)
+signals[SIGNAL_MIXER_4_INVERT_2] = cc_to_unipolar(4)
+signals[SIGNAL_MIXER_5_LEVEL_1]  = cc_to_unipolar(124)
+signals[SIGNAL_MIXER_5_INVERT_1] = cc_to_unipolar(4)
+signals[SIGNAL_MIXER_5_LEVEL_2]  = cc_to_unipolar(124)
+signals[SIGNAL_MIXER_5_INVERT_2] = cc_to_unipolar(4)
 
 # The default patch, written into the NRPN table the loop reads it back from. Every module is in
 # the run order, so a patch only ever has to route, never to switch something on first. A mixer
@@ -526,39 +533,39 @@ loop do
   cc_mixer_5_level_2     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_5_LEVEL_2)
   cc_mixer_5_invert_2    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_5_INVERT_2)
 
-  signals[cc_slot(cc_osc_1_waveform, SIGNAL_OSC_1_WAVEFORM)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_osc_1_waveform))
-  signals[cc_slot(cc_osc_1_mod_amount, SIGNAL_OSC_1_MOD_AMOUNT)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_osc_1_mod_amount))
-  signals[cc_slot(cc_osc_1_coarse_tune, SIGNAL_OSC_1_COARSE_TUNE)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_osc_1_coarse_tune))
-  signals[cc_slot(cc_osc_1_fine_tune, SIGNAL_OSC_1_FINE_TUNE)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_osc_1_fine_tune))
-  signals[cc_slot(cc_filter_1_cutoff, SIGNAL_FILTER_1_CUTOFF)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_filter_1_cutoff))
-  signals[cc_slot(cc_filter_1_resonance, SIGNAL_FILTER_1_RESONANCE)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_filter_1_resonance))
-  signals[cc_slot(cc_filter_1_mod_amount, SIGNAL_FILTER_1_MOD_AMOUNT)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_filter_1_mod_amount))
-  signals[cc_slot(cc_filter_1_gain, SIGNAL_FILTER_1_GAIN)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_filter_1_gain))
-  signals[cc_slot(cc_amp_1_gain, SIGNAL_AMP_1_GAIN)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_amp_1_gain))
-  signals[cc_slot(cc_env_gen_1_attack, SIGNAL_ENV_GEN_1_ATTACK)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_env_gen_1_attack))
-  signals[cc_slot(cc_env_gen_1_decay, SIGNAL_ENV_GEN_1_DECAY)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_env_gen_1_decay))
-  signals[cc_slot(cc_env_gen_1_sustain, SIGNAL_ENV_GEN_1_SUSTAIN)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_env_gen_1_sustain))
-  signals[cc_slot(cc_lfo_1_rate, SIGNAL_LFO_1_RATE)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_rate))
-  signals[cc_slot(cc_mixer_1_level_1, SIGNAL_MIXER_1_LEVEL_1)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_level_1))
-  signals[cc_slot(cc_mixer_1_invert_1, SIGNAL_MIXER_1_INVERT_1)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_invert_1))
-  signals[cc_slot(cc_mixer_1_level_2, SIGNAL_MIXER_1_LEVEL_2)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_level_2))
-  signals[cc_slot(cc_mixer_1_invert_2, SIGNAL_MIXER_1_INVERT_2)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_invert_2))
-  signals[cc_slot(cc_mixer_2_level_1, SIGNAL_MIXER_2_LEVEL_1)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_2_level_1))
-  signals[cc_slot(cc_mixer_2_invert_1, SIGNAL_MIXER_2_INVERT_1)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_2_invert_1))
-  signals[cc_slot(cc_mixer_2_level_2, SIGNAL_MIXER_2_LEVEL_2)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_2_level_2))
-  signals[cc_slot(cc_mixer_2_invert_2, SIGNAL_MIXER_2_INVERT_2)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_2_invert_2))
-  signals[cc_slot(cc_mixer_3_level_1, SIGNAL_MIXER_3_LEVEL_1)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_3_level_1))
-  signals[cc_slot(cc_mixer_3_invert_1, SIGNAL_MIXER_3_INVERT_1)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_3_invert_1))
-  signals[cc_slot(cc_mixer_3_level_2, SIGNAL_MIXER_3_LEVEL_2)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_3_level_2))
-  signals[cc_slot(cc_mixer_3_invert_2, SIGNAL_MIXER_3_INVERT_2)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_3_invert_2))
-  signals[cc_slot(cc_mixer_4_level_1, SIGNAL_MIXER_4_LEVEL_1)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_4_level_1))
-  signals[cc_slot(cc_mixer_4_invert_1, SIGNAL_MIXER_4_INVERT_1)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_4_invert_1))
-  signals[cc_slot(cc_mixer_4_level_2, SIGNAL_MIXER_4_LEVEL_2)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_4_level_2))
-  signals[cc_slot(cc_mixer_4_invert_2, SIGNAL_MIXER_4_INVERT_2)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_4_invert_2))
-  signals[cc_slot(cc_mixer_5_level_1, SIGNAL_MIXER_5_LEVEL_1)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_5_level_1))
-  signals[cc_slot(cc_mixer_5_invert_1, SIGNAL_MIXER_5_INVERT_1)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_5_invert_1))
-  signals[cc_slot(cc_mixer_5_level_2, SIGNAL_MIXER_5_LEVEL_2)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_5_level_2))
-  signals[cc_slot(cc_mixer_5_invert_2, SIGNAL_MIXER_5_INVERT_2)] = cc_to_ratio(C.get_midi_cc_value(MIDI_CH, cc_mixer_5_invert_2))
+  signals[cc_slot(cc_osc_1_waveform, SIGNAL_OSC_1_WAVEFORM)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_waveform))
+  signals[cc_slot(cc_osc_1_mod_amount, SIGNAL_OSC_1_MOD_AMOUNT)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_mod_amount))
+  signals[cc_slot(cc_osc_1_coarse_tune, SIGNAL_OSC_1_COARSE_TUNE)] = cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_coarse_tune))
+  signals[cc_slot(cc_osc_1_fine_tune, SIGNAL_OSC_1_FINE_TUNE)] = cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_fine_tune))
+  signals[cc_slot(cc_filter_1_cutoff, SIGNAL_FILTER_1_CUTOFF)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_cutoff))
+  signals[cc_slot(cc_filter_1_resonance, SIGNAL_FILTER_1_RESONANCE)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_resonance))
+  signals[cc_slot(cc_filter_1_mod_amount, SIGNAL_FILTER_1_MOD_AMOUNT)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_mod_amount))
+  signals[cc_slot(cc_filter_1_gain, SIGNAL_FILTER_1_GAIN)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_gain))
+  signals[cc_slot(cc_amp_1_gain, SIGNAL_AMP_1_GAIN)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_amp_1_gain))
+  signals[cc_slot(cc_env_gen_1_attack, SIGNAL_ENV_GEN_1_ATTACK)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_env_gen_1_attack))
+  signals[cc_slot(cc_env_gen_1_decay, SIGNAL_ENV_GEN_1_DECAY)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_env_gen_1_decay))
+  signals[cc_slot(cc_env_gen_1_sustain, SIGNAL_ENV_GEN_1_SUSTAIN)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_env_gen_1_sustain))
+  signals[cc_slot(cc_lfo_1_rate, SIGNAL_LFO_1_RATE)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_rate))
+  signals[cc_slot(cc_mixer_1_level_1, SIGNAL_MIXER_1_LEVEL_1)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_level_1))
+  signals[cc_slot(cc_mixer_1_invert_1, SIGNAL_MIXER_1_INVERT_1)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_invert_1))
+  signals[cc_slot(cc_mixer_1_level_2, SIGNAL_MIXER_1_LEVEL_2)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_level_2))
+  signals[cc_slot(cc_mixer_1_invert_2, SIGNAL_MIXER_1_INVERT_2)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_invert_2))
+  signals[cc_slot(cc_mixer_2_level_1, SIGNAL_MIXER_2_LEVEL_1)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_2_level_1))
+  signals[cc_slot(cc_mixer_2_invert_1, SIGNAL_MIXER_2_INVERT_1)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_2_invert_1))
+  signals[cc_slot(cc_mixer_2_level_2, SIGNAL_MIXER_2_LEVEL_2)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_2_level_2))
+  signals[cc_slot(cc_mixer_2_invert_2, SIGNAL_MIXER_2_INVERT_2)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_2_invert_2))
+  signals[cc_slot(cc_mixer_3_level_1, SIGNAL_MIXER_3_LEVEL_1)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_3_level_1))
+  signals[cc_slot(cc_mixer_3_invert_1, SIGNAL_MIXER_3_INVERT_1)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_3_invert_1))
+  signals[cc_slot(cc_mixer_3_level_2, SIGNAL_MIXER_3_LEVEL_2)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_3_level_2))
+  signals[cc_slot(cc_mixer_3_invert_2, SIGNAL_MIXER_3_INVERT_2)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_3_invert_2))
+  signals[cc_slot(cc_mixer_4_level_1, SIGNAL_MIXER_4_LEVEL_1)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_4_level_1))
+  signals[cc_slot(cc_mixer_4_invert_1, SIGNAL_MIXER_4_INVERT_1)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_4_invert_1))
+  signals[cc_slot(cc_mixer_4_level_2, SIGNAL_MIXER_4_LEVEL_2)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_4_level_2))
+  signals[cc_slot(cc_mixer_4_invert_2, SIGNAL_MIXER_4_INVERT_2)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_4_invert_2))
+  signals[cc_slot(cc_mixer_5_level_1, SIGNAL_MIXER_5_LEVEL_1)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_5_level_1))
+  signals[cc_slot(cc_mixer_5_invert_1, SIGNAL_MIXER_5_INVERT_1)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_5_invert_1))
+  signals[cc_slot(cc_mixer_5_level_2, SIGNAL_MIXER_5_LEVEL_2)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_5_level_2))
+  signals[cc_slot(cc_mixer_5_invert_2, SIGNAL_MIXER_5_INVERT_2)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_5_invert_2))
 
   osc_1.set_waveform(signals[source_osc_1_waveform])
   osc_1.set_modulation_amount(signals[source_osc_1_mod_amount])
