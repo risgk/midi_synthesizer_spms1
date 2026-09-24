@@ -1994,8 +1994,71 @@
     } else if (cmd === 0xB0) {
       const [, cc, value] = data;
       // The synth already has it from the pass-through.
+      receiveNRPN(cc, value);
       if (ccInUse(cc)) setCCValue(cc, value, false);
     }
+  }
+
+  // Follows NRPN edits arriving at MIDI In by the rules of handle_midi_nrpn_cc in
+  // spms1_type1.ino, so the patch shown stays the one the synth was passed.
+  const nrpnSelect = { msb: 0, lsb: 0, selected: false };
+
+  function receiveNRPN(cc, value) {
+    if (cc === 99) {
+      nrpnSelect.msb = value;
+      nrpnSelect.selected = true;
+    } else if (cc === 98) {
+      nrpnSelect.lsb = value;
+      nrpnSelect.selected = true;
+    } else if (cc === 101 || cc === 100) {
+      nrpnSelect.selected = false;
+    } else if (cc === 6 && nrpnSelect.selected) {
+      applyNRPN((nrpnSelect.msb << 7) | nrpnSelect.lsb, value);
+    }
+  }
+
+  // The synth's 32 run order slots. The editor keeps only the order up to the first 0, so the
+  // slots past it are remembered here for a later write to reconnect them; the mirror is reset
+  // whenever the order was changed from the editor.
+  let orderMirror = new Array(MODULES_SIZE).fill(0);
+
+  function orderFromMirror() {
+    const order = [];
+    for (const id of orderMirror) {
+      if (id === 0) break;
+      const m = MODULES.find(m => m.id === id);
+      // An unknown id or a second copy runs on the synth, but the editor cannot show either.
+      if (m && !order.includes(m.key)) order.push(m.key);
+    }
+    return order;
+  }
+
+  function applyNRPN(nrpn, value) {
+    if (nrpn < MODULES_SIZE) {
+      if (JSON.stringify(orderFromMirror()) !== JSON.stringify(state.order)) {
+        orderMirror = new Array(MODULES_SIZE).fill(0);
+        state.order.forEach((k, i) => { orderMirror[i] = MOD[k].id; });
+      }
+      orderMirror[nrpn] = value;
+      state.order = orderFromMirror();
+    } else if (nrpn >= 128 && nrpn < 128 + INPUT_ITEMS.length) {
+      state.inputs[INPUT_ITEMS[nrpn - 128].key] = SIGNAL_NAMES[value] || 'NONE';
+    } else if (nrpn >= 256 && nrpn < 256 + PARAM_ITEMS.length) {
+      const p = PARAM_ITEMS[nrpn - 256];
+      state.params[p.key] = SIGNAL_NAMES[value] || p.key;
+    } else if (nrpn >= 384 && nrpn < 384 + CONTROL_ITEMS.length) {
+      state.cc[CONTROL_ITEMS[nrpn - 384].key] = value;
+    } else {
+      return;
+    }
+    // The synth already has it, so Live mode must not send it back.
+    if (lastSent) lastSent.set('n' + nrpn, value);
+    renderControls();
+    renderWires();
+    renderOrder();
+    refreshControls();
+    updateExport();
+    saveLocal();
   }
 
   function ccInUse(cc) {
@@ -2053,7 +2116,7 @@
 
   document.getElementById('midi-in').addEventListener('change', () => { handleDeviceChange(); saveMIDISettings(); });
   document.getElementById('midi-out').addEventListener('change', () => { handleDeviceChange(); saveMIDISettings(); });
-  chSelect.addEventListener('change', () => { lastSent = null; updateExport(); refreshNoteNode(); saveMIDISettings(); liveSend(); });
+  chSelect.addEventListener('change', () => { lastSent = null; nrpnSelect.selected = false; updateExport(); refreshNoteNode(); saveMIDISettings(); liveSend(); });
   document.getElementById('live').addEventListener('change', e => {
     if (e.target.checked) sendAll();
   });
