@@ -256,11 +256,40 @@ static void *load_symbol(void *lib, const char *name) {
   return p;
 }
 
+#if defined(_WIN32)
+/* A full path is loaded with its own folder searched for what it depends on, which is where
+   MSYS2 keeps the rest of the DLLs it builds against. */
+static void *load_library(const char *path) {
+  int full = strchr(path, '\\') || strchr(path, '/');
+  return (void *)(full ? LoadLibraryExA(path, NULL, LOAD_WITH_ALTERED_SEARCH_PATH) : LoadLibraryA(path));
+}
+
+/* MSYS2's own install, then the one inside each RubyInstaller, whose folder carries the Ruby
+   version in its name. */
+static void *load_msys2_portaudio(void) {
+  static const char *const dll = "\\msys64\\ucrt64\\bin\\libportaudio.dll";
+  char path[MAX_PATH];
+  WIN32_FIND_DATAA found;
+  void *lib = NULL;
+  snprintf(path, sizeof(path), "C:%s", dll);
+  lib = load_library(path);
+  HANDLE h = FindFirstFileA("C:\\Ruby*", &found);
+  if (h == INVALID_HANDLE_VALUE) return lib;
+  do {
+    if (!lib && (found.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+      snprintf(path, sizeof(path), "C:\\%s%s", found.cFileName, dll);
+      lib = load_library(path);
+    }
+  } while (!lib && FindNextFileA(h, &found));
+  FindClose(h);
+  return lib;
+}
+#endif
+
 static void load_portaudio(void) {
   static const char *candidates[] = {
 #if defined(_WIN32)
-    "portaudio.dll", "libportaudio.dll", "libportaudio-2.dll", "portaudio_x64.dll",
-    "C:\\Program Files\\Audacity\\portaudio_x64.dll",
+    "libportaudio.dll", "libportaudio-2.dll", "portaudio.dll",
 #else
     "libportaudio.dylib", "libportaudio.2.dylib", "/opt/homebrew/lib/libportaudio.dylib",
     "/usr/local/lib/libportaudio.dylib",
@@ -272,11 +301,14 @@ static void load_portaudio(void) {
     const char *path = (i < 0) ? env : candidates[i];
     if (!path) continue;
 #if defined(_WIN32)
-    lib = (void *)LoadLibraryA(path);
+    lib = load_library(path);
 #else
     lib = dlopen(path, RTLD_NOW);
 #endif
   }
+#if defined(_WIN32)
+  if (!lib) lib = load_msys2_portaudio();
+#endif
   if (!lib) {
     fprintf(stderr, "PortAudio not found; set SPMS1_PORTAUDIO_DLL to its path\n");
     exit(1);

@@ -438,12 +438,18 @@ that off makes far weaker high harmonics than a hard edge would fold back down i
   for Windows or macOS and runs it in real time, with audio out through PortAudio and MIDI in
   through WinMM or CoreMIDI. Build with `sh sim_spinel/build.sh` (MinGW gcc in Git Bash on
   Windows, clang on macOS), then run `build/sim_spinel/spms1_sim --midi-in NAME`; `--list` shows
-  the MIDI inputs. PortAudio is loaded at run time; `SPMS1_PORTAUDIO_DLL` gives its path
+  the MIDI inputs
+    - The build first regenerates "spms1_main.c" with Spinel, found on the PATH or, on Windows,
+      inside WSL. `--no-spinel`, or no Spinel to be found, builds the one already here
+    - PortAudio is loaded at run time. The PortAudio project releases source only; on Windows,
+      install it into RubyInstaller's MSYS2 with
+      `ridk exec pacman -S mingw-w64-ucrt-x86_64-portaudio` (the simulators look there), and on
+      macOS with `brew install portaudio`. `SPMS1_PORTAUDIO_DLL` gives a path of your own
     - Not tested on macOS
 - CRuby (experimental): "sim_cruby" -- runs "spms1_main.rb" itself on CRuby, with PortAudio
-  through the ffi gem and MIDI in through the unimidi gem: `ruby sim_cruby/spms1_sim.rb --midi-in
-  NAME`, with `SPMS1_PORTAUDIO_DLL` as above. The interpreter does not keep up with the default
-  patch in real time
+  through the ffi gem, installed as above, and MIDI in through WinMM on Windows and the unimidi
+  gem on macOS: `ruby sim_cruby/spms1_sim.rb --midi-in NAME`. The interpreter does not keep up
+  with the default patch in real time
     - Not tested on macOS
 - Offline WAV output: "sim_offline/spms1_output_wav.rb" -- renders the default patch offline, the
   same modules in the same order with the CC values the synth powers up with, save for two: Decay

@@ -1,25 +1,26 @@
 # Runs spms1_main.rb unmodified on CRuby, standing in for the sketch: Spms1::C is implemented here
-# in Ruby, audio goes out through PortAudio and MIDI comes in through unimidi.
+# in Ruby, audio goes out through PortAudio and MIDI comes in through WinMM on Windows and unimidi
+# elsewhere.
 #
-#   ruby sim_cruby/spms1_sim.rb [--midi-in N|NAME] [--frames 256] [--host wasapi|mme|ds]
+#   ruby sim_cruby/spms1_sim.rb [--midi-in N|NAME] [--frames 256] [--host wasapi|mme|ds|default]
 #
-# Needs the ffi and unimidi gems and a PortAudio DLL; SPMS1_PORTAUDIO_DLL overrides where it is
-# looked for.
+# Needs the ffi gem (and unimidi outside Windows) and a PortAudio DLL; SPMS1_PORTAUDIO_DLL
+# overrides where it is looked for.
 require 'ffi'
-require 'unimidi'
 require 'optparse'
 
 options = { midi_in: nil, frames: 256, host: 'wasapi' }
 OptionParser.new do |o|
   o.on('--midi-in N', 'MIDI input: index or part of its name') { |v| options[:midi_in] = v }
   o.on('--frames N', Integer, 'frames per PortAudio write') { |v| options[:frames] = v }
-  o.on('--host NAME', 'wasapi, mme or ds') { |v| options[:host] = v.downcase }
+  o.on('--host NAME', 'wasapi, mme, ds or default') { |v| options[:host] = v.downcase }
 end.parse!
 
 module PortAudio
   extend FFI::Library
+  # The last is where RubyInstaller's own MSYS2 puts the one pacman installs.
   ffi_lib [ENV['SPMS1_PORTAUDIO_DLL'], 'portaudio', 'libportaudio', 'libportaudio-2',
-           'C:/Program Files/Audacity/portaudio_x64.dll'].compact
+           File.join(RbConfig::TOPDIR, 'msys64/ucrt64/bin/libportaudio.dll')].compact
 
   PA_FLOAT32 = 0x00000001
   PA_CLIP_OFF = 0x00000001
@@ -146,27 +147,20 @@ module Spms1
 
       def start_audio
         PortAudio.check(PortAudio.Pa_Initialize, 'Pa_Initialize')
-        api = PortAudio.Pa_HostApiTypeIdToHostApiIndex(PortAudio::HOST_API_TYPES.fetch(@host))
-        device = (api >= 0) ? PortAudio.Pa_GetHostApiInfo(api)[:default_output_device] : -1
-        device = PortAudio.Pa_GetDefaultOutputDevice if device < 0
-        info = PortAudio.Pa_GetDeviceInfo(device)
-        api_name = PortAudio.Pa_GetHostApiInfo(info[:host_api])[:name]
+        $stderr.puts PortAudio.Pa_GetVersionText
 
-        params = PortAudio::StreamParameters.new
-        params[:device] = device
-        params[:channel_count] = 2
-        params[:sample_format] = PortAudio::PA_FLOAT32
-        params[:suggested_latency] = info[:default_low_output_latency]
-        params[:host_api_specific_stream_info] = nil
-
-        stream_ptr = FFI::MemoryPointer.new(:pointer)
-        PortAudio.check(PortAudio.Pa_OpenStream(stream_ptr, nil, params, @sample_rate.to_f, @frames,
-                                                PortAudio::PA_CLIP_OFF, nil, nil),
-                        "Pa_OpenStream (#{api_name}, #{info[:name]})")
-        @stream = stream_ptr.read_pointer
+        # WASAPI in shared mode opens only at the device's own rate; the default API resamples.
+        err = -1
+        type = PortAudio::HOST_API_TYPES[@host]
+        api = type ? PortAudio.Pa_HostApiTypeIdToHostApiIndex(type) : -1
+        if api >= 0
+          device = PortAudio.Pa_GetHostApiInfo(api)[:default_output_device]
+          err = open_stream(device) if device >= 0
+        end
+        err = open_stream(PortAudio.Pa_GetDefaultOutputDevice) if err < 0
+        PortAudio.check(err, 'Pa_OpenStream')
         PortAudio.check(PortAudio.Pa_StartStream(@stream), 'Pa_StartStream')
-        $stderr.puts "#{PortAudio.Pa_GetVersionText}: #{api_name}, #{info[:name]}, " \
-                     "#{@sample_rate} Hz, #{@frames} frames per write"
+        $stderr.puts "#{@sample_rate} Hz, #{@frames} frames per write"
 
         @out = Array.new(@frames * 2, 0.0)
         @out_index = 0
@@ -225,53 +219,112 @@ module Spms1
 
       private
 
+      def open_stream(device)
+        info = PortAudio.Pa_GetDeviceInfo(device)
+        api_name = PortAudio.Pa_GetHostApiInfo(info[:host_api])[:name]
+        params = PortAudio::StreamParameters.new
+        params[:device] = device
+        params[:channel_count] = 2
+        params[:sample_format] = PortAudio::PA_FLOAT32
+        params[:suggested_latency] = info[:default_low_output_latency]
+        params[:host_api_specific_stream_info] = nil
+
+        stream_ptr = FFI::MemoryPointer.new(:pointer)
+        err = PortAudio.Pa_OpenStream(stream_ptr, nil, params, @sample_rate.to_f, @frames,
+                                      PortAudio::PA_CLIP_OFF, nil, nil)
+        if err < 0
+          $stderr.puts "Could not open #{api_name}, #{info[:name]}: #{PortAudio.Pa_GetErrorText(err)}"
+        else
+          $stderr.puts "Audio out: #{api_name}, #{info[:name]}: open"
+          @stream = stream_ptr.read_pointer
+        end
+        err
+      end
+
       def now = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     end
   end
 end
 
-def select_midi_input(spec)
-  inputs = UniMIDI::Input.all
-  if inputs.empty?
-    $stderr.puts 'No MIDI input found; running without MIDI.'
-    return nil
-  end
-  if spec.nil?
-    inputs.each_with_index { |d, i| $stderr.puts "#{i}: #{d.name}" }
-    $stderr.print 'MIDI input: '
-    spec = $stdin.gets.to_s.strip
-  end
-  input = (spec =~ /\A\d+\z/) ? inputs[spec.to_i] : inputs.find { |d| d.name.include?(spec) }
-  raise "No MIDI input matches #{spec.inspect}" unless input
-  input
-end
+# The MIDI inputs by name, and a way to open one of them that feeds Spms1::C. Windows goes to WinMM
+# directly: midi-winmm, what unimidi uses there, reads the input handle as a 32-bit int, which
+# breaks it on 64-bit Ruby.
+module MidiIn
+  if Gem.win_platform?
+    module WinMM
+      extend FFI::Library
+      ffi_lib 'winmm'
 
-# unimidi hands over raw bytes, so running status is resolved here. Real-time bytes may arrive
-# anywhere and are skipped, and so is SysEx.
-def start_midi_thread(input)
-  input.open
-  $stderr.puts "MIDI in: #{input.name}"
-  Thread.new do
-    status = 0
-    data = []
-    in_sysex = false
-    loop do
-      input.gets.each do |message|
-        message[:data].each do |byte|
-          if byte >= 0xF8
-            next
-          elsif byte == 0xF0
-            in_sysex = true
-          elsif byte >= 0x80
-            in_sysex = false
-            status = (byte < 0xF0) ? byte : 0
-            data.clear
-          elsif !in_sysex && status != 0
-            data << byte
-            length = (status & 0xE0) == 0xC0 ? 1 : 2
-            next if data.size < length
-            Spms1::C.handle_midi_message(status, data[0], data[1] || 0)
-            data.clear
+      MIM_DATA = 0x3C3
+      CALLBACK_FUNCTION = 0x30000
+
+      class MidiInCaps < FFI::Struct
+        layout :mid, :ushort, :pid, :ushort, :driver_version, :uint, :name, [:char, 32],
+               :support, :uint
+      end
+
+      callback :midi_in_proc, [:pointer, :uint, :uintptr_t, :uintptr_t, :uintptr_t], :void
+      attach_function :midiInGetNumDevs, [], :uint
+      attach_function :midiInGetDevCapsA, [:uintptr_t, MidiInCaps.by_ref, :uint], :uint
+      attach_function :midiInOpen, [:pointer, :uint, :midi_in_proc, :uintptr_t, :uint], :uint
+      attach_function :midiInStart, [:pointer], :uint
+    end
+
+    def self.names
+      Array.new(WinMM.midiInGetNumDevs) do |i|
+        caps = WinMM::MidiInCaps.new
+        WinMM.midiInGetDevCapsA(i, caps, caps.size)
+        caps[:name].to_s.force_encoding(Encoding.find('locale'))
+                   .encode('UTF-8', invalid: :replace, undef: :replace)
+      end
+    end
+
+    # WinMM hands over each short message whole, running status already resolved, on a thread of
+    # its own. The callback and the handle are held here so that neither is collected while open.
+    def self.open(index)
+      @proc = proc do |_handle, msg, _instance, p1, _p2|
+        if msg == WinMM::MIM_DATA
+          Spms1::C.handle_midi_message(p1 & 0xFF, (p1 >> 8) & 0x7F, (p1 >> 16) & 0x7F)
+        end
+      end
+      @handle = FFI::MemoryPointer.new(:pointer)
+      err = WinMM.midiInOpen(@handle, index, @proc, 0, WinMM::CALLBACK_FUNCTION)
+      raise "midiInOpen returned #{err}" if err != 0
+      WinMM.midiInStart(@handle.read_pointer)
+    end
+  else
+    require 'unimidi'
+
+    def self.names = UniMIDI::Input.all.map(&:name)
+
+    # unimidi hands over raw bytes, so running status is resolved here. Real-time bytes may
+    # arrive anywhere and are skipped, and so is SysEx.
+    def self.open(index)
+      input = UniMIDI::Input.all[index]
+      input.open
+      Thread.new do
+        status = 0
+        data = []
+        in_sysex = false
+        loop do
+          input.gets.each do |message|
+            message[:data].each do |byte|
+              if byte >= 0xF8
+                next
+              elsif byte == 0xF0
+                in_sysex = true
+              elsif byte >= 0x80
+                in_sysex = false
+                status = (byte < 0xF0) ? byte : 0
+                data.clear
+              elsif !in_sysex && status != 0
+                data << byte
+                length = (status & 0xE0) == 0xC0 ? 1 : 2
+                next if data.size < length
+                Spms1::C.handle_midi_message(status, data[0], data[1] || 0)
+                data.clear
+              end
+            end
           end
         end
       end
@@ -279,10 +332,34 @@ def start_midi_thread(input)
   end
 end
 
+def select_midi_input(spec)
+  names = MidiIn.names
+  if names.empty?
+    $stderr.puts 'No MIDI input found; running without MIDI.'
+    return nil
+  end
+  if spec.nil?
+    names.each_with_index { |name, i| $stderr.puts "#{i}: #{name}" }
+    $stderr.print 'MIDI input (Enter for none): '
+    spec = $stdin.gets.to_s.strip
+    if spec.empty?
+      $stderr.puts 'Running without MIDI input.'
+      return nil
+    end
+  end
+  index = (spec =~ /\A\d+\z/) ? spec.to_i : names.index { |name| name.include?(spec) }
+  abort "No MIDI input matches #{spec.inspect}" unless index && index < names.size
+  begin
+    MidiIn.open(index)
+  rescue StandardError => e
+    abort "Could not open MIDI input #{names[index]}: #{e.message}"
+  end
+  $stderr.puts "MIDI in: #{names[index]}"
+end
+
 Spms1::C.frames = options[:frames]
 Spms1::C.host = options[:host]
-input = select_midi_input(options[:midi_in])
-start_midi_thread(input) if input
+select_midi_input(options[:midi_in])
 
 at_exit { Spms1::C.stop_audio }
 begin
