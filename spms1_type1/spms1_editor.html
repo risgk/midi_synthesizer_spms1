@@ -1887,7 +1887,11 @@
   // only for the pitch that last came on, and pitch bend is kept signed, -8192 to 8191.
   // pending is a pitch typed while the gate was shut, sent with the next gate on: MIDI can set the
   // pitch only by a note on, which would open the gate for as long as the synth took to read it.
-  const noteStates = Array.from({ length: 16 }, () => ({ pitch: 60, gate: 0, bend: 0, pending: null }));
+  //
+  // heldBy is the key whose note off should close the gate after a Pitch edit moved the note away
+  // from it. The synth ignores a note off for any pitch but the last, so without it, releasing that
+  // key would leave the gate open.
+  const noteStates = Array.from({ length: 16 }, () => ({ pitch: 60, gate: 0, bend: 0, pending: null, heldBy: null }));
 
   function trackNote(ch, status, data1, data2) {
     const n = noteStates[ch];
@@ -1896,8 +1900,15 @@
       n.pitch = data1;
       n.gate = 1;
       n.pending = null;
+      n.heldBy = null;
     } else if (cmd === 0x80 || cmd === 0x90) {
-      if (data1 === n.pitch) n.gate = 0;
+      if (data1 === n.pitch) {
+        n.gate = 0;
+        n.heldBy = null;
+      } else if (data1 === n.heldBy && n.gate && ch === exportOptions().ch) {
+        sendNote(0x80, n.pitch, 0);
+        return;
+      }
     } else if (cmd === 0xE0) {
       n.bend = ((data2 << 7) | data1) - 8192;
     } else {
@@ -1940,7 +1951,11 @@
         switch (row.dataset.noteSig) {
         case 'PITCH':
           if (n.gate) {
-            if (v !== n.pitch) sendNote(0x90, v, 100);
+            if (v !== n.pitch) {
+              const heldBy = n.heldBy ?? n.pitch;
+              sendNote(0x90, v, 100);
+              n.heldBy = heldBy;
+            }
           } else {
             n.pending = (v === n.pitch) ? null : v;
             refreshNoteNode();
