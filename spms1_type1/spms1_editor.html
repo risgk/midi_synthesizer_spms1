@@ -567,6 +567,9 @@
       width: 40px;
       text-align: right;
     }
+    .row input.nv {
+      width: 58px;
+    }
     .row .norm {
       font-family: monospace;
       font-size: 0.72rem;
@@ -1252,7 +1255,7 @@
   let selectedWire = null;
 
   const NODES = [
-    { key: 'NOTE', label: 'Note', aux: true, outs: ['PITCH', 'GATE', 'BEND'] },
+    { key: 'NOTE', label: 'Note', aux: true, notes: [['PITCH', 'Pitch', 0, 127], ['GATE', 'Gate', 0, 1], ['BEND', 'Bend', -8192, 8191]] },
     { key: 'CONST', label: 'Constants', aux: true, outs: ['ONE', 'HALF', 'NONE', 'MINUS_HALF', 'MINUS_ONE'] },
     { key: 'GENERAL', label: 'General Controls', aux: true, controls: CONTROL_ITEMS.slice(PARAMS.length) },
     ...MODULES.map(m => ({
@@ -1286,6 +1289,12 @@
     if (node.module) {
       h += `<div class="row"><span class="lbl right">Out</span><span class="port out" data-src="${node.module.out}"></span></div>`;
     }
+    if (node.notes) {
+      h += `<div class="sep"><span>Signals</span><span>Value</span><span class="norm-head">Norm</span></div>`;
+    }
+    for (const [o, label, min, max] of node.notes || []) {
+      h += `<div class="row note-row" data-note-sig="${o}"><span class="lbl">${label}</span><input type="number" class="nv" min="${min}" max="${max}"><span class="norm"></span><span class="port out" data-src="${o}"></span></div>`;
+    }
     for (const o of node.outs || []) {
       h += `<div class="row"><span class="lbl right">${escapeHTML(sigLabel(o))}</span><span class="port out" data-src="${o}"></span></div>`;
     }
@@ -1315,6 +1324,8 @@
     world.querySelectorAll('.port.out').forEach(p => { portEls['o:' + p.dataset.src] = p; });
     world.querySelectorAll('.port.in').forEach(p => { portEls['i:' + p.dataset.dst] = p; });
     bindControlInputs();
+    bindNoteInputs();
+    refreshNoteNode();
     refreshControls();
   }
 
@@ -1867,10 +1878,87 @@
     liveSend();
   }
 
+  // What the synth holds for each channel, kept by the same rules as spms1_type1.ino: a note on
+  // takes the pitch and opens the gate, a note off -- or a note on at velocity 0 -- closes the gate
+  // only for the pitch that last came on, and pitch bend is kept signed, -8192 to 8191.
+  const noteStates = Array.from({ length: 16 }, () => ({ pitch: 60, gate: 0, bend: 0 }));
+
+  function trackNote(ch, status, data1, data2) {
+    const n = noteStates[ch];
+    const cmd = status & 0xF0;
+    if (cmd === 0x90 && data2 > 0) {
+      n.pitch = data1;
+      n.gate = 1;
+    } else if (cmd === 0x80 || cmd === 0x90) {
+      if (data1 === n.pitch) n.gate = 0;
+    } else if (cmd === 0xE0) {
+      n.bend = ((data2 << 7) | data1) - 8192;
+    } else {
+      return;
+    }
+    if (ch === exportOptions().ch) refreshNoteNode();
+  }
+
+  // The values spms1_main.rb writes to SIGNAL_PITCH, SIGNAL_GATE and SIGNAL_BEND.
+  function refreshNoteNode() {
+    const n = noteStates[exportOptions().ch];
+    const signed = v => (v < 0 ? '-' : '+') + Math.abs(v).toFixed(3);
+    const shown = {
+      PITCH: [n.pitch, signed(n.pitch / 120 - 0.5)],
+      GATE: [n.gate, n.gate.toFixed(3)],
+      BEND: [n.bend, signed(Math.floor((n.bend + 1) / 2) / 8192)],
+    };
+    world.querySelectorAll('.note-row').forEach(row => {
+      const [value, norm] = shown[row.dataset.noteSig];
+      const input = row.querySelector('.nv');
+      if (document.activeElement !== input) input.value = value;
+      row.querySelector('.norm').textContent = norm;
+    });
+  }
+
+  // Editing a value sends what would make the synth hold it, so the node stays a view of the synth.
+  function bindNoteInputs() {
+    world.querySelectorAll('.note-row').forEach(row => {
+      const input = row.querySelector('.nv');
+      input.addEventListener('input', () => {
+        if (input.value === '') return;
+        const v = Math.max(+input.min, Math.min(+input.max, Math.round(Number(input.value) || 0)));
+        const n = noteStates[exportOptions().ch];
+        switch (row.dataset.noteSig) {
+        case 'PITCH': {
+          if (v === n.pitch) break;
+          // A note on is the only way to set the pitch. With the gate shut, a note off straight after
+          // shuts it again, before the synth is likely to read it.
+          const wasOpen = n.gate;
+          sendNote(0x90, v, 100);
+          if (!wasOpen) sendNote(0x80, v, 0);
+          break;
+        }
+        case 'GATE':
+          if (v === n.gate) break;
+          sendNote(v ? 0x90 : 0x80, n.pitch, v ? 100 : 0);
+          break;
+        case 'BEND':
+          sendBend(v);
+          break;
+        }
+      });
+      input.addEventListener('change', refreshNoteNode);
+    });
+  }
+
+  function sendBend(bend) {
+    const ch = exportOptions().ch;
+    const raw = bend + 8192;
+    if (midiOutput) midiOutput.send([0xE0 | ch, raw & 0x7F, raw >> 7]);
+    trackNote(ch, 0xE0, raw & 0x7F, raw >> 7);
+  }
+
   function onMIDIMessage(event) {
     const data = event.data;
     if (midiOutput) midiOutput.send(data);
     const cmd = data[0] & 0xF0;
+    if (cmd >= 0x80 && cmd <= 0xE0) trackNote(data[0] & 0x0F, data[0], data[1], data[2]);
     if ((data[0] & 0x0F) !== exportOptions().ch) return;
     if (cmd === 0x90 || cmd === 0x80) {
       const key = document.querySelector(`.key[data-note="${data[1]}"]`);
@@ -1937,7 +2025,7 @@
 
   document.getElementById('midi-in').addEventListener('change', () => { handleDeviceChange(); saveMIDISettings(); });
   document.getElementById('midi-out').addEventListener('change', () => { handleDeviceChange(); saveMIDISettings(); });
-  chSelect.addEventListener('change', () => { lastSent = null; updateExport(); saveMIDISettings(); liveSend(); });
+  chSelect.addEventListener('change', () => { lastSent = null; updateExport(); refreshNoteNode(); saveMIDISettings(); liveSend(); });
   document.getElementById('live').addEventListener('change', e => {
     if (e.target.checked) sendAll();
   });
@@ -2072,7 +2160,9 @@
   // ---- Soft keyboard -------------------------------------------------------------------------
 
   function sendNote(status, note, velocity) {
-    if (midiOutput) midiOutput.send([(status & 0xF0) | exportOptions().ch, note, velocity]);
+    const ch = exportOptions().ch;
+    if (midiOutput) midiOutput.send([(status & 0xF0) | ch, note, velocity]);
+    trackNote(ch, status, note, velocity);
   }
 
   function createKeyboard() {
