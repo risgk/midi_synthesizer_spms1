@@ -4,6 +4,7 @@ MIDI Synthesizer SPMS-1 (type-1) v0.0.3
 - Monophonic semi-modular MIDI Synthesizer for M5Stack AtomS3 Lite and Raspberry Pi Pico 2, made with Spinel (Ruby AOT Compiler)
 - Controlled by MIDI as a sound module
 - 48 kHz/24 bit audio output
+- Filter: ZDF/TPT State Variable Filter (with delayed soft clipping)
 - Developed by ISGK Instruments (Ryo Ishigaki)
 - <https://github.com/risgk/midi_synthesizer_spms1>
 - [日本語版 README](./README.ja.md)

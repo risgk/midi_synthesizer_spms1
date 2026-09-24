@@ -11,7 +11,7 @@ SPMS-1 (type-1)
 ---------------
 
 - M5Stack AtomS3 Lite と Raspberry Pi Pico 2 用のモノフォニック・セミモジュラー MIDI シンセサイザー
-- フィルタ: ZDF/TPT SVF (ゼロ遅延フィードバック、トポロジー保存変換によるステート・バリアブル・フィルタ)
+- フィルタ: ZDF/TPT ステート・バリアブル・フィルタ (遅延ソフトクリッピング付き)
 - 必要なハードウェア: M5Stack AtomS3 Lite と Atomic Audio-3.5 Base (推奨)、または Raspberry Pi Pico 2 と Pimoroni Pico Audio Pack (または代わりとなる I2S DAC ハードウェア)
 - [README](./spms1_type1/README.ja.md)
 

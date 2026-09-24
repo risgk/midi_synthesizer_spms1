@@ -1,6 +1,6 @@
 module Spms1
   # ZDF (zero-delay feedback) / TPT (topology-preserving transform) state variable filter, low
-  # pass, with soft clipping on both integrator states.
+  # pass, with delayed soft clipping on both integrator states.
   # This implementation is not oversampled; the nonlinear behavior is kept intentionally simple.
   # Reference: https://www.discodsp.net/VAFilterDesign_2.1.2.pdf (The Art of VA Filter Design)
   # Reference: https://jatinchowdhury18.medium.com/complex-nonlinearities-episode-4-nonlinear-biquad-filters-ae6b3f23cb0e
