@@ -4,8 +4,9 @@ module Spms1
   # This implementation is not oversampled; the nonlinear behavior is kept intentionally simple.
   # Reference: https://www.discodsp.net/VAFilterDesign_2.1.2.pdf (The Art of VA Filter Design)
   # Reference: https://jatinchowdhury18.medium.com/complex-nonlinearities-episode-4-nonlinear-biquad-filters-ae6b3f23cb0e
-  # Coefficients are recomputed every 4 samples rather than every sample: the computation needs two
-  # table lookups and a division, and the parameters feeding it are smoothed in the same place.
+  # Coefficients are recomputed every 4 samples rather than every sample, and ramped between: the
+  # computation needs two table lookups and a division, and the parameters feeding it are smoothed
+  # in the same place.
   class Filter
     # What leaves the filter, as opposed to what circulates inside it: exactly linear up to
     # OUTPUT_KNEE, then a quadratic shoulder that reaches OUTPUT_LIMIT with zero slope at
@@ -92,6 +93,12 @@ module Spms1
       @g = 0.0
       @one_over_a0 = 1.0
       @g_plus_k_over_a0 = 0.0
+      @last_g = 0.0
+      @last_one_over_a0 = 1.0
+      @last_g_plus_k_over_a0 = 0.0
+      @g_slope = 0.0
+      @one_over_a0_slope = 0.0
+      @g_plus_k_over_a0_slope = 0.0
       @s1 = 0.0
       @s2 = 0.0
 
@@ -133,6 +140,10 @@ module Spms1
         @s1 = flush_tiny(@s1)
         @s2 = flush_tiny(@s2)
       end
+
+      @g += @g_slope
+      @one_over_a0 += @one_over_a0_slope
+      @g_plus_k_over_a0 += @g_plus_k_over_a0_slope
 
       driven_input = audio_input * @current_gain
 
@@ -183,8 +194,13 @@ module Spms1
       k0 + fraction * (k1 - k0)
     end
 
-    # The three coefficients are replaced together, so the filter never runs on a g from one
-    # setting and a damping from another.
+    # The three coefficients ramp together from the last step's set to this one's over the next
+    # four samples, as the EG's output does, so a fast cutoff sweep is a line rather than a
+    # staircase at a quarter of the sample rate. Each is ramped on its own, so between the ends
+    # of a ramp they only approximately satisfy a0 = 1 + g * (g + k); the ends are exact, and the
+    # states stay bounded by soft_clip either way. Each ramp starts from the stored set rather
+    # than from where the additions got to, so rounding does not build up. 0.25 is
+    # 1 / CONTROL_RATE_DIVISOR, written out for the reason Mixer#process gives.
     def update_coefficients
       @current_cutoff += (@cutoff - @current_cutoff) * @smoothing_target_blend
       @current_resonance += (@resonance - @current_resonance) * @smoothing_target_blend
@@ -204,9 +220,17 @@ module Spms1
       g_plus_k = g + k
       one_over_a0 = 1.0 / (1.0 + g * g_plus_k)
 
-      @g = g
-      @one_over_a0 = one_over_a0
-      @g_plus_k_over_a0 = g_plus_k * one_over_a0
+      g_plus_k_over_a0 = g_plus_k * one_over_a0
+
+      @g = @last_g
+      @one_over_a0 = @last_one_over_a0
+      @g_plus_k_over_a0 = @last_g_plus_k_over_a0
+      @g_slope = (g - @last_g) * 0.25
+      @one_over_a0_slope = (one_over_a0 - @last_one_over_a0) * 0.25
+      @g_plus_k_over_a0_slope = (g_plus_k_over_a0 - @last_g_plus_k_over_a0) * 0.25
+      @last_g = g
+      @last_one_over_a0 = one_over_a0
+      @last_g_plus_k_over_a0 = g_plus_k_over_a0
     end
 
     # Bounds what the module hands to the bus. Separate from soft_clip, which bounds the states
