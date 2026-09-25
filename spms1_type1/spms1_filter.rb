@@ -67,6 +67,16 @@ module Spms1
       @sample_rate = sample_rate
       @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (48000.0 / @sample_rate) * (CONTROL_RATE_DIVISOR / 4.0)
 
+      # The states pass through soft_clip once a sample, so what it takes out of them adds up with
+      # the sample rate: left alone, the distortion grows as the rate rises and does not settle
+      # toward any continuous-time filter. Blending the clip by alpha = 48000 / f_s,
+      # s - alpha * (s - soft_clip(s)), keeps the sound at 48 kHz on other rates. alpha is folded
+      # into the two values soft_clip reads; at 48 kHz the leak is exactly zero and the scale
+      # exactly SOFT_CLIP_GAIN_SCALE, so the output there is the plain clip's, bit for bit.
+      soft_clip_alpha = 48000.0 / @sample_rate
+      @soft_clip_gain_scale = SOFT_CLIP_GAIN_SCALE * soft_clip_alpha
+      @soft_clip_leak = (1.0 - soft_clip_alpha) * 0.5
+
       # Integrator gain lookup, g = tan(pi * f_0 / f_s), one entry per semitone of MIDI note 15
       # (19 Hz) to 135 (20 kHz), the cutoff dial's range. It depends on the sample rate, so it is
       # built here rather than as a constant. The prewarp puts the cutoff exactly where the note
@@ -274,11 +284,15 @@ module Spms1
     # state within the ceiling is only ever scaled down and a state past it is held at two thirds
     # of it. Clamped the way clip_output clamps, without a comparison; this one runs twice per
     # sample, on the states inside the feedback path.
+    # Blended by alpha as initialize describes: with the state split into its clamped part c and
+    # the part past the ceiling d, s - alpha * (s - soft_clip(s)) is c - alpha * c^3 / (3 *
+    # ceiling^2) + (1 - alpha) * d. excess is twice d, which is why the leak carries a half.
     def soft_clip(sample)
       over    = sample - SOFT_CLIP_CEILING
       under   = SOFT_CLIP_FLOOR - sample
-      clamped = sample - ((over + over.abs) - (under + under.abs)) * 0.5
-      clamped * (1.0 - clamped * clamped * SOFT_CLIP_GAIN_SCALE)
+      excess  = (over + over.abs) - (under + under.abs)
+      clamped = sample - excess * 0.5
+      clamped * (1.0 - clamped * clamped * @soft_clip_gain_scale) + excess * @soft_clip_leak
     end
   end
 end
