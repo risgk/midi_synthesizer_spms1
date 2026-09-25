@@ -462,6 +462,9 @@ that off makes far weaker high harmonics than a hard edge would fold back down i
   as an envelope does; it takes a mixer and the constant -0.5 to swing both ways about CC 64
 - The NRPN CCs are stored as ordinary controls too, so a parameter may be mapped to CC 6 -- which
   then moves it every time a patch edit is sent
+- A feedback loop through the bus -- a mixer wired back to its own input at a level below full,
+  directly or through other modules -- decays toward zero and can settle on a denormal, which
+  x86 computes slowly, so the PC simulator there may slow down. Nothing in the loop flushes it
 
 ### Debug UART
 
