@@ -1,11 +1,12 @@
 module Spms1
   # ZDF (zero-delay feedback) / TPT (topology-preserving transform) state variable filter, low
-  # pass, with soft clipping on both integrator states.
+  # pass, with delayed soft clipping on both integrator states.
   # This implementation is not oversampled; the nonlinear behavior is kept intentionally simple.
   # Reference: https://www.discodsp.net/VAFilterDesign_2.1.2.pdf (The Art of VA Filter Design)
   # Reference: https://jatinchowdhury18.medium.com/complex-nonlinearities-episode-4-nonlinear-biquad-filters-ae6b3f23cb0e
-  # Coefficients are recomputed every 4 samples rather than every sample: the computation needs two
-  # table lookups and a division, and the parameters feeding it are smoothed in the same place.
+  # Coefficients are recomputed every 4 samples rather than every sample, and ramped between: the
+  # computation needs two table lookups and a division, and the parameters feeding it are smoothed
+  # in the same place.
   class Filter
     # What leaves the filter, as opposed to what circulates inside it: exactly linear up to
     # OUTPUT_KNEE, then a quadratic shoulder that reaches OUTPUT_LIMIT with zero slope at
@@ -92,6 +93,12 @@ module Spms1
       @g = 0.0
       @one_over_a0 = 1.0
       @g_plus_k_over_a0 = 0.0
+      @last_g = 0.0
+      @last_one_over_a0 = 1.0
+      @last_g_plus_k_over_a0 = 0.0
+      @g_slope = 0.0
+      @one_over_a0_slope = 0.0
+      @g_plus_k_over_a0_slope = 0.0
       @s1 = 0.0
       @s2 = 0.0
 
@@ -101,32 +108,28 @@ module Spms1
       update_coefficients
     end
 
-    # Every parameter is normalized to [-0.5, 0.5] and held in [0.0, 1.0], which is what the
-    # smoothing, the modulation sum and the table lookups below are written against.
-    # Cutoff range: MIDI note 15 (19 Hz) at -0.5, MIDI note 75 (622 Hz) at 0.0, MIDI note 135 (20 kHz) at 0.5.
+    # Every parameter is unipolar, [0.0, 1.0], which is what the smoothing, the modulation sum and
+    # the table lookups below are written against.
+    # Cutoff range: MIDI note 15 (19 Hz) at 0.0, MIDI note 75 (622 Hz) at 0.5, MIDI note 135 (20 kHz) at 1.0.
     def set_cutoff(cutoff)
-      clamped = (cutoff < -0.5) ? -0.5 : ((cutoff > 0.5) ? 0.5 : cutoff)
-      @cutoff = clamped + 0.5
+      @cutoff = (cutoff < 0.0) ? 0.0 : ((cutoff > 1.0) ? 1.0 : cutoff)
     end
 
-    # Modulation depth, none at -0.5.
+    # Modulation depth, none at 0.0.
     def set_modulation_amount(amount)
-      clamped = (amount < -0.5) ? -0.5 : ((amount > 0.5) ? 0.5 : amount)
-      @modulation_amount = clamped + 0.5
+      @modulation_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
     end
 
-    # How hard the audio input drives the filter, used as a plain multiplier: 0.0 at -0.5, 1.0 at
-    # 0.5. It sits on the input rather than the output because that is what decides how far the
-    # states run into soft_clip: past the middle of the dial the filter starts to saturate.
+    # How hard the audio input drives the filter, used as a plain multiplier. It sits on the input
+    # rather than the output because that is what decides how far the states run into soft_clip:
+    # past the middle of the dial the filter starts to saturate.
     def set_gain(gain)
-      clamped = (gain < -0.5) ? -0.5 : ((gain > 0.5) ? 0.5 : gain)
-      @gain = clamped + 0.5
+      @gain = (gain < 0.0) ? 0.0 : ((gain > 1.0) ? 1.0 : gain)
     end
 
-    # Q range: ~0.7 (-0.5), ~2.83 (0.0), ~11.3 (0.5).
+    # Q range: ~0.7 (0.0), ~2.83 (0.5), ~11.3 (1.0).
     def set_resonance(resonance)
-      clamped = (resonance < -0.5) ? -0.5 : ((resonance > 0.5) ? 0.5 : resonance)
-      @resonance = clamped + 0.5
+      @resonance = (resonance < 0.0) ? 0.0 : ((resonance > 1.0) ? 1.0 : resonance)
     end
 
     def process(audio_input = 0.0, modulation_input = 0.0)
@@ -134,7 +137,13 @@ module Spms1
 
       if @sample_counter == 0
         update_coefficients
+        @s1 = flush_tiny(@s1)
+        @s2 = flush_tiny(@s2)
       end
+
+      @g += @g_slope
+      @one_over_a0 += @one_over_a0_slope
+      @g_plus_k_over_a0 += @g_plus_k_over_a0_slope
 
       driven_input = audio_input * @current_gain
 
@@ -185,8 +194,13 @@ module Spms1
       k0 + fraction * (k1 - k0)
     end
 
-    # The three coefficients are replaced together, so the filter never runs on a g from one
-    # setting and a damping from another.
+    # The three coefficients ramp together from the last step's set to this one's over the next
+    # four samples, as the EG's output does, so a fast cutoff sweep is a line rather than a
+    # staircase at a quarter of the sample rate. Each is ramped on its own, so between the ends
+    # of a ramp they only approximately satisfy a0 = 1 + g * (g + k); the ends are exact, and the
+    # states stay bounded by soft_clip either way. Each ramp starts from the stored set rather
+    # than from where the additions got to, so rounding does not build up. 0.25 is
+    # 1 / CONTROL_RATE_DIVISOR, written out for the reason Mixer#process gives.
     def update_coefficients
       @current_cutoff += (@cutoff - @current_cutoff) * @smoothing_target_blend
       @current_resonance += (@resonance - @current_resonance) * @smoothing_target_blend
@@ -206,9 +220,17 @@ module Spms1
       g_plus_k = g + k
       one_over_a0 = 1.0 / (1.0 + g * g_plus_k)
 
-      @g = g
-      @one_over_a0 = one_over_a0
-      @g_plus_k_over_a0 = g_plus_k * one_over_a0
+      g_plus_k_over_a0 = g_plus_k * one_over_a0
+
+      @g = @last_g
+      @one_over_a0 = @last_one_over_a0
+      @g_plus_k_over_a0 = @last_g_plus_k_over_a0
+      @g_slope = (g - @last_g) * 0.25
+      @one_over_a0_slope = (one_over_a0 - @last_one_over_a0) * 0.25
+      @g_plus_k_over_a0_slope = (g_plus_k_over_a0 - @last_g_plus_k_over_a0) * 0.25
+      @last_g = g
+      @last_one_over_a0 = one_over_a0
+      @last_g_plus_k_over_a0 = g_plus_k_over_a0
     end
 
     # Bounds what the module hands to the bus. Separate from soft_clip, which bounds the states
@@ -231,6 +253,20 @@ module Spms1
       below   = OUTPUT_KNEE_FLOOR - clamped
       excess  = (above + above.abs) - (below + below.abs)
       clamped - (excess * excess.abs) * OUTPUT_KNEE_SCALE
+    end
+
+    # A dead zone of 1e-20 about zero, so that a state decaying on a silent input lands on exactly
+    # zero instead of sinking into denormals, which x86 computes slowly. It shifts every other
+    # value toward zero by 1e-20, which rounds away at any audible level. Built from a + |a| as
+    # clip_output is, rather than as (s + c) - c: -ffast-math may fold that one to s, while this
+    # is a dead zone in exact arithmetic, so any rewrite it allows still is one. What comes out is
+    # zero or at least 8e-28, the spacing of floats near 1e-20: never a denormal. Rewritten under
+    # -ffast-math it rounds at that spacing and may leave a remnant of that size instead of zero,
+    # still far above the denormals. A literal, for the reason given above.
+    def flush_tiny(state)
+      above = state - 1e-20
+      below = (0.0 - state) - 1e-20
+      ((above + above.abs) - (below + below.abs)) * 0.5
     end
 
     # Cubic soft clip written as a gain: the clamped value times 1 - c^2 / (3 * ceiling^2). Same

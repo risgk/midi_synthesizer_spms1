@@ -54,21 +54,20 @@ module Spms1
       @sample_counter = 0
     end
 
-    # Waveform morph is normalized to [-0.5, 0.5] and held in [0.0, 1.0].
-    # -0.5 = sawtooth, 0.0 = 50% morph, 0.5 = square.
+    # Waveform morph is unipolar, [0.0, 1.0].
+    # 0.0 = sawtooth, 0.5 = 50% morph, 1.0 = square.
     def set_waveform(waveform)
-      clamped = (waveform < -0.5) ? -0.5 : ((waveform > 0.5) ? 0.5 : waveform)
-      @waveform = clamped + 0.5
+      @waveform = (waveform < 0.0) ? 0.0 : ((waveform > 1.0) ? 1.0 : waveform)
     end
 
-    # Modulation depth is normalized to [-0.5, 0.5], none at -0.5, and scaled here rather than per
+    # Modulation depth is unipolar, [0.0, 1.0], none at 0.0, and scaled here rather than per
     # sample so the smoothed value is already in pitch units.
     def set_modulation_amount(amount)
-      clamped_amount = (amount < -0.5) ? -0.5 : ((amount > 0.5) ? 0.5 : amount)
-      @modulation_amount = (clamped_amount + 0.5) * MODULATION_RANGE
+      clamped_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
+      @modulation_amount = clamped_amount * MODULATION_RANGE
     end
 
-    # Both tune controls are normalized to [-0.5, 0.5] with 0.0 meaning no offset, so a controller's
+    # Both tune controls are bipolar, [-0.5, 0.5], with 0.0 meaning no offset, so a controller's
     # centre detent lands there. Linear about that centre, which is what puts every step on a whole
     # semitone or a whole cent; a curve here would make exact intervals unreachable.
     def set_coarse_tune(coarse_tune)

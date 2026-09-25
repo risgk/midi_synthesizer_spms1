@@ -26,10 +26,10 @@ module Spms1
     end
     EXP_TABLE[121] = EXP_TABLE[120]
 
-    # Time scaling constants (value at -0.5 / (EXP_TABLE min * ln(2))).
-    # Attack range: 2.5 ms at -0.5, 80 ms at 0.0, 2.56 s at 0.5.
+    # Time scaling constants (value at 0.0 / (EXP_TABLE min * ln(2))).
+    # Attack range: 2.5 ms at 0.0, 80 ms at 0.5, 2.56 s at 1.0.
     ATTACK_BASE = 0.0025 / ((1.0 / 32.0) * Math::log(2))
-    # Decay range: 10 ms at -0.5, 320 ms at 0.0, 10.24 s at 0.5 -- the attack times four throughout.
+    # Decay range: 10 ms at 0.0, 320 ms at 0.5, 10.24 s at 1.0 -- the attack times four throughout.
     # Decay is measured to 1/1024 = 2^-10, which keeps the attack's base of 2 rather than landing
     # on a round -60 dB. 1/1024 is -60.2 dB; the shared base is worth more than closing the 0.2.
     DECAY_BASE  = 0.010 / ((1.0 / 32.0) * 10 * Math::log(2))
@@ -44,6 +44,9 @@ module Spms1
       @effective_rate = sample_rate * (1.0 / CONTROL_RATE_DIVISOR)
       @state = STATE_IDLE
       @current_level = 0.0
+      @last_level = 0.0
+      @output = 0.0
+      @slope = 0.0
 
       @attack = 0.0
       @decay = 0.0
@@ -57,24 +60,21 @@ module Spms1
       update_coefficients_full
     end
 
-    # Every parameter is normalized to [-0.5, 0.5] and held in [0.0, 1.0], which is what the table
-    # lookup and the level comparisons below are written against.
+    # Every parameter is unipolar, [0.0, 1.0], which is what the table lookup and the level
+    # comparisons below are written against.
     # Attack time: see ATTACK_BASE for scaling details.
     def set_attack(attack)
-      clamped = (attack < -0.5) ? -0.5 : ((attack > 0.5) ? 0.5 : attack)
-      @attack = clamped + 0.5
+      @attack = (attack < 0.0) ? 0.0 : ((attack > 1.0) ? 1.0 : attack)
     end
 
     # Decay time: see DECAY_BASE for scaling details.
     def set_decay(decay)
-      clamped = (decay < -0.5) ? -0.5 : ((decay > 0.5) ? 0.5 : decay)
-      @decay = clamped + 0.5
+      @decay = (decay < 0.0) ? 0.0 : ((decay > 1.0) ? 1.0 : decay)
     end
 
-    # Sustain level: silent at -0.5, full at 0.5.
+    # Sustain level: silent at 0.0, full at 1.0.
     def set_sustain(sustain)
-      clamped = (sustain < -0.5) ? -0.5 : ((sustain > 0.5) ? 0.5 : sustain)
-      @sustain = clamped + 0.5
+      @sustain = (sustain < 0.0) ? 0.0 : ((sustain > 1.0) ? 1.0 : sustain)
     end
 
     def process(gate_input = 0.0)
@@ -98,17 +98,30 @@ module Spms1
         @current_level += (target - @current_level) * coef_masked
 
         is_attack_done = (@state == STATE_ATTACK) && (@current_level >= 1.0 || !@was_gate_on)
-        is_idle_reached = (@state == STATE_SUSTAIN) && !@was_gate_on && (@current_level < 1e-5)
+        # The floor holds with the gate on too: decaying toward a sustain of 0.0, the level would
+        # otherwise sink into denormals and stick at the smallest one, which x86 computes slowly.
+        is_floor_reached = (@state == STATE_SUSTAIN) && (@current_level < 1e-5)
+        is_idle_reached = is_floor_reached && !@was_gate_on
         is_forced_attack = (@state == STATE_IDLE) && @was_gate_on
 
         @state = is_attack_done ? STATE_SUSTAIN : (is_idle_reached ? STATE_IDLE : (is_forced_attack ? STATE_ATTACK : @state))
 
         @current_level = 1.0 if is_attack_done
-        @current_level = 0.0 if is_idle_reached || (@state == STATE_IDLE && !@was_gate_on)
+        @current_level = 0.0 if is_floor_reached || (@state == STATE_IDLE && !@was_gate_on)
+
+        # The output ramps from the last step's level to this one's over the next four samples,
+        # so what reaches the amp is a line rather than a staircase at a quarter of the sample
+        # rate. Starting each ramp from the stored level rather than from where the additions
+        # got to keeps rounding from building up, and lands a ramp to 0.0 on exactly zero.
+        # 0.25 is 1 / CONTROL_RATE_DIVISOR, written out for the reason Mixer#process gives.
+        @output = @last_level
+        @slope = (@current_level - @last_level) * 0.25
+        @last_level = @current_level
       end
 
       @sample_counter = (@sample_counter + 1) & CONTROL_RATE_MASK
-      @current_level
+      @output += @slope
+      @output
     end
 
     private

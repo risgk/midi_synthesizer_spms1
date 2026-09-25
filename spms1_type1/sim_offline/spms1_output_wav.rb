@@ -2,12 +2,12 @@
 # the way spms1_main.rb wires them, on the CC values it ships with, save for the two marked below.
 # What it does not reproduce is the layer above, the signals bus and the run order and the NRPN
 # table, so it will not catch a routing mistake, only a change in what the modules do themselves.
-require_relative 'spms1_osc'
-require_relative 'spms1_filter'
-require_relative 'spms1_amp'
-require_relative 'spms1_env_gen'
-require_relative 'spms1_lfo'
-require_relative 'spms1_mixer'
+require_relative '../spms1_osc'
+require_relative '../spms1_filter'
+require_relative '../spms1_amp'
+require_relative '../spms1_env_gen'
+require_relative '../spms1_lfo'
+require_relative '../spms1_mixer'
 
 SAMPLE_RATE = 48000.0
 DURATION_SEC = 15.0
@@ -15,47 +15,52 @@ NUM_SAMPLES = (SAMPLE_RATE * DURATION_SEC).to_i
 FILENAME = "spms1_output.wav"
 NOTE = 60
 
-# The same converter spms1_main.rb uses, so a number here means the CC value it looks like.
-def cc_to_ratio(value)
+# The same converters spms1_main.rb uses, so a number here means the CC value it looks like.
+def cc_to_unipolar(value)
+  scaled = (value.to_f - 4.0) * (1.0 / 120.0)
+  (scaled < 0.0) ? 0.0 : ((scaled > 1.0) ? 1.0 : scaled)
+end
+
+def cc_to_bipolar(value)
   scaled = (value.to_f - 64.0) * (1.0 / 120.0)
   (scaled < -0.5) ? -0.5 : ((scaled > 0.5) ? 0.5 : scaled)
 end
 
 # The CC values the synth powers up with.
 oscillator = Spms1::Osc.new(SAMPLE_RATE)
-oscillator.set_waveform(cc_to_ratio(4))
-oscillator.set_modulation_amount(cc_to_ratio(4))
-oscillator.set_coarse_tune(cc_to_ratio(64))
-oscillator.set_fine_tune(cc_to_ratio(64))
+oscillator.set_waveform(cc_to_unipolar(4))
+oscillator.set_modulation_amount(cc_to_unipolar(4))
+oscillator.set_coarse_tune(cc_to_bipolar(64))
+oscillator.set_fine_tune(cc_to_bipolar(64))
 
 filter = Spms1::Filter.new(SAMPLE_RATE)
 # Cutoff sits a quarter of the way up rather than at the default's top, so that the envelope
 # opening it through Mod Amt is what the file is of. Wide open there is nothing left to open.
-filter.set_cutoff(cc_to_ratio(34))
-filter.set_resonance(cc_to_ratio(64))
-filter.set_modulation_amount(cc_to_ratio(64))
-filter.set_gain(cc_to_ratio(64))
+filter.set_cutoff(cc_to_unipolar(34))
+filter.set_resonance(cc_to_unipolar(64))
+filter.set_modulation_amount(cc_to_unipolar(64))
+filter.set_gain(cc_to_unipolar(64))
 
 amp = Spms1::Amp.new(SAMPLE_RATE)
-amp.set_gain(cc_to_ratio(64))
+amp.set_gain(cc_to_unipolar(64))
 
 env_gen = Spms1::EnvGen.new(SAMPLE_RATE)
-env_gen.set_attack(cc_to_ratio(4))
+env_gen.set_attack(cc_to_unipolar(4))
 # Decay is held at the top of its dial so that the note carries as far into the render as it can:
 # the gate stays down throughout and Sustain is at its floor, so the note is only ever decaying.
-env_gen.set_decay(cc_to_ratio(124))
-env_gen.set_sustain(cc_to_ratio(4))
+env_gen.set_decay(cc_to_unipolar(124))
+env_gen.set_sustain(cc_to_unipolar(4))
 
 lfo = Spms1::LFO.new(SAMPLE_RATE)
-lfo.set_rate(cc_to_ratio(64))
+lfo.set_rate(cc_to_unipolar(64))
 
-# Mixer 1 stands between the LFO and the oscillator, at the level of 0.2 its control slots are
-# seeded with.
+# Mixer 1 stands between the LFO and the oscillator, both levels on the constant 0.2 the default
+# patch routes to them.
 mixer_1 = Spms1::Mixer.new(SAMPLE_RATE)
-mixer_1.set_level_1(cc_to_ratio(28))
-mixer_1.set_invert_1(cc_to_ratio(4))
-mixer_1.set_level_2(cc_to_ratio(28))
-mixer_1.set_invert_2(cc_to_ratio(4))
+mixer_1.set_level_1(0.2)
+mixer_1.set_invert_1(cc_to_unipolar(4))
+mixer_1.set_level_2(0.2)
+mixer_1.set_invert_2(cc_to_unipolar(4))
 
 puts "Generating stereo waveform data..."
 
