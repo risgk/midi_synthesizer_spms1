@@ -54,12 +54,12 @@ env_gen.set_sustain(cc_to_unipolar(4))
 lfo = Spms1::LFO.new(SAMPLE_RATE)
 lfo.set_rate(cc_to_unipolar(64))
 
-# Mixer 1 stands between the LFO and the oscillator, at the level of 0.2 its control slots are
-# seeded with.
+# Mixer 1 stands between the LFO and the oscillator, both levels on the constant 0.2 the default
+# patch routes to them.
 mixer_1 = Spms1::Mixer.new(SAMPLE_RATE)
-mixer_1.set_level_1(cc_to_unipolar(28))
+mixer_1.set_level_1(0.2)
 mixer_1.set_invert_1(cc_to_unipolar(4))
-mixer_1.set_level_2(cc_to_unipolar(28))
+mixer_1.set_level_2(0.2)
 mixer_1.set_invert_2(cc_to_unipolar(4))
 
 puts "Generating stereo waveform data..."
