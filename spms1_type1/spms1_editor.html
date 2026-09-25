@@ -570,6 +570,9 @@
     .row input.nv {
       width: 58px;
     }
+    .norm.held, .slider-norm.held {
+      font-style: italic;
+    }
     .row.pending input.nv, .row.pending .norm {
       font-style: italic;
       color: var(--wire-feedback);
@@ -1334,6 +1337,7 @@
   }
 
   function refreshControls() {
+    updateSlotHeld();
     refreshSliders();
     world.querySelectorAll('.row.ctrl').forEach(row => {
       const c = CONTROL[row.dataset.ctrl];
@@ -1348,10 +1352,30 @@
       valIn.disabled = !cc;
       if (document.activeElement !== valIn) valIn.value = cc ? ccValue(cc) : '';
       valIn.placeholder = cc ? '' : '—';
-      row.querySelector('.norm').textContent = cc ? normalized(c, ccValue(cc)) : '—';
+      const own = signalNorm(c.key);
+      const norm = row.querySelector('.norm');
+      norm.textContent = own ? own.text : '—';
+      norm.classList.toggle('held', !!own && own.held);
+      norm.title = own && own.held
+        ? 'No CC: the value the slot last took, assuming the synth has followed the editor'
+        : 'The value the synth sees in the slot';
       valIn.title = cc
         ? `Value of CC ${cc}, shared by every slot on it`
         : 'No CC: the slot keeps what it holds (mixers are seeded at power-on)';
+    });
+    refreshSourceValues();
+  }
+
+  // The value each routed input or parameter reads, where the editor can know it.
+  function refreshSourceValues() {
+    world.querySelectorAll('[data-src-of]').forEach(span => {
+      const dst = span.dataset.srcOf;
+      span.innerHTML = isConnected(dst) ? '← ' + sourceHTML(currentSource(dst)) : '';
+    });
+    world.querySelectorAll('.row.ctrl.routed').forEach(row => {
+      const src = state.params[row.dataset.ctrl];
+      const v = signalNorm(src);
+      row.title = `Reads ${sigLabel(src)}${v ? ` = ${v.text}` : ''}. CC and value still set this slot, which the output port carries.`;
     });
   }
 
@@ -1427,16 +1451,11 @@
       svg.appendChild(hit);
       from.classList.add('connected');
       to.classList.add('connected');
-      if (c.kind === 'param') {
-        const row = to.closest('.row');
-        row.classList.add('routed');
-        row.title = `Reads ${sigLabel(c.src)}. CC and value still set this slot, which the output port carries.`;
-      }
-      const srcText = world.querySelector(`[data-src-of="${c.dst}"]`);
-      if (srcText) srcText.textContent = '← ' + sigLabel(c.src);
+      if (c.kind === 'param') to.closest('.row').classList.add('routed');
     }
     const temp = svg.querySelector('.temp');
     if (temp) svg.appendChild(temp);
+    refreshSourceValues();
   }
 
   function renderBadges() {
@@ -1920,12 +1939,11 @@
   // The values spms1_main.rb writes to SIGNAL_PITCH, SIGNAL_GATE and SIGNAL_BEND.
   function refreshNoteNode() {
     const n = noteStates[exportOptions().ch];
-    const signed = v => (v < 0 ? '-' : '+') + Math.abs(v).toFixed(3);
-    const pitch = n.pending ?? n.pitch;
+    const norms = noteNorms(n, true);
     const shown = {
-      PITCH: [pitch, signed(pitch / 120 - 0.5)],
-      GATE: [n.gate, n.gate.toFixed(3)],
-      BEND: [n.bend, signed(Math.floor((n.bend + 1) / 2) / 8192)],
+      PITCH: [n.pending ?? n.pitch, norms.PITCH],
+      GATE: [n.gate, norms.GATE],
+      BEND: [n.bend, norms.BEND],
     };
     world.querySelectorAll('.note-row').forEach(row => {
       const [value, norm] = shown[row.dataset.noteSig];
@@ -1938,6 +1956,19 @@
         row.title = pending ? `Sent with the next Gate on. The synth still holds ${n.pitch}.` : '';
       }
     });
+    refreshSourceValues();
+    refreshSliders();
+  }
+
+  // withPending shows a pitch still waiting for its gate, which the synth does not have yet.
+  function noteNorms(n, withPending) {
+    const signed = v => (v < 0 ? '-' : '+') + Math.abs(v).toFixed(3);
+    const pitch = withPending ? (n.pending ?? n.pitch) : n.pitch;
+    return {
+      PITCH: signed(pitch / 120 - 0.5),
+      GATE: n.gate.toFixed(3),
+      BEND: signed(Math.floor((n.bend + 1) / 2) / 8192),
+    };
   }
 
   // Editing a value sends what would make the synth hold it, so the node stays a view of the synth.
@@ -2159,6 +2190,51 @@
   }
 
   // What the synth writes to the slot: cc_to_unipolar and cc_to_bipolar in spms1_main.rb.
+  // A copy of each control slot on the synth's signals bus, as the CC value that put it there:
+  // rewritten from the CC while one is assigned and held while none is, as spms1_main.rb does.
+  // It starts from what the synth holds at power-on -- the mixer seeds and the default patch's
+  // CC values -- so it is right only while the synth has followed the editor. null is a slot
+  // written from a reserved CC, whose value the editor does not track.
+  const slotHeld = {};
+  CONTROL_ITEMS.forEach(c => {
+    if (c.module && c.module.startsWith('MIXER_')) {
+      slotHeld[c.key] = c.label.startsWith('Level') ? (c.module === 'MIXER_1' ? 28 : 124) : 4;
+    } else {
+      slotHeld[c.key] = c.defaultValue;
+    }
+  });
+
+  function updateSlotHeld() {
+    CONTROL_ITEMS.forEach(c => {
+      const cc = state.cc[c.key];
+      if (cc) slotHeld[c.key] = RESERVED_CCS.has(cc) ? null : ccValue(cc);
+    });
+  }
+
+  const CONSTANT_NORMS = { NONE: '0.000', ONE: '+1.000', HALF: '+0.500', MINUS_HALF: '-0.500', MINUS_ONE: '-1.000' };
+
+  // What a signal reads as normalized, and whether that is a held slot rather than a live CC.
+  // null where the editor cannot know it: a module output.
+  function signalNorm(sig) {
+    const c = CONTROL[sig];
+    if (c) {
+      const v = slotHeld[c.key];
+      return v == null ? null : { text: normalized(c, v), held: !state.cc[c.key] };
+    }
+    if (sig in CONSTANT_NORMS) return { text: CONSTANT_NORMS[sig], held: false };
+    const notes = noteNorms(noteStates[exportOptions().ch], false);
+    if (sig in notes) return { text: notes[sig], held: false };
+    return null;
+  }
+
+  // A constant's label is already its value, so only slots and note signals take one.
+  function sourceHTML(sig) {
+    const label = escapeHTML(sigLabel(sig));
+    const v = signalNorm(sig);
+    if (!v || sig in CONSTANT_NORMS) return label;
+    return `${label} ${v.held ? `<i>(${v.text})</i>` : `(${v.text})`}`;
+  }
+
   function normalized(c, value) {
     if (c.bipolar) {
       const v = Math.max(-0.5, Math.min(0.5, (value - 64) / 120));
@@ -2220,15 +2296,21 @@
       const src = state.params[c.key];
       const routed = src !== undefined && src !== c.key;
       zone.classList.toggle('routed', routed);
-      zone.querySelector('.cc-num').textContent =
+      zone.querySelector('.cc-num').innerHTML =
         (!cc ? '(no CC)' : RESERVED_CCS.has(cc) ? `(CC ${cc}, reserved)` : `(CC ${cc})`) +
-        (routed ? ` ← ${sigLabel(src)}` : '');
+        (routed ? ` ← ${sourceHTML(src)}` : '');
       zone.title = routed ? `${c.full} reads ${sigLabel(src)}. This slider sets only its own slot, which other wires may read.` : '';
       slider.disabled = !usable;
       const value = usable ? ccValue(cc) : 64;
       if (document.activeElement !== slider) slider.value = value;
       zone.querySelector('.slider-value').textContent = usable ? String(value) : '—';
-      zone.querySelector('.slider-norm').textContent = usable ? normalized(c, value) : '';
+      const own = signalNorm(c.key);
+      const norm = zone.querySelector('.slider-norm');
+      norm.textContent = own ? own.text : '';
+      norm.classList.toggle('held', !!own && own.held);
+      norm.title = own && own.held
+        ? 'No CC: the value the slot last took, assuming the synth has followed the editor'
+        : 'The value the synth sees in the slot';
     });
   }
 
