@@ -95,13 +95,16 @@ module Spms1
         @current_level += (target - @current_level) * coef_masked
 
         is_attack_done = (@state == STATE_ATTACK) && (@current_level >= 1.0 || !@was_gate_on)
-        is_idle_reached = (@state == STATE_SUSTAIN) && !@was_gate_on && (@current_level < 1e-5)
+        # The floor holds with the gate on too: decaying toward a sustain of 0.0, the level would
+        # otherwise sink into denormals and stick at the smallest one, which x86 computes slowly.
+        is_floor_reached = (@state == STATE_SUSTAIN) && (@current_level < 1e-5)
+        is_idle_reached = is_floor_reached && !@was_gate_on
         is_forced_attack = (@state == STATE_IDLE) && @was_gate_on
 
         @state = is_attack_done ? STATE_SUSTAIN : (is_idle_reached ? STATE_IDLE : (is_forced_attack ? STATE_ATTACK : @state))
 
         @current_level = 1.0 if is_attack_done
-        @current_level = 0.0 if is_idle_reached || (@state == STATE_IDLE && !@was_gate_on)
+        @current_level = 0.0 if is_floor_reached || (@state == STATE_IDLE && !@was_gate_on)
       end
 
       @sample_counter = (@sample_counter + 1) & CONTROL_RATE_MASK
