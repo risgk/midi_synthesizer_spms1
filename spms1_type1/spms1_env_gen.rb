@@ -44,6 +44,9 @@ module Spms1
       @effective_rate = sample_rate * (1.0 / CONTROL_RATE_DIVISOR)
       @state = STATE_IDLE
       @current_level = 0.0
+      @last_level = 0.0
+      @output = 0.0
+      @slope = 0.0
 
       @attack = 0.0
       @decay = 0.0
@@ -105,10 +108,20 @@ module Spms1
 
         @current_level = 1.0 if is_attack_done
         @current_level = 0.0 if is_floor_reached || (@state == STATE_IDLE && !@was_gate_on)
+
+        # The output ramps from the last step's level to this one's over the next four samples,
+        # so what reaches the amp is a line rather than a staircase at a quarter of the sample
+        # rate. Starting each ramp from the stored level rather than from where the additions
+        # got to keeps rounding from building up, and lands a ramp to 0.0 on exactly zero.
+        # 0.25 is 1 / CONTROL_RATE_DIVISOR, written out for the reason Mixer#process gives.
+        @output = @last_level
+        @slope = (@current_level - @last_level) * 0.25
+        @last_level = @current_level
       end
 
       @sample_counter = (@sample_counter + 1) & CONTROL_RATE_MASK
-      @current_level
+      @output += @slope
+      @output
     end
 
     private
