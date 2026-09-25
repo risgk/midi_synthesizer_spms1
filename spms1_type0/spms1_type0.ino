@@ -34,7 +34,7 @@
 #include <MIDI.h>
 struct MySettings : public midi::DefaultSettings {
   static const long BaudRate = SPMS1_UART_MIDI_SPEED;
-  static const bool HandleNullVelocityNoteOnAsNoteOff = true;
+  static const bool HandleNullVelocityNoteOnAsNoteOff = false;
 };
 
 #if defined(SPMS1_USE_USB_MIDI)
@@ -366,8 +366,14 @@ void loop() {
   delay(1);
 }
 
+// A note on at velocity 0 is a note off, at the default velocity of 64.
 void handleNoteOn(byte channel, byte pitch, byte velocity)
 {
+  if (velocity == 0) {
+    handleNoteOff(channel, pitch, 64);
+    return;
+  }
+
   set_midi_note_on_pitch(channel - 1, pitch);
   set_midi_note_on_state(channel - 1, 1);
 }
