@@ -441,7 +441,8 @@
     .node {
       position: absolute;
       width: 300px;
-      background: #fff;
+      /* Wires run behind the nodes, so a see-through body keeps the ones crossing a node in view. */
+      background: rgba(255, 255, 255, 0.72);
       border: 1px solid var(--border-color);
       border-radius: 8px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
