@@ -414,10 +414,15 @@
       stroke: var(--wire-signal);
       stroke-width: 2.5;
     }
+    /* Set back from the signal wires, which carry the patch's audio and modulation. */
     .wire.param {
       stroke: var(--wire-param);
-      stroke-width: 2;
-      stroke-dasharray: 6 4;
+      stroke-width: 1.5;
+      stroke-dasharray: 5 4;
+      opacity: 0.45;
+    }
+    .wire.param.selected {
+      opacity: 1;
     }
     .wire.feedback {
       stroke: var(--wire-feedback);
@@ -1448,7 +1453,9 @@
     world.querySelectorAll('[data-src-of]').forEach(s => { s.textContent = ''; });
     const conns = connections();
     if (selectedWire && !conns.some(c => c.dst === selectedWire)) selectedWire = null;
-    for (const c of conns) {
+    // Parameter wires first, so the signal wires are drawn over them.
+    const ordered = conns.filter(c => c.kind.startsWith('param')).concat(conns.filter(c => !c.kind.startsWith('param')));
+    for (const c of ordered) {
       const from = portEls['o:' + c.src];
       const to = portEls['i:' + c.dst];
       if (!from || !to) continue;
