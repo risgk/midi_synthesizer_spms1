@@ -2021,11 +2021,11 @@ int main(int argc,char**argv){
   cst_OUTPUT_KNEE_FLOOR = (-cst_OUTPUT_KNEE);
 #line 26 "spms1_filter.rb"
   cst_OUTPUT_KNEE_SCALE = (1.0 / ((16.0 * ((cst_OUTPUT_LIMIT - cst_OUTPUT_KNEE)))));
-#line 32 "spms1_filter.rb"
+#line 31 "spms1_filter.rb"
   cst_SOFT_CLIP_CEILING = 4.0;
-#line 37 "spms1_filter.rb"
+#line 36 "spms1_filter.rb"
   cst_SOFT_CLIP_FLOOR = (-cst_SOFT_CLIP_CEILING);
-#line 38 "spms1_filter.rb"
+#line 37 "spms1_filter.rb"
   cst_SOFT_CLIP_GAIN_SCALE = (1.0 / (((3.0 * cst_SOFT_CLIP_CEILING) * cst_SOFT_CLIP_CEILING)));
 #line 40 "spms1_filter.rb"
   cst_LOW_PASS_STATE_CEILING = 16.0;

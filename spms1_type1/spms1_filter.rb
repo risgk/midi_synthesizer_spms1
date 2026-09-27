@@ -25,9 +25,8 @@ module Spms1
     # excess is doubled.
     OUTPUT_KNEE_SCALE  = 1.0 / (16.0 * (OUTPUT_LIMIT - OUTPUT_KNEE))
 
-    # A power of two, 4, to match PRA32-U2, whose fixed-point clamp is a single saturate
-    # instruction. The cubic is self-similar: scaling the ceiling scales the flat value, two thirds
-    # of it, with it. What this value sets in play is how hard the curve bends below the rail;
+    # The cubic is self-similar: scaling the ceiling scales the flat value, two thirds of it, with
+    # it. What this value sets in play is how hard the curve bends below the rail;
     # applied every sample inside the loop, that bend is what holds the resonant peak down.
     SOFT_CLIP_CEILING = 4.0
     # Everything soft_clip needs derived from the ceiling once, at startup. The vendored Spinel
@@ -36,7 +35,8 @@ module Spms1
     # method that runs every sample.
     SOFT_CLIP_FLOOR      = -SOFT_CLIP_CEILING
     SOFT_CLIP_GAIN_SCALE = 1.0 / (3.0 * SOFT_CLIP_CEILING * SOFT_CLIP_CEILING)
-    # The guard on the low pass state that process describes, a power of two as PRA32-U2's is.
+    # The guard on the low pass state that process describes, well above anything ordinary use
+    # reaches.
     LOW_PASS_STATE_CEILING = 16.0
     LOW_PASS_STATE_FLOOR   = -LOW_PASS_STATE_CEILING
     # Blend at the reference rate on the line below. The two move together: their product is what
@@ -56,12 +56,12 @@ module Spms1
     # linked, and the buffer time did not move (853/857us against 854/856).
     CONTROL_RATE_MASK = CONTROL_RATE_DIVISOR - 1
 
-    # Damping lookup, k = 1 / Q, one entry per step of the resonance dial. Written against the
-    # dial position r = i / 120 so that PRA32-U2, whose dial has 128 steps, follows the same
-    # curve: Q = 0.707 * 2^(4r) up to Q 8 at r = 0.875; then Q doubles every 1/64 of r, reaching
-    # Q 256 at r = 122/128; above that k is zero, and the self-oscillation that update_coefficients
-    # adds takes over. The last entry repeats the one before it so that interpolating at the top
-    # of the dial reads a real entry rather than past the end.
+    # Damping lookup, k = 1 / Q, one entry per step of the resonance dial, written against the
+    # dial position r = i / 120: Q = 0.707 * 2^(4r) up to Q 8 at r = 0.875. Past that the curve is
+    # laid out on v = 128r, where Q doubles every two steps of v, reaching Q 256 at v = 122; above
+    # that k is zero, and the self-oscillation that update_coefficients adds takes over. The last
+    # entry repeats the one before it so that interpolating at the top of the dial reads a real
+    # entry rather than past the end.
     K_TABLE = Array.new(122, 0.0)
     BASE_Q = 0.7071067811865476
     for i in 0...121
