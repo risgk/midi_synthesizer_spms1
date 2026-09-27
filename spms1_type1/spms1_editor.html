@@ -1637,6 +1637,21 @@
     moveWireDrag(e);
   }
 
+  // An input reading 0.0 is an input with no wire, so a wire from 0.0 to one would not stay drawn.
+  // A parameter reading 0.0 differs from one reading its own slot, so that wire is kept.
+  function accepts(src, dst) {
+    return !(src === 'NONE' && dst.startsWith('IN:'));
+  }
+
+  // The port under the pointer that would complete the wire being dragged, if any.
+  function dropTarget(e) {
+    const target = portUnder(e);
+    if (!target || !target.classList.contains(drag.src ? 'in' : 'out')) return null;
+    const src = drag.src || target.dataset.src;
+    const dst = drag.dst || target.dataset.dst;
+    return accepts(src, dst) ? target : null;
+  }
+
   function portUnder(e) {
     const el = document.elementFromPoint(e.clientX, e.clientY);
     return el && el.closest('.port');
@@ -1647,17 +1662,17 @@
     const d = drag.src ? curve(portPos(portEls['o:' + drag.src]), p) : curve(p, portPos(portEls['i:' + drag.dst]));
     drag.temp.setAttribute('d', d);
     world.querySelectorAll('.port.target').forEach(el => el.classList.remove('target'));
-    const target = portUnder(e);
-    if (target && target.classList.contains(drag.src ? 'in' : 'out')) target.classList.add('target');
+    const target = dropTarget(e);
+    if (target) target.classList.add('target');
   }
 
   function endWireDrag(e) {
     drag.temp.remove();
     world.querySelectorAll('.port.target').forEach(el => el.classList.remove('target'));
-    const target = portUnder(e);
+    const target = dropTarget(e);
     let src = drag.src, dst = drag.dst;
-    if (target && src && target.classList.contains('in')) dst = target.dataset.dst;
-    else if (target && dst && target.classList.contains('out')) src = target.dataset.src;
+    if (target && src) dst = target.dataset.dst;
+    else if (target && dst) src = target.dataset.src;
     if (src && dst) {
       if (!drag.pushed) pushHistory();
       connect(src, dst);
