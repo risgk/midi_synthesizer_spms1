@@ -387,7 +387,8 @@ that path a semitone of vibrato sits at CC 14 and an octave at the top of the di
 
 Filter 1 Gain sets how hard the audio input drives the filter, which is also what decides how far
 the filter runs into its own saturation. Its default of CC 64 is the level the oscillator used to
-be scaled to on its own; above that the filter starts to compress the loud part of a note.
+be scaled to on its own. The saturation sits on the resonance rather than the pass band: a low
+cutoff passes a loud note nearly clean, while turning the gain up rounds off the resonant peak.
 
 A mixer takes each input at its own level and its own polarity, then adds them. Level runs from
 silent at 0.0 (CC 4) to full at 1.0 (CC 124), and Invert from unchanged at 0.0, through silence

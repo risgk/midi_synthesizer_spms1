@@ -1,6 +1,6 @@
 module Spms1
   # ZDF (zero-delay feedback) / TPT (topology-preserving transform) state variable filter, low
-  # pass, with delayed soft clipping on both integrator states.
+  # pass, with delayed soft clipping on the band pass integrator's state.
   # This implementation is not oversampled; the nonlinear behavior is kept intentionally simple.
   # Reference: https://www.discodsp.net/VAFilterDesign_2.1.2.pdf (The Art of VA Filter Design)
   # Reference: https://jatinchowdhury18.medium.com/complex-nonlinearities-episode-4-nonlinear-biquad-filters-ae6b3f23cb0e
@@ -25,15 +25,15 @@ module Spms1
     # excess is doubled.
     OUTPUT_KNEE_SCALE  = 1.0 / (16.0 * (OUTPUT_LIMIT - OUTPUT_KNEE))
 
-    # Twice OUTPUT_CEILING, so a state rails at twice what leaves the module. The cubic is
-    # self-similar: scaling the ceiling scales the flat value, two thirds of it, with it. What
-    # this value sets in play is how hard the curve bends below the rail, and that is what holds
-    # the resonant peak down.
-    SOFT_CLIP_CEILING = 3.0
+    # A power of two, 4, to match PRA32-U2, whose fixed-point clamp is a single saturate
+    # instruction. The cubic is self-similar: scaling the ceiling scales the flat value, two thirds
+    # of it, with it. What this value sets in play is how hard the curve bends below the rail;
+    # applied every sample inside the loop, that bend is what holds the resonant peak down.
+    SOFT_CLIP_CEILING = 4.0
     # Everything soft_clip needs derived from the ceiling once, at startup. The vendored Spinel
     # emits Float constants as runtime globals rather than compile-time literals, so writing these
     # expressions inline in soft_clip would leave a real division and extra multiplies in a
-    # method that runs twice per sample.
+    # method that runs every sample.
     SOFT_CLIP_FLOOR      = -SOFT_CLIP_CEILING
     SOFT_CLIP_GAIN_SCALE = 1.0 / (3.0 * SOFT_CLIP_CEILING * SOFT_CLIP_CEILING)
     # Blend at the reference rate on the line below. The two move together: their product is what
@@ -67,7 +67,7 @@ module Spms1
       @sample_rate = sample_rate
       @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (48000.0 / @sample_rate) * (CONTROL_RATE_DIVISOR / 4.0)
 
-      # The states pass through soft_clip once a sample, so what it takes out of them adds up with
+      # The state passes through soft_clip once a sample, so what it takes out of it adds up with
       # the sample rate: left alone, the distortion grows as the rate rises and does not settle
       # toward any continuous-time filter. Blending the clip by alpha = 48000 / f_s,
       # s - alpha * (s - soft_clip(s)), keeps the sound at 48 kHz on other rates. alpha is folded
@@ -131,8 +131,8 @@ module Spms1
     end
 
     # How hard the audio input drives the filter, used as a plain multiplier. It sits on the input
-    # rather than the output because that is what decides how far the states run into soft_clip:
-    # past the middle of the dial the filter starts to saturate.
+    # rather than the output because that is what decides how far the band pass state runs into
+    # soft_clip, which the resonant peak reaches first: the pass band itself stays nearly clean.
     def set_gain(gain)
       @gain = (gain < 0.0) ? 0.0 : ((gain > 1.0) ? 1.0 : gain)
     end
@@ -157,12 +157,17 @@ module Spms1
 
       driven_input = audio_input * @current_gain
 
-      # Gain prediction: each integrator's soft clip is evaluated on its state from the previous
-      # sample, so its gain is fixed for this one. The zero-delay feedback equation then stays
-      # linear within the sample and keeps its closed-form solution, with no iteration and no
-      # division here -- 1 / a0 comes from the control-rate update.
+      # Gain prediction: the soft clip is evaluated on the state from the previous sample, so its
+      # gain is fixed for this one. The zero-delay feedback equation then stays linear within the
+      # sample and keeps its closed-form solution, with no iteration and no division here -- 1 / a0
+      # comes from the control-rate update.
+      # Only the band pass state is soft-clipped: the low pass passes clean and the resonance stays
+      # in tune, still held down by the clip inside the loop; clip_output trims what peaks remain.
+      # The low pass state has no ceiling of its own and is bounded only through the band pass.
+      # To clip both states, use the line in the comment instead:
+      #   s2 = soft_clip(@s2)
       s1 = soft_clip(@s1)
-      s2 = soft_clip(@s2)
+      s2 = @s2
 
       # high_pass = (x - (g + k) * s1 - s2) / (1 + g * (g + k))
       high_pass = (driven_input - s2) * @one_over_a0 - s1 * @g_plus_k_over_a0
@@ -208,7 +213,7 @@ module Spms1
     # four samples, as the EG's output does, so a fast cutoff sweep is a line rather than a
     # staircase at a quarter of the sample rate. Each is ramped on its own, so between the ends
     # of a ramp they only approximately satisfy a0 = 1 + g * (g + k); the ends are exact, and the
-    # states stay bounded by soft_clip either way. Each ramp starts from the stored set rather
+    # states stay bounded through soft_clip either way. Each ramp starts from the stored set rather
     # than from where the additions got to, so rounding does not build up. 0.25 is
     # 1 / CONTROL_RATE_DIVISOR, written out for the reason Mixer#process gives.
     def update_coefficients
@@ -243,8 +248,9 @@ module Spms1
       @last_g_plus_k_over_a0 = g_plus_k_over_a0
     end
 
-    # Bounds what the module hands to the bus. Separate from soft_clip, which bounds the states
-    # inside the loop at a much higher ceiling and has to stay where it is.
+    # Bounds what the module hands to the bus. Separate from soft_clip, which bounds the band pass
+    # state inside the loop at a much higher ceiling and has to stay where it is. With only that
+    # state clipped, a high Q on a loud input reaches the shoulder here.
     # No comparisons, so nothing for the compiler to turn into a branch: Spinel emits abs as fabs,
     # one vabs.f32, and a + |a| is twice a where a is positive and exactly zero where it is not.
     # Each clamp and the knee are built from two of those, one per side, which is also what keeps
@@ -282,8 +288,8 @@ module Spms1
     # Cubic soft clip written as a gain: the clamped value times 1 - c^2 / (3 * ceiling^2). Same
     # curve as c - c^3 / (3 * ceiling^2), slope exactly 1 at zero and flat at the ceiling, so a
     # state within the ceiling is only ever scaled down and a state past it is held at two thirds
-    # of it. Clamped the way clip_output clamps, without a comparison; this one runs twice per
-    # sample, on the states inside the feedback path.
+    # of it. Clamped the way clip_output clamps, without a comparison; this one runs every sample,
+    # on the band pass state inside the feedback path.
     # Blended by alpha as initialize describes: with the state split into its clamped part c and
     # the part past the ceiling d, s - alpha * (s - soft_clip(s)) is c - alpha * c^3 / (3 *
     # ceiling^2) + (1 - alpha) * d. excess is twice d, which is why the leak carries a half.
