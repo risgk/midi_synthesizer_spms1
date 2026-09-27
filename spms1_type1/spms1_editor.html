@@ -1286,7 +1286,7 @@
 
   const NODES = [
     { key: 'NOTE', label: 'Note', aux: true, notes: [['PITCH', 'Pitch', 0, 127], ['GATE', 'Gate', 0, 1], ['BEND', 'Bend', -8192, 8191]] },
-    { key: 'CONST', label: 'Constants', aux: true, outs: ['ONE', 'HALF', 'POINT_TWO', 'NONE', 'MINUS_POINT_TWO', 'MINUS_HALF', 'MINUS_ONE'] },
+    { key: 'CONST', label: 'Constants', aux: true, normed: true, outs: ['ONE', 'HALF', 'POINT_TWO', 'NONE', 'MINUS_POINT_TWO', 'MINUS_HALF', 'MINUS_ONE'] },
     { key: 'GENERAL', label: 'General Controls', aux: true, controls: CONTROL_ITEMS.slice(PARAMS.length) },
     ...MODULES.map(m => ({
       key: m.key, label: m.label, module: m,
@@ -1326,14 +1326,19 @@
     for (const [o, label, min, max] of node.notes || []) {
       h += `<div class="row note-row" data-note-sig="${o}"><span class="lbl">${label}</span><input type="number" class="nv" min="${min}" max="${max}"><span class="norm"></span><span class="port out" data-src="${o}"></span></div>`;
     }
+    if (node.normed) {
+      h += `<div class="sep"><span>Signals</span><span class="norm-head">Norm</span></div>`;
+    }
     for (const o of node.outs || []) {
-      h += `<div class="row"><span class="lbl right">${escapeHTML(sigLabel(o))}</span><span class="port out" data-src="${o}"></span></div>`;
+      h += node.normed
+        ? `<div class="row"><span class="lbl">${escapeHTML(sigLabel(o))}</span><span class="norm">${CONSTANT_NORMS[o]}</span><span class="port out" data-src="${o}"></span></div>`
+        : `<div class="row"><span class="lbl right">${escapeHTML(sigLabel(o))}</span><span class="port out" data-src="${o}"></span></div>`;
     }
     for (const i of node.inputs || []) {
       h += `<div class="row input-row"><span class="port in" data-dst="IN:${i.key}" title="Read every sample"></span><span class="lbl">${escapeHTML(i.label)}</span><span class="src" data-src-of="IN:${i.key}"></span></div>`;
     }
     if (node.controls && node.controls.length) {
-      h += `<div class="sep"><span>${node.module ? 'Parameters' : 'Slots'}</span><span>CC</span><span>Value</span><span class="norm-head">Norm</span></div>`;
+      h += `<div class="sep"><span>${node.module ? 'Parameters' : 'Signals'}</span><span>CC</span><span>Value</span><span class="norm-head">Norm</span></div>`;
       for (const c of node.controls) h += controlRowHTML(c, !!node.module);
     }
     return h + '<div class="rows-end"></div>';
