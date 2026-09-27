@@ -57,20 +57,22 @@ module Spms1
     CONTROL_RATE_MASK = CONTROL_RATE_DIVISOR - 1
 
     # Damping lookup, k = 1 / Q, one entry per step of the resonance dial, written against the
-    # dial position r = i / 120: Q = 0.707 * 2^(4r) up to Q 8 at r = 0.875. Past that the curve is
-    # laid out on v = 128r, where Q doubles every two steps of v, reaching Q 256 at v = 122; above
-    # that k is zero, and the self-oscillation that update_coefficients adds takes over. The last
-    # entry repeats the one before it so that interpolating at the top of the dial reads a real
-    # entry rather than past the end.
+    # dial position r = i / 120: Q = 0.707 * 2^(4r) up to Q 5.66 at r = 0.75. Past that the curve
+    # is laid out on v = 128r, where a quadratic term in (v - 96) is added to log2(Q), so that the
+    # slope grows smoothly rather than stepping up, reaching Q 256 at v = 122; above that k is
+    # zero, and the self-oscillation that update_coefficients adds takes over. The last entry
+    # repeats the one before it so that interpolating at the top of the dial reads a real entry
+    # rather than past the end.
     K_TABLE = Array.new(122, 0.0)
     BASE_Q = 0.7071067811865476
+    Q_CURVE_C = (8.0 - (122.0 - 16.0) / 32.0) / ((122.0 - 96.0) * (122.0 - 96.0))
     for i in 0...121
-      if i <= 105
+      if i <= 90
         K_TABLE[i] = 1.0 / (BASE_Q * (2.0 ** (i.to_f * (1.0 / 30.0))))
       else
         v = i.to_f * (128.0 / 120.0)
         if v <= 122.0
-          K_TABLE[i] = 1.0 / (8.0 * (2.0 ** ((v - 112.0) * 0.5)))
+          K_TABLE[i] = 1.0 / (2.0 ** ((v - 16.0) * (1.0 / 32.0) + Q_CURVE_C * (v - 96.0) * (v - 96.0)))
         end
       end
     end
@@ -171,7 +173,7 @@ module Spms1
       @gain = (gain < 0.0) ? 0.0 : ((gain > 1.0) ? 1.0 : gain)
     end
 
-    # Q range: ~0.7 (0.0), ~2.83 (0.5), 8 (0.875), 256 (~0.953); self-oscillation from there,
+    # Q range: ~0.7 (0.0), ~2.83 (0.5), ~5.66 (0.75), ~27 (0.875), 256 (~0.953); self-oscillation from there,
     # growing to its full level at ~0.992 and staying there to 1.0.
     def set_resonance(resonance)
       @resonance = (resonance < 0.0) ? 0.0 : ((resonance > 1.0) ? 1.0 : resonance)
