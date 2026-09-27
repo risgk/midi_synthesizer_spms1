@@ -624,6 +624,7 @@ void loop() {
     SPMS1_DEBUG_PRINT_SERIAL.print("stack free ");
     SPMS1_DEBUG_PRINT_SERIAL.print(uxTaskGetStackHighWaterMark(g_synth_task));
 #endif  // defined(ARDUINO_ARCH_ESP32)
+    SPMS1_DEBUG_PRINT_SERIAL.println();
     // Both cleared on every report, so the pair brackets the buffers since the last one rather
     // than since boot. min is the uncontended compute time, max is what the deadline is about,
     // and the gap between them is interference from core0 and interrupts.
