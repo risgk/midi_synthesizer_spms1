@@ -1,4 +1,4 @@
-MIDI Synthesizer SPMS-1 (type-1) v0.0.4
+MIDI Synthesizer SPMS-1 (type-1) v0.0.5
 =======================================
 
 - Monophonic semi-modular MIDI Synthesizer for M5Stack AtomS3 Lite and Raspberry Pi Pico 2, made with Spinel (Ruby AOT Compiler)
@@ -199,6 +199,47 @@ anything behind. Mixer 1 can reach the LFO, Mixer 3 can reach the oscillator, an
 A mixer is what lets two of anything meet, and what makes a signal that runs one way, such as the
 envelope, swing both ways. See the examples below.
 
+#### Filter 1
+
+A zero-delay feedback state variable filter: at the sum, the loop equation is solved in closed
+form, so the high pass is found in one step. The soft clip acts only where the band pass state is
+read back, and it is what holds the resonance down; the low pass state stays linear, with a
+clamp at 16 as a guard that ordinary use never reaches. The output clip comes last. At the top of
+the resonance dial k turns negative and the loop oscillates.
+
+```mermaid
+flowchart LR
+  IN([Input]) --> SUM((Σ))
+  SUM -->|HP| I1["Integrator 1<br/>BP, state s1"]
+  I1 -->|BP| I2["Integrator 2<br/>LP, state s2"]
+  I2 -->|LP| OC["Output clip<br/>linear up to 0.5"]
+  OC --> OUT([Output])
+  SC["State clip<br/>ceiling 4.0, α comp."] -.- I1
+  L2["s2 is linear<br/>guard clamp at 16"] -.- I2
+  I1 -->|"−k·BP"| SUM
+  I2 -->|"−LP"| SUM
+  classDef nl fill:#FAECE7,stroke:#D85A30,color:#712B13
+  class SC,OC nl
+```
+
+The same structure redrawn as an op-amp integrator filter. The diode pair stands for the state
+clip and the output limiter for the output clip. It is an interpretation, not a reproduction of
+an actual circuit.
+
+```mermaid
+flowchart LR
+  IN([Input]) --> A1["Summing amp Σ"]
+  A1 -->|HP| A2["Integrator ∫<br/>C1"]
+  D["Diode pair"] -.-|across C1| A2
+  A2 -->|BP| A3["Integrator ∫<br/>C2, linear"]
+  A3 -->|LP| LIM["Output limiter"]
+  LIM --> OUT([Output])
+  A2 -->|"R/k (resonance)"| A1
+  A3 -->|R| A1
+  classDef nl fill:#FAECE7,stroke:#D85A30,color:#712B13
+  class D,LIM nl
+```
+
 ### Patch Editing (NRPN)
 
 The patch is data, and NRPN rewrites it while the synth is running: which modules run and in what
@@ -387,7 +428,16 @@ that path a semitone of vibrato sits at CC 14 and an octave at the top of the di
 
 Filter 1 Gain sets how hard the audio input drives the filter, which is also what decides how far
 the filter runs into its own saturation. Its default of CC 64 is the level the oscillator used to
-be scaled to on its own; above that the filter starts to compress the loud part of a note.
+be scaled to on its own. The saturation sits on the resonance rather than the pass band: a low
+cutoff passes a loud note nearly clean, while turning the gain up rounds off the resonant peak.
+
+Filter 1 Resonance reaches Q 8 at CC 109 and from there doubles Q every 1.875 CC steps, to Q 256
+just past CC 118. Above that the filter oscillates on its own: a sine at the cutoff frequency,
+growing to its full level of about 0.5 by CC 123 and holding it to the top of the dial. Low in
+that range the oscillation builds slowly and shares the filter with the input; at the top it
+takes the input over. Its level holds across the cutoff range down to about 150 Hz and falls
+below that. With the cutoff following the keyboard, as in the examples below, it plays as a
+sine voice.
 
 A mixer takes each input at its own level and its own polarity, then adds them. Level runs from
 silent at 0.0 (CC 4) to full at 1.0 (CC 124), and Invert from unchanged at 0.0, through silence
