@@ -964,6 +964,9 @@
     const s = { name: 'Init', order: DEFAULT_ORDER.slice(), inputs: {}, params: {}, cc: {}, values: {}, layout: {} };
     INPUT_ITEMS.forEach(i => { s.inputs[i.key] = i.defaultSource; });
     PARAM_ITEMS.forEach(p => { s.params[p.key] = p.key; });
+    PARAM_ITEMS.forEach(p => {
+      if (p.module && p.module.startsWith('MIXER_')) s.params[p.key] = p.label.startsWith('Level') ? 'ONE' : 'NONE';
+    });
     s.params.MIXER_1_LEVEL_1 = 'POINT_TWO';
     s.params.MIXER_1_LEVEL_2 = 'POINT_TWO';
     CONTROL_ITEMS.forEach(c => {
@@ -1364,7 +1367,7 @@
         : 'The value the synth sees in the slot';
       valIn.title = cc
         ? `Value of CC ${cc}, shared by every slot on it`
-        : 'No CC: the slot keeps what it holds (mixers are seeded at power-on)';
+        : 'No CC: the slot keeps what it holds (0.0 at power-on)';
     });
     refreshSourceValues();
   }
@@ -2195,16 +2198,12 @@
   // What the synth writes to the slot: cc_to_unipolar and cc_to_bipolar in spms1_main.rb.
   // A copy of each control slot on the synth's signals bus, as the CC value that put it there:
   // rewritten from the CC while one is assigned and held while none is, as spms1_main.rb does.
-  // It starts from what the synth holds at power-on -- the mixer seeds and the default patch's
-  // CC values -- so it is right only while the synth has followed the editor. null is a slot
-  // written from a reserved CC, whose value the editor does not track.
+  // It starts from what the synth holds at power-on -- 0.0 in a slot with no CC, the default
+  // patch's CC values elsewhere -- so it is right only while the synth has followed the editor.
+  // null is a slot written from a reserved CC, whose value the editor does not track.
   const slotHeld = {};
   CONTROL_ITEMS.forEach(c => {
-    if (c.module && c.module.startsWith('MIXER_')) {
-      slotHeld[c.key] = c.label.startsWith('Level') ? 124 : 4;
-    } else {
-      slotHeld[c.key] = c.defaultValue;
-    }
+    slotHeld[c.key] = c.defaultCC ? c.defaultValue : (c.bipolar ? 64 : 4);
   });
 
   function updateSlotHeld() {

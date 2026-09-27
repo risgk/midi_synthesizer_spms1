@@ -275,10 +275,10 @@ already holds, so the parameter can be driven by routing alone.
 
 There is one of every module that makes a sound and there are five mixers, and **all ten are in
 the default run order**, so a patch only ever has to route, never to switch something on first.
-A mixer is the only kind with no CC on any of its parameters: their control slots are seeded
-instead, at full level and no inversion, so a mixer with one input routed passes it through
-rather than muting it. Mixer 1's two levels read the constant 0.2 instead, because the default
-patch runs the LFO through it.
+A mixer is the only kind with no CC on any of its parameters: the default patch points them at
+constants instead, each level at 1.0 and each invert at 0.0, so a mixer with one input routed
+passes it through rather than muting it. Mixer 1's two levels read the constant 0.2 instead,
+because the default patch runs the LFO through it.
 
 #### Entries (CC 98), category 1
 
@@ -386,7 +386,7 @@ parameter is unipolar or bipolar, and its slot takes the same range. A unipolar 
 of its dial. A bipolar one runs -0.5 to +0.5 with CC 64 at 0.0, the span of an LFO, so a bipolar
 source pointed at one swings it about the middle. Only the two tune controls are bipolar, since
 their middle is no change at all. Pointing a parameter at another slot is what makes a
-modulation. Anything with no CC sits at what it was seeded with until one is assigned.
+modulation. A slot with no CC holds 0.0 until one is assigned.
 
 Slots 53-60, the General slots, are control slots that no parameter owns: a CC put on the bus for
 any module input or parameter to read. General Unipolar 1-4 run 0.0 to 1.0 and General Bipolar
