@@ -1,4 +1,4 @@
-MIDI Synthesizer SPMS-1 (type-0) v0.1.4
+MIDI Synthesizer SPMS-1 (type-0) v0.1.5
 =======================================
 
 - Spinel (Ruby AOT コンパイラ) で作った、Raspberry Pi Pico 2 用のモノフォニック・セミモジュラー MIDI シンセサイザー
@@ -17,6 +17,7 @@ MIDI Synthesizer SPMS-1 (type-0) v0.1.4
     - 以下の I2S DAC ハードウェア (48 kHz/24 bit) も使えます:
         - [Adafruit PCM5102 I2S DAC](https://www.adafruit.com/product/6250) (Product ID: 6250)
         - GY-PCM5102 (PCM5102A I2S DAC モジュール)
+- 注意: RP2350 のシステムクロック (sysclk) は、I2S Audio Library の setSysClk() によって 153.6 MHz にオーバークロックされます
 
 
 改造に必要なソフトウェア

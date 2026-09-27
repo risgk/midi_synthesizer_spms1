@@ -1,4 +1,4 @@
-MIDI Synthesizer SPMS-1 (type-0) v0.1.4
+MIDI Synthesizer SPMS-1 (type-0) v0.1.5
 =======================================
 
 - Monophonic semi-modular MIDI Synthesizer for Raspberry Pi Pico 2, made with Spinel (Ruby AOT Compiler)
@@ -17,6 +17,7 @@ Required Hardware
     - The following I2S DAC hardware (48 kHz/24 bit) can also be used:
         - [Adafruit PCM5102 I2S DAC](https://www.adafruit.com/product/6250) (Product ID: 6250)
         - GY-PCM5102 (PCM5102A I2S DAC Module)
+- NOTE: The RP2350 system clock (sysclk) changes to overclocked 153.6 MHz by I2S Audio Library setSysClk()
 
 
 Required Software for Modification

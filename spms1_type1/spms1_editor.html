@@ -414,10 +414,15 @@
       stroke: var(--wire-signal);
       stroke-width: 2.5;
     }
+    /* Set back from the signal wires, which carry the patch's audio and modulation. */
     .wire.param {
       stroke: var(--wire-param);
-      stroke-width: 2;
-      stroke-dasharray: 6 4;
+      stroke-width: 1.5;
+      stroke-dasharray: 5 4;
+      opacity: 0.45;
+    }
+    .wire.param.selected {
+      opacity: 1;
     }
     .wire.feedback {
       stroke: var(--wire-feedback);
@@ -453,7 +458,10 @@
       width: 200px;
     }
     .node.general {
-      width: 280px;
+      width: 250px;
+    }
+    .node.const {
+      width: 120px;
     }
     .node.off {
       opacity: 0.55;
@@ -507,6 +515,15 @@
     }
     .row.input-row .src {
       flex: 1;
+      max-width: none;
+    }
+    /* What a routed parameter reads, in the space between its label and its fields. */
+    .row.ctrl .lbl {
+      flex: 0 0 auto;
+    }
+    .row.ctrl .src {
+      flex: 1;
+      min-width: 0;
       max-width: none;
     }
     .row .src {
@@ -728,7 +745,7 @@
 <body>
 
 <header>
-  <h1>SPMS-1 (type-1) Editor<span class="version">v0.0.5</span></h1>
+  <h1>SPMS-1 (type-1) Editor<span class="version">v0.0.8</span></h1>
   <nav class="tabs">
     <button class="tab-btn active" data-tab="controls">Controls</button>
     <button class="tab-btn" data-tab="patch">Patch<span class="exp">Experimental</span></button>
@@ -944,26 +961,29 @@
   const DEFAULT_ORDER = ['LFO_1', 'MIXER_1', 'ENV_GEN_1', 'MIXER_2', 'OSC_1', 'MIXER_3', 'FILTER_1', 'MIXER_4', 'AMP_1', 'MIXER_5'];
 
   const DEFAULT_LAYOUT = {
-    NOTE:      { x: 40,   y: 40 },
-    CONST:     { x: 40,   y: 190 },
-    GENERAL:   { x: 40,   y: 435 },
+    NOTE:      { x: 20,   y: 40 },
+    CONST:     { x: 20,   y: 530 },
+    GENERAL:   { x: 20,   y: 220 },
     LFO_1:     { x: 360,  y: 40 },
     MIXER_1:   { x: 360,  y: 180 },
     ENV_GEN_1: { x: 360,  y: 460 },
-    MIXER_2:   { x: 360,  y: 690 },
+    MIXER_2:   { x: 360,  y: 710 },
     OSC_1:     { x: 720,  y: 40 },
-    MIXER_3:   { x: 720,  y: 320 },
+    MIXER_3:   { x: 720,  y: 710 },
     FILTER_1:  { x: 1080, y: 40 },
-    MIXER_4:   { x: 1080, y: 320 },
+    MIXER_4:   { x: 1080, y: 710 },
     AMP_1:     { x: 1440, y: 40 },
-    MIXER_5:   { x: 1440, y: 240 },
-    OUT:       { x: 1440, y: 520 },
+    MIXER_5:   { x: 1440, y: 710 },
+    OUT:       { x: 1440, y: 240 },
   };
 
   function defaultState() {
     const s = { name: 'Init', order: DEFAULT_ORDER.slice(), inputs: {}, params: {}, cc: {}, values: {}, layout: {} };
     INPUT_ITEMS.forEach(i => { s.inputs[i.key] = i.defaultSource; });
     PARAM_ITEMS.forEach(p => { s.params[p.key] = p.key; });
+    PARAM_ITEMS.forEach(p => {
+      if (p.module && p.module.startsWith('MIXER_')) s.params[p.key] = p.label.startsWith('Level') ? 'ONE' : 'NONE';
+    });
     s.params.MIXER_1_LEVEL_1 = 'POINT_TWO';
     s.params.MIXER_1_LEVEL_2 = 'POINT_TWO';
     CONTROL_ITEMS.forEach(c => {
@@ -1266,7 +1286,7 @@
 
   const NODES = [
     { key: 'NOTE', label: 'Note', aux: true, notes: [['PITCH', 'Pitch', 0, 127], ['GATE', 'Gate', 0, 1], ['BEND', 'Bend', -8192, 8191]] },
-    { key: 'CONST', label: 'Constants', aux: true, outs: ['ONE', 'HALF', 'POINT_TWO', 'NONE', 'MINUS_POINT_TWO', 'MINUS_HALF', 'MINUS_ONE'] },
+    { key: 'CONST', label: 'Constants', aux: true, normed: true, outs: ['ONE', 'HALF', 'POINT_TWO', 'NONE', 'MINUS_POINT_TWO', 'MINUS_HALF', 'MINUS_ONE'] },
     { key: 'GENERAL', label: 'General Controls', aux: true, controls: CONTROL_ITEMS.slice(PARAMS.length) },
     ...MODULES.map(m => ({
       key: m.key, label: m.label, module: m,
@@ -1285,6 +1305,7 @@
     return `<div class="row ctrl" data-ctrl="${c.key}">
       ${withInput ? `<span class="port in param" data-dst="PR:${c.key}" title="Where ${escapeHTML(c.full)} takes its value (per buffer)"></span>` : ''}
       <span class="lbl" title="${tip}">${escapeHTML(c.label)}</span>
+      <span class="src"${withInput ? ` data-src-of="PR:${c.key}"` : ''}></span>
       <input type="number" class="cc" min="0" max="127" title="CC number, 0 for none">
       <input type="number" class="val" min="0" max="127" title="CC value">
       <span class="norm" title="The value the synth sees in the slot"></span>
@@ -1305,14 +1326,19 @@
     for (const [o, label, min, max] of node.notes || []) {
       h += `<div class="row note-row" data-note-sig="${o}"><span class="lbl">${label}</span><input type="number" class="nv" min="${min}" max="${max}"><span class="norm"></span><span class="port out" data-src="${o}"></span></div>`;
     }
+    if (node.normed) {
+      h += `<div class="sep"><span>Signals</span><span class="norm-head">Norm</span></div>`;
+    }
     for (const o of node.outs || []) {
-      h += `<div class="row"><span class="lbl right">${escapeHTML(sigLabel(o))}</span><span class="port out" data-src="${o}"></span></div>`;
+      h += node.normed
+        ? `<div class="row"><span class="lbl">${escapeHTML(sigLabel(o))}</span><span class="norm">${CONSTANT_NORMS[o]}</span><span class="port out" data-src="${o}"></span></div>`
+        : `<div class="row"><span class="lbl right">${escapeHTML(sigLabel(o))}</span><span class="port out" data-src="${o}"></span></div>`;
     }
     for (const i of node.inputs || []) {
       h += `<div class="row input-row"><span class="port in" data-dst="IN:${i.key}" title="Read every sample"></span><span class="lbl">${escapeHTML(i.label)}</span><span class="src" data-src-of="IN:${i.key}"></span></div>`;
     }
     if (node.controls && node.controls.length) {
-      h += `<div class="sep"><span>${node.module ? 'Parameters' : 'Slots'}</span><span>CC</span><span>Value</span><span class="norm-head">Norm</span></div>`;
+      h += `<div class="sep"><span>${node.module ? 'Parameters' : 'Signals'}</span><span>CC</span><span>Value</span><span class="norm-head">Norm</span></div>`;
       for (const c of node.controls) h += controlRowHTML(c, !!node.module);
     }
     return h + '<div class="rows-end"></div>';
@@ -1323,7 +1349,7 @@
     portEls = {};
     for (const node of NODES) {
       const el = document.createElement('div');
-      el.className = 'node' + (node.aux ? ' aux' : '') + (node.key === 'GENERAL' ? ' general' : '');
+      el.className = 'node' + (node.aux ? ' aux' : '') + (node.key === 'GENERAL' ? ' general' : '') + (node.key === 'CONST' ? ' const' : '');
       el.dataset.node = node.key;
       el.innerHTML = nodeHTML(node);
       const pos = state.layout[node.key];
@@ -1364,7 +1390,7 @@
         : 'The value the synth sees in the slot';
       valIn.title = cc
         ? `Value of CC ${cc}, shared by every slot on it`
-        : 'No CC: the slot keeps what it holds (mixers are seeded at power-on)';
+        : 'No CC: the slot keeps what it holds (0.0 at power-on)';
     });
     refreshSourceValues();
   }
@@ -1432,7 +1458,9 @@
     world.querySelectorAll('[data-src-of]').forEach(s => { s.textContent = ''; });
     const conns = connections();
     if (selectedWire && !conns.some(c => c.dst === selectedWire)) selectedWire = null;
-    for (const c of conns) {
+    // Parameter wires first, so the signal wires are drawn over them.
+    const ordered = conns.filter(c => c.kind.startsWith('param')).concat(conns.filter(c => !c.kind.startsWith('param')));
+    for (const c of ordered) {
       const from = portEls['o:' + c.src];
       const to = portEls['i:' + c.dst];
       if (!from || !to) continue;
@@ -1609,6 +1637,21 @@
     moveWireDrag(e);
   }
 
+  // An input reading 0.0 is an input with no wire, so a wire from 0.0 to one would not stay drawn.
+  // A parameter reading 0.0 differs from one reading its own slot, so that wire is kept.
+  function accepts(src, dst) {
+    return !(src === 'NONE' && dst.startsWith('IN:'));
+  }
+
+  // The port under the pointer that would complete the wire being dragged, if any.
+  function dropTarget(e) {
+    const target = portUnder(e);
+    if (!target || !target.classList.contains(drag.src ? 'in' : 'out')) return null;
+    const src = drag.src || target.dataset.src;
+    const dst = drag.dst || target.dataset.dst;
+    return accepts(src, dst) ? target : null;
+  }
+
   function portUnder(e) {
     const el = document.elementFromPoint(e.clientX, e.clientY);
     return el && el.closest('.port');
@@ -1619,17 +1662,17 @@
     const d = drag.src ? curve(portPos(portEls['o:' + drag.src]), p) : curve(p, portPos(portEls['i:' + drag.dst]));
     drag.temp.setAttribute('d', d);
     world.querySelectorAll('.port.target').forEach(el => el.classList.remove('target'));
-    const target = portUnder(e);
-    if (target && target.classList.contains(drag.src ? 'in' : 'out')) target.classList.add('target');
+    const target = dropTarget(e);
+    if (target) target.classList.add('target');
   }
 
   function endWireDrag(e) {
     drag.temp.remove();
     world.querySelectorAll('.port.target').forEach(el => el.classList.remove('target'));
-    const target = portUnder(e);
+    const target = dropTarget(e);
     let src = drag.src, dst = drag.dst;
-    if (target && src && target.classList.contains('in')) dst = target.dataset.dst;
-    else if (target && dst && target.classList.contains('out')) src = target.dataset.src;
+    if (target && src) dst = target.dataset.dst;
+    else if (target && dst) src = target.dataset.src;
     if (src && dst) {
       if (!drag.pushed) pushHistory();
       connect(src, dst);
@@ -2195,16 +2238,12 @@
   // What the synth writes to the slot: cc_to_unipolar and cc_to_bipolar in spms1_main.rb.
   // A copy of each control slot on the synth's signals bus, as the CC value that put it there:
   // rewritten from the CC while one is assigned and held while none is, as spms1_main.rb does.
-  // It starts from what the synth holds at power-on -- the mixer seeds and the default patch's
-  // CC values -- so it is right only while the synth has followed the editor. null is a slot
-  // written from a reserved CC, whose value the editor does not track.
+  // It starts from what the synth holds at power-on -- 0.0 in a slot with no CC, the default
+  // patch's CC values elsewhere -- so it is right only while the synth has followed the editor.
+  // null is a slot written from a reserved CC, whose value the editor does not track.
   const slotHeld = {};
   CONTROL_ITEMS.forEach(c => {
-    if (c.module && c.module.startsWith('MIXER_')) {
-      slotHeld[c.key] = c.label.startsWith('Level') ? 124 : 4;
-    } else {
-      slotHeld[c.key] = c.defaultValue;
-    }
+    slotHeld[c.key] = c.defaultCC ? c.defaultValue : (c.bipolar ? 64 : 4);
   });
 
   function updateSlotHeld() {

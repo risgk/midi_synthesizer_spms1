@@ -221,9 +221,8 @@ NRPN_SOURCE_MIXER_5_LEVEL_2     = 287
 NRPN_SOURCE_MIXER_5_INVERT_2    = 288
 
 # A CC number of 0 means the parameter has no CC: its control slot keeps whatever it holds, so the
-# parameter can be driven by routing alone. A parameter shipped that way wants its slot seeded
-# below, unless 0.0 -- the bottom of a unipolar dial, the middle of a bipolar one -- is the value
-# it should rest at. Every mixer parameter ships that way.
+# parameter can be driven by routing alone. Nothing seeds a control slot, so one with no CC holds
+# 0.0 -- the bottom of a unipolar dial, the middle of a bipolar one -- until a CC is assigned.
 NRPN_CC_LFO_1_RATE          = 384
 NRPN_CC_ENV_GEN_1_ATTACK    = 385
 NRPN_CC_ENV_GEN_1_DECAY     = 386
@@ -320,30 +319,6 @@ signals[SIGNAL_MINUS_POINT_TWO] = -0.2
 signals[SIGNAL_MINUS_HALF]      = -0.5
 signals[SIGNAL_MINUS_ONE]       = -1.0
 
-# A mixer's parameters are the only ones with no CC, so nothing ever writes their slots and what
-# is put here is what they keep. Full level and no inversion makes a mixer pass its input through
-# rather than mute it. Everything else takes its value from MIDI on buffer one and needs no seed.
-signals[SIGNAL_MIXER_1_LEVEL_1]  = cc_to_unipolar(124)
-signals[SIGNAL_MIXER_1_INVERT_1] = cc_to_unipolar(4)
-signals[SIGNAL_MIXER_1_LEVEL_2]  = cc_to_unipolar(124)
-signals[SIGNAL_MIXER_1_INVERT_2] = cc_to_unipolar(4)
-signals[SIGNAL_MIXER_2_LEVEL_1]  = cc_to_unipolar(124)
-signals[SIGNAL_MIXER_2_INVERT_1] = cc_to_unipolar(4)
-signals[SIGNAL_MIXER_2_LEVEL_2]  = cc_to_unipolar(124)
-signals[SIGNAL_MIXER_2_INVERT_2] = cc_to_unipolar(4)
-signals[SIGNAL_MIXER_3_LEVEL_1]  = cc_to_unipolar(124)
-signals[SIGNAL_MIXER_3_INVERT_1] = cc_to_unipolar(4)
-signals[SIGNAL_MIXER_3_LEVEL_2]  = cc_to_unipolar(124)
-signals[SIGNAL_MIXER_3_INVERT_2] = cc_to_unipolar(4)
-signals[SIGNAL_MIXER_4_LEVEL_1]  = cc_to_unipolar(124)
-signals[SIGNAL_MIXER_4_INVERT_1] = cc_to_unipolar(4)
-signals[SIGNAL_MIXER_4_LEVEL_2]  = cc_to_unipolar(124)
-signals[SIGNAL_MIXER_4_INVERT_2] = cc_to_unipolar(4)
-signals[SIGNAL_MIXER_5_LEVEL_1]  = cc_to_unipolar(124)
-signals[SIGNAL_MIXER_5_INVERT_1] = cc_to_unipolar(4)
-signals[SIGNAL_MIXER_5_LEVEL_2]  = cc_to_unipolar(124)
-signals[SIGNAL_MIXER_5_INVERT_2] = cc_to_unipolar(4)
-
 # The default patch, written into the NRPN table the loop reads it back from. Every module is in
 # the run order, so a patch only ever has to route, never to switch something on first. A mixer
 # follows each module that makes a sound, and where it sits is what decides whose value it can
@@ -352,6 +327,8 @@ signals[SIGNAL_MIXER_5_INVERT_2] = cc_to_unipolar(4)
 # vibrato depth on the way to the oscillator, so that Osc Mod Amt can span the whole pitch range
 # the way every other modulation depth does. Both of its levels read the constant 0.2, so a
 # bipolar pair built there stays centred.
+# A mixer's parameters have no CC, so the default patch points them at constants instead: full
+# level and no inversion, which makes a mixer pass its input through rather than mute it.
 C.set_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 0, MODULE_LFO_1)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 1, MODULE_MIXER_1)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 2, MODULE_ENV_GEN_1)
@@ -387,25 +364,25 @@ C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_GAIN       , SIGNAL_FILTER_1
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_AMOUNT , SIGNAL_FILTER_1_MOD_AMOUNT)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_GAIN          , SIGNAL_AMP_1_GAIN)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_LEVEL_1     , SIGNAL_POINT_TWO)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_INVERT_1    , SIGNAL_MIXER_1_INVERT_1)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_INVERT_1    , SIGNAL_NONE)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_LEVEL_2     , SIGNAL_POINT_TWO)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_INVERT_2    , SIGNAL_MIXER_1_INVERT_2)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_LEVEL_1     , SIGNAL_MIXER_2_LEVEL_1)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_INVERT_1    , SIGNAL_MIXER_2_INVERT_1)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_LEVEL_2     , SIGNAL_MIXER_2_LEVEL_2)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_INVERT_2    , SIGNAL_MIXER_2_INVERT_2)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_3_LEVEL_1     , SIGNAL_MIXER_3_LEVEL_1)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_3_INVERT_1    , SIGNAL_MIXER_3_INVERT_1)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_3_LEVEL_2     , SIGNAL_MIXER_3_LEVEL_2)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_3_INVERT_2    , SIGNAL_MIXER_3_INVERT_2)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_4_LEVEL_1     , SIGNAL_MIXER_4_LEVEL_1)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_4_INVERT_1    , SIGNAL_MIXER_4_INVERT_1)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_4_LEVEL_2     , SIGNAL_MIXER_4_LEVEL_2)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_4_INVERT_2    , SIGNAL_MIXER_4_INVERT_2)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_5_LEVEL_1     , SIGNAL_MIXER_5_LEVEL_1)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_5_INVERT_1    , SIGNAL_MIXER_5_INVERT_1)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_5_LEVEL_2     , SIGNAL_MIXER_5_LEVEL_2)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_5_INVERT_2    , SIGNAL_MIXER_5_INVERT_2)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_INVERT_2    , SIGNAL_NONE)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_LEVEL_1     , SIGNAL_ONE)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_INVERT_1    , SIGNAL_NONE)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_LEVEL_2     , SIGNAL_ONE)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_INVERT_2    , SIGNAL_NONE)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_3_LEVEL_1     , SIGNAL_ONE)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_3_INVERT_1    , SIGNAL_NONE)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_3_LEVEL_2     , SIGNAL_ONE)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_3_INVERT_2    , SIGNAL_NONE)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_4_LEVEL_1     , SIGNAL_ONE)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_4_INVERT_1    , SIGNAL_NONE)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_4_LEVEL_2     , SIGNAL_ONE)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_4_INVERT_2    , SIGNAL_NONE)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_5_LEVEL_1     , SIGNAL_ONE)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_5_INVERT_1    , SIGNAL_NONE)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_5_LEVEL_2     , SIGNAL_ONE)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_5_INVERT_2    , SIGNAL_NONE)
 
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_RATE         , 3)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_1_ATTACK   , 73)

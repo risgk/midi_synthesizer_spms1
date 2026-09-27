@@ -1,4 +1,4 @@
-MIDI Synthesizer SPMS-1 (type-1) v0.0.5
+MIDI Synthesizer SPMS-1 (type-1) v0.0.8
 =======================================
 
 - Monophonic semi-modular MIDI Synthesizer for M5Stack AtomS3 Lite and Raspberry Pi Pico 2, made with Spinel (Ruby AOT Compiler)
@@ -22,6 +22,7 @@ Required Hardware
         - The following I2S DAC hardware (48 kHz/24 bit) can also be used:
             - [Adafruit PCM5102 I2S DAC](https://www.adafruit.com/product/6250) (Product ID: 6250)
             - GY-PCM5102 (PCM5102A I2S DAC Module)
+    - NOTE: The RP2350 system clock (sysclk) changes to overclocked 153.6 MHz by I2S Audio Library setSysClk()
 
 
 Required Software for Modification
@@ -274,10 +275,10 @@ already holds, so the parameter can be driven by routing alone.
 
 There is one of every module that makes a sound and there are five mixers, and **all ten are in
 the default run order**, so a patch only ever has to route, never to switch something on first.
-A mixer is the only kind with no CC on any of its parameters: their control slots are seeded
-instead, at full level and no inversion, so a mixer with one input routed passes it through
-rather than muting it. Mixer 1's two levels read the constant 0.2 instead, because the default
-patch runs the LFO through it.
+A mixer is the only kind with no CC on any of its parameters: the default patch points them at
+constants instead, each level at 1.0 and each invert at 0.0, so a mixer with one input routed
+passes it through rather than muting it. Mixer 1's two levels read the constant 0.2 instead,
+because the default patch runs the LFO through it.
 
 #### Entries (CC 98), category 1
 
@@ -385,7 +386,7 @@ parameter is unipolar or bipolar, and its slot takes the same range. A unipolar 
 of its dial. A bipolar one runs -0.5 to +0.5 with CC 64 at 0.0, the span of an LFO, so a bipolar
 source pointed at one swings it about the middle. Only the two tune controls are bipolar, since
 their middle is no change at all. Pointing a parameter at another slot is what makes a
-modulation. Anything with no CC sits at what it was seeded with until one is assigned.
+modulation. A slot with no CC holds 0.0 until one is assigned.
 
 Slots 53-60, the General slots, are control slots that no parameter owns: a CC put on the bus for
 any module input or parameter to read. General Unipolar 1-4 run 0.0 to 1.0 and General Bipolar
@@ -431,13 +432,13 @@ the filter runs into its own saturation. Its default of CC 64 is the level the o
 be scaled to on its own. The saturation sits on the resonance rather than the pass band: a low
 cutoff passes a loud note nearly clean, while turning the gain up rounds off the resonant peak.
 
-Filter 1 Resonance reaches Q 8 at CC 109 and from there doubles Q every 1.875 CC steps, to Q 256
-just past CC 118. Above that the filter oscillates on its own: a sine at the cutoff frequency,
-growing to its full level of about 0.5 by CC 123 and holding it to the top of the dial. Low in
-that range the oscillation builds slowly and shares the filter with the input; at the top it
-takes the input over. Its level holds across the cutoff range down to about 150 Hz and falls
-below that. With the cutoff following the keyboard, as in the examples below, it plays as a
-sine voice.
+Filter 1 Resonance doubles Q every 30 CC steps up to Q 5.66 at CC 94, and from there rises faster
+and faster, without a sudden step, through Q 27 at CC 109 to Q 256 just past CC 118. Above that
+the filter oscillates on its own: a sine at the cutoff frequency, growing to its full level of
+about 0.25 by CC 123 and holding it to the top of the dial. Low in that range the oscillation
+builds slowly and shares the filter with the input; at the top it takes the input over. Its
+level holds across the cutoff range down to about 37 Hz and falls below that. With the cutoff
+following the keyboard, as in the examples below, it plays as a sine voice.
 
 A mixer takes each input at its own level and its own polarity, then adds them. Level runs from
 silent at 0.0 (CC 4) to full at 1.0 (CC 124), and Invert from unchanged at 0.0, through silence

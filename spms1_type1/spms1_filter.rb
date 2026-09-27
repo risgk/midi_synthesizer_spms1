@@ -57,20 +57,22 @@ module Spms1
     CONTROL_RATE_MASK = CONTROL_RATE_DIVISOR - 1
 
     # Damping lookup, k = 1 / Q, one entry per step of the resonance dial, written against the
-    # dial position r = i / 120: Q = 0.707 * 2^(4r) up to Q 8 at r = 0.875. Past that the curve is
-    # laid out on v = 128r, where Q doubles every two steps of v, reaching Q 256 at v = 122; above
-    # that k is zero, and the self-oscillation that update_coefficients adds takes over. The last
-    # entry repeats the one before it so that interpolating at the top of the dial reads a real
-    # entry rather than past the end.
+    # dial position r = i / 120: Q = 0.707 * 2^(4r) up to Q 5.66 at r = 0.75. Past that the curve
+    # is laid out on v = 128r, where a quadratic term in (v - 96) is added to log2(Q), so that the
+    # slope grows smoothly rather than stepping up, reaching Q 256 at v = 122; above that k is
+    # zero, and the self-oscillation that update_coefficients adds takes over. The last entry
+    # repeats the one before it so that interpolating at the top of the dial reads a real entry
+    # rather than past the end.
     K_TABLE = Array.new(122, 0.0)
     BASE_Q = 0.7071067811865476
+    Q_CURVE_C = (8.0 - (122.0 - 16.0) / 32.0) / ((122.0 - 96.0) * (122.0 - 96.0))
     for i in 0...121
-      if i <= 105
+      if i <= 90
         K_TABLE[i] = 1.0 / (BASE_Q * (2.0 ** (i.to_f * (1.0 / 30.0))))
       else
         v = i.to_f * (128.0 / 120.0)
         if v <= 122.0
-          K_TABLE[i] = 1.0 / (8.0 * (2.0 ** ((v - 112.0) * 0.5)))
+          K_TABLE[i] = 1.0 / (2.0 ** ((v - 16.0) * (1.0 / 32.0) + Q_CURVE_C * (v - 96.0) * (v - 96.0)))
         end
       end
     end
@@ -80,13 +82,14 @@ module Spms1
     # the amount dialled in. The soft clip on the band pass state settles the oscillation at about
     # 11.4 * sqrt(|k| * g / (1 + g^2)^2), so this holds it near SELF_OSC_LEVEL whatever the cutoff;
     # the (1 + g^2)^2 matters only in the top octaves, where g is no longer small.
-    # Set at the output clip's knee, the most that leaves the filter as a clean sine; the
-    # oscillation settles just below it. The value is for 48 kHz; initialize scales it with the
-    # sample rate, as it does the clip.
-    SELF_OSC_LEVEL = 0.5
+    # Set near the default patch's peak of about 0.3, so the oscillation is no louder than a note;
+    # the output clip's knee, 0.5, is the most that would leave as a clean sine. The value is for
+    # 48 kHz; initialize scales it with the sample rate, as it does the clip.
+    SELF_OSC_LEVEL = 0.25
     SELF_OSC_KAPPA = (SELF_OSC_LEVEL / 11.4) * (SELF_OSC_LEVEL / 11.4)
-    # How negative k may go. Below about 150 Hz, -kappa / g grows large enough to pull the
-    # oscillation's pitch down; held here, the amplitude falls off there instead.
+    # How negative k may go. Below about 37 Hz, -kappa / g grows large enough to pull the
+    # oscillation's pitch down; held here, the amplitude falls off there instead. kappa goes as
+    # the square of SELF_OSC_LEVEL, and this frequency with it.
     SELF_OSC_K_FLOOR = -0.2
     # The loop cannot start oscillating from states of exactly zero. This is added to the band
     # pass state at every control-rate step with its sign flipped each time, so the states never
@@ -171,7 +174,7 @@ module Spms1
       @gain = (gain < 0.0) ? 0.0 : ((gain > 1.0) ? 1.0 : gain)
     end
 
-    # Q range: ~0.7 (0.0), ~2.83 (0.5), 8 (0.875), 256 (~0.953); self-oscillation from there,
+    # Q range: ~0.7 (0.0), ~2.83 (0.5), ~5.66 (0.75), ~27 (0.875), 256 (~0.953); self-oscillation from there,
     # growing to its full level at ~0.992 and staying there to 1.0.
     def set_resonance(resonance)
       @resonance = (resonance < 0.0) ? 0.0 : ((resonance > 1.0) ? 1.0 : resonance)
