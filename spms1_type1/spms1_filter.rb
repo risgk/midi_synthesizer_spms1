@@ -56,15 +56,43 @@ module Spms1
     # linked, and the buffer time did not move (853/857us against 854/856).
     CONTROL_RATE_MASK = CONTROL_RATE_DIVISOR - 1
 
-    # Damping lookup, k = 1 / Q, one entry per step of the resonance dial: Q runs from ~0.7 to
-    # ~11.3 across 121 entries. The last entry repeats the one before it so that interpolating
-    # at the top of the dial reads a real entry rather than past the end.
+    # Damping lookup, k = 1 / Q, one entry per step of the resonance dial. Written against the
+    # dial position r = i / 120 so that PRA32-U2, whose dial has 128 steps, follows the same
+    # curve: Q = 0.707 * 2^(4r) up to Q 8 at r = 0.875; then Q doubles every 1/64 of r, reaching
+    # Q 256 at r = 122/128; above that k is zero, and the self-oscillation that update_coefficients
+    # adds takes over. The last entry repeats the one before it so that interpolating at the top
+    # of the dial reads a real entry rather than past the end.
     K_TABLE = Array.new(122, 0.0)
     BASE_Q = 0.7071067811865476
     for i in 0...121
-      K_TABLE[i] = 1.0 / (BASE_Q * (2.0 ** (i.to_f * (1.0 / 30.0))))
+      if i <= 105
+        K_TABLE[i] = 1.0 / (BASE_Q * (2.0 ** (i.to_f * (1.0 / 30.0))))
+      else
+        v = i.to_f * (128.0 / 120.0)
+        if v <= 122.0
+          K_TABLE[i] = 1.0 / (8.0 * (2.0 ** ((v - 112.0) * 0.5)))
+        end
+      end
     end
     K_TABLE[121] = K_TABLE[120]
+
+    # Negative damping at the top of the resonance dial, as k = -t * kappa * (1 + g^2)^2 / g with t
+    # the amount dialled in. The soft clip on the band pass state settles the oscillation at about
+    # 11.4 * sqrt(|k| * g / (1 + g^2)^2), so this holds it near SELF_OSC_LEVEL whatever the cutoff;
+    # the (1 + g^2)^2 matters only in the top octaves, where g is no longer small.
+    # Kept under the output clip's knee, so what leaves the filter is the clean sine. The value is
+    # for 48 kHz; initialize scales it with the sample rate, as it does the clip.
+    SELF_OSC_LEVEL = 0.4
+    SELF_OSC_KAPPA = (SELF_OSC_LEVEL / 11.4) * (SELF_OSC_LEVEL / 11.4)
+    # How negative k may go. Below a few hundred Hz, -kappa / g grows large enough to pull the
+    # oscillation's pitch down; held here, the amplitude falls off there instead.
+    SELF_OSC_K_FLOOR = -0.2
+    # The loop cannot start oscillating from states of exactly zero. This is added to the band
+    # pass state at every control-rate step with its sign flipped each time, so the states never
+    # rest at zero and never rest on a point that a change of k leaves in place; a constant would
+    # do the latter, as k does not move the loop's DC balance. Well above flush_tiny's dead zone,
+    # and far below anything audible.
+    SELF_OSC_SEED = 1e-6
 
     def initialize(sample_rate)
       @sample_rate = sample_rate
@@ -79,6 +107,8 @@ module Spms1
       soft_clip_alpha = 48000.0 / @sample_rate
       @soft_clip_gain_scale = SOFT_CLIP_GAIN_SCALE * soft_clip_alpha
       @soft_clip_leak = (1.0 - soft_clip_alpha) * 0.5
+      @self_osc_kappa = SELF_OSC_KAPPA * soft_clip_alpha
+      @self_osc_seed = SELF_OSC_SEED
 
       # Integrator gain lookup, g = tan(pi * f_0 / f_s), one entry per semitone of MIDI note 15
       # (19 Hz) to 135 (20 kHz), the cutoff dial's range. It depends on the sample rate, so it is
@@ -140,7 +170,8 @@ module Spms1
       @gain = (gain < 0.0) ? 0.0 : ((gain > 1.0) ? 1.0 : gain)
     end
 
-    # Q range: ~0.7 (0.0), ~2.83 (0.5), ~11.3 (1.0).
+    # Q range: ~0.7 (0.0), ~2.83 (0.5), 8 (0.875), 256 (~0.953); self-oscillation from there,
+    # growing to its full level at ~0.992 and staying there to 1.0.
     def set_resonance(resonance)
       @resonance = (resonance < 0.0) ? 0.0 : ((resonance > 1.0) ? 1.0 : resonance)
     end
@@ -150,8 +181,9 @@ module Spms1
 
       if @sample_counter == 0
         update_coefficients
-        @s1 = flush_tiny(@s1)
+        @s1 = flush_tiny(@s1) + @self_osc_seed
         @s2 = flush_tiny(@s2)
+        @self_osc_seed = 0.0 - @self_osc_seed
       end
 
       @g += @g_slope
@@ -239,7 +271,18 @@ module Spms1
       clamped_cutoff = total_cutoff - ((over + over.abs) - (under + under.abs)) * 0.5
 
       g = cutoff_to_g_fast(clamped_cutoff)
-      k = resonance_to_k_fast(@current_resonance)
+
+      # The self-oscillation amount: zero up to r = 122/128, rising to one at 127/128 and held
+      # there. Worked out here rather than in K_TABLE, whose interpolation would round off the
+      # corner at 127/128. Each clamp is built as clip_output builds its own.
+      t = @current_resonance * 25.6 - 24.4
+      over  = t - 1.0
+      under = 0.0 - t
+      t = t - ((over + over.abs) - (under + under.abs)) * 0.5
+      one_plus_g_squared = 1.0 + g * g
+      k = resonance_to_k_fast(@current_resonance) - t * @self_osc_kappa * one_plus_g_squared * one_plus_g_squared / g
+      below_floor = SELF_OSC_K_FLOOR - k
+      k = k + (below_floor + below_floor.abs) * 0.5
       g_plus_k = g + k
       one_over_a0 = 1.0 / (1.0 + g * g_plus_k)
 

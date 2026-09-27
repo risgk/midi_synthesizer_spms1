@@ -390,6 +390,14 @@ the filter runs into its own saturation. Its default of CC 64 is the level the o
 be scaled to on its own. The saturation sits on the resonance rather than the pass band: a low
 cutoff passes a loud note nearly clean, while turning the gain up rounds off the resonant peak.
 
+Filter 1 Resonance reaches Q 8 at CC 109 and from there doubles Q every 1.875 CC steps, to Q 256
+just past CC 118. Above that the filter oscillates on its own: a sine at the cutoff frequency,
+growing to its full level of about 0.4 by CC 123 and holding it to the top of the dial. Low in
+that range the oscillation builds slowly and shares the filter with the input; at the top it
+takes the input over. Its level holds across the cutoff range down to about 100 Hz and falls
+below that. With the cutoff following the keyboard, as in the examples below, it plays as a
+sine voice.
+
 A mixer takes each input at its own level and its own polarity, then adds them. Level runs from
 silent at 0.0 (CC 4) to full at 1.0 (CC 124), and Invert from unchanged at 0.0, through silence
 at 0.5, to negated at 1.0. Levels default to full and inverts to unchanged, so a mixer
