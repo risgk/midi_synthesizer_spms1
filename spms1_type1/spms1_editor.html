@@ -509,6 +509,15 @@
       flex: 1;
       max-width: none;
     }
+    /* What a routed parameter reads, in the space between its label and its fields. */
+    .row.ctrl .lbl {
+      flex: 0 0 auto;
+    }
+    .row.ctrl .src {
+      flex: 1;
+      min-width: 0;
+      max-width: none;
+    }
     .row .src {
       color: var(--text-muted);
       font-size: 0.7rem;
@@ -1288,6 +1297,7 @@
     return `<div class="row ctrl" data-ctrl="${c.key}">
       ${withInput ? `<span class="port in param" data-dst="PR:${c.key}" title="Where ${escapeHTML(c.full)} takes its value (per buffer)"></span>` : ''}
       <span class="lbl" title="${tip}">${escapeHTML(c.label)}</span>
+      <span class="src"${withInput ? ` data-src-of="PR:${c.key}"` : ''}></span>
       <input type="number" class="cc" min="0" max="127" title="CC number, 0 for none">
       <input type="number" class="val" min="0" max="127" title="CC value">
       <span class="norm" title="The value the synth sees in the slot"></span>
