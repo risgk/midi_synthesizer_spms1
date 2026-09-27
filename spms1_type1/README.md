@@ -433,9 +433,9 @@ cutoff passes a loud note nearly clean, while turning the gain up rounds off the
 
 Filter 1 Resonance reaches Q 8 at CC 109 and from there doubles Q every 1.875 CC steps, to Q 256
 just past CC 118. Above that the filter oscillates on its own: a sine at the cutoff frequency,
-growing to its full level of about 0.4 by CC 123 and holding it to the top of the dial. Low in
+growing to its full level of about 0.5 by CC 123 and holding it to the top of the dial. Low in
 that range the oscillation builds slowly and shares the filter with the input; at the top it
-takes the input over. Its level holds across the cutoff range down to about 100 Hz and falls
+takes the input over. Its level holds across the cutoff range down to about 150 Hz and falls
 below that. With the cutoff following the keyboard, as in the examples below, it plays as a
 sine voice.
 
