@@ -453,7 +453,10 @@
       width: 200px;
     }
     .node.general {
-      width: 280px;
+      width: 250px;
+    }
+    .node.const {
+      width: 120px;
     }
     .node.off {
       opacity: 0.55;
@@ -1336,7 +1339,7 @@
     portEls = {};
     for (const node of NODES) {
       const el = document.createElement('div');
-      el.className = 'node' + (node.aux ? ' aux' : '') + (node.key === 'GENERAL' ? ' general' : '');
+      el.className = 'node' + (node.aux ? ' aux' : '') + (node.key === 'GENERAL' ? ' general' : '') + (node.key === 'CONST' ? ' const' : '');
       el.dataset.node = node.key;
       el.innerHTML = nodeHTML(node);
       const pos = state.layout[node.key];
