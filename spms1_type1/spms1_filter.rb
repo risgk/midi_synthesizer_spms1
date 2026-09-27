@@ -36,6 +36,9 @@ module Spms1
     # method that runs every sample.
     SOFT_CLIP_FLOOR      = -SOFT_CLIP_CEILING
     SOFT_CLIP_GAIN_SCALE = 1.0 / (3.0 * SOFT_CLIP_CEILING * SOFT_CLIP_CEILING)
+    # The guard on the low pass state that process describes, a power of two as PRA32-U2's is.
+    LOW_PASS_STATE_CEILING = 16.0
+    LOW_PASS_STATE_FLOOR   = -LOW_PASS_STATE_CEILING
     # Blend at the reference rate on the line below. The two move together: their product is what
     # fixes the time constant, so changing one without the other changes how fast smoothing is.
     SMOOTHING_TARGET_BLEND_BASE = 0.03125
@@ -163,11 +166,16 @@ module Spms1
       # comes from the control-rate update.
       # Only the band pass state is soft-clipped: the low pass passes clean and the resonance stays
       # in tune, still held down by the clip inside the loop; clip_output trims what peaks remain.
-      # The low pass state has no ceiling of its own and is bounded only through the band pass.
-      # To clip both states, use the line in the comment instead:
+      # To clip both states, use the line in the comment instead of the clamp:
       #   s2 = soft_clip(@s2)
+      # The clamp is a guard that ordinary use never reaches. Between control-rate steps the
+      # coefficients only approximately satisfy a0 = 1 + g * (g + k), and a cutoff thrown across
+      # its range every step, as audio on the modulation input at full depth does, can then give
+      # the loop gain; nothing else bounds the low pass state. Clamped the way clip_output clamps.
       s1 = soft_clip(@s1)
-      s2 = @s2
+      s2_over  = @s2 - LOW_PASS_STATE_CEILING
+      s2_under = LOW_PASS_STATE_FLOOR - @s2
+      s2 = @s2 - ((s2_over + s2_over.abs) - (s2_under + s2_under.abs)) * 0.5
 
       # high_pass = (x - (g + k) * s1 - s2) / (1 + g * (g + k))
       high_pass = (driven_input - s2) * @one_over_a0 - s1 * @g_plus_k_over_a0
@@ -213,7 +221,7 @@ module Spms1
     # four samples, as the EG's output does, so a fast cutoff sweep is a line rather than a
     # staircase at a quarter of the sample rate. Each is ramped on its own, so between the ends
     # of a ramp they only approximately satisfy a0 = 1 + g * (g + k); the ends are exact, and the
-    # states stay bounded through soft_clip either way. Each ramp starts from the stored set rather
+    # states stay bounded either way, through soft_clip and the guard on the low pass state. Each ramp starts from the stored set rather
     # than from where the additions got to, so rounding does not build up. 0.25 is
     # 1 / CONTROL_RATE_DIVISOR, written out for the reason Mixer#process gives.
     def update_coefficients
