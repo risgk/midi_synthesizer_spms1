@@ -3,6 +3,7 @@ module Spms1
   # pass, with delayed soft clipping on the band pass integrator's state.
   # This implementation is not oversampled; the nonlinear behavior is kept intentionally simple.
   # Reference: https://www.discodsp.net/VAFilterDesign_2.1.2.pdf (The Art of VA Filter Design)
+  # Reference: https://www.kvraudio.com/forum/viewtopic.php?t=349859 (Cheap non-linear zero-delay filters)
   # Reference: https://jatinchowdhury18.medium.com/complex-nonlinearities-episode-4-nonlinear-biquad-filters-ae6b3f23cb0e
   # Coefficients are recomputed every 4 samples rather than every sample, and ramped between: the
   # computation needs two table lookups and a division, and the parameters feeding it are smoothed
