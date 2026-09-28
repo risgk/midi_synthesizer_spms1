@@ -272,7 +272,7 @@ flowchart LR
 
 音を作るモジュールは 1 つずつ、ミキサーは 5 つあり、**この 10 個すべてがデフォルトの実行順に入っています**。
 パッチは結線するだけでよく、何かを先に有効化する必要はありません。どのパラメータにも CC が付いていないのは
-ミキサーだけで、そのぶんデフォルトのパッチでは定数を指させてあります。レベルは 1.0、反転は 0.0 なので、
+ミキサーだけで、そのぶんデフォルトのパッチでは定数を指させてあります。レベルは 1.0、極性は +0.5 なので、
 入力を 1 つ結線したミキサーはそれをそのまま通します。Mixer 1 だけは 2 つのレベルが定数 0.2 を読みます。
 デフォルトのパッチが LFO をそこに通すからです。
 
@@ -302,17 +302,17 @@ flowchart LR
 
 | CC 98 | パラメータ | | CC 98 | パラメータ | | CC 98 | パラメータ |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | LFO 1 Rate | | 11 | Filter 1 Mod Amt | | 22 | Mixer 3 Invert 1 |
+| 0 | LFO 1 Rate | | 11 | Filter 1 Mod Amt | | 22 | Mixer 3 Polarity 1 |
 | 1 | EG 1 Attack | | 12 | Amp 1 Gain | | 23 | Mixer 3 Level 2 |
-| 2 | EG 1 Decay | | 13 | Mixer 1 Level 1 | | 24 | Mixer 3 Invert 2 |
-| 3 | EG 1 Sustain | | 14 | Mixer 1 Invert 1 | | 25 | Mixer 4 Level 1 |
-| 4 | Osc 1 Wave | | 15 | Mixer 1 Level 2 | | 26 | Mixer 4 Invert 1 |
-| 5 | Osc 1 Coarse Tune | | 16 | Mixer 1 Invert 2 | | 27 | Mixer 4 Level 2 |
-| 6 | Osc 1 Fine Tune | | 17 | Mixer 2 Level 1 | | 28 | Mixer 4 Invert 2 |
-| 7 | Osc 1 Mod Amt | | 18 | Mixer 2 Invert 1 | | 29 | Mixer 5 Level 1 |
-| 8 | Filter 1 Cutoff | | 19 | Mixer 2 Level 2 | | 30 | Mixer 5 Invert 1 |
-| 9 | Filter 1 Resonance | | 20 | Mixer 2 Invert 2 | | 31 | Mixer 5 Level 2 |
-| 10 | Filter 1 Gain | | 21 | Mixer 3 Level 1 | | 32 | Mixer 5 Invert 2 |
+| 2 | EG 1 Decay | | 13 | Mixer 1 Level 1 | | 24 | Mixer 3 Polarity 2 |
+| 3 | EG 1 Sustain | | 14 | Mixer 1 Polarity 1 | | 25 | Mixer 4 Level 1 |
+| 4 | Osc 1 Wave | | 15 | Mixer 1 Level 2 | | 26 | Mixer 4 Polarity 1 |
+| 5 | Osc 1 Coarse Tune | | 16 | Mixer 1 Polarity 2 | | 27 | Mixer 4 Level 2 |
+| 6 | Osc 1 Fine Tune | | 17 | Mixer 2 Level 1 | | 28 | Mixer 4 Polarity 2 |
+| 7 | Osc 1 Mod Amt | | 18 | Mixer 2 Polarity 1 | | 29 | Mixer 5 Level 1 |
+| 8 | Filter 1 Cutoff | | 19 | Mixer 2 Level 2 | | 30 | Mixer 5 Polarity 1 |
+| 9 | Filter 1 Resonance | | 20 | Mixer 2 Polarity 2 | | 31 | Mixer 5 Level 2 |
+| 10 | Filter 1 Gain | | 21 | Mixer 3 Level 1 | | 32 | Mixer 5 Polarity 2 |
 
 #### エントリ (CC 98)、カテゴリ 3 のみ
 
@@ -347,26 +347,26 @@ General スロットを参照してください。
 | ID | シグナル | | ID | シグナル | | ID | シグナル |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
 | 0 | なし（定数 0.0） | | 21 | Osc 1 Wave | | 42 | Mixer 4 Level 1 |
-| 1 | 定数 1.0 | | 22 | Osc 1 Coarse Tune ± | | 43 | Mixer 4 Invert 1 |
+| 1 | 定数 1.0 | | 22 | Osc 1 Coarse Tune ± | | 43 | Mixer 4 Polarity 1 ± |
 | 2 | 定数 0.5 | | 23 | Osc 1 Fine Tune ± | | 44 | Mixer 4 Level 2 |
-| 3 | 定数 0.2 | | 24 | Osc 1 Mod Amt | | 45 | Mixer 4 Invert 2 |
+| 3 | 定数 0.2 | | 24 | Osc 1 Mod Amt | | 45 | Mixer 4 Polarity 2 ± |
 | 4 | 定数 -0.2 | | 25 | Filter 1 Cutoff | | 46 | Mixer 5 Level 1 |
-| 5 | 定数 -0.5 | | 26 | Filter 1 Resonance | | 47 | Mixer 5 Invert 1 |
+| 5 | 定数 -0.5 | | 26 | Filter 1 Resonance | | 47 | Mixer 5 Polarity 1 ± |
 | 6 | 定数 -1.0 | | 27 | Filter 1 Gain | | 48 | Mixer 5 Level 2 |
-| 7 | LFO 1 Output ± | | 28 | Filter 1 Mod Amt | | 49 | Mixer 5 Invert 2 |
+| 7 | LFO 1 Output ± | | 28 | Filter 1 Mod Amt | | 49 | Mixer 5 Polarity 2 ± |
 | 8 | EG 1 Output | | 29 | Amp 1 Gain | | 50 | Note Pitch ± |
 | 9 | Osc 1 Output ± | | 30 | Mixer 1 Level 1 | | 51 | Note Gate |
-| 10 | Filter 1 Output ± | | 31 | Mixer 1 Invert 1 | | 52 | Pitch Bend ± |
+| 10 | Filter 1 Output ± | | 31 | Mixer 1 Polarity 1 ± | | 52 | Pitch Bend ± |
 | 11 | Amp 1 Output ± | | 32 | Mixer 1 Level 2 | | 53 | General Unipolar 1 |
-| 12 | Mixer 1 Output ± | | 33 | Mixer 1 Invert 2 | | 54 | General Unipolar 2 |
+| 12 | Mixer 1 Output ± | | 33 | Mixer 1 Polarity 2 ± | | 54 | General Unipolar 2 |
 | 13 | Mixer 2 Output ± | | 34 | Mixer 2 Level 1 | | 55 | General Unipolar 3 |
-| 14 | Mixer 3 Output ± | | 35 | Mixer 2 Invert 1 | | 56 | General Unipolar 4 |
+| 14 | Mixer 3 Output ± | | 35 | Mixer 2 Polarity 1 ± | | 56 | General Unipolar 4 |
 | 15 | Mixer 4 Output ± | | 36 | Mixer 2 Level 2 | | 57 | General Bipolar 1 ± |
-| 16 | Mixer 5 Output ± | | 37 | Mixer 2 Invert 2 | | 58 | General Bipolar 2 ± |
+| 16 | Mixer 5 Output ± | | 37 | Mixer 2 Polarity 2 ± | | 58 | General Bipolar 2 ± |
 | 17 | LFO 1 Rate | | 38 | Mixer 3 Level 1 | | 59 | General Bipolar 3 ± |
-| 18 | EG 1 Attack | | 39 | Mixer 3 Invert 1 | | 60 | General Bipolar 4 ± |
+| 18 | EG 1 Attack | | 39 | Mixer 3 Polarity 1 ± | | 60 | General Bipolar 4 ± |
 | 19 | EG 1 Decay | | 40 | Mixer 3 Level 2 | |  |  |
-| 20 | EG 1 Sustain | | 41 | Mixer 3 Invert 2 | |  |  |
+| 20 | EG 1 Sustain | | 41 | Mixer 3 Polarity 2 ± | |  |  |
 
 **±** は、正負どちらにも振れるシグナルを表します。モジュール出力はフルスケールで -0.5 と +0.5 に届き、
 バイポーラのコントロールスロットは -0.5〜+0.5 で、ミキサーはそれを 2 つ足して 1.0 で止まります。印のない
@@ -377,8 +377,8 @@ General スロットを参照してください。
 パラメータはそれぞれユニポーラかバイポーラで、スロットも同じレンジを取ります。ユニポーラは CC 4〜124 で
 0.0〜1.0 と、エンベロープと同じ幅なので、エンベロープを向ければつまみの全域を動かせます。バイポーラは
 CC 64 を 0.0 とする -0.5〜+0.5 と、LFO と同じ幅なので、バイポーラのソースを向ければ中央を挟んで上下に
-振れます。バイポーラなのは 2 つのチューンだけで、中央が「変化なし」を意味するからです。パラメータに別の
-スロットを指させることがモジュレーションになります。CC のないスロットは、割り当てられるまで 0.0 のままです。
+振れます。2 つのチューンは中央が「変化なし」を意味するのでバイポーラです。ミキサーの極性も、符号そのものが
+設定する値なのでバイポーラです。パラメータに別のスロットを指させることがモジュレーションになります。CC のないスロットは、割り当てられるまで 0.0 のままです。
 
 スロット 53〜60 の General スロットは、どのパラメータにも属さないコントロールスロットです。CC をバスに
 載せるだけで、どのモジュール入力やパラメータからも読めます。General Unipolar 1〜4 は 0.0〜1.0、General
@@ -430,8 +430,8 @@ Filter 1 Resonance は CC 94 の Q 5.66 までは CC 30 段ごとに Q が2倍�
 下の例のようにカットオフを鍵盤に追従させると、サイン波の音源として弾けます。
 
 ミキサーは各入力をそれぞれのレベルとそれぞれの極性で受け取り、足し合わせます。Level は 0.0 (CC 4) で
-無音、1.0 (CC 124) で最大、Invert は 0.0 でそのまま、0.5 で無音、1.0 で反転します。レベルの初期値は
-最大、Invert はそのままなので、入力を 1 つだけ結線したミキサーはバッファになります。その入力を反転させれば
+無音、1.0 (CC 124) で最大、Polarity は -0.5 (CC 4) で反転、0.0 (CC 64) で無音、+0.5 (CC 124) で
+そのままです。レベルの初期値は最大、Polarity はそのままなので、入力を 1 つだけ結線したミキサーはバッファになります。その入力を反転させれば
 インバータに、2 番目だけを反転させれば減算器になります。Mixer 1 だけは例外で、結線されているビブラート
 経路に合わせて、デフォルトのパッチが両方のレベルを定数 0.2 に向けています。
 
@@ -477,8 +477,8 @@ Filter 1 Resonance は CC 94 の Q 5.66 までは CC 30 段ごとに Q が2倍�
   曲げるようになります
 - 逆向きに効く CC。ミキサーに反転させます。Mixer 2 はすでに走っているので、結線するだけです。
   CC 99 = 1, CC 98 = 9, CC 6 = 25 でカットオフのコントロールスロットを 1 番目の入力に、CC 98 = 10,
-  CC 6 = 1 で定数 1.0 を 2 番目の入力に置き、CC 99 = 2, CC 98 = 18, CC 6 = 1 で 1 番目の入力の Invert を
-  1.0、つまり反転側の端に固定すると、ミキサーは 1.0 から CC を引いた値、つまり CC を CC 64 で折り返した
+  CC 6 = 1 で定数 1.0 を 2 番目の入力に置き、CC 99 = 2, CC 98 = 18, CC 6 = 5 で 1 番目の入力の Polarity を
+  -0.5、つまり反転側の端に固定すると、ミキサーは 1.0 から CC を引いた値、つまり CC を CC 64 で折り返した
   ものを出力します。CC 99 = 2, CC 98 = 8, CC 6 = 13 でカットオフ自身のソースをその
   ミキサーに向ければ、CC 74 は上げるほどフィルタを閉じるようになります
 - フィルタを経路から外す: CC 99 = 1, CC 98 = 5, CC 6 = 9 でアンプのオーディオ入力をオシレータに向けます。

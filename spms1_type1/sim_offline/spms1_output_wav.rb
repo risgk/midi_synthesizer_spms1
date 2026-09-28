@@ -58,9 +58,9 @@ lfo.set_rate(cc_to_unipolar(64))
 # patch routes to them.
 mixer_1 = Spms1::Mixer.new(SAMPLE_RATE)
 mixer_1.set_level_1(0.2)
-mixer_1.set_invert_1(cc_to_unipolar(4))
+mixer_1.set_polarity_1(cc_to_bipolar(124))
 mixer_1.set_level_2(0.2)
-mixer_1.set_invert_2(cc_to_unipolar(4))
+mixer_1.set_polarity_2(cc_to_bipolar(124))
 
 puts "Generating stereo waveform data..."
 

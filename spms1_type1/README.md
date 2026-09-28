@@ -276,7 +276,7 @@ already holds, so the parameter can be driven by routing alone.
 There is one of every module that makes a sound and there are five mixers, and **all ten are in
 the default run order**, so a patch only ever has to route, never to switch something on first.
 A mixer is the only kind with no CC on any of its parameters: the default patch points them at
-constants instead, each level at 1.0 and each invert at 0.0, so a mixer with one input routed
+constants instead, each level at 1.0 and each polarity at +0.5, so a mixer with one input routed
 passes it through rather than muting it. Mixer 1's two levels read the constant 0.2 instead,
 because the default patch runs the LFO through it.
 
@@ -308,17 +308,17 @@ gain down but never up.
 
 | CC 98 | Parameter | | CC 98 | Parameter | | CC 98 | Parameter |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | LFO 1 Rate | | 11 | Filter 1 Mod Amt | | 22 | Mixer 3 Invert 1 |
+| 0 | LFO 1 Rate | | 11 | Filter 1 Mod Amt | | 22 | Mixer 3 Polarity 1 |
 | 1 | EG 1 Attack | | 12 | Amp 1 Gain | | 23 | Mixer 3 Level 2 |
-| 2 | EG 1 Decay | | 13 | Mixer 1 Level 1 | | 24 | Mixer 3 Invert 2 |
-| 3 | EG 1 Sustain | | 14 | Mixer 1 Invert 1 | | 25 | Mixer 4 Level 1 |
-| 4 | Osc 1 Wave | | 15 | Mixer 1 Level 2 | | 26 | Mixer 4 Invert 1 |
-| 5 | Osc 1 Coarse Tune | | 16 | Mixer 1 Invert 2 | | 27 | Mixer 4 Level 2 |
-| 6 | Osc 1 Fine Tune | | 17 | Mixer 2 Level 1 | | 28 | Mixer 4 Invert 2 |
-| 7 | Osc 1 Mod Amt | | 18 | Mixer 2 Invert 1 | | 29 | Mixer 5 Level 1 |
-| 8 | Filter 1 Cutoff | | 19 | Mixer 2 Level 2 | | 30 | Mixer 5 Invert 1 |
-| 9 | Filter 1 Resonance | | 20 | Mixer 2 Invert 2 | | 31 | Mixer 5 Level 2 |
-| 10 | Filter 1 Gain | | 21 | Mixer 3 Level 1 | | 32 | Mixer 5 Invert 2 |
+| 2 | EG 1 Decay | | 13 | Mixer 1 Level 1 | | 24 | Mixer 3 Polarity 2 |
+| 3 | EG 1 Sustain | | 14 | Mixer 1 Polarity 1 | | 25 | Mixer 4 Level 1 |
+| 4 | Osc 1 Wave | | 15 | Mixer 1 Level 2 | | 26 | Mixer 4 Polarity 1 |
+| 5 | Osc 1 Coarse Tune | | 16 | Mixer 1 Polarity 2 | | 27 | Mixer 4 Level 2 |
+| 6 | Osc 1 Fine Tune | | 17 | Mixer 2 Level 1 | | 28 | Mixer 4 Polarity 2 |
+| 7 | Osc 1 Mod Amt | | 18 | Mixer 2 Polarity 1 | | 29 | Mixer 5 Level 1 |
+| 8 | Filter 1 Cutoff | | 19 | Mixer 2 Level 2 | | 30 | Mixer 5 Polarity 1 |
+| 9 | Filter 1 Resonance | | 20 | Mixer 2 Polarity 2 | | 31 | Mixer 5 Level 2 |
+| 10 | Filter 1 Gain | | 21 | Mixer 3 Level 1 | | 32 | Mixer 5 Polarity 2 |
 
 #### Entries (CC 98), category 3 only
 
@@ -353,26 +353,26 @@ below.
 | ID | Signal | | ID | Signal | | ID | Signal |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
 | 0 | None (constant 0.0) | | 21 | Osc 1 Wave | | 42 | Mixer 4 Level 1 |
-| 1 | Constant 1.0 | | 22 | Osc 1 Coarse Tune ± | | 43 | Mixer 4 Invert 1 |
+| 1 | Constant 1.0 | | 22 | Osc 1 Coarse Tune ± | | 43 | Mixer 4 Polarity 1 ± |
 | 2 | Constant 0.5 | | 23 | Osc 1 Fine Tune ± | | 44 | Mixer 4 Level 2 |
-| 3 | Constant 0.2 | | 24 | Osc 1 Mod Amt | | 45 | Mixer 4 Invert 2 |
+| 3 | Constant 0.2 | | 24 | Osc 1 Mod Amt | | 45 | Mixer 4 Polarity 2 ± |
 | 4 | Constant -0.2 | | 25 | Filter 1 Cutoff | | 46 | Mixer 5 Level 1 |
-| 5 | Constant -0.5 | | 26 | Filter 1 Resonance | | 47 | Mixer 5 Invert 1 |
+| 5 | Constant -0.5 | | 26 | Filter 1 Resonance | | 47 | Mixer 5 Polarity 1 ± |
 | 6 | Constant -1.0 | | 27 | Filter 1 Gain | | 48 | Mixer 5 Level 2 |
-| 7 | LFO 1 Output ± | | 28 | Filter 1 Mod Amt | | 49 | Mixer 5 Invert 2 |
+| 7 | LFO 1 Output ± | | 28 | Filter 1 Mod Amt | | 49 | Mixer 5 Polarity 2 ± |
 | 8 | EG 1 Output | | 29 | Amp 1 Gain | | 50 | Note Pitch ± |
 | 9 | Osc 1 Output ± | | 30 | Mixer 1 Level 1 | | 51 | Note Gate |
-| 10 | Filter 1 Output ± | | 31 | Mixer 1 Invert 1 | | 52 | Pitch Bend ± |
+| 10 | Filter 1 Output ± | | 31 | Mixer 1 Polarity 1 ± | | 52 | Pitch Bend ± |
 | 11 | Amp 1 Output ± | | 32 | Mixer 1 Level 2 | | 53 | General Unipolar 1 |
-| 12 | Mixer 1 Output ± | | 33 | Mixer 1 Invert 2 | | 54 | General Unipolar 2 |
+| 12 | Mixer 1 Output ± | | 33 | Mixer 1 Polarity 2 ± | | 54 | General Unipolar 2 |
 | 13 | Mixer 2 Output ± | | 34 | Mixer 2 Level 1 | | 55 | General Unipolar 3 |
-| 14 | Mixer 3 Output ± | | 35 | Mixer 2 Invert 1 | | 56 | General Unipolar 4 |
+| 14 | Mixer 3 Output ± | | 35 | Mixer 2 Polarity 1 ± | | 56 | General Unipolar 4 |
 | 15 | Mixer 4 Output ± | | 36 | Mixer 2 Level 2 | | 57 | General Bipolar 1 ± |
-| 16 | Mixer 5 Output ± | | 37 | Mixer 2 Invert 2 | | 58 | General Bipolar 2 ± |
+| 16 | Mixer 5 Output ± | | 37 | Mixer 2 Polarity 2 ± | | 58 | General Bipolar 2 ± |
 | 17 | LFO 1 Rate | | 38 | Mixer 3 Level 1 | | 59 | General Bipolar 3 ± |
-| 18 | EG 1 Attack | | 39 | Mixer 3 Invert 1 | | 60 | General Bipolar 4 ± |
+| 18 | EG 1 Attack | | 39 | Mixer 3 Polarity 1 ± | | 60 | General Bipolar 4 ± |
 | 19 | EG 1 Decay | | 40 | Mixer 3 Level 2 | |  |  |
-| 20 | EG 1 Sustain | | 41 | Mixer 3 Invert 2 | |  |  |
+| 20 | EG 1 Sustain | | 41 | Mixer 3 Polarity 2 ± | |  |  |
 
 A **±** marks a signal that swings both ways: a module output reaches -0.5 and +0.5 at full
 scale, a bipolar control slot runs -0.5 to +0.5, and a mixer sums two of them and stops at one.
@@ -384,9 +384,10 @@ Slots 17-49 hold the values arriving from CC, so a parameter reads its own CC by
 parameter is unipolar or bipolar, and its slot takes the same range. A unipolar one runs 0.0 to
 1.0 from CC 4 to CC 124, the span of an envelope, so an envelope pointed at one sweeps the whole
 of its dial. A bipolar one runs -0.5 to +0.5 with CC 64 at 0.0, the span of an LFO, so a bipolar
-source pointed at one swings it about the middle. Only the two tune controls are bipolar, since
-their middle is no change at all. Pointing a parameter at another slot is what makes a
-modulation. A slot with no CC holds 0.0 until one is assigned.
+source pointed at one swings it about the middle. The two tune controls are bipolar, since their
+middle is no change at all, and so are the mixer polarities, since their sign is what they set.
+Pointing a parameter at another slot is what makes a modulation. A slot with no CC holds 0.0
+until one is assigned.
 
 Slots 53-60, the General slots, are control slots that no parameter owns: a CC put on the bus for
 any module input or parameter to read. General Unipolar 1-4 run 0.0 to 1.0 and General Bipolar
@@ -441,10 +442,10 @@ level holds across the cutoff range down to about 150 Hz and falls below that. W
 following the keyboard, as in the examples below, it plays as a sine voice.
 
 A mixer takes each input at its own level and its own polarity, then adds them. Level runs from
-silent at 0.0 (CC 4) to full at 1.0 (CC 124), and Invert from unchanged at 0.0, through silence
-at 0.5, to negated at 1.0. Levels default to full and inverts to unchanged, so a mixer
-with one input routed is a buffer; inverting that one input makes it an inverter; and inverting
-only the second makes the mixer a subtractor. Mixer 1 is the exception: the default patch points
+silent at 0.0 (CC 4) to full at 1.0 (CC 124), and Polarity from negated at -0.5 (CC 4), through
+silence at 0.0 (CC 64), to unchanged at +0.5 (CC 124). Levels default to full and polarities to
+unchanged, so a mixer with one input routed is a buffer; inverting that one input makes it an
+inverter; and inverting only the second makes the mixer a subtractor. Mixer 1 is the exception: the default patch points
 both of its levels at the constant 0.2, for the vibrato path it is wired into.
 
 The sum is held to -1.0 and +1.0. Two full-scale signals reach exactly that, so nothing ordinary
@@ -494,7 +495,7 @@ that off makes far weaker high harmonics than a hard edge would fold back down i
 - A CC that works backwards, which needs a mixer to invert it. Mixer 2 is already running, so it
   only needs wiring: CC 99 = 1, CC 98 = 9, CC 6 = 25 puts the cutoff's control slot on its first
   input and CC 98 = 10, CC 6 = 1 the constant 1.0 on its second, and CC 99 = 2, CC 98 = 18,
-  CC 6 = 1 pins the first input's invert to 1.0, the negating end of its dial, so the mixer
+  CC 6 = 5 pins the first input's polarity to -0.5, the negating end of its dial, so the mixer
   outputs 1.0 less the CC: the CC mirrored about CC 64. Point the cutoff's own source at the
   mixer with CC 99 = 2, CC 98 = 8, CC 6 = 13 and CC 74 now closes the filter as it rises
 - Take the filter out of the chain: CC 99 = 1, CC 98 = 5, CC 6 = 9 points the amp's audio input

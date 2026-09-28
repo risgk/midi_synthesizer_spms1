@@ -48,19 +48,20 @@ module Spms1
       @target_2 = @level_2 * @polarity_2
     end
 
-    # Each invert is unipolar, [0.0, 1.0], and read as a polarity on its own input: 0.0 passes it
-    # through, 1.0 negates it, and the way between scales it, crossing silence at 0.5. Continuous
-    # rather than a switch so that smoothing carries it across zero without a step. Inverting one
-    # input is what makes a difference rather than a sum; inverting both negates the output.
-    def set_invert_1(invert)
-      clamped_invert = (invert < 0.0) ? 0.0 : ((invert > 1.0) ? 1.0 : invert)
-      @polarity_1 = 1.0 - (clamped_invert + clamped_invert)
+    # Each polarity is bipolar, [-0.5, 0.5], and doubled into a multiplier on its own input: +0.5
+    # passes it through, -0.5 negates it, and the way between scales it, crossing silence at 0.0.
+    # Continuous rather than a switch so that smoothing carries it across zero without a step.
+    # Inverting one input is what makes a difference rather than a sum; inverting both negates the
+    # output.
+    def set_polarity_1(polarity)
+      clamped_polarity = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
+      @polarity_1 = clamped_polarity + clamped_polarity
       @target_1 = @level_1 * @polarity_1
     end
 
-    def set_invert_2(invert)
-      clamped_invert = (invert < 0.0) ? 0.0 : ((invert > 1.0) ? 1.0 : invert)
-      @polarity_2 = 1.0 - (clamped_invert + clamped_invert)
+    def set_polarity_2(polarity)
+      clamped_polarity = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
+      @polarity_2 = clamped_polarity + clamped_polarity
       @target_2 = @level_2 * @polarity_2
     end
 

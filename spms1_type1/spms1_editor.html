@@ -920,9 +920,10 @@
     ['AMP_1',     'GAIN',        'Gain',        false, 15,  64],
   ];
   for (let n = 1; n <= 5; n++) {
-    for (const [suffix, label] of [['LEVEL_1', 'Level 1'], ['INVERT_1', 'Invert 1'], ['LEVEL_2', 'Level 2'], ['INVERT_2', 'Invert 2']]) {
-      PARAMS.push([`MIXER_${n}`, suffix, label, false, 0, null]);
-    }
+    PARAMS.push([`MIXER_${n}`, 'LEVEL_1',    'Level 1',    false, 0, null]);
+    PARAMS.push([`MIXER_${n}`, 'POLARITY_1', 'Polarity 1', true,  0, 124]);
+    PARAMS.push([`MIXER_${n}`, 'LEVEL_2',    'Level 2',    false, 0, null]);
+    PARAMS.push([`MIXER_${n}`, 'POLARITY_2', 'Polarity 2', true,  0, 124]);
   }
 
   // Category 3 only, after the parameters.
@@ -982,7 +983,7 @@
     INPUT_ITEMS.forEach(i => { s.inputs[i.key] = i.defaultSource; });
     PARAM_ITEMS.forEach(p => { s.params[p.key] = p.key; });
     PARAM_ITEMS.forEach(p => {
-      if (p.module && p.module.startsWith('MIXER_')) s.params[p.key] = p.label.startsWith('Level') ? 'ONE' : 'NONE';
+      if (p.module && p.module.startsWith('MIXER_')) s.params[p.key] = p.label.startsWith('Level') ? 'ONE' : 'HALF';
     });
     s.params.MIXER_1_LEVEL_1 = 'POINT_TWO';
     s.params.MIXER_1_LEVEL_2 = 'POINT_TWO';
