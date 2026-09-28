@@ -173,7 +173,7 @@ Each module is processed once per sample, in the run order below. Their paramete
 cutoff, gain and the rest -- arrive from CC and are left out of the diagram.
 
 The LFO goes straight to the oscillator, and LFO 1 Polarity reads the constant 0.1, which brings
-it down to a vibrato depth. Osc 1 Mod Amt Uni spans the whole pitch range, as every modulation
+it down to a vibrato depth. Osc 1 Mod Amt spans the whole pitch range, as every modulation
 depth here does, so bringing a source down to a musical depth is left to the source rather than
 built into the oscillator.
 
@@ -306,16 +306,16 @@ gain down but never up.
 | CC 98 | Parameter | | CC 98 | Parameter | | CC 98 | Parameter |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
 | 0 | LFO 1 Rate | | 13 | Filter 1 Gain | | 26 | Mixer 3 Polarity 1 |
-| 1 | LFO 1 Level | | 14 | Filter 1 Mod Amt Uni | | 27 | Mixer 3 Level 2 |
-| 2 | LFO 1 Polarity | | 15 | Filter 1 Mod Amt Bi | | 28 | Mixer 3 Polarity 2 |
+| 1 | LFO 1 Level | | 14 | Filter 1 Mod Amt | | 27 | Mixer 3 Level 2 |
+| 2 | LFO 1 Polarity | | 15 | Filter 1 Mod Polarity | | 28 | Mixer 3 Polarity 2 |
 | 3 | EG 1 Attack | | 16 | Amp 1 Gain | | 29 | Mixer 4 Level 1 |
 | 4 | EG 1 Decay | | 17 | Mixer 1 Level 1 | | 30 | Mixer 4 Polarity 1 |
 | 5 | EG 1 Sustain | | 18 | Mixer 1 Polarity 1 | | 31 | Mixer 4 Level 2 |
 | 6 | Osc 1 Wave | | 19 | Mixer 1 Level 2 | | 32 | Mixer 4 Polarity 2 |
 | 7 | Osc 1 Coarse Tune | | 20 | Mixer 1 Polarity 2 | | 33 | Mixer 5 Level 1 |
 | 8 | Osc 1 Fine Tune | | 21 | Mixer 2 Level 1 | | 34 | Mixer 5 Polarity 1 |
-| 9 | Osc 1 Mod Amt Uni | | 22 | Mixer 2 Polarity 1 | | 35 | Mixer 5 Level 2 |
-| 10 | Osc 1 Mod Amt Bi | | 23 | Mixer 2 Level 2 | | 36 | Mixer 5 Polarity 2 |
+| 9 | Osc 1 Mod Amt | | 22 | Mixer 2 Polarity 1 | | 35 | Mixer 5 Level 2 |
+| 10 | Osc 1 Mod Polarity | | 23 | Mixer 2 Level 2 | | 36 | Mixer 5 Polarity 2 |
 | 11 | Filter 1 Cutoff | | 24 | Mixer 2 Polarity 2 | |  |  |
 | 12 | Filter 1 Resonance | | 25 | Mixer 3 Level 1 | |  |  |
 
@@ -356,13 +356,13 @@ below.
 | 2 | Constant 0.5 | | 25 | Osc 1 Wave | | 48 | Mixer 4 Level 1 |
 | 3 | Constant 0.2 | | 26 | Osc 1 Coarse Tune ± | | 49 | Mixer 4 Polarity 1 ± |
 | 4 | Constant 0.1 | | 27 | Osc 1 Fine Tune ± | | 50 | Mixer 4 Level 2 |
-| 5 | Constant -0.1 | | 28 | Osc 1 Mod Amt Uni | | 51 | Mixer 4 Polarity 2 ± |
-| 6 | Constant -0.2 | | 29 | Osc 1 Mod Amt Bi ± | | 52 | Mixer 5 Level 1 |
+| 5 | Constant -0.1 | | 28 | Osc 1 Mod Amt | | 51 | Mixer 4 Polarity 2 ± |
+| 6 | Constant -0.2 | | 29 | Osc 1 Mod Polarity ± | | 52 | Mixer 5 Level 1 |
 | 7 | Constant -0.5 | | 30 | Filter 1 Cutoff | | 53 | Mixer 5 Polarity 1 ± |
 | 8 | Constant -1.0 | | 31 | Filter 1 Resonance | | 54 | Mixer 5 Level 2 |
 | 9 | LFO 1 Output ± | | 32 | Filter 1 Gain | | 55 | Mixer 5 Polarity 2 ± |
-| 10 | EG 1 Output | | 33 | Filter 1 Mod Amt Uni | | 56 | Note Pitch ± |
-| 11 | Osc 1 Output ± | | 34 | Filter 1 Mod Amt Bi ± | | 57 | Note Gate |
+| 10 | EG 1 Output | | 33 | Filter 1 Mod Amt | | 56 | Note Pitch ± |
+| 11 | Osc 1 Output ± | | 34 | Filter 1 Mod Polarity ± | | 57 | Note Gate |
 | 12 | Filter 1 Output ± | | 35 | Amp 1 Gain | | 58 | Pitch Bend ± |
 | 13 | Amp 1 Output ± | | 36 | Mixer 1 Level 1 | | 59 | General Unipolar 1 |
 | 14 | Mixer 1 Output ± | | 37 | Mixer 1 Polarity 1 ± | | 60 | General Unipolar 2 |
@@ -386,10 +386,9 @@ parameter is unipolar or bipolar, and its slot takes the same range. A unipolar 
 1.0 from CC 4 to CC 124, the span of an envelope, so an envelope pointed at one sweeps the whole
 of its dial. A bipolar one runs -0.5 to +0.5 with CC 64 at 0.0, the span of an LFO, so a bipolar
 source pointed at one swings it about the middle. The two tune controls are bipolar, since their
-middle is no change at all, and so are the two Mod Amt Bi controls and the mixer polarities,
-since their sign is what they set.
-Pointing a parameter at another slot is what makes a modulation. A slot with no CC holds 0.0
-until one is assigned.
+middle is no change at all, and so is every Polarity -- the LFO's, the mixers' and the two Mod
+Polarity controls -- since its sign is what it sets. Pointing a parameter at another slot is what
+makes a modulation. A slot with no CC holds 0.0 until one is assigned.
 
 Slots 59-66, the General slots, are control slots that no parameter owns: a CC put on the bus for
 any module input or parameter to read. General Unipolar 1-4 run 0.0 to 1.0 and General Bipolar
@@ -432,13 +431,13 @@ negated at -0.5 (CC 4), through silence at 0.0 (CC 64), to unchanged at +0.5 (CC
 CC 113 and powers up at CC 124; Polarity has no CC, and the default patch points it at the
 constant 0.1, a fifth of the way to its top.
 
-Each modulation depth is Mod Amt Uni times Mod Amt Bi, the second doubled: Mod Amt Bi passes
-Mod Amt Uni through at +0.5 (CC 124), silences it at 0.0 (CC 64) and negates it at -0.5 (CC 4).
-Mod Amt Bi has no CC and the default patch points it at the constant 0.5, so either can be the
-one that is turned: Mod Amt Uni for a depth in one direction, Mod Amt Bi for one that crosses
-zero.
+Each modulation depth is Mod Amt times Mod Polarity, the second doubled: Mod Polarity passes
+Mod Amt through at +0.5 (CC 124), silences it at 0.0 (CC 64) and negates it at -0.5 (CC 4), and
+the way between scales it, so it sets depth as well as direction. Mod Polarity has no CC and the
+default patch points it at the constant 0.5, so either can be the one that is turned: Mod Amt for
+a depth in one direction, Mod Polarity for one that crosses zero.
 
-Osc 1 Mod Amt Uni is a depth, not an offset, and it reaches the whole pitch range: at its top a
+Osc 1 Mod Amt is a depth, not an offset, and it reaches the whole pitch range: at its top a
 bipolar source swings the pitch five octaves up and five down. That is a coarse dial for vibrato,
 half a semitone per CC step, which is why the default patch brings the LFO down to a fifth with
 LFO 1 Polarity. There a semitone of vibrato sits at CC 14 and an octave at the top of the dial,
@@ -477,7 +476,7 @@ that off makes far weaker high harmonics than a hard edge would fold back down i
   so CC 13 sets the depth, CC 113 scales it down and CC 3 sets the rate
 - Filter cutoff follows note pitch (keyboard tracking): CC 99 = 1, CC 98 = 4, CC 6 = 56 puts
   Note Pitch on the filter's modulation input in the envelope's place. With the cutoff at CC 64
-  and Mod Amt Uni at CC 124, note 60 leaves the cutoff at the middle of its dial and each note moves
+  and Mod Amt at CC 124, note 60 leaves the cutoff at the middle of its dial and each note moves
   it a semitone
 - Filter cutoff swept by the LFO about the middle of its dial: CC 99 = 1, CC 98 = 4, CC 6 = 9.
   A module input is read every sample, so the LFO can run at any rate

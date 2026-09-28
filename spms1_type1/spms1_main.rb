@@ -107,43 +107,43 @@ SIGNAL_MIXER_3_OUTPUT      = 16
 SIGNAL_MIXER_4_OUTPUT      = 17
 SIGNAL_MIXER_5_OUTPUT      = 18
 
-SIGNAL_LFO_1_RATE                   = 19
-SIGNAL_LFO_1_LEVEL                  = 20
-SIGNAL_LFO_1_POLARITY               = 21
-SIGNAL_ENV_GEN_1_ATTACK             = 22
-SIGNAL_ENV_GEN_1_DECAY              = 23
-SIGNAL_ENV_GEN_1_SUSTAIN            = 24
-SIGNAL_OSC_1_WAVEFORM               = 25
-SIGNAL_OSC_1_COARSE_TUNE            = 26
-SIGNAL_OSC_1_FINE_TUNE              = 27
-SIGNAL_OSC_1_MOD_AMOUNT_UNIPOLAR    = 28
-SIGNAL_OSC_1_MOD_AMOUNT_BIPOLAR     = 29
-SIGNAL_FILTER_1_CUTOFF              = 30
-SIGNAL_FILTER_1_RESONANCE           = 31
-SIGNAL_FILTER_1_GAIN                = 32
-SIGNAL_FILTER_1_MOD_AMOUNT_UNIPOLAR = 33
-SIGNAL_FILTER_1_MOD_AMOUNT_BIPOLAR  = 34
-SIGNAL_AMP_1_GAIN                   = 35
-SIGNAL_MIXER_1_LEVEL_1              = 36
-SIGNAL_MIXER_1_POLARITY_1           = 37
-SIGNAL_MIXER_1_LEVEL_2              = 38
-SIGNAL_MIXER_1_POLARITY_2           = 39
-SIGNAL_MIXER_2_LEVEL_1              = 40
-SIGNAL_MIXER_2_POLARITY_1           = 41
-SIGNAL_MIXER_2_LEVEL_2              = 42
-SIGNAL_MIXER_2_POLARITY_2           = 43
-SIGNAL_MIXER_3_LEVEL_1              = 44
-SIGNAL_MIXER_3_POLARITY_1           = 45
-SIGNAL_MIXER_3_LEVEL_2              = 46
-SIGNAL_MIXER_3_POLARITY_2           = 47
-SIGNAL_MIXER_4_LEVEL_1              = 48
-SIGNAL_MIXER_4_POLARITY_1           = 49
-SIGNAL_MIXER_4_LEVEL_2              = 50
-SIGNAL_MIXER_4_POLARITY_2           = 51
-SIGNAL_MIXER_5_LEVEL_1              = 52
-SIGNAL_MIXER_5_POLARITY_1           = 53
-SIGNAL_MIXER_5_LEVEL_2              = 54
-SIGNAL_MIXER_5_POLARITY_2           = 55
+SIGNAL_LFO_1_RATE            = 19
+SIGNAL_LFO_1_LEVEL           = 20
+SIGNAL_LFO_1_POLARITY        = 21
+SIGNAL_ENV_GEN_1_ATTACK      = 22
+SIGNAL_ENV_GEN_1_DECAY       = 23
+SIGNAL_ENV_GEN_1_SUSTAIN     = 24
+SIGNAL_OSC_1_WAVEFORM        = 25
+SIGNAL_OSC_1_COARSE_TUNE     = 26
+SIGNAL_OSC_1_FINE_TUNE       = 27
+SIGNAL_OSC_1_MOD_AMOUNT      = 28
+SIGNAL_OSC_1_MOD_POLARITY    = 29
+SIGNAL_FILTER_1_CUTOFF       = 30
+SIGNAL_FILTER_1_RESONANCE    = 31
+SIGNAL_FILTER_1_GAIN         = 32
+SIGNAL_FILTER_1_MOD_AMOUNT   = 33
+SIGNAL_FILTER_1_MOD_POLARITY = 34
+SIGNAL_AMP_1_GAIN            = 35
+SIGNAL_MIXER_1_LEVEL_1       = 36
+SIGNAL_MIXER_1_POLARITY_1    = 37
+SIGNAL_MIXER_1_LEVEL_2       = 38
+SIGNAL_MIXER_1_POLARITY_2    = 39
+SIGNAL_MIXER_2_LEVEL_1       = 40
+SIGNAL_MIXER_2_POLARITY_1    = 41
+SIGNAL_MIXER_2_LEVEL_2       = 42
+SIGNAL_MIXER_2_POLARITY_2    = 43
+SIGNAL_MIXER_3_LEVEL_1       = 44
+SIGNAL_MIXER_3_POLARITY_1    = 45
+SIGNAL_MIXER_3_LEVEL_2       = 46
+SIGNAL_MIXER_3_POLARITY_2    = 47
+SIGNAL_MIXER_4_LEVEL_1       = 48
+SIGNAL_MIXER_4_POLARITY_1    = 49
+SIGNAL_MIXER_4_LEVEL_2       = 50
+SIGNAL_MIXER_4_POLARITY_2    = 51
+SIGNAL_MIXER_5_LEVEL_1       = 52
+SIGNAL_MIXER_5_POLARITY_1    = 53
+SIGNAL_MIXER_5_LEVEL_2       = 54
+SIGNAL_MIXER_5_POLARITY_2    = 55
 
 SIGNAL_PITCH               = 56
 SIGNAL_GATE                = 57
@@ -192,99 +192,99 @@ NRPN_SOURCE_MIXER_5_IN_1   = 143
 NRPN_SOURCE_MIXER_5_IN_2   = 144
 NRPN_SOURCE_OUTPUT         = 145
 
-NRPN_SOURCE_LFO_1_RATE                   = 256
-NRPN_SOURCE_LFO_1_LEVEL                  = 257
-NRPN_SOURCE_LFO_1_POLARITY               = 258
-NRPN_SOURCE_ENV_GEN_1_ATTACK             = 259
-NRPN_SOURCE_ENV_GEN_1_DECAY              = 260
-NRPN_SOURCE_ENV_GEN_1_SUSTAIN            = 261
-NRPN_SOURCE_OSC_1_WAVEFORM               = 262
-NRPN_SOURCE_OSC_1_COARSE_TUNE            = 263
-NRPN_SOURCE_OSC_1_FINE_TUNE              = 264
-NRPN_SOURCE_OSC_1_MOD_AMOUNT_UNIPOLAR    = 265
-NRPN_SOURCE_OSC_1_MOD_AMOUNT_BIPOLAR     = 266
-NRPN_SOURCE_FILTER_1_CUTOFF              = 267
-NRPN_SOURCE_FILTER_1_RESONANCE           = 268
-NRPN_SOURCE_FILTER_1_GAIN                = 269
-NRPN_SOURCE_FILTER_1_MOD_AMOUNT_UNIPOLAR = 270
-NRPN_SOURCE_FILTER_1_MOD_AMOUNT_BIPOLAR  = 271
-NRPN_SOURCE_AMP_1_GAIN                   = 272
-NRPN_SOURCE_MIXER_1_LEVEL_1              = 273
-NRPN_SOURCE_MIXER_1_POLARITY_1           = 274
-NRPN_SOURCE_MIXER_1_LEVEL_2              = 275
-NRPN_SOURCE_MIXER_1_POLARITY_2           = 276
-NRPN_SOURCE_MIXER_2_LEVEL_1              = 277
-NRPN_SOURCE_MIXER_2_POLARITY_1           = 278
-NRPN_SOURCE_MIXER_2_LEVEL_2              = 279
-NRPN_SOURCE_MIXER_2_POLARITY_2           = 280
-NRPN_SOURCE_MIXER_3_LEVEL_1              = 281
-NRPN_SOURCE_MIXER_3_POLARITY_1           = 282
-NRPN_SOURCE_MIXER_3_LEVEL_2              = 283
-NRPN_SOURCE_MIXER_3_POLARITY_2           = 284
-NRPN_SOURCE_MIXER_4_LEVEL_1              = 285
-NRPN_SOURCE_MIXER_4_POLARITY_1           = 286
-NRPN_SOURCE_MIXER_4_LEVEL_2              = 287
-NRPN_SOURCE_MIXER_4_POLARITY_2           = 288
-NRPN_SOURCE_MIXER_5_LEVEL_1              = 289
-NRPN_SOURCE_MIXER_5_POLARITY_1           = 290
-NRPN_SOURCE_MIXER_5_LEVEL_2              = 291
-NRPN_SOURCE_MIXER_5_POLARITY_2           = 292
+NRPN_SOURCE_LFO_1_RATE            = 256
+NRPN_SOURCE_LFO_1_LEVEL           = 257
+NRPN_SOURCE_LFO_1_POLARITY        = 258
+NRPN_SOURCE_ENV_GEN_1_ATTACK      = 259
+NRPN_SOURCE_ENV_GEN_1_DECAY       = 260
+NRPN_SOURCE_ENV_GEN_1_SUSTAIN     = 261
+NRPN_SOURCE_OSC_1_WAVEFORM        = 262
+NRPN_SOURCE_OSC_1_COARSE_TUNE     = 263
+NRPN_SOURCE_OSC_1_FINE_TUNE       = 264
+NRPN_SOURCE_OSC_1_MOD_AMOUNT      = 265
+NRPN_SOURCE_OSC_1_MOD_POLARITY    = 266
+NRPN_SOURCE_FILTER_1_CUTOFF       = 267
+NRPN_SOURCE_FILTER_1_RESONANCE    = 268
+NRPN_SOURCE_FILTER_1_GAIN         = 269
+NRPN_SOURCE_FILTER_1_MOD_AMOUNT   = 270
+NRPN_SOURCE_FILTER_1_MOD_POLARITY = 271
+NRPN_SOURCE_AMP_1_GAIN            = 272
+NRPN_SOURCE_MIXER_1_LEVEL_1       = 273
+NRPN_SOURCE_MIXER_1_POLARITY_1    = 274
+NRPN_SOURCE_MIXER_1_LEVEL_2       = 275
+NRPN_SOURCE_MIXER_1_POLARITY_2    = 276
+NRPN_SOURCE_MIXER_2_LEVEL_1       = 277
+NRPN_SOURCE_MIXER_2_POLARITY_1    = 278
+NRPN_SOURCE_MIXER_2_LEVEL_2       = 279
+NRPN_SOURCE_MIXER_2_POLARITY_2    = 280
+NRPN_SOURCE_MIXER_3_LEVEL_1       = 281
+NRPN_SOURCE_MIXER_3_POLARITY_1    = 282
+NRPN_SOURCE_MIXER_3_LEVEL_2       = 283
+NRPN_SOURCE_MIXER_3_POLARITY_2    = 284
+NRPN_SOURCE_MIXER_4_LEVEL_1       = 285
+NRPN_SOURCE_MIXER_4_POLARITY_1    = 286
+NRPN_SOURCE_MIXER_4_LEVEL_2       = 287
+NRPN_SOURCE_MIXER_4_POLARITY_2    = 288
+NRPN_SOURCE_MIXER_5_LEVEL_1       = 289
+NRPN_SOURCE_MIXER_5_POLARITY_1    = 290
+NRPN_SOURCE_MIXER_5_LEVEL_2       = 291
+NRPN_SOURCE_MIXER_5_POLARITY_2    = 292
 
 # A CC number of 0 means the parameter has no CC: its control slot keeps whatever it holds, so the
 # parameter can be driven by routing alone. Nothing seeds a control slot, so one with no CC holds
 # 0.0 -- the bottom of a unipolar dial, the middle of a bipolar one -- until a CC is assigned.
-NRPN_CC_LFO_1_RATE                   = 384
-NRPN_CC_LFO_1_LEVEL                  = 385
-NRPN_CC_LFO_1_POLARITY               = 386
-NRPN_CC_ENV_GEN_1_ATTACK             = 387
-NRPN_CC_ENV_GEN_1_DECAY              = 388
-NRPN_CC_ENV_GEN_1_SUSTAIN            = 389
-NRPN_CC_OSC_1_WAVEFORM               = 390
-NRPN_CC_OSC_1_COARSE_TUNE            = 391
-NRPN_CC_OSC_1_FINE_TUNE              = 392
-NRPN_CC_OSC_1_MOD_AMOUNT_UNIPOLAR    = 393
-NRPN_CC_OSC_1_MOD_AMOUNT_BIPOLAR     = 394
-NRPN_CC_FILTER_1_CUTOFF              = 395
-NRPN_CC_FILTER_1_RESONANCE           = 396
-NRPN_CC_FILTER_1_GAIN                = 397
-NRPN_CC_FILTER_1_MOD_AMOUNT_UNIPOLAR = 398
-NRPN_CC_FILTER_1_MOD_AMOUNT_BIPOLAR  = 399
-NRPN_CC_AMP_1_GAIN                   = 400
-NRPN_CC_MIXER_1_LEVEL_1              = 401
-NRPN_CC_MIXER_1_POLARITY_1           = 402
-NRPN_CC_MIXER_1_LEVEL_2              = 403
-NRPN_CC_MIXER_1_POLARITY_2           = 404
-NRPN_CC_MIXER_2_LEVEL_1              = 405
-NRPN_CC_MIXER_2_POLARITY_1           = 406
-NRPN_CC_MIXER_2_LEVEL_2              = 407
-NRPN_CC_MIXER_2_POLARITY_2           = 408
-NRPN_CC_MIXER_3_LEVEL_1              = 409
-NRPN_CC_MIXER_3_POLARITY_1           = 410
-NRPN_CC_MIXER_3_LEVEL_2              = 411
-NRPN_CC_MIXER_3_POLARITY_2           = 412
-NRPN_CC_MIXER_4_LEVEL_1              = 413
-NRPN_CC_MIXER_4_POLARITY_1           = 414
-NRPN_CC_MIXER_4_LEVEL_2              = 415
-NRPN_CC_MIXER_4_POLARITY_2           = 416
-NRPN_CC_MIXER_5_LEVEL_1              = 417
-NRPN_CC_MIXER_5_POLARITY_1           = 418
-NRPN_CC_MIXER_5_LEVEL_2              = 419
-NRPN_CC_MIXER_5_POLARITY_2           = 420
-NRPN_CC_GENERAL_UNIPOLAR_1           = 421
-NRPN_CC_GENERAL_UNIPOLAR_2           = 422
-NRPN_CC_GENERAL_UNIPOLAR_3           = 423
-NRPN_CC_GENERAL_UNIPOLAR_4           = 424
-NRPN_CC_GENERAL_BIPOLAR_1            = 425
-NRPN_CC_GENERAL_BIPOLAR_2            = 426
-NRPN_CC_GENERAL_BIPOLAR_3            = 427
-NRPN_CC_GENERAL_BIPOLAR_4            = 428
+NRPN_CC_LFO_1_RATE            = 384
+NRPN_CC_LFO_1_LEVEL           = 385
+NRPN_CC_LFO_1_POLARITY        = 386
+NRPN_CC_ENV_GEN_1_ATTACK      = 387
+NRPN_CC_ENV_GEN_1_DECAY       = 388
+NRPN_CC_ENV_GEN_1_SUSTAIN     = 389
+NRPN_CC_OSC_1_WAVEFORM        = 390
+NRPN_CC_OSC_1_COARSE_TUNE     = 391
+NRPN_CC_OSC_1_FINE_TUNE       = 392
+NRPN_CC_OSC_1_MOD_AMOUNT      = 393
+NRPN_CC_OSC_1_MOD_POLARITY    = 394
+NRPN_CC_FILTER_1_CUTOFF       = 395
+NRPN_CC_FILTER_1_RESONANCE    = 396
+NRPN_CC_FILTER_1_GAIN         = 397
+NRPN_CC_FILTER_1_MOD_AMOUNT   = 398
+NRPN_CC_FILTER_1_MOD_POLARITY = 399
+NRPN_CC_AMP_1_GAIN            = 400
+NRPN_CC_MIXER_1_LEVEL_1       = 401
+NRPN_CC_MIXER_1_POLARITY_1    = 402
+NRPN_CC_MIXER_1_LEVEL_2       = 403
+NRPN_CC_MIXER_1_POLARITY_2    = 404
+NRPN_CC_MIXER_2_LEVEL_1       = 405
+NRPN_CC_MIXER_2_POLARITY_1    = 406
+NRPN_CC_MIXER_2_LEVEL_2       = 407
+NRPN_CC_MIXER_2_POLARITY_2    = 408
+NRPN_CC_MIXER_3_LEVEL_1       = 409
+NRPN_CC_MIXER_3_POLARITY_1    = 410
+NRPN_CC_MIXER_3_LEVEL_2       = 411
+NRPN_CC_MIXER_3_POLARITY_2    = 412
+NRPN_CC_MIXER_4_LEVEL_1       = 413
+NRPN_CC_MIXER_4_POLARITY_1    = 414
+NRPN_CC_MIXER_4_LEVEL_2       = 415
+NRPN_CC_MIXER_4_POLARITY_2    = 416
+NRPN_CC_MIXER_5_LEVEL_1       = 417
+NRPN_CC_MIXER_5_POLARITY_1    = 418
+NRPN_CC_MIXER_5_LEVEL_2       = 419
+NRPN_CC_MIXER_5_POLARITY_2    = 420
+NRPN_CC_GENERAL_UNIPOLAR_1    = 421
+NRPN_CC_GENERAL_UNIPOLAR_2    = 422
+NRPN_CC_GENERAL_UNIPOLAR_3    = 423
+NRPN_CC_GENERAL_UNIPOLAR_4    = 424
+NRPN_CC_GENERAL_BIPOLAR_1     = 425
+NRPN_CC_GENERAL_BIPOLAR_2     = 426
+NRPN_CC_GENERAL_BIPOLAR_3     = 427
+NRPN_CC_GENERAL_BIPOLAR_4     = 428
 
 # CC value normalization. Each control slot is unipolar or bipolar, matching the range its
 # parameter clamps to, and takes the converter of its kind: unipolar is 0.0..1.0, the span of an
 # envelope, and bipolar is -0.5..0.5, the span of an LFO, with 0.0 at CC 64 where a MIDI
 # controller puts its detent. The tune controls are bipolar, being offsets about that detent,
-# and so are the bipolar modulation amounts and the mixer polarities, whose sign is what they set.
-# Both map CC 4..124 to the full range and clamp anything outside. Every lookup table in the synth is spaced to match --
+# and so are the polarities, whose sign is what they set. Both map CC 4..124 to the full range and
+# clamp anything outside. Every lookup table in the synth is spaced to match --
 # FREQ_TABLE is semitone-spaced across 120, and EXP_TABLE and Q_TABLE are 121 entries over their
 # ranges -- so a CC value lands on an integer table index, and CC 64 is the exact mid-value of
 # each.
@@ -342,12 +342,11 @@ signals[SIGNAL_MINUS_ONE]       = -1.0
 # see this sample rather than last: Mixer 1 can reach the LFO, Mixer 3 can reach the oscillator,
 # and so on down the chain. The default patch uses none of them: the LFO goes straight to the
 # oscillator, and its own polarity reads the constant 0.1, which brings it down to a vibrato depth
-# so that Osc Mod Amt Uni can span the whole pitch range the way every other modulation depth does.
+# so that Osc Mod Amt can span the whole pitch range the way every other modulation depth does.
 # LFO 1 Level is on CC 113 and starts at full scale.
 # A mixer's parameters have no CC, so the default patch points them at constants instead: full
 # level and a polarity of +0.5, which makes a mixer pass its input through rather than mute it.
-# Each bipolar modulation amount has no CC either and reads +0.5, which leaves the unipolar one
-# in charge.
+# Each modulation polarity has no CC either and reads +0.5, which leaves the amount in charge.
 C.set_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 0, MODULE_LFO_1)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 1, MODULE_MIXER_1)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 2, MODULE_ENV_GEN_1)
@@ -368,66 +367,66 @@ C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_AUDIO    , SIGNAL_FILTER_1_OUTP
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_MOD      , SIGNAL_ENV_GEN_1_OUTPUT)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OUTPUT         , SIGNAL_AMP_1_OUTPUT)
 
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_RATE                   , SIGNAL_LFO_1_RATE)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_LEVEL                  , SIGNAL_LFO_1_LEVEL)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_POLARITY               , SIGNAL_POINT_ONE)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_1_ATTACK             , SIGNAL_ENV_GEN_1_ATTACK)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_1_DECAY              , SIGNAL_ENV_GEN_1_DECAY)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_1_SUSTAIN            , SIGNAL_ENV_GEN_1_SUSTAIN)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_WAVEFORM               , SIGNAL_OSC_1_WAVEFORM)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_COARSE_TUNE            , SIGNAL_OSC_1_COARSE_TUNE)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_FINE_TUNE              , SIGNAL_OSC_1_FINE_TUNE)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_MOD_AMOUNT_UNIPOLAR    , SIGNAL_OSC_1_MOD_AMOUNT_UNIPOLAR)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_MOD_AMOUNT_BIPOLAR     , SIGNAL_HALF)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_CUTOFF              , SIGNAL_FILTER_1_CUTOFF)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_RESONANCE           , SIGNAL_FILTER_1_RESONANCE)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_GAIN                , SIGNAL_FILTER_1_GAIN)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_AMOUNT_UNIPOLAR , SIGNAL_FILTER_1_MOD_AMOUNT_UNIPOLAR)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_AMOUNT_BIPOLAR  , SIGNAL_HALF)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_GAIN                   , SIGNAL_AMP_1_GAIN)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_LEVEL_1              , SIGNAL_ONE)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_POLARITY_1           , SIGNAL_HALF)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_LEVEL_2              , SIGNAL_ONE)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_POLARITY_2           , SIGNAL_HALF)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_LEVEL_1              , SIGNAL_ONE)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_POLARITY_1           , SIGNAL_HALF)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_LEVEL_2              , SIGNAL_ONE)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_POLARITY_2           , SIGNAL_HALF)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_3_LEVEL_1              , SIGNAL_ONE)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_3_POLARITY_1           , SIGNAL_HALF)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_3_LEVEL_2              , SIGNAL_ONE)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_3_POLARITY_2           , SIGNAL_HALF)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_4_LEVEL_1              , SIGNAL_ONE)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_4_POLARITY_1           , SIGNAL_HALF)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_4_LEVEL_2              , SIGNAL_ONE)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_4_POLARITY_2           , SIGNAL_HALF)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_5_LEVEL_1              , SIGNAL_ONE)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_5_POLARITY_1           , SIGNAL_HALF)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_5_LEVEL_2              , SIGNAL_ONE)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_5_POLARITY_2           , SIGNAL_HALF)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_RATE            , SIGNAL_LFO_1_RATE)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_LEVEL           , SIGNAL_LFO_1_LEVEL)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_POLARITY        , SIGNAL_POINT_ONE)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_1_ATTACK      , SIGNAL_ENV_GEN_1_ATTACK)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_1_DECAY       , SIGNAL_ENV_GEN_1_DECAY)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_1_SUSTAIN     , SIGNAL_ENV_GEN_1_SUSTAIN)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_WAVEFORM        , SIGNAL_OSC_1_WAVEFORM)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_COARSE_TUNE     , SIGNAL_OSC_1_COARSE_TUNE)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_FINE_TUNE       , SIGNAL_OSC_1_FINE_TUNE)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_MOD_AMOUNT      , SIGNAL_OSC_1_MOD_AMOUNT)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_MOD_POLARITY    , SIGNAL_HALF)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_CUTOFF       , SIGNAL_FILTER_1_CUTOFF)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_RESONANCE    , SIGNAL_FILTER_1_RESONANCE)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_GAIN         , SIGNAL_FILTER_1_GAIN)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_AMOUNT   , SIGNAL_FILTER_1_MOD_AMOUNT)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_POLARITY , SIGNAL_HALF)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_GAIN            , SIGNAL_AMP_1_GAIN)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_LEVEL_1       , SIGNAL_ONE)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_POLARITY_1    , SIGNAL_HALF)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_LEVEL_2       , SIGNAL_ONE)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_POLARITY_2    , SIGNAL_HALF)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_LEVEL_1       , SIGNAL_ONE)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_POLARITY_1    , SIGNAL_HALF)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_LEVEL_2       , SIGNAL_ONE)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_POLARITY_2    , SIGNAL_HALF)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_3_LEVEL_1       , SIGNAL_ONE)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_3_POLARITY_1    , SIGNAL_HALF)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_3_LEVEL_2       , SIGNAL_ONE)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_3_POLARITY_2    , SIGNAL_HALF)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_4_LEVEL_1       , SIGNAL_ONE)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_4_POLARITY_1    , SIGNAL_HALF)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_4_LEVEL_2       , SIGNAL_ONE)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_4_POLARITY_2    , SIGNAL_HALF)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_5_LEVEL_1       , SIGNAL_ONE)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_5_POLARITY_1    , SIGNAL_HALF)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_5_LEVEL_2       , SIGNAL_ONE)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_5_POLARITY_2    , SIGNAL_HALF)
 
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_RATE                   , 3)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_LEVEL                  , 113)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_1_ATTACK             , 73)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_1_DECAY              , 75)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_1_SUSTAIN            , 30)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_WAVEFORM               , 20)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_COARSE_TUNE            , 86)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_FINE_TUNE              , 70)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_MOD_AMOUNT_UNIPOLAR    , 13)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_CUTOFF              , 74)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_RESONANCE           , 71)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_GAIN                , 112)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_MOD_AMOUNT_UNIPOLAR , 24)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_AMP_1_GAIN                   , 15)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_UNIPOLAR_1           , 16)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_UNIPOLAR_2           , 17)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_UNIPOLAR_3           , 18)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_UNIPOLAR_4           , 19)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_BIPOLAR_1            , 16)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_BIPOLAR_2            , 17)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_BIPOLAR_3            , 18)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_BIPOLAR_4            , 19)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_RATE          , 3)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_LEVEL         , 113)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_1_ATTACK    , 73)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_1_DECAY     , 75)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_1_SUSTAIN   , 30)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_WAVEFORM      , 20)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_COARSE_TUNE   , 86)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_FINE_TUNE     , 70)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_MOD_AMOUNT    , 13)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_CUTOFF     , 74)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_RESONANCE  , 71)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_GAIN       , 112)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_MOD_AMOUNT , 24)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_AMP_1_GAIN          , 15)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_UNIPOLAR_1  , 16)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_UNIPOLAR_2  , 17)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_UNIPOLAR_3  , 18)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_UNIPOLAR_4  , 19)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_BIPOLAR_1   , 16)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_BIPOLAR_2   , 17)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_BIPOLAR_3   , 18)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_BIPOLAR_4   , 19)
 
 C.set_midi_cc_value(MIDI_CH, 113, 124) # LFO 1 Level
 C.set_midi_cc_value(MIDI_CH, 3  , 64 ) # LFO 1 Rate
@@ -437,11 +436,11 @@ C.set_midi_cc_value(MIDI_CH, 30 , 4  ) # EG 1 Sustain
 C.set_midi_cc_value(MIDI_CH, 20 , 4  ) # Osc 1 Wave
 C.set_midi_cc_value(MIDI_CH, 86 , 64 ) # Osc 1 Coarse Tune
 C.set_midi_cc_value(MIDI_CH, 70 , 64 ) # Osc 1 Fine Tune
-C.set_midi_cc_value(MIDI_CH, 13 , 4  ) # Osc 1 Mod Amt Uni
+C.set_midi_cc_value(MIDI_CH, 13 , 4  ) # Osc 1 Mod Amt
 C.set_midi_cc_value(MIDI_CH, 74 , 64 ) # Filter 1 Cutoff
 C.set_midi_cc_value(MIDI_CH, 71 , 94 ) # Filter 1 Resonance
 C.set_midi_cc_value(MIDI_CH, 112, 64 ) # Filter 1 Gain
-C.set_midi_cc_value(MIDI_CH, 24 , 64 ) # Filter 1 Mod Amt Uni
+C.set_midi_cc_value(MIDI_CH, 24 , 64 ) # Filter 1 Mod Amt
 C.set_midi_cc_value(MIDI_CH, 15 , 64 ) # Amp 1 Gain
 # Each of these fills a unipolar and a bipolar slot at once, and CC 64 is the one value that puts
 # neither at an end: the unipolar slot at 0.5, the bipolar at 0.0.
@@ -500,91 +499,91 @@ loop do
   # the control rate with a 2.67 ms time constant, which swallows the difference between feeding
   # it at 48 kHz and at the 750 Hz buffer rate. Faster modulation goes through the module inputs
   # above, which are read per sample and not smoothed.
-  source_lfo_1_rate                   = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_RATE)
-  source_lfo_1_level                  = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_LEVEL)
-  source_lfo_1_polarity               = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_POLARITY)
-  source_env_gen_1_attack             = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_1_ATTACK)
-  source_env_gen_1_decay              = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_1_DECAY)
-  source_env_gen_1_sustain            = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_1_SUSTAIN)
-  source_osc_1_waveform               = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_WAVEFORM)
-  source_osc_1_coarse_tune            = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_COARSE_TUNE)
-  source_osc_1_fine_tune              = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_FINE_TUNE)
-  source_osc_1_mod_amount_unipolar    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_MOD_AMOUNT_UNIPOLAR)
-  source_osc_1_mod_amount_bipolar     = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_MOD_AMOUNT_BIPOLAR)
-  source_filter_1_cutoff              = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_CUTOFF)
-  source_filter_1_resonance           = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_RESONANCE)
-  source_filter_1_gain                = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_GAIN)
-  source_filter_1_mod_amount_unipolar = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_AMOUNT_UNIPOLAR)
-  source_filter_1_mod_amount_bipolar  = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_AMOUNT_BIPOLAR)
-  source_amp_1_gain                   = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_GAIN)
-  source_mixer_1_level_1              = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_LEVEL_1)
-  source_mixer_1_polarity_1           = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_POLARITY_1)
-  source_mixer_1_level_2              = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_LEVEL_2)
-  source_mixer_1_polarity_2           = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_POLARITY_2)
-  source_mixer_2_level_1              = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_LEVEL_1)
-  source_mixer_2_polarity_1           = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_POLARITY_1)
-  source_mixer_2_level_2              = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_LEVEL_2)
-  source_mixer_2_polarity_2           = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_POLARITY_2)
-  source_mixer_3_level_1              = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_3_LEVEL_1)
-  source_mixer_3_polarity_1           = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_3_POLARITY_1)
-  source_mixer_3_level_2              = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_3_LEVEL_2)
-  source_mixer_3_polarity_2           = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_3_POLARITY_2)
-  source_mixer_4_level_1              = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_4_LEVEL_1)
-  source_mixer_4_polarity_1           = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_4_POLARITY_1)
-  source_mixer_4_level_2              = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_4_LEVEL_2)
-  source_mixer_4_polarity_2           = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_4_POLARITY_2)
-  source_mixer_5_level_1              = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_5_LEVEL_1)
-  source_mixer_5_polarity_1           = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_5_POLARITY_1)
-  source_mixer_5_level_2              = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_5_LEVEL_2)
-  source_mixer_5_polarity_2           = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_5_POLARITY_2)
+  source_lfo_1_rate            = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_RATE)
+  source_lfo_1_level           = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_LEVEL)
+  source_lfo_1_polarity        = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_POLARITY)
+  source_env_gen_1_attack      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_1_ATTACK)
+  source_env_gen_1_decay       = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_1_DECAY)
+  source_env_gen_1_sustain     = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_1_SUSTAIN)
+  source_osc_1_waveform        = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_WAVEFORM)
+  source_osc_1_coarse_tune     = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_COARSE_TUNE)
+  source_osc_1_fine_tune       = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_FINE_TUNE)
+  source_osc_1_mod_amount      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_MOD_AMOUNT)
+  source_osc_1_mod_polarity    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_MOD_POLARITY)
+  source_filter_1_cutoff       = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_CUTOFF)
+  source_filter_1_resonance    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_RESONANCE)
+  source_filter_1_gain         = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_GAIN)
+  source_filter_1_mod_amount   = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_AMOUNT)
+  source_filter_1_mod_polarity = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_POLARITY)
+  source_amp_1_gain            = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_GAIN)
+  source_mixer_1_level_1       = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_LEVEL_1)
+  source_mixer_1_polarity_1    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_POLARITY_1)
+  source_mixer_1_level_2       = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_LEVEL_2)
+  source_mixer_1_polarity_2    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_POLARITY_2)
+  source_mixer_2_level_1       = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_LEVEL_1)
+  source_mixer_2_polarity_1    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_POLARITY_1)
+  source_mixer_2_level_2       = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_LEVEL_2)
+  source_mixer_2_polarity_2    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_POLARITY_2)
+  source_mixer_3_level_1       = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_3_LEVEL_1)
+  source_mixer_3_polarity_1    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_3_POLARITY_1)
+  source_mixer_3_level_2       = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_3_LEVEL_2)
+  source_mixer_3_polarity_2    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_3_POLARITY_2)
+  source_mixer_4_level_1       = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_4_LEVEL_1)
+  source_mixer_4_polarity_1    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_4_POLARITY_1)
+  source_mixer_4_level_2       = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_4_LEVEL_2)
+  source_mixer_4_polarity_2    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_4_POLARITY_2)
+  source_mixer_5_level_1       = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_5_LEVEL_1)
+  source_mixer_5_polarity_1    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_5_POLARITY_1)
+  source_mixer_5_level_2       = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_5_LEVEL_2)
+  source_mixer_5_polarity_2    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_5_POLARITY_2)
 
   # Which CC fills each control slot. The bus is the only thing downstream reads, so this is
   # where MIDI enters and the only place a CC number appears.
-  cc_lfo_1_rate                   = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_RATE)
-  cc_lfo_1_level                  = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_LEVEL)
-  cc_lfo_1_polarity               = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_POLARITY)
-  cc_env_gen_1_attack             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_1_ATTACK)
-  cc_env_gen_1_decay              = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_1_DECAY)
-  cc_env_gen_1_sustain            = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_1_SUSTAIN)
-  cc_osc_1_waveform               = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_WAVEFORM)
-  cc_osc_1_coarse_tune            = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_COARSE_TUNE)
-  cc_osc_1_fine_tune              = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_FINE_TUNE)
-  cc_osc_1_mod_amount_unipolar    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_MOD_AMOUNT_UNIPOLAR)
-  cc_osc_1_mod_amount_bipolar     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_MOD_AMOUNT_BIPOLAR)
-  cc_filter_1_cutoff              = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_CUTOFF)
-  cc_filter_1_resonance           = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_RESONANCE)
-  cc_filter_1_gain                = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_GAIN)
-  cc_filter_1_mod_amount_unipolar = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_MOD_AMOUNT_UNIPOLAR)
-  cc_filter_1_mod_amount_bipolar  = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_MOD_AMOUNT_BIPOLAR)
-  cc_amp_1_gain                   = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_AMP_1_GAIN)
-  cc_mixer_1_level_1              = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_1_LEVEL_1)
-  cc_mixer_1_polarity_1           = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_1_POLARITY_1)
-  cc_mixer_1_level_2              = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_1_LEVEL_2)
-  cc_mixer_1_polarity_2           = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_1_POLARITY_2)
-  cc_mixer_2_level_1              = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_LEVEL_1)
-  cc_mixer_2_polarity_1           = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_POLARITY_1)
-  cc_mixer_2_level_2              = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_LEVEL_2)
-  cc_mixer_2_polarity_2           = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_POLARITY_2)
-  cc_mixer_3_level_1              = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_3_LEVEL_1)
-  cc_mixer_3_polarity_1           = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_3_POLARITY_1)
-  cc_mixer_3_level_2              = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_3_LEVEL_2)
-  cc_mixer_3_polarity_2           = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_3_POLARITY_2)
-  cc_mixer_4_level_1              = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_4_LEVEL_1)
-  cc_mixer_4_polarity_1           = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_4_POLARITY_1)
-  cc_mixer_4_level_2              = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_4_LEVEL_2)
-  cc_mixer_4_polarity_2           = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_4_POLARITY_2)
-  cc_mixer_5_level_1              = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_5_LEVEL_1)
-  cc_mixer_5_polarity_1           = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_5_POLARITY_1)
-  cc_mixer_5_level_2              = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_5_LEVEL_2)
-  cc_mixer_5_polarity_2           = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_5_POLARITY_2)
-  cc_general_unipolar_1           = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_UNIPOLAR_1)
-  cc_general_unipolar_2           = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_UNIPOLAR_2)
-  cc_general_unipolar_3           = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_UNIPOLAR_3)
-  cc_general_unipolar_4           = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_UNIPOLAR_4)
-  cc_general_bipolar_1            = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_BIPOLAR_1)
-  cc_general_bipolar_2            = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_BIPOLAR_2)
-  cc_general_bipolar_3            = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_BIPOLAR_3)
-  cc_general_bipolar_4            = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_BIPOLAR_4)
+  cc_lfo_1_rate            = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_RATE)
+  cc_lfo_1_level           = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_LEVEL)
+  cc_lfo_1_polarity        = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_POLARITY)
+  cc_env_gen_1_attack      = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_1_ATTACK)
+  cc_env_gen_1_decay       = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_1_DECAY)
+  cc_env_gen_1_sustain     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_1_SUSTAIN)
+  cc_osc_1_waveform        = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_WAVEFORM)
+  cc_osc_1_coarse_tune     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_COARSE_TUNE)
+  cc_osc_1_fine_tune       = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_FINE_TUNE)
+  cc_osc_1_mod_amount      = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_MOD_AMOUNT)
+  cc_osc_1_mod_polarity    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_MOD_POLARITY)
+  cc_filter_1_cutoff       = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_CUTOFF)
+  cc_filter_1_resonance    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_RESONANCE)
+  cc_filter_1_gain         = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_GAIN)
+  cc_filter_1_mod_amount   = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_MOD_AMOUNT)
+  cc_filter_1_mod_polarity = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_MOD_POLARITY)
+  cc_amp_1_gain            = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_AMP_1_GAIN)
+  cc_mixer_1_level_1       = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_1_LEVEL_1)
+  cc_mixer_1_polarity_1    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_1_POLARITY_1)
+  cc_mixer_1_level_2       = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_1_LEVEL_2)
+  cc_mixer_1_polarity_2    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_1_POLARITY_2)
+  cc_mixer_2_level_1       = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_LEVEL_1)
+  cc_mixer_2_polarity_1    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_POLARITY_1)
+  cc_mixer_2_level_2       = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_LEVEL_2)
+  cc_mixer_2_polarity_2    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_POLARITY_2)
+  cc_mixer_3_level_1       = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_3_LEVEL_1)
+  cc_mixer_3_polarity_1    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_3_POLARITY_1)
+  cc_mixer_3_level_2       = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_3_LEVEL_2)
+  cc_mixer_3_polarity_2    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_3_POLARITY_2)
+  cc_mixer_4_level_1       = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_4_LEVEL_1)
+  cc_mixer_4_polarity_1    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_4_POLARITY_1)
+  cc_mixer_4_level_2       = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_4_LEVEL_2)
+  cc_mixer_4_polarity_2    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_4_POLARITY_2)
+  cc_mixer_5_level_1       = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_5_LEVEL_1)
+  cc_mixer_5_polarity_1    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_5_POLARITY_1)
+  cc_mixer_5_level_2       = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_5_LEVEL_2)
+  cc_mixer_5_polarity_2    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_5_POLARITY_2)
+  cc_general_unipolar_1    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_UNIPOLAR_1)
+  cc_general_unipolar_2    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_UNIPOLAR_2)
+  cc_general_unipolar_3    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_UNIPOLAR_3)
+  cc_general_unipolar_4    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_UNIPOLAR_4)
+  cc_general_bipolar_1     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_BIPOLAR_1)
+  cc_general_bipolar_2     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_BIPOLAR_2)
+  cc_general_bipolar_3     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_BIPOLAR_3)
+  cc_general_bipolar_4     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_BIPOLAR_4)
 
   signals[cc_slot(cc_lfo_1_rate, SIGNAL_LFO_1_RATE)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_rate))
   signals[cc_slot(cc_lfo_1_level, SIGNAL_LFO_1_LEVEL)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_level))
@@ -595,13 +594,13 @@ loop do
   signals[cc_slot(cc_osc_1_waveform, SIGNAL_OSC_1_WAVEFORM)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_waveform))
   signals[cc_slot(cc_osc_1_coarse_tune, SIGNAL_OSC_1_COARSE_TUNE)] = cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_coarse_tune))
   signals[cc_slot(cc_osc_1_fine_tune, SIGNAL_OSC_1_FINE_TUNE)] = cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_fine_tune))
-  signals[cc_slot(cc_osc_1_mod_amount_unipolar, SIGNAL_OSC_1_MOD_AMOUNT_UNIPOLAR)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_mod_amount_unipolar))
-  signals[cc_slot(cc_osc_1_mod_amount_bipolar, SIGNAL_OSC_1_MOD_AMOUNT_BIPOLAR)] = cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_mod_amount_bipolar))
+  signals[cc_slot(cc_osc_1_mod_amount, SIGNAL_OSC_1_MOD_AMOUNT)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_mod_amount))
+  signals[cc_slot(cc_osc_1_mod_polarity, SIGNAL_OSC_1_MOD_POLARITY)] = cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_mod_polarity))
   signals[cc_slot(cc_filter_1_cutoff, SIGNAL_FILTER_1_CUTOFF)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_cutoff))
   signals[cc_slot(cc_filter_1_resonance, SIGNAL_FILTER_1_RESONANCE)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_resonance))
   signals[cc_slot(cc_filter_1_gain, SIGNAL_FILTER_1_GAIN)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_gain))
-  signals[cc_slot(cc_filter_1_mod_amount_unipolar, SIGNAL_FILTER_1_MOD_AMOUNT_UNIPOLAR)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_mod_amount_unipolar))
-  signals[cc_slot(cc_filter_1_mod_amount_bipolar, SIGNAL_FILTER_1_MOD_AMOUNT_BIPOLAR)] = cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_mod_amount_bipolar))
+  signals[cc_slot(cc_filter_1_mod_amount, SIGNAL_FILTER_1_MOD_AMOUNT)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_mod_amount))
+  signals[cc_slot(cc_filter_1_mod_polarity, SIGNAL_FILTER_1_MOD_POLARITY)] = cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_mod_polarity))
   signals[cc_slot(cc_amp_1_gain, SIGNAL_AMP_1_GAIN)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_amp_1_gain))
   signals[cc_slot(cc_mixer_1_level_1, SIGNAL_MIXER_1_LEVEL_1)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_level_1))
   signals[cc_slot(cc_mixer_1_polarity_1, SIGNAL_MIXER_1_POLARITY_1)] = cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_polarity_1))
@@ -641,13 +640,13 @@ loop do
   osc_1.set_waveform(signals[source_osc_1_waveform])
   osc_1.set_coarse_tune(signals[source_osc_1_coarse_tune])
   osc_1.set_fine_tune(signals[source_osc_1_fine_tune])
-  osc_1.set_modulation_amount_unipolar(signals[source_osc_1_mod_amount_unipolar])
-  osc_1.set_modulation_amount_bipolar(signals[source_osc_1_mod_amount_bipolar])
+  osc_1.set_modulation_amount(signals[source_osc_1_mod_amount])
+  osc_1.set_modulation_polarity(signals[source_osc_1_mod_polarity])
   filter_1.set_cutoff(signals[source_filter_1_cutoff])
   filter_1.set_resonance(signals[source_filter_1_resonance])
   filter_1.set_gain(signals[source_filter_1_gain])
-  filter_1.set_modulation_amount_unipolar(signals[source_filter_1_mod_amount_unipolar])
-  filter_1.set_modulation_amount_bipolar(signals[source_filter_1_mod_amount_bipolar])
+  filter_1.set_modulation_amount(signals[source_filter_1_mod_amount])
+  filter_1.set_modulation_polarity(signals[source_filter_1_mod_polarity])
   amp_1.set_gain(signals[source_amp_1_gain])
   mixer_1.set_level_1(signals[source_mixer_1_level_1])
   mixer_1.set_polarity_1(signals[source_mixer_1_polarity_1])

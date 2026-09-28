@@ -300,16 +300,16 @@ flowchart LR
 | CC 98 | パラメータ | | CC 98 | パラメータ | | CC 98 | パラメータ |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
 | 0 | LFO 1 Rate | | 13 | Filter 1 Gain | | 26 | Mixer 3 Polarity 1 |
-| 1 | LFO 1 Level | | 14 | Filter 1 Mod Amt Uni | | 27 | Mixer 3 Level 2 |
-| 2 | LFO 1 Polarity | | 15 | Filter 1 Mod Amt Bi | | 28 | Mixer 3 Polarity 2 |
+| 1 | LFO 1 Level | | 14 | Filter 1 Mod Amt | | 27 | Mixer 3 Level 2 |
+| 2 | LFO 1 Polarity | | 15 | Filter 1 Mod Polarity | | 28 | Mixer 3 Polarity 2 |
 | 3 | EG 1 Attack | | 16 | Amp 1 Gain | | 29 | Mixer 4 Level 1 |
 | 4 | EG 1 Decay | | 17 | Mixer 1 Level 1 | | 30 | Mixer 4 Polarity 1 |
 | 5 | EG 1 Sustain | | 18 | Mixer 1 Polarity 1 | | 31 | Mixer 4 Level 2 |
 | 6 | Osc 1 Wave | | 19 | Mixer 1 Level 2 | | 32 | Mixer 4 Polarity 2 |
 | 7 | Osc 1 Coarse Tune | | 20 | Mixer 1 Polarity 2 | | 33 | Mixer 5 Level 1 |
 | 8 | Osc 1 Fine Tune | | 21 | Mixer 2 Level 1 | | 34 | Mixer 5 Polarity 1 |
-| 9 | Osc 1 Mod Amt Uni | | 22 | Mixer 2 Polarity 1 | | 35 | Mixer 5 Level 2 |
-| 10 | Osc 1 Mod Amt Bi | | 23 | Mixer 2 Level 2 | | 36 | Mixer 5 Polarity 2 |
+| 9 | Osc 1 Mod Amt | | 22 | Mixer 2 Polarity 1 | | 35 | Mixer 5 Level 2 |
+| 10 | Osc 1 Mod Polarity | | 23 | Mixer 2 Level 2 | | 36 | Mixer 5 Polarity 2 |
 | 11 | Filter 1 Cutoff | | 24 | Mixer 2 Polarity 2 | |  |  |
 | 12 | Filter 1 Resonance | | 25 | Mixer 3 Level 1 | |  |  |
 
@@ -350,13 +350,13 @@ General スロットを参照してください。
 | 2 | 定数 0.5 | | 25 | Osc 1 Wave | | 48 | Mixer 4 Level 1 |
 | 3 | 定数 0.2 | | 26 | Osc 1 Coarse Tune ± | | 49 | Mixer 4 Polarity 1 ± |
 | 4 | 定数 0.1 | | 27 | Osc 1 Fine Tune ± | | 50 | Mixer 4 Level 2 |
-| 5 | 定数 -0.1 | | 28 | Osc 1 Mod Amt Uni | | 51 | Mixer 4 Polarity 2 ± |
-| 6 | 定数 -0.2 | | 29 | Osc 1 Mod Amt Bi ± | | 52 | Mixer 5 Level 1 |
+| 5 | 定数 -0.1 | | 28 | Osc 1 Mod Amt | | 51 | Mixer 4 Polarity 2 ± |
+| 6 | 定数 -0.2 | | 29 | Osc 1 Mod Polarity ± | | 52 | Mixer 5 Level 1 |
 | 7 | 定数 -0.5 | | 30 | Filter 1 Cutoff | | 53 | Mixer 5 Polarity 1 ± |
 | 8 | 定数 -1.0 | | 31 | Filter 1 Resonance | | 54 | Mixer 5 Level 2 |
 | 9 | LFO 1 Output ± | | 32 | Filter 1 Gain | | 55 | Mixer 5 Polarity 2 ± |
-| 10 | EG 1 Output | | 33 | Filter 1 Mod Amt Uni | | 56 | Note Pitch ± |
-| 11 | Osc 1 Output ± | | 34 | Filter 1 Mod Amt Bi ± | | 57 | Note Gate |
+| 10 | EG 1 Output | | 33 | Filter 1 Mod Amt | | 56 | Note Pitch ± |
+| 11 | Osc 1 Output ± | | 34 | Filter 1 Mod Polarity ± | | 57 | Note Gate |
 | 12 | Filter 1 Output ± | | 35 | Amp 1 Gain | | 58 | Pitch Bend ± |
 | 13 | Amp 1 Output ± | | 36 | Mixer 1 Level 1 | | 59 | General Unipolar 1 |
 | 14 | Mixer 1 Output ± | | 37 | Mixer 1 Polarity 1 ± | | 60 | General Unipolar 2 |
@@ -378,8 +378,8 @@ General スロットを参照してください。
 パラメータはそれぞれユニポーラかバイポーラで、スロットも同じレンジを取ります。ユニポーラは CC 4〜124 で
 0.0〜1.0 と、エンベロープと同じ幅なので、エンベロープを向ければつまみの全域を動かせます。バイポーラは
 CC 64 を 0.0 とする -0.5〜+0.5 と、LFO と同じ幅なので、バイポーラのソースを向ければ中央を挟んで上下に
-振れます。2 つのチューンは中央が「変化なし」を意味するのでバイポーラです。2 つの Mod Amt Bi とミキサーの
-極性も、符号そのものが設定する値なのでバイポーラです。パラメータに別のスロットを指させることがモジュレー
+振れます。2 つのチューンは中央が「変化なし」を意味するのでバイポーラです。Polarity も、LFO、ミキサー、
+2 つの Mod Polarity のいずれも、符号そのものが設定する値なのでバイポーラです。パラメータに別のスロットを指させることがモジュレー
 ションになります。CC のないスロットは、割り当てられるまで 0.0 のままです。
 
 スロット 59〜66 の General スロットは、どのパラメータにも属さないコントロールスロットです。CC をバスに
@@ -420,12 +420,13 @@ LFO 1 Level と LFO 1 Polarity は、ミキサーの Level と Polarity が入�
 0.0 (CC 64) で無音、+0.5 (CC 124) でそのままです。Level は CC 113 で、起動時は CC 124 です。Polarity には
 CC がなく、デフォルトのパッチは上端の 5 分の 1 の定数 0.1 を指させています。
 
-モジュレーションの深さは Mod Amt Uni と、2 倍にした Mod Amt Bi の積です。Mod Amt Bi は +0.5 (CC 124) で
-Mod Amt Uni をそのまま通し、0.0 (CC 64) で無効にし、-0.5 (CC 4) で反転させます。Mod Amt Bi には CC がなく、
-デフォルトのパッチは定数 0.5 を指させているので、どちらを回してもかまいません。一方向の深さなら
-Mod Amt Uni、0 をまたぐ深さなら Mod Amt Bi です。
+モジュレーションの深さは Mod Amt と、2 倍にした Mod Polarity の積です。Mod Polarity は +0.5 (CC 124) で
+Mod Amt をそのまま通し、0.0 (CC 64) で無効にし、-0.5 (CC 4) で反転させます。その間では Mod Amt を
+スケールするので、向きだけでなく深さも決めます。Mod Polarity には CC がなく、デフォルトのパッチは定数
+0.5 を指させているので、どちらを回してもかまいません。一方向の深さなら Mod Amt、0 をまたぐ深さなら
+Mod Polarity です。
 
-Osc 1 Mod Amt Uni はオフセットではなく深さで、ピッチの全域に届きます。最大にすると、バイポーラのソースがピッチ
+Osc 1 Mod Amt はオフセットではなく深さで、ピッチの全域に届きます。最大にすると、バイポーラのソースがピッチ
 を 5 オクターブ上下に振ります。ビブラートのつまみとしては CC 1 ステップが 50 セントと粗いので、デフォルト
 のパッチでは LFO 1 Polarity で LFO を 5 分の 1 に絞っています。そこでは半音のビブラートが CC 14、つまみの
 上端で 1 オクターブで、そこから CC 113 で小さくできます。
@@ -460,7 +461,7 @@ Filter 1 Resonance は CC 94 の Q 5.66 までは CC 30 段ごとに Q が2倍�
   深さ、CC 113 でそこからの絞り、CC 3 でレートを決められます
 - フィルタのカットオフをノートのピッチに追従させる（キーボードトラッキング）: CC 99 = 1, CC 98 = 4,
   CC 6 = 56 で、エンベロープの代わりに Note Pitch をフィルタのモジュレーション入力に置きます。カットオフが
-  CC 64、Mod Amt Uni が CC 124 なら、ノート 60 でカットオフはつまみの中央のままで、1 ノートごとに半音動きます
+  CC 64、Mod Amt が CC 124 なら、ノート 60 でカットオフはつまみの中央のままで、1 ノートごとに半音動きます
 - フィルタのカットオフを LFO でつまみの中央を挟んで揺らす: CC 99 = 1, CC 98 = 4, CC 6 = 9。
   モジュール入力は毎サンプル読まれるので、LFO のレートはいくつでも構いません
 - フィルタのカットオフを、自分の CC ではなくエンベロープで動かす: CC 99 = 2, CC 98 = 11, CC 6 = 10。

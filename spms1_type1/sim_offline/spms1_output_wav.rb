@@ -29,7 +29,7 @@ end
 # The CC values the synth powers up with.
 oscillator = Spms1::Osc.new(SAMPLE_RATE)
 oscillator.set_waveform(cc_to_unipolar(4))
-oscillator.set_modulation_amount_unipolar(cc_to_unipolar(4))
+oscillator.set_modulation_amount(cc_to_unipolar(4))
 oscillator.set_coarse_tune(cc_to_bipolar(64))
 oscillator.set_fine_tune(cc_to_bipolar(64))
 
@@ -38,7 +38,7 @@ filter = Spms1::Filter.new(SAMPLE_RATE)
 # opening it through Mod Amt is what the file is of. Wide open there is nothing left to open.
 filter.set_cutoff(cc_to_unipolar(34))
 filter.set_resonance(cc_to_unipolar(64))
-filter.set_modulation_amount_unipolar(cc_to_unipolar(64))
+filter.set_modulation_amount(cc_to_unipolar(64))
 filter.set_gain(cc_to_unipolar(64))
 
 amp = Spms1::Amp.new(SAMPLE_RATE)

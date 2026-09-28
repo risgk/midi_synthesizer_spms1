@@ -43,11 +43,11 @@ module Spms1
       @phase = 0.0
       @waveform = 0.0
       @current_waveform = 0.0
-      # The two amounts are multiplied before smoothing, as the tune controls are summed.
-      @modulation_amount_unipolar = 0.0
-      @modulation_amount_bipolar = 1.0
+      # Amount and polarity are multiplied before smoothing, as the tune controls are summed.
       @modulation_amount = 0.0
-      @current_modulation_amount = 0.0
+      @modulation_polarity = 1.0
+      @modulation_depth = 0.0
+      @current_modulation_depth = 0.0
       @coarse_tune = 0.0
       @fine_tune = 0.0
       # The two tune controls are summed before smoothing, so the per-sample path adds one offset
@@ -63,20 +63,20 @@ module Spms1
       @waveform = (waveform < 0.0) ? 0.0 : ((waveform > 1.0) ? 1.0 : waveform)
     end
 
-    # Modulation depth is the product of two amounts: one unipolar, [0.0, 1.0], and one bipolar,
-    # [-0.5, 0.5], doubled so that +0.5 leaves the first as it is and -0.5 negates it. Either at
-    # zero gives no modulation. Scaled here rather than per sample so the smoothed value is already
-    # in pitch units.
-    def set_modulation_amount_unipolar(amount)
+    # Modulation depth is amount times polarity. Amount is unipolar, [0.0, 1.0]. Polarity is
+    # bipolar, [-0.5, 0.5], and doubled, so +0.5 leaves the amount as it is, -0.5 negates it and
+    # the way between scales it, crossing zero; it sets depth as well as direction. Scaled here
+    # rather than per sample so the smoothed value is already in pitch units.
+    def set_modulation_amount(amount)
       clamped_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
-      @modulation_amount_unipolar = clamped_amount * MODULATION_RANGE
-      @modulation_amount = @modulation_amount_unipolar * @modulation_amount_bipolar
+      @modulation_amount = clamped_amount * MODULATION_RANGE
+      @modulation_depth = @modulation_amount * @modulation_polarity
     end
 
-    def set_modulation_amount_bipolar(amount)
-      clamped_amount = (amount < -0.5) ? -0.5 : ((amount > 0.5) ? 0.5 : amount)
-      @modulation_amount_bipolar = clamped_amount + clamped_amount
-      @modulation_amount = @modulation_amount_unipolar * @modulation_amount_bipolar
+    def set_modulation_polarity(polarity)
+      clamped_polarity = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
+      @modulation_polarity = clamped_polarity + clamped_polarity
+      @modulation_depth = @modulation_amount * @modulation_polarity
     end
 
     # Both tune controls are bipolar, [-0.5, 0.5], with 0.0 meaning no offset, so a controller's
@@ -102,11 +102,11 @@ module Spms1
       if @sample_counter == 0
         # Morph and depth are smoothed at the control rate to avoid sudden jumps.
         @current_waveform += (@waveform - @current_waveform) * @smoothing_target_blend
-        @current_modulation_amount += (@modulation_amount - @current_modulation_amount) * @smoothing_target_blend
+        @current_modulation_depth += (@modulation_depth - @current_modulation_depth) * @smoothing_target_blend
         @current_tune += (@tune - @current_tune) * @smoothing_target_blend
       end
 
-      total_pitch = pitch_input + @current_tune + (modulation_input * @current_modulation_amount)
+      total_pitch = pitch_input + @current_tune + (modulation_input * @current_modulation_depth)
       pitch = (total_pitch < -0.5) ? -0.5 : ((total_pitch > 0.5) ? 0.5 : total_pitch)
       freq = pitch_to_freq_fast(pitch)
       current_dt = freq * @inv_sample_rate
