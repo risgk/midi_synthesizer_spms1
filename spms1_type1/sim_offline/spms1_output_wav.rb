@@ -53,26 +53,21 @@ env_gen.set_sustain(cc_to_unipolar(4))
 
 lfo = Spms1::LFO.new(SAMPLE_RATE)
 lfo.set_rate(cc_to_unipolar(64))
-
-# Mixer 1 stands between the LFO and the oscillator, both levels on the constant 0.2 the default
-# patch routes to them.
-mixer_1 = Spms1::Mixer.new(SAMPLE_RATE)
-mixer_1.set_level_1(0.2)
-mixer_1.set_polarity_1(cc_to_bipolar(124))
-mixer_1.set_level_2(0.2)
-mixer_1.set_polarity_2(cc_to_bipolar(124))
+# The CC value LFO 1 Level powers up with.
+lfo.set_level(cc_to_unipolar(124))
+# The constant 0.1 the default patch routes to it.
+lfo.set_polarity(0.1)
 
 puts "Generating stereo waveform data..."
 
 pcm_bytes = []
 
-# The default run order: LFO, Mixer 1, EG, Osc, Filter, Amp. Each module reads what the ones ahead
+# The default run order, less the mixers it does not use: LFO, EG, Osc, Filter, Amp. Each module reads what the ones ahead
 # of it made in this same sample, which is what the run order buys.
 NUM_SAMPLES.times do
   lfo_output = lfo.process
-  mixer_1_output = mixer_1.process(lfo_output, 0.0)
   env_gen_output = env_gen.process(1.0)
-  oscillator_output = oscillator.process(NOTE * (1.0 / 120.0) - 0.5, mixer_1_output)
+  oscillator_output = oscillator.process(NOTE * (1.0 / 120.0) - 0.5, lfo_output)
   filter_output = filter.process(oscillator_output, env_gen_output)
   amp_output = amp.process(filter_output, env_gen_output)
 

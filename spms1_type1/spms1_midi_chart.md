@@ -23,18 +23,19 @@
 | Pitch Bend                    | x             | o             | Bipolar, routable as a signal        |
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Control                    20 | x             | o             | Osc Wave (Saw to Square)             |
-| Change                     13 | x             | o             | Osc Mod Amt                          |
+| Change                     13 | x             | o             | Osc Mod Amt Uni                      |
 |                            86 | x             | o             | Osc Coarse Tune (+-5 Octaves)        |
 |                            70 | x             | o             | Osc Fine Tune (+-60 Cents)           |
 |                            74 | x             | o             | Filter Cutoff                        |
 |                            71 | x             | o             | Filter Resonance                     |
-|                            24 | x             | o             | Filter Mod Amt                       |
+|                            24 | x             | o             | Filter Mod Amt Uni                   |
 |                           112 | x             | o             | Filter Gain                          |
 |                            15 | x             | o             | Amp Gain                             |
 |                            73 | x             | o             | EG Attack (Time)                     |
 |                            75 | x             | o             | EG Decay (Time)                      |
 |                            30 | x             | o             | EG Sustain (Level)                   |
 |                             3 | x             | o             | LFO Rate                             |
+|                           113 | x             | o             | LFO Level                            |
 |                            16 | x             | o             | General 1 (Unipolar and Bipolar)     |
 |                            17 | x             | o             | General 2 (Unipolar and Bipolar)     |
 |                            18 | x             | o             | General 3 (Unipolar and Bipolar)     |

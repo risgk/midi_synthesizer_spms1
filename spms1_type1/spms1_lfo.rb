@@ -38,6 +38,12 @@ module Spms1
       # Middle of the range, so the LFO starts where its control does rather than sliding up to it.
       @rate = 0.5
       @current_rate = 0.5
+      @level = 1.0
+      @polarity = 1.0
+      # Level and polarity are multiplied before smoothing, so the per-sample path takes one
+      # multiply and only one smoothing state has to be carried.
+      @amount = 1.0
+      @current_amount = 1.0
       # Not derived here: process assigns it on its first call, before anything reads it.
       @dt = 0.0
       @sample_counter = 0
@@ -49,15 +55,31 @@ module Spms1
       @rate = (rate < 0.0) ? 0.0 : ((rate > 1.0) ? 1.0 : rate)
     end
 
-    # Output is bipolar and spans one unit peak to peak, [-0.5, 0.5], the same span as the pitch
-    # domain. Every bipolar signal on the bus is scaled that way, so a destination's amount control
-    # means the same thing whichever one is routed to it.
+    # The output is scaled by level and polarity together, so a destination can take the LFO at
+    # less than full scale, or inverted, without a mixer in between. Level is unipolar, [0.0, 1.0],
+    # a plain multiplier. Polarity is bipolar, [-0.5, 0.5], and doubled: +0.5 passes the output
+    # through, -0.5 negates it, and the way between scales it, crossing silence at 0.0.
+    def set_level(level)
+      @level = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
+      @amount = @level * @polarity
+    end
+
+    def set_polarity(polarity)
+      clamped_polarity = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
+      @polarity = clamped_polarity + clamped_polarity
+      @amount = @level * @polarity
+    end
+
+    # Output is bipolar and spans one unit peak to peak at full level and polarity, [-0.5, 0.5],
+    # the same span as the pitch domain. Every bipolar signal on the bus is scaled that way, so a destination's
+    # amount control means the same thing whichever one is routed to it.
     def process
       if @sample_counter == 0
-        # Rate is smoothed at the control rate to avoid sudden jumps, and the phase increment is
-        # derived here rather than per sample: nothing feeds this module, so it cannot change
-        # between control-rate updates.
+        # Rate and amount are smoothed at the control rate to avoid sudden jumps, and the phase
+        # increment is derived here rather than per sample: nothing feeds this module, so it
+        # cannot change between control-rate updates.
         @current_rate += (@rate - @current_rate) * @smoothing_target_blend
+        @current_amount += (@amount - @current_amount) * @smoothing_target_blend
         @dt = rate_to_freq_fast(@current_rate) * @inv_sample_rate
       end
 
@@ -72,7 +94,7 @@ module Spms1
       # branch it replaces was the only one in the per-sample path that actually alternated --
       # taken for half of every LFO cycle.
       folded = distance.abs
-      output = 0.5 - (2.0 * folded)
+      output = (0.5 - (2.0 * folded)) * @current_amount
 
       @phase += @dt
       @phase -= (@phase < 1.0) ? 0.0 : 1.0

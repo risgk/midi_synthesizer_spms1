@@ -892,22 +892,24 @@
   const INPUTS = [
     ['ENV_GEN_1', 'GATE',  'Gate',  'GATE'],
     ['OSC_1',     'PITCH', 'Pitch', 'PITCH'],
-    ['OSC_1',     'MOD',   'Mod',   'MIXER_1_OUTPUT'],
+    ['OSC_1',     'MOD',   'Mod',   'LFO_1_OUTPUT'],
     ['FILTER_1',  'AUDIO', 'Audio', 'OSC_1_OUTPUT'],
     ['FILTER_1',  'MOD',   'Mod',   'ENV_GEN_1_OUTPUT'],
     ['AMP_1',     'AUDIO', 'Audio', 'FILTER_1_OUTPUT'],
     ['AMP_1',     'MOD',   'Mod',   'ENV_GEN_1_OUTPUT'],
   ];
   for (let n = 1; n <= 5; n++) {
-    INPUTS.push([`MIXER_${n}`, 'IN_1', 'In 1', n === 1 ? 'LFO_1_OUTPUT' : 'NONE']);
+    INPUTS.push([`MIXER_${n}`, 'IN_1', 'In 1', 'NONE']);
     INPUTS.push([`MIXER_${n}`, 'IN_2', 'In 2', 'NONE']);
   }
   INPUTS.push([null, 'OUTPUT', 'Audio', 'AMP_1_OUTPUT']);
 
   // NRPN categories 2 and 3 share entry numbers for these, and each one's control slot is
-  // signal 17 + entry: [module, suffix, label, bipolar, default CC, default CC value].
+  // signal 19 + entry: [module, suffix, label, bipolar, default CC, default CC value].
   const PARAMS = [
     ['LFO_1',     'RATE',                'Rate',        false, 3,   64],
+    ['LFO_1',     'LEVEL',               'Level',       false, 113, 124],
+    ['LFO_1',     'POLARITY',            'Polarity',    true,  0,   124],
     ['ENV_GEN_1', 'ATTACK',              'Attack',      false, 73,  4],
     ['ENV_GEN_1', 'DECAY',               'Decay',       false, 75,  100],
     ['ENV_GEN_1', 'SUSTAIN',             'Sustain',     false, 30,  4],
@@ -970,8 +972,8 @@
     CONST:     { x: 20,   y: 530 },
     GENERAL:   { x: 20,   y: 220 },
     LFO_1:     { x: 360,  y: 40 },
-    ENV_GEN_1: { x: 360,  y: 180 },
-    MIXER_1:   { x: 360,  y: 400 },
+    ENV_GEN_1: { x: 360,  y: 228 },
+    MIXER_1:   { x: 360,  y: 442 },
     MIXER_2:   { x: 360,  y: 710 },
     OSC_1:     { x: 720,  y: 40 },
     MIXER_3:   { x: 720,  y: 710 },
@@ -989,8 +991,7 @@
     PARAM_ITEMS.forEach(p => {
       if (p.module && p.module.startsWith('MIXER_')) s.params[p.key] = p.label.startsWith('Level') ? 'ONE' : 'HALF';
     });
-    s.params.MIXER_1_LEVEL_1 = 'POINT_TWO';
-    s.params.MIXER_1_LEVEL_2 = 'POINT_TWO';
+    s.params.LFO_1_POLARITY = 'POINT_ONE';
     s.params.OSC_1_MOD_AMOUNT_BIPOLAR = 'HALF';
     s.params.FILTER_1_MOD_AMOUNT_BIPOLAR = 'HALF';
     CONTROL_ITEMS.forEach(c => {
