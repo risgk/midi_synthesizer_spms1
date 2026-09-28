@@ -2009,36 +2009,36 @@ int main(int argc,char**argv){
     }
   }
 #line 1 "spms1_filter.rb"
-#line 10 "spms1_filter.rb"
-#line 19 "spms1_filter.rb"
-  cst_OUTPUT_LIMIT = 1.0;
+#line 11 "spms1_filter.rb"
 #line 20 "spms1_filter.rb"
-  cst_OUTPUT_KNEE = 0.5;
+  cst_OUTPUT_LIMIT = 1.0;
 #line 21 "spms1_filter.rb"
-  cst_OUTPUT_CEILING = ((cst_OUTPUT_LIMIT + cst_OUTPUT_LIMIT) - cst_OUTPUT_KNEE);
+  cst_OUTPUT_KNEE = 0.5;
 #line 22 "spms1_filter.rb"
-  cst_OUTPUT_FLOOR = (-cst_OUTPUT_CEILING);
+  cst_OUTPUT_CEILING = ((cst_OUTPUT_LIMIT + cst_OUTPUT_LIMIT) - cst_OUTPUT_KNEE);
 #line 23 "spms1_filter.rb"
+  cst_OUTPUT_FLOOR = (-cst_OUTPUT_CEILING);
+#line 24 "spms1_filter.rb"
   cst_OUTPUT_KNEE_FLOOR = (-cst_OUTPUT_KNEE);
-#line 26 "spms1_filter.rb"
+#line 27 "spms1_filter.rb"
   cst_OUTPUT_KNEE_SCALE = (1.0 / ((16.0 * ((cst_OUTPUT_LIMIT - cst_OUTPUT_KNEE)))));
-#line 31 "spms1_filter.rb"
+#line 32 "spms1_filter.rb"
   cst_SOFT_CLIP_CEILING = 4.0;
-#line 36 "spms1_filter.rb"
-  cst_SOFT_CLIP_FLOOR = (-cst_SOFT_CLIP_CEILING);
 #line 37 "spms1_filter.rb"
+  cst_SOFT_CLIP_FLOOR = (-cst_SOFT_CLIP_CEILING);
+#line 38 "spms1_filter.rb"
   cst_SOFT_CLIP_GAIN_SCALE = (1.0 / (((3.0 * cst_SOFT_CLIP_CEILING) * cst_SOFT_CLIP_CEILING)));
-#line 40 "spms1_filter.rb"
-  cst_LOW_PASS_STATE_CEILING = 16.0;
 #line 41 "spms1_filter.rb"
+  cst_LOW_PASS_STATE_CEILING = 16.0;
+#line 42 "spms1_filter.rb"
   cst_LOW_PASS_STATE_FLOOR = (-cst_LOW_PASS_STATE_CEILING);
-#line 44 "spms1_filter.rb"
+#line 45 "spms1_filter.rb"
   cst_Spms1__Filter__SMOOTHING_TARGET_BLEND_BASE = 0.03125;
-#line 49 "spms1_filter.rb"
+#line 50 "spms1_filter.rb"
   cst_Spms1__Filter__CONTROL_RATE_DIVISOR = 4LL;
-#line 57 "spms1_filter.rb"
+#line 58 "spms1_filter.rb"
   cst_Spms1__Filter__CONTROL_RATE_MASK = sp_int_sub(cst_Spms1__Filter__CONTROL_RATE_DIVISOR, 1LL);
-#line 66 "spms1_filter.rb"
+#line 67 "spms1_filter.rb"
   mrb_int _t30 = 122LL;
   if (_t30 < 0) sp_raise_cls("ArgumentError", "negative array size");
   mrb_float _t31 = 0.0;
@@ -2046,34 +2046,34 @@ int main(int argc,char**argv){
   SP_GC_ROOT(_t32);
   for (mrb_int _t33 = 0; _t33 < _t30; _t33++) sp_FloatArray_push(_t32, _t31);
   cst_K_TABLE = _t32;
-#line 67 "spms1_filter.rb"
-  cst_BASE_Q = 0.70710678118654757;
 #line 68 "spms1_filter.rb"
-  cst_Q_CURVE_C = (((8.0 - (((122.0 - 16.0)) / 32.0))) / ((((122.0 - 96.0)) * ((122.0 - 96.0)))));
+  cst_BASE_Q = 0.70710678118654757;
 #line 69 "spms1_filter.rb"
+  cst_Q_CURVE_C = (((8.0 - (((122.0 - 16.0)) / 32.0))) / ((((122.0 - 96.0)) * ((122.0 - 96.0)))));
+#line 70 "spms1_filter.rb"
   { mrb_int _t34 = 121LL;
     for (lv_i = 0LL; lv_i < _t34; lv_i++) {
-#line 70 "spms1_filter.rb"
-      if ((lv_i <= 90LL)) {
 #line 71 "spms1_filter.rb"
+      if ((lv_i <= 90LL)) {
+#line 72 "spms1_filter.rb"
         sp_FloatArray_set(cst_K_TABLE, lv_i, (1.0 / ((cst_BASE_Q * (sp_float_pow(2.0, ((((mrb_float)(lv_i)) * ((1.0 / 30.0))))))))));
       }
       else {
-#line 73 "spms1_filter.rb"
-        lv_v = (((mrb_float)(lv_i)) * ((128.0 / 120.0)));
 #line 74 "spms1_filter.rb"
-        if ((lv_v <= 122.0)) {
+        lv_v = (((mrb_float)(lv_i)) * ((128.0 / 120.0)));
 #line 75 "spms1_filter.rb"
+        if ((lv_v <= 122.0)) {
+#line 76 "spms1_filter.rb"
           sp_FloatArray_set(cst_K_TABLE, lv_i, (1.0 / (sp_float_pow(2.0, (((((lv_v - 16.0)) * ((1.0 / 32.0))) + ((cst_Q_CURVE_C * ((lv_v - 96.0))) * ((lv_v - 96.0)))))))));
         }
       }
     }
   }
-#line 79 "spms1_filter.rb"
+#line 80 "spms1_filter.rb"
   sp_FloatArray_set(cst_K_TABLE, 121LL, sp_FloatArray_get(cst_K_TABLE, 120LL));
-#line 88 "spms1_filter.rb"
-  cst_SELF_OSC_LEVEL = 0.25;
 #line 89 "spms1_filter.rb"
+  cst_SELF_OSC_LEVEL = 0.5;
+#line 90 "spms1_filter.rb"
   cst_SELF_OSC_KAPPA = (((cst_SELF_OSC_LEVEL / 11.4)) * ((cst_SELF_OSC_LEVEL / 11.4)));
 #line 93 "spms1_filter.rb"
   cst_SELF_OSC_K_FLOOR = -0.20000000000000001;

@@ -3,6 +3,7 @@ module Spms1
   # pass, with delayed soft clipping on the band pass integrator's state.
   # This implementation is not oversampled; the nonlinear behavior is kept intentionally simple.
   # Reference: https://www.discodsp.net/VAFilterDesign_2.1.2.pdf (The Art of VA Filter Design)
+  # Reference: https://www.kvraudio.com/forum/viewtopic.php?t=349859 (Cheap non-linear zero-delay filters)
   # Reference: https://jatinchowdhury18.medium.com/complex-nonlinearities-episode-4-nonlinear-biquad-filters-ae6b3f23cb0e
   # Coefficients are recomputed every 4 samples rather than every sample, and ramped between: the
   # computation needs two table lookups and a division, and the parameters feeding it are smoothed
@@ -82,14 +83,13 @@ module Spms1
     # the amount dialled in. The soft clip on the band pass state settles the oscillation at about
     # 11.4 * sqrt(|k| * g / (1 + g^2)^2), so this holds it near SELF_OSC_LEVEL whatever the cutoff;
     # the (1 + g^2)^2 matters only in the top octaves, where g is no longer small.
-    # Set near the default patch's peak of about 0.3, so the oscillation is no louder than a note;
-    # the output clip's knee, 0.5, is the most that would leave as a clean sine. The value is for
-    # 48 kHz; initialize scales it with the sample rate, as it does the clip.
-    SELF_OSC_LEVEL = 0.25
+    # Set at the output clip's knee, the most that leaves the filter as a clean sine; the
+    # oscillation settles just below it. The value is for 48 kHz; initialize scales it with the
+    # sample rate, as it does the clip.
+    SELF_OSC_LEVEL = 0.5
     SELF_OSC_KAPPA = (SELF_OSC_LEVEL / 11.4) * (SELF_OSC_LEVEL / 11.4)
-    # How negative k may go. Below about 37 Hz, -kappa / g grows large enough to pull the
-    # oscillation's pitch down; held here, the amplitude falls off there instead. kappa goes as
-    # the square of SELF_OSC_LEVEL, and this frequency with it.
+    # How negative k may go. Below about 150 Hz, -kappa / g grows large enough to pull the
+    # oscillation's pitch down; held here, the amplitude falls off there instead.
     SELF_OSC_K_FLOOR = -0.2
     # The loop cannot start oscillating from states of exactly zero. This is added to the band
     # pass state at every control-rate step with its sign flipped each time, so the states never
