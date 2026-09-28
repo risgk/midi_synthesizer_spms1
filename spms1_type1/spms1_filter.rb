@@ -130,11 +130,13 @@ module Spms1
       @cutoff = 1.0
       @resonance = 0.0
       @modulation_amount = 0.0
+      @modulation_polarity = 1.0
+      @modulation_depth = 0.0
       @gain = 0.5
 
       @current_cutoff = 1.0
       @current_resonance = 0.0
-      @current_modulation_amount = 0.0
+      @current_modulation_depth = 0.0
       @current_gain = 0.5
 
       @g = 0.0
@@ -155,16 +157,26 @@ module Spms1
       update_coefficients
     end
 
-    # Every parameter is unipolar, [0.0, 1.0], which is what the smoothing, the modulation sum and
-    # the table lookups below are written against.
+    # Every parameter but the modulation polarity is unipolar, [0.0, 1.0], which is what the
+    # smoothing, the modulation sum and the table lookups below are written against.
     # Cutoff range: MIDI note 15 (19 Hz) at 0.0, MIDI note 75 (622 Hz) at 0.5, MIDI note 135 (20 kHz) at 1.0.
     def set_cutoff(cutoff)
       @cutoff = (cutoff < 0.0) ? 0.0 : ((cutoff > 1.0) ? 1.0 : cutoff)
     end
 
-    # Modulation depth, none at 0.0.
+    # Modulation depth is amount times polarity. Amount is unipolar, [0.0, 1.0]. Polarity is
+    # bipolar, [-0.5, 0.5], and doubled, so +0.5 leaves the amount as it is, -0.5 negates it and
+    # the way between scales it, crossing zero; it sets depth as well as direction. Multiplied here
+    # so that only the product is smoothed.
     def set_modulation_amount(amount)
       @modulation_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
+      @modulation_depth = @modulation_amount * @modulation_polarity
+    end
+
+    def set_modulation_polarity(polarity)
+      clamped_polarity = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
+      @modulation_polarity = clamped_polarity + clamped_polarity
+      @modulation_depth = @modulation_amount * @modulation_polarity
     end
 
     # How hard the audio input drives the filter, used as a plain multiplier. It sits on the input
@@ -263,13 +275,13 @@ module Spms1
     def update_coefficients
       @current_cutoff += (@cutoff - @current_cutoff) * @smoothing_target_blend
       @current_resonance += (@resonance - @current_resonance) * @smoothing_target_blend
-      @current_modulation_amount += (@modulation_amount - @current_modulation_amount) * @smoothing_target_blend
+      @current_modulation_depth += (@modulation_depth - @current_modulation_depth) * @smoothing_target_blend
       @current_gain += (@gain - @current_gain) * @smoothing_target_blend
 
       # The modulation input arrives as it is; clamping total_cutoff below is what holds the
       # table lookup in range, and a source that swings both ways moves the cutoff both ways.
       # Clamped without a comparison, as clip_output does it.
-      total_cutoff = @current_cutoff + (@current_modulation_input * @current_modulation_amount)
+      total_cutoff = @current_cutoff + (@current_modulation_input * @current_modulation_depth)
       over  = total_cutoff - 1.0
       under = 0.0 - total_cutoff
       clamped_cutoff = total_cutoff - ((over + over.abs) - (under + under.abs)) * 0.5

@@ -200,12 +200,14 @@
       background: var(--primary-color);
       cursor: pointer;
     }
+    /* A disabled slider has no CC behind it, so there is no position to show: the value the
+       parameter reads is in its label instead. */
     input[type="range"]:disabled::-webkit-slider-thumb {
-      background: var(--border-color);
+      background: transparent;
       cursor: default;
     }
     input[type="range"]:disabled::-moz-range-thumb {
-      background: var(--border-color);
+      background: transparent;
       cursor: default;
     }
     .slider-value {
@@ -745,7 +747,7 @@
 <body>
 
 <header>
-  <h1>SPMS-1 (type-1) Editor<span class="version">v0.0.9</span></h1>
+  <h1>SPMS-1 (type-1) Editor<span class="version">v0.0.10</span></h1>
   <nav class="tabs">
     <button class="tab-btn active" data-tab="controls">Controls</button>
     <button class="tab-btn" data-tab="patch">Patch<span class="exp">Experimental</span></button>
@@ -890,39 +892,44 @@
   const INPUTS = [
     ['ENV_GEN_1', 'GATE',  'Gate',  'GATE'],
     ['OSC_1',     'PITCH', 'Pitch', 'PITCH'],
-    ['OSC_1',     'MOD',   'Mod',   'MIXER_1_OUTPUT'],
+    ['OSC_1',     'MOD',   'Mod',   'LFO_1_OUTPUT'],
     ['FILTER_1',  'AUDIO', 'Audio', 'OSC_1_OUTPUT'],
     ['FILTER_1',  'MOD',   'Mod',   'ENV_GEN_1_OUTPUT'],
     ['AMP_1',     'AUDIO', 'Audio', 'FILTER_1_OUTPUT'],
     ['AMP_1',     'MOD',   'Mod',   'ENV_GEN_1_OUTPUT'],
   ];
   for (let n = 1; n <= 5; n++) {
-    INPUTS.push([`MIXER_${n}`, 'IN_1', 'In 1', n === 1 ? 'LFO_1_OUTPUT' : 'NONE']);
+    INPUTS.push([`MIXER_${n}`, 'IN_1', 'In 1', 'NONE']);
     INPUTS.push([`MIXER_${n}`, 'IN_2', 'In 2', 'NONE']);
   }
   INPUTS.push([null, 'OUTPUT', 'Audio', 'AMP_1_OUTPUT']);
 
   // NRPN categories 2 and 3 share entry numbers for these, and each one's control slot is
-  // signal 17 + entry: [module, suffix, label, bipolar, default CC, default CC value].
+  // signal 19 + entry: [module, suffix, label, bipolar, default CC, default CC value].
   const PARAMS = [
-    ['LFO_1',     'RATE',        'Rate',        false, 3,   64],
-    ['ENV_GEN_1', 'ATTACK',      'Attack',      false, 73,  4],
-    ['ENV_GEN_1', 'DECAY',       'Decay',       false, 75,  100],
-    ['ENV_GEN_1', 'SUSTAIN',     'Sustain',     false, 30,  4],
-    ['OSC_1',     'WAVEFORM',    'Wave',        false, 20,  4],
-    ['OSC_1',     'COARSE_TUNE', 'Coarse Tune', true,  86,  64],
-    ['OSC_1',     'FINE_TUNE',   'Fine Tune',   true,  70,  64],
-    ['OSC_1',     'MOD_AMOUNT',  'Mod Amt',     false, 13,  4],
-    ['FILTER_1',  'CUTOFF',      'Cutoff',      false, 74,  64],
-    ['FILTER_1',  'RESONANCE',   'Resonance',   false, 71,  94],
-    ['FILTER_1',  'GAIN',        'Gain',        false, 112, 64],
-    ['FILTER_1',  'MOD_AMOUNT',  'Mod Amt',     false, 24,  64],
-    ['AMP_1',     'GAIN',        'Gain',        false, 15,  64],
+    ['LFO_1',     'RATE',         'Rate',         false, 3,   64],
+    ['LFO_1',     'LEVEL',        'Level',        false, 113, 124],
+    ['LFO_1',     'POLARITY',     'Polarity',     true,  0,   124],
+    ['ENV_GEN_1', 'ATTACK',       'Attack',       false, 73,  4],
+    ['ENV_GEN_1', 'DECAY',        'Decay',        false, 75,  100],
+    ['ENV_GEN_1', 'SUSTAIN',      'Sustain',      false, 30,  4],
+    ['OSC_1',     'WAVEFORM',     'Wave',         false, 20,  4],
+    ['OSC_1',     'COARSE_TUNE',  'Coarse Tune',  true,  86,  64],
+    ['OSC_1',     'FINE_TUNE',    'Fine Tune',    true,  70,  64],
+    ['OSC_1',     'MOD_AMOUNT',   'Mod Amt',      false, 13,  4],
+    ['OSC_1',     'MOD_POLARITY', 'Mod Polarity', true,  0,   124],
+    ['FILTER_1',  'CUTOFF',       'Cutoff',       false, 74,  64],
+    ['FILTER_1',  'RESONANCE',    'Resonance',    false, 71,  94],
+    ['FILTER_1',  'GAIN',         'Gain',         false, 112, 64],
+    ['FILTER_1',  'MOD_AMOUNT',   'Mod Amt',      false, 24,  64],
+    ['FILTER_1',  'MOD_POLARITY', 'Mod Polarity', true,  0,   124],
+    ['AMP_1',     'GAIN',         'Gain',         false, 15,  64],
   ];
   for (let n = 1; n <= 5; n++) {
-    for (const [suffix, label] of [['LEVEL_1', 'Level 1'], ['INVERT_1', 'Invert 1'], ['LEVEL_2', 'Level 2'], ['INVERT_2', 'Invert 2']]) {
-      PARAMS.push([`MIXER_${n}`, suffix, label, false, 0, null]);
-    }
+    PARAMS.push([`MIXER_${n}`, 'LEVEL_1',    'Level 1',    false, 0, null]);
+    PARAMS.push([`MIXER_${n}`, 'POLARITY_1', 'Polarity 1', true,  0, 124]);
+    PARAMS.push([`MIXER_${n}`, 'LEVEL_2',    'Level 2',    false, 0, null]);
+    PARAMS.push([`MIXER_${n}`, 'POLARITY_2', 'Polarity 2', true,  0, 124]);
   }
 
   // Category 3 only, after the parameters.
@@ -945,13 +952,13 @@
   const CONTROL = Object.fromEntries(CONTROL_ITEMS.map(c => [c.key, c]));
 
   // The signals bus, in slot order.
-  const SIGNAL_NAMES = ['NONE', 'ONE', 'HALF', 'POINT_TWO', 'MINUS_POINT_TWO', 'MINUS_HALF', 'MINUS_ONE',
+  const SIGNAL_NAMES = ['NONE', 'ONE', 'HALF', 'POINT_TWO', 'POINT_ONE', 'MINUS_POINT_ONE', 'MINUS_POINT_TWO', 'MINUS_HALF', 'MINUS_ONE',
     ...MODULES.map(m => m.out), ...PARAM_ITEMS.map(p => p.key),
     'PITCH', 'GATE', 'BEND', ...GENERALS.map(g => g[1])];
   const SIG = Object.fromEntries(SIGNAL_NAMES.map((n, i) => [n, i]));
 
   const SIGNAL_LABELS = {
-    NONE: '0.0', ONE: '+1.0', HALF: '+0.5', POINT_TWO: '+0.2', MINUS_POINT_TWO: '-0.2', MINUS_HALF: '-0.5', MINUS_ONE: '-1.0',
+    NONE: '0.0', ONE: '+1.0', HALF: '+0.5', POINT_TWO: '+0.2', POINT_ONE: '+0.1', MINUS_POINT_ONE: '-0.1', MINUS_POINT_TWO: '-0.2', MINUS_HALF: '-0.5', MINUS_ONE: '-1.0',
     PITCH: 'Note Pitch', GATE: 'Note Gate', BEND: 'Pitch Bend',
   };
   MODULES.forEach(m => { SIGNAL_LABELS[m.out] = `${m.label} Out`; });
@@ -965,8 +972,8 @@
     CONST:     { x: 20,   y: 530 },
     GENERAL:   { x: 20,   y: 220 },
     LFO_1:     { x: 360,  y: 40 },
-    MIXER_1:   { x: 360,  y: 180 },
-    ENV_GEN_1: { x: 360,  y: 460 },
+    MIXER_1:   { x: 360,  y: 228 },
+    ENV_GEN_1: { x: 360,  y: 494 },
     MIXER_2:   { x: 360,  y: 710 },
     OSC_1:     { x: 720,  y: 40 },
     MIXER_3:   { x: 720,  y: 710 },
@@ -982,10 +989,11 @@
     INPUT_ITEMS.forEach(i => { s.inputs[i.key] = i.defaultSource; });
     PARAM_ITEMS.forEach(p => { s.params[p.key] = p.key; });
     PARAM_ITEMS.forEach(p => {
-      if (p.module && p.module.startsWith('MIXER_')) s.params[p.key] = p.label.startsWith('Level') ? 'ONE' : 'NONE';
+      if (p.module && p.module.startsWith('MIXER_')) s.params[p.key] = p.label.startsWith('Level') ? 'ONE' : 'HALF';
     });
-    s.params.MIXER_1_LEVEL_1 = 'POINT_TWO';
-    s.params.MIXER_1_LEVEL_2 = 'POINT_TWO';
+    s.params.LFO_1_POLARITY = 'POINT_ONE';
+    s.params.OSC_1_MOD_POLARITY = 'HALF';
+    s.params.FILTER_1_MOD_POLARITY = 'HALF';
     CONTROL_ITEMS.forEach(c => {
       s.cc[c.key] = c.defaultCC;
       if (c.defaultCC) s.values[c.defaultCC] = c.defaultValue;
@@ -1286,7 +1294,7 @@
 
   const NODES = [
     { key: 'NOTE', label: 'Note', aux: true, notes: [['PITCH', 'Pitch', 0, 127], ['GATE', 'Gate', 0, 1], ['BEND', 'Bend', -8192, 8191]] },
-    { key: 'CONST', label: 'Constants', aux: true, normed: true, outs: ['ONE', 'HALF', 'POINT_TWO', 'NONE', 'MINUS_POINT_TWO', 'MINUS_HALF', 'MINUS_ONE'] },
+    { key: 'CONST', label: 'Constants', aux: true, normed: true, outs: ['ONE', 'HALF', 'POINT_TWO', 'POINT_ONE', 'NONE', 'MINUS_POINT_ONE', 'MINUS_POINT_TWO', 'MINUS_HALF', 'MINUS_ONE'] },
     { key: 'GENERAL', label: 'General Controls', aux: true, controls: CONTROL_ITEMS.slice(PARAMS.length) },
     ...MODULES.map(m => ({
       key: m.key, label: m.label, module: m,
@@ -2254,7 +2262,7 @@
   }
 
   const CONSTANT_NORMS = {
-    NONE: '0.000', ONE: '+1.000', HALF: '+0.500', POINT_TWO: '+0.200', MINUS_POINT_TWO: '-0.200', MINUS_HALF: '-0.500', MINUS_ONE: '-1.000',
+    NONE: '0.000', ONE: '+1.000', HALF: '+0.500', POINT_TWO: '+0.200', POINT_ONE: '+0.100', MINUS_POINT_ONE: '-0.100', MINUS_POINT_TWO: '-0.200', MINUS_HALF: '-0.500', MINUS_ONE: '-1.000',
   };
 
   // What a signal reads as normalized, and whether that is a held slot rather than a live CC.
