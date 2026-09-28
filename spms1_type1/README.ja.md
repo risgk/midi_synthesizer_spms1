@@ -174,7 +174,7 @@ flowchart LR
 から届くもので、この図では省いています。
 
 Mixer 1 がビブラートの経路に入っているのは、LFO を 0.2 倍に落とすためです。2 つのレベルはどちらも定数
-0.2 を読んでいます。Osc 1 Mod Amt はここにあるどのモジュレーション深度とも同じくピッチの全域に届くので、
+0.2 を読んでいます。Osc 1 Mod Amt Uni はここにあるどのモジュレーション深度とも同じくピッチの全域に届くので、
 ソースを音楽的な深さまで絞る仕事はオシレータに作り込まず、ミキサーに任せています。
 
 以上はどれも固定ではありません。実行順も、上の図のすべての矢印も、どの CC がどのパラメータに入るかも、
@@ -302,17 +302,18 @@ flowchart LR
 
 | CC 98 | パラメータ | | CC 98 | パラメータ | | CC 98 | パラメータ |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | LFO 1 Rate | | 11 | Filter 1 Mod Amt | | 22 | Mixer 3 Polarity 1 |
-| 1 | EG 1 Attack | | 12 | Amp 1 Gain | | 23 | Mixer 3 Level 2 |
-| 2 | EG 1 Decay | | 13 | Mixer 1 Level 1 | | 24 | Mixer 3 Polarity 2 |
-| 3 | EG 1 Sustain | | 14 | Mixer 1 Polarity 1 | | 25 | Mixer 4 Level 1 |
-| 4 | Osc 1 Wave | | 15 | Mixer 1 Level 2 | | 26 | Mixer 4 Polarity 1 |
-| 5 | Osc 1 Coarse Tune | | 16 | Mixer 1 Polarity 2 | | 27 | Mixer 4 Level 2 |
-| 6 | Osc 1 Fine Tune | | 17 | Mixer 2 Level 1 | | 28 | Mixer 4 Polarity 2 |
-| 7 | Osc 1 Mod Amt | | 18 | Mixer 2 Polarity 1 | | 29 | Mixer 5 Level 1 |
-| 8 | Filter 1 Cutoff | | 19 | Mixer 2 Level 2 | | 30 | Mixer 5 Polarity 1 |
-| 9 | Filter 1 Resonance | | 20 | Mixer 2 Polarity 2 | | 31 | Mixer 5 Level 2 |
-| 10 | Filter 1 Gain | | 21 | Mixer 3 Level 1 | | 32 | Mixer 5 Polarity 2 |
+| 0 | LFO 1 Rate | | 13 | Filter 1 Mod Amt Bi | | 25 | Mixer 3 Level 2 |
+| 1 | EG 1 Attack | | 14 | Amp 1 Gain | | 26 | Mixer 3 Polarity 2 |
+| 2 | EG 1 Decay | | 15 | Mixer 1 Level 1 | | 27 | Mixer 4 Level 1 |
+| 3 | EG 1 Sustain | | 16 | Mixer 1 Polarity 1 | | 28 | Mixer 4 Polarity 1 |
+| 4 | Osc 1 Wave | | 17 | Mixer 1 Level 2 | | 29 | Mixer 4 Level 2 |
+| 5 | Osc 1 Coarse Tune | | 18 | Mixer 1 Polarity 2 | | 30 | Mixer 4 Polarity 2 |
+| 6 | Osc 1 Fine Tune | | 19 | Mixer 2 Level 1 | | 31 | Mixer 5 Level 1 |
+| 7 | Osc 1 Mod Amt Uni | | 20 | Mixer 2 Polarity 1 | | 32 | Mixer 5 Polarity 1 |
+| 8 | Osc 1 Mod Amt Bi | | 21 | Mixer 2 Level 2 | | 33 | Mixer 5 Level 2 |
+| 9 | Filter 1 Cutoff | | 22 | Mixer 2 Polarity 2 | | 34 | Mixer 5 Polarity 2 |
+| 10 | Filter 1 Resonance | | 23 | Mixer 3 Level 1 | |  |  |
+| 11 | Filter 1 Gain | | 24 | Mixer 3 Polarity 1 | |  |  |
 
 #### エントリ (CC 98)、カテゴリ 3 のみ
 
@@ -321,10 +322,10 @@ General スロットを参照してください。
 
 | CC 98 | コントロールスロット | | CC 98 | コントロールスロット |
 | ----- | ------ | - | ----- | ------ |
-| 33 | General Unipolar 1 | | 37 | General Bipolar 1 |
-| 34 | General Unipolar 2 | | 38 | General Bipolar 2 |
-| 35 | General Unipolar 3 | | 39 | General Bipolar 3 |
-| 36 | General Unipolar 4 | | 40 | General Bipolar 4 |
+| 35 | General Unipolar 1 | | 39 | General Bipolar 1 |
+| 36 | General Unipolar 2 | | 40 | General Bipolar 2 |
+| 37 | General Unipolar 3 | | 41 | General Bipolar 3 |
+| 38 | General Unipolar 4 | | 42 | General Bipolar 4 |
 
 #### モジュール ID
 
@@ -346,41 +347,42 @@ General スロットを参照してください。
 
 | ID | シグナル | | ID | シグナル | | ID | シグナル |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | なし（定数 0.0） | | 21 | Osc 1 Wave | | 42 | Mixer 4 Level 1 |
-| 1 | 定数 1.0 | | 22 | Osc 1 Coarse Tune ± | | 43 | Mixer 4 Polarity 1 ± |
-| 2 | 定数 0.5 | | 23 | Osc 1 Fine Tune ± | | 44 | Mixer 4 Level 2 |
-| 3 | 定数 0.2 | | 24 | Osc 1 Mod Amt | | 45 | Mixer 4 Polarity 2 ± |
-| 4 | 定数 -0.2 | | 25 | Filter 1 Cutoff | | 46 | Mixer 5 Level 1 |
-| 5 | 定数 -0.5 | | 26 | Filter 1 Resonance | | 47 | Mixer 5 Polarity 1 ± |
-| 6 | 定数 -1.0 | | 27 | Filter 1 Gain | | 48 | Mixer 5 Level 2 |
-| 7 | LFO 1 Output ± | | 28 | Filter 1 Mod Amt | | 49 | Mixer 5 Polarity 2 ± |
-| 8 | EG 1 Output | | 29 | Amp 1 Gain | | 50 | Note Pitch ± |
-| 9 | Osc 1 Output ± | | 30 | Mixer 1 Level 1 | | 51 | Note Gate |
-| 10 | Filter 1 Output ± | | 31 | Mixer 1 Polarity 1 ± | | 52 | Pitch Bend ± |
-| 11 | Amp 1 Output ± | | 32 | Mixer 1 Level 2 | | 53 | General Unipolar 1 |
-| 12 | Mixer 1 Output ± | | 33 | Mixer 1 Polarity 2 ± | | 54 | General Unipolar 2 |
-| 13 | Mixer 2 Output ± | | 34 | Mixer 2 Level 1 | | 55 | General Unipolar 3 |
-| 14 | Mixer 3 Output ± | | 35 | Mixer 2 Polarity 1 ± | | 56 | General Unipolar 4 |
-| 15 | Mixer 4 Output ± | | 36 | Mixer 2 Level 2 | | 57 | General Bipolar 1 ± |
-| 16 | Mixer 5 Output ± | | 37 | Mixer 2 Polarity 2 ± | | 58 | General Bipolar 2 ± |
-| 17 | LFO 1 Rate | | 38 | Mixer 3 Level 1 | | 59 | General Bipolar 3 ± |
-| 18 | EG 1 Attack | | 39 | Mixer 3 Polarity 1 ± | | 60 | General Bipolar 4 ± |
-| 19 | EG 1 Decay | | 40 | Mixer 3 Level 2 | |  |  |
-| 20 | EG 1 Sustain | | 41 | Mixer 3 Polarity 2 ± | |  |  |
+| 0 | なし（定数 0.0） | | 21 | Osc 1 Wave | | 42 | Mixer 3 Level 2 |
+| 1 | 定数 1.0 | | 22 | Osc 1 Coarse Tune ± | | 43 | Mixer 3 Polarity 2 ± |
+| 2 | 定数 0.5 | | 23 | Osc 1 Fine Tune ± | | 44 | Mixer 4 Level 1 |
+| 3 | 定数 0.2 | | 24 | Osc 1 Mod Amt Uni | | 45 | Mixer 4 Polarity 1 ± |
+| 4 | 定数 -0.2 | | 25 | Osc 1 Mod Amt Bi ± | | 46 | Mixer 4 Level 2 |
+| 5 | 定数 -0.5 | | 26 | Filter 1 Cutoff | | 47 | Mixer 4 Polarity 2 ± |
+| 6 | 定数 -1.0 | | 27 | Filter 1 Resonance | | 48 | Mixer 5 Level 1 |
+| 7 | LFO 1 Output ± | | 28 | Filter 1 Gain | | 49 | Mixer 5 Polarity 1 ± |
+| 8 | EG 1 Output | | 29 | Filter 1 Mod Amt Uni | | 50 | Mixer 5 Level 2 |
+| 9 | Osc 1 Output ± | | 30 | Filter 1 Mod Amt Bi ± | | 51 | Mixer 5 Polarity 2 ± |
+| 10 | Filter 1 Output ± | | 31 | Amp 1 Gain | | 52 | Note Pitch ± |
+| 11 | Amp 1 Output ± | | 32 | Mixer 1 Level 1 | | 53 | Note Gate |
+| 12 | Mixer 1 Output ± | | 33 | Mixer 1 Polarity 1 ± | | 54 | Pitch Bend ± |
+| 13 | Mixer 2 Output ± | | 34 | Mixer 1 Level 2 | | 55 | General Unipolar 1 |
+| 14 | Mixer 3 Output ± | | 35 | Mixer 1 Polarity 2 ± | | 56 | General Unipolar 2 |
+| 15 | Mixer 4 Output ± | | 36 | Mixer 2 Level 1 | | 57 | General Unipolar 3 |
+| 16 | Mixer 5 Output ± | | 37 | Mixer 2 Polarity 1 ± | | 58 | General Unipolar 4 |
+| 17 | LFO 1 Rate | | 38 | Mixer 2 Level 2 | | 59 | General Bipolar 1 ± |
+| 18 | EG 1 Attack | | 39 | Mixer 2 Polarity 2 ± | | 60 | General Bipolar 2 ± |
+| 19 | EG 1 Decay | | 40 | Mixer 3 Level 1 | | 61 | General Bipolar 3 ± |
+| 20 | EG 1 Sustain | | 41 | Mixer 3 Polarity 1 ± | | 62 | General Bipolar 4 ± |
 
 **±** は、正負どちらにも振れるシグナルを表します。モジュール出力はフルスケールで -0.5 と +0.5 に届き、
 バイポーラのコントロールスロットは -0.5〜+0.5 で、ミキサーはそれを 2 つ足して 1.0 で止まります。印のない
 ものは 0.0〜1.0 で、エンベロープの出力、Note Gate、ユニポーラのコントロールスロットがこれにあたります。
 バスは両方を 1 つの番号空間で運ぶので、レンジは「何が書いたか」ではなくスロットごとの性質です。
 
-スロット 17〜49 には CC から届いた値が入るので、パラメータはデフォルトでは自分の CC を読んでいるわけです。
+スロット 17〜51 には CC から届いた値が入るので、パラメータはデフォルトでは自分の CC を読んでいるわけです。
 パラメータはそれぞれユニポーラかバイポーラで、スロットも同じレンジを取ります。ユニポーラは CC 4〜124 で
 0.0〜1.0 と、エンベロープと同じ幅なので、エンベロープを向ければつまみの全域を動かせます。バイポーラは
 CC 64 を 0.0 とする -0.5〜+0.5 と、LFO と同じ幅なので、バイポーラのソースを向ければ中央を挟んで上下に
-振れます。2 つのチューンは中央が「変化なし」を意味するのでバイポーラです。ミキサーの極性も、符号そのものが
-設定する値なのでバイポーラです。パラメータに別のスロットを指させることがモジュレーションになります。CC のないスロットは、割り当てられるまで 0.0 のままです。
+振れます。2 つのチューンは中央が「変化なし」を意味するのでバイポーラです。2 つの Mod Amt Bi とミキサーの
+極性も、符号そのものが設定する値なのでバイポーラです。パラメータに別のスロットを指させることがモジュレー
+ションになります。CC のないスロットは、割り当てられるまで 0.0 のままです。
 
-スロット 53〜60 の General スロットは、どのパラメータにも属さないコントロールスロットです。CC をバスに
+スロット 55〜62 の General スロットは、どのパラメータにも属さないコントロールスロットです。CC をバスに
 載せるだけで、どのモジュール入力やパラメータからも読めます。General Unipolar 1〜4 は 0.0〜1.0、General
 Bipolar 1〜4 は -0.5〜+0.5 です。どちらもデフォルトでは CC 16〜19 を読むので、それぞれの CC が両方の形で
 同時に届きます。起動時はどちらも CC 64 で、ユニポーラは 0.5、バイポーラは 0.0 です。
@@ -412,7 +414,12 @@ ID 番号はファームウェアのバージョンをまたいで安定では�
 上下 5 オクターブまで、Fine Tune は 1 セントで上下 60 セントまでです。両者は加算されるので、どのピッチにも
 届きます。
 
-Osc 1 Mod Amt はオフセットではなく深さで、ピッチの全域に届きます。最大にすると、バイポーラのソースがピッチ
+モジュレーションの深さは Mod Amt Uni と、2 倍にした Mod Amt Bi の積です。Mod Amt Bi は +0.5 (CC 124) で
+Mod Amt Uni をそのまま通し、0.0 (CC 64) で無効にし、-0.5 (CC 4) で反転させます。Mod Amt Bi には CC がなく、
+デフォルトのパッチは定数 0.5 を指させているので、どちらを回してもかまいません。一方向の深さなら
+Mod Amt Uni、0 をまたぐ深さなら Mod Amt Bi です。
+
+Osc 1 Mod Amt Uni はオフセットではなく深さで、ピッチの全域に届きます。最大にすると、バイポーラのソースがピッチ
 を 5 オクターブ上下に振ります。ビブラートのつまみとしては CC 1 ステップが 50 セントと粗いので、デフォルト
 のパッチでは LFO をまず Mixer 1 で 0.2 倍にしています。この経路なら半音のビブラートが CC 14、つまみの上端で
 1 オクターブです。
@@ -447,39 +454,39 @@ Filter 1 Resonance は CC 94 の Q 5.66 までは CC 30 段ごとに Q が2倍�
 - ビブラートはデフォルトで結線済みです。LFO が Mixer 1 を経てオシレータのモジュレーション入力に届くので、
   CC 13 で深さ、CC 3 でレートを決められます
 - フィルタのカットオフをノートのピッチに追従させる（キーボードトラッキング）: CC 99 = 1, CC 98 = 4,
-  CC 6 = 50 で、エンベロープの代わりに Note Pitch をフィルタのモジュレーション入力に置きます。カットオフが
-  CC 64、Mod Amt が CC 124 なら、ノート 60 でカットオフはつまみの中央のままで、1 ノートごとに半音動きます
+  CC 6 = 52 で、エンベロープの代わりに Note Pitch をフィルタのモジュレーション入力に置きます。カットオフが
+  CC 64、Mod Amt Uni が CC 124 なら、ノート 60 でカットオフはつまみの中央のままで、1 ノートごとに半音動きます
 - フィルタのカットオフを LFO でつまみの中央を挟んで揺らす: CC 99 = 1, CC 98 = 4, CC 6 = 7。
   モジュール入力は毎サンプル読まれるので、LFO のレートはいくつでも構いません
-- フィルタのカットオフを、自分の CC ではなくエンベロープで動かす: CC 99 = 2, CC 98 = 8, CC 6 = 8。
+- フィルタのカットオフを、自分の CC ではなくエンベロープで動かす: CC 99 = 2, CC 98 = 9, CC 6 = 8。
   エンベロープもカットオフもユニポーラなので、カットオフはつまみの下端から上端まで開きます
-- アンプのゲインとフィルタのカットオフで 1 つの CC を共有する: CC 99 = 3, CC 98 = 12, CC 6 = 74
+- アンプのゲインとフィルタのカットオフで 1 つの CC を共有する: CC 99 = 3, CC 98 = 14, CC 6 = 74
 - エンベロープなしでアンプをフルレベルにする: CC 99 = 1, CC 98 = 6, CC 6 = 1
 - フィルタのモジュレーション入力を切り離す: CC 99 = 1, CC 98 = 4, CC 6 = 0
 - 深さ 60 セントのピッチエンベロープ: CC 99 = 2, CC 98 = 6, CC 6 = 8 で Osc 1 Fine Tune をエンベロープに
   向けると、チューニングが元の音程から 60 セント高いところまで動き、エンベロープのピークの半分でそこに
   届きます
-- ノートの出だしでエンベロープがフィルタをより強く駆動する: CC 99 = 2, CC 98 = 10, CC 6 = 8 で、フィルタの
+- ノートの出だしでエンベロープがフィルタをより強く駆動する: CC 99 = 2, CC 98 = 11, CC 6 = 8 で、フィルタの
   入力レベルが無音からつまみの上端まで上がって戻ります
 - ピッチを LFO ではなくエンベロープで動かす: CC 99 = 1, CC 98 = 7, CC 6 = 8 で LFO の代わりにエンベロープ
   を Mixer 1 の 1 番目の入力に置き、あとは CC 13 で深さを決めます -- 14 で半音、124 で 1 オクターブです
-- ピッチベンド。デフォルトではどこにも結線されていません。CC 99 = 1 で CC 98 = 9 と 10 に CC 6 = 50 と 52
+- ピッチベンド。デフォルトではどこにも結線されていません。CC 99 = 1 で CC 98 = 9 と 10 に CC 6 = 52 と 54
   を送ると Note Pitch と Pitch Bend が Mixer 2 の 2 つの入力に入り、CC 99 = 1, CC 98 = 1, CC 6 = 13 で
   その和がオシレータのピッチになります。Mixer 2 はオシレータより前を走るので、ホイールは同じサンプルで
   音程を動かします。レベルはどちらも最大なので、そのままではホイールが上下 5 オクターブ振ります。
-  CC 99 = 2, CC 98 = 19, CC 6 = 53 で Mixer 2 の 2 番目のレベルを General Unipolar 1 から取るように
+  CC 99 = 2, CC 98 = 21, CC 6 = 55 で Mixer 2 の 2 番目のレベルを General Unipolar 1 から取るように
   すれば、CC 16 で演奏できるベンドレンジまで絞れます
 - モジュレーション入力を通して、ピッチを両方向に曲げる CC。Mixer 1 はすでにオシレータのモジュレーション
-  入力に繋がっているので、あとは混ぜるものを与えるだけです: CC 99 = 1, CC 98 = 7, CC 6 = 25 で LFO の
+  入力に繋がっているので、あとは混ぜるものを与えるだけです: CC 99 = 1, CC 98 = 7, CC 6 = 26 で LFO の
   代わりにフィルタのカットオフのコントロールスロットを 1 番目の入力に置き、CC 98 = 8, CC 6 = 5 で定数
   -0.5 を 2 番目の入力に置きます。スロットはユニポーラなので、この定数が LFO が 0 を中心とするのと同じく
   CC 64 を中心にします。レベルはどちらも 0.2 なので、CC 74 がビブラートの深さでノートの上下にピッチを
   曲げるようになります
 - 逆向きに効く CC。ミキサーに反転させます。Mixer 2 はすでに走っているので、結線するだけです。
-  CC 99 = 1, CC 98 = 9, CC 6 = 25 でカットオフのコントロールスロットを 1 番目の入力に、CC 98 = 10,
-  CC 6 = 1 で定数 1.0 を 2 番目の入力に置き、CC 99 = 2, CC 98 = 18, CC 6 = 5 で 1 番目の入力の Polarity を
+  CC 99 = 1, CC 98 = 9, CC 6 = 26 でカットオフのコントロールスロットを 1 番目の入力に、CC 98 = 10,
+  CC 6 = 1 で定数 1.0 を 2 番目の入力に置き、CC 99 = 2, CC 98 = 20, CC 6 = 5 で 1 番目の入力の Polarity を
   -0.5、つまり反転側の端に固定すると、ミキサーは 1.0 から CC を引いた値、つまり CC を CC 64 で折り返した
-  ものを出力します。CC 99 = 2, CC 98 = 8, CC 6 = 13 でカットオフ自身のソースをその
+  ものを出力します。CC 99 = 2, CC 98 = 9, CC 6 = 13 でカットオフ自身のソースをその
   ミキサーに向ければ、CC 74 は上げるほどフィルタを閉じるようになります
 - フィルタを経路から外す: CC 99 = 1, CC 98 = 5, CC 6 = 9 でアンプのオーディオ入力をオシレータに向けます。
   フィルタは走り続けスロットも占めたままですが、誰も読みません
@@ -489,7 +496,7 @@ Filter 1 Resonance は CC 94 の Q 5.66 までは CC 30 段ごとに Q が2倍�
 - モジュール入力（カテゴリ 1）は毎サンプル読まれ、スムージングされません。パラメータ（カテゴリ 2）は
   1 バッファに 1 回読まれ、受け取る側でスムージングされます。速いソースはモジュール入力へ、段階的なものは
   パラメータへ通してください
-- パラメータのソースは 128 のスロットのどれでも指せます。60 より上のスロットは、何かが書き込むまで 0 を
+- パラメータのソースは 128 のスロットのどれでも指せます。62 より上のスロットは、何かが書き込むまで 0 を
   返すので、そこを指したパラメータはユニポーラならつまみの下端、バイポーラなら中央に留まります
 - パラメータは自分の値を自分のレンジ、0.0〜1.0 か -0.5〜+0.5 に丸め、コントロールスロットも同じレンジを
   バスに載せます。ユニポーラのスロットをモジュール入力に結線するとエンベロープと同じく片側にしか振れず、

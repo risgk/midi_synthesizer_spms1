@@ -129,6 +129,8 @@ module Spms1
 
       @cutoff = 1.0
       @resonance = 0.0
+      @modulation_amount_unipolar = 0.0
+      @modulation_amount_bipolar = 1.0
       @modulation_amount = 0.0
       @gain = 0.5
 
@@ -155,16 +157,25 @@ module Spms1
       update_coefficients
     end
 
-    # Every parameter is unipolar, [0.0, 1.0], which is what the smoothing, the modulation sum and
-    # the table lookups below are written against.
+    # Every parameter but the bipolar modulation amount is unipolar, [0.0, 1.0], which is what the
+    # smoothing, the modulation sum and the table lookups below are written against.
     # Cutoff range: MIDI note 15 (19 Hz) at 0.0, MIDI note 75 (622 Hz) at 0.5, MIDI note 135 (20 kHz) at 1.0.
     def set_cutoff(cutoff)
       @cutoff = (cutoff < 0.0) ? 0.0 : ((cutoff > 1.0) ? 1.0 : cutoff)
     end
 
-    # Modulation depth, none at 0.0.
-    def set_modulation_amount(amount)
-      @modulation_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
+    # Modulation depth is the product of two amounts: one unipolar, [0.0, 1.0], and one bipolar,
+    # [-0.5, 0.5], doubled so that +0.5 leaves the first as it is and -0.5 negates it. Either at
+    # zero gives no modulation. Multiplied here so that only the product is smoothed.
+    def set_modulation_amount_unipolar(amount)
+      @modulation_amount_unipolar = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
+      @modulation_amount = @modulation_amount_unipolar * @modulation_amount_bipolar
+    end
+
+    def set_modulation_amount_bipolar(amount)
+      clamped_amount = (amount < -0.5) ? -0.5 : ((amount > 0.5) ? 0.5 : amount)
+      @modulation_amount_bipolar = clamped_amount + clamped_amount
+      @modulation_amount = @modulation_amount_unipolar * @modulation_amount_bipolar
     end
 
     # How hard the audio input drives the filter, used as a plain multiplier. It sits on the input

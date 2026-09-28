@@ -200,12 +200,14 @@
       background: var(--primary-color);
       cursor: pointer;
     }
+    /* A disabled slider has no CC behind it, so there is no position to show: the value the
+       parameter reads is in its label instead. */
     input[type="range"]:disabled::-webkit-slider-thumb {
-      background: var(--border-color);
+      background: transparent;
       cursor: default;
     }
     input[type="range"]:disabled::-moz-range-thumb {
-      background: var(--border-color);
+      background: transparent;
       cursor: default;
     }
     .slider-value {
@@ -905,19 +907,21 @@
   // NRPN categories 2 and 3 share entry numbers for these, and each one's control slot is
   // signal 17 + entry: [module, suffix, label, bipolar, default CC, default CC value].
   const PARAMS = [
-    ['LFO_1',     'RATE',        'Rate',        false, 3,   64],
-    ['ENV_GEN_1', 'ATTACK',      'Attack',      false, 73,  4],
-    ['ENV_GEN_1', 'DECAY',       'Decay',       false, 75,  100],
-    ['ENV_GEN_1', 'SUSTAIN',     'Sustain',     false, 30,  4],
-    ['OSC_1',     'WAVEFORM',    'Wave',        false, 20,  4],
-    ['OSC_1',     'COARSE_TUNE', 'Coarse Tune', true,  86,  64],
-    ['OSC_1',     'FINE_TUNE',   'Fine Tune',   true,  70,  64],
-    ['OSC_1',     'MOD_AMOUNT',  'Mod Amt',     false, 13,  4],
-    ['FILTER_1',  'CUTOFF',      'Cutoff',      false, 74,  64],
-    ['FILTER_1',  'RESONANCE',   'Resonance',   false, 71,  94],
-    ['FILTER_1',  'GAIN',        'Gain',        false, 112, 64],
-    ['FILTER_1',  'MOD_AMOUNT',  'Mod Amt',     false, 24,  64],
-    ['AMP_1',     'GAIN',        'Gain',        false, 15,  64],
+    ['LFO_1',     'RATE',                'Rate',        false, 3,   64],
+    ['ENV_GEN_1', 'ATTACK',              'Attack',      false, 73,  4],
+    ['ENV_GEN_1', 'DECAY',               'Decay',       false, 75,  100],
+    ['ENV_GEN_1', 'SUSTAIN',             'Sustain',     false, 30,  4],
+    ['OSC_1',     'WAVEFORM',            'Wave',        false, 20,  4],
+    ['OSC_1',     'COARSE_TUNE',         'Coarse Tune', true,  86,  64],
+    ['OSC_1',     'FINE_TUNE',           'Fine Tune',   true,  70,  64],
+    ['OSC_1',     'MOD_AMOUNT_UNIPOLAR', 'Mod Amt Uni', false, 13,  4],
+    ['OSC_1',     'MOD_AMOUNT_BIPOLAR',  'Mod Amt Bi',  true,  0,   124],
+    ['FILTER_1',  'CUTOFF',              'Cutoff',      false, 74,  64],
+    ['FILTER_1',  'RESONANCE',           'Resonance',   false, 71,  94],
+    ['FILTER_1',  'GAIN',                'Gain',        false, 112, 64],
+    ['FILTER_1',  'MOD_AMOUNT_UNIPOLAR', 'Mod Amt Uni', false, 24,  64],
+    ['FILTER_1',  'MOD_AMOUNT_BIPOLAR',  'Mod Amt Bi',  true,  0,   124],
+    ['AMP_1',     'GAIN',                'Gain',        false, 15,  64],
   ];
   for (let n = 1; n <= 5; n++) {
     PARAMS.push([`MIXER_${n}`, 'LEVEL_1',    'Level 1',    false, 0, null]);
@@ -987,6 +991,8 @@
     });
     s.params.MIXER_1_LEVEL_1 = 'POINT_TWO';
     s.params.MIXER_1_LEVEL_2 = 'POINT_TWO';
+    s.params.OSC_1_MOD_AMOUNT_BIPOLAR = 'HALF';
+    s.params.FILTER_1_MOD_AMOUNT_BIPOLAR = 'HALF';
     CONTROL_ITEMS.forEach(c => {
       s.cc[c.key] = c.defaultCC;
       if (c.defaultCC) s.values[c.defaultCC] = c.defaultValue;
