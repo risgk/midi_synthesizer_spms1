@@ -95,8 +95,9 @@
     .midi-bar .check {
       margin-bottom: 9px;
     }
+    /* Its height is set by fitPatchArea, so that it ends at the bottom of the window whatever
+       stands above it. */
     .app {
-      height: calc(100vh - 120px);
       min-height: 520px;
       display: grid;
       grid-template-columns: 1fr 340px;
@@ -110,26 +111,45 @@
     /* Controls */
     .editor-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-columns: repeat(4, 1fr);
       gap: 20px;
       align-items: start;
     }
-    /* A slider row needs about 390px, so the third column wraps under the first before then. */
-    @media (max-width: 1200px) {
+    /* A slider row needs about 390px, so the last columns wrap under the first ones before then. */
+    @media (max-width: 1640px) {
+      .editor-grid { grid-template-columns: 1fr 1fr 1fr; }
+    }
+    @media (max-width: 1240px) {
       .editor-grid { grid-template-columns: 1fr 1fr; }
     }
     @media (max-width: 768px) {
       .editor-grid { grid-template-columns: 1fr; }
     }
+    /* Spaced a little tighter than the other panels, so the columns fit a full HD window without
+       scrolling. */
     .editor-column {
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 16px;
+    }
+    .editor-column .panel {
+      padding: 12px 16px;
+    }
+    /* The Amp column runs the full height of its row, so the Init button under it sits at the
+       bottom, just above the keyboard. */
+    .editor-column:last-child {
+      align-self: stretch;
+    }
+    #init-values {
+      margin-top: auto;
+    }
+    .editor-column .panel h2 {
+      margin-bottom: 8px;
     }
     .control-row {
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 12px;
     }
     .slider-knob-zone {
       display: flex;
@@ -151,9 +171,6 @@
       display: flex;
       align-items: center;
       gap: 12px;
-    }
-    .controls-actions {
-      margin-top: 20px;
     }
     :root {
       /* Slider ticks. The thumb's centre travels from half a thumb in to half a thumb from the
@@ -663,7 +680,7 @@
     .legend {
       position: absolute;
       left: 10px;
-      bottom: 10px;
+      top: 10px;
       z-index: 5;
       display: flex;
       gap: 12px;
@@ -783,9 +800,8 @@
 
 <div id="tab-controls">
   <div class="editor-grid" id="controls"></div>
-  <div class="controls-actions">
-    <button class="btn primary" id="init-values" style="width: 100%; padding: 12px; font-size: 1rem;">Initialize & Send All</button>
-  </div>
+  <!-- Moved under the Amp panel each time the controls are drawn. -->
+  <button class="btn primary" id="init-values" style="width: 100%; padding: 12px; font-size: 1rem;">Initialize & Send All</button>
 </div>
 
 <div class="app" id="tab-patch" hidden>
@@ -983,16 +999,16 @@
   const DEFAULT_ORDER = ['LFO_1', 'ENV_GEN_1', 'MIXER_1', 'OSC_1', 'FILTER_1', 'AMP_1'];
 
   const DEFAULT_LAYOUT = {
-    NOTE:      { x: 20,   y: 40 },
-    CONST:     { x: 20,   y: 538 },
-    GENERAL:   { x: 20,   y: 220 },
-    LFO_1:     { x: 360,  y: 40 },
-    ENV_GEN_1: { x: 360,  y: 228 },
-    MIXER_1:   { x: 360,  y: 494 },
-    OSC_1:     { x: 720,  y: 40 },
-    FILTER_1:  { x: 1080, y: 40 },
-    AMP_1:     { x: 1440, y: 40 },
-    OUT:       { x: 1440, y: 240 },
+    NOTE:      { x: 180,  y: 358 },
+    CONST:     { x: 20,   y: 40 },
+    GENERAL:   { x: 180,  y: 40 },
+    LFO_1:     { x: 520,  y: 40 },
+    ENV_GEN_1: { x: 520,  y: 228 },
+    MIXER_1:   { x: 520,  y: 518 },
+    OSC_1:     { x: 880,  y: 40 },
+    FILTER_1:  { x: 880,  y: 332 },
+    AMP_1:     { x: 1240, y: 40 },
+    OUT:       { x: 1240, y: 228 },
   };
 
   function defaultState() {
@@ -1586,10 +1602,13 @@
       y1 = Math.max(y1, n.offsetTop + n.offsetHeight);
     });
     const pad = 30;
-    const w = canvas.clientWidth, h = canvas.clientHeight;
-    view.s = Math.max(0.25, Math.min(1, (w - pad * 2) / (x1 - x0), (h - pad * 2) / (y1 - y0)));
+    // The legend sits over the top left corner, so the nodes are fitted below it.
+    const legend = canvas.querySelector('.legend');
+    const top = legend.offsetTop + legend.offsetHeight + 10;
+    const w = canvas.clientWidth, h = canvas.clientHeight - top;
+    view.s = Math.max(0.25, Math.min(1, (w - pad * 2) / (x1 - x0), (h - pad) / (y1 - y0)));
     view.x = (w - (x1 - x0) * view.s) / 2 - x0 * view.s;
-    view.y = (h - (y1 - y0) * view.s) / 2 - y0 * view.s;
+    view.y = top + (h - pad - (y1 - y0) * view.s) / 2 - y0 * view.s;
     applyView();
   }
 
@@ -2256,7 +2275,7 @@
     { col: 1, title: 'EG', module: 'ENV_GEN_1' },
     { col: 2, title: 'Osc', module: 'OSC_1' },
     { col: 2, title: 'Filter', module: 'FILTER_1' },
-    { col: 2, title: 'Amp', module: 'AMP_1' },
+    { col: 3, title: 'Amp', module: 'AMP_1' },
   ];
   CONTROL_PANELS.push({ col: 1, title: 'Mixer 1', module: 'MIXER_1', onlyWithCC: true });
 
@@ -2323,7 +2342,7 @@
     const active = document.activeElement;
     // Rebuilding under a slider being dragged would drop the drag.
     if (active && active.type === 'range' && root.contains(active)) return;
-    const cols = [document.createElement('div'), document.createElement('div'), document.createElement('div')];
+    const cols = [0, 1, 2, 3].map(() => document.createElement('div'));
     cols.forEach(c => { c.className = 'editor-column'; });
     for (const p of CONTROL_PANELS) {
       const items = panelItems(p);
@@ -2342,6 +2361,7 @@
         </div>`).join('') + '</div>';
       cols[p.col].appendChild(panel);
     }
+    cols[3].appendChild(document.getElementById('init-values'));
     root.replaceChildren(...cols);
     root.querySelectorAll('.slider-knob-zone').forEach(zone => {
       const c = CONTROL[zone.dataset.ctrl];
@@ -2471,11 +2491,25 @@
     document.getElementById('tab-controls').hidden = name !== 'controls';
     document.getElementById('tab-patch').hidden = name !== 'patch';
     if (name === 'patch') {
+      fitPatchArea();
       if (!viewTouched) fitView();
       renderWires();
     }
     try { localStorage.setItem(TAB_KEY, name); } catch (e) { /* storage unavailable */ }
   }
+
+  // The patch area runs from wherever the header and MIDI bar leave it, which moves as they wrap,
+  // to the bottom of the window. Below the breakpoint the CSS gives the canvas a height instead.
+  function fitPatchArea() {
+    const app = document.getElementById('tab-patch');
+    if (app.hidden || matchMedia('(max-width: 900px)').matches) {
+      app.style.height = '';
+      return;
+    }
+    const top = app.getBoundingClientRect().top + window.scrollY;
+    app.style.height = Math.max(520, window.innerHeight - top - 20) + 'px';
+  }
+  window.addEventListener('resize', fitPatchArea);
 
   document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
 
