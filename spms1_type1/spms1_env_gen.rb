@@ -4,6 +4,9 @@ module Spms1
     STATE_ATTACK = 0
     STATE_SUSTAIN = 1
     STATE_IDLE = 2
+    # Blend at the reference rate on the line below. The two move together: their product is what
+    # fixes the time constant, so changing one without the other changes how fast smoothing is.
+    SMOOTHING_TARGET_BLEND_BASE = 0.03125
     # Number of samples between control-rate updates; envelope timing is kept approximately constant if this is changed.
     # It has to stay a power of two: the counter below wraps with a mask, because Ruby's % is a
     # floor-modulo and sp_imod carries a sign correction the counter can never need -- one branch
@@ -42,15 +45,22 @@ module Spms1
       # Rate the envelope actually steps at. Fixed once sample_rate is, so it is computed here
       # rather than on every control-rate update.
       @effective_rate = sample_rate * (1.0 / CONTROL_RATE_DIVISOR)
+      @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (48000.0 / @sample_rate) * (CONTROL_RATE_DIVISOR / 4.0)
       @state = STATE_IDLE
       @current_level = 0.0
-      @last_level = 0.0
+      @last_output_level = 0.0
       @output = 0.0
       @slope = 0.0
 
       @attack = 0.0
       @decay = 0.0
       @sustain = 1.0
+      @level = 1.0
+      @polarity = 1.0
+      # Level and polarity are multiplied before smoothing, so the control-rate path takes one
+      # multiply and only one smoothing state has to be carried.
+      @amount = 1.0
+      @current_amount = 1.0
 
       @was_gate_on = false
       @attack_coef = 1.0
@@ -75,6 +85,20 @@ module Spms1
     # Sustain level: silent at 0.0, full at 1.0.
     def set_sustain(sustain)
       @sustain = (sustain < 0.0) ? 0.0 : ((sustain > 1.0) ? 1.0 : sustain)
+    end
+
+    # The output is scaled by level and polarity together, as the LFO's is. Level is unipolar,
+    # [0.0, 1.0], a plain multiplier. Polarity is bipolar, [-0.5, 0.5], and doubled: +0.5 passes
+    # the output through, -0.5 negates it, and the way between scales it, crossing silence at 0.0.
+    def set_level(level)
+      @level = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
+      @amount = @level * @polarity
+    end
+
+    def set_polarity(polarity)
+      clamped_polarity = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
+      @polarity = clamped_polarity + clamped_polarity
+      @amount = @level * @polarity
     end
 
     def process(gate_input = 0.0)
@@ -109,14 +133,19 @@ module Spms1
         @current_level = 1.0 if is_attack_done
         @current_level = 0.0 if is_floor_reached || (@state == STATE_IDLE && !@was_gate_on)
 
+        # The amount is smoothed here, on the step, so a change in it rides the same ramp as the
+        # level does rather than stepping the output.
+        @current_amount += (@amount - @current_amount) * @smoothing_target_blend
+        output_level = @current_level * @current_amount
+
         # The output ramps from the last step's level to this one's over the next four samples,
         # so what reaches the amp is a line rather than a staircase at a quarter of the sample
         # rate. Starting each ramp from the stored level rather than from where the additions
         # got to keeps rounding from building up, and lands a ramp to 0.0 on exactly zero.
         # 0.25 is 1 / CONTROL_RATE_DIVISOR, written out for the reason Mixer#process gives.
-        @output = @last_level
-        @slope = (@current_level - @last_level) * 0.25
-        @last_level = @current_level
+        @output = @last_output_level
+        @slope = (output_level - @last_output_level) * 0.25
+        @last_output_level = output_level
       end
 
       @sample_counter = (@sample_counter + 1) & CONTROL_RATE_MASK

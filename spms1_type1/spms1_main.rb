@@ -113,52 +113,54 @@ SIGNAL_LFO_1_POLARITY        = 21
 SIGNAL_ENV_GEN_1_ATTACK      = 22
 SIGNAL_ENV_GEN_1_DECAY       = 23
 SIGNAL_ENV_GEN_1_SUSTAIN     = 24
-SIGNAL_OSC_1_WAVEFORM        = 25
-SIGNAL_OSC_1_COARSE_TUNE     = 26
-SIGNAL_OSC_1_FINE_TUNE       = 27
-SIGNAL_OSC_1_MOD_AMOUNT      = 28
-SIGNAL_OSC_1_MOD_POLARITY    = 29
-SIGNAL_FILTER_1_CUTOFF       = 30
-SIGNAL_FILTER_1_RESONANCE    = 31
-SIGNAL_FILTER_1_GAIN         = 32
-SIGNAL_FILTER_1_MOD_AMOUNT   = 33
-SIGNAL_FILTER_1_MOD_POLARITY = 34
-SIGNAL_AMP_1_GAIN            = 35
-SIGNAL_MIXER_1_LEVEL_1       = 36
-SIGNAL_MIXER_1_POLARITY_1    = 37
-SIGNAL_MIXER_1_LEVEL_2       = 38
-SIGNAL_MIXER_1_POLARITY_2    = 39
-SIGNAL_MIXER_2_LEVEL_1       = 40
-SIGNAL_MIXER_2_POLARITY_1    = 41
-SIGNAL_MIXER_2_LEVEL_2       = 42
-SIGNAL_MIXER_2_POLARITY_2    = 43
-SIGNAL_MIXER_3_LEVEL_1       = 44
-SIGNAL_MIXER_3_POLARITY_1    = 45
-SIGNAL_MIXER_3_LEVEL_2       = 46
-SIGNAL_MIXER_3_POLARITY_2    = 47
-SIGNAL_MIXER_4_LEVEL_1       = 48
-SIGNAL_MIXER_4_POLARITY_1    = 49
-SIGNAL_MIXER_4_LEVEL_2       = 50
-SIGNAL_MIXER_4_POLARITY_2    = 51
-SIGNAL_MIXER_5_LEVEL_1       = 52
-SIGNAL_MIXER_5_POLARITY_1    = 53
-SIGNAL_MIXER_5_LEVEL_2       = 54
-SIGNAL_MIXER_5_POLARITY_2    = 55
+SIGNAL_ENV_GEN_1_LEVEL       = 25
+SIGNAL_ENV_GEN_1_POLARITY    = 26
+SIGNAL_OSC_1_WAVEFORM        = 27
+SIGNAL_OSC_1_COARSE_TUNE     = 28
+SIGNAL_OSC_1_FINE_TUNE       = 29
+SIGNAL_OSC_1_MOD_AMOUNT      = 30
+SIGNAL_OSC_1_MOD_POLARITY    = 31
+SIGNAL_FILTER_1_CUTOFF       = 32
+SIGNAL_FILTER_1_RESONANCE    = 33
+SIGNAL_FILTER_1_GAIN         = 34
+SIGNAL_FILTER_1_MOD_AMOUNT   = 35
+SIGNAL_FILTER_1_MOD_POLARITY = 36
+SIGNAL_AMP_1_GAIN            = 37
+SIGNAL_MIXER_1_LEVEL_1       = 38
+SIGNAL_MIXER_1_POLARITY_1    = 39
+SIGNAL_MIXER_1_LEVEL_2       = 40
+SIGNAL_MIXER_1_POLARITY_2    = 41
+SIGNAL_MIXER_2_LEVEL_1       = 42
+SIGNAL_MIXER_2_POLARITY_1    = 43
+SIGNAL_MIXER_2_LEVEL_2       = 44
+SIGNAL_MIXER_2_POLARITY_2    = 45
+SIGNAL_MIXER_3_LEVEL_1       = 46
+SIGNAL_MIXER_3_POLARITY_1    = 47
+SIGNAL_MIXER_3_LEVEL_2       = 48
+SIGNAL_MIXER_3_POLARITY_2    = 49
+SIGNAL_MIXER_4_LEVEL_1       = 50
+SIGNAL_MIXER_4_POLARITY_1    = 51
+SIGNAL_MIXER_4_LEVEL_2       = 52
+SIGNAL_MIXER_4_POLARITY_2    = 53
+SIGNAL_MIXER_5_LEVEL_1       = 54
+SIGNAL_MIXER_5_POLARITY_1    = 55
+SIGNAL_MIXER_5_LEVEL_2       = 56
+SIGNAL_MIXER_5_POLARITY_2    = 57
 
-SIGNAL_PITCH               = 56
-SIGNAL_GATE                = 57
-SIGNAL_BEND                = 58
+SIGNAL_PITCH               = 58
+SIGNAL_GATE                = 59
+SIGNAL_BEND                = 60
 
 # Control slots no parameter owns: each is a CC put on the bus for any input or parameter to read.
 # Four of each kind, so a knob can be taken either way without a mixer to shift it.
-SIGNAL_GENERAL_UNIPOLAR_1  = 59
-SIGNAL_GENERAL_UNIPOLAR_2  = 60
-SIGNAL_GENERAL_UNIPOLAR_3  = 61
-SIGNAL_GENERAL_UNIPOLAR_4  = 62
-SIGNAL_GENERAL_BIPOLAR_1   = 63
-SIGNAL_GENERAL_BIPOLAR_2   = 64
-SIGNAL_GENERAL_BIPOLAR_3   = 65
-SIGNAL_GENERAL_BIPOLAR_4   = 66
+SIGNAL_GENERAL_UNIPOLAR_1  = 61
+SIGNAL_GENERAL_UNIPOLAR_2  = 62
+SIGNAL_GENERAL_UNIPOLAR_3  = 63
+SIGNAL_GENERAL_UNIPOLAR_4  = 64
+SIGNAL_GENERAL_BIPOLAR_1   = 65
+SIGNAL_GENERAL_BIPOLAR_2   = 66
+SIGNAL_GENERAL_BIPOLAR_3   = 67
+SIGNAL_GENERAL_BIPOLAR_4   = 68
 
 SIGNALS_SIZE = 128
 
@@ -198,37 +200,39 @@ NRPN_SOURCE_LFO_1_POLARITY        = 258
 NRPN_SOURCE_ENV_GEN_1_ATTACK      = 259
 NRPN_SOURCE_ENV_GEN_1_DECAY       = 260
 NRPN_SOURCE_ENV_GEN_1_SUSTAIN     = 261
-NRPN_SOURCE_OSC_1_WAVEFORM        = 262
-NRPN_SOURCE_OSC_1_COARSE_TUNE     = 263
-NRPN_SOURCE_OSC_1_FINE_TUNE       = 264
-NRPN_SOURCE_OSC_1_MOD_AMOUNT      = 265
-NRPN_SOURCE_OSC_1_MOD_POLARITY    = 266
-NRPN_SOURCE_FILTER_1_CUTOFF       = 267
-NRPN_SOURCE_FILTER_1_RESONANCE    = 268
-NRPN_SOURCE_FILTER_1_GAIN         = 269
-NRPN_SOURCE_FILTER_1_MOD_AMOUNT   = 270
-NRPN_SOURCE_FILTER_1_MOD_POLARITY = 271
-NRPN_SOURCE_AMP_1_GAIN            = 272
-NRPN_SOURCE_MIXER_1_LEVEL_1       = 273
-NRPN_SOURCE_MIXER_1_POLARITY_1    = 274
-NRPN_SOURCE_MIXER_1_LEVEL_2       = 275
-NRPN_SOURCE_MIXER_1_POLARITY_2    = 276
-NRPN_SOURCE_MIXER_2_LEVEL_1       = 277
-NRPN_SOURCE_MIXER_2_POLARITY_1    = 278
-NRPN_SOURCE_MIXER_2_LEVEL_2       = 279
-NRPN_SOURCE_MIXER_2_POLARITY_2    = 280
-NRPN_SOURCE_MIXER_3_LEVEL_1       = 281
-NRPN_SOURCE_MIXER_3_POLARITY_1    = 282
-NRPN_SOURCE_MIXER_3_LEVEL_2       = 283
-NRPN_SOURCE_MIXER_3_POLARITY_2    = 284
-NRPN_SOURCE_MIXER_4_LEVEL_1       = 285
-NRPN_SOURCE_MIXER_4_POLARITY_1    = 286
-NRPN_SOURCE_MIXER_4_LEVEL_2       = 287
-NRPN_SOURCE_MIXER_4_POLARITY_2    = 288
-NRPN_SOURCE_MIXER_5_LEVEL_1       = 289
-NRPN_SOURCE_MIXER_5_POLARITY_1    = 290
-NRPN_SOURCE_MIXER_5_LEVEL_2       = 291
-NRPN_SOURCE_MIXER_5_POLARITY_2    = 292
+NRPN_SOURCE_ENV_GEN_1_LEVEL       = 262
+NRPN_SOURCE_ENV_GEN_1_POLARITY    = 263
+NRPN_SOURCE_OSC_1_WAVEFORM        = 264
+NRPN_SOURCE_OSC_1_COARSE_TUNE     = 265
+NRPN_SOURCE_OSC_1_FINE_TUNE       = 266
+NRPN_SOURCE_OSC_1_MOD_AMOUNT      = 267
+NRPN_SOURCE_OSC_1_MOD_POLARITY    = 268
+NRPN_SOURCE_FILTER_1_CUTOFF       = 269
+NRPN_SOURCE_FILTER_1_RESONANCE    = 270
+NRPN_SOURCE_FILTER_1_GAIN         = 271
+NRPN_SOURCE_FILTER_1_MOD_AMOUNT   = 272
+NRPN_SOURCE_FILTER_1_MOD_POLARITY = 273
+NRPN_SOURCE_AMP_1_GAIN            = 274
+NRPN_SOURCE_MIXER_1_LEVEL_1       = 275
+NRPN_SOURCE_MIXER_1_POLARITY_1    = 276
+NRPN_SOURCE_MIXER_1_LEVEL_2       = 277
+NRPN_SOURCE_MIXER_1_POLARITY_2    = 278
+NRPN_SOURCE_MIXER_2_LEVEL_1       = 279
+NRPN_SOURCE_MIXER_2_POLARITY_1    = 280
+NRPN_SOURCE_MIXER_2_LEVEL_2       = 281
+NRPN_SOURCE_MIXER_2_POLARITY_2    = 282
+NRPN_SOURCE_MIXER_3_LEVEL_1       = 283
+NRPN_SOURCE_MIXER_3_POLARITY_1    = 284
+NRPN_SOURCE_MIXER_3_LEVEL_2       = 285
+NRPN_SOURCE_MIXER_3_POLARITY_2    = 286
+NRPN_SOURCE_MIXER_4_LEVEL_1       = 287
+NRPN_SOURCE_MIXER_4_POLARITY_1    = 288
+NRPN_SOURCE_MIXER_4_LEVEL_2       = 289
+NRPN_SOURCE_MIXER_4_POLARITY_2    = 290
+NRPN_SOURCE_MIXER_5_LEVEL_1       = 291
+NRPN_SOURCE_MIXER_5_POLARITY_1    = 292
+NRPN_SOURCE_MIXER_5_LEVEL_2       = 293
+NRPN_SOURCE_MIXER_5_POLARITY_2    = 294
 
 # A CC number of 0 means the parameter has no CC: its control slot keeps whatever it holds, so the
 # parameter can be driven by routing alone. Nothing seeds a control slot, so one with no CC holds
@@ -239,45 +243,47 @@ NRPN_CC_LFO_1_POLARITY        = 386
 NRPN_CC_ENV_GEN_1_ATTACK      = 387
 NRPN_CC_ENV_GEN_1_DECAY       = 388
 NRPN_CC_ENV_GEN_1_SUSTAIN     = 389
-NRPN_CC_OSC_1_WAVEFORM        = 390
-NRPN_CC_OSC_1_COARSE_TUNE     = 391
-NRPN_CC_OSC_1_FINE_TUNE       = 392
-NRPN_CC_OSC_1_MOD_AMOUNT      = 393
-NRPN_CC_OSC_1_MOD_POLARITY    = 394
-NRPN_CC_FILTER_1_CUTOFF       = 395
-NRPN_CC_FILTER_1_RESONANCE    = 396
-NRPN_CC_FILTER_1_GAIN         = 397
-NRPN_CC_FILTER_1_MOD_AMOUNT   = 398
-NRPN_CC_FILTER_1_MOD_POLARITY = 399
-NRPN_CC_AMP_1_GAIN            = 400
-NRPN_CC_MIXER_1_LEVEL_1       = 401
-NRPN_CC_MIXER_1_POLARITY_1    = 402
-NRPN_CC_MIXER_1_LEVEL_2       = 403
-NRPN_CC_MIXER_1_POLARITY_2    = 404
-NRPN_CC_MIXER_2_LEVEL_1       = 405
-NRPN_CC_MIXER_2_POLARITY_1    = 406
-NRPN_CC_MIXER_2_LEVEL_2       = 407
-NRPN_CC_MIXER_2_POLARITY_2    = 408
-NRPN_CC_MIXER_3_LEVEL_1       = 409
-NRPN_CC_MIXER_3_POLARITY_1    = 410
-NRPN_CC_MIXER_3_LEVEL_2       = 411
-NRPN_CC_MIXER_3_POLARITY_2    = 412
-NRPN_CC_MIXER_4_LEVEL_1       = 413
-NRPN_CC_MIXER_4_POLARITY_1    = 414
-NRPN_CC_MIXER_4_LEVEL_2       = 415
-NRPN_CC_MIXER_4_POLARITY_2    = 416
-NRPN_CC_MIXER_5_LEVEL_1       = 417
-NRPN_CC_MIXER_5_POLARITY_1    = 418
-NRPN_CC_MIXER_5_LEVEL_2       = 419
-NRPN_CC_MIXER_5_POLARITY_2    = 420
-NRPN_CC_GENERAL_UNIPOLAR_1    = 421
-NRPN_CC_GENERAL_UNIPOLAR_2    = 422
-NRPN_CC_GENERAL_UNIPOLAR_3    = 423
-NRPN_CC_GENERAL_UNIPOLAR_4    = 424
-NRPN_CC_GENERAL_BIPOLAR_1     = 425
-NRPN_CC_GENERAL_BIPOLAR_2     = 426
-NRPN_CC_GENERAL_BIPOLAR_3     = 427
-NRPN_CC_GENERAL_BIPOLAR_4     = 428
+NRPN_CC_ENV_GEN_1_LEVEL       = 390
+NRPN_CC_ENV_GEN_1_POLARITY    = 391
+NRPN_CC_OSC_1_WAVEFORM        = 392
+NRPN_CC_OSC_1_COARSE_TUNE     = 393
+NRPN_CC_OSC_1_FINE_TUNE       = 394
+NRPN_CC_OSC_1_MOD_AMOUNT      = 395
+NRPN_CC_OSC_1_MOD_POLARITY    = 396
+NRPN_CC_FILTER_1_CUTOFF       = 397
+NRPN_CC_FILTER_1_RESONANCE    = 398
+NRPN_CC_FILTER_1_GAIN         = 399
+NRPN_CC_FILTER_1_MOD_AMOUNT   = 400
+NRPN_CC_FILTER_1_MOD_POLARITY = 401
+NRPN_CC_AMP_1_GAIN            = 402
+NRPN_CC_MIXER_1_LEVEL_1       = 403
+NRPN_CC_MIXER_1_POLARITY_1    = 404
+NRPN_CC_MIXER_1_LEVEL_2       = 405
+NRPN_CC_MIXER_1_POLARITY_2    = 406
+NRPN_CC_MIXER_2_LEVEL_1       = 407
+NRPN_CC_MIXER_2_POLARITY_1    = 408
+NRPN_CC_MIXER_2_LEVEL_2       = 409
+NRPN_CC_MIXER_2_POLARITY_2    = 410
+NRPN_CC_MIXER_3_LEVEL_1       = 411
+NRPN_CC_MIXER_3_POLARITY_1    = 412
+NRPN_CC_MIXER_3_LEVEL_2       = 413
+NRPN_CC_MIXER_3_POLARITY_2    = 414
+NRPN_CC_MIXER_4_LEVEL_1       = 415
+NRPN_CC_MIXER_4_POLARITY_1    = 416
+NRPN_CC_MIXER_4_LEVEL_2       = 417
+NRPN_CC_MIXER_4_POLARITY_2    = 418
+NRPN_CC_MIXER_5_LEVEL_1       = 419
+NRPN_CC_MIXER_5_POLARITY_1    = 420
+NRPN_CC_MIXER_5_LEVEL_2       = 421
+NRPN_CC_MIXER_5_POLARITY_2    = 422
+NRPN_CC_GENERAL_UNIPOLAR_1    = 423
+NRPN_CC_GENERAL_UNIPOLAR_2    = 424
+NRPN_CC_GENERAL_UNIPOLAR_3    = 425
+NRPN_CC_GENERAL_UNIPOLAR_4    = 426
+NRPN_CC_GENERAL_BIPOLAR_1     = 427
+NRPN_CC_GENERAL_BIPOLAR_2     = 428
+NRPN_CC_GENERAL_BIPOLAR_3     = 429
+NRPN_CC_GENERAL_BIPOLAR_4     = 430
 
 # CC value normalization. Each control slot is unipolar or bipolar, matching the range its
 # parameter clamps to, and takes the converter of its kind: unipolar is 0.0..1.0, the span of an
@@ -347,6 +353,7 @@ signals[SIGNAL_MINUS_ONE]       = -1.0
 # A mixer's parameters have no CC, so the default patch points them at constants instead: full
 # level and a polarity of +0.5, which makes a mixer pass its input through rather than mute it.
 # Each modulation polarity has no CC either and reads +0.5, which leaves the amount in charge.
+# EG 1 Level and Polarity have no CC either and read 1.0 and +0.5, passing the envelope as it is.
 C.set_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 0, MODULE_LFO_1)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 1, MODULE_MIXER_1)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 2, MODULE_ENV_GEN_1)
@@ -373,6 +380,8 @@ C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_POLARITY        , SIGNAL_POINT_
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_1_ATTACK      , SIGNAL_ENV_GEN_1_ATTACK)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_1_DECAY       , SIGNAL_ENV_GEN_1_DECAY)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_1_SUSTAIN     , SIGNAL_ENV_GEN_1_SUSTAIN)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_1_LEVEL       , SIGNAL_ONE)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_1_POLARITY    , SIGNAL_HALF)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_WAVEFORM        , SIGNAL_OSC_1_WAVEFORM)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_COARSE_TUNE     , SIGNAL_OSC_1_COARSE_TUNE)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_FINE_TUNE       , SIGNAL_OSC_1_FINE_TUNE)
@@ -505,6 +514,8 @@ loop do
   source_env_gen_1_attack      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_1_ATTACK)
   source_env_gen_1_decay       = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_1_DECAY)
   source_env_gen_1_sustain     = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_1_SUSTAIN)
+  source_env_gen_1_level       = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_1_LEVEL)
+  source_env_gen_1_polarity    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_1_POLARITY)
   source_osc_1_waveform        = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_WAVEFORM)
   source_osc_1_coarse_tune     = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_COARSE_TUNE)
   source_osc_1_fine_tune       = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_FINE_TUNE)
@@ -545,6 +556,8 @@ loop do
   cc_env_gen_1_attack      = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_1_ATTACK)
   cc_env_gen_1_decay       = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_1_DECAY)
   cc_env_gen_1_sustain     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_1_SUSTAIN)
+  cc_env_gen_1_level       = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_1_LEVEL)
+  cc_env_gen_1_polarity    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_1_POLARITY)
   cc_osc_1_waveform        = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_WAVEFORM)
   cc_osc_1_coarse_tune     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_COARSE_TUNE)
   cc_osc_1_fine_tune       = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_FINE_TUNE)
@@ -591,6 +604,8 @@ loop do
   signals[cc_slot(cc_env_gen_1_attack, SIGNAL_ENV_GEN_1_ATTACK)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_env_gen_1_attack))
   signals[cc_slot(cc_env_gen_1_decay, SIGNAL_ENV_GEN_1_DECAY)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_env_gen_1_decay))
   signals[cc_slot(cc_env_gen_1_sustain, SIGNAL_ENV_GEN_1_SUSTAIN)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_env_gen_1_sustain))
+  signals[cc_slot(cc_env_gen_1_level, SIGNAL_ENV_GEN_1_LEVEL)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_env_gen_1_level))
+  signals[cc_slot(cc_env_gen_1_polarity, SIGNAL_ENV_GEN_1_POLARITY)] = cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_env_gen_1_polarity))
   signals[cc_slot(cc_osc_1_waveform, SIGNAL_OSC_1_WAVEFORM)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_waveform))
   signals[cc_slot(cc_osc_1_coarse_tune, SIGNAL_OSC_1_COARSE_TUNE)] = cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_coarse_tune))
   signals[cc_slot(cc_osc_1_fine_tune, SIGNAL_OSC_1_FINE_TUNE)] = cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_fine_tune))
@@ -637,6 +652,8 @@ loop do
   env_gen_1.set_attack(signals[source_env_gen_1_attack])
   env_gen_1.set_decay(signals[source_env_gen_1_decay])
   env_gen_1.set_sustain(signals[source_env_gen_1_sustain])
+  env_gen_1.set_level(signals[source_env_gen_1_level])
+  env_gen_1.set_polarity(signals[source_env_gen_1_polarity])
   osc_1.set_waveform(signals[source_osc_1_waveform])
   osc_1.set_coarse_tune(signals[source_osc_1_coarse_tune])
   osc_1.set_fine_tune(signals[source_osc_1_fine_tune])

@@ -305,19 +305,19 @@ gain down but never up.
 
 | CC 98 | Parameter | | CC 98 | Parameter | | CC 98 | Parameter |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | LFO 1 Rate | | 13 | Filter 1 Gain | | 26 | Mixer 3 Polarity 1 |
-| 1 | LFO 1 Level | | 14 | Filter 1 Mod Amt | | 27 | Mixer 3 Level 2 |
-| 2 | LFO 1 Polarity | | 15 | Filter 1 Mod Polarity | | 28 | Mixer 3 Polarity 2 |
-| 3 | EG 1 Attack | | 16 | Amp 1 Gain | | 29 | Mixer 4 Level 1 |
-| 4 | EG 1 Decay | | 17 | Mixer 1 Level 1 | | 30 | Mixer 4 Polarity 1 |
-| 5 | EG 1 Sustain | | 18 | Mixer 1 Polarity 1 | | 31 | Mixer 4 Level 2 |
-| 6 | Osc 1 Wave | | 19 | Mixer 1 Level 2 | | 32 | Mixer 4 Polarity 2 |
-| 7 | Osc 1 Coarse Tune | | 20 | Mixer 1 Polarity 2 | | 33 | Mixer 5 Level 1 |
-| 8 | Osc 1 Fine Tune | | 21 | Mixer 2 Level 1 | | 34 | Mixer 5 Polarity 1 |
-| 9 | Osc 1 Mod Amt | | 22 | Mixer 2 Polarity 1 | | 35 | Mixer 5 Level 2 |
-| 10 | Osc 1 Mod Polarity | | 23 | Mixer 2 Level 2 | | 36 | Mixer 5 Polarity 2 |
-| 11 | Filter 1 Cutoff | | 24 | Mixer 2 Polarity 2 | |  |  |
-| 12 | Filter 1 Resonance | | 25 | Mixer 3 Level 1 | |  |  |
+| 0 | LFO 1 Rate | | 13 | Filter 1 Cutoff | | 26 | Mixer 2 Polarity 2 |
+| 1 | LFO 1 Level | | 14 | Filter 1 Resonance | | 27 | Mixer 3 Level 1 |
+| 2 | LFO 1 Polarity | | 15 | Filter 1 Gain | | 28 | Mixer 3 Polarity 1 |
+| 3 | EG 1 Attack | | 16 | Filter 1 Mod Amt | | 29 | Mixer 3 Level 2 |
+| 4 | EG 1 Decay | | 17 | Filter 1 Mod Polarity | | 30 | Mixer 3 Polarity 2 |
+| 5 | EG 1 Sustain | | 18 | Amp 1 Gain | | 31 | Mixer 4 Level 1 |
+| 6 | EG 1 Level | | 19 | Mixer 1 Level 1 | | 32 | Mixer 4 Polarity 1 |
+| 7 | EG 1 Polarity | | 20 | Mixer 1 Polarity 1 | | 33 | Mixer 4 Level 2 |
+| 8 | Osc 1 Wave | | 21 | Mixer 1 Level 2 | | 34 | Mixer 4 Polarity 2 |
+| 9 | Osc 1 Coarse Tune | | 22 | Mixer 1 Polarity 2 | | 35 | Mixer 5 Level 1 |
+| 10 | Osc 1 Fine Tune | | 23 | Mixer 2 Level 1 | | 36 | Mixer 5 Polarity 1 |
+| 11 | Osc 1 Mod Amt | | 24 | Mixer 2 Polarity 1 | | 37 | Mixer 5 Level 2 |
+| 12 | Osc 1 Mod Polarity | | 25 | Mixer 2 Level 2 | | 38 | Mixer 5 Polarity 2 |
 
 #### Entries (CC 98), category 3 only
 
@@ -351,46 +351,47 @@ below.
 
 | ID | Signal | | ID | Signal | | ID | Signal |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | None (constant 0.0) | | 23 | EG 1 Decay | | 46 | Mixer 3 Level 2 |
-| 1 | Constant 1.0 | | 24 | EG 1 Sustain | | 47 | Mixer 3 Polarity 2 ± |
-| 2 | Constant 0.5 | | 25 | Osc 1 Wave | | 48 | Mixer 4 Level 1 |
-| 3 | Constant 0.2 | | 26 | Osc 1 Coarse Tune ± | | 49 | Mixer 4 Polarity 1 ± |
-| 4 | Constant 0.1 | | 27 | Osc 1 Fine Tune ± | | 50 | Mixer 4 Level 2 |
-| 5 | Constant -0.1 | | 28 | Osc 1 Mod Amt | | 51 | Mixer 4 Polarity 2 ± |
-| 6 | Constant -0.2 | | 29 | Osc 1 Mod Polarity ± | | 52 | Mixer 5 Level 1 |
-| 7 | Constant -0.5 | | 30 | Filter 1 Cutoff | | 53 | Mixer 5 Polarity 1 ± |
-| 8 | Constant -1.0 | | 31 | Filter 1 Resonance | | 54 | Mixer 5 Level 2 |
-| 9 | LFO 1 Output ± | | 32 | Filter 1 Gain | | 55 | Mixer 5 Polarity 2 ± |
-| 10 | EG 1 Output | | 33 | Filter 1 Mod Amt | | 56 | Note Pitch ± |
-| 11 | Osc 1 Output ± | | 34 | Filter 1 Mod Polarity ± | | 57 | Note Gate |
-| 12 | Filter 1 Output ± | | 35 | Amp 1 Gain | | 58 | Pitch Bend ± |
-| 13 | Amp 1 Output ± | | 36 | Mixer 1 Level 1 | | 59 | General Unipolar 1 |
-| 14 | Mixer 1 Output ± | | 37 | Mixer 1 Polarity 1 ± | | 60 | General Unipolar 2 |
-| 15 | Mixer 2 Output ± | | 38 | Mixer 1 Level 2 | | 61 | General Unipolar 3 |
-| 16 | Mixer 3 Output ± | | 39 | Mixer 1 Polarity 2 ± | | 62 | General Unipolar 4 |
-| 17 | Mixer 4 Output ± | | 40 | Mixer 2 Level 1 | | 63 | General Bipolar 1 ± |
-| 18 | Mixer 5 Output ± | | 41 | Mixer 2 Polarity 1 ± | | 64 | General Bipolar 2 ± |
-| 19 | LFO 1 Rate | | 42 | Mixer 2 Level 2 | | 65 | General Bipolar 3 ± |
-| 20 | LFO 1 Level | | 43 | Mixer 2 Polarity 2 ± | | 66 | General Bipolar 4 ± |
-| 21 | LFO 1 Polarity ± | | 44 | Mixer 3 Level 1 | |  |  |
-| 22 | EG 1 Attack | | 45 | Mixer 3 Polarity 1 ± | |  |  |
+| 0 | None (constant 0.0) | | 23 | EG 1 Decay | | 46 | Mixer 3 Level 1 |
+| 1 | Constant 1.0 | | 24 | EG 1 Sustain | | 47 | Mixer 3 Polarity 1 ± |
+| 2 | Constant 0.5 | | 25 | EG 1 Level | | 48 | Mixer 3 Level 2 |
+| 3 | Constant 0.2 | | 26 | EG 1 Polarity ± | | 49 | Mixer 3 Polarity 2 ± |
+| 4 | Constant 0.1 | | 27 | Osc 1 Wave | | 50 | Mixer 4 Level 1 |
+| 5 | Constant -0.1 | | 28 | Osc 1 Coarse Tune ± | | 51 | Mixer 4 Polarity 1 ± |
+| 6 | Constant -0.2 | | 29 | Osc 1 Fine Tune ± | | 52 | Mixer 4 Level 2 |
+| 7 | Constant -0.5 | | 30 | Osc 1 Mod Amt | | 53 | Mixer 4 Polarity 2 ± |
+| 8 | Constant -1.0 | | 31 | Osc 1 Mod Polarity ± | | 54 | Mixer 5 Level 1 |
+| 9 | LFO 1 Output ± | | 32 | Filter 1 Cutoff | | 55 | Mixer 5 Polarity 1 ± |
+| 10 | EG 1 Output ± | | 33 | Filter 1 Resonance | | 56 | Mixer 5 Level 2 |
+| 11 | Osc 1 Output ± | | 34 | Filter 1 Gain | | 57 | Mixer 5 Polarity 2 ± |
+| 12 | Filter 1 Output ± | | 35 | Filter 1 Mod Amt | | 58 | Note Pitch ± |
+| 13 | Amp 1 Output ± | | 36 | Filter 1 Mod Polarity ± | | 59 | Note Gate |
+| 14 | Mixer 1 Output ± | | 37 | Amp 1 Gain | | 60 | Pitch Bend ± |
+| 15 | Mixer 2 Output ± | | 38 | Mixer 1 Level 1 | | 61 | General Unipolar 1 |
+| 16 | Mixer 3 Output ± | | 39 | Mixer 1 Polarity 1 ± | | 62 | General Unipolar 2 |
+| 17 | Mixer 4 Output ± | | 40 | Mixer 1 Level 2 | | 63 | General Unipolar 3 |
+| 18 | Mixer 5 Output ± | | 41 | Mixer 1 Polarity 2 ± | | 64 | General Unipolar 4 |
+| 19 | LFO 1 Rate | | 42 | Mixer 2 Level 1 | | 65 | General Bipolar 1 ± |
+| 20 | LFO 1 Level | | 43 | Mixer 2 Polarity 1 ± | | 66 | General Bipolar 2 ± |
+| 21 | LFO 1 Polarity ± | | 44 | Mixer 2 Level 2 | | 67 | General Bipolar 3 ± |
+| 22 | EG 1 Attack | | 45 | Mixer 2 Polarity 2 ± | | 68 | General Bipolar 4 ± |
 
 A **±** marks a signal that swings both ways: a module output reaches -0.5 and +0.5 at full
 scale, a bipolar control slot runs -0.5 to +0.5, and a mixer sums two of them and stops at one.
-Everything unmarked runs 0.0 to 1.0 -- an envelope's output, Note Gate and every unipolar
-control slot. The bus carries both kinds under one numbering, so the range belongs to the slot
+The envelope is the exception: 0.0 to 1.0 at the default Polarity of +0.5, and down to -1.0 once
+its Polarity is turned negative. Everything unmarked runs 0.0 to 1.0 -- Note Gate and every
+unipolar control slot. The bus carries both kinds under one numbering, so the range belongs to the slot
 rather than to the sort of thing that wrote it.
 
-Slots 19-55 hold the values arriving from CC, so a parameter reads its own CC by default. Each
+Slots 19-57 hold the values arriving from CC, so a parameter reads its own CC by default. Each
 parameter is unipolar or bipolar, and its slot takes the same range. A unipolar one runs 0.0 to
 1.0 from CC 4 to CC 124, the span of an envelope, so an envelope pointed at one sweeps the whole
 of its dial. A bipolar one runs -0.5 to +0.5 with CC 64 at 0.0, the span of an LFO, so a bipolar
 source pointed at one swings it about the middle. The two tune controls are bipolar, since their
-middle is no change at all, and so is every Polarity -- the LFO's, the mixers' and the two Mod
-Polarity controls -- since its sign is what it sets. Pointing a parameter at another slot is what
+middle is no change at all, and so is every Polarity -- the LFO's, the EG's, the mixers' and the two
+Mod Polarity controls -- since its sign is what it sets. Pointing a parameter at another slot is what
 makes a modulation. A slot with no CC holds 0.0 until one is assigned.
 
-Slots 59-66, the General slots, are control slots that no parameter owns: a CC put on the bus for
+Slots 61-68, the General slots, are control slots that no parameter owns: a CC put on the bus for
 any module input or parameter to read. General Unipolar 1-4 run 0.0 to 1.0 and General Bipolar
 1-4 run -0.5 to +0.5. Both sets read CC 16-19 by default, so each of those CCs arrives both ways
 at once, and both power up at CC 64: the unipolar slots at 0.5, the bipolar ones at 0.0.
@@ -430,6 +431,10 @@ scale its input: Level from silent at 0.0 (CC 4) to full at 1.0 (CC 124), and Po
 negated at -0.5 (CC 4), through silence at 0.0 (CC 64), to unchanged at +0.5 (CC 124). Level is on
 CC 113 and powers up at CC 124; Polarity has no CC, and the default patch points it at the
 constant 0.1, a fifth of the way to its top.
+
+EG 1 Level and EG 1 Polarity scale the envelope's output the same way, over the same ranges.
+Neither has a CC, and the default patch points them at the constants 1.0 and +0.5, which pass
+the envelope through as it is.
 
 Each modulation depth is Mod Amt times Mod Polarity, the second doubled: Mod Polarity passes
 Mod Amt through at +0.5 (CC 124), silences it at 0.0 (CC 64) and negates it at -0.5 (CC 4), and

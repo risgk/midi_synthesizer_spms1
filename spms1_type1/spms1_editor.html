@@ -913,6 +913,8 @@
     ['ENV_GEN_1', 'ATTACK',       'Attack',       false, 73,  4],
     ['ENV_GEN_1', 'DECAY',        'Decay',        false, 75,  100],
     ['ENV_GEN_1', 'SUSTAIN',      'Sustain',      false, 30,  4],
+    ['ENV_GEN_1', 'LEVEL',        'Level',        false, 0,   null],
+    ['ENV_GEN_1', 'POLARITY',     'Polarity',     true,  0,   null],
     ['OSC_1',     'WAVEFORM',     'Wave',         false, 20,  4],
     ['OSC_1',     'COARSE_TUNE',  'Coarse Tune',  true,  86,  64],
     ['OSC_1',     'FINE_TUNE',    'Fine Tune',    true,  70,  64],
@@ -974,13 +976,13 @@
     LFO_1:     { x: 360,  y: 40 },
     MIXER_1:   { x: 360,  y: 228 },
     ENV_GEN_1: { x: 360,  y: 494 },
-    MIXER_2:   { x: 360,  y: 710 },
+    MIXER_2:   { x: 360,  y: 760 },
     OSC_1:     { x: 720,  y: 40 },
-    MIXER_3:   { x: 720,  y: 710 },
+    MIXER_3:   { x: 720,  y: 760 },
     FILTER_1:  { x: 1080, y: 40 },
-    MIXER_4:   { x: 1080, y: 710 },
+    MIXER_4:   { x: 1080, y: 760 },
     AMP_1:     { x: 1440, y: 40 },
-    MIXER_5:   { x: 1440, y: 710 },
+    MIXER_5:   { x: 1440, y: 760 },
     OUT:       { x: 1440, y: 240 },
   };
 
@@ -992,6 +994,8 @@
       if (p.module && p.module.startsWith('MIXER_')) s.params[p.key] = p.label.startsWith('Level') ? 'ONE' : 'HALF';
     });
     s.params.LFO_1_POLARITY = 'POINT_ONE';
+    s.params.ENV_GEN_1_LEVEL = 'ONE';
+    s.params.ENV_GEN_1_POLARITY = 'HALF';
     s.params.OSC_1_MOD_POLARITY = 'HALF';
     s.params.FILTER_1_MOD_POLARITY = 'HALF';
     CONTROL_ITEMS.forEach(c => {

@@ -299,19 +299,19 @@ flowchart LR
 
 | CC 98 | パラメータ | | CC 98 | パラメータ | | CC 98 | パラメータ |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | LFO 1 Rate | | 13 | Filter 1 Gain | | 26 | Mixer 3 Polarity 1 |
-| 1 | LFO 1 Level | | 14 | Filter 1 Mod Amt | | 27 | Mixer 3 Level 2 |
-| 2 | LFO 1 Polarity | | 15 | Filter 1 Mod Polarity | | 28 | Mixer 3 Polarity 2 |
-| 3 | EG 1 Attack | | 16 | Amp 1 Gain | | 29 | Mixer 4 Level 1 |
-| 4 | EG 1 Decay | | 17 | Mixer 1 Level 1 | | 30 | Mixer 4 Polarity 1 |
-| 5 | EG 1 Sustain | | 18 | Mixer 1 Polarity 1 | | 31 | Mixer 4 Level 2 |
-| 6 | Osc 1 Wave | | 19 | Mixer 1 Level 2 | | 32 | Mixer 4 Polarity 2 |
-| 7 | Osc 1 Coarse Tune | | 20 | Mixer 1 Polarity 2 | | 33 | Mixer 5 Level 1 |
-| 8 | Osc 1 Fine Tune | | 21 | Mixer 2 Level 1 | | 34 | Mixer 5 Polarity 1 |
-| 9 | Osc 1 Mod Amt | | 22 | Mixer 2 Polarity 1 | | 35 | Mixer 5 Level 2 |
-| 10 | Osc 1 Mod Polarity | | 23 | Mixer 2 Level 2 | | 36 | Mixer 5 Polarity 2 |
-| 11 | Filter 1 Cutoff | | 24 | Mixer 2 Polarity 2 | |  |  |
-| 12 | Filter 1 Resonance | | 25 | Mixer 3 Level 1 | |  |  |
+| 0 | LFO 1 Rate | | 13 | Filter 1 Cutoff | | 26 | Mixer 2 Polarity 2 |
+| 1 | LFO 1 Level | | 14 | Filter 1 Resonance | | 27 | Mixer 3 Level 1 |
+| 2 | LFO 1 Polarity | | 15 | Filter 1 Gain | | 28 | Mixer 3 Polarity 1 |
+| 3 | EG 1 Attack | | 16 | Filter 1 Mod Amt | | 29 | Mixer 3 Level 2 |
+| 4 | EG 1 Decay | | 17 | Filter 1 Mod Polarity | | 30 | Mixer 3 Polarity 2 |
+| 5 | EG 1 Sustain | | 18 | Amp 1 Gain | | 31 | Mixer 4 Level 1 |
+| 6 | EG 1 Level | | 19 | Mixer 1 Level 1 | | 32 | Mixer 4 Polarity 1 |
+| 7 | EG 1 Polarity | | 20 | Mixer 1 Polarity 1 | | 33 | Mixer 4 Level 2 |
+| 8 | Osc 1 Wave | | 21 | Mixer 1 Level 2 | | 34 | Mixer 4 Polarity 2 |
+| 9 | Osc 1 Coarse Tune | | 22 | Mixer 1 Polarity 2 | | 35 | Mixer 5 Level 1 |
+| 10 | Osc 1 Fine Tune | | 23 | Mixer 2 Level 1 | | 36 | Mixer 5 Polarity 1 |
+| 11 | Osc 1 Mod Amt | | 24 | Mixer 2 Polarity 1 | | 37 | Mixer 5 Level 2 |
+| 12 | Osc 1 Mod Polarity | | 25 | Mixer 2 Level 2 | | 38 | Mixer 5 Polarity 2 |
 
 #### エントリ (CC 98)、カテゴリ 3 のみ
 
@@ -345,44 +345,45 @@ General スロットを参照してください。
 
 | ID | シグナル | | ID | シグナル | | ID | シグナル |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | なし（定数 0.0） | | 23 | EG 1 Decay | | 46 | Mixer 3 Level 2 |
-| 1 | 定数 1.0 | | 24 | EG 1 Sustain | | 47 | Mixer 3 Polarity 2 ± |
-| 2 | 定数 0.5 | | 25 | Osc 1 Wave | | 48 | Mixer 4 Level 1 |
-| 3 | 定数 0.2 | | 26 | Osc 1 Coarse Tune ± | | 49 | Mixer 4 Polarity 1 ± |
-| 4 | 定数 0.1 | | 27 | Osc 1 Fine Tune ± | | 50 | Mixer 4 Level 2 |
-| 5 | 定数 -0.1 | | 28 | Osc 1 Mod Amt | | 51 | Mixer 4 Polarity 2 ± |
-| 6 | 定数 -0.2 | | 29 | Osc 1 Mod Polarity ± | | 52 | Mixer 5 Level 1 |
-| 7 | 定数 -0.5 | | 30 | Filter 1 Cutoff | | 53 | Mixer 5 Polarity 1 ± |
-| 8 | 定数 -1.0 | | 31 | Filter 1 Resonance | | 54 | Mixer 5 Level 2 |
-| 9 | LFO 1 Output ± | | 32 | Filter 1 Gain | | 55 | Mixer 5 Polarity 2 ± |
-| 10 | EG 1 Output | | 33 | Filter 1 Mod Amt | | 56 | Note Pitch ± |
-| 11 | Osc 1 Output ± | | 34 | Filter 1 Mod Polarity ± | | 57 | Note Gate |
-| 12 | Filter 1 Output ± | | 35 | Amp 1 Gain | | 58 | Pitch Bend ± |
-| 13 | Amp 1 Output ± | | 36 | Mixer 1 Level 1 | | 59 | General Unipolar 1 |
-| 14 | Mixer 1 Output ± | | 37 | Mixer 1 Polarity 1 ± | | 60 | General Unipolar 2 |
-| 15 | Mixer 2 Output ± | | 38 | Mixer 1 Level 2 | | 61 | General Unipolar 3 |
-| 16 | Mixer 3 Output ± | | 39 | Mixer 1 Polarity 2 ± | | 62 | General Unipolar 4 |
-| 17 | Mixer 4 Output ± | | 40 | Mixer 2 Level 1 | | 63 | General Bipolar 1 ± |
-| 18 | Mixer 5 Output ± | | 41 | Mixer 2 Polarity 1 ± | | 64 | General Bipolar 2 ± |
-| 19 | LFO 1 Rate | | 42 | Mixer 2 Level 2 | | 65 | General Bipolar 3 ± |
-| 20 | LFO 1 Level | | 43 | Mixer 2 Polarity 2 ± | | 66 | General Bipolar 4 ± |
-| 21 | LFO 1 Polarity ± | | 44 | Mixer 3 Level 1 | |  |  |
-| 22 | EG 1 Attack | | 45 | Mixer 3 Polarity 1 ± | |  |  |
+| 0 | なし（定数 0.0） | | 23 | EG 1 Decay | | 46 | Mixer 3 Level 1 |
+| 1 | 定数 1.0 | | 24 | EG 1 Sustain | | 47 | Mixer 3 Polarity 1 ± |
+| 2 | 定数 0.5 | | 25 | EG 1 Level | | 48 | Mixer 3 Level 2 |
+| 3 | 定数 0.2 | | 26 | EG 1 Polarity ± | | 49 | Mixer 3 Polarity 2 ± |
+| 4 | 定数 0.1 | | 27 | Osc 1 Wave | | 50 | Mixer 4 Level 1 |
+| 5 | 定数 -0.1 | | 28 | Osc 1 Coarse Tune ± | | 51 | Mixer 4 Polarity 1 ± |
+| 6 | 定数 -0.2 | | 29 | Osc 1 Fine Tune ± | | 52 | Mixer 4 Level 2 |
+| 7 | 定数 -0.5 | | 30 | Osc 1 Mod Amt | | 53 | Mixer 4 Polarity 2 ± |
+| 8 | 定数 -1.0 | | 31 | Osc 1 Mod Polarity ± | | 54 | Mixer 5 Level 1 |
+| 9 | LFO 1 Output ± | | 32 | Filter 1 Cutoff | | 55 | Mixer 5 Polarity 1 ± |
+| 10 | EG 1 Output ± | | 33 | Filter 1 Resonance | | 56 | Mixer 5 Level 2 |
+| 11 | Osc 1 Output ± | | 34 | Filter 1 Gain | | 57 | Mixer 5 Polarity 2 ± |
+| 12 | Filter 1 Output ± | | 35 | Filter 1 Mod Amt | | 58 | Note Pitch ± |
+| 13 | Amp 1 Output ± | | 36 | Filter 1 Mod Polarity ± | | 59 | Note Gate |
+| 14 | Mixer 1 Output ± | | 37 | Amp 1 Gain | | 60 | Pitch Bend ± |
+| 15 | Mixer 2 Output ± | | 38 | Mixer 1 Level 1 | | 61 | General Unipolar 1 |
+| 16 | Mixer 3 Output ± | | 39 | Mixer 1 Polarity 1 ± | | 62 | General Unipolar 2 |
+| 17 | Mixer 4 Output ± | | 40 | Mixer 1 Level 2 | | 63 | General Unipolar 3 |
+| 18 | Mixer 5 Output ± | | 41 | Mixer 1 Polarity 2 ± | | 64 | General Unipolar 4 |
+| 19 | LFO 1 Rate | | 42 | Mixer 2 Level 1 | | 65 | General Bipolar 1 ± |
+| 20 | LFO 1 Level | | 43 | Mixer 2 Polarity 1 ± | | 66 | General Bipolar 2 ± |
+| 21 | LFO 1 Polarity ± | | 44 | Mixer 2 Level 2 | | 67 | General Bipolar 3 ± |
+| 22 | EG 1 Attack | | 45 | Mixer 2 Polarity 2 ± | | 68 | General Bipolar 4 ± |
 
 **±** は、正負どちらにも振れるシグナルを表します。モジュール出力はフルスケールで -0.5 と +0.5 に届き、
-バイポーラのコントロールスロットは -0.5〜+0.5 で、ミキサーはそれを 2 つ足して 1.0 で止まります。印のない
-ものは 0.0〜1.0 で、エンベロープの出力、Note Gate、ユニポーラのコントロールスロットがこれにあたります。
+バイポーラのコントロールスロットは -0.5〜+0.5 で、ミキサーはそれを 2 つ足して 1.0 で止まります。
+エンベロープだけは例外で、デフォルトの Polarity +0.5 では 0.0〜1.0、Polarity を負にすると -1.0 まで
+振れます。印のないものは 0.0〜1.0 で、Note Gate とユニポーラのコントロールスロットがこれにあたります。
 バスは両方を 1 つの番号空間で運ぶので、レンジは「何が書いたか」ではなくスロットごとの性質です。
 
-スロット 19〜55 には CC から届いた値が入るので、パラメータはデフォルトでは自分の CC を読んでいるわけです。
+スロット 19〜57 には CC から届いた値が入るので、パラメータはデフォルトでは自分の CC を読んでいるわけです。
 パラメータはそれぞれユニポーラかバイポーラで、スロットも同じレンジを取ります。ユニポーラは CC 4〜124 で
 0.0〜1.0 と、エンベロープと同じ幅なので、エンベロープを向ければつまみの全域を動かせます。バイポーラは
 CC 64 を 0.0 とする -0.5〜+0.5 と、LFO と同じ幅なので、バイポーラのソースを向ければ中央を挟んで上下に
-振れます。2 つのチューンは中央が「変化なし」を意味するのでバイポーラです。Polarity も、LFO、ミキサー、
+振れます。2 つのチューンは中央が「変化なし」を意味するのでバイポーラです。Polarity も、LFO、EG、ミキサー、
 2 つの Mod Polarity のいずれも、符号そのものが設定する値なのでバイポーラです。パラメータに別のスロットを指させることがモジュレー
 ションになります。CC のないスロットは、割り当てられるまで 0.0 のままです。
 
-スロット 59〜66 の General スロットは、どのパラメータにも属さないコントロールスロットです。CC をバスに
+スロット 61〜68 の General スロットは、どのパラメータにも属さないコントロールスロットです。CC をバスに
 載せるだけで、どのモジュール入力やパラメータからも読めます。General Unipolar 1〜4 は 0.0〜1.0、General
 Bipolar 1〜4 は -0.5〜+0.5 です。どちらもデフォルトでは CC 16〜19 を読むので、それぞれの CC が両方の形で
 同時に届きます。起動時はどちらも CC 64 で、ユニポーラは 0.5、バイポーラは 0.0 です。
@@ -419,6 +420,9 @@ LFO 1 Level と LFO 1 Polarity は、ミキサーの Level と Polarity が入�
 一緒に掛かります。Level は 0.0 (CC 4) で無音、1.0 (CC 124) で最大、Polarity は -0.5 (CC 4) で反転、
 0.0 (CC 64) で無音、+0.5 (CC 124) でそのままです。Level は CC 113 で、起動時は CC 124 です。Polarity には
 CC がなく、デフォルトのパッチは上端の 5 分の 1 の定数 0.1 を指させています。
+
+EG 1 Level と EG 1 Polarity も、同じレンジで同じようにエンベロープの出力に掛かります。どちらも CC がなく、
+デフォルトのパッチは定数 1.0 と +0.5 を指させているので、エンベロープはそのまま出ます。
 
 モジュレーションの深さは Mod Amt と、2 倍にした Mod Polarity の積です。Mod Polarity は +0.5 (CC 124) で
 Mod Amt をそのまま通し、0.0 (CC 64) で無効にし、-0.5 (CC 4) で反転させます。その間では Mod Amt を
