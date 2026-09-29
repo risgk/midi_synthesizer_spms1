@@ -211,7 +211,7 @@ flowchart LR
   IN([Input]) --> SUM((Σ))
   SUM -->|HP| I1["Integrator 1<br/>BP, state s1"]
   I1 -->|BP| I2["Integrator 2<br/>LP, state s2"]
-  I2 -->|LP| OC["Output clip<br/>linear up to 0.5"]
+  I2 -->|LP| OC["Output clip<br/>linear up to 0.75"]
   OC --> OUT([Output])
   SC["State clip<br/>ceiling 4.0, α comp."] -.- I1
   L2["s2 is linear<br/>guard clamp at 16"] -.- I2
@@ -466,9 +466,10 @@ The sum is held to -1.0 and +1.0. Two full-scale signals reach exactly that, so 
 is cut; what it stops is a mixer wired back to its own input, which would otherwise double every
 sample until the number stopped being a number and took the oscillator or the filter with it.
 The filter is held to the same one unit, by a curve rather than a corner: its output passes
-untouched up to half a unit, which is more than the default patch ever reaches, and above that
-bends smoothly onto the limit. Its resonant peak can climb past one unit on a sweep, and rounding
-that off makes far weaker high harmonics than a hard edge would fold back down into the note.
+untouched up to three quarters of a unit, well above anything the default patch reaches, and
+above that bends smoothly onto the limit. Its resonant peak can climb past one unit on a sweep,
+and rounding that off makes far weaker high harmonics than a hard edge would fold back down into
+the note.
 
 #### Examples
 

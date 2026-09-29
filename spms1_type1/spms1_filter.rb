@@ -18,7 +18,7 @@ module Spms1
     # steps at the knee, so what crosses it gains odd harmonics of every order rather than just the
     # third, falling as 1/n^3; a hard clamp, stepping in slope, falls as 1/n^2.
     OUTPUT_LIMIT       = 1.0
-    OUTPUT_KNEE        = 0.5
+    OUTPUT_KNEE        = 0.75
     OUTPUT_CEILING     = OUTPUT_LIMIT + OUTPUT_LIMIT - OUTPUT_KNEE
     OUTPUT_FLOOR       = -OUTPUT_CEILING
     OUTPUT_KNEE_FLOOR  = -OUTPUT_KNEE
@@ -83,8 +83,8 @@ module Spms1
     # the amount dialled in. The soft clip on the band pass state settles the oscillation at about
     # 11.4 * sqrt(|k| * g / (1 + g^2)^2), so this holds it near SELF_OSC_LEVEL whatever the cutoff;
     # the (1 + g^2)^2 matters only in the top octaves, where g is no longer small.
-    # Set at the output clip's knee, the most that leaves the filter as a clean sine; the
-    # oscillation settles just below it. The value is for 48 kHz; initialize scales it with the
+    # Set below the output clip's knee, so that the oscillation leaves the filter as a clean sine;
+    # the same level as in PRA32-U2. The value is for 48 kHz; initialize scales it with the
     # sample rate, as it does the clip.
     SELF_OSC_LEVEL = 0.5
     SELF_OSC_KAPPA = (SELF_OSC_LEVEL / 11.4) * (SELF_OSC_LEVEL / 11.4)

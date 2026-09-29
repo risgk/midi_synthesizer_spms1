@@ -2130,7 +2130,7 @@ int main(int argc,char**argv){
 #line 20 "spms1_filter.rb"
   cst_OUTPUT_LIMIT = 1.0;
 #line 21 "spms1_filter.rb"
-  cst_OUTPUT_KNEE = 0.5;
+  cst_OUTPUT_KNEE = 0.75;
 #line 22 "spms1_filter.rb"
   cst_OUTPUT_CEILING = ((cst_OUTPUT_LIMIT + cst_OUTPUT_LIMIT) - cst_OUTPUT_KNEE);
 #line 23 "spms1_filter.rb"
