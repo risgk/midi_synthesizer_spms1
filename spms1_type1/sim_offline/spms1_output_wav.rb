@@ -62,7 +62,7 @@ puts "Generating stereo waveform data..."
 
 pcm_bytes = []
 
-# The default run order, less the mixers it does not use: LFO, EG, Osc, Filter, Amp. Each module reads what the ones ahead
+# The default run order, less the mixer it does not use: LFO, EG, Osc, Filter, Amp. Each module reads what the ones ahead
 # of it made in this same sample, which is what the run order buys.
 NUM_SAMPLES.times do
   lfo_output = lfo.process

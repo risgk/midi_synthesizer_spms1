@@ -10,13 +10,13 @@ module Spms1
     # Number of samples between control-rate updates; smoothing speed is kept approximately constant if this is changed.
     # It has to stay a power of two: the counter below wraps with a mask, because Ruby's % is a
     # floor-modulo and sp_imod carries a sign correction the counter can never need -- one branch
-    # a sample in each module, ten across the six of them.
+    # a sample in each module, six across the six of them.
     CONTROL_RATE_DIVISOR = 4
     # Its own constant, not CONTROL_RATE_DIVISOR - 1 where it is used: Spinel emits an Integer
     # constant as a runtime global and does not fold arithmetic on one, so written that way the
     # subtraction survives into the per-sample path carrying an overflow check of its own, which
     # measured far worse than the modulo it replaces. What the mask buys is size, not
-    # determinism: the ten branches it removes, one per site, are ones that could never be taken.
+    # determinism: the six branches it removes, one per site, are ones that could never be taken.
     # Together with the LFO's fold it took 11 branches and 60 instructions out of Spms1_main as
     # linked, and the buffer time did not move (853/857us against 854/856).
     CONTROL_RATE_MASK = CONTROL_RATE_DIVISOR - 1
@@ -73,7 +73,7 @@ module Spms1
     #
     # One unit is the sum of two full-scale bipolar signals, as much as any destination can use.
     # Written as a literal rather than a constant on purpose: Spinel emits a named Float as a mutable
-    # global, and five mixers loading one twice a sample is about 9us a buffer.
+    # global, and a mixer loading one twice a sample is about 1.8us a buffer.
     def process(input_1 = 0.0, input_2 = 0.0)
       if @sample_counter == 0
         @current_1 += (@target_1 - @current_1) * @smoothing_target_blend

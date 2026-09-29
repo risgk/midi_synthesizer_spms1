@@ -883,8 +883,8 @@
     { key: 'OSC_1',     id: 3, label: 'Osc 1' },
     { key: 'FILTER_1',  id: 4, label: 'Filter 1' },
     { key: 'AMP_1',     id: 5, label: 'Amp 1' },
+    { key: 'MIXER_1',   id: 6, label: 'Mixer 1' },
   ];
-  for (let n = 1; n <= 5; n++) MODULES.push({ key: `MIXER_${n}`, id: 5 + n, label: `Mixer ${n}` });
   MODULES.forEach(m => { m.out = m.key + '_OUTPUT'; });
   const MOD = Object.fromEntries(MODULES.map(m => [m.key, m]));
 
@@ -897,15 +897,13 @@
     ['FILTER_1',  'MOD',   'Mod',   'ENV_GEN_1_OUTPUT'],
     ['AMP_1',     'AUDIO', 'Audio', 'FILTER_1_OUTPUT'],
     ['AMP_1',     'MOD',   'Mod',   'ENV_GEN_1_OUTPUT'],
+    ['MIXER_1',   'IN_1',  'In 1',  'NONE'],
+    ['MIXER_1',   'IN_2',  'In 2',  'NONE'],
+    [null,        'OUTPUT', 'Audio', 'AMP_1_OUTPUT'],
   ];
-  for (let n = 1; n <= 5; n++) {
-    INPUTS.push([`MIXER_${n}`, 'IN_1', 'In 1', 'NONE']);
-    INPUTS.push([`MIXER_${n}`, 'IN_2', 'In 2', 'NONE']);
-  }
-  INPUTS.push([null, 'OUTPUT', 'Audio', 'AMP_1_OUTPUT']);
 
   // NRPN categories 2 and 3 share entry numbers for these, and each one's control slot is
-  // signal 19 + entry: [module, suffix, label, bipolar, default CC, default CC value].
+  // signal 15 + entry: [module, suffix, label, bipolar, default CC, default CC value].
   const PARAMS = [
     ['LFO_1',     'RATE',         'Rate',         false, 3,   64],
     ['LFO_1',     'LEVEL',        'Level',        false, 0,   null],
@@ -926,13 +924,11 @@
     ['FILTER_1',  'MOD_AMOUNT',   'Mod Amt',      false, 24,  64],
     ['FILTER_1',  'MOD_POLARITY', 'Mod Polarity', true,  0,   124],
     ['AMP_1',     'GAIN',         'Gain',         false, 15,  64],
+    ['MIXER_1',   'LEVEL_1',      'Level 1',      false, 0,   null],
+    ['MIXER_1',   'POLARITY_1',   'Polarity 1',   true,  0,   124],
+    ['MIXER_1',   'LEVEL_2',      'Level 2',      false, 0,   null],
+    ['MIXER_1',   'POLARITY_2',   'Polarity 2',   true,  0,   124],
   ];
-  for (let n = 1; n <= 5; n++) {
-    PARAMS.push([`MIXER_${n}`, 'LEVEL_1',    'Level 1',    false, 0, null]);
-    PARAMS.push([`MIXER_${n}`, 'POLARITY_1', 'Polarity 1', true,  0, 124]);
-    PARAMS.push([`MIXER_${n}`, 'LEVEL_2',    'Level 2',    false, 0, null]);
-    PARAMS.push([`MIXER_${n}`, 'POLARITY_2', 'Polarity 2', true,  0, 124]);
-  }
 
   // Category 3 only, after the parameters.
   const GENERALS = [[null, 'GENERAL_MOD_WHEEL', 'Mod Wheel', false, 1, 4]];
@@ -967,22 +963,18 @@
   CONTROL_ITEMS.forEach(c => { SIGNAL_LABELS[c.key] = c.full; });
   const sigLabel = s => SIGNAL_LABELS[s] || s;
 
-  const DEFAULT_ORDER = ['LFO_1', 'MIXER_1', 'ENV_GEN_1', 'MIXER_2', 'OSC_1', 'MIXER_3', 'FILTER_1', 'MIXER_4', 'AMP_1', 'MIXER_5'];
+  const DEFAULT_ORDER = ['LFO_1', 'ENV_GEN_1', 'MIXER_1', 'OSC_1', 'FILTER_1', 'AMP_1'];
 
   const DEFAULT_LAYOUT = {
     NOTE:      { x: 20,   y: 40 },
     CONST:     { x: 20,   y: 538 },
     GENERAL:   { x: 20,   y: 220 },
     LFO_1:     { x: 360,  y: 40 },
-    MIXER_1:   { x: 360,  y: 228 },
-    ENV_GEN_1: { x: 360,  y: 494 },
-    MIXER_2:   { x: 360,  y: 760 },
+    ENV_GEN_1: { x: 360,  y: 228 },
+    MIXER_1:   { x: 360,  y: 494 },
     OSC_1:     { x: 720,  y: 40 },
-    MIXER_3:   { x: 720,  y: 760 },
     FILTER_1:  { x: 1080, y: 40 },
-    MIXER_4:   { x: 1080, y: 760 },
     AMP_1:     { x: 1440, y: 40 },
-    MIXER_5:   { x: 1440, y: 760 },
     OUT:       { x: 1440, y: 240 },
   };
 
@@ -2242,7 +2234,7 @@
     { col: 1, title: 'EG', module: 'ENV_GEN_1' },
     { col: 1, title: 'LFO', module: 'LFO_1' },
   ];
-  for (let n = 1; n <= 5; n++) CONTROL_PANELS.push({ col: n % 2, title: `Mixer ${n}`, module: `MIXER_${n}`, onlyWithCC: true });
+  CONTROL_PANELS.push({ col: 1, title: 'Mixer 1', module: 'MIXER_1', onlyWithCC: true });
 
   function panelItems(p) {
     return p.general ? CONTROL_ITEMS.slice(PARAMS.length) : PARAM_ITEMS.filter(c => c.module === p.module);
