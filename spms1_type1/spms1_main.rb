@@ -127,8 +127,9 @@ SIGNAL_GATE                = 39
 SIGNAL_BEND                = 40
 
 # Control slots no parameter owns: each is a CC put on the bus for any input or parameter to read.
-# The mod wheel first, unipolar and on CC 1, then four of each kind, so a knob can be taken either
-# way without a mixer to shift it.
+# The mod wheel first, unipolar and on CC 1, then four of each kind. The two kinds share General
+# CCs 1-4, one CC filling a slot of each, so a knob can be taken either way without a mixer to
+# shift it.
 SIGNAL_GENERAL_MOD_WHEEL   = 41
 SIGNAL_GENERAL_UNIPOLAR_1  = 42
 SIGNAL_GENERAL_UNIPOLAR_2  = 43
@@ -214,14 +215,10 @@ NRPN_CC_MIXER_1_POLARITY_1    = 404
 NRPN_CC_MIXER_1_LEVEL_2       = 405
 NRPN_CC_MIXER_1_POLARITY_2    = 406
 NRPN_CC_GENERAL_MOD_WHEEL     = 407
-NRPN_CC_GENERAL_UNIPOLAR_1    = 408
-NRPN_CC_GENERAL_UNIPOLAR_2    = 409
-NRPN_CC_GENERAL_UNIPOLAR_3    = 410
-NRPN_CC_GENERAL_UNIPOLAR_4    = 411
-NRPN_CC_GENERAL_BIPOLAR_1     = 412
-NRPN_CC_GENERAL_BIPOLAR_2     = 413
-NRPN_CC_GENERAL_BIPOLAR_3     = 414
-NRPN_CC_GENERAL_BIPOLAR_4     = 415
+NRPN_CC_GENERAL_1             = 408
+NRPN_CC_GENERAL_2             = 409
+NRPN_CC_GENERAL_3             = 410
+NRPN_CC_GENERAL_4             = 411
 
 # CC value normalization. Each control slot is unipolar or bipolar, matching the range its
 # parameter clamps to, and takes the converter of its kind: unipolar is 0.0..1.0, the span of an
@@ -342,14 +339,10 @@ C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_GAIN       , 112)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_MOD_AMOUNT , 24)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_AMP_1_GAIN          , 15)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_MOD_WHEEL   , 1)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_UNIPOLAR_1  , 16)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_UNIPOLAR_2  , 17)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_UNIPOLAR_3  , 18)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_UNIPOLAR_4  , 19)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_BIPOLAR_1   , 16)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_BIPOLAR_2   , 17)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_BIPOLAR_3   , 18)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_BIPOLAR_4   , 19)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_1           , 16)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_2           , 17)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_3           , 18)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_4           , 19)
 
 C.set_midi_cc_value(MIDI_CH, 3  , 64 ) # LFO 1 Rate
 C.set_midi_cc_value(MIDI_CH, 73 , 4  ) # EG 1 Attack
@@ -464,14 +457,10 @@ loop do
   cc_mixer_1_level_2       = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_1_LEVEL_2)
   cc_mixer_1_polarity_2    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_1_POLARITY_2)
   cc_general_mod_wheel     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_MOD_WHEEL)
-  cc_general_unipolar_1    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_UNIPOLAR_1)
-  cc_general_unipolar_2    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_UNIPOLAR_2)
-  cc_general_unipolar_3    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_UNIPOLAR_3)
-  cc_general_unipolar_4    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_UNIPOLAR_4)
-  cc_general_bipolar_1     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_BIPOLAR_1)
-  cc_general_bipolar_2     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_BIPOLAR_2)
-  cc_general_bipolar_3     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_BIPOLAR_3)
-  cc_general_bipolar_4     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_BIPOLAR_4)
+  cc_general_1             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_1)
+  cc_general_2             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_2)
+  cc_general_3             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_3)
+  cc_general_4             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_4)
 
   signals[cc_slot(cc_lfo_1_rate, SIGNAL_LFO_1_RATE)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_rate))
   signals[cc_slot(cc_lfo_1_level, SIGNAL_LFO_1_LEVEL)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_level))
@@ -497,14 +486,19 @@ loop do
   signals[cc_slot(cc_mixer_1_level_2, SIGNAL_MIXER_1_LEVEL_2)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_level_2))
   signals[cc_slot(cc_mixer_1_polarity_2, SIGNAL_MIXER_1_POLARITY_2)] = cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_polarity_2))
   signals[cc_slot(cc_general_mod_wheel, SIGNAL_GENERAL_MOD_WHEEL)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_general_mod_wheel))
-  signals[cc_slot(cc_general_unipolar_1, SIGNAL_GENERAL_UNIPOLAR_1)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_general_unipolar_1))
-  signals[cc_slot(cc_general_unipolar_2, SIGNAL_GENERAL_UNIPOLAR_2)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_general_unipolar_2))
-  signals[cc_slot(cc_general_unipolar_3, SIGNAL_GENERAL_UNIPOLAR_3)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_general_unipolar_3))
-  signals[cc_slot(cc_general_unipolar_4, SIGNAL_GENERAL_UNIPOLAR_4)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_general_unipolar_4))
-  signals[cc_slot(cc_general_bipolar_1, SIGNAL_GENERAL_BIPOLAR_1)] = cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_general_bipolar_1))
-  signals[cc_slot(cc_general_bipolar_2, SIGNAL_GENERAL_BIPOLAR_2)] = cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_general_bipolar_2))
-  signals[cc_slot(cc_general_bipolar_3, SIGNAL_GENERAL_BIPOLAR_3)] = cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_general_bipolar_3))
-  signals[cc_slot(cc_general_bipolar_4, SIGNAL_GENERAL_BIPOLAR_4)] = cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_general_bipolar_4))
+  # Each General CC fills two slots, the same value taken both ways.
+  general_1 = C.get_midi_cc_value(MIDI_CH, cc_general_1)
+  general_2 = C.get_midi_cc_value(MIDI_CH, cc_general_2)
+  general_3 = C.get_midi_cc_value(MIDI_CH, cc_general_3)
+  general_4 = C.get_midi_cc_value(MIDI_CH, cc_general_4)
+  signals[cc_slot(cc_general_1, SIGNAL_GENERAL_UNIPOLAR_1)] = cc_to_unipolar(general_1)
+  signals[cc_slot(cc_general_2, SIGNAL_GENERAL_UNIPOLAR_2)] = cc_to_unipolar(general_2)
+  signals[cc_slot(cc_general_3, SIGNAL_GENERAL_UNIPOLAR_3)] = cc_to_unipolar(general_3)
+  signals[cc_slot(cc_general_4, SIGNAL_GENERAL_UNIPOLAR_4)] = cc_to_unipolar(general_4)
+  signals[cc_slot(cc_general_1, SIGNAL_GENERAL_BIPOLAR_1)] = cc_to_bipolar(general_1)
+  signals[cc_slot(cc_general_2, SIGNAL_GENERAL_BIPOLAR_2)] = cc_to_bipolar(general_2)
+  signals[cc_slot(cc_general_3, SIGNAL_GENERAL_BIPOLAR_3)] = cc_to_bipolar(general_3)
+  signals[cc_slot(cc_general_4, SIGNAL_GENERAL_BIPOLAR_4)] = cc_to_bipolar(general_4)
 
   lfo_1.set_rate(signals[source_lfo_1_rate])
   lfo_1.set_level(signals[source_lfo_1_level])

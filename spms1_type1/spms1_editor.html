@@ -930,10 +930,13 @@
     ['MIXER_1',   'POLARITY_2',   'Polarity 2',   true,  0,   124],
   ];
 
-  // Category 3 only, after the parameters.
+  // Category 3 only, after the parameters. General 1-4 each fill two slots from one CC, a
+  // unipolar and a bipolar one, as spms1_main.rb does.
   const GENERALS = [[null, 'GENERAL_MOD_WHEEL', 'Mod Wheel', false, 1, 4]];
-  for (let n = 1; n <= 4; n++) GENERALS.push([null, `GENERAL_UNIPOLAR_${n}`, `Unipolar ${n}`, false, 15 + n, 64]);
-  for (let n = 1; n <= 4; n++) GENERALS.push([null, `GENERAL_BIPOLAR_${n}`, `Bipolar ${n}`, true, 15 + n, 64]);
+  for (let n = 1; n <= 4; n++) GENERALS.push([null, `GENERAL_${n}`, `${n}`, false, 15 + n, 64]);
+  const GENERAL_SLOTS = ['GENERAL_MOD_WHEEL'];
+  for (let n = 1; n <= 4; n++) GENERAL_SLOTS.push(`GENERAL_UNIPOLAR_${n}`);
+  for (let n = 1; n <= 4; n++) GENERAL_SLOTS.push(`GENERAL_BIPOLAR_${n}`);
 
   function toItem([module, suffix, label, ...rest]) {
     const key = module ? `${module}_${suffix}` : suffix;
@@ -944,15 +947,25 @@
   const CONTROL_ITEMS = PARAMS.concat(GENERALS).map(a => {
     const it = toItem(a);
     [it.bipolar, it.defaultCC, it.defaultValue] = it.rest;
+    // The bus slots the item's CC fills, each with its own range: [slot, label, bipolar].
+    const n = /^GENERAL_(\d)$/.exec(it.key);
+    it.slots = n
+      ? [[`GENERAL_UNIPOLAR_${n[1]}`, `Unipolar ${n[1]}`, false], [`GENERAL_BIPOLAR_${n[1]}`, `Bipolar ${n[1]}`, true]]
+      : [[it.key, it.label, it.bipolar]];
     return it;
   });
   const PARAM_ITEMS = CONTROL_ITEMS.slice(0, PARAMS.length);
   const CONTROL = Object.fromEntries(CONTROL_ITEMS.map(c => [c.key, c]));
+  // Each control slot, with the item whose CC fills it and the range it takes.
+  const SLOT = {};
+  CONTROL_ITEMS.forEach(c => c.slots.forEach(([slot, label, bipolar]) => {
+    SLOT[slot] = { c, bipolar, full: c.module ? c.full : `General ${label}` };
+  }));
 
   // The signals bus, in slot order.
   const SIGNAL_NAMES = ['NONE', 'ONE', 'HALF', 'POINT_TWO', 'POINT_ONE', 'MINUS_POINT_ONE', 'MINUS_POINT_TWO', 'MINUS_HALF', 'MINUS_ONE',
     ...MODULES.map(m => m.out), ...PARAM_ITEMS.map(p => p.key),
-    'PITCH', 'GATE', 'BEND', ...GENERALS.map(g => g[1])];
+    'PITCH', 'GATE', 'BEND', ...GENERAL_SLOTS];
   const SIG = Object.fromEntries(SIGNAL_NAMES.map((n, i) => [n, i]));
 
   const SIGNAL_LABELS = {
@@ -960,7 +973,7 @@
     PITCH: 'Note Pitch', GATE: 'Note Gate', BEND: 'Pitch Bend',
   };
   MODULES.forEach(m => { SIGNAL_LABELS[m.out] = `${m.label} Out`; });
-  CONTROL_ITEMS.forEach(c => { SIGNAL_LABELS[c.key] = c.full; });
+  for (const slot in SLOT) SIGNAL_LABELS[slot] = SLOT[slot].full;
   const sigLabel = s => SIGNAL_LABELS[s] || s;
 
   const DEFAULT_ORDER = ['LFO_1', 'ENV_GEN_1', 'MIXER_1', 'OSC_1', 'FILTER_1', 'AMP_1'];
@@ -1305,17 +1318,23 @@
     return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
 
+  // An item with two slots takes a second row for the second one, under the CC it shares.
   function controlRowHTML(c, withInput) {
-    const tip = c.bipolar ? 'Bipolar: CC 64 is the centre' : 'Unipolar';
+    const [[slot, label, bipolar], ...more] = c.slots;
+    const tip = bipolar ? 'Bipolar: CC 64 is the centre' : 'Unipolar';
     return `<div class="row ctrl" data-ctrl="${c.key}">
       ${withInput ? `<span class="port in param" data-dst="PR:${c.key}" title="Where ${escapeHTML(c.full)} takes its value (per buffer)"></span>` : ''}
-      <span class="lbl" title="${tip}">${escapeHTML(c.label)}</span>
+      <span class="lbl" title="${tip}">${escapeHTML(label)}</span>
       <span class="src"${withInput ? ` data-src-of="PR:${c.key}"` : ''}></span>
       <input type="number" class="cc" min="0" max="127" title="CC number, 0 for none">
       <input type="number" class="val" min="0" max="127" title="CC value">
-      <span class="norm" title="The value the synth sees in the slot"></span>
-      <span class="port out param" data-src="${c.key}" title="${escapeHTML(c.full)} control slot"></span>
-    </div>`;
+      <span class="norm" data-slot="${slot}" title="The value the synth sees in the slot"></span>
+      <span class="port out param" data-src="${slot}" title="${escapeHTML(SLOT[slot].full)} control slot"></span>
+    </div>` + more.map(([slot, label, bipolar]) => `<div class="row">
+      <span class="lbl" title="${bipolar ? 'Bipolar: CC 64 is the centre' : 'Unipolar'}, on the CC above">${escapeHTML(label)}</span>
+      <span class="norm" data-slot="${slot}" title="The value the synth sees in the slot"></span>
+      <span class="port out param" data-src="${slot}" title="${escapeHTML(SLOT[slot].full)} control slot"></span>
+    </div>`).join('');
   }
 
   function nodeHTML(node) {
@@ -1386,16 +1405,17 @@
       valIn.disabled = !cc;
       if (document.activeElement !== valIn) valIn.value = cc ? ccValue(cc) : '';
       valIn.placeholder = cc ? '' : '—';
-      const own = signalNorm(c.key);
-      const norm = row.querySelector('.norm');
+      valIn.title = cc
+        ? `Value of CC ${cc}, shared by every slot on it`
+        : 'No CC: the slot keeps what it holds (0.0 at power-on)';
+    });
+    world.querySelectorAll('.norm[data-slot]').forEach(norm => {
+      const own = signalNorm(norm.dataset.slot);
       norm.textContent = own ? own.text : '—';
       norm.classList.toggle('held', !!own && own.held);
       norm.title = own && own.held
         ? 'No CC: the value the slot last took, assuming the synth has followed the editor'
         : 'The value the synth sees in the slot';
-      valIn.title = cc
-        ? `Value of CC ${cc}, shared by every slot on it`
-        : 'No CC: the slot keeps what it holds (0.0 at power-on)';
     });
     refreshSourceValues();
   }
@@ -2265,10 +2285,10 @@
   // What a signal reads as normalized, and whether that is a held slot rather than a live CC.
   // null where the editor cannot know it: a module output.
   function signalNorm(sig) {
-    const c = CONTROL[sig];
-    if (c) {
-      const v = slotHeld[c.key];
-      return v == null ? null : { text: normalized(c, v), held: !state.cc[c.key] };
+    const slot = SLOT[sig];
+    if (slot) {
+      const v = slotHeld[slot.c.key];
+      return v == null ? null : { text: normalized(slot.bipolar, v), held: !state.cc[slot.c.key] };
     }
     if (sig in CONSTANT_NORMS) return { text: CONSTANT_NORMS[sig], held: false };
     const notes = noteNorms(noteStates[exportOptions().ch], false);
@@ -2284,8 +2304,8 @@
     return `${label} ${v.held ? `<i>(${v.text})</i>` : `(${v.text})`}`;
   }
 
-  function normalized(c, value) {
-    if (c.bipolar) {
+  function normalized(bipolar, value) {
+    if (bipolar) {
       const v = Math.max(-0.5, Math.min(0.5, (value - 64) / 120));
       return (v < 0 ? '-' : '+') + Math.abs(v).toFixed(3);
     }
@@ -2309,9 +2329,9 @@
       panel.className = 'panel';
       panel.innerHTML = `<h2>${p.title}</h2><div class="control-row">` + items.map(c => `
         <div class="slider-knob-zone" data-ctrl="${c.key}">
-          <div class="slider-label">${escapeHTML(c.label)} <span class="cc-num"></span></div>
+          <div class="slider-label">${escapeHTML(/^\d$/.test(c.label) ? c.full : c.label)} <span class="cc-num"></span></div>
           <div class="slider-input-wrapper">
-            <input type="range" min="0" max="127"${c.bipolar ? ' class="bipolar"' : ''}>
+            <input type="range" min="0" max="127"${c.slots.some(([, , bipolar]) => bipolar) ? ' class="bipolar"' : ''}>
             <span class="slider-value"></span>
             <span class="slider-norm" title="The value the synth sees in the slot"></span>
           </div>
@@ -2353,7 +2373,7 @@
       const value = usable ? ccValue(cc) : 64;
       if (document.activeElement !== slider) slider.value = value;
       zone.querySelector('.slider-value').textContent = usable ? String(value) : '—';
-      const own = signalNorm(c.key);
+      const own = signalNorm(c.slots[0][0]);
       const norm = zone.querySelector('.slider-norm');
       norm.textContent = own ? own.text : '';
       norm.classList.toggle('held', !!own && own.held);

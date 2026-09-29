@@ -259,7 +259,7 @@ flowchart LR
 | 0 | 0-31 | 実行順、スロットごとに | モジュール ID |
 | 1 | 0-9 | モジュール入力に何を入れるか | シグナル ID |
 | 2 | 0-22 | パラメータがどこから値を取るか | シグナル ID |
-| 3 | 0-31 | どの CC がコントロールスロットを埋めるか | CC 番号、0 なら割り当てなし |
+| 3 | 0-27 | どの CC がコントロールスロットを埋めるか | CC 番号、0 なら割り当てなし |
 
 実行順はスロット 0 から上へ読まれ、最初に現れたモジュール ID 0 で止まります。32 個に満たないパッチは
 そこで自ら終わるわけです。実行順はモジュールの番号付けとは別物です。あるモジュールが今サンプルの値を
@@ -306,16 +306,16 @@ flowchart LR
 
 #### エントリ (CC 98)、カテゴリ 3 のみ
 
-これらのスロットはどのパラメータにも属さないので、カテゴリ 2 には対応するエントリがありません。後述の
-General スロットを参照してください。
+これらの CC はどのパラメータにも属さないので、カテゴリ 2 には対応するエントリがありません。General 1〜4 は
+それぞれユニポーラとバイポーラの 2 つのスロットを埋めます。後述の General スロットを参照してください。
 
-| CC 98 | コントロールスロット | | CC 98 | コントロールスロット |
-| ----- | ------ | - | ----- | ------ |
-| 23 | General Mod Wheel | | 28 | General Bipolar 1 |
-| 24 | General Unipolar 1 | | 29 | General Bipolar 2 |
-| 25 | General Unipolar 2 | | 30 | General Bipolar 3 |
-| 26 | General Unipolar 3 | | 31 | General Bipolar 4 |
-| 27 | General Unipolar 4 | |  |  |
+| CC 98 | CC の割り当て先 | 埋めるスロット |
+| ----- | ------ | ----- |
+| 23 | General Mod Wheel | General Mod Wheel |
+| 24 | General 1 | General Unipolar 1、General Bipolar 1 |
+| 25 | General 2 | General Unipolar 2、General Bipolar 2 |
+| 26 | General 3 | General Unipolar 3、General Bipolar 3 |
+| 27 | General 4 | General Unipolar 4、General Bipolar 4 |
 
 #### モジュール ID
 
@@ -368,9 +368,10 @@ CC 64 を 0.0 とする -0.5〜+0.5 と、LFO と同じ幅なので、バイポ�
 スロット 41〜49 の General スロットは、どのパラメータにも属さないコントロールスロットです。CC をバスに
 載せるだけで、どのモジュール入力やパラメータからも読めます。General Mod Wheel は CC 1 を読む 0.0〜1.0
 のスロットで、起動時は CC 4 なので、ホイールを動かすまで 0.0 です。デフォルトではどこにも結線されて
-いません。General Unipolar 1〜4 は 0.0〜1.0、General
-Bipolar 1〜4 は -0.5〜+0.5 です。どちらもデフォルトでは CC 16〜19 を読むので、それぞれの CC が両方の形で
-同時に届きます。起動時はどちらも CC 64 で、ユニポーラは 0.5、バイポーラは 0.0 です。
+いません。General 1〜4 はデフォルトで
+CC 16〜19 を読み、それぞれの CC を両方の形で同時にバスに載せます。General Unipolar 1〜4 は 0.0〜1.0、
+General Bipolar 1〜4 は -0.5〜+0.5 です。起動時は 4 つとも CC 64 なので、ユニポーラは 0.5、バイポーラは
+0.0 から始まります。
 
 Note Pitch、Note Gate、Pitch Bend の 3 つは鍵盤がバスに載せるものです。Note Pitch は MIDI ノート 0〜120 を
 -0.5〜+0.5 で運びます。オシレータがピッチの全域として読むのと同じ幅です。Pitch Bend も同じくバイポーラで、

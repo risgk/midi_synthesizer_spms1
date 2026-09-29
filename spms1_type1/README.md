@@ -263,7 +263,7 @@ a matter of changing slot numbers.
 | 0 | 0-31 | Run order, slot by slot | Module ID |
 | 1 | 0-9 | What feeds a module input | Signal ID |
 | 2 | 0-22 | Where a parameter takes its value | Signal ID |
-| 3 | 0-31 | Which CC fills a control slot | CC number, or 0 for none |
+| 3 | 0-27 | Which CC fills a control slot | CC number, or 0 for none |
 
 The run order is read from slot 0 upwards and stops at the first Module ID 0, so a patch shorter
 than 32 modules ends itself. It is separate from the module numbering: a module only sees the
@@ -313,16 +313,16 @@ gain down but never up.
 
 #### Entries (CC 98), category 3 only
 
-These slots belong to no parameter, so category 2 has no entry for them. See the General slots
-below.
+These CCs belong to no parameter, so category 2 has no entry for them. Each of General 1-4 fills
+two slots, a unipolar and a bipolar one. See the General slots below.
 
-| CC 98 | Control slot | | CC 98 | Control slot |
-| ----- | ------ | - | ----- | ------ |
-| 23 | General Mod Wheel | | 28 | General Bipolar 1 |
-| 24 | General Unipolar 1 | | 29 | General Bipolar 2 |
-| 25 | General Unipolar 2 | | 30 | General Bipolar 3 |
-| 26 | General Unipolar 3 | | 31 | General Bipolar 4 |
-| 27 | General Unipolar 4 | |  |  |
+| CC 98 | CC for | Fills |
+| ----- | ------ | ----- |
+| 23 | General Mod Wheel | General Mod Wheel |
+| 24 | General 1 | General Unipolar 1, General Bipolar 1 |
+| 25 | General 2 | General Unipolar 2, General Bipolar 2 |
+| 26 | General 3 | General Unipolar 3, General Bipolar 3 |
+| 27 | General 4 | General Unipolar 4, General Bipolar 4 |
 
 #### Module IDs
 
@@ -376,10 +376,10 @@ makes a modulation. A slot with no CC holds 0.0 until one is assigned.
 
 Slots 41-49, the General slots, are control slots that no parameter owns: a CC put on the bus for
 any module input or parameter to read. General Mod Wheel reads CC 1, runs 0.0 to 1.0 and powers
-up at CC 4, so it is at 0.0 until the wheel moves; nothing is routed to it by default. General
-Unipolar 1-4 run 0.0 to 1.0 and General Bipolar
-1-4 run -0.5 to +0.5. Both sets read CC 16-19 by default, so each of those CCs arrives both ways
-at once, and both power up at CC 64: the unipolar slots at 0.5, the bipolar ones at 0.0.
+up at CC 4, so it is at 0.0 until the wheel moves; nothing is routed to it by default. General 1-4
+read CC 16-19 by default, and each puts its CC on the bus both ways at once: General Unipolar 1-4
+run 0.0 to 1.0 and General Bipolar 1-4 run -0.5 to +0.5. All four power up at CC 64, so the
+unipolar slots start at 0.5 and the bipolar ones at 0.0.
 
 Note Pitch, Note Gate and Pitch Bend are what the keyboard puts on the bus. Note Pitch carries
 MIDI notes 0 to 120 as -0.5 to +0.5, the same span the oscillator reads as its whole pitch
