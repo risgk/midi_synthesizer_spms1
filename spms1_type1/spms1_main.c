@@ -1625,7 +1625,7 @@ static mrb_float sp_EnvGen_process(sp_EnvGen *self, mrb_float lv_gate_input) {
 #line 82 "spms1_env_gen.rb"
   if ((self->iv_sample_counter == 0LL)) {
 #line 83 "spms1_env_gen.rb"
-    lv_is_gate_on = (lv_gate_input >= 0.5);
+    lv_is_gate_on = (lv_gate_input >= 0.25);
 #line 84 "spms1_env_gen.rb"
     lv_gate_rose = (lv_is_gate_on && (!self->iv_was_gate_on));
 #line 85 "spms1_env_gen.rb"

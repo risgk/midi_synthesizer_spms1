@@ -292,7 +292,7 @@ passes it through rather than muting it.
 | 8 | Mixer 1 In 2 | | 17 | Final Output |
 
 Most of these take what their name suggests, but three do not say it on their face. A Gate is a
-threshold rather than a level: an envelope triggers as the signal crosses 0.5 and releases as it
+threshold rather than a level: an envelope triggers as the signal reaches 0.25 and releases as it
 falls back. A Pitch is -0.5 to +0.5 across MIDI notes 0 to 120, so 0.0 is note 60 and a tenth of
 a unit is an octave. And a Mod In is taken as it arrives: nothing is held to a range on the way
 in, and what gets clamped is the value the module ends up with -- cutoff to the ends of its dial,
@@ -399,7 +399,7 @@ Note Pitch, Note Gate and Pitch Bend are what the keyboard puts on the bus. Note
 MIDI notes 0 to 120 as -0.5 to +0.5, the same span the oscillator reads as its whole pitch
 range, and Pitch Bend is bipolar too, one unit across the whole wheel: exactly -0.5 and +0.5 at
 the ends of its travel and exactly zero at the centre detent, so it can feed a module input
-without a mixer to shift it. Note Gate is 0.0 or 1.0, and an envelope triggers at 0.5. Nothing
+without a mixer to shift it. Note Gate is 0.0 or 1.0, and an envelope triggers at 0.25. Nothing
 is routed to Pitch Bend by default.
 
 Slots 0-8 are constants that nothing writes, for inputs that want a fixed value rather than a

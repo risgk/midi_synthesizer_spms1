@@ -80,7 +80,7 @@ module Spms1
     def process(gate_input = 0.0)
       # Gate transitions drive the ADS state machine; level changes are stepped at the control rate.
       if @sample_counter == 0
-        is_gate_on = gate_input >= 0.5
+        is_gate_on = gate_input >= 0.25
         gate_rose = is_gate_on && !@was_gate_on
         gate_fell = !is_gate_on && @was_gate_on
 
