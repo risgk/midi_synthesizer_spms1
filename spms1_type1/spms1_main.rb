@@ -152,15 +152,17 @@ SIGNAL_GATE                = 59
 SIGNAL_BEND                = 60
 
 # Control slots no parameter owns: each is a CC put on the bus for any input or parameter to read.
-# Four of each kind, so a knob can be taken either way without a mixer to shift it.
-SIGNAL_GENERAL_UNIPOLAR_1  = 61
-SIGNAL_GENERAL_UNIPOLAR_2  = 62
-SIGNAL_GENERAL_UNIPOLAR_3  = 63
-SIGNAL_GENERAL_UNIPOLAR_4  = 64
-SIGNAL_GENERAL_BIPOLAR_1   = 65
-SIGNAL_GENERAL_BIPOLAR_2   = 66
-SIGNAL_GENERAL_BIPOLAR_3   = 67
-SIGNAL_GENERAL_BIPOLAR_4   = 68
+# The mod wheel first, unipolar and on CC 1, then four of each kind, so a knob can be taken either
+# way without a mixer to shift it.
+SIGNAL_GENERAL_MOD_WHEEL   = 61
+SIGNAL_GENERAL_UNIPOLAR_1  = 62
+SIGNAL_GENERAL_UNIPOLAR_2  = 63
+SIGNAL_GENERAL_UNIPOLAR_3  = 64
+SIGNAL_GENERAL_UNIPOLAR_4  = 65
+SIGNAL_GENERAL_BIPOLAR_1   = 66
+SIGNAL_GENERAL_BIPOLAR_2   = 67
+SIGNAL_GENERAL_BIPOLAR_3   = 68
+SIGNAL_GENERAL_BIPOLAR_4   = 69
 
 SIGNALS_SIZE = 128
 
@@ -276,14 +278,15 @@ NRPN_CC_MIXER_5_LEVEL_1       = 419
 NRPN_CC_MIXER_5_POLARITY_1    = 420
 NRPN_CC_MIXER_5_LEVEL_2       = 421
 NRPN_CC_MIXER_5_POLARITY_2    = 422
-NRPN_CC_GENERAL_UNIPOLAR_1    = 423
-NRPN_CC_GENERAL_UNIPOLAR_2    = 424
-NRPN_CC_GENERAL_UNIPOLAR_3    = 425
-NRPN_CC_GENERAL_UNIPOLAR_4    = 426
-NRPN_CC_GENERAL_BIPOLAR_1     = 427
-NRPN_CC_GENERAL_BIPOLAR_2     = 428
-NRPN_CC_GENERAL_BIPOLAR_3     = 429
-NRPN_CC_GENERAL_BIPOLAR_4     = 430
+NRPN_CC_GENERAL_MOD_WHEEL     = 423
+NRPN_CC_GENERAL_UNIPOLAR_1    = 424
+NRPN_CC_GENERAL_UNIPOLAR_2    = 425
+NRPN_CC_GENERAL_UNIPOLAR_3    = 426
+NRPN_CC_GENERAL_UNIPOLAR_4    = 427
+NRPN_CC_GENERAL_BIPOLAR_1     = 428
+NRPN_CC_GENERAL_BIPOLAR_2     = 429
+NRPN_CC_GENERAL_BIPOLAR_3     = 430
+NRPN_CC_GENERAL_BIPOLAR_4     = 431
 
 # CC value normalization. Each control slot is unipolar or bipolar, matching the range its
 # parameter clamps to, and takes the converter of its kind: unipolar is 0.0..1.0, the span of an
@@ -349,11 +352,11 @@ signals[SIGNAL_MINUS_ONE]       = -1.0
 # and so on down the chain. The default patch uses none of them: the LFO goes straight to the
 # oscillator, and its own polarity reads the constant 0.1, which brings it down to a vibrato depth
 # so that Osc Mod Amt can span the whole pitch range the way every other modulation depth does.
-# LFO 1 Level is on CC 113 and starts at full scale.
 # A mixer's parameters have no CC, so the default patch points them at constants instead: full
 # level and a polarity of +0.5, which makes a mixer pass its input through rather than mute it.
 # Each modulation polarity has no CC either and reads +0.5, which leaves the amount in charge.
-# EG 1 Level and Polarity have no CC either and read 1.0 and +0.5, passing the envelope as it is.
+# LFO 1 Level has no CC either and reads 1.0. EG 1 Level and Polarity read 1.0 and +0.5, passing
+# the envelope as it is.
 C.set_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 0, MODULE_LFO_1)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 1, MODULE_MIXER_1)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 2, MODULE_ENV_GEN_1)
@@ -375,7 +378,7 @@ C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_MOD      , SIGNAL_ENV_GEN_1_OUT
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OUTPUT         , SIGNAL_AMP_1_OUTPUT)
 
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_RATE            , SIGNAL_LFO_1_RATE)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_LEVEL           , SIGNAL_LFO_1_LEVEL)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_LEVEL           , SIGNAL_ONE)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_POLARITY        , SIGNAL_POINT_ONE)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_1_ATTACK      , SIGNAL_ENV_GEN_1_ATTACK)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_1_DECAY       , SIGNAL_ENV_GEN_1_DECAY)
@@ -415,7 +418,6 @@ C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_5_LEVEL_2       , SIGNAL_ONE)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_5_POLARITY_2    , SIGNAL_HALF)
 
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_RATE          , 3)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_LEVEL         , 113)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_1_ATTACK    , 73)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_1_DECAY     , 75)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_1_SUSTAIN   , 30)
@@ -428,6 +430,7 @@ C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_RESONANCE  , 71)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_GAIN       , 112)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_MOD_AMOUNT , 24)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_AMP_1_GAIN          , 15)
+C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_MOD_WHEEL   , 1)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_UNIPOLAR_1  , 16)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_UNIPOLAR_2  , 17)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_UNIPOLAR_3  , 18)
@@ -437,7 +440,6 @@ C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_BIPOLAR_2   , 17)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_BIPOLAR_3   , 18)
 C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_BIPOLAR_4   , 19)
 
-C.set_midi_cc_value(MIDI_CH, 113, 124) # LFO 1 Level
 C.set_midi_cc_value(MIDI_CH, 3  , 64 ) # LFO 1 Rate
 C.set_midi_cc_value(MIDI_CH, 73 , 4  ) # EG 1 Attack
 C.set_midi_cc_value(MIDI_CH, 75 , 100) # EG 1 Decay
@@ -451,6 +453,7 @@ C.set_midi_cc_value(MIDI_CH, 71 , 94 ) # Filter 1 Resonance
 C.set_midi_cc_value(MIDI_CH, 112, 64 ) # Filter 1 Gain
 C.set_midi_cc_value(MIDI_CH, 24 , 64 ) # Filter 1 Mod Amt
 C.set_midi_cc_value(MIDI_CH, 15 , 64 ) # Amp 1 Gain
+C.set_midi_cc_value(MIDI_CH, 1  , 4  ) # General Mod Wheel
 # Each of these fills a unipolar and a bipolar slot at once, and CC 64 is the one value that puts
 # neither at an end: the unipolar slot at 0.5, the bipolar at 0.0.
 C.set_midi_cc_value(MIDI_CH, 16 , 64 ) # General 1
@@ -589,6 +592,7 @@ loop do
   cc_mixer_5_polarity_1    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_5_POLARITY_1)
   cc_mixer_5_level_2       = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_5_LEVEL_2)
   cc_mixer_5_polarity_2    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_5_POLARITY_2)
+  cc_general_mod_wheel     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_MOD_WHEEL)
   cc_general_unipolar_1    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_UNIPOLAR_1)
   cc_general_unipolar_2    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_UNIPOLAR_2)
   cc_general_unipolar_3    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_UNIPOLAR_3)
@@ -637,6 +641,7 @@ loop do
   signals[cc_slot(cc_mixer_5_polarity_1, SIGNAL_MIXER_5_POLARITY_1)] = cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_5_polarity_1))
   signals[cc_slot(cc_mixer_5_level_2, SIGNAL_MIXER_5_LEVEL_2)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_5_level_2))
   signals[cc_slot(cc_mixer_5_polarity_2, SIGNAL_MIXER_5_POLARITY_2)] = cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_5_polarity_2))
+  signals[cc_slot(cc_general_mod_wheel, SIGNAL_GENERAL_MOD_WHEEL)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_general_mod_wheel))
   signals[cc_slot(cc_general_unipolar_1, SIGNAL_GENERAL_UNIPOLAR_1)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_general_unipolar_1))
   signals[cc_slot(cc_general_unipolar_2, SIGNAL_GENERAL_UNIPOLAR_2)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_general_unipolar_2))
   signals[cc_slot(cc_general_unipolar_3, SIGNAL_GENERAL_UNIPOLAR_3)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_general_unipolar_3))

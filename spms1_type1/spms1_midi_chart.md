@@ -35,7 +35,7 @@
 |                            75 | x             | o             | EG Decay (Time)                      |
 |                            30 | x             | o             | EG Sustain (Level)                   |
 |                             3 | x             | o             | LFO Rate                             |
-|                           113 | x             | o             | LFO Level                            |
+|                             1 | x             | o             | General Mod Wheel (Unipolar)         |
 |                            16 | x             | o             | General 1 (Unipolar and Bipolar)     |
 |                            17 | x             | o             | General 2 (Unipolar and Bipolar)     |
 |                            18 | x             | o             | General 3 (Unipolar and Bipolar)     |

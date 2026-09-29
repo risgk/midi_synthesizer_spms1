@@ -908,7 +908,7 @@
   // signal 19 + entry: [module, suffix, label, bipolar, default CC, default CC value].
   const PARAMS = [
     ['LFO_1',     'RATE',         'Rate',         false, 3,   64],
-    ['LFO_1',     'LEVEL',        'Level',        false, 113, 124],
+    ['LFO_1',     'LEVEL',        'Level',        false, 0,   null],
     ['LFO_1',     'POLARITY',     'Polarity',     true,  0,   124],
     ['ENV_GEN_1', 'ATTACK',       'Attack',       false, 73,  4],
     ['ENV_GEN_1', 'DECAY',        'Decay',        false, 75,  100],
@@ -935,7 +935,7 @@
   }
 
   // Category 3 only, after the parameters.
-  const GENERALS = [];
+  const GENERALS = [[null, 'GENERAL_MOD_WHEEL', 'Mod Wheel', false, 1, 4]];
   for (let n = 1; n <= 4; n++) GENERALS.push([null, `GENERAL_UNIPOLAR_${n}`, `Unipolar ${n}`, false, 15 + n, 64]);
   for (let n = 1; n <= 4; n++) GENERALS.push([null, `GENERAL_BIPOLAR_${n}`, `Bipolar ${n}`, true, 15 + n, 64]);
 
@@ -971,7 +971,7 @@
 
   const DEFAULT_LAYOUT = {
     NOTE:      { x: 20,   y: 40 },
-    CONST:     { x: 20,   y: 530 },
+    CONST:     { x: 20,   y: 538 },
     GENERAL:   { x: 20,   y: 220 },
     LFO_1:     { x: 360,  y: 40 },
     MIXER_1:   { x: 360,  y: 228 },
@@ -993,6 +993,7 @@
     PARAM_ITEMS.forEach(p => {
       if (p.module && p.module.startsWith('MIXER_')) s.params[p.key] = p.label.startsWith('Level') ? 'ONE' : 'HALF';
     });
+    s.params.LFO_1_LEVEL = 'ONE';
     s.params.LFO_1_POLARITY = 'POINT_ONE';
     s.params.ENV_GEN_1_LEVEL = 'ONE';
     s.params.ENV_GEN_1_POLARITY = 'HALF';
