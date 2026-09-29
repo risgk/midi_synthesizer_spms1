@@ -110,9 +110,13 @@
     /* Controls */
     .editor-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr;
       gap: 20px;
       align-items: start;
+    }
+    /* A slider row needs about 390px, so the third column wraps under the first before then. */
+    @media (max-width: 1200px) {
+      .editor-grid { grid-template-columns: 1fr 1fr; }
     }
     @media (max-width: 768px) {
       .editor-grid { grid-template-columns: 1fr; }
@@ -2247,12 +2251,12 @@
 
   // Each slider follows its slot's CC assignment in the patch, and moves the value of that CC.
   const CONTROL_PANELS = [
-    { col: 0, title: 'Osc', module: 'OSC_1' },
     { col: 0, title: 'General', general: true },
-    { col: 1, title: 'Filter', module: 'FILTER_1' },
-    { col: 1, title: 'Amp', module: 'AMP_1' },
-    { col: 1, title: 'EG', module: 'ENV_GEN_1' },
     { col: 1, title: 'LFO', module: 'LFO_1' },
+    { col: 1, title: 'EG', module: 'ENV_GEN_1' },
+    { col: 2, title: 'Osc', module: 'OSC_1' },
+    { col: 2, title: 'Filter', module: 'FILTER_1' },
+    { col: 2, title: 'Amp', module: 'AMP_1' },
   ];
   CONTROL_PANELS.push({ col: 1, title: 'Mixer 1', module: 'MIXER_1', onlyWithCC: true });
 
@@ -2319,7 +2323,7 @@
     const active = document.activeElement;
     // Rebuilding under a slider being dragged would drop the drag.
     if (active && active.type === 'range' && root.contains(active)) return;
-    const cols = [document.createElement('div'), document.createElement('div')];
+    const cols = [document.createElement('div'), document.createElement('div'), document.createElement('div')];
     cols.forEach(c => { c.className = 'editor-column'; });
     for (const p of CONTROL_PANELS) {
       const items = panelItems(p);
