@@ -18,7 +18,7 @@ module Spms1
     # steps at the knee, so what crosses it gains odd harmonics of every order rather than just the
     # third, falling as 1/n^3; a hard clamp, stepping in slope, falls as 1/n^2.
     OUTPUT_LIMIT       = 1.0
-    OUTPUT_KNEE        = 0.5
+    OUTPUT_KNEE        = 0.75
     OUTPUT_CEILING     = OUTPUT_LIMIT + OUTPUT_LIMIT - OUTPUT_KNEE
     OUTPUT_FLOOR       = -OUTPUT_CEILING
     OUTPUT_KNEE_FLOOR  = -OUTPUT_KNEE
@@ -46,13 +46,13 @@ module Spms1
     # Number of samples between control-rate updates; smoothing speed is kept approximately
     # constant if this is changed. It has to stay a power of two: the counter below wraps with a
     # mask, because Ruby's % is a floor-modulo and sp_imod carries a sign correction the counter
-    # can never need -- one branch a sample in each module, ten across the six of them.
+    # can never need -- one branch a sample in each module, six across the six of them.
     CONTROL_RATE_DIVISOR = 4
     # Its own constant, not CONTROL_RATE_DIVISOR - 1 where it is used: Spinel emits an Integer
     # constant as a runtime global and does not fold arithmetic on one, so written that way the
     # subtraction survives into the per-sample path carrying an overflow check of its own, which
     # measured far worse than the modulo it replaces. What the mask buys is size, not
-    # determinism: the ten branches it removes, one per site, are ones that could never be taken.
+    # determinism: the six branches it removes, one per site, are ones that could never be taken.
     # Together with the LFO's fold it took 11 branches and 60 instructions out of Spms1_main as
     # linked, and the buffer time did not move (853/857us against 854/856).
     CONTROL_RATE_MASK = CONTROL_RATE_DIVISOR - 1
@@ -83,8 +83,8 @@ module Spms1
     # the amount dialled in. The soft clip on the band pass state settles the oscillation at about
     # 11.4 * sqrt(|k| * g / (1 + g^2)^2), so this holds it near SELF_OSC_LEVEL whatever the cutoff;
     # the (1 + g^2)^2 matters only in the top octaves, where g is no longer small.
-    # Set at the output clip's knee, the most that leaves the filter as a clean sine; the
-    # oscillation settles just below it. The value is for 48 kHz; initialize scales it with the
+    # Set below the output clip's knee, so that the oscillation leaves the filter as a clean sine;
+    # the same level as in PRA32-U2. The value is for 48 kHz; initialize scales it with the
     # sample rate, as it does the clip.
     SELF_OSC_LEVEL = 0.5
     SELF_OSC_KAPPA = (SELF_OSC_LEVEL / 11.4) * (SELF_OSC_LEVEL / 11.4)
