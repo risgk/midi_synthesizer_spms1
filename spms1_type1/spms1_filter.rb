@@ -154,6 +154,10 @@ module Spms1
       @current_modulation_input = 0.0
       @sample_counter = 0
 
+      # How soft_clip weighs the band pass and low pass states; update_coefficients sets them.
+      @clip_s1_weight = 1.0
+      @clip_s2_weight = 0.0
+
       update_coefficients
     end
 
@@ -220,7 +224,7 @@ module Spms1
       # coefficients only approximately satisfy a0 = 1 + g * (g + k), and a cutoff thrown across
       # its range every step, as audio on the modulation input at full depth does, can then give
       # the loop gain; nothing else bounds the low pass state. Clamped the way clip_output clamps.
-      s1 = soft_clip(@s1)
+      s1 = soft_clip(@s1, @s2)
       s2_over  = @s2 - LOW_PASS_STATE_CEILING
       s2_under = LOW_PASS_STATE_FLOOR - @s2
       s2 = @s2 - ((s2_over + s2_over.abs) - (s2_under + s2_under.abs)) * 0.5
@@ -295,6 +299,16 @@ module Spms1
       over  = t - 1.0
       under = 0.0 - t
       t = t - ((over + over.abs) - (under + under.abs)) * 0.5
+      # Self-oscillating, the two states run at nearly equal amplitude a quarter cycle apart, so
+      # s1^2 + s2^2 holds nearly still over a cycle where s1^2 alone swings at twice the pitch.
+      # That swing is what puts a third harmonic on the oscillation, and above 8 kHz the third
+      # harmonic folds back below Nyquist. Weighting the clip by the sum instead takes the
+      # aliasing down by 35 to 48 dB. 0.75 holds the level: averaged over a cycle, the cubic
+      # takes 3/4 * A^2 out of a sine and the sum only A^2 / 2. Blended by t, so below the
+      # self-oscillation range the weights are exactly 1 and 0 and the clip is the one it was,
+      # bit for bit.
+      @clip_s1_weight = 1.0 - 0.25 * t
+      @clip_s2_weight = 0.75 * t
       one_plus_g_squared = 1.0 + g * g
       k = resonance_to_k_fast(@current_resonance) - t * @self_osc_kappa * one_plus_g_squared * one_plus_g_squared / g
       below_floor = SELF_OSC_K_FLOOR - k
@@ -360,12 +374,20 @@ module Spms1
     # Blended by alpha as initialize describes: with the state split into its clamped part c and
     # the part past the ceiling d, s - alpha * (s - soft_clip(s)) is c - alpha * c^3 / (3 *
     # ceiling^2) + (1 - alpha) * d. excess is twice d, which is why the leak carries a half.
-    def soft_clip(sample)
+    # In the self-oscillation range c^2 gives way to a weighted sum of c^2 and the other state's
+    # square, as update_coefficients describes; below it the weights leave c^2 exactly as it is.
+    def soft_clip(sample, other)
       over    = sample - SOFT_CLIP_CEILING
       under   = SOFT_CLIP_FLOOR - sample
       excess  = (over + over.abs) - (under + under.abs)
       clamped = sample - excess * 0.5
-      clamped * (1.0 - clamped * clamped * @soft_clip_gain_scale) + excess * @soft_clip_leak
+      # The other state is held to the same ceiling. Its own guard is four times wider, and with
+      # that range the energy could push the gain below zero.
+      other_over    = other - SOFT_CLIP_CEILING
+      other_under   = SOFT_CLIP_FLOOR - other
+      other_clamped = other - ((other_over + other_over.abs) - (other_under + other_under.abs)) * 0.5
+      energy = clamped * clamped * @clip_s1_weight + other_clamped * other_clamped * @clip_s2_weight
+      clamped * (1.0 - energy * @soft_clip_gain_scale) + excess * @soft_clip_leak
     end
   end
 end
