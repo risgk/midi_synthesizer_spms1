@@ -442,8 +442,10 @@ and faster, without a sudden step, through Q 27 at CC 109 to Q 256 just past CC 
 the filter oscillates on its own: a sine at the cutoff frequency, growing to its full level of
 about 0.5 by CC 123 and holding it to the top of the dial. Low in that range the oscillation
 builds slowly and shares the filter with the input; at the top it takes the input over. Its
-level holds across the cutoff range down to about 150 Hz and falls below that. With the cutoff
-following the keyboard, as in the examples below, it plays as a sine voice.
+level holds across the cutoff range down to about 150 Hz and falls below that. Near the top of the
+cutoff range it fades out, before its 3rd harmonic folds back as an inharmonic tone: at 48 kHz,
+from 8 kHz (CC 108) to 10 kHz (CC 112), modulation included. Above that the resonance acts as at
+Q 256. With the cutoff following the keyboard, as in the examples below, it plays as a sine voice.
 
 A mixer takes each input at its own level and its own polarity, then adds them. Level runs from
 silent at 0.0 (CC 4) to full at 1.0 (CC 124), and Polarity from negated at -0.5 (CC 4), through

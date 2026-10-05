@@ -96,6 +96,16 @@ module Spms1
     # do the latter, as k does not move the loop's DC balance. Well above flush_tiny's dead zone,
     # and far below anything audible.
     SELF_OSC_SEED = 1e-6
+    # Where the self-oscillation starts on the resonance dial, v = 122 of 128.
+    SELF_OSC_START = 122.0 / 128.0
+    # The soft clip on the band pass state gives the oscillation a 3rd harmonic, which folds back
+    # to f_s - 3 * f_0 once 3 * f_0 is above f_s / 2 (an inharmonic 11.8 kHz tone for f_0 = 19.9
+    # kHz at 48 kHz). The oscillation therefore fades out as the cutoff, modulation included, rises
+    # from f_s / 6 to f_s / 4.8, linearly on the cutoff dial, where the folded tone is still above
+    # 0.375 * f_s; above that the resonance past SELF_OSC_START acts as SELF_OSC_START. At 48 kHz
+    # that is 8 kHz to 10 kHz, CC 108 to 112. The fade's width on the dial does not depend on the
+    # sample rate: log2(6 / 4.8) octaves, at 10 octaves to the dial.
+    SELF_OSC_FADE_WIDTH = Math.log(6.0 / 4.8) / (10.0 * Math.log(2.0))
 
     def initialize(sample_rate)
       @sample_rate = sample_rate
@@ -112,6 +122,13 @@ module Spms1
       @soft_clip_leak = (1.0 - soft_clip_alpha) * 0.5
       @self_osc_kappa = SELF_OSC_KAPPA * soft_clip_alpha
       @self_osc_seed = SELF_OSC_SEED
+      # The fade's weight is offset - cutoff * scale, clamped to [0, 1]: one at f_s / 6 and below,
+      # zero at f_s / 4.8 and above. The dial puts MIDI note 15 at 0.0 and 135 at 1.0, 440 Hz at
+      # 0.45. At a sample rate of 96 kHz or more, f_s / 4.8 lies past the top of the dial and the
+      # oscillation never fades out entirely.
+      self_osc_fade_end = 0.45 + Math.log(sample_rate * (1.0 / (4.8 * 440.0))) / (10.0 * Math.log(2.0))
+      @self_osc_fade_scale = 1.0 / SELF_OSC_FADE_WIDTH
+      @self_osc_fade_offset = self_osc_fade_end * @self_osc_fade_scale
 
       # Integrator gain lookup, g = tan(pi * f_0 / f_s), one entry per semitone of MIDI note 15
       # (19 Hz) to 135 (20 kHz), the cutoff dial's range. It depends on the sample rate, so it is
@@ -186,7 +203,7 @@ module Spms1
     end
 
     # Q range: ~0.7 (0.0), ~2.83 (0.5), ~5.66 (0.75), ~27 (0.875), 256 (~0.953); self-oscillation from there,
-    # growing to its full level at ~0.992 and staying there to 1.0.
+    # growing to its full level at ~0.992 and staying there to 1.0, fading out at a high cutoff.
     def set_resonance(resonance)
       @resonance = (resonance < 0.0) ? 0.0 : ((resonance > 1.0) ? 1.0 : resonance)
     end
@@ -287,15 +304,26 @@ module Spms1
 
       g = cutoff_to_g_fast(clamped_cutoff)
 
+      # The resonance past SELF_OSC_START, scaled down toward it by the fade's weight, so that a
+      # high cutoff fades out the self-oscillation as SELF_OSC_FADE_WIDTH describes. Each clamp
+      # is built as clip_output builds its own.
+      weight = @self_osc_fade_offset - clamped_cutoff * @self_osc_fade_scale
+      over  = weight - 1.0
+      under = 0.0 - weight
+      weight = weight - ((over + over.abs) - (under + under.abs)) * 0.5
+      self_osc_over = @current_resonance - SELF_OSC_START
+      self_osc_over = (self_osc_over + self_osc_over.abs) * 0.5
+      resonance = @current_resonance - self_osc_over * (1.0 - weight)
+
       # The self-oscillation amount: zero up to r = 122/128, rising to one at 127/128 and held
       # there. Worked out here rather than in K_TABLE, whose interpolation would round off the
-      # corner at 127/128. Each clamp is built as clip_output builds its own.
-      t = @current_resonance * 25.6 - 24.4
+      # corner at 127/128.
+      t = resonance * 25.6 - 24.4
       over  = t - 1.0
       under = 0.0 - t
       t = t - ((over + over.abs) - (under + under.abs)) * 0.5
       one_plus_g_squared = 1.0 + g * g
-      k = resonance_to_k_fast(@current_resonance) - t * @self_osc_kappa * one_plus_g_squared * one_plus_g_squared / g
+      k = resonance_to_k_fast(resonance) - t * @self_osc_kappa * one_plus_g_squared * one_plus_g_squared / g
       below_floor = SELF_OSC_K_FLOOR - k
       k = k + (below_floor + below_floor.abs) * 0.5
       g_plus_k = g + k
