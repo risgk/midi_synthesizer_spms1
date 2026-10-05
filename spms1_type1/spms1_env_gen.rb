@@ -121,15 +121,16 @@ module Spms1
         target = (@state == STATE_ATTACK) ? ATTACK_TARGET : (((@state == STATE_SUSTAIN) && is_gate_on) ? @sustain : 0.0)
         coef = (@state == STATE_ATTACK) ? @attack_coef : ((@state == STATE_SUSTAIN) ? @decay_coef : 0.0)
 
-        apply_step = (@state != STATE_SUSTAIN) || !is_gate_on || (@sustain < @current_level)
-        coef_masked = apply_step ? coef : 0.0
-
-        @current_level += (target - @current_level) * coef_masked
+        # With the gate on, the level follows the sustain both ways at the decay rate, so raising
+        # the sustain while a note is held raises the level too.
+        @current_level += (target - @current_level) * coef
 
         is_attack_done = (@state == STATE_ATTACK) && (@current_level >= 1.0 || !@was_gate_on)
         # The floor holds with the gate on too: decaying toward a sustain of 0.0, the level would
         # otherwise sink into denormals and stick at the smallest one, which x86 computes slowly.
-        is_floor_reached = (@state == STATE_SUSTAIN) && (@current_level < 1e-5)
+        # Only where the target is below it as well, so that a sustain raised from 0.0 is not held
+        # at the floor by a long decay, whose first step can fall short of it.
+        is_floor_reached = (@state == STATE_SUSTAIN) && (@current_level < 1e-5) && (target < 1e-5)
         is_idle_reached = is_floor_reached && !@was_gate_on
         is_forced_attack = (@state == STATE_IDLE) && @was_gate_on
 

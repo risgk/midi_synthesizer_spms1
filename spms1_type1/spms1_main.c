@@ -1696,8 +1696,6 @@ static mrb_float sp_EnvGen_process(sp_EnvGen *self, mrb_float lv_gate_input) {
     mrb_bool lv_gate_fell = 0;
     mrb_float lv_target = 0.0;
     mrb_float lv_coef = 0.0;
-    mrb_bool lv_apply_step = 0;
-    mrb_float lv_coef_masked = 0.0;
     mrb_bool lv_is_attack_done = 0;
     mrb_bool lv_is_floor_reached = 0;
     mrb_bool lv_is_idle_reached = 0;
@@ -1721,63 +1719,59 @@ static mrb_float sp_EnvGen_process(sp_EnvGen *self, mrb_float lv_gate_input) {
     lv_target = (((self->iv_state == cst_STATE_ATTACK)) ? cst_ATTACK_TARGET : ((((((self->iv_state == cst_STATE_SUSTAIN)) && lv_is_gate_on)) ? self->iv_sustain : 0.0)));
 #line 122 "spms1_env_gen.rb"
     lv_coef = (((self->iv_state == cst_STATE_ATTACK)) ? self->iv_attack_coef : ((((self->iv_state == cst_STATE_SUSTAIN)) ? self->iv_decay_coef : 0.0)));
-#line 124 "spms1_env_gen.rb"
-    lv_apply_step = ((((self->iv_state != cst_STATE_SUSTAIN)) || (!lv_is_gate_on)) || ((self->iv_sustain < self->iv_current_level)));
-#line 125 "spms1_env_gen.rb"
-    lv_coef_masked = (lv_apply_step ? lv_coef : 0.0);
-#line 127 "spms1_env_gen.rb"
-    self->iv_current_level += (((lv_target - self->iv_current_level)) * lv_coef_masked);
-#line 129 "spms1_env_gen.rb"
+#line 126 "spms1_env_gen.rb"
+    self->iv_current_level += (((lv_target - self->iv_current_level)) * lv_coef);
+#line 128 "spms1_env_gen.rb"
     lv_is_attack_done = (((self->iv_state == cst_STATE_ATTACK)) && (((self->iv_current_level >= 1.0) || (!self->iv_was_gate_on))));
-#line 132 "spms1_env_gen.rb"
-    lv_is_floor_reached = (((self->iv_state == cst_STATE_SUSTAIN)) && ((self->iv_current_level < 1.0000000000000001e-05)));
 #line 133 "spms1_env_gen.rb"
-    lv_is_idle_reached = (lv_is_floor_reached && (!self->iv_was_gate_on));
+    lv_is_floor_reached = ((((self->iv_state == cst_STATE_SUSTAIN)) && ((self->iv_current_level < 1.0000000000000001e-05))) && ((lv_target < 1.0000000000000001e-05)));
 #line 134 "spms1_env_gen.rb"
+    lv_is_idle_reached = (lv_is_floor_reached && (!self->iv_was_gate_on));
+#line 135 "spms1_env_gen.rb"
     lv_is_forced_attack = (((self->iv_state == cst_STATE_IDLE)) && self->iv_was_gate_on);
-#line 136 "spms1_env_gen.rb"
+#line 137 "spms1_env_gen.rb"
     self->iv_state = (lv_is_attack_done ? cst_STATE_SUSTAIN : ((lv_is_idle_reached ? cst_STATE_IDLE : ((lv_is_forced_attack ? cst_STATE_ATTACK : self->iv_state)))));
-#line 138 "spms1_env_gen.rb"
+#line 139 "spms1_env_gen.rb"
     if (lv_is_attack_done) {
       self->iv_current_level = 1.0;
     }
-#line 139 "spms1_env_gen.rb"
+#line 140 "spms1_env_gen.rb"
     if ((lv_is_floor_reached || (((self->iv_state == cst_STATE_IDLE) && (!self->iv_was_gate_on))))) {
       self->iv_current_level = 0.0;
     }
-#line 143 "spms1_env_gen.rb"
-    self->iv_stage_1_amount += (((self->iv_amount - self->iv_stage_1_amount)) * self->iv_smoothing_target_blend);
 #line 144 "spms1_env_gen.rb"
-    self->iv_current_amount += (((self->iv_stage_1_amount - self->iv_current_amount)) * self->iv_smoothing_target_blend);
+    self->iv_stage_1_amount += (((self->iv_amount - self->iv_stage_1_amount)) * self->iv_smoothing_target_blend);
 #line 145 "spms1_env_gen.rb"
+    self->iv_current_amount += (((self->iv_stage_1_amount - self->iv_current_amount)) * self->iv_smoothing_target_blend);
+#line 146 "spms1_env_gen.rb"
     lv_output_level = (self->iv_current_level * self->iv_current_amount);
-#line 152 "spms1_env_gen.rb"
-    self->iv_output = self->iv_last_output_level;
 #line 153 "spms1_env_gen.rb"
-    self->iv_slope = (((lv_output_level - self->iv_last_output_level)) * 0.25);
+    self->iv_output = self->iv_last_output_level;
 #line 154 "spms1_env_gen.rb"
+    self->iv_slope = (((lv_output_level - self->iv_last_output_level)) * 0.25);
+#line 155 "spms1_env_gen.rb"
     self->iv_last_output_level = lv_output_level;
   }
-#line 157 "spms1_env_gen.rb"
-  self->iv_sample_counter = ((sp_int_add(self->iv_sample_counter, 1LL)) & cst_Spms1__EnvGen__CONTROL_RATE_MASK);
 #line 158 "spms1_env_gen.rb"
-  self->iv_output += self->iv_slope;
+  self->iv_sample_counter = ((sp_int_add(self->iv_sample_counter, 1LL)) & cst_Spms1__EnvGen__CONTROL_RATE_MASK);
 #line 159 "spms1_env_gen.rb"
+  self->iv_output += self->iv_slope;
+#line 160 "spms1_env_gen.rb"
   return self->iv_output;
   return 0.0;
 }
-#line 164 "spms1_env_gen.rb"
+#line 165 "spms1_env_gen.rb"
 static mrb_float sp_EnvGen_update_coefficients_full(sp_EnvGen *self) {
     SP_GC_SAVE();
-#line 165 "spms1_env_gen.rb"
+#line 166 "spms1_env_gen.rb"
   mrb_float _t22 = self->iv_attack;
   self->iv_attack_coef = (1.0 / (((cst_ATTACK_BASE * sp_EnvGen_calculate_exp_fast((sp_EnvGen *)self, _t22)) * self->iv_effective_rate)));
-#line 166 "spms1_env_gen.rb"
+#line 167 "spms1_env_gen.rb"
   mrb_float _t23 = self->iv_decay;
   self->iv_decay_coef = (1.0 / (((cst_DECAY_BASE * sp_EnvGen_calculate_exp_fast((sp_EnvGen *)self, _t23)) * self->iv_effective_rate)));
   return 0.0;
 }
-#line 169 "spms1_env_gen.rb"
+#line 170 "spms1_env_gen.rb"
 static mrb_float sp_EnvGen_calculate_exp_fast(sp_EnvGen *self, mrb_float lv_value) {
     SP_GC_SAVE();
     mrb_float lv_v_scale = 0.0;
@@ -1785,17 +1779,17 @@ static mrb_float sp_EnvGen_calculate_exp_fast(sp_EnvGen *self, mrb_float lv_valu
     mrb_float lv_fraction = 0.0;
     mrb_float lv_e0 = 0.0;
     mrb_float lv_e1 = 0.0;
-#line 170 "spms1_env_gen.rb"
-  lv_v_scale = (lv_value * 120.0);
 #line 171 "spms1_env_gen.rb"
-  lv_index = sp_float_to_i_checked(lv_v_scale);
+  lv_v_scale = (lv_value * 120.0);
 #line 172 "spms1_env_gen.rb"
+  lv_index = sp_float_to_i_checked(lv_v_scale);
+#line 173 "spms1_env_gen.rb"
   lv_fraction = (lv_v_scale - ((mrb_float)(lv_index)));
-#line 174 "spms1_env_gen.rb"
-  lv_e0 = sp_FloatArray_get(cst_EXP_TABLE, lv_index);
 #line 175 "spms1_env_gen.rb"
+  lv_e0 = sp_FloatArray_get(cst_EXP_TABLE, lv_index);
+#line 176 "spms1_env_gen.rb"
   lv_e1 = sp_FloatArray_get(cst_EXP_TABLE, sp_int_add(lv_index, 1LL));
-#line 177 "spms1_env_gen.rb"
+#line 178 "spms1_env_gen.rb"
   return (lv_e0 + (lv_fraction * ((lv_e1 - lv_e0))));
   return 0.0;
 }
@@ -2154,7 +2148,7 @@ int main(int argc,char**argv){
     volatile mrb_int lv_general_3 = 0;
     volatile mrb_int lv_general_4 = 0;
     volatile mrb_int lv_module_id = 0;
-    mrb_int lv_i__bp5859 = 0;
+    mrb_int lv_i__bp5841 = 0;
 
 #line 1 "spms1_osc.rb"
 #line 3 "spms1_osc.rb"
@@ -3214,9 +3208,9 @@ int main(int argc,char**argv){
       (stop_debug_measure(), (mrb_int)0);
 #line 561 "spms1_main.rb"
       for (mrb_int _t280 = 0; _t280 < cst_AUDIO_BUFFER_WORDS; _t280++) {
-        lv_i__bp5859 = _t280;
+        lv_i__bp5841 = _t280;
 #line 562 "spms1_main.rb"
-        (write_to_audio_buffer(((float)(sp_FloatArray_get(lv_audio_buffer, lv_i__bp5859))), ((float)(sp_FloatArray_get(lv_audio_buffer, lv_i__bp5859)))), (mrb_int)0);
+        (write_to_audio_buffer(((float)(sp_FloatArray_get(lv_audio_buffer, lv_i__bp5841))), ((float)(sp_FloatArray_get(lv_audio_buffer, lv_i__bp5841)))), (mrb_int)0);
       }
     }
     sp_exc_top--;
