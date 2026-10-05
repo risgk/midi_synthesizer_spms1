@@ -4,9 +4,13 @@ module Spms1
     STATE_ATTACK = 0
     STATE_SUSTAIN = 1
     STATE_IDLE = 2
-    # Blend at the reference rate on the line below. The two move together: their product is what
-    # fixes the time constant, so changing one without the other changes how fast smoothing is.
-    SMOOTHING_TARGET_BLEND_BASE = 0.03125
+    # Blend at the reference rate on the line below, for each of two cascaded stages. The two move
+    # together: their product is what fixes the time constant, so changing one without the other
+    # changes how fast smoothing is. Two stages at 1/64 (5.3 ms each at 48 kHz) delay a step by
+    # 10.7 ms on average, as one stage at 1/128 would, but start from zero slope, so that the steps
+    # of a controller sending sparse CCs (e.g. every 20 ms) are rounded off rather than heard,
+    # and settle sooner, 99% in 35 ms.
+    SMOOTHING_TARGET_BLEND_BASE = 0.015625
     # Number of samples between control-rate updates; envelope timing is kept approximately constant if this is changed.
     # It has to stay a power of two: the counter below wraps with a mask, because Ruby's % is a
     # floor-modulo and sp_imod carries a sign correction the counter can never need -- one branch
@@ -60,6 +64,7 @@ module Spms1
       # Level and polarity are multiplied before smoothing, so the control-rate path takes one
       # multiply and only one smoothing state has to be carried.
       @amount = 1.0
+      @stage_1_amount = 1.0
       @current_amount = 1.0
 
       @was_gate_on = false
@@ -135,7 +140,8 @@ module Spms1
 
         # The amount is smoothed here, on the step, so a change in it rides the same ramp as the
         # level does rather than stepping the output.
-        @current_amount += (@amount - @current_amount) * @smoothing_target_blend
+        @stage_1_amount += (@amount - @stage_1_amount) * @smoothing_target_blend
+        @current_amount += (@stage_1_amount - @current_amount) * @smoothing_target_blend
         output_level = @current_level * @current_amount
 
         # The output ramps from the last step's level to this one's over the next four samples,

@@ -4,7 +4,13 @@ module Spms1
   class LFO
     # Blend at the reference rate on the line below. The two move together: their product is what
     # fixes the time constant, so changing one without the other changes how fast smoothing is.
+    # For the rate, kept at one stage (2.7 ms at 48 kHz).
     SMOOTHING_TARGET_BLEND_BASE = 0.03125
+    # The same for the rest, for each of two cascaded stages. Two stages at 1/64 (5.3 ms each at
+    # 48 kHz) delay a step by 10.7 ms on average, as one stage at 1/128 would, but start from zero
+    # slope, so that the steps of a controller sending sparse CCs (e.g. every 20 ms) are rounded
+    # off rather than heard, and settle sooner, 99% in 35 ms.
+    SLOW_SMOOTHING_TARGET_BLEND_BASE = 0.015625
     # Number of samples between control-rate updates; smoothing speed is kept approximately constant if this is changed.
     # It has to stay a power of two: the counter below wraps with a mask, because Ruby's % is a
     # floor-modulo and sp_imod carries a sign correction the counter can never need -- one branch
@@ -34,6 +40,7 @@ module Spms1
       # conversion on top of the division.
       @inv_sample_rate = 1.0 / sample_rate
       @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (48000.0 / @sample_rate) * (CONTROL_RATE_DIVISOR / 4.0)
+      @slow_smoothing_target_blend = SLOW_SMOOTHING_TARGET_BLEND_BASE * (48000.0 / @sample_rate) * (CONTROL_RATE_DIVISOR / 4.0)
       @phase = 0.0
       # Middle of the range, so the LFO starts where its control does rather than sliding up to it.
       @rate = 0.5
@@ -43,6 +50,7 @@ module Spms1
       # Level and polarity are multiplied before smoothing, so the per-sample path takes one
       # multiply and only one smoothing state has to be carried.
       @amount = 1.0
+      @stage_1_amount = 1.0
       @current_amount = 1.0
       # Not derived here: process assigns it on its first call, before anything reads it.
       @dt = 0.0
@@ -79,7 +87,8 @@ module Spms1
         # increment is derived here rather than per sample: nothing feeds this module, so it
         # cannot change between control-rate updates.
         @current_rate += (@rate - @current_rate) * @smoothing_target_blend
-        @current_amount += (@amount - @current_amount) * @smoothing_target_blend
+        @stage_1_amount += (@amount - @stage_1_amount) * @slow_smoothing_target_blend
+        @current_amount += (@stage_1_amount - @current_amount) * @slow_smoothing_target_blend
         @dt = rate_to_freq_fast(@current_rate) * @inv_sample_rate
       end
 

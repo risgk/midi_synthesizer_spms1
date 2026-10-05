@@ -3,7 +3,14 @@ module Spms1
   class Osc
     # Blend at the reference rate on the line below. The two move together: their product is what
     # fixes the time constant, so changing one without the other changes how fast smoothing is.
+    # For the tune and the modulation depth, which move the pitch and so are kept at one stage
+    # (2.7 ms at 48 kHz), to follow right away.
     SMOOTHING_TARGET_BLEND_BASE = 0.03125
+    # The same for the rest, for each of two cascaded stages. Two stages at 1/64 (5.3 ms each at
+    # 48 kHz) delay a step by 10.7 ms on average, as one stage at 1/128 would, but start from zero
+    # slope, so that the steps of a controller sending sparse CCs (e.g. every 20 ms) are rounded
+    # off rather than heard, and settle sooner, 99% in 35 ms.
+    SLOW_SMOOTHING_TARGET_BLEND_BASE = 0.015625
     # Number of samples between control-rate updates; smoothing speed is kept approximately
     # constant if this is changed. It has to stay a power of two: the counter below wraps with a
     # mask, because Ruby's % is a floor-modulo and sp_imod carries a sign correction the counter
@@ -40,8 +47,10 @@ module Spms1
       # conversion on top of the division.
       @inv_sample_rate = 1.0 / sample_rate
       @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (48000.0 / @sample_rate) * (CONTROL_RATE_DIVISOR / 4.0)
+      @slow_smoothing_target_blend = SLOW_SMOOTHING_TARGET_BLEND_BASE * (48000.0 / @sample_rate) * (CONTROL_RATE_DIVISOR / 4.0)
       @phase = 0.0
       @waveform = 0.0
+      @stage_1_waveform = 0.0
       @current_waveform = 0.0
       # Amount and polarity are multiplied before smoothing, as the tune controls are summed.
       @modulation_amount = 0.0
@@ -101,7 +110,8 @@ module Spms1
     def process(pitch_input = 0.0, modulation_input = 0.0)
       if @sample_counter == 0
         # Morph and depth are smoothed at the control rate to avoid sudden jumps.
-        @current_waveform += (@waveform - @current_waveform) * @smoothing_target_blend
+        @stage_1_waveform += (@waveform - @stage_1_waveform) * @slow_smoothing_target_blend
+        @current_waveform += (@stage_1_waveform - @current_waveform) * @slow_smoothing_target_blend
         @current_modulation_depth += (@modulation_depth - @current_modulation_depth) * @smoothing_target_blend
         @current_tune += (@tune - @current_tune) * @smoothing_target_blend
       end

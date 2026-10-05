@@ -40,9 +40,13 @@ module Spms1
     # reaches.
     LOW_PASS_STATE_CEILING = 16.0
     LOW_PASS_STATE_FLOOR   = -LOW_PASS_STATE_CEILING
-    # Blend at the reference rate on the line below. The two move together: their product is what
-    # fixes the time constant, so changing one without the other changes how fast smoothing is.
-    SMOOTHING_TARGET_BLEND_BASE = 0.03125
+    # Blend at the reference rate on the line below, for each of two cascaded stages. The two move
+    # together: their product is what fixes the time constant, so changing one without the other
+    # changes how fast smoothing is. Two stages at 1/64 (5.3 ms each at 48 kHz) delay a step by
+    # 10.7 ms on average, as one stage at 1/128 would, but start from zero slope, so that the steps
+    # of a controller sending sparse CCs (e.g. every 20 ms) are rounded off rather than heard,
+    # and settle sooner, 99% in 35 ms.
+    SMOOTHING_TARGET_BLEND_BASE = 0.015625
     # Number of samples between control-rate updates; smoothing speed is kept approximately
     # constant if this is changed. It has to stay a power of two: the counter below wraps with a
     # mask, because Ruby's % is a floor-modulo and sp_imod carries a sign correction the counter
@@ -150,6 +154,10 @@ module Spms1
       @modulation_depth = 0.0
       @gain = 0.5
 
+      @stage_1_cutoff = 1.0
+      @stage_1_resonance = 0.0
+      @stage_1_modulation_depth = 0.0
+      @stage_1_gain = 0.5
       @current_cutoff = 1.0
       @current_resonance = 0.0
       @current_modulation_depth = 0.0
@@ -289,10 +297,14 @@ module Spms1
     # than from where the additions got to, so rounding does not build up. 0.25 is
     # 1 / CONTROL_RATE_DIVISOR, written out for the reason Mixer#process gives.
     def update_coefficients
-      @current_cutoff += (@cutoff - @current_cutoff) * @smoothing_target_blend
-      @current_resonance += (@resonance - @current_resonance) * @smoothing_target_blend
-      @current_modulation_depth += (@modulation_depth - @current_modulation_depth) * @smoothing_target_blend
-      @current_gain += (@gain - @current_gain) * @smoothing_target_blend
+      @stage_1_cutoff += (@cutoff - @stage_1_cutoff) * @smoothing_target_blend
+      @current_cutoff += (@stage_1_cutoff - @current_cutoff) * @smoothing_target_blend
+      @stage_1_resonance += (@resonance - @stage_1_resonance) * @smoothing_target_blend
+      @current_resonance += (@stage_1_resonance - @current_resonance) * @smoothing_target_blend
+      @stage_1_modulation_depth += (@modulation_depth - @stage_1_modulation_depth) * @smoothing_target_blend
+      @current_modulation_depth += (@stage_1_modulation_depth - @current_modulation_depth) * @smoothing_target_blend
+      @stage_1_gain += (@gain - @stage_1_gain) * @smoothing_target_blend
+      @current_gain += (@stage_1_gain - @current_gain) * @smoothing_target_blend
 
       # The modulation input arrives as it is; clamping total_cutoff below is what holds the
       # table lookup in range, and a source that swings both ways moves the cutoff both ways.
