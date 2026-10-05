@@ -515,7 +515,8 @@ the note.
   are read once per buffer and are smoothed by their destination. Route a fast source through a
   module input, a stepped one through a parameter
 - The smoothing takes two stages (10.7 ms average delay, 99% in 35 ms at 48 kHz), which round off
-  the steps of a controller sending sparse CCs (e.g. every 20 ms)
+  the steps of a controller sending sparse CCs (e.g. every 20 ms). Osc 1 Coarse Tune and Fine Tune
+  are not smoothed, so that the pitch follows right away
 - A parameter source may point at any of the 128 slots. Slots above 49 read 0 until something
   writes them, which leaves a parameter pointed at one at the bottom of a unipolar dial or the
   middle of a bipolar one

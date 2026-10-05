@@ -48,7 +48,8 @@ module Spms1
       @waveform = 0.0
       @stage_1_waveform = 0.0
       @current_waveform = 0.0
-      # Amount and polarity are multiplied before smoothing, as the tune controls are summed.
+      # Amount and polarity are multiplied before smoothing, so only one smoothing state has to be
+      # carried.
       @modulation_amount = 0.0
       @modulation_polarity = 1.0
       @modulation_depth = 0.0
@@ -56,11 +57,9 @@ module Spms1
       @current_modulation_depth = 0.0
       @coarse_tune = 0.0
       @fine_tune = 0.0
-      # The two tune controls are summed before smoothing, so the per-sample path adds one offset
-      # rather than two and only one smoothing state has to be carried.
+      # The two tune controls are summed when set, so the per-sample path adds one offset rather
+      # than two.
       @tune = 0.0
-      @stage_1_tune = 0.0
-      @current_tune = 0.0
       @sample_counter = 0
     end
 
@@ -89,6 +88,8 @@ module Spms1
     # Both tune controls are bipolar, [-0.5, 0.5], with 0.0 meaning no offset, so a controller's
     # centre detent lands there. Linear about that centre, which is what puts every step on a whole
     # semitone or a whole cent; a curve here would make exact intervals unreachable.
+    # Not smoothed: a semitone step is part of the sound, a cent step is too small to hear as one,
+    # and a step in pitch does not click, as the phase runs on unbroken.
     def set_coarse_tune(coarse_tune)
       clamped = (coarse_tune < -0.5) ? -0.5 : ((coarse_tune > 0.5) ? 0.5 : coarse_tune)
       @coarse_tune = (clamped + clamped) * COARSE_TUNE_RANGE
@@ -112,11 +113,9 @@ module Spms1
         @current_waveform += (@stage_1_waveform - @current_waveform) * @smoothing_target_blend
         @stage_1_modulation_depth += (@modulation_depth - @stage_1_modulation_depth) * @smoothing_target_blend
         @current_modulation_depth += (@stage_1_modulation_depth - @current_modulation_depth) * @smoothing_target_blend
-        @stage_1_tune += (@tune - @stage_1_tune) * @smoothing_target_blend
-        @current_tune += (@stage_1_tune - @current_tune) * @smoothing_target_blend
       end
 
-      total_pitch = pitch_input + @current_tune + (modulation_input * @current_modulation_depth)
+      total_pitch = pitch_input + @tune +(modulation_input * @current_modulation_depth)
       pitch = (total_pitch < -0.5) ? -0.5 : ((total_pitch > 0.5) ? 0.5 : total_pitch)
       freq = pitch_to_freq_fast(pitch)
       current_dt = freq * @inv_sample_rate
