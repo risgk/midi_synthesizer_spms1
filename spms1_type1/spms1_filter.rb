@@ -83,9 +83,8 @@ module Spms1
     # the amount dialled in. The soft clip on the band pass state settles the oscillation at about
     # 11.4 * sqrt(|k| * g / (1 + g^2)^2), so this holds it near SELF_OSC_LEVEL whatever the cutoff;
     # the (1 + g^2)^2 matters only in the top octaves, where g is no longer small.
-    # Set below the output clip's knee, so that the oscillation leaves the filter as a clean sine;
-    # the same level as in PRA32-U2. The value is for 48 kHz; initialize scales it with the
-    # sample rate, as it does the clip.
+    # Set below the output clip's knee, so that the oscillation leaves the filter as a clean sine.
+    # The value is for 48 kHz; initialize scales it with the sample rate, as it does the clip.
     SELF_OSC_LEVEL = 0.5
     SELF_OSC_KAPPA = (SELF_OSC_LEVEL / 11.4) * (SELF_OSC_LEVEL / 11.4)
     # How negative k may go. Below about 150 Hz, -kappa / g grows large enough to pull the
