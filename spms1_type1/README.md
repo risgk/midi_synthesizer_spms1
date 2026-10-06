@@ -598,7 +598,7 @@ Four things to know before reading the output:
   Differences between two standalone builds are reliable; absolute totals are not. Take those
   from the `.elf` the Arduino build leaves in its sketch cache
 - A shape that compiles well in a test function may not survive inlining into `Spms1_main`, which
-  is about 30000 instructions. Measure the change in the real file, not in a small one
+  is about 12000 instructions. Measure the change in the real file, not in a small one
 
 
 SPMS-1 (type-1) Licence

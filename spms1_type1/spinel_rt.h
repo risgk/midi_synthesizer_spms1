@@ -8949,7 +8949,9 @@ static void sp_exc_print_uncaught(const char *cls, const char *msg) {
 #ifdef SPINEL_EXT_HOST
 SP_NORETURN SP_COLD void sp_raise_cls(const char *cls, const char *msg);
 #else
-SP_NORETURN SP_COLD void sp_raise_cls(const char *cls, const char *msg) {
+/* noinline for the MCU: flatten would otherwise put a copy of the raise at every call site in
+   Spms1_main, which is most of what Spms1_main holds in RAM. Raising is the cold path. */
+__attribute__((noinline)) SP_NORETURN SP_COLD void sp_raise_cls(const char *cls, const char *msg) {
   /* Launder the message onto the string heap and root the copy before anything
      below allocates. `msg` is the caller's own pointer and comes in one of two
      shapes, neither of which survives a collection here. A raiser that formats
@@ -12050,8 +12052,7 @@ static sp_sym sp_sym_intern(const char *s) { (void)s; return (sp_sym)0; }
    generated code still calls or names these. sp_float_to_i_checked is here so that flatten can
    inline it into Spms1_main, as it could when it was static in sp_runtime.h. The nil check in
    the Integer operators calls sp_raise_nil_int_op, so it stays noinline, out of line as it is
-   in sp_cold.c: flattened, a copy of the raise at each of those sites puts about 40KB more of
-   Spms1_main in RAM. */
+   in sp_cold.c, rather than adding a copy of itself to each of those sites in Spms1_main. */
 __attribute__((noinline)) SP_NORETURN void sp_raise_nil_int_op(sp_int a, sp_int b, const char *op) {SP_GC_ROOT_STR(op);
   (void)b;
   if (a == SP_INT_NIL)
