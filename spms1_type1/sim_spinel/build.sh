@@ -37,8 +37,9 @@ case "$(uname -s)" in
 esac
 
 # Spinel runs in a scratch directory on copies under the same names, so that the #line directives
-# in its output name the files as a run in this folder would.
-spinel_script='set -e; dir=$1; tmp=$(mktemp -d); cp "$dir"/spms1_*.rb "$tmp"/; cd "$tmp"; spinel spms1_main.rb -c; cp spms1_main.c "$dir"/; rm -rf "$tmp"'
+# in its output name the files as a run in this folder would. The type seeds in sig/ go with them;
+# sig/spms1_filter.rbs says why they are needed.
+spinel_script='set -e; dir=$1; tmp=$(mktemp -d); cp "$dir"/spms1_*.rb "$tmp"/; cp -R "$dir"/sig "$tmp"/; cd "$tmp"; spinel spms1_main.rb -c --rbs sig; cp spms1_main.c "$dir"/; rm -rf "$tmp"'
 if [ "$use_spinel" = 1 ]; then
   if command -v spinel > /dev/null 2>&1; then
     bash -c "$spinel_script" _ "$(pwd)"

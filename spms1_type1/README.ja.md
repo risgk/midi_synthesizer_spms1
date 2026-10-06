@@ -43,12 +43,14 @@ MIDI Synthesizer SPMS-1 (type-1) v0.0.11
     - このスケッチはバージョン 5.0.2 で動作確認しています: <https://github.com/FortySevenEffects/arduino_midi_library/releases/tag/5.0.2>
     - 情報: <https://github.com/FortySevenEffects/arduino_midi_library>
 - Spinel
-    - コミット: <https://github.com/matz/spinel/tree/5af61ae7d53e36ca59a8de5870f532360d88fd7c>
-    - Spinel の出力ファイル "spms1_main.c" に手を入れる必要はありません。本スケッチの "sp_runtime.h" が
+    - リリース: 2026.09.12 <https://github.com/matz/spinel/tree/2026.09.12>
+    - Spinel の出力ファイル "spms1_main.c" に手を入れる必要はありません。本スケッチの "spinel_rt.h" が
       ESP32-S3 向けに `#define main IRAM_ATTR __attribute__((flatten)) Spms1_main`、RP2350 向けに
       `#define main __attribute__((section(".time_critical"), flatten)) Spms1_main` を持っており、改名と
       シンセ本体の RAM 配置 (ESP32-S3 では IRAM) を同時に行います。手で改名すると、このマクロが一致しなく
       なって属性が付かず、本体が flash から実行されます
+    - "spms1_main.c" は `spinel spms1_main.rb -c --rbs sig` で生成します。"sig" の型シードが
+      フィルタの状態をボックス化させずに保ちます。必要な理由は "sig/spms1_filter.rbs" にあります
 
 
 使い方
@@ -525,7 +527,8 @@ Filter 1 Resonance は CC 94 の Q 5.66 までは CC 30 段ごとに Q が2倍�
   受けます。`sh sim_spinel/build.sh` でビルドし (Windows は Git Bash 上の MinGW gcc、macOS は clang)、
   `build/sim_spinel/spms1_sim --midi-in NAME` で起動します。`--list` で MIDI 入力の一覧を表示します
     - ビルドの最初に、PATH 上、Windows では WSL の中にある Spinel で "spms1_main.c" を生成し直します。
-      `--no-spinel` を付けるか、Spinel が見つからなければ、今ある "spms1_main.c" をビルドします
+      その際 "sig" の型シードを渡します。`--no-spinel` を付けるか、Spinel が見つからなければ、
+      今ある "spms1_main.c" をビルドします
     - PortAudio は実行時に読み込みます。PortAudio プロジェクトの配布はソースのみなので、Windows では
       RubyInstaller の MSYS2 に `ridk exec pacman -S mingw-w64-ucrt-x86_64-portaudio` で入れ
       (シミュレーターはそこを探します)、macOS では `brew install portaudio` で入れます。
@@ -560,10 +563,10 @@ C が `.rb` を指す `#line` を持っているので、対応は最後まで�
 
 読む前に知っておくべきことが 4 つあります。
 
-- 上の `-Os` は実際の設定ではありません。"sp_runtime.h" が `#pragma GCC optimize ("O3")` を
+- 上の `-Os` は実際の設定ではありません。"spinel_rt.h" が `#pragma GCC optimize ("O3")` を
   持っており、この翻訳単位ではコマンドラインの指定を上書きします。`-O3` を渡しても `-Os` を
   渡しても結果は変わりません
-- シンセ本体は `.text` にありません。"sp_runtime.h" の `#define main` が `.time_critical` に
+- シンセ本体は `.text` にありません。"spinel_rt.h" の `#define main` が `.time_critical` に
   置きます。2 つのビルドが同じコードだと示すには、それぞれに
   `arm-none-eabi-objcopy -O binary --only-section=.time_critical` をかけてバイト比較します。
   コメントだけの変更は "spms1_main.c" の `#line` を全部動かして他は何も変えませんが、その確認も
@@ -611,6 +614,6 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 ```
 
-- ベースコミット: <https://github.com/matz/spinel/tree/5af61ae7d53e36ca59a8de5870f532360d88fd7c>
-- 対象ファイル: `sp_*.*`, `re_*.*`
+- ベースリリース: 2026.09.12 <https://github.com/matz/spinel/tree/2026.09.12>
+- 対象ファイル: `spinel_rt.h*`, `mruby_shim.h*`, `sp_*.*`, `re_*.*`
     - 注: ランタイムの一部のファイルは、MCU 向けに ISGK Instruments (Ryo Ishigaki) が変更しています

@@ -17,7 +17,7 @@ require_relative 'spms1_mixer'
 #   per buffer and are smoothed by the module receiving them. Which of the two a signal arrives
 #   through is what decides how fast it is allowed to move.
 #
-# Claims below about the generated C hold for the Spinel version vendored in sp_runtime.h.
+# Claims below about the generated C hold for the Spinel version vendored in spinel_rt.h.
 # Re-check them on updating it.
 
 module Spms1

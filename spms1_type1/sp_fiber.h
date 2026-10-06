@@ -12,7 +12,12 @@
 #include "sp_fiber_ctx.h"
 
 
+/* A green thread's whole C stack. Overridable at build time (-DSP_FIBER_STACK_SIZE=...)
+   for a program whose request path collapses into one deep frame; the default
+   stays small because every fiber pays it. */
+#ifndef SP_FIBER_STACK_SIZE
 #define SP_FIBER_STACK_SIZE (64*1024)
+#endif
 
 /* ThreadSanitizer support: the asm context switch swaps stacks without TSan's
    knowledge, so a fiber program reports spurious "unexpected memory mapping"
@@ -72,7 +77,7 @@ sp_RbVal sp_Fiber_transfer_catch(sp_Fiber *f, sp_RbVal val, int *out_raised,
 sp_RbVal sp_Fiber_raise(sp_Fiber *f, const char *cls, const char *msg, void *obj);
 /* Fiber#kill: terminate the fiber (running its ensure blocks); returns it. */
 sp_Fiber *sp_Fiber_kill(sp_Fiber *f);
-mrb_bool sp_Fiber_alive(sp_Fiber *f);
+sp_bool sp_Fiber_alive(sp_Fiber *f);
 sp_RbVal sp_Fiber_storage_get(sp_Fiber *f, sp_sym k);
 void sp_Fiber_storage_set(sp_Fiber *f, sp_sym k, sp_RbVal v);
 /* Reached from sp_re_mark_globals in the generated TU during a GC pass. */

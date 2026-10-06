@@ -43,13 +43,15 @@ Required Software for Modification
     - This sketch is tested with version 5.0.2: <https://github.com/FortySevenEffects/arduino_midi_library/releases/tag/5.0.2>
     - Info: <https://github.com/FortySevenEffects/arduino_midi_library>
 - Spinel
-    - Commit: <https://github.com/matz/spinel/tree/5af61ae7d53e36ca59a8de5870f532360d88fd7c>
-    - The Spinel output file "spms1_main.c" needs no editing. "sp_runtime.h" in this sketch
+    - Release: 2026.09.12 <https://github.com/matz/spinel/tree/2026.09.12>
+    - The Spinel output file "spms1_main.c" needs no editing. "spinel_rt.h" in this sketch
       carries `#define main IRAM_ATTR __attribute__((flatten)) Spms1_main` for the ESP32-S3 and
       `#define main __attribute__((section(".time_critical"), flatten)) Spms1_main` for the
       RP2350, which renames it and puts the synth core in RAM (IRAM on the ESP32-S3) at the same
       time. Renaming it by hand instead leaves the macro with nothing to match, and the core runs
       from flash
+    - "spms1_main.c" is generated with `spinel spms1_main.rb -c --rbs sig`. The type seeds in "sig"
+      keep the filter states unboxed; "sig/spms1_filter.rbs" says why they are needed
 
 
 Usage
@@ -545,7 +547,8 @@ the note.
   Windows, clang on macOS), then run `build/sim_spinel/spms1_sim --midi-in NAME`; `--list` shows
   the MIDI inputs
     - The build first regenerates "spms1_main.c" with Spinel, found on the PATH or, on Windows,
-      inside WSL. `--no-spinel`, or no Spinel to be found, builds the one already here
+      inside WSL, passing it the type seeds in "sig". `--no-spinel`, or no Spinel to be found,
+      builds the one already here
     - PortAudio is loaded at run time. The PortAudio project releases source only; on Windows,
       install it into RubyInstaller's MSYS2 with
       `ridk exec pacman -S mingw-w64-ucrt-x86_64-portaudio` (the simulators look there), and on
@@ -582,10 +585,10 @@ files, so the mapping survives all the way down.
 
 Four things to know before reading the output:
 
-- The `-Os` above is not what the synth is built with. "sp_runtime.h" carries
+- The `-Os` above is not what the synth is built with. "spinel_rt.h" carries
   `#pragma GCC optimize ("O3")`, which overrides whatever is on the command line for that
   translation unit. Passing `-O3` instead changes nothing, and neither does passing `-Os`
-- The synth core is not in `.text`. The `#define main` in "sp_runtime.h" puts it in
+- The synth core is not in `.text`. The `#define main` in "spinel_rt.h" puts it in
   `.time_critical`. To prove two builds are the same code,
   `arm-none-eabi-objcopy -O binary --only-section=.time_critical` on each and compare the bytes.
   A comment-only edit moves every `#line` in "spms1_main.c" and nothing else, and this is how to
@@ -634,6 +637,6 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 ```
 
-- Base Commit: <https://github.com/matz/spinel/tree/5af61ae7d53e36ca59a8de5870f532360d88fd7c>
-- Target files: `sp_*.*`, `re_*.*`
+- Base Release: 2026.09.12 <https://github.com/matz/spinel/tree/2026.09.12>
+- Target files: `spinel_rt.h*`, `mruby_shim.h*`, `sp_*.*`, `re_*.*`
     - Note: Some files for runtime are modified for MCU by ISGK Instruments (Ryo Ishigaki)
