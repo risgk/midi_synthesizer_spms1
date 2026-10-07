@@ -22,7 +22,7 @@ done
 case "$(uname -s)" in
   MINGW*|MSYS*)
     exe=build/sim_spinel/spms1_sim.exe
-    libs="-lwinmm"
+    libs="-lwinmm -Wl,-Bstatic -lwinpthread -Wl,-Bdynamic"
     strip_unused="-Wl,--gc-sections"
     ;;
   Darwin)

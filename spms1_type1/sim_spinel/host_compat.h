@@ -38,6 +38,17 @@ static inline int setenv(const char *k, const char *v, int overwrite) {
 static inline int unsetenv(const char *k) { return _putenv_s(k, ""); }
 #define malloc_trim(x) ((void)0)
 
+/* MinGW has no POSIX locale_t. sp_core.c pins the "C" locale with it around snprintf, and the
+   simulator never leaves the "C" locale, so these do nothing. */
+#include <locale.h>
+typedef int locale_t;
+#define LC_ALL_MASK 0
+static inline locale_t newlocale(int mask, const char *name, locale_t base) {
+  (void)mask; (void)name; (void)base;
+  return 1;
+}
+static inline locale_t uselocale(locale_t loc) { (void)loc; return 0; }
+
 /* Only the runtime's Signal.list table names these; Windows defines six signals. */
 #ifndef SIGHUP
 #define SIGHUP    1
