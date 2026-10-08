@@ -22,7 +22,12 @@ MIDI Synthesizer SPMS-1 (type-1) v0.0.11
         - 以下の I2S DAC ハードウェア (48 kHz/24 bit) も使えます:
             - [Adafruit PCM5102 I2S DAC](https://www.adafruit.com/product/6250) (Product ID: 6250)
             - GY-PCM5102 (PCM5102A I2S DAC モジュール)
-    - 注意: RP2350 のシステムクロック (sysclk) は、I2S Audio Library の setSysClk() によって 153.6 MHz にオーバークロックされます
+    - I2S DAC の代わりに PWM Audio も使えます (Raspberry Pi Pico 2 のみ): `SPMS1_USE_PWM_AUDIO_INSTEAD_OF_I2S` のコメントを外してください
+        - L は GP28、R は GP27 で、Pimoroni [Pico VGA Demo Base](https://shop.pimoroni.com/products/pimoroni-pico-vga-demo-base) (PIM553) と同じです
+        - PWM のレベル (3200 段階) は、1 次のノイズシェーピングと TPDF ディザ付きで量子化されます
+        - PWM のリップルを取り除くため、各出力に RC ローパスフィルターを付けることをお勧めします
+    - 注意: RP2350 のシステムクロック (sysclk) は 153.6 MHz にオーバークロックされます。設定するのはスケッチ自身の I2S または
+      PWM Audio 出力 ("spms1_pico2_i2s.h" または "spms1_pico2_pwm_audio.h"、PRA32-U2 と同じもの) で、Arduino-Pico の I2S ライブラリではありません
 
 
 改造に必要なソフトウェア
@@ -36,7 +41,7 @@ MIDI Synthesizer SPMS-1 (type-1) v0.0.11
       すべてコアのものを使うので、Arduino MIDI Library 以外のライブラリは要りません
 - Raspberry Pi Pico 2 用: Arduino-Pico = Raspberry Pi Pico/RP2040/RP2350 (by Earle F. Philhower, III) コア
     - 追加のボードマネージャ URL: <https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json>
-    - このスケッチはバージョン 6.1.1 で動作確認しています: <https://github.com/earlephilhower/arduino-pico/releases/tag/6.1.1>
+    - このスケッチはバージョン 6.2.0 で動作確認しています: <https://github.com/earlephilhower/arduino-pico/releases/tag/6.2.0>
     - 情報: <https://github.com/earlephilhower/arduino-pico>
     - ボード: "Raspberry Pi Pico 2"、"ツール" メニューの USB Stack: "Adafruit TinyUSB"
 - Arduino MIDI Library (by Francois Best, lathoub)
@@ -512,10 +517,10 @@ Filter 1 Resonance は CC 94 の Q 5.66 までは CC 30 段ごとに Q が2倍�
   遅いので、そこで動かす PC シミュレーターが重くなることがあります。ループの中にこれを 0 に落とすものは
   ありません
 
-### デバッグ UART
+### デバッグプリント
 
-- M5Stack AtomS3 Lite: USB CDC (同じケーブルで USB MIDI と並ぶシリアルポート)
-- Raspberry Pi Pico 2
+- USB CDC (同じケーブルで USB MIDI と並ぶシリアルポート)
+- Raspberry Pi Pico 2 では、代わりに UART も使えます: `SPMS1_DEBUG_PRINT_USE_USB_SERIAL` をコメントアウトしてください
     - 速度: 115200 bps
     - GP0 ピンと GP1 ピンを UART0 TX と UART0 RX に使います
 

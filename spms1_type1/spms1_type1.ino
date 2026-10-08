@@ -45,18 +45,31 @@
 
 #else  // defined(ARDUINO_ARCH_ESP32)
 
+#define SPMS1_DEBUG_PRINT_USE_USB_SERIAL    // USB CDC, next to USB MIDI; comment out for UART0 on GP0 and GP1
+
+#if defined(SPMS1_DEBUG_PRINT_USE_USB_SERIAL)
+#define SPMS1_DEBUG_PRINT_SERIAL            g_debug_print_buffer  // Transferred to USB CDC by loop()
+#else  // defined(SPMS1_DEBUG_PRINT_USE_USB_SERIAL)
 #define SPMS1_DEBUG_PRINT_SERIAL            Serial1
 #define SPMS1_DEBUG_PRINT_TX_PIN            (0)
 #define SPMS1_DEBUG_PRINT_RX_PIN            (1)
+#endif  // defined(SPMS1_DEBUG_PRINT_USE_USB_SERIAL)
 
 #define SPMS1_UART_MIDI_SERIAL              Serial2
 #define SPMS1_UART_MIDI_TX_PIN              (4)
 #define SPMS1_UART_MIDI_RX_PIN              (5)
 
 // for Pimoroni Pico Audio Pack (PIM544)
+#define SPMS1_I2S_DAC_MUTE_OFF_PIN          (22)  // Comment out if GP22 is used for something else
 #define SPMS1_I2S_DATA_PIN                  (9)
-#define SPMS1_I2S_BCLK_PIN                  (10)
+#define SPMS1_I2S_BCLK_PIN                  (10)  // LRCLK is SPMS1_I2S_BCLK_PIN + 1
 #define SPMS1_I2S_SWAP_LEFT_AND_RIGHT       (false)
+
+//#define SPMS1_USE_PWM_AUDIO_INSTEAD_OF_I2S  // Raspberry Pi Pico 2 only
+
+// for Pimoroni Pico VGA Demo Base (PIM553)
+#define SPMS1_PWM_AUDIO_L_PIN               (28)
+#define SPMS1_PWM_AUDIO_R_PIN               (27)
 
 #endif  // defined(ARDUINO_ARCH_ESP32)
 
@@ -81,7 +94,14 @@ struct MySettings : public midi::DefaultSettings {
 USBMIDI g_usb_midi("SPMS-1 (type-1)");
 #else  // defined(ARDUINO_ARCH_ESP32)
 #include <Adafruit_TinyUSB.h>
+#include <pico/mutex.h>
 Adafruit_USBD_MIDI usbd_midi;
+// __usb_mutex is internal to the Adafruit TinyUSB Library (Adafruit_TinyUSB_rp2040.cpp), not its
+// API. The library's IRQ on core 0 runs tud_task() only when it can take this mutex, but
+// Adafruit_USBD_MIDI and Adafruit_USBD_CDC call TinyUSB without it. An IRQ that lands while one
+// of them holds a TinyUSB internal mutex waits for it forever, so loop() holds __usb_mutex
+// around them to make the IRQ skip. A rename in the library shows up as a link error.
+extern mutex_t __usb_mutex;
 MIDI_CREATE_CUSTOM_INSTANCE(Adafruit_USBD_MIDI, usbd_midi, USB_MIDI, MySettings);
 #endif  // defined(ARDUINO_ARCH_ESP32)
 #endif  // defined(SPMS1_USE_USB_MIDI)
@@ -97,10 +117,44 @@ i2s_chan_handle_t g_i2s_output = NULL;
 int32_t*          g_i2s_frames = NULL;
 uint32_t          g_i2s_frame_index = 0;
 TaskHandle_t      g_synth_task = NULL;
+#elif defined(SPMS1_USE_PWM_AUDIO_INSTEAD_OF_I2S)
+#include "spms1_pico2_pwm_audio.h"
+SPMS1_PWMAudioOutput g_pwm_output(SPMS1_PWM_AUDIO_L_PIN, SPMS1_PWM_AUDIO_R_PIN);
 #else  // defined(ARDUINO_ARCH_ESP32)
-#include <I2S.h>
-I2S g_i2s_output(OUTPUT);
+#include "spms1_pico2_i2s.h"
+SPMS1_I2SOutput g_i2s_output;
 #endif  // defined(ARDUINO_ARCH_ESP32)
+
+#if defined(SPMS1_USE_DEBUG_PRINT) && defined(SPMS1_DEBUG_PRINT_USE_USB_SERIAL)
+// Collects one report so that it goes to USB CDC whole or not at all. A plain Serial.print would
+// wait for room in the CDC FIFO, and with __usb_mutex held nothing would ever make that room.
+class SPMS1_DebugPrintBuffer : public Print {
+  uint8_t m_buffer[256];  // A report must fit, and so must CFG_TUD_CDC_TX_BUFSIZE (256)
+  size_t  m_length = 0;
+
+public:
+  virtual size_t write(uint8_t c) {
+    if (m_length == sizeof(m_buffer)) {
+      return 0;
+    }
+    m_buffer[m_length++] = c;
+    return 1;
+  }
+
+  using Print::write;
+
+  // Drops the report if the host is not reading
+  template <typename T>
+  void transfer_to(T& output) {
+    if (output.availableForWrite() >= static_cast<int>(m_length)) {
+      output.write(m_buffer, m_length);
+      output.flush();
+    }
+    m_length = 0;
+  }
+};
+SPMS1_DebugPrintBuffer g_debug_print_buffer;
+#endif  // defined(SPMS1_USE_DEBUG_PRINT) && defined(SPMS1_DEBUG_PRINT_USE_USB_SERIAL)
 
 uint32_t g_debug_measurement_start_us = 0;
 uint32_t g_debug_measurement_min_us   = UINT32_MAX;
@@ -403,6 +457,27 @@ IRAM_ATTR void write_to_audio_buffer(float l, float r) {
   }
 }
 
+#elif defined(SPMS1_USE_PWM_AUDIO_INSTEAD_OF_I2S)
+
+void start_audio() {
+  g_pwm_output.setSysClk(g_sample_rate);
+  pinMode(SPMS1_PWM_AUDIO_L_PIN, OUTPUT_12MA);
+  pinMode(SPMS1_PWM_AUDIO_R_PIN, OUTPUT_12MA);
+  g_pwm_output.setBufferFrames(g_audio_buffers * g_audio_buffer_words);
+  g_pwm_output.begin(g_sample_rate);
+}
+
+void stop_audio() {
+}
+
+void write_to_audio_buffer(float l, float r) {
+  int32_t clamped_l = static_cast<int32_t>(std::lroundf(l * 8388607.0f));
+  int32_t clamped_r = static_cast<int32_t>(std::lroundf(r * 8388607.0f));
+  clamped_l = std::clamp(clamped_l, static_cast<int32_t>(-8388608), static_cast<int32_t>(8388607));
+  clamped_r = std::clamp(clamped_r, static_cast<int32_t>(-8388608), static_cast<int32_t>(8388607));
+  g_pwm_output.write24(clamped_l << 8, clamped_r << 8);
+}
+
 #else  // defined(ARDUINO_ARCH_ESP32)
 
 void start_audio() {
@@ -410,9 +485,13 @@ void start_audio() {
   g_i2s_output.setFrequency(g_sample_rate);
   g_i2s_output.setDATA(SPMS1_I2S_DATA_PIN);
   g_i2s_output.setBCLK(SPMS1_I2S_BCLK_PIN);
-  g_i2s_output.setBitsPerSample(24);
-  g_i2s_output.setBuffers(g_audio_buffers, g_audio_buffer_words);
+  g_i2s_output.setBufferFrames(g_audio_buffers * g_audio_buffer_words);
   g_i2s_output.begin();
+
+#if defined(SPMS1_I2S_DAC_MUTE_OFF_PIN)
+  pinMode(SPMS1_I2S_DAC_MUTE_OFF_PIN, OUTPUT);
+  digitalWrite(SPMS1_I2S_DAC_MUTE_OFF_PIN, HIGH);
+#endif  // defined(SPMS1_I2S_DAC_MUTE_OFF_PIN)
 }
 
 void stop_audio() {
@@ -508,12 +587,14 @@ void setup() {
   delay(100);
 
 #if defined(SPMS1_USE_DEBUG_PRINT)
-#if !defined(ARDUINO_ARCH_ESP32)
+#if defined(ARDUINO_ARCH_ESP32)
+  SPMS1_DEBUG_PRINT_SERIAL.begin(115200);
+#elif !defined(SPMS1_DEBUG_PRINT_USE_USB_SERIAL)
   pinMode(SPMS1_DEBUG_PRINT_RX_PIN, INPUT_PULLUP);
   SPMS1_DEBUG_PRINT_SERIAL.setTX(SPMS1_DEBUG_PRINT_TX_PIN);
   SPMS1_DEBUG_PRINT_SERIAL.setRX(SPMS1_DEBUG_PRINT_RX_PIN);
-#endif  // !defined(ARDUINO_ARCH_ESP32)
   SPMS1_DEBUG_PRINT_SERIAL.begin(115200);
+#endif  // defined(ARDUINO_ARCH_ESP32)
 #endif  // defined(SPMS1_USE_DEBUG_PRINT)
 
 #if defined(SPMS1_USE_USB_MIDI)
@@ -526,6 +607,9 @@ void setup() {
   USB.begin();
 #else  // defined(ARDUINO_ARCH_ESP32)
   TinyUSB_Device_Init(0);
+#if defined(SPMS1_USE_DEBUG_PRINT) && defined(SPMS1_DEBUG_PRINT_USE_USB_SERIAL)
+  TinyUSBDevice.addInterface(Serial);  // TinyUSB_Device_Init() clears the configuration, Serial included
+#endif  // defined(SPMS1_USE_DEBUG_PRINT) && defined(SPMS1_DEBUG_PRINT_USE_USB_SERIAL)
   USBDevice.setManufacturerDescriptor("ISGK Instruments");
   USBDevice.setProductDescriptor("SPMS-1 (type-1)");
   USB_MIDI.setHandleNoteOn(handleNoteOn);
@@ -591,7 +675,9 @@ void loop() {
 #if defined(ARDUINO_ARCH_ESP32)
   read_usb_midi();
 #else  // defined(ARDUINO_ARCH_ESP32)
+  mutex_enter_blocking(&__usb_mutex);
   USB_MIDI.read();
+  mutex_exit(&__usb_mutex);
 #endif  // defined(ARDUINO_ARCH_ESP32)
 #endif  // defined(SPMS1_USE_USB_MIDI)
 
@@ -599,6 +685,7 @@ void loop() {
   UART_MIDI.read();
 #endif
 
+#if defined(SPMS1_USE_DEBUG_PRINT)
   static uint8_t s_loop_counter = 0;
   if (++s_loop_counter == 0) {
     SPMS1_DEBUG_PRINT_SERIAL.print("\e[1;1H\e[K");
@@ -625,12 +712,22 @@ void loop() {
     SPMS1_DEBUG_PRINT_SERIAL.print(uxTaskGetStackHighWaterMark(g_synth_task));
 #endif  // defined(ARDUINO_ARCH_ESP32)
     SPMS1_DEBUG_PRINT_SERIAL.println();
+#if defined(SPMS1_DEBUG_PRINT_USE_USB_SERIAL)
+#if defined(SPMS1_USE_USB_MIDI)
+    mutex_enter_blocking(&__usb_mutex);
+#endif  // defined(SPMS1_USE_USB_MIDI)
+    g_debug_print_buffer.transfer_to(Serial);
+#if defined(SPMS1_USE_USB_MIDI)
+    mutex_exit(&__usb_mutex);
+#endif  // defined(SPMS1_USE_USB_MIDI)
+#endif  // defined(SPMS1_DEBUG_PRINT_USE_USB_SERIAL)
     // Both cleared on every report, so the pair brackets the buffers since the last one rather
     // than since boot. min is the uncontended compute time, max is what the deadline is about,
     // and the gap between them is interference from core0 and interrupts.
     g_debug_measurement_min_us = UINT32_MAX;
     g_debug_measurement_max_us = 0;
   }
+#endif  // defined(SPMS1_USE_DEBUG_PRINT)
 
   delay(1);
 }

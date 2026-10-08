@@ -22,7 +22,12 @@ Required Hardware
         - The following I2S DAC hardware (48 kHz/24 bit) can also be used:
             - [Adafruit PCM5102 I2S DAC](https://www.adafruit.com/product/6250) (Product ID: 6250)
             - GY-PCM5102 (PCM5102A I2S DAC Module)
-    - NOTE: The RP2350 system clock (sysclk) changes to overclocked 153.6 MHz by I2S Audio Library setSysClk()
+    - PWM Audio can be used instead, without an I2S DAC (Raspberry Pi Pico 2 only): uncomment `SPMS1_USE_PWM_AUDIO_INSTEAD_OF_I2S`
+        - L on GP28 and R on GP27, as on the Pimoroni [Pico VGA Demo Base](https://shop.pimoroni.com/products/pimoroni-pico-vga-demo-base) (PIM553)
+        - The PWM level (3200 steps) is quantized with 1st-order noise shaping and TPDF dither
+        - An RC low pass filter on each output is recommended, to take out the PWM ripple
+    - NOTE: The RP2350 system clock (sysclk) changes to overclocked 153.6 MHz, set by the sketch's own I2S or PWM Audio output
+      ("spms1_pico2_i2s.h" or "spms1_pico2_pwm_audio.h", the same as PRA32-U2's), not by the Arduino-Pico I2S library
 
 
 Required Software for Modification
@@ -36,7 +41,7 @@ Required Software for Modification
       and I2C all come from the core, so no library beyond the Arduino MIDI Library is needed
 - For Raspberry Pi Pico 2: Arduino-Pico = Raspberry Pi Pico/RP2040/RP2350 (by Earle F. Philhower, III) core
     - Additional Board Manager URL: <https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json>
-    - This sketch is tested with version 6.1.1: <https://github.com/earlephilhower/arduino-pico/releases/tag/6.1.1>
+    - This sketch is tested with version 6.2.0: <https://github.com/earlephilhower/arduino-pico/releases/tag/6.2.0>
     - Info: <https://github.com/earlephilhower/arduino-pico>
     - Board: "Raspberry Pi Pico 2", with USB Stack: "Adafruit TinyUSB" in the "Tools" menu
 - Arduino MIDI Library (by Francois Best, lathoub)
@@ -531,10 +536,10 @@ the note.
   directly or through other modules -- decays toward zero and can settle on a denormal, which
   x86 computes slowly, so the PC simulator there may slow down. Nothing in the loop flushes it
 
-### Debug UART
+### Debug Print
 
-- M5Stack AtomS3 Lite: USB CDC (the serial port next to USB MIDI on the same cable)
-- Raspberry Pi Pico 2
+- USB CDC (the serial port next to USB MIDI on the same cable)
+- On the Raspberry Pi Pico 2, UART can be used instead: comment out `SPMS1_DEBUG_PRINT_USE_USB_SERIAL`
     - Speed: 115200 bps
     - GP0 and GP1 pins are used by UART0 TX and UART0 RX
 
