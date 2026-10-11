@@ -5,7 +5,7 @@ MIDI Synthesizer SPMS-1 (type-1) v0.0.11
 - Controlled by MIDI as a sound module
 - 48 kHz/24 bit audio output
 - Filter: ZDF/TPT State Variable Filter (with delayed soft clipping)
-- Delay: mono, with feedback, as a module in the run order (up to 339 ms)
+- Delay: mono, with feedback, as a module in the run order (up to 340 ms)
 - Developed by ISGK Instruments (Ryo Ishigaki)
 - <https://github.com/risgk/midi_synthesizer_spms1>
 - [日本語版 README](./README.ja.md)
@@ -261,7 +261,7 @@ flowchart LR
   IN([Audio In]) --> H["× 0.5"]
   H --> SUM((Σ))
   SUM --> LPF["Low pass<br/>1-pole"]
-  LPF --> DL["Delay line<br/>up to 339 ms"]
+  LPF --> DL["Delay line<br/>up to 340 ms"]
   DL --> FB["× Feedback<br/>0 to 0.5"]
   FB --> SUM
   DL --> X["Crossfade<br/>Mix"]
@@ -505,15 +505,14 @@ and rounding that off makes far weaker high harmonics than a hard edge would fol
 the note.
 
 The three Delay 1 parameters are unipolar and move in steps of 1/120, as every unipolar dial
-does. Time runs in a straight line, 3 ms a step, from 0 at CC 4 to 360 ms at CC 124, and is clipped
-to 3 ms at the bottom and 339 ms at the top, so it holds 3 ms up to CC 5 and 339 ms from CC 117;
-it is 180 ms at CC 64. Turning it bends the pitch of the repeats, by at most 25%,
-as a tape delay's would, and they reach the new time a moment later. Feedback is the gain from the
-repeats back into the line, from 0 at CC 4, a single repeat, to 0.5 at CC 124, where each repeat
-comes back 6 dB down and a little darker; it is 0.25 at CC 64. Mix is the repeats' share of the
-crossfade, from the dry input alone at CC 4 to the repeats alone at CC 124, half and half at
-CC 64. Time and Feedback power up at CC 64 and Mix at CC 34, 0.25: the dry signal is 2.5 dB down
-and the first repeat about 16 dB under it.
+does. Time runs in a straight line, 2.83 ms a step, from 0 at CC 4 to 340 ms at CC 124, and is
+clipped to 2.83 ms at the bottom, so it holds 2.83 ms up to CC 5; it is 170 ms at CC 64. Turning
+it bends the pitch of the repeats, by at most 25%, as a tape delay's would, and they reach the new
+time a moment later. Feedback is the gain from the repeats back into the line, from 0 at CC 4, a
+single repeat, to 0.5 at CC 124, where each repeat comes back 6 dB down and a little darker; it is
+0.25 at CC 64. Mix is the repeats' share of the crossfade, from the dry input alone at CC 4 to the
+repeats alone at CC 124, half and half at CC 64. Time and Feedback power up at CC 64 and Mix at
+CC 34, 0.25: the dry signal is 2.5 dB down and the first repeat about 16 dB under it.
 
 #### Examples
 

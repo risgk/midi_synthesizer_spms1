@@ -2761,11 +2761,11 @@ int main(int argc,char**argv){
 #line 38 "spms1_delay.rb"
   cst_DELAY_LINE_MASK = sp_int_sub(cst_DELAY_LINE_SIZE, 1LL);
 #line 44 "spms1_delay.rb"
-  cst_FULL_SCALE_TIME_AT_48K = 17280.0;
+  cst_FULL_SCALE_TIME_AT_48K = 16320.0;
 #line 45 "spms1_delay.rb"
-  cst_MIN_TIME_AT_48K = 144.0;
+  cst_MIN_TIME_AT_48K = 136.0;
 #line 46 "spms1_delay.rb"
-  cst_MAX_TIME_AT_48K = 16272.0;
+  cst_MAX_TIME_AT_48K = 16320.0;
 #line 51 "spms1_delay.rb"
   cst_TIME_SLEW = 0.25;
 #line 24 "spms1_main.rb"
