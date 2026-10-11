@@ -3,7 +3,7 @@ MIDI Synthesizer SPMS-1 (type-1) v0.0.11
 
 - Spinel (Ruby AOT コンパイラ) で作った、M5Stack AtomS3 Lite と Raspberry Pi Pico 2 用のモノフォニック・セミモジュラー MIDI シンセサイザー
 - 音源モジュールとして MIDI で制御します
-- 48 kHz/24 bit オーディオ出力 (M5Stack AtomS3 Lite ではデフォルトで 48 kHz/16 bit の PDM 出力)
+- 48 kHz/24 bit オーディオ出力 (M5Stack AtomS3 Lite ではオプションで 48 kHz/16 bit の PDM 出力)
 - フィルタ: ZDF/TPT ステート・バリアブル・フィルタ (遅延ソフトクリッピング付き)
 - ディレイ: モノラル、フィードバック付き、実行順に入るモジュール (最大 340 ms)
 - 開発: ISGK Instruments (Ryo Ishigaki)
@@ -16,7 +16,13 @@ MIDI Synthesizer SPMS-1 (type-1) v0.0.11
 
 - M5Stack AtomS3 Lite (ESP32-S3)、推奨
     - M5Stack [AtomS3 Lite](https://shop.m5stack.com/products/atoms3-lite-esp32s3-dev-kit) (SKU: C124)
-    - M5Stack [ATOMIC PortABC Extension Base](https://docs.m5stack.com/en/atom/AtomPortABC)、デフォルト
+    - M5Stack [Atomic Audio-3.5 Base](https://shop.m5stack.com/products/atomic-audio-3-5-base) (SKU: A166)
+      とその ES8311 I2S DAC (48 kHz/24 bit)、デフォルト
+        - ES8311 の DAC は 1 つなので、出力はモノラルです: L チャンネルだけを再生します。
+          SPMS-1 は今のところ L と R に同じ信号を出していますが、今後ステレオ出力に対応した場合も、
+          このベースからは R チャンネルは聞こえません
+    - または M5Stack [ATOMIC PortABC Extension Base](https://docs.m5stack.com/en/atom/AtomPortABC)
+      と PDM 出力 (ステレオ): `#define SPMS1_USE_PDM_OUTPUT` のコメントを外してください
         - オーディオは AtomS3 Lite 本体の Grove ポートから PDM (1 bit のシグマ・デルタ、6.144 MHz) で出力します。
           ESP32-S3 の I2S ハードウェアで作るので、DAC は要りません: G2 ピン (白い線) が L、G1 ピン (黄色い線) が R です
             - PDM には (48 kHz の PWM と違って) 可聴帯域の近くに決まったキャリアがないので、フィルタなしでも
@@ -28,8 +34,6 @@ MIDI Synthesizer SPMS-1 (type-1) v0.0.11
               例えば R = 1 kΩ、C = 10 nF (カットオフ 16 kHz)。直流を除くには 10 uF のコンデンサ (AC カップリング) を
               直列に入れます
             - L と R が逆なら、`SPMS1_PDM_L_PIN` と `SPMS1_PDM_R_PIN` を入れ替えてください
-    - または M5Stack [Atomic Audio-3.5 Base](https://shop.m5stack.com/products/atomic-audio-3-5-base) (SKU: A166)
-      とその ES8311 I2S DAC (48 kHz/24 bit): `#define SPMS1_USE_PDM_OUTPUT` をコメントアウトしてください
 - Raspberry Pi Pico 2 (RP2350)
     - [Raspberry Pi Pico 2](https://www.raspberrypi.com/products/raspberry-pi-pico-2/)
     - Pimoroni [Pico Audio Pack](https://shop.pimoroni.com/products/pico-audio-pack) (PIM544)
@@ -78,7 +82,7 @@ MIDI Synthesizer SPMS-1 (type-1) v0.0.11
 ### ビルド済みバイナリ
 
 - "bin" フォルダの "spms1_type1.ino.merged.bin" は M5Stack AtomS3 Lite と Atomic Audio-3.5 Base 用です
-    - 注意: ATOMIC PortABC Extension Base からの PDM 出力 (スケッチのデフォルト) 用にはビルドされていません
+    - 注意: ATOMIC PortABC Extension Base からの PDM 出力用にはビルドされていません
     - AtomS3 Lite のリセットボタンを、内部の緑色 LED が点くまで約 2 秒長押しして、ダウンロードモードに
       します。そのうえで、たとえば esptool (Arduino core for the ESP32 に同梱) で、アドレス 0x0 に
       書き込みます:
@@ -116,10 +120,7 @@ MIDI Synthesizer SPMS-1 (type-1) v0.0.11
       ドライバを "USB オーディオ デバイス" に変更してください
 - UART MIDI 入力
     - 速度: 31250 bps
-    - M5Stack AtomS3 Lite で PDM 出力 (デフォルト) の場合: G5 ピンと G6 ピン (ATOMIC PortABC Extension Base の
-      Port C) を UART2 TX と UART2 RX に使います
-        - 受信できないときは `SPMS1_UART_MIDI_TX_PIN` と `SPMS1_UART_MIDI_RX_PIN` を入れ替えてください
-    - M5Stack AtomS3 Lite と Atomic Audio-3.5 Base の場合: G2 ピンと G1 ピン (Grove ポート) を UART2 TX と UART2 RX に使います
+    - M5Stack AtomS3 Lite と Atomic Audio-3.5 Base (デフォルト) の場合: G2 ピンと G1 ピン (Grove ポート) を UART2 TX と UART2 RX に使います
         - M5Stack [Unit MIDI](https://shop.m5stack.com/products/midi-unit-with-din-connector-sam2695)
           (SKU: U187) を Grove ポートに直接つなげば、DIN MIDI インターフェースとして使えます (セパレートモード)
         - AtomS3 Lite 自体を Grove ユニットとして、別の M5Stack コントローラから Grove ポート経由で
@@ -129,6 +130,9 @@ MIDI Synthesizer SPMS-1 (type-1) v0.0.11
             #define SPMS1_UART_MIDI_TX_PIN              (1)     // Grove
             #define SPMS1_UART_MIDI_RX_PIN              (2)     // Grove
             ```
+    - M5Stack AtomS3 Lite で PDM 出力の場合: G5 ピンと G6 ピン (ATOMIC PortABC Extension Base の
+      Port C) を UART2 TX と UART2 RX に使います
+        - 受信できないときは `SPMS1_UART_MIDI_TX_PIN` と `SPMS1_UART_MIDI_RX_PIN` を入れ替えてください
 
     - Raspberry Pi Pico 2: GP4 ピンと GP5 ピンを UART1 TX と UART1 RX に使います
     - Raspberry Pi Pico 2 では、以下のように書き換えれば `SoftwareSerial` も使えます:

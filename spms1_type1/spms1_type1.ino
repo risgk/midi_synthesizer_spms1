@@ -29,13 +29,13 @@
 
 #define SPMS1_DEBUG_PRINT_SERIAL            Serial  // USB CDC, next to USB MIDI
 
-// PDM output from the AtomS3 Lite's own Grove port (G2 and G1), with the UART MIDI moved to Port C
-// (G5 and G6) of the M5Stack ATOMIC PortABC Extension Base.
+// Uncomment SPMS1_USE_PDM_OUTPUT for the PDM output from the AtomS3 Lite's own Grove port (G2 and G1),
+// in place of the Atomic Audio-3.5 Base. The UART MIDI then moves to Port C (G5 and G6) of the
+// M5Stack ATOMIC PortABC Extension Base, as the Audio-3.5 Base takes G5 and G6 for I2S.
 // The I2S peripheral's PCM-to-PDM converter drives one 1-bit sigma-delta stream per channel at
 // 6.144 MHz, so no DAC is needed, and no fixed carrier near the audio band is left to beat or
-// alias into a whistle. Comment out SPMS1_USE_PDM_OUTPUT for the Atomic Audio-3.5 Base, which
-// takes G5 and G6, so the UART MIDI stays on the Grove port then.
-#define SPMS1_USE_PDM_OUTPUT
+// alias into a whistle.
+//#define SPMS1_USE_PDM_OUTPUT
 
 #define SPMS1_UART_MIDI_SERIAL              Serial2
 #if defined(SPMS1_USE_PDM_OUTPUT)
@@ -221,7 +221,7 @@ static void start_es8311() {
   write_i2c_register(ES8311, 0x06, (read_i2c_register(ES8311, 0x06) & 0xC0) | 0x03);  // SCLK not inverted, divider 4
   write_i2c_register(ES8311, 0x07, read_i2c_register(ES8311, 0x07) & 0xC0);  // LRCK divider 0x00FF
   write_i2c_register(ES8311, 0x08, 0xFF);
-  write_i2c_register(ES8311, 0x09, 0x10);  // SDP in, I2S, 32-bit
+  write_i2c_register(ES8311, 0x09, 0x10);  // SDP in, I2S, 32-bit, left channel to the mono DAC
   write_i2c_register(ES8311, 0x0A, 0x10);  // SDP out, I2S, 32-bit
   write_i2c_register(ES8311, 0x0D, 0x01);  // Analog power up
   write_i2c_register(ES8311, 0x0E, 0x02);
