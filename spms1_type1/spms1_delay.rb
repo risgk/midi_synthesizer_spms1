@@ -28,20 +28,22 @@ module Spms1
     CONTROL_RATE_MASK = CONTROL_RATE_DIVISOR - 1
 
     # The delay line, a power of two so that its index wraps with a mask, for the same reason as
-    # the counter above. It holds the longest delay at 48 kHz, 15984 samples, plus the older of
+    # the counter above. It holds the longest delay at 48 kHz, 16272 samples, plus the older of
     # the two samples the interpolation reads; a higher sample rate would need it longer.
+    # Reading reaches back 16384 samples at most, to the slot about to be written, which still
+    # holds its oldest sample; a delay of 16384 or more would read back the newest one.
     # Array.new(16384, 0.0) grows by pushes to a capacity of 17407, 68 KB of floats, and on the
     # way there briefly holds the 34 KB it grew from as well.
     DELAY_LINE_SIZE = 16384
     DELAY_LINE_MASK = DELAY_LINE_SIZE - 1
 
     # The Time dial, in samples at 48 kHz: a straight line from 0 at 0.0 to 17280 (360 ms) at 1.0,
-    # 3 ms a CC step, clipped to 144 (3 ms) at the bottom and 15984 (333 ms) at the top. The bottom
-    # keeps the read clear of the sample about to be written; the top is what fits the line above
-    # with its power of two kept, just under PRA32-U2's 340 ms.
+    # 3 ms a CC step, clipped to 144 (3 ms) at the bottom and 16272 (339 ms) at the top. The bottom
+    # keeps the read clear of the sample about to be written; the top is the last CC step that fits
+    # the line above, with room left for the slew to overshoot by rounding.
     FULL_SCALE_TIME_AT_48K = 17280.0
     MIN_TIME_AT_48K        = 144.0
-    MAX_TIME_AT_48K        = 15984.0
+    MAX_TIME_AT_48K        = 16272.0
     # How far the read position may move per sample while Time is turned, in samples: a quarter,
     # as PRA32-U2 allows. Moving it faster would read the line at many times its speed, which is
     # heard as noise; held to this, the repeats bend in pitch by at most 25%, as a tape delay's do,
@@ -70,9 +72,9 @@ module Spms1
       @feedback = 0.25
       @stage_1_feedback = 0.25
       @current_feedback = 0.25
-      @mix = 0.5
-      @stage_1_mix = 0.5
-      @current_mix = 0.5
+      @mix = 0.25
+      @stage_1_mix = 0.25
+      @current_mix = 0.25
 
       # The delay the line is read at, in samples, which follows Time no faster than TIME_SLEW,
       # moved a step every sample so that it arrives at each control-rate update's value on time.
@@ -82,7 +84,7 @@ module Spms1
     end
 
     # Time is unipolar, [0.0, 1.0], read as 0 to 360 ms in a straight line and clipped to 3 ms at
-    # the bottom and 333 ms at the top.
+    # the bottom and 339 ms at the top.
     def set_time(time)
       @time = (time < 0.0) ? 0.0 : ((time > 1.0) ? 1.0 : time)
     end

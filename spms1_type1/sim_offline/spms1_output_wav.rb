@@ -62,7 +62,7 @@ lfo.set_polarity(0.1)
 delay = Spms1::Delay.new(SAMPLE_RATE)
 delay.set_time(cc_to_unipolar(64))
 delay.set_feedback(cc_to_unipolar(64))
-delay.set_mix(cc_to_unipolar(64))
+delay.set_mix(cc_to_unipolar(34))
 
 puts "Generating stereo waveform data..."
 

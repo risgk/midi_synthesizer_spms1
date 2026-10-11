@@ -381,7 +381,7 @@ C.set_midi_cc_value(MIDI_CH, 24 , 64 ) # Filter 1 Mod Amt
 C.set_midi_cc_value(MIDI_CH, 15 , 64 ) # Amp 1 Gain
 C.set_midi_cc_value(MIDI_CH, 55 , 64 ) # Delay 1 Time
 C.set_midi_cc_value(MIDI_CH, 56 , 64 ) # Delay 1 Feedback
-C.set_midi_cc_value(MIDI_CH, 94 , 64 ) # Delay 1 Mix
+C.set_midi_cc_value(MIDI_CH, 94 , 34 ) # Delay 1 Mix
 C.set_midi_cc_value(MIDI_CH, 1  , 4  ) # General Mod Wheel
 # Each of these fills a unipolar and a bipolar slot at once, and CC 64 is the one value that puts
 # neither at an end: the unipolar slot at 0.5, the bipolar at 0.0.

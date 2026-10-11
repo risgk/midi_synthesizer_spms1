@@ -2277,24 +2277,24 @@ static inline __attribute__((always_inline)) sp_float sp_Mixer_process(sp_Mixer 
   }
   return 0.0;
 }
-#line 51 "spms1_delay.rb"
+#line 53 "spms1_delay.rb"
 static void sp_Delay_initialize(sp_Delay *self, sp_int lv_sample_rate) {
     SP_GC_SAVE();
-#line 52 "spms1_delay.rb"
-  self->iv_sample_rate = lv_sample_rate;
-#line 53 "spms1_delay.rb"
-  self->iv_smoothing_target_blend = ((cst_Spms1__Delay__SMOOTHING_TARGET_BLEND_BASE * ((48000.0 / (double)(self->iv_sample_rate)))) * (((double)(cst_Spms1__Delay__CONTROL_RATE_DIVISOR) / 4.0)));
 #line 54 "spms1_delay.rb"
-  self->iv_full_scale_time = (cst_FULL_SCALE_TIME_AT_48K * (((double)(self->iv_sample_rate) / 48000.0)));
+  self->iv_sample_rate = lv_sample_rate;
 #line 55 "spms1_delay.rb"
-  self->iv_min_time = (cst_MIN_TIME_AT_48K * (((double)(self->iv_sample_rate) / 48000.0)));
+  self->iv_smoothing_target_blend = ((cst_Spms1__Delay__SMOOTHING_TARGET_BLEND_BASE * ((48000.0 / (double)(self->iv_sample_rate)))) * (((double)(cst_Spms1__Delay__CONTROL_RATE_DIVISOR) / 4.0)));
 #line 56 "spms1_delay.rb"
+  self->iv_full_scale_time = (cst_FULL_SCALE_TIME_AT_48K * (((double)(self->iv_sample_rate) / 48000.0)));
+#line 57 "spms1_delay.rb"
+  self->iv_min_time = (cst_MIN_TIME_AT_48K * (((double)(self->iv_sample_rate) / 48000.0)));
+#line 58 "spms1_delay.rb"
   self->iv_max_time = (cst_MAX_TIME_AT_48K * (((double)(self->iv_sample_rate) / 48000.0)));
-#line 59 "spms1_delay.rb"
-  self->iv_time_slew_up = (cst_TIME_SLEW * (double)(cst_Spms1__Delay__CONTROL_RATE_DIVISOR));
-#line 60 "spms1_delay.rb"
-  self->iv_time_slew_down = (-self->iv_time_slew_up);
 #line 61 "spms1_delay.rb"
+  self->iv_time_slew_up = (cst_TIME_SLEW * (double)(cst_Spms1__Delay__CONTROL_RATE_DIVISOR));
+#line 62 "spms1_delay.rb"
+  self->iv_time_slew_down = (-self->iv_time_slew_up);
+#line 63 "spms1_delay.rb"
   sp_int _t33 = cst_DELAY_LINE_SIZE;
   if (_t33 < 0) sp_raise_cls("ArgumentError", "negative array size");
   sp_float _t34 = 0.0;
@@ -2302,60 +2302,60 @@ static void sp_Delay_initialize(sp_Delay *self, sp_int lv_sample_rate) {
   SP_GC_ROOT(_t35);
   for (sp_int _t36 = 0; _t36 < _t33; _t36++) sp_FloatArray_push(_t35, _t34);
   { __typeof__(self) _wb334 = self; _wb334->iv_delay_line = _t35; sp_gc_wb((void *)_wb334); }
-#line 62 "spms1_delay.rb"
-  self->iv_write_index = 0LL;
 #line 64 "spms1_delay.rb"
+  self->iv_write_index = 0LL;
+#line 66 "spms1_delay.rb"
   self->iv_filtered = 0.0;
-#line 67 "spms1_delay.rb"
-  self->iv_time = 0.5;
-#line 68 "spms1_delay.rb"
-  self->iv_stage_1_time = 0.5;
 #line 69 "spms1_delay.rb"
-  self->iv_current_time = 0.5;
+  self->iv_time = 0.5;
 #line 70 "spms1_delay.rb"
-  self->iv_feedback = 0.25;
+  self->iv_stage_1_time = 0.5;
 #line 71 "spms1_delay.rb"
-  self->iv_stage_1_feedback = 0.25;
+  self->iv_current_time = 0.5;
 #line 72 "spms1_delay.rb"
-  self->iv_current_feedback = 0.25;
+  self->iv_feedback = 0.25;
 #line 73 "spms1_delay.rb"
-  self->iv_mix = 0.5;
+  self->iv_stage_1_feedback = 0.25;
 #line 74 "spms1_delay.rb"
-  self->iv_stage_1_mix = 0.5;
+  self->iv_current_feedback = 0.25;
 #line 75 "spms1_delay.rb"
-  self->iv_current_mix = 0.5;
-#line 79 "spms1_delay.rb"
-  self->iv_delay = (self->iv_full_scale_time * self->iv_current_time);
-#line 80 "spms1_delay.rb"
-  self->iv_delay_step = 0.0;
+  self->iv_mix = 0.25;
+#line 76 "spms1_delay.rb"
+  self->iv_stage_1_mix = 0.25;
+#line 77 "spms1_delay.rb"
+  self->iv_current_mix = 0.25;
 #line 81 "spms1_delay.rb"
+  self->iv_delay = (self->iv_full_scale_time * self->iv_current_time);
+#line 82 "spms1_delay.rb"
+  self->iv_delay_step = 0.0;
+#line 83 "spms1_delay.rb"
   self->iv_sample_counter = 0LL;
 }
-#line 86 "spms1_delay.rb"
+#line 88 "spms1_delay.rb"
 static inline __attribute__((always_inline)) sp_float sp_Delay_set_time(sp_Delay *self, sp_float lv_time) {
-#line 87 "spms1_delay.rb"
+#line 89 "spms1_delay.rb"
   self->iv_time = (((lv_time < 0.0)) ? 0.0 : ((((lv_time > 1.0)) ? 1.0 : lv_time)));
   return self->iv_time;
   return 0.0;
 }
-#line 93 "spms1_delay.rb"
+#line 95 "spms1_delay.rb"
 static inline __attribute__((always_inline)) sp_float sp_Delay_set_feedback(sp_Delay *self, sp_float lv_feedback) {
     sp_float lv_clamped_feedback = 0.0;
-#line 94 "spms1_delay.rb"
+#line 96 "spms1_delay.rb"
   lv_clamped_feedback = (((lv_feedback < 0.0)) ? 0.0 : ((((lv_feedback > 1.0)) ? 1.0 : lv_feedback)));
-#line 95 "spms1_delay.rb"
+#line 97 "spms1_delay.rb"
   self->iv_feedback = (lv_clamped_feedback * 0.5);
   return self->iv_feedback;
   return 0.0;
 }
-#line 100 "spms1_delay.rb"
+#line 102 "spms1_delay.rb"
 static inline __attribute__((always_inline)) sp_float sp_Delay_set_mix(sp_Delay *self, sp_float lv_mix) {
-#line 101 "spms1_delay.rb"
+#line 103 "spms1_delay.rb"
   self->iv_mix = (((lv_mix < 0.0)) ? 0.0 : ((((lv_mix > 1.0)) ? 1.0 : lv_mix)));
   return self->iv_mix;
   return 0.0;
 }
-#line 104 "spms1_delay.rb"
+#line 106 "spms1_delay.rb"
 static sp_float sp_Delay_process(sp_Delay *self, sp_float lv_audio_input) {
     sp_float lv_target = 0.0;
     sp_float lv_distance = 0.0;
@@ -2366,56 +2366,56 @@ static sp_float sp_Delay_process(sp_Delay *self, sp_float lv_audio_input) {
     sp_float lv_older = 0.0;
     sp_float lv_delayed = 0.0;
     sp_float lv_loop_input = 0.0;
-#line 105 "spms1_delay.rb"
-  if ((self->iv_sample_counter == 0LL)) {
-#line 106 "spms1_delay.rb"
-    self->iv_stage_1_time += ((self->iv_time - self->iv_stage_1_time) * self->iv_smoothing_target_blend);
 #line 107 "spms1_delay.rb"
-    self->iv_current_time += ((self->iv_stage_1_time - self->iv_current_time) * self->iv_smoothing_target_blend);
+  if ((self->iv_sample_counter == 0LL)) {
 #line 108 "spms1_delay.rb"
-    self->iv_stage_1_feedback += ((self->iv_feedback - self->iv_stage_1_feedback) * self->iv_smoothing_target_blend);
+    self->iv_stage_1_time += ((self->iv_time - self->iv_stage_1_time) * self->iv_smoothing_target_blend);
 #line 109 "spms1_delay.rb"
-    self->iv_current_feedback += ((self->iv_stage_1_feedback - self->iv_current_feedback) * self->iv_smoothing_target_blend);
+    self->iv_current_time += ((self->iv_stage_1_time - self->iv_current_time) * self->iv_smoothing_target_blend);
 #line 110 "spms1_delay.rb"
-    self->iv_stage_1_mix += ((self->iv_mix - self->iv_stage_1_mix) * self->iv_smoothing_target_blend);
+    self->iv_stage_1_feedback += ((self->iv_feedback - self->iv_stage_1_feedback) * self->iv_smoothing_target_blend);
 #line 111 "spms1_delay.rb"
+    self->iv_current_feedback += ((self->iv_stage_1_feedback - self->iv_current_feedback) * self->iv_smoothing_target_blend);
+#line 112 "spms1_delay.rb"
+    self->iv_stage_1_mix += ((self->iv_mix - self->iv_stage_1_mix) * self->iv_smoothing_target_blend);
+#line 113 "spms1_delay.rb"
     self->iv_current_mix += ((self->iv_stage_1_mix - self->iv_current_mix) * self->iv_smoothing_target_blend);
-#line 115 "spms1_delay.rb"
-    lv_target = (self->iv_full_scale_time * self->iv_current_time);
-#line 116 "spms1_delay.rb"
-    lv_target = (((lv_target < self->iv_min_time)) ? self->iv_min_time : ((((lv_target > self->iv_max_time)) ? self->iv_max_time : lv_target)));
 #line 117 "spms1_delay.rb"
-    lv_distance = (lv_target - self->iv_delay);
+    lv_target = (self->iv_full_scale_time * self->iv_current_time);
 #line 118 "spms1_delay.rb"
-    lv_distance = (((lv_distance < self->iv_time_slew_down)) ? self->iv_time_slew_down : ((((lv_distance > self->iv_time_slew_up)) ? self->iv_time_slew_up : lv_distance)));
+    lv_target = (((lv_target < self->iv_min_time)) ? self->iv_min_time : ((((lv_target > self->iv_max_time)) ? self->iv_max_time : lv_target)));
 #line 119 "spms1_delay.rb"
+    lv_distance = (lv_target - self->iv_delay);
+#line 120 "spms1_delay.rb"
+    lv_distance = (((lv_distance < self->iv_time_slew_down)) ? self->iv_time_slew_down : ((((lv_distance > self->iv_time_slew_up)) ? self->iv_time_slew_up : lv_distance)));
+#line 121 "spms1_delay.rb"
     self->iv_delay_step = (lv_distance * 0.25);
   }
-#line 122 "spms1_delay.rb"
+#line 124 "spms1_delay.rb"
   self->iv_sample_counter = (sp_int_add(self->iv_sample_counter, 1LL) & cst_Spms1__Delay__CONTROL_RATE_MASK);
-#line 126 "spms1_delay.rb"
-  lv_input = (((lv_audio_input < -1.0)) ? -1.0 : ((((lv_audio_input > 1.0)) ? 1.0 : lv_audio_input)));
 #line 128 "spms1_delay.rb"
+  lv_input = (((lv_audio_input < -1.0)) ? -1.0 : ((((lv_audio_input > 1.0)) ? 1.0 : lv_audio_input)));
+#line 130 "spms1_delay.rb"
   self->iv_delay += self->iv_delay_step;
-#line 129 "spms1_delay.rb"
+#line 131 "spms1_delay.rb"
   self->iv_write_index = (sp_int_add(self->iv_write_index, 1LL) & cst_DELAY_LINE_MASK);
-#line 132 "spms1_delay.rb"
-  lv_whole = sp_float_to_i_checked(self->iv_delay);
-#line 133 "spms1_delay.rb"
-  lv_fraction = (self->iv_delay - ({ sp_int _t37 = (lv_whole); _t37 == SP_INT_NIL ? 0.0 : ((sp_float)_t37); }));
 #line 134 "spms1_delay.rb"
-  lv_newer = sp_FloatArray_get(self->iv_delay_line, (sp_int_sub(self->iv_write_index, lv_whole) & cst_DELAY_LINE_MASK));
+  lv_whole = sp_float_to_i_checked(self->iv_delay);
 #line 135 "spms1_delay.rb"
-  lv_older = sp_FloatArray_get(self->iv_delay_line, (sp_int_sub(sp_int_sub(self->iv_write_index, lv_whole), 1LL) & cst_DELAY_LINE_MASK));
+  lv_fraction = (self->iv_delay - ({ sp_int _t37 = (lv_whole); _t37 == SP_INT_NIL ? 0.0 : ((sp_float)_t37); }));
 #line 136 "spms1_delay.rb"
+  lv_newer = sp_FloatArray_get(self->iv_delay_line, (sp_int_sub(self->iv_write_index, lv_whole) & cst_DELAY_LINE_MASK));
+#line 137 "spms1_delay.rb"
+  lv_older = sp_FloatArray_get(self->iv_delay_line, (sp_int_sub(sp_int_sub(self->iv_write_index, lv_whole), 1LL) & cst_DELAY_LINE_MASK));
+#line 138 "spms1_delay.rb"
   lv_delayed = (lv_newer + (lv_fraction * ((lv_older - lv_newer))));
-#line 140 "spms1_delay.rb"
-  lv_loop_input = ((lv_input * 0.5) + (lv_delayed * self->iv_current_feedback));
-#line 141 "spms1_delay.rb"
-  self->iv_filtered = (lv_loop_input + ((self->iv_filtered - lv_loop_input) * 0.25));
 #line 142 "spms1_delay.rb"
-  sp_FloatArray_set(self->iv_delay_line, self->iv_write_index, self->iv_filtered);
+  lv_loop_input = ((lv_input * 0.5) + (lv_delayed * self->iv_current_feedback));
+#line 143 "spms1_delay.rb"
+  self->iv_filtered = (lv_loop_input + ((self->iv_filtered - lv_loop_input) * 0.25));
 #line 144 "spms1_delay.rb"
+  sp_FloatArray_set(self->iv_delay_line, self->iv_write_index, self->iv_filtered);
+#line 146 "spms1_delay.rb"
   return (lv_input + ((lv_delayed - lv_input) * self->iv_current_mix));
   return 0.0;
 }
@@ -2756,17 +2756,17 @@ int main(int argc,char**argv){
   cst_Spms1__Delay__CONTROL_RATE_DIVISOR = 4LL;
 #line 28 "spms1_delay.rb"
   cst_Spms1__Delay__CONTROL_RATE_MASK = sp_int_sub(cst_Spms1__Delay__CONTROL_RATE_DIVISOR, 1LL);
-#line 35 "spms1_delay.rb"
+#line 37 "spms1_delay.rb"
   cst_DELAY_LINE_SIZE = 16384LL;
-#line 36 "spms1_delay.rb"
+#line 38 "spms1_delay.rb"
   cst_DELAY_LINE_MASK = sp_int_sub(cst_DELAY_LINE_SIZE, 1LL);
-#line 42 "spms1_delay.rb"
-  cst_FULL_SCALE_TIME_AT_48K = 17280.0;
-#line 43 "spms1_delay.rb"
-  cst_MIN_TIME_AT_48K = 144.0;
 #line 44 "spms1_delay.rb"
-  cst_MAX_TIME_AT_48K = 15984.0;
-#line 49 "spms1_delay.rb"
+  cst_FULL_SCALE_TIME_AT_48K = 17280.0;
+#line 45 "spms1_delay.rb"
+  cst_MIN_TIME_AT_48K = 144.0;
+#line 46 "spms1_delay.rb"
+  cst_MAX_TIME_AT_48K = 16272.0;
+#line 51 "spms1_delay.rb"
   cst_TIME_SLEW = 0.25;
 #line 24 "spms1_main.rb"
 #line 25 "spms1_main.rb"
@@ -3261,7 +3261,7 @@ int main(int argc,char**argv){
 #line 383 "spms1_main.rb"
   (set_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(56LL)), ((uint8_t)(64LL))), (sp_int)0);
 #line 384 "spms1_main.rb"
-  (set_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(94LL)), ((uint8_t)(64LL))), (sp_int)0);
+  (set_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(94LL)), ((uint8_t)(34LL))), (sp_int)0);
 #line 385 "spms1_main.rb"
   (set_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(1LL)), ((uint8_t)(4LL))), (sp_int)0);
 #line 388 "spms1_main.rb"
