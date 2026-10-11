@@ -241,57 +241,111 @@
     }
 
     /* Soft keyboard */
-    .keyboard-scroll-container {
-      width: 100%;
-      overflow-x: auto;
+    .kbd-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px 8px;
+      margin-bottom: 12px;
+    }
+    .kbd-bar h2 {
+      margin-bottom: 0;
+    }
+    /* A ResizeObserver sees no size on an inline box, so kbFitScale would never hear of a change. */
+    #kbd-label {
+      display: inline-block;
+    }
+    .kbd-bar .btn {
+      min-width: 32px;
+    }
+    .kbd-hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    .kbd-bar .kbd-panic {
+      margin-left: auto;
+    }
+    /* The sizes of the keys are times the scale of the text, --kbd-scale, set by kbdFitScale. */
+    .keyboard-frame {
+      --kbd-scale: 1;
+      --kbd-key-width: calc(24px * var(--kbd-scale));  /* KB_KEY_WIDTH: a semitone in the upper half */
+      --kbd-half-height: calc(70px * var(--kbd-scale));
       border: 1px solid var(--border-color);
       border-radius: 6px;
       background: #222;
-      padding: 10px 5px 15px 5px;
+      padding: 10px 5px 5px 5px;
       user-select: none;
       -webkit-user-select: none;
     }
+    /* The native scroll bar is hidden, since Safari cannot color it; .kbd-scrollbar stands in. */
+    .keyboard-scroll-container {
+      width: 100%;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
     .keyboard-scroll-container::-webkit-scrollbar {
-      height: 10px;
+      display: none;
     }
-    .keyboard-scroll-container::-webkit-scrollbar-track {
-      background: #222;
-      border-radius: 5px;
+    .kbd-scrollbar {
+      position: relative;
+      height: 12px;
+      margin-top: 5px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.15);
+      touch-action: none;
+      cursor: pointer;
     }
-    .keyboard-scroll-container::-webkit-scrollbar-thumb {
+    .kbd-scrollbar-thumb {
+      position: absolute;
+      top: 0;
+      height: 12px;
+      border-radius: 6px;
       background: var(--primary-color);
-      border-radius: 5px;
     }
     .keyboard-wrapper {
       position: relative;
-      width: 2414px;
-      height: 140px;
-      margin: 0 auto;
+      height: calc(140px * var(--kbd-scale));
+      touch-action: none;
     }
+    /* The upper half: the 12 semitones at equal intervals, the black keys as wide as the upper parts
+       of the white keys. The lower half: the white keys only, C - E each 5/3 semitones wide and F - B
+       each 7/4, so that the lines between E and F and between B and C run straight. A white key is
+       the two parts, joined at the middle without a line. */
     .key {
       position: absolute;
       cursor: pointer;
     }
-    .key.white {
-      width: 34px;
-      height: 140px;
+    .key.upper {
+      top: 0;
+      width: var(--kbd-key-width);
+      height: var(--kbd-half-height);
+      z-index: 2;
+    }
+    .key.upper.white {
       background: #fff;
       border: 1px solid #ccc;
+      border-bottom: none;
+    }
+    .key.lower {
+      top: var(--kbd-half-height);
+      height: var(--kbd-half-height);
+      background: #fff;
+      border: 1px solid #ccc;
+      border-top: none;
       border-radius: 0 0 4px 4px;
       z-index: 1;
     }
-    .key.white:active, .key.white.active {
+    .key.white.active {
       background: #f0f0f0;
+    }
+    .key.lower.active {
       border-bottom: 4px solid var(--primary-color);
     }
     .key.black {
-      width: 22px;
-      height: 85px;
       background: #111;
       border-radius: 0 0 3px 3px;
-      z-index: 2;
     }
-    .key.black:active, .key.black.active {
+    .key.black.active {
       background: var(--primary-color);
     }
     .key-label {
@@ -872,9 +926,18 @@
 </div>
 
 <div class="panel">
-  <h2>Soft Keyboard (10 Octaves: C-1 - C9)</h2>
-  <div class="keyboard-scroll-container" id="kb-scroll">
-    <div class="keyboard-wrapper" id="keyboard"></div>
+  <div class="kbd-bar">
+    <h2><span id="kbd-label">Soft Keyboard</span></h2>
+    <button class="btn" id="kbd-oct-down" title="Octave Down">&#9664;</button>
+    <button class="btn" id="kbd-oct-up" title="Octave Up">&#9654;</button>
+    <span class="kbd-hint">PC Keys: A - K, Z / X</span>
+    <button class="btn kbd-panic" id="kbd-panic" title="Note Off on every note, Pitch Bend to the center, and the keys held let go">Panic</button>
+  </div>
+  <div class="keyboard-frame">
+    <div class="keyboard-scroll-container" id="kb-scroll">
+      <div class="keyboard-wrapper" id="keyboard"></div>
+    </div>
+    <div class="kbd-scrollbar" id="kbd-scrollbar"><div class="kbd-scrollbar-thumb" id="kbd-scrollbar-thumb"></div></div>
   </div>
 </div>
 
@@ -2107,8 +2170,7 @@
     if (cmd >= 0x80 && cmd <= 0xE0) trackNote(data[0] & 0x0F, data[0], data[1], data[2]);
     if ((data[0] & 0x0F) !== exportOptions().ch) return;
     if (cmd === 0x90 || cmd === 0x80) {
-      const key = document.querySelector(`.key[data-note="${data[1]}"]`);
-      if (key) key.classList.toggle('active', cmd === 0x90 && data[2] > 0);
+      setKeyActive(data[1], cmd === 0x90 && data[2] > 0);
     } else if (cmd === 0xB0) {
       const [, cc, value] = data;
       // The synth already has it from the pass-through.
@@ -2409,58 +2471,281 @@
   function sendNote(status, note, velocity) {
     const ch = exportOptions().ch;
     if (midiOutput) midiOutput.send([(status & 0xF0) | ch, note, velocity]);
+    setKeyActive(note, (status & 0xF0) === 0x90 && velocity > 0);
     trackNote(ch, status, note, velocity);
   }
 
+  const KB_NOTE_MAX = 120;
+  const KB_KEY_WIDTH = 24;  // a semitone in the upper half, times kbScale
+  // The center of 37 keys from a C (C3 - C6 by default), in semitones from the left end of the C.
+  const KB_CENTER_OFFSET = (36 + 5 / 3) / 2;
+  const KB_DEFAULT_C = 48;  // C3
+  // The keys of the PC keyboard, from C (A) to the C an octave up (K).
+  const KB_PC_KEYS = ['KeyA', 'KeyW', 'KeyS', 'KeyE', 'KeyD', 'KeyF', 'KeyT', 'KeyG', 'KeyY', 'KeyH', 'KeyU', 'KeyJ', 'KeyK'];
+  const KB_STORAGE_KEY = 'spms1-type1-editor-keyboard';
+  const kbKeys = [];  // note number -> the upper part, and the lower part of a white key
+  const kbPointers = new Map();  // pointerId, or 'key:' + code for the PC keyboard -> the note it holds
+  let kbScale = 1;
+  const kbPrefs = { center: KB_DEFAULT_C + KB_CENTER_OFFSET };
+
+  function loadKbPrefs() {
+    try { Object.assign(kbPrefs, JSON.parse(localStorage.getItem(KB_STORAGE_KEY))); } catch (e) { /* storage unavailable */ }
+  }
+
+  function saveKbPrefs() {
+    try { localStorage.setItem(KB_STORAGE_KEY, JSON.stringify(kbPrefs)); } catch (e) { /* storage unavailable */ }
+  }
+
+  function setKeyActive(note, on) {
+    (kbKeys[note] || []).forEach(k => k.classList.toggle('active', on));
+  }
+
+  // The left edge and the width of a white key's lower part, in semitones from C-1.
+  function lowerLeftWidth(note) {
+    const index = [0, 0, 1, 1, 2, 3, 3, 4, 4, 5, 5, 6][note % 12];
+    const left = index < 3 ? index * 5 / 3 : 5 + (index - 3) * 7 / 4;
+    return [Math.floor(note / 12) * 12 + left, index < 3 ? 5 / 3 : 7 / 4];
+  }
+
+  // A press, or a glide to another key while pressed. The new note on goes out before the old
+  // note off, so the gate stays open and the envelope does not restart: legato.
+  function kbPress(id, note) {
+    const old = kbPointers.get(id);
+    sendNote(0x90, note, 127);
+    kbPointers.set(id, note);
+    if (old !== undefined) sendNote(0x80, old, 0);
+  }
+
+  function kbRelease(id) {
+    if (!kbPointers.has(id)) return;
+    const note = kbPointers.get(id);
+    kbPointers.delete(id);
+    sendNote(0x80, note, 0);
+  }
+
+  // The synth ignores All Notes Off, and a CC 123 would move whatever parameter is mapped to it,
+  // so Panic sends a Note Off on every note instead.
+  function kbPanic() {
+    kbPointers.clear();
+    const ch = exportOptions().ch;
+    for (let note = 0; note < 128; note++) {
+      if (midiOutput) midiOutput.send([0x80 | ch, note, 0]);
+      setKeyActive(note, false);
+    }
+    trackNote(ch, 0x80, noteStates[ch].pitch, 0);
+    sendBend(0);
+  }
+
+  function kbNoteOf(e) {
+    const key = e.target.closest ? e.target.closest('.key') : null;
+    return key ? parseInt(key.dataset.note) : -1;
+  }
+
+  // The center of the visible area, in semitones of the upper half from C-1.
+  function kbGetCenter() {
+    const scroll = document.getElementById('kb-scroll');
+    return (scroll.scrollLeft + scroll.clientWidth / 2) / (KB_KEY_WIDTH * kbScale);
+  }
+
+  function kbSetCenter(center) {
+    const scroll = document.getElementById('kb-scroll');
+    scroll.scrollLeft = center * KB_KEY_WIDTH * kbScale - scroll.clientWidth / 2;
+    kbUpdateScrollbar();
+  }
+
+  // To the 37 keys from the next C to the left or to the right of where the keyboard is, the
+  // last of them ending at C9.
+  function kbShiftOctave(delta) {
+    const position = (kbGetCenter() - KB_CENTER_OFFSET) / 12;  // in octaves from C-1
+    let octave = delta < 0 ? Math.ceil(position - 0.01) + delta : Math.floor(position + 0.01) + delta;
+    octave = Math.max(0, Math.min(Math.floor((KB_NOTE_MAX - 36) / 12), octave));
+    kbPrefs.center = octave * 12 + KB_CENTER_OFFSET;
+    kbSetCenter(kbPrefs.center);
+    saveKbPrefs();
+  }
+
+  // The keys as large as the text: the scale of the text is the width of the label on the page,
+  // with the text size of the browser or the OS, over the same text drawn in a canvas at its
+  // size in rem times 16px, without it. Browser zoom scales both, so it leaves this at 1.
+  const KB_LABEL_REM = 1.2;  // .panel h2
+  function kbFitScale() {
+    const label = document.getElementById('kbd-label');
+    const style = getComputedStyle(label);
+    const canvas = kbFitScale.canvas || (kbFitScale.canvas = document.createElement('canvas'));
+    const context = canvas.getContext('2d');
+    context.font = `${style.fontWeight} ${KB_LABEL_REM * 16}px ${style.fontFamily}`;
+    const base = context.measureText(label.textContent).width;
+    if (!(base > 0)) return;
+    let scale = Math.round(label.getBoundingClientRect().width / base * 20) / 20;  // in steps of 5%
+    scale = Math.max(0.5, Math.min(3, scale));
+    if (scale === kbScale) return;
+    kbScale = scale;
+    document.querySelector('.keyboard-frame').style.setProperty('--kbd-scale', scale);
+    kbSetCenter(kbPrefs.center);
+  }
+
+  function kbUpdateScrollbar() {
+    const scroll = document.getElementById('kb-scroll');
+    const bar = document.getElementById('kbd-scrollbar');
+    const thumb = document.getElementById('kbd-scrollbar-thumb');
+    const barWidth = bar.clientWidth;
+    const thumbWidth = Math.max(24, barWidth * scroll.clientWidth / scroll.scrollWidth);
+    const range = scroll.scrollWidth - scroll.clientWidth;
+    thumb.style.width = thumbWidth + 'px';
+    thumb.style.left = (range > 0 ? (barWidth - thumbWidth) * scroll.scrollLeft / range : 0) + 'px';
+  }
+
+  function kbScrollToThumbLeft(thumbLeft) {
+    const scroll = document.getElementById('kb-scroll');
+    const bar = document.getElementById('kbd-scrollbar');
+    const thumb = document.getElementById('kbd-scrollbar-thumb');
+    const free = bar.clientWidth - thumb.offsetWidth;
+    if (free > 0) {
+      scroll.scrollLeft = (scroll.scrollWidth - scroll.clientWidth) * Math.max(0, Math.min(1, thumbLeft / free));
+      kbUpdateScrollbar();
+    }
+  }
+
+  // Not while typing in a field or choosing in a select, which picks an item by its letter, and
+  // not with Ctrl, Alt or Command, which belong to the browser's shortcuts.
+  function kbPcKeyEnabled(e) {
+    const t = e.target;
+    const tag = t.tagName;
+    return !e.ctrlKey && !e.altKey && !e.metaKey &&
+      tag !== 'SELECT' && tag !== 'TEXTAREA' && !t.isContentEditable &&
+      !(tag === 'INPUT' && t.type !== 'range' && t.type !== 'button' && t.type !== 'checkbox');
+  }
+
   function createKeyboard() {
+    loadKbPrefs();
     const kb = document.getElementById('keyboard');
-    const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-    let whiteKeyIndex = 0;
-    const whiteKeyWidth = 34;
+    const names = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
-    for (let noteNum = 0; noteNum <= 120; noteNum++) {
-      const noteName = notes[noteNum % 12];
-      const octave = Math.floor(noteNum / 12) - 1;
-      const keyEl = document.createElement('div');
-      keyEl.dataset.note = noteNum;
-
-      if (!noteName.includes('#')) {
-        keyEl.className = 'key white';
-        keyEl.style.left = (whiteKeyIndex * whiteKeyWidth) + 'px';
-        if (noteName === 'C') {
-          const label = document.createElement('span');
-          label.className = 'key-label';
-          label.innerText = 'C' + octave;
-          keyEl.appendChild(label);
-        }
-        whiteKeyIndex++;
-      } else {
-        keyEl.className = 'key black';
-        keyEl.style.left = ((whiteKeyIndex - 1) * whiteKeyWidth + (whiteKeyWidth - 11)) + 'px';
-      }
-
-      keyEl.addEventListener('mousedown', () => {
-        keyEl.classList.add('active');
-        sendNote(0x90, noteNum, 127);
-      });
-      keyEl.addEventListener('mouseup', () => {
-        keyEl.classList.remove('active');
-        sendNote(0x80, noteNum, 0);
-      });
-      keyEl.addEventListener('mouseleave', () => {
-        if (keyEl.classList.contains('active')) {
-          keyEl.classList.remove('active');
-          sendNote(0x80, noteNum, 0);
-        }
-      });
-
-      kb.appendChild(keyEl);
+    function createKey(note, className) {
+      const key = document.createElement('div');
+      key.className = className;
+      key.dataset.note = note;
+      key.title = names[note % 12] + (Math.floor(note / 12) - 1) + ' (' + note + ')';
+      kb.appendChild(key);
+      return key;
     }
 
-    setTimeout(() => {
-      const scrollCont = document.getElementById('kb-scroll');
-      scrollCont.scrollLeft = (scrollCont.scrollWidth - scrollCont.clientWidth) / 2;
-    }, 100);
+    for (let note = 0; note <= KB_NOTE_MAX; note++) {
+      const white = !names[note % 12].includes('#');
+      const upper = createKey(note, 'key upper ' + (white ? 'white' : 'black'));
+      upper.style.left = `calc(${note} * var(--kbd-key-width))`;
+      kbKeys[note] = [upper];
+      if (white) {
+        const [left, width] = lowerLeftWidth(note);
+        const lower = createKey(note, 'key lower white');
+        lower.style.left = `calc(${left} * var(--kbd-key-width))`;
+        lower.style.width = `calc(${width} * var(--kbd-key-width))`;
+        if (note % 12 === 0) {
+          const label = document.createElement('span');
+          label.className = 'key-label';
+          label.innerText = 'C' + (Math.floor(note / 12) - 1);
+          lower.appendChild(label);
+        }
+        kbKeys[note].push(lower);
+      }
+    }
+    const [lastLeft, lastWidth] = lowerLeftWidth(KB_NOTE_MAX);
+    kb.style.width = `calc(${lastLeft + lastWidth} * var(--kbd-key-width))`;
+
+    kb.addEventListener('contextmenu', e => e.preventDefault());
+    kb.addEventListener('pointerdown', e => {
+      if (e.button !== 0) return;
+      const note = kbNoteOf(e);
+      if (note < 0) return;
+      e.preventDefault();
+      // A touch captures the pointer to the key it landed on; released so the finger can glide.
+      if (e.target.hasPointerCapture && e.target.hasPointerCapture(e.pointerId)) {
+        e.target.releasePointerCapture(e.pointerId);
+      }
+      kbPress(e.pointerId, note);
+    });
+    kb.addEventListener('pointerover', e => {
+      const note = kbNoteOf(e);
+      if (!kbPointers.has(e.pointerId) || note < 0 || note === kbPointers.get(e.pointerId)) return;
+      kbPress(e.pointerId, note);
+    });
+    // A mouse that leaves the keyboard upward or downward while pressed keeps its note on, with no
+    // Note Off when the button comes up, so a note can be held; Panic lets it go. A mouse that
+    // leaves it to the left or right, or a touch, sends the Note Off.
+    kb.addEventListener('pointerleave', e => {
+      const rect = kb.getBoundingClientRect();
+      if (e.pointerType === 'mouse' && (e.clientY <= rect.top || e.clientY >= rect.bottom)) {
+        kbPointers.delete(e.pointerId);
+      } else {
+        kbRelease(e.pointerId);
+      }
+    });
+    window.addEventListener('pointerup', e => kbRelease(e.pointerId));
+    window.addEventListener('pointercancel', e => kbRelease(e.pointerId));
+    window.addEventListener('blur', () => [...kbPointers.keys()].forEach(kbRelease));
+
+    // The PC keyboard, as in DAWs: A - K are the white keys from C to C, W - U the black keys, and
+    // Z / X shift the octave. Keys go by position (e.code), so any layout or input mode plays the
+    // same. A is the C of the middle octave in view. A key held is a pointer of its own, so one
+    // released after an octave shift turns off the note it played.
+    document.addEventListener('keydown', e => {
+      if (!kbPcKeyEnabled(e)) return;
+      if (e.code === 'KeyZ' || e.code === 'KeyX') {
+        e.preventDefault();
+        if (!e.repeat) kbShiftOctave(e.code === 'KeyZ' ? -1 : 1);
+        return;
+      }
+      const offset = KB_PC_KEYS.indexOf(e.code);
+      if (offset < 0) return;
+      e.preventDefault();
+      const id = 'key:' + e.code;
+      if (e.repeat || kbPointers.has(id)) return;
+      const note = Math.round((kbGetCenter() - KB_CENTER_OFFSET) / 12) * 12 + 12 + offset;
+      if (note >= 0 && note <= KB_NOTE_MAX) kbPress(id, note);
+    });
+    document.addEventListener('keyup', e => kbRelease('key:' + e.code));
+
+    document.getElementById('kbd-oct-down').addEventListener('click', () => kbShiftOctave(-1));
+    document.getElementById('kbd-oct-up').addEventListener('click', () => kbShiftOctave(1));
+    document.getElementById('kbd-panic').addEventListener('click', kbPanic);
+
+    // The position is kept as the center of the visible area, so it stays put in another window
+    // width or key size.
+    const scroll = document.getElementById('kb-scroll');
+    let saveTimer = null;
+    scroll.addEventListener('scroll', () => {
+      kbUpdateScrollbar();
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(() => { kbPrefs.center = kbGetCenter(); saveKbPrefs(); }, 200);
+    });
+    window.addEventListener('resize', () => kbSetCenter(kbPrefs.center));
+
+    // Safari cannot color the native scroll bar. The thumb drags, and a press on the track moves
+    // the thumb there.
+    const bar = document.getElementById('kbd-scrollbar');
+    const thumb = document.getElementById('kbd-scrollbar-thumb');
+    let drag = null;
+    bar.addEventListener('pointerdown', e => {
+      if (e.button !== 0) return;
+      e.preventDefault();
+      const barRect = bar.getBoundingClientRect();
+      let thumbRect = thumb.getBoundingClientRect();
+      if (e.clientX < thumbRect.left || e.clientX > thumbRect.right) {
+        kbScrollToThumbLeft(e.clientX - barRect.left - thumbRect.width / 2);
+        thumbRect = thumb.getBoundingClientRect();
+      }
+      drag = { pointerId: e.pointerId, offset: e.clientX - thumbRect.left };
+      bar.setPointerCapture(e.pointerId);
+    });
+    bar.addEventListener('pointermove', e => {
+      if (drag && e.pointerId === drag.pointerId) kbScrollToThumbLeft(e.clientX - bar.getBoundingClientRect().left - drag.offset);
+    });
+    ['pointerup', 'pointercancel'].forEach(type => bar.addEventListener(type, () => { drag = null; }));
+
+    kbFitScale();
+    kbSetCenter(kbPrefs.center);
+    // The text size can change without a resize of the window.
+    if (window.ResizeObserver) new ResizeObserver(() => kbFitScale()).observe(document.getElementById('kbd-label'));
   }
 
   // ---- Tabs ----------------------------------------------------------------------------------
