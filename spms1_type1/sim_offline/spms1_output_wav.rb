@@ -43,7 +43,7 @@ filter.set_modulation_amount(cc_to_unipolar(64))
 filter.set_gain(cc_to_unipolar(64))
 
 amp = Spms1::Amp.new(SAMPLE_RATE)
-amp.set_gain(cc_to_unipolar(64))
+amp.set_gain(cc_to_unipolar(124))
 
 env_gen = Spms1::EnvGen.new(SAMPLE_RATE)
 env_gen.set_attack(cc_to_unipolar(4))

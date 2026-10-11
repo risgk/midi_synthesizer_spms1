@@ -372,7 +372,7 @@ C.set_midi_cc_value(MIDI_CH, 74 , 64 ) # Filter 1 Cutoff
 C.set_midi_cc_value(MIDI_CH, 71 , 94 ) # Filter 1 Resonance
 C.set_midi_cc_value(MIDI_CH, 112, 64 ) # Filter 1 Gain
 C.set_midi_cc_value(MIDI_CH, 24 , 64 ) # Filter 1 Mod Amt
-C.set_midi_cc_value(MIDI_CH, 15 , 64 ) # Amp 1 Gain
+C.set_midi_cc_value(MIDI_CH, 15 , 124) # Amp 1 Gain
 C.set_midi_cc_value(MIDI_CH, 55 , 64 ) # Delay 1 Time
 C.set_midi_cc_value(MIDI_CH, 56 , 64 ) # Delay 1 Feedback
 C.set_midi_cc_value(MIDI_CH, 94 , 34 ) # Delay 1 Mix

@@ -29,9 +29,24 @@
 
 #define SPMS1_DEBUG_PRINT_SERIAL            Serial  // USB CDC, next to USB MIDI
 
+// PDM output from the AtomS3 Lite's own Grove port (G2 and G1), with the UART MIDI moved to Port C
+// (G5 and G6) of the M5Stack ATOMIC PortABC Extension Base.
+// The I2S peripheral's PCM-to-PDM converter drives one 1-bit sigma-delta stream per channel at
+// 6.144 MHz, so no DAC is needed, and no fixed carrier near the audio band is left to beat or
+// alias into a whistle. Comment out SPMS1_USE_PDM_OUTPUT for the Atomic Audio-3.5 Base, which
+// takes G5 and G6, so the UART MIDI stays on the Grove port then.
+#define SPMS1_USE_PDM_OUTPUT
+
 #define SPMS1_UART_MIDI_SERIAL              Serial2
+#if defined(SPMS1_USE_PDM_OUTPUT)
+#define SPMS1_PDM_L_PIN                     (2)     // Grove, white
+#define SPMS1_PDM_R_PIN                     (1)     // Grove, yellow
+#define SPMS1_UART_MIDI_TX_PIN              (5)     // Port C
+#define SPMS1_UART_MIDI_RX_PIN              (6)     // Port C
+#else  // defined(SPMS1_USE_PDM_OUTPUT)
 #define SPMS1_UART_MIDI_TX_PIN              (2)     // Grove
 #define SPMS1_UART_MIDI_RX_PIN              (1)     // Grove
+#endif  // defined(SPMS1_USE_PDM_OUTPUT)
 
 // for M5Stack Atomic Audio-3.5 Base
 #define SPMS1_I2S_DATA_PIN                  (5)
@@ -111,10 +126,16 @@ MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, SPMS1_UART_MIDI_SERIAL, UART_MIDI, M
 #endif
 
 #if defined(ARDUINO_ARCH_ESP32)
+#if defined(SPMS1_USE_PDM_OUTPUT)
+#include <driver/i2s_pdm.h>
+typedef int16_t   i2s_sample_t;  // PCM-to-PDM takes 16-bit samples only
+#else  // defined(SPMS1_USE_PDM_OUTPUT)
 #include <Wire.h>
 #include <driver/i2s_std.h>
+typedef int32_t   i2s_sample_t;
+#endif  // defined(SPMS1_USE_PDM_OUTPUT)
 i2s_chan_handle_t g_i2s_output = NULL;
-int32_t*          g_i2s_frames = NULL;
+i2s_sample_t*     g_i2s_frames = NULL;
 uint32_t          g_i2s_frame_index = 0;
 TaskHandle_t      g_synth_task = NULL;
 #elif defined(SPMS1_USE_PWM_AUDIO_INSTEAD_OF_I2S)
@@ -166,7 +187,7 @@ void handleNoteOff(byte channel, byte pitch, byte velocity);
 void handleControlChange(byte channel, byte number, byte value);
 void handlePitchBend(byte channel, int bend);
 
-#if defined(ARDUINO_ARCH_ESP32)
+#if defined(ARDUINO_ARCH_ESP32) && !defined(SPMS1_USE_PDM_OUTPUT)
 
 static void write_i2c_register(uint8_t address, uint8_t reg, uint8_t value) {
   Wire.beginTransmission(address);
@@ -221,7 +242,11 @@ static void start_pi4ioe() {
   write_i2c_register(PI4IOE, 0x05, 0xFF);  // Outputs high
 }
 
-#endif  // defined(ARDUINO_ARCH_ESP32)
+#endif  // defined(ARDUINO_ARCH_ESP32) && !defined(SPMS1_USE_PDM_OUTPUT)
+
+// Arduino's prototype generator puts its prototypes before the first function defined, so one must
+// come before extern "C", or setup() and loop() get C linkage and Arduino.h rejects them.
+[[maybe_unused]] static void keep_prototypes_out_of_extern_c() {}
 
 extern "C" {
 
@@ -397,15 +422,34 @@ uint32_t get_audio_buffer_words() {
 #if defined(ARDUINO_ARCH_ESP32)
 
 void start_audio() {
-  g_i2s_frames = static_cast<int32_t*>(calloc(g_audio_buffer_words * 2, sizeof(int32_t)));
+  g_i2s_frames = static_cast<i2s_sample_t*>(calloc(g_audio_buffer_words * 2, sizeof(i2s_sample_t)));
   g_i2s_frame_index = 0;
 
+  // PDM TX is on I2S0 only
   i2s_chan_config_t chan_cfg = I2S_CHANNEL_DEFAULT_CONFIG(I2S_NUM_0, I2S_ROLE_MASTER);
   chan_cfg.dma_desc_num  = g_audio_buffers;
   chan_cfg.dma_frame_num = g_audio_buffer_words;
   chan_cfg.auto_clear    = true;
   i2s_new_channel(&chan_cfg, &g_i2s_output, NULL);
 
+#if defined(SPMS1_USE_PDM_OUTPUT)
+  // The DAC line mode puts L on dout and R on dout2, with no PDM clock pin. The PDM rate is
+  // 128 x 48 kHz = 6.144 MHz.
+  i2s_pdm_tx_config_t pdm_cfg = {
+    .clk_cfg  = I2S_PDM_TX_CLK_DAC_DEFAULT_CONFIG(g_sample_rate),
+    .slot_cfg = I2S_PDM_TX_SLOT_DAC_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_16BIT, I2S_SLOT_MODE_STEREO),
+    .gpio_cfg = {
+      .clk   = I2S_GPIO_UNUSED,
+      .dout  = static_cast<gpio_num_t>(SPMS1_PDM_L_PIN),
+      .dout2 = static_cast<gpio_num_t>(SPMS1_PDM_R_PIN),
+      .invert_flags = {
+        .clk_inv = false,
+      },
+    },
+  };
+  i2s_channel_init_pdm_tx_mode(g_i2s_output, &pdm_cfg);
+  i2s_channel_enable(g_i2s_output);
+#else  // defined(SPMS1_USE_PDM_OUTPUT)
   i2s_std_config_t std_cfg = {
     .clk_cfg  = I2S_STD_CLK_DEFAULT_CONFIG(g_sample_rate),
     .slot_cfg = I2S_STD_PHILIPS_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_32BIT, I2S_SLOT_MODE_STEREO),
@@ -428,6 +472,7 @@ void start_audio() {
   Wire.begin(SPMS1_I2C_SDA_PIN, SPMS1_I2C_SCL_PIN, 100000U);
   start_es8311();
   start_pi4ioe();
+#endif  // defined(SPMS1_USE_PDM_OUTPUT)
 
 #if defined(ARDUINO_M5STACK_ATOMS3) && defined(SPMS1_M5STACK_ATOMS3_LITE)
   rgbLedWrite(RGB_BUILTIN, SPMS1_LED_LEVEL_R, SPMS1_LED_LEVEL_G, SPMS1_LED_LEVEL_B);
@@ -444,15 +489,24 @@ void stop_audio() {
 
 // One i2s_channel_write per buffer, not per frame: each call takes the channel's lock.
 IRAM_ATTR void write_to_audio_buffer(float l, float r) {
+#if defined(SPMS1_USE_PDM_OUTPUT)
+  int32_t clamped_l = static_cast<int32_t>(std::lroundf(l * 32767.0f));
+  int32_t clamped_r = static_cast<int32_t>(std::lroundf(r * 32767.0f));
+  clamped_l = std::clamp(clamped_l, static_cast<int32_t>(-32768), static_cast<int32_t>(32767));
+  clamped_r = std::clamp(clamped_r, static_cast<int32_t>(-32768), static_cast<int32_t>(32767));
+  g_i2s_frames[g_i2s_frame_index * 2]     = static_cast<int16_t>(clamped_l);
+  g_i2s_frames[g_i2s_frame_index * 2 + 1] = static_cast<int16_t>(clamped_r);
+#else  // defined(SPMS1_USE_PDM_OUTPUT)
   int32_t clamped_l = static_cast<int32_t>(std::lroundf(l * 8388607.0f));
   int32_t clamped_r = static_cast<int32_t>(std::lroundf(r * 8388607.0f));
   clamped_l = std::clamp(clamped_l, static_cast<int32_t>(-8388608), static_cast<int32_t>(8388607));
   clamped_r = std::clamp(clamped_r, static_cast<int32_t>(-8388608), static_cast<int32_t>(8388607));
   g_i2s_frames[g_i2s_frame_index * 2]     = clamped_l << 8;
   g_i2s_frames[g_i2s_frame_index * 2 + 1] = clamped_r << 8;
+#endif  // defined(SPMS1_USE_PDM_OUTPUT)
   if (++g_i2s_frame_index == g_audio_buffer_words) {
     size_t bytes_written;
-    i2s_channel_write(g_i2s_output, g_i2s_frames, g_audio_buffer_words * 2 * sizeof(int32_t), &bytes_written, portMAX_DELAY);
+    i2s_channel_write(g_i2s_output, g_i2s_frames, g_audio_buffer_words * 2 * sizeof(i2s_sample_t), &bytes_written, portMAX_DELAY);
     g_i2s_frame_index = 0;
   }
 }

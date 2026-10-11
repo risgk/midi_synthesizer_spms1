@@ -3,7 +3,7 @@ MIDI Synthesizer SPMS-1 (type-1) v0.0.11
 
 - Monophonic semi-modular MIDI Synthesizer for M5Stack AtomS3 Lite and Raspberry Pi Pico 2, made with Spinel (Ruby AOT Compiler)
 - Controlled by MIDI as a sound module
-- 48 kHz/24 bit audio output
+- 48 kHz/24 bit audio output (48 kHz/16 bit PDM output with M5Stack AtomS3 Lite, by default)
 - Filter: ZDF/TPT State Variable Filter (with delayed soft clipping)
 - Delay: mono, with feedback, as a module in the run order (up to 340 ms)
 - Developed by ISGK Instruments (Ryo Ishigaki)
@@ -16,7 +16,20 @@ Required Hardware
 
 - M5Stack AtomS3 Lite (ESP32-S3), recommended
     - M5Stack [AtomS3 Lite](https://shop.m5stack.com/products/atoms3-lite-esp32s3-dev-kit) (SKU: C124)
-    - M5Stack [Atomic Audio-3.5 Base](https://shop.m5stack.com/products/atomic-audio-3-5-base) (SKU: A166)
+    - M5Stack [ATOMIC PortABC Extension Base](https://docs.m5stack.com/en/atom/AtomPortABC), by default
+        - Audio is output from the AtomS3 Lite's own Grove port as PDM (1-bit sigma-delta, 6.144 MHz),
+          made by the ESP32-S3's I2S hardware, with no DAC: G2 (white wire) is L, and G1 (yellow wire) is R
+            - The PDM stream has no fixed carrier near the audio band (unlike 48 kHz PWM), so it
+              does not beat or alias into a whistle in active speakers, even without a filter
+            - The UART MIDI moves to Port C of the base (see [MIDI Settings](#midi-settings))
+        - Connect the Grove port (G2, G1, and GND) to a line input of an amplifier or an active speaker.
+          Do not connect headphones or a passive speaker
+            - We recommend an RC filter (post LPF) on each channel, to cut the high-frequency noise of
+              the PDM stream: e.g. R = 1 kohm and C = 10 nF (cutoff 16 kHz), and a 10 uF capacitor
+              (AC coupling) in series to cut the DC
+            - If L and R are reversed, swap `SPMS1_PDM_L_PIN` and `SPMS1_PDM_R_PIN`
+    - Or M5Stack [Atomic Audio-3.5 Base](https://shop.m5stack.com/products/atomic-audio-3-5-base) (SKU: A166),
+      with its ES8311 I2S DAC (48 kHz/24 bit): comment out `#define SPMS1_USE_PDM_OUTPUT`
 - Raspberry Pi Pico 2 (RP2350)
     - [Raspberry Pi Pico 2](https://www.raspberrypi.com/products/raspberry-pi-pico-2/)
     - Pimoroni [Pico Audio Pack](https://shop.pimoroni.com/products/pico-audio-pack) (PIM544)
@@ -66,6 +79,7 @@ Usage
 ### Prebuilt Binary
 
 - "spms1_type1.ino.merged.bin" (in the "bin" folder) is for M5Stack AtomS3 Lite and Atomic Audio-3.5 Base
+    - NOTE: It is not built for the PDM output from the ATOMIC PortABC Extension Base (the default of the sketch)
     - Hold the AtomS3 Lite's reset button for about 2 seconds, until the green LED inside lights,
       to put it into download mode. Then write the file at address 0x0, with esptool (it ships
       with the Arduino core for the ESP32), for example:
@@ -103,7 +117,10 @@ Usage
       to "USB Audio Device"
 - UART MIDI Input
     - Speed: 31250 bps
-    - M5Stack AtomS3 Lite: G2 and G1 pins (Grove port) are used by UART2 TX and UART2 RX
+    - M5Stack AtomS3 Lite with the PDM output (default): G5 and G6 pins (Port C of ATOMIC PortABC
+      Extension Base) are used by UART2 TX and UART2 RX
+        - If it does not receive, swap `SPMS1_UART_MIDI_TX_PIN` and `SPMS1_UART_MIDI_RX_PIN`
+    - M5Stack AtomS3 Lite with Atomic Audio-3.5 Base: G2 and G1 pins (Grove port) are used by UART2 TX and UART2 RX
         - M5Stack [Unit MIDI](https://shop.m5stack.com/products/midi-unit-with-din-connector-sam2695)
           (SKU: U187) plugs straight into the Grove port as the DIN MIDI interface, in Separate mode
         - To use the AtomS3 Lite itself as a Grove unit, driven over the Grove port by another

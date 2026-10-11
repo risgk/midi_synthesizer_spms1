@@ -3252,7 +3252,7 @@ int main(int argc,char**argv){
 #line 374 "spms1_main.rb"
   (set_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(24LL)), ((uint8_t)(64LL))), (sp_int)0);
 #line 375 "spms1_main.rb"
-  (set_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(15LL)), ((uint8_t)(64LL))), (sp_int)0);
+  (set_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(15LL)), ((uint8_t)(124LL))), (sp_int)0);
 #line 376 "spms1_main.rb"
   (set_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(55LL)), ((uint8_t)(64LL))), (sp_int)0);
 #line 377 "spms1_main.rb"
