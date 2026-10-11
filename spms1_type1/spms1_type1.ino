@@ -34,7 +34,8 @@
 // M5Stack ATOMIC PortABC Extension Base, as the Audio-3.5 Base takes G5 and G6 for I2S.
 // The I2S peripheral's PCM-to-PDM converter drives one 1-bit sigma-delta stream per channel at
 // 6.144 MHz, so no DAC is needed, and no fixed carrier near the audio band is left to beat or
-// alias into a whistle.
+// alias into a whistle. The noise on it may still be noticeable, and with USB MIDI, the USB's
+// noise rides on it too.
 //#define SPMS1_USE_PDM_OUTPUT
 
 #define SPMS1_UART_MIDI_SERIAL              Serial2

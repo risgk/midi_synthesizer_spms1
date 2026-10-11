@@ -28,6 +28,7 @@ Required Hardware
             - The PDM stream has no fixed carrier near the audio band (unlike 48 kHz PWM), so it
               does not beat or alias into a whistle in active speakers, even without a filter
             - The UART MIDI moves to Port C of the base (see [MIDI Settings](#midi-settings))
+        - The noise on the output may be noticeable, and with USB MIDI, the USB's noise rides on it too
         - Connect the Grove port (G2, G1, and GND) to a line input of an amplifier or an active speaker.
           Do not connect headphones or a passive speaker
             - We recommend an RC filter (post LPF) on each channel, to cut the high-frequency noise of
