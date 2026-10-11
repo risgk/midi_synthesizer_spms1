@@ -800,7 +800,7 @@
 
 <div id="tab-controls">
   <div class="editor-grid" id="controls"></div>
-  <!-- Moved under the Amp panel each time the controls are drawn. -->
+  <!-- Moved under the Delay panel each time the controls are drawn. -->
   <button class="btn primary" id="init-values" style="width: 100%; padding: 12px; font-size: 1rem;">Initialize & Send All</button>
 </div>
 
@@ -904,6 +904,7 @@
     { key: 'FILTER_1',  id: 4, label: 'Filter 1' },
     { key: 'AMP_1',     id: 5, label: 'Amp 1' },
     { key: 'MIXER_1',   id: 6, label: 'Mixer 1' },
+    { key: 'DELAY_1',   id: 7, label: 'Delay 1' },
   ];
   MODULES.forEach(m => { m.out = m.key + '_OUTPUT'; });
   const MOD = Object.fromEntries(MODULES.map(m => [m.key, m]));
@@ -919,11 +920,12 @@
     ['AMP_1',     'MOD',   'Mod',   'ENV_GEN_1_OUTPUT'],
     ['MIXER_1',   'IN_1',  'In 1',  'NONE'],
     ['MIXER_1',   'IN_2',  'In 2',  'NONE'],
-    [null,        'OUTPUT', 'Audio', 'AMP_1_OUTPUT'],
+    ['DELAY_1',   'AUDIO', 'Audio', 'AMP_1_OUTPUT'],
+    [null,        'OUTPUT', 'Audio', 'DELAY_1_OUTPUT'],
   ];
 
   // NRPN categories 2 and 3 share entry numbers for these, and each one's control slot is
-  // signal 15 + entry: [module, suffix, label, bipolar, default CC, default CC value].
+  // signal 16 + entry: [module, suffix, label, bipolar, default CC, default CC value].
   const PARAMS = [
     ['LFO_1',     'RATE',         'Rate',         false, 3,   64],
     ['LFO_1',     'LEVEL',        'Level',        false, 0,   null],
@@ -948,6 +950,9 @@
     ['MIXER_1',   'POLARITY_1',   'Polarity 1',   true,  0,   124],
     ['MIXER_1',   'LEVEL_2',      'Level 2',      false, 0,   null],
     ['MIXER_1',   'POLARITY_2',   'Polarity 2',   true,  0,   124],
+    ['DELAY_1',   'TIME',         'Time',         false, 55,  64],
+    ['DELAY_1',   'FEEDBACK',     'Feedback',     false, 56,  64],
+    ['DELAY_1',   'MIX',          'Mix',          false, 94,  64],
   ];
 
   // Category 3 only, after the parameters. General 1-4 each fill two slots from one CC, a
@@ -996,7 +1001,7 @@
   for (const slot in SLOT) SIGNAL_LABELS[slot] = SLOT[slot].full;
   const sigLabel = s => SIGNAL_LABELS[s] || s;
 
-  const DEFAULT_ORDER = ['LFO_1', 'ENV_GEN_1', 'MIXER_1', 'OSC_1', 'FILTER_1', 'AMP_1'];
+  const DEFAULT_ORDER = ['LFO_1', 'ENV_GEN_1', 'MIXER_1', 'OSC_1', 'FILTER_1', 'AMP_1', 'DELAY_1'];
 
   const DEFAULT_LAYOUT = {
     NOTE:      { x: 180,  y: 358 },
@@ -1008,7 +1013,8 @@
     OSC_1:     { x: 880,  y: 40 },
     FILTER_1:  { x: 880,  y: 332 },
     AMP_1:     { x: 1240, y: 40 },
-    OUT:       { x: 1240, y: 228 },
+    DELAY_1:   { x: 1240, y: 228 },
+    OUT:       { x: 1240, y: 488 },
   };
 
   function defaultState() {
@@ -2276,6 +2282,7 @@
     { col: 2, title: 'Osc', module: 'OSC_1' },
     { col: 2, title: 'Filter', module: 'FILTER_1' },
     { col: 3, title: 'Amp', module: 'AMP_1' },
+    { col: 3, title: 'Delay', module: 'DELAY_1' },
   ];
   CONTROL_PANELS.push({ col: 1, title: 'Mixer 1', module: 'MIXER_1', onlyWithCC: true });
 

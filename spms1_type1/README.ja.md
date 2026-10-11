@@ -5,6 +5,7 @@ MIDI Synthesizer SPMS-1 (type-1) v0.0.11
 - 音源モジュールとして MIDI で制御します
 - 48 kHz/24 bit オーディオ出力
 - フィルタ: ZDF/TPT ステート・バリアブル・フィルタ (遅延ソフトクリッピング付き)
+- ディレイ: モノラル、フィードバック付き、実行順に入るモジュール (最大 333 ms)
 - 開発: ISGK Instruments (Ryo Ishigaki)
 - <https://github.com/risgk/midi_synthesizer_spms1>
 - [English README](./README.md) (英語版が正です)
@@ -162,11 +163,13 @@ flowchart LR
   OSC[Osc 1]
   FILTER[Filter 1]
   AMP[Amp 1]
+  DELAY[Delay 1]
   OUT([Audio Out])
 
   OSC --> FILTER
   FILTER --> AMP
-  AMP --> OUT
+  AMP --> DELAY
+  DELAY --> OUT
 
   NOTE -. Gate .-> EG
   NOTE -. Pitch .-> OSC
@@ -188,11 +191,11 @@ NRPN が書き換えます。
 #### 実行順
 
 すべてのモジュールが入っています。音を作る型が 1 つずつと、モジュレーションのソースとオシレータの間に
-ミキサーが 1 つです。
+ミキサーが 1 つ、最後にディレイです。
 
 ```mermaid
 flowchart LR
-  LFO[LFO 1] ~~~ EG[EG 1] ~~~ MIX1[Mixer 1] ~~~ OSC[Osc 1] ~~~ FILTER[Filter 1] ~~~ AMP[Amp 1]
+  LFO[LFO 1] ~~~ EG[EG 1] ~~~ MIX1[Mixer 1] ~~~ OSC[Osc 1] ~~~ FILTER[Filter 1] ~~~ AMP[Amp 1] ~~~ DELAY[Delay 1]
 ```
 
 ミキサーには何も結線されていないので、毎サンプル自分のスロットぶんのコストを払うだけで、パッチが
@@ -243,6 +246,31 @@ flowchart LR
   class D,LIM nl
 ```
 
+#### Delay 1
+
+PRA32-U2 の Delay FX にならった、フィードバック付きのモノラルディレイです。入力の半分と、Feedback を
+掛けた遅延信号が、穏やかなローパスフィルタを通ってディレイラインに入ります。出力は入力と遅延信号の
+クロスフェードです。
+
+```mermaid
+flowchart LR
+  IN([Audio In]) --> H["× 0.5"]
+  H --> SUM((Σ))
+  SUM --> LPF["ローパス<br/>1 次"]
+  LPF --> DL["ディレイライン<br/>最大 333 ms"]
+  DL --> FB["× Feedback<br/>0〜0.5"]
+  FB --> SUM
+  DL --> X["クロスフェード<br/>Mix"]
+  IN --> X
+  X --> OUT([出力])
+```
+
+後ろにリミッターもクリップも要りません。入ってくるのが入力の半分、戻るのが遅延信号の高々半分なので、
+遅延信号が 1.0 以内なら書き戻すものも 1.0 以内で、始まりは無音です。フィルタも 2 サンプル間の読み出しも
+クロスフェードも重み付き平均で、平均するもの以上にはなりません。代わりに、最初の繰り返しはドライ信号より
+6 dB 小さくなります。入力は、アンプが Mod In にするのと同じく入口で 1.0 に収めるので、何を結線しても
+この上限は保たれます。
+
 ### パッチの編集 (NRPN)
 
 パッチはデータであり、NRPN は動いているシンセのそれを書き換えます。どのモジュールがどの順で走るか、各
@@ -264,9 +292,9 @@ flowchart LR
 | CC 99 | CC 98 | 設定する対象 | CC 6 の値 |
 | ----- | ----- | ---- | ---------- |
 | 0 | 0-31 | 実行順、スロットごとに | モジュール ID |
-| 1 | 0-9 | モジュール入力に何を入れるか | シグナル ID |
-| 2 | 0-22 | パラメータがどこから値を取るか | シグナル ID |
-| 3 | 0-27 | どの CC がコントロールスロットを埋めるか | CC 番号、0 なら割り当てなし |
+| 1 | 0-10 | モジュール入力に何を入れるか | シグナル ID |
+| 2 | 0-25 | パラメータがどこから値を取るか | シグナル ID |
+| 3 | 0-30 | どの CC がコントロールスロットを埋めるか | CC 番号、0 なら割り当てなし |
 
 実行順はスロット 0 から上へ読まれ、最初に現れたモジュール ID 0 で止まります。32 個に満たないパッチは
 そこで自ら終わるわけです。実行順はモジュールの番号付けとは別物です。あるモジュールが今サンプルの値を
@@ -275,8 +303,9 @@ flowchart LR
 カテゴリ 3 で CC 番号 0 を指定すると、そのパラメータには CC がない状態になります。コントロールスロットは
 そのとき持っている値をそのまま保つので、パラメータをルーティングだけで動かせます。
 
-音を作るモジュールは 1 つずつ、ミキサーは 1 つあり、**この 6 個すべてがデフォルトの実行順に入っています**。
-パッチは結線するだけでよく、何かを先に有効化する必要はありません。どのパラメータにも CC が付いていないのは
+音を作るモジュールは 1 つずつ、ミキサーとディレイが 1 つずつあり、**この 7 個すべてがデフォルトの実行順に
+入っています**。パッチは結線するだけでよく、何かを先に有効化する必要はありません。ディレイを実行順から
+外せばそのぶんの時間が浮きます。そのときは最終出力をアンプに向け直します。どのパラメータにも CC が付いていないのは
 ミキサーだけで、そのぶんデフォルトのパッチでは定数を指させてあります。レベルは 1.0、極性は +0.5 なので、
 入力を 1 つ結線したミキサーはそれをそのまま通します。
 
@@ -284,11 +313,12 @@ flowchart LR
 
 | CC 98 | モジュール入力 | | CC 98 | モジュール入力 |
 | ----- | ------ | - | ----- | ------ |
-| 0 | EG 1 Gate | | 5 | Amp 1 Audio In |
-| 1 | Osc 1 Pitch | | 6 | Amp 1 Mod In |
-| 2 | Osc 1 Mod In | | 7 | Mixer 1 In 1 |
-| 3 | Filter 1 Audio In | | 8 | Mixer 1 In 2 |
-| 4 | Filter 1 Mod In | | 9 | 最終出力 |
+| 0 | EG 1 Gate | | 6 | Amp 1 Mod In |
+| 1 | Osc 1 Pitch | | 7 | Mixer 1 In 1 |
+| 2 | Osc 1 Mod In | | 8 | Mixer 1 In 2 |
+| 3 | Filter 1 Audio In | | 9 | Delay 1 Audio In |
+| 4 | Filter 1 Mod In | | 10 | 最終出力 |
+| 5 | Amp 1 Audio In | |  |  |
 
 ほとんどは名前のとおりのものを受け取りますが、3 つだけ名前からは分からない決まりがあります。Gate はレベル
 ではなく閾値で、信号が 0.25 以上になるとエンベロープがトリガし、下回るとリリースします。Pitch は MIDI ノート
@@ -302,14 +332,15 @@ flowchart LR
 
 | CC 98 | パラメータ | | CC 98 | パラメータ | | CC 98 | パラメータ |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | LFO 1 Rate | | 8 | Osc 1 Wave | | 16 | Filter 1 Mod Amt |
-| 1 | LFO 1 Level | | 9 | Osc 1 Coarse Tune | | 17 | Filter 1 Mod Polarity |
-| 2 | LFO 1 Polarity | | 10 | Osc 1 Fine Tune | | 18 | Amp 1 Gain |
-| 3 | EG 1 Attack | | 11 | Osc 1 Mod Amt | | 19 | Mixer 1 Level 1 |
-| 4 | EG 1 Decay | | 12 | Osc 1 Mod Polarity | | 20 | Mixer 1 Polarity 1 |
-| 5 | EG 1 Sustain | | 13 | Filter 1 Cutoff | | 21 | Mixer 1 Level 2 |
-| 6 | EG 1 Level | | 14 | Filter 1 Resonance | | 22 | Mixer 1 Polarity 2 |
-| 7 | EG 1 Polarity | | 15 | Filter 1 Gain | |  |  |
+| 0 | LFO 1 Rate | | 9 | Osc 1 Coarse Tune | | 18 | Amp 1 Gain |
+| 1 | LFO 1 Level | | 10 | Osc 1 Fine Tune | | 19 | Mixer 1 Level 1 |
+| 2 | LFO 1 Polarity | | 11 | Osc 1 Mod Amt | | 20 | Mixer 1 Polarity 1 |
+| 3 | EG 1 Attack | | 12 | Osc 1 Mod Polarity | | 21 | Mixer 1 Level 2 |
+| 4 | EG 1 Decay | | 13 | Filter 1 Cutoff | | 22 | Mixer 1 Polarity 2 |
+| 5 | EG 1 Sustain | | 14 | Filter 1 Resonance | | 23 | Delay 1 Time |
+| 6 | EG 1 Level | | 15 | Filter 1 Gain | | 24 | Delay 1 Feedback |
+| 7 | EG 1 Polarity | | 16 | Filter 1 Mod Amt | | 25 | Delay 1 Mix |
+| 8 | Osc 1 Wave | | 17 | Filter 1 Mod Polarity | |  |  |
 
 #### エントリ (CC 98)、カテゴリ 3 のみ
 
@@ -318,11 +349,11 @@ flowchart LR
 
 | CC 98 | CC の割り当て先 | 埋めるスロット |
 | ----- | ------ | ----- |
-| 23 | General Mod Wheel | General Mod Wheel |
-| 24 | General 1 | General Unipolar 1、General Bipolar 1 |
-| 25 | General 2 | General Unipolar 2、General Bipolar 2 |
-| 26 | General 3 | General Unipolar 3、General Bipolar 3 |
-| 27 | General 4 | General Unipolar 4、General Bipolar 4 |
+| 26 | General Mod Wheel | General Mod Wheel |
+| 27 | General 1 | General Unipolar 1、General Bipolar 1 |
+| 28 | General 2 | General Unipolar 2、General Bipolar 2 |
+| 29 | General 3 | General Unipolar 3、General Bipolar 3 |
+| 30 | General 4 | General Unipolar 4、General Bipolar 4 |
 
 #### モジュール ID
 
@@ -335,28 +366,30 @@ flowchart LR
 | 4 | Filter 1 |
 | 5 | Amp 1 |
 | 6 | Mixer 1 |
+| 7 | Delay 1 |
 
 #### シグナル ID
 
 | ID | シグナル | | ID | シグナル | | ID | シグナル |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | なし（定数 0.0） | | 17 | LFO 1 Polarity ± | | 34 | Mixer 1 Level 1 |
-| 1 | 定数 1.0 | | 18 | EG 1 Attack | | 35 | Mixer 1 Polarity 1 ± |
-| 2 | 定数 0.5 | | 19 | EG 1 Decay | | 36 | Mixer 1 Level 2 |
-| 3 | 定数 0.2 | | 20 | EG 1 Sustain | | 37 | Mixer 1 Polarity 2 ± |
-| 4 | 定数 0.1 | | 21 | EG 1 Level | | 38 | Note Pitch ± |
-| 5 | 定数 -0.1 | | 22 | EG 1 Polarity ± | | 39 | Note Gate |
-| 6 | 定数 -0.2 | | 23 | Osc 1 Wave | | 40 | Pitch Bend ± |
-| 7 | 定数 -0.5 | | 24 | Osc 1 Coarse Tune ± | | 41 | General Mod Wheel |
-| 8 | 定数 -1.0 | | 25 | Osc 1 Fine Tune ± | | 42 | General Unipolar 1 |
-| 9 | LFO 1 Output ± | | 26 | Osc 1 Mod Amt | | 43 | General Unipolar 2 |
-| 10 | EG 1 Output ± | | 27 | Osc 1 Mod Polarity ± | | 44 | General Unipolar 3 |
-| 11 | Osc 1 Output ± | | 28 | Filter 1 Cutoff | | 45 | General Unipolar 4 |
-| 12 | Filter 1 Output ± | | 29 | Filter 1 Resonance | | 46 | General Bipolar 1 ± |
-| 13 | Amp 1 Output ± | | 30 | Filter 1 Gain | | 47 | General Bipolar 2 ± |
-| 14 | Mixer 1 Output ± | | 31 | Filter 1 Mod Amt | | 48 | General Bipolar 3 ± |
-| 15 | LFO 1 Rate | | 32 | Filter 1 Mod Polarity ± | | 49 | General Bipolar 4 ± |
-| 16 | LFO 1 Level | | 33 | Amp 1 Gain | |  |  |
+| 0 | なし（定数 0.0） | | 18 | LFO 1 Polarity ± | | 36 | Mixer 1 Polarity 1 ± |
+| 1 | 定数 1.0 | | 19 | EG 1 Attack | | 37 | Mixer 1 Level 2 |
+| 2 | 定数 0.5 | | 20 | EG 1 Decay | | 38 | Mixer 1 Polarity 2 ± |
+| 3 | 定数 0.2 | | 21 | EG 1 Sustain | | 39 | Delay 1 Time |
+| 4 | 定数 0.1 | | 22 | EG 1 Level | | 40 | Delay 1 Feedback |
+| 5 | 定数 -0.1 | | 23 | EG 1 Polarity ± | | 41 | Delay 1 Mix |
+| 6 | 定数 -0.2 | | 24 | Osc 1 Wave | | 42 | Note Pitch ± |
+| 7 | 定数 -0.5 | | 25 | Osc 1 Coarse Tune ± | | 43 | Note Gate |
+| 8 | 定数 -1.0 | | 26 | Osc 1 Fine Tune ± | | 44 | Pitch Bend ± |
+| 9 | LFO 1 Output ± | | 27 | Osc 1 Mod Amt | | 45 | General Mod Wheel |
+| 10 | EG 1 Output ± | | 28 | Osc 1 Mod Polarity ± | | 46 | General Unipolar 1 |
+| 11 | Osc 1 Output ± | | 29 | Filter 1 Cutoff | | 47 | General Unipolar 2 |
+| 12 | Filter 1 Output ± | | 30 | Filter 1 Resonance | | 48 | General Unipolar 3 |
+| 13 | Amp 1 Output ± | | 31 | Filter 1 Gain | | 49 | General Unipolar 4 |
+| 14 | Mixer 1 Output ± | | 32 | Filter 1 Mod Amt | | 50 | General Bipolar 1 ± |
+| 15 | Delay 1 Output ± | | 33 | Filter 1 Mod Polarity ± | | 51 | General Bipolar 2 ± |
+| 16 | LFO 1 Rate | | 34 | Amp 1 Gain | | 52 | General Bipolar 3 ± |
+| 17 | LFO 1 Level | | 35 | Mixer 1 Level 1 | | 53 | General Bipolar 4 ± |
 
 **±** は、正負どちらにも振れるシグナルを表します。モジュール出力はフルスケールで -0.5 と +0.5 に届き、
 バイポーラのコントロールスロットは -0.5〜+0.5 で、ミキサーはそれを 2 つ足して 1.0 で止まります。
@@ -364,7 +397,7 @@ flowchart LR
 振れます。印のないものは 0.0〜1.0 で、Note Gate とユニポーラのコントロールスロットがこれにあたります。
 バスは両方を 1 つの番号空間で運ぶので、レンジは「何が書いたか」ではなくスロットごとの性質です。
 
-スロット 15〜37 には CC から届いた値が入るので、パラメータはデフォルトでは自分の CC を読んでいるわけです。
+スロット 16〜41 には CC から届いた値が入るので、パラメータはデフォルトでは自分の CC を読んでいるわけです。
 パラメータはそれぞれユニポーラかバイポーラで、スロットも同じレンジを取ります。ユニポーラは CC 4〜124 で
 0.0〜1.0 と、エンベロープと同じ幅なので、エンベロープを向ければつまみの全域を動かせます。バイポーラは
 CC 64 を 0.0 とする -0.5〜+0.5 と、LFO と同じ幅なので、バイポーラのソースを向ければ中央を挟んで上下に
@@ -372,7 +405,7 @@ CC 64 を 0.0 とする -0.5〜+0.5 と、LFO と同じ幅なので、バイポ�
 2 つの Mod Polarity のいずれも、符号そのものが設定する値なのでバイポーラです。パラメータに別のスロットを指させることがモジュレー
 ションになります。CC のないスロットは、割り当てられるまで 0.0 のままです。
 
-スロット 41〜49 の General スロットは、どのパラメータにも属さないコントロールスロットです。CC をバスに
+スロット 45〜53 の General スロットは、どのパラメータにも属さないコントロールスロットです。CC をバスに
 載せるだけで、どのモジュール入力やパラメータからも読めます。General Mod Wheel は CC 1 を読む 0.0〜1.0
 のスロットで、起動時は CC 4 なので、ホイールを動かすまで 0.0 です。デフォルトではどこにも結線されて
 いません。General 1〜4 はデフォルトで
@@ -453,13 +486,22 @@ Filter 1 Resonance は CC 94 の Q 5.66 までは CC 30 段ごとに Q が2倍�
 届きません）、その先で滑らかに上限へ寄せます。共振のピークはスイープ中に 1.0 を超えることがあり、そこを
 丸めても、角で切った場合に音の中へ折り返してくる高次の倍音よりずっと弱いもので済みます。
 
+Delay 1 の 3 つのパラメータはユニポーラで、ほかのユニポーラのつまみと同じく 1/120 刻みで動きます。Time は
+1 ステップ 3 ms の直線で CC 4 の 0 から CC 124 の 360 ms までを取り、下は 3 ms、上は 333 ms でクリップ
+します。CC 5 までは 3 ms、CC 115 からは 333 ms のままで、CC 64 で 180 ms です。回すと、テープディレイの
+ように繰り返しのピッチが最大 25% 曲がり、少し遅れて新しい時間に着きます。
+Feedback は繰り返しをラインに戻すゲインで、CC 4 の 0（繰り返しは 1 回）から CC 124 の 0.5（繰り返す
+たびに 6 dB 下がり、少しずつ暗くなる）までです。CC 64 で 0.25 です。Mix はクロスフェードの繰り返しの
+割合で、CC 4 でドライ入力だけ、CC 64 で半々、CC 124 で繰り返しだけです。起動時は 3 つとも CC 64 です。
+この Mix ではドライ信号が半分（6 dB 下）になり、最初の繰り返しはその下に来ます。
+
 #### 例
 
 - ビブラートはデフォルトで結線済みです。LFO がオシレータのモジュレーション入力に直接届くので、CC 13 で
-  深さ、CC 3 でレートを決められます。CC 99 = 2, CC 98 = 1, CC 6 = 41 で LFO 1 Level を General Mod Wheel
+  深さ、CC 3 でレートを決められます。CC 99 = 2, CC 98 = 1, CC 6 = 45 で LFO 1 Level を General Mod Wheel
   から取るようにすれば、CC 13 で決めた深さまでホイールでビブラートを掛けられます
 - フィルタのカットオフをノートのピッチに追従させる（キーボードトラッキング）: CC 99 = 1, CC 98 = 4,
-  CC 6 = 38 で、エンベロープの代わりに Note Pitch をフィルタのモジュレーション入力に置きます。カットオフが
+  CC 6 = 42 で、エンベロープの代わりに Note Pitch をフィルタのモジュレーション入力に置きます。カットオフが
   CC 64、Mod Amt が CC 124 なら、ノート 60 でカットオフはつまみの中央のままで、1 ノートごとに半音動きます
 - フィルタのカットオフを LFO でつまみの中央を挟んで揺らす: CC 99 = 1, CC 98 = 4, CC 6 = 9。
   モジュール入力は毎サンプル読まれるので、LFO のレートはいくつでも構いません
@@ -476,26 +518,34 @@ Filter 1 Resonance は CC 94 の Q 5.66 までは CC 30 段ごとに Q が2倍�
 - ピッチを LFO ではなくエンベロープで動かす: CC 99 = 1, CC 98 = 2, CC 6 = 10 で LFO の代わりにエンベロープ
   をオシレータのモジュレーション入力に置き、あとは CC 13 で深さを決めます。この経路ではエンベロープを
   絞るものがないので、CC 5 で半音、CC 16 で 1 オクターブです
-- ピッチベンド。デフォルトではどこにも結線されていません。CC 99 = 1 で CC 98 = 7 と 8 に CC 6 = 38 と 40
+- ピッチベンド。デフォルトではどこにも結線されていません。CC 99 = 1 で CC 98 = 7 と 8 に CC 6 = 42 と 44
   を送ると Note Pitch と Pitch Bend が Mixer 1 の 2 つの入力に入り、CC 99 = 1, CC 98 = 1, CC 6 = 14 で
   その和がオシレータのピッチになります。Mixer 1 はオシレータより前を走るので、ホイールは同じサンプルで
   音程を動かします。レベルはどちらも最大なので、そのままではホイールが上下 5 オクターブ振ります。
-  CC 99 = 2, CC 98 = 21, CC 6 = 42 で Mixer 1 の 2 番目のレベルを General Unipolar 1 から取るように
+  CC 99 = 2, CC 98 = 21, CC 6 = 46 で Mixer 1 の 2 番目のレベルを General Unipolar 1 から取るように
   すれば、CC 16 で演奏できるベンドレンジまで絞れます
 - モジュレーション入力を通して、ピッチを両方向に曲げる CC。Mixer 1 はオシレータより前を走り、空いて
-  います: CC 99 = 1, CC 98 = 7, CC 6 = 28 でフィルタのカットオフのコントロールスロットを 1 番目の入力に、
+  います: CC 99 = 1, CC 98 = 7, CC 6 = 29 でフィルタのカットオフのコントロールスロットを 1 番目の入力に、
   CC 98 = 8, CC 6 = 7 で定数 -0.5 を 2 番目の入力に置き、CC 98 = 2, CC 6 = 14 で LFO の代わりに Mixer 1 を
   オシレータのモジュレーション入力に向けます。スロットはユニポーラなので、この定数が LFO が 0 を中心と
   するのと同じく CC 64 を中心にします。CC 74 は CC 13 の許す範囲でノートの上下にピッチを曲げるように
   なります。CC 6 で上下に半音、CC 28 で 1 オクターブです
 - 逆向きに効く CC。ミキサーに反転させます。Mixer 1 はすでに走っているので、結線するだけです。
-  CC 99 = 1, CC 98 = 7, CC 6 = 28 でカットオフのコントロールスロットを 1 番目の入力に、CC 98 = 8,
+  CC 99 = 1, CC 98 = 7, CC 6 = 29 でカットオフのコントロールスロットを 1 番目の入力に、CC 98 = 8,
   CC 6 = 1 で定数 1.0 を 2 番目の入力に置き、CC 99 = 2, CC 98 = 20, CC 6 = 7 で 1 番目の入力の Polarity を
   -0.5、つまり反転側の端に固定すると、ミキサーは 1.0 から CC を引いた値、つまり CC を CC 64 で折り返した
   ものを出力します。CC 99 = 2, CC 98 = 13, CC 6 = 14 でカットオフ自身のソースをその
   ミキサーに向ければ、CC 74 は上げるほどフィルタを閉じるようになります
 - フィルタを経路から外す: CC 99 = 1, CC 98 = 5, CC 6 = 11 でアンプのオーディオ入力をオシレータに向けます。
   フィルタは走り続けスロットも占めたままですが、誰も読みません
+- モジュレーションホイールで掛かるエコー: CC 99 = 2, CC 98 = 25, CC 6 = 45 で Delay 1 Mix を General Mod
+  Wheel から取ります。起動時は 0.0 なので、ホイールを動かすまで出力はドライです
+- ディレイを外して時間を浮かせる: CC 99 = 0, CC 98 = 6, CC 6 = 0 で実行順をアンプの後ろで終わらせ、
+  CC 99 = 1, CC 98 = 10, CC 6 = 13 で最終出力をアンプに戻します
+- フィルタの前に置くエコー: CC 99 = 1, CC 98 = 9, CC 6 = 11 で Delay 1 にオシレータを入れ、CC 98 = 3,
+  CC 6 = 15 でフィルタに Delay 1 を入れ、CC 98 = 10, CC 6 = 13 で最終出力をアンプに戻します。繰り返しも
+  ノートと同じくフィルタとアンプのエンベロープを通るので、音と一緒に消えていきます。Delay 1 はフィルタの
+  後ろで走ったままなので、フィルタは 1 サンプル遅れて読みますが、エコーには関係ありません
 
 #### 注意点
 
@@ -505,7 +555,7 @@ Filter 1 Resonance は CC 94 の Q 5.66 までは CC 30 段ごとに Q が2倍�
 - スムージングは 2 段（48 kHz で平均遅れ 10.7 ms、35 ms で 99%）で、CC をまばらに（例えば 20 ms ごとに）
   送るコントローラーの段差を丸めます。Osc 1 Coarse Tune と Fine Tune は、音程がすぐ追従するように
   スムージングしません
-- パラメータのソースは 128 のスロットのどれでも指せます。49 より上のスロットは、何かが書き込むまで 0 を
+- パラメータのソースは 128 のスロットのどれでも指せます。53 より上のスロットは、何かが書き込むまで 0 を
   返すので、そこを指したパラメータはユニポーラならつまみの下端、バイポーラなら中央に留まります
 - パラメータは自分の値を自分のレンジ、0.0〜1.0 か -0.5〜+0.5 に丸め、コントロールスロットも同じレンジを
   バスに載せます。ユニポーラのスロットをモジュール入力に結線するとエンベロープと同じく片側にしか振れず、
