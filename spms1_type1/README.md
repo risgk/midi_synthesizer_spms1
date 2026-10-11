@@ -305,8 +305,8 @@ The run order is read from slot 0 upwards and stops at the first Module ID 0, so
 than 32 modules ends itself. It is separate from the module numbering: a module only sees the
 current sample's value from something listed before it, and last sample's from something after.
 
-In category 3, CC number 0 means the parameter has no CC. Its control slot then keeps whatever it
-already holds, so the parameter can be driven by routing alone.
+In category 3, CC number 0 means the parameter has no CC. Its control slot then holds 0.0, whatever
+CC it had before, so the patch alone sets what the parameter reads.
 
 There is one of every module that makes a sound, one mixer and one delay, and **all seven are in
 the default run order**, so a patch only ever has to route, never to switch something on first.
@@ -414,7 +414,7 @@ of its dial. A bipolar one runs -0.5 to +0.5 with CC 64 at 0.0, the span of an L
 source pointed at one swings it about the middle. The two tune controls are bipolar, since their
 middle is no change at all, and so is every Polarity -- the LFO's, the EG's, the mixer's and the two
 Mod Polarity controls -- since its sign is what it sets. Pointing a parameter at another slot is what
-makes a modulation. A slot with no CC holds 0.0 until one is assigned.
+makes a modulation. A slot with no CC holds 0.0.
 
 Slots 45-53, the General slots, are control slots that no parameter owns: a CC put on the bus for
 any module input or parameter to read. General Mod Wheel reads CC 1, runs 0.0 to 1.0 and powers
@@ -440,8 +440,6 @@ Signal 6 its negative. Signal 4 is the LFO 1 Polarity the default patch uses, wh
 LFO down to a vibrato depth, and Signal 5 its negative. A constant on a mixer's second input
 shifts a signal between the two kinds: -0.5 turns one that runs one way into one that swings
 both, and +0.5 the other way round.
-
-Slot 127 is where a parameter with no CC sends its unused value. Nothing should read it.
 
 The ID numbers are not stable across firmware versions. A patch is never saved, so a new module
 type, another instance of one, or another signal may renumber everything after it. Read these

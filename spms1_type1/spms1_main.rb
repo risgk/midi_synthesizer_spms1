@@ -148,10 +148,6 @@ SIGNAL_GENERAL_BIPOLAR_4   = 53
 
 SIGNALS_SIZE = 128
 
-# Where a control slot's value goes when its parameter has no CC assigned. Nothing reads this slot.
-# It exists so that filling the control slots is one array write either way: see cc_slot.
-SIGNAL_SINK = SIGNALS_SIZE - 1
-
 # NRPN parameter numbers: (MSB << 7) | LSB, where the MSB picks a category and the LSB an entry.
 #   0..127   active_modules[slot]
 # 128..255   what feeds each module input
@@ -198,9 +194,8 @@ NRPN_SOURCE_DELAY_1_TIME          = 279
 NRPN_SOURCE_DELAY_1_FEEDBACK      = 280
 NRPN_SOURCE_DELAY_1_MIX           = 281
 
-# A CC number of 0 means the parameter has no CC: its control slot keeps whatever it holds, so the
-# parameter can be driven by routing alone. Nothing seeds a control slot, so one with no CC holds
-# 0.0 -- the bottom of a unipolar dial, the middle of a bipolar one -- until a CC is assigned.
+# A CC number of 0 means the parameter has no CC: its control slot holds 0.0 -- the bottom of a
+# unipolar dial, the middle of a bipolar one -- whatever CC it had before, so a patch sets it alone.
 NRPN_CC_LFO_1_RATE            = 384
 NRPN_CC_LFO_1_LEVEL           = 385
 NRPN_CC_LFO_1_POLARITY        = 386
@@ -254,11 +249,10 @@ def cc_to_bipolar(value)
   (scaled < -0.5) ? -0.5 : ((scaled > 0.5) ? 0.5 : scaled)
 end
 
-# Which slot a control value is written to. CC number 0 means no CC is assigned, and the value is
-# sent to SIGNAL_SINK so the parameter's own slot keeps what it already holds. Selecting the
-# destination rather than skipping the write keeps the cost the same whatever the patch says.
-def cc_slot(cc_number, slot)
-  (cc_number == 0) ? SIGNAL_SINK : slot
+# What a control slot is filled with. CC number 0 means no CC is assigned, and the slot gets 0.0.
+# Selecting the value rather than skipping the write keeps the cost the same whatever the patch says.
+def cc_or_zero(cc_number, value)
+  (cc_number == 0) ? 0.0 : value
 end
 
 lfo_1     = LFO.new(SAMPLE_RATE)
@@ -494,46 +488,46 @@ loop do
   cc_general_3             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_3)
   cc_general_4             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_4)
 
-  signals[cc_slot(cc_lfo_1_rate, SIGNAL_LFO_1_RATE)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_rate))
-  signals[cc_slot(cc_lfo_1_level, SIGNAL_LFO_1_LEVEL)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_level))
-  signals[cc_slot(cc_lfo_1_polarity, SIGNAL_LFO_1_POLARITY)] = cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_polarity))
-  signals[cc_slot(cc_env_gen_1_attack, SIGNAL_ENV_GEN_1_ATTACK)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_env_gen_1_attack))
-  signals[cc_slot(cc_env_gen_1_decay, SIGNAL_ENV_GEN_1_DECAY)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_env_gen_1_decay))
-  signals[cc_slot(cc_env_gen_1_sustain, SIGNAL_ENV_GEN_1_SUSTAIN)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_env_gen_1_sustain))
-  signals[cc_slot(cc_env_gen_1_level, SIGNAL_ENV_GEN_1_LEVEL)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_env_gen_1_level))
-  signals[cc_slot(cc_env_gen_1_polarity, SIGNAL_ENV_GEN_1_POLARITY)] = cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_env_gen_1_polarity))
-  signals[cc_slot(cc_osc_1_waveform, SIGNAL_OSC_1_WAVEFORM)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_waveform))
-  signals[cc_slot(cc_osc_1_coarse_tune, SIGNAL_OSC_1_COARSE_TUNE)] = cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_coarse_tune))
-  signals[cc_slot(cc_osc_1_fine_tune, SIGNAL_OSC_1_FINE_TUNE)] = cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_fine_tune))
-  signals[cc_slot(cc_osc_1_mod_amount, SIGNAL_OSC_1_MOD_AMOUNT)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_mod_amount))
-  signals[cc_slot(cc_osc_1_mod_polarity, SIGNAL_OSC_1_MOD_POLARITY)] = cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_mod_polarity))
-  signals[cc_slot(cc_filter_1_cutoff, SIGNAL_FILTER_1_CUTOFF)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_cutoff))
-  signals[cc_slot(cc_filter_1_resonance, SIGNAL_FILTER_1_RESONANCE)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_resonance))
-  signals[cc_slot(cc_filter_1_gain, SIGNAL_FILTER_1_GAIN)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_gain))
-  signals[cc_slot(cc_filter_1_mod_amount, SIGNAL_FILTER_1_MOD_AMOUNT)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_mod_amount))
-  signals[cc_slot(cc_filter_1_mod_polarity, SIGNAL_FILTER_1_MOD_POLARITY)] = cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_mod_polarity))
-  signals[cc_slot(cc_amp_1_gain, SIGNAL_AMP_1_GAIN)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_amp_1_gain))
-  signals[cc_slot(cc_mixer_1_level_1, SIGNAL_MIXER_1_LEVEL_1)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_level_1))
-  signals[cc_slot(cc_mixer_1_polarity_1, SIGNAL_MIXER_1_POLARITY_1)] = cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_polarity_1))
-  signals[cc_slot(cc_mixer_1_level_2, SIGNAL_MIXER_1_LEVEL_2)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_level_2))
-  signals[cc_slot(cc_mixer_1_polarity_2, SIGNAL_MIXER_1_POLARITY_2)] = cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_polarity_2))
-  signals[cc_slot(cc_delay_1_time, SIGNAL_DELAY_1_TIME)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_delay_1_time))
-  signals[cc_slot(cc_delay_1_feedback, SIGNAL_DELAY_1_FEEDBACK)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_delay_1_feedback))
-  signals[cc_slot(cc_delay_1_mix, SIGNAL_DELAY_1_MIX)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_delay_1_mix))
-  signals[cc_slot(cc_general_mod_wheel, SIGNAL_GENERAL_MOD_WHEEL)] = cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_general_mod_wheel))
+  signals[SIGNAL_LFO_1_RATE] = cc_or_zero(cc_lfo_1_rate, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_rate)))
+  signals[SIGNAL_LFO_1_LEVEL] = cc_or_zero(cc_lfo_1_level, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_level)))
+  signals[SIGNAL_LFO_1_POLARITY] = cc_or_zero(cc_lfo_1_polarity, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_polarity)))
+  signals[SIGNAL_ENV_GEN_1_ATTACK] = cc_or_zero(cc_env_gen_1_attack, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_env_gen_1_attack)))
+  signals[SIGNAL_ENV_GEN_1_DECAY] = cc_or_zero(cc_env_gen_1_decay, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_env_gen_1_decay)))
+  signals[SIGNAL_ENV_GEN_1_SUSTAIN] = cc_or_zero(cc_env_gen_1_sustain, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_env_gen_1_sustain)))
+  signals[SIGNAL_ENV_GEN_1_LEVEL] = cc_or_zero(cc_env_gen_1_level, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_env_gen_1_level)))
+  signals[SIGNAL_ENV_GEN_1_POLARITY] = cc_or_zero(cc_env_gen_1_polarity, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_env_gen_1_polarity)))
+  signals[SIGNAL_OSC_1_WAVEFORM] = cc_or_zero(cc_osc_1_waveform, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_waveform)))
+  signals[SIGNAL_OSC_1_COARSE_TUNE] = cc_or_zero(cc_osc_1_coarse_tune, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_coarse_tune)))
+  signals[SIGNAL_OSC_1_FINE_TUNE] = cc_or_zero(cc_osc_1_fine_tune, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_fine_tune)))
+  signals[SIGNAL_OSC_1_MOD_AMOUNT] = cc_or_zero(cc_osc_1_mod_amount, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_mod_amount)))
+  signals[SIGNAL_OSC_1_MOD_POLARITY] = cc_or_zero(cc_osc_1_mod_polarity, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_mod_polarity)))
+  signals[SIGNAL_FILTER_1_CUTOFF] = cc_or_zero(cc_filter_1_cutoff, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_cutoff)))
+  signals[SIGNAL_FILTER_1_RESONANCE] = cc_or_zero(cc_filter_1_resonance, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_resonance)))
+  signals[SIGNAL_FILTER_1_GAIN] = cc_or_zero(cc_filter_1_gain, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_gain)))
+  signals[SIGNAL_FILTER_1_MOD_AMOUNT] = cc_or_zero(cc_filter_1_mod_amount, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_mod_amount)))
+  signals[SIGNAL_FILTER_1_MOD_POLARITY] = cc_or_zero(cc_filter_1_mod_polarity, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_mod_polarity)))
+  signals[SIGNAL_AMP_1_GAIN] = cc_or_zero(cc_amp_1_gain, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_amp_1_gain)))
+  signals[SIGNAL_MIXER_1_LEVEL_1] = cc_or_zero(cc_mixer_1_level_1, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_level_1)))
+  signals[SIGNAL_MIXER_1_POLARITY_1] = cc_or_zero(cc_mixer_1_polarity_1, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_polarity_1)))
+  signals[SIGNAL_MIXER_1_LEVEL_2] = cc_or_zero(cc_mixer_1_level_2, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_level_2)))
+  signals[SIGNAL_MIXER_1_POLARITY_2] = cc_or_zero(cc_mixer_1_polarity_2, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_polarity_2)))
+  signals[SIGNAL_DELAY_1_TIME] = cc_or_zero(cc_delay_1_time, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_delay_1_time)))
+  signals[SIGNAL_DELAY_1_FEEDBACK] = cc_or_zero(cc_delay_1_feedback, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_delay_1_feedback)))
+  signals[SIGNAL_DELAY_1_MIX] = cc_or_zero(cc_delay_1_mix, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_delay_1_mix)))
+  signals[SIGNAL_GENERAL_MOD_WHEEL] = cc_or_zero(cc_general_mod_wheel, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_general_mod_wheel)))
   # Each General CC fills two slots, the same value taken both ways.
   general_1 = C.get_midi_cc_value(MIDI_CH, cc_general_1)
   general_2 = C.get_midi_cc_value(MIDI_CH, cc_general_2)
   general_3 = C.get_midi_cc_value(MIDI_CH, cc_general_3)
   general_4 = C.get_midi_cc_value(MIDI_CH, cc_general_4)
-  signals[cc_slot(cc_general_1, SIGNAL_GENERAL_UNIPOLAR_1)] = cc_to_unipolar(general_1)
-  signals[cc_slot(cc_general_2, SIGNAL_GENERAL_UNIPOLAR_2)] = cc_to_unipolar(general_2)
-  signals[cc_slot(cc_general_3, SIGNAL_GENERAL_UNIPOLAR_3)] = cc_to_unipolar(general_3)
-  signals[cc_slot(cc_general_4, SIGNAL_GENERAL_UNIPOLAR_4)] = cc_to_unipolar(general_4)
-  signals[cc_slot(cc_general_1, SIGNAL_GENERAL_BIPOLAR_1)] = cc_to_bipolar(general_1)
-  signals[cc_slot(cc_general_2, SIGNAL_GENERAL_BIPOLAR_2)] = cc_to_bipolar(general_2)
-  signals[cc_slot(cc_general_3, SIGNAL_GENERAL_BIPOLAR_3)] = cc_to_bipolar(general_3)
-  signals[cc_slot(cc_general_4, SIGNAL_GENERAL_BIPOLAR_4)] = cc_to_bipolar(general_4)
+  signals[SIGNAL_GENERAL_UNIPOLAR_1] = cc_or_zero(cc_general_1, cc_to_unipolar(general_1))
+  signals[SIGNAL_GENERAL_UNIPOLAR_2] = cc_or_zero(cc_general_2, cc_to_unipolar(general_2))
+  signals[SIGNAL_GENERAL_UNIPOLAR_3] = cc_or_zero(cc_general_3, cc_to_unipolar(general_3))
+  signals[SIGNAL_GENERAL_UNIPOLAR_4] = cc_or_zero(cc_general_4, cc_to_unipolar(general_4))
+  signals[SIGNAL_GENERAL_BIPOLAR_1] = cc_or_zero(cc_general_1, cc_to_bipolar(general_1))
+  signals[SIGNAL_GENERAL_BIPOLAR_2] = cc_or_zero(cc_general_2, cc_to_bipolar(general_2))
+  signals[SIGNAL_GENERAL_BIPOLAR_3] = cc_or_zero(cc_general_3, cc_to_bipolar(general_3))
+  signals[SIGNAL_GENERAL_BIPOLAR_4] = cc_or_zero(cc_general_4, cc_to_bipolar(general_4))
 
   lfo_1.set_rate(signals[source_lfo_1_rate])
   lfo_1.set_level(signals[source_lfo_1_level])

@@ -605,9 +605,6 @@
     .row input.nv {
       width: 58px;
     }
-    .norm.held, .slider-norm.held {
-      font-style: italic;
-    }
     .row.pending input.nv, .row.pending .norm {
       font-style: italic;
       color: var(--wire-feedback);
@@ -1410,7 +1407,6 @@
   }
 
   function refreshControls() {
-    updateSlotHeld();
     refreshSliders();
     world.querySelectorAll('.row.ctrl').forEach(row => {
       const c = CONTROL[row.dataset.ctrl];
@@ -1427,15 +1423,12 @@
       valIn.placeholder = cc ? '' : '—';
       valIn.title = cc
         ? `Value of CC ${cc}, shared by every slot on it`
-        : 'No CC: the slot keeps what it holds (0.0 at power-on)';
+        : 'No CC: the slot holds 0.0';
     });
     world.querySelectorAll('.norm[data-slot]').forEach(norm => {
       const own = signalNorm(norm.dataset.slot);
       norm.textContent = own ? own.text : '—';
-      norm.classList.toggle('held', !!own && own.held);
-      norm.title = own && own.held
-        ? 'No CC: the value the slot last took, assuming the synth has followed the editor'
-        : 'The value the synth sees in the slot';
+      norm.title = 'The value the synth sees in the slot';
     });
     refreshSourceValues();
   }
@@ -2284,39 +2277,29 @@
     return p.general ? CONTROL_ITEMS.slice(PARAMS.length) : PARAM_ITEMS.filter(c => c.module === p.module);
   }
 
-  // What the synth writes to the slot: cc_to_unipolar and cc_to_bipolar in spms1_main.rb.
-  // A copy of each control slot on the synth's signals bus, as the CC value that put it there:
-  // rewritten from the CC while one is assigned and held while none is, as spms1_main.rb does.
-  // It starts from what the synth holds at power-on -- 0.0 in a slot with no CC, the default
-  // patch's CC values elsewhere -- so it is right only while the synth has followed the editor.
-  // null is a slot written from a reserved CC, whose value the editor does not track.
-  const slotHeld = {};
-  CONTROL_ITEMS.forEach(c => {
-    slotHeld[c.key] = c.defaultCC ? c.defaultValue : (c.bipolar ? 64 : 4);
-  });
-
-  function updateSlotHeld() {
-    CONTROL_ITEMS.forEach(c => {
-      const cc = state.cc[c.key];
-      if (cc) slotHeld[c.key] = RESERVED_CCS.has(cc) ? null : ccValue(cc);
-    });
+  // What the synth writes to a control slot, as a CC value: the CC's own value while one is
+  // assigned, and 0.0 while none is, as cc_or_zero in spms1_main.rb does. null is a slot written
+  // from a reserved CC, whose value the editor does not track.
+  function slotValue(c, bipolar) {
+    const cc = state.cc[c.key];
+    if (!cc) return bipolar ? 64 : 4;
+    return RESERVED_CCS.has(cc) ? null : ccValue(cc);
   }
 
   const CONSTANT_NORMS = {
     NONE: '0.000', ONE: '+1.000', HALF: '+0.500', POINT_TWO: '+0.200', POINT_ONE: '+0.100', MINUS_POINT_ONE: '-0.100', MINUS_POINT_TWO: '-0.200', MINUS_HALF: '-0.500', MINUS_ONE: '-1.000',
   };
 
-  // What a signal reads as normalized, and whether that is a held slot rather than a live CC.
-  // null where the editor cannot know it: a module output.
+  // What a signal reads as normalized, or null where the editor cannot know it: a module output.
   function signalNorm(sig) {
     const slot = SLOT[sig];
     if (slot) {
-      const v = slotHeld[slot.c.key];
-      return v == null ? null : { text: normalized(slot.bipolar, v), held: !state.cc[slot.c.key] };
+      const v = slotValue(slot.c, slot.bipolar);
+      return v == null ? null : { text: normalized(slot.bipolar, v) };
     }
-    if (sig in CONSTANT_NORMS) return { text: CONSTANT_NORMS[sig], held: false };
+    if (sig in CONSTANT_NORMS) return { text: CONSTANT_NORMS[sig] };
     const notes = noteNorms(noteStates[exportOptions().ch], false);
-    if (sig in notes) return { text: notes[sig], held: false };
+    if (sig in notes) return { text: notes[sig] };
     return null;
   }
 
@@ -2325,7 +2308,7 @@
     const label = escapeHTML(sigLabel(sig));
     const v = signalNorm(sig);
     if (!v || sig in CONSTANT_NORMS) return label;
-    return `${label} ${v.held ? `<i>(${v.text})</i>` : `(${v.text})`}`;
+    return `${label} (${v.text})`;
   }
 
   function normalized(bipolar, value) {
@@ -2401,10 +2384,7 @@
       const own = signalNorm(c.slots[0][0]);
       const norm = zone.querySelector('.slider-norm');
       norm.textContent = own ? own.text : '';
-      norm.classList.toggle('held', !!own && own.held);
-      norm.title = own && own.held
-        ? 'No CC: the value the slot last took, assuming the synth has followed the editor'
-        : 'The value the synth sees in the slot';
+      norm.title = 'The value the synth sees in the slot';
     });
   }
 
