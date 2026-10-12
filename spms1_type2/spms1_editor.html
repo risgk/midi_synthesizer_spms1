@@ -73,26 +73,46 @@
       border-color: var(--primary-color);
       color: #fff;
     }
+    /* One line with each label beside its select, so the MIDI settings, set once and left, take
+       little of the height. */
+    .panel.midi-panel {
+      padding: 8px 16px;
+    }
     .midi-bar {
       display: flex;
-      align-items: flex-end;
-      gap: 12px;
+      align-items: center;
+      gap: 8px 20px;
       flex-wrap: wrap;
     }
     .midi-bar .form-group {
       margin-bottom: 0;
-      flex: 1 1 200px;
+      flex: 1 1 220px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
     .midi-bar .form-group.narrow {
-      flex: 0 0 90px;
+      flex: 0 0 auto;
+    }
+    .midi-bar .form-group label {
+      margin-bottom: 0;
+      white-space: nowrap;
+    }
+    /* A long device name is cut short; its title gives it in full. */
+    .midi-bar .form-group select {
+      min-width: 0;
+      text-overflow: ellipsis;
+    }
+    .midi-bar .form-group.narrow select {
+      width: auto;
     }
     .midi-bar .check {
-      margin-bottom: 9px;
+      margin-bottom: 0;
     }
-    /* Its height is set by fitPatchArea, so that it ends at the bottom of the window whatever
-       stands above it. */
+    /* Its height is set by fitTabArea, so that the soft keyboard under it ends at the bottom of the
+       window whatever stands above it. */
     .app {
-      min-height: 520px;
+      min-height: 300px;
       display: grid;
       grid-template-columns: 1fr 340px;
       gap: 20px;
@@ -114,11 +134,20 @@
     }
 
     /* Controls */
+    /* Given at least the height of the patch area by fitTabArea, so the soft keyboard stays at the
+       bottom of the window when the tab changes; the grid takes the extra height, so the Init button
+       stays above the keyboard. Not on a hidden tab, where display: flex would win over [hidden]. */
+    #tab-controls:not([hidden]) {
+      display: flex;
+      flex-direction: column;
+    }
     .editor-grid {
+      flex-grow: 1;
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 20px;
       align-items: start;
+      align-content: start;
     }
     /* A slider row needs about 390px, so the last columns wrap under the first ones before then. */
     @media (max-width: 1640px) {
@@ -148,6 +177,9 @@
     }
     #init-values {
       margin-top: auto;
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
     }
     .editor-column .panel h2 {
       margin-bottom: 8px;
@@ -171,6 +203,19 @@
       font-size: 0.75rem;
       color: var(--text-muted);
       display: block;
+    }
+    /* In four columns the CC number goes on the line of the name, and the panels are packed
+       tighter, so the soft keyboard fits a full HD window under them even with a bookmarks bar. */
+    @media (min-width: 1641px) {
+      .slider-label { white-space: nowrap; }
+      .slider-label .cc-num { display: inline; }
+      .control-row { gap: 10px; }
+      .editor-column { gap: 12px; }
+      .editor-column .panel { padding: 10px 16px; }
+      .editor-column .panel h2 { margin-bottom: 6px; }
+      #init-values { padding: 6px; }
+      /* One row, which takes the extra height of the tab. */
+      .editor-grid { align-content: stretch; }
     }
     .slider-input-wrapper {
       flex-grow: 1;
@@ -845,20 +890,20 @@
   </nav>
 </header>
 
-<div class="panel">
+<div class="panel midi-panel">
   <div class="midi-bar">
     <div class="form-group narrow">
       <label for="midi-ch">MIDI Channel</label>
       <select id="midi-ch"></select>
     </div>
     <div class="form-group">
-      <label for="midi-in">MIDI In Device (Keyboard / Controller)</label>
+      <label for="midi-in" title="Keyboard or controller">MIDI In</label>
       <select id="midi-in">
         <option value="">Select MIDI Input Device...</option>
       </select>
     </div>
     <div class="form-group">
-      <label for="midi-out">MIDI Out Device (SPMS-1 Synthesizer)</label>
+      <label for="midi-out" title="SPMS-1 synthesizer">MIDI Out</label>
       <select id="midi-out">
         <option value="">Select SPMS-1 Device...</option>
       </select>
@@ -871,7 +916,7 @@
 <div id="tab-controls">
   <div class="editor-grid" id="controls"></div>
   <!-- Moved under the Delay panel each time the controls are drawn. -->
-  <button class="btn primary" id="init-values" style="width: 100%; padding: 12px; font-size: 1rem;">Initialize & Send All</button>
+  <button class="btn primary" id="init-values">Initialize & Send All</button>
 </div>
 
 <div class="app" id="tab-patch" hidden>
@@ -2096,6 +2141,10 @@
   }
 
   function handleDeviceChange() {
+    ['midi-in', 'midi-out'].forEach(id => {
+      const sel = document.getElementById(id);
+      sel.title = sel.value ? sel.selectedOptions[0].textContent : '';
+    });
     if (!midiAccess) return;
     if (midiInput) midiInput.onmidimessage = null;
     midiInput = midiAccess.inputs.get(document.getElementById('midi-in').value) || null;
@@ -2812,33 +2861,41 @@
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
     document.getElementById('tab-controls').hidden = name !== 'controls';
     document.getElementById('tab-patch').hidden = name !== 'patch';
+    fitTabArea();
     if (name === 'patch') {
-      fitPatchArea();
       if (!viewTouched) fitView();
       renderWires();
     }
     try { localStorage.setItem(TAB_KEY, name); } catch (e) { /* storage unavailable */ }
   }
 
-  // The patch area runs from wherever the header and MIDI bar leave it, which moves as they wrap,
-  // to the bottom of the window. Below the breakpoint the canvas alone does, leaving room for the
-  // soft keyboard under it.
-  function fitPatchArea() {
+  // The tab runs from wherever the header and MIDI bar leave it, which moves as they wrap, to
+  // the soft keyboard at the bottom of the window. The patch area, or in one column its canvas,
+  // takes that height; the controls take at least it, so the keyboard does not move when the tab
+  // changes.
+  function fitTabArea() {
+    const controls = document.getElementById('tab-controls');
     const app = document.getElementById('tab-patch');
     const canvas = document.getElementById('canvas');
+    controls.style.minHeight = '';
     app.style.height = '';
     canvas.style.height = '';
-    if (app.hidden) return;
-    if (app.classList.contains('wide') || matchMedia('(max-width: 800px)').matches) {
-      const top = canvas.getBoundingClientRect().top + window.scrollY;
-      const keyboard = document.getElementById('kbd-panel').offsetHeight;
-      canvas.style.height = Math.max(240, window.innerHeight - top - 16 - keyboard - 20) + 'px';
-      return;
+    // In one column the patch area has no box of its own, but the canvas starts where it would.
+    const top = (controls.hidden ? canvas : controls).getBoundingClientRect().top + window.scrollY;
+    const keyboard = document.getElementById('kbd-panel').offsetHeight;
+    const height = window.innerHeight - top - 16 - keyboard - 20;
+    const narrow = matchMedia('(max-width: 800px)').matches;
+    if (!controls.hidden) {
+      if (!narrow) controls.style.minHeight = height + 'px';
+    } else if (!app.hidden) {
+      if (app.classList.contains('wide') || narrow) {
+        canvas.style.height = Math.max(240, height) + 'px';
+      } else {
+        app.style.height = Math.max(300, height) + 'px';
+      }
     }
-    const top = app.getBoundingClientRect().top + window.scrollY;
-    app.style.height = Math.max(520, window.innerHeight - top - 20) + 'px';
   }
-  window.addEventListener('resize', fitPatchArea);
+  window.addEventListener('resize', fitTabArea);
 
   document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
 
@@ -2850,7 +2907,7 @@
     button.classList.toggle('primary', wide);
     button.setAttribute('aria-pressed', String(wide));
     if (!document.getElementById('tab-patch').hidden) {
-      fitPatchArea();
+      fitTabArea();
       if (!viewTouched) fitView();
       renderWires();
     }
