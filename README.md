@@ -7,6 +7,17 @@ MIDI Synthesizer SPMS-1
 - [日本語版 README](./README.ja.md)
 
 
+SPMS-1 (type-2)
+---------------
+
+- Monophonic semi-modular MIDI Synthesizer for M5Stack AtomS3 Lite and Raspberry Pi Pico 2
+- Filter: ZDF/TPT State Variable Filter (with delayed soft clipping)
+- Required Hardware: M5Stack AtomS3 Lite and Atomic Audio-3.5 Base (recommended), or Raspberry Pi Pico 2 and Pimoroni Pico Audio Pack (or alternative I2S DAC hardware)
+- [README](./spms1_type2/README.md) / [日本語版](./spms1_type2/README.ja.md)
+
+![SPMS-1 (type-2)](./midi_synthesizer_spms1_type2.jpg)
+
+
 SPMS-1 (type-1) (Frozen)
 ------------------------
 
