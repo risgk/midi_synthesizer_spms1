@@ -68,6 +68,12 @@ Required Software for Modification
 Usage
 -----
 
+### Prebuilt Binary
+
+- "spms1_type2_pwm_audio.ino.uf2" (in the "bin" folder) is for Raspberry Pi Pico 2 with PWM Audio output (L on GP20 and R on GP21)
+- "spms1_type2_i2s.ino.uf2" (in the "bin" folder) is for Raspberry Pi Pico 2 and Pimoroni Pico Audio Pack
+
+
 ### Web Editor
 
 - Cross-platform web-based parameter controller via Web MIDI API: "spms1_editor.html"
