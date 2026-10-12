@@ -1,5 +1,5 @@
 # Renders the default patch offline, module for module: the same modules in the same order, wired
-# the way spms1_main.rb wires them, on the CC values it ships with, save for the two marked below.
+# the way spms1_main.rb wires them, on the CC values it ships with.
 # What it does not reproduce is the layer above, the signals bus and the run order and the NRPN
 # table, so it will not catch a routing mistake, only a change in what the modules do themselves.
 require_relative '../spms1_osc'
@@ -12,10 +12,14 @@ require_relative '../spms1_chorus'
 require_relative '../spms1_delay'
 
 SAMPLE_RATE = 48000.0
-DURATION_SEC = 15.0
+# Long enough for the release and the delay's repeats after it to fall to about -100 dBFS.
+DURATION_SEC = 4.0
 NUM_SAMPLES = (SAMPLE_RATE * DURATION_SEC).to_i
 FILENAME = "spms1_output.wav"
 NOTE = 60
+# The gate is let go here, so that the default Sustain, at the top of its dial, does not hold the
+# note through the whole render, and the release at the Decay rate is heard.
+GATE_SAMPLES = (SAMPLE_RATE * 1.0).to_i
 
 # The same converters spms1_main.rb uses, so a number here means the CC value it looks like.
 def cc_to_unipolar(value)
@@ -36,11 +40,9 @@ oscillator.set_coarse_tune(cc_to_bipolar(64))
 oscillator.set_fine_tune(cc_to_bipolar(64))
 
 filter = Spms1::Filter.new(SAMPLE_RATE)
-# Cutoff sits a quarter of the way up rather than at the default's top, so that the envelope
-# opening it through Mod Amt is what the file is of. Wide open there is nothing left to open.
-filter.set_cutoff(cc_to_unipolar(34))
-filter.set_resonance(cc_to_unipolar(64))
-filter.set_modulation_amount(cc_to_unipolar(64))
+filter.set_cutoff(cc_to_unipolar(100))
+filter.set_resonance(cc_to_unipolar(94))
+filter.set_modulation_amount(cc_to_unipolar(28))
 filter.set_gain(cc_to_unipolar(64))
 
 amp = Spms1::Amp.new(SAMPLE_RATE)
@@ -48,10 +50,8 @@ amp.set_gain(cc_to_unipolar(124))
 
 env_gen = Spms1::EnvGen.new(SAMPLE_RATE)
 env_gen.set_attack(cc_to_unipolar(4))
-# Decay is held at the top of its dial so that the note carries as far into the render as it can:
-# the gate stays down throughout and Sustain is at its floor, so the note is only ever decaying.
-env_gen.set_decay(cc_to_unipolar(124))
-env_gen.set_sustain(cc_to_unipolar(4))
+env_gen.set_decay(cc_to_unipolar(96))
+env_gen.set_sustain(cc_to_unipolar(124))
 
 lfo = Spms1::LFO.new(SAMPLE_RATE)
 lfo.set_rate(cc_to_unipolar(64))
@@ -77,9 +77,9 @@ pcm_bytes = []
 # The default run order, less the mixer it does not use: LFO, EG, Osc, Filter, Amp, Chorus, Delay.
 # Each module reads what the ones ahead of it made in this same sample, which is what the run order
 # buys. The chorus turns the mono amp into a left and a right, and the delay keeps the two apart.
-NUM_SAMPLES.times do
+NUM_SAMPLES.times do |i|
   lfo_output = lfo.process
-  env_gen_output = env_gen.process(1.0)
+  env_gen_output = env_gen.process((i < GATE_SAMPLES) ? 1.0 : 0.0)
   oscillator_output = oscillator.process(NOTE * (1.0 / 120.0) - 0.5, lfo_output)
   filter_output = filter.process(oscillator_output, env_gen_output)
   amp_output = amp.process(filter_output, env_gen_output)

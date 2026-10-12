@@ -393,16 +393,16 @@ C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_4           , 19)
 
 C.set_midi_cc_value(MIDI_CH, 3  , 64 ) # LFO 1 Rate
 C.set_midi_cc_value(MIDI_CH, 73 , 4  ) # EG 1 Attack
-C.set_midi_cc_value(MIDI_CH, 75 , 100) # EG 1 Decay
-C.set_midi_cc_value(MIDI_CH, 30 , 4  ) # EG 1 Sustain
+C.set_midi_cc_value(MIDI_CH, 75 , 96 ) # EG 1 Decay
+C.set_midi_cc_value(MIDI_CH, 30 , 124) # EG 1 Sustain
 C.set_midi_cc_value(MIDI_CH, 20 , 4  ) # Osc 1 Wave
 C.set_midi_cc_value(MIDI_CH, 86 , 64 ) # Osc 1 Coarse Tune
 C.set_midi_cc_value(MIDI_CH, 70 , 64 ) # Osc 1 Fine Tune
 C.set_midi_cc_value(MIDI_CH, 13 , 4  ) # Osc 1 Mod Amt
-C.set_midi_cc_value(MIDI_CH, 74 , 64 ) # Filter 1 Cutoff
+C.set_midi_cc_value(MIDI_CH, 74 , 100) # Filter 1 Cutoff
 C.set_midi_cc_value(MIDI_CH, 71 , 94 ) # Filter 1 Resonance
 C.set_midi_cc_value(MIDI_CH, 112, 64 ) # Filter 1 Gain
-C.set_midi_cc_value(MIDI_CH, 24 , 64 ) # Filter 1 Mod Amt
+C.set_midi_cc_value(MIDI_CH, 24 , 28 ) # Filter 1 Mod Amt
 C.set_midi_cc_value(MIDI_CH, 15 , 124) # Amp 1 Gain
 C.set_midi_cc_value(MIDI_CH, 58 , 64 ) # Chorus 1 Rate
 C.set_midi_cc_value(MIDI_CH, 59 , 64 ) # Chorus 1 Depth

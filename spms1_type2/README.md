@@ -662,10 +662,8 @@ CC 34, 0.25: the dry signal is 2.5 dB down and the first repeat about 16 dB unde
   with the default patch in real time
     - Not tested on macOS
 - Offline WAV output: "sim_offline/spms1_output_wav.rb" -- renders the default patch offline, the
-  same modules in the same order with the CC values the synth powers up with, save for two: Decay
-  is at the top of its dial so the note carries as far into the render as it can, and Cutoff a
-  quarter of the way up so the envelope opening it is what you hear. It does not reproduce the
-  signals bus or the run order, so it catches a change in a module, not in a routing
+  same modules in the same order with the CC values the synth powers up with. It does not
+  reproduce the signals bus or the run order, so it catches a change in a module, not in a routing
 
 
 ### Checking the Generated Code
