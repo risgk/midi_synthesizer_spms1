@@ -30,17 +30,17 @@
 #define SPMS1_UART_MIDI_TX_PIN              (4)
 #define SPMS1_UART_MIDI_RX_PIN              (5)
 
+// for Pimoroni Pico VGA Demo Base (PIM553)
+#define SPMS1_PWM_AUDIO_L_PIN               (28)
+#define SPMS1_PWM_AUDIO_R_PIN               (27)
+
+//#define SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO
+
 // for Pimoroni Pico Audio Pack (PIM544)
 #define SPMS1_I2S_DAC_MUTE_OFF_PIN          (22)  // Comment out if GP22 is used for something else
 #define SPMS1_I2S_DATA_PIN                  (9)
 #define SPMS1_I2S_BCLK_PIN                  (10)  // LRCLK is SPMS1_I2S_BCLK_PIN + 1
 #define SPMS1_I2S_SWAP_LEFT_AND_RIGHT       (false)
-
-//#define SPMS1_USE_PWM_AUDIO_INSTEAD_OF_I2S
-
-// for Pimoroni Pico VGA Demo Base (PIM553)
-#define SPMS1_PWM_AUDIO_L_PIN               (28)
-#define SPMS1_PWM_AUDIO_R_PIN               (27)
 
 ////////////////////////////////////////////////////////////////
 
@@ -70,13 +70,13 @@ MIDI_CREATE_CUSTOM_INSTANCE(Adafruit_USBD_MIDI, usbd_midi, USB_MIDI, MySettings)
 MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, SPMS1_UART_MIDI_SERIAL, UART_MIDI, MySettings);
 #endif
 
-#if defined(SPMS1_USE_PWM_AUDIO_INSTEAD_OF_I2S)
+#if !defined(SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO)
 #include "spms1_pico2_pwm_audio.h"
 SPMS1_PWMAudioOutput g_pwm_output(SPMS1_PWM_AUDIO_L_PIN, SPMS1_PWM_AUDIO_R_PIN);
-#else  // defined(SPMS1_USE_PWM_AUDIO_INSTEAD_OF_I2S)
+#else  // !defined(SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO)
 #include "spms1_pico2_i2s.h"
 SPMS1_I2SOutput g_i2s_output;
-#endif  // defined(SPMS1_USE_PWM_AUDIO_INSTEAD_OF_I2S)
+#endif  // !defined(SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO)
 
 #if defined(SPMS1_USE_DEBUG_PRINT) && defined(SPMS1_DEBUG_PRINT_USE_USB_SERIAL)
 // Collects one report so that it goes to USB CDC whole or not at all. A plain Serial.print would
@@ -294,7 +294,7 @@ uint32_t get_audio_buffer_words() {
   return g_audio_buffer_words;
 }
 
-#if defined(SPMS1_USE_PWM_AUDIO_INSTEAD_OF_I2S)
+#if !defined(SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO)
 
 void start_audio() {
   g_pwm_output.setSysClk(g_sample_rate);
@@ -315,7 +315,7 @@ void write_to_audio_buffer(float l, float r) {
   g_pwm_output.write24(clamped_l << 8, clamped_r << 8);
 }
 
-#else  // defined(SPMS1_USE_PWM_AUDIO_INSTEAD_OF_I2S)
+#else  // !defined(SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO)
 
 void start_audio() {
   g_i2s_output.setSysClk(g_sample_rate);
@@ -343,7 +343,7 @@ void write_to_audio_buffer(float l, float r) {
   g_i2s_output.write24(clamped_l << 8, clamped_r << 8);
 }
 
-#endif  // defined(SPMS1_USE_PWM_AUDIO_INSTEAD_OF_I2S)
+#endif  // !defined(SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO)
 
 void start_debug_measure(void) {
 #if defined(SPMS1_USE_DEBUG_PRINT)

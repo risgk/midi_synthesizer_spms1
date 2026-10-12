@@ -3,7 +3,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.0
 
 - Monophonic semi-modular MIDI Synthesizer for Raspberry Pi Pico 2, made with Spinel (Ruby AOT Compiler)
 - Controlled by MIDI as a sound module
-- 48 kHz/24 bit audio output
+- 48 kHz audio output: PWM Audio (no DAC needed), or 24 bit through an I2S DAC
 - Filter: ZDF/TPT State Variable Filter (with delayed soft clipping)
 - Delay: mono, with feedback, as a module in the run order (up to 340 ms)
 - Developed by ISGK Instruments (Ryo Ishigaki)
@@ -16,11 +16,7 @@ Required Hardware
 
 - Raspberry Pi Pico 2 (RP2350)
     - [Raspberry Pi Pico 2](https://www.raspberrypi.com/products/raspberry-pi-pico-2/)
-    - Pimoroni [Pico Audio Pack](https://shop.pimoroni.com/products/pico-audio-pack) (PIM544)
-        - The following I2S DAC hardware (48 kHz/24 bit) can also be used:
-            - [Adafruit PCM5102 I2S DAC](https://www.adafruit.com/product/6250) (Product ID: 6250)
-            - GY-PCM5102 (PCM5102A I2S DAC Module)
-    - PWM Audio can be used instead, without an I2S DAC: uncomment `SPMS1_USE_PWM_AUDIO_INSTEAD_OF_I2S`
+    - PWM Audio output, without a DAC, by default
         - L on GP28 and R on GP27, as on the Pimoroni [Pico VGA Demo Base](https://shop.pimoroni.com/products/pimoroni-pico-vga-demo-base) (PIM553)
         - The PWM level (3200 steps) is quantized with 1st-order noise shaping and TPDF dither
         - An RC low pass filter on each output is recommended, to take out the PWM ripple
@@ -29,8 +25,12 @@ Required Hardware
         - Without the RC filter, reduce the level with resistors or the input gain (volume) of the connected device:
           the PWM ripple (3.3 V square waves) may saturate the input (e.g. of an audio interface) and cause beeps or noises,
           even when its level meter looks fine
-    - NOTE: The RP2350 system clock (sysclk) changes to overclocked 153.6 MHz, set by the sketch's own I2S or PWM Audio output
-      ("spms1_pico2_i2s.h" or "spms1_pico2_pwm_audio.h", the same as PRA32-U2's), not by the Arduino-Pico I2S library
+    - Or I2S DAC hardware (48 kHz/24 bit) instead: uncomment `SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO`
+        - Pimoroni [Pico Audio Pack](https://shop.pimoroni.com/products/pico-audio-pack) (PIM544)
+        - [Adafruit PCM5102 I2S DAC](https://www.adafruit.com/product/6250) (Product ID: 6250)
+        - GY-PCM5102 (PCM5102A I2S DAC Module)
+    - NOTE: The RP2350 system clock (sysclk) changes to overclocked 153.6 MHz, set by the sketch's own PWM Audio or I2S output
+      ("spms1_pico2_pwm_audio.h" or "spms1_pico2_i2s.h", the same as PRA32-U2's), not by the Arduino-Pico I2S library
 
 
 Required Software for Modification

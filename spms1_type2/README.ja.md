@@ -3,7 +3,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.0
 
 - Spinel (Ruby AOT コンパイラ) で作った、Raspberry Pi Pico 2 用のモノフォニック・セミモジュラー MIDI シンセサイザー
 - 音源モジュールとして MIDI で制御します
-- 48 kHz/24 bit オーディオ出力
+- 48 kHz オーディオ出力: PWM Audio (DAC 不要)、または I2S DAC による 24 bit
 - フィルタ: ZDF/TPT ステート・バリアブル・フィルタ (遅延ソフトクリッピング付き)
 - ディレイ: モノラル、フィードバック付き、実行順に入るモジュール (最大 340 ms)
 - 開発: ISGK Instruments (Ryo Ishigaki)
@@ -16,11 +16,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.0
 
 - Raspberry Pi Pico 2 (RP2350)
     - [Raspberry Pi Pico 2](https://www.raspberrypi.com/products/raspberry-pi-pico-2/)
-    - Pimoroni [Pico Audio Pack](https://shop.pimoroni.com/products/pico-audio-pack) (PIM544)
-        - 以下の I2S DAC ハードウェア (48 kHz/24 bit) も使えます:
-            - [Adafruit PCM5102 I2S DAC](https://www.adafruit.com/product/6250) (Product ID: 6250)
-            - GY-PCM5102 (PCM5102A I2S DAC モジュール)
-    - I2S DAC の代わりに PWM Audio も使えます: `SPMS1_USE_PWM_AUDIO_INSTEAD_OF_I2S` のコメントを外してください
+    - PWM Audio 出力 (DAC 不要)、デフォルト
         - L は GP28、R は GP27 で、Pimoroni [Pico VGA Demo Base](https://shop.pimoroni.com/products/pimoroni-pico-vga-demo-base) (PIM553) と同じです
         - PWM のレベル (3200 段階) は、1 次のノイズシェーピングと TPDF ディザ付きで量子化されます
         - PWM のリップルを取り除くため、各出力に RC ローパスフィルターを付けることをお勧めします
@@ -29,8 +25,12 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.0
         - RC フィルタを付けない場合は、抵抗か接続先の機器の入力ゲイン (ボリューム) でレベルを下げてください:
           PWM のリップル (3.3 V の矩形波) で入力 (オーディオインターフェースなど) が飽和し、「ピー」という音やノイズが出ることがあります。
           レベルメーターが適正に見えていても起こります
-    - 注意: RP2350 のシステムクロック (sysclk) は 153.6 MHz にオーバークロックされます。設定するのはスケッチ自身の I2S または
-      PWM Audio 出力 ("spms1_pico2_i2s.h" または "spms1_pico2_pwm_audio.h"、PRA32-U2 と同じもの) で、Arduino-Pico の I2S ライブラリではありません
+    - または代わりに I2S DAC ハードウェア (48 kHz/24 bit): `SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO` のコメントを外してください
+        - Pimoroni [Pico Audio Pack](https://shop.pimoroni.com/products/pico-audio-pack) (PIM544)
+        - [Adafruit PCM5102 I2S DAC](https://www.adafruit.com/product/6250) (Product ID: 6250)
+        - GY-PCM5102 (PCM5102A I2S DAC モジュール)
+    - 注意: RP2350 のシステムクロック (sysclk) は 153.6 MHz にオーバークロックされます。設定するのはスケッチ自身の PWM Audio または
+      I2S 出力 ("spms1_pico2_pwm_audio.h" または "spms1_pico2_i2s.h"、PRA32-U2 と同じもの) で、Arduino-Pico の I2S ライブラリではありません
 
 
 改造に必要なソフトウェア
