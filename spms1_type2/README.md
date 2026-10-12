@@ -97,7 +97,7 @@ Usage
     - Device Name: "SPMS-1 (type-2)"
 - UART MIDI Input
     - Speed: 31250 bps
-    - GP4 and GP5 pins are used by TX and RX, through `SerialPIO` (a UART on PIO)
+    - GP4 and GP5 pins are used by TX and RX, through `SoftwareSerial`
     - Any pins can be used, TX and RX swapped included, by changing `SPMS1_UART_MIDI_TX_PIN` and
       `SPMS1_UART_MIDI_RX_PIN`
     - DIN/TRS MIDI is available by using (and modifying) Adafruit MIDI FeatherWing Kit, for example

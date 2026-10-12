@@ -97,7 +97,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.1
     - デバイス名: "SPMS-1 (type-2)"
 - UART MIDI 入力
     - 速度: 31250 bps
-    - GP4 ピンと GP5 ピンを TX と RX に、`SerialPIO` (PIO による UART) で使います
+    - GP4 ピンと GP5 ピンを TX と RX に、`SoftwareSerial` で使います
     - `SPMS1_UART_MIDI_TX_PIN` と `SPMS1_UART_MIDI_RX_PIN` を書き換えれば、TX と RX の入れ替えを含め、
       どのピンでも使えます
     - DIN/TRS MIDI は、たとえば Adafruit MIDI FeatherWing Kit などを使う (そして手を入れる) ことで利用できます

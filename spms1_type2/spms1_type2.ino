@@ -26,7 +26,7 @@
 #define SPMS1_DEBUG_PRINT_RX_PIN            (1)
 #endif  // defined(SPMS1_DEBUG_PRINT_USE_USB_SERIAL)
 
-// SerialPIO takes any two pins, where a hardware UART fixes TX to one and RX to the other
+// SoftwareSerial takes any two pins, where a hardware UART fixes TX to one and RX to the other
 #define SPMS1_UART_MIDI_SERIAL              g_uart_midi_serial
 #define SPMS1_UART_MIDI_TX_PIN              (4)
 #define SPMS1_UART_MIDI_RX_PIN              (5)
@@ -68,7 +68,8 @@ MIDI_CREATE_CUSTOM_INSTANCE(Adafruit_USBD_MIDI, usbd_midi, USB_MIDI, MySettings)
 #endif  // defined(SPMS1_USE_USB_MIDI)
 
 #if defined(SPMS1_USE_UART_MIDI)
-SerialPIO g_uart_midi_serial(SPMS1_UART_MIDI_TX_PIN, SPMS1_UART_MIDI_RX_PIN);
+#include <SoftwareSerial.h>
+SoftwareSerial g_uart_midi_serial(SPMS1_UART_MIDI_RX_PIN, SPMS1_UART_MIDI_TX_PIN);
 MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, SPMS1_UART_MIDI_SERIAL, UART_MIDI, MySettings);
 #endif
 
@@ -408,7 +409,7 @@ void setup() {
   UART_MIDI.setHandleNoteOff(handleNoteOff);
   UART_MIDI.setHandleControlChange(handleControlChange);
   UART_MIDI.setHandlePitchBend(handlePitchBend);
-  UART_MIDI.begin(MIDI_CHANNEL_OMNI);  // Begins the serial too, and only once: SerialPIO cannot take a second begin
+  UART_MIDI.begin(MIDI_CHANNEL_OMNI);  // Begins the serial too, and only once: SoftwareSerial cannot take a second begin
   UART_MIDI.turnThruOff();
   gpio_pull_up(SPMS1_UART_MIDI_RX_PIN);  // After the begin, which leaves the RX pin without pulls
 #endif  // defined(SPMS1_USE_UART_MIDI)
