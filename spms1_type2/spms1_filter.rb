@@ -225,7 +225,7 @@ module Spms1
       @gain = (gain < 0.0) ? 0.0 : ((gain > 1.0) ? 1.0 : gain)
     end
 
-    # Q range: ~0.7 (0.0), ~2.83 (0.5), ~5.66 (0.75), ~27 (0.875), 256 (~0.953); self-oscillation from there,
+    # Q range: ~0.7 (0.0), ~2.83 (0.5), ~5.66 (0.75), ~29 (0.875), 256 (0.95); self-oscillation from there,
     # growing to its full level at ~0.992 and staying there to 1.0, fading out at a high cutoff.
     def set_resonance(resonance)
       @resonance = (resonance < 0.0) ? 0.0 : ((resonance > 1.0) ? 1.0 : resonance)
