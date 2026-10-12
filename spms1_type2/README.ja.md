@@ -613,6 +613,12 @@ C のホスト ("sim_spinel"、"sim_render"、"web" の SPMS-1 Web) は、スケ
 ("spms1_main.rb" が読むテーブルと、それを埋めるハンドラ) で MIDI を扱うので、そこを変えれば実機とすべての
 ホストに一度に反映されます。"sim_cruby" は Ruby で書いた写しを "sim_cruby/spms1_c_midi.rb" に持っています。
 
+シミュレーターは Windows で開発・テストしています。macOS と Linux は、各 API に沿って書いてはいますが、
+試せる環境が手元にないため、ベストエフォートでの対応です。Linux では、オーディオや MIDI のハードウェアの
+ないコンテナ上で、ビルド、オフライン・レンダリング、CRuby との比較を確認しています (sim_spinel は、
+MIDI デバイスの代わりの FIFO と、音声用の ALSA の file プラグインで確認)。macOS はまったく試していません。
+これらの環境での動作報告や修正を歓迎します。
+
 - Spinel 出力 (実験的): "sim_spinel" -- このフォルダの "spms1_main.c" とランタイムを、変更せずに Windows、macOS、
   Linux 向けにビルドし、リアルタイムで動かします。音声は PortAudio で出力し、MIDI は WinMM、CoreMIDI、
   または ALSA の raw MIDI デバイス ("/dev/snd/midiC*D*") で受けます。`sh sim_spinel/build.sh` でビルドし
@@ -629,13 +635,10 @@ C のホスト ("sim_spinel"、"sim_render"、"web" の SPMS-1 Web) は、スケ
     - Linux: `--host alsa` か `--host jack` で PortAudio のホスト API を選びます (省略時は PortAudio の既定)。
       USB の MIDI キーボードやインターフェースは raw MIDI デバイスとして見えます。ALSA シーケンサーの
       ソフトウェアのポート (仮想キーボードなど) には raw MIDI デバイスがないので、使えません
-    - macOS では動作確認していません。Linux では、MIDI デバイスの代わりの FIFO と、音声用の ALSA の
-      file プラグインで確認しました。実際のハードウェアでは確認していません
 - CRuby (実験的): "sim_cruby" -- "spms1_main.rb" そのものを CRuby で動かします。PortAudio は上と同じく
   入れたものを ffi gem 経由で使い、MIDI 入力は Windows では WinMM、macOS では unimidi gem で受けます:
   `ruby sim_cruby/spms1_sim.rb --midi-in NAME`。デフォルトのパッチはインタプリタではリアルタイムに
   間に合いません
-    - macOS では動作確認していません
     - オフライン (gem 不要): `ruby sim_cruby/spms1_render.rb` は下の "sim_render" と同じオプションを取り、
       "spms1_render_cruby.wav" に書き出します。`ruby sim_cruby/spms1_compare.rb A.wav B.wav` で 2 つの
       レンダリングを比べます

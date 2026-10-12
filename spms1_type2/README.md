@@ -639,6 +639,12 @@ The C hosts ("sim_spinel", "sim_render", and SPMS-1 Web in "web") keep the MIDI 
 "spms1_midi_state.h", the tables "spms1_main.rb" reads and the handlers that fill them, so a change
 there reaches the device and all of them at once. "sim_cruby" keeps a Ruby copy in "sim_cruby/spms1_c_midi.rb".
 
+The simulators are developed and tested on Windows. macOS and Linux are supported on a best-effort
+basis, written to their APIs but without the machines to try them on: on Linux, the builds, the
+offline renders and the comparison with CRuby are checked in a container with no audio or MIDI
+hardware (sim_spinel with a FIFO standing in for the MIDI device and ALSA's file plugin for the
+audio), and macOS is not tested at all. Reports and fixes from those platforms are welcome.
+
 - Spinel output (experimental): "sim_spinel" -- builds "spms1_main.c" and the runtime in this folder, unmodified,
   for Windows, macOS or Linux and runs it in real time, with audio out through PortAudio and MIDI in
   through WinMM, CoreMIDI, or the ALSA raw MIDI devices ("/dev/snd/midiC*D*"). Build with
@@ -655,13 +661,10 @@ there reaches the device and all of them at once. "sim_cruby" keeps a Ruby copy 
     - Linux: `--host alsa` or `--host jack` picks the PortAudio host API (PortAudio's default otherwise).
       A MIDI keyboard or interface on USB shows up as a raw MIDI device; a software port of the ALSA
       sequencer (a virtual keyboard) has none, so it cannot be used
-    - Not tested on macOS. On Linux, tested with a FIFO standing in for the MIDI device and ALSA's
-      file plugin for the audio, not with real hardware
 - CRuby (experimental): "sim_cruby" -- runs "spms1_main.rb" itself on CRuby, with PortAudio
   through the ffi gem, installed as above, and MIDI in through WinMM on Windows and the unimidi
   gem on macOS: `ruby sim_cruby/spms1_sim.rb --midi-in NAME`. The interpreter does not keep up
   with the default patch in real time
-    - Not tested on macOS
     - Offline, with no gems: `ruby sim_cruby/spms1_render.rb` takes the same options as "sim_render" below
       and writes "spms1_render_cruby.wav". `ruby sim_cruby/spms1_compare.rb A.wav B.wav` compares two renders
 - Offline render of the Spinel output: "sim_render" -- builds "spms1_main.c" and the runtime, unmodified,
