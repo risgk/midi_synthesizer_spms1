@@ -15,9 +15,11 @@
 #include <math.h>      /* isinf: early-exit once a limb fold overflows to Infinity */
 #include "sp_bigint.h"
 
-/* Defined in sp_runtime.h (linked into the final program); forward-declared
+/* Defined in spinel_rt.h (linked into the final program); forward-declared
    here so the bigint object can raise without pulling in the whole header. */
 extern __attribute__((noreturn)) void sp_raise_cls(const char *cls, const char *msg);
+extern char *sp_str_alloc_ext(size_t len);   /* string heap; sp_alloc.h cannot be included here */
+extern __attribute__((noreturn)) void sp_oom_die(void);   /* sp_gc.h, same include constraint */
 const char *sp_sprintf(const char *fmt, ...);  /* defined in the generated TU */
 
 #define DIG_SIZE (MPZ_DIG_SIZE)
@@ -5464,12 +5466,18 @@ int64_t sp_bigint_to_int(sp_Bigint *b) {
   if (b == NULL) return 0;
   mpz_t *z = &b->mpz;
   if (z->sz == 0) return 0;
-  int64_t v = 0;
+  /* Assemble in UNSIGNED. A limb is 32 bits and DIG_SIZE is 32, so the second
+     limb's top bit shifts into bit 63 -- undefined for a signed left shift, and
+     the ordinary `x & 0xFFFFFFFFFFFFFFFF` mask idiom reaches it. Negating is
+     the same story: -INT64_MIN overflows. Both are well defined on uint64_t,
+     and the final conversion back is the wrap every caller already expects. */
+  uint64_t v = 0;
   size_t n = z->sz < 2 ? z->sz : 2;
   for (size_t i = 0; i < n; i++) {
-    v |= ((int64_t)z->p[i]) << (i * DIG_SIZE);
+    v |= ((uint64_t)z->p[i]) << (i * DIG_SIZE);
   }
-  return z->sn < 0 ? -v : v;
+  if (z->sn < 0) v = (uint64_t)0 - v;
+  return (int64_t)v;
 }
 
 /* Convert a bigint to the nearest double. Unlike sp_bigint_to_int, which keeps
@@ -5494,11 +5502,61 @@ double sp_bigint_to_double(sp_Bigint *b) {
    int64 round-trip truncated `0x9e37…c16 & MASK64` to its signed value). A
    negative operand follows Ruby's infinite two's-complement, which is uncommon
    for bit masking, so it still routes through the int64 path. */
+/* Load |x| into `out` as an n-limb two's-complement word when x is negative,
+   so a bitwise op sees the infinitely sign-extended value Ruby specifies. */
+static void bw_load(const mpz_t *m, mp_limb *out, size_t n, int neg) {
+  for (size_t i = 0; i < n; i++) out[i] = dg(m, i);
+  if (!neg) return;
+  mp_limb carry = 1;
+  for (size_t i = 0; i < n; i++) {
+    mp_limb v = (mp_limb)(~out[i] & DIG_MASK);
+    mp_limb sum = (mp_limb)((v + carry) & DIG_MASK);
+    carry = (carry && sum == 0) ? 1 : 0;
+    out[i] = sum;
+  }
+}
+
 static sp_Bigint *sp_bigint_bitwise(sp_Bigint *a, sp_Bigint *b, char op) {
-  if (!a || !b || a->mpz.sn < 0 || b->mpz.sn < 0) {
+  if (!a || !b) {
     int64_t x = sp_bigint_to_int(a), y = sp_bigint_to_int(b);
     int64_t r = (op == '&') ? (x & y) : (op == '|') ? (x | y) : (x ^ y);
     return sp_bigint_new_int(r);
+  }
+  /* A negative operand is not a fixed-width word: `-1 & 0xFFFFFFFFFFFFFFFF` is
+     that mask, not -1, so the walk runs over two's-complement limbs and folds
+     the result back into sign+magnitude. */
+  if (a->mpz.sn < 0 || b->mpz.sn < 0) {
+    int sa = a->mpz.sn < 0, sb = b->mpz.sn < 0;
+    size_t na0 = a->mpz.sz, nb0 = b->mpz.sz;
+    size_t n = (na0 > nb0 ? na0 : nb0) + 1;
+    mp_limb *ta = (mp_limb *)calloc(n, sizeof(mp_limb));
+    mp_limb *tb = (mp_limb *)calloc(n, sizeof(mp_limb));
+    if (!ta || !tb) { free(ta); free(tb); sp_oom_die(); }
+    bw_load(&a->mpz, ta, n, sa);
+    bw_load(&b->mpz, tb, n, sb);
+    int rneg = (op == '&') ? (sa && sb) : (op == '|') ? (sa || sb) : (sa != sb);
+    for (size_t i = 0; i < n; i++)
+      ta[i] = (mp_limb)(((op == '&') ? (ta[i] & tb[i])
+                       : (op == '|') ? (ta[i] | tb[i])
+                                     : (ta[i] ^ tb[i])) & DIG_MASK);
+    if (rneg) {  /* back to magnitude: negate the two's-complement word */
+      mp_limb carry = 1;
+      for (size_t i = 0; i < n; i++) {
+        mp_limb v = (mp_limb)(~ta[i] & DIG_MASK);
+        mp_limb sum = (mp_limb)((v + carry) & DIG_MASK);
+        carry = (carry && sum == 0) ? 1 : 0;
+        ta[i] = sum;
+      }
+    }
+    sp_Bigint *rb = sp_bigint_alloc();
+    mpz_t z;
+    mpz_init_heap(sp_mpz_ctx, &z, n);
+    for (size_t i = 0; i < n; i++) z.p[i] = ta[i];
+    z.sn = rneg ? -1 : 1;
+    trim(&z);
+    free(ta); free(tb);
+    rb->mpz = z;
+    return rb;
   }
   size_t na = a->mpz.sz, nb = b->mpz.sz;
   size_t n = (op == '&') ? (na < nb ? na : nb) : (na > nb ? na : nb);
@@ -5542,13 +5600,15 @@ sp_Bigint *sp_bigint_not(sp_Bigint *a) {
 }
 
 const char *sp_bigint_to_s(sp_Bigint *b) {
-  if (!b) {   /* defensive: a NULL bigint surfaces as "0" rather than segfaulting.
-                 Heap-allocate it (not a string literal) so every return value of
-                 this function has one uniform owner-frees contract -- callers
-                 cannot otherwise tell a malloc'd "0" (a real zero bigint) from a
-                 literal one, so a literal here would make freeing unsafe. */
-    char *z = (char*)malloc(2);
-    z[0] = '0'; z[1] = '\0';
+  /* Every return is a STRING-HEAP string, marker byte and all. It has to be:
+     the result reaches Ruby as an ordinary String (Integer#to_s, poly #to_s /
+     #inspect, BigRational#to_s), and sp_str_byte_len reads the byte BEFORE it.
+     A bare malloc'd buffer has no such byte, so the length came out of whatever
+     preceded the chunk and the next concat memcpy'd that many bytes (#3396).
+     Callers must not free it -- the GC owns it. */
+  if (!b) {   /* defensive: a NULL bigint surfaces as "0" rather than segfaulting */
+    char *z = sp_str_alloc_ext(1);
+    z[0] = '0';
     return z;
   }
   sp_bigint_init_ctx();
@@ -5564,8 +5624,11 @@ const char *sp_bigint_to_s(sp_Bigint *b) {
      past 2^63.) */
   if (z->sz <= 1 || (z->sz == 2 && (z->p[1] >> (DIG_SIZE - 1)) == 0)) {
     int64_t v = sp_bigint_to_int(b);
-    char *s = (char*)malloc(24);
-    snprintf(s, 24, "%lld", (long long)v);
+    char tmp[24];
+    int n = snprintf(tmp, sizeof tmp, "%lld", (long long)v);
+    if (n < 0) n = 0;
+    char *s = sp_str_alloc_ext((size_t)n);
+    memcpy(s, tmp, (size_t)n);
     return s;
   }
   /* Use mpz_get_str which dispatches to:
@@ -5577,8 +5640,8 @@ const char *sp_bigint_to_s(sp_Bigint *b) {
   mpz_get_str(sp_mpz_ctx, buf, (mrb_int)est, 10, z);
   /* mpz_get_str writes into buf; return a trimmed copy */
   size_t len = strlen(buf);
-  char *result = (char*)malloc(len + 1);
-  memcpy(result, buf, len + 1);
+  char *result = sp_str_alloc_ext(len);
+  memcpy(result, buf, len);
   free(buf);
   return result;
 }
@@ -5627,10 +5690,9 @@ const char *sp_bigint_to_s_base(sp_Bigint *b, mrb_int base) {
 
 int sp_bigint_even_p(sp_Bigint *b) {
   if (!b) return 1;
-  const char *s10 = sp_bigint_to_s(b);
+  const char *s10 = sp_bigint_to_s(b);   /* string heap: the GC owns it */
   size_t n = strlen(s10);
   int last = n ? s10[n - 1] - '0' : 0;
-  free((void *)s10);
   return (last % 2) == 0;
 }
 

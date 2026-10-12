@@ -1,6 +1,6 @@
 /* sp_gc.h -- the mark/sweep collector's shared surface.
  *
- * Included by both the generated translation unit (via sp_runtime.h) and
+ * Included by both the generated translation unit (via spinel_rt.h) and
  * lib/sp_gc.c, which holds the collector's non-inline machinery (mark,
  * sweep, collect, the memory-limit governor, and the SPINEL_GC_VERIFY
  * support). The hot inline mark helpers stay here so both sides inline
@@ -29,7 +29,7 @@
 /* SP_TAG_OBJ cls_id sentinel for an opaque foreign/FFI pointer (e.g. a
    ffi_read_ptr / ffi func ptr return). It is NOT a sp_gc_alloc allocation, so
    the collector must not trace it -- sp_mark_rbval skips it. Kept here (not with
-   the other SP_BUILTIN_* in sp_runtime.h) so the inline mark helper can see it.
+   the other SP_BUILTIN_* in spinel_rt.h) so the inline mark helper can see it.
    Value is the next free slot below SP_BUILTIN_METHOD (-24). */
 #define SP_BUILTIN_FOREIGN_PTR (-25)
 /* a compiled Regexp: malloc-owned (never GC heap), so like FOREIGN_PTR the
@@ -39,13 +39,20 @@
    lib/sp_marshal.c can recognize them by cls_id. */
 #define SP_BUILTIN_COMPLEX  (-26)
 #define SP_BUILTIN_RATIONAL (-27)
-/* A Rational whose numerator/denominator exceed mrb_int: a boxed object with
+/* A Rational whose numerator/denominator exceed sp_int: a boxed object with
    two sp_Bigint* fields, distinct from the by-value int Rational (#2469). */
 #define SP_BUILTIN_BIG_RATIONAL (-35)
 /* A Float range (1.0..3.0): a boxed sp_FloatRange, distinct from the int-backed
    by-value Range so its endpoints are not truncated. */
 #define SP_BUILTIN_FLOAT_RANGE (-36)
-typedef struct { int tag; int cls_id; union { mrb_int i; const char *s; mrb_float f; mrb_bool b; void *p; } v; } sp_RbVal;
+#define SP_BUILTIN_STR_RANGE   (-42)  /* ("a".."e"): sp_StrRange. Distinct from
+                                         STRBUF/ADDRINFO, which -40 already
+                                         names: a boxed string range answered
+                                         String from every tag-keyed switch,
+                                         so it was neither a Range nor
+                                         enumerable through a poly slot (#3619) */
+#define SP_BUILTIN_OPENSTRUCT  (-41)  /* OpenStruct: dynamic symbol->value members */
+typedef struct { int tag; int cls_id; union { sp_int i; const char *s; sp_float f; sp_bool b; void *p; } v; } sp_RbVal;
 
 /* ---- Collector globals shared with the generated TU ----
  * Only the globals touched by both the kept hot path (sp_gc_alloc, the
@@ -74,7 +81,7 @@ extern SP_TLS int sp_gc_nroots;
 
 /* GC root tracking. SP_GC_ROOT registers a stack-resident root with a
    cleanup-attribute sentinel so it auto-pops when its declaring scope ends.
-   Shared here (was in sp_runtime.h) so standalone lib C files -- e.g. the
+   Shared here (was in spinel_rt.h) so standalone lib C files -- e.g. the
    Marshal loader, which builds GC arrays/hashes across a recursive parse --
    can root their in-flight objects too. Helpers touch only the extern root
    stack above, so relocating them is layout-neutral. */
@@ -99,10 +106,148 @@ static inline void sp_gc_cleanup(int *p) { sp_gc_nroots = *p; }
    header walk. Use this for string parameters in runtime helpers. */
 #define SP_GC_ROOT_STR(v) int __attribute__((cleanup(_sp_gc_root_pop))) _SP_GC_CONCAT(_sp_gcr_, __COUNTER__) = _sp_gc_root_push((void**)((uintptr_t)&(v) | (uintptr_t)2))
 #define SP_GC_RESTORE() sp_gc_nroots = _gc_saved
+
+/* ---- write barrier ----
+   A generational mark walks the young objects and whatever the roots reach; an
+   old object it does not walk can still be the only thing holding a young one.
+   The barrier records those: when a reference is stored into an object that has
+   already been promoted, that object joins the remembered set, which a minor
+   collection treats as an extra root.
+
+   Cost is one load of a header bit already on the store's own cache line and a
+   branch that steady state does not take -- measured at 0.5% on optcarrot when
+   it fires on reference stores only, and 14% when it fires on every ivar store
+   including the scalar ones, which is why the emitter discriminates.
+
+   The set is a plain array with a dirty bit for deduplication. Overflow is
+   safe rather than fatal: a full set means the next collection marks whole-heap
+   (sp_gc_rem_overflow), which is exactly what today's collector always does. */
+/* Wrap the OBJECT of a reference store: runs the barrier and yields the object
+   itself, so it works wherever the store appears -- a statement, or an
+   assignment inside a larger expression. The statement expression evaluates the
+   object once, which a comma form would not. */
+#define SP_WBO(x) ({ __typeof__(x) _sp_wbo = (x); sp_gc_wb((void *)_sp_wbo); _sp_wbo; })
+/* Lowered from Spinel's 65536 for the MCU, where it is 4 bytes of SRAM a slot (256KB as shipped).
+   A full set is safe: the next collection marks the whole heap, and SPMS-1 allocates nothing per
+   sample, so collections are rare to begin with. */
+#define SP_GC_REMEMBERED_MAX 256
+extern void *sp_gc_remembered[SP_GC_REMEMBERED_MAX];
+extern int sp_gc_nremembered;
+extern int sp_gc_rem_overflow;
+extern int sp_gc_minor_on;   /* read by sp_gc_wb below; set once before main */
+/* SPINEL_GC_OBJ_BUDGET=walk: the object collection budget is priced off the
+   whole set a mark walks (objects + strings) rather than the object heap
+   alone. Set once before main, beside the modes above; read by
+   sp_gc_retune_object, which is where the reasoning lives. */
+extern int sp_gc_obj_budget_mode;   /* 0 obj, 1 walk, 2 gated (default) */
+extern size_t sp_gc_obj_alpha1024;  /* the last gate decision, in 1024ths */
+extern int sp_gc_str_major_fixed;
+extern int sp_gc_str_major_sched;
+extern size_t sp_gc_str_majors;
+extern int sp_gc_obj_budget_fixed;
+extern int sp_gc_str_budget_fixed;
+/* Set for the duration of the string sweep hook on a minor cycle: only the
+   young string list may be swept, because the mark that just ran did not
+   walk old objects and so did not reach the strings they hold. */
+extern int sp_gc_str_minor_only;
+/* The barrier proper. Out of line and behind the mode test: with the minor
+   mark off, which is the default, every store site pays one predictable
+   branch instead of carrying the tag protocol and the remembered-set push
+   inline. Inlining all of it cost ~5% on optcarrot, whose inner loops write
+   object references per scanline. */
+void sp_gc_wb_slow(void *obj);
+/* The STICKY half of the remembered set. `sp_gc_wb` records a store the
+   barrier saw; this records a HOLDER whose stores it will not see, so the
+   entry is kept for as long as the object lives rather than cleared each
+   cycle.
+
+   The one producer is a by-reference String parameter. The callee stores
+   through `const char **_cell_x` and cannot name what owns that slot -- the
+   caller may have lent a stack local, a heap cell, a proc's capture slot or
+   an ivar -- and reading a header off a stack address to find out is exactly
+   the fault that took #4391's first half down. The owner IS nameable at the
+   lending call site, but that site runs BEFORE the store, and a barrier
+   before a call that can collect does not cover the stores after it (#4378).
+   Sticky is what makes the placement stop mattering.
+
+   Only the two forms that need it are lent: a heap cell and an ivar's owner.
+   A stack local is lent as `&lv_x`, and the caller's frame roots it for the
+   whole nest below, so nothing is pinned for it -- which is also why
+   FORWARDING a by-reference parameter pins nothing: whatever the original
+   lending site was, it already decided. */
+void sp_gc_pin_remembered_slow(void *obj);
+static inline void sp_gc_pin_remembered(void *obj) {
+  if (__builtin_expect(sp_gc_minor_on, 1)) sp_gc_pin_remembered_slow(obj);
+}
+/* Lowered from Spinel's 16384 for the MCU (64KB of SRAM as shipped). Overflow is safe in the same
+   way as the remembered set's. */
+#define SP_GC_PINNED_MAX 256
+extern void *sp_gc_pinned[SP_GC_PINNED_MAX];
+extern int sp_gc_npinned;
+extern int sp_gc_pin_overflow;
+static inline void sp_gc_wb(void *obj) {
+  /* Nothing reads the remembered set unless a minor mark runs, and whether one
+     can is decided once, from the environment, before main. So with the
+     generational mark off -- the default -- the whole barrier is bookkeeping
+     for a reader that never comes. rubys observed the other half of this from
+     the source: `old` is set on every survivor regardless of the mode, so the
+     barrier was doing its full work in both. */
+  if (__builtin_expect(sp_gc_minor_on, 1)) {
+    /* With the mark on, the common case -- a young holder, or an old one
+       already recorded -- is decided here from the header the store is about
+       to touch anyway, so the call is paid only by a store that actually
+       records something. The tag byte says whether there is a header at all
+       (the same protocol sp_gc_wb_slow and sp_gc_mark read). */
+    if (!obj) return;
+    unsigned char pm = ((const unsigned char *)obj)[-1];
+    if (pm == 0xfd || pm == 0xff || pm == 0xf1 || pm == 0xf0 ||
+        pm == 0xfe || pm == 0xfc || pm == 0xfb) return;
+    const sp_gc_hdr *h = (const sp_gc_hdr *)obj - 1;
+    if (!h->old || h->dirty) return;
+    sp_gc_wb_slow(obj);
+  }
+}
+/* Young object heap. Threaded build: per-worker lists (one pusher each, since a
+   started thread is pinned to its worker), so allocation pushes without the
+   CAS-on-shared-head that made object-heavy parallel workloads bounce a cache
+   line every alloc. Removals happen only under stop-the-world (every mutator
+   parked). Survivors promote into the single shared old heap during the sweep,
+   under stop-the-world, so the old list stays lock-free and shared. The live-
+   byte counter sp_gc_bytes stays a single (relaxed-atomic) total -- array data
+   buffers adjust it from whichever worker mutates them, which a per-worker split
+   could not attribute correctly. */
+#ifdef SP_THREADS
+/* One cache-line-padded slot per worker holding the two fields written on every
+   object allocation: the young list head and the unflushed live-byte delta.
+   Padding is essential -- without it adjacent workers' 8-byte slots share a
+   cache line, so a per-worker heap still bounced that line every alloc (false
+   sharing), which kept object-heavy parallel allocation from scaling despite the
+   lock/CAS removal. One line per worker isolates them completely. */
+#define SP_CACHELINE 64
+typedef struct {
+  sp_gc_hdr *young;     /* per-worker young list head */
+  size_t flush_delta;   /* per-worker unflushed live-byte delta (see below) */
+  char _pad[SP_CACHELINE - sizeof(sp_gc_hdr*) - sizeof(size_t)];
+} sp_gc_wslot_t;
+extern sp_gc_wslot_t sp_gc_wslot[SP_MAX_WORKERS];
+#else
 extern sp_gc_hdr *sp_gc_heap;
+#endif
+/* Current mark generation (see sp_gc_hdr.marked in sp_types.h). */
+extern unsigned sp_gc_mark_gen;
+extern void (*sp_gc_obj_retune_hook)(size_t before);
 extern size_t sp_gc_bytes;
 extern size_t sp_gc_old_bytes;
 extern int sp_gc_cycle;
+/* SPINEL_GC_STATS=1 (report in sp_alloc.c): how many collections ran and what
+   they cost. A program whose GC share of CPU climbs with concurrency looks
+   from outside the process exactly like one collecting more often, and there
+   was no counter to tell the two apart -- which is where the diagnosis in
+   #4352 stopped. One clock pair and two increments per COLLECTION, so they
+   are always kept; only the printing is gated. */
+extern unsigned long long sp_gc_stat_collections;
+extern unsigned long long sp_gc_stat_fulls;
+extern double sp_gc_stat_seconds;
 extern void (*sp_gc_mark_suspended_fibers_hook)(void);
 
 /* Heap byte-counter accounting. The container growth paths (sp_array.h,
@@ -129,6 +274,46 @@ extern void (*sp_gc_mark_suspended_fibers_hook)(void);
 #define SP_GC_CTR_SET(ctr, n) ((ctr) = (size_t)(n))
 #endif
 
+/* Live-byte accounting for the object heap. Every allocation and every array-
+   buffer resize adjusts sp_gc_bytes; under SP_THREADS a shared atomic RMW per
+   op bounces one cache line across workers and dominated object-heavy parallel
+   allocation (measured ~13x on the counter alone at 4 workers). Batch it: each
+   worker accumulates its delta in a private (non-atomic) slot and flushes to the
+   shared total only every SP_GC_FLUSH_QUANTUM, cutting the atomic frequency by
+   ~quantum/alloc-size. sp_gc_bytes stays the authoritative shared total -- every
+   read (threshold trigger, GC.stat) and the collector's recompute are unchanged;
+   the trigger merely lags the true total by at most quantum*workers, bounded
+   overshoot for a heuristic. The collector resets the deltas after its recompute
+   (which already counts every live object's size, so the pending deltas are
+   subsumed). The single-threaded build is the plain +=/-= it always was. */
+#ifdef SP_THREADS
+#define SP_GC_FLUSH_QUANTUM (16u * 1024u)
+static inline void sp_gc_bytes_add(size_t n) {
+  size_t *d = &sp_gc_wslot[sp_worker_id].flush_delta;
+  size_t v = *d + n;
+  if (v >= SP_GC_FLUSH_QUANTUM) { SP_GC_CTR_ADD(sp_gc_bytes, v); *d = 0; }
+  else *d = v;
+}
+static inline void sp_gc_bytes_sub(size_t n) {
+  size_t *d = &sp_gc_wslot[sp_worker_id].flush_delta;
+  if (*d >= n) { *d -= n; }
+  else { size_t rem = n - *d; *d = 0; SP_GC_CTR_SUB(sp_gc_bytes, rem); }
+}
+#else
+static inline void sp_gc_bytes_add(size_t n) { sp_gc_bytes += n; }
+/* Floored: the counter is a heuristic the retune divides by, and a wrapped
+   value there is not a large heap but a collector that never triggers again
+   (#4073). */
+/* Floored. The counter is a heuristic the retune divides by and multiplies, and
+   an array-growth path can subtract a capacity larger than the counter holds
+   (measured: sp_array.h's StrArray grow, 20472 against 10344) -- wrapping it
+   makes the trigger fire on every allocation until the next collection resets
+   it, and used to make the retune set a threshold that never fires at all. */
+static inline void sp_gc_bytes_sub(size_t n) {
+  sp_gc_bytes = sp_gc_bytes >= n ? sp_gc_bytes - n : 0;
+}
+#endif
+
 /* Push a header onto the shared sp_gc_heap list. Under SP_THREADS this is a
    lock-free CAS push so callers that hold no lock (the pool-hit relink) stay
    off the heap mutex; the allocators, which hold the mutex anyway for the
@@ -142,20 +327,64 @@ extern void (*sp_gc_mark_suspended_fibers_hook)(void);
    defense. Release order publishes the node's initialized header to the
    collector. */
 #ifdef SP_THREADS
+/* Per-worker young list: only this worker's M pushes here (started threads are
+   pinned and a worker pumps one green thread at a time), so a plain store is
+   race-free -- no CAS, no shared-head cache-line bounce. */
 #define SP_GC_HEAP_PUSH(hdr) do { \
-    sp_gc_hdr *_sp_old = __atomic_load_n(&sp_gc_heap, __ATOMIC_RELAXED); \
-    do { __atomic_store_n(&(hdr)->next, _sp_old, __ATOMIC_RELAXED); } \
-    while (!__atomic_compare_exchange_n(&sp_gc_heap, &_sp_old, (hdr), 1, \
-                                        __ATOMIC_RELEASE, __ATOMIC_RELAXED)); \
+    sp_gc_hdr **_sp_head = &sp_gc_wslot[sp_worker_id].young; \
+    (hdr)->next = *_sp_head; *_sp_head = (hdr); \
   } while (0)
 #else
 #define SP_GC_HEAP_PUSH(hdr) do { (hdr)->next = sp_gc_heap; sp_gc_heap = (hdr); } while (0)
 #endif
 
 /* ---- Collector entry points (defined in lib/sp_gc.c) ---- */
+int  sp_gc_verify_on(void);   /* SPINEL_GC_VERIFY is set (diagnostics only) */
+extern const char *sp_gc_dbg_phase;   /* which root group the mark walk is in */
+extern void *sp_gc_dbg_ctx;
 void sp_gc_mark(void *obj);
 void sp_gc_mark_all(void);
+void sp_gc_mark_drain(void);
+extern int sp_gc_minor;
+extern int sp_gc_young_probe_on, sp_gc_young_probe_hit;
+extern int sp_gc_age_survivors, sp_gc_age_on, sp_gc_root_phase;
+extern size_t sp_gc_old_live;
+extern size_t sp_gc_young_kept_bytes, sp_gc_npromoted;
+extern int sp_gc_minor_on;
+extern int sp_gc_verify_gen;
+extern int sp_gc_verify_gen_fail;
+extern int sp_gc_verify_probe_on, sp_gc_verify_probe_hit;
+extern unsigned sp_gc_verify_probe;
+/* Per-phase collector time, in seconds, cumulative (SPINEL_GC_PHASES=1; all
+   zero when it is off). sp_gc_stat_seconds is their sum plus the bookkeeping
+   between them. Reported by sp_alloc.c, which is where the stats line lives. */
+/* Objects marked and slots swept since the process started. Counts are what
+   the two phases' costs are actually per; see sp_gc_sweep_young. */
+extern size_t sp_gc_ct_swept, sp_gc_ct_marked;
+extern double sp_gc_ph_mark, sp_gc_ph_oldsweep, sp_gc_ph_slotsweep,
+              sp_gc_ph_rembclear, sp_gc_ph_strsweep, sp_gc_ph_trim;
+/* The mark, split the way sp_gc_mark_all walks: this worker's own root stack,
+   every live fiber's saved roots, the globals hook, then the trace that drains
+   what those three found. Named as sp_gc_dbg_phase names them under verify, so
+   a number leads to the code. They sum to sp_gc_ph_mark.
+
+   The split exists because "mark grew" has two causes that need different
+   answers: more ROOTS to scan (the fibers row, which grows with in-flight
+   fibers) and more GRAPH to trace (the scan row, which grows because those
+   fibers hold live objects). Only the first is what slicing the fiber list to
+   the parked workers would address (#4384). */
+extern double sp_gc_ph_mk_roots, sp_gc_ph_mk_fibers,
+              sp_gc_ph_mk_globals, sp_gc_ph_mk_scan;
+extern int sp_gc_ph_on;
 void sp_gc_collect(void);
+#ifdef SP_THREADS
+/* Sweep one worker's young list on that worker (see sp_gc.c). Survivors come
+   back as a local list for the collector to splice into the old heap. */
+void sp_gc_sweep_slot(int wid, sp_gc_hdr **out_head, sp_gc_hdr **out_tail, size_t *out_bytes);
+extern void (*sp_gc_par_sweep_hook)(void);
+/* Splice one worker's survivors onto the shared old heap. Collector-only. */
+void sp_gc_promote_slot(sp_gc_hdr *head, sp_gc_hdr *tail, size_t bytes);
+#endif
 void sp_gc_enforce_mem_limit(void);
 /* Collect + re-tune the threshold, assuming exclusive heap access (see
    sp_alloc.c). sp_stw_collect (sp_sched.c, threaded build) stops the world then
@@ -163,6 +392,7 @@ void sp_gc_enforce_mem_limit(void);
    under the heap lock. */
 void sp_gc_collect_retune(void);
 void sp_stw_collect(void);
+void sp_gc_collect_request(void);   /* explicit GC.start: same barrier, forced */
 void sp_oom_die(void);
 
 /* ---- Embedder callbacks supplied by the generated TU ----
@@ -174,6 +404,11 @@ void sp_oom_die(void);
  * same way fibers register sp_gc_mark_suspended_fibers_hook. */
 extern void (*sp_gc_mark_globals_hook)(void);
 extern void (*sp_gc_str_sweep_hook)(void);
+/* Whether the string heap's own schedule (or its growth backstop) would take
+   a major this cycle. A string major needs a whole-heap mark, so under the
+   minor mark the object cycle it lands on has to be full; the collector asks
+   this before it decides. */
+extern int (*sp_gc_str_major_due_hook)(void);
 
 /* ---- value-introspection hooks (set by the generated TU at startup) ----
  * lib/sp_json.c (and other cold readers) own no container types; they reach the
@@ -183,9 +418,9 @@ extern void (*sp_gc_str_sweep_hook)(void);
  * iterate any array; hpair yields a hash's (key,value) at insertion index i. */
 extern const char *(*sp_sym_name_fn)(sp_sym);
 extern int (*sp_json_kind_fn)(sp_RbVal);
-extern mrb_int (*sp_json_len_fn)(sp_RbVal);
-extern sp_RbVal (*sp_json_aref_fn)(sp_RbVal, mrb_int);
-extern void (*sp_json_hpair_fn)(sp_RbVal, mrb_int, sp_RbVal *, sp_RbVal *);
+extern sp_int (*sp_json_len_fn)(sp_RbVal);
+extern sp_RbVal (*sp_json_aref_fn)(sp_RbVal, sp_int);
+extern void (*sp_json_hpair_fn)(sp_RbVal, sp_int, sp_RbVal *, sp_RbVal *);
 /* Container BUILDERS for JSON.parse (installed by the generated TU, which owns
    the hash type): make an empty string-keyed hash, and set a (key, value) pair
    -- CRuby's JSON.parse returns String keys. Arrays are built directly from the
@@ -196,11 +431,34 @@ extern void (*sp_json_hash_set_fn)(sp_RbVal, const char *, sp_RbVal);
 /* Recursive #inspect of a boxed value, for lib/sp_inspect.c's container walker
    (set to sp_poly_inspect; same idiom as the JSON hooks). */
 extern const char *(*sp_poly_inspect_fn)(sp_RbVal);
+/* #to_s of any boxed value, for a package that writes one (StringIO#puts):
+   the generated TU installs sp_poly_to_s, which renders a user object
+   through its own #to_s or the #<Name:0xADDR> default. */
+extern const char *(*sp_poly_to_s_fn)(sp_RbVal);
 /* Convert a plain object (a Struct) to a boxed StrPoly hash of its members,
    generic (no format knowledge). The generated program installs it (switch on
    cls_id) when it has Structs and a package consumes it; a consumer such as
    the json package reads it to serialize an object as a hash. NULL otherwise. */
 extern sp_RbVal (*sp_obj_to_hash_fn)(sp_RbVal);
+extern const char *(*sp_obj_to_json_fn)(sp_RbVal);
+/* Symbol-keyed Struct/Data #to_h, for a poly receiver (#2906). */
+extern sp_RbVal (*sp_obj_to_h_fn)(sp_RbVal);
+/* user-object #to_a for container-read poly receivers (#3234): installed by
+   the generated prologue when any instantiated class defines a no-arg to_a */
+extern sp_RbVal (*sp_obj_to_a_fn)(sp_RbVal);
+/* #to_ary, the CONVERSION protocol -- distinct from to_a, the enumeration
+   one: Kernel#Array asks to_ary first, and only a class that defines it
+   answers here (#4187). */
+extern sp_RbVal (*sp_obj_to_ary_fn)(sp_RbVal);
+/* The array a `case/in` array pattern matches a user object against. Separate
+   from #to_a: a Data answers #deconstruct but has no #to_a at all. */
+extern sp_RbVal (*sp_obj_deconstruct_fn)(sp_RbVal);
+/* 1 when cls_id is a Data class. Data defines no #dig, so a dig that lands on
+   one is the TypeError CRuby raises rather than a member read; Struct, which
+   does define #dig, is unaffected. */
+extern int (*sp_obj_is_data_fn)(int cls_id);
+/* Data#with copy-update for a poly receiver: (value, symbol-keyed overrides). (#2890) */
+extern sp_RbVal (*sp_obj_with_fn)(sp_RbVal, sp_RbVal);
 /* default Object#inspect for user objects: the generated TU installs a
    per-class ivar walk (sp_obj_inspect_sw); sp_poly_inspect's OBJ default
    consults it so nested/boxed objects render like CRuby */
@@ -208,6 +466,24 @@ extern const char *(*sp_obj_inspect_fn)(int cls_id, void *p);
 /* Same shape for user #to_s: sp_poly_to_s's OBJ default consults it so a
    boxed user object with a custom to_s renders through it. */
 extern const char *(*sp_obj_to_s_fn)(int cls_id, void *p);
+/* CRuby's implicit conversion protocol on BOXED user objects: the runtime's
+   Integer/String conversion sites (pack, typed-slot coercions) reach a
+   compiled #to_int / #to_str through these. A class without the method is
+   the default arm (*ok = 0 / NULL) and the caller raises CRuby's TypeError. */
+extern sp_int (*sp_obj_to_int_fn)(int cls_id, void *p, int *ok);
+extern const char *(*sp_obj_to_str_fn)(int cls_id, void *p);
+/* #to_path, which File/Dir/IO's path slots ask before #to_str (CRuby's
+   rb_get_path); NULL when the class defines none. */
+extern const char *(*sp_obj_to_path_fn)(int cls_id, void *p);
+/* Kernel#Integer / Kernel#Float on a boxed user object: the class's #to_int,
+   #to_i, #to_f or #to_str (`which`, in that order), WHATEVER the method's
+   static type -- CRuby calls it and judges the answer -- boxed into *out.
+   Answers 1 when the class has the method, 0 when it does not; with a NULL
+   `out` it only answers that, calling nothing. */
+extern int (*sp_obj_conv_fn)(int cls_id, void *p, int which, sp_RbVal *out);
+/* Ruby class name for a user cls_id (the generated id->name table), so a
+   runtime TU can word a TypeError the way CRuby does. */
+extern const char *(*sp_obj_cls_name_fn)(int cls_id);
 
 /* ---- Hot inline mark helpers (inlined into both sides) ----
  * String tag bytes: 0xfe heap-unmarked -> 0xfc marked; others skipped. */
@@ -215,6 +491,15 @@ static inline void sp_mark_string(const char *s) {
   if (!s) return;
   if ((unsigned char)s[-1] == 0xfe) {
     ((char *)s)[-1] = (char)0xfc;
+    return;
+  }
+  /* 0xfd is a mutable String's payload, whose lifetime belongs to the handle
+     in front of it: marking the bytes alone leaves the handle unreferenced,
+     and its finalizer frees the bytes this container still points at. The
+     payload's `next` field carries that handle (sp_fd_own). */
+  if ((unsigned char)s[-1] == 0xfd) {
+    void *owner = (void *)(((const sp_str_hdr *)(s - 1)) - 1)->next;
+    if (owner) sp_gc_mark(owner);
   }
   /* No frozen (0xf1) branch here: this is inlined into optcarrot's GC mark and
      is layout-sensitive. A live frozen heap string is kept immortal by
@@ -227,11 +512,19 @@ static inline void sp_mark_rbval(sp_RbVal v) {
   else if (v.tag == SP_TAG_BIGINT) sp_gc_mark(v.v.p);
 }
 /* Closure-cell content markers. A captured non-int local is laundered into the
-   pointer-sized mrb_int cell as (uintptr_t)<ptr>; the cell's GC scan marks the
+   pointer-sized sp_int cell as (uintptr_t)<ptr>; the cell's GC scan marks the
    referent so it survives as long as the capturing proc does. */
 static inline void sp_cell_scan_str(void *p) { sp_mark_string(*(const char **)p); }
 static inline void sp_cell_scan_ptr(void *p) { sp_gc_mark(*(void **)p); }
 static inline void sp_cell_scan_rbval(void *p) { sp_mark_rbval(*(sp_RbVal *)p); }
+/* A captured Proc rides in an sp_int cell as (sp_int)(uintptr_t)ptr -- the cell
+   is an integer slot, but what it holds is a collectable object, and without a
+   scan the capture kept the CELL alive and nothing kept the proc. A nested
+   `proc { |v| two.call(v, v) }` then called through freed memory (#4077). */
+static inline void sp_cell_scan_procint(void *p) {
+  sp_int v = *(sp_int *)p;
+  if (v) sp_gc_mark((void *)(uintptr_t)v);
+}
 /* A low-bit-tagged root entry is an sp_RbVal* (see SP_GC_ROOT_RBVAL);
    an untagged entry is a plain void** to a direct GC pointer. */
 static inline void sp_gc_mark_root_entry(void **e) {

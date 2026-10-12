@@ -36,13 +36,29 @@ module Spms1
     # method that runs every sample.
     SOFT_CLIP_FLOOR      = -SOFT_CLIP_CEILING
     SOFT_CLIP_GAIN_SCALE = 1.0 / (3.0 * SOFT_CLIP_CEILING * SOFT_CLIP_CEILING)
+    # The clip is shifted by B, its output at zero, soft_clip(B), taken back off so that zero
+    # still maps to zero, and its slope there, 1 - B^2 / ceiling^2, made up again:
+    #   soft_clip_biased(x) = (soft_clip(x + B) - soft_clip(B)) / (1 - B^2 / ceiling^2)
+    # Without the make-up the loop loses gain at small signals, which weakens the
+    # self-oscillation and, at twice this B, stops it. The bias gives the state even harmonics and
+    # a DC that follows its level; the DC blocker on the output takes the DC back out.
+    SOFT_CLIP_BIAS        = 0.125
+    SOFT_CLIP_BIAS_OUTPUT = SOFT_CLIP_BIAS * (1.0 - SOFT_CLIP_BIAS * SOFT_CLIP_BIAS * SOFT_CLIP_GAIN_SCALE)
+    SOFT_CLIP_BIAS_GAIN   = 1.0 / (1.0 - 3.0 * SOFT_CLIP_BIAS * SOFT_CLIP_BIAS * SOFT_CLIP_GAIN_SCALE)
+    # One-pole high pass on the output at f_s * coefficient / (2 * pi), 7.5 Hz at 48 kHz; initialize
+    # scales the coefficient with the sample rate to hold that frequency.
+    DC_BLOCKER_COEFFICIENT_BASE = 1.0 / 1024.0
     # The guard on the low pass state that process describes, well above anything ordinary use
     # reaches.
     LOW_PASS_STATE_CEILING = 16.0
     LOW_PASS_STATE_FLOOR   = -LOW_PASS_STATE_CEILING
-    # Blend at the reference rate on the line below. The two move together: their product is what
-    # fixes the time constant, so changing one without the other changes how fast smoothing is.
-    SMOOTHING_TARGET_BLEND_BASE = 0.03125
+    # Blend at the reference rate on the line below, for each of two cascaded stages. The two move
+    # together: their product is what fixes the time constant, so changing one without the other
+    # changes how fast smoothing is. Two stages at 1/64 (5.3 ms each at 48 kHz) delay a step by
+    # 10.7 ms on average, as one stage at 1/128 would, but start from zero slope, so that the steps
+    # of a controller sending sparse CCs (e.g. every 20 ms) are rounded off rather than heard,
+    # and settle sooner, 99% in 35 ms.
+    SMOOTHING_TARGET_BLEND_BASE = 0.015625
     # Number of samples between control-rate updates; smoothing speed is kept approximately
     # constant if this is changed. It has to stay a power of two: the counter below wraps with a
     # mask, because Ruby's % is a floor-modulo and sp_imod carries a sign correction the counter
@@ -83,9 +99,8 @@ module Spms1
     # the amount dialled in. The soft clip on the band pass state settles the oscillation at about
     # 11.4 * sqrt(|k| * g / (1 + g^2)^2), so this holds it near SELF_OSC_LEVEL whatever the cutoff;
     # the (1 + g^2)^2 matters only in the top octaves, where g is no longer small.
-    # Set below the output clip's knee, so that the oscillation leaves the filter as a clean sine;
-    # the same level as in PRA32-U2. The value is for 48 kHz; initialize scales it with the
-    # sample rate, as it does the clip.
+    # Set below the output clip's knee, so that the oscillation leaves the filter as a clean sine.
+    # The value is for 48 kHz; initialize scales it with the sample rate, as it does the clip.
     SELF_OSC_LEVEL = 0.5
     SELF_OSC_KAPPA = (SELF_OSC_LEVEL / 11.4) * (SELF_OSC_LEVEL / 11.4)
     # How negative k may go. Below about 150 Hz, -kappa / g grows large enough to pull the
@@ -97,6 +112,16 @@ module Spms1
     # do the latter, as k does not move the loop's DC balance. Well above flush_tiny's dead zone,
     # and far below anything audible.
     SELF_OSC_SEED = 1e-6
+    # Where the self-oscillation starts on the resonance dial, v = 122 of 128.
+    SELF_OSC_START = 122.0 / 128.0
+    # The soft clip on the band pass state gives the oscillation a 3rd harmonic, which folds back
+    # to f_s - 3 * f_0 once 3 * f_0 is above f_s / 2 (an inharmonic 11.8 kHz tone for f_0 = 19.9
+    # kHz at 48 kHz). The oscillation therefore fades out as the cutoff, modulation included, rises
+    # from f_s / 6 to f_s / 4.8, linearly on the cutoff dial, where the folded tone is still above
+    # 0.375 * f_s; above that the resonance past SELF_OSC_START acts as SELF_OSC_START. At 48 kHz
+    # that is 8 kHz to 10 kHz, CC 108 to 112. The fade's width on the dial does not depend on the
+    # sample rate: log2(6 / 4.8) octaves, at 10 octaves to the dial.
+    SELF_OSC_FADE_WIDTH = Math.log(6.0 / 4.8) / (10.0 * Math.log(2.0))
 
     def initialize(sample_rate)
       @sample_rate = sample_rate
@@ -105,14 +130,24 @@ module Spms1
       # The state passes through soft_clip once a sample, so what it takes out of it adds up with
       # the sample rate: left alone, the distortion grows as the rate rises and does not settle
       # toward any continuous-time filter. Blending the clip by alpha = 48000 / f_s,
-      # s - alpha * (s - soft_clip(s)), keeps the sound at 48 kHz on other rates. alpha is folded
-      # into the two values soft_clip reads; at 48 kHz the leak is exactly zero and the scale
-      # exactly SOFT_CLIP_GAIN_SCALE, so the output there is the plain clip's, bit for bit.
+      # s - alpha * (s - soft_clip_biased(s)), keeps the sound at 48 kHz on other rates. alpha and
+      # the bias are folded into the four values soft_clip reads, as it describes; at 48 kHz the
+      # leak is exactly zero.
       soft_clip_alpha = 48000.0 / @sample_rate
-      @soft_clip_gain_scale = SOFT_CLIP_GAIN_SCALE * soft_clip_alpha
+      @soft_clip_gain = 1.0 - soft_clip_alpha + soft_clip_alpha * SOFT_CLIP_BIAS_GAIN
+      @soft_clip_gain_scale = SOFT_CLIP_GAIN_SCALE * soft_clip_alpha * SOFT_CLIP_BIAS_GAIN
       @soft_clip_leak = (1.0 - soft_clip_alpha) * 0.5
+      @soft_clip_offset = (1.0 - soft_clip_alpha) * SOFT_CLIP_BIAS + soft_clip_alpha * SOFT_CLIP_BIAS_GAIN * SOFT_CLIP_BIAS_OUTPUT
       @self_osc_kappa = SELF_OSC_KAPPA * soft_clip_alpha
+      @dc_blocker_coefficient = DC_BLOCKER_COEFFICIENT_BASE * (48000.0 / @sample_rate)
       @self_osc_seed = SELF_OSC_SEED
+      # The fade's weight is offset - cutoff * scale, clamped to [0, 1]: one at f_s / 6 and below,
+      # zero at f_s / 4.8 and above. The dial puts MIDI note 15 at 0.0 and 135 at 1.0, 440 Hz at
+      # 0.45. At a sample rate of 96 kHz or more, f_s / 4.8 lies past the top of the dial and the
+      # oscillation never fades out entirely.
+      self_osc_fade_end = 0.45 + Math.log(sample_rate * (1.0 / (4.8 * 440.0))) / (10.0 * Math.log(2.0))
+      @self_osc_fade_scale = 1.0 / SELF_OSC_FADE_WIDTH
+      @self_osc_fade_offset = self_osc_fade_end * @self_osc_fade_scale
 
       # Integrator gain lookup, g = tan(pi * f_0 / f_s), one entry per semitone of MIDI note 15
       # (19 Hz) to 135 (20 kHz), the cutoff dial's range. It depends on the sample rate, so it is
@@ -134,6 +169,10 @@ module Spms1
       @modulation_depth = 0.0
       @gain = 0.5
 
+      @stage_1_cutoff = 1.0
+      @stage_1_resonance = 0.0
+      @stage_1_modulation_depth = 0.0
+      @stage_1_gain = 0.5
       @current_cutoff = 1.0
       @current_resonance = 0.0
       @current_modulation_depth = 0.0
@@ -150,6 +189,7 @@ module Spms1
       @g_plus_k_over_a0_slope = 0.0
       @s1 = 0.0
       @s2 = 0.0
+      @dc_blocker = 0.0
 
       @current_modulation_input = 0.0
       @sample_counter = 0
@@ -187,7 +227,7 @@ module Spms1
     end
 
     # Q range: ~0.7 (0.0), ~2.83 (0.5), ~5.66 (0.75), ~27 (0.875), 256 (~0.953); self-oscillation from there,
-    # growing to its full level at ~0.992 and staying there to 1.0.
+    # growing to its full level at ~0.992 and staying there to 1.0, fading out at a high cutoff.
     def set_resonance(resonance)
       @resonance = (resonance < 0.0) ? 0.0 : ((resonance > 1.0) ? 1.0 : resonance)
     end
@@ -199,6 +239,7 @@ module Spms1
         update_coefficients
         @s1 = flush_tiny(@s1) + @self_osc_seed
         @s2 = flush_tiny(@s2)
+        @dc_blocker = flush_tiny(@dc_blocker)
         @self_osc_seed = 0.0 - @self_osc_seed
       end
 
@@ -238,7 +279,9 @@ module Spms1
 
       @sample_counter = (@sample_counter + 1) & CONTROL_RATE_MASK
 
-      clip_output(low_pass)
+      # Ahead of clip_output, so that the output limit holds on what actually leaves.
+      @dc_blocker += (low_pass - @dc_blocker) * @dc_blocker_coefficient
+      clip_output(low_pass - @dc_blocker)
     end
 
     private
@@ -273,10 +316,14 @@ module Spms1
     # than from where the additions got to, so rounding does not build up. 0.25 is
     # 1 / CONTROL_RATE_DIVISOR, written out for the reason Mixer#process gives.
     def update_coefficients
-      @current_cutoff += (@cutoff - @current_cutoff) * @smoothing_target_blend
-      @current_resonance += (@resonance - @current_resonance) * @smoothing_target_blend
-      @current_modulation_depth += (@modulation_depth - @current_modulation_depth) * @smoothing_target_blend
-      @current_gain += (@gain - @current_gain) * @smoothing_target_blend
+      @stage_1_cutoff += (@cutoff - @stage_1_cutoff) * @smoothing_target_blend
+      @current_cutoff += (@stage_1_cutoff - @current_cutoff) * @smoothing_target_blend
+      @stage_1_resonance += (@resonance - @stage_1_resonance) * @smoothing_target_blend
+      @current_resonance += (@stage_1_resonance - @current_resonance) * @smoothing_target_blend
+      @stage_1_modulation_depth += (@modulation_depth - @stage_1_modulation_depth) * @smoothing_target_blend
+      @current_modulation_depth += (@stage_1_modulation_depth - @current_modulation_depth) * @smoothing_target_blend
+      @stage_1_gain += (@gain - @stage_1_gain) * @smoothing_target_blend
+      @current_gain += (@stage_1_gain - @current_gain) * @smoothing_target_blend
 
       # The modulation input arrives as it is; clamping total_cutoff below is what holds the
       # table lookup in range, and a source that swings both ways moves the cutoff both ways.
@@ -288,15 +335,26 @@ module Spms1
 
       g = cutoff_to_g_fast(clamped_cutoff)
 
+      # The resonance past SELF_OSC_START, scaled down toward it by the fade's weight, so that a
+      # high cutoff fades out the self-oscillation as SELF_OSC_FADE_WIDTH describes. Each clamp
+      # is built as clip_output builds its own.
+      weight = @self_osc_fade_offset - clamped_cutoff * @self_osc_fade_scale
+      over  = weight - 1.0
+      under = 0.0 - weight
+      weight = weight - ((over + over.abs) - (under + under.abs)) * 0.5
+      self_osc_over = @current_resonance - SELF_OSC_START
+      self_osc_over = (self_osc_over + self_osc_over.abs) * 0.5
+      resonance = @current_resonance - self_osc_over * (1.0 - weight)
+
       # The self-oscillation amount: zero up to r = 122/128, rising to one at 127/128 and held
       # there. Worked out here rather than in K_TABLE, whose interpolation would round off the
-      # corner at 127/128. Each clamp is built as clip_output builds its own.
-      t = @current_resonance * 25.6 - 24.4
+      # corner at 127/128.
+      t = resonance * 25.6 - 24.4
       over  = t - 1.0
       under = 0.0 - t
       t = t - ((over + over.abs) - (under + under.abs)) * 0.5
       one_plus_g_squared = 1.0 + g * g
-      k = resonance_to_k_fast(@current_resonance) - t * @self_osc_kappa * one_plus_g_squared * one_plus_g_squared / g
+      k = resonance_to_k_fast(resonance) - t * @self_osc_kappa * one_plus_g_squared * one_plus_g_squared / g
       below_floor = SELF_OSC_K_FLOOR - k
       k = k + (below_floor + below_floor.abs) * 0.5
       g_plus_k = g + k
@@ -355,17 +413,20 @@ module Spms1
     # Cubic soft clip written as a gain: the clamped value times 1 - c^2 / (3 * ceiling^2). Same
     # curve as c - c^3 / (3 * ceiling^2), slope exactly 1 at zero and flat at the ceiling, so a
     # state within the ceiling is only ever scaled down and a state past it is held at two thirds
-    # of it. Clamped the way clip_output clamps, without a comparison; this one runs every sample,
-    # on the band pass state inside the feedback path.
-    # Blended by alpha as initialize describes: with the state split into its clamped part c and
-    # the part past the ceiling d, s - alpha * (s - soft_clip(s)) is c - alpha * c^3 / (3 *
-    # ceiling^2) + (1 - alpha) * d. excess is twice d, which is why the leak carries a half.
+    # of it; the bias moves both rails down by B. Clamped the way clip_output clamps, without a
+    # comparison; this one runs every sample, on the band pass state inside the feedback path.
+    # Biased and blended by alpha as SOFT_CLIP_BIAS and initialize describe: with s + B split into
+    # its clamped part c and the part past the ceiling d, and G = SOFT_CLIP_BIAS_GAIN,
+    # s - alpha * (s - soft_clip_biased(s)) is c * (1 - alpha + alpha * G) - alpha * G * c^3 /
+    # (3 * ceiling^2) + (1 - alpha) * d - ((1 - alpha) * B + alpha * G * soft_clip(B)). excess is
+    # twice d, which is why the leak carries a half.
     def soft_clip(sample)
-      over    = sample - SOFT_CLIP_CEILING
-      under   = SOFT_CLIP_FLOOR - sample
+      shifted = sample + SOFT_CLIP_BIAS
+      over    = shifted - SOFT_CLIP_CEILING
+      under   = SOFT_CLIP_FLOOR - shifted
       excess  = (over + over.abs) - (under + under.abs)
-      clamped = sample - excess * 0.5
-      clamped * (1.0 - clamped * clamped * @soft_clip_gain_scale) + excess * @soft_clip_leak
+      clamped = shifted - excess * 0.5
+      clamped * (@soft_clip_gain - clamped * clamped * @soft_clip_gain_scale) + excess * @soft_clip_leak - @soft_clip_offset
     end
   end
 end

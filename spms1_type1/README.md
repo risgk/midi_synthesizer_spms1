@@ -1,10 +1,11 @@
-MIDI Synthesizer SPMS-1 (type-1) v0.0.11
-========================================
+MIDI Synthesizer SPMS-1 (type-1) v0.0.12 (Frozen)
+=================================================
 
 - Monophonic semi-modular MIDI Synthesizer for M5Stack AtomS3 Lite and Raspberry Pi Pico 2, made with Spinel (Ruby AOT Compiler)
 - Controlled by MIDI as a sound module
-- 48 kHz/24 bit audio output
+- 48 kHz/24 bit audio output (or 48 kHz/16 bit PDM output with M5Stack AtomS3 Lite, as an option)
 - Filter: ZDF/TPT State Variable Filter (with delayed soft clipping)
+- Delay: mono, with feedback, as a module in the run order (up to 340 ms)
 - Developed by ISGK Instruments (Ryo Ishigaki)
 - <https://github.com/risgk/midi_synthesizer_spms1>
 - [日本語版 README](./README.ja.md)
@@ -15,14 +16,42 @@ Required Hardware
 
 - M5Stack AtomS3 Lite (ESP32-S3), recommended
     - M5Stack [AtomS3 Lite](https://shop.m5stack.com/products/atoms3-lite-esp32s3-dev-kit) (SKU: C124)
-    - M5Stack [Atomic Audio-3.5 Base](https://shop.m5stack.com/products/atomic-audio-3-5-base) (SKU: A166)
+    - M5Stack [Atomic Audio-3.5 Base](https://shop.m5stack.com/products/atomic-audio-3-5-base) (SKU: A166),
+      with its ES8311 I2S DAC (48 kHz/24 bit), by default
+        - The output is mono, as the ES8311 has one DAC: it plays the L channel only.
+          SPMS-1 puts the same signal on L and R for now, but if it gains a stereo output later,
+          the R channel will not be heard from this base
+    - Or M5Stack [ATOMIC PortABC Extension Base](https://docs.m5stack.com/en/atom/AtomPortABC),
+      with the PDM output (stereo): uncomment `#define SPMS1_USE_PDM_OUTPUT`
+        - Audio is output from the AtomS3 Lite's own Grove port as PDM (1-bit sigma-delta, 6.144 MHz),
+          made by the ESP32-S3's I2S hardware, with no DAC: G2 (white wire) is L, and G1 (yellow wire) is R
+            - The PDM stream has no fixed carrier near the audio band (unlike 48 kHz PWM), so it
+              does not beat or alias into a whistle in active speakers, even without a filter
+            - The UART MIDI moves to Port C of the base (see [MIDI Settings](#midi-settings))
+        - The noise on the output may be noticeable, and with USB MIDI, the USB's noise rides on it too
+        - Connect the Grove port (G2, G1, and GND) to a line input of an amplifier or an active speaker.
+          Do not connect headphones or a passive speaker
+            - We recommend an RC filter (post LPF) on each channel, to cut the high-frequency noise of
+              the PDM stream: e.g. R = 1 kohm and C = 10 nF (cutoff 16 kHz), and a 10 uF capacitor
+              (AC coupling) in series to cut the DC
+            - If L and R are reversed, swap `SPMS1_PDM_L_PIN` and `SPMS1_PDM_R_PIN`
 - Raspberry Pi Pico 2 (RP2350)
     - [Raspberry Pi Pico 2](https://www.raspberrypi.com/products/raspberry-pi-pico-2/)
     - Pimoroni [Pico Audio Pack](https://shop.pimoroni.com/products/pico-audio-pack) (PIM544)
         - The following I2S DAC hardware (48 kHz/24 bit) can also be used:
             - [Adafruit PCM5102 I2S DAC](https://www.adafruit.com/product/6250) (Product ID: 6250)
             - GY-PCM5102 (PCM5102A I2S DAC Module)
-    - NOTE: The RP2350 system clock (sysclk) changes to overclocked 153.6 MHz by I2S Audio Library setSysClk()
+    - PWM Audio can be used instead, without an I2S DAC (Raspberry Pi Pico 2 only): uncomment `SPMS1_USE_PWM_AUDIO_INSTEAD_OF_I2S`
+        - L on GP28 and R on GP27, as on the Pimoroni [Pico VGA Demo Base](https://shop.pimoroni.com/products/pimoroni-pico-vga-demo-base) (PIM553)
+        - The PWM level (3200 steps) is quantized with 1st-order noise shaping and TPDF dither
+        - An RC low pass filter on each output is recommended, to take out the PWM ripple
+        - Each sample is split into 4 PWM periods (PWM carrier: 192 kHz instead of 48 kHz), so the carrier is easier to filter out
+          and less likely to cause beeps or whines in active speakers (`SPMS1_PWM_AUDIO_SUBPERIODS`: 1, 2, 4, or 8)
+        - Without the RC filter, reduce the level with resistors or the input gain (volume) of the connected device:
+          the PWM ripple (3.3 V square waves) may saturate the input (e.g. of an audio interface) and cause beeps or noises,
+          even when its level meter looks fine
+    - NOTE: The RP2350 system clock (sysclk) changes to overclocked 153.6 MHz, set by the sketch's own I2S or PWM Audio output
+      ("spms1_pico2_i2s.h" or "spms1_pico2_pwm_audio.h", the same as PRA32-U2's), not by the Arduino-Pico I2S library
 
 
 Required Software for Modification
@@ -36,20 +65,22 @@ Required Software for Modification
       and I2C all come from the core, so no library beyond the Arduino MIDI Library is needed
 - For Raspberry Pi Pico 2: Arduino-Pico = Raspberry Pi Pico/RP2040/RP2350 (by Earle F. Philhower, III) core
     - Additional Board Manager URL: <https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json>
-    - This sketch is tested with version 6.1.1: <https://github.com/earlephilhower/arduino-pico/releases/tag/6.1.1>
+    - This sketch is tested with version 6.2.0: <https://github.com/earlephilhower/arduino-pico/releases/tag/6.2.0>
     - Info: <https://github.com/earlephilhower/arduino-pico>
     - Board: "Raspberry Pi Pico 2", with USB Stack: "Adafruit TinyUSB" in the "Tools" menu
 - Arduino MIDI Library (by Francois Best, lathoub)
     - This sketch is tested with version 5.0.2: <https://github.com/FortySevenEffects/arduino_midi_library/releases/tag/5.0.2>
     - Info: <https://github.com/FortySevenEffects/arduino_midi_library>
 - Spinel
-    - Commit: <https://github.com/matz/spinel/tree/5af61ae7d53e36ca59a8de5870f532360d88fd7c>
-    - The Spinel output file "spms1_main.c" needs no editing. "sp_runtime.h" in this sketch
+    - Release: 2026.09.12 <https://github.com/matz/spinel/tree/2026.09.12>
+    - The Spinel output file "spms1_main.c" needs no editing. "spinel_rt.h" in this sketch
       carries `#define main IRAM_ATTR __attribute__((flatten)) Spms1_main` for the ESP32-S3 and
       `#define main __attribute__((section(".time_critical"), flatten)) Spms1_main` for the
       RP2350, which renames it and puts the synth core in RAM (IRAM on the ESP32-S3) at the same
       time. Renaming it by hand instead leaves the macro with nothing to match, and the core runs
       from flash
+    - "spms1_main.c" is generated with `spinel spms1_main.rb -c --rbs sig`. The type seeds in "sig"
+      keep the filter states unboxed; "sig/spms1_filter.rbs" says why they are needed
 
 
 Usage
@@ -58,6 +89,7 @@ Usage
 ### Prebuilt Binary
 
 - "spms1_type1.ino.merged.bin" (in the "bin" folder) is for M5Stack AtomS3 Lite and Atomic Audio-3.5 Base
+    - NOTE: It is not built for the PDM output from the ATOMIC PortABC Extension Base
     - Hold the AtomS3 Lite's reset button for about 2 seconds, until the green LED inside lights,
       to put it into download mode. Then write the file at address 0x0, with esptool (it ships
       with the Arduino core for the ESP32), for example:
@@ -76,7 +108,7 @@ Usage
 
 - Cross-platform web-based parameter controller via Web MIDI API: "spms1_editor.html"
 - Built-in software keyboard for note input and testing
-- Graphical patch editor (experimental) on its Patch tab
+- Graphical patch editor on its Patch tab
     - Wires module outputs to inputs and parameters, and sets the run order and CC assignments
     - Saves and loads patches as JSON
     - Copies the patch as MIDI bytes or as an NRPN list, or sends it through Web MIDI
@@ -95,7 +127,7 @@ Usage
       to "USB Audio Device"
 - UART MIDI Input
     - Speed: 31250 bps
-    - M5Stack AtomS3 Lite: G2 and G1 pins (Grove port) are used by UART2 TX and UART2 RX
+    - M5Stack AtomS3 Lite with Atomic Audio-3.5 Base (default): G2 and G1 pins (Grove port) are used by UART2 TX and UART2 RX
         - M5Stack [Unit MIDI](https://shop.m5stack.com/products/midi-unit-with-din-connector-sam2695)
           (SKU: U187) plugs straight into the Grove port as the DIN MIDI interface, in Separate mode
         - To use the AtomS3 Lite itself as a Grove unit, driven over the Grove port by another
@@ -105,6 +137,9 @@ Usage
             #define SPMS1_UART_MIDI_TX_PIN              (1)     // Grove
             #define SPMS1_UART_MIDI_RX_PIN              (2)     // Grove
             ```
+    - M5Stack AtomS3 Lite with the PDM output: G5 and G6 pins (Port C of ATOMIC PortABC
+      Extension Base) are used by UART2 TX and UART2 RX
+        - If it does not receive, swap `SPMS1_UART_MIDI_TX_PIN` and `SPMS1_UART_MIDI_RX_PIN`
 
     - Raspberry Pi Pico 2: GP4 and GP5 pins are used by UART1 TX and UART1 RX
     - On the Raspberry Pi Pico 2, you can also use `SoftwareSerial` by making the following changes:
@@ -156,11 +191,13 @@ flowchart LR
   OSC[Osc 1]
   FILTER[Filter 1]
   AMP[Amp 1]
+  DELAY[Delay 1]
   OUT([Audio Out])
 
   OSC --> FILTER
   FILTER --> AMP
-  AMP --> OUT
+  AMP --> DELAY
+  DELAY --> OUT
 
   NOTE -. Gate .-> EG
   NOTE -. Pitch .-> OSC
@@ -182,12 +219,12 @@ parameter.
 
 #### The run order
 
-Every module is in it, one of each kind that makes a sound and a mixer between the modulation
-sources and the oscillator:
+Every module is in it, one of each kind that makes a sound, a mixer between the modulation
+sources and the oscillator, and the delay last:
 
 ```mermaid
 flowchart LR
-  LFO[LFO 1] ~~~ EG[EG 1] ~~~ MIX1[Mixer 1] ~~~ OSC[Osc 1] ~~~ FILTER[Filter 1] ~~~ AMP[Amp 1]
+  LFO[LFO 1] ~~~ EG[EG 1] ~~~ MIX1[Mixer 1] ~~~ OSC[Osc 1] ~~~ FILTER[Filter 1] ~~~ AMP[Amp 1] ~~~ DELAY[Delay 1]
 ```
 
 The mixer has nothing routed to it, so it costs its slot every sample and changes nothing until
@@ -240,6 +277,32 @@ flowchart LR
   class D,LIM nl
 ```
 
+#### Delay 1
+
+A mono delay with feedback, after PRA32-U2's Delay FX. Half the input and the delayed signal at
+the Feedback gain go through a gentle low pass filter into the delay line, and the output is a
+crossfade of the input with the delayed signal.
+
+```mermaid
+flowchart LR
+  IN([Audio In]) --> H["× 0.5"]
+  H --> SUM((Σ))
+  SUM --> LPF["Low pass<br/>1-pole"]
+  LPF --> DL["Delay line<br/>up to 340 ms"]
+  DL --> FB["× Feedback<br/>0 to 0.5"]
+  FB --> SUM
+  DL --> X["Crossfade<br/>Mix"]
+  IN --> X
+  X --> OUT([Output])
+```
+
+It needs no limiter and no clip after it. With half the input coming in and at most half the
+delayed signal going round again, what is written back stays within one unit as long as the
+delayed signal does, and it starts from silence; the filter, the reading between two samples and
+the crossfade are all weighted averages, which cannot reach past what they average. The price is
+that the first repeat comes 6 dB under the dry signal. The input is held to one unit on the way
+in, as the amp holds its modulation input, so whatever is routed to it the bound holds.
+
 ### Patch Editing (NRPN)
 
 The patch is data, and NRPN rewrites it while the synth is running: which modules run and in what
@@ -261,19 +324,21 @@ a matter of changing slot numbers.
 | CC 99 | CC 98 | Sets | CC 6 value |
 | ----- | ----- | ---- | ---------- |
 | 0 | 0-31 | Run order, slot by slot | Module ID |
-| 1 | 0-9 | What feeds a module input | Signal ID |
-| 2 | 0-22 | Where a parameter takes its value | Signal ID |
-| 3 | 0-27 | Which CC fills a control slot | CC number, or 0 for none |
+| 1 | 0-10 | What feeds a module input | Signal ID |
+| 2 | 0-25 | Where a parameter takes its value | Signal ID |
+| 3 | 0-30 | Which CC fills a control slot | CC number, or 0 for none |
 
 The run order is read from slot 0 upwards and stops at the first Module ID 0, so a patch shorter
 than 32 modules ends itself. It is separate from the module numbering: a module only sees the
 current sample's value from something listed before it, and last sample's from something after.
 
-In category 3, CC number 0 means the parameter has no CC. Its control slot then keeps whatever it
-already holds, so the parameter can be driven by routing alone.
+In category 3, CC number 0 means the parameter has no CC. Its control slot then holds 0.0, whatever
+CC it had before, so the patch alone sets what the parameter reads.
 
-There is one of every module that makes a sound and one mixer, and **all six are in the default
-run order**, so a patch only ever has to route, never to switch something on first.
+There is one of every module that makes a sound, one mixer and one delay, and **all seven are in
+the default run order**, so a patch only ever has to route, never to switch something on first.
+Taking the delay out of the order saves its share of the time, which leaves the final output to
+be pointed at the amp.
 A mixer is the only kind with no CC on any of its parameters: the default patch points them at
 constants instead, each level at 1.0 and each polarity at +0.5, so a mixer with one input routed
 passes it through rather than muting it.
@@ -282,11 +347,12 @@ passes it through rather than muting it.
 
 | CC 98 | Module input | | CC 98 | Module input |
 | ----- | ------ | - | ----- | ------ |
-| 0 | EG 1 Gate | | 5 | Amp 1 Audio In |
-| 1 | Osc 1 Pitch | | 6 | Amp 1 Mod In |
-| 2 | Osc 1 Mod In | | 7 | Mixer 1 In 1 |
-| 3 | Filter 1 Audio In | | 8 | Mixer 1 In 2 |
-| 4 | Filter 1 Mod In | | 9 | Final Output |
+| 0 | EG 1 Gate | | 6 | Amp 1 Mod In |
+| 1 | Osc 1 Pitch | | 7 | Mixer 1 In 1 |
+| 2 | Osc 1 Mod In | | 8 | Mixer 1 In 2 |
+| 3 | Filter 1 Audio In | | 9 | Delay 1 Audio In |
+| 4 | Filter 1 Mod In | | 10 | Final Output |
+| 5 | Amp 1 Audio In | |  |  |
 
 Most of these take what their name suggests, but three do not say it on their face. A Gate is a
 threshold rather than a level: an envelope triggers as the signal reaches 0.25 and releases as it
@@ -302,14 +368,15 @@ gain down but never up.
 
 | CC 98 | Parameter | | CC 98 | Parameter | | CC 98 | Parameter |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | LFO 1 Rate | | 8 | Osc 1 Wave | | 16 | Filter 1 Mod Amt |
-| 1 | LFO 1 Level | | 9 | Osc 1 Coarse Tune | | 17 | Filter 1 Mod Polarity |
-| 2 | LFO 1 Polarity | | 10 | Osc 1 Fine Tune | | 18 | Amp 1 Gain |
-| 3 | EG 1 Attack | | 11 | Osc 1 Mod Amt | | 19 | Mixer 1 Level 1 |
-| 4 | EG 1 Decay | | 12 | Osc 1 Mod Polarity | | 20 | Mixer 1 Polarity 1 |
-| 5 | EG 1 Sustain | | 13 | Filter 1 Cutoff | | 21 | Mixer 1 Level 2 |
-| 6 | EG 1 Level | | 14 | Filter 1 Resonance | | 22 | Mixer 1 Polarity 2 |
-| 7 | EG 1 Polarity | | 15 | Filter 1 Gain | |  |  |
+| 0 | LFO 1 Rate | | 9 | Osc 1 Coarse Tune | | 18 | Amp 1 Gain |
+| 1 | LFO 1 Level | | 10 | Osc 1 Fine Tune | | 19 | Mixer 1 Level 1 |
+| 2 | LFO 1 Polarity | | 11 | Osc 1 Mod Amt | | 20 | Mixer 1 Polarity 1 |
+| 3 | EG 1 Attack | | 12 | Osc 1 Mod Polarity | | 21 | Mixer 1 Level 2 |
+| 4 | EG 1 Decay | | 13 | Filter 1 Cutoff | | 22 | Mixer 1 Polarity 2 |
+| 5 | EG 1 Sustain | | 14 | Filter 1 Resonance | | 23 | Delay 1 Time |
+| 6 | EG 1 Level | | 15 | Filter 1 Gain | | 24 | Delay 1 Feedback |
+| 7 | EG 1 Polarity | | 16 | Filter 1 Mod Amt | | 25 | Delay 1 Mix |
+| 8 | Osc 1 Wave | | 17 | Filter 1 Mod Polarity | |  |  |
 
 #### Entries (CC 98), category 3 only
 
@@ -318,11 +385,11 @@ two slots, a unipolar and a bipolar one. See the General slots below.
 
 | CC 98 | CC for | Fills |
 | ----- | ------ | ----- |
-| 23 | General Mod Wheel | General Mod Wheel |
-| 24 | General 1 | General Unipolar 1, General Bipolar 1 |
-| 25 | General 2 | General Unipolar 2, General Bipolar 2 |
-| 26 | General 3 | General Unipolar 3, General Bipolar 3 |
-| 27 | General 4 | General Unipolar 4, General Bipolar 4 |
+| 26 | General Mod Wheel | General Mod Wheel |
+| 27 | General 1 | General Unipolar 1, General Bipolar 1 |
+| 28 | General 2 | General Unipolar 2, General Bipolar 2 |
+| 29 | General 3 | General Unipolar 3, General Bipolar 3 |
+| 30 | General 4 | General Unipolar 4, General Bipolar 4 |
 
 #### Module IDs
 
@@ -335,28 +402,30 @@ two slots, a unipolar and a bipolar one. See the General slots below.
 | 4 | Filter 1 |
 | 5 | Amp 1 |
 | 6 | Mixer 1 |
+| 7 | Delay 1 |
 
 #### Signal IDs
 
 | ID | Signal | | ID | Signal | | ID | Signal |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | None (constant 0.0) | | 17 | LFO 1 Polarity ± | | 34 | Mixer 1 Level 1 |
-| 1 | Constant 1.0 | | 18 | EG 1 Attack | | 35 | Mixer 1 Polarity 1 ± |
-| 2 | Constant 0.5 | | 19 | EG 1 Decay | | 36 | Mixer 1 Level 2 |
-| 3 | Constant 0.2 | | 20 | EG 1 Sustain | | 37 | Mixer 1 Polarity 2 ± |
-| 4 | Constant 0.1 | | 21 | EG 1 Level | | 38 | Note Pitch ± |
-| 5 | Constant -0.1 | | 22 | EG 1 Polarity ± | | 39 | Note Gate |
-| 6 | Constant -0.2 | | 23 | Osc 1 Wave | | 40 | Pitch Bend ± |
-| 7 | Constant -0.5 | | 24 | Osc 1 Coarse Tune ± | | 41 | General Mod Wheel |
-| 8 | Constant -1.0 | | 25 | Osc 1 Fine Tune ± | | 42 | General Unipolar 1 |
-| 9 | LFO 1 Output ± | | 26 | Osc 1 Mod Amt | | 43 | General Unipolar 2 |
-| 10 | EG 1 Output ± | | 27 | Osc 1 Mod Polarity ± | | 44 | General Unipolar 3 |
-| 11 | Osc 1 Output ± | | 28 | Filter 1 Cutoff | | 45 | General Unipolar 4 |
-| 12 | Filter 1 Output ± | | 29 | Filter 1 Resonance | | 46 | General Bipolar 1 ± |
-| 13 | Amp 1 Output ± | | 30 | Filter 1 Gain | | 47 | General Bipolar 2 ± |
-| 14 | Mixer 1 Output ± | | 31 | Filter 1 Mod Amt | | 48 | General Bipolar 3 ± |
-| 15 | LFO 1 Rate | | 32 | Filter 1 Mod Polarity ± | | 49 | General Bipolar 4 ± |
-| 16 | LFO 1 Level | | 33 | Amp 1 Gain | |  |  |
+| 0 | None (constant 0.0) | | 18 | LFO 1 Polarity ± | | 36 | Mixer 1 Polarity 1 ± |
+| 1 | Constant 1.0 | | 19 | EG 1 Attack | | 37 | Mixer 1 Level 2 |
+| 2 | Constant 0.5 | | 20 | EG 1 Decay | | 38 | Mixer 1 Polarity 2 ± |
+| 3 | Constant 0.2 | | 21 | EG 1 Sustain | | 39 | Delay 1 Time |
+| 4 | Constant 0.1 | | 22 | EG 1 Level | | 40 | Delay 1 Feedback |
+| 5 | Constant -0.1 | | 23 | EG 1 Polarity ± | | 41 | Delay 1 Mix |
+| 6 | Constant -0.2 | | 24 | Osc 1 Wave | | 42 | Note Pitch ± |
+| 7 | Constant -0.5 | | 25 | Osc 1 Coarse Tune ± | | 43 | Note Gate |
+| 8 | Constant -1.0 | | 26 | Osc 1 Fine Tune ± | | 44 | Pitch Bend ± |
+| 9 | LFO 1 Output ± | | 27 | Osc 1 Mod Amt | | 45 | General Mod Wheel |
+| 10 | EG 1 Output ± | | 28 | Osc 1 Mod Polarity ± | | 46 | General Unipolar 1 |
+| 11 | Osc 1 Output ± | | 29 | Filter 1 Cutoff | | 47 | General Unipolar 2 |
+| 12 | Filter 1 Output ± | | 30 | Filter 1 Resonance | | 48 | General Unipolar 3 |
+| 13 | Amp 1 Output ± | | 31 | Filter 1 Gain | | 49 | General Unipolar 4 |
+| 14 | Mixer 1 Output ± | | 32 | Filter 1 Mod Amt | | 50 | General Bipolar 1 ± |
+| 15 | Delay 1 Output ± | | 33 | Filter 1 Mod Polarity ± | | 51 | General Bipolar 2 ± |
+| 16 | LFO 1 Rate | | 34 | Amp 1 Gain | | 52 | General Bipolar 3 ± |
+| 17 | LFO 1 Level | | 35 | Mixer 1 Level 1 | | 53 | General Bipolar 4 ± |
 
 A **±** marks a signal that swings both ways: a module output reaches -0.5 and +0.5 at full
 scale, a bipolar control slot runs -0.5 to +0.5, and a mixer sums two of them and stops at one.
@@ -365,16 +434,16 @@ its Polarity is turned negative. Everything unmarked runs 0.0 to 1.0 -- Note Gat
 unipolar control slot. The bus carries both kinds under one numbering, so the range belongs to the slot
 rather than to the sort of thing that wrote it.
 
-Slots 15-37 hold the values arriving from CC, so a parameter reads its own CC by default. Each
+Slots 16-41 hold the values arriving from CC, so a parameter reads its own CC by default. Each
 parameter is unipolar or bipolar, and its slot takes the same range. A unipolar one runs 0.0 to
 1.0 from CC 4 to CC 124, the span of an envelope, so an envelope pointed at one sweeps the whole
 of its dial. A bipolar one runs -0.5 to +0.5 with CC 64 at 0.0, the span of an LFO, so a bipolar
 source pointed at one swings it about the middle. The two tune controls are bipolar, since their
 middle is no change at all, and so is every Polarity -- the LFO's, the EG's, the mixer's and the two
 Mod Polarity controls -- since its sign is what it sets. Pointing a parameter at another slot is what
-makes a modulation. A slot with no CC holds 0.0 until one is assigned.
+makes a modulation. A slot with no CC holds 0.0.
 
-Slots 41-49, the General slots, are control slots that no parameter owns: a CC put on the bus for
+Slots 45-53, the General slots, are control slots that no parameter owns: a CC put on the bus for
 any module input or parameter to read. General Mod Wheel reads CC 1, runs 0.0 to 1.0 and powers
 up at CC 4, so it is at 0.0 until the wheel moves; nothing is routed to it by default. General 1-4
 read CC 16-19 by default, and each puts its CC on the bus both ways at once: General Unipolar 1-4
@@ -398,8 +467,6 @@ Signal 6 its negative. Signal 4 is the LFO 1 Polarity the default patch uses, wh
 LFO down to a vibrato depth, and Signal 5 its negative. A constant on a mixer's second input
 shifts a signal between the two kinds: -0.5 turns one that runs one way into one that swings
 both, and +0.5 the other way round.
-
-Slot 127 is where a parameter with no CC sends its unused value. Nothing should read it.
 
 The ID numbers are not stable across firmware versions. A patch is never saved, so a new module
 type, another instance of one, or another signal may renumber everything after it. Read these
@@ -442,8 +509,10 @@ and faster, without a sudden step, through Q 27 at CC 109 to Q 256 just past CC 
 the filter oscillates on its own: a sine at the cutoff frequency, growing to its full level of
 about 0.5 by CC 123 and holding it to the top of the dial. Low in that range the oscillation
 builds slowly and shares the filter with the input; at the top it takes the input over. Its
-level holds across the cutoff range down to about 150 Hz and falls below that. With the cutoff
-following the keyboard, as in the examples below, it plays as a sine voice.
+level holds across the cutoff range down to about 150 Hz and falls below that. Near the top of the
+cutoff range it fades out, before its 3rd harmonic folds back as an inharmonic tone: at 48 kHz,
+from 8 kHz (CC 108) to 10 kHz (CC 112), modulation included. Above that the resonance acts as at
+Q 256. With the cutoff following the keyboard, as in the examples below, it plays as a sine voice.
 
 A mixer takes each input at its own level and its own polarity, then adds them. Level runs from
 silent at 0.0 (CC 4) to full at 1.0 (CC 124), and Polarity from negated at -0.5 (CC 4), through
@@ -460,12 +529,22 @@ above that bends smoothly onto the limit. Its resonant peak can climb past one u
 and rounding that off makes far weaker high harmonics than a hard edge would fold back down into
 the note.
 
+The three Delay 1 parameters are unipolar and move in steps of 1/120, as every unipolar dial
+does. Time runs in a straight line, 2.83 ms a step, from 0 at CC 4 to 340 ms at CC 124, and is
+clipped to 2.83 ms at the bottom, so it holds 2.83 ms up to CC 5; it is 170 ms at CC 64. Turning
+it bends the pitch of the repeats, by at most 25%, as a tape delay's would, and they reach the new
+time a moment later. Feedback is the gain from the repeats back into the line, from 0 at CC 4, a
+single repeat, to 0.5 at CC 124, where each repeat comes back 6 dB down and a little darker; it is
+0.25 at CC 64. Mix is the repeats' share of the crossfade, from the dry input alone at CC 4 to the
+repeats alone at CC 124, half and half at CC 64. Time and Feedback power up at CC 64 and Mix at
+CC 34, 0.25: the dry signal is 2.5 dB down and the first repeat about 16 dB under it.
+
 #### Examples
 
 - Vibrato is wired by default -- the LFO goes straight to the oscillator's modulation input --
-  so CC 13 sets the depth and CC 3 the rate. CC 99 = 2, CC 98 = 1, CC 6 = 41 takes LFO 1 Level
+  so CC 13 sets the depth and CC 3 the rate. CC 99 = 2, CC 98 = 1, CC 6 = 45 takes LFO 1 Level
   from General Mod Wheel, so the wheel brings the vibrato in up to the depth CC 13 sets
-- Filter cutoff follows note pitch (keyboard tracking): CC 99 = 1, CC 98 = 4, CC 6 = 38 puts
+- Filter cutoff follows note pitch (keyboard tracking): CC 99 = 1, CC 98 = 4, CC 6 = 42 puts
   Note Pitch on the filter's modulation input in the envelope's place. With the cutoff at CC 64
   and Mod Amt at CC 124, note 60 leaves the cutoff at the middle of its dial and each note moves
   it a semitone
@@ -485,34 +564,46 @@ the note.
 - Pitch swept by the envelope instead of the LFO: CC 99 = 1, CC 98 = 2, CC 6 = 10 puts the
   envelope on the oscillator's modulation input in the LFO's place, then set the depth on CC 13.
   Nothing scales the envelope down on this path, so a semitone is at CC 5 and an octave at CC 16
-- Pitch bend, which nothing is routed to by default. CC 99 = 1 with CC 98 = 7 and 8, CC 6 = 38
-  and 40 puts Note Pitch and Pitch Bend on Mixer 1's two inputs, and CC 99 = 1, CC 98 = 1,
+- Pitch bend, which nothing is routed to by default. CC 99 = 1 with CC 98 = 7 and 8, CC 6 = 42
+  and 44 puts Note Pitch and Pitch Bend on Mixer 1's two inputs, and CC 99 = 1, CC 98 = 1,
   CC 6 = 14 makes that sum the oscillator's pitch. Mixer 1 runs ahead of the oscillator, so the
   wheel moves the note in the same sample. Both levels are full, so the wheel reaches five
-  octaves either way; CC 99 = 2, CC 98 = 21, CC 6 = 42 takes Mixer 1's second level from General
+  octaves either way; CC 99 = 2, CC 98 = 21, CC 6 = 46 takes Mixer 1's second level from General
   Unipolar 1, so CC 16 trims that down to a bend range worth playing
 - A CC that bends pitch both ways through the modulation input. Mixer 1 runs ahead of the
-  oscillator and is free: CC 99 = 1, CC 98 = 7, CC 6 = 28 puts the filter cutoff's control slot on
+  oscillator and is free: CC 99 = 1, CC 98 = 7, CC 6 = 29 puts the filter cutoff's control slot on
   its first input, CC 98 = 8, CC 6 = 7 the constant -0.5 on its second, and CC 98 = 2, CC 6 = 14
   points the oscillator's modulation input at Mixer 1 in the LFO's place. The slot is unipolar, so
   that constant is what centres it on CC 64 as the LFO is on zero. CC 74 now bends the pitch down
   and up around the note, as far as CC 13 allows: a semitone either way at CC 6, an octave at
   CC 28
 - A CC that works backwards, which needs a mixer to invert it. Mixer 1 is already running, so it
-  only needs wiring: CC 99 = 1, CC 98 = 7, CC 6 = 28 puts the cutoff's control slot on its first
+  only needs wiring: CC 99 = 1, CC 98 = 7, CC 6 = 29 puts the cutoff's control slot on its first
   input and CC 98 = 8, CC 6 = 1 the constant 1.0 on its second, and CC 99 = 2, CC 98 = 20,
   CC 6 = 7 pins the first input's polarity to -0.5, the negating end of its dial, so the mixer
   outputs 1.0 less the CC: the CC mirrored about CC 64. Point the cutoff's own source at the
   mixer with CC 99 = 2, CC 98 = 13, CC 6 = 14 and CC 74 now closes the filter as it rises
 - Take the filter out of the chain: CC 99 = 1, CC 98 = 5, CC 6 = 11 points the amp's audio input
   at the oscillator. The filter keeps running and keeps its slot; nothing reads it
+- Echoes that only come in with the mod wheel: CC 99 = 2, CC 98 = 25, CC 6 = 45 takes Delay 1 Mix
+  from General Mod Wheel, which powers up at 0.0, so the output is dry until the wheel moves
+- Take the delay out and save its time: CC 99 = 0, CC 98 = 6, CC 6 = 0 ends the run order after
+  the amp, and CC 99 = 1, CC 98 = 10, CC 6 = 13 points the final output back at the amp
+- Echoes ahead of the filter: CC 99 = 1, CC 98 = 9, CC 6 = 11 feeds Delay 1 from the oscillator,
+  CC 98 = 3, CC 6 = 15 feeds the filter from Delay 1, and CC 98 = 10, CC 6 = 13 points the final
+  output back at the amp. The repeats then go through the filter and the amp's envelope as the
+  note does, so they die away with it. Delay 1 still runs after the filter, which reads it a
+  sample late; for an echo that does not matter
 
 #### Notes
 
 - Module inputs (category 1) are read every sample and are not smoothed; parameters (category 2)
   are read once per buffer and are smoothed by their destination. Route a fast source through a
   module input, a stepped one through a parameter
-- A parameter source may point at any of the 128 slots. Slots above 49 read 0 until something
+- The smoothing takes two stages (10.7 ms average delay, 99% in 35 ms at 48 kHz), which round off
+  the steps of a controller sending sparse CCs (e.g. every 20 ms). Osc 1 Coarse Tune and Fine Tune
+  are not smoothed, so that the pitch follows right away
+- A parameter source may point at any of the 128 slots. Slots above 53 read 0 until something
   writes them, which leaves a parameter pointed at one at the bottom of a unipolar dial or the
   middle of a bipolar one
 - A parameter clamps its value to its own range, 0.0 to 1.0 or -0.5 to +0.5, and its control slot
@@ -524,10 +615,10 @@ the note.
   directly or through other modules -- decays toward zero and can settle on a denormal, which
   x86 computes slowly, so the PC simulator there may slow down. Nothing in the loop flushes it
 
-### Debug UART
+### Debug Print
 
-- M5Stack AtomS3 Lite: USB CDC (the serial port next to USB MIDI on the same cable)
-- Raspberry Pi Pico 2
+- USB CDC (the serial port next to USB MIDI on the same cable)
+- On the Raspberry Pi Pico 2, UART can be used instead: comment out `SPMS1_DEBUG_PRINT_USE_USB_SERIAL`
     - Speed: 115200 bps
     - GP0 and GP1 pins are used by UART0 TX and UART0 RX
 
@@ -540,7 +631,8 @@ the note.
   Windows, clang on macOS), then run `build/sim_spinel/spms1_sim --midi-in NAME`; `--list` shows
   the MIDI inputs
     - The build first regenerates "spms1_main.c" with Spinel, found on the PATH or, on Windows,
-      inside WSL. `--no-spinel`, or no Spinel to be found, builds the one already here
+      inside WSL, passing it the type seeds in "sig". `--no-spinel`, or no Spinel to be found,
+      builds the one already here
     - PortAudio is loaded at run time. The PortAudio project releases source only; on Windows,
       install it into RubyInstaller's MSYS2 with
       `ridk exec pacman -S mingw-w64-ucrt-x86_64-portaudio` (the simulators look there), and on
@@ -577,10 +669,10 @@ files, so the mapping survives all the way down.
 
 Four things to know before reading the output:
 
-- The `-Os` above is not what the synth is built with. "sp_runtime.h" carries
+- The `-Os` above is not what the synth is built with. "spinel_rt.h" carries
   `#pragma GCC optimize ("O3")`, which overrides whatever is on the command line for that
   translation unit. Passing `-O3` instead changes nothing, and neither does passing `-Os`
-- The synth core is not in `.text`. The `#define main` in "sp_runtime.h" puts it in
+- The synth core is not in `.text`. The `#define main` in "spinel_rt.h" puts it in
   `.time_critical`. To prove two builds are the same code,
   `arm-none-eabi-objcopy -O binary --only-section=.time_critical` on each and compare the bytes.
   A comment-only edit moves every `#line` in "spms1_main.c" and nothing else, and this is how to
@@ -590,7 +682,7 @@ Four things to know before reading the output:
   Differences between two standalone builds are reliable; absolute totals are not. Take those
   from the `.elf` the Arduino build leaves in its sketch cache
 - A shape that compiles well in a test function may not survive inlining into `Spms1_main`, which
-  is about 30000 instructions. Measure the change in the real file, not in a small one
+  is about 12000 instructions. Measure the change in the real file, not in a small one
 
 
 SPMS-1 (type-1) Licence
@@ -629,6 +721,6 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 ```
 
-- Base Commit: <https://github.com/matz/spinel/tree/5af61ae7d53e36ca59a8de5870f532360d88fd7c>
-- Target files: `sp_*.*`, `re_*.*`
+- Base Release: 2026.09.12 <https://github.com/matz/spinel/tree/2026.09.12>
+- Target files: `spinel_rt.h*`, `mruby_shim.h*`, `sp_*.*`, `re_*.*`
     - Note: Some files for runtime are modified for MCU by ISGK Instruments (Ryo Ishigaki)

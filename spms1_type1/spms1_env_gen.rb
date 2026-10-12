@@ -4,9 +4,13 @@ module Spms1
     STATE_ATTACK = 0
     STATE_SUSTAIN = 1
     STATE_IDLE = 2
-    # Blend at the reference rate on the line below. The two move together: their product is what
-    # fixes the time constant, so changing one without the other changes how fast smoothing is.
-    SMOOTHING_TARGET_BLEND_BASE = 0.03125
+    # Blend at the reference rate on the line below, for each of two cascaded stages. The two move
+    # together: their product is what fixes the time constant, so changing one without the other
+    # changes how fast smoothing is. Two stages at 1/64 (5.3 ms each at 48 kHz) delay a step by
+    # 10.7 ms on average, as one stage at 1/128 would, but start from zero slope, so that the steps
+    # of a controller sending sparse CCs (e.g. every 20 ms) are rounded off rather than heard,
+    # and settle sooner, 99% in 35 ms.
+    SMOOTHING_TARGET_BLEND_BASE = 0.015625
     # Number of samples between control-rate updates; envelope timing is kept approximately constant if this is changed.
     # It has to stay a power of two: the counter below wraps with a mask, because Ruby's % is a
     # floor-modulo and sp_imod carries a sign correction the counter can never need -- one branch
@@ -60,6 +64,7 @@ module Spms1
       # Level and polarity are multiplied before smoothing, so the control-rate path takes one
       # multiply and only one smoothing state has to be carried.
       @amount = 1.0
+      @stage_1_amount = 1.0
       @current_amount = 1.0
 
       @was_gate_on = false
@@ -116,15 +121,16 @@ module Spms1
         target = (@state == STATE_ATTACK) ? ATTACK_TARGET : (((@state == STATE_SUSTAIN) && is_gate_on) ? @sustain : 0.0)
         coef = (@state == STATE_ATTACK) ? @attack_coef : ((@state == STATE_SUSTAIN) ? @decay_coef : 0.0)
 
-        apply_step = (@state != STATE_SUSTAIN) || !is_gate_on || (@sustain < @current_level)
-        coef_masked = apply_step ? coef : 0.0
-
-        @current_level += (target - @current_level) * coef_masked
+        # With the gate on, the level follows the sustain both ways at the decay rate, so raising
+        # the sustain while a note is held raises the level too.
+        @current_level += (target - @current_level) * coef
 
         is_attack_done = (@state == STATE_ATTACK) && (@current_level >= 1.0 || !@was_gate_on)
         # The floor holds with the gate on too: decaying toward a sustain of 0.0, the level would
         # otherwise sink into denormals and stick at the smallest one, which x86 computes slowly.
-        is_floor_reached = (@state == STATE_SUSTAIN) && (@current_level < 1e-5)
+        # Only where the target is below it as well, so that a sustain raised from 0.0 is not held
+        # at the floor by a long decay, whose first step can fall short of it.
+        is_floor_reached = (@state == STATE_SUSTAIN) && (@current_level < 1e-5) && (target < 1e-5)
         is_idle_reached = is_floor_reached && !@was_gate_on
         is_forced_attack = (@state == STATE_IDLE) && @was_gate_on
 
@@ -135,7 +141,8 @@ module Spms1
 
         # The amount is smoothed here, on the step, so a change in it rides the same ramp as the
         # level does rather than stepping the output.
-        @current_amount += (@amount - @current_amount) * @smoothing_target_blend
+        @stage_1_amount += (@amount - @stage_1_amount) * @smoothing_target_blend
+        @current_amount += (@stage_1_amount - @current_amount) * @smoothing_target_blend
         output_level = @current_level * @current_amount
 
         # The output ramps from the last step's level to this one's over the next four samples,

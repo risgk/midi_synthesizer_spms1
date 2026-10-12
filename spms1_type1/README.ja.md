@@ -1,10 +1,11 @@
-MIDI Synthesizer SPMS-1 (type-1) v0.0.11
-========================================
+MIDI Synthesizer SPMS-1 (type-1) v0.0.12 (Frozen)
+=================================================
 
 - Spinel (Ruby AOT コンパイラ) で作った、M5Stack AtomS3 Lite と Raspberry Pi Pico 2 用のモノフォニック・セミモジュラー MIDI シンセサイザー
 - 音源モジュールとして MIDI で制御します
-- 48 kHz/24 bit オーディオ出力
+- 48 kHz/24 bit オーディオ出力 (M5Stack AtomS3 Lite ではオプションで 48 kHz/16 bit の PDM 出力)
 - フィルタ: ZDF/TPT ステート・バリアブル・フィルタ (遅延ソフトクリッピング付き)
+- ディレイ: モノラル、フィードバック付き、実行順に入るモジュール (最大 340 ms)
 - 開発: ISGK Instruments (Ryo Ishigaki)
 - <https://github.com/risgk/midi_synthesizer_spms1>
 - [English README](./README.md) (英語版が正です)
@@ -16,13 +17,41 @@ MIDI Synthesizer SPMS-1 (type-1) v0.0.11
 - M5Stack AtomS3 Lite (ESP32-S3)、推奨
     - M5Stack [AtomS3 Lite](https://shop.m5stack.com/products/atoms3-lite-esp32s3-dev-kit) (SKU: C124)
     - M5Stack [Atomic Audio-3.5 Base](https://shop.m5stack.com/products/atomic-audio-3-5-base) (SKU: A166)
+      とその ES8311 I2S DAC (48 kHz/24 bit)、デフォルト
+        - ES8311 の DAC は 1 つなので、出力はモノラルです: L チャンネルだけを再生します。
+          SPMS-1 は今のところ L と R に同じ信号を出していますが、今後ステレオ出力に対応した場合も、
+          このベースからは R チャンネルは聞こえません
+    - または M5Stack [ATOMIC PortABC Extension Base](https://docs.m5stack.com/en/atom/AtomPortABC)
+      と PDM 出力 (ステレオ): `#define SPMS1_USE_PDM_OUTPUT` のコメントを外してください
+        - オーディオは AtomS3 Lite 本体の Grove ポートから PDM (1 bit のシグマ・デルタ、6.144 MHz) で出力します。
+          ESP32-S3 の I2S ハードウェアで作るので、DAC は要りません: G2 ピン (白い線) が L、G1 ピン (黄色い線) が R です
+            - PDM には (48 kHz の PWM と違って) 可聴帯域の近くに決まったキャリアがないので、フィルタなしでも
+              アクティブスピーカーの中でうなりや折り返しの「ピー」という音になりません
+            - UART MIDI はベースの Port C に移ります ([MIDI の設定](#midi-の設定) を参照)
+        - 出力のノイズが気になるかもしれません。USB MIDI を使う場合は、USB のノイズも乗ります
+        - Grove ポート (G2、G1、GND) をアンプかアクティブスピーカーのライン入力につないでください。
+          ヘッドホンやパッシブスピーカーはつながないでください
+            - PDM の高域ノイズを除くため、各チャンネルに RC フィルタ (ポスト LPF) を入れることをお勧めします:
+              例えば R = 1 kΩ、C = 10 nF (カットオフ 16 kHz)。直流を除くには 10 uF のコンデンサ (AC カップリング) を
+              直列に入れます
+            - L と R が逆なら、`SPMS1_PDM_L_PIN` と `SPMS1_PDM_R_PIN` を入れ替えてください
 - Raspberry Pi Pico 2 (RP2350)
     - [Raspberry Pi Pico 2](https://www.raspberrypi.com/products/raspberry-pi-pico-2/)
     - Pimoroni [Pico Audio Pack](https://shop.pimoroni.com/products/pico-audio-pack) (PIM544)
         - 以下の I2S DAC ハードウェア (48 kHz/24 bit) も使えます:
             - [Adafruit PCM5102 I2S DAC](https://www.adafruit.com/product/6250) (Product ID: 6250)
             - GY-PCM5102 (PCM5102A I2S DAC モジュール)
-    - 注意: RP2350 のシステムクロック (sysclk) は、I2S Audio Library の setSysClk() によって 153.6 MHz にオーバークロックされます
+    - I2S DAC の代わりに PWM Audio も使えます (Raspberry Pi Pico 2 のみ): `SPMS1_USE_PWM_AUDIO_INSTEAD_OF_I2S` のコメントを外してください
+        - L は GP28、R は GP27 で、Pimoroni [Pico VGA Demo Base](https://shop.pimoroni.com/products/pimoroni-pico-vga-demo-base) (PIM553) と同じです
+        - PWM のレベル (3200 段階) は、1 次のノイズシェーピングと TPDF ディザ付きで量子化されます
+        - PWM のリップルを取り除くため、各出力に RC ローパスフィルターを付けることをお勧めします
+        - 1 サンプルを 4 つの PWM 周期に分けて出力します (PWM キャリア: 48 kHz ではなく 192 kHz)。キャリアをフィルタで取り除きやすく、
+          アクティブスピーカーで「ピー」という音が出にくくなります (`SPMS1_PWM_AUDIO_SUBPERIODS`: 1、2、4、8)
+        - RC フィルタを付けない場合は、抵抗か接続先の機器の入力ゲイン (ボリューム) でレベルを下げてください:
+          PWM のリップル (3.3 V の矩形波) で入力 (オーディオインターフェースなど) が飽和し、「ピー」という音やノイズが出ることがあります。
+          レベルメーターが適正に見えていても起こります
+    - 注意: RP2350 のシステムクロック (sysclk) は 153.6 MHz にオーバークロックされます。設定するのはスケッチ自身の I2S または
+      PWM Audio 出力 ("spms1_pico2_i2s.h" または "spms1_pico2_pwm_audio.h"、PRA32-U2 と同じもの) で、Arduino-Pico の I2S ライブラリではありません
 
 
 改造に必要なソフトウェア
@@ -36,19 +65,21 @@ MIDI Synthesizer SPMS-1 (type-1) v0.0.11
       すべてコアのものを使うので、Arduino MIDI Library 以外のライブラリは要りません
 - Raspberry Pi Pico 2 用: Arduino-Pico = Raspberry Pi Pico/RP2040/RP2350 (by Earle F. Philhower, III) コア
     - 追加のボードマネージャ URL: <https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json>
-    - このスケッチはバージョン 6.1.1 で動作確認しています: <https://github.com/earlephilhower/arduino-pico/releases/tag/6.1.1>
+    - このスケッチはバージョン 6.2.0 で動作確認しています: <https://github.com/earlephilhower/arduino-pico/releases/tag/6.2.0>
     - 情報: <https://github.com/earlephilhower/arduino-pico>
     - ボード: "Raspberry Pi Pico 2"、"ツール" メニューの USB Stack: "Adafruit TinyUSB"
 - Arduino MIDI Library (by Francois Best, lathoub)
     - このスケッチはバージョン 5.0.2 で動作確認しています: <https://github.com/FortySevenEffects/arduino_midi_library/releases/tag/5.0.2>
     - 情報: <https://github.com/FortySevenEffects/arduino_midi_library>
 - Spinel
-    - コミット: <https://github.com/matz/spinel/tree/5af61ae7d53e36ca59a8de5870f532360d88fd7c>
-    - Spinel の出力ファイル "spms1_main.c" に手を入れる必要はありません。本スケッチの "sp_runtime.h" が
+    - リリース: 2026.09.12 <https://github.com/matz/spinel/tree/2026.09.12>
+    - Spinel の出力ファイル "spms1_main.c" に手を入れる必要はありません。本スケッチの "spinel_rt.h" が
       ESP32-S3 向けに `#define main IRAM_ATTR __attribute__((flatten)) Spms1_main`、RP2350 向けに
       `#define main __attribute__((section(".time_critical"), flatten)) Spms1_main` を持っており、改名と
       シンセ本体の RAM 配置 (ESP32-S3 では IRAM) を同時に行います。手で改名すると、このマクロが一致しなく
       なって属性が付かず、本体が flash から実行されます
+    - "spms1_main.c" は `spinel spms1_main.rb -c --rbs sig` で生成します。"sig" の型シードが
+      フィルタの状態をボックス化させずに保ちます。必要な理由は "sig/spms1_filter.rbs" にあります
 
 
 使い方
@@ -57,6 +88,7 @@ MIDI Synthesizer SPMS-1 (type-1) v0.0.11
 ### ビルド済みバイナリ
 
 - "bin" フォルダの "spms1_type1.ino.merged.bin" は M5Stack AtomS3 Lite と Atomic Audio-3.5 Base 用です
+    - 注意: ATOMIC PortABC Extension Base からの PDM 出力用にはビルドされていません
     - AtomS3 Lite のリセットボタンを、内部の緑色 LED が点くまで約 2 秒長押しして、ダウンロードモードに
       します。そのうえで、たとえば esptool (Arduino core for the ESP32 に同梱) で、アドレス 0x0 に
       書き込みます:
@@ -75,7 +107,7 @@ MIDI Synthesizer SPMS-1 (type-1) v0.0.11
 
 - Web MIDI API を使う、プラットフォームを問わないパラメータ・コントローラ: "spms1_editor.html"
 - 音を出して試すためのソフトウェア鍵盤を内蔵しています
-- グラフィカルなパッチエディタ（実験的）を Patch タブに内蔵しています
+- グラフィカルなパッチエディタを Patch タブに内蔵しています
     - モジュールの出力を入力やパラメータへ配線し、実行順と CC の割り当てを設定します
     - パッチを JSON で保存・読み込みします
     - パッチを MIDI バイト列または NRPN リストとしてコピーするか、Web MIDI で送信します
@@ -94,7 +126,7 @@ MIDI Synthesizer SPMS-1 (type-1) v0.0.11
       ドライバを "USB オーディオ デバイス" に変更してください
 - UART MIDI 入力
     - 速度: 31250 bps
-    - M5Stack AtomS3 Lite: G2 ピンと G1 ピン (Grove ポート) を UART2 TX と UART2 RX に使います
+    - M5Stack AtomS3 Lite と Atomic Audio-3.5 Base (デフォルト) の場合: G2 ピンと G1 ピン (Grove ポート) を UART2 TX と UART2 RX に使います
         - M5Stack [Unit MIDI](https://shop.m5stack.com/products/midi-unit-with-din-connector-sam2695)
           (SKU: U187) を Grove ポートに直接つなげば、DIN MIDI インターフェースとして使えます (セパレートモード)
         - AtomS3 Lite 自体を Grove ユニットとして、別の M5Stack コントローラから Grove ポート経由で
@@ -104,6 +136,9 @@ MIDI Synthesizer SPMS-1 (type-1) v0.0.11
             #define SPMS1_UART_MIDI_TX_PIN              (1)     // Grove
             #define SPMS1_UART_MIDI_RX_PIN              (2)     // Grove
             ```
+    - M5Stack AtomS3 Lite で PDM 出力の場合: G5 ピンと G6 ピン (ATOMIC PortABC Extension Base の
+      Port C) を UART2 TX と UART2 RX に使います
+        - 受信できないときは `SPMS1_UART_MIDI_TX_PIN` と `SPMS1_UART_MIDI_RX_PIN` を入れ替えてください
 
     - Raspberry Pi Pico 2: GP4 ピンと GP5 ピンを UART1 TX と UART1 RX に使います
     - Raspberry Pi Pico 2 では、以下のように書き換えれば `SoftwareSerial` も使えます:
@@ -155,11 +190,13 @@ flowchart LR
   OSC[Osc 1]
   FILTER[Filter 1]
   AMP[Amp 1]
+  DELAY[Delay 1]
   OUT([Audio Out])
 
   OSC --> FILTER
   FILTER --> AMP
-  AMP --> OUT
+  AMP --> DELAY
+  DELAY --> OUT
 
   NOTE -. Gate .-> EG
   NOTE -. Pitch .-> OSC
@@ -181,11 +218,11 @@ NRPN が書き換えます。
 #### 実行順
 
 すべてのモジュールが入っています。音を作る型が 1 つずつと、モジュレーションのソースとオシレータの間に
-ミキサーが 1 つです。
+ミキサーが 1 つ、最後にディレイです。
 
 ```mermaid
 flowchart LR
-  LFO[LFO 1] ~~~ EG[EG 1] ~~~ MIX1[Mixer 1] ~~~ OSC[Osc 1] ~~~ FILTER[Filter 1] ~~~ AMP[Amp 1]
+  LFO[LFO 1] ~~~ EG[EG 1] ~~~ MIX1[Mixer 1] ~~~ OSC[Osc 1] ~~~ FILTER[Filter 1] ~~~ AMP[Amp 1] ~~~ DELAY[Delay 1]
 ```
 
 ミキサーには何も結線されていないので、毎サンプル自分のスロットぶんのコストを払うだけで、パッチが
@@ -236,6 +273,31 @@ flowchart LR
   class D,LIM nl
 ```
 
+#### Delay 1
+
+PRA32-U2 の Delay FX にならった、フィードバック付きのモノラルディレイです。入力の半分と、Feedback を
+掛けた遅延信号が、穏やかなローパスフィルタを通ってディレイラインに入ります。出力は入力と遅延信号の
+クロスフェードです。
+
+```mermaid
+flowchart LR
+  IN([Audio In]) --> H["× 0.5"]
+  H --> SUM((Σ))
+  SUM --> LPF["ローパス<br/>1 次"]
+  LPF --> DL["ディレイライン<br/>最大 340 ms"]
+  DL --> FB["× Feedback<br/>0〜0.5"]
+  FB --> SUM
+  DL --> X["クロスフェード<br/>Mix"]
+  IN --> X
+  X --> OUT([出力])
+```
+
+後ろにリミッターもクリップも要りません。入ってくるのが入力の半分、戻るのが遅延信号の高々半分なので、
+遅延信号が 1.0 以内なら書き戻すものも 1.0 以内で、始まりは無音です。フィルタも 2 サンプル間の読み出しも
+クロスフェードも重み付き平均で、平均するもの以上にはなりません。代わりに、最初の繰り返しはドライ信号より
+6 dB 小さくなります。入力は、アンプが Mod In にするのと同じく入口で 1.0 に収めるので、何を結線しても
+この上限は保たれます。
+
 ### パッチの編集 (NRPN)
 
 パッチはデータであり、NRPN は動いているシンセのそれを書き換えます。どのモジュールがどの順で走るか、各
@@ -257,19 +319,20 @@ flowchart LR
 | CC 99 | CC 98 | 設定する対象 | CC 6 の値 |
 | ----- | ----- | ---- | ---------- |
 | 0 | 0-31 | 実行順、スロットごとに | モジュール ID |
-| 1 | 0-9 | モジュール入力に何を入れるか | シグナル ID |
-| 2 | 0-22 | パラメータがどこから値を取るか | シグナル ID |
-| 3 | 0-27 | どの CC がコントロールスロットを埋めるか | CC 番号、0 なら割り当てなし |
+| 1 | 0-10 | モジュール入力に何を入れるか | シグナル ID |
+| 2 | 0-25 | パラメータがどこから値を取るか | シグナル ID |
+| 3 | 0-30 | どの CC がコントロールスロットを埋めるか | CC 番号、0 なら割り当てなし |
 
 実行順はスロット 0 から上へ読まれ、最初に現れたモジュール ID 0 で止まります。32 個に満たないパッチは
 そこで自ら終わるわけです。実行順はモジュールの番号付けとは別物です。あるモジュールが今サンプルの値を
 見られるのは自分より前に並んでいるものからだけで、後ろにあるものからは前サンプルの値を受け取ります。
 
 カテゴリ 3 で CC 番号 0 を指定すると、そのパラメータには CC がない状態になります。コントロールスロットは
-そのとき持っている値をそのまま保つので、パラメータをルーティングだけで動かせます。
+それまでの CC にかかわらず 0.0 になるので、パラメータが読む値はパッチだけで決まります。
 
-音を作るモジュールは 1 つずつ、ミキサーは 1 つあり、**この 6 個すべてがデフォルトの実行順に入っています**。
-パッチは結線するだけでよく、何かを先に有効化する必要はありません。どのパラメータにも CC が付いていないのは
+音を作るモジュールは 1 つずつ、ミキサーとディレイが 1 つずつあり、**この 7 個すべてがデフォルトの実行順に
+入っています**。パッチは結線するだけでよく、何かを先に有効化する必要はありません。ディレイを実行順から
+外せばそのぶんの時間が浮きます。そのときは最終出力をアンプに向け直します。どのパラメータにも CC が付いていないのは
 ミキサーだけで、そのぶんデフォルトのパッチでは定数を指させてあります。レベルは 1.0、極性は +0.5 なので、
 入力を 1 つ結線したミキサーはそれをそのまま通します。
 
@@ -277,11 +340,12 @@ flowchart LR
 
 | CC 98 | モジュール入力 | | CC 98 | モジュール入力 |
 | ----- | ------ | - | ----- | ------ |
-| 0 | EG 1 Gate | | 5 | Amp 1 Audio In |
-| 1 | Osc 1 Pitch | | 6 | Amp 1 Mod In |
-| 2 | Osc 1 Mod In | | 7 | Mixer 1 In 1 |
-| 3 | Filter 1 Audio In | | 8 | Mixer 1 In 2 |
-| 4 | Filter 1 Mod In | | 9 | 最終出力 |
+| 0 | EG 1 Gate | | 6 | Amp 1 Mod In |
+| 1 | Osc 1 Pitch | | 7 | Mixer 1 In 1 |
+| 2 | Osc 1 Mod In | | 8 | Mixer 1 In 2 |
+| 3 | Filter 1 Audio In | | 9 | Delay 1 Audio In |
+| 4 | Filter 1 Mod In | | 10 | 最終出力 |
+| 5 | Amp 1 Audio In | |  |  |
 
 ほとんどは名前のとおりのものを受け取りますが、3 つだけ名前からは分からない決まりがあります。Gate はレベル
 ではなく閾値で、信号が 0.25 以上になるとエンベロープがトリガし、下回るとリリースします。Pitch は MIDI ノート
@@ -295,14 +359,15 @@ flowchart LR
 
 | CC 98 | パラメータ | | CC 98 | パラメータ | | CC 98 | パラメータ |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | LFO 1 Rate | | 8 | Osc 1 Wave | | 16 | Filter 1 Mod Amt |
-| 1 | LFO 1 Level | | 9 | Osc 1 Coarse Tune | | 17 | Filter 1 Mod Polarity |
-| 2 | LFO 1 Polarity | | 10 | Osc 1 Fine Tune | | 18 | Amp 1 Gain |
-| 3 | EG 1 Attack | | 11 | Osc 1 Mod Amt | | 19 | Mixer 1 Level 1 |
-| 4 | EG 1 Decay | | 12 | Osc 1 Mod Polarity | | 20 | Mixer 1 Polarity 1 |
-| 5 | EG 1 Sustain | | 13 | Filter 1 Cutoff | | 21 | Mixer 1 Level 2 |
-| 6 | EG 1 Level | | 14 | Filter 1 Resonance | | 22 | Mixer 1 Polarity 2 |
-| 7 | EG 1 Polarity | | 15 | Filter 1 Gain | |  |  |
+| 0 | LFO 1 Rate | | 9 | Osc 1 Coarse Tune | | 18 | Amp 1 Gain |
+| 1 | LFO 1 Level | | 10 | Osc 1 Fine Tune | | 19 | Mixer 1 Level 1 |
+| 2 | LFO 1 Polarity | | 11 | Osc 1 Mod Amt | | 20 | Mixer 1 Polarity 1 |
+| 3 | EG 1 Attack | | 12 | Osc 1 Mod Polarity | | 21 | Mixer 1 Level 2 |
+| 4 | EG 1 Decay | | 13 | Filter 1 Cutoff | | 22 | Mixer 1 Polarity 2 |
+| 5 | EG 1 Sustain | | 14 | Filter 1 Resonance | | 23 | Delay 1 Time |
+| 6 | EG 1 Level | | 15 | Filter 1 Gain | | 24 | Delay 1 Feedback |
+| 7 | EG 1 Polarity | | 16 | Filter 1 Mod Amt | | 25 | Delay 1 Mix |
+| 8 | Osc 1 Wave | | 17 | Filter 1 Mod Polarity | |  |  |
 
 #### エントリ (CC 98)、カテゴリ 3 のみ
 
@@ -311,11 +376,11 @@ flowchart LR
 
 | CC 98 | CC の割り当て先 | 埋めるスロット |
 | ----- | ------ | ----- |
-| 23 | General Mod Wheel | General Mod Wheel |
-| 24 | General 1 | General Unipolar 1、General Bipolar 1 |
-| 25 | General 2 | General Unipolar 2、General Bipolar 2 |
-| 26 | General 3 | General Unipolar 3、General Bipolar 3 |
-| 27 | General 4 | General Unipolar 4、General Bipolar 4 |
+| 26 | General Mod Wheel | General Mod Wheel |
+| 27 | General 1 | General Unipolar 1、General Bipolar 1 |
+| 28 | General 2 | General Unipolar 2、General Bipolar 2 |
+| 29 | General 3 | General Unipolar 3、General Bipolar 3 |
+| 30 | General 4 | General Unipolar 4、General Bipolar 4 |
 
 #### モジュール ID
 
@@ -328,28 +393,30 @@ flowchart LR
 | 4 | Filter 1 |
 | 5 | Amp 1 |
 | 6 | Mixer 1 |
+| 7 | Delay 1 |
 
 #### シグナル ID
 
 | ID | シグナル | | ID | シグナル | | ID | シグナル |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | なし（定数 0.0） | | 17 | LFO 1 Polarity ± | | 34 | Mixer 1 Level 1 |
-| 1 | 定数 1.0 | | 18 | EG 1 Attack | | 35 | Mixer 1 Polarity 1 ± |
-| 2 | 定数 0.5 | | 19 | EG 1 Decay | | 36 | Mixer 1 Level 2 |
-| 3 | 定数 0.2 | | 20 | EG 1 Sustain | | 37 | Mixer 1 Polarity 2 ± |
-| 4 | 定数 0.1 | | 21 | EG 1 Level | | 38 | Note Pitch ± |
-| 5 | 定数 -0.1 | | 22 | EG 1 Polarity ± | | 39 | Note Gate |
-| 6 | 定数 -0.2 | | 23 | Osc 1 Wave | | 40 | Pitch Bend ± |
-| 7 | 定数 -0.5 | | 24 | Osc 1 Coarse Tune ± | | 41 | General Mod Wheel |
-| 8 | 定数 -1.0 | | 25 | Osc 1 Fine Tune ± | | 42 | General Unipolar 1 |
-| 9 | LFO 1 Output ± | | 26 | Osc 1 Mod Amt | | 43 | General Unipolar 2 |
-| 10 | EG 1 Output ± | | 27 | Osc 1 Mod Polarity ± | | 44 | General Unipolar 3 |
-| 11 | Osc 1 Output ± | | 28 | Filter 1 Cutoff | | 45 | General Unipolar 4 |
-| 12 | Filter 1 Output ± | | 29 | Filter 1 Resonance | | 46 | General Bipolar 1 ± |
-| 13 | Amp 1 Output ± | | 30 | Filter 1 Gain | | 47 | General Bipolar 2 ± |
-| 14 | Mixer 1 Output ± | | 31 | Filter 1 Mod Amt | | 48 | General Bipolar 3 ± |
-| 15 | LFO 1 Rate | | 32 | Filter 1 Mod Polarity ± | | 49 | General Bipolar 4 ± |
-| 16 | LFO 1 Level | | 33 | Amp 1 Gain | |  |  |
+| 0 | なし（定数 0.0） | | 18 | LFO 1 Polarity ± | | 36 | Mixer 1 Polarity 1 ± |
+| 1 | 定数 1.0 | | 19 | EG 1 Attack | | 37 | Mixer 1 Level 2 |
+| 2 | 定数 0.5 | | 20 | EG 1 Decay | | 38 | Mixer 1 Polarity 2 ± |
+| 3 | 定数 0.2 | | 21 | EG 1 Sustain | | 39 | Delay 1 Time |
+| 4 | 定数 0.1 | | 22 | EG 1 Level | | 40 | Delay 1 Feedback |
+| 5 | 定数 -0.1 | | 23 | EG 1 Polarity ± | | 41 | Delay 1 Mix |
+| 6 | 定数 -0.2 | | 24 | Osc 1 Wave | | 42 | Note Pitch ± |
+| 7 | 定数 -0.5 | | 25 | Osc 1 Coarse Tune ± | | 43 | Note Gate |
+| 8 | 定数 -1.0 | | 26 | Osc 1 Fine Tune ± | | 44 | Pitch Bend ± |
+| 9 | LFO 1 Output ± | | 27 | Osc 1 Mod Amt | | 45 | General Mod Wheel |
+| 10 | EG 1 Output ± | | 28 | Osc 1 Mod Polarity ± | | 46 | General Unipolar 1 |
+| 11 | Osc 1 Output ± | | 29 | Filter 1 Cutoff | | 47 | General Unipolar 2 |
+| 12 | Filter 1 Output ± | | 30 | Filter 1 Resonance | | 48 | General Unipolar 3 |
+| 13 | Amp 1 Output ± | | 31 | Filter 1 Gain | | 49 | General Unipolar 4 |
+| 14 | Mixer 1 Output ± | | 32 | Filter 1 Mod Amt | | 50 | General Bipolar 1 ± |
+| 15 | Delay 1 Output ± | | 33 | Filter 1 Mod Polarity ± | | 51 | General Bipolar 2 ± |
+| 16 | LFO 1 Rate | | 34 | Amp 1 Gain | | 52 | General Bipolar 3 ± |
+| 17 | LFO 1 Level | | 35 | Mixer 1 Level 1 | | 53 | General Bipolar 4 ± |
 
 **±** は、正負どちらにも振れるシグナルを表します。モジュール出力はフルスケールで -0.5 と +0.5 に届き、
 バイポーラのコントロールスロットは -0.5〜+0.5 で、ミキサーはそれを 2 つ足して 1.0 で止まります。
@@ -357,15 +424,15 @@ flowchart LR
 振れます。印のないものは 0.0〜1.0 で、Note Gate とユニポーラのコントロールスロットがこれにあたります。
 バスは両方を 1 つの番号空間で運ぶので、レンジは「何が書いたか」ではなくスロットごとの性質です。
 
-スロット 15〜37 には CC から届いた値が入るので、パラメータはデフォルトでは自分の CC を読んでいるわけです。
+スロット 16〜41 には CC から届いた値が入るので、パラメータはデフォルトでは自分の CC を読んでいるわけです。
 パラメータはそれぞれユニポーラかバイポーラで、スロットも同じレンジを取ります。ユニポーラは CC 4〜124 で
 0.0〜1.0 と、エンベロープと同じ幅なので、エンベロープを向ければつまみの全域を動かせます。バイポーラは
 CC 64 を 0.0 とする -0.5〜+0.5 と、LFO と同じ幅なので、バイポーラのソースを向ければ中央を挟んで上下に
 振れます。2 つのチューンは中央が「変化なし」を意味するのでバイポーラです。Polarity も、LFO、EG、ミキサー、
 2 つの Mod Polarity のいずれも、符号そのものが設定する値なのでバイポーラです。パラメータに別のスロットを指させることがモジュレー
-ションになります。CC のないスロットは、割り当てられるまで 0.0 のままです。
+ションになります。CC のないスロットは 0.0 です。
 
-スロット 41〜49 の General スロットは、どのパラメータにも属さないコントロールスロットです。CC をバスに
+スロット 45〜53 の General スロットは、どのパラメータにも属さないコントロールスロットです。CC をバスに
 載せるだけで、どのモジュール入力やパラメータからも読めます。General Mod Wheel は CC 1 を読む 0.0〜1.0
 のスロットで、起動時は CC 4 なので、ホイールを動かすまで 0.0 です。デフォルトではどこにも結線されて
 いません。General 1〜4 はデフォルトで
@@ -388,8 +455,6 @@ Note Pitch、Note Gate、Pitch Bend の 3 つは鍵盤がバスに載せるも�
 その負の値です。シグナル 4 はデフォルトのパッチが LFO 1 Polarity に与える値で、LFO をビブラートの深さ
 まで絞ります。シグナル 5 はその負の値です。ミキサーの 2 番目の入力に定数を置けば、信号を 2 種類の間で
 ずらせます。-0.5 なら片側にしか振れない信号を正負どちらにも振れるものへ、+0.5 ならその逆です。
-
-スロット 127 は、CC のないパラメータが使われない値を捨てる先です。ここを読ませてはいけません。
 
 ID 番号はファームウェアのバージョンをまたいで安定ではありません。パッチは保存されないので、モジュールの
 種類が増えたり、あるモジュールのインスタンスが増えたり、シグナルが増えたりすると、それ以降がすべて振り
@@ -430,6 +495,8 @@ Filter 1 Resonance は CC 94 の Q 5.66 までは CC 30 段ごとに Q が2倍�
 自己発振し、カットオフ周波数のサイン波を出します。発振は CC 123 までに約 0.5 の最大レベルに達し、
 つまみの上端までそのままです。この区間の下の方では発振がゆっくり立ち上がって入力と共存し、上端では
 入力を押しのけます。レベルはカットオフが約 150 Hz まではほぼ一定で、それより下では小さくなります。
+カットオフの上の方では、3倍音が折り返して非整数次の音になる前に発振がフェードアウトします。48 kHz では
+変調込みで 8 kHz（CC 108）から 10 kHz（CC 112）までで、それより上では Q 256 のレゾナンスとして働きます。
 下の例のようにカットオフを鍵盤に追従させると、サイン波の音源として弾けます。
 
 ミキサーは各入力をそれぞれのレベルとそれぞれの極性で受け取り、足し合わせます。Level は 0.0 (CC 4) で
@@ -444,13 +511,22 @@ Filter 1 Resonance は CC 94 の Q 5.66 までは CC 30 段ごとに Q が2倍�
 届きません）、その先で滑らかに上限へ寄せます。共振のピークはスイープ中に 1.0 を超えることがあり、そこを
 丸めても、角で切った場合に音の中へ折り返してくる高次の倍音よりずっと弱いもので済みます。
 
+Delay 1 の 3 つのパラメータはユニポーラで、ほかのユニポーラのつまみと同じく 1/120 刻みで動きます。Time は
+1 ステップ 2.83 ms の直線で CC 4 の 0 から CC 124 の 340 ms までを取り、下は 2.83 ms でクリップします。
+CC 5 までは 2.83 ms のままで、CC 64 で 170 ms です。回すと、テープディレイのように繰り返しのピッチが
+最大 25% 曲がり、少し遅れて新しい時間に着きます。
+Feedback は繰り返しをラインに戻すゲインで、CC 4 の 0（繰り返しは 1 回）から CC 124 の 0.5（繰り返す
+たびに 6 dB 下がり、少しずつ暗くなる）までです。CC 64 で 0.25 です。Mix はクロスフェードの繰り返しの
+割合で、CC 4 でドライ入力だけ、CC 64 で半々、CC 124 で繰り返しだけです。起動時は Time と Feedback が
+CC 64、Mix が CC 34（0.25）で、ドライ信号は 2.5 dB 下がり、最初の繰り返しはその約 16 dB 下に来ます。
+
 #### 例
 
 - ビブラートはデフォルトで結線済みです。LFO がオシレータのモジュレーション入力に直接届くので、CC 13 で
-  深さ、CC 3 でレートを決められます。CC 99 = 2, CC 98 = 1, CC 6 = 41 で LFO 1 Level を General Mod Wheel
+  深さ、CC 3 でレートを決められます。CC 99 = 2, CC 98 = 1, CC 6 = 45 で LFO 1 Level を General Mod Wheel
   から取るようにすれば、CC 13 で決めた深さまでホイールでビブラートを掛けられます
 - フィルタのカットオフをノートのピッチに追従させる（キーボードトラッキング）: CC 99 = 1, CC 98 = 4,
-  CC 6 = 38 で、エンベロープの代わりに Note Pitch をフィルタのモジュレーション入力に置きます。カットオフが
+  CC 6 = 42 で、エンベロープの代わりに Note Pitch をフィルタのモジュレーション入力に置きます。カットオフが
   CC 64、Mod Amt が CC 124 なら、ノート 60 でカットオフはつまみの中央のままで、1 ノートごとに半音動きます
 - フィルタのカットオフを LFO でつまみの中央を挟んで揺らす: CC 99 = 1, CC 98 = 4, CC 6 = 9。
   モジュール入力は毎サンプル読まれるので、LFO のレートはいくつでも構いません
@@ -467,33 +543,44 @@ Filter 1 Resonance は CC 94 の Q 5.66 までは CC 30 段ごとに Q が2倍�
 - ピッチを LFO ではなくエンベロープで動かす: CC 99 = 1, CC 98 = 2, CC 6 = 10 で LFO の代わりにエンベロープ
   をオシレータのモジュレーション入力に置き、あとは CC 13 で深さを決めます。この経路ではエンベロープを
   絞るものがないので、CC 5 で半音、CC 16 で 1 オクターブです
-- ピッチベンド。デフォルトではどこにも結線されていません。CC 99 = 1 で CC 98 = 7 と 8 に CC 6 = 38 と 40
+- ピッチベンド。デフォルトではどこにも結線されていません。CC 99 = 1 で CC 98 = 7 と 8 に CC 6 = 42 と 44
   を送ると Note Pitch と Pitch Bend が Mixer 1 の 2 つの入力に入り、CC 99 = 1, CC 98 = 1, CC 6 = 14 で
   その和がオシレータのピッチになります。Mixer 1 はオシレータより前を走るので、ホイールは同じサンプルで
   音程を動かします。レベルはどちらも最大なので、そのままではホイールが上下 5 オクターブ振ります。
-  CC 99 = 2, CC 98 = 21, CC 6 = 42 で Mixer 1 の 2 番目のレベルを General Unipolar 1 から取るように
+  CC 99 = 2, CC 98 = 21, CC 6 = 46 で Mixer 1 の 2 番目のレベルを General Unipolar 1 から取るように
   すれば、CC 16 で演奏できるベンドレンジまで絞れます
 - モジュレーション入力を通して、ピッチを両方向に曲げる CC。Mixer 1 はオシレータより前を走り、空いて
-  います: CC 99 = 1, CC 98 = 7, CC 6 = 28 でフィルタのカットオフのコントロールスロットを 1 番目の入力に、
+  います: CC 99 = 1, CC 98 = 7, CC 6 = 29 でフィルタのカットオフのコントロールスロットを 1 番目の入力に、
   CC 98 = 8, CC 6 = 7 で定数 -0.5 を 2 番目の入力に置き、CC 98 = 2, CC 6 = 14 で LFO の代わりに Mixer 1 を
   オシレータのモジュレーション入力に向けます。スロットはユニポーラなので、この定数が LFO が 0 を中心と
   するのと同じく CC 64 を中心にします。CC 74 は CC 13 の許す範囲でノートの上下にピッチを曲げるように
   なります。CC 6 で上下に半音、CC 28 で 1 オクターブです
 - 逆向きに効く CC。ミキサーに反転させます。Mixer 1 はすでに走っているので、結線するだけです。
-  CC 99 = 1, CC 98 = 7, CC 6 = 28 でカットオフのコントロールスロットを 1 番目の入力に、CC 98 = 8,
+  CC 99 = 1, CC 98 = 7, CC 6 = 29 でカットオフのコントロールスロットを 1 番目の入力に、CC 98 = 8,
   CC 6 = 1 で定数 1.0 を 2 番目の入力に置き、CC 99 = 2, CC 98 = 20, CC 6 = 7 で 1 番目の入力の Polarity を
   -0.5、つまり反転側の端に固定すると、ミキサーは 1.0 から CC を引いた値、つまり CC を CC 64 で折り返した
   ものを出力します。CC 99 = 2, CC 98 = 13, CC 6 = 14 でカットオフ自身のソースをその
   ミキサーに向ければ、CC 74 は上げるほどフィルタを閉じるようになります
 - フィルタを経路から外す: CC 99 = 1, CC 98 = 5, CC 6 = 11 でアンプのオーディオ入力をオシレータに向けます。
   フィルタは走り続けスロットも占めたままですが、誰も読みません
+- モジュレーションホイールで掛かるエコー: CC 99 = 2, CC 98 = 25, CC 6 = 45 で Delay 1 Mix を General Mod
+  Wheel から取ります。起動時は 0.0 なので、ホイールを動かすまで出力はドライです
+- ディレイを外して時間を浮かせる: CC 99 = 0, CC 98 = 6, CC 6 = 0 で実行順をアンプの後ろで終わらせ、
+  CC 99 = 1, CC 98 = 10, CC 6 = 13 で最終出力をアンプに戻します
+- フィルタの前に置くエコー: CC 99 = 1, CC 98 = 9, CC 6 = 11 で Delay 1 にオシレータを入れ、CC 98 = 3,
+  CC 6 = 15 でフィルタに Delay 1 を入れ、CC 98 = 10, CC 6 = 13 で最終出力をアンプに戻します。繰り返しも
+  ノートと同じくフィルタとアンプのエンベロープを通るので、音と一緒に消えていきます。Delay 1 はフィルタの
+  後ろで走ったままなので、フィルタは 1 サンプル遅れて読みますが、エコーには関係ありません
 
 #### 注意点
 
 - モジュール入力（カテゴリ 1）は毎サンプル読まれ、スムージングされません。パラメータ（カテゴリ 2）は
   1 バッファに 1 回読まれ、受け取る側でスムージングされます。速いソースはモジュール入力へ、段階的なものは
   パラメータへ通してください
-- パラメータのソースは 128 のスロットのどれでも指せます。49 より上のスロットは、何かが書き込むまで 0 を
+- スムージングは 2 段（48 kHz で平均遅れ 10.7 ms、35 ms で 99%）で、CC をまばらに（例えば 20 ms ごとに）
+  送るコントローラーの段差を丸めます。Osc 1 Coarse Tune と Fine Tune は、音程がすぐ追従するように
+  スムージングしません
+- パラメータのソースは 128 のスロットのどれでも指せます。53 より上のスロットは、何かが書き込むまで 0 を
   返すので、そこを指したパラメータはユニポーラならつまみの下端、バイポーラなら中央に留まります
 - パラメータは自分の値を自分のレンジ、0.0〜1.0 か -0.5〜+0.5 に丸め、コントロールスロットも同じレンジを
   バスに載せます。ユニポーラのスロットをモジュール入力に結線するとエンベロープと同じく片側にしか振れず、
@@ -505,10 +592,10 @@ Filter 1 Resonance は CC 94 の Q 5.66 までは CC 30 段ごとに Q が2倍�
   遅いので、そこで動かす PC シミュレーターが重くなることがあります。ループの中にこれを 0 に落とすものは
   ありません
 
-### デバッグ UART
+### デバッグプリント
 
-- M5Stack AtomS3 Lite: USB CDC (同じケーブルで USB MIDI と並ぶシリアルポート)
-- Raspberry Pi Pico 2
+- USB CDC (同じケーブルで USB MIDI と並ぶシリアルポート)
+- Raspberry Pi Pico 2 では、代わりに UART も使えます: `SPMS1_DEBUG_PRINT_USE_USB_SERIAL` をコメントアウトしてください
     - 速度: 115200 bps
     - GP0 ピンと GP1 ピンを UART0 TX と UART0 RX に使います
 
@@ -520,7 +607,8 @@ Filter 1 Resonance は CC 94 の Q 5.66 までは CC 30 段ごとに Q が2倍�
   受けます。`sh sim_spinel/build.sh` でビルドし (Windows は Git Bash 上の MinGW gcc、macOS は clang)、
   `build/sim_spinel/spms1_sim --midi-in NAME` で起動します。`--list` で MIDI 入力の一覧を表示します
     - ビルドの最初に、PATH 上、Windows では WSL の中にある Spinel で "spms1_main.c" を生成し直します。
-      `--no-spinel` を付けるか、Spinel が見つからなければ、今ある "spms1_main.c" をビルドします
+      その際 "sig" の型シードを渡します。`--no-spinel` を付けるか、Spinel が見つからなければ、
+      今ある "spms1_main.c" をビルドします
     - PortAudio は実行時に読み込みます。PortAudio プロジェクトの配布はソースのみなので、Windows では
       RubyInstaller の MSYS2 に `ridk exec pacman -S mingw-w64-ucrt-x86_64-portaudio` で入れ
       (シミュレーターはそこを探します)、macOS では `brew install portaudio` で入れます。
@@ -555,10 +643,10 @@ C が `.rb` を指す `#line` を持っているので、対応は最後まで�
 
 読む前に知っておくべきことが 4 つあります。
 
-- 上の `-Os` は実際の設定ではありません。"sp_runtime.h" が `#pragma GCC optimize ("O3")` を
+- 上の `-Os` は実際の設定ではありません。"spinel_rt.h" が `#pragma GCC optimize ("O3")` を
   持っており、この翻訳単位ではコマンドラインの指定を上書きします。`-O3` を渡しても `-Os` を
   渡しても結果は変わりません
-- シンセ本体は `.text` にありません。"sp_runtime.h" の `#define main` が `.time_critical` に
+- シンセ本体は `.text` にありません。"spinel_rt.h" の `#define main` が `.time_critical` に
   置きます。2 つのビルドが同じコードだと示すには、それぞれに
   `arm-none-eabi-objcopy -O binary --only-section=.time_critical` をかけてバイト比較します。
   コメントだけの変更は "spms1_main.c" の `#line` を全部動かして他は何も変えませんが、その確認も
@@ -566,7 +654,7 @@ C が `.rb` を指す `#line` を持っているので、対応は最後まで�
 - 単体コンパイルは実際の firmware より 2000 命令ほど軽く出ます。本番のビルドでは `flatten` が
   スケッチ側の関数まで `Spms1_main` に取り込むからです。単体ビルド同士の差分は信用できますが、
   絶対値は信用できません。絶対値は Arduino のビルドキャッシュに残る `.elf` から取ります
-- テスト用の小さな関数でうまくコンパイルされる書き方が、3 万命令の `Spms1_main` に
+- テスト用の小さな関数でうまくコンパイルされる書き方が、1 万 2000 命令の `Spms1_main` に
   インライン展開されたあとも同じとは限りません。小さなファイルではなく、実物で測ります
 
 
@@ -606,6 +694,6 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 ```
 
-- ベースコミット: <https://github.com/matz/spinel/tree/5af61ae7d53e36ca59a8de5870f532360d88fd7c>
-- 対象ファイル: `sp_*.*`, `re_*.*`
+- ベースリリース: 2026.09.12 <https://github.com/matz/spinel/tree/2026.09.12>
+- 対象ファイル: `spinel_rt.h*`, `mruby_shim.h*`, `sp_*.*`, `re_*.*`
     - 注: ランタイムの一部のファイルは、MCU 向けに ISGK Instruments (Ryo Ishigaki) が変更しています

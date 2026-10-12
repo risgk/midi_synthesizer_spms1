@@ -1,6 +1,6 @@
 ```
-  [MIDI Synthesizer]                                              Date: 2026-09-29                      
-  Model: SPMS-1 (type-1)          MIDI Implementation Chart       Version: 0.0.11                       
+  [MIDI Synthesizer]                                              Date: 2026-10-12                      
+  Model: SPMS-1 (type-1)          MIDI Implementation Chart       Version: 0.0.12                       
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Function...                   | Transmitted   | Recognized    | Remarks                              |
 +-------------------------------+---------------+---------------+--------------------------------------+
@@ -35,6 +35,9 @@
 |                            75 | x             | o             | EG Decay (Time)                      |
 |                            30 | x             | o             | EG Sustain (Level)                   |
 |                             3 | x             | o             | LFO Rate                             |
+|                            55 | x             | o             | Delay Time                           |
+|                            56 | x             | o             | Delay Feedback                       |
+|                            94 | x             | o             | Delay Mix                            |
 |                             1 | x             | o             | General Mod Wheel (Unipolar)         |
 |                            16 | x             | o             | General 1 (Unipolar and Bipolar)     |
 |                            17 | x             | o             | General 2 (Unipolar and Bipolar)     |

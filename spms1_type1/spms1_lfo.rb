@@ -2,9 +2,13 @@ module Spms1
   # Triangle LFO. Deliberately not band-limited: a triangle's harmonics fall off as 1/n^2, so even
   # at the top of the rate range what folds back stays far below the fundamental.
   class LFO
-    # Blend at the reference rate on the line below. The two move together: their product is what
-    # fixes the time constant, so changing one without the other changes how fast smoothing is.
-    SMOOTHING_TARGET_BLEND_BASE = 0.03125
+    # Blend at the reference rate on the line below, for each of two cascaded stages. The two move
+    # together: their product is what fixes the time constant, so changing one without the other
+    # changes how fast smoothing is. Two stages at 1/64 (5.3 ms each at 48 kHz) delay a step by
+    # 10.7 ms on average, as one stage at 1/128 would, but start from zero slope, so that the steps
+    # of a controller sending sparse CCs (e.g. every 20 ms) are rounded off rather than heard,
+    # and settle sooner, 99% in 35 ms.
+    SMOOTHING_TARGET_BLEND_BASE = 0.015625
     # Number of samples between control-rate updates; smoothing speed is kept approximately constant if this is changed.
     # It has to stay a power of two: the counter below wraps with a mask, because Ruby's % is a
     # floor-modulo and sp_imod carries a sign correction the counter can never need -- one branch
@@ -37,12 +41,14 @@ module Spms1
       @phase = 0.0
       # Middle of the range, so the LFO starts where its control does rather than sliding up to it.
       @rate = 0.5
+      @stage_1_rate = 0.5
       @current_rate = 0.5
       @level = 1.0
       @polarity = 1.0
       # Level and polarity are multiplied before smoothing, so the per-sample path takes one
       # multiply and only one smoothing state has to be carried.
       @amount = 1.0
+      @stage_1_amount = 1.0
       @current_amount = 1.0
       # Not derived here: process assigns it on its first call, before anything reads it.
       @dt = 0.0
@@ -78,8 +84,10 @@ module Spms1
         # Rate and amount are smoothed at the control rate to avoid sudden jumps, and the phase
         # increment is derived here rather than per sample: nothing feeds this module, so it
         # cannot change between control-rate updates.
-        @current_rate += (@rate - @current_rate) * @smoothing_target_blend
-        @current_amount += (@amount - @current_amount) * @smoothing_target_blend
+        @stage_1_rate += (@rate - @stage_1_rate) * @smoothing_target_blend
+        @current_rate += (@stage_1_rate - @current_rate) * @smoothing_target_blend
+        @stage_1_amount += (@amount - @stage_1_amount) * @smoothing_target_blend
+        @current_amount += (@stage_1_amount - @current_amount) * @smoothing_target_blend
         @dt = rate_to_freq_fast(@current_rate) * @inv_sample_rate
       end
 

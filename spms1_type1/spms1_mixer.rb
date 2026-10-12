@@ -4,9 +4,13 @@ module Spms1
   # other; and a constant on the second input shifts a unipolar signal, such as the envelope, into
   # a bipolar one.
   class Mixer
-    # Blend at the reference rate on the line below. The two move together: their product is what
-    # fixes the time constant, so changing one without the other changes how fast smoothing is.
-    SMOOTHING_TARGET_BLEND_BASE = 0.03125
+    # Blend at the reference rate on the line below, for each of two cascaded stages. The two move
+    # together: their product is what fixes the time constant, so changing one without the other
+    # changes how fast smoothing is. Two stages at 1/64 (5.3 ms each at 48 kHz) delay a step by
+    # 10.7 ms on average, as one stage at 1/128 would, but start from zero slope, so that the steps
+    # of a controller sending sparse CCs (e.g. every 20 ms) are rounded off rather than heard,
+    # and settle sooner, 99% in 35 ms.
+    SMOOTHING_TARGET_BLEND_BASE = 0.015625
     # Number of samples between control-rate updates; smoothing speed is kept approximately constant if this is changed.
     # It has to stay a power of two: the counter below wraps with a mask, because Ruby's % is a
     # floor-modulo and sp_imod carries a sign correction the counter can never need -- one branch
@@ -32,6 +36,8 @@ module Spms1
       # sample, so the per-sample path is two multiplies and an add and only two states smooth.
       @target_1 = 1.0
       @target_2 = 1.0
+      @stage_1_1 = 1.0
+      @stage_1_2 = 1.0
       @current_1 = 1.0
       @current_2 = 1.0
       @sample_counter = 0
@@ -76,8 +82,10 @@ module Spms1
     # global, and a mixer loading one twice a sample is about 1.8us a buffer.
     def process(input_1 = 0.0, input_2 = 0.0)
       if @sample_counter == 0
-        @current_1 += (@target_1 - @current_1) * @smoothing_target_blend
-        @current_2 += (@target_2 - @current_2) * @smoothing_target_blend
+        @stage_1_1 += (@target_1 - @stage_1_1) * @smoothing_target_blend
+        @current_1 += (@stage_1_1 - @current_1) * @smoothing_target_blend
+        @stage_1_2 += (@target_2 - @stage_1_2) * @smoothing_target_blend
+        @current_2 += (@stage_1_2 - @current_2) * @smoothing_target_blend
       end
 
       @sample_counter = (@sample_counter + 1) & CONTROL_RATE_MASK

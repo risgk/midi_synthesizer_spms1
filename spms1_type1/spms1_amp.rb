@@ -2,9 +2,13 @@ module Spms1
   # Amplifier that smooths the gain parameter to avoid zipper noise.
   # Modulation input is applied directly without smoothing.
   class Amp
-    # Blend at the reference rate on the line below. The two move together: their product is what
-    # fixes the time constant, so changing one without the other changes how fast smoothing is.
-    SMOOTHING_TARGET_BLEND_BASE = 0.03125
+    # Blend at the reference rate on the line below, for each of two cascaded stages. The two move
+    # together: their product is what fixes the time constant, so changing one without the other
+    # changes how fast smoothing is. Two stages at 1/64 (5.3 ms each at 48 kHz) delay a step by
+    # 10.7 ms on average, as one stage at 1/128 would, but start from zero slope, so that the steps
+    # of a controller sending sparse CCs (e.g. every 20 ms) are rounded off rather than heard,
+    # and settle sooner, 99% in 35 ms.
+    SMOOTHING_TARGET_BLEND_BASE = 0.015625
     # Number of samples between control-rate updates; smoothing speed is kept approximately
     # constant if this is changed. It has to stay a power of two: the counter below wraps with a
     # mask, because Ruby's % is a floor-modulo and sp_imod carries a sign correction the counter
@@ -23,6 +27,7 @@ module Spms1
       @sample_rate = sample_rate
       @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (48000.0 / @sample_rate) * (CONTROL_RATE_DIVISOR / 4.0)
       @gain = 1.0
+      @stage_1_gain = 1.0
       @current_gain = 1.0
       @sample_counter = 0
     end
@@ -38,7 +43,8 @@ module Spms1
     def process(audio_input = 0.0, modulation_input = 1.0)
       # Gain parameter is smoothed at control rate to avoid zipper noise.
       if @sample_counter == 0
-        @current_gain += (@gain - @current_gain) * @smoothing_target_blend
+        @stage_1_gain += (@gain - @stage_1_gain) * @smoothing_target_blend
+        @current_gain += (@stage_1_gain - @current_gain) * @smoothing_target_blend
       end
 
       @sample_counter = (@sample_counter + 1) & CONTROL_RATE_MASK

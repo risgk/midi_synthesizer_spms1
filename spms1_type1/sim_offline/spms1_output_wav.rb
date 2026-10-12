@@ -8,6 +8,7 @@ require_relative '../spms1_amp'
 require_relative '../spms1_env_gen'
 require_relative '../spms1_lfo'
 require_relative '../spms1_mixer'
+require_relative '../spms1_delay'
 
 SAMPLE_RATE = 48000.0
 DURATION_SEC = 15.0
@@ -42,7 +43,7 @@ filter.set_modulation_amount(cc_to_unipolar(64))
 filter.set_gain(cc_to_unipolar(64))
 
 amp = Spms1::Amp.new(SAMPLE_RATE)
-amp.set_gain(cc_to_unipolar(64))
+amp.set_gain(cc_to_unipolar(124))
 
 env_gen = Spms1::EnvGen.new(SAMPLE_RATE)
 env_gen.set_attack(cc_to_unipolar(4))
@@ -58,11 +59,16 @@ lfo.set_level(cc_to_unipolar(124))
 # The constant 0.1 the default patch routes to it.
 lfo.set_polarity(0.1)
 
+delay = Spms1::Delay.new(SAMPLE_RATE)
+delay.set_time(cc_to_unipolar(64))
+delay.set_feedback(cc_to_unipolar(64))
+delay.set_mix(cc_to_unipolar(34))
+
 puts "Generating stereo waveform data..."
 
 pcm_bytes = []
 
-# The default run order, less the mixer it does not use: LFO, EG, Osc, Filter, Amp. Each module reads what the ones ahead
+# The default run order, less the mixer it does not use: LFO, EG, Osc, Filter, Amp, Delay. Each module reads what the ones ahead
 # of it made in this same sample, which is what the run order buys.
 NUM_SAMPLES.times do
   lfo_output = lfo.process
@@ -70,8 +76,9 @@ NUM_SAMPLES.times do
   oscillator_output = oscillator.process(NOTE * (1.0 / 120.0) - 0.5, lfo_output)
   filter_output = filter.process(oscillator_output, env_gen_output)
   amp_output = amp.process(filter_output, env_gen_output)
+  delay_output = delay.process(amp_output)
 
-  [amp_output, amp_output].each do |ch_sample|
+  [delay_output, delay_output].each do |ch_sample|
     clamped_sample = (ch_sample * 8388607.0).round
     clamped_sample = [8388607, [clamped_sample, -8388608].max].min
 

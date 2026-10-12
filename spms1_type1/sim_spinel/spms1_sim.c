@@ -7,6 +7,7 @@
  *
  *   spms1_sim [--list] [--midi-in N|NAME] [--frames N] [--host wasapi|mme|ds|default]
  */
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,6 +24,12 @@
 #endif
 
 extern int Spms1_main(int argc, char **argv);
+
+/* The MinGW linker keeps runtime code that the synth never calls but that refers to these, which
+   upstream define in files the sketch does not vendor. urandom fails closed on the 0. */
+bool sp_convert_soft;
+bool sp_convert_failed;
+int sp_crypto_entropy(unsigned char *out, int nbytes) { (void)out; (void)nbytes; return 0; }
 
 /* ---- MIDI state, as in spms1_type1.ino ---- */
 
