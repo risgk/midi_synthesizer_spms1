@@ -97,22 +97,9 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.1
     - デバイス名: "SPMS-1 (type-2)"
 - UART MIDI 入力
     - 速度: 31250 bps
-    - GP4 ピンと GP5 ピンを UART1 TX と UART1 RX に使います
-    - 以下のように書き換えれば `SoftwareSerial` も使えます:
-
-        ```cpp
-        #include <SoftwareSerial.h>
-        #define SPMS1_UART_MIDI_TX_PIN              (4)
-        #define SPMS1_UART_MIDI_RX_PIN              (5)
-        SoftwareSerial mySerial(SPMS1_UART_MIDI_RX_PIN, SPMS1_UART_MIDI_TX_PIN);
-        #define SPMS1_UART_MIDI_SERIAL              mySerial
-        ```
-
-        ```cpp
-        //  SPMS1_UART_MIDI_SERIAL.setTX(SPMS1_UART_MIDI_TX_PIN);
-        //  SPMS1_UART_MIDI_SERIAL.setRX(SPMS1_UART_MIDI_RX_PIN);
-        ```
-
+    - GP4 ピンと GP5 ピンを TX と RX に、`SerialPIO` (PIO による UART) で使います
+    - `SPMS1_UART_MIDI_TX_PIN` と `SPMS1_UART_MIDI_RX_PIN` を書き換えれば、TX と RX の入れ替えを含め、
+      どのピンでも使えます
     - DIN/TRS MIDI は、たとえば Adafruit MIDI FeatherWing Kit などを使う (そして手を入れる) ことで利用できます
         - Adafruit [MIDI FeatherWing Kit](https://www.adafruit.com/product/4740) (Product ID: 4740)
         - M5Stack [Midi Unit with DIN Connector (SAM2695)](https://shop.m5stack.com/products/midi-unit-with-din-connector-sam2695) (SKU: U187) のセパレートモード
