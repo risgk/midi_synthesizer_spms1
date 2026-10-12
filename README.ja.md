@@ -7,8 +7,8 @@ MIDI Synthesizer SPMS-1
 - [English README](./README.md) (英語版が正です)
 
 
-SPMS-1 (type-1)
----------------
+SPMS-1 (type-1) (Frozen)
+------------------------
 
 - M5Stack AtomS3 Lite と Raspberry Pi Pico 2 用のモノフォニック・セミモジュラー MIDI シンセサイザー
 - フィルタ: ZDF/TPT ステート・バリアブル・フィルタ (遅延ソフトクリッピング付き)
