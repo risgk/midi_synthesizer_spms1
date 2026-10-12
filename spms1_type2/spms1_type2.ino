@@ -411,7 +411,6 @@ void setup() {
   UART_MIDI.setHandlePitchBend(handlePitchBend);
   UART_MIDI.begin(MIDI_CHANNEL_OMNI);
   UART_MIDI.turnThruOff();
-  SPMS1_UART_MIDI_SERIAL.begin(SPMS1_UART_MIDI_SPEED);
 #endif  // defined(SPMS1_USE_UART_MIDI)
 
 #if defined(ARDUINO_RASPBERRY_PI_PICO) || defined(ARDUINO_RASPBERRY_PI_PICO_2)
