@@ -11,55 +11,10 @@
 #pragma GCC diagnostic ignored "-Wunused-function"
 
 #define SPMS1_USE_DEBUG_PRINT
-#define SPMS1_USE_USB_MIDI                  // Select USB Mode: "USB-OTG (TinyUSB)" (ESP32-S3) or USB Stack: "Adafruit TinyUSB" (RP2350) in the Arduino IDE "Tools" menu
+#define SPMS1_USE_USB_MIDI                  // Select USB Stack: "Adafruit TinyUSB" in the Arduino IDE "Tools" menu
 #define SPMS1_USE_UART_MIDI
 
 #define SPMS1_UART_MIDI_SPEED               (31250)
-
-#if defined(ARDUINO_ARCH_ESP32)
-
-// for M5Stack AtomS3 Lite
-// The board "M5AtomS3" covers the AtomS3 too, which has no RGB LED, so the LED is switched here.
-#define SPMS1_M5STACK_ATOMS3_LITE
-// PWM levels, 0-255, picked by eye to read as Ruby, #E0115F. The LED's primaries are not sRGB's,
-// so converting the colour does not land on it.
-#define SPMS1_LED_LEVEL_R                   (48)
-#define SPMS1_LED_LEVEL_G                   (0)
-#define SPMS1_LED_LEVEL_B                   (16)
-
-#define SPMS1_DEBUG_PRINT_SERIAL            Serial  // USB CDC, next to USB MIDI
-
-// Uncomment SPMS1_USE_PDM_OUTPUT for the PDM output from the AtomS3 Lite's own Grove port (G2 and G1),
-// in place of the Atomic Audio-3.5 Base. The UART MIDI then moves to Port C (G5 and G6) of the
-// M5Stack ATOMIC PortABC Extension Base, as the Audio-3.5 Base takes G5 and G6 for I2S.
-// The I2S peripheral's PCM-to-PDM converter drives one 1-bit sigma-delta stream per channel at
-// 6.144 MHz, so no DAC is needed, and no fixed carrier near the audio band is left to beat or
-// alias into a whistle. The noise on it may still be noticeable, and with USB MIDI, the USB's
-// noise rides on it too.
-//#define SPMS1_USE_PDM_OUTPUT
-
-#define SPMS1_UART_MIDI_SERIAL              Serial2
-#if defined(SPMS1_USE_PDM_OUTPUT)
-#define SPMS1_PDM_L_PIN                     (2)     // Grove, white
-#define SPMS1_PDM_R_PIN                     (1)     // Grove, yellow
-#define SPMS1_UART_MIDI_TX_PIN              (5)     // Port C
-#define SPMS1_UART_MIDI_RX_PIN              (6)     // Port C
-#else  // defined(SPMS1_USE_PDM_OUTPUT)
-#define SPMS1_UART_MIDI_TX_PIN              (2)     // Grove
-#define SPMS1_UART_MIDI_RX_PIN              (1)     // Grove
-#endif  // defined(SPMS1_USE_PDM_OUTPUT)
-
-// for M5Stack Atomic Audio-3.5 Base
-#define SPMS1_I2S_DATA_PIN                  (5)
-#define SPMS1_I2S_BCLK_PIN                  (8)
-#define SPMS1_I2S_LRCK_PIN                  (6)
-#define SPMS1_I2C_SDA_PIN                   (38)
-#define SPMS1_I2C_SCL_PIN                   (39)
-#define SPMS1_ES8311_DAC_VOLUME             (0xBF)  // 0.5 dB steps, 0xBF = 0 dB
-
-#define SPMS1_SYNTH_TASK_STACK_SIZE         (16384)
-
-#else  // defined(ARDUINO_ARCH_ESP32)
 
 #define SPMS1_DEBUG_PRINT_USE_USB_SERIAL    // USB CDC, next to USB MIDI; comment out for UART0 on GP0 and GP1
 
@@ -81,13 +36,11 @@
 #define SPMS1_I2S_BCLK_PIN                  (10)  // LRCLK is SPMS1_I2S_BCLK_PIN + 1
 #define SPMS1_I2S_SWAP_LEFT_AND_RIGHT       (false)
 
-//#define SPMS1_USE_PWM_AUDIO_INSTEAD_OF_I2S  // Raspberry Pi Pico 2 only
+//#define SPMS1_USE_PWM_AUDIO_INSTEAD_OF_I2S
 
 // for Pimoroni Pico VGA Demo Base (PIM553)
 #define SPMS1_PWM_AUDIO_L_PIN               (28)
 #define SPMS1_PWM_AUDIO_R_PIN               (27)
-
-#endif  // defined(ARDUINO_ARCH_ESP32)
 
 ////////////////////////////////////////////////////////////////
 
@@ -101,14 +54,6 @@ struct MySettings : public midi::DefaultSettings {
 };
 
 #if defined(SPMS1_USE_USB_MIDI)
-#if defined(ARDUINO_ARCH_ESP32)
-#if ARDUINO_USB_MODE
-#error Select USB Mode: "USB-OTG (TinyUSB)" in the Arduino IDE "Tools" menu
-#endif  // ARDUINO_USB_MODE
-#include <USB.h>
-#include <USBMIDI.h>
-USBMIDI g_usb_midi("SPMS-1 (type-2)");
-#else  // defined(ARDUINO_ARCH_ESP32)
 #include <Adafruit_TinyUSB.h>
 #include <pico/mutex.h>
 Adafruit_USBD_MIDI usbd_midi;
@@ -119,33 +64,19 @@ Adafruit_USBD_MIDI usbd_midi;
 // around them to make the IRQ skip. A rename in the library shows up as a link error.
 extern mutex_t __usb_mutex;
 MIDI_CREATE_CUSTOM_INSTANCE(Adafruit_USBD_MIDI, usbd_midi, USB_MIDI, MySettings);
-#endif  // defined(ARDUINO_ARCH_ESP32)
 #endif  // defined(SPMS1_USE_USB_MIDI)
 
 #if defined(SPMS1_USE_UART_MIDI)
 MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, SPMS1_UART_MIDI_SERIAL, UART_MIDI, MySettings);
 #endif
 
-#if defined(ARDUINO_ARCH_ESP32)
-#if defined(SPMS1_USE_PDM_OUTPUT)
-#include <driver/i2s_pdm.h>
-typedef int16_t   i2s_sample_t;  // PCM-to-PDM takes 16-bit samples only
-#else  // defined(SPMS1_USE_PDM_OUTPUT)
-#include <Wire.h>
-#include <driver/i2s_std.h>
-typedef int32_t   i2s_sample_t;
-#endif  // defined(SPMS1_USE_PDM_OUTPUT)
-i2s_chan_handle_t g_i2s_output = NULL;
-i2s_sample_t*     g_i2s_frames = NULL;
-uint32_t          g_i2s_frame_index = 0;
-TaskHandle_t      g_synth_task = NULL;
-#elif defined(SPMS1_USE_PWM_AUDIO_INSTEAD_OF_I2S)
+#if defined(SPMS1_USE_PWM_AUDIO_INSTEAD_OF_I2S)
 #include "spms1_pico2_pwm_audio.h"
 SPMS1_PWMAudioOutput g_pwm_output(SPMS1_PWM_AUDIO_L_PIN, SPMS1_PWM_AUDIO_R_PIN);
-#else  // defined(ARDUINO_ARCH_ESP32)
+#else  // defined(SPMS1_USE_PWM_AUDIO_INSTEAD_OF_I2S)
 #include "spms1_pico2_i2s.h"
 SPMS1_I2SOutput g_i2s_output;
-#endif  // defined(ARDUINO_ARCH_ESP32)
+#endif  // defined(SPMS1_USE_PWM_AUDIO_INSTEAD_OF_I2S)
 
 #if defined(SPMS1_USE_DEBUG_PRINT) && defined(SPMS1_DEBUG_PRINT_USE_USB_SERIAL)
 // Collects one report so that it goes to USB CDC whole or not at all. A plain Serial.print would
@@ -187,63 +118,6 @@ void handleNoteOn(byte channel, byte pitch, byte velocity);
 void handleNoteOff(byte channel, byte pitch, byte velocity);
 void handleControlChange(byte channel, byte number, byte value);
 void handlePitchBend(byte channel, int bend);
-
-#if defined(ARDUINO_ARCH_ESP32) && !defined(SPMS1_USE_PDM_OUTPUT)
-
-static void write_i2c_register(uint8_t address, uint8_t reg, uint8_t value) {
-  Wire.beginTransmission(address);
-  Wire.write(reg);
-  Wire.write(value);
-  Wire.endTransmission();
-}
-
-static uint8_t read_i2c_register(uint8_t address, uint8_t reg) {
-  Wire.beginTransmission(address);
-  Wire.write(reg);
-  Wire.endTransmission(false);
-  Wire.requestFrom(address, static_cast<uint8_t>(1));
-  return Wire.read();
-}
-
-// Follows es8311_init() in M5Atomic-EchoBase, minus the microphone. The ES8311 takes its master
-// clock from SCLK, so the dividers are for SCLK = 48 kHz x 64 = 3.072 MHz: 48 kHz and 32-bit
-// slots only.
-static void start_es8311() {
-  const uint8_t ES8311 = 0x18;
-  write_i2c_register(ES8311, 0x00, 0x1F);  // Reset
-  delay(20);
-  write_i2c_register(ES8311, 0x00, 0x00);
-  write_i2c_register(ES8311, 0x00, 0x80);  // Power on, slave
-  write_i2c_register(ES8311, 0x01, 0xBF);  // All clocks on, MCLK from SCLK
-  write_i2c_register(ES8311, 0x02, (read_i2c_register(ES8311, 0x02) & 0x07) | (2 << 3));  // Pre-multiply x4
-  write_i2c_register(ES8311, 0x03, 0x10);  // ADC OSR
-  write_i2c_register(ES8311, 0x04, 0x10);  // DAC OSR
-  write_i2c_register(ES8311, 0x05, 0x00);  // ADC and DAC dividers 1
-  write_i2c_register(ES8311, 0x06, (read_i2c_register(ES8311, 0x06) & 0xC0) | 0x03);  // SCLK not inverted, divider 4
-  write_i2c_register(ES8311, 0x07, read_i2c_register(ES8311, 0x07) & 0xC0);  // LRCK divider 0x00FF
-  write_i2c_register(ES8311, 0x08, 0xFF);
-  write_i2c_register(ES8311, 0x09, 0x10);  // SDP in, I2S, 32-bit, left channel to the mono DAC
-  write_i2c_register(ES8311, 0x0A, 0x10);  // SDP out, I2S, 32-bit
-  write_i2c_register(ES8311, 0x0D, 0x01);  // Analog power up
-  write_i2c_register(ES8311, 0x0E, 0x02);
-  write_i2c_register(ES8311, 0x12, 0x00);  // DAC power up
-  write_i2c_register(ES8311, 0x13, 0x10);  // Output to HP drive
-  write_i2c_register(ES8311, 0x1C, 0x6A);
-  write_i2c_register(ES8311, 0x37, 0x08);  // DAC equalizer bypassed
-  write_i2c_register(ES8311, 0x32, SPMS1_ES8311_DAC_VOLUME);
-}
-
-// The PI4IOE5V6408 drives the power amplifier's enable from P0.
-static void start_pi4ioe() {
-  const uint8_t PI4IOE = 0x43;
-  read_i2c_register(PI4IOE, 0x00);
-  write_i2c_register(PI4IOE, 0x07, 0x00);  // Outputs high-impedance
-  write_i2c_register(PI4IOE, 0x0D, 0xFF);  // Pull-ups
-  write_i2c_register(PI4IOE, 0x03, 0x6F);  // Directions
-  write_i2c_register(PI4IOE, 0x05, 0xFF);  // Outputs high
-}
-
-#endif  // defined(ARDUINO_ARCH_ESP32) && !defined(SPMS1_USE_PDM_OUTPUT)
 
 // Arduino's prototype generator puts its prototypes before the first function defined, so one must
 // come before extern "C", or setup() and loop() get C linkage and Arduino.h rejects them.
@@ -420,99 +294,7 @@ uint32_t get_audio_buffer_words() {
   return g_audio_buffer_words;
 }
 
-#if defined(ARDUINO_ARCH_ESP32)
-
-void start_audio() {
-  g_i2s_frames = static_cast<i2s_sample_t*>(calloc(g_audio_buffer_words * 2, sizeof(i2s_sample_t)));
-  g_i2s_frame_index = 0;
-
-  // PDM TX is on I2S0 only
-  i2s_chan_config_t chan_cfg = I2S_CHANNEL_DEFAULT_CONFIG(I2S_NUM_0, I2S_ROLE_MASTER);
-  chan_cfg.dma_desc_num  = g_audio_buffers;
-  chan_cfg.dma_frame_num = g_audio_buffer_words;
-  chan_cfg.auto_clear    = true;
-  i2s_new_channel(&chan_cfg, &g_i2s_output, NULL);
-
-#if defined(SPMS1_USE_PDM_OUTPUT)
-  // The DAC line mode puts L on dout and R on dout2, with no PDM clock pin. The PDM rate is
-  // 128 x 48 kHz = 6.144 MHz.
-  i2s_pdm_tx_config_t pdm_cfg = {
-    .clk_cfg  = I2S_PDM_TX_CLK_DAC_DEFAULT_CONFIG(g_sample_rate),
-    .slot_cfg = I2S_PDM_TX_SLOT_DAC_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_16BIT, I2S_SLOT_MODE_STEREO),
-    .gpio_cfg = {
-      .clk   = I2S_GPIO_UNUSED,
-      .dout  = static_cast<gpio_num_t>(SPMS1_PDM_L_PIN),
-      .dout2 = static_cast<gpio_num_t>(SPMS1_PDM_R_PIN),
-      .invert_flags = {
-        .clk_inv = false,
-      },
-    },
-  };
-  i2s_channel_init_pdm_tx_mode(g_i2s_output, &pdm_cfg);
-  i2s_channel_enable(g_i2s_output);
-#else  // defined(SPMS1_USE_PDM_OUTPUT)
-  i2s_std_config_t std_cfg = {
-    .clk_cfg  = I2S_STD_CLK_DEFAULT_CONFIG(g_sample_rate),
-    .slot_cfg = I2S_STD_PHILIPS_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_32BIT, I2S_SLOT_MODE_STEREO),
-    .gpio_cfg = {
-      .mclk = I2S_GPIO_UNUSED,
-      .bclk = static_cast<gpio_num_t>(SPMS1_I2S_BCLK_PIN),
-      .ws   = static_cast<gpio_num_t>(SPMS1_I2S_LRCK_PIN),
-      .dout = static_cast<gpio_num_t>(SPMS1_I2S_DATA_PIN),
-      .din  = I2S_GPIO_UNUSED,
-      .invert_flags = {
-        .mclk_inv = false,
-        .bclk_inv = false,
-        .ws_inv   = false,
-      },
-    },
-  };
-  i2s_channel_init_std_mode(g_i2s_output, &std_cfg);
-  i2s_channel_enable(g_i2s_output);
-
-  Wire.begin(SPMS1_I2C_SDA_PIN, SPMS1_I2C_SCL_PIN, 100000U);
-  start_es8311();
-  start_pi4ioe();
-#endif  // defined(SPMS1_USE_PDM_OUTPUT)
-
-#if defined(ARDUINO_M5STACK_ATOMS3) && defined(SPMS1_M5STACK_ATOMS3_LITE)
-  rgbLedWrite(RGB_BUILTIN, SPMS1_LED_LEVEL_R, SPMS1_LED_LEVEL_G, SPMS1_LED_LEVEL_B);
-#endif  // defined(ARDUINO_M5STACK_ATOMS3) && defined(SPMS1_M5STACK_ATOMS3_LITE)
-}
-
-void stop_audio() {
-  i2s_channel_disable(g_i2s_output);
-  i2s_del_channel(g_i2s_output);
-  g_i2s_output = NULL;
-  free(g_i2s_frames);
-  g_i2s_frames = NULL;
-}
-
-// One i2s_channel_write per buffer, not per frame: each call takes the channel's lock.
-IRAM_ATTR void write_to_audio_buffer(float l, float r) {
-#if defined(SPMS1_USE_PDM_OUTPUT)
-  int32_t clamped_l = static_cast<int32_t>(std::lroundf(l * 32767.0f));
-  int32_t clamped_r = static_cast<int32_t>(std::lroundf(r * 32767.0f));
-  clamped_l = std::clamp(clamped_l, static_cast<int32_t>(-32768), static_cast<int32_t>(32767));
-  clamped_r = std::clamp(clamped_r, static_cast<int32_t>(-32768), static_cast<int32_t>(32767));
-  g_i2s_frames[g_i2s_frame_index * 2]     = static_cast<int16_t>(clamped_l);
-  g_i2s_frames[g_i2s_frame_index * 2 + 1] = static_cast<int16_t>(clamped_r);
-#else  // defined(SPMS1_USE_PDM_OUTPUT)
-  int32_t clamped_l = static_cast<int32_t>(std::lroundf(l * 8388607.0f));
-  int32_t clamped_r = static_cast<int32_t>(std::lroundf(r * 8388607.0f));
-  clamped_l = std::clamp(clamped_l, static_cast<int32_t>(-8388608), static_cast<int32_t>(8388607));
-  clamped_r = std::clamp(clamped_r, static_cast<int32_t>(-8388608), static_cast<int32_t>(8388607));
-  g_i2s_frames[g_i2s_frame_index * 2]     = clamped_l << 8;
-  g_i2s_frames[g_i2s_frame_index * 2 + 1] = clamped_r << 8;
-#endif  // defined(SPMS1_USE_PDM_OUTPUT)
-  if (++g_i2s_frame_index == g_audio_buffer_words) {
-    size_t bytes_written;
-    i2s_channel_write(g_i2s_output, g_i2s_frames, g_audio_buffer_words * 2 * sizeof(i2s_sample_t), &bytes_written, portMAX_DELAY);
-    g_i2s_frame_index = 0;
-  }
-}
-
-#elif defined(SPMS1_USE_PWM_AUDIO_INSTEAD_OF_I2S)
+#if defined(SPMS1_USE_PWM_AUDIO_INSTEAD_OF_I2S)
 
 void start_audio() {
   g_pwm_output.setSysClk(g_sample_rate);
@@ -533,7 +315,7 @@ void write_to_audio_buffer(float l, float r) {
   g_pwm_output.write24(clamped_l << 8, clamped_r << 8);
 }
 
-#else  // defined(ARDUINO_ARCH_ESP32)
+#else  // defined(SPMS1_USE_PWM_AUDIO_INSTEAD_OF_I2S)
 
 void start_audio() {
   g_i2s_output.setSysClk(g_sample_rate);
@@ -561,7 +343,7 @@ void write_to_audio_buffer(float l, float r) {
   g_i2s_output.write24(clamped_l << 8, clamped_r << 8);
 }
 
-#endif  // defined(ARDUINO_ARCH_ESP32)
+#endif  // defined(SPMS1_USE_PWM_AUDIO_INSTEAD_OF_I2S)
 
 void start_debug_measure(void) {
 #if defined(SPMS1_USE_DEBUG_PRINT)
@@ -587,48 +369,6 @@ void stop_debug_measure(void) {
 
 }
 
-#if defined(ARDUINO_ARCH_ESP32)
-
-void control_loop();
-
-void synth_task(void* parameter) {
-  Spms1_main(0, NULL);
-  vTaskDelete(NULL);
-}
-
-void control_task(void* parameter) {
-  for (;;) {
-    control_loop();
-  }
-}
-
-#if defined(SPMS1_USE_USB_MIDI)
-// Stands in for the MIDI library, which has no transport for the core's USBMIDI. Dispatches the
-// same four messages, with pitch bend signed as the library would hand it over.
-void read_usb_midi() {
-  midiEventPacket_t packet;
-  while (g_usb_midi.readPacket(&packet)) {
-    byte channel = (packet.byte1 & 0x0F) + 1;
-    switch (packet.header & 0x0F) {
-    case 0x8:
-      handleNoteOff(channel, packet.byte2, packet.byte3);
-      break;
-    case 0x9:
-      handleNoteOn(channel, packet.byte2, packet.byte3);
-      break;
-    case 0xB:
-      handleControlChange(channel, packet.byte2, packet.byte3);
-      break;
-    case 0xE:
-      handlePitchBend(channel, ((packet.byte3 << 7) | packet.byte2) - 8192);
-      break;
-    }
-  }
-}
-#endif  // defined(SPMS1_USE_USB_MIDI)
-
-#else  // defined(ARDUINO_ARCH_ESP32)
-
 void setup1() {
 }
 
@@ -636,31 +376,17 @@ void loop1() {
   Spms1_main(0, NULL);
 }
 
-#endif  // defined(ARDUINO_ARCH_ESP32)
-
 void setup() {
   delay(100);
 
-#if defined(SPMS1_USE_DEBUG_PRINT)
-#if defined(ARDUINO_ARCH_ESP32)
-  SPMS1_DEBUG_PRINT_SERIAL.begin(115200);
-#elif !defined(SPMS1_DEBUG_PRINT_USE_USB_SERIAL)
+#if defined(SPMS1_USE_DEBUG_PRINT) && !defined(SPMS1_DEBUG_PRINT_USE_USB_SERIAL)
   pinMode(SPMS1_DEBUG_PRINT_RX_PIN, INPUT_PULLUP);
   SPMS1_DEBUG_PRINT_SERIAL.setTX(SPMS1_DEBUG_PRINT_TX_PIN);
   SPMS1_DEBUG_PRINT_SERIAL.setRX(SPMS1_DEBUG_PRINT_RX_PIN);
   SPMS1_DEBUG_PRINT_SERIAL.begin(115200);
-#endif  // defined(ARDUINO_ARCH_ESP32)
-#endif  // defined(SPMS1_USE_DEBUG_PRINT)
+#endif  // defined(SPMS1_USE_DEBUG_PRINT) && !defined(SPMS1_DEBUG_PRINT_USE_USB_SERIAL)
 
 #if defined(SPMS1_USE_USB_MIDI)
-#if defined(ARDUINO_ARCH_ESP32)
-  // Both names are ignored with USB CDC On Boot enabled, which starts USB before setup(). The
-  // MIDI interface keeps the name given to g_usb_midi either way.
-  USB.manufacturerName("ISGK Instruments");
-  USB.productName("SPMS-1 (type-2)");
-  g_usb_midi.begin();
-  USB.begin();
-#else  // defined(ARDUINO_ARCH_ESP32)
   TinyUSB_Device_Init(0);
 #if defined(SPMS1_USE_DEBUG_PRINT) && defined(SPMS1_DEBUG_PRINT_USE_USB_SERIAL)
   TinyUSBDevice.addInterface(Serial);  // TinyUSB_Device_Init() clears the configuration, Serial included
@@ -673,29 +399,19 @@ void setup() {
   USB_MIDI.setHandlePitchBend(handlePitchBend);
   USB_MIDI.begin(MIDI_CHANNEL_OMNI);
   USB_MIDI.turnThruOff();
-#endif  // defined(ARDUINO_ARCH_ESP32)
 #endif  // defined(SPMS1_USE_USB_MIDI)
 
 #if defined(SPMS1_USE_UART_MIDI)
-#if defined(ARDUINO_ARCH_ESP32)
-  // Started on its pins before UART_MIDI.begin(), whose pinless begin() keeps the pins already
-  // set. Left to itself, that begin() would put UART2 on its default pins, GPIO19 and GPIO20,
-  // which are the ESP32-S3's USB D- and D+.
-  SPMS1_UART_MIDI_SERIAL.begin(SPMS1_UART_MIDI_SPEED, SERIAL_8N1, SPMS1_UART_MIDI_RX_PIN, SPMS1_UART_MIDI_TX_PIN);
-#else  // defined(ARDUINO_ARCH_ESP32)
   pinMode(SPMS1_UART_MIDI_RX_PIN, INPUT_PULLUP);
   SPMS1_UART_MIDI_SERIAL.setTX(SPMS1_UART_MIDI_TX_PIN);
   SPMS1_UART_MIDI_SERIAL.setRX(SPMS1_UART_MIDI_RX_PIN);
-#endif  // defined(ARDUINO_ARCH_ESP32)
   UART_MIDI.setHandleNoteOn(handleNoteOn);
   UART_MIDI.setHandleNoteOff(handleNoteOff);
   UART_MIDI.setHandleControlChange(handleControlChange);
   UART_MIDI.setHandlePitchBend(handlePitchBend);
   UART_MIDI.begin(MIDI_CHANNEL_OMNI);
   UART_MIDI.turnThruOff();
-#if !defined(ARDUINO_ARCH_ESP32)
   SPMS1_UART_MIDI_SERIAL.begin(SPMS1_UART_MIDI_SPEED);
-#endif  // !defined(ARDUINO_ARCH_ESP32)
 #endif  // defined(SPMS1_USE_UART_MIDI)
 
 #if defined(ARDUINO_RASPBERRY_PI_PICO) || defined(ARDUINO_RASPBERRY_PI_PICO_2)
@@ -705,35 +421,13 @@ void setup() {
   pinMode(23, OUTPUT);  // RT6150 (PMIC) Power Save Pin
   digitalWrite(23, HIGH);
 #endif  // defined(ARDUINO_RASPBERRY_PI_PICO) || defined(ARDUINO_RASPBERRY_PI_PICO_2)
-
-#if defined(ARDUINO_ARCH_ESP32)
-  // The synth gets core 1 to itself, as on the RP2350, and blocks in i2s_channel_write for the
-  // rest of each buffer. MIDI moves to core 0, whose idle task the task watchdog watches, so the
-  // synth must not go there. loopTask shares core 1 and is deleted from loop().
-  xTaskCreatePinnedToCore(synth_task, "spms1_synth", SPMS1_SYNTH_TASK_STACK_SIZE, NULL, configMAX_PRIORITIES - 2, &g_synth_task, 1);
-  xTaskCreatePinnedToCore(control_task, "spms1_control", 4096, NULL, 1, NULL, 0);
-#endif  // defined(ARDUINO_ARCH_ESP32)
 }
 
-#if defined(ARDUINO_ARCH_ESP32)
-
 void loop() {
-  vTaskDelete(NULL);
-}
-
-void control_loop() {
-#else  // defined(ARDUINO_ARCH_ESP32)
-
-void loop() {
-#endif  // defined(ARDUINO_ARCH_ESP32)
 #if defined(SPMS1_USE_USB_MIDI)
-#if defined(ARDUINO_ARCH_ESP32)
-  read_usb_midi();
-#else  // defined(ARDUINO_ARCH_ESP32)
   mutex_enter_blocking(&__usb_mutex);
   USB_MIDI.read();
   mutex_exit(&__usb_mutex);
-#endif  // defined(ARDUINO_ARCH_ESP32)
 #endif  // defined(SPMS1_USE_USB_MIDI)
 
 #if defined(SPMS1_USE_UART_MIDI)
@@ -760,12 +454,6 @@ void loop() {
     SPMS1_DEBUG_PRINT_SERIAL.print(sp_gc_nroots);
     SPMS1_DEBUG_PRINT_SERIAL.print(" peak ");
     SPMS1_DEBUG_PRINT_SERIAL.print(s_gc_nroots_max);
-#if defined(ARDUINO_ARCH_ESP32)
-    // What is left of SPMS1_SYNTH_TASK_STACK_SIZE at the deepest point so far.
-    SPMS1_DEBUG_PRINT_SERIAL.print("\e[4;1H\e[K");
-    SPMS1_DEBUG_PRINT_SERIAL.print("stack free ");
-    SPMS1_DEBUG_PRINT_SERIAL.print(uxTaskGetStackHighWaterMark(g_synth_task));
-#endif  // defined(ARDUINO_ARCH_ESP32)
     SPMS1_DEBUG_PRINT_SERIAL.println();
 #if defined(SPMS1_DEBUG_PRINT_USE_USB_SERIAL)
 #if defined(SPMS1_USE_USB_MIDI)
@@ -787,8 +475,7 @@ void loop() {
   delay(1);
 }
 
-// A note on at velocity 0 is a note off, at the default velocity of 64. Handled here rather than
-// by the MIDI library's setting, since read_usb_midi calls this directly.
+// A note on at velocity 0 is a note off, at the default velocity of 64.
 void handleNoteOn(byte channel, byte pitch, byte velocity)
 {
   if (velocity == 0) {
