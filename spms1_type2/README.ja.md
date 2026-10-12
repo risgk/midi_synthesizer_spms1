@@ -17,7 +17,10 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.0
 - Raspberry Pi Pico 2 (RP2350)
     - [Raspberry Pi Pico 2](https://www.raspberrypi.com/products/raspberry-pi-pico-2/)
     - PWM Audio 出力 (DAC 不要)、デフォルト
-        - L は GP28、R は GP27 で、Pimoroni [Pico VGA Demo Base](https://shop.pimoroni.com/products/pimoroni-pico-vga-demo-base) (PIM553) と同じです
+        - L は GP20、R は GP21 です: Seeed Studio [Grove Shield for Pi Pico](https://www.seeedstudio.com/Grove-Shield-for-Pi-Pico-v1-0-p-4846.html) の D20 ポートで、
+          黄色い線が L、白い線が R です
+        - Pimoroni [Pico VGA Demo Base](https://shop.pimoroni.com/products/pimoroni-pico-vga-demo-base) (PIM553) で使う場合は、
+          `SPMS1_PWM_AUDIO_L_PIN` を 28 に、`SPMS1_PWM_AUDIO_R_PIN` を 27 にしてください
         - PWM のレベル (3200 段階) は、1 次のノイズシェーピングと TPDF ディザ付きで量子化されます
         - PWM のリップルを取り除くため、各出力に RC ローパスフィルターを付けることをお勧めします
         - 1 サンプルを 4 つの PWM 周期に分けて出力します (PWM キャリア: 48 kHz ではなく 192 kHz)。キャリアをフィルタで取り除きやすく、

@@ -17,7 +17,10 @@ Required Hardware
 - Raspberry Pi Pico 2 (RP2350)
     - [Raspberry Pi Pico 2](https://www.raspberrypi.com/products/raspberry-pi-pico-2/)
     - PWM Audio output, without a DAC, by default
-        - L on GP28 and R on GP27, as on the Pimoroni [Pico VGA Demo Base](https://shop.pimoroni.com/products/pimoroni-pico-vga-demo-base) (PIM553)
+        - L on GP20 and R on GP21: the D20 port of Seeed Studio [Grove Shield for Pi Pico](https://www.seeedstudio.com/Grove-Shield-for-Pi-Pico-v1-0-p-4846.html),
+          with the yellow wire L and the white wire R
+        - For the Pimoroni [Pico VGA Demo Base](https://shop.pimoroni.com/products/pimoroni-pico-vga-demo-base) (PIM553),
+          set `SPMS1_PWM_AUDIO_L_PIN` to 28 and `SPMS1_PWM_AUDIO_R_PIN` to 27
         - The PWM level (3200 steps) is quantized with 1st-order noise shaping and TPDF dither
         - An RC low pass filter on each output is recommended, to take out the PWM ripple
         - Each sample is split into 4 PWM periods (PWM carrier: 192 kHz instead of 48 kHz), so the carrier is easier to filter out
