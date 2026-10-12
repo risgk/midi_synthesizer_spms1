@@ -19,23 +19,22 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.0
     - PWM Audio 出力 (DAC 不要)、デフォルト
         - L は GP20、R は GP21 です: Seeed Studio [Grove Shield for Pi Pico](https://www.seeedstudio.com/Grove-Shield-for-Pi-Pico-v1-0-p-4846.html) の D20 ポートで、
           黄色い線が L、白い線が R です
-        - オーディオの接続に使う部品 ([トップの README](../README.ja.md) の写真のとおり):
+            - Pimoroni [Pico VGA Demo Base](https://shop.pimoroni.com/products/pimoroni-pico-vga-demo-base) (PIM553) で使う場合は、
+              `SPMS1_PWM_AUDIO_L_PIN` を 28 に、`SPMS1_PWM_AUDIO_R_PIN` を 27 にしてください
+        - オーディオの接続に使う部品 ([トップの README](../README.ja.md) の写真のとおり、RC フィルタなし):
             - Grove - ジャンパーワイヤー変換ケーブル。D20 ポートから (赤い線 (VCC) はつなぎません)
             - ネジ端子 (L、R、GND) 付きの 3.5 mm ステレオジャック
             - ボリュームコントロール付きの 3.5 mm ステレオケーブル (パッシブのステレオボリュームダイアル)。
               ジャックとアンプまたはアクティブスピーカーの間に入れます
-                - ダイアルは音声と一緒に PWM のリップルも下げるので、RC フィルタなしでも接続先の機器の入力が
-                  飽和しにくくなります。ダイアルを絞った状態から始めてください: 最大では 3.3 V の矩形波がそのまま
-                  機器に届きます
-        - Pimoroni [Pico VGA Demo Base](https://shop.pimoroni.com/products/pimoroni-pico-vga-demo-base) (PIM553) で使う場合は、
-          `SPMS1_PWM_AUDIO_L_PIN` を 28 に、`SPMS1_PWM_AUDIO_R_PIN` を 27 にしてください
+        - RC フィルタがないと、PWM のリップル (3.3 V の矩形波) が音声と一緒に接続先の機器に届き、その入力 (オーディオインターフェースなど) が
+          飽和して「ピー」という音やノイズが出ることがあります。レベルメーターが適正に見えていても起こります
+            - ボリュームダイアルは音声と一緒にリップルも下げます。絞った状態から始めてください:
+              最大では 3.3 V の矩形波がそのまま機器に届きます
+            - 抵抗か、接続先の機器の入力ゲイン (ボリューム) でレベルを下げることもできます
+        - 任意: 各出力に RC ローパスフィルターを付けると、PWM のリップルそのものを取り除けます
         - PWM のレベル (3200 段階) は、1 次のノイズシェーピングと TPDF ディザ付きで量子化されます
-        - PWM のリップルを取り除くため、各出力に RC ローパスフィルターを付けることをお勧めします
         - 1 サンプルを 4 つの PWM 周期に分けて出力します (PWM キャリア: 48 kHz ではなく 192 kHz)。キャリアをフィルタで取り除きやすく、
           アクティブスピーカーで「ピー」という音が出にくくなります (`SPMS1_PWM_AUDIO_SUBPERIODS`: 1、2、4、8)
-        - RC フィルタを付けない場合は、抵抗か接続先の機器の入力ゲイン (ボリューム) でレベルを下げてください:
-          PWM のリップル (3.3 V の矩形波) で入力 (オーディオインターフェースなど) が飽和し、「ピー」という音やノイズが出ることがあります。
-          レベルメーターが適正に見えていても起こります
     - または代わりに I2S DAC ハードウェア (48 kHz/24 bit): `SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO` のコメントを外してください
         - Pimoroni [Pico Audio Pack](https://shop.pimoroni.com/products/pico-audio-pack) (PIM544)
         - [Adafruit PCM5102 I2S DAC](https://www.adafruit.com/product/6250) (Product ID: 6250)
