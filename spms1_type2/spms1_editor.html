@@ -97,9 +97,20 @@
       grid-template-columns: 1fr 340px;
       gap: 20px;
     }
-    @media (max-width: 900px) {
-      .app { grid-template-columns: 1fr; height: auto; }
-      .canvas-panel { height: 70vh; }
+    /* In one column the soft keyboard comes right under the canvas: the canvas and the side
+       panels become items of the body, so order can put the keyboard between them. Not on a
+       hidden tab, where display: contents would win over [hidden]. The Wide button gives the same
+       layout above the breakpoint. */
+    .app.wide:not([hidden]) { display: contents; }
+    .app.wide:not([hidden]) > .canvas-panel { order: 1; }
+    .app.wide:not([hidden]) ~ #kbd-panel { order: 2; }
+    .app.wide:not([hidden]) > .side { order: 3; }
+    @media (max-width: 800px) {
+      .app:not([hidden]) { display: contents; }
+      .canvas-panel { order: 1; }
+      #kbd-panel { order: 2; }
+      .side { order: 3; }
+      #zoom-wide { display: none; }
     }
 
     /* Controls */
@@ -125,6 +136,7 @@
       display: flex;
       flex-direction: column;
       gap: 16px;
+      min-width: 0;
     }
     .editor-column .panel {
       padding: 12px 16px;
@@ -162,6 +174,7 @@
     }
     .slider-input-wrapper {
       flex-grow: 1;
+      min-width: 0;
       display: flex;
       align-items: center;
       gap: 12px;
@@ -174,8 +187,11 @@
       --tick-64: calc(9px + (100% - 18px) * 0.503937 - 1px);
       --tick-124: calc(9px + (100% - 18px) * 0.976378 - 1px);
     }
+    /* Chrome gives a range input a minimum width of about 130px, which would push two columns past
+       a window under about 880px wide. */
     input[type="range"] {
       flex-grow: 1;
+      min-width: 0;
       -webkit-appearance: none;
       appearance: none;
       height: 6px;
@@ -268,7 +284,7 @@
     /* The sizes of the keys are times the scale of the text, --kbd-scale, set by kbdFitScale. */
     .keyboard-frame {
       --kbd-scale: 1;
-      --kbd-key-width: calc(24px * var(--kbd-scale));  /* KB_KEY_WIDTH: a semitone in the upper half */
+      --kbd-key-width: calc(22px * var(--kbd-scale));  /* KB_KEY_WIDTH: a semitone in the upper half */
       --kbd-half-height: calc(70px * var(--kbd-scale));
       border: 1px solid var(--border-color);
       border-radius: 6px;
@@ -710,23 +726,32 @@
     .port:hover, .port.target {
       transform: scale(1.35);
     }
-    .zoom-controls {
+    /* The legend and the zoom buttons share the top of the canvas; the legend wraps short of the
+       buttons rather than running under them. */
+    .canvas-bar {
       position: absolute;
+      left: 10px;
       right: 10px;
       top: 10px;
-      display: flex;
-      gap: 4px;
       z-index: 5;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      pointer-events: none;
+    }
+    .zoom-controls {
+      display: flex;
+      flex-shrink: 0;
+      gap: 4px;
+      pointer-events: auto;
     }
     .zoom-controls .btn {
       padding: 4px 9px;
       min-width: 32px;
     }
     .legend {
-      position: absolute;
-      left: 10px;
-      top: 10px;
-      z-index: 5;
+      min-width: 0;
       display: flex;
       gap: 12px;
       flex-wrap: wrap;
@@ -854,16 +879,19 @@
     <div class="world" id="world">
       <svg class="wires" id="wires"></svg>
     </div>
-    <div class="zoom-controls">
-      <button class="btn" id="zoom-out" title="Zoom out">&minus;</button>
-      <button class="btn" id="zoom-in" title="Zoom in">+</button>
-      <button class="btn" id="zoom-fit" title="Fit all nodes">Fit</button>
-    </div>
-    <div class="legend">
-      <span><svg width="28" height="6"><line x1="0" y1="3" x2="28" y2="3" stroke="#9B111E" stroke-width="2.5"/></svg>Module input</span>
-      <span><svg width="28" height="6"><line x1="0" y1="3" x2="28" y2="3" stroke="#d68910" stroke-width="2.5"/></svg>1-sample delay (runs later)</span>
-      <span><svg width="28" height="6"><line x1="0" y1="3" x2="28" y2="3" stroke="#b8c0c4" stroke-width="2.5"/></svg>Source not running</span>
-      <span><svg width="28" height="6"><line x1="0" y1="3" x2="28" y2="3" stroke="#4f7cac" stroke-width="2" stroke-dasharray="6 4"/></svg>Parameter</span>
+    <div class="canvas-bar">
+      <div class="legend">
+        <span><svg width="28" height="6"><line x1="0" y1="3" x2="28" y2="3" stroke="#9B111E" stroke-width="2.5"/></svg>Module input</span>
+        <span><svg width="28" height="6"><line x1="0" y1="3" x2="28" y2="3" stroke="#d68910" stroke-width="2.5"/></svg>1-sample delay (runs later)</span>
+        <span><svg width="28" height="6"><line x1="0" y1="3" x2="28" y2="3" stroke="#b8c0c4" stroke-width="2.5"/></svg>Source not running</span>
+        <span><svg width="28" height="6"><line x1="0" y1="3" x2="28" y2="3" stroke="#4f7cac" stroke-width="2" stroke-dasharray="6 4"/></svg>Parameter</span>
+      </div>
+      <div class="zoom-controls">
+        <button class="btn" id="zoom-out" title="Zoom out">&minus;</button>
+        <button class="btn" id="zoom-in" title="Zoom in">+</button>
+        <button class="btn" id="zoom-fit" title="Fit all nodes">Fit</button>
+        <button class="btn" id="zoom-wide" title="The canvas the full width of the window, with the panels under the soft keyboard">Wide</button>
+      </div>
     </div>
   </div>
 
@@ -925,7 +953,7 @@
   </div>
 </div>
 
-<div class="panel">
+<div class="panel" id="kbd-panel">
   <div class="kbd-bar">
     <h2><span id="kbd-label">Soft Keyboard</span></h2>
     <button class="btn" id="kbd-oct-down" title="Octave Down">&#9664;</button>
@@ -1685,9 +1713,9 @@
       y1 = Math.max(y1, n.offsetTop + n.offsetHeight);
     });
     const pad = 30;
-    // The legend sits over the top left corner, so the nodes are fitted below it.
-    const legend = canvas.querySelector('.legend');
-    const top = legend.offsetTop + legend.offsetHeight + 10;
+    // The legend and the buttons sit over the top of the canvas, so the nodes are fitted below them.
+    const bar = canvas.querySelector('.canvas-bar');
+    const top = bar.offsetTop + bar.offsetHeight + 10;
     const w = canvas.clientWidth, h = canvas.clientHeight - top;
     view.s = Math.max(0.25, Math.min(1, (w - pad * 2) / (x1 - x0), (h - pad) / (y1 - y0)));
     view.x = (w - (x1 - x0) * view.s) / 2 - x0 * view.s;
@@ -2504,7 +2532,7 @@
   }
 
   const KB_NOTE_MAX = 120;
-  const KB_KEY_WIDTH = 24;  // a semitone in the upper half, times kbScale
+  const KB_KEY_WIDTH = 22;  // a semitone in the upper half, times kbScale; 37 keys fit a 960px window
   // The center of 37 keys from a C (C3 - C6 by default), in semitones from the left end of the C.
   const KB_CENTER_OFFSET = (36 + 5 / 3) / 2;
   const KB_DEFAULT_C = 48;  // C3
@@ -2793,11 +2821,18 @@
   }
 
   // The patch area runs from wherever the header and MIDI bar leave it, which moves as they wrap,
-  // to the bottom of the window. Below the breakpoint the CSS gives the canvas a height instead.
+  // to the bottom of the window. Below the breakpoint the canvas alone does, leaving room for the
+  // soft keyboard under it.
   function fitPatchArea() {
     const app = document.getElementById('tab-patch');
-    if (app.hidden || matchMedia('(max-width: 900px)').matches) {
-      app.style.height = '';
+    const canvas = document.getElementById('canvas');
+    app.style.height = '';
+    canvas.style.height = '';
+    if (app.hidden) return;
+    if (app.classList.contains('wide') || matchMedia('(max-width: 800px)').matches) {
+      const top = canvas.getBoundingClientRect().top + window.scrollY;
+      const keyboard = document.getElementById('kbd-panel').offsetHeight;
+      canvas.style.height = Math.max(240, window.innerHeight - top - 16 - keyboard - 20) + 'px';
       return;
     }
     const top = app.getBoundingClientRect().top + window.scrollY;
@@ -2806,6 +2841,25 @@
   window.addEventListener('resize', fitPatchArea);
 
   document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
+
+  const WIDE_KEY = 'spms1-type2-editor-wide';
+
+  function setWide(wide) {
+    document.getElementById('tab-patch').classList.toggle('wide', wide);
+    const button = document.getElementById('zoom-wide');
+    button.classList.toggle('primary', wide);
+    button.setAttribute('aria-pressed', String(wide));
+    if (!document.getElementById('tab-patch').hidden) {
+      fitPatchArea();
+      if (!viewTouched) fitView();
+      renderWires();
+    }
+    try { localStorage.setItem(WIDE_KEY, wide ? '1' : ''); } catch (e) { /* storage unavailable */ }
+  }
+  document.getElementById('zoom-wide').addEventListener('click', () => {
+    setWide(!document.getElementById('tab-patch').classList.contains('wide'));
+  });
+
 
   // ---- Start ---------------------------------------------------------------------------------
 
@@ -2816,6 +2870,9 @@
     createKeyboard();
     let tab = 'controls';
     try { tab = localStorage.getItem(TAB_KEY) || tab; } catch (e) { /* storage unavailable */ }
+    let wide = false;
+    try { wide = localStorage.getItem(WIDE_KEY) === '1'; } catch (e) { /* storage unavailable */ }
+    setWide(wide);
     showTab(tab === 'patch' ? 'patch' : 'controls');
     initMIDI();
   });
