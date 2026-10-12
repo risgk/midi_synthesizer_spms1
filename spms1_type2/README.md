@@ -38,6 +38,8 @@ Required Hardware
               at the top, the full 3.3 V square waves reach the device
             - Resistors, or the input gain (volume) of the connected device, can lower the level instead
         - Optional: an RC low pass filter on each output takes out the PWM ripple itself
+            - It also reduces the radio noise (EMI) radiated from the cables carrying the square waves:
+              put it close to the pins (e.g. at the screw terminals of the jack, not after the cable)
         - The PWM level (3200 steps) is quantized with 1st-order noise shaping and TPDF dither
         - Each sample is split into 4 PWM periods (PWM carrier: 192 kHz instead of 48 kHz), so the carrier is easier to filter out
           and less likely to cause beeps or whines in active speakers (`SPMS1_PWM_AUDIO_SUBPERIODS`: 1, 2, 4, or 8)

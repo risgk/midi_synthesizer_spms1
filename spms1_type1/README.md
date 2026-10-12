@@ -45,6 +45,7 @@ Required Hardware
         - L on GP28 and R on GP27, as on the Pimoroni [Pico VGA Demo Base](https://shop.pimoroni.com/products/pimoroni-pico-vga-demo-base) (PIM553)
         - The PWM level (3200 steps) is quantized with 1st-order noise shaping and TPDF dither
         - An RC low pass filter on each output is recommended, to take out the PWM ripple
+            - It also reduces the radio noise (EMI) radiated from the wires carrying the square waves: put it close to the pins
         - Each sample is split into 4 PWM periods (PWM carrier: 192 kHz instead of 48 kHz), so the carrier is easier to filter out
           and less likely to cause beeps or whines in active speakers (`SPMS1_PWM_AUDIO_SUBPERIODS`: 1, 2, 4, or 8)
         - Without the RC filter, reduce the level with resistors or the input gain (volume) of the connected device:
