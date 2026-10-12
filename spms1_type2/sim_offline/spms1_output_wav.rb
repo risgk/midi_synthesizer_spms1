@@ -8,6 +8,7 @@ require_relative '../spms1_amp'
 require_relative '../spms1_env_gen'
 require_relative '../spms1_lfo'
 require_relative '../spms1_mixer'
+require_relative '../spms1_chorus'
 require_relative '../spms1_delay'
 
 SAMPLE_RATE = 48000.0
@@ -59,6 +60,11 @@ lfo.set_level(cc_to_unipolar(124))
 # The constant 0.1 the default patch routes to it.
 lfo.set_polarity(0.1)
 
+chorus = Spms1::Chorus.new(SAMPLE_RATE)
+chorus.set_rate(cc_to_unipolar(64))
+chorus.set_depth(cc_to_unipolar(64))
+chorus.set_mix(cc_to_unipolar(64))
+
 delay = Spms1::Delay.new(SAMPLE_RATE)
 delay.set_time(cc_to_unipolar(64))
 delay.set_feedback(cc_to_unipolar(64))
@@ -68,17 +74,19 @@ puts "Generating stereo waveform data..."
 
 pcm_bytes = []
 
-# The default run order, less the mixer it does not use: LFO, EG, Osc, Filter, Amp, Delay. Each module reads what the ones ahead
-# of it made in this same sample, which is what the run order buys.
+# The default run order, less the mixer it does not use: LFO, EG, Osc, Filter, Amp, Chorus, Delay.
+# Each module reads what the ones ahead of it made in this same sample, which is what the run order
+# buys. The chorus turns the mono amp into a left and a right, and the delay keeps the two apart.
 NUM_SAMPLES.times do
   lfo_output = lfo.process
   env_gen_output = env_gen.process(1.0)
   oscillator_output = oscillator.process(NOTE * (1.0 / 120.0) - 0.5, lfo_output)
   filter_output = filter.process(oscillator_output, env_gen_output)
   amp_output = amp.process(filter_output, env_gen_output)
-  delay_output = delay.process(amp_output)
+  chorus.process(amp_output)
+  delay.process(chorus.output_l, chorus.output_r)
 
-  [delay_output, delay_output].each do |ch_sample|
+  [delay.output_l, delay.output_r].each do |ch_sample|
     clamped_sample = (ch_sample * 8388607.0).round
     clamped_sample = [8388607, [clamped_sample, -8388608].max].min
 
