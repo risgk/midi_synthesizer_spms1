@@ -234,7 +234,8 @@ flowchart LR
 
 #### Chorus 1
 
-A mono-in, stereo-out chorus, after PRA32-U2's Chorus FX. The input goes through a gentle low pass
+A mono-in, stereo-out chorus, after PRA32-U2's Chorus FX, put in the chain as an insert, as the
+delay is: Mix sets the balance of dry and chorused, rather than a send level. The input goes through a gentle low pass
 filter into one short delay line, which is read at two taps. A triangle LFO swings the two taps in
 opposite directions about 5.33 ms, so the left and right delayed signals bend in pitch against
 each other. Each output is a crossfade of the input with its own tap, so a mono source comes out
@@ -524,7 +525,7 @@ the note.
 
 The three Chorus 1 parameters are unipolar and move in steps of 1/120. Rate is read as a note
 number, a semitone a step, as LFO 1 Rate is: 0.015 Hz at CC 4, 0.48 Hz at CC 64 and 15.4 Hz at
-CC 124. Depth is how far each tap swings either side of 5.33 ms, in a straight line from not at
+CC 124, the default divided and multiplied by 32. Depth is how far each tap swings either side of 5.33 ms, in a straight line from not at
 all at CC 4, through 2.63 ms at CC 64, to 5.25 ms at CC 124. Mix is each tap's share of its side's
 crossfade: the dry input alone at CC 4, half and half at CC 64 -- the chorus PRA32-U2 makes at full
 Chorus Level -- and only the taps at CC 124, a vibrato on each side, the two moving opposite ways.

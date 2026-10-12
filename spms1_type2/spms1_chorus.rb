@@ -1,8 +1,9 @@
 module Spms1
   # Mono-in, stereo-out chorus, after PRA32-U2's Chorus FX: one audio input, two outputs, each a
-  # crossfade of the dry input with a tap of one short delay line. A triangle LFO swings the two
-  # taps in opposite directions about a fixed delay, so the left and right outputs bend in pitch
-  # against each other, and a mono source comes out spread across the stereo field.
+  # crossfade of the dry input with a tap of one short delay line. It is an insert, as Delay 1 is:
+  # Mix sets the balance of the two, rather than a send level. A triangle LFO swings the two taps
+  # in opposite directions about a fixed delay, so the left and right outputs bend in pitch against
+  # each other, and a mono source comes out spread across the stereo field.
   # Reference: https://github.com/risgk/digital-synth-pra32-u2 (pra32-u2-chorus-fx.h)
   #
   # It keeps the bus's one unit without a limiter or a clip: the input is held to one unit on the
@@ -45,7 +46,8 @@ module Spms1
     FULL_SCALE_DEPTH_AT_48K = 252.0
 
     # Rate lookup table, one entry per semitone, so the dial is linear in pitch as LFO 1 Rate's is:
-    # 0.015 Hz at 0.0, 0.48 Hz at 0.5 (PRA32-U2's Chorus Rate at its default), 15.4 Hz at 1.0.
+    # 0.015 Hz at 0.0, 0.48 Hz at 0.5 (PRA32-U2's Chorus Rate at its default), 15.4 Hz at 1.0:
+    # the default divided by 32 at the bottom and multiplied by 32 at the top.
     # 122 entries so that a rate of 1.0 still has an entry above it to interpolate against.
     FREQ_TABLE = Array.new(122, 0.0)
     for i in 0...122
