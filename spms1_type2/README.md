@@ -656,6 +656,21 @@ CC 34, 0.25: the dry signal is 2.5 dB down and the first repeat about 16 dB unde
 - Offline WAV output: "sim_offline/spms1_output_wav.rb" -- renders the default patch offline, the
   same modules in the same order with the CC values the synth powers up with. It does not
   reproduce the signals bus or the run order, so it catches a change in a module, not in a routing
+- Offline render of the Spinel output: "sim_render" -- builds "spms1_main.c" and the runtime, unmodified,
+  as "sim_spinel" does, and runs the whole synth faster than real time into a WAV file (48 kHz, 24 bit,
+  stereo). The signals bus, the run order and the NRPN table are all there, so a routing is heard as
+  the device plays it. Needs only a C compiler, on Linux, macOS, or Windows (MinGW gcc in Git Bash):
+  `sh sim_render/build.sh`, then `build/sim_render/spms1_render`
+    - `--patch FILE`: a patch copied from the editor with Format "MIDI bytes (hex)" (';' starts a comment),
+      taken after the synth has written its default patch, as a patch sent after power-up is
+    - `--score FILE`: the MIDI to play, a line each, the time in seconds and then the bytes in hex,
+      e.g. `1.5 80 3C 40`. Without it, note 60 is held from 0 s to 1 s
+    - `--seconds N` (default 4) and `--out FILE` (default "spms1_render.wav")
+    - It prints the peaks and a hash of the samples, so two renders can be told apart at a glance:
+      the editor's "Init" patch renders to the same hash as no patch at all. Compare hashes from the
+      same compiler only: clang ignores the `single-precision-constant` of "spinel_rt.h", which GCC (as
+      on the device) honors, so the last bits differ between them
+    - The build regenerates "spms1_main.c" with Spinel first, as "sim_spinel" does (`--no-spinel` to skip)
 
 
 ### Checking the Generated Code
