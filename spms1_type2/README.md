@@ -664,9 +664,6 @@ there reaches the device and all of them at once. "sim_cruby" keeps a Ruby copy 
     - Not tested on macOS
     - Offline, with no gems: `ruby sim_cruby/spms1_render.rb` takes the same options as "sim_render" below
       and writes "spms1_render_cruby.wav". `ruby sim_cruby/spms1_compare.rb A.wav B.wav` compares two renders
-- Offline WAV output: "sim_offline/spms1_output_wav.rb" -- renders the default patch offline, the
-  same modules in the same order with the CC values the synth powers up with. It does not
-  reproduce the signals bus or the run order, so it catches a change in a module, not in a routing
 - Offline render of the Spinel output: "sim_render" -- builds "spms1_main.c" and the runtime, unmodified,
   as "sim_spinel" does, and runs the whole synth faster than real time into a WAV file (48 kHz, 24 bit,
   stereo). The signals bus, the run order and the NRPN table are all there, so a routing is heard as

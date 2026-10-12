@@ -639,9 +639,6 @@ C のホスト ("sim_spinel"、"sim_render"、"web" の SPMS-1 Web) は、スケ
     - オフライン (gem 不要): `ruby sim_cruby/spms1_render.rb` は下の "sim_render" と同じオプションを取り、
       "spms1_render_cruby.wav" に書き出します。`ruby sim_cruby/spms1_compare.rb A.wav B.wav` で 2 つの
       レンダリングを比べます
-- オフライン WAV 出力: "sim_offline/spms1_output_wav.rb" -- デフォルトのパッチをオフラインで
-  レンダリングします。同じモジュールを同じ順で、電源投入時の CC 値で鳴らします。
-  シグナルバスと実行順は再現しないので、モジュール自体の変化は捉えますが、結線の間違いは捉えません
 - Spinel 出力のオフライン・レンダリング: "sim_render" -- "sim_spinel" と同じく "spms1_main.c" と
   ランタイムを改変せずにビルドし、シンセ全体を実時間より速く動かして WAV ファイル (48 kHz、24 bit、
   ステレオ) に書き出します。シグナルバス、実行順、NRPN テーブルがすべて動くので、結線も実機と同じに
