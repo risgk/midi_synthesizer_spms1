@@ -495,7 +495,7 @@ be scaled to on its own. The saturation sits on the resonance rather than the pa
 cutoff passes a loud note nearly clean, while turning the gain up rounds off the resonant peak.
 
 Filter 1 Resonance doubles Q every 30 CC steps up to Q 5.66 at CC 94, and from there rises faster
-and faster, without a sudden step, through Q 27 at CC 109 to Q 256 just past CC 118. Above that
+and faster, without a sudden step, through Q 29 at CC 109 to Q 256 at CC 118. Above that
 the filter oscillates on its own: a sine at the cutoff frequency, growing to its full level of
 about 0.5 by CC 123 and holding it to the top of the dial. Low in that range the oscillation
 builds slowly and shares the filter with the input; at the top it takes the input over. Its
