@@ -35,6 +35,9 @@
 |                            75 | x             | o             | EG Decay (Time)                      |
 |                            30 | x             | o             | EG Sustain (Level)                   |
 |                             3 | x             | o             | LFO Rate                             |
+|                            58 | x             | o             | Chorus Rate                          |
+|                            59 | x             | o             | Chorus Depth                         |
+|                            93 | x             | o             | Chorus Mix                           |
 |                            55 | x             | o             | Delay Time                           |
 |                            56 | x             | o             | Delay Feedback                       |
 |                            94 | x             | o             | Delay Mix                            |

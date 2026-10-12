@@ -958,9 +958,15 @@
     { key: 'FILTER_1',  id: 4, label: 'Filter 1' },
     { key: 'AMP_1',     id: 5, label: 'Amp 1' },
     { key: 'MIXER_1',   id: 6, label: 'Mixer 1' },
-    { key: 'DELAY_1',   id: 7, label: 'Delay 1' },
+    { key: 'CHORUS_1',  id: 7, label: 'Chorus 1', stereo: true },
+    { key: 'DELAY_1',   id: 8, label: 'Delay 1',  stereo: true },
   ];
-  MODULES.forEach(m => { m.out = m.key + '_OUTPUT'; });
+  // Each output a module writes to the bus: one, or a left and a right for a stereo module.
+  MODULES.forEach(m => {
+    m.outs = m.stereo
+      ? [{ sig: m.key + '_OUTPUT_L', label: 'Out L' }, { sig: m.key + '_OUTPUT_R', label: 'Out R' }]
+      : [{ sig: m.key + '_OUTPUT', label: 'Out' }];
+  });
   const MOD = Object.fromEntries(MODULES.map(m => [m.key, m]));
 
   // NRPN category 1, in entry order: [module, suffix, label, default source].
@@ -974,12 +980,15 @@
     ['AMP_1',     'MOD',   'Mod',   'ENV_GEN_1_OUTPUT'],
     ['MIXER_1',   'IN_1',  'In 1',  'NONE'],
     ['MIXER_1',   'IN_2',  'In 2',  'NONE'],
-    ['DELAY_1',   'AUDIO', 'Audio', 'AMP_1_OUTPUT'],
-    [null,        'OUTPUT', 'Audio', 'DELAY_1_OUTPUT'],
+    ['CHORUS_1',  'AUDIO', 'Audio', 'AMP_1_OUTPUT'],
+    ['DELAY_1',   'AUDIO_L', 'Audio L', 'CHORUS_1_OUTPUT_L'],
+    ['DELAY_1',   'AUDIO_R', 'Audio R', 'CHORUS_1_OUTPUT_R'],
+    [null,        'OUTPUT_L', 'L', 'DELAY_1_OUTPUT_L'],
+    [null,        'OUTPUT_R', 'R', 'DELAY_1_OUTPUT_R'],
   ];
 
   // NRPN categories 2 and 3 share entry numbers for these, and each one's control slot is
-  // signal 16 + entry: [module, suffix, label, bipolar, default CC, default CC value].
+  // signal 19 + entry: [module, suffix, label, bipolar, default CC, default CC value].
   const PARAMS = [
     ['LFO_1',     'RATE',         'Rate',         false, 3,   64],
     ['LFO_1',     'LEVEL',        'Level',        false, 0,   null],
@@ -1004,6 +1013,9 @@
     ['MIXER_1',   'POLARITY_1',   'Polarity 1',   true,  0,   124],
     ['MIXER_1',   'LEVEL_2',      'Level 2',      false, 0,   null],
     ['MIXER_1',   'POLARITY_2',   'Polarity 2',   true,  0,   124],
+    ['CHORUS_1',  'RATE',         'Rate',         false, 58,  64],
+    ['CHORUS_1',  'DEPTH',        'Depth',        false, 59,  64],
+    ['CHORUS_1',  'MIX',          'Mix',          false, 93,  64],
     ['DELAY_1',   'TIME',         'Time',         false, 55,  64],
     ['DELAY_1',   'FEEDBACK',     'Feedback',     false, 56,  64],
     ['DELAY_1',   'MIX',          'Mix',          false, 94,  34],
@@ -1019,7 +1031,7 @@
 
   function toItem([module, suffix, label, ...rest]) {
     const key = module ? `${module}_${suffix}` : suffix;
-    const full = module ? `${MOD[module].label} ${label}` : (suffix === 'OUTPUT' ? 'Final Output' : `General ${label}`);
+    const full = module ? `${MOD[module].label} ${label}` : (suffix.startsWith('OUTPUT') ? `Final Output ${label}` : `General ${label}`);
     return { module, key, label, full, rest };
   }
   const INPUT_ITEMS = INPUTS.map(a => { const it = toItem(a); it.defaultSource = it.rest[0]; return it; });
@@ -1043,7 +1055,7 @@
 
   // The signals bus, in slot order.
   const SIGNAL_NAMES = ['NONE', 'ONE', 'HALF', 'POINT_TWO', 'POINT_ONE', 'MINUS_POINT_ONE', 'MINUS_POINT_TWO', 'MINUS_HALF', 'MINUS_ONE',
-    ...MODULES.map(m => m.out), ...PARAM_ITEMS.map(p => p.key),
+    ...MODULES.flatMap(m => m.outs.map(o => o.sig)), ...PARAM_ITEMS.map(p => p.key),
     'PITCH', 'GATE', 'BEND', ...GENERAL_SLOTS];
   const SIG = Object.fromEntries(SIGNAL_NAMES.map((n, i) => [n, i]));
 
@@ -1051,11 +1063,11 @@
     NONE: '0.0', ONE: '+1.0', HALF: '+0.5', POINT_TWO: '+0.2', POINT_ONE: '+0.1', MINUS_POINT_ONE: '-0.1', MINUS_POINT_TWO: '-0.2', MINUS_HALF: '-0.5', MINUS_ONE: '-1.0',
     PITCH: 'Note Pitch', GATE: 'Note Gate', BEND: 'Pitch Bend',
   };
-  MODULES.forEach(m => { SIGNAL_LABELS[m.out] = `${m.label} Out`; });
+  MODULES.forEach(m => m.outs.forEach(o => { SIGNAL_LABELS[o.sig] = `${m.label} ${o.label}`; }));
   for (const slot in SLOT) SIGNAL_LABELS[slot] = SLOT[slot].full;
   const sigLabel = s => SIGNAL_LABELS[s] || s;
 
-  const DEFAULT_ORDER = ['LFO_1', 'ENV_GEN_1', 'MIXER_1', 'OSC_1', 'FILTER_1', 'AMP_1', 'DELAY_1'];
+  const DEFAULT_ORDER = ['LFO_1', 'ENV_GEN_1', 'MIXER_1', 'OSC_1', 'FILTER_1', 'AMP_1', 'CHORUS_1', 'DELAY_1'];
 
   const DEFAULT_LAYOUT = {
     NOTE:      { x: 180,  y: 358 },
@@ -1067,8 +1079,9 @@
     OSC_1:     { x: 880,  y: 40 },
     FILTER_1:  { x: 880,  y: 332 },
     AMP_1:     { x: 1240, y: 40 },
-    DELAY_1:   { x: 1240, y: 228 },
-    OUT:       { x: 1240, y: 488 },
+    CHORUS_1:  { x: 1240, y: 228 },
+    DELAY_1:   { x: 1600, y: 40 },
+    OUT:       { x: 1600, y: 340 },
   };
 
   function defaultState() {
@@ -1100,7 +1113,7 @@
     CONTROL_ITEMS.forEach(c => { const cc = s.cc[c.key]; if (cc) used[cc] = s.values[cc] ?? 64; });
     return {
       format: 'spms1-type2-patch',
-      version: 1,
+      version: 2,
       name: s.name,
       order: s.order.slice(),
       inputs: { ...s.inputs },
@@ -1121,7 +1134,19 @@
       s.order = obj.order.filter((k, i, a) => MOD[k] && a.indexOf(k) === i).slice(0, MODULES_SIZE);
     }
     const src = v => (typeof v === 'string' && v in SIG) ? v : null;
-    INPUT_ITEMS.forEach(i => { if (obj.inputs && i.key in obj.inputs) s.inputs[i.key] = src(obj.inputs[i.key]) || 'NONE'; });
+    // Version 1 had a mono Delay 1 and a mono Final Output. Each of its inputs feeds both sides
+    // now, and its output is read from the side of the input reading it, so an old patch sounds
+    // as it did: without the chorus, which it does not run.
+    const inputs = obj.inputs && typeof obj.inputs === 'object' ? { ...obj.inputs } : null;
+    if (inputs && !(obj.version >= 2)) {
+      for (const [old, side] of [['DELAY_1_AUDIO', 'DELAY_1_AUDIO_'], ['OUTPUT', 'OUTPUT_']]) {
+        if (old in inputs) for (const lr of ['L', 'R']) if (!(side + lr in inputs)) inputs[side + lr] = inputs[old];
+      }
+      for (const k in inputs) {
+        if (inputs[k] === 'DELAY_1_OUTPUT') inputs[k] = k.endsWith('_R') ? 'DELAY_1_OUTPUT_R' : 'DELAY_1_OUTPUT_L';
+      }
+    }
+    INPUT_ITEMS.forEach(i => { if (inputs && i.key in inputs) s.inputs[i.key] = src(inputs[i.key]) || 'NONE'; });
     PARAM_ITEMS.forEach(p => { if (obj.params && p.key in obj.params) s.params[p.key] = src(obj.params[p.key]) || p.key; });
     CONTROL_ITEMS.forEach(c => { if (obj.cc && c.key in obj.cc) s.cc[c.key] = clamp7(obj.cc[c.key]); });
     if (obj.values && typeof obj.values === 'object') {
@@ -1346,7 +1371,7 @@
     else state.params[key] = key;
   }
 
-  const moduleOfOutput = Object.fromEntries(MODULES.map(m => [m.out, m.key]));
+  const moduleOfOutput = Object.fromEntries(MODULES.flatMap(m => m.outs.map(o => [o.sig, m.key])));
 
   function connections() {
     const list = [];
@@ -1391,7 +1416,7 @@
       inputs: INPUT_ITEMS.filter(i => i.module === m.key),
       controls: PARAM_ITEMS.filter(p => p.module === m.key),
     })),
-    { key: 'OUT', label: 'Output', aux: true, inputs: INPUT_ITEMS.filter(i => i.key === 'OUTPUT') },
+    { key: 'OUT', label: 'Output', aux: true, inputs: INPUT_ITEMS.filter(i => !i.module) },
   ];
 
   function escapeHTML(s) {
@@ -1422,7 +1447,9 @@
     if (node.module) h += `<span class="badge" title="Click to add to or remove from the run order"></span>`;
     h += `</div>`;
     if (node.module) {
-      h += `<div class="row"><span class="lbl right">Out</span><span class="port out" data-src="${node.module.out}"></span></div>`;
+      for (const o of node.module.outs) {
+        h += `<div class="row"><span class="lbl right">${o.label}</span><span class="port out" data-src="${o.sig}"></span></div>`;
+      }
     }
     if (node.notes) {
       h += `<div class="sep"><span>Signals</span><span>Value</span><span class="norm-head">Norm</span></div>`;
@@ -2331,6 +2358,7 @@
     { col: 2, title: 'Osc', module: 'OSC_1' },
     { col: 2, title: 'Filter', module: 'FILTER_1' },
     { col: 3, title: 'Amp', module: 'AMP_1' },
+    { col: 3, title: 'Chorus', module: 'CHORUS_1' },
     { col: 3, title: 'Delay', module: 'DELAY_1' },
   ];
   CONTROL_PANELS.push({ col: 1, title: 'Mixer 1', module: 'MIXER_1', onlyWithCC: true });

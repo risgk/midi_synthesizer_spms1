@@ -12,6 +12,7 @@ SPMS-1 (type-2)
 
 - Raspberry Pi Pico 2 用のモノフォニック・セミモジュラー MIDI シンセサイザー
 - フィルタ: ZDF/TPT ステート・バリアブル・フィルタ (遅延ソフトクリッピング付き)
+- コーラス (モノラルからステレオへ) とディレイ (ステレオ)、ステレオ出力
 - 必要なハードウェア: Raspberry Pi Pico 2 (PWM Audio 出力、DAC 不要)、または Raspberry Pi Pico 2 と Pimoroni Pico Audio Pack (または代わりとなる I2S DAC ハードウェア)
     - 写真: Grove Shield for Pi Pico からの PWM Audio を、ネジ端子付きの 3.5 mm ステレオジャックと、ボリュームコントロール付きのケーブルを通して出力しています
 - [README](./spms1_type2/README.ja.md)
