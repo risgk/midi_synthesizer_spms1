@@ -71,7 +71,8 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.0
 ### ビルド済みバイナリ
 
 - "bin" フォルダの "spms1_type2_pwm_audio.ino.uf2" は Raspberry Pi Pico 2 と PWM Audio 出力 (L は GP20、R は GP21) 用です
-- "bin" フォルダの "spms1_type2_i2s.ino.uf2" は Raspberry Pi Pico 2 と Pimoroni Pico Audio Pack 用です
+- "bin" フォルダの "spms1_type2_i2s.ino.uf2" は Raspberry Pi Pico 2 と、Pimoroni Pico Audio Pack、
+  Adafruit PCM5102 I2S DAC、または GY-PCM5102 用です
 
 
 ### Web エディタ

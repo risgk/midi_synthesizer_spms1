@@ -71,7 +71,8 @@ Usage
 ### Prebuilt Binary
 
 - "spms1_type2_pwm_audio.ino.uf2" (in the "bin" folder) is for Raspberry Pi Pico 2 with PWM Audio output (L on GP20 and R on GP21)
-- "spms1_type2_i2s.ino.uf2" (in the "bin" folder) is for Raspberry Pi Pico 2 and Pimoroni Pico Audio Pack
+- "spms1_type2_i2s.ino.uf2" (in the "bin" folder) is for Raspberry Pi Pico 2 and Pimoroni Pico Audio Pack,
+  Adafruit PCM5102 I2S DAC, or GY-PCM5102
 
 
 ### Web Editor
