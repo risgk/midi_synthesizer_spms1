@@ -640,10 +640,11 @@ The C hosts ("sim_spinel", "sim_render", and SPMS-1 Web in "web") keep the MIDI 
 there reaches the device and all of them at once. "sim_cruby" keeps a Ruby copy in "sim_cruby/spms1_c_midi.rb".
 
 The simulators are developed and tested on Windows. macOS and Linux are supported on a best-effort
-basis, written to their APIs but without the machines to try them on: on Linux, the builds, the
-offline renders and the comparison with CRuby are checked in a container with no audio or MIDI
-hardware (sim_spinel with a FIFO standing in for the MIDI device and ALSA's file plugin for the
-audio), and macOS is not tested at all.
+basis, written to their APIs but without the machines to try them on. The GitHub Actions workflow
+("SPMS-1 (type-2) Checks") builds sim_spinel and sim_render on macOS and Linux and runs the offline
+renders there, and compares them with CRuby on Linux; neither is tried with audio or MIDI hardware
+(on Linux, sim_spinel was run once with a FIFO standing in for the MIDI device and ALSA's file
+plugin for the audio).
 
 - Spinel output (experimental): "sim_spinel" -- builds "spms1_main.c" and the runtime in this folder, unmodified,
   for Windows, macOS or Linux and runs it in real time, with audio out through PortAudio and MIDI in
