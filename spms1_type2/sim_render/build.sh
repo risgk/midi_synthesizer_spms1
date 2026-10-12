@@ -62,7 +62,7 @@ for src in spms1_main.c sp_*.c re_*.c; do
       -c "$src" -o "$obj"
   fi
 done
-"$cc" -O2 -Wall -c sim_render/spms1_render.c -o build/sim_render/spms1_render_host.o
+"$cc" -O2 -Wall -I. -c sim_render/spms1_render.c -o build/sim_render/spms1_render_host.o
 "$cc" -o "$exe" build/sim_render/*.o -lm $strip_unused
 
 echo "Built $exe"

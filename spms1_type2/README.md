@@ -635,24 +635,35 @@ CC 34, 0.25: the dry signal is 2.5 dB down and the first repeat about 16 dB unde
 
 ### PC Simulators
 
+The C hosts ("sim_spinel", "sim_render", and SPMS-1 Web in "web") keep the MIDI with the sketch's own
+"spms1_midi_state.h", the tables "spms1_main.rb" reads and the handlers that fill them, so a change
+there reaches the device and all of them at once. "sim_cruby" keeps a Ruby copy in "sim_cruby/spms1_c_midi.rb".
+
 - Spinel output (experimental): "sim_spinel" -- builds "spms1_main.c" and the runtime in this folder, unmodified,
-  for Windows or macOS and runs it in real time, with audio out through PortAudio and MIDI in
-  through WinMM or CoreMIDI. Build with `sh sim_spinel/build.sh` (MinGW gcc in Git Bash on
-  Windows, clang on macOS), then run `build/sim_spinel/spms1_sim --midi-in NAME`; `--list` shows
-  the MIDI inputs
+  for Windows, macOS or Linux and runs it in real time, with audio out through PortAudio and MIDI in
+  through WinMM, CoreMIDI, or the ALSA raw MIDI devices ("/dev/snd/midiC*D*"). Build with
+  `sh sim_spinel/build.sh` (MinGW gcc in Git Bash on Windows, clang on macOS, cc on Linux), then run
+  `build/sim_spinel/spms1_sim --midi-in NAME`; `--list` shows the MIDI inputs
     - The build first regenerates "spms1_main.c" with Spinel, found on the PATH or, on Windows,
       inside WSL, passing it the type seeds in "sig". `--no-spinel`, or no Spinel to be found,
       builds the one already here
     - PortAudio is loaded at run time. The PortAudio project releases source only; on Windows,
       install it into RubyInstaller's MSYS2 with
       `ridk exec pacman -S mingw-w64-ucrt-x86_64-portaudio` (the simulators look there), and on
-      macOS with `brew install portaudio`. `SPMS1_PORTAUDIO_DLL` gives a path of your own
-    - Not tested on macOS
+      macOS with `brew install portaudio`, and on Linux with the package of the distribution
+      (`sudo apt install libportaudio2` on Debian and Ubuntu). `SPMS1_PORTAUDIO_DLL` gives a path of your own
+    - Linux: `--host alsa` or `--host jack` picks the PortAudio host API (PortAudio's default otherwise).
+      A MIDI keyboard or interface on USB shows up as a raw MIDI device; a software port of the ALSA
+      sequencer (a virtual keyboard) has none, so it cannot be used
+    - Not tested on macOS. On Linux, tested with a FIFO standing in for the MIDI device and ALSA's
+      file plugin for the audio, not with real hardware
 - CRuby (experimental): "sim_cruby" -- runs "spms1_main.rb" itself on CRuby, with PortAudio
   through the ffi gem, installed as above, and MIDI in through WinMM on Windows and the unimidi
   gem on macOS: `ruby sim_cruby/spms1_sim.rb --midi-in NAME`. The interpreter does not keep up
   with the default patch in real time
     - Not tested on macOS
+    - Offline, with no gems: `ruby sim_cruby/spms1_render.rb` takes the same options as "sim_render" below
+      and writes "spms1_render_cruby.wav". `ruby sim_cruby/spms1_compare.rb A.wav B.wav` compares two renders
 - Offline WAV output: "sim_offline/spms1_output_wav.rb" -- renders the default patch offline, the
   same modules in the same order with the CC values the synth powers up with. It does not
   reproduce the signals bus or the run order, so it catches a change in a module, not in a routing
@@ -671,6 +682,13 @@ CC 34, 0.25: the dry signal is 2.5 dB down and the first repeat about 16 dB unde
       same compiler only: clang ignores the `single-precision-constant` of "spinel_rt.h", which GCC (as
       on the device) honors, so the last bits differ between them
     - The build regenerates "spms1_main.c" with Spinel first, as "sim_spinel" does (`--no-spinel` to skip)
+    - `sh sim_render/compare_with_cruby.sh [--patch FILE] [--score FILE] [--seconds N]` renders the same
+      patch and score with this and with CRuby running "spms1_main.rb" itself, and compares them, so it
+      tells whether the C that Spinel made does what the Ruby says. The comparison is of short-time
+      spectra, relative to the signal: float (Spinel's output) and double (CRuby) let the oscillators'
+      phase drift apart, which differs sample by sample but not in the spectra. Precision stays below
+      about -35 dB, and a different routing, or a CC value 4 steps away, lands above -10 dB; the limit
+      is -25 dB (`ruby sim_cruby/spms1_compare.rb --limit DB` for another)
 
 
 ### Checking the Generated Code

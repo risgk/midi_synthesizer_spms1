@@ -41,103 +41,9 @@ char *crypt(const char *key, const char *salt) {
 }
 #endif
 
-/* ---- MIDI state, as in spms1_type2.ino ---- */
+/* ---- MIDI state, the sketch's own ---- */
 
-#define SPMS1_NRPN_SIZE (512)
-
-static uint8_t g_midi_note_on_pitch[16] = {60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60};
-static uint8_t g_midi_note_on_state[16];
-static uint8_t g_midi_cc_values[16][128];
-static int16_t g_midi_pitch_bend[16];
-static uint8_t g_midi_nrpn_values[16][SPMS1_NRPN_SIZE];
-static uint8_t g_midi_nrpn_msb[16];
-static uint8_t g_midi_nrpn_lsb[16];
-static uint8_t g_midi_nrpn_selected[16];
-
-void set_midi_note_on_pitch(uint8_t ch, uint8_t v) { if (ch < 16) g_midi_note_on_pitch[ch] = v; }
-uint8_t get_midi_note_on_pitch(uint8_t ch) { return (ch < 16) ? g_midi_note_on_pitch[ch] : 0; }
-void set_midi_note_on_state(uint8_t ch, uint8_t v) { if (ch < 16) g_midi_note_on_state[ch] = v; }
-uint8_t get_midi_note_on_state(uint8_t ch) { return (ch < 16) ? g_midi_note_on_state[ch] : 0; }
-void set_midi_pitch_bend(uint8_t ch, int32_t v) { if (ch < 16) g_midi_pitch_bend[ch] = (int16_t)v; }
-int32_t get_midi_pitch_bend(uint8_t ch) { return (ch < 16) ? g_midi_pitch_bend[ch] : 0; }
-
-void set_midi_cc_value(uint8_t ch, uint8_t n, uint8_t v) {
-  if (ch < 16 && n < 128) g_midi_cc_values[ch][n] = v;
-}
-uint8_t get_midi_cc_value(uint8_t ch, uint8_t n) {
-  return (ch < 16 && n < 128) ? g_midi_cc_values[ch][n] : 0;
-}
-
-void set_midi_nrpn_value(uint8_t ch, int32_t i, uint8_t v) {
-  if (ch < 16 && i >= 0 && i < SPMS1_NRPN_SIZE) g_midi_nrpn_values[ch][i] = v;
-}
-uint8_t get_midi_nrpn_value(uint8_t ch, int32_t i) {
-  return (ch < 16 && i >= 0 && i < SPMS1_NRPN_SIZE) ? g_midi_nrpn_values[ch][i] : 0;
-}
-
-static void handle_midi_nrpn_cc(uint8_t ch, uint8_t number, uint8_t value) {
-  if (number == 99) {
-    g_midi_nrpn_msb[ch] = value;
-    g_midi_nrpn_selected[ch] = 1;
-  } else if (number == 98) {
-    g_midi_nrpn_lsb[ch] = value;
-    g_midi_nrpn_selected[ch] = 1;
-  } else if (number == 101 || number == 100) {
-    g_midi_nrpn_selected[ch] = 0;
-  } else if (number == 6 && g_midi_nrpn_selected[ch]) {
-    set_midi_nrpn_value(ch, ((int32_t)g_midi_nrpn_msb[ch] << 7) | g_midi_nrpn_lsb[ch], value);
-  }
-}
-
-/* A note-on of velocity 0 is a note-off, as the MIDI library the sketch uses treats it. */
-static void handle_midi_message(uint8_t status, uint8_t d1, uint8_t d2) {
-  uint8_t ch = status & 0x0F;
-  switch (status & 0xF0) {
-  case 0x90:
-    if (d2 != 0) {
-      set_midi_note_on_pitch(ch, d1);
-      set_midi_note_on_state(ch, 1);
-      break;
-    }
-    /* fall through */
-  case 0x80:
-    if (d1 == g_midi_note_on_pitch[ch]) set_midi_note_on_state(ch, 0);
-    break;
-  case 0xB0:
-    set_midi_cc_value(ch, d1, d2);
-    handle_midi_nrpn_cc(ch, d1, d2);
-    break;
-  case 0xE0:
-    set_midi_pitch_bend(ch, (((int32_t)d2 << 7) | d1) - 8192);
-    break;
-  }
-}
-
-/* The bytes are parsed as a stream, running status included, so a line may carry several
-   messages. Real-time bytes are skipped, and so is SysEx. */
-static uint8_t g_parse_status;
-static uint8_t g_parse_data[2];
-static int g_parse_count;
-static int g_parse_in_sysex;
-
-static void midi_parse_byte(uint8_t b) {
-  if (b >= 0xF8) {
-    return;
-  } else if (b == 0xF0) {
-    g_parse_in_sysex = 1;
-  } else if (b >= 0x80) {
-    g_parse_in_sysex = 0;
-    g_parse_status = (b < 0xF0) ? b : 0;
-    g_parse_count = 0;
-  } else if (!g_parse_in_sysex && g_parse_status) {
-    int length = ((g_parse_status & 0xE0) == 0xC0) ? 1 : 2;
-    g_parse_data[g_parse_count++] = b;
-    if (g_parse_count == length) {
-      handle_midi_message(g_parse_status, g_parse_data[0], (length == 2) ? g_parse_data[1] : 0);
-      g_parse_count = 0;
-    }
-  }
-}
+#include "spms1_midi_state.h"
 
 /* ---- The patch and the score ---- */
 
@@ -292,7 +198,7 @@ static void write_wav_header(uint32_t data_size) {
 /* Called once the synth has written its default patch and its default CC values, so the patch
    given here replaces them, as one sent from the editor after power-up does. */
 void start_audio(void) {
-  for (size_t i = 0; i < g_patch_size; i++) midi_parse_byte(g_patch[i]);
+  for (size_t i = 0; i < g_patch_size; i++) spms1_midi_parse_byte(g_patch[i]);
   g_wav = fopen(g_out_path, "wb");
   if (!g_wav) die("Could not open ", g_out_path);
   write_wav_header(0);
@@ -316,7 +222,7 @@ static double to_dbfs(float v) { return (v > 0.0f) ? 20.0 * log10(v) : -INFINITY
 void write_to_audio_buffer(float l, float r) {
   while (g_next_event < g_num_events && g_events[g_next_event].frame <= g_frames) {
     const Event *e = &g_events[g_next_event++];
-    for (int i = 0; i < e->size; i++) midi_parse_byte(e->bytes[i]);
+    for (int i = 0; i < e->size; i++) spms1_midi_parse_byte(e->bytes[i]);
   }
 
   write_sample(l, 0);

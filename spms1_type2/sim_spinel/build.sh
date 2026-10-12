@@ -1,6 +1,6 @@
 #!/bin/sh
 # Builds the PC simulator into build/sim_spinel: gcc from MinGW (run in Git Bash) on Windows,
-# clang on macOS.
+# clang on macOS, cc (gcc or clang) on Linux.
 #
 #   sh sim_spinel/build.sh [--no-spinel]
 #
@@ -30,8 +30,13 @@ case "$(uname -s)" in
     libs="-framework CoreMIDI -framework CoreFoundation"
     strip_unused="-Wl,-dead_strip"
     ;;
+  Linux)
+    exe=build/sim_spinel/spms1_sim
+    libs="-ldl -lpthread"
+    strip_unused="-Wl,--gc-sections"
+    ;;
   *)
-    echo "Windows or macOS only" >&2
+    echo "Windows, macOS or Linux only" >&2
     exit 1
     ;;
 esac
@@ -63,7 +68,7 @@ for src in spms1_main.c sp_*.c re_*.c; do
       -c "$src" -o "$obj"
   fi
 done
-"$cc" -O2 -Wall -Wno-deprecated-declarations -c sim_spinel/spms1_sim.c -o build/sim_spinel/spms1_sim_host.o
+"$cc" -O2 -Wall -Wno-deprecated-declarations -I. -c sim_spinel/spms1_sim.c -o build/sim_spinel/spms1_sim_host.o
 "$cc" -o "$exe" build/sim_spinel/*.o $libs -lm $strip_unused
 
 echo "Built $exe"

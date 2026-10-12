@@ -609,23 +609,36 @@ CC 64、Mix が CC 34（0.25）で、ドライ信号は 2.5 dB 下がり、最�
 
 ### PC シミュレーター
 
-- Spinel 出力 (実験的): "sim_spinel" -- このフォルダの "spms1_main.c" とランタイムを、変更せずに Windows か macOS
-  向けにビルドし、リアルタイムで動かします。音声は PortAudio で出力し、MIDI は WinMM か CoreMIDI で
-  受けます。`sh sim_spinel/build.sh` でビルドし (Windows は Git Bash 上の MinGW gcc、macOS は clang)、
+C のホスト ("sim_spinel"、"sim_render"、"web" の SPMS-1 Web) は、スケッチ自身の "spms1_midi_state.h"
+("spms1_main.rb" が読むテーブルと、それを埋めるハンドラ) で MIDI を扱うので、そこを変えれば実機とすべての
+ホストに一度に反映されます。"sim_cruby" は Ruby で書いた写しを "sim_cruby/spms1_c_midi.rb" に持っています。
+
+- Spinel 出力 (実験的): "sim_spinel" -- このフォルダの "spms1_main.c" とランタイムを、変更せずに Windows、macOS、
+  Linux 向けにビルドし、リアルタイムで動かします。音声は PortAudio で出力し、MIDI は WinMM、CoreMIDI、
+  または ALSA の raw MIDI デバイス ("/dev/snd/midiC*D*") で受けます。`sh sim_spinel/build.sh` でビルドし
+  (Windows は Git Bash 上の MinGW gcc、macOS は clang、Linux は cc)、
   `build/sim_spinel/spms1_sim --midi-in NAME` で起動します。`--list` で MIDI 入力の一覧を表示します
     - ビルドの最初に、PATH 上、Windows では WSL の中にある Spinel で "spms1_main.c" を生成し直します。
       その際 "sig" の型シードを渡します。`--no-spinel` を付けるか、Spinel が見つからなければ、
       今ある "spms1_main.c" をビルドします
     - PortAudio は実行時に読み込みます。PortAudio プロジェクトの配布はソースのみなので、Windows では
       RubyInstaller の MSYS2 に `ridk exec pacman -S mingw-w64-ucrt-x86_64-portaudio` で入れ
-      (シミュレーターはそこを探します)、macOS では `brew install portaudio` で入れます。
+      (シミュレーターはそこを探します)、macOS では `brew install portaudio`、Linux ではディストリビューションの
+      パッケージ (Debian と Ubuntu では `sudo apt install libportaudio2`) で入れます。
       `SPMS1_PORTAUDIO_DLL` で任意のパスを指定することもできます
-    - macOS では動作確認していません
+    - Linux: `--host alsa` か `--host jack` で PortAudio のホスト API を選びます (省略時は PortAudio の既定)。
+      USB の MIDI キーボードやインターフェースは raw MIDI デバイスとして見えます。ALSA シーケンサーの
+      ソフトウェアのポート (仮想キーボードなど) には raw MIDI デバイスがないので、使えません
+    - macOS では動作確認していません。Linux では、MIDI デバイスの代わりの FIFO と、音声用の ALSA の
+      file プラグインで確認しました。実際のハードウェアでは確認していません
 - CRuby (実験的): "sim_cruby" -- "spms1_main.rb" そのものを CRuby で動かします。PortAudio は上と同じく
   入れたものを ffi gem 経由で使い、MIDI 入力は Windows では WinMM、macOS では unimidi gem で受けます:
   `ruby sim_cruby/spms1_sim.rb --midi-in NAME`。デフォルトのパッチはインタプリタではリアルタイムに
   間に合いません
     - macOS では動作確認していません
+    - オフライン (gem 不要): `ruby sim_cruby/spms1_render.rb` は下の "sim_render" と同じオプションを取り、
+      "spms1_render_cruby.wav" に書き出します。`ruby sim_cruby/spms1_compare.rb A.wav B.wav` で 2 つの
+      レンダリングを比べます
 - オフライン WAV 出力: "sim_offline/spms1_output_wav.rb" -- デフォルトのパッチをオフラインで
   レンダリングします。同じモジュールを同じ順で、電源投入時の CC 値で鳴らします。
   シグナルバスと実行順は再現しないので、モジュール自体の変化は捉えますが、結線の間違いは捉えません
@@ -644,6 +657,12 @@ CC 64、Mix が CC 34（0.25）で、ドライ信号は 2.5 dB 下がり、最�
       比べてください: "spinel_rt.h" の `single-precision-constant` を GCC は (実機と同じく) 守り、
       clang は無視するので、両者では下位のビットが変わります
     - ビルドは "sim_spinel" と同じく、先に Spinel で "spms1_main.c" を再生成します (`--no-spinel` で省略)
+    - `sh sim_render/compare_with_cruby.sh [--patch FILE] [--score FILE] [--seconds N]` は、同じパッチと
+      スコアをこれと、"spms1_main.rb" そのものを動かす CRuby とでレンダリングして比べるので、Spinel が
+      作った C が Ruby の書いたとおりに動くかが分かります。比較は短時間スペクトルで、信号に対する相対値です:
+      float (Spinel の出力) と double (CRuby) ではオシレーターの位相が少しずつずれ、サンプル単位では
+      差が出ますが、スペクトルには出ません。精度による差は約 -35 dB 以下、結線の違いや CC 値の 4 段階の
+      違いは -10 dB 以上になります。判定の上限は -25 dB です (`ruby sim_cruby/spms1_compare.rb --limit DB` で変更)
 
 
 ### 生成コードの確認
