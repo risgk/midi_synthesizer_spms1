@@ -19,6 +19,14 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.0
     - PWM Audio 出力 (DAC 不要)、デフォルト
         - L は GP20、R は GP21 です: Seeed Studio [Grove Shield for Pi Pico](https://www.seeedstudio.com/Grove-Shield-for-Pi-Pico-v1-0-p-4846.html) の D20 ポートで、
           黄色い線が L、白い線が R です
+        - オーディオの接続に使う部品 ([トップの README](../README.ja.md) の写真のとおり):
+            - Grove - ジャンパーワイヤー変換ケーブル。D20 ポートから (赤い線 (VCC) はつなぎません)
+            - ネジ端子 (L、R、GND) 付きの 3.5 mm ステレオジャック
+            - ボリュームコントロール付きの 3.5 mm ステレオケーブル (パッシブのステレオボリュームダイアル)。
+              ジャックとアンプまたはアクティブスピーカーの間に入れます
+                - ダイアルは音声と一緒に PWM のリップルも下げるので、RC フィルタなしでも接続先の機器の入力が
+                  飽和しにくくなります。ダイアルを絞った状態から始めてください: 最大では 3.3 V の矩形波がそのまま
+                  機器に届きます
         - Pimoroni [Pico VGA Demo Base](https://shop.pimoroni.com/products/pimoroni-pico-vga-demo-base) (PIM553) で使う場合は、
           `SPMS1_PWM_AUDIO_L_PIN` を 28 に、`SPMS1_PWM_AUDIO_R_PIN` を 27 にしてください
         - PWM のレベル (3200 段階) は、1 次のノイズシェーピングと TPDF ディザ付きで量子化されます
