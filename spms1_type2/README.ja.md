@@ -87,6 +87,10 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.1
     - モジュールの出力を入力やパラメータへ配線し、実行順と CC の割り当てを設定します
     - パッチを JSON で保存・読み込みします
     - パッチを MIDI バイト列または NRPN リストとしてコピーするか、Web MIDI で送信します
+- SPMS-1 Web: エディタに組み込まれたシンセサイザー本体 ("spms1_web_synth.js")
+    - "MIDI Out" で "SPMS-1 Web (Built-in)" を選び、ソフトウェア鍵盤 (または "MIDI In" の MIDI キーボード) で演奏します
+    - "spms1_main.c" を WebAssembly として Web ブラウザで動かすので、実機と同じ音がします
+    - [web/README.md](./web/README.md) を参照してください
 
 
 ### MIDI の設定

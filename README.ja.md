@@ -15,6 +15,7 @@ SPMS-1 (type-2)
 - コーラス (モノラルからステレオへ) とディレイ (ステレオ)、ステレオ出力
 - 必要なハードウェア: Raspberry Pi Pico 2 と Pimoroni Pico Audio Pack (または代わりとなる I2S DAC ハードウェア)、または Raspberry Pi Pico 2 のみ (PWM Audio 出力、DAC 不要)
     - 写真: Grove Shield for Pi Pico からの PWM Audio を、ネジ端子付きの 3.5 mm ステレオジャックと、ボリュームコントロール付きのケーブルを通して出力しています
+- SPMS-1 Web: シンセサイザー本体が Web ブラウザで動きます (Web エディタ "spms1_editor.html" に組み込み)
 - [README](./spms1_type2/README.ja.md)
 
 ![SPMS-1 (type-2)](./midi_synthesizer_spms1_type2.jpg)

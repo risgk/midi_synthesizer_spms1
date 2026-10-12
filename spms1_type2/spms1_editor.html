@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SPMS-1 (type-2) Editor</title>
+  <!-- SPMS-1 Web: the synth itself, built into the editor as "SPMS-1 Web (Built-in)" in MIDI Out (optional) -->
+  <script src="spms1_web_synth.js"></script>
   <style>
     :root {
       --primary-color: #9B111E;
@@ -2074,6 +2076,21 @@
   let midiAccess = null;
   let midiInput = null;
   let midiOutput = null;
+  // SPMS-1 Web, a virtual MIDI output listed after the devices; null without spms1_web_synth.js.
+  // It works without Web MIDI API too (e.g. on Safari), played from the soft keyboard.
+  const webSynthOutput = window.Spms1WebSynth ? window.Spms1WebSynth.output : null;
+
+  function outputPorts() {
+    const ports = midiAccess ? [...midiAccess.outputs.values()] : [];
+    if (webSynthOutput) ports.push(webSynthOutput);
+    return ports;
+  }
+
+  function outputById(id) {
+    if (!id) return null;
+    if (webSynthOutput && id === webSynthOutput.id) return webSynthOutput;
+    return (midiAccess && midiAccess.outputs.get(id)) || null;
+  }
   // What the device was last sent, so Live mode can send only what changed.
   let lastSent = null;
 
@@ -2125,9 +2142,11 @@
       lastSent = null;
       updateExport();
     }
-    if (!midiAccess) return;
-    fillPortSelect(inSelect, 'Select MIDI Input Device...', midiAccess.inputs, saved.in || current(inSelect));
-    fillPortSelect(outSelect, 'Select SPMS-1 Device...', midiAccess.outputs, saved.out || current(outSelect));
+    if (!midiAccess && !webSynthOutput) return;
+    if (midiAccess) {
+      fillPortSelect(inSelect, 'Select MIDI Input Device...', midiAccess.inputs, saved.in || current(inSelect));
+    }
+    fillPortSelect(outSelect, 'Select SPMS-1 Device...', outputPorts(), saved.out || current(outSelect));
     handleDeviceChange();
   }
 
@@ -2145,13 +2164,17 @@
       const sel = document.getElementById(id);
       sel.title = sel.value ? sel.selectedOptions[0].textContent : '';
     });
-    if (!midiAccess) return;
-    if (midiInput) midiInput.onmidimessage = null;
-    midiInput = midiAccess.inputs.get(document.getElementById('midi-in').value) || null;
-    if (midiInput) midiInput.onmidimessage = onMIDIMessage;
-    const next = midiAccess.outputs.get(document.getElementById('midi-out').value) || null;
+    if (!midiAccess && !webSynthOutput) return;
+    if (midiAccess) {
+      if (midiInput) midiInput.onmidimessage = null;
+      midiInput = midiAccess.inputs.get(document.getElementById('midi-in').value) || null;
+      if (midiInput) midiInput.onmidimessage = onMIDIMessage;
+    }
+    const next = outputById(document.getElementById('midi-out').value);
     if (next !== midiOutput) lastSent = null;
     midiOutput = next;
+    // SPMS-1 Web starts with the default patch, so it is given the patch shown, Live or not.
+    if (midiOutput && midiOutput === webSynthOutput && !lastSent) sendAll();
     liveSend();
   }
 
