@@ -643,7 +643,7 @@ The simulators are developed and tested on Windows. macOS and Linux are supporte
 basis, written to their APIs but without the machines to try them on: on Linux, the builds, the
 offline renders and the comparison with CRuby are checked in a container with no audio or MIDI
 hardware (sim_spinel with a FIFO standing in for the MIDI device and ALSA's file plugin for the
-audio), and macOS is not tested at all. Reports and fixes from those platforms are welcome.
+audio), and macOS is not tested at all.
 
 - Spinel output (experimental): "sim_spinel" -- builds "spms1_main.c" and the runtime in this folder, unmodified,
   for Windows, macOS or Linux and runs it in real time, with audio out through PortAudio and MIDI in

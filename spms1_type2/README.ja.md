@@ -617,7 +617,6 @@ C のホスト ("sim_spinel"、"sim_render"、"web" の SPMS-1 Web) は、スケ
 試せる環境が手元にないため、ベストエフォートでの対応です。Linux では、オーディオや MIDI のハードウェアの
 ないコンテナ上で、ビルド、オフライン・レンダリング、CRuby との比較を確認しています (sim_spinel は、
 MIDI デバイスの代わりの FIFO と、音声用の ALSA の file プラグインで確認)。macOS はまったく試していません。
-これらの環境での動作報告や修正を歓迎します。
 
 - Spinel 出力 (実験的): "sim_spinel" -- このフォルダの "spms1_main.c" とランタイムを、変更せずに Windows、macOS、
   Linux 向けにビルドし、リアルタイムで動かします。音声は PortAudio で出力し、MIDI は WinMM、CoreMIDI、
