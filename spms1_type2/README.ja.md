@@ -666,6 +666,20 @@ C のホスト ("sim_spinel"、"sim_render"、"web" の SPMS-1 Web) は、スケ
       違いは -10 dB 以上になります。判定の上限は -25 dB です (`ruby sim_cruby/spms1_compare.rb --limit DB` で変更)
 
 
+### GitHub Actions
+
+"../.github/workflows/spms1-type2.yml" の "SPMS-1 (type-2) Checks" を手動で実行します (Actions タブの
+"Run workflow" で、ジョブをチェックボックスで選びます):
+
+- スケッチ: "spms1_type2.ino" を Arduino-Pico 6.2.0 で PWM Audio 版と I2S 版にコンパイルし、UF2 ファイルを
+  成果物 (artifact) として残します ("bin" のものは置き換えません)
+- シミュレーター: "sim_spinel" と "sim_render" を Linux、macOS、Windows でビルドしてレンダリングし、
+  Linux では CRuby とのレンダリングの比較もします
+- SPMS-1 Web: "spms1_web_synth.js" をビルド・テストして成果物として残し、"Commit SPMS-1 Web" を選ぶと
+  コミットします
+- Spinel: 上で指定したリリースをビルドし、"spms1_main.c" が .rb ファイルから作られるものと一致するかを確認します
+
+
 ### 生成コードの確認
 
 サンプル単位の処理に手を入れたら、書き込む前にコンパイラが何を吐いたか見る価値があります。

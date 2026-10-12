@@ -692,6 +692,20 @@ plugin for the audio).
       is -25 dB (`ruby sim_cruby/spms1_compare.rb --limit DB` for another)
 
 
+### GitHub Actions
+
+"SPMS-1 (type-2) Checks" in "../.github/workflows/spms1-type2.yml", run by hand ("Run workflow" in
+the Actions tab, each job chosen by a checkbox):
+
+- Sketch: compiles "spms1_type2.ino" for PWM Audio and I2S with Arduino-Pico 6.2.0, and keeps the
+  UF2 files as artifacts (the ones in "bin" are not replaced)
+- Simulators: builds "sim_spinel" and "sim_render" on Linux, macOS and Windows, renders, and compares
+  the renders with CRuby on Linux
+- SPMS-1 Web: builds and tests "spms1_web_synth.js", keeps it as an artifact, and commits it
+  with "Commit SPMS-1 Web"
+- Spinel: builds the release named above and checks that "spms1_main.c" is what it makes of the .rb files
+
+
 ### Checking the Generated Code
 
 What the compiler makes of a change to the per-sample path is worth looking at before flashing it,

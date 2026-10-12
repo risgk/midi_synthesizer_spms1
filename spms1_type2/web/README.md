@@ -78,6 +78,8 @@ node spms1_web_test.js
 ```
 
 - The output: "../spms1_web_synth.js"
+- GitHub Actions: "SPMS-1 (type-2) Checks" in "../../.github/workflows/spms1-type2.yml"
+  builds and tests "spms1_web_synth.js" (and commits it with "Commit SPMS-1 Web")
 - The source files
     - "spms1_web_main.c": the C API for the AudioWorkletProcessor, standing in for "spms1_type2.ino"
       (the MIDI tables and handlers are the sketch's own "../spms1_midi_state.h")
