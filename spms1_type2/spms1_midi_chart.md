@@ -1,0 +1,77 @@
+```
+  [MIDI Synthesizer]                                              Date: 2026-10-12                      
+  Model: SPMS-1 (type-2)          MIDI Implementation Chart       Version: 0.0.1                        
++-------------------------------+---------------+---------------+--------------------------------------+
+| Function...                   | Transmitted   | Recognized    | Remarks                              |
++-------------------------------+---------------+---------------+--------------------------------------+
+| Basic        Default          | x             | 1             |                                      |
+| Channel      Changed          | x             | x             |                                      |
++-------------------------------+---------------+---------------+--------------------------------------+
+| Mode         Default          | x             | Mode 4        |                                      |
+|              Messages         | x             | x             |                                      |
+|              Altered          | ************* |               |                                      |
++-------------------------------+---------------+---------------+--------------------------------------+
+| Note                          | x             | 0-127         |                                      |
+| Number       : True Voice     | ************* | 0-120         |                                      |
++-------------------------------+---------------+---------------+--------------------------------------+
+| Velocity     Note ON          | x             | x             |                                      |
+|              Note OFF         | x             | x             |                                      |
++-------------------------------+---------------+---------------+--------------------------------------+
+| After        Key's            | x             | x             |                                      |
+| Touch        Ch's             | x             | x             |                                      |
++-------------------------------+---------------+---------------+--------------------------------------+
+| Pitch Bend                    | x             | o             | Bipolar, routable as a signal        |
++-------------------------------+---------------+---------------+--------------------------------------+
+| Control                    20 | x             | o             | Osc Wave (Saw to Square)             |
+| Change                     13 | x             | o             | Osc Mod Amt                          |
+|                            86 | x             | o             | Osc Coarse Tune (+-5 Octaves)        |
+|                            70 | x             | o             | Osc Fine Tune (+-60 Cents)           |
+|                            74 | x             | o             | Filter Cutoff                        |
+|                            71 | x             | o             | Filter Resonance                     |
+|                            24 | x             | o             | Filter Mod Amt                       |
+|                           112 | x             | o             | Filter Gain                          |
+|                            15 | x             | o             | Amp Gain                             |
+|                            73 | x             | o             | EG Attack (Time)                     |
+|                            75 | x             | o             | EG Decay (Time)                      |
+|                            30 | x             | o             | EG Sustain (Level)                   |
+|                             3 | x             | o             | LFO Rate                             |
+|                            58 | x             | o             | Chorus Rate                          |
+|                            59 | x             | o             | Chorus Depth                         |
+|                            93 | x             | o             | Chorus Mix                           |
+|                            55 | x             | o             | Delay Time                           |
+|                            56 | x             | o             | Delay Feedback                       |
+|                            94 | x             | o             | Delay Mix                            |
+|                             1 | x             | o             | General Mod Wheel (Unipolar)         |
+|                            16 | x             | o             | General 1 (Unipolar and Bipolar)     |
+|                            17 | x             | o             | General 2 (Unipolar and Bipolar)     |
+|                            18 | x             | o             | General 3 (Unipolar and Bipolar)     |
+|                            19 | x             | o             | General 4 (Unipolar and Bipolar)     |
+|                            99 | x             | o             | NRPN MSB                             |
+|                            98 | x             | o             | NRPN LSB                             |
+|                             6 | x             | o             | Data Entry MSB (NRPN value)          |
+|                       101,100 | x             | o             | RPN select: suspends NRPN data entry |
++-------------------------------+---------------+---------------+--------------------------------------+
+| Program                       | x             | x             |                                      |
+| Change       : True #         | ************* | ************* |                                      |
++-------------------------------+---------------+---------------+--------------------------------------+
+| System Exclusive              | x             | x             |                                      |
++-------------------------------+---------------+---------------+--------------------------------------+
+| System       : Song Pos       | x             | x             |                                      |
+| Common       : Song Sel       | x             | x             |                                      |
+|              : Tune           | x             | x             |                                      |
++-------------------------------+---------------+---------------+--------------------------------------+
+| System       : Clock          | x             | x             |                                      |
+| Real Time    : Commands       | x             | x             |                                      |
++-------------------------------+---------------+---------------+--------------------------------------+
+| Aux          : All Sound OFF  | x             | x             |                                      |
+| Messages     : Reset All Ctrl | x             | x             |                                      |
+|              : Local ON/OFF   | x             | x             |                                      |
+|              : All Notes OFF  | x             | x             |                                      |
+|              : Active Sense   | x             | x             |                                      |
+|              : Reset          | x             | x             |                                      |
++-------------------------------+---------------+---------------+--------------------------------------+
+| Notes                         | Control Change 4-124, centred on 64. NRPN is 7-bit, CC 6 only.       |
++-------------------------------+----------------------------------------------------------------------+
+  Mode 1: Omni On,  Poly          Mode 2: Omni On,  Mono          o: Yes                                
+  Mode 3: Omni Off, Poly          Mode 4: Omni Off, Mono          x: No                                 
+```

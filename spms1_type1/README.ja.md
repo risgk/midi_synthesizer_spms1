@@ -45,6 +45,7 @@ MIDI Synthesizer SPMS-1 (type-1) v0.0.12 (Frozen)
         - L は GP28、R は GP27 で、Pimoroni [Pico VGA Demo Base](https://shop.pimoroni.com/products/pimoroni-pico-vga-demo-base) (PIM553) と同じです
         - PWM のレベル (3200 段階) は、1 次のノイズシェーピングと TPDF ディザ付きで量子化されます
         - PWM のリップルを取り除くため、各出力に RC ローパスフィルターを付けることをお勧めします
+            - 矩形波が流れる配線からの輻射ノイズ (EMI) も減らせます。ピンの近くに付けてください
         - 1 サンプルを 4 つの PWM 周期に分けて出力します (PWM キャリア: 48 kHz ではなく 192 kHz)。キャリアをフィルタで取り除きやすく、
           アクティブスピーカーで「ピー」という音が出にくくなります (`SPMS1_PWM_AUDIO_SUBPERIODS`: 1、2、4、8)
         - RC フィルタを付けない場合は、抵抗か接続先の機器の入力ゲイン (ボリューム) でレベルを下げてください:

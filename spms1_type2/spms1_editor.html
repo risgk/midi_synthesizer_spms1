@@ -1,0 +1,2938 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SPMS-1 (type-2) Editor</title>
+  <style>
+    :root {
+      --primary-color: #9B111E;
+      --primary-hover: #7A0D17;
+      --bg-color: #f7f9fa;
+      --panel-bg: #ffffff;
+      --border-color: #e1e4e6;
+      --text-color: #2c3e50;
+      --text-muted: #7f8c8d;
+      --wire-signal: #9B111E;
+      --wire-param: #4f7cac;
+      --wire-feedback: #d68910;
+      --wire-inactive: #b8c0c4;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    header {
+      border-bottom: 3px solid var(--primary-color);
+      padding-bottom: 12px;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    header h1 {
+      font-size: 1.8rem;
+      color: var(--primary-color);
+    }
+    header .version {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: normal;
+      margin-left: 10px;
+    }
+    [hidden] {
+      display: none !important;
+    }
+    .tabs {
+      display: flex;
+      gap: 6px;
+    }
+    .tab-btn {
+      padding: 6px 14px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--text-color);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .tab-btn.active {
+      background: var(--primary-color);
+      border-color: var(--primary-color);
+      color: #fff;
+    }
+    /* One line with each label beside its select, so the MIDI settings, set once and left, take
+       little of the height. */
+    .panel.midi-panel {
+      padding: 8px 16px;
+    }
+    .midi-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px 20px;
+      flex-wrap: wrap;
+    }
+    .midi-bar .form-group {
+      margin-bottom: 0;
+      flex: 1 1 220px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .midi-bar .form-group.narrow {
+      flex: 0 0 auto;
+    }
+    .midi-bar .form-group label {
+      margin-bottom: 0;
+      white-space: nowrap;
+    }
+    /* A long device name is cut short; its title gives it in full. */
+    .midi-bar .form-group select {
+      min-width: 0;
+      text-overflow: ellipsis;
+    }
+    .midi-bar .form-group.narrow select {
+      width: auto;
+    }
+    .midi-bar .check {
+      margin-bottom: 0;
+    }
+    /* Its height is set by fitTabArea, so that the soft keyboard under it ends at the bottom of the
+       window whatever stands above it. */
+    .app {
+      min-height: 300px;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 20px;
+    }
+    /* In one column the soft keyboard comes right under the canvas: the canvas and the side
+       panels become items of the body, so order can put the keyboard between them. Not on a
+       hidden tab, where display: contents would win over [hidden]. The Wide button gives the same
+       layout above the breakpoint. */
+    .app.wide:not([hidden]) { display: contents; }
+    .app.wide:not([hidden]) > .canvas-panel { order: 1; }
+    .app.wide:not([hidden]) ~ #kbd-panel { order: 2; }
+    .app.wide:not([hidden]) > .side { order: 3; }
+    @media (max-width: 800px) {
+      .app:not([hidden]) { display: contents; }
+      .canvas-panel { order: 1; }
+      #kbd-panel { order: 2; }
+      .side { order: 3; }
+      #zoom-wide { display: none; }
+    }
+
+    /* Controls */
+    /* Given at least the height of the patch area by fitTabArea, so the soft keyboard stays at the
+       bottom of the window when the tab changes; the grid takes the extra height, so the Init button
+       stays above the keyboard. Not on a hidden tab, where display: flex would win over [hidden]. */
+    #tab-controls:not([hidden]) {
+      display: flex;
+      flex-direction: column;
+    }
+    .editor-grid {
+      flex-grow: 1;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      align-items: start;
+      align-content: start;
+    }
+    /* A slider row needs about 390px, so the last columns wrap under the first ones before then. */
+    @media (max-width: 1640px) {
+      .editor-grid { grid-template-columns: 1fr 1fr 1fr; }
+    }
+    @media (max-width: 1240px) {
+      .editor-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 768px) {
+      .editor-grid { grid-template-columns: 1fr; }
+    }
+    /* Spaced a little tighter than the other panels, so the columns fit a full HD window without
+       scrolling. */
+    .editor-column {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-width: 0;
+    }
+    .editor-column .panel {
+      padding: 12px 16px;
+    }
+    /* The Amp column runs the full height of its row, so the Init button under it sits at the
+       bottom, just above the keyboard. */
+    .editor-column:last-child {
+      align-self: stretch;
+    }
+    #init-values {
+      margin-top: auto;
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+    }
+    .editor-column .panel h2 {
+      margin-bottom: 8px;
+    }
+    .control-row {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .slider-knob-zone {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .slider-label {
+      min-width: 140px;
+      font-size: 0.9rem;
+    }
+    .slider-label .cc-num {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: block;
+    }
+    /* In four columns the CC number goes on the line of the name, and the panels are packed
+       tighter, so the soft keyboard fits a full HD window under them even with a bookmarks bar. */
+    @media (min-width: 1641px) {
+      .slider-label { white-space: nowrap; }
+      .slider-label .cc-num { display: inline; }
+      .control-row { gap: 10px; }
+      .editor-column { gap: 12px; }
+      .editor-column .panel { padding: 10px 16px; }
+      .editor-column .panel h2 { margin-bottom: 6px; }
+      #init-values { padding: 6px; }
+      /* One row, which takes the extra height of the tab. */
+      .editor-grid { align-content: stretch; }
+    }
+    .slider-input-wrapper {
+      flex-grow: 1;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    :root {
+      /* Slider ticks. The thumb's centre travels from half a thumb in to half a thumb from the
+         far end, so a tick for CC n sits at that fraction of what is left of the track. */
+      --tick: linear-gradient(var(--text-muted), var(--text-muted));
+      --tick-4: calc(9px + (100% - 18px) * 0.031496 - 1px);
+      --tick-64: calc(9px + (100% - 18px) * 0.503937 - 1px);
+      --tick-124: calc(9px + (100% - 18px) * 0.976378 - 1px);
+    }
+    /* Chrome gives a range input a minimum width of about 130px, which would push two columns past
+       a window under about 880px wide. */
+    input[type="range"] {
+      flex-grow: 1;
+      min-width: 0;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 6px;
+      background-color: var(--border-color);
+      border-radius: 3px;
+      outline: none;
+      /* CC 4 and CC 124 are the ends of the range the synth uses: cc_to_unipolar and
+         cc_to_bipolar map them to the ends of their ranges and clamp anything past them, so the
+         track outside the ticks does nothing. */
+      background-image: var(--tick), var(--tick);
+      background-size: 2px 100%, 2px 100%;
+      background-position: var(--tick-4) center, var(--tick-124) center;
+      background-repeat: no-repeat;
+    }
+    /* A third tick at CC 64 where the centre of the dial means no change. Drawn rather than
+       declared as a <datalist>, which some browsers turn into a snap point. */
+    input[type="range"].bipolar {
+      background-image: var(--tick), var(--tick), var(--tick);
+      background-size: 2px 100%, 2px 100%, 2px 100%;
+      background-position: var(--tick-4) center, var(--tick-64) center, var(--tick-124) center;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--primary-color);
+      cursor: pointer;
+    }
+    /* Same size as the WebKit thumb above, so the tick positions line up here too. */
+    input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border: none;
+      border-radius: 50%;
+      background: var(--primary-color);
+      cursor: pointer;
+    }
+    /* A disabled slider has no CC behind it, so there is no position to show: the value the
+       parameter reads is in its label instead. */
+    input[type="range"]:disabled::-webkit-slider-thumb {
+      background: transparent;
+      cursor: default;
+    }
+    input[type="range"]:disabled::-moz-range-thumb {
+      background: transparent;
+      cursor: default;
+    }
+    .slider-value {
+      min-width: 32px;
+      text-align: right;
+      font-family: monospace;
+      font-size: 0.95rem;
+      font-weight: bold;
+    }
+    .slider-norm {
+      min-width: 48px;
+      text-align: right;
+      font-family: monospace;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* Soft keyboard */
+    .kbd-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px 8px;
+      margin-bottom: 12px;
+    }
+    .kbd-bar h2 {
+      margin-bottom: 0;
+    }
+    /* A ResizeObserver sees no size on an inline box, so kbFitScale would never hear of a change. */
+    #kbd-label {
+      display: inline-block;
+    }
+    .kbd-bar .btn {
+      min-width: 32px;
+    }
+    .kbd-hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    .kbd-bar .kbd-panic {
+      margin-left: auto;
+    }
+    /* The sizes of the keys are times the scale of the text, --kbd-scale, set by kbdFitScale. */
+    .keyboard-frame {
+      --kbd-scale: 1;
+      --kbd-key-width: calc(22px * var(--kbd-scale));  /* KB_KEY_WIDTH: a semitone in the upper half */
+      --kbd-half-height: calc(70px * var(--kbd-scale));
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background: #222;
+      padding: 10px 5px 5px 5px;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    /* The native scroll bar is hidden, since Safari cannot color it; .kbd-scrollbar stands in. */
+    .keyboard-scroll-container {
+      width: 100%;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .keyboard-scroll-container::-webkit-scrollbar {
+      display: none;
+    }
+    .kbd-scrollbar {
+      position: relative;
+      height: 12px;
+      margin-top: 5px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.15);
+      touch-action: none;
+      cursor: pointer;
+    }
+    .kbd-scrollbar-thumb {
+      position: absolute;
+      top: 0;
+      height: 12px;
+      border-radius: 6px;
+      background: var(--primary-color);
+    }
+    .keyboard-wrapper {
+      position: relative;
+      height: calc(140px * var(--kbd-scale));
+      touch-action: none;
+    }
+    /* The upper half: the 12 semitones at equal intervals, the black keys as wide as the upper parts
+       of the white keys. The lower half: the white keys only, C - E each 5/3 semitones wide and F - B
+       each 7/4, so that the lines between E and F and between B and C run straight. A white key is
+       the two parts, joined at the middle without a line. */
+    .key {
+      position: absolute;
+      cursor: pointer;
+    }
+    .key.upper {
+      top: 0;
+      width: var(--kbd-key-width);
+      height: var(--kbd-half-height);
+      z-index: 2;
+    }
+    .key.upper.white {
+      background: #fff;
+      border: 1px solid #ccc;
+      border-bottom: none;
+    }
+    .key.lower {
+      top: var(--kbd-half-height);
+      height: var(--kbd-half-height);
+      background: #fff;
+      border: 1px solid #ccc;
+      border-top: none;
+      border-radius: 0 0 4px 4px;
+      z-index: 1;
+    }
+    .key.white.active {
+      background: #f0f0f0;
+    }
+    .key.lower.active {
+      border-bottom: 4px solid var(--primary-color);
+    }
+    .key.black {
+      background: #111;
+      border-radius: 0 0 3px 3px;
+    }
+    .key.black.active {
+      background: var(--primary-color);
+    }
+    .key-label {
+      position: absolute;
+      bottom: 5px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    .panel {
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .panel h2 {
+      font-size: 1.2rem;
+      margin-bottom: 12px;
+      color: var(--primary-color);
+      border-left: 4px solid var(--primary-color);
+      padding-left: 8px;
+    }
+    .side {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow-y: auto;
+      min-height: 0;
+    }
+    .form-group {
+      margin-bottom: 10px;
+    }
+    .form-group label, .field-label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    select, input[type="text"] {
+      width: 100%;
+      padding: 7px 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: #fff;
+      font-size: 0.9rem;
+      color: var(--text-color);
+      outline: none;
+    }
+    select:focus, input:focus, textarea:focus {
+      border-color: var(--primary-color);
+      outline: none;
+    }
+    .btn {
+      padding: 7px 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--text-color);
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .btn:hover {
+      border-color: var(--primary-color);
+    }
+    .btn.primary {
+      background: var(--primary-color);
+      border-color: var(--primary-color);
+      color: #fff;
+      font-weight: bold;
+    }
+    .btn.primary:hover {
+      background: var(--primary-hover);
+    }
+    .btn-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .btn-row .btn {
+      flex: 1;
+    }
+    .check {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      margin-bottom: 4px;
+    }
+    .hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Canvas */
+    .canvas-panel {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background-color: #fcfdfd;
+      background-image: radial-gradient(circle, #d5dadd 1px, transparent 1px);
+      background-size: 20px 20px;
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .canvas-panel.panning {
+      cursor: grabbing;
+    }
+    .world {
+      position: absolute;
+      left: 0;
+      top: 0;
+      transform-origin: 0 0;
+    }
+    svg.wires {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1px;
+      height: 1px;
+      overflow: visible;
+      /* Behind the nodes, so a wire's hit area never covers the port it ends on. */
+      z-index: 0;
+      pointer-events: none;
+    }
+    svg.wires path {
+      fill: none;
+    }
+    .wire {
+      stroke: var(--wire-signal);
+      stroke-width: 2.5;
+    }
+    /* Set back from the signal wires, which carry the patch's audio and modulation. */
+    .wire.param {
+      stroke: var(--wire-param);
+      stroke-width: 1.5;
+      stroke-dasharray: 5 4;
+      opacity: 0.45;
+    }
+    .wire.param.selected {
+      opacity: 1;
+    }
+    .wire.feedback {
+      stroke: var(--wire-feedback);
+    }
+    .wire.inactive {
+      stroke: var(--wire-inactive);
+    }
+    .wire.selected {
+      stroke-width: 5;
+    }
+    .wire.temp {
+      stroke: var(--text-muted);
+      stroke-dasharray: 4 4;
+    }
+    .hit {
+      stroke: transparent;
+      stroke-width: 14;
+      pointer-events: stroke;
+      cursor: pointer;
+    }
+    .node {
+      position: absolute;
+      width: 300px;
+      /* Wires run behind the nodes, so a see-through body keeps the ones crossing a node in view. */
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      font-size: 0.8rem;
+      z-index: 1;
+    }
+    .node.aux {
+      width: 200px;
+    }
+    .node.general {
+      width: 250px;
+    }
+    .node.const {
+      width: 120px;
+    }
+    .node.off {
+      opacity: 0.55;
+    }
+    .node.off .node-head {
+      background: var(--text-muted);
+    }
+    .node-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 10px;
+      background: var(--primary-color);
+      color: #fff;
+      font-weight: bold;
+      border-radius: 7px 7px 0 0;
+      cursor: move;
+    }
+    .node.aux .node-head {
+      background: var(--text-color);
+    }
+    .badge {
+      font-size: 0.7rem;
+      font-weight: normal;
+      background: rgba(255,255,255,0.22);
+      padding: 1px 7px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .badge:hover {
+      background: rgba(255,255,255,0.4);
+    }
+    .row {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 26px;
+      padding: 2px 14px;
+    }
+    .row .lbl {
+      flex: 1;
+      white-space: nowrap;
+    }
+    .row .lbl.right {
+      text-align: right;
+    }
+    /* Short labels, so the source names line up in a column just after them. */
+    .row.input-row .lbl {
+      flex: 0 0 44px;
+    }
+    .row.input-row .src {
+      flex: 1;
+      max-width: none;
+    }
+    /* What a routed parameter reads, in the space between its label and its fields. */
+    .row.ctrl .lbl {
+      flex: 0 0 auto;
+    }
+    .row.ctrl .src {
+      flex: 1;
+      min-width: 0;
+      max-width: none;
+    }
+    .row .src {
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 130px;
+    }
+    .row input[type="number"] {
+      width: 46px;
+      padding: 2px 3px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-family: monospace;
+      color: var(--text-color);
+    }
+    .row input[type="number"]:disabled {
+      background: #f2f4f5;
+      color: var(--text-muted);
+    }
+    .row input.warn {
+      border-color: var(--wire-feedback);
+      background: #fdf2e3;
+    }
+    /* A routed parameter reads its wire, but its CC still fills its own slot and so still feeds
+       the output port: the fields stay live, only set back. */
+    .row.routed input[type="number"] {
+      opacity: 0.55;
+    }
+    .slider-knob-zone.routed .slider-label {
+      color: var(--wire-param);
+      font-style: italic;
+    }
+    .row.routed .lbl {
+      color: var(--wire-param);
+      font-style: italic;
+    }
+    .sep {
+      display: flex;
+      gap: 6px;
+      padding: 4px 14px 2px;
+      margin-top: 2px;
+      border-top: 1px solid var(--border-color);
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .sep span:first-child {
+      flex: 1;
+    }
+    .sep span:not(:first-child) {
+      width: 46px;
+    }
+    .sep span.norm-head, .row .norm {
+      width: 40px;
+      text-align: right;
+    }
+    .row input.nv {
+      width: 58px;
+    }
+    .row.pending input.nv, .row.pending .norm {
+      font-style: italic;
+      color: var(--wire-feedback);
+    }
+    .row .norm {
+      font-family: monospace;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+    .node .rows-end {
+      height: 6px;
+    }
+    .port {
+      position: absolute;
+      top: 50%;
+      width: 14px;
+      height: 14px;
+      margin-top: -7px;
+      border-radius: 50%;
+      border: 2px solid var(--wire-signal);
+      background: #fff;
+      cursor: crosshair;
+      z-index: 3;
+    }
+    .port.in {
+      left: -8px;
+    }
+    .port.out {
+      right: -8px;
+    }
+    .port.param {
+      border-color: var(--wire-param);
+      width: 12px;
+      height: 12px;
+      margin-top: -6px;
+    }
+    .port.in.param {
+      left: -7px;
+    }
+    .port.out.param {
+      right: -7px;
+    }
+    .port.connected {
+      background: var(--wire-signal);
+    }
+    .port.param.connected {
+      background: var(--wire-param);
+    }
+    .port:hover, .port.target {
+      transform: scale(1.35);
+    }
+    /* The legend and the zoom buttons share the top of the canvas; the legend wraps short of the
+       buttons rather than running under them. */
+    .canvas-bar {
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      top: 10px;
+      z-index: 5;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      pointer-events: none;
+    }
+    .zoom-controls {
+      display: flex;
+      flex-shrink: 0;
+      gap: 4px;
+      pointer-events: auto;
+    }
+    .zoom-controls .btn {
+      padding: 4px 9px;
+      min-width: 32px;
+    }
+    .legend {
+      min-width: 0;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      background: rgba(255,255,255,0.9);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    .legend svg {
+      vertical-align: middle;
+      margin-right: 4px;
+    }
+
+    /* Run order */
+    #order-list {
+      list-style: none;
+      margin-bottom: 8px;
+    }
+    #order-list li {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 6px;
+      margin-bottom: 3px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background: #fff;
+      font-size: 0.85rem;
+      cursor: grab;
+    }
+    #order-list li.drag-over {
+      border-color: var(--primary-color);
+      box-shadow: 0 -2px 0 var(--primary-color);
+    }
+    #order-list .num {
+      width: 20px;
+      color: var(--text-muted);
+      font-family: monospace;
+      font-size: 0.75rem;
+    }
+    #order-list .name {
+      flex: 1;
+    }
+    #order-list button {
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.8rem;
+      padding: 0 3px;
+    }
+    #order-list button:hover {
+      color: var(--primary-color);
+    }
+    .add-row {
+      display: flex;
+      gap: 6px;
+    }
+    .add-row select {
+      flex: 1;
+    }
+
+    /* Export */
+    #export-text {
+      width: 100%;
+      height: 180px;
+      padding: 6px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 0.72rem;
+      white-space: pre;
+      resize: vertical;
+      color: var(--text-color);
+    }
+    #export-info {
+      margin: 4px 0 8px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>SPMS-1 (type-2) Editor<span class="version">v0.0.1</span></h1>
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="controls">Controls</button>
+    <button class="tab-btn" data-tab="patch">Patch</button>
+  </nav>
+</header>
+
+<div class="panel midi-panel">
+  <div class="midi-bar">
+    <div class="form-group narrow">
+      <label for="midi-ch">MIDI Channel</label>
+      <select id="midi-ch"></select>
+    </div>
+    <div class="form-group">
+      <label for="midi-in" title="Keyboard or controller">MIDI In</label>
+      <select id="midi-in">
+        <option value="">Select MIDI Input Device...</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="midi-out" title="SPMS-1 synthesizer">MIDI Out</label>
+      <select id="midi-out">
+        <option value="">Select SPMS-1 Device...</option>
+      </select>
+    </div>
+    <label class="check" title="Send each routing, run order or CC assignment change as it is made. CC values are always sent."><input type="checkbox" id="live"> Live patch</label>
+    <button class="btn primary" id="btn-send" title="Send the whole patch: NRPN and CC values">Send Patch</button>
+  </div>
+</div>
+
+<div id="tab-controls">
+  <div class="editor-grid" id="controls"></div>
+  <!-- Moved under the Delay panel each time the controls are drawn. -->
+  <button class="btn primary" id="init-values">Initialize & Send All</button>
+</div>
+
+<div class="app" id="tab-patch" hidden>
+  <div class="canvas-panel" id="canvas">
+    <div class="world" id="world">
+      <svg class="wires" id="wires"></svg>
+    </div>
+    <div class="canvas-bar">
+      <div class="legend">
+        <span><svg width="28" height="6"><line x1="0" y1="3" x2="28" y2="3" stroke="#9B111E" stroke-width="2.5"/></svg>Module input</span>
+        <span><svg width="28" height="6"><line x1="0" y1="3" x2="28" y2="3" stroke="#d68910" stroke-width="2.5"/></svg>1-sample delay (runs later)</span>
+        <span><svg width="28" height="6"><line x1="0" y1="3" x2="28" y2="3" stroke="#b8c0c4" stroke-width="2.5"/></svg>Source not running</span>
+        <span><svg width="28" height="6"><line x1="0" y1="3" x2="28" y2="3" stroke="#4f7cac" stroke-width="2" stroke-dasharray="6 4"/></svg>Parameter</span>
+      </div>
+      <div class="zoom-controls">
+        <button class="btn" id="zoom-out" title="Zoom out">&minus;</button>
+        <button class="btn" id="zoom-in" title="Zoom in">+</button>
+        <button class="btn" id="zoom-fit" title="Fit all nodes">Fit</button>
+        <button class="btn" id="zoom-wide" title="The canvas the full width of the window, with the panels under the soft keyboard">Wide</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="side">
+    <div class="panel">
+      <h2>Patch</h2>
+      <div class="form-group">
+        <label for="patch-name">Name</label>
+        <input type="text" id="patch-name" maxlength="64">
+      </div>
+      <div class="btn-row" style="margin-bottom: 6px;">
+        <button class="btn" id="btn-save">Save JSON</button>
+        <button class="btn" id="btn-load">Load JSON</button>
+        <input type="file" id="file-load" accept=".json,application/json" hidden>
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="btn-undo" title="Ctrl+Z">Undo</button>
+        <button class="btn" id="btn-redo" title="Ctrl+Y">Redo</button>
+        <button class="btn" id="btn-init">Init</button>
+      </div>
+      <p class="hint" style="margin-top: 8px;">
+        MIDI In is passed through to the synth, and a CC on the channel above moves every slot
+        assigned to it. Drag from an output (right) to an input (left) to connect. Drag a connected input away to
+        unplug it; click a wire and press Delete to remove it. An unplugged parameter reads its own
+        control slot. Drag the background to pan, wheel to zoom.
+      </p>
+    </div>
+
+    <div class="panel">
+      <h2>Run Order</h2>
+      <ol id="order-list"></ol>
+      <div class="add-row">
+        <select id="order-add"></select>
+        <button class="btn" id="order-add-btn">Add</button>
+      </div>
+      <p class="hint" style="margin-top: 8px;">
+        A module sees this sample's output only from modules above it; from itself or below, it
+        gets last sample's.
+      </p>
+    </div>
+
+    <div class="panel">
+      <h2>Export</h2>
+      <div class="form-group">
+        <label for="export-format">Format</label>
+        <select id="export-format">
+          <option value="hex">MIDI bytes (hex)</option>
+          <option value="nrpn">NRPN list (MSB, LSB, value)</option>
+        </select>
+      </div>
+      <label class="check"><input type="checkbox" id="opt-cc" checked> Include CC values</label>
+      <label class="check"><input type="checkbox" id="opt-omit-msb" checked> Omit CC 99 when unchanged</label>
+      <label class="check"><input type="checkbox" id="opt-comments" checked> Comments</label>
+      <label class="check"><input type="checkbox" id="opt-one-line"> One line (hex, no comments)</label>
+      <textarea id="export-text" readonly spellcheck="false"></textarea>
+      <p class="hint" id="export-info"></p>
+      <button class="btn primary" id="btn-copy" style="width: 100%;">Copy</button>
+    </div>
+  </div>
+</div>
+
+<div class="panel" id="kbd-panel">
+  <div class="kbd-bar">
+    <h2><span id="kbd-label">Soft Keyboard</span></h2>
+    <button class="btn" id="kbd-oct-down" title="Octave Down">&#9664;</button>
+    <button class="btn" id="kbd-oct-up" title="Octave Up">&#9654;</button>
+    <span class="kbd-hint">PC Keys: A - K, Z / X</span>
+    <button class="btn kbd-panic" id="kbd-panic" title="Note Off on every note, Pitch Bend to the center, and the keys held let go">Panic</button>
+  </div>
+  <div class="keyboard-frame">
+    <div class="keyboard-scroll-container" id="kb-scroll">
+      <div class="keyboard-wrapper" id="keyboard"></div>
+    </div>
+    <div class="kbd-scrollbar" id="kbd-scrollbar"><div class="kbd-scrollbar-thumb" id="kbd-scrollbar-thumb"></div></div>
+  </div>
+</div>
+
+<script>
+  'use strict';
+
+  // ---- Patch model: mirrors the NRPN table in spms1_main.rb --------------------------------
+
+  const MODULES_SIZE = 32;
+  // CC 6 and 38 carry NRPN data and 98-101 select a parameter, so a control mapped to one of
+  // them would edit the patch every time its value was sent.
+  const RESERVED_CCS = new Set([6, 38, 98, 99, 100, 101]);
+
+  const MODULES = [
+    { key: 'LFO_1',     id: 1, label: 'LFO 1' },
+    { key: 'ENV_GEN_1', id: 2, label: 'EG 1' },
+    { key: 'OSC_1',     id: 3, label: 'Osc 1' },
+    { key: 'FILTER_1',  id: 4, label: 'Filter 1' },
+    { key: 'AMP_1',     id: 5, label: 'Amp 1' },
+    { key: 'MIXER_1',   id: 6, label: 'Mixer 1' },
+    { key: 'CHORUS_1',  id: 7, label: 'Chorus 1', stereo: true },
+    { key: 'DELAY_1',   id: 8, label: 'Delay 1',  stereo: true },
+  ];
+  // Each output a module writes to the bus: one, or a left and a right for a stereo module.
+  MODULES.forEach(m => {
+    m.outs = m.stereo
+      ? [{ sig: m.key + '_OUTPUT_L', label: 'Out L' }, { sig: m.key + '_OUTPUT_R', label: 'Out R' }]
+      : [{ sig: m.key + '_OUTPUT', label: 'Out' }];
+  });
+  const MOD = Object.fromEntries(MODULES.map(m => [m.key, m]));
+
+  // NRPN category 1, in entry order: [module, suffix, label, default source].
+  const INPUTS = [
+    ['ENV_GEN_1', 'GATE',  'Gate',  'GATE'],
+    ['OSC_1',     'PITCH', 'Pitch', 'PITCH'],
+    ['OSC_1',     'MOD',   'Mod',   'LFO_1_OUTPUT'],
+    ['FILTER_1',  'AUDIO', 'Audio', 'OSC_1_OUTPUT'],
+    ['FILTER_1',  'MOD',   'Mod',   'ENV_GEN_1_OUTPUT'],
+    ['AMP_1',     'AUDIO', 'Audio', 'FILTER_1_OUTPUT'],
+    ['AMP_1',     'MOD',   'Mod',   'ENV_GEN_1_OUTPUT'],
+    ['MIXER_1',   'IN_1',  'In 1',  'NONE'],
+    ['MIXER_1',   'IN_2',  'In 2',  'NONE'],
+    ['CHORUS_1',  'AUDIO', 'Audio', 'AMP_1_OUTPUT'],
+    ['DELAY_1',   'AUDIO_L', 'Audio L', 'CHORUS_1_OUTPUT_L'],
+    ['DELAY_1',   'AUDIO_R', 'Audio R', 'CHORUS_1_OUTPUT_R'],
+    [null,        'OUTPUT_L', 'L', 'DELAY_1_OUTPUT_L'],
+    [null,        'OUTPUT_R', 'R', 'DELAY_1_OUTPUT_R'],
+  ];
+
+  // NRPN categories 2 and 3 share entry numbers for these, and each one's control slot is
+  // signal 19 + entry: [module, suffix, label, bipolar, default CC, default CC value].
+  const PARAMS = [
+    ['LFO_1',     'RATE',         'Rate',         false, 3,   64],
+    ['LFO_1',     'LEVEL',        'Level',        false, 0,   null],
+    ['LFO_1',     'POLARITY',     'Polarity',     true,  0,   124],
+    ['ENV_GEN_1', 'ATTACK',       'Attack',       false, 73,  4],
+    ['ENV_GEN_1', 'DECAY',        'Decay',        false, 75,  96],
+    ['ENV_GEN_1', 'SUSTAIN',      'Sustain',      false, 30,  124],
+    ['ENV_GEN_1', 'LEVEL',        'Level',        false, 0,   null],
+    ['ENV_GEN_1', 'POLARITY',     'Polarity',     true,  0,   null],
+    ['OSC_1',     'WAVEFORM',     'Wave',         false, 20,  4],
+    ['OSC_1',     'COARSE_TUNE',  'Coarse Tune',  true,  86,  64],
+    ['OSC_1',     'FINE_TUNE',    'Fine Tune',    true,  70,  64],
+    ['OSC_1',     'MOD_AMOUNT',   'Mod Amt',      false, 13,  4],
+    ['OSC_1',     'MOD_POLARITY', 'Mod Polarity', true,  0,   124],
+    ['FILTER_1',  'CUTOFF',       'Cutoff',       false, 74,  100],
+    ['FILTER_1',  'RESONANCE',    'Resonance',    false, 71,  94],
+    ['FILTER_1',  'GAIN',         'Gain',         false, 112, 64],
+    ['FILTER_1',  'MOD_AMOUNT',   'Mod Amt',      false, 24,  28],
+    ['FILTER_1',  'MOD_POLARITY', 'Mod Polarity', true,  0,   124],
+    ['AMP_1',     'GAIN',         'Gain',         false, 15,  124],
+    ['MIXER_1',   'LEVEL_1',      'Level 1',      false, 0,   null],
+    ['MIXER_1',   'POLARITY_1',   'Polarity 1',   true,  0,   124],
+    ['MIXER_1',   'LEVEL_2',      'Level 2',      false, 0,   null],
+    ['MIXER_1',   'POLARITY_2',   'Polarity 2',   true,  0,   124],
+    ['CHORUS_1',  'RATE',         'Rate',         false, 58,  64],
+    ['CHORUS_1',  'DEPTH',        'Depth',        false, 59,  64],
+    ['CHORUS_1',  'MIX',          'Mix',          false, 93,  64],
+    ['DELAY_1',   'TIME',         'Time',         false, 55,  64],
+    ['DELAY_1',   'FEEDBACK',     'Feedback',     false, 56,  64],
+    ['DELAY_1',   'MIX',          'Mix',          false, 94,  34],
+  ];
+
+  // Category 3 only, after the parameters. General 1-4 each fill two slots from one CC, a
+  // unipolar and a bipolar one, as spms1_main.rb does.
+  const GENERALS = [[null, 'GENERAL_MOD_WHEEL', 'Mod Wheel', false, 1, 4]];
+  for (let n = 1; n <= 4; n++) GENERALS.push([null, `GENERAL_${n}`, `${n}`, false, 15 + n, 64]);
+  const GENERAL_SLOTS = ['GENERAL_MOD_WHEEL'];
+  for (let n = 1; n <= 4; n++) GENERAL_SLOTS.push(`GENERAL_UNIPOLAR_${n}`);
+  for (let n = 1; n <= 4; n++) GENERAL_SLOTS.push(`GENERAL_BIPOLAR_${n}`);
+
+  function toItem([module, suffix, label, ...rest]) {
+    const key = module ? `${module}_${suffix}` : suffix;
+    const full = module ? `${MOD[module].label} ${label}` : (suffix.startsWith('OUTPUT') ? `Final Output ${label}` : `General ${label}`);
+    return { module, key, label, full, rest };
+  }
+  const INPUT_ITEMS = INPUTS.map(a => { const it = toItem(a); it.defaultSource = it.rest[0]; return it; });
+  const CONTROL_ITEMS = PARAMS.concat(GENERALS).map(a => {
+    const it = toItem(a);
+    [it.bipolar, it.defaultCC, it.defaultValue] = it.rest;
+    // The bus slots the item's CC fills, each with its own range: [slot, label, bipolar].
+    const n = /^GENERAL_(\d)$/.exec(it.key);
+    it.slots = n
+      ? [[`GENERAL_UNIPOLAR_${n[1]}`, `Unipolar ${n[1]}`, false], [`GENERAL_BIPOLAR_${n[1]}`, `Bipolar ${n[1]}`, true]]
+      : [[it.key, it.label, it.bipolar]];
+    return it;
+  });
+  const PARAM_ITEMS = CONTROL_ITEMS.slice(0, PARAMS.length);
+  const CONTROL = Object.fromEntries(CONTROL_ITEMS.map(c => [c.key, c]));
+  // Each control slot, with the item whose CC fills it and the range it takes.
+  const SLOT = {};
+  CONTROL_ITEMS.forEach(c => c.slots.forEach(([slot, label, bipolar]) => {
+    SLOT[slot] = { c, bipolar, full: c.module ? c.full : `General ${label}` };
+  }));
+
+  // The signals bus, in slot order.
+  const SIGNAL_NAMES = ['NONE', 'ONE', 'HALF', 'POINT_TWO', 'POINT_ONE', 'MINUS_POINT_ONE', 'MINUS_POINT_TWO', 'MINUS_HALF', 'MINUS_ONE',
+    ...MODULES.flatMap(m => m.outs.map(o => o.sig)), ...PARAM_ITEMS.map(p => p.key),
+    'PITCH', 'GATE', 'BEND', ...GENERAL_SLOTS];
+  const SIG = Object.fromEntries(SIGNAL_NAMES.map((n, i) => [n, i]));
+
+  const SIGNAL_LABELS = {
+    NONE: '0.0', ONE: '+1.0', HALF: '+0.5', POINT_TWO: '+0.2', POINT_ONE: '+0.1', MINUS_POINT_ONE: '-0.1', MINUS_POINT_TWO: '-0.2', MINUS_HALF: '-0.5', MINUS_ONE: '-1.0',
+    PITCH: 'Note Pitch', GATE: 'Note Gate', BEND: 'Pitch Bend',
+  };
+  MODULES.forEach(m => m.outs.forEach(o => { SIGNAL_LABELS[o.sig] = `${m.label} ${o.label}`; }));
+  for (const slot in SLOT) SIGNAL_LABELS[slot] = SLOT[slot].full;
+  const sigLabel = s => SIGNAL_LABELS[s] || s;
+
+  const DEFAULT_ORDER = ['LFO_1', 'ENV_GEN_1', 'MIXER_1', 'OSC_1', 'FILTER_1', 'AMP_1', 'CHORUS_1', 'DELAY_1'];
+
+  const DEFAULT_LAYOUT = {
+    NOTE:      { x: 180,  y: 358 },
+    CONST:     { x: 20,   y: 40 },
+    GENERAL:   { x: 180,  y: 40 },
+    LFO_1:     { x: 520,  y: 40 },
+    ENV_GEN_1: { x: 520,  y: 228 },
+    MIXER_1:   { x: 520,  y: 518 },
+    OSC_1:     { x: 880,  y: 40 },
+    FILTER_1:  { x: 880,  y: 332 },
+    AMP_1:     { x: 1240, y: 40 },
+    CHORUS_1:  { x: 1240, y: 228 },
+    DELAY_1:   { x: 1600, y: 40 },
+    OUT:       { x: 1600, y: 340 },
+  };
+
+  function defaultState() {
+    const s = { name: 'Init', order: DEFAULT_ORDER.slice(), inputs: {}, params: {}, cc: {}, values: {}, layout: {} };
+    INPUT_ITEMS.forEach(i => { s.inputs[i.key] = i.defaultSource; });
+    PARAM_ITEMS.forEach(p => { s.params[p.key] = p.key; });
+    PARAM_ITEMS.forEach(p => {
+      if (p.module && p.module.startsWith('MIXER_')) s.params[p.key] = p.label.startsWith('Level') ? 'ONE' : 'HALF';
+    });
+    s.params.LFO_1_LEVEL = 'ONE';
+    s.params.LFO_1_POLARITY = 'POINT_ONE';
+    s.params.ENV_GEN_1_LEVEL = 'ONE';
+    s.params.ENV_GEN_1_POLARITY = 'HALF';
+    s.params.OSC_1_MOD_POLARITY = 'HALF';
+    s.params.FILTER_1_MOD_POLARITY = 'HALF';
+    CONTROL_ITEMS.forEach(c => {
+      s.cc[c.key] = c.defaultCC;
+      if (c.defaultCC) s.values[c.defaultCC] = c.defaultValue;
+    });
+    for (const k in DEFAULT_LAYOUT) s.layout[k] = { ...DEFAULT_LAYOUT[k] };
+    return s;
+  }
+
+  const clamp7 = v => Math.max(0, Math.min(127, Math.round(Number(v) || 0)));
+  const ccValue = cc => (state.values[cc] ?? 64);
+
+  function serialize(s) {
+    const used = {};
+    CONTROL_ITEMS.forEach(c => { const cc = s.cc[c.key]; if (cc) used[cc] = s.values[cc] ?? 64; });
+    return {
+      format: 'spms1-type2-patch',
+      version: 2,
+      name: s.name,
+      order: s.order.slice(),
+      inputs: { ...s.inputs },
+      params: { ...s.params },
+      cc: { ...s.cc },
+      values: used,
+      layout: JSON.parse(JSON.stringify(s.layout)),
+    };
+  }
+
+  // Anything missing or unknown falls back to the default patch, so an older file still loads.
+  function deserialize(obj) {
+    if (!obj || typeof obj !== 'object') throw new Error('Not a patch');
+    if (obj.format && obj.format !== 'spms1-type2-patch') throw new Error('Unknown format: ' + obj.format);
+    const s = defaultState();
+    if (typeof obj.name === 'string') s.name = obj.name.slice(0, 64);
+    if (Array.isArray(obj.order)) {
+      s.order = obj.order.filter((k, i, a) => MOD[k] && a.indexOf(k) === i).slice(0, MODULES_SIZE);
+    }
+    const src = v => (typeof v === 'string' && v in SIG) ? v : null;
+    // Version 1 had a mono Delay 1 and a mono Final Output. Each of its inputs feeds both sides
+    // now, and its output is read from the side of the input reading it, so an old patch sounds
+    // as it did: without the chorus, which it does not run.
+    const inputs = obj.inputs && typeof obj.inputs === 'object' ? { ...obj.inputs } : null;
+    if (inputs && !(obj.version >= 2)) {
+      for (const [old, side] of [['DELAY_1_AUDIO', 'DELAY_1_AUDIO_'], ['OUTPUT', 'OUTPUT_']]) {
+        if (old in inputs) for (const lr of ['L', 'R']) if (!(side + lr in inputs)) inputs[side + lr] = inputs[old];
+      }
+      for (const k in inputs) {
+        if (inputs[k] === 'DELAY_1_OUTPUT') inputs[k] = k.endsWith('_R') ? 'DELAY_1_OUTPUT_R' : 'DELAY_1_OUTPUT_L';
+      }
+    }
+    INPUT_ITEMS.forEach(i => { if (inputs && i.key in inputs) s.inputs[i.key] = src(inputs[i.key]) || 'NONE'; });
+    PARAM_ITEMS.forEach(p => { if (obj.params && p.key in obj.params) s.params[p.key] = src(obj.params[p.key]) || p.key; });
+    CONTROL_ITEMS.forEach(c => { if (obj.cc && c.key in obj.cc) s.cc[c.key] = clamp7(obj.cc[c.key]); });
+    if (obj.values && typeof obj.values === 'object') {
+      for (const k in obj.values) s.values[clamp7(k)] = clamp7(obj.values[k]);
+    }
+    if (obj.layout && typeof obj.layout === 'object') {
+      for (const k in s.layout) {
+        const p = obj.layout[k];
+        if (p && Number.isFinite(p.x) && Number.isFinite(p.y)) s.layout[k] = { x: p.x, y: p.y };
+      }
+    }
+    return s;
+  }
+
+  // ---- NRPN table and MIDI messages -----------------------------------------------------------
+
+  function nrpnEntries() {
+    const e = [];
+    // The run order ends at the first 0, so the slots after it are never read.
+    const count = Math.min(state.order.length + 1, MODULES_SIZE);
+    for (let i = 0; i < count; i++) {
+      const k = state.order[i];
+      e.push({ nrpn: i, value: k ? MOD[k].id : 0, comment: `Run order ${i + 1}: ${k ? MOD[k].label : '(end)'}` });
+    }
+    INPUT_ITEMS.forEach((inp, i) => {
+      const s = state.inputs[inp.key];
+      e.push({ nrpn: 128 + i, value: SIG[s], comment: `${inp.full} <- ${sigLabel(s)}` });
+    });
+    PARAM_ITEMS.forEach((p, i) => {
+      const s = state.params[p.key];
+      e.push({ nrpn: 256 + i, value: SIG[s], comment: `${p.full} <- ${s === p.key ? 'own slot' : sigLabel(s)}` });
+    });
+    CONTROL_ITEMS.forEach((c, i) => {
+      const cc = state.cc[c.key];
+      e.push({ nrpn: 384 + i, value: cc, comment: `${c.full} CC = ${cc || 'none'}` });
+    });
+    return e;
+  }
+
+  function ccEntries() {
+    const users = new Map();
+    CONTROL_ITEMS.forEach(c => {
+      const cc = state.cc[c.key];
+      if (!cc || RESERVED_CCS.has(cc)) return;
+      if (!users.has(cc)) users.set(cc, []);
+      users.get(cc).push(c.full);
+    });
+    return [...users.keys()].sort((a, b) => a - b)
+      .map(cc => ({ cc, value: ccValue(cc), comment: `CC ${cc}: ${users.get(cc).join(', ')}` }));
+  }
+
+  // Each item is one line: the bytes of one NRPN write or one CC, with its comment.
+  function buildMessages({ includeCC, omitMSB, ch }) {
+    const st = 0xB0 | ch;
+    const lines = [];
+    let lastMSB = -1;
+    for (const { nrpn, value, comment } of nrpnEntries()) {
+      const msb = nrpn >> 7, lsb = nrpn & 0x7F;
+      const bytes = [];
+      if (!omitMSB || msb !== lastMSB) bytes.push(st, 99, msb);
+      bytes.push(st, 98, lsb, st, 6, value);
+      lastMSB = msb;
+      lines.push({ bytes, comment, nrpn: [msb, lsb, value] });
+    }
+    // Deselects the NRPN, so a later CC 6 from anywhere cannot land in the patch.
+    lines.push({ bytes: [st, 101, 127, st, 100, 127], comment: 'RPN null' });
+    if (includeCC) {
+      for (const { cc, value, comment } of ccEntries()) lines.push({ bytes: [st, cc, value], comment, cc: [cc, value] });
+    }
+    return lines;
+  }
+
+  const hex = b => b.toString(16).toUpperCase().padStart(2, '0');
+
+  function exportText() {
+    const opts = exportOptions();
+    const lines = buildMessages(opts);
+    const format = document.getElementById('export-format').value;
+    const comments = document.getElementById('opt-comments').checked;
+    const oneLine = document.getElementById('opt-one-line').checked;
+    const total = lines.reduce((n, l) => n + l.bytes.length, 0);
+    let text;
+    if (format === 'hex') {
+      if (oneLine) {
+        text = lines.map(l => l.bytes.map(hex).join(' ')).join(' ');
+      } else {
+        const rows = lines.map(l => l.bytes.map(hex).join(' '));
+        const width = Math.max(...rows.map(r => r.length));
+        text = rows.map((r, i) => comments ? `${r.padEnd(width)}  ; ${lines[i].comment}` : r).join('\n');
+        if (comments) text = `; SPMS-1 (type-2) patch "${state.name}", MIDI ch ${opts.ch + 1}, ${total} bytes\n` + text;
+      }
+    } else {
+      const rows = [];
+      if (comments) rows.push(`; SPMS-1 (type-2) patch "${state.name}"`, '; NRPN MSB (CC 99), LSB (CC 98), value (CC 6)');
+      for (const l of lines) {
+        if (!l.nrpn) continue;
+        const r = l.nrpn.map(v => String(v).padStart(3)).join(', ');
+        rows.push(comments ? `${r}  ; ${l.comment}` : r);
+      }
+      const ccs = lines.filter(l => l.cc);
+      if (ccs.length) {
+        if (comments) rows.push('; CC number, value');
+        for (const l of ccs) {
+          const r = l.cc.map(v => String(v).padStart(3)).join(', ');
+          rows.push(comments ? `${r}       ; ${l.comment}` : r);
+        }
+      }
+      text = rows.join('\n');
+    }
+    return { text, info: `${lines.filter(l => l.nrpn).length} NRPN, ${lines.filter(l => l.cc).length} CC, ${total} bytes` };
+  }
+
+  function exportOptions() {
+    return {
+      includeCC: document.getElementById('opt-cc').checked,
+      omitMSB: document.getElementById('opt-omit-msb').checked,
+      ch: parseInt(document.getElementById('midi-ch').value) || 0,
+    };
+  }
+
+  function updateExport() {
+    const { text, info } = exportText();
+    document.getElementById('export-text').value = text;
+    document.getElementById('export-info').textContent = info;
+  }
+
+  // ---- State, history and storage ----------------------------------------------------------
+
+  const STORAGE_KEY = 'spms1-type2-patch-editor';
+  let state = defaultState();
+  const undoStack = [];
+  const redoStack = [];
+
+  function pushHistory(snapshot) {
+    undoStack.push(snapshot || JSON.stringify(serialize(state)));
+    if (undoStack.length > 200) undoStack.shift();
+    redoStack.length = 0;
+  }
+
+  function restore(json) {
+    state = deserialize(JSON.parse(json));
+    renderAll();
+  }
+
+  function undo() {
+    if (!undoStack.length) return;
+    redoStack.push(JSON.stringify(serialize(state)));
+    restore(undoStack.pop());
+  }
+
+  function redo() {
+    if (!redoStack.length) return;
+    undoStack.push(JSON.stringify(serialize(state)));
+    restore(redoStack.pop());
+  }
+
+  function saveLocal() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        patch: serialize(state),
+        prefs: {
+          format: document.getElementById('export-format').value,
+          includeCC: document.getElementById('opt-cc').checked,
+          omitMSB: document.getElementById('opt-omit-msb').checked,
+          comments: document.getElementById('opt-comments').checked,
+          oneLine: document.getElementById('opt-one-line').checked,
+        },
+      }));
+    } catch (e) { /* storage unavailable */ }
+  }
+
+  function loadLocal() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      if (!saved) return;
+      if (saved.patch) state = deserialize(saved.patch);
+      const p = saved.prefs || {};
+      if (p.format) document.getElementById('export-format').value = p.format;
+      if (p.includeCC != null) document.getElementById('opt-cc').checked = p.includeCC;
+      if (p.omitMSB != null) document.getElementById('opt-omit-msb').checked = p.omitMSB;
+      if (p.comments != null) document.getElementById('opt-comments').checked = p.comments;
+      if (p.oneLine != null) document.getElementById('opt-one-line').checked = p.oneLine;
+    } catch (e) { /* storage unavailable or corrupt: keep the default patch */ }
+  }
+
+  // Everything that follows a change to the patch.
+  function commit() {
+    renderControls();
+    renderWires();
+    renderOrder();
+    updateExport();
+    saveLocal();
+    liveSend();
+  }
+
+  // ---- Connections ---------------------------------------------------------------------------
+
+  function currentSource(dst) {
+    const [kind, key] = splitDst(dst);
+    return kind === 'IN' ? state.inputs[key] : state.params[key];
+  }
+
+  function isConnected(dst) {
+    const [kind, key] = splitDst(dst);
+    return kind === 'IN' ? state.inputs[key] !== 'NONE' : state.params[key] !== key;
+  }
+
+  function splitDst(dst) {
+    const i = dst.indexOf(':');
+    return [dst.slice(0, i), dst.slice(i + 1)];
+  }
+
+  function connect(src, dst) {
+    const [kind, key] = splitDst(dst);
+    if (kind === 'IN') state.inputs[key] = src;
+    else state.params[key] = src;
+  }
+
+  function disconnect(dst) {
+    const [kind, key] = splitDst(dst);
+    if (kind === 'IN') state.inputs[key] = 'NONE';
+    else state.params[key] = key;
+  }
+
+  const moduleOfOutput = Object.fromEntries(MODULES.flatMap(m => m.outs.map(o => [o.sig, m.key])));
+
+  function connections() {
+    const list = [];
+    INPUT_ITEMS.forEach(inp => {
+      const src = state.inputs[inp.key];
+      if (src === 'NONE') return;
+      let kind = 'signal';
+      const srcModule = moduleOfOutput[src];
+      if (srcModule) {
+        const si = state.order.indexOf(srcModule);
+        const di = inp.module ? state.order.indexOf(inp.module) : Infinity;
+        if (si < 0) kind += ' inactive';
+        else if (inp.module && di >= 0 && si >= di) kind += ' feedback';
+      }
+      list.push({ src, dst: 'IN:' + inp.key, kind });
+    });
+    PARAM_ITEMS.forEach(p => {
+      const src = state.params[p.key];
+      if (src !== p.key) list.push({ src, dst: 'PR:' + p.key, kind: 'param' });
+    });
+    return list;
+  }
+
+  // ---- Rendering -----------------------------------------------------------------------------
+
+  const canvas = document.getElementById('canvas');
+  const world = document.getElementById('world');
+  const svg = document.getElementById('wires');
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+  const view = { x: 0, y: 0, s: 1 };
+  // Until the view is panned or zoomed by hand, it follows the canvas size with a fit.
+  let viewTouched = false;
+  let portEls = {};
+  let selectedWire = null;
+
+  const NODES = [
+    { key: 'NOTE', label: 'Note', aux: true, notes: [['PITCH', 'Pitch', 0, 127], ['GATE', 'Gate', 0, 1], ['BEND', 'Bend', -8192, 8191]] },
+    { key: 'CONST', label: 'Constants', aux: true, normed: true, outs: ['ONE', 'HALF', 'POINT_TWO', 'POINT_ONE', 'NONE', 'MINUS_POINT_ONE', 'MINUS_POINT_TWO', 'MINUS_HALF', 'MINUS_ONE'] },
+    { key: 'GENERAL', label: 'General Controls', aux: true, controls: CONTROL_ITEMS.slice(PARAMS.length) },
+    ...MODULES.map(m => ({
+      key: m.key, label: m.label, module: m,
+      inputs: INPUT_ITEMS.filter(i => i.module === m.key),
+      controls: PARAM_ITEMS.filter(p => p.module === m.key),
+    })),
+    { key: 'OUT', label: 'Output', aux: true, inputs: INPUT_ITEMS.filter(i => !i.module) },
+  ];
+
+  function escapeHTML(s) {
+    return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  // An item with two slots takes a second row for the second one, under the CC it shares.
+  function controlRowHTML(c, withInput) {
+    const [[slot, label, bipolar], ...more] = c.slots;
+    const tip = bipolar ? 'Bipolar: CC 64 is the centre' : 'Unipolar';
+    return `<div class="row ctrl" data-ctrl="${c.key}">
+      ${withInput ? `<span class="port in param" data-dst="PR:${c.key}" title="Where ${escapeHTML(c.full)} takes its value (per buffer)"></span>` : ''}
+      <span class="lbl" title="${tip}">${escapeHTML(label)}</span>
+      <span class="src"${withInput ? ` data-src-of="PR:${c.key}"` : ''}></span>
+      <input type="number" class="cc" min="0" max="127" title="CC number, 0 for none">
+      <input type="number" class="val" min="0" max="127" title="CC value">
+      <span class="norm" data-slot="${slot}" title="The value the synth sees in the slot"></span>
+      <span class="port out param" data-src="${slot}" title="${escapeHTML(SLOT[slot].full)} control slot"></span>
+    </div>` + more.map(([slot, label, bipolar]) => `<div class="row">
+      <span class="lbl" title="${bipolar ? 'Bipolar: CC 64 is the centre' : 'Unipolar'}, on the CC above">${escapeHTML(label)}</span>
+      <span class="norm" data-slot="${slot}" title="The value the synth sees in the slot"></span>
+      <span class="port out param" data-src="${slot}" title="${escapeHTML(SLOT[slot].full)} control slot"></span>
+    </div>`).join('');
+  }
+
+  function nodeHTML(node) {
+    let h = `<div class="node-head"><span>${escapeHTML(node.label)}</span>`;
+    if (node.module) h += `<span class="badge" title="Click to add to or remove from the run order"></span>`;
+    h += `</div>`;
+    if (node.module) {
+      for (const o of node.module.outs) {
+        h += `<div class="row"><span class="lbl right">${o.label}</span><span class="port out" data-src="${o.sig}"></span></div>`;
+      }
+    }
+    if (node.notes) {
+      h += `<div class="sep"><span>Signals</span><span>Value</span><span class="norm-head">Norm</span></div>`;
+    }
+    for (const [o, label, min, max] of node.notes || []) {
+      h += `<div class="row note-row" data-note-sig="${o}"><span class="lbl">${label}</span><input type="number" class="nv" min="${min}" max="${max}"><span class="norm"></span><span class="port out" data-src="${o}"></span></div>`;
+    }
+    if (node.normed) {
+      h += `<div class="sep"><span>Signals</span><span class="norm-head">Norm</span></div>`;
+    }
+    for (const o of node.outs || []) {
+      h += node.normed
+        ? `<div class="row"><span class="lbl">${escapeHTML(sigLabel(o))}</span><span class="norm">${CONSTANT_NORMS[o]}</span><span class="port out" data-src="${o}"></span></div>`
+        : `<div class="row"><span class="lbl right">${escapeHTML(sigLabel(o))}</span><span class="port out" data-src="${o}"></span></div>`;
+    }
+    for (const i of node.inputs || []) {
+      h += `<div class="row input-row"><span class="port in" data-dst="IN:${i.key}" title="Read every sample"></span><span class="lbl">${escapeHTML(i.label)}</span><span class="src" data-src-of="IN:${i.key}"></span></div>`;
+    }
+    if (node.controls && node.controls.length) {
+      h += `<div class="sep"><span>${node.module ? 'Parameters' : 'Signals'}</span><span>CC</span><span>Value</span><span class="norm-head">Norm</span></div>`;
+      for (const c of node.controls) h += controlRowHTML(c, !!node.module);
+    }
+    return h + '<div class="rows-end"></div>';
+  }
+
+  function renderNodes() {
+    world.querySelectorAll('.node').forEach(n => n.remove());
+    portEls = {};
+    for (const node of NODES) {
+      const el = document.createElement('div');
+      el.className = 'node' + (node.aux ? ' aux' : '') + (node.key === 'GENERAL' ? ' general' : '') + (node.key === 'CONST' ? ' const' : '');
+      el.dataset.node = node.key;
+      el.innerHTML = nodeHTML(node);
+      const pos = state.layout[node.key];
+      el.style.left = pos.x + 'px';
+      el.style.top = pos.y + 'px';
+      world.appendChild(el);
+    }
+    world.querySelectorAll('.port.out').forEach(p => { portEls['o:' + p.dataset.src] = p; });
+    world.querySelectorAll('.port.in').forEach(p => { portEls['i:' + p.dataset.dst] = p; });
+    bindControlInputs();
+    bindNoteInputs();
+    refreshNoteNode();
+    refreshControls();
+  }
+
+  function refreshControls() {
+    refreshSliders();
+    world.querySelectorAll('.row.ctrl').forEach(row => {
+      const c = CONTROL[row.dataset.ctrl];
+      const cc = state.cc[c.key];
+      const ccIn = row.querySelector('.cc');
+      const valIn = row.querySelector('.val');
+      if (document.activeElement !== ccIn) ccIn.value = cc;
+      ccIn.classList.toggle('warn', RESERVED_CCS.has(cc));
+      ccIn.title = RESERVED_CCS.has(cc)
+        ? `CC ${cc} carries NRPN selection or data: its value is not sent`
+        : 'CC number, 0 for none';
+      valIn.disabled = !cc;
+      if (document.activeElement !== valIn) valIn.value = cc ? ccValue(cc) : '';
+      valIn.placeholder = cc ? '' : '—';
+      valIn.title = cc
+        ? `Value of CC ${cc}, shared by every slot on it`
+        : 'No CC: the slot holds 0.0';
+    });
+    world.querySelectorAll('.norm[data-slot]').forEach(norm => {
+      const own = signalNorm(norm.dataset.slot);
+      norm.textContent = own ? own.text : '—';
+      norm.title = 'The value the synth sees in the slot';
+    });
+    refreshSourceValues();
+  }
+
+  // The value each routed input or parameter reads, where the editor can know it.
+  function refreshSourceValues() {
+    world.querySelectorAll('[data-src-of]').forEach(span => {
+      const dst = span.dataset.srcOf;
+      span.innerHTML = isConnected(dst) ? '← ' + sourceHTML(currentSource(dst)) : '';
+    });
+    world.querySelectorAll('.row.ctrl.routed').forEach(row => {
+      const src = state.params[row.dataset.ctrl];
+      const v = signalNorm(src);
+      row.title = `Reads ${sigLabel(src)}${v ? ` = ${v.text}` : ''}. CC and value still set this slot, which the output port carries.`;
+    });
+  }
+
+  function bindControlInputs() {
+    world.querySelectorAll('.row.ctrl').forEach(row => {
+      const key = row.dataset.ctrl;
+      const ccIn = row.querySelector('.cc');
+      const valIn = row.querySelector('.val');
+      let before = null;
+      for (const input of [ccIn, valIn]) {
+        input.addEventListener('focus', () => { before = JSON.stringify(serialize(state)); });
+        input.addEventListener('change', () => {
+          if (before && before !== JSON.stringify(serialize(state))) pushHistory(before);
+          before = JSON.stringify(serialize(state));
+          input.value = input === ccIn ? state.cc[key] : ccValue(state.cc[key]);
+        });
+      }
+      ccIn.addEventListener('input', () => {
+        if (ccIn.value === '') return;
+        state.cc[key] = clamp7(ccIn.value);
+        refreshControls();
+        commit();
+      });
+      valIn.addEventListener('input', () => {
+        const cc = state.cc[key];
+        if (!cc || valIn.value === '') return;
+        setCCValue(cc, clamp7(valIn.value), true);
+      });
+    });
+  }
+
+  function portPos(el) {
+    const r = el.getBoundingClientRect();
+    const c = canvas.getBoundingClientRect();
+    return {
+      x: (r.left + r.width / 2 - c.left - view.x) / view.s,
+      y: (r.top + r.height / 2 - c.top - view.y) / view.s,
+    };
+  }
+
+  function curve(a, b) {
+    const dx = Math.max(40, Math.abs(b.x - a.x) * 0.5);
+    return `M ${a.x} ${a.y} C ${a.x + dx} ${a.y}, ${b.x - dx} ${b.y}, ${b.x} ${b.y}`;
+  }
+
+  function renderWires() {
+    if (!canvas.clientWidth) return;
+    svg.querySelectorAll('path:not(.temp)').forEach(p => p.remove());
+    world.querySelectorAll('.port.connected').forEach(p => p.classList.remove('connected'));
+    world.querySelectorAll('.row.routed').forEach(r => { r.classList.remove('routed'); r.title = ''; });
+    world.querySelectorAll('[data-src-of]').forEach(s => { s.textContent = ''; });
+    const conns = connections();
+    if (selectedWire && !conns.some(c => c.dst === selectedWire)) selectedWire = null;
+    // Parameter wires first, so the signal wires are drawn over them.
+    const ordered = conns.filter(c => c.kind.startsWith('param')).concat(conns.filter(c => !c.kind.startsWith('param')));
+    for (const c of ordered) {
+      const from = portEls['o:' + c.src];
+      const to = portEls['i:' + c.dst];
+      if (!from || !to) continue;
+      const d = curve(portPos(from), portPos(to));
+      const vis = document.createElementNS(SVG_NS, 'path');
+      vis.setAttribute('d', d);
+      vis.setAttribute('class', `wire ${c.kind}` + (c.dst === selectedWire ? ' selected' : ''));
+      const hit = document.createElementNS(SVG_NS, 'path');
+      hit.setAttribute('d', d);
+      hit.setAttribute('class', 'hit');
+      hit.dataset.dst = c.dst;
+      const title = document.createElementNS(SVG_NS, 'title');
+      let tip = `${sigLabel(c.src)} → ${c.dst.startsWith('IN:') ? INPUT_ITEMS.find(i => 'IN:' + i.key === c.dst).full : CONTROL[c.dst.slice(3)].full}`;
+      if (c.kind.includes('feedback')) tip += ' (source runs later: 1-sample delay)';
+      if (c.kind.includes('inactive')) tip += ' (source is not in the run order)';
+      title.textContent = tip;
+      hit.appendChild(title);
+      svg.appendChild(vis);
+      svg.appendChild(hit);
+      from.classList.add('connected');
+      to.classList.add('connected');
+      if (c.kind === 'param') to.closest('.row').classList.add('routed');
+    }
+    const temp = svg.querySelector('.temp');
+    if (temp) svg.appendChild(temp);
+    refreshSourceValues();
+  }
+
+  function renderBadges() {
+    for (const m of MODULES) {
+      const el = world.querySelector(`.node[data-node="${m.key}"]`);
+      const i = state.order.indexOf(m.key);
+      el.classList.toggle('off', i < 0);
+      el.querySelector('.badge').textContent = i < 0 ? 'off' : '#' + (i + 1);
+    }
+  }
+
+  function renderOrder() {
+    const list = document.getElementById('order-list');
+    list.innerHTML = '';
+    state.order.forEach((k, i) => {
+      const li = document.createElement('li');
+      li.draggable = true;
+      li.dataset.index = i;
+      li.innerHTML = `<span class="num">${i + 1}</span><span class="name">${MOD[k].label}</span>
+        <button data-act="up" title="Move up">▲</button><button data-act="down" title="Move down">▼</button><button data-act="remove" title="Remove from the run order">✕</button>`;
+      list.appendChild(li);
+    });
+    const add = document.getElementById('order-add');
+    const missing = MODULES.filter(m => !state.order.includes(m.key));
+    add.innerHTML = missing.length
+      ? missing.map(m => `<option value="${m.key}">${m.label}</option>`).join('')
+      : '<option value="">All modules are running</option>';
+    add.disabled = !missing.length;
+    document.getElementById('order-add-btn').disabled = !missing.length;
+    renderBadges();
+  }
+
+  function renderAll() {
+    document.getElementById('patch-name').value = state.name;
+    renderControls();
+    renderNodes();
+    renderWires();
+    renderOrder();
+    updateExport();
+    saveLocal();
+    liveSend();
+  }
+
+  // ---- View: pan and zoom --------------------------------------------------------------------
+
+  function applyView() {
+    world.style.transform = `translate(${view.x}px, ${view.y}px) scale(${view.s})`;
+    canvas.style.backgroundPosition = `${view.x}px ${view.y}px`;
+    canvas.style.backgroundSize = `${20 * view.s}px ${20 * view.s}px`;
+  }
+
+  function zoomAt(factor, cx, cy) {
+    viewTouched = true;
+    const s = Math.max(0.25, Math.min(2, view.s * factor));
+    view.x = cx - (cx - view.x) * (s / view.s);
+    view.y = cy - (cy - view.y) * (s / view.s);
+    view.s = s;
+    applyView();
+  }
+
+  function fitView() {
+    if (!canvas.clientWidth || !canvas.clientHeight) return;
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    world.querySelectorAll('.node').forEach(n => {
+      x0 = Math.min(x0, n.offsetLeft);
+      y0 = Math.min(y0, n.offsetTop);
+      x1 = Math.max(x1, n.offsetLeft + n.offsetWidth);
+      y1 = Math.max(y1, n.offsetTop + n.offsetHeight);
+    });
+    const pad = 30;
+    // The legend and the buttons sit over the top of the canvas, so the nodes are fitted below them.
+    const bar = canvas.querySelector('.canvas-bar');
+    const top = bar.offsetTop + bar.offsetHeight + 10;
+    const w = canvas.clientWidth, h = canvas.clientHeight - top;
+    view.s = Math.max(0.25, Math.min(1, (w - pad * 2) / (x1 - x0), (h - pad) / (y1 - y0)));
+    view.x = (w - (x1 - x0) * view.s) / 2 - x0 * view.s;
+    view.y = top + (h - pad - (y1 - y0) * view.s) / 2 - y0 * view.s;
+    applyView();
+  }
+
+  canvas.addEventListener('wheel', e => {
+    e.preventDefault();
+    const r = canvas.getBoundingClientRect();
+    zoomAt(Math.exp(-e.deltaY * 0.0015), e.clientX - r.left, e.clientY - r.top);
+  }, { passive: false });
+
+  document.getElementById('zoom-in').addEventListener('click', () => zoomAt(1.2, canvas.clientWidth / 2, canvas.clientHeight / 2));
+  document.getElementById('zoom-out').addEventListener('click', () => zoomAt(1 / 1.2, canvas.clientWidth / 2, canvas.clientHeight / 2));
+  document.getElementById('zoom-fit').addEventListener('click', fitView);
+  new ResizeObserver(() => { if (!viewTouched) fitView(); }).observe(canvas);
+
+  // ---- Pointer interaction -------------------------------------------------------------------
+
+  let drag = null;
+
+  function toWorld(e) {
+    const r = canvas.getBoundingClientRect();
+    return { x: (e.clientX - r.left - view.x) / view.s, y: (e.clientY - r.top - view.y) / view.s };
+  }
+
+  function selectWire(dst) {
+    selectedWire = dst;
+    renderWires();
+  }
+
+  canvas.addEventListener('pointerdown', e => {
+    if (e.button !== 0) return;
+    const t = e.target;
+    if (t.closest('input, button, select, textarea')) return;
+    const port = t.closest('.port');
+    if (port) {
+      e.preventDefault();
+      startWireDrag(port, e);
+      return;
+    }
+    if (t.classList.contains('hit')) {
+      e.preventDefault();
+      selectWire(t.dataset.dst);
+      return;
+    }
+    if (t.classList.contains('badge')) return;
+    const head = t.closest('.node-head');
+    if (head) {
+      e.preventDefault();
+      startNodeDrag(head.parentElement, e);
+      return;
+    }
+    if (t.closest('.node, .zoom-controls')) return;
+    if (selectedWire) selectWire(null);
+    drag = { mode: 'pan', sx: e.clientX, sy: e.clientY, vx: view.x, vy: view.y };
+    viewTouched = true;
+    canvas.classList.add('panning');
+  });
+
+  function startWireDrag(port, e) {
+    const temp = document.createElementNS(SVG_NS, 'path');
+    temp.setAttribute('class', 'wire temp');
+    svg.appendChild(temp);
+    if (port.classList.contains('out')) {
+      drag = { mode: 'wire', src: port.dataset.src, temp };
+    } else if (isConnected(port.dataset.dst)) {
+      // Pick the wire up by its input end, keeping its source.
+      pushHistory();
+      const src = currentSource(port.dataset.dst);
+      disconnect(port.dataset.dst);
+      drag = { mode: 'wire', src, temp, pushed: true };
+      commit();
+    } else {
+      drag = { mode: 'wire', dst: port.dataset.dst, temp };
+    }
+    moveWireDrag(e);
+  }
+
+  // An input reading 0.0 is an input with no wire, so a wire from 0.0 to one would not stay drawn.
+  // A parameter reading 0.0 differs from one reading its own slot, so that wire is kept.
+  function accepts(src, dst) {
+    return !(src === 'NONE' && dst.startsWith('IN:'));
+  }
+
+  // The port under the pointer that would complete the wire being dragged, if any.
+  function dropTarget(e) {
+    const target = portUnder(e);
+    if (!target || !target.classList.contains(drag.src ? 'in' : 'out')) return null;
+    const src = drag.src || target.dataset.src;
+    const dst = drag.dst || target.dataset.dst;
+    return accepts(src, dst) ? target : null;
+  }
+
+  function portUnder(e) {
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    return el && el.closest('.port');
+  }
+
+  function moveWireDrag(e) {
+    const p = toWorld(e);
+    const d = drag.src ? curve(portPos(portEls['o:' + drag.src]), p) : curve(p, portPos(portEls['i:' + drag.dst]));
+    drag.temp.setAttribute('d', d);
+    world.querySelectorAll('.port.target').forEach(el => el.classList.remove('target'));
+    const target = dropTarget(e);
+    if (target) target.classList.add('target');
+  }
+
+  function endWireDrag(e) {
+    drag.temp.remove();
+    world.querySelectorAll('.port.target').forEach(el => el.classList.remove('target'));
+    const target = dropTarget(e);
+    let src = drag.src, dst = drag.dst;
+    if (target && src) dst = target.dataset.dst;
+    else if (target && dst) src = target.dataset.src;
+    if (src && dst) {
+      if (!drag.pushed) pushHistory();
+      connect(src, dst);
+      commit();
+    }
+  }
+
+  function startNodeDrag(el, e) {
+    const key = el.dataset.node;
+    drag = { mode: 'node', el, key, sx: e.clientX, sy: e.clientY, start: { ...state.layout[key] }, snapshot: JSON.stringify(serialize(state)) };
+    el.style.zIndex = 4;
+  }
+
+  window.addEventListener('pointermove', e => {
+    if (!drag) return;
+    if (drag.mode === 'pan') {
+      view.x = drag.vx + e.clientX - drag.sx;
+      view.y = drag.vy + e.clientY - drag.sy;
+      applyView();
+    } else if (drag.mode === 'node') {
+      const pos = {
+        x: Math.round(drag.start.x + (e.clientX - drag.sx) / view.s),
+        y: Math.round(drag.start.y + (e.clientY - drag.sy) / view.s),
+      };
+      state.layout[drag.key] = pos;
+      drag.el.style.left = pos.x + 'px';
+      drag.el.style.top = pos.y + 'px';
+      drag.moved = true;
+      renderWires();
+    } else if (drag.mode === 'wire') {
+      moveWireDrag(e);
+    }
+  });
+
+  window.addEventListener('pointerup', e => {
+    if (!drag) return;
+    if (drag.mode === 'wire') {
+      endWireDrag(e);
+    } else if (drag.mode === 'node') {
+      drag.el.style.zIndex = '';
+      if (drag.moved) {
+        pushHistory(drag.snapshot);
+        saveLocal();
+      }
+    }
+    canvas.classList.remove('panning');
+    drag = null;
+  });
+
+  world.addEventListener('click', e => {
+    const badge = e.target.closest('.badge');
+    if (!badge) return;
+    const key = badge.closest('.node').dataset.node;
+    pushHistory();
+    const i = state.order.indexOf(key);
+    if (i >= 0) state.order.splice(i, 1);
+    else state.order.push(key);
+    commit();
+  });
+
+  world.addEventListener('dblclick', e => {
+    if (!e.target.classList.contains('hit')) return;
+    pushHistory();
+    disconnect(e.target.dataset.dst);
+    commit();
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.target.closest && e.target.closest('input, textarea, select')) return;
+    if ((e.key === 'Delete' || e.key === 'Backspace') && selectedWire) {
+      e.preventDefault();
+      pushHistory();
+      disconnect(selectedWire);
+      selectedWire = null;
+      commit();
+    } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+      e.preventDefault();
+      e.shiftKey ? redo() : undo();
+    } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+      e.preventDefault();
+      redo();
+    }
+  });
+
+  // ---- Run order panel -----------------------------------------------------------------------
+
+  const orderList = document.getElementById('order-list');
+
+  orderList.addEventListener('click', e => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    const i = parseInt(btn.closest('li').dataset.index);
+    const o = state.order;
+    const act = btn.dataset.act;
+    if ((act === 'up' && i === 0) || (act === 'down' && i === o.length - 1)) return;
+    pushHistory();
+    if (act === 'up') [o[i - 1], o[i]] = [o[i], o[i - 1]];
+    else if (act === 'down') [o[i + 1], o[i]] = [o[i], o[i + 1]];
+    else o.splice(i, 1);
+    commit();
+  });
+
+  let dragIndex = -1;
+  orderList.addEventListener('dragstart', e => {
+    dragIndex = parseInt(e.target.closest('li').dataset.index);
+    e.dataTransfer.effectAllowed = 'move';
+  });
+  orderList.addEventListener('dragover', e => {
+    const li = e.target.closest('li');
+    if (!li) return;
+    e.preventDefault();
+    orderList.querySelectorAll('.drag-over').forEach(l => l.classList.remove('drag-over'));
+    li.classList.add('drag-over');
+  });
+  orderList.addEventListener('dragleave', e => {
+    const li = e.target.closest('li');
+    if (li) li.classList.remove('drag-over');
+  });
+  orderList.addEventListener('drop', e => {
+    const li = e.target.closest('li');
+    if (!li || dragIndex < 0) return;
+    e.preventDefault();
+    const to = parseInt(li.dataset.index);
+    if (to !== dragIndex) {
+      pushHistory();
+      const [k] = state.order.splice(dragIndex, 1);
+      state.order.splice(to, 0, k);
+    }
+    dragIndex = -1;
+    commit();
+  });
+  orderList.addEventListener('dragend', () => {
+    dragIndex = -1;
+    orderList.querySelectorAll('.drag-over').forEach(l => l.classList.remove('drag-over'));
+  });
+
+  document.getElementById('order-add-btn').addEventListener('click', () => {
+    const key = document.getElementById('order-add').value;
+    if (!key || state.order.length >= MODULES_SIZE) return;
+    pushHistory();
+    state.order.push(key);
+    commit();
+  });
+
+  // ---- Patch panel ---------------------------------------------------------------------------
+
+  let nameBefore = null;
+  const nameInput = document.getElementById('patch-name');
+  nameInput.addEventListener('focus', () => { nameBefore = JSON.stringify(serialize(state)); });
+  nameInput.addEventListener('input', () => {
+    state.name = nameInput.value;
+    updateExport();
+    saveLocal();
+  });
+  nameInput.addEventListener('change', () => {
+    if (nameBefore && nameBefore !== JSON.stringify(serialize(state))) pushHistory(nameBefore);
+    nameBefore = JSON.stringify(serialize(state));
+  });
+
+  document.getElementById('btn-save').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(serialize(state), null, 2) + '\n'], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = (state.name.trim() || 'patch').replace(/[^\w\-]+/g, '_') + '.json';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  });
+
+  const fileInput = document.getElementById('file-load');
+  document.getElementById('btn-load').addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+    file.text().then(text => {
+      const next = deserialize(JSON.parse(text));
+      pushHistory();
+      state = next;
+      renderAll();
+      fitView();
+    }).catch(err => alert('Could not load the patch: ' + err.message));
+    fileInput.value = '';
+  });
+
+  document.getElementById('btn-undo').addEventListener('click', undo);
+  document.getElementById('btn-redo').addEventListener('click', redo);
+  document.getElementById('btn-init').addEventListener('click', () => {
+    pushHistory();
+    state = defaultState();
+    renderAll();
+    fitView();
+  });
+
+  // ---- MIDI ----------------------------------------------------------------------------------
+
+  let midiAccess = null;
+  let midiInput = null;
+  let midiOutput = null;
+  // What the device was last sent, so Live mode can send only what changed.
+  let lastSent = null;
+
+  const chSelect = document.getElementById('midi-ch');
+  for (let ch = 0; ch < 16; ch++) chSelect.add(new Option(String(ch + 1), String(ch)));
+
+  // Remembered across reloads. A device is matched by id and then by name, since an id need not
+  // survive the device being replugged.
+  const MIDI_SETTINGS_KEY = 'spms1-type2-midi';
+
+  function loadMIDISettings() {
+    try {
+      return JSON.parse(localStorage.getItem(MIDI_SETTINGS_KEY)) || {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function saveMIDISettings() {
+    const port = sel => ({ id: sel.value, name: sel.value ? sel.selectedOptions[0].textContent : '' });
+    try {
+      localStorage.setItem(MIDI_SETTINGS_KEY, JSON.stringify({
+        ch: chSelect.value,
+        in: port(document.getElementById('midi-in')),
+        out: port(document.getElementById('midi-out')),
+      }));
+    } catch (e) { /* storage unavailable */ }
+  }
+
+  function fillPortSelect(sel, placeholder, ports, want) {
+    sel.innerHTML = `<option value="">${placeholder}</option>`;
+    ports.forEach(p => sel.add(new Option(p.name, p.id)));
+    if (!want || !want.id) {
+      sel.value = '';
+      return;
+    }
+    const all = [...ports.values()];
+    const match = all.find(p => p.id === want.id) || all.find(p => p.name === want.name);
+    sel.value = match ? match.id : '';
+  }
+
+  // Selects what was saved, or keeps the current choice when nothing is saved.
+  function applyMIDISettings(saved) {
+    const inSelect = document.getElementById('midi-in');
+    const outSelect = document.getElementById('midi-out');
+    const current = sel => ({ id: sel.value, name: sel.value ? sel.selectedOptions[0].textContent : '' });
+    if (saved.ch != null && saved.ch !== chSelect.value) {
+      chSelect.value = saved.ch;
+      lastSent = null;
+      updateExport();
+    }
+    if (!midiAccess) return;
+    fillPortSelect(inSelect, 'Select MIDI Input Device...', midiAccess.inputs, saved.in || current(inSelect));
+    fillPortSelect(outSelect, 'Select SPMS-1 Device...', midiAccess.outputs, saved.out || current(outSelect));
+    handleDeviceChange();
+  }
+
+  function initMIDI() {
+    if (!navigator.requestMIDIAccess) return;
+    navigator.requestMIDIAccess().then(access => {
+      midiAccess = access;
+      applyMIDISettings(loadMIDISettings());
+      midiAccess.onstatechange = () => applyMIDISettings(loadMIDISettings());
+    }, err => console.error('Failed to get MIDI access - ' + err));
+  }
+
+  function handleDeviceChange() {
+    ['midi-in', 'midi-out'].forEach(id => {
+      const sel = document.getElementById(id);
+      sel.title = sel.value ? sel.selectedOptions[0].textContent : '';
+    });
+    if (!midiAccess) return;
+    if (midiInput) midiInput.onmidimessage = null;
+    midiInput = midiAccess.inputs.get(document.getElementById('midi-in').value) || null;
+    if (midiInput) midiInput.onmidimessage = onMIDIMessage;
+    const next = midiAccess.outputs.get(document.getElementById('midi-out').value) || null;
+    if (next !== midiOutput) lastSent = null;
+    midiOutput = next;
+    liveSend();
+  }
+
+  // What the synth holds for each channel, kept by the same rules as spms1_type2.ino: a note on
+  // takes the pitch and opens the gate, a note off -- or a note on at velocity 0 -- closes the gate
+  // only for the pitch that last came on, and pitch bend is kept signed, -8192 to 8191.
+  // pending is a pitch typed while the gate was shut, sent with the next gate on: MIDI can set the
+  // pitch only by a note on, which would open the gate for as long as the synth took to read it.
+  //
+  // heldBy is the key whose note off should close the gate after a Pitch edit moved the note away
+  // from it. The synth ignores a note off for any pitch but the last, so without it, releasing that
+  // key would leave the gate open.
+  const noteStates = Array.from({ length: 16 }, () => ({ pitch: 60, gate: 0, bend: 0, pending: null, heldBy: null }));
+
+  function trackNote(ch, status, data1, data2) {
+    const n = noteStates[ch];
+    const cmd = status & 0xF0;
+    if (cmd === 0x90 && data2 > 0) {
+      n.pitch = data1;
+      n.gate = 1;
+      n.pending = null;
+      n.heldBy = null;
+    } else if (cmd === 0x80 || cmd === 0x90) {
+      if (data1 === n.pitch) {
+        n.gate = 0;
+        n.heldBy = null;
+      } else if (data1 === n.heldBy && n.gate && ch === exportOptions().ch) {
+        sendNote(0x80, n.pitch, 0);
+        return;
+      }
+    } else if (cmd === 0xE0) {
+      n.bend = ((data2 << 7) | data1) - 8192;
+    } else {
+      return;
+    }
+    if (ch === exportOptions().ch) refreshNoteNode();
+  }
+
+  // The values spms1_main.rb writes to SIGNAL_PITCH, SIGNAL_GATE and SIGNAL_BEND.
+  function refreshNoteNode() {
+    const n = noteStates[exportOptions().ch];
+    const norms = noteNorms(n, true);
+    const shown = {
+      PITCH: [n.pending ?? n.pitch, norms.PITCH],
+      GATE: [n.gate, norms.GATE],
+      BEND: [n.bend, norms.BEND],
+    };
+    world.querySelectorAll('.note-row').forEach(row => {
+      const [value, norm] = shown[row.dataset.noteSig];
+      const input = row.querySelector('.nv');
+      if (document.activeElement !== input) input.value = value;
+      row.querySelector('.norm').textContent = norm;
+      if (row.dataset.noteSig === 'PITCH') {
+        const pending = n.pending !== null;
+        row.classList.toggle('pending', pending);
+        row.title = pending ? `Sent with the next Gate on. The synth still holds ${n.pitch}.` : '';
+      }
+    });
+    refreshSourceValues();
+    refreshSliders();
+  }
+
+  // withPending shows a pitch still waiting for its gate, which the synth does not have yet.
+  function noteNorms(n, withPending) {
+    const signed = v => (v < 0 ? '-' : '+') + Math.abs(v).toFixed(3);
+    const pitch = withPending ? (n.pending ?? n.pitch) : n.pitch;
+    return {
+      PITCH: signed(pitch / 120 - 0.5),
+      GATE: n.gate.toFixed(3),
+      BEND: signed(Math.floor((n.bend + 1) / 2) / 8192),
+    };
+  }
+
+  // Editing a value sends what would make the synth hold it, so the node stays a view of the synth.
+  function bindNoteInputs() {
+    world.querySelectorAll('.note-row').forEach(row => {
+      const input = row.querySelector('.nv');
+      input.addEventListener('input', () => {
+        if (input.value === '') return;
+        const v = Math.max(+input.min, Math.min(+input.max, Math.round(Number(input.value) || 0)));
+        const n = noteStates[exportOptions().ch];
+        switch (row.dataset.noteSig) {
+        case 'PITCH':
+          if (n.gate) {
+            if (v !== n.pitch) {
+              const heldBy = n.heldBy ?? n.pitch;
+              sendNote(0x90, v, 100);
+              n.heldBy = heldBy;
+            }
+          } else {
+            n.pending = (v === n.pitch) ? null : v;
+            refreshNoteNode();
+          }
+          break;
+        case 'GATE':
+          if (v === n.gate) break;
+          if (v) sendNote(0x90, n.pending ?? n.pitch, 100);
+          else sendNote(0x80, n.pitch, 0);
+          break;
+        case 'BEND':
+          sendBend(v);
+          break;
+        }
+      });
+      input.addEventListener('change', refreshNoteNode);
+    });
+  }
+
+  function sendBend(bend) {
+    const ch = exportOptions().ch;
+    const raw = bend + 8192;
+    if (midiOutput) midiOutput.send([0xE0 | ch, raw & 0x7F, raw >> 7]);
+    trackNote(ch, 0xE0, raw & 0x7F, raw >> 7);
+  }
+
+  function onMIDIMessage(event) {
+    const data = event.data;
+    if (midiOutput) midiOutput.send(data);
+    const cmd = data[0] & 0xF0;
+    if (cmd >= 0x80 && cmd <= 0xE0) trackNote(data[0] & 0x0F, data[0], data[1], data[2]);
+    if ((data[0] & 0x0F) !== exportOptions().ch) return;
+    if (cmd === 0x90 || cmd === 0x80) {
+      setKeyActive(data[1], cmd === 0x90 && data[2] > 0);
+    } else if (cmd === 0xB0) {
+      const [, cc, value] = data;
+      // The synth already has it from the pass-through.
+      receiveNRPN(cc, value);
+      if (ccInUse(cc)) setCCValue(cc, value, false);
+    }
+  }
+
+  // Follows NRPN edits arriving at MIDI In by the rules of handle_midi_nrpn_cc in
+  // spms1_type2.ino, so the patch shown stays the one the synth was passed.
+  const nrpnSelect = { msb: 0, lsb: 0, selected: false };
+
+  function receiveNRPN(cc, value) {
+    if (cc === 99) {
+      nrpnSelect.msb = value;
+      nrpnSelect.selected = true;
+    } else if (cc === 98) {
+      nrpnSelect.lsb = value;
+      nrpnSelect.selected = true;
+    } else if (cc === 101 || cc === 100) {
+      nrpnSelect.selected = false;
+    } else if (cc === 6 && nrpnSelect.selected) {
+      applyNRPN((nrpnSelect.msb << 7) | nrpnSelect.lsb, value);
+    }
+  }
+
+  // The synth's 32 run order slots. The editor keeps only the order up to the first 0, so the
+  // slots past it are remembered here for a later write to reconnect them; the mirror is reset
+  // whenever the order was changed from the editor.
+  let orderMirror = new Array(MODULES_SIZE).fill(0);
+
+  function orderFromMirror() {
+    const order = [];
+    for (const id of orderMirror) {
+      if (id === 0) break;
+      const m = MODULES.find(m => m.id === id);
+      // An unknown id or a second copy runs on the synth, but the editor cannot show either.
+      if (m && !order.includes(m.key)) order.push(m.key);
+    }
+    return order;
+  }
+
+  function applyNRPN(nrpn, value) {
+    if (nrpn < MODULES_SIZE) {
+      if (JSON.stringify(orderFromMirror()) !== JSON.stringify(state.order)) {
+        orderMirror = new Array(MODULES_SIZE).fill(0);
+        state.order.forEach((k, i) => { orderMirror[i] = MOD[k].id; });
+      }
+      orderMirror[nrpn] = value;
+      state.order = orderFromMirror();
+    } else if (nrpn >= 128 && nrpn < 128 + INPUT_ITEMS.length) {
+      state.inputs[INPUT_ITEMS[nrpn - 128].key] = SIGNAL_NAMES[value] || 'NONE';
+    } else if (nrpn >= 256 && nrpn < 256 + PARAM_ITEMS.length) {
+      const p = PARAM_ITEMS[nrpn - 256];
+      state.params[p.key] = SIGNAL_NAMES[value] || p.key;
+    } else if (nrpn >= 384 && nrpn < 384 + CONTROL_ITEMS.length) {
+      state.cc[CONTROL_ITEMS[nrpn - 384].key] = value;
+    } else {
+      return;
+    }
+    // The synth already has it, so Live mode must not send it back.
+    if (lastSent) lastSent.set('n' + nrpn, value);
+    renderControls();
+    renderWires();
+    renderOrder();
+    refreshControls();
+    updateExport();
+    saveLocal();
+  }
+
+  function ccInUse(cc) {
+    return cc && !RESERVED_CCS.has(cc) && CONTROL_ITEMS.some(c => state.cc[c.key] === cc);
+  }
+
+  // A CC value is a knob position rather than part of the routing, so it goes out whether or not
+  // Live is on, as the old slider page did.
+  function setCCValue(cc, value, send) {
+    state.values[cc] = value;
+    if (send && midiOutput) midiOutput.send([0xB0 | exportOptions().ch, cc, value]);
+    if (lastSent) lastSent.set('c' + cc, value);
+    refreshControls();
+    updateExport();
+    saveLocal();
+  }
+
+  function snapshotTable() {
+    const t = new Map();
+    nrpnEntries().forEach(e => t.set('n' + e.nrpn, e.value));
+    ccEntries().forEach(e => t.set('c' + e.cc, e.value));
+    return t;
+  }
+
+  function sendAll() {
+    if (!midiOutput) return;
+    const opts = exportOptions();
+    opts.includeCC = true;
+    buildMessages(opts).forEach(l => midiOutput.send(l.bytes));
+    lastSent = snapshotTable();
+  }
+
+  function liveSend() {
+    if (!midiOutput || !document.getElementById('live').checked) return;
+    if (!lastSent) {
+      sendAll();
+      return;
+    }
+    const st = 0xB0 | exportOptions().ch;
+    const now = snapshotTable();
+    let nrpnSent = false;
+    for (const [k, v] of now) {
+      if (lastSent.get(k) === v) continue;
+      const n = parseInt(k.slice(1));
+      if (k[0] === 'n') {
+        midiOutput.send([st, 99, n >> 7, st, 98, n & 0x7F, st, 6, v]);
+        nrpnSent = true;
+      } else {
+        midiOutput.send([st, n, v]);
+      }
+    }
+    if (nrpnSent) midiOutput.send([st, 101, 127, st, 100, 127]);
+    lastSent = now;
+  }
+
+  document.getElementById('midi-in').addEventListener('change', () => { handleDeviceChange(); saveMIDISettings(); });
+  document.getElementById('midi-out').addEventListener('change', () => { handleDeviceChange(); saveMIDISettings(); });
+  chSelect.addEventListener('change', () => { lastSent = null; nrpnSelect.selected = false; updateExport(); refreshNoteNode(); saveMIDISettings(); liveSend(); });
+  document.getElementById('live').addEventListener('change', e => {
+    if (e.target.checked) sendAll();
+  });
+  document.getElementById('btn-send').addEventListener('click', sendAll);
+
+  // ---- Export panel --------------------------------------------------------------------------
+
+  for (const id of ['export-format', 'opt-cc', 'opt-omit-msb', 'opt-comments', 'opt-one-line']) {
+    document.getElementById(id).addEventListener('change', () => { updateExport(); saveLocal(); });
+  }
+
+  document.getElementById('btn-copy').addEventListener('click', () => {
+    const ta = document.getElementById('export-text');
+    const btn = document.getElementById('btn-copy');
+    const done = () => { btn.textContent = 'Copied'; setTimeout(() => { btn.textContent = 'Copy'; }, 1200); };
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(ta.value).then(done);
+    } else {
+      ta.select();
+      document.execCommand('copy');
+      done();
+    }
+  });
+
+  // ---- Controls tab --------------------------------------------------------------------------
+
+  // Each slider follows its slot's CC assignment in the patch, and moves the value of that CC.
+  const CONTROL_PANELS = [
+    { col: 0, title: 'General', general: true },
+    { col: 1, title: 'LFO', module: 'LFO_1' },
+    { col: 1, title: 'EG', module: 'ENV_GEN_1' },
+    { col: 2, title: 'Osc', module: 'OSC_1' },
+    { col: 2, title: 'Filter', module: 'FILTER_1' },
+    { col: 3, title: 'Amp', module: 'AMP_1' },
+    { col: 3, title: 'Chorus', module: 'CHORUS_1' },
+    { col: 3, title: 'Delay', module: 'DELAY_1' },
+  ];
+  CONTROL_PANELS.push({ col: 1, title: 'Mixer 1', module: 'MIXER_1', onlyWithCC: true });
+
+  function panelItems(p) {
+    return p.general ? CONTROL_ITEMS.slice(PARAMS.length) : PARAM_ITEMS.filter(c => c.module === p.module);
+  }
+
+  // What the synth writes to a control slot, as a CC value: the CC's own value while one is
+  // assigned, and 0.0 while none is, as cc_or_zero in spms1_main.rb does. null is a slot written
+  // from a reserved CC, whose value the editor does not track.
+  function slotValue(c, bipolar) {
+    const cc = state.cc[c.key];
+    if (!cc) return bipolar ? 64 : 4;
+    return RESERVED_CCS.has(cc) ? null : ccValue(cc);
+  }
+
+  const CONSTANT_NORMS = {
+    NONE: '0.000', ONE: '+1.000', HALF: '+0.500', POINT_TWO: '+0.200', POINT_ONE: '+0.100', MINUS_POINT_ONE: '-0.100', MINUS_POINT_TWO: '-0.200', MINUS_HALF: '-0.500', MINUS_ONE: '-1.000',
+  };
+
+  // What a signal reads as normalized, or null where the editor cannot know it: a module output.
+  function signalNorm(sig) {
+    const slot = SLOT[sig];
+    if (slot) {
+      const v = slotValue(slot.c, slot.bipolar);
+      return v == null ? null : { text: normalized(slot.bipolar, v) };
+    }
+    if (sig in CONSTANT_NORMS) return { text: CONSTANT_NORMS[sig] };
+    const notes = noteNorms(noteStates[exportOptions().ch], false);
+    if (sig in notes) return { text: notes[sig] };
+    return null;
+  }
+
+  // A constant's label is already its value, so only slots and note signals take one.
+  function sourceHTML(sig) {
+    const label = escapeHTML(sigLabel(sig));
+    const v = signalNorm(sig);
+    if (!v || sig in CONSTANT_NORMS) return label;
+    return `${label} (${v.text})`;
+  }
+
+  function normalized(bipolar, value) {
+    if (bipolar) {
+      const v = Math.max(-0.5, Math.min(0.5, (value - 64) / 120));
+      return (v < 0 ? '-' : '+') + Math.abs(v).toFixed(3);
+    }
+    return Math.max(0, Math.min(1, (value - 4) / 120)).toFixed(3);
+  }
+
+  let sliderBefore = null;
+
+  function renderControls() {
+    const root = document.getElementById('controls');
+    const active = document.activeElement;
+    // Rebuilding under a slider being dragged would drop the drag.
+    if (active && active.type === 'range' && root.contains(active)) return;
+    const cols = [0, 1, 2, 3].map(() => document.createElement('div'));
+    cols.forEach(c => { c.className = 'editor-column'; });
+    for (const p of CONTROL_PANELS) {
+      const items = panelItems(p);
+      // A mixer has no CC by default, so its panel appears only once a patch gives it one.
+      if (p.onlyWithCC && !items.some(c => state.cc[c.key])) continue;
+      const panel = document.createElement('div');
+      panel.className = 'panel';
+      panel.innerHTML = `<h2>${p.title}</h2><div class="control-row">` + items.map(c => `
+        <div class="slider-knob-zone" data-ctrl="${c.key}">
+          <div class="slider-label">${escapeHTML(/^\d$/.test(c.label) ? c.full : c.label)} <span class="cc-num"></span></div>
+          <div class="slider-input-wrapper">
+            <input type="range" min="0" max="127"${c.slots.some(([, , bipolar]) => bipolar) ? ' class="bipolar"' : ''}>
+            <span class="slider-value"></span>
+            <span class="slider-norm" title="The value the synth sees in the slot"></span>
+          </div>
+        </div>`).join('') + '</div>';
+      cols[p.col].appendChild(panel);
+    }
+    cols[3].appendChild(document.getElementById('init-values'));
+    root.replaceChildren(...cols);
+    root.querySelectorAll('.slider-knob-zone').forEach(zone => {
+      const c = CONTROL[zone.dataset.ctrl];
+      const slider = zone.querySelector('input');
+      slider.addEventListener('pointerdown', () => { sliderBefore = JSON.stringify(serialize(state)); });
+      slider.addEventListener('focus', () => { sliderBefore = JSON.stringify(serialize(state)); });
+      slider.addEventListener('input', () => {
+        const cc = state.cc[c.key];
+        if (ccInUse(cc)) setCCValue(cc, parseInt(slider.value), true);
+      });
+      slider.addEventListener('change', () => {
+        if (sliderBefore && sliderBefore !== JSON.stringify(serialize(state))) pushHistory(sliderBefore);
+        sliderBefore = JSON.stringify(serialize(state));
+      });
+    });
+    refreshSliders();
+  }
+
+  function refreshSliders() {
+    document.querySelectorAll('#controls .slider-knob-zone').forEach(zone => {
+      const c = CONTROL[zone.dataset.ctrl];
+      const cc = state.cc[c.key];
+      const slider = zone.querySelector('input');
+      const usable = ccInUse(cc);
+      const src = state.params[c.key];
+      const routed = src !== undefined && src !== c.key;
+      zone.classList.toggle('routed', routed);
+      zone.querySelector('.cc-num').innerHTML =
+        (!cc ? '(no CC)' : RESERVED_CCS.has(cc) ? `(CC ${cc}, reserved)` : `(CC ${cc})`) +
+        (routed ? ` ← ${sourceHTML(src)}` : '');
+      zone.title = routed ? `${c.full} reads ${sigLabel(src)}. This slider sets only its own slot, which other wires may read.` : '';
+      slider.disabled = !usable;
+      const value = usable ? ccValue(cc) : 64;
+      if (document.activeElement !== slider) slider.value = value;
+      zone.querySelector('.slider-value').textContent = usable ? String(value) : '—';
+      const own = signalNorm(c.slots[0][0]);
+      const norm = zone.querySelector('.slider-norm');
+      norm.textContent = own ? own.text : '';
+      norm.title = 'The value the synth sees in the slot';
+    });
+  }
+
+  document.getElementById('init-values').addEventListener('click', () => {
+    pushHistory();
+    CONTROL_ITEMS.forEach(c => {
+      const cc = state.cc[c.key];
+      if (ccInUse(cc) && c.defaultValue != null) state.values[cc] = c.defaultValue;
+    });
+    if (midiOutput) {
+      const st = 0xB0 | exportOptions().ch;
+      ccEntries().forEach(e => midiOutput.send([st, e.cc, e.value]));
+      if (lastSent) ccEntries().forEach(e => lastSent.set('c' + e.cc, e.value));
+    }
+    refreshControls();
+    updateExport();
+    saveLocal();
+  });
+
+  // ---- Soft keyboard -------------------------------------------------------------------------
+
+  function sendNote(status, note, velocity) {
+    const ch = exportOptions().ch;
+    if (midiOutput) midiOutput.send([(status & 0xF0) | ch, note, velocity]);
+    setKeyActive(note, (status & 0xF0) === 0x90 && velocity > 0);
+    trackNote(ch, status, note, velocity);
+  }
+
+  const KB_NOTE_MAX = 120;
+  const KB_KEY_WIDTH = 22;  // a semitone in the upper half, times kbScale; 37 keys fit a 960px window
+  // The center of 37 keys from a C (C3 - C6 by default), in semitones from the left end of the C.
+  const KB_CENTER_OFFSET = (36 + 5 / 3) / 2;
+  const KB_DEFAULT_C = 48;  // C3
+  // The keys of the PC keyboard, from C (A) to the C an octave up (K).
+  const KB_PC_KEYS = ['KeyA', 'KeyW', 'KeyS', 'KeyE', 'KeyD', 'KeyF', 'KeyT', 'KeyG', 'KeyY', 'KeyH', 'KeyU', 'KeyJ', 'KeyK'];
+  const KB_STORAGE_KEY = 'spms1-type2-editor-keyboard';
+  const kbKeys = [];  // note number -> the upper part, and the lower part of a white key
+  const kbPointers = new Map();  // pointerId, or 'key:' + code for the PC keyboard -> the note it holds
+  let kbScale = 1;
+  const kbPrefs = { center: KB_DEFAULT_C + KB_CENTER_OFFSET };
+
+  function loadKbPrefs() {
+    try { Object.assign(kbPrefs, JSON.parse(localStorage.getItem(KB_STORAGE_KEY))); } catch (e) { /* storage unavailable */ }
+  }
+
+  function saveKbPrefs() {
+    try { localStorage.setItem(KB_STORAGE_KEY, JSON.stringify(kbPrefs)); } catch (e) { /* storage unavailable */ }
+  }
+
+  function setKeyActive(note, on) {
+    (kbKeys[note] || []).forEach(k => k.classList.toggle('active', on));
+  }
+
+  // The left edge and the width of a white key's lower part, in semitones from C-1.
+  function lowerLeftWidth(note) {
+    const index = [0, 0, 1, 1, 2, 3, 3, 4, 4, 5, 5, 6][note % 12];
+    const left = index < 3 ? index * 5 / 3 : 5 + (index - 3) * 7 / 4;
+    return [Math.floor(note / 12) * 12 + left, index < 3 ? 5 / 3 : 7 / 4];
+  }
+
+  // A press, or a glide to another key while pressed. The new note on goes out before the old
+  // note off, so the gate stays open and the envelope does not restart: legato.
+  function kbPress(id, note) {
+    const old = kbPointers.get(id);
+    sendNote(0x90, note, 127);
+    kbPointers.set(id, note);
+    if (old !== undefined) sendNote(0x80, old, 0);
+  }
+
+  function kbRelease(id) {
+    if (!kbPointers.has(id)) return;
+    const note = kbPointers.get(id);
+    kbPointers.delete(id);
+    sendNote(0x80, note, 0);
+  }
+
+  // The synth ignores All Notes Off, and a CC 123 would move whatever parameter is mapped to it,
+  // so Panic sends a Note Off on every note instead.
+  function kbPanic() {
+    kbPointers.clear();
+    const ch = exportOptions().ch;
+    for (let note = 0; note < 128; note++) {
+      if (midiOutput) midiOutput.send([0x80 | ch, note, 0]);
+      setKeyActive(note, false);
+    }
+    trackNote(ch, 0x80, noteStates[ch].pitch, 0);
+    sendBend(0);
+  }
+
+  function kbNoteOf(e) {
+    const key = e.target.closest ? e.target.closest('.key') : null;
+    return key ? parseInt(key.dataset.note) : -1;
+  }
+
+  // The center of the visible area, in semitones of the upper half from C-1.
+  function kbGetCenter() {
+    const scroll = document.getElementById('kb-scroll');
+    return (scroll.scrollLeft + scroll.clientWidth / 2) / (KB_KEY_WIDTH * kbScale);
+  }
+
+  function kbSetCenter(center) {
+    const scroll = document.getElementById('kb-scroll');
+    scroll.scrollLeft = center * KB_KEY_WIDTH * kbScale - scroll.clientWidth / 2;
+    kbUpdateScrollbar();
+  }
+
+  // To the 37 keys from the next C to the left or to the right of where the keyboard is, the
+  // last of them ending at C9.
+  function kbShiftOctave(delta) {
+    const position = (kbGetCenter() - KB_CENTER_OFFSET) / 12;  // in octaves from C-1
+    let octave = delta < 0 ? Math.ceil(position - 0.01) + delta : Math.floor(position + 0.01) + delta;
+    octave = Math.max(0, Math.min(Math.floor((KB_NOTE_MAX - 36) / 12), octave));
+    kbPrefs.center = octave * 12 + KB_CENTER_OFFSET;
+    kbSetCenter(kbPrefs.center);
+    saveKbPrefs();
+  }
+
+  // The keys as large as the text: the scale of the text is the width of the label on the page,
+  // with the text size of the browser or the OS, over the same text drawn in a canvas at its
+  // size in rem times 16px, without it. Browser zoom scales both, so it leaves this at 1.
+  const KB_LABEL_REM = 1.2;  // .panel h2
+  function kbFitScale() {
+    const label = document.getElementById('kbd-label');
+    const style = getComputedStyle(label);
+    const canvas = kbFitScale.canvas || (kbFitScale.canvas = document.createElement('canvas'));
+    const context = canvas.getContext('2d');
+    context.font = `${style.fontWeight} ${KB_LABEL_REM * 16}px ${style.fontFamily}`;
+    const base = context.measureText(label.textContent).width;
+    if (!(base > 0)) return;
+    let scale = Math.round(label.getBoundingClientRect().width / base * 20) / 20;  // in steps of 5%
+    scale = Math.max(0.5, Math.min(3, scale));
+    if (scale === kbScale) return;
+    kbScale = scale;
+    document.querySelector('.keyboard-frame').style.setProperty('--kbd-scale', scale);
+    kbSetCenter(kbPrefs.center);
+  }
+
+  function kbUpdateScrollbar() {
+    const scroll = document.getElementById('kb-scroll');
+    const bar = document.getElementById('kbd-scrollbar');
+    const thumb = document.getElementById('kbd-scrollbar-thumb');
+    const barWidth = bar.clientWidth;
+    const thumbWidth = Math.max(24, barWidth * scroll.clientWidth / scroll.scrollWidth);
+    const range = scroll.scrollWidth - scroll.clientWidth;
+    thumb.style.width = thumbWidth + 'px';
+    thumb.style.left = (range > 0 ? (barWidth - thumbWidth) * scroll.scrollLeft / range : 0) + 'px';
+  }
+
+  function kbScrollToThumbLeft(thumbLeft) {
+    const scroll = document.getElementById('kb-scroll');
+    const bar = document.getElementById('kbd-scrollbar');
+    const thumb = document.getElementById('kbd-scrollbar-thumb');
+    const free = bar.clientWidth - thumb.offsetWidth;
+    if (free > 0) {
+      scroll.scrollLeft = (scroll.scrollWidth - scroll.clientWidth) * Math.max(0, Math.min(1, thumbLeft / free));
+      kbUpdateScrollbar();
+    }
+  }
+
+  // Not while typing in a field or choosing in a select, which picks an item by its letter, and
+  // not with Ctrl, Alt or Command, which belong to the browser's shortcuts.
+  function kbPcKeyEnabled(e) {
+    const t = e.target;
+    const tag = t.tagName;
+    return !e.ctrlKey && !e.altKey && !e.metaKey &&
+      tag !== 'SELECT' && tag !== 'TEXTAREA' && !t.isContentEditable &&
+      !(tag === 'INPUT' && t.type !== 'range' && t.type !== 'button' && t.type !== 'checkbox');
+  }
+
+  function createKeyboard() {
+    loadKbPrefs();
+    const kb = document.getElementById('keyboard');
+    const names = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+    function createKey(note, className) {
+      const key = document.createElement('div');
+      key.className = className;
+      key.dataset.note = note;
+      key.title = names[note % 12] + (Math.floor(note / 12) - 1) + ' (' + note + ')';
+      kb.appendChild(key);
+      return key;
+    }
+
+    for (let note = 0; note <= KB_NOTE_MAX; note++) {
+      const white = !names[note % 12].includes('#');
+      const upper = createKey(note, 'key upper ' + (white ? 'white' : 'black'));
+      upper.style.left = `calc(${note} * var(--kbd-key-width))`;
+      kbKeys[note] = [upper];
+      if (white) {
+        const [left, width] = lowerLeftWidth(note);
+        const lower = createKey(note, 'key lower white');
+        lower.style.left = `calc(${left} * var(--kbd-key-width))`;
+        lower.style.width = `calc(${width} * var(--kbd-key-width))`;
+        if (note % 12 === 0) {
+          const label = document.createElement('span');
+          label.className = 'key-label';
+          label.innerText = 'C' + (Math.floor(note / 12) - 1);
+          lower.appendChild(label);
+        }
+        kbKeys[note].push(lower);
+      }
+    }
+    const [lastLeft, lastWidth] = lowerLeftWidth(KB_NOTE_MAX);
+    kb.style.width = `calc(${lastLeft + lastWidth} * var(--kbd-key-width))`;
+
+    kb.addEventListener('contextmenu', e => e.preventDefault());
+    kb.addEventListener('pointerdown', e => {
+      if (e.button !== 0) return;
+      const note = kbNoteOf(e);
+      if (note < 0) return;
+      e.preventDefault();
+      // A touch captures the pointer to the key it landed on; released so the finger can glide.
+      if (e.target.hasPointerCapture && e.target.hasPointerCapture(e.pointerId)) {
+        e.target.releasePointerCapture(e.pointerId);
+      }
+      kbPress(e.pointerId, note);
+    });
+    kb.addEventListener('pointerover', e => {
+      const note = kbNoteOf(e);
+      if (!kbPointers.has(e.pointerId) || note < 0 || note === kbPointers.get(e.pointerId)) return;
+      kbPress(e.pointerId, note);
+    });
+    // A mouse that leaves the keyboard upward or downward while pressed keeps its note on, with no
+    // Note Off when the button comes up, so a note can be held; Panic lets it go. A mouse that
+    // leaves it to the left or right, or a touch, sends the Note Off.
+    kb.addEventListener('pointerleave', e => {
+      const rect = kb.getBoundingClientRect();
+      if (e.pointerType === 'mouse' && (e.clientY <= rect.top || e.clientY >= rect.bottom)) {
+        kbPointers.delete(e.pointerId);
+      } else {
+        kbRelease(e.pointerId);
+      }
+    });
+    window.addEventListener('pointerup', e => kbRelease(e.pointerId));
+    window.addEventListener('pointercancel', e => kbRelease(e.pointerId));
+    window.addEventListener('blur', () => [...kbPointers.keys()].forEach(kbRelease));
+
+    // The PC keyboard, as in DAWs: A - K are the white keys from C to C, W - U the black keys, and
+    // Z / X shift the octave. Keys go by position (e.code), so any layout or input mode plays the
+    // same. A is the C of the middle octave in view. A key held is a pointer of its own, so one
+    // released after an octave shift turns off the note it played.
+    document.addEventListener('keydown', e => {
+      if (!kbPcKeyEnabled(e)) return;
+      if (e.code === 'KeyZ' || e.code === 'KeyX') {
+        e.preventDefault();
+        if (!e.repeat) kbShiftOctave(e.code === 'KeyZ' ? -1 : 1);
+        return;
+      }
+      const offset = KB_PC_KEYS.indexOf(e.code);
+      if (offset < 0) return;
+      e.preventDefault();
+      const id = 'key:' + e.code;
+      if (e.repeat || kbPointers.has(id)) return;
+      const note = Math.round((kbGetCenter() - KB_CENTER_OFFSET) / 12) * 12 + 12 + offset;
+      if (note >= 0 && note <= KB_NOTE_MAX) kbPress(id, note);
+    });
+    document.addEventListener('keyup', e => kbRelease('key:' + e.code));
+
+    document.getElementById('kbd-oct-down').addEventListener('click', () => kbShiftOctave(-1));
+    document.getElementById('kbd-oct-up').addEventListener('click', () => kbShiftOctave(1));
+    document.getElementById('kbd-panic').addEventListener('click', kbPanic);
+
+    // The position is kept as the center of the visible area, so it stays put in another window
+    // width or key size.
+    const scroll = document.getElementById('kb-scroll');
+    let saveTimer = null;
+    scroll.addEventListener('scroll', () => {
+      kbUpdateScrollbar();
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(() => { kbPrefs.center = kbGetCenter(); saveKbPrefs(); }, 200);
+    });
+    window.addEventListener('resize', () => kbSetCenter(kbPrefs.center));
+
+    // Safari cannot color the native scroll bar. The thumb drags, and a press on the track moves
+    // the thumb there.
+    const bar = document.getElementById('kbd-scrollbar');
+    const thumb = document.getElementById('kbd-scrollbar-thumb');
+    let drag = null;
+    bar.addEventListener('pointerdown', e => {
+      if (e.button !== 0) return;
+      e.preventDefault();
+      const barRect = bar.getBoundingClientRect();
+      let thumbRect = thumb.getBoundingClientRect();
+      if (e.clientX < thumbRect.left || e.clientX > thumbRect.right) {
+        kbScrollToThumbLeft(e.clientX - barRect.left - thumbRect.width / 2);
+        thumbRect = thumb.getBoundingClientRect();
+      }
+      drag = { pointerId: e.pointerId, offset: e.clientX - thumbRect.left };
+      bar.setPointerCapture(e.pointerId);
+    });
+    bar.addEventListener('pointermove', e => {
+      if (drag && e.pointerId === drag.pointerId) kbScrollToThumbLeft(e.clientX - bar.getBoundingClientRect().left - drag.offset);
+    });
+    ['pointerup', 'pointercancel'].forEach(type => bar.addEventListener(type, () => { drag = null; }));
+
+    kbFitScale();
+    kbSetCenter(kbPrefs.center);
+    // The text size can change without a resize of the window.
+    if (window.ResizeObserver) new ResizeObserver(() => kbFitScale()).observe(document.getElementById('kbd-label'));
+  }
+
+  // ---- Tabs ----------------------------------------------------------------------------------
+
+  const TAB_KEY = 'spms1-type2-editor-tab';
+
+  function showTab(name) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+    document.getElementById('tab-controls').hidden = name !== 'controls';
+    document.getElementById('tab-patch').hidden = name !== 'patch';
+    fitTabArea();
+    if (name === 'patch') {
+      if (!viewTouched) fitView();
+      renderWires();
+    }
+    try { localStorage.setItem(TAB_KEY, name); } catch (e) { /* storage unavailable */ }
+  }
+
+  // The tab runs from wherever the header and MIDI bar leave it, which moves as they wrap, to
+  // the soft keyboard at the bottom of the window. The patch area, or in one column its canvas,
+  // takes that height; the controls take at least it, so the keyboard does not move when the tab
+  // changes.
+  function fitTabArea() {
+    const controls = document.getElementById('tab-controls');
+    const app = document.getElementById('tab-patch');
+    const canvas = document.getElementById('canvas');
+    controls.style.minHeight = '';
+    app.style.height = '';
+    canvas.style.height = '';
+    // In one column the patch area has no box of its own, but the canvas starts where it would.
+    const top = (controls.hidden ? canvas : controls).getBoundingClientRect().top + window.scrollY;
+    const keyboard = document.getElementById('kbd-panel').offsetHeight;
+    const height = window.innerHeight - top - 16 - keyboard - 20;
+    const narrow = matchMedia('(max-width: 800px)').matches;
+    if (!controls.hidden) {
+      if (!narrow) controls.style.minHeight = height + 'px';
+    } else if (!app.hidden) {
+      if (app.classList.contains('wide') || narrow) {
+        canvas.style.height = Math.max(240, height) + 'px';
+      } else {
+        app.style.height = Math.max(300, height) + 'px';
+      }
+    }
+  }
+  window.addEventListener('resize', fitTabArea);
+
+  document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
+
+  const WIDE_KEY = 'spms1-type2-editor-wide';
+
+  function setWide(wide) {
+    document.getElementById('tab-patch').classList.toggle('wide', wide);
+    const button = document.getElementById('zoom-wide');
+    button.classList.toggle('primary', wide);
+    button.setAttribute('aria-pressed', String(wide));
+    if (!document.getElementById('tab-patch').hidden) {
+      fitTabArea();
+      if (!viewTouched) fitView();
+      renderWires();
+    }
+    try { localStorage.setItem(WIDE_KEY, wide ? '1' : ''); } catch (e) { /* storage unavailable */ }
+  }
+  document.getElementById('zoom-wide').addEventListener('click', () => {
+    setWide(!document.getElementById('tab-patch').classList.contains('wide'));
+  });
+
+
+  // ---- Start ---------------------------------------------------------------------------------
+
+  window.addEventListener('DOMContentLoaded', () => {
+    loadLocal();
+    applyMIDISettings(loadMIDISettings());
+    renderAll();
+    createKeyboard();
+    let tab = 'controls';
+    try { tab = localStorage.getItem(TAB_KEY) || tab; } catch (e) { /* storage unavailable */ }
+    let wide = false;
+    try { wide = localStorage.getItem(WIDE_KEY) === '1'; } catch (e) { /* storage unavailable */ }
+    setWide(wide);
+    showTab(tab === 'patch' ? 'patch' : 'controls');
+    initMIDI();
+  });
+</script>
+</body>
+</html>
