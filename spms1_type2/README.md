@@ -1,4 +1,4 @@
-MIDI Synthesizer SPMS-1 (type-2) v0.0.1
+MIDI Synthesizer SPMS-1 (type-2) v0.0.2
 =======================================
 
 - Monophonic semi-modular MIDI Synthesizer for Raspberry Pi Pico 2, made with Spinel (Ruby AOT Compiler)
@@ -23,23 +23,13 @@ Required Hardware
         - [Adafruit PCM5102 I2S DAC](https://www.adafruit.com/product/6250) (Product ID: 6250)
         - GY-PCM5102 (PCM5102A I2S DAC Module)
     - Or PWM Audio output, without a DAC (the default of the sketch)
-        - L on GP20 and R on GP21: the D20 port of Seeed Studio [Grove Shield for Pi Pico](https://www.seeedstudio.com/Grove-Shield-for-Pi-Pico-v1-0-p-4846.html),
-          with the yellow wire L and the white wire R
-            - For the Pimoroni [Pico VGA Demo Base](https://shop.pimoroni.com/products/pimoroni-pico-vga-demo-base) (PIM553),
-              set `SPMS1_PWM_AUDIO_L_PIN` to 28 and `SPMS1_PWM_AUDIO_R_PIN` to 27
-        - Parts for the audio connection, as in the photo of the [top-level README](../README.md) (no RC filter):
-            - A Grove to jumper wire cable, from the D20 port (the red wire, VCC, is not connected)
-            - A 3.5 mm stereo jack with screw terminals (L, R, and GND)
-            - A 3.5 mm stereo cable with an inline volume control (a passive stereo volume dial),
-              between the jack and the amplifier or the active speaker
-        - Without an RC filter, the PWM ripple (3.3 V square waves) reaches the connected device along with the audio,
-          and may saturate its input (e.g. of an audio interface) and cause beeps or noises, even when its level meter looks fine
-            - The volume dial lowers the ripple together with the audio. Start with it turned down:
-              at the top, the full 3.3 V square waves reach the device
-            - Resistors, or the input gain (volume) of the connected device, can lower the level instead
-        - Optional: an RC low pass filter on each output takes out the PWM ripple itself
+        - L on GP28 and R on GP27, as on the Pimoroni [Pico VGA Demo Base](https://shop.pimoroni.com/products/pimoroni-pico-vga-demo-base) (PIM553)
+        - An RC low pass filter on each output is recommended, to take out the PWM ripple
             - It also reduces the radio noise (EMI) radiated from the cables carrying the square waves:
-              put it close to the pins (e.g. at the screw terminals of the jack, not after the cable)
+              put it close to the pins, not after the cable
+        - Without the RC filter, reduce the level with resistors or the input gain (volume) of the connected device:
+          the PWM ripple (3.3 V square waves) may saturate the input (e.g. of an audio interface) and cause beeps or noises,
+          even when its level meter looks fine
         - The PWM level (3200 steps) is quantized with 1st-order noise shaping and TPDF dither
         - Each sample is split into 4 PWM periods (PWM carrier: 192 kHz instead of 48 kHz), so the carrier is easier to filter out
           and less likely to cause beeps or whines in active speakers (`SPMS1_PWM_AUDIO_SUBPERIODS`: 1, 2, 4, or 8)
@@ -76,7 +66,7 @@ Usage
 
 - "spms1_type2_i2s.ino.uf2" (in the "bin" folder) is for Raspberry Pi Pico 2 and Pimoroni Pico Audio Pack,
   Adafruit PCM5102 I2S DAC, or GY-PCM5102
-- "spms1_type2_pwm_audio.ino.uf2" (in the "bin" folder) is for Raspberry Pi Pico 2 with PWM Audio output (L on GP20 and R on GP21)
+- "spms1_type2_pwm_audio.ino.uf2" (in the "bin" folder) is for Raspberry Pi Pico 2 with PWM Audio output, built with L on GP28 and R on GP27
 
 
 ### Web Editor
@@ -87,6 +77,10 @@ Usage
     - Wires module outputs to inputs and parameters, and sets the run order and CC assignments
     - Saves and loads patches as JSON
     - Copies the patch as MIDI bytes or as an NRPN list, or sends it through Web MIDI
+- SPMS-1 Web: the synth itself, built into the editor ("spms1_web_synth.js")
+    - Select "SPMS-1 Web (Built-in)" in "MIDI Out", and play the soft keyboard (or a MIDI keyboard in "MIDI In")
+    - "spms1_main.c" runs in the Web browser as WebAssembly, so it sounds the same as the device
+    - See [web/README.md](./web/README.md)
 
 
 ### MIDI Settings
@@ -97,22 +91,9 @@ Usage
     - Device Name: "SPMS-1 (type-2)"
 - UART MIDI Input
     - Speed: 31250 bps
-    - GP4 and GP5 pins are used by UART1 TX and UART1 RX
-    - You can also use `SoftwareSerial` by making the following changes:
-
-        ```cpp
-        #include <SoftwareSerial.h>
-        #define SPMS1_UART_MIDI_TX_PIN              (4)
-        #define SPMS1_UART_MIDI_RX_PIN              (5)
-        SoftwareSerial mySerial(SPMS1_UART_MIDI_RX_PIN, SPMS1_UART_MIDI_TX_PIN);
-        #define SPMS1_UART_MIDI_SERIAL              mySerial
-        ```
-
-        ```cpp
-        //  SPMS1_UART_MIDI_SERIAL.setTX(SPMS1_UART_MIDI_TX_PIN);
-        //  SPMS1_UART_MIDI_SERIAL.setRX(SPMS1_UART_MIDI_RX_PIN);
-        ```
-
+    - GP4 and GP5 pins are used by TX and RX, through `SoftwareSerial`
+    - Any pins can be used, TX and RX swapped included, by changing `SPMS1_UART_MIDI_TX_PIN` and
+      `SPMS1_UART_MIDI_RX_PIN`
     - DIN/TRS MIDI is available by using (and modifying) Adafruit MIDI FeatherWing Kit, for example
         - Adafruit [MIDI FeatherWing Kit](https://www.adafruit.com/product/4740) (Product ID: 4740)
         - M5Stack [Midi Unit with DIN Connector (SAM2695)](https://shop.m5stack.com/products/midi-unit-with-din-connector-sam2695) (SKU: U187) in Separate mode
@@ -507,15 +488,16 @@ the filter runs into its own saturation. Its default of CC 64 is the level the o
 be scaled to on its own. The saturation sits on the resonance rather than the pass band: a low
 cutoff passes a loud note nearly clean, while turning the gain up rounds off the resonant peak.
 
-Filter 1 Resonance doubles Q every 30 CC steps up to Q 5.66 at CC 94, and from there rises faster
-and faster, without a sudden step, through Q 27 at CC 109 to Q 256 just past CC 118. Above that
-the filter oscillates on its own: a sine at the cutoff frequency, growing to its full level of
-about 0.5 by CC 123 and holding it to the top of the dial. Low in that range the oscillation
-builds slowly and shares the filter with the input; at the top it takes the input over. Its
-level holds across the cutoff range down to about 150 Hz and falls below that. Near the top of the
-cutoff range it fades out, before its 3rd harmonic folds back as an inharmonic tone: at 48 kHz,
-from 8 kHz (CC 108) to 10 kHz (CC 112), modulation included. Above that the resonance acts as at
-Q 256. With the cutoff following the keyboard, as in the examples below, it plays as a sine voice.
+Filter 1 Resonance raises the resonant peak 6 dB every 30 CC steps, Q doubling each time, up to
+Q 5.66 at CC 94, and from there Q rises faster and faster, without a sudden step, through Q 29
+at CC 109 to Q 256 at CC 118. Above that the filter oscillates on its own: a sine at the cutoff
+frequency, growing to its full level of about 0.5 by CC 123 and holding it to the top of the
+dial. Low in that range the oscillation builds slowly and shares the filter with the input; at
+the top it takes the input over. Its level holds across the cutoff range down to about 150 Hz
+and falls below that. Near the top of the cutoff range it fades out, before its 3rd harmonic
+folds back as an inharmonic tone: at 48 kHz, from 8 kHz (CC 108) to 10 kHz (CC 112), modulation
+included. Above that the resonance acts as at Q 256. With the cutoff following the keyboard, as
+in the examples below, it plays as a sine voice.
 
 A mixer takes each input at its own level and its own polarity, then adds them. Level runs from
 silent at 0.0 (CC 4) to full at 1.0 (CC 124), and Polarity from negated at -0.5 (CC 4), through
@@ -643,27 +625,77 @@ CC 34, 0.25: the dry signal is 2.5 dB down and the first repeat about 16 dB unde
 
 ### PC Simulators
 
+The C hosts ("sim_spinel", "sim_render", and SPMS-1 Web in "web") keep the MIDI with the sketch's own
+"spms1_midi_state.h", the tables "spms1_main.rb" reads and the handlers that fill them, so a change
+there reaches the device and all of them at once. "sim_cruby" keeps a Ruby copy in "sim_cruby/spms1_c_midi.rb".
+
+The simulators are developed and tested on Windows. macOS and Linux are supported on a best-effort
+basis, written to their APIs but without the machines to try them on. The GitHub Actions workflow
+("SPMS-1 (type-2) Build (UF2 and Web)") builds sim_spinel and sim_render on macOS and Linux and runs
+the offline renders there, and compares them with CRuby on Linux; neither is tried with audio or MIDI hardware
+(on Linux, sim_spinel was run once with a FIFO standing in for the MIDI device and ALSA's file
+plugin for the audio).
+
 - Spinel output (experimental): "sim_spinel" -- builds "spms1_main.c" and the runtime in this folder, unmodified,
-  for Windows or macOS and runs it in real time, with audio out through PortAudio and MIDI in
-  through WinMM or CoreMIDI. Build with `sh sim_spinel/build.sh` (MinGW gcc in Git Bash on
-  Windows, clang on macOS), then run `build/sim_spinel/spms1_sim --midi-in NAME`; `--list` shows
-  the MIDI inputs
+  for Windows, macOS or Linux and runs it in real time, with audio out through PortAudio and MIDI in
+  through WinMM, CoreMIDI, or the ALSA raw MIDI devices ("/dev/snd/midiC*D*"). Build with
+  `sh sim_spinel/build.sh` (MinGW gcc in Git Bash on Windows, clang on macOS, cc on Linux), then run
+  `build/sim_spinel/spms1_sim --midi-in NAME`; `--list` shows the MIDI inputs
     - The build first regenerates "spms1_main.c" with Spinel, found on the PATH or, on Windows,
       inside WSL, passing it the type seeds in "sig". `--no-spinel`, or no Spinel to be found,
       builds the one already here
     - PortAudio is loaded at run time. The PortAudio project releases source only; on Windows,
       install it into RubyInstaller's MSYS2 with
       `ridk exec pacman -S mingw-w64-ucrt-x86_64-portaudio` (the simulators look there), and on
-      macOS with `brew install portaudio`. `SPMS1_PORTAUDIO_DLL` gives a path of your own
-    - Not tested on macOS
+      macOS with `brew install portaudio`, and on Linux with the package of the distribution
+      (`sudo apt install libportaudio2` on Debian and Ubuntu). `SPMS1_PORTAUDIO_DLL` gives a path of your own
+    - Linux: `--host alsa` or `--host jack` picks the PortAudio host API (PortAudio's default otherwise).
+      A MIDI keyboard or interface on USB shows up as a raw MIDI device; a software port of the ALSA
+      sequencer (a virtual keyboard) has none, so it cannot be used
 - CRuby (experimental): "sim_cruby" -- runs "spms1_main.rb" itself on CRuby, with PortAudio
   through the ffi gem, installed as above, and MIDI in through WinMM on Windows and the unimidi
   gem on macOS: `ruby sim_cruby/spms1_sim.rb --midi-in NAME`. The interpreter does not keep up
   with the default patch in real time
-    - Not tested on macOS
-- Offline WAV output: "sim_offline/spms1_output_wav.rb" -- renders the default patch offline, the
-  same modules in the same order with the CC values the synth powers up with. It does not
-  reproduce the signals bus or the run order, so it catches a change in a module, not in a routing
+    - Offline, with no gems: `ruby sim_cruby/spms1_render.rb` takes the same options as "sim_render" below
+      and writes "spms1_render_cruby.wav". `ruby sim_cruby/spms1_compare.rb A.wav B.wav` compares two renders
+- Offline render of the Spinel output: "sim_render" -- builds "spms1_main.c" and the runtime, unmodified,
+  as "sim_spinel" does, and runs the whole synth faster than real time into a WAV file (48 kHz, 24 bit,
+  stereo). The signals bus, the run order and the NRPN table are all there, so a routing is heard as
+  the device plays it. Needs only a C compiler, on Linux, macOS, or Windows (MinGW gcc in Git Bash):
+  `sh sim_render/build.sh`, then `build/sim_render/spms1_render`
+    - `--patch FILE`: a patch copied from the editor with Format "MIDI bytes (hex)" (';' starts a comment),
+      taken after the synth has written its default patch, as a patch sent after power-up is
+    - `--score FILE`: the MIDI to play, a line each, the time in seconds and then the bytes in hex,
+      e.g. `1.5 80 3C 40`. Without it, note 60 is held from 0 s to 1 s
+    - `--seconds N` (default 4) and `--out FILE` (default "spms1_render.wav")
+    - It prints the peaks and a hash of the samples, so two renders can be told apart at a glance:
+      the editor's "Init" patch renders to the same hash as no patch at all. Compare hashes from the
+      same compiler only: clang ignores the `single-precision-constant` of "spinel_rt.h", which GCC (as
+      on the device) honors, so the last bits differ between them
+    - The build regenerates "spms1_main.c" with Spinel first, as "sim_spinel" does (`--no-spinel` to skip)
+    - `sh sim_render/compare_with_cruby.sh [--patch FILE] [--score FILE] [--seconds N]` renders the same
+      patch and score with this and with CRuby running "spms1_main.rb" itself, and compares them, so it
+      tells whether the C that Spinel made does what the Ruby says. The comparison is of short-time
+      spectra, relative to the signal: float (Spinel's output) and double (CRuby) let the oscillators'
+      phase drift apart, which differs sample by sample but not in the spectra. Precision stays below
+      about -35 dB, and a different routing, or a CC value 4 steps away, lands above -10 dB; the limit
+      is -25 dB (`ruby sim_cruby/spms1_compare.rb --limit DB` for another)
+
+
+### GitHub Actions
+
+"SPMS-1 (type-2) Build (UF2 and Web)" in "../.github/workflows/spms1-type2.yml", run by hand
+("Run workflow" in the Actions tab, e.g. at a release); every run does all of the following:
+
+- UF2: compiles "spms1_type2.ino" for PWM Audio and I2S with Arduino-Pico 6.2.0, and keeps the
+  UF2 files as an artifact
+- SPMS-1 Web: builds and tests "spms1_web_synth.js", and keeps it as an artifact
+- Simulators: builds "sim_spinel" and "sim_render" on Linux, macOS and Windows, renders, and compares
+  the renders with CRuby on Linux
+- Spinel: builds the release named above and checks that "spms1_main.c" is what it makes of the .rb files
+- With "commit_package" checked, and when all of the above pass, the UF2 files ("bin") and
+  "spms1_web_synth.js" are committed on the selected branch (not if the sources were changed after
+  the build, nor if nothing changed)
 
 
 ### Checking the Generated Code

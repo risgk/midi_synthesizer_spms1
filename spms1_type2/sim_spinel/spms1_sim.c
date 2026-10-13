@@ -1,11 +1,12 @@
 /*
  * MIDI Synthesizer SPMS-1 (type-2) PC simulator
  *
- * Runs spms1_main.c, the Spinel output the sketch runs, on Windows or macOS. This file stands in
- * for spms1_type2.ino: the MIDI tables and handlers are the sketch's, audio goes out through
- * PortAudio, loaded at run time, and MIDI comes in through WinMM or CoreMIDI.
+ * Runs spms1_main.c, the Spinel output the sketch runs, on Windows, macOS or Linux. This file
+ * stands in for spms1_type2.ino: the MIDI tables and handlers are the sketch's, audio goes out
+ * through PortAudio, loaded at run time, and MIDI comes in through WinMM, CoreMIDI, or the ALSA raw
+ * MIDI devices (/dev/snd/midiC*D*).
  *
- *   spms1_sim [--list] [--midi-in N|NAME] [--frames N] [--host wasapi|mme|ds|default]
+ *   spms1_sim [--list] [--midi-in N|NAME] [--frames N] [--host wasapi|mme|ds|alsa|jack|default]
  */
 #include <stdbool.h>
 #include <stdint.h>
@@ -16,92 +17,31 @@
 #if defined(_WIN32)
 #include <windows.h>
 #include <mmsystem.h>
-#else
+#elif defined(__APPLE__)
 #include <dlfcn.h>
 #include <time.h>
 #include <CoreFoundation/CoreFoundation.h>
 #include <CoreMIDI/CoreMIDI.h>
+#else
+#include <dlfcn.h>
+#include <fcntl.h>
+#include <glob.h>
+#include <pthread.h>
+#include <time.h>
+#include <unistd.h>
 #endif
 
 extern int Spms1_main(int argc, char **argv);
 
-/* The MinGW linker keeps runtime code that the synth never calls but that refers to these, which
-   upstream define in files the sketch does not vendor. urandom fails closed on the 0. */
+/* The linker (MinGW's, and GNU ld on Linux) keeps runtime code that the synth never calls but that
+   refers to these, which upstream define in files the sketch does not vendor. urandom fails closed on the 0. */
 bool sp_convert_soft;
 bool sp_convert_failed;
 int sp_crypto_entropy(unsigned char *out, int nbytes) { (void)out; (void)nbytes; return 0; }
 
-/* ---- MIDI state, as in spms1_type2.ino ---- */
+/* ---- MIDI state, the sketch's own ---- */
 
-#define SPMS1_NRPN_SIZE (512)
-
-static uint8_t g_midi_note_on_pitch[16] = {60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60};
-static uint8_t g_midi_note_on_state[16];
-static uint8_t g_midi_cc_values[16][128];
-static int16_t g_midi_pitch_bend[16];
-static uint8_t g_midi_nrpn_values[16][SPMS1_NRPN_SIZE];
-static uint8_t g_midi_nrpn_msb[16];
-static uint8_t g_midi_nrpn_lsb[16];
-static uint8_t g_midi_nrpn_selected[16];
-
-void set_midi_note_on_pitch(uint8_t ch, uint8_t v) { if (ch < 16) g_midi_note_on_pitch[ch] = v; }
-uint8_t get_midi_note_on_pitch(uint8_t ch) { return (ch < 16) ? g_midi_note_on_pitch[ch] : 0; }
-void set_midi_note_on_state(uint8_t ch, uint8_t v) { if (ch < 16) g_midi_note_on_state[ch] = v; }
-uint8_t get_midi_note_on_state(uint8_t ch) { return (ch < 16) ? g_midi_note_on_state[ch] : 0; }
-void set_midi_pitch_bend(uint8_t ch, int32_t v) { if (ch < 16) g_midi_pitch_bend[ch] = (int16_t)v; }
-int32_t get_midi_pitch_bend(uint8_t ch) { return (ch < 16) ? g_midi_pitch_bend[ch] : 0; }
-
-void set_midi_cc_value(uint8_t ch, uint8_t n, uint8_t v) {
-  if (ch < 16 && n < 128) g_midi_cc_values[ch][n] = v;
-}
-uint8_t get_midi_cc_value(uint8_t ch, uint8_t n) {
-  return (ch < 16 && n < 128) ? g_midi_cc_values[ch][n] : 0;
-}
-
-void set_midi_nrpn_value(uint8_t ch, int32_t i, uint8_t v) {
-  if (ch < 16 && i >= 0 && i < SPMS1_NRPN_SIZE) g_midi_nrpn_values[ch][i] = v;
-}
-uint8_t get_midi_nrpn_value(uint8_t ch, int32_t i) {
-  return (ch < 16 && i >= 0 && i < SPMS1_NRPN_SIZE) ? g_midi_nrpn_values[ch][i] : 0;
-}
-
-static void handle_midi_nrpn_cc(uint8_t ch, uint8_t number, uint8_t value) {
-  if (number == 99) {
-    g_midi_nrpn_msb[ch] = value;
-    g_midi_nrpn_selected[ch] = 1;
-  } else if (number == 98) {
-    g_midi_nrpn_lsb[ch] = value;
-    g_midi_nrpn_selected[ch] = 1;
-  } else if (number == 101 || number == 100) {
-    g_midi_nrpn_selected[ch] = 0;
-  } else if (number == 6 && g_midi_nrpn_selected[ch]) {
-    set_midi_nrpn_value(ch, ((int32_t)g_midi_nrpn_msb[ch] << 7) | g_midi_nrpn_lsb[ch], value);
-  }
-}
-
-/* A note-on of velocity 0 is a note-off, as the MIDI library the sketch uses treats it. */
-static void handle_midi_message(uint8_t status, uint8_t d1, uint8_t d2) {
-  uint8_t ch = status & 0x0F;
-  switch (status & 0xF0) {
-  case 0x90:
-    if (d2 != 0) {
-      set_midi_note_on_pitch(ch, d1);
-      set_midi_note_on_state(ch, 1);
-      break;
-    }
-    /* fall through */
-  case 0x80:
-    if (d1 == g_midi_note_on_pitch[ch]) set_midi_note_on_state(ch, 0);
-    break;
-  case 0xB0:
-    set_midi_cc_value(ch, d1, d2);
-    handle_midi_nrpn_cc(ch, d1, d2);
-    break;
-  case 0xE0:
-    set_midi_pitch_bend(ch, (((int32_t)d2 << 7) | d1) - 8192);
-    break;
-  }
-}
+#include "spms1_midi_state.h"
 
 /* ---- MIDI input ---- */
 
@@ -124,7 +64,7 @@ static void midi_in_name(int i, char *buf, size_t size) {
 static void CALLBACK midi_in_proc(HMIDIIN h, UINT msg, DWORD_PTR inst, DWORD_PTR p1, DWORD_PTR p2) {
   (void)h; (void)inst; (void)p2;
   if (msg == MIM_DATA) {
-    handle_midi_message((uint8_t)(p1 & 0xFF), (uint8_t)((p1 >> 8) & 0x7F), (uint8_t)((p1 >> 16) & 0x7F));
+    spms1_handle_midi_message((uint8_t)(p1 & 0xFF), (uint8_t)((p1 >> 8) & 0x7F), (uint8_t)((p1 >> 16) & 0x7F));
   }
 }
 
@@ -136,14 +76,10 @@ static int midi_in_open(int i) {
   return 1;
 }
 
-#else
+#elif defined(__APPLE__)
 
 static MIDIClientRef g_midi_client;
 static MIDIPortRef g_midi_port;
-static uint8_t g_parse_status;
-static uint8_t g_parse_data[2];
-static int g_parse_count;
-static int g_parse_in_sysex;
 
 static int midi_in_count(void) { return (int)MIDIGetNumberOfSources(); }
 
@@ -156,32 +92,12 @@ static void midi_in_name(int i, char *buf, size_t size) {
   }
 }
 
-/* CoreMIDI hands over a byte stream, so running status is resolved here. Real-time bytes may
-   arrive anywhere and are skipped, and so is SysEx. */
-static void midi_parse_byte(uint8_t b) {
-  if (b >= 0xF8) {
-    return;
-  } else if (b == 0xF0) {
-    g_parse_in_sysex = 1;
-  } else if (b >= 0x80) {
-    g_parse_in_sysex = 0;
-    g_parse_status = (b < 0xF0) ? b : 0;
-    g_parse_count = 0;
-  } else if (!g_parse_in_sysex && g_parse_status) {
-    int length = ((g_parse_status & 0xE0) == 0xC0) ? 1 : 2;
-    g_parse_data[g_parse_count++] = b;
-    if (g_parse_count == length) {
-      handle_midi_message(g_parse_status, g_parse_data[0], (length == 2) ? g_parse_data[1] : 0);
-      g_parse_count = 0;
-    }
-  }
-}
-
+/* CoreMIDI hands over a byte stream, which spms1_midi_parse_byte takes as it comes. */
 static void midi_read_proc(const MIDIPacketList *list, void *ref, void *src) {
   (void)ref; (void)src;
   const MIDIPacket *p = &list->packet[0];
   for (UInt32 i = 0; i < list->numPackets; i++) {
-    for (UInt16 j = 0; j < p->length; j++) midi_parse_byte(p->data[j]);
+    for (UInt16 j = 0; j < p->length; j++) spms1_midi_parse_byte(p->data[j]);
     p = MIDIPacketNext(p);
   }
 }
@@ -190,6 +106,67 @@ static int midi_in_open(int i) {
   if (MIDIClientCreate(CFSTR("SPMS-1 (type-2) simulator"), NULL, NULL, &g_midi_client) != noErr) return 0;
   if (MIDIInputPortCreate(g_midi_client, CFSTR("MIDI In"), midi_read_proc, NULL, &g_midi_port) != noErr) return 0;
   return MIDIPortConnectSource(g_midi_port, MIDIGetSource((ItemCount)i), NULL) == noErr;
+}
+
+#else
+
+/* The ALSA raw MIDI devices, one file for each port of each card: what a USB MIDI keyboard or
+   interface shows up as, with no library needed. Software ports of the ALSA sequencer (a virtual
+   keyboard, for one) have no such file; `aconnect` cannot route them here. */
+static glob_t g_midi_devices;
+static int g_midi_devices_found;
+
+static int midi_in_count(void) {
+  if (!g_midi_devices_found) {
+    g_midi_devices_found = 1;
+    if (glob("/dev/snd/midiC*D*", 0, NULL, &g_midi_devices) != 0) g_midi_devices.gl_pathc = 0;
+  }
+  return (int)g_midi_devices.gl_pathc;
+}
+
+/* The card's name from /proc/asound/cards ("  1 [Keyboard       ]: USB-Audio - The Name"), and the
+   device file, since one card may have several ports. */
+static void midi_in_name(int i, char *buf, size_t size) {
+  const char *path = g_midi_devices.gl_pathv[i];
+  int card = -1, device = -1;
+  char line[256], card_name[200] = "";
+  sscanf(path, "/dev/snd/midiC%dD%d", &card, &device);
+  FILE *f = fopen("/proc/asound/cards", "r");
+  while (f && fgets(line, sizeof(line), f)) {
+    int n;
+    char *dash = strstr(line, " - ");
+    if (sscanf(line, " %d [", &n) == 1 && n == card && dash) {
+      snprintf(card_name, sizeof(card_name), "%s", dash + 3);
+      card_name[strcspn(card_name, "\r\n")] = '\0';
+      break;
+    }
+  }
+  if (f) fclose(f);
+  snprintf(buf, size, "%s (%s)", *card_name ? card_name : "?", path + strlen("/dev/snd/"));
+}
+
+static int g_midi_fd = -1;
+
+/* A blocking read on a thread of its own, handing the byte stream to spms1_midi_parse_byte. */
+static void *midi_read_thread(void *arg) {
+  (void)arg;
+  uint8_t buf[256];
+  for (;;) {
+    ssize_t n = read(g_midi_fd, buf, sizeof(buf));
+    if (n <= 0) break;
+    for (ssize_t j = 0; j < n; j++) spms1_midi_parse_byte(buf[j]);
+  }
+  fprintf(stderr, "\nMIDI input closed\n");
+  return NULL;
+}
+
+static int midi_in_open(int i) {
+  pthread_t thread;
+  g_midi_fd = open(g_midi_devices.gl_pathv[i], O_RDONLY);
+  if (g_midi_fd < 0) return 0;
+  if (pthread_create(&thread, NULL, midi_read_thread, NULL) != 0) return 0;
+  pthread_detach(thread);
+  return 1;
 }
 
 #endif
@@ -235,6 +212,8 @@ typedef struct {
 #define PA_OUTPUT_UNDERFLOWED (-9980)
 #define PA_DIRECTSOUND        (1)
 #define PA_MME                (2)
+#define PA_ALSA               (8)
+#define PA_JACK               (12)
 #define PA_WASAPI             (13)
 
 static PaError (*Pa_Initialize)(void);
@@ -297,9 +276,11 @@ static void load_portaudio(void) {
   static const char *candidates[] = {
 #if defined(_WIN32)
     "libportaudio.dll", "libportaudio-2.dll", "portaudio.dll",
-#else
+#elif defined(__APPLE__)
     "libportaudio.dylib", "libportaudio.2.dylib", "/opt/homebrew/lib/libportaudio.dylib",
     "/usr/local/lib/libportaudio.dylib",
+#else
+    "libportaudio.so.2", "libportaudio.so",
 #endif
   };
   void *lib = NULL;
@@ -355,6 +336,10 @@ void set_audio_buffer_words(int32_t v) { g_audio_buffer_words = (uint32_t)v; }
 int32_t get_audio_buffer_words(void) { return (int32_t)g_audio_buffer_words; }
 
 static PaError open_stream(int device) {
+  if (device < 0) {
+    fprintf(stderr, "No audio output device\n");
+    return -1;
+  }
   const PaDeviceInfo *info = Pa_GetDeviceInfo(device);
   PaStreamParameters params;
   params.device = device;
@@ -455,8 +440,9 @@ void stop_debug_measure(void) {
   g_report_at += 1.0;
 }
 
-#if defined(_WIN32)
-/* sp_str.c's String#crypt calls libc's crypt, which Windows lacks; nothing here reaches it. */
+#if !defined(__APPLE__)
+/* sp_str.c's String#crypt calls libc's crypt, which Windows lacks and glibc keeps in libcrypt;
+   nothing here reaches it. */
 char *crypt(const char *key, const char *salt) {
   (void)key; (void)salt;
   return NULL;
@@ -505,9 +491,10 @@ int main(int argc, char **argv) {
     } else if (!strcmp(argv[i], "--host") && i + 1 < argc) {
       const char *h = argv[++i];
       g_host_api_type = !strcmp(h, "wasapi") ? PA_WASAPI : !strcmp(h, "mme") ? PA_MME :
-                        !strcmp(h, "ds") ? PA_DIRECTSOUND : -1;
+                        !strcmp(h, "ds") ? PA_DIRECTSOUND : !strcmp(h, "alsa") ? PA_ALSA :
+                        !strcmp(h, "jack") ? PA_JACK : -1;
     } else {
-      fprintf(stderr, "usage: %s [--list] [--midi-in N|NAME] [--frames N] [--host wasapi|mme|ds|default]\n", argv[0]);
+      fprintf(stderr, "usage: %s [--list] [--midi-in N|NAME] [--frames N] [--host wasapi|mme|ds|alsa|jack|default]\n", argv[0]);
       return 1;
     }
   }

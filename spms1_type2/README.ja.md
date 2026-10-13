@@ -1,4 +1,4 @@
-MIDI Synthesizer SPMS-1 (type-2) v0.0.1
+MIDI Synthesizer SPMS-1 (type-2) v0.0.2
 =======================================
 
 - Spinel (Ruby AOT コンパイラ) で作った、Raspberry Pi Pico 2 用のモノフォニック・セミモジュラー MIDI シンセサイザー
@@ -23,23 +23,12 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.1
         - [Adafruit PCM5102 I2S DAC](https://www.adafruit.com/product/6250) (Product ID: 6250)
         - GY-PCM5102 (PCM5102A I2S DAC モジュール)
     - または PWM Audio 出力 (DAC 不要、スケッチのデフォルト)
-        - L は GP20、R は GP21 です: Seeed Studio [Grove Shield for Pi Pico](https://www.seeedstudio.com/Grove-Shield-for-Pi-Pico-v1-0-p-4846.html) の D20 ポートで、
-          黄色い線が L、白い線が R です
-            - Pimoroni [Pico VGA Demo Base](https://shop.pimoroni.com/products/pimoroni-pico-vga-demo-base) (PIM553) で使う場合は、
-              `SPMS1_PWM_AUDIO_L_PIN` を 28 に、`SPMS1_PWM_AUDIO_R_PIN` を 27 にしてください
-        - オーディオの接続に使う部品 ([トップの README](../README.ja.md) の写真のとおり、RC フィルタなし):
-            - Grove - ジャンパーワイヤー変換ケーブル。D20 ポートから (赤い線 (VCC) はつなぎません)
-            - ネジ端子 (L、R、GND) 付きの 3.5 mm ステレオジャック
-            - ボリュームコントロール付きの 3.5 mm ステレオケーブル (パッシブのステレオボリュームダイアル)。
-              ジャックとアンプまたはアクティブスピーカーの間に入れます
-        - RC フィルタがないと、PWM のリップル (3.3 V の矩形波) が音声と一緒に接続先の機器に届き、その入力 (オーディオインターフェースなど) が
-          飽和して「ピー」という音やノイズが出ることがあります。レベルメーターが適正に見えていても起こります
-            - ボリュームダイアルは音声と一緒にリップルも下げます。絞った状態から始めてください:
-              最大では 3.3 V の矩形波がそのまま機器に届きます
-            - 抵抗か、接続先の機器の入力ゲイン (ボリューム) でレベルを下げることもできます
-        - 任意: 各出力に RC ローパスフィルターを付けると、PWM のリップルそのものを取り除けます
-            - 矩形波が流れるケーブルからの輻射ノイズ (EMI) も減らせます。ピンの近くに付けてください
-              (例えばジャックのネジ端子に。ケーブルの先ではなく)
+        - L は GP28、R は GP27 で、Pimoroni [Pico VGA Demo Base](https://shop.pimoroni.com/products/pimoroni-pico-vga-demo-base) (PIM553) と同じです
+        - PWM のリップルを取り除くため、各出力に RC ローパスフィルターを付けることをお勧めします
+            - 矩形波が流れるケーブルからの輻射ノイズ (EMI) も減らせます。ケーブルの先ではなく、ピンの近くに付けてください
+        - RC フィルタを付けない場合は、抵抗か接続先の機器の入力ゲイン (ボリューム) でレベルを下げてください:
+          PWM のリップル (3.3 V の矩形波) で入力 (オーディオインターフェースなど) が飽和し、「ピー」という音やノイズが出ることがあります。
+          レベルメーターが適正に見えていても起こります
         - PWM のレベル (3200 段階) は、1 次のノイズシェーピングと TPDF ディザ付きで量子化されます
         - 1 サンプルを 4 つの PWM 周期に分けて出力します (PWM キャリア: 48 kHz ではなく 192 kHz)。キャリアをフィルタで取り除きやすく、
           アクティブスピーカーで「ピー」という音が出にくくなります (`SPMS1_PWM_AUDIO_SUBPERIODS`: 1、2、4、8)
@@ -76,7 +65,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.1
 
 - "bin" フォルダの "spms1_type2_i2s.ino.uf2" は Raspberry Pi Pico 2 と、Pimoroni Pico Audio Pack、
   Adafruit PCM5102 I2S DAC、または GY-PCM5102 用です
-- "bin" フォルダの "spms1_type2_pwm_audio.ino.uf2" は Raspberry Pi Pico 2 と PWM Audio 出力 (L は GP20、R は GP21) 用です
+- "bin" フォルダの "spms1_type2_pwm_audio.ino.uf2" は Raspberry Pi Pico 2 と PWM Audio 出力用で、L は GP28、R は GP27 でビルドされています
 
 
 ### Web エディタ
@@ -87,6 +76,10 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.1
     - モジュールの出力を入力やパラメータへ配線し、実行順と CC の割り当てを設定します
     - パッチを JSON で保存・読み込みします
     - パッチを MIDI バイト列または NRPN リストとしてコピーするか、Web MIDI で送信します
+- SPMS-1 Web: エディタに組み込まれたシンセサイザー本体 ("spms1_web_synth.js")
+    - "MIDI Out" で "SPMS-1 Web (Built-in)" を選び、ソフトウェア鍵盤 (または "MIDI In" の MIDI キーボード) で演奏します
+    - "spms1_main.c" を WebAssembly として Web ブラウザで動かすので、実機と同じ音がします
+    - [web/README.md](./web/README.md) を参照してください
 
 
 ### MIDI の設定
@@ -97,22 +90,9 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.1
     - デバイス名: "SPMS-1 (type-2)"
 - UART MIDI 入力
     - 速度: 31250 bps
-    - GP4 ピンと GP5 ピンを UART1 TX と UART1 RX に使います
-    - 以下のように書き換えれば `SoftwareSerial` も使えます:
-
-        ```cpp
-        #include <SoftwareSerial.h>
-        #define SPMS1_UART_MIDI_TX_PIN              (4)
-        #define SPMS1_UART_MIDI_RX_PIN              (5)
-        SoftwareSerial mySerial(SPMS1_UART_MIDI_RX_PIN, SPMS1_UART_MIDI_TX_PIN);
-        #define SPMS1_UART_MIDI_SERIAL              mySerial
-        ```
-
-        ```cpp
-        //  SPMS1_UART_MIDI_SERIAL.setTX(SPMS1_UART_MIDI_TX_PIN);
-        //  SPMS1_UART_MIDI_SERIAL.setRX(SPMS1_UART_MIDI_RX_PIN);
-        ```
-
+    - GP4 ピンと GP5 ピンを TX と RX に、`SoftwareSerial` で使います
+    - `SPMS1_UART_MIDI_TX_PIN` と `SPMS1_UART_MIDI_RX_PIN` を書き換えれば、TX と RX の入れ替えを含め、
+      どのピンでも使えます
     - DIN/TRS MIDI は、たとえば Adafruit MIDI FeatherWing Kit などを使う (そして手を入れる) ことで利用できます
         - Adafruit [MIDI FeatherWing Kit](https://www.adafruit.com/product/4740) (Product ID: 4740)
         - M5Stack [Midi Unit with DIN Connector (SAM2695)](https://shop.m5stack.com/products/midi-unit-with-din-connector-sam2695) (SKU: U187) のセパレートモード
@@ -492,8 +472,8 @@ Filter 1 Gain はオーディオ入力がフィルタをどれだけ強く駆動
 ます。サチュレーションが掛かるのは通過帯域ではなくレゾナンスです。カットオフが低くても大きな音はほぼ
 そのまま通り、ゲインを上げるとレゾナンスのピークが丸くなります。
 
-Filter 1 Resonance は CC 94 の Q 5.66 までは CC 30 段ごとに Q が2倍になり、そこから急な段差なしに次第に
-速く上がって、CC 109 で Q 27、CC 118 を少し過ぎたところで Q 256 になります。それより上ではフィルタが
+Filter 1 Resonance は CC 94 の Q 5.66 までは CC 30 段ごとにピークが 6 dB（Q が2倍）上がり、そこから
+Q は段差なしに次第に速く上がって、CC 109 で Q 29、CC 118 で Q 256 になります。それより上ではフィルタが
 自己発振し、カットオフ周波数のサイン波を出します。発振は CC 123 までに約 0.5 の最大レベルに達し、
 つまみの上端までそのままです。この区間の下の方では発振がゆっくり立ち上がって入力と共存し、上端では
 入力を押しのけます。レベルはカットオフが約 150 Hz まではほぼ一定で、それより下では小さくなります。
@@ -618,26 +598,76 @@ CC 64、Mix が CC 34（0.25）で、ドライ信号は 2.5 dB 下がり、最�
 
 ### PC シミュレーター
 
-- Spinel 出力 (実験的): "sim_spinel" -- このフォルダの "spms1_main.c" とランタイムを、変更せずに Windows か macOS
-  向けにビルドし、リアルタイムで動かします。音声は PortAudio で出力し、MIDI は WinMM か CoreMIDI で
-  受けます。`sh sim_spinel/build.sh` でビルドし (Windows は Git Bash 上の MinGW gcc、macOS は clang)、
+C のホスト ("sim_spinel"、"sim_render"、"web" の SPMS-1 Web) は、スケッチ自身の "spms1_midi_state.h"
+("spms1_main.rb" が読むテーブルと、それを埋めるハンドラ) で MIDI を扱うので、そこを変えれば実機とすべての
+ホストに一度に反映されます。"sim_cruby" は Ruby で書いた写しを "sim_cruby/spms1_c_midi.rb" に持っています。
+
+シミュレーターは Windows で開発・テストしています。macOS と Linux は、各 API に沿って書いてはいますが、
+試せる環境が手元にないため、ベストエフォートでの対応です。GitHub Actions のワークフロー
+("SPMS-1 (type-2) Build (UF2 and Web)") で、macOS と Linux での sim_spinel と sim_render のビルドとオフライン・
+レンダリング、Linux での CRuby との比較を確認しています。どちらもオーディオや MIDI のハードウェアでは
+試していません (Linux では、sim_spinel を MIDI デバイスの代わりの FIFO と、音声用の ALSA の file
+プラグインで一度動かしました)。
+
+- Spinel 出力 (実験的): "sim_spinel" -- このフォルダの "spms1_main.c" とランタイムを、変更せずに Windows、macOS、
+  Linux 向けにビルドし、リアルタイムで動かします。音声は PortAudio で出力し、MIDI は WinMM、CoreMIDI、
+  または ALSA の raw MIDI デバイス ("/dev/snd/midiC*D*") で受けます。`sh sim_spinel/build.sh` でビルドし
+  (Windows は Git Bash 上の MinGW gcc、macOS は clang、Linux は cc)、
   `build/sim_spinel/spms1_sim --midi-in NAME` で起動します。`--list` で MIDI 入力の一覧を表示します
     - ビルドの最初に、PATH 上、Windows では WSL の中にある Spinel で "spms1_main.c" を生成し直します。
       その際 "sig" の型シードを渡します。`--no-spinel` を付けるか、Spinel が見つからなければ、
       今ある "spms1_main.c" をビルドします
     - PortAudio は実行時に読み込みます。PortAudio プロジェクトの配布はソースのみなので、Windows では
       RubyInstaller の MSYS2 に `ridk exec pacman -S mingw-w64-ucrt-x86_64-portaudio` で入れ
-      (シミュレーターはそこを探します)、macOS では `brew install portaudio` で入れます。
+      (シミュレーターはそこを探します)、macOS では `brew install portaudio`、Linux ではディストリビューションの
+      パッケージ (Debian と Ubuntu では `sudo apt install libportaudio2`) で入れます。
       `SPMS1_PORTAUDIO_DLL` で任意のパスを指定することもできます
-    - macOS では動作確認していません
+    - Linux: `--host alsa` か `--host jack` で PortAudio のホスト API を選びます (省略時は PortAudio の既定)。
+      USB の MIDI キーボードやインターフェースは raw MIDI デバイスとして見えます。ALSA シーケンサーの
+      ソフトウェアのポート (仮想キーボードなど) には raw MIDI デバイスがないので、使えません
 - CRuby (実験的): "sim_cruby" -- "spms1_main.rb" そのものを CRuby で動かします。PortAudio は上と同じく
   入れたものを ffi gem 経由で使い、MIDI 入力は Windows では WinMM、macOS では unimidi gem で受けます:
   `ruby sim_cruby/spms1_sim.rb --midi-in NAME`。デフォルトのパッチはインタプリタではリアルタイムに
   間に合いません
-    - macOS では動作確認していません
-- オフライン WAV 出力: "sim_offline/spms1_output_wav.rb" -- デフォルトのパッチをオフラインで
-  レンダリングします。同じモジュールを同じ順で、電源投入時の CC 値で鳴らします。
-  シグナルバスと実行順は再現しないので、モジュール自体の変化は捉えますが、結線の間違いは捉えません
+    - オフライン (gem 不要): `ruby sim_cruby/spms1_render.rb` は下の "sim_render" と同じオプションを取り、
+      "spms1_render_cruby.wav" に書き出します。`ruby sim_cruby/spms1_compare.rb A.wav B.wav` で 2 つの
+      レンダリングを比べます
+- Spinel 出力のオフライン・レンダリング: "sim_render" -- "sim_spinel" と同じく "spms1_main.c" と
+  ランタイムを改変せずにビルドし、シンセ全体を実時間より速く動かして WAV ファイル (48 kHz、24 bit、
+  ステレオ) に書き出します。シグナルバス、実行順、NRPN テーブルがすべて動くので、結線も実機と同じに
+  鳴ります。必要なのは C コンパイラだけで、Linux、macOS、Windows (Git Bash 上の MinGW gcc) で動きます:
+  `sh sim_render/build.sh` の後に `build/sim_render/spms1_render`
+    - `--patch FILE`: エディタから Format "MIDI bytes (hex)" でコピーしたパッチ (';' 以降はコメント)。
+      シンセがデフォルトのパッチを書いた後に、電源投入後に送ったパッチと同じく取り込まれます
+    - `--score FILE`: 演奏する MIDI。1 行に 1 つずつ、秒単位の時刻と 16 進のバイト列を書きます
+      (例: `1.5 80 3C 40`)。省略すると、ノート 60 を 0 秒から 1 秒まで鳴らします
+    - `--seconds N` (デフォルト 4) と `--out FILE` (デフォルト "spms1_render.wav")
+    - ピークとサンプルのハッシュを表示するので、2 つのレンダリングの違いがすぐ分かります。
+      エディタの "Init" パッチは、パッチなしと同じハッシュになります。ハッシュは同じコンパイラ同士で
+      比べてください: "spinel_rt.h" の `single-precision-constant` を GCC は (実機と同じく) 守り、
+      clang は無視するので、両者では下位のビットが変わります
+    - ビルドは "sim_spinel" と同じく、先に Spinel で "spms1_main.c" を再生成します (`--no-spinel` で省略)
+    - `sh sim_render/compare_with_cruby.sh [--patch FILE] [--score FILE] [--seconds N]` は、同じパッチと
+      スコアをこれと、"spms1_main.rb" そのものを動かす CRuby とでレンダリングして比べるので、Spinel が
+      作った C が Ruby の書いたとおりに動くかが分かります。比較は短時間スペクトルで、信号に対する相対値です:
+      float (Spinel の出力) と double (CRuby) ではオシレーターの位相が少しずつずれ、サンプル単位では
+      差が出ますが、スペクトルには出ません。精度による差は約 -35 dB 以下、結線の違いや CC 値の 4 段階の
+      違いは -10 dB 以上になります。判定の上限は -25 dB です (`ruby sim_cruby/spms1_compare.rb --limit DB` で変更)
+
+
+### GitHub Actions
+
+"../.github/workflows/spms1-type2.yml" の "SPMS-1 (type-2) Build (UF2 and Web)" を手動で実行します
+(リリース時など、Actions タブの "Run workflow" で)。毎回、以下をすべて行います:
+
+- UF2: "spms1_type2.ino" を Arduino-Pico 6.2.0 で PWM Audio 版と I2S 版にコンパイルし、UF2 ファイルを
+  成果物 (artifact) として残します
+- SPMS-1 Web: "spms1_web_synth.js" をビルド・テストし、成果物として残します
+- シミュレーター: "sim_spinel" と "sim_render" を Linux、macOS、Windows でビルドしてレンダリングし、
+  Linux では CRuby とのレンダリングの比較もします
+- Spinel: 上で指定したリリースをビルドし、"spms1_main.c" が .rb ファイルから作られるものと一致するかを確認します
+- "commit_package" を選び、上記がすべて通ると、UF2 ファイル ("bin") と "spms1_web_synth.js" を選んだブランチに
+  コミットします (ビルドの後でソースが変わっていた場合と、何も変わっていない場合はコミットしません)
 
 
 ### 生成コードの確認

@@ -10,6 +10,10 @@
    double as float. */
 #include <stddef.h>
 #include <stdint.h>
+#if defined(__APPLE__)
+/* So does xlocale.h on macOS, which sp_core.c includes after it. */
+#include <xlocale.h>
+#endif
 
 /* The same define turns the long double inside the host libc's type-generic math macros into
    long float wherever they are used. */

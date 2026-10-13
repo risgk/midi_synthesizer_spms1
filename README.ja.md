@@ -14,10 +14,11 @@ SPMS-1 (type-2)
 - フィルタ: ZDF/TPT ステート・バリアブル・フィルタ (遅延ソフトクリッピング付き)
 - コーラス (モノラルからステレオへ) とディレイ (ステレオ)、ステレオ出力
 - 必要なハードウェア: Raspberry Pi Pico 2 と Pimoroni Pico Audio Pack (または代わりとなる I2S DAC ハードウェア)、または Raspberry Pi Pico 2 のみ (PWM Audio 出力、DAC 不要)
-    - 写真: Grove Shield for Pi Pico からの PWM Audio を、ネジ端子付きの 3.5 mm ステレオジャックと、ボリュームコントロール付きのケーブルを通して出力しています
+    - 写真: ブレッドボード上の Raspberry Pi Pico 2 からの PWM Audio を、各出力の RC ローパスフィルタを通して、ネジ端子付きの 3.5 mm ステレオジャックへ出力しています
+- SPMS-1 Web: シンセサイザー本体が Web ブラウザで動きます (Web エディタ "spms1_editor.html" に組み込み)
 - [README](./spms1_type2/README.ja.md)
 
-![SPMS-1 (type-2)](./midi_synthesizer_spms1_type2.jpg)
+![SPMS-1 (type-2), PWM Audio](./midi_synthesizer_spms1_type2_pwm_audio.jpg)
 
 
 SPMS-1 (type-1) (Frozen)
@@ -28,7 +29,7 @@ SPMS-1 (type-1) (Frozen)
 - 必要なハードウェア: M5Stack AtomS3 Lite と Atomic Audio-3.5 Base (推奨)、または Raspberry Pi Pico 2 と Pimoroni Pico Audio Pack (または代わりとなる I2S DAC ハードウェア)
 - [README](./spms1_type1/README.ja.md)
 
-![SPMS-1 (type-1)](./midi_synthesizer_spms1_type1.jpg)
+![SPMS-1 (type-1), AtomS3 Lite](./midi_synthesizer_spms1_type1_atoms3_lite.jpg)
 
 
 SPMS-1 (type-0)
@@ -40,4 +41,4 @@ SPMS-1 (type-0)
 - 必要なハードウェア: Raspberry Pi Pico 2、Pimoroni Pico Audio Pack (または代わりとなる I2S DAC ハードウェア)
 - [README](./spms1_type0/README.ja.md)
 
-![SPMS-1 (type-0)](./midi_synthesizer_spms1_type0.jpg)
+![SPMS-1 (type-0), Pico Audio Pack](./midi_synthesizer_spms1_type0_pico_audio_pack.jpg)

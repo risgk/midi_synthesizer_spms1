@@ -1,6 +1,6 @@
 # Runs spms1_main.rb unmodified on CRuby, standing in for the sketch: Spms1::C is implemented here
-# in Ruby, audio goes out through PortAudio and MIDI comes in through WinMM on Windows and unimidi
-# elsewhere.
+# in Ruby (its MIDI side in spms1_c_midi.rb), audio goes out through PortAudio and MIDI comes in
+# through WinMM on Windows and unimidi elsewhere.
 #
 #   ruby sim_cruby/spms1_sim.rb [--midi-in N|NAME] [--frames 256] [--host wasapi|mme|ds|default]
 #
@@ -8,6 +8,7 @@
 # overrides where it is looked for.
 require 'ffi'
 require 'optparse'
+require_relative 'spms1_c_midi'
 
 options = { midi_in: nil, frames: 256, host: 'wasapi' }
 OptionParser.new do |o|
@@ -69,81 +70,9 @@ end
 
 module Spms1
   module C
-    @note_on_pitch = Array.new(16, 60)
-    @note_on_state = Array.new(16, 0)
-    @pitch_bend    = Array.new(16, 0)
-    @cc_values     = Array.new(16) { Array.new(128, 0) }
-    @nrpn_values   = Array.new(16) { Array.new(512, 0) }
-    @nrpn_msb      = Array.new(16, 0)
-    @nrpn_lsb      = Array.new(16, 0)
-    @nrpn_selected = Array.new(16, false)
-
-    @sample_rate = 48000
-    @audio_buffers = 2
-    @audio_buffer_words = 64
-
     class << self
       attr_accessor :frames, :host
       attr_reader :stream
-
-      # spms1_main.rb declares the functions the sketch provides. They are all defined here
-      # already, so a declaration only checks that nothing it needs is missing.
-      def ffi_func(name, _args, _ret)
-        raise NotImplementedError, "Spms1::C.#{name} is not simulated" unless respond_to?(name)
-      end
-
-      def set_midi_note_on_pitch(ch, v) = (@note_on_pitch[ch] = v)
-      def get_midi_note_on_pitch(ch) = @note_on_pitch[ch]
-      def set_midi_note_on_state(ch, v) = (@note_on_state[ch] = v)
-      def get_midi_note_on_state(ch) = @note_on_state[ch]
-      def set_midi_pitch_bend(ch, v) = (@pitch_bend[ch] = v)
-      def get_midi_pitch_bend(ch) = @pitch_bend[ch]
-      def set_midi_cc_value(ch, n, v) = (@cc_values[ch][n] = v)
-      def get_midi_cc_value(ch, n) = @cc_values[ch][n]
-      def set_midi_nrpn_value(ch, i, v) = (@nrpn_values[ch][i] = v if i >= 0 && i < 512)
-      def get_midi_nrpn_value(ch, i) = ((i >= 0 && i < 512) ? @nrpn_values[ch][i] : 0)
-      def set_sample_rate(v) = (@sample_rate = v)
-      def get_sample_rate = @sample_rate
-      def set_audio_buffers(v) = (@audio_buffers = v)
-      def get_audio_buffers = @audio_buffers
-      def set_audio_buffer_words(v) = (@audio_buffer_words = v)
-      def get_audio_buffer_words = @audio_buffer_words
-
-      # The handlers of spms1_type2.ino, as the MIDI library calls them: a note-on of velocity 0
-      # is a note-off.
-      def handle_midi_message(status, d1, d2)
-        ch = status & 0x0F
-        case status & 0xF0
-        when 0x80
-          @note_on_state[ch] = 0 if d1 == @note_on_pitch[ch]
-        when 0x90
-          if d2 == 0
-            @note_on_state[ch] = 0 if d1 == @note_on_pitch[ch]
-          else
-            @note_on_pitch[ch] = d1
-            @note_on_state[ch] = 1
-          end
-        when 0xB0
-          @cc_values[ch][d1] = d2
-          handle_midi_nrpn_cc(ch, d1, d2)
-        when 0xE0
-          @pitch_bend[ch] = ((d2 << 7) | d1) - 8192
-        end
-      end
-
-      def handle_midi_nrpn_cc(ch, number, value)
-        if number == 99
-          @nrpn_msb[ch] = value
-          @nrpn_selected[ch] = true
-        elsif number == 98
-          @nrpn_lsb[ch] = value
-          @nrpn_selected[ch] = true
-        elsif number == 101 || number == 100
-          @nrpn_selected[ch] = false
-        elsif number == 6 && @nrpn_selected[ch]
-          set_midi_nrpn_value(ch, (@nrpn_msb[ch] << 7) | @nrpn_lsb[ch], value)
-        end
-      end
 
       def start_audio
         PortAudio.check(PortAudio.Pa_Initialize, 'Pa_Initialize')
@@ -297,34 +226,14 @@ module MidiIn
 
     def self.names = UniMIDI::Input.all.map(&:name)
 
-    # unimidi hands over raw bytes, so running status is resolved here. Real-time bytes may
-    # arrive anywhere and are skipped, and so is SysEx.
+    # unimidi hands over raw bytes, which Spms1::C.parse_midi_byte takes as they come.
     def self.open(index)
       input = UniMIDI::Input.all[index]
       input.open
       Thread.new do
-        status = 0
-        data = []
-        in_sysex = false
         loop do
           input.gets.each do |message|
-            message[:data].each do |byte|
-              if byte >= 0xF8
-                next
-              elsif byte == 0xF0
-                in_sysex = true
-              elsif byte >= 0x80
-                in_sysex = false
-                status = (byte < 0xF0) ? byte : 0
-                data.clear
-              elsif !in_sysex && status != 0
-                data << byte
-                length = (status & 0xE0) == 0xC0 ? 1 : 2
-                next if data.size < length
-                Spms1::C.handle_midi_message(status, data[0], data[1] || 0)
-                data.clear
-              end
-            end
+            message[:data].each { |byte| Spms1::C.parse_midi_byte(byte) }
           end
         end
       end
