@@ -1,4 +1,4 @@
-MIDI Synthesizer SPMS-1 (type-2) v0.0.1
+MIDI Synthesizer SPMS-1 (type-2) v0.0.2
 =======================================
 
 - Monophonic semi-modular MIDI Synthesizer for Raspberry Pi Pico 2, made with Spinel (Ruby AOT Compiler)
@@ -66,8 +66,7 @@ Usage
 
 - "spms1_type2_i2s.ino.uf2" (in the "bin" folder) is for Raspberry Pi Pico 2 and Pimoroni Pico Audio Pack,
   Adafruit PCM5102 I2S DAC, or GY-PCM5102
-- "spms1_type2_pwm_audio.ino.uf2" (in the "bin" folder) is for Raspberry Pi Pico 2 with PWM Audio output, built with L on GP20 and R on GP21
-  (not rebuilt yet since the sketch's default returned to L on GP28 and R on GP27)
+- "spms1_type2_pwm_audio.ino.uf2" (in the "bin" folder) is for Raspberry Pi Pico 2 with PWM Audio output, built with L on GP28 and R on GP27
 
 
 ### Web Editor
