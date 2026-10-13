@@ -605,7 +605,7 @@ C のホスト ("sim_spinel"、"sim_render"、"web" の SPMS-1 Web) は、スケ
 
 シミュレーターは Windows で開発・テストしています。macOS と Linux は、各 API に沿って書いてはいますが、
 試せる環境が手元にないため、ベストエフォートでの対応です。GitHub Actions のワークフロー
-("SPMS-1 (type-2) Checks") で、macOS と Linux での sim_spinel と sim_render のビルドとオフライン・
+("SPMS-1 (type-2) Build (UF2 and Web)") で、macOS と Linux での sim_spinel と sim_render のビルドとオフライン・
 レンダリング、Linux での CRuby との比較を確認しています。どちらもオーディオや MIDI のハードウェアでは
 試していません (Linux では、sim_spinel を MIDI デバイスの代わりの FIFO と、音声用の ALSA の file
 プラグインで一度動かしました)。
@@ -658,16 +658,17 @@ C のホスト ("sim_spinel"、"sim_render"、"web" の SPMS-1 Web) は、スケ
 
 ### GitHub Actions
 
-"../.github/workflows/spms1-type2.yml" の "SPMS-1 (type-2) Checks" を手動で実行します (Actions タブの
-"Run workflow" で、ジョブをチェックボックスで選びます):
+"../.github/workflows/spms1-type2.yml" の "SPMS-1 (type-2) Build (UF2 and Web)" を手動で実行します
+(リリース時など、Actions タブの "Run workflow" で)。毎回、以下をすべて行います:
 
-- スケッチ: "spms1_type2.ino" を Arduino-Pico 6.2.0 で PWM Audio 版と I2S 版にコンパイルし、UF2 ファイルを
-  成果物 (artifact) として残します ("bin" のものは置き換えません)
+- UF2: "spms1_type2.ino" を Arduino-Pico 6.2.0 で PWM Audio 版と I2S 版にコンパイルし、UF2 ファイルを
+  成果物 (artifact) として残します
+- SPMS-1 Web: "spms1_web_synth.js" をビルド・テストし、成果物として残します
 - シミュレーター: "sim_spinel" と "sim_render" を Linux、macOS、Windows でビルドしてレンダリングし、
   Linux では CRuby とのレンダリングの比較もします
-- SPMS-1 Web: "spms1_web_synth.js" をビルド・テストして成果物として残し、"Commit SPMS-1 Web" を選ぶと
-  コミットします
 - Spinel: 上で指定したリリースをビルドし、"spms1_main.c" が .rb ファイルから作られるものと一致するかを確認します
+- "commit_package" を選び、上記がすべて通ると、UF2 ファイル ("bin") と "spms1_web_synth.js" を選んだブランチに
+  コミットします (ビルドの後でソースが変わっていた場合と、何も変わっていない場合はコミットしません)
 
 
 ### 生成コードの確認

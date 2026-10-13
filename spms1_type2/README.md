@@ -632,8 +632,8 @@ there reaches the device and all of them at once. "sim_cruby" keeps a Ruby copy 
 
 The simulators are developed and tested on Windows. macOS and Linux are supported on a best-effort
 basis, written to their APIs but without the machines to try them on. The GitHub Actions workflow
-("SPMS-1 (type-2) Checks") builds sim_spinel and sim_render on macOS and Linux and runs the offline
-renders there, and compares them with CRuby on Linux; neither is tried with audio or MIDI hardware
+("SPMS-1 (type-2) Build (UF2 and Web)") builds sim_spinel and sim_render on macOS and Linux and runs
+the offline renders there, and compares them with CRuby on Linux; neither is tried with audio or MIDI hardware
 (on Linux, sim_spinel was run once with a FIFO standing in for the MIDI device and ALSA's file
 plugin for the audio).
 
@@ -685,16 +685,18 @@ plugin for the audio).
 
 ### GitHub Actions
 
-"SPMS-1 (type-2) Checks" in "../.github/workflows/spms1-type2.yml", run by hand ("Run workflow" in
-the Actions tab, each job chosen by a checkbox):
+"SPMS-1 (type-2) Build (UF2 and Web)" in "../.github/workflows/spms1-type2.yml", run by hand
+("Run workflow" in the Actions tab, e.g. at a release); every run does all of the following:
 
-- Sketch: compiles "spms1_type2.ino" for PWM Audio and I2S with Arduino-Pico 6.2.0, and keeps the
-  UF2 files as artifacts (the ones in "bin" are not replaced)
+- UF2: compiles "spms1_type2.ino" for PWM Audio and I2S with Arduino-Pico 6.2.0, and keeps the
+  UF2 files as an artifact
+- SPMS-1 Web: builds and tests "spms1_web_synth.js", and keeps it as an artifact
 - Simulators: builds "sim_spinel" and "sim_render" on Linux, macOS and Windows, renders, and compares
   the renders with CRuby on Linux
-- SPMS-1 Web: builds and tests "spms1_web_synth.js", keeps it as an artifact, and commits it
-  with "Commit SPMS-1 Web"
 - Spinel: builds the release named above and checks that "spms1_main.c" is what it makes of the .rb files
+- With "commit_package" checked, and when all of the above pass, the UF2 files ("bin") and
+  "spms1_web_synth.js" are committed on the selected branch (not if the sources were changed after
+  the build, nor if nothing changed)
 
 
 ### Checking the Generated Code

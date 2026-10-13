@@ -1,38 +1,30 @@
-# SPMS-1 (type-2): builds and checks, run by hand from the Actions tab ("Run workflow").
-# Each job has a checkbox; "Commit SPMS-1 Web" also commits the built spms1_web_synth.js
-# to the branch the workflow runs on.
-name: SPMS-1 (type-2) Checks
+# SPMS-1 (type-2) Build: the UF2 files ("spms1_type2/bin/") and SPMS-1 Web ("spms1_type2/spms1_web_synth.js"),
+# with the checks of the simulators and of the Spinel output
+# - UF2: built with arduino-cli (Ubuntu), the same as the Arduino IDE builds (see spms1_type2/README.md)
+# - SPMS-1 Web: built with Emscripten (Ubuntu), and tested with Node.js (see spms1_type2/web/README.md)
+# - Simulators: sim_spinel and sim_render built on Linux, macOS, and Windows, and compared with CRuby on Linux
+# - Spinel: spms1_main.c regenerated from the .rb files, and checked against the one committed
+name: SPMS-1 (type-2) Build (UF2 and Web)
 
 on:
-  workflow_dispatch:
+  workflow_dispatch:  # Manual runs only (e.g. at a release)
     inputs:
-      sketch:
-        description: "Sketch: compile spms1_type2.ino (PWM Audio and I2S) and keep the UF2 files"
-        type: boolean
-        default: true
-      simulators:
-        description: "Simulators (Linux): build sim_render and sim_spinel, and compare Spinel's output with CRuby"
-        type: boolean
-        default: true
-      other_os:
-        description: "macOS and Windows: build sim_spinel and sim_render, and render"
-        type: boolean
-        default: true
-      web:
-        description: "SPMS-1 Web: build and test spms1_web_synth.js, and keep it"
-        type: boolean
-        default: true
-      commit_web:
-        description: "Commit SPMS-1 Web: commit the built spms1_web_synth.js if it changed (with SPMS-1 Web)"
+      commit_package:
+        description: 'Commit the UF2 files (spms1_type2/bin/) and spms1_web_synth.js on the selected branch'
         type: boolean
         default: false
-      spinel:
-        description: "Spinel: regenerate spms1_main.c from the .rb files and check that it is the one committed"
-        type: boolean
-        default: true
 
 permissions:
   contents: read
+
+env:
+  ARDUINO_CLI_VERSION: '1.5.1'
+  ARDUINO_PICO_VERSION: '6.2.0'  # The same as "This sketch is tested with version ..." in spms1_type2/README.md
+  MIDI_LIBRARY_VERSION: '5.0.2'
+  ARDUINO_PICO_INDEX_URL: 'https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json'
+  EMSDK_VERSION: '6.0.12'  # Emscripten, for SPMS-1 Web (the version spms1_type2/web/README.md names)
+  EMSDK_QUIET: '1'
+  UF2_FQBN: 'rp2040:rp2040:rpipico2:usbstack=tinyusb'
 
 defaults:
   run:
@@ -40,73 +32,112 @@ defaults:
     working-directory: spms1_type2
 
 jobs:
-  sketch:
-    name: Sketch (${{ matrix.audio }})
-    if: inputs.sketch
+  uf2:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        audio: [pwm_audio, i2s]
+    outputs:
+      name: ${{ steps.build.outputs.name }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: arduino/setup-arduino-cli@v2
-      - uses: actions/cache@v4
-        with:
-          path: |
-            ~/.arduino15
-            ~/Arduino/libraries
-          key: arduino-rp2040-6.2.0-midi-5.0.2
-      # The versions the README says the sketch is tested with
-      - name: Install Arduino-Pico and the MIDI Library
-        run: |
-          arduino-cli core update-index --additional-urls https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
-          arduino-cli core install rp2040:rp2040@6.2.0 --additional-urls https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
-          arduino-cli lib install "MIDI Library@5.0.2"
-      - name: Select I2S
-        if: matrix.audio == 'i2s'
-        run: sed -i 's|^//#define SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO|#define SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO|' spms1_type2.ino
-      - name: Compile
-        run: |
-          arduino-cli compile --fqbn rp2040:rp2040:rpipico2:usbstack=tinyusb --output-dir "$RUNNER_TEMP/out" .
-          cp "$RUNNER_TEMP/out/spms1_type2.ino.uf2" "$RUNNER_TEMP/spms1_type2_${{ matrix.audio }}.ino.uf2"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: spms1_type2_${{ matrix.audio }}.ino.uf2
-          path: ${{ runner.temp }}/spms1_type2_${{ matrix.audio }}.ino.uf2
+      - uses: actions/checkout@v6
 
-  simulators:
-    name: Simulators (Linux)
-    if: inputs.simulators
+      - name: Install arduino-cli
+        run: |
+          curl -fsSL "https://downloads.arduino.cc/arduino-cli/arduino-cli_${ARDUINO_CLI_VERSION}_Linux_64bit.tar.gz" | tar -xz -C "$RUNNER_TEMP" arduino-cli
+          echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+
+      - name: Install the core and the library
+        run: |
+          arduino-cli core update-index --additional-urls "$ARDUINO_PICO_INDEX_URL"
+          arduino-cli core install "rp2040:rp2040@$ARDUINO_PICO_VERSION" --additional-urls "$ARDUINO_PICO_INDEX_URL"
+          arduino-cli lib install "MIDI Library@$MIDI_LIBRARY_VERSION"
+
+      - name: Build (PWM Audio and I2S)
+        id: build
+        run: |
+          version=$(sed -n '1s/.* v\([0-9.]*\)$/\1/p' README.md)
+          echo "name=SPMS-1-type-2-UF2-v$version" >> "$GITHUB_OUTPUT"
+          mkdir -p "$RUNNER_TEMP/uf2"
+
+          # PWM Audio (the default)
+          arduino-cli compile --fqbn "$UF2_FQBN" --output-dir "$RUNNER_TEMP/out/pwm_audio" .
+          cp "$RUNNER_TEMP/out/pwm_audio/spms1_type2.ino.uf2" "$RUNNER_TEMP/uf2/spms1_type2_pwm_audio.ino.uf2"
+
+          # I2S: "spms1_type2.ino" with SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO uncommented
+          sed -i 's|^//#define SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO|#define SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO|' spms1_type2.ino
+          grep -q '^#define SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO' spms1_type2.ino
+          arduino-cli compile --fqbn "$UF2_FQBN" --output-dir "$RUNNER_TEMP/out/i2s" .
+          cp "$RUNNER_TEMP/out/i2s/spms1_type2.ino.uf2" "$RUNNER_TEMP/uf2/spms1_type2_i2s.ino.uf2"
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: ${{ steps.build.outputs.name }}
+          path: ${{ runner.temp }}/uf2
+
+  # SPMS-1 Web ("spms1_web_synth.js", for "spms1_editor.html")
+  web:
+    runs-on: ubuntu-latest
+    outputs:
+      name: ${{ steps.build.outputs.name }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install Emscripten
+        run: |
+          git clone -q --depth 1 https://github.com/emscripten-core/emsdk.git "$RUNNER_TEMP/emsdk"
+          "$RUNNER_TEMP/emsdk/emsdk" install "$EMSDK_VERSION"
+          "$RUNNER_TEMP/emsdk/emsdk" activate "$EMSDK_VERSION"
+
+      - name: Build
+        id: build
+        run: |
+          source "$RUNNER_TEMP/emsdk/emsdk_env.sh"
+          version=$(sed -n '1s/.* v\([0-9.]*\)$/\1/p' README.md)
+          echo "name=SPMS-1-type-2-Web-v$version" >> "$GITHUB_OUTPUT"
+          (cd web && node spms1_web_build.js)
+
+      - name: Test
+        run: |
+          source "$RUNNER_TEMP/emsdk/emsdk_env.sh"
+          (cd web && node spms1_web_test.js)
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: ${{ steps.build.outputs.name }}
+          path: spms1_type2/spms1_web_synth.js
+
+  simulators-linux:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.3"
+          ruby-version: '3.3'
+
       - name: Build sim_spinel
         run: |
           sh sim_spinel/build.sh --no-spinel
           build/sim_spinel/spms1_sim --list
+
       - name: Build sim_render
         run: sh sim_render/build.sh --no-spinel
+
       - name: Compare with CRuby (the default patch)
         run: sh sim_render/compare_with_cruby.sh
+
       - name: Compare with CRuby (the example score)
         run: sh sim_render/compare_with_cruby.sh --score sim_render/examples/score_example.txt --seconds 3
+
       - name: Compare with CRuby (the example patch and score)
         run: sh sim_render/compare_with_cruby.sh --patch sim_render/examples/patch_routing_example.txt --score sim_render/examples/score_example.txt --seconds 3
 
-  other_os:
-    name: Simulators (${{ matrix.os }})
-    if: inputs.other_os
+  simulators-other-os:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [macos-latest, windows-latest]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
+
       # Git Bash's own sh with MinGW gcc, as the README has it for Windows
       - uses: msys2/setup-msys2@v2
         if: runner.os == 'Windows'
@@ -114,6 +145,7 @@ jobs:
           msystem: UCRT64
           install: mingw-w64-ucrt-x86_64-gcc
           path-type: inherit
+
       - name: Build sim_spinel and sim_render (Windows)
         if: runner.os == 'Windows'
         shell: msys2 {0}
@@ -122,6 +154,7 @@ jobs:
           sh sim_render/build.sh --no-spinel
           build/sim_render/spms1_render.exe
           build/sim_render/spms1_render.exe --score sim_render/examples/score_example.txt --seconds 3
+
       - name: Build sim_spinel and sim_render (macOS)
         if: runner.os == 'macOS'
         run: |
@@ -131,57 +164,23 @@ jobs:
           build/sim_render/spms1_render
           build/sim_render/spms1_render --score sim_render/examples/score_example.txt --seconds 3
 
-  web:
-    name: SPMS-1 Web
-    if: inputs.web
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-      # The version web/README.md says it is built with
-      - uses: mymindstorm/setup-emsdk@v14
-        with:
-          version: 6.0.12
-          actions-cache-folder: emsdk-cache
-      - name: Build and test
-        working-directory: spms1_type2/web
-        run: |
-          node spms1_web_build.js
-          node spms1_web_test.js
-      - uses: actions/upload-artifact@v4
-        with:
-          name: spms1_web_synth.js
-          path: spms1_type2/spms1_web_synth.js
-      - name: Commit spms1_web_synth.js
-        if: inputs.commit_web
-        run: |
-          if git diff --quiet -- spms1_web_synth.js; then
-            echo "spms1_web_synth.js is unchanged"
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add spms1_web_synth.js
-          git commit -m "type-2: Build SPMS-1 Web (spms1_web_synth.js)"
-          git push
-
   spinel:
-    name: Spinel
-    if: inputs.spinel
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
+
       # The release the README names ("Release: 2026.09.12" under Spinel)
       - name: Read the Spinel release
         id: release
         run: |
           echo "tag=$(grep -m1 -oE 'Release: [0-9]{4}\.[0-9]{2}\.[0-9]{2}' README.md | cut -d' ' -f2)" >> "$GITHUB_OUTPUT"
+
       - uses: actions/cache@v4
         id: cache
         with:
           path: ~/spinel
           key: spinel-${{ steps.release.outputs.tag }}-${{ runner.os }}
+
       - name: Build Spinel ${{ steps.release.outputs.tag }}
         if: steps.cache.outputs.cache-hit != 'true'
         working-directory: ${{ runner.temp }}
@@ -190,12 +189,62 @@ jobs:
           cd ~/spinel
           make deps
           make -j"$(nproc)"
+
       # sim_render/build.sh regenerates spms1_main.c the way the README says, then builds it
       - name: Regenerate spms1_main.c
         run: PATH="$HOME/spinel/bin:$PATH" sh sim_render/build.sh
+
       - name: Check that spms1_main.c is the one committed
         run: |
           if ! git diff --exit-code --stat -- spms1_main.c; then
             echo "::error file=spms1_type2/spms1_main.c::spms1_main.c is not what Spinel makes of the .rb files: regenerate it (see README.md) and commit it"
             exit 1
           fi
+
+  commit:
+    if: inputs.commit_package
+    needs: [uf2, web, simulators-linux, simulators-other-os, spinel]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v7
+        with:
+          name: ${{ needs.uf2.outputs.name }}
+          path: ${{ runner.temp }}/uf2
+
+      - uses: actions/download-artifact@v7
+        with:
+          name: ${{ needs.web.outputs.name }}
+          path: ${{ runner.temp }}/web
+
+      - name: Commit the UF2 files and SPMS-1 Web
+        run: |
+          branch="${{ github.ref_name }}"
+          git fetch -q origin "$branch"
+
+          # Not committed if the sources were changed after this build (the binaries would be older than the sources)
+          changed=$(git diff --name-only "${{ github.sha }}" "origin/$branch" -- . ":(exclude)bin" ":(exclude)spms1_web_synth.js")
+          if [ -n "$changed" ]; then
+            echo "::warning::Not committed: the sources were changed after ${{ github.sha }} (run this workflow again)"
+            echo "$changed" | sed 's/^/  /'
+            exit 0
+          fi
+
+          # Committed on the latest branch (e.g. after the binaries committed by another run)
+          git checkout -q -B "$branch" "origin/$branch"
+          cp "$RUNNER_TEMP"/uf2/*.uf2 bin/
+          cp "$RUNNER_TEMP/web/spms1_web_synth.js" .
+          git add bin spms1_web_synth.js
+          if git diff --cached --quiet; then
+            echo "The UF2 files and spms1_web_synth.js are unchanged"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "type-2: Update the UF2 files and SPMS-1 Web: ${{ needs.uf2.outputs.name }}, ${{ needs.web.outputs.name }}" -m "Built by ${{ github.workflow }} run #${{ github.run_number }} from ${{ github.sha }}"
+          git push origin "HEAD:$branch"
