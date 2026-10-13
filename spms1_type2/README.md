@@ -23,23 +23,13 @@ Required Hardware
         - [Adafruit PCM5102 I2S DAC](https://www.adafruit.com/product/6250) (Product ID: 6250)
         - GY-PCM5102 (PCM5102A I2S DAC Module)
     - Or PWM Audio output, without a DAC (the default of the sketch)
-        - L on GP20 and R on GP21: the D20 port of Seeed Studio [Grove Shield for Pi Pico](https://www.seeedstudio.com/Grove-Shield-for-Pi-Pico-v1-0-p-4846.html),
-          with the yellow wire L and the white wire R
-            - For the Pimoroni [Pico VGA Demo Base](https://shop.pimoroni.com/products/pimoroni-pico-vga-demo-base) (PIM553),
-              set `SPMS1_PWM_AUDIO_L_PIN` to 28 and `SPMS1_PWM_AUDIO_R_PIN` to 27
-        - Parts for the audio connection, as in the photo of the [top-level README](../README.md) (no RC filter):
-            - A Grove to jumper wire cable, from the D20 port (the red wire, VCC, is not connected)
-            - A 3.5 mm stereo jack with screw terminals (L, R, and GND)
-            - A 3.5 mm stereo cable with an inline volume control (a passive stereo volume dial),
-              between the jack and the amplifier or the active speaker
-        - Without an RC filter, the PWM ripple (3.3 V square waves) reaches the connected device along with the audio,
-          and may saturate its input (e.g. of an audio interface) and cause beeps or noises, even when its level meter looks fine
-            - The volume dial lowers the ripple together with the audio. Start with it turned down:
-              at the top, the full 3.3 V square waves reach the device
-            - Resistors, or the input gain (volume) of the connected device, can lower the level instead
-        - Optional: an RC low pass filter on each output takes out the PWM ripple itself
+        - L on GP28 and R on GP27, as on the Pimoroni [Pico VGA Demo Base](https://shop.pimoroni.com/products/pimoroni-pico-vga-demo-base) (PIM553)
+        - An RC low pass filter on each output is recommended, to take out the PWM ripple
             - It also reduces the radio noise (EMI) radiated from the cables carrying the square waves:
-              put it close to the pins (e.g. at the screw terminals of the jack, not after the cable)
+              put it close to the pins, not after the cable
+        - Without the RC filter, reduce the level with resistors or the input gain (volume) of the connected device:
+          the PWM ripple (3.3 V square waves) may saturate the input (e.g. of an audio interface) and cause beeps or noises,
+          even when its level meter looks fine
         - The PWM level (3200 steps) is quantized with 1st-order noise shaping and TPDF dither
         - Each sample is split into 4 PWM periods (PWM carrier: 192 kHz instead of 48 kHz), so the carrier is easier to filter out
           and less likely to cause beeps or whines in active speakers (`SPMS1_PWM_AUDIO_SUBPERIODS`: 1, 2, 4, or 8)
@@ -76,7 +66,8 @@ Usage
 
 - "spms1_type2_i2s.ino.uf2" (in the "bin" folder) is for Raspberry Pi Pico 2 and Pimoroni Pico Audio Pack,
   Adafruit PCM5102 I2S DAC, or GY-PCM5102
-- "spms1_type2_pwm_audio.ino.uf2" (in the "bin" folder) is for Raspberry Pi Pico 2 with PWM Audio output (L on GP20 and R on GP21)
+- "spms1_type2_pwm_audio.ino.uf2" (in the "bin" folder) is for Raspberry Pi Pico 2 with PWM Audio output, built with L on GP20 and R on GP21
+  (not rebuilt yet since the sketch's default returned to L on GP28 and R on GP27)
 
 
 ### Web Editor

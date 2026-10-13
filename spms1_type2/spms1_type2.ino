@@ -31,9 +31,9 @@
 #define SPMS1_UART_MIDI_TX_PIN              (4)
 #define SPMS1_UART_MIDI_RX_PIN              (5)
 
-// for the D20 port of Grove Shield for Pi Pico (yellow wire L, white wire R)
-#define SPMS1_PWM_AUDIO_L_PIN               (20)
-#define SPMS1_PWM_AUDIO_R_PIN               (21)
+// for Pimoroni Pico VGA Demo Base (PIM553)
+#define SPMS1_PWM_AUDIO_L_PIN               (28)
+#define SPMS1_PWM_AUDIO_R_PIN               (27)
 
 //#define SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO
 

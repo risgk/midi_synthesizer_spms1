@@ -23,23 +23,12 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.1
         - [Adafruit PCM5102 I2S DAC](https://www.adafruit.com/product/6250) (Product ID: 6250)
         - GY-PCM5102 (PCM5102A I2S DAC モジュール)
     - または PWM Audio 出力 (DAC 不要、スケッチのデフォルト)
-        - L は GP20、R は GP21 です: Seeed Studio [Grove Shield for Pi Pico](https://www.seeedstudio.com/Grove-Shield-for-Pi-Pico-v1-0-p-4846.html) の D20 ポートで、
-          黄色い線が L、白い線が R です
-            - Pimoroni [Pico VGA Demo Base](https://shop.pimoroni.com/products/pimoroni-pico-vga-demo-base) (PIM553) で使う場合は、
-              `SPMS1_PWM_AUDIO_L_PIN` を 28 に、`SPMS1_PWM_AUDIO_R_PIN` を 27 にしてください
-        - オーディオの接続に使う部品 ([トップの README](../README.ja.md) の写真のとおり、RC フィルタなし):
-            - Grove - ジャンパーワイヤー変換ケーブル。D20 ポートから (赤い線 (VCC) はつなぎません)
-            - ネジ端子 (L、R、GND) 付きの 3.5 mm ステレオジャック
-            - ボリュームコントロール付きの 3.5 mm ステレオケーブル (パッシブのステレオボリュームダイアル)。
-              ジャックとアンプまたはアクティブスピーカーの間に入れます
-        - RC フィルタがないと、PWM のリップル (3.3 V の矩形波) が音声と一緒に接続先の機器に届き、その入力 (オーディオインターフェースなど) が
-          飽和して「ピー」という音やノイズが出ることがあります。レベルメーターが適正に見えていても起こります
-            - ボリュームダイアルは音声と一緒にリップルも下げます。絞った状態から始めてください:
-              最大では 3.3 V の矩形波がそのまま機器に届きます
-            - 抵抗か、接続先の機器の入力ゲイン (ボリューム) でレベルを下げることもできます
-        - 任意: 各出力に RC ローパスフィルターを付けると、PWM のリップルそのものを取り除けます
-            - 矩形波が流れるケーブルからの輻射ノイズ (EMI) も減らせます。ピンの近くに付けてください
-              (例えばジャックのネジ端子に。ケーブルの先ではなく)
+        - L は GP28、R は GP27 で、Pimoroni [Pico VGA Demo Base](https://shop.pimoroni.com/products/pimoroni-pico-vga-demo-base) (PIM553) と同じです
+        - PWM のリップルを取り除くため、各出力に RC ローパスフィルターを付けることをお勧めします
+            - 矩形波が流れるケーブルからの輻射ノイズ (EMI) も減らせます。ケーブルの先ではなく、ピンの近くに付けてください
+        - RC フィルタを付けない場合は、抵抗か接続先の機器の入力ゲイン (ボリューム) でレベルを下げてください:
+          PWM のリップル (3.3 V の矩形波) で入力 (オーディオインターフェースなど) が飽和し、「ピー」という音やノイズが出ることがあります。
+          レベルメーターが適正に見えていても起こります
         - PWM のレベル (3200 段階) は、1 次のノイズシェーピングと TPDF ディザ付きで量子化されます
         - 1 サンプルを 4 つの PWM 周期に分けて出力します (PWM キャリア: 48 kHz ではなく 192 kHz)。キャリアをフィルタで取り除きやすく、
           アクティブスピーカーで「ピー」という音が出にくくなります (`SPMS1_PWM_AUDIO_SUBPERIODS`: 1、2、4、8)
@@ -76,7 +65,8 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.1
 
 - "bin" フォルダの "spms1_type2_i2s.ino.uf2" は Raspberry Pi Pico 2 と、Pimoroni Pico Audio Pack、
   Adafruit PCM5102 I2S DAC、または GY-PCM5102 用です
-- "bin" フォルダの "spms1_type2_pwm_audio.ino.uf2" は Raspberry Pi Pico 2 と PWM Audio 出力 (L は GP20、R は GP21) 用です
+- "bin" フォルダの "spms1_type2_pwm_audio.ino.uf2" は Raspberry Pi Pico 2 と PWM Audio 出力用で、L は GP20、R は GP21 でビルドされています
+  (スケッチのデフォルトが L は GP28、R は GP27 に戻ってから、まだ作り直していません)
 
 
 ### Web エディタ
