@@ -682,17 +682,17 @@ C のホスト ("sim_spinel"、"sim_render"、"web" の SPMS-1 Web) は、スケ
 
 ### Spinel の更新
 
-このフォルダのランタイムのファイルは、上で指定したリリースの Spinel の `lib` (と `lib/regexp`) です。
+このフォルダのランタイムのファイルは、上で指定したリリースの Spinel の `lib` (と `lib/regexp`) のすべてです。
 MCU 向けの変更は 2 か所にまとめてあります:
 
 - "spinel_rt_mcu_head.h"、"spinel_rt_mcu_libm.h"、"spinel_rt_mcu_cold.h": MCU 向けに足すもの --
-  シンセ本体のセクションと pragma、数学関数の float 版、ビルドしない `lib/sp_cold.c` から
+  シンセ本体のセクションと pragma、数学関数の float 版、外している `lib/sp_cold.c` から
   生成コードが必要とするもの、そして "spinel_rt.h" の最後で生成コードを float のランタイムに
   つなぐもの (下記)。"spinel_rt.h" にはそれぞれの `#include` 行だけがあります
 - "spinel_mcu/spinel_mcu.patch": Spinel 自身のファイルへの変更 -- Float を表す `double` を `sp_float`
   で書いたランタイム、POSIX 部分の `#if 0` による除外 (中身がリリースで変わってもパッチが
-  当たりやすいように)、SRAM に収まる GC のバッファ。変更するファイルの隣には、リリースのままの
-  コピー "NAME.orig" があります
+  当たりやすいように)、全体が POSIX 前提のファイルの `SPINEL_BARE_METAL` による除外 (下記)、
+  SRAM に収まる GC のバッファ。変更するファイルの隣には、リリースのままのコピー "NAME.orig" があります
 
 RP2350 の FPU は単精度だけなので、Float は float です。ランタイム全体を "sp_types.h" の
 `SPINEL_FLOAT32` が決めます: ここでは 1 で、0 にすると Spinel のとおり double になり、結果は CRuby と
@@ -700,6 +700,12 @@ RP2350 の FPU は単精度だけなので、Float は float です。ランタ�
 使うので、"spinel_rt_mcu_cold.h" の最後に `#define double float` と `DBL_*` の代わりの `FLT_*` があり、
 これは生成コードにだけ効きます。`Float#to_s` は、同じ float に読み戻せる最短の桁を出します
 (`0.1`、`0.33333334`)。
+
+シンセの下に OS はありません。"sp_types.h" の `SPINEL_BARE_METAL` (ここでは 1) が、POSIX を必要とする
+ランタイムのファイルを丸ごと外します: "sp_cold.c"、"sp_fiber.c"、"sp_io.c"、"sp_net.c"、"sp_process.c"、
+"sp_process_status.c"、"sp_sched.c"、"sp_system.c"。残り ("sp_crypto.c"、"sp_pack.c"、"sp_time.c" も) は
+そのままビルドし、シンセが使わないものはリンカが捨てます。シミュレーターと SPMS-1 Web も同じように
+ランタイムをビルドします。
 
 新しいリリースは GitHub Actions で取り込むので、特定の OS は要りません:
 
@@ -714,8 +720,9 @@ RP2350 の FPU は単精度だけなので、Float は float です。ランタ�
 2. 実行結果のまとめを見ます。"spinel_mcu/size_report.sh" が 2 つのビルドを比べ、RAM 上のシンセ本体
    (`Spms1_main`)、RAM、flash がどれだけ増えたかを表示し、2% を超えると警告します。本体が大きく
    なると 1 サンプルあたりの命令が増えますが、音にもシミュレーターにも表れません。リリースが
-   `lib` に足したファイルもここに出ます: 生成コードが必要とするものはコピーし、それ以外は
-   "spinel_mcu/not_vendored.txt" に加えます
+   `lib` に足したファイルもここに出ます (ほかと同じくコピーされます): POSIX を必要とするものは
+   ビルドできないので、ほかと同じく `SPINEL_BARE_METAL` で外します ("NAME.orig" にコピーし、中身を
+   `#include "sp_types.h"` `#if !SPINEL_BARE_METAL` と `#endif` で囲み、`sh spinel_mcu/update.sh save`)
 3. 成果物の "spinel-TAG.diff" をリポジトリの最上位で当て (`git apply spinel-TAG.diff`)、
    コミットして、ビルド用のワークフローを実行します。その Spinel ジョブが結果を確認します
    (`sh spinel_mcu/update.sh check`)

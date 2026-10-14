@@ -17,12 +17,11 @@
 
 extern int Spms1_main(int argc, char **argv);
 
-/* The MinGW linker of the PC simulator keeps runtime code that refers to these; so may this
-   one. urandom fails closed on the 0. */
+/* The MinGW linker of the PC simulator keeps runtime code that refers to these, which upstream
+   define in sp_cold.c, left out with SPINEL_BARE_METAL; so may this one. */
 #include <stdbool.h>
 bool sp_convert_soft;
 bool sp_convert_failed;
-int sp_crypto_entropy(unsigned char *out, int nbytes) { (void)out; (void)nbytes; return 0; }
 
 /* ---- MIDI state, the sketch's own ---- */
 

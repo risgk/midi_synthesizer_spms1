@@ -1,16 +1,18 @@
 #!/bin/sh
 # Keeps the Spinel runtime in the sketch folder in step with a Spinel release.
 #
-# The runtime files (sp_*.[ch], re_*.[ch], spinel_rt.h, mruby_shim.h) are Spinel's lib as
-# released. Each one changed for the MCU sits next to its released copy, "NAME.orig", and the
-# changes are kept as one patch, "spinel_mcu/spinel_mcu.patch". The MCU's own additions live in
-# "spinel_rt_mcu_*.h", which spinel_rt.h includes, so the patch stays small.
+# The runtime files (sp_*.[ch], re_*.[ch], spinel_rt.h, mruby_shim.h) are all of Spinel's lib
+# (lib/*.[ch] and lib/regexp/*.[ch]) as released. Each one changed for the MCU sits next to its
+# released copy, "NAME.orig", and the changes are kept as one patch, "spinel_mcu/spinel_mcu.patch".
+# The MCU's own additions live in "spinel_rt_mcu_*.h", which spinel_rt.h includes, so the patch
+# stays small. The files that need POSIX are left out whole with SPINEL_BARE_METAL (sp_types.h).
 #
 #   sh spinel_mcu/update.sh update TAG [--spinel DIR]
 #       Takes release TAG: copies its runtime files in, applies the patch to them, and names the
 #       release in the READMEs. A hunk that no longer applies is left in NAME.rej, to be carried
-#       over by hand; then "save". Files the release adds to its lib are listed, to be vendored
-#       (copied in by hand, then "update" again) or added to spinel_mcu/not_vendored.txt.
+#       over by hand; then "save". Files the release adds to its lib are copied in too, and
+#       listed: one that needs POSIX is to be left out with SPINEL_BARE_METAL, as sp_net.c is
+#       (copy it to NAME.orig first, then "save"). Files it no longer has are removed.
 #   sh spinel_mcu/update.sh save
 #       Writes the patch again from NAME.orig and NAME, after a change made by hand. To change a
 #       file that has no NAME.orig yet, copy it to NAME.orig first.
@@ -28,7 +30,6 @@ set -eu
 cd "$(dirname "$0")/.."
 HERE=$(pwd)
 PATCH=spinel_mcu/spinel_mcu.patch
-NOT_VENDORED=spinel_mcu/not_vendored.txt
 
 die() { echo "update.sh: $*" >&2; exit 1; }
 
@@ -50,6 +51,13 @@ readme_release() {
 vendored() {
   for f in sp_*.c sp_*.h re_*.c re_*.h spinel_rt.h mruby_shim.h; do
     [ -f "$f" ] && echo "$f"
+  done
+}
+
+# The runtime files of Spinel's lib, one path a line
+upstream_files() {
+  for p in "$LIB"/*.[ch] "$LIB"/regexp/*.[ch]; do
+    [ -f "$p" ] && echo "$p"
   done
 }
 
@@ -90,13 +98,11 @@ save() {
   echo "Wrote $PATCH ($(grep -c '^@@' "$PATCH") hunks in $(grep -c '^+++ ' "$PATCH") files)"
 }
 
-# Files of Spinel's lib that are neither in the sketch nor in not_vendored.txt
+# Files of Spinel's lib that are not in the sketch
 new_upstream() {
-  for p in "$LIB"/*.[ch] "$LIB"/regexp/*.[ch]; do
+  for p in $(upstream_files); do
     f=$(basename "$p")
-    [ -f "$f" ] && continue
-    grep -qx "$f" "$NOT_VENDORED" && continue
-    echo "$f"
+    [ -f "$f" ] || echo "$f"
   done
 }
 
@@ -105,13 +111,15 @@ update() {
   gnu_patch
   fetch "$tag"
 
-  missing=
+  added=$(new_upstream)
+  removed=
   for f in $(vendored); do
     p=$(upstream_path "$f")
-    if [ -z "$p" ]; then missing="$missing $f"; continue; fi
+    if [ -z "$p" ]; then removed="$removed $f"; rm -f "$f" "$f.orig"; continue; fi
     cp "$p" "$f"
     [ -f "$f.orig" ] && cp "$p" "$f.orig"
   done
+  for f in $added; do cp "$(upstream_path "$f")" "$f"; done
   find . -maxdepth 1 -name '*.rej' -exec rm {} +
 
   status=0
@@ -124,9 +132,8 @@ update() {
     echo "README.md and README.ja.md now name $tag (was $old)"
   fi
 
-  [ -z "$missing" ] || echo "Not in $tag any more, left as they were:$missing"
-  added=$(new_upstream)
-  [ -z "$added" ] || { echo "New in $tag, neither vendored nor in $NOT_VENDORED:"; echo "$added" | sed 's/^/  /'; }
+  [ -z "$removed" ] || echo "Not in $tag any more, removed:$removed"
+  [ -z "$added" ] || { echo "New in $tag, copied in (one that needs POSIX is to be left out with SPINEL_BARE_METAL):"; echo "$added" | sed 's/^/  /'; }
 
   if [ $status -ne 0 ]; then
     echo "Some hunks did not apply; they are in:"
@@ -173,7 +180,7 @@ check() {
   done
 
   added=$(new_upstream)
-  [ -z "$added" ] || { echo "In Spinel $tag, neither vendored nor in $NOT_VENDORED:"; echo "$added" | sed 's/^/  /'; bad=1; }
+  [ -z "$added" ] || { echo "In Spinel $tag, not in the sketch:"; echo "$added" | sed 's/^/  /'; bad=1; }
 
   if [ $bad -ne 0 ]; then exit 1; fi
   echo "The runtime is Spinel $tag with $PATCH applied"

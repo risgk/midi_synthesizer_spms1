@@ -710,18 +710,19 @@ plugin for the audio).
 
 ### Updating Spinel
 
-The runtime files in this folder are Spinel's `lib` (and `lib/regexp`) of the release named above, with
-the changes for the MCU kept in two places:
+The runtime files in this folder are all of Spinel's `lib` (and `lib/regexp`) of the release named
+above, with the changes for the MCU kept in two places:
 
 - "spinel_rt_mcu_head.h", "spinel_rt_mcu_libm.h" and "spinel_rt_mcu_cold.h": what the MCU adds -- the
   section and the pragmas of the synth core, the float versions of the math functions, what the
-  generated code needs from `lib/sp_cold.c`, which is not built, and, at the end of "spinel_rt.h",
+  generated code needs from `lib/sp_cold.c`, which is left out, and, at the end of "spinel_rt.h",
   what binds the generated code to a float runtime (below). "spinel_rt.h" carries only an
   `#include` line for each
 - "spinel_mcu/spinel_mcu.patch": what is changed in Spinel's own files -- the runtime written in
   `sp_float` where it said `double` for a Float, the POSIX parts left out with `#if 0` (a release
-  changing what is inside them seldom stops the patch from applying), and the GC's buffers made
-  to fit SRAM. Each file it changes sits next to its released copy, "NAME.orig"
+  changing what is inside them seldom stops the patch from applying), the files that need POSIX
+  throughout left out whole with `SPINEL_BARE_METAL` (below), and the GC's buffers made to fit
+  SRAM. Each file it changes sits next to its released copy, "NAME.orig"
 
 Float is float, the RP2350 having a single-precision FPU only. `SPINEL_FLOAT32` in "sp_types.h"
 decides it for the whole runtime: 1 here, and 0 gives double, as Spinel has it, with the same
@@ -729,6 +730,12 @@ results as CRuby. The generated code still spells `double` in casts and temporar
 `DBL_EPSILON` and the like for the Float constants, so "spinel_rt_mcu_cold.h" ends with
 `#define double float` and `FLT_*` for `DBL_*`, which reach the generated code only. `Float#to_s`
 prints the shortest digits that read back as the same float (`0.1`, `0.33333334`).
+
+There is no OS under the synth. `SPINEL_BARE_METAL` in "sp_types.h", 1 here, leaves out whole the
+files of the runtime that need POSIX: "sp_cold.c", "sp_fiber.c", "sp_io.c", "sp_net.c",
+"sp_process.c", "sp_process_status.c", "sp_sched.c" and "sp_system.c". The rest, "sp_crypto.c",
+"sp_pack.c" and "sp_time.c" among them, are built as they are; the linker drops what the synth
+does not use. The simulators and SPMS-1 Web build the runtime the same way.
 
 A new release is taken on GitHub Actions, so it needs no particular OS:
 
@@ -743,8 +750,10 @@ A new release is taken on GitHub Actions, so it needs no particular OS:
 2. Look at the summary of the run. "spinel_mcu/size_report.sh" compares the two builds: how much
    the synth core in RAM (`Spms1_main`), the RAM and the flash grew, with a warning above 2%. A
    larger core runs more instructions a sample, which neither the sound nor the simulators show.
-   Files the release adds to its `lib` are listed there too: copy in the ones the generated code
-   needs, and add the others to "spinel_mcu/not_vendored.txt"
+   Files the release adds to its `lib` are listed there too, copied in like the rest: one that
+   needs POSIX does not build, and is to be left out with `SPINEL_BARE_METAL` as the others are
+   (copy it to "NAME.orig", put its text between `#include "sp_types.h"` `#if !SPINEL_BARE_METAL`
+   and `#endif`, and `sh spinel_mcu/update.sh save`)
 3. Apply "spinel-TAG.diff" from the artifact at the top of the repository (`git apply
    spinel-TAG.diff`), commit it, and run the build workflow, whose Spinel job checks the result
    (`sh spinel_mcu/update.sh check`)

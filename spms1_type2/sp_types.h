@@ -98,6 +98,12 @@ typedef float sp_float;
 #else
 typedef double sp_float;
 #endif
+/* For the MCU: no OS under the program, so the parts of the runtime that need POSIX are left out
+   where SPINEL_BARE_METAL is 1, which is the default here (Spinel's would be 0). The simulators
+   build the runtime the same way, as the device has it. */
+#ifndef SPINEL_BARE_METAL
+#define SPINEL_BARE_METAL 1
+#endif
 typedef bool sp_bool;
 
 /* Sentinel value reserved by the int? (scalar-nullable int) type. An

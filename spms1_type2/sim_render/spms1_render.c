@@ -31,10 +31,9 @@
 extern int Spms1_main(int argc, char **argv);
 
 /* The linker keeps runtime code that the synth never calls but that refers to these, which
-   upstream define in files the sketch does not vendor. urandom fails closed on the 0. */
+   upstream define in sp_cold.c, left out with SPINEL_BARE_METAL. */
 bool sp_convert_soft;
 bool sp_convert_failed;
-int sp_crypto_entropy(unsigned char *out, int nbytes) { (void)out; (void)nbytes; return 0; }
 
 #if !defined(__APPLE__)
 /* sp_str.c's String#crypt calls libc's crypt, which Windows lacks and glibc keeps in libcrypt;

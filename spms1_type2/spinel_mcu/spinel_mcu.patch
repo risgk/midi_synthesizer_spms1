@@ -241,6 +241,19 @@
  sp_IntArray *sp_IntArray_concat(sp_IntArray *a, sp_IntArray *b);
  sp_StrArray *sp_StrArray_concat(sp_StrArray *a, sp_StrArray *b);
  sp_FloatArray *sp_FloatArray_concat(sp_FloatArray *a, sp_FloatArray *b);
+--- a/sp_cold.c
++++ b/sp_cold.c
+@@ -1,3 +1,5 @@
++#include "sp_types.h"   /* for the MCU: SPINEL_BARE_METAL */
++#if !SPINEL_BARE_METAL   /* for the MCU: needs POSIX throughout (dirent, sockets, poll, ...) */
+ /* Cold, out-of-line helpers extracted from spinel_rt.h.
+  *
+  * Functions that are large and not on any hot path were `static` in
+@@ -3993,3 +3995,4 @@
+   if (to == 2) sp_str_mark_binary(res);
+   return res;
+ }
++#endif /* !SPINEL_BARE_METAL */
 --- a/sp_core.c
 +++ b/sp_core.c
 @@ -21,7 +21,11 @@
@@ -418,6 +431,19 @@
 +sp_float sp_float_prec_op(sp_float x, intptr_t nd, int op);
  
  #endif
+--- a/sp_fiber.c
++++ b/sp_fiber.c
+@@ -1,3 +1,5 @@
++#include "sp_types.h"   /* for the MCU: SPINEL_BARE_METAL */
++#if !SPINEL_BARE_METAL   /* for the MCU: needs <sys/mman.h> for the fiber stacks */
+ /* sp_fiber.c -- Fiber runtime bodies (POSIX ucontext).
+  * See sp_fiber.h. The collector roots, sp_gc_alloc, and sp_raise_cls live
+  * in the generated TU and are reached by name; fiber-local storage is
+@@ -388,3 +390,4 @@
+ sp_RbVal sp_Fiber_transfer_catch(sp_Fiber*f,sp_RbVal val,int*out_raised,const char**out_cls,const char**out_msg,void**out_obj){SP_GC_ROOT_RBVAL(val);SP_GC_ROOT(f);sp_RbVal r=sp_Fiber_transfer_core(f,val);*out_raised=f->raised;if(f->raised){f->raised=0;*out_cls=f->raised_cls;*out_msg=f->raised_msg;*out_obj=f->raised_obj;f->raised_obj=NULL;}return r;}
+ 
+ void sp_mark_fiber_root_storage(void){if(sp_fiber_root.storage)sp_gc_mark(sp_fiber_root.storage);}
++#endif /* !SPINEL_BARE_METAL */
 --- a/sp_fiber_ctx.h
 +++ b/sp_fiber_ctx.h
 @@ -1,81 +1,6 @@
@@ -684,6 +710,19 @@
  extern void *sp_gc_pinned[SP_GC_PINNED_MAX];
  extern int sp_gc_npinned;
  extern int sp_gc_pin_overflow;
+--- a/sp_io.c
++++ b/sp_io.c
+@@ -1,3 +1,5 @@
++#include "sp_types.h"   /* for the MCU: SPINEL_BARE_METAL */
++#if !SPINEL_BARE_METAL   /* for the MCU: needs <sys/ioctl.h> and the file descriptors */
+ /* sp_io.c -- File / IO handle ops in libspinel_rt.a.
+  *
+  * The allocation-free handle ops (open / pipe / fdopen / write / close /
+@@ -1321,3 +1323,4 @@
+   f->lineno = 0;
+   return f;
+ }
++#endif /* !SPINEL_BARE_METAL */
 --- a/sp_io.h
 +++ b/sp_io.h
 @@ -188,7 +188,7 @@
@@ -728,6 +767,58 @@
        sp_mar_bytes(b, fs, strlen(fs));
        break;
      }
+--- a/sp_net.c
++++ b/sp_net.c
+@@ -1,3 +1,5 @@
++#include "sp_types.h"   /* for the MCU: SPINEL_BARE_METAL */
++#if !SPINEL_BARE_METAL   /* for the MCU: needs sockets and <poll.h> */
+ /* sp_net.c -- POSIX TCP / poll / process / shell primitives.
+  * See sp_net.h. Pure C, no spinel-runtime dependency; no OpenSSL.
+  *
+@@ -968,3 +970,4 @@
+     }
+     return -1;
+ }
++#endif /* !SPINEL_BARE_METAL */
+--- a/sp_process.c
++++ b/sp_process.c
+@@ -1,3 +1,5 @@
++#include "sp_types.h"   /* for the MCU: SPINEL_BARE_METAL */
++#if !SPINEL_BARE_METAL   /* for the MCU: needs processes and rlimits */
+ /* lib/sp_process.c -- Process.spawn and Process.waitpid2 (CRuby-compatible)
+  *
+  * Lives in its own TU because the codegen calls sp_process_spawn
+@@ -366,3 +368,4 @@
+   sp_PolyArray_push(pa, sp_box_process_status(sp_process_status_new((sp_int)r, (sp_int)status)));
+   return pa;
+ }
++#endif /* !SPINEL_BARE_METAL */
+--- a/sp_process_status.c
++++ b/sp_process_status.c
+@@ -1,3 +1,5 @@
++#include "sp_types.h"   /* for the MCU: SPINEL_BARE_METAL */
++#if !SPINEL_BARE_METAL   /* for the MCU: needs <sys/wait.h> and processes */
+ /* sp_process_status.c -- Process::Status runtime.
+  *
+  * The runtime is deliberately tiny: a heap-allocated struct holding
+@@ -181,3 +183,4 @@
+   }
+   return sp_status_buf;
+ }
++#endif /* !SPINEL_BARE_METAL */
+--- a/sp_sched.c
++++ b/sp_sched.c
+@@ -1,3 +1,5 @@
++#include "sp_types.h"   /* for the MCU: SPINEL_BARE_METAL */
++#if !SPINEL_BARE_METAL   /* for the MCU: needs <poll.h> and threads */
+ /* sp_sched.c -- cooperative M:N thread scheduler bodies, Phase 0 (N=1).
+  * See sp_sched.h. Built on the sp_fiber context switch: the main thread runs on
+  * the root fiber and pumps a run queue of green threads whenever it blocks. */
+@@ -2482,3 +2484,4 @@
+                       (long long)t->birth_line, st);
+   return sp_sprintf("#<Thread:0x%016llx %s>", (unsigned long long)(uintptr_t)t, st);
+ }
++#endif /* !SPINEL_BARE_METAL */
 --- a/sp_sched.h
 +++ b/sp_sched.h
 @@ -54,7 +54,7 @@
@@ -757,6 +848,19 @@
  sp_thread *sp_Thread_current(void);       /* Thread.current */
  sp_bool   sp_Thread_alive(sp_thread *t); /* #alive? */
  sp_bool   sp_Thread_set_report_default(sp_bool v);  /* Thread.report_on_exception= */
+--- a/sp_system.c
++++ b/sp_system.c
+@@ -1,3 +1,5 @@
++#include "sp_types.h"   /* for the MCU: SPINEL_BARE_METAL */
++#if !SPINEL_BARE_METAL   /* for the MCU: needs fork and exec */
+ /* sp_system.c -- system()/backtick support in libspinel_rt.a.
+  * See sp_system.h.
+  *
+@@ -56,3 +58,4 @@
+   sp_last_status = status;
+   return (WIFEXITED(status) && WEXITSTATUS(status) == 0) ? TRUE : FALSE;
+ }
++#endif /* !SPINEL_BARE_METAL */
 --- a/sp_time.h
 +++ b/sp_time.h
 @@ -12,6 +12,9 @@
@@ -771,7 +875,7 @@
  #include <time.h>
 --- a/sp_types.h
 +++ b/sp_types.h
-@@ -88,7 +88,16 @@
+@@ -88,7 +88,22 @@
  #error "spinel: unsupported intptr_t width (need 32- or 64-bit)"
  #endif
  typedef intptr_t sp_int;
@@ -784,6 +888,12 @@
 +typedef float sp_float;
 +#else
  typedef double sp_float;
++#endif
++/* For the MCU: no OS under the program, so the parts of the runtime that need POSIX are left out
++   where SPINEL_BARE_METAL is 1, which is the default here (Spinel's would be 0). The simulators
++   build the runtime the same way, as the device has it. */
++#ifndef SPINEL_BARE_METAL
++#define SPINEL_BARE_METAL 1
 +#endif
  typedef bool sp_bool;
  

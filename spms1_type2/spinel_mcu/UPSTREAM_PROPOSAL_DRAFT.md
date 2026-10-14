@@ -45,6 +45,14 @@ The proposal: a macro, say `SPINEL_BARE_METAL`, defined only by those who build 
 under which the runtime leaves these out, with the IO and thread features simply absent. A
 program that uses none of them does not miss them. Without the macro nothing changes.
 
+My patch takes this shape already, as far as it can from outside: it carries all of `lib`, and
+`SPINEL_BARE_METAL` in `lib/sp_types.h` leaves out whole the eight files that need POSIX
+throughout (`sp_cold.c`, `sp_fiber.c`, `sp_io.c`, `sp_net.c`, `sp_process.c`,
+`sp_process_status.c`, `sp_sched.c`, `sp_system.c`), two lines each; `sp_crypto.c`, `sp_pack.c`
+and `sp_time.c` build as they are. What is still done with `#if 0` is the POSIX inside the files
+that are built (`spinel_rt.h` above all), and four definitions the generated code needs from
+`sp_cold.c` are copied out of it.
+
 It can come in steps, starting with what is harmless on POSIX as well (for example
 `__has_include` checks for `<execinfo.h>` and `<ucontext.h>`). To keep it from breaking unnoticed,
 I would add a compile-only CI job: the runtime compiled with `arm-none-eabi-gcc` and newlib, with
