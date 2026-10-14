@@ -5,7 +5,7 @@
 > It has not been posted, and nothing in it has been agreed with the Spinel project.
 > Check it against the Spinel release in use before posting: the line numbers are those of 2026.09.12.
 
-**Title:** Build knobs for running the runtime on a microcontroller (float as sp_float, no POSIX, smaller GC tables)
+**Title:** A freestanding build of the runtime, for microcontrollers (float as sp_float, no OS, smaller GC tables)
 
 I run Spinel's output on a Raspberry Pi Pico 2 (RP2350, Cortex-M33, 520 KB SRAM, single-precision FPU)
 as the core of a MIDI synthesizer (https://github.com/risgk/midi_synthesizer_spms1, type-2).
@@ -30,9 +30,13 @@ used in all three, with `sp_core.h`'s prototypes in terms of `sp_float` rather t
 (Today I also `#define double float` in the runtime and map `sin`/`sqrt`/... to their `f` forms.
 I can do that part on my side, but the typedefs have to agree across translation units.)
 
-## 2. A switch for a build without POSIX
+## 2. A freestanding build: no OS, only the C library
 
-On newlib without an OS, these are missing and are the rest of my patch:
+By "freestanding" I mean a target with no OS underneath: the C library is there (newlib, with
+`malloc`, `stdio`, `math.h` and `setjmp`), but POSIX and the OS services behind it are not. That is
+less strict than a freestanding implementation in the C standard's sense, which has no C library at
+all; the runtime still needs one, and the generated code calls it. On such a target these are
+missing, and they are the rest of my patch:
 
 - `spinel_rt.h`: `<sys/stat.h>`, `<dirent.h>`, `<pwd.h>`, `<sys/times.h>`, `<unistd.h>`, `<signal.h>`,
   `<sys/resource.h>`, `<fcntl.h>`, `<fnmatch.h>`, `<sys/file.h>`, `<sys/mman.h>`, `<sys/wait.h>`,
@@ -45,8 +49,8 @@ On newlib without an OS, these are missing and are the rest of my patch:
   (IO, Dir, Thread, Queue, Mutex, BigRational, FloatRange inspect) and need those objects to link
 - `__int128` in `sp_time.h` (absent on 32-bit targets)
 
-Something like `#ifdef SPINEL_NO_POSIX` around those (or `__has_include` checks) would let the
-runtime build for a bare-metal target, with the IO/thread features simply absent. The generated
+Something like `#ifndef SPINEL_FREESTANDING` around those (or `__has_include` checks) would let the
+runtime build for such a target, with the IO/thread features simply absent. The generated
 code of a program that uses none of them does not need them.
 
 ## 3. `#ifndef` on the remaining table sizes
