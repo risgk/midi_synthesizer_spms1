@@ -706,7 +706,7 @@ MCU 向けの変更は 2 か所にまとめてあります:
 
 ランタイムのファイルをさらに変更するときは、"NAME.orig" がなければ先にコピーしてから編集し、
 `sh spinel_mcu/update.sh save` を実行します。スクリプトには diff と GNU patch が必要です
-(Windows では Git Bash にあります)。
+(Windows では Git Bash にあります。macOS では `brew install gpatch`)。
 
 パッチの大半は、Spinel 自体にいくつかのビルドオプションがあれば不要になります。それを提案する Issue の
 **下書き** が "spinel_mcu/UPSTREAM_PROPOSAL_DRAFT.md" にあります (**未投稿**)。

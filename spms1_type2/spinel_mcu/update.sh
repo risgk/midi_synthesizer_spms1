@@ -21,7 +21,7 @@
 # --spinel DIR takes Spinel from a checkout of the release, instead of cloning it from GitHub.
 #
 # Run from anywhere; it works in the sketch folder. Needs git (to clone), diff and GNU patch
-# (Git Bash on Windows has both).
+# (Git Bash on Windows has both; on macOS, brew install gpatch).
 
 set -eu
 
@@ -31,6 +31,15 @@ PATCH=spinel_mcu/spinel_mcu.patch
 NOT_VENDORED=spinel_mcu/not_vendored.txt
 
 die() { echo "update.sh: $*" >&2; exit 1; }
+
+# GNU patch, as gpatch (Homebrew's, on macOS) or as patch. The patch of macOS and BSD lacks
+# --no-backup-if-mismatch and the fuzz this relies on
+gnu_patch() {
+  for p in gpatch patch; do
+    if "$p" --version 2>/dev/null | grep -q 'GNU patch'; then PATCH_CMD=$p; return; fi
+  done
+  die "needs GNU patch (on macOS: brew install gpatch)"
+}
 
 # The release the README names
 readme_release() {
@@ -93,6 +102,7 @@ new_upstream() {
 
 update() {
   tag=$1
+  gnu_patch
   fetch "$tag"
 
   missing=
@@ -106,7 +116,7 @@ update() {
 
   status=0
   echo "Applying $PATCH"
-  patch -s -p1 --no-backup-if-mismatch < "$PATCH" || status=1
+  "$PATCH_CMD" -s -p1 --no-backup-if-mismatch < "$PATCH" || status=1
 
   old=$(readme_release)
   if [ "$old" != "$tag" ]; then
@@ -131,6 +141,7 @@ update() {
 
 check() {
   tag=$(readme_release)
+  gnu_patch
   fetch "$tag"
   bad=0
 
@@ -145,7 +156,7 @@ check() {
     fi
     cp "$p" "$WORK/$f"
   done
-  if (cd "$WORK" && patch -s -p1 --no-backup-if-mismatch -r - < "$HERE/$PATCH" > /dev/null); then
+  if (cd "$WORK" && "$PATCH_CMD" -s -p1 --no-backup-if-mismatch -r - < "$HERE/$PATCH" > /dev/null); then
     for f in $(vendored); do
       cmp -s "$WORK/$f" "$f" || { echo "$f is not Spinel $tag's with $PATCH applied"; bad=1; }
     done

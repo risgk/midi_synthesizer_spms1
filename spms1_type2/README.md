@@ -733,7 +733,8 @@ builds the UF2, and keeps what it changed as an artifact ("spinel-TAG.diff", to 
 4. `sh spinel_mcu/update.sh check` confirms the result, as the GitHub Actions workflow does
 
 To change a runtime file further, copy it to "NAME.orig" first if it has none, edit it, and
-`sh spinel_mcu/update.sh save`. The script needs diff and GNU patch, which Git Bash has on Windows.
+`sh spinel_mcu/update.sh save`. The script needs diff and GNU patch, which Git Bash has on Windows
+(on macOS, `brew install gpatch`).
 
 Most of the patch would go away with a few build options in Spinel itself.
 "spinel_mcu/UPSTREAM_PROPOSAL_DRAFT.md" is a **draft** of an issue proposing them, **not filed**.
