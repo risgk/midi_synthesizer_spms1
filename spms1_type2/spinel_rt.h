@@ -1449,7 +1449,7 @@ int sp_bigint_even_p(sp_Bigint *b);
 sp_Bigint *sp_bigint_abs_v(sp_Bigint *b);
 sp_int sp_bigint_bit_length(sp_Bigint *b);
 int64_t sp_bigint_to_int(sp_Bigint *b);
-sp_float sp_bigint_to_double(sp_Bigint *b);
+double sp_bigint_to_double(sp_Bigint *b);   /* for the MCU: double, as sp_bigint.c defines it */
 int sp_bigint_cmp(sp_Bigint *a, sp_Bigint *b);
 sp_Bigint *sp_bigint_new_int(int64_t v);
 sp_Bigint *sp_bigint_add(sp_Bigint *a, sp_Bigint *b);

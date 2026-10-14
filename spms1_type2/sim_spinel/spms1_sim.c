@@ -33,10 +33,6 @@
 
 extern int Spms1_main(int argc, char **argv);
 
-/* The linker (MinGW's, and GNU ld on Linux) keeps runtime code that the synth never calls but that
-   refers to these, which upstream define in sp_cold.c, left out with SPINEL_BARE_METAL. */
-bool sp_convert_soft;
-bool sp_convert_failed;
 
 /* ---- MIDI state, the sketch's own ---- */
 

@@ -923,7 +923,7 @@ sp_Bigint *sp_bigint_gcd(sp_Bigint *a, sp_Bigint *b);
 sp_Bigint *sp_bigint_div(sp_Bigint *a, sp_Bigint *b);
 char *sp_str_alloc_ext(size_t len);   /* non-inline sp_str_alloc; see sp_alloc.c */
 const char *sp_bigint_to_s(sp_Bigint *b);
-sp_float sp_bigint_to_double(sp_Bigint *b);
+double sp_bigint_to_double(sp_Bigint *b);   /* for the MCU: double, as sp_bigint.c defines it */
 void sp_brat_scan(void *p);
 sp_RbVal sp_box_brat(sp_Bigint *num, sp_Bigint *den);
 sp_RbVal sp_brat_from_bigint(sp_Bigint *n);
