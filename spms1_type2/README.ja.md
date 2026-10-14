@@ -685,6 +685,12 @@ MCU 向けの変更は 2 か所にまとめてあります:
   リリースで変わってもパッチが当たりやすいように)、SRAM に収まる GC のバッファ。
   変更するファイルの隣には、リリースのままのコピー "NAME.orig" があります
 
+新しいリリースは、ブランチに手を付けずに先に試せます: "../.github/workflows/spms1-type2-spinel-try.yml" の
+"SPMS-1 (type-2) Try a Spinel Release" を、タグを指定して手動で実行します。下の手順 1 と同じように
+リリースを取り込み、"spms1_main.c" を再生成し、CRuby とレンダリングを比べ、UF2 をビルドして、
+変わったものを成果物 (artifact) として残します ("spinel-TAG.diff" は `git apply` で当てられます。
+"NAME.rej" があればそれも)。
+
 新しいリリースは "spinel_mcu/update.sh" で取り込みます:
 
 1. `sh spinel_mcu/update.sh update TAG` がリリースのファイルをコピーし、パッチを当て、この README と

@@ -712,6 +712,12 @@ the changes for the MCU kept in two places:
   changing what is inside them seldom stops the patch from applying), and the GC's buffers made
   to fit SRAM. Each file it changes sits next to its released copy, "NAME.orig"
 
+A new release can be tried first, without touching the branch: run "SPMS-1 (type-2) Try a Spinel
+Release" in "../.github/workflows/spms1-type2-spinel-try.yml" by hand with its tag. It takes the
+release as step 1 below does, regenerates "spms1_main.c", compares the renders with CRuby, and
+builds the UF2, and keeps what it changed as an artifact ("spinel-TAG.diff", to be applied with
+`git apply`, and any "NAME.rej").
+
 "spinel_mcu/update.sh" takes a new release:
 
 1. `sh spinel_mcu/update.sh update TAG` copies the release's files in, applies the patch, and names
