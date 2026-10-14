@@ -1,0 +1,114 @@
+# SPMS-1 (type-2) Try a Spinel Release: takes a Spinel release into the sketch on the runner, and
+# tells whether it still builds and sounds the same, before the release is taken for real
+# (see "Updating Spinel" in spms1_type2/README.md)
+# - spinel_mcu/update.sh update TAG: the runtime files of the release, with spinel_mcu.patch applied
+# - spms1_main.c regenerated with the release, and the renders compared with CRuby
+# - The UF2 (PWM Audio) built before and after, to see that it compiles and fits, and how much the synth
+#   core in RAM and the firmware grew (spinel_mcu/size_report.sh; a warning above 2%)
+# Nothing is committed: what the run changed is kept as an artifact, "spinel-TAG.diff" (to be applied with
+# "git apply"), together with any "*.rej" left by hunks that did not apply.
+name: SPMS-1 (type-2) Try a Spinel Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      spinel_tag:
+        description: 'Spinel release (tag of matz/spinel), e.g. 2026.09.12'
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+env:
+  ARDUINO_CLI_VERSION: '1.5.1'
+  ARDUINO_PICO_VERSION: '6.2.0'  # The same as in spms1-type2.yml
+  MIDI_LIBRARY_VERSION: '5.0.2'
+  ARDUINO_PICO_INDEX_URL: 'https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json'
+  UF2_FQBN: 'rp2040:rp2040:rpipico2:usbstack=tinyusb'
+  SPINEL_TAG: ${{ inputs.spinel_tag }}
+
+defaults:
+  run:
+    shell: bash
+    working-directory: spms1_type2
+
+jobs:
+  try:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+
+      - uses: actions/cache@v6
+        id: cache
+        with:
+          path: ~/spinel
+          key: spinel-${{ inputs.spinel_tag }}-${{ runner.os }}
+
+      - name: Build Spinel ${{ inputs.spinel_tag }}
+        if: steps.cache.outputs.cache-hit != 'true'
+        working-directory: ${{ runner.temp }}
+        run: |
+          git clone --depth 1 -b "$SPINEL_TAG" https://github.com/matz/spinel.git ~/spinel
+          cd ~/spinel
+          make deps
+          make -j"$(nproc)"
+
+      - name: Install arduino-cli
+        run: |
+          curl -fsSL "https://downloads.arduino.cc/arduino-cli/arduino-cli_${ARDUINO_CLI_VERSION}_Linux_64bit.tar.gz" | tar -xz -C "$RUNNER_TEMP" arduino-cli
+          echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+
+      - name: Install the core and the library
+        run: |
+          arduino-cli core update-index --additional-urls "$ARDUINO_PICO_INDEX_URL"
+          arduino-cli core install "rp2040:rp2040@$ARDUINO_PICO_VERSION" --additional-urls "$ARDUINO_PICO_INDEX_URL"
+          arduino-cli lib install "MIDI Library@$MIDI_LIBRARY_VERSION"
+
+      # The same checkout and path as the build after, so that the two differ only by the release
+      - name: Build the UF2 (PWM Audio) before taking the release
+        run: arduino-cli compile --fqbn "$UF2_FQBN" --output-dir "$RUNNER_TEMP/before" .
+
+      # Clones the release by itself, so as not to read the build tree above
+      - name: Take the release (spinel_mcu/update.sh update)
+        run: sh spinel_mcu/update.sh update "$SPINEL_TAG" | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Regenerate spms1_main.c and build sim_render
+        run: PATH="$HOME/spinel/bin:$PATH" sh sim_render/build.sh
+
+      - name: Compare with CRuby (the default patch)
+        run: sh sim_render/compare_with_cruby.sh
+
+      - name: Compare with CRuby (the example score)
+        run: sh sim_render/compare_with_cruby.sh --score sim_render/examples/score_example.txt --seconds 3
+
+      - name: Compare with CRuby (the example patch and score)
+        run: sh sim_render/compare_with_cruby.sh --patch sim_render/examples/patch_routing_example.txt --score sim_render/examples/score_example.txt --seconds 3
+
+      - name: Build the UF2 (PWM Audio)
+        run: arduino-cli compile --fqbn "$UF2_FQBN" --output-dir "$RUNNER_TEMP/after" . | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Compare the sizes with the build before
+        run: |
+          mkdir -p "$RUNNER_TEMP/try"
+          sh spinel_mcu/size_report.sh "$RUNNER_TEMP/before/spms1_type2.ino.elf" "$RUNNER_TEMP/after/spms1_type2.ino.elf" > "$RUNNER_TEMP/try/size_report.md"
+          { echo "### Sizes, before and after Spinel $SPINEL_TAG"; echo; cat "$RUNNER_TEMP/try/size_report.md"; } >> "$GITHUB_STEP_SUMMARY"
+          grep '^WARNING' "$RUNNER_TEMP/try/size_report.md" | sed 's/^WARNING: /::warning::/' || true
+
+      # Run even when a step above failed, so that what the release changed (and any .rej) can be looked at
+      - name: Keep what the run changed
+        if: always()
+        run: |
+          mkdir -p "$RUNNER_TEMP/try"
+          git add -N .
+          git diff --binary -- . ":(exclude)*.rej" > "$RUNNER_TEMP/try/spinel-$SPINEL_TAG.diff"
+          cp *.rej "$RUNNER_TEMP/try/" 2>/dev/null || true
+
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: spms1-type2-spinel-${{ inputs.spinel_tag }}
+          path: ${{ runner.temp }}/try

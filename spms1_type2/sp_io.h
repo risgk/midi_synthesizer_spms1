@@ -204,7 +204,9 @@ SP_NORETURN void sp_file_raise_errno(const char *op, const char *path);
    any syscall sees it; the multi-path File.delete checks every path first. */
 void sp_file_path_check(const char *path);
 
-//#include <dirent.h>
+#if 0 /* Not on the MCU */
+#include <dirent.h>
+#endif
 /* Dir handle (Dir.open / Dir.each_child ...): ops live in lib/sp_cold.c. */
 typedef struct { void *dp; const char *path; } sp_Dir;
 /* The Dir counterpart of SP_IO_OPEN: reading or positioning a closed handle

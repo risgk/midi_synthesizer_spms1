@@ -50,7 +50,8 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.2
     - 情報: <https://github.com/FortySevenEffects/arduino_midi_library>
 - Spinel
     - リリース: 2026.09.12 <https://github.com/matz/spinel/tree/2026.09.12>
-    - Spinel の出力ファイル "spms1_main.c" に手を入れる必要はありません。本スケッチの "spinel_rt.h" が
+    - Spinel の出力ファイル "spms1_main.c" に手を入れる必要はありません。本スケッチの
+      "spinel_rt_mcu_head.h" ("spinel_rt.h" の先頭で読み込み) が
       `#define main __attribute__((section(".time_critical"), flatten)) Spms1_main` を持っており、改名と
       シンセ本体の RAM 配置を同時に行います。手で改名すると、このマクロが一致しなく
       なって属性が付かず、本体が flash から実行されます
@@ -644,8 +645,14 @@ C のホスト ("sim_spinel"、"sim_render"、"web" の SPMS-1 Web) は、スケ
     - `--seconds N` (デフォルト 4) と `--out FILE` (デフォルト "spms1_render.wav")
     - ピークとサンプルのハッシュを表示するので、2 つのレンダリングの違いがすぐ分かります。
       エディタの "Init" パッチは、パッチなしと同じハッシュになります。ハッシュは同じコンパイラ同士で
-      比べてください: "spinel_rt.h" の `single-precision-constant` を GCC は (実機と同じく) 守り、
+      比べてください: "spinel_rt_mcu_head.h" の `single-precision-constant` を GCC は (実機と同じく) 守り、
       clang は無視するので、両者では下位のビットが変わります
+    - GC も確認し、次のどちらかに反すると終了コード 1 で終わります ("compare_with_cruby.sh" と
+      GitHub Actions のワークフローも失敗します): シンセが鳴っている間に何も確保しないこと
+      (実機では GC が音を途切れさせます)、"sp_gc.h" が MCU 向けに決めた `sp_gc_roots` の大きさ
+      (`SP_GC_STACK_MAX`) が足りずに GC ルートが落とされないこと。前のリリースがボックス化しなかった値を
+      ボックス化するリリースは前者で分かります。後者は実機に負担をかけないよう、ここでだけ
+      `SP_GC_ROOT_OVERFLOW_CHECK` 付きで確認します
     - ビルドは "sim_spinel" と同じく、先に Spinel で "spms1_main.c" を再生成します (`--no-spinel` で省略)
     - `sh sim_render/compare_with_cruby.sh [--patch FILE] [--score FILE] [--seconds N]` は、同じパッチと
       スコアをこれと、"spms1_main.rb" そのものを動かす CRuby とでレンダリングして比べるので、Spinel が
@@ -665,9 +672,62 @@ C のホスト ("sim_spinel"、"sim_render"、"web" の SPMS-1 Web) は、スケ
 - SPMS-1 Web: "spms1_web_synth.js" をビルド・テストし、成果物として残します
 - シミュレーター: "sim_spinel" と "sim_render" を Linux、macOS、Windows でビルドしてレンダリングし、
   Linux では CRuby とのレンダリングの比較もします
-- Spinel: 上で指定したリリースをビルドし、"spms1_main.c" が .rb ファイルから作られるものと一致するかを確認します
+- Spinel: 上で指定したリリースをビルドし、"spms1_main.c" が .rb ファイルから作られるものと一致するかを確認します。
+  また、ランタイムのファイルがそのリリースに "spinel_mcu/spinel_mcu.patch" を当てたものかを確認します (下記参照)
 - "commit_package" を選び、上記がすべて通ると、UF2 ファイル ("bin") と "spms1_web_synth.js" を選んだブランチに
   コミットします (ビルドの後でソースが変わっていた場合と、何も変わっていない場合はコミットしません)
+
+
+### Spinel の更新
+
+このフォルダのランタイムのファイルは、上で指定したリリースの Spinel の `lib` (と `lib/regexp`) です。
+MCU 向けの変更は 2 か所にまとめてあります:
+
+- "spinel_rt_mcu_head.h"、"spinel_rt_mcu_libm.h"、"spinel_rt_mcu_cold.h": MCU 向けに足すもの --
+  シンセ本体のセクションと pragma、`double` の代わりの `float`、ビルドしない `lib/sp_cold.c` から
+  生成コードが必要とするもの。"spinel_rt.h" にはそれぞれの `#include` 行だけがあります
+- "spinel_mcu/spinel_mcu.patch": Spinel 自身のファイルへの変更 -- Spinel のヘッダや C ファイルが
+  自分で宣言している `double` を `float` に、POSIX 部分の `#if 0` による除外 (中身が
+  リリースで変わってもパッチが当たりやすいように)、SRAM に収まる GC のバッファ。
+  変更するファイルの隣には、リリースのままのコピー "NAME.orig" があります
+
+新しいリリースは GitHub Actions で取り込むので、特定の OS は要りません:
+
+1. "SPMS-1 (type-2) Try a Spinel Release" ("../.github/workflows/spms1-type2-spinel-try.yml") を、
+   ブランチを選び、リリースのタグを指定して手動で実行します。`sh spinel_mcu/update.sh update TAG` で
+   リリースを取り込み (ファイルをコピーし、パッチを当て、この README と README.md のリリース名を
+   書き換えます)、"spms1_main.c" を再生成し、CRuby とレンダリングを比べ (リリースのせいでシンセが
+   鳴っている間に確保したり、GC ルートが収まらなくなったりすると失敗します)、取り込む前と後の
+   UF2 をビルドします (`sp_float` が `float` でなくなるとビルドが止まります)。何もコミットせず、
+   変わったものを成果物 (artifact) として残します
+2. 実行結果のまとめを見ます。"spinel_mcu/size_report.sh" が 2 つのビルドを比べ、RAM 上のシンセ本体
+   (`Spms1_main`)、RAM、flash がどれだけ増えたかを表示し、2% を超えると警告します。本体が大きく
+   なると 1 サンプルあたりの命令が増えますが、音にもシミュレーターにも表れません。リリースが
+   `lib` に足したファイルもここに出ます: 生成コードが必要とするものはコピーし、それ以外は
+   "spinel_mcu/not_vendored.txt" に加えます
+3. 成果物の "spinel-TAG.diff" をリポジトリの最上位で当て (`git apply spinel-TAG.diff`)、
+   コミットして、ビルド用のワークフローを実行します。その Spinel ジョブが結果を確認します
+   (`sh spinel_mcu/update.sh check`)
+4. 当たらなかった hunk は成果物の "NAME.rej" に入り、実行は失敗します。それ以外はすべて diff に
+   入っています。diff を当てた後で手で変更し、`sh spinel_mcu/update.sh save` でパッチを書き直します
+   (diff だけで動きます。Windows では Git Bash にあります)。そのうえで、ブランチで手順 1 を
+   もう一度実行します
+
+手動実行のワークフローは GitHub がデフォルトブランチのものを使うので、デフォルトブランチに
+入ってから実行できます。実行するブランチはそのとき選べます。
+
+ランタイムのファイルをさらに変更するときは、"NAME.orig" がなければ先にコピーしてから編集し、
+`sh spinel_mcu/update.sh save` を実行します。
+
+スクリプトはこのフォルダからローカルでも実行できます: `sh spinel_mcu/update.sh update TAG`、
+`sh spinel_mcu/update.sh check` (どちらも `--spinel DIR` で、clone せずにチェックアウト済みの
+Spinel を使います)、`sh spinel_mcu/size_report.sh BEFORE.elf AFTER.elf` (`arduino-cli compile
+--output-dir DIR` が DIR に残す .elf)。git、diff、GNU patch が必要で、size_report.sh には
+Arduino-Pico コアのツールが必要です。動作を確認しているのは Linux だけです。Windows では Git Bash に
+すべてあり、macOS では `brew install gpatch` で GNU patch が入ります。
+
+パッチの大半は、Spinel 自体にいくつかのビルドオプションがあれば不要になります。それを提案する Issue の
+**下書き** が "spinel_mcu/UPSTREAM_PROPOSAL_DRAFT.md" にあります (**未投稿**)。
 
 
 ### 生成コードの確認
@@ -688,10 +748,10 @@ C が `.rb` を指す `#line` を持っているので、対応は最後まで�
 
 読む前に知っておくべきことが 4 つあります。
 
-- 上の `-Os` は実際の設定ではありません。"spinel_rt.h" が `#pragma GCC optimize ("O3")` を
+- 上の `-Os` は実際の設定ではありません。"spinel_rt_mcu_head.h" が `#pragma GCC optimize ("O3")` を
   持っており、この翻訳単位ではコマンドラインの指定を上書きします。`-O3` を渡しても `-Os` を
   渡しても結果は変わりません
-- シンセ本体は `.text` にありません。"spinel_rt.h" の `#define main` が `.time_critical` に
+- シンセ本体は `.text` にありません。"spinel_rt_mcu_head.h" の `#define main` が `.time_critical` に
   置きます。2 つのビルドが同じコードだと示すには、それぞれに
   `arm-none-eabi-objcopy -O binary --only-section=.time_critical` をかけてバイト比較します。
   コメントだけの変更は "spms1_main.c" の `#line` を全部動かして他は何も変えませんが、その確認も
@@ -740,5 +800,5 @@ DEALINGS IN THE SOFTWARE.
 ```
 
 - ベースリリース: 2026.09.12 <https://github.com/matz/spinel/tree/2026.09.12>
-- 対象ファイル: `spinel_rt.h*`, `mruby_shim.h*`, `sp_*.*`, `re_*.*`
+- 対象ファイル: `spinel_rt*.h*`, `mruby_shim.h*`, `sp_*.*`, `re_*.*`, `spinel_mcu/*`
     - 注: ランタイムの一部のファイルは、MCU 向けに ISGK Instruments (Ryo Ishigaki) が変更しています

@@ -15,6 +15,10 @@
  *          Without it, note 60 is played from 0 s to 1 s.
  * --seconds: the length of the render (default 4).
  * --out:   the WAV file (default spms1_render.wav): 48 kHz, 24 bit, stereo, as the I2S DAC gets it.
+ *
+ * It also checks what the synth relies on to keep time on the device, and exits with 1 if either
+ * fails: that nothing is allocated while it plays, which a collection would interrupt, and that
+ * no GC root was dropped for want of room in sp_gc_roots (sized for the MCU in sp_gc.h).
  */
 #include <ctype.h>
 #include <math.h>
@@ -44,6 +48,10 @@ char *crypt(const char *key, const char *salt) {
 /* ---- MIDI state, the sketch's own ---- */
 
 #include "spms1_midi_state.h"
+
+/* The GC's counters and root stack, watched while the synth plays (see watch_gc) */
+#include "sp_gc.h"
+extern size_t sp_str_heap_bytes;
 
 /* ---- The patch and the score ---- */
 
@@ -217,9 +225,60 @@ static void write_sample(float v, int channel) {
 
 static double to_dbfs(float v) { return (v > 0.0f) ? 20.0 * log10(v) : -INFINITY; }
 
+/* The runtime's own counters: the object heap's bytes, the string heap's young bytes, and the
+   collections run. Allocating moves the first or the second, and a collection the third, so
+   none of them moving while the synth plays means it allocates nothing. Not every allocation
+   moves them (the runtime reuses some memory between collections), so the frames counted are a
+   lower bound; one that allocates every frame is still caught within a few buffers. */
+typedef struct { size_t bytes, str_bytes; int cycle; } GcCounters;
+static GcCounters g_gc;
+static bool g_gc_started;
+static long g_gc_alloc_frames;
+static long g_gc_first_alloc_frame = -1;
+static int g_gc_nroots_peak;
+
+static GcCounters gc_counters(void) {
+  GcCounters c = {sp_gc_bytes, sp_str_heap_bytes, sp_gc_cycle};
+  return c;
+}
+
+/* Called for each frame. The roots are sampled here, as the sketch's debug print samples them:
+   the module process methods push and pop theirs within the frame, so this is a lower bound of
+   the peak, where sp_gc_root_overflow is exact. */
+static void watch_gc(long frame) {
+  GcCounters c = gc_counters();
+  if (g_gc_started && (c.bytes != g_gc.bytes || c.str_bytes != g_gc.str_bytes || c.cycle != g_gc.cycle)) {
+    if (g_gc_first_alloc_frame < 0) g_gc_first_alloc_frame = frame;
+    g_gc_alloc_frames++;
+  }
+  g_gc = c;
+  g_gc_started = true;
+  if (sp_gc_nroots > g_gc_nroots_peak) g_gc_nroots_peak = sp_gc_nroots;
+}
+
+/* Prints what watch_gc saw, and says whether it passed */
+static bool report_gc(void) {
+  bool ok = true;
+  if (g_gc_alloc_frames == 0) {
+    printf("GC: nothing allocated while playing");
+  } else {
+    printf("GC: FAILED: allocation seen in %ld of %ld frames, from frame %ld on (look for a value "
+           "Spinel boxes, e.g. an untyped instance variable, and seed its type in \"sig\")",
+           g_gc_alloc_frames, g_frames, g_gc_first_alloc_frame);
+    ok = false;
+  }
+  printf("; roots %d of %d at most (sampled)\n", g_gc_nroots_peak, SP_GC_STACK_MAX);
+  if (sp_gc_root_overflow) {
+    printf("GC: FAILED: a root did not fit in sp_gc_roots and was dropped: raise SP_GC_STACK_MAX in sp_gc.h\n");
+    ok = false;
+  }
+  return ok;
+}
+
 /* The score's messages arrive as the frame they are timed at goes out, so the synth takes them at
    its next buffer, as it takes MIDI on the device. */
 void write_to_audio_buffer(float l, float r) {
+  watch_gc(g_frames);
   while (g_next_event < g_num_events && g_events[g_next_event].frame <= g_frames) {
     const Event *e = &g_events[g_next_event++];
     for (int i = 0; i < e->size; i++) spms1_midi_parse_byte(e->bytes[i]);
@@ -234,7 +293,7 @@ void write_to_audio_buffer(float l, float r) {
   fclose(g_wav);
   printf("%s: %.3f s, peak L %.1f dBFS, R %.1f dBFS, hash %08x\n", g_out_path,
          (double)g_frames / g_sample_rate, to_dbfs(g_peak[0]), to_dbfs(g_peak[1]), (unsigned)g_hash);
-  exit(0);
+  exit(report_gc() ? 0 : 1);
 }
 
 /* ---- Entry ---- */

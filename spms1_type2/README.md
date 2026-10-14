@@ -51,8 +51,8 @@ Required Software for Modification
     - Info: <https://github.com/FortySevenEffects/arduino_midi_library>
 - Spinel
     - Release: 2026.09.12 <https://github.com/matz/spinel/tree/2026.09.12>
-    - The Spinel output file "spms1_main.c" needs no editing. "spinel_rt.h" in this sketch
-      carries `#define main __attribute__((section(".time_critical"), flatten)) Spms1_main`,
+    - The Spinel output file "spms1_main.c" needs no editing. "spinel_rt_mcu_head.h" in this sketch,
+      included at the top of "spinel_rt.h", carries `#define main __attribute__((section(".time_critical"), flatten)) Spms1_main`,
       which renames it and puts the synth core in RAM at the same time. Renaming it by hand
       instead leaves the macro with nothing to match, and the core runs from flash
     - "spms1_main.c" is generated with `spinel spms1_main.rb -c --rbs sig`. The type seeds in "sig"
@@ -670,8 +670,14 @@ plugin for the audio).
     - `--seconds N` (default 4) and `--out FILE` (default "spms1_render.wav")
     - It prints the peaks and a hash of the samples, so two renders can be told apart at a glance:
       the editor's "Init" patch renders to the same hash as no patch at all. Compare hashes from the
-      same compiler only: clang ignores the `single-precision-constant` of "spinel_rt.h", which GCC (as
+      same compiler only: clang ignores the `single-precision-constant` of "spinel_rt_mcu_head.h", which GCC (as
       on the device) honors, so the last bits differ between them
+    - It also checks the GC, and exits with 1 (failing "compare_with_cruby.sh" and the GitHub Actions
+      workflow) unless both hold: that nothing is allocated while the synth plays,
+      as a collection would interrupt the audio on the device, and that no GC root is dropped for want
+      of room in `sp_gc_roots`, which "sp_gc.h" sizes for the MCU (`SP_GC_STACK_MAX`). A Spinel
+      release that boxes a value the previous one kept unboxed fails the first; the second is checked
+      only here, with `SP_GC_ROOT_OVERFLOW_CHECK`, so as to cost the device nothing
     - The build regenerates "spms1_main.c" with Spinel first, as "sim_spinel" does (`--no-spinel` to skip)
     - `sh sim_render/compare_with_cruby.sh [--patch FILE] [--score FILE] [--seconds N]` renders the same
       patch and score with this and with CRuby running "spms1_main.rb" itself, and compares them, so it
@@ -692,10 +698,63 @@ plugin for the audio).
 - SPMS-1 Web: builds and tests "spms1_web_synth.js", and keeps it as an artifact
 - Simulators: builds "sim_spinel" and "sim_render" on Linux, macOS and Windows, renders, and compares
   the renders with CRuby on Linux
-- Spinel: builds the release named above and checks that "spms1_main.c" is what it makes of the .rb files
+- Spinel: builds the release named above and checks that "spms1_main.c" is what it makes of the .rb files,
+  and that the runtime files are the release with "spinel_mcu/spinel_mcu.patch" applied (see below)
 - With "commit_package" checked, and when all of the above pass, the UF2 files ("bin") and
   "spms1_web_synth.js" are committed on the selected branch (not if the sources were changed after
   the build, nor if nothing changed)
+
+
+### Updating Spinel
+
+The runtime files in this folder are Spinel's `lib` (and `lib/regexp`) of the release named above, with
+the changes for the MCU kept in two places:
+
+- "spinel_rt_mcu_head.h", "spinel_rt_mcu_libm.h" and "spinel_rt_mcu_cold.h": what the MCU adds -- the
+  section and the pragmas of the synth core, `float` for `double`, and what the generated code needs
+  from `lib/sp_cold.c`, which is not built. "spinel_rt.h" carries only an `#include` line for each
+- "spinel_mcu/spinel_mcu.patch": what is changed in Spinel's own files -- `float` for `double` where
+  a header or a C file of its own declares it, the POSIX parts left out with `#if 0` (a release
+  changing what is inside them seldom stops the patch from applying), and the GC's buffers made
+  to fit SRAM. Each file it changes sits next to its released copy, "NAME.orig"
+
+A new release is taken on GitHub Actions, so it needs no particular OS:
+
+1. Run "SPMS-1 (type-2) Try a Spinel Release" ("../.github/workflows/spms1-type2-spinel-try.yml")
+   by hand on the branch, with the release's tag. It takes the release with
+   `sh spinel_mcu/update.sh update TAG`, which copies its files in, applies the patch and names the
+   release in this README and README.ja.md; regenerates "spms1_main.c"; compares the renders with
+   CRuby, which fails if the release makes the synth allocate while it plays or need more GC roots
+   than there is room for; and builds the UF2 before and after, which stops if `sp_float` is no
+   longer `float`. Nothing is committed: what it changed is kept as an artifact
+2. Look at the summary of the run. "spinel_mcu/size_report.sh" compares the two builds: how much
+   the synth core in RAM (`Spms1_main`), the RAM and the flash grew, with a warning above 2%. A
+   larger core runs more instructions a sample, which neither the sound nor the simulators show.
+   Files the release adds to its `lib` are listed there too: copy in the ones the generated code
+   needs, and add the others to "spinel_mcu/not_vendored.txt"
+3. Apply "spinel-TAG.diff" from the artifact at the top of the repository (`git apply
+   spinel-TAG.diff`), commit it, and run the build workflow, whose Spinel job checks the result
+   (`sh spinel_mcu/update.sh check`)
+4. A hunk that no longer applies is in the artifact as "NAME.rej", and the run fails; the diff holds
+   everything else. Make the change by hand after applying the diff, and write the patch again with
+   `sh spinel_mcu/update.sh save`, which needs only diff (Git Bash has it on Windows). Then run
+   step 1 again on the branch
+
+The workflow can be run only once it is on the default branch, as GitHub runs a manual workflow
+from there; it then runs on whichever branch is chosen.
+
+To change a runtime file further, copy it to "NAME.orig" first if it has none, edit it, and
+`sh spinel_mcu/update.sh save`.
+
+The scripts can also be run locally, from this folder: `sh spinel_mcu/update.sh update TAG`,
+`sh spinel_mcu/update.sh check` (both with `--spinel DIR` to take Spinel from a checkout instead of
+cloning it), and `sh spinel_mcu/size_report.sh BEFORE.elf AFTER.elf` (the .elf that
+`arduino-cli compile --output-dir DIR` leaves in DIR). They need git, diff and GNU patch, and
+size_report.sh the tools of the Arduino-Pico core. They are tested on Linux only; on Windows,
+Git Bash has all of them, and on macOS, `brew install gpatch` adds GNU patch.
+
+Most of the patch would go away with a few build options in Spinel itself.
+"spinel_mcu/UPSTREAM_PROPOSAL_DRAFT.md" is a **draft** of an issue proposing them, **not filed**.
 
 
 ### Checking the Generated Code
@@ -717,10 +776,10 @@ files, so the mapping survives all the way down.
 
 Four things to know before reading the output:
 
-- The `-Os` above is not what the synth is built with. "spinel_rt.h" carries
+- The `-Os` above is not what the synth is built with. "spinel_rt_mcu_head.h" carries
   `#pragma GCC optimize ("O3")`, which overrides whatever is on the command line for that
   translation unit. Passing `-O3` instead changes nothing, and neither does passing `-Os`
-- The synth core is not in `.text`. The `#define main` in "spinel_rt.h" puts it in
+- The synth core is not in `.text`. The `#define main` in "spinel_rt_mcu_head.h" puts it in
   `.time_critical`. To prove two builds are the same code,
   `arm-none-eabi-objcopy -O binary --only-section=.time_critical` on each and compare the bytes.
   A comment-only edit moves every `#line` in "spms1_main.c" and nothing else, and this is how to
@@ -770,5 +829,5 @@ DEALINGS IN THE SOFTWARE.
 ```
 
 - Base Release: 2026.09.12 <https://github.com/matz/spinel/tree/2026.09.12>
-- Target files: `spinel_rt.h*`, `mruby_shim.h*`, `sp_*.*`, `re_*.*`
+- Target files: `spinel_rt*.h*`, `mruby_shim.h*`, `sp_*.*`, `re_*.*`, `spinel_mcu/*`
     - Note: Some files for runtime are modified for MCU by ISGK Instruments (Ryo Ishigaki)

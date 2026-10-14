@@ -2,18 +2,7 @@
 #ifndef SP_RUNTIME_H
 #define SP_RUNTIME_H
 
-/* Puts the synth core in RAM. */
-/* flatten pulls the module process methods into Spms1_main. Without it GCC stops inlining them
-   once a module type has two instances and so two call sites, and anything not inlined into main
-   runs from XIP flash, main being the only function that carries .time_critical. */
-#define main __attribute__((section(".time_critical"), flatten)) Spms1_main
-#pragma GCC optimize("single-precision-constant")
-#pragma GCC optimize ("O3")
-#if defined(__arm__)
-#pragma GCC target ("thumb")
-#endif
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wunused-function"
+#include "spinel_rt_mcu_head.h"
 
 /* Platform feature-test macros (_DARWIN_C_SOURCE for MAP_ANON) live at the top
    of sp_types.h so every translation unit that includes it defines them before
@@ -46,16 +35,7 @@ const char *sp_str_setbyte_cow(const char *s, sp_int i, sp_int v);
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#define double float
-#define sin(x) sinf(x)
-#define cos(x) cosf(x)
-#define tan(x) tanf(x)
-#define atan2(y,x) atan2f(y,x)
-#define sqrt(x) sqrtf(x)
-#define fabs(x) fabsf(x)
-#define pow(x,y) powf(x,y)
-#define exp(x) expf(x)
-#define log(x) logf(x)
+#include "spinel_rt_mcu_libm.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <ctype.h>
@@ -63,10 +43,12 @@ const char *sp_str_setbyte_cow(const char *s, sp_int i, sp_int v);
 #include <time.h>
 #include <setjmp.h>
 #include <errno.h>
-//#include <sys/stat.h>
-//#include <dirent.h>
-//#include <pwd.h>
-//#include <sys/times.h>   /* struct tms for Process.times */
+#if 0 /* Not on the MCU */
+#include <sys/stat.h>
+#include <dirent.h>
+#include <pwd.h>
+#include <sys/times.h>   /* struct tms for Process.times */
+#endif
 
 /* Opt-in native backtrace (spinel --debug). In a -g, non-inlined build the
    sp_<method> symbols are present, so sp_raise_cls can snapshot the live C
@@ -75,39 +57,44 @@ const char *sp_str_setbyte_cow(const char *s, sp_int i, sp_int v);
    generated main() sets sp_bt_enabled (debug builds), so non-debug behaviour
    and cost are unchanged. execinfo is not quite POSIX-ish; it's absent on
    Windows and other platforms. */
-//#if defined(__has_include)
-//#  if __has_include(<execinfo.h>)
-//#    define HAVE_EXECINFO_H 1
-//#  endif
-//#elif defined(__GLIBC__) || defined(__APPLE__) || defined(__FreeBSD__)
-//#  define HAVE_EXECINFO_H 1
-//#endif
-//
-//#ifdef HAVE_EXECINFO_H
-//#include <execinfo.h>
-//#else
-///* No execinfo.h: provide no-op shims so the formatting code below compiles
-//   and links unchanged. backtrace_symbols returns NULL, which the formatter
-//   treats as "nothing to format" -- the backtrace is simply empty. */
-//#define backtrace_symbols(buf, n) ((char **)0)
-//#define backtrace(buf, sz) 0
-//#endif
-//#define SP_BT_AVAILABLE 1
+#if 0 /* Not on the MCU */
+#if defined(__has_include)
+#  if __has_include(<execinfo.h>)
+#    define HAVE_EXECINFO_H 1
+#  endif
+#elif defined(__GLIBC__) || defined(__APPLE__) || defined(__FreeBSD__)
+#  define HAVE_EXECINFO_H 1
+#endif
+
+#ifdef HAVE_EXECINFO_H
+#include <execinfo.h>
+#else
+/* No execinfo.h: provide no-op shims so the formatting code below compiles
+   and links unchanged. backtrace_symbols returns NULL, which the formatter
+   treats as "nothing to format" -- the backtrace is simply empty. */
+#define backtrace_symbols(buf, n) ((char **)0)
+#define backtrace(buf, sz) 0
+#endif
+#define SP_BT_AVAILABLE 1
+#else
 #define SP_BT_AVAILABLE 0
+#endif
 extern int sp_bt_enabled;          /* set to 1 by debug-build main(); defined in lib/sp_cold.c */
 extern const char *sp_bt_srcfile;  /* toplevel .rb path, set by debug main() */
 #if SP_BT_AVAILABLE
 static void *sp_bt_buf[256];       /* frames captured at the last raise */
 static int sp_bt_n = 0;
 #endif
-//#include <unistd.h>
-//#include <signal.h>
-//#include <sys/resource.h>   /* PRIO_* selectors for Process.getpriority */
-//#include <fcntl.h>
-//#include <fnmatch.h>
-//#include <sys/file.h>
-//#include <sys/mman.h>
-//#include <sys/wait.h>
+#if 0 /* Not on the MCU */
+#include <unistd.h>
+#include <signal.h>
+#include <sys/resource.h>   /* PRIO_* selectors for Process.getpriority */
+#include <fcntl.h>
+#include <fnmatch.h>
+#include <sys/file.h>
+#include <sys/mman.h>
+#include <sys/wait.h>
+#endif
 #if !defined(__APPLE__) && !defined(__FreeBSD__)
 #include <malloc.h>
 #else
@@ -480,9 +467,11 @@ static const char sp_ruby_platform_data[] = "\xff" SP_RUBY_ARCH "-" SP_RUBY_OS;
 static inline const char *sp_ruby_platform_str(void) { return sp_ruby_platform_data + 1; }
 
 /* Process.ppid wrapper. */
-//static inline sp_int sp_process_ppid(void) {
-//  return (sp_int)getppid();
-//}
+#if 0 /* Not on the MCU */
+static inline sp_int sp_process_ppid(void) {
+  return (sp_int)getppid();
+}
+#endif
 
 static inline double sp_process_clock_gettime(void) {
 #if defined(CLOCK_MONOTONIC)
@@ -1125,18 +1114,20 @@ sp_RbVal sp_File_ungetc(sp_File *f, sp_RbVal v);
 const char *sp_File_readpartial(sp_File *f, sp_int n);
 /* IO#pread(len, offset): read without moving the file position. Inline
    because it allocates from this TU's string heap (#3038). */
-//static inline const char *sp_File_pread(sp_File *f, sp_int len, sp_int off) {
-//  SP_IO_OPEN(f);
-//  if (len < 0) len = 0;
-//  char *buf = (char *)sp_str_alloc((size_t)len);
-//  ssize_t got = pread(fileno(f->fp), buf, (size_t)len, (off_t)off);
-//  if (got < 0) sp_raise_cls("IOError", "pread failed");
-//  if (got == 0 && len > 0) sp_raise_cls("EOFError", "end of file reached");
-//  buf[got] = '\0';
-//  sp_str_set_len(buf, (size_t)got);
-//  sp_str_mark_binary(buf);   /* pread answers ASCII-8BIT, as CRuby */
-//  return buf;
-//}
+#if 0 /* Not on the MCU */
+static inline const char *sp_File_pread(sp_File *f, sp_int len, sp_int off) {
+  SP_IO_OPEN(f);
+  if (len < 0) len = 0;
+  char *buf = (char *)sp_str_alloc((size_t)len);
+  ssize_t got = pread(fileno(f->fp), buf, (size_t)len, (off_t)off);
+  if (got < 0) sp_raise_cls("IOError", "pread failed");
+  if (got == 0 && len > 0) sp_raise_cls("EOFError", "end of file reached");
+  buf[got] = '\0';
+  sp_str_set_len(buf, (size_t)got);
+  sp_str_mark_binary(buf);   /* pread answers ASCII-8BIT, as CRuby */
+  return buf;
+}
+#endif
 sp_int sp_File_sysseek(sp_File *f, sp_int off, sp_int whence);
 sp_int sp_File_flock(sp_File *f, sp_int op);
 sp_int sp_File_fsync(sp_File *f);
@@ -1346,7 +1337,9 @@ static void sp_re_mark_globals(void) {
   sp_mark_string(sp_re_match_post);
   SP_GLB_PHASE("globals:argv");
   for (sp_int i = 0; i < sp_argv.len; i++) sp_mark_string(sp_argv.data[i]);
-//  if (sp_argv_array_cache) sp_gc_mark(sp_argv_array_cache);
+#if 0 /* Not on the MCU */
+  if (sp_argv_array_cache) sp_gc_mark(sp_argv_array_cache);
+#endif
   SP_GLB_PHASE("globals:exceptions");
   sp_mark_in_flight_exceptions();
   SP_GLB_PHASE("globals:proc-homes");
@@ -1356,7 +1349,9 @@ static void sp_re_mark_globals(void) {
   SP_GLB_PHASE("globals:at-exit");
   sp_mark_at_exit_hooks();
   SP_GLB_PHASE("globals:fiber-storage");
-//  sp_mark_fiber_root_storage();
+#if 0 /* Not on the MCU */
+  sp_mark_fiber_root_storage();
+#endif
   SP_GLB_PHASE("globals");
 #undef SP_GLB_PHASE
 }
@@ -1684,12 +1679,16 @@ static inline void sp_poly_puts(sp_RbVal v) {
           break;
         }
         case SP_BUILTIN_RANGE: puts(sp_Range_inspect((sp_Range *)v.v.p)); break;
-//        case SP_BUILTIN_FLOAT_RANGE: puts(sp_frange_inspect(*(sp_FloatRange *)v.v.p)); break;
+#if 0 /* Not on the MCU */
+        case SP_BUILTIN_FLOAT_RANGE: puts(sp_frange_inspect(*(sp_FloatRange *)v.v.p)); break;
+#endif
         case SP_BUILTIN_TIME: puts(sp_Time_to_s((sp_Time *)v.v.p)); break;
         case SP_BUILTIN_STRBUF: puts(sp_String_cstr((sp_String *)v.v.p)); break;
         case SP_BUILTIN_COMPLEX: puts(sp_complex_to_s(*(sp_Complex *)v.v.p)); break;
         case SP_BUILTIN_RATIONAL: puts(sp_rational_to_s(*(sp_Rational *)v.v.p)); break;
-//        case SP_BUILTIN_BIG_RATIONAL: puts(sp_brat_to_s((sp_BigRational *)v.v.p)); break;
+#if 0 /* Not on the MCU */
+        case SP_BUILTIN_BIG_RATIONAL: puts(sp_brat_to_s((sp_BigRational *)v.v.p)); break;
+#endif
         case SP_BUILTIN_REGEX: puts(sp_re_to_s_str(v.v.p)); break;
         case SP_BUILTIN_POLY_ARRAY: {
           /* puts flattens arrays recursively, one element per line -- and one
@@ -1849,21 +1848,27 @@ static inline const char *sp_poly_to_s(sp_RbVal v) {
            and fell through to "" (#3007) */
         case SP_BUILTIN_POLY_ARRAY: return sp_PolyArray_inspect((sp_PolyArray *)v.v.p);
         case SP_BUILTIN_RANGE: return sp_Range_inspect((sp_Range *)v.v.p);
-//        case SP_BUILTIN_FLOAT_RANGE: return sp_frange_inspect(*(sp_FloatRange *)v.v.p);
+#if 0 /* Not on the MCU */
+        case SP_BUILTIN_FLOAT_RANGE: return sp_frange_inspect(*(sp_FloatRange *)v.v.p);
+#endif
         case SP_BUILTIN_TIME: return sp_Time_to_s((sp_Time *)v.v.p);
         case SP_BUILTIN_STRBUF: return sp_String_cstr((sp_String *)v.v.p);   /* live buffer (#3227) */
         case SP_BUILTIN_METHOD: return sp_method_desc_cstr((sp_BoundMethod *)v.v.p);
         case SP_BUILTIN_COMPLEX: return sp_complex_to_s(*(sp_Complex *)v.v.p);
         case SP_BUILTIN_RATIONAL: return sp_rational_to_s(*(sp_Rational *)v.v.p);
-//        case SP_BUILTIN_BIG_RATIONAL: return sp_brat_to_s((sp_BigRational *)v.v.p);
+#if 0 /* Not on the MCU */
+        case SP_BUILTIN_BIG_RATIONAL: return sp_brat_to_s((sp_BigRational *)v.v.p);
+#endif
         case SP_BUILTIN_REGEX: return sp_re_to_s_str(v.v.p);
         /* MatchData#to_s is the whole match (#3641) */
         case SP_BUILTIN_MATCHDATA: { const char *_m0 = sp_MatchData_aref((sp_MatchData *)v.v.p, 0); return _m0 ? _m0 : sp_str_empty; }
         case SP_BUILTIN_EXCEPTION: return sp_exc_message((volatile struct sp_Exception_s *)v.v.p);
         /* Object#to_s on a boxed handle of the IO family, as the typed arm
            renders it: a boxed one fell through to "" (`puts [f, d]`) */
-//        case SP_BUILTIN_IO: return sp_io_to_s((sp_File *)v.v.p);
-//        case SP_BUILTIN_DIR: return sp_Dir_to_s((sp_Dir *)v.v.p);
+#if 0 /* Not on the MCU */
+        case SP_BUILTIN_IO: return sp_io_to_s((sp_File *)v.v.p);
+        case SP_BUILTIN_DIR: return sp_Dir_to_s((sp_Dir *)v.v.p);
+#endif
         default:
           if ((v.cls_id >= 0 || v.cls_id == SP_BUILTIN_OBJECT) && v.v.p) {
             /* a class with a user #to_s renders through the generated
@@ -1949,22 +1954,26 @@ static const char *sp_poly_class_name(sp_RbVal v) {
         case SP_BUILTIN_METHOD:
           return ((sp_BoundMethod *)v.v.p)->unbound ? SPL("UnboundMethod") : SPL("Method");   /* (#3692) */
         case SP_BUILTIN_ENUMERATOR: return SPL("Enumerator");
-//        case SP_BUILTIN_IO: {
-//          /* the handle kind names the class, through the same authority the
-//             typed .class emit uses -- a boxed socket must not report plain IO */
-//          sp_File *_iof = (sp_File *)v.v.p;
-//          if (_iof && _iof->mode &&
-//              (strcmp(_iof->mode, "stat") == 0 || strcmp(_iof->mode, "lstat") == 0))
-//            return SPL("File::Stat");
-//          return sp_io_kind_name(_iof);
-//        }
+#if 0 /* Not on the MCU */
+        case SP_BUILTIN_IO: {
+          /* the handle kind names the class, through the same authority the
+             typed .class emit uses -- a boxed socket must not report plain IO */
+          sp_File *_iof = (sp_File *)v.v.p;
+          if (_iof && _iof->mode &&
+              (strcmp(_iof->mode, "stat") == 0 || strcmp(_iof->mode, "lstat") == 0))
+            return SPL("File::Stat");
+          return sp_io_kind_name(_iof);
+        }
+#endif
         /* The concurrency handles: a boxed one reached the default arm and
            answered an empty name, so `(:ok && queue).class` printed nothing
            and a method on it raised NoMethodError with a blank class (#3484).
            Mutex and Queue name themselves through the same helpers the typed
            `.class` emit uses, so a Monitor and a SizedQueue stay distinct. */
-//        case SP_BUILTIN_MUTEX: return sp_Mutex_class_name((sp_mutex *)v.v.p);
-//        case SP_BUILTIN_QUEUE: return sp_Queue_class_name((sp_queue *)v.v.p);
+#if 0 /* Not on the MCU */
+        case SP_BUILTIN_MUTEX: return sp_Mutex_class_name((sp_mutex *)v.v.p);
+        case SP_BUILTIN_QUEUE: return sp_Queue_class_name((sp_queue *)v.v.p);
+#endif
         case SP_BUILTIN_CONDVAR: return SPL("Thread::ConditionVariable");
         case SP_BUILTIN_FIBER: return SPL("Fiber");
         case SP_BUILTIN_THREAD: return SPL("Thread");
@@ -2107,18 +2116,20 @@ static sp_PolyArray *sp_sock_addr(sp_File *f, int peer) {
 }
 /* Process.times -> Process::Tms: four cumulative CPU times in seconds.
    An unboxed value like sp_Range/sp_Class -- there is nothing to mutate. */
-//static sp_Tms sp_process_times(void) {
-//  sp_Tms t;
-//  struct tms b;
-//  double hz = (double)sysconf(_SC_CLK_TCK);
-//  if (hz <= 0) hz = 100.0;
-//  if (times(&b) == (clock_t)-1) { t.utime = t.stime = t.cutime = t.cstime = 0.0; return t; }
-//  t.utime  = (sp_float)b.tms_utime  / hz;
-//  t.stime  = (sp_float)b.tms_stime  / hz;
-//  t.cutime = (sp_float)b.tms_cutime / hz;
-//  t.cstime = (sp_float)b.tms_cstime / hz;
-//  return t;
-//}
+#if 0 /* Not on the MCU */
+static sp_Tms sp_process_times(void) {
+  sp_Tms t;
+  struct tms b;
+  double hz = (double)sysconf(_SC_CLK_TCK);
+  if (hz <= 0) hz = 100.0;
+  if (times(&b) == (clock_t)-1) { t.utime = t.stime = t.cutime = t.cstime = 0.0; return t; }
+  t.utime  = (sp_float)b.tms_utime  / hz;
+  t.stime  = (sp_float)b.tms_stime  / hz;
+  t.cutime = (sp_float)b.tms_cutime / hz;
+  t.cstime = (sp_float)b.tms_cstime / hz;
+  return t;
+}
+#endif
 /* Class/Module#freeze / #frozen?: a class value is an unboxed {cls_id, name},
    so the frozen flag lives in a global per-class map -- user ids from 0 up,
    builtins (-100..-163) mapped to the top of the range (#3101). */
@@ -3799,24 +3810,26 @@ static sp_RbVal sp_poly_shl(sp_RbVal a, sp_RbVal b) {
       }
       return sp_poly_binop_bad("<<", a, b);
     }
-//    if (a.cls_id == SP_BUILTIN_IO && a.v.p) {
-//      /* IO#<< through a boxed handle writes and chains (#2802) */
-//      /* A String operand writes its own byte count; only a stringified value
-//         needs strlen (sp_poly_to_s can answer an unmarked static name). Without
-//         the split, `io << binary` truncated or not depending on whether
-//         inference typed the operand -- the same bug, but intermittent. */
-//      if (b.tag == SP_TAG_STR && b.v.s) sp_File_write_bin((sp_File *)a.v.p, b.v.s);
-//      else sp_File_write((sp_File *)a.v.p, sp_poly_to_s(b));
-//      return a;
-//    }
-//    if (a.cls_id == SP_BUILTIN_QUEUE && a.v.p) {
-//      /* Queue#<< (and #push / #enq, which lower to it) appends and chains.
-//         Without an arm the boxed handle fell past every case to the Integer
-//         bit-shift fallback below, so a push through a yielded Queue was
-//         silently discarded and the queue stayed empty. */
-//      sp_Queue_push((sp_queue *)a.v.p, b);
-//      return a;
-//    }
+#if 0 /* Not on the MCU */
+    if (a.cls_id == SP_BUILTIN_IO && a.v.p) {
+      /* IO#<< through a boxed handle writes and chains (#2802) */
+      /* A String operand writes its own byte count; only a stringified value
+         needs strlen (sp_poly_to_s can answer an unmarked static name). Without
+         the split, `io << binary` truncated or not depending on whether
+         inference typed the operand -- the same bug, but intermittent. */
+      if (b.tag == SP_TAG_STR && b.v.s) sp_File_write_bin((sp_File *)a.v.p, b.v.s);
+      else sp_File_write((sp_File *)a.v.p, sp_poly_to_s(b));
+      return a;
+    }
+    if (a.cls_id == SP_BUILTIN_QUEUE && a.v.p) {
+      /* Queue#<< (and #push / #enq, which lower to it) appends and chains.
+         Without an arm the boxed handle fell past every case to the Integer
+         bit-shift fallback below, so a push through a yielded Queue was
+         silently discarded and the queue stayed empty. */
+      sp_Queue_push((sp_queue *)a.v.p, b);
+      return a;
+    }
+#endif
     /* A user object with a `<<` method (a Set held as a Hash value, #3174):
        dispatch through the user-binop hook, which mutates it in place and
        returns the receiver -- not the Integer#<< bit-shift fallback below. */
@@ -5496,14 +5509,18 @@ static inline const char *sp_poly_inspect(sp_RbVal v) {
         case SP_BUILTIN_PTR_ARRAY: return sp_PtrArray_inspect((sp_PtrArray *)v.v.p);
         case SP_BUILTIN_POLY_ARRAY: return sp_PolyArray_inspect((sp_PolyArray *)v.v.p);
         case SP_BUILTIN_RANGE:     return sp_Range_inspect((sp_Range *)v.v.p);
-//        case SP_BUILTIN_FLOAT_RANGE: return sp_frange_inspect(*(sp_FloatRange *)v.v.p);
+#if 0 /* Not on the MCU */
+        case SP_BUILTIN_FLOAT_RANGE: return sp_frange_inspect(*(sp_FloatRange *)v.v.p);
+#endif
         case SP_BUILTIN_TIME:      return sp_Time_inspect((sp_Time *)v.v.p);
       case SP_BUILTIN_STRBUF: return sp_str_inspect(sp_String_cstr((sp_String *)v.v.p));   /* (#3227) */
       case SP_BUILTIN_METHOD: return sp_method_desc_cstr((sp_BoundMethod *)v.v.p);
         case SP_BUILTIN_COMPLEX:   return sp_complex_inspect(*(sp_Complex *)v.v.p);
         case SP_BUILTIN_RATIONAL:  return sp_rational_inspect(*(sp_Rational *)v.v.p);
-//        case SP_BUILTIN_BIG_RATIONAL:  return sp_brat_inspect((sp_BigRational *)v.v.p);
-//        case SP_BUILTIN_REGEX:     return sp_re_inspect_str(v.v.p);
+#if 0 /* Not on the MCU */
+        case SP_BUILTIN_BIG_RATIONAL:  return sp_brat_inspect((sp_BigRational *)v.v.p);
+        case SP_BUILTIN_REGEX:     return sp_re_inspect_str(v.v.p);
+#endif
         case SP_BUILTIN_MATCHDATA: return sp_MatchData_inspect((sp_MatchData *)v.v.p);
         case SP_BUILTIN_EXCEPTION: return sp_sprintf("#<%s: %s>", sp_exc_class_name((volatile struct sp_Exception_s *)v.v.p), sp_exc_message((volatile struct sp_Exception_s *)v.v.p));
         case SP_BUILTIN_STR_INT_HASH:  return sp_StrIntHash_inspect((sp_StrIntHash *)v.v.p);
@@ -5610,7 +5627,9 @@ static const char *sp_poly_join(sp_RbVal a, const char *sep) {
      slot (e.g. `threads.each(&:join)`, where the thread array boxed to poly)
      means Thread#join: run it to completion. Its result (the thread) is almost
      always discarded, so yield the empty string for the const char* surface. */
-//  if (a.cls_id == SP_BUILTIN_THREAD) { sp_Thread_join((sp_thread *)a.v.p); return sp_str_empty; }
+#if 0 /* Not on the MCU */
+  if (a.cls_id == SP_BUILTIN_THREAD) { sp_Thread_join((sp_thread *)a.v.p); return sp_str_empty; }
+#endif
   switch (a.cls_id) {
     case SP_BUILTIN_STR_ARRAY: return sp_StrArray_join((sp_StrArray *)a.v.p, sep);
     case SP_BUILTIN_POLY_ARRAY: return sp_PolyArray_join((sp_PolyArray *)a.v.p, sep);
@@ -7981,7 +8000,9 @@ static sp_int sp_poly_count_val(sp_RbVal v, sp_RbVal x) {
 static sp_int sp_poly_length(sp_RbVal v){if(v.tag==SP_TAG_STR)return v.v.s?(sp_int)sp_str_byte_len(v.v.s):0;   /* the header length, so an embedded NUL counts (#3540) */if(v.tag==SP_TAG_SYM)return sp_sym_name_fn?(sp_int)strlen(sp_sym_name_fn((sp_sym)v.v.i)):0;if(v.tag!=SP_TAG_OBJ)return 0;switch(v.cls_id){case SP_BUILTIN_INT_ARRAY:return sp_IntArray_length((sp_IntArray*)v.v.p);case SP_BUILTIN_FLT_ARRAY:return sp_FloatArray_length((sp_FloatArray*)v.v.p);case SP_BUILTIN_STR_ARRAY:return sp_StrArray_length((sp_StrArray*)v.v.p);case SP_BUILTIN_SYM_ARRAY:return sp_IntArray_length((sp_IntArray*)v.v.p);case SP_BUILTIN_POLY_ARRAY:return sp_PolyArray_length((sp_PolyArray*)v.v.p);case SP_BUILTIN_STR_INT_HASH:return sp_StrIntHash_length((sp_StrIntHash*)v.v.p);case SP_BUILTIN_STR_STR_HASH:return sp_StrStrHash_length((sp_StrStrHash*)v.v.p);case SP_BUILTIN_INT_STR_HASH:return sp_IntStrHash_length((sp_IntStrHash*)v.v.p);case SP_BUILTIN_INT_INT_HASH:return sp_IntIntHash_length((sp_IntIntHash*)v.v.p);case SP_BUILTIN_STR_POLY_HASH:return sp_StrPolyHash_length((sp_StrPolyHash*)v.v.p);case SP_BUILTIN_SYM_POLY_HASH:return sp_SymPolyHash_length((sp_SymPolyHash*)v.v.p);case SP_BUILTIN_POLY_POLY_HASH:return sp_PolyPolyHash_length((sp_PolyPolyHash*)v.v.p);
 /* File#size / File::Stat#size on a boxed handle: the file's byte size via its
    path (a poly-held stat handle's .size read this as container length 0) (#3041) */
-//case SP_BUILTIN_IO:{sp_int sp_file_size(const char*);sp_File*_f=(sp_File*)v.v.p;if(_f&&sp_File_path(_f)[0]&&sp_File_path(_f)[0]!='<')return sp_file_size(sp_File_path(_f));return 0;}
+#if 0 /* Not on the MCU */
+case SP_BUILTIN_IO:{sp_int sp_file_size(const char*);sp_File*_f=(sp_File*)v.v.p;if(_f&&sp_File_path(_f)[0]&&sp_File_path(_f)[0]!='<')return sp_file_size(sp_File_path(_f));return 0;}
+#endif
 case SP_BUILTIN_STRBUF: return (sp_int)((sp_String *)v.v.p)->len;   /* live length (#3227) */
 /* a user object with #to_a (a container-read Set, #3234): its element count */
 default: if (sp_obj_to_a_fn) { sp_RbVal _a = sp_obj_to_a_fn(v); if (_a.tag == SP_TAG_OBJ && sp_poly_is_array_kind(_a.cls_id)) return sp_poly_length(_a); } return 0;}}
@@ -8472,8 +8493,10 @@ static sp_RbVal sp_poly_sample(sp_RbVal v) {
    result; join runs it and returns the thread (self). A non-Fiber poly returns
    nil, matching the NoMethodError gate for an unknown poly method. */
 static sp_RbVal sp_poly_fiber_value(sp_RbVal v) {
-//  if (v.tag == SP_TAG_OBJ && v.cls_id == SP_BUILTIN_THREAD)
-//    return sp_Thread_value((sp_thread *)v.v.p);   /* a green thread carried in a poly slot */
+#if 0 /* Not on the MCU */
+  if (v.tag == SP_TAG_OBJ && v.cls_id == SP_BUILTIN_THREAD)
+    return sp_Thread_value((sp_thread *)v.v.p);   /* a green thread carried in a poly slot */
+#endif
   if (v.tag == SP_TAG_OBJ && v.cls_id == SP_BUILTIN_FIBER) {
     sp_Fiber *f = (sp_Fiber *)v.v.p;
     if (f->state == 3) return f->yielded_value;   /* already run: cached result, idempotent */
@@ -8503,10 +8526,12 @@ static sp_RbVal sp_poly_join_timeout(sp_RbVal v, double seconds, const char *arg
 }
 
 static sp_RbVal sp_poly_fiber_join(sp_RbVal v) {
-//  if (v.tag == SP_TAG_OBJ && v.cls_id == SP_BUILTIN_THREAD) {
-//    sp_Thread_join((sp_thread *)v.v.p);
-//    return v;
-//  }
+#if 0 /* Not on the MCU */
+  if (v.tag == SP_TAG_OBJ && v.cls_id == SP_BUILTIN_THREAD) {
+    sp_Thread_join((sp_thread *)v.v.p);
+    return v;
+  }
+#endif
   if (v.tag == SP_TAG_OBJ && v.cls_id == SP_BUILTIN_FIBER) {
     sp_Fiber *f = (sp_Fiber *)v.v.p;
     if (f->state != 3) sp_Fiber_resume(f, sp_box_nil());
@@ -8707,8 +8732,11 @@ static sp_RbVal sp_json_symbolize(sp_RbVal v) {
   return v;
 }
 __attribute__((constructor)) static void sp_json_install_hooks(void) {
-//  sp_json_kind_fn = sp_json_kind;
+#if 0 /* Not on the MCU */
+  sp_json_kind_fn = sp_json_kind;
+#else
   sp_json_kind_fn = NULL;
+#endif
   sp_json_len_fn = sp_poly_length;
   sp_json_aref_fn = sp_poly_arr_get;
   sp_json_hpair_fn = sp_poly_hash_pair;
@@ -9966,17 +9994,19 @@ sp_int sp_stat_mode(sp_File *f);
 const char *sp_stat_ftype(sp_File *f);
 sp_int sp_file_stat_mode(const char *path);
 /* IO#puts with an Array argument: one element per line, recursively (#2813) */
-//static void sp_File_puts_val(sp_File *f, sp_RbVal v) {
-//  if (v.tag == SP_TAG_OBJ && sp_poly_is_array_kind(v.cls_id)) {
-//    sp_int n = sp_poly_length(v);
-//    for (sp_int i = 0; i < n; i++) sp_File_puts_val(f, sp_poly_arr_get(v, i));
-//    return;
-//  }
-//  {
-//    const char *sv = (v.tag == SP_TAG_NIL) ? "" : sp_poly_to_s(v);
-//    sp_File_puts(f, sv ? sv : "");
-//  }
-//}
+#if 0 /* Not on the MCU */
+static void sp_File_puts_val(sp_File *f, sp_RbVal v) {
+  if (v.tag == SP_TAG_OBJ && sp_poly_is_array_kind(v.cls_id)) {
+    sp_int n = sp_poly_length(v);
+    for (sp_int i = 0; i < n; i++) sp_File_puts_val(f, sp_poly_arr_get(v, i));
+    return;
+  }
+  {
+    const char *sv = (v.tag == SP_TAG_NIL) ? "" : sp_poly_to_s(v);
+    sp_File_puts(f, sv ? sv : "");
+  }
+}
+#endif
 /* A boxed IO handle read back out of a poly slot (an IO.pipe element, a
    poly-widened local): unbox for the IO instance dispatch, NoMethodError on
    any other tag. */
@@ -12039,38 +12069,6 @@ static const char *sp_class_to_s(sp_Class c) { return c.name ? c.name : sp_str_e
 static sp_sym sp_sym_intern(const char *s) { (void)s; return (sp_sym)0; }
 #endif
 
-
-/* Definitions that Spinel keeps in lib/sp_cold.c, copied here for the MCU. sp_cold.c is the
-   runtime's POSIX side (sockets, poll, dirent, ...) and is not built for the MCU, but the
-   generated code still calls or names these. sp_float_to_i_checked is here so that flatten can
-   inline it into Spms1_main, as it could when it was static in sp_runtime.h. The nil check in
-   the Integer operators calls sp_raise_nil_int_op, so it stays noinline, out of line as it is
-   in sp_cold.c, rather than adding a copy of itself to each of those sites in Spms1_main. */
-__attribute__((noinline)) SP_NORETURN void sp_raise_nil_int_op(sp_int a, sp_int b, const char *op) {SP_GC_ROOT_STR(op);
-  (void)b;
-  if (a == SP_INT_NIL)
-    sp_raise_cls("NoMethodError", sp_sprintf("undefined method '%s' for nil", op));
-  /* nil on the RIGHT is the coercion failure CRuby reports from Integer#+ */
-  sp_raise_cls("TypeError", "nil can't be coerced into Integer");
-}
-sp_int sp_float_to_i_checked(sp_float f) {
-  if (isnan(f) || isinf(f)) sp_raise_cls("FloatDomainError", sp_sprintf("%g", f));
-  if (f >= 9223372036854775808.0 || f < -9223372036854775808.0)
-    sp_raise_cls("RangeError", "float out of Integer range (Bignum promotion pending)");
-  return (sp_int)f;
-}
-void sp_Dir_scan(void *p) { sp_Dir *d = (sp_Dir *)p; if (d->path) sp_mark_string(d->path); }
-void sp_Enumerator_scan(void *p) {
-  sp_Enumerator *e = (sp_Enumerator *)p;
-  if (e->items) sp_gc_mark(e->items);
-  if (e->fib) sp_gc_mark(e->fib);
-  if (e->gen_cap) sp_gc_mark(e->gen_cap);
-  if (e->peeked) sp_mark_rbval(e->peek_val);
-  sp_mark_rbval(e->size);
-  if (e->has_feed) sp_mark_rbval(e->feed);
-  sp_mark_rbval(e->gen_result);
-  sp_mark_rbval(e->source);
-  sp_mark_string(e->meth);
-}
+#include "spinel_rt_mcu_cold.h"
 
 #endif /* SP_RUNTIME_H */
