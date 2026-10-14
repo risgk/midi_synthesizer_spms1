@@ -1005,6 +1005,7 @@
     <h2><span id="kbd-label">Soft Keyboard</span></h2>
     <button class="btn" id="kbd-oct-down" title="Octave Down">&#9664;</button>
     <button class="btn" id="kbd-oct-up" title="Octave Up">&#9654;</button>
+    <button class="btn" id="kbd-hold" aria-pressed="false" title="The key released keeps its note on, until Hold is turned off">Hold</button>
     <span class="kbd-hint">PC Keys: A - K, Z / X</span>
     <button class="btn kbd-panic" id="kbd-panic" title="Note Off on every note, Pitch Bend to the center, and the keys held let go">Panic</button>
   </div>
@@ -2613,6 +2614,8 @@
   const KB_STORAGE_KEY = 'spms1-type2-editor-keyboard';
   const kbKeys = [];  // note number -> the upper part, and the lower part of a white key
   const kbPointers = new Map();  // pointerId, or 'key:' + code for the PC keyboard -> the note it holds
+  const kbHeld = new Set();  // the notes of the keys released while Hold is on, still on
+  let kbHold = false;
   let kbScale = 1;
   const kbPrefs = { center: KB_DEFAULT_C + KB_CENTER_OFFSET };
 
@@ -2637,24 +2640,44 @@
 
   // A press, or a glide to another key while pressed. The new note on goes out before the old
   // note off, so the gate stays open and the envelope does not restart: legato.
+  // The synth plays one note, so the notes held by Hold are let go by a new key; their note offs
+  // only turn their keys off, the synth ignoring a note off for any pitch but the last. A key
+  // pressed again takes its held note over with no note off, which would close the gate.
   function kbPress(id, note) {
     const old = kbPointers.get(id);
     sendNote(0x90, note, 127);
     kbPointers.set(id, note);
-    if (old !== undefined) sendNote(0x80, old, 0);
+    kbHeld.delete(note);
+    [...kbHeld].forEach(n => { kbHeld.delete(n); sendNote(0x80, n, 0); });
+    if (old !== undefined) kbLetGo(old);
   }
 
   function kbRelease(id) {
     if (!kbPointers.has(id)) return;
     const note = kbPointers.get(id);
     kbPointers.delete(id);
-    sendNote(0x80, note, 0);
+    kbLetGo(note);
+  }
+
+  // The note of a key released, or left by a glide: a note off, or held while Hold is on.
+  function kbLetGo(note) {
+    if (kbHold) kbHeld.add(note);
+    else sendNote(0x80, note, 0);
+  }
+
+  function kbSetHold(on) {
+    kbHold = on;
+    const button = document.getElementById('kbd-hold');
+    button.classList.toggle('primary', on);
+    button.setAttribute('aria-pressed', String(on));
+    if (!on) [...kbHeld].forEach(n => { kbHeld.delete(n); sendNote(0x80, n, 0); });
   }
 
   // The synth ignores All Notes Off, and a CC 123 would move whatever parameter is mapped to it,
   // so Panic sends a Note Off on every note instead.
   function kbPanic() {
     kbPointers.clear();
+    kbHeld.clear();
     const ch = exportOptions().ch;
     for (let note = 0; note < 128; note++) {
       if (midiOutput) midiOutput.send([0x80 | ch, note, 0]);
@@ -2797,17 +2820,8 @@
       if (!kbPointers.has(e.pointerId) || note < 0 || note === kbPointers.get(e.pointerId)) return;
       kbPress(e.pointerId, note);
     });
-    // A mouse that leaves the keyboard upward or downward while pressed keeps its note on, with no
-    // Note Off when the button comes up, so a note can be held; Panic lets it go. A mouse that
-    // leaves it to the left or right, or a touch, sends the Note Off.
-    kb.addEventListener('pointerleave', e => {
-      const rect = kb.getBoundingClientRect();
-      if (e.pointerType === 'mouse' && (e.clientY <= rect.top || e.clientY >= rect.bottom)) {
-        kbPointers.delete(e.pointerId);
-      } else {
-        kbRelease(e.pointerId);
-      }
-    });
+    // A pointer that leaves the keyboard while pressed lets its key go; Hold keeps a note on.
+    kb.addEventListener('pointerleave', e => kbRelease(e.pointerId));
     window.addEventListener('pointerup', e => kbRelease(e.pointerId));
     window.addEventListener('pointercancel', e => kbRelease(e.pointerId));
     window.addEventListener('blur', () => [...kbPointers.keys()].forEach(kbRelease));
@@ -2835,6 +2849,7 @@
 
     document.getElementById('kbd-oct-down').addEventListener('click', () => kbShiftOctave(-1));
     document.getElementById('kbd-oct-up').addEventListener('click', () => kbShiftOctave(1));
+    document.getElementById('kbd-hold').addEventListener('click', () => kbSetHold(!kbHold));
     document.getElementById('kbd-panic').addEventListener('click', kbPanic);
 
     // The position is kept as the center of the visible area, so it stays put in another window
