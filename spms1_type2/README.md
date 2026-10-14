@@ -148,8 +148,8 @@ flowchart LR
   EG -. Mod .-> AMP
 ```
 
-Each module is processed once per sample, in the run order below. Their parameters -- waveform,
-cutoff, gain and the rest -- arrive from CC and are left out of the diagram.
+Each module processes a whole buffer (64 samples) in turn, in the run order below. Their
+parameters -- waveform, cutoff, gain and the rest -- arrive from CC and are left out of the diagram.
 
 The LFO goes straight to the oscillator, and LFO 1 Polarity reads the constant 0.1, which brings
 it down to a vibrato depth. Osc 1 Mod Amt spans the whole pitch range, as every modulation
@@ -173,9 +173,10 @@ flowchart LR
   LFO[LFO 1] ~~~ EG[EG 1] ~~~ MIX1[Mixer 1] ~~~ OSC[Osc 1] ~~~ FILTER[Filter 1] ~~~ AMP[Amp 1] ~~~ CHORUS[Chorus 1] ~~~ DELAY[Delay 1]
 ```
 
-The mixer has nothing routed to it, so it costs its slot every sample and changes nothing until
+The mixer has nothing routed to it, so it costs its slot every buffer and changes nothing until
 a patch gives it something. Where it sits is what it buys: a module sees the current sample's
-value only from something ahead of it in this line, and last sample's from anything behind.
+value only from something ahead of it in this line, and from anything behind it the sample at the
+same place in the last buffer, 64 samples (1.3 ms) earlier.
 Mixer 1 can reach the LFO and the envelope, and the oscillator, the filter and the amp can reach
 Mixer 1.
 
@@ -307,7 +308,8 @@ a matter of changing slot numbers.
 
 The run order is read from slot 0 upwards and stops at the first Module ID 0, so a patch shorter
 than 32 modules ends itself. It is separate from the module numbering: a module only sees the
-current sample's value from something listed before it, and last sample's from something after.
+current sample's value from something listed before it, and from something after it the value of
+64 samples (one buffer, 1.3 ms) earlier. A loop through the bus is that long too.
 
 In category 3, CC number 0 means the parameter has no CC. Its control slot then holds 0.0, whatever
 CC it had before, so the patch alone sets what the parameter reads.
@@ -601,7 +603,8 @@ CC 34, 0.25: the dry signal is 2.5 dB down and the first repeat about 16 dB unde
   oscillator, CC 98 = 3, CC 6 = 17 feeds the filter from it, and CC 98 = 12 and 13, CC 6 = 15 and
   16 points the final output at the chorus, which still takes the amp. The repeats then go
   through the filter and the amp's envelope as the note does, so they die away with it. Delay 1
-  still runs after the filter, which reads it a sample late; for an echo that does not matter
+  still runs after the filter, which reads it a buffer (1.3 ms) late; for an echo that does not
+  matter
 
 #### Notes
 
@@ -722,14 +725,18 @@ The runtime files in this folder are all of Spinel's `lib` (and `lib/regexp`) of
 above, with the changes for the MCU kept in two places:
 
 - "spinel_rt_mcu_head.h", "spinel_rt_mcu_libm.h" and "spinel_rt_mcu_cold.h": what the MCU adds -- the
-  section and the pragmas of the synth core, the float versions of the math functions, and, at
+  section and the pragmas of the synth core, Integer arithmetic without the overflow check
+  (`SP_INT_OVERFLOW_MODE_WRAP`, as `spinel --int-overflow=wrap` builds it), the float versions of
+  the math functions, and, at
   the end of "spinel_rt.h", what binds the generated code to a float runtime (below).
   "spinel_rt.h" carries only an `#include` line for each
 - "spinel_mcu/spinel_mcu.patch": what is changed in Spinel's own files -- the runtime written in
   `sp_float` where it said `double` for a Float, the POSIX parts left out with `#if 0` (a release
   changing what is inside them seldom stops the patch from applying), the files that need POSIX
-  throughout left out whole with `SPINEL_BARE_METAL` (below), and the GC's buffers made to fit
-  SRAM. Each file it changes sits next to its released copy, "NAME.orig"
+  throughout left out whole with `SPINEL_BARE_METAL` (below), the GC's buffers made to fit
+  SRAM, and the in-range path of an Array read or write (`sp_FloatArray_get`/`set`,
+  `sp_IntArray_get`) put ahead of the other checks, which go out of line unchanged. Each file it
+  changes sits next to its released copy, "NAME.orig"
 - "sp_cold_bare_metal.c" and "spinel_mcu/sp_cold_bare_metal.patch": "sp_cold.c" for a bare-metal
   build (below), kept apart from the released one, which stays as it is but for its being left
   out whole
