@@ -672,8 +672,8 @@ C のホスト ("sim_spinel"、"sim_render"、"web" の SPMS-1 Web) は、スケ
 - SPMS-1 Web: "spms1_web_synth.js" をビルド・テストし、成果物として残します
 - シミュレーター: "sim_spinel" と "sim_render" を Linux、macOS、Windows でビルドしてレンダリングし、
   Linux では CRuby とのレンダリングの比較もします。Linux では、ランタイムの関数と変数がどこで宣言されても
-  同じ型かも確認します ("spinel_mcu/lto_type_check.sh")。MCU 向けの `#define double float` は一部の
-  ファイルにだけ効くので、片側で float、もう片側で double と宣言された関数は、ほかでは気づけません
+  同じ型かも確認します ("spinel_mcu/lto_type_check.sh")。片側で float、もう片側で double と宣言された関数は、
+  ほかでは気づけません (MCU 向けの変更が `#define double float` でランタイムを float にしていた頃、2 つありました)
 - Spinel: 上で指定したリリースをビルドし、"spms1_main.c" が .rb ファイルから作られるものと一致するかを確認します。
   また、ランタイムのファイルがそのリリースに "spinel_mcu/spinel_mcu.patch" を当てたものかを確認します (下記参照)
 - "commit_package" を選び、上記がすべて通ると、UF2 ファイル ("bin") と "spms1_web_synth.js" を選んだブランチに
@@ -686,12 +686,20 @@ C のホスト ("sim_spinel"、"sim_render"、"web" の SPMS-1 Web) は、スケ
 MCU 向けの変更は 2 か所にまとめてあります:
 
 - "spinel_rt_mcu_head.h"、"spinel_rt_mcu_libm.h"、"spinel_rt_mcu_cold.h": MCU 向けに足すもの --
-  シンセ本体のセクションと pragma、`double` の代わりの `float`、ビルドしない `lib/sp_cold.c` から
-  生成コードが必要とするもの。"spinel_rt.h" にはそれぞれの `#include` 行だけがあります
-- "spinel_mcu/spinel_mcu.patch": Spinel 自身のファイルへの変更 -- Spinel のヘッダや C ファイルが
-  自分で宣言している `double` を `float` に、POSIX 部分の `#if 0` による除外 (中身が
-  リリースで変わってもパッチが当たりやすいように)、SRAM に収まる GC のバッファ。
-  変更するファイルの隣には、リリースのままのコピー "NAME.orig" があります
+  シンセ本体のセクションと pragma、数学関数の float 版、ビルドしない `lib/sp_cold.c` から
+  生成コードが必要とするもの、そして "spinel_rt.h" の最後で生成コードを float のランタイムに
+  つなぐもの (下記)。"spinel_rt.h" にはそれぞれの `#include` 行だけがあります
+- "spinel_mcu/spinel_mcu.patch": Spinel 自身のファイルへの変更 -- Float を表す `double` を `sp_float`
+  で書いたランタイム、POSIX 部分の `#if 0` による除外 (中身がリリースで変わってもパッチが
+  当たりやすいように)、SRAM に収まる GC のバッファ。変更するファイルの隣には、リリースのままの
+  コピー "NAME.orig" があります
+
+RP2350 の FPU は単精度だけなので、Float は float です。ランタイム全体を "sp_types.h" の
+`SPINEL_FLOAT32` が決めます: ここでは 1 で、0 にすると Spinel のとおり double になり、結果は CRuby と
+同じです。生成コードはキャストや一時変数でまだ `double` と書き、Float の定数に `DBL_EPSILON` などを
+使うので、"spinel_rt_mcu_cold.h" の最後に `#define double float` と `DBL_*` の代わりの `FLT_*` があり、
+これは生成コードにだけ効きます。`Float#to_s` は、同じ float に読み戻せる最短の桁を出します
+(`0.1`、`0.33333334`)。
 
 新しいリリースは GitHub Actions で取り込むので、特定の OS は要りません:
 

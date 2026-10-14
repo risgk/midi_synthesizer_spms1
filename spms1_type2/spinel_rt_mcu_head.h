@@ -10,7 +10,11 @@
    once a module type has two instances and so two call sites, and anything not inlined into main
    runs from XIP flash, main being the only function that carries .time_critical. */
 #define main __attribute__((section(".time_critical"), flatten)) Spms1_main
+/* Float literals of the generated code as float where Float is float (SPINEL_FLOAT32 in sp_types.h,
+   1 unless defined otherwise), as a Spinel that spelled them SP_FLT(0.5) would not need. */
+#if !defined(SPINEL_FLOAT32) || SPINEL_FLOAT32
 #pragma GCC optimize("single-precision-constant")
+#endif
 #pragma GCC optimize ("O3")
 #if defined(__arm__)
 #pragma GCC target ("thumb")

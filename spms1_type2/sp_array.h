@@ -264,7 +264,7 @@ sp_RbVal sp_FloatArray_index_key(sp_FloatArray *a, sp_RbVal v);
 sp_RbVal sp_FloatArray_rindex_key(sp_FloatArray *a, sp_RbVal v);
 sp_float sp_FloatArray_delete_key(sp_FloatArray *a, sp_RbVal v);
 const int64_t *sp_IntArray_ffi_data(sp_IntArray *a);
-const double *sp_FloatArray_ffi_data(sp_FloatArray *a);
+const sp_float *sp_FloatArray_ffi_data(sp_FloatArray *a);
 sp_IntArray *sp_IntArray_concat(sp_IntArray *a, sp_IntArray *b);
 sp_StrArray *sp_StrArray_concat(sp_StrArray *a, sp_StrArray *b);
 sp_FloatArray *sp_FloatArray_concat(sp_FloatArray *a, sp_FloatArray *b);

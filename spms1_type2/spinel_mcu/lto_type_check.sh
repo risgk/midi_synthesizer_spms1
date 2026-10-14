@@ -1,12 +1,12 @@
 #!/bin/sh
 # Checks that every function and variable of the runtime has the same type wherever it is declared.
 #
-# The MCU changes make double float with #define double float in some files of the runtime and in
-# the generated code, and not in others (see spinel_mcu/spinel_mcu.patch). A function declared in
-# a header that one file sees with the #define and another without takes a float on one side and a
-# double on the other. Nothing in a normal build notices: sp_float_shortest and sp_read_float were
-# like that, and Float#to_s printed garbage. A link with -flto compares the declarations across
-# all the files, and -Wlto-type-mismatch reports those that differ.
+# The MCU changes make Float float: the runtime in sp_float, and the generated code with
+# #define double float at the end of spinel_rt.h (see spinel_mcu/spinel_mcu.patch). A function
+# declared with float on one side and double on the other is a bug nothing in a normal build
+# notices: when the runtime too was made float with that #define, sp_float_shortest and
+# sp_read_float were like that, and Float#to_s printed garbage. A link with -flto compares the
+# declarations across all the files, and -Wlto-type-mismatch reports those that differ.
 #
 #   sh spinel_mcu/lto_type_check.sh
 #

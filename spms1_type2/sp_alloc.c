@@ -306,7 +306,7 @@ static size_t sp_gc_sat_mul(size_t v, size_t k) {
 static void sp_gc_stats_emit(void);
 static void sp_gc_stats_report(void) {
   static int on = -1;
-  static double last = 0;
+  static sp_float last = 0;
   if (on < 0) {
     const char *e = getenv("SPINEL_GC_STATS"); on = (e && *e && *e != '0') ? 1 : 0;
     /* SPINEL_GC_PHASES arms the same reporter on its own, so the breakdown does
@@ -320,17 +320,17 @@ static void sp_gc_stats_report(void) {
   }
   if (!on) return;
   struct timespec ts = {0}; //clock_gettime(CLOCK_MONOTONIC, &ts);
-  double now = (double)ts.tv_sec + (double)ts.tv_nsec * 1e-9;
+  sp_float now = (sp_float)ts.tv_sec + (sp_float)ts.tv_nsec * 1e-9;
   if (now - last < 1.0) return;
   last = now;
   sp_gc_stats_emit();
 }
 static void sp_gc_stats_emit(void) {
-  static double first = 0;
+  static sp_float first = 0;
   struct timespec ts = {0}; //clock_gettime(CLOCK_MONOTONIC, &ts);
-  double now = (double)ts.tv_sec + (double)ts.tv_nsec * 1e-9;
+  sp_float now = (sp_float)ts.tv_sec + (sp_float)ts.tv_nsec * 1e-9;
   if (first == 0) first = now;
-  double wall = now - first;
+  sp_float wall = now - first;
   unsigned long long n = sp_gc_stat_collections;
 #ifdef SP_THREADS
   int nw = sp_active_workers; if (nw < 1) nw = 1;
@@ -347,11 +347,11 @@ static void sp_gc_stats_emit(void) {
           "mark share %.2f\n",
           n, sp_gc_stat_fulls, sp_gc_stat_seconds, wall,
           wall > 0 ? 100.0 * sp_gc_stat_seconds / wall : 0.0,
-          n ? 1000.0 * sp_gc_stat_seconds / (double)n : 0.0,
-          (double)SP_GC_CTR_GET(sp_gc_bytes) / 1048576.0, (double)sbytes / 1048576.0,
-          (double)SP_GC_CTR_GET(sp_gc_threshold) / 1048576.0,
-          (double)SP_GC_CTR_GET(sp_str_threshold) / 1048576.0, nw,
-          (double)sp_gc_obj_alpha1024 / 1024.0);
+          n ? 1000.0 * sp_gc_stat_seconds / (sp_float)n : 0.0,
+          (sp_float)SP_GC_CTR_GET(sp_gc_bytes) / 1048576.0, (sp_float)sbytes / 1048576.0,
+          (sp_float)SP_GC_CTR_GET(sp_gc_threshold) / 1048576.0,
+          (sp_float)SP_GC_CTR_GET(sp_str_threshold) / 1048576.0, nw,
+          (sp_float)sp_gc_obj_alpha1024 / 1024.0);
   if (!sp_gc_ph_on) return;
   /* Which part of a collection cost that time. The names are the ones the
      collector's own comments use, so a number leads to the code that spent it.
@@ -365,10 +365,10 @@ static void sp_gc_stats_emit(void) {
   fprintf(stderr,
           "[gcph] string live %.1f MB young + %.1f MB old  "
           "(major %s%.1f MB old, %llu so far)\n",
-          (double)(sp_str_live_total() - sp_str_old_total()) / 1048576.0,
-          (double)sp_str_old_total() / 1048576.0,
+          (sp_float)(sp_str_live_total() - sp_str_old_total()) / 1048576.0,
+          (sp_float)sp_str_old_total() / 1048576.0,
           sp_str_major_label(),
-          (double)sp_str_old_threshold / 1048576.0,
+          (sp_float)sp_str_old_threshold / 1048576.0,
           (unsigned long long)sp_gc_str_majors);
   /* median / min over the sweeps, and their ratio. One number for the sawtooth
      the per-second line can only show a slice of. */
@@ -378,11 +378,11 @@ static void sp_gc_stats_emit(void) {
     if (cp) {
       memcpy(cp, sp_str_shape, (size_t)n * sizeof *cp);
       qsort(cp, n, sizeof *cp, sp_str_shape_cmp);
-      double med = (double)cp[n / 2], mn = (double)cp[0];
+      sp_float med = (sp_float)cp[n / 2], mn = (sp_float)cp[0];
       fprintf(stderr,
               "[gcph] string old over %u sweeps: min %.1f MB  median %.1f MB  max %.1f MB"
               "  (median/min %.1fx)\n",
-              n, mn / 1048576.0, med / 1048576.0, (double)cp[n - 1] / 1048576.0,
+              n, mn / 1048576.0, med / 1048576.0, (sp_float)cp[n - 1] / 1048576.0,
               mn > 0 ? med / mn : 0.0);
       free(cp);
     }
@@ -979,6 +979,36 @@ __attribute__((constructor)) static void sp_alloc_install_hooks(void) {
    with no locale dependency (pure integer arithmetic; see sp_dtoa.c); the
    fixed vs scientific layout is Ruby's Float#to_s rule (which differs from
    %g's), preserved from the previous strtod-probe implementation. */
+#if SPINEL_FLOAT32
+/* For the MCU: the shortest digits that read back as the same float. sp_float_shortest finds the
+   shortest for a double, which for a float's value is its exact expansion (0.10000000149011612
+   for 0.1f); this takes the fewest of its leading digits, rounded, that sp_read_float and a
+   conversion to float turn back into f (at most 9, which always do). */
+static void sp_float32_shortest(sp_float f, char *digits, int *dlen, int *exp) {
+  for (int p = 1; p < *dlen && p < 9; p++) {
+    char d[16]; int e = *exp;
+    memcpy(d, digits, (size_t)p);
+    if (digits[p] >= '5') {
+      int i = p - 1;
+      while (i >= 0 && d[i] == '9') d[i--] = '0';
+      if (i >= 0) d[i]++;
+      else { memmove(d + 1, d, (size_t)(p - 1)); d[0] = '1'; e++; }
+    }
+    int q = p;
+    while (q > 1 && d[q - 1] == '0') q--;
+    char buf[32]; int o = 0;
+    buf[o++] = d[0]; buf[o++] = '.';
+    if (q > 1) { memcpy(buf + o, d + 1, (size_t)(q - 1)); o += q - 1; } else buf[o++] = '0';
+    snprintf(buf + o, sizeof buf - (size_t)o, "e%d", e);
+    double x = 0;
+    if (sp_read_float(buf, NULL, &x) && (sp_float)x == f) {
+      memcpy(digits, d, (size_t)q); digits[q] = 0; *dlen = q; *exp = e;
+      return;
+    }
+  }
+}
+#endif
+
 const char *sp_float_to_s(sp_float f) {
   if(f!=f){char*r=sp_str_alloc_raw(4);r[0]='N';r[1]='a';r[2]='N';r[3]=0;return r;}
   if(f==HUGE_VAL||f==-HUGE_VAL){if(f<0){char*r=sp_str_alloc_raw(10);memcpy(r,"-Infinity",10);return r;}char*r=sp_str_alloc_raw(9);memcpy(r,"Infinity",9);return r;}
@@ -986,6 +1016,9 @@ const char *sp_float_to_s(sp_float f) {
   int neg = signbit(f);
   char digits[32]; int dlen;
   int exp = sp_float_shortest(neg ? -f : f, digits, &dlen);
+#if SPINEL_FLOAT32
+  sp_float32_shortest(neg ? -f : f, digits, &dlen, &exp);
+#endif
   int decpt = exp + 1;   /* number of digits before the decimal point in fixed form */
   char *out=sp_str_alloc_raw(64);int o=0;
   if(neg)out[o++]='-';

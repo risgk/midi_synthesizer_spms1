@@ -88,7 +88,16 @@ extern int sp_active_workers;        /* live worker count; sp_sched.c */
 #error "spinel: unsupported intptr_t width (need 32- or 64-bit)"
 #endif
 typedef intptr_t sp_int;
+/* For the MCU: Float is float where SPINEL_FLOAT32 is 1, which is the default here (Spinel's
+   would be 0, double). The runtime is written in sp_float, so this is the one place that decides. */
+#ifndef SPINEL_FLOAT32
+#define SPINEL_FLOAT32 1
+#endif
+#if SPINEL_FLOAT32
 typedef float sp_float;
+#else
+typedef double sp_float;
+#endif
 typedef bool sp_bool;
 
 /* Sentinel value reserved by the int? (scalar-nullable int) type. An

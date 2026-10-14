@@ -228,21 +228,21 @@ static inline sp_int sp_imod(sp_int a, sp_int b) {
 /* float %% with an INTEGER zero divisor raises in CRuby (5.0 %% 0), while a
    float zero divisor yields NaN (5.0 %% 0.0) -- the int-divisor emit routes
    here so the check costs nothing on the float-divisor path. */
-static inline double sp_fmod_intdiv(double a, sp_int b) {
+static inline sp_float sp_fmod_intdiv(sp_float a, sp_int b) {
   if (b == 0) sp_raise_cls("ZeroDivisionError", "divided by 0");
-  double r = fmod(a, (double)b);
-  if (r != 0 && ((r < 0) != (b < 0))) r += (double)b;
+  sp_float r = fmod(a, (sp_float)b);
+  if (r != 0 && ((r < 0) != (b < 0))) r += (sp_float)b;
   return r;
 }
-static inline double sp_fmod(double a, double b) {
+static inline sp_float sp_fmod(sp_float a, sp_float b) {
   if (b == 0) sp_raise_cls("ZeroDivisionError", "divided by 0");  /* 5.0 % 0.0 raises in CRuby */
-  double r = fmod(a, b);
+  sp_float r = fmod(a, b);
   if (r != 0.0 && ((r < 0.0) != (b < 0.0))) r += b;
   return r;
 }
 /* Float#remainder: plain C fmod, but a zero divisor raises the way every other
    Float division-derived operation does (#3649). */
-static inline double sp_fremainder(double a, double b) {
+static inline sp_float sp_fremainder(sp_float a, sp_float b) {
   if (b == 0) sp_raise_cls("ZeroDivisionError", "divided by 0");
   return fmod(a, b);
 }
@@ -473,11 +473,11 @@ static inline sp_int sp_process_ppid(void) {
 }
 #endif
 
-static inline double sp_process_clock_gettime(void) {
+static inline sp_float sp_process_clock_gettime(void) {
 #if defined(CLOCK_MONOTONIC)
   struct timespec ts;
   clock_gettime(CLOCK_MONOTONIC, &ts);
-  return (double)ts.tv_sec + ((double)ts.tv_nsec * 1e-9);
+  return (sp_float)ts.tv_sec + ((sp_float)ts.tv_nsec * 1e-9);
 #else
   return 0.0;
 #endif
@@ -1449,7 +1449,7 @@ int sp_bigint_even_p(sp_Bigint *b);
 sp_Bigint *sp_bigint_abs_v(sp_Bigint *b);
 sp_int sp_bigint_bit_length(sp_Bigint *b);
 int64_t sp_bigint_to_int(sp_Bigint *b);
-double sp_bigint_to_double(sp_Bigint *b);
+sp_float sp_bigint_to_double(sp_Bigint *b);
 int sp_bigint_cmp(sp_Bigint *a, sp_Bigint *b);
 sp_Bigint *sp_bigint_new_int(int64_t v);
 sp_Bigint *sp_bigint_add(sp_Bigint *a, sp_Bigint *b);
@@ -1599,13 +1599,13 @@ sp_FloatArray *sp_frange_step(sp_FloatRange r, sp_float st);
    principal branch (ln|base| + i*pi), base==0 is 0. Both result components are
    Float-classed (fl = 3). */
 static sp_Complex sp_real_pow_complex(sp_float base, sp_Complex e) {
-  double lr, li;
+  sp_float lr, li;
   if (base > 0)      { lr = log(base);  li = 0; }
   else if (base < 0) { lr = log(-base); li = M_PI; }
   else               { return (sp_Complex){0, 0, 3}; }
-  double wr = e.re * lr - e.im * li;
-  double wi = e.re * li + e.im * lr;
-  double m = exp(wr);
+  sp_float wr = e.re * lr - e.im * li;
+  sp_float wi = e.re * li + e.im * lr;
+  sp_float m = exp(wr);
   return (sp_Complex){ m * cos(wi), m * sin(wi), 3 };
 }
 /* sp_Range_inspect moved to lib/sp_format.c (cold). */
@@ -2120,7 +2120,7 @@ static sp_PolyArray *sp_sock_addr(sp_File *f, int peer) {
 static sp_Tms sp_process_times(void) {
   sp_Tms t;
   struct tms b;
-  double hz = (double)sysconf(_SC_CLK_TCK);
+  sp_float hz = (sp_float)sysconf(_SC_CLK_TCK);
   if (hz <= 0) hz = 100.0;
   if (times(&b) == (clock_t)-1) { t.utime = t.stime = t.cutime = t.cstime = 0.0; return t; }
   t.utime  = (sp_float)b.tms_utime  / hz;
@@ -3036,17 +3036,17 @@ static sp_RbVal sp_poly_round(sp_RbVal v) { if (v.tag == SP_TAG_FLT) { sp_poly_f
    codegen path, dispatched on the runtime tag. */
 static sp_RbVal sp_poly_round_n(sp_RbVal v, sp_int n) {
   if (v.tag == SP_TAG_FLT) {
-    double x = v.v.f;
-    if (n > 0) { double f = pow(10, (double)n); if (isinf(f)) return sp_box_float(x);
-      double r = round(x * f) / f; return sp_box_float((x != 0.0 && r == 0.0) ? 0.0 : r); }  /* +0.0 normalize (#3235) */
+    sp_float x = v.v.f;
+    if (n > 0) { sp_float f = pow(10, (sp_float)n); if (isinf(f)) return sp_box_float(x);
+      sp_float r = round(x * f) / f; return sp_box_float((x != 0.0 && r == 0.0) ? 0.0 : r); }  /* +0.0 normalize (#3235) */
     sp_poly_flo_domain_ck(x);
-    double f = pow(10, (double)(-n));
+    sp_float f = pow(10, (sp_float)(-n));
     return sp_box_int(isinf(f) ? 0 : (sp_int)(round(x / f) * f));
   }
   if (v.tag == SP_TAG_INT) {
     if (n >= 0) return v;
-    double f = pow(10, (double)(-n));
-    return sp_box_int(isinf(f) ? 0 : (sp_int)(round((double)v.v.i / f) * f));
+    sp_float f = pow(10, (sp_float)(-n));
+    return sp_box_int(isinf(f) ? 0 : (sp_int)(round((sp_float)v.v.i / f) * f));
   }
   if (v.tag == SP_TAG_BIGINT) return v;  /* n < 0 on a bignum is out of scope */
   /* Rational#round(n): a positive precision keeps the Rational, n <= 0 lands
@@ -3615,7 +3615,7 @@ static sp_RbVal sp_poly_pow(sp_RbVal a, sp_RbVal b) {
     if (b.tag == SP_TAG_FLT)
       return sp_box_complex(sp_complex_pow_c(ca, (sp_Complex){b.v.f, 0.0, SP_CPLX_RE_F | SP_CPLX_IM_F}));
   }
-  double r = pow((double)sp_poly_to_f(a), (double)sp_poly_to_f(b));
+  sp_float r = pow((sp_float)sp_poly_to_f(a), (sp_float)sp_poly_to_f(b));
   return sp_box_float((sp_float)r);
 }
 /* sp_poly_shl is defined after sp_PolyArray_push (below) so the
@@ -3716,10 +3716,10 @@ static sp_RbVal sp_PolyArray_pop(sp_PolyArray *a) { if (!a || a->len <= 0) retur
    below carries it to ~1e-15. Gamma(1) and Gamma(2) are exactly 1, so their
    logs are returned as an exact 0 rather than a rounding-noise residual. */
 /* sp_lgamma_pos: moved to lib/sp_cold.c */
-double sp_lgamma_pos(double x);
+sp_float sp_lgamma_pos(sp_float x);
 /* Math.lgamma(x) -> [log(|gamma(x)|), sign of gamma(x)]. */
 /* sp_math_lgamma: moved to lib/sp_cold.c */
-sp_PolyArray *sp_math_lgamma(double x);
+sp_PolyArray *sp_math_lgamma(sp_float x);
 static sp_RbVal sp_PolyArray_shift(sp_PolyArray *a) { if (!a || a->len <= 0) return sp_box_nil(); if (a->frozen) { sp_raise_frozen_array_at(a, SP_BUILTIN_POLY_ARRAY); return sp_box_nil(); } sp_RbVal v = a->data[0]; memmove(a->data, a->data+1, (size_t)(--a->len)*sizeof(sp_RbVal)); return v; }
 static sp_RbVal sp_PolyArray_delete_at(sp_PolyArray *a, sp_int i) {sp_gc_wb((void*)a);  if (!a) return sp_box_nil(); if (i < 0) i += a->len; if (i < 0 || i >= a->len) return sp_box_nil(); sp_RbVal v = a->data[i]; for (sp_int j = i; j < a->len - 1; j++) a->data[j] = a->data[j+1]; a->len--; return v; }
 static void sp_PolyArray_insert(sp_PolyArray *a, sp_int i, sp_RbVal v) {sp_gc_wb((void*)a);  if (!a) return; if (a->frozen) { sp_raise_frozen_array_at(a, SP_BUILTIN_POLY_ARRAY); return; } sp_int orig = i; if (i < 0) i += a->len + 1; if (i < 0) sp_raise_cls("IndexError", sp_sprintf("index %lld too small for array; minimum: %lld", (long long)orig, (long long)(-(a->len + 1)))); while (i > a->len) sp_PolyArray_push(a, sp_box_nil()); /* CRuby pads with nils past the end */ sp_PolyArray_push(a, sp_box_nil()); for (sp_int j = a->len - 1; j > i; j--) a->data[j] = a->data[j-1]; a->data[i] = v; }
@@ -4949,14 +4949,14 @@ else {
     }
 else if (conv == 'f' || conv == 'e' || conv == 'E' || conv == 'g' || conv == 'G' ||
          conv == 'a' || conv == 'A') {
-      double dv = 0;
+      sp_float dv = 0;
       if (v.tag == SP_TAG_FLT) dv = v.v.f;
-      else if (v.tag == SP_TAG_INT) dv = (double)v.v.i;
+      else if (v.tag == SP_TAG_INT) dv = (sp_float)v.v.i;
       else if (sp_poly_is_rational(v)) dv = sp_poly_to_f_with_rational(v);
       else if (v.tag == SP_TAG_BIGINT) dv = sp_poly_to_f(v);
       /* a String converts the way Float() does; anything else is not a number
          and CRuby refuses rather than formatting a zero (#4010) */
-      else if (v.tag == SP_TAG_STR) dv = (double)sp_str_to_f_strict(v.v.s ? v.v.s : sp_str_empty);
+      else if (v.tag == SP_TAG_STR) dv = (sp_float)sp_str_to_f_strict(v.v.s ? v.v.s : sp_str_empty);
       else { free(buf); sp_raise_cls("TypeError", sp_sprintf("can't convert %s into Float", sp_convert_src_name(v))); }
       /* Ruby prints non-finite floats as Inf/-Inf/NaN (C printf lowercases) */
       if (!isfinite(dv)) wn = snprintf(tmp, sizeof(tmp), "%s", isnan(dv) ? "NaN" : dv > 0 ? "Inf" : "-Inf");
@@ -6043,7 +6043,7 @@ static sp_int sp_rbval_hash_key(sp_RbVal v) {
     }
     /* -0.0 and 0.0 are eql?, so they must hash alike: normalize the sign of
        zero away before hashing the bits (#3651). */
-    case SP_TAG_FLT: { double f = v.v.f == 0.0 ? 0.0 : v.v.f;
+    case SP_TAG_FLT: { sp_float f = v.v.f == 0.0 ? 0.0 : v.v.f;
                        uint64_t b; memcpy(&b, &f, sizeof(b)); return (sp_int)b; }
     case SP_TAG_OBJ:
       /* A shared-string handle is `==` to the immediate string with the same
@@ -6151,7 +6151,7 @@ static sp_int sp_rbval_hash_key(sp_RbVal v) {
         sp_FloatRange *fr = (sp_FloatRange *)v.v.p;
         if (!fr) return 0;
         uint64_t bf, bl;
-        double f = fr->first == 0.0 ? 0.0 : fr->first, l = fr->last == 0.0 ? 0.0 : fr->last;
+        sp_float f = fr->first == 0.0 ? 0.0 : fr->first, l = fr->last == 0.0 ? 0.0 : fr->last;
         memcpy(&bf, &f, sizeof bf); memcpy(&bl, &l, sizeof bl);
         return (sp_int)(((bf * 31u) ^ bl) * 2u + (uint64_t)(fr->excl ? 1 : 0));
       }
@@ -8507,7 +8507,7 @@ static sp_RbVal sp_poly_fiber_value(sp_RbVal v) {
 /* Forward declarations for sp_sched.c functions used by codegen. The
    codegen emits direct symbol references (sp_Thread_join_timeout) so
    the signatures must be visible here. */
-sp_thread *sp_Thread_join_timeout(sp_thread *t, double seconds);
+sp_thread *sp_Thread_join_timeout(sp_thread *t, sp_float seconds);
 
 /* `poly.join(<number>)` can only be Thread#join(limit): Array#join with a
    numeric separator is a TypeError in CRuby, so a numeric argument leaves no
@@ -8515,7 +8515,7 @@ sp_thread *sp_Thread_join_timeout(sp_thread *t, double seconds);
    limit and nil when it did not, which is why this returns sp_RbVal where
    sp_poly_join returns the joined string. A non-Thread receiver gets the
    TypeError the separator slot would have raised. */
-static sp_RbVal sp_poly_join_timeout(sp_RbVal v, double seconds, const char *argcls) {
+static sp_RbVal sp_poly_join_timeout(sp_RbVal v, sp_float seconds, const char *argcls) {
   if (v.tag == SP_TAG_OBJ && v.cls_id == SP_BUILTIN_THREAD)
     return sp_Thread_join_timeout((sp_thread *)v.v.p, seconds) ? v : sp_box_nil();
   /* the separator slot's own refusal, naming the class the argument was
@@ -9126,7 +9126,7 @@ static sp_RbVal sp_bm_receiver(sp_BoundMethod *m) {
 
 /* Float#round(half: mode) where the mode is only known at run time (#3646).
    A nil mode is the default (round half up, away from zero). */
-static double sp_round_half_mode(double x, sp_sym mode) {
+static sp_float sp_round_half_mode(sp_float x, sp_sym mode) {
   const char *m = (mode == (sp_sym)-1) ? NULL : sp_sym_to_s(mode);
   if (!m || !m[0]) return round(x);
   if (strcmp(m, "even") == 0) return sp_round_half_even(x);
@@ -9961,8 +9961,8 @@ sp_Addrinfo *sp_addrinfo_new(const char *ip, sp_int port, sp_int stype, sp_int i
 const char *sp_addrinfo_inspect(sp_Addrinfo *a);
 sp_SockOpt *sp_sockopt_new(sp_int family, sp_int level, sp_int optname, sp_int value);
 const char *sp_sockopt_inspect(sp_SockOpt *o);
-sp_File *sp_io_wait_events(sp_File *f, double timeout, sp_int kind);
-sp_RbVal sp_io_select(sp_PolyArray *rd, sp_PolyArray *wr, sp_PolyArray *er, double timeout);
+sp_File *sp_io_wait_events(sp_File *f, sp_float timeout, sp_int kind);
+sp_RbVal sp_io_select(sp_PolyArray *rd, sp_PolyArray *wr, sp_PolyArray *er, sp_float timeout);
 sp_int sp_file_size_q(const char *path);
 sp_bool sp_file_pipe(const char *path);
 sp_bool sp_file_identical(const char *a, const char *b);
@@ -11994,7 +11994,7 @@ sp_Bigint *sp_bigint_new_str(const char *s, int base);
    own exact comparison does, rather than true from a lossy double round-trip.
    Ordering does compare as doubles (sp_poly_cmp does the same); only equality
    can be decided by a single ulp. */
-static int sp_bigint_eq_f(sp_Bigint *a, double d) {
+static int sp_bigint_eq_f(sp_Bigint *a, sp_float d) {
   if (!isfinite(d) || d != floor(d)) return 0;   /* inf/nan/fraction is no integer */
   char buf[400];
   snprintf(buf, sizeof buf, "%.0f", d);

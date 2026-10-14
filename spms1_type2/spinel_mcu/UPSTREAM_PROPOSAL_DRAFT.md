@@ -87,19 +87,26 @@ rewritten C, compiled that way, needs no `#define double float` and no
 left (only the conversions that the error messages pass to `sp_sprintf`), and comes out the same,
 byte for byte, as what my patch produces today, and renders the same audio.
 
-The runtime side is then the larger part, and stays opt-in, for those who accept results that
-differ from CRuby's (`0.1 + 0.2` is 0.30000001192092896, integers above 2^24 lose precision,
-`1.0e39` is Infinity):
+The runtime side is the larger part, and stays opt-in, for those who accept results that differ
+from CRuby's (`0.1 + 0.2` is 0.3 as a float, integers above 2^24 lose precision, `1.0e39` is
+Infinity). I have done it in my patch, in the shape it would take in Spinel:
 
-- `sp_float` declared in one place (today `lib/sp_types.h`, `lib/sp_core.c`, and `mrb_float` in
-  `lib/mruby_shim.h`), with the prototypes in terms of `sp_float`
-- `<tgmath.h>`, its own inline helpers in terms of `sp_float`, and `SP_FLOAT_EPSILON`,
-  `SP_FLOAT_MAX` and the like defined from `FLT_EPSILON`, `FLT_MAX`, ...
-- the shortest round trip for a float in `Float#to_s`, and `strtof` (or the float counterpart of
-  `sp_read_float`) in `String#to_f`
+- `SPINEL_FLOAT32` in `lib/sp_types.h` decides `sp_float` (and `mrb_float` in `lib/mruby_shim.h`)
+- the runtime written in `sp_float` where it said `double` for a Float: about 140 places in 11
+  files, `double` kept where it means double (`sp_dtoa`, the GC's clocks, `Time`)
+- the float versions of the math functions, and `FLT_EPSILON`, `FLT_MAX` and the like for the
+  Float constants
+- `Float#to_s` giving the shortest digits that read back as the same float (`0.1`, `0.33333334`);
+  `String#to_f` reads a double and converts it
 
-Doing it from outside, as I do now (`#define double float` around the runtime), is fragile: in my
-patch, `sp_float_shortest` and `sp_read_float` were declared with float in some translation units
+With `SPINEL_FLOAT32` set to 0, a test program prints exactly what CRuby does; with 1, the synth core
+of my program compiles to the same machine code as before. A round trip of 52,200 floats through `to_s` and `to_f`
+gave them all back. What the patch cannot do is the generated C: it still needs `#define double
+float` and the `DBL_*` constants redefined at the end of `spinel_rt.h`, which the change in the
+table above would make unnecessary.
+
+Doing it from outside with `#define double float` around the runtime, as I did before, is
+fragile: in my patch, `sp_float_shortest` and `sp_read_float` were declared with float in some translation units
 and defined with double in `sp_dtoa.c`, so `Float#to_s` printed garbage and `String#to_f` wrote
 past a variable, unnoticed until an LTO type check (`-flto -Wlto-type-mismatch`). And `<tgmath.h>`
 cannot be used under that `#define` (its macros spell `long double`), so each math function has to

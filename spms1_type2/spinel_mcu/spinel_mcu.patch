@@ -1,11 +1,15 @@
 --- a/mruby_shim.h
 +++ b/mruby_shim.h
-@@ -22,7 +22,7 @@
+@@ -22,7 +22,12 @@
  /* Basic mruby types */
  typedef int64_t mrb_int;
  typedef uint64_t mrb_uint;
--typedef double mrb_float;
++/* For the MCU: as sp_types.h decides */
++#if !defined(SPINEL_FLOAT32) || SPINEL_FLOAT32
 +typedef float mrb_float;
++#else
+ typedef double mrb_float;
++#endif
  typedef int mrb_bool;
  #define TRUE 1
  #define FALSE 0
@@ -21,25 +25,133 @@
  static size_t sp_str_shape[SP_STR_SHAPE_MAX];
  static unsigned sp_str_shape_n = 0;      /* total sweeps seen */
  static int sp_str_shape_cmp(const void *a, const void *b) {
-@@ -318,7 +319,7 @@
+@@ -305,7 +306,7 @@
+ static void sp_gc_stats_emit(void);
+ static void sp_gc_stats_report(void) {
+   static int on = -1;
+-  static double last = 0;
++  static sp_float last = 0;
+   if (on < 0) {
+     const char *e = getenv("SPINEL_GC_STATS"); on = (e && *e && *e != '0') ? 1 : 0;
+     /* SPINEL_GC_PHASES arms the same reporter on its own, so the breakdown does
+@@ -318,18 +319,18 @@
      if (on) atexit(sp_gc_stats_emit);
    }
    if (!on) return;
 -  struct timespec ts; clock_gettime(CLOCK_MONOTONIC, &ts);
+-  double now = (double)ts.tv_sec + (double)ts.tv_nsec * 1e-9;
 +  struct timespec ts = {0}; //clock_gettime(CLOCK_MONOTONIC, &ts);
-   double now = (double)ts.tv_sec + (double)ts.tv_nsec * 1e-9;
++  sp_float now = (sp_float)ts.tv_sec + (sp_float)ts.tv_nsec * 1e-9;
    if (now - last < 1.0) return;
    last = now;
-@@ -326,7 +327,7 @@
+   sp_gc_stats_emit();
  }
  static void sp_gc_stats_emit(void) {
-   static double first = 0;
+-  static double first = 0;
 -  struct timespec ts; clock_gettime(CLOCK_MONOTONIC, &ts);
+-  double now = (double)ts.tv_sec + (double)ts.tv_nsec * 1e-9;
++  static sp_float first = 0;
 +  struct timespec ts = {0}; //clock_gettime(CLOCK_MONOTONIC, &ts);
-   double now = (double)ts.tv_sec + (double)ts.tv_nsec * 1e-9;
++  sp_float now = (sp_float)ts.tv_sec + (sp_float)ts.tv_nsec * 1e-9;
    if (first == 0) first = now;
-   double wall = now - first;
-@@ -1027,14 +1028,17 @@
+-  double wall = now - first;
++  sp_float wall = now - first;
+   unsigned long long n = sp_gc_stat_collections;
+ #ifdef SP_THREADS
+   int nw = sp_active_workers; if (nw < 1) nw = 1;
+@@ -346,11 +347,11 @@
+           "mark share %.2f\n",
+           n, sp_gc_stat_fulls, sp_gc_stat_seconds, wall,
+           wall > 0 ? 100.0 * sp_gc_stat_seconds / wall : 0.0,
+-          n ? 1000.0 * sp_gc_stat_seconds / (double)n : 0.0,
+-          (double)SP_GC_CTR_GET(sp_gc_bytes) / 1048576.0, (double)sbytes / 1048576.0,
+-          (double)SP_GC_CTR_GET(sp_gc_threshold) / 1048576.0,
+-          (double)SP_GC_CTR_GET(sp_str_threshold) / 1048576.0, nw,
+-          (double)sp_gc_obj_alpha1024 / 1024.0);
++          n ? 1000.0 * sp_gc_stat_seconds / (sp_float)n : 0.0,
++          (sp_float)SP_GC_CTR_GET(sp_gc_bytes) / 1048576.0, (sp_float)sbytes / 1048576.0,
++          (sp_float)SP_GC_CTR_GET(sp_gc_threshold) / 1048576.0,
++          (sp_float)SP_GC_CTR_GET(sp_str_threshold) / 1048576.0, nw,
++          (sp_float)sp_gc_obj_alpha1024 / 1024.0);
+   if (!sp_gc_ph_on) return;
+   /* Which part of a collection cost that time. The names are the ones the
+      collector's own comments use, so a number leads to the code that spent it.
+@@ -364,10 +365,10 @@
+   fprintf(stderr,
+           "[gcph] string live %.1f MB young + %.1f MB old  "
+           "(major %s%.1f MB old, %llu so far)\n",
+-          (double)(sp_str_live_total() - sp_str_old_total()) / 1048576.0,
+-          (double)sp_str_old_total() / 1048576.0,
++          (sp_float)(sp_str_live_total() - sp_str_old_total()) / 1048576.0,
++          (sp_float)sp_str_old_total() / 1048576.0,
+           sp_str_major_label(),
+-          (double)sp_str_old_threshold / 1048576.0,
++          (sp_float)sp_str_old_threshold / 1048576.0,
+           (unsigned long long)sp_gc_str_majors);
+   /* median / min over the sweeps, and their ratio. One number for the sawtooth
+      the per-second line can only show a slice of. */
+@@ -377,11 +378,11 @@
+     if (cp) {
+       memcpy(cp, sp_str_shape, (size_t)n * sizeof *cp);
+       qsort(cp, n, sizeof *cp, sp_str_shape_cmp);
+-      double med = (double)cp[n / 2], mn = (double)cp[0];
++      sp_float med = (sp_float)cp[n / 2], mn = (sp_float)cp[0];
+       fprintf(stderr,
+               "[gcph] string old over %u sweeps: min %.1f MB  median %.1f MB  max %.1f MB"
+               "  (median/min %.1fx)\n",
+-              n, mn / 1048576.0, med / 1048576.0, (double)cp[n - 1] / 1048576.0,
++              n, mn / 1048576.0, med / 1048576.0, (sp_float)cp[n - 1] / 1048576.0,
+               mn > 0 ? med / mn : 0.0);
+       free(cp);
+     }
+@@ -978,6 +979,36 @@
+    with no locale dependency (pure integer arithmetic; see sp_dtoa.c); the
+    fixed vs scientific layout is Ruby's Float#to_s rule (which differs from
+    %g's), preserved from the previous strtod-probe implementation. */
++#if SPINEL_FLOAT32
++/* For the MCU: the shortest digits that read back as the same float. sp_float_shortest finds the
++   shortest for a double, which for a float's value is its exact expansion (0.10000000149011612
++   for 0.1f); this takes the fewest of its leading digits, rounded, that sp_read_float and a
++   conversion to float turn back into f (at most 9, which always do). */
++static void sp_float32_shortest(sp_float f, char *digits, int *dlen, int *exp) {
++  for (int p = 1; p < *dlen && p < 9; p++) {
++    char d[16]; int e = *exp;
++    memcpy(d, digits, (size_t)p);
++    if (digits[p] >= '5') {
++      int i = p - 1;
++      while (i >= 0 && d[i] == '9') d[i--] = '0';
++      if (i >= 0) d[i]++;
++      else { memmove(d + 1, d, (size_t)(p - 1)); d[0] = '1'; e++; }
++    }
++    int q = p;
++    while (q > 1 && d[q - 1] == '0') q--;
++    char buf[32]; int o = 0;
++    buf[o++] = d[0]; buf[o++] = '.';
++    if (q > 1) { memcpy(buf + o, d + 1, (size_t)(q - 1)); o += q - 1; } else buf[o++] = '0';
++    snprintf(buf + o, sizeof buf - (size_t)o, "e%d", e);
++    double x = 0;
++    if (sp_read_float(buf, NULL, &x) && (sp_float)x == f) {
++      memcpy(digits, d, (size_t)q); digits[q] = 0; *dlen = q; *exp = e;
++      return;
++    }
++  }
++}
++#endif
++
+ const char *sp_float_to_s(sp_float f) {
+   if(f!=f){char*r=sp_str_alloc_raw(4);r[0]='N';r[1]='a';r[2]='N';r[3]=0;return r;}
+   if(f==HUGE_VAL||f==-HUGE_VAL){if(f<0){char*r=sp_str_alloc_raw(10);memcpy(r,"-Infinity",10);return r;}char*r=sp_str_alloc_raw(9);memcpy(r,"Infinity",9);return r;}
+@@ -985,6 +1016,9 @@
+   int neg = signbit(f);
+   char digits[32]; int dlen;
+   int exp = sp_float_shortest(neg ? -f : f, digits, &dlen);
++#if SPINEL_FLOAT32
++  sp_float32_shortest(neg ? -f : f, digits, &dlen, &exp);
++#endif
+   int decpt = exp + 1;   /* number of digits before the decimal point in fixed form */
+   char *out=sp_str_alloc_raw(64);int o=0;
+   if(neg)out[o++]='-';
+@@ -1027,14 +1061,17 @@
     into the home slot -- the one failure mode that would quietly misattribute
     the numbers this feature exists to report. BSS, so the untouched tail costs
     nothing when the report is off. */
@@ -59,7 +171,7 @@
  static sp_AllocName sp_alloc_names[SP_ALLOC_NAMES];
  
  static const char *sp_alloc_name_of(void *key) {
-@@ -1297,11 +1301,13 @@
+@@ -1297,11 +1334,13 @@
  #endif
      /* SA_RESTART: asking for a report must not turn an in-flight read(2) into
         an EINTR the program never expected to handle. */
@@ -75,67 +187,186 @@
  }
 --- a/sp_alloc.h
 +++ b/sp_alloc.h
-@@ -19,6 +19,7 @@
- #include <string.h>
- #include <stdio.h>      /* snprintf for the int/float formatters below */
- #include <math.h>       /* HUGE_VAL / signbit for sp_float_to_s */
-+#define double float
+@@ -908,8 +908,8 @@
+ sp_bool sp_class_frozen_id(sp_int cls_id);
  
- const char *sp_sprintf(const char *fmt, ...);  /* defined in the generated TU */
+ /* ---- rounding helpers relocated from spinel_rt.h (0 optcarrot uses). ---- */
+-double sp_round_half_even(double x);
+-double sp_round_half_down(double x);
++sp_float sp_round_half_even(sp_float x);
++sp_float sp_round_half_down(sp_float x);
+ 
+ /* ---- BigRational (Bignum-denominator Rational, #2469): 0 optcarrot
+    uses. sp_Bigint is forward-declared above (box_bigint); the specific
+@@ -923,7 +923,7 @@
+ sp_Bigint *sp_bigint_div(sp_Bigint *a, sp_Bigint *b);
+ char *sp_str_alloc_ext(size_t len);   /* non-inline sp_str_alloc; see sp_alloc.c */
+ const char *sp_bigint_to_s(sp_Bigint *b);
+-double sp_bigint_to_double(sp_Bigint *b);
++sp_float sp_bigint_to_double(sp_Bigint *b);
+ void sp_brat_scan(void *p);
+ sp_RbVal sp_box_brat(sp_Bigint *num, sp_Bigint *den);
+ sp_RbVal sp_brat_from_bigint(sp_Bigint *n);
+@@ -948,9 +948,9 @@
+ /* ---- FFI array data pointers, array-kind length probe, sp_Class
+    unboxing: relocated from spinel_rt.h (0 optcarrot uses). ---- */
+ const int64_t *sp_ffi_int_array_data(sp_RbVal v);
+-const double *sp_ffi_float_array_data(sp_RbVal v);
++const sp_float *sp_ffi_float_array_data(sp_RbVal v);
+ const int64_t *sp_PolyArray_ffi_int_data(sp_PolyArray *a);
+-const double *sp_PolyArray_ffi_float_data(sp_PolyArray *a);
++const sp_float *sp_PolyArray_ffi_float_data(sp_PolyArray *a);
+ sp_int sp_array_kind_len(sp_RbVal el);
+ sp_Class sp_unbox_class(sp_RbVal v);
  
 --- a/sp_array.c
 +++ b/sp_array.c
-@@ -14,6 +14,7 @@
- #include <stdio.h>
- #include <math.h>
- #include <float.h>
-+#define double float
- #include <stdint.h>
- #include "sp_array.h"
- #include "sp_random.h"  /* sp_krand_below for shuffle/sample */
+@@ -620,7 +620,7 @@
+ sp_RbVal sp_FloatArray_rindex_key(sp_FloatArray *a, sp_RbVal v) {SP_GC_ROOT(a); if (v.tag == SP_TAG_FLT) return sp_FloatArray_rindex_poly(a, v.v.f); if (v.tag == SP_TAG_INT) return sp_FloatArray_rindex_poly(a, (sp_float)v.v.i); return sp_box_nil(); }
+ sp_float sp_FloatArray_delete_key(sp_FloatArray *a, sp_RbVal v) {SP_GC_ROOT(a); if (v.tag == SP_TAG_FLT) return sp_FloatArray_delete(a, v.v.f); if (v.tag == SP_TAG_INT) return sp_FloatArray_delete(a, (sp_float)v.v.i); return sp_float_nil(); }
+ const int64_t *sp_IntArray_ffi_data(sp_IntArray *a) { return a ? (const int64_t *)(a->data + a->start) : (const int64_t *)0; }
+-const double  *sp_FloatArray_ffi_data(sp_FloatArray *a) { return a ? (const double *)a->data : (const double *)0; }
++const sp_float  *sp_FloatArray_ffi_data(sp_FloatArray *a) { return a ? (const sp_float *)a->data : (const sp_float *)0; }
+ sp_IntArray *sp_IntArray_concat(sp_IntArray *a, sp_IntArray *b) { SP_GC_ROOT(a); SP_GC_ROOT(b); sp_IntArray *r = sp_IntArray_new(); SP_GC_ROOT(r); if (a) for (sp_int i = 0; i < a->len; i++) sp_IntArray_push(r, sp_IntArray_get(a, i)); if (b) for (sp_int i = 0; i < b->len; i++) sp_IntArray_push(r, sp_IntArray_get(b, i)); return r; }
+ sp_StrArray *sp_StrArray_concat(sp_StrArray *a, sp_StrArray *b) {SP_GC_ROOT(a);SP_GC_ROOT(b); sp_StrArray *r = sp_StrArray_new(); SP_GC_ROOT(r); if (a) for (sp_int i = 0; i < a->len; i++) sp_StrArray_push(r, sp_StrArray_get(a, i)); if (b) for (sp_int i = 0; i < b->len; i++) sp_StrArray_push(r, sp_StrArray_get(b, i)); return r; }
+ sp_FloatArray *sp_FloatArray_concat(sp_FloatArray *a, sp_FloatArray *b) {SP_GC_ROOT(a);SP_GC_ROOT(b); sp_FloatArray *r = sp_FloatArray_new(); SP_GC_ROOT(r); if (a) for (sp_int i = 0; i < a->len; i++) sp_FloatArray_push(r, sp_FloatArray_get(a, i)); if (b) for (sp_int i = 0; i < b->len; i++) sp_FloatArray_push(r, sp_FloatArray_get(b, i)); return r; }
+--- a/sp_array.h
++++ b/sp_array.h
+@@ -264,7 +264,7 @@
+ sp_RbVal sp_FloatArray_rindex_key(sp_FloatArray *a, sp_RbVal v);
+ sp_float sp_FloatArray_delete_key(sp_FloatArray *a, sp_RbVal v);
+ const int64_t *sp_IntArray_ffi_data(sp_IntArray *a);
+-const double *sp_FloatArray_ffi_data(sp_FloatArray *a);
++const sp_float *sp_FloatArray_ffi_data(sp_FloatArray *a);
+ sp_IntArray *sp_IntArray_concat(sp_IntArray *a, sp_IntArray *b);
+ sp_StrArray *sp_StrArray_concat(sp_StrArray *a, sp_StrArray *b);
+ sp_FloatArray *sp_FloatArray_concat(sp_FloatArray *a, sp_FloatArray *b);
 --- a/sp_core.c
 +++ b/sp_core.c
-@@ -21,7 +21,7 @@
+@@ -21,7 +21,11 @@
  /* Must match sp_types.h: sp_int is pointer-width (int64 on 64-bit,
     int32 on 32-bit) so this TU's helper ABI agrees with the generated TU. */
  typedef intptr_t sp_int;
--typedef double  sp_float;
++#if SPINEL_FLOAT32   /* for the MCU: as sp_types.h decides */
 +typedef float  sp_float;
++#else
+ typedef double  sp_float;
++#endif
  /* 10^p fits sp_int only up to this exponent (p>= it collapses to 0):
     10^19 > INT64_MAX, 10^10 > INT32_MAX. */
  #if INTPTR_MAX == INT32_MAX
-@@ -102,7 +102,7 @@
+@@ -79,7 +83,7 @@
+    separator (CRuby's `"1_000.5".to_f == 1000.5`), returning 0.0 when no
+    number leads. Underscores are stripped into a small scratch buffer before
+    strtod so the C parser (which stops at `_`) sees clean digits. */
+-double sp_str_to_f_cruby(const char *s) {
++sp_float sp_str_to_f_cruby(const char *s) {
+   if (!s) return 0.0;
+   const char *p = s;
+   while (isspace((unsigned char)*p)) p++;
+@@ -398,7 +402,7 @@
+    always uses '.', matching Ruby, regardless of the process locale. The number
+    primitives (Float#to_s / to_f) are locale-free via fp_uscale; this is only
+    for the printf-compatible field/flag machinery libc handles best. */
+-int sp_snprintf_c_float(char *buf, size_t size, const char *fmt, double v) {
++int sp_snprintf_c_float(char *buf, size_t size, const char *fmt, sp_float v) {
+   static locale_t sp_c_loc = (locale_t)0;
+   if (!sp_c_loc) sp_c_loc = newlocale(LC_ALL_MASK, "C", (locale_t)0);
+   if (sp_c_loc) {
+@@ -417,11 +421,11 @@
+    identify that double. Ties there go to even, so 2.345 answers 2.34 where C
+    answers 2.35. Round to `keep` significant digits the same way and rebuild
+    the value, leaving libc to lay out the field. */
+-static double sp_float_round_shortest(double v, int keep) {
++static sp_float sp_float_round_shortest(sp_float v, int keep) {
+   if (!isfinite(v) || v == 0.0 || keep <= 0 || keep > 17) return v;
+   char digs[48];
+   int nd = 0;
+-  double a = v < 0 ? -v : v;
++  sp_float a = v < 0 ? -v : v;
+   int dp = sp_float_shortest(a, digs, &nd);
+   /* nothing to re-round: the cut falls before the first digit (where Ruby's
+      own dtoa consults the exact value instead) or past the last one. A value
+@@ -448,7 +452,7 @@
+    %f counts them from the decimal point, %e from the first digit, %g is a
+    significant-digit count of its own. A `*` precision takes an argument this
+    call does not receive, so such a format is left to libc. */
+-int sp_snprintf_ruby_float(char *buf, size_t size, const char *fmt, double v) {
++int sp_snprintf_ruby_float(char *buf, size_t size, const char *fmt, sp_float v) {
+   size_t n = fmt ? strlen(fmt) : 0;
+   char conv = n ? fmt[n - 1] : 0;
+   if ((conv == 'f' || conv == 'e' || conv == 'E' || conv == 'g' || conv == 'G') &&
+@@ -463,7 +467,7 @@
+     if (conv == 'f') {
+       char digs[48];
+       int nd = 0;
+-      double a = v < 0 ? -v : v;
++      sp_float a = v < 0 ? -v : v;
+       keep = sp_float_shortest(a, digs, &nd) + prec + 1;
      }
+     else if (conv == 'g' || conv == 'G') keep = prec ? prec : 1;
+@@ -571,7 +575,7 @@
+    settle the tie the same way CRuby's rational arithmetic does, which the
+    library conversion alone cannot: it breaks exact ties to even, and Ruby's
+    default breaks them away from zero. */
+-static double sp_prec_decimal_round(double x, intptr_t nd, int op) {
++static sp_float sp_prec_decimal_round(sp_float x, intptr_t nd, int op) {
+   char buf[512];
+   int extra = 25;
+   snprintf(buf, sizeof buf, "%.*f", (int)nd + extra, x);
+@@ -582,7 +586,7 @@
+   int tail_nonzero = 0;
+   for (char *q = cut + 1; *q; q++) if (*q != '0') { tail_nonzero = 1; break; }
+   *cut = '\0';                        /* the truncation toward zero */
+-  double r = strtod(buf, NULL);
++  sp_float r = strtod(buf, NULL);
+   int away;
+   if (cutd > '5') away = 1;
+   else if (cutd < '5') away = 0;
+@@ -594,7 +598,7 @@
    }
-   buf[n] = 0;
--  double d = 0.0;
-+  sp_dtoa_double d = 0.0;   /* for the MCU: double itself (see sp_dtoa.h) */
-   sp_read_float(buf, NULL, &d);   /* locale-independent parse */
-   return d;
+   else away = 1;                      /* the default: ties leave zero behind */
+   if (!away) return r;
+-  double step = 1.0 / pow(10, (double)nd);
++  sp_float step = 1.0 / pow(10, (sp_float)nd);
+   snprintf(buf, sizeof buf, "%.*f", (int)nd, x < 0.0 ? r - step : r + step);
+   return strtod(buf, NULL);
  }
-@@ -361,7 +361,7 @@
-     buf[o] = '\0';
-     {
-       char *endptr;
--      double v = 0.0;
-+      sp_dtoa_double v = 0.0;   /* for the MCU: double itself (see sp_dtoa.h) */
-       /* A hex literal (0x...) is validated integral above and has no decimal
-          point, so strtod (which parses hex floats) is safe and locale-neutral;
-          a decimal literal uses the locale-independent sp_read_float. The shape
-@@ -439,7 +439,7 @@
-   char buf[64];
-   snprintf(buf, sizeof buf, "%llde%d", num, dp - keep + 1);
-   char *end = NULL;
--  double r = 0;
-+  sp_dtoa_double r = 0;   /* for the MCU: double itself (see sp_dtoa.h) */
-   if (!sp_read_float(buf, &end, &r)) return v;
-   return v < 0 ? -r : r;
+@@ -604,7 +608,7 @@
+ static int sp_prec_underflow(intptr_t nd, int binexp) {
+   return nd < -(binexp > 0 ? binexp / 3 + 1 : binexp / 4);
  }
-@@ -638,7 +638,11 @@
+-double sp_float_prec_op(double x, intptr_t nd, int op) {
++sp_float sp_float_prec_op(sp_float x, intptr_t nd, int op) {
+   if (x == 0.0 || !isfinite(x) || nd <= 0) return x;
+   if (op == SP_PREC_TRUNC) return sp_float_prec_op(x, nd, signbit(x) ? SP_PREC_CEIL : SP_PREC_FLOOR);
+   int binexp = 0;
+@@ -622,14 +626,14 @@
+      The decimal conversion is the same exact answer. floor and ceil keep the
+      scaled form -- that is what CRuby answers for them. */
+   if (nd >= DBL_DIG && op != SP_PREC_FLOOR && op != SP_PREC_CEIL) return sp_prec_decimal_round(x, nd, op);
+-  double s = pow(10, (double)nd);
+-  double xs = x * s;
++  sp_float s = pow(10, (sp_float)nd);
++  sp_float xs = x * s;
+   if (!isfinite(s) || !isfinite(xs)) return x;
+-  double f;
++  sp_float f;
+   switch (op) {
+     case SP_PREC_FLOOR: {
+       f = floor(xs);
+-      double res = (f + 1) / s;
++      sp_float res = (f + 1) / s;
+       return res > x ? f / s : res;
+     }
+     case SP_PREC_CEIL:
+@@ -637,8 +641,12 @@
+     case SP_PREC_HALF_EVEN: {
        /* the tie is decided on the fractional part alone, so the integral part
           is split off first and only rejoined at the end */
-       double u, v, us, vs, ff, d, uf;
-+#if 0 /* Not on the MCU */
+-      double u, v, us, vs, ff, d, uf;
++      sp_float u, v, us, vs, ff, d, uf;
++#if !SPINEL_FLOAT32   /* for the MCU: modff where sp_float is float */
        v = modf(x, &u);
 +#else
 +      v = modff(x, &u);
@@ -145,12 +376,16 @@
          ff = floor(vs); uf = us + ff; d = vs - ff;
 --- a/sp_core.h
 +++ b/sp_core.h
-@@ -15,15 +15,15 @@
+@@ -12,18 +12,19 @@
+ 
+ #include <stdint.h>
+ #include <stddef.h>   /* size_t (sp_snprintf_c_float) */
++#include "sp_types.h"  /* for the MCU: the signatures below use sp_float for double */
  
  /* String -> number parsers (cold, I/O-boundary). */
  intptr_t sp_str_to_i_cruby(const char *s);
 -double sp_str_to_f_cruby(const char *s);
-+float sp_str_to_f_cruby(const char *s);
++sp_float sp_str_to_f_cruby(const char *s);
  intptr_t sp_str_to_i_base(const char *s, intptr_t base);
  intptr_t sp_str_to_i_strict(const char *s);
  intptr_t sp_str_to_i_strict_base(const char *s, intptr_t base);
@@ -159,52 +394,28 @@
 -double sp_str_to_f_lenient(const char *s);
 -int     sp_snprintf_c_float(char *buf, size_t size, const char *fmt, double v);
 -int     sp_snprintf_ruby_float(char *buf, size_t size, const char *fmt, double v);
-+float  sp_str_to_f_strict(const char *s);
-+float sp_str_to_f_lenient(const char *s);
-+int     sp_snprintf_c_float(char *buf, size_t size, const char *fmt, float v);
-+int     sp_snprintf_ruby_float(char *buf, size_t size, const char *fmt, float v);
++sp_float  sp_str_to_f_strict(const char *s);
++sp_float sp_str_to_f_lenient(const char *s);
++int     sp_snprintf_c_float(char *buf, size_t size, const char *fmt, sp_float v);
++int     sp_snprintf_ruby_float(char *buf, size_t size, const char *fmt, sp_float v);
  
  /* Cold integer-math + String#oct helpers. */
  intptr_t sp_gcd(intptr_t a, intptr_t b);
-@@ -31,7 +31,7 @@
+@@ -31,7 +32,7 @@
  intptr_t sp_powmod(intptr_t base, intptr_t exp, intptr_t mod);
  intptr_t sp_ceildiv(intptr_t a, intptr_t b);
  intptr_t sp_int_clamp(intptr_t v, intptr_t lo, intptr_t hi);
 -double sp_float_clamp(double v, double lo, double hi);
-+float sp_float_clamp(float v, float lo, float hi);
++sp_float sp_float_clamp(sp_float v, sp_float lo, sp_float hi);
  intptr_t sp_int_sqrt(intptr_t n);
  intptr_t sp_ipow10(intptr_t p);
  intptr_t sp_int_round(intptr_t v, intptr_t nd);
-@@ -48,6 +48,6 @@
+@@ -48,6 +49,6 @@
  #define SP_PREC_TRUNC      3
  #define SP_PREC_HALF_EVEN  4
  #define SP_PREC_HALF_DOWN  5
 -double sp_float_prec_op(double x, intptr_t nd, int op);
-+float sp_float_prec_op(float x, intptr_t nd, int op);
- 
- #endif
---- a/sp_dtoa.h
-+++ b/sp_dtoa.h
-@@ -10,6 +10,14 @@
- 
- #include "sp_types.h"
- 
-+/* For the MCU: sp_dtoa.c is built with double, but some files that include this define double to
-+   float first, and the prototypes below then took a float where sp_dtoa.c reads a double
-+   (Float#to_s and String#to_f printed and read garbage). Declared with double whatever the
-+   including file has done, and sp_dtoa_double is double itself for the callers' variables. */
-+#pragma push_macro("double")
-+#undef double
-+typedef double sp_dtoa_double;
-+
- /* Shortest-round-trip and printf-style float formatting into `buf` (NUL
-    terminated). fmt is one of 'e'/'f'/'g' (upper-case for E/upper output);
-    prec is the precision, or -2 for shortest round-trip ('g' only). sign is a
-@@ -25,5 +33,6 @@
-    exponent of the leading digit. The caller applies its own fixed/scientific
-    layout (Ruby's Float#to_s threshold is not %g's). */
- int sp_float_shortest(double f, char *digs, int *nd);
-+#pragma pop_macro("double")
++sp_float sp_float_prec_op(sp_float x, intptr_t nd, int op);
  
  #endif
 --- a/sp_fiber_ctx.h
@@ -292,6 +503,89 @@
 +typedef void* sp_fiber_ctx;
  
  #endif /* SP_FIBER_CTX_H */
+--- a/sp_format.c
++++ b/sp_format.c
+@@ -340,7 +340,7 @@
+   if (isnan(f) || isinf(f)) sp_raise_cls("FloatDomainError", isnan(f) ? "NaN" : "Infinity");
+   if (f == 0.0) { sp_Rational z; z.num = 0; z.den = 1; return z; }
+   int e;
+-  double m = frexp((double)f, &e);          /* f = m * 2^e, 0.5 <= |m| < 1 */
++  sp_float m = frexp((sp_float)f, &e);          /* f = m * 2^e, 0.5 <= |m| < 1 */
+   for (int i = 0; i < 53 && m != floor(m); i++) { m *= 2.0; e--; }
+   sp_rat_wide num = (sp_rat_wide)m;          /* integer mantissa (fits in 54 bits) */
+   if (e >= 0) {
+@@ -357,8 +357,8 @@
+ /* Simplest p/q with lo <= p/q <= hi, for 0 < lo <= hi. Classic continued-fraction
+    "simplest rational in an interval" recursion; the convergent depth is bounded by
+    the interval, so q stays small for sane epsilons. */
+-static void sp_simplest_pos(double lo, double hi, sp_rat_wide *np, sp_rat_wide *dp) {
+-  double fl = floor(lo);
++static void sp_simplest_pos(sp_float lo, sp_float hi, sp_rat_wide *np, sp_rat_wide *dp) {
++  sp_float fl = floor(lo);
+   if (fl == lo) { *np = (sp_rat_wide)fl; *dp = 1; return; }   /* lo is an integer */
+   if (fl == floor(hi)) {                                       /* no integer in (lo,hi) */
+     sp_rat_wide n, d;
+@@ -369,14 +369,14 @@
+   }
+   *np = (sp_rat_wide)fl + 1; *dp = 1;                          /* fl+1 lies in [lo,hi] */
+ }
+-static sp_Rational sp_rationalize_interval(double lo, double hi) {
+-  if (lo > hi) { double t = lo; lo = hi; hi = t; }
++static sp_Rational sp_rationalize_interval(sp_float lo, sp_float hi) {
++  if (lo > hi) { sp_float t = lo; lo = hi; hi = t; }
+   if (lo <= 0.0 && hi >= 0.0) { sp_Rational z; z.num = 0; z.den = 1; return z; }
+   int neg = 0;
+-  if (hi < 0.0) { double t = -lo; lo = -hi; hi = t; neg = 1; } /* fold to positives */
++  if (hi < 0.0) { sp_float t = -lo; lo = -hi; hi = t; neg = 1; } /* fold to positives */
+   /* Any p/q in [lo,hi] has p >= lo*q >= lo, so lo past sp_int can't fit and
+      floor(lo) would also overflow the (double->sp_rat_wide) cast below. */
+-  if (lo > (double)INTPTR_MAX) sp_raise_cls("RangeError", "Rational out of sp_int range");
++  if (lo > (sp_float)INTPTR_MAX) sp_raise_cls("RangeError", "Rational out of sp_int range");
+   sp_rat_wide n, d;
+   sp_simplest_pos(lo, hi, &n, &d);
+   if (neg) n = -n;
+@@ -384,8 +384,8 @@
+ }
+ sp_Rational sp_float_rationalize(sp_float f, sp_float eps) {
+   if (isnan(f) || isinf(f)) sp_raise_cls("FloatDomainError", isnan(f) ? "NaN" : "Infinity");
+-  double e = eps < 0 ? -eps : eps;
+-  return sp_rationalize_interval((double)f - e, (double)f + e);
++  sp_float e = eps < 0 ? -eps : eps;
++  return sp_rationalize_interval((sp_float)f - e, (sp_float)f + e);
+ }
+ /* No-arg rationalize: simplest rational that round-trips to this exact double,
+    i.e. lying in the half-ulp interval around f. */
+@@ -400,15 +400,15 @@
+   if (isnan(f) || isinf(f)) sp_raise_cls("FloatDomainError", isnan(f) ? "NaN" : "Infinity");
+   if (f == 0.0) { sp_Rational z; z.num = 0; z.den = 1; return z; }
+   int neg = f < 0.0;
+-  double x = neg ? -(double)f : (double)f;
+-  double v = x;
++  sp_float x = neg ? -(sp_float)f : (sp_float)f;
++  sp_float v = x;
+   sp_rat_wide h0 = 1, h1 = 0, k0 = 0, k1 = 1;  /* convergent num/den recurrences */
+   sp_rat_wide num = 0, den = 1;
+   int found = 0;
+   for (int i = 0; i < 64 && !found; i++) {
+     /* floor(v) out of sp_rat_wide range would make the cast below UB; any such
+        convergent exceeds INTPTR_MAX anyway, so bail to the exact-ratio fallback. */
+-    if (v > (double)INTPTR_MAX) break;
++    if (v > (sp_float)INTPTR_MAX) break;
+     sp_rat_wide a = (sp_rat_wide)floor(v);
+     /* guard the convergent against sp_int overflow before forming it (all in
+        integer arithmetic: a*h0 + h1 <= INTPTR_MAX). */
+@@ -418,9 +418,9 @@
+     sp_rat_wide h = a * h0 + h1;
+     sp_rat_wide k = a * k0 + k1;
+     num = h; den = k;
+-    if (k != 0 && (double)h / (double)k == x) { found = 1; break; }
++    if (k != 0 && (sp_float)h / (sp_float)k == x) { found = 1; break; }
+     h1 = h0; h0 = h; k1 = k0; k0 = k;
+-    double frac = v - a;
++    sp_float frac = v - a;
+     if (frac == 0.0) break;
+     v = 1.0 / frac;
+   }
 --- a/sp_gc.c
 +++ b/sp_gc.c
 @@ -27,6 +27,7 @@
@@ -392,6 +686,15 @@
  extern int sp_gc_pin_overflow;
 --- a/sp_io.h
 +++ b/sp_io.h
+@@ -188,7 +188,7 @@
+ sp_int sp_file_do_link(const char *oldp, const char *newp);
+ sp_int sp_file_umask(sp_int mask, int have_arg);
+ sp_int sp_file_mkfifo(const char *path, sp_int mode);
+-sp_int sp_file_utime(double atime, double mtime, const char *path);
++sp_int sp_file_utime(sp_float atime, sp_float mtime, const char *path);
+ const char *sp_file_readlink(const char *path);  /* defined in sp_cold.c */
+ void sp_file_delete(const char *path);
+ void sp_file_rename(const char *from, const char *to);
 @@ -204,9 +204,11 @@
     any syscall sees it; the multi-path File.delete checks every path first. */
  void sp_file_path_check(const char *path);
@@ -407,15 +710,53 @@
  SP_NORETURN SP_COLD void sp_dir_raise_closed(void);
 --- a/sp_marshal.c
 +++ b/sp_marshal.c
-@@ -69,7 +69,7 @@
- static const char *sp_mar_float_str(double f, char *buf, size_t bufsz) {SP_GC_ROOT_STR(buf);
+@@ -66,7 +66,7 @@
+ }
+ /* CRuby's Marshal float text: the shortest %.g that round-trips, exponent
+    normalized ("1e+02" -> "1e2"); 0.0 is "0", 100.0 is "1e2", 0.1 is "0.1". */
+-static const char *sp_mar_float_str(double f, char *buf, size_t bufsz) {SP_GC_ROOT_STR(buf);
++static const char *sp_mar_float_str(sp_float f, char *buf, size_t bufsz) {SP_GC_ROOT_STR(buf);
    for (int prec = 1; prec <= 17; prec++) {
      sp_format_float(f, buf, bufsz, 'g', prec, '\0');   /* locale-independent */
--    double rt = 0.0; sp_read_float(buf, NULL, &rt);
-+    sp_dtoa_double rt = 0.0; sp_read_float(buf, NULL, &rt);   /* for the MCU: see sp_dtoa.h */
-     if (rt == f) break;
-   }
-   char *e = strchr(buf, 'e');
+     double rt = 0.0; sp_read_float(buf, NULL, &rt);
+@@ -114,7 +114,7 @@
+       sp_float f = v.v.f; const char *fs; char fbuf[64];
+       if (isnan(f)) fs = "nan";
+       else if (isinf(f)) fs = f < 0 ? "-inf" : "inf";
+-      else fs = sp_mar_float_str((double)f, fbuf, sizeof fbuf);
++      else fs = sp_mar_float_str((sp_float)f, fbuf, sizeof fbuf);
+       sp_mar_bytes(b, fs, strlen(fs));
+       break;
+     }
+--- a/sp_sched.h
++++ b/sp_sched.h
+@@ -54,7 +54,7 @@
+   struct sp_thread **wait_head;  /* head of that wait list, so #kill/#raise can unpark it */
+   struct sp_thread *all_next, *all_prev;  /* registry of live threads (GC roots) */
+   void             *tls;         /* thread-local storage (Thread#[] / #[]=); lazily allocated */
+-  double            wake_deadline; /* CLOCK_MONOTONIC time to wake a sleeping thread (Kernel#sleep) */
++  sp_float            wake_deadline; /* CLOCK_MONOTONIC time to wake a sleeping thread (Kernel#sleep) */
+   int               io_fd;       /* fd this thread is parked on for I/O (-1 = none, scheduler-aware I/O) */
+   short             io_events;   /* poll events it is waiting for (POLLIN/POLLOUT) */
+   short             io_revents;  /* poll result the monitor delivered when the fd became ready */
+@@ -83,7 +83,7 @@
+ /* Kernel#sleep(seconds): park the calling thread and free its OS worker for other
+    green threads; a monitor thread wakes it after the duration. Falls back to a
+    plain blocking sleep only in the single-threaded build (spinel_rt.h). */
+-void       sp_sched_sleep(double seconds);
++void       sp_sched_sleep(sp_float seconds);
+ int        sp_sched_other_threads_live(void);
+ int        sp_sched_wait_child(int pid, int *status);
+ void       sp_sleep(sp_float s);   /* Kernel#sleep; relocated from spinel_rt.h to lib/sp_cold.c */
+@@ -106,7 +106,7 @@
+    worker; a blocking select(2) here pins the worker for the whole timeout,
+    and with every worker pinned the peer that would make the fd ready never
+    gets to run. */
+-int        sp_sched_wait_io_timeout(int fd, short events, double timeout_s);
++int        sp_sched_wait_io_timeout(int fd, short events, sp_float timeout_s);
+ sp_thread *sp_Thread_current(void);       /* Thread.current */
+ sp_bool   sp_Thread_alive(sp_thread *t); /* #alive? */
+ sp_bool   sp_Thread_set_report_default(sp_bool v);  /* Thread.report_on_exception= */
 --- a/sp_time.h
 +++ b/sp_time.h
 @@ -12,6 +12,9 @@
@@ -430,12 +771,20 @@
  #include <time.h>
 --- a/sp_types.h
 +++ b/sp_types.h
-@@ -88,7 +88,7 @@
+@@ -88,7 +88,16 @@
  #error "spinel: unsupported intptr_t width (need 32- or 64-bit)"
  #endif
  typedef intptr_t sp_int;
--typedef double sp_float;
++/* For the MCU: Float is float where SPINEL_FLOAT32 is 1, which is the default here (Spinel's
++   would be 0, double). The runtime is written in sp_float, so this is the one place that decides. */
++#ifndef SPINEL_FLOAT32
++#define SPINEL_FLOAT32 1
++#endif
++#if SPINEL_FLOAT32
 +typedef float sp_float;
++#else
+ typedef double sp_float;
++#endif
  typedef bool sp_bool;
  
  /* Sentinel value reserved by the int? (scalar-nullable int) type. An
@@ -504,7 +853,35 @@
  #if !defined(__APPLE__) && !defined(__FreeBSD__)
  #include <malloc.h>
  #else
-@@ -456,9 +467,11 @@
+@@ -217,21 +228,21 @@
+ /* float %% with an INTEGER zero divisor raises in CRuby (5.0 %% 0), while a
+    float zero divisor yields NaN (5.0 %% 0.0) -- the int-divisor emit routes
+    here so the check costs nothing on the float-divisor path. */
+-static inline double sp_fmod_intdiv(double a, sp_int b) {
++static inline sp_float sp_fmod_intdiv(sp_float a, sp_int b) {
+   if (b == 0) sp_raise_cls("ZeroDivisionError", "divided by 0");
+-  double r = fmod(a, (double)b);
+-  if (r != 0 && ((r < 0) != (b < 0))) r += (double)b;
++  sp_float r = fmod(a, (sp_float)b);
++  if (r != 0 && ((r < 0) != (b < 0))) r += (sp_float)b;
+   return r;
+ }
+-static inline double sp_fmod(double a, double b) {
++static inline sp_float sp_fmod(sp_float a, sp_float b) {
+   if (b == 0) sp_raise_cls("ZeroDivisionError", "divided by 0");  /* 5.0 % 0.0 raises in CRuby */
+-  double r = fmod(a, b);
++  sp_float r = fmod(a, b);
+   if (r != 0.0 && ((r < 0.0) != (b < 0.0))) r += b;
+   return r;
+ }
+ /* Float#remainder: plain C fmod, but a zero divisor raises the way every other
+    Float division-derived operation does (#3649). */
+-static inline double sp_fremainder(double a, double b) {
++static inline sp_float sp_fremainder(sp_float a, sp_float b) {
+   if (b == 0) sp_raise_cls("ZeroDivisionError", "divided by 0");
+   return fmod(a, b);
+ }
+@@ -456,15 +467,17 @@
  static inline const char *sp_ruby_platform_str(void) { return sp_ruby_platform_data + 1; }
  
  /* Process.ppid wrapper. */
@@ -514,8 +891,16 @@
  }
 +#endif
  
- static inline double sp_process_clock_gettime(void) {
+-static inline double sp_process_clock_gettime(void) {
++static inline sp_float sp_process_clock_gettime(void) {
  #if defined(CLOCK_MONOTONIC)
+   struct timespec ts;
+   clock_gettime(CLOCK_MONOTONIC, &ts);
+-  return (double)ts.tv_sec + ((double)ts.tv_nsec * 1e-9);
++  return (sp_float)ts.tv_sec + ((sp_float)ts.tv_nsec * 1e-9);
+ #else
+   return 0.0;
+ #endif
 @@ -1101,6 +1114,7 @@
  const char *sp_File_readpartial(sp_File *f, sp_int n);
  /* IO#pread(len, offset): read without moving the file position. Inline
@@ -552,6 +937,33 @@
    SP_GLB_PHASE("globals");
  #undef SP_GLB_PHASE
  }
+@@ -1430,7 +1449,7 @@
+ sp_Bigint *sp_bigint_abs_v(sp_Bigint *b);
+ sp_int sp_bigint_bit_length(sp_Bigint *b);
+ int64_t sp_bigint_to_int(sp_Bigint *b);
+-double sp_bigint_to_double(sp_Bigint *b);
++sp_float sp_bigint_to_double(sp_Bigint *b);
+ int sp_bigint_cmp(sp_Bigint *a, sp_Bigint *b);
+ sp_Bigint *sp_bigint_new_int(int64_t v);
+ sp_Bigint *sp_bigint_add(sp_Bigint *a, sp_Bigint *b);
+@@ -1580,13 +1599,13 @@
+    principal branch (ln|base| + i*pi), base==0 is 0. Both result components are
+    Float-classed (fl = 3). */
+ static sp_Complex sp_real_pow_complex(sp_float base, sp_Complex e) {
+-  double lr, li;
++  sp_float lr, li;
+   if (base > 0)      { lr = log(base);  li = 0; }
+   else if (base < 0) { lr = log(-base); li = M_PI; }
+   else               { return (sp_Complex){0, 0, 3}; }
+-  double wr = e.re * lr - e.im * li;
+-  double wi = e.re * li + e.im * lr;
+-  double m = exp(wr);
++  sp_float wr = e.re * lr - e.im * li;
++  sp_float wi = e.re * li + e.im * lr;
++  sp_float m = exp(wr);
+   return (sp_Complex){ m * cos(wi), m * sin(wi), 3 };
+ }
+ /* sp_Range_inspect moved to lib/sp_format.c (cold). */
 @@ -1660,12 +1679,16 @@
            break;
          }
@@ -622,7 +1034,7 @@
          case SP_BUILTIN_CONDVAR: return SPL("Thread::ConditionVariable");
          case SP_BUILTIN_FIBER: return SPL("Fiber");
          case SP_BUILTIN_THREAD: return SPL("Thread");
-@@ -2083,6 +2116,7 @@
+@@ -2083,10 +2116,11 @@
  }
  /* Process.times -> Process::Tms: four cumulative CPU times in seconds.
     An unboxed value like sp_Range/sp_Class -- there is nothing to mutate. */
@@ -630,6 +1042,11 @@
  static sp_Tms sp_process_times(void) {
    sp_Tms t;
    struct tms b;
+-  double hz = (double)sysconf(_SC_CLK_TCK);
++  sp_float hz = (sp_float)sysconf(_SC_CLK_TCK);
+   if (hz <= 0) hz = 100.0;
+   if (times(&b) == (clock_t)-1) { t.utime = t.stime = t.cutime = t.cstime = 0.0; return t; }
+   t.utime  = (sp_float)b.tms_utime  / hz;
 @@ -2095,6 +2129,7 @@
    t.cstime = (sp_float)b.tms_cstime / hz;
    return t;
@@ -638,6 +1055,52 @@
  /* Class/Module#freeze / #frozen?: a class value is an unboxed {cls_id, name},
     so the frozen flag lives in a global per-class map -- user ids from 0 up,
     builtins (-100..-163) mapped to the top of the range (#3101). */
+@@ -3001,17 +3036,17 @@
+    codegen path, dispatched on the runtime tag. */
+ static sp_RbVal sp_poly_round_n(sp_RbVal v, sp_int n) {
+   if (v.tag == SP_TAG_FLT) {
+-    double x = v.v.f;
+-    if (n > 0) { double f = pow(10, (double)n); if (isinf(f)) return sp_box_float(x);
+-      double r = round(x * f) / f; return sp_box_float((x != 0.0 && r == 0.0) ? 0.0 : r); }  /* +0.0 normalize (#3235) */
++    sp_float x = v.v.f;
++    if (n > 0) { sp_float f = pow(10, (sp_float)n); if (isinf(f)) return sp_box_float(x);
++      sp_float r = round(x * f) / f; return sp_box_float((x != 0.0 && r == 0.0) ? 0.0 : r); }  /* +0.0 normalize (#3235) */
+     sp_poly_flo_domain_ck(x);
+-    double f = pow(10, (double)(-n));
++    sp_float f = pow(10, (sp_float)(-n));
+     return sp_box_int(isinf(f) ? 0 : (sp_int)(round(x / f) * f));
+   }
+   if (v.tag == SP_TAG_INT) {
+     if (n >= 0) return v;
+-    double f = pow(10, (double)(-n));
+-    return sp_box_int(isinf(f) ? 0 : (sp_int)(round((double)v.v.i / f) * f));
++    sp_float f = pow(10, (sp_float)(-n));
++    return sp_box_int(isinf(f) ? 0 : (sp_int)(round((sp_float)v.v.i / f) * f));
+   }
+   if (v.tag == SP_TAG_BIGINT) return v;  /* n < 0 on a bignum is out of scope */
+   /* Rational#round(n): a positive precision keeps the Rational, n <= 0 lands
+@@ -3580,7 +3615,7 @@
+     if (b.tag == SP_TAG_FLT)
+       return sp_box_complex(sp_complex_pow_c(ca, (sp_Complex){b.v.f, 0.0, SP_CPLX_RE_F | SP_CPLX_IM_F}));
+   }
+-  double r = pow((double)sp_poly_to_f(a), (double)sp_poly_to_f(b));
++  sp_float r = pow((sp_float)sp_poly_to_f(a), (sp_float)sp_poly_to_f(b));
+   return sp_box_float((sp_float)r);
+ }
+ /* sp_poly_shl is defined after sp_PolyArray_push (below) so the
+@@ -3681,10 +3716,10 @@
+    below carries it to ~1e-15. Gamma(1) and Gamma(2) are exactly 1, so their
+    logs are returned as an exact 0 rather than a rounding-noise residual. */
+ /* sp_lgamma_pos: moved to lib/sp_cold.c */
+-double sp_lgamma_pos(double x);
++sp_float sp_lgamma_pos(sp_float x);
+ /* Math.lgamma(x) -> [log(|gamma(x)|), sign of gamma(x)]. */
+ /* sp_math_lgamma: moved to lib/sp_cold.c */
+-sp_PolyArray *sp_math_lgamma(double x);
++sp_PolyArray *sp_math_lgamma(sp_float x);
+ static sp_RbVal sp_PolyArray_shift(sp_PolyArray *a) { if (!a || a->len <= 0) return sp_box_nil(); if (a->frozen) { sp_raise_frozen_array_at(a, SP_BUILTIN_POLY_ARRAY); return sp_box_nil(); } sp_RbVal v = a->data[0]; memmove(a->data, a->data+1, (size_t)(--a->len)*sizeof(sp_RbVal)); return v; }
+ static sp_RbVal sp_PolyArray_delete_at(sp_PolyArray *a, sp_int i) {sp_gc_wb((void*)a);  if (!a) return sp_box_nil(); if (i < 0) i += a->len; if (i < 0 || i >= a->len) return sp_box_nil(); sp_RbVal v = a->data[i]; for (sp_int j = i; j < a->len - 1; j++) a->data[j] = a->data[j+1]; a->len--; return v; }
+ static void sp_PolyArray_insert(sp_PolyArray *a, sp_int i, sp_RbVal v) {sp_gc_wb((void*)a);  if (!a) return; if (a->frozen) { sp_raise_frozen_array_at(a, SP_BUILTIN_POLY_ARRAY); return; } sp_int orig = i; if (i < 0) i += a->len + 1; if (i < 0) sp_raise_cls("IndexError", sp_sprintf("index %lld too small for array; minimum: %lld", (long long)orig, (long long)(-(a->len + 1)))); while (i > a->len) sp_PolyArray_push(a, sp_box_nil()); /* CRuby pads with nils past the end */ sp_PolyArray_push(a, sp_box_nil()); for (sp_int j = a->len - 1; j > i; j--) a->data[j] = a->data[j-1]; a->data[i] = v; }
 @@ -3775,6 +3810,7 @@
        }
        return sp_poly_binop_bad("<<", a, b);
@@ -654,6 +1117,24 @@
      /* A user object with a `<<` method (a Set held as a Hash value, #3174):
         dispatch through the user-binop hook, which mutates it in place and
         returns the receiver -- not the Integer#<< bit-shift fallback below. */
+@@ -4912,14 +4949,14 @@
+     }
+ else if (conv == 'f' || conv == 'e' || conv == 'E' || conv == 'g' || conv == 'G' ||
+          conv == 'a' || conv == 'A') {
+-      double dv = 0;
++      sp_float dv = 0;
+       if (v.tag == SP_TAG_FLT) dv = v.v.f;
+-      else if (v.tag == SP_TAG_INT) dv = (double)v.v.i;
++      else if (v.tag == SP_TAG_INT) dv = (sp_float)v.v.i;
+       else if (sp_poly_is_rational(v)) dv = sp_poly_to_f_with_rational(v);
+       else if (v.tag == SP_TAG_BIGINT) dv = sp_poly_to_f(v);
+       /* a String converts the way Float() does; anything else is not a number
+          and CRuby refuses rather than formatting a zero (#4010) */
+-      else if (v.tag == SP_TAG_STR) dv = (double)sp_str_to_f_strict(v.v.s ? v.v.s : sp_str_empty);
++      else if (v.tag == SP_TAG_STR) dv = (sp_float)sp_str_to_f_strict(v.v.s ? v.v.s : sp_str_empty);
+       else { free(buf); sp_raise_cls("TypeError", sp_sprintf("can't convert %s into Float", sp_convert_src_name(v))); }
+       /* Ruby prints non-finite floats as Inf/-Inf/NaN (C printf lowercases) */
+       if (!isfinite(dv)) wn = snprintf(tmp, sizeof(tmp), "%s", isnan(dv) ? "NaN" : dv > 0 ? "Inf" : "-Inf");
 @@ -5472,14 +5509,18 @@
          case SP_BUILTIN_PTR_ARRAY: return sp_PtrArray_inspect((sp_PtrArray *)v.v.p);
          case SP_BUILTIN_POLY_ARRAY: return sp_PolyArray_inspect((sp_PolyArray *)v.v.p);
@@ -683,6 +1164,24 @@
    switch (a.cls_id) {
      case SP_BUILTIN_STR_ARRAY: return sp_StrArray_join((sp_StrArray *)a.v.p, sep);
      case SP_BUILTIN_POLY_ARRAY: return sp_PolyArray_join((sp_PolyArray *)a.v.p, sep);
+@@ -6000,7 +6043,7 @@
+     }
+     /* -0.0 and 0.0 are eql?, so they must hash alike: normalize the sign of
+        zero away before hashing the bits (#3651). */
+-    case SP_TAG_FLT: { double f = v.v.f == 0.0 ? 0.0 : v.v.f;
++    case SP_TAG_FLT: { sp_float f = v.v.f == 0.0 ? 0.0 : v.v.f;
+                        uint64_t b; memcpy(&b, &f, sizeof(b)); return (sp_int)b; }
+     case SP_TAG_OBJ:
+       /* A shared-string handle is `==` to the immediate string with the same
+@@ -6108,7 +6151,7 @@
+         sp_FloatRange *fr = (sp_FloatRange *)v.v.p;
+         if (!fr) return 0;
+         uint64_t bf, bl;
+-        double f = fr->first == 0.0 ? 0.0 : fr->first, l = fr->last == 0.0 ? 0.0 : fr->last;
++        sp_float f = fr->first == 0.0 ? 0.0 : fr->first, l = fr->last == 0.0 ? 0.0 : fr->last;
+         memcpy(&bf, &f, sizeof bf); memcpy(&bl, &l, sizeof bl);
+         return (sp_int)(((bf * 31u) ^ bl) * 2u + (uint64_t)(fr->excl ? 1 : 0));
+       }
 @@ -7957,7 +8000,9 @@
  static sp_int sp_poly_length(sp_RbVal v){if(v.tag==SP_TAG_STR)return v.v.s?(sp_int)sp_str_byte_len(v.v.s):0;   /* the header length, so an embedded NUL counts (#3540) */if(v.tag==SP_TAG_SYM)return sp_sym_name_fn?(sp_int)strlen(sp_sym_name_fn((sp_sym)v.v.i)):0;if(v.tag!=SP_TAG_OBJ)return 0;switch(v.cls_id){case SP_BUILTIN_INT_ARRAY:return sp_IntArray_length((sp_IntArray*)v.v.p);case SP_BUILTIN_FLT_ARRAY:return sp_FloatArray_length((sp_FloatArray*)v.v.p);case SP_BUILTIN_STR_ARRAY:return sp_StrArray_length((sp_StrArray*)v.v.p);case SP_BUILTIN_SYM_ARRAY:return sp_IntArray_length((sp_IntArray*)v.v.p);case SP_BUILTIN_POLY_ARRAY:return sp_PolyArray_length((sp_PolyArray*)v.v.p);case SP_BUILTIN_STR_INT_HASH:return sp_StrIntHash_length((sp_StrIntHash*)v.v.p);case SP_BUILTIN_STR_STR_HASH:return sp_StrStrHash_length((sp_StrStrHash*)v.v.p);case SP_BUILTIN_INT_STR_HASH:return sp_IntStrHash_length((sp_IntStrHash*)v.v.p);case SP_BUILTIN_INT_INT_HASH:return sp_IntIntHash_length((sp_IntIntHash*)v.v.p);case SP_BUILTIN_STR_POLY_HASH:return sp_StrPolyHash_length((sp_StrPolyHash*)v.v.p);case SP_BUILTIN_SYM_POLY_HASH:return sp_SymPolyHash_length((sp_SymPolyHash*)v.v.p);case SP_BUILTIN_POLY_POLY_HASH:return sp_PolyPolyHash_length((sp_PolyPolyHash*)v.v.p);
  /* File#size / File::Stat#size on a boxed handle: the file's byte size via its
@@ -704,6 +1203,24 @@
    if (v.tag == SP_TAG_OBJ && v.cls_id == SP_BUILTIN_FIBER) {
      sp_Fiber *f = (sp_Fiber *)v.v.p;
      if (f->state == 3) return f->yielded_value;   /* already run: cached result, idempotent */
+@@ -8460,7 +8507,7 @@
+ /* Forward declarations for sp_sched.c functions used by codegen. The
+    codegen emits direct symbol references (sp_Thread_join_timeout) so
+    the signatures must be visible here. */
+-sp_thread *sp_Thread_join_timeout(sp_thread *t, double seconds);
++sp_thread *sp_Thread_join_timeout(sp_thread *t, sp_float seconds);
+ 
+ /* `poly.join(<number>)` can only be Thread#join(limit): Array#join with a
+    numeric separator is a TypeError in CRuby, so a numeric argument leaves no
+@@ -8468,7 +8515,7 @@
+    limit and nil when it did not, which is why this returns sp_RbVal where
+    sp_poly_join returns the joined string. A non-Thread receiver gets the
+    TypeError the separator slot would have raised. */
+-static sp_RbVal sp_poly_join_timeout(sp_RbVal v, double seconds, const char *argcls) {
++static sp_RbVal sp_poly_join_timeout(sp_RbVal v, sp_float seconds, const char *argcls) {
+   if (v.tag == SP_TAG_OBJ && v.cls_id == SP_BUILTIN_THREAD)
+     return sp_Thread_join_timeout((sp_thread *)v.v.p, seconds) ? v : sp_box_nil();
+   /* the separator slot's own refusal, naming the class the argument was
 @@ -8479,10 +8526,12 @@
  }
  
@@ -740,6 +1257,26 @@
    /* Launder the message onto the string heap and root the copy before anything
       below allocates. `msg` is the caller's own pointer and comes in one of two
       shapes, neither of which survives a collection here. A raiser that formats
+@@ -9071,7 +9126,7 @@
+ 
+ /* Float#round(half: mode) where the mode is only known at run time (#3646).
+    A nil mode is the default (round half up, away from zero). */
+-static double sp_round_half_mode(double x, sp_sym mode) {
++static sp_float sp_round_half_mode(sp_float x, sp_sym mode) {
+   const char *m = (mode == (sp_sym)-1) ? NULL : sp_sym_to_s(mode);
+   if (!m || !m[0]) return round(x);
+   if (strcmp(m, "even") == 0) return sp_round_half_even(x);
+@@ -9906,8 +9961,8 @@
+ const char *sp_addrinfo_inspect(sp_Addrinfo *a);
+ sp_SockOpt *sp_sockopt_new(sp_int family, sp_int level, sp_int optname, sp_int value);
+ const char *sp_sockopt_inspect(sp_SockOpt *o);
+-sp_File *sp_io_wait_events(sp_File *f, double timeout, sp_int kind);
+-sp_RbVal sp_io_select(sp_PolyArray *rd, sp_PolyArray *wr, sp_PolyArray *er, double timeout);
++sp_File *sp_io_wait_events(sp_File *f, sp_float timeout, sp_int kind);
++sp_RbVal sp_io_select(sp_PolyArray *rd, sp_PolyArray *wr, sp_PolyArray *er, sp_float timeout);
+ sp_int sp_file_size_q(const char *path);
+ sp_bool sp_file_pipe(const char *path);
+ sp_bool sp_file_identical(const char *a, const char *b);
 @@ -9939,6 +9994,7 @@
  const char *sp_stat_ftype(sp_File *f);
  sp_int sp_file_stat_mode(const char *path);
@@ -756,6 +1293,15 @@
  /* A boxed IO handle read back out of a poly slot (an IO.pipe element, a
     poly-widened local): unbox for the IO instance dispatch, NoMethodError on
     any other tag. */
+@@ -11937,7 +11994,7 @@
+    own exact comparison does, rather than true from a lossy double round-trip.
+    Ordering does compare as doubles (sp_poly_cmp does the same); only equality
+    can be decided by a single ulp. */
+-static int sp_bigint_eq_f(sp_Bigint *a, double d) {
++static int sp_bigint_eq_f(sp_Bigint *a, sp_float d) {
+   if (!isfinite(d) || d != floor(d)) return 0;   /* inf/nan/fraction is no integer */
+   char buf[400];
+   snprintf(buf, sizeof buf, "%.0f", d);
 @@ -12012,4 +12069,6 @@
  static sp_sym sp_sym_intern(const char *s) { (void)s; return (sp_sym)0; }
  #endif

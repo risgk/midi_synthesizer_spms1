@@ -188,7 +188,7 @@ sp_int sp_file_do_symlink(const char *oldp, const char *newp);
 sp_int sp_file_do_link(const char *oldp, const char *newp);
 sp_int sp_file_umask(sp_int mask, int have_arg);
 sp_int sp_file_mkfifo(const char *path, sp_int mode);
-sp_int sp_file_utime(double atime, double mtime, const char *path);
+sp_int sp_file_utime(sp_float atime, sp_float mtime, const char *path);
 const char *sp_file_readlink(const char *path);  /* defined in sp_cold.c */
 void sp_file_delete(const char *path);
 void sp_file_rename(const char *from, const char *to);

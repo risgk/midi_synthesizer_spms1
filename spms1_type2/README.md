@@ -698,9 +698,9 @@ plugin for the audio).
 - SPMS-1 Web: builds and tests "spms1_web_synth.js", and keeps it as an artifact
 - Simulators: builds "sim_spinel" and "sim_render" on Linux, macOS and Windows, renders, and compares
   the renders with CRuby on Linux. On Linux it also checks that every function and variable of the
-  runtime has the same type wherever it is declared ("spinel_mcu/lto_type_check.sh"): the
-  `#define double float` of the MCU changes reaches some files and not others, and a function
-  declared with float on one side and double on the other goes unnoticed otherwise
+  runtime has the same type wherever it is declared ("spinel_mcu/lto_type_check.sh"): a function
+  declared with float on one side and double on the other goes unnoticed otherwise, as two did
+  when the MCU changes made the runtime float with `#define double float`
 - Spinel: builds the release named above and checks that "spms1_main.c" is what it makes of the .rb files,
   and that the runtime files are the release with "spinel_mcu/spinel_mcu.patch" applied (see below)
 - With "commit_package" checked, and when all of the above pass, the UF2 files ("bin") and
@@ -714,12 +714,21 @@ The runtime files in this folder are Spinel's `lib` (and `lib/regexp`) of the re
 the changes for the MCU kept in two places:
 
 - "spinel_rt_mcu_head.h", "spinel_rt_mcu_libm.h" and "spinel_rt_mcu_cold.h": what the MCU adds -- the
-  section and the pragmas of the synth core, `float` for `double`, and what the generated code needs
-  from `lib/sp_cold.c`, which is not built. "spinel_rt.h" carries only an `#include` line for each
-- "spinel_mcu/spinel_mcu.patch": what is changed in Spinel's own files -- `float` for `double` where
-  a header or a C file of its own declares it, the POSIX parts left out with `#if 0` (a release
+  section and the pragmas of the synth core, the float versions of the math functions, what the
+  generated code needs from `lib/sp_cold.c`, which is not built, and, at the end of "spinel_rt.h",
+  what binds the generated code to a float runtime (below). "spinel_rt.h" carries only an
+  `#include` line for each
+- "spinel_mcu/spinel_mcu.patch": what is changed in Spinel's own files -- the runtime written in
+  `sp_float` where it said `double` for a Float, the POSIX parts left out with `#if 0` (a release
   changing what is inside them seldom stops the patch from applying), and the GC's buffers made
   to fit SRAM. Each file it changes sits next to its released copy, "NAME.orig"
+
+Float is float, the RP2350 having a single-precision FPU only. `SPINEL_FLOAT32` in "sp_types.h"
+decides it for the whole runtime: 1 here, and 0 gives double, as Spinel has it, with the same
+results as CRuby. The generated code still spells `double` in casts and temporaries and uses
+`DBL_EPSILON` and the like for the Float constants, so "spinel_rt_mcu_cold.h" ends with
+`#define double float` and `FLT_*` for `DBL_*`, which reach the generated code only. `Float#to_s`
+prints the shortest digits that read back as the same float (`0.1`, `0.33333334`).
 
 A new release is taken on GitHub Actions, so it needs no particular OS:
 
