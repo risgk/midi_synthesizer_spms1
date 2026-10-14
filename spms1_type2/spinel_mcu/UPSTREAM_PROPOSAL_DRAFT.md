@@ -65,22 +65,27 @@ decides:
 
 | In the generated C today | Instead | Defined by the runtime as, with double |
 |---|---|---|
-| `(double)` casts | `(sp_float)` | `double` (`sp_float` itself) |
+| `double` in casts and temporaries (`(double)(n)`, `double _t40 = x;` for `Float#floor`) | `sp_float` | `double` |
 | float literals (`0.5`) | `SP_FLT(0.5)` | `((sp_float)(0.5))` |
-| `fabs()`, `tan()` called directly | `sp_float_fabs()`, `sp_float_tan()` | `fabs()`, `tan()` |
+| `DBL_EPSILON`, `DBL_MAX` and the other Float constants | `SP_FLOAT_EPSILON`, `SP_FLOAT_MAX`, ... | `DBL_EPSILON`, `DBL_MAX`, ... |
+
+The math functions need nothing: the generated C calls `sin()`, `floor()` and the rest of
+`<math.h>` with `sp_float` arguments already, and a runtime for float that includes `<tgmath.h>`
+sends each of them to its float version (`sinf`, `floorf`). With 20 of them called from Ruby
+(`Math.sin` to `Math.hypot`, `Float#floor`, `%`, `**`), compiled for a Cortex-M33 that way, every
+call was to the float version.
 
 The compiler then has no option and emits the same C whatever Float is to be; the runtime's
 headers decide, when the C is compiled. With double, nothing changes: I rewrote the Spinel output
-of my program this way (32 casts, 898 literals, 22 calls) and compiled it for a Cortex-M33 against
-the runtime as released, and the machine code is the same as before, byte for byte.
+of my program this way (32 `double`, 898 literals) and compiled it for a Cortex-M33 against the
+runtime as released, and the machine code is the same as before, byte for byte.
 
-With float, the runtime defines `sp_float` as float, `SP_FLT(x)` as a float constant,
-`sp_float_fabs` as `fabsf` and so on, and uses `powf` and `logf` in its own helpers
-(`sp_float_pow`, `sp_math_log`). The same rewritten C, compiled that way, needs no
-`#define double float` and no `-fsingle-precision-constant` (which clang ignores): the hot
-function has no soft-float arithmetic left (only the conversions that the error messages pass to
-`sp_sprintf`), and comes out the same, byte for byte, as what my
-patch produces today, and renders the same audio.
+With float, the runtime defines `sp_float` as float and `SP_FLT(x)` as a float constant, includes
+`<tgmath.h>`, and has its own helpers in `sp_float` (`sp_fmod` takes double today). The same
+rewritten C, compiled that way, needs no `#define double float` and no
+`-fsingle-precision-constant` (which clang ignores): the hot function has no soft-float arithmetic
+left (only the conversions that the error messages pass to `sp_sprintf`), and comes out the same,
+byte for byte, as what my patch produces today, and renders the same audio.
 
 The runtime side is then the larger part, and stays opt-in, for those who accept results that
 differ from CRuby's (`0.1 + 0.2` is 0.30000001192092896, integers above 2^24 lose precision,
@@ -88,15 +93,17 @@ differ from CRuby's (`0.1 + 0.2` is 0.30000001192092896, integers above 2^24 los
 
 - `sp_float` declared in one place (today `lib/sp_types.h`, `lib/sp_core.c`, and `mrb_float` in
   `lib/mruby_shim.h`), with the prototypes in terms of `sp_float`
-- the float counterparts of the math functions, and `SP_FLOAT_EPSILON`, `SP_FLOAT_MAX` and the
-  like for the Float constants (the generated C carries `DBL_EPSILON` for `Float::EPSILON` today)
+- `<tgmath.h>`, its own inline helpers in terms of `sp_float`, and `SP_FLOAT_EPSILON`,
+  `SP_FLOAT_MAX` and the like defined from `FLT_EPSILON`, `FLT_MAX`, ...
 - the shortest round trip for a float in `Float#to_s`, and `strtof` (or the float counterpart of
   `sp_read_float`) in `String#to_f`
 
 Doing it from outside, as I do now (`#define double float` around the runtime), is fragile: in my
 patch, `sp_float_shortest` and `sp_read_float` were declared with float in some translation units
 and defined with double in `sp_dtoa.c`, so `Float#to_s` printed garbage and `String#to_f` wrote
-past a variable, unnoticed until an LTO type check (`-flto -Wlto-type-mismatch`).
+past a variable, unnoticed until an LTO type check (`-flto -Wlto-type-mismatch`). And `<tgmath.h>`
+cannot be used under that `#define` (its macros spell `long double`), so each math function has to
+be sent to its float version by hand, and one left out falls back to double silently.
 
 The generated-C part can come first: with double it changes nothing. The CRuby comparison does not
 apply to the float runtime, so that would need its own tests: a small set with a tolerance, and
