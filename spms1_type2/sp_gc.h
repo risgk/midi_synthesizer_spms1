@@ -78,6 +78,12 @@ typedef struct { int tag; int cls_id; union { sp_int i; const char *s; sp_float 
    switch. Plain globals in the single-threaded build. */
 extern SP_TLS void **sp_gc_roots[SP_GC_STACK_MAX];
 extern SP_TLS int sp_gc_nroots;
+/* For the MCU: set when a root did not fit in sp_gc_roots and was dropped, which upstream leaves
+   silent and which can free an object still in use. Only with SP_GC_ROOT_OVERFLOW_CHECK, which
+   sim_render builds with and the sketch does not: the store, at each of the pushes inlined into
+   Spms1_main, would cost the synth core about 400 bytes of RAM. The synth takes the same paths
+   in sim_render as on the device, so the check there stands for the device. */
+extern int sp_gc_root_overflow;
 
 /* GC root tracking. SP_GC_ROOT registers a stack-resident root with a
    cleanup-attribute sentinel so it auto-pops when its declaring scope ends.
@@ -87,6 +93,9 @@ extern SP_TLS int sp_gc_nroots;
    stack above, so relocating them is layout-neutral. */
 static inline int _sp_gc_root_push(void **p) {
   if (sp_gc_nroots < SP_GC_STACK_MAX) { sp_gc_roots[sp_gc_nroots++] = p; return 1; }
+#ifdef SP_GC_ROOT_OVERFLOW_CHECK
+  sp_gc_root_overflow = 1;
+#endif
   return 0;
 }
 static inline void _sp_gc_root_pop(int *added) { if (*added) sp_gc_nroots--; }

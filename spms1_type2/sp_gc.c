@@ -27,6 +27,7 @@ void sp_str_verify_probe_done(void);
 /* ---- Globals shared with the generated TU (declared extern in sp_gc.h) ---- */
 SP_TLS void **sp_gc_roots[SP_GC_STACK_MAX];   /* per-worker (SP_TLS); see sp_gc.h */
 SP_TLS int sp_gc_nroots = 0;
+int sp_gc_root_overflow = 0;   /* for the MCU: see sp_gc.h */
 #ifdef SP_THREADS
 sp_gc_wslot_t sp_gc_wslot[SP_MAX_WORKERS];   /* per-worker young head + flush delta, cache-line padded */
 #else

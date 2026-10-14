@@ -672,6 +672,12 @@ plugin for the audio).
       the editor's "Init" patch renders to the same hash as no patch at all. Compare hashes from the
       same compiler only: clang ignores the `single-precision-constant` of "spinel_rt_mcu_head.h", which GCC (as
       on the device) honors, so the last bits differ between them
+    - It also checks the GC, and exits with 1 (failing "compare_with_cruby.sh" and the GitHub Actions
+      workflow) unless both hold: that nothing is allocated while the synth plays,
+      as a collection would interrupt the audio on the device, and that no GC root is dropped for want
+      of room in `sp_gc_roots`, which "sp_gc.h" sizes for the MCU (`SP_GC_STACK_MAX`). A Spinel
+      release that boxes a value the previous one kept unboxed fails the first; the second is checked
+      only here, with `SP_GC_ROOT_OVERFLOW_CHECK`, so as to cost the device nothing
     - The build regenerates "spms1_main.c" with Spinel first, as "sim_spinel" does (`--no-spinel` to skip)
     - `sh sim_render/compare_with_cruby.sh [--patch FILE] [--score FILE] [--seconds N]` renders the same
       patch and score with this and with CRuby running "spms1_main.rb" itself, and compares them, so it
@@ -729,7 +735,8 @@ builds the UF2, and keeps what it changed as an artifact ("spinel-TAG.diff", to 
    add the others to "spinel_mcu/not_vendored.txt"
 3. Regenerate "spms1_main.c" (`sh sim_render/build.sh`), compare with CRuby
    (`sh sim_render/compare_with_cruby.sh`), and build for the device. The build stops if `sp_float`
-   is no longer `float`. The debug print shows whether the GC roots still fit
+   is no longer `float`, and the render fails if the release makes the synth allocate while it plays
+   or need more GC roots than there is room for
 4. `sh spinel_mcu/update.sh check` confirms the result, as the GitHub Actions workflow does
 
 To change a runtime file further, copy it to "NAME.orig" first if it has none, edit it, and

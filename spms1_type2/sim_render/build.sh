@@ -52,14 +52,15 @@ cc=${CC:-cc}
 command -v "$cc" > /dev/null || cc=gcc
 
 # The runtime is built as the sketch has it, warnings included, so they are not shown, with the
-# same compatibility header as the PC simulator. Its objects are rebuilt only when their source or
+# same compatibility header as the PC simulator, and with the check for dropped GC roots (see
+# sp_gc.h), which the sketch leaves out. Its objects are rebuilt only when their source or
 # any header is newer; spms1_main.c always is.
 newest_header=$(ls -t *.h sim_spinel/host_compat.h | head -n 1)
 for src in spms1_main.c sp_*.c re_*.c; do
   obj="build/sim_render/$(basename "$src" .c).o"
   if [ "$src" = spms1_main.c ] || [ ! -f "$obj" ] || [ "$src" -nt "$obj" ] || [ "$newest_header" -nt "$obj" ]; then
     "$cc" -O2 -w -ffunction-sections -fdata-sections -include sim_spinel/host_compat.h -I. \
-      -c "$src" -o "$obj"
+      -DSP_GC_ROOT_OVERFLOW_CHECK -c "$src" -o "$obj"
   fi
 done
 "$cc" -O2 -Wall -I. -c sim_render/spms1_render.c -o build/sim_render/spms1_render_host.o

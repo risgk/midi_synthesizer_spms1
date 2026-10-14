@@ -243,7 +243,15 @@
  #endif /* SP_FIBER_CTX_H */
 --- a/sp_gc.c
 +++ b/sp_gc.c
-@@ -164,6 +164,7 @@
+@@ -27,6 +27,7 @@
+ /* ---- Globals shared with the generated TU (declared extern in sp_gc.h) ---- */
+ SP_TLS void **sp_gc_roots[SP_GC_STACK_MAX];   /* per-worker (SP_TLS); see sp_gc.h */
+ SP_TLS int sp_gc_nroots = 0;
++int sp_gc_root_overflow = 0;   /* for the MCU: see sp_gc.h */
+ #ifdef SP_THREADS
+ sp_gc_wslot_t sp_gc_wslot[SP_MAX_WORKERS];   /* per-worker young head + flush delta, cache-line padded */
+ #else
+@@ -164,6 +165,7 @@
     Name the root slot the collector was walking, which is what turns an
     unreproducible crash into a variable. Re-raises so the core dump is still
     produced. */
@@ -251,7 +259,7 @@
  static void sp_gc_fault_report(int sig) {
    static const char hex[] = "0123456789abcdef";
    char buf[256]; size_t o = 0;
-@@ -183,6 +184,7 @@
+@@ -183,6 +185,7 @@
    signal(sig, SIG_DFL);
    raise(sig);
  }
@@ -259,7 +267,7 @@
  __attribute__((constructor)) static void sp_gc_debug_env(void){
    const char *v=getenv("SPINEL_GC_VERIFY"); sp_gc_verify=(v&&*v&&*v!='0');
    { const char *ph=getenv("SPINEL_GC_PHASES"); sp_gc_ph_on=(ph&&*ph&&*ph!='0'); }
-@@ -229,7 +231,9 @@
+@@ -229,7 +232,9 @@
      const char *sm = getenv("SPINEL_GC_STR_MAJOR");
      sp_gc_str_major_fixed = (sm && strcmp(sm, "fixed") == 0);
      sp_gc_str_major_sched = !(sm && strcmp(sm, "size") == 0); }
@@ -285,7 +293,30 @@
  #endif
  #define SP_GC_FULL_INTERVAL 8
  /* Per-worker root stack (SP_TLS): each OS worker carries the active roots of
-@@ -123,7 +127,10 @@
+@@ -74,6 +78,12 @@
+    switch. Plain globals in the single-threaded build. */
+ extern SP_TLS void **sp_gc_roots[SP_GC_STACK_MAX];
+ extern SP_TLS int sp_gc_nroots;
++/* For the MCU: set when a root did not fit in sp_gc_roots and was dropped, which upstream leaves
++   silent and which can free an object still in use. Only with SP_GC_ROOT_OVERFLOW_CHECK, which
++   sim_render builds with and the sketch does not: the store, at each of the pushes inlined into
++   Spms1_main, would cost the synth core about 400 bytes of RAM. The synth takes the same paths
++   in sim_render as on the device, so the check there stands for the device. */
++extern int sp_gc_root_overflow;
+ 
+ /* GC root tracking. SP_GC_ROOT registers a stack-resident root with a
+    cleanup-attribute sentinel so it auto-pops when its declaring scope ends.
+@@ -83,6 +93,9 @@
+    stack above, so relocating them is layout-neutral. */
+ static inline int _sp_gc_root_push(void **p) {
+   if (sp_gc_nroots < SP_GC_STACK_MAX) { sp_gc_roots[sp_gc_nroots++] = p; return 1; }
++#ifdef SP_GC_ROOT_OVERFLOW_CHECK
++  sp_gc_root_overflow = 1;
++#endif
+   return 0;
+ }
+ static inline void _sp_gc_root_pop(int *added) { if (*added) sp_gc_nroots--; }
+@@ -123,7 +136,10 @@
     assignment inside a larger expression. The statement expression evaluates the
     object once, which a comma form would not. */
  #define SP_WBO(x) ({ __typeof__(x) _sp_wbo = (x); sp_gc_wb((void *)_sp_wbo); _sp_wbo; })
@@ -297,7 +328,7 @@
  extern void *sp_gc_remembered[SP_GC_REMEMBERED_MAX];
  extern int sp_gc_nremembered;
  extern int sp_gc_rem_overflow;
-@@ -172,7 +179,9 @@
+@@ -172,7 +188,9 @@
  static inline void sp_gc_pin_remembered(void *obj) {
    if (__builtin_expect(sp_gc_minor_on, 1)) sp_gc_pin_remembered_slow(obj);
  }

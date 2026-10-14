@@ -647,6 +647,12 @@ C のホスト ("sim_spinel"、"sim_render"、"web" の SPMS-1 Web) は、スケ
       エディタの "Init" パッチは、パッチなしと同じハッシュになります。ハッシュは同じコンパイラ同士で
       比べてください: "spinel_rt_mcu_head.h" の `single-precision-constant` を GCC は (実機と同じく) 守り、
       clang は無視するので、両者では下位のビットが変わります
+    - GC も確認し、次のどちらかに反すると終了コード 1 で終わります ("compare_with_cruby.sh" と
+      GitHub Actions のワークフローも失敗します): シンセが鳴っている間に何も確保しないこと
+      (実機では GC が音を途切れさせます)、"sp_gc.h" が MCU 向けに決めた `sp_gc_roots` の大きさ
+      (`SP_GC_STACK_MAX`) が足りずに GC ルートが落とされないこと。前のリリースがボックス化しなかった値を
+      ボックス化するリリースは前者で分かります。後者は実機に負担をかけないよう、ここでだけ
+      `SP_GC_ROOT_OVERFLOW_CHECK` 付きで確認します
     - ビルドは "sim_spinel" と同じく、先に Spinel で "spms1_main.c" を再生成します (`--no-spinel` で省略)
     - `sh sim_render/compare_with_cruby.sh [--patch FILE] [--score FILE] [--seconds N]` は、同じパッチと
       スコアをこれと、"spms1_main.rb" そのものを動かす CRuby とでレンダリングして比べるので、Spinel が
@@ -701,7 +707,8 @@ MCU 向けの変更は 2 か所にまとめてあります:
    "spinel_mcu/not_vendored.txt" に加えます
 3. "spms1_main.c" を再生成し (`sh sim_render/build.sh`)、CRuby と比べ
    (`sh sim_render/compare_with_cruby.sh`)、実機向けにビルドします。`sp_float` が `float` でなくなると
-   ビルドが止まります。GC ルートが収まっているかはデバッグプリントで分かります
+   ビルドが止まり、リリースのせいでシンセが鳴っている間に確保したり、GC ルートが収まらなく
+   なったりすると、レンダリングが失敗します
 4. `sh spinel_mcu/update.sh check` で、GitHub Actions のワークフローと同じ確認をします
 
 ランタイムのファイルをさらに変更するときは、"NAME.orig" がなければ先にコピーしてから編集し、
