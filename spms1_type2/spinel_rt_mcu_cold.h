@@ -19,7 +19,14 @@ __attribute__((noinline)) SP_NORETURN void sp_raise_nil_int_op(sp_int a, sp_int 
 }
 sp_int sp_float_to_i_checked(sp_float f) {
   if (isnan(f) || isinf(f)) sp_raise_cls("FloatDomainError", sp_sprintf("%g", f));
+  /* The range of sp_int, which is pointer-width: Spinel's sp_cold.c checks against 2^63 only, so
+     on the MCU, where sp_int is 32-bit, a Float from 2^31 up was converted out of range (which
+     C leaves undefined) instead of raising. The same two comparisons, so the cost is the same. */
+#if INTPTR_MAX == INT32_MAX
+  if (f >= 2147483648.0 || f < -2147483648.0)
+#else
   if (f >= 9223372036854775808.0 || f < -9223372036854775808.0)
+#endif
     sp_raise_cls("RangeError", "float out of Integer range (Bignum promotion pending)");
   return (sp_int)f;
 }
