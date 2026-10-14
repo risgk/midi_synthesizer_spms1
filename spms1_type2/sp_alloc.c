@@ -1301,11 +1301,13 @@ __attribute__((constructor)) static void sp_alloc_report_boot(void) {
 #endif
     /* SA_RESTART: asking for a report must not turn an in-flight read(2) into
        an EINTR the program never expected to handle. */
-//    { struct sigaction sa; memset(&sa, 0, sizeof sa);
-//      sa.sa_handler = sp_alloc_report_handler;
-//      sigemptyset(&sa.sa_mask);
-//      sa.sa_flags = SA_RESTART;
-//      sigaction(sp_resolve_report_signal(), &sa, NULL); }
+#if 0 /* Not on the MCU */
+    { struct sigaction sa; memset(&sa, 0, sizeof sa);
+      sa.sa_handler = sp_alloc_report_handler;
+      sigemptyset(&sa.sa_mask);
+      sa.sa_flags = SA_RESTART;
+      sigaction(sp_resolve_report_signal(), &sa, NULL); }
+#endif
     atexit(sp_alloc_report_dump);
   }
 }

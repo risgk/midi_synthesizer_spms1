@@ -681,7 +681,8 @@ MCU 向けの変更は 2 か所にまとめてあります:
   シンセ本体のセクションと pragma、`double` の代わりの `float`、ビルドしない `lib/sp_cold.c` から
   生成コードが必要とするもの。"spinel_rt.h" にはそれぞれの `#include` 行だけがあります
 - "spinel_mcu/spinel_mcu.patch": Spinel 自身のファイルへの変更 -- Spinel のヘッダや C ファイルが
-  自分で宣言している `double` を `float` に、POSIX 部分のコメントアウト、SRAM に収まる GC のバッファ。
+  自分で宣言している `double` を `float` に、POSIX 部分の `#if 0` による除外 (中身が
+  リリースで変わってもパッチが当たりやすいように)、SRAM に収まる GC のバッファ。
   変更するファイルの隣には、リリースのままのコピー "NAME.orig" があります
 
 新しいリリースは "spinel_mcu/update.sh" で取り込みます:

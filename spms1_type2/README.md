@@ -708,8 +708,9 @@ the changes for the MCU kept in two places:
   section and the pragmas of the synth core, `float` for `double`, and what the generated code needs
   from `lib/sp_cold.c`, which is not built. "spinel_rt.h" carries only an `#include` line for each
 - "spinel_mcu/spinel_mcu.patch": what is changed in Spinel's own files -- `float` for `double` where
-  a header or a C file of its own declares it, the POSIX parts commented out, and the GC's buffers
-  made to fit SRAM. Each file it changes sits next to its released copy, "NAME.orig"
+  a header or a C file of its own declares it, the POSIX parts left out with `#if 0` (a release
+  changing what is inside them seldom stops the patch from applying), and the GC's buffers made
+  to fit SRAM. Each file it changes sits next to its released copy, "NAME.orig"
 
 "spinel_mcu/update.sh" takes a new release:
 

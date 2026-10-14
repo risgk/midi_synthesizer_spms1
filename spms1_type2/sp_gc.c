@@ -164,25 +164,27 @@ static void sp_gc_verify_fail(void *obj, sp_gc_hdr *h){
    Name the root slot the collector was walking, which is what turns an
    unreproducible crash into a variable. Re-raises so the core dump is still
    produced. */
-//static void sp_gc_fault_report(int sig) {
-//  static const char hex[] = "0123456789abcdef";
-//  char buf[256]; size_t o = 0;
-//  const char *m1 = "\n*** SPINEL_GC_VERIFY: fault on the GC mark path (signal ";
-//  for (const char *p = m1; *p; p++) buf[o++] = *p;
-//  buf[o++] = (char)('0' + (sig / 10) % 10); buf[o++] = (char)('0' + sig % 10);
-//  const char *m2 = ")\n  phase = ";
-//  for (const char *p = m2; *p; p++) buf[o++] = *p;
-//  for (const char *p = sp_gc_dbg_phase ? sp_gc_dbg_phase : "?"; *p && o < 200; p++) buf[o++] = *p;
-//  const char *m3 = "\n  root slot = 0x";
-//  for (const char *p = m3; *p; p++) buf[o++] = *p;
-//  uintptr_t v = (uintptr_t)sp_gc_dbg_ctx;
-//  for (int i = (int)(sizeof(v) * 2) - 1; i >= 0; i--) buf[o++] = hex[(v >> (i * 4)) & 0xf];
-//  const char *m4 = "\n  The slot's value is the pointer the collector could not read.\n";
-//  for (const char *p = m4; *p; p++) buf[o++] = *p;
-//  ssize_t wr = write(2, buf, o); (void)wr;
-//  signal(sig, SIG_DFL);
-//  raise(sig);
-//}
+#if 0 /* Not on the MCU */
+static void sp_gc_fault_report(int sig) {
+  static const char hex[] = "0123456789abcdef";
+  char buf[256]; size_t o = 0;
+  const char *m1 = "\n*** SPINEL_GC_VERIFY: fault on the GC mark path (signal ";
+  for (const char *p = m1; *p; p++) buf[o++] = *p;
+  buf[o++] = (char)('0' + (sig / 10) % 10); buf[o++] = (char)('0' + sig % 10);
+  const char *m2 = ")\n  phase = ";
+  for (const char *p = m2; *p; p++) buf[o++] = *p;
+  for (const char *p = sp_gc_dbg_phase ? sp_gc_dbg_phase : "?"; *p && o < 200; p++) buf[o++] = *p;
+  const char *m3 = "\n  root slot = 0x";
+  for (const char *p = m3; *p; p++) buf[o++] = *p;
+  uintptr_t v = (uintptr_t)sp_gc_dbg_ctx;
+  for (int i = (int)(sizeof(v) * 2) - 1; i >= 0; i--) buf[o++] = hex[(v >> (i * 4)) & 0xf];
+  const char *m4 = "\n  The slot's value is the pointer the collector could not read.\n";
+  for (const char *p = m4; *p; p++) buf[o++] = *p;
+  ssize_t wr = write(2, buf, o); (void)wr;
+  signal(sig, SIG_DFL);
+  raise(sig);
+}
+#endif
 __attribute__((constructor)) static void sp_gc_debug_env(void){
   const char *v=getenv("SPINEL_GC_VERIFY"); sp_gc_verify=(v&&*v&&*v!='0');
   { const char *ph=getenv("SPINEL_GC_PHASES"); sp_gc_ph_on=(ph&&*ph&&*ph!='0'); }
@@ -229,7 +231,9 @@ __attribute__((constructor)) static void sp_gc_debug_env(void){
     const char *sm = getenv("SPINEL_GC_STR_MAJOR");
     sp_gc_str_major_fixed = (sm && strcmp(sm, "fixed") == 0);
     sp_gc_str_major_sched = !(sm && strcmp(sm, "size") == 0); }
-//  if (sp_gc_verify) { signal(SIGSEGV, sp_gc_fault_report); signal(SIGBUS, sp_gc_fault_report); }
+#if 0 /* Not on the MCU */
+  if (sp_gc_verify) { signal(SIGSEGV, sp_gc_fault_report); signal(SIGBUS, sp_gc_fault_report); }
+#endif
 }
 
 /* Tag byte preceding `obj`: 0xfe heap-unmarked -> 0xfc; 0xfc/0xff/0xfd/0xf1/

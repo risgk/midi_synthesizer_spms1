@@ -638,8 +638,11 @@ double sp_float_prec_op(double x, intptr_t nd, int op) {
       /* the tie is decided on the fractional part alone, so the integral part
          is split off first and only rejoined at the end */
       double u, v, us, vs, ff, d, uf;
-//      v = modf(x, &u);
+#if 0 /* Not on the MCU */
+      v = modf(x, &u);
+#else
       v = modff(x, &u);
+#endif
       us = u * s; vs = v * s;
       if (x > 0.0) {
         ff = floor(vs); uf = us + ff; d = vs - ff;
