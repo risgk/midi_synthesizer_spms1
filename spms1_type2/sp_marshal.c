@@ -69,7 +69,7 @@ void sp_mar_sym(sp_mar_buf *b, const char *name) {SP_GC_ROOT_STR(name);
 static const char *sp_mar_float_str(double f, char *buf, size_t bufsz) {SP_GC_ROOT_STR(buf);
   for (int prec = 1; prec <= 17; prec++) {
     sp_format_float(f, buf, bufsz, 'g', prec, '\0');   /* locale-independent */
-    double rt = 0.0; sp_read_float(buf, NULL, &rt);
+    sp_dtoa_double rt = 0.0; sp_read_float(buf, NULL, &rt);   /* for the MCU: see sp_dtoa.h */
     if (rt == f) break;
   }
   char *e = strchr(buf, 'e');

@@ -102,7 +102,7 @@ double sp_str_to_f_cruby(const char *s) {
     }
   }
   buf[n] = 0;
-  double d = 0.0;
+  sp_dtoa_double d = 0.0;   /* for the MCU: double itself (see sp_dtoa.h) */
   sp_read_float(buf, NULL, &d);   /* locale-independent parse */
   return d;
 }
@@ -361,7 +361,7 @@ static sp_float sp_str_to_f_impl(const char *s, int lenient) {SP_GC_ROOT_STR(s);
     buf[o] = '\0';
     {
       char *endptr;
-      double v = 0.0;
+      sp_dtoa_double v = 0.0;   /* for the MCU: double itself (see sp_dtoa.h) */
       /* A hex literal (0x...) is validated integral above and has no decimal
          point, so strtod (which parses hex floats) is safe and locale-neutral;
          a decimal literal uses the locale-independent sp_read_float. The shape
@@ -439,7 +439,7 @@ static double sp_float_round_shortest(double v, int keep) {
   char buf[64];
   snprintf(buf, sizeof buf, "%llde%d", num, dp - keep + 1);
   char *end = NULL;
-  double r = 0;
+  sp_dtoa_double r = 0;   /* for the MCU: double itself (see sp_dtoa.h) */
   if (!sp_read_float(buf, &end, &r)) return v;
   return v < 0 ? -r : r;
 }

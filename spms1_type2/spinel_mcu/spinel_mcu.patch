@@ -104,6 +104,33 @@
  /* 10^p fits sp_int only up to this exponent (p>= it collapses to 0):
     10^19 > INT64_MAX, 10^10 > INT32_MAX. */
  #if INTPTR_MAX == INT32_MAX
+@@ -102,7 +102,7 @@
+     }
+   }
+   buf[n] = 0;
+-  double d = 0.0;
++  sp_dtoa_double d = 0.0;   /* for the MCU: double itself (see sp_dtoa.h) */
+   sp_read_float(buf, NULL, &d);   /* locale-independent parse */
+   return d;
+ }
+@@ -361,7 +361,7 @@
+     buf[o] = '\0';
+     {
+       char *endptr;
+-      double v = 0.0;
++      sp_dtoa_double v = 0.0;   /* for the MCU: double itself (see sp_dtoa.h) */
+       /* A hex literal (0x...) is validated integral above and has no decimal
+          point, so strtod (which parses hex floats) is safe and locale-neutral;
+          a decimal literal uses the locale-independent sp_read_float. The shape
+@@ -439,7 +439,7 @@
+   char buf[64];
+   snprintf(buf, sizeof buf, "%llde%d", num, dp - keep + 1);
+   char *end = NULL;
+-  double r = 0;
++  sp_dtoa_double r = 0;   /* for the MCU: double itself (see sp_dtoa.h) */
+   if (!sp_read_float(buf, &end, &r)) return v;
+   return v < 0 ? -r : r;
+ }
 @@ -638,7 +638,11 @@
        /* the tie is decided on the fractional part alone, so the integral part
           is split off first and only rejoined at the end */
@@ -154,6 +181,30 @@
  #define SP_PREC_HALF_DOWN  5
 -double sp_float_prec_op(double x, intptr_t nd, int op);
 +float sp_float_prec_op(float x, intptr_t nd, int op);
+ 
+ #endif
+--- a/sp_dtoa.h
++++ b/sp_dtoa.h
+@@ -10,6 +10,14 @@
+ 
+ #include "sp_types.h"
+ 
++/* For the MCU: sp_dtoa.c is built with double, but some files that include this define double to
++   float first, and the prototypes below then took a float where sp_dtoa.c reads a double
++   (Float#to_s and String#to_f printed and read garbage). Declared with double whatever the
++   including file has done, and sp_dtoa_double is double itself for the callers' variables. */
++#pragma push_macro("double")
++#undef double
++typedef double sp_dtoa_double;
++
+ /* Shortest-round-trip and printf-style float formatting into `buf` (NUL
+    terminated). fmt is one of 'e'/'f'/'g' (upper-case for E/upper output);
+    prec is the precision, or -2 for shortest round-trip ('g' only). sign is a
+@@ -25,5 +33,6 @@
+    exponent of the leading digit. The caller applies its own fixed/scientific
+    layout (Ruby's Float#to_s threshold is not %g's). */
+ int sp_float_shortest(double f, char *digs, int *nd);
++#pragma pop_macro("double")
  
  #endif
 --- a/sp_fiber_ctx.h
@@ -354,6 +405,17 @@
  /* The Dir counterpart of SP_IO_OPEN: reading or positioning a closed handle
     is IOError "closed directory" in CRuby; #close, #path and #inspect work. */
  SP_NORETURN SP_COLD void sp_dir_raise_closed(void);
+--- a/sp_marshal.c
++++ b/sp_marshal.c
+@@ -69,7 +69,7 @@
+ static const char *sp_mar_float_str(double f, char *buf, size_t bufsz) {SP_GC_ROOT_STR(buf);
+   for (int prec = 1; prec <= 17; prec++) {
+     sp_format_float(f, buf, bufsz, 'g', prec, '\0');   /* locale-independent */
+-    double rt = 0.0; sp_read_float(buf, NULL, &rt);
++    sp_dtoa_double rt = 0.0; sp_read_float(buf, NULL, &rt);   /* for the MCU: see sp_dtoa.h */
+     if (rt == f) break;
+   }
+   char *e = strchr(buf, 'e');
 --- a/sp_time.h
 +++ b/sp_time.h
 @@ -12,6 +12,9 @@

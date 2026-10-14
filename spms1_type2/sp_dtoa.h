@@ -10,6 +10,14 @@
 
 #include "sp_types.h"
 
+/* For the MCU: sp_dtoa.c is built with double, but some files that include this define double to
+   float first, and the prototypes below then took a float where sp_dtoa.c reads a double
+   (Float#to_s and String#to_f printed and read garbage). Declared with double whatever the
+   including file has done, and sp_dtoa_double is double itself for the callers' variables. */
+#pragma push_macro("double")
+#undef double
+typedef double sp_dtoa_double;
+
 /* Shortest-round-trip and printf-style float formatting into `buf` (NUL
    terminated). fmt is one of 'e'/'f'/'g' (upper-case for E/upper output);
    prec is the precision, or -2 for shortest round-trip ('g' only). sign is a
@@ -25,5 +33,6 @@ sp_bool sp_read_float(const char *str, char **endp, double *fp);
    exponent of the leading digit. The caller applies its own fixed/scientific
    layout (Ruby's Float#to_s threshold is not %g's). */
 int sp_float_shortest(double f, char *digs, int *nd);
+#pragma pop_macro("double")
 
 #endif
