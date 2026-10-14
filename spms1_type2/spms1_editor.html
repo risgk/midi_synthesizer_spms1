@@ -2178,29 +2178,40 @@
     liveSend();
   }
 
-  // What the synth holds for each channel, kept by the same rules as spms1_type2.ino: a note on
-  // takes the pitch and opens the gate, a note off -- or a note on at velocity 0 -- closes the gate
-  // only for the pitch that last came on, and pitch bend is kept signed, -8192 to 8191.
+  // What the synth holds for each channel, kept by the same rules as spms1_midi_state.h: a note on
+  // takes the pitch and opens the gate, remembering as prev the note it took over from if the gate
+  // was open. A note off -- or a note on at velocity 0 -- of the pitch that last came on brings prev
+  // back with the gate left open, or closes the gate if there is none; one of prev only forgets it.
+  // Pitch bend is kept signed, -8192 to 8191.
   // pending is a pitch typed while the gate was shut, sent with the next gate on: MIDI can set the
   // pitch only by a note on, which would open the gate for as long as the synth took to read it.
   //
   // heldBy is the key whose note off should close the gate after a Pitch edit moved the note away
-  // from it. The synth ignores a note off for any pitch but the last, so without it, releasing that
-  // key would leave the gate open.
-  const noteStates = Array.from({ length: 16 }, () => ({ pitch: 60, gate: 0, bend: 0, pending: null, heldBy: null }));
+  // from it. The synth ignores a note off for any pitch but the last and prev, so without it,
+  // releasing that key would leave the gate open.
+  const noteStates = Array.from({ length: 16 }, () => ({ pitch: 60, gate: 0, bend: 0, prev: null, pending: null, heldBy: null }));
 
   function trackNote(ch, status, data1, data2) {
     const n = noteStates[ch];
     const cmd = status & 0xF0;
     if (cmd === 0x90 && data2 > 0) {
+      if (!n.gate) n.prev = null;
+      else if (data1 !== n.pitch) n.prev = n.pitch;
       n.pitch = data1;
       n.gate = 1;
       n.pending = null;
       n.heldBy = null;
     } else if (cmd === 0x80 || cmd === 0x90) {
       if (data1 === n.pitch) {
-        n.gate = 0;
+        if (n.prev !== null) {
+          n.pitch = n.prev;
+          n.prev = null;
+        } else {
+          n.gate = 0;
+        }
         n.heldBy = null;
+      } else if (data1 === n.prev) {
+        n.prev = null;
       } else if (data1 === n.heldBy && n.gate && ch === exportOptions().ch) {
         sendNote(0x80, n.pitch, 0);
         return;
@@ -2258,10 +2269,14 @@
         const n = noteStates[exportOptions().ch];
         switch (row.dataset.noteSig) {
         case 'PITCH':
+          // A glide, as on the soft keyboard: the note off after the note on leaves the synth
+          // nothing to come back to, which would keep the gate open when the key is released.
           if (n.gate) {
             if (v !== n.pitch) {
               const heldBy = n.heldBy ?? n.pitch;
+              const old = n.pitch;
               sendNote(0x90, v, 100);
+              sendNote(0x80, old, 0);
               n.heldBy = heldBy;
             }
           } else {
@@ -2271,8 +2286,13 @@
           break;
         case 'GATE':
           if (v === n.gate) break;
-          if (v) sendNote(0x90, n.pending ?? n.pitch, 100);
-          else sendNote(0x80, n.pitch, 0);
+          if (v) {
+            sendNote(0x90, n.pending ?? n.pitch, 100);
+          } else {
+            // prev first, or the note off of the pitch would bring it back.
+            if (n.prev !== null) sendNote(0x80, n.prev, 0);
+            sendNote(0x80, n.pitch, 0);
+          }
           break;
         case 'BEND':
           sendBend(v);
@@ -2660,6 +2680,7 @@
       if (midiOutput) midiOutput.send([0x80 | ch, note, 0]);
       setKeyActive(note, false);
     }
+    noteStates[ch].prev = null;
     trackNote(ch, 0x80, noteStates[ch].pitch, 0);
     sendBend(0);
   }

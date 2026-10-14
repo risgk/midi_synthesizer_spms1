@@ -3,6 +3,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.2
 
 - Monophonic semi-modular MIDI Synthesizer for Raspberry Pi Pico 2, made with Spinel (Ruby AOT Compiler)
 - Controlled by MIDI as a sound module
+- Last-note priority with one note of memory: releasing the newest note while the one before it is still held goes back to that one, legato (for trills)
 - 48 kHz audio output: 24 bit through an I2S DAC, or PWM Audio (no DAC needed)
 - Filter: ZDF/TPT State Variable Filter (with delayed soft clipping)
 - Chorus: mono in, stereo out, as a module in the run order
@@ -440,6 +441,13 @@ range, and Pitch Bend is bipolar too, one unit across the whole wheel: exactly -
 the ends of its travel and exactly zero at the centre detent, so it can feed a module input
 without a mixer to shift it. Note Gate is 0.0 or 1.0, and an envelope triggers at 0.25. Nothing
 is routed to Pitch Bend by default.
+
+The newest note sounds, and the note it took over from is remembered while it is still held: one
+note, no more. When the newest note is released, the remembered one comes back with Note Gate
+left at 1.0, so the envelopes go on without a new attack, and holding one key while tapping
+another plays a trill. Releasing the remembered note only forgets it, and with three keys held,
+releasing the newest goes back to the second, and releasing that closes the gate, even with the
+first still held.
 
 Slots 0-8 are constants that nothing writes, for inputs that want a fixed value rather than a
 source. Signal 0 is also what an entry nobody has set reads as, so an unrouted input is silent
