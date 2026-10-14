@@ -50,7 +50,8 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.2
     - 情報: <https://github.com/FortySevenEffects/arduino_midi_library>
 - Spinel
     - リリース: 2026.09.12 <https://github.com/matz/spinel/tree/2026.09.12>
-    - Spinel の出力ファイル "spms1_main.c" に手を入れる必要はありません。本スケッチの "spinel_rt.h" が
+    - Spinel の出力ファイル "spms1_main.c" に手を入れる必要はありません。本スケッチの
+      "spinel_rt_mcu_head.h" ("spinel_rt.h" の先頭で読み込み) が
       `#define main __attribute__((section(".time_critical"), flatten)) Spms1_main` を持っており、改名と
       シンセ本体の RAM 配置を同時に行います。手で改名すると、このマクロが一致しなく
       なって属性が付かず、本体が flash から実行されます
@@ -644,7 +645,7 @@ C のホスト ("sim_spinel"、"sim_render"、"web" の SPMS-1 Web) は、スケ
     - `--seconds N` (デフォルト 4) と `--out FILE` (デフォルト "spms1_render.wav")
     - ピークとサンプルのハッシュを表示するので、2 つのレンダリングの違いがすぐ分かります。
       エディタの "Init" パッチは、パッチなしと同じハッシュになります。ハッシュは同じコンパイラ同士で
-      比べてください: "spinel_rt.h" の `single-precision-constant` を GCC は (実機と同じく) 守り、
+      比べてください: "spinel_rt_mcu_head.h" の `single-precision-constant` を GCC は (実機と同じく) 守り、
       clang は無視するので、両者では下位のビットが変わります
     - ビルドは "sim_spinel" と同じく、先に Spinel で "spms1_main.c" を再生成します (`--no-spinel` で省略)
     - `sh sim_render/compare_with_cruby.sh [--patch FILE] [--score FILE] [--seconds N]` は、同じパッチと
@@ -665,9 +666,40 @@ C のホスト ("sim_spinel"、"sim_render"、"web" の SPMS-1 Web) は、スケ
 - SPMS-1 Web: "spms1_web_synth.js" をビルド・テストし、成果物として残します
 - シミュレーター: "sim_spinel" と "sim_render" を Linux、macOS、Windows でビルドしてレンダリングし、
   Linux では CRuby とのレンダリングの比較もします
-- Spinel: 上で指定したリリースをビルドし、"spms1_main.c" が .rb ファイルから作られるものと一致するかを確認します
+- Spinel: 上で指定したリリースをビルドし、"spms1_main.c" が .rb ファイルから作られるものと一致するかを確認します。
+  また、ランタイムのファイルがそのリリースに "spinel_mcu/spinel_mcu.patch" を当てたものかを確認します (下記参照)
 - "commit_package" を選び、上記がすべて通ると、UF2 ファイル ("bin") と "spms1_web_synth.js" を選んだブランチに
   コミットします (ビルドの後でソースが変わっていた場合と、何も変わっていない場合はコミットしません)
+
+
+### Spinel の更新
+
+このフォルダのランタイムのファイルは、上で指定したリリースの Spinel の `lib` (と `lib/regexp`) です。
+MCU 向けの変更は 2 か所にまとめてあります:
+
+- "spinel_rt_mcu_head.h"、"spinel_rt_mcu_libm.h"、"spinel_rt_mcu_cold.h": MCU 向けに足すもの --
+  シンセ本体のセクションと pragma、`double` の代わりの `float`、ビルドしない `lib/sp_cold.c` から
+  生成コードが必要とするもの。"spinel_rt.h" にはそれぞれの `#include` 行だけがあります
+- "spinel_mcu/spinel_mcu.patch": Spinel 自身のファイルへの変更 -- Spinel のヘッダや C ファイルが
+  自分で宣言している `double` を `float` に、POSIX 部分のコメントアウト、SRAM に収まる GC のバッファ。
+  変更するファイルの隣には、リリースのままのコピー "NAME.orig" があります
+
+新しいリリースは "spinel_mcu/update.sh" で取り込みます:
+
+1. `sh spinel_mcu/update.sh update TAG` がリリースのファイルをコピーし、パッチを当て、この README と
+   README.md のリリース名を書き換えます。`--spinel DIR` で、clone せずにチェックアウト済みのものを使います
+2. 当たらなかった hunk は "NAME.rej" に残ります: 手で変更し、.rej ファイルを消して、
+   `sh spinel_mcu/update.sh save` でパッチを書き直します。リリースが `lib` に足したファイルは一覧に
+   出ます: 生成コードが必要とするものはコピーして (`update` をもう一度実行)、それ以外は
+   "spinel_mcu/not_vendored.txt" に加えます
+3. "spms1_main.c" を再生成し (`sh sim_render/build.sh`)、CRuby と比べ
+   (`sh sim_render/compare_with_cruby.sh`)、実機向けにビルドします。`sp_float` が `float` でなくなると
+   ビルドが止まります。GC ルートが収まっているかはデバッグプリントで分かります
+4. `sh spinel_mcu/update.sh check` で、GitHub Actions のワークフローと同じ確認をします
+
+ランタイムのファイルをさらに変更するときは、"NAME.orig" がなければ先にコピーしてから編集し、
+`sh spinel_mcu/update.sh save` を実行します。スクリプトには diff と GNU patch が必要です
+(Windows では Git Bash にあります)。
 
 
 ### 生成コードの確認
@@ -688,10 +720,10 @@ C が `.rb` を指す `#line` を持っているので、対応は最後まで�
 
 読む前に知っておくべきことが 4 つあります。
 
-- 上の `-Os` は実際の設定ではありません。"spinel_rt.h" が `#pragma GCC optimize ("O3")` を
+- 上の `-Os` は実際の設定ではありません。"spinel_rt_mcu_head.h" が `#pragma GCC optimize ("O3")` を
   持っており、この翻訳単位ではコマンドラインの指定を上書きします。`-O3` を渡しても `-Os` を
   渡しても結果は変わりません
-- シンセ本体は `.text` にありません。"spinel_rt.h" の `#define main` が `.time_critical` に
+- シンセ本体は `.text` にありません。"spinel_rt_mcu_head.h" の `#define main` が `.time_critical` に
   置きます。2 つのビルドが同じコードだと示すには、それぞれに
   `arm-none-eabi-objcopy -O binary --only-section=.time_critical` をかけてバイト比較します。
   コメントだけの変更は "spms1_main.c" の `#line` を全部動かして他は何も変えませんが、その確認も
@@ -740,5 +772,5 @@ DEALINGS IN THE SOFTWARE.
 ```
 
 - ベースリリース: 2026.09.12 <https://github.com/matz/spinel/tree/2026.09.12>
-- 対象ファイル: `spinel_rt.h*`, `mruby_shim.h*`, `sp_*.*`, `re_*.*`
+- 対象ファイル: `spinel_rt*.h*`, `mruby_shim.h*`, `sp_*.*`, `re_*.*`, `spinel_mcu/*`
     - 注: ランタイムの一部のファイルは、MCU 向けに ISGK Instruments (Ryo Ishigaki) が変更しています

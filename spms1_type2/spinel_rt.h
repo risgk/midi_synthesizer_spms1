@@ -2,18 +2,7 @@
 #ifndef SP_RUNTIME_H
 #define SP_RUNTIME_H
 
-/* Puts the synth core in RAM. */
-/* flatten pulls the module process methods into Spms1_main. Without it GCC stops inlining them
-   once a module type has two instances and so two call sites, and anything not inlined into main
-   runs from XIP flash, main being the only function that carries .time_critical. */
-#define main __attribute__((section(".time_critical"), flatten)) Spms1_main
-#pragma GCC optimize("single-precision-constant")
-#pragma GCC optimize ("O3")
-#if defined(__arm__)
-#pragma GCC target ("thumb")
-#endif
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wunused-function"
+#include "spinel_rt_mcu_head.h"
 
 /* Platform feature-test macros (_DARWIN_C_SOURCE for MAP_ANON) live at the top
    of sp_types.h so every translation unit that includes it defines them before
@@ -46,16 +35,7 @@ const char *sp_str_setbyte_cow(const char *s, sp_int i, sp_int v);
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#define double float
-#define sin(x) sinf(x)
-#define cos(x) cosf(x)
-#define tan(x) tanf(x)
-#define atan2(y,x) atan2f(y,x)
-#define sqrt(x) sqrtf(x)
-#define fabs(x) fabsf(x)
-#define pow(x,y) powf(x,y)
-#define exp(x) expf(x)
-#define log(x) logf(x)
+#include "spinel_rt_mcu_libm.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <ctype.h>
@@ -12039,38 +12019,6 @@ static const char *sp_class_to_s(sp_Class c) { return c.name ? c.name : sp_str_e
 static sp_sym sp_sym_intern(const char *s) { (void)s; return (sp_sym)0; }
 #endif
 
-
-/* Definitions that Spinel keeps in lib/sp_cold.c, copied here for the MCU. sp_cold.c is the
-   runtime's POSIX side (sockets, poll, dirent, ...) and is not built for the MCU, but the
-   generated code still calls or names these. sp_float_to_i_checked is here so that flatten can
-   inline it into Spms1_main, as it could when it was static in sp_runtime.h. The nil check in
-   the Integer operators calls sp_raise_nil_int_op, so it stays noinline, out of line as it is
-   in sp_cold.c, rather than adding a copy of itself to each of those sites in Spms1_main. */
-__attribute__((noinline)) SP_NORETURN void sp_raise_nil_int_op(sp_int a, sp_int b, const char *op) {SP_GC_ROOT_STR(op);
-  (void)b;
-  if (a == SP_INT_NIL)
-    sp_raise_cls("NoMethodError", sp_sprintf("undefined method '%s' for nil", op));
-  /* nil on the RIGHT is the coercion failure CRuby reports from Integer#+ */
-  sp_raise_cls("TypeError", "nil can't be coerced into Integer");
-}
-sp_int sp_float_to_i_checked(sp_float f) {
-  if (isnan(f) || isinf(f)) sp_raise_cls("FloatDomainError", sp_sprintf("%g", f));
-  if (f >= 9223372036854775808.0 || f < -9223372036854775808.0)
-    sp_raise_cls("RangeError", "float out of Integer range (Bignum promotion pending)");
-  return (sp_int)f;
-}
-void sp_Dir_scan(void *p) { sp_Dir *d = (sp_Dir *)p; if (d->path) sp_mark_string(d->path); }
-void sp_Enumerator_scan(void *p) {
-  sp_Enumerator *e = (sp_Enumerator *)p;
-  if (e->items) sp_gc_mark(e->items);
-  if (e->fib) sp_gc_mark(e->fib);
-  if (e->gen_cap) sp_gc_mark(e->gen_cap);
-  if (e->peeked) sp_mark_rbval(e->peek_val);
-  sp_mark_rbval(e->size);
-  if (e->has_feed) sp_mark_rbval(e->feed);
-  sp_mark_rbval(e->gen_result);
-  sp_mark_rbval(e->source);
-  sp_mark_string(e->meth);
-}
+#include "spinel_rt_mcu_cold.h"
 
 #endif /* SP_RUNTIME_H */
