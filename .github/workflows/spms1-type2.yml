@@ -2,8 +2,10 @@
 # with the checks of the simulators and of the Spinel output
 # - UF2: built with arduino-cli (Ubuntu), the same as the Arduino IDE builds (see spms1_type2/README.md)
 # - SPMS-1 Web: built with Emscripten (Ubuntu), and tested with Node.js (see spms1_type2/web/README.md)
-# - Simulators: sim_spinel and sim_render built on Linux, macOS, and Windows, and compared with CRuby on Linux
-# - Spinel: spms1_main.c regenerated from the .rb files, and checked against the one committed
+# - Simulators: sim_spinel and sim_render built on Linux, macOS, and Windows, and compared with CRuby on Linux;
+#   on Linux, the types across the runtime checked with LTO (spinel_mcu/lto_type_check.sh)
+# - Spinel: spms1_main.c regenerated from the .rb files, and checked against the one committed,
+#   and the runtime files checked to be the release with spinel_mcu/spinel_mcu.patch applied
 name: SPMS-1 (type-2) Build (UF2 and Web)
 
 on:
@@ -120,6 +122,9 @@ jobs:
       - name: Build sim_render
         run: sh sim_render/build.sh --no-spinel
 
+      - name: Check that types agree across the runtime (LTO)
+        run: sh spinel_mcu/lto_type_check.sh
+
       - name: Compare with CRuby (the default patch)
         run: sh sim_render/compare_with_cruby.sh
 
@@ -168,6 +173,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+
+      # Clones the release the README names by itself, so as not to read the build tree below
+      - name: Check that the runtime is the release with spinel_mcu.patch applied
+        run: sh spinel_mcu/update.sh check
 
       # The release the README names ("Release: 2026.09.12" under Spinel)
       - name: Read the Spinel release
