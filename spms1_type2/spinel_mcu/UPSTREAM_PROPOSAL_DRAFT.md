@@ -6,7 +6,7 @@
 > Check it against the Spinel release in use before posting: the numbers and line numbers are
 > those of Spinel 2026.09.12. Check also the name of mruby's option (`MRB_USE_FLOAT32`).
 
-**Title:** Spinel on bare-metal microcontrollers: an opt-in build without POSIX, and Float as float
+**Title:** Spinel on bare-metal microcontrollers: an opt-in build without POSIX, and Float as float chosen by the runtime
 
 ## Background
 
@@ -19,8 +19,8 @@ hardware, written and tested as Ruby and shipped as C. Spinel's design -- whole-
 inference, no VM, unused runtime dropped by the linker -- is what makes it fit, where an
 interpreter would not keep up.
 
-To get there I carry a patch of the runtime from release to release. Two opt-in options would
-take most of it away. Neither would change the default build.
+To get there I carry a patch of the runtime from release to release. Two changes would take most
+of it away. Neither would change the default build, nor add an option to the compiler.
 
 ## 1. An opt-in bare-metal build
 
@@ -50,40 +50,57 @@ It can come in steps, starting with what is harmless on POSIX as well (for examp
 I would add a compile-only CI job: the runtime compiled with `arm-none-eabi-gcc` and newlib, with
 the macro defined. No hardware is needed for that.
 
-## 2. An opt-in Float as float
+## 2. Float as float, chosen where the runtime is linked in, not in the compiler
 
 Many microcontrollers have a single-precision FPU only: the Cortex-M4F and the Cortex-M33 (as in
 the RP2350), for example. There, double arithmetic is done in software. Compiled with Float as
 double, the hot function of my program had about 1,900 calls to the soft-float routines
 (`__aeabi_dmul`, `__aeabi_dadd`, ...), each in place of one FPU instruction, and was 24% larger.
 
-mruby has an option for this (`MRB_USE_FLOAT32`), and Spinel already shares some of mruby's
-ground (`lib/mruby_shim.h`, and `sp_dtoa` from mruby's `fp_uscale.c`). An option such as
-`SPINEL_USE_FLOAT32` would be the counterpart, opt-in, for those who accept what it means: results
-that differ from CRuby's (`0.1 + 0.2` is 0.30000001192092896, integers above 2^24 lose precision,
-`1.0e39` is Infinity).
+mruby lets Float be float (`MRB_USE_FLOAT32`), and Spinel already shares some of mruby's ground
+(`lib/mruby_shim.h`, and `sp_dtoa` from mruby's `fp_uscale.c`). For Spinel, though, I would not
+ask for an option in the compiler. The generated C is already written almost entirely in terms of
+`sp_float`; what it spells as double itself is small, and could be spelled so that the runtime
+decides:
 
-Unlike mruby, it is not the runtime alone: the generated C carries double too. What it takes:
+| In the generated C today | Instead | Defined by the runtime as, with double |
+|---|---|---|
+| `(double)` casts | `(sp_float)` | `double` (`sp_float` itself) |
+| float literals (`0.5`) | `SP_FLT(0.5)` | `((sp_float)(0.5))` |
+| `fabs()`, `tan()` called directly | `sp_float_fabs()`, `sp_float_tan()` | `fabs()`, `tan()` |
 
-- **The generated code**: `(sp_float)` casts instead of `(double)`, and macros such as
-  `SP_FLOAT_EPSILON` and `SP_FLOAT_MAX` instead of `DBL_EPSILON` and `DBL_MAX`. With double as
-  the default, this changes nothing, and could come first
-- **The runtime**: `sp_float` declared in one place (today `lib/sp_types.h`, `lib/sp_core.c`, and
-  `mrb_float` in `lib/mruby_shim.h`), with the prototypes in terms of `sp_float`; `sinf`, `powf`
-  and the rest where `sp_float` is float
-- **Float to and from text**: the shortest round trip for a float in `Float#to_s`, and `strtof`
-  (or the float counterpart of `sp_read_float`) in `String#to_f`
-- **Float literals**: a suffix (`0.5f`) or a macro, so that an expression does not turn double;
-  GCC's `-fsingle-precision-constant` does this today, but clang ignores it
+The compiler then has no option and emits the same C whatever Float is to be; the runtime's
+headers decide, when the C is compiled. With double, nothing changes: I rewrote the Spinel output
+of my program this way (32 casts, 898 literals, 22 calls) and compiled it for a Cortex-M33 against
+the runtime as released, and the machine code is the same as before, byte for byte.
+
+With float, the runtime defines `sp_float` as float, `SP_FLT(x)` as a float constant,
+`sp_float_fabs` as `fabsf` and so on, and uses `powf` and `logf` in its own helpers
+(`sp_float_pow`, `sp_math_log`). The same rewritten C, compiled that way, needs no
+`#define double float` and no `-fsingle-precision-constant` (which clang ignores): the hot
+function has no soft-float arithmetic left (only the conversions that the error messages pass to
+`sp_sprintf`), and comes out the same, byte for byte, as what my
+patch produces today, and renders the same audio.
+
+The runtime side is then the larger part, and stays opt-in, for those who accept results that
+differ from CRuby's (`0.1 + 0.2` is 0.30000001192092896, integers above 2^24 lose precision,
+`1.0e39` is Infinity):
+
+- `sp_float` declared in one place (today `lib/sp_types.h`, `lib/sp_core.c`, and `mrb_float` in
+  `lib/mruby_shim.h`), with the prototypes in terms of `sp_float`
+- the float counterparts of the math functions, and `SP_FLOAT_EPSILON`, `SP_FLOAT_MAX` and the
+  like for the Float constants (the generated C carries `DBL_EPSILON` for `Float::EPSILON` today)
+- the shortest round trip for a float in `Float#to_s`, and `strtof` (or the float counterpart of
+  `sp_read_float`) in `String#to_f`
 
 Doing it from outside, as I do now (`#define double float` around the runtime), is fragile: in my
 patch, `sp_float_shortest` and `sp_read_float` were declared with float in some translation units
 and defined with double in `sp_dtoa.c`, so `Float#to_s` printed garbage and `String#to_f` wrote
-past a variable, unnoticed until an LTO type check (`-flto -Wlto-type-mismatch`). An option in
-Spinel itself would not have that problem.
+past a variable, unnoticed until an LTO type check (`-flto -Wlto-type-mismatch`).
 
-The CRuby comparison does not apply to it, so it would need its own tests: a small set with a
-tolerance, and the compile-only CI job above with the option defined.
+The generated-C part can come first: with double it changes nothing. The CRuby comparison does not
+apply to the float runtime, so that would need its own tests: a small set with a tolerance, and
+the compile-only CI job above with float.
 
 ## Smaller, separate
 
