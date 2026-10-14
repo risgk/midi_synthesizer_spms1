@@ -5,7 +5,7 @@
 > It has not been posted, and nothing in it has been agreed with the Spinel project.
 > Check it against the Spinel release in use before posting: the line numbers are those of 2026.09.12.
 
-**Title:** A freestanding build of the runtime, for microcontrollers (float as sp_float, no OS, smaller GC tables)
+**Title:** A bare-metal build of the runtime, for microcontrollers (float as sp_float, no OS, smaller GC tables)
 
 I run Spinel's output on a Raspberry Pi Pico 2 (RP2350, Cortex-M33, 520 KB SRAM, single-precision FPU)
 as the core of a MIDI synthesizer (https://github.com/risgk/midi_synthesizer_spms1, type-2).
@@ -30,13 +30,13 @@ used in all three, with `sp_core.h`'s prototypes in terms of `sp_float` rather t
 (Today I also `#define double float` in the runtime and map `sin`/`sqrt`/... to their `f` forms.
 I can do that part on my side, but the typedefs have to agree across translation units.)
 
-## 2. A freestanding build: no OS, only the C library
+## 2. A bare-metal build: no OS, only the C library
 
-By "freestanding" I mean a target with no OS underneath: the C library is there (newlib, with
-`malloc`, `stdio`, `math.h` and `setjmp`), but POSIX and the OS services behind it are not. That is
-less strict than a freestanding implementation in the C standard's sense, which has no C library at
-all; the runtime still needs one, and the generated code calls it. On such a target these are
-missing, and they are the rest of my patch:
+The program runs on the hardware with no OS underneath: the C library is there (newlib, with
+`malloc`, `stdio`, `math.h` and `setjmp`), but POSIX and the OS services behind it are not. (Not
+"freestanding" in the C standard's sense, which has no C library at all: the runtime and the
+generated code need one.) An RTOS target without POSIX, such as FreeRTOS, is in the same place.
+On such a target these are missing, and they are the rest of my patch:
 
 - `spinel_rt.h`: `<sys/stat.h>`, `<dirent.h>`, `<pwd.h>`, `<sys/times.h>`, `<unistd.h>`, `<signal.h>`,
   `<sys/resource.h>`, `<fcntl.h>`, `<fnmatch.h>`, `<sys/file.h>`, `<sys/mman.h>`, `<sys/wait.h>`,
@@ -49,7 +49,7 @@ missing, and they are the rest of my patch:
   (IO, Dir, Thread, Queue, Mutex, BigRational, FloatRange inspect) and need those objects to link
 - `__int128` in `sp_time.h` (absent on 32-bit targets)
 
-Something like `#ifndef SPINEL_FREESTANDING` around those (or `__has_include` checks) would let the
+Something like `#ifndef SPINEL_BARE_METAL` around those (or `__has_include` checks) would let the
 runtime build for such a target, with the IO/thread features simply absent. The generated
 code of a program that uses none of them does not need them.
 
