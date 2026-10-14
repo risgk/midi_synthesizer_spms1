@@ -708,6 +708,9 @@ MCU 向けの変更は 2 か所にまとめてあります:
 `sh spinel_mcu/update.sh save` を実行します。スクリプトには diff と GNU patch が必要です
 (Windows では Git Bash にあります)。
 
+パッチの大半は、Spinel 自体にいくつかのビルドオプションがあれば不要になります。それを提案する Issue の
+**下書き** が "spinel_mcu/UPSTREAM_PROPOSAL_DRAFT.md" にあります (**未投稿**)。
+
 
 ### 生成コードの確認
 
