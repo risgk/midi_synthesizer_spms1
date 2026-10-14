@@ -2626,6 +2626,7 @@
   const kbPointers = new Map();  // pointerId, or 'key:' + code for the PC keyboard -> the note it holds
   const kbHeld = new Set();  // the notes of the keys released while Hold is on, still on
   let kbHold = false;
+  let kbLast = -1;  // the note of the last press
   let kbScale = 1;
   const kbPrefs = { center: KB_DEFAULT_C + KB_CENTER_OFFSET };
 
@@ -2656,6 +2657,7 @@
   function kbPress(id, note) {
     const old = kbPointers.get(id);
     sendNote(0x90, note, 127);
+    kbLast = note;
     kbPointers.set(id, note);
     kbHeld.delete(note);
     [...kbHeld].forEach(n => { kbHeld.delete(n); sendNote(0x80, n, 0); });
@@ -2669,9 +2671,11 @@
     kbLetGo(note);
   }
 
-  // The note of a key released, or left by a glide: a note off, or held while Hold is on.
+  // The note of a key released, or left by a glide: a note off, or held while Hold is on. Hold
+  // keeps only the note the synth plays, the last note on; an older one, let go after a legato,
+  // would stay lit with nothing to turn it off but the next key.
   function kbLetGo(note) {
-    if (kbHold) kbHeld.add(note);
+    if (kbHold && note === kbLast) kbHeld.add(note);
     else sendNote(0x80, note, 0);
   }
 
