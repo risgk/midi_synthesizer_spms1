@@ -325,7 +325,8 @@
       font-size: 0.75rem;
       color: var(--text-muted);
     }
-    .kbd-bar .kbd-panic {
+    /* Hold and Panic at the right end. */
+    .kbd-bar .kbd-hold {
       margin-left: auto;
     }
     /* The sizes of the keys are times the scale of the text, --kbd-scale, set by kbdFitScale. */
@@ -1005,8 +1006,8 @@
     <h2><span id="kbd-label">Soft Keyboard</span></h2>
     <button class="btn" id="kbd-oct-down" title="Octave Down">&#9664;</button>
     <button class="btn" id="kbd-oct-up" title="Octave Up">&#9654;</button>
-    <button class="btn" id="kbd-hold" aria-pressed="false" title="The key released keeps its note on, until Hold is turned off">Hold</button>
     <span class="kbd-hint">PC Keys: A - K, Z / X</span>
+    <button class="btn kbd-hold" id="kbd-hold" aria-pressed="false" title="The key released keeps its note on, until Hold is turned off">Hold</button>
     <button class="btn kbd-panic" id="kbd-panic" title="Note Off on every note, Pitch Bend to the center, and the keys held let go">Panic</button>
   </div>
   <div class="keyboard-frame">
