@@ -4,48 +4,31 @@
 > **DRAFT -- NOT FILED.** This is a draft of an issue for matz/spinel, kept here as a memo.
 > It has not been posted, and nothing in it has been agreed with the Spinel project.
 > Check it against the Spinel release in use before posting: the numbers and line numbers are
-> those of SPMS-1 (type-2) v0.0.2 and Spinel 2026.09.12.
+> those of Spinel 2026.09.12. Check also the name of mruby's option (`MRB_USE_FLOAT32`).
 
-**Title:** Spinel on bare metal: a 48 kHz synthesizer written in Ruby, running on a Raspberry Pi Pico 2
+**Title:** Spinel on bare-metal microcontrollers: an opt-in build without POSIX, and Float as float
 
-## A Ruby program on a microcontroller, in real time
+## Background
 
-SPMS-1 (type-2) (https://github.com/risgk/midi_synthesizer_spms1, `spms1_type2/`) is a
-monophonic semi-modular MIDI synthesizer written in Ruby, about 2,100 lines in nine files. Spinel
-compiles it to C, and the C runs on a Raspberry Pi Pico 2: an RP2350, a Cortex-M33 at 153.6 MHz with
-520 KB of SRAM, and no OS. One core runs the synth; the other takes MIDI.
+I use Spinel to run a real-time audio program written in Ruby on a microcontroller, an RP2350
+(Raspberry Pi Pico 2) with no OS. The work done for every audio sample is Ruby, compiled by
+Spinel; the same source also runs on CRuby, which serves as the reference.
 
-- **Every sample in Ruby.** At 48 kHz, stereo, the oscillator, a zero-delay feedback state variable
-  filter, the envelope, the LFO, the amp, a mixer, a chorus and a delay each run once per sample,
-  as Ruby methods. The patch -- which modules run in what order, and what feeds what -- is data,
-  rewired over MIDI while it plays
-- **Small enough for the chip.** The whole synth core compiles to one function of 41,004 bytes,
-  placed in RAM so that it does not wait on flash. The firmware takes 199 KB of flash and 137 KB of
-  static RAM. About 4 ms from a MIDI message to the sound
-- **Nothing allocated while it plays.** With RBS type seeds (`--rbs`) where inference needs a hint,
-  every per-sample value stays unboxed. A check in CI renders the synth on a PC and fails if
-  anything is allocated while it plays
-- **One source, everywhere.** The same Ruby runs on CRuby as the reference, and the C Spinel makes
-  of it runs on the device, in PC simulators, and in a web browser as WebAssembly. Renders of the
-  two are compared in CI: the difference of their spectra stays below -35 dB (-39 dB measured),
-  where float against double puts it
+This works well, and it seems worth having more widely: Ruby for real-time work on small, cheap
+hardware, written and tested as Ruby and shipped as C. Spinel's design -- whole-program type
+inference, no VM, unused runtime dropped by the linker -- is what makes it fit, where an
+interpreter would not keep up.
 
-## Why it is worth having
+To get there I carry a patch of the runtime from release to release. Two opt-in options would
+take most of it away. Neither would change the default build.
 
-- **Ruby that keeps time.** Per-sample DSP is out of reach of an interpreter: CRuby does not keep
-  up with SPMS-1 in real time even on a PC. Spinel's design -- whole-program type inference, no VM,
-  unused runtime dropped by the linker -- is what lets the same Ruby do it on a microcontroller
-- **Write in Ruby, test on CRuby, ship as C.** The DSP is read and changed as Ruby, checked against
-  CRuby on a PC, and becomes firmware without being translated by hand
-- **A board that costs a few dollars.** Instruments, education and hobby electronics, with Ruby
-- **Little stands in the way.** What the runtime needs on such a target beyond what it does today
-  is small: the C library is there (newlib); what is missing is POSIX and the OS behind it
+## 1. An opt-in bare-metal build
 
-## What it takes today
-
-I carry a patch of the runtime from release to release: 13 files, 55 hunks, applied with a script
-and checked in CI. Most of it leaves out the parts that assume POSIX, which a bare-metal target
-does not have:
+On a microcontroller with no OS, the C library is there (newlib: `malloc`, `stdio`, `math.h`,
+`setjmp`), but POSIX and the OS behind it are not. ("Bare metal", not "freestanding": a
+freestanding implementation in the C standard's sense guarantees only a few headers, while the
+runtime and the generated code are built hosted and call the C library.) An RTOS target without
+POSIX, such as FreeRTOS, is in the same place. What the runtime needs there and does not find:
 
 - `spinel_rt.h`: `<sys/stat.h>`, `<dirent.h>`, `<pwd.h>`, `<sys/times.h>`, `<unistd.h>`, `<signal.h>`,
   `<sys/resource.h>`, `<fcntl.h>`, `<fnmatch.h>`, `<sys/file.h>`, `<sys/mman.h>`, `<sys/wait.h>`,
@@ -58,24 +41,49 @@ does not have:
   Thread, Queue, Mutex, BigRational, FloatRange inspect) and need those objects to link
 - `__int128` in `sp_time.h` (absent on 32-bit targets)
 
-## The proposal: an opt-in bare-metal build
+The proposal: a macro, say `SPINEL_BARE_METAL`, defined only by those who build for such a target,
+under which the runtime leaves these out, with the IO and thread features simply absent. A
+program that uses none of them does not miss them. Without the macro nothing changes.
 
-A macro, say `SPINEL_BARE_METAL`, defined only by those who build for such a target, under which
-the runtime leaves out the parts above, with the IO and thread features simply absent. A program
-that uses none of them, as SPMS-1 does not, does not miss them. Without the macro nothing changes:
-the default build stays POSIX, as the README describes it.
+It can come in steps, starting with what is harmless on POSIX as well (for example
+`__has_include` checks for `<execinfo.h>` and `<ucontext.h>`). To keep it from breaking unnoticed,
+I would add a compile-only CI job: the runtime compiled with `arm-none-eabi-gcc` and newlib, with
+the macro defined. No hardware is needed for that.
 
-"Bare metal" here means no OS under the program, with the C library still there (`malloc`,
-`stdio`, `math.h`, `setjmp`). It is not "freestanding" in the C standard's sense, which guarantees
-only a few headers; the runtime and the generated code are built hosted and call the C library.
-An RTOS target without POSIX, such as FreeRTOS, is in the same place.
+## 2. An opt-in Float as float
 
-To keep it from breaking unnoticed, I would add a compile-only CI job: the runtime compiled with
-`arm-none-eabi-gcc` and newlib, with `SPINEL_BARE_METAL` defined. No hardware is needed for that.
-It can also come in steps, starting with the parts that are harmless on POSIX as well (for example
-`__has_include` checks for `<execinfo.h>` and `<ucontext.h>`).
+Many microcontrollers have a single-precision FPU only: the Cortex-M4F and the Cortex-M33 (as in
+the RP2350), for example. There, double arithmetic is done in software. Compiled with Float as
+double, the hot function of my program had about 1,900 calls to the soft-float routines
+(`__aeabi_dmul`, `__aeabi_dadd`, ...), each in place of one FPU instruction, and was 24% larger.
 
-I would be glad to send the pull requests, and the CI job, and to keep them working.
+mruby has an option for this (`MRB_USE_FLOAT32`), and Spinel already shares some of mruby's
+ground (`lib/mruby_shim.h`, and `sp_dtoa` from mruby's `fp_uscale.c`). An option such as
+`SPINEL_USE_FLOAT32` would be the counterpart, opt-in, for those who accept what it means: results
+that differ from CRuby's (`0.1 + 0.2` is 0.30000001192092896, integers above 2^24 lose precision,
+`1.0e39` is Infinity).
+
+Unlike mruby, it is not the runtime alone: the generated C carries double too. What it takes:
+
+- **The generated code**: `(sp_float)` casts instead of `(double)`, and macros such as
+  `SP_FLOAT_EPSILON` and `SP_FLOAT_MAX` instead of `DBL_EPSILON` and `DBL_MAX`. With double as
+  the default, this changes nothing, and could come first
+- **The runtime**: `sp_float` declared in one place (today `lib/sp_types.h`, `lib/sp_core.c`, and
+  `mrb_float` in `lib/mruby_shim.h`), with the prototypes in terms of `sp_float`; `sinf`, `powf`
+  and the rest where `sp_float` is float
+- **Float to and from text**: the shortest round trip for a float in `Float#to_s`, and `strtof`
+  (or the float counterpart of `sp_read_float`) in `String#to_f`
+- **Float literals**: a suffix (`0.5f`) or a macro, so that an expression does not turn double;
+  GCC's `-fsingle-precision-constant` does this today, but clang ignores it
+
+Doing it from outside, as I do now (`#define double float` around the runtime), is fragile: in my
+patch, `sp_float_shortest` and `sp_read_float` were declared with float in some translation units
+and defined with double in `sp_dtoa.c`, so `Float#to_s` printed garbage and `String#to_f` wrote
+past a variable, unnoticed until an LTO type check (`-flto -Wlto-type-mismatch`). An option in
+Spinel itself would not have that problem.
+
+The CRuby comparison does not apply to it, so it would need its own tests: a small set with a
+tolerance, and the compile-only CI job above with the option defined.
 
 ## Smaller, separate
 
@@ -93,7 +101,7 @@ I would be glad to send the pull requests, and the CI job, and to keep them work
   ```
 
 - **`#ifndef` on the remaining table sizes.** `SP_GC_STACK_MAX` and `SP_ALLOC_STATS` can already be
-  overridden. These cannot, and as static tables they take more SRAM than the chip has:
+  overridden. These cannot, and as static tables they take more SRAM than a microcontroller has:
 
   | Macro | Where | Default | Bytes on 32-bit |
   |---|---|---|---|
@@ -102,5 +110,7 @@ I would be glad to send the pull requests, and the CI job, and to keep them work
   | `SP_STR_SHAPE_MAX` | `sp_alloc.c:114` | 8192 | 32 KB |
   | `SP_ALLOC_NAMES` | `sp_alloc.c:1037` | 512 | 4 KB |
 
-Not asked: SPMS-1 also makes `sp_float` a `float`, since the Cortex-M33 has a single-precision FPU
-only. That changes results against CRuby, so it stays on my side.
+I would be glad to send pull requests for any of these, one at a time, and the CI job, and to
+keep them working.
+
+For reference, the program: https://github.com/risgk/midi_synthesizer_spms1 (`spms1_type2/`).
