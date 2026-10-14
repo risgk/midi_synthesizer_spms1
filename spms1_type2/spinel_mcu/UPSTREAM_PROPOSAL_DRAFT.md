@@ -34,8 +34,10 @@ I can do that part on my side, but the typedefs have to agree across translation
 
 The program runs on the hardware with no OS underneath: the C library is there (newlib, with
 `malloc`, `stdio`, `math.h` and `setjmp`), but POSIX and the OS services behind it are not. (Not
-"freestanding" in the C standard's sense, which has no C library at all: the runtime and the
-generated code need one.) An RTOS target without POSIX, such as FreeRTOS, is in the same place.
+"freestanding": a freestanding implementation in the C standard's sense need provide only a few
+headers, mostly of types and macros, and GCC's `-ffreestanding` stops it assuming the library.
+The runtime and the generated code are built hosted, and call the C library.) An RTOS target
+without POSIX, such as FreeRTOS, is in the same place.
 On such a target these are missing, and they are the rest of my patch:
 
 - `spinel_rt.h`: `<sys/stat.h>`, `<dirent.h>`, `<pwd.h>`, `<sys/times.h>`, `<unistd.h>`, `<signal.h>`,
