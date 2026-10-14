@@ -7,6 +7,11 @@
 # The MCU's own additions live in "spinel_rt_mcu_*.h", which spinel_rt.h includes, so the patch
 # stays small. The files that need POSIX are left out whole with SPINEL_BARE_METAL (sp_types.h).
 #
+# A derived file is a released file with a patch of its own, kept apart from the released one
+# rather than in it: "sp_cold_bare_metal.c" is "sp_cold.c" with
+# "spinel_mcu/sp_cold_bare_metal.patch" applied, built instead of it for the MCU. update and check
+# make and check it as they do the runtime files, and save writes its patch too.
+#
 #   sh spinel_mcu/update.sh update TAG [--spinel DIR]
 #       Takes release TAG: copies its runtime files in, applies the patch to them, and names the
 #       release in the READMEs. A hunk that no longer applies is left in NAME.rej, to be carried
@@ -30,6 +35,8 @@ set -eu
 cd "$(dirname "$0")/.."
 HERE=$(pwd)
 PATCH=spinel_mcu/spinel_mcu.patch
+# Derived files, DERIVED=RELEASED a pair, each with the patch spinel_mcu/DERIVED-without-.c.patch
+DERIVED="sp_cold_bare_metal.c=sp_cold.c"
 
 die() { echo "update.sh: $*" >&2; exit 1; }
 
@@ -47,11 +54,24 @@ readme_release() {
   grep -m1 -oE 'Release: [0-9]{4}\.[0-9]{2}\.[0-9]{2}' README.md | cut -d' ' -f2
 }
 
-# The runtime files of the sketch, without the .orig copies
+# The runtime files of the sketch, without the .orig copies and the derived files
 vendored() {
   for f in sp_*.c sp_*.h re_*.c re_*.h spinel_rt.h mruby_shim.h; do
-    [ -f "$f" ] && echo "$f"
+    [ -f "$f" ] || continue
+    case " $DERIVED " in *" $f="*) continue ;; esac
+    echo "$f"
   done
+}
+
+# The patch of a derived file
+derived_patch() {
+  echo "spinel_mcu/${1%.c}.patch"
+}
+
+# Makes derived file $1 in folder $3 from the released file $2 there; fails if a hunk does not apply
+derive() {
+  cp "$3/$2" "$3/$1"
+  (cd "$3" && "$PATCH_CMD" -s --no-backup-if-mismatch "$1" < "$HERE/$(derived_patch "$1")")
 }
 
 # The runtime files of Spinel's lib, one path a line
@@ -96,6 +116,14 @@ save() {
   done
   mv "$PATCH.tmp" "$PATCH"
   echo "Wrote $PATCH ($(grep -c '^@@' "$PATCH") hunks in $(grep -c '^+++ ' "$PATCH") files)"
+  for pair in $DERIVED; do
+    d=${pair%%=*}; base=${pair#*=}
+    released=$base; [ -f "$base.orig" ] && released=$base.orig
+    p=$(derived_patch "$d")
+    diff -u --label "a/$d" --label "b/$d" "$released" "$d" > "$p" || [ $? -eq 1 ] ||
+      die "diff failed on $d"
+    echo "Wrote $p ($(grep -c '^@@' "$p") hunks)"
+  done
 }
 
 # Files of Spinel's lib that are not in the sketch
@@ -125,6 +153,15 @@ update() {
   status=0
   echo "Applying $PATCH"
   "$PATCH_CMD" -s -p1 --no-backup-if-mismatch < "$PATCH" || status=1
+  for pair in $DERIVED; do
+    d=${pair%%=*}; base=${pair#*=}
+    p=$(upstream_path "$base")
+    [ -n "$p" ] || { echo "$base is not in $tag any more: $d left as it was"; continue; }
+    echo "Making $d from $base and $(derived_patch "$d")"
+    WORKD=$(mktemp -d); cp "$p" "$WORKD/$base"
+    if derive "$d" "$base" "$WORKD"; then cp "$WORKD/$d" "$d"; else cp "$WORKD/$d" "$d"; cp "$WORKD/$d.rej" . 2>/dev/null; status=1; fi
+    rm -rf "$WORKD"
+  done
 
   old=$(readme_release)
   if [ "$old" != "$tag" ]; then
@@ -171,6 +208,19 @@ check() {
     echo "$PATCH does not apply to Spinel $tag"; bad=1
   fi
 
+  # Each derived file is its released file with its patch applied
+  for pair in $DERIVED; do
+    d=${pair%%=*}; base=${pair#*=}
+    p=$(upstream_path "$base")
+    [ -n "$p" ] || { echo "Not in Spinel $tag: $base, from which $d is made"; bad=1; continue; }
+    mkdir -p "$WORK/derived"; cp "$p" "$WORK/derived/$base"
+    if derive "$d" "$base" "$WORK/derived" > /dev/null 2>&1; then
+      cmp -s "$WORK/derived/$d" "$d" || { echo "$d is not Spinel $tag's $base with $(derived_patch "$d") applied"; bad=1; }
+    else
+      echo "$(derived_patch "$d") does not apply to Spinel $tag's $base"; bad=1
+    fi
+  done
+
   # The patch and the .orig copies name the same files, so that "save" writes this patch again
   for f in $(sed -n 's|^+++ b/||p' "$PATCH"); do
     [ -f "$f.orig" ] || { echo "$PATCH changes $f, which has no $f.orig"; bad=1; }
@@ -183,7 +233,7 @@ check() {
   [ -z "$added" ] || { echo "In Spinel $tag, not in the sketch:"; echo "$added" | sed 's/^/  /'; bad=1; }
 
   if [ $bad -ne 0 ]; then exit 1; fi
-  echo "The runtime is Spinel $tag with $PATCH applied"
+  echo "The runtime is Spinel $tag with $PATCH applied, and its derived files with theirs"
 }
 
 cmd=${1:-}

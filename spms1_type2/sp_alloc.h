@@ -810,7 +810,26 @@ const char *sp_float_opt_inspect(sp_float v);
 const char *sp_float_opt_to_s(sp_float v);
 sp_int sp_float_denominator(sp_float f);
 sp_RbVal sp_float_numerator(sp_float f);
+#if SPINEL_BARE_METAL
+/* For the MCU: Float#to_i, which the generated code calls every sample in a synth (index =
+   pitch.to_i and the like), inline here rather than out of line in sp_cold.c, so that it is
+   inlined into the caller instead of called (from flash, on the MCU). sp_cold_bare_metal.c leaves
+   its own out. It also checks the range of sp_int, which is pointer-width: against 2^63 only, a
+   Float from 2^31 up was converted out of range on a 32-bit target (which C leaves undefined)
+   instead of raising. The same two comparisons, so the cost is the same. */
+static inline sp_int sp_float_to_i_checked(sp_float f) {
+  if (isnan(f) || isinf(f)) sp_raise_cls("FloatDomainError", sp_sprintf("%g", f));
+#if INTPTR_MAX == INT32_MAX
+  if (f >= 2147483648.0 || f < -2147483648.0)
+#else
+  if (f >= 9223372036854775808.0 || f < -9223372036854775808.0)
+#endif
+    sp_raise_cls("RangeError", "float out of Integer range (Bignum promotion pending)");
+  return (sp_int)f;
+}
+#else
 sp_int sp_float_to_i_checked(sp_float f);
+#endif
 
 /* ---- forward declarations for pointer-only box params (full types stay
    opaque to lib/sp_alloc.h -- these box functions only store the pointer). ---- */

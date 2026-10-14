@@ -50,8 +50,20 @@ My patch takes this shape already, as far as it can from outside: it carries all
 throughout (`sp_cold.c`, `sp_fiber.c`, `sp_io.c`, `sp_net.c`, `sp_process.c`,
 `sp_process_status.c`, `sp_sched.c`, `sp_system.c`), two lines each; `sp_crypto.c`, `sp_pack.c`
 and `sp_time.c` build as they are. What is still done with `#if 0` is the POSIX inside the files
-that are built (`spinel_rt.h` above all), and four definitions the generated code needs from
-`sp_cold.c` are copied out of it.
+that are built (`spinel_rt.h` above all).
+
+`sp_cold.c` is the hard one. It holds what the generated code needs (`sp_raise_nil_int_op`, the
+GC scan functions of Dir and Enumerator, Float and Integer leaf ops, ...) side by side with
+files, directories, processes and sockets: built for bare metal, about 100 of its functions have
+to be left out one by one, about 1,160 of its 4,200 lines, and the line between them runs
+through the whole file. I build a copy of it with those left out, kept apart as
+`sp_cold_bare_metal.c`. A split of `sp_cold.c` into what needs an OS and what does not would make
+it two files, one of them left out whole, as the others are.
+
+`sp_float_to_i_checked` (`Float#to_i`) moved into `sp_cold.c` from the header where it was static.
+Out of line in another file, it is a call for every `to_i`, which in a synth is every sample; on
+a microcontroller, a call into flash. I keep it `static inline` in `sp_alloc.h`, where it is
+declared, for the bare-metal build. Back in the header for every build would do as well.
 
 It can come in steps, starting with what is harmless on POSIX as well (for example
 `__has_include` checks for `<execinfo.h>` and `<ucontext.h>`). To keep it from breaking unnoticed,

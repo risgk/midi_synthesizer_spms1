@@ -714,15 +714,17 @@ The runtime files in this folder are all of Spinel's `lib` (and `lib/regexp`) of
 above, with the changes for the MCU kept in two places:
 
 - "spinel_rt_mcu_head.h", "spinel_rt_mcu_libm.h" and "spinel_rt_mcu_cold.h": what the MCU adds -- the
-  section and the pragmas of the synth core, the float versions of the math functions, what the
-  generated code needs inlined (`Float#to_i`), and, at the end of "spinel_rt.h", what binds the
-  generated code to a float runtime (below). "spinel_rt.h" carries only an
-  `#include` line for each
+  section and the pragmas of the synth core, the float versions of the math functions, and, at
+  the end of "spinel_rt.h", what binds the generated code to a float runtime (below).
+  "spinel_rt.h" carries only an `#include` line for each
 - "spinel_mcu/spinel_mcu.patch": what is changed in Spinel's own files -- the runtime written in
   `sp_float` where it said `double` for a Float, the POSIX parts left out with `#if 0` (a release
   changing what is inside them seldom stops the patch from applying), the files that need POSIX
   throughout left out whole with `SPINEL_BARE_METAL` (below), and the GC's buffers made to fit
   SRAM. Each file it changes sits next to its released copy, "NAME.orig"
+- "sp_cold_bare_metal.c" and "spinel_mcu/sp_cold_bare_metal.patch": "sp_cold.c" for a bare-metal
+  build (below), kept apart from the released one, which stays as it is but for its being left
+  out whole
 
 Float is float, the RP2350 having a single-precision FPU only. `SPINEL_FLOAT32` in "sp_types.h"
 decides it for the whole runtime: 1 here, and 0 gives double, as Spinel has it, with the same
@@ -732,11 +734,15 @@ results as CRuby. The generated code still spells `double` in casts and temporar
 prints the shortest digits that read back as the same float (`0.1`, `0.33333334`).
 
 There is no OS under the synth. `SPINEL_BARE_METAL` in "sp_types.h", 1 here, leaves out what in the
-runtime needs more than the C library: whole, the files that need POSIX throughout ("sp_fiber.c",
-"sp_io.c", "sp_net.c", "sp_process.c", "sp_process_status.c", "sp_sched.c" and "sp_system.c"),
-and, in "sp_cold.c", the functions that do (files, directories, processes, sockets, and what
-uses the files left out). The rest is built as it is; the linker drops what the synth does not
-use. The simulators and SPMS-1 Web build the runtime the same way.
+runtime needs more than the C library: whole, the files that need POSIX throughout ("sp_cold.c",
+"sp_fiber.c", "sp_io.c", "sp_net.c", "sp_process.c", "sp_process_status.c", "sp_sched.c" and
+"sp_system.c"). "sp_cold.c" is built instead as "sp_cold_bare_metal.c", which is "sp_cold.c" with
+the functions that need more than the C library left out (files, directories, processes,
+sockets, and what uses the files left out), made from it by "spinel_mcu/sp_cold_bare_metal.patch"
+when a release is taken. `Float#to_i`, which a synth calls every sample, is inline in
+"sp_alloc.h" there, so that it is inlined into the synth core rather than called from flash. The
+rest is built as it is; the linker drops what the synth does not use. The simulators and SPMS-1
+Web build the runtime the same way.
 
 A new release is taken on GitHub Actions, so it needs no particular OS:
 

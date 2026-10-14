@@ -3,24 +3,6 @@
 #ifndef SPINEL_RT_MCU_COLD_H
 #define SPINEL_RT_MCU_COLD_H
 
-/* Float#to_i, which the synth calls every sample (index = pitch.to_i and the like). sp_cold.c has
-   it, out of line; this copy is here so that flatten can inline it into Spms1_main, as it could
-   when it was static in sp_runtime.h, rather than call into flash every sample. Under another
-   name, through a #define that only the generated code below sees, so that the runtime keeps
-   sp_cold.c's. */
-static inline sp_int sp_mcu_float_to_i_checked(sp_float f) {
-  if (isnan(f) || isinf(f)) sp_raise_cls("FloatDomainError", sp_sprintf("%g", f));
-  /* The range of sp_int, which is pointer-width (see sp_cold.c) */
-#if INTPTR_MAX == INT32_MAX
-  if (f >= 2147483648.0 || f < -2147483648.0)
-#else
-  if (f >= 9223372036854775808.0 || f < -9223372036854775808.0)
-#endif
-    sp_raise_cls("RangeError", "float out of Integer range (Bignum promotion pending)");
-  return (sp_int)f;
-}
-#define sp_float_to_i_checked sp_mcu_float_to_i_checked
-
 /* sp_types.h declares sp_float as float for the MCU (see spinel_mcu/spinel_mcu.patch). This stops the build
    if a new release declares it in a way the patch no longer reaches. */
 _Static_assert(!SPINEL_FLOAT32 || sizeof(sp_float) == sizeof(float), "sp_float must be float for the MCU");

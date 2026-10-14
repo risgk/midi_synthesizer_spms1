@@ -1,0 +1,1220 @@
+--- a/sp_cold_bare_metal.c
++++ b/sp_cold_bare_metal.c
+@@ -1,3 +1,10 @@
++/* sp_cold_bare_metal.c -- for the MCU: Spinel's lib/sp_cold.c for a bare-metal build, built where
++   SPINEL_BARE_METAL is 1 instead of sp_cold.c, which is left out then. It is sp_cold.c with
++   spinel_mcu/sp_cold_bare_metal.patch applied (spinel_mcu/update.sh makes it so): the functions
++   that need more than the C library -- files, directories, processes, sockets, poll, sleep, and
++   what uses the files left out whole -- left out with SPINEL_BARE_METAL, and the rest in sp_float. */
++#include "sp_types.h"   /* SPINEL_BARE_METAL */
++#if SPINEL_BARE_METAL
+ /* Cold, out-of-line helpers extracted from spinel_rt.h.
+  *
+  * Functions that are large and not on any hot path were `static` in
+@@ -20,11 +27,17 @@
+ #include <unistd.h>
+ #include "sp_alloc.h"   /* sp_str_alloc / sp_str_set_len / sp_raise_cls */
+ #include "sp_array.h"   /* sp_StrArray for Dir.glob */
++#if !SPINEL_BARE_METAL   /* for the MCU */
+ #include <dirent.h>
++#endif
++#if !SPINEL_BARE_METAL   /* for the MCU */
+ #include <fnmatch.h>
++#endif
+ #include <sys/stat.h>
+ #include <sys/types.h>
++#if !SPINEL_BARE_METAL   /* for the MCU */
+ #include <sys/resource.h>   /* getpriority for Process.getpriority */
++#endif
+ #include <fcntl.h>      /* AT_FDCWD for statx */
+ #include <errno.h>
+ #include "sp_time.h"   /* sp_Time for File.mtime */
+@@ -33,9 +46,15 @@
+ #include "sp_string.h"
+ #include "sp_system.h" /* sp_last_status for backtick */
+ #include "sp_format.h" /* sp_float_to_rational for sp_float_denominator/numerator */
++#if !SPINEL_BARE_METAL   /* for the MCU */
+ #include <sys/select.h>  /* IO.select and the IO#wait_* readiness family */
++#endif
++#if !SPINEL_BARE_METAL   /* for the MCU */
+ #include <poll.h>        /* POLLIN/POLLOUT for the scheduler park behind them */
++#endif
++#if !SPINEL_BARE_METAL   /* for the MCU */
+ #include <sys/socket.h> /* SOCK_STREAM / SOCK_DGRAM for Addrinfo */
++#endif
+ 
+ /* lib/sp_gc.c. Declared here rather than in sp_gc.h: that header is included
+    by every generated TU, so adding to it recompiles the whole suite. */
+@@ -46,7 +65,9 @@
+    implementations ship it. Detect availability by the toolchain macros so we
+    can guard the header inclusion. Where it is missing we still provide
+    no-op struct/macro shims below so the backtrace code compiles unchanged. */
+-#if defined(__has_include)
++#if SPINEL_BARE_METAL
++   /* for the MCU: none, whatever the host has (the simulators build it as the device does) */
++#elif defined(__has_include)
+ #  if __has_include(<execinfo.h>)
+ #    define HAVE_EXECINFO_H 1
+ #  endif
+@@ -248,6 +269,7 @@
+ }
+ 
+ /* File.readlink(path): the symlink target as a fresh spinel string (#3005) */
++#if !SPINEL_BARE_METAL   /* for the MCU: POSIX files, directories and processes */
+ const char *sp_file_readlink(const char *path) {SP_GC_ROOT_STR(path);
+   char buf[4096];
+   ssize_t n = readlink(path ? path : "", buf, sizeof(buf) - 1);
+@@ -263,6 +285,7 @@
+   sp_str_set_len(out, (size_t)n);
+   return out;
+ }
++#endif
+ 
+ /* ---- String#to_c parse + Dir.glob (cold; moved from spinel_rt.h) ---- */
+ 
+@@ -272,25 +295,25 @@
+ sp_bool sp_convert_soft = 0;
+ sp_bool sp_convert_failed = 0;
+ static sp_Complex sp_str_to_c_impl(const char *s, int strict) {
+-  double re = 0, im = 0;
++  sp_float re = 0, im = 0;
+   int parsed = 0;
+   const char *fin = s;   /* first byte NOT consumed by the parse */
+   if (s) {
+     const char *p = s;
+     while (*p == ' ' || *p == '\t') p++;
+     char *end = NULL;
+-    double a = strtod(p, &end);
++    sp_float a = strtod(p, &end);
+     if (end != p) {
+       parsed = 1;
+       /* rational-syntax component "n/d" */
+-      if (*end == '/') { const char *dp = end + 1; char *de = NULL; double d = strtod(dp, &de); if (de != dp) { a /= d; end = de; } }
++      if (*end == '/') { const char *dp = end + 1; char *de = NULL; sp_float d = strtod(dp, &de); if (de != dp) { a /= d; end = de; } }
+       if (*end == 'i') { im = a; fin = end + 1; }
+       else {
+         re = a;
+         const char *q = end;
+-        double b2 = strtod(q, &end);
++        sp_float b2 = strtod(q, &end);
+         if (end != q) {
+-          if (*end == '/') { const char *dp = end + 1; char *de = NULL; double d = strtod(dp, &de); if (de != dp) { b2 /= d; end = de; } }
++          if (*end == '/') { const char *dp = end + 1; char *de = NULL; sp_float d = strtod(dp, &de); if (de != dp) { b2 /= d; end = de; } }
+           if (*end == 'i') { im = b2; fin = end + 1; }
+           else fin = q;   /* an imaginary number without the 'i' suffix ("1+2") is invalid */
+         }
+@@ -352,10 +375,12 @@
+    File.fnmatch called it a match (#4252). No FNM_PATHNAME: the component holds
+    no separator by construction. FNM_PERIOD hides a leading dot unless the
+    pattern asks for one, which is CRuby's rule and the flag's own. */
++#if !SPINEL_BARE_METAL   /* for the MCU: directories (dirent, fnmatch, pwd) */
+ static int sp_glob_comp_match(const char *comp, const char *name) {
+   if (name[0] == '.' && !sp_glob_dotmatch && comp[0] != '.') return 0;
+   return fnmatch(comp, name, sp_glob_dotmatch ? 0 : FNM_PERIOD) == 0;
+ }
++#endif
+ 
+ static int sp_glob_has_meta(const char *comp) {
+   for (const char *p = comp; *p; p++)
+@@ -374,10 +399,12 @@
+   return stat(path, &st) == 0 && S_ISDIR(st.st_mode);
+ }
+ 
++#if !SPINEL_BARE_METAL   /* for the MCU: POSIX files, directories and processes */
+ static int sp_glob_exists(const char *path) {
+   struct stat st;
+   return lstat(path, &st) == 0;
+ }
++#endif
+ 
+ /* Walk the components from index `ci`. `fsdir` is the directory to read (""
+    means the process's own), `outprefix` is what the answers are spelled with.
+@@ -386,6 +413,7 @@
+    walk split the pattern at its LAST slash and opendir'd the part before it, so
+    a wildcard middle component opened a directory literally named with it,
+    and found nothing. */
++#if !SPINEL_BARE_METAL   /* for the MCU: directories (dirent, fnmatch, pwd) */
+ static void sp_glob_walk(const char *fsdir, const char *outprefix,
+                          char **comps, int ncomp, int ci, sp_StrArray *a) {
+   if (ci >= ncomp) return;
+@@ -464,9 +492,11 @@
+   }
+   closedir(d);
+ }
++#endif
+ 
+ /* The old entry point, kept for its callers: everything under `fsdir` whose
+    basename matches `tail`. */
++#if !SPINEL_BARE_METAL   /* for the MCU: POSIX files, directories and processes */
+ void sp_dir_glob_rec(const char *fsdir, const char *outprefix,
+                      const char *tail, sp_StrArray *a) {
+   char *comps[2];
+@@ -476,17 +506,21 @@
+   comps[0] = sstar; comps[1] = tbuf;
+   sp_glob_walk(fsdir && fsdir[0] && strcmp(fsdir, ".") ? fsdir : "", outprefix, comps, 2, 0, a);
+ }
++#endif
+ 
+ sp_StrArray *sp_dir_glob(const char *pattern);
+ /* Dir.glob(pat, File::FNM_DOTMATCH) (#2828) */
++#if !SPINEL_BARE_METAL   /* for the MCU: uses what the left-out files define */
+ sp_StrArray *sp_dir_glob_dot(const char *pattern) {SP_GC_ROOT_STR(pattern);
+   sp_glob_dotmatch = 1;
+   sp_StrArray *a = sp_dir_glob(pattern);
+   sp_glob_dotmatch = 0;
+   return a;
+ }
++#endif
+ 
+ /* One pattern, already brace-free, into `a`. */
++#if !SPINEL_BARE_METAL   /* for the MCU: POSIX files, directories and processes */
+ static void sp_dir_glob_one(const char *pattern, sp_StrArray *a) {
+   char buf[2048];
+   snprintf(buf, sizeof buf, "%s", pattern);
+@@ -539,10 +573,12 @@
+       sp_glob_push(a, withslash);
+     } }
+ }
++#endif
+ 
+ /* CRuby expands `{a,b}` before matching, and the system matcher does not do it
+    at all, so it is expanded here: one alternative at a time, recursively, so
+    nested and multiple braces both work. */
++#if !SPINEL_BARE_METAL   /* for the MCU: POSIX files, directories and processes */
+ static void sp_dir_glob_braces(const char *pattern, sp_StrArray *a, int depth) {
+   const char *open = NULL;
+   int nest = 0;
+@@ -578,7 +614,9 @@
+     }
+   }
+ }
++#endif
+ 
++#if !SPINEL_BARE_METAL   /* for the MCU: POSIX files, directories and processes */
+ sp_StrArray *sp_dir_glob(const char *pattern) {
+   /* the pattern is often a fresh interpolation temp, unrooted at the call
+      site; the per-match sp_str_allocs below can collect it mid-walk */
+@@ -604,6 +642,7 @@
+     a->len = w; }
+   return a;
+ }
++#endif
+ 
+ /* ---- File.read/size/mtime/join/readlines + Math.lgamma (cold) ---- */
+ 
+@@ -670,19 +709,19 @@
+   return a;
+ }
+ 
+-double sp_lgamma_pos(double x) {  /* x > 0 */
++sp_float sp_lgamma_pos(sp_float x) {  /* x > 0 */
+   if (x == 1.0 || x == 2.0) return 0.0;
+-  double corr = 0.0;
++  sp_float corr = 0.0;
+   while (x < 12.0) { corr -= log(x); x += 1.0; }
+-  double inv = 1.0 / x, inv2 = inv * inv;
++  sp_float inv = 1.0 / x, inv2 = inv * inv;
+   /* sum_{k>=1} B_2k / (2k(2k-1) x^(2k-1)) up to the 1/x^11 term */
+-  double series = (1.0/12.0) + (inv2 * (-(1.0/360.0) + (inv2 * ((1.0/1260.0)
++  sp_float series = (1.0/12.0) + (inv2 * (-(1.0/360.0) + (inv2 * ((1.0/1260.0)
+                   + (inv2 * (-(1.0/1680.0) + (inv2 * (1.0/1188.0))))))));
+   return corr + ((x - 0.5) * log(x)) - x + (0.5 * log(2.0 * M_PI)) + (series * inv);
+ }
+ 
+-sp_PolyArray *sp_math_lgamma(double x) {
+-  int sign = 1; double v;
++sp_PolyArray *sp_math_lgamma(sp_float x) {
++  int sign = 1; sp_float v;
+   if (x > 0.0) {
+     v = sp_lgamma_pos(x);
+   }
+@@ -695,7 +734,7 @@
+     if (x == 0.0 && signbit(x)) sign = -1;
+   }
+   else {
+-    double s = sin(M_PI * x);
++    sp_float s = sin(M_PI * x);
+     if (s < 0.0) sign = -1;
+     v = log(M_PI / fabs(s)) - sp_lgamma_pos(1.0 - x);
+   }
+@@ -754,6 +793,7 @@
+    Park, then take exactly what arrived. The park frees the worker; the fgetc
+    after it triggers the read(2) that fills stdio's buffer; and draining
+    exactly what stdio then holds cannot block. Round again. (#4307) */
++#if !SPINEL_BARE_METAL   /* for the MCU: uses what the left-out files define */
+ const char *sp_slurp_stream_parked(sp_File *f) {SP_GC_ROOT(f);
+   if (!f || !f->fp) return &("\xff" "")[1];
+   size_t cap = 8192, len = 0;
+@@ -789,6 +829,7 @@
+   return r;
+ }
+ 
++#if !SPINEL_BARE_METAL   /* for the MCU: uses what the left-out files define */
+ const char *sp_file_read(const char *path) {SP_GC_ROOT_STR(path);
+   if (sp_file_directory(path)) {
+     sp_raise_cls("Errno::EISDIR", sp_sprintf("Is a directory @ io_fread - %s", path));
+@@ -803,7 +844,10 @@
+   fclose(f);
+   return r;
+ }
++#endif
++#endif
+ 
++#if !SPINEL_BARE_METAL   /* for the MCU: POSIX files, directories and processes */
+ sp_Time sp_file_atime(const char *path) {SP_GC_ROOT_STR(path);
+   if (!path) { sp_raise_cls("TypeError", "no implicit conversion of nil into String"); return (sp_Time){0, 0, 0}; }
+   struct stat st;
+@@ -849,6 +893,7 @@
+   return (sp_Time){(int64_t)st.st_mtim.tv_sec, (int32_t)st.st_mtim.tv_nsec, 0};
+ #endif
+ }
++#endif
+ sp_Time sp_file_birthtime(const char *path) {SP_GC_ROOT_STR(path);  /* (#2985) */
+   if (!path) { sp_raise_cls("TypeError", "no implicit conversion of nil into String"); return (sp_Time){0, 0, 0}; }
+ #if defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
+@@ -871,6 +916,7 @@
+   return (sp_Time){0, 0, 0};
+ #endif
+ }
++#if !SPINEL_BARE_METAL   /* for the MCU: POSIX files, directories and processes */
+ sp_int sp_process_getpriority(sp_int which, sp_int who) {  /* (#3046) */
+   errno = 0;
+   int r = getpriority((int)which, (id_t)who);
+@@ -890,7 +936,9 @@
+   free(buf);
+   return a;
+ }
++#endif
+ 
++#if !SPINEL_BARE_METAL   /* for the MCU: uses what the left-out files define */
+ sp_int sp_file_size(const char *path) {SP_GC_ROOT_STR(path);
+   if (!path) {
+     sp_raise_cls("TypeError", "no implicit conversion of nil into String");
+@@ -910,6 +958,7 @@
+   return (sp_int)st.st_size;
+ }
+ 
++#if !SPINEL_BARE_METAL   /* for the MCU: uses what the left-out files define */
+ sp_IntArray *sp_file_binread_bytes(const char *path) {SP_GC_ROOT_STR(path);
+   if (sp_file_directory(path)) {
+     sp_raise_cls("Errno::EISDIR", sp_sprintf("Is a directory @ io_fread - %s", path));
+@@ -935,6 +984,8 @@
+   fclose(f);
+   return a;
+ }
++#endif
++#endif
+ 
+ /* ---- more cold helpers: string/File/Dir/poly-combinatorics/misc ---- */
+ 
+@@ -1149,6 +1200,7 @@
+ /* File.write(path, data): answers the byte count it wrote, measured by the
+    same rule that sizes the write, so an embedded NUL in a stringified value
+    counts once in both places. */
++#if !SPINEL_BARE_METAL   /* for the MCU: uses what the left-out files define */
+ sp_int sp_file_write(const char *path, const char *data) {SP_GC_ROOT_STR(path);SP_GC_ROOT_STR(data);
+   if (sp_file_directory(path)) {
+     sp_raise_cls("Errno::EISDIR", sp_sprintf("Is a directory @ rb_sysopen - %s", path));
+@@ -1173,7 +1225,9 @@
+   }
+   return (sp_int)w;
+ }
++#endif
+ 
++#if !SPINEL_BARE_METAL   /* for the MCU: uses what the left-out files define */
+ const char *sp_backtick(const char *cmd) {
+   FILE *p = popen(cmd, "r");
+   if (!p) { sp_last_status = -1; return sp_str_empty; }
+@@ -1186,6 +1240,7 @@
+   sp_last_status = st;
+   return buf;
+ }
++#endif
+ 
+ const char *sp_file_basename(const char *path) {SP_GC_ROOT_STR(path);
+   /* CRuby: trailing separators are ignored ("/a/b/" -> "b"); an all-separator
+@@ -1239,6 +1294,7 @@
+   return buf;
+ }
+ 
++#if !SPINEL_BARE_METAL   /* for the MCU: directories (dirent, fnmatch, pwd) */
+ sp_StrArray *sp_dir_entries_impl(const char *path, int children) {
+   SP_GC_ROOT_STR(path);
+   if (!path) sp_raise_cls("TypeError", "no implicit conversion of nil into String");
+@@ -1259,6 +1315,7 @@
+   sp_StrArray_sort_bang(a);
+   return a;
+ }
++#endif
+ 
+ /* The rows of a transpose are Arrays; a row that is not is CRuby's TypeError,
+    named by the class of what was there. This unit sees the tags alone, so the
+@@ -1510,9 +1567,15 @@
+ }
+ 
+ #include <fcntl.h>
++#if !SPINEL_BARE_METAL   /* for the MCU */
+ #include <sys/file.h>
++#endif
++#if !SPINEL_BARE_METAL   /* for the MCU */
+ #include <pwd.h>
++#endif
++#if !SPINEL_BARE_METAL   /* for the MCU */
+ #include <sys/wait.h>
++#endif
+ 
+ /* ---- File / Dir surface ops moved from spinel_rt.h ----
+    Path-level libc wrappers (stat family, Dir handle ops, FileTest
+@@ -1545,8 +1608,8 @@
+ sp_SockOpt *sp_sockopt_new(sp_int family, sp_int level, sp_int optname, sp_int value);
+ const char *sp_sockopt_inspect(sp_SockOpt *o);
+ sp_File *sp_io_for_fd(sp_int fd, const char *mode, sp_bool autoclose);
+-sp_File *sp_io_wait_events(sp_File *f, double timeout, sp_int kind);
+-sp_RbVal sp_io_select(sp_PolyArray *rd, sp_PolyArray *wr, sp_PolyArray *er, double timeout);
++sp_File *sp_io_wait_events(sp_File *f, sp_float timeout, sp_int kind);
++sp_RbVal sp_io_select(sp_PolyArray *rd, sp_PolyArray *wr, sp_PolyArray *er, sp_float timeout);
+ sp_int sp_file_size_q(const char *path);
+ sp_bool sp_file_pipe(const char *path);
+ sp_bool sp_file_identical(const char *a, const char *b);
+@@ -1588,6 +1651,7 @@
+ const char *sp_dir_home_user(const char *user);
+ sp_StrArray *sp_dir_children(const char *path);
+ 
++#if !SPINEL_BARE_METAL   /* for the MCU: uses what the left-out files define */
+ const char *sp_File_gets_sep(sp_File *f, const char *sep, sp_int limit, sp_bool chomp) {SP_GC_ROOT(f);SP_GC_ROOT_STR(sep);
+   SP_IO_OPEN(f);
+   sp_io_wait_readable(f);
+@@ -1628,6 +1692,8 @@
+   f->lineno++;
+   return r;
+ }
++#endif
++#if !SPINEL_BARE_METAL   /* for the MCU: uses what the left-out files define */
+ sp_StrArray *sp_File_readlines_sep(sp_File *f, const char *sep, sp_bool chomp) {SP_GC_ROOT(f);SP_GC_ROOT_STR(sep);
+   sp_StrArray *a = sp_StrArray_new();
+   SP_GC_ROOT(a);
+@@ -1635,6 +1701,8 @@
+   while ((l = sp_File_gets_sep(f, sep, 0, chomp)) != NULL) sp_StrArray_push(a, l);
+   return a;
+ }
++#endif
++#if !SPINEL_BARE_METAL   /* for the MCU: uses what the left-out files define */
+ sp_StrArray *sp_file_readlines_sep(const char *path, const char *sep, sp_bool chomp) {SP_GC_ROOT_STR(path);SP_GC_ROOT_STR(sep);
+   sp_File *f = sp_File_open(path, "r");
+   SP_GC_ROOT(f);
+@@ -1642,11 +1710,15 @@
+   sp_File_close(f);
+   return a;
+ }
++#endif
++#if !SPINEL_BARE_METAL   /* for the MCU: uses what the left-out files define */
+ const char *sp_File_readline_sep(sp_File *f, const char *sep, sp_int limit, sp_bool chomp) {SP_GC_ROOT(f);SP_GC_ROOT_STR(sep);
+   const char *r = sp_File_gets_sep(f, sep, limit, chomp);
+   if (!r) sp_raise_cls("EOFError", "end of file reached");
+   return r;
+ }
++#endif
++#if !SPINEL_BARE_METAL   /* for the MCU: uses what the left-out files define */
+ const char *sp_File_getc(sp_File *f) {SP_GC_ROOT(f);
+   SP_IO_OPEN(f);
+   int ch = fgetc(f->fp);
+@@ -1664,16 +1736,22 @@
+   sp_str_set_len(r, n);
+   return r;
+ }
++#endif
++#if !SPINEL_BARE_METAL   /* for the MCU: uses what the left-out files define */
+ const char *sp_File_readchar(sp_File *f) {SP_GC_ROOT(f);
+   const char *r = sp_File_getc(f);
+   if (!r) sp_raise_cls("EOFError", "end of file reached");
+   return r;
+ }
++#endif
++#if !SPINEL_BARE_METAL   /* for the MCU: uses what the left-out files define */
+ sp_int sp_File_getbyte(sp_File *f) {
+   SP_IO_OPEN(f);
+   int ch = fgetc(f->fp);
+   return ch == EOF ? SP_INT_NIL : (sp_int)ch;
+ }
++#endif
++#if !SPINEL_BARE_METAL   /* for the MCU: uses what the left-out files define */
+ sp_RbVal sp_File_ungetc(sp_File *f, sp_RbVal v) {
+   SP_IO_OPEN(f);
+   if (v.tag == SP_TAG_STR && v.v.s && v.v.s[0]) {
+@@ -1683,11 +1761,15 @@
+   else if (v.tag == SP_TAG_INT) ungetc((int)v.v.i, f->fp);
+   return sp_box_nil();
+ }
++#endif
++#if !SPINEL_BARE_METAL   /* for the MCU: uses what the left-out files define */
+ sp_int sp_File_sysseek(sp_File *f, sp_int off, sp_int whence) {
+   SP_IO_OPEN(f);
+   fseek(f->fp, (long)off, whence == 1 ? SEEK_CUR : whence == 2 ? SEEK_END : SEEK_SET);
+   return (sp_int)ftell(f->fp);
+ }
++#endif
++#if !SPINEL_BARE_METAL   /* for the MCU: POSIX files, directories and processes */
+ sp_int sp_File_flock(sp_File *f, sp_int op) {
+   SP_IO_OPEN(f);
+   return flock(fileno(f->fp), (int)op) == 0 ? 0 : 1;
+@@ -1698,12 +1780,16 @@
+   fsync(fileno(f->fp));
+   return 0;
+ }
++#endif
++#if !SPINEL_BARE_METAL   /* for the MCU: uses what the left-out files define */
+ sp_RbVal sp_File_putc(sp_File *f, sp_RbVal v) {
+   SP_IO_OPEN(f);
+   if (v.tag == SP_TAG_INT) fputc((int)(v.v.i & 0xff), f->fp);
+   else if (v.tag == SP_TAG_STR && v.v.s && v.v.s[0]) fputc(v.v.s[0], f->fp);
+   return v;
+ }
++#endif
++#if !SPINEL_BARE_METAL   /* for the MCU: POSIX files, directories and processes */
+ const char *sp_file_ftype(const char *path) {SP_GC_ROOT_STR(path);
+   struct stat st;
+   if (lstat(path ? path : "", &st) != 0)
+@@ -1720,16 +1806,25 @@
+ #endif
+   return (&("\xff" "unknown")[1]);
+ }
++#endif
+ /* The `_real?` predicates test the real uid/gid, which is exactly what
+    access(2) does; their plain counterparts test the effective ids, which needs
+    AT_EACCESS. Routing both through access() would make File.readable? answer
+    for the wrong identity in a setuid program. */
++#if !SPINEL_BARE_METAL   /* for the MCU: POSIX files, directories and processes */
+ static sp_bool sp_file_access_eff(const char *path, int mode) {
+   return faccessat(AT_FDCWD, path ? path : "", mode, AT_EACCESS) == 0;
+ }
++#endif
++#if !SPINEL_BARE_METAL   /* for the MCU: POSIX files, directories and processes */
+ sp_bool sp_file_readable(const char *path)   {SP_GC_ROOT_STR(path); return sp_file_access_eff(path, R_OK); }
++#endif
++#if !SPINEL_BARE_METAL   /* for the MCU: POSIX files, directories and processes */
+ sp_bool sp_file_writable(const char *path)   {SP_GC_ROOT_STR(path); return sp_file_access_eff(path, W_OK); }
++#endif
++#if !SPINEL_BARE_METAL   /* for the MCU: POSIX files, directories and processes */
+ sp_bool sp_file_executable(const char *path) {SP_GC_ROOT_STR(path); return sp_file_access_eff(path, X_OK); }
++#endif
+ sp_bool sp_file_readable_real(const char *path)   { return access(path ? path : "", R_OK) == 0; }
+ sp_bool sp_file_writable_real(const char *path)   { return access(path ? path : "", W_OK) == 0; }
+ sp_bool sp_file_executable_real(const char *path) { return access(path ? path : "", X_OK) == 0; }
+@@ -1747,6 +1842,7 @@
+   if (stat(a ? a : "", &sa) != 0 || stat(b ? b : "", &sb) != 0) return 0;
+   return sa.st_dev == sb.st_dev && sa.st_ino == sb.st_ino;
+ }
++#if !SPINEL_BARE_METAL   /* for the MCU: POSIX files, directories and processes */
+ const char *sp_file_realpath(const char *path) {SP_GC_ROOT_STR(path);
+   char buf[4096];
+   if (!realpath(path ? path : "", buf))
+@@ -1754,8 +1850,10 @@
+                  sp_sprintf("No such file or directory @ realpath_rec - %s", path ? path : ""));
+   return sp_sprintf("%s", buf);
+ }
++#endif
+ /* realdirpath resolves every component but the last, so it answers for a name
+    that does not exist yet -- where realpath raises Errno::ENOENT. */
++#if !SPINEL_BARE_METAL   /* for the MCU: POSIX files, directories and processes */
+ const char *sp_file_realdirpath(const char *path) {
+   const char *p = path ? path : "";
+   char buf[4096];
+@@ -1773,12 +1871,15 @@
+   if (strcmp(buf, "/") == 0) return sp_sprintf("/%s", base);
+   return sp_sprintf("%s/%s", buf, base);
+ }
++#endif
+ sp_bool sp_file_absolute_path_p(const char *path) { return path && path[0] == '/'; }  /* (#2988) */
++#if !SPINEL_BARE_METAL   /* for the MCU: POSIX files, directories and processes */
+ sp_int sp_file_chown(const char *path, sp_int uid, sp_int gid) {SP_GC_ROOT_STR(path);  /* -1 leaves that id unchanged; returns the path count (#2987) */
+   if (chown(path ? path : "", (uid_t)uid, (gid_t)gid) != 0)
+     sp_raise_cls("Errno::ENOENT", sp_sprintf("No such file or directory - %s", path ? path : ""));
+   return 1;
+ }
++#endif
+ const char *sp_file_read_len(const char *path, sp_int n) {SP_GC_ROOT_STR(path);
+   FILE *fp = fopen(path ? path : "", "rb");
+   if (!fp)
+@@ -1798,11 +1899,14 @@
+                  sp_sprintf("No such file or directory @ apply2files - %s", path ? path : ""));
+   return 1;
+ }
++#if !SPINEL_BARE_METAL   /* for the MCU: uses what the left-out files define */
+ sp_int sp_file_truncate(const char *path, sp_int n) {SP_GC_ROOT_STR(path);
+   sp_file_path_check(path);
+   if (truncate(path, (off_t)n) != 0) sp_file_raise_errno("rb_file_s_truncate", path);
+   return 0;
+ }
++#endif
++#if !SPINEL_BARE_METAL   /* for the MCU: POSIX files, directories and processes */
+ sp_int sp_file_write_at(const char *path, const char *data, sp_int off) {SP_GC_ROOT_STR(path);SP_GC_ROOT_STR(data);
+   int fd = open(path ? path : "", O_WRONLY | O_CREAT, 0666);
+   if (fd < 0)
+@@ -1813,6 +1917,7 @@
+   close(fd);
+   return w < 0 ? 0 : (sp_int)w;
+ }
++#endif
+ sp_int sp_file_write_mode(const char *path, const char *data, const char *mode) {SP_GC_ROOT_STR(path);SP_GC_ROOT_STR(data);
+   FILE *fp = fopen(path ? path : "", mode && mode[0] ? mode : "w");
+   if (!fp)
+@@ -1855,6 +1960,7 @@
+    stat(2) does not block on a FIFO, so asking first is safe. Anything else,
+    including a path that does not exist yet, opens exactly as before and pays
+    one stat: no other shape inherits O_NONBLOCK's different answers. */
++#if !SPINEL_BARE_METAL   /* for the MCU: POSIX files, directories and processes */
+ static int sp_open_fifo_aware(const char *path, int fl, mode_t perm) {
+   struct stat st;
+   if (stat(path, &st) != 0 || !S_ISFIFO(st.st_mode))
+@@ -1889,15 +1995,19 @@
+   f->path = path;
+   return f;
+ }
++#endif
++#if !SPINEL_BARE_METAL   /* for the MCU: uses what the left-out files define */
+ sp_File *sp_File_open_flags(const char *path, sp_int fl) {
+   return sp_File_open_flags_perm(path, fl, 0666);
+ }
++#endif
+ /* File.open(path, "w", perm): the mode string selects the open(2) flags the
+    way fopen(3) reads it -- `+` for read-write, `x` for exclusive creation --
+    so the permission bits reach the syscall as they do for the flag-word
+    form. The mode is checked before the file is opened, so a bad one raises
+    CRuby's ArgumentError and leaves no descriptor behind. A nil perm (SP_INT_NIL)
+    is CRuby's default, 0666. */
++#if !SPINEL_BARE_METAL   /* for the MCU: POSIX files, directories and processes */
+ sp_File *sp_File_open_perm(const char *path, const char *mode, sp_int perm) {SP_GC_ROOT_STR(path);SP_GC_ROOT_STR(mode);
+   const char *m = mode && mode[0] ? mode : "r";
+   int fl;
+@@ -1928,6 +2038,7 @@
+   f->mode = m;
+   return f;
+ }
++#endif
+ void sp_file_stat_scan(void *p) {
+   sp_File *f = (sp_File *)p;
+   if (f->path) sp_mark_string(f->path);
+@@ -1950,6 +2061,7 @@
+ /* File.lstat / File#lstat: like stat, but describing the link itself when the
+    final component is a symlink. The handle records mode "lstat" so the
+    accessors below read it with lstat(2). (#2986) */
++#if !SPINEL_BARE_METAL   /* for the MCU: POSIX files, directories and processes */
+ sp_File *sp_file_lstat_handle(const char *path) {SP_GC_ROOT_STR(path);
+   struct stat st;
+   if (lstat(path ? path : "", &st) != 0)
+@@ -1964,6 +2076,7 @@
+   f->lineno = 0;
+   return f;
+ }
++#endif
+ /* File::Stat#== is Comparable's, over <=>, which File::Stat defines on the
+    modification time: two stats of one unchanged file are equal, and a stat
+    handle is never equal to an open stream. Any other pair of handles compares
+@@ -1972,11 +2085,14 @@
+ static int sp_stat_handle_p(sp_File *f) {
+   return f && f->mode && (strcmp(f->mode, "stat") == 0 || strcmp(f->mode, "lstat") == 0);
+ }
++#if !SPINEL_BARE_METAL   /* for the MCU: POSIX files, directories and processes */
+ static int sp_stat_handle_mtime(sp_File *f, struct stat *st) {
+   if (f->path && f->path[0])
+     return (strcmp(f->mode, "lstat") == 0 ? lstat(f->path, st) : stat(f->path, st)) == 0;
+   return f->fp && fstat(fileno(f->fp), st) == 0;
+ }
++#endif
++#if !SPINEL_BARE_METAL   /* for the MCU: POSIX files, directories and processes */
+ sp_bool sp_io_eq(sp_File *a, sp_File *b) {
+   if (a == b) return TRUE;
+   if (!sp_stat_handle_p(a) || !sp_stat_handle_p(b)) return FALSE;
+@@ -1988,11 +2104,13 @@
+   return sa.st_mtim.tv_sec == sb.st_mtim.tv_sec && sa.st_mtim.tv_nsec == sb.st_mtim.tv_nsec;
+ #endif
+ }
++#endif
+ /* Object#<=> on a handle against any operand (boxed): 0 for the same object,
+    nil otherwise -- except two File::Stat handles, which Comparable orders by
+    modification time, the reading sp_io_eq takes for ==. A NULL handle is nil,
+    which is 0 against nil and nil against everything else. The answer is an
+    Integer or nil, boxed. */
++#if !SPINEL_BARE_METAL   /* for the MCU: POSIX files, directories and processes */
+ sp_RbVal sp_io_cmp(sp_File *a, sp_RbVal other) {
+   if (other.tag == SP_TAG_NIL) return a ? sp_box_nil() : sp_box_int(0);
+   if (other.tag != SP_TAG_OBJ || other.cls_id != SP_BUILTIN_IO) return sp_box_nil();
+@@ -2009,15 +2127,18 @@
+   if (ma.tv_sec != mb.tv_sec) return sp_box_int(ma.tv_sec < mb.tv_sec ? -1 : 1);
+   return sp_box_int(ma.tv_nsec < mb.tv_nsec ? -1 : ma.tv_nsec > mb.tv_nsec ? 1 : 0);
+ }
++#endif
+ /* Object#to_s on a handle: #<Class:0xADDR> under the class the handle presents
+    as -- a stat handle is a File::Stat, and sp_io_kind_name tells File, IO and
+    the socket classes apart. #inspect keeps the handle's own render. A NULL
+    handle is nil, whose to_s is the empty string. */
++#if !SPINEL_BARE_METAL   /* for the MCU: uses what the left-out files define */
+ const char *sp_io_to_s(sp_File *f) {
+   if (!f) return SPL("");
+   return sp_sprintf("#<%s:0x%016llx>", sp_stat_handle_p(f) ? "File::Stat" : sp_io_kind_name(f),
+                     (unsigned long long)(uintptr_t)f);
+ }
++#endif
+ /* True when the handle came from lstat, so a final symlink is not followed. */
+ sp_bool sp_stat_nofollow(sp_File *f) {
+   return f && f->mode && strcmp(f->mode, "lstat") == 0;
+@@ -2028,6 +2149,7 @@
+ static int sp_stat_pathless(sp_File *f) {
+   return f && f->fp && (!f->path || f->path[0] == 0);
+ }
++#if !SPINEL_BARE_METAL   /* for the MCU: uses what the left-out files define */
+ sp_File *sp_io_stat_handle(sp_File *f) {SP_GC_ROOT(f);
+   SP_IO_OPEN(f);
+   if (f->path && f->path[0]) return sp_file_stat_handle(f->path);
+@@ -2041,9 +2163,11 @@
+   h->lineno = 0;
+   return h;
+ }
++#endif
+ /* One stat(2) field by index, so File::Stat's numeric accessors need one
+    runtime entry rather than a dozen. 0=uid 1=gid 2=nlink 3=dev 4=ino
+    5=blksize 6=blocks 7=rdev. SP_INT_NIL when the stat itself fails. */
++#if !SPINEL_BARE_METAL   /* for the MCU: POSIX files, directories and processes */
+ sp_int sp_stat_field(sp_File *f, sp_int which) {SP_GC_ROOT(f);
+   struct stat st;
+   int r;
+@@ -2064,9 +2188,11 @@
+     default: return (sp_int)st.st_rdev;
+   }
+ }
++#endif
+ /* The mode-derived predicates of File::Stat that no path helper covers. Kinds:
+    0=pipe? 1=zero? 2=readable? 3=writable? 4=executable? 5=blockdev?
+    6=chardev? 7=size? (non-zero size, else nil). */
++#if !SPINEL_BARE_METAL   /* for the MCU: POSIX files, directories and processes */
+ sp_int sp_stat_pred(sp_File *f, sp_int kind) {SP_GC_ROOT(f);
+   struct stat st;
+   int r;
+@@ -2087,6 +2213,8 @@
+     default: return st.st_size == 0 ? SP_INT_NIL : (sp_int)st.st_size;
+   }
+ }
++#endif
++#if !SPINEL_BARE_METAL   /* for the MCU: POSIX files, directories and processes */
+ sp_int sp_stat_size(sp_File *f) {SP_GC_ROOT(f);
+   struct stat st;
+   if (sp_stat_pathless(f))
+@@ -2095,6 +2223,8 @@
+   int r = sp_stat_nofollow(f) ? lstat(p, &st) : stat(p, &st);
+   return r == 0 ? (sp_int)st.st_size : SP_INT_NIL;
+ }
++#endif
++#if !SPINEL_BARE_METAL   /* for the MCU: POSIX files, directories and processes */
+ sp_int sp_stat_mode(sp_File *f) {SP_GC_ROOT(f);
+   struct stat st;
+   if (sp_stat_pathless(f))
+@@ -2103,6 +2233,8 @@
+   int r = sp_stat_nofollow(f) ? lstat(p, &st) : stat(p, &st);
+   return r == 0 ? (sp_int)st.st_mode : 0;
+ }
++#endif
++#if !SPINEL_BARE_METAL   /* for the MCU: POSIX files, directories and processes */
+ const char *sp_stat_ftype(sp_File *f) {SP_GC_ROOT(f);
+   if (sp_stat_pathless(f)) {
+     struct stat st;
+@@ -2120,14 +2252,17 @@
+   if (sp_stat_nofollow(f)) return sp_file_ftype(p);
+   { const char *rp = sp_file_realpath(p); return sp_file_ftype(rp ? rp : p); }
+ }
++#endif
+ sp_int sp_file_stat_mode(const char *path) {
+   struct stat st;
+   if (stat(path ? path : "", &st) != 0) return 0;
+   return (sp_int)st.st_mode;
+ }
++#if !SPINEL_BARE_METAL   /* for the MCU: directories (dirent, fnmatch, pwd) */
+ sp_bool sp_file_fnmatch(const char *pat, const char *path) {
+   return fnmatch(pat ? pat : "", path ? path : "", FNM_PATHNAME | FNM_PERIOD) == 0;
+ }
++#endif
+ sp_StrArray *sp_file_split(const char *path) {SP_GC_ROOT_STR(path);
+   sp_StrArray *a = sp_StrArray_new();
+   SP_GC_ROOT(a);
+@@ -2162,34 +2297,45 @@
+    CRuby's labels; its block-form chdir says dir_chdir0 where this wrapper
+    says chdir_path in both forms. A nil path (a NULL string at run time) is
+    CRuby's TypeError, as it is for File.size and the time readers above. */
++#if !SPINEL_BARE_METAL   /* for the MCU: POSIX files, directories and processes */
+ sp_int sp_dir_mkdir(const char *path) {SP_GC_ROOT_STR(path);
+   sp_file_path_check(path);
+   if (mkdir(path, 0777) != 0) sp_file_raise_errno("dir_s_mkdir", path);
+   return 0;
+ }
++#endif
++#if !SPINEL_BARE_METAL   /* for the MCU: uses what the left-out files define */
+ sp_int sp_dir_rmdir(const char *path) {SP_GC_ROOT_STR(path);
+   sp_file_path_check(path);
+   if (rmdir(path) != 0) sp_file_raise_errno("dir_s_rmdir", path);
+   return 0;
+ }
++#endif
++#if !SPINEL_BARE_METAL   /* for the MCU: uses what the left-out files define */
+ sp_int sp_dir_chdir(const char *path) {SP_GC_ROOT_STR(path);
+   sp_file_path_check(path);
+   if (chdir(path) != 0) sp_file_raise_errno("chdir_path", path);
+   return 0;
+ }
++#endif
+ /* the block form: the same switch under CRuby's label for it */
++#if !SPINEL_BARE_METAL   /* for the MCU: uses what the left-out files define */
+ sp_int sp_dir_chdir0(const char *path) {SP_GC_ROOT_STR(path);
+   sp_file_path_check(path);
+   if (chdir(path) != 0) sp_file_raise_errno("dir_chdir0", path);
+   return 0;
+ }
++#endif
+ const char *sp_dir_home(void) {
+   const char *h = getenv("HOME");
+   if (!h) return sp_str_empty;
+   return sp_str_dup_external(h);
+ }
++#if !SPINEL_BARE_METAL   /* for the MCU: POSIX files, directories and processes */
+ void sp_Dir_fin(void *p) { sp_Dir *d = (sp_Dir *)p; if (d->dp) { closedir(d->dp); d->dp = NULL; } }
++#endif
+ void sp_Dir_scan(void *p) { sp_Dir *d = (sp_Dir *)p; if (d->path) sp_mark_string(d->path); }
++#if !SPINEL_BARE_METAL   /* for the MCU: directories (dirent, fnmatch, pwd) */
+ sp_Dir *sp_Dir_new(const char *path) {SP_GC_ROOT_STR(path);
+   DIR *dp = opendir(path ? path : "");
+   if (!dp)
+@@ -2203,8 +2349,10 @@
+   sp_gc_wb((void *)d);   /* the sprintf can promote the rooted handle */
+   return d;
+ }
++#endif
+ /* Dir.for_fd(fd): take over a descriptor already opened on a directory. The
+    handle owns the fd from here, as CRuby's does. */
++#if !SPINEL_BARE_METAL   /* for the MCU: directories (dirent, fnmatch, pwd) */
+ sp_Dir *sp_Dir_for_fd(sp_int fd) {
+   DIR *dp = fd >= 0 ? fdopendir((int)fd) : NULL;
+   if (!dp) sp_raise_cls("Errno::EBADF", "Bad file descriptor - fdopendir");
+@@ -2214,9 +2362,11 @@
+   d->path = NULL;
+   return d;
+ }
++#endif
+ /* #entries / #children read the OPEN handle: a Dir from Dir.for_fd has no path
+    to re-open, and re-opening by path would miss a directory that has since been
+    renamed. Rewinds first so the listing is complete however far #read got. */
++#if !SPINEL_BARE_METAL   /* for the MCU: directories (dirent, fnmatch, pwd) */
+ sp_StrArray *sp_Dir_entries_h(sp_Dir *d, sp_int children) {SP_GC_ROOT(d);
+   SP_DIR_OPEN(d);
+   rewinddir(d->dp);
+@@ -2230,19 +2380,24 @@
+   rewinddir(d->dp);
+   return a;
+ }
++#endif
++#if !SPINEL_BARE_METAL   /* for the MCU: POSIX files, directories and processes */
+ sp_int sp_Dir_fchdir(sp_int fd) {
+   if (fd < 0 || fchdir((int)fd) != 0)
+     sp_raise_cls("Errno::EBADF", "Bad file descriptor - fchdir");
+   return 0;
+ }
++#endif
+ SP_NORETURN SP_COLD void sp_dir_raise_closed(void) {
+   sp_raise_cls("IOError", "closed directory");
+ }
++#if !SPINEL_BARE_METAL   /* for the MCU: directories (dirent, fnmatch, pwd) */
+ const char *sp_Dir_read(sp_Dir *d) {
+   SP_DIR_OPEN(d);
+   struct dirent *e = readdir(d->dp);
+   return e ? sp_sprintf("%s", e->d_name) : NULL;
+ }
++#endif
+ /* NULL is Ruby nil in the string convention: a Dir from Dir.for_fd has no path,
+    and CRuby answers nil for it rather than an empty string (#3365). */
+ const char *sp_Dir_path(sp_Dir *d) { return d ? d->path : NULL; }
+@@ -2258,12 +2413,17 @@
+     return sp_box_int(0);
+   return sp_box_nil();
+ }
++#if !SPINEL_BARE_METAL   /* for the MCU: POSIX files, directories and processes */
+ sp_RbVal sp_Dir_close(sp_Dir *d) { if (d && d->dp) { closedir(d->dp); d->dp = NULL; } return sp_box_nil(); }
++#endif
++#if !SPINEL_BARE_METAL   /* for the MCU: POSIX files, directories and processes */
+ sp_Dir *sp_Dir_rewind(sp_Dir *d) { SP_DIR_OPEN(d); rewinddir(d->dp); return d; }
+ sp_int sp_Dir_tell(sp_Dir *d) { SP_DIR_OPEN(d); return (sp_int)telldir(d->dp); }
+ sp_Dir *sp_Dir_seek(sp_Dir *d, sp_int pos) { SP_DIR_OPEN(d); seekdir(d->dp, (long)pos); return d; }
+ sp_int sp_Dir_fileno(sp_Dir *d) { SP_DIR_OPEN(d); return (sp_int)dirfd(d->dp); }
+ sp_StrArray *sp_dir_entries(const char *path) {SP_GC_ROOT_STR(path); return sp_dir_entries_impl(path, 0); }
++#endif
++#if !SPINEL_BARE_METAL   /* for the MCU: directories (dirent, fnmatch, pwd) */
+ sp_bool sp_dir_empty(const char *path) {SP_GC_ROOT_STR(path);
+   struct stat st;
+   if (!path || stat(path, &st) != 0)
+@@ -2280,6 +2440,8 @@
+   closedir(d);
+   return empty;
+ }
++#endif
++#if !SPINEL_BARE_METAL   /* for the MCU: directories (dirent, fnmatch, pwd) */
+ const char *sp_dir_home_user(const char *user) {SP_GC_ROOT_STR(user);
+   if (!user || !*user) return sp_dir_home();
+   struct passwd *pw = getpwnam(user);
+@@ -2287,7 +2449,10 @@
+     sp_raise_cls("ArgumentError", sp_sprintf("user %s doesn't exist", user));
+   return sp_str_dup_external(pw->pw_dir);
+ }
++#endif
++#if !SPINEL_BARE_METAL   /* for the MCU: POSIX files, directories and processes */
+ sp_StrArray *sp_dir_children(const char *path) {SP_GC_ROOT_STR(path); return sp_dir_entries_impl(path, 1); }
++#endif
+ 
+ /* ---- Signal trap machinery + Enumerator cursor/generator ops moved from
+    spinel_rt.h ----
+@@ -2407,6 +2572,7 @@
+   sp_WiCap *cap = (sp_WiCap *)p;
+   if (cap->src) sp_gc_mark(cap->src);
+ }
++#if !SPINEL_BARE_METAL   /* for the MCU: uses what the left-out files define */
+ static void sp_with_index_gen(sp_Fiber *f) {
+   sp_WiCap *cap = (sp_WiCap *)f->user_data;
+   sp_Enumerator *s = cap->src;
+@@ -2430,6 +2596,8 @@
+     sp_Fiber_yield(sp_box_poly_array(pair));
+   }
+ }
++#endif
++#if !SPINEL_BARE_METAL   /* for the MCU: uses what the left-out files define */
+ sp_Enumerator *sp_Enumerator_with_index(sp_Enumerator *e, sp_int off) {
+   if (e && e->gen) {
+     /* Two allocations, and two things held in nothing but a C local across
+@@ -2465,6 +2633,7 @@
+   { sp_RbVal src_recv = e ? e->source : sp_box_nil();
+     sp_Enumerator *r = sp_Enumerator_new_from_items(out); r->source = src_recv; return r; }
+ }
++#endif
+ sp_Enumerator *sp_Enumerator_new_gen(void (*gen)(sp_Fiber *), void *cap, sp_RbVal size) {SP_GC_ROOT_RBVAL(size);
+   sp_Enumerator *e = (sp_Enumerator *)sp_gc_alloc(sizeof(sp_Enumerator), NULL, sp_Enumerator_scan);
+   e->items = NULL; e->cursor = 0; e->gen = gen; e->gen_cap = cap; e->fib = NULL; e->peeked = FALSE; e->size = size; e->feed = sp_box_nil(); e->has_feed = FALSE; e->gen_result = sp_box_nil(); e->source = sp_box_nil(); e->meth = SPL("each");
+@@ -2472,15 +2641,19 @@
+ }
+ /* Blockless Kernel#loop: an infinite Enumerator that yields nil forever (#3236).
+    The generator is internal; only sp_loop_enum is exposed (spinel_rt.h). */
++#if !SPINEL_BARE_METAL   /* for the MCU: uses what the left-out files define */
+ static void sp_loop_gen(sp_Fiber *f) {
+   (void)f;
+   for (;;) sp_Fiber_yield(sp_box_nil());
+ }
++#endif
++#if !SPINEL_BARE_METAL   /* for the MCU: uses what the left-out files define */
+ sp_Enumerator *sp_loop_enum(void) {
+   sp_Enumerator *e = sp_Enumerator_new_gen(sp_loop_gen, NULL, sp_box_nil());
+   e->meth = SPL("loop");
+   return e;
+ }
++#endif
+ 
+ /* IO.copy_stream(src_path, dst_path): stream one file to another, byte count. */
+ sp_int sp_io_copy_stream(const char *src, const char *dst) {SP_GC_ROOT_STR(src);SP_GC_ROOT_STR(dst);
+@@ -2507,6 +2680,7 @@
+ static void sp_int_repeated_permutation_recur(sp_IntArray*src,sp_int k,sp_IntArray*acc,sp_PtrArray*out){SP_GC_ROOT(src);SP_GC_ROOT(acc);SP_GC_ROOT(out);if(k==0){sp_IntArray*cp=sp_IntArray_new();SP_GC_ROOT(cp);for(sp_int i=0;i<acc->len;i++)sp_IntArray_push(cp,acc->data[acc->start+i]);sp_PtrArray_push(out,cp);return;}for(sp_int i=0;i<src->len;i++){sp_IntArray_push(acc,src->data[src->start+i]);sp_int_repeated_permutation_recur(src,k-1,acc,out);acc->len--;}}
+ sp_PtrArray*sp_IntArray_repeated_permutation(sp_IntArray*a,sp_int k){SP_GC_ROOT(a);sp_PtrArray*out=sp_PtrArray_new();SP_GC_ROOT(out);if(!a||k<0)return out;sp_IntArray*acc=sp_IntArray_new();SP_GC_ROOT(acc);sp_int_repeated_permutation_recur(a,k,acc,out);return out;}
+ sp_PtrArray*sp_IntArray_permutation(sp_IntArray*a,sp_int k){SP_GC_ROOT(a);sp_PtrArray*out=sp_PtrArray_new();SP_GC_ROOT(out);if(!a||k<0||k>a->len)return out;sp_IntArray*used=sp_IntArray_new();SP_GC_ROOT(used);for(sp_int i=0;i<a->len;i++)sp_IntArray_push(used,0);sp_IntArray*acc=sp_IntArray_new();SP_GC_ROOT(acc);sp_int_permutation_recur(a,k,used,acc,out);return out;}
++#if !SPINEL_BARE_METAL   /* for the MCU: uses what the left-out files define */
+ sp_RbVal sp_enum_gen_pull(sp_Enumerator *e) {SP_GC_ROOT(e); sp_gc_wb((void*)e);
+   if (!e->fib) {
+     e->fib = sp_Fiber_new(e->gen);
+@@ -2520,6 +2694,8 @@
+   if (!sp_Fiber_alive(e->fib)) { e->gen_result = v; sp_gc_wb((void*)e); sp_raise_stop_iteration(v); }
+   return v;
+ }
++#endif
++#if !SPINEL_BARE_METAL   /* for the MCU: uses what the left-out files define */
+ sp_RbVal sp_Enumerator_next(sp_Enumerator *e) {SP_GC_ROOT(e);
+   if (e->gen) {
+     if (e->peeked) { e->peeked = FALSE; return e->peek_val; }
+@@ -2528,6 +2704,8 @@
+   if (!e->items || e->cursor >= e->items->len) sp_raise_stop_iteration(e->source);
+   return e->items->data[e->cursor++];
+ }
++#endif
++#if !SPINEL_BARE_METAL   /* for the MCU: uses what the left-out files define */
+ sp_RbVal sp_Enumerator_peek(sp_Enumerator *e) {SP_GC_ROOT(e); sp_gc_wb((void*)e);
+   if (e->gen) {
+     if (!e->peeked) { e->peek_val = sp_enum_gen_pull(e); sp_gc_wb((void*)e); e->peeked = TRUE; }
+@@ -2536,14 +2714,19 @@
+   if (!e->items || e->cursor >= e->items->len) sp_raise_stop_iteration(e->source);
+   return e->items->data[e->cursor];
+ }
++#endif
+ sp_PolyArray *sp_enum_values_wrap(sp_RbVal v) {SP_GC_ROOT_RBVAL(v);
+   if (v.tag == SP_TAG_OBJ && v.cls_id == SP_BUILTIN_POLY_ARRAY) return (sp_PolyArray *)v.v.p;
+   sp_PolyArray *a = sp_PolyArray_new(); SP_GC_ROOT(a);
+   sp_PolyArray_push(a, v);
+   return a;
+ }
++#if !SPINEL_BARE_METAL   /* for the MCU: uses what the left-out files define */
+ sp_PolyArray *sp_Enumerator_next_values(sp_Enumerator *e) {SP_GC_ROOT(e); return sp_enum_values_wrap(sp_Enumerator_next(e)); }
++#endif
++#if !SPINEL_BARE_METAL   /* for the MCU: uses what the left-out files define */
+ sp_PolyArray *sp_Enumerator_peek_values(sp_Enumerator *e) {SP_GC_ROOT(e); return sp_enum_values_wrap(sp_Enumerator_peek(e)); }
++#endif
+ sp_Enumerator *sp_Enumerator_rewind(sp_Enumerator *e) { sp_gc_wb((void*)e);
+   if (!e) return NULL;
+   if (e->gen) { e->fib = NULL; e->peeked = FALSE; e->gen_result = sp_box_nil(); }
+@@ -2557,6 +2740,7 @@
+   e->feed = v; e->has_feed = TRUE;
+   return sp_box_nil();
+ }
++#if !SPINEL_BARE_METAL   /* for the MCU: uses what the left-out files define */
+ sp_PolyArray *sp_Enumerator_take(sp_Enumerator *e, sp_int n) {SP_GC_ROOT(e);
+   sp_PolyArray *r = sp_PolyArray_new();
+   SP_GC_ROOT(r);
+@@ -2578,6 +2762,8 @@
+   for (sp_int i = 0; i < lim; i++) sp_PolyArray_push(r, e->items->data[i]);
+   return r;
+ }
++#endif
++#if !SPINEL_BARE_METAL   /* for the MCU: uses what the left-out files define */
+ sp_PolyArray *sp_Enumerator_to_a(sp_Enumerator *e) {
+   SP_GC_ROOT(e);   /* the allocation below can collect it */
+   sp_PolyArray *r = sp_PolyArray_new();
+@@ -2597,6 +2783,7 @@
+   if (e->items) for (sp_int i = 0; i < e->items->len; i++) sp_PolyArray_push(r, e->items->data[i]);
+   return r;
+ }
++#endif
+ void sp_sig_c_handler(int no) {
+   sp_Proc *p = (no >= 0 && no < SP_SIG_MAX) ? (sp_Proc *)sp_trap_proc[no] : NULL;
+   if (p) {
+@@ -2641,6 +2828,7 @@
+   }
+   return prev;
+ }
++#if !SPINEL_BARE_METAL   /* for the MCU: POSIX files, directories and processes */
+ sp_int sp_process_kill1(sp_RbVal sig, sp_int pid) {SP_GC_ROOT_RBVAL(sig);
+   int no = sp_signal_resolve(sig);
+   if (kill((pid_t)pid, no) != 0) {
+@@ -2650,6 +2838,7 @@
+   }
+   return 1;
+ }
++#endif
+ sp_RbVal sp_Enumerator_size(sp_Enumerator *e) {SP_GC_ROOT(e);
+   if (!e) return sp_box_nil();
+   if (e->items) return sp_box_int(e->items->len);
+@@ -3096,12 +3285,7 @@
+ /* Float#to_i whose integer value escapes int64: CRuby promotes to Bignum;
+    until the promotion plan covers statically-int results (#2024), raise
+    loudly instead of saturating silently. NaN/Inf raise FloatDomainError. */
+-sp_int sp_float_to_i_checked(sp_float f) {
+-  if (isnan(f) || isinf(f)) sp_raise_cls("FloatDomainError", sp_sprintf("%g", f));
+-  if (f >= 9223372036854775808.0 || f < -9223372036854775808.0)
+-    sp_raise_cls("RangeError", "float out of Integer range (Bignum promotion pending)");
+-  return (sp_int)f;
+-}
++/* For the MCU: sp_float_to_i_checked is inline in sp_alloc.h, so that it is inlined where it is called */
+ 
+ /* ---- Box helpers (0 optcarrot uses) -- relocated from spinel_rt.h. ---- */
+ 
+@@ -3285,8 +3469,8 @@
+ /* Float#round(half:) tie-breaking: :even is banker's rounding (rint under
+    the default FE_TONEAREST), :down rounds ties toward zero. (:up is the
+    plain round().) */
+-double sp_round_half_even(double x) { return rint(x); }
+-double sp_round_half_down(double x) { return x >= 0 ? ceil(x - 0.5) : floor(x + 0.5); }
++sp_float sp_round_half_even(sp_float x) { return rint(x); }
++sp_float sp_round_half_down(sp_float x) { return x >= 0 ? ceil(x - 0.5) : floor(x + 0.5); }
+ /* Frozen flag of a builtin array, matching what sp_*Array_splice check (the
+    struct field, which the promote path would otherwise bypass by building a new
+    array, and which lets us check frozen up front before any GC root is live). */
+@@ -3300,6 +3484,7 @@
+   }
+ }
+ /* IO.pipe -> [reader, writer] handles (#2815) */
++#if !SPINEL_BARE_METAL   /* for the MCU: uses what the left-out files define */
+ sp_PolyArray *sp_io_pipe(void) {
+   int fds[2];
+   if (sp_io_make_pipe(fds) != 0) sp_raise_cls("IOError", "pipe failed");
+@@ -3314,9 +3499,11 @@
+     sp_PolyArray_push(a, sp_box_obj(wf, SP_BUILTIN_IO)); }
+   return a;
+ }
++#endif
+ /* IO.for_fd(fd, mode): wrap a descriptor the program already owns. autoclose
+    false leaves the fd open when the handle is collected, which is the point of
+    the call -- the fd usually belongs to something else. */
++#if !SPINEL_BARE_METAL   /* for the MCU: POSIX files, directories and processes */
+ sp_File *sp_io_for_fd(sp_int fd, const char *mode, sp_bool autoclose) {SP_GC_ROOT_STR(mode);
+   if (fd < 0 || fcntl((int)fd, F_GETFD) < 0)
+     sp_raise_cls("Errno::EBADF", "Bad file descriptor");
+@@ -3347,6 +3534,7 @@
+   sp_File *f = sp_io_fdopen_ex((int)fd, mode && *mode ? mode : "r", 0);
+   return f;
+ }
++#endif
+ 
+ /* The readiness family and IO.select both run on select(2), which is what
+    CRuby's IO.select is: its exceptfds set is the only portable spelling of
+@@ -3355,12 +3543,14 @@
+    `kind` is 0 read / 1 write / 2 priority / 3 read|write, kept numeric so the
+    generated TU does not have to pull in the flag headers. A negative timeout
+    blocks. Each answers the handle itself when ready and nil on timeout. */
+-static void sp_io_sel_timeout(double timeout, struct timeval *tv, struct timeval **tvp) {
++#if !SPINEL_BARE_METAL   /* for the MCU: POSIX files, directories and processes */
++static void sp_io_sel_timeout(sp_float timeout, struct timeval *tv, struct timeval **tvp) {
+   if (timeout < 0) { *tvp = NULL; return; }
+   tv->tv_sec = (time_t)timeout;
+-  tv->tv_usec = (suseconds_t)((timeout - (double)tv->tv_sec) * 1000000.0);
++  tv->tv_usec = (suseconds_t)((timeout - (sp_float)tv->tv_sec) * 1000000.0);
+   *tvp = tv;
+ }
++#endif
+ #ifdef SP_THREADS
+ /* Under the threaded runtime a timed single-fd wait parks the green thread
+    (sp_sched_wait_io_timeout) instead of sitting in select(2): select blocks
+@@ -3372,12 +3562,13 @@
+   return kind == 0 ? POLLIN : kind == 1 ? POLLOUT : kind == 3 ? (POLLIN | POLLOUT) : 0;
+ }
+ #endif
+-sp_File *sp_io_wait_events(sp_File *f, double timeout, sp_int kind) {SP_GC_ROOT(f);
++#if !SPINEL_BARE_METAL   /* for the MCU: poll and sockets */
++sp_File *sp_io_wait_events(sp_File *f, sp_float timeout, sp_int kind) {SP_GC_ROOT(f);
+   SP_IO_OPEN(f);
+   int fd = fileno(f->fp);
+ #ifdef SP_THREADS
+   if (sp_io_park_events(kind) && timeout != 0.0) {
+-    extern int sp_sched_wait_io_timeout(int fd, short events, double timeout_s);
++    extern int sp_sched_wait_io_timeout(int fd, short events, sp_float timeout_s);
+     return sp_sched_wait_io_timeout(fd, sp_io_park_events(kind), timeout) ? f : NULL;
+   }
+ #endif
+@@ -3411,6 +3602,7 @@
+   if (n < 0) sp_raise_cls("IOError", "select failed");
+   return n > 0 ? f : NULL;
+ }
++#endif
+ 
+ /* IO.select(read, write, error, timeout) -> [ready_read, ready_write,
+    ready_error], or nil when the timeout expires first. A nil array stands for
+@@ -3430,7 +3622,8 @@
+                             ? sp_obj_cls_name_fn(v.cls_id) : "nil"));
+   return NULL;
+ }
+-sp_RbVal sp_io_select(sp_PolyArray *rd, sp_PolyArray *wr, sp_PolyArray *er, double timeout) {
++#if !SPINEL_BARE_METAL   /* for the MCU: poll and sockets */
++sp_RbVal sp_io_select(sp_PolyArray *rd, sp_PolyArray *wr, sp_PolyArray *er, sp_float timeout) {
+   sp_PolyArray *src[3] = { rd, wr, er };
+   /* No PRIORITY set: this is a poll, and then no descriptor is out of range.
+      select(2) cannot name one at or past FD_SETSIZE, and a server holding two
+@@ -3444,7 +3637,7 @@
+     /* One IO and a real timeout still parks instead of polling: a poll here
+        would hold the OS worker for the whole timeout (see sp_io_wait_events). */
+     if (nfd == 1 && timeout != 0.0) {
+-      extern int sp_sched_wait_io_timeout(int fd, short events, double timeout_s);
++      extern int sp_sched_wait_io_timeout(int fd, short events, sp_float timeout_s);
+       int g1 = nrd ? 0 : 1;
+       sp_RbVal io1 = src[g1]->data[0];
+       sp_File *f1 = sp_select_io_of(io1);
+@@ -3530,7 +3723,7 @@
+   {
+     sp_int nrd = rd ? rd->len : 0, nwr = wr ? wr->len : 0, ner = er ? er->len : 0;
+     if (nrd + nwr == 1 && ner == 0 && timeout != 0.0) {
+-      extern int sp_sched_wait_io_timeout(int fd, short events, double timeout_s);
++      extern int sp_sched_wait_io_timeout(int fd, short events, sp_float timeout_s);
+       int g = nrd ? 0 : 1;
+       sp_RbVal io = src[g]->data[0];
+       sp_File *f = sp_select_io_of(io);
+@@ -3566,6 +3759,7 @@
+   }
+   return sp_box_poly_array(out);
+ }
++#endif
+ 
+ sp_int sp_io_sysopen(const char *path, sp_int flags, sp_int perm) {SP_GC_ROOT_STR(path);
+   /* flags are CRuby's File::Constants (O_* on this platform); 0 is O_RDONLY.
+@@ -3593,21 +3787,23 @@
+    cast truncated to 0 and returned immediately. POSIX uses
+    nanosleep(); Windows uses Sleep() (milliseconds). Negative or NaN
+    inputs no-op. */
++#if !SPINEL_BARE_METAL   /* for the MCU: POSIX files, directories and processes */
+ void sp_sleep(sp_float s) {
+   if (!(s > 0.0)) return;
+ #ifdef SP_THREADS
+   /* Scheduler-aware: park the green thread and free its OS worker for others; a
+      monitor thread wakes it after the duration (see lib/sp_sched.c). */
+-  sp_sched_sleep((double)s);
++  sp_sched_sleep((sp_float)s);
+ #else
+   struct timespec req;
+   req.tv_sec = (time_t)s;
+-  req.tv_nsec = (long)((s - (double)req.tv_sec) * 1e9);
++  req.tv_nsec = (long)((s - (sp_float)req.tv_sec) * 1e9);
+   if (req.tv_nsec < 0) req.tv_nsec = 0;
+   if (req.tv_nsec >= 1000000000L) req.tv_nsec = 999999999L;
+   while (nanosleep(&req, &req) == -1 && errno == EINTR) {}
+ #endif
+ }
++#endif
+ 
+ /* ---- BigRational box/scan/format ops -- relocated from spinel_rt.h.
+    0 optcarrot uses. ---- */
+@@ -3661,6 +3857,7 @@
+ }
+ /* Addrinfo.tcp / .udp / .ip / .unix, and the endpoint behind #local_address /
+    #remote_address. `stype` is SOCK_STREAM / SOCK_DGRAM, 0 for a bare address. */
++#if !SPINEL_BARE_METAL   /* for the MCU: poll and sockets */
+ sp_Addrinfo *sp_addrinfo_new(const char *ip, sp_int port, sp_int stype, sp_int is_unix) {SP_GC_ROOT_STR(ip);
+   sp_Addrinfo *a = (sp_Addrinfo *)sp_gc_alloc(sizeof(sp_Addrinfo), NULL, sp_addrinfo_scan);
+   a->ip = NULL; a->afname = NULL;
+@@ -3675,6 +3872,8 @@
+   a->protocol = 0;
+   return a;
+ }
++#endif
++#if !SPINEL_BARE_METAL   /* for the MCU: poll and sockets */
+ const char *sp_addrinfo_inspect(sp_Addrinfo *a) {SP_GC_ROOT(a);
+   if (!a) return sp_sprintf("nil");
+   if (strcmp(a->afname, "AF_UNIX") == 0) return sp_sprintf("#<Addrinfo: %s SOCK_STREAM>", a->ip);
+@@ -3684,6 +3883,7 @@
+     return sp_sprintf("#<Addrinfo: [%s]:%lld%s>", a->ip, (long long)a->port, st);
+   return sp_sprintf("#<Addrinfo: %s:%lld%s>", a->ip, (long long)a->port, st);
+ }
++#endif
+ const char *sp_brat_to_s(sp_BigRational *r) {SP_GC_ROOT(r);
+   /* Each text is a fresh string-heap string that nothing but its local refers
+      to across an allocation: the numerator's while the denominator's is
+@@ -3850,14 +4050,14 @@
+   sp_raise_cls("TypeError", "no implicit conversion into an FFI :int_array");
+   return (const int64_t *)0;  /* unreached */
+ }
+-const double *sp_ffi_float_array_data(sp_RbVal v) {SP_GC_ROOT_RBVAL(v);
++const sp_float *sp_ffi_float_array_data(sp_RbVal v) {SP_GC_ROOT_RBVAL(v);
+   if (v.tag == SP_TAG_OBJ && v.cls_id == SP_BUILTIN_FLT_ARRAY)
+     return sp_FloatArray_ffi_data((sp_FloatArray *)v.v.p);
+   if (v.tag == SP_TAG_OBJ && v.cls_id == SP_BUILTIN_POLY_ARRAY)
+     return sp_PolyArray_ffi_float_data((sp_PolyArray *)v.v.p);
+-  if (v.tag == SP_TAG_NIL) return (const double *)0;
++  if (v.tag == SP_TAG_NIL) return (const sp_float *)0;
+   sp_raise_cls("TypeError", "no implicit conversion into an FFI :float_array");
+-  return (const double *)0;  /* unreached */
++  return (const sp_float *)0;  /* unreached */
+ }
+ /* FFI array hand-off. Concrete arrays expose their element storage zero-copy
+    (sp_int/sp_float are int64/double on 64-bit targets). A poly_array can't
+@@ -3870,10 +4070,10 @@
+   for (sp_int i = 0; i < a->len; i++) buf[i] = (int64_t)a->data[i].v.i;
+   return buf;
+ }
+-const double *sp_PolyArray_ffi_float_data(sp_PolyArray *a) {SP_GC_ROOT(a);
+-  if (!a || a->len <= 0) return (const double *)0;
+-  double *buf = (double *)sp_gc_alloc_nogc((size_t)a->len * sizeof(double), NULL, NULL);
+-  for (sp_int i = 0; i < a->len; i++) buf[i] = (double)a->data[i].v.f;
++const sp_float *sp_PolyArray_ffi_float_data(sp_PolyArray *a) {SP_GC_ROOT(a);
++  if (!a || a->len <= 0) return (const sp_float *)0;
++  sp_float *buf = (sp_float *)sp_gc_alloc_nogc((size_t)a->len * sizeof(sp_float), NULL, NULL);
++  for (sp_int i = 0; i < a->len; i++) buf[i] = (sp_float)a->data[i].v.f;
+   return buf;
+ }
+ /* Element count of an array-kind value, or -1 if `el` is not an array (a
+@@ -3993,3 +4193,4 @@
+   if (to == 2) sp_str_mark_binary(res);
+   return res;
+ }
++#endif /* SPINEL_BARE_METAL */

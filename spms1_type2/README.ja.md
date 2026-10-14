@@ -686,13 +686,14 @@ C のホスト ("sim_spinel"、"sim_render"、"web" の SPMS-1 Web) は、スケ
 MCU 向けの変更は 2 か所にまとめてあります:
 
 - "spinel_rt_mcu_head.h"、"spinel_rt_mcu_libm.h"、"spinel_rt_mcu_cold.h": MCU 向けに足すもの --
-  シンセ本体のセクションと pragma、数学関数の float 版、生成コードがインライン展開で使う
-  `Float#to_i`、そして "spinel_rt.h" の最後で生成コードを float のランタイムに
-  つなぐもの (下記)。"spinel_rt.h" にはそれぞれの `#include` 行だけがあります
+  シンセ本体のセクションと pragma、数学関数の float 版、そして "spinel_rt.h" の最後で生成コードを
+  float のランタイムにつなぐもの (下記)。"spinel_rt.h" にはそれぞれの `#include` 行だけがあります
 - "spinel_mcu/spinel_mcu.patch": Spinel 自身のファイルへの変更 -- Float を表す `double` を `sp_float`
   で書いたランタイム、POSIX 部分の `#if 0` による除外 (中身がリリースで変わってもパッチが
   当たりやすいように)、全体が POSIX 前提のファイルの `SPINEL_BARE_METAL` による除外 (下記)、
   SRAM に収まる GC のバッファ。変更するファイルの隣には、リリースのままのコピー "NAME.orig" があります
+- "sp_cold_bare_metal.c" と "spinel_mcu/sp_cold_bare_metal.patch": ベアメタル向けの "sp_cold.c" (下記)。
+  リリースの "sp_cold.c" とは分けてあり、そちらは丸ごと外すこと以外は元のままです
 
 RP2350 の FPU は単精度だけなので、Float は float です。ランタイム全体を "sp_types.h" の
 `SPINEL_FLOAT32` が決めます: ここでは 1 で、0 にすると Spinel のとおり double になり、結果は CRuby と
@@ -702,11 +703,14 @@ RP2350 の FPU は単精度だけなので、Float は float です。ランタ�
 (`0.1`、`0.33333334`)。
 
 シンセの下に OS はありません。"sp_types.h" の `SPINEL_BARE_METAL` (ここでは 1) が、ランタイムのうち
-C ライブラリより多くを必要とするものを外します: POSIX が全体の前提のファイル ("sp_fiber.c"、"sp_io.c"、
-"sp_net.c"、"sp_process.c"、"sp_process_status.c"、"sp_sched.c"、"sp_system.c") は丸ごと、"sp_cold.c" は
-それを必要とする関数 (ファイル、ディレクトリ、プロセス、ソケット、外したファイルを使うもの) を。
-残りはそのままビルドし、シンセが使わないものはリンカが捨てます。シミュレーターと SPMS-1 Web も同じように
-ランタイムをビルドします。
+C ライブラリより多くを必要とするものを外します: POSIX が全体の前提のファイル ("sp_cold.c"、"sp_fiber.c"、
+"sp_io.c"、"sp_net.c"、"sp_process.c"、"sp_process_status.c"、"sp_sched.c"、"sp_system.c") を丸ごと。
+"sp_cold.c" の代わりには "sp_cold_bare_metal.c" をビルドします。これは "sp_cold.c" から、C ライブラリより
+多くを必要とする関数 (ファイル、ディレクトリ、プロセス、ソケット、外したファイルを使うもの) を外したもので、
+リリースを取り込むときに "spinel_mcu/sp_cold_bare_metal.patch" で作られます。シンセが毎サンプル呼ぶ
+`Float#to_i` は、そこで "sp_alloc.h" のインライン関数にしてあり、flash から呼ばれずにシンセ本体へ
+展開されます。残りはそのままビルドし、シンセが使わないものはリンカが捨てます。シミュレーターと
+SPMS-1 Web も同じようにランタイムをビルドします。
 
 新しいリリースは GitHub Actions で取り込むので、特定の OS は要りません:
 
