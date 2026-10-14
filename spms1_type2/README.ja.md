@@ -693,9 +693,9 @@ MCU 向けの変更は 2 か所にまとめてあります:
 
 新しいリリースは、ブランチに手を付けずに先に試せます: "../.github/workflows/spms1-type2-spinel-try.yml" の
 "SPMS-1 (type-2) Try a Spinel Release" を、タグを指定して手動で実行します。下の手順 1 と同じように
-リリースを取り込み、"spms1_main.c" を再生成し、CRuby とレンダリングを比べ、UF2 をビルドして、
-変わったものを成果物 (artifact) として残します ("spinel-TAG.diff" は `git apply` で当てられます。
-"NAME.rej" があればそれも)。
+リリースを取り込み、"spms1_main.c" を再生成し、CRuby とレンダリングを比べ、取り込む前と後の UF2 を
+ビルドしてサイズを比べ (下の手順 3)、変わったものを成果物 (artifact) として残します ("spinel-TAG.diff"
+は `git apply` で当てられます。"NAME.rej" があればそれも、サイズの比較結果も)。
 
 新しいリリースは "spinel_mcu/update.sh" で取り込みます:
 
@@ -708,7 +708,11 @@ MCU 向けの変更は 2 か所にまとめてあります:
 3. "spms1_main.c" を再生成し (`sh sim_render/build.sh`)、CRuby と比べ
    (`sh sim_render/compare_with_cruby.sh`)、実機向けにビルドします。`sp_float` が `float` でなくなると
    ビルドが止まり、リリースのせいでシンセが鳴っている間に確保したり、GC ルートが収まらなく
-   なったりすると、レンダリングが失敗します
+   なったりすると、レンダリングが失敗します。そのうえで、前のビルドと比べます:
+   `sh spinel_mcu/size_report.sh BEFORE.elf AFTER.elf` (`arduino-cli compile --output-dir DIR` が
+   DIR に残す .elf) が、RAM 上のシンセ本体 (`Spms1_main`)、RAM、flash がどれだけ増えたかを表示し、
+   2% を超えると警告します。本体が大きくなると 1 サンプルあたりの命令が増えますが、音にも
+   シミュレーターにも表れません
 4. `sh spinel_mcu/update.sh check` で、GitHub Actions のワークフローと同じ確認をします
 
 ランタイムのファイルをさらに変更するときは、"NAME.orig" がなければ先にコピーしてから編集し、

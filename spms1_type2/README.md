@@ -720,9 +720,9 @@ the changes for the MCU kept in two places:
 
 A new release can be tried first, without touching the branch: run "SPMS-1 (type-2) Try a Spinel
 Release" in "../.github/workflows/spms1-type2-spinel-try.yml" by hand with its tag. It takes the
-release as step 1 below does, regenerates "spms1_main.c", compares the renders with CRuby, and
-builds the UF2, and keeps what it changed as an artifact ("spinel-TAG.diff", to be applied with
-`git apply`, and any "NAME.rej").
+release as step 1 below does, regenerates "spms1_main.c", compares the renders with CRuby, builds
+the UF2 before and after and compares their sizes (step 3 below), and keeps what it changed as an
+artifact ("spinel-TAG.diff", to be applied with `git apply`, any "NAME.rej", and the size report).
 
 "spinel_mcu/update.sh" takes a new release:
 
@@ -736,7 +736,11 @@ builds the UF2, and keeps what it changed as an artifact ("spinel-TAG.diff", to 
 3. Regenerate "spms1_main.c" (`sh sim_render/build.sh`), compare with CRuby
    (`sh sim_render/compare_with_cruby.sh`), and build for the device. The build stops if `sp_float`
    is no longer `float`, and the render fails if the release makes the synth allocate while it plays
-   or need more GC roots than there is room for
+   or need more GC roots than there is room for. Then compare the build with the one before:
+   `sh spinel_mcu/size_report.sh BEFORE.elf AFTER.elf` (the .elf that `arduino-cli compile
+   --output-dir DIR` leaves in DIR) shows how much the synth core in RAM (`Spms1_main`), the RAM
+   and the flash grew, and warns above 2%. A larger core runs more instructions a sample, which
+   neither the sound nor the simulators show
 4. `sh spinel_mcu/update.sh check` confirms the result, as the GitHub Actions workflow does
 
 To change a runtime file further, copy it to "NAME.orig" first if it has none, edit it, and
