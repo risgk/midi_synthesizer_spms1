@@ -54,13 +54,11 @@ MIDI_CH            = 0
 SAMPLE_RATE        = 48000
 AUDIO_BUFFERS      = 2
 AUDIO_BUFFER_WORDS = 64
-# The length of a bus slot: a slot holds a buffer of samples, the first of them at slot * W.
-W = AUDIO_BUFFER_WORDS
 
 # How many modules a patch can chain, and so the range of NRPN category 0. Every slot is rewritten
 # from NRPN each buffer, so nothing needs a terminator: a shorter patch stops at the first
 # MODULE_NONE, which is what an unset NRPN entry reads as. Only the rewriting is paid for the full
-# length; the walk down it stops at that first MODULE_NONE.
+# length; the per-sample walk stops at that first MODULE_NONE.
 MODULES_SIZE = 32
 
 # Numbers only ever get added, at the end of their range: a module id after the last, a bus slot
@@ -86,7 +84,6 @@ MODULE_DELAY_1   = 8
 # slot. A slot is a plain float; its range is whatever the destination expects. Indexing an array
 # is what holds a routed input to one read whatever the module count: passing the candidates in as
 # arguments instead costs picks x candidates per sample, which grows quadratically.
-# Nothing in the code depends on the numbering beyond signal_stride, which marks the module outputs.
 # The constants come first so that SIGNAL_NONE is 0: an NRPN entry nobody has set reads 0, and an
 # unrouted input should be silent rather than wired to whatever happens to sit in slot 0. Nothing
 # ever writes them, so they hold what the bus was filled with at startup. They are what a routing
@@ -293,35 +290,18 @@ active_modules = Array.new(MODULES_SIZE, MODULE_NONE)
 audio_buffer_l = Array.new(AUDIO_BUFFER_WORDS, 0.0)
 audio_buffer_r = Array.new(AUDIO_BUFFER_WORDS, 0.0)
 
-# The signal bus: each module's output for this buffer, a sample per position of its SIGNAL_*
-# slot, and every other slot's one value at the first position of its own. Declared out here so
-# it carries across buffers, since a routing with feedback reads a module that has not run yet
-# this buffer, and so gets the previous buffer's sample at the same position: a loop through the
-# bus is W samples long, 1.3 ms at 48 kHz.
-signals = Array.new(SIGNALS_SIZE * W, 0.0)
-signals[SIGNAL_ONE * W]             =  1.0
-signals[SIGNAL_HALF * W]            =  0.5
-signals[SIGNAL_POINT_TWO * W]       =  0.2
-signals[SIGNAL_POINT_ONE * W]       =  0.1
-signals[SIGNAL_MINUS_POINT_ONE * W] = -0.1
-signals[SIGNAL_MINUS_POINT_TWO * W] = -0.2
-signals[SIGNAL_MINUS_HALF * W]      = -0.5
-signals[SIGNAL_MINUS_ONE * W]       = -1.0
-
-# How far apart a reader of each slot finds its samples: 1 for a module output, which changes
-# every sample, and 0 for the rest, which hold one value a buffer. Reading at stride 0 is what lets
-# those be written once a buffer rather than W times.
-signal_stride = Array.new(SIGNALS_SIZE, 0)
-signal_stride[SIGNAL_LFO_1_OUTPUT]      = 1
-signal_stride[SIGNAL_ENV_GEN_1_OUTPUT]  = 1
-signal_stride[SIGNAL_OSC_1_OUTPUT]      = 1
-signal_stride[SIGNAL_FILTER_1_OUTPUT]   = 1
-signal_stride[SIGNAL_AMP_1_OUTPUT]      = 1
-signal_stride[SIGNAL_MIXER_1_OUTPUT]    = 1
-signal_stride[SIGNAL_CHORUS_1_OUTPUT_L] = 1
-signal_stride[SIGNAL_CHORUS_1_OUTPUT_R] = 1
-signal_stride[SIGNAL_DELAY_1_OUTPUT_L]  = 1
-signal_stride[SIGNAL_DELAY_1_OUTPUT_R]  = 1
+# The signal bus: each module's latest output, in its SIGNAL_* slot. Declared out here so it
+# carries across buffers, since a routing with feedback reads last sample's value and at a buffer
+# edge that is the previous iteration's.
+signals = Array.new(SIGNALS_SIZE, 0.0)
+signals[SIGNAL_ONE]             =  1.0
+signals[SIGNAL_HALF]            =  0.5
+signals[SIGNAL_POINT_TWO]       =  0.2
+signals[SIGNAL_POINT_ONE]       =  0.1
+signals[SIGNAL_MINUS_POINT_ONE] = -0.1
+signals[SIGNAL_MINUS_POINT_TWO] = -0.2
+signals[SIGNAL_MINUS_HALF]      = -0.5
+signals[SIGNAL_MINUS_ONE]       = -1.0
 
 # The default patch, written into the NRPN table the loop reads it back from. Every module is in
 # the run order, so a patch only ever has to route, never to switch something on first. The mixer
@@ -446,11 +426,14 @@ C.set_audio_buffers(AUDIO_BUFFERS)
 C.set_audio_buffer_words(AUDIO_BUFFER_WORDS)
 C.start_audio
 
-loop do
+# while rather than loop: Spinel builds a loop block with a setjmp, for the StopIteration that ends
+# one, which makes every local written inside it volatile, so that the per-sample code loaded and
+# stored each of them, slot and i included, at every use: 6% of all instructions.
+while true
   C.start_debug_measure
 
-  signals[SIGNAL_PITCH * W] = C.get_midi_note_on_pitch(MIDI_CH).to_f * (1.0 / 120.0) - 0.5
-  signals[SIGNAL_GATE * W]  = C.get_midi_note_on_state(MIDI_CH).to_f
+  signals[SIGNAL_PITCH] = C.get_midi_note_on_pitch(MIDI_CH).to_f * (1.0 / 120.0) - 0.5
+  signals[SIGNAL_GATE]  = C.get_midi_note_on_state(MIDI_CH).to_f
   # Pitch bend arrives 14-bit and signed, -8192 to 8191, so a whole turn of the wheel is one unit
   # and half of it lands where the pitch domain's own half does. The count of steps is even, so
   # the middle of the range falls between -1 and 0 rather than on a value. Pairing the steps off
@@ -458,7 +441,7 @@ loop do
   # steps, still far under a cent at any usable bend range -- and buys a centre that is exactly
   # zero with both ends exactly on -0.5 and +0.5. The division must floor for the bottom end to
   # land: Integer#/ does, and Spinel's sp_idiv implements it.
-  signals[SIGNAL_BEND * W]  = ((C.get_midi_pitch_bend(MIDI_CH) + 1) / 2).to_f * (1.0 / 8192.0)
+  signals[SIGNAL_BEND]  = ((C.get_midi_pitch_bend(MIDI_CH) + 1) / 2).to_f * (1.0 / 8192.0)
 
   # The patch, read back from the NRPN table. active_modules is packed from the front with no
   # gaps; every source_* holds a SIGNAL_* bus slot.
@@ -554,192 +537,118 @@ loop do
   cc_general_3             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_3)
   cc_general_4             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_4)
 
-  signals[SIGNAL_LFO_1_RATE * W] = cc_or_zero(cc_lfo_1_rate, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_rate)))
-  signals[SIGNAL_LFO_1_LEVEL * W] = cc_or_zero(cc_lfo_1_level, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_level)))
-  signals[SIGNAL_LFO_1_POLARITY * W] = cc_or_zero(cc_lfo_1_polarity, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_polarity)))
-  signals[SIGNAL_ENV_GEN_1_ATTACK * W] = cc_or_zero(cc_env_gen_1_attack, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_env_gen_1_attack)))
-  signals[SIGNAL_ENV_GEN_1_DECAY * W] = cc_or_zero(cc_env_gen_1_decay, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_env_gen_1_decay)))
-  signals[SIGNAL_ENV_GEN_1_SUSTAIN * W] = cc_or_zero(cc_env_gen_1_sustain, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_env_gen_1_sustain)))
-  signals[SIGNAL_ENV_GEN_1_LEVEL * W] = cc_or_zero(cc_env_gen_1_level, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_env_gen_1_level)))
-  signals[SIGNAL_ENV_GEN_1_POLARITY * W] = cc_or_zero(cc_env_gen_1_polarity, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_env_gen_1_polarity)))
-  signals[SIGNAL_OSC_1_WAVEFORM * W] = cc_or_zero(cc_osc_1_waveform, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_waveform)))
-  signals[SIGNAL_OSC_1_COARSE_TUNE * W] = cc_or_zero(cc_osc_1_coarse_tune, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_coarse_tune)))
-  signals[SIGNAL_OSC_1_FINE_TUNE * W] = cc_or_zero(cc_osc_1_fine_tune, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_fine_tune)))
-  signals[SIGNAL_OSC_1_MOD_AMOUNT * W] = cc_or_zero(cc_osc_1_mod_amount, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_mod_amount)))
-  signals[SIGNAL_OSC_1_MOD_POLARITY * W] = cc_or_zero(cc_osc_1_mod_polarity, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_mod_polarity)))
-  signals[SIGNAL_FILTER_1_CUTOFF * W] = cc_or_zero(cc_filter_1_cutoff, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_cutoff)))
-  signals[SIGNAL_FILTER_1_RESONANCE * W] = cc_or_zero(cc_filter_1_resonance, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_resonance)))
-  signals[SIGNAL_FILTER_1_GAIN * W] = cc_or_zero(cc_filter_1_gain, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_gain)))
-  signals[SIGNAL_FILTER_1_MOD_AMOUNT * W] = cc_or_zero(cc_filter_1_mod_amount, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_mod_amount)))
-  signals[SIGNAL_FILTER_1_MOD_POLARITY * W] = cc_or_zero(cc_filter_1_mod_polarity, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_mod_polarity)))
-  signals[SIGNAL_AMP_1_GAIN * W] = cc_or_zero(cc_amp_1_gain, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_amp_1_gain)))
-  signals[SIGNAL_MIXER_1_LEVEL_1 * W] = cc_or_zero(cc_mixer_1_level_1, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_level_1)))
-  signals[SIGNAL_MIXER_1_POLARITY_1 * W] = cc_or_zero(cc_mixer_1_polarity_1, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_polarity_1)))
-  signals[SIGNAL_MIXER_1_LEVEL_2 * W] = cc_or_zero(cc_mixer_1_level_2, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_level_2)))
-  signals[SIGNAL_MIXER_1_POLARITY_2 * W] = cc_or_zero(cc_mixer_1_polarity_2, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_polarity_2)))
-  signals[SIGNAL_CHORUS_1_RATE * W] = cc_or_zero(cc_chorus_1_rate, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_chorus_1_rate)))
-  signals[SIGNAL_CHORUS_1_DEPTH * W] = cc_or_zero(cc_chorus_1_depth, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_chorus_1_depth)))
-  signals[SIGNAL_CHORUS_1_MIX * W] = cc_or_zero(cc_chorus_1_mix, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_chorus_1_mix)))
-  signals[SIGNAL_DELAY_1_TIME * W] = cc_or_zero(cc_delay_1_time, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_delay_1_time)))
-  signals[SIGNAL_DELAY_1_FEEDBACK * W] = cc_or_zero(cc_delay_1_feedback, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_delay_1_feedback)))
-  signals[SIGNAL_DELAY_1_MIX * W] = cc_or_zero(cc_delay_1_mix, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_delay_1_mix)))
-  signals[SIGNAL_GENERAL_MOD_WHEEL * W] = cc_or_zero(cc_general_mod_wheel, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_general_mod_wheel)))
+  signals[SIGNAL_LFO_1_RATE] = cc_or_zero(cc_lfo_1_rate, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_rate)))
+  signals[SIGNAL_LFO_1_LEVEL] = cc_or_zero(cc_lfo_1_level, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_level)))
+  signals[SIGNAL_LFO_1_POLARITY] = cc_or_zero(cc_lfo_1_polarity, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_polarity)))
+  signals[SIGNAL_ENV_GEN_1_ATTACK] = cc_or_zero(cc_env_gen_1_attack, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_env_gen_1_attack)))
+  signals[SIGNAL_ENV_GEN_1_DECAY] = cc_or_zero(cc_env_gen_1_decay, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_env_gen_1_decay)))
+  signals[SIGNAL_ENV_GEN_1_SUSTAIN] = cc_or_zero(cc_env_gen_1_sustain, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_env_gen_1_sustain)))
+  signals[SIGNAL_ENV_GEN_1_LEVEL] = cc_or_zero(cc_env_gen_1_level, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_env_gen_1_level)))
+  signals[SIGNAL_ENV_GEN_1_POLARITY] = cc_or_zero(cc_env_gen_1_polarity, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_env_gen_1_polarity)))
+  signals[SIGNAL_OSC_1_WAVEFORM] = cc_or_zero(cc_osc_1_waveform, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_waveform)))
+  signals[SIGNAL_OSC_1_COARSE_TUNE] = cc_or_zero(cc_osc_1_coarse_tune, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_coarse_tune)))
+  signals[SIGNAL_OSC_1_FINE_TUNE] = cc_or_zero(cc_osc_1_fine_tune, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_fine_tune)))
+  signals[SIGNAL_OSC_1_MOD_AMOUNT] = cc_or_zero(cc_osc_1_mod_amount, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_mod_amount)))
+  signals[SIGNAL_OSC_1_MOD_POLARITY] = cc_or_zero(cc_osc_1_mod_polarity, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_mod_polarity)))
+  signals[SIGNAL_FILTER_1_CUTOFF] = cc_or_zero(cc_filter_1_cutoff, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_cutoff)))
+  signals[SIGNAL_FILTER_1_RESONANCE] = cc_or_zero(cc_filter_1_resonance, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_resonance)))
+  signals[SIGNAL_FILTER_1_GAIN] = cc_or_zero(cc_filter_1_gain, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_gain)))
+  signals[SIGNAL_FILTER_1_MOD_AMOUNT] = cc_or_zero(cc_filter_1_mod_amount, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_mod_amount)))
+  signals[SIGNAL_FILTER_1_MOD_POLARITY] = cc_or_zero(cc_filter_1_mod_polarity, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_mod_polarity)))
+  signals[SIGNAL_AMP_1_GAIN] = cc_or_zero(cc_amp_1_gain, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_amp_1_gain)))
+  signals[SIGNAL_MIXER_1_LEVEL_1] = cc_or_zero(cc_mixer_1_level_1, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_level_1)))
+  signals[SIGNAL_MIXER_1_POLARITY_1] = cc_or_zero(cc_mixer_1_polarity_1, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_polarity_1)))
+  signals[SIGNAL_MIXER_1_LEVEL_2] = cc_or_zero(cc_mixer_1_level_2, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_level_2)))
+  signals[SIGNAL_MIXER_1_POLARITY_2] = cc_or_zero(cc_mixer_1_polarity_2, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_polarity_2)))
+  signals[SIGNAL_CHORUS_1_RATE] = cc_or_zero(cc_chorus_1_rate, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_chorus_1_rate)))
+  signals[SIGNAL_CHORUS_1_DEPTH] = cc_or_zero(cc_chorus_1_depth, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_chorus_1_depth)))
+  signals[SIGNAL_CHORUS_1_MIX] = cc_or_zero(cc_chorus_1_mix, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_chorus_1_mix)))
+  signals[SIGNAL_DELAY_1_TIME] = cc_or_zero(cc_delay_1_time, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_delay_1_time)))
+  signals[SIGNAL_DELAY_1_FEEDBACK] = cc_or_zero(cc_delay_1_feedback, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_delay_1_feedback)))
+  signals[SIGNAL_DELAY_1_MIX] = cc_or_zero(cc_delay_1_mix, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_delay_1_mix)))
+  signals[SIGNAL_GENERAL_MOD_WHEEL] = cc_or_zero(cc_general_mod_wheel, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_general_mod_wheel)))
   # Each General CC fills two slots, the same value taken both ways.
   general_1 = C.get_midi_cc_value(MIDI_CH, cc_general_1)
   general_2 = C.get_midi_cc_value(MIDI_CH, cc_general_2)
   general_3 = C.get_midi_cc_value(MIDI_CH, cc_general_3)
   general_4 = C.get_midi_cc_value(MIDI_CH, cc_general_4)
-  signals[SIGNAL_GENERAL_UNIPOLAR_1 * W] = cc_or_zero(cc_general_1, cc_to_unipolar(general_1))
-  signals[SIGNAL_GENERAL_UNIPOLAR_2 * W] = cc_or_zero(cc_general_2, cc_to_unipolar(general_2))
-  signals[SIGNAL_GENERAL_UNIPOLAR_3 * W] = cc_or_zero(cc_general_3, cc_to_unipolar(general_3))
-  signals[SIGNAL_GENERAL_UNIPOLAR_4 * W] = cc_or_zero(cc_general_4, cc_to_unipolar(general_4))
-  signals[SIGNAL_GENERAL_BIPOLAR_1 * W] = cc_or_zero(cc_general_1, cc_to_bipolar(general_1))
-  signals[SIGNAL_GENERAL_BIPOLAR_2 * W] = cc_or_zero(cc_general_2, cc_to_bipolar(general_2))
-  signals[SIGNAL_GENERAL_BIPOLAR_3 * W] = cc_or_zero(cc_general_3, cc_to_bipolar(general_3))
-  signals[SIGNAL_GENERAL_BIPOLAR_4 * W] = cc_or_zero(cc_general_4, cc_to_bipolar(general_4))
+  signals[SIGNAL_GENERAL_UNIPOLAR_1] = cc_or_zero(cc_general_1, cc_to_unipolar(general_1))
+  signals[SIGNAL_GENERAL_UNIPOLAR_2] = cc_or_zero(cc_general_2, cc_to_unipolar(general_2))
+  signals[SIGNAL_GENERAL_UNIPOLAR_3] = cc_or_zero(cc_general_3, cc_to_unipolar(general_3))
+  signals[SIGNAL_GENERAL_UNIPOLAR_4] = cc_or_zero(cc_general_4, cc_to_unipolar(general_4))
+  signals[SIGNAL_GENERAL_BIPOLAR_1] = cc_or_zero(cc_general_1, cc_to_bipolar(general_1))
+  signals[SIGNAL_GENERAL_BIPOLAR_2] = cc_or_zero(cc_general_2, cc_to_bipolar(general_2))
+  signals[SIGNAL_GENERAL_BIPOLAR_3] = cc_or_zero(cc_general_3, cc_to_bipolar(general_3))
+  signals[SIGNAL_GENERAL_BIPOLAR_4] = cc_or_zero(cc_general_4, cc_to_bipolar(general_4))
 
-  lfo_1.set_rate(signals[source_lfo_1_rate * W])
-  lfo_1.set_level(signals[source_lfo_1_level * W])
-  lfo_1.set_polarity(signals[source_lfo_1_polarity * W])
-  env_gen_1.set_attack(signals[source_env_gen_1_attack * W])
-  env_gen_1.set_decay(signals[source_env_gen_1_decay * W])
-  env_gen_1.set_sustain(signals[source_env_gen_1_sustain * W])
-  env_gen_1.set_level(signals[source_env_gen_1_level * W])
-  env_gen_1.set_polarity(signals[source_env_gen_1_polarity * W])
-  osc_1.set_waveform(signals[source_osc_1_waveform * W])
-  osc_1.set_coarse_tune(signals[source_osc_1_coarse_tune * W])
-  osc_1.set_fine_tune(signals[source_osc_1_fine_tune * W])
-  osc_1.set_modulation_amount(signals[source_osc_1_mod_amount * W])
-  osc_1.set_modulation_polarity(signals[source_osc_1_mod_polarity * W])
-  filter_1.set_cutoff(signals[source_filter_1_cutoff * W])
-  filter_1.set_resonance(signals[source_filter_1_resonance * W])
-  filter_1.set_gain(signals[source_filter_1_gain * W])
-  filter_1.set_modulation_amount(signals[source_filter_1_mod_amount * W])
-  filter_1.set_modulation_polarity(signals[source_filter_1_mod_polarity * W])
-  amp_1.set_gain(signals[source_amp_1_gain * W])
-  mixer_1.set_level_1(signals[source_mixer_1_level_1 * W])
-  mixer_1.set_polarity_1(signals[source_mixer_1_polarity_1 * W])
-  mixer_1.set_level_2(signals[source_mixer_1_level_2 * W])
-  mixer_1.set_polarity_2(signals[source_mixer_1_polarity_2 * W])
-  chorus_1.set_rate(signals[source_chorus_1_rate * W])
-  chorus_1.set_depth(signals[source_chorus_1_depth * W])
-  chorus_1.set_mix(signals[source_chorus_1_mix * W])
-  delay_1.set_time(signals[source_delay_1_time * W])
-  delay_1.set_feedback(signals[source_delay_1_feedback * W])
-  delay_1.set_mix(signals[source_delay_1_mix * W])
+  lfo_1.set_rate(signals[source_lfo_1_rate])
+  lfo_1.set_level(signals[source_lfo_1_level])
+  lfo_1.set_polarity(signals[source_lfo_1_polarity])
+  env_gen_1.set_attack(signals[source_env_gen_1_attack])
+  env_gen_1.set_decay(signals[source_env_gen_1_decay])
+  env_gen_1.set_sustain(signals[source_env_gen_1_sustain])
+  env_gen_1.set_level(signals[source_env_gen_1_level])
+  env_gen_1.set_polarity(signals[source_env_gen_1_polarity])
+  osc_1.set_waveform(signals[source_osc_1_waveform])
+  osc_1.set_coarse_tune(signals[source_osc_1_coarse_tune])
+  osc_1.set_fine_tune(signals[source_osc_1_fine_tune])
+  osc_1.set_modulation_amount(signals[source_osc_1_mod_amount])
+  osc_1.set_modulation_polarity(signals[source_osc_1_mod_polarity])
+  filter_1.set_cutoff(signals[source_filter_1_cutoff])
+  filter_1.set_resonance(signals[source_filter_1_resonance])
+  filter_1.set_gain(signals[source_filter_1_gain])
+  filter_1.set_modulation_amount(signals[source_filter_1_mod_amount])
+  filter_1.set_modulation_polarity(signals[source_filter_1_mod_polarity])
+  amp_1.set_gain(signals[source_amp_1_gain])
+  mixer_1.set_level_1(signals[source_mixer_1_level_1])
+  mixer_1.set_polarity_1(signals[source_mixer_1_polarity_1])
+  mixer_1.set_level_2(signals[source_mixer_1_level_2])
+  mixer_1.set_polarity_2(signals[source_mixer_1_polarity_2])
+  chorus_1.set_rate(signals[source_chorus_1_rate])
+  chorus_1.set_depth(signals[source_chorus_1_depth])
+  chorus_1.set_mix(signals[source_chorus_1_mix])
+  delay_1.set_time(signals[source_delay_1_time])
+  delay_1.set_feedback(signals[source_delay_1_feedback])
+  delay_1.set_mix(signals[source_delay_1_mix])
 
-  # Each module runs the whole buffer before the next one starts, so the walk down the run order
-  # and the case below are paid once a buffer rather than once a sample. Spinel never emits a jump
-  # table however the Ruby is written, so the case costs one compare per id up to the one that
-  # matches. An input reads its source at stride 1 when that is a module output, which holds a
-  # sample per position, and at stride 0 otherwise, which reads the one value the buffer has.
-  # ob, lb and rb are where an output starts on the bus; ab and as the first input's start and
-  # stride, bb and bs the second's.
-  slot = 0
-  while slot < MODULES_SIZE
-    module_id = active_modules[slot]
-    break if module_id == MODULE_NONE
+  i = 0
+  while i < AUDIO_BUFFER_WORDS
+    slot = 0
+    while slot < MODULES_SIZE
+      module_id = active_modules[slot]
+      break if module_id == MODULE_NONE
 
-    case module_id
-    when MODULE_LFO_1
-      ob = SIGNAL_LFO_1_OUTPUT * W
-      i = 0
-      while i < W
-        signals[ob + i] = lfo_1.process
-        i += 1
+      # Spinel never emits a jump table however the Ruby is written, so a case costs one compare
+      # per id up to the one that matches: 36 a sample at eight modules. Splitting the chain on a
+      # kind of module pays only once that kind has several instances.
+      case module_id
+      when MODULE_LFO_1
+        signals[SIGNAL_LFO_1_OUTPUT] = lfo_1.process
+      when MODULE_ENV_GEN_1
+        signals[SIGNAL_ENV_GEN_1_OUTPUT] = env_gen_1.process(signals[source_env_gen_1_gate])
+      when MODULE_OSC_1
+        signals[SIGNAL_OSC_1_OUTPUT] = osc_1.process(signals[source_osc_1_pitch], signals[source_osc_1_mod])
+      when MODULE_FILTER_1
+        signals[SIGNAL_FILTER_1_OUTPUT] = filter_1.process(signals[source_filter_1_audio], signals[source_filter_1_mod])
+      when MODULE_AMP_1
+        signals[SIGNAL_AMP_1_OUTPUT] = amp_1.process(signals[source_amp_1_audio], signals[source_amp_1_mod])
+      when MODULE_MIXER_1
+        signals[SIGNAL_MIXER_1_OUTPUT] = mixer_1.process(signals[source_mixer_1_in_1], signals[source_mixer_1_in_2])
+      when MODULE_CHORUS_1
+        chorus_1.process(signals[source_chorus_1_audio])
+        signals[SIGNAL_CHORUS_1_OUTPUT_L] = chorus_1.output_l
+        signals[SIGNAL_CHORUS_1_OUTPUT_R] = chorus_1.output_r
+      when MODULE_DELAY_1
+        delay_1.process(signals[source_delay_1_audio_l], signals[source_delay_1_audio_r])
+        signals[SIGNAL_DELAY_1_OUTPUT_L] = delay_1.output_l
+        signals[SIGNAL_DELAY_1_OUTPUT_R] = delay_1.output_r
       end
-    when MODULE_ENV_GEN_1
-      ob = SIGNAL_ENV_GEN_1_OUTPUT * W
-      ab = source_env_gen_1_gate * W
-      as = signal_stride[source_env_gen_1_gate]
-      i = 0
-      while i < W
-        signals[ob + i] = env_gen_1.process(signals[ab + i * as])
-        i += 1
-      end
-    when MODULE_OSC_1
-      ob = SIGNAL_OSC_1_OUTPUT * W
-      ab = source_osc_1_pitch * W
-      as = signal_stride[source_osc_1_pitch]
-      bb = source_osc_1_mod * W
-      bs = signal_stride[source_osc_1_mod]
-      i = 0
-      while i < W
-        signals[ob + i] = osc_1.process(signals[ab + i * as], signals[bb + i * bs])
-        i += 1
-      end
-    when MODULE_FILTER_1
-      ob = SIGNAL_FILTER_1_OUTPUT * W
-      ab = source_filter_1_audio * W
-      as = signal_stride[source_filter_1_audio]
-      bb = source_filter_1_mod * W
-      bs = signal_stride[source_filter_1_mod]
-      i = 0
-      while i < W
-        signals[ob + i] = filter_1.process(signals[ab + i * as], signals[bb + i * bs])
-        i += 1
-      end
-    when MODULE_AMP_1
-      ob = SIGNAL_AMP_1_OUTPUT * W
-      ab = source_amp_1_audio * W
-      as = signal_stride[source_amp_1_audio]
-      bb = source_amp_1_mod * W
-      bs = signal_stride[source_amp_1_mod]
-      i = 0
-      while i < W
-        signals[ob + i] = amp_1.process(signals[ab + i * as], signals[bb + i * bs])
-        i += 1
-      end
-    when MODULE_MIXER_1
-      ob = SIGNAL_MIXER_1_OUTPUT * W
-      ab = source_mixer_1_in_1 * W
-      as = signal_stride[source_mixer_1_in_1]
-      bb = source_mixer_1_in_2 * W
-      bs = signal_stride[source_mixer_1_in_2]
-      i = 0
-      while i < W
-        signals[ob + i] = mixer_1.process(signals[ab + i * as], signals[bb + i * bs])
-        i += 1
-      end
-    when MODULE_CHORUS_1
-      lb = SIGNAL_CHORUS_1_OUTPUT_L * W
-      rb = SIGNAL_CHORUS_1_OUTPUT_R * W
-      ab = source_chorus_1_audio * W
-      as = signal_stride[source_chorus_1_audio]
-      i = 0
-      while i < W
-        chorus_1.process(signals[ab + i * as])
-        signals[lb + i] = chorus_1.output_l
-        signals[rb + i] = chorus_1.output_r
-        i += 1
-      end
-    when MODULE_DELAY_1
-      lb = SIGNAL_DELAY_1_OUTPUT_L * W
-      rb = SIGNAL_DELAY_1_OUTPUT_R * W
-      ab = source_delay_1_audio_l * W
-      as = signal_stride[source_delay_1_audio_l]
-      bb = source_delay_1_audio_r * W
-      bs = signal_stride[source_delay_1_audio_r]
-      i = 0
-      while i < W
-        delay_1.process(signals[ab + i * as], signals[bb + i * bs])
-        signals[lb + i] = delay_1.output_l
-        signals[rb + i] = delay_1.output_r
-        i += 1
-      end
+
+      slot += 1
     end
 
-    slot += 1
-  end
-
-  lb = source_output_l * W
-  ls = signal_stride[source_output_l]
-  rb = source_output_r * W
-  rs = signal_stride[source_output_r]
-  i = 0
-  while i < W
-    audio_buffer_l[i] = signals[lb + i * ls]
-    audio_buffer_r[i] = signals[rb + i * rs]
+    audio_buffer_l[i] = signals[source_output_l]
+    audio_buffer_r[i] = signals[source_output_r]
     i += 1
   end
 
