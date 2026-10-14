@@ -11,7 +11,7 @@ I run Spinel's output on a Raspberry Pi Pico 2 (RP2350, Cortex-M33, 520 KB SRAM,
 as the core of a MIDI synthesizer (https://github.com/risgk/midi_synthesizer_spms1, type-2).
 It works well with release 2026.09.12, but the runtime needs a patch for the MCU, which I carry
 from release to release (13 files, about 50 hunks). Most of it would go away with three knobs,
-each a no-op for existing builds:
+each a no-op for existing builds, and there is one fix for 32-bit targets:
 
 ## 1. The float type as one macro
 
@@ -69,5 +69,22 @@ take more SRAM than the MCU has:
 | `SP_ALLOC_NAMES` | `sp_alloc.c:1037` | 512 | 4 KB |
 
 `#ifndef` around each, as `SP_GC_STACK_MAX` has, is all it takes.
+
+## 4. A bug on 32-bit targets: the range check of Float#to_i
+
+`sp_float_to_i_checked` (`lib/sp_cold.c:3099`) raises RangeError outside +-2^63, the range of a
+64-bit `sp_int`. `sp_int` is pointer-width, so on a 32-bit target a Float from 2^31 up passes the
+check and is converted out of range, which C leaves undefined. Checking against the range of
+`sp_int` fixes it, at the same cost:
+
+```c
+#if INTPTR_MAX == INT32_MAX
+  if (f >= 2147483648.0 || f < -2147483648.0)
+#else
+  if (f >= 9223372036854775808.0 || f < -9223372036854775808.0)
+#endif
+```
+
+This one is independent of the knobs above, and could go in on its own.
 
 I would be happy to send pull requests for any of these, one at a time, if the direction is welcome.
