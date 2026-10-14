@@ -1,0 +1,177 @@
+# MIDI Synthesizer SPMS-1 (type-2): the patch, as data
+#
+# Every number a patch is made of -- module ids, bus slots, NRPN entries -- and the default patch,
+# in one place. patch_gen/spms1_patch_gen.rb writes what the rest of the sketch reads from here:
+#
+#   spms1_patch.rb      the constants and the default patch, for spms1_main.rb
+#   spms1_editor.html   the tables of the editor, between its "patch_gen" markers
+#   README.md           the NRPN tables, between the "patch_gen" markers, and README.ja.md likewise
+#
+# Run `ruby patch_gen/spms1_patch_gen.rb` after a change here, and commit what it writes;
+# `--check` says whether that is needed, as the GitHub Actions workflow does.
+#
+# Numbers only ever get added, at the end of their range: a module id after the last, a bus slot
+# after the last, an NRPN entry after the last of its category. A patch sent as NRPN bytes names
+# everything by number, so one made before keeps meaning the same thing after. Each number is
+# written out rather than counted from the order of the list, so a slip is caught rather than
+# shifting everything after it.
+#
+# Labels: `label` is what the README and the editor call a thing. Where the Japanese README calls
+# it otherwise, `label_ja` says so.
+
+# Module ids (NRPN category 0 values). 0 is MODULE_NONE, which ends the run order. A module with
+# `stereo` writes a left and a right output.
+modules:
+  - { key: LFO_1,     id: 1, label: LFO 1 }
+  - { key: ENV_GEN_1, id: 2, label: EG 1 }
+  - { key: OSC_1,     id: 3, label: Osc 1 }
+  - { key: FILTER_1,  id: 4, label: Filter 1 }
+  - { key: AMP_1,     id: 5, label: Amp 1 }
+  - { key: MIXER_1,   id: 6, label: Mixer 1 }
+  - { key: CHORUS_1,  id: 7, label: Chorus 1, stereo: true }
+  - { key: DELAY_1,   id: 8, label: Delay 1,  stereo: true }
+
+# The run order of the default patch.
+default_order: [LFO_1, ENV_GEN_1, MIXER_1, OSC_1, FILTER_1, AMP_1, CHORUS_1, DELAY_1]
+
+# Slots of the signal bus (the values of NRPN categories 1 and 2), each one of:
+#   value:    a constant, which the bus holds from startup; `short` is the editor's label for it
+#   output:   a module output, `module` writing it, `output` its label on the module in the editor
+#   control:  the control slot that the CC of that control (below) fills
+#   (none):   a note input, written by the synth from MIDI
+# `bipolar` marks a slot that swings both ways (the README's ±); a control slot takes its
+# control's.
+signals:
+  - { key: NONE,            id: 0, value: 0.0,  short: "0.0",  label: None (constant 0.0), label_ja: なし（定数 0.0） }
+  - { key: ONE,             id: 1, value: 1.0,  short: "+1.0", label: Constant 1.0,  label_ja: 定数 1.0 }
+  - { key: HALF,            id: 2, value: 0.5,  short: "+0.5", label: Constant 0.5,  label_ja: 定数 0.5 }
+  - { key: POINT_TWO,       id: 3, value: 0.2,  short: "+0.2", label: Constant 0.2,  label_ja: 定数 0.2 }
+  - { key: POINT_ONE,       id: 4, value: 0.1,  short: "+0.1", label: Constant 0.1,  label_ja: 定数 0.1 }
+  - { key: MINUS_POINT_ONE, id: 5, value: -0.1, short: "-0.1", label: Constant -0.1, label_ja: 定数 -0.1 }
+  - { key: MINUS_POINT_TWO, id: 6, value: -0.2, short: "-0.2", label: Constant -0.2, label_ja: 定数 -0.2 }
+  - { key: MINUS_HALF,      id: 7, value: -0.5, short: "-0.5", label: Constant -0.5, label_ja: 定数 -0.5 }
+  - { key: MINUS_ONE,       id: 8, value: -1.0, short: "-1.0", label: Constant -1.0, label_ja: 定数 -1.0 }
+
+  - { key: LFO_1_OUTPUT,      id: 9,  module: LFO_1,     output: Out,   label: LFO 1 Output,      bipolar: true }
+  - { key: ENV_GEN_1_OUTPUT,  id: 10, module: ENV_GEN_1, output: Out,   label: EG 1 Output,       bipolar: true }
+  - { key: OSC_1_OUTPUT,      id: 11, module: OSC_1,     output: Out,   label: Osc 1 Output,      bipolar: true }
+  - { key: FILTER_1_OUTPUT,   id: 12, module: FILTER_1,  output: Out,   label: Filter 1 Output,   bipolar: true }
+  - { key: AMP_1_OUTPUT,      id: 13, module: AMP_1,     output: Out,   label: Amp 1 Output,      bipolar: true }
+  - { key: MIXER_1_OUTPUT,    id: 14, module: MIXER_1,   output: Out,   label: Mixer 1 Output,    bipolar: true }
+  - { key: CHORUS_1_OUTPUT_L, id: 15, module: CHORUS_1,  output: Out L, label: Chorus 1 Output L, bipolar: true }
+  - { key: CHORUS_1_OUTPUT_R, id: 16, module: CHORUS_1,  output: Out R, label: Chorus 1 Output R, bipolar: true }
+  - { key: DELAY_1_OUTPUT_L,  id: 17, module: DELAY_1,   output: Out L, label: Delay 1 Output L,  bipolar: true }
+  - { key: DELAY_1_OUTPUT_R,  id: 18, module: DELAY_1,   output: Out R, label: Delay 1 Output R,  bipolar: true }
+
+  - { key: LFO_1_RATE,            id: 19, control: LFO_1_RATE }
+  - { key: LFO_1_LEVEL,           id: 20, control: LFO_1_LEVEL }
+  - { key: LFO_1_POLARITY,        id: 21, control: LFO_1_POLARITY }
+  - { key: ENV_GEN_1_ATTACK,      id: 22, control: ENV_GEN_1_ATTACK }
+  - { key: ENV_GEN_1_DECAY,       id: 23, control: ENV_GEN_1_DECAY }
+  - { key: ENV_GEN_1_SUSTAIN,     id: 24, control: ENV_GEN_1_SUSTAIN }
+  - { key: ENV_GEN_1_LEVEL,       id: 25, control: ENV_GEN_1_LEVEL }
+  - { key: ENV_GEN_1_POLARITY,    id: 26, control: ENV_GEN_1_POLARITY }
+  - { key: OSC_1_WAVEFORM,        id: 27, control: OSC_1_WAVEFORM }
+  - { key: OSC_1_COARSE_TUNE,     id: 28, control: OSC_1_COARSE_TUNE }
+  - { key: OSC_1_FINE_TUNE,       id: 29, control: OSC_1_FINE_TUNE }
+  - { key: OSC_1_MOD_AMOUNT,      id: 30, control: OSC_1_MOD_AMOUNT }
+  - { key: OSC_1_MOD_POLARITY,    id: 31, control: OSC_1_MOD_POLARITY }
+  - { key: FILTER_1_CUTOFF,       id: 32, control: FILTER_1_CUTOFF }
+  - { key: FILTER_1_RESONANCE,    id: 33, control: FILTER_1_RESONANCE }
+  - { key: FILTER_1_GAIN,         id: 34, control: FILTER_1_GAIN }
+  - { key: FILTER_1_MOD_AMOUNT,   id: 35, control: FILTER_1_MOD_AMOUNT }
+  - { key: FILTER_1_MOD_POLARITY, id: 36, control: FILTER_1_MOD_POLARITY }
+  - { key: AMP_1_GAIN,            id: 37, control: AMP_1_GAIN }
+  - { key: MIXER_1_LEVEL_1,       id: 38, control: MIXER_1_LEVEL_1 }
+  - { key: MIXER_1_POLARITY_1,    id: 39, control: MIXER_1_POLARITY_1 }
+  - { key: MIXER_1_LEVEL_2,       id: 40, control: MIXER_1_LEVEL_2 }
+  - { key: MIXER_1_POLARITY_2,    id: 41, control: MIXER_1_POLARITY_2 }
+  - { key: CHORUS_1_RATE,         id: 42, control: CHORUS_1_RATE }
+  - { key: CHORUS_1_DEPTH,        id: 43, control: CHORUS_1_DEPTH }
+  - { key: CHORUS_1_MIX,          id: 44, control: CHORUS_1_MIX }
+  - { key: DELAY_1_TIME,          id: 45, control: DELAY_1_TIME }
+  - { key: DELAY_1_FEEDBACK,      id: 46, control: DELAY_1_FEEDBACK }
+  - { key: DELAY_1_MIX,           id: 47, control: DELAY_1_MIX }
+
+  - { key: PITCH, id: 48, label: Note Pitch, bipolar: true }
+  - { key: GATE,  id: 49, label: Note Gate }
+  - { key: BEND,  id: 50, label: Pitch Bend, bipolar: true }
+
+  # Control slots no parameter owns: each is a CC put on the bus for any input or parameter to read.
+  # The mod wheel first, unipolar and on CC 1, then four of each kind. The two kinds share General
+  # CCs 1-4, one CC filling a slot of each, so a knob can be taken either way without a mixer to
+  # shift it.
+  - { key: GENERAL_MOD_WHEEL,  id: 51, control: GENERAL_MOD_WHEEL }
+  - { key: GENERAL_UNIPOLAR_1, id: 52, control: GENERAL_1, label: General Unipolar 1 }
+  - { key: GENERAL_UNIPOLAR_2, id: 53, control: GENERAL_2, label: General Unipolar 2 }
+  - { key: GENERAL_UNIPOLAR_3, id: 54, control: GENERAL_3, label: General Unipolar 3 }
+  - { key: GENERAL_UNIPOLAR_4, id: 55, control: GENERAL_4, label: General Unipolar 4 }
+  - { key: GENERAL_BIPOLAR_1,  id: 56, control: GENERAL_1, label: General Bipolar 1, bipolar: true }
+  - { key: GENERAL_BIPOLAR_2,  id: 57, control: GENERAL_2, label: General Bipolar 2, bipolar: true }
+  - { key: GENERAL_BIPOLAR_3,  id: 58, control: GENERAL_3, label: General Bipolar 3, bipolar: true }
+  - { key: GENERAL_BIPOLAR_4,  id: 59, control: GENERAL_4, label: General Bipolar 4, bipolar: true }
+
+# Module inputs, NRPN category 1, by entry: what feeds each one in the default patch (`source`, a
+# signal key). `label` is the editor's, on the module; `name` the README's, after the module's
+# label. An input with no module is a side of the final output.
+inputs:
+  - { entry: 0,  module: ENV_GEN_1, key: GATE,     label: Gate,    name: Gate,       source: GATE }
+  - { entry: 1,  module: OSC_1,     key: PITCH,    label: Pitch,   name: Pitch,      source: PITCH }
+  - { entry: 2,  module: OSC_1,     key: MOD,      label: Mod,     name: Mod In,     source: LFO_1_OUTPUT }
+  - { entry: 3,  module: FILTER_1,  key: AUDIO,    label: Audio,   name: Audio In,   source: OSC_1_OUTPUT }
+  - { entry: 4,  module: FILTER_1,  key: MOD,      label: Mod,     name: Mod In,     source: ENV_GEN_1_OUTPUT }
+  - { entry: 5,  module: AMP_1,     key: AUDIO,    label: Audio,   name: Audio In,   source: FILTER_1_OUTPUT }
+  - { entry: 6,  module: AMP_1,     key: MOD,      label: Mod,     name: Mod In,     source: ENV_GEN_1_OUTPUT }
+  - { entry: 7,  module: MIXER_1,   key: IN_1,     label: In 1,    name: In 1,       source: NONE }
+  - { entry: 8,  module: MIXER_1,   key: IN_2,     label: In 2,    name: In 2,       source: NONE }
+  - { entry: 9,  module: CHORUS_1,  key: AUDIO,    label: Audio,   name: Audio In,   source: AMP_1_OUTPUT }
+  - { entry: 10, module: DELAY_1,   key: AUDIO_L,  label: Audio L, name: Audio In L, source: CHORUS_1_OUTPUT_L }
+  - { entry: 11, module: DELAY_1,   key: AUDIO_R,  label: Audio R, name: Audio In R, source: CHORUS_1_OUTPUT_R }
+  - { entry: 12,                    key: OUTPUT_L, label: L,       name: Final Output L, name_ja: 最終出力 L, source: DELAY_1_OUTPUT_L }
+  - { entry: 13,                    key: OUTPUT_R, label: R,       name: Final Output R, name_ja: 最終出力 R, source: DELAY_1_OUTPUT_R }
+
+# Controls, by entry: a parameter is one entry of NRPN category 2 (where it takes its value) and
+# the same entry of category 3 (which CC fills its control slot); a General control is in
+# category 3 only. `cc` is the CC of the default patch, 0 for none, and `value` what that CC
+# powers up at; for a control with no CC, what the editor's Init Values sets the CC given to it
+# to. A parameter takes its own control slot unless `source` (a signal key) says otherwise. Why the defaults are what they are is in spms1_main.rb, above the default patch.
+controls:
+  - { entry: 0,  module: LFO_1,     key: RATE,         label: Rate,         cc: 3,   value: 64 }
+  - { entry: 1,  module: LFO_1,     key: LEVEL,        label: Level,        cc: 0,   source: ONE }
+  - { entry: 2,  module: LFO_1,     key: POLARITY,     label: Polarity,     cc: 0,   value: 124, source: POINT_ONE, bipolar: true }
+  - { entry: 3,  module: ENV_GEN_1, key: ATTACK,       label: Attack,       cc: 73,  value: 4 }
+  - { entry: 4,  module: ENV_GEN_1, key: DECAY,        label: Decay,        cc: 75,  value: 96 }
+  - { entry: 5,  module: ENV_GEN_1, key: SUSTAIN,      label: Sustain,      cc: 30,  value: 124 }
+  - { entry: 6,  module: ENV_GEN_1, key: LEVEL,        label: Level,        cc: 0,   source: ONE }
+  - { entry: 7,  module: ENV_GEN_1, key: POLARITY,     label: Polarity,     cc: 0,   source: HALF, bipolar: true }
+  - { entry: 8,  module: OSC_1,     key: WAVEFORM,     label: Wave,         cc: 20,  value: 4 }
+  - { entry: 9,  module: OSC_1,     key: COARSE_TUNE,  label: Coarse Tune,  cc: 86,  value: 64, bipolar: true }
+  - { entry: 10, module: OSC_1,     key: FINE_TUNE,    label: Fine Tune,    cc: 70,  value: 64, bipolar: true }
+  - { entry: 11, module: OSC_1,     key: MOD_AMOUNT,   label: Mod Amt,      cc: 13,  value: 4 }
+  - { entry: 12, module: OSC_1,     key: MOD_POLARITY, label: Mod Polarity, cc: 0,   value: 124, source: HALF, bipolar: true }
+  - { entry: 13, module: FILTER_1,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 100 }
+  - { entry: 14, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 94 }
+  - { entry: 15, module: FILTER_1,  key: GAIN,         label: Gain,         cc: 112, value: 64 }
+  - { entry: 16, module: FILTER_1,  key: MOD_AMOUNT,   label: Mod Amt,      cc: 24,  value: 28 }
+  - { entry: 17, module: FILTER_1,  key: MOD_POLARITY, label: Mod Polarity, cc: 0,   value: 124, source: HALF, bipolar: true }
+  - { entry: 18, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 124 }
+  - { entry: 19, module: MIXER_1,   key: LEVEL_1,      label: Level 1,      cc: 0,   source: ONE }
+  - { entry: 20, module: MIXER_1,   key: POLARITY_1,   label: Polarity 1,   cc: 0,   value: 124, source: HALF, bipolar: true }
+  - { entry: 21, module: MIXER_1,   key: LEVEL_2,      label: Level 2,      cc: 0,   source: ONE }
+  - { entry: 22, module: MIXER_1,   key: POLARITY_2,   label: Polarity 2,   cc: 0,   value: 124, source: HALF, bipolar: true }
+  - { entry: 23, module: CHORUS_1,  key: RATE,         label: Rate,         cc: 58,  value: 64 }
+  - { entry: 24, module: CHORUS_1,  key: DEPTH,        label: Depth,        cc: 59,  value: 64 }
+  - { entry: 25, module: CHORUS_1,  key: MIX,          label: Mix,          cc: 93,  value: 64 }
+  - { entry: 26, module: DELAY_1,   key: TIME,         label: Time,         cc: 55,  value: 64 }
+  - { entry: 27, module: DELAY_1,   key: FEEDBACK,     label: Feedback,     cc: 56,  value: 64 }
+  - { entry: 28, module: DELAY_1,   key: MIX,          label: Mix,          cc: 94,  value: 34 }
+
+  # General controls: a CC put on the bus for any input or parameter to read, the mod wheel
+  # unipolar and each of General 1-4 filling a unipolar and a bipolar slot (see `signals`). Each
+  # of General 1-4 powers up at CC 64, the one value that puts neither slot at an end: the
+  # unipolar slot at 0.5, the bipolar at 0.0.
+  - { entry: 29, general: true, key: GENERAL_MOD_WHEEL, label: Mod Wheel, cc: 1,  value: 4 }
+  - { entry: 30, general: true, key: GENERAL_1,         label: "1",       cc: 16, value: 64 }
+  - { entry: 31, general: true, key: GENERAL_2,         label: "2",       cc: 17, value: 64 }
+  - { entry: 32, general: true, key: GENERAL_3,         label: "3",       cc: 18, value: 64 }
+  - { entry: 33, general: true, key: GENERAL_4,         label: "4",       cc: 19, value: 64 }

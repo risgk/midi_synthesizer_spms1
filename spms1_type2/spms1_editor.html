@@ -1037,123 +1037,183 @@
   // them would edit the patch every time its value was sent.
   const RESERVED_CCS = new Set([6, 38, 98, 99, 100, 101]);
 
-  const MODULES = [
-    { key: 'LFO_1',     id: 1, label: 'LFO 1' },
-    { key: 'ENV_GEN_1', id: 2, label: 'EG 1' },
-    { key: 'OSC_1',     id: 3, label: 'Osc 1' },
-    { key: 'FILTER_1',  id: 4, label: 'Filter 1' },
-    { key: 'AMP_1',     id: 5, label: 'Amp 1' },
-    { key: 'MIXER_1',   id: 6, label: 'Mixer 1' },
-    { key: 'CHORUS_1',  id: 7, label: 'Chorus 1', stereo: true },
-    { key: 'DELAY_1',   id: 8, label: 'Delay 1',  stereo: true },
-  ];
-  // Each output a module writes to the bus: one, or a left and a right for a stereo module.
-  MODULES.forEach(m => {
-    m.outs = m.stereo
-      ? [{ sig: m.key + '_OUTPUT_L', label: 'Out L' }, { sig: m.key + '_OUTPUT_R', label: 'Out R' }]
-      : [{ sig: m.key + '_OUTPUT', label: 'Out' }];
-  });
+  // Every number of the patch -- module ids, bus slots, NRPN entries -- and the default patch,
+  // from spms1_patch.yaml, which patch_gen/spms1_patch_gen.rb writes in here. Edit the YAML, not
+  // this.
+  // patch_gen spec
+  const SPEC = {
+    modules: [
+      {"key":"LFO_1","id":1,"label":"LFO 1","outs":[{"sig":"LFO_1_OUTPUT","label":"Out"}]},
+      {"key":"ENV_GEN_1","id":2,"label":"EG 1","outs":[{"sig":"ENV_GEN_1_OUTPUT","label":"Out"}]},
+      {"key":"OSC_1","id":3,"label":"Osc 1","outs":[{"sig":"OSC_1_OUTPUT","label":"Out"}]},
+      {"key":"FILTER_1","id":4,"label":"Filter 1","outs":[{"sig":"FILTER_1_OUTPUT","label":"Out"}]},
+      {"key":"AMP_1","id":5,"label":"Amp 1","outs":[{"sig":"AMP_1_OUTPUT","label":"Out"}]},
+      {"key":"MIXER_1","id":6,"label":"Mixer 1","outs":[{"sig":"MIXER_1_OUTPUT","label":"Out"}]},
+      {"key":"CHORUS_1","id":7,"label":"Chorus 1","outs":[{"sig":"CHORUS_1_OUTPUT_L","label":"Out L"},{"sig":"CHORUS_1_OUTPUT_R","label":"Out R"}]},
+      {"key":"DELAY_1","id":8,"label":"Delay 1","outs":[{"sig":"DELAY_1_OUTPUT_L","label":"Out L"},{"sig":"DELAY_1_OUTPUT_R","label":"Out R"}]},
+    ],
+    inputs: [
+      {"entry":0,"module":"ENV_GEN_1","key":"GATE","label":"Gate","source":"GATE"},
+      {"entry":1,"module":"OSC_1","key":"PITCH","label":"Pitch","source":"PITCH"},
+      {"entry":2,"module":"OSC_1","key":"MOD","label":"Mod","source":"LFO_1_OUTPUT"},
+      {"entry":3,"module":"FILTER_1","key":"AUDIO","label":"Audio","source":"OSC_1_OUTPUT"},
+      {"entry":4,"module":"FILTER_1","key":"MOD","label":"Mod","source":"ENV_GEN_1_OUTPUT"},
+      {"entry":5,"module":"AMP_1","key":"AUDIO","label":"Audio","source":"FILTER_1_OUTPUT"},
+      {"entry":6,"module":"AMP_1","key":"MOD","label":"Mod","source":"ENV_GEN_1_OUTPUT"},
+      {"entry":7,"module":"MIXER_1","key":"IN_1","label":"In 1","source":"NONE"},
+      {"entry":8,"module":"MIXER_1","key":"IN_2","label":"In 2","source":"NONE"},
+      {"entry":9,"module":"CHORUS_1","key":"AUDIO","label":"Audio","source":"AMP_1_OUTPUT"},
+      {"entry":10,"module":"DELAY_1","key":"AUDIO_L","label":"Audio L","source":"CHORUS_1_OUTPUT_L"},
+      {"entry":11,"module":"DELAY_1","key":"AUDIO_R","label":"Audio R","source":"CHORUS_1_OUTPUT_R"},
+      {"entry":12,"module":null,"key":"OUTPUT_L","label":"L","source":"DELAY_1_OUTPUT_L"},
+      {"entry":13,"module":null,"key":"OUTPUT_R","label":"R","source":"DELAY_1_OUTPUT_R"},
+    ],
+    controls: [
+      {"entry":0,"module":"LFO_1","key":"RATE","label":"Rate","bipolar":false,"cc":3,"value":64,"general":false,"slots":[["LFO_1_RATE","Rate",false]]},
+      {"entry":1,"module":"LFO_1","key":"LEVEL","label":"Level","bipolar":false,"cc":0,"source":"ONE","general":false,"slots":[["LFO_1_LEVEL","Level",false]]},
+      {"entry":2,"module":"LFO_1","key":"POLARITY","label":"Polarity","bipolar":true,"cc":0,"value":124,"source":"POINT_ONE","general":false,"slots":[["LFO_1_POLARITY","Polarity",true]]},
+      {"entry":3,"module":"ENV_GEN_1","key":"ATTACK","label":"Attack","bipolar":false,"cc":73,"value":4,"general":false,"slots":[["ENV_GEN_1_ATTACK","Attack",false]]},
+      {"entry":4,"module":"ENV_GEN_1","key":"DECAY","label":"Decay","bipolar":false,"cc":75,"value":96,"general":false,"slots":[["ENV_GEN_1_DECAY","Decay",false]]},
+      {"entry":5,"module":"ENV_GEN_1","key":"SUSTAIN","label":"Sustain","bipolar":false,"cc":30,"value":124,"general":false,"slots":[["ENV_GEN_1_SUSTAIN","Sustain",false]]},
+      {"entry":6,"module":"ENV_GEN_1","key":"LEVEL","label":"Level","bipolar":false,"cc":0,"source":"ONE","general":false,"slots":[["ENV_GEN_1_LEVEL","Level",false]]},
+      {"entry":7,"module":"ENV_GEN_1","key":"POLARITY","label":"Polarity","bipolar":true,"cc":0,"source":"HALF","general":false,"slots":[["ENV_GEN_1_POLARITY","Polarity",true]]},
+      {"entry":8,"module":"OSC_1","key":"WAVEFORM","label":"Wave","bipolar":false,"cc":20,"value":4,"general":false,"slots":[["OSC_1_WAVEFORM","Wave",false]]},
+      {"entry":9,"module":"OSC_1","key":"COARSE_TUNE","label":"Coarse Tune","bipolar":true,"cc":86,"value":64,"general":false,"slots":[["OSC_1_COARSE_TUNE","Coarse Tune",true]]},
+      {"entry":10,"module":"OSC_1","key":"FINE_TUNE","label":"Fine Tune","bipolar":true,"cc":70,"value":64,"general":false,"slots":[["OSC_1_FINE_TUNE","Fine Tune",true]]},
+      {"entry":11,"module":"OSC_1","key":"MOD_AMOUNT","label":"Mod Amt","bipolar":false,"cc":13,"value":4,"general":false,"slots":[["OSC_1_MOD_AMOUNT","Mod Amt",false]]},
+      {"entry":12,"module":"OSC_1","key":"MOD_POLARITY","label":"Mod Polarity","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["OSC_1_MOD_POLARITY","Mod Polarity",true]]},
+      {"entry":13,"module":"FILTER_1","key":"CUTOFF","label":"Cutoff","bipolar":false,"cc":74,"value":100,"general":false,"slots":[["FILTER_1_CUTOFF","Cutoff",false]]},
+      {"entry":14,"module":"FILTER_1","key":"RESONANCE","label":"Resonance","bipolar":false,"cc":71,"value":94,"general":false,"slots":[["FILTER_1_RESONANCE","Resonance",false]]},
+      {"entry":15,"module":"FILTER_1","key":"GAIN","label":"Gain","bipolar":false,"cc":112,"value":64,"general":false,"slots":[["FILTER_1_GAIN","Gain",false]]},
+      {"entry":16,"module":"FILTER_1","key":"MOD_AMOUNT","label":"Mod Amt","bipolar":false,"cc":24,"value":28,"general":false,"slots":[["FILTER_1_MOD_AMOUNT","Mod Amt",false]]},
+      {"entry":17,"module":"FILTER_1","key":"MOD_POLARITY","label":"Mod Polarity","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["FILTER_1_MOD_POLARITY","Mod Polarity",true]]},
+      {"entry":18,"module":"AMP_1","key":"GAIN","label":"Gain","bipolar":false,"cc":15,"value":124,"general":false,"slots":[["AMP_1_GAIN","Gain",false]]},
+      {"entry":19,"module":"MIXER_1","key":"LEVEL_1","label":"Level 1","bipolar":false,"cc":0,"source":"ONE","general":false,"slots":[["MIXER_1_LEVEL_1","Level 1",false]]},
+      {"entry":20,"module":"MIXER_1","key":"POLARITY_1","label":"Polarity 1","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["MIXER_1_POLARITY_1","Polarity 1",true]]},
+      {"entry":21,"module":"MIXER_1","key":"LEVEL_2","label":"Level 2","bipolar":false,"cc":0,"source":"ONE","general":false,"slots":[["MIXER_1_LEVEL_2","Level 2",false]]},
+      {"entry":22,"module":"MIXER_1","key":"POLARITY_2","label":"Polarity 2","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["MIXER_1_POLARITY_2","Polarity 2",true]]},
+      {"entry":23,"module":"CHORUS_1","key":"RATE","label":"Rate","bipolar":false,"cc":58,"value":64,"general":false,"slots":[["CHORUS_1_RATE","Rate",false]]},
+      {"entry":24,"module":"CHORUS_1","key":"DEPTH","label":"Depth","bipolar":false,"cc":59,"value":64,"general":false,"slots":[["CHORUS_1_DEPTH","Depth",false]]},
+      {"entry":25,"module":"CHORUS_1","key":"MIX","label":"Mix","bipolar":false,"cc":93,"value":64,"general":false,"slots":[["CHORUS_1_MIX","Mix",false]]},
+      {"entry":26,"module":"DELAY_1","key":"TIME","label":"Time","bipolar":false,"cc":55,"value":64,"general":false,"slots":[["DELAY_1_TIME","Time",false]]},
+      {"entry":27,"module":"DELAY_1","key":"FEEDBACK","label":"Feedback","bipolar":false,"cc":56,"value":64,"general":false,"slots":[["DELAY_1_FEEDBACK","Feedback",false]]},
+      {"entry":28,"module":"DELAY_1","key":"MIX","label":"Mix","bipolar":false,"cc":94,"value":34,"general":false,"slots":[["DELAY_1_MIX","Mix",false]]},
+      {"entry":29,"key":"GENERAL_MOD_WHEEL","label":"Mod Wheel","bipolar":false,"cc":1,"value":4,"general":true,"slots":[["GENERAL_MOD_WHEEL","Mod Wheel",false]]},
+      {"entry":30,"key":"GENERAL_1","label":"1","bipolar":false,"cc":16,"value":64,"general":true,"slots":[["GENERAL_UNIPOLAR_1","Unipolar 1",false],["GENERAL_BIPOLAR_1","Bipolar 1",true]]},
+      {"entry":31,"key":"GENERAL_2","label":"2","bipolar":false,"cc":17,"value":64,"general":true,"slots":[["GENERAL_UNIPOLAR_2","Unipolar 2",false],["GENERAL_BIPOLAR_2","Bipolar 2",true]]},
+      {"entry":32,"key":"GENERAL_3","label":"3","bipolar":false,"cc":18,"value":64,"general":true,"slots":[["GENERAL_UNIPOLAR_3","Unipolar 3",false],["GENERAL_BIPOLAR_3","Bipolar 3",true]]},
+      {"entry":33,"key":"GENERAL_4","label":"4","bipolar":false,"cc":19,"value":64,"general":true,"slots":[["GENERAL_UNIPOLAR_4","Unipolar 4",false],["GENERAL_BIPOLAR_4","Bipolar 4",true]]},
+    ],
+    signals: [
+      {"id":0,"key":"NONE","label":"0.0"},
+      {"id":1,"key":"ONE","label":"+1.0"},
+      {"id":2,"key":"HALF","label":"+0.5"},
+      {"id":3,"key":"POINT_TWO","label":"+0.2"},
+      {"id":4,"key":"POINT_ONE","label":"+0.1"},
+      {"id":5,"key":"MINUS_POINT_ONE","label":"-0.1"},
+      {"id":6,"key":"MINUS_POINT_TWO","label":"-0.2"},
+      {"id":7,"key":"MINUS_HALF","label":"-0.5"},
+      {"id":8,"key":"MINUS_ONE","label":"-1.0"},
+      {"id":9,"key":"LFO_1_OUTPUT"},
+      {"id":10,"key":"ENV_GEN_1_OUTPUT"},
+      {"id":11,"key":"OSC_1_OUTPUT"},
+      {"id":12,"key":"FILTER_1_OUTPUT"},
+      {"id":13,"key":"AMP_1_OUTPUT"},
+      {"id":14,"key":"MIXER_1_OUTPUT"},
+      {"id":15,"key":"CHORUS_1_OUTPUT_L"},
+      {"id":16,"key":"CHORUS_1_OUTPUT_R"},
+      {"id":17,"key":"DELAY_1_OUTPUT_L"},
+      {"id":18,"key":"DELAY_1_OUTPUT_R"},
+      {"id":19,"key":"LFO_1_RATE"},
+      {"id":20,"key":"LFO_1_LEVEL"},
+      {"id":21,"key":"LFO_1_POLARITY"},
+      {"id":22,"key":"ENV_GEN_1_ATTACK"},
+      {"id":23,"key":"ENV_GEN_1_DECAY"},
+      {"id":24,"key":"ENV_GEN_1_SUSTAIN"},
+      {"id":25,"key":"ENV_GEN_1_LEVEL"},
+      {"id":26,"key":"ENV_GEN_1_POLARITY"},
+      {"id":27,"key":"OSC_1_WAVEFORM"},
+      {"id":28,"key":"OSC_1_COARSE_TUNE"},
+      {"id":29,"key":"OSC_1_FINE_TUNE"},
+      {"id":30,"key":"OSC_1_MOD_AMOUNT"},
+      {"id":31,"key":"OSC_1_MOD_POLARITY"},
+      {"id":32,"key":"FILTER_1_CUTOFF"},
+      {"id":33,"key":"FILTER_1_RESONANCE"},
+      {"id":34,"key":"FILTER_1_GAIN"},
+      {"id":35,"key":"FILTER_1_MOD_AMOUNT"},
+      {"id":36,"key":"FILTER_1_MOD_POLARITY"},
+      {"id":37,"key":"AMP_1_GAIN"},
+      {"id":38,"key":"MIXER_1_LEVEL_1"},
+      {"id":39,"key":"MIXER_1_POLARITY_1"},
+      {"id":40,"key":"MIXER_1_LEVEL_2"},
+      {"id":41,"key":"MIXER_1_POLARITY_2"},
+      {"id":42,"key":"CHORUS_1_RATE"},
+      {"id":43,"key":"CHORUS_1_DEPTH"},
+      {"id":44,"key":"CHORUS_1_MIX"},
+      {"id":45,"key":"DELAY_1_TIME"},
+      {"id":46,"key":"DELAY_1_FEEDBACK"},
+      {"id":47,"key":"DELAY_1_MIX"},
+      {"id":48,"key":"PITCH","label":"Note Pitch"},
+      {"id":49,"key":"GATE","label":"Note Gate"},
+      {"id":50,"key":"BEND","label":"Pitch Bend"},
+      {"id":51,"key":"GENERAL_MOD_WHEEL"},
+      {"id":52,"key":"GENERAL_UNIPOLAR_1"},
+      {"id":53,"key":"GENERAL_UNIPOLAR_2"},
+      {"id":54,"key":"GENERAL_UNIPOLAR_3"},
+      {"id":55,"key":"GENERAL_UNIPOLAR_4"},
+      {"id":56,"key":"GENERAL_BIPOLAR_1"},
+      {"id":57,"key":"GENERAL_BIPOLAR_2"},
+      {"id":58,"key":"GENERAL_BIPOLAR_3"},
+      {"id":59,"key":"GENERAL_BIPOLAR_4"},
+    ],
+    defaultOrder: ["LFO_1","ENV_GEN_1","MIXER_1","OSC_1","FILTER_1","AMP_1","CHORUS_1","DELAY_1"],
+  };
+  // patch_gen end
+
+  // Each module, with the outputs it writes to the bus: one, or a left and a right.
+  const MODULES = SPEC.modules;
   const MOD = Object.fromEntries(MODULES.map(m => [m.key, m]));
 
-  // NRPN category 1, in entry order: [module, suffix, label, default source].
-  const INPUTS = [
-    ['ENV_GEN_1', 'GATE',  'Gate',  'GATE'],
-    ['OSC_1',     'PITCH', 'Pitch', 'PITCH'],
-    ['OSC_1',     'MOD',   'Mod',   'LFO_1_OUTPUT'],
-    ['FILTER_1',  'AUDIO', 'Audio', 'OSC_1_OUTPUT'],
-    ['FILTER_1',  'MOD',   'Mod',   'ENV_GEN_1_OUTPUT'],
-    ['AMP_1',     'AUDIO', 'Audio', 'FILTER_1_OUTPUT'],
-    ['AMP_1',     'MOD',   'Mod',   'ENV_GEN_1_OUTPUT'],
-    ['MIXER_1',   'IN_1',  'In 1',  'NONE'],
-    ['MIXER_1',   'IN_2',  'In 2',  'NONE'],
-    ['CHORUS_1',  'AUDIO', 'Audio', 'AMP_1_OUTPUT'],
-    ['DELAY_1',   'AUDIO_L', 'Audio L', 'CHORUS_1_OUTPUT_L'],
-    ['DELAY_1',   'AUDIO_R', 'Audio R', 'CHORUS_1_OUTPUT_R'],
-    [null,        'OUTPUT_L', 'L', 'DELAY_1_OUTPUT_L'],
-    [null,        'OUTPUT_R', 'R', 'DELAY_1_OUTPUT_R'],
-  ];
-
-  // NRPN categories 2 and 3 share entry numbers for these, and each one's control slot is
-  // signal 19 + entry: [module, suffix, label, bipolar, default CC, default CC value].
-  const PARAMS = [
-    ['LFO_1',     'RATE',         'Rate',         false, 3,   64],
-    ['LFO_1',     'LEVEL',        'Level',        false, 0,   null],
-    ['LFO_1',     'POLARITY',     'Polarity',     true,  0,   124],
-    ['ENV_GEN_1', 'ATTACK',       'Attack',       false, 73,  4],
-    ['ENV_GEN_1', 'DECAY',        'Decay',        false, 75,  96],
-    ['ENV_GEN_1', 'SUSTAIN',      'Sustain',      false, 30,  124],
-    ['ENV_GEN_1', 'LEVEL',        'Level',        false, 0,   null],
-    ['ENV_GEN_1', 'POLARITY',     'Polarity',     true,  0,   null],
-    ['OSC_1',     'WAVEFORM',     'Wave',         false, 20,  4],
-    ['OSC_1',     'COARSE_TUNE',  'Coarse Tune',  true,  86,  64],
-    ['OSC_1',     'FINE_TUNE',    'Fine Tune',    true,  70,  64],
-    ['OSC_1',     'MOD_AMOUNT',   'Mod Amt',      false, 13,  4],
-    ['OSC_1',     'MOD_POLARITY', 'Mod Polarity', true,  0,   124],
-    ['FILTER_1',  'CUTOFF',       'Cutoff',       false, 74,  100],
-    ['FILTER_1',  'RESONANCE',    'Resonance',    false, 71,  94],
-    ['FILTER_1',  'GAIN',         'Gain',         false, 112, 64],
-    ['FILTER_1',  'MOD_AMOUNT',   'Mod Amt',      false, 24,  28],
-    ['FILTER_1',  'MOD_POLARITY', 'Mod Polarity', true,  0,   124],
-    ['AMP_1',     'GAIN',         'Gain',         false, 15,  124],
-    ['MIXER_1',   'LEVEL_1',      'Level 1',      false, 0,   null],
-    ['MIXER_1',   'POLARITY_1',   'Polarity 1',   true,  0,   124],
-    ['MIXER_1',   'LEVEL_2',      'Level 2',      false, 0,   null],
-    ['MIXER_1',   'POLARITY_2',   'Polarity 2',   true,  0,   124],
-    ['CHORUS_1',  'RATE',         'Rate',         false, 58,  64],
-    ['CHORUS_1',  'DEPTH',        'Depth',        false, 59,  64],
-    ['CHORUS_1',  'MIX',          'Mix',          false, 93,  64],
-    ['DELAY_1',   'TIME',         'Time',         false, 55,  64],
-    ['DELAY_1',   'FEEDBACK',     'Feedback',     false, 56,  64],
-    ['DELAY_1',   'MIX',          'Mix',          false, 94,  34],
-  ];
-
-  // Category 3 only, after the parameters. General 1-4 each fill two slots from one CC, a
-  // unipolar and a bipolar one, as spms1_main.rb does.
-  const GENERALS = [[null, 'GENERAL_MOD_WHEEL', 'Mod Wheel', false, 1, 4]];
-  for (let n = 1; n <= 4; n++) GENERALS.push([null, `GENERAL_${n}`, `${n}`, false, 15 + n, 64]);
-  const GENERAL_SLOTS = ['GENERAL_MOD_WHEEL'];
-  for (let n = 1; n <= 4; n++) GENERAL_SLOTS.push(`GENERAL_UNIPOLAR_${n}`);
-  for (let n = 1; n <= 4; n++) GENERAL_SLOTS.push(`GENERAL_BIPOLAR_${n}`);
-
-  function toItem([module, suffix, label, ...rest]) {
+  function toItem({ module, key: suffix, label }) {
     const key = module ? `${module}_${suffix}` : suffix;
     const full = module ? `${MOD[module].label} ${label}` : (suffix.startsWith('OUTPUT') ? `Final Output ${label}` : `General ${label}`);
-    return { module, key, label, full, rest };
+    return { module, key, label, full };
   }
-  const INPUT_ITEMS = INPUTS.map(a => { const it = toItem(a); it.defaultSource = it.rest[0]; return it; });
-  const CONTROL_ITEMS = PARAMS.concat(GENERALS).map(a => {
-    const it = toItem(a);
-    [it.bipolar, it.defaultCC, it.defaultValue] = it.rest;
-    // The bus slots the item's CC fills, each with its own range: [slot, label, bipolar].
-    const n = /^GENERAL_(\d)$/.exec(it.key);
-    it.slots = n
-      ? [[`GENERAL_UNIPOLAR_${n[1]}`, `Unipolar ${n[1]}`, false], [`GENERAL_BIPOLAR_${n[1]}`, `Bipolar ${n[1]}`, true]]
-      : [[it.key, it.label, it.bipolar]];
-    return it;
-  });
-  const PARAM_ITEMS = CONTROL_ITEMS.slice(0, PARAMS.length);
+  // NRPN category 1: each module input, and the two sides of the final output.
+  const INPUT_ITEMS = SPEC.inputs.map(i => ({ ...toItem(i), entry: i.entry, defaultSource: i.source }));
+  // NRPN categories 2 and 3 share entry numbers for the parameters; the General controls are in
+  // category 3 only, and each of General 1-4 fills two slots from one CC, a unipolar and a
+  // bipolar one, as spms1_main.rb does. A control's slots are the bus slots its CC fills, each
+  // with its own range: [slot, label, bipolar].
+  const CONTROL_ITEMS = SPEC.controls.map(c => ({
+    ...toItem(c), entry: c.entry, general: !!c.general, bipolar: c.bipolar, slots: c.slots,
+    defaultCC: c.cc, defaultValue: c.value ?? null, defaultSource: c.source || null,
+  }));
+  const PARAM_ITEMS = CONTROL_ITEMS.filter(c => !c.general);
+  const GENERAL_ITEMS = CONTROL_ITEMS.filter(c => c.general);
   const CONTROL = Object.fromEntries(CONTROL_ITEMS.map(c => [c.key, c]));
+  // By NRPN entry, for what the synth sends back.
+  const INPUT_BY_ENTRY = Object.fromEntries(INPUT_ITEMS.map(i => [i.entry, i]));
+  const PARAM_BY_ENTRY = Object.fromEntries(PARAM_ITEMS.map(p => [p.entry, p]));
+  const CONTROL_BY_ENTRY = Object.fromEntries(CONTROL_ITEMS.map(c => [c.entry, c]));
   // Each control slot, with the item whose CC fills it and the range it takes.
   const SLOT = {};
   CONTROL_ITEMS.forEach(c => c.slots.forEach(([slot, label, bipolar]) => {
     SLOT[slot] = { c, bipolar, full: c.module ? c.full : `General ${label}` };
   }));
 
-  // The signals bus, in slot order.
-  const SIGNAL_NAMES = ['NONE', 'ONE', 'HALF', 'POINT_TWO', 'POINT_ONE', 'MINUS_POINT_ONE', 'MINUS_POINT_TWO', 'MINUS_HALF', 'MINUS_ONE',
-    ...MODULES.flatMap(m => m.outs.map(o => o.sig)), ...PARAM_ITEMS.map(p => p.key),
-    'PITCH', 'GATE', 'BEND', ...GENERAL_SLOTS];
-  const SIG = Object.fromEntries(SIGNAL_NAMES.map((n, i) => [n, i]));
+  // The signals bus: each slot's name by its number, and each name's number.
+  const SIGNAL_NAMES = [];
+  SPEC.signals.forEach(sg => { SIGNAL_NAMES[sg.id] = sg.key; });
+  const SIG = Object.fromEntries(SPEC.signals.map(sg => [sg.key, sg.id]));
 
-  const SIGNAL_LABELS = {
-    NONE: '0.0', ONE: '+1.0', HALF: '+0.5', POINT_TWO: '+0.2', POINT_ONE: '+0.1', MINUS_POINT_ONE: '-0.1', MINUS_POINT_TWO: '-0.2', MINUS_HALF: '-0.5', MINUS_ONE: '-1.0',
-    PITCH: 'Note Pitch', GATE: 'Note Gate', BEND: 'Pitch Bend',
-  };
+  const SIGNAL_LABELS = {};
+  SPEC.signals.forEach(sg => { if (sg.label) SIGNAL_LABELS[sg.key] = sg.label; });
   MODULES.forEach(m => m.outs.forEach(o => { SIGNAL_LABELS[o.sig] = `${m.label} ${o.label}`; }));
   for (const slot in SLOT) SIGNAL_LABELS[slot] = SLOT[slot].full;
   const sigLabel = s => SIGNAL_LABELS[s] || s;
 
-  const DEFAULT_ORDER = ['LFO_1', 'ENV_GEN_1', 'MIXER_1', 'OSC_1', 'FILTER_1', 'AMP_1', 'CHORUS_1', 'DELAY_1'];
+  const DEFAULT_ORDER = SPEC.defaultOrder;
 
   const DEFAULT_LAYOUT = {
     NOTE:      { x: 180,  y: 358 },
@@ -1173,16 +1233,7 @@
   function defaultState() {
     const s = { name: 'Init', order: DEFAULT_ORDER.slice(), inputs: {}, params: {}, cc: {}, values: {}, layout: {} };
     INPUT_ITEMS.forEach(i => { s.inputs[i.key] = i.defaultSource; });
-    PARAM_ITEMS.forEach(p => { s.params[p.key] = p.key; });
-    PARAM_ITEMS.forEach(p => {
-      if (p.module && p.module.startsWith('MIXER_')) s.params[p.key] = p.label.startsWith('Level') ? 'ONE' : 'HALF';
-    });
-    s.params.LFO_1_LEVEL = 'ONE';
-    s.params.LFO_1_POLARITY = 'POINT_ONE';
-    s.params.ENV_GEN_1_LEVEL = 'ONE';
-    s.params.ENV_GEN_1_POLARITY = 'HALF';
-    s.params.OSC_1_MOD_POLARITY = 'HALF';
-    s.params.FILTER_1_MOD_POLARITY = 'HALF';
+    PARAM_ITEMS.forEach(p => { s.params[p.key] = p.defaultSource || p.key; });
     CONTROL_ITEMS.forEach(c => {
       s.cc[c.key] = c.defaultCC;
       if (c.defaultCC) s.values[c.defaultCC] = c.defaultValue;
@@ -1257,17 +1308,17 @@
       const k = state.order[i];
       e.push({ nrpn: i, value: k ? MOD[k].id : 0, comment: `Run order ${i + 1}: ${k ? MOD[k].label : '(end)'}` });
     }
-    INPUT_ITEMS.forEach((inp, i) => {
+    INPUT_ITEMS.forEach(inp => {
       const s = state.inputs[inp.key];
-      e.push({ nrpn: 128 + i, value: SIG[s], comment: `${inp.full} <- ${sigLabel(s)}` });
+      e.push({ nrpn: 128 + inp.entry, value: SIG[s], comment: `${inp.full} <- ${sigLabel(s)}` });
     });
-    PARAM_ITEMS.forEach((p, i) => {
+    PARAM_ITEMS.forEach(p => {
       const s = state.params[p.key];
-      e.push({ nrpn: 256 + i, value: SIG[s], comment: `${p.full} <- ${s === p.key ? 'own slot' : sigLabel(s)}` });
+      e.push({ nrpn: 256 + p.entry, value: SIG[s], comment: `${p.full} <- ${s === p.key ? 'own slot' : sigLabel(s)}` });
     });
-    CONTROL_ITEMS.forEach((c, i) => {
+    CONTROL_ITEMS.forEach(c => {
       const cc = state.cc[c.key];
-      e.push({ nrpn: 384 + i, value: cc, comment: `${c.full} CC = ${cc || 'none'}` });
+      e.push({ nrpn: 384 + c.entry, value: cc, comment: `${c.full} CC = ${cc || 'none'}` });
     });
     return e;
   }
@@ -1496,7 +1547,7 @@
   const NODES = [
     { key: 'NOTE', label: 'Note', aux: true, notes: [['PITCH', 'Pitch', 0, 127], ['GATE', 'Gate', 0, 1], ['BEND', 'Bend', -8192, 8191]] },
     { key: 'CONST', label: 'Constants', aux: true, normed: true, outs: ['ONE', 'HALF', 'POINT_TWO', 'POINT_ONE', 'NONE', 'MINUS_POINT_ONE', 'MINUS_POINT_TWO', 'MINUS_HALF', 'MINUS_ONE'] },
-    { key: 'GENERAL', label: 'General Controls', aux: true, controls: CONTROL_ITEMS.slice(PARAMS.length) },
+    { key: 'GENERAL', label: 'General Controls', aux: true, controls: GENERAL_ITEMS },
     ...MODULES.map(m => ({
       key: m.key, label: m.label, module: m,
       inputs: INPUT_ITEMS.filter(i => i.module === m.key),
@@ -2379,13 +2430,13 @@
       }
       orderMirror[nrpn] = value;
       state.order = orderFromMirror();
-    } else if (nrpn >= 128 && nrpn < 128 + INPUT_ITEMS.length) {
-      state.inputs[INPUT_ITEMS[nrpn - 128].key] = SIGNAL_NAMES[value] || 'NONE';
-    } else if (nrpn >= 256 && nrpn < 256 + PARAM_ITEMS.length) {
-      const p = PARAM_ITEMS[nrpn - 256];
+    } else if (nrpn >= 128 && nrpn < 256 && INPUT_BY_ENTRY[nrpn - 128]) {
+      state.inputs[INPUT_BY_ENTRY[nrpn - 128].key] = SIGNAL_NAMES[value] || 'NONE';
+    } else if (nrpn >= 256 && nrpn < 384 && PARAM_BY_ENTRY[nrpn - 256]) {
+      const p = PARAM_BY_ENTRY[nrpn - 256];
       state.params[p.key] = SIGNAL_NAMES[value] || p.key;
-    } else if (nrpn >= 384 && nrpn < 384 + CONTROL_ITEMS.length) {
-      state.cc[CONTROL_ITEMS[nrpn - 384].key] = value;
+    } else if (nrpn >= 384 && nrpn < 512 && CONTROL_BY_ENTRY[nrpn - 384]) {
+      state.cc[CONTROL_BY_ENTRY[nrpn - 384].key] = value;
     } else {
       return;
     }
@@ -2495,7 +2546,7 @@
   CONTROL_PANELS.push({ col: 1, title: 'Mixer 1', module: 'MIXER_1', onlyWithCC: true });
 
   function panelItems(p) {
-    return p.general ? CONTROL_ITEMS.slice(PARAMS.length) : PARAM_ITEMS.filter(c => c.module === p.module);
+    return p.general ? GENERAL_ITEMS : PARAM_ITEMS.filter(c => c.module === p.module);
   }
 
   // What the synth writes to a control slot, as a CC value: the CC's own value while one is

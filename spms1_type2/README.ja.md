@@ -58,6 +58,10 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.2
       なって属性が付かず、本体が flash から実行されます
     - "spms1_main.c" は `spinel spms1_main.rb -c --rbs sig` で生成します。"sig" の型シードが
       フィルタの状態をボックス化させずに保ちます。必要な理由は "sig/spms1_filter.rbs" にあります
+- Ruby (CRuby): パッチの番号や初期パッチを変えるとき。これらは "spms1_patch.yaml" にまとめてあり、
+  `ruby patch_gen/spms1_patch_gen.rb` が "spms1_patch.rb" ("spms1_main.rb" が読み込みます)、
+  "spms1_editor.html" のテーブル、この README と "README.md" の NRPN の表に書き出します。実行したあと、
+  "spms1_main.c" を生成し直してください。`--check` は、ファイルが最新かどうかを調べるだけです
 
 
 使い方
@@ -313,6 +317,8 @@ flowchart LR
 
 #### エントリ (CC 98)、カテゴリ 1
 
+<!-- patch_gen inputs -->
+
 | CC 98 | モジュール入力 | | CC 98 | モジュール入力 |
 | ----- | ------ | - | ----- | ------ |
 | 0 | EG 1 Gate | | 7 | Mixer 1 In 1 |
@@ -322,6 +328,8 @@ flowchart LR
 | 4 | Filter 1 Mod In | | 11 | Delay 1 Audio In R |
 | 5 | Amp 1 Audio In | | 12 | 最終出力 L |
 | 6 | Amp 1 Mod In | | 13 | 最終出力 R |
+
+<!-- patch_gen end -->
 
 ほとんどは名前のとおりのものを受け取りますが、3 つだけ名前からは分からない決まりがあります。Gate はレベル
 ではなく閾値で、信号が 0.25 以上になるとエンベロープがトリガし、下回るとリリースします。Pitch は MIDI ノート
@@ -337,6 +345,8 @@ flowchart LR
 
 #### エントリ (CC 98)、カテゴリ 2 と 3
 
+<!-- patch_gen params -->
+
 | CC 98 | パラメータ | | CC 98 | パラメータ | | CC 98 | パラメータ |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
 | 0 | LFO 1 Rate | | 10 | Osc 1 Fine Tune | | 20 | Mixer 1 Polarity 1 |
@@ -350,10 +360,14 @@ flowchart LR
 | 8 | Osc 1 Wave | | 18 | Amp 1 Gain | | 28 | Delay 1 Mix |
 | 9 | Osc 1 Coarse Tune | | 19 | Mixer 1 Level 1 | |  |  |
 
+<!-- patch_gen end -->
+
 #### エントリ (CC 98)、カテゴリ 3 のみ
 
 これらの CC はどのパラメータにも属さないので、カテゴリ 2 には対応するエントリがありません。General 1〜4 は
 それぞれユニポーラとバイポーラの 2 つのスロットを埋めます。後述の General スロットを参照してください。
+
+<!-- patch_gen generals -->
 
 | CC 98 | CC の割り当て先 | 埋めるスロット |
 | ----- | ------ | ----- |
@@ -363,7 +377,11 @@ flowchart LR
 | 32 | General 3 | General Unipolar 3、General Bipolar 3 |
 | 33 | General 4 | General Unipolar 4、General Bipolar 4 |
 
+<!-- patch_gen end -->
+
 #### モジュール ID
+
+<!-- patch_gen modules -->
 
 | ID | モジュール |
 | ----- | ------ |
@@ -377,7 +395,11 @@ flowchart LR
 | 7 | Chorus 1 |
 | 8 | Delay 1 |
 
+<!-- patch_gen end -->
+
 #### シグナル ID
+
+<!-- patch_gen signals -->
 
 | ID | シグナル | | ID | シグナル | | ID | シグナル |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
@@ -401,6 +423,8 @@ flowchart LR
 | 17 | Delay 1 Output L ± | | 37 | Amp 1 Gain | | 57 | General Bipolar 2 ± |
 | 18 | Delay 1 Output R ± | | 38 | Mixer 1 Level 1 | | 58 | General Bipolar 3 ± |
 | 19 | LFO 1 Rate | | 39 | Mixer 1 Polarity 1 ± | | 59 | General Bipolar 4 ± |
+
+<!-- patch_gen end -->
 
 **±** は、正負どちらにも振れるシグナルを表します。モジュール出力はフルスケールで -0.5 と +0.5 に届き、
 バイポーラのコントロールスロットは -0.5〜+0.5 で、ミキサーはそれを 2 つ足して 1.0 で止まります。

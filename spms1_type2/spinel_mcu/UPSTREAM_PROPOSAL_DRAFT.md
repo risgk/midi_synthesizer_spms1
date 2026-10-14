@@ -161,6 +161,35 @@ the compile-only CI job above with float.
   | `SP_STR_SHAPE_MAX` | `sp_alloc.c:114` | 8192 | 32 KB |
   | `SP_ALLOC_NAMES` | `sp_alloc.c:1037` | 512 | 4 KB |
 
+- **`--int-overflow=wrap` with `-c`.** The mode reaches the C only as `-DSP_INT_OVERFLOW_MODE_WRAP`
+  on the command line of the C compiler that `spinel` runs itself (`src/main.c:852`). With `-c`,
+  where the C is compiled elsewhere (here by the Arduino build), nothing in the file says which
+  mode it was generated for, and it compiles in the default raise mode. Writing the define at the
+  top of the C, ahead of `#include "spinel_rt.h"`, would make the file carry its mode. I define it
+  in a header of my own instead (`spinel_rt_mcu_head.h`). The checks it removes were 8% of the
+  instructions of my program's per-sample code on a Cortex-M33.
+
+- **The in-range path of an Array access first.** `sp_FloatArray_get`/`set` and `sp_IntArray_get`
+  test null, frozen, a negative index and the length in turn, all inline. Testing
+  `a && (uintptr_t)i < (uintptr_t)a->len` (and `!a->frozen` for set) first, inline, and leaving
+  the rest out of line with the body as it is, keeps what every access does and took 12% of the
+  instructions out of the same code:
+
+  ```c
+  static inline sp_float sp_FloatArray_get(sp_FloatArray*a,sp_int i){
+    if(__builtin_expect(a&&(uintptr_t)i<(uintptr_t)a->len,1))return a->data[i];
+    return sp_FloatArray_get_slow(a,i);  /* the released body, noinline */
+  }
+  ```
+
+- **`loop do` makes every local in it volatile.** `loop` emits a setjmp to rescue StopIteration,
+  and the volatile analysis (`begin_volatile_names`, `is_stopiter_loop`) then treats its block as
+  a `begin`: every local written inside it is volatile, loaded and stored at every use. A program's
+  main loop is often `loop do`, so this reaches its whole hot path, though nothing in it can raise
+  StopIteration. Writing it as `while true` took 6% of the instructions out of my program. Leaving
+  the setjmp (and the volatile) out when the block calls nothing that can raise StopIteration
+  would make the two the same.
+
 I would be glad to send pull requests for any of these, one at a time, and the CI job, and to
 keep them working.
 

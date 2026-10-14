@@ -58,6 +58,10 @@ Required Software for Modification
       instead leaves the macro with nothing to match, and the core runs from flash
     - "spms1_main.c" is generated with `spinel spms1_main.rb -c --rbs sig`. The type seeds in "sig"
       keep the filter states unboxed; "sig/spms1_filter.rbs" says why they are needed
+- Ruby (CRuby), to change the patch's numbers or the default patch: they are kept in "spms1_patch.yaml",
+  and `ruby patch_gen/spms1_patch_gen.rb` writes them out to "spms1_patch.rb" (read by "spms1_main.rb"),
+  the tables of "spms1_editor.html", and the NRPN tables of this README and "README.ja.md". Run it, then
+  regenerate "spms1_main.c"; `--check` only says whether the files are up to date
 
 
 Usage
@@ -322,6 +326,8 @@ passes it through rather than muting it.
 
 #### Entries (CC 98), category 1
 
+<!-- patch_gen inputs -->
+
 | CC 98 | Module input | | CC 98 | Module input |
 | ----- | ------ | - | ----- | ------ |
 | 0 | EG 1 Gate | | 7 | Mixer 1 In 1 |
@@ -331,6 +337,8 @@ passes it through rather than muting it.
 | 4 | Filter 1 Mod In | | 11 | Delay 1 Audio In R |
 | 5 | Amp 1 Audio In | | 12 | Final Output L |
 | 6 | Amp 1 Mod In | | 13 | Final Output R |
+
+<!-- patch_gen end -->
 
 Most of these take what their name suggests, but three do not say it on their face. A Gate is a
 threshold rather than a level: an envelope triggers as the signal reaches 0.25 and releases as it
@@ -347,6 +355,8 @@ both at the same signal for a mono output.
 
 #### Entries (CC 98), categories 2 and 3
 
+<!-- patch_gen params -->
+
 | CC 98 | Parameter | | CC 98 | Parameter | | CC 98 | Parameter |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
 | 0 | LFO 1 Rate | | 10 | Osc 1 Fine Tune | | 20 | Mixer 1 Polarity 1 |
@@ -360,10 +370,14 @@ both at the same signal for a mono output.
 | 8 | Osc 1 Wave | | 18 | Amp 1 Gain | | 28 | Delay 1 Mix |
 | 9 | Osc 1 Coarse Tune | | 19 | Mixer 1 Level 1 | |  |  |
 
+<!-- patch_gen end -->
+
 #### Entries (CC 98), category 3 only
 
 These CCs belong to no parameter, so category 2 has no entry for them. Each of General 1-4 fills
 two slots, a unipolar and a bipolar one. See the General slots below.
+
+<!-- patch_gen generals -->
 
 | CC 98 | CC for | Fills |
 | ----- | ------ | ----- |
@@ -373,7 +387,11 @@ two slots, a unipolar and a bipolar one. See the General slots below.
 | 32 | General 3 | General Unipolar 3, General Bipolar 3 |
 | 33 | General 4 | General Unipolar 4, General Bipolar 4 |
 
+<!-- patch_gen end -->
+
 #### Module IDs
+
+<!-- patch_gen modules -->
 
 | ID | Module |
 | ----- | ------ |
@@ -387,7 +405,11 @@ two slots, a unipolar and a bipolar one. See the General slots below.
 | 7 | Chorus 1 |
 | 8 | Delay 1 |
 
+<!-- patch_gen end -->
+
 #### Signal IDs
+
+<!-- patch_gen signals -->
 
 | ID | Signal | | ID | Signal | | ID | Signal |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
@@ -411,6 +433,8 @@ two slots, a unipolar and a bipolar one. See the General slots below.
 | 17 | Delay 1 Output L ± | | 37 | Amp 1 Gain | | 57 | General Bipolar 2 ± |
 | 18 | Delay 1 Output R ± | | 38 | Mixer 1 Level 1 | | 58 | General Bipolar 3 ± |
 | 19 | LFO 1 Rate | | 39 | Mixer 1 Polarity 1 ± | | 59 | General Bipolar 4 ± |
+
+<!-- patch_gen end -->
 
 A **±** marks a signal that swings both ways: a module output reaches -0.5 and +0.5 at full
 scale, a bipolar control slot runs -0.5 to +0.5, and a mixer sums two of them and stops at one.
