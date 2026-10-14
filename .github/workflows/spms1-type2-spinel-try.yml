@@ -2,7 +2,8 @@
 # tells whether it still builds and sounds the same, before the release is taken for real
 # (see "Updating Spinel" in spms1_type2/README.md)
 # - spinel_mcu/update.sh update TAG: the runtime files of the release, with spinel_mcu.patch applied
-# - spms1_main.c regenerated with the release, and the renders compared with CRuby
+# - spms1_main.c regenerated with the release, the types across the runtime checked with LTO, and the
+#   renders compared with CRuby
 # - The UF2 (PWM Audio) built before and after, to see that it compiles and fits, and how much the synth
 #   core in RAM and the firmware grew (spinel_mcu/size_report.sh; a warning above 2%)
 # Nothing is committed: what the run changed is kept as an artifact, "spinel-TAG.diff" (to be applied with
@@ -78,6 +79,9 @@ jobs:
 
       - name: Regenerate spms1_main.c and build sim_render
         run: PATH="$HOME/spinel/bin:$PATH" sh sim_render/build.sh
+
+      - name: Check that types agree across the runtime (LTO)
+        run: sh spinel_mcu/lto_type_check.sh
 
       - name: Compare with CRuby (the default patch)
         run: sh sim_render/compare_with_cruby.sh

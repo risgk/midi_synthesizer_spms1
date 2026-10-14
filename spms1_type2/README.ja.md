@@ -671,7 +671,9 @@ C のホスト ("sim_spinel"、"sim_render"、"web" の SPMS-1 Web) は、スケ
   成果物 (artifact) として残します
 - SPMS-1 Web: "spms1_web_synth.js" をビルド・テストし、成果物として残します
 - シミュレーター: "sim_spinel" と "sim_render" を Linux、macOS、Windows でビルドしてレンダリングし、
-  Linux では CRuby とのレンダリングの比較もします
+  Linux では CRuby とのレンダリングの比較もします。Linux では、ランタイムの関数と変数がどこで宣言されても
+  同じ型かも確認します ("spinel_mcu/lto_type_check.sh")。MCU 向けの `#define double float` は一部の
+  ファイルにだけ効くので、片側で float、もう片側で double と宣言された関数は、ほかでは気づけません
 - Spinel: 上で指定したリリースをビルドし、"spms1_main.c" が .rb ファイルから作られるものと一致するかを確認します。
   また、ランタイムのファイルがそのリリースに "spinel_mcu/spinel_mcu.patch" を当てたものかを確認します (下記参照)
 - "commit_package" を選び、上記がすべて通ると、UF2 ファイル ("bin") と "spms1_web_synth.js" を選んだブランチに
@@ -696,7 +698,8 @@ MCU 向けの変更は 2 か所にまとめてあります:
 1. "SPMS-1 (type-2) Try a Spinel Release" ("../.github/workflows/spms1-type2-spinel-try.yml") を、
    ブランチを選び、リリースのタグを指定して手動で実行します。`sh spinel_mcu/update.sh update TAG` で
    リリースを取り込み (ファイルをコピーし、パッチを当て、この README と README.md のリリース名を
-   書き換えます)、"spms1_main.c" を再生成し、CRuby とレンダリングを比べ (リリースのせいでシンセが
+   書き換えます)、"spms1_main.c" を再生成し、ランタイムの型が食い違っていないかを確かめ
+   ("spinel_mcu/lto_type_check.sh"、"GitHub Actions" 参照)、CRuby とレンダリングを比べ (リリースのせいでシンセが
    鳴っている間に確保したり、GC ルートが収まらなくなったりすると失敗します)、取り込む前と後の
    UF2 をビルドします (`sp_float` が `float` でなくなるとビルドが止まります)。何もコミットせず、
    変わったものを成果物 (artifact) として残します

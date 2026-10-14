@@ -697,7 +697,10 @@ plugin for the audio).
   UF2 files as an artifact
 - SPMS-1 Web: builds and tests "spms1_web_synth.js", and keeps it as an artifact
 - Simulators: builds "sim_spinel" and "sim_render" on Linux, macOS and Windows, renders, and compares
-  the renders with CRuby on Linux
+  the renders with CRuby on Linux. On Linux it also checks that every function and variable of the
+  runtime has the same type wherever it is declared ("spinel_mcu/lto_type_check.sh"): the
+  `#define double float` of the MCU changes reaches some files and not others, and a function
+  declared with float on one side and double on the other goes unnoticed otherwise
 - Spinel: builds the release named above and checks that "spms1_main.c" is what it makes of the .rb files,
   and that the runtime files are the release with "spinel_mcu/spinel_mcu.patch" applied (see below)
 - With "commit_package" checked, and when all of the above pass, the UF2 files ("bin") and
@@ -723,7 +726,8 @@ A new release is taken on GitHub Actions, so it needs no particular OS:
 1. Run "SPMS-1 (type-2) Try a Spinel Release" ("../.github/workflows/spms1-type2-spinel-try.yml")
    by hand on the branch, with the release's tag. It takes the release with
    `sh spinel_mcu/update.sh update TAG`, which copies its files in, applies the patch and names the
-   release in this README and README.ja.md; regenerates "spms1_main.c"; compares the renders with
+   release in this README and README.ja.md; regenerates "spms1_main.c"; checks that types agree
+   across the runtime ("spinel_mcu/lto_type_check.sh", see "GitHub Actions"); compares the renders with
    CRuby, which fails if the release makes the synth allocate while it plays or need more GC roots
    than there is room for; and builds the UF2 before and after, which stops if `sp_float` is no
    longer `float`. Nothing is committed: what it changed is kept as an artifact
