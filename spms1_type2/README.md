@@ -718,34 +718,40 @@ the changes for the MCU kept in two places:
   changing what is inside them seldom stops the patch from applying), and the GC's buffers made
   to fit SRAM. Each file it changes sits next to its released copy, "NAME.orig"
 
-A new release can be tried first, without touching the branch: run "SPMS-1 (type-2) Try a Spinel
-Release" in "../.github/workflows/spms1-type2-spinel-try.yml" by hand with its tag. It takes the
-release as step 1 below does, regenerates "spms1_main.c", compares the renders with CRuby, builds
-the UF2 before and after and compares their sizes (step 3 below), and keeps what it changed as an
-artifact ("spinel-TAG.diff", to be applied with `git apply`, any "NAME.rej", and the size report).
+A new release is taken on GitHub Actions, so it needs no particular OS:
 
-"spinel_mcu/update.sh" takes a new release:
+1. Run "SPMS-1 (type-2) Try a Spinel Release" ("../.github/workflows/spms1-type2-spinel-try.yml")
+   by hand on the branch, with the release's tag. It takes the release with
+   `sh spinel_mcu/update.sh update TAG`, which copies its files in, applies the patch and names the
+   release in this README and README.ja.md; regenerates "spms1_main.c"; compares the renders with
+   CRuby, which fails if the release makes the synth allocate while it plays or need more GC roots
+   than there is room for; and builds the UF2 before and after, which stops if `sp_float` is no
+   longer `float`. Nothing is committed: what it changed is kept as an artifact
+2. Look at the summary of the run. "spinel_mcu/size_report.sh" compares the two builds: how much
+   the synth core in RAM (`Spms1_main`), the RAM and the flash grew, with a warning above 2%. A
+   larger core runs more instructions a sample, which neither the sound nor the simulators show.
+   Files the release adds to its `lib` are listed there too: copy in the ones the generated code
+   needs, and add the others to "spinel_mcu/not_vendored.txt"
+3. Apply "spinel-TAG.diff" from the artifact at the top of the repository (`git apply
+   spinel-TAG.diff`), commit it, and run the build workflow, whose Spinel job checks the result
+   (`sh spinel_mcu/update.sh check`)
+4. A hunk that no longer applies is in the artifact as "NAME.rej", and the run fails; the diff holds
+   everything else. Make the change by hand after applying the diff, and write the patch again with
+   `sh spinel_mcu/update.sh save`, which needs only diff (Git Bash has it on Windows). Then run
+   step 1 again on the branch
 
-1. `sh spinel_mcu/update.sh update TAG` copies the release's files in, applies the patch, and names
-   the release in this README and README.ja.md. `--spinel DIR` takes them from a checkout instead
-   of cloning
-2. A hunk that no longer applies is left in "NAME.rej": make the change by hand, delete the .rej
-   file, and write the patch again with `sh spinel_mcu/update.sh save`. Files the release adds to
-   its `lib` are listed: copy in the ones the generated code needs (and run `update` again), and
-   add the others to "spinel_mcu/not_vendored.txt"
-3. Regenerate "spms1_main.c" (`sh sim_render/build.sh`), compare with CRuby
-   (`sh sim_render/compare_with_cruby.sh`), and build for the device. The build stops if `sp_float`
-   is no longer `float`, and the render fails if the release makes the synth allocate while it plays
-   or need more GC roots than there is room for. Then compare the build with the one before:
-   `sh spinel_mcu/size_report.sh BEFORE.elf AFTER.elf` (the .elf that `arduino-cli compile
-   --output-dir DIR` leaves in DIR) shows how much the synth core in RAM (`Spms1_main`), the RAM
-   and the flash grew, and warns above 2%. A larger core runs more instructions a sample, which
-   neither the sound nor the simulators show
-4. `sh spinel_mcu/update.sh check` confirms the result, as the GitHub Actions workflow does
+The workflow can be run only once it is on the default branch, as GitHub runs a manual workflow
+from there; it then runs on whichever branch is chosen.
 
 To change a runtime file further, copy it to "NAME.orig" first if it has none, edit it, and
-`sh spinel_mcu/update.sh save`. The script needs diff and GNU patch, which Git Bash has on Windows
-(on macOS, `brew install gpatch`).
+`sh spinel_mcu/update.sh save`.
+
+The scripts can also be run locally, from this folder: `sh spinel_mcu/update.sh update TAG`,
+`sh spinel_mcu/update.sh check` (both with `--spinel DIR` to take Spinel from a checkout instead of
+cloning it), and `sh spinel_mcu/size_report.sh BEFORE.elf AFTER.elf` (the .elf that
+`arduino-cli compile --output-dir DIR` leaves in DIR). They need git, diff and GNU patch, and
+size_report.sh the tools of the Arduino-Pico core. They are tested on Linux only; on Windows,
+Git Bash has all of them, and on macOS, `brew install gpatch` adds GNU patch.
 
 Most of the patch would go away with a few build options in Spinel itself.
 "spinel_mcu/UPSTREAM_PROPOSAL_DRAFT.md" is a **draft** of an issue proposing them, **not filed**.

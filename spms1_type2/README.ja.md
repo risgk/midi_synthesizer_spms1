@@ -691,33 +691,40 @@ MCU 向けの変更は 2 か所にまとめてあります:
   リリースで変わってもパッチが当たりやすいように)、SRAM に収まる GC のバッファ。
   変更するファイルの隣には、リリースのままのコピー "NAME.orig" があります
 
-新しいリリースは、ブランチに手を付けずに先に試せます: "../.github/workflows/spms1-type2-spinel-try.yml" の
-"SPMS-1 (type-2) Try a Spinel Release" を、タグを指定して手動で実行します。下の手順 1 と同じように
-リリースを取り込み、"spms1_main.c" を再生成し、CRuby とレンダリングを比べ、取り込む前と後の UF2 を
-ビルドしてサイズを比べ (下の手順 3)、変わったものを成果物 (artifact) として残します ("spinel-TAG.diff"
-は `git apply` で当てられます。"NAME.rej" があればそれも、サイズの比較結果も)。
+新しいリリースは GitHub Actions で取り込むので、特定の OS は要りません:
 
-新しいリリースは "spinel_mcu/update.sh" で取り込みます:
-
-1. `sh spinel_mcu/update.sh update TAG` がリリースのファイルをコピーし、パッチを当て、この README と
-   README.md のリリース名を書き換えます。`--spinel DIR` で、clone せずにチェックアウト済みのものを使います
-2. 当たらなかった hunk は "NAME.rej" に残ります: 手で変更し、.rej ファイルを消して、
-   `sh spinel_mcu/update.sh save` でパッチを書き直します。リリースが `lib` に足したファイルは一覧に
-   出ます: 生成コードが必要とするものはコピーして (`update` をもう一度実行)、それ以外は
+1. "SPMS-1 (type-2) Try a Spinel Release" ("../.github/workflows/spms1-type2-spinel-try.yml") を、
+   ブランチを選び、リリースのタグを指定して手動で実行します。`sh spinel_mcu/update.sh update TAG` で
+   リリースを取り込み (ファイルをコピーし、パッチを当て、この README と README.md のリリース名を
+   書き換えます)、"spms1_main.c" を再生成し、CRuby とレンダリングを比べ (リリースのせいでシンセが
+   鳴っている間に確保したり、GC ルートが収まらなくなったりすると失敗します)、取り込む前と後の
+   UF2 をビルドします (`sp_float` が `float` でなくなるとビルドが止まります)。何もコミットせず、
+   変わったものを成果物 (artifact) として残します
+2. 実行結果のまとめを見ます。"spinel_mcu/size_report.sh" が 2 つのビルドを比べ、RAM 上のシンセ本体
+   (`Spms1_main`)、RAM、flash がどれだけ増えたかを表示し、2% を超えると警告します。本体が大きく
+   なると 1 サンプルあたりの命令が増えますが、音にもシミュレーターにも表れません。リリースが
+   `lib` に足したファイルもここに出ます: 生成コードが必要とするものはコピーし、それ以外は
    "spinel_mcu/not_vendored.txt" に加えます
-3. "spms1_main.c" を再生成し (`sh sim_render/build.sh`)、CRuby と比べ
-   (`sh sim_render/compare_with_cruby.sh`)、実機向けにビルドします。`sp_float` が `float` でなくなると
-   ビルドが止まり、リリースのせいでシンセが鳴っている間に確保したり、GC ルートが収まらなく
-   なったりすると、レンダリングが失敗します。そのうえで、前のビルドと比べます:
-   `sh spinel_mcu/size_report.sh BEFORE.elf AFTER.elf` (`arduino-cli compile --output-dir DIR` が
-   DIR に残す .elf) が、RAM 上のシンセ本体 (`Spms1_main`)、RAM、flash がどれだけ増えたかを表示し、
-   2% を超えると警告します。本体が大きくなると 1 サンプルあたりの命令が増えますが、音にも
-   シミュレーターにも表れません
-4. `sh spinel_mcu/update.sh check` で、GitHub Actions のワークフローと同じ確認をします
+3. 成果物の "spinel-TAG.diff" をリポジトリの最上位で当て (`git apply spinel-TAG.diff`)、
+   コミットして、ビルド用のワークフローを実行します。その Spinel ジョブが結果を確認します
+   (`sh spinel_mcu/update.sh check`)
+4. 当たらなかった hunk は成果物の "NAME.rej" に入り、実行は失敗します。それ以外はすべて diff に
+   入っています。diff を当てた後で手で変更し、`sh spinel_mcu/update.sh save` でパッチを書き直します
+   (diff だけで動きます。Windows では Git Bash にあります)。そのうえで、ブランチで手順 1 を
+   もう一度実行します
+
+手動実行のワークフローは GitHub がデフォルトブランチのものを使うので、デフォルトブランチに
+入ってから実行できます。実行するブランチはそのとき選べます。
 
 ランタイムのファイルをさらに変更するときは、"NAME.orig" がなければ先にコピーしてから編集し、
-`sh spinel_mcu/update.sh save` を実行します。スクリプトには diff と GNU patch が必要です
-(Windows では Git Bash にあります。macOS では `brew install gpatch`)。
+`sh spinel_mcu/update.sh save` を実行します。
+
+スクリプトはこのフォルダからローカルでも実行できます: `sh spinel_mcu/update.sh update TAG`、
+`sh spinel_mcu/update.sh check` (どちらも `--spinel DIR` で、clone せずにチェックアウト済みの
+Spinel を使います)、`sh spinel_mcu/size_report.sh BEFORE.elf AFTER.elf` (`arduino-cli compile
+--output-dir DIR` が DIR に残す .elf)。git、diff、GNU patch が必要で、size_report.sh には
+Arduino-Pico コアのツールが必要です。動作を確認しているのは Linux だけです。Windows では Git Bash に
+すべてあり、macOS では `brew install gpatch` で GNU patch が入ります。
 
 パッチの大半は、Spinel 自体にいくつかのビルドオプションがあれば不要になります。それを提案する Issue の
 **下書き** が "spinel_mcu/UPSTREAM_PROPOSAL_DRAFT.md" にあります (**未投稿**)。
