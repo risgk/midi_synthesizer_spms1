@@ -63,7 +63,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.3
 - Ruby (CRuby): パッチの番号や初期パッチを変えるとき。これらは "spms1_patch.yaml" にまとめてあり、
   `ruby patch_gen/spms1_patch_gen.rb` が "spms1_patch.rb" ("spms1_main.rb" が読み込みます)、
   "spms1_editor.html" のテーブル、この README と "README.md" の NRPN の表、"spms1_main.rb" のディスパッチの
-  モジュール ID (`# MODULE_<キー>` を添えたリテラル) に書き出します。実行したあと、
+  モジュール ID と出力先スロット (定数名を添えたリテラル) に書き出します。実行したあと、
   "spms1_main.c" を生成し直してください。`--check` は、ファイルが最新かどうかを調べるだけです
 
 

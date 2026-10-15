@@ -64,7 +64,8 @@ AUDIO_BUFFER_WORDS = 64
 # How many modules a patch can chain, and so the range of NRPN category 0. Every slot is rewritten
 # from NRPN each buffer, so nothing needs a terminator: a shorter patch stops at the first
 # MODULE_NONE, which is what an unset NRPN entry reads as. Only the rewriting is paid for the full
-# length; the per-sample walk stops at that first MODULE_NONE.
+# length; the per-sample walk runs to active_count, counted once a buffer up to that first
+# MODULE_NONE.
 MODULES_SIZE = 32
 
 # The module ids (MODULE_*), in spms1_patch.rb: one of every module type that makes a sound, one
@@ -189,6 +190,12 @@ while true
   while slot < MODULES_SIZE
     active_modules[slot] = C.get_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + slot)
     slot += 1
+  end
+  # Counted here, once a buffer, so the per-sample walk neither reads the MODULE_NONE that ends
+  # the order nor compares every id against it.
+  active_count = 0
+  while active_count < MODULES_SIZE && active_modules[active_count] != MODULE_NONE
+    active_count += 1
   end
 
   source_env_gen_1_gate  = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_1_GATE)
@@ -359,9 +366,8 @@ while true
   i = 0
   while i < AUDIO_BUFFER_WORDS
     slot = 0
-    while slot < MODULES_SIZE
+    while slot < active_count
       module_id = active_modules[slot]
-      break if module_id == 0 # MODULE_NONE
 
       # Spinel never emits a jump table however the Ruby is written, so a case costs one compare
       # per id up to the one that matches: 45 a sample at nine modules. Splitting the chain on a
@@ -369,34 +375,36 @@ while true
       # chain moves the cost between modules but not the total, so one added later goes at the
       # end whatever its place in the run order, and leaves what the others cost as it was.
       #
-      # The ids are literals, each with its constant's name after it, and patch_gen writes the
-      # numbers from spms1_patch.yaml (--check catches one out of step). Spinel emits an Integer
-      # constant as a runtime global, so `when MODULE_LFO_1` loaded its address and then its value
-      # before every compare; a literal is a compare with an immediate. That took 10.6% of the
-      # instructions out of a buffer of the default patch (100.5k to 89.8k, emulated Cortex-M33).
+      # The ids are literals, each with its constant's name after it, and so are the bus slots the
+      # outputs go to; patch_gen writes the numbers from spms1_patch.yaml (--check catches one out
+      # of step). Spinel emits an Integer constant as a runtime global, so `when MODULE_LFO_1`
+      # loaded its address and then its value before every compare, and `signals[SIGNAL_...]`
+      # before every write; a literal is an immediate. The ids took 10.6% of the instructions out
+      # of a buffer of the default patch (100.5k to 89.8k, emulated Cortex-M33), and the slots
+      # with active_count above another 4.4% (to 85.8k).
       case module_id
       when 1 # MODULE_LFO_1
-        signals[SIGNAL_LFO_1_OUTPUT] = lfo_1.process
+        signals[9] = lfo_1.process # SIGNAL_LFO_1_OUTPUT
       when 2 # MODULE_ENV_GEN_1
-        signals[SIGNAL_ENV_GEN_1_OUTPUT] = env_gen_1.process(signals[source_env_gen_1_gate])
+        signals[10] = env_gen_1.process(signals[source_env_gen_1_gate]) # SIGNAL_ENV_GEN_1_OUTPUT
       when 3 # MODULE_OSC_1
-        signals[SIGNAL_OSC_1_OUTPUT] = osc_1.process(signals[source_osc_1_pitch], signals[source_osc_1_mod])
+        signals[11] = osc_1.process(signals[source_osc_1_pitch], signals[source_osc_1_mod]) # SIGNAL_OSC_1_OUTPUT
       when 4 # MODULE_FILTER_1
-        signals[SIGNAL_FILTER_1_OUTPUT] = filter_1.process(signals[source_filter_1_audio], signals[source_filter_1_mod])
+        signals[12] = filter_1.process(signals[source_filter_1_audio], signals[source_filter_1_mod]) # SIGNAL_FILTER_1_OUTPUT
       when 5 # MODULE_AMP_1
-        signals[SIGNAL_AMP_1_OUTPUT] = amp_1.process(signals[source_amp_1_audio], signals[source_amp_1_mod])
+        signals[13] = amp_1.process(signals[source_amp_1_audio], signals[source_amp_1_mod]) # SIGNAL_AMP_1_OUTPUT
       when 6 # MODULE_MIXER_1
-        signals[SIGNAL_MIXER_1_OUTPUT] = mixer_1.process(signals[source_mixer_1_in_1], signals[source_mixer_1_in_2])
+        signals[14] = mixer_1.process(signals[source_mixer_1_in_1], signals[source_mixer_1_in_2]) # SIGNAL_MIXER_1_OUTPUT
       when 7 # MODULE_CHORUS_1
         chorus_1.process(signals[source_chorus_1_audio])
-        signals[SIGNAL_CHORUS_1_OUTPUT_L] = chorus_1.output_l
-        signals[SIGNAL_CHORUS_1_OUTPUT_R] = chorus_1.output_r
+        signals[15] = chorus_1.output_l # SIGNAL_CHORUS_1_OUTPUT_L
+        signals[16] = chorus_1.output_r # SIGNAL_CHORUS_1_OUTPUT_R
       when 8 # MODULE_DELAY_1
         delay_1.process(signals[source_delay_1_audio_l], signals[source_delay_1_audio_r])
-        signals[SIGNAL_DELAY_1_OUTPUT_L] = delay_1.output_l
-        signals[SIGNAL_DELAY_1_OUTPUT_R] = delay_1.output_r
+        signals[17] = delay_1.output_l # SIGNAL_DELAY_1_OUTPUT_L
+        signals[18] = delay_1.output_r # SIGNAL_DELAY_1_OUTPUT_R
       when 9 # MODULE_SLEW_1
-        signals[SIGNAL_SLEW_1_OUTPUT] = slew_1.process(signals[source_slew_1_in])
+        signals[60] = slew_1.process(signals[source_slew_1_in]) # SIGNAL_SLEW_1_OUTPUT
       end
 
       slot += 1

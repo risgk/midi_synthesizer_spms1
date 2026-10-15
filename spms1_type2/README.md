@@ -62,9 +62,9 @@ Required Software for Modification
       "sig/spms1_dsp.rbs" say why they are needed
 - Ruby (CRuby), to change the patch's numbers or the default patch: they are kept in "spms1_patch.yaml",
   and `ruby patch_gen/spms1_patch_gen.rb` writes them out to "spms1_patch.rb" (read by "spms1_main.rb"),
-  the tables of "spms1_editor.html", the NRPN tables of this README and "README.ja.md", and the module ids
-  of the dispatch in "spms1_main.rb" (literals, each marked `# MODULE_<key>`). Run it, then
-  regenerate "spms1_main.c"; `--check` only says whether the files are up to date
+  the tables of "spms1_editor.html", the NRPN tables of this README and "README.ja.md", and the module
+  ids and output slots of the dispatch in "spms1_main.rb" (literals, each marked with its constant's
+  name). Run it, then regenerate "spms1_main.c"; `--check` only says whether the files are up to date
 
 
 Usage

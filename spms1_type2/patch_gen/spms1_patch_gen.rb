@@ -1,6 +1,6 @@
 # Writes what the sketch reads from spms1_patch.yaml: spms1_patch.rb whole, the parts of
 # spms1_editor.html, README.md and README.ja.md between their "patch_gen" markers, and the module
-# ids of the dispatch in spms1_main.rb.
+# ids and output slots of the dispatch in spms1_main.rb.
 #
 #   ruby patch_gen/spms1_patch_gen.rb [--check]
 #
@@ -261,23 +261,37 @@ end
 
 # ---- spms1_main.rb ----------------------------------------------------------------------------
 
-# The module dispatch of the per-sample loop compares against literal ids rather than the MODULE_*
-# constants, which Spinel emits as runtime globals (see spms1_main.rb). Each literal carries its
-# constant's name in a comment, `when 3 # MODULE_OSC_1`, and this writes the number from the spec.
-# Every module has to have exactly one `when`, and nothing else may be named.
+# The module dispatch of the per-sample loop compares against literal ids, and writes to literal
+# bus slots, rather than the MODULE_* and SIGNAL_* constants, which Spinel emits as runtime globals
+# (see spms1_main.rb). Each literal carries its constant's name in a comment at the end of its
+# line, `when 3 # MODULE_OSC_1` and `signals[11] = ... # SIGNAL_OSC_1_OUTPUT`, and this writes the
+# number from the spec. Every module has to have exactly one `when` and every module output exactly
+# one write, and nothing else may be named.
 def main_rb(content)
   s = SPEC
-  ids = { 'NONE' => 0 }.merge(s.modules.to_h { |m| [m['key'], m['id']] })
-  seen = Hash.new(0)
-  out = content.gsub(/^(\s*(?:when|break if module_id ==) )\d+( # MODULE_(\w+))$/) do
+  module_ids = s.modules.to_h { |m| [m['key'], m['id']] }
+  signal_ids = s.signals.to_h { |sig| [sig['key'], sig['id']] }
+  seen_modules = Hash.new(0)
+  seen_outputs = Hash.new(0)
+  out = content.gsub(/^(\s*when )\d+( # MODULE_(\w+))$/) do
     head, tail, key = $1, $2, $3
-    abort "spms1_patch_gen.rb: spms1_main.rb names MODULE_#{key}, no module" unless ids.key?(key)
-    seen[key] += 1 if head.lstrip.start_with?('when')
-    "#{head}#{ids[key]}#{tail}"
+    abort "spms1_patch_gen.rb: spms1_main.rb names MODULE_#{key}, no module" unless module_ids.key?(key)
+    seen_modules[key] += 1
+    "#{head}#{module_ids[key]}#{tail}"
+  end
+  out = out.gsub(/^(\s*signals\[)\d+(\] = .* # SIGNAL_(\w+))$/) do
+    head, tail, key = $1, $2, $3
+    abort "spms1_patch_gen.rb: spms1_main.rb names SIGNAL_#{key}, no signal" unless signal_ids.key?(key)
+    seen_outputs[key] += 1
+    "#{head}#{signal_ids[key]}#{tail}"
   end
   s.modules.each do |m|
-    n = seen[m['key']]
+    n = seen_modules[m['key']]
     abort "spms1_patch_gen.rb: spms1_main.rb has #{n} `when ... # MODULE_#{m['key']}`, not one" unless n == 1
+    s.outputs_of(m).each do |o|
+      n = seen_outputs[o['key']]
+      abort "spms1_patch_gen.rb: spms1_main.rb has #{n} `signals[...] = ... # SIGNAL_#{o['key']}`, not one" unless n == 1
+    end
   end
   out
 end
