@@ -26,27 +26,28 @@ require_relative 'spms1_slew'
 
 module Spms1
   module C
-    ffi_func :set_midi_note_on_pitch, [:uint8, :uint8],         :void
-    ffi_func :get_midi_note_on_pitch, [:uint8],                 :uint8
-    ffi_func :set_midi_note_on_state, [:uint8, :uint8],         :void
-    ffi_func :get_midi_note_on_state, [:uint8],                 :uint8
-    ffi_func :set_midi_pitch_bend,    [:uint8, :int32],         :void
-    ffi_func :get_midi_pitch_bend,    [:uint8],                 :int32
-    ffi_func :set_midi_cc_value,      [:uint8, :uint8, :uint8], :void
-    ffi_func :get_midi_cc_value,      [:uint8, :uint8],         :uint8
-    ffi_func :set_midi_nrpn_value,    [:uint8, :int32, :uint8], :void
-    ffi_func :get_midi_nrpn_value,    [:uint8, :int32],         :uint8
-    ffi_func :set_sample_rate,        [:int32],                 :void
-    ffi_func :get_sample_rate,        [],                       :int32
-    ffi_func :set_audio_buffers,      [:int32],                 :void
-    ffi_func :get_audio_buffers,      [],                       :int32
-    ffi_func :set_audio_buffer_words, [:int32],                 :void
-    ffi_func :get_audio_buffer_words, [],                       :int32
-    ffi_func :start_audio,            [],                       :void
-    ffi_func :stop_audio,             [],                       :void
-    ffi_func :write_to_audio_buffer,  [:float, :float],         :void
-    ffi_func :start_debug_measure,    [],                       :void
-    ffi_func :stop_debug_measure,     [],                       :void
+    ffi_func :set_midi_note_on_pitch,     [:uint8, :uint8],          :void
+    ffi_func :get_midi_note_on_pitch,     [:uint8],                  :uint8
+    ffi_func :set_midi_note_on_state,     [:uint8, :uint8],          :void
+    ffi_func :get_midi_note_on_state,     [:uint8],                  :uint8
+    ffi_func :set_midi_pitch_bend,        [:uint8, :int32],          :void
+    ffi_func :get_midi_pitch_bend,        [:uint8],                  :int32
+    ffi_func :set_midi_cc_value,          [:uint8, :uint8, :uint8],  :void
+    ffi_func :get_midi_cc_value,          [:uint8, :uint8],          :uint8
+    ffi_func :set_midi_nrpn_value,        [:uint8, :int32, :uint8],  :void
+    ffi_func :get_midi_nrpn_value,        [:uint8, :int32],          :uint8
+    ffi_func :get_midi_run_order_written, [:uint8, :int32],          :int32
+    ffi_func :set_sample_rate,            [:int32],                  :void
+    ffi_func :get_sample_rate,            [],                        :int32
+    ffi_func :set_audio_buffers,          [:int32],                  :void
+    ffi_func :get_audio_buffers,          [],                        :int32
+    ffi_func :set_audio_buffer_words,     [:int32],                  :void
+    ffi_func :get_audio_buffer_words,     [],                        :int32
+    ffi_func :start_audio,                [],                        :void
+    ffi_func :stop_audio,                 [],                        :void
+    ffi_func :write_to_audio_buffer,      [:float, :float],          :void
+    ffi_func :start_debug_measure,        [],                        :void
+    ffi_func :stop_debug_measure,         [],                        :void
   end
 end
 
@@ -65,7 +66,7 @@ AUDIO_BUFFER_WORDS = 64
 # from NRPN each buffer, so nothing needs a terminator: a shorter patch stops at the first
 # MODULE_NONE, which is what an unset NRPN entry reads as. Only the rewriting is paid for the full
 # length; the per-sample walk runs to active_count, counted once a buffer up to that first
-# MODULE_NONE. A module listed more than once runs once, at the last of its slots.
+# MODULE_NONE. A module listed more than once runs once, at the slot written last.
 MODULES_SIZE = 32
 
 # The module ids (MODULE_*), in spms1_patch.rb: one of every module type that makes a sound, one
@@ -133,10 +134,12 @@ slew_1    = Slew.new(SAMPLE_RATE)
 
 # Allocated once; which slots are filled is decided per buffer, inside the loop.
 active_modules = Array.new(MODULES_SIZE, MODULE_NONE)
-# The last slot of the run order each module id is listed at, by id: 128 entries, as an id read
-# from NRPN is 7-bit. Only the entries of the ids listed in the same buffer are read, and those
-# are written first, so it is never cleared.
-last_listed = Array.new(128, 0)
+# The slot of the run order each module id runs at, by id: 128 entries, as an id read from NRPN
+# is 7-bit. Only the entries of the ids listed in the same buffer are read, and those are reset
+# first, so it is never cleared.
+winning_slot = Array.new(128, 0)
+# When each slot was last written, from spms1_midi_state.h, for the slots in the order.
+order_written = Array.new(MODULES_SIZE, 0)
 
 audio_buffer_l = Array.new(AUDIO_BUFFER_WORDS, 0.0)
 audio_buffer_r = Array.new(AUDIO_BUFFER_WORDS, 0.0)
@@ -195,22 +198,34 @@ while true
     active_modules[slot] = C.get_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + slot)
     slot += 1
   end
-  # The order up to the first MODULE_NONE, and the last slot each module is listed at in it.
+  # The order up to the first MODULE_NONE, with when each of its slots was written.
   listed_count = 0
   while listed_count < MODULES_SIZE && active_modules[listed_count] != MODULE_NONE
-    last_listed[active_modules[listed_count]] = listed_count
+    order_written[listed_count] = C.get_midi_run_order_written(MIDI_CH, listed_count)
+    winning_slot[active_modules[listed_count]] = -1
     listed_count += 1
   end
   # A module listed twice would run twice a sample -- an LFO at twice its rate, a filter taking
-  # two steps -- so the last listing wins and the others are dropped, packing the order in place:
-  # a slot is only ever written once it has been read. Counted here, once a buffer, so the
-  # per-sample walk neither reads the MODULE_NONE that ends the order nor compares every id
-  # against it.
+  # two steps -- so it runs once, at the slot written last, and its other slots are dropped. Last
+  # in time rather than in place, so that a module written to a slot ahead of where it was moves
+  # there, as one written to a slot after it does. On a tie, never written alike, the later slot.
+  slot = 0
+  while slot < listed_count
+    module_id = active_modules[slot]
+    winner = winning_slot[module_id]
+    if winner < 0 || order_written[slot] >= order_written[winner]
+      winning_slot[module_id] = slot
+    end
+    slot += 1
+  end
+  # Packed in place: a slot is only ever written once it has been read. Counted here, once a
+  # buffer, so the per-sample walk neither reads the MODULE_NONE that ends the order nor compares
+  # every id against it.
   active_count = 0
   slot = 0
   while slot < listed_count
     module_id = active_modules[slot]
-    if last_listed[module_id] == slot
+    if winning_slot[module_id] == slot
       active_modules[active_count] = module_id
       active_count += 1
     end

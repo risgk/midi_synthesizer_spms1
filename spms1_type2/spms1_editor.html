@@ -2468,26 +2468,33 @@
   // slots past it are remembered here for a later write to reconnect them; the mirror is reset
   // whenever the order was changed from the editor.
   let orderMirror = new Array(MODULES_SIZE).fill(0);
+  // When each slot was last written, as a count of the writes, as the synth keeps it.
+  let orderWritten = new Array(MODULES_SIZE).fill(0);
+  let orderWrites = 0;
 
   function orderFromMirror() {
     const listed = [];
-    for (const id of orderMirror) {
-      if (id === 0) break;
-      const m = MODULES.find(m => m.id === id);
+    for (let i = 0; i < MODULES_SIZE && orderMirror[i] !== 0; i++) {
+      const m = MODULES.find(m => m.id === orderMirror[i]);
       // An unknown id runs on the synth as nothing, and the editor cannot show it.
-      if (m) listed.push(m.key);
+      if (m) listed.push({ key: m.key, written: orderWritten[i] });
     }
-    // A module listed twice runs once on the synth, at its last slot (the last listing wins).
-    return listed.filter((k, i) => listed.lastIndexOf(k) === i);
+    // A module listed twice runs once on the synth, at the slot written last (the last write
+    // wins), and on a tie at the later slot.
+    return listed.filter((e, i) => listed.every((o, j) =>
+      o.key !== e.key || j === i || (j < i ? o.written <= e.written : o.written < e.written)
+    )).map(e => e.key);
   }
 
   function applyNRPN(nrpn, value) {
     if (nrpn < MODULES_SIZE) {
       if (JSON.stringify(orderFromMirror()) !== JSON.stringify(state.order)) {
         orderMirror = new Array(MODULES_SIZE).fill(0);
+        orderWritten = new Array(MODULES_SIZE).fill(0);
         state.order.forEach((k, i) => { orderMirror[i] = MOD[k].id; });
       }
       orderMirror[nrpn] = value;
+      orderWritten[nrpn] = ++orderWrites;
       state.order = orderFromMirror();
     } else if (nrpn >= 128 && nrpn < 256 && INPUT_BY_ENTRY[nrpn - 128]) {
       state.inputs[INPUT_BY_ENTRY[nrpn - 128].key] = SIGNAL_NAMES[value] || 'NONE';

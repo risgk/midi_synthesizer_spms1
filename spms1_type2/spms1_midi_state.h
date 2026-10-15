@@ -34,6 +34,13 @@ uint8_t  g_midi_nrpn_values[16][SPMS1_NRPN_SIZE] = {{0}};
 uint8_t  g_midi_nrpn_msb[16]            = {0};
 uint8_t  g_midi_nrpn_lsb[16]            = {0};
 uint8_t  g_midi_nrpn_selected[16]       = {0};  // 0 until CC 99 or 98 arrives, and again after an RPN
+// When each slot of the run order (NRPN category 0) was last written, as a count of such writes on
+// its channel, so the synth can tell which of two slots naming one module was written later: the
+// last write wins, wherever its slot is. 0 is a slot never written. The count passes the int32 the
+// synth reads it as after 2 billion writes, which no patch editing reaches.
+#define SPMS1_RUN_ORDER_SIZE (32)
+uint32_t g_midi_run_order_writes[16]                       = {0};
+uint32_t g_midi_run_order_written[16][SPMS1_RUN_ORDER_SIZE] = {{0}};
 
 void set_midi_note_on_pitch(uint8_t midi_ch, uint8_t midi_note_on_pitch) {
   if (midi_ch >= 16) {
@@ -117,6 +124,9 @@ void set_midi_nrpn_value(uint8_t midi_ch, int32_t index, uint8_t value) {
   }
 
   g_midi_nrpn_values[midi_ch][index] = value;
+  if (index < SPMS1_RUN_ORDER_SIZE) {
+    g_midi_run_order_written[midi_ch][index] = ++g_midi_run_order_writes[midi_ch];
+  }
 }
 
 uint8_t get_midi_nrpn_value(uint8_t midi_ch, int32_t index) {
@@ -129,6 +139,18 @@ uint8_t get_midi_nrpn_value(uint8_t midi_ch, int32_t index) {
   }
 
   return g_midi_nrpn_values[midi_ch][index];
+}
+
+int32_t get_midi_run_order_written(uint8_t midi_ch, int32_t slot) {
+  if (midi_ch >= 16) {
+    return 0;
+  }
+
+  if (slot < 0 || slot >= SPMS1_RUN_ORDER_SIZE) {
+    return 0;
+  }
+
+  return (int32_t)g_midi_run_order_written[midi_ch][slot];
 }
 
 // CC 99 and 98 select a parameter, in either order, and CC 6 commits a value to it. CC 38 is

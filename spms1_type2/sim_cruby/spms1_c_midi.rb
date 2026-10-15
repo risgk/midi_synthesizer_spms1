@@ -12,6 +12,9 @@ module Spms1
     @nrpn_msb      = Array.new(16, 0)
     @nrpn_lsb      = Array.new(16, 0)
     @nrpn_selected = Array.new(16, false)
+    # When each slot of the run order was last written, as in spms1_midi_state.h.
+    @run_order_writes  = Array.new(16, 0)
+    @run_order_written = Array.new(16) { Array.new(32, 0) }
 
     @sample_rate = 48000
     @audio_buffers = 2
@@ -36,7 +39,12 @@ module Spms1
       def get_midi_pitch_bend(ch) = @pitch_bend[ch]
       def set_midi_cc_value(ch, n, v) = (@cc_values[ch][n] = v)
       def get_midi_cc_value(ch, n) = @cc_values[ch][n]
-      def set_midi_nrpn_value(ch, i, v) = (@nrpn_values[ch][i] = v if i >= 0 && i < 512)
+      def set_midi_nrpn_value(ch, i, v)
+        return unless i >= 0 && i < 512
+        @nrpn_values[ch][i] = v
+        @run_order_written[ch][i] = (@run_order_writes[ch] += 1) if i < 32
+      end
+      def get_midi_run_order_written(ch, slot) = ((slot >= 0 && slot < 32) ? @run_order_written[ch][slot] : 0)
       def get_midi_nrpn_value(ch, i) = ((i >= 0 && i < 512) ? @nrpn_values[ch][i] : 0)
       def set_sample_rate(v) = (@sample_rate = v)
       def get_sample_rate = @sample_rate
