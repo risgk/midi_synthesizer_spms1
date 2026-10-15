@@ -5,7 +5,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.2
 - Controlled by MIDI as a sound module
 - Last-note priority with one note of memory: releasing the newest note while the one before it is still held goes back to that one, legato (for trills)
 - 48 kHz audio output: 24 bit through an I2S DAC, or PWM Audio (no DAC needed)
-- Filter: ZDF/TPT State Variable Filter (with delayed soft clipping)
+- Filter: ZDF/TPT State Variable Filter (with a nonlinear leak on the band pass integrator, solved by one Newton step)
 - Chorus: mono in, stereo out, as a module in the run order
 - Delay: stereo, with feedback, as a module in the run order (up to 340 ms)
 - Stereo output: the chorus spreads the mono voice into a left and a right, and the delay keeps them apart
@@ -188,9 +188,12 @@ envelope, swing both ways. See the examples below.
 
 #### Filter 1
 
-A zero-delay feedback state variable filter: at the sum, the loop equation is solved in closed
-form, so the high pass is found in one step. The soft clip acts only where the band pass state is
-read back, and it is what holds the resonance down; the low pass state stays linear, with a
+A zero-delay feedback state variable filter. The band pass integrator leaks, more and more as the
+band pass bends into a soft clip curve, and that is what holds the resonance down; at small levels
+the leak is next to nothing, so the pass band passes nearly clean. The loop equation, leak
+included, is solved every sample by one step of Newton's method from the linear solution, which
+lands almost on the root. The leak's rate is fixed in time, so the sound does not change with the
+sample rate. The low pass state stays linear, with a
 clamp at 16 as a guard that ordinary use never reaches. The output clip comes last. At the top of
 the resonance dial k turns negative and the loop oscillates.
 
@@ -201,7 +204,7 @@ flowchart LR
   I1 -->|BP| I2["Integrator 2<br/>LP, state s2"]
   I2 -->|LP| OC["Output clip<br/>linear up to 0.75"]
   OC --> OUT([Output])
-  SC["State clip<br/>ceiling 4.0, α comp."] -.- I1
+  SC["Nonlinear leak<br/>ceiling 4.0, Newton step"] -.- I1
   L2["s2 is linear<br/>guard clamp at 16"] -.- I2
   I1 -->|"−k·BP"| SUM
   I2 -->|"−LP"| SUM
@@ -209,8 +212,8 @@ flowchart LR
   class SC,OC nl
 ```
 
-The same structure redrawn as an op-amp integrator filter. The diode pair stands for the state
-clip and the output limiter for the output clip. It is an interpretation, not a reproduction of
+The same structure redrawn as an op-amp integrator filter. The diode pair stands for the
+nonlinear leak and the output limiter for the output clip. It is an interpretation, not a reproduction of
 an actual circuit.
 
 ```mermaid
