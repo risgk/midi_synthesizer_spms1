@@ -57,7 +57,8 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.3
       シンセ本体の RAM 配置を同時に行います。手で改名すると、このマクロが一致しなく
       なって属性が付かず、本体が flash から実行されます
     - "spms1_main.c" は `spinel spms1_main.rb -c --rbs sig` で生成します。"sig" の型シードが
-      フィルタの状態をボックス化させずに保ちます。必要な理由は "sig/spms1_filter.rbs" にあります
+      フィルタの状態とパラメータのスムージングをボックス化させずに保ちます。必要な理由は
+      "sig/spms1_filter.rbs" と "sig/spms1_dsp.rbs" にあります
 - Ruby (CRuby): パッチの番号や初期パッチを変えるとき。これらは "spms1_patch.yaml" にまとめてあり、
   `ruby patch_gen/spms1_patch_gen.rb` が "spms1_patch.rb" ("spms1_main.rb" が読み込みます)、
   "spms1_editor.html" のテーブル、この README と "README.md" の NRPN の表に書き出します。実行したあと、

@@ -248,9 +248,9 @@ module Spms1
 
       if @sample_counter == 0
         update_coefficients
-        @s1 = flush_tiny(@s1) + @self_osc_seed
-        @s2 = flush_tiny(@s2)
-        @dc_blocker = flush_tiny(@dc_blocker)
+        @s1 = Dsp.flush_tiny(@s1) + @self_osc_seed
+        @s2 = Dsp.flush_tiny(@s2)
+        @dc_blocker = Dsp.flush_tiny(@dc_blocker)
         @self_osc_seed = 0.0 - @self_osc_seed
       end
 
@@ -341,14 +341,14 @@ module Spms1
     # rather than from where the additions got to, so rounding does not build up. 0.25 is
     # 1 / CONTROL_RATE_DIVISOR, written out for the reason Mixer#process gives.
     def update_coefficients
-      @stage_1_cutoff += (@cutoff - @stage_1_cutoff) * @smoothing_target_blend
-      @current_cutoff += (@stage_1_cutoff - @current_cutoff) * @smoothing_target_blend
-      @stage_1_resonance += (@resonance - @stage_1_resonance) * @smoothing_target_blend
-      @current_resonance += (@stage_1_resonance - @current_resonance) * @smoothing_target_blend
-      @stage_1_modulation_depth += (@modulation_depth - @stage_1_modulation_depth) * @smoothing_target_blend
-      @current_modulation_depth += (@stage_1_modulation_depth - @current_modulation_depth) * @smoothing_target_blend
-      @stage_1_gain += (@gain - @stage_1_gain) * @smoothing_target_blend
-      @current_gain += (@stage_1_gain - @current_gain) * @smoothing_target_blend
+      @stage_1_cutoff = Dsp.smooth(@cutoff, @stage_1_cutoff, @smoothing_target_blend)
+      @current_cutoff = Dsp.smooth(@stage_1_cutoff, @current_cutoff, @smoothing_target_blend)
+      @stage_1_resonance = Dsp.smooth(@resonance, @stage_1_resonance, @smoothing_target_blend)
+      @current_resonance = Dsp.smooth(@stage_1_resonance, @current_resonance, @smoothing_target_blend)
+      @stage_1_modulation_depth = Dsp.smooth(@modulation_depth, @stage_1_modulation_depth, @smoothing_target_blend)
+      @current_modulation_depth = Dsp.smooth(@stage_1_modulation_depth, @current_modulation_depth, @smoothing_target_blend)
+      @stage_1_gain = Dsp.smooth(@gain, @stage_1_gain, @smoothing_target_blend)
+      @current_gain = Dsp.smooth(@stage_1_gain, @current_gain, @smoothing_target_blend)
 
       # The modulation input arrives as it is; clamping total_cutoff below is what holds the
       # table lookup in range, and a source that swings both ways moves the cutoff both ways.
@@ -415,20 +415,6 @@ module Spms1
       below   = OUTPUT_KNEE_FLOOR - clamped
       excess  = (above + above.abs) - (below + below.abs)
       clamped - (excess * excess.abs) * OUTPUT_KNEE_SCALE
-    end
-
-    # A dead zone of 1e-20 about zero, so that a state decaying on a silent input lands on exactly
-    # zero instead of sinking into denormals, which x86 computes slowly. It shifts every other
-    # value toward zero by 1e-20, which rounds away at any audible level. Built from a + |a| as
-    # clip_output is, rather than as (s + c) - c: -ffast-math may fold that one to s, while this
-    # is a dead zone in exact arithmetic, so any rewrite it allows still is one. What comes out is
-    # zero or at least 8e-28, the spacing of floats near 1e-20: never a denormal. Rewritten under
-    # -ffast-math it rounds at that spacing and may leave a remnant of that size instead of zero,
-    # still far above the denormals. A literal, for the reason given above.
-    def flush_tiny(state)
-      above = state - 1e-20
-      below = (0.0 - state) - 1e-20
-      ((above + above.abs) - (below + below.abs)) * 0.5
     end
   end
 end

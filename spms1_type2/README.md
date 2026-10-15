@@ -57,7 +57,8 @@ Required Software for Modification
       which renames it and puts the synth core in RAM at the same time. Renaming it by hand
       instead leaves the macro with nothing to match, and the core runs from flash
     - "spms1_main.c" is generated with `spinel spms1_main.rb -c --rbs sig`. The type seeds in "sig"
-      keep the filter states unboxed; "sig/spms1_filter.rbs" says why they are needed
+      keep the filter states and the parameter smoothing unboxed; "sig/spms1_filter.rbs" and
+      "sig/spms1_dsp.rbs" say why they are needed
 - Ruby (CRuby), to change the patch's numbers or the default patch: they are kept in "spms1_patch.yaml",
   and `ruby patch_gen/spms1_patch_gen.rb` writes them out to "spms1_patch.rb" (read by "spms1_main.rb"),
   the tables of "spms1_editor.html", and the NRPN tables of this README and "README.ja.md". Run it, then

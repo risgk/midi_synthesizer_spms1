@@ -88,10 +88,10 @@ module Spms1
         # Rate and amount are smoothed at the control rate to avoid sudden jumps, and the phase
         # increment is derived here rather than per sample: nothing feeds this module, so it
         # cannot change between control-rate updates.
-        @stage_1_rate += (@rate - @stage_1_rate) * @smoothing_target_blend
-        @current_rate += (@stage_1_rate - @current_rate) * @smoothing_target_blend
-        @stage_1_amount += (@amount - @stage_1_amount) * @smoothing_target_blend
-        @current_amount += (@stage_1_amount - @current_amount) * @smoothing_target_blend
+        @stage_1_rate = Dsp.smooth(@rate, @stage_1_rate, @smoothing_target_blend)
+        @current_rate = Dsp.smooth(@stage_1_rate, @current_rate, @smoothing_target_blend)
+        @stage_1_amount = Dsp.smooth(@amount, @stage_1_amount, @smoothing_target_blend)
+        @current_amount = Dsp.smooth(@stage_1_amount, @current_amount, @smoothing_target_blend)
         @dt = rate_to_freq_fast(@current_rate) * @inv_sample_rate
         # The PolyBLAMP residual is (1 - |x|)^3 / 6 of the slope change for a corner x samples
         # away. The slope changes by 4 * dt at each corner, and with the distance d = |x| * dt in

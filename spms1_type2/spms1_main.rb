@@ -1,3 +1,4 @@
+require_relative 'spms1_dsp'
 require_relative 'spms1_osc'
 require_relative 'spms1_filter'
 require_relative 'spms1_amp'

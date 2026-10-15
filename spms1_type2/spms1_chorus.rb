@@ -114,12 +114,12 @@ module Spms1
 
     def process(audio_input = 0.0)
       if @sample_counter == 0
-        @stage_1_rate += (@rate - @stage_1_rate) * @smoothing_target_blend
-        @current_rate += (@stage_1_rate - @current_rate) * @smoothing_target_blend
-        @stage_1_depth += (@depth - @stage_1_depth) * @smoothing_target_blend
-        @current_depth += (@stage_1_depth - @current_depth) * @smoothing_target_blend
-        @stage_1_mix += (@mix - @stage_1_mix) * @smoothing_target_blend
-        @current_mix += (@stage_1_mix - @current_mix) * @smoothing_target_blend
+        @stage_1_rate = Dsp.smooth(@rate, @stage_1_rate, @smoothing_target_blend)
+        @current_rate = Dsp.smooth(@stage_1_rate, @current_rate, @smoothing_target_blend)
+        @stage_1_depth = Dsp.smooth(@depth, @stage_1_depth, @smoothing_target_blend)
+        @current_depth = Dsp.smooth(@stage_1_depth, @current_depth, @smoothing_target_blend)
+        @stage_1_mix = Dsp.smooth(@mix, @stage_1_mix, @smoothing_target_blend)
+        @current_mix = Dsp.smooth(@stage_1_mix, @current_mix, @smoothing_target_blend)
 
         # A triangle, -1.0 to 1.0, folded out of the phase ramp as LFO 1's is, with the same
         # quarter-turn shift so that it starts from 0.0, where both taps already are.

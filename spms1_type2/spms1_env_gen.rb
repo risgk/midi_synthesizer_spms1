@@ -141,8 +141,8 @@ module Spms1
 
         # The amount is smoothed here, on the step, so a change in it rides the same ramp as the
         # level does rather than stepping the output.
-        @stage_1_amount += (@amount - @stage_1_amount) * @smoothing_target_blend
-        @current_amount += (@stage_1_amount - @current_amount) * @smoothing_target_blend
+        @stage_1_amount = Dsp.smooth(@amount, @stage_1_amount, @smoothing_target_blend)
+        @current_amount = Dsp.smooth(@stage_1_amount, @current_amount, @smoothing_target_blend)
         output_level = @current_level * @current_amount
 
         # The output ramps from the last step's level to this one's over the next four samples,
