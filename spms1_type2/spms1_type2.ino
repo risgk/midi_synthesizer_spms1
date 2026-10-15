@@ -26,7 +26,7 @@
 #define SPMS1_DEBUG_PRINT_RX_PIN            (1)
 #endif  // defined(SPMS1_DEBUG_PRINT_USE_USB_SERIAL)
 
-// SoftwareSerial takes any two pins, where a hardware UART fixes TX to one and RX to the other
+// SerialPIO takes any two pins, where a hardware UART fixes TX to one and RX to the other
 #define SPMS1_UART_MIDI_SERIAL              g_uart_midi_serial
 #define SPMS1_UART_MIDI_TX_PIN              (4)
 #define SPMS1_UART_MIDI_RX_PIN              (5)
@@ -68,8 +68,7 @@ MIDI_CREATE_CUSTOM_INSTANCE(Adafruit_USBD_MIDI, usbd_midi, USB_MIDI, MySettings)
 #endif  // defined(SPMS1_USE_USB_MIDI)
 
 #if defined(SPMS1_USE_UART_MIDI)
-#include <SoftwareSerial.h>
-SoftwareSerial g_uart_midi_serial(SPMS1_UART_MIDI_RX_PIN, SPMS1_UART_MIDI_TX_PIN);
+SerialPIO g_uart_midi_serial(SPMS1_UART_MIDI_TX_PIN, SPMS1_UART_MIDI_RX_PIN, 256);  // FIFO: 256 bytes, to absorb bursts
 MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, SPMS1_UART_MIDI_SERIAL, UART_MIDI, MySettings);
 #endif
 
@@ -279,7 +278,7 @@ void setup() {
   UART_MIDI.setHandleNoteOff(handleNoteOff);
   UART_MIDI.setHandleControlChange(handleControlChange);
   UART_MIDI.setHandlePitchBend(handlePitchBend);
-  UART_MIDI.begin(MIDI_CHANNEL_OMNI);  // Begins the serial too, and only once: SoftwareSerial cannot take a second begin
+  UART_MIDI.begin(MIDI_CHANNEL_OMNI);  // Begins the serial too, and only once: SerialPIO cannot take a second begin
   UART_MIDI.turnThruOff();
   gpio_pull_up(SPMS1_UART_MIDI_RX_PIN);  // After the begin, which leaves the RX pin without pulls
 #endif  // defined(SPMS1_USE_UART_MIDI)
@@ -296,13 +295,19 @@ void setup() {
 void loop() {
 #if defined(SPMS1_USE_USB_MIDI)
   mutex_enter_blocking(&__usb_mutex);
-  USB_MIDI.read();
+  for (uint32_t i = 0; i < 8; i++) {
+    USB_MIDI.read();
+  }
   mutex_exit(&__usb_mutex);
 #endif  // defined(SPMS1_USE_USB_MIDI)
 
 #if defined(SPMS1_USE_UART_MIDI)
-  UART_MIDI.read();
-#endif
+  // The MIDI Library parses 1 byte per read(), and up to about 3.2 bytes arrive per loop (1 ms or
+  // a little more) at 31250 bps, so read 8 bytes per loop not to overflow the receive FIFO
+  for (uint32_t i = 0; i < 8; i++) {
+    UART_MIDI.read();
+  }
+#endif  // defined(SPMS1_USE_UART_MIDI)
 
 #if defined(SPMS1_USE_DEBUG_PRINT)
   static uint8_t s_loop_counter = 0;
