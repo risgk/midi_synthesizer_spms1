@@ -2470,14 +2470,15 @@
   let orderMirror = new Array(MODULES_SIZE).fill(0);
 
   function orderFromMirror() {
-    const order = [];
+    const listed = [];
     for (const id of orderMirror) {
       if (id === 0) break;
       const m = MODULES.find(m => m.id === id);
-      // An unknown id or a second copy runs on the synth, but the editor cannot show either.
-      if (m && !order.includes(m.key)) order.push(m.key);
+      // An unknown id runs on the synth as nothing, and the editor cannot show it.
+      if (m) listed.push(m.key);
     }
-    return order;
+    // A module listed twice runs once on the synth, at its last slot (the last listing wins).
+    return listed.filter((k, i) => listed.lastIndexOf(k) === i);
   }
 
   function applyNRPN(nrpn, value) {
