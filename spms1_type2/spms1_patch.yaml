@@ -162,8 +162,8 @@ controls:
   - { entry: 23, module: CHORUS_1,  key: RATE,         label: Rate,         cc: 58,  value: 64 }
   - { entry: 24, module: CHORUS_1,  key: DEPTH,        label: Depth,        cc: 59,  value: 64 }
   - { entry: 25, module: CHORUS_1,  key: MIX,          label: Mix,          cc: 93,  value: 64 }
-  - { entry: 26, module: DELAY_1,   key: TIME,         label: Time,         cc: 55,  value: 64 }
-  - { entry: 27, module: DELAY_1,   key: FEEDBACK,     label: Feedback,     cc: 56,  value: 64 }
+  - { entry: 26, module: DELAY_1,   key: TIME,         label: Time,         cc: 90,  value: 64 }
+  - { entry: 27, module: DELAY_1,   key: FEEDBACK,     label: Feedback,     cc: 92,  value: 64 }
   - { entry: 28, module: DELAY_1,   key: MIX,          label: Mix,          cc: 94,  value: 34 }
 
   # General controls: a CC put on the bus for any input or parameter to read, the mod wheel

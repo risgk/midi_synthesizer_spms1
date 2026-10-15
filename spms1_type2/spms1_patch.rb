@@ -247,8 +247,8 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_CHORUS_1_RATE      , 58)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_CHORUS_1_DEPTH     , 59)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_CHORUS_1_MIX       , 93)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_DELAY_1_TIME       , 55)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_DELAY_1_FEEDBACK   , 56)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_DELAY_1_TIME       , 90)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_DELAY_1_FEEDBACK   , 92)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_DELAY_1_MIX        , 94)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_GENERAL_MOD_WHEEL  , 1)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_GENERAL_1          , 16)
@@ -272,8 +272,8 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 58 , 64 ) # Chorus 1 Rate
   C.set_midi_cc_value(midi_ch, 59 , 64 ) # Chorus 1 Depth
   C.set_midi_cc_value(midi_ch, 93 , 64 ) # Chorus 1 Mix
-  C.set_midi_cc_value(midi_ch, 55 , 64 ) # Delay 1 Time
-  C.set_midi_cc_value(midi_ch, 56 , 64 ) # Delay 1 Feedback
+  C.set_midi_cc_value(midi_ch, 90 , 64 ) # Delay 1 Time
+  C.set_midi_cc_value(midi_ch, 92 , 64 ) # Delay 1 Feedback
   C.set_midi_cc_value(midi_ch, 94 , 34 ) # Delay 1 Mix
   C.set_midi_cc_value(midi_ch, 1  , 4  ) # General Mod Wheel
   C.set_midi_cc_value(midi_ch, 16 , 64 ) # General 1

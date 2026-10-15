@@ -38,8 +38,8 @@
 |                            58 | x             | o             | Chorus Rate                          |
 |                            59 | x             | o             | Chorus Depth                         |
 |                            93 | x             | o             | Chorus Mix                           |
-|                            55 | x             | o             | Delay Time                           |
-|                            56 | x             | o             | Delay Feedback                       |
+|                            90 | x             | o             | Delay Time                           |
+|                            92 | x             | o             | Delay Feedback                       |
 |                            94 | x             | o             | Delay Mix                            |
 |                             1 | x             | o             | General Mod Wheel (Unipolar)         |
 |                            16 | x             | o             | General 1 (Unipolar and Bipolar)     |
