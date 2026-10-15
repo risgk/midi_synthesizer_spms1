@@ -87,6 +87,8 @@ Usage
     - Wires module outputs to inputs and parameters, and sets the run order and CC assignments
     - Saves and loads patches as JSON
     - Copies the patch as MIDI bytes or as an NRPN list, or sends it through Web MIDI
+    - The side panels (Patch, Run Order, Export) fold to their headings with a click, each remembered;
+      with all three folded, the canvas takes the width they leave
 - SPMS-1 Web: the synth itself, built into the editor ("spms1_web_synth.js")
     - Select "SPMS-1 Web (Built-in)" in "MIDI Out", and play the soft keyboard (or a MIDI keyboard in "MIDI In")
     - "spms1_main.c" runs in the Web browser as WebAssembly, so it sounds the same as the device

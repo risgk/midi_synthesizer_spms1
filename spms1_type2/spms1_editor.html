@@ -128,6 +128,11 @@
       grid-template-columns: 1fr 340px;
       gap: 20px;
     }
+    /* With every side panel folded the side column is only as wide as its headings, and the
+       canvas takes the rest. */
+    .app.side-folded {
+      grid-template-columns: 1fr max-content;
+    }
     /* In one column the soft keyboard comes right under the canvas: the canvas and the side
        panels become items of the body, so order can put the keyboard between them. Not on a
        hidden tab, where display: contents would win over [hidden]. The Wide button gives the same
@@ -323,9 +328,9 @@
     .kbd-bar h2 {
       margin-bottom: 0;
     }
-    /* The heading is the button that shows and hides the keyboard, as PRA32-U2's editor does with
-       the bar of its keyboard. */
-    .kbd-toggle {
+    /* A heading that is the button that shows and hides its panel, as PRA32-U2's editor does with
+       the bar of its keyboard: the soft keyboard and the side panels of the patch tab. */
+    .fold-toggle {
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -336,13 +341,23 @@
       font: inherit;
       cursor: pointer;
     }
-    .kbd-caret {
+    .fold-caret {
       display: inline-block;
       font-size: 0.7em;
       transition: transform 0.15s;
     }
-    #kbd-panel.collapsed .kbd-caret {
+    .collapsed .fold-caret {
       transform: rotate(-90deg);
+    }
+    /* A side panel folded keeps only its heading. */
+    .side .panel.collapsed > :not(h2) {
+      display: none;
+    }
+    .side .panel.collapsed > h2 {
+      margin-bottom: 0;
+    }
+    .side .panel > h2 .fold-toggle {
+      white-space: nowrap;
     }
     /* Hidden, the bar keeps only the heading and Panic, which a note left on still needs. */
     #kbd-panel.collapsed .keyboard-frame,
@@ -988,8 +1003,8 @@
   </div>
 
   <div class="side">
-    <div class="panel">
-      <h2>Patch</h2>
+    <div class="panel" id="side-patch">
+      <h2><button type="button" class="fold-toggle" aria-expanded="true" title="Show or hide this panel"><span class="fold-caret" aria-hidden="true">&#9660;</span>Patch</button></h2>
       <div class="form-group">
         <label for="patch-name">Name</label>
         <input type="text" id="patch-name" maxlength="64">
@@ -1012,8 +1027,8 @@
       </p>
     </div>
 
-    <div class="panel">
-      <h2>Run Order</h2>
+    <div class="panel" id="side-order">
+      <h2><button type="button" class="fold-toggle" aria-expanded="true" title="Show or hide this panel"><span class="fold-caret" aria-hidden="true">&#9660;</span>Run Order</button></h2>
       <ol id="order-list"></ol>
       <div class="add-row">
         <select id="order-add"></select>
@@ -1025,8 +1040,8 @@
       </p>
     </div>
 
-    <div class="panel">
-      <h2>Export</h2>
+    <div class="panel" id="side-export">
+      <h2><button type="button" class="fold-toggle" aria-expanded="true" title="Show or hide this panel"><span class="fold-caret" aria-hidden="true">&#9660;</span>Export</button></h2>
       <div class="form-group">
         <label for="export-format">Format</label>
         <select id="export-format">
@@ -1047,7 +1062,7 @@
 
 <div class="panel" id="kbd-panel">
   <div class="kbd-bar">
-    <h2><button type="button" class="kbd-toggle" id="kbd-toggle" aria-expanded="true" title="Show or hide the soft keyboard"><span class="kbd-caret" aria-hidden="true">&#9660;</span><span id="kbd-label">Soft Keyboard</span></button></h2>
+    <h2><button type="button" class="fold-toggle" id="kbd-toggle" aria-expanded="true" title="Show or hide the soft keyboard"><span class="fold-caret" aria-hidden="true">&#9660;</span><span id="kbd-label">Soft Keyboard</span></button></h2>
     <button class="btn" id="kbd-oct-down" title="Octave Down">&#9664;</button>
     <button class="btn" id="kbd-oct-up" title="Octave Up">&#9654;</button>
     <span class="kbd-hint">PC Keys: A - K, Z / X</span>
@@ -3114,6 +3129,39 @@
   });
 
 
+  // ---- Side panels ---------------------------------------------------------------------------
+
+  // Each side panel of the patch tab folds to its heading, as the soft keyboard does, and stays
+  // as it was left. With all of them folded the side column narrows, so the canvas widens.
+  const SIDE_FOLD_KEY = 'spms1-type2-editor-side-folded';
+  const SIDE_PANELS = ['side-patch', 'side-order', 'side-export'];
+  let sideFolded = {};
+
+  function setSideFolded(id, folded) {
+    const panel = document.getElementById(id);
+    panel.classList.toggle('collapsed', folded);
+    panel.querySelector('.fold-toggle').setAttribute('aria-expanded', String(!folded));
+    sideFolded[id] = folded;
+    try { localStorage.setItem(SIDE_FOLD_KEY, JSON.stringify(sideFolded)); } catch (e) { /* storage unavailable */ }
+    const app = document.getElementById('tab-patch');
+    app.classList.toggle('side-folded', SIDE_PANELS.every(p => sideFolded[p]));
+    if (!app.hidden) {
+      fitTabArea();
+      if (!viewTouched) fitView();
+      renderWires();
+    }
+  }
+
+  function initSidePanels() {
+    try { sideFolded = JSON.parse(localStorage.getItem(SIDE_FOLD_KEY)) || {}; } catch (e) { sideFolded = {}; }
+    SIDE_PANELS.forEach(id => {
+      document.getElementById(id).querySelector('.fold-toggle')
+        .addEventListener('click', () => setSideFolded(id, !sideFolded[id]));
+      setSideFolded(id, !!sideFolded[id]);
+    });
+  }
+
+
   // ---- Start ---------------------------------------------------------------------------------
 
   window.addEventListener('DOMContentLoaded', () => {
@@ -3121,6 +3169,7 @@
     applyMIDISettings(loadMIDISettings());
     renderAll();
     createKeyboard();
+    initSidePanels();
     let tab = 'controls';
     try { tab = localStorage.getItem(TAB_KEY) || tab; } catch (e) { /* storage unavailable */ }
     let wide = false;
