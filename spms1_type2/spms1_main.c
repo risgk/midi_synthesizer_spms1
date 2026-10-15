@@ -337,6 +337,7 @@ struct sp_LFO_s {
   sp_float iv_stage_1_amount;
   sp_float iv_current_amount;
   sp_float iv_dt;
+  sp_float iv_blamp_scale;
   sp_int iv_sample_counter;
 };
 struct sp_Mixer_s {
@@ -524,6 +525,7 @@ static sp_float civ_LFO_amount = 0.0;
 static sp_float civ_LFO_stage_1_amount = 0.0;
 static sp_float civ_LFO_current_amount = 0.0;
 static sp_float civ_LFO_dt = 0.0;
+static sp_float civ_LFO_blamp_scale = 0.0;
 static sp_int civ_LFO_sample_counter = SP_INT_NIL;
 static sp_int civ_Mixer_sample_rate = SP_INT_NIL;
 static sp_float civ_Mixer_smoothing_target_blend = 0.0;
@@ -1237,6 +1239,7 @@ static const char *sp_obj_inspect_sw(int cls_id, void *p) {
       sp_String_append(_s, ", @stage_1_amount="); sp_String_append(_s, sp_poly_inspect(sp_box_float(o->iv_stage_1_amount)));
       sp_String_append(_s, ", @current_amount="); sp_String_append(_s, sp_poly_inspect(sp_box_float(o->iv_current_amount)));
       sp_String_append(_s, ", @dt="); sp_String_append(_s, sp_poly_inspect(sp_box_float(o->iv_dt)));
+      sp_String_append(_s, ", @blamp_scale="); sp_String_append(_s, sp_poly_inspect(sp_box_float(o->iv_blamp_scale)));
       sp_String_append(_s, ", @sample_counter="); sp_String_append(_s, sp_poly_inspect((o->iv_sample_counter == SP_INT_NIL ? sp_box_nil() : sp_box_int(o->iv_sample_counter))));
       sp_String_append(_s, ">");
       sp_poly_recur_pop(_rcm);
@@ -2215,123 +2218,141 @@ static inline __attribute__((always_inline)) sp_float sp_EnvGen_calculate_exp_fa
   return (lv_e0 + (lv_fraction * ((lv_e1 - lv_e0))));
   return 0.0;
 }
-#line 34 "spms1_lfo.rb"
+#line 37 "spms1_lfo.rb"
 static void sp_LFO_initialize(sp_LFO *self, sp_int lv_sample_rate) {
-#line 35 "spms1_lfo.rb"
+#line 38 "spms1_lfo.rb"
   self->iv_sample_rate = lv_sample_rate;
-#line 39 "spms1_lfo.rb"
+#line 42 "spms1_lfo.rb"
   self->iv_inv_sample_rate = (1.0 / (double)(lv_sample_rate));
-#line 40 "spms1_lfo.rb"
-  self->iv_smoothing_target_blend = ((cst_Spms1__LFO__SMOOTHING_TARGET_BLEND_BASE * ((48000.0 / (double)(self->iv_sample_rate)))) * (((double)(cst_Spms1__LFO__CONTROL_RATE_DIVISOR) / 4.0)));
-#line 41 "spms1_lfo.rb"
-  self->iv_phase = 0.0;
 #line 43 "spms1_lfo.rb"
-  self->iv_rate = 0.5;
+  self->iv_smoothing_target_blend = ((cst_Spms1__LFO__SMOOTHING_TARGET_BLEND_BASE * ((48000.0 / (double)(self->iv_sample_rate)))) * (((double)(cst_Spms1__LFO__CONTROL_RATE_DIVISOR) / 4.0)));
 #line 44 "spms1_lfo.rb"
-  self->iv_stage_1_rate = 0.5;
-#line 45 "spms1_lfo.rb"
-  self->iv_current_rate = 0.5;
+  self->iv_phase = 0.0;
 #line 46 "spms1_lfo.rb"
-  self->iv_level = 1.0;
+  self->iv_rate = 0.5;
 #line 47 "spms1_lfo.rb"
-  self->iv_polarity = 1.0;
+  self->iv_stage_1_rate = 0.5;
+#line 48 "spms1_lfo.rb"
+  self->iv_current_rate = 0.5;
+#line 49 "spms1_lfo.rb"
+  self->iv_level = 1.0;
 #line 50 "spms1_lfo.rb"
+  self->iv_polarity = 1.0;
+#line 53 "spms1_lfo.rb"
   self->iv_amount = 1.0;
-#line 51 "spms1_lfo.rb"
-  self->iv_stage_1_amount = 1.0;
-#line 52 "spms1_lfo.rb"
-  self->iv_current_amount = 1.0;
 #line 54 "spms1_lfo.rb"
-  self->iv_dt = 0.0;
+  self->iv_stage_1_amount = 1.0;
 #line 55 "spms1_lfo.rb"
+  self->iv_current_amount = 1.0;
+#line 57 "spms1_lfo.rb"
+  self->iv_dt = 0.0;
+#line 58 "spms1_lfo.rb"
+  self->iv_blamp_scale = 0.0;
+#line 59 "spms1_lfo.rb"
   self->iv_sample_counter = 0LL;
 }
-#line 60 "spms1_lfo.rb"
+#line 64 "spms1_lfo.rb"
 static inline __attribute__((always_inline)) sp_float sp_LFO_set_rate(sp_LFO *self, sp_float lv_rate) {
-#line 61 "spms1_lfo.rb"
+#line 65 "spms1_lfo.rb"
   self->iv_rate = (((lv_rate < 0.0)) ? 0.0 : ((((lv_rate > 1.0)) ? 1.0 : lv_rate)));
   return self->iv_rate;
   return 0.0;
 }
-#line 68 "spms1_lfo.rb"
+#line 72 "spms1_lfo.rb"
 static inline __attribute__((always_inline)) sp_float sp_LFO_set_level(sp_LFO *self, sp_float lv_level) {
-#line 69 "spms1_lfo.rb"
+#line 73 "spms1_lfo.rb"
   self->iv_level = (((lv_level < 0.0)) ? 0.0 : ((((lv_level > 1.0)) ? 1.0 : lv_level)));
-#line 70 "spms1_lfo.rb"
+#line 74 "spms1_lfo.rb"
   self->iv_amount = (self->iv_level * self->iv_polarity);
   return self->iv_amount;
   return 0.0;
 }
-#line 73 "spms1_lfo.rb"
+#line 77 "spms1_lfo.rb"
 static inline __attribute__((always_inline)) sp_float sp_LFO_set_polarity(sp_LFO *self, sp_float lv_polarity) {
     sp_float lv_clamped_polarity = 0.0;
-#line 74 "spms1_lfo.rb"
+#line 78 "spms1_lfo.rb"
   lv_clamped_polarity = (((lv_polarity < -0.5)) ? -0.5 : ((((lv_polarity > 0.5)) ? 0.5 : lv_polarity)));
-#line 75 "spms1_lfo.rb"
+#line 79 "spms1_lfo.rb"
   self->iv_polarity = (lv_clamped_polarity + lv_clamped_polarity);
-#line 76 "spms1_lfo.rb"
+#line 80 "spms1_lfo.rb"
   self->iv_amount = (self->iv_level * self->iv_polarity);
   return self->iv_amount;
   return 0.0;
 }
-#line 82 "spms1_lfo.rb"
+#line 86 "spms1_lfo.rb"
 static inline __attribute__((always_inline)) sp_float sp_LFO_process(sp_LFO *self) {
     sp_float lv_shifted = 0.0;
     sp_float lv_distance = 0.0;
     sp_float lv_folded = 0.0;
+    sp_float lv_triangle = 0.0;
+    sp_float lv_corner_gap = 0.0;
+    sp_float lv_correction = 0.0;
     sp_float lv_output = 0.0;
-#line 83 "spms1_lfo.rb"
-  if ((self->iv_sample_counter == 0LL)) {
 #line 87 "spms1_lfo.rb"
-    self->iv_stage_1_rate += ((self->iv_rate - self->iv_stage_1_rate) * self->iv_smoothing_target_blend);
-#line 88 "spms1_lfo.rb"
-    self->iv_current_rate += ((self->iv_stage_1_rate - self->iv_current_rate) * self->iv_smoothing_target_blend);
-#line 89 "spms1_lfo.rb"
-    self->iv_stage_1_amount += ((self->iv_amount - self->iv_stage_1_amount) * self->iv_smoothing_target_blend);
-#line 90 "spms1_lfo.rb"
-    self->iv_current_amount += ((self->iv_stage_1_amount - self->iv_current_amount) * self->iv_smoothing_target_blend);
+  if ((self->iv_sample_counter == 0LL)) {
 #line 91 "spms1_lfo.rb"
+    self->iv_stage_1_rate += ((self->iv_rate - self->iv_stage_1_rate) * self->iv_smoothing_target_blend);
+#line 92 "spms1_lfo.rb"
+    self->iv_current_rate += ((self->iv_stage_1_rate - self->iv_current_rate) * self->iv_smoothing_target_blend);
+#line 93 "spms1_lfo.rb"
+    self->iv_stage_1_amount += ((self->iv_amount - self->iv_stage_1_amount) * self->iv_smoothing_target_blend);
+#line 94 "spms1_lfo.rb"
+    self->iv_current_amount += ((self->iv_stage_1_amount - self->iv_current_amount) * self->iv_smoothing_target_blend);
+#line 95 "spms1_lfo.rb"
     sp_float _t30 = self->iv_current_rate;
     self->iv_dt = (sp_LFO_rate_to_freq_fast((sp_LFO *)self, _t30) * self->iv_inv_sample_rate);
-  }
-#line 94 "spms1_lfo.rb"
-  self->iv_sample_counter = (sp_int_add(self->iv_sample_counter, 1LL) & cst_Spms1__LFO__CONTROL_RATE_MASK);
-#line 98 "spms1_lfo.rb"
-  lv_shifted = (self->iv_phase + 0.25);
-#line 99 "spms1_lfo.rb"
-  lv_shifted -= (((lv_shifted < 1.0)) ? 0.0 : 1.0);
 #line 100 "spms1_lfo.rb"
-  lv_distance = (lv_shifted - 0.5);
-#line 104 "spms1_lfo.rb"
-  lv_folded = fabs(lv_distance);
-#line 105 "spms1_lfo.rb"
-  lv_output = ((0.5 - ((2.0 * lv_folded))) * self->iv_current_amount);
+    self->iv_blamp_scale = (0.66666669999999995 / ((self->iv_dt * self->iv_dt)));
+  }
+#line 103 "spms1_lfo.rb"
+  self->iv_sample_counter = (sp_int_add(self->iv_sample_counter, 1LL) & cst_Spms1__LFO__CONTROL_RATE_MASK);
 #line 107 "spms1_lfo.rb"
-  self->iv_phase += self->iv_dt;
+  lv_shifted = (self->iv_phase + 0.25);
 #line 108 "spms1_lfo.rb"
+  lv_shifted -= (((lv_shifted < 1.0)) ? 0.0 : 1.0);
+#line 109 "spms1_lfo.rb"
+  lv_distance = (lv_shifted - 0.5);
+#line 113 "spms1_lfo.rb"
+  lv_folded = fabs(lv_distance);
+#line 114 "spms1_lfo.rb"
+  lv_triangle = (0.5 - ((2.0 * lv_folded)));
+#line 121 "spms1_lfo.rb"
+  lv_corner_gap = (self->iv_dt - ((0.25 - fabs((lv_folded - 0.25)))));
+#line 122 "spms1_lfo.rb"
+  if ((lv_corner_gap > 0.0)) {
+#line 123 "spms1_lfo.rb"
+    lv_correction = (((lv_corner_gap * lv_corner_gap) * lv_corner_gap) * self->iv_blamp_scale);
+#line 124 "spms1_lfo.rb"
+    lv_triangle += (((lv_folded < 0.25)) ? (-lv_correction) : lv_correction);
+  }
+#line 126 "spms1_lfo.rb"
+  lv_output = (lv_triangle * self->iv_current_amount);
+#line 128 "spms1_lfo.rb"
+  self->iv_phase += self->iv_dt;
+#line 129 "spms1_lfo.rb"
   self->iv_phase -= (((self->iv_phase < 1.0)) ? 0.0 : 1.0);
-#line 110 "spms1_lfo.rb"
+#line 131 "spms1_lfo.rb"
   return lv_output;
   return 0.0;
 }
-#line 115 "spms1_lfo.rb"
+#line 136 "spms1_lfo.rb"
 static inline __attribute__((always_inline)) sp_float sp_LFO_rate_to_freq_fast(sp_LFO *self, sp_float lv_rate) {
     sp_float lv_internal_rate = 0.0;
     sp_int lv_index = 0;
     sp_float lv_fraction = 0.0;
     sp_float lv_f0 = 0.0;
     sp_float lv_f1 = 0.0;
-#line 116 "spms1_lfo.rb"
+#line 137 "spms1_lfo.rb"
   lv_internal_rate = (lv_rate * 120.0);
-#line 117 "spms1_lfo.rb"
+#line 138 "spms1_lfo.rb"
   lv_index = sp_float_to_i_checked(lv_internal_rate);
-#line 118 "spms1_lfo.rb"
+#line 139 "spms1_lfo.rb"
   lv_fraction = (lv_internal_rate - ({ sp_int _t31 = (lv_index); _t31 == SP_INT_NIL ? 0.0 : ((sp_float)_t31); }));
-#line 119 "spms1_lfo.rb"
+#line 140 "spms1_lfo.rb"
   lv_f0 = sp_FloatArray_get(cst_Spms1__LFO__FREQ_TABLE, lv_index);
-#line 120 "spms1_lfo.rb"
+#line 141 "spms1_lfo.rb"
   lv_f1 = sp_FloatArray_get(cst_Spms1__LFO__FREQ_TABLE, sp_int_add(lv_index, 1LL));
-#line 121 "spms1_lfo.rb"
+#line 142 "spms1_lfo.rb"
   return (lv_f0 + (lv_fraction * ((lv_f1 - lv_f0))));
   return 0.0;
 }
@@ -3186,7 +3207,7 @@ int main(int argc,char**argv){
     sp_int lv_general_3 = 0;
     sp_int lv_general_4 = 0;
     sp_int lv_module_id = 0;
-    sp_int lv_i__bp7726 = 0;
+    sp_int lv_i__bp7785 = 0;
 
 #line 1 "spms1_osc.rb"
 #line 3 "spms1_osc.rb"
@@ -3345,14 +3366,14 @@ int main(int argc,char**argv){
 #line 45 "spms1_env_gen.rb"
   cst_ATTACK_TARGET = 2.0;
 #line 1 "spms1_lfo.rb"
-#line 4 "spms1_lfo.rb"
-#line 11 "spms1_lfo.rb"
+#line 7 "spms1_lfo.rb"
+#line 14 "spms1_lfo.rb"
   cst_Spms1__LFO__SMOOTHING_TARGET_BLEND_BASE = 0.015625;
-#line 16 "spms1_lfo.rb"
+#line 19 "spms1_lfo.rb"
   cst_Spms1__LFO__CONTROL_RATE_DIVISOR = 4LL;
-#line 24 "spms1_lfo.rb"
+#line 27 "spms1_lfo.rb"
   cst_Spms1__LFO__CONTROL_RATE_MASK = sp_int_sub(cst_Spms1__LFO__CONTROL_RATE_DIVISOR, 1LL);
-#line 29 "spms1_lfo.rb"
+#line 32 "spms1_lfo.rb"
   sp_int _t185 = 122LL;
   if (_t185 < 0) sp_raise_cls("ArgumentError", "negative array size");
   sp_float _t186 = 0.0;
@@ -3360,10 +3381,10 @@ int main(int argc,char**argv){
   SP_GC_ROOT(_t187);
   for (sp_int _t188 = 0; _t188 < _t185; _t188++) sp_FloatArray_push(_t187, _t186);
   cst_Spms1__LFO__FREQ_TABLE = _t187;
-#line 30 "spms1_lfo.rb"
+#line 33 "spms1_lfo.rb"
   { sp_int _t189 = 122LL;
     for (lv_i = 0LL; lv_i < _t189; lv_i++) {
-#line 31 "spms1_lfo.rb"
+#line 34 "spms1_lfo.rb"
       sp_FloatArray_set(cst_Spms1__LFO__FREQ_TABLE, lv_i, (440.0 * (sp_float_pow(2.0, (((({ sp_int _t190 = (lv_i); _t190 == SP_INT_NIL ? 0.0 : ((sp_float)_t190); }) - 132.0) * ((1.0 / 12.0))))))));
     }
   }
@@ -4226,9 +4247,9 @@ int main(int argc,char**argv){
     (stop_debug_measure(), (sp_int)0);
 #line 390 "spms1_main.rb"
     for (sp_int _t392 = 0; _t392 < cst_AUDIO_BUFFER_WORDS; _t392++) {
-      lv_i__bp7726 = _t392;
+      lv_i__bp7785 = _t392;
 #line 391 "spms1_main.rb"
-      ({ sp_float _t393 = sp_FloatArray_get(lv_audio_buffer_l, lv_i__bp7726); sp_float _t394 = sp_FloatArray_get(lv_audio_buffer_r, lv_i__bp7726); (write_to_audio_buffer(((float)(_t393)), ((float)(_t394))), (sp_int)0); });
+      ({ sp_float _t393 = sp_FloatArray_get(lv_audio_buffer_l, lv_i__bp7785); sp_float _t394 = sp_FloatArray_get(lv_audio_buffer_r, lv_i__bp7785); (write_to_audio_buffer(((float)(_t393)), ((float)(_t394))), (sp_int)0); });
     }
   }
   return 0;
