@@ -279,7 +279,11 @@ module Spms1
       # The denominator, a0 + h * leak'(y), is at least a0 - 0.001 * h, since the clip's slope
       # never exceeds its make-up gain, 1.001: well clear of zero, as a0 stays above 0.99 with k
       # held at SELF_OSC_K_FLOOR. No branch: the clamp is built as clip_output's is.
-      b = @s1 + @g * (driven_input - s2)
+      # This is neither the delayed soft clipping it replaces, which clipped the band pass state of
+      # the previous sample before the linear solve, nor the "gain prediction" of the KVR thread,
+      # which puts a gain predicted from the previous sample into the linear solve: the leak is
+      # evaluated at this sample's linear solution, and Newton's step takes it off.
+      b =@s1 + @g * (driven_input - s2)
       a0 = 1.0 + @g * @g_plus_k
       guess = b * @one_over_a0
       shifted = guess + SOFT_CLIP_BIAS
