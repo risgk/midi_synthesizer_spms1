@@ -119,12 +119,12 @@ module Spms1
 
     def process(audio_input_l = 0.0, audio_input_r = 0.0)
       if @sample_counter == 0
-        @stage_1_time += (@time - @stage_1_time) * @smoothing_target_blend
-        @current_time += (@stage_1_time - @current_time) * @smoothing_target_blend
-        @stage_1_feedback += (@feedback - @stage_1_feedback) * @smoothing_target_blend
-        @current_feedback += (@stage_1_feedback - @current_feedback) * @smoothing_target_blend
-        @stage_1_mix += (@mix - @stage_1_mix) * @smoothing_target_blend
-        @current_mix += (@stage_1_mix - @current_mix) * @smoothing_target_blend
+        @stage_1_time = Dsp.smooth(@time, @stage_1_time, @smoothing_target_blend)
+        @current_time = Dsp.smooth(@stage_1_time, @current_time, @smoothing_target_blend)
+        @stage_1_feedback = Dsp.smooth(@feedback, @stage_1_feedback, @smoothing_target_blend)
+        @current_feedback = Dsp.smooth(@stage_1_feedback, @current_feedback, @smoothing_target_blend)
+        @stage_1_mix = Dsp.smooth(@mix, @stage_1_mix, @smoothing_target_blend)
+        @current_mix = Dsp.smooth(@stage_1_mix, @current_mix, @smoothing_target_blend)
 
         # Where the read position should be by the next update, at most the slew away, and a
         # quarter of the way there each sample.

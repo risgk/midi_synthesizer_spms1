@@ -43,8 +43,8 @@ module Spms1
     def process(audio_input = 0.0, modulation_input = 1.0)
       # Gain parameter is smoothed at control rate to avoid zipper noise.
       if @sample_counter == 0
-        @stage_1_gain += (@gain - @stage_1_gain) * @smoothing_target_blend
-        @current_gain += (@stage_1_gain - @current_gain) * @smoothing_target_blend
+        @stage_1_gain = Dsp.smooth(@gain, @stage_1_gain, @smoothing_target_blend)
+        @current_gain = Dsp.smooth(@stage_1_gain, @current_gain, @smoothing_target_blend)
       end
 
       @sample_counter = (@sample_counter + 1) & CONTROL_RATE_MASK

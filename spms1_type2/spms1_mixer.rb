@@ -82,10 +82,10 @@ module Spms1
     # global, and a mixer loading one twice a sample is about 1.8us a buffer.
     def process(input_1 = 0.0, input_2 = 0.0)
       if @sample_counter == 0
-        @stage_1_1 += (@target_1 - @stage_1_1) * @smoothing_target_blend
-        @current_1 += (@stage_1_1 - @current_1) * @smoothing_target_blend
-        @stage_1_2 += (@target_2 - @stage_1_2) * @smoothing_target_blend
-        @current_2 += (@stage_1_2 - @current_2) * @smoothing_target_blend
+        @stage_1_1 = Dsp.smooth(@target_1, @stage_1_1, @smoothing_target_blend)
+        @current_1 = Dsp.smooth(@stage_1_1, @current_1, @smoothing_target_blend)
+        @stage_1_2 = Dsp.smooth(@target_2, @stage_1_2, @smoothing_target_blend)
+        @current_2 = Dsp.smooth(@stage_1_2, @current_2, @smoothing_target_blend)
       end
 
       @sample_counter = (@sample_counter + 1) & CONTROL_RATE_MASK

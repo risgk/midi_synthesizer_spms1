@@ -109,10 +109,10 @@ module Spms1
     def process(pitch_input = 0.0, modulation_input = 0.0)
       if @sample_counter == 0
         # Morph and depth are smoothed at the control rate to avoid sudden jumps.
-        @stage_1_waveform += (@waveform - @stage_1_waveform) * @smoothing_target_blend
-        @current_waveform += (@stage_1_waveform - @current_waveform) * @smoothing_target_blend
-        @stage_1_modulation_depth += (@modulation_depth - @stage_1_modulation_depth) * @smoothing_target_blend
-        @current_modulation_depth += (@stage_1_modulation_depth - @current_modulation_depth) * @smoothing_target_blend
+        @stage_1_waveform = Dsp.smooth(@waveform, @stage_1_waveform, @smoothing_target_blend)
+        @current_waveform = Dsp.smooth(@stage_1_waveform, @current_waveform, @smoothing_target_blend)
+        @stage_1_modulation_depth = Dsp.smooth(@modulation_depth, @stage_1_modulation_depth, @smoothing_target_blend)
+        @current_modulation_depth = Dsp.smooth(@stage_1_modulation_depth, @current_modulation_depth, @smoothing_target_blend)
       end
 
       total_pitch = pitch_input + @tune +(modulation_input * @current_modulation_depth)
