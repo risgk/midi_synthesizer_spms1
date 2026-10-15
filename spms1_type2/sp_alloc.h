@@ -19,7 +19,6 @@
 #include <string.h>
 #include <stdio.h>      /* snprintf for the int/float formatters below */
 #include <math.h>       /* HUGE_VAL / signbit for sp_float_to_s */
-#define double float
 
 const char *sp_sprintf(const char *fmt, ...);  /* defined in the generated TU */
 
@@ -811,7 +810,26 @@ const char *sp_float_opt_inspect(sp_float v);
 const char *sp_float_opt_to_s(sp_float v);
 sp_int sp_float_denominator(sp_float f);
 sp_RbVal sp_float_numerator(sp_float f);
+#if SPINEL_BARE_METAL
+/* For the MCU: Float#to_i, which the generated code calls every sample in a synth (index =
+   pitch.to_i and the like), inline here rather than out of line in sp_cold.c, so that it is
+   inlined into the caller instead of called (from flash, on the MCU). sp_cold_bare_metal.c leaves
+   its own out. It also checks the range of sp_int, which is pointer-width: against 2^63 only, a
+   Float from 2^31 up was converted out of range on a 32-bit target (which C leaves undefined)
+   instead of raising. The same two comparisons, so the cost is the same. */
+static inline sp_int sp_float_to_i_checked(sp_float f) {
+  if (isnan(f) || isinf(f)) sp_raise_cls("FloatDomainError", sp_sprintf("%g", f));
+#if INTPTR_MAX == INT32_MAX
+  if (f >= 2147483648.0 || f < -2147483648.0)
+#else
+  if (f >= 9223372036854775808.0 || f < -9223372036854775808.0)
+#endif
+    sp_raise_cls("RangeError", "float out of Integer range (Bignum promotion pending)");
+  return (sp_int)f;
+}
+#else
 sp_int sp_float_to_i_checked(sp_float f);
+#endif
 
 /* ---- forward declarations for pointer-only box params (full types stay
    opaque to lib/sp_alloc.h -- these box functions only store the pointer). ---- */
@@ -909,8 +927,8 @@ void sp_class_freeze_id(sp_int cls_id);
 sp_bool sp_class_frozen_id(sp_int cls_id);
 
 /* ---- rounding helpers relocated from spinel_rt.h (0 optcarrot uses). ---- */
-double sp_round_half_even(double x);
-double sp_round_half_down(double x);
+sp_float sp_round_half_even(sp_float x);
+sp_float sp_round_half_down(sp_float x);
 
 /* ---- BigRational (Bignum-denominator Rational, #2469): 0 optcarrot
    uses. sp_Bigint is forward-declared above (box_bigint); the specific
@@ -924,7 +942,7 @@ sp_Bigint *sp_bigint_gcd(sp_Bigint *a, sp_Bigint *b);
 sp_Bigint *sp_bigint_div(sp_Bigint *a, sp_Bigint *b);
 char *sp_str_alloc_ext(size_t len);   /* non-inline sp_str_alloc; see sp_alloc.c */
 const char *sp_bigint_to_s(sp_Bigint *b);
-double sp_bigint_to_double(sp_Bigint *b);
+double sp_bigint_to_double(sp_Bigint *b);   /* for the MCU: double, as sp_bigint.c defines it */
 void sp_brat_scan(void *p);
 sp_RbVal sp_box_brat(sp_Bigint *num, sp_Bigint *den);
 sp_RbVal sp_brat_from_bigint(sp_Bigint *n);
@@ -949,9 +967,9 @@ void sp_marv_raise(const char *cls, const char *msg);
 /* ---- FFI array data pointers, array-kind length probe, sp_Class
    unboxing: relocated from spinel_rt.h (0 optcarrot uses). ---- */
 const int64_t *sp_ffi_int_array_data(sp_RbVal v);
-const double *sp_ffi_float_array_data(sp_RbVal v);
+const sp_float *sp_ffi_float_array_data(sp_RbVal v);
 const int64_t *sp_PolyArray_ffi_int_data(sp_PolyArray *a);
-const double *sp_PolyArray_ffi_float_data(sp_PolyArray *a);
+const sp_float *sp_PolyArray_ffi_float_data(sp_PolyArray *a);
 sp_int sp_array_kind_len(sp_RbVal el);
 sp_Class sp_unbox_class(sp_RbVal v);
 

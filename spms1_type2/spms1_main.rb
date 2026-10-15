@@ -50,6 +50,10 @@ end
 
 include Spms1
 
+# The numbers of the patch -- module ids, bus slots, NRPN entries -- and the default patch,
+# generated from spms1_patch.yaml.
+require_relative 'spms1_patch'
+
 MIDI_CH            = 0
 SAMPLE_RATE        = 48000
 AUDIO_BUFFERS      = 2
@@ -61,189 +65,30 @@ AUDIO_BUFFER_WORDS = 64
 # length; the per-sample walk stops at that first MODULE_NONE.
 MODULES_SIZE = 32
 
-# One of every module type that makes a sound, one mixer, one chorus and one delay. Instances carry
-# their number in the id rather than being indexed by one, so a second oscillator would be
-# MODULE_OSC_2 sitting next to MODULE_OSC_1 here, and the numbering after it would shift.
-MODULE_NONE      = 0
-MODULE_LFO_1     = 1
-MODULE_ENV_GEN_1 = 2
-MODULE_OSC_1     = 3
-MODULE_FILTER_1  = 4
-MODULE_AMP_1     = 5
-MODULE_MIXER_1   = 6
-MODULE_CHORUS_1  = 7
-MODULE_DELAY_1   = 8
+# The module ids (MODULE_*), in spms1_patch.rb: one of every module type that makes a sound, one
+# mixer, one chorus and one delay. Instances carry their number in the id rather than being
+# indexed by one, so a second oscillator would be MODULE_OSC_2, the next id after MODULE_DELAY_1:
+# numbers only ever get added, at the end of their range (see spms1_patch.yaml).
 
-# Slots of the `signals` bus: module outputs, control values and the note inputs in one namespace,
-# so a routing is just a slot number and one source can feed as many destinations as read its
-# slot. A slot is a plain float; its range is whatever the destination expects. Indexing an array
+# The slots of the `signals` bus (SIGNAL_*), in spms1_patch.rb: module outputs, control values
+# and the note inputs in one namespace, so a routing is just a slot number and one source can feed
+# as many destinations as read its slot. A slot is a plain float; its range is whatever the destination expects. Indexing an array
 # is what holds a routed input to one read whatever the module count: passing the candidates in as
 # arguments instead costs picks x candidates per sample, which grows quadratically.
-# Nothing in the code depends on the numbering and a patch is never saved, so the order is for the
-# reader alone and regrouping it costs only a documentation update.
 # The constants come first so that SIGNAL_NONE is 0: an NRPN entry nobody has set reads 0, and an
 # unrouted input should be silent rather than wired to whatever happens to sit in slot 0. Nothing
 # ever writes them, so they hold what the bus was filled with at startup. They are what a routing
 # reaches for when an input wants a fixed value rather than a source.
-SIGNAL_NONE                = 0
-SIGNAL_ONE                 = 1
-SIGNAL_HALF                = 2
-SIGNAL_POINT_TWO           = 3
-SIGNAL_POINT_ONE           = 4
-SIGNAL_MINUS_POINT_ONE     = 5
-SIGNAL_MINUS_POINT_TWO     = 6
-SIGNAL_MINUS_HALF          = 7
-SIGNAL_MINUS_ONE           = 8
-
-SIGNAL_LFO_1_OUTPUT        = 9
-SIGNAL_ENV_GEN_1_OUTPUT    = 10
-SIGNAL_OSC_1_OUTPUT        = 11
-SIGNAL_FILTER_1_OUTPUT     = 12
-SIGNAL_AMP_1_OUTPUT        = 13
-SIGNAL_MIXER_1_OUTPUT      = 14
-SIGNAL_CHORUS_1_OUTPUT_L   = 15
-SIGNAL_CHORUS_1_OUTPUT_R   = 16
-SIGNAL_DELAY_1_OUTPUT_L    = 17
-SIGNAL_DELAY_1_OUTPUT_R    = 18
-
-SIGNAL_LFO_1_RATE            = 19
-SIGNAL_LFO_1_LEVEL           = 20
-SIGNAL_LFO_1_POLARITY        = 21
-SIGNAL_ENV_GEN_1_ATTACK      = 22
-SIGNAL_ENV_GEN_1_DECAY       = 23
-SIGNAL_ENV_GEN_1_SUSTAIN     = 24
-SIGNAL_ENV_GEN_1_LEVEL       = 25
-SIGNAL_ENV_GEN_1_POLARITY    = 26
-SIGNAL_OSC_1_WAVEFORM        = 27
-SIGNAL_OSC_1_COARSE_TUNE     = 28
-SIGNAL_OSC_1_FINE_TUNE       = 29
-SIGNAL_OSC_1_MOD_AMOUNT      = 30
-SIGNAL_OSC_1_MOD_POLARITY    = 31
-SIGNAL_FILTER_1_CUTOFF       = 32
-SIGNAL_FILTER_1_RESONANCE    = 33
-SIGNAL_FILTER_1_GAIN         = 34
-SIGNAL_FILTER_1_MOD_AMOUNT   = 35
-SIGNAL_FILTER_1_MOD_POLARITY = 36
-SIGNAL_AMP_1_GAIN            = 37
-SIGNAL_MIXER_1_LEVEL_1       = 38
-SIGNAL_MIXER_1_POLARITY_1    = 39
-SIGNAL_MIXER_1_LEVEL_2       = 40
-SIGNAL_MIXER_1_POLARITY_2    = 41
-SIGNAL_CHORUS_1_RATE         = 42
-SIGNAL_CHORUS_1_DEPTH        = 43
-SIGNAL_CHORUS_1_MIX          = 44
-SIGNAL_DELAY_1_TIME          = 45
-SIGNAL_DELAY_1_FEEDBACK      = 46
-SIGNAL_DELAY_1_MIX           = 47
-
-SIGNAL_PITCH               = 48
-SIGNAL_GATE                = 49
-SIGNAL_BEND                = 50
-
-# Control slots no parameter owns: each is a CC put on the bus for any input or parameter to read.
-# The mod wheel first, unipolar and on CC 1, then four of each kind. The two kinds share General
-# CCs 1-4, one CC filling a slot of each, so a knob can be taken either way without a mixer to
-# shift it.
-SIGNAL_GENERAL_MOD_WHEEL   = 51
-SIGNAL_GENERAL_UNIPOLAR_1  = 52
-SIGNAL_GENERAL_UNIPOLAR_2  = 53
-SIGNAL_GENERAL_UNIPOLAR_3  = 54
-SIGNAL_GENERAL_UNIPOLAR_4  = 55
-SIGNAL_GENERAL_BIPOLAR_1   = 56
-SIGNAL_GENERAL_BIPOLAR_2   = 57
-SIGNAL_GENERAL_BIPOLAR_3   = 58
-SIGNAL_GENERAL_BIPOLAR_4   = 59
-
 SIGNALS_SIZE = 128
 
-# NRPN parameter numbers: (MSB << 7) | LSB, where the MSB picks a category and the LSB an entry.
+# The NRPN parameter numbers (NRPN_*), in spms1_patch.rb: (MSB << 7) | LSB, where the MSB picks
+# a category and the LSB an entry.
 #   0..127   active_modules[slot]
 # 128..255   what feeds each module input
 # 256..383   where each parameter's value comes from
 # 384..511   which CC fills each control slot
-NRPN_ACTIVE_MODULE_BASE = 0
-
-NRPN_SOURCE_ENV_GEN_1_GATE  = 128
-NRPN_SOURCE_OSC_1_PITCH     = 129
-NRPN_SOURCE_OSC_1_MOD       = 130
-NRPN_SOURCE_FILTER_1_AUDIO  = 131
-NRPN_SOURCE_FILTER_1_MOD    = 132
-NRPN_SOURCE_AMP_1_AUDIO     = 133
-NRPN_SOURCE_AMP_1_MOD       = 134
-NRPN_SOURCE_MIXER_1_IN_1    = 135
-NRPN_SOURCE_MIXER_1_IN_2    = 136
-NRPN_SOURCE_CHORUS_1_AUDIO  = 137
-NRPN_SOURCE_DELAY_1_AUDIO_L = 138
-NRPN_SOURCE_DELAY_1_AUDIO_R = 139
-NRPN_SOURCE_OUTPUT_L        = 140
-NRPN_SOURCE_OUTPUT_R        = 141
-
-NRPN_SOURCE_LFO_1_RATE            = 256
-NRPN_SOURCE_LFO_1_LEVEL           = 257
-NRPN_SOURCE_LFO_1_POLARITY        = 258
-NRPN_SOURCE_ENV_GEN_1_ATTACK      = 259
-NRPN_SOURCE_ENV_GEN_1_DECAY       = 260
-NRPN_SOURCE_ENV_GEN_1_SUSTAIN     = 261
-NRPN_SOURCE_ENV_GEN_1_LEVEL       = 262
-NRPN_SOURCE_ENV_GEN_1_POLARITY    = 263
-NRPN_SOURCE_OSC_1_WAVEFORM        = 264
-NRPN_SOURCE_OSC_1_COARSE_TUNE     = 265
-NRPN_SOURCE_OSC_1_FINE_TUNE       = 266
-NRPN_SOURCE_OSC_1_MOD_AMOUNT      = 267
-NRPN_SOURCE_OSC_1_MOD_POLARITY    = 268
-NRPN_SOURCE_FILTER_1_CUTOFF       = 269
-NRPN_SOURCE_FILTER_1_RESONANCE    = 270
-NRPN_SOURCE_FILTER_1_GAIN         = 271
-NRPN_SOURCE_FILTER_1_MOD_AMOUNT   = 272
-NRPN_SOURCE_FILTER_1_MOD_POLARITY = 273
-NRPN_SOURCE_AMP_1_GAIN            = 274
-NRPN_SOURCE_MIXER_1_LEVEL_1       = 275
-NRPN_SOURCE_MIXER_1_POLARITY_1    = 276
-NRPN_SOURCE_MIXER_1_LEVEL_2       = 277
-NRPN_SOURCE_MIXER_1_POLARITY_2    = 278
-NRPN_SOURCE_CHORUS_1_RATE         = 279
-NRPN_SOURCE_CHORUS_1_DEPTH        = 280
-NRPN_SOURCE_CHORUS_1_MIX          = 281
-NRPN_SOURCE_DELAY_1_TIME          = 282
-NRPN_SOURCE_DELAY_1_FEEDBACK      = 283
-NRPN_SOURCE_DELAY_1_MIX           = 284
-
 # A CC number of 0 means the parameter has no CC: its control slot holds 0.0 -- the bottom of a
 # unipolar dial, the middle of a bipolar one -- whatever CC it had before, so a patch sets it alone.
-NRPN_CC_LFO_1_RATE            = 384
-NRPN_CC_LFO_1_LEVEL           = 385
-NRPN_CC_LFO_1_POLARITY        = 386
-NRPN_CC_ENV_GEN_1_ATTACK      = 387
-NRPN_CC_ENV_GEN_1_DECAY       = 388
-NRPN_CC_ENV_GEN_1_SUSTAIN     = 389
-NRPN_CC_ENV_GEN_1_LEVEL       = 390
-NRPN_CC_ENV_GEN_1_POLARITY    = 391
-NRPN_CC_OSC_1_WAVEFORM        = 392
-NRPN_CC_OSC_1_COARSE_TUNE     = 393
-NRPN_CC_OSC_1_FINE_TUNE       = 394
-NRPN_CC_OSC_1_MOD_AMOUNT      = 395
-NRPN_CC_OSC_1_MOD_POLARITY    = 396
-NRPN_CC_FILTER_1_CUTOFF       = 397
-NRPN_CC_FILTER_1_RESONANCE    = 398
-NRPN_CC_FILTER_1_GAIN         = 399
-NRPN_CC_FILTER_1_MOD_AMOUNT   = 400
-NRPN_CC_FILTER_1_MOD_POLARITY = 401
-NRPN_CC_AMP_1_GAIN            = 402
-NRPN_CC_MIXER_1_LEVEL_1       = 403
-NRPN_CC_MIXER_1_POLARITY_1    = 404
-NRPN_CC_MIXER_1_LEVEL_2       = 405
-NRPN_CC_MIXER_1_POLARITY_2    = 406
-NRPN_CC_CHORUS_1_RATE         = 407
-NRPN_CC_CHORUS_1_DEPTH        = 408
-NRPN_CC_CHORUS_1_MIX          = 409
-NRPN_CC_DELAY_1_TIME          = 410
-NRPN_CC_DELAY_1_FEEDBACK      = 411
-NRPN_CC_DELAY_1_MIX           = 412
-NRPN_CC_GENERAL_MOD_WHEEL     = 413
-NRPN_CC_GENERAL_1             = 414
-NRPN_CC_GENERAL_2             = 415
-NRPN_CC_GENERAL_3             = 416
-NRPN_CC_GENERAL_4             = 417
 
 # CC value normalization. Each control slot is unipolar or bipolar, matching the range its
 # parameter clamps to, and takes the converter of its kind: unipolar is 0.0..1.0, the span of an
@@ -291,14 +136,7 @@ audio_buffer_r = Array.new(AUDIO_BUFFER_WORDS, 0.0)
 # carries across buffers, since a routing with feedback reads last sample's value and at a buffer
 # edge that is the previous iteration's.
 signals = Array.new(SIGNALS_SIZE, 0.0)
-signals[SIGNAL_ONE]             =  1.0
-signals[SIGNAL_HALF]            =  0.5
-signals[SIGNAL_POINT_TWO]       =  0.2
-signals[SIGNAL_POINT_ONE]       =  0.1
-signals[SIGNAL_MINUS_POINT_ONE] = -0.1
-signals[SIGNAL_MINUS_POINT_TWO] = -0.2
-signals[SIGNAL_MINUS_HALF]      = -0.5
-signals[SIGNAL_MINUS_ONE]       = -1.0
+spms1_fill_constant_signals(signals)
 
 # The default patch, written into the NRPN table the loop reads it back from. Every module is in
 # the run order, so a patch only ever has to route, never to switch something on first. The mixer
@@ -314,116 +152,17 @@ signals[SIGNAL_MINUS_ONE]       = -1.0
 # the envelope as it is. The chorus and the delay run last, after the amp: the chorus takes the mono
 # amp and spreads it into a left and a right, the delay takes the two sides, and its two outputs
 # are what the final output's left and right read.
-C.set_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 0, MODULE_LFO_1)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 1, MODULE_ENV_GEN_1)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 2, MODULE_MIXER_1)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 3, MODULE_OSC_1)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 4, MODULE_FILTER_1)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 5, MODULE_AMP_1)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 6, MODULE_CHORUS_1)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + 7, MODULE_DELAY_1)
-
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_1_GATE , SIGNAL_GATE)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PITCH    , SIGNAL_PITCH)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_MOD      , SIGNAL_LFO_1_OUTPUT)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_AUDIO , SIGNAL_OSC_1_OUTPUT)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD   , SIGNAL_ENV_GEN_1_OUTPUT)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_AUDIO    , SIGNAL_FILTER_1_OUTPUT)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_MOD      , SIGNAL_ENV_GEN_1_OUTPUT)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_CHORUS_1_AUDIO , SIGNAL_AMP_1_OUTPUT)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_AUDIO_L, SIGNAL_CHORUS_1_OUTPUT_L)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_AUDIO_R, SIGNAL_CHORUS_1_OUTPUT_R)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OUTPUT_L       , SIGNAL_DELAY_1_OUTPUT_L)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OUTPUT_R       , SIGNAL_DELAY_1_OUTPUT_R)
-
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_RATE            , SIGNAL_LFO_1_RATE)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_LEVEL           , SIGNAL_ONE)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_POLARITY        , SIGNAL_POINT_ONE)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_1_ATTACK      , SIGNAL_ENV_GEN_1_ATTACK)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_1_DECAY       , SIGNAL_ENV_GEN_1_DECAY)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_1_SUSTAIN     , SIGNAL_ENV_GEN_1_SUSTAIN)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_1_LEVEL       , SIGNAL_ONE)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_1_POLARITY    , SIGNAL_HALF)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_WAVEFORM        , SIGNAL_OSC_1_WAVEFORM)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_COARSE_TUNE     , SIGNAL_OSC_1_COARSE_TUNE)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_FINE_TUNE       , SIGNAL_OSC_1_FINE_TUNE)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_MOD_AMOUNT      , SIGNAL_OSC_1_MOD_AMOUNT)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_MOD_POLARITY    , SIGNAL_HALF)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_CUTOFF       , SIGNAL_FILTER_1_CUTOFF)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_RESONANCE    , SIGNAL_FILTER_1_RESONANCE)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_GAIN         , SIGNAL_FILTER_1_GAIN)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_AMOUNT   , SIGNAL_FILTER_1_MOD_AMOUNT)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_POLARITY , SIGNAL_HALF)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_GAIN            , SIGNAL_AMP_1_GAIN)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_LEVEL_1       , SIGNAL_ONE)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_POLARITY_1    , SIGNAL_HALF)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_LEVEL_2       , SIGNAL_ONE)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_POLARITY_2    , SIGNAL_HALF)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_CHORUS_1_RATE         , SIGNAL_CHORUS_1_RATE)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_CHORUS_1_DEPTH        , SIGNAL_CHORUS_1_DEPTH)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_CHORUS_1_MIX          , SIGNAL_CHORUS_1_MIX)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_TIME          , SIGNAL_DELAY_1_TIME)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_FEEDBACK      , SIGNAL_DELAY_1_FEEDBACK)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_MIX           , SIGNAL_DELAY_1_MIX)
-
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_RATE          , 3)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_1_ATTACK    , 73)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_1_DECAY     , 75)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_1_SUSTAIN   , 30)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_WAVEFORM      , 20)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_COARSE_TUNE   , 86)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_FINE_TUNE     , 70)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_MOD_AMOUNT    , 13)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_CUTOFF     , 74)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_RESONANCE  , 71)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_GAIN       , 112)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_MOD_AMOUNT , 24)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_AMP_1_GAIN          , 15)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_CHORUS_1_RATE       , 58)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_CHORUS_1_DEPTH      , 59)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_CHORUS_1_MIX        , 93)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_DELAY_1_TIME        , 55)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_DELAY_1_FEEDBACK    , 56)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_DELAY_1_MIX         , 94)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_MOD_WHEEL   , 1)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_1           , 16)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_2           , 17)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_3           , 18)
-C.set_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_4           , 19)
-
-C.set_midi_cc_value(MIDI_CH, 3  , 64 ) # LFO 1 Rate
-C.set_midi_cc_value(MIDI_CH, 73 , 4  ) # EG 1 Attack
-C.set_midi_cc_value(MIDI_CH, 75 , 96 ) # EG 1 Decay
-C.set_midi_cc_value(MIDI_CH, 30 , 124) # EG 1 Sustain
-C.set_midi_cc_value(MIDI_CH, 20 , 4  ) # Osc 1 Wave
-C.set_midi_cc_value(MIDI_CH, 86 , 64 ) # Osc 1 Coarse Tune
-C.set_midi_cc_value(MIDI_CH, 70 , 64 ) # Osc 1 Fine Tune
-C.set_midi_cc_value(MIDI_CH, 13 , 4  ) # Osc 1 Mod Amt
-C.set_midi_cc_value(MIDI_CH, 74 , 100) # Filter 1 Cutoff
-C.set_midi_cc_value(MIDI_CH, 71 , 94 ) # Filter 1 Resonance
-C.set_midi_cc_value(MIDI_CH, 112, 64 ) # Filter 1 Gain
-C.set_midi_cc_value(MIDI_CH, 24 , 28 ) # Filter 1 Mod Amt
-C.set_midi_cc_value(MIDI_CH, 15 , 124) # Amp 1 Gain
-C.set_midi_cc_value(MIDI_CH, 58 , 64 ) # Chorus 1 Rate
-C.set_midi_cc_value(MIDI_CH, 59 , 64 ) # Chorus 1 Depth
-C.set_midi_cc_value(MIDI_CH, 93 , 64 ) # Chorus 1 Mix
-C.set_midi_cc_value(MIDI_CH, 55 , 64 ) # Delay 1 Time
-C.set_midi_cc_value(MIDI_CH, 56 , 64 ) # Delay 1 Feedback
-C.set_midi_cc_value(MIDI_CH, 94 , 34 ) # Delay 1 Mix
-C.set_midi_cc_value(MIDI_CH, 1  , 4  ) # General Mod Wheel
-# Each of these fills a unipolar and a bipolar slot at once, and CC 64 is the one value that puts
-# neither at an end: the unipolar slot at 0.5, the bipolar at 0.0.
-C.set_midi_cc_value(MIDI_CH, 16 , 64 ) # General 1
-C.set_midi_cc_value(MIDI_CH, 17 , 64 ) # General 2
-C.set_midi_cc_value(MIDI_CH, 18 , 64 ) # General 3
-C.set_midi_cc_value(MIDI_CH, 19 , 64 ) # General 4
+spms1_write_default_patch(MIDI_CH)
 
 C.set_sample_rate(SAMPLE_RATE)
 C.set_audio_buffers(AUDIO_BUFFERS)
 C.set_audio_buffer_words(AUDIO_BUFFER_WORDS)
 C.start_audio
 
-loop do
+# while rather than loop: Spinel builds a loop block with a setjmp, for the StopIteration that ends
+# one, which makes every local written inside it volatile, so that the per-sample code loaded and
+# stored each of them, slot and i included, at every use: 6% of all instructions.
+while true
   C.start_debug_measure
 
   signals[SIGNAL_PITCH] = C.get_midi_note_on_pitch(MIDI_CH).to_f * (1.0 / 120.0) - 0.5

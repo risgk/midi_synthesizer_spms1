@@ -66,7 +66,7 @@ void sp_mar_sym(sp_mar_buf *b, const char *name) {SP_GC_ROOT_STR(name);
 }
 /* CRuby's Marshal float text: the shortest %.g that round-trips, exponent
    normalized ("1e+02" -> "1e2"); 0.0 is "0", 100.0 is "1e2", 0.1 is "0.1". */
-static const char *sp_mar_float_str(double f, char *buf, size_t bufsz) {SP_GC_ROOT_STR(buf);
+static const char *sp_mar_float_str(sp_float f, char *buf, size_t bufsz) {SP_GC_ROOT_STR(buf);
   for (int prec = 1; prec <= 17; prec++) {
     sp_format_float(f, buf, bufsz, 'g', prec, '\0');   /* locale-independent */
     double rt = 0.0; sp_read_float(buf, NULL, &rt);
@@ -114,7 +114,7 @@ void sp_mar_w(sp_mar_buf *b, sp_RbVal v) {
       sp_float f = v.v.f; const char *fs; char fbuf[64];
       if (isnan(f)) fs = "nan";
       else if (isinf(f)) fs = f < 0 ? "-inf" : "inf";
-      else fs = sp_mar_float_str((double)f, fbuf, sizeof fbuf);
+      else fs = sp_mar_float_str((sp_float)f, fbuf, sizeof fbuf);
       sp_mar_bytes(b, fs, strlen(fs));
       break;
     }

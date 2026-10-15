@@ -21,7 +21,11 @@
 /* Must match sp_types.h: sp_int is pointer-width (int64 on 64-bit,
    int32 on 32-bit) so this TU's helper ABI agrees with the generated TU. */
 typedef intptr_t sp_int;
+#if SPINEL_FLOAT32   /* for the MCU: as sp_types.h decides */
 typedef float  sp_float;
+#else
+typedef double  sp_float;
+#endif
 /* 10^p fits sp_int only up to this exponent (p>= it collapses to 0):
    10^19 > INT64_MAX, 10^10 > INT32_MAX. */
 #if INTPTR_MAX == INT32_MAX
@@ -79,7 +83,7 @@ else {
    separator (CRuby's `"1_000.5".to_f == 1000.5`), returning 0.0 when no
    number leads. Underscores are stripped into a small scratch buffer before
    strtod so the C parser (which stops at `_`) sees clean digits. */
-double sp_str_to_f_cruby(const char *s) {
+sp_float sp_str_to_f_cruby(const char *s) {
   if (!s) return 0.0;
   const char *p = s;
   while (isspace((unsigned char)*p)) p++;
@@ -398,7 +402,7 @@ sp_float sp_str_to_f_lenient(const char *s) { return sp_str_to_f_impl(s, 1); }
    always uses '.', matching Ruby, regardless of the process locale. The number
    primitives (Float#to_s / to_f) are locale-free via fp_uscale; this is only
    for the printf-compatible field/flag machinery libc handles best. */
-int sp_snprintf_c_float(char *buf, size_t size, const char *fmt, double v) {
+int sp_snprintf_c_float(char *buf, size_t size, const char *fmt, sp_float v) {
   static locale_t sp_c_loc = (locale_t)0;
   if (!sp_c_loc) sp_c_loc = newlocale(LC_ALL_MASK, "C", (locale_t)0);
   if (sp_c_loc) {
@@ -417,11 +421,11 @@ int sp_snprintf_c_float(char *buf, size_t size, const char *fmt, double v) {
    identify that double. Ties there go to even, so 2.345 answers 2.34 where C
    answers 2.35. Round to `keep` significant digits the same way and rebuild
    the value, leaving libc to lay out the field. */
-static double sp_float_round_shortest(double v, int keep) {
+static sp_float sp_float_round_shortest(sp_float v, int keep) {
   if (!isfinite(v) || v == 0.0 || keep <= 0 || keep > 17) return v;
   char digs[48];
   int nd = 0;
-  double a = v < 0 ? -v : v;
+  sp_float a = v < 0 ? -v : v;
   int dp = sp_float_shortest(a, digs, &nd);
   /* nothing to re-round: the cut falls before the first digit (where Ruby's
      own dtoa consults the exact value instead) or past the last one. A value
@@ -448,7 +452,7 @@ static double sp_float_round_shortest(double v, int keep) {
    %f counts them from the decimal point, %e from the first digit, %g is a
    significant-digit count of its own. A `*` precision takes an argument this
    call does not receive, so such a format is left to libc. */
-int sp_snprintf_ruby_float(char *buf, size_t size, const char *fmt, double v) {
+int sp_snprintf_ruby_float(char *buf, size_t size, const char *fmt, sp_float v) {
   size_t n = fmt ? strlen(fmt) : 0;
   char conv = n ? fmt[n - 1] : 0;
   if ((conv == 'f' || conv == 'e' || conv == 'E' || conv == 'g' || conv == 'G') &&
@@ -463,7 +467,7 @@ int sp_snprintf_ruby_float(char *buf, size_t size, const char *fmt, double v) {
     if (conv == 'f') {
       char digs[48];
       int nd = 0;
-      double a = v < 0 ? -v : v;
+      sp_float a = v < 0 ? -v : v;
       keep = sp_float_shortest(a, digs, &nd) + prec + 1;
     }
     else if (conv == 'g' || conv == 'G') keep = prec ? prec : 1;
@@ -571,7 +575,7 @@ sp_int sp_str_oct(const char*s){SP_GC_ROOT_STR(s);
    settle the tie the same way CRuby's rational arithmetic does, which the
    library conversion alone cannot: it breaks exact ties to even, and Ruby's
    default breaks them away from zero. */
-static double sp_prec_decimal_round(double x, intptr_t nd, int op) {
+static sp_float sp_prec_decimal_round(sp_float x, intptr_t nd, int op) {
   char buf[512];
   int extra = 25;
   snprintf(buf, sizeof buf, "%.*f", (int)nd + extra, x);
@@ -582,7 +586,7 @@ static double sp_prec_decimal_round(double x, intptr_t nd, int op) {
   int tail_nonzero = 0;
   for (char *q = cut + 1; *q; q++) if (*q != '0') { tail_nonzero = 1; break; }
   *cut = '\0';                        /* the truncation toward zero */
-  double r = strtod(buf, NULL);
+  sp_float r = strtod(buf, NULL);
   int away;
   if (cutd > '5') away = 1;
   else if (cutd < '5') away = 0;
@@ -594,7 +598,7 @@ static double sp_prec_decimal_round(double x, intptr_t nd, int op) {
   }
   else away = 1;                      /* the default: ties leave zero behind */
   if (!away) return r;
-  double step = 1.0 / pow(10, (double)nd);
+  sp_float step = 1.0 / pow(10, (sp_float)nd);
   snprintf(buf, sizeof buf, "%.*f", (int)nd, x < 0.0 ? r - step : r + step);
   return strtod(buf, NULL);
 }
@@ -604,7 +608,7 @@ static int sp_prec_overflow(intptr_t nd, int binexp) {
 static int sp_prec_underflow(intptr_t nd, int binexp) {
   return nd < -(binexp > 0 ? binexp / 3 + 1 : binexp / 4);
 }
-double sp_float_prec_op(double x, intptr_t nd, int op) {
+sp_float sp_float_prec_op(sp_float x, intptr_t nd, int op) {
   if (x == 0.0 || !isfinite(x) || nd <= 0) return x;
   if (op == SP_PREC_TRUNC) return sp_float_prec_op(x, nd, signbit(x) ? SP_PREC_CEIL : SP_PREC_FLOOR);
   int binexp = 0;
@@ -622,14 +626,14 @@ double sp_float_prec_op(double x, intptr_t nd, int op) {
      The decimal conversion is the same exact answer. floor and ceil keep the
      scaled form -- that is what CRuby answers for them. */
   if (nd >= DBL_DIG && op != SP_PREC_FLOOR && op != SP_PREC_CEIL) return sp_prec_decimal_round(x, nd, op);
-  double s = pow(10, (double)nd);
-  double xs = x * s;
+  sp_float s = pow(10, (sp_float)nd);
+  sp_float xs = x * s;
   if (!isfinite(s) || !isfinite(xs)) return x;
-  double f;
+  sp_float f;
   switch (op) {
     case SP_PREC_FLOOR: {
       f = floor(xs);
-      double res = (f + 1) / s;
+      sp_float res = (f + 1) / s;
       return res > x ? f / s : res;
     }
     case SP_PREC_CEIL:
@@ -637,9 +641,12 @@ double sp_float_prec_op(double x, intptr_t nd, int op) {
     case SP_PREC_HALF_EVEN: {
       /* the tie is decided on the fractional part alone, so the integral part
          is split off first and only rejoined at the end */
-      double u, v, us, vs, ff, d, uf;
-//      v = modf(x, &u);
+      sp_float u, v, us, vs, ff, d, uf;
+#if !SPINEL_FLOAT32   /* for the MCU: modff where sp_float is float */
+      v = modf(x, &u);
+#else
       v = modff(x, &u);
+#endif
       us = u * s; vs = v * s;
       if (x > 0.0) {
         ff = floor(vs); uf = us + ff; d = vs - ff;

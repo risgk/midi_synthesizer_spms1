@@ -15,6 +15,13 @@
 
 uint8_t  g_midi_note_on_pitch[16]  = {60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60};
 uint8_t  g_midi_note_on_state[16]  = {0};
+// The note held before the one sounding, which comes back when that one is let go, or
+// SPMS1_NO_NOTE. One note is remembered, no more: enough for a trill.
+#define SPMS1_NO_NOTE (0xFF)
+uint8_t  g_midi_note_prev_pitch[16] = {SPMS1_NO_NOTE, SPMS1_NO_NOTE, SPMS1_NO_NOTE, SPMS1_NO_NOTE,
+                                       SPMS1_NO_NOTE, SPMS1_NO_NOTE, SPMS1_NO_NOTE, SPMS1_NO_NOTE,
+                                       SPMS1_NO_NOTE, SPMS1_NO_NOTE, SPMS1_NO_NOTE, SPMS1_NO_NOTE,
+                                       SPMS1_NO_NOTE, SPMS1_NO_NOTE, SPMS1_NO_NOTE, SPMS1_NO_NOTE};
 uint8_t  g_midi_cc_values[16][128] = {{0}};
 // Pitch bend arrives 14-bit and centred, and the MIDI library hands it over already signed,
 // so it is kept that way rather than folded into the 7-bit tables above.
@@ -146,15 +153,25 @@ void handle_midi_nrpn_cc(uint8_t midi_ch, uint8_t number, uint8_t value) {
   }
 }
 
-// The handlers, by 0-based channel. A note off closes the gate only for the pitch that last came
-// on, and a note on at velocity 0 is a note off, as the MIDI library the sketch uses treats it.
+// The handlers, by 0-based channel. A note on remembers the note it takes over from, if that one
+// is still held, and a note off of the note sounding brings the remembered one back with the gate
+// left open (legato), or closes the gate if there is none. A note off of the remembered note only
+// forgets it, and one for any other pitch is ignored. A note on at velocity 0 is a note off, as the
+// MIDI library the sketch uses treats it.
 void spms1_handle_note_off(uint8_t midi_ch, uint8_t pitch) {
   if (midi_ch >= 16) {
     return;
   }
 
   if (pitch == g_midi_note_on_pitch[midi_ch]) {
-    set_midi_note_on_state(midi_ch, 0);
+    if (g_midi_note_prev_pitch[midi_ch] != SPMS1_NO_NOTE) {
+      set_midi_note_on_pitch(midi_ch, g_midi_note_prev_pitch[midi_ch]);
+      g_midi_note_prev_pitch[midi_ch] = SPMS1_NO_NOTE;
+    } else {
+      set_midi_note_on_state(midi_ch, 0);
+    }
+  } else if (pitch == g_midi_note_prev_pitch[midi_ch]) {
+    g_midi_note_prev_pitch[midi_ch] = SPMS1_NO_NOTE;
   }
 }
 
@@ -162,6 +179,17 @@ void spms1_handle_note_on(uint8_t midi_ch, uint8_t pitch, uint8_t velocity) {
   if (velocity == 0) {
     spms1_handle_note_off(midi_ch, pitch);
     return;
+  }
+
+  if (midi_ch >= 16) {
+    return;
+  }
+
+  // The same note again keeps what is remembered.
+  if (!g_midi_note_on_state[midi_ch]) {
+    g_midi_note_prev_pitch[midi_ch] = SPMS1_NO_NOTE;
+  } else if (pitch != g_midi_note_on_pitch[midi_ch]) {
+    g_midi_note_prev_pitch[midi_ch] = g_midi_note_on_pitch[midi_ch];
   }
 
   set_midi_note_on_pitch(midi_ch, pitch);

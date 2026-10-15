@@ -340,7 +340,7 @@ sp_Rational sp_float_to_rational(sp_float f) {
   if (isnan(f) || isinf(f)) sp_raise_cls("FloatDomainError", isnan(f) ? "NaN" : "Infinity");
   if (f == 0.0) { sp_Rational z; z.num = 0; z.den = 1; return z; }
   int e;
-  double m = frexp((double)f, &e);          /* f = m * 2^e, 0.5 <= |m| < 1 */
+  sp_float m = frexp((sp_float)f, &e);          /* f = m * 2^e, 0.5 <= |m| < 1 */
   for (int i = 0; i < 53 && m != floor(m); i++) { m *= 2.0; e--; }
   sp_rat_wide num = (sp_rat_wide)m;          /* integer mantissa (fits in 54 bits) */
   if (e >= 0) {
@@ -357,8 +357,8 @@ sp_Rational sp_float_to_rational(sp_float f) {
 /* Simplest p/q with lo <= p/q <= hi, for 0 < lo <= hi. Classic continued-fraction
    "simplest rational in an interval" recursion; the convergent depth is bounded by
    the interval, so q stays small for sane epsilons. */
-static void sp_simplest_pos(double lo, double hi, sp_rat_wide *np, sp_rat_wide *dp) {
-  double fl = floor(lo);
+static void sp_simplest_pos(sp_float lo, sp_float hi, sp_rat_wide *np, sp_rat_wide *dp) {
+  sp_float fl = floor(lo);
   if (fl == lo) { *np = (sp_rat_wide)fl; *dp = 1; return; }   /* lo is an integer */
   if (fl == floor(hi)) {                                       /* no integer in (lo,hi) */
     sp_rat_wide n, d;
@@ -369,14 +369,14 @@ static void sp_simplest_pos(double lo, double hi, sp_rat_wide *np, sp_rat_wide *
   }
   *np = (sp_rat_wide)fl + 1; *dp = 1;                          /* fl+1 lies in [lo,hi] */
 }
-static sp_Rational sp_rationalize_interval(double lo, double hi) {
-  if (lo > hi) { double t = lo; lo = hi; hi = t; }
+static sp_Rational sp_rationalize_interval(sp_float lo, sp_float hi) {
+  if (lo > hi) { sp_float t = lo; lo = hi; hi = t; }
   if (lo <= 0.0 && hi >= 0.0) { sp_Rational z; z.num = 0; z.den = 1; return z; }
   int neg = 0;
-  if (hi < 0.0) { double t = -lo; lo = -hi; hi = t; neg = 1; } /* fold to positives */
+  if (hi < 0.0) { sp_float t = -lo; lo = -hi; hi = t; neg = 1; } /* fold to positives */
   /* Any p/q in [lo,hi] has p >= lo*q >= lo, so lo past sp_int can't fit and
      floor(lo) would also overflow the (double->sp_rat_wide) cast below. */
-  if (lo > (double)INTPTR_MAX) sp_raise_cls("RangeError", "Rational out of sp_int range");
+  if (lo > (sp_float)INTPTR_MAX) sp_raise_cls("RangeError", "Rational out of sp_int range");
   sp_rat_wide n, d;
   sp_simplest_pos(lo, hi, &n, &d);
   if (neg) n = -n;
@@ -384,8 +384,8 @@ static sp_Rational sp_rationalize_interval(double lo, double hi) {
 }
 sp_Rational sp_float_rationalize(sp_float f, sp_float eps) {
   if (isnan(f) || isinf(f)) sp_raise_cls("FloatDomainError", isnan(f) ? "NaN" : "Infinity");
-  double e = eps < 0 ? -eps : eps;
-  return sp_rationalize_interval((double)f - e, (double)f + e);
+  sp_float e = eps < 0 ? -eps : eps;
+  return sp_rationalize_interval((sp_float)f - e, (sp_float)f + e);
 }
 /* No-arg rationalize: simplest rational that round-trips to this exact double,
    i.e. lying in the half-ulp interval around f. */
@@ -400,15 +400,15 @@ sp_Rational sp_float_rationalize0(sp_float f) {
   if (isnan(f) || isinf(f)) sp_raise_cls("FloatDomainError", isnan(f) ? "NaN" : "Infinity");
   if (f == 0.0) { sp_Rational z; z.num = 0; z.den = 1; return z; }
   int neg = f < 0.0;
-  double x = neg ? -(double)f : (double)f;
-  double v = x;
+  sp_float x = neg ? -(sp_float)f : (sp_float)f;
+  sp_float v = x;
   sp_rat_wide h0 = 1, h1 = 0, k0 = 0, k1 = 1;  /* convergent num/den recurrences */
   sp_rat_wide num = 0, den = 1;
   int found = 0;
   for (int i = 0; i < 64 && !found; i++) {
     /* floor(v) out of sp_rat_wide range would make the cast below UB; any such
        convergent exceeds INTPTR_MAX anyway, so bail to the exact-ratio fallback. */
-    if (v > (double)INTPTR_MAX) break;
+    if (v > (sp_float)INTPTR_MAX) break;
     sp_rat_wide a = (sp_rat_wide)floor(v);
     /* guard the convergent against sp_int overflow before forming it (all in
        integer arithmetic: a*h0 + h1 <= INTPTR_MAX). */
@@ -418,9 +418,9 @@ sp_Rational sp_float_rationalize0(sp_float f) {
     sp_rat_wide h = a * h0 + h1;
     sp_rat_wide k = a * k0 + k1;
     num = h; den = k;
-    if (k != 0 && (double)h / (double)k == x) { found = 1; break; }
+    if (k != 0 && (sp_float)h / (sp_float)k == x) { found = 1; break; }
     h1 = h0; h0 = h; k1 = k0; k0 = k;
-    double frac = v - a;
+    sp_float frac = v - a;
     if (frac == 0.0) break;
     v = 1.0 / frac;
   }

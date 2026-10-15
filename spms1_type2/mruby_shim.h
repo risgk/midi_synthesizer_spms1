@@ -22,7 +22,12 @@
 /* Basic mruby types */
 typedef int64_t mrb_int;
 typedef uint64_t mrb_uint;
+/* For the MCU: as sp_types.h decides */
+#if !defined(SPINEL_FLOAT32) || SPINEL_FLOAT32
 typedef float mrb_float;
+#else
+typedef double mrb_float;
+#endif
 typedef int mrb_bool;
 #define TRUE 1
 #define FALSE 0

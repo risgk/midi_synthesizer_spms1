@@ -1,10 +1,11 @@
-MIDI Synthesizer SPMS-1 (type-2) v0.0.2
+MIDI Synthesizer SPMS-1 (type-2) v0.0.3
 =======================================
 
 - Spinel (Ruby AOT コンパイラ) で作った、Raspberry Pi Pico 2 用のモノフォニック・セミモジュラー MIDI シンセサイザー
 - 音源モジュールとして MIDI で制御します
+- 後着優先で 1 ノート分を記憶: 前のノートを押さえたまま新しいノートを離すと、前のノートにレガートで戻ります (トリルなどに)
 - 48 kHz オーディオ出力: I2S DAC による 24 bit、または PWM Audio (DAC 不要)
-- フィルタ: ZDF/TPT ステート・バリアブル・フィルタ (遅延ソフトクリッピング付き)
+- フィルタ: ZDF/TPT ステート・バリアブル・フィルタ (BP 積分器の非線形リーク付き、1 ステップ・ニュートン法で解く)
 - コーラス: モノラル入力・ステレオ出力、実行順に入るモジュール
 - ディレイ: ステレオ、フィードバック付き、実行順に入るモジュール (最大 340 ms)
 - ステレオ出力: コーラスがモノラルの音を左右に広げ、ディレイが左右を分けたまま運びます
@@ -50,12 +51,17 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.2
     - 情報: <https://github.com/FortySevenEffects/arduino_midi_library>
 - Spinel
     - リリース: 2026.09.12 <https://github.com/matz/spinel/tree/2026.09.12>
-    - Spinel の出力ファイル "spms1_main.c" に手を入れる必要はありません。本スケッチの "spinel_rt.h" が
+    - Spinel の出力ファイル "spms1_main.c" に手を入れる必要はありません。本スケッチの
+      "spinel_rt_mcu_head.h" ("spinel_rt.h" の先頭で読み込み) が
       `#define main __attribute__((section(".time_critical"), flatten)) Spms1_main` を持っており、改名と
       シンセ本体の RAM 配置を同時に行います。手で改名すると、このマクロが一致しなく
       なって属性が付かず、本体が flash から実行されます
     - "spms1_main.c" は `spinel spms1_main.rb -c --rbs sig` で生成します。"sig" の型シードが
       フィルタの状態をボックス化させずに保ちます。必要な理由は "sig/spms1_filter.rbs" にあります
+- Ruby (CRuby): パッチの番号や初期パッチを変えるとき。これらは "spms1_patch.yaml" にまとめてあり、
+  `ruby patch_gen/spms1_patch_gen.rb` が "spms1_patch.rb" ("spms1_main.rb" が読み込みます)、
+  "spms1_editor.html" のテーブル、この README と "README.md" の NRPN の表に書き出します。実行したあと、
+  "spms1_main.c" を生成し直してください。`--check` は、ファイルが最新かどうかを調べるだけです
 
 
 使い方
@@ -90,7 +96,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.2
     - デバイス名: "SPMS-1 (type-2)"
 - UART MIDI 入力
     - 速度: 31250 bps
-    - GP4 ピンと GP5 ピンを TX と RX に、`SoftwareSerial` で使います
+    - GP4 ピンと GP5 ピンを TX と RX に、`SerialPIO` で使います
     - `SPMS1_UART_MIDI_TX_PIN` と `SPMS1_UART_MIDI_RX_PIN` を書き換えれば、TX と RX の入れ替えを含め、
       どのピンでも使えます
     - DIN/TRS MIDI は、たとえば Adafruit MIDI FeatherWing Kit などを使う (そして手を入れる) ことで利用できます
@@ -179,8 +185,11 @@ flowchart LR
 
 #### Filter 1
 
-ゼロディレイ・フィードバックの状態変数フィルタです。Σ ではループの式を閉形式で解き、HP を一度に
-求めます。ソフトクリップが掛かるのは BP の状態を読み出すところだけで、これがレゾナンスを抑えます。
+ゼロディレイ・フィードバックの状態変数フィルタです。BP の積分器は、BP がソフトクリップの曲線に
+入るほど強く漏れ (リーク)、これがレゾナンスを抑えます。小さな信号ではリークはほぼゼロなので、
+通過帯域はほぼクリーンです。リークを含むループの式はサンプルごとに 1 ステップ・ニュートン法で解きます。
+初期値はリークを除いた線形の解で、そこから 1 ステップでほぼ収束します。リークの速さは時間で
+決まっているので、サンプルレートを変えても音は変わりません。
 LP の状態は線形のままで、通常の使い方では届かない保険として ±16 のクランプだけがあります。出力
 クリップはフィルタの最後にあります。レゾナンスのつまみの上端では k が負になり、ループが発振します。
 
@@ -191,7 +200,7 @@ flowchart LR
   I1 -->|BP| I2["積分器2<br/>LP・状態 s2"]
   I2 -->|LP| OC["出力クリップ<br/>0.75まで線形"]
   OC --> OUT([出力])
-  SC["状態クリップ<br/>上限4.0・α補正"] -.- I1
+  SC["非線形リーク<br/>上限4.0・1ステップ・ニュートン法"] -.- I1
   L2["s2 は線形<br/>保険のクランプ ±16"] -.- I2
   I1 -->|"−k·BP"| SUM
   I2 -->|"−LP"| SUM
@@ -199,7 +208,7 @@ flowchart LR
   class SC,OC nl
 ```
 
-同じ構造を、オペアンプ積分器によるフィルタに置き換えて描いたものです。ダイオード対は状態クリップ、
+同じ構造を、オペアンプ積分器によるフィルタに置き換えて描いたものです。ダイオード対は非線形リーク、
 出力リミッタは出力クリップに対応します。解釈として描いたもので、実在の回路を再現したものではあり
 ません。
 
@@ -311,6 +320,8 @@ flowchart LR
 
 #### エントリ (CC 98)、カテゴリ 1
 
+<!-- patch_gen inputs -->
+
 | CC 98 | モジュール入力 | | CC 98 | モジュール入力 |
 | ----- | ------ | - | ----- | ------ |
 | 0 | EG 1 Gate | | 7 | Mixer 1 In 1 |
@@ -320,6 +331,8 @@ flowchart LR
 | 4 | Filter 1 Mod In | | 11 | Delay 1 Audio In R |
 | 5 | Amp 1 Audio In | | 12 | 最終出力 L |
 | 6 | Amp 1 Mod In | | 13 | 最終出力 R |
+
+<!-- patch_gen end -->
 
 ほとんどは名前のとおりのものを受け取りますが、3 つだけ名前からは分からない決まりがあります。Gate はレベル
 ではなく閾値で、信号が 0.25 以上になるとエンベロープがトリガし、下回るとリリースします。Pitch は MIDI ノート
@@ -335,6 +348,8 @@ flowchart LR
 
 #### エントリ (CC 98)、カテゴリ 2 と 3
 
+<!-- patch_gen params -->
+
 | CC 98 | パラメータ | | CC 98 | パラメータ | | CC 98 | パラメータ |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
 | 0 | LFO 1 Rate | | 10 | Osc 1 Fine Tune | | 20 | Mixer 1 Polarity 1 |
@@ -348,10 +363,14 @@ flowchart LR
 | 8 | Osc 1 Wave | | 18 | Amp 1 Gain | | 28 | Delay 1 Mix |
 | 9 | Osc 1 Coarse Tune | | 19 | Mixer 1 Level 1 | |  |  |
 
+<!-- patch_gen end -->
+
 #### エントリ (CC 98)、カテゴリ 3 のみ
 
 これらの CC はどのパラメータにも属さないので、カテゴリ 2 には対応するエントリがありません。General 1〜4 は
 それぞれユニポーラとバイポーラの 2 つのスロットを埋めます。後述の General スロットを参照してください。
+
+<!-- patch_gen generals -->
 
 | CC 98 | CC の割り当て先 | 埋めるスロット |
 | ----- | ------ | ----- |
@@ -361,7 +380,11 @@ flowchart LR
 | 32 | General 3 | General Unipolar 3、General Bipolar 3 |
 | 33 | General 4 | General Unipolar 4、General Bipolar 4 |
 
+<!-- patch_gen end -->
+
 #### モジュール ID
+
+<!-- patch_gen modules -->
 
 | ID | モジュール |
 | ----- | ------ |
@@ -375,7 +398,11 @@ flowchart LR
 | 7 | Chorus 1 |
 | 8 | Delay 1 |
 
+<!-- patch_gen end -->
+
 #### シグナル ID
+
+<!-- patch_gen signals -->
 
 | ID | シグナル | | ID | シグナル | | ID | シグナル |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
@@ -399,6 +426,8 @@ flowchart LR
 | 17 | Delay 1 Output L ± | | 37 | Amp 1 Gain | | 57 | General Bipolar 2 ± |
 | 18 | Delay 1 Output R ± | | 38 | Mixer 1 Level 1 | | 58 | General Bipolar 3 ± |
 | 19 | LFO 1 Rate | | 39 | Mixer 1 Polarity 1 ± | | 59 | General Bipolar 4 ± |
+
+<!-- patch_gen end -->
 
 **±** は、正負どちらにも振れるシグナルを表します。モジュール出力はフルスケールで -0.5 と +0.5 に届き、
 バイポーラのコントロールスロットは -0.5〜+0.5 で、ミキサーはそれを 2 つ足して 1.0 で止まります。
@@ -427,6 +456,12 @@ Note Pitch、Note Gate、Pitch Bend の 3 つは鍵盤がバスに載せるも�
 ホイールの端から端までがちょうど 1 単位で、両端がちょうど -0.5 と +0.5、中央のディテントがちょうど 0 に
 なるので、ミキサーで下駄を履かせなくてもモジュール入力へ入れられます。Note Gate は 0.0 か 1.0 で、
 エンベロープは 0.25 以上でトリガします。Pitch Bend はデフォルトではどこにも結線されていません。
+
+鳴るのは最後に押したノートで、それに置き換わったノートは、まだ押さえられている間は記憶されます (1 ノート
+分だけです)。最後のノートを離すと記憶していたノートが Note Gate を 1.0 のまま戻ってくるので、エンベロープは
+アタックをやり直さずに続き、1 つのキーを押さえたまま別のキーを叩くとトリルになります。記憶しているノートを
+離したときは記憶から消すだけです。3 つのキーを押さえたときは、最後のキーを離すと 2 番目に戻り、それを離すと
+1 番目がまだ押さえられていても Gate が閉じます。
 
 スロット 0〜8 は何も書き込まない定数で、ソースではなく固定値を入れたい入力のためにあります。シグナル 0 は
 誰も設定していないエントリが読む値でもあるので、未結線の入力は最初のスロットに入っているものに繋がるので
@@ -644,8 +679,14 @@ C のホスト ("sim_spinel"、"sim_render"、"web" の SPMS-1 Web) は、スケ
     - `--seconds N` (デフォルト 4) と `--out FILE` (デフォルト "spms1_render.wav")
     - ピークとサンプルのハッシュを表示するので、2 つのレンダリングの違いがすぐ分かります。
       エディタの "Init" パッチは、パッチなしと同じハッシュになります。ハッシュは同じコンパイラ同士で
-      比べてください: "spinel_rt.h" の `single-precision-constant` を GCC は (実機と同じく) 守り、
+      比べてください: "spinel_rt_mcu_head.h" の `single-precision-constant` を GCC は (実機と同じく) 守り、
       clang は無視するので、両者では下位のビットが変わります
+    - GC も確認し、次のどちらかに反すると終了コード 1 で終わります ("compare_with_cruby.sh" と
+      GitHub Actions のワークフローも失敗します): シンセが鳴っている間に何も確保しないこと
+      (実機では GC が音を途切れさせます)、"sp_gc.h" が MCU 向けに決めた `sp_gc_roots` の大きさ
+      (`SP_GC_STACK_MAX`) が足りずに GC ルートが落とされないこと。前のリリースがボックス化しなかった値を
+      ボックス化するリリースは前者で分かります。後者は実機に負担をかけないよう、ここでだけ
+      `SP_GC_ROOT_OVERFLOW_CHECK` 付きで確認します
     - ビルドは "sim_spinel" と同じく、先に Spinel で "spms1_main.c" を再生成します (`--no-spinel` で省略)
     - `sh sim_render/compare_with_cruby.sh [--patch FILE] [--score FILE] [--seconds N]` は、同じパッチと
       スコアをこれと、"spms1_main.rb" そのものを動かす CRuby とでレンダリングして比べるので、Spinel が
@@ -664,10 +705,89 @@ C のホスト ("sim_spinel"、"sim_render"、"web" の SPMS-1 Web) は、スケ
   成果物 (artifact) として残します
 - SPMS-1 Web: "spms1_web_synth.js" をビルド・テストし、成果物として残します
 - シミュレーター: "sim_spinel" と "sim_render" を Linux、macOS、Windows でビルドしてレンダリングし、
-  Linux では CRuby とのレンダリングの比較もします
-- Spinel: 上で指定したリリースをビルドし、"spms1_main.c" が .rb ファイルから作られるものと一致するかを確認します
+  Linux では CRuby とのレンダリングの比較もします。Linux では、ランタイムの関数と変数がどこで宣言されても
+  同じ型かも確認します ("spinel_mcu/lto_type_check.sh")。片側で float、もう片側で double と宣言された関数は、
+  ほかでは気づけません (MCU 向けの変更が `#define double float` でランタイムを float にしていた頃、2 つありました)
+- Spinel: 上で指定したリリースをビルドし、"spms1_main.c" が .rb ファイルから作られるものと一致するかを確認します。
+  また、ランタイムのファイルがそのリリースに "spinel_mcu/spinel_mcu.patch" を当てたものかを確認します (下記参照)
 - "commit_package" を選び、上記がすべて通ると、UF2 ファイル ("bin") と "spms1_web_synth.js" を選んだブランチに
   コミットします (ビルドの後でソースが変わっていた場合と、何も変わっていない場合はコミットしません)
+
+
+### Spinel の更新
+
+このフォルダのランタイムのファイルは、上で指定したリリースの Spinel の `lib` (と `lib/regexp`) のすべてです。
+MCU 向けの変更は 2 か所にまとめてあります:
+
+- "spinel_rt_mcu_head.h"、"spinel_rt_mcu_libm.h"、"spinel_rt_mcu_cold.h": MCU 向けに足すもの --
+  シンセ本体のセクションと pragma、オーバーフロー検査なしの Integer 演算 (`SP_INT_OVERFLOW_MODE_WRAP`。
+  `spinel --int-overflow=wrap` と同じ)、数学関数の float 版、そして "spinel_rt.h" の最後で生成コードを
+  float のランタイムにつなぐもの (下記)。"spinel_rt.h" にはそれぞれの `#include` 行だけがあります
+- "spinel_mcu/spinel_mcu.patch": Spinel 自身のファイルへの変更 -- Float を表す `double` を `sp_float`
+  で書いたランタイム、POSIX 部分の `#if 0` による除外 (中身がリリースで変わってもパッチが
+  当たりやすいように)、全体が POSIX 前提のファイルの `SPINEL_BARE_METAL` による除外 (下記)、
+  SRAM に収まる GC のバッファ、配列の読み書き (`sp_FloatArray_get`/`set`、`sp_IntArray_get`) で範囲内の
+  場合を他の検査より先に置くこと (残りの検査はそのまま関数の外へ)。変更するファイルの隣には、
+  リリースのままのコピー "NAME.orig" があります
+- "sp_cold_bare_metal.c" と "spinel_mcu/sp_cold_bare_metal.patch": ベアメタル向けの "sp_cold.c" (下記)。
+  リリースの "sp_cold.c" とは分けてあり、そちらは丸ごと外すこと以外は元のままです
+
+RP2350 の FPU は単精度だけなので、Float は float です。ランタイム全体を "sp_types.h" の
+`SPINEL_FLOAT32` が決めます: ここでは 1 で、0 にすると Spinel のとおり double になり、結果は CRuby と
+同じです。生成コードはキャストや一時変数でまだ `double` と書き、Float の定数に `DBL_EPSILON` などを
+使うので、"spinel_rt_mcu_cold.h" の最後に `#define double float` と `DBL_*` の代わりの `FLT_*` があり、
+これは生成コードにだけ効きます。`Float#to_s` は、同じ float に読み戻せる最短の桁を出します
+(`0.1`、`0.33333334`)。
+
+シンセの下に OS はありません。"sp_types.h" の `SPINEL_BARE_METAL` (ここでは 1) が、ランタイムのうち
+C ライブラリより多くを必要とするものを外します: POSIX が全体の前提のファイル ("sp_cold.c"、"sp_fiber.c"、
+"sp_io.c"、"sp_net.c"、"sp_process.c"、"sp_process_status.c"、"sp_sched.c"、"sp_system.c") を丸ごと。
+"sp_cold.c" の代わりには "sp_cold_bare_metal.c" をビルドします。これは "sp_cold.c" から、C ライブラリより
+多くを必要とする関数 (ファイル、ディレクトリ、プロセス、ソケット、外したファイルを使うもの) を外したもので、
+リリースを取り込むときに "spinel_mcu/sp_cold_bare_metal.patch" で作られます。シンセが毎サンプル呼ぶ
+`Float#to_i` は、そこで "sp_alloc.h" のインライン関数にしてあり、flash から呼ばれずにシンセ本体へ
+展開されます。残りはそのままビルドし、シンセが使わないものはリンカが捨てます。シミュレーターと
+SPMS-1 Web も同じようにランタイムをビルドします。
+
+新しいリリースは GitHub Actions で取り込むので、特定の OS は要りません:
+
+1. "SPMS-1 (type-2) Try a Spinel Release" ("../.github/workflows/spms1-type2-spinel-try.yml") を、
+   ブランチを選び、リリースのタグを指定して手動で実行します。`sh spinel_mcu/update.sh update TAG` で
+   リリースを取り込み (ファイルをコピーし、パッチを当て、この README と README.md のリリース名を
+   書き換えます)、"spms1_main.c" を再生成し、ランタイムの型が食い違っていないかを確かめ
+   ("spinel_mcu/lto_type_check.sh"、"GitHub Actions" 参照)、CRuby とレンダリングを比べ (リリースのせいでシンセが
+   鳴っている間に確保したり、GC ルートが収まらなくなったりすると失敗します)、取り込む前と後の
+   UF2 をビルドします (`sp_float` が `float` でなくなるとビルドが止まります)。何もコミットせず、
+   変わったものを成果物 (artifact) として残します
+2. 実行結果のまとめを見ます。"spinel_mcu/size_report.sh" が 2 つのビルドを比べ、RAM 上のシンセ本体
+   (`Spms1_main`)、RAM、flash がどれだけ増えたかを表示し、2% を超えると警告します。本体が大きく
+   なると 1 サンプルあたりの命令が増えますが、音にもシミュレーターにも表れません。リリースが
+   `lib` に足したファイルもここに出ます (ほかと同じくコピーされます): POSIX を必要とするものは
+   ビルドできないので、ほかと同じく `SPINEL_BARE_METAL` で外します ("NAME.orig" にコピーし、中身を
+   `#include "sp_types.h"` `#if !SPINEL_BARE_METAL` と `#endif` で囲み、`sh spinel_mcu/update.sh save`)
+3. 成果物の "spinel-TAG.diff" をリポジトリの最上位で当て (`git apply spinel-TAG.diff`)、
+   コミットして、ビルド用のワークフローを実行します。その Spinel ジョブが結果を確認します
+   (`sh spinel_mcu/update.sh check`)
+4. 当たらなかった hunk は成果物の "NAME.rej" に入り、実行は失敗します。それ以外はすべて diff に
+   入っています。diff を当てた後で手で変更し、`sh spinel_mcu/update.sh save` でパッチを書き直します
+   (diff だけで動きます。Windows では Git Bash にあります)。そのうえで、ブランチで手順 1 を
+   もう一度実行します
+
+手動実行のワークフローは GitHub がデフォルトブランチのものを使うので、デフォルトブランチに
+入ってから実行できます。実行するブランチはそのとき選べます。
+
+ランタイムのファイルをさらに変更するときは、"NAME.orig" がなければ先にコピーしてから編集し、
+`sh spinel_mcu/update.sh save` を実行します。
+
+スクリプトはこのフォルダからローカルでも実行できます: `sh spinel_mcu/update.sh update TAG`、
+`sh spinel_mcu/update.sh check` (どちらも `--spinel DIR` で、clone せずにチェックアウト済みの
+Spinel を使います)、`sh spinel_mcu/size_report.sh BEFORE.elf AFTER.elf` (`arduino-cli compile
+--output-dir DIR` が DIR に残す .elf)。git、diff、GNU patch が必要で、size_report.sh には
+Arduino-Pico コアのツールが必要です。動作を確認しているのは Linux だけです。Windows では Git Bash に
+すべてあり、macOS では `brew install gpatch` で GNU patch が入ります。
+
+パッチの大半は、Spinel 自体にいくつかのビルドオプションがあれば不要になります。それを提案する Issue の
+**下書き** が "spinel_mcu/UPSTREAM_PROPOSAL_DRAFT.md" にあります (**未投稿**)。
 
 
 ### 生成コードの確認
@@ -688,10 +808,10 @@ C が `.rb` を指す `#line` を持っているので、対応は最後まで�
 
 読む前に知っておくべきことが 4 つあります。
 
-- 上の `-Os` は実際の設定ではありません。"spinel_rt.h" が `#pragma GCC optimize ("O3")` を
+- 上の `-Os` は実際の設定ではありません。"spinel_rt_mcu_head.h" が `#pragma GCC optimize ("O3")` を
   持っており、この翻訳単位ではコマンドラインの指定を上書きします。`-O3` を渡しても `-Os` を
   渡しても結果は変わりません
-- シンセ本体は `.text` にありません。"spinel_rt.h" の `#define main` が `.time_critical` に
+- シンセ本体は `.text` にありません。"spinel_rt_mcu_head.h" の `#define main` が `.time_critical` に
   置きます。2 つのビルドが同じコードだと示すには、それぞれに
   `arm-none-eabi-objcopy -O binary --only-section=.time_critical` をかけてバイト比較します。
   コメントだけの変更は "spms1_main.c" の `#line` を全部動かして他は何も変えませんが、その確認も
@@ -740,5 +860,5 @@ DEALINGS IN THE SOFTWARE.
 ```
 
 - ベースリリース: 2026.09.12 <https://github.com/matz/spinel/tree/2026.09.12>
-- 対象ファイル: `spinel_rt.h*`, `mruby_shim.h*`, `sp_*.*`, `re_*.*`
+- 対象ファイル: `spinel_rt*.h*`, `mruby_shim.h*`, `sp_*.*`, `re_*.*`, `spinel_mcu/*`
     - 注: ランタイムの一部のファイルは、MCU 向けに ISGK Instruments (Ryo Ishigaki) が変更しています

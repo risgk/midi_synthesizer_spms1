@@ -114,6 +114,9 @@ jobs:
         with:
           ruby-version: '3.3'
 
+      - name: Check that the files generated from spms1_patch.yaml are up to date
+        run: ruby patch_gen/spms1_patch_gen.rb --check
+
       - name: Build sim_spinel
         run: |
           sh sim_spinel/build.sh --no-spinel

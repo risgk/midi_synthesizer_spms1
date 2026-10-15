@@ -188,7 +188,7 @@ sp_int sp_file_do_symlink(const char *oldp, const char *newp);
 sp_int sp_file_do_link(const char *oldp, const char *newp);
 sp_int sp_file_umask(sp_int mask, int have_arg);
 sp_int sp_file_mkfifo(const char *path, sp_int mode);
-sp_int sp_file_utime(double atime, double mtime, const char *path);
+sp_int sp_file_utime(sp_float atime, sp_float mtime, const char *path);
 const char *sp_file_readlink(const char *path);  /* defined in sp_cold.c */
 void sp_file_delete(const char *path);
 void sp_file_rename(const char *from, const char *to);
@@ -204,7 +204,9 @@ SP_NORETURN void sp_file_raise_errno(const char *op, const char *path);
    any syscall sees it; the multi-path File.delete checks every path first. */
 void sp_file_path_check(const char *path);
 
-//#include <dirent.h>
+#if 0 /* Not on the MCU */
+#include <dirent.h>
+#endif
 /* Dir handle (Dir.open / Dir.each_child ...): ops live in lib/sp_cold.c. */
 typedef struct { void *dp; const char *path; } sp_Dir;
 /* The Dir counterpart of SP_IO_OPEN: reading or positioning a closed handle

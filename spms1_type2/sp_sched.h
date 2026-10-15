@@ -54,7 +54,7 @@ typedef struct sp_thread {
   struct sp_thread **wait_head;  /* head of that wait list, so #kill/#raise can unpark it */
   struct sp_thread *all_next, *all_prev;  /* registry of live threads (GC roots) */
   void             *tls;         /* thread-local storage (Thread#[] / #[]=); lazily allocated */
-  double            wake_deadline; /* CLOCK_MONOTONIC time to wake a sleeping thread (Kernel#sleep) */
+  sp_float            wake_deadline; /* CLOCK_MONOTONIC time to wake a sleeping thread (Kernel#sleep) */
   int               io_fd;       /* fd this thread is parked on for I/O (-1 = none, scheduler-aware I/O) */
   short             io_events;   /* poll events it is waiting for (POLLIN/POLLOUT) */
   short             io_revents;  /* poll result the monitor delivered when the fd became ready */
@@ -83,7 +83,7 @@ void       sp_Thread_pass(void);          /* Thread.pass: cooperative yield */
 /* Kernel#sleep(seconds): park the calling thread and free its OS worker for other
    green threads; a monitor thread wakes it after the duration. Falls back to a
    plain blocking sleep only in the single-threaded build (spinel_rt.h). */
-void       sp_sched_sleep(double seconds);
+void       sp_sched_sleep(sp_float seconds);
 int        sp_sched_other_threads_live(void);
 int        sp_sched_wait_child(int pid, int *status);
 void       sp_sleep(sp_float s);   /* Kernel#sleep; relocated from spinel_rt.h to lib/sp_cold.c */
@@ -106,7 +106,7 @@ void       sp_sched_ev_forget(int fd);
    worker; a blocking select(2) here pins the worker for the whole timeout,
    and with every worker pinned the peer that would make the fd ready never
    gets to run. */
-int        sp_sched_wait_io_timeout(int fd, short events, double timeout_s);
+int        sp_sched_wait_io_timeout(int fd, short events, sp_float timeout_s);
 sp_thread *sp_Thread_current(void);       /* Thread.current */
 sp_bool   sp_Thread_alive(sp_thread *t); /* #alive? */
 sp_bool   sp_Thread_set_report_default(sp_bool v);  /* Thread.report_on_exception= */

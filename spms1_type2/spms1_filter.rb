@@ -1,6 +1,7 @@
 module Spms1
   # ZDF (zero-delay feedback) / TPT (topology-preserving transform) state variable filter, low
-  # pass, with delayed soft clipping on the band pass integrator's state.
+  # pass, with a nonlinear leak on the band pass integrator, solved within the sample by one step
+  # of Newton's method.
   # This implementation is not oversampled; the nonlinear behavior is kept intentionally simple.
   # Reference: https://www.discodsp.net/VAFilterDesign_2.1.2.pdf (The Art of VA Filter Design)
   # Reference: https://www.kvraudio.com/forum/viewtopic.php?t=349859 (Cheap non-linear zero-delay filters)
@@ -26,25 +27,42 @@ module Spms1
     # excess is doubled.
     OUTPUT_KNEE_SCALE  = 1.0 / (16.0 * (OUTPUT_LIMIT - OUTPUT_KNEE))
 
+    # The band pass integrator leaks at LEAK_RATE * (y - soft_clip_biased(y)) on top of what it
+    # integrates, y being the band pass: nothing at small levels, more and more as y bends into the
+    # cubic below. In continuous time,
+    #   dy/dt = w_c * high_pass - LEAK_RATE * (y - soft_clip_biased(y))
+    # which is an integrator with a soft limiter across its capacitor. The rate is the one the
+    # filter used to have implicitly, when it soft-clipped the state once a sample at 48 kHz, and
+    # it keeps that sound: what is now fixed in time was then fixed per sample, so the distortion
+    # no longer grows with the sample rate and needs no blend to hold it. That leak is what holds
+    # the resonant peak down; the pass band, where y stays small, passes nearly clean.
+    LEAK_RATE = 48000.0
     # The cubic is self-similar: scaling the ceiling scales the flat value, two thirds of it, with
-    # it. What this value sets in play is how hard the curve bends below the rail;
-    # applied every sample inside the loop, that bend is what holds the resonant peak down.
+    # it. What this value sets in play is how hard the curve bends below the rail, and so how fast
+    # the leak grows with the level.
     SOFT_CLIP_CEILING = 4.0
-    # Everything soft_clip needs derived from the ceiling once, at startup. The vendored Spinel
+    # Everything the leak needs derived from the ceiling once, at startup. The vendored Spinel
     # emits Float constants as runtime globals rather than compile-time literals, so writing these
-    # expressions inline in soft_clip would leave a real division and extra multiplies in a
-    # method that runs every sample.
+    # expressions inline in process would leave a real division and extra multiplies in a method
+    # that runs every sample.
     SOFT_CLIP_FLOOR      = -SOFT_CLIP_CEILING
     SOFT_CLIP_GAIN_SCALE = 1.0 / (3.0 * SOFT_CLIP_CEILING * SOFT_CLIP_CEILING)
     # The clip is shifted by B, its output at zero, soft_clip(B), taken back off so that zero
     # still maps to zero, and its slope there, 1 - B^2 / ceiling^2, made up again:
     #   soft_clip_biased(x) = (soft_clip(x + B) - soft_clip(B)) / (1 - B^2 / ceiling^2)
-    # Without the make-up the loop loses gain at small signals, which weakens the
-    # self-oscillation and, at twice this B, stops it. The bias gives the state even harmonics and
-    # a DC that follows its level; the DC blocker on the output takes the DC back out.
+    # so that the leak and its slope are both zero at zero. Without the make-up the leak would be
+    # negative there, a gain in the loop at small signals. The bias gives the state even harmonics
+    # and a DC that follows its level; the DC blocker on the output takes the DC back out.
     SOFT_CLIP_BIAS        = 0.125
     SOFT_CLIP_BIAS_OUTPUT = SOFT_CLIP_BIAS * (1.0 - SOFT_CLIP_BIAS * SOFT_CLIP_BIAS * SOFT_CLIP_GAIN_SCALE)
     SOFT_CLIP_BIAS_GAIN   = 1.0 / (1.0 - 3.0 * SOFT_CLIP_BIAS * SOFT_CLIP_BIAS * SOFT_CLIP_GAIN_SCALE)
+    # With c the clamped x + B and G the make-up gain, soft_clip_biased(x) is
+    # c * (G - c^2 * G / (3 * ceiling^2)) - G * soft_clip(B), and its slope G - c^2 * G / ceiling^2,
+    # zero past the ceiling, where c is held at it. The leak's slope is one minus that.
+    LEAK_CLIP_GAIN_SCALE = SOFT_CLIP_GAIN_SCALE * SOFT_CLIP_BIAS_GAIN
+    LEAK_CLIP_OFFSET     = SOFT_CLIP_BIAS_GAIN * SOFT_CLIP_BIAS_OUTPUT
+    LEAK_SLOPE_OFFSET    = 1.0 - SOFT_CLIP_BIAS_GAIN
+    LEAK_SLOPE_SCALE     = 3.0 * LEAK_CLIP_GAIN_SCALE
     # One-pole high pass on the output at f_s * coefficient / (2 * pi), 7.5 Hz at 48 kHz; initialize
     # scales the coefficient with the sample rate to hold that frequency.
     DC_BLOCKER_COEFFICIENT_BASE = 1.0 / 1024.0
@@ -93,12 +111,14 @@ module Spms1
     end
     K_TABLE[121] = K_TABLE[120]
 
-    # Negative damping at the top of the resonance dial, as k = -t * kappa * (1 + g^2)^2 / g with t
-    # the amount dialled in. The soft clip on the band pass state settles the oscillation at about
-    # 11.4 * sqrt(|k| * g / (1 + g^2)^2), so this holds it near SELF_OSC_LEVEL whatever the cutoff;
-    # the (1 + g^2)^2 matters only in the top octaves, where g is no longer small.
-    # Set below the output clip's knee, so that the oscillation leaves the filter as a clean sine.
-    # The value is for 48 kHz; initialize scales it with the sample rate, as it does the clip.
+    # Negative damping at the top of the resonance dial, as k = -t * kappa / g with t the amount
+    # dialled in. The leak settles the oscillation where it takes out what the negative damping
+    # puts in: g * |k| against h * A^2 / (4 * ceiling^2) for a band pass of amplitude A, with h the
+    # leak's step that initialize sets, so at about 2 * ceiling * sqrt(|k| * g / h), 11.3 *
+    # sqrt(|k| * g) at 48 kHz (11.4 as measured). Both sit in the same implicit equation, so the
+    # balance holds whatever the cutoff, the top octaves included, and this holds the oscillation
+    # near SELF_OSC_LEVEL. Set below the output clip's knee, so that the oscillation leaves the filter as
+    # a clean sine. The value is for 48 kHz; initialize scales it with h.
     SELF_OSC_LEVEL = 0.5
     SELF_OSC_KAPPA = (SELF_OSC_LEVEL / 11.4) * (SELF_OSC_LEVEL / 11.4)
     # How negative k may go. Below about 150 Hz, -kappa / g grows large enough to pull the
@@ -113,7 +133,7 @@ module Spms1
     # Where the self-oscillation starts on the resonance dial, r = 114/120 (CC 118), where K_TABLE
     # reaches Q 256.
     SELF_OSC_START = 114.0 / 120.0
-    # The soft clip on the band pass state gives the oscillation a 3rd harmonic, which folds back
+    # The leak on the band pass gives the oscillation a 3rd harmonic, which folds back
     # to f_s - 3 * f_0 once 3 * f_0 is above f_s / 2 (an inharmonic 11.8 kHz tone for f_0 = 19.9
     # kHz at 48 kHz). The oscillation therefore fades out as the cutoff, modulation included, rises
     # from f_s / 6 to f_s / 4.8, linearly on the cutoff dial, where the folded tone is still above
@@ -126,18 +146,10 @@ module Spms1
       @sample_rate = sample_rate
       @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (48000.0 / @sample_rate) * (CONTROL_RATE_DIVISOR / 4.0)
 
-      # The state passes through soft_clip once a sample, so what it takes out of it adds up with
-      # the sample rate: left alone, the distortion grows as the rate rises and does not settle
-      # toward any continuous-time filter. Blending the clip by alpha = 48000 / f_s,
-      # s - alpha * (s - soft_clip_biased(s)), keeps the sound at 48 kHz on other rates. alpha and
-      # the bias are folded into the four values soft_clip reads, as it describes; at 48 kHz the
-      # leak is exactly zero.
-      soft_clip_alpha = 48000.0 / @sample_rate
-      @soft_clip_gain = 1.0 - soft_clip_alpha + soft_clip_alpha * SOFT_CLIP_BIAS_GAIN
-      @soft_clip_gain_scale = SOFT_CLIP_GAIN_SCALE * soft_clip_alpha * SOFT_CLIP_BIAS_GAIN
-      @soft_clip_leak = (1.0 - soft_clip_alpha) * 0.5
-      @soft_clip_offset = (1.0 - soft_clip_alpha) * SOFT_CLIP_BIAS + soft_clip_alpha * SOFT_CLIP_BIAS_GAIN * SOFT_CLIP_BIAS_OUTPUT
-      @self_osc_kappa = SELF_OSC_KAPPA * soft_clip_alpha
+      # The leak's rate over the trapezoidal rule's step, LEAK_RATE * T / 2, as g is w_c * T / 2
+      # (prewarped); a half at 48 kHz.
+      @leak_step = 0.5 * LEAK_RATE / @sample_rate
+      @self_osc_kappa = SELF_OSC_KAPPA * (48000.0 / @sample_rate)
       @dc_blocker_coefficient = DC_BLOCKER_COEFFICIENT_BASE * (48000.0 / @sample_rate)
       @self_osc_seed = SELF_OSC_SEED
       # The fade's weight is offset - cutoff * scale, clamped to [0, 1]: one at f_s / 6 and below,
@@ -178,14 +190,14 @@ module Spms1
       @current_gain = 0.5
 
       @g = 0.0
+      @g_plus_k = 0.0
       @one_over_a0 = 1.0
-      @g_plus_k_over_a0 = 0.0
       @last_g = 0.0
+      @last_g_plus_k = 0.0
       @last_one_over_a0 = 1.0
-      @last_g_plus_k_over_a0 = 0.0
       @g_slope = 0.0
+      @g_plus_k_slope = 0.0
       @one_over_a0_slope = 0.0
-      @g_plus_k_over_a0_slope = 0.0
       @s1 = 0.0
       @s2 = 0.0
       @dc_blocker = 0.0
@@ -219,8 +231,8 @@ module Spms1
     end
 
     # How hard the audio input drives the filter, used as a plain multiplier. It sits on the input
-    # rather than the output because that is what decides how far the band pass state runs into
-    # soft_clip, which the resonant peak reaches first: the pass band itself stays nearly clean.
+    # rather than the output because that is what decides how far the band pass runs into the
+    # leak, which the resonant peak reaches first: the pass band itself stays nearly clean.
     def set_gain(gain)
       @gain = (gain < 0.0) ? 0.0 : ((gain > 1.0) ? 1.0 : gain)
     end
@@ -243,38 +255,52 @@ module Spms1
       end
 
       @g += @g_slope
+      @g_plus_k += @g_plus_k_slope
       @one_over_a0 += @one_over_a0_slope
-      @g_plus_k_over_a0 += @g_plus_k_over_a0_slope
 
       driven_input = audio_input * @current_gain
 
-      # Gain prediction: the soft clip is evaluated on the state from the previous sample, so its
-      # gain is fixed for this one. The zero-delay feedback equation then stays linear within the
-      # sample and keeps its closed-form solution, with no iteration and no division here -- 1 / a0
-      # comes from the control-rate update.
-      # Only the band pass state is soft-clipped: the low pass passes clean and the resonance stays
-      # in tune, still held down by the clip inside the loop; clip_output trims what peaks remain.
-      # To clip both states, use the line in the comment instead of the clamp:
-      #   s2 = soft_clip(@s2)
-      # The clamp is a guard that ordinary use never reaches. Between control-rate steps the
-      # coefficients only approximately satisfy a0 = 1 + g * (g + k), and a cutoff thrown across
-      # its range every step, as audio on the modulation input at full depth does, can then give
-      # the loop gain; nothing else bounds the low pass state. Clamped the way clip_output clamps.
-      s1 = soft_clip(@s1)
+      # The clamp is a guard that ordinary use never reaches: nothing else bounds the low pass
+      # state, and a cutoff thrown across its range every step, as audio on the modulation input
+      # at full depth does, with k negative at the top of the resonance dial, is where to expect
+      # it if anywhere. Clamped the way clip_output clamps.
       s2_over  = @s2 - LOW_PASS_STATE_CEILING
       s2_under = LOW_PASS_STATE_FLOOR - @s2
       s2 = @s2 - ((s2_over + s2_over.abs) - (s2_under + s2_under.abs)) * 0.5
 
-      # high_pass = (x - (g + k) * s1 - s2) / (1 + g * (g + k))
-      high_pass = (driven_input - s2) * @one_over_a0 - s1 * @g_plus_k_over_a0
+      # With the high pass x - s2 - (g + k) * y, the band pass y = s1 + g * high_pass - h * leak(y)
+      # (the trapezoidal rule on the equation LEAK_RATE describes, h being @leak_step) is
+      #   a0 * y + h * leak(y) = b,  a0 = 1 + g * (g + k),  b = s1 + g * (x - s2)
+      # Without the leak, y = b / a0: that is the guess, from the control-rate 1 / a0, so no
+      # division for it. The leak is small next to a0 * y wherever the curve is nearly straight,
+      # so one Newton step from there lands within 1e-5 of the root on a loud input and much
+      # closer on an ordinary one; starting from the last sample's y instead, the step falls short
+      # at a high cutoff, where y moves far between samples, and lifts the self-oscillation there.
+      # The denominator, a0 + h * leak'(y), is at least a0 - 0.001 * h, since the clip's slope
+      # never exceeds its make-up gain, 1.001: well clear of zero, as a0 stays above 0.99 with k
+      # held at SELF_OSC_K_FLOOR. No branch: the clamp is built as clip_output's is.
+      # This is neither the delayed soft clipping it replaces, which clipped the band pass state of
+      # the previous sample before the linear solve, nor the "gain prediction" of the KVR thread,
+      # which puts a gain predicted from the previous sample into the linear solve: the leak is
+      # evaluated at this sample's linear solution, and Newton's step takes it off.
+      b =@s1 + @g * (driven_input - s2)
+      a0 = 1.0 + @g * @g_plus_k
+      guess = b * @one_over_a0
+      shifted = guess + SOFT_CLIP_BIAS
+      over    = shifted - SOFT_CLIP_CEILING
+      under   = SOFT_CLIP_FLOOR - shifted
+      clamped = shifted - ((over + over.abs) - (under + under.abs)) * 0.5
+      clamped_squared = clamped * clamped
+      leak = guess - clamped * (SOFT_CLIP_BIAS_GAIN - clamped_squared * LEAK_CLIP_GAIN_SCALE) + LEAK_CLIP_OFFSET
+      leak_slope = LEAK_SLOPE_OFFSET + clamped_squared * LEAK_SLOPE_SCALE
+      band_pass = guess - (a0 * guess + @leak_step * leak - b) / (a0 + @leak_step * leak_slope)
 
-      # Two trapezoidal integrators in series.
-      v1 = @g * high_pass
-      band_pass = v1 + s1
-      v2 = @g * band_pass
-      low_pass = v2 + s2
-      @s1 = band_pass + v1
-      @s2 = low_pass + v2
+      # Two trapezoidal integrators in series. Each new state is twice the output less the old
+      # state, s1 + 2 * (g * high_pass - h * leak) and s2 + 2 * g * y, the leak taken as Newton's
+      # step took it, which is what makes y satisfy its equation to the last bit.
+      low_pass = s2 + @g * band_pass
+      @s1 = band_pass + band_pass - @s1
+      @s2 = low_pass + low_pass - s2
 
       @sample_counter = (@sample_counter + 1) & CONTROL_RATE_MASK
 
@@ -309,10 +335,10 @@ module Spms1
 
     # The three coefficients ramp together from the last step's set to this one's over the next
     # four samples, as the EG's output does, so a fast cutoff sweep is a line rather than a
-    # staircase at a quarter of the sample rate. Each is ramped on its own, so between the ends
-    # of a ramp they only approximately satisfy a0 = 1 + g * (g + k); the ends are exact, and the
-    # states stay bounded either way, through soft_clip and the guard on the low pass state. Each ramp starts from the stored set rather
-    # than from where the additions got to, so rounding does not build up. 0.25 is
+    # staircase at a quarter of the sample rate. process forms a0 from g and g + k itself, so the
+    # equation it solves is exact all along the ramp; 1 / a0, ramped on its own, only feeds the
+    # guess, and Newton's step takes up the difference. Each ramp starts from the stored set
+    # rather than from where the additions got to, so rounding does not build up. 0.25 is
     # 1 / CONTROL_RATE_DIVISOR, written out for the reason Mixer#process gives.
     def update_coefficients
       @stage_1_cutoff += (@cutoff - @stage_1_cutoff) * @smoothing_target_blend
@@ -351,29 +377,26 @@ module Spms1
       over  = t - 1.0
       under = 0.0 - t
       t = t - ((over + over.abs) - (under + under.abs)) * 0.5
-      one_plus_g_squared = 1.0 + g * g
-      k = resonance_to_k_fast(resonance) - t * @self_osc_kappa * one_plus_g_squared * one_plus_g_squared / g
+      k = resonance_to_k_fast(resonance) - t * @self_osc_kappa / g
       below_floor = SELF_OSC_K_FLOOR - k
       k = k + (below_floor + below_floor.abs) * 0.5
       g_plus_k = g + k
       one_over_a0 = 1.0 / (1.0 + g * g_plus_k)
 
-      g_plus_k_over_a0 = g_plus_k * one_over_a0
-
       @g = @last_g
+      @g_plus_k = @last_g_plus_k
       @one_over_a0 = @last_one_over_a0
-      @g_plus_k_over_a0 = @last_g_plus_k_over_a0
       @g_slope = (g - @last_g) * 0.25
+      @g_plus_k_slope = (g_plus_k - @last_g_plus_k) * 0.25
       @one_over_a0_slope = (one_over_a0 - @last_one_over_a0) * 0.25
-      @g_plus_k_over_a0_slope = (g_plus_k_over_a0 - @last_g_plus_k_over_a0) * 0.25
       @last_g = g
+      @last_g_plus_k = g_plus_k
       @last_one_over_a0 = one_over_a0
-      @last_g_plus_k_over_a0 = g_plus_k_over_a0
     end
 
-    # Bounds what the module hands to the bus. Separate from soft_clip, which bounds the band pass
-    # state inside the loop at a much higher ceiling and has to stay where it is. With only that
-    # state clipped, a high Q on a loud input reaches the shoulder here.
+    # Bounds what the module hands to the bus. Separate from the leak, which holds the band pass
+    # down inside the loop at a much higher level and has to stay where it is. With only the band
+    # pass held, a high Q on a loud input reaches the shoulder here.
     # No comparisons, so nothing for the compiler to turn into a branch: Spinel emits abs as fabs,
     # one vabs.f32, and a + |a| is twice a where a is positive and exactly zero where it is not.
     # Each clamp and the knee are built from two of those, one per side, which is also what keeps
@@ -406,25 +429,6 @@ module Spms1
       above = state - 1e-20
       below = (0.0 - state) - 1e-20
       ((above + above.abs) - (below + below.abs)) * 0.5
-    end
-
-    # Cubic soft clip written as a gain: the clamped value times 1 - c^2 / (3 * ceiling^2). Same
-    # curve as c - c^3 / (3 * ceiling^2), slope exactly 1 at zero and flat at the ceiling, so a
-    # state within the ceiling is only ever scaled down and a state past it is held at two thirds
-    # of it; the bias moves both rails down by B. Clamped the way clip_output clamps, without a
-    # comparison; this one runs every sample, on the band pass state inside the feedback path.
-    # Biased and blended by alpha as SOFT_CLIP_BIAS and initialize describe: with s + B split into
-    # its clamped part c and the part past the ceiling d, and G = SOFT_CLIP_BIAS_GAIN,
-    # s - alpha * (s - soft_clip_biased(s)) is c * (1 - alpha + alpha * G) - alpha * G * c^3 /
-    # (3 * ceiling^2) + (1 - alpha) * d - ((1 - alpha) * B + alpha * G * soft_clip(B)). excess is
-    # twice d, which is why the leak carries a half.
-    def soft_clip(sample)
-      shifted = sample + SOFT_CLIP_BIAS
-      over    = shifted - SOFT_CLIP_CEILING
-      under   = SOFT_CLIP_FLOOR - shifted
-      excess  = (over + over.abs) - (under + under.abs)
-      clamped = shifted - excess * 0.5
-      clamped * (@soft_clip_gain - clamped * clamped * @soft_clip_gain_scale) + excess * @soft_clip_leak - @soft_clip_offset
     end
   end
 end

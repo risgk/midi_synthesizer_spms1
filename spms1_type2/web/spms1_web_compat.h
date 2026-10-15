@@ -28,8 +28,8 @@
 #define signbit(x)    __builtin_signbit(x)
 #define fpclassify(x) __builtin_fpclassify(FP_NAN, FP_INFINITE, FP_NORMAL, FP_SUBNORMAL, FP_ZERO, x)
 
-/* WebAssembly has no sections to put a function in, so the .time_critical of spinel_rt.h's
-   #define main is dropped there. Nothing else in the runtime spells section(. */
+/* WebAssembly has no sections to put a function in, so the .time_critical of the #define main
+   in spinel_rt_mcu_head.h is dropped there. Nothing else in the runtime spells section(. */
 #define section(x) used
 
 /* setjmp and longjmp of Emscripten go through JavaScript (or through Wasm exceptions, which

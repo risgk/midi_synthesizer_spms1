@@ -33,11 +33,6 @@
 
 extern int Spms1_main(int argc, char **argv);
 
-/* The linker (MinGW's, and GNU ld on Linux) keeps runtime code that the synth never calls but that
-   refers to these, which upstream define in files the sketch does not vendor. urandom fails closed on the 0. */
-bool sp_convert_soft;
-bool sp_convert_failed;
-int sp_crypto_entropy(unsigned char *out, int nbytes) { (void)out; (void)nbytes; return 0; }
 
 /* ---- MIDI state, the sketch's own ---- */
 

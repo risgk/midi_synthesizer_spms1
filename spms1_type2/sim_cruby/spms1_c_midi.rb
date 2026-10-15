@@ -5,6 +5,7 @@ module Spms1
   module C
     @note_on_pitch = Array.new(16, 60)
     @note_on_state = Array.new(16, 0)
+    @note_prev_pitch = Array.new(16, nil)  # the note that comes back on a note off, or nil
     @pitch_bend    = Array.new(16, 0)
     @cc_values     = Array.new(16) { Array.new(128, 0) }
     @nrpn_values   = Array.new(16) { Array.new(512, 0) }
@@ -50,11 +51,16 @@ module Spms1
         ch = status & 0x0F
         case status & 0xF0
         when 0x80
-          @note_on_state[ch] = 0 if d1 == @note_on_pitch[ch]
+          handle_note_off(ch, d1)
         when 0x90
           if d2 == 0
-            @note_on_state[ch] = 0 if d1 == @note_on_pitch[ch]
+            handle_note_off(ch, d1)
           else
+            if @note_on_state[ch] == 0
+              @note_prev_pitch[ch] = nil
+            elsif d1 != @note_on_pitch[ch]
+              @note_prev_pitch[ch] = @note_on_pitch[ch]
+            end
             @note_on_pitch[ch] = d1
             @note_on_state[ch] = 1
           end
@@ -63,6 +69,21 @@ module Spms1
           handle_midi_nrpn_cc(ch, d1, d2)
         when 0xE0
           @pitch_bend[ch] = ((d2 << 7) | d1) - 8192
+        end
+      end
+
+      # The note sounding gives way to the one remembered, with the gate left open, or closes the
+      # gate; the remembered note is only forgotten.
+      def handle_note_off(ch, pitch)
+        if pitch == @note_on_pitch[ch]
+          if @note_prev_pitch[ch]
+            @note_on_pitch[ch] = @note_prev_pitch[ch]
+            @note_prev_pitch[ch] = nil
+          else
+            @note_on_state[ch] = 0
+          end
+        elsif pitch == @note_prev_pitch[ch]
+          @note_prev_pitch[ch] = nil
         end
       end
 

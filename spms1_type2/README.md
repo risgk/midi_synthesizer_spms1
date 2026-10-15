@@ -1,10 +1,11 @@
-MIDI Synthesizer SPMS-1 (type-2) v0.0.2
+MIDI Synthesizer SPMS-1 (type-2) v0.0.3
 =======================================
 
 - Monophonic semi-modular MIDI Synthesizer for Raspberry Pi Pico 2, made with Spinel (Ruby AOT Compiler)
 - Controlled by MIDI as a sound module
+- Last-note priority with one note of memory: releasing the newest note while the one before it is still held goes back to that one, legato (for trills)
 - 48 kHz audio output: 24 bit through an I2S DAC, or PWM Audio (no DAC needed)
-- Filter: ZDF/TPT State Variable Filter (with delayed soft clipping)
+- Filter: ZDF/TPT State Variable Filter (with a nonlinear leak on the band pass integrator, solved by the one-step Newton method)
 - Chorus: mono in, stereo out, as a module in the run order
 - Delay: stereo, with feedback, as a module in the run order (up to 340 ms)
 - Stereo output: the chorus spreads the mono voice into a left and a right, and the delay keeps them apart
@@ -51,12 +52,16 @@ Required Software for Modification
     - Info: <https://github.com/FortySevenEffects/arduino_midi_library>
 - Spinel
     - Release: 2026.09.12 <https://github.com/matz/spinel/tree/2026.09.12>
-    - The Spinel output file "spms1_main.c" needs no editing. "spinel_rt.h" in this sketch
-      carries `#define main __attribute__((section(".time_critical"), flatten)) Spms1_main`,
+    - The Spinel output file "spms1_main.c" needs no editing. "spinel_rt_mcu_head.h" in this sketch,
+      included at the top of "spinel_rt.h", carries `#define main __attribute__((section(".time_critical"), flatten)) Spms1_main`,
       which renames it and puts the synth core in RAM at the same time. Renaming it by hand
       instead leaves the macro with nothing to match, and the core runs from flash
     - "spms1_main.c" is generated with `spinel spms1_main.rb -c --rbs sig`. The type seeds in "sig"
       keep the filter states unboxed; "sig/spms1_filter.rbs" says why they are needed
+- Ruby (CRuby), to change the patch's numbers or the default patch: they are kept in "spms1_patch.yaml",
+  and `ruby patch_gen/spms1_patch_gen.rb` writes them out to "spms1_patch.rb" (read by "spms1_main.rb"),
+  the tables of "spms1_editor.html", and the NRPN tables of this README and "README.ja.md". Run it, then
+  regenerate "spms1_main.c"; `--check` only says whether the files are up to date
 
 
 Usage
@@ -91,7 +96,7 @@ Usage
     - Device Name: "SPMS-1 (type-2)"
 - UART MIDI Input
     - Speed: 31250 bps
-    - GP4 and GP5 pins are used by TX and RX, through `SoftwareSerial`
+    - GP4 and GP5 pins are used by TX and RX, through `SerialPIO`
     - Any pins can be used, TX and RX swapped included, by changing `SPMS1_UART_MIDI_TX_PIN` and
       `SPMS1_UART_MIDI_RX_PIN`
     - DIN/TRS MIDI is available by using (and modifying) Adafruit MIDI FeatherWing Kit, for example
@@ -183,9 +188,12 @@ envelope, swing both ways. See the examples below.
 
 #### Filter 1
 
-A zero-delay feedback state variable filter: at the sum, the loop equation is solved in closed
-form, so the high pass is found in one step. The soft clip acts only where the band pass state is
-read back, and it is what holds the resonance down; the low pass state stays linear, with a
+A zero-delay feedback state variable filter. The band pass integrator leaks, more and more as the
+band pass bends into a soft clip curve, and that is what holds the resonance down; at small levels
+the leak is next to nothing, so the pass band passes nearly clean. The loop equation, leak
+included, is solved every sample by the one-step Newton method from the linear solution, which
+lands almost on the root. The leak's rate is fixed in time, so the sound does not change with the
+sample rate. The low pass state stays linear, with a
 clamp at 16 as a guard that ordinary use never reaches. The output clip comes last. At the top of
 the resonance dial k turns negative and the loop oscillates.
 
@@ -196,7 +204,7 @@ flowchart LR
   I1 -->|BP| I2["Integrator 2<br/>LP, state s2"]
   I2 -->|LP| OC["Output clip<br/>linear up to 0.75"]
   OC --> OUT([Output])
-  SC["State clip<br/>ceiling 4.0, α comp."] -.- I1
+  SC["Nonlinear leak<br/>ceiling 4.0, one-step Newton"] -.- I1
   L2["s2 is linear<br/>guard clamp at 16"] -.- I2
   I1 -->|"−k·BP"| SUM
   I2 -->|"−LP"| SUM
@@ -204,8 +212,8 @@ flowchart LR
   class SC,OC nl
 ```
 
-The same structure redrawn as an op-amp integrator filter. The diode pair stands for the state
-clip and the output limiter for the output clip. It is an interpretation, not a reproduction of
+The same structure redrawn as an op-amp integrator filter. The diode pair stands for the
+nonlinear leak and the output limiter for the output clip. It is an interpretation, not a reproduction of
 an actual circuit.
 
 ```mermaid
@@ -321,6 +329,8 @@ passes it through rather than muting it.
 
 #### Entries (CC 98), category 1
 
+<!-- patch_gen inputs -->
+
 | CC 98 | Module input | | CC 98 | Module input |
 | ----- | ------ | - | ----- | ------ |
 | 0 | EG 1 Gate | | 7 | Mixer 1 In 1 |
@@ -330,6 +340,8 @@ passes it through rather than muting it.
 | 4 | Filter 1 Mod In | | 11 | Delay 1 Audio In R |
 | 5 | Amp 1 Audio In | | 12 | Final Output L |
 | 6 | Amp 1 Mod In | | 13 | Final Output R |
+
+<!-- patch_gen end -->
 
 Most of these take what their name suggests, but three do not say it on their face. A Gate is a
 threshold rather than a level: an envelope triggers as the signal reaches 0.25 and releases as it
@@ -346,6 +358,8 @@ both at the same signal for a mono output.
 
 #### Entries (CC 98), categories 2 and 3
 
+<!-- patch_gen params -->
+
 | CC 98 | Parameter | | CC 98 | Parameter | | CC 98 | Parameter |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
 | 0 | LFO 1 Rate | | 10 | Osc 1 Fine Tune | | 20 | Mixer 1 Polarity 1 |
@@ -359,10 +373,14 @@ both at the same signal for a mono output.
 | 8 | Osc 1 Wave | | 18 | Amp 1 Gain | | 28 | Delay 1 Mix |
 | 9 | Osc 1 Coarse Tune | | 19 | Mixer 1 Level 1 | |  |  |
 
+<!-- patch_gen end -->
+
 #### Entries (CC 98), category 3 only
 
 These CCs belong to no parameter, so category 2 has no entry for them. Each of General 1-4 fills
 two slots, a unipolar and a bipolar one. See the General slots below.
+
+<!-- patch_gen generals -->
 
 | CC 98 | CC for | Fills |
 | ----- | ------ | ----- |
@@ -372,7 +390,11 @@ two slots, a unipolar and a bipolar one. See the General slots below.
 | 32 | General 3 | General Unipolar 3, General Bipolar 3 |
 | 33 | General 4 | General Unipolar 4, General Bipolar 4 |
 
+<!-- patch_gen end -->
+
 #### Module IDs
+
+<!-- patch_gen modules -->
 
 | ID | Module |
 | ----- | ------ |
@@ -386,7 +408,11 @@ two slots, a unipolar and a bipolar one. See the General slots below.
 | 7 | Chorus 1 |
 | 8 | Delay 1 |
 
+<!-- patch_gen end -->
+
 #### Signal IDs
+
+<!-- patch_gen signals -->
 
 | ID | Signal | | ID | Signal | | ID | Signal |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
@@ -410,6 +436,8 @@ two slots, a unipolar and a bipolar one. See the General slots below.
 | 17 | Delay 1 Output L ± | | 37 | Amp 1 Gain | | 57 | General Bipolar 2 ± |
 | 18 | Delay 1 Output R ± | | 38 | Mixer 1 Level 1 | | 58 | General Bipolar 3 ± |
 | 19 | LFO 1 Rate | | 39 | Mixer 1 Polarity 1 ± | | 59 | General Bipolar 4 ± |
+
+<!-- patch_gen end -->
 
 A **±** marks a signal that swings both ways: a module output reaches -0.5 and +0.5 at full
 scale, a bipolar control slot runs -0.5 to +0.5, and a mixer sums two of them and stops at one.
@@ -440,6 +468,13 @@ range, and Pitch Bend is bipolar too, one unit across the whole wheel: exactly -
 the ends of its travel and exactly zero at the centre detent, so it can feed a module input
 without a mixer to shift it. Note Gate is 0.0 or 1.0, and an envelope triggers at 0.25. Nothing
 is routed to Pitch Bend by default.
+
+The newest note sounds, and the note it took over from is remembered while it is still held: one
+note, no more. When the newest note is released, the remembered one comes back with Note Gate
+left at 1.0, so the envelopes go on without a new attack, and holding one key while tapping
+another plays a trill. Releasing the remembered note only forgets it, and with three keys held,
+releasing the newest goes back to the second, and releasing that closes the gate, even with the
+first still held.
 
 Slots 0-8 are constants that nothing writes, for inputs that want a fixed value rather than a
 source. Signal 0 is also what an entry nobody has set reads as, so an unrouted input is silent
@@ -670,8 +705,14 @@ plugin for the audio).
     - `--seconds N` (default 4) and `--out FILE` (default "spms1_render.wav")
     - It prints the peaks and a hash of the samples, so two renders can be told apart at a glance:
       the editor's "Init" patch renders to the same hash as no patch at all. Compare hashes from the
-      same compiler only: clang ignores the `single-precision-constant` of "spinel_rt.h", which GCC (as
+      same compiler only: clang ignores the `single-precision-constant` of "spinel_rt_mcu_head.h", which GCC (as
       on the device) honors, so the last bits differ between them
+    - It also checks the GC, and exits with 1 (failing "compare_with_cruby.sh" and the GitHub Actions
+      workflow) unless both hold: that nothing is allocated while the synth plays,
+      as a collection would interrupt the audio on the device, and that no GC root is dropped for want
+      of room in `sp_gc_roots`, which "sp_gc.h" sizes for the MCU (`SP_GC_STACK_MAX`). A Spinel
+      release that boxes a value the previous one kept unboxed fails the first; the second is checked
+      only here, with `SP_GC_ROOT_OVERFLOW_CHECK`, so as to cost the device nothing
     - The build regenerates "spms1_main.c" with Spinel first, as "sim_spinel" does (`--no-spinel` to skip)
     - `sh sim_render/compare_with_cruby.sh [--patch FILE] [--score FILE] [--seconds N]` renders the same
       patch and score with this and with CRuby running "spms1_main.rb" itself, and compares them, so it
@@ -691,11 +732,97 @@ plugin for the audio).
   UF2 files as an artifact
 - SPMS-1 Web: builds and tests "spms1_web_synth.js", and keeps it as an artifact
 - Simulators: builds "sim_spinel" and "sim_render" on Linux, macOS and Windows, renders, and compares
-  the renders with CRuby on Linux
-- Spinel: builds the release named above and checks that "spms1_main.c" is what it makes of the .rb files
+  the renders with CRuby on Linux. On Linux it also checks that every function and variable of the
+  runtime has the same type wherever it is declared ("spinel_mcu/lto_type_check.sh"): a function
+  declared with float on one side and double on the other goes unnoticed otherwise, as two did
+  when the MCU changes made the runtime float with `#define double float`
+- Spinel: builds the release named above and checks that "spms1_main.c" is what it makes of the .rb files,
+  and that the runtime files are the release with "spinel_mcu/spinel_mcu.patch" applied (see below)
 - With "commit_package" checked, and when all of the above pass, the UF2 files ("bin") and
   "spms1_web_synth.js" are committed on the selected branch (not if the sources were changed after
   the build, nor if nothing changed)
+
+
+### Updating Spinel
+
+The runtime files in this folder are all of Spinel's `lib` (and `lib/regexp`) of the release named
+above, with the changes for the MCU kept in two places:
+
+- "spinel_rt_mcu_head.h", "spinel_rt_mcu_libm.h" and "spinel_rt_mcu_cold.h": what the MCU adds -- the
+  section and the pragmas of the synth core, Integer arithmetic without the overflow check
+  (`SP_INT_OVERFLOW_MODE_WRAP`, as `spinel --int-overflow=wrap` builds it), the float versions of
+  the math functions, and, at
+  the end of "spinel_rt.h", what binds the generated code to a float runtime (below).
+  "spinel_rt.h" carries only an `#include` line for each
+- "spinel_mcu/spinel_mcu.patch": what is changed in Spinel's own files -- the runtime written in
+  `sp_float` where it said `double` for a Float, the POSIX parts left out with `#if 0` (a release
+  changing what is inside them seldom stops the patch from applying), the files that need POSIX
+  throughout left out whole with `SPINEL_BARE_METAL` (below), the GC's buffers made to fit
+  SRAM, and the in-range path of an Array read or write (`sp_FloatArray_get`/`set`,
+  `sp_IntArray_get`) put ahead of the other checks, which go out of line unchanged. Each file it
+  changes sits next to its released copy, "NAME.orig"
+- "sp_cold_bare_metal.c" and "spinel_mcu/sp_cold_bare_metal.patch": "sp_cold.c" for a bare-metal
+  build (below), kept apart from the released one, which stays as it is but for its being left
+  out whole
+
+Float is float, the RP2350 having a single-precision FPU only. `SPINEL_FLOAT32` in "sp_types.h"
+decides it for the whole runtime: 1 here, and 0 gives double, as Spinel has it, with the same
+results as CRuby. The generated code still spells `double` in casts and temporaries and uses
+`DBL_EPSILON` and the like for the Float constants, so "spinel_rt_mcu_cold.h" ends with
+`#define double float` and `FLT_*` for `DBL_*`, which reach the generated code only. `Float#to_s`
+prints the shortest digits that read back as the same float (`0.1`, `0.33333334`).
+
+There is no OS under the synth. `SPINEL_BARE_METAL` in "sp_types.h", 1 here, leaves out what in the
+runtime needs more than the C library: whole, the files that need POSIX throughout ("sp_cold.c",
+"sp_fiber.c", "sp_io.c", "sp_net.c", "sp_process.c", "sp_process_status.c", "sp_sched.c" and
+"sp_system.c"). "sp_cold.c" is built instead as "sp_cold_bare_metal.c", which is "sp_cold.c" with
+the functions that need more than the C library left out (files, directories, processes,
+sockets, and what uses the files left out), made from it by "spinel_mcu/sp_cold_bare_metal.patch"
+when a release is taken. `Float#to_i`, which a synth calls every sample, is inline in
+"sp_alloc.h" there, so that it is inlined into the synth core rather than called from flash. The
+rest is built as it is; the linker drops what the synth does not use. The simulators and SPMS-1
+Web build the runtime the same way.
+
+A new release is taken on GitHub Actions, so it needs no particular OS:
+
+1. Run "SPMS-1 (type-2) Try a Spinel Release" ("../.github/workflows/spms1-type2-spinel-try.yml")
+   by hand on the branch, with the release's tag. It takes the release with
+   `sh spinel_mcu/update.sh update TAG`, which copies its files in, applies the patch and names the
+   release in this README and README.ja.md; regenerates "spms1_main.c"; checks that types agree
+   across the runtime ("spinel_mcu/lto_type_check.sh", see "GitHub Actions"); compares the renders with
+   CRuby, which fails if the release makes the synth allocate while it plays or need more GC roots
+   than there is room for; and builds the UF2 before and after, which stops if `sp_float` is no
+   longer `float`. Nothing is committed: what it changed is kept as an artifact
+2. Look at the summary of the run. "spinel_mcu/size_report.sh" compares the two builds: how much
+   the synth core in RAM (`Spms1_main`), the RAM and the flash grew, with a warning above 2%. A
+   larger core runs more instructions a sample, which neither the sound nor the simulators show.
+   Files the release adds to its `lib` are listed there too, copied in like the rest: one that
+   needs POSIX does not build, and is to be left out with `SPINEL_BARE_METAL` as the others are
+   (copy it to "NAME.orig", put its text between `#include "sp_types.h"` `#if !SPINEL_BARE_METAL`
+   and `#endif`, and `sh spinel_mcu/update.sh save`)
+3. Apply "spinel-TAG.diff" from the artifact at the top of the repository (`git apply
+   spinel-TAG.diff`), commit it, and run the build workflow, whose Spinel job checks the result
+   (`sh spinel_mcu/update.sh check`)
+4. A hunk that no longer applies is in the artifact as "NAME.rej", and the run fails; the diff holds
+   everything else. Make the change by hand after applying the diff, and write the patch again with
+   `sh spinel_mcu/update.sh save`, which needs only diff (Git Bash has it on Windows). Then run
+   step 1 again on the branch
+
+The workflow can be run only once it is on the default branch, as GitHub runs a manual workflow
+from there; it then runs on whichever branch is chosen.
+
+To change a runtime file further, copy it to "NAME.orig" first if it has none, edit it, and
+`sh spinel_mcu/update.sh save`.
+
+The scripts can also be run locally, from this folder: `sh spinel_mcu/update.sh update TAG`,
+`sh spinel_mcu/update.sh check` (both with `--spinel DIR` to take Spinel from a checkout instead of
+cloning it), and `sh spinel_mcu/size_report.sh BEFORE.elf AFTER.elf` (the .elf that
+`arduino-cli compile --output-dir DIR` leaves in DIR). They need git, diff and GNU patch, and
+size_report.sh the tools of the Arduino-Pico core. They are tested on Linux only; on Windows,
+Git Bash has all of them, and on macOS, `brew install gpatch` adds GNU patch.
+
+Most of the patch would go away with a few build options in Spinel itself.
+"spinel_mcu/UPSTREAM_PROPOSAL_DRAFT.md" is a **draft** of an issue proposing them, **not filed**.
 
 
 ### Checking the Generated Code
@@ -717,10 +844,10 @@ files, so the mapping survives all the way down.
 
 Four things to know before reading the output:
 
-- The `-Os` above is not what the synth is built with. "spinel_rt.h" carries
+- The `-Os` above is not what the synth is built with. "spinel_rt_mcu_head.h" carries
   `#pragma GCC optimize ("O3")`, which overrides whatever is on the command line for that
   translation unit. Passing `-O3` instead changes nothing, and neither does passing `-Os`
-- The synth core is not in `.text`. The `#define main` in "spinel_rt.h" puts it in
+- The synth core is not in `.text`. The `#define main` in "spinel_rt_mcu_head.h" puts it in
   `.time_critical`. To prove two builds are the same code,
   `arm-none-eabi-objcopy -O binary --only-section=.time_critical` on each and compare the bytes.
   A comment-only edit moves every `#line` in "spms1_main.c" and nothing else, and this is how to
@@ -770,5 +897,5 @@ DEALINGS IN THE SOFTWARE.
 ```
 
 - Base Release: 2026.09.12 <https://github.com/matz/spinel/tree/2026.09.12>
-- Target files: `spinel_rt.h*`, `mruby_shim.h*`, `sp_*.*`, `re_*.*`
+- Target files: `spinel_rt*.h*`, `mruby_shim.h*`, `sp_*.*`, `re_*.*`, `spinel_mcu/*`
     - Note: Some files for runtime are modified for MCU by ISGK Instruments (Ryo Ishigaki)
