@@ -2286,7 +2286,8 @@ static inline __attribute__((always_inline)) sp_float sp_LFO_process(sp_LFO *sel
     sp_float lv_folded = 0.0;
     sp_float lv_triangle = 0.0;
     sp_float lv_corner_gap = 0.0;
-    sp_float lv_correction = 0.0;
+    sp_float lv_gap = 0.0;
+    sp_float lv_side = 0.0;
     sp_float lv_output = 0.0;
 #line 87 "spms1_lfo.rb"
   if ((self->iv_sample_counter == 0LL)) {
@@ -2316,15 +2317,14 @@ static inline __attribute__((always_inline)) sp_float sp_LFO_process(sp_LFO *sel
   lv_folded = fabs(lv_distance);
 #line 114 "spms1_lfo.rb"
   lv_triangle = (0.5 - ((2.0 * lv_folded)));
-#line 121 "spms1_lfo.rb"
-  lv_corner_gap = (self->iv_dt - ((0.25 - fabs((lv_folded - 0.25)))));
 #line 122 "spms1_lfo.rb"
-  if ((lv_corner_gap > 0.0)) {
+  lv_corner_gap = (self->iv_dt - ((0.25 - fabs((lv_folded - 0.25)))));
 #line 123 "spms1_lfo.rb"
-    lv_correction = (((lv_corner_gap * lv_corner_gap) * lv_corner_gap) * self->iv_blamp_scale);
+  lv_gap = (((lv_corner_gap > 0.0)) ? lv_corner_gap : 0.0);
 #line 124 "spms1_lfo.rb"
-    lv_triangle += (((lv_folded < 0.25)) ? (-lv_correction) : lv_correction);
-  }
+  lv_side = (((lv_folded < 0.25)) ? (-self->iv_blamp_scale) : self->iv_blamp_scale);
+#line 125 "spms1_lfo.rb"
+  lv_triangle += (((lv_gap * lv_gap) * lv_gap) * lv_side);
 #line 126 "spms1_lfo.rb"
   lv_output = (lv_triangle * self->iv_current_amount);
 #line 128 "spms1_lfo.rb"
@@ -3207,7 +3207,7 @@ int main(int argc,char**argv){
     sp_int lv_general_3 = 0;
     sp_int lv_general_4 = 0;
     sp_int lv_module_id = 0;
-    sp_int lv_i__bp7785 = 0;
+    sp_int lv_i__bp7792 = 0;
 
 #line 1 "spms1_osc.rb"
 #line 3 "spms1_osc.rb"
@@ -4247,9 +4247,9 @@ int main(int argc,char**argv){
     (stop_debug_measure(), (sp_int)0);
 #line 390 "spms1_main.rb"
     for (sp_int _t392 = 0; _t392 < cst_AUDIO_BUFFER_WORDS; _t392++) {
-      lv_i__bp7785 = _t392;
+      lv_i__bp7792 = _t392;
 #line 391 "spms1_main.rb"
-      ({ sp_float _t393 = sp_FloatArray_get(lv_audio_buffer_l, lv_i__bp7785); sp_float _t394 = sp_FloatArray_get(lv_audio_buffer_r, lv_i__bp7785); (write_to_audio_buffer(((float)(_t393)), ((float)(_t394))), (sp_int)0); });
+      ({ sp_float _t393 = sp_FloatArray_get(lv_audio_buffer_l, lv_i__bp7792); sp_float _t394 = sp_FloatArray_get(lv_audio_buffer_r, lv_i__bp7792); (write_to_audio_buffer(((float)(_t393)), ((float)(_t394))), (sp_int)0); });
     }
   }
   return 0;

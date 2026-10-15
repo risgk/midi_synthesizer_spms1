@@ -114,15 +114,15 @@ module Spms1
       triangle = 0.5 - (2.0 * folded)
       # PolyBLAMP: folded is the distance in phase to the top corner, and 0.5 - folded to the
       # bottom one, so the nearer of the two is 0.25 - |folded - 0.25| away. A sample within dt of
-      # it is pulled toward the inside of the corner, down at the top and up at the bottom. Only
-      # four samples a cycle are, so the per-sample path takes one comparison and one branch, over a
-      # body it almost never runs. Asking for each corner in turn took two of each, both branches
-      # taken, in Spms1_main as compiled for the Cortex-M33.
+      # it is pulled toward the inside of the corner, down at the top and up at the bottom.
+      # Branchless, as the oscillator's selects are meant to be, and unlike them it survives the C
+      # compiler: each select here only picks a value, with nothing on either side for GCC to move
+      # inside a branch, so the correction is computed every sample and comes out as 0.0 away from
+      # a corner. The cost is the same at every phase.
       corner_gap = @dt - (0.25 - (folded - 0.25).abs)
-      if corner_gap > 0.0
-        correction = corner_gap * corner_gap * corner_gap * @blamp_scale
-        triangle += (folded < 0.25) ? -correction : correction
-      end
+      gap = (corner_gap > 0.0) ? corner_gap : 0.0
+      side = (folded < 0.25) ? -@blamp_scale : @blamp_scale
+      triangle += gap * gap * gap * side
       output = triangle * @current_amount
 
       @phase += @dt
