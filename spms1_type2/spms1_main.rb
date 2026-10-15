@@ -361,35 +361,41 @@ while true
     slot = 0
     while slot < MODULES_SIZE
       module_id = active_modules[slot]
-      break if module_id == MODULE_NONE
+      break if module_id == 0 # MODULE_NONE
 
       # Spinel never emits a jump table however the Ruby is written, so a case costs one compare
       # per id up to the one that matches: 45 a sample at nine modules. Splitting the chain on a
       # kind of module pays only once that kind has several instances. Where a module sits in the
       # chain moves the cost between modules but not the total, so one added later goes at the
       # end whatever its place in the run order, and leaves what the others cost as it was.
+      #
+      # The ids are literals, each with its constant's name after it, and patch_gen writes the
+      # numbers from spms1_patch.yaml (--check catches one out of step). Spinel emits an Integer
+      # constant as a runtime global, so `when MODULE_LFO_1` loaded its address and then its value
+      # before every compare; a literal is a compare with an immediate. That took 10.6% of the
+      # instructions out of a buffer of the default patch (100.5k to 89.8k, emulated Cortex-M33).
       case module_id
-      when MODULE_LFO_1
+      when 1 # MODULE_LFO_1
         signals[SIGNAL_LFO_1_OUTPUT] = lfo_1.process
-      when MODULE_ENV_GEN_1
+      when 2 # MODULE_ENV_GEN_1
         signals[SIGNAL_ENV_GEN_1_OUTPUT] = env_gen_1.process(signals[source_env_gen_1_gate])
-      when MODULE_OSC_1
+      when 3 # MODULE_OSC_1
         signals[SIGNAL_OSC_1_OUTPUT] = osc_1.process(signals[source_osc_1_pitch], signals[source_osc_1_mod])
-      when MODULE_FILTER_1
+      when 4 # MODULE_FILTER_1
         signals[SIGNAL_FILTER_1_OUTPUT] = filter_1.process(signals[source_filter_1_audio], signals[source_filter_1_mod])
-      when MODULE_AMP_1
+      when 5 # MODULE_AMP_1
         signals[SIGNAL_AMP_1_OUTPUT] = amp_1.process(signals[source_amp_1_audio], signals[source_amp_1_mod])
-      when MODULE_MIXER_1
+      when 6 # MODULE_MIXER_1
         signals[SIGNAL_MIXER_1_OUTPUT] = mixer_1.process(signals[source_mixer_1_in_1], signals[source_mixer_1_in_2])
-      when MODULE_CHORUS_1
+      when 7 # MODULE_CHORUS_1
         chorus_1.process(signals[source_chorus_1_audio])
         signals[SIGNAL_CHORUS_1_OUTPUT_L] = chorus_1.output_l
         signals[SIGNAL_CHORUS_1_OUTPUT_R] = chorus_1.output_r
-      when MODULE_DELAY_1
+      when 8 # MODULE_DELAY_1
         delay_1.process(signals[source_delay_1_audio_l], signals[source_delay_1_audio_r])
         signals[SIGNAL_DELAY_1_OUTPUT_L] = delay_1.output_l
         signals[SIGNAL_DELAY_1_OUTPUT_R] = delay_1.output_r
-      when MODULE_SLEW_1
+      when 9 # MODULE_SLEW_1
         signals[SIGNAL_SLEW_1_OUTPUT] = slew_1.process(signals[source_slew_1_in])
       end
 

@@ -1,5 +1,6 @@
-# Writes what the sketch reads from spms1_patch.yaml: spms1_patch.rb whole, and the parts of
-# spms1_editor.html, README.md and README.ja.md between their "patch_gen" markers.
+# Writes what the sketch reads from spms1_patch.yaml: spms1_patch.rb whole, the parts of
+# spms1_editor.html, README.md and README.ja.md between their "patch_gen" markers, and the module
+# ids of the dispatch in spms1_main.rb.
 #
 #   ruby patch_gen/spms1_patch_gen.rb [--check]
 #
@@ -258,6 +259,29 @@ def readme_tables(ja:)
   t
 end
 
+# ---- spms1_main.rb ----------------------------------------------------------------------------
+
+# The module dispatch of the per-sample loop compares against literal ids rather than the MODULE_*
+# constants, which Spinel emits as runtime globals (see spms1_main.rb). Each literal carries its
+# constant's name in a comment, `when 3 # MODULE_OSC_1`, and this writes the number from the spec.
+# Every module has to have exactly one `when`, and nothing else may be named.
+def main_rb(content)
+  s = SPEC
+  ids = { 'NONE' => 0 }.merge(s.modules.to_h { |m| [m['key'], m['id']] })
+  seen = Hash.new(0)
+  out = content.gsub(/^(\s*(?:when|break if module_id ==) )\d+( # MODULE_(\w+))$/) do
+    head, tail, key = $1, $2, $3
+    abort "spms1_patch_gen.rb: spms1_main.rb names MODULE_#{key}, no module" unless ids.key?(key)
+    seen[key] += 1 if head.lstrip.start_with?('when')
+    "#{head}#{ids[key]}#{tail}"
+  end
+  s.modules.each do |m|
+    n = seen[m['key']]
+    abort "spms1_patch_gen.rb: spms1_main.rb has #{n} `when ... # MODULE_#{m['key']}`, not one" unless n == 1
+  end
+  out
+end
+
 # ---- writing -----------------------------------------------------------------------------------
 
 # Puts `text` between the lines "<!-- patch_gen NAME -->" (or "// patch_gen NAME") and the next
@@ -270,6 +294,7 @@ end
 
 outputs = {}
 outputs['spms1_patch.rb'] = patch_rb
+outputs['spms1_main.rb'] = main_rb(File.read(File.join(DIR, 'spms1_main.rb')))
 editor = File.read(File.join(DIR, 'spms1_editor.html'))
 outputs['spms1_editor.html'] = replace_block(editor, 'spms1_editor.html', 'spec', editor_js)
 { 'README.md' => false, 'README.ja.md' => true }.each do |file, ja|

@@ -6,6 +6,7 @@
 #   spms1_patch.rb      the constants and the default patch, for spms1_main.rb
 #   spms1_editor.html   the tables of the editor, between its "patch_gen" markers
 #   README.md           the NRPN tables, between the "patch_gen" markers, and README.ja.md likewise
+#   spms1_main.rb       the module ids of the dispatch, each literal marked `# MODULE_<key>`
 #
 # Run `ruby patch_gen/spms1_patch_gen.rb` after a change here, and commit what it writes;
 # `--check` says whether that is needed, as the GitHub Actions workflow does.
