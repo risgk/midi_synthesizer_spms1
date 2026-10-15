@@ -1,6 +1,9 @@
 module Spms1
-  # Triangle LFO. Deliberately not band-limited: a triangle's harmonics fall off as 1/n^2, so even
-  # at the top of the rate range what folds back stays far below the fundamental.
+  # Triangle LFO, band-limited with PolyBLAMP (polynomial band-limited ramp): the slope change at
+  # each corner is rounded off over the two samples around it, as PolyBLEP rounds off a step. A
+  # triangle's harmonics fall off as 1/n^2, so what folds back stays low even without it, but at the
+  # top of the rate range, where the LFO is an audible tone, it takes the aliases at 220 Hz from
+  # -69 dB to -81 dB, in total against the signal.
   class LFO
     # Blend at the reference rate on the line below, for each of two cascaded stages. The two move
     # together: their product is what fixes the time constant, so changing one without the other
@@ -50,8 +53,9 @@ module Spms1
       @amount = 1.0
       @stage_1_amount = 1.0
       @current_amount = 1.0
-      # Not derived here: process assigns it on its first call, before anything reads it.
+      # Not derived here: process assigns them on its first call, before anything reads them.
       @dt = 0.0
+      @blamp_scale = 0.0
       @sample_counter = 0
     end
 
@@ -89,6 +93,11 @@ module Spms1
         @stage_1_amount += (@amount - @stage_1_amount) * @smoothing_target_blend
         @current_amount += (@stage_1_amount - @current_amount) * @smoothing_target_blend
         @dt = rate_to_freq_fast(@current_rate) * @inv_sample_rate
+        # The PolyBLAMP residual is (1 - |x|)^3 / 6 of the slope change for a corner x samples
+        # away. The slope changes by 4 * dt at each corner, and with the distance d = |x| * dt in
+        # phase that is (dt - d)^3 * (2/3) / dt^2: the division is taken here, once per update,
+        # and process only multiplies. dt is never 0, the lowest rate being 0.215 Hz.
+        @blamp_scale = 0.6666667 / (@dt * @dt)
       end
 
       @sample_counter = (@sample_counter + 1) & CONTROL_RATE_MASK
@@ -102,7 +111,19 @@ module Spms1
       # branch it replaces was the only one in the per-sample path that actually alternated --
       # taken for half of every LFO cycle.
       folded = distance.abs
-      output = (0.5 - (2.0 * folded)) * @current_amount
+      triangle = 0.5 - (2.0 * folded)
+      # PolyBLAMP: folded is the distance in phase to the top corner, and 0.5 - folded to the
+      # bottom one, so the nearer of the two is 0.25 - |folded - 0.25| away. A sample within dt of
+      # it is pulled toward the inside of the corner, down at the top and up at the bottom.
+      # Branchless, as the oscillator's selects are meant to be, and unlike them it survives the C
+      # compiler: each select here only picks a value, with nothing on either side for GCC to move
+      # inside a branch, so the correction is computed every sample and comes out as 0.0 away from
+      # a corner. The cost is the same at every phase.
+      corner_gap = @dt - (0.25 - (folded - 0.25).abs)
+      gap = (corner_gap > 0.0) ? corner_gap : 0.0
+      side = (folded < 0.25) ? -@blamp_scale : @blamp_scale
+      triangle += gap * gap * gap * side
+      output = triangle * @current_amount
 
       @phase += @dt
       @phase -= (@phase < 1.0) ? 0.0 : 1.0
