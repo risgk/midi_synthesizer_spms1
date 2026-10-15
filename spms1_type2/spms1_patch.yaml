@@ -30,9 +30,10 @@ modules:
   - { key: MIXER_1,   id: 6, label: Mixer 1 }
   - { key: CHORUS_1,  id: 7, label: Chorus 1, stereo: true }
   - { key: DELAY_1,   id: 8, label: Delay 1,  stereo: true }
+  - { key: SLEW_1,    id: 9, label: Slew 1 }
 
 # The run order of the default patch.
-default_order: [LFO_1, ENV_GEN_1, MIXER_1, OSC_1, FILTER_1, AMP_1, CHORUS_1, DELAY_1]
+default_order: [SLEW_1, LFO_1, ENV_GEN_1, MIXER_1, OSC_1, FILTER_1, AMP_1, CHORUS_1, DELAY_1]
 
 # Slots of the signal bus (the values of NRPN categories 1 and 2), each one of:
 #   value:    a constant, which the bus holds from startup; `short` is the editor's label for it
@@ -111,12 +112,15 @@ signals:
   - { key: GENERAL_BIPOLAR_3,  id: 58, control: GENERAL_3, label: General Bipolar 3, bipolar: true }
   - { key: GENERAL_BIPOLAR_4,  id: 59, control: GENERAL_4, label: General Bipolar 4, bipolar: true }
 
+  - { key: SLEW_1_OUTPUT, id: 60, module: SLEW_1, output: Out, label: Slew 1 Output, bipolar: true }
+  - { key: SLEW_1_TIME,   id: 61, control: SLEW_1_TIME }
+
 # Module inputs, NRPN category 1, by entry: what feeds each one in the default patch (`source`, a
 # signal key). `label` is the editor's, on the module; `name` the README's, after the module's
 # label. An input with no module is a side of the final output.
 inputs:
   - { entry: 0,  module: ENV_GEN_1, key: GATE,     label: Gate,    name: Gate,       source: GATE }
-  - { entry: 1,  module: OSC_1,     key: PITCH,    label: Pitch,   name: Pitch,      source: PITCH }
+  - { entry: 1,  module: OSC_1,     key: PITCH,    label: Pitch,   name: Pitch,      source: SLEW_1_OUTPUT }
   - { entry: 2,  module: OSC_1,     key: MOD,      label: Mod,     name: Mod In,     source: LFO_1_OUTPUT }
   - { entry: 3,  module: FILTER_1,  key: AUDIO,    label: Audio,   name: Audio In,   source: OSC_1_OUTPUT }
   - { entry: 4,  module: FILTER_1,  key: MOD,      label: Mod,     name: Mod In,     source: ENV_GEN_1_OUTPUT }
@@ -129,6 +133,7 @@ inputs:
   - { entry: 11, module: DELAY_1,   key: AUDIO_R,  label: Audio R, name: Audio In R, source: CHORUS_1_OUTPUT_R }
   - { entry: 12,                    key: OUTPUT_L, label: L,       name: Final Output L, name_ja: 最終出力 L, source: DELAY_1_OUTPUT_L }
   - { entry: 13,                    key: OUTPUT_R, label: R,       name: Final Output R, name_ja: 最終出力 R, source: DELAY_1_OUTPUT_R }
+  - { entry: 14, module: SLEW_1,    key: IN,       label: In,      name: In,         source: PITCH }
 
 # Controls, by entry: a parameter is one entry of NRPN category 2 (where it takes its value) and
 # the same entry of category 3 (which CC fills its control slot); a General control is in
@@ -175,3 +180,7 @@ controls:
   - { entry: 31, general: true, key: GENERAL_2,         label: "2",       cc: 17, value: 64 }
   - { entry: 32, general: true, key: GENERAL_3,         label: "3",       cc: 18, value: 64 }
   - { entry: 33, general: true, key: GENERAL_4,         label: "4",       cc: 19, value: 64 }
+
+  # Slew 1 came after the General controls, so its entry follows theirs. CC 5 is Portamento Time
+  # in the MIDI spec; it powers up at CC 4, 0.0, where the slew is off.
+  - { entry: 34, module: SLEW_1,    key: TIME,         label: Time,         cc: 5,   value: 4 }

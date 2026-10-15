@@ -1051,10 +1051,11 @@
       {"key":"MIXER_1","id":6,"label":"Mixer 1","outs":[{"sig":"MIXER_1_OUTPUT","label":"Out"}]},
       {"key":"CHORUS_1","id":7,"label":"Chorus 1","outs":[{"sig":"CHORUS_1_OUTPUT_L","label":"Out L"},{"sig":"CHORUS_1_OUTPUT_R","label":"Out R"}]},
       {"key":"DELAY_1","id":8,"label":"Delay 1","outs":[{"sig":"DELAY_1_OUTPUT_L","label":"Out L"},{"sig":"DELAY_1_OUTPUT_R","label":"Out R"}]},
+      {"key":"SLEW_1","id":9,"label":"Slew 1","outs":[{"sig":"SLEW_1_OUTPUT","label":"Out"}]},
     ],
     inputs: [
       {"entry":0,"module":"ENV_GEN_1","key":"GATE","label":"Gate","source":"GATE"},
-      {"entry":1,"module":"OSC_1","key":"PITCH","label":"Pitch","source":"PITCH"},
+      {"entry":1,"module":"OSC_1","key":"PITCH","label":"Pitch","source":"SLEW_1_OUTPUT"},
       {"entry":2,"module":"OSC_1","key":"MOD","label":"Mod","source":"LFO_1_OUTPUT"},
       {"entry":3,"module":"FILTER_1","key":"AUDIO","label":"Audio","source":"OSC_1_OUTPUT"},
       {"entry":4,"module":"FILTER_1","key":"MOD","label":"Mod","source":"ENV_GEN_1_OUTPUT"},
@@ -1067,6 +1068,7 @@
       {"entry":11,"module":"DELAY_1","key":"AUDIO_R","label":"Audio R","source":"CHORUS_1_OUTPUT_R"},
       {"entry":12,"module":null,"key":"OUTPUT_L","label":"L","source":"DELAY_1_OUTPUT_L"},
       {"entry":13,"module":null,"key":"OUTPUT_R","label":"R","source":"DELAY_1_OUTPUT_R"},
+      {"entry":14,"module":"SLEW_1","key":"IN","label":"In","source":"PITCH"},
     ],
     controls: [
       {"entry":0,"module":"LFO_1","key":"RATE","label":"Rate","bipolar":false,"cc":3,"value":64,"general":false,"slots":[["LFO_1_RATE","Rate",false]]},
@@ -1103,6 +1105,7 @@
       {"entry":31,"key":"GENERAL_2","label":"2","bipolar":false,"cc":17,"value":64,"general":true,"slots":[["GENERAL_UNIPOLAR_2","Unipolar 2",false],["GENERAL_BIPOLAR_2","Bipolar 2",true]]},
       {"entry":32,"key":"GENERAL_3","label":"3","bipolar":false,"cc":18,"value":64,"general":true,"slots":[["GENERAL_UNIPOLAR_3","Unipolar 3",false],["GENERAL_BIPOLAR_3","Bipolar 3",true]]},
       {"entry":33,"key":"GENERAL_4","label":"4","bipolar":false,"cc":19,"value":64,"general":true,"slots":[["GENERAL_UNIPOLAR_4","Unipolar 4",false],["GENERAL_BIPOLAR_4","Bipolar 4",true]]},
+      {"entry":34,"module":"SLEW_1","key":"TIME","label":"Time","bipolar":false,"cc":5,"value":4,"general":false,"slots":[["SLEW_1_TIME","Time",false]]},
     ],
     signals: [
       {"id":0,"key":"NONE","label":"0.0"},
@@ -1165,8 +1168,10 @@
       {"id":57,"key":"GENERAL_BIPOLAR_2"},
       {"id":58,"key":"GENERAL_BIPOLAR_3"},
       {"id":59,"key":"GENERAL_BIPOLAR_4"},
+      {"id":60,"key":"SLEW_1_OUTPUT"},
+      {"id":61,"key":"SLEW_1_TIME"},
     ],
-    defaultOrder: ["LFO_1","ENV_GEN_1","MIXER_1","OSC_1","FILTER_1","AMP_1","CHORUS_1","DELAY_1"],
+    defaultOrder: ["SLEW_1","LFO_1","ENV_GEN_1","MIXER_1","OSC_1","FILTER_1","AMP_1","CHORUS_1","DELAY_1"],
   };
   // patch_gen end
 
@@ -1222,6 +1227,7 @@
     LFO_1:     { x: 520,  y: 40 },
     ENV_GEN_1: { x: 520,  y: 228 },
     MIXER_1:   { x: 520,  y: 518 },
+    SLEW_1:    { x: 180,  y: 520 },
     OSC_1:     { x: 880,  y: 40 },
     FILTER_1:  { x: 880,  y: 332 },
     AMP_1:     { x: 1240, y: 40 },
@@ -2537,6 +2543,7 @@
     { col: 0, title: 'General', general: true },
     { col: 1, title: 'LFO', module: 'LFO_1' },
     { col: 1, title: 'EG', module: 'ENV_GEN_1' },
+    { col: 1, title: 'Slew', module: 'SLEW_1' },
     { col: 2, title: 'Osc', module: 'OSC_1' },
     { col: 2, title: 'Filter', module: 'FILTER_1' },
     { col: 3, title: 'Amp', module: 'AMP_1' },

@@ -7,6 +7,7 @@ require_relative 'spms1_lfo'
 require_relative 'spms1_mixer'
 require_relative 'spms1_chorus'
 require_relative 'spms1_delay'
+require_relative 'spms1_slew'
 
 # The patch is data: which modules run and in what order, what feeds each module input, where each
 # parameter takes its value, and which CC fills each control slot all live in the NRPN table, read
@@ -67,9 +68,10 @@ AUDIO_BUFFER_WORDS = 64
 MODULES_SIZE = 32
 
 # The module ids (MODULE_*), in spms1_patch.rb: one of every module type that makes a sound, one
-# mixer, one chorus and one delay. Instances carry their number in the id rather than being
-# indexed by one, so a second oscillator would be MODULE_OSC_2, the next id after MODULE_DELAY_1:
-# numbers only ever get added, at the end of their range (see spms1_patch.yaml).
+# mixer, one chorus, one delay and one slew. Instances carry their number in the id rather than
+# being indexed by one, so a second oscillator would be MODULE_OSC_2, the next id after
+# MODULE_SLEW_1: numbers only ever get added, at the end of their range (see spms1_patch.yaml),
+# which is also why MODULE_SLEW_1 comes after MODULE_DELAY_1 though it runs first.
 
 # The slots of the `signals` bus (SIGNAL_*), in spms1_patch.rb: module outputs, control values
 # and the note inputs in one namespace, so a routing is just a slot number and one source can feed
@@ -126,6 +128,7 @@ amp_1     = Amp.new(SAMPLE_RATE)
 mixer_1   = Mixer.new(SAMPLE_RATE)
 chorus_1  = Chorus.new(SAMPLE_RATE)
 delay_1   = Delay.new(SAMPLE_RATE)
+slew_1    = Slew.new(SAMPLE_RATE)
 
 # Allocated once; which slots are filled is decided per buffer, inside the loop.
 active_modules = Array.new(MODULES_SIZE, MODULE_NONE)
@@ -140,7 +143,10 @@ signals = Array.new(SIGNALS_SIZE, 0.0)
 spms1_fill_constant_signals(signals)
 
 # The default patch, written into the NRPN table the loop reads it back from. Every module is in
-# the run order, so a patch only ever has to route, never to switch something on first. The mixer
+# the run order, so a patch only ever has to route, never to switch something on first. The slew
+# runs first, taking Note Pitch and handing it to the oscillator: its time powers up at 0.0, where
+# it passes its input through as it is, so the patch plays as one without it until CC 5 turns the
+# portamento up. Running first is what lets anything read it in the same sample. The mixer
 # runs after both modulation sources and ahead of the oscillator, so it sees this sample's LFO and
 # envelope and can feed the oscillator, the filter and the amp without a sample's delay. The
 # default patch leaves it unused: the LFO goes straight to the
@@ -199,6 +205,7 @@ while true
   source_delay_1_audio_r = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_AUDIO_R)
   source_output_l        = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OUTPUT_L)
   source_output_r        = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OUTPUT_R)
+  source_slew_1_in       = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_SLEW_1_IN)
 
   # Parameter sources. Read once per buffer rather than per sample: each destination smooths at
   # the control rate with a 2.67 ms time constant, which swallows the difference between feeding
@@ -233,6 +240,7 @@ while true
   source_delay_1_time          = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_TIME)
   source_delay_1_feedback      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_FEEDBACK)
   source_delay_1_mix           = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_MIX)
+  source_slew_1_time           = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_SLEW_1_TIME)
 
   # Which CC fills each control slot. The bus is the only thing downstream reads, so this is
   # where MIDI enters and the only place a CC number appears.
@@ -265,6 +273,7 @@ while true
   cc_delay_1_time          = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_DELAY_1_TIME)
   cc_delay_1_feedback      = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_DELAY_1_FEEDBACK)
   cc_delay_1_mix           = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_DELAY_1_MIX)
+  cc_slew_1_time           = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_SLEW_1_TIME)
   cc_general_mod_wheel     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_MOD_WHEEL)
   cc_general_1             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_1)
   cc_general_2             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_2)
@@ -300,6 +309,7 @@ while true
   signals[SIGNAL_DELAY_1_TIME] = cc_or_zero(cc_delay_1_time, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_delay_1_time)))
   signals[SIGNAL_DELAY_1_FEEDBACK] = cc_or_zero(cc_delay_1_feedback, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_delay_1_feedback)))
   signals[SIGNAL_DELAY_1_MIX] = cc_or_zero(cc_delay_1_mix, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_delay_1_mix)))
+  signals[SIGNAL_SLEW_1_TIME] = cc_or_zero(cc_slew_1_time, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_slew_1_time)))
   signals[SIGNAL_GENERAL_MOD_WHEEL] = cc_or_zero(cc_general_mod_wheel, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_general_mod_wheel)))
   # Each General CC fills two slots, the same value taken both ways.
   general_1 = C.get_midi_cc_value(MIDI_CH, cc_general_1)
@@ -344,6 +354,7 @@ while true
   delay_1.set_time(signals[source_delay_1_time])
   delay_1.set_feedback(signals[source_delay_1_feedback])
   delay_1.set_mix(signals[source_delay_1_mix])
+  slew_1.set_time(signals[source_slew_1_time])
 
   i = 0
   while i < AUDIO_BUFFER_WORDS
@@ -353,8 +364,10 @@ while true
       break if module_id == MODULE_NONE
 
       # Spinel never emits a jump table however the Ruby is written, so a case costs one compare
-      # per id up to the one that matches: 36 a sample at eight modules. Splitting the chain on a
-      # kind of module pays only once that kind has several instances.
+      # per id up to the one that matches: 45 a sample at nine modules. Splitting the chain on a
+      # kind of module pays only once that kind has several instances. Where a module sits in the
+      # chain moves the cost between modules but not the total, so one added later goes at the
+      # end whatever its place in the run order, and leaves what the others cost as it was.
       case module_id
       when MODULE_LFO_1
         signals[SIGNAL_LFO_1_OUTPUT] = lfo_1.process
@@ -376,6 +389,8 @@ while true
         delay_1.process(signals[source_delay_1_audio_l], signals[source_delay_1_audio_r])
         signals[SIGNAL_DELAY_1_OUTPUT_L] = delay_1.output_l
         signals[SIGNAL_DELAY_1_OUTPUT_R] = delay_1.output_r
+      when MODULE_SLEW_1
+        signals[SIGNAL_SLEW_1_OUTPUT] = slew_1.process(signals[source_slew_1_in])
       end
 
       slot += 1
