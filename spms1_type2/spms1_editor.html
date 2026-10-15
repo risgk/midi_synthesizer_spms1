@@ -1323,8 +1323,10 @@
     if (obj.format && obj.format !== 'spms1-type2-patch') throw new Error('Unknown format: ' + obj.format);
     const s = defaultState();
     if (typeof obj.name === 'string') s.name = obj.name.slice(0, 64);
+    // A module listed twice keeps its last place, as the synth runs it there (the last listing
+    // wins), so a hand-edited file loads as the synth plays it.
     if (Array.isArray(obj.order)) {
-      s.order = obj.order.filter((k, i, a) => MOD[k] && a.indexOf(k) === i).slice(0, MODULES_SIZE);
+      s.order = obj.order.slice(0, MODULES_SIZE).filter((k, i, a) => MOD[k] && a.lastIndexOf(k) === i);
     }
     const src = v => (typeof v === 'string' && v in SIG) ? v : null;
     // Version 1 had a mono Delay 1 and a mono Final Output. Each of its inputs feeds both sides

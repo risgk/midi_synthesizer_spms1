@@ -329,6 +329,8 @@ a matter of changing slot numbers.
 The run order is read from slot 0 upwards and stops at the first Module ID 0, so a patch shorter
 than 32 modules ends itself. It is separate from the module numbering: a module only sees the
 current sample's value from something listed before it, and last sample's from something after.
+A module listed more than once runs once, at the last of its slots, as if the earlier ones were
+not there: the last listing wins.
 
 In category 3, CC number 0 means the parameter has no CC. Its control slot then holds 0.0, whatever
 CC it had before, so the patch alone sets what the parameter reads.

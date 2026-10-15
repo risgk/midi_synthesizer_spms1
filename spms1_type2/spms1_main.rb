@@ -65,7 +65,7 @@ AUDIO_BUFFER_WORDS = 64
 # from NRPN each buffer, so nothing needs a terminator: a shorter patch stops at the first
 # MODULE_NONE, which is what an unset NRPN entry reads as. Only the rewriting is paid for the full
 # length; the per-sample walk runs to active_count, counted once a buffer up to that first
-# MODULE_NONE.
+# MODULE_NONE. A module listed more than once runs once, at the last of its slots.
 MODULES_SIZE = 32
 
 # The module ids (MODULE_*), in spms1_patch.rb: one of every module type that makes a sound, one
@@ -133,6 +133,10 @@ slew_1    = Slew.new(SAMPLE_RATE)
 
 # Allocated once; which slots are filled is decided per buffer, inside the loop.
 active_modules = Array.new(MODULES_SIZE, MODULE_NONE)
+# The last slot of the run order each module id is listed at, by id: 128 entries, as an id read
+# from NRPN is 7-bit. Only the entries of the ids listed in the same buffer are read, and those
+# are written first, so it is never cleared.
+last_listed = Array.new(128, 0)
 
 audio_buffer_l = Array.new(AUDIO_BUFFER_WORDS, 0.0)
 audio_buffer_r = Array.new(AUDIO_BUFFER_WORDS, 0.0)
@@ -191,11 +195,26 @@ while true
     active_modules[slot] = C.get_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + slot)
     slot += 1
   end
-  # Counted here, once a buffer, so the per-sample walk neither reads the MODULE_NONE that ends
-  # the order nor compares every id against it.
+  # The order up to the first MODULE_NONE, and the last slot each module is listed at in it.
+  listed_count = 0
+  while listed_count < MODULES_SIZE && active_modules[listed_count] != MODULE_NONE
+    last_listed[active_modules[listed_count]] = listed_count
+    listed_count += 1
+  end
+  # A module listed twice would run twice a sample -- an LFO at twice its rate, a filter taking
+  # two steps -- so the last listing wins and the others are dropped, packing the order in place:
+  # a slot is only ever written once it has been read. Counted here, once a buffer, so the
+  # per-sample walk neither reads the MODULE_NONE that ends the order nor compares every id
+  # against it.
   active_count = 0
-  while active_count < MODULES_SIZE && active_modules[active_count] != MODULE_NONE
-    active_count += 1
+  slot = 0
+  while slot < listed_count
+    module_id = active_modules[slot]
+    if last_listed[module_id] == slot
+      active_modules[active_count] = module_id
+      active_count += 1
+    end
+    slot += 1
   end
 
   source_env_gen_1_gate  = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_1_GATE)
