@@ -81,6 +81,8 @@ Usage
 
 - Cross-platform web-based parameter controller via Web MIDI API: "spms1_editor.html"
 - Built-in software keyboard for note input and testing
+    - Click its heading to hide it, so the patch editor or the controls take its height; the editor remembers
+      which, and the keys of the PC keyboard do not play while it is hidden
 - Graphical patch editor on its Patch tab
     - Wires module outputs to inputs and parameters, and sets the run order and CC assignments
     - Saves and loads patches as JSON

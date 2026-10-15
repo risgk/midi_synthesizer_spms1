@@ -323,6 +323,41 @@
     .kbd-bar h2 {
       margin-bottom: 0;
     }
+    /* The heading is the button that shows and hides the keyboard, as PRA32-U2's editor does with
+       the bar of its keyboard. */
+    .kbd-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0;
+      border: 0;
+      background: none;
+      color: inherit;
+      font: inherit;
+      cursor: pointer;
+    }
+    .kbd-caret {
+      display: inline-block;
+      font-size: 0.7em;
+      transition: transform 0.15s;
+    }
+    #kbd-panel.collapsed .kbd-caret {
+      transform: rotate(-90deg);
+    }
+    /* Hidden, the bar keeps only the heading and Panic, which a note left on still needs. */
+    #kbd-panel.collapsed .keyboard-frame,
+    #kbd-panel.collapsed #kbd-oct-down,
+    #kbd-panel.collapsed #kbd-oct-up,
+    #kbd-panel.collapsed .kbd-hint,
+    #kbd-panel.collapsed .kbd-hold {
+      display: none;
+    }
+    #kbd-panel.collapsed .kbd-bar {
+      margin-bottom: 0;
+    }
+    #kbd-panel.collapsed .kbd-panic {
+      margin-left: auto;
+    }
     /* A ResizeObserver sees no size on an inline box, so kbFitScale would never hear of a change. */
     #kbd-label {
       display: inline-block;
@@ -1012,7 +1047,7 @@
 
 <div class="panel" id="kbd-panel">
   <div class="kbd-bar">
-    <h2><span id="kbd-label">Soft Keyboard</span></h2>
+    <h2><button type="button" class="kbd-toggle" id="kbd-toggle" aria-expanded="true" title="Show or hide the soft keyboard"><span class="kbd-caret" aria-hidden="true">&#9660;</span><span id="kbd-label">Soft Keyboard</span></button></h2>
     <button class="btn" id="kbd-oct-down" title="Octave Down">&#9664;</button>
     <button class="btn" id="kbd-oct-up" title="Octave Up">&#9654;</button>
     <span class="kbd-hint">PC Keys: A - K, Z / X</span>
@@ -2706,7 +2741,7 @@
   let kbHold = false;
   let kbLast = -1;  // the note of the last press
   let kbScale = 1;
-  const kbPrefs = { center: KB_DEFAULT_C + KB_CENTER_OFFSET };
+  const kbPrefs = { center: KB_DEFAULT_C + KB_CENTER_OFFSET, hidden: false };
 
   function loadKbPrefs() {
     try { Object.assign(kbPrefs, JSON.parse(localStorage.getItem(KB_STORAGE_KEY))); } catch (e) { /* storage unavailable */ }
@@ -2851,12 +2886,13 @@
     }
   }
 
-  // Not while typing in a field or choosing in a select, which picks an item by its letter, and
-  // not with Ctrl, Alt or Command, which belong to the browser's shortcuts.
+  // Not while the keyboard is hidden, nor while typing in a field or choosing in a select, which
+  // picks an item by its letter, and not with Ctrl, Alt or Command, which belong to the
+  // browser's shortcuts.
   function kbPcKeyEnabled(e) {
     const t = e.target;
     const tag = t.tagName;
-    return !e.ctrlKey && !e.altKey && !e.metaKey &&
+    return !kbPrefs.hidden && !e.ctrlKey && !e.altKey && !e.metaKey &&
       tag !== 'SELECT' && tag !== 'TEXTAREA' && !t.isContentEditable &&
       !(tag === 'INPUT' && t.type !== 'range' && t.type !== 'button' && t.type !== 'checkbox');
   }
@@ -2951,6 +2987,8 @@
     const scroll = document.getElementById('kb-scroll');
     let saveTimer = null;
     scroll.addEventListener('scroll', () => {
+      // A hidden keyboard has no width, so where it scrolls to then is not a position to keep.
+      if (kbPrefs.hidden) return;
       kbUpdateScrollbar();
       clearTimeout(saveTimer);
       saveTimer = setTimeout(() => { kbPrefs.center = kbGetCenter(); saveKbPrefs(); }, 200);
@@ -2979,10 +3017,36 @@
     });
     ['pointerup', 'pointercancel'].forEach(type => bar.addEventListener(type, () => { drag = null; }));
 
+    document.getElementById('kbd-toggle').addEventListener('click', () => kbSetVisible(kbPrefs.hidden));
+
     kbFitScale();
     kbSetCenter(kbPrefs.center);
     // The text size can change without a resize of the window.
     if (window.ResizeObserver) new ResizeObserver(() => kbFitScale()).observe(document.getElementById('kbd-label'));
+    kbSetVisible(!kbPrefs.hidden);
+  }
+
+  // Shown or hidden, as the last time. Hiding lets go of the keys held and of Hold, so that no
+  // note is left on with nothing in sight to turn it off. A hidden keyboard cannot be scrolled,
+  // so its position is set again when it is shown. The tab above takes the height it leaves.
+  function kbSetVisible(visible) {
+    if (!visible) {
+      [...kbPointers.keys()].forEach(kbRelease);
+      kbSetHold(false);
+    }
+    document.getElementById('kbd-panel').classList.toggle('collapsed', !visible);
+    document.getElementById('kbd-toggle').setAttribute('aria-expanded', String(visible));
+    kbPrefs.hidden = !visible;
+    saveKbPrefs();
+    if (visible) {
+      kbFitScale();
+      kbSetCenter(kbPrefs.center);
+    }
+    fitTabArea();
+    if (!document.getElementById('tab-patch').hidden) {
+      if (!viewTouched) fitView();
+      renderWires();
+    }
   }
 
   // ---- Tabs ----------------------------------------------------------------------------------
