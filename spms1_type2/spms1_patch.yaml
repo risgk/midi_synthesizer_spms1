@@ -170,9 +170,9 @@ controls:
   # them at 1.0 and +0.5, a depth of 1.0, and leaves Mod In unrouted, so the default patch renders
   # as before and routing a source to it is enough.
   - { entry: 41, module: LFO_1,     key: MOD_AMOUNT,   label: Mod Amt,      cc: 0,   value: 124, source: ONE }
-  - { entry: 42, module: LFO_1,     key: MOD_POLARITY, label: Mod Polarity, cc: 0,   value: 124, source: HALF, bipolar: true }
+  - { entry: 42, module: LFO_1,     key: MOD_POLARITY, label: Mod Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 1,  module: LFO_1,     key: LEVEL,        label: Level,        cc: 0,   source: ONE }
-  - { entry: 2,  module: LFO_1,     key: POLARITY,     label: Polarity,     cc: 0,   value: 124, source: HALF, bipolar: true }
+  - { entry: 2,  module: LFO_1,     key: POLARITY,     label: Pol,     cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 3,  module: ENV_GEN_1, key: ATTACK,       label: Attack,       cc: 73,  value: 4 }
   - { entry: 4,  module: ENV_GEN_1, key: DECAY,        label: Decay,        cc: 75,  value: 96 }
   - { entry: 5,  module: ENV_GEN_1, key: SUSTAIN,      label: Sustain,      cc: 30,  value: 124 }
@@ -182,7 +182,7 @@ controls:
   # has, so the default patch renders as before.
   - { entry: 38, module: ENV_GEN_1, key: RELEASE_SWITCH, label: Release Switch, cc: 105, value: 124 }
   - { entry: 6,  module: ENV_GEN_1, key: LEVEL,        label: Level,        cc: 0,   source: ONE }
-  - { entry: 7,  module: ENV_GEN_1, key: POLARITY,     label: Polarity,     cc: 0,   source: HALF, bipolar: true }
+  - { entry: 7,  module: ENV_GEN_1, key: POLARITY,     label: Pol,     cc: 0,   source: HALF, bipolar: true }
   # Osc 1 in the editor: the pitch and its two modulations, then the waveform and the pulse
   # width's modulation, each target next to what moves it. Pulse Width, PW Mod Amt and PW Mod Polarity
   # came after Slew 1, so their entries follow its, but they are listed here. CC 19 is where
@@ -195,17 +195,17 @@ controls:
   # follow theirs. Neither has a CC: the default patch points them at 1.0 and +0.5, a depth of
   # exactly 1.0, which plays the note on Pitch Mod 1 In in tune, as the oscillator always did.
   - { entry: 43, module: OSC_1,     key: PITCH_MOD_1_AMOUNT,   label: Pitch Mod 1 Amt,      cc: 0,   value: 124, source: ONE }
-  - { entry: 44, module: OSC_1,     key: PITCH_MOD_1_POLARITY, label: Pitch Mod 1 Polarity, cc: 0,   value: 124, source: HALF, bipolar: true }
+  - { entry: 44, module: OSC_1,     key: PITCH_MOD_1_POLARITY, label: Pitch Mod 1 Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 11, module: OSC_1,     key: PITCH_MOD_2_AMOUNT,   label: Pitch Mod 2 Amt,      cc: 13,  value: 4 }
-  - { entry: 12, module: OSC_1,     key: PITCH_MOD_2_POLARITY, label: Pitch Mod 2 Polarity, cc: 0,   value: 124, source: POINT_ONE, bipolar: true }
+  - { entry: 12, module: OSC_1,     key: PITCH_MOD_2_POLARITY, label: Pitch Mod 2 Pol, cc: 0,   value: 124, source: POINT_ONE, bipolar: true }
   - { entry: 8,  module: OSC_1,     key: WAVEFORM,     label: Wave,         cc: 20,  value: 4 }
   - { entry: 35, module: OSC_1,     key: PULSE_WIDTH,  label: Pulse Width,  cc: 19,  value: 4 }
   - { entry: 36, module: OSC_1,     key: PW_MOD_AMOUNT,   label: PW Mod Amt,      cc: 103, value: 4 }
-  - { entry: 37, module: OSC_1,     key: PW_MOD_POLARITY, label: PW Mod Polarity, cc: 0,   value: 124, source: HALF, bipolar: true }
+  - { entry: 37, module: OSC_1,     key: PW_MOD_POLARITY, label: PW Mod Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
   # Filter 1 in the editor as Osc 1: the cutoff and its modulation, then the rest.
   - { entry: 13, module: FILTER_1,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 100 }
   - { entry: 16, module: FILTER_1,  key: MOD_AMOUNT,   label: Mod Amt,      cc: 24,  value: 28 }
-  - { entry: 17, module: FILTER_1,  key: MOD_POLARITY, label: Mod Polarity, cc: 0,   value: 124, source: HALF, bipolar: true }
+  - { entry: 17, module: FILTER_1,  key: MOD_POLARITY, label: Mod Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 14, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 94 }
   - { entry: 15, module: FILTER_1,  key: GAIN,         label: Gain,         cc: 112, value: 64 }
   - { entry: 18, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 124 }
@@ -213,11 +213,11 @@ controls:
   # they are listed here, after Gain. Neither has a CC: the default patch points them at 1.0 and
   # +0.5, a depth of exactly 1.0, which passes the envelope as the amp always took it.
   - { entry: 39, module: AMP_1,     key: MOD_AMOUNT,   label: Mod Amt,      cc: 0,   value: 124, source: ONE }
-  - { entry: 40, module: AMP_1,     key: MOD_POLARITY, label: Mod Polarity, cc: 0,   value: 124, source: HALF, bipolar: true }
+  - { entry: 40, module: AMP_1,     key: MOD_POLARITY, label: Mod Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 19, module: MIXER_1,   key: LEVEL_1,      label: Level 1,      cc: 0,   source: ONE }
-  - { entry: 20, module: MIXER_1,   key: POLARITY_1,   label: Polarity 1,   cc: 0,   value: 124, source: HALF, bipolar: true }
+  - { entry: 20, module: MIXER_1,   key: POLARITY_1,   label: Pol 1,   cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 21, module: MIXER_1,   key: LEVEL_2,      label: Level 2,      cc: 0,   source: ONE }
-  - { entry: 22, module: MIXER_1,   key: POLARITY_2,   label: Polarity 2,   cc: 0,   value: 124, source: HALF, bipolar: true }
+  - { entry: 22, module: MIXER_1,   key: POLARITY_2,   label: Pol 2,   cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 23, module: CHORUS_1,  key: RATE,         label: Rate,         cc: 58,  value: 64 }
   - { entry: 24, module: CHORUS_1,  key: DEPTH,        label: Depth,        cc: 59,  value: 64 }
   - { entry: 25, module: CHORUS_1,  key: MIX,          label: Mix,          cc: 93,  value: 64 }
