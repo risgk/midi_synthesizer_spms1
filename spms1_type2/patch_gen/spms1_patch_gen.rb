@@ -226,8 +226,10 @@ end
 # ---- README.md, README.ja.md -------------------------------------------------------------------
 
 # A Markdown table of `rows` (each a row's cells) in `columns` groups side by side, filled down
-# each group in turn, with an empty column between groups.
+# each group in turn, with an empty column between groups. A '|' in a cell, as in a label that
+# lists its choices, is escaped so that it does not end the cell.
 def side_by_side(headers, rows, columns)
+  rows = rows.map { |row| row.map { |cell| cell.to_s.gsub('|', '\\|') } }
   line = ->(groups, between) { '| ' + groups.map { |g| g.join(' | ') }.join(" | #{between}| ") + ' |' }
   per = (rows.length + columns - 1) / columns
   head = line.call([headers] * columns, '')

@@ -382,7 +382,7 @@ flowchart LR
 | 6 | EG 1 Level | | 17 | Filter 1 Mod Polarity | | 28 | Delay 1 Mix |
 | 7 | EG 1 Polarity | | 18 | Amp 1 Gain | | 34 | Slew 1 Time |
 | 8 | Osc 1 Wave | | 19 | Mixer 1 Level 1 | | 35 | Osc 1 Pulse Width |
-| 9 | Osc 1 Coarse Tune | | 20 | Mixer 1 Polarity 1 | | 36 | Osc 1 Mod Dst (Pitch|PW) |
+| 9 | Osc 1 Coarse Tune | | 20 | Mixer 1 Polarity 1 | | 36 | Osc 1 Mod Dst [Pitch\|PW] |
 | 10 | Osc 1 Fine Tune | | 21 | Mixer 1 Level 2 | |  |  |
 
 <!-- patch_gen end -->
@@ -448,7 +448,7 @@ flowchart LR
 | 16 | Chorus 1 Output R ± | | 38 | Mixer 1 Level 1 | | 60 | Slew 1 Output ± |
 | 17 | Delay 1 Output L ± | | 39 | Mixer 1 Polarity 1 ± | | 61 | Slew 1 Time |
 | 18 | Delay 1 Output R ± | | 40 | Mixer 1 Level 2 | | 62 | Osc 1 Pulse Width |
-| 19 | LFO 1 Rate | | 41 | Mixer 1 Polarity 2 ± | | 63 | Osc 1 Mod Dst (Pitch|PW) |
+| 19 | LFO 1 Rate | | 41 | Mixer 1 Polarity 2 ± | | 63 | Osc 1 Mod Dst [Pitch\|PW] |
 | 20 | LFO 1 Level | | 42 | Chorus 1 Rate | |  |  |
 | 21 | LFO 1 Polarity ± | | 43 | Chorus 1 Depth | |  |  |
 
