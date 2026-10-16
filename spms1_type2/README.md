@@ -291,8 +291,7 @@ flowchart LR
 
 It needs no limiter and no clip after it: the input is held to one unit on the way in, and the
 filter, the reading between two samples and the crossfades are all weighted averages, which cannot
-reach past what they average. The delay the taps swing about is fixed, as PRA32-U2 keeps its own
-internal.
+reach past what they average. The delay the taps swing about is fixed.
 
 #### Delay 1
 
@@ -414,8 +413,8 @@ both at the same signal for a mono output.
 | 6 | EG 1 Level | | 20 | Mixer 1 Pol 1 | | 39 | Amp 1 Mod Amt |
 | 7 | EG 1 Pol | | 21 | Mixer 1 Level 2 | | 40 | Amp 1 Mod Pol |
 | 8 | Osc 1 Wave | | 22 | Mixer 1 Pol 2 | | 41 | LFO 1 Mod Amt |
-| 9 | Osc 1 Coarse Tune | | 23 | Chorus 1 Rate | | 42 | LFO 1 Mod Pol |
-| 10 | Osc 1 Fine Tune | | 24 | Chorus 1 Depth | | 43 | Osc 1 Pitch Mod 1 Amt |
+| 9 | Osc 1 Pitch Coarse | | 23 | Chorus 1 Rate | | 42 | LFO 1 Mod Pol |
+| 10 | Osc 1 Pitch Fine | | 24 | Chorus 1 Depth | | 43 | Osc 1 Pitch Mod 1 Amt |
 | 11 | Osc 1 Pitch Mod 2 Amt | | 25 | Chorus 1 Mix | | 44 | Osc 1 Pitch Mod 1 Pol |
 | 12 | Osc 1 Pitch Mod 2 Pol | | 26 | Delay 1 Time | |  |  |
 | 13 | Filter 1 Cutoff | | 27 | Delay 1 Feedback | |  |  |
@@ -467,8 +466,8 @@ two slots, a unipolar and a bipolar one. See the General slots below.
 | 0 | None (constant 0.0) | | 25 | EG 1 Level | | 50 | Pitch Bend ± |
 | 1 | Constant 1.0 | | 26 | EG 1 Pol ± | | 51 | General Mod Wheel |
 | 2 | Constant 0.5 | | 27 | Osc 1 Wave | | 52 | General Unipolar 1 |
-| 3 | Constant 0.2 | | 28 | Osc 1 Coarse Tune ± | | 53 | General Unipolar 2 |
-| 4 | Constant 0.1 | | 29 | Osc 1 Fine Tune ± | | 54 | General Unipolar 3 |
+| 3 | Constant 0.2 | | 28 | Osc 1 Pitch Coarse ± | | 53 | General Unipolar 2 |
+| 4 | Constant 0.1 | | 29 | Osc 1 Pitch Fine ± | | 54 | General Unipolar 3 |
 | 5 | Constant -0.1 | | 30 | Osc 1 Pitch Mod 2 Amt | | 55 | General Unipolar 4 |
 | 6 | Constant -0.2 | | 31 | Osc 1 Pitch Mod 2 Pol ± | | 56 | General Bipolar 1 ± |
 | 7 | Constant -0.5 | | 32 | Filter 1 Cutoff | | 57 | General Bipolar 2 ± |
@@ -503,7 +502,7 @@ Slots 19-47, 61, 62-64 and 67-73 hold the values arriving from CC, so a paramete
 by default. Each parameter is unipolar or bipolar, and its slot takes the same range. A unipolar one
 runs 0.0 to 1.0 from CC 4 to CC 124, the span of an envelope, so an envelope pointed at one sweeps
 the whole of its dial. A bipolar one runs -0.5 to +0.5 with CC 64 at 0.0, the span of an LFO, so a
-bipolar source pointed at one swings it about the middle. The two tune controls are bipolar, since
+bipolar source pointed at one swings it about the middle. Pitch Coarse and Pitch Fine are bipolar, since
 their middle is no change at all, and so is every Pol -- the LFO's, the EG's, the mixer's and
 the six Mod Pol controls -- since its sign is what it sets. Pointing a parameter at another
 slot is what makes a modulation. A slot with no CC holds 0.0.
@@ -546,8 +545,8 @@ tables again after an update.
 
 #### Ranges worth knowing
 
-Both tune controls are centred on CC 64 and move one whole unit per CC step: Coarse Tune a
-semitone, reaching 5 octaves either way, and Fine Tune a cent, reaching 60 either way. They are
+Osc 1 Pitch Coarse and Pitch Fine are both centred on CC 64 and move one whole unit per CC step:
+Pitch Coarse a semitone, reaching 5 octaves either way, and Pitch Fine a cent, reaching 60 either way. They are
 summed, so any pitch is reachable.
 
 LFO 1 Level and LFO 1 Pol scale the LFO's output together, as a mixer's Level and Pol
@@ -572,7 +571,7 @@ depth of 1.0 the envelope passes as it arrives, at 0.5 the amp is 6 dB down, at 
 and a negative depth inverts the output. Neither has a CC, and the default patch points them at
 the constants 1.0 and +0.5, a depth of 1.0.
 
-EG 1 Release Switch, on CC 105 as in PRA32-U2, picks the release, after the note's gate falls: on
+EG 1 Release Switch, on CC 105, picks the release, after the note's gate falls: on
 from 0.5 up (CC 64-124), it runs at the decay's rate, set by EG 1 Decay; off below 0.5 (CC 4-63), it
 runs at the shortest decay's, 10 ms, whatever the decay is, so a long decay still ends a note
 short. It powers up on. It is a switch, so it is not smoothed.
@@ -597,8 +596,8 @@ Neither has a CC: the default patch points them at 1.0 and +0.5.
 
 Osc 1 Pulse Width shifts the second of the two sawtooths that the morph is made of, from half a
 cycle at 0.0 (CC 4) toward a whole one at 1.0 (CC 124). At the square end of Osc 1 Wave that is a
-pulse of 50% at CC 4, 25% at CC 64 and 0%, silence, at CC 124; it is CC 19, where PRA32-U2 has
-Osc 1 Shape. Osc 1 PW Mod In moves it, by PW Mod Amt (CC 103) times PW Mod Pol, the same
+pulse of 50% at CC 4, 25% at CC 64 and 0%, silence, at CC 124; it is on CC 19.
+Osc 1 PW Mod In moves it, by PW Mod Amt (CC 103) times PW Mod Pol, the same
 way as each Pitch Mod In, Amt and Pol move the pitch. A unit of modulation is the whole pulse
 width range, so at the top of PW Mod Amt the LFO, which the default patch feeds it, swings the
 pulse width half the range either way: with Pulse Width at CC 64, from 50% to nearly 0%. The pulse
@@ -639,8 +638,7 @@ The three Chorus 1 parameters are unipolar and move in steps of 1/120. Rate is r
 number, a semitone a step, as LFO 1 Rate is: 0.015 Hz at CC 4, 0.48 Hz at CC 64 and 15.4 Hz at
 CC 124, the default divided and multiplied by 32. Depth is how far each tap swings either side of 5.33 ms, in a straight line from not at
 all at CC 4, through 2.63 ms at CC 64, to 5.25 ms at CC 124. Mix is each tap's share of its side's
-crossfade: the dry input alone at CC 4, half and half at CC 64 -- the chorus PRA32-U2 makes at full
-Chorus Level -- and only the taps at CC 124, a vibrato on each side, the two moving opposite ways.
+crossfade: the dry input alone at CC 4, half and half at CC 64, and only the taps at CC 124, a vibrato on each side, the two moving opposite ways.
 All three power up at CC 64. The halves of the crossfade are what hold the chorus to one unit, so
 at the default the dry signal is 6 dB down, and the sum with the tap makes up some of it.
 
@@ -680,7 +678,7 @@ changes only how fast the output moves, so it cannot step it.
 - Amp gain and filter cutoff share one CC: CC 99 = 3, CC 98 = 18, CC 6 = 74
 - Amp at full level with no envelope: CC 99 = 1, CC 98 = 6, CC 6 = 1
 - Disconnect the filter's modulation input: CC 99 = 1, CC 98 = 4, CC 6 = 0
-- A pitch envelope 60 cents deep: CC 99 = 2, CC 98 = 10, CC 6 = 10 points Osc 1 Fine Tune at the
+- A pitch envelope 60 cents deep: CC 99 = 2, CC 98 = 10, CC 6 = 10 points Osc 1 Pitch Fine at the
   envelope, which then sweeps the tuning from in tune up to 60 cents sharp, reached at half the
   envelope's peak
 - The envelope drives the filter harder as a note starts: CC 99 = 2, CC 98 = 15, CC 6 = 10 takes
@@ -737,7 +735,7 @@ changes only how fast the output moves, so it cannot step it.
   smoothed; parameters (category 2) are read once per buffer and are smoothed by their
   destination. Route a fast source through a module input, a stepped one through a parameter
 - The smoothing takes two stages (10.7 ms average delay, 99% in 35 ms at 48 kHz), which round off
-  the steps of a controller sending sparse CCs (e.g. every 20 ms). Osc 1 Coarse Tune and Fine Tune
+  the steps of a controller sending sparse CCs (e.g. every 20 ms). Osc 1 Pitch Coarse and Pitch Fine
   are not smoothed, so that the pitch follows right away, and neither is Slew 1 Time, which
   cannot step what it sets
 - A parameter source may point at any of the 128 slots. Slots above 73 read 0 until something

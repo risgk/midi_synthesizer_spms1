@@ -1094,7 +1094,7 @@
   const SPEC = {
     modules: [
       {"key":"LFO_1","id":1,"label":"LFO 1","outs":[{"sig":"LFO_1_OUTPUT","label":"Out"}]},
-      {"key":"ENV_GEN_1","id":2,"label":"EG 1","outs":[{"sig":"ENV_GEN_1_OUTPUT","label":"Out"}]},
+      {"key":"EG_1","id":2,"label":"EG 1","outs":[{"sig":"EG_1_OUTPUT","label":"Out"}]},
       {"key":"OSC_1","id":3,"label":"Osc 1","outs":[{"sig":"OSC_1_OUTPUT","label":"Out"}]},
       {"key":"FILTER_1","id":4,"label":"Filter 1","outs":[{"sig":"FILTER_1_OUTPUT_LP","label":"Out LP"},{"sig":"FILTER_1_OUTPUT_BP","label":"Out BP"},{"sig":"FILTER_1_OUTPUT_HP","label":"Out HP"}]},
       {"key":"AMP_1","id":5,"label":"Amp 1","outs":[{"sig":"AMP_1_OUTPUT","label":"Out"}]},
@@ -1104,13 +1104,13 @@
       {"key":"SLEW_1","id":9,"label":"Slew 1","outs":[{"sig":"SLEW_1_OUTPUT","label":"Out"}]},
     ],
     inputs: [
-      {"entry":0,"module":"ENV_GEN_1","key":"GATE","label":"Gate In","source":"GATE"},
+      {"entry":0,"module":"EG_1","key":"GATE","label":"Gate In","source":"NOTE_GATE"},
       {"entry":1,"module":"OSC_1","key":"PITCH_MOD_1","label":"Pitch Mod 1 In","source":"SLEW_1_OUTPUT"},
       {"entry":2,"module":"OSC_1","key":"PITCH_MOD_2","label":"Pitch Mod 2 In","source":"LFO_1_OUTPUT"},
       {"entry":3,"module":"FILTER_1","key":"AUDIO","label":"Audio In","source":"OSC_1_OUTPUT"},
-      {"entry":4,"module":"FILTER_1","key":"MOD","label":"Mod In","source":"ENV_GEN_1_OUTPUT"},
+      {"entry":4,"module":"FILTER_1","key":"MOD","label":"Mod In","source":"EG_1_OUTPUT"},
       {"entry":5,"module":"AMP_1","key":"AUDIO","label":"Audio In","source":"FILTER_1_OUTPUT_LP"},
-      {"entry":6,"module":"AMP_1","key":"MOD","label":"Mod In","source":"ENV_GEN_1_OUTPUT"},
+      {"entry":6,"module":"AMP_1","key":"MOD","label":"Mod In","source":"EG_1_OUTPUT"},
       {"entry":7,"module":"MIXER_1","key":"IN_1","label":"In 1","source":"NONE"},
       {"entry":8,"module":"MIXER_1","key":"IN_2","label":"In 2","source":"NONE"},
       {"entry":9,"module":"CHORUS_1","key":"AUDIO","label":"Audio In","source":"AMP_1_OUTPUT"},
@@ -1118,44 +1118,44 @@
       {"entry":11,"module":"DELAY_1","key":"AUDIO_R","label":"Audio In R","source":"CHORUS_1_OUTPUT_R"},
       {"entry":12,"module":null,"key":"OUTPUT_L","label":"L","source":"DELAY_1_OUTPUT_L"},
       {"entry":13,"module":null,"key":"OUTPUT_R","label":"R","source":"DELAY_1_OUTPUT_R"},
-      {"entry":14,"module":"SLEW_1","key":"IN","label":"In","source":"PITCH"},
+      {"entry":14,"module":"SLEW_1","key":"IN","label":"In","source":"NOTE_PITCH"},
       {"entry":15,"module":"OSC_1","key":"PW_MOD","label":"PW Mod In","source":"LFO_1_OUTPUT"},
       {"entry":16,"module":"LFO_1","key":"MOD","label":"Mod In","source":"NONE"},
     ],
     controls: [
       {"entry":0,"module":"LFO_1","key":"RATE","label":"Rate","bipolar":false,"cc":3,"value":64,"general":false,"slots":[["LFO_1_RATE","Rate",false]]},
-      {"entry":41,"module":"LFO_1","key":"MOD_AMOUNT","label":"Mod Amt","bipolar":false,"cc":0,"value":124,"source":"ONE","general":false,"slots":[["LFO_1_MOD_AMOUNT","Mod Amt",false]]},
-      {"entry":42,"module":"LFO_1","key":"MOD_POLARITY","label":"Mod Pol","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["LFO_1_MOD_POLARITY","Mod Pol",true]]},
+      {"entry":41,"module":"LFO_1","key":"MOD_AMT","label":"Mod Amt","bipolar":false,"cc":0,"value":124,"source":"ONE","general":false,"slots":[["LFO_1_MOD_AMT","Mod Amt",false]]},
+      {"entry":42,"module":"LFO_1","key":"MOD_POL","label":"Mod Pol","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["LFO_1_MOD_POL","Mod Pol",true]]},
       {"entry":1,"module":"LFO_1","key":"LEVEL","label":"Level","bipolar":false,"cc":0,"source":"ONE","general":false,"slots":[["LFO_1_LEVEL","Level",false]]},
-      {"entry":2,"module":"LFO_1","key":"POLARITY","label":"Pol","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["LFO_1_POLARITY","Pol",true]]},
-      {"entry":3,"module":"ENV_GEN_1","key":"ATTACK","label":"Attack","bipolar":false,"cc":73,"value":4,"general":false,"slots":[["ENV_GEN_1_ATTACK","Attack",false]]},
-      {"entry":4,"module":"ENV_GEN_1","key":"DECAY","label":"Decay","bipolar":false,"cc":75,"value":96,"general":false,"slots":[["ENV_GEN_1_DECAY","Decay",false]]},
-      {"entry":5,"module":"ENV_GEN_1","key":"SUSTAIN","label":"Sustain","bipolar":false,"cc":30,"value":124,"general":false,"slots":[["ENV_GEN_1_SUSTAIN","Sustain",false]]},
-      {"entry":38,"module":"ENV_GEN_1","key":"RELEASE_SWITCH","label":"Release Switch","bipolar":false,"cc":105,"value":124,"general":false,"slots":[["ENV_GEN_1_RELEASE_SWITCH","Release Switch",false]]},
-      {"entry":6,"module":"ENV_GEN_1","key":"LEVEL","label":"Level","bipolar":false,"cc":0,"source":"ONE","general":false,"slots":[["ENV_GEN_1_LEVEL","Level",false]]},
-      {"entry":7,"module":"ENV_GEN_1","key":"POLARITY","label":"Pol","bipolar":true,"cc":0,"source":"HALF","general":false,"slots":[["ENV_GEN_1_POLARITY","Pol",true]]},
-      {"entry":9,"module":"OSC_1","key":"COARSE_TUNE","label":"Coarse Tune","bipolar":true,"cc":86,"value":64,"general":false,"slots":[["OSC_1_COARSE_TUNE","Coarse Tune",true]]},
-      {"entry":10,"module":"OSC_1","key":"FINE_TUNE","label":"Fine Tune","bipolar":true,"cc":70,"value":64,"general":false,"slots":[["OSC_1_FINE_TUNE","Fine Tune",true]]},
-      {"entry":43,"module":"OSC_1","key":"PITCH_MOD_1_AMOUNT","label":"Pitch Mod 1 Amt","bipolar":false,"cc":0,"value":124,"source":"ONE","general":false,"slots":[["OSC_1_PITCH_MOD_1_AMOUNT","Pitch Mod 1 Amt",false]]},
-      {"entry":44,"module":"OSC_1","key":"PITCH_MOD_1_POLARITY","label":"Pitch Mod 1 Pol","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["OSC_1_PITCH_MOD_1_POLARITY","Pitch Mod 1 Pol",true]]},
-      {"entry":11,"module":"OSC_1","key":"PITCH_MOD_2_AMOUNT","label":"Pitch Mod 2 Amt","bipolar":false,"cc":13,"value":4,"general":false,"slots":[["OSC_1_PITCH_MOD_2_AMOUNT","Pitch Mod 2 Amt",false]]},
-      {"entry":12,"module":"OSC_1","key":"PITCH_MOD_2_POLARITY","label":"Pitch Mod 2 Pol","bipolar":true,"cc":0,"value":124,"source":"POINT_ONE","general":false,"slots":[["OSC_1_PITCH_MOD_2_POLARITY","Pitch Mod 2 Pol",true]]},
-      {"entry":8,"module":"OSC_1","key":"WAVEFORM","label":"Wave","bipolar":false,"cc":20,"value":4,"general":false,"slots":[["OSC_1_WAVEFORM","Wave",false]]},
+      {"entry":2,"module":"LFO_1","key":"POL","label":"Pol","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["LFO_1_POL","Pol",true]]},
+      {"entry":3,"module":"EG_1","key":"ATTACK","label":"Attack","bipolar":false,"cc":73,"value":4,"general":false,"slots":[["EG_1_ATTACK","Attack",false]]},
+      {"entry":4,"module":"EG_1","key":"DECAY","label":"Decay","bipolar":false,"cc":75,"value":96,"general":false,"slots":[["EG_1_DECAY","Decay",false]]},
+      {"entry":5,"module":"EG_1","key":"SUSTAIN","label":"Sustain","bipolar":false,"cc":30,"value":124,"general":false,"slots":[["EG_1_SUSTAIN","Sustain",false]]},
+      {"entry":38,"module":"EG_1","key":"RELEASE_SWITCH","label":"Release Switch","bipolar":false,"cc":105,"value":124,"general":false,"slots":[["EG_1_RELEASE_SWITCH","Release Switch",false]]},
+      {"entry":6,"module":"EG_1","key":"LEVEL","label":"Level","bipolar":false,"cc":0,"source":"ONE","general":false,"slots":[["EG_1_LEVEL","Level",false]]},
+      {"entry":7,"module":"EG_1","key":"POL","label":"Pol","bipolar":true,"cc":0,"source":"HALF","general":false,"slots":[["EG_1_POL","Pol",true]]},
+      {"entry":9,"module":"OSC_1","key":"PITCH_COARSE","label":"Pitch Coarse","bipolar":true,"cc":86,"value":64,"general":false,"slots":[["OSC_1_PITCH_COARSE","Pitch Coarse",true]]},
+      {"entry":10,"module":"OSC_1","key":"PITCH_FINE","label":"Pitch Fine","bipolar":true,"cc":70,"value":64,"general":false,"slots":[["OSC_1_PITCH_FINE","Pitch Fine",true]]},
+      {"entry":43,"module":"OSC_1","key":"PITCH_MOD_1_AMT","label":"Pitch Mod 1 Amt","bipolar":false,"cc":0,"value":124,"source":"ONE","general":false,"slots":[["OSC_1_PITCH_MOD_1_AMT","Pitch Mod 1 Amt",false]]},
+      {"entry":44,"module":"OSC_1","key":"PITCH_MOD_1_POL","label":"Pitch Mod 1 Pol","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["OSC_1_PITCH_MOD_1_POL","Pitch Mod 1 Pol",true]]},
+      {"entry":11,"module":"OSC_1","key":"PITCH_MOD_2_AMT","label":"Pitch Mod 2 Amt","bipolar":false,"cc":13,"value":4,"general":false,"slots":[["OSC_1_PITCH_MOD_2_AMT","Pitch Mod 2 Amt",false]]},
+      {"entry":12,"module":"OSC_1","key":"PITCH_MOD_2_POL","label":"Pitch Mod 2 Pol","bipolar":true,"cc":0,"value":124,"source":"POINT_ONE","general":false,"slots":[["OSC_1_PITCH_MOD_2_POL","Pitch Mod 2 Pol",true]]},
+      {"entry":8,"module":"OSC_1","key":"WAVE","label":"Wave","bipolar":false,"cc":20,"value":4,"general":false,"slots":[["OSC_1_WAVE","Wave",false]]},
       {"entry":35,"module":"OSC_1","key":"PULSE_WIDTH","label":"Pulse Width","bipolar":false,"cc":19,"value":4,"general":false,"slots":[["OSC_1_PULSE_WIDTH","Pulse Width",false]]},
-      {"entry":36,"module":"OSC_1","key":"PW_MOD_AMOUNT","label":"PW Mod Amt","bipolar":false,"cc":103,"value":4,"general":false,"slots":[["OSC_1_PW_MOD_AMOUNT","PW Mod Amt",false]]},
-      {"entry":37,"module":"OSC_1","key":"PW_MOD_POLARITY","label":"PW Mod Pol","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["OSC_1_PW_MOD_POLARITY","PW Mod Pol",true]]},
+      {"entry":36,"module":"OSC_1","key":"PW_MOD_AMT","label":"PW Mod Amt","bipolar":false,"cc":103,"value":4,"general":false,"slots":[["OSC_1_PW_MOD_AMT","PW Mod Amt",false]]},
+      {"entry":37,"module":"OSC_1","key":"PW_MOD_POL","label":"PW Mod Pol","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["OSC_1_PW_MOD_POL","PW Mod Pol",true]]},
       {"entry":13,"module":"FILTER_1","key":"CUTOFF","label":"Cutoff","bipolar":false,"cc":74,"value":100,"general":false,"slots":[["FILTER_1_CUTOFF","Cutoff",false]]},
-      {"entry":16,"module":"FILTER_1","key":"MOD_AMOUNT","label":"Mod Amt","bipolar":false,"cc":24,"value":28,"general":false,"slots":[["FILTER_1_MOD_AMOUNT","Mod Amt",false]]},
-      {"entry":17,"module":"FILTER_1","key":"MOD_POLARITY","label":"Mod Pol","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["FILTER_1_MOD_POLARITY","Mod Pol",true]]},
+      {"entry":16,"module":"FILTER_1","key":"MOD_AMT","label":"Mod Amt","bipolar":false,"cc":24,"value":28,"general":false,"slots":[["FILTER_1_MOD_AMT","Mod Amt",false]]},
+      {"entry":17,"module":"FILTER_1","key":"MOD_POL","label":"Mod Pol","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["FILTER_1_MOD_POL","Mod Pol",true]]},
       {"entry":14,"module":"FILTER_1","key":"RESONANCE","label":"Resonance","bipolar":false,"cc":71,"value":94,"general":false,"slots":[["FILTER_1_RESONANCE","Resonance",false]]},
       {"entry":15,"module":"FILTER_1","key":"GAIN","label":"Gain","bipolar":false,"cc":112,"value":64,"general":false,"slots":[["FILTER_1_GAIN","Gain",false]]},
       {"entry":18,"module":"AMP_1","key":"GAIN","label":"Gain","bipolar":false,"cc":15,"value":124,"general":false,"slots":[["AMP_1_GAIN","Gain",false]]},
-      {"entry":39,"module":"AMP_1","key":"MOD_AMOUNT","label":"Mod Amt","bipolar":false,"cc":0,"value":124,"source":"ONE","general":false,"slots":[["AMP_1_MOD_AMOUNT","Mod Amt",false]]},
-      {"entry":40,"module":"AMP_1","key":"MOD_POLARITY","label":"Mod Pol","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["AMP_1_MOD_POLARITY","Mod Pol",true]]},
+      {"entry":39,"module":"AMP_1","key":"MOD_AMT","label":"Mod Amt","bipolar":false,"cc":0,"value":124,"source":"ONE","general":false,"slots":[["AMP_1_MOD_AMT","Mod Amt",false]]},
+      {"entry":40,"module":"AMP_1","key":"MOD_POL","label":"Mod Pol","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["AMP_1_MOD_POL","Mod Pol",true]]},
       {"entry":19,"module":"MIXER_1","key":"LEVEL_1","label":"Level 1","bipolar":false,"cc":0,"source":"ONE","general":false,"slots":[["MIXER_1_LEVEL_1","Level 1",false]]},
-      {"entry":20,"module":"MIXER_1","key":"POLARITY_1","label":"Pol 1","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["MIXER_1_POLARITY_1","Pol 1",true]]},
+      {"entry":20,"module":"MIXER_1","key":"POL_1","label":"Pol 1","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["MIXER_1_POL_1","Pol 1",true]]},
       {"entry":21,"module":"MIXER_1","key":"LEVEL_2","label":"Level 2","bipolar":false,"cc":0,"source":"ONE","general":false,"slots":[["MIXER_1_LEVEL_2","Level 2",false]]},
-      {"entry":22,"module":"MIXER_1","key":"POLARITY_2","label":"Pol 2","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["MIXER_1_POLARITY_2","Pol 2",true]]},
+      {"entry":22,"module":"MIXER_1","key":"POL_2","label":"Pol 2","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["MIXER_1_POL_2","Pol 2",true]]},
       {"entry":23,"module":"CHORUS_1","key":"RATE","label":"Rate","bipolar":false,"cc":58,"value":64,"general":false,"slots":[["CHORUS_1_RATE","Rate",false]]},
       {"entry":24,"module":"CHORUS_1","key":"DEPTH","label":"Depth","bipolar":false,"cc":59,"value":64,"general":false,"slots":[["CHORUS_1_DEPTH","Depth",false]]},
       {"entry":25,"module":"CHORUS_1","key":"MIX","label":"Mix","bipolar":false,"cc":93,"value":64,"general":false,"slots":[["CHORUS_1_MIX","Mix",false]]},
@@ -1180,7 +1180,7 @@
       {"id":7,"key":"MINUS_HALF","label":"-0.5"},
       {"id":8,"key":"MINUS_ONE","label":"-1.0"},
       {"id":9,"key":"LFO_1_OUTPUT"},
-      {"id":10,"key":"ENV_GEN_1_OUTPUT"},
+      {"id":10,"key":"EG_1_OUTPUT"},
       {"id":11,"key":"OSC_1_OUTPUT"},
       {"id":12,"key":"FILTER_1_OUTPUT_LP"},
       {"id":13,"key":"AMP_1_OUTPUT"},
@@ -1191,36 +1191,36 @@
       {"id":18,"key":"DELAY_1_OUTPUT_R"},
       {"id":19,"key":"LFO_1_RATE"},
       {"id":20,"key":"LFO_1_LEVEL"},
-      {"id":21,"key":"LFO_1_POLARITY"},
-      {"id":22,"key":"ENV_GEN_1_ATTACK"},
-      {"id":23,"key":"ENV_GEN_1_DECAY"},
-      {"id":24,"key":"ENV_GEN_1_SUSTAIN"},
-      {"id":25,"key":"ENV_GEN_1_LEVEL"},
-      {"id":26,"key":"ENV_GEN_1_POLARITY"},
-      {"id":27,"key":"OSC_1_WAVEFORM"},
-      {"id":28,"key":"OSC_1_COARSE_TUNE"},
-      {"id":29,"key":"OSC_1_FINE_TUNE"},
-      {"id":30,"key":"OSC_1_PITCH_MOD_2_AMOUNT"},
-      {"id":31,"key":"OSC_1_PITCH_MOD_2_POLARITY"},
+      {"id":21,"key":"LFO_1_POL"},
+      {"id":22,"key":"EG_1_ATTACK"},
+      {"id":23,"key":"EG_1_DECAY"},
+      {"id":24,"key":"EG_1_SUSTAIN"},
+      {"id":25,"key":"EG_1_LEVEL"},
+      {"id":26,"key":"EG_1_POL"},
+      {"id":27,"key":"OSC_1_WAVE"},
+      {"id":28,"key":"OSC_1_PITCH_COARSE"},
+      {"id":29,"key":"OSC_1_PITCH_FINE"},
+      {"id":30,"key":"OSC_1_PITCH_MOD_2_AMT"},
+      {"id":31,"key":"OSC_1_PITCH_MOD_2_POL"},
       {"id":32,"key":"FILTER_1_CUTOFF"},
       {"id":33,"key":"FILTER_1_RESONANCE"},
       {"id":34,"key":"FILTER_1_GAIN"},
-      {"id":35,"key":"FILTER_1_MOD_AMOUNT"},
-      {"id":36,"key":"FILTER_1_MOD_POLARITY"},
+      {"id":35,"key":"FILTER_1_MOD_AMT"},
+      {"id":36,"key":"FILTER_1_MOD_POL"},
       {"id":37,"key":"AMP_1_GAIN"},
       {"id":38,"key":"MIXER_1_LEVEL_1"},
-      {"id":39,"key":"MIXER_1_POLARITY_1"},
+      {"id":39,"key":"MIXER_1_POL_1"},
       {"id":40,"key":"MIXER_1_LEVEL_2"},
-      {"id":41,"key":"MIXER_1_POLARITY_2"},
+      {"id":41,"key":"MIXER_1_POL_2"},
       {"id":42,"key":"CHORUS_1_RATE"},
       {"id":43,"key":"CHORUS_1_DEPTH"},
       {"id":44,"key":"CHORUS_1_MIX"},
       {"id":45,"key":"DELAY_1_TIME"},
       {"id":46,"key":"DELAY_1_FEEDBACK"},
       {"id":47,"key":"DELAY_1_MIX"},
-      {"id":48,"key":"PITCH","label":"Note Pitch"},
-      {"id":49,"key":"GATE","label":"Note Gate"},
-      {"id":50,"key":"BEND","label":"Pitch Bend"},
+      {"id":48,"key":"NOTE_PITCH","label":"Note Pitch"},
+      {"id":49,"key":"NOTE_GATE","label":"Note Gate"},
+      {"id":50,"key":"PITCH_BEND","label":"Pitch Bend"},
       {"id":51,"key":"GENERAL_MOD_WHEEL"},
       {"id":52,"key":"GENERAL_UNIPOLAR_1"},
       {"id":53,"key":"GENERAL_UNIPOLAR_2"},
@@ -1233,19 +1233,19 @@
       {"id":60,"key":"SLEW_1_OUTPUT"},
       {"id":61,"key":"SLEW_1_TIME"},
       {"id":62,"key":"OSC_1_PULSE_WIDTH"},
-      {"id":63,"key":"OSC_1_PW_MOD_AMOUNT"},
-      {"id":64,"key":"OSC_1_PW_MOD_POLARITY"},
+      {"id":63,"key":"OSC_1_PW_MOD_AMT"},
+      {"id":64,"key":"OSC_1_PW_MOD_POL"},
       {"id":65,"key":"FILTER_1_OUTPUT_BP"},
       {"id":66,"key":"FILTER_1_OUTPUT_HP"},
-      {"id":67,"key":"ENV_GEN_1_RELEASE_SWITCH"},
-      {"id":68,"key":"AMP_1_MOD_AMOUNT"},
-      {"id":69,"key":"AMP_1_MOD_POLARITY"},
-      {"id":70,"key":"LFO_1_MOD_AMOUNT"},
-      {"id":71,"key":"LFO_1_MOD_POLARITY"},
-      {"id":72,"key":"OSC_1_PITCH_MOD_1_AMOUNT"},
-      {"id":73,"key":"OSC_1_PITCH_MOD_1_POLARITY"},
+      {"id":67,"key":"EG_1_RELEASE_SWITCH"},
+      {"id":68,"key":"AMP_1_MOD_AMT"},
+      {"id":69,"key":"AMP_1_MOD_POL"},
+      {"id":70,"key":"LFO_1_MOD_AMT"},
+      {"id":71,"key":"LFO_1_MOD_POL"},
+      {"id":72,"key":"OSC_1_PITCH_MOD_1_AMT"},
+      {"id":73,"key":"OSC_1_PITCH_MOD_1_POL"},
     ],
-    defaultOrder: ["SLEW_1","LFO_1","ENV_GEN_1","MIXER_1","OSC_1","FILTER_1","AMP_1","CHORUS_1","DELAY_1"],
+    defaultOrder: ["SLEW_1","LFO_1","EG_1","MIXER_1","OSC_1","FILTER_1","AMP_1","CHORUS_1","DELAY_1"],
   };
   // patch_gen end
 
@@ -1300,7 +1300,7 @@
     GENERAL:   { x: 280,  y: 40 },
     SLEW_1:    { x: 280,  y: 371 },
     LFO_1:     { x: 640,  y: 40 },
-    ENV_GEN_1: { x: 640,  y: 320 },
+    EG_1:      { x: 640,  y: 320 },
     MIXER_1:   { x: 640,  y: 626 },
     OSC_1:     { x: 1000, y: 40 },
     FILTER_1:  { x: 1000, y: 502 },
@@ -1627,7 +1627,7 @@
   let selectedWire = null;
 
   const NODES = [
-    { key: 'NOTE', label: 'Note', aux: true, notes: [['PITCH', 'Pitch', 0, 127], ['GATE', 'Gate', 0, 1], ['BEND', 'Bend', -8192, 8191]] },
+    { key: 'NOTE', label: 'Note', aux: true, notes: [['NOTE_PITCH', 'Pitch', 0, 127], ['NOTE_GATE', 'Gate', 0, 1], ['PITCH_BEND', 'Bend', -8192, 8191]] },
     { key: 'CONST', label: 'Constants', aux: true, normed: true, outs: ['ONE', 'HALF', 'POINT_TWO', 'POINT_ONE', 'NONE', 'MINUS_POINT_ONE', 'MINUS_POINT_TWO', 'MINUS_HALF', 'MINUS_ONE'] },
     { key: 'GENERAL', label: 'General', aux: true, controls: GENERAL_ITEMS },
     ...MODULES.map(m => ({
@@ -2369,21 +2369,21 @@
     if (ch === exportOptions().ch) refreshNoteNode();
   }
 
-  // The values spms1_main.rb writes to SIGNAL_PITCH, SIGNAL_GATE and SIGNAL_BEND.
+  // The values spms1_main.rb writes to SIGNAL_NOTE_PITCH, SIGNAL_NOTE_GATE and SIGNAL_PITCH_BEND.
   function refreshNoteNode() {
     const n = noteStates[exportOptions().ch];
     const norms = noteNorms(n, true);
     const shown = {
-      PITCH: [n.pending ?? n.pitch, norms.PITCH],
-      GATE: [n.gate, norms.GATE],
-      BEND: [n.bend, norms.BEND],
+      NOTE_PITCH: [n.pending ?? n.pitch, norms.NOTE_PITCH],
+      NOTE_GATE: [n.gate, norms.NOTE_GATE],
+      PITCH_BEND: [n.bend, norms.PITCH_BEND],
     };
     world.querySelectorAll('.note-row').forEach(row => {
       const [value, norm] = shown[row.dataset.noteSig];
       const input = row.querySelector('.nv');
       if (document.activeElement !== input) input.value = value;
       row.querySelector('.norm').textContent = norm;
-      if (row.dataset.noteSig === 'PITCH') {
+      if (row.dataset.noteSig === 'NOTE_PITCH') {
         const pending = n.pending !== null;
         row.classList.toggle('pending', pending);
         row.title = pending ? `Sent with the next Gate on. The synth still holds ${n.pitch}.` : '';
@@ -2398,9 +2398,9 @@
     const signed = v => (v < 0 ? '-' : '+') + Math.abs(v).toFixed(3);
     const pitch = withPending ? (n.pending ?? n.pitch) : n.pitch;
     return {
-      PITCH: signed(pitch / 120 - 0.5),
-      GATE: n.gate.toFixed(3),
-      BEND: signed(Math.floor((n.bend + 1) / 2) / 8192),
+      NOTE_PITCH: signed(pitch / 120 - 0.5),
+      NOTE_GATE: n.gate.toFixed(3),
+      PITCH_BEND: signed(Math.floor((n.bend + 1) / 2) / 8192),
     };
   }
 
@@ -2413,7 +2413,7 @@
         const v = Math.max(+input.min, Math.min(+input.max, Math.round(Number(input.value) || 0)));
         const n = noteStates[exportOptions().ch];
         switch (row.dataset.noteSig) {
-        case 'PITCH':
+        case 'NOTE_PITCH':
           // A glide, as on the soft keyboard: the note off after the note on leaves the synth
           // nothing to come back to, which would keep the gate open when the key is released.
           if (n.gate) {
@@ -2429,7 +2429,7 @@
             refreshNoteNode();
           }
           break;
-        case 'GATE':
+        case 'NOTE_GATE':
           if (v === n.gate) break;
           if (v) {
             sendNote(0x90, n.pending ?? n.pitch, 100);
@@ -2439,7 +2439,7 @@
             sendNote(0x80, n.pitch, 0);
           }
           break;
-        case 'BEND':
+        case 'PITCH_BEND':
           sendBend(v);
           break;
         }
@@ -2628,7 +2628,7 @@
     { col: 0, title: 'General', general: true },
     { col: 0, title: 'Slew 1', module: 'SLEW_1' },
     { col: 1, title: 'LFO 1', module: 'LFO_1' },
-    { col: 1, title: 'EG 1', module: 'ENV_GEN_1' },
+    { col: 1, title: 'EG 1', module: 'EG_1' },
     { col: 2, title: 'Osc 1', module: 'OSC_1' },
     { col: 2, title: 'Filter 1', module: 'FILTER_1' },
     { col: 3, title: 'Amp 1', module: 'AMP_1' },

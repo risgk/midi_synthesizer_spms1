@@ -26,10 +26,10 @@ module Spms1
     # swings the pitch five octaves up and five down. Bringing a source down to a musical depth is
     # a mixer's job, not this one's.
     MODULATION_RANGE = 120.0 / 120.0
-    # How far each tune control reaches at either end of its dial. Both are spaced so that one step
+    # How far Pitch Coarse and Pitch Fine reach at either end of their dials. Both are spaced so that one step
     # of a 7-bit control is one whole unit: a semitone for coarse, a cent for fine.
-    COARSE_TUNE_RANGE = 60.0 / 120.0
-    FINE_TUNE_RANGE   = 0.6 / 120.0
+    PITCH_COARSE_RANGE = 60.0 / 120.0
+    PITCH_FINE_RANGE   = 0.6 / 120.0
 
     # Pitch lookup table for note-to-frequency conversion.
     FREQ_TABLE = Array.new(129, 0.0)
@@ -70,9 +70,9 @@ module Spms1
       @pw_modulation_depth = 0.0
       @stage_1_pw_modulation_depth = 0.0
       @current_pw_modulation_depth = 0.0
-      @coarse_tune = 0.0
-      @fine_tune = 0.0
-      # The two tune controls are summed when set, so the per-sample path adds one offset rather
+      @pitch_coarse = 0.0
+      @pitch_fine = 0.0
+      # Pitch Coarse and Pitch Fine are summed when set, so the per-sample path adds one offset rather
       # than two.
       @tune = 0.0
       @sample_counter = 0
@@ -136,21 +136,21 @@ module Spms1
       @pw_modulation_depth = @pw_modulation_amount * @pw_modulation_polarity
     end
 
-    # Both tune controls are bipolar, [-0.5, 0.5], with 0.0 meaning no offset, so a controller's
+    # Pitch Coarse and Pitch Fine are both bipolar, [-0.5, 0.5], with 0.0 meaning no offset, so a controller's
     # centre detent lands there. Linear about that centre, which is what puts every step on a whole
     # semitone or a whole cent; a curve here would make exact intervals unreachable.
     # Not smoothed: a semitone step is part of the sound, a cent step is too small to hear as one,
     # and a step in pitch does not click, as the phase runs on unbroken.
-    def set_coarse_tune(coarse_tune)
-      clamped = (coarse_tune < -0.5) ? -0.5 : ((coarse_tune > 0.5) ? 0.5 : coarse_tune)
-      @coarse_tune = (clamped + clamped) * COARSE_TUNE_RANGE
-      @tune = @coarse_tune + @fine_tune
+    def set_pitch_coarse(pitch_coarse)
+      clamped = (pitch_coarse < -0.5) ? -0.5 : ((pitch_coarse > 0.5) ? 0.5 : pitch_coarse)
+      @pitch_coarse = (clamped + clamped) * PITCH_COARSE_RANGE
+      @tune = @pitch_coarse + @pitch_fine
     end
 
-    def set_fine_tune(fine_tune)
-      clamped = (fine_tune < -0.5) ? -0.5 : ((fine_tune > 0.5) ? 0.5 : fine_tune)
-      @fine_tune = (clamped + clamped) * FINE_TUNE_RANGE
-      @tune = @coarse_tune + @fine_tune
+    def set_pitch_fine(pitch_fine)
+      clamped = (pitch_fine < -0.5) ? -0.5 : ((pitch_fine > 0.5) ? 0.5 : pitch_fine)
+      @pitch_fine = (clamped + clamped) * PITCH_FINE_RANGE
+      @tune = @pitch_coarse + @pitch_fine
     end
 
     # The inputs are taken as they arrive; what is held to a range is the pitch they add up to.
