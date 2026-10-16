@@ -195,4 +195,4 @@ controls:
   # are where PRA32-U2 has Osc 1 Shape and LFO Mod Dst. Both power up at CC 4, 0.0: a pulse of 50%
   # and the modulation on the pitch, so the default patch renders as before.
   - { entry: 35, module: OSC_1,     key: PULSE_WIDTH,     label: Pulse Width,  cc: 19,  value: 4 }
-  - { entry: 36, module: OSC_1,     key: MOD_DESTINATION, label: Mod Dst,      cc: 103, value: 4 }
+  - { entry: 36, module: OSC_1,     key: MOD_DESTINATION, label: "Mod Dst (Pitch|PW)", cc: 103, value: 4 }

@@ -302,5 +302,5 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 113, 64 ) # General 4
   C.set_midi_cc_value(midi_ch, 5  , 4  ) # Slew 1 Time
   C.set_midi_cc_value(midi_ch, 19 , 4  ) # Osc 1 Pulse Width
-  C.set_midi_cc_value(midi_ch, 103, 4  ) # Osc 1 Mod Dst
+  C.set_midi_cc_value(midi_ch, 103, 4  ) # Osc 1 Mod Dst (Pitch|PW)
 end
