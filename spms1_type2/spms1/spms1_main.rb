@@ -165,11 +165,11 @@ spms1_fill_constant_signals(signals)
 # A mixer's parameters have no CC, so the default patch points them at constants instead: full
 # level and a polarity of +0.5, which makes a mixer pass its input through rather than mute it.
 # Each modulation polarity has no CC either and reads +0.5, which leaves the amount in charge,
-# but for the pitch's. LFO 1 Level and Polarity have no CC either and read 1.0 and +0.5. EG 1
-# Level and Polarity read 1.0 and +0.5, passing the envelope as it is, and so do Amp 1 Mod Amt and
-# Mod Polarity, passing it on to the amp as it is. The chorus and the delay run last, after the amp: the chorus takes the mono
-# amp and spreads it into a left and a right, the delay takes the two sides, and its two outputs
-# are what the final output's left and right read.
+# but for the pitch's. LFO 1 Level and EG 1 Level have no CC either and read 1.0, passing the LFO
+# and the envelope as they are, and Amp 1 Mod Amt and Mod Polarity read 1.0 and +0.5, passing the
+# envelope on to the amp as it is. The chorus and the delay run last, after the amp: the chorus
+# takes the mono amp and spreads it into a left and a right, the delay takes the two sides, and
+# its two outputs are what the final output's left and right read.
 spms1_write_default_patch(MIDI_CH)
 
 C.set_sample_rate(SAMPLE_RATE)
@@ -259,12 +259,10 @@ while true
   # above, which are read per sample and not smoothed.
   source_lfo_1_rate            = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_RATE)
   source_lfo_1_level           = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_LEVEL)
-  source_lfo_1_pol             = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_POL)
   source_eg_1_attack           = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_EG_1_ATTACK)
   source_eg_1_decay            = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_EG_1_DECAY)
   source_eg_1_sustain          = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_EG_1_SUSTAIN)
   source_eg_1_level            = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_EG_1_LEVEL)
-  source_eg_1_pol              = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_EG_1_POL)
   source_osc_1_wave            = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_WAVE)
   source_osc_1_pitch_coarse    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PITCH_COARSE)
   source_osc_1_pitch_fine      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PITCH_FINE)
@@ -301,12 +299,10 @@ while true
   # where MIDI enters and the only place a CC number appears.
   cc_lfo_1_rate            = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_RATE)
   cc_lfo_1_level           = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_LEVEL)
-  cc_lfo_1_pol             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_POL)
   cc_eg_1_attack           = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_EG_1_ATTACK)
   cc_eg_1_decay            = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_EG_1_DECAY)
   cc_eg_1_sustain          = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_EG_1_SUSTAIN)
   cc_eg_1_level            = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_EG_1_LEVEL)
-  cc_eg_1_pol              = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_EG_1_POL)
   cc_osc_1_wave            = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_WAVE)
   cc_osc_1_pitch_coarse    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_PITCH_COARSE)
   cc_osc_1_pitch_fine      = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_PITCH_FINE)
@@ -346,12 +342,10 @@ while true
 
   signals[SIGNAL_LFO_1_RATE] = cc_or_zero(cc_lfo_1_rate, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_rate)))
   signals[SIGNAL_LFO_1_LEVEL] = cc_or_zero(cc_lfo_1_level, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_level)))
-  signals[SIGNAL_LFO_1_POL] = cc_or_zero(cc_lfo_1_pol, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_pol)))
   signals[SIGNAL_EG_1_ATTACK] = cc_or_zero(cc_eg_1_attack, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_eg_1_attack)))
   signals[SIGNAL_EG_1_DECAY] = cc_or_zero(cc_eg_1_decay, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_eg_1_decay)))
   signals[SIGNAL_EG_1_SUSTAIN] = cc_or_zero(cc_eg_1_sustain, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_eg_1_sustain)))
   signals[SIGNAL_EG_1_LEVEL] = cc_or_zero(cc_eg_1_level, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_eg_1_level)))
-  signals[SIGNAL_EG_1_POL] = cc_or_zero(cc_eg_1_pol, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_eg_1_pol)))
   signals[SIGNAL_OSC_1_WAVE] = cc_or_zero(cc_osc_1_wave, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_wave)))
   signals[SIGNAL_OSC_1_PITCH_COARSE] = cc_or_zero(cc_osc_1_pitch_coarse, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_pitch_coarse)))
   signals[SIGNAL_OSC_1_PITCH_FINE] = cc_or_zero(cc_osc_1_pitch_fine, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_pitch_fine)))
@@ -400,12 +394,10 @@ while true
 
   lfo_1.set_rate(signals[source_lfo_1_rate])
   lfo_1.set_level(signals[source_lfo_1_level])
-  lfo_1.set_polarity(signals[source_lfo_1_pol])
   eg_1.set_attack(signals[source_eg_1_attack])
   eg_1.set_decay(signals[source_eg_1_decay])
   eg_1.set_sustain(signals[source_eg_1_sustain])
   eg_1.set_level(signals[source_eg_1_level])
-  eg_1.set_polarity(signals[source_eg_1_pol])
   osc_1.set_waveform(signals[source_osc_1_wave])
   osc_1.set_pitch_coarse(signals[source_osc_1_pitch_coarse])
   osc_1.set_pitch_fine(signals[source_osc_1_pitch_fine])

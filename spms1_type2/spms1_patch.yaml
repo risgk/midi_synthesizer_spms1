@@ -56,7 +56,7 @@ signals:
   - { key: MINUS_ONE,       id: 8, value: -1.0, short: "-1.0", label: Constant -1.0, label_ja: 定数 -1.0 }
 
   - { key: LFO_1_OUTPUT,      id: 9,  module: LFO_1,     output: Out,   label: LFO 1 Output,      bipolar: true }
-  - { key: EG_1_OUTPUT,  id: 10, module: EG_1,      output: Out,   label: EG 1 Output,       bipolar: true }
+  - { key: EG_1_OUTPUT,  id: 10, module: EG_1,      output: Out,   label: EG 1 Output }
   - { key: OSC_1_OUTPUT,      id: 11, module: OSC_1,     output: Out,   label: Osc 1 Output,      bipolar: true }
   - { key: FILTER_1_OUTPUT_LP, id: 12, module: FILTER_1,  output: Out LP, label: Filter 1 Output LP, bipolar: true }
   - { key: AMP_1_OUTPUT,      id: 13, module: AMP_1,     output: Out,   label: Amp 1 Output,      bipolar: true }
@@ -68,12 +68,10 @@ signals:
 
   - { key: LFO_1_RATE,            id: 19, control: LFO_1_RATE }
   - { key: LFO_1_LEVEL,           id: 20, control: LFO_1_LEVEL }
-  - { key: LFO_1_POL,        id: 21, control: LFO_1_POL }
   - { key: EG_1_ATTACK,      id: 22, control: EG_1_ATTACK }
   - { key: EG_1_DECAY,       id: 23, control: EG_1_DECAY }
   - { key: EG_1_SUSTAIN,     id: 24, control: EG_1_SUSTAIN }
   - { key: EG_1_LEVEL,       id: 25, control: EG_1_LEVEL }
-  - { key: EG_1_POL,    id: 26, control: EG_1_POL }
   - { key: OSC_1_WAVE,        id: 27, control: OSC_1_WAVE }
   - { key: OSC_1_PITCH_COARSE,     id: 28, control: OSC_1_PITCH_COARSE }
   - { key: OSC_1_PITCH_FINE,       id: 29, control: OSC_1_PITCH_FINE }
@@ -171,12 +169,10 @@ controls:
   - { entry: 40, module: LFO_1,     key: MOD_AMT,   label: Mod Amt,      cc: 0,   value: 124, source: ONE }
   - { entry: 41, module: LFO_1,     key: MOD_POL, label: Mod Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 1,  module: LFO_1,     key: LEVEL,        label: Level,        cc: 0,   source: ONE }
-  - { entry: 2,  module: LFO_1,     key: POL,     label: Pol,     cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 3,  module: EG_1,      key: ATTACK,       label: Attack,       cc: 73,  value: 4 }
   - { entry: 4,  module: EG_1,      key: DECAY,        label: Decay,        cc: 75,  value: 96 }
   - { entry: 5,  module: EG_1,      key: SUSTAIN,      label: Sustain,      cc: 30,  value: 124 }
   - { entry: 6,  module: EG_1,      key: LEVEL,        label: Level,        cc: 0,   source: ONE }
-  - { entry: 7,  module: EG_1,      key: POL,     label: Pol,     cc: 0,   source: HALF, bipolar: true }
   # Osc 1 in the editor: the pitch and its two modulations, then the waveform and the pulse
   # width's modulation, each target next to what moves it. Pulse Width, PW Mod Amt and PW Mod Pol
   # came after Slew 1, so their entries follow its, but they are listed here. Pulse Width and PW Mod

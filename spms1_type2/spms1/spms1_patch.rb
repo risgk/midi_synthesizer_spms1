@@ -35,12 +35,10 @@ SIGNAL_DELAY_1_OUTPUT_L      = 17
 SIGNAL_DELAY_1_OUTPUT_R      = 18
 SIGNAL_LFO_1_RATE            = 19
 SIGNAL_LFO_1_LEVEL           = 20
-SIGNAL_LFO_1_POL             = 21
 SIGNAL_EG_1_ATTACK           = 22
 SIGNAL_EG_1_DECAY            = 23
 SIGNAL_EG_1_SUSTAIN          = 24
 SIGNAL_EG_1_LEVEL            = 25
-SIGNAL_EG_1_POL              = 26
 SIGNAL_OSC_1_WAVE            = 27
 SIGNAL_OSC_1_PITCH_COARSE    = 28
 SIGNAL_OSC_1_PITCH_FINE      = 29
@@ -115,12 +113,10 @@ NRPN_SOURCE_LFO_1_MOD         = 144
 
 NRPN_SOURCE_LFO_1_RATE            = 256
 NRPN_SOURCE_LFO_1_LEVEL           = 257
-NRPN_SOURCE_LFO_1_POL             = 258
 NRPN_SOURCE_EG_1_ATTACK           = 259
 NRPN_SOURCE_EG_1_DECAY            = 260
 NRPN_SOURCE_EG_1_SUSTAIN          = 261
 NRPN_SOURCE_EG_1_LEVEL            = 262
-NRPN_SOURCE_EG_1_POL              = 263
 NRPN_SOURCE_OSC_1_WAVE            = 264
 NRPN_SOURCE_OSC_1_PITCH_COARSE    = 265
 NRPN_SOURCE_OSC_1_PITCH_FINE      = 266
@@ -157,12 +153,10 @@ NRPN_SOURCE_OSC_1_PITCH_MOD_1_POL = 299
 # unipolar dial, the middle of a bipolar one -- whatever CC it had before, so a patch sets it alone.
 NRPN_CC_LFO_1_RATE            = 384
 NRPN_CC_LFO_1_LEVEL           = 385
-NRPN_CC_LFO_1_POL             = 386
 NRPN_CC_EG_1_ATTACK           = 387
 NRPN_CC_EG_1_DECAY            = 388
 NRPN_CC_EG_1_SUSTAIN          = 389
 NRPN_CC_EG_1_LEVEL            = 390
-NRPN_CC_EG_1_POL              = 391
 NRPN_CC_OSC_1_WAVE            = 392
 NRPN_CC_OSC_1_PITCH_COARSE    = 393
 NRPN_CC_OSC_1_PITCH_FINE      = 394
@@ -244,12 +238,10 @@ def spms1_write_default_patch(midi_ch)
 
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_LFO_1_RATE           , SIGNAL_LFO_1_RATE)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_LFO_1_LEVEL          , SIGNAL_ONE)
-  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_LFO_1_POL            , SIGNAL_HALF)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_EG_1_ATTACK          , SIGNAL_EG_1_ATTACK)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_EG_1_DECAY           , SIGNAL_EG_1_DECAY)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_EG_1_SUSTAIN         , SIGNAL_EG_1_SUSTAIN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_EG_1_LEVEL           , SIGNAL_ONE)
-  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_EG_1_POL             , SIGNAL_HALF)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_1_WAVE           , SIGNAL_OSC_1_WAVE)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_1_PITCH_COARSE   , SIGNAL_OSC_1_PITCH_COARSE)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_1_PITCH_FINE     , SIGNAL_OSC_1_PITCH_FINE)

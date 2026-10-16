@@ -174,7 +174,7 @@ Slew 1 Time は CC 5 (MIDI 規格の Portamento Time) にあり、起動時は 0
 
 パラメータ名では Amount を Amt、Polarity (極性) を Pol と略しています。
 
-LFO はオシレータのピッチとパルス幅に直接、フルレベルで入ります。LFO 1 Pol は定数 0.5 を読みます。
+LFO はオシレータのピッチとパルス幅に直接、フルレベルで入ります。
 Osc 1 Pitch Mod 2 Pol が定数 0.1 を読んでピッチへの変調をビブラートの深さまで絞り、Osc 1 PW Mod Pol は
 0.5 を読んで LFO をそのまま受け取ります。モジュレーションの深さはどれも動かす先のレンジ全体に届くので、
 ソースを音楽的な深さまで絞る仕事はオシレータに作り込まず、パッチの側に任せています。
@@ -394,19 +394,19 @@ flowchart LR
 
 | CC 98 | パラメータ | | CC 98 | パラメータ | | CC 98 | パラメータ |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | LFO 1 Rate | | 13 | Filter 1 Cutoff | | 26 | Delay 1 Time |
-| 1 | LFO 1 Level | | 14 | Filter 1 Resonance | | 27 | Delay 1 Feedback |
-| 2 | LFO 1 Pol | | 15 | Filter 1 Gain | | 28 | Delay 1 Mix |
-| 3 | EG 1 Attack | | 16 | Filter 1 Mod Amt | | 34 | Slew 1 Time |
-| 4 | EG 1 Decay | | 17 | Filter 1 Mod Pol | | 35 | Osc 1 Pulse Width |
-| 5 | EG 1 Sustain | | 18 | Amp 1 Gain | | 36 | Osc 1 PW Mod Amt |
-| 6 | EG 1 Level | | 19 | Mixer 1 Level 1 | | 37 | Osc 1 PW Mod Pol |
-| 7 | EG 1 Pol | | 20 | Mixer 1 Pol 1 | | 38 | Amp 1 Mod Amt |
+| 0 | LFO 1 Rate | | 15 | Filter 1 Gain | | 28 | Delay 1 Mix |
+| 1 | LFO 1 Level | | 16 | Filter 1 Mod Amt | | 34 | Slew 1 Time |
+| 3 | EG 1 Attack | | 17 | Filter 1 Mod Pol | | 35 | Osc 1 Pulse Width |
+| 4 | EG 1 Decay | | 18 | Amp 1 Gain | | 36 | Osc 1 PW Mod Amt |
+| 5 | EG 1 Sustain | | 19 | Mixer 1 Level 1 | | 37 | Osc 1 PW Mod Pol |
+| 6 | EG 1 Level | | 20 | Mixer 1 Pol 1 | | 38 | Amp 1 Mod Amt |
 | 8 | Osc 1 Wave | | 21 | Mixer 1 Level 2 | | 39 | Amp 1 Mod Pol |
 | 9 | Osc 1 Pitch Coarse | | 22 | Mixer 1 Pol 2 | | 40 | LFO 1 Mod Amt |
 | 10 | Osc 1 Pitch Fine | | 23 | Chorus 1 Rate | | 41 | LFO 1 Mod Pol |
 | 11 | Osc 1 Pitch Mod 2 Amt | | 24 | Chorus 1 Depth | | 42 | Osc 1 Pitch Mod 1 Amt |
 | 12 | Osc 1 Pitch Mod 2 Pol | | 25 | Chorus 1 Mix | | 43 | Osc 1 Pitch Mod 1 Pol |
+| 13 | Filter 1 Cutoff | | 26 | Delay 1 Time | |  |  |
+| 14 | Filter 1 Resonance | | 27 | Delay 1 Feedback | |  |  |
 
 <!-- patch_gen end -->
 
@@ -453,44 +453,42 @@ flowchart LR
 | ID | シグナル | | ID | シグナル | | ID | シグナル |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
 | 0 | なし（定数 0.0） | | 25 | EG 1 Level | | 50 | Pitch Bend ± |
-| 1 | 定数 1.0 | | 26 | EG 1 Pol ± | | 51 | General Mod Wheel |
-| 2 | 定数 0.5 | | 27 | Osc 1 Wave | | 52 | General Unipolar 1 |
-| 3 | 定数 0.2 | | 28 | Osc 1 Pitch Coarse ± | | 53 | General Unipolar 2 |
-| 4 | 定数 0.1 | | 29 | Osc 1 Pitch Fine ± | | 54 | General Unipolar 3 |
-| 5 | 定数 -0.1 | | 30 | Osc 1 Pitch Mod 2 Amt | | 55 | General Unipolar 4 |
-| 6 | 定数 -0.2 | | 31 | Osc 1 Pitch Mod 2 Pol ± | | 56 | General Bipolar 1 ± |
-| 7 | 定数 -0.5 | | 32 | Filter 1 Cutoff | | 57 | General Bipolar 2 ± |
-| 8 | 定数 -1.0 | | 33 | Filter 1 Resonance | | 58 | General Bipolar 3 ± |
-| 9 | LFO 1 Output ± | | 34 | Filter 1 Gain | | 59 | General Bipolar 4 ± |
-| 10 | EG 1 Output ± | | 35 | Filter 1 Mod Amt | | 60 | Slew 1 Output ± |
-| 11 | Osc 1 Output ± | | 36 | Filter 1 Mod Pol ± | | 61 | Slew 1 Time |
-| 12 | Filter 1 Output LP ± | | 37 | Amp 1 Gain | | 62 | Osc 1 Pulse Width |
-| 13 | Amp 1 Output ± | | 38 | Mixer 1 Level 1 | | 63 | Osc 1 PW Mod Amt |
-| 14 | Mixer 1 Output ± | | 39 | Mixer 1 Pol 1 ± | | 64 | Osc 1 PW Mod Pol ± |
-| 15 | Chorus 1 Output L ± | | 40 | Mixer 1 Level 2 | | 65 | Filter 1 Output BP ± |
-| 16 | Chorus 1 Output R ± | | 41 | Mixer 1 Pol 2 ± | | 66 | Filter 1 Output HP ± |
-| 17 | Delay 1 Output L ± | | 42 | Chorus 1 Rate | | 67 | Amp 1 Mod Amt |
-| 18 | Delay 1 Output R ± | | 43 | Chorus 1 Depth | | 68 | Amp 1 Mod Pol ± |
-| 19 | LFO 1 Rate | | 44 | Chorus 1 Mix | | 69 | LFO 1 Mod Amt |
-| 20 | LFO 1 Level | | 45 | Delay 1 Time | | 70 | LFO 1 Mod Pol ± |
-| 21 | LFO 1 Pol ± | | 46 | Delay 1 Feedback | | 71 | Osc 1 Pitch Mod 1 Amt |
-| 22 | EG 1 Attack | | 47 | Delay 1 Mix | | 72 | Osc 1 Pitch Mod 1 Pol ± |
-| 23 | EG 1 Decay | | 48 | Note Pitch ± | |  |  |
+| 1 | 定数 1.0 | | 27 | Osc 1 Wave | | 51 | General Mod Wheel |
+| 2 | 定数 0.5 | | 28 | Osc 1 Pitch Coarse ± | | 52 | General Unipolar 1 |
+| 3 | 定数 0.2 | | 29 | Osc 1 Pitch Fine ± | | 53 | General Unipolar 2 |
+| 4 | 定数 0.1 | | 30 | Osc 1 Pitch Mod 2 Amt | | 54 | General Unipolar 3 |
+| 5 | 定数 -0.1 | | 31 | Osc 1 Pitch Mod 2 Pol ± | | 55 | General Unipolar 4 |
+| 6 | 定数 -0.2 | | 32 | Filter 1 Cutoff | | 56 | General Bipolar 1 ± |
+| 7 | 定数 -0.5 | | 33 | Filter 1 Resonance | | 57 | General Bipolar 2 ± |
+| 8 | 定数 -1.0 | | 34 | Filter 1 Gain | | 58 | General Bipolar 3 ± |
+| 9 | LFO 1 Output ± | | 35 | Filter 1 Mod Amt | | 59 | General Bipolar 4 ± |
+| 10 | EG 1 Output | | 36 | Filter 1 Mod Pol ± | | 60 | Slew 1 Output ± |
+| 11 | Osc 1 Output ± | | 37 | Amp 1 Gain | | 61 | Slew 1 Time |
+| 12 | Filter 1 Output LP ± | | 38 | Mixer 1 Level 1 | | 62 | Osc 1 Pulse Width |
+| 13 | Amp 1 Output ± | | 39 | Mixer 1 Pol 1 ± | | 63 | Osc 1 PW Mod Amt |
+| 14 | Mixer 1 Output ± | | 40 | Mixer 1 Level 2 | | 64 | Osc 1 PW Mod Pol ± |
+| 15 | Chorus 1 Output L ± | | 41 | Mixer 1 Pol 2 ± | | 65 | Filter 1 Output BP ± |
+| 16 | Chorus 1 Output R ± | | 42 | Chorus 1 Rate | | 66 | Filter 1 Output HP ± |
+| 17 | Delay 1 Output L ± | | 43 | Chorus 1 Depth | | 67 | Amp 1 Mod Amt |
+| 18 | Delay 1 Output R ± | | 44 | Chorus 1 Mix | | 68 | Amp 1 Mod Pol ± |
+| 19 | LFO 1 Rate | | 45 | Delay 1 Time | | 69 | LFO 1 Mod Amt |
+| 20 | LFO 1 Level | | 46 | Delay 1 Feedback | | 70 | LFO 1 Mod Pol ± |
+| 22 | EG 1 Attack | | 47 | Delay 1 Mix | | 71 | Osc 1 Pitch Mod 1 Amt |
+| 23 | EG 1 Decay | | 48 | Note Pitch ± | | 72 | Osc 1 Pitch Mod 1 Pol ± |
 | 24 | EG 1 Sustain | | 49 | Note Gate | |  |  |
 
 <!-- patch_gen end -->
 
 **±** は、正負どちらにも振れるシグナルを表します。モジュール出力はフルスケールで -0.5 と +0.5 に届き、
 バイポーラのコントロールスロットは -0.5〜+0.5 で、ミキサーはそれを 2 つ足して 1.0 で止まります。
-エンベロープだけは例外で、デフォルトの Pol +0.5 では 0.0〜1.0、Pol を負にすると -1.0 まで
-振れます。印のないものは 0.0〜1.0 で、Note Gate とユニポーラのコントロールスロットがこれにあたります。
+印のないものは 0.0〜1.0 で、エンベロープ、Note Gate、ユニポーラのコントロールスロットがこれにあたります。
 バスは両方を 1 つの番号空間で運ぶので、レンジは「何が書いたか」ではなくスロットごとの性質です。
 
 スロット 19〜47、61、62〜64、67〜72 には CC から届いた値が入るので、パラメータはデフォルトでは自分の CC を読んでいるわけです。
 パラメータはそれぞれユニポーラかバイポーラで、スロットも同じレンジを取ります。ユニポーラは CC 4〜124 で
 0.0〜1.0 と、エンベロープと同じ幅なので、エンベロープを向ければつまみの全域を動かせます。バイポーラは
 CC 64 を 0.0 とする -0.5〜+0.5 と、LFO と同じ幅なので、バイポーラのソースを向ければ中央を挟んで上下に
-振れます。Pitch Coarse と Pitch Fine は中央が「変化なし」を意味するのでバイポーラです。Pol も、LFO、EG、ミキサー、
+振れます。Pitch Coarse と Pitch Fine は中央が「変化なし」を意味するのでバイポーラです。Pol も、ミキサーの 2 つ、
 6 つの Mod Pol のいずれも、符号そのものが設定する値なのでバイポーラです。パラメータに別のスロットを指させることがモジュレー
 ションになります。CC のないスロットは 0.0 です。
 
@@ -534,10 +532,9 @@ Osc 1 Pitch Coarse と Pitch Fine はどちらも CC 64 を中心とし、CC 1 �
 Pitch Coarse は半音で上下 5 オクターブまで、Pitch Fine は 1 セントで上下 60 セントまでです。両者は加算されるので、どのピッチにも
 届きます。
 
-LFO 1 Level と LFO 1 Pol は、ミキサーの Level と Pol が入力に掛かるのと同じく、LFO の出力に
-一緒に掛かります。Level は 0.0 (CC 4) で無音、1.0 (CC 124) で最大、Pol は -0.5 (CC 4) で反転、
-0.0 (CC 64) で無音、+0.5 (CC 124) でそのままです。どちらも CC
-がなく、デフォルトのパッチは Level に定数 1.0、Pol に定数 0.5 を指させているので、LFO はそのまま出ます。
+LFO 1 Level は、ミキサーの Level が入力に掛かるのと同じく、LFO の出力に掛かります。0.0 (CC 4) で無音、
+1.0 (CC 124) で最大です。CC がなく、デフォルトのパッチは定数 1.0 を指させているので、LFO はそのまま出ます。
+LFO を反転させたいときは、行き先の Mod Pol かミキサーの Pol を使います。
 
 LFO 1 Mod In は、Pitch Mod 2 In がオシレータのピッチを動かすのと同じく、Mod Amt と Mod Pol
 の積だけ周波数を動かします。入力と深さの積の 1 単位が周波数の全域 (10 オクターブ) なので、0.1 で 1 オクターブ
@@ -545,8 +542,9 @@ LFO 1 Mod In は、Pitch Mod 2 In がオシレータのピッチを動かすの�
 つないでいないので、ソースをつなぐだけで効きます。ほかのモジュール入力が毎サンプル読まれるのに対し、
 LFO が周波数を計算する 4 サンプルごとに読まれます。
 
-EG 1 Level と EG 1 Pol も、同じレンジで同じようにエンベロープの出力に掛かります。どちらも CC がなく、
-デフォルトのパッチは定数 1.0 と +0.5 を指させているので、エンベロープはそのまま出ます。
+EG 1 Level も、同じレンジで同じようにエンベロープの出力に掛かります。CC がなく、デフォルトのパッチは
+定数 1.0 を指させているので、エンベロープはそのまま出ます。エンベロープは 0.0〜1.0 の片側にだけ振れます。
+反転させたいときは、行き先の Mod Pol かミキサーの Pol を使います。
 
 Amp 1 Mod Amt と Amp 1 Mod Pol は、ほかのモジュールの Mod Amt と Mod Pol と同じく Mod In の効き方を
 決めます。ただしアンプは変調を足すのではなくゲインに掛けるので、深さ 1.0 ではエンベロープがそのまま効き、

@@ -60,9 +60,7 @@ module Spms1
       @decay = 0.0
       @sustain = 1.0
       @level = 1.0
-      @polarity = 1.0
-      # Level and polarity are multiplied before smoothing, so the control-rate path takes one
-      # multiply and only one smoothing state has to be carried.
+      # The level, smoothed; the control-rate path takes one multiply by it.
       @amount = 1.0
       @stage_1_amount = 1.0
       @current_amount = 1.0
@@ -92,18 +90,11 @@ module Spms1
       @sustain = (sustain < 0.0) ? 0.0 : ((sustain > 1.0) ? 1.0 : sustain)
     end
 
-    # The output is scaled by level and polarity together, as the LFO's is. Level is unipolar,
-    # [0.0, 1.0], a plain multiplier. Polarity is bipolar, [-0.5, 0.5], and doubled: +0.5 passes
-    # the output through, -0.5 negates it, and the way between scales it, crossing silence at 0.0.
+    # The output is scaled by level, as the LFO's is: unipolar, [0.0, 1.0], a plain multiplier.
+    # Turning it the other way up is for the destination's own Mod Pol, or a mixer's Pol.
     def set_level(level)
       @level = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
-      @amount = @level * @polarity
-    end
-
-    def set_polarity(polarity)
-      clamped_polarity = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
-      @polarity = clamped_polarity + clamped_polarity
-      @amount = @level * @polarity
+      @amount = @level
     end
 
     def process(gate_input = 0.0)

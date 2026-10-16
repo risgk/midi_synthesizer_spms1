@@ -47,13 +47,12 @@ module Spms1
       @stage_1_rate = 0.5
       @current_rate = 0.5
       @level = 1.0
-      @polarity = 1.0
-      # Level and polarity are multiplied before smoothing, so the per-sample path takes one
-      # multiply and only one smoothing state has to be carried.
+      # The level, smoothed; the per-sample path takes one multiply by it.
       @amount = 1.0
       @stage_1_amount = 1.0
       @current_amount = 1.0
-      # Modulation depth is amount times polarity, as the other modules' are, multiplied before smoothing so that only one smoothing state has to be carried.
+      # Modulation depth is amount times polarity, as the other modules' are, multiplied before
+      # smoothing so that only one smoothing state has to be carried.
       @modulation_amount = 1.0
       @modulation_polarity = 1.0
       @modulation_depth = 1.0
@@ -87,22 +86,15 @@ module Spms1
       @modulation_depth = @modulation_amount * @modulation_polarity
     end
 
-    # The output is scaled by level and polarity together, so a destination can take the LFO at
-    # less than full scale, or inverted, without a mixer in between. Level is unipolar, [0.0, 1.0],
-    # a plain multiplier. Polarity is bipolar, [-0.5, 0.5], and doubled: +0.5 passes the output
-    # through, -0.5 negates it, and the way between scales it, crossing silence at 0.0.
+    # The output is scaled by level, unipolar, [0.0, 1.0], a plain multiplier, so a destination
+    # can take the LFO at less than full scale without a mixer in between. Turning it the other
+    # way up is for the destination's own Mod Pol, or a mixer's Pol.
     def set_level(level)
       @level = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
-      @amount = @level * @polarity
+      @amount = @level
     end
 
-    def set_polarity(polarity)
-      clamped_polarity = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
-      @polarity = clamped_polarity + clamped_polarity
-      @amount = @level * @polarity
-    end
-
-    # Output is bipolar and spans one unit peak to peak at full level and polarity, [-0.5, 0.5],
+    # Output is bipolar and spans one unit peak to peak at full level, [-0.5, 0.5],
     # the same span as the pitch domain. Every bipolar signal on the bus is scaled that way, so a destination's
     # amount control means the same thing whichever one is routed to it.
     # The modulation input, on the rate, is read at the control-rate step, as the filter reads its own, and
