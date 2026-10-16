@@ -159,6 +159,7 @@ flowchart LR
 
   NOTE -. Gate .-> EG
   NOTE -. Pitch .-> SLEW
+  NOTE -. Bend .-> SLEW
   SLEW -. Mod 1 .-> OSC
   LFO -. Mod 2 .-> OSC
   LFO -. PW Mod .-> OSC
@@ -173,7 +174,11 @@ cutoff, gain and the rest -- arrive from CC and are left out of the diagram.
 
 The note's pitch reaches the oscillator through Slew 1, which glides from one note to the next:
 portamento. Slew 1 Time is on CC 5, Portamento Time in the MIDI spec, and powers up at 0.0, where
-the slew is off and passes the pitch through exactly as it arrives.
+the slew is off and passes the pitch through exactly as it arrives. Pitch Bend comes in on Slew 1
+Direct In, which is added to the output past the glide, so the bend acts at once and reaches the
+oscillator and the filter's keyboard tracking alike. Slew 1 Direct Amt (CC 57) is the bend range,
+half a semitone a step: 2 semitones either way at CC 8, where it powers up, an octave at CC 28 and
+5 octaves at the top.
 
 Parameter names shorten Amount to Amt and Polarity to Pol.
 
@@ -385,7 +390,7 @@ passes it through rather than muting it.
 | 6 | Amp 1 Mod In | | 16 | LFO 1 Mod In |
 | 7 | Mixer 1 In 1 | | 17 | Filter 1 Mod 2 In |
 | 8 | Mixer 1 In 2 | | 18 | Filter 1 Mod 3 In |
-| 9 | Chorus 1 Audio In | |  |  |
+| 9 | Chorus 1 Audio In | | 19 | Slew 1 Direct In |
 
 <!-- patch_gen end -->
 
@@ -410,19 +415,20 @@ both at the same signal for a mono output.
 
 | CC 98 | Parameter | | CC 98 | Parameter | | CC 98 | Parameter |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | LFO 1 Rate | | 15 | Filter 1 Gain | | 28 | Delay 1 Mix |
-| 1 | LFO 1 Level | | 16 | Filter 1 Mod 1 Amt | | 34 | Slew 1 Time |
-| 3 | EG 1 Attack | | 17 | Filter 1 Mod 1 Pol | | 35 | Osc 1 Pulse Width |
-| 4 | EG 1 Decay | | 18 | Amp 1 Gain | | 36 | Osc 1 PW Mod Amt |
-| 5 | EG 1 Sustain | | 19 | Mixer 1 Level 1 | | 37 | Osc 1 PW Mod Pol |
-| 6 | EG 1 Level | | 20 | Mixer 1 Pol 1 | | 40 | LFO 1 Mod Amt |
-| 8 | Osc 1 Wave | | 21 | Mixer 1 Level 2 | | 41 | LFO 1 Mod Pol |
-| 9 | Osc 1 Pitch Coarse | | 22 | Mixer 1 Pol 2 | | 42 | Osc 1 Mod 1 Amt |
-| 10 | Osc 1 Pitch Fine | | 23 | Chorus 1 Rate | | 43 | Osc 1 Mod 1 Pol |
-| 11 | Osc 1 Mod 2 Amt | | 24 | Chorus 1 Depth | | 44 | Filter 1 Mod 2 Amt |
-| 12 | Osc 1 Mod 2 Pol | | 25 | Chorus 1 Mix | | 45 | Filter 1 Mod 2 Pol |
-| 13 | Filter 1 Cutoff | | 26 | Delay 1 Time | | 46 | Filter 1 Mod 3 Amt |
-| 14 | Filter 1 Resonance | | 27 | Delay 1 Feedback | | 47 | Filter 1 Mod 3 Pol |
+| 0 | LFO 1 Rate | | 16 | Filter 1 Mod 1 Amt | | 35 | Osc 1 Pulse Width |
+| 1 | LFO 1 Level | | 17 | Filter 1 Mod 1 Pol | | 36 | Osc 1 PW Mod Amt |
+| 3 | EG 1 Attack | | 18 | Amp 1 Gain | | 37 | Osc 1 PW Mod Pol |
+| 4 | EG 1 Decay | | 19 | Mixer 1 Level 1 | | 40 | LFO 1 Mod Amt |
+| 5 | EG 1 Sustain | | 20 | Mixer 1 Pol 1 | | 41 | LFO 1 Mod Pol |
+| 6 | EG 1 Level | | 21 | Mixer 1 Level 2 | | 42 | Osc 1 Mod 1 Amt |
+| 8 | Osc 1 Wave | | 22 | Mixer 1 Pol 2 | | 43 | Osc 1 Mod 1 Pol |
+| 9 | Osc 1 Pitch Coarse | | 23 | Chorus 1 Rate | | 44 | Filter 1 Mod 2 Amt |
+| 10 | Osc 1 Pitch Fine | | 24 | Chorus 1 Depth | | 45 | Filter 1 Mod 2 Pol |
+| 11 | Osc 1 Mod 2 Amt | | 25 | Chorus 1 Mix | | 46 | Filter 1 Mod 3 Amt |
+| 12 | Osc 1 Mod 2 Pol | | 26 | Delay 1 Time | | 47 | Filter 1 Mod 3 Pol |
+| 13 | Filter 1 Cutoff | | 27 | Delay 1 Feedback | | 48 | Slew 1 Direct Amt |
+| 14 | Filter 1 Resonance | | 28 | Delay 1 Mix | | 49 | Slew 1 Direct Pol |
+| 15 | Filter 1 Gain | | 34 | Slew 1 Time | |  |  |
 
 <!-- patch_gen end -->
 
@@ -491,8 +497,8 @@ two slots, a unipolar and a bipolar one. See the General slots below.
 | 20 | LFO 1 Level | | 47 | Delay 1 Mix | | 74 | Filter 1 Mod 2 Pol ± |
 | 22 | EG 1 Attack | | 48 | Note Pitch ± | | 75 | Filter 1 Mod 3 Amt |
 | 23 | EG 1 Decay | | 49 | Note Gate | | 76 | Filter 1 Mod 3 Pol ± |
-| 24 | EG 1 Sustain | | 50 | Pitch Bend ± | |  |  |
-| 25 | EG 1 Level | | 51 | General Mod Wheel | |  |  |
+| 24 | EG 1 Sustain | | 50 | Pitch Bend ± | | 77 | Slew 1 Direct Amt |
+| 25 | EG 1 Level | | 51 | General Mod Wheel | | 78 | Slew 1 Direct Pol ± |
 
 <!-- patch_gen end -->
 
@@ -501,13 +507,13 @@ scale, a bipolar control slot runs -0.5 to +0.5, and a mixer sums two of them an
 Everything unmarked runs 0.0 to 1.0 -- the envelope, Note Gate and every unipolar control slot. The bus carries both kinds under one numbering, so the range belongs to the slot
 rather than to the sort of thing that wrote it.
 
-Slots 19-47, 61, 62-64 and 69-76 hold the values arriving from CC, so a parameter reads its own CC
+Slots 19-47, 61, 62-64 and 69-78 hold the values arriving from CC, so a parameter reads its own CC
 by default. Each parameter is unipolar or bipolar, and its slot takes the same range. A unipolar one
 runs 0.0 to 1.0 from CC 4 to CC 124, the span of an envelope, so an envelope pointed at one sweeps
 the whole of its dial. A bipolar one runs -0.5 to +0.5 with CC 64 at 0.0, the span of an LFO, so a
 bipolar source pointed at one swings it about the middle. Pitch Coarse and Pitch Fine are bipolar, since
 their middle is no change at all, and so is every Pol -- the mixer's two and
-the seven Mod Pol controls -- since its sign is what it sets. Pointing a parameter at another
+the seven Mod Pol controls and Slew 1 Direct Pol -- since its sign is what it sets. Pointing a parameter at another
 slot is what makes a modulation. A slot with no CC holds 0.0.
 
 Slots 51-59, the General slots, are control slots that no parameter owns: a CC put on the bus for
@@ -521,8 +527,8 @@ Note Pitch, Note Gate and Pitch Bend are what the keyboard puts on the bus. Note
 MIDI notes 0 to 120 as -0.5 to +0.5, the same span the oscillator reads as its whole pitch
 range, and Pitch Bend is bipolar too, one unit across the whole wheel: exactly -0.5 and +0.5 at
 the ends of its travel and exactly zero at the centre detent, so it can feed a module input
-without a mixer to shift it. Note Gate is 0.0 or 1.0, and an envelope triggers at 0.25. Nothing
-is routed to Pitch Bend by default.
+without a mixer to shift it. Note Gate is 0.0 or 1.0, and an envelope triggers at 0.25. Pitch Bend
+is routed to Slew 1 Direct In by default.
 
 The newest note sounds, and the note it took over from is remembered while it is still held: one
 note, no more. When the newest note is released, the remembered one comes back with Note Gate
@@ -682,12 +688,6 @@ changes only how fast the output moves, so it cannot step it.
   sets the time; CC 64 is a glide of about a tenth of a second. Every note glides, played legato
   or not. CC 99 = 2, CC 98 = 34, CC 6 = 51 takes the time from General Mod Wheel instead, so the
   wheel brings the portamento in
-- Pitch bend, which nothing is routed to by default. CC 99 = 1 with CC 98 = 7 and 8, CC 6 = 48
-  and 50 puts Note Pitch and Pitch Bend on Mixer 1's two inputs, and CC 99 = 1, CC 98 = 1,
-  CC 6 = 14 makes that sum the oscillator's pitch, in Slew 1's place. Mixer 1 runs ahead of the oscillator, so the
-  wheel moves the note in the same sample. Both levels are full, so the wheel reaches five
-  octaves either way; CC 99 = 2, CC 98 = 21, CC 6 = 52 takes Mixer 1's second level from General
-  Unipolar 1, so CC 16 trims that down to a bend range worth playing
 - A CC that bends pitch both ways through the modulation input. Mixer 1 runs ahead of the
   oscillator and is free: CC 99 = 1, CC 98 = 7, CC 6 = 32 puts the filter cutoff's control slot on
   its first input, CC 98 = 8, CC 6 = 7 the constant -0.5 on its second, and CC 98 = 2, CC 6 = 14
@@ -729,7 +729,7 @@ changes only how fast the output moves, so it cannot step it.
   the steps of a controller sending sparse CCs (e.g. every 20 ms). Osc 1 Pitch Coarse and Pitch Fine
   are not smoothed, so that the pitch follows right away, and neither is Slew 1 Time, which
   cannot step what it sets
-- A parameter source may point at any of the 128 slots. Slots above 76 read 0 until something
+- A parameter source may point at any of the 128 slots. Slots above 78 read 0 until something
   writes them, which leaves a parameter pointed at one at the bottom of a unipolar dial or the
   middle of a bipolar one
 - A parameter clamps its value to its own range, 0.0 to 1.0 or -0.5 to +0.5, and its control slot

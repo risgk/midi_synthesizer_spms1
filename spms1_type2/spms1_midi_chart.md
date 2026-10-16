@@ -20,7 +20,7 @@
 | After        Key's            | x             | x             |                                      |
 | Touch        Ch's             | x             | x             |                                      |
 +-------------------------------+---------------+---------------+--------------------------------------+
-| Pitch Bend                    | x             | o             | Bipolar, routable as a signal        |
+| Pitch Bend                    | x             | o             | Slew Direct In, +-2 Semitones        |
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Control                    20 | x             | o             | Osc Wave (Saw to Square)             |
 | Change                     13 | x             | o             | Osc Mod 2 Amt                        |
@@ -46,6 +46,7 @@
 |                            92 | x             | o             | Delay Feedback                       |
 |                            94 | x             | o             | Delay Mix                            |
 |                             5 | x             | o             | Slew Time (Portamento Time)          |
+|                            57 | x             | o             | Slew Direct Amt (Pitch Bend Range)   |
 |                             1 | x             | o             | General Mod Wheel (Unipolar)         |
 |                            16 | x             | o             | General 1 (Unipolar and Bipolar)     |
 |                            17 | x             | o             | General 2 (Unipolar and Bipolar)     |

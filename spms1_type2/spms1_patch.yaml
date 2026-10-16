@@ -138,6 +138,10 @@ signals:
   - { key: FILTER_1_MOD_3_AMT,   id: 75, control: FILTER_1_MOD_3_AMT }
   - { key: FILTER_1_MOD_3_POL, id: 76, control: FILTER_1_MOD_3_POL }
 
+  # Slew 1 Direct Amt and Pol came after Filter 1 Mod 3 Amt and Pol.
+  - { key: SLEW_1_DIRECT_AMT,   id: 77, control: SLEW_1_DIRECT_AMT }
+  - { key: SLEW_1_DIRECT_POL, id: 78, control: SLEW_1_DIRECT_POL }
+
 # Module inputs, NRPN category 1, by entry: what feeds each one in the default patch (`source`, a
 # signal key). `label` is the editor's, on the module; `name` the README's, after the module's
 # label. An input with no module is a side of the final output.
@@ -161,6 +165,7 @@ inputs:
   - { entry: 16, module: LFO_1,       key: MOD,         label: Mod In,         name: Mod In,         source: NONE }
   - { entry: 17, module: FILTER_1,    key: MOD_2,       label: Mod 2 In,       name: Mod 2 In,       source: LFO_1_OUTPUT }
   - { entry: 18, module: FILTER_1,    key: MOD_3,       label: Mod 3 In,       name: Mod 3 In,       source: SLEW_1_OUTPUT }
+  - { entry: 19, module: SLEW_1,      key: DIRECT,      label: Direct In,      name: Direct In,      source: PITCH_BEND }
 
 # Controls, listed in the editor's order, each by its entry: a parameter is one entry of NRPN category 2 (where it takes its value) and
 # the same entry of category 3 (which CC fills its control slot); a General control is in
@@ -240,3 +245,7 @@ controls:
   # Slew 1 came after the General controls, so its entry follows theirs. CC 5 is Portamento Time
   # in the MIDI spec; it powers up at CC 4, 0.0, where the slew is off.
   - { entry: 34, module: SLEW_1,    key: TIME,         label: Time,         cc: 5,   value: 4 }
+  # Direct Amt and Pol came last of all. Direct Amt is the bend range, half a semitone a step:
+  # CC 8, its power-up value, is 2 semitones either way. Direct Pol has no CC and reads +0.5.
+  - { entry: 48, module: SLEW_1,    key: DIRECT_AMT,   label: Direct Amt,   cc: 57,  value: 8 }
+  - { entry: 49, module: SLEW_1,    key: DIRECT_POL,   label: Direct Pol,   cc: 0,   value: 124, source: HALF, bipolar: true }

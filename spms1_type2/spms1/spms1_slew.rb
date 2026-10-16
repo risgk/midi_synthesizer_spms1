@@ -3,7 +3,8 @@ module Spms1
   # curve, as a voltage across an RC network does. Fed with Note Pitch, it is portamento, and the
   # pitch domain being linear in semitones makes the glide an exponential one in pitch, which is
   # what an analog synth's portamento is. It takes any signal, though, so it rounds off the steps of
-  # a stepped one as well.
+  # a stepped one as well. Direct In is added to the output past the lag, for what should move the
+  # pitch at once rather than glide, as a pitch bend should.
   class Slew
     # Lookup table for exponential time mapping, the envelope's: a twelfth of an octave per index,
     # so one CC step of the 120-step control range moves the time by a semitone and the whole dial
@@ -21,6 +22,12 @@ module Spms1
     # the table's lowest entry: value at 0.0 / (EXP_TABLE min * 10 * ln(2)).
     TIME_BASE = 0.010 / ((1.0 / 32.0) * 10 * Math::log(2))
 
+    # Direct Amt and Pol are smoothed as every other module's depths are: two stages at this blend,
+    # updated every CONTROL_RATE_DIVISOR samples. See Amp for both.
+    SMOOTHING_TARGET_BLEND_BASE = 0.015625
+    CONTROL_RATE_DIVISOR = 4
+    CONTROL_RATE_MASK = CONTROL_RATE_DIVISOR - 1
+
     def initialize(sample_rate)
       @sample_rate = sample_rate
       @time = 0.0
@@ -29,6 +36,13 @@ module Spms1
       # The state is the distance from the output to the input, not the output itself; see process.
       @distance = 0.0
       @last_input = 0.0
+      @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (48000.0 / @sample_rate) * (CONTROL_RATE_DIVISOR / 4.0)
+      @direct_amount = 0.0
+      @direct_polarity = 1.0
+      @direct_depth = 0.0
+      @stage_1_direct_depth = 0.0
+      @current_direct_depth = 0.0
+      @sample_counter = 0
     end
 
     # Time is unipolar, [0.0, 1.0]; see TIME_BASE for scaling details. 0.0 turns the slew off.
@@ -41,6 +55,22 @@ module Spms1
       @time = (time < 0.0) ? 0.0 : ((time > 1.0) ? 1.0 : time)
       blend = 1.0 / (TIME_BASE * calculate_exp_fast(@time) * @sample_rate)
       @blend = (@time > 0.0) ? blend : 1.0
+    end
+
+    # The depth of Direct In is amount times polarity, as a modulation depth is. Amount is unipolar,
+    # [0.0, 1.0], and at 1.0 Direct In is added as it arrives; polarity is bipolar, [-0.5, 0.5], and
+    # doubled, so +0.5 leaves the amount as it is and -0.5 negates it. Pitch Bend is one unit across
+    # the wheel, the pitch range's whole width, so the bend range is the amount times 60 semitones
+    # either way: half a semitone a CC step, and 2 semitones at CC 8.
+    def set_direct_amount(amount)
+      @direct_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
+      @direct_depth = @direct_amount * @direct_polarity
+    end
+
+    def set_direct_polarity(polarity)
+      clamped_polarity = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
+      @direct_polarity = clamped_polarity + clamped_polarity
+      @direct_depth = @direct_amount * @direct_polarity
     end
 
     # The distance left is what is carried from sample to sample, and the output is the input plus
@@ -56,12 +86,21 @@ module Spms1
     # It goes through Dsp.flush_tiny's dead zone first, as the filter's states do: shrinking by a
     # share each sample, it would otherwise sink into denormals and stick at the smallest one,
     # which x86 computes slowly.
-    def process(input = 0.0)
+    #
+    # Direct In is added last, so that the lag never holds it, and so that at zero it leaves the
+    # output as it was, bit for bit.
+    def process(input = 0.0, direct_input = 0.0)
+      if @sample_counter == 0
+        @stage_1_direct_depth = Dsp.smooth(@direct_depth, @stage_1_direct_depth, @smoothing_target_blend)
+        @current_direct_depth = Dsp.smooth(@stage_1_direct_depth, @current_direct_depth, @smoothing_target_blend)
+      end
+      @sample_counter = (@sample_counter + 1) & CONTROL_RATE_MASK
+
       distance = @distance + (@last_input - input)
       @last_input = input
       flushed = Dsp.flush_tiny(distance)
       @distance = flushed - flushed * @blend
-      input + @distance
+      (input + @distance) + (direct_input * @current_direct_depth)
     end
 
     private
