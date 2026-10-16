@@ -398,17 +398,18 @@ both at the same signal for a mono output.
 
 | CC 98 | Parameter | | CC 98 | Parameter | | CC 98 | Parameter |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | LFO 1 Rate | | 11 | Osc 1 Pitch Mod Amt | | 22 | Mixer 1 Polarity 2 |
-| 1 | LFO 1 Level | | 12 | Osc 1 Pitch Mod Polarity | | 23 | Chorus 1 Rate |
-| 2 | LFO 1 Polarity | | 13 | Filter 1 Cutoff | | 24 | Chorus 1 Depth |
-| 3 | EG 1 Attack | | 14 | Filter 1 Resonance | | 25 | Chorus 1 Mix |
-| 4 | EG 1 Decay | | 15 | Filter 1 Gain | | 26 | Delay 1 Time |
-| 5 | EG 1 Sustain | | 16 | Filter 1 Mod Amt | | 27 | Delay 1 Feedback |
-| 6 | EG 1 Level | | 17 | Filter 1 Mod Polarity | | 28 | Delay 1 Mix |
-| 7 | EG 1 Polarity | | 18 | Amp 1 Gain | | 34 | Slew 1 Time |
-| 8 | Osc 1 Wave | | 19 | Mixer 1 Level 1 | | 35 | Osc 1 Pulse Width |
-| 9 | Osc 1 Coarse Tune | | 20 | Mixer 1 Polarity 1 | | 36 | Osc 1 PW Mod Amt |
-| 10 | Osc 1 Fine Tune | | 21 | Mixer 1 Level 2 | | 37 | Osc 1 PW Mod Polarity |
+| 0 | LFO 1 Rate | | 12 | Osc 1 Pitch Mod Polarity | | 24 | Chorus 1 Depth |
+| 1 | LFO 1 Level | | 13 | Filter 1 Cutoff | | 25 | Chorus 1 Mix |
+| 2 | LFO 1 Polarity | | 14 | Filter 1 Resonance | | 26 | Delay 1 Time |
+| 3 | EG 1 Attack | | 15 | Filter 1 Gain | | 27 | Delay 1 Feedback |
+| 4 | EG 1 Decay | | 16 | Filter 1 Mod Amt | | 28 | Delay 1 Mix |
+| 5 | EG 1 Sustain | | 17 | Filter 1 Mod Polarity | | 34 | Slew 1 Time |
+| 6 | EG 1 Level | | 18 | Amp 1 Gain | | 35 | Osc 1 Pulse Width |
+| 7 | EG 1 Polarity | | 19 | Mixer 1 Level 1 | | 36 | Osc 1 PW Mod Amt |
+| 8 | Osc 1 Wave | | 20 | Mixer 1 Polarity 1 | | 37 | Osc 1 PW Mod Polarity |
+| 9 | Osc 1 Coarse Tune | | 21 | Mixer 1 Level 2 | | 38 | EG 1 Release Switch |
+| 10 | Osc 1 Fine Tune | | 22 | Mixer 1 Polarity 2 | |  |  |
+| 11 | Osc 1 Pitch Mod Amt | | 23 | Chorus 1 Rate | |  |  |
 
 <!-- patch_gen end -->
 
@@ -475,7 +476,7 @@ two slots, a unipolar and a bipolar one. See the General slots below.
 | 18 | Delay 1 Output R ± | | 41 | Mixer 1 Polarity 2 ± | | 64 | Osc 1 PW Mod Polarity ± |
 | 19 | LFO 1 Rate | | 42 | Chorus 1 Rate | | 65 | Filter 1 Output BP ± |
 | 20 | LFO 1 Level | | 43 | Chorus 1 Depth | | 66 | Filter 1 Output HP ± |
-| 21 | LFO 1 Polarity ± | | 44 | Chorus 1 Mix | |  |  |
+| 21 | LFO 1 Polarity ± | | 44 | Chorus 1 Mix | | 67 | EG 1 Release Switch |
 | 22 | EG 1 Attack | | 45 | Delay 1 Time | |  |  |
 
 <!-- patch_gen end -->
@@ -487,7 +488,7 @@ its Polarity is turned negative. Everything unmarked runs 0.0 to 1.0 -- Note Gat
 unipolar control slot. The bus carries both kinds under one numbering, so the range belongs to the slot
 rather than to the sort of thing that wrote it.
 
-Slots 19-47, 61 and 62-64 hold the values arriving from CC, so a parameter reads its own CC by default. Each
+Slots 19-47, 61, 62-64 and 67 hold the values arriving from CC, so a parameter reads its own CC by default. Each
 parameter is unipolar or bipolar, and its slot takes the same range. A unipolar one runs 0.0 to
 1.0 from CC 4 to CC 124, the span of an envelope, so an envelope pointed at one sweeps the whole
 of its dial. A bipolar one runs -0.5 to +0.5 with CC 64 at 0.0, the span of an LFO, so a bipolar
@@ -547,6 +548,11 @@ pass the LFO through as it is.
 EG 1 Level and EG 1 Polarity scale the envelope's output the same way, over the same ranges.
 Neither has a CC, and the default patch points them at the constants 1.0 and +0.5, which pass
 the envelope through as it is.
+
+EG 1 Release Switch, on CC 105 as in PRA32-U2, picks the release, after the note's gate falls: on
+from 0.5 up (CC 64-124), it runs at the decay's rate, set by EG 1 Decay; off below 0.5 (CC 4-63), it
+runs at the shortest decay's, 10 ms, whatever the decay is, so a long decay still ends a note
+short. It powers up on. It is a switch, so it is not smoothed.
 
 Each modulation depth is Mod Amt times Mod Polarity, the second doubled: Mod Polarity passes
 Mod Amt through at +0.5 (CC 124), silences it at 0.0 (CC 64) and negates it at -0.5 (CC 4), and
@@ -705,7 +711,7 @@ changes only how fast the output moves, so it cannot step it.
   the steps of a controller sending sparse CCs (e.g. every 20 ms). Osc 1 Coarse Tune and Fine Tune
   are not smoothed, so that the pitch follows right away, and neither is Slew 1 Time, which
   cannot step what it sets
-- A parameter source may point at any of the 128 slots. Slots above 66 read 0 until something
+- A parameter source may point at any of the 128 slots. Slots above 67 read 0 until something
   writes them, which leaves a parameter pointed at one at the bottom of a unipolar dial or the
   middle of a bipolar one
 - A parameter clamps its value to its own range, 0.0 to 1.0 or -0.5 to +0.5, and its control slot

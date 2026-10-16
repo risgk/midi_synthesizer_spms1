@@ -125,6 +125,8 @@ signals:
   - { key: FILTER_1_OUTPUT_BP, id: 65, module: FILTER_1, output: BP, label: Filter 1 Output BP, bipolar: true }
   - { key: FILTER_1_OUTPUT_HP, id: 66, module: FILTER_1, output: HP, label: Filter 1 Output HP, bipolar: true }
 
+  - { key: ENV_GEN_1_RELEASE_SWITCH, id: 67, control: ENV_GEN_1_RELEASE_SWITCH }
+
 # Module inputs, NRPN category 1, by entry: what feeds each one in the default patch (`source`, a
 # signal key). `label` is the editor's, on the module; `name` the README's, after the module's
 # label. An input with no module is a side of the final output.
@@ -204,3 +206,8 @@ controls:
   - { entry: 35, module: OSC_1,     key: PULSE_WIDTH,     label: Pulse Width,     cc: 19,  value: 4 }
   - { entry: 36, module: OSC_1,     key: PW_MOD_AMOUNT,   label: PW Mod Amt,      cc: 103, value: 4 }
   - { entry: 37, module: OSC_1,     key: PW_MOD_POLARITY, label: PW Mod Polarity, cc: 0,   value: 124, source: HALF, bipolar: true }
+
+  # EG 1 Release Switch came after them, on CC 105 as in PRA32-U2 (EG/Amp Rel = Dec). It powers up
+  # at CC 124, on, the release following the decay as it always has, so the default patch renders
+  # as before.
+  - { entry: 38, module: ENV_GEN_1, key: RELEASE_SWITCH,  label: Release Switch,  cc: 105, value: 124 }

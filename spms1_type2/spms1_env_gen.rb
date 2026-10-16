@@ -1,5 +1,6 @@
 module Spms1
-  # ADS envelope updated at 4-sample control-rate grid.
+  # ADS envelope updated at 4-sample control-rate grid, its release either the decay's or the
+  # shortest decay's (the release switch).
   class EnvGen
     STATE_ATTACK = 0
     STATE_SUSTAIN = 1
@@ -58,6 +59,9 @@ module Spms1
 
       @attack = 0.0
       @decay = 0.0
+      # 1.0 when the release follows the decay, 0.0 when it takes the shortest decay; see
+      # set_release_switch.
+      @release_follows_decay = 1.0
       @sustain = 1.0
       @level = 1.0
       @polarity = 1.0
@@ -70,6 +74,10 @@ module Spms1
       @was_gate_on = false
       @attack_coef = 1.0
       @decay_coef = 1.0
+      @release_coef = 1.0
+      # The shortest decay's coefficient, the release's with the switch off. Fixed once the
+      # sample rate is, as EXP_TABLE's first entry is the bottom of the decay dial.
+      @shortest_decay_coef = 1.0 / (DECAY_BASE * EXP_TABLE[0] * @effective_rate)
       @sample_counter = 0
 
       update_coefficients_full
@@ -85,6 +93,14 @@ module Spms1
     # Decay time: see DECAY_BASE for scaling details.
     def set_decay(decay)
       @decay = (decay < 0.0) ? 0.0 : ((decay > 1.0) ? 1.0 : decay)
+    end
+
+    # Release switch, unipolar, [0.0, 1.0], and taken as a switch: from 0.5 up the release, after
+    # the gate falls, runs at the decay's rate, as it always used to; below 0.5 it runs at the
+    # shortest decay's, 10 ms, whatever the decay is. Not smoothed: there is nothing between its
+    # two settings to pass through.
+    def set_release_switch(release_switch)
+      @release_follows_decay = (release_switch < 0.5) ? 0.0 : 1.0
     end
 
     # Sustain level: silent at 0.0, full at 1.0.
@@ -119,7 +135,8 @@ module Spms1
         update_coefficients_full
 
         target = (@state == STATE_ATTACK) ? ATTACK_TARGET : (((@state == STATE_SUSTAIN) && is_gate_on) ? @sustain : 0.0)
-        coef = (@state == STATE_ATTACK) ? @attack_coef : ((@state == STATE_SUSTAIN) ? @decay_coef : 0.0)
+        # With the gate off, the sustain state is the release, and takes the release's rate.
+        coef = (@state == STATE_ATTACK) ? @attack_coef : ((@state == STATE_SUSTAIN) ? (is_gate_on ? @decay_coef : @release_coef) : 0.0)
 
         # With the gate on, the level follows the sustain both ways at the decay rate, so raising
         # the sustain while a note is held raises the level too.
@@ -165,6 +182,10 @@ module Spms1
     def update_coefficients_full
       @attack_coef = 1.0 / (ATTACK_BASE * calculate_exp_fast(@attack) * @effective_rate)
       @decay_coef  = 1.0 / (DECAY_BASE  * calculate_exp_fast(@decay)  * @effective_rate)
+      # A blend of the two by a weight of 1.0 or 0.0, so the pick is a multiply, not a branch.
+      # Each term is weighted on its own, rather than as shortest + (decay - shortest) * weight,
+      # so that the release lands on the decay's coefficient exactly, not within a rounding of it.
+      @release_coef = @decay_coef * @release_follows_decay + @shortest_decay_coef * (1.0 - @release_follows_decay)
     end
 
     def calculate_exp_fast(value)
