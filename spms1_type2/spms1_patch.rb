@@ -76,6 +76,8 @@ SIGNAL_GENERAL_BIPOLAR_3     = 58
 SIGNAL_GENERAL_BIPOLAR_4     = 59
 SIGNAL_SLEW_1_OUTPUT         = 60
 SIGNAL_SLEW_1_TIME           = 61
+SIGNAL_OSC_1_PULSE_WIDTH     = 62
+SIGNAL_OSC_1_MOD_DESTINATION = 63
 
 # NRPN parameter numbers: (MSB << 7) | LSB, where the MSB picks a category and the LSB an entry.
 #   0..127   active_modules[slot]
@@ -130,6 +132,8 @@ NRPN_SOURCE_DELAY_1_TIME          = 282
 NRPN_SOURCE_DELAY_1_FEEDBACK      = 283
 NRPN_SOURCE_DELAY_1_MIX           = 284
 NRPN_SOURCE_SLEW_1_TIME           = 290
+NRPN_SOURCE_OSC_1_PULSE_WIDTH     = 291
+NRPN_SOURCE_OSC_1_MOD_DESTINATION = 292
 
 # A CC number of 0 means the parameter has no CC: its control slot holds 0.0 -- the bottom of a
 # unipolar dial, the middle of a bipolar one -- whatever CC it had before, so a patch sets it alone.
@@ -168,6 +172,8 @@ NRPN_CC_GENERAL_2             = 415
 NRPN_CC_GENERAL_3             = 416
 NRPN_CC_GENERAL_4             = 417
 NRPN_CC_SLEW_1_TIME           = 418
+NRPN_CC_OSC_1_PULSE_WIDTH     = 419
+NRPN_CC_OSC_1_MOD_DESTINATION = 420
 
 # The constants of the bus, which nothing else ever writes. A slot not written here holds 0.0.
 def spms1_fill_constant_signals(signals)
@@ -239,32 +245,36 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_DELAY_1_FEEDBACK     , SIGNAL_DELAY_1_FEEDBACK)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_DELAY_1_MIX          , SIGNAL_DELAY_1_MIX)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_SLEW_1_TIME          , SIGNAL_SLEW_1_TIME)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_1_PULSE_WIDTH    , SIGNAL_OSC_1_PULSE_WIDTH)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_1_MOD_DESTINATION, SIGNAL_OSC_1_MOD_DESTINATION)
 
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_RATE         , 3)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_ENV_GEN_1_ATTACK   , 73)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_ENV_GEN_1_DECAY    , 75)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_ENV_GEN_1_SUSTAIN  , 30)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_WAVEFORM     , 20)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_COARSE_TUNE  , 86)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_FINE_TUNE    , 70)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_MOD_AMOUNT   , 13)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_CUTOFF    , 74)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_RESONANCE , 71)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_GAIN      , 112)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_MOD_AMOUNT, 24)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_AMP_1_GAIN         , 15)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_CHORUS_1_RATE      , 58)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_CHORUS_1_DEPTH     , 59)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_CHORUS_1_MIX       , 93)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_DELAY_1_TIME       , 90)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_DELAY_1_FEEDBACK   , 92)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_DELAY_1_MIX        , 94)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_GENERAL_MOD_WHEEL  , 1)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_GENERAL_1          , 16)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_GENERAL_2          , 17)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_GENERAL_3          , 18)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_GENERAL_4          , 19)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_SLEW_1_TIME        , 5)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_RATE           , 3)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_ENV_GEN_1_ATTACK     , 73)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_ENV_GEN_1_DECAY      , 75)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_ENV_GEN_1_SUSTAIN    , 30)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_WAVEFORM       , 20)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_COARSE_TUNE    , 86)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_FINE_TUNE      , 70)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_MOD_AMOUNT     , 13)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_CUTOFF      , 74)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_RESONANCE   , 71)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_GAIN        , 112)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_MOD_AMOUNT  , 24)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_AMP_1_GAIN           , 15)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_CHORUS_1_RATE        , 58)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_CHORUS_1_DEPTH       , 59)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_CHORUS_1_MIX         , 93)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_DELAY_1_TIME         , 90)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_DELAY_1_FEEDBACK     , 92)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_DELAY_1_MIX          , 94)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_GENERAL_MOD_WHEEL    , 1)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_GENERAL_1            , 16)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_GENERAL_2            , 17)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_GENERAL_3            , 18)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_GENERAL_4            , 113)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_SLEW_1_TIME          , 5)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_PULSE_WIDTH    , 19)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_MOD_DESTINATION, 103)
 
   C.set_midi_cc_value(midi_ch, 3  , 64 ) # LFO 1 Rate
   C.set_midi_cc_value(midi_ch, 73 , 4  ) # EG 1 Attack
@@ -289,6 +299,8 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 16 , 64 ) # General 1
   C.set_midi_cc_value(midi_ch, 17 , 64 ) # General 2
   C.set_midi_cc_value(midi_ch, 18 , 64 ) # General 3
-  C.set_midi_cc_value(midi_ch, 19 , 64 ) # General 4
+  C.set_midi_cc_value(midi_ch, 113, 64 ) # General 4
   C.set_midi_cc_value(midi_ch, 5  , 4  ) # Slew 1 Time
+  C.set_midi_cc_value(midi_ch, 19 , 4  ) # Osc 1 Pulse Width
+  C.set_midi_cc_value(midi_ch, 103, 4  ) # Osc 1 Mod Dst
 end

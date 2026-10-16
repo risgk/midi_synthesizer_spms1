@@ -1,5 +1,5 @@
 ```
-  [MIDI Synthesizer]                                              Date: 2026-10-15                      
+  [MIDI Synthesizer]                                              Date: 2026-10-16                      
   Model: SPMS-1 (type-2)          MIDI Implementation Chart       Version: 0.0.3                        
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Function...                   | Transmitted   | Recognized    | Remarks                              |
@@ -26,6 +26,8 @@
 | Change                     13 | x             | o             | Osc Mod Amt                          |
 |                            86 | x             | o             | Osc Coarse Tune (+-5 Octaves)        |
 |                            70 | x             | o             | Osc Fine Tune (+-60 Cents)           |
+|                            19 | x             | o             | Osc Pulse Width (50% to 0%)          |
+|                           103 | x             | o             | Osc Mod Dst [Pitch|PW]               |
 |                            74 | x             | o             | Filter Cutoff                        |
 |                            71 | x             | o             | Filter Resonance                     |
 |                            24 | x             | o             | Filter Mod Amt                       |
@@ -46,7 +48,7 @@
 |                            16 | x             | o             | General 1 (Unipolar and Bipolar)     |
 |                            17 | x             | o             | General 2 (Unipolar and Bipolar)     |
 |                            18 | x             | o             | General 3 (Unipolar and Bipolar)     |
-|                            19 | x             | o             | General 4 (Unipolar and Bipolar)     |
+|                           113 | x             | o             | General 4 (Unipolar and Bipolar)     |
 |                            99 | x             | o             | NRPN MSB                             |
 |                            98 | x             | o             | NRPN LSB                             |
 |                             6 | x             | o             | Data Entry MSB (NRPN value)          |

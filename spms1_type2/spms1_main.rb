@@ -282,6 +282,8 @@ while true
   source_delay_1_feedback      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_FEEDBACK)
   source_delay_1_mix           = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_MIX)
   source_slew_1_time           = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_SLEW_1_TIME)
+  source_osc_1_pulse_width     = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PULSE_WIDTH)
+  source_osc_1_mod_destination = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_MOD_DESTINATION)
 
   # Which CC fills each control slot. The bus is the only thing downstream reads, so this is
   # where MIDI enters and the only place a CC number appears.
@@ -315,6 +317,8 @@ while true
   cc_delay_1_feedback      = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_DELAY_1_FEEDBACK)
   cc_delay_1_mix           = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_DELAY_1_MIX)
   cc_slew_1_time           = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_SLEW_1_TIME)
+  cc_osc_1_pulse_width     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_PULSE_WIDTH)
+  cc_osc_1_mod_destination = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_MOD_DESTINATION)
   cc_general_mod_wheel     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_MOD_WHEEL)
   cc_general_1             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_1)
   cc_general_2             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_2)
@@ -351,6 +355,8 @@ while true
   signals[SIGNAL_DELAY_1_FEEDBACK] = cc_or_zero(cc_delay_1_feedback, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_delay_1_feedback)))
   signals[SIGNAL_DELAY_1_MIX] = cc_or_zero(cc_delay_1_mix, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_delay_1_mix)))
   signals[SIGNAL_SLEW_1_TIME] = cc_or_zero(cc_slew_1_time, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_slew_1_time)))
+  signals[SIGNAL_OSC_1_PULSE_WIDTH] = cc_or_zero(cc_osc_1_pulse_width, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_pulse_width)))
+  signals[SIGNAL_OSC_1_MOD_DESTINATION] = cc_or_zero(cc_osc_1_mod_destination, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_mod_destination)))
   signals[SIGNAL_GENERAL_MOD_WHEEL] = cc_or_zero(cc_general_mod_wheel, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_general_mod_wheel)))
   # Each General CC fills two slots, the same value taken both ways.
   general_1 = C.get_midi_cc_value(MIDI_CH, cc_general_1)
@@ -396,6 +402,8 @@ while true
   delay_1.set_feedback(signals[source_delay_1_feedback])
   delay_1.set_mix(signals[source_delay_1_mix])
   slew_1.set_time(signals[source_slew_1_time])
+  osc_1.set_pulse_width(signals[source_osc_1_pulse_width])
+  osc_1.set_modulation_destination(signals[source_osc_1_mod_destination])
 
   i = 0
   while i < AUDIO_BUFFER_WORDS

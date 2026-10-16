@@ -117,6 +117,9 @@ signals:
   - { key: SLEW_1_OUTPUT, id: 60, module: SLEW_1, output: Out, label: Slew 1 Output, bipolar: true }
   - { key: SLEW_1_TIME,   id: 61, control: SLEW_1_TIME }
 
+  - { key: OSC_1_PULSE_WIDTH,     id: 62, control: OSC_1_PULSE_WIDTH }
+  - { key: OSC_1_MOD_DESTINATION, id: 63, control: OSC_1_MOD_DESTINATION }
+
 # Module inputs, NRPN category 1, by entry: what feeds each one in the default patch (`source`, a
 # signal key). `label` is the editor's, on the module; `name` the README's, after the module's
 # label. An input with no module is a side of the final output.
@@ -176,13 +179,20 @@ controls:
   # General controls: a CC put on the bus for any input or parameter to read, the mod wheel
   # unipolar and each of General 1-4 filling a unipolar and a bipolar slot (see `signals`). Each
   # of General 1-4 powers up at CC 64, the one value that puts neither slot at an end: the
-  # unipolar slot at 0.5, the bipolar at 0.0.
-  - { entry: 29, general: true, key: GENERAL_MOD_WHEEL, label: Mod Wheel, cc: 1,  value: 4 }
-  - { entry: 30, general: true, key: GENERAL_1,         label: "1",       cc: 16, value: 64 }
-  - { entry: 31, general: true, key: GENERAL_2,         label: "2",       cc: 17, value: 64 }
-  - { entry: 32, general: true, key: GENERAL_3,         label: "3",       cc: 18, value: 64 }
-  - { entry: 33, general: true, key: GENERAL_4,         label: "4",       cc: 19, value: 64 }
+  # unipolar slot at 0.5, the bipolar at 0.0. General 4 is on CC 113, CC 19 having gone to Osc 1
+  # Pulse Width, as PRA32-U2 has Osc 1 Shape there.
+  - { entry: 29, general: true, key: GENERAL_MOD_WHEEL, label: Mod Wheel, cc: 1,   value: 4 }
+  - { entry: 30, general: true, key: GENERAL_1,         label: "1",       cc: 16,  value: 64 }
+  - { entry: 31, general: true, key: GENERAL_2,         label: "2",       cc: 17,  value: 64 }
+  - { entry: 32, general: true, key: GENERAL_3,         label: "3",       cc: 18,  value: 64 }
+  - { entry: 33, general: true, key: GENERAL_4,         label: "4",       cc: 113, value: 64 }
 
   # Slew 1 came after the General controls, so its entry follows theirs. CC 5 is Portamento Time
   # in the MIDI spec; it powers up at CC 4, 0.0, where the slew is off.
   - { entry: 34, module: SLEW_1,    key: TIME,         label: Time,         cc: 5,   value: 4 }
+
+  # Osc 1 Pulse Width and Mod Dst came after Slew 1, so their entries follow its. CC 19 and CC 103
+  # are where PRA32-U2 has Osc 1 Shape and LFO Mod Dst. Both power up at CC 4, 0.0: a pulse of 50%
+  # and the modulation on the pitch, so the default patch renders as before.
+  - { entry: 35, module: OSC_1,     key: PULSE_WIDTH,     label: Pulse Width,  cc: 19,  value: 4 }
+  - { entry: 36, module: OSC_1,     key: MOD_DESTINATION, label: Mod Dst,      cc: 103, value: 4 }

@@ -5,6 +5,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.3
 - Controlled by MIDI as a sound module
 - Last-note priority with one note of memory: releasing the newest note while the one before it is still held goes back to that one, legato (for trills)
 - 48 kHz audio output: 24 bit through an I2S DAC, or PWM Audio (no DAC needed)
+- Oscillator: a sawtooth-to-square morph with pulse width (CC 19), its modulation going to the pitch or the pulse width (CC 103)
 - Filter: ZDF/TPT State Variable Filter (with a nonlinear leak on the band pass integrator, solved by the one-step Newton method)
 - Chorus: mono in, stereo out, as a module in the run order
 - Delay: stereo, with feedback, as a module in the run order (up to 340 ms)
@@ -381,16 +382,17 @@ both at the same signal for a mono output.
 
 | CC 98 | Parameter | | CC 98 | Parameter | | CC 98 | Parameter |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | LFO 1 Rate | | 10 | Osc 1 Fine Tune | | 20 | Mixer 1 Polarity 1 |
-| 1 | LFO 1 Level | | 11 | Osc 1 Mod Amt | | 21 | Mixer 1 Level 2 |
-| 2 | LFO 1 Polarity | | 12 | Osc 1 Mod Polarity | | 22 | Mixer 1 Polarity 2 |
-| 3 | EG 1 Attack | | 13 | Filter 1 Cutoff | | 23 | Chorus 1 Rate |
-| 4 | EG 1 Decay | | 14 | Filter 1 Resonance | | 24 | Chorus 1 Depth |
-| 5 | EG 1 Sustain | | 15 | Filter 1 Gain | | 25 | Chorus 1 Mix |
-| 6 | EG 1 Level | | 16 | Filter 1 Mod Amt | | 26 | Delay 1 Time |
-| 7 | EG 1 Polarity | | 17 | Filter 1 Mod Polarity | | 27 | Delay 1 Feedback |
-| 8 | Osc 1 Wave | | 18 | Amp 1 Gain | | 28 | Delay 1 Mix |
-| 9 | Osc 1 Coarse Tune | | 19 | Mixer 1 Level 1 | | 34 | Slew 1 Time |
+| 0 | LFO 1 Rate | | 11 | Osc 1 Mod Amt | | 22 | Mixer 1 Polarity 2 |
+| 1 | LFO 1 Level | | 12 | Osc 1 Mod Polarity | | 23 | Chorus 1 Rate |
+| 2 | LFO 1 Polarity | | 13 | Filter 1 Cutoff | | 24 | Chorus 1 Depth |
+| 3 | EG 1 Attack | | 14 | Filter 1 Resonance | | 25 | Chorus 1 Mix |
+| 4 | EG 1 Decay | | 15 | Filter 1 Gain | | 26 | Delay 1 Time |
+| 5 | EG 1 Sustain | | 16 | Filter 1 Mod Amt | | 27 | Delay 1 Feedback |
+| 6 | EG 1 Level | | 17 | Filter 1 Mod Polarity | | 28 | Delay 1 Mix |
+| 7 | EG 1 Polarity | | 18 | Amp 1 Gain | | 34 | Slew 1 Time |
+| 8 | Osc 1 Wave | | 19 | Mixer 1 Level 1 | | 35 | Osc 1 Pulse Width |
+| 9 | Osc 1 Coarse Tune | | 20 | Mixer 1 Polarity 1 | | 36 | Osc 1 Mod Dst |
+| 10 | Osc 1 Fine Tune | | 21 | Mixer 1 Level 2 | |  |  |
 
 <!-- patch_gen end -->
 
@@ -436,27 +438,28 @@ two slots, a unipolar and a bipolar one. See the General slots below.
 
 | ID | Signal | | ID | Signal | | ID | Signal |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | None (constant 0.0) | | 21 | LFO 1 Polarity ± | | 42 | Chorus 1 Rate |
-| 1 | Constant 1.0 | | 22 | EG 1 Attack | | 43 | Chorus 1 Depth |
-| 2 | Constant 0.5 | | 23 | EG 1 Decay | | 44 | Chorus 1 Mix |
-| 3 | Constant 0.2 | | 24 | EG 1 Sustain | | 45 | Delay 1 Time |
-| 4 | Constant 0.1 | | 25 | EG 1 Level | | 46 | Delay 1 Feedback |
-| 5 | Constant -0.1 | | 26 | EG 1 Polarity ± | | 47 | Delay 1 Mix |
-| 6 | Constant -0.2 | | 27 | Osc 1 Wave | | 48 | Note Pitch ± |
-| 7 | Constant -0.5 | | 28 | Osc 1 Coarse Tune ± | | 49 | Note Gate |
-| 8 | Constant -1.0 | | 29 | Osc 1 Fine Tune ± | | 50 | Pitch Bend ± |
-| 9 | LFO 1 Output ± | | 30 | Osc 1 Mod Amt | | 51 | General Mod Wheel |
-| 10 | EG 1 Output ± | | 31 | Osc 1 Mod Polarity ± | | 52 | General Unipolar 1 |
-| 11 | Osc 1 Output ± | | 32 | Filter 1 Cutoff | | 53 | General Unipolar 2 |
-| 12 | Filter 1 Output ± | | 33 | Filter 1 Resonance | | 54 | General Unipolar 3 |
-| 13 | Amp 1 Output ± | | 34 | Filter 1 Gain | | 55 | General Unipolar 4 |
-| 14 | Mixer 1 Output ± | | 35 | Filter 1 Mod Amt | | 56 | General Bipolar 1 ± |
-| 15 | Chorus 1 Output L ± | | 36 | Filter 1 Mod Polarity ± | | 57 | General Bipolar 2 ± |
-| 16 | Chorus 1 Output R ± | | 37 | Amp 1 Gain | | 58 | General Bipolar 3 ± |
-| 17 | Delay 1 Output L ± | | 38 | Mixer 1 Level 1 | | 59 | General Bipolar 4 ± |
-| 18 | Delay 1 Output R ± | | 39 | Mixer 1 Polarity 1 ± | | 60 | Slew 1 Output ± |
-| 19 | LFO 1 Rate | | 40 | Mixer 1 Level 2 | | 61 | Slew 1 Time |
-| 20 | LFO 1 Level | | 41 | Mixer 1 Polarity 2 ± | |  |  |
+| 0 | None (constant 0.0) | | 22 | EG 1 Attack | | 44 | Chorus 1 Mix |
+| 1 | Constant 1.0 | | 23 | EG 1 Decay | | 45 | Delay 1 Time |
+| 2 | Constant 0.5 | | 24 | EG 1 Sustain | | 46 | Delay 1 Feedback |
+| 3 | Constant 0.2 | | 25 | EG 1 Level | | 47 | Delay 1 Mix |
+| 4 | Constant 0.1 | | 26 | EG 1 Polarity ± | | 48 | Note Pitch ± |
+| 5 | Constant -0.1 | | 27 | Osc 1 Wave | | 49 | Note Gate |
+| 6 | Constant -0.2 | | 28 | Osc 1 Coarse Tune ± | | 50 | Pitch Bend ± |
+| 7 | Constant -0.5 | | 29 | Osc 1 Fine Tune ± | | 51 | General Mod Wheel |
+| 8 | Constant -1.0 | | 30 | Osc 1 Mod Amt | | 52 | General Unipolar 1 |
+| 9 | LFO 1 Output ± | | 31 | Osc 1 Mod Polarity ± | | 53 | General Unipolar 2 |
+| 10 | EG 1 Output ± | | 32 | Filter 1 Cutoff | | 54 | General Unipolar 3 |
+| 11 | Osc 1 Output ± | | 33 | Filter 1 Resonance | | 55 | General Unipolar 4 |
+| 12 | Filter 1 Output ± | | 34 | Filter 1 Gain | | 56 | General Bipolar 1 ± |
+| 13 | Amp 1 Output ± | | 35 | Filter 1 Mod Amt | | 57 | General Bipolar 2 ± |
+| 14 | Mixer 1 Output ± | | 36 | Filter 1 Mod Polarity ± | | 58 | General Bipolar 3 ± |
+| 15 | Chorus 1 Output L ± | | 37 | Amp 1 Gain | | 59 | General Bipolar 4 ± |
+| 16 | Chorus 1 Output R ± | | 38 | Mixer 1 Level 1 | | 60 | Slew 1 Output ± |
+| 17 | Delay 1 Output L ± | | 39 | Mixer 1 Polarity 1 ± | | 61 | Slew 1 Time |
+| 18 | Delay 1 Output R ± | | 40 | Mixer 1 Level 2 | | 62 | Osc 1 Pulse Width |
+| 19 | LFO 1 Rate | | 41 | Mixer 1 Polarity 2 ± | | 63 | Osc 1 Mod Dst |
+| 20 | LFO 1 Level | | 42 | Chorus 1 Rate | |  |  |
+| 21 | LFO 1 Polarity ± | | 43 | Chorus 1 Depth | |  |  |
 
 <!-- patch_gen end -->
 
@@ -467,7 +470,7 @@ its Polarity is turned negative. Everything unmarked runs 0.0 to 1.0 -- Note Gat
 unipolar control slot. The bus carries both kinds under one numbering, so the range belongs to the slot
 rather than to the sort of thing that wrote it.
 
-Slots 19-47 and 61 hold the values arriving from CC, so a parameter reads its own CC by default. Each
+Slots 19-47, 61 and 62-63 hold the values arriving from CC, so a parameter reads its own CC by default. Each
 parameter is unipolar or bipolar, and its slot takes the same range. A unipolar one runs 0.0 to
 1.0 from CC 4 to CC 124, the span of an envelope, so an envelope pointed at one sweeps the whole
 of its dial. A bipolar one runs -0.5 to +0.5 with CC 64 at 0.0, the span of an LFO, so a bipolar
@@ -479,7 +482,7 @@ makes a modulation. A slot with no CC holds 0.0.
 Slots 51-59, the General slots, are control slots that no parameter owns: a CC put on the bus for
 any module input or parameter to read. General Mod Wheel reads CC 1, runs 0.0 to 1.0 and powers
 up at CC 4, so it is at 0.0 until the wheel moves; nothing is routed to it by default. General 1-4
-read CC 16-19 by default, and each puts its CC on the bus both ways at once: General Unipolar 1-4
+read CC 16, 17, 18 and 113 by default, and each puts its CC on the bus both ways at once: General Unipolar 1-4
 run 0.0 to 1.0 and General Bipolar 1-4 run -0.5 to +0.5. All four power up at CC 64, so the
 unipolar slots start at 0.5 and the bipolar ones at 0.0.
 
@@ -538,6 +541,15 @@ Osc 1 Mod Amt is a depth, not an offset, and it reaches the whole pitch range: a
 bipolar source swings the pitch five octaves up and five down. That is a coarse dial for vibrato,
 half a semitone per CC step, which is why the default patch brings the LFO down to a fifth with
 LFO 1 Polarity. There a semitone of vibrato sits at CC 14 and an octave at the top of the dial.
+
+Osc 1 Pulse Width shifts the second of the two sawtooths that the morph is made of, from half a
+cycle at 0.0 (CC 4) toward a whole one at 1.0 (CC 124). At the square end of Osc 1 Wave that is a
+pulse of 50% at CC 4, 25% at CC 64 and 0%, silence, at CC 124; it is CC 19, where PRA32-U2 has
+Osc 1 Shape. Osc 1 Mod Dst picks what Mod In and Mod Amt move: the pitch below 0.5 (CC 4-63) and
+the pulse width from 0.5 up (CC 64-124), with CC 103 as in PRA32-U2. A unit of modulation is the
+whole range either way, so at the default patch's vibrato depth the LFO moves the pulse width
+little; a PWM takes LFO 1 Polarity turned up as well. The pulse width the modulation adds up to is
+held to 0.0 to 1.0, and Osc 1 Mod Dst is a switch, so it is not smoothed.
 
 Filter 1 Gain sets how hard the audio input drives the filter, which is also what decides how far
 the filter runs into its own saturation. Its default of CC 64 is the level the oscillator used to
@@ -673,7 +685,7 @@ changes only how fast the output moves, so it cannot step it.
   the steps of a controller sending sparse CCs (e.g. every 20 ms). Osc 1 Coarse Tune and Fine Tune
   are not smoothed, so that the pitch follows right away, and neither is Slew 1 Time, which
   cannot step what it sets
-- A parameter source may point at any of the 128 slots. Slots above 61 read 0 until something
+- A parameter source may point at any of the 128 slots. Slots above 63 read 0 until something
   writes them, which leaves a parameter pointed at one at the bottom of a unipolar dial or the
   middle of a bipolar one
 - A parameter clamps its value to its own range, 0.0 to 1.0 or -0.5 to +0.5, and its control slot
