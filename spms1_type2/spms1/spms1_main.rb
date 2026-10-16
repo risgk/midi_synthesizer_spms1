@@ -162,7 +162,8 @@ spms1_fill_constant_signals(signals)
 # down to a vibrato depth on the pitch, so that Osc Mod 2 Amt can span the whole pitch range
 # the way every other modulation depth does. Osc 1 Mod 1 Amt and Pol read 1.0 and +0.5,
 # which play the note from the slew in tune. The LFO also reaches Filter 1 Mod 2 In, but Filter 1
-# Mod 2 Amt powers up at 0.0, so the cutoff follows the envelope alone until CC 25 turns it up.
+# Mod 2 Amt powers up at 0.0, so the cutoff follows the envelope alone until CC 25 turns it up,
+# and Filter 1 Mod 2 Pol reads 0.1, as Osc 1 Mod 2 Pol does.
 # A mixer's parameters have no CC, so the default patch points them at constants instead: full
 # level and a polarity of +0.5, which makes a mixer pass its input through rather than mute it.
 # Each modulation polarity has no CC either and reads +0.5, which leaves the amount in charge,

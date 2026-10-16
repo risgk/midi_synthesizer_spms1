@@ -178,8 +178,8 @@ Parameter names shorten Amount to Amt and Polarity to Pol.
 
 The LFO goes straight to the oscillator, both to its pitch and to its pulse width, at its full
 level, and to the filter, where Filter 1 Mod 2 Amt (CC 25) powers up at 0.0 and leaves the cutoff
-to the envelope until it is turned up. Osc 1 Mod 2 Pol reads the constant 0.1,
-which brings it down to a vibrato depth on the pitch, while Osc 1 PW Mod Pol reads 0.5 and
+to the envelope until it is turned up. Osc 1 Mod 2 Pol and Filter 1 Mod 2 Pol read the constant
+0.1, which brings it down to a vibrato depth on the pitch and a like depth on the cutoff, while Osc 1 PW Mod Pol reads 0.5 and
 takes the LFO whole. Each modulation depth spans the whole range of what it moves, so bringing a
 source down to a musical depth is left to the patch rather than built into the oscillator.
 
@@ -533,7 +533,7 @@ rather than wired to whatever sits in the first slot. Signal 1 is the value an u
 wants: routing an amp's modulation input to it leaves the amp at full level. Signals 0 and 1 are the
 two ends of a unipolar parameter's range and Signals 7 and 2 of a bipolar one, for pinning one
 there; Signal 2 is also the middle of a unipolar dial. Signal 3 is a fifth of full scale and Signal
-6 its negative. Signal 4 is the Osc 1 Mod 2 Pol the default patch uses, which brings the
+6 its negative. Signal 4 is the Osc 1 and Filter 1 Mod 2 Pol the default patch uses, which brings the
 LFO down to a vibrato depth, and Signal 5 its negative. A constant on a mixer's second input shifts
 a signal between the two kinds: -0.5 turns one that runs one way into one that swings both, and +0.5
 the other way round.
@@ -663,7 +663,8 @@ changes only how fast the output moves, so it cannot step it.
 - The LFO reaches the filter's Mod 2 input by default too, so CC 25 sweeps the cutoff with it, on
   top of the envelope on Mod 1
 - Filter cutoff follows note pitch (keyboard tracking): CC 99 = 1, CC 98 = 17, CC 6 = 48 puts
-  Note Pitch on the filter's Mod 2 input in the LFO's place, leaving the envelope on Mod 1. With
+  Note Pitch on the filter's Mod 2 input in the LFO's place, leaving the envelope on Mod 1, and
+  CC 99 = 2, CC 98 = 45, CC 6 = 2 sets Filter 1 Mod 2 Pol back to +0.5 from the LFO's depth. With
   Mod 2 Amt (CC 25) at CC 124, note 60 adds nothing to the cutoff and each note moves it a semitone
 - Filter cutoff driven by the envelope instead of its CC: CC 99 = 2, CC 98 = 13, CC 6 = 10. The
   envelope and the cutoff are both unipolar, so it opens the cutoff from the bottom of its dial
