@@ -53,11 +53,11 @@ module Spms1
       @current_pulse_width = 0.0
       # Amount and polarity are multiplied before smoothing, so only one smoothing state has to be
       # carried.
-      @modulation_amount = 0.0
-      @modulation_polarity = 1.0
-      @modulation_depth = 0.0
-      @stage_1_modulation_depth = 0.0
-      @current_modulation_depth = 0.0
+      @pitch_modulation_amount = 0.0
+      @pitch_modulation_polarity = 1.0
+      @pitch_modulation_depth = 0.0
+      @stage_1_pitch_modulation_depth = 0.0
+      @current_pitch_modulation_depth = 0.0
       # The pulse width modulation has a depth of its own, carried the same way.
       @pw_modulation_amount = 0.0
       @pw_modulation_polarity = 1.0
@@ -90,16 +90,16 @@ module Spms1
     # bipolar, [-0.5, 0.5], and doubled, so +0.5 leaves the amount as it is, -0.5 negates it and
     # the way between scales it, crossing zero; it sets depth as well as direction. Scaled here
     # rather than per sample so the smoothed value is already in pitch units.
-    def set_modulation_amount(amount)
+    def set_pitch_modulation_amount(amount)
       clamped_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
-      @modulation_amount = clamped_amount * MODULATION_RANGE
-      @modulation_depth = @modulation_amount * @modulation_polarity
+      @pitch_modulation_amount = clamped_amount * MODULATION_RANGE
+      @pitch_modulation_depth = @pitch_modulation_amount * @pitch_modulation_polarity
     end
 
-    def set_modulation_polarity(polarity)
+    def set_pitch_modulation_polarity(polarity)
       clamped_polarity = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
-      @modulation_polarity = clamped_polarity + clamped_polarity
-      @modulation_depth = @modulation_amount * @modulation_polarity
+      @pitch_modulation_polarity = clamped_polarity + clamped_polarity
+      @pitch_modulation_depth = @pitch_modulation_amount * @pitch_modulation_polarity
     end
 
     # The pulse width modulation depth is amount times polarity, as the pitch's is. A unit of
@@ -138,20 +138,20 @@ module Spms1
     # lookup in bounds. The pulse width its modulation adds up to is held to its own, [0.0, 1.0].
     # The modulation inputs are deliberately not smoothed, so a fast source reaches the pitch and
     # the pulse width unslewed.
-    def process(pitch_input = 0.0, modulation_input = 0.0, pw_modulation_input = 0.0)
+    def process(pitch_input = 0.0, pitch_modulation_input = 0.0, pw_modulation_input = 0.0)
       if @sample_counter == 0
         # Morph, pulse width and depth are smoothed at the control rate to avoid sudden jumps.
         @stage_1_waveform = Dsp.smooth(@waveform, @stage_1_waveform, @smoothing_target_blend)
         @current_waveform = Dsp.smooth(@stage_1_waveform, @current_waveform, @smoothing_target_blend)
         @stage_1_pulse_width = Dsp.smooth(@pulse_width, @stage_1_pulse_width, @smoothing_target_blend)
         @current_pulse_width = Dsp.smooth(@stage_1_pulse_width, @current_pulse_width, @smoothing_target_blend)
-        @stage_1_modulation_depth = Dsp.smooth(@modulation_depth, @stage_1_modulation_depth, @smoothing_target_blend)
-        @current_modulation_depth = Dsp.smooth(@stage_1_modulation_depth, @current_modulation_depth, @smoothing_target_blend)
+        @stage_1_pitch_modulation_depth = Dsp.smooth(@pitch_modulation_depth, @stage_1_pitch_modulation_depth, @smoothing_target_blend)
+        @current_pitch_modulation_depth = Dsp.smooth(@stage_1_pitch_modulation_depth, @current_pitch_modulation_depth, @smoothing_target_blend)
         @stage_1_pw_modulation_depth = Dsp.smooth(@pw_modulation_depth, @stage_1_pw_modulation_depth, @smoothing_target_blend)
         @current_pw_modulation_depth = Dsp.smooth(@stage_1_pw_modulation_depth, @current_pw_modulation_depth, @smoothing_target_blend)
       end
 
-      total_pitch = pitch_input + @tune + (modulation_input * @current_modulation_depth)
+      total_pitch = pitch_input + @tune + (pitch_modulation_input * @current_pitch_modulation_depth)
       pitch = (total_pitch < -0.5) ? -0.5 : ((total_pitch > 0.5) ? 0.5 : total_pitch)
       freq = pitch_to_freq_fast(pitch)
       current_dt = freq * @inv_sample_rate

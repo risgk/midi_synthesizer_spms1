@@ -171,7 +171,7 @@ Slew 1 Time は CC 5 (MIDI 規格の Portamento Time) にあり、起動時は 0
 ピッチを届いたとおりそのまま通します。
 
 LFO はオシレータのピッチとパルス幅に直接、フルレベルで入ります。LFO 1 Polarity は定数 0.5 を読みます。
-Osc 1 Mod Polarity が定数 0.1 を読んでピッチへの変調をビブラートの深さまで絞り、Osc 1 PW Mod Polarity は
+Osc 1 Pitch Mod Polarity が定数 0.1 を読んでピッチへの変調をビブラートの深さまで絞り、Osc 1 PW Mod Polarity は
 0.5 を読んで LFO をそのまま受け取ります。モジュレーションの深さはどれも動かす先のレンジ全体に届くので、
 ソースを音楽的な深さまで絞る仕事はオシレータに作り込まず、パッチの側に任せています。
 
@@ -347,7 +347,7 @@ flowchart LR
 | ----- | ------ | - | ----- | ------ |
 | 0 | EG 1 Gate | | 8 | Mixer 1 In 2 |
 | 1 | Osc 1 Pitch | | 9 | Chorus 1 Audio In |
-| 2 | Osc 1 Mod In | | 10 | Delay 1 Audio In L |
+| 2 | Osc 1 Pitch Mod In | | 10 | Delay 1 Audio In L |
 | 3 | Filter 1 Audio In | | 11 | Delay 1 Audio In R |
 | 4 | Filter 1 Mod In | | 12 | 最終出力 L |
 | 5 | Amp 1 Audio In | | 13 | 最終出力 R |
@@ -375,8 +375,8 @@ flowchart LR
 
 | CC 98 | パラメータ | | CC 98 | パラメータ | | CC 98 | パラメータ |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | LFO 1 Rate | | 11 | Osc 1 Mod Amt | | 22 | Mixer 1 Polarity 2 |
-| 1 | LFO 1 Level | | 12 | Osc 1 Mod Polarity | | 23 | Chorus 1 Rate |
+| 0 | LFO 1 Rate | | 11 | Osc 1 Pitch Mod Amt | | 22 | Mixer 1 Polarity 2 |
+| 1 | LFO 1 Level | | 12 | Osc 1 Pitch Mod Polarity | | 23 | Chorus 1 Rate |
 | 2 | LFO 1 Polarity | | 13 | Filter 1 Cutoff | | 24 | Chorus 1 Depth |
 | 3 | EG 1 Attack | | 14 | Filter 1 Resonance | | 25 | Chorus 1 Mix |
 | 4 | EG 1 Decay | | 15 | Filter 1 Gain | | 26 | Delay 1 Time |
@@ -439,8 +439,8 @@ flowchart LR
 | 5 | 定数 -0.1 | | 27 | Osc 1 Wave | | 49 | Note Gate |
 | 6 | 定数 -0.2 | | 28 | Osc 1 Coarse Tune ± | | 50 | Pitch Bend ± |
 | 7 | 定数 -0.5 | | 29 | Osc 1 Fine Tune ± | | 51 | General Mod Wheel |
-| 8 | 定数 -1.0 | | 30 | Osc 1 Mod Amt | | 52 | General Unipolar 1 |
-| 9 | LFO 1 Output ± | | 31 | Osc 1 Mod Polarity ± | | 53 | General Unipolar 2 |
+| 8 | 定数 -1.0 | | 30 | Osc 1 Pitch Mod Amt | | 52 | General Unipolar 1 |
+| 9 | LFO 1 Output ± | | 31 | Osc 1 Pitch Mod Polarity ± | | 53 | General Unipolar 2 |
 | 10 | EG 1 Output ± | | 32 | Filter 1 Cutoff | | 54 | General Unipolar 3 |
 | 11 | Osc 1 Output ± | | 33 | Filter 1 Resonance | | 55 | General Unipolar 4 |
 | 12 | Filter 1 Output ± | | 34 | Filter 1 Gain | | 56 | General Bipolar 1 ± |
@@ -496,7 +496,7 @@ Note Pitch、Note Gate、Pitch Bend の 3 つは鍵盤がバスに載せるも�
 モジュレーション入力をここへ向ければアンプはフルレベルのままです。シグナル 0 と 1 はユニポーラの、
 シグナル 7 と 2 はバイポーラのパラメータのレンジの両端なので、パラメータをそこに固定するのに使えます。
 シグナル 2 はユニポーラのつまみの中央でもあります。シグナル 3 はフルスケールの 5 分の 1 で、シグナル 6 は
-その負の値です。シグナル 4 はデフォルトのパッチが Osc 1 Mod Polarity に与える値で、LFO をビブラートの深さ
+その負の値です。シグナル 4 はデフォルトのパッチが Osc 1 Pitch Mod Polarity に与える値で、LFO をビブラートの深さ
 まで絞ります。シグナル 5 はその負の値です。ミキサーの 2 番目の入力に定数を置けば、信号を 2 種類の間で
 ずらせます。-0.5 なら片側にしか振れない信号を正負どちらにも振れるものへ、+0.5 ならその逆です。
 
@@ -524,16 +524,16 @@ Mod Amt をそのまま通し、0.0 (CC 64) で無効にし、-0.5 (CC 4) で反
 を指させているので、どちらを回してもかまいません。一方向の深さなら Mod Amt、0 をまたぐ深さなら
 Mod Polarity です。
 
-Osc 1 Mod Amt はオフセットではなく深さで、ピッチの全域に届きます。最大にすると、バイポーラのソースがピッチ
+Osc 1 Pitch Mod Amt はオフセットではなく深さで、ピッチの全域に届きます。最大にすると、バイポーラのソースがピッチ
 を 5 オクターブ上下に振ります。ビブラートのつまみとしては CC 1 ステップが 50 セントと粗いので、デフォルト
-のパッチでは Osc 1 Mod Polarity で LFO を 5 分の 1 に絞っています。そこでは半音のビブラートが CC 14、つまみの
+のパッチでは Osc 1 Pitch Mod Polarity で LFO を 5 分の 1 に絞っています。そこでは半音のビブラートが CC 14、つまみの
 上端で 1 オクターブです。
 
 Osc 1 Pulse Width は、モーフを作る 2 つのノコギリ波のうち 2 つ目をずらす量で、0.0 (CC 4) の半周期から
 1.0 (CC 124) の 1 周期に向かってずれます。Osc 1 Wave の矩形波側の端では、CC 4 でパルス幅 50%、CC 64 で
 25%、CC 124 で 0%（無音）です。CC は PRA32-U2 の Osc 1 Shape と同じ 19 です。パルス幅は Osc 1 PW Mod In
-が PW Mod Amt (CC 103) と PW Mod Polarity の積だけ動かします。Mod In、Mod Amt、Mod Polarity がピッチを
-動かすのと同じ仕組みです。モジュレーション 1 単位がパルス幅のレンジ全体なので、PW Mod Amt を最大にすると、
+が PW Mod Amt (CC 103) と PW Mod Polarity の積だけ動かします。Pitch Mod In、Pitch Mod Amt、
+Pitch Mod Polarity がピッチを動かすのと同じ仕組みです。モジュレーション 1 単位がパルス幅のレンジ全体なので、PW Mod Amt を最大にすると、
 デフォルトのパッチでつながっている LFO がパルス幅をレンジの半分ずつ上下に振ります。Pulse Width が CC 64
 なら 50% からほぼ 0% までです。モジュレーションを足したパルス幅は 0.0〜1.0 に丸められます。
 
@@ -590,7 +590,7 @@ Slew 1 Time はユニポーラで、1/120 刻み、1 ステップで時間が半
 
 #### 例
 
-- ビブラートはデフォルトで結線済みです。LFO がオシレータのモジュレーション入力に直接届くので、CC 13 で
+- ビブラートはデフォルトで結線済みです。LFO がオシレータのピッチ・モジュレーション入力に直接届くので、CC 13 で
   深さ、CC 3 でレートを決められます。CC 99 = 2, CC 98 = 1, CC 6 = 51 で LFO 1 Level を General Mod Wheel
   から取るようにすれば、CC 13 で決めた深さまでホイールでビブラートを掛けられます
 - フィルタのカットオフをノートのピッチに追従させる（キーボードトラッキング）: CC 99 = 1, CC 98 = 4,
@@ -609,7 +609,7 @@ Slew 1 Time はユニポーラで、1/120 刻み、1 ステップで時間が半
 - ノートの出だしでエンベロープがフィルタをより強く駆動する: CC 99 = 2, CC 98 = 15, CC 6 = 10 で、フィルタの
   入力レベルが無音からつまみの上端まで上がって戻ります
 - ピッチを LFO ではなくエンベロープで動かす: CC 99 = 1, CC 98 = 2, CC 6 = 10 で LFO の代わりにエンベロープ
-  をオシレータのモジュレーション入力に置き、CC 99 = 2, CC 98 = 12, CC 6 = 2 で Osc 1 Mod Polarity を
+  をオシレータのピッチ・モジュレーション入力に置き、CC 99 = 2, CC 98 = 12, CC 6 = 2 で Osc 1 Pitch Mod Polarity を
   LFO のビブラート用の深さから +0.5 に戻して、あとは CC 13 で深さを決めます。この経路ではエンベロープを
   絞るものがないので、CC 5 で半音、CC 16 で 1 オクターブです
 - ポルタメントはデフォルトで結線済みです。Note Pitch が Slew 1 を通ってオシレータに届くので、CC 5 で時間を
@@ -625,7 +625,7 @@ Slew 1 Time はユニポーラで、1/120 刻み、1 ステップで時間が半
 - モジュレーション入力を通して、ピッチを両方向に曲げる CC。Mixer 1 はオシレータより前を走り、空いて
   います: CC 99 = 1, CC 98 = 7, CC 6 = 32 でフィルタのカットオフのコントロールスロットを 1 番目の入力に、
   CC 98 = 8, CC 6 = 7 で定数 -0.5 を 2 番目の入力に置き、CC 98 = 2, CC 6 = 14 で LFO の代わりに Mixer 1 を
-  オシレータのモジュレーション入力に向け、CC 99 = 2, CC 98 = 12, CC 6 = 2 で Osc 1 Mod Polarity を +0.5
+  オシレータのピッチ・モジュレーション入力に向け、CC 99 = 2, CC 98 = 12, CC 6 = 2 で Osc 1 Pitch Mod Polarity を +0.5
   に戻します。スロットはユニポーラなので、この定数が LFO が 0 を中心と
   するのと同じく CC 64 を中心にします。CC 74 は CC 13 の許す範囲でノートの上下にピッチを曲げるように
   なります。CC 6 で上下に半音、CC 28 で 1 オクターブです

@@ -23,7 +23,7 @@
 | Pitch Bend                    | x             | o             | Bipolar, routable as a signal        |
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Control                    20 | x             | o             | Osc Wave (Saw to Square)             |
-| Change                     13 | x             | o             | Osc Mod Amt                          |
+| Change                     13 | x             | o             | Osc Pitch Mod Amt                    |
 |                            86 | x             | o             | Osc Coarse Tune (+-5 Octaves)        |
 |                            70 | x             | o             | Osc Fine Tune (+-60 Cents)           |
 |                            19 | x             | o             | Osc Pulse Width (50% to 0%)          |

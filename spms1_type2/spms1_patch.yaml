@@ -77,8 +77,8 @@ signals:
   - { key: OSC_1_WAVEFORM,        id: 27, control: OSC_1_WAVEFORM }
   - { key: OSC_1_COARSE_TUNE,     id: 28, control: OSC_1_COARSE_TUNE }
   - { key: OSC_1_FINE_TUNE,       id: 29, control: OSC_1_FINE_TUNE }
-  - { key: OSC_1_MOD_AMOUNT,      id: 30, control: OSC_1_MOD_AMOUNT }
-  - { key: OSC_1_MOD_POLARITY,    id: 31, control: OSC_1_MOD_POLARITY }
+  - { key: OSC_1_PITCH_MOD_AMOUNT,   id: 30, control: OSC_1_PITCH_MOD_AMOUNT }
+  - { key: OSC_1_PITCH_MOD_POLARITY, id: 31, control: OSC_1_PITCH_MOD_POLARITY }
   - { key: FILTER_1_CUTOFF,       id: 32, control: FILTER_1_CUTOFF }
   - { key: FILTER_1_RESONANCE,    id: 33, control: FILTER_1_RESONANCE }
   - { key: FILTER_1_GAIN,         id: 34, control: FILTER_1_GAIN }
@@ -127,7 +127,7 @@ signals:
 inputs:
   - { entry: 0,  module: ENV_GEN_1, key: GATE,     label: Gate,    name: Gate,       source: GATE }
   - { entry: 1,  module: OSC_1,     key: PITCH,    label: Pitch,   name: Pitch,      source: SLEW_1_OUTPUT }
-  - { entry: 2,  module: OSC_1,     key: MOD,      label: Mod,     name: Mod In,     source: LFO_1_OUTPUT }
+  - { entry: 2,  module: OSC_1,     key: PITCH_MOD, label: Pitch Mod, name: Pitch Mod In, source: LFO_1_OUTPUT }
   - { entry: 3,  module: FILTER_1,  key: AUDIO,    label: Audio,   name: Audio In,   source: OSC_1_OUTPUT }
   - { entry: 4,  module: FILTER_1,  key: MOD,      label: Mod,     name: Mod In,     source: ENV_GEN_1_OUTPUT }
   - { entry: 5,  module: AMP_1,     key: AUDIO,    label: Audio,   name: Audio In,   source: FILTER_1_OUTPUT }
@@ -159,8 +159,8 @@ controls:
   - { entry: 8,  module: OSC_1,     key: WAVEFORM,     label: Wave,         cc: 20,  value: 4 }
   - { entry: 9,  module: OSC_1,     key: COARSE_TUNE,  label: Coarse Tune,  cc: 86,  value: 64, bipolar: true }
   - { entry: 10, module: OSC_1,     key: FINE_TUNE,    label: Fine Tune,    cc: 70,  value: 64, bipolar: true }
-  - { entry: 11, module: OSC_1,     key: MOD_AMOUNT,   label: Mod Amt,      cc: 13,  value: 4 }
-  - { entry: 12, module: OSC_1,     key: MOD_POLARITY, label: Mod Polarity, cc: 0,   value: 124, source: POINT_ONE, bipolar: true }
+  - { entry: 11, module: OSC_1,     key: PITCH_MOD_AMOUNT,   label: Pitch Mod Amt,      cc: 13,  value: 4 }
+  - { entry: 12, module: OSC_1,     key: PITCH_MOD_POLARITY, label: Pitch Mod Polarity, cc: 0,   value: 124, source: POINT_ONE, bipolar: true }
   - { entry: 13, module: FILTER_1,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 100 }
   - { entry: 14, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 94 }
   - { entry: 15, module: FILTER_1,  key: GAIN,         label: Gain,         cc: 112, value: 64 }
