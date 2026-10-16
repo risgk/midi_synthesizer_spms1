@@ -1,6 +1,6 @@
-# Writes what the sketch reads from spms1_patch.yaml: spms1_patch.rb whole, the parts of
+# Writes what the sketch reads from spms1_patch.yaml: spms1/spms1_patch.rb whole, the parts of
 # spms1_editor.html, README.md and README.ja.md between their "patch_gen" markers, and the module
-# ids and output slots of the dispatch in spms1_main.rb.
+# ids and output slots of the dispatch in spms1/spms1_main.rb.
 #
 #   ruby patch_gen/spms1_patch_gen.rb [--check]
 #
@@ -312,8 +312,8 @@ def replace_block(content, file, name, text)
 end
 
 outputs = {}
-outputs['spms1_patch.rb'] = patch_rb
-outputs['spms1_main.rb'] = main_rb(File.read(File.join(DIR, 'spms1_main.rb')))
+outputs['spms1/spms1_patch.rb'] = patch_rb
+outputs['spms1/spms1_main.rb'] = main_rb(File.read(File.join(DIR, 'spms1/spms1_main.rb')))
 editor = File.read(File.join(DIR, 'spms1_editor.html'))
 outputs['spms1_editor.html'] = replace_block(editor, 'spms1_editor.html', 'spec', editor_js)
 { 'README.md' => false, 'README.ja.md' => true }.each do |file, ja|

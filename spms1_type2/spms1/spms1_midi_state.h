@@ -2,7 +2,7 @@
  * MIDI Synthesizer SPMS-1 (type-2): the MIDI state the synth reads through ffi_func, and the
  * handlers that fill it
  *
- * Included once per program, by spms1_type2.ino (inside its extern "C") and by the hosts that stand
+ * Included once per program, by spms1.ino (inside its extern "C") and by the hosts that stand
  * in for it: sim_spinel, sim_render and web. They all keep the MIDI the same way, so a change here
  * reaches the device and every simulator at once. sim_cruby keeps its own copy, in Ruby.
  *

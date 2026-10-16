@@ -3,11 +3,11 @@
 # Every number a patch is made of -- module ids, bus slots, NRPN entries -- and the default patch,
 # in one place. patch_gen/spms1_patch_gen.rb writes what the rest of the sketch reads from here:
 #
-#   spms1_patch.rb      the constants and the default patch, for spms1_main.rb
-#   spms1_editor.html   the tables of the editor, between its "patch_gen" markers
-#   README.md           the NRPN tables, between the "patch_gen" markers, and README.ja.md likewise
-#   spms1_main.rb       the module ids and output slots of the dispatch, each literal marked with
-#                       its constant's name (`# MODULE_<key>`, `# SIGNAL_<key>`)
+#   spms1/spms1_patch.rb  the constants and the default patch, for spms1_main.rb
+#   spms1_editor.html     the tables of the editor, between its "patch_gen" markers
+#   README.md             the NRPN tables, between the "patch_gen" markers, and README.ja.md likewise
+#   spms1/spms1_main.rb   the module ids and output slots of the dispatch, each literal marked with
+#                         its constant's name (`# MODULE_<key>`, `# SIGNAL_<key>`)
 #
 # Run `ruby patch_gen/spms1_patch_gen.rb` after a change here, and commit what it writes;
 # `--check` says whether that is needed, as the GitHub Actions workflow does.

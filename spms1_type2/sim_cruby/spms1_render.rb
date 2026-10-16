@@ -100,4 +100,4 @@ Spms1::C.patch = patch
 Spms1::C.events = events
 Spms1::C.total_frames = [(options[:seconds] * 48000.0).round, 1].max
 Spms1::C.out_path = options[:out]
-load File.join(__dir__, '..', 'spms1_main.rb')
+load File.join(__dir__, '..', 'spms1', 'spms1_main.rb')

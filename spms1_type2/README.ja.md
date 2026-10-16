@@ -43,6 +43,8 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.3
 ------------------------
 
 - [Arduino IDE](https://www.arduino.cc/en/software)
+    - スケッチは "spms1" フォルダです。"spms1/spms1.ino" を開いてください。エディタ、README、ツール類は
+      その外側のこのフォルダにあります
 - Arduino-Pico = Raspberry Pi Pico/RP2040/RP2350 (by Earle F. Philhower, III) コア
     - 追加のボードマネージャ URL: <https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json>
     - このスケッチはバージョン 6.2.0 で動作確認しています: <https://github.com/earlephilhower/arduino-pico/releases/tag/6.2.0>
@@ -58,14 +60,14 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.3
       `#define main __attribute__((section(".time_critical"), flatten)) Spms1_main` を持っており、改名と
       シンセ本体の RAM 配置を同時に行います。手で改名すると、このマクロが一致しなく
       なって属性が付かず、本体が flash から実行されます
-    - "spms1_main.c" は `spinel spms1_main.rb -c --rbs sig` で生成します。"sig" の型シードが
-      フィルタの状態とパラメータのスムージングをボックス化させずに保ちます。必要な理由は
-      "sig/spms1_filter.rbs" と "sig/spms1_dsp.rbs" にあります
+    - "spms1_main.c" は "spms1" で `spinel spms1_main.rb -c --rbs sig` を実行して生成します。"spms1/sig" の
+      型シードがフィルタの状態とパラメータのスムージングをボックス化させずに保ちます。必要な理由は
+      "spms1/sig/spms1_filter.rbs" と "spms1/sig/spms1_dsp.rbs" にあります
 - Ruby (CRuby): パッチの番号や初期パッチを変えるとき。これらは "spms1_patch.yaml" にまとめてあり、
-  `ruby patch_gen/spms1_patch_gen.rb` が "spms1_patch.rb" ("spms1_main.rb" が読み込みます)、
-  "spms1_editor.html" のテーブル、この README と "README.md" の NRPN の表、"spms1_main.rb" のディスパッチの
-  モジュール ID と出力先スロット (定数名を添えたリテラル) に書き出します。実行したあと、
-  "spms1_main.c" を生成し直してください。`--check` は、ファイルが最新かどうかを調べるだけです
+  `ruby patch_gen/spms1_patch_gen.rb` が "spms1/spms1_patch.rb" ("spms1/spms1_main.rb" が読み込みます)、
+  "spms1_editor.html" のテーブル、この README と "README.md" の NRPN の表、"spms1/spms1_main.rb" の
+  ディスパッチのモジュール ID と出力先スロット (定数名を添えたリテラル) に書き出します。実行したあと、
+  "spms1/spms1_main.c" を生成し直してください。`--check` は、ファイルが最新かどうかを調べるだけです
 
 
 使い方
@@ -73,9 +75,9 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.3
 
 ### ビルド済みバイナリ
 
-- "bin" フォルダの "spms1_type2_i2s.ino.uf2" は Raspberry Pi Pico 2 と、Pimoroni Pico Audio Pack、
+- "bin" フォルダの "spms1_i2s.ino.uf2" は Raspberry Pi Pico 2 と、Pimoroni Pico Audio Pack、
   Adafruit PCM5102 I2S DAC、または GY-PCM5102 用です
-- "bin" フォルダの "spms1_type2_pwm_audio.ino.uf2" は Raspberry Pi Pico 2 と PWM Audio 出力用で、L は GP28、R は GP27 でビルドされています
+- "bin" フォルダの "spms1_pwm_audio.ino.uf2" は Raspberry Pi Pico 2 と PWM Audio 出力用で、L は GP28、R は GP27 でビルドされています
 
 
 ### Web エディタ
@@ -736,13 +738,13 @@ C のホスト ("sim_spinel"、"sim_render"、"web" の SPMS-1 Web) は、スケ
 試していません (Linux では、sim_spinel を MIDI デバイスの代わりの FIFO と、音声用の ALSA の file
 プラグインで一度動かしました)。
 
-- Spinel 出力 (実験的): "sim_spinel" -- このフォルダの "spms1_main.c" とランタイムを、変更せずに Windows、macOS、
+- Spinel 出力 (実験的): "sim_spinel" -- "spms1" の "spms1_main.c" とランタイムを、変更せずに Windows、macOS、
   Linux 向けにビルドし、リアルタイムで動かします。音声は PortAudio で出力し、MIDI は WinMM、CoreMIDI、
   または ALSA の raw MIDI デバイス ("/dev/snd/midiC*D*") で受けます。`sh sim_spinel/build.sh` でビルドし
   (Windows は Git Bash 上の MinGW gcc、macOS は clang、Linux は cc)、
   `build/sim_spinel/spms1_sim --midi-in NAME` で起動します。`--list` で MIDI 入力の一覧を表示します
     - ビルドの最初に、PATH 上、Windows では WSL の中にある Spinel で "spms1_main.c" を生成し直します。
-      その際 "sig" の型シードを渡します。`--no-spinel` を付けるか、Spinel が見つからなければ、
+      その際 "spms1/sig" の型シードを渡します。`--no-spinel` を付けるか、Spinel が見つからなければ、
       今ある "spms1_main.c" をビルドします
     - PortAudio は実行時に読み込みます。PortAudio プロジェクトの配布はソースのみなので、Windows では
       RubyInstaller の MSYS2 に `ridk exec pacman -S mingw-w64-ucrt-x86_64-portaudio` で入れ
@@ -793,7 +795,7 @@ C のホスト ("sim_spinel"、"sim_render"、"web" の SPMS-1 Web) は、スケ
 "../.github/workflows/spms1-type2.yml" の "SPMS-1 (type-2) Build (UF2 and Web)" を手動で実行します
 (リリース時など、Actions タブの "Run workflow" で)。毎回、以下をすべて行います:
 
-- UF2: "spms1_type2.ino" を Arduino-Pico 6.2.0 で PWM Audio 版と I2S 版にコンパイルし、UF2 ファイルを
+- UF2: "spms1/spms1.ino" を Arduino-Pico 6.2.0 で PWM Audio 版と I2S 版にコンパイルし、UF2 ファイルを
   成果物 (artifact) として残します
 - SPMS-1 Web: "spms1_web_synth.js" をビルド・テストし、成果物として残します
 - シミュレーター: "sim_spinel" と "sim_render" を Linux、macOS、Windows でビルドしてレンダリングし、
@@ -808,7 +810,7 @@ C のホスト ("sim_spinel"、"sim_render"、"web" の SPMS-1 Web) は、スケ
 
 ### Spinel の更新
 
-このフォルダのランタイムのファイルは、上で指定したリリースの Spinel の `lib` (と `lib/regexp`) のすべてです。
+"spms1" のランタイムのファイルは、上で指定したリリースの Spinel の `lib` (と `lib/regexp`) のすべてです。
 MCU 向けの変更は 2 か所にまとめてあります:
 
 - "spinel_rt_mcu_head.h"、"spinel_rt_mcu_libm.h"、"spinel_rt_mcu_cold.h": MCU 向けに足すもの --
@@ -886,7 +888,7 @@ Arduino-Pico コアのツールが必要です。動作を確認しているの�
 
 サンプル単位の処理に手を入れたら、書き込む前にコンパイラが何を吐いたか見る価値があります。
 Ruby でブランチレスに書いても、バイナリがブランチレスになるとは限りません。決めるのは GCC で、
-その判断は関数全体に依存します。スケッチのフォルダで、
+その判断は関数全体に依存します。スケッチのフォルダ "spms1" で、
 Spinel の出力を単体でコンパイルします。
 
 ```
@@ -923,7 +925,7 @@ MIDI Synthesizer SPMS-1 (type-2) by ISGK Instruments (Ryo Ishigaki) is marked wi
 To view a copy of this license, visit https://creativecommons.org/publicdomain/zero/1.0/
 ```
 
-- 対象ファイル: `spms1_*.*`
+- 対象ファイル: `spms1_*.*`, `spms1/spms1.ino`, `spms1/spms1_*.*`
 
 
 Spinel のライセンス
@@ -952,5 +954,5 @@ DEALINGS IN THE SOFTWARE.
 ```
 
 - ベースリリース: 2026.09.12 <https://github.com/matz/spinel/tree/2026.09.12>
-- 対象ファイル: `spinel_rt*.h*`, `mruby_shim.h*`, `sp_*.*`, `re_*.*`, `spinel_mcu/*`
+- 対象ファイル: `spms1/spinel_rt*.h*`, `spms1/mruby_shim.h*`, `spms1/sp_*.*`, `spms1/re_*.*`, `spinel_mcu/*`
     - 注: ランタイムの一部のファイルは、MCU 向けに ISGK Instruments (Ryo Ishigaki) が変更しています

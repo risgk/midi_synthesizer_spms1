@@ -81,8 +81,8 @@ node spms1_web_test.js
 - GitHub Actions: "SPMS-1 (type-2) Build (UF2 and Web)" in "../../.github/workflows/spms1-type2.yml"
   builds and tests "spms1_web_synth.js" (and commits it with "commit_package")
 - The source files
-    - "spms1_web_main.c": the C API for the AudioWorkletProcessor, standing in for "spms1_type2.ino"
-      (the MIDI tables and handlers are the sketch's own "../spms1_midi_state.h")
+    - "spms1_web_main.c": the C API for the AudioWorkletProcessor, standing in for "spms1.ino"
+      (the MIDI tables and handlers are the sketch's own "../spms1/spms1_midi_state.h")
     - "spms1_web_compat.h": force-included ahead of the Spinel files, as "../sim_spinel/host_compat.h" is in the PC build
     - "spms1_web_synth_processor.js": the AudioWorkletProcessor (runs the WebAssembly)
     - "spms1_web_synth_main.js": the main thread part (the virtual MIDI output for the editor)

@@ -2,7 +2,7 @@
  * MIDI Synthesizer SPMS-1 (type-2) PC simulator
  *
  * Runs spms1_main.c, the Spinel output the sketch runs, on Windows, macOS or Linux. This file
- * stands in for spms1_type2.ino: the MIDI tables and handlers are the sketch's, audio goes out
+ * stands in for spms1.ino: the MIDI tables and handlers are the sketch's, audio goes out
  * through PortAudio, loaded at run time, and MIDI comes in through WinMM, CoreMIDI, or the ALSA raw
  * MIDI devices (/dev/snd/midiC*D*).
  *

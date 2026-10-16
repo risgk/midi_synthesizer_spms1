@@ -2,7 +2,7 @@
  * MIDI Synthesizer SPMS-1 (type-2) offline renderer
  *
  * Runs spms1_main.c, the Spinel output the sketch runs, faster than real time and writes what it
- * puts out to a WAV file. This file stands in for spms1_type2.ino: the MIDI tables and handlers are
+ * puts out to a WAV file. This file stands in for spms1.ino: the MIDI tables and handlers are
  * the sketch's, and the MIDI comes from a patch and a score instead of a cable. The whole synth
  * runs -- the signals bus, the run order, the NRPN table and the CC assignments -- so a patch is
  * heard as the device would play it.

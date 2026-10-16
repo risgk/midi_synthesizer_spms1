@@ -53,7 +53,7 @@ module Spms1
       def set_audio_buffer_words(v) = (@audio_buffer_words = v)
       def get_audio_buffer_words = @audio_buffer_words
 
-      # The handlers of spms1_type2.ino, as the MIDI library calls them: a note-on of velocity 0
+      # The handlers of spms1.ino, as the MIDI library calls them: a note-on of velocity 0
       # is a note-off.
       def handle_midi_message(status, d1, d2)
         ch = status & 0x0F

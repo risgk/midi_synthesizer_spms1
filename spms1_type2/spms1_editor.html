@@ -2472,7 +2472,7 @@
   }
 
   // Follows NRPN edits arriving at MIDI In by the rules of handle_midi_nrpn_cc in
-  // spms1_type2.ino, so the patch shown stays the one the synth was passed.
+  // spms1.ino, so the patch shown stays the one the synth was passed.
   const nrpnSelect = { msb: 0, lsb: 0, selected: false };
 
   function receiveNRPN(cc, value) {

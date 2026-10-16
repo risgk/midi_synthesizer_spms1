@@ -44,6 +44,8 @@ Required Software for Modification
 ----------------------------------
 
 - [Arduino IDE](https://www.arduino.cc/en/software)
+    - The sketch is the "spms1" folder: open "spms1/spms1.ino". The editor, the READMEs and the
+      tools stay in this folder, outside it
 - Arduino-Pico = Raspberry Pi Pico/RP2040/RP2350 (by Earle F. Philhower, III) core
     - Additional Board Manager URL: <https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json>
     - This sketch is tested with version 6.2.0: <https://github.com/earlephilhower/arduino-pico/releases/tag/6.2.0>
@@ -58,14 +60,15 @@ Required Software for Modification
       included at the top of "spinel_rt.h", carries `#define main __attribute__((section(".time_critical"), flatten)) Spms1_main`,
       which renames it and puts the synth core in RAM at the same time. Renaming it by hand
       instead leaves the macro with nothing to match, and the core runs from flash
-    - "spms1_main.c" is generated with `spinel spms1_main.rb -c --rbs sig`. The type seeds in "sig"
-      keep the filter states and the parameter smoothing unboxed; "sig/spms1_filter.rbs" and
-      "sig/spms1_dsp.rbs" say why they are needed
+    - "spms1_main.c" is generated in "spms1" with `spinel spms1_main.rb -c --rbs sig`. The type seeds
+      in "spms1/sig" keep the filter states and the parameter smoothing unboxed;
+      "spms1/sig/spms1_filter.rbs" and "spms1/sig/spms1_dsp.rbs" say why they are needed
 - Ruby (CRuby), to change the patch's numbers or the default patch: they are kept in "spms1_patch.yaml",
-  and `ruby patch_gen/spms1_patch_gen.rb` writes them out to "spms1_patch.rb" (read by "spms1_main.rb"),
-  the tables of "spms1_editor.html", the NRPN tables of this README and "README.ja.md", and the module
-  ids and output slots of the dispatch in "spms1_main.rb" (literals, each marked with its constant's
-  name). Run it, then regenerate "spms1_main.c"; `--check` only says whether the files are up to date
+  and `ruby patch_gen/spms1_patch_gen.rb` writes them out to "spms1/spms1_patch.rb" (read by
+  "spms1/spms1_main.rb"), the tables of "spms1_editor.html", the NRPN tables of this README and
+  "README.ja.md", and the module ids and output slots of the dispatch in "spms1/spms1_main.rb"
+  (literals, each marked with its constant's name). Run it, then regenerate "spms1/spms1_main.c";
+  `--check` only says whether the files are up to date
 
 
 Usage
@@ -73,9 +76,9 @@ Usage
 
 ### Prebuilt Binary
 
-- "spms1_type2_i2s.ino.uf2" (in the "bin" folder) is for Raspberry Pi Pico 2 and Pimoroni Pico Audio Pack,
+- "spms1_i2s.ino.uf2" (in the "bin" folder) is for Raspberry Pi Pico 2 and Pimoroni Pico Audio Pack,
   Adafruit PCM5102 I2S DAC, or GY-PCM5102
-- "spms1_type2_pwm_audio.ino.uf2" (in the "bin" folder) is for Raspberry Pi Pico 2 with PWM Audio output, built with L on GP28 and R on GP27
+- "spms1_pwm_audio.ino.uf2" (in the "bin" folder) is for Raspberry Pi Pico 2 with PWM Audio output, built with L on GP28 and R on GP27
 
 
 ### Web Editor
@@ -768,13 +771,13 @@ the offline renders there, and compares them with CRuby on Linux; neither is tri
 (on Linux, sim_spinel was run once with a FIFO standing in for the MIDI device and ALSA's file
 plugin for the audio).
 
-- Spinel output (experimental): "sim_spinel" -- builds "spms1_main.c" and the runtime in this folder, unmodified,
+- Spinel output (experimental): "sim_spinel" -- builds "spms1_main.c" and the runtime in "spms1", unmodified,
   for Windows, macOS or Linux and runs it in real time, with audio out through PortAudio and MIDI in
   through WinMM, CoreMIDI, or the ALSA raw MIDI devices ("/dev/snd/midiC*D*"). Build with
   `sh sim_spinel/build.sh` (MinGW gcc in Git Bash on Windows, clang on macOS, cc on Linux), then run
   `build/sim_spinel/spms1_sim --midi-in NAME`; `--list` shows the MIDI inputs
     - The build first regenerates "spms1_main.c" with Spinel, found on the PATH or, on Windows,
-      inside WSL, passing it the type seeds in "sig". `--no-spinel`, or no Spinel to be found,
+      inside WSL, passing it the type seeds in "spms1/sig". `--no-spinel`, or no Spinel to be found,
       builds the one already here
     - PortAudio is loaded at run time. The PortAudio project releases source only; on Windows,
       install it into RubyInstaller's MSYS2 with
@@ -825,7 +828,7 @@ plugin for the audio).
 "SPMS-1 (type-2) Build (UF2 and Web)" in "../.github/workflows/spms1-type2.yml", run by hand
 ("Run workflow" in the Actions tab, e.g. at a release); every run does all of the following:
 
-- UF2: compiles "spms1_type2.ino" for PWM Audio and I2S with Arduino-Pico 6.2.0, and keeps the
+- UF2: compiles "spms1/spms1.ino" for PWM Audio and I2S with Arduino-Pico 6.2.0, and keeps the
   UF2 files as an artifact
 - SPMS-1 Web: builds and tests "spms1_web_synth.js", and keeps it as an artifact
 - Simulators: builds "sim_spinel" and "sim_render" on Linux, macOS and Windows, renders, and compares
@@ -842,7 +845,7 @@ plugin for the audio).
 
 ### Updating Spinel
 
-The runtime files in this folder are all of Spinel's `lib` (and `lib/regexp`) of the release named
+The runtime files in "spms1" are all of Spinel's `lib` (and `lib/regexp`) of the release named
 above, with the changes for the MCU kept in two places:
 
 - "spinel_rt_mcu_head.h", "spinel_rt_mcu_libm.h" and "spinel_rt_mcu_cold.h": what the MCU adds -- the
@@ -927,7 +930,7 @@ Most of the patch would go away with a few build options in Spinel itself.
 What the compiler makes of a change to the per-sample path is worth looking at before flashing it,
 and "branchless in Ruby" does not mean branchless in the binary -- the decision is GCC's, and it
 depends on the whole function. Compile the
-Spinel output on its own, from the sketch folder:
+Spinel output on its own, from the sketch folder, "spms1":
 
 ```
 arm-none-eabi-gcc -c -g -mcpu=cortex-m33 -mthumb -march=armv8-m.main+fp+dsp -mfloat-abi=softfp -mcmse -std=gnu23 -Os -I. -o out.o spms1_main.c
@@ -965,7 +968,7 @@ MIDI Synthesizer SPMS-1 (type-2) by ISGK Instruments (Ryo Ishigaki) is marked wi
 To view a copy of this license, visit https://creativecommons.org/publicdomain/zero/1.0/
 ```
 
-- Target files: `spms1_*.*`
+- Target files: `spms1_*.*`, `spms1/spms1.ino`, `spms1/spms1_*.*`
 
 
 Spinel Licence
@@ -994,5 +997,5 @@ DEALINGS IN THE SOFTWARE.
 ```
 
 - Base Release: 2026.09.12 <https://github.com/matz/spinel/tree/2026.09.12>
-- Target files: `spinel_rt*.h*`, `mruby_shim.h*`, `sp_*.*`, `re_*.*`, `spinel_mcu/*`
+- Target files: `spms1/spinel_rt*.h*`, `spms1/mruby_shim.h*`, `spms1/sp_*.*`, `spms1/re_*.*`, `spinel_mcu/*`
     - Note: Some files for runtime are modified for MCU by ISGK Instruments (Ryo Ishigaki)
