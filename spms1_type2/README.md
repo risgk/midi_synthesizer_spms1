@@ -390,7 +390,7 @@ passes it through rather than muting it.
 | 0 | EG 1 Gate In | | 11 | Delay 1 Audio In R |
 | 1 | Osc 1 Mod 1 In | | 12 | Final Output L |
 | 2 | Osc 1 Mod 2 In | | 13 | Final Output R |
-| 3 | Filter 1 Audio In | | 14 | Pitch 1 In |
+| 3 | Filter 1 Audio In | | 14 | Pitch 1 Pitch In |
 | 4 | Filter 1 Mod 1 In | | 15 | Osc 1 PW Mod In |
 | 5 | Amp 1 Audio In | | 16 | LFO 1 Rate Mod In |
 | 6 | Amp 1 Mod In | | 17 | Filter 1 Mod 2 In |
@@ -410,7 +410,7 @@ nothing is held to a range on the way in, and what gets clamped is the value the
 oscillator's Mod 1 In, Mod 2 In and PW Mod In are Mod Ins too. A mixer adds without a ceiling, so a loud modulation pins its destination at one
 end rather than being trimmed on the way in. The amp is the exception, and holds its modulation
 input to -1.0 and +1.0: it is an attenuator, so a modulation may scale its gain down but never up.
-The chorus and the delay hold their audio inputs to the same one unit. Pitch 1 In takes anything,
+The chorus and the delay hold their audio inputs to the same one unit. Pitch 1 Pitch In takes anything,
 as a Mod In does, and puts out what it takes, glided, bent and transposed.
 
 The two sides of the final output are read separately, so either can be pointed anywhere; point

@@ -257,7 +257,7 @@ while true
   source_delay_1_audio_r   = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_AUDIO_R)
   source_output_l          = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OUTPUT_L)
   source_output_r          = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OUTPUT_R)
-  source_pitch_1_in         = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_IN)
+  source_pitch_1_pitch         = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_PITCH)
   source_pitch_1_bend     = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_BEND)
   source_osc_1_pw_mod      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PW_MOD)
   source_lfo_1_rate_mod         = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_RATE_MOD)
@@ -519,7 +519,7 @@ while true
         signals[17] = delay_1.output_l # SIGNAL_DELAY_1_OUTPUT_L
         signals[18] = delay_1.output_r # SIGNAL_DELAY_1_OUTPUT_R
       when 9 # MODULE_PITCH_1
-        signals[60] = pitch_1.process(signals[source_pitch_1_in], signals[source_pitch_1_bend]) # SIGNAL_PITCH_1_OUTPUT
+        signals[60] = pitch_1.process(signals[source_pitch_1_pitch], signals[source_pitch_1_bend]) # SIGNAL_PITCH_1_OUTPUT
       end
 
       slot += 1

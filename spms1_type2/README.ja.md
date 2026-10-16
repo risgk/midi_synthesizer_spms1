@@ -380,7 +380,7 @@ flowchart LR
 | 0 | EG 1 Gate In | | 11 | Delay 1 Audio In R |
 | 1 | Osc 1 Mod 1 In | | 12 | 最終出力 L |
 | 2 | Osc 1 Mod 2 In | | 13 | 最終出力 R |
-| 3 | Filter 1 Audio In | | 14 | Pitch 1 In |
+| 3 | Filter 1 Audio In | | 14 | Pitch 1 Pitch In |
 | 4 | Filter 1 Mod 1 In | | 15 | Osc 1 PW Mod In |
 | 5 | Amp 1 Audio In | | 16 | LFO 1 Rate Mod In |
 | 6 | Amp 1 Mod In | | 17 | Filter 1 Mod 2 In |
@@ -398,7 +398,7 @@ flowchart LR
 つまみの両端、ピッチは -0.5〜+0.5、パルス幅は 0.0〜1.0 に収まります。オシレータの Mod 1 In、Mod 2 In、PW Mod In も Mod In の一種です。ミキサーは上限なしで足し算をするので、大きすぎる変調は入口で
 削られるのではなく、行き先を端に貼り付かせます。アンプだけは例外で、Mod In を -1.0〜+1.0 でクランプします。
 アンプはアッテネーターなので、変調はゲインを下げられても上げられてはならないからです。コーラスとディレイ
-もオーディオ入力を同じく 1.0 に収めます。Pitch 1 の In は Mod In と同じく何でも受け取り、受け取ったものを
+もオーディオ入力を同じく 1.0 に収めます。Pitch 1 の Pitch In は Mod In と同じく何でも受け取り、受け取ったものを
 グライド、ベンド、移調して出すだけです。
 
 最終出力の左右は別々に読まれるので、どちらもどこへでも向けられます。両方を同じシグナルに向ければモノラル

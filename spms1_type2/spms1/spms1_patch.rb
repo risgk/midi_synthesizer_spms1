@@ -116,7 +116,7 @@ NRPN_SOURCE_DELAY_1_AUDIO_L = 138
 NRPN_SOURCE_DELAY_1_AUDIO_R = 139
 NRPN_SOURCE_OUTPUT_L        = 140
 NRPN_SOURCE_OUTPUT_R        = 141
-NRPN_SOURCE_PITCH_1_IN      = 142
+NRPN_SOURCE_PITCH_1_PITCH   = 142
 NRPN_SOURCE_OSC_1_PW_MOD    = 143
 NRPN_SOURCE_LFO_1_RATE_MOD  = 144
 NRPN_SOURCE_FILTER_1_MOD_2  = 145
@@ -263,7 +263,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_DELAY_1_AUDIO_R, SIGNAL_CHORUS_1_OUTPUT_R)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OUTPUT_L       , SIGNAL_DELAY_1_OUTPUT_L)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OUTPUT_R       , SIGNAL_DELAY_1_OUTPUT_R)
-  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_PITCH_1_IN     , SIGNAL_NOTE_PITCH)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_PITCH_1_PITCH  , SIGNAL_NOTE_PITCH)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_1_PW_MOD   , SIGNAL_LFO_1_OUTPUT)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_LFO_1_RATE_MOD , SIGNAL_NONE)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_MOD_2 , SIGNAL_LFO_1_OUTPUT)

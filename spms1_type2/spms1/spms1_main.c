@@ -999,7 +999,7 @@ static sp_int cst_NRPN_SOURCE_DELAY_1_AUDIO_L = 0;
 static sp_int cst_NRPN_SOURCE_DELAY_1_AUDIO_R = 0;
 static sp_int cst_NRPN_SOURCE_OUTPUT_L = 0;
 static sp_int cst_NRPN_SOURCE_OUTPUT_R = 0;
-static sp_int cst_NRPN_SOURCE_PITCH_1_IN = 0;
+static sp_int cst_NRPN_SOURCE_PITCH_1_PITCH = 0;
 static sp_int cst_NRPN_SOURCE_OSC_1_PW_MOD = 0;
 static sp_int cst_NRPN_SOURCE_LFO_1_RATE_MOD = 0;
 static sp_int cst_NRPN_SOURCE_FILTER_1_MOD_2 = 0;
@@ -3621,7 +3621,7 @@ static void sp_spms1_write_default_patch(sp_int lv_midi_ch) {
 #line 265 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_OUTPUT_R)), ((uint8_t)(cst_SIGNAL_DELAY_1_OUTPUT_R))), (sp_int)0);
 #line 266 "spms1_patch.rb"
-  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_IN)), ((uint8_t)(cst_SIGNAL_NOTE_PITCH))), (sp_int)0);
+  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_PITCH)), ((uint8_t)(cst_SIGNAL_NOTE_PITCH))), (sp_int)0);
 #line 267 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_PW_MOD)), ((uint8_t)(cst_SIGNAL_LFO_1_OUTPUT))), (sp_int)0);
 #line 268 "spms1_patch.rb"
@@ -3947,7 +3947,7 @@ int main(int argc,char**argv){
     sp_int lv_source_delay_1_audio_r = 0;
     sp_int lv_source_output_l = 0;
     sp_int lv_source_output_r = 0;
-    sp_int lv_source_pitch_1_in = 0;
+    sp_int lv_source_pitch_1_pitch = 0;
     sp_int lv_source_pitch_1_bend = 0;
     sp_int lv_source_osc_1_pw_mod = 0;
     sp_int lv_source_lfo_1_rate_mod = 0;
@@ -4550,7 +4550,7 @@ int main(int argc,char**argv){
 #line 118 "spms1_patch.rb"
   cst_NRPN_SOURCE_OUTPUT_R = 141LL;
 #line 119 "spms1_patch.rb"
-  cst_NRPN_SOURCE_PITCH_1_IN = 142LL;
+  cst_NRPN_SOURCE_PITCH_1_PITCH = 142LL;
 #line 120 "spms1_patch.rb"
   cst_NRPN_SOURCE_OSC_1_PW_MOD = 143LL;
 #line 121 "spms1_patch.rb"
@@ -4949,7 +4949,7 @@ int main(int argc,char**argv){
 #line 259 "spms1_main.rb"
     lv_source_output_r = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OUTPUT_R)))));
 #line 260 "spms1_main.rb"
-    lv_source_pitch_1_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_IN)))));
+    lv_source_pitch_1_pitch = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_PITCH)))));
 #line 261 "spms1_main.rb"
     lv_source_pitch_1_bend = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_BEND)))));
 #line 262 "spms1_main.rb"
@@ -5501,7 +5501,7 @@ int main(int argc,char**argv){
         case 9LL:
         {
 #line 522 "spms1_main.rb"
-          sp_float _t592 = sp_FloatArray_get(lv_signals, lv_source_pitch_1_in);
+          sp_float _t592 = sp_FloatArray_get(lv_signals, lv_source_pitch_1_pitch);
           sp_float _t593 = sp_FloatArray_get(lv_signals, lv_source_pitch_1_bend);
           sp_FloatArray_set(lv_signals, 60LL, sp_Pitch_process((sp_Pitch *)lv_pitch_1, _t592, _t593));
           break;

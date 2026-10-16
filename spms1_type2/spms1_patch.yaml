@@ -171,7 +171,7 @@ inputs:
   - { entry: 11, module: DELAY_1,     key: AUDIO_R,     label: Audio In R,     name: Audio In R,     source: CHORUS_1_OUTPUT_R }
   - { entry: 12,                      key: OUTPUT_L,    label: L,              name: Final Output L, name_ja: 最終出力 L, source: DELAY_1_OUTPUT_L }
   - { entry: 13,                      key: OUTPUT_R,    label: R,              name: Final Output R, name_ja: 最終出力 R, source: DELAY_1_OUTPUT_R }
-  - { entry: 14, module: PITCH_1,      key: IN,          label: In,             name: In,             source: NOTE_PITCH }
+  - { entry: 14, module: PITCH_1,      key: PITCH,       label: Pitch In,       name: Pitch In,       source: NOTE_PITCH }
   - { entry: 15, module: OSC_1,       key: PW_MOD,      label: PW Mod In,      name: PW Mod In,      source: LFO_1_OUTPUT }
   - { entry: 16, module: LFO_1,       key: RATE_MOD,    label: Rate Mod In,    name: Rate Mod In,    source: NONE }
   - { entry: 17, module: FILTER_1,    key: MOD_2,       label: Mod 2 In,       name: Mod 2 In,       source: LFO_1_OUTPUT }
