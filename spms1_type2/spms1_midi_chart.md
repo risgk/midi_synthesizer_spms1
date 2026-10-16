@@ -39,6 +39,7 @@
 |                            75 | x             | o             | EG Decay (Time)                      |
 |                            30 | x             | o             | EG Sustain (Level)                   |
 |                             3 | x             | o             | LFO Rate                             |
+|                           113 | x             | o             | LFO Level                            |
 |                            58 | x             | o             | Chorus Rate                          |
 |                            59 | x             | o             | Chorus Depth                         |
 |                            93 | x             | o             | Chorus Mix                           |
@@ -51,7 +52,7 @@
 |                            16 | x             | o             | General 1 (Unipolar and Bipolar)     |
 |                            17 | x             | o             | General 2 (Unipolar and Bipolar)     |
 |                            18 | x             | o             | General 3 (Unipolar and Bipolar)     |
-|                           113 | x             | o             | General 4 (Unipolar and Bipolar)     |
+|                           114 | x             | o             | General 4 (Unipolar and Bipolar)     |
 |                            99 | x             | o             | NRPN MSB                             |
 |                            98 | x             | o             | NRPN LSB                             |
 |                             6 | x             | o             | Data Entry MSB (NRPN value)          |

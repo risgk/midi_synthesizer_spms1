@@ -170,8 +170,9 @@ spms1_fill_constant_signals(signals)
 # A mixer's parameters have no CC, so the default patch points them at constants instead: full
 # level and a polarity of +0.5, which makes a mixer pass its input through rather than mute it.
 # Each modulation polarity has no CC either and reads +0.5, which leaves the amount in charge,
-# but for the pitch's. LFO 1 Level and EG 1 Level have no CC either and read 1.0, passing the LFO
-# and the envelope as they are. The chorus and the delay run last, after the amp: the chorus
+# but for the pitch's. LFO 1 Level is on CC 113 and powers up at 1.0, and the mod wheel on its Level
+# Mod In adds to it up to that top; EG 1 Level has no CC and reads 1.0, passing the envelope as it
+# is. The chorus and the delay run last, after the amp: the chorus
 # takes the mono amp and spreads it into a left and a right, the delay takes the two sides, and
 # its two outputs are what the final output's left and right read.
 spms1_write_default_patch(MIDI_CH)
@@ -258,7 +259,8 @@ while true
   source_slew_1_in         = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_SLEW_1_IN)
   source_slew_1_direct     = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_SLEW_1_DIRECT)
   source_osc_1_pw_mod      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PW_MOD)
-  source_lfo_1_mod         = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_MOD)
+  source_lfo_1_rate_mod         = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_RATE_MOD)
+  source_lfo_1_level_mod   = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_LEVEL_MOD)
 
   # Parameter sources. Read once per buffer rather than per sample: each destination smooths at
   # the control rate with a 2.67 ms time constant, which swallows the difference between feeding
@@ -295,8 +297,8 @@ while true
   source_osc_1_pulse_width     = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PULSE_WIDTH)
   source_osc_1_pw_mod_amt      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PW_MOD_AMT)
   source_osc_1_pw_mod_pol      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PW_MOD_POL)
-  source_lfo_1_mod_amt         = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_MOD_AMT)
-  source_lfo_1_mod_pol         = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_MOD_POL)
+  source_lfo_1_rate_mod_amt         = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_RATE_MOD_AMT)
+  source_lfo_1_rate_mod_pol         = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_RATE_MOD_POL)
   source_osc_1_mod_1_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_MOD_1_AMT)
   source_osc_1_mod_1_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_MOD_1_POL)
   source_filter_1_mod_2_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_2_AMT)
@@ -305,6 +307,8 @@ while true
   source_filter_1_mod_3_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_3_POL)
   source_slew_1_direct_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_SLEW_1_DIRECT_AMT)
   source_slew_1_direct_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_SLEW_1_DIRECT_POL)
+  source_lfo_1_level_mod_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_LEVEL_MOD_AMT)
+  source_lfo_1_level_mod_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_LEVEL_MOD_POL)
 
   # Which CC fills each control slot. The bus is the only thing downstream reads, so this is
   # where MIDI enters and the only place a CC number appears.
@@ -339,8 +343,8 @@ while true
   cc_osc_1_pulse_width     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_PULSE_WIDTH)
   cc_osc_1_pw_mod_amt      = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_PW_MOD_AMT)
   cc_osc_1_pw_mod_pol      = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_PW_MOD_POL)
-  cc_lfo_1_mod_amt         = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_MOD_AMT)
-  cc_lfo_1_mod_pol         = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_MOD_POL)
+  cc_lfo_1_rate_mod_amt         = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_RATE_MOD_AMT)
+  cc_lfo_1_rate_mod_pol         = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_RATE_MOD_POL)
   cc_osc_1_mod_1_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_MOD_1_AMT)
   cc_osc_1_mod_1_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_MOD_1_POL)
   cc_filter_1_mod_2_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_MOD_2_AMT)
@@ -349,6 +353,8 @@ while true
   cc_filter_1_mod_3_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_MOD_3_POL)
   cc_slew_1_direct_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_SLEW_1_DIRECT_AMT)
   cc_slew_1_direct_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_SLEW_1_DIRECT_POL)
+  cc_lfo_1_level_mod_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_LEVEL_MOD_AMT)
+  cc_lfo_1_level_mod_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_LEVEL_MOD_POL)
   cc_general_mod_wheel     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_MOD_WHEEL)
   cc_general_1             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_1)
   cc_general_2             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_2)
@@ -386,8 +392,8 @@ while true
   signals[SIGNAL_OSC_1_PULSE_WIDTH] = cc_or_zero(cc_osc_1_pulse_width, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_pulse_width)))
   signals[SIGNAL_OSC_1_PW_MOD_AMT] = cc_or_zero(cc_osc_1_pw_mod_amt, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_pw_mod_amt)))
   signals[SIGNAL_OSC_1_PW_MOD_POL] = cc_or_zero(cc_osc_1_pw_mod_pol, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_pw_mod_pol)))
-  signals[SIGNAL_LFO_1_MOD_AMT] = cc_or_zero(cc_lfo_1_mod_amt, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_mod_amt)))
-  signals[SIGNAL_LFO_1_MOD_POL] = cc_or_zero(cc_lfo_1_mod_pol, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_mod_pol)))
+  signals[SIGNAL_LFO_1_RATE_MOD_AMT] = cc_or_zero(cc_lfo_1_rate_mod_amt, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_rate_mod_amt)))
+  signals[SIGNAL_LFO_1_RATE_MOD_POL] = cc_or_zero(cc_lfo_1_rate_mod_pol, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_rate_mod_pol)))
   signals[SIGNAL_OSC_1_MOD_1_AMT] = cc_or_zero(cc_osc_1_mod_1_amt, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_mod_1_amt)))
   signals[SIGNAL_OSC_1_MOD_1_POL] = cc_or_zero(cc_osc_1_mod_1_pol, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_mod_1_pol)))
   signals[SIGNAL_FILTER_1_MOD_2_AMT] = cc_or_zero(cc_filter_1_mod_2_amt, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_mod_2_amt)))
@@ -396,6 +402,8 @@ while true
   signals[SIGNAL_FILTER_1_MOD_3_POL] = cc_or_zero(cc_filter_1_mod_3_pol, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_mod_3_pol)))
   signals[SIGNAL_SLEW_1_DIRECT_AMT] = cc_or_zero(cc_slew_1_direct_amt, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_slew_1_direct_amt)))
   signals[SIGNAL_SLEW_1_DIRECT_POL] = cc_or_zero(cc_slew_1_direct_pol, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_slew_1_direct_pol)))
+  signals[SIGNAL_LFO_1_LEVEL_MOD_AMT] = cc_or_zero(cc_lfo_1_level_mod_amt, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_level_mod_amt)))
+  signals[SIGNAL_LFO_1_LEVEL_MOD_POL] = cc_or_zero(cc_lfo_1_level_mod_pol, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_level_mod_pol)))
   signals[SIGNAL_GENERAL_MOD_WHEEL] = cc_or_zero(cc_general_mod_wheel, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_general_mod_wheel)))
   # Each General CC fills two slots, the same value taken both ways.
   general_1 = C.get_midi_cc_value(MIDI_CH, cc_general_1)
@@ -448,8 +456,10 @@ while true
   osc_1.set_pulse_width(signals[source_osc_1_pulse_width])
   osc_1.set_pw_modulation_amount(signals[source_osc_1_pw_mod_amt])
   osc_1.set_pw_modulation_polarity(signals[source_osc_1_pw_mod_pol])
-  lfo_1.set_modulation_amount(signals[source_lfo_1_mod_amt])
-  lfo_1.set_modulation_polarity(signals[source_lfo_1_mod_pol])
+  lfo_1.set_rate_modulation_amount(signals[source_lfo_1_rate_mod_amt])
+  lfo_1.set_rate_modulation_polarity(signals[source_lfo_1_rate_mod_pol])
+  lfo_1.set_level_modulation_amount(signals[source_lfo_1_level_mod_amt])
+  lfo_1.set_level_modulation_polarity(signals[source_lfo_1_level_mod_pol])
   osc_1.set_modulation_1_amount(signals[source_osc_1_mod_1_amt])
   osc_1.set_modulation_1_polarity(signals[source_osc_1_mod_1_pol])
 
@@ -474,7 +484,7 @@ while true
       # with active_count above another 4.4% (to 85.8k).
       case module_id
       when 1 # MODULE_LFO_1
-        signals[9] = lfo_1.process(signals[source_lfo_1_mod]) # SIGNAL_LFO_1_OUTPUT
+        signals[9] = lfo_1.process(signals[source_lfo_1_rate_mod], signals[source_lfo_1_level_mod]) # SIGNAL_LFO_1_OUTPUT
       when 2 # MODULE_EG_1
         signals[10] = eg_1.process(signals[source_eg_1_gate]) # SIGNAL_EG_1_OUTPUT
       when 3 # MODULE_OSC_1

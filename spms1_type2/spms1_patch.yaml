@@ -124,8 +124,8 @@ signals:
   - { key: FILTER_1_OUTPUT_HP, id: 66, module: FILTER_1, output: Out HP, label: Filter 1 Output HP, bipolar: true }
 
 
-  - { key: LFO_1_MOD_AMT,   id: 69, control: LFO_1_MOD_AMT }
-  - { key: LFO_1_MOD_POL, id: 70, control: LFO_1_MOD_POL }
+  - { key: LFO_1_RATE_MOD_AMT,   id: 69, control: LFO_1_RATE_MOD_AMT }
+  - { key: LFO_1_RATE_MOD_POL, id: 70, control: LFO_1_RATE_MOD_POL }
 
   - { key: OSC_1_MOD_1_AMT,   id: 71, control: OSC_1_MOD_1_AMT }
   - { key: OSC_1_MOD_1_POL, id: 72, control: OSC_1_MOD_1_POL }
@@ -141,6 +141,10 @@ signals:
   # Slew 1 Direct Amt and Pol came after Filter 1 Mod 3 Amt and Pol.
   - { key: SLEW_1_DIRECT_AMT,   id: 77, control: SLEW_1_DIRECT_AMT }
   - { key: SLEW_1_DIRECT_POL, id: 78, control: SLEW_1_DIRECT_POL }
+
+  # LFO 1 Level Mod Amt and Pol came after Slew 1 Direct Amt and Pol.
+  - { key: LFO_1_LEVEL_MOD_AMT, id: 79, control: LFO_1_LEVEL_MOD_AMT }
+  - { key: LFO_1_LEVEL_MOD_POL, id: 80, control: LFO_1_LEVEL_MOD_POL }
 
 # Module inputs, NRPN category 1, by entry: what feeds each one in the default patch (`source`, a
 # signal key). `label` is the editor's, on the module; `name` the README's, after the module's
@@ -162,10 +166,11 @@ inputs:
   - { entry: 13,                      key: OUTPUT_R,    label: R,              name: Final Output R, name_ja: 最終出力 R, source: DELAY_1_OUTPUT_R }
   - { entry: 14, module: SLEW_1,      key: IN,          label: In,             name: In,             source: NOTE_PITCH }
   - { entry: 15, module: OSC_1,       key: PW_MOD,      label: PW Mod In,      name: PW Mod In,      source: LFO_1_OUTPUT }
-  - { entry: 16, module: LFO_1,       key: MOD,         label: Mod In,         name: Mod In,         source: NONE }
+  - { entry: 16, module: LFO_1,       key: RATE_MOD,    label: Rate Mod In,    name: Rate Mod In,    source: NONE }
   - { entry: 17, module: FILTER_1,    key: MOD_2,       label: Mod 2 In,       name: Mod 2 In,       source: LFO_1_OUTPUT }
   - { entry: 18, module: FILTER_1,    key: MOD_3,       label: Mod 3 In,       name: Mod 3 In,       source: SLEW_1_OUTPUT }
   - { entry: 19, module: SLEW_1,      key: DIRECT,      label: Direct In,      name: Direct In,      source: PITCH_BEND }
+  - { entry: 20, module: LFO_1,       key: LEVEL_MOD,   label: Level Mod In,   name: Level Mod In,   source: GENERAL_MOD_WHEEL }
 
 # Controls, listed in the editor's order, each by its entry: a parameter is one entry of NRPN category 2 (where it takes its value) and
 # the same entry of category 3 (which CC fills its control slot); a General control is in
@@ -174,13 +179,15 @@ inputs:
 # to. A parameter takes its own control slot unless `source` (a signal key) says otherwise. Why the defaults are what they are is in spms1_main.rb, above the default patch.
 controls:
   - { entry: 0,  module: LFO_1,     key: RATE,         label: Rate,         cc: 3,   value: 64 }
-  # LFO 1 Mod Amt and Mod Pol, which move its rate, came after Amp 1's, so their entries
-  # follow theirs, but they are listed here, after Rate. Neither has a CC: the default patch points
-  # them at 1.0 and +0.5, a depth of 1.0, and leaves Mod In unrouted, so the default patch renders
-  # as before and routing a source to it is enough.
-  - { entry: 40, module: LFO_1,     key: MOD_AMT,   label: Mod Amt,      cc: 0,   value: 124, source: ONE }
-  - { entry: 41, module: LFO_1,     key: MOD_POL, label: Mod Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
-  - { entry: 1,  module: LFO_1,     key: LEVEL,        label: Level,        cc: 0,   source: ONE }
+  # LFO 1 Rate Mod Amt and Pol came after Amp 1's old modulation controls, and Level Mod Amt and
+  # Pol last of all, but each pair is listed after what it moves. None has a CC: the default patch
+  # points each at 1.0 and +0.5, a depth of 1.0. Rate Mod In is left unrouted, so routing a source
+  # to it is enough; Level Mod In takes the mod wheel, which adds to Level (CC 113) up to its top.
+  - { entry: 40, module: LFO_1,     key: RATE_MOD_AMT, label: Rate Mod Amt, cc: 0,   value: 124, source: ONE }
+  - { entry: 41, module: LFO_1,     key: RATE_MOD_POL, label: Rate Mod Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
+  - { entry: 1,  module: LFO_1,     key: LEVEL,        label: Level,        cc: 113, value: 124 }
+  - { entry: 50, module: LFO_1,     key: LEVEL_MOD_AMT, label: Level Mod Amt, cc: 0,  value: 124, source: ONE }
+  - { entry: 51, module: LFO_1,     key: LEVEL_MOD_POL, label: Level Mod Pol, cc: 0,  value: 124, source: HALF, bipolar: true }
   - { entry: 3,  module: EG_1,      key: ATTACK,       label: Attack,       cc: 73,  value: 4 }
   - { entry: 4,  module: EG_1,      key: DECAY,        label: Decay,        cc: 75,  value: 96 }
   - { entry: 5,  module: EG_1,      key: SUSTAIN,      label: Sustain,      cc: 30,  value: 124 }
@@ -240,7 +247,7 @@ controls:
   - { entry: 30, general: true, key: GENERAL_1,         label: "1",       cc: 16,  value: 64 }
   - { entry: 31, general: true, key: GENERAL_2,         label: "2",       cc: 17,  value: 64 }
   - { entry: 32, general: true, key: GENERAL_3,         label: "3",       cc: 18,  value: 64 }
-  - { entry: 33, general: true, key: GENERAL_4,         label: "4",       cc: 113, value: 64 }
+  - { entry: 33, general: true, key: GENERAL_4,         label: "4",       cc: 114, value: 64 }
 
   # Slew 1 came after the General controls, so its entry follows theirs. CC 5 is Portamento Time
   # in the MIDI spec; it powers up at CC 4, 0.0, where the slew is off.

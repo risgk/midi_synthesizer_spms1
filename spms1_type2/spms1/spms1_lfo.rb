@@ -53,11 +53,19 @@ module Spms1
       @current_amount = 1.0
       # Modulation depth is amount times polarity, as the other modules' are, multiplied before
       # smoothing so that only one smoothing state has to be carried.
-      @modulation_amount = 1.0
-      @modulation_polarity = 1.0
-      @modulation_depth = 1.0
-      @stage_1_modulation_depth = 1.0
-      @current_modulation_depth = 1.0
+      @rate_modulation_amount = 1.0
+      @rate_modulation_polarity = 1.0
+      @rate_modulation_depth = 1.0
+      @stage_1_rate_modulation_depth = 1.0
+      @current_rate_modulation_depth = 1.0
+      # The level's modulation depth likewise. The level and what Level Mod In adds to it are
+      # summed and held to [0.0, 1.0] at each control-rate step.
+      @level_modulation_amount = 1.0
+      @level_modulation_polarity = 1.0
+      @level_modulation_depth = 1.0
+      @stage_1_level_modulation_depth = 1.0
+      @current_level_modulation_depth = 1.0
+      @total_amount = 1.0
       # Not derived here: process assigns them on its first call, before anything reads them.
       @dt = 0.0
       @blamp_scale = 0.0
@@ -70,20 +78,33 @@ module Spms1
       @rate = (rate < 0.0) ? 0.0 : ((rate > 1.0) ? 1.0 : rate)
     end
 
-    # Modulation depth, on the rate, is amount times polarity. Amount is unipolar, [0.0, 1.0]. Polarity is
+    # Rate Mod depth is amount times polarity. Amount is unipolar, [0.0, 1.0]. Polarity is
     # bipolar, [-0.5, 0.5], and doubled, so +0.5 leaves the amount as it is, -0.5 negates it and
     # the way between scales it, crossing zero. A unit of modulation input times depth is the
     # whole rate range, ten octaves, so at full depth a bipolar source swings the rate five octaves
     # either way.
-    def set_modulation_amount(amount)
-      @modulation_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
-      @modulation_depth = @modulation_amount * @modulation_polarity
+    def set_rate_modulation_amount(amount)
+      @rate_modulation_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
+      @rate_modulation_depth = @rate_modulation_amount * @rate_modulation_polarity
     end
 
-    def set_modulation_polarity(polarity)
+    def set_rate_modulation_polarity(polarity)
       clamped_polarity = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
-      @modulation_polarity = clamped_polarity + clamped_polarity
-      @modulation_depth = @modulation_amount * @modulation_polarity
+      @rate_modulation_polarity = clamped_polarity + clamped_polarity
+      @rate_modulation_depth = @rate_modulation_amount * @rate_modulation_polarity
+    end
+
+    # Level Mod depth is amount times polarity in the same way. A unit of Level Mod In times depth
+    # is the whole level, so the mod wheel at its top adds a full level at full depth.
+    def set_level_modulation_amount(amount)
+      @level_modulation_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
+      @level_modulation_depth = @level_modulation_amount * @level_modulation_polarity
+    end
+
+    def set_level_modulation_polarity(polarity)
+      clamped_polarity = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
+      @level_modulation_polarity = clamped_polarity + clamped_polarity
+      @level_modulation_depth = @level_modulation_amount * @level_modulation_polarity
     end
 
     # The output is scaled by level, unipolar, [0.0, 1.0], a plain multiplier, so a destination
@@ -97,21 +118,26 @@ module Spms1
     # Output is bipolar and spans one unit peak to peak at full level, [-0.5, 0.5],
     # the same span as the pitch domain. Every bipolar signal on the bus is scaled that way, so a destination's
     # amount control means the same thing whichever one is routed to it.
-    # The modulation input, on the rate, is read at the control-rate step, as the filter reads its own, and
+    # Both modulation inputs are read at the control-rate step, as the filter reads its own, and
     # not smoothed: the phase increment and the PolyBLAMP scale below take a table lookup and a
-    # division, which every fourth sample can afford and every sample would be paying for. It is
-    # held to the rate range after it is added, which also keeps the lookup in bounds.
-    def process(modulation_input = 0.0)
+    # division, which every fourth sample can afford and every sample would be paying for. Rate Mod
+    # In is held to the rate range after it is added, which also keeps the lookup in bounds, and
+    # Level Mod In to the level's, so the wheel adds to the level up to its top and no further.
+    def process(rate_modulation_input = 0.0, level_modulation_input = 0.0)
       if @sample_counter == 0
-        # Rate, amount and modulation depth are smoothed at the control rate to avoid sudden
+        # Rate, amount and the two modulation depths are smoothed at the control rate to avoid sudden
         # jumps, and the phase increment is derived here rather than per sample.
         @stage_1_rate = Dsp.smooth(@rate, @stage_1_rate, @smoothing_target_blend)
         @current_rate = Dsp.smooth(@stage_1_rate, @current_rate, @smoothing_target_blend)
         @stage_1_amount = Dsp.smooth(@amount, @stage_1_amount, @smoothing_target_blend)
         @current_amount = Dsp.smooth(@stage_1_amount, @current_amount, @smoothing_target_blend)
-        @stage_1_modulation_depth = Dsp.smooth(@modulation_depth, @stage_1_modulation_depth, @smoothing_target_blend)
-        @current_modulation_depth = Dsp.smooth(@stage_1_modulation_depth, @current_modulation_depth, @smoothing_target_blend)
-        total_rate = @current_rate + (modulation_input * @current_modulation_depth)
+        @stage_1_rate_modulation_depth = Dsp.smooth(@rate_modulation_depth, @stage_1_rate_modulation_depth, @smoothing_target_blend)
+        @current_rate_modulation_depth = Dsp.smooth(@stage_1_rate_modulation_depth, @current_rate_modulation_depth, @smoothing_target_blend)
+        @stage_1_level_modulation_depth = Dsp.smooth(@level_modulation_depth, @stage_1_level_modulation_depth, @smoothing_target_blend)
+        @current_level_modulation_depth = Dsp.smooth(@stage_1_level_modulation_depth, @current_level_modulation_depth, @smoothing_target_blend)
+        total_amount = @current_amount + (level_modulation_input * @current_level_modulation_depth)
+        @total_amount = (total_amount < 0.0) ? 0.0 : ((total_amount > 1.0) ? 1.0 : total_amount)
+        total_rate = @current_rate + (rate_modulation_input * @current_rate_modulation_depth)
         rate = (total_rate < 0.0) ? 0.0 : ((total_rate > 1.0) ? 1.0 : total_rate)
         @dt = rate_to_freq_fast(rate) * @inv_sample_rate
         # The PolyBLAMP residual is (1 - |x|)^3 / 6 of the slope change for a corner x samples
@@ -144,7 +170,7 @@ module Spms1
       gap = (corner_gap > 0.0) ? corner_gap : 0.0
       side = (folded < 0.25) ? -@blamp_scale : @blamp_scale
       triangle += gap * gap * gap * side
-      output = triangle * @current_amount
+      output = triangle * @total_amount
 
       @phase += @dt
       @phase -= (@phase < 1.0) ? 0.0 : 1.0
