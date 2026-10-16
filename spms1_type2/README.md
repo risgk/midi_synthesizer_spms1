@@ -200,20 +200,21 @@ parameter.
 
 #### The run order
 
-Every module is in it: Pitch 1 first, one of each kind that makes a sound, a mixer between the
-modulation sources and the oscillator, and the chorus and the delay last:
+Every module is in it: one of each kind that makes a sound, a mixer between the modulation
+sources and Pitch 1, Pitch 1 just ahead of the oscillator, and the chorus and the delay last:
 
 ```mermaid
 flowchart LR
-  PITCH[Pitch 1] ~~~ LFO[LFO 1] ~~~ EG[EG 1] ~~~ MIX1[Mixer 1] ~~~ OSC[Osc 1] ~~~ FILTER[Filter 1] ~~~ AMP[Amp 1] ~~~ CHORUS[Chorus 1] ~~~ DELAY[Delay 1]
+  LFO[LFO 1] ~~~ EG[EG 1] ~~~ MIX1[Mixer 1] ~~~ PITCH[Pitch 1] ~~~ OSC[Osc 1] ~~~ FILTER[Filter 1] ~~~ AMP[Amp 1] ~~~ CHORUS[Chorus 1] ~~~ DELAY[Delay 1]
 ```
 
 The mixer has nothing routed to it, so it costs its slot every sample and changes nothing until
 a patch gives it something. Where it sits is what it buys: a module sees the current sample's
 value only from something ahead of it in this line, and last sample's from anything behind.
 Mixer 1 can reach the LFO and the envelope, and the oscillator, the filter and the amp can reach
-Mixer 1. Pitch 1 comes first so that whatever reads it, in its default place or another, sees it
-in the same sample.
+Mixer 1. Pitch 1 comes after all three, so that a modulation of its own -- a bend from the LFO
+through Direct In, say -- is this sample's, and before the oscillator and the filter, which read
+it in the same sample.
 
 A mixer is what lets two of anything meet, and what makes a signal that runs one way, such as the
 envelope, swing both ways. See the examples below.

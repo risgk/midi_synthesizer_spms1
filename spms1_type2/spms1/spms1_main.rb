@@ -73,7 +73,7 @@ MODULES_SIZE = 32
 # mixer, one chorus, one delay and one pitch module. Instances carry their number in the id rather than
 # being indexed by one, so a second oscillator would be MODULE_OSC_2, the next id after
 # MODULE_PITCH_1: numbers only ever get added, at the end of their range (see spms1_patch.yaml),
-# which is also why MODULE_PITCH_1 comes after MODULE_DELAY_1 though it runs first.
+# which is also why MODULE_PITCH_1 comes after MODULE_DELAY_1 though it runs before the oscillator.
 
 # The slots of the `signals` bus (SIGNAL_*), in spms1_patch.rb: module outputs, control values
 # and the note inputs in one namespace, so a routing is just a slot number and one source can feed
@@ -152,11 +152,12 @@ spms1_fill_constant_signals(signals)
 
 # The default patch, written into the NRPN table the loop reads it back from. Every module is in
 # the run order, so a patch only ever has to route, never to switch something on first. Pitch 1
-# runs first, taking Note Pitch and handing it to the oscillator: its Portamento Time powers up at 0.0, where
+# runs just ahead of the oscillator, taking Note Pitch and handing it to the oscillator: its Portamento Time powers up at 0.0, where
 # it passes its input through as it is, so the patch plays as one without it until CC 5 turns the
 # portamento up. Pitch Bend goes to its Direct In, added past the glide, 2 semitones either way at
 # Direct Amt's power-up value of CC 8, so the bend reaches the oscillator and the filter's keyboard
-# tracking at once. Running first is what lets anything read it in the same sample. The mixer
+# tracking at once. Running after the LFO, the envelope and the mixer
+# lets it take any of them in the same sample, and the oscillator and the filter read it so too. The mixer
 # runs after both modulation sources and ahead of the oscillator, so it sees this sample's LFO and
 # envelope and can feed the oscillator, the filter and the amp without a sample's delay. The
 # default patch leaves it unused: the LFO goes straight to the oscillator's pitch and pulse
