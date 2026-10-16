@@ -57,13 +57,13 @@ module Spms1
       @offset = 0.0
     end
 
-    # Portamento Time is unipolar, [0.0, 1.0]; see TIME_BASE for scaling details. 0.0 turns the portamento off.
+    # Glide, the portamento time, is unipolar, [0.0, 1.0]; see TIME_BASE for scaling details. 0.0 turns the portamento off.
     # Not smoothed: a new time changes only how fast the output moves from where it is, so a step
     # in it cannot step the output. Converted here rather than in process, as this is called once
     # per buffer, and with nothing to smooth there is no control-rate update to put it in.
     # The share is 1/(time constant in samples), the first-order form of the exact
     # 1 - exp(-1/(time constant in samples)); at the shortest time, 69 samples, it runs 0.7% fast.
-    def set_portamento_time(time)
+    def set_glide(time)
       @time = (time < 0.0) ? 0.0 : ((time > 1.0) ? 1.0 : time)
       blend = 1.0 / (TIME_BASE * calculate_exp_fast(@time) * @sample_rate)
       @blend = (@time > 0.0) ? blend : 1.0

@@ -172,7 +172,7 @@ flowchart LR
 から届くもので、この図では省いています。
 
 ノートのピッチは Pitch 1 を通ってオシレータに届き、ノートからノートへ滑らかに移ります。ポルタメントです。
-Pitch 1 Portamento Time は CC 5 (MIDI 規格と同じ) にあり、起動時は 0.0 です。そこではポルタメントはオフで、
+Pitch 1 Glide は CC 5 (MIDI 規格の Portamento Time) にあり、起動時は 0.0 です。そこではポルタメントはオフで、
 ピッチを届いたとおりそのまま通します。Pitch Bend は Pitch 1 Bend In に入ります。Bend In はグライドの後で出力に
 足されるので、ベンドはすぐに効き、オシレータにもフィルタのキーボードトラッキングにも同じように届きます。
 Pitch 1 Bend Amt（CC 57）がベンドレンジで、1 目盛り半音ずつです。起動時の CC 8 で上下 2 半音、CC 28 で
@@ -417,7 +417,7 @@ flowchart LR
 | 11 | Osc 1 Mod 2 Amt | | 26 | Delay 1 Time | | 48 | Pitch 1 Bend Amt |
 | 12 | Osc 1 Mod 2 Pol | | 27 | Delay 1 Feedback | | 49 | Pitch 1 Bend Pol |
 | 13 | Filter 1 Cutoff | | 28 | Delay 1 Mix | | 50 | LFO 1 Level Mod Amt |
-| 14 | Filter 1 Resonance | | 34 | Pitch 1 Portamento Time | | 51 | LFO 1 Level Mod Pol |
+| 14 | Filter 1 Resonance | | 34 | Pitch 1 Glide | | 51 | LFO 1 Level Mod Pol |
 | 15 | Filter 1 Gain | | 35 | Osc 1 Pulse Width | | 52 | Pitch 1 Coarse |
 | 16 | Filter 1 Mod 1 Amt | | 36 | Osc 1 PW Mod Amt | | 53 | Pitch 1 Fine |
 
@@ -470,7 +470,7 @@ flowchart LR
 | 2 | 定数 0.5 | | 31 | Osc 1 Mod 2 Pol ± | | 58 | General Bipolar 3 ± |
 | 3 | 定数 0.2 | | 32 | Filter 1 Cutoff | | 59 | General Bipolar 4 ± |
 | 4 | 定数 0.1 | | 33 | Filter 1 Resonance | | 60 | Pitch 1 Output ± |
-| 5 | 定数 -0.1 | | 34 | Filter 1 Gain | | 61 | Pitch 1 Portamento Time |
+| 5 | 定数 -0.1 | | 34 | Filter 1 Gain | | 61 | Pitch 1 Glide |
 | 6 | 定数 -0.2 | | 35 | Filter 1 Mod 1 Amt | | 62 | Osc 1 Pulse Width |
 | 7 | 定数 -0.5 | | 36 | Filter 1 Mod 1 Pol ± | | 63 | Osc 1 PW Mod Amt |
 | 8 | 定数 -1.0 | | 37 | Amp 1 Gain | | 64 | Osc 1 PW Mod Pol ± |
@@ -636,7 +636,7 @@ Feedback は繰り返しをラインに戻すゲインで、CC 4 の 0（繰り�
 割合で、CC 4 でドライ入力だけ、CC 64 で半々、CC 124 で繰り返しだけです。起動時は Time と Feedback が
 CC 64、Mix が CC 34（0.25）で、ドライ信号は 2.5 dB 下がり、最初の繰り返しはその約 16 dB 下に来ます。
 
-Pitch 1 Portamento Time はユニポーラで、1/120 刻み、1 ステップで時間が半音ぶん動きます。EG 1 Decay と同じで、レンジも
+Pitch 1 Glide はユニポーラで、1/120 刻み、1 ステップで時間が半音ぶん動きます。EG 1 Decay と同じで、レンジも
 同じです。CC 5 で 10 ms、CC 64 で 320 ms、CC 124 で 10.24 s で、どれも残りの 1/1024 まで近づく時間です。
 1 オクターブのグライドなら半音の 1/100 手前にあたります。9 割まではその 3 分の 1 で進みます。CC 4 以下の
 0.0 ではポルタメントはオフで、出力は入力そのままです。グライドは指数カーブで、アナログシンセのポルタメントと同じく
@@ -708,7 +708,7 @@ Pitch 1 Portamento Time はユニポーラで、1/120 刻み、1 ステップで
   パラメータへ通してください
 - スムージングは 2 段（48 kHz で平均遅れ 10.7 ms、35 ms で 99%）で、CC をまばらに（例えば 20 ms ごとに）
   送るコントローラーの段差を丸めます。Osc 1 Pitch Coarse と Pitch Fine、Pitch 1 Coarse と Fine は、音程がすぐ追従するように
-  スムージングしません。Pitch 1 Portamento Time も、設定する対象に段差を生じさせないのでスムージングしません
+  スムージングしません。Pitch 1 Glide も、設定する対象に段差を生じさせないのでスムージングしません
 - パラメータのソースは 128 のスロットのどれでも指せます。82 より上のスロットは、何かが書き込むまで 0 を
   返すので、そこを指したパラメータはユニポーラならつまみの下端、バイポーラなら中央に留まります
 - パラメータは自分の値を自分のレンジ、0.0〜1.0 か -0.5〜+0.5 に丸め、コントロールスロットも同じレンジを

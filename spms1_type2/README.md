@@ -173,7 +173,7 @@ Each module is processed once per sample, in the run order below. Their paramete
 cutoff, gain and the rest -- arrive from CC and are left out of the diagram.
 
 The note's pitch reaches the oscillator through Pitch 1, which glides from one note to the next:
-portamento. Pitch 1 Portamento Time is on CC 5, as in the MIDI spec, and powers up at 0.0, where
+portamento. Pitch 1 Glide is on CC 5, Portamento Time in the MIDI spec, and powers up at 0.0, where
 the portamento is off and passes the pitch through exactly as it arrives. Pitch Bend comes in on Pitch 1
 Bend In, which is added to the output past the glide, so the bend acts at once and reaches the
 oscillator and the filter's keyboard tracking alike. Pitch 1 Bend Amt (CC 57) is the bend range,
@@ -429,7 +429,7 @@ both at the same signal for a mono output.
 | 11 | Osc 1 Mod 2 Amt | | 26 | Delay 1 Time | | 48 | Pitch 1 Bend Amt |
 | 12 | Osc 1 Mod 2 Pol | | 27 | Delay 1 Feedback | | 49 | Pitch 1 Bend Pol |
 | 13 | Filter 1 Cutoff | | 28 | Delay 1 Mix | | 50 | LFO 1 Level Mod Amt |
-| 14 | Filter 1 Resonance | | 34 | Pitch 1 Portamento Time | | 51 | LFO 1 Level Mod Pol |
+| 14 | Filter 1 Resonance | | 34 | Pitch 1 Glide | | 51 | LFO 1 Level Mod Pol |
 | 15 | Filter 1 Gain | | 35 | Osc 1 Pulse Width | | 52 | Pitch 1 Coarse |
 | 16 | Filter 1 Mod 1 Amt | | 36 | Osc 1 PW Mod Amt | | 53 | Pitch 1 Fine |
 
@@ -482,7 +482,7 @@ two slots, a unipolar and a bipolar one. See the General slots below.
 | 2 | Constant 0.5 | | 31 | Osc 1 Mod 2 Pol ± | | 58 | General Bipolar 3 ± |
 | 3 | Constant 0.2 | | 32 | Filter 1 Cutoff | | 59 | General Bipolar 4 ± |
 | 4 | Constant 0.1 | | 33 | Filter 1 Resonance | | 60 | Pitch 1 Output ± |
-| 5 | Constant -0.1 | | 34 | Filter 1 Gain | | 61 | Pitch 1 Portamento Time |
+| 5 | Constant -0.1 | | 34 | Filter 1 Gain | | 61 | Pitch 1 Glide |
 | 6 | Constant -0.2 | | 35 | Filter 1 Mod 1 Amt | | 62 | Osc 1 Pulse Width |
 | 7 | Constant -0.5 | | 36 | Filter 1 Mod 1 Pol ± | | 63 | Osc 1 PW Mod Amt |
 | 8 | Constant -1.0 | | 37 | Amp 1 Gain | | 64 | Osc 1 PW Mod Pol ± |
@@ -662,7 +662,7 @@ single repeat, to 0.5 at CC 124, where each repeat comes back 6 dB down and a li
 repeats alone at CC 124, half and half at CC 64. Time and Feedback power up at CC 64 and Mix at
 CC 34, 0.25: the dry signal is 2.5 dB down and the first repeat about 16 dB under it.
 
-Pitch 1 Portamento Time is unipolar and moves in steps of 1/120, a semitone of time a step, as EG 1 Decay
+Pitch 1 Glide is unipolar and moves in steps of 1/120, a semitone of time a step, as EG 1 Decay
 does and over the same range: from 10 ms at CC 5 through 320 ms at CC 64 to 10.24 s at CC 124,
 each the time to come within 1/1024 of the way, where a glide of an octave is a hundredth of a
 semitone short; nine tenths of the way take a third of it. At CC 4 and below, 0.0, the portamento
@@ -739,7 +739,7 @@ changes only how fast the output moves, so it cannot step it.
   destination. Route a fast source through a module input, a stepped one through a parameter
 - The smoothing takes two stages (10.7 ms average delay, 99% in 35 ms at 48 kHz), which round off
   the steps of a controller sending sparse CCs (e.g. every 20 ms). Osc 1 Pitch Coarse and Pitch Fine
-  and Pitch 1 Coarse and Fine are not smoothed, so that the pitch follows right away, and neither is Pitch 1 Portamento Time, which
+  and Pitch 1 Coarse and Fine are not smoothed, so that the pitch follows right away, and neither is Pitch 1 Glide, which
   cannot step what it sets
 - A parameter source may point at any of the 128 slots. Slots above 82 read 0 until something
   writes them, which leaves a parameter pointed at one at the bottom of a unipolar dial or the

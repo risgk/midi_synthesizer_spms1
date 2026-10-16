@@ -113,7 +113,7 @@ signals:
   - { key: GENERAL_BIPOLAR_4,  id: 59, control: GENERAL_4, label: General Bipolar 4, bipolar: true }
 
   - { key: PITCH_1_OUTPUT, id: 60, module: PITCH_1, output: Out, label: Pitch 1 Output, bipolar: true }
-  - { key: PITCH_1_PORTAMENTO_TIME,   id: 61, control: PITCH_1_PORTAMENTO_TIME }
+  - { key: PITCH_1_GLIDE,   id: 61, control: PITCH_1_GLIDE }
 
   - { key: OSC_1_PULSE_WIDTH,     id: 62, control: OSC_1_PULSE_WIDTH }
   - { key: OSC_1_PW_MOD_AMT,   id: 63, control: OSC_1_PW_MOD_AMT }
@@ -255,10 +255,10 @@ controls:
   - { entry: 32, general: true, key: GENERAL_3,         label: "3",       cc: 18,  value: 64 }
   - { entry: 33, general: true, key: GENERAL_4,         label: "4",       cc: 19,  value: 64 }
 
-  # Pitch 1 came after the General controls, so its entry follows theirs. CC 5 is Portamento Time
+  # Pitch 1 came after the General controls, so its entry follows theirs. Glide is on CC 5, Portamento Time
   # in the MIDI spec; it powers up at CC 4, 0.0, where the portamento is off.
-  - { entry: 34, module: PITCH_1,   key: PORTAMENTO_TIME, label: Portamento Time, cc: 5, value: 4 }
-  # Coarse and Fine came after LFO 1 Level Mod Amt and Pol, and are listed after Portamento Time: the
+  - { entry: 34, module: PITCH_1,   key: GLIDE,        label: Glide,        cc: 5, value: 4 }
+  # Coarse and Fine came after LFO 1 Level Mod Amt and Pol, and are listed after Glide: the
   # transposition, on the CCs the oscillator's Pitch Coarse and Fine had, 64 at the centre.
   - { entry: 52, module: PITCH_1,    key: COARSE, label: Coarse, cc: 86, value: 64, bipolar: true }
   - { entry: 53, module: PITCH_1,    key: FINE, label: Fine,  cc: 70,  value: 64, bipolar: true }

@@ -152,7 +152,7 @@ spms1_fill_constant_signals(signals)
 
 # The default patch, written into the NRPN table the loop reads it back from. Every module is in
 # the run order, so a patch only ever has to route, never to switch something on first. Pitch 1
-# runs just ahead of the oscillator, taking Note Pitch and handing it to the oscillator: its Portamento Time powers up at 0.0, where
+# runs just ahead of the oscillator, taking Note Pitch and handing it to the oscillator: its Glide powers up at 0.0, where
 # it passes its input through as it is, so the patch plays as one without it until CC 5 turns the
 # portamento up. Pitch Bend goes to its Bend In, added past the glide, 2 semitones either way at
 # Bend Amt's power-up value of CC 8, so the bend reaches the oscillator and the filter's keyboard
@@ -294,7 +294,7 @@ while true
   source_delay_1_time          = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_TIME)
   source_delay_1_feedback      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_FEEDBACK)
   source_delay_1_mix           = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_MIX)
-  source_pitch_1_portamento_time           = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_PORTAMENTO_TIME)
+  source_pitch_1_glide           = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_GLIDE)
   source_osc_1_pulse_width     = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PULSE_WIDTH)
   source_osc_1_pw_mod_amt      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PW_MOD_AMT)
   source_osc_1_pw_mod_pol      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PW_MOD_POL)
@@ -342,7 +342,7 @@ while true
   cc_delay_1_time          = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_DELAY_1_TIME)
   cc_delay_1_feedback      = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_DELAY_1_FEEDBACK)
   cc_delay_1_mix           = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_DELAY_1_MIX)
-  cc_pitch_1_portamento_time           = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_PITCH_1_PORTAMENTO_TIME)
+  cc_pitch_1_glide           = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_PITCH_1_GLIDE)
   cc_osc_1_pulse_width     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_PULSE_WIDTH)
   cc_osc_1_pw_mod_amt      = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_PW_MOD_AMT)
   cc_osc_1_pw_mod_pol      = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_PW_MOD_POL)
@@ -393,7 +393,7 @@ while true
   signals[SIGNAL_DELAY_1_TIME] = cc_or_zero(cc_delay_1_time, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_delay_1_time)))
   signals[SIGNAL_DELAY_1_FEEDBACK] = cc_or_zero(cc_delay_1_feedback, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_delay_1_feedback)))
   signals[SIGNAL_DELAY_1_MIX] = cc_or_zero(cc_delay_1_mix, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_delay_1_mix)))
-  signals[SIGNAL_PITCH_1_PORTAMENTO_TIME] = cc_or_zero(cc_pitch_1_portamento_time, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_pitch_1_portamento_time)))
+  signals[SIGNAL_PITCH_1_GLIDE] = cc_or_zero(cc_pitch_1_glide, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_pitch_1_glide)))
   signals[SIGNAL_OSC_1_PULSE_WIDTH] = cc_or_zero(cc_osc_1_pulse_width, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_pulse_width)))
   signals[SIGNAL_OSC_1_PW_MOD_AMT] = cc_or_zero(cc_osc_1_pw_mod_amt, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_pw_mod_amt)))
   signals[SIGNAL_OSC_1_PW_MOD_POL] = cc_or_zero(cc_osc_1_pw_mod_pol, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_pw_mod_pol)))
@@ -457,7 +457,7 @@ while true
   delay_1.set_time(signals[source_delay_1_time])
   delay_1.set_feedback(signals[source_delay_1_feedback])
   delay_1.set_mix(signals[source_delay_1_mix])
-  pitch_1.set_portamento_time(signals[source_pitch_1_portamento_time])
+  pitch_1.set_glide(signals[source_pitch_1_glide])
   pitch_1.set_bend_amount(signals[source_pitch_1_bend_amt])
   pitch_1.set_bend_polarity(signals[source_pitch_1_bend_pol])
   pitch_1.set_coarse(signals[source_pitch_1_coarse])

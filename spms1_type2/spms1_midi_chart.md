@@ -44,7 +44,7 @@
 |                            90 | x             | o             | Delay Time                           |
 |                            92 | x             | o             | Delay Feedback                       |
 |                            94 | x             | o             | Delay Mix                            |
-|                             5 | x             | o             | Pitch Portamento Time                |
+|                             5 | x             | o             | Pitch Glide (Portamento Time)        |
 |                            57 | x             | o             | Pitch Bend Amt (Pitch Bend Range)    |
 |                            86 | x             | o             | Pitch Coarse (+-5 Octaves)           |
 |                            70 | x             | o             | Pitch Fine (+-60 Cents)              |

@@ -22,7 +22,7 @@ extern void stop_audio(void);
 extern void write_to_audio_buffer(float, float);
 extern void start_debug_measure(void);
 extern void stop_debug_measure(void);
-static const char *const sp_sym_names[86] = {(&("\xff" "i")[1]), (&("\xff" "flush_tiny")[1]), (&("\xff" "smooth")[1]), (&("\xff" "initialize")[1]), (&("\xff" "set_waveform")[1]), (&("\xff" "set_pulse_width")[1]), (&("\xff" "set_modulation_1_amount")[1]), (&("\xff" "set_modulation_1_polarity")[1]), (&("\xff" "set_modulation_2_amount")[1]), (&("\xff" "set_modulation_2_polarity")[1]), (&("\xff" "set_pw_modulation_amount")[1]), (&("\xff" "set_pw_modulation_polarity")[1]), (&("\xff" "set_pitch_coarse")[1]), (&("\xff" "set_pitch_fine")[1]), (&("\xff" "process")[1]), (&("\xff" "pitch_to_freq_fast")[1]), (&("\xff" "poly_blep")[1]), (&("\xff" "set_cutoff")[1]), (&("\xff" "set_modulation_3_amount")[1]), (&("\xff" "set_modulation_3_polarity")[1]), (&("\xff" "set_gain")[1]), (&("\xff" "set_resonance")[1]), (&("\xff" "output_bp")[1]), (&("\xff" "output_hp")[1]), (&("\xff" "cutoff_to_g_fast")[1]), (&("\xff" "resonance_to_k_fast")[1]), (&("\xff" "update_coefficients")[1]), (&("\xff" "clip_output")[1]), (&("\xff" "set_attack")[1]), (&("\xff" "set_decay")[1]), (&("\xff" "set_sustain")[1]), (&("\xff" "set_level")[1]), (&("\xff" "update_coefficients_full")[1]), (&("\xff" "calculate_exp_fast")[1]), (&("\xff" "set_rate")[1]), (&("\xff" "set_rate_modulation_amount")[1]), (&("\xff" "set_rate_modulation_polarity")[1]), (&("\xff" "set_level_modulation_amount")[1]), (&("\xff" "set_level_modulation_polarity")[1]), (&("\xff" "rate_to_freq_fast")[1]), (&("\xff" "set_level_1")[1]), (&("\xff" "set_level_2")[1]), (&("\xff" "set_polarity_1")[1]), (&("\xff" "set_polarity_2")[1]), (&("\xff" "output_l")[1]), (&("\xff" "output_r")[1]), (&("\xff" "set_depth")[1]), (&("\xff" "set_mix")[1]), (&("\xff" "set_time")[1]), (&("\xff" "set_feedback")[1]), (&("\xff" "set_portamento_time")[1]), (&("\xff" "set_bend_amount")[1]), (&("\xff" "set_bend_polarity")[1]), (&("\xff" "set_coarse")[1]), (&("\xff" "set_fine")[1]), (&("\xff" "set_midi_note_on_pitch")[1]), (&("\xff" "uint8")[1]), (&("\xff" "void")[1]), (&("\xff" "get_midi_note_on_pitch")[1]), (&("\xff" "set_midi_note_on_state")[1]), (&("\xff" "get_midi_note_on_state")[1]), (&("\xff" "set_midi_pitch_bend")[1]), (&("\xff" "int32")[1]), (&("\xff" "get_midi_pitch_bend")[1]), (&("\xff" "set_midi_cc_value")[1]), (&("\xff" "get_midi_cc_value")[1]), (&("\xff" "set_midi_nrpn_value")[1]), (&("\xff" "get_midi_nrpn_value")[1]), (&("\xff" "get_midi_run_order_written")[1]), (&("\xff" "set_sample_rate")[1]), (&("\xff" "get_sample_rate")[1]), (&("\xff" "set_audio_buffers")[1]), (&("\xff" "get_audio_buffers")[1]), (&("\xff" "set_audio_buffer_words")[1]), (&("\xff" "get_audio_buffer_words")[1]), (&("\xff" "start_audio")[1]), (&("\xff" "stop_audio")[1]), (&("\xff" "write_to_audio_buffer")[1]), (&("\xff" "float")[1]), (&("\xff" "start_debug_measure")[1]), (&("\xff" "stop_debug_measure")[1]), (&("\xff" "spms1_fill_constant_signals")[1]), (&("\xff" "spms1_write_default_patch")[1]), (&("\xff" "cc_to_unipolar")[1]), (&("\xff" "cc_to_bipolar")[1]), (&("\xff" "cc_or_zero")[1])};
+static const char *const sp_sym_names[86] = {(&("\xff" "i")[1]), (&("\xff" "flush_tiny")[1]), (&("\xff" "smooth")[1]), (&("\xff" "initialize")[1]), (&("\xff" "set_waveform")[1]), (&("\xff" "set_pulse_width")[1]), (&("\xff" "set_modulation_1_amount")[1]), (&("\xff" "set_modulation_1_polarity")[1]), (&("\xff" "set_modulation_2_amount")[1]), (&("\xff" "set_modulation_2_polarity")[1]), (&("\xff" "set_pw_modulation_amount")[1]), (&("\xff" "set_pw_modulation_polarity")[1]), (&("\xff" "set_pitch_coarse")[1]), (&("\xff" "set_pitch_fine")[1]), (&("\xff" "process")[1]), (&("\xff" "pitch_to_freq_fast")[1]), (&("\xff" "poly_blep")[1]), (&("\xff" "set_cutoff")[1]), (&("\xff" "set_modulation_3_amount")[1]), (&("\xff" "set_modulation_3_polarity")[1]), (&("\xff" "set_gain")[1]), (&("\xff" "set_resonance")[1]), (&("\xff" "output_bp")[1]), (&("\xff" "output_hp")[1]), (&("\xff" "cutoff_to_g_fast")[1]), (&("\xff" "resonance_to_k_fast")[1]), (&("\xff" "update_coefficients")[1]), (&("\xff" "clip_output")[1]), (&("\xff" "set_attack")[1]), (&("\xff" "set_decay")[1]), (&("\xff" "set_sustain")[1]), (&("\xff" "set_level")[1]), (&("\xff" "update_coefficients_full")[1]), (&("\xff" "calculate_exp_fast")[1]), (&("\xff" "set_rate")[1]), (&("\xff" "set_rate_modulation_amount")[1]), (&("\xff" "set_rate_modulation_polarity")[1]), (&("\xff" "set_level_modulation_amount")[1]), (&("\xff" "set_level_modulation_polarity")[1]), (&("\xff" "rate_to_freq_fast")[1]), (&("\xff" "set_level_1")[1]), (&("\xff" "set_level_2")[1]), (&("\xff" "set_polarity_1")[1]), (&("\xff" "set_polarity_2")[1]), (&("\xff" "output_l")[1]), (&("\xff" "output_r")[1]), (&("\xff" "set_depth")[1]), (&("\xff" "set_mix")[1]), (&("\xff" "set_time")[1]), (&("\xff" "set_feedback")[1]), (&("\xff" "set_glide")[1]), (&("\xff" "set_bend_amount")[1]), (&("\xff" "set_bend_polarity")[1]), (&("\xff" "set_coarse")[1]), (&("\xff" "set_fine")[1]), (&("\xff" "set_midi_note_on_pitch")[1]), (&("\xff" "uint8")[1]), (&("\xff" "void")[1]), (&("\xff" "get_midi_note_on_pitch")[1]), (&("\xff" "set_midi_note_on_state")[1]), (&("\xff" "get_midi_note_on_state")[1]), (&("\xff" "set_midi_pitch_bend")[1]), (&("\xff" "int32")[1]), (&("\xff" "get_midi_pitch_bend")[1]), (&("\xff" "set_midi_cc_value")[1]), (&("\xff" "get_midi_cc_value")[1]), (&("\xff" "set_midi_nrpn_value")[1]), (&("\xff" "get_midi_nrpn_value")[1]), (&("\xff" "get_midi_run_order_written")[1]), (&("\xff" "set_sample_rate")[1]), (&("\xff" "get_sample_rate")[1]), (&("\xff" "set_audio_buffers")[1]), (&("\xff" "get_audio_buffers")[1]), (&("\xff" "set_audio_buffer_words")[1]), (&("\xff" "get_audio_buffer_words")[1]), (&("\xff" "start_audio")[1]), (&("\xff" "stop_audio")[1]), (&("\xff" "write_to_audio_buffer")[1]), (&("\xff" "float")[1]), (&("\xff" "start_debug_measure")[1]), (&("\xff" "stop_debug_measure")[1]), (&("\xff" "spms1_fill_constant_signals")[1]), (&("\xff" "spms1_write_default_patch")[1]), (&("\xff" "cc_to_unipolar")[1]), (&("\xff" "cc_to_bipolar")[1]), (&("\xff" "cc_or_zero")[1])};
 static const char *sp_dyn_syms[SP_DYN_SYMS_MAX]; static int sp_ndyn = 0;
 static void sp_mark_dyn_syms(void){for(int _i=0;_i<sp_ndyn;_i++)sp_mark_string(sp_dyn_syms[_i]);}
 static const char *sp_sym_to_s(sp_sym id){if(id>=0&&id<86)return sp_sym_names[id];if(id>=86&&id<86+sp_ndyn)return sp_dyn_syms[id-86];return sp_str_empty;}
@@ -779,7 +779,7 @@ static inline __attribute__((always_inline)) sp_float sp_Delay_set_feedback(sp_D
 static inline __attribute__((always_inline)) sp_float sp_Delay_set_mix(sp_Delay *self, sp_float lv_mix);
 static sp_float sp_Delay_process(sp_Delay *self, sp_float lv_audio_input_l, sp_float lv_audio_input_r);
 static void sp_Pitch_initialize(sp_Pitch *self, sp_int lv_sample_rate);
-static inline __attribute__((always_inline)) sp_float sp_Pitch_set_portamento_time(sp_Pitch *self, sp_float lv_time);
+static inline __attribute__((always_inline)) sp_float sp_Pitch_set_glide(sp_Pitch *self, sp_float lv_time);
 static inline __attribute__((always_inline)) sp_float sp_Pitch_set_bend_amount(sp_Pitch *self, sp_float lv_amount);
 static inline __attribute__((always_inline)) sp_float sp_Pitch_set_bend_polarity(sp_Pitch *self, sp_float lv_polarity);
 static inline __attribute__((always_inline)) sp_float sp_Pitch_set_coarse(sp_Pitch *self, sp_float lv_coarse);
@@ -956,7 +956,7 @@ static sp_int cst_SIGNAL_GENERAL_BIPOLAR_2 = 0;
 static sp_int cst_SIGNAL_GENERAL_BIPOLAR_3 = 0;
 static sp_int cst_SIGNAL_GENERAL_BIPOLAR_4 = 0;
 static sp_int cst_SIGNAL_PITCH_1_OUTPUT = 0;
-static sp_int cst_SIGNAL_PITCH_1_PORTAMENTO_TIME = 0;
+static sp_int cst_SIGNAL_PITCH_1_GLIDE = 0;
 static sp_int cst_SIGNAL_OSC_1_PULSE_WIDTH = 0;
 static sp_int cst_SIGNAL_OSC_1_PW_MOD_AMT = 0;
 static sp_int cst_SIGNAL_OSC_1_PW_MOD_POL = 0;
@@ -1025,7 +1025,7 @@ static sp_int cst_NRPN_SOURCE_CHORUS_1_MIX = 0;
 static sp_int cst_NRPN_SOURCE_DELAY_1_TIME = 0;
 static sp_int cst_NRPN_SOURCE_DELAY_1_FEEDBACK = 0;
 static sp_int cst_NRPN_SOURCE_DELAY_1_MIX = 0;
-static sp_int cst_NRPN_SOURCE_PITCH_1_PORTAMENTO_TIME = 0;
+static sp_int cst_NRPN_SOURCE_PITCH_1_GLIDE = 0;
 static sp_int cst_NRPN_SOURCE_OSC_1_PULSE_WIDTH = 0;
 static sp_int cst_NRPN_SOURCE_OSC_1_PW_MOD_AMT = 0;
 static sp_int cst_NRPN_SOURCE_OSC_1_PW_MOD_POL = 0;
@@ -1075,7 +1075,7 @@ static sp_int cst_NRPN_CC_GENERAL_1 = 0;
 static sp_int cst_NRPN_CC_GENERAL_2 = 0;
 static sp_int cst_NRPN_CC_GENERAL_3 = 0;
 static sp_int cst_NRPN_CC_GENERAL_4 = 0;
-static sp_int cst_NRPN_CC_PITCH_1_PORTAMENTO_TIME = 0;
+static sp_int cst_NRPN_CC_PITCH_1_GLIDE = 0;
 static sp_int cst_NRPN_CC_OSC_1_PULSE_WIDTH = 0;
 static sp_int cst_NRPN_CC_OSC_1_PW_MOD_AMT = 0;
 static sp_int cst_NRPN_CC_OSC_1_PW_MOD_POL = 0;
@@ -3417,7 +3417,7 @@ static void sp_Pitch_initialize(sp_Pitch *self, sp_int lv_sample_rate) {
   self->iv_offset = 0.0;
 }
 #line 66 "spms1_pitch.rb"
-static inline __attribute__((always_inline)) sp_float sp_Pitch_set_portamento_time(sp_Pitch *self, sp_float lv_time) {
+static inline __attribute__((always_inline)) sp_float sp_Pitch_set_glide(sp_Pitch *self, sp_float lv_time) {
     sp_float lv_blend = 0.0;
 #line 67 "spms1_pitch.rb"
   self->iv_time = (((lv_time < 0.0)) ? 0.0 : ((((lv_time > 1.0)) ? 1.0 : lv_time)));
@@ -3659,7 +3659,7 @@ static void sp_spms1_write_default_patch(sp_int lv_midi_ch) {
 #line 297 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_DELAY_1_MIX)), ((uint8_t)(cst_SIGNAL_DELAY_1_MIX))), (sp_int)0);
 #line 298 "spms1_patch.rb"
-  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_PORTAMENTO_TIME)), ((uint8_t)(cst_SIGNAL_PITCH_1_PORTAMENTO_TIME))), (sp_int)0);
+  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_GLIDE)), ((uint8_t)(cst_SIGNAL_PITCH_1_GLIDE))), (sp_int)0);
 #line 299 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_PULSE_WIDTH)), ((uint8_t)(cst_SIGNAL_OSC_1_PULSE_WIDTH))), (sp_int)0);
 #line 300 "spms1_patch.rb"
@@ -3741,7 +3741,7 @@ static void sp_spms1_write_default_patch(sp_int lv_midi_ch) {
 #line 339 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_CC_GENERAL_4)), ((uint8_t)(19LL))), (sp_int)0);
 #line 340 "spms1_patch.rb"
-  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_CC_PITCH_1_PORTAMENTO_TIME)), ((uint8_t)(5LL))), (sp_int)0);
+  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_CC_PITCH_1_GLIDE)), ((uint8_t)(5LL))), (sp_int)0);
 #line 341 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_CC_OSC_1_PULSE_WIDTH)), ((uint8_t)(114LL))), (sp_int)0);
 #line 342 "spms1_patch.rb"
@@ -3947,7 +3947,7 @@ int main(int argc,char**argv){
     sp_int lv_source_delay_1_time = 0;
     sp_int lv_source_delay_1_feedback = 0;
     sp_int lv_source_delay_1_mix = 0;
-    sp_int lv_source_pitch_1_portamento_time = 0;
+    sp_int lv_source_pitch_1_glide = 0;
     sp_int lv_source_osc_1_pulse_width = 0;
     sp_int lv_source_osc_1_pw_mod_amt = 0;
     sp_int lv_source_osc_1_pw_mod_pol = 0;
@@ -3992,7 +3992,7 @@ int main(int argc,char**argv){
     sp_int lv_cc_delay_1_time = 0;
     sp_int lv_cc_delay_1_feedback = 0;
     sp_int lv_cc_delay_1_mix = 0;
-    sp_int lv_cc_pitch_1_portamento_time = 0;
+    sp_int lv_cc_pitch_1_glide = 0;
     sp_int lv_cc_osc_1_pulse_width = 0;
     sp_int lv_cc_osc_1_pw_mod_amt = 0;
     sp_int lv_cc_osc_1_pw_mod_pol = 0;
@@ -4444,7 +4444,7 @@ int main(int argc,char**argv){
 #line 75 "spms1_patch.rb"
   cst_SIGNAL_PITCH_1_OUTPUT = 60LL;
 #line 76 "spms1_patch.rb"
-  cst_SIGNAL_PITCH_1_PORTAMENTO_TIME = 61LL;
+  cst_SIGNAL_PITCH_1_GLIDE = 61LL;
 #line 77 "spms1_patch.rb"
   cst_SIGNAL_OSC_1_PULSE_WIDTH = 62LL;
 #line 78 "spms1_patch.rb"
@@ -4582,7 +4582,7 @@ int main(int argc,char**argv){
 #line 152 "spms1_patch.rb"
   cst_NRPN_SOURCE_DELAY_1_MIX = 284LL;
 #line 153 "spms1_patch.rb"
-  cst_NRPN_SOURCE_PITCH_1_PORTAMENTO_TIME = 290LL;
+  cst_NRPN_SOURCE_PITCH_1_GLIDE = 290LL;
 #line 154 "spms1_patch.rb"
   cst_NRPN_SOURCE_OSC_1_PULSE_WIDTH = 291LL;
 #line 155 "spms1_patch.rb"
@@ -4682,7 +4682,7 @@ int main(int argc,char**argv){
 #line 205 "spms1_patch.rb"
   cst_NRPN_CC_GENERAL_4 = 417LL;
 #line 206 "spms1_patch.rb"
-  cst_NRPN_CC_PITCH_1_PORTAMENTO_TIME = 418LL;
+  cst_NRPN_CC_PITCH_1_GLIDE = 418LL;
 #line 207 "spms1_patch.rb"
   cst_NRPN_CC_OSC_1_PULSE_WIDTH = 419LL;
 #line 208 "spms1_patch.rb"
@@ -4973,7 +4973,7 @@ int main(int argc,char**argv){
 #line 296 "spms1_main.rb"
     lv_source_delay_1_mix = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_DELAY_1_MIX)))));
 #line 297 "spms1_main.rb"
-    lv_source_pitch_1_portamento_time = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_PORTAMENTO_TIME)))));
+    lv_source_pitch_1_glide = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_GLIDE)))));
 #line 298 "spms1_main.rb"
     lv_source_osc_1_pulse_width = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_PULSE_WIDTH)))));
 #line 299 "spms1_main.rb"
@@ -5063,7 +5063,7 @@ int main(int argc,char**argv){
 #line 344 "spms1_main.rb"
     lv_cc_delay_1_mix = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_DELAY_1_MIX)))));
 #line 345 "spms1_main.rb"
-    lv_cc_pitch_1_portamento_time = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_PITCH_1_PORTAMENTO_TIME)))));
+    lv_cc_pitch_1_glide = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_PITCH_1_GLIDE)))));
 #line 346 "spms1_main.rb"
     lv_cc_osc_1_pulse_width = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_PULSE_WIDTH)))));
 #line 347 "spms1_main.rb"
@@ -5163,7 +5163,7 @@ int main(int argc,char**argv){
 #line 395 "spms1_main.rb"
     sp_FloatArray_set(lv_signals, cst_SIGNAL_DELAY_1_MIX, sp_cc_or_zero(lv_cc_delay_1_mix, sp_cc_to_unipolar(((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_delay_1_mix))))))));
 #line 396 "spms1_main.rb"
-    sp_FloatArray_set(lv_signals, cst_SIGNAL_PITCH_1_PORTAMENTO_TIME, sp_cc_or_zero(lv_cc_pitch_1_portamento_time, sp_cc_to_unipolar(((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_pitch_1_portamento_time))))))));
+    sp_FloatArray_set(lv_signals, cst_SIGNAL_PITCH_1_GLIDE, sp_cc_or_zero(lv_cc_pitch_1_glide, sp_cc_to_unipolar(((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_pitch_1_glide))))))));
 #line 397 "spms1_main.rb"
     sp_FloatArray_set(lv_signals, cst_SIGNAL_OSC_1_PULSE_WIDTH, sp_cc_or_zero(lv_cc_osc_1_pulse_width, sp_cc_to_unipolar(((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_1_pulse_width))))))));
 #line 398 "spms1_main.rb"
@@ -5318,8 +5318,8 @@ int main(int argc,char**argv){
     sp_float _t552 = sp_FloatArray_get(lv_signals, lv_source_delay_1_mix);
     sp_Delay_set_mix((sp_Delay *)lv_delay_1, _t552);
 #line 460 "spms1_main.rb"
-    sp_float _t553 = sp_FloatArray_get(lv_signals, lv_source_pitch_1_portamento_time);
-    sp_Pitch_set_portamento_time((sp_Pitch *)lv_pitch_1, _t553);
+    sp_float _t553 = sp_FloatArray_get(lv_signals, lv_source_pitch_1_glide);
+    sp_Pitch_set_glide((sp_Pitch *)lv_pitch_1, _t553);
 #line 461 "spms1_main.rb"
     sp_float _t554 = sp_FloatArray_get(lv_signals, lv_source_pitch_1_bend_amt);
     sp_Pitch_set_bend_amount((sp_Pitch *)lv_pitch_1, _t554);
