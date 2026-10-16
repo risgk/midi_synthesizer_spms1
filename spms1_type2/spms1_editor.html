@@ -714,6 +714,11 @@
     .node.folded .row.ctrl.quiet {
       display: none;
     }
+    /* The node last opened stands over the others, and opaque, should it still meet one. */
+    .node.lifted {
+      z-index: 2;
+      background: rgba(255, 255, 255, 0.96);
+    }
     .row.fold {
       cursor: pointer;
       color: var(--text-muted);
@@ -1878,6 +1883,31 @@
     });
   }
 
+  // Opening a node pushes the nodes under it in its column down by what it grew, and closing it
+  // pulls them back up, so the opened rows never land on a neighbour.
+  function toggleFold(el) {
+    const key = el.dataset.node;
+    const before = el.offsetHeight;
+    const bottom = state.layout[key].y + before;
+    if (unfolded.has(key)) unfolded.delete(key); else unfolded.add(key);
+    try { localStorage.setItem(UNFOLDED_KEY, JSON.stringify([...unfolded])); } catch (e) { /* storage unavailable */ }
+    renderWires();
+    const delta = el.offsetHeight - before;
+    if (delta) {
+      const x0 = state.layout[key].x, x1 = x0 + el.offsetWidth;
+      world.querySelectorAll('.node').forEach(n => {
+        const pos = state.layout[n.dataset.node];
+        if (n === el || pos.x >= x1 || pos.x + n.offsetWidth <= x0 || pos.y < bottom - 1) return;
+        pos.y += delta;
+        n.style.top = pos.y + 'px';
+      });
+      saveLocal();
+      renderWires();
+    }
+    world.querySelectorAll('.node.lifted').forEach(n => n.classList.remove('lifted'));
+    if (unfolded.has(key)) el.classList.add('lifted');
+  }
+
   function renderWires() {
     if (!canvas.clientWidth) return;
     svg.querySelectorAll('path:not(.temp)').forEach(p => p.remove());
@@ -2158,10 +2188,7 @@
   world.addEventListener('click', e => {
     const fold = e.target.closest('.row.fold');
     if (fold) {
-      const key = fold.closest('.node').dataset.node;
-      if (unfolded.has(key)) unfolded.delete(key); else unfolded.add(key);
-      try { localStorage.setItem(UNFOLDED_KEY, JSON.stringify([...unfolded])); } catch (err) { /* storage unavailable */ }
-      renderWires();
+      toggleFold(fold.closest('.node'));
       return;
     }
     const badge = e.target.closest('.badge');
