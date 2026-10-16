@@ -4,7 +4,10 @@ module Spms1
   # pitch domain being linear in semitones makes the glide an exponential one in pitch, which is
   # what an analog synth's portamento is. It takes any signal, though, so it rounds off the steps of
   # a stepped one as well. Direct In is added to the output past the lag, for what should move the
-  # pitch at once rather than glide, as a pitch bend should.
+  # pitch at once rather than glide, as a pitch bend should, and Offset Coarse and Fine shift the
+  # output in the same place: a transposition that takes effect at once, ahead of everything the
+  # slew feeds, so two oscillators on it move together and keep their own Pitch Coarse and Fine as
+  # the interval between them.
   class Slew
     # Lookup table for exponential time mapping, the envelope's: a twelfth of an octave per index,
     # so one CC step of the 120-step control range moves the time by a semitone and the whole dial
@@ -28,6 +31,11 @@ module Spms1
     CONTROL_RATE_DIVISOR = 4
     CONTROL_RATE_MASK = CONTROL_RATE_DIVISOR - 1
 
+    # The offsets' ranges, the oscillator's Pitch Coarse and Fine's: 60 semitones and 60 cents
+    # either way, in the pitch domain's units, where 120 semitones are one.
+    OFFSET_COARSE_RANGE = 60.0 / 120.0
+    OFFSET_FINE_RANGE   = 0.6 / 120.0
+
     def initialize(sample_rate)
       @sample_rate = sample_rate
       @time = 0.0
@@ -43,6 +51,9 @@ module Spms1
       @stage_1_direct_depth = 0.0
       @current_direct_depth = 0.0
       @sample_counter = 0
+      @offset_coarse = 0.0
+      @offset_fine = 0.0
+      @offset = 0.0
     end
 
     # Time is unipolar, [0.0, 1.0]; see TIME_BASE for scaling details. 0.0 turns the slew off.
@@ -73,6 +84,21 @@ module Spms1
       @direct_depth = @direct_amount * @direct_polarity
     end
 
+    # Offset Coarse and Offset Fine are bipolar, [-0.5, 0.5], 0.0 at a controller's centre detent,
+    # and linear about it, so every step lands on a whole semitone or a whole cent, as the
+    # oscillator's Pitch Coarse and Fine do. Not smoothed, for the reasons the oscillator gives.
+    def set_offset_coarse(offset_coarse)
+      clamped = (offset_coarse < -0.5) ? -0.5 : ((offset_coarse > 0.5) ? 0.5 : offset_coarse)
+      @offset_coarse = (clamped + clamped) * OFFSET_COARSE_RANGE
+      @offset = @offset_coarse + @offset_fine
+    end
+
+    def set_offset_fine(offset_fine)
+      clamped = (offset_fine < -0.5) ? -0.5 : ((offset_fine > 0.5) ? 0.5 : offset_fine)
+      @offset_fine = (clamped + clamped) * OFFSET_FINE_RANGE
+      @offset = @offset_coarse + @offset_fine
+    end
+
     # The distance left is what is carried from sample to sample, and the output is the input plus
     # it. Carrying the output instead, as a one-pole filter usually does, rounds every step to the
     # spacing of floats at the output, and at the longest time a step of an octave's glide is only
@@ -87,8 +113,8 @@ module Spms1
     # share each sample, it would otherwise sink into denormals and stick at the smallest one,
     # which x86 computes slowly.
     #
-    # Direct In is added last, so that the lag never holds it, and so that at zero it leaves the
-    # output as it was, bit for bit.
+    # Direct In and the offset are added last, so that the lag never holds them, and so that at
+    # zero they leave the output as it was, bit for bit.
     def process(input = 0.0, direct_input = 0.0)
       if @sample_counter == 0
         @stage_1_direct_depth = Dsp.smooth(@direct_depth, @stage_1_direct_depth, @smoothing_target_blend)
@@ -100,7 +126,7 @@ module Spms1
       @last_input = input
       flushed = Dsp.flush_tiny(distance)
       @distance = flushed - flushed * @blend
-      (input + @distance) + (direct_input * @current_direct_depth)
+      ((input + @distance) + (direct_input * @current_direct_depth)) + @offset
     end
 
     private

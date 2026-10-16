@@ -98,8 +98,8 @@ SIGNALS_SIZE = 128
 # CC value normalization. Each control slot is unipolar or bipolar, matching the range its
 # parameter clamps to, and takes the converter of its kind: unipolar is 0.0..1.0, the span of an
 # envelope, and bipolar is -0.5..0.5, the span of an LFO, with 0.0 at CC 64 where a MIDI
-# controller puts its detent. Pitch Coarse and Pitch Fine are bipolar, being offsets about that detent,
-# and so are the polarities, whose sign is what they set. Both map CC 4..124 to the full range and
+# controller puts its detent. Pitch Coarse, Pitch Fine and the slew's Offset Coarse and Fine are
+# bipolar, being offsets about that detent, and so are the polarities, whose sign is what they set. Both map CC 4..124 to the full range and
 # clamp anything outside. Every lookup table in the synth is spaced to match --
 # FREQ_TABLE is semitone-spaced across 120, and EXP_TABLE and Q_TABLE are 121 entries over their
 # ranges -- so a CC value lands on an integer table index, and CC 64 is the exact mid-value of
@@ -309,6 +309,8 @@ while true
   source_slew_1_direct_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_SLEW_1_DIRECT_POL)
   source_lfo_1_level_mod_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_LEVEL_MOD_AMT)
   source_lfo_1_level_mod_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_LEVEL_MOD_POL)
+  source_slew_1_offset_coarse = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_SLEW_1_OFFSET_COARSE)
+  source_slew_1_offset_fine = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_SLEW_1_OFFSET_FINE)
 
   # Which CC fills each control slot. The bus is the only thing downstream reads, so this is
   # where MIDI enters and the only place a CC number appears.
@@ -355,6 +357,8 @@ while true
   cc_slew_1_direct_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_SLEW_1_DIRECT_POL)
   cc_lfo_1_level_mod_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_LEVEL_MOD_AMT)
   cc_lfo_1_level_mod_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_LEVEL_MOD_POL)
+  cc_slew_1_offset_coarse = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_SLEW_1_OFFSET_COARSE)
+  cc_slew_1_offset_fine = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_SLEW_1_OFFSET_FINE)
   cc_general_mod_wheel     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_MOD_WHEEL)
   cc_general_1             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_1)
   cc_general_2             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_2)
@@ -404,6 +408,8 @@ while true
   signals[SIGNAL_SLEW_1_DIRECT_POL] = cc_or_zero(cc_slew_1_direct_pol, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_slew_1_direct_pol)))
   signals[SIGNAL_LFO_1_LEVEL_MOD_AMT] = cc_or_zero(cc_lfo_1_level_mod_amt, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_level_mod_amt)))
   signals[SIGNAL_LFO_1_LEVEL_MOD_POL] = cc_or_zero(cc_lfo_1_level_mod_pol, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_level_mod_pol)))
+  signals[SIGNAL_SLEW_1_OFFSET_COARSE] = cc_or_zero(cc_slew_1_offset_coarse, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_slew_1_offset_coarse)))
+  signals[SIGNAL_SLEW_1_OFFSET_FINE] = cc_or_zero(cc_slew_1_offset_fine, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_slew_1_offset_fine)))
   signals[SIGNAL_GENERAL_MOD_WHEEL] = cc_or_zero(cc_general_mod_wheel, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_general_mod_wheel)))
   # Each General CC fills two slots, the same value taken both ways.
   general_1 = C.get_midi_cc_value(MIDI_CH, cc_general_1)
@@ -453,6 +459,8 @@ while true
   slew_1.set_time(signals[source_slew_1_time])
   slew_1.set_direct_amount(signals[source_slew_1_direct_amt])
   slew_1.set_direct_polarity(signals[source_slew_1_direct_pol])
+  slew_1.set_offset_coarse(signals[source_slew_1_offset_coarse])
+  slew_1.set_offset_fine(signals[source_slew_1_offset_fine])
   osc_1.set_pulse_width(signals[source_osc_1_pulse_width])
   osc_1.set_pw_modulation_amount(signals[source_osc_1_pw_mod_amt])
   osc_1.set_pw_modulation_polarity(signals[source_osc_1_pw_mod_pol])

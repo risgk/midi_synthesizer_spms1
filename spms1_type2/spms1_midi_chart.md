@@ -24,8 +24,6 @@
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Control                    20 | x             | o             | Osc Wave (Saw to Square)             |
 | Change                     13 | x             | o             | Osc Mod 2 Amt                        |
-|                            86 | x             | o             | Osc Pitch Coarse (+-5 Octaves)       |
-|                            70 | x             | o             | Osc Pitch Fine (+-60 Cents)          |
 |                            19 | x             | o             | Osc Pulse Width (50% to 0%)          |
 |                           103 | x             | o             | Osc PW Mod Amt                       |
 |                            74 | x             | o             | Filter Cutoff                        |
@@ -48,6 +46,8 @@
 |                            94 | x             | o             | Delay Mix                            |
 |                             5 | x             | o             | Slew Time (Portamento Time)          |
 |                            57 | x             | o             | Slew Direct Amt (Pitch Bend Range)   |
+|                            86 | x             | o             | Slew Offset Coarse (+-5 Octaves)     |
+|                            70 | x             | o             | Slew Offset Fine (+-60 Cents)        |
 |                             1 | x             | o             | General Mod Wheel (Unipolar)         |
 |                            16 | x             | o             | General 1 (Unipolar and Bipolar)     |
 |                            17 | x             | o             | General 2 (Unipolar and Bipolar)     |
