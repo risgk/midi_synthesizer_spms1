@@ -156,8 +156,8 @@ flowchart LR
 
   NOTE -. Gate .-> EG
   NOTE -. Pitch .-> SLEW
-  SLEW -. Pitch .-> OSC
-  LFO -. Mod .-> OSC
+  SLEW -. Pitch Mod 1 .-> OSC
+  LFO -. Pitch Mod 2 .-> OSC
   LFO -. PW Mod .-> OSC
   EG -. Mod .-> FILTER
   EG -. Mod .-> AMP
@@ -171,10 +171,10 @@ portamento. Slew 1 Time is on CC 5, Portamento Time in the MIDI spec, and powers
 the slew is off and passes the pitch through exactly as it arrives.
 
 The LFO goes straight to the oscillator, both to its pitch and to its pulse width, at its full
-level: LFO 1 Polarity reads the constant 0.5. Osc 1 Pitch Mod Polarity reads the constant 0.1, which
-brings it down to a vibrato depth on the pitch, while Osc 1 PW Mod Polarity reads 0.5 and takes
-the LFO whole. Each modulation depth spans the whole range of what it moves, so bringing a source
-down to a musical depth is left to the patch rather than built into the oscillator.
+level: LFO 1 Polarity reads the constant 0.5. Osc 1 Pitch Mod 2 Polarity reads the constant 0.1,
+which brings it down to a vibrato depth on the pitch, while Osc 1 PW Mod Polarity reads 0.5 and
+takes the LFO whole. Each modulation depth spans the whole range of what it moves, so bringing a
+source down to a musical depth is left to the patch rather than built into the oscillator.
 
 The voice is mono up to the amp. The chorus takes it and puts out a left and a right, the delay
 takes the two sides and keeps them apart, and its two outputs are the two sides of the final
@@ -368,8 +368,8 @@ passes it through rather than muting it.
 | CC 98 | Module input | | CC 98 | Module input |
 | ----- | ------ | - | ----- | ------ |
 | 0 | EG 1 Gate | | 9 | Chorus 1 Audio In |
-| 1 | Osc 1 Pitch | | 10 | Delay 1 Audio In L |
-| 2 | Osc 1 Pitch Mod In | | 11 | Delay 1 Audio In R |
+| 1 | Osc 1 Pitch Mod 1 In | | 10 | Delay 1 Audio In L |
+| 2 | Osc 1 Pitch Mod 2 In | | 11 | Delay 1 Audio In R |
 | 3 | Filter 1 Audio In | | 12 | Final Output L |
 | 4 | Filter 1 Mod In | | 13 | Final Output R |
 | 5 | Amp 1 Audio In | | 14 | Slew 1 In |
@@ -381,14 +381,15 @@ passes it through rather than muting it.
 
 Most of these take what their name suggests, but three do not say it on their face. A Gate is a
 threshold rather than a level: an envelope triggers as the signal reaches 0.25 and releases as it
-falls back. A Pitch is -0.5 to +0.5 across MIDI notes 0 to 120, so 0.0 is note 60 and a tenth of
-a unit is an octave. And a Mod In is taken as it arrives: nothing is held to a range on the way
-in, and what gets clamped is the value the module ends up with -- cutoff to the ends of its dial,
-pitch to -0.5 and +0.5, pulse width to 0.0 and 1.0. A PW Mod In is a Mod In too. A mixer adds without a ceiling, so a loud modulation pins its
-destination at one end rather than being trimmed on the way in. The amp is the exception, and
-holds its modulation input to -1.0 and +1.0: it is an attenuator, so a modulation may scale its
-gain down but never up. The chorus and the delay hold their audio inputs to the same one unit.
-The slew's In takes anything, as a Mod In does, and puts out what it takes, only later.
+falls back. A pitch, as Note Pitch carries one to Pitch Mod 1 In, is -0.5 to +0.5 across MIDI notes
+0 to 120, so 0.0 is note 60 and a tenth of a unit is an octave. And a Mod In is taken as it arrives:
+nothing is held to a range on the way in, and what gets clamped is the value the module ends up with
+-- cutoff to the ends of its dial, pitch to -0.5 and +0.5, pulse width to 0.0 and 1.0. The
+oscillator's Pitch Mod 1 In, Pitch Mod 2 In and PW Mod In are Mod Ins too. A mixer adds without a ceiling, so a loud modulation pins its destination at one
+end rather than being trimmed on the way in. The amp is the exception, and holds its modulation
+input to -1.0 and +1.0: it is an attenuator, so a modulation may scale its gain down but never up.
+The chorus and the delay hold their audio inputs to the same one unit. The slew's In takes anything,
+as a Mod In does, and puts out what it takes, only later.
 
 The two sides of the final output are read separately, so either can be pointed anywhere; point
 both at the same signal for a mono output.
@@ -399,19 +400,20 @@ both at the same signal for a mono output.
 
 | CC 98 | Parameter | | CC 98 | Parameter | | CC 98 | Parameter |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | LFO 1 Rate | | 13 | Filter 1 Cutoff | | 26 | Delay 1 Time |
-| 1 | LFO 1 Level | | 14 | Filter 1 Resonance | | 27 | Delay 1 Feedback |
-| 2 | LFO 1 Polarity | | 15 | Filter 1 Gain | | 28 | Delay 1 Mix |
-| 3 | EG 1 Attack | | 16 | Filter 1 Mod Amt | | 34 | Slew 1 Time |
-| 4 | EG 1 Decay | | 17 | Filter 1 Mod Polarity | | 35 | Osc 1 Pulse Width |
-| 5 | EG 1 Sustain | | 18 | Amp 1 Gain | | 36 | Osc 1 PW Mod Amt |
-| 6 | EG 1 Level | | 19 | Mixer 1 Level 1 | | 37 | Osc 1 PW Mod Polarity |
-| 7 | EG 1 Polarity | | 20 | Mixer 1 Polarity 1 | | 38 | EG 1 Release Switch |
-| 8 | Osc 1 Wave | | 21 | Mixer 1 Level 2 | | 39 | Amp 1 Mod Amt |
-| 9 | Osc 1 Coarse Tune | | 22 | Mixer 1 Polarity 2 | | 40 | Amp 1 Mod Polarity |
-| 10 | Osc 1 Fine Tune | | 23 | Chorus 1 Rate | | 41 | LFO 1 Rate Mod Amt |
-| 11 | Osc 1 Pitch Mod Amt | | 24 | Chorus 1 Depth | | 42 | LFO 1 Rate Mod Polarity |
-| 12 | Osc 1 Pitch Mod Polarity | | 25 | Chorus 1 Mix | |  |  |
+| 0 | LFO 1 Rate | | 14 | Filter 1 Resonance | | 28 | Delay 1 Mix |
+| 1 | LFO 1 Level | | 15 | Filter 1 Gain | | 34 | Slew 1 Time |
+| 2 | LFO 1 Polarity | | 16 | Filter 1 Mod Amt | | 35 | Osc 1 Pulse Width |
+| 3 | EG 1 Attack | | 17 | Filter 1 Mod Polarity | | 36 | Osc 1 PW Mod Amt |
+| 4 | EG 1 Decay | | 18 | Amp 1 Gain | | 37 | Osc 1 PW Mod Polarity |
+| 5 | EG 1 Sustain | | 19 | Mixer 1 Level 1 | | 38 | EG 1 Release Switch |
+| 6 | EG 1 Level | | 20 | Mixer 1 Polarity 1 | | 39 | Amp 1 Mod Amt |
+| 7 | EG 1 Polarity | | 21 | Mixer 1 Level 2 | | 40 | Amp 1 Mod Polarity |
+| 8 | Osc 1 Wave | | 22 | Mixer 1 Polarity 2 | | 41 | LFO 1 Rate Mod Amt |
+| 9 | Osc 1 Coarse Tune | | 23 | Chorus 1 Rate | | 42 | LFO 1 Rate Mod Polarity |
+| 10 | Osc 1 Fine Tune | | 24 | Chorus 1 Depth | | 43 | Osc 1 Pitch Mod 1 Amt |
+| 11 | Osc 1 Pitch Mod 2 Amt | | 25 | Chorus 1 Mix | | 44 | Osc 1 Pitch Mod 1 Polarity |
+| 12 | Osc 1 Pitch Mod 2 Polarity | | 26 | Delay 1 Time | |  |  |
+| 13 | Filter 1 Cutoff | | 27 | Delay 1 Feedback | |  |  |
 
 <!-- patch_gen end -->
 
@@ -457,30 +459,31 @@ two slots, a unipolar and a bipolar one. See the General slots below.
 
 | ID | Signal | | ID | Signal | | ID | Signal |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | None (constant 0.0) | | 24 | EG 1 Sustain | | 48 | Note Pitch ± |
-| 1 | Constant 1.0 | | 25 | EG 1 Level | | 49 | Note Gate |
-| 2 | Constant 0.5 | | 26 | EG 1 Polarity ± | | 50 | Pitch Bend ± |
-| 3 | Constant 0.2 | | 27 | Osc 1 Wave | | 51 | General Mod Wheel |
-| 4 | Constant 0.1 | | 28 | Osc 1 Coarse Tune ± | | 52 | General Unipolar 1 |
-| 5 | Constant -0.1 | | 29 | Osc 1 Fine Tune ± | | 53 | General Unipolar 2 |
-| 6 | Constant -0.2 | | 30 | Osc 1 Pitch Mod Amt | | 54 | General Unipolar 3 |
-| 7 | Constant -0.5 | | 31 | Osc 1 Pitch Mod Polarity ± | | 55 | General Unipolar 4 |
-| 8 | Constant -1.0 | | 32 | Filter 1 Cutoff | | 56 | General Bipolar 1 ± |
-| 9 | LFO 1 Output ± | | 33 | Filter 1 Resonance | | 57 | General Bipolar 2 ± |
-| 10 | EG 1 Output ± | | 34 | Filter 1 Gain | | 58 | General Bipolar 3 ± |
-| 11 | Osc 1 Output ± | | 35 | Filter 1 Mod Amt | | 59 | General Bipolar 4 ± |
-| 12 | Filter 1 Output LP ± | | 36 | Filter 1 Mod Polarity ± | | 60 | Slew 1 Output ± |
-| 13 | Amp 1 Output ± | | 37 | Amp 1 Gain | | 61 | Slew 1 Time |
-| 14 | Mixer 1 Output ± | | 38 | Mixer 1 Level 1 | | 62 | Osc 1 Pulse Width |
-| 15 | Chorus 1 Output L ± | | 39 | Mixer 1 Polarity 1 ± | | 63 | Osc 1 PW Mod Amt |
-| 16 | Chorus 1 Output R ± | | 40 | Mixer 1 Level 2 | | 64 | Osc 1 PW Mod Polarity ± |
-| 17 | Delay 1 Output L ± | | 41 | Mixer 1 Polarity 2 ± | | 65 | Filter 1 Output BP ± |
-| 18 | Delay 1 Output R ± | | 42 | Chorus 1 Rate | | 66 | Filter 1 Output HP ± |
-| 19 | LFO 1 Rate | | 43 | Chorus 1 Depth | | 67 | EG 1 Release Switch |
-| 20 | LFO 1 Level | | 44 | Chorus 1 Mix | | 68 | Amp 1 Mod Amt |
-| 21 | LFO 1 Polarity ± | | 45 | Delay 1 Time | | 69 | Amp 1 Mod Polarity ± |
-| 22 | EG 1 Attack | | 46 | Delay 1 Feedback | | 70 | LFO 1 Rate Mod Amt |
-| 23 | EG 1 Decay | | 47 | Delay 1 Mix | | 71 | LFO 1 Rate Mod Polarity ± |
+| 0 | None (constant 0.0) | | 25 | EG 1 Level | | 50 | Pitch Bend ± |
+| 1 | Constant 1.0 | | 26 | EG 1 Polarity ± | | 51 | General Mod Wheel |
+| 2 | Constant 0.5 | | 27 | Osc 1 Wave | | 52 | General Unipolar 1 |
+| 3 | Constant 0.2 | | 28 | Osc 1 Coarse Tune ± | | 53 | General Unipolar 2 |
+| 4 | Constant 0.1 | | 29 | Osc 1 Fine Tune ± | | 54 | General Unipolar 3 |
+| 5 | Constant -0.1 | | 30 | Osc 1 Pitch Mod 2 Amt | | 55 | General Unipolar 4 |
+| 6 | Constant -0.2 | | 31 | Osc 1 Pitch Mod 2 Polarity ± | | 56 | General Bipolar 1 ± |
+| 7 | Constant -0.5 | | 32 | Filter 1 Cutoff | | 57 | General Bipolar 2 ± |
+| 8 | Constant -1.0 | | 33 | Filter 1 Resonance | | 58 | General Bipolar 3 ± |
+| 9 | LFO 1 Output ± | | 34 | Filter 1 Gain | | 59 | General Bipolar 4 ± |
+| 10 | EG 1 Output ± | | 35 | Filter 1 Mod Amt | | 60 | Slew 1 Output ± |
+| 11 | Osc 1 Output ± | | 36 | Filter 1 Mod Polarity ± | | 61 | Slew 1 Time |
+| 12 | Filter 1 Output LP ± | | 37 | Amp 1 Gain | | 62 | Osc 1 Pulse Width |
+| 13 | Amp 1 Output ± | | 38 | Mixer 1 Level 1 | | 63 | Osc 1 PW Mod Amt |
+| 14 | Mixer 1 Output ± | | 39 | Mixer 1 Polarity 1 ± | | 64 | Osc 1 PW Mod Polarity ± |
+| 15 | Chorus 1 Output L ± | | 40 | Mixer 1 Level 2 | | 65 | Filter 1 Output BP ± |
+| 16 | Chorus 1 Output R ± | | 41 | Mixer 1 Polarity 2 ± | | 66 | Filter 1 Output HP ± |
+| 17 | Delay 1 Output L ± | | 42 | Chorus 1 Rate | | 67 | EG 1 Release Switch |
+| 18 | Delay 1 Output R ± | | 43 | Chorus 1 Depth | | 68 | Amp 1 Mod Amt |
+| 19 | LFO 1 Rate | | 44 | Chorus 1 Mix | | 69 | Amp 1 Mod Polarity ± |
+| 20 | LFO 1 Level | | 45 | Delay 1 Time | | 70 | LFO 1 Rate Mod Amt |
+| 21 | LFO 1 Polarity ± | | 46 | Delay 1 Feedback | | 71 | LFO 1 Rate Mod Polarity ± |
+| 22 | EG 1 Attack | | 47 | Delay 1 Mix | | 72 | Osc 1 Pitch Mod 1 Amt |
+| 23 | EG 1 Decay | | 48 | Note Pitch ± | | 73 | Osc 1 Pitch Mod 1 Polarity ± |
+| 24 | EG 1 Sustain | | 49 | Note Gate | |  |  |
 
 <!-- patch_gen end -->
 
@@ -491,14 +494,14 @@ its Polarity is turned negative. Everything unmarked runs 0.0 to 1.0 -- Note Gat
 unipolar control slot. The bus carries both kinds under one numbering, so the range belongs to the slot
 rather than to the sort of thing that wrote it.
 
-Slots 19-47, 61, 62-64 and 67-71 hold the values arriving from CC, so a parameter reads its own CC by default. Each
-parameter is unipolar or bipolar, and its slot takes the same range. A unipolar one runs 0.0 to
-1.0 from CC 4 to CC 124, the span of an envelope, so an envelope pointed at one sweeps the whole
-of its dial. A bipolar one runs -0.5 to +0.5 with CC 64 at 0.0, the span of an LFO, so a bipolar
-source pointed at one swings it about the middle. The two tune controls are bipolar, since their
-middle is no change at all, and so is every Polarity -- the LFO's, the EG's, the mixer's and the five
-Mod Polarity controls -- since its sign is what it sets. Pointing a parameter at another slot is what
-makes a modulation. A slot with no CC holds 0.0.
+Slots 19-47, 61, 62-64 and 67-73 hold the values arriving from CC, so a parameter reads its own CC
+by default. Each parameter is unipolar or bipolar, and its slot takes the same range. A unipolar one
+runs 0.0 to 1.0 from CC 4 to CC 124, the span of an envelope, so an envelope pointed at one sweeps
+the whole of its dial. A bipolar one runs -0.5 to +0.5 with CC 64 at 0.0, the span of an LFO, so a
+bipolar source pointed at one swings it about the middle. The two tune controls are bipolar, since
+their middle is no change at all, and so is every Polarity -- the LFO's, the EG's, the mixer's and
+the six Mod Polarity controls -- since its sign is what it sets. Pointing a parameter at another
+slot is what makes a modulation. A slot with no CC holds 0.0.
 
 Slots 51-59, the General slots, are control slots that no parameter owns: a CC put on the bus for
 any module input or parameter to read. General Mod Wheel reads CC 1, runs 0.0 to 1.0 and powers
@@ -524,13 +527,13 @@ first still held.
 Slots 0-8 are constants that nothing writes, for inputs that want a fixed value rather than a
 source. Signal 0 is also what an entry nobody has set reads as, so an unrouted input is silent
 rather than wired to whatever sits in the first slot. Signal 1 is the value an unmodulated input
-wants: routing an amp's modulation input to it leaves the amp at full level. Signals 0 and 1 are
-the two ends of a unipolar parameter's range and Signals 7 and 2 of a bipolar one, for pinning
-one there; Signal 2 is also the middle of a unipolar dial. Signal 3 is a fifth of full scale and
-Signal 6 its negative. Signal 4 is the Osc 1 Pitch Mod Polarity the default patch uses, which brings the
-LFO down to a vibrato depth, and Signal 5 its negative. A constant on a mixer's second input
-shifts a signal between the two kinds: -0.5 turns one that runs one way into one that swings
-both, and +0.5 the other way round.
+wants: routing an amp's modulation input to it leaves the amp at full level. Signals 0 and 1 are the
+two ends of a unipolar parameter's range and Signals 7 and 2 of a bipolar one, for pinning one
+there; Signal 2 is also the middle of a unipolar dial. Signal 3 is a fifth of full scale and Signal
+6 its negative. Signal 4 is the Osc 1 Pitch Mod 2 Polarity the default patch uses, which brings the
+LFO down to a vibrato depth, and Signal 5 its negative. A constant on a mixer's second input shifts
+a signal between the two kinds: -0.5 turns one that runs one way into one that swings both, and +0.5
+the other way round.
 
 The ID numbers are not stable across firmware versions. A patch is never saved, so a new module
 type, another instance of one, or another signal may renumber everything after it. Read these
@@ -548,9 +551,9 @@ negated at -0.5 (CC 4), through silence at 0.0 (CC 64), to unchanged at +0.5 (CC
 CC: the default patch points Level at the constant 1.0 and Polarity at the constant 0.5, which
 pass the LFO through as it is.
 
-LFO 1 Rate Mod In moves the rate by Rate Mod Amt times Rate Mod Polarity, as Pitch Mod In moves the
-oscillator's pitch: a unit of input times depth is the whole rate range, ten octaves, so 0.1 is an
-octave. Neither has a CC, and the default patch points them at 1.0 and +0.5, a depth of 1.0, and
+LFO 1 Rate Mod In moves the rate by Rate Mod Amt times Rate Mod Polarity, as Pitch Mod 2 In moves
+the oscillator's pitch: a unit of input times depth is the whole rate range, ten octaves, so 0.1 is
+an octave. Neither has a CC, and the default patch points them at 1.0 and +0.5, a depth of 1.0, and
 leaves Rate Mod In unrouted, so routing a source to it is all it takes. It is read every fourth
 sample, where the LFO works out its rate, rather than every sample as the other module inputs are.
 
@@ -575,16 +578,23 @@ the way between scales it, so it sets depth as well as direction. Mod Polarity h
 default patch points it at a constant, so either can be the one that is turned: Mod Amt for
 a depth in one direction, Mod Polarity for one that crosses zero.
 
-Osc 1 Pitch Mod Amt is a depth, not an offset, and it reaches the whole pitch range: at its top a
+Osc 1 Pitch Mod 2 Amt is a depth, not an offset, and it reaches the whole pitch range: at its top a
 bipolar source swings the pitch five octaves up and five down. That is a coarse dial for vibrato,
-half a semitone per CC step, which is why the default patch brings the LFO down to a fifth with
-Osc 1 Pitch Mod Polarity. There a semitone of vibrato sits at CC 14 and an octave at the top of the dial.
+half a semitone per CC step, which is why the default patch brings the LFO down to a fifth with Osc
+1 Pitch Mod 2 Polarity. There a semitone of vibrato sits at CC 14 and an octave at the top of the
+dial.
+
+Osc 1 Pitch Mod 1 In is where the note comes in, from Slew 1 in the default patch, and it is a
+modulation input like Pitch Mod 2 In, with a depth of its own: Pitch Mod 1 Amt times Pitch Mod 1
+Polarity. At exactly 1.0, the default, it plays the note in tune, a key a semitone; less brings
+the keys closer together, about note 60, and a negative depth turns the keyboard upside down.
+Neither has a CC: the default patch points them at 1.0 and +0.5.
 
 Osc 1 Pulse Width shifts the second of the two sawtooths that the morph is made of, from half a
 cycle at 0.0 (CC 4) toward a whole one at 1.0 (CC 124). At the square end of Osc 1 Wave that is a
 pulse of 50% at CC 4, 25% at CC 64 and 0%, silence, at CC 124; it is CC 19, where PRA32-U2 has
 Osc 1 Shape. Osc 1 PW Mod In moves it, by PW Mod Amt (CC 103) times PW Mod Polarity, the same
-way as Pitch Mod In, Pitch Mod Amt and Pitch Mod Polarity move the pitch. A unit of modulation is the whole pulse
+way as each Pitch Mod In, Amt and Polarity move the pitch. A unit of modulation is the whole pulse
 width range, so at the top of PW Mod Amt the LFO, which the default patch feeds it, swings the
 pulse width half the range either way: with Pulse Width at CC 64, from 50% to nearly 0%. The pulse
 width the modulation adds up to is held to 0.0 to 1.0.
@@ -650,7 +660,7 @@ changes only how fast the output moves, so it cannot step it.
 
 #### Examples
 
-- Vibrato is wired by default -- the LFO goes straight to the oscillator's pitch modulation input --
+- Vibrato is wired by default -- the LFO goes straight to the oscillator's Pitch Mod 2 input --
   so CC 13 sets the depth and CC 3 the rate. CC 99 = 2, CC 98 = 1, CC 6 = 51 takes LFO 1 Level
   from General Mod Wheel, so the wheel brings the vibrato in up to the depth CC 13 sets
 - Filter cutoff follows note pitch (keyboard tracking): CC 99 = 1, CC 98 = 4, CC 6 = 48 puts
@@ -670,11 +680,10 @@ changes only how fast the output moves, so it cannot step it.
   envelope's peak
 - The envelope drives the filter harder as a note starts: CC 99 = 2, CC 98 = 15, CC 6 = 10 takes
   the filter's input level from silence up to the top of its dial and back
-- Pitch swept by the envelope instead of the LFO: CC 99 = 1, CC 98 = 2, CC 6 = 10 puts the
-  envelope on the oscillator's pitch modulation input in the LFO's place, and CC 99 = 2, CC 98 = 12,
-  CC 6 = 2 sets Osc 1 Pitch Mod Polarity back to +0.5 from the LFO's vibrato depth; then set the depth on
-  CC 13. Nothing scales the envelope down on this path, so a semitone is at CC 5 and an octave at
-  CC 16
+- Pitch swept by the envelope instead of the LFO: CC 99 = 1, CC 98 = 2, CC 6 = 10 puts the envelope
+  on the oscillator's Pitch Mod 2 input in the LFO's place, and CC 99 = 2, CC 98 = 12, CC 6 = 2 sets
+  Osc 1 Pitch Mod 2 Polarity back to +0.5 from the LFO's vibrato depth; then set the depth on CC 13.
+  Nothing scales the envelope down on this path, so a semitone is at CC 5 and an octave at CC 16
 - Portamento is wired by default -- Note Pitch reaches the oscillator through Slew 1 -- so CC 5
   sets the time; CC 64 is a glide of about a tenth of a second. Every note glides, played legato
   or not. CC 99 = 2, CC 98 = 34, CC 6 = 51 takes the time from General Mod Wheel instead, so the
@@ -688,8 +697,8 @@ changes only how fast the output moves, so it cannot step it.
 - A CC that bends pitch both ways through the modulation input. Mixer 1 runs ahead of the
   oscillator and is free: CC 99 = 1, CC 98 = 7, CC 6 = 32 puts the filter cutoff's control slot on
   its first input, CC 98 = 8, CC 6 = 7 the constant -0.5 on its second, and CC 98 = 2, CC 6 = 14
-  points the oscillator's pitch modulation input at Mixer 1 in the LFO's place, and CC 99 = 2,
-  CC 98 = 12, CC 6 = 2 sets Osc 1 Pitch Mod Polarity back to +0.5. The slot is unipolar, so
+  points the oscillator's Pitch Mod 2 input at Mixer 1 in the LFO's place, and CC 99 = 2,
+  CC 98 = 12, CC 6 = 2 sets Osc 1 Pitch Mod 2 Polarity back to +0.5. The slot is unipolar, so
   that constant is what centres it on CC 64 as the LFO is on zero. CC 74 now bends the pitch down
   and up around the note, as far as CC 13 allows: a semitone either way at CC 6, an octave at
   CC 28
@@ -726,7 +735,7 @@ changes only how fast the output moves, so it cannot step it.
   the steps of a controller sending sparse CCs (e.g. every 20 ms). Osc 1 Coarse Tune and Fine Tune
   are not smoothed, so that the pitch follows right away, and neither is Slew 1 Time, which
   cannot step what it sets
-- A parameter source may point at any of the 128 slots. Slots above 71 read 0 until something
+- A parameter source may point at any of the 128 slots. Slots above 73 read 0 until something
   writes them, which leaves a parameter pointed at one at the bottom of a unipolar dial or the
   middle of a bipolar one
 - A parameter clamps its value to its own range, 0.0 to 1.0 or -0.5 to +0.5, and its control slot

@@ -77,8 +77,8 @@ signals:
   - { key: OSC_1_WAVEFORM,        id: 27, control: OSC_1_WAVEFORM }
   - { key: OSC_1_COARSE_TUNE,     id: 28, control: OSC_1_COARSE_TUNE }
   - { key: OSC_1_FINE_TUNE,       id: 29, control: OSC_1_FINE_TUNE }
-  - { key: OSC_1_PITCH_MOD_AMOUNT,   id: 30, control: OSC_1_PITCH_MOD_AMOUNT }
-  - { key: OSC_1_PITCH_MOD_POLARITY, id: 31, control: OSC_1_PITCH_MOD_POLARITY }
+  - { key: OSC_1_PITCH_MOD_2_AMOUNT,   id: 30, control: OSC_1_PITCH_MOD_2_AMOUNT }
+  - { key: OSC_1_PITCH_MOD_2_POLARITY, id: 31, control: OSC_1_PITCH_MOD_2_POLARITY }
   - { key: FILTER_1_CUTOFF,       id: 32, control: FILTER_1_CUTOFF }
   - { key: FILTER_1_RESONANCE,    id: 33, control: FILTER_1_RESONANCE }
   - { key: FILTER_1_GAIN,         id: 34, control: FILTER_1_GAIN }
@@ -133,13 +133,16 @@ signals:
   - { key: LFO_1_RATE_MOD_AMOUNT,   id: 70, control: LFO_1_RATE_MOD_AMOUNT }
   - { key: LFO_1_RATE_MOD_POLARITY, id: 71, control: LFO_1_RATE_MOD_POLARITY }
 
+  - { key: OSC_1_PITCH_MOD_1_AMOUNT,   id: 72, control: OSC_1_PITCH_MOD_1_AMOUNT }
+  - { key: OSC_1_PITCH_MOD_1_POLARITY, id: 73, control: OSC_1_PITCH_MOD_1_POLARITY }
+
 # Module inputs, NRPN category 1, by entry: what feeds each one in the default patch (`source`, a
 # signal key). `label` is the editor's, on the module; `name` the README's, after the module's
 # label. An input with no module is a side of the final output.
 inputs:
   - { entry: 0,  module: ENV_GEN_1, key: GATE,     label: Gate,    name: Gate,       source: GATE }
-  - { entry: 1,  module: OSC_1,     key: PITCH,    label: Pitch,   name: Pitch,      source: SLEW_1_OUTPUT }
-  - { entry: 2,  module: OSC_1,     key: PITCH_MOD, label: Pitch Mod, name: Pitch Mod In, source: LFO_1_OUTPUT }
+  - { entry: 1,  module: OSC_1,     key: PITCH_MOD_1, label: Pitch Mod 1, name: Pitch Mod 1 In, source: SLEW_1_OUTPUT }
+  - { entry: 2,  module: OSC_1,     key: PITCH_MOD_2, label: Pitch Mod 2, name: Pitch Mod 2 In, source: LFO_1_OUTPUT }
   - { entry: 3,  module: FILTER_1,  key: AUDIO,    label: Audio,   name: Audio In,   source: OSC_1_OUTPUT }
   - { entry: 4,  module: FILTER_1,  key: MOD,      label: Mod,     name: Mod In,     source: ENV_GEN_1_OUTPUT }
   - { entry: 5,  module: AMP_1,     key: AUDIO,    label: Audio,   name: Audio In,   source: FILTER_1_OUTPUT_LP }
@@ -180,16 +183,21 @@ controls:
   - { entry: 38, module: ENV_GEN_1, key: RELEASE_SWITCH, label: Release Switch, cc: 105, value: 124 }
   - { entry: 6,  module: ENV_GEN_1, key: LEVEL,        label: Level,        cc: 0,   source: ONE }
   - { entry: 7,  module: ENV_GEN_1, key: POLARITY,     label: Polarity,     cc: 0,   source: HALF, bipolar: true }
-  # Osc 1 in the editor: the pitch and its modulation, then the waveform and the pulse width's
-  # modulation, each target next to what moves it. Pulse Width, PW Mod Amt and PW Mod Polarity
+  # Osc 1 in the editor: the pitch and its two modulations, then the waveform and the pulse
+  # width's modulation, each target next to what moves it. Pulse Width, PW Mod Amt and PW Mod Polarity
   # came after Slew 1, so their entries follow its, but they are listed here. CC 19 is where
   # PRA32-U2 has Osc 1 Shape. Pulse Width and PW Mod Amt power up at CC 4, 0.0: a pulse of 50% and
   # no modulation of it, so the default patch renders as before. PW Mod Polarity has no CC and
   # reads +0.5, as each modulation polarity does.
   - { entry: 9,  module: OSC_1,     key: COARSE_TUNE,  label: Coarse Tune,  cc: 86,  value: 64, bipolar: true }
   - { entry: 10, module: OSC_1,     key: FINE_TUNE,    label: Fine Tune,    cc: 70,  value: 64, bipolar: true }
-  - { entry: 11, module: OSC_1,     key: PITCH_MOD_AMOUNT,   label: Pitch Mod Amt,      cc: 13,  value: 4 }
-  - { entry: 12, module: OSC_1,     key: PITCH_MOD_POLARITY, label: Pitch Mod Polarity, cc: 0,   value: 124, source: POINT_ONE, bipolar: true }
+  # Pitch Mod 1 Amt and Polarity came after LFO 1's rate modulation controls, so their entries
+  # follow theirs. Neither has a CC: the default patch points them at 1.0 and +0.5, a depth of
+  # exactly 1.0, which plays the note on Pitch Mod 1 In in tune, as the oscillator always did.
+  - { entry: 43, module: OSC_1,     key: PITCH_MOD_1_AMOUNT,   label: Pitch Mod 1 Amt,      cc: 0,   value: 124, source: ONE }
+  - { entry: 44, module: OSC_1,     key: PITCH_MOD_1_POLARITY, label: Pitch Mod 1 Polarity, cc: 0,   value: 124, source: HALF, bipolar: true }
+  - { entry: 11, module: OSC_1,     key: PITCH_MOD_2_AMOUNT,   label: Pitch Mod 2 Amt,      cc: 13,  value: 4 }
+  - { entry: 12, module: OSC_1,     key: PITCH_MOD_2_POLARITY, label: Pitch Mod 2 Polarity, cc: 0,   value: 124, source: POINT_ONE, bipolar: true }
   - { entry: 8,  module: OSC_1,     key: WAVEFORM,     label: Wave,         cc: 20,  value: 4 }
   - { entry: 35, module: OSC_1,     key: PULSE_WIDTH,  label: Pulse Width,  cc: 19,  value: 4 }
   - { entry: 36, module: OSC_1,     key: PW_MOD_AMOUNT,   label: PW Mod Amt,      cc: 103, value: 4 }
