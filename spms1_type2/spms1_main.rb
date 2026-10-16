@@ -158,12 +158,13 @@ spms1_fill_constant_signals(signals)
 # runs after both modulation sources and ahead of the oscillator, so it sees this sample's LFO and
 # envelope and can feed the oscillator, the filter and the amp without a sample's delay. The
 # default patch leaves it unused: the LFO goes straight to the
-# oscillator, and its own polarity reads the constant 0.1, which brings it down to a vibrato depth
-# so that Osc Mod Amt can span the whole pitch range the way every other modulation depth does.
+# oscillator's pitch and pulse width at its full level, and Osc 1 Mod Polarity reads the constant
+# 0.1, which brings it down to a vibrato depth on the pitch, so that Osc Mod Amt can span the
+# whole pitch range the way every other modulation depth does.
 # A mixer's parameters have no CC, so the default patch points them at constants instead: full
 # level and a polarity of +0.5, which makes a mixer pass its input through rather than mute it.
-# Each modulation polarity has no CC either and reads +0.5, which leaves the amount in charge.
-# LFO 1 Level has no CC either and reads 1.0. EG 1 Level and Polarity read 1.0 and +0.5, passing
+# Each modulation polarity has no CC either and reads +0.5, which leaves the amount in charge,
+# but for the pitch's. LFO 1 Level and Polarity have no CC either and read 1.0 and +0.5. EG 1 Level and Polarity read 1.0 and +0.5, passing
 # the envelope as it is. The chorus and the delay run last, after the amp: the chorus takes the mono
 # amp and spreads it into a left and a right, the delay takes the two sides, and its two outputs
 # are what the final output's left and right read.
@@ -247,6 +248,7 @@ while true
   source_output_l        = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OUTPUT_L)
   source_output_r        = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OUTPUT_R)
   source_slew_1_in       = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_SLEW_1_IN)
+  source_osc_1_pw_mod    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PW_MOD)
 
   # Parameter sources. Read once per buffer rather than per sample: each destination smooths at
   # the control rate with a 2.67 ms time constant, which swallows the difference between feeding
@@ -283,7 +285,8 @@ while true
   source_delay_1_mix           = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_MIX)
   source_slew_1_time           = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_SLEW_1_TIME)
   source_osc_1_pulse_width     = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PULSE_WIDTH)
-  source_osc_1_mod_destination = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_MOD_DESTINATION)
+  source_osc_1_pw_mod_amount   = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PW_MOD_AMOUNT)
+  source_osc_1_pw_mod_polarity = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PW_MOD_POLARITY)
 
   # Which CC fills each control slot. The bus is the only thing downstream reads, so this is
   # where MIDI enters and the only place a CC number appears.
@@ -318,7 +321,8 @@ while true
   cc_delay_1_mix           = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_DELAY_1_MIX)
   cc_slew_1_time           = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_SLEW_1_TIME)
   cc_osc_1_pulse_width     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_PULSE_WIDTH)
-  cc_osc_1_mod_destination = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_MOD_DESTINATION)
+  cc_osc_1_pw_mod_amount   = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_PW_MOD_AMOUNT)
+  cc_osc_1_pw_mod_polarity = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_PW_MOD_POLARITY)
   cc_general_mod_wheel     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_MOD_WHEEL)
   cc_general_1             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_1)
   cc_general_2             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_2)
@@ -356,7 +360,8 @@ while true
   signals[SIGNAL_DELAY_1_MIX] = cc_or_zero(cc_delay_1_mix, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_delay_1_mix)))
   signals[SIGNAL_SLEW_1_TIME] = cc_or_zero(cc_slew_1_time, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_slew_1_time)))
   signals[SIGNAL_OSC_1_PULSE_WIDTH] = cc_or_zero(cc_osc_1_pulse_width, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_pulse_width)))
-  signals[SIGNAL_OSC_1_MOD_DESTINATION] = cc_or_zero(cc_osc_1_mod_destination, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_mod_destination)))
+  signals[SIGNAL_OSC_1_PW_MOD_AMOUNT] = cc_or_zero(cc_osc_1_pw_mod_amount, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_pw_mod_amount)))
+  signals[SIGNAL_OSC_1_PW_MOD_POLARITY] = cc_or_zero(cc_osc_1_pw_mod_polarity, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_pw_mod_polarity)))
   signals[SIGNAL_GENERAL_MOD_WHEEL] = cc_or_zero(cc_general_mod_wheel, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_general_mod_wheel)))
   # Each General CC fills two slots, the same value taken both ways.
   general_1 = C.get_midi_cc_value(MIDI_CH, cc_general_1)
@@ -403,7 +408,8 @@ while true
   delay_1.set_mix(signals[source_delay_1_mix])
   slew_1.set_time(signals[source_slew_1_time])
   osc_1.set_pulse_width(signals[source_osc_1_pulse_width])
-  osc_1.set_modulation_destination(signals[source_osc_1_mod_destination])
+  osc_1.set_pw_modulation_amount(signals[source_osc_1_pw_mod_amount])
+  osc_1.set_pw_modulation_polarity(signals[source_osc_1_pw_mod_polarity])
 
   i = 0
   while i < AUDIO_BUFFER_WORDS
@@ -430,7 +436,7 @@ while true
       when 2 # MODULE_ENV_GEN_1
         signals[10] = env_gen_1.process(signals[source_env_gen_1_gate]) # SIGNAL_ENV_GEN_1_OUTPUT
       when 3 # MODULE_OSC_1
-        signals[11] = osc_1.process(signals[source_osc_1_pitch], signals[source_osc_1_mod]) # SIGNAL_OSC_1_OUTPUT
+        signals[11] = osc_1.process(signals[source_osc_1_pitch], signals[source_osc_1_mod], signals[source_osc_1_pw_mod]) # SIGNAL_OSC_1_OUTPUT
       when 4 # MODULE_FILTER_1
         signals[12] = filter_1.process(signals[source_filter_1_audio], signals[source_filter_1_mod]) # SIGNAL_FILTER_1_OUTPUT
       when 5 # MODULE_AMP_1

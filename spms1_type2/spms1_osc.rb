@@ -58,10 +58,12 @@ module Spms1
       @modulation_depth = 0.0
       @stage_1_modulation_depth = 0.0
       @current_modulation_depth = 0.0
-      # Where the modulation goes, as a pair of weights of which one is 1.0 and the other 0.0, so
-      # the per-sample path multiplies rather than branches.
-      @modulation_to_pitch = 1.0
-      @modulation_to_pulse_width = 0.0
+      # The pulse width modulation has a depth of its own, carried the same way.
+      @pw_modulation_amount = 0.0
+      @pw_modulation_polarity = 1.0
+      @pw_modulation_depth = 0.0
+      @stage_1_pw_modulation_depth = 0.0
+      @current_pw_modulation_depth = 0.0
       @coarse_tune = 0.0
       @fine_tune = 0.0
       # The two tune controls are summed when set, so the per-sample path adds one offset rather
@@ -84,15 +86,6 @@ module Spms1
       @pulse_width = (pulse_width < 0.0) ? 0.0 : ((pulse_width > 1.0) ? 1.0 : pulse_width)
     end
 
-    # Modulation destination is unipolar, [0.0, 1.0], and taken as a switch: below 0.5 the
-    # modulation input moves the pitch, from 0.5 up the pulse width. The depth is the same either
-    # way, a unit of modulation input times depth being the whole of either range. Not smoothed:
-    # it is a switch, so there is nothing between its two settings to pass through.
-    def set_modulation_destination(destination)
-      @modulation_to_pulse_width = (destination < 0.5) ? 0.0 : 1.0
-      @modulation_to_pitch = 1.0 - @modulation_to_pulse_width
-    end
-
     # Modulation depth is amount times polarity. Amount is unipolar, [0.0, 1.0]. Polarity is
     # bipolar, [-0.5, 0.5], and doubled, so +0.5 leaves the amount as it is, -0.5 negates it and
     # the way between scales it, crossing zero; it sets depth as well as direction. Scaled here
@@ -107,6 +100,20 @@ module Spms1
       clamped_polarity = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
       @modulation_polarity = clamped_polarity + clamped_polarity
       @modulation_depth = @modulation_amount * @modulation_polarity
+    end
+
+    # The pulse width modulation depth is amount times polarity, as the pitch's is. A unit of
+    # pulse width modulation input times depth is the whole pulse width range, so at full depth a
+    # bipolar source swings it half the range either way.
+    def set_pw_modulation_amount(amount)
+      @pw_modulation_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
+      @pw_modulation_depth = @pw_modulation_amount * @pw_modulation_polarity
+    end
+
+    def set_pw_modulation_polarity(polarity)
+      clamped_polarity = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
+      @pw_modulation_polarity = clamped_polarity + clamped_polarity
+      @pw_modulation_depth = @pw_modulation_amount * @pw_modulation_polarity
     end
 
     # Both tune controls are bipolar, [-0.5, 0.5], with 0.0 meaning no offset, so a controller's
@@ -128,10 +135,10 @@ module Spms1
 
     # Both inputs are taken as they arrive; what is held to a range is the pitch they add up to.
     # [-0.5, 0.5] is that range, covering MIDI notes 0 to 120, and it is what keeps the table
-    # lookup in bounds. The pulse width the modulation adds up to is held to its own, [0.0, 1.0].
-    # modulation_input is deliberately not smoothed, so a fast source reaches the pitch or the
-    # pulse width unslewed.
-    def process(pitch_input = 0.0, modulation_input = 0.0)
+    # lookup in bounds. The pulse width its modulation adds up to is held to its own, [0.0, 1.0].
+    # The modulation inputs are deliberately not smoothed, so a fast source reaches the pitch and
+    # the pulse width unslewed.
+    def process(pitch_input = 0.0, modulation_input = 0.0, pw_modulation_input = 0.0)
       if @sample_counter == 0
         # Morph, pulse width and depth are smoothed at the control rate to avoid sudden jumps.
         @stage_1_waveform = Dsp.smooth(@waveform, @stage_1_waveform, @smoothing_target_blend)
@@ -140,10 +147,11 @@ module Spms1
         @current_pulse_width = Dsp.smooth(@stage_1_pulse_width, @current_pulse_width, @smoothing_target_blend)
         @stage_1_modulation_depth = Dsp.smooth(@modulation_depth, @stage_1_modulation_depth, @smoothing_target_blend)
         @current_modulation_depth = Dsp.smooth(@stage_1_modulation_depth, @current_modulation_depth, @smoothing_target_blend)
+        @stage_1_pw_modulation_depth = Dsp.smooth(@pw_modulation_depth, @stage_1_pw_modulation_depth, @smoothing_target_blend)
+        @current_pw_modulation_depth = Dsp.smooth(@stage_1_pw_modulation_depth, @current_pw_modulation_depth, @smoothing_target_blend)
       end
 
-      modulation = modulation_input * @current_modulation_depth
-      total_pitch = pitch_input + @tune + (modulation * @modulation_to_pitch)
+      total_pitch = pitch_input + @tune + (modulation_input * @current_modulation_depth)
       pitch = (total_pitch < -0.5) ? -0.5 : ((total_pitch > 0.5) ? 0.5 : total_pitch)
       freq = pitch_to_freq_fast(pitch)
       current_dt = freq * @inv_sample_rate
@@ -157,7 +165,7 @@ module Spms1
 
       # The pulse width is held to its range after the modulation is added, which also keeps the
       # shift within one cycle, so that a single wrap below brings phase2 back under 1.0.
-      total_pulse_width = @current_pulse_width + (modulation * @modulation_to_pulse_width)
+      total_pulse_width = @current_pulse_width + (pw_modulation_input * @current_pw_modulation_depth)
       pulse_width = (total_pulse_width < 0.0) ? 0.0 : ((total_pulse_width > 1.0) ? 1.0 : total_pulse_width)
       phase2 = @phase + (0.5 + pulse_width * 0.5)
       phase2 -= (phase2 < 1.0) ? 0.0 : 1.0

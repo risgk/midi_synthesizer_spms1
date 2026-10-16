@@ -118,7 +118,8 @@ signals:
   - { key: SLEW_1_TIME,   id: 61, control: SLEW_1_TIME }
 
   - { key: OSC_1_PULSE_WIDTH,     id: 62, control: OSC_1_PULSE_WIDTH }
-  - { key: OSC_1_MOD_DESTINATION, id: 63, control: OSC_1_MOD_DESTINATION }
+  - { key: OSC_1_PW_MOD_AMOUNT,   id: 63, control: OSC_1_PW_MOD_AMOUNT }
+  - { key: OSC_1_PW_MOD_POLARITY, id: 64, control: OSC_1_PW_MOD_POLARITY }
 
 # Module inputs, NRPN category 1, by entry: what feeds each one in the default patch (`source`, a
 # signal key). `label` is the editor's, on the module; `name` the README's, after the module's
@@ -139,6 +140,7 @@ inputs:
   - { entry: 12,                    key: OUTPUT_L, label: L,       name: Final Output L, name_ja: 最終出力 L, source: DELAY_1_OUTPUT_L }
   - { entry: 13,                    key: OUTPUT_R, label: R,       name: Final Output R, name_ja: 最終出力 R, source: DELAY_1_OUTPUT_R }
   - { entry: 14, module: SLEW_1,    key: IN,       label: In,      name: In,         source: PITCH }
+  - { entry: 15, module: OSC_1,     key: PW_MOD,   label: PW Mod,  name: PW Mod In,  source: LFO_1_OUTPUT }
 
 # Controls, by entry: a parameter is one entry of NRPN category 2 (where it takes its value) and
 # the same entry of category 3 (which CC fills its control slot); a General control is in
@@ -148,7 +150,7 @@ inputs:
 controls:
   - { entry: 0,  module: LFO_1,     key: RATE,         label: Rate,         cc: 3,   value: 64 }
   - { entry: 1,  module: LFO_1,     key: LEVEL,        label: Level,        cc: 0,   source: ONE }
-  - { entry: 2,  module: LFO_1,     key: POLARITY,     label: Polarity,     cc: 0,   value: 124, source: POINT_ONE, bipolar: true }
+  - { entry: 2,  module: LFO_1,     key: POLARITY,     label: Polarity,     cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 3,  module: ENV_GEN_1, key: ATTACK,       label: Attack,       cc: 73,  value: 4 }
   - { entry: 4,  module: ENV_GEN_1, key: DECAY,        label: Decay,        cc: 75,  value: 96 }
   - { entry: 5,  module: ENV_GEN_1, key: SUSTAIN,      label: Sustain,      cc: 30,  value: 124 }
@@ -158,7 +160,7 @@ controls:
   - { entry: 9,  module: OSC_1,     key: COARSE_TUNE,  label: Coarse Tune,  cc: 86,  value: 64, bipolar: true }
   - { entry: 10, module: OSC_1,     key: FINE_TUNE,    label: Fine Tune,    cc: 70,  value: 64, bipolar: true }
   - { entry: 11, module: OSC_1,     key: MOD_AMOUNT,   label: Mod Amt,      cc: 13,  value: 4 }
-  - { entry: 12, module: OSC_1,     key: MOD_POLARITY, label: Mod Polarity, cc: 0,   value: 124, source: HALF, bipolar: true }
+  - { entry: 12, module: OSC_1,     key: MOD_POLARITY, label: Mod Polarity, cc: 0,   value: 124, source: POINT_ONE, bipolar: true }
   - { entry: 13, module: FILTER_1,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 100 }
   - { entry: 14, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 94 }
   - { entry: 15, module: FILTER_1,  key: GAIN,         label: Gain,         cc: 112, value: 64 }
@@ -191,8 +193,10 @@ controls:
   # in the MIDI spec; it powers up at CC 4, 0.0, where the slew is off.
   - { entry: 34, module: SLEW_1,    key: TIME,         label: Time,         cc: 5,   value: 4 }
 
-  # Osc 1 Pulse Width and Mod Dst came after Slew 1, so their entries follow its. CC 19 and CC 103
-  # are where PRA32-U2 has Osc 1 Shape and LFO Mod Dst. Both power up at CC 4, 0.0: a pulse of 50%
-  # and the modulation on the pitch, so the default patch renders as before.
-  - { entry: 35, module: OSC_1,     key: PULSE_WIDTH,     label: Pulse Width,  cc: 19,  value: 4 }
-  - { entry: 36, module: OSC_1,     key: MOD_DESTINATION, label: "Mod Dst [Pitch|PW]", cc: 103, value: 4 }
+  # Osc 1 Pulse Width and the depth of its modulation came after Slew 1, so their entries follow
+  # its. CC 19 is where PRA32-U2 has Osc 1 Shape. Pulse Width and PW Mod Amt power up at CC 4, 0.0:
+  # a pulse of 50% and no modulation of it, so the default patch renders as before. PW Mod Polarity
+  # has no CC and reads +0.5, as each modulation polarity does.
+  - { entry: 35, module: OSC_1,     key: PULSE_WIDTH,     label: Pulse Width,     cc: 19,  value: 4 }
+  - { entry: 36, module: OSC_1,     key: PW_MOD_AMOUNT,   label: PW Mod Amt,      cc: 103, value: 4 }
+  - { entry: 37, module: OSC_1,     key: PW_MOD_POLARITY, label: PW Mod Polarity, cc: 0,   value: 124, source: HALF, bipolar: true }
