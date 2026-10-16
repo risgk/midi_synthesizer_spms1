@@ -1629,7 +1629,7 @@
   const NODES = [
     { key: 'NOTE', label: 'Note', aux: true, notes: [['PITCH', 'Pitch', 0, 127], ['GATE', 'Gate', 0, 1], ['BEND', 'Bend', -8192, 8191]] },
     { key: 'CONST', label: 'Constants', aux: true, normed: true, outs: ['ONE', 'HALF', 'POINT_TWO', 'POINT_ONE', 'NONE', 'MINUS_POINT_ONE', 'MINUS_POINT_TWO', 'MINUS_HALF', 'MINUS_ONE'] },
-    { key: 'GENERAL', label: 'General Controls', aux: true, controls: GENERAL_ITEMS },
+    { key: 'GENERAL', label: 'General', aux: true, controls: GENERAL_ITEMS },
     ...MODULES.map(m => ({
       key: m.key, label: m.label, module: m,
       inputs: INPUT_ITEMS.filter(i => i.module === m.key),
@@ -2626,14 +2626,14 @@
   // Each slider follows its slot's CC assignment in the patch, and moves the value of that CC.
   const CONTROL_PANELS = [
     { col: 0, title: 'General', general: true },
-    { col: 0, title: 'Slew', module: 'SLEW_1' },
-    { col: 1, title: 'LFO', module: 'LFO_1' },
-    { col: 1, title: 'EG', module: 'ENV_GEN_1' },
-    { col: 2, title: 'Osc', module: 'OSC_1' },
-    { col: 2, title: 'Filter', module: 'FILTER_1' },
-    { col: 3, title: 'Amp', module: 'AMP_1' },
-    { col: 3, title: 'Chorus', module: 'CHORUS_1' },
-    { col: 3, title: 'Delay', module: 'DELAY_1' },
+    { col: 0, title: 'Slew 1', module: 'SLEW_1' },
+    { col: 1, title: 'LFO 1', module: 'LFO_1' },
+    { col: 1, title: 'EG 1', module: 'ENV_GEN_1' },
+    { col: 2, title: 'Osc 1', module: 'OSC_1' },
+    { col: 2, title: 'Filter 1', module: 'FILTER_1' },
+    { col: 3, title: 'Amp 1', module: 'AMP_1' },
+    { col: 3, title: 'Chorus 1', module: 'CHORUS_1' },
+    { col: 3, title: 'Delay 1', module: 'DELAY_1' },
   ];
   CONTROL_PANELS.push({ col: 1, title: 'Mixer 1', module: 'MIXER_1', onlyWithCC: true });
 
