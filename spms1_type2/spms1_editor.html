@@ -1665,11 +1665,6 @@
     let h = `<div class="node-head"><span>${escapeHTML(node.label)}</span>`;
     if (node.module) h += `<span class="badge" title="Click to add to or remove from the run order"></span>`;
     h += `</div>`;
-    if (node.module) {
-      for (const o of node.module.outs) {
-        h += `<div class="row"><span class="lbl right">${o.label}</span><span class="port out" data-src="${o.sig}"></span></div>`;
-      }
-    }
     if (node.notes) {
       h += `<div class="sep"><span>Signals</span><span>Value</span><span class="norm-head">Norm</span></div>`;
     }
@@ -1686,6 +1681,12 @@
     }
     for (const i of node.inputs || []) {
       h += `<div class="row input-row"><span class="port in" data-dst="IN:${i.key}" title="Read every sample"></span><span class="lbl">${escapeHTML(i.label)}</span><span class="src" data-src-of="IN:${i.key}"></span></div>`;
+    }
+    // A module's outputs come after its inputs, so a node reads from what goes in to what comes out.
+    if (node.module) {
+      for (const o of node.module.outs) {
+        h += `<div class="row"><span class="lbl right">${o.label}</span><span class="port out" data-src="${o.sig}"></span></div>`;
+      }
     }
     if (node.controls && node.controls.length) {
       h += `<div class="sep"><span>${node.module ? 'Parameters' : 'Signals'}</span><span>CC</span><span>Value</span><span class="norm-head">Norm</span></div>`;
