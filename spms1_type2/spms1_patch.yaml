@@ -148,7 +148,7 @@ inputs:
   - { entry: 14, module: SLEW_1,    key: IN,       label: In,      name: In,         source: PITCH }
   - { entry: 15, module: OSC_1,     key: PW_MOD,   label: PW Mod,  name: PW Mod In,  source: LFO_1_OUTPUT }
 
-# Controls, by entry: a parameter is one entry of NRPN category 2 (where it takes its value) and
+# Controls, listed in the editor's order, each by its entry: a parameter is one entry of NRPN category 2 (where it takes its value) and
 # the same entry of category 3 (which CC fills its control slot); a General control is in
 # category 3 only. `cc` is the CC of the default patch, 0 for none, and `value` what that CC
 # powers up at; for a control with no CC, what the editor's Init Values sets the CC given to it
@@ -160,6 +160,11 @@ controls:
   - { entry: 3,  module: ENV_GEN_1, key: ATTACK,       label: Attack,       cc: 73,  value: 4 }
   - { entry: 4,  module: ENV_GEN_1, key: DECAY,        label: Decay,        cc: 75,  value: 96 }
   - { entry: 5,  module: ENV_GEN_1, key: SUSTAIN,      label: Sustain,      cc: 30,  value: 124 }
+  # EG 1 Release Switch came after the Osc 1 pulse width controls, so its entry follows theirs, but
+  # it is listed here, after Sustain, which puts it there in the editor. On CC 105 as in PRA32-U2
+  # (EG/Amp Rel = Dec), it powers up at CC 124, on, the release following the decay as it always
+  # has, so the default patch renders as before.
+  - { entry: 38, module: ENV_GEN_1, key: RELEASE_SWITCH, label: Release Switch, cc: 105, value: 124 }
   - { entry: 6,  module: ENV_GEN_1, key: LEVEL,        label: Level,        cc: 0,   source: ONE }
   - { entry: 7,  module: ENV_GEN_1, key: POLARITY,     label: Polarity,     cc: 0,   source: HALF, bipolar: true }
   - { entry: 8,  module: OSC_1,     key: WAVEFORM,     label: Wave,         cc: 20,  value: 4 }
@@ -206,8 +211,3 @@ controls:
   - { entry: 35, module: OSC_1,     key: PULSE_WIDTH,     label: Pulse Width,     cc: 19,  value: 4 }
   - { entry: 36, module: OSC_1,     key: PW_MOD_AMOUNT,   label: PW Mod Amt,      cc: 103, value: 4 }
   - { entry: 37, module: OSC_1,     key: PW_MOD_POLARITY, label: PW Mod Polarity, cc: 0,   value: 124, source: HALF, bipolar: true }
-
-  # EG 1 Release Switch came after them, on CC 105 as in PRA32-U2 (EG/Amp Rel = Dec). It powers up
-  # at CC 124, on, the release following the decay as it always has, so the default patch renders
-  # as before.
-  - { entry: 38, module: ENV_GEN_1, key: RELEASE_SWITCH,  label: Release Switch,  cc: 105, value: 124 }
