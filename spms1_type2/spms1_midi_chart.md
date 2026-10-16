@@ -36,7 +36,6 @@
 |                            73 | x             | o             | EG Attack (Time)                     |
 |                            75 | x             | o             | EG Decay (Time)                      |
 |                            30 | x             | o             | EG Sustain (Level)                   |
-|                           105 | x             | o             | EG Release Switch [Off|On]           |
 |                             3 | x             | o             | LFO Rate                             |
 |                            58 | x             | o             | Chorus Rate                          |
 |                            59 | x             | o             | Chorus Depth                         |

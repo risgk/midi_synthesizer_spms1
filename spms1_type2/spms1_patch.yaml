@@ -125,16 +125,15 @@ signals:
   - { key: FILTER_1_OUTPUT_BP, id: 65, module: FILTER_1, output: Out BP, label: Filter 1 Output BP, bipolar: true }
   - { key: FILTER_1_OUTPUT_HP, id: 66, module: FILTER_1, output: Out HP, label: Filter 1 Output HP, bipolar: true }
 
-  - { key: EG_1_RELEASE_SWITCH, id: 67, control: EG_1_RELEASE_SWITCH }
 
-  - { key: AMP_1_MOD_AMT,   id: 68, control: AMP_1_MOD_AMT }
-  - { key: AMP_1_MOD_POL, id: 69, control: AMP_1_MOD_POL }
+  - { key: AMP_1_MOD_AMT,   id: 67, control: AMP_1_MOD_AMT }
+  - { key: AMP_1_MOD_POL, id: 68, control: AMP_1_MOD_POL }
 
-  - { key: LFO_1_MOD_AMT,   id: 70, control: LFO_1_MOD_AMT }
-  - { key: LFO_1_MOD_POL, id: 71, control: LFO_1_MOD_POL }
+  - { key: LFO_1_MOD_AMT,   id: 69, control: LFO_1_MOD_AMT }
+  - { key: LFO_1_MOD_POL, id: 70, control: LFO_1_MOD_POL }
 
-  - { key: OSC_1_PITCH_MOD_1_AMT,   id: 72, control: OSC_1_PITCH_MOD_1_AMT }
-  - { key: OSC_1_PITCH_MOD_1_POL, id: 73, control: OSC_1_PITCH_MOD_1_POL }
+  - { key: OSC_1_PITCH_MOD_1_AMT,   id: 71, control: OSC_1_PITCH_MOD_1_AMT }
+  - { key: OSC_1_PITCH_MOD_1_POL, id: 72, control: OSC_1_PITCH_MOD_1_POL }
 
 # Module inputs, NRPN category 1, by entry: what feeds each one in the default patch (`source`, a
 # signal key). `label` is the editor's, on the module; `name` the README's, after the module's
@@ -169,18 +168,13 @@ controls:
   # follow theirs, but they are listed here, after Rate. Neither has a CC: the default patch points
   # them at 1.0 and +0.5, a depth of 1.0, and leaves Mod In unrouted, so the default patch renders
   # as before and routing a source to it is enough.
-  - { entry: 41, module: LFO_1,     key: MOD_AMT,   label: Mod Amt,      cc: 0,   value: 124, source: ONE }
-  - { entry: 42, module: LFO_1,     key: MOD_POL, label: Mod Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
+  - { entry: 40, module: LFO_1,     key: MOD_AMT,   label: Mod Amt,      cc: 0,   value: 124, source: ONE }
+  - { entry: 41, module: LFO_1,     key: MOD_POL, label: Mod Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 1,  module: LFO_1,     key: LEVEL,        label: Level,        cc: 0,   source: ONE }
   - { entry: 2,  module: LFO_1,     key: POL,     label: Pol,     cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 3,  module: EG_1,      key: ATTACK,       label: Attack,       cc: 73,  value: 4 }
   - { entry: 4,  module: EG_1,      key: DECAY,        label: Decay,        cc: 75,  value: 96 }
   - { entry: 5,  module: EG_1,      key: SUSTAIN,      label: Sustain,      cc: 30,  value: 124 }
-  # EG 1 Release Switch came after the Osc 1 pulse width controls, so its entry follows theirs, but
-  # it is listed here, after Sustain, which puts it there in the editor. On CC 105, it powers
-  # up at CC 124, on, the release following the decay as it always
-  # has, so the default patch renders as before.
-  - { entry: 38, module: EG_1,      key: RELEASE_SWITCH, label: Release Switch, cc: 105, value: 124 }
   - { entry: 6,  module: EG_1,      key: LEVEL,        label: Level,        cc: 0,   source: ONE }
   - { entry: 7,  module: EG_1,      key: POL,     label: Pol,     cc: 0,   source: HALF, bipolar: true }
   # Osc 1 in the editor: the pitch and its two modulations, then the waveform and the pulse
@@ -193,8 +187,8 @@ controls:
   # Pitch Mod 1 Amt and Polarity came after LFO 1's modulation controls, so their entries
   # follow theirs. Neither has a CC: the default patch points them at 1.0 and +0.5, a depth of
   # exactly 1.0, which plays the note on Pitch Mod 1 In in tune, as the oscillator always did.
-  - { entry: 43, module: OSC_1,     key: PITCH_MOD_1_AMT,   label: Pitch Mod 1 Amt,      cc: 0,   value: 124, source: ONE }
-  - { entry: 44, module: OSC_1,     key: PITCH_MOD_1_POL, label: Pitch Mod 1 Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
+  - { entry: 42, module: OSC_1,     key: PITCH_MOD_1_AMT,   label: Pitch Mod 1 Amt,      cc: 0,   value: 124, source: ONE }
+  - { entry: 43, module: OSC_1,     key: PITCH_MOD_1_POL, label: Pitch Mod 1 Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 11, module: OSC_1,     key: PITCH_MOD_2_AMT,   label: Pitch Mod 2 Amt,      cc: 13,  value: 4 }
   - { entry: 12, module: OSC_1,     key: PITCH_MOD_2_POL, label: Pitch Mod 2 Pol, cc: 0,   value: 124, source: POINT_ONE, bipolar: true }
   - { entry: 8,  module: OSC_1,     key: WAVE,     label: Wave,         cc: 20,  value: 4 }
@@ -208,11 +202,11 @@ controls:
   - { entry: 14, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 94 }
   - { entry: 15, module: FILTER_1,  key: GAIN,         label: Gain,         cc: 112, value: 64 }
   - { entry: 18, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 124 }
-  # Amp 1 Mod Amt and Mod Polarity came after EG 1 Release Switch, so their entries follow its, but
+  # Amp 1 Mod Amt and Mod Polarity came after Osc 1's pulse width controls, so their entries follow theirs, but
   # they are listed here, after Gain. Neither has a CC: the default patch points them at 1.0 and
   # +0.5, a depth of exactly 1.0, which passes the envelope as the amp always took it.
-  - { entry: 39, module: AMP_1,     key: MOD_AMT,   label: Mod Amt,      cc: 0,   value: 124, source: ONE }
-  - { entry: 40, module: AMP_1,     key: MOD_POL, label: Mod Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
+  - { entry: 38, module: AMP_1,     key: MOD_AMT,   label: Mod Amt,      cc: 0,   value: 124, source: ONE }
+  - { entry: 39, module: AMP_1,     key: MOD_POL, label: Mod Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 19, module: MIXER_1,   key: LEVEL_1,      label: Level 1,      cc: 0,   source: ONE }
   - { entry: 20, module: MIXER_1,   key: POL_1,   label: Pol 1,   cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 21, module: MIXER_1,   key: LEVEL_2,      label: Level 2,      cc: 0,   source: ONE }

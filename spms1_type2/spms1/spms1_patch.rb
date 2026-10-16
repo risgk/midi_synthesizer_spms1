@@ -81,13 +81,12 @@ SIGNAL_OSC_1_PW_MOD_AMT      = 63
 SIGNAL_OSC_1_PW_MOD_POL      = 64
 SIGNAL_FILTER_1_OUTPUT_BP    = 65
 SIGNAL_FILTER_1_OUTPUT_HP    = 66
-SIGNAL_EG_1_RELEASE_SWITCH   = 67
-SIGNAL_AMP_1_MOD_AMT         = 68
-SIGNAL_AMP_1_MOD_POL         = 69
-SIGNAL_LFO_1_MOD_AMT         = 70
-SIGNAL_LFO_1_MOD_POL         = 71
-SIGNAL_OSC_1_PITCH_MOD_1_AMT = 72
-SIGNAL_OSC_1_PITCH_MOD_1_POL = 73
+SIGNAL_AMP_1_MOD_AMT         = 67
+SIGNAL_AMP_1_MOD_POL         = 68
+SIGNAL_LFO_1_MOD_AMT         = 69
+SIGNAL_LFO_1_MOD_POL         = 70
+SIGNAL_OSC_1_PITCH_MOD_1_AMT = 71
+SIGNAL_OSC_1_PITCH_MOD_1_POL = 72
 
 # NRPN parameter numbers: (MSB << 7) | LSB, where the MSB picks a category and the LSB an entry.
 #   0..127   active_modules[slot]
@@ -147,13 +146,12 @@ NRPN_SOURCE_SLEW_1_TIME           = 290
 NRPN_SOURCE_OSC_1_PULSE_WIDTH     = 291
 NRPN_SOURCE_OSC_1_PW_MOD_AMT      = 292
 NRPN_SOURCE_OSC_1_PW_MOD_POL      = 293
-NRPN_SOURCE_EG_1_RELEASE_SWITCH   = 294
-NRPN_SOURCE_AMP_1_MOD_AMT         = 295
-NRPN_SOURCE_AMP_1_MOD_POL         = 296
-NRPN_SOURCE_LFO_1_MOD_AMT         = 297
-NRPN_SOURCE_LFO_1_MOD_POL         = 298
-NRPN_SOURCE_OSC_1_PITCH_MOD_1_AMT = 299
-NRPN_SOURCE_OSC_1_PITCH_MOD_1_POL = 300
+NRPN_SOURCE_AMP_1_MOD_AMT         = 294
+NRPN_SOURCE_AMP_1_MOD_POL         = 295
+NRPN_SOURCE_LFO_1_MOD_AMT         = 296
+NRPN_SOURCE_LFO_1_MOD_POL         = 297
+NRPN_SOURCE_OSC_1_PITCH_MOD_1_AMT = 298
+NRPN_SOURCE_OSC_1_PITCH_MOD_1_POL = 299
 
 # A CC number of 0 means the parameter has no CC: its control slot holds 0.0 -- the bottom of a
 # unipolar dial, the middle of a bipolar one -- whatever CC it had before, so a patch sets it alone.
@@ -195,13 +193,12 @@ NRPN_CC_SLEW_1_TIME           = 418
 NRPN_CC_OSC_1_PULSE_WIDTH     = 419
 NRPN_CC_OSC_1_PW_MOD_AMT      = 420
 NRPN_CC_OSC_1_PW_MOD_POL      = 421
-NRPN_CC_EG_1_RELEASE_SWITCH   = 422
-NRPN_CC_AMP_1_MOD_AMT         = 423
-NRPN_CC_AMP_1_MOD_POL         = 424
-NRPN_CC_LFO_1_MOD_AMT         = 425
-NRPN_CC_LFO_1_MOD_POL         = 426
-NRPN_CC_OSC_1_PITCH_MOD_1_AMT = 427
-NRPN_CC_OSC_1_PITCH_MOD_1_POL = 428
+NRPN_CC_AMP_1_MOD_AMT         = 422
+NRPN_CC_AMP_1_MOD_POL         = 423
+NRPN_CC_LFO_1_MOD_AMT         = 424
+NRPN_CC_LFO_1_MOD_POL         = 425
+NRPN_CC_OSC_1_PITCH_MOD_1_AMT = 426
+NRPN_CC_OSC_1_PITCH_MOD_1_POL = 427
 
 # The constants of the bus, which nothing else ever writes. A slot not written here holds 0.0.
 def spms1_fill_constant_signals(signals)
@@ -278,7 +275,6 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_1_PULSE_WIDTH    , SIGNAL_OSC_1_PULSE_WIDTH)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_1_PW_MOD_AMT     , SIGNAL_OSC_1_PW_MOD_AMT)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_1_PW_MOD_POL     , SIGNAL_HALF)
-  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_EG_1_RELEASE_SWITCH  , SIGNAL_EG_1_RELEASE_SWITCH)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_AMP_1_MOD_AMT        , SIGNAL_ONE)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_AMP_1_MOD_POL        , SIGNAL_HALF)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_LFO_1_MOD_AMT        , SIGNAL_ONE)
@@ -313,7 +309,6 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_SLEW_1_TIME          , 5)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_PULSE_WIDTH    , 19)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_PW_MOD_AMT     , 103)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_EG_1_RELEASE_SWITCH  , 105)
 
   C.set_midi_cc_value(midi_ch, 3  , 64 ) # LFO 1 Rate
   C.set_midi_cc_value(midi_ch, 73 , 4  ) # EG 1 Attack
@@ -342,5 +337,4 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 5  , 4  ) # Slew 1 Time
   C.set_midi_cc_value(midi_ch, 19 , 4  ) # Osc 1 Pulse Width
   C.set_midi_cc_value(midi_ch, 103, 4  ) # Osc 1 PW Mod Amt
-  C.set_midi_cc_value(midi_ch, 105, 124) # EG 1 Release Switch
 end

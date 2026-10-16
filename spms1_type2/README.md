@@ -404,20 +404,19 @@ both at the same signal for a mono output.
 
 | CC 98 | Parameter | | CC 98 | Parameter | | CC 98 | Parameter |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | LFO 1 Rate | | 14 | Filter 1 Resonance | | 28 | Delay 1 Mix |
-| 1 | LFO 1 Level | | 15 | Filter 1 Gain | | 34 | Slew 1 Time |
-| 2 | LFO 1 Pol | | 16 | Filter 1 Mod Amt | | 35 | Osc 1 Pulse Width |
-| 3 | EG 1 Attack | | 17 | Filter 1 Mod Pol | | 36 | Osc 1 PW Mod Amt |
-| 4 | EG 1 Decay | | 18 | Amp 1 Gain | | 37 | Osc 1 PW Mod Pol |
-| 5 | EG 1 Sustain | | 19 | Mixer 1 Level 1 | | 38 | EG 1 Release Switch |
-| 6 | EG 1 Level | | 20 | Mixer 1 Pol 1 | | 39 | Amp 1 Mod Amt |
-| 7 | EG 1 Pol | | 21 | Mixer 1 Level 2 | | 40 | Amp 1 Mod Pol |
-| 8 | Osc 1 Wave | | 22 | Mixer 1 Pol 2 | | 41 | LFO 1 Mod Amt |
-| 9 | Osc 1 Pitch Coarse | | 23 | Chorus 1 Rate | | 42 | LFO 1 Mod Pol |
-| 10 | Osc 1 Pitch Fine | | 24 | Chorus 1 Depth | | 43 | Osc 1 Pitch Mod 1 Amt |
-| 11 | Osc 1 Pitch Mod 2 Amt | | 25 | Chorus 1 Mix | | 44 | Osc 1 Pitch Mod 1 Pol |
-| 12 | Osc 1 Pitch Mod 2 Pol | | 26 | Delay 1 Time | |  |  |
-| 13 | Filter 1 Cutoff | | 27 | Delay 1 Feedback | |  |  |
+| 0 | LFO 1 Rate | | 13 | Filter 1 Cutoff | | 26 | Delay 1 Time |
+| 1 | LFO 1 Level | | 14 | Filter 1 Resonance | | 27 | Delay 1 Feedback |
+| 2 | LFO 1 Pol | | 15 | Filter 1 Gain | | 28 | Delay 1 Mix |
+| 3 | EG 1 Attack | | 16 | Filter 1 Mod Amt | | 34 | Slew 1 Time |
+| 4 | EG 1 Decay | | 17 | Filter 1 Mod Pol | | 35 | Osc 1 Pulse Width |
+| 5 | EG 1 Sustain | | 18 | Amp 1 Gain | | 36 | Osc 1 PW Mod Amt |
+| 6 | EG 1 Level | | 19 | Mixer 1 Level 1 | | 37 | Osc 1 PW Mod Pol |
+| 7 | EG 1 Pol | | 20 | Mixer 1 Pol 1 | | 38 | Amp 1 Mod Amt |
+| 8 | Osc 1 Wave | | 21 | Mixer 1 Level 2 | | 39 | Amp 1 Mod Pol |
+| 9 | Osc 1 Pitch Coarse | | 22 | Mixer 1 Pol 2 | | 40 | LFO 1 Mod Amt |
+| 10 | Osc 1 Pitch Fine | | 23 | Chorus 1 Rate | | 41 | LFO 1 Mod Pol |
+| 11 | Osc 1 Pitch Mod 2 Amt | | 24 | Chorus 1 Depth | | 42 | Osc 1 Pitch Mod 1 Amt |
+| 12 | Osc 1 Pitch Mod 2 Pol | | 25 | Chorus 1 Mix | | 43 | Osc 1 Pitch Mod 1 Pol |
 
 <!-- patch_gen end -->
 
@@ -480,13 +479,13 @@ two slots, a unipolar and a bipolar one. See the General slots below.
 | 14 | Mixer 1 Output ± | | 39 | Mixer 1 Pol 1 ± | | 64 | Osc 1 PW Mod Pol ± |
 | 15 | Chorus 1 Output L ± | | 40 | Mixer 1 Level 2 | | 65 | Filter 1 Output BP ± |
 | 16 | Chorus 1 Output R ± | | 41 | Mixer 1 Pol 2 ± | | 66 | Filter 1 Output HP ± |
-| 17 | Delay 1 Output L ± | | 42 | Chorus 1 Rate | | 67 | EG 1 Release Switch |
-| 18 | Delay 1 Output R ± | | 43 | Chorus 1 Depth | | 68 | Amp 1 Mod Amt |
-| 19 | LFO 1 Rate | | 44 | Chorus 1 Mix | | 69 | Amp 1 Mod Pol ± |
-| 20 | LFO 1 Level | | 45 | Delay 1 Time | | 70 | LFO 1 Mod Amt |
-| 21 | LFO 1 Pol ± | | 46 | Delay 1 Feedback | | 71 | LFO 1 Mod Pol ± |
-| 22 | EG 1 Attack | | 47 | Delay 1 Mix | | 72 | Osc 1 Pitch Mod 1 Amt |
-| 23 | EG 1 Decay | | 48 | Note Pitch ± | | 73 | Osc 1 Pitch Mod 1 Pol ± |
+| 17 | Delay 1 Output L ± | | 42 | Chorus 1 Rate | | 67 | Amp 1 Mod Amt |
+| 18 | Delay 1 Output R ± | | 43 | Chorus 1 Depth | | 68 | Amp 1 Mod Pol ± |
+| 19 | LFO 1 Rate | | 44 | Chorus 1 Mix | | 69 | LFO 1 Mod Amt |
+| 20 | LFO 1 Level | | 45 | Delay 1 Time | | 70 | LFO 1 Mod Pol ± |
+| 21 | LFO 1 Pol ± | | 46 | Delay 1 Feedback | | 71 | Osc 1 Pitch Mod 1 Amt |
+| 22 | EG 1 Attack | | 47 | Delay 1 Mix | | 72 | Osc 1 Pitch Mod 1 Pol ± |
+| 23 | EG 1 Decay | | 48 | Note Pitch ± | |  |  |
 | 24 | EG 1 Sustain | | 49 | Note Gate | |  |  |
 
 <!-- patch_gen end -->
@@ -498,7 +497,7 @@ its Pol is turned negative. Everything unmarked runs 0.0 to 1.0 -- Note Gate and
 unipolar control slot. The bus carries both kinds under one numbering, so the range belongs to the slot
 rather than to the sort of thing that wrote it.
 
-Slots 19-47, 61, 62-64 and 67-73 hold the values arriving from CC, so a parameter reads its own CC
+Slots 19-47, 61, 62-64 and 67-72 hold the values arriving from CC, so a parameter reads its own CC
 by default. Each parameter is unipolar or bipolar, and its slot takes the same range. A unipolar one
 runs 0.0 to 1.0 from CC 4 to CC 124, the span of an envelope, so an envelope pointed at one sweeps
 the whole of its dial. A bipolar one runs -0.5 to +0.5 with CC 64 at 0.0, the span of an LFO, so a
@@ -570,11 +569,6 @@ Amt and Mod Pol do, but the amp multiplies by its modulation rather than adding 
 depth of 1.0 the envelope passes as it arrives, at 0.5 the amp is 6 dB down, at 0.0 it is shut,
 and a negative depth inverts the output. Neither has a CC, and the default patch points them at
 the constants 1.0 and +0.5, a depth of 1.0.
-
-EG 1 Release Switch, on CC 105, picks the release, after the note's gate falls: on
-from 0.5 up (CC 64-124), it runs at the decay's rate, set by EG 1 Decay; off below 0.5 (CC 4-63), it
-runs at the shortest decay's, 10 ms, whatever the decay is, so a long decay still ends a note
-short. It powers up on. It is a switch, so it is not smoothed.
 
 Each modulation depth is Mod Amt times Mod Pol, the second doubled: Mod Pol passes
 Mod Amt through at +0.5 (CC 124), silences it at 0.0 (CC 64) and negates it at -0.5 (CC 4), and
@@ -738,7 +732,7 @@ changes only how fast the output moves, so it cannot step it.
   the steps of a controller sending sparse CCs (e.g. every 20 ms). Osc 1 Pitch Coarse and Pitch Fine
   are not smoothed, so that the pitch follows right away, and neither is Slew 1 Time, which
   cannot step what it sets
-- A parameter source may point at any of the 128 slots. Slots above 73 read 0 until something
+- A parameter source may point at any of the 128 slots. Slots above 72 read 0 until something
   writes them, which leaves a parameter pointed at one at the bottom of a unipolar dial or the
   middle of a bipolar one
 - A parameter clamps its value to its own range, 0.0 to 1.0 or -0.5 to +0.5, and its control slot
