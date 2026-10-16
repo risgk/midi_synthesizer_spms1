@@ -161,7 +161,8 @@ spms1_fill_constant_signals(signals)
 # width at its full level, and Osc 1 Mod 2 Pol reads the constant 0.1, which brings it
 # down to a vibrato depth on the pitch, so that Osc Mod 2 Amt can span the whole pitch range
 # the way every other modulation depth does. Osc 1 Mod 1 Amt and Pol read 1.0 and +0.5,
-# which play the note from the slew in tune.
+# which play the note from the slew in tune. The LFO also reaches Filter 1 Mod 2 In, but Filter 1
+# Mod 2 Amt powers up at 0.0, so the cutoff follows the envelope alone until CC 25 turns it up.
 # A mixer's parameters have no CC, so the default patch points them at constants instead: full
 # level and a polarity of +0.5, which makes a mixer pass its input through rather than mute it.
 # Each modulation polarity has no CC either and reads +0.5, which leaves the amount in charge,
@@ -239,7 +240,8 @@ while true
   source_osc_1_mod_1 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_MOD_1)
   source_osc_1_mod_2 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_MOD_2)
   source_filter_1_audio    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_AUDIO)
-  source_filter_1_mod      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD)
+  source_filter_1_mod_1    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_1)
+  source_filter_1_mod_2    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_2)
   source_amp_1_audio       = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_AUDIO)
   source_amp_1_mod         = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_MOD)
   source_mixer_1_in_1      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_IN_1)
@@ -271,8 +273,8 @@ while true
   source_filter_1_cutoff       = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_CUTOFF)
   source_filter_1_resonance    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_RESONANCE)
   source_filter_1_gain         = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_GAIN)
-  source_filter_1_mod_amt      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_AMT)
-  source_filter_1_mod_pol      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_POL)
+  source_filter_1_mod_1_amt    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_1_AMT)
+  source_filter_1_mod_1_pol    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_1_POL)
   source_amp_1_gain            = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_GAIN)
   source_mixer_1_level_1       = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_LEVEL_1)
   source_mixer_1_pol_1         = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_POL_1)
@@ -294,6 +296,8 @@ while true
   source_lfo_1_mod_pol         = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_MOD_POL)
   source_osc_1_mod_1_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_MOD_1_AMT)
   source_osc_1_mod_1_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_MOD_1_POL)
+  source_filter_1_mod_2_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_2_AMT)
+  source_filter_1_mod_2_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_2_POL)
 
   # Which CC fills each control slot. The bus is the only thing downstream reads, so this is
   # where MIDI enters and the only place a CC number appears.
@@ -311,8 +315,8 @@ while true
   cc_filter_1_cutoff       = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_CUTOFF)
   cc_filter_1_resonance    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_RESONANCE)
   cc_filter_1_gain         = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_GAIN)
-  cc_filter_1_mod_amt      = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_MOD_AMT)
-  cc_filter_1_mod_pol      = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_MOD_POL)
+  cc_filter_1_mod_1_amt    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_MOD_1_AMT)
+  cc_filter_1_mod_1_pol    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_MOD_1_POL)
   cc_amp_1_gain            = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_AMP_1_GAIN)
   cc_mixer_1_level_1       = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_1_LEVEL_1)
   cc_mixer_1_pol_1         = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_1_POL_1)
@@ -334,6 +338,8 @@ while true
   cc_lfo_1_mod_pol         = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_MOD_POL)
   cc_osc_1_mod_1_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_MOD_1_AMT)
   cc_osc_1_mod_1_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_MOD_1_POL)
+  cc_filter_1_mod_2_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_MOD_2_AMT)
+  cc_filter_1_mod_2_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_MOD_2_POL)
   cc_general_mod_wheel     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_MOD_WHEEL)
   cc_general_1             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_1)
   cc_general_2             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_2)
@@ -354,8 +360,8 @@ while true
   signals[SIGNAL_FILTER_1_CUTOFF] = cc_or_zero(cc_filter_1_cutoff, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_cutoff)))
   signals[SIGNAL_FILTER_1_RESONANCE] = cc_or_zero(cc_filter_1_resonance, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_resonance)))
   signals[SIGNAL_FILTER_1_GAIN] = cc_or_zero(cc_filter_1_gain, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_gain)))
-  signals[SIGNAL_FILTER_1_MOD_AMT] = cc_or_zero(cc_filter_1_mod_amt, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_mod_amt)))
-  signals[SIGNAL_FILTER_1_MOD_POL] = cc_or_zero(cc_filter_1_mod_pol, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_mod_pol)))
+  signals[SIGNAL_FILTER_1_MOD_1_AMT] = cc_or_zero(cc_filter_1_mod_1_amt, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_mod_1_amt)))
+  signals[SIGNAL_FILTER_1_MOD_1_POL] = cc_or_zero(cc_filter_1_mod_1_pol, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_mod_1_pol)))
   signals[SIGNAL_AMP_1_GAIN] = cc_or_zero(cc_amp_1_gain, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_amp_1_gain)))
   signals[SIGNAL_MIXER_1_LEVEL_1] = cc_or_zero(cc_mixer_1_level_1, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_level_1)))
   signals[SIGNAL_MIXER_1_POL_1] = cc_or_zero(cc_mixer_1_pol_1, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_pol_1)))
@@ -377,6 +383,8 @@ while true
   signals[SIGNAL_LFO_1_MOD_POL] = cc_or_zero(cc_lfo_1_mod_pol, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_mod_pol)))
   signals[SIGNAL_OSC_1_MOD_1_AMT] = cc_or_zero(cc_osc_1_mod_1_amt, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_mod_1_amt)))
   signals[SIGNAL_OSC_1_MOD_1_POL] = cc_or_zero(cc_osc_1_mod_1_pol, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_mod_1_pol)))
+  signals[SIGNAL_FILTER_1_MOD_2_AMT] = cc_or_zero(cc_filter_1_mod_2_amt, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_mod_2_amt)))
+  signals[SIGNAL_FILTER_1_MOD_2_POL] = cc_or_zero(cc_filter_1_mod_2_pol, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_mod_2_pol)))
   signals[SIGNAL_GENERAL_MOD_WHEEL] = cc_or_zero(cc_general_mod_wheel, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_general_mod_wheel)))
   # Each General CC fills two slots, the same value taken both ways.
   general_1 = C.get_midi_cc_value(MIDI_CH, cc_general_1)
@@ -406,8 +414,10 @@ while true
   filter_1.set_cutoff(signals[source_filter_1_cutoff])
   filter_1.set_resonance(signals[source_filter_1_resonance])
   filter_1.set_gain(signals[source_filter_1_gain])
-  filter_1.set_modulation_amount(signals[source_filter_1_mod_amt])
-  filter_1.set_modulation_polarity(signals[source_filter_1_mod_pol])
+  filter_1.set_modulation_1_amount(signals[source_filter_1_mod_1_amt])
+  filter_1.set_modulation_1_polarity(signals[source_filter_1_mod_1_pol])
+  filter_1.set_modulation_2_amount(signals[source_filter_1_mod_2_amt])
+  filter_1.set_modulation_2_polarity(signals[source_filter_1_mod_2_pol])
   amp_1.set_gain(signals[source_amp_1_gain])
   mixer_1.set_level_1(signals[source_mixer_1_level_1])
   mixer_1.set_polarity_1(signals[source_mixer_1_pol_1])
@@ -457,7 +467,7 @@ while true
       when 3 # MODULE_OSC_1
         signals[11] = osc_1.process(signals[source_osc_1_mod_1], signals[source_osc_1_mod_2], signals[source_osc_1_pw_mod]) # SIGNAL_OSC_1_OUTPUT
       when 4 # MODULE_FILTER_1
-        signals[12] = filter_1.process(signals[source_filter_1_audio], signals[source_filter_1_mod]) # SIGNAL_FILTER_1_OUTPUT_LP
+        signals[12] = filter_1.process(signals[source_filter_1_audio], signals[source_filter_1_mod_1], signals[source_filter_1_mod_2]) # SIGNAL_FILTER_1_OUTPUT_LP
         signals[65] = filter_1.output_bp # SIGNAL_FILTER_1_OUTPUT_BP
         signals[66] = filter_1.output_hp # SIGNAL_FILTER_1_OUTPUT_HP
       when 5 # MODULE_AMP_1

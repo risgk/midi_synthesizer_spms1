@@ -177,18 +177,23 @@ module Spms1
 
       @cutoff = 1.0
       @resonance = 0.0
-      @modulation_amount = 0.0
-      @modulation_polarity = 1.0
-      @modulation_depth = 0.0
+      @modulation_1_amount = 0.0
+      @modulation_1_polarity = 1.0
+      @modulation_1_depth = 0.0
+      @modulation_2_amount = 0.0
+      @modulation_2_polarity = 1.0
+      @modulation_2_depth = 0.0
       @gain = 0.5
 
       @stage_1_cutoff = 1.0
       @stage_1_resonance = 0.0
-      @stage_1_modulation_depth = 0.0
+      @stage_1_modulation_1_depth = 0.0
+      @stage_1_modulation_2_depth = 0.0
       @stage_1_gain = 0.5
       @current_cutoff = 1.0
       @current_resonance = 0.0
-      @current_modulation_depth = 0.0
+      @current_modulation_1_depth = 0.0
+      @current_modulation_2_depth = 0.0
       @current_gain = 0.5
 
       @g = 0.0
@@ -208,7 +213,8 @@ module Spms1
       @output_bp = 0.0
       @output_hp = 0.0
 
-      @current_modulation_input = 0.0
+      @current_modulation_1_input = 0.0
+      @current_modulation_2_input = 0.0
       @sample_counter = 0
 
       update_coefficients
@@ -221,19 +227,30 @@ module Spms1
       @cutoff = (cutoff < 0.0) ? 0.0 : ((cutoff > 1.0) ? 1.0 : cutoff)
     end
 
-    # Modulation depth is amount times polarity. Amount is unipolar, [0.0, 1.0]. Polarity is
+    # Each modulation depth is amount times polarity. Amount is unipolar, [0.0, 1.0]. Polarity is
     # bipolar, [-0.5, 0.5], and doubled, so +0.5 leaves the amount as it is, -0.5 negates it and
     # the way between scales it, crossing zero; it sets depth as well as direction. Multiplied here
     # so that only the product is smoothed.
-    def set_modulation_amount(amount)
-      @modulation_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
-      @modulation_depth = @modulation_amount * @modulation_polarity
+    def set_modulation_1_amount(amount)
+      @modulation_1_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
+      @modulation_1_depth = @modulation_1_amount * @modulation_1_polarity
     end
 
-    def set_modulation_polarity(polarity)
+    def set_modulation_1_polarity(polarity)
       clamped_polarity = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
-      @modulation_polarity = clamped_polarity + clamped_polarity
-      @modulation_depth = @modulation_amount * @modulation_polarity
+      @modulation_1_polarity = clamped_polarity + clamped_polarity
+      @modulation_1_depth = @modulation_1_amount * @modulation_1_polarity
+    end
+
+    def set_modulation_2_amount(amount)
+      @modulation_2_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
+      @modulation_2_depth = @modulation_2_amount * @modulation_2_polarity
+    end
+
+    def set_modulation_2_polarity(polarity)
+      clamped_polarity = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
+      @modulation_2_polarity = clamped_polarity + clamped_polarity
+      @modulation_2_depth = @modulation_2_amount * @modulation_2_polarity
     end
 
     # How hard the audio input drives the filter, used as a plain multiplier. It sits on the input
@@ -249,8 +266,9 @@ module Spms1
       @resonance = (resonance < 0.0) ? 0.0 : ((resonance > 1.0) ? 1.0 : resonance)
     end
 
-    def process(audio_input = 0.0, modulation_input = 0.0)
-      @current_modulation_input = modulation_input
+    def process(audio_input = 0.0, modulation_1_input = 0.0, modulation_2_input = 0.0)
+      @current_modulation_1_input = modulation_1_input
+      @current_modulation_2_input = modulation_2_input
 
       if @sample_counter == 0
         update_coefficients
@@ -372,15 +390,17 @@ module Spms1
       @current_cutoff = Dsp.smooth(@stage_1_cutoff, @current_cutoff, @smoothing_target_blend)
       @stage_1_resonance = Dsp.smooth(@resonance, @stage_1_resonance, @smoothing_target_blend)
       @current_resonance = Dsp.smooth(@stage_1_resonance, @current_resonance, @smoothing_target_blend)
-      @stage_1_modulation_depth = Dsp.smooth(@modulation_depth, @stage_1_modulation_depth, @smoothing_target_blend)
-      @current_modulation_depth = Dsp.smooth(@stage_1_modulation_depth, @current_modulation_depth, @smoothing_target_blend)
+      @stage_1_modulation_1_depth = Dsp.smooth(@modulation_1_depth, @stage_1_modulation_1_depth, @smoothing_target_blend)
+      @current_modulation_1_depth = Dsp.smooth(@stage_1_modulation_1_depth, @current_modulation_1_depth, @smoothing_target_blend)
+      @stage_1_modulation_2_depth = Dsp.smooth(@modulation_2_depth, @stage_1_modulation_2_depth, @smoothing_target_blend)
+      @current_modulation_2_depth = Dsp.smooth(@stage_1_modulation_2_depth, @current_modulation_2_depth, @smoothing_target_blend)
       @stage_1_gain = Dsp.smooth(@gain, @stage_1_gain, @smoothing_target_blend)
       @current_gain = Dsp.smooth(@stage_1_gain, @current_gain, @smoothing_target_blend)
 
-      # The modulation input arrives as it is; clamping total_cutoff below is what holds the
+      # The modulation inputs arrive as they are; clamping total_cutoff below is what holds the
       # table lookup in range, and a source that swings both ways moves the cutoff both ways.
       # Clamped without a comparison, as clip_output does it.
-      total_cutoff = @current_cutoff + (@current_modulation_input * @current_modulation_depth)
+      total_cutoff = @current_cutoff + (@current_modulation_1_input * @current_modulation_1_depth) + (@current_modulation_2_input * @current_modulation_2_depth)
       over  = total_cutoff - 1.0
       under = 0.0 - total_cutoff
       clamped_cutoff = total_cutoff - ((over + over.abs) - (under + under.abs)) * 0.5

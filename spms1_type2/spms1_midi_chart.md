@@ -23,14 +23,15 @@
 | Pitch Bend                    | x             | o             | Bipolar, routable as a signal        |
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Control                    20 | x             | o             | Osc Wave (Saw to Square)             |
-| Change                     13 | x             | o             | Osc Mod 2 Amt                  |
+| Change                     13 | x             | o             | Osc Mod 2 Amt                        |
 |                            86 | x             | o             | Osc Pitch Coarse (+-5 Octaves)       |
 |                            70 | x             | o             | Osc Pitch Fine (+-60 Cents)          |
 |                            19 | x             | o             | Osc Pulse Width (50% to 0%)          |
 |                           103 | x             | o             | Osc PW Mod Amt                       |
 |                            74 | x             | o             | Filter Cutoff                        |
 |                            71 | x             | o             | Filter Resonance                     |
-|                            24 | x             | o             | Filter Mod Amt                       |
+|                            24 | x             | o             | Filter Mod 1 Amt                     |
+|                            25 | x             | o             | Filter Mod 2 Amt                     |
 |                           112 | x             | o             | Filter Gain                          |
 |                            15 | x             | o             | Amp Gain                             |
 |                            73 | x             | o             | EG Attack (Time)                     |

@@ -80,8 +80,8 @@ signals:
   - { key: FILTER_1_CUTOFF,       id: 32, control: FILTER_1_CUTOFF }
   - { key: FILTER_1_RESONANCE,    id: 33, control: FILTER_1_RESONANCE }
   - { key: FILTER_1_GAIN,         id: 34, control: FILTER_1_GAIN }
-  - { key: FILTER_1_MOD_AMT,   id: 35, control: FILTER_1_MOD_AMT }
-  - { key: FILTER_1_MOD_POL, id: 36, control: FILTER_1_MOD_POL }
+  - { key: FILTER_1_MOD_1_AMT,   id: 35, control: FILTER_1_MOD_1_AMT }
+  - { key: FILTER_1_MOD_1_POL, id: 36, control: FILTER_1_MOD_1_POL }
   - { key: AMP_1_GAIN,            id: 37, control: AMP_1_GAIN }
   - { key: MIXER_1_LEVEL_1,       id: 38, control: MIXER_1_LEVEL_1 }
   - { key: MIXER_1_POL_1,    id: 39, control: MIXER_1_POL_1 }
@@ -133,6 +133,10 @@ signals:
   - { key: OSC_1_MOD_1_AMT,   id: 71, control: OSC_1_MOD_1_AMT }
   - { key: OSC_1_MOD_1_POL, id: 72, control: OSC_1_MOD_1_POL }
 
+  # Filter 1 Mod 2 Amt and Pol came after Osc 1 Mod 1 Amt and Pol.
+  - { key: FILTER_1_MOD_2_AMT,   id: 73, control: FILTER_1_MOD_2_AMT }
+  - { key: FILTER_1_MOD_2_POL, id: 74, control: FILTER_1_MOD_2_POL }
+
 # Module inputs, NRPN category 1, by entry: what feeds each one in the default patch (`source`, a
 # signal key). `label` is the editor's, on the module; `name` the README's, after the module's
 # label. An input with no module is a side of the final output.
@@ -141,7 +145,7 @@ inputs:
   - { entry: 1,  module: OSC_1,       key: MOD_1, label: Mod 1 In, name: Mod 1 In, source: SLEW_1_OUTPUT }
   - { entry: 2,  module: OSC_1,       key: MOD_2, label: Mod 2 In, name: Mod 2 In, source: LFO_1_OUTPUT }
   - { entry: 3,  module: FILTER_1,    key: AUDIO,       label: Audio In,       name: Audio In,       source: OSC_1_OUTPUT }
-  - { entry: 4,  module: FILTER_1,    key: MOD,         label: Mod In,         name: Mod In,         source: EG_1_OUTPUT }
+  - { entry: 4,  module: FILTER_1,    key: MOD_1,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
   - { entry: 5,  module: AMP_1,       key: AUDIO,       label: Audio In,       name: Audio In,       source: FILTER_1_OUTPUT_LP }
   - { entry: 6,  module: AMP_1,       key: MOD,         label: Mod In,         name: Mod In,         source: EG_1_OUTPUT }
   - { entry: 7,  module: MIXER_1,     key: IN_1,        label: In 1,           name: In 1,           source: NONE }
@@ -154,6 +158,7 @@ inputs:
   - { entry: 14, module: SLEW_1,      key: IN,          label: In,             name: In,             source: NOTE_PITCH }
   - { entry: 15, module: OSC_1,       key: PW_MOD,      label: PW Mod In,      name: PW Mod In,      source: LFO_1_OUTPUT }
   - { entry: 16, module: LFO_1,       key: MOD,         label: Mod In,         name: Mod In,         source: NONE }
+  - { entry: 17, module: FILTER_1,    key: MOD_2,       label: Mod 2 In,       name: Mod 2 In,       source: LFO_1_OUTPUT }
 
 # Controls, listed in the editor's order, each by its entry: a parameter is one entry of NRPN category 2 (where it takes its value) and
 # the same entry of category 3 (which CC fills its control slot); a General control is in
@@ -191,11 +196,15 @@ controls:
   - { entry: 35, module: OSC_1,     key: PULSE_WIDTH,  label: Pulse Width,  cc: 19,  value: 4 }
   - { entry: 36, module: OSC_1,     key: PW_MOD_AMT,   label: PW Mod Amt,      cc: 103, value: 4 }
   - { entry: 37, module: OSC_1,     key: PW_MOD_POL, label: PW Mod Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
-  # Filter 1 in the editor as Osc 1: the cutoff and its modulation, then the rest.
+  # Filter 1 in the editor: Gain, the cutoff and its two modulations, then the resonance. Mod 2
+  # Amt and Pol came last of all, so their entries follow every other. Mod 2 Amt powers up at
+  # CC 4, 0.0, so the LFO on Mod 2 In leaves the default patch as it was.
   - { entry: 15, module: FILTER_1,  key: GAIN,         label: Gain,         cc: 112, value: 64 }
   - { entry: 13, module: FILTER_1,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 100 }
-  - { entry: 16, module: FILTER_1,  key: MOD_AMT,   label: Mod Amt,      cc: 24,  value: 28 }
-  - { entry: 17, module: FILTER_1,  key: MOD_POL, label: Mod Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
+  - { entry: 16, module: FILTER_1,  key: MOD_1_AMT, label: Mod 1 Amt,     cc: 24,  value: 28 }
+  - { entry: 17, module: FILTER_1,  key: MOD_1_POL, label: Mod 1 Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
+  - { entry: 44, module: FILTER_1,  key: MOD_2_AMT, label: Mod 2 Amt,    cc: 25,  value: 4 }
+  - { entry: 45, module: FILTER_1,  key: MOD_2_POL, label: Mod 2 Pol,    cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 14, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 94 }
   - { entry: 18, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 124 }
   # Amp 1 Mod Amt and Mod Pol came after Osc 1's pulse width controls, so their entries follow theirs, but
