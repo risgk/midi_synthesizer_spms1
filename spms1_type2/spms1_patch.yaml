@@ -75,8 +75,8 @@ signals:
   - { key: OSC_1_WAVE,        id: 27, control: OSC_1_WAVE }
   - { key: OSC_1_PITCH_COARSE,     id: 28, control: OSC_1_PITCH_COARSE }
   - { key: OSC_1_PITCH_FINE,       id: 29, control: OSC_1_PITCH_FINE }
-  - { key: OSC_1_PITCH_MOD_AMT, id: 30, control: OSC_1_PITCH_MOD_AMT }
-  - { key: OSC_1_PITCH_MOD_POL, id: 31, control: OSC_1_PITCH_MOD_POL }
+  - { key: OSC_1_MOD_2_AMT, id: 30, control: OSC_1_MOD_2_AMT }
+  - { key: OSC_1_MOD_2_POL, id: 31, control: OSC_1_MOD_2_POL }
   - { key: FILTER_1_CUTOFF,       id: 32, control: FILTER_1_CUTOFF }
   - { key: FILTER_1_RESONANCE,    id: 33, control: FILTER_1_RESONANCE }
   - { key: FILTER_1_GAIN,         id: 34, control: FILTER_1_GAIN }
@@ -150,13 +150,18 @@ signals:
   # Mixer 1 Out Level came after Pitch 1 Coarse and Fine.
   - { key: MIXER_1_OUT_LEVEL, id: 83, control: MIXER_1_OUT_LEVEL }
 
-# Module inputs, NRPN category 1, by entry: what feeds each one in the default patch (`source`, a
-# signal key). `label` is the editor's, on the module; `name` the README's, after the module's
-# label. An input with no module is a side of the final output.
+  # Osc 1 Mod 1 Amt and Pol came after Mixer 1 Out Level.
+  - { key: OSC_1_MOD_1_AMT, id: 84, control: OSC_1_MOD_1_AMT }
+  - { key: OSC_1_MOD_1_POL, id: 85, control: OSC_1_MOD_1_POL }
+
+# Module inputs, NRPN category 1, listed in the editor's order, each by its entry: what feeds each
+# one in the default patch (`source`, a signal key). `label` is the editor's, on the module; `name`
+# the README's, after the module's label. An input with no module is a side of the final output.
 inputs:
   - { entry: 0,  module: EG_1,        key: GATE,        label: Gate In,        name: Gate In,        source: NOTE_GATE }
   - { entry: 1,  module: OSC_1,       key: PITCH,       label: Pitch In,       name: Pitch In,       source: PITCH_1_OUTPUT }
-  - { entry: 2,  module: OSC_1,       key: PITCH_MOD,   label: Pitch Mod In,   name: Pitch Mod In,   source: LFO_1_OUTPUT }
+  - { entry: 21, module: OSC_1,       key: MOD_1,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
+  - { entry: 2,  module: OSC_1,       key: MOD_2,       label: Mod 2 In,   name: Mod 2 In,   source: LFO_1_OUTPUT }
   - { entry: 3,  module: FILTER_1,    key: AUDIO,       label: Audio In,       name: Audio In,       source: OSC_1_OUTPUT }
   - { entry: 4,  module: FILTER_1,    key: MOD_1,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
   - { entry: 5,  module: AMP_1,       key: AUDIO,       label: Audio In,       name: Audio In,       source: FILTER_1_OUTPUT_LP }
@@ -196,7 +201,7 @@ controls:
   - { entry: 4,  module: EG_1,      key: DECAY,        label: Decay,        cc: 75,  value: 96 }
   - { entry: 5,  module: EG_1,      key: SUSTAIN,      label: Sustain,      cc: 30,  value: 124 }
   - { entry: 6,  module: EG_1,      key: LEVEL,        label: Level,        cc: 0,   source: ONE }
-  # Osc 1 in the editor: the pitch and its modulation, then the waveform and the pulse
+  # Osc 1 in the editor: the pitch and its two modulations, then the waveform and the pulse
   # width's modulation, each target next to what moves it. Pulse Width, PW Mod Amt and PW Mod Pol
   # came after Pitch 1, so their entries follow its, but they are listed here. Pitch Coarse and Fine
   # have no CC and stay at 0.0 by default: the transposition is Pitch 1's Coarse and Fine,
@@ -206,8 +211,13 @@ controls:
   - { entry: 9,  module: OSC_1,     key: PITCH_COARSE,  label: Pitch Coarse,  cc: 0,   value: 64, bipolar: true }
   - { entry: 10, module: OSC_1,     key: PITCH_FINE,    label: Pitch Fine,    cc: 0,   value: 64, bipolar: true }
   # Entries 42 and 43, Osc 1's old Mod 1 Amt and Pol, are unused: Pitch In takes the note whole.
-  - { entry: 11, module: OSC_1,     key: PITCH_MOD_AMT, label: Pitch Mod Amt, cc: 13,  value: 4 }
-  - { entry: 12, module: OSC_1,     key: PITCH_MOD_POL, label: Pitch Mod Pol, cc: 0,   value: 124, source: POINT_ONE, bipolar: true }
+  # Mod 1 Amt and Pol came after Mixer 1 Out Level, so their entries follow its. Mod 1 In takes
+  # the envelope, for a pitch envelope; Mod 1 Amt has no CC and powers up at 0.0, leaving it off,
+  # and Mod 1 Pol reads +0.5, as Filter 1 Mod 1 Pol does.
+  - { entry: 55, module: OSC_1,     key: MOD_1_AMT, label: Mod 1 Amt, cc: 0,   value: 4 }
+  - { entry: 56, module: OSC_1,     key: MOD_1_POL, label: Mod 1 Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
+  - { entry: 11, module: OSC_1,     key: MOD_2_AMT, label: Mod 2 Amt, cc: 13,  value: 4 }
+  - { entry: 12, module: OSC_1,     key: MOD_2_POL, label: Mod 2 Pol, cc: 0,   value: 124, source: POINT_ONE, bipolar: true }
   - { entry: 8,  module: OSC_1,     key: WAVE,     label: Wave,         cc: 20,  value: 4 }
   - { entry: 35, module: OSC_1,     key: PULSE_WIDTH,  label: Pulse Width,  cc: 114, value: 4 }
   - { entry: 36, module: OSC_1,     key: PW_MOD_AMT,   label: PW Mod Amt,      cc: 103, value: 4 }
@@ -216,7 +226,7 @@ controls:
   # Amt and Pol came last of all, so their entries follow every other. Mod 2 Amt powers up at
   # CC 4, 0.0, so the LFO on Mod 2 In leaves the cutoff alone until it is turned up. Mod 2 Pol reads 0.1, as
   # Osc 1 Mod 2 Pol does, which brings the LFO down to a musical depth on the cutoff. Mod 3 is the keyboard
-  # tracking: Mod 3 In takes the pitch from Pitch 1, as Osc 1 Mod 1 In does, and Mod 3 Pol reads
+  # tracking: Mod 3 In takes the pitch from Pitch 1, as Osc 1 Pitch In does, and Mod 3 Pol reads
   # +0.5, so that Mod 3 Amt (CC 9) at its top makes the cutoff follow the note a semitone for a
   # semitone, unmoved at note 60. Mod 3 Amt powers up at CC 4, 0.0, with the tracking off.
   - { entry: 15, module: FILTER_1,  key: GAIN,         label: Gain,         cc: 112, value: 64 }

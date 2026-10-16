@@ -28,14 +28,15 @@ end
 
 # The spec, read and checked: every number unique, every key it names defined.
 class Spec
-  attr_reader :modules, :signals, :inputs, :controls, :controls_in_list_order, :default_order
+  attr_reader :modules, :signals, :inputs, :inputs_in_list_order, :controls, :controls_in_list_order, :default_order
 
   def initialize(yaml)
     @modules  = yaml.fetch('modules')
     @signals  = yaml.fetch('signals')
-    @inputs   = yaml.fetch('inputs')
-    # The list's order is the editor's: a control goes next to its module's others there, though
-    # its entry is appended. Everything else takes them by entry.
+    # The list's order is the editor's: an input or a control goes next to its module's others
+    # there, though its entry is appended. Everything else takes them by entry.
+    @inputs_in_list_order = yaml.fetch('inputs')
+    @inputs = @inputs_in_list_order.sort_by { |i| i['entry'] }
     @controls_in_list_order = yaml.fetch('controls')
     @controls = @controls_in_list_order.sort_by { |c| c['entry'] }
     @default_order = yaml.fetch('default_order')
@@ -193,7 +194,7 @@ def editor_js
       { key: m['key'], id: m['id'], label: m['label'],
         outs: s.outputs_of(m).map { |o| { sig: o['key'], label: o['output'] } } }
     end,
-    inputs: s.inputs.map do |i|
+    inputs: s.inputs_in_list_order.map do |i|
       { entry: i['entry'], module: i['module'], key: i['key'], label: i['label'], source: i['source'] }
     end,
     controls: s.controls_in_list_order.map do |c|
