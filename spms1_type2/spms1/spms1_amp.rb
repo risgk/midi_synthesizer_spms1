@@ -1,5 +1,5 @@
 module Spms1
-  # Amplifier that smooths the gain parameter and the modulation depth to avoid zipper noise.
+  # Amplifier that smooths the gain parameter to avoid zipper noise.
   # Modulation input is applied directly without smoothing.
   class Amp
     # Blend at the reference rate on the line below, for each of two cascaded stages. The two move
@@ -29,13 +29,6 @@ module Spms1
       @gain = 1.0
       @stage_1_gain = 1.0
       @current_gain = 1.0
-      # Modulation depth is amount times polarity, as the other modules' is, multiplied before
-      # smoothing so that only one smoothing state has to be carried.
-      @modulation_amount = 1.0
-      @modulation_polarity = 1.0
-      @modulation_depth = 1.0
-      @stage_1_modulation_depth = 1.0
-      @current_modulation_depth = 1.0
       @sample_counter = 0
     end
 
@@ -47,39 +40,21 @@ module Spms1
       @gain = (gain < 0.0) ? 0.0 : ((gain > 1.0) ? 1.0 : gain)
     end
 
-    # Modulation depth is amount times polarity. Amount is unipolar, [0.0, 1.0]. Polarity is
-    # bipolar, [-0.5, 0.5], and doubled, so +0.5 leaves the amount as it is, -0.5 negates it and
-    # the way between scales it, crossing zero. The depth scales the modulation input before it
-    # scales the gain, so at 1.0 the input passes as it arrives and at 0.0 the amp is shut, as a
-    # mixer's Level shuts its input.
-    def set_modulation_amount(amount)
-      @modulation_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
-      @modulation_depth = @modulation_amount * @modulation_polarity
-    end
-
-    def set_modulation_polarity(polarity)
-      clamped_polarity = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
-      @modulation_polarity = clamped_polarity + clamped_polarity
-      @modulation_depth = @modulation_amount * @modulation_polarity
-    end
-
     def process(audio_input = 0.0, modulation_input = 1.0)
       # Gain parameter is smoothed at control rate to avoid zipper noise.
       if @sample_counter == 0
         @stage_1_gain = Dsp.smooth(@gain, @stage_1_gain, @smoothing_target_blend)
         @current_gain = Dsp.smooth(@stage_1_gain, @current_gain, @smoothing_target_blend)
-        @stage_1_modulation_depth = Dsp.smooth(@modulation_depth, @stage_1_modulation_depth, @smoothing_target_blend)
-        @current_modulation_depth = Dsp.smooth(@stage_1_modulation_depth, @current_modulation_depth, @smoothing_target_blend)
       end
 
       @sample_counter = (@sample_counter + 1) & CONTROL_RATE_MASK
 
       # The one modulation input in the synth that is clamped on the way in, because an amp is an
       # attenuator: a modulation scales the gain down, and must not be able to scale it up however
-      # loud it arrives. Negative still inverts. @gain is already [0.0, 1.0] and the depth
-      # [-1.0, 1.0], so the product needs no clamp of its own.
+      # loud it arrives. Negative still inverts. @gain is already [0.0, 1.0], so the product needs
+      # no clamp of its own.
       mod = (modulation_input < -1.0) ? -1.0 : ((modulation_input > 1.0) ? 1.0 : modulation_input)
-      total_gain = @current_gain * (mod * @current_modulation_depth)
+      total_gain = @current_gain * mod
 
       audio_input * total_gain
     end

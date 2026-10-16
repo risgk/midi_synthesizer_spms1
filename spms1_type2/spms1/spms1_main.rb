@@ -168,8 +168,7 @@ spms1_fill_constant_signals(signals)
 # level and a polarity of +0.5, which makes a mixer pass its input through rather than mute it.
 # Each modulation polarity has no CC either and reads +0.5, which leaves the amount in charge,
 # but for the pitch's. LFO 1 Level and EG 1 Level have no CC either and read 1.0, passing the LFO
-# and the envelope as they are, and Amp 1 Mod Amt and Mod Pol read 1.0 and +0.5, passing the
-# envelope on to the amp as it is. The chorus and the delay run last, after the amp: the chorus
+# and the envelope as they are. The chorus and the delay run last, after the amp: the chorus
 # takes the mono amp and spreads it into a left and a right, the delay takes the two sides, and
 # its two outputs are what the final output's left and right read.
 spms1_write_default_patch(MIDI_CH)
@@ -291,8 +290,6 @@ while true
   source_osc_1_pulse_width     = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PULSE_WIDTH)
   source_osc_1_pw_mod_amt      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PW_MOD_AMT)
   source_osc_1_pw_mod_pol      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PW_MOD_POL)
-  source_amp_1_mod_amt         = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_MOD_AMT)
-  source_amp_1_mod_pol         = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_MOD_POL)
   source_lfo_1_mod_amt         = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_MOD_AMT)
   source_lfo_1_mod_pol         = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_MOD_POL)
   source_osc_1_mod_1_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_MOD_1_AMT)
@@ -333,8 +330,6 @@ while true
   cc_osc_1_pulse_width     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_PULSE_WIDTH)
   cc_osc_1_pw_mod_amt      = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_PW_MOD_AMT)
   cc_osc_1_pw_mod_pol      = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_PW_MOD_POL)
-  cc_amp_1_mod_amt         = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_AMP_1_MOD_AMT)
-  cc_amp_1_mod_pol         = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_AMP_1_MOD_POL)
   cc_lfo_1_mod_amt         = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_MOD_AMT)
   cc_lfo_1_mod_pol         = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_MOD_POL)
   cc_osc_1_mod_1_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_MOD_1_AMT)
@@ -378,8 +373,6 @@ while true
   signals[SIGNAL_OSC_1_PULSE_WIDTH] = cc_or_zero(cc_osc_1_pulse_width, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_pulse_width)))
   signals[SIGNAL_OSC_1_PW_MOD_AMT] = cc_or_zero(cc_osc_1_pw_mod_amt, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_pw_mod_amt)))
   signals[SIGNAL_OSC_1_PW_MOD_POL] = cc_or_zero(cc_osc_1_pw_mod_pol, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_pw_mod_pol)))
-  signals[SIGNAL_AMP_1_MOD_AMT] = cc_or_zero(cc_amp_1_mod_amt, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_amp_1_mod_amt)))
-  signals[SIGNAL_AMP_1_MOD_POL] = cc_or_zero(cc_amp_1_mod_pol, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_amp_1_mod_pol)))
   signals[SIGNAL_LFO_1_MOD_AMT] = cc_or_zero(cc_lfo_1_mod_amt, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_mod_amt)))
   signals[SIGNAL_LFO_1_MOD_POL] = cc_or_zero(cc_lfo_1_mod_pol, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_mod_pol)))
   signals[SIGNAL_OSC_1_MOD_1_AMT] = cc_or_zero(cc_osc_1_mod_1_amt, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_mod_1_amt)))
@@ -434,8 +427,6 @@ while true
   osc_1.set_pulse_width(signals[source_osc_1_pulse_width])
   osc_1.set_pw_modulation_amount(signals[source_osc_1_pw_mod_amt])
   osc_1.set_pw_modulation_polarity(signals[source_osc_1_pw_mod_pol])
-  amp_1.set_modulation_amount(signals[source_amp_1_mod_amt])
-  amp_1.set_modulation_polarity(signals[source_amp_1_mod_pol])
   lfo_1.set_modulation_amount(signals[source_lfo_1_mod_amt])
   lfo_1.set_modulation_polarity(signals[source_lfo_1_mod_pol])
   osc_1.set_modulation_1_amount(signals[source_osc_1_mod_1_amt])

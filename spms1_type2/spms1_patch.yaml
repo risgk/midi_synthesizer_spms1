@@ -124,9 +124,6 @@ signals:
   - { key: FILTER_1_OUTPUT_HP, id: 66, module: FILTER_1, output: Out HP, label: Filter 1 Output HP, bipolar: true }
 
 
-  - { key: AMP_1_MOD_AMT,   id: 67, control: AMP_1_MOD_AMT }
-  - { key: AMP_1_MOD_POL, id: 68, control: AMP_1_MOD_POL }
-
   - { key: LFO_1_MOD_AMT,   id: 69, control: LFO_1_MOD_AMT }
   - { key: LFO_1_MOD_POL, id: 70, control: LFO_1_MOD_POL }
 
@@ -208,11 +205,6 @@ controls:
   - { entry: 45, module: FILTER_1,  key: MOD_2_POL, label: Mod 2 Pol,    cc: 0,   value: 124, source: POINT_ONE, bipolar: true }
   - { entry: 14, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 94 }
   - { entry: 18, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 124 }
-  # Amp 1 Mod Amt and Mod Pol came after Osc 1's pulse width controls, so their entries follow theirs, but
-  # they are listed here, after Gain. Neither has a CC: the default patch points them at 1.0 and
-  # +0.5, a depth of exactly 1.0, which passes the envelope as the amp always took it.
-  - { entry: 38, module: AMP_1,     key: MOD_AMT,   label: Mod Amt,      cc: 0,   value: 124, source: ONE }
-  - { entry: 39, module: AMP_1,     key: MOD_POL, label: Mod Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 19, module: MIXER_1,   key: LEVEL_1,      label: Level 1,      cc: 0,   source: ONE }
   - { entry: 20, module: MIXER_1,   key: POL_1,   label: Pol 1,   cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 21, module: MIXER_1,   key: LEVEL_2,      label: Level 2,      cc: 0,   source: ONE }
