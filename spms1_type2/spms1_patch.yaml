@@ -213,7 +213,7 @@ controls:
   - { entry: 11, module: OSC_1,     key: MOD_2_AMT,   label: Mod 2 Amt,      cc: 13,  value: 4 }
   - { entry: 12, module: OSC_1,     key: MOD_2_POL, label: Mod 2 Pol, cc: 0,   value: 124, source: POINT_ONE, bipolar: true }
   - { entry: 8,  module: OSC_1,     key: WAVE,     label: Wave,         cc: 20,  value: 4 }
-  - { entry: 35, module: OSC_1,     key: PULSE_WIDTH,  label: Pulse Width,  cc: 19,  value: 4 }
+  - { entry: 35, module: OSC_1,     key: PULSE_WIDTH,  label: Pulse Width,  cc: 114, value: 4 }
   - { entry: 36, module: OSC_1,     key: PW_MOD_AMT,   label: PW Mod Amt,      cc: 103, value: 4 }
   - { entry: 37, module: OSC_1,     key: PW_MOD_POL, label: PW Mod Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
   # Filter 1 in the editor: Gain, the cutoff and its two modulations, then the resonance. Mod 2
@@ -247,13 +247,13 @@ controls:
   # General controls: a CC put on the bus for any input or parameter to read, the mod wheel
   # unipolar and each of General 1-4 filling a unipolar and a bipolar slot (see `signals`). Each
   # of General 1-4 powers up at CC 64, the one value that puts neither slot at an end: the
-  # unipolar slot at 0.5, the bipolar at 0.0. General 4 is on CC 113, CC 19 having gone to Osc 1
-  # Pulse Width.
+  # unipolar slot at 0.5, the bipolar at 0.0. General 1-4 are on CC 16-19, the MIDI spec's
+  # General Purpose Controllers 1-4.
   - { entry: 29, general: true, key: GENERAL_MOD_WHEEL, label: Mod Wheel, cc: 1,   value: 4 }
   - { entry: 30, general: true, key: GENERAL_1,         label: "1",       cc: 16,  value: 64 }
   - { entry: 31, general: true, key: GENERAL_2,         label: "2",       cc: 17,  value: 64 }
   - { entry: 32, general: true, key: GENERAL_3,         label: "3",       cc: 18,  value: 64 }
-  - { entry: 33, general: true, key: GENERAL_4,         label: "4",       cc: 114, value: 64 }
+  - { entry: 33, general: true, key: GENERAL_4,         label: "4",       cc: 19,  value: 64 }
 
   # Pitch 1 came after the General controls, so its entry follows theirs. CC 5 is Portamento Time
   # in the MIDI spec; it powers up at CC 4, 0.0, where the portamento is off.

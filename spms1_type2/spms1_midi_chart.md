@@ -24,7 +24,7 @@
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Control                    20 | x             | o             | Osc Wave (Saw to Square)             |
 | Change                     13 | x             | o             | Osc Mod 2 Amt                        |
-|                            19 | x             | o             | Osc Pulse Width (50% to 0%)          |
+|                           114 | x             | o             | Osc Pulse Width (50% to 0%)          |
 |                           103 | x             | o             | Osc PW Mod Amt                       |
 |                            74 | x             | o             | Filter Cutoff                        |
 |                            71 | x             | o             | Filter Resonance                     |
@@ -52,7 +52,7 @@
 |                            16 | x             | o             | General 1 (Unipolar and Bipolar)     |
 |                            17 | x             | o             | General 2 (Unipolar and Bipolar)     |
 |                            18 | x             | o             | General 3 (Unipolar and Bipolar)     |
-|                           114 | x             | o             | General 4 (Unipolar and Bipolar)     |
+|                            19 | x             | o             | General 4 (Unipolar and Bipolar)     |
 |                            99 | x             | o             | NRPN MSB                             |
 |                            98 | x             | o             | NRPN LSB                             |
 |                             6 | x             | o             | Data Entry MSB (NRPN value)          |

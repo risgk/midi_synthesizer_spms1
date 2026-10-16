@@ -336,9 +336,9 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_GENERAL_1              , 16)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_GENERAL_2              , 17)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_GENERAL_3              , 18)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_GENERAL_4              , 114)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_GENERAL_4              , 19)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_PITCH_1_PORTAMENTO_TIME, 5)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_PULSE_WIDTH      , 19)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_PULSE_WIDTH      , 114)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_PW_MOD_AMT       , 103)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_MOD_2_AMT     , 25)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_MOD_3_AMT     , 9)
@@ -368,9 +368,9 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 16 , 64 ) # General 1
   C.set_midi_cc_value(midi_ch, 17 , 64 ) # General 2
   C.set_midi_cc_value(midi_ch, 18 , 64 ) # General 3
-  C.set_midi_cc_value(midi_ch, 114, 64 ) # General 4
+  C.set_midi_cc_value(midi_ch, 19 , 64 ) # General 4
   C.set_midi_cc_value(midi_ch, 5  , 4  ) # Pitch 1 Portamento Time
-  C.set_midi_cc_value(midi_ch, 19 , 4  ) # Osc 1 Pulse Width
+  C.set_midi_cc_value(midi_ch, 114, 4  ) # Osc 1 Pulse Width
   C.set_midi_cc_value(midi_ch, 103, 4  ) # Osc 1 PW Mod Amt
   C.set_midi_cc_value(midi_ch, 25 , 4  ) # Filter 1 Mod 2 Amt
   C.set_midi_cc_value(midi_ch, 9  , 4  ) # Filter 1 Mod 3 Amt

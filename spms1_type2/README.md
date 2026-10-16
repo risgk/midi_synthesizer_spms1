@@ -5,7 +5,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.3
 - Controlled by MIDI as a sound module
 - Last-note priority with one note of memory: releasing the newest note while the one before it is still held goes back to that one, legato (for trills)
 - 48 kHz audio output: 24 bit through an I2S DAC, or PWM Audio (no DAC needed)
-- Oscillator: a sawtooth-to-square morph with pulse width (CC 19), and a modulation input of its own for the pulse width (PWM, CC 103)
+- Oscillator: a sawtooth-to-square morph with pulse width (CC 114), and a modulation input of its own for the pulse width (PWM, CC 103)
 - Filter: ZDF/TPT State Variable Filter (with a nonlinear leak on the band pass integrator, solved by the one-step Newton method), with low pass, band pass and high pass outputs
 - Chorus: mono in, stereo out, as a module in the run order
 - Delay: stereo, with feedback, as a module in the run order (up to 340 ms)
@@ -606,7 +606,7 @@ Neither has a CC: the default patch points them at 1.0 and +0.5.
 
 Osc 1 Pulse Width shifts the second of the two sawtooths that the morph is made of, from half a
 cycle at 0.0 (CC 4) toward a whole one at 1.0 (CC 124). At the square end of Osc 1 Wave that is a
-pulse of 50% at CC 4, 25% at CC 64 and 0%, silence, at CC 124; it is on CC 19.
+pulse of 50% at CC 4, 25% at CC 64 and 0%, silence, at CC 124; it is on CC 114.
 Osc 1 PW Mod In moves it, by PW Mod Amt (CC 103) times PW Mod Pol, the same
 way as Mod 1 In and Mod 2 In, with their Amt and Pol, move the pitch. A unit of modulation is the whole pulse
 width range, so at the top of PW Mod Amt the LFO, which the default patch feeds it, swings the
