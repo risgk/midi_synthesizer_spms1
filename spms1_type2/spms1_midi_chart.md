@@ -32,6 +32,7 @@
 |                            71 | x             | o             | Filter Resonance                     |
 |                            24 | x             | o             | Filter Mod 1 Amt                     |
 |                            25 | x             | o             | Filter Mod 2 Amt                     |
+|                             9 | x             | o             | Filter Mod 3 Amt (Key Track)         |
 |                           112 | x             | o             | Filter Gain                          |
 |                            15 | x             | o             | Amp Gain                             |
 |                            73 | x             | o             | EG Attack (Time)                     |

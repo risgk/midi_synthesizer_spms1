@@ -1122,6 +1122,7 @@
       {"entry":15,"module":"OSC_1","key":"PW_MOD","label":"PW Mod In","source":"LFO_1_OUTPUT"},
       {"entry":16,"module":"LFO_1","key":"MOD","label":"Mod In","source":"NONE"},
       {"entry":17,"module":"FILTER_1","key":"MOD_2","label":"Mod 2 In","source":"LFO_1_OUTPUT"},
+      {"entry":18,"module":"FILTER_1","key":"MOD_3","label":"Mod 3 In","source":"SLEW_1_OUTPUT"},
     ],
     controls: [
       {"entry":0,"module":"LFO_1","key":"RATE","label":"Rate","bipolar":false,"cc":3,"value":64,"general":false,"slots":[["LFO_1_RATE","Rate",false]]},
@@ -1148,6 +1149,8 @@
       {"entry":17,"module":"FILTER_1","key":"MOD_1_POL","label":"Mod 1 Pol","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["FILTER_1_MOD_1_POL","Mod 1 Pol",true]]},
       {"entry":44,"module":"FILTER_1","key":"MOD_2_AMT","label":"Mod 2 Amt","bipolar":false,"cc":25,"value":4,"general":false,"slots":[["FILTER_1_MOD_2_AMT","Mod 2 Amt",false]]},
       {"entry":45,"module":"FILTER_1","key":"MOD_2_POL","label":"Mod 2 Pol","bipolar":true,"cc":0,"value":124,"source":"POINT_ONE","general":false,"slots":[["FILTER_1_MOD_2_POL","Mod 2 Pol",true]]},
+      {"entry":46,"module":"FILTER_1","key":"MOD_3_AMT","label":"Mod 3 Amt","bipolar":false,"cc":9,"value":124,"general":false,"slots":[["FILTER_1_MOD_3_AMT","Mod 3 Amt",false]]},
+      {"entry":47,"module":"FILTER_1","key":"MOD_3_POL","label":"Mod 3 Pol","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["FILTER_1_MOD_3_POL","Mod 3 Pol",true]]},
       {"entry":14,"module":"FILTER_1","key":"RESONANCE","label":"Resonance","bipolar":false,"cc":71,"value":94,"general":false,"slots":[["FILTER_1_RESONANCE","Resonance",false]]},
       {"entry":18,"module":"AMP_1","key":"GAIN","label":"Gain","bipolar":false,"cc":15,"value":124,"general":false,"slots":[["AMP_1_GAIN","Gain",false]]},
       {"entry":19,"module":"MIXER_1","key":"LEVEL_1","label":"Level 1","bipolar":false,"cc":0,"source":"ONE","general":false,"slots":[["MIXER_1_LEVEL_1","Level 1",false]]},
@@ -1239,6 +1242,8 @@
       {"id":72,"key":"OSC_1_MOD_1_POL"},
       {"id":73,"key":"FILTER_1_MOD_2_AMT"},
       {"id":74,"key":"FILTER_1_MOD_2_POL"},
+      {"id":75,"key":"FILTER_1_MOD_3_AMT"},
+      {"id":76,"key":"FILTER_1_MOD_3_POL"},
     ],
     defaultOrder: ["SLEW_1","LFO_1","EG_1","MIXER_1","OSC_1","FILTER_1","AMP_1","CHORUS_1","DELAY_1"],
   };

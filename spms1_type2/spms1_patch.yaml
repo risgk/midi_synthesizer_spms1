@@ -134,6 +134,10 @@ signals:
   - { key: FILTER_1_MOD_2_AMT,   id: 73, control: FILTER_1_MOD_2_AMT }
   - { key: FILTER_1_MOD_2_POL, id: 74, control: FILTER_1_MOD_2_POL }
 
+  # Filter 1 Mod 3 Amt and Pol came after Mod 2 Amt and Pol.
+  - { key: FILTER_1_MOD_3_AMT,   id: 75, control: FILTER_1_MOD_3_AMT }
+  - { key: FILTER_1_MOD_3_POL, id: 76, control: FILTER_1_MOD_3_POL }
+
 # Module inputs, NRPN category 1, by entry: what feeds each one in the default patch (`source`, a
 # signal key). `label` is the editor's, on the module; `name` the README's, after the module's
 # label. An input with no module is a side of the final output.
@@ -156,6 +160,7 @@ inputs:
   - { entry: 15, module: OSC_1,       key: PW_MOD,      label: PW Mod In,      name: PW Mod In,      source: LFO_1_OUTPUT }
   - { entry: 16, module: LFO_1,       key: MOD,         label: Mod In,         name: Mod In,         source: NONE }
   - { entry: 17, module: FILTER_1,    key: MOD_2,       label: Mod 2 In,       name: Mod 2 In,       source: LFO_1_OUTPUT }
+  - { entry: 18, module: FILTER_1,    key: MOD_3,       label: Mod 3 In,       name: Mod 3 In,       source: SLEW_1_OUTPUT }
 
 # Controls, listed in the editor's order, each by its entry: a parameter is one entry of NRPN category 2 (where it takes its value) and
 # the same entry of category 3 (which CC fills its control slot); a General control is in
@@ -195,14 +200,19 @@ controls:
   - { entry: 37, module: OSC_1,     key: PW_MOD_POL, label: PW Mod Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
   # Filter 1 in the editor: Gain, the cutoff and its two modulations, then the resonance. Mod 2
   # Amt and Pol came last of all, so their entries follow every other. Mod 2 Amt powers up at
-  # CC 4, 0.0, so the LFO on Mod 2 In leaves the default patch as it was. Mod 2 Pol reads 0.1, as
-  # Osc 1 Mod 2 Pol does, which brings the LFO down to a musical depth on the cutoff.
+  # CC 4, 0.0, so the LFO on Mod 2 In leaves the cutoff alone until it is turned up. Mod 2 Pol reads 0.1, as
+  # Osc 1 Mod 2 Pol does, which brings the LFO down to a musical depth on the cutoff. Mod 3 is the keyboard
+  # tracking: Mod 3 In takes the pitch from Slew 1, as Osc 1 Mod 1 In does, and Mod 3 Amt (CC 9)
+  # powers up at its top and Mod 3 Pol reads +0.5, a depth of 1.0, so the cutoff follows the note
+  # a semitone a semitone, about the middle of its dial at note 60.
   - { entry: 15, module: FILTER_1,  key: GAIN,         label: Gain,         cc: 112, value: 64 }
   - { entry: 13, module: FILTER_1,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 100 }
   - { entry: 16, module: FILTER_1,  key: MOD_1_AMT, label: Mod 1 Amt,     cc: 24,  value: 28 }
   - { entry: 17, module: FILTER_1,  key: MOD_1_POL, label: Mod 1 Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 44, module: FILTER_1,  key: MOD_2_AMT, label: Mod 2 Amt,    cc: 25,  value: 4 }
   - { entry: 45, module: FILTER_1,  key: MOD_2_POL, label: Mod 2 Pol,    cc: 0,   value: 124, source: POINT_ONE, bipolar: true }
+  - { entry: 46, module: FILTER_1,  key: MOD_3_AMT, label: Mod 3 Amt,    cc: 9,   value: 124 }
+  - { entry: 47, module: FILTER_1,  key: MOD_3_POL, label: Mod 3 Pol,    cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 14, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 94 }
   - { entry: 18, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 124 }
   - { entry: 19, module: MIXER_1,   key: LEVEL_1,      label: Level 1,      cc: 0,   source: ONE }

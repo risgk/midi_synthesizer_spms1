@@ -183,17 +183,22 @@ module Spms1
       @modulation_2_amount = 0.0
       @modulation_2_polarity = 1.0
       @modulation_2_depth = 0.0
+      @modulation_3_amount = 0.0
+      @modulation_3_polarity = 1.0
+      @modulation_3_depth = 0.0
       @gain = 0.5
 
       @stage_1_cutoff = 1.0
       @stage_1_resonance = 0.0
       @stage_1_modulation_1_depth = 0.0
       @stage_1_modulation_2_depth = 0.0
+      @stage_1_modulation_3_depth = 0.0
       @stage_1_gain = 0.5
       @current_cutoff = 1.0
       @current_resonance = 0.0
       @current_modulation_1_depth = 0.0
       @current_modulation_2_depth = 0.0
+      @current_modulation_3_depth = 0.0
       @current_gain = 0.5
 
       @g = 0.0
@@ -215,6 +220,7 @@ module Spms1
 
       @current_modulation_1_input = 0.0
       @current_modulation_2_input = 0.0
+      @current_modulation_3_input = 0.0
       @sample_counter = 0
 
       update_coefficients
@@ -253,6 +259,17 @@ module Spms1
       @modulation_2_depth = @modulation_2_amount * @modulation_2_polarity
     end
 
+    def set_modulation_3_amount(amount)
+      @modulation_3_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
+      @modulation_3_depth = @modulation_3_amount * @modulation_3_polarity
+    end
+
+    def set_modulation_3_polarity(polarity)
+      clamped_polarity = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
+      @modulation_3_polarity = clamped_polarity + clamped_polarity
+      @modulation_3_depth = @modulation_3_amount * @modulation_3_polarity
+    end
+
     # How hard the audio input drives the filter, used as a plain multiplier. It sits on the input
     # rather than the output because that is what decides how far the band pass runs into the
     # leak, which the resonant peak reaches first: the pass band itself stays nearly clean.
@@ -266,9 +283,10 @@ module Spms1
       @resonance = (resonance < 0.0) ? 0.0 : ((resonance > 1.0) ? 1.0 : resonance)
     end
 
-    def process(audio_input = 0.0, modulation_1_input = 0.0, modulation_2_input = 0.0)
+    def process(audio_input = 0.0, modulation_1_input = 0.0, modulation_2_input = 0.0, modulation_3_input = 0.0)
       @current_modulation_1_input = modulation_1_input
       @current_modulation_2_input = modulation_2_input
+      @current_modulation_3_input = modulation_3_input
 
       if @sample_counter == 0
         update_coefficients
@@ -394,13 +412,15 @@ module Spms1
       @current_modulation_1_depth = Dsp.smooth(@stage_1_modulation_1_depth, @current_modulation_1_depth, @smoothing_target_blend)
       @stage_1_modulation_2_depth = Dsp.smooth(@modulation_2_depth, @stage_1_modulation_2_depth, @smoothing_target_blend)
       @current_modulation_2_depth = Dsp.smooth(@stage_1_modulation_2_depth, @current_modulation_2_depth, @smoothing_target_blend)
+      @stage_1_modulation_3_depth = Dsp.smooth(@modulation_3_depth, @stage_1_modulation_3_depth, @smoothing_target_blend)
+      @current_modulation_3_depth = Dsp.smooth(@stage_1_modulation_3_depth, @current_modulation_3_depth, @smoothing_target_blend)
       @stage_1_gain = Dsp.smooth(@gain, @stage_1_gain, @smoothing_target_blend)
       @current_gain = Dsp.smooth(@stage_1_gain, @current_gain, @smoothing_target_blend)
 
       # The modulation inputs arrive as they are; clamping total_cutoff below is what holds the
       # table lookup in range, and a source that swings both ways moves the cutoff both ways.
       # Clamped without a comparison, as clip_output does it.
-      total_cutoff = @current_cutoff + (@current_modulation_1_input * @current_modulation_1_depth) + (@current_modulation_2_input * @current_modulation_2_depth)
+      total_cutoff = @current_cutoff + (@current_modulation_1_input * @current_modulation_1_depth) + (@current_modulation_2_input * @current_modulation_2_depth) + (@current_modulation_3_input * @current_modulation_3_depth)
       over  = total_cutoff - 1.0
       under = 0.0 - total_cutoff
       clamped_cutoff = total_cutoff - ((over + over.abs) - (under + under.abs)) * 0.5
