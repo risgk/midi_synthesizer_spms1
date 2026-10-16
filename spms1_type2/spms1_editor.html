@@ -3118,9 +3118,11 @@
   // The tab runs from wherever the header and MIDI bar leave it, which moves as they wrap, to
   // the soft keyboard at the bottom of the window. The patch area, or in one column its canvas,
   // takes that height; the controls take at least it, so the keyboard does not move when the tab
-  // changes. The patch area keeps a height of its own all the same, as the controls do, so that
-  // zooming the page in moves the keyboard down rather than squeezing the canvas; only a narrow
-  // window, in one column, lets the canvas go shorter.
+  // changes. Zoomed in, the patch area keeps the height it has at 100%, as the controls keep
+  // theirs, so the keyboard moves down the page rather than squeezing the canvas. The zoom is the
+  // outer width of the window over the inner: the outer is in screen pixels, which zoom leaves
+  // alone, where the browser says so (Chrome, Edge, Safari); where it does not, the ratio stays
+  // near 1 and the area fits the window as before.
   function fitTabArea() {
     const controls = document.getElementById('tab-controls');
     const app = document.getElementById('tab-patch');
@@ -3132,14 +3134,16 @@
     const top = (controls.hidden ? canvas : controls).getBoundingClientRect().top + window.scrollY;
     const keyboard = document.getElementById('kbd-panel').offsetHeight;
     const height = window.innerHeight - top - 16 - keyboard - 20;
+    const zoom = Math.min(5, Math.max(1, Math.round(window.outerWidth / window.innerWidth * 20) / 20));
+    const heightAt100 = Math.round(window.innerHeight * zoom) - top - 16 - keyboard - 20;
     const narrow = matchMedia('(max-width: 800px)').matches;
     if (!controls.hidden) {
       if (!narrow) controls.style.minHeight = height + 'px';
     } else if (!app.hidden) {
       if (app.classList.contains('wide') || narrow) {
-        canvas.style.height = Math.max(narrow ? 240 : 480, height) + 'px';
+        canvas.style.height = Math.max(240, narrow ? height : Math.max(height, heightAt100)) + 'px';
       } else {
-        app.style.height = Math.max(540, height) + 'px';
+        app.style.height = Math.max(300, height, heightAt100) + 'px';
       }
     }
   }
