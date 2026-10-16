@@ -181,9 +181,9 @@ The LFO goes straight to the oscillator, both to its pitch and to its pulse widt
 level, and to the filter, where Filter 1 Mod 2 Amt (CC 25) powers up at 0.0 and leaves the cutoff
 to the envelope until it is turned up. Osc 1 Mod 2 Pol and Filter 1 Mod 2 Pol read the constant
 0.1, which brings it down to a vibrato depth on the pitch and a like depth on the cutoff, while Osc 1 PW Mod Pol reads 0.5 and
-takes the LFO whole. The pitch from Slew 1 reaches the filter too, on Filter 1 Mod 3 In, where Mod 3 Amt (CC 9) powers
-up at its top and Mod 3 Pol reads +0.5: keyboard tracking, the cutoff following the note a semitone
-for a semitone, and unmoved at note 60. Each modulation depth spans the whole range of what it moves, so bringing a
+takes the LFO whole. The pitch from Slew 1 reaches the filter too, on Filter 1 Mod 3 In, for keyboard tracking: Mod 3
+Pol reads +0.5, so CC 9 (Mod 3 Amt) at its top has the cutoff follow the note a semitone for a
+semitone, unmoved at note 60. Mod 3 Amt powers up at 0.0, with the tracking off. Each modulation depth spans the whole range of what it moves, so bringing a
 source down to a musical depth is left to the patch rather than built into the oscillator.
 
 The voice is mono up to the amp. The chorus takes it and puts out a left and a right, the delay
@@ -661,7 +661,8 @@ changes only how fast the output moves, so it cannot step it.
 - The LFO reaches the filter's Mod 2 input by default too, so CC 25 sweeps the cutoff with it, on
   top of the envelope on Mod 1
 - Keyboard tracking is wired by default as well, the pitch from Slew 1 on the filter's Mod 3 input,
-  so CC 9 sets how far the cutoff follows the keys: all the way at CC 124, not at all at CC 4
+  so CC 9 sets how far the cutoff follows the keys: all the way at CC 124, not at all at CC 4,
+  where it powers up
 - Filter cutoff driven by the envelope instead of its CC: CC 99 = 2, CC 98 = 13, CC 6 = 10. The
   envelope and the cutoff are both unipolar, so it opens the cutoff from the bottom of its dial
   to the top

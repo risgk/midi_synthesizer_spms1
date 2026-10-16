@@ -3597,7 +3597,7 @@ static void sp_spms1_write_default_patch(sp_int lv_midi_ch) {
 #line 346 "spms1_patch.rb"
   (set_midi_cc_value(((uint8_t)(lv_midi_ch)), ((uint8_t)(25LL)), ((uint8_t)(4LL))), (sp_int)0);
 #line 347 "spms1_patch.rb"
-  (set_midi_cc_value(((uint8_t)(lv_midi_ch)), ((uint8_t)(9LL)), ((uint8_t)(124LL))), (sp_int)0);
+  (set_midi_cc_value(((uint8_t)(lv_midi_ch)), ((uint8_t)(9LL)), ((uint8_t)(4LL))), (sp_int)0);
 }
 #line 109 "spms1_main.rb"
 static sp_float sp_cc_to_unipolar(sp_int lv_value) {

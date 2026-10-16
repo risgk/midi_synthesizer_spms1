@@ -164,7 +164,7 @@ spms1_fill_constant_signals(signals)
 # which play the note from the slew in tune. The LFO also reaches Filter 1 Mod 2 In, but Filter 1
 # Mod 2 Amt powers up at 0.0, so the cutoff follows the envelope alone until CC 25 turns it up,
 # and Filter 1 Mod 2 Pol reads 0.1, as Osc 1 Mod 2 Pol does. Filter 1 Mod 3 In takes the slew's
-# pitch too, at a depth of 1.0 from Mod 3 Amt at its top and Mod 3 Pol at +0.5: keyboard tracking.
+# pitch too, for keyboard tracking, but Mod 3 Amt powers up at 0.0 and leaves it off until CC 9.
 # A mixer's parameters have no CC, so the default patch points them at constants instead: full
 # level and a polarity of +0.5, which makes a mixer pass its input through rather than mute it.
 # Each modulation polarity has no CC either and reads +0.5, which leaves the amount in charge,

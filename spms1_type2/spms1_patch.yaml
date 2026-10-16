@@ -202,16 +202,16 @@ controls:
   # Amt and Pol came last of all, so their entries follow every other. Mod 2 Amt powers up at
   # CC 4, 0.0, so the LFO on Mod 2 In leaves the cutoff alone until it is turned up. Mod 2 Pol reads 0.1, as
   # Osc 1 Mod 2 Pol does, which brings the LFO down to a musical depth on the cutoff. Mod 3 is the keyboard
-  # tracking: Mod 3 In takes the pitch from Slew 1, as Osc 1 Mod 1 In does, and Mod 3 Amt (CC 9)
-  # powers up at its top and Mod 3 Pol reads +0.5, a depth of 1.0, so the cutoff follows the note
-  # a semitone a semitone, about the middle of its dial at note 60.
+  # tracking: Mod 3 In takes the pitch from Slew 1, as Osc 1 Mod 1 In does, and Mod 3 Pol reads
+  # +0.5, so that Mod 3 Amt (CC 9) at its top makes the cutoff follow the note a semitone for a
+  # semitone, unmoved at note 60. Mod 3 Amt powers up at CC 4, 0.0, with the tracking off.
   - { entry: 15, module: FILTER_1,  key: GAIN,         label: Gain,         cc: 112, value: 64 }
   - { entry: 13, module: FILTER_1,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 100 }
   - { entry: 16, module: FILTER_1,  key: MOD_1_AMT, label: Mod 1 Amt,     cc: 24,  value: 28 }
   - { entry: 17, module: FILTER_1,  key: MOD_1_POL, label: Mod 1 Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 44, module: FILTER_1,  key: MOD_2_AMT, label: Mod 2 Amt,    cc: 25,  value: 4 }
   - { entry: 45, module: FILTER_1,  key: MOD_2_POL, label: Mod 2 Pol,    cc: 0,   value: 124, source: POINT_ONE, bipolar: true }
-  - { entry: 46, module: FILTER_1,  key: MOD_3_AMT, label: Mod 3 Amt,    cc: 9,   value: 124 }
+  - { entry: 46, module: FILTER_1,  key: MOD_3_AMT, label: Mod 3 Amt,    cc: 9,   value: 4 }
   - { entry: 47, module: FILTER_1,  key: MOD_3_POL, label: Mod 3 Pol,    cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 14, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 94 }
   - { entry: 18, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 124 }

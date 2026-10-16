@@ -344,5 +344,5 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 19 , 4  ) # Osc 1 Pulse Width
   C.set_midi_cc_value(midi_ch, 103, 4  ) # Osc 1 PW Mod Amt
   C.set_midi_cc_value(midi_ch, 25 , 4  ) # Filter 1 Mod 2 Amt
-  C.set_midi_cc_value(midi_ch, 9  , 124) # Filter 1 Mod 3 Amt
+  C.set_midi_cc_value(midi_ch, 9  , 4  ) # Filter 1 Mod 3 Amt
 end
