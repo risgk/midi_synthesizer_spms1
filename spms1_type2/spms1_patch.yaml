@@ -127,6 +127,9 @@ signals:
 
   - { key: ENV_GEN_1_RELEASE_SWITCH, id: 67, control: ENV_GEN_1_RELEASE_SWITCH }
 
+  - { key: AMP_1_MOD_AMOUNT,   id: 68, control: AMP_1_MOD_AMOUNT }
+  - { key: AMP_1_MOD_POLARITY, id: 69, control: AMP_1_MOD_POLARITY }
+
 # Module inputs, NRPN category 1, by entry: what feeds each one in the default patch (`source`, a
 # signal key). `label` is the editor's, on the module; `name` the README's, after the module's
 # label. An input with no module is a side of the final output.
@@ -188,6 +191,11 @@ controls:
   - { entry: 14, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 94 }
   - { entry: 15, module: FILTER_1,  key: GAIN,         label: Gain,         cc: 112, value: 64 }
   - { entry: 18, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 124 }
+  # Amp 1 Mod Amt and Mod Polarity came after EG 1 Release Switch, so their entries follow its, but
+  # they are listed here, after Gain. Neither has a CC: the default patch points them at 1.0 and
+  # +0.5, a depth of exactly 1.0, which passes the envelope as the amp always took it.
+  - { entry: 39, module: AMP_1,     key: MOD_AMOUNT,   label: Mod Amt,      cc: 0,   value: 124, source: ONE }
+  - { entry: 40, module: AMP_1,     key: MOD_POLARITY, label: Mod Polarity, cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 19, module: MIXER_1,   key: LEVEL_1,      label: Level 1,      cc: 0,   source: ONE }
   - { entry: 20, module: MIXER_1,   key: POLARITY_1,   label: Polarity 1,   cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 21, module: MIXER_1,   key: LEVEL_2,      label: Level 2,      cc: 0,   source: ONE }

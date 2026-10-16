@@ -164,8 +164,9 @@ spms1_fill_constant_signals(signals)
 # A mixer's parameters have no CC, so the default patch points them at constants instead: full
 # level and a polarity of +0.5, which makes a mixer pass its input through rather than mute it.
 # Each modulation polarity has no CC either and reads +0.5, which leaves the amount in charge,
-# but for the pitch's. LFO 1 Level and Polarity have no CC either and read 1.0 and +0.5. EG 1 Level and Polarity read 1.0 and +0.5, passing
-# the envelope as it is. The chorus and the delay run last, after the amp: the chorus takes the mono
+# but for the pitch's. LFO 1 Level and Polarity have no CC either and read 1.0 and +0.5. EG 1
+# Level and Polarity read 1.0 and +0.5, passing the envelope as it is, and so do Amp 1 Mod Amt and
+# Mod Polarity, passing it on to the amp as it is. The chorus and the delay run last, after the amp: the chorus takes the mono
 # amp and spreads it into a left and a right, the delay takes the two sides, and its two outputs
 # are what the final output's left and right read.
 spms1_write_default_patch(MIDI_CH)
@@ -288,6 +289,8 @@ while true
   source_osc_1_pw_mod_amount   = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PW_MOD_AMOUNT)
   source_osc_1_pw_mod_polarity = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PW_MOD_POLARITY)
   source_env_gen_1_release_switch = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_1_RELEASE_SWITCH)
+  source_amp_1_mod_amount      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_MOD_AMOUNT)
+  source_amp_1_mod_polarity    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_MOD_POLARITY)
 
   # Which CC fills each control slot. The bus is the only thing downstream reads, so this is
   # where MIDI enters and the only place a CC number appears.
@@ -325,6 +328,8 @@ while true
   cc_osc_1_pw_mod_amount   = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_PW_MOD_AMOUNT)
   cc_osc_1_pw_mod_polarity = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_PW_MOD_POLARITY)
   cc_env_gen_1_release_switch = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_1_RELEASE_SWITCH)
+  cc_amp_1_mod_amount      = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_AMP_1_MOD_AMOUNT)
+  cc_amp_1_mod_polarity    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_AMP_1_MOD_POLARITY)
   cc_general_mod_wheel     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_MOD_WHEEL)
   cc_general_1             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_1)
   cc_general_2             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_2)
@@ -365,6 +370,8 @@ while true
   signals[SIGNAL_OSC_1_PW_MOD_AMOUNT] = cc_or_zero(cc_osc_1_pw_mod_amount, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_pw_mod_amount)))
   signals[SIGNAL_OSC_1_PW_MOD_POLARITY] = cc_or_zero(cc_osc_1_pw_mod_polarity, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_pw_mod_polarity)))
   signals[SIGNAL_ENV_GEN_1_RELEASE_SWITCH] = cc_or_zero(cc_env_gen_1_release_switch, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_env_gen_1_release_switch)))
+  signals[SIGNAL_AMP_1_MOD_AMOUNT] = cc_or_zero(cc_amp_1_mod_amount, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_amp_1_mod_amount)))
+  signals[SIGNAL_AMP_1_MOD_POLARITY] = cc_or_zero(cc_amp_1_mod_polarity, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_amp_1_mod_polarity)))
   signals[SIGNAL_GENERAL_MOD_WHEEL] = cc_or_zero(cc_general_mod_wheel, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_general_mod_wheel)))
   # Each General CC fills two slots, the same value taken both ways.
   general_1 = C.get_midi_cc_value(MIDI_CH, cc_general_1)
@@ -414,6 +421,8 @@ while true
   osc_1.set_pw_modulation_amount(signals[source_osc_1_pw_mod_amount])
   osc_1.set_pw_modulation_polarity(signals[source_osc_1_pw_mod_polarity])
   env_gen_1.set_release_switch(signals[source_env_gen_1_release_switch])
+  amp_1.set_modulation_amount(signals[source_amp_1_mod_amount])
+  amp_1.set_modulation_polarity(signals[source_amp_1_mod_polarity])
 
   i = 0
   while i < AUDIO_BUFFER_WORDS

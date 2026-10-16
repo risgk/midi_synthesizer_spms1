@@ -408,8 +408,8 @@ both at the same signal for a mono output.
 | 7 | EG 1 Polarity | | 19 | Mixer 1 Level 1 | | 36 | Osc 1 PW Mod Amt |
 | 8 | Osc 1 Wave | | 20 | Mixer 1 Polarity 1 | | 37 | Osc 1 PW Mod Polarity |
 | 9 | Osc 1 Coarse Tune | | 21 | Mixer 1 Level 2 | | 38 | EG 1 Release Switch |
-| 10 | Osc 1 Fine Tune | | 22 | Mixer 1 Polarity 2 | |  |  |
-| 11 | Osc 1 Pitch Mod Amt | | 23 | Chorus 1 Rate | |  |  |
+| 10 | Osc 1 Fine Tune | | 22 | Mixer 1 Polarity 2 | | 39 | Amp 1 Mod Amt |
+| 11 | Osc 1 Pitch Mod Amt | | 23 | Chorus 1 Rate | | 40 | Amp 1 Mod Polarity |
 
 <!-- patch_gen end -->
 
@@ -455,29 +455,30 @@ two slots, a unipolar and a bipolar one. See the General slots below.
 
 | ID | Signal | | ID | Signal | | ID | Signal |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | None (constant 0.0) | | 23 | EG 1 Decay | | 46 | Delay 1 Feedback |
-| 1 | Constant 1.0 | | 24 | EG 1 Sustain | | 47 | Delay 1 Mix |
-| 2 | Constant 0.5 | | 25 | EG 1 Level | | 48 | Note Pitch ± |
-| 3 | Constant 0.2 | | 26 | EG 1 Polarity ± | | 49 | Note Gate |
-| 4 | Constant 0.1 | | 27 | Osc 1 Wave | | 50 | Pitch Bend ± |
-| 5 | Constant -0.1 | | 28 | Osc 1 Coarse Tune ± | | 51 | General Mod Wheel |
-| 6 | Constant -0.2 | | 29 | Osc 1 Fine Tune ± | | 52 | General Unipolar 1 |
-| 7 | Constant -0.5 | | 30 | Osc 1 Pitch Mod Amt | | 53 | General Unipolar 2 |
-| 8 | Constant -1.0 | | 31 | Osc 1 Pitch Mod Polarity ± | | 54 | General Unipolar 3 |
-| 9 | LFO 1 Output ± | | 32 | Filter 1 Cutoff | | 55 | General Unipolar 4 |
-| 10 | EG 1 Output ± | | 33 | Filter 1 Resonance | | 56 | General Bipolar 1 ± |
-| 11 | Osc 1 Output ± | | 34 | Filter 1 Gain | | 57 | General Bipolar 2 ± |
-| 12 | Filter 1 Output LP ± | | 35 | Filter 1 Mod Amt | | 58 | General Bipolar 3 ± |
-| 13 | Amp 1 Output ± | | 36 | Filter 1 Mod Polarity ± | | 59 | General Bipolar 4 ± |
-| 14 | Mixer 1 Output ± | | 37 | Amp 1 Gain | | 60 | Slew 1 Output ± |
-| 15 | Chorus 1 Output L ± | | 38 | Mixer 1 Level 1 | | 61 | Slew 1 Time |
-| 16 | Chorus 1 Output R ± | | 39 | Mixer 1 Polarity 1 ± | | 62 | Osc 1 Pulse Width |
-| 17 | Delay 1 Output L ± | | 40 | Mixer 1 Level 2 | | 63 | Osc 1 PW Mod Amt |
-| 18 | Delay 1 Output R ± | | 41 | Mixer 1 Polarity 2 ± | | 64 | Osc 1 PW Mod Polarity ± |
-| 19 | LFO 1 Rate | | 42 | Chorus 1 Rate | | 65 | Filter 1 Output BP ± |
-| 20 | LFO 1 Level | | 43 | Chorus 1 Depth | | 66 | Filter 1 Output HP ± |
-| 21 | LFO 1 Polarity ± | | 44 | Chorus 1 Mix | | 67 | EG 1 Release Switch |
-| 22 | EG 1 Attack | | 45 | Delay 1 Time | |  |  |
+| 0 | None (constant 0.0) | | 24 | EG 1 Sustain | | 48 | Note Pitch ± |
+| 1 | Constant 1.0 | | 25 | EG 1 Level | | 49 | Note Gate |
+| 2 | Constant 0.5 | | 26 | EG 1 Polarity ± | | 50 | Pitch Bend ± |
+| 3 | Constant 0.2 | | 27 | Osc 1 Wave | | 51 | General Mod Wheel |
+| 4 | Constant 0.1 | | 28 | Osc 1 Coarse Tune ± | | 52 | General Unipolar 1 |
+| 5 | Constant -0.1 | | 29 | Osc 1 Fine Tune ± | | 53 | General Unipolar 2 |
+| 6 | Constant -0.2 | | 30 | Osc 1 Pitch Mod Amt | | 54 | General Unipolar 3 |
+| 7 | Constant -0.5 | | 31 | Osc 1 Pitch Mod Polarity ± | | 55 | General Unipolar 4 |
+| 8 | Constant -1.0 | | 32 | Filter 1 Cutoff | | 56 | General Bipolar 1 ± |
+| 9 | LFO 1 Output ± | | 33 | Filter 1 Resonance | | 57 | General Bipolar 2 ± |
+| 10 | EG 1 Output ± | | 34 | Filter 1 Gain | | 58 | General Bipolar 3 ± |
+| 11 | Osc 1 Output ± | | 35 | Filter 1 Mod Amt | | 59 | General Bipolar 4 ± |
+| 12 | Filter 1 Output LP ± | | 36 | Filter 1 Mod Polarity ± | | 60 | Slew 1 Output ± |
+| 13 | Amp 1 Output ± | | 37 | Amp 1 Gain | | 61 | Slew 1 Time |
+| 14 | Mixer 1 Output ± | | 38 | Mixer 1 Level 1 | | 62 | Osc 1 Pulse Width |
+| 15 | Chorus 1 Output L ± | | 39 | Mixer 1 Polarity 1 ± | | 63 | Osc 1 PW Mod Amt |
+| 16 | Chorus 1 Output R ± | | 40 | Mixer 1 Level 2 | | 64 | Osc 1 PW Mod Polarity ± |
+| 17 | Delay 1 Output L ± | | 41 | Mixer 1 Polarity 2 ± | | 65 | Filter 1 Output BP ± |
+| 18 | Delay 1 Output R ± | | 42 | Chorus 1 Rate | | 66 | Filter 1 Output HP ± |
+| 19 | LFO 1 Rate | | 43 | Chorus 1 Depth | | 67 | EG 1 Release Switch |
+| 20 | LFO 1 Level | | 44 | Chorus 1 Mix | | 68 | Amp 1 Mod Amt |
+| 21 | LFO 1 Polarity ± | | 45 | Delay 1 Time | | 69 | Amp 1 Mod Polarity ± |
+| 22 | EG 1 Attack | | 46 | Delay 1 Feedback | |  |  |
+| 23 | EG 1 Decay | | 47 | Delay 1 Mix | |  |  |
 
 <!-- patch_gen end -->
 
@@ -488,12 +489,12 @@ its Polarity is turned negative. Everything unmarked runs 0.0 to 1.0 -- Note Gat
 unipolar control slot. The bus carries both kinds under one numbering, so the range belongs to the slot
 rather than to the sort of thing that wrote it.
 
-Slots 19-47, 61, 62-64 and 67 hold the values arriving from CC, so a parameter reads its own CC by default. Each
+Slots 19-47, 61, 62-64 and 67-69 hold the values arriving from CC, so a parameter reads its own CC by default. Each
 parameter is unipolar or bipolar, and its slot takes the same range. A unipolar one runs 0.0 to
 1.0 from CC 4 to CC 124, the span of an envelope, so an envelope pointed at one sweeps the whole
 of its dial. A bipolar one runs -0.5 to +0.5 with CC 64 at 0.0, the span of an LFO, so a bipolar
 source pointed at one swings it about the middle. The two tune controls are bipolar, since their
-middle is no change at all, and so is every Polarity -- the LFO's, the EG's, the mixer's and the three
+middle is no change at all, and so is every Polarity -- the LFO's, the EG's, the mixer's and the four
 Mod Polarity controls -- since its sign is what it sets. Pointing a parameter at another slot is what
 makes a modulation. A slot with no CC holds 0.0.
 
@@ -548,6 +549,12 @@ pass the LFO through as it is.
 EG 1 Level and EG 1 Polarity scale the envelope's output the same way, over the same ranges.
 Neither has a CC, and the default patch points them at the constants 1.0 and +0.5, which pass
 the envelope through as it is.
+
+Amp 1 Mod Amt and Amp 1 Mod Polarity scale what Mod In does to the gain, as the other modules' Mod
+Amt and Mod Polarity do, but the amp multiplies by its modulation rather than adding it: at a
+depth of 1.0 the envelope passes as it arrives, at 0.5 the amp is 6 dB down, at 0.0 it is shut,
+and a negative depth inverts the output. Neither has a CC, and the default patch points them at
+the constants 1.0 and +0.5, a depth of 1.0.
 
 EG 1 Release Switch, on CC 105 as in PRA32-U2, picks the release, after the note's gate falls: on
 from 0.5 up (CC 64-124), it runs at the decay's rate, set by EG 1 Decay; off below 0.5 (CC 4-63), it
@@ -711,7 +718,7 @@ changes only how fast the output moves, so it cannot step it.
   the steps of a controller sending sparse CCs (e.g. every 20 ms). Osc 1 Coarse Tune and Fine Tune
   are not smoothed, so that the pitch follows right away, and neither is Slew 1 Time, which
   cannot step what it sets
-- A parameter source may point at any of the 128 slots. Slots above 67 read 0 until something
+- A parameter source may point at any of the 128 slots. Slots above 69 read 0 until something
   writes them, which leaves a parameter pointed at one at the bottom of a unipolar dial or the
   middle of a bipolar one
 - A parameter clamps its value to its own range, 0.0 to 1.0 or -0.5 to +0.5, and its control slot

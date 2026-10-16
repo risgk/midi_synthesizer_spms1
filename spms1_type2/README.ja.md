@@ -399,8 +399,8 @@ flowchart LR
 | 7 | EG 1 Polarity | | 19 | Mixer 1 Level 1 | | 36 | Osc 1 PW Mod Amt |
 | 8 | Osc 1 Wave | | 20 | Mixer 1 Polarity 1 | | 37 | Osc 1 PW Mod Polarity |
 | 9 | Osc 1 Coarse Tune | | 21 | Mixer 1 Level 2 | | 38 | EG 1 Release Switch |
-| 10 | Osc 1 Fine Tune | | 22 | Mixer 1 Polarity 2 | |  |  |
-| 11 | Osc 1 Pitch Mod Amt | | 23 | Chorus 1 Rate | |  |  |
+| 10 | Osc 1 Fine Tune | | 22 | Mixer 1 Polarity 2 | | 39 | Amp 1 Mod Amt |
+| 11 | Osc 1 Pitch Mod Amt | | 23 | Chorus 1 Rate | | 40 | Amp 1 Mod Polarity |
 
 <!-- patch_gen end -->
 
@@ -446,29 +446,30 @@ flowchart LR
 
 | ID | シグナル | | ID | シグナル | | ID | シグナル |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | なし（定数 0.0） | | 23 | EG 1 Decay | | 46 | Delay 1 Feedback |
-| 1 | 定数 1.0 | | 24 | EG 1 Sustain | | 47 | Delay 1 Mix |
-| 2 | 定数 0.5 | | 25 | EG 1 Level | | 48 | Note Pitch ± |
-| 3 | 定数 0.2 | | 26 | EG 1 Polarity ± | | 49 | Note Gate |
-| 4 | 定数 0.1 | | 27 | Osc 1 Wave | | 50 | Pitch Bend ± |
-| 5 | 定数 -0.1 | | 28 | Osc 1 Coarse Tune ± | | 51 | General Mod Wheel |
-| 6 | 定数 -0.2 | | 29 | Osc 1 Fine Tune ± | | 52 | General Unipolar 1 |
-| 7 | 定数 -0.5 | | 30 | Osc 1 Pitch Mod Amt | | 53 | General Unipolar 2 |
-| 8 | 定数 -1.0 | | 31 | Osc 1 Pitch Mod Polarity ± | | 54 | General Unipolar 3 |
-| 9 | LFO 1 Output ± | | 32 | Filter 1 Cutoff | | 55 | General Unipolar 4 |
-| 10 | EG 1 Output ± | | 33 | Filter 1 Resonance | | 56 | General Bipolar 1 ± |
-| 11 | Osc 1 Output ± | | 34 | Filter 1 Gain | | 57 | General Bipolar 2 ± |
-| 12 | Filter 1 Output LP ± | | 35 | Filter 1 Mod Amt | | 58 | General Bipolar 3 ± |
-| 13 | Amp 1 Output ± | | 36 | Filter 1 Mod Polarity ± | | 59 | General Bipolar 4 ± |
-| 14 | Mixer 1 Output ± | | 37 | Amp 1 Gain | | 60 | Slew 1 Output ± |
-| 15 | Chorus 1 Output L ± | | 38 | Mixer 1 Level 1 | | 61 | Slew 1 Time |
-| 16 | Chorus 1 Output R ± | | 39 | Mixer 1 Polarity 1 ± | | 62 | Osc 1 Pulse Width |
-| 17 | Delay 1 Output L ± | | 40 | Mixer 1 Level 2 | | 63 | Osc 1 PW Mod Amt |
-| 18 | Delay 1 Output R ± | | 41 | Mixer 1 Polarity 2 ± | | 64 | Osc 1 PW Mod Polarity ± |
-| 19 | LFO 1 Rate | | 42 | Chorus 1 Rate | | 65 | Filter 1 Output BP ± |
-| 20 | LFO 1 Level | | 43 | Chorus 1 Depth | | 66 | Filter 1 Output HP ± |
-| 21 | LFO 1 Polarity ± | | 44 | Chorus 1 Mix | | 67 | EG 1 Release Switch |
-| 22 | EG 1 Attack | | 45 | Delay 1 Time | |  |  |
+| 0 | なし（定数 0.0） | | 24 | EG 1 Sustain | | 48 | Note Pitch ± |
+| 1 | 定数 1.0 | | 25 | EG 1 Level | | 49 | Note Gate |
+| 2 | 定数 0.5 | | 26 | EG 1 Polarity ± | | 50 | Pitch Bend ± |
+| 3 | 定数 0.2 | | 27 | Osc 1 Wave | | 51 | General Mod Wheel |
+| 4 | 定数 0.1 | | 28 | Osc 1 Coarse Tune ± | | 52 | General Unipolar 1 |
+| 5 | 定数 -0.1 | | 29 | Osc 1 Fine Tune ± | | 53 | General Unipolar 2 |
+| 6 | 定数 -0.2 | | 30 | Osc 1 Pitch Mod Amt | | 54 | General Unipolar 3 |
+| 7 | 定数 -0.5 | | 31 | Osc 1 Pitch Mod Polarity ± | | 55 | General Unipolar 4 |
+| 8 | 定数 -1.0 | | 32 | Filter 1 Cutoff | | 56 | General Bipolar 1 ± |
+| 9 | LFO 1 Output ± | | 33 | Filter 1 Resonance | | 57 | General Bipolar 2 ± |
+| 10 | EG 1 Output ± | | 34 | Filter 1 Gain | | 58 | General Bipolar 3 ± |
+| 11 | Osc 1 Output ± | | 35 | Filter 1 Mod Amt | | 59 | General Bipolar 4 ± |
+| 12 | Filter 1 Output LP ± | | 36 | Filter 1 Mod Polarity ± | | 60 | Slew 1 Output ± |
+| 13 | Amp 1 Output ± | | 37 | Amp 1 Gain | | 61 | Slew 1 Time |
+| 14 | Mixer 1 Output ± | | 38 | Mixer 1 Level 1 | | 62 | Osc 1 Pulse Width |
+| 15 | Chorus 1 Output L ± | | 39 | Mixer 1 Polarity 1 ± | | 63 | Osc 1 PW Mod Amt |
+| 16 | Chorus 1 Output R ± | | 40 | Mixer 1 Level 2 | | 64 | Osc 1 PW Mod Polarity ± |
+| 17 | Delay 1 Output L ± | | 41 | Mixer 1 Polarity 2 ± | | 65 | Filter 1 Output BP ± |
+| 18 | Delay 1 Output R ± | | 42 | Chorus 1 Rate | | 66 | Filter 1 Output HP ± |
+| 19 | LFO 1 Rate | | 43 | Chorus 1 Depth | | 67 | EG 1 Release Switch |
+| 20 | LFO 1 Level | | 44 | Chorus 1 Mix | | 68 | Amp 1 Mod Amt |
+| 21 | LFO 1 Polarity ± | | 45 | Delay 1 Time | | 69 | Amp 1 Mod Polarity ± |
+| 22 | EG 1 Attack | | 46 | Delay 1 Feedback | |  |  |
+| 23 | EG 1 Decay | | 47 | Delay 1 Mix | |  |  |
 
 <!-- patch_gen end -->
 
@@ -478,12 +479,12 @@ flowchart LR
 振れます。印のないものは 0.0〜1.0 で、Note Gate とユニポーラのコントロールスロットがこれにあたります。
 バスは両方を 1 つの番号空間で運ぶので、レンジは「何が書いたか」ではなくスロットごとの性質です。
 
-スロット 19〜47、61、62〜64、67 には CC から届いた値が入るので、パラメータはデフォルトでは自分の CC を読んでいるわけです。
+スロット 19〜47、61、62〜64、67〜69 には CC から届いた値が入るので、パラメータはデフォルトでは自分の CC を読んでいるわけです。
 パラメータはそれぞれユニポーラかバイポーラで、スロットも同じレンジを取ります。ユニポーラは CC 4〜124 で
 0.0〜1.0 と、エンベロープと同じ幅なので、エンベロープを向ければつまみの全域を動かせます。バイポーラは
 CC 64 を 0.0 とする -0.5〜+0.5 と、LFO と同じ幅なので、バイポーラのソースを向ければ中央を挟んで上下に
 振れます。2 つのチューンは中央が「変化なし」を意味するのでバイポーラです。Polarity も、LFO、EG、ミキサー、
-3 つの Mod Polarity のいずれも、符号そのものが設定する値なのでバイポーラです。パラメータに別のスロットを指させることがモジュレー
+4 つの Mod Polarity のいずれも、符号そのものが設定する値なのでバイポーラです。パラメータに別のスロットを指させることがモジュレー
 ションになります。CC のないスロットは 0.0 です。
 
 スロット 51〜59 の General スロットは、どのパラメータにも属さないコントロールスロットです。CC をバスに
@@ -533,6 +534,11 @@ LFO 1 Level と LFO 1 Polarity は、ミキサーの Level と Polarity が入�
 
 EG 1 Level と EG 1 Polarity も、同じレンジで同じようにエンベロープの出力に掛かります。どちらも CC がなく、
 デフォルトのパッチは定数 1.0 と +0.5 を指させているので、エンベロープはそのまま出ます。
+
+Amp 1 Mod Amt と Amp 1 Mod Polarity は、ほかのモジュールの Mod Amt と Mod Polarity と同じく Mod In の効き方を
+決めます。ただしアンプは変調を足すのではなくゲインに掛けるので、深さ 1.0 ではエンベロープがそのまま効き、
+0.5 では 6 dB 下がり、0.0 では閉じ、深さが負なら出力が反転します。どちらも CC がなく、デフォルトのパッチは
+定数 1.0 と +0.5 を指させているので、深さは 1.0 です。
 
 EG 1 Release Switch は PRA32-U2 と同じ CC 105 で、ノートのゲートが下りた後のリリースを選びます。0.5 以上
 (CC 64〜124) でオンのときは EG 1 Decay で決まるディケイの速さ、0.5 未満 (CC 4〜63) でオフのときは
@@ -681,7 +687,7 @@ Slew 1 Time はユニポーラで、1/120 刻み、1 ステップで時間が半
 - スムージングは 2 段（48 kHz で平均遅れ 10.7 ms、35 ms で 99%）で、CC をまばらに（例えば 20 ms ごとに）
   送るコントローラーの段差を丸めます。Osc 1 Coarse Tune と Fine Tune は、音程がすぐ追従するように
   スムージングしません。Slew 1 Time も、設定する対象に段差を生じさせないのでスムージングしません
-- パラメータのソースは 128 のスロットのどれでも指せます。67 より上のスロットは、何かが書き込むまで 0 を
+- パラメータのソースは 128 のスロットのどれでも指せます。69 より上のスロットは、何かが書き込むまで 0 を
   返すので、そこを指したパラメータはユニポーラならつまみの下端、バイポーラなら中央に留まります
 - パラメータは自分の値を自分のレンジ、0.0〜1.0 か -0.5〜+0.5 に丸め、コントロールスロットも同じレンジを
   バスに載せます。ユニポーラのスロットをモジュール入力に結線するとエンベロープと同じく片側にしか振れず、

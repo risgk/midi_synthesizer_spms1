@@ -1145,6 +1145,8 @@
       {"entry":14,"module":"FILTER_1","key":"RESONANCE","label":"Resonance","bipolar":false,"cc":71,"value":94,"general":false,"slots":[["FILTER_1_RESONANCE","Resonance",false]]},
       {"entry":15,"module":"FILTER_1","key":"GAIN","label":"Gain","bipolar":false,"cc":112,"value":64,"general":false,"slots":[["FILTER_1_GAIN","Gain",false]]},
       {"entry":18,"module":"AMP_1","key":"GAIN","label":"Gain","bipolar":false,"cc":15,"value":124,"general":false,"slots":[["AMP_1_GAIN","Gain",false]]},
+      {"entry":39,"module":"AMP_1","key":"MOD_AMOUNT","label":"Mod Amt","bipolar":false,"cc":0,"value":124,"source":"ONE","general":false,"slots":[["AMP_1_MOD_AMOUNT","Mod Amt",false]]},
+      {"entry":40,"module":"AMP_1","key":"MOD_POLARITY","label":"Mod Polarity","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["AMP_1_MOD_POLARITY","Mod Polarity",true]]},
       {"entry":19,"module":"MIXER_1","key":"LEVEL_1","label":"Level 1","bipolar":false,"cc":0,"source":"ONE","general":false,"slots":[["MIXER_1_LEVEL_1","Level 1",false]]},
       {"entry":20,"module":"MIXER_1","key":"POLARITY_1","label":"Polarity 1","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["MIXER_1_POLARITY_1","Polarity 1",true]]},
       {"entry":21,"module":"MIXER_1","key":"LEVEL_2","label":"Level 2","bipolar":false,"cc":0,"source":"ONE","general":false,"slots":[["MIXER_1_LEVEL_2","Level 2",false]]},
@@ -1231,6 +1233,8 @@
       {"id":65,"key":"FILTER_1_OUTPUT_BP"},
       {"id":66,"key":"FILTER_1_OUTPUT_HP"},
       {"id":67,"key":"ENV_GEN_1_RELEASE_SWITCH"},
+      {"id":68,"key":"AMP_1_MOD_AMOUNT"},
+      {"id":69,"key":"AMP_1_MOD_POLARITY"},
     ],
     defaultOrder: ["SLEW_1","LFO_1","ENV_GEN_1","MIXER_1","OSC_1","FILTER_1","AMP_1","CHORUS_1","DELAY_1"],
   };
@@ -1292,7 +1296,7 @@
     OSC_1:     { x: 880,  y: 40 },
     FILTER_1:  { x: 880,  y: 456 },
     AMP_1:     { x: 1240, y: 40 },
-    CHORUS_1:  { x: 1240, y: 228 },
+    CHORUS_1:  { x: 1240, y: 290 },
     DELAY_1:   { x: 1600, y: 40 },
     OUT:       { x: 1600, y: 340 },
   };
