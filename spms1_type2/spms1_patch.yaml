@@ -140,23 +140,23 @@ signals:
 # signal key). `label` is the editor's, on the module; `name` the README's, after the module's
 # label. An input with no module is a side of the final output.
 inputs:
-  - { entry: 0,  module: ENV_GEN_1, key: GATE,     label: Gate,    name: Gate,       source: GATE }
-  - { entry: 1,  module: OSC_1,     key: PITCH_MOD_1, label: Pitch Mod 1, name: Pitch Mod 1 In, source: SLEW_1_OUTPUT }
-  - { entry: 2,  module: OSC_1,     key: PITCH_MOD_2, label: Pitch Mod 2, name: Pitch Mod 2 In, source: LFO_1_OUTPUT }
-  - { entry: 3,  module: FILTER_1,  key: AUDIO,    label: Audio,   name: Audio In,   source: OSC_1_OUTPUT }
-  - { entry: 4,  module: FILTER_1,  key: MOD,      label: Mod,     name: Mod In,     source: ENV_GEN_1_OUTPUT }
-  - { entry: 5,  module: AMP_1,     key: AUDIO,    label: Audio,   name: Audio In,   source: FILTER_1_OUTPUT_LP }
-  - { entry: 6,  module: AMP_1,     key: MOD,      label: Mod,     name: Mod In,     source: ENV_GEN_1_OUTPUT }
-  - { entry: 7,  module: MIXER_1,   key: IN_1,     label: In 1,    name: In 1,       source: NONE }
-  - { entry: 8,  module: MIXER_1,   key: IN_2,     label: In 2,    name: In 2,       source: NONE }
-  - { entry: 9,  module: CHORUS_1,  key: AUDIO,    label: Audio,   name: Audio In,   source: AMP_1_OUTPUT }
-  - { entry: 10, module: DELAY_1,   key: AUDIO_L,  label: Audio L, name: Audio In L, source: CHORUS_1_OUTPUT_L }
-  - { entry: 11, module: DELAY_1,   key: AUDIO_R,  label: Audio R, name: Audio In R, source: CHORUS_1_OUTPUT_R }
-  - { entry: 12,                    key: OUTPUT_L, label: L,       name: Final Output L, name_ja: 最終出力 L, source: DELAY_1_OUTPUT_L }
-  - { entry: 13,                    key: OUTPUT_R, label: R,       name: Final Output R, name_ja: 最終出力 R, source: DELAY_1_OUTPUT_R }
-  - { entry: 14, module: SLEW_1,    key: IN,       label: In,      name: In,         source: PITCH }
-  - { entry: 15, module: OSC_1,     key: PW_MOD,   label: PW Mod,  name: PW Mod In,  source: LFO_1_OUTPUT }
-  - { entry: 16, module: LFO_1,     key: MOD,      label: Mod,     name: Mod In,     source: NONE }
+  - { entry: 0,  module: ENV_GEN_1,   key: GATE,        label: Gate In,        name: Gate In,        source: GATE }
+  - { entry: 1,  module: OSC_1,       key: PITCH_MOD_1, label: Pitch Mod 1 In, name: Pitch Mod 1 In, source: SLEW_1_OUTPUT }
+  - { entry: 2,  module: OSC_1,       key: PITCH_MOD_2, label: Pitch Mod 2 In, name: Pitch Mod 2 In, source: LFO_1_OUTPUT }
+  - { entry: 3,  module: FILTER_1,    key: AUDIO,       label: Audio In,       name: Audio In,       source: OSC_1_OUTPUT }
+  - { entry: 4,  module: FILTER_1,    key: MOD,         label: Mod In,         name: Mod In,         source: ENV_GEN_1_OUTPUT }
+  - { entry: 5,  module: AMP_1,       key: AUDIO,       label: Audio In,       name: Audio In,       source: FILTER_1_OUTPUT_LP }
+  - { entry: 6,  module: AMP_1,       key: MOD,         label: Mod In,         name: Mod In,         source: ENV_GEN_1_OUTPUT }
+  - { entry: 7,  module: MIXER_1,     key: IN_1,        label: In 1,           name: In 1,           source: NONE }
+  - { entry: 8,  module: MIXER_1,     key: IN_2,        label: In 2,           name: In 2,           source: NONE }
+  - { entry: 9,  module: CHORUS_1,    key: AUDIO,       label: Audio In,       name: Audio In,       source: AMP_1_OUTPUT }
+  - { entry: 10, module: DELAY_1,     key: AUDIO_L,     label: Audio In L,     name: Audio In L,     source: CHORUS_1_OUTPUT_L }
+  - { entry: 11, module: DELAY_1,     key: AUDIO_R,     label: Audio In R,     name: Audio In R,     source: CHORUS_1_OUTPUT_R }
+  - { entry: 12,                      key: OUTPUT_L,    label: L,              name: Final Output L, name_ja: 最終出力 L, source: DELAY_1_OUTPUT_L }
+  - { entry: 13,                      key: OUTPUT_R,    label: R,              name: Final Output R, name_ja: 最終出力 R, source: DELAY_1_OUTPUT_R }
+  - { entry: 14, module: SLEW_1,      key: IN,          label: In,             name: In,             source: PITCH }
+  - { entry: 15, module: OSC_1,       key: PW_MOD,      label: PW Mod In,      name: PW Mod In,      source: LFO_1_OUTPUT }
+  - { entry: 16, module: LFO_1,       key: MOD,         label: Mod In,         name: Mod In,         source: NONE }
 
 # Controls, listed in the editor's order, each by its entry: a parameter is one entry of NRPN category 2 (where it takes its value) and
 # the same entry of category 3 (which CC fills its control slot); a General control is in

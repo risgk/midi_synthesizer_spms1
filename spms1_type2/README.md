@@ -367,7 +367,7 @@ passes it through rather than muting it.
 
 | CC 98 | Module input | | CC 98 | Module input |
 | ----- | ------ | - | ----- | ------ |
-| 0 | EG 1 Gate | | 9 | Chorus 1 Audio In |
+| 0 | EG 1 Gate In | | 9 | Chorus 1 Audio In |
 | 1 | Osc 1 Pitch Mod 1 In | | 10 | Delay 1 Audio In L |
 | 2 | Osc 1 Pitch Mod 2 In | | 11 | Delay 1 Audio In R |
 | 3 | Filter 1 Audio In | | 12 | Final Output L |
