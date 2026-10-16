@@ -366,7 +366,7 @@ flowchart LR
 | 4 | Filter 1 Mod In | | 13 | 最終出力 R |
 | 5 | Amp 1 Audio In | | 14 | Slew 1 In |
 | 6 | Amp 1 Mod In | | 15 | Osc 1 PW Mod In |
-| 7 | Mixer 1 In 1 | | 16 | LFO 1 Rate Mod In |
+| 7 | Mixer 1 In 1 | | 16 | LFO 1 Mod In |
 | 8 | Mixer 1 In 2 | |  |  |
 
 <!-- patch_gen end -->
@@ -398,8 +398,8 @@ flowchart LR
 | 5 | EG 1 Sustain | | 19 | Mixer 1 Level 1 | | 38 | EG 1 Release Switch |
 | 6 | EG 1 Level | | 20 | Mixer 1 Polarity 1 | | 39 | Amp 1 Mod Amt |
 | 7 | EG 1 Polarity | | 21 | Mixer 1 Level 2 | | 40 | Amp 1 Mod Polarity |
-| 8 | Osc 1 Wave | | 22 | Mixer 1 Polarity 2 | | 41 | LFO 1 Rate Mod Amt |
-| 9 | Osc 1 Coarse Tune | | 23 | Chorus 1 Rate | | 42 | LFO 1 Rate Mod Polarity |
+| 8 | Osc 1 Wave | | 22 | Mixer 1 Polarity 2 | | 41 | LFO 1 Mod Amt |
+| 9 | Osc 1 Coarse Tune | | 23 | Chorus 1 Rate | | 42 | LFO 1 Mod Polarity |
 | 10 | Osc 1 Fine Tune | | 24 | Chorus 1 Depth | | 43 | Osc 1 Pitch Mod 1 Amt |
 | 11 | Osc 1 Pitch Mod 2 Amt | | 25 | Chorus 1 Mix | | 44 | Osc 1 Pitch Mod 1 Polarity |
 | 12 | Osc 1 Pitch Mod 2 Polarity | | 26 | Delay 1 Time | |  |  |
@@ -469,8 +469,8 @@ flowchart LR
 | 17 | Delay 1 Output L ± | | 42 | Chorus 1 Rate | | 67 | EG 1 Release Switch |
 | 18 | Delay 1 Output R ± | | 43 | Chorus 1 Depth | | 68 | Amp 1 Mod Amt |
 | 19 | LFO 1 Rate | | 44 | Chorus 1 Mix | | 69 | Amp 1 Mod Polarity ± |
-| 20 | LFO 1 Level | | 45 | Delay 1 Time | | 70 | LFO 1 Rate Mod Amt |
-| 21 | LFO 1 Polarity ± | | 46 | Delay 1 Feedback | | 71 | LFO 1 Rate Mod Polarity ± |
+| 20 | LFO 1 Level | | 45 | Delay 1 Time | | 70 | LFO 1 Mod Amt |
+| 21 | LFO 1 Polarity ± | | 46 | Delay 1 Feedback | | 71 | LFO 1 Mod Polarity ± |
 | 22 | EG 1 Attack | | 47 | Delay 1 Mix | | 72 | Osc 1 Pitch Mod 1 Amt |
 | 23 | EG 1 Decay | | 48 | Note Pitch ± | | 73 | Osc 1 Pitch Mod 1 Polarity ± |
 | 24 | EG 1 Sustain | | 49 | Note Gate | |  |  |
@@ -536,9 +536,9 @@ LFO 1 Level と LFO 1 Polarity は、ミキサーの Level と Polarity が入�
 0.0 (CC 64) で無音、+0.5 (CC 124) でそのままです。どちらも CC
 がなく、デフォルトのパッチは Level に定数 1.0、Polarity に定数 0.5 を指させているので、LFO はそのまま出ます。
 
-LFO 1 Rate Mod In は、Pitch Mod 2 In がオシレータのピッチを動かすのと同じく、Rate Mod Amt と Rate Mod Polarity
+LFO 1 Mod In は、Pitch Mod 2 In がオシレータのピッチを動かすのと同じく、Mod Amt と Mod Polarity
 の積だけ周波数を動かします。入力と深さの積の 1 単位が周波数の全域 (10 オクターブ) なので、0.1 で 1 オクターブ
-です。どちらも CC がなく、デフォルトのパッチは定数 1.0 と +0.5 (深さ 1.0) を指させ、Rate Mod In には何も
+です。どちらも CC がなく、デフォルトのパッチは定数 1.0 と +0.5 (深さ 1.0) を指させ、Mod In には何も
 つないでいないので、ソースをつなぐだけで効きます。ほかのモジュール入力が毎サンプル読まれるのに対し、
 LFO が周波数を計算する 4 サンプルごとに読まれます。
 
@@ -697,7 +697,7 @@ Slew 1 Time はユニポーラで、1/120 刻み、1 ステップで時間が半
 
 #### 注意点
 
-- モジュール入力（カテゴリ 1）は毎サンプル（LFO 1 Rate Mod In は 4 サンプルごと）読まれ、スムージングされません。パラメータ（カテゴリ 2）は
+- モジュール入力（カテゴリ 1）は毎サンプル（LFO 1 Mod In は 4 サンプルごと）読まれ、スムージングされません。パラメータ（カテゴリ 2）は
   1 バッファに 1 回読まれ、受け取る側でスムージングされます。速いソースはモジュール入力へ、段階的なものは
   パラメータへ通してください
 - スムージングは 2 段（48 kHz で平均遅れ 10.7 ms、35 ms で 99%）で、CC をまばらに（例えば 20 ms ごとに）

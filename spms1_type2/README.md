@@ -374,7 +374,7 @@ passes it through rather than muting it.
 | 4 | Filter 1 Mod In | | 13 | Final Output R |
 | 5 | Amp 1 Audio In | | 14 | Slew 1 In |
 | 6 | Amp 1 Mod In | | 15 | Osc 1 PW Mod In |
-| 7 | Mixer 1 In 1 | | 16 | LFO 1 Rate Mod In |
+| 7 | Mixer 1 In 1 | | 16 | LFO 1 Mod In |
 | 8 | Mixer 1 In 2 | |  |  |
 
 <!-- patch_gen end -->
@@ -408,8 +408,8 @@ both at the same signal for a mono output.
 | 5 | EG 1 Sustain | | 19 | Mixer 1 Level 1 | | 38 | EG 1 Release Switch |
 | 6 | EG 1 Level | | 20 | Mixer 1 Polarity 1 | | 39 | Amp 1 Mod Amt |
 | 7 | EG 1 Polarity | | 21 | Mixer 1 Level 2 | | 40 | Amp 1 Mod Polarity |
-| 8 | Osc 1 Wave | | 22 | Mixer 1 Polarity 2 | | 41 | LFO 1 Rate Mod Amt |
-| 9 | Osc 1 Coarse Tune | | 23 | Chorus 1 Rate | | 42 | LFO 1 Rate Mod Polarity |
+| 8 | Osc 1 Wave | | 22 | Mixer 1 Polarity 2 | | 41 | LFO 1 Mod Amt |
+| 9 | Osc 1 Coarse Tune | | 23 | Chorus 1 Rate | | 42 | LFO 1 Mod Polarity |
 | 10 | Osc 1 Fine Tune | | 24 | Chorus 1 Depth | | 43 | Osc 1 Pitch Mod 1 Amt |
 | 11 | Osc 1 Pitch Mod 2 Amt | | 25 | Chorus 1 Mix | | 44 | Osc 1 Pitch Mod 1 Polarity |
 | 12 | Osc 1 Pitch Mod 2 Polarity | | 26 | Delay 1 Time | |  |  |
@@ -479,8 +479,8 @@ two slots, a unipolar and a bipolar one. See the General slots below.
 | 17 | Delay 1 Output L ± | | 42 | Chorus 1 Rate | | 67 | EG 1 Release Switch |
 | 18 | Delay 1 Output R ± | | 43 | Chorus 1 Depth | | 68 | Amp 1 Mod Amt |
 | 19 | LFO 1 Rate | | 44 | Chorus 1 Mix | | 69 | Amp 1 Mod Polarity ± |
-| 20 | LFO 1 Level | | 45 | Delay 1 Time | | 70 | LFO 1 Rate Mod Amt |
-| 21 | LFO 1 Polarity ± | | 46 | Delay 1 Feedback | | 71 | LFO 1 Rate Mod Polarity ± |
+| 20 | LFO 1 Level | | 45 | Delay 1 Time | | 70 | LFO 1 Mod Amt |
+| 21 | LFO 1 Polarity ± | | 46 | Delay 1 Feedback | | 71 | LFO 1 Mod Polarity ± |
 | 22 | EG 1 Attack | | 47 | Delay 1 Mix | | 72 | Osc 1 Pitch Mod 1 Amt |
 | 23 | EG 1 Decay | | 48 | Note Pitch ± | | 73 | Osc 1 Pitch Mod 1 Polarity ± |
 | 24 | EG 1 Sustain | | 49 | Note Gate | |  |  |
@@ -551,11 +551,11 @@ negated at -0.5 (CC 4), through silence at 0.0 (CC 64), to unchanged at +0.5 (CC
 CC: the default patch points Level at the constant 1.0 and Polarity at the constant 0.5, which
 pass the LFO through as it is.
 
-LFO 1 Rate Mod In moves the rate by Rate Mod Amt times Rate Mod Polarity, as Pitch Mod 2 In moves
-the oscillator's pitch: a unit of input times depth is the whole rate range, ten octaves, so 0.1 is
-an octave. Neither has a CC, and the default patch points them at 1.0 and +0.5, a depth of 1.0, and
-leaves Rate Mod In unrouted, so routing a source to it is all it takes. It is read every fourth
-sample, where the LFO works out its rate, rather than every sample as the other module inputs are.
+LFO 1 Mod In moves the rate by LFO 1 Mod Amt times Mod Polarity, as Pitch Mod 2 In moves the
+oscillator's pitch: a unit of input times depth is the whole rate range, ten octaves, so 0.1 is an
+octave. Neither has a CC, and the default patch points them at 1.0 and +0.5, a depth of 1.0, and
+leaves Mod In unrouted, so routing a source to it is all it takes. It is read every fourth sample,
+where the LFO works out its rate, rather than every sample as the other module inputs are.
 
 EG 1 Level and EG 1 Polarity scale the envelope's output the same way, over the same ranges.
 Neither has a CC, and the default patch points them at the constants 1.0 and +0.5, which pass
@@ -728,7 +728,7 @@ changes only how fast the output moves, so it cannot step it.
 
 #### Notes
 
-- Module inputs (category 1) are read every sample (LFO 1 Rate Mod In every fourth) and are not
+- Module inputs (category 1) are read every sample (LFO 1 Mod In every fourth) and are not
   smoothed; parameters (category 2) are read once per buffer and are smoothed by their
   destination. Route a fast source through a module input, a stepped one through a parameter
 - The smoothing takes two stages (10.7 ms average delay, 99% in 35 ms at 48 kHz), which round off

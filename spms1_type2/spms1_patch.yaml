@@ -130,8 +130,8 @@ signals:
   - { key: AMP_1_MOD_AMOUNT,   id: 68, control: AMP_1_MOD_AMOUNT }
   - { key: AMP_1_MOD_POLARITY, id: 69, control: AMP_1_MOD_POLARITY }
 
-  - { key: LFO_1_RATE_MOD_AMOUNT,   id: 70, control: LFO_1_RATE_MOD_AMOUNT }
-  - { key: LFO_1_RATE_MOD_POLARITY, id: 71, control: LFO_1_RATE_MOD_POLARITY }
+  - { key: LFO_1_MOD_AMOUNT,   id: 70, control: LFO_1_MOD_AMOUNT }
+  - { key: LFO_1_MOD_POLARITY, id: 71, control: LFO_1_MOD_POLARITY }
 
   - { key: OSC_1_PITCH_MOD_1_AMOUNT,   id: 72, control: OSC_1_PITCH_MOD_1_AMOUNT }
   - { key: OSC_1_PITCH_MOD_1_POLARITY, id: 73, control: OSC_1_PITCH_MOD_1_POLARITY }
@@ -156,7 +156,7 @@ inputs:
   - { entry: 13,                    key: OUTPUT_R, label: R,       name: Final Output R, name_ja: 最終出力 R, source: DELAY_1_OUTPUT_R }
   - { entry: 14, module: SLEW_1,    key: IN,       label: In,      name: In,         source: PITCH }
   - { entry: 15, module: OSC_1,     key: PW_MOD,   label: PW Mod,  name: PW Mod In,  source: LFO_1_OUTPUT }
-  - { entry: 16, module: LFO_1,     key: RATE_MOD, label: Rate Mod, name: Rate Mod In, source: NONE }
+  - { entry: 16, module: LFO_1,     key: MOD,      label: Mod,     name: Mod In,     source: NONE }
 
 # Controls, listed in the editor's order, each by its entry: a parameter is one entry of NRPN category 2 (where it takes its value) and
 # the same entry of category 3 (which CC fills its control slot); a General control is in
@@ -165,12 +165,12 @@ inputs:
 # to. A parameter takes its own control slot unless `source` (a signal key) says otherwise. Why the defaults are what they are is in spms1_main.rb, above the default patch.
 controls:
   - { entry: 0,  module: LFO_1,     key: RATE,         label: Rate,         cc: 3,   value: 64 }
-  # LFO 1 Rate Mod Amt and Rate Mod Polarity came after Amp 1's, so their entries follow theirs,
-  # but they are listed here, after Rate. Neither has a CC: the default patch points them at 1.0
-  # and +0.5, a depth of 1.0, and leaves Rate Mod In unrouted, so the default patch renders as
-  # before and routing a source to it is enough.
-  - { entry: 41, module: LFO_1,     key: RATE_MOD_AMOUNT,   label: Rate Mod Amt,      cc: 0,   value: 124, source: ONE }
-  - { entry: 42, module: LFO_1,     key: RATE_MOD_POLARITY, label: Rate Mod Polarity, cc: 0,   value: 124, source: HALF, bipolar: true }
+  # LFO 1 Mod Amt and Mod Polarity, which move its rate, came after Amp 1's, so their entries
+  # follow theirs, but they are listed here, after Rate. Neither has a CC: the default patch points
+  # them at 1.0 and +0.5, a depth of 1.0, and leaves Mod In unrouted, so the default patch renders
+  # as before and routing a source to it is enough.
+  - { entry: 41, module: LFO_1,     key: MOD_AMOUNT,   label: Mod Amt,      cc: 0,   value: 124, source: ONE }
+  - { entry: 42, module: LFO_1,     key: MOD_POLARITY, label: Mod Polarity, cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 1,  module: LFO_1,     key: LEVEL,        label: Level,        cc: 0,   source: ONE }
   - { entry: 2,  module: LFO_1,     key: POLARITY,     label: Polarity,     cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 3,  module: ENV_GEN_1, key: ATTACK,       label: Attack,       cc: 73,  value: 4 }
@@ -191,7 +191,7 @@ controls:
   # reads +0.5, as each modulation polarity does.
   - { entry: 9,  module: OSC_1,     key: COARSE_TUNE,  label: Coarse Tune,  cc: 86,  value: 64, bipolar: true }
   - { entry: 10, module: OSC_1,     key: FINE_TUNE,    label: Fine Tune,    cc: 70,  value: 64, bipolar: true }
-  # Pitch Mod 1 Amt and Polarity came after LFO 1's rate modulation controls, so their entries
+  # Pitch Mod 1 Amt and Polarity came after LFO 1's modulation controls, so their entries
   # follow theirs. Neither has a CC: the default patch points them at 1.0 and +0.5, a depth of
   # exactly 1.0, which plays the note on Pitch Mod 1 In in tune, as the oscillator always did.
   - { entry: 43, module: OSC_1,     key: PITCH_MOD_1_AMOUNT,   label: Pitch Mod 1 Amt,      cc: 0,   value: 124, source: ONE }
