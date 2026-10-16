@@ -75,8 +75,8 @@ signals:
   - { key: OSC_1_WAVE,        id: 27, control: OSC_1_WAVE }
   - { key: OSC_1_PITCH_COARSE,     id: 28, control: OSC_1_PITCH_COARSE }
   - { key: OSC_1_PITCH_FINE,       id: 29, control: OSC_1_PITCH_FINE }
-  - { key: OSC_1_PITCH_MOD_2_AMT,   id: 30, control: OSC_1_PITCH_MOD_2_AMT }
-  - { key: OSC_1_PITCH_MOD_2_POL, id: 31, control: OSC_1_PITCH_MOD_2_POL }
+  - { key: OSC_1_MOD_2_AMT,   id: 30, control: OSC_1_MOD_2_AMT }
+  - { key: OSC_1_MOD_2_POL, id: 31, control: OSC_1_MOD_2_POL }
   - { key: FILTER_1_CUTOFF,       id: 32, control: FILTER_1_CUTOFF }
   - { key: FILTER_1_RESONANCE,    id: 33, control: FILTER_1_RESONANCE }
   - { key: FILTER_1_GAIN,         id: 34, control: FILTER_1_GAIN }
@@ -130,16 +130,16 @@ signals:
   - { key: LFO_1_MOD_AMT,   id: 69, control: LFO_1_MOD_AMT }
   - { key: LFO_1_MOD_POL, id: 70, control: LFO_1_MOD_POL }
 
-  - { key: OSC_1_PITCH_MOD_1_AMT,   id: 71, control: OSC_1_PITCH_MOD_1_AMT }
-  - { key: OSC_1_PITCH_MOD_1_POL, id: 72, control: OSC_1_PITCH_MOD_1_POL }
+  - { key: OSC_1_MOD_1_AMT,   id: 71, control: OSC_1_MOD_1_AMT }
+  - { key: OSC_1_MOD_1_POL, id: 72, control: OSC_1_MOD_1_POL }
 
 # Module inputs, NRPN category 1, by entry: what feeds each one in the default patch (`source`, a
 # signal key). `label` is the editor's, on the module; `name` the README's, after the module's
 # label. An input with no module is a side of the final output.
 inputs:
   - { entry: 0,  module: EG_1,        key: GATE,        label: Gate In,        name: Gate In,        source: NOTE_GATE }
-  - { entry: 1,  module: OSC_1,       key: PITCH_MOD_1, label: Pitch Mod 1 In, name: Pitch Mod 1 In, source: SLEW_1_OUTPUT }
-  - { entry: 2,  module: OSC_1,       key: PITCH_MOD_2, label: Pitch Mod 2 In, name: Pitch Mod 2 In, source: LFO_1_OUTPUT }
+  - { entry: 1,  module: OSC_1,       key: MOD_1, label: Mod 1 In, name: Mod 1 In, source: SLEW_1_OUTPUT }
+  - { entry: 2,  module: OSC_1,       key: MOD_2, label: Mod 2 In, name: Mod 2 In, source: LFO_1_OUTPUT }
   - { entry: 3,  module: FILTER_1,    key: AUDIO,       label: Audio In,       name: Audio In,       source: OSC_1_OUTPUT }
   - { entry: 4,  module: FILTER_1,    key: MOD,         label: Mod In,         name: Mod In,         source: EG_1_OUTPUT }
   - { entry: 5,  module: AMP_1,       key: AUDIO,       label: Audio In,       name: Audio In,       source: FILTER_1_OUTPUT_LP }
@@ -162,7 +162,7 @@ inputs:
 # to. A parameter takes its own control slot unless `source` (a signal key) says otherwise. Why the defaults are what they are is in spms1_main.rb, above the default patch.
 controls:
   - { entry: 0,  module: LFO_1,     key: RATE,         label: Rate,         cc: 3,   value: 64 }
-  # LFO 1 Mod Amt and Mod Polarity, which move its rate, came after Amp 1's, so their entries
+  # LFO 1 Mod Amt and Mod Pol, which move its rate, came after Amp 1's, so their entries
   # follow theirs, but they are listed here, after Rate. Neither has a CC: the default patch points
   # them at 1.0 and +0.5, a depth of 1.0, and leaves Mod In unrouted, so the default patch renders
   # as before and routing a source to it is enough.
@@ -180,13 +180,13 @@ controls:
   # as before. PW Mod Pol has no CC and reads +0.5, as each modulation polarity does.
   - { entry: 9,  module: OSC_1,     key: PITCH_COARSE,  label: Pitch Coarse,  cc: 86,  value: 64, bipolar: true }
   - { entry: 10, module: OSC_1,     key: PITCH_FINE,    label: Pitch Fine,    cc: 70,  value: 64, bipolar: true }
-  # Pitch Mod 1 Amt and Polarity came after LFO 1's modulation controls, so their entries
+  # Mod 1 Amt and Pol came after LFO 1's modulation controls, so their entries
   # follow theirs. Neither has a CC: the default patch points them at 1.0 and +0.5, a depth of
-  # exactly 1.0, which plays the note on Pitch Mod 1 In in tune, as the oscillator always did.
-  - { entry: 42, module: OSC_1,     key: PITCH_MOD_1_AMT,   label: Pitch Mod 1 Amt,      cc: 0,   value: 124, source: ONE }
-  - { entry: 43, module: OSC_1,     key: PITCH_MOD_1_POL, label: Pitch Mod 1 Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
-  - { entry: 11, module: OSC_1,     key: PITCH_MOD_2_AMT,   label: Pitch Mod 2 Amt,      cc: 13,  value: 4 }
-  - { entry: 12, module: OSC_1,     key: PITCH_MOD_2_POL, label: Pitch Mod 2 Pol, cc: 0,   value: 124, source: POINT_ONE, bipolar: true }
+  # exactly 1.0, which plays the note on Mod 1 In in tune, as the oscillator always did.
+  - { entry: 42, module: OSC_1,     key: MOD_1_AMT,   label: Mod 1 Amt,      cc: 0,   value: 124, source: ONE }
+  - { entry: 43, module: OSC_1,     key: MOD_1_POL, label: Mod 1 Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
+  - { entry: 11, module: OSC_1,     key: MOD_2_AMT,   label: Mod 2 Amt,      cc: 13,  value: 4 }
+  - { entry: 12, module: OSC_1,     key: MOD_2_POL, label: Mod 2 Pol, cc: 0,   value: 124, source: POINT_ONE, bipolar: true }
   - { entry: 8,  module: OSC_1,     key: WAVE,     label: Wave,         cc: 20,  value: 4 }
   - { entry: 35, module: OSC_1,     key: PULSE_WIDTH,  label: Pulse Width,  cc: 19,  value: 4 }
   - { entry: 36, module: OSC_1,     key: PW_MOD_AMT,   label: PW Mod Amt,      cc: 103, value: 4 }
@@ -198,7 +198,7 @@ controls:
   - { entry: 14, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 94 }
   - { entry: 15, module: FILTER_1,  key: GAIN,         label: Gain,         cc: 112, value: 64 }
   - { entry: 18, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 124 }
-  # Amp 1 Mod Amt and Mod Polarity came after Osc 1's pulse width controls, so their entries follow theirs, but
+  # Amp 1 Mod Amt and Mod Pol came after Osc 1's pulse width controls, so their entries follow theirs, but
   # they are listed here, after Gain. Neither has a CC: the default patch points them at 1.0 and
   # +0.5, a depth of exactly 1.0, which passes the envelope as the amp always took it.
   - { entry: 38, module: AMP_1,     key: MOD_AMT,   label: Mod Amt,      cc: 0,   value: 124, source: ONE }
