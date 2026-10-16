@@ -84,6 +84,8 @@ SIGNAL_FILTER_1_OUTPUT_HP       = 66
 SIGNAL_ENV_GEN_1_RELEASE_SWITCH = 67
 SIGNAL_AMP_1_MOD_AMOUNT         = 68
 SIGNAL_AMP_1_MOD_POLARITY       = 69
+SIGNAL_LFO_1_RATE_MOD_AMOUNT    = 70
+SIGNAL_LFO_1_RATE_MOD_POLARITY  = 71
 
 # NRPN parameter numbers: (MSB << 7) | LSB, where the MSB picks a category and the LSB an entry.
 #   0..127   active_modules[slot]
@@ -108,6 +110,7 @@ NRPN_SOURCE_OUTPUT_L        = 140
 NRPN_SOURCE_OUTPUT_R        = 141
 NRPN_SOURCE_SLEW_1_IN       = 142
 NRPN_SOURCE_OSC_1_PW_MOD    = 143
+NRPN_SOURCE_LFO_1_RATE_MOD  = 144
 
 NRPN_SOURCE_LFO_1_RATE               = 256
 NRPN_SOURCE_LFO_1_LEVEL              = 257
@@ -145,6 +148,8 @@ NRPN_SOURCE_OSC_1_PW_MOD_POLARITY    = 293
 NRPN_SOURCE_ENV_GEN_1_RELEASE_SWITCH = 294
 NRPN_SOURCE_AMP_1_MOD_AMOUNT         = 295
 NRPN_SOURCE_AMP_1_MOD_POLARITY       = 296
+NRPN_SOURCE_LFO_1_RATE_MOD_AMOUNT    = 297
+NRPN_SOURCE_LFO_1_RATE_MOD_POLARITY  = 298
 
 # A CC number of 0 means the parameter has no CC: its control slot holds 0.0 -- the bottom of a
 # unipolar dial, the middle of a bipolar one -- whatever CC it had before, so a patch sets it alone.
@@ -189,6 +194,8 @@ NRPN_CC_OSC_1_PW_MOD_POLARITY    = 421
 NRPN_CC_ENV_GEN_1_RELEASE_SWITCH = 422
 NRPN_CC_AMP_1_MOD_AMOUNT         = 423
 NRPN_CC_AMP_1_MOD_POLARITY       = 424
+NRPN_CC_LFO_1_RATE_MOD_AMOUNT    = 425
+NRPN_CC_LFO_1_RATE_MOD_POLARITY  = 426
 
 # The constants of the bus, which nothing else ever writes. A slot not written here holds 0.0.
 def spms1_fill_constant_signals(signals)
@@ -230,6 +237,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OUTPUT_R       , SIGNAL_DELAY_1_OUTPUT_R)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_SLEW_1_IN      , SIGNAL_PITCH)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_1_PW_MOD   , SIGNAL_LFO_1_OUTPUT)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_LFO_1_RATE_MOD , SIGNAL_NONE)
 
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_LFO_1_RATE              , SIGNAL_LFO_1_RATE)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_LFO_1_LEVEL             , SIGNAL_ONE)
@@ -267,6 +275,8 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_ENV_GEN_1_RELEASE_SWITCH, SIGNAL_ENV_GEN_1_RELEASE_SWITCH)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_AMP_1_MOD_AMOUNT        , SIGNAL_ONE)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_AMP_1_MOD_POLARITY      , SIGNAL_HALF)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_LFO_1_RATE_MOD_AMOUNT   , SIGNAL_ONE)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_LFO_1_RATE_MOD_POLARITY , SIGNAL_HALF)
 
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_RATE              , 3)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_ENV_GEN_1_ATTACK        , 73)

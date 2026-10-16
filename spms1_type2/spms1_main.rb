@@ -250,6 +250,7 @@ while true
   source_output_r        = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OUTPUT_R)
   source_slew_1_in       = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_SLEW_1_IN)
   source_osc_1_pw_mod    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PW_MOD)
+  source_lfo_1_rate_mod  = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_RATE_MOD)
 
   # Parameter sources. Read once per buffer rather than per sample: each destination smooths at
   # the control rate with a 2.67 ms time constant, which swallows the difference between feeding
@@ -291,6 +292,8 @@ while true
   source_env_gen_1_release_switch = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_ENV_GEN_1_RELEASE_SWITCH)
   source_amp_1_mod_amount      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_MOD_AMOUNT)
   source_amp_1_mod_polarity    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_MOD_POLARITY)
+  source_lfo_1_rate_mod_amount   = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_RATE_MOD_AMOUNT)
+  source_lfo_1_rate_mod_polarity = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_RATE_MOD_POLARITY)
 
   # Which CC fills each control slot. The bus is the only thing downstream reads, so this is
   # where MIDI enters and the only place a CC number appears.
@@ -330,6 +333,8 @@ while true
   cc_env_gen_1_release_switch = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_ENV_GEN_1_RELEASE_SWITCH)
   cc_amp_1_mod_amount      = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_AMP_1_MOD_AMOUNT)
   cc_amp_1_mod_polarity    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_AMP_1_MOD_POLARITY)
+  cc_lfo_1_rate_mod_amount   = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_RATE_MOD_AMOUNT)
+  cc_lfo_1_rate_mod_polarity = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_RATE_MOD_POLARITY)
   cc_general_mod_wheel     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_MOD_WHEEL)
   cc_general_1             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_1)
   cc_general_2             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_2)
@@ -372,6 +377,8 @@ while true
   signals[SIGNAL_ENV_GEN_1_RELEASE_SWITCH] = cc_or_zero(cc_env_gen_1_release_switch, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_env_gen_1_release_switch)))
   signals[SIGNAL_AMP_1_MOD_AMOUNT] = cc_or_zero(cc_amp_1_mod_amount, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_amp_1_mod_amount)))
   signals[SIGNAL_AMP_1_MOD_POLARITY] = cc_or_zero(cc_amp_1_mod_polarity, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_amp_1_mod_polarity)))
+  signals[SIGNAL_LFO_1_RATE_MOD_AMOUNT] = cc_or_zero(cc_lfo_1_rate_mod_amount, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_rate_mod_amount)))
+  signals[SIGNAL_LFO_1_RATE_MOD_POLARITY] = cc_or_zero(cc_lfo_1_rate_mod_polarity, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_rate_mod_polarity)))
   signals[SIGNAL_GENERAL_MOD_WHEEL] = cc_or_zero(cc_general_mod_wheel, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_general_mod_wheel)))
   # Each General CC fills two slots, the same value taken both ways.
   general_1 = C.get_midi_cc_value(MIDI_CH, cc_general_1)
@@ -423,6 +430,8 @@ while true
   env_gen_1.set_release_switch(signals[source_env_gen_1_release_switch])
   amp_1.set_modulation_amount(signals[source_amp_1_mod_amount])
   amp_1.set_modulation_polarity(signals[source_amp_1_mod_polarity])
+  lfo_1.set_rate_modulation_amount(signals[source_lfo_1_rate_mod_amount])
+  lfo_1.set_rate_modulation_polarity(signals[source_lfo_1_rate_mod_polarity])
 
   i = 0
   while i < AUDIO_BUFFER_WORDS
@@ -445,7 +454,7 @@ while true
       # with active_count above another 4.4% (to 85.8k).
       case module_id
       when 1 # MODULE_LFO_1
-        signals[9] = lfo_1.process # SIGNAL_LFO_1_OUTPUT
+        signals[9] = lfo_1.process(signals[source_lfo_1_rate_mod]) # SIGNAL_LFO_1_OUTPUT
       when 2 # MODULE_ENV_GEN_1
         signals[10] = env_gen_1.process(signals[source_env_gen_1_gate]) # SIGNAL_ENV_GEN_1_OUTPUT
       when 3 # MODULE_OSC_1

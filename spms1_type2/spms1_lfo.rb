@@ -53,6 +53,13 @@ module Spms1
       @amount = 1.0
       @stage_1_amount = 1.0
       @current_amount = 1.0
+      # Rate modulation depth is amount times polarity, as the other modules' modulation depths
+      # are, multiplied before smoothing so that only one smoothing state has to be carried.
+      @rate_modulation_amount = 1.0
+      @rate_modulation_polarity = 1.0
+      @rate_modulation_depth = 1.0
+      @stage_1_rate_modulation_depth = 1.0
+      @current_rate_modulation_depth = 1.0
       # Not derived here: process assigns them on its first call, before anything reads them.
       @dt = 0.0
       @blamp_scale = 0.0
@@ -63,6 +70,22 @@ module Spms1
     # 0.215 Hz at 0.0, 6.875 Hz at 0.5, 220 Hz at 1.0.
     def set_rate(rate)
       @rate = (rate < 0.0) ? 0.0 : ((rate > 1.0) ? 1.0 : rate)
+    end
+
+    # Rate modulation depth is amount times polarity. Amount is unipolar, [0.0, 1.0]. Polarity is
+    # bipolar, [-0.5, 0.5], and doubled, so +0.5 leaves the amount as it is, -0.5 negates it and
+    # the way between scales it, crossing zero. A unit of modulation input times depth is the
+    # whole rate range, ten octaves, so at full depth a bipolar source swings the rate five octaves
+    # either way.
+    def set_rate_modulation_amount(amount)
+      @rate_modulation_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
+      @rate_modulation_depth = @rate_modulation_amount * @rate_modulation_polarity
+    end
+
+    def set_rate_modulation_polarity(polarity)
+      clamped_polarity = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
+      @rate_modulation_polarity = clamped_polarity + clamped_polarity
+      @rate_modulation_depth = @rate_modulation_amount * @rate_modulation_polarity
     end
 
     # The output is scaled by level and polarity together, so a destination can take the LFO at
@@ -83,16 +106,23 @@ module Spms1
     # Output is bipolar and spans one unit peak to peak at full level and polarity, [-0.5, 0.5],
     # the same span as the pitch domain. Every bipolar signal on the bus is scaled that way, so a destination's
     # amount control means the same thing whichever one is routed to it.
-    def process
+    # The rate modulation input is read at the control-rate step, as the filter reads its own, and
+    # not smoothed: the phase increment and the PolyBLAMP scale below take a table lookup and a
+    # division, which every fourth sample can afford and every sample would be paying for. It is
+    # held to the rate range after it is added, which also keeps the lookup in bounds.
+    def process(rate_modulation_input = 0.0)
       if @sample_counter == 0
-        # Rate and amount are smoothed at the control rate to avoid sudden jumps, and the phase
-        # increment is derived here rather than per sample: nothing feeds this module, so it
-        # cannot change between control-rate updates.
+        # Rate, amount and rate modulation depth are smoothed at the control rate to avoid sudden
+        # jumps, and the phase increment is derived here rather than per sample.
         @stage_1_rate = Dsp.smooth(@rate, @stage_1_rate, @smoothing_target_blend)
         @current_rate = Dsp.smooth(@stage_1_rate, @current_rate, @smoothing_target_blend)
         @stage_1_amount = Dsp.smooth(@amount, @stage_1_amount, @smoothing_target_blend)
         @current_amount = Dsp.smooth(@stage_1_amount, @current_amount, @smoothing_target_blend)
-        @dt = rate_to_freq_fast(@current_rate) * @inv_sample_rate
+        @stage_1_rate_modulation_depth = Dsp.smooth(@rate_modulation_depth, @stage_1_rate_modulation_depth, @smoothing_target_blend)
+        @current_rate_modulation_depth = Dsp.smooth(@stage_1_rate_modulation_depth, @current_rate_modulation_depth, @smoothing_target_blend)
+        total_rate = @current_rate + (rate_modulation_input * @current_rate_modulation_depth)
+        rate = (total_rate < 0.0) ? 0.0 : ((total_rate > 1.0) ? 1.0 : total_rate)
+        @dt = rate_to_freq_fast(rate) * @inv_sample_rate
         # The PolyBLAMP residual is (1 - |x|)^3 / 6 of the slope change for a corner x samples
         # away. The slope changes by 4 * dt at each corner, and with the distance d = |x| * dt in
         # phase that is (dt - d)^3 * (2/3) / dt^2: the division is taken here, once per update,

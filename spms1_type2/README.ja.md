@@ -359,14 +359,15 @@ flowchart LR
 
 | CC 98 | モジュール入力 | | CC 98 | モジュール入力 |
 | ----- | ------ | - | ----- | ------ |
-| 0 | EG 1 Gate | | 8 | Mixer 1 In 2 |
-| 1 | Osc 1 Pitch | | 9 | Chorus 1 Audio In |
-| 2 | Osc 1 Pitch Mod In | | 10 | Delay 1 Audio In L |
-| 3 | Filter 1 Audio In | | 11 | Delay 1 Audio In R |
-| 4 | Filter 1 Mod In | | 12 | 最終出力 L |
-| 5 | Amp 1 Audio In | | 13 | 最終出力 R |
-| 6 | Amp 1 Mod In | | 14 | Slew 1 In |
-| 7 | Mixer 1 In 1 | | 15 | Osc 1 PW Mod In |
+| 0 | EG 1 Gate | | 9 | Chorus 1 Audio In |
+| 1 | Osc 1 Pitch | | 10 | Delay 1 Audio In L |
+| 2 | Osc 1 Pitch Mod In | | 11 | Delay 1 Audio In R |
+| 3 | Filter 1 Audio In | | 12 | 最終出力 L |
+| 4 | Filter 1 Mod In | | 13 | 最終出力 R |
+| 5 | Amp 1 Audio In | | 14 | Slew 1 In |
+| 6 | Amp 1 Mod In | | 15 | Osc 1 PW Mod In |
+| 7 | Mixer 1 In 1 | | 16 | LFO 1 Rate Mod In |
+| 8 | Mixer 1 In 2 | |  |  |
 
 <!-- patch_gen end -->
 
@@ -389,18 +390,19 @@ flowchart LR
 
 | CC 98 | パラメータ | | CC 98 | パラメータ | | CC 98 | パラメータ |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | LFO 1 Rate | | 12 | Osc 1 Pitch Mod Polarity | | 24 | Chorus 1 Depth |
-| 1 | LFO 1 Level | | 13 | Filter 1 Cutoff | | 25 | Chorus 1 Mix |
-| 2 | LFO 1 Polarity | | 14 | Filter 1 Resonance | | 26 | Delay 1 Time |
-| 3 | EG 1 Attack | | 15 | Filter 1 Gain | | 27 | Delay 1 Feedback |
-| 4 | EG 1 Decay | | 16 | Filter 1 Mod Amt | | 28 | Delay 1 Mix |
-| 5 | EG 1 Sustain | | 17 | Filter 1 Mod Polarity | | 34 | Slew 1 Time |
-| 6 | EG 1 Level | | 18 | Amp 1 Gain | | 35 | Osc 1 Pulse Width |
-| 7 | EG 1 Polarity | | 19 | Mixer 1 Level 1 | | 36 | Osc 1 PW Mod Amt |
-| 8 | Osc 1 Wave | | 20 | Mixer 1 Polarity 1 | | 37 | Osc 1 PW Mod Polarity |
-| 9 | Osc 1 Coarse Tune | | 21 | Mixer 1 Level 2 | | 38 | EG 1 Release Switch |
-| 10 | Osc 1 Fine Tune | | 22 | Mixer 1 Polarity 2 | | 39 | Amp 1 Mod Amt |
-| 11 | Osc 1 Pitch Mod Amt | | 23 | Chorus 1 Rate | | 40 | Amp 1 Mod Polarity |
+| 0 | LFO 1 Rate | | 13 | Filter 1 Cutoff | | 26 | Delay 1 Time |
+| 1 | LFO 1 Level | | 14 | Filter 1 Resonance | | 27 | Delay 1 Feedback |
+| 2 | LFO 1 Polarity | | 15 | Filter 1 Gain | | 28 | Delay 1 Mix |
+| 3 | EG 1 Attack | | 16 | Filter 1 Mod Amt | | 34 | Slew 1 Time |
+| 4 | EG 1 Decay | | 17 | Filter 1 Mod Polarity | | 35 | Osc 1 Pulse Width |
+| 5 | EG 1 Sustain | | 18 | Amp 1 Gain | | 36 | Osc 1 PW Mod Amt |
+| 6 | EG 1 Level | | 19 | Mixer 1 Level 1 | | 37 | Osc 1 PW Mod Polarity |
+| 7 | EG 1 Polarity | | 20 | Mixer 1 Polarity 1 | | 38 | EG 1 Release Switch |
+| 8 | Osc 1 Wave | | 21 | Mixer 1 Level 2 | | 39 | Amp 1 Mod Amt |
+| 9 | Osc 1 Coarse Tune | | 22 | Mixer 1 Polarity 2 | | 40 | Amp 1 Mod Polarity |
+| 10 | Osc 1 Fine Tune | | 23 | Chorus 1 Rate | | 41 | LFO 1 Rate Mod Amt |
+| 11 | Osc 1 Pitch Mod Amt | | 24 | Chorus 1 Depth | | 42 | LFO 1 Rate Mod Polarity |
+| 12 | Osc 1 Pitch Mod Polarity | | 25 | Chorus 1 Mix | |  |  |
 
 <!-- patch_gen end -->
 
@@ -468,8 +470,8 @@ flowchart LR
 | 19 | LFO 1 Rate | | 43 | Chorus 1 Depth | | 67 | EG 1 Release Switch |
 | 20 | LFO 1 Level | | 44 | Chorus 1 Mix | | 68 | Amp 1 Mod Amt |
 | 21 | LFO 1 Polarity ± | | 45 | Delay 1 Time | | 69 | Amp 1 Mod Polarity ± |
-| 22 | EG 1 Attack | | 46 | Delay 1 Feedback | |  |  |
-| 23 | EG 1 Decay | | 47 | Delay 1 Mix | |  |  |
+| 22 | EG 1 Attack | | 46 | Delay 1 Feedback | | 70 | LFO 1 Rate Mod Amt |
+| 23 | EG 1 Decay | | 47 | Delay 1 Mix | | 71 | LFO 1 Rate Mod Polarity ± |
 
 <!-- patch_gen end -->
 
@@ -479,12 +481,12 @@ flowchart LR
 振れます。印のないものは 0.0〜1.0 で、Note Gate とユニポーラのコントロールスロットがこれにあたります。
 バスは両方を 1 つの番号空間で運ぶので、レンジは「何が書いたか」ではなくスロットごとの性質です。
 
-スロット 19〜47、61、62〜64、67〜69 には CC から届いた値が入るので、パラメータはデフォルトでは自分の CC を読んでいるわけです。
+スロット 19〜47、61、62〜64、67〜71 には CC から届いた値が入るので、パラメータはデフォルトでは自分の CC を読んでいるわけです。
 パラメータはそれぞれユニポーラかバイポーラで、スロットも同じレンジを取ります。ユニポーラは CC 4〜124 で
 0.0〜1.0 と、エンベロープと同じ幅なので、エンベロープを向ければつまみの全域を動かせます。バイポーラは
 CC 64 を 0.0 とする -0.5〜+0.5 と、LFO と同じ幅なので、バイポーラのソースを向ければ中央を挟んで上下に
 振れます。2 つのチューンは中央が「変化なし」を意味するのでバイポーラです。Polarity も、LFO、EG、ミキサー、
-4 つの Mod Polarity のいずれも、符号そのものが設定する値なのでバイポーラです。パラメータに別のスロットを指させることがモジュレー
+5 つの Mod Polarity のいずれも、符号そのものが設定する値なのでバイポーラです。パラメータに別のスロットを指させることがモジュレー
 ションになります。CC のないスロットは 0.0 です。
 
 スロット 51〜59 の General スロットは、どのパラメータにも属さないコントロールスロットです。CC をバスに
@@ -531,6 +533,12 @@ LFO 1 Level と LFO 1 Polarity は、ミキサーの Level と Polarity が入�
 一緒に掛かります。Level は 0.0 (CC 4) で無音、1.0 (CC 124) で最大、Polarity は -0.5 (CC 4) で反転、
 0.0 (CC 64) で無音、+0.5 (CC 124) でそのままです。どちらも CC
 がなく、デフォルトのパッチは Level に定数 1.0、Polarity に定数 0.5 を指させているので、LFO はそのまま出ます。
+
+LFO 1 Rate Mod In は、Pitch Mod In がオシレータのピッチを動かすのと同じく、Rate Mod Amt と Rate Mod Polarity
+の積だけ周波数を動かします。入力と深さの積の 1 単位が周波数の全域 (10 オクターブ) なので、0.1 で 1 オクターブ
+です。どちらも CC がなく、デフォルトのパッチは定数 1.0 と +0.5 (深さ 1.0) を指させ、Rate Mod In には何も
+つないでいないので、ソースをつなぐだけで効きます。ほかのモジュール入力が毎サンプル読まれるのに対し、
+LFO が周波数を計算する 4 サンプルごとに読まれます。
 
 EG 1 Level と EG 1 Polarity も、同じレンジで同じようにエンベロープの出力に掛かります。どちらも CC がなく、
 デフォルトのパッチは定数 1.0 と +0.5 を指させているので、エンベロープはそのまま出ます。
@@ -681,13 +689,13 @@ Slew 1 Time はユニポーラで、1/120 刻み、1 ステップで時間が半
 
 #### 注意点
 
-- モジュール入力（カテゴリ 1）は毎サンプル読まれ、スムージングされません。パラメータ（カテゴリ 2）は
+- モジュール入力（カテゴリ 1）は毎サンプル（LFO 1 Rate Mod In は 4 サンプルごと）読まれ、スムージングされません。パラメータ（カテゴリ 2）は
   1 バッファに 1 回読まれ、受け取る側でスムージングされます。速いソースはモジュール入力へ、段階的なものは
   パラメータへ通してください
 - スムージングは 2 段（48 kHz で平均遅れ 10.7 ms、35 ms で 99%）で、CC をまばらに（例えば 20 ms ごとに）
   送るコントローラーの段差を丸めます。Osc 1 Coarse Tune と Fine Tune は、音程がすぐ追従するように
   スムージングしません。Slew 1 Time も、設定する対象に段差を生じさせないのでスムージングしません
-- パラメータのソースは 128 のスロットのどれでも指せます。69 より上のスロットは、何かが書き込むまで 0 を
+- パラメータのソースは 128 のスロットのどれでも指せます。71 より上のスロットは、何かが書き込むまで 0 を
   返すので、そこを指したパラメータはユニポーラならつまみの下端、バイポーラなら中央に留まります
 - パラメータは自分の値を自分のレンジ、0.0〜1.0 か -0.5〜+0.5 に丸め、コントロールスロットも同じレンジを
   バスに載せます。ユニポーラのスロットをモジュール入力に結線するとエンベロープと同じく片側にしか振れず、

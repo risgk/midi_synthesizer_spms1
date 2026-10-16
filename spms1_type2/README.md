@@ -367,14 +367,15 @@ passes it through rather than muting it.
 
 | CC 98 | Module input | | CC 98 | Module input |
 | ----- | ------ | - | ----- | ------ |
-| 0 | EG 1 Gate | | 8 | Mixer 1 In 2 |
-| 1 | Osc 1 Pitch | | 9 | Chorus 1 Audio In |
-| 2 | Osc 1 Pitch Mod In | | 10 | Delay 1 Audio In L |
-| 3 | Filter 1 Audio In | | 11 | Delay 1 Audio In R |
-| 4 | Filter 1 Mod In | | 12 | Final Output L |
-| 5 | Amp 1 Audio In | | 13 | Final Output R |
-| 6 | Amp 1 Mod In | | 14 | Slew 1 In |
-| 7 | Mixer 1 In 1 | | 15 | Osc 1 PW Mod In |
+| 0 | EG 1 Gate | | 9 | Chorus 1 Audio In |
+| 1 | Osc 1 Pitch | | 10 | Delay 1 Audio In L |
+| 2 | Osc 1 Pitch Mod In | | 11 | Delay 1 Audio In R |
+| 3 | Filter 1 Audio In | | 12 | Final Output L |
+| 4 | Filter 1 Mod In | | 13 | Final Output R |
+| 5 | Amp 1 Audio In | | 14 | Slew 1 In |
+| 6 | Amp 1 Mod In | | 15 | Osc 1 PW Mod In |
+| 7 | Mixer 1 In 1 | | 16 | LFO 1 Rate Mod In |
+| 8 | Mixer 1 In 2 | |  |  |
 
 <!-- patch_gen end -->
 
@@ -398,18 +399,19 @@ both at the same signal for a mono output.
 
 | CC 98 | Parameter | | CC 98 | Parameter | | CC 98 | Parameter |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | LFO 1 Rate | | 12 | Osc 1 Pitch Mod Polarity | | 24 | Chorus 1 Depth |
-| 1 | LFO 1 Level | | 13 | Filter 1 Cutoff | | 25 | Chorus 1 Mix |
-| 2 | LFO 1 Polarity | | 14 | Filter 1 Resonance | | 26 | Delay 1 Time |
-| 3 | EG 1 Attack | | 15 | Filter 1 Gain | | 27 | Delay 1 Feedback |
-| 4 | EG 1 Decay | | 16 | Filter 1 Mod Amt | | 28 | Delay 1 Mix |
-| 5 | EG 1 Sustain | | 17 | Filter 1 Mod Polarity | | 34 | Slew 1 Time |
-| 6 | EG 1 Level | | 18 | Amp 1 Gain | | 35 | Osc 1 Pulse Width |
-| 7 | EG 1 Polarity | | 19 | Mixer 1 Level 1 | | 36 | Osc 1 PW Mod Amt |
-| 8 | Osc 1 Wave | | 20 | Mixer 1 Polarity 1 | | 37 | Osc 1 PW Mod Polarity |
-| 9 | Osc 1 Coarse Tune | | 21 | Mixer 1 Level 2 | | 38 | EG 1 Release Switch |
-| 10 | Osc 1 Fine Tune | | 22 | Mixer 1 Polarity 2 | | 39 | Amp 1 Mod Amt |
-| 11 | Osc 1 Pitch Mod Amt | | 23 | Chorus 1 Rate | | 40 | Amp 1 Mod Polarity |
+| 0 | LFO 1 Rate | | 13 | Filter 1 Cutoff | | 26 | Delay 1 Time |
+| 1 | LFO 1 Level | | 14 | Filter 1 Resonance | | 27 | Delay 1 Feedback |
+| 2 | LFO 1 Polarity | | 15 | Filter 1 Gain | | 28 | Delay 1 Mix |
+| 3 | EG 1 Attack | | 16 | Filter 1 Mod Amt | | 34 | Slew 1 Time |
+| 4 | EG 1 Decay | | 17 | Filter 1 Mod Polarity | | 35 | Osc 1 Pulse Width |
+| 5 | EG 1 Sustain | | 18 | Amp 1 Gain | | 36 | Osc 1 PW Mod Amt |
+| 6 | EG 1 Level | | 19 | Mixer 1 Level 1 | | 37 | Osc 1 PW Mod Polarity |
+| 7 | EG 1 Polarity | | 20 | Mixer 1 Polarity 1 | | 38 | EG 1 Release Switch |
+| 8 | Osc 1 Wave | | 21 | Mixer 1 Level 2 | | 39 | Amp 1 Mod Amt |
+| 9 | Osc 1 Coarse Tune | | 22 | Mixer 1 Polarity 2 | | 40 | Amp 1 Mod Polarity |
+| 10 | Osc 1 Fine Tune | | 23 | Chorus 1 Rate | | 41 | LFO 1 Rate Mod Amt |
+| 11 | Osc 1 Pitch Mod Amt | | 24 | Chorus 1 Depth | | 42 | LFO 1 Rate Mod Polarity |
+| 12 | Osc 1 Pitch Mod Polarity | | 25 | Chorus 1 Mix | |  |  |
 
 <!-- patch_gen end -->
 
@@ -477,8 +479,8 @@ two slots, a unipolar and a bipolar one. See the General slots below.
 | 19 | LFO 1 Rate | | 43 | Chorus 1 Depth | | 67 | EG 1 Release Switch |
 | 20 | LFO 1 Level | | 44 | Chorus 1 Mix | | 68 | Amp 1 Mod Amt |
 | 21 | LFO 1 Polarity ± | | 45 | Delay 1 Time | | 69 | Amp 1 Mod Polarity ± |
-| 22 | EG 1 Attack | | 46 | Delay 1 Feedback | |  |  |
-| 23 | EG 1 Decay | | 47 | Delay 1 Mix | |  |  |
+| 22 | EG 1 Attack | | 46 | Delay 1 Feedback | | 70 | LFO 1 Rate Mod Amt |
+| 23 | EG 1 Decay | | 47 | Delay 1 Mix | | 71 | LFO 1 Rate Mod Polarity ± |
 
 <!-- patch_gen end -->
 
@@ -489,12 +491,12 @@ its Polarity is turned negative. Everything unmarked runs 0.0 to 1.0 -- Note Gat
 unipolar control slot. The bus carries both kinds under one numbering, so the range belongs to the slot
 rather than to the sort of thing that wrote it.
 
-Slots 19-47, 61, 62-64 and 67-69 hold the values arriving from CC, so a parameter reads its own CC by default. Each
+Slots 19-47, 61, 62-64 and 67-71 hold the values arriving from CC, so a parameter reads its own CC by default. Each
 parameter is unipolar or bipolar, and its slot takes the same range. A unipolar one runs 0.0 to
 1.0 from CC 4 to CC 124, the span of an envelope, so an envelope pointed at one sweeps the whole
 of its dial. A bipolar one runs -0.5 to +0.5 with CC 64 at 0.0, the span of an LFO, so a bipolar
 source pointed at one swings it about the middle. The two tune controls are bipolar, since their
-middle is no change at all, and so is every Polarity -- the LFO's, the EG's, the mixer's and the four
+middle is no change at all, and so is every Polarity -- the LFO's, the EG's, the mixer's and the five
 Mod Polarity controls -- since its sign is what it sets. Pointing a parameter at another slot is what
 makes a modulation. A slot with no CC holds 0.0.
 
@@ -545,6 +547,12 @@ scale its input: Level from silent at 0.0 (CC 4) to full at 1.0 (CC 124), and Po
 negated at -0.5 (CC 4), through silence at 0.0 (CC 64), to unchanged at +0.5 (CC 124). Neither has a
 CC: the default patch points Level at the constant 1.0 and Polarity at the constant 0.5, which
 pass the LFO through as it is.
+
+LFO 1 Rate Mod In moves the rate by Rate Mod Amt times Rate Mod Polarity, as Pitch Mod In moves the
+oscillator's pitch: a unit of input times depth is the whole rate range, ten octaves, so 0.1 is an
+octave. Neither has a CC, and the default patch points them at 1.0 and +0.5, a depth of 1.0, and
+leaves Rate Mod In unrouted, so routing a source to it is all it takes. It is read every fourth
+sample, where the LFO works out its rate, rather than every sample as the other module inputs are.
 
 EG 1 Level and EG 1 Polarity scale the envelope's output the same way, over the same ranges.
 Neither has a CC, and the default patch points them at the constants 1.0 and +0.5, which pass
@@ -711,14 +719,14 @@ changes only how fast the output moves, so it cannot step it.
 
 #### Notes
 
-- Module inputs (category 1) are read every sample and are not smoothed; parameters (category 2)
-  are read once per buffer and are smoothed by their destination. Route a fast source through a
-  module input, a stepped one through a parameter
+- Module inputs (category 1) are read every sample (LFO 1 Rate Mod In every fourth) and are not
+  smoothed; parameters (category 2) are read once per buffer and are smoothed by their
+  destination. Route a fast source through a module input, a stepped one through a parameter
 - The smoothing takes two stages (10.7 ms average delay, 99% in 35 ms at 48 kHz), which round off
   the steps of a controller sending sparse CCs (e.g. every 20 ms). Osc 1 Coarse Tune and Fine Tune
   are not smoothed, so that the pitch follows right away, and neither is Slew 1 Time, which
   cannot step what it sets
-- A parameter source may point at any of the 128 slots. Slots above 69 read 0 until something
+- A parameter source may point at any of the 128 slots. Slots above 71 read 0 until something
   writes them, which leaves a parameter pointed at one at the bottom of a unipolar dial or the
   middle of a bipolar one
 - A parameter clamps its value to its own range, 0.0 to 1.0 or -0.5 to +0.5, and its control slot
