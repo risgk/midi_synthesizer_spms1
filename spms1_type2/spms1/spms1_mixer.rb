@@ -40,6 +40,10 @@ module Spms1
       @stage_1_2 = 1.0
       @current_1 = 1.0
       @current_2 = 1.0
+      # Out Level scales the sum, smoothed as the input levels are.
+      @out_level = 1.0
+      @stage_1_out_level = 1.0
+      @current_out_level = 1.0
       @sample_counter = 0
     end
 
@@ -71,6 +75,13 @@ module Spms1
       @target_2 = @level_2 * @polarity_2
     end
 
+    # Out Level is unipolar, [0.0, 1.0], a plain multiplier on the sum, so one control can take a
+    # blend of two sources up and down together. It is applied before the sum is held to its range,
+    # so it can also bring a sum that would have been clipped back inside it.
+    def set_out_level(level)
+      @out_level = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
+    end
+
     # Both inputs are taken as they are; only the sum is held to a range. A mixer is the one place on
     # the bus where a value can come out bigger than what went in -- every other module is fixed at
     # half a unit, or saturates, or only attenuates -- so this is what keeps every slot finite. That
@@ -86,11 +97,13 @@ module Spms1
         @current_1 = Dsp.smooth(@stage_1_1, @current_1, @smoothing_target_blend)
         @stage_1_2 = Dsp.smooth(@target_2, @stage_1_2, @smoothing_target_blend)
         @current_2 = Dsp.smooth(@stage_1_2, @current_2, @smoothing_target_blend)
+        @stage_1_out_level = Dsp.smooth(@out_level, @stage_1_out_level, @smoothing_target_blend)
+        @current_out_level = Dsp.smooth(@stage_1_out_level, @current_out_level, @smoothing_target_blend)
       end
 
       @sample_counter = (@sample_counter + 1) & CONTROL_RATE_MASK
 
-      sum = input_1 * @current_1 + input_2 * @current_2
+      sum = (input_1 * @current_1 + input_2 * @current_2) * @current_out_level
       # One nested ternary, not two statements. Split in two, each comparison compiles to a vsel
       # when the method stands alone, which is not how it is built: inside the flattened
       # Spms1_main the branch count does not move and the extra instructions cost 870/875us a

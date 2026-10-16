@@ -150,6 +150,9 @@ signals:
   - { key: PITCH_1_COARSE, id: 81, control: PITCH_1_COARSE }
   - { key: PITCH_1_FINE,   id: 82, control: PITCH_1_FINE }
 
+  # Mixer 1 Out Level came after Pitch 1 Coarse and Fine.
+  - { key: MIXER_1_OUT_LEVEL, id: 83, control: MIXER_1_OUT_LEVEL }
+
 # Module inputs, NRPN category 1, by entry: what feeds each one in the default patch (`source`, a
 # signal key). `label` is the editor's, on the module; `name` the README's, after the module's
 # label. An input with no module is a side of the final output.
@@ -237,6 +240,8 @@ controls:
   - { entry: 20, module: MIXER_1,   key: POL_1,   label: Pol 1,   cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 21, module: MIXER_1,   key: LEVEL_2,      label: Level 2,      cc: 0,   source: ONE }
   - { entry: 22, module: MIXER_1,   key: POL_2,   label: Pol 2,   cc: 0,   value: 124, source: HALF, bipolar: true }
+  # Out Level came after Pitch 1 Coarse and Fine; like the input levels it has no CC and reads 1.0.
+  - { entry: 54, module: MIXER_1,   key: OUT_LEVEL,    label: Out Level,    cc: 0,   source: ONE }
   - { entry: 25, module: CHORUS_1,  key: MIX,          label: Mix,          cc: 93,  value: 64 }
   - { entry: 23, module: CHORUS_1,  key: RATE,         label: Rate,         cc: 58,  value: 64 }
   - { entry: 24, module: CHORUS_1,  key: DEPTH,        label: Depth,        cc: 59,  value: 64 }

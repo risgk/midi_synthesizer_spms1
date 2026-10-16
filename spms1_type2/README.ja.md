@@ -368,7 +368,7 @@ flowchart LR
 実行順に入っています**。パッチは結線するだけでよく、何かを先に有効化する必要はありません。コーラスや
 ディレイを実行順から外せばそのぶんの時間が浮きます。そのときはそれを読んでいたものを別の所へ向け直します。
 下の例を参照してください。どのパラメータにも CC が付いていないのは
-ミキサーだけで、そのぶんデフォルトのパッチでは定数を指させてあります。レベルは 1.0、極性は +0.5 なので、
+ミキサーだけで、そのぶんデフォルトのパッチでは定数を指させてあります。レベルと Out Level は 1.0、極性は +0.5 なので、
 入力を 1 つ結線したミキサーはそれをそのまま通します。
 
 #### エントリ (CC 98)、カテゴリ 1
@@ -410,21 +410,22 @@ flowchart LR
 
 | CC 98 | パラメータ | | CC 98 | パラメータ | | CC 98 | パラメータ |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | LFO 1 Rate | | 17 | Filter 1 Mod 1 Pol | | 37 | Osc 1 PW Mod Pol |
-| 1 | LFO 1 Level | | 18 | Amp 1 Gain | | 40 | LFO 1 Rate Mod Amt |
-| 3 | EG 1 Attack | | 19 | Mixer 1 Level 1 | | 41 | LFO 1 Rate Mod Pol |
-| 4 | EG 1 Decay | | 20 | Mixer 1 Pol 1 | | 42 | Osc 1 Mod 1 Amt |
-| 5 | EG 1 Sustain | | 21 | Mixer 1 Level 2 | | 43 | Osc 1 Mod 1 Pol |
-| 6 | EG 1 Level | | 22 | Mixer 1 Pol 2 | | 44 | Filter 1 Mod 2 Amt |
-| 8 | Osc 1 Wave | | 23 | Chorus 1 Rate | | 45 | Filter 1 Mod 2 Pol |
-| 9 | Osc 1 Pitch Coarse | | 24 | Chorus 1 Depth | | 46 | Filter 1 Mod 3 Amt |
-| 10 | Osc 1 Pitch Fine | | 25 | Chorus 1 Mix | | 47 | Filter 1 Mod 3 Pol |
-| 11 | Osc 1 Mod 2 Amt | | 26 | Delay 1 Time | | 48 | Pitch 1 Bend Amt |
-| 12 | Osc 1 Mod 2 Pol | | 27 | Delay 1 Feedback | | 49 | Pitch 1 Bend Pol |
-| 13 | Filter 1 Cutoff | | 28 | Delay 1 Mix | | 50 | LFO 1 Level Mod Amt |
-| 14 | Filter 1 Resonance | | 34 | Pitch 1 Glide | | 51 | LFO 1 Level Mod Pol |
-| 15 | Filter 1 Gain | | 35 | Osc 1 Pulse Width | | 52 | Pitch 1 Coarse |
-| 16 | Filter 1 Mod 1 Amt | | 36 | Osc 1 PW Mod Amt | | 53 | Pitch 1 Fine |
+| 0 | LFO 1 Rate | | 18 | Amp 1 Gain | | 41 | LFO 1 Rate Mod Pol |
+| 1 | LFO 1 Level | | 19 | Mixer 1 Level 1 | | 42 | Osc 1 Mod 1 Amt |
+| 3 | EG 1 Attack | | 20 | Mixer 1 Pol 1 | | 43 | Osc 1 Mod 1 Pol |
+| 4 | EG 1 Decay | | 21 | Mixer 1 Level 2 | | 44 | Filter 1 Mod 2 Amt |
+| 5 | EG 1 Sustain | | 22 | Mixer 1 Pol 2 | | 45 | Filter 1 Mod 2 Pol |
+| 6 | EG 1 Level | | 23 | Chorus 1 Rate | | 46 | Filter 1 Mod 3 Amt |
+| 8 | Osc 1 Wave | | 24 | Chorus 1 Depth | | 47 | Filter 1 Mod 3 Pol |
+| 9 | Osc 1 Pitch Coarse | | 25 | Chorus 1 Mix | | 48 | Pitch 1 Bend Amt |
+| 10 | Osc 1 Pitch Fine | | 26 | Delay 1 Time | | 49 | Pitch 1 Bend Pol |
+| 11 | Osc 1 Mod 2 Amt | | 27 | Delay 1 Feedback | | 50 | LFO 1 Level Mod Amt |
+| 12 | Osc 1 Mod 2 Pol | | 28 | Delay 1 Mix | | 51 | LFO 1 Level Mod Pol |
+| 13 | Filter 1 Cutoff | | 34 | Pitch 1 Glide | | 52 | Pitch 1 Coarse |
+| 14 | Filter 1 Resonance | | 35 | Osc 1 Pulse Width | | 53 | Pitch 1 Fine |
+| 15 | Filter 1 Gain | | 36 | Osc 1 PW Mod Amt | | 54 | Mixer 1 Out Level |
+| 16 | Filter 1 Mod 1 Amt | | 37 | Osc 1 PW Mod Pol | |  |  |
+| 17 | Filter 1 Mod 1 Pol | | 40 | LFO 1 Rate Mod Amt | |  |  |
 
 <!-- patch_gen end -->
 
@@ -495,7 +496,7 @@ flowchart LR
 | 23 | EG 1 Decay | | 51 | General Mod Wheel | | 80 | LFO 1 Level Mod Pol ± |
 | 24 | EG 1 Sustain | | 52 | General Unipolar 1 | | 81 | Pitch 1 Coarse ± |
 | 25 | EG 1 Level | | 53 | General Unipolar 2 | | 82 | Pitch 1 Fine ± |
-| 27 | Osc 1 Wave | | 54 | General Unipolar 3 | |  |  |
+| 27 | Osc 1 Wave | | 54 | General Unipolar 3 | | 83 | Mixer 1 Out Level |
 | 28 | Osc 1 Pitch Coarse ± | | 55 | General Unipolar 4 | |  |  |
 
 <!-- patch_gen end -->
@@ -615,7 +616,9 @@ Q は段差なしに次第に速く上がって、CC 109 で Q 29、CC 118 で Q
 ミキサーは各入力をそれぞれのレベルとそれぞれの極性で受け取り、足し合わせます。Level は 0.0 (CC 4) で
 無音、1.0 (CC 124) で最大、Pol は -0.5 (CC 4) で反転、0.0 (CC 64) で無音、+0.5 (CC 124) で
 そのままです。レベルの初期値は最大、Pol はそのままなので、入力を 1 つだけ結線したミキサーは
-バッファになります。その入力を反転させればインバータに、2 番目だけを反転させれば減算器になります。
+バッファになります。その入力を反転させればインバータに、2 番目だけを反転させれば減算器になります。そのうえで Out Level が
+和に掛かります。レンジは Level と同じで、初期値も 1.0 です。2 つのソースを混ぜたものを 1 つのつまみで
+まとめて増減でき、和を -1.0〜+1.0 に収める前に掛かるので、絞れば切られるはずだった和も範囲内に戻せます。
 
 和は -1.0〜+1.0 に収められます。フルスケールの信号 2 本がちょうどそこに届くので、普通の使い方では何も
 切られません。止めているのは、ミキサーを自分の入力に戻した場合です。放っておけば毎サンプル 2 倍になり、

@@ -93,6 +93,7 @@ SIGNAL_LFO_1_LEVEL_MOD_AMT = 79
 SIGNAL_LFO_1_LEVEL_MOD_POL = 80
 SIGNAL_PITCH_1_COARSE      = 81
 SIGNAL_PITCH_1_FINE        = 82
+SIGNAL_MIXER_1_OUT_LEVEL   = 83
 
 # NRPN parameter numbers: (MSB << 7) | LSB, where the MSB picks a category and the LSB an entry.
 #   0..127   active_modules[slot]
@@ -168,6 +169,7 @@ NRPN_SOURCE_LFO_1_LEVEL_MOD_AMT = 306
 NRPN_SOURCE_LFO_1_LEVEL_MOD_POL = 307
 NRPN_SOURCE_PITCH_1_COARSE      = 308
 NRPN_SOURCE_PITCH_1_FINE        = 309
+NRPN_SOURCE_MIXER_1_OUT_LEVEL   = 310
 
 # A CC number of 0 means the parameter has no CC: its control slot holds 0.0 -- the bottom of a
 # unipolar dial, the middle of a bipolar one -- whatever CC it had before, so a patch sets it alone.
@@ -221,6 +223,7 @@ NRPN_CC_LFO_1_LEVEL_MOD_AMT = 434
 NRPN_CC_LFO_1_LEVEL_MOD_POL = 435
 NRPN_CC_PITCH_1_COARSE      = 436
 NRPN_CC_PITCH_1_FINE        = 437
+NRPN_CC_MIXER_1_OUT_LEVEL   = 438
 
 # The constants of the bus, which nothing else ever writes. A slot not written here holds 0.0.
 def spms1_fill_constant_signals(signals)
@@ -313,6 +316,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_LFO_1_LEVEL_MOD_POL, SIGNAL_HALF)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_PITCH_1_COARSE     , SIGNAL_PITCH_1_COARSE)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_PITCH_1_FINE       , SIGNAL_PITCH_1_FINE)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_1_OUT_LEVEL  , SIGNAL_ONE)
 
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_RATE        , 3)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_LEVEL       , 113)

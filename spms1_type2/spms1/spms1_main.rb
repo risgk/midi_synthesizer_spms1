@@ -312,6 +312,7 @@ while true
   source_lfo_1_level_mod_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_LEVEL_MOD_POL)
   source_pitch_1_coarse = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_COARSE)
   source_pitch_1_fine = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_FINE)
+  source_mixer_1_out_level = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_OUT_LEVEL)
 
   # Which CC fills each control slot. The bus is the only thing downstream reads, so this is
   # where MIDI enters and the only place a CC number appears.
@@ -360,6 +361,7 @@ while true
   cc_lfo_1_level_mod_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_LEVEL_MOD_POL)
   cc_pitch_1_coarse = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_PITCH_1_COARSE)
   cc_pitch_1_fine = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_PITCH_1_FINE)
+  cc_mixer_1_out_level = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_1_OUT_LEVEL)
   cc_general_mod_wheel     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_MOD_WHEEL)
   cc_general_1             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_1)
   cc_general_2             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_2)
@@ -411,6 +413,7 @@ while true
   signals[SIGNAL_LFO_1_LEVEL_MOD_POL] = cc_or_zero(cc_lfo_1_level_mod_pol, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_level_mod_pol)))
   signals[SIGNAL_PITCH_1_COARSE] = cc_or_zero(cc_pitch_1_coarse, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_pitch_1_coarse)))
   signals[SIGNAL_PITCH_1_FINE] = cc_or_zero(cc_pitch_1_fine, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_pitch_1_fine)))
+  signals[SIGNAL_MIXER_1_OUT_LEVEL] = cc_or_zero(cc_mixer_1_out_level, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_out_level)))
   signals[SIGNAL_GENERAL_MOD_WHEEL] = cc_or_zero(cc_general_mod_wheel, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_general_mod_wheel)))
   # Each General CC fills two slots, the same value taken both ways.
   general_1 = C.get_midi_cc_value(MIDI_CH, cc_general_1)
@@ -451,6 +454,7 @@ while true
   mixer_1.set_polarity_1(signals[source_mixer_1_pol_1])
   mixer_1.set_level_2(signals[source_mixer_1_level_2])
   mixer_1.set_polarity_2(signals[source_mixer_1_pol_2])
+  mixer_1.set_out_level(signals[source_mixer_1_out_level])
   chorus_1.set_rate(signals[source_chorus_1_rate])
   chorus_1.set_depth(signals[source_chorus_1_depth])
   chorus_1.set_mix(signals[source_chorus_1_mix])

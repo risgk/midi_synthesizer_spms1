@@ -378,7 +378,7 @@ and **all nine are in the default run order**, so a patch only ever has to route
 on first. Taking the chorus or the delay out of the order saves its share of the time, which
 leaves what read it to be pointed elsewhere; see the examples below.
 A mixer is the only kind with no CC on any of its parameters: the default patch points them at
-constants instead, each level at 1.0 and each polarity at +0.5, so a mixer with one input routed
+constants instead, each level and Out Level at 1.0 and each polarity at +0.5, so a mixer with one input routed
 passes it through rather than muting it.
 
 #### Entries (CC 98), category 1
@@ -422,21 +422,22 @@ both at the same signal for a mono output.
 
 | CC 98 | Parameter | | CC 98 | Parameter | | CC 98 | Parameter |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | LFO 1 Rate | | 17 | Filter 1 Mod 1 Pol | | 37 | Osc 1 PW Mod Pol |
-| 1 | LFO 1 Level | | 18 | Amp 1 Gain | | 40 | LFO 1 Rate Mod Amt |
-| 3 | EG 1 Attack | | 19 | Mixer 1 Level 1 | | 41 | LFO 1 Rate Mod Pol |
-| 4 | EG 1 Decay | | 20 | Mixer 1 Pol 1 | | 42 | Osc 1 Mod 1 Amt |
-| 5 | EG 1 Sustain | | 21 | Mixer 1 Level 2 | | 43 | Osc 1 Mod 1 Pol |
-| 6 | EG 1 Level | | 22 | Mixer 1 Pol 2 | | 44 | Filter 1 Mod 2 Amt |
-| 8 | Osc 1 Wave | | 23 | Chorus 1 Rate | | 45 | Filter 1 Mod 2 Pol |
-| 9 | Osc 1 Pitch Coarse | | 24 | Chorus 1 Depth | | 46 | Filter 1 Mod 3 Amt |
-| 10 | Osc 1 Pitch Fine | | 25 | Chorus 1 Mix | | 47 | Filter 1 Mod 3 Pol |
-| 11 | Osc 1 Mod 2 Amt | | 26 | Delay 1 Time | | 48 | Pitch 1 Bend Amt |
-| 12 | Osc 1 Mod 2 Pol | | 27 | Delay 1 Feedback | | 49 | Pitch 1 Bend Pol |
-| 13 | Filter 1 Cutoff | | 28 | Delay 1 Mix | | 50 | LFO 1 Level Mod Amt |
-| 14 | Filter 1 Resonance | | 34 | Pitch 1 Glide | | 51 | LFO 1 Level Mod Pol |
-| 15 | Filter 1 Gain | | 35 | Osc 1 Pulse Width | | 52 | Pitch 1 Coarse |
-| 16 | Filter 1 Mod 1 Amt | | 36 | Osc 1 PW Mod Amt | | 53 | Pitch 1 Fine |
+| 0 | LFO 1 Rate | | 18 | Amp 1 Gain | | 41 | LFO 1 Rate Mod Pol |
+| 1 | LFO 1 Level | | 19 | Mixer 1 Level 1 | | 42 | Osc 1 Mod 1 Amt |
+| 3 | EG 1 Attack | | 20 | Mixer 1 Pol 1 | | 43 | Osc 1 Mod 1 Pol |
+| 4 | EG 1 Decay | | 21 | Mixer 1 Level 2 | | 44 | Filter 1 Mod 2 Amt |
+| 5 | EG 1 Sustain | | 22 | Mixer 1 Pol 2 | | 45 | Filter 1 Mod 2 Pol |
+| 6 | EG 1 Level | | 23 | Chorus 1 Rate | | 46 | Filter 1 Mod 3 Amt |
+| 8 | Osc 1 Wave | | 24 | Chorus 1 Depth | | 47 | Filter 1 Mod 3 Pol |
+| 9 | Osc 1 Pitch Coarse | | 25 | Chorus 1 Mix | | 48 | Pitch 1 Bend Amt |
+| 10 | Osc 1 Pitch Fine | | 26 | Delay 1 Time | | 49 | Pitch 1 Bend Pol |
+| 11 | Osc 1 Mod 2 Amt | | 27 | Delay 1 Feedback | | 50 | LFO 1 Level Mod Amt |
+| 12 | Osc 1 Mod 2 Pol | | 28 | Delay 1 Mix | | 51 | LFO 1 Level Mod Pol |
+| 13 | Filter 1 Cutoff | | 34 | Pitch 1 Glide | | 52 | Pitch 1 Coarse |
+| 14 | Filter 1 Resonance | | 35 | Osc 1 Pulse Width | | 53 | Pitch 1 Fine |
+| 15 | Filter 1 Gain | | 36 | Osc 1 PW Mod Amt | | 54 | Mixer 1 Out Level |
+| 16 | Filter 1 Mod 1 Amt | | 37 | Osc 1 PW Mod Pol | |  |  |
+| 17 | Filter 1 Mod 1 Pol | | 40 | LFO 1 Rate Mod Amt | |  |  |
 
 <!-- patch_gen end -->
 
@@ -507,7 +508,7 @@ two slots, a unipolar and a bipolar one. See the General slots below.
 | 23 | EG 1 Decay | | 51 | General Mod Wheel | | 80 | LFO 1 Level Mod Pol ± |
 | 24 | EG 1 Sustain | | 52 | General Unipolar 1 | | 81 | Pitch 1 Coarse ± |
 | 25 | EG 1 Level | | 53 | General Unipolar 2 | | 82 | Pitch 1 Fine ± |
-| 27 | Osc 1 Wave | | 54 | General Unipolar 3 | |  |  |
+| 27 | Osc 1 Wave | | 54 | General Unipolar 3 | | 83 | Mixer 1 Out Level |
 | 28 | Osc 1 Pitch Coarse ± | | 55 | General Unipolar 4 | |  |  |
 
 <!-- patch_gen end -->
@@ -638,7 +639,10 @@ A mixer takes each input at its own level and its own polarity, then adds them. 
 silent at 0.0 (CC 4) to full at 1.0 (CC 124), and Pol from negated at -0.5 (CC 4), through
 silence at 0.0 (CC 64), to unchanged at +0.5 (CC 124). Levels default to full and polarities to
 unchanged, so a mixer with one input routed is a buffer; inverting that one input makes it an
-inverter; and inverting only the second makes the mixer a subtractor.
+inverter; and inverting only the second makes the mixer a subtractor. Out Level then scales the
+sum, over the same range as Level and also at 1.0 by default, so one control can take a blend of
+two sources up and down together; it is applied before the sum is held to its range, so turning
+it down also brings a sum that would have been cut back inside it.
 
 The sum is held to -1.0 and +1.0. Two full-scale signals reach exactly that, so nothing ordinary
 is cut; what it stops is a mixer wired back to its own input, which would otherwise double every
