@@ -820,7 +820,7 @@ static sp_int cst_SIGNAL_MINUS_ONE = 0;
 static sp_int cst_SIGNAL_LFO_1_OUTPUT = 0;
 static sp_int cst_SIGNAL_ENV_GEN_1_OUTPUT = 0;
 static sp_int cst_SIGNAL_OSC_1_OUTPUT = 0;
-static sp_int cst_SIGNAL_FILTER_1_OUTPUT = 0;
+static sp_int cst_SIGNAL_FILTER_1_OUTPUT_LP = 0;
 static sp_int cst_SIGNAL_AMP_1_OUTPUT = 0;
 static sp_int cst_SIGNAL_MIXER_1_OUTPUT = 0;
 static sp_int cst_SIGNAL_CHORUS_1_OUTPUT_L = 0;
@@ -3161,7 +3161,7 @@ static void sp_spms1_write_default_patch(sp_int lv_midi_ch) {
 #line 212 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_FILTER_1_MOD)), ((uint8_t)(cst_SIGNAL_ENV_GEN_1_OUTPUT))), (sp_int)0);
 #line 213 "spms1_patch.rb"
-  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_AMP_1_AUDIO)), ((uint8_t)(cst_SIGNAL_FILTER_1_OUTPUT))), (sp_int)0);
+  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_AMP_1_AUDIO)), ((uint8_t)(cst_SIGNAL_FILTER_1_OUTPUT_LP))), (sp_int)0);
 #line 214 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_AMP_1_MOD)), ((uint8_t)(cst_SIGNAL_ENV_GEN_1_OUTPUT))), (sp_int)0);
 #line 215 "spms1_patch.rb"
@@ -3849,7 +3849,7 @@ int main(int argc,char**argv){
 #line 28 "spms1_patch.rb"
   cst_SIGNAL_OSC_1_OUTPUT = 11LL;
 #line 29 "spms1_patch.rb"
-  cst_SIGNAL_FILTER_1_OUTPUT = 12LL;
+  cst_SIGNAL_FILTER_1_OUTPUT_LP = 12LL;
 #line 30 "spms1_patch.rb"
   cst_SIGNAL_AMP_1_OUTPUT = 13LL;
 #line 31 "spms1_patch.rb"

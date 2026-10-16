@@ -438,7 +438,7 @@ while true
       when 3 # MODULE_OSC_1
         signals[11] = osc_1.process(signals[source_osc_1_pitch], signals[source_osc_1_pitch_mod], signals[source_osc_1_pw_mod]) # SIGNAL_OSC_1_OUTPUT
       when 4 # MODULE_FILTER_1
-        signals[12] = filter_1.process(signals[source_filter_1_audio], signals[source_filter_1_mod]) # SIGNAL_FILTER_1_OUTPUT
+        signals[12] = filter_1.process(signals[source_filter_1_audio], signals[source_filter_1_mod]) # SIGNAL_FILTER_1_OUTPUT_LP
         signals[65] = filter_1.output_bp # SIGNAL_FILTER_1_OUTPUT_BP
         signals[66] = filter_1.output_hp # SIGNAL_FILTER_1_OUTPUT_HP
       when 5 # MODULE_AMP_1

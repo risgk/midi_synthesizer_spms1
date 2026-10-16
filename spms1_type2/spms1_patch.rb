@@ -26,7 +26,7 @@ SIGNAL_MINUS_ONE                = 8
 SIGNAL_LFO_1_OUTPUT             = 9
 SIGNAL_ENV_GEN_1_OUTPUT         = 10
 SIGNAL_OSC_1_OUTPUT             = 11
-SIGNAL_FILTER_1_OUTPUT          = 12
+SIGNAL_FILTER_1_OUTPUT_LP       = 12
 SIGNAL_AMP_1_OUTPUT             = 13
 SIGNAL_MIXER_1_OUTPUT           = 14
 SIGNAL_CHORUS_1_OUTPUT_L        = 15
@@ -210,7 +210,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_1_PITCH_MOD, SIGNAL_LFO_1_OUTPUT)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_AUDIO , SIGNAL_OSC_1_OUTPUT)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_MOD   , SIGNAL_ENV_GEN_1_OUTPUT)
-  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_AMP_1_AUDIO    , SIGNAL_FILTER_1_OUTPUT)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_AMP_1_AUDIO    , SIGNAL_FILTER_1_OUTPUT_LP)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_AMP_1_MOD      , SIGNAL_ENV_GEN_1_OUTPUT)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_1_IN_1   , SIGNAL_NONE)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_1_IN_2   , SIGNAL_NONE)
