@@ -138,7 +138,7 @@ The default patch. Solid arrows carry audio, dashed arrows carry control.
 
 ```mermaid
 flowchart LR
-  NOTE([MIDI Note])
+  KBD([Keyboard])
   PITCH[Pitch 1]
   LFO[LFO 1]
   EG[EG 1]
@@ -157,9 +157,9 @@ flowchart LR
   DELAY -->|L| OUT
   DELAY -->|R| OUT
 
-  NOTE -. Gate .-> EG
-  NOTE -. Pitch .-> PITCH
-  NOTE -. Bend .-> PITCH
+  KBD -. Gate .-> EG
+  KBD -. Pitch .-> PITCH
+  KBD -. Bend .-> PITCH
   PITCH -. Mod 1 .-> OSC
   LFO -. Mod 2 .-> OSC
   LFO -. PW Mod .-> OSC
