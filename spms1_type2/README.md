@@ -157,9 +157,9 @@ flowchart LR
   DELAY -->|L| OUT
   DELAY -->|R| OUT
 
-  KBD -. Gate .-> EG
-  KBD -. Pitch .-> PITCH
-  KBD -. Bend .-> PITCH
+  KBD -. Note Gate .-> EG
+  KBD -. Note Pitch .-> PITCH
+  KBD -. Pitch Bend .-> PITCH
   PITCH -. Mod 1 .-> OSC
   LFO -. Mod 2 .-> OSC
   LFO -. PW Mod .-> OSC
