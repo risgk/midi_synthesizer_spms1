@@ -7,7 +7,7 @@ require_relative 'spms1_lfo'
 require_relative 'spms1_mixer'
 require_relative 'spms1_chorus'
 require_relative 'spms1_delay'
-require_relative 'spms1_slew'
+require_relative 'spms1_pitch'
 
 # The patch is data: which modules run and in what order, what feeds each module input, where each
 # parameter takes its value, and which CC fills each control slot all live in the NRPN table, read
@@ -70,10 +70,10 @@ AUDIO_BUFFER_WORDS = 64
 MODULES_SIZE = 32
 
 # The module ids (MODULE_*), in spms1_patch.rb: one of every module type that makes a sound, one
-# mixer, one chorus, one delay and one slew. Instances carry their number in the id rather than
+# mixer, one chorus, one delay and one pitch module. Instances carry their number in the id rather than
 # being indexed by one, so a second oscillator would be MODULE_OSC_2, the next id after
-# MODULE_SLEW_1: numbers only ever get added, at the end of their range (see spms1_patch.yaml),
-# which is also why MODULE_SLEW_1 comes after MODULE_DELAY_1 though it runs first.
+# MODULE_PITCH_1: numbers only ever get added, at the end of their range (see spms1_patch.yaml),
+# which is also why MODULE_PITCH_1 comes after MODULE_DELAY_1 though it runs first.
 
 # The slots of the `signals` bus (SIGNAL_*), in spms1_patch.rb: module outputs, control values
 # and the note inputs in one namespace, so a routing is just a slot number and one source can feed
@@ -98,7 +98,7 @@ SIGNALS_SIZE = 128
 # CC value normalization. Each control slot is unipolar or bipolar, matching the range its
 # parameter clamps to, and takes the converter of its kind: unipolar is 0.0..1.0, the span of an
 # envelope, and bipolar is -0.5..0.5, the span of an LFO, with 0.0 at CC 64 where a MIDI
-# controller puts its detent. Pitch Coarse, Pitch Fine and the slew's Offset Coarse and Fine are
+# controller puts its detent. Pitch Coarse, Pitch Fine and Pitch 1 Offset Coarse and Fine are
 # bipolar, being offsets about that detent, and so are the polarities, whose sign is what they set. Both map CC 4..124 to the full range and
 # clamp anything outside. Every lookup table in the synth is spaced to match --
 # FREQ_TABLE is semitone-spaced across 120, and EXP_TABLE and Q_TABLE are 121 entries over their
@@ -130,7 +130,7 @@ amp_1     = Amp.new(SAMPLE_RATE)
 mixer_1   = Mixer.new(SAMPLE_RATE)
 chorus_1  = Chorus.new(SAMPLE_RATE)
 delay_1   = Delay.new(SAMPLE_RATE)
-slew_1    = Slew.new(SAMPLE_RATE)
+pitch_1    = Pitch.new(SAMPLE_RATE)
 
 # Allocated once; which slots are filled is decided per buffer, inside the loop.
 active_modules = Array.new(MODULES_SIZE, MODULE_NONE)
@@ -151,8 +151,8 @@ signals = Array.new(SIGNALS_SIZE, 0.0)
 spms1_fill_constant_signals(signals)
 
 # The default patch, written into the NRPN table the loop reads it back from. Every module is in
-# the run order, so a patch only ever has to route, never to switch something on first. The slew
-# runs first, taking Note Pitch and handing it to the oscillator: its time powers up at 0.0, where
+# the run order, so a patch only ever has to route, never to switch something on first. Pitch 1
+# runs first, taking Note Pitch and handing it to the oscillator: its Portamento Time powers up at 0.0, where
 # it passes its input through as it is, so the patch plays as one without it until CC 5 turns the
 # portamento up. Pitch Bend goes to its Direct In, added past the glide, 2 semitones either way at
 # Direct Amt's power-up value of CC 8, so the bend reaches the oscillator and the filter's keyboard
@@ -163,9 +163,9 @@ spms1_fill_constant_signals(signals)
 # width at its full level, and Osc 1 Mod 2 Pol reads the constant 0.1, which brings it
 # down to a vibrato depth on the pitch, so that Osc Mod 2 Amt can span the whole pitch range
 # the way every other modulation depth does. Osc 1 Mod 1 Amt and Pol read 1.0 and +0.5,
-# which play the note from the slew in tune. The LFO also reaches Filter 1 Mod 2 In, but Filter 1
+# which play the note from Pitch 1 in tune. The LFO also reaches Filter 1 Mod 2 In, but Filter 1
 # Mod 2 Amt powers up at 0.0, so the cutoff follows the envelope alone until CC 25 turns it up,
-# and Filter 1 Mod 2 Pol reads 0.1, as Osc 1 Mod 2 Pol does. Filter 1 Mod 3 In takes the slew's
+# and Filter 1 Mod 2 Pol reads 0.1, as Osc 1 Mod 2 Pol does. Filter 1 Mod 3 In takes Pitch 1's
 # pitch too, for keyboard tracking, but Mod 3 Amt powers up at 0.0 and leaves it off until CC 9.
 # A mixer's parameters have no CC, so the default patch points them at constants instead: full
 # level and a polarity of +0.5, which makes a mixer pass its input through rather than mute it.
@@ -256,8 +256,8 @@ while true
   source_delay_1_audio_r   = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_AUDIO_R)
   source_output_l          = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OUTPUT_L)
   source_output_r          = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OUTPUT_R)
-  source_slew_1_in         = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_SLEW_1_IN)
-  source_slew_1_direct     = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_SLEW_1_DIRECT)
+  source_pitch_1_in         = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_IN)
+  source_pitch_1_direct     = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_DIRECT)
   source_osc_1_pw_mod      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PW_MOD)
   source_lfo_1_rate_mod         = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_RATE_MOD)
   source_lfo_1_level_mod   = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_LEVEL_MOD)
@@ -293,7 +293,7 @@ while true
   source_delay_1_time          = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_TIME)
   source_delay_1_feedback      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_FEEDBACK)
   source_delay_1_mix           = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_MIX)
-  source_slew_1_time           = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_SLEW_1_TIME)
+  source_pitch_1_portamento_time           = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_PORTAMENTO_TIME)
   source_osc_1_pulse_width     = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PULSE_WIDTH)
   source_osc_1_pw_mod_amt      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PW_MOD_AMT)
   source_osc_1_pw_mod_pol      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PW_MOD_POL)
@@ -305,12 +305,12 @@ while true
   source_filter_1_mod_2_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_2_POL)
   source_filter_1_mod_3_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_3_AMT)
   source_filter_1_mod_3_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_3_POL)
-  source_slew_1_direct_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_SLEW_1_DIRECT_AMT)
-  source_slew_1_direct_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_SLEW_1_DIRECT_POL)
+  source_pitch_1_direct_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_DIRECT_AMT)
+  source_pitch_1_direct_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_DIRECT_POL)
   source_lfo_1_level_mod_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_LEVEL_MOD_AMT)
   source_lfo_1_level_mod_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_LEVEL_MOD_POL)
-  source_slew_1_offset_coarse = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_SLEW_1_OFFSET_COARSE)
-  source_slew_1_offset_fine = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_SLEW_1_OFFSET_FINE)
+  source_pitch_1_offset_coarse = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_OFFSET_COARSE)
+  source_pitch_1_offset_fine = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_OFFSET_FINE)
 
   # Which CC fills each control slot. The bus is the only thing downstream reads, so this is
   # where MIDI enters and the only place a CC number appears.
@@ -341,7 +341,7 @@ while true
   cc_delay_1_time          = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_DELAY_1_TIME)
   cc_delay_1_feedback      = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_DELAY_1_FEEDBACK)
   cc_delay_1_mix           = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_DELAY_1_MIX)
-  cc_slew_1_time           = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_SLEW_1_TIME)
+  cc_pitch_1_portamento_time           = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_PITCH_1_PORTAMENTO_TIME)
   cc_osc_1_pulse_width     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_PULSE_WIDTH)
   cc_osc_1_pw_mod_amt      = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_PW_MOD_AMT)
   cc_osc_1_pw_mod_pol      = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_PW_MOD_POL)
@@ -353,12 +353,12 @@ while true
   cc_filter_1_mod_2_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_MOD_2_POL)
   cc_filter_1_mod_3_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_MOD_3_AMT)
   cc_filter_1_mod_3_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_MOD_3_POL)
-  cc_slew_1_direct_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_SLEW_1_DIRECT_AMT)
-  cc_slew_1_direct_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_SLEW_1_DIRECT_POL)
+  cc_pitch_1_direct_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_PITCH_1_DIRECT_AMT)
+  cc_pitch_1_direct_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_PITCH_1_DIRECT_POL)
   cc_lfo_1_level_mod_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_LEVEL_MOD_AMT)
   cc_lfo_1_level_mod_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_LEVEL_MOD_POL)
-  cc_slew_1_offset_coarse = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_SLEW_1_OFFSET_COARSE)
-  cc_slew_1_offset_fine = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_SLEW_1_OFFSET_FINE)
+  cc_pitch_1_offset_coarse = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_PITCH_1_OFFSET_COARSE)
+  cc_pitch_1_offset_fine = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_PITCH_1_OFFSET_FINE)
   cc_general_mod_wheel     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_MOD_WHEEL)
   cc_general_1             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_1)
   cc_general_2             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_2)
@@ -392,7 +392,7 @@ while true
   signals[SIGNAL_DELAY_1_TIME] = cc_or_zero(cc_delay_1_time, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_delay_1_time)))
   signals[SIGNAL_DELAY_1_FEEDBACK] = cc_or_zero(cc_delay_1_feedback, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_delay_1_feedback)))
   signals[SIGNAL_DELAY_1_MIX] = cc_or_zero(cc_delay_1_mix, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_delay_1_mix)))
-  signals[SIGNAL_SLEW_1_TIME] = cc_or_zero(cc_slew_1_time, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_slew_1_time)))
+  signals[SIGNAL_PITCH_1_PORTAMENTO_TIME] = cc_or_zero(cc_pitch_1_portamento_time, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_pitch_1_portamento_time)))
   signals[SIGNAL_OSC_1_PULSE_WIDTH] = cc_or_zero(cc_osc_1_pulse_width, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_pulse_width)))
   signals[SIGNAL_OSC_1_PW_MOD_AMT] = cc_or_zero(cc_osc_1_pw_mod_amt, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_pw_mod_amt)))
   signals[SIGNAL_OSC_1_PW_MOD_POL] = cc_or_zero(cc_osc_1_pw_mod_pol, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_pw_mod_pol)))
@@ -404,12 +404,12 @@ while true
   signals[SIGNAL_FILTER_1_MOD_2_POL] = cc_or_zero(cc_filter_1_mod_2_pol, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_mod_2_pol)))
   signals[SIGNAL_FILTER_1_MOD_3_AMT] = cc_or_zero(cc_filter_1_mod_3_amt, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_mod_3_amt)))
   signals[SIGNAL_FILTER_1_MOD_3_POL] = cc_or_zero(cc_filter_1_mod_3_pol, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_mod_3_pol)))
-  signals[SIGNAL_SLEW_1_DIRECT_AMT] = cc_or_zero(cc_slew_1_direct_amt, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_slew_1_direct_amt)))
-  signals[SIGNAL_SLEW_1_DIRECT_POL] = cc_or_zero(cc_slew_1_direct_pol, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_slew_1_direct_pol)))
+  signals[SIGNAL_PITCH_1_DIRECT_AMT] = cc_or_zero(cc_pitch_1_direct_amt, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_pitch_1_direct_amt)))
+  signals[SIGNAL_PITCH_1_DIRECT_POL] = cc_or_zero(cc_pitch_1_direct_pol, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_pitch_1_direct_pol)))
   signals[SIGNAL_LFO_1_LEVEL_MOD_AMT] = cc_or_zero(cc_lfo_1_level_mod_amt, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_level_mod_amt)))
   signals[SIGNAL_LFO_1_LEVEL_MOD_POL] = cc_or_zero(cc_lfo_1_level_mod_pol, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_level_mod_pol)))
-  signals[SIGNAL_SLEW_1_OFFSET_COARSE] = cc_or_zero(cc_slew_1_offset_coarse, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_slew_1_offset_coarse)))
-  signals[SIGNAL_SLEW_1_OFFSET_FINE] = cc_or_zero(cc_slew_1_offset_fine, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_slew_1_offset_fine)))
+  signals[SIGNAL_PITCH_1_OFFSET_COARSE] = cc_or_zero(cc_pitch_1_offset_coarse, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_pitch_1_offset_coarse)))
+  signals[SIGNAL_PITCH_1_OFFSET_FINE] = cc_or_zero(cc_pitch_1_offset_fine, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_pitch_1_offset_fine)))
   signals[SIGNAL_GENERAL_MOD_WHEEL] = cc_or_zero(cc_general_mod_wheel, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_general_mod_wheel)))
   # Each General CC fills two slots, the same value taken both ways.
   general_1 = C.get_midi_cc_value(MIDI_CH, cc_general_1)
@@ -456,11 +456,11 @@ while true
   delay_1.set_time(signals[source_delay_1_time])
   delay_1.set_feedback(signals[source_delay_1_feedback])
   delay_1.set_mix(signals[source_delay_1_mix])
-  slew_1.set_time(signals[source_slew_1_time])
-  slew_1.set_direct_amount(signals[source_slew_1_direct_amt])
-  slew_1.set_direct_polarity(signals[source_slew_1_direct_pol])
-  slew_1.set_offset_coarse(signals[source_slew_1_offset_coarse])
-  slew_1.set_offset_fine(signals[source_slew_1_offset_fine])
+  pitch_1.set_portamento_time(signals[source_pitch_1_portamento_time])
+  pitch_1.set_direct_amount(signals[source_pitch_1_direct_amt])
+  pitch_1.set_direct_polarity(signals[source_pitch_1_direct_pol])
+  pitch_1.set_offset_coarse(signals[source_pitch_1_offset_coarse])
+  pitch_1.set_offset_fine(signals[source_pitch_1_offset_fine])
   osc_1.set_pulse_width(signals[source_osc_1_pulse_width])
   osc_1.set_pw_modulation_amount(signals[source_osc_1_pw_mod_amt])
   osc_1.set_pw_modulation_polarity(signals[source_osc_1_pw_mod_pol])
@@ -513,8 +513,8 @@ while true
         delay_1.process(signals[source_delay_1_audio_l], signals[source_delay_1_audio_r])
         signals[17] = delay_1.output_l # SIGNAL_DELAY_1_OUTPUT_L
         signals[18] = delay_1.output_r # SIGNAL_DELAY_1_OUTPUT_R
-      when 9 # MODULE_SLEW_1
-        signals[60] = slew_1.process(signals[source_slew_1_in], signals[source_slew_1_direct]) # SIGNAL_SLEW_1_OUTPUT
+      when 9 # MODULE_PITCH_1
+        signals[60] = pitch_1.process(signals[source_pitch_1_in], signals[source_pitch_1_direct]) # SIGNAL_PITCH_1_OUTPUT
       end
 
       slot += 1

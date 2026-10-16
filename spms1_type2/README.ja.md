@@ -9,7 +9,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.3
 - フィルタ: ZDF/TPT ステート・バリアブル・フィルタ (BP 積分器の非線形リーク付き、1 ステップ・ニュートン法で解く)。LP、BP、HP の 3 出力
 - コーラス: モノラル入力・ステレオ出力、実行順に入るモジュール
 - ディレイ: ステレオ、フィードバック付き、実行順に入るモジュール (最大 340 ms)
-- スルー: 指数カーブのラグ、実行順に入るモジュール。デフォルトのパッチではノートのピッチに掛けてポルタメントにしています (CC 5)
+- ピッチ: ノートのピッチを扱う、実行順に入るモジュール。指数カーブのラグによるポルタメント (CC 5)、その後に足すピッチベンド (レンジは CC 57)、移調 (CC 86 と 70)
 - ステレオ出力: コーラスがモノラルの音を左右に広げ、ディレイが左右を分けたまま運びます
 - 開発: ISGK Instruments (Ryo Ishigaki)
 - <https://github.com/risgk/midi_synthesizer_spms1>
@@ -138,7 +138,7 @@ MIDI メッセージを受けてから音が出るまで、およそ 4 ms です
 ```mermaid
 flowchart LR
   NOTE([MIDI Note])
-  SLEW[Slew 1]
+  PITCH[Pitch 1]
   LFO[LFO 1]
   EG[EG 1]
   OSC[Osc 1]
@@ -157,25 +157,25 @@ flowchart LR
   DELAY -->|R| OUT
 
   NOTE -. Gate .-> EG
-  NOTE -. Pitch .-> SLEW
-  NOTE -. Bend .-> SLEW
-  SLEW -. Mod 1 .-> OSC
+  NOTE -. Pitch .-> PITCH
+  NOTE -. Bend .-> PITCH
+  PITCH -. Mod 1 .-> OSC
   LFO -. Mod 2 .-> OSC
   LFO -. PW Mod .-> OSC
   EG -. Mod 1 .-> FILTER
   LFO -. Mod 2 .-> FILTER
-  SLEW -. Mod 3 .-> FILTER
+  PITCH -. Mod 3 .-> FILTER
   EG -. Mod .-> AMP
 ```
 
 モジュールは下の実行順で、1 サンプルずつ処理されます。波形やカットオフ、ゲインといったパラメータは CC
 から届くもので、この図では省いています。
 
-ノートのピッチは Slew 1 を通ってオシレータに届き、ノートからノートへ滑らかに移ります。ポルタメントです。
-Slew 1 Time は CC 5 (MIDI 規格の Portamento Time) にあり、起動時は 0.0 です。そこではスルーはオフで、
-ピッチを届いたとおりそのまま通します。Pitch Bend は Slew 1 Direct In に入ります。Direct In はグライドの後で出力に
+ノートのピッチは Pitch 1 を通ってオシレータに届き、ノートからノートへ滑らかに移ります。ポルタメントです。
+Pitch 1 Portamento Time は CC 5 (MIDI 規格と同じ) にあり、起動時は 0.0 です。そこではポルタメントはオフで、
+ピッチを届いたとおりそのまま通します。Pitch Bend は Pitch 1 Direct In に入ります。Direct In はグライドの後で出力に
 足されるので、ベンドはすぐに効き、オシレータにもフィルタのキーボードトラッキングにも同じように届きます。
-Slew 1 Direct Amt（CC 57）がベンドレンジで、1 目盛り半音ずつです。起動時の CC 8 で上下 2 半音、CC 28 で
+Pitch 1 Direct Amt（CC 57）がベンドレンジで、1 目盛り半音ずつです。起動時の CC 8 で上下 2 半音、CC 28 で
 1 オクターブ、最大で 5 オクターブです。
 
 パラメータ名では Amount を Amt、Polarity (極性) を Pol と略しています。
@@ -183,7 +183,7 @@ Slew 1 Direct Amt（CC 57）がベンドレンジで、1 目盛り半音ずつ�
 LFO はオシレータのピッチとパルス幅に直接、フルレベルで入ります。フィルタにも入りますが、Filter 1 Mod 2 Amt
 （CC 25）が起動時 0.0 なので、上げるまではカットオフはエンベロープだけで動きます。
 Osc 1 Mod 2 Pol と Filter 1 Mod 2 Pol が定数 0.1 を読んでピッチへの変調をビブラートの深さまで、カットオフへの変調も同じくらいまで絞り、Osc 1 PW Mod Pol は
-0.5 を読んで LFO をそのまま受け取ります。Slew 1 からのピッチはフィルタの Filter 1 Mod 3 In にも入ります。キーボードトラッキング用です。
+0.5 を読んで LFO をそのまま受け取ります。Pitch 1 からのピッチはフィルタの Filter 1 Mod 3 In にも入ります。キーボードトラッキング用です。
 Mod 3 Pol は +0.5 なので、CC 9（Mod 3 Amt）を最大にするとカットオフがノートに半音ずつ追従し、ノート 60 では
 動きません。Mod 3 Amt は起動時 0.0 で、トラッキングはオフです。モジュレーションの深さはどれも動かす先のレンジ全体に届くので、
 ソースを音楽的な深さまで絞る仕事はオシレータに作り込まず、パッチの側に任せています。
@@ -196,19 +196,19 @@ NRPN が書き換えます。
 
 #### 実行順
 
-すべてのモジュールが入っています。先頭にスルー、音を作る型が 1 つずつと、モジュレーションのソースと
+すべてのモジュールが入っています。先頭に Pitch 1、音を作る型が 1 つずつと、モジュレーションのソースと
 オシレータの間にミキサーが 1 つ、最後にコーラスとディレイです。
 
 ```mermaid
 flowchart LR
-  SLEW[Slew 1] ~~~ LFO[LFO 1] ~~~ EG[EG 1] ~~~ MIX1[Mixer 1] ~~~ OSC[Osc 1] ~~~ FILTER[Filter 1] ~~~ AMP[Amp 1] ~~~ CHORUS[Chorus 1] ~~~ DELAY[Delay 1]
+  PITCH[Pitch 1] ~~~ LFO[LFO 1] ~~~ EG[EG 1] ~~~ MIX1[Mixer 1] ~~~ OSC[Osc 1] ~~~ FILTER[Filter 1] ~~~ AMP[Amp 1] ~~~ CHORUS[Chorus 1] ~~~ DELAY[Delay 1]
 ```
 
 ミキサーには何も結線されていないので、毎サンプル自分のスロットぶんのコストを払うだけで、パッチが
 何かを与えるまでは何も変えません。どこに座っているかがそのまま価値になります。あるモジュールが今サンプル
 の値を見られるのは、この列で自分より前にあるものからだけで、後ろにあるものからは前サンプルの値を受け取り
 ます。Mixer 1 は LFO とエンベロープに手が届き、オシレータ、フィルタ、アンプは Mixer 1 に手が届きます。
-スルーが先頭にあるのは、デフォルトの位置でも別の所でも、それを読むものが同じサンプルの値を見られるように
+Pitch 1 が先頭にあるのは、デフォルトの位置でも別の所でも、それを読むものが同じサンプルの値を見られるように
 するためです。
 
 ミキサーは 2 つの信号を合流させるための道具であり、エンベロープのように片側にしか振れない信号を正負
@@ -359,7 +359,7 @@ flowchart LR
 カテゴリ 3 で CC 番号 0 を指定すると、そのパラメータには CC がない状態になります。コントロールスロットは
 それまでの CC にかかわらず 0.0 になるので、パラメータが読む値はパッチだけで決まります。
 
-音を作るモジュールは 1 つずつ、ミキサーとコーラスとディレイとスルーが 1 つずつあり、**この 9 個すべてがデフォルトの
+音を作るモジュールは 1 つずつ、ミキサーとコーラスとディレイとピッチのモジュールが 1 つずつあり、**この 9 個すべてがデフォルトの
 実行順に入っています**。パッチは結線するだけでよく、何かを先に有効化する必要はありません。コーラスや
 ディレイを実行順から外せばそのぶんの時間が浮きます。そのときはそれを読んでいたものを別の所へ向け直します。
 下の例を参照してください。どのパラメータにも CC が付いていないのは
@@ -375,12 +375,12 @@ flowchart LR
 | 0 | EG 1 Gate In | | 11 | Delay 1 Audio In R |
 | 1 | Osc 1 Mod 1 In | | 12 | 最終出力 L |
 | 2 | Osc 1 Mod 2 In | | 13 | 最終出力 R |
-| 3 | Filter 1 Audio In | | 14 | Slew 1 In |
+| 3 | Filter 1 Audio In | | 14 | Pitch 1 In |
 | 4 | Filter 1 Mod 1 In | | 15 | Osc 1 PW Mod In |
 | 5 | Amp 1 Audio In | | 16 | LFO 1 Rate Mod In |
 | 6 | Amp 1 Mod In | | 17 | Filter 1 Mod 2 In |
 | 7 | Mixer 1 In 1 | | 18 | Filter 1 Mod 3 In |
-| 8 | Mixer 1 In 2 | | 19 | Slew 1 Direct In |
+| 8 | Mixer 1 In 2 | | 19 | Pitch 1 Direct In |
 | 9 | Chorus 1 Audio In | | 20 | LFO 1 Level Mod In |
 | 10 | Delay 1 Audio In L | |  |  |
 
@@ -393,8 +393,8 @@ flowchart LR
 つまみの両端、ピッチは -0.5〜+0.5、パルス幅は 0.0〜1.0 に収まります。オシレータの Mod 1 In、Mod 2 In、PW Mod In も Mod In の一種です。ミキサーは上限なしで足し算をするので、大きすぎる変調は入口で
 削られるのではなく、行き先を端に貼り付かせます。アンプだけは例外で、Mod In を -1.0〜+1.0 でクランプします。
 アンプはアッテネーターなので、変調はゲインを下げられても上げられてはならないからです。コーラスとディレイ
-もオーディオ入力を同じく 1.0 に収めます。スルーの In は Mod In と同じく何でも受け取り、受け取ったものを
-遅れて出すだけです。
+もオーディオ入力を同じく 1.0 に収めます。Pitch 1 の In は Mod In と同じく何でも受け取り、受け取ったものを
+グライド、ベンド、移調して出すだけです。
 
 最終出力の左右は別々に読まれるので、どちらもどこへでも向けられます。両方を同じシグナルに向ければモノラル
 出力になります。
@@ -414,12 +414,12 @@ flowchart LR
 | 8 | Osc 1 Wave | | 23 | Chorus 1 Rate | | 45 | Filter 1 Mod 2 Pol |
 | 9 | Osc 1 Pitch Coarse | | 24 | Chorus 1 Depth | | 46 | Filter 1 Mod 3 Amt |
 | 10 | Osc 1 Pitch Fine | | 25 | Chorus 1 Mix | | 47 | Filter 1 Mod 3 Pol |
-| 11 | Osc 1 Mod 2 Amt | | 26 | Delay 1 Time | | 48 | Slew 1 Direct Amt |
-| 12 | Osc 1 Mod 2 Pol | | 27 | Delay 1 Feedback | | 49 | Slew 1 Direct Pol |
+| 11 | Osc 1 Mod 2 Amt | | 26 | Delay 1 Time | | 48 | Pitch 1 Direct Amt |
+| 12 | Osc 1 Mod 2 Pol | | 27 | Delay 1 Feedback | | 49 | Pitch 1 Direct Pol |
 | 13 | Filter 1 Cutoff | | 28 | Delay 1 Mix | | 50 | LFO 1 Level Mod Amt |
-| 14 | Filter 1 Resonance | | 34 | Slew 1 Time | | 51 | LFO 1 Level Mod Pol |
-| 15 | Filter 1 Gain | | 35 | Osc 1 Pulse Width | | 52 | Slew 1 Offset Coarse |
-| 16 | Filter 1 Mod 1 Amt | | 36 | Osc 1 PW Mod Amt | | 53 | Slew 1 Offset Fine |
+| 14 | Filter 1 Resonance | | 34 | Pitch 1 Portamento Time | | 51 | LFO 1 Level Mod Pol |
+| 15 | Filter 1 Gain | | 35 | Osc 1 Pulse Width | | 52 | Pitch 1 Offset Coarse |
+| 16 | Filter 1 Mod 1 Amt | | 36 | Osc 1 PW Mod Amt | | 53 | Pitch 1 Offset Fine |
 
 <!-- patch_gen end -->
 
@@ -455,7 +455,7 @@ flowchart LR
 | 6 | Mixer 1 |
 | 7 | Chorus 1 |
 | 8 | Delay 1 |
-| 9 | Slew 1 |
+| 9 | Pitch 1 |
 
 <!-- patch_gen end -->
 
@@ -469,8 +469,8 @@ flowchart LR
 | 1 | 定数 1.0 | | 30 | Osc 1 Mod 2 Amt | | 57 | General Bipolar 2 ± |
 | 2 | 定数 0.5 | | 31 | Osc 1 Mod 2 Pol ± | | 58 | General Bipolar 3 ± |
 | 3 | 定数 0.2 | | 32 | Filter 1 Cutoff | | 59 | General Bipolar 4 ± |
-| 4 | 定数 0.1 | | 33 | Filter 1 Resonance | | 60 | Slew 1 Output ± |
-| 5 | 定数 -0.1 | | 34 | Filter 1 Gain | | 61 | Slew 1 Time |
+| 4 | 定数 0.1 | | 33 | Filter 1 Resonance | | 60 | Pitch 1 Output ± |
+| 5 | 定数 -0.1 | | 34 | Filter 1 Gain | | 61 | Pitch 1 Portamento Time |
 | 6 | 定数 -0.2 | | 35 | Filter 1 Mod 1 Amt | | 62 | Osc 1 Pulse Width |
 | 7 | 定数 -0.5 | | 36 | Filter 1 Mod 1 Pol ± | | 63 | Osc 1 PW Mod Amt |
 | 8 | 定数 -1.0 | | 37 | Amp 1 Gain | | 64 | Osc 1 PW Mod Pol ± |
@@ -484,12 +484,12 @@ flowchart LR
 | 16 | Chorus 1 Output R ± | | 45 | Delay 1 Time | | 74 | Filter 1 Mod 2 Pol ± |
 | 17 | Delay 1 Output L ± | | 46 | Delay 1 Feedback | | 75 | Filter 1 Mod 3 Amt |
 | 18 | Delay 1 Output R ± | | 47 | Delay 1 Mix | | 76 | Filter 1 Mod 3 Pol ± |
-| 19 | LFO 1 Rate | | 48 | Note Pitch ± | | 77 | Slew 1 Direct Amt |
-| 20 | LFO 1 Level | | 49 | Note Gate | | 78 | Slew 1 Direct Pol ± |
+| 19 | LFO 1 Rate | | 48 | Note Pitch ± | | 77 | Pitch 1 Direct Amt |
+| 20 | LFO 1 Level | | 49 | Note Gate | | 78 | Pitch 1 Direct Pol ± |
 | 22 | EG 1 Attack | | 50 | Pitch Bend ± | | 79 | LFO 1 Level Mod Amt |
 | 23 | EG 1 Decay | | 51 | General Mod Wheel | | 80 | LFO 1 Level Mod Pol ± |
-| 24 | EG 1 Sustain | | 52 | General Unipolar 1 | | 81 | Slew 1 Offset Coarse ± |
-| 25 | EG 1 Level | | 53 | General Unipolar 2 | | 82 | Slew 1 Offset Fine ± |
+| 24 | EG 1 Sustain | | 52 | General Unipolar 1 | | 81 | Pitch 1 Offset Coarse ± |
+| 25 | EG 1 Level | | 53 | General Unipolar 2 | | 82 | Pitch 1 Offset Fine ± |
 | 27 | Osc 1 Wave | | 54 | General Unipolar 3 | |  |  |
 | 28 | Osc 1 Pitch Coarse ± | | 55 | General Unipolar 4 | |  |  |
 
@@ -504,8 +504,8 @@ flowchart LR
 パラメータはそれぞれユニポーラかバイポーラで、スロットも同じレンジを取ります。ユニポーラは CC 4〜124 で
 0.0〜1.0 と、エンベロープと同じ幅なので、エンベロープを向ければつまみの全域を動かせます。バイポーラは
 CC 64 を 0.0 とする -0.5〜+0.5 と、LFO と同じ幅なので、バイポーラのソースを向ければ中央を挟んで上下に
-振れます。Pitch Coarse、Pitch Fine と Slew の Offset Coarse、Offset Fine は中央が「変化なし」を意味するのでバイポーラです。Pol も、ミキサーの 2 つ、
-8 つの Mod Pol と Slew 1 Direct Pol のいずれも、符号そのものが設定する値なのでバイポーラです。パラメータに別のスロットを指させることがモジュレー
+振れます。Pitch Coarse、Pitch Fine と Pitch 1 の Offset Coarse、Offset Fine は中央が「変化なし」を意味するのでバイポーラです。Pol も、ミキサーの 2 つ、
+8 つの Mod Pol と Pitch 1 Direct Pol のいずれも、符号そのものが設定する値なのでバイポーラです。パラメータに別のスロットを指させることがモジュレー
 ションになります。CC のないスロットは 0.0 です。
 
 スロット 51〜59 の General スロットは、どのパラメータにも属さないコントロールスロットです。CC をバスに
@@ -520,7 +520,7 @@ Note Pitch、Note Gate、Pitch Bend の 3 つは鍵盤がバスに載せるも�
 -0.5〜+0.5 で運びます。オシレータがピッチの全域として読むのと同じ幅です。Pitch Bend も同じくバイポーラで、
 ホイールの端から端までがちょうど 1 単位で、両端がちょうど -0.5 と +0.5、中央のディテントがちょうど 0 に
 なるので、ミキサーで下駄を履かせなくてもモジュール入力へ入れられます。Note Gate は 0.0 か 1.0 で、
-エンベロープは 0.25 以上でトリガします。Pitch Bend はデフォルトでは Slew 1 Direct In に結線されています。
+エンベロープは 0.25 以上でトリガします。Pitch Bend はデフォルトでは Pitch 1 Direct In に結線されています。
 
 鳴るのは最後に押したノートで、それに置き換わったノートは、まだ押さえられている間は記憶されます (1 ノート
 分だけです)。最後のノートを離すと記憶していたノートが Note Gate を 1.0 のまま戻ってくるので、エンベロープは
@@ -544,7 +544,7 @@ ID 番号はファームウェアのバージョンをまたいで安定では�
 
 #### 知っておきたいレンジ
 
-Slew 1 Offset Coarse（CC 86）と Offset Fine（CC 70）は、Slew が渡すピッチをグライドの後で移調します。
+Pitch 1 Offset Coarse（CC 86）と Offset Fine（CC 70）は、Pitch 1 が渡すピッチをグライドの後で移調します。
 変えるとすぐに効き、オシレータにもフィルタのキーボードトラッキングにも同じように届きます。どちらも CC 64 を
 中心とし、CC 1 ステップでちょうど 1 単位動きます。Offset Coarse は半音で上下 5 オクターブまで、Offset Fine は
 1 セントで上下 60 セントまでです。両者は加算されるので、どのピッチにも届きます。Osc 1 Pitch Coarse と
@@ -579,7 +579,7 @@ Osc 1 Mod 2 Amt はオフセットではなく深さで、ピッチの全域に�
 のパッチでは Osc 1 Mod 2 Pol で LFO を 5 分の 1 に絞っています。そこでは半音のビブラートが CC 14、つまみの
 上端で 1 オクターブです。
 
-Osc 1 Mod 1 In はノートが入ってくる入力で、デフォルトのパッチでは Slew 1 からつながっています。
+Osc 1 Mod 1 In はノートが入ってくる入力で、デフォルトのパッチでは Pitch 1 からつながっています。
 Mod 2 In と同じモジュレーション入力で、Mod 1 Amt と Mod 1 Pol の積という自分の深さを
 持ちます。デフォルトのちょうど 1.0 ではノートが鍵盤どおりの音程 (1 鍵で半音) で鳴り、それより小さいと
 ノート 60 を中心に鍵盤の間隔が狭まり、深さが負なら鍵盤の上下が逆になります。どちらも CC がなく、デフォルトの
@@ -636,10 +636,10 @@ Feedback は繰り返しをラインに戻すゲインで、CC 4 の 0（繰り�
 割合で、CC 4 でドライ入力だけ、CC 64 で半々、CC 124 で繰り返しだけです。起動時は Time と Feedback が
 CC 64、Mix が CC 34（0.25）で、ドライ信号は 2.5 dB 下がり、最初の繰り返しはその約 16 dB 下に来ます。
 
-Slew 1 Time はユニポーラで、1/120 刻み、1 ステップで時間が半音ぶん動きます。EG 1 Decay と同じで、レンジも
+Pitch 1 Portamento Time はユニポーラで、1/120 刻み、1 ステップで時間が半音ぶん動きます。EG 1 Decay と同じで、レンジも
 同じです。CC 5 で 10 ms、CC 64 で 320 ms、CC 124 で 10.24 s で、どれも残りの 1/1024 まで近づく時間です。
 1 オクターブのグライドなら半音の 1/100 手前にあたります。9 割まではその 3 分の 1 で進みます。CC 4 以下の
-0.0 ではスルーはオフで、出力は入力そのままです。グライドは指数カーブで、アナログシンセのポルタメントと同じく
+0.0 ではポルタメントはオフで、出力は入力そのままです。グライドは指数カーブで、アナログシンセのポルタメントと同じく
 最初は速く、着地に向かって遅くなります。出力がその時いる所から動き出すので、グライド中に弾いたノートは
 そこから引き継ぎます。時間はスムージングしません。時間を変えても出力の動く速さが変わるだけなので、出力に
 段差は生じません。
@@ -651,7 +651,7 @@ Slew 1 Time はユニポーラで、1/120 刻み、1 ステップで時間が半
   に足されるので、CC 113 を CC 4 まで下げておけば、CC 13 で決めた深さまでホイールでビブラートを掛けられます
 - LFO はデフォルトでフィルタの Mod 2 入力にも届いているので、CC 25 で、Mod 1 のエンベロープに重ねて
   カットオフを LFO で揺らせます
-- キーボードトラッキングもデフォルトで結線済みです。Slew 1 からのピッチがフィルタの Mod 3 入力に届くので、
+- キーボードトラッキングもデフォルトで結線済みです。Pitch 1 からのピッチがフィルタの Mod 3 入力に届くので、
   CC 9 でカットオフが鍵盤にどれだけ追従するかを決められます。CC 124 で完全に追従し、起動時の CC 4 では追従しません
 - フィルタのカットオフを、自分の CC ではなくエンベロープで動かす: CC 99 = 2, CC 98 = 13, CC 6 = 10。
   エンベロープもカットオフもユニポーラなので、カットオフはつまみの下端から上端まで開きます
@@ -667,7 +667,7 @@ Slew 1 Time はユニポーラで、1/120 刻み、1 ステップで時間が半
   をオシレータの Mod 2 入力に置き、CC 99 = 2, CC 98 = 12, CC 6 = 2 で Osc 1 Mod 2 Pol を
   LFO のビブラート用の深さから +0.5 に戻して、あとは CC 13 で深さを決めます。この経路ではエンベロープを
   絞るものがないので、CC 5 で半音、CC 16 で 1 オクターブです
-- ポルタメントはデフォルトで結線済みです。Note Pitch が Slew 1 を通ってオシレータに届くので、CC 5 で時間を
+- ポルタメントはデフォルトで結線済みです。Note Pitch が Pitch 1 を通ってオシレータに届くので、CC 5 で時間を
   決められます。CC 64 で 0.1 秒ほどのグライドです。レガートで弾いてもそうでなくても、どのノートも
   グライドします。CC 99 = 2, CC 98 = 34, CC 6 = 51 で時間を General Mod Wheel から取るようにすれば、
   ホイールでポルタメントを掛けられます
@@ -707,8 +707,8 @@ Slew 1 Time はユニポーラで、1/120 刻み、1 ステップで時間が半
   1 バッファに 1 回読まれ、受け取る側でスムージングされます。速いソースはモジュール入力へ、段階的なものは
   パラメータへ通してください
 - スムージングは 2 段（48 kHz で平均遅れ 10.7 ms、35 ms で 99%）で、CC をまばらに（例えば 20 ms ごとに）
-  送るコントローラーの段差を丸めます。Osc 1 Pitch Coarse と Pitch Fine、Slew 1 Offset Coarse と Offset Fine は、音程がすぐ追従するように
-  スムージングしません。Slew 1 Time も、設定する対象に段差を生じさせないのでスムージングしません
+  送るコントローラーの段差を丸めます。Osc 1 Pitch Coarse と Pitch Fine、Pitch 1 Offset Coarse と Offset Fine は、音程がすぐ追従するように
+  スムージングしません。Pitch 1 Portamento Time も、設定する対象に段差を生じさせないのでスムージングしません
 - パラメータのソースは 128 のスロットのどれでも指せます。82 より上のスロットは、何かが書き込むまで 0 を
   返すので、そこを指したパラメータはユニポーラならつまみの下端、バイポーラなら中央に留まります
 - パラメータは自分の値を自分のレンジ、0.0〜1.0 か -0.5〜+0.5 に丸め、コントロールスロットも同じレンジを

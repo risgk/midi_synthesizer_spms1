@@ -32,10 +32,10 @@ modules:
   - { key: MIXER_1,   id: 6, label: Mixer 1 }
   - { key: CHORUS_1,  id: 7, label: Chorus 1, stereo: true }
   - { key: DELAY_1,   id: 8, label: Delay 1,  stereo: true }
-  - { key: SLEW_1,    id: 9, label: Slew 1 }
+  - { key: PITCH_1,    id: 9, label: Pitch 1 }
 
 # The run order of the default patch.
-default_order: [SLEW_1, LFO_1, EG_1, MIXER_1, OSC_1, FILTER_1, AMP_1, CHORUS_1, DELAY_1]
+default_order: [PITCH_1, LFO_1, EG_1, MIXER_1, OSC_1, FILTER_1, AMP_1, CHORUS_1, DELAY_1]
 
 # Slots of the signal bus (the values of NRPN categories 1 and 2), each one of:
 #   value:    a constant, which the bus holds from startup; `short` is the editor's label for it
@@ -112,8 +112,8 @@ signals:
   - { key: GENERAL_BIPOLAR_3,  id: 58, control: GENERAL_3, label: General Bipolar 3, bipolar: true }
   - { key: GENERAL_BIPOLAR_4,  id: 59, control: GENERAL_4, label: General Bipolar 4, bipolar: true }
 
-  - { key: SLEW_1_OUTPUT, id: 60, module: SLEW_1, output: Out, label: Slew 1 Output, bipolar: true }
-  - { key: SLEW_1_TIME,   id: 61, control: SLEW_1_TIME }
+  - { key: PITCH_1_OUTPUT, id: 60, module: PITCH_1, output: Out, label: Pitch 1 Output, bipolar: true }
+  - { key: PITCH_1_PORTAMENTO_TIME,   id: 61, control: PITCH_1_PORTAMENTO_TIME }
 
   - { key: OSC_1_PULSE_WIDTH,     id: 62, control: OSC_1_PULSE_WIDTH }
   - { key: OSC_1_PW_MOD_AMT,   id: 63, control: OSC_1_PW_MOD_AMT }
@@ -138,24 +138,24 @@ signals:
   - { key: FILTER_1_MOD_3_AMT,   id: 75, control: FILTER_1_MOD_3_AMT }
   - { key: FILTER_1_MOD_3_POL, id: 76, control: FILTER_1_MOD_3_POL }
 
-  # Slew 1 Direct Amt and Pol came after Filter 1 Mod 3 Amt and Pol.
-  - { key: SLEW_1_DIRECT_AMT,   id: 77, control: SLEW_1_DIRECT_AMT }
-  - { key: SLEW_1_DIRECT_POL, id: 78, control: SLEW_1_DIRECT_POL }
+  # Pitch 1 Direct Amt and Pol came after Filter 1 Mod 3 Amt and Pol.
+  - { key: PITCH_1_DIRECT_AMT,   id: 77, control: PITCH_1_DIRECT_AMT }
+  - { key: PITCH_1_DIRECT_POL, id: 78, control: PITCH_1_DIRECT_POL }
 
-  # LFO 1 Level Mod Amt and Pol came after Slew 1 Direct Amt and Pol.
+  # LFO 1 Level Mod Amt and Pol came after Pitch 1 Direct Amt and Pol.
   - { key: LFO_1_LEVEL_MOD_AMT, id: 79, control: LFO_1_LEVEL_MOD_AMT }
   - { key: LFO_1_LEVEL_MOD_POL, id: 80, control: LFO_1_LEVEL_MOD_POL }
 
-  # Slew 1 Offset Coarse and Fine came after LFO 1 Level Mod Amt and Pol.
-  - { key: SLEW_1_OFFSET_COARSE, id: 81, control: SLEW_1_OFFSET_COARSE }
-  - { key: SLEW_1_OFFSET_FINE,   id: 82, control: SLEW_1_OFFSET_FINE }
+  # Pitch 1 Offset Coarse and Fine came after LFO 1 Level Mod Amt and Pol.
+  - { key: PITCH_1_OFFSET_COARSE, id: 81, control: PITCH_1_OFFSET_COARSE }
+  - { key: PITCH_1_OFFSET_FINE,   id: 82, control: PITCH_1_OFFSET_FINE }
 
 # Module inputs, NRPN category 1, by entry: what feeds each one in the default patch (`source`, a
 # signal key). `label` is the editor's, on the module; `name` the README's, after the module's
 # label. An input with no module is a side of the final output.
 inputs:
   - { entry: 0,  module: EG_1,        key: GATE,        label: Gate In,        name: Gate In,        source: NOTE_GATE }
-  - { entry: 1,  module: OSC_1,       key: MOD_1, label: Mod 1 In, name: Mod 1 In, source: SLEW_1_OUTPUT }
+  - { entry: 1,  module: OSC_1,       key: MOD_1, label: Mod 1 In, name: Mod 1 In, source: PITCH_1_OUTPUT }
   - { entry: 2,  module: OSC_1,       key: MOD_2, label: Mod 2 In, name: Mod 2 In, source: LFO_1_OUTPUT }
   - { entry: 3,  module: FILTER_1,    key: AUDIO,       label: Audio In,       name: Audio In,       source: OSC_1_OUTPUT }
   - { entry: 4,  module: FILTER_1,    key: MOD_1,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
@@ -168,12 +168,12 @@ inputs:
   - { entry: 11, module: DELAY_1,     key: AUDIO_R,     label: Audio In R,     name: Audio In R,     source: CHORUS_1_OUTPUT_R }
   - { entry: 12,                      key: OUTPUT_L,    label: L,              name: Final Output L, name_ja: 最終出力 L, source: DELAY_1_OUTPUT_L }
   - { entry: 13,                      key: OUTPUT_R,    label: R,              name: Final Output R, name_ja: 最終出力 R, source: DELAY_1_OUTPUT_R }
-  - { entry: 14, module: SLEW_1,      key: IN,          label: In,             name: In,             source: NOTE_PITCH }
+  - { entry: 14, module: PITCH_1,      key: IN,          label: In,             name: In,             source: NOTE_PITCH }
   - { entry: 15, module: OSC_1,       key: PW_MOD,      label: PW Mod In,      name: PW Mod In,      source: LFO_1_OUTPUT }
   - { entry: 16, module: LFO_1,       key: RATE_MOD,    label: Rate Mod In,    name: Rate Mod In,    source: NONE }
   - { entry: 17, module: FILTER_1,    key: MOD_2,       label: Mod 2 In,       name: Mod 2 In,       source: LFO_1_OUTPUT }
-  - { entry: 18, module: FILTER_1,    key: MOD_3,       label: Mod 3 In,       name: Mod 3 In,       source: SLEW_1_OUTPUT }
-  - { entry: 19, module: SLEW_1,      key: DIRECT,      label: Direct In,      name: Direct In,      source: PITCH_BEND }
+  - { entry: 18, module: FILTER_1,    key: MOD_3,       label: Mod 3 In,       name: Mod 3 In,       source: PITCH_1_OUTPUT }
+  - { entry: 19, module: PITCH_1,      key: DIRECT,      label: Direct In,      name: Direct In,      source: PITCH_BEND }
   - { entry: 20, module: LFO_1,       key: LEVEL_MOD,   label: Level Mod In,   name: Level Mod In,   source: GENERAL_MOD_WHEEL }
 
 # Controls, listed in the editor's order, each by its entry: a parameter is one entry of NRPN category 2 (where it takes its value) and
@@ -198,8 +198,8 @@ controls:
   - { entry: 6,  module: EG_1,      key: LEVEL,        label: Level,        cc: 0,   source: ONE }
   # Osc 1 in the editor: the pitch and its two modulations, then the waveform and the pulse
   # width's modulation, each target next to what moves it. Pulse Width, PW Mod Amt and PW Mod Pol
-  # came after Slew 1, so their entries follow its, but they are listed here. Pitch Coarse and Fine
-  # have no CC and stay at 0.0 by default: the transposition is Slew 1's Offset Coarse and Fine,
+  # came after Pitch 1, so their entries follow its, but they are listed here. Pitch Coarse and Fine
+  # have no CC and stay at 0.0 by default: the transposition is Pitch 1's Offset Coarse and Fine,
   # on CC 86 and 70. Pulse Width and PW Mod
   # Amt power up at CC 4, 0.0: a pulse of 50% and no modulation of it, so the default patch renders
   # as before. PW Mod Pol has no CC and reads +0.5, as each modulation polarity does.
@@ -220,7 +220,7 @@ controls:
   # Amt and Pol came last of all, so their entries follow every other. Mod 2 Amt powers up at
   # CC 4, 0.0, so the LFO on Mod 2 In leaves the cutoff alone until it is turned up. Mod 2 Pol reads 0.1, as
   # Osc 1 Mod 2 Pol does, which brings the LFO down to a musical depth on the cutoff. Mod 3 is the keyboard
-  # tracking: Mod 3 In takes the pitch from Slew 1, as Osc 1 Mod 1 In does, and Mod 3 Pol reads
+  # tracking: Mod 3 In takes the pitch from Pitch 1, as Osc 1 Mod 1 In does, and Mod 3 Pol reads
   # +0.5, so that Mod 3 Amt (CC 9) at its top makes the cutoff follow the note a semitone for a
   # semitone, unmoved at note 60. Mod 3 Amt powers up at CC 4, 0.0, with the tracking off.
   - { entry: 15, module: FILTER_1,  key: GAIN,         label: Gain,         cc: 112, value: 64 }
@@ -255,14 +255,14 @@ controls:
   - { entry: 32, general: true, key: GENERAL_3,         label: "3",       cc: 18,  value: 64 }
   - { entry: 33, general: true, key: GENERAL_4,         label: "4",       cc: 114, value: 64 }
 
-  # Slew 1 came after the General controls, so its entry follows theirs. CC 5 is Portamento Time
-  # in the MIDI spec; it powers up at CC 4, 0.0, where the slew is off.
-  - { entry: 34, module: SLEW_1,    key: TIME,         label: Time,         cc: 5,   value: 4 }
+  # Pitch 1 came after the General controls, so its entry follows theirs. CC 5 is Portamento Time
+  # in the MIDI spec; it powers up at CC 4, 0.0, where the portamento is off.
+  - { entry: 34, module: PITCH_1,   key: PORTAMENTO_TIME, label: Portamento Time, cc: 5, value: 4 }
   # Offset Coarse and Fine came after LFO 1 Level Mod Amt and Pol, and are listed after Time: the
   # transposition, on the CCs the oscillator's Pitch Coarse and Fine had, 64 at the centre.
-  - { entry: 52, module: SLEW_1,    key: OFFSET_COARSE, label: Offset Coarse, cc: 86, value: 64, bipolar: true }
-  - { entry: 53, module: SLEW_1,    key: OFFSET_FINE,  label: Offset Fine,  cc: 70,  value: 64, bipolar: true }
+  - { entry: 52, module: PITCH_1,    key: OFFSET_COARSE, label: Offset Coarse, cc: 86, value: 64, bipolar: true }
+  - { entry: 53, module: PITCH_1,    key: OFFSET_FINE,  label: Offset Fine,  cc: 70,  value: 64, bipolar: true }
   # Direct Amt and Pol came last of all. Direct Amt is the bend range, half a semitone a step:
   # CC 8, its power-up value, is 2 semitones either way. Direct Pol has no CC and reads +0.5.
-  - { entry: 48, module: SLEW_1,    key: DIRECT_AMT,   label: Direct Amt,   cc: 57,  value: 8 }
-  - { entry: 49, module: SLEW_1,    key: DIRECT_POL,   label: Direct Pol,   cc: 0,   value: 124, source: HALF, bipolar: true }
+  - { entry: 48, module: PITCH_1,    key: DIRECT_AMT,   label: Direct Amt,   cc: 57,  value: 8 }
+  - { entry: 49, module: PITCH_1,    key: DIRECT_POL,   label: Direct Pol,   cc: 0,   value: 124, source: HALF, bipolar: true }

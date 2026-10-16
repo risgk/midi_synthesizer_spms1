@@ -1,14 +1,15 @@
 module Spms1
-  # Slew limiter of the exponential kind, a lag: the output follows the input along a one-pole
+  # The note's pitch on its way to the oscillator and the filter. Portamento is a slew limiter of
+  # the exponential kind, a lag: the output follows the input along a one-pole
   # curve, as a voltage across an RC network does. Fed with Note Pitch, it is portamento, and the
   # pitch domain being linear in semitones makes the glide an exponential one in pitch, which is
   # what an analog synth's portamento is. It takes any signal, though, so it rounds off the steps of
   # a stepped one as well. Direct In is added to the output past the lag, for what should move the
   # pitch at once rather than glide, as a pitch bend should, and Offset Coarse and Fine shift the
   # output in the same place: a transposition that takes effect at once, ahead of everything the
-  # slew feeds, so two oscillators on it move together and keep their own Pitch Coarse and Fine as
+  # module feeds, so two oscillators on it move together and keep their own Pitch Coarse and Fine as
   # the interval between them.
-  class Slew
+  class Pitch
     # Lookup table for exponential time mapping, the envelope's: a twelfth of an octave per index,
     # so one CC step of the 120-step control range moves the time by a semitone and the whole dial
     # spans ten octaves.
@@ -56,13 +57,13 @@ module Spms1
       @offset = 0.0
     end
 
-    # Time is unipolar, [0.0, 1.0]; see TIME_BASE for scaling details. 0.0 turns the slew off.
+    # Portamento Time is unipolar, [0.0, 1.0]; see TIME_BASE for scaling details. 0.0 turns the portamento off.
     # Not smoothed: a new time changes only how fast the output moves from where it is, so a step
     # in it cannot step the output. Converted here rather than in process, as this is called once
     # per buffer, and with nothing to smooth there is no control-rate update to put it in.
     # The share is 1/(time constant in samples), the first-order form of the exact
     # 1 - exp(-1/(time constant in samples)); at the shortest time, 69 samples, it runs 0.7% fast.
-    def set_time(time)
+    def set_portamento_time(time)
       @time = (time < 0.0) ? 0.0 : ((time > 1.0) ? 1.0 : time)
       blend = 1.0 / (TIME_BASE * calculate_exp_fast(@time) * @sample_rate)
       @blend = (@time > 0.0) ? blend : 1.0
