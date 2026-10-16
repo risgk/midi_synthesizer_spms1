@@ -191,8 +191,17 @@
     .editor-column:last-child {
       align-self: stretch;
     }
-    #init-values {
+    /* The no-CC toggle and the Init button, at the bottom of the last column. */
+    #controls-foot {
       margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    #controls-foot .check {
+      margin-bottom: 0;
+    }
+    #init-values {
       width: 100%;
       padding: 12px;
       font-size: 1rem;
@@ -978,7 +987,10 @@
 <div id="tab-controls">
   <div class="editor-grid" id="controls"></div>
   <!-- Moved under the Delay panel each time the controls are drawn. -->
-  <button class="btn primary" id="init-values">Initialize & Send All</button>
+  <div id="controls-foot">
+    <label class="check" title="A parameter with no CC has no slider to move; it reads its own slot or what the patch points it at. Hidden, it shows up as soon as a CC is given to it."><input type="checkbox" id="show-no-cc"> Show parameters with no CC</label>
+    <button class="btn primary" id="init-values">Initialize & Send All</button>
+  </div>
 </div>
 
 <div class="app" id="tab-patch" hidden>
@@ -2649,7 +2661,7 @@
     { col: 3, title: 'Chorus 1', module: 'CHORUS_1' },
     { col: 3, title: 'Delay 1', module: 'DELAY_1' },
   ];
-  CONTROL_PANELS.push({ col: 0, title: 'Mixer 1', module: 'MIXER_1', onlyWithCC: true });
+  CONTROL_PANELS.push({ col: 0, title: 'Mixer 1', module: 'MIXER_1' });
 
   function panelItems(p) {
     return p.general ? GENERAL_ITEMS : PARAM_ITEMS.filter(c => c.module === p.module);
@@ -2699,6 +2711,19 @@
 
   let sliderBefore = null;
 
+  // Parameters with no CC are left out of the controls unless asked for: they have no slider to
+  // move, and a CC given to one brings it back. The choice is kept, as the tab is.
+  const SHOW_NO_CC_KEY = 'spms1-type2-editor-show-no-cc';
+  let showNoCC = false;
+  try { showNoCC = localStorage.getItem(SHOW_NO_CC_KEY) === '1'; } catch (e) { /* storage unavailable */ }
+  document.getElementById('show-no-cc').checked = showNoCC;
+  document.getElementById('show-no-cc').addEventListener('change', e => {
+    showNoCC = e.target.checked;
+    try { localStorage.setItem(SHOW_NO_CC_KEY, showNoCC ? '1' : ''); } catch (err) { /* storage unavailable */ }
+    renderControls();
+    fitTabArea();
+  });
+
   function renderControls() {
     const root = document.getElementById('controls');
     const active = document.activeElement;
@@ -2707,9 +2732,10 @@
     const cols = [0, 1, 2, 3].map(() => document.createElement('div'));
     cols.forEach(c => { c.className = 'editor-column'; });
     for (const p of CONTROL_PANELS) {
-      const items = panelItems(p);
-      // A mixer has no CC by default, so its panel appears only once a patch gives it one.
-      if (p.onlyWithCC && !items.some(c => state.cc[c.key])) continue;
+      const items = panelItems(p).filter(c => showNoCC || state.cc[c.key]);
+      // A mixer has no CC by default, so its panel appears only once a patch gives it one, or
+      // with the parameters that have none shown.
+      if (!items.length) continue;
       const panel = document.createElement('div');
       panel.className = 'panel';
       panel.innerHTML = `<h2>${p.title}</h2><div class="control-row">` + items.map(c => `
@@ -2723,7 +2749,7 @@
         </div>`).join('') + '</div>';
       cols[p.col].appendChild(panel);
     }
-    cols[3].appendChild(document.getElementById('init-values'));
+    cols[3].appendChild(document.getElementById('controls-foot'));
     root.replaceChildren(...cols);
     root.querySelectorAll('.slider-knob-zone').forEach(zone => {
       const c = CONTROL[zone.dataset.ctrl];
