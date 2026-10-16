@@ -830,6 +830,24 @@ plugin for the audio).
       is -25 dB (`ruby sim_cruby/spms1_compare.rb --limit DB` for another)
 
 
+### Load Estimate
+
+"sim_load" estimates how much of each audio buffer the synth takes on the Raspberry Pi Pico 2, without
+the board: `sh sim_load/estimate.sh [--profile]` builds the sketch with arduino-cli, as the GitHub
+Actions workflow does, and runs its `Spms1_main` in an emulator of the Cortex-M33 (Unicorn), counting
+the instructions between `start_debug_measure` and `stop_debug_measure` -- the span Debug Print
+measures on the device -- with the default patch and a note held.
+
+- It prints the instructions per buffer, which are exact for the code as built, and the cycles and
+  the time at 153.6 MHz against the 1333 us a buffer of 64 samples lasts at 48 kHz, which come from a
+  first-order cost model and are an estimate (see `cost` in "sim_load/spms1_load_estimate.py")
+- `--profile` lists the functions the cycles go to; `--elf FILE` estimates an ELF built elsewhere, from
+  another commit say, so two versions can be compared; `--help` shows the rest
+- Needs Python 3 and `pip install unicorn capstone pyelftools numpy`, installed by you and not shipped
+  here: Unicorn's Python binding is under the BSD licence and its emulator under the GPLv2, Capstone
+  and NumPy under the BSD licence, and pyelftools is in the public domain
+
+
 ### GitHub Actions
 
 "SPMS-1 (type-2) Build (UF2 and Web)" in "../.github/workflows/spms1-type2.yml", run by hand

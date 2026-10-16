@@ -797,6 +797,24 @@ C のホスト ("sim_spinel"、"sim_render"、"web" の SPMS-1 Web) は、スケ
       違いは -10 dB 以上になります。判定の上限は -25 dB です (`ruby sim_cruby/spms1_compare.rb --limit DB` で変更)
 
 
+### 処理負荷の見積もり
+
+"sim_load" は、Raspberry Pi Pico 2 の実機なしで、シンセが各オーディオバッファの時間をどれだけ使うかを見積もります。
+`sh sim_load/estimate.sh [--profile]` で、GitHub Actions のワークフローと同じく arduino-cli でスケッチをビルドし、
+その `Spms1_main` を Cortex-M33 のエミュレータ (Unicorn) で動かして、`start_debug_measure` から
+`stop_debug_measure` まで (実機の Debug Print が測る区間) の命令数を数えます。デフォルトのパッチで、ノートを
+押したままの状態です。
+
+- バッファあたりの命令数 (ビルドしたコードについて正確な値) と、153.6 MHz でのサイクル数と時間を表示し、
+  48 kHz で 64 サンプルのバッファ 1 つぶんの 1333 us と比べます。サイクル数と時間は 1 次の近似モデルによる
+  見積もりです ("sim_load/spms1_load_estimate.py" の `cost` を参照)
+- `--profile` でサイクルの行き先の関数を表示し、`--elf FILE` で別にビルドした ELF (別のコミットのものなど) を
+  見積もれるので、2 つの版を比べられます。そのほかは `--help` を参照してください
+- Python 3 と `pip install unicorn capstone pyelftools numpy` が必要です。各自でインストールするもので、ここには
+  含めていません。Unicorn は Python バインディングが BSD ライセンス、エミュレータ本体が GPLv2、Capstone と
+  NumPy は BSD ライセンス、pyelftools はパブリックドメインです
+
+
 ### GitHub Actions
 
 "../.github/workflows/spms1-type2.yml" の "SPMS-1 (type-2) Build (UF2 and Web)" を手動で実行します
