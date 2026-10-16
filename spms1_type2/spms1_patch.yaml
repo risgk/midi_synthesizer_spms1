@@ -167,15 +167,20 @@ controls:
   - { entry: 38, module: ENV_GEN_1, key: RELEASE_SWITCH, label: Release Switch, cc: 105, value: 124 }
   - { entry: 6,  module: ENV_GEN_1, key: LEVEL,        label: Level,        cc: 0,   source: ONE }
   - { entry: 7,  module: ENV_GEN_1, key: POLARITY,     label: Polarity,     cc: 0,   source: HALF, bipolar: true }
-  - { entry: 8,  module: OSC_1,     key: WAVEFORM,     label: Wave,         cc: 20,  value: 4 }
-  # Osc 1 Pulse Width came after Slew 1, so its entry follows its, but it is listed after Wave,
-  # which puts it there in the editor. CC 19 is where PRA32-U2 has Osc 1 Shape. It powers up at
-  # CC 4, 0.0, a pulse of 50%, so the default patch renders as before.
-  - { entry: 35, module: OSC_1,     key: PULSE_WIDTH,  label: Pulse Width,  cc: 19,  value: 4 }
+  # Osc 1 in the editor: the pitch and its modulation, then the waveform and the pulse width's
+  # modulation, each target next to what moves it. Pulse Width, PW Mod Amt and PW Mod Polarity
+  # came after Slew 1, so their entries follow its, but they are listed here. CC 19 is where
+  # PRA32-U2 has Osc 1 Shape. Pulse Width and PW Mod Amt power up at CC 4, 0.0: a pulse of 50% and
+  # no modulation of it, so the default patch renders as before. PW Mod Polarity has no CC and
+  # reads +0.5, as each modulation polarity does.
   - { entry: 9,  module: OSC_1,     key: COARSE_TUNE,  label: Coarse Tune,  cc: 86,  value: 64, bipolar: true }
   - { entry: 10, module: OSC_1,     key: FINE_TUNE,    label: Fine Tune,    cc: 70,  value: 64, bipolar: true }
   - { entry: 11, module: OSC_1,     key: PITCH_MOD_AMOUNT,   label: Pitch Mod Amt,      cc: 13,  value: 4 }
   - { entry: 12, module: OSC_1,     key: PITCH_MOD_POLARITY, label: Pitch Mod Polarity, cc: 0,   value: 124, source: POINT_ONE, bipolar: true }
+  - { entry: 8,  module: OSC_1,     key: WAVEFORM,     label: Wave,         cc: 20,  value: 4 }
+  - { entry: 35, module: OSC_1,     key: PULSE_WIDTH,  label: Pulse Width,  cc: 19,  value: 4 }
+  - { entry: 36, module: OSC_1,     key: PW_MOD_AMOUNT,   label: PW Mod Amt,      cc: 103, value: 4 }
+  - { entry: 37, module: OSC_1,     key: PW_MOD_POLARITY, label: PW Mod Polarity, cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 13, module: FILTER_1,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 100 }
   - { entry: 14, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 94 }
   - { entry: 15, module: FILTER_1,  key: GAIN,         label: Gain,         cc: 112, value: 64 }
@@ -207,10 +212,3 @@ controls:
   # Slew 1 came after the General controls, so its entry follows theirs. CC 5 is Portamento Time
   # in the MIDI spec; it powers up at CC 4, 0.0, where the slew is off.
   - { entry: 34, module: SLEW_1,    key: TIME,         label: Time,         cc: 5,   value: 4 }
-
-  # Osc 1 PW Mod Amt and PW Mod Polarity came after Slew 1, so their entries follow its, as Pulse
-  # Width's does (listed after Wave, above). PW Mod Amt powers up at CC 4, 0.0, no modulation, so
-  # the default patch renders as before. PW Mod Polarity has no CC and reads +0.5, as each
-  # modulation polarity does.
-  - { entry: 36, module: OSC_1,     key: PW_MOD_AMOUNT,   label: PW Mod Amt,      cc: 103, value: 4 }
-  - { entry: 37, module: OSC_1,     key: PW_MOD_POLARITY, label: PW Mod Polarity, cc: 0,   value: 124, source: HALF, bipolar: true }
