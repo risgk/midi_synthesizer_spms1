@@ -3118,7 +3118,9 @@
   // The tab runs from wherever the header and MIDI bar leave it, which moves as they wrap, to
   // the soft keyboard at the bottom of the window. The patch area, or in one column its canvas,
   // takes that height; the controls take at least it, so the keyboard does not move when the tab
-  // changes.
+  // changes. The patch area keeps a height of its own all the same, as the controls do, so that
+  // zooming the page in moves the keyboard down rather than squeezing the canvas; only a narrow
+  // window, in one column, lets the canvas go shorter.
   function fitTabArea() {
     const controls = document.getElementById('tab-controls');
     const app = document.getElementById('tab-patch');
@@ -3135,9 +3137,9 @@
       if (!narrow) controls.style.minHeight = height + 'px';
     } else if (!app.hidden) {
       if (app.classList.contains('wide') || narrow) {
-        canvas.style.height = Math.max(240, height) + 'px';
+        canvas.style.height = Math.max(narrow ? 240 : 480, height) + 'px';
       } else {
-        app.style.height = Math.max(300, height) + 'px';
+        app.style.height = Math.max(540, height) + 'px';
       }
     }
   }
