@@ -709,6 +709,27 @@
       flex: 1;
       white-space: nowrap;
     }
+    /* A module's parameters with no CC and nothing on their slots fold away under one row,
+       which opens and closes them; a wire to one of them ends on that row while it is folded. */
+    .node.folded .row.ctrl.quiet {
+      display: none;
+    }
+    .row.fold {
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      font-style: italic;
+    }
+    .row.fold:hover {
+      color: var(--primary-color);
+    }
+    .row.fold .fold-anchor {
+      position: absolute;
+      left: 0;
+      top: 50%;
+      width: 1px;
+      height: 1px;
+    }
     .row .lbl.right {
       text-align: right;
     }
@@ -1325,8 +1346,8 @@
     CONST:     { x: 20,   y: 215 },
     GENERAL:   { x: 20,   y: 546 },
     LFO_1:     { x: 340,  y: 40 },
-    EG_1:      { x: 340,  y: 372 },
-    MIXER_1:   { x: 340,  y: 626 },
+    EG_1:      { x: 340,  y: 294 },
+    MIXER_1:   { x: 340,  y: 548 },
     PITCH_1:   { x: 700,  y: 40 },
     OSC_1:     { x: 700,  y: 346 },
     FILTER_1:  { x: 1060, y: 40 },
@@ -1717,6 +1738,7 @@
     if (node.controls && node.controls.length) {
       h += `<div class="sep"><span>${node.module ? 'Parameters' : 'Signals'}</span><span>CC</span><span>Value</span><span class="norm-head">Norm</span></div>`;
       for (const c of node.controls) h += controlRowHTML(c, !!node.module);
+      if (node.module) h += `<div class="row fold" title="Show or hide the parameters with no CC whose slots nothing reads"><span class="fold-anchor"></span><span class="lbl"></span></div>`;
     }
     return h + '<div class="rows-end"></div>';
   }
@@ -1824,6 +1846,38 @@
     return `M ${a.x} ${a.y} C ${a.x + dx} ${a.y}, ${b.x - dx} ${b.y}, ${b.x} ${b.y}`;
   }
 
+  // Which module nodes have their quiet parameters open; folded is the default, and it is kept.
+  const UNFOLDED_KEY = 'spms1-type2-editor-unfolded';
+  let unfolded = new Set();
+  try { unfolded = new Set(JSON.parse(localStorage.getItem(UNFOLDED_KEY) || '[]')); } catch (e) { /* storage unavailable */ }
+
+  // A parameter is quiet when it has no CC, reads its own slot or a constant, and nothing reads
+  // its slot: a fixed setting that wiring a patch need not see.
+  function isQuiet(c, read) {
+    if (state.cc[c.key]) return false;
+    const src = state.params[c.key];
+    if (src !== undefined && src !== c.key && !(src in CONSTANT_NORMS)) return false;
+    return !c.slots.some(([slot]) => read.has(slot));
+  }
+
+  function refreshFolds(conns) {
+    const read = new Set(conns.map(c => c.src));
+    world.querySelectorAll('.node').forEach(el => {
+      const fold = el.querySelector('.row.fold');
+      if (!fold) return;
+      let quiet = 0;
+      el.querySelectorAll('.row.ctrl').forEach(row => {
+        const q = isQuiet(CONTROL[row.dataset.ctrl], read);
+        row.classList.toggle('quiet', q);
+        if (q) quiet++;
+      });
+      const open = unfolded.has(el.dataset.node);
+      el.classList.toggle('folded', !open);
+      fold.hidden = !quiet;
+      fold.querySelector('.lbl').textContent = open ? `Hide ${quiet} with no CC` : `${quiet} more with no CC`;
+    });
+  }
+
   function renderWires() {
     if (!canvas.clientWidth) return;
     svg.querySelectorAll('path:not(.temp)').forEach(p => p.remove());
@@ -1831,14 +1885,16 @@
     world.querySelectorAll('.row.routed').forEach(r => { r.classList.remove('routed'); r.title = ''; });
     world.querySelectorAll('[data-src-of]').forEach(s => { s.textContent = ''; });
     const conns = connections();
+    refreshFolds(conns);
     if (selectedWire && !conns.some(c => c.dst === selectedWire)) selectedWire = null;
     // Parameter wires first, so the signal wires are drawn over them.
     const ordered = conns.filter(c => c.kind.startsWith('param')).concat(conns.filter(c => !c.kind.startsWith('param')));
     for (const c of ordered) {
       const from = portEls['o:' + c.src];
-      const to = portEls['i:' + c.dst];
+      let to = portEls['i:' + c.dst];
       if (!from || !to) continue;
-      const d = curve(portPos(from), portPos(to));
+      const folded = to.closest('.row.quiet') && to.closest('.node.folded');
+      const d = curve(portPos(from), portPos(folded ? to.closest('.node').querySelector('.fold-anchor') : to));
       const vis = document.createElementNS(SVG_NS, 'path');
       vis.setAttribute('d', d);
       vis.setAttribute('class', `wire ${c.kind}` + (c.dst === selectedWire ? ' selected' : ''));
@@ -2100,6 +2156,14 @@
   });
 
   world.addEventListener('click', e => {
+    const fold = e.target.closest('.row.fold');
+    if (fold) {
+      const key = fold.closest('.node').dataset.node;
+      if (unfolded.has(key)) unfolded.delete(key); else unfolded.add(key);
+      try { localStorage.setItem(UNFOLDED_KEY, JSON.stringify([...unfolded])); } catch (err) { /* storage unavailable */ }
+      renderWires();
+      return;
+    }
     const badge = e.target.closest('.badge');
     if (!badge) return;
     const key = badge.closest('.node').dataset.node;

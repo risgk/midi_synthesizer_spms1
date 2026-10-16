@@ -91,6 +91,9 @@ Usage
       which, and the keys of the PC keyboard do not play while it is hidden
 - Graphical patch editor on its Patch tab
     - Wires module outputs to inputs and parameters, and sets the run order and CC assignments
+    - Folds away each module's parameters that have no CC and whose slots nothing reads, under a
+      row that opens and closes them; a wire to one ends on that row while it is folded, and each
+      module's choice is remembered
     - Saves and loads patches as JSON
     - Copies the patch as MIDI bytes or as an NRPN list, or sends it through Web MIDI
     - The side panels (Patch, Run Order, Export) fold to their headings with a click, each remembered;
