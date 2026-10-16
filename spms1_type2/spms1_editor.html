@@ -2331,6 +2331,15 @@
   document.getElementById('btn-init').addEventListener('click', () => {
     pushHistory();
     state = defaultState();
+    // The default layout is packed to the folded heights, so Init folds every node again, and
+    // hides the parameters with no CC on the Controls tab as well.
+    unfolded.clear();
+    showNoCC = false;
+    document.getElementById('show-no-cc').checked = false;
+    try {
+      localStorage.setItem(UNFOLDED_KEY, '[]');
+      localStorage.setItem(SHOW_NO_CC_KEY, '');
+    } catch (e) { /* storage unavailable */ }
     renderAll();
     fitView();
   });
