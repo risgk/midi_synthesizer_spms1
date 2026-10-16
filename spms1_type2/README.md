@@ -175,8 +175,8 @@ cutoff, gain and the rest -- arrive from CC and are left out of the diagram.
 The note's pitch reaches the oscillator through Pitch 1, which glides from one note to the next:
 portamento. Pitch 1 Portamento Time is on CC 5, as in the MIDI spec, and powers up at 0.0, where
 the portamento is off and passes the pitch through exactly as it arrives. Pitch Bend comes in on Pitch 1
-Direct In, which is added to the output past the glide, so the bend acts at once and reaches the
-oscillator and the filter's keyboard tracking alike. Pitch 1 Direct Amt (CC 57) is the bend range,
+Bend In, which is added to the output past the glide, so the bend acts at once and reaches the
+oscillator and the filter's keyboard tracking alike. Pitch 1 Bend Amt (CC 57) is the bend range,
 half a semitone a step: 2 semitones either way at CC 8, where it powers up, an octave at CC 28 and
 5 octaves at the top.
 
@@ -213,7 +213,7 @@ a patch gives it something. Where it sits is what it buys: a module sees the cur
 value only from something ahead of it in this line, and last sample's from anything behind.
 Mixer 1 can reach the LFO and the envelope, and the oscillator, the filter and the amp can reach
 Mixer 1. Pitch 1 comes after all three, so that a modulation of its own -- a bend from the LFO
-through Direct In, say -- is this sample's, and before the oscillator and the filter, which read
+through Bend In, say -- is this sample's, and before the oscillator and the filter, which read
 it in the same sample.
 
 A mixer is what lets two of anything meet, and what makes a signal that runs one way, such as the
@@ -390,7 +390,7 @@ passes it through rather than muting it.
 | 5 | Amp 1 Audio In | | 16 | LFO 1 Rate Mod In |
 | 6 | Amp 1 Mod In | | 17 | Filter 1 Mod 2 In |
 | 7 | Mixer 1 In 1 | | 18 | Filter 1 Mod 3 In |
-| 8 | Mixer 1 In 2 | | 19 | Pitch 1 Direct In |
+| 8 | Mixer 1 In 2 | | 19 | Pitch 1 Bend In |
 | 9 | Chorus 1 Audio In | | 20 | LFO 1 Level Mod In |
 | 10 | Delay 1 Audio In L | |  |  |
 
@@ -426,12 +426,12 @@ both at the same signal for a mono output.
 | 8 | Osc 1 Wave | | 23 | Chorus 1 Rate | | 45 | Filter 1 Mod 2 Pol |
 | 9 | Osc 1 Pitch Coarse | | 24 | Chorus 1 Depth | | 46 | Filter 1 Mod 3 Amt |
 | 10 | Osc 1 Pitch Fine | | 25 | Chorus 1 Mix | | 47 | Filter 1 Mod 3 Pol |
-| 11 | Osc 1 Mod 2 Amt | | 26 | Delay 1 Time | | 48 | Pitch 1 Direct Amt |
-| 12 | Osc 1 Mod 2 Pol | | 27 | Delay 1 Feedback | | 49 | Pitch 1 Direct Pol |
+| 11 | Osc 1 Mod 2 Amt | | 26 | Delay 1 Time | | 48 | Pitch 1 Bend Amt |
+| 12 | Osc 1 Mod 2 Pol | | 27 | Delay 1 Feedback | | 49 | Pitch 1 Bend Pol |
 | 13 | Filter 1 Cutoff | | 28 | Delay 1 Mix | | 50 | LFO 1 Level Mod Amt |
 | 14 | Filter 1 Resonance | | 34 | Pitch 1 Portamento Time | | 51 | LFO 1 Level Mod Pol |
-| 15 | Filter 1 Gain | | 35 | Osc 1 Pulse Width | | 52 | Pitch 1 Offset Coarse |
-| 16 | Filter 1 Mod 1 Amt | | 36 | Osc 1 PW Mod Amt | | 53 | Pitch 1 Offset Fine |
+| 15 | Filter 1 Gain | | 35 | Osc 1 Pulse Width | | 52 | Pitch 1 Coarse |
+| 16 | Filter 1 Mod 1 Amt | | 36 | Osc 1 PW Mod Amt | | 53 | Pitch 1 Fine |
 
 <!-- patch_gen end -->
 
@@ -496,12 +496,12 @@ two slots, a unipolar and a bipolar one. See the General slots below.
 | 16 | Chorus 1 Output R ± | | 45 | Delay 1 Time | | 74 | Filter 1 Mod 2 Pol ± |
 | 17 | Delay 1 Output L ± | | 46 | Delay 1 Feedback | | 75 | Filter 1 Mod 3 Amt |
 | 18 | Delay 1 Output R ± | | 47 | Delay 1 Mix | | 76 | Filter 1 Mod 3 Pol ± |
-| 19 | LFO 1 Rate | | 48 | Note Pitch ± | | 77 | Pitch 1 Direct Amt |
-| 20 | LFO 1 Level | | 49 | Note Gate | | 78 | Pitch 1 Direct Pol ± |
+| 19 | LFO 1 Rate | | 48 | Note Pitch ± | | 77 | Pitch 1 Bend Amt |
+| 20 | LFO 1 Level | | 49 | Note Gate | | 78 | Pitch 1 Bend Pol ± |
 | 22 | EG 1 Attack | | 50 | Pitch Bend ± | | 79 | LFO 1 Level Mod Amt |
 | 23 | EG 1 Decay | | 51 | General Mod Wheel | | 80 | LFO 1 Level Mod Pol ± |
-| 24 | EG 1 Sustain | | 52 | General Unipolar 1 | | 81 | Pitch 1 Offset Coarse ± |
-| 25 | EG 1 Level | | 53 | General Unipolar 2 | | 82 | Pitch 1 Offset Fine ± |
+| 24 | EG 1 Sustain | | 52 | General Unipolar 1 | | 81 | Pitch 1 Coarse ± |
+| 25 | EG 1 Level | | 53 | General Unipolar 2 | | 82 | Pitch 1 Fine ± |
 | 27 | Osc 1 Wave | | 54 | General Unipolar 3 | |  |  |
 | 28 | Osc 1 Pitch Coarse ± | | 55 | General Unipolar 4 | |  |  |
 
@@ -516,9 +516,9 @@ Slots 19-47, 61, 62-64 and 69-82 hold the values arriving from CC, so a paramete
 by default. Each parameter is unipolar or bipolar, and its slot takes the same range. A unipolar one
 runs 0.0 to 1.0 from CC 4 to CC 124, the span of an envelope, so an envelope pointed at one sweeps
 the whole of its dial. A bipolar one runs -0.5 to +0.5 with CC 64 at 0.0, the span of an LFO, so a
-bipolar source pointed at one swings it about the middle. Pitch Coarse, Pitch Fine and Pitch 1 Offset Coarse and
-Offset Fine are bipolar, since their middle is no change at all, and so is every Pol -- the mixer's two and
-the eight Mod Pol controls and Pitch 1 Direct Pol -- since its sign is what it sets. Pointing a parameter at another
+bipolar source pointed at one swings it about the middle. Osc 1 Pitch Coarse and Fine and Pitch 1 Coarse and
+Fine are bipolar, since their middle is no change at all, and so is every Pol -- the mixer's two and
+the eight Mod Pol controls and Pitch 1 Bend Pol -- since its sign is what it sets. Pointing a parameter at another
 slot is what makes a modulation. A slot with no CC holds 0.0.
 
 Slots 51-59, the General slots, are control slots that no parameter owns: a CC put on the bus for
@@ -533,7 +533,7 @@ MIDI notes 0 to 120 as -0.5 to +0.5, the same span the oscillator reads as its w
 range, and Pitch Bend is bipolar too, one unit across the whole wheel: exactly -0.5 and +0.5 at
 the ends of its travel and exactly zero at the centre detent, so it can feed a module input
 without a mixer to shift it. Note Gate is 0.0 or 1.0, and an envelope triggers at 0.25. Pitch Bend
-is routed to Pitch 1 Direct In by default.
+is routed to Pitch 1 Bend In by default.
 
 The newest note sounds, and the note it took over from is remembered while it is still held: one
 note, no more. When the newest note is released, the remembered one comes back with Note Gate
@@ -559,10 +559,10 @@ tables again after an update.
 
 #### Ranges worth knowing
 
-Pitch 1 Offset Coarse (CC 86) and Offset Fine (CC 70) transpose the pitch Pitch 1 hands on, after
+Pitch 1 Coarse (CC 86) and Fine (CC 70) transpose the pitch Pitch 1 hands on, after
 the glide, so a change acts at once and reaches the oscillator and the filter's keyboard tracking
-alike. Both are centred on CC 64 and move one whole unit per CC step: Offset Coarse a semitone,
-reaching 5 octaves either way, and Offset Fine a cent, reaching 60 either way. They are summed, so
+alike. Both are centred on CC 64 and move one whole unit per CC step: Coarse a semitone,
+reaching 5 octaves either way, and Fine a cent, reaching 60 either way. They are summed, so
 any pitch is reachable. Osc 1 Pitch Coarse and Pitch Fine have the same ranges and add to the
 oscillator alone; they have no CC and stay at 0.0 by default, for an interval or a detune between
 oscillators.
@@ -739,7 +739,7 @@ changes only how fast the output moves, so it cannot step it.
   destination. Route a fast source through a module input, a stepped one through a parameter
 - The smoothing takes two stages (10.7 ms average delay, 99% in 35 ms at 48 kHz), which round off
   the steps of a controller sending sparse CCs (e.g. every 20 ms). Osc 1 Pitch Coarse and Pitch Fine
-  and Pitch 1 Offset Coarse and Offset Fine are not smoothed, so that the pitch follows right away, and neither is Pitch 1 Portamento Time, which
+  and Pitch 1 Coarse and Fine are not smoothed, so that the pitch follows right away, and neither is Pitch 1 Portamento Time, which
   cannot step what it sets
 - A parameter source may point at any of the 128 slots. Slots above 82 read 0 until something
   writes them, which leaves a parameter pointed at one at the bottom of a unipolar dial or the

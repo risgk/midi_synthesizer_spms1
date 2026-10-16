@@ -173,9 +173,9 @@ flowchart LR
 
 ノートのピッチは Pitch 1 を通ってオシレータに届き、ノートからノートへ滑らかに移ります。ポルタメントです。
 Pitch 1 Portamento Time は CC 5 (MIDI 規格と同じ) にあり、起動時は 0.0 です。そこではポルタメントはオフで、
-ピッチを届いたとおりそのまま通します。Pitch Bend は Pitch 1 Direct In に入ります。Direct In はグライドの後で出力に
+ピッチを届いたとおりそのまま通します。Pitch Bend は Pitch 1 Bend In に入ります。Bend In はグライドの後で出力に
 足されるので、ベンドはすぐに効き、オシレータにもフィルタのキーボードトラッキングにも同じように届きます。
-Pitch 1 Direct Amt（CC 57）がベンドレンジで、1 目盛り半音ずつです。起動時の CC 8 で上下 2 半音、CC 28 で
+Pitch 1 Bend Amt（CC 57）がベンドレンジで、1 目盛り半音ずつです。起動時の CC 8 で上下 2 半音、CC 28 で
 1 オクターブ、最大で 5 オクターブです。
 
 パラメータ名では Amount を Amt、Polarity (極性) を Pol と略しています。
@@ -208,7 +208,7 @@ flowchart LR
 何かを与えるまでは何も変えません。どこに座っているかがそのまま価値になります。あるモジュールが今サンプル
 の値を見られるのは、この列で自分より前にあるものからだけで、後ろにあるものからは前サンプルの値を受け取り
 ます。Mixer 1 は LFO とエンベロープに手が届き、オシレータ、フィルタ、アンプは Mixer 1 に手が届きます。
-Pitch 1 がその 3 つの後にあるのは、自分への変調（LFO を Direct In に入れたベンドなど）を今サンプルの値で
+Pitch 1 がその 3 つの後にあるのは、自分への変調（LFO を Bend In に入れたベンドなど）を今サンプルの値で
 受け取るためで、オシレータとフィルタの前にあるのは、それらが同じサンプルの値を読めるようにするためです。
 
 ミキサーは 2 つの信号を合流させるための道具であり、エンベロープのように片側にしか振れない信号を正負
@@ -380,7 +380,7 @@ flowchart LR
 | 5 | Amp 1 Audio In | | 16 | LFO 1 Rate Mod In |
 | 6 | Amp 1 Mod In | | 17 | Filter 1 Mod 2 In |
 | 7 | Mixer 1 In 1 | | 18 | Filter 1 Mod 3 In |
-| 8 | Mixer 1 In 2 | | 19 | Pitch 1 Direct In |
+| 8 | Mixer 1 In 2 | | 19 | Pitch 1 Bend In |
 | 9 | Chorus 1 Audio In | | 20 | LFO 1 Level Mod In |
 | 10 | Delay 1 Audio In L | |  |  |
 
@@ -414,12 +414,12 @@ flowchart LR
 | 8 | Osc 1 Wave | | 23 | Chorus 1 Rate | | 45 | Filter 1 Mod 2 Pol |
 | 9 | Osc 1 Pitch Coarse | | 24 | Chorus 1 Depth | | 46 | Filter 1 Mod 3 Amt |
 | 10 | Osc 1 Pitch Fine | | 25 | Chorus 1 Mix | | 47 | Filter 1 Mod 3 Pol |
-| 11 | Osc 1 Mod 2 Amt | | 26 | Delay 1 Time | | 48 | Pitch 1 Direct Amt |
-| 12 | Osc 1 Mod 2 Pol | | 27 | Delay 1 Feedback | | 49 | Pitch 1 Direct Pol |
+| 11 | Osc 1 Mod 2 Amt | | 26 | Delay 1 Time | | 48 | Pitch 1 Bend Amt |
+| 12 | Osc 1 Mod 2 Pol | | 27 | Delay 1 Feedback | | 49 | Pitch 1 Bend Pol |
 | 13 | Filter 1 Cutoff | | 28 | Delay 1 Mix | | 50 | LFO 1 Level Mod Amt |
 | 14 | Filter 1 Resonance | | 34 | Pitch 1 Portamento Time | | 51 | LFO 1 Level Mod Pol |
-| 15 | Filter 1 Gain | | 35 | Osc 1 Pulse Width | | 52 | Pitch 1 Offset Coarse |
-| 16 | Filter 1 Mod 1 Amt | | 36 | Osc 1 PW Mod Amt | | 53 | Pitch 1 Offset Fine |
+| 15 | Filter 1 Gain | | 35 | Osc 1 Pulse Width | | 52 | Pitch 1 Coarse |
+| 16 | Filter 1 Mod 1 Amt | | 36 | Osc 1 PW Mod Amt | | 53 | Pitch 1 Fine |
 
 <!-- patch_gen end -->
 
@@ -484,12 +484,12 @@ flowchart LR
 | 16 | Chorus 1 Output R ± | | 45 | Delay 1 Time | | 74 | Filter 1 Mod 2 Pol ± |
 | 17 | Delay 1 Output L ± | | 46 | Delay 1 Feedback | | 75 | Filter 1 Mod 3 Amt |
 | 18 | Delay 1 Output R ± | | 47 | Delay 1 Mix | | 76 | Filter 1 Mod 3 Pol ± |
-| 19 | LFO 1 Rate | | 48 | Note Pitch ± | | 77 | Pitch 1 Direct Amt |
-| 20 | LFO 1 Level | | 49 | Note Gate | | 78 | Pitch 1 Direct Pol ± |
+| 19 | LFO 1 Rate | | 48 | Note Pitch ± | | 77 | Pitch 1 Bend Amt |
+| 20 | LFO 1 Level | | 49 | Note Gate | | 78 | Pitch 1 Bend Pol ± |
 | 22 | EG 1 Attack | | 50 | Pitch Bend ± | | 79 | LFO 1 Level Mod Amt |
 | 23 | EG 1 Decay | | 51 | General Mod Wheel | | 80 | LFO 1 Level Mod Pol ± |
-| 24 | EG 1 Sustain | | 52 | General Unipolar 1 | | 81 | Pitch 1 Offset Coarse ± |
-| 25 | EG 1 Level | | 53 | General Unipolar 2 | | 82 | Pitch 1 Offset Fine ± |
+| 24 | EG 1 Sustain | | 52 | General Unipolar 1 | | 81 | Pitch 1 Coarse ± |
+| 25 | EG 1 Level | | 53 | General Unipolar 2 | | 82 | Pitch 1 Fine ± |
 | 27 | Osc 1 Wave | | 54 | General Unipolar 3 | |  |  |
 | 28 | Osc 1 Pitch Coarse ± | | 55 | General Unipolar 4 | |  |  |
 
@@ -504,8 +504,8 @@ flowchart LR
 パラメータはそれぞれユニポーラかバイポーラで、スロットも同じレンジを取ります。ユニポーラは CC 4〜124 で
 0.0〜1.0 と、エンベロープと同じ幅なので、エンベロープを向ければつまみの全域を動かせます。バイポーラは
 CC 64 を 0.0 とする -0.5〜+0.5 と、LFO と同じ幅なので、バイポーラのソースを向ければ中央を挟んで上下に
-振れます。Pitch Coarse、Pitch Fine と Pitch 1 の Offset Coarse、Offset Fine は中央が「変化なし」を意味するのでバイポーラです。Pol も、ミキサーの 2 つ、
-8 つの Mod Pol と Pitch 1 Direct Pol のいずれも、符号そのものが設定する値なのでバイポーラです。パラメータに別のスロットを指させることがモジュレー
+振れます。Pitch Coarse、Pitch Fine と Pitch 1 の Coarse、Fine は中央が「変化なし」を意味するのでバイポーラです。Pol も、ミキサーの 2 つ、
+8 つの Mod Pol と Pitch 1 Bend Pol のいずれも、符号そのものが設定する値なのでバイポーラです。パラメータに別のスロットを指させることがモジュレー
 ションになります。CC のないスロットは 0.0 です。
 
 スロット 51〜59 の General スロットは、どのパラメータにも属さないコントロールスロットです。CC をバスに
@@ -520,7 +520,7 @@ Note Pitch、Note Gate、Pitch Bend の 3 つは鍵盤がバスに載せるも�
 -0.5〜+0.5 で運びます。オシレータがピッチの全域として読むのと同じ幅です。Pitch Bend も同じくバイポーラで、
 ホイールの端から端までがちょうど 1 単位で、両端がちょうど -0.5 と +0.5、中央のディテントがちょうど 0 に
 なるので、ミキサーで下駄を履かせなくてもモジュール入力へ入れられます。Note Gate は 0.0 か 1.0 で、
-エンベロープは 0.25 以上でトリガします。Pitch Bend はデフォルトでは Pitch 1 Direct In に結線されています。
+エンベロープは 0.25 以上でトリガします。Pitch Bend はデフォルトでは Pitch 1 Bend In に結線されています。
 
 鳴るのは最後に押したノートで、それに置き換わったノートは、まだ押さえられている間は記憶されます (1 ノート
 分だけです)。最後のノートを離すと記憶していたノートが Note Gate を 1.0 のまま戻ってくるので、エンベロープは
@@ -544,9 +544,9 @@ ID 番号はファームウェアのバージョンをまたいで安定では�
 
 #### 知っておきたいレンジ
 
-Pitch 1 Offset Coarse（CC 86）と Offset Fine（CC 70）は、Pitch 1 が渡すピッチをグライドの後で移調します。
+Pitch 1 Coarse（CC 86）と Fine（CC 70）は、Pitch 1 が渡すピッチをグライドの後で移調します。
 変えるとすぐに効き、オシレータにもフィルタのキーボードトラッキングにも同じように届きます。どちらも CC 64 を
-中心とし、CC 1 ステップでちょうど 1 単位動きます。Offset Coarse は半音で上下 5 オクターブまで、Offset Fine は
+中心とし、CC 1 ステップでちょうど 1 単位動きます。Coarse は半音で上下 5 オクターブまで、Fine は
 1 セントで上下 60 セントまでです。両者は加算されるので、どのピッチにも届きます。Osc 1 Pitch Coarse と
 Pitch Fine も同じレンジで、そのオシレータにだけ足されます。CC はなく、デフォルトでは 0.0 のままで、
 オシレータ間の音程差やデチューンに使います。
@@ -707,7 +707,7 @@ Pitch 1 Portamento Time はユニポーラで、1/120 刻み、1 ステップで
   1 バッファに 1 回読まれ、受け取る側でスムージングされます。速いソースはモジュール入力へ、段階的なものは
   パラメータへ通してください
 - スムージングは 2 段（48 kHz で平均遅れ 10.7 ms、35 ms で 99%）で、CC をまばらに（例えば 20 ms ごとに）
-  送るコントローラーの段差を丸めます。Osc 1 Pitch Coarse と Pitch Fine、Pitch 1 Offset Coarse と Offset Fine は、音程がすぐ追従するように
+  送るコントローラーの段差を丸めます。Osc 1 Pitch Coarse と Pitch Fine、Pitch 1 Coarse と Fine は、音程がすぐ追従するように
   スムージングしません。Pitch 1 Portamento Time も、設定する対象に段差を生じさせないのでスムージングしません
 - パラメータのソースは 128 のスロットのどれでも指せます。82 より上のスロットは、何かが書き込むまで 0 を
   返すので、そこを指したパラメータはユニポーラならつまみの下端、バイポーラなら中央に留まります

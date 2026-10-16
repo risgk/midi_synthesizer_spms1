@@ -20,7 +20,7 @@
 | After        Key's            | x             | x             |                                      |
 | Touch        Ch's             | x             | x             |                                      |
 +-------------------------------+---------------+---------------+--------------------------------------+
-| Pitch Bend                    | x             | o             | Pitch Direct In, +-2 Semitones       |
+| Pitch Bend                    | x             | o             | Pitch Bend In, +-2 Semitones         |
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Control                    20 | x             | o             | Osc Wave (Saw to Square)             |
 | Change                     13 | x             | o             | Osc Mod 2 Amt                        |
@@ -45,9 +45,9 @@
 |                            92 | x             | o             | Delay Feedback                       |
 |                            94 | x             | o             | Delay Mix                            |
 |                             5 | x             | o             | Pitch Portamento Time                |
-|                            57 | x             | o             | Pitch Direct Amt (Pitch Bend Range)  |
-|                            86 | x             | o             | Pitch Offset Coarse (+-5 Octaves)    |
-|                            70 | x             | o             | Pitch Offset Fine (+-60 Cents)       |
+|                            57 | x             | o             | Pitch Bend Amt (Pitch Bend Range)    |
+|                            86 | x             | o             | Pitch Coarse (+-5 Octaves)           |
+|                            70 | x             | o             | Pitch Fine (+-60 Cents)              |
 |                             1 | x             | o             | General Mod Wheel (Unipolar)         |
 |                            16 | x             | o             | General 1 (Unipolar and Bipolar)     |
 |                            17 | x             | o             | General 2 (Unipolar and Bipolar)     |

@@ -22,7 +22,7 @@ extern void stop_audio(void);
 extern void write_to_audio_buffer(float, float);
 extern void start_debug_measure(void);
 extern void stop_debug_measure(void);
-static const char *const sp_sym_names[86] = {(&("\xff" "i")[1]), (&("\xff" "flush_tiny")[1]), (&("\xff" "smooth")[1]), (&("\xff" "initialize")[1]), (&("\xff" "set_waveform")[1]), (&("\xff" "set_pulse_width")[1]), (&("\xff" "set_modulation_1_amount")[1]), (&("\xff" "set_modulation_1_polarity")[1]), (&("\xff" "set_modulation_2_amount")[1]), (&("\xff" "set_modulation_2_polarity")[1]), (&("\xff" "set_pw_modulation_amount")[1]), (&("\xff" "set_pw_modulation_polarity")[1]), (&("\xff" "set_pitch_coarse")[1]), (&("\xff" "set_pitch_fine")[1]), (&("\xff" "process")[1]), (&("\xff" "pitch_to_freq_fast")[1]), (&("\xff" "poly_blep")[1]), (&("\xff" "set_cutoff")[1]), (&("\xff" "set_modulation_3_amount")[1]), (&("\xff" "set_modulation_3_polarity")[1]), (&("\xff" "set_gain")[1]), (&("\xff" "set_resonance")[1]), (&("\xff" "output_bp")[1]), (&("\xff" "output_hp")[1]), (&("\xff" "cutoff_to_g_fast")[1]), (&("\xff" "resonance_to_k_fast")[1]), (&("\xff" "update_coefficients")[1]), (&("\xff" "clip_output")[1]), (&("\xff" "set_attack")[1]), (&("\xff" "set_decay")[1]), (&("\xff" "set_sustain")[1]), (&("\xff" "set_level")[1]), (&("\xff" "update_coefficients_full")[1]), (&("\xff" "calculate_exp_fast")[1]), (&("\xff" "set_rate")[1]), (&("\xff" "set_rate_modulation_amount")[1]), (&("\xff" "set_rate_modulation_polarity")[1]), (&("\xff" "set_level_modulation_amount")[1]), (&("\xff" "set_level_modulation_polarity")[1]), (&("\xff" "rate_to_freq_fast")[1]), (&("\xff" "set_level_1")[1]), (&("\xff" "set_level_2")[1]), (&("\xff" "set_polarity_1")[1]), (&("\xff" "set_polarity_2")[1]), (&("\xff" "output_l")[1]), (&("\xff" "output_r")[1]), (&("\xff" "set_depth")[1]), (&("\xff" "set_mix")[1]), (&("\xff" "set_time")[1]), (&("\xff" "set_feedback")[1]), (&("\xff" "set_portamento_time")[1]), (&("\xff" "set_direct_amount")[1]), (&("\xff" "set_direct_polarity")[1]), (&("\xff" "set_offset_coarse")[1]), (&("\xff" "set_offset_fine")[1]), (&("\xff" "set_midi_note_on_pitch")[1]), (&("\xff" "uint8")[1]), (&("\xff" "void")[1]), (&("\xff" "get_midi_note_on_pitch")[1]), (&("\xff" "set_midi_note_on_state")[1]), (&("\xff" "get_midi_note_on_state")[1]), (&("\xff" "set_midi_pitch_bend")[1]), (&("\xff" "int32")[1]), (&("\xff" "get_midi_pitch_bend")[1]), (&("\xff" "set_midi_cc_value")[1]), (&("\xff" "get_midi_cc_value")[1]), (&("\xff" "set_midi_nrpn_value")[1]), (&("\xff" "get_midi_nrpn_value")[1]), (&("\xff" "get_midi_run_order_written")[1]), (&("\xff" "set_sample_rate")[1]), (&("\xff" "get_sample_rate")[1]), (&("\xff" "set_audio_buffers")[1]), (&("\xff" "get_audio_buffers")[1]), (&("\xff" "set_audio_buffer_words")[1]), (&("\xff" "get_audio_buffer_words")[1]), (&("\xff" "start_audio")[1]), (&("\xff" "stop_audio")[1]), (&("\xff" "write_to_audio_buffer")[1]), (&("\xff" "float")[1]), (&("\xff" "start_debug_measure")[1]), (&("\xff" "stop_debug_measure")[1]), (&("\xff" "spms1_fill_constant_signals")[1]), (&("\xff" "spms1_write_default_patch")[1]), (&("\xff" "cc_to_unipolar")[1]), (&("\xff" "cc_to_bipolar")[1]), (&("\xff" "cc_or_zero")[1])};
+static const char *const sp_sym_names[86] = {(&("\xff" "i")[1]), (&("\xff" "flush_tiny")[1]), (&("\xff" "smooth")[1]), (&("\xff" "initialize")[1]), (&("\xff" "set_waveform")[1]), (&("\xff" "set_pulse_width")[1]), (&("\xff" "set_modulation_1_amount")[1]), (&("\xff" "set_modulation_1_polarity")[1]), (&("\xff" "set_modulation_2_amount")[1]), (&("\xff" "set_modulation_2_polarity")[1]), (&("\xff" "set_pw_modulation_amount")[1]), (&("\xff" "set_pw_modulation_polarity")[1]), (&("\xff" "set_pitch_coarse")[1]), (&("\xff" "set_pitch_fine")[1]), (&("\xff" "process")[1]), (&("\xff" "pitch_to_freq_fast")[1]), (&("\xff" "poly_blep")[1]), (&("\xff" "set_cutoff")[1]), (&("\xff" "set_modulation_3_amount")[1]), (&("\xff" "set_modulation_3_polarity")[1]), (&("\xff" "set_gain")[1]), (&("\xff" "set_resonance")[1]), (&("\xff" "output_bp")[1]), (&("\xff" "output_hp")[1]), (&("\xff" "cutoff_to_g_fast")[1]), (&("\xff" "resonance_to_k_fast")[1]), (&("\xff" "update_coefficients")[1]), (&("\xff" "clip_output")[1]), (&("\xff" "set_attack")[1]), (&("\xff" "set_decay")[1]), (&("\xff" "set_sustain")[1]), (&("\xff" "set_level")[1]), (&("\xff" "update_coefficients_full")[1]), (&("\xff" "calculate_exp_fast")[1]), (&("\xff" "set_rate")[1]), (&("\xff" "set_rate_modulation_amount")[1]), (&("\xff" "set_rate_modulation_polarity")[1]), (&("\xff" "set_level_modulation_amount")[1]), (&("\xff" "set_level_modulation_polarity")[1]), (&("\xff" "rate_to_freq_fast")[1]), (&("\xff" "set_level_1")[1]), (&("\xff" "set_level_2")[1]), (&("\xff" "set_polarity_1")[1]), (&("\xff" "set_polarity_2")[1]), (&("\xff" "output_l")[1]), (&("\xff" "output_r")[1]), (&("\xff" "set_depth")[1]), (&("\xff" "set_mix")[1]), (&("\xff" "set_time")[1]), (&("\xff" "set_feedback")[1]), (&("\xff" "set_portamento_time")[1]), (&("\xff" "set_bend_amount")[1]), (&("\xff" "set_bend_polarity")[1]), (&("\xff" "set_coarse")[1]), (&("\xff" "set_fine")[1]), (&("\xff" "set_midi_note_on_pitch")[1]), (&("\xff" "uint8")[1]), (&("\xff" "void")[1]), (&("\xff" "get_midi_note_on_pitch")[1]), (&("\xff" "set_midi_note_on_state")[1]), (&("\xff" "get_midi_note_on_state")[1]), (&("\xff" "set_midi_pitch_bend")[1]), (&("\xff" "int32")[1]), (&("\xff" "get_midi_pitch_bend")[1]), (&("\xff" "set_midi_cc_value")[1]), (&("\xff" "get_midi_cc_value")[1]), (&("\xff" "set_midi_nrpn_value")[1]), (&("\xff" "get_midi_nrpn_value")[1]), (&("\xff" "get_midi_run_order_written")[1]), (&("\xff" "set_sample_rate")[1]), (&("\xff" "get_sample_rate")[1]), (&("\xff" "set_audio_buffers")[1]), (&("\xff" "get_audio_buffers")[1]), (&("\xff" "set_audio_buffer_words")[1]), (&("\xff" "get_audio_buffer_words")[1]), (&("\xff" "start_audio")[1]), (&("\xff" "stop_audio")[1]), (&("\xff" "write_to_audio_buffer")[1]), (&("\xff" "float")[1]), (&("\xff" "start_debug_measure")[1]), (&("\xff" "stop_debug_measure")[1]), (&("\xff" "spms1_fill_constant_signals")[1]), (&("\xff" "spms1_write_default_patch")[1]), (&("\xff" "cc_to_unipolar")[1]), (&("\xff" "cc_to_bipolar")[1]), (&("\xff" "cc_or_zero")[1])};
 static const char *sp_dyn_syms[SP_DYN_SYMS_MAX]; static int sp_ndyn = 0;
 static void sp_mark_dyn_syms(void){for(int _i=0;_i<sp_ndyn;_i++)sp_mark_string(sp_dyn_syms[_i]);}
 static const char *sp_sym_to_s(sp_sym id){if(id>=0&&id<86)return sp_sym_names[id];if(id>=86&&id<86+sp_ndyn)return sp_dyn_syms[id-86];return sp_str_empty;}
@@ -464,14 +464,14 @@ struct sp_Pitch_s {
   sp_float iv_distance;
   sp_float iv_last_input;
   sp_float iv_smoothing_target_blend;
-  sp_float iv_direct_amount;
-  sp_float iv_direct_polarity;
-  sp_float iv_direct_depth;
-  sp_float iv_stage_1_direct_depth;
-  sp_float iv_current_direct_depth;
+  sp_float iv_bend_amount;
+  sp_float iv_bend_polarity;
+  sp_float iv_bend_depth;
+  sp_float iv_stage_1_bend_depth;
+  sp_float iv_current_bend_depth;
   sp_int iv_sample_counter;
-  sp_float iv_offset_coarse;
-  sp_float iv_offset_fine;
+  sp_float iv_coarse;
+  sp_float iv_fine;
   sp_float iv_offset;
 };
 struct sp_C_s {
@@ -693,14 +693,14 @@ static sp_float civ_Pitch_blend = 0.0;
 static sp_float civ_Pitch_distance = 0.0;
 static sp_float civ_Pitch_last_input = 0.0;
 static sp_float civ_Pitch_smoothing_target_blend = 0.0;
-static sp_float civ_Pitch_direct_amount = 0.0;
-static sp_float civ_Pitch_direct_polarity = 0.0;
-static sp_float civ_Pitch_direct_depth = 0.0;
-static sp_float civ_Pitch_stage_1_direct_depth = 0.0;
-static sp_float civ_Pitch_current_direct_depth = 0.0;
+static sp_float civ_Pitch_bend_amount = 0.0;
+static sp_float civ_Pitch_bend_polarity = 0.0;
+static sp_float civ_Pitch_bend_depth = 0.0;
+static sp_float civ_Pitch_stage_1_bend_depth = 0.0;
+static sp_float civ_Pitch_current_bend_depth = 0.0;
 static sp_int civ_Pitch_sample_counter = SP_INT_NIL;
-static sp_float civ_Pitch_offset_coarse = 0.0;
-static sp_float civ_Pitch_offset_fine = 0.0;
+static sp_float civ_Pitch_coarse = 0.0;
+static sp_float civ_Pitch_fine = 0.0;
 static sp_float civ_Pitch_offset = 0.0;
 static const char *sp_obj_inspect_sw(int cls_id, void *p) __attribute__((cold, noinline));
 static const char *sp_obj_to_s_sw(int cls_id, void *p) __attribute__((cold, noinline));
@@ -780,11 +780,11 @@ static inline __attribute__((always_inline)) sp_float sp_Delay_set_mix(sp_Delay 
 static sp_float sp_Delay_process(sp_Delay *self, sp_float lv_audio_input_l, sp_float lv_audio_input_r);
 static void sp_Pitch_initialize(sp_Pitch *self, sp_int lv_sample_rate);
 static inline __attribute__((always_inline)) sp_float sp_Pitch_set_portamento_time(sp_Pitch *self, sp_float lv_time);
-static inline __attribute__((always_inline)) sp_float sp_Pitch_set_direct_amount(sp_Pitch *self, sp_float lv_amount);
-static inline __attribute__((always_inline)) sp_float sp_Pitch_set_direct_polarity(sp_Pitch *self, sp_float lv_polarity);
-static inline __attribute__((always_inline)) sp_float sp_Pitch_set_offset_coarse(sp_Pitch *self, sp_float lv_offset_coarse);
-static inline __attribute__((always_inline)) sp_float sp_Pitch_set_offset_fine(sp_Pitch *self, sp_float lv_offset_fine);
-static inline __attribute__((always_inline)) sp_float sp_Pitch_process(sp_Pitch *self, sp_float lv_input, sp_float lv_direct_input);
+static inline __attribute__((always_inline)) sp_float sp_Pitch_set_bend_amount(sp_Pitch *self, sp_float lv_amount);
+static inline __attribute__((always_inline)) sp_float sp_Pitch_set_bend_polarity(sp_Pitch *self, sp_float lv_polarity);
+static inline __attribute__((always_inline)) sp_float sp_Pitch_set_coarse(sp_Pitch *self, sp_float lv_coarse);
+static inline __attribute__((always_inline)) sp_float sp_Pitch_set_fine(sp_Pitch *self, sp_float lv_fine);
+static inline __attribute__((always_inline)) sp_float sp_Pitch_process(sp_Pitch *self, sp_float lv_input, sp_float lv_bend_input);
 static inline __attribute__((always_inline)) sp_float sp_Pitch_calculate_exp_fast(sp_Pitch *self, sp_float lv_value);
 static inline __attribute__((always_inline)) sp_float sp_spms1_fill_constant_signals(sp_FloatArray * lv_signals);
 static void sp_spms1_write_default_patch(sp_int lv_midi_ch);
@@ -885,8 +885,8 @@ static sp_float cst_TIME_BASE = 0.0;
 static sp_float cst_Spms1__Pitch__SMOOTHING_TARGET_BLEND_BASE = 0.0;
 static sp_int cst_Spms1__Pitch__CONTROL_RATE_DIVISOR = 0;
 static sp_int cst_Spms1__Pitch__CONTROL_RATE_MASK = 0;
-static sp_float cst_OFFSET_COARSE_RANGE = 0.0;
-static sp_float cst_OFFSET_FINE_RANGE = 0.0;
+static sp_float cst_COARSE_RANGE = 0.0;
+static sp_float cst_FINE_RANGE = 0.0;
 static sp_int cst_MODULE_NONE = 0;
 static sp_int cst_MODULE_LFO_1 = 0;
 static sp_int cst_MODULE_EG_1 = 0;
@@ -970,12 +970,12 @@ static sp_int cst_SIGNAL_FILTER_1_MOD_2_AMT = 0;
 static sp_int cst_SIGNAL_FILTER_1_MOD_2_POL = 0;
 static sp_int cst_SIGNAL_FILTER_1_MOD_3_AMT = 0;
 static sp_int cst_SIGNAL_FILTER_1_MOD_3_POL = 0;
-static sp_int cst_SIGNAL_PITCH_1_DIRECT_AMT = 0;
-static sp_int cst_SIGNAL_PITCH_1_DIRECT_POL = 0;
+static sp_int cst_SIGNAL_PITCH_1_BEND_AMT = 0;
+static sp_int cst_SIGNAL_PITCH_1_BEND_POL = 0;
 static sp_int cst_SIGNAL_LFO_1_LEVEL_MOD_AMT = 0;
 static sp_int cst_SIGNAL_LFO_1_LEVEL_MOD_POL = 0;
-static sp_int cst_SIGNAL_PITCH_1_OFFSET_COARSE = 0;
-static sp_int cst_SIGNAL_PITCH_1_OFFSET_FINE = 0;
+static sp_int cst_SIGNAL_PITCH_1_COARSE = 0;
+static sp_int cst_SIGNAL_PITCH_1_FINE = 0;
 static sp_int cst_NRPN_ACTIVE_MODULE_BASE = 0;
 static sp_int cst_NRPN_SOURCE_EG_1_GATE = 0;
 static sp_int cst_NRPN_SOURCE_OSC_1_MOD_1 = 0;
@@ -996,7 +996,7 @@ static sp_int cst_NRPN_SOURCE_OSC_1_PW_MOD = 0;
 static sp_int cst_NRPN_SOURCE_LFO_1_RATE_MOD = 0;
 static sp_int cst_NRPN_SOURCE_FILTER_1_MOD_2 = 0;
 static sp_int cst_NRPN_SOURCE_FILTER_1_MOD_3 = 0;
-static sp_int cst_NRPN_SOURCE_PITCH_1_DIRECT = 0;
+static sp_int cst_NRPN_SOURCE_PITCH_1_BEND = 0;
 static sp_int cst_NRPN_SOURCE_LFO_1_LEVEL_MOD = 0;
 static sp_int cst_NRPN_SOURCE_LFO_1_RATE = 0;
 static sp_int cst_NRPN_SOURCE_LFO_1_LEVEL = 0;
@@ -1037,12 +1037,12 @@ static sp_int cst_NRPN_SOURCE_FILTER_1_MOD_2_AMT = 0;
 static sp_int cst_NRPN_SOURCE_FILTER_1_MOD_2_POL = 0;
 static sp_int cst_NRPN_SOURCE_FILTER_1_MOD_3_AMT = 0;
 static sp_int cst_NRPN_SOURCE_FILTER_1_MOD_3_POL = 0;
-static sp_int cst_NRPN_SOURCE_PITCH_1_DIRECT_AMT = 0;
-static sp_int cst_NRPN_SOURCE_PITCH_1_DIRECT_POL = 0;
+static sp_int cst_NRPN_SOURCE_PITCH_1_BEND_AMT = 0;
+static sp_int cst_NRPN_SOURCE_PITCH_1_BEND_POL = 0;
 static sp_int cst_NRPN_SOURCE_LFO_1_LEVEL_MOD_AMT = 0;
 static sp_int cst_NRPN_SOURCE_LFO_1_LEVEL_MOD_POL = 0;
-static sp_int cst_NRPN_SOURCE_PITCH_1_OFFSET_COARSE = 0;
-static sp_int cst_NRPN_SOURCE_PITCH_1_OFFSET_FINE = 0;
+static sp_int cst_NRPN_SOURCE_PITCH_1_COARSE = 0;
+static sp_int cst_NRPN_SOURCE_PITCH_1_FINE = 0;
 static sp_int cst_NRPN_CC_LFO_1_RATE = 0;
 static sp_int cst_NRPN_CC_LFO_1_LEVEL = 0;
 static sp_int cst_NRPN_CC_EG_1_ATTACK = 0;
@@ -1087,12 +1087,12 @@ static sp_int cst_NRPN_CC_FILTER_1_MOD_2_AMT = 0;
 static sp_int cst_NRPN_CC_FILTER_1_MOD_2_POL = 0;
 static sp_int cst_NRPN_CC_FILTER_1_MOD_3_AMT = 0;
 static sp_int cst_NRPN_CC_FILTER_1_MOD_3_POL = 0;
-static sp_int cst_NRPN_CC_PITCH_1_DIRECT_AMT = 0;
-static sp_int cst_NRPN_CC_PITCH_1_DIRECT_POL = 0;
+static sp_int cst_NRPN_CC_PITCH_1_BEND_AMT = 0;
+static sp_int cst_NRPN_CC_PITCH_1_BEND_POL = 0;
 static sp_int cst_NRPN_CC_LFO_1_LEVEL_MOD_AMT = 0;
 static sp_int cst_NRPN_CC_LFO_1_LEVEL_MOD_POL = 0;
-static sp_int cst_NRPN_CC_PITCH_1_OFFSET_COARSE = 0;
-static sp_int cst_NRPN_CC_PITCH_1_OFFSET_FINE = 0;
+static sp_int cst_NRPN_CC_PITCH_1_COARSE = 0;
+static sp_int cst_NRPN_CC_PITCH_1_FINE = 0;
 static sp_int cst_MIDI_CH = 0;
 static sp_int cst_SAMPLE_RATE = 0;
 static sp_int cst_AUDIO_BUFFERS = 0;
@@ -1622,14 +1622,14 @@ static const char *sp_obj_inspect_sw(int cls_id, void *p) {
       sp_String_append(_s, ", @distance="); sp_String_append(_s, sp_poly_inspect(sp_box_float(o->iv_distance)));
       sp_String_append(_s, ", @last_input="); sp_String_append(_s, sp_poly_inspect(sp_box_float(o->iv_last_input)));
       sp_String_append(_s, ", @smoothing_target_blend="); sp_String_append(_s, sp_poly_inspect(sp_box_float(o->iv_smoothing_target_blend)));
-      sp_String_append(_s, ", @direct_amount="); sp_String_append(_s, sp_poly_inspect(sp_box_float(o->iv_direct_amount)));
-      sp_String_append(_s, ", @direct_polarity="); sp_String_append(_s, sp_poly_inspect(sp_box_float(o->iv_direct_polarity)));
-      sp_String_append(_s, ", @direct_depth="); sp_String_append(_s, sp_poly_inspect(sp_box_float(o->iv_direct_depth)));
-      sp_String_append(_s, ", @stage_1_direct_depth="); sp_String_append(_s, sp_poly_inspect(sp_box_float(o->iv_stage_1_direct_depth)));
-      sp_String_append(_s, ", @current_direct_depth="); sp_String_append(_s, sp_poly_inspect(sp_box_float(o->iv_current_direct_depth)));
+      sp_String_append(_s, ", @bend_amount="); sp_String_append(_s, sp_poly_inspect(sp_box_float(o->iv_bend_amount)));
+      sp_String_append(_s, ", @bend_polarity="); sp_String_append(_s, sp_poly_inspect(sp_box_float(o->iv_bend_polarity)));
+      sp_String_append(_s, ", @bend_depth="); sp_String_append(_s, sp_poly_inspect(sp_box_float(o->iv_bend_depth)));
+      sp_String_append(_s, ", @stage_1_bend_depth="); sp_String_append(_s, sp_poly_inspect(sp_box_float(o->iv_stage_1_bend_depth)));
+      sp_String_append(_s, ", @current_bend_depth="); sp_String_append(_s, sp_poly_inspect(sp_box_float(o->iv_current_bend_depth)));
       sp_String_append(_s, ", @sample_counter="); sp_String_append(_s, sp_poly_inspect((o->iv_sample_counter == SP_INT_NIL ? sp_box_nil() : sp_box_int(o->iv_sample_counter))));
-      sp_String_append(_s, ", @offset_coarse="); sp_String_append(_s, sp_poly_inspect(sp_box_float(o->iv_offset_coarse)));
-      sp_String_append(_s, ", @offset_fine="); sp_String_append(_s, sp_poly_inspect(sp_box_float(o->iv_offset_fine)));
+      sp_String_append(_s, ", @coarse="); sp_String_append(_s, sp_poly_inspect(sp_box_float(o->iv_coarse)));
+      sp_String_append(_s, ", @fine="); sp_String_append(_s, sp_poly_inspect(sp_box_float(o->iv_fine)));
       sp_String_append(_s, ", @offset="); sp_String_append(_s, sp_poly_inspect(sp_box_float(o->iv_offset)));
       sp_String_append(_s, ">");
       sp_poly_recur_pop(_rcm);
@@ -3398,21 +3398,21 @@ static void sp_Pitch_initialize(sp_Pitch *self, sp_int lv_sample_rate) {
 #line 48 "spms1_pitch.rb"
   self->iv_smoothing_target_blend = ((cst_Spms1__Pitch__SMOOTHING_TARGET_BLEND_BASE * ((48000.0 / (double)(self->iv_sample_rate)))) * (((double)(cst_Spms1__Pitch__CONTROL_RATE_DIVISOR) / 4.0)));
 #line 49 "spms1_pitch.rb"
-  self->iv_direct_amount = 0.0;
+  self->iv_bend_amount = 0.0;
 #line 50 "spms1_pitch.rb"
-  self->iv_direct_polarity = 1.0;
+  self->iv_bend_polarity = 1.0;
 #line 51 "spms1_pitch.rb"
-  self->iv_direct_depth = 0.0;
+  self->iv_bend_depth = 0.0;
 #line 52 "spms1_pitch.rb"
-  self->iv_stage_1_direct_depth = 0.0;
+  self->iv_stage_1_bend_depth = 0.0;
 #line 53 "spms1_pitch.rb"
-  self->iv_current_direct_depth = 0.0;
+  self->iv_current_bend_depth = 0.0;
 #line 54 "spms1_pitch.rb"
   self->iv_sample_counter = 0LL;
 #line 55 "spms1_pitch.rb"
-  self->iv_offset_coarse = 0.0;
+  self->iv_coarse = 0.0;
 #line 56 "spms1_pitch.rb"
-  self->iv_offset_fine = 0.0;
+  self->iv_fine = 0.0;
 #line 57 "spms1_pitch.rb"
   self->iv_offset = 0.0;
 }
@@ -3430,60 +3430,60 @@ static inline __attribute__((always_inline)) sp_float sp_Pitch_set_portamento_ti
   return 0.0;
 }
 #line 77 "spms1_pitch.rb"
-static inline __attribute__((always_inline)) sp_float sp_Pitch_set_direct_amount(sp_Pitch *self, sp_float lv_amount) {
+static inline __attribute__((always_inline)) sp_float sp_Pitch_set_bend_amount(sp_Pitch *self, sp_float lv_amount) {
 #line 78 "spms1_pitch.rb"
-  self->iv_direct_amount = (((lv_amount < 0.0)) ? 0.0 : ((((lv_amount > 1.0)) ? 1.0 : lv_amount)));
+  self->iv_bend_amount = (((lv_amount < 0.0)) ? 0.0 : ((((lv_amount > 1.0)) ? 1.0 : lv_amount)));
 #line 79 "spms1_pitch.rb"
-  self->iv_direct_depth = (self->iv_direct_amount * self->iv_direct_polarity);
-  return self->iv_direct_depth;
+  self->iv_bend_depth = (self->iv_bend_amount * self->iv_bend_polarity);
+  return self->iv_bend_depth;
   return 0.0;
 }
 #line 82 "spms1_pitch.rb"
-static inline __attribute__((always_inline)) sp_float sp_Pitch_set_direct_polarity(sp_Pitch *self, sp_float lv_polarity) {
+static inline __attribute__((always_inline)) sp_float sp_Pitch_set_bend_polarity(sp_Pitch *self, sp_float lv_polarity) {
     sp_float lv_clamped_polarity = 0.0;
 #line 83 "spms1_pitch.rb"
   lv_clamped_polarity = (((lv_polarity < -0.5)) ? -0.5 : ((((lv_polarity > 0.5)) ? 0.5 : lv_polarity)));
 #line 84 "spms1_pitch.rb"
-  self->iv_direct_polarity = (lv_clamped_polarity + lv_clamped_polarity);
+  self->iv_bend_polarity = (lv_clamped_polarity + lv_clamped_polarity);
 #line 85 "spms1_pitch.rb"
-  self->iv_direct_depth = (self->iv_direct_amount * self->iv_direct_polarity);
-  return self->iv_direct_depth;
+  self->iv_bend_depth = (self->iv_bend_amount * self->iv_bend_polarity);
+  return self->iv_bend_depth;
   return 0.0;
 }
 #line 91 "spms1_pitch.rb"
-static inline __attribute__((always_inline)) sp_float sp_Pitch_set_offset_coarse(sp_Pitch *self, sp_float lv_offset_coarse) {
+static inline __attribute__((always_inline)) sp_float sp_Pitch_set_coarse(sp_Pitch *self, sp_float lv_coarse) {
     sp_float lv_clamped = 0.0;
 #line 92 "spms1_pitch.rb"
-  lv_clamped = (((lv_offset_coarse < -0.5)) ? -0.5 : ((((lv_offset_coarse > 0.5)) ? 0.5 : lv_offset_coarse)));
+  lv_clamped = (((lv_coarse < -0.5)) ? -0.5 : ((((lv_coarse > 0.5)) ? 0.5 : lv_coarse)));
 #line 93 "spms1_pitch.rb"
-  self->iv_offset_coarse = ((lv_clamped + lv_clamped) * cst_OFFSET_COARSE_RANGE);
+  self->iv_coarse = ((lv_clamped + lv_clamped) * cst_COARSE_RANGE);
 #line 94 "spms1_pitch.rb"
-  self->iv_offset = (self->iv_offset_coarse + self->iv_offset_fine);
+  self->iv_offset = (self->iv_coarse + self->iv_fine);
   return self->iv_offset;
   return 0.0;
 }
 #line 97 "spms1_pitch.rb"
-static inline __attribute__((always_inline)) sp_float sp_Pitch_set_offset_fine(sp_Pitch *self, sp_float lv_offset_fine) {
+static inline __attribute__((always_inline)) sp_float sp_Pitch_set_fine(sp_Pitch *self, sp_float lv_fine) {
     sp_float lv_clamped = 0.0;
 #line 98 "spms1_pitch.rb"
-  lv_clamped = (((lv_offset_fine < -0.5)) ? -0.5 : ((((lv_offset_fine > 0.5)) ? 0.5 : lv_offset_fine)));
+  lv_clamped = (((lv_fine < -0.5)) ? -0.5 : ((((lv_fine > 0.5)) ? 0.5 : lv_fine)));
 #line 99 "spms1_pitch.rb"
-  self->iv_offset_fine = ((lv_clamped + lv_clamped) * cst_OFFSET_FINE_RANGE);
+  self->iv_fine = ((lv_clamped + lv_clamped) * cst_FINE_RANGE);
 #line 100 "spms1_pitch.rb"
-  self->iv_offset = (self->iv_offset_coarse + self->iv_offset_fine);
+  self->iv_offset = (self->iv_coarse + self->iv_fine);
   return self->iv_offset;
   return 0.0;
 }
 #line 119 "spms1_pitch.rb"
-static inline __attribute__((always_inline)) sp_float sp_Pitch_process(sp_Pitch *self, sp_float lv_input, sp_float lv_direct_input) {
+static inline __attribute__((always_inline)) sp_float sp_Pitch_process(sp_Pitch *self, sp_float lv_input, sp_float lv_bend_input) {
     sp_float lv_distance = 0.0;
     sp_float lv_flushed = 0.0;
 #line 120 "spms1_pitch.rb"
   if ((self->iv_sample_counter == 0LL)) {
 #line 121 "spms1_pitch.rb"
-    self->iv_stage_1_direct_depth = sp_Dsp_s_smooth(self->iv_direct_depth, self->iv_stage_1_direct_depth, self->iv_smoothing_target_blend);
+    self->iv_stage_1_bend_depth = sp_Dsp_s_smooth(self->iv_bend_depth, self->iv_stage_1_bend_depth, self->iv_smoothing_target_blend);
 #line 122 "spms1_pitch.rb"
-    self->iv_current_direct_depth = sp_Dsp_s_smooth(self->iv_stage_1_direct_depth, self->iv_current_direct_depth, self->iv_smoothing_target_blend);
+    self->iv_current_bend_depth = sp_Dsp_s_smooth(self->iv_stage_1_bend_depth, self->iv_current_bend_depth, self->iv_smoothing_target_blend);
   }
 #line 124 "spms1_pitch.rb"
   self->iv_sample_counter = (sp_int_add(self->iv_sample_counter, 1LL) & cst_Spms1__Pitch__CONTROL_RATE_MASK);
@@ -3496,7 +3496,7 @@ static inline __attribute__((always_inline)) sp_float sp_Pitch_process(sp_Pitch 
 #line 129 "spms1_pitch.rb"
   self->iv_distance = (lv_flushed - (lv_flushed * self->iv_blend));
 #line 130 "spms1_pitch.rb"
-  return (((lv_input + self->iv_distance) + ((lv_direct_input * self->iv_current_direct_depth))) + self->iv_offset);
+  return (((lv_input + self->iv_distance) + ((lv_bend_input * self->iv_current_bend_depth))) + self->iv_offset);
   return 0.0;
 }
 #line 135 "spms1_pitch.rb"
@@ -3601,7 +3601,7 @@ static void sp_spms1_write_default_patch(sp_int lv_midi_ch) {
 #line 267 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_FILTER_1_MOD_3)), ((uint8_t)(cst_SIGNAL_PITCH_1_OUTPUT))), (sp_int)0);
 #line 268 "spms1_patch.rb"
-  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_DIRECT)), ((uint8_t)(cst_SIGNAL_PITCH_BEND))), (sp_int)0);
+  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_BEND)), ((uint8_t)(cst_SIGNAL_PITCH_BEND))), (sp_int)0);
 #line 269 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_LFO_1_LEVEL_MOD)), ((uint8_t)(cst_SIGNAL_GENERAL_MOD_WHEEL))), (sp_int)0);
 #line 271 "spms1_patch.rb"
@@ -3683,17 +3683,17 @@ static void sp_spms1_write_default_patch(sp_int lv_midi_ch) {
 #line 309 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_FILTER_1_MOD_3_POL)), ((uint8_t)(cst_SIGNAL_HALF))), (sp_int)0);
 #line 310 "spms1_patch.rb"
-  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_DIRECT_AMT)), ((uint8_t)(cst_SIGNAL_PITCH_1_DIRECT_AMT))), (sp_int)0);
+  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_BEND_AMT)), ((uint8_t)(cst_SIGNAL_PITCH_1_BEND_AMT))), (sp_int)0);
 #line 311 "spms1_patch.rb"
-  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_DIRECT_POL)), ((uint8_t)(cst_SIGNAL_HALF))), (sp_int)0);
+  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_BEND_POL)), ((uint8_t)(cst_SIGNAL_HALF))), (sp_int)0);
 #line 312 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_LFO_1_LEVEL_MOD_AMT)), ((uint8_t)(cst_SIGNAL_ONE))), (sp_int)0);
 #line 313 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_LFO_1_LEVEL_MOD_POL)), ((uint8_t)(cst_SIGNAL_HALF))), (sp_int)0);
 #line 314 "spms1_patch.rb"
-  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_OFFSET_COARSE)), ((uint8_t)(cst_SIGNAL_PITCH_1_OFFSET_COARSE))), (sp_int)0);
+  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_COARSE)), ((uint8_t)(cst_SIGNAL_PITCH_1_COARSE))), (sp_int)0);
 #line 315 "spms1_patch.rb"
-  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_OFFSET_FINE)), ((uint8_t)(cst_SIGNAL_PITCH_1_OFFSET_FINE))), (sp_int)0);
+  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_FINE)), ((uint8_t)(cst_SIGNAL_PITCH_1_FINE))), (sp_int)0);
 #line 317 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_CC_LFO_1_RATE)), ((uint8_t)(3LL))), (sp_int)0);
 #line 318 "spms1_patch.rb"
@@ -3751,11 +3751,11 @@ static void sp_spms1_write_default_patch(sp_int lv_midi_ch) {
 #line 344 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_CC_FILTER_1_MOD_3_AMT)), ((uint8_t)(9LL))), (sp_int)0);
 #line 345 "spms1_patch.rb"
-  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_CC_PITCH_1_DIRECT_AMT)), ((uint8_t)(57LL))), (sp_int)0);
+  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_CC_PITCH_1_BEND_AMT)), ((uint8_t)(57LL))), (sp_int)0);
 #line 346 "spms1_patch.rb"
-  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_CC_PITCH_1_OFFSET_COARSE)), ((uint8_t)(86LL))), (sp_int)0);
+  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_CC_PITCH_1_COARSE)), ((uint8_t)(86LL))), (sp_int)0);
 #line 347 "spms1_patch.rb"
-  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_CC_PITCH_1_OFFSET_FINE)), ((uint8_t)(70LL))), (sp_int)0);
+  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_CC_PITCH_1_FINE)), ((uint8_t)(70LL))), (sp_int)0);
 #line 349 "spms1_patch.rb"
   (set_midi_cc_value(((uint8_t)(lv_midi_ch)), ((uint8_t)(3LL)), ((uint8_t)(64LL))), (sp_int)0);
 #line 350 "spms1_patch.rb"
@@ -3916,7 +3916,7 @@ int main(int argc,char**argv){
     sp_int lv_source_output_l = 0;
     sp_int lv_source_output_r = 0;
     sp_int lv_source_pitch_1_in = 0;
-    sp_int lv_source_pitch_1_direct = 0;
+    sp_int lv_source_pitch_1_bend = 0;
     sp_int lv_source_osc_1_pw_mod = 0;
     sp_int lv_source_lfo_1_rate_mod = 0;
     sp_int lv_source_lfo_1_level_mod = 0;
@@ -3959,12 +3959,12 @@ int main(int argc,char**argv){
     sp_int lv_source_filter_1_mod_2_pol = 0;
     sp_int lv_source_filter_1_mod_3_amt = 0;
     sp_int lv_source_filter_1_mod_3_pol = 0;
-    sp_int lv_source_pitch_1_direct_amt = 0;
-    sp_int lv_source_pitch_1_direct_pol = 0;
+    sp_int lv_source_pitch_1_bend_amt = 0;
+    sp_int lv_source_pitch_1_bend_pol = 0;
     sp_int lv_source_lfo_1_level_mod_amt = 0;
     sp_int lv_source_lfo_1_level_mod_pol = 0;
-    sp_int lv_source_pitch_1_offset_coarse = 0;
-    sp_int lv_source_pitch_1_offset_fine = 0;
+    sp_int lv_source_pitch_1_coarse = 0;
+    sp_int lv_source_pitch_1_fine = 0;
     sp_int lv_cc_lfo_1_rate = 0;
     sp_int lv_cc_lfo_1_level = 0;
     sp_int lv_cc_eg_1_attack = 0;
@@ -4004,12 +4004,12 @@ int main(int argc,char**argv){
     sp_int lv_cc_filter_1_mod_2_pol = 0;
     sp_int lv_cc_filter_1_mod_3_amt = 0;
     sp_int lv_cc_filter_1_mod_3_pol = 0;
-    sp_int lv_cc_pitch_1_direct_amt = 0;
-    sp_int lv_cc_pitch_1_direct_pol = 0;
+    sp_int lv_cc_pitch_1_bend_amt = 0;
+    sp_int lv_cc_pitch_1_bend_pol = 0;
     sp_int lv_cc_lfo_1_level_mod_amt = 0;
     sp_int lv_cc_lfo_1_level_mod_pol = 0;
-    sp_int lv_cc_pitch_1_offset_coarse = 0;
-    sp_int lv_cc_pitch_1_offset_fine = 0;
+    sp_int lv_cc_pitch_1_coarse = 0;
+    sp_int lv_cc_pitch_1_fine = 0;
     sp_int lv_cc_general_mod_wheel = 0;
     sp_int lv_cc_general_1 = 0;
     sp_int lv_cc_general_2 = 0;
@@ -4299,9 +4299,9 @@ int main(int argc,char**argv){
 #line 33 "spms1_pitch.rb"
   cst_Spms1__Pitch__CONTROL_RATE_MASK = sp_int_sub(cst_Spms1__Pitch__CONTROL_RATE_DIVISOR, 1LL);
 #line 37 "spms1_pitch.rb"
-  cst_OFFSET_COARSE_RANGE = (60.0 / 120.0);
+  cst_COARSE_RANGE = (60.0 / 120.0);
 #line 38 "spms1_pitch.rb"
-  cst_OFFSET_FINE_RANGE = (0.59999999999999998 / 120.0);
+  cst_FINE_RANGE = (0.59999999999999998 / 120.0);
 #line 27 "spms1_main.rb"
 #line 28 "spms1_main.rb"
 #line 54 "spms1_main.rb"
@@ -4472,17 +4472,17 @@ int main(int argc,char**argv){
 #line 89 "spms1_patch.rb"
   cst_SIGNAL_FILTER_1_MOD_3_POL = 76LL;
 #line 90 "spms1_patch.rb"
-  cst_SIGNAL_PITCH_1_DIRECT_AMT = 77LL;
+  cst_SIGNAL_PITCH_1_BEND_AMT = 77LL;
 #line 91 "spms1_patch.rb"
-  cst_SIGNAL_PITCH_1_DIRECT_POL = 78LL;
+  cst_SIGNAL_PITCH_1_BEND_POL = 78LL;
 #line 92 "spms1_patch.rb"
   cst_SIGNAL_LFO_1_LEVEL_MOD_AMT = 79LL;
 #line 93 "spms1_patch.rb"
   cst_SIGNAL_LFO_1_LEVEL_MOD_POL = 80LL;
 #line 94 "spms1_patch.rb"
-  cst_SIGNAL_PITCH_1_OFFSET_COARSE = 81LL;
+  cst_SIGNAL_PITCH_1_COARSE = 81LL;
 #line 95 "spms1_patch.rb"
-  cst_SIGNAL_PITCH_1_OFFSET_FINE = 82LL;
+  cst_SIGNAL_PITCH_1_FINE = 82LL;
 #line 102 "spms1_patch.rb"
   cst_NRPN_ACTIVE_MODULE_BASE = 0LL;
 #line 104 "spms1_patch.rb"
@@ -4524,7 +4524,7 @@ int main(int argc,char**argv){
 #line 122 "spms1_patch.rb"
   cst_NRPN_SOURCE_FILTER_1_MOD_3 = 146LL;
 #line 123 "spms1_patch.rb"
-  cst_NRPN_SOURCE_PITCH_1_DIRECT = 147LL;
+  cst_NRPN_SOURCE_PITCH_1_BEND = 147LL;
 #line 124 "spms1_patch.rb"
   cst_NRPN_SOURCE_LFO_1_LEVEL_MOD = 148LL;
 #line 126 "spms1_patch.rb"
@@ -4606,17 +4606,17 @@ int main(int argc,char**argv){
 #line 164 "spms1_patch.rb"
   cst_NRPN_SOURCE_FILTER_1_MOD_3_POL = 303LL;
 #line 165 "spms1_patch.rb"
-  cst_NRPN_SOURCE_PITCH_1_DIRECT_AMT = 304LL;
+  cst_NRPN_SOURCE_PITCH_1_BEND_AMT = 304LL;
 #line 166 "spms1_patch.rb"
-  cst_NRPN_SOURCE_PITCH_1_DIRECT_POL = 305LL;
+  cst_NRPN_SOURCE_PITCH_1_BEND_POL = 305LL;
 #line 167 "spms1_patch.rb"
   cst_NRPN_SOURCE_LFO_1_LEVEL_MOD_AMT = 306LL;
 #line 168 "spms1_patch.rb"
   cst_NRPN_SOURCE_LFO_1_LEVEL_MOD_POL = 307LL;
 #line 169 "spms1_patch.rb"
-  cst_NRPN_SOURCE_PITCH_1_OFFSET_COARSE = 308LL;
+  cst_NRPN_SOURCE_PITCH_1_COARSE = 308LL;
 #line 170 "spms1_patch.rb"
-  cst_NRPN_SOURCE_PITCH_1_OFFSET_FINE = 309LL;
+  cst_NRPN_SOURCE_PITCH_1_FINE = 309LL;
 #line 174 "spms1_patch.rb"
   cst_NRPN_CC_LFO_1_RATE = 384LL;
 #line 175 "spms1_patch.rb"
@@ -4706,17 +4706,17 @@ int main(int argc,char**argv){
 #line 217 "spms1_patch.rb"
   cst_NRPN_CC_FILTER_1_MOD_3_POL = 431LL;
 #line 218 "spms1_patch.rb"
-  cst_NRPN_CC_PITCH_1_DIRECT_AMT = 432LL;
+  cst_NRPN_CC_PITCH_1_BEND_AMT = 432LL;
 #line 219 "spms1_patch.rb"
-  cst_NRPN_CC_PITCH_1_DIRECT_POL = 433LL;
+  cst_NRPN_CC_PITCH_1_BEND_POL = 433LL;
 #line 220 "spms1_patch.rb"
   cst_NRPN_CC_LFO_1_LEVEL_MOD_AMT = 434LL;
 #line 221 "spms1_patch.rb"
   cst_NRPN_CC_LFO_1_LEVEL_MOD_POL = 435LL;
 #line 222 "spms1_patch.rb"
-  cst_NRPN_CC_PITCH_1_OFFSET_COARSE = 436LL;
+  cst_NRPN_CC_PITCH_1_COARSE = 436LL;
 #line 223 "spms1_patch.rb"
-  cst_NRPN_CC_PITCH_1_OFFSET_FINE = 437LL;
+  cst_NRPN_CC_PITCH_1_FINE = 437LL;
 #line 226 "spms1_patch.rb"
 #line 238 "spms1_patch.rb"
 #line 60 "spms1_main.rb"
@@ -4911,7 +4911,7 @@ int main(int argc,char**argv){
 #line 260 "spms1_main.rb"
     lv_source_pitch_1_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_IN)))));
 #line 261 "spms1_main.rb"
-    lv_source_pitch_1_direct = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_DIRECT)))));
+    lv_source_pitch_1_bend = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_BEND)))));
 #line 262 "spms1_main.rb"
     lv_source_osc_1_pw_mod = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_PW_MOD)))));
 #line 263 "spms1_main.rb"
@@ -4997,17 +4997,17 @@ int main(int argc,char**argv){
 #line 308 "spms1_main.rb"
     lv_source_filter_1_mod_3_pol = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_1_MOD_3_POL)))));
 #line 309 "spms1_main.rb"
-    lv_source_pitch_1_direct_amt = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_DIRECT_AMT)))));
+    lv_source_pitch_1_bend_amt = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_BEND_AMT)))));
 #line 310 "spms1_main.rb"
-    lv_source_pitch_1_direct_pol = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_DIRECT_POL)))));
+    lv_source_pitch_1_bend_pol = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_BEND_POL)))));
 #line 311 "spms1_main.rb"
     lv_source_lfo_1_level_mod_amt = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_LFO_1_LEVEL_MOD_AMT)))));
 #line 312 "spms1_main.rb"
     lv_source_lfo_1_level_mod_pol = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_LFO_1_LEVEL_MOD_POL)))));
 #line 313 "spms1_main.rb"
-    lv_source_pitch_1_offset_coarse = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_OFFSET_COARSE)))));
+    lv_source_pitch_1_coarse = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_COARSE)))));
 #line 314 "spms1_main.rb"
-    lv_source_pitch_1_offset_fine = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_OFFSET_FINE)))));
+    lv_source_pitch_1_fine = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_FINE)))));
 #line 318 "spms1_main.rb"
     lv_cc_lfo_1_rate = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_LFO_1_RATE)))));
 #line 319 "spms1_main.rb"
@@ -5087,17 +5087,17 @@ int main(int argc,char**argv){
 #line 356 "spms1_main.rb"
     lv_cc_filter_1_mod_3_pol = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_FILTER_1_MOD_3_POL)))));
 #line 357 "spms1_main.rb"
-    lv_cc_pitch_1_direct_amt = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_PITCH_1_DIRECT_AMT)))));
+    lv_cc_pitch_1_bend_amt = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_PITCH_1_BEND_AMT)))));
 #line 358 "spms1_main.rb"
-    lv_cc_pitch_1_direct_pol = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_PITCH_1_DIRECT_POL)))));
+    lv_cc_pitch_1_bend_pol = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_PITCH_1_BEND_POL)))));
 #line 359 "spms1_main.rb"
     lv_cc_lfo_1_level_mod_amt = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_LFO_1_LEVEL_MOD_AMT)))));
 #line 360 "spms1_main.rb"
     lv_cc_lfo_1_level_mod_pol = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_LFO_1_LEVEL_MOD_POL)))));
 #line 361 "spms1_main.rb"
-    lv_cc_pitch_1_offset_coarse = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_PITCH_1_OFFSET_COARSE)))));
+    lv_cc_pitch_1_coarse = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_PITCH_1_COARSE)))));
 #line 362 "spms1_main.rb"
-    lv_cc_pitch_1_offset_fine = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_PITCH_1_OFFSET_FINE)))));
+    lv_cc_pitch_1_fine = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_PITCH_1_FINE)))));
 #line 363 "spms1_main.rb"
     lv_cc_general_mod_wheel = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_GENERAL_MOD_WHEEL)))));
 #line 364 "spms1_main.rb"
@@ -5187,17 +5187,17 @@ int main(int argc,char**argv){
 #line 407 "spms1_main.rb"
     sp_FloatArray_set(lv_signals, cst_SIGNAL_FILTER_1_MOD_3_POL, sp_cc_or_zero(lv_cc_filter_1_mod_3_pol, sp_cc_to_bipolar(((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_filter_1_mod_3_pol))))))));
 #line 408 "spms1_main.rb"
-    sp_FloatArray_set(lv_signals, cst_SIGNAL_PITCH_1_DIRECT_AMT, sp_cc_or_zero(lv_cc_pitch_1_direct_amt, sp_cc_to_unipolar(((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_pitch_1_direct_amt))))))));
+    sp_FloatArray_set(lv_signals, cst_SIGNAL_PITCH_1_BEND_AMT, sp_cc_or_zero(lv_cc_pitch_1_bend_amt, sp_cc_to_unipolar(((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_pitch_1_bend_amt))))))));
 #line 409 "spms1_main.rb"
-    sp_FloatArray_set(lv_signals, cst_SIGNAL_PITCH_1_DIRECT_POL, sp_cc_or_zero(lv_cc_pitch_1_direct_pol, sp_cc_to_bipolar(((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_pitch_1_direct_pol))))))));
+    sp_FloatArray_set(lv_signals, cst_SIGNAL_PITCH_1_BEND_POL, sp_cc_or_zero(lv_cc_pitch_1_bend_pol, sp_cc_to_bipolar(((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_pitch_1_bend_pol))))))));
 #line 410 "spms1_main.rb"
     sp_FloatArray_set(lv_signals, cst_SIGNAL_LFO_1_LEVEL_MOD_AMT, sp_cc_or_zero(lv_cc_lfo_1_level_mod_amt, sp_cc_to_unipolar(((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_lfo_1_level_mod_amt))))))));
 #line 411 "spms1_main.rb"
     sp_FloatArray_set(lv_signals, cst_SIGNAL_LFO_1_LEVEL_MOD_POL, sp_cc_or_zero(lv_cc_lfo_1_level_mod_pol, sp_cc_to_bipolar(((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_lfo_1_level_mod_pol))))))));
 #line 412 "spms1_main.rb"
-    sp_FloatArray_set(lv_signals, cst_SIGNAL_PITCH_1_OFFSET_COARSE, sp_cc_or_zero(lv_cc_pitch_1_offset_coarse, sp_cc_to_bipolar(((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_pitch_1_offset_coarse))))))));
+    sp_FloatArray_set(lv_signals, cst_SIGNAL_PITCH_1_COARSE, sp_cc_or_zero(lv_cc_pitch_1_coarse, sp_cc_to_bipolar(((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_pitch_1_coarse))))))));
 #line 413 "spms1_main.rb"
-    sp_FloatArray_set(lv_signals, cst_SIGNAL_PITCH_1_OFFSET_FINE, sp_cc_or_zero(lv_cc_pitch_1_offset_fine, sp_cc_to_bipolar(((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_pitch_1_offset_fine))))))));
+    sp_FloatArray_set(lv_signals, cst_SIGNAL_PITCH_1_FINE, sp_cc_or_zero(lv_cc_pitch_1_fine, sp_cc_to_bipolar(((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_pitch_1_fine))))))));
 #line 414 "spms1_main.rb"
     sp_FloatArray_set(lv_signals, cst_SIGNAL_GENERAL_MOD_WHEEL, sp_cc_or_zero(lv_cc_general_mod_wheel, sp_cc_to_unipolar(((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_general_mod_wheel))))))));
 #line 416 "spms1_main.rb"
@@ -5321,17 +5321,17 @@ int main(int argc,char**argv){
     sp_float _t553 = sp_FloatArray_get(lv_signals, lv_source_pitch_1_portamento_time);
     sp_Pitch_set_portamento_time((sp_Pitch *)lv_pitch_1, _t553);
 #line 461 "spms1_main.rb"
-    sp_float _t554 = sp_FloatArray_get(lv_signals, lv_source_pitch_1_direct_amt);
-    sp_Pitch_set_direct_amount((sp_Pitch *)lv_pitch_1, _t554);
+    sp_float _t554 = sp_FloatArray_get(lv_signals, lv_source_pitch_1_bend_amt);
+    sp_Pitch_set_bend_amount((sp_Pitch *)lv_pitch_1, _t554);
 #line 462 "spms1_main.rb"
-    sp_float _t555 = sp_FloatArray_get(lv_signals, lv_source_pitch_1_direct_pol);
-    sp_Pitch_set_direct_polarity((sp_Pitch *)lv_pitch_1, _t555);
+    sp_float _t555 = sp_FloatArray_get(lv_signals, lv_source_pitch_1_bend_pol);
+    sp_Pitch_set_bend_polarity((sp_Pitch *)lv_pitch_1, _t555);
 #line 463 "spms1_main.rb"
-    sp_float _t556 = sp_FloatArray_get(lv_signals, lv_source_pitch_1_offset_coarse);
-    sp_Pitch_set_offset_coarse((sp_Pitch *)lv_pitch_1, _t556);
+    sp_float _t556 = sp_FloatArray_get(lv_signals, lv_source_pitch_1_coarse);
+    sp_Pitch_set_coarse((sp_Pitch *)lv_pitch_1, _t556);
 #line 464 "spms1_main.rb"
-    sp_float _t557 = sp_FloatArray_get(lv_signals, lv_source_pitch_1_offset_fine);
-    sp_Pitch_set_offset_fine((sp_Pitch *)lv_pitch_1, _t557);
+    sp_float _t557 = sp_FloatArray_get(lv_signals, lv_source_pitch_1_fine);
+    sp_Pitch_set_fine((sp_Pitch *)lv_pitch_1, _t557);
 #line 465 "spms1_main.rb"
     sp_float _t558 = sp_FloatArray_get(lv_signals, lv_source_osc_1_pulse_width);
     sp_Osc_set_pulse_width((sp_Osc *)lv_osc_1, _t558);
@@ -5453,7 +5453,7 @@ int main(int argc,char**argv){
         {
 #line 518 "spms1_main.rb"
           sp_float _t585 = sp_FloatArray_get(lv_signals, lv_source_pitch_1_in);
-          sp_float _t586 = sp_FloatArray_get(lv_signals, lv_source_pitch_1_direct);
+          sp_float _t586 = sp_FloatArray_get(lv_signals, lv_source_pitch_1_bend);
           sp_FloatArray_set(lv_signals, 60LL, sp_Pitch_process((sp_Pitch *)lv_pitch_1, _t585, _t586));
           break;
         }
