@@ -192,11 +192,11 @@ controls:
   - { entry: 36, module: OSC_1,     key: PW_MOD_AMT,   label: PW Mod Amt,      cc: 103, value: 4 }
   - { entry: 37, module: OSC_1,     key: PW_MOD_POL, label: PW Mod Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
   # Filter 1 in the editor as Osc 1: the cutoff and its modulation, then the rest.
+  - { entry: 15, module: FILTER_1,  key: GAIN,         label: Gain,         cc: 112, value: 64 }
   - { entry: 13, module: FILTER_1,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 100 }
   - { entry: 16, module: FILTER_1,  key: MOD_AMT,   label: Mod Amt,      cc: 24,  value: 28 }
   - { entry: 17, module: FILTER_1,  key: MOD_POL, label: Mod Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 14, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 94 }
-  - { entry: 15, module: FILTER_1,  key: GAIN,         label: Gain,         cc: 112, value: 64 }
   - { entry: 18, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 124 }
   # Amp 1 Mod Amt and Mod Pol came after Osc 1's pulse width controls, so their entries follow theirs, but
   # they are listed here, after Gain. Neither has a CC: the default patch points them at 1.0 and
@@ -207,12 +207,12 @@ controls:
   - { entry: 20, module: MIXER_1,   key: POL_1,   label: Pol 1,   cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 21, module: MIXER_1,   key: LEVEL_2,      label: Level 2,      cc: 0,   source: ONE }
   - { entry: 22, module: MIXER_1,   key: POL_2,   label: Pol 2,   cc: 0,   value: 124, source: HALF, bipolar: true }
+  - { entry: 25, module: CHORUS_1,  key: MIX,          label: Mix,          cc: 93,  value: 64 }
   - { entry: 23, module: CHORUS_1,  key: RATE,         label: Rate,         cc: 58,  value: 64 }
   - { entry: 24, module: CHORUS_1,  key: DEPTH,        label: Depth,        cc: 59,  value: 64 }
-  - { entry: 25, module: CHORUS_1,  key: MIX,          label: Mix,          cc: 93,  value: 64 }
+  - { entry: 28, module: DELAY_1,   key: MIX,          label: Mix,          cc: 94,  value: 34 }
   - { entry: 26, module: DELAY_1,   key: TIME,         label: Time,         cc: 90,  value: 64 }
   - { entry: 27, module: DELAY_1,   key: FEEDBACK,     label: Feedback,     cc: 92,  value: 64 }
-  - { entry: 28, module: DELAY_1,   key: MIX,          label: Mix,          cc: 94,  value: 34 }
 
   # General controls: a CC put on the bus for any input or parameter to read, the mod wheel
   # unipolar and each of General 1-4 filling a unipolar and a bipolar slot (see `signals`). Each
