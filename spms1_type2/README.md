@@ -6,7 +6,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.3
 - Last-note priority with one note of memory: releasing the newest note while the one before it is still held goes back to that one, legato (for trills)
 - 48 kHz audio output: 24 bit through an I2S DAC, or PWM Audio (no DAC needed)
 - Oscillator: a sawtooth-to-square morph with pulse width (CC 19), and a modulation input of its own for the pulse width (PWM, CC 103)
-- Filter: ZDF/TPT State Variable Filter (with a nonlinear leak on the band pass integrator, solved by the one-step Newton method)
+- Filter: ZDF/TPT State Variable Filter (with a nonlinear leak on the band pass integrator, solved by the one-step Newton method), with low pass, band pass and high pass outputs
 - Chorus: mono in, stereo out, as a module in the run order
 - Delay: stereo, with feedback, as a module in the run order (up to 340 ms)
 - Slew: an exponential lag, as a module in the run order; the default patch puts it on the note pitch as portamento (CC 5)
@@ -214,13 +214,23 @@ sample rate. The low pass state stays linear, with a
 clamp at 16 as a guard that ordinary use never reaches. The output clip comes last. At the top of
 the resonance dial k turns negative and the loop oscillates.
 
+The filter puts out its low pass, band pass and high pass at once, as Out LP, Out BP and Out HP,
+each through a DC blocker and an output clip of its own. Out LP is the one the default patch
+uses, in the slot the single output had. The three add up as a state variable filter's do, the
+input being LP + k·BP + HP, so the band pass peaks at Q times the input at the cutoff, as the
+low pass does; with the resonance up it is the loudest of the three.
+
 ```mermaid
 flowchart LR
   IN([Input]) --> SUM((Σ))
   SUM -->|HP| I1["Integrator 1<br/>BP, state s1"]
   I1 -->|BP| I2["Integrator 2<br/>LP, state s2"]
-  I2 -->|LP| OC["Output clip<br/>linear up to 0.75"]
-  OC --> OUT([Output])
+  I2 -->|LP| OC["Output clips<br/>linear up to 0.75"]
+  I1 -->|BP| OC
+  SUM -->|HP| OC
+  OC -->|LP| OUT_LP([Out LP])
+  OC -->|BP| OUT_BP([Out BP])
+  OC -->|HP| OUT_HP([Out HP])
   SC["Nonlinear leak<br/>ceiling 4.0, one-step Newton"] -.- I1
   L2["s2 is linear<br/>guard clamp at 16"] -.- I2
   I1 -->|"−k·BP"| SUM
@@ -239,8 +249,12 @@ flowchart LR
   A1 -->|HP| A2["Integrator ∫<br/>C1"]
   D["Diode pair"] -.-|across C1| A2
   A2 -->|BP| A3["Integrator ∫<br/>C2, linear"]
-  A3 -->|LP| LIM["Output limiter"]
-  LIM --> OUT([Output])
+  A3 -->|LP| LIM["Output limiters"]
+  A2 -->|BP| LIM
+  A1 -->|HP| LIM
+  LIM -->|LP| OUT_LP([Out LP])
+  LIM -->|BP| OUT_BP([Out BP])
+  LIM -->|HP| OUT_HP([Out HP])
   A2 -->|"R/k (resonance)"| A1
   A3 -->|R| A1
   classDef nl fill:#FAECE7,stroke:#D85A30,color:#712B13
@@ -440,28 +454,29 @@ two slots, a unipolar and a bipolar one. See the General slots below.
 
 | ID | Signal | | ID | Signal | | ID | Signal |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | None (constant 0.0) | | 22 | EG 1 Attack | | 44 | Chorus 1 Mix |
-| 1 | Constant 1.0 | | 23 | EG 1 Decay | | 45 | Delay 1 Time |
-| 2 | Constant 0.5 | | 24 | EG 1 Sustain | | 46 | Delay 1 Feedback |
-| 3 | Constant 0.2 | | 25 | EG 1 Level | | 47 | Delay 1 Mix |
-| 4 | Constant 0.1 | | 26 | EG 1 Polarity ± | | 48 | Note Pitch ± |
-| 5 | Constant -0.1 | | 27 | Osc 1 Wave | | 49 | Note Gate |
-| 6 | Constant -0.2 | | 28 | Osc 1 Coarse Tune ± | | 50 | Pitch Bend ± |
-| 7 | Constant -0.5 | | 29 | Osc 1 Fine Tune ± | | 51 | General Mod Wheel |
-| 8 | Constant -1.0 | | 30 | Osc 1 Pitch Mod Amt | | 52 | General Unipolar 1 |
-| 9 | LFO 1 Output ± | | 31 | Osc 1 Pitch Mod Polarity ± | | 53 | General Unipolar 2 |
-| 10 | EG 1 Output ± | | 32 | Filter 1 Cutoff | | 54 | General Unipolar 3 |
-| 11 | Osc 1 Output ± | | 33 | Filter 1 Resonance | | 55 | General Unipolar 4 |
-| 12 | Filter 1 Output ± | | 34 | Filter 1 Gain | | 56 | General Bipolar 1 ± |
-| 13 | Amp 1 Output ± | | 35 | Filter 1 Mod Amt | | 57 | General Bipolar 2 ± |
-| 14 | Mixer 1 Output ± | | 36 | Filter 1 Mod Polarity ± | | 58 | General Bipolar 3 ± |
-| 15 | Chorus 1 Output L ± | | 37 | Amp 1 Gain | | 59 | General Bipolar 4 ± |
-| 16 | Chorus 1 Output R ± | | 38 | Mixer 1 Level 1 | | 60 | Slew 1 Output ± |
-| 17 | Delay 1 Output L ± | | 39 | Mixer 1 Polarity 1 ± | | 61 | Slew 1 Time |
-| 18 | Delay 1 Output R ± | | 40 | Mixer 1 Level 2 | | 62 | Osc 1 Pulse Width |
-| 19 | LFO 1 Rate | | 41 | Mixer 1 Polarity 2 ± | | 63 | Osc 1 PW Mod Amt |
-| 20 | LFO 1 Level | | 42 | Chorus 1 Rate | | 64 | Osc 1 PW Mod Polarity ± |
-| 21 | LFO 1 Polarity ± | | 43 | Chorus 1 Depth | |  |  |
+| 0 | None (constant 0.0) | | 23 | EG 1 Decay | | 46 | Delay 1 Feedback |
+| 1 | Constant 1.0 | | 24 | EG 1 Sustain | | 47 | Delay 1 Mix |
+| 2 | Constant 0.5 | | 25 | EG 1 Level | | 48 | Note Pitch ± |
+| 3 | Constant 0.2 | | 26 | EG 1 Polarity ± | | 49 | Note Gate |
+| 4 | Constant 0.1 | | 27 | Osc 1 Wave | | 50 | Pitch Bend ± |
+| 5 | Constant -0.1 | | 28 | Osc 1 Coarse Tune ± | | 51 | General Mod Wheel |
+| 6 | Constant -0.2 | | 29 | Osc 1 Fine Tune ± | | 52 | General Unipolar 1 |
+| 7 | Constant -0.5 | | 30 | Osc 1 Pitch Mod Amt | | 53 | General Unipolar 2 |
+| 8 | Constant -1.0 | | 31 | Osc 1 Pitch Mod Polarity ± | | 54 | General Unipolar 3 |
+| 9 | LFO 1 Output ± | | 32 | Filter 1 Cutoff | | 55 | General Unipolar 4 |
+| 10 | EG 1 Output ± | | 33 | Filter 1 Resonance | | 56 | General Bipolar 1 ± |
+| 11 | Osc 1 Output ± | | 34 | Filter 1 Gain | | 57 | General Bipolar 2 ± |
+| 12 | Filter 1 Output LP ± | | 35 | Filter 1 Mod Amt | | 58 | General Bipolar 3 ± |
+| 13 | Amp 1 Output ± | | 36 | Filter 1 Mod Polarity ± | | 59 | General Bipolar 4 ± |
+| 14 | Mixer 1 Output ± | | 37 | Amp 1 Gain | | 60 | Slew 1 Output ± |
+| 15 | Chorus 1 Output L ± | | 38 | Mixer 1 Level 1 | | 61 | Slew 1 Time |
+| 16 | Chorus 1 Output R ± | | 39 | Mixer 1 Polarity 1 ± | | 62 | Osc 1 Pulse Width |
+| 17 | Delay 1 Output L ± | | 40 | Mixer 1 Level 2 | | 63 | Osc 1 PW Mod Amt |
+| 18 | Delay 1 Output R ± | | 41 | Mixer 1 Polarity 2 ± | | 64 | Osc 1 PW Mod Polarity ± |
+| 19 | LFO 1 Rate | | 42 | Chorus 1 Rate | | 65 | Filter 1 Output BP ± |
+| 20 | LFO 1 Level | | 43 | Chorus 1 Depth | | 66 | Filter 1 Output HP ± |
+| 21 | LFO 1 Polarity ± | | 44 | Chorus 1 Mix | |  |  |
+| 22 | EG 1 Attack | | 45 | Delay 1 Time | |  |  |
 
 <!-- patch_gen end -->
 
@@ -690,7 +705,7 @@ changes only how fast the output moves, so it cannot step it.
   the steps of a controller sending sparse CCs (e.g. every 20 ms). Osc 1 Coarse Tune and Fine Tune
   are not smoothed, so that the pitch follows right away, and neither is Slew 1 Time, which
   cannot step what it sets
-- A parameter source may point at any of the 128 slots. Slots above 64 read 0 until something
+- A parameter source may point at any of the 128 slots. Slots above 66 read 0 until something
   writes them, which leaves a parameter pointed at one at the bottom of a unipolar dial or the
   middle of a bipolar one
 - A parameter clamps its value to its own range, 0.0 to 1.0 or -0.5 to +0.5, and its control slot

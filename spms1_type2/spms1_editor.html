@@ -1096,7 +1096,7 @@
       {"key":"LFO_1","id":1,"label":"LFO 1","outs":[{"sig":"LFO_1_OUTPUT","label":"Out"}]},
       {"key":"ENV_GEN_1","id":2,"label":"EG 1","outs":[{"sig":"ENV_GEN_1_OUTPUT","label":"Out"}]},
       {"key":"OSC_1","id":3,"label":"Osc 1","outs":[{"sig":"OSC_1_OUTPUT","label":"Out"}]},
-      {"key":"FILTER_1","id":4,"label":"Filter 1","outs":[{"sig":"FILTER_1_OUTPUT","label":"Out"}]},
+      {"key":"FILTER_1","id":4,"label":"Filter 1","outs":[{"sig":"FILTER_1_OUTPUT","label":"LP"},{"sig":"FILTER_1_OUTPUT_BP","label":"BP"},{"sig":"FILTER_1_OUTPUT_HP","label":"HP"}]},
       {"key":"AMP_1","id":5,"label":"Amp 1","outs":[{"sig":"AMP_1_OUTPUT","label":"Out"}]},
       {"key":"MIXER_1","id":6,"label":"Mixer 1","outs":[{"sig":"MIXER_1_OUTPUT","label":"Out"}]},
       {"key":"CHORUS_1","id":7,"label":"Chorus 1","outs":[{"sig":"CHORUS_1_OUTPUT_L","label":"Out L"},{"sig":"CHORUS_1_OUTPUT_R","label":"Out R"}]},
@@ -1227,6 +1227,8 @@
       {"id":62,"key":"OSC_1_PULSE_WIDTH"},
       {"id":63,"key":"OSC_1_PW_MOD_AMOUNT"},
       {"id":64,"key":"OSC_1_PW_MOD_POLARITY"},
+      {"id":65,"key":"FILTER_1_OUTPUT_BP"},
+      {"id":66,"key":"FILTER_1_OUTPUT_HP"},
     ],
     defaultOrder: ["SLEW_1","LFO_1","ENV_GEN_1","MIXER_1","OSC_1","FILTER_1","AMP_1","CHORUS_1","DELAY_1"],
   };

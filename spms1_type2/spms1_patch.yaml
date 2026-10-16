@@ -58,7 +58,7 @@ signals:
   - { key: LFO_1_OUTPUT,      id: 9,  module: LFO_1,     output: Out,   label: LFO 1 Output,      bipolar: true }
   - { key: ENV_GEN_1_OUTPUT,  id: 10, module: ENV_GEN_1, output: Out,   label: EG 1 Output,       bipolar: true }
   - { key: OSC_1_OUTPUT,      id: 11, module: OSC_1,     output: Out,   label: Osc 1 Output,      bipolar: true }
-  - { key: FILTER_1_OUTPUT,   id: 12, module: FILTER_1,  output: Out,   label: Filter 1 Output,   bipolar: true }
+  - { key: FILTER_1_OUTPUT,   id: 12, module: FILTER_1,  output: LP,    label: Filter 1 Output LP, bipolar: true }
   - { key: AMP_1_OUTPUT,      id: 13, module: AMP_1,     output: Out,   label: Amp 1 Output,      bipolar: true }
   - { key: MIXER_1_OUTPUT,    id: 14, module: MIXER_1,   output: Out,   label: Mixer 1 Output,    bipolar: true }
   - { key: CHORUS_1_OUTPUT_L, id: 15, module: CHORUS_1,  output: Out L, label: Chorus 1 Output L, bipolar: true }
@@ -120,6 +120,10 @@ signals:
   - { key: OSC_1_PULSE_WIDTH,     id: 62, control: OSC_1_PULSE_WIDTH }
   - { key: OSC_1_PW_MOD_AMOUNT,   id: 63, control: OSC_1_PW_MOD_AMOUNT }
   - { key: OSC_1_PW_MOD_POLARITY, id: 64, control: OSC_1_PW_MOD_POLARITY }
+
+  # The filter's band pass and high pass came after its low pass, which keeps slot 12 and its key.
+  - { key: FILTER_1_OUTPUT_BP, id: 65, module: FILTER_1, output: BP, label: Filter 1 Output BP, bipolar: true }
+  - { key: FILTER_1_OUTPUT_HP, id: 66, module: FILTER_1, output: HP, label: Filter 1 Output HP, bipolar: true }
 
 # Module inputs, NRPN category 1, by entry: what feeds each one in the default patch (`source`, a
 # signal key). `label` is the editor's, on the module; `name` the README's, after the module's

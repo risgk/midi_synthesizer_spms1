@@ -79,6 +79,8 @@ SIGNAL_SLEW_1_TIME              = 61
 SIGNAL_OSC_1_PULSE_WIDTH        = 62
 SIGNAL_OSC_1_PW_MOD_AMOUNT      = 63
 SIGNAL_OSC_1_PW_MOD_POLARITY    = 64
+SIGNAL_FILTER_1_OUTPUT_BP       = 65
+SIGNAL_FILTER_1_OUTPUT_HP       = 66
 
 # NRPN parameter numbers: (MSB << 7) | LSB, where the MSB picks a category and the LSB an entry.
 #   0..127   active_modules[slot]
