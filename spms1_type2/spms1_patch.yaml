@@ -158,7 +158,7 @@ signals:
   - { key: OSC_1_MOD_1_POL, id: 85, control: OSC_1_MOD_1_POL }
 
   # Noise 1 came after Osc 1 Mod 1 Amt and Pol.
-  - { key: NOISE_1_OUTPUT, id: 86, module: NOISE_1, output: Out, label: Noise 1 Output, bipolar: true }
+  - { key: NOISE_1_OUTPUT_WHITE, id: 86, module: NOISE_1, output: Out White, label: Noise 1 Output White, bipolar: true }
   - { key: NOISE_1_LEVEL,  id: 87, control: NOISE_1_LEVEL }
 
   # Osc 2 came after Noise 1. 99-101, Filter 1's audio gains for a while, are unused.
@@ -190,6 +190,10 @@ signals:
   - { key: MIXER_2_POL_4,     id: 114, control: MIXER_2_POL_4 }
   - { key: MIXER_2_OUT_LEVEL, id: 115, control: MIXER_2_OUT_LEVEL }
 
+  # The noise's red output and its cutoff came after Mixer 2; the white keeps slot 86.
+  - { key: NOISE_1_OUTPUT_RED, id: 116, module: NOISE_1, output: Out Red, label: Noise 1 Output Red, bipolar: true }
+  - { key: NOISE_1_RED_CUTOFF, id: 117, control: NOISE_1_RED_CUTOFF }
+
 # Module inputs, NRPN category 1, listed in the editor's order, each by its entry: what feeds each
 # one in the default patch (`source`, a signal key). `label` is the editor's, on the module; `name`
 # the README's, after the module's label. An input with no module is a side of the final output.
@@ -213,7 +217,7 @@ inputs:
   - { entry: 29, module: MIXER_1,     key: IN_4,        label: In 4,           name: In 4,           source: NONE }
   - { entry: 30, module: MIXER_2,     key: IN_1,        label: In 1,           name: In 1,           source: OSC_1_OUTPUT }
   - { entry: 31, module: MIXER_2,     key: IN_2,        label: In 2,           name: In 2,           source: OSC_2_OUTPUT }
-  - { entry: 32, module: MIXER_2,     key: IN_3,        label: In 3,           name: In 3,           source: NOISE_1_OUTPUT }
+  - { entry: 32, module: MIXER_2,     key: IN_3,        label: In 3,           name: In 3,           source: NOISE_1_OUTPUT_WHITE }
   - { entry: 33, module: MIXER_2,     key: IN_4,        label: In 4,           name: In 4,           source: NONE }
   - { entry: 9,  module: CHORUS_1,    key: AUDIO,       label: Audio In,       name: Audio In,       source: AMP_1_OUTPUT }
   - { entry: 10, module: DELAY_1,     key: AUDIO_L,     label: Audio In L,     name: Audio In L,     source: CHORUS_1_OUTPUT_L }
@@ -305,6 +309,9 @@ controls:
   # Noise 1 came after Osc 1 Mod 1 Amt and Pol. Level has no CC and reads 1.0: the noise runs at
   # full level, and Mixer 2 Level 3 (CC 23), or the depth of what it modulates, sets how much is heard.
   - { entry: 57, module: NOISE_1,   key: LEVEL,        label: Level,        cc: 0,   value: 124, source: ONE }
+  # Red Cutoff came after Mixer 2. It has no CC and reads 0.5, 51 Hz, where the red falls 6 dB an
+  # octave across the audible band.
+  - { entry: 84, module: NOISE_1,   key: RED_CUTOFF,   label: Red Cutoff,   cc: 0,   value: 64,  source: HALF }
   - { entry: 18, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 124 }
   - { entry: 19, module: MIXER_1,   key: LEVEL_1,      label: Level 1,      cc: 0,   source: ONE }
   - { entry: 20, module: MIXER_1,   key: POL_1,   label: Pol 1,   cc: 0,   value: 124, source: HALF, bipolar: true }
