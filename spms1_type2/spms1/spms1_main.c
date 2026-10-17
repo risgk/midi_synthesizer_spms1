@@ -3245,56 +3245,43 @@ static inline __attribute__((always_inline)) sp_float sp_Mixer_set_out_level(sp_
   return self->iv_out_level;
   return 0.0;
 }
-#line 134 "spms1_mixer.rb"
+#line 130 "spms1_mixer.rb"
 static inline __attribute__((always_inline)) sp_float sp_Mixer_process(sp_Mixer *self, sp_float lv_input_1, sp_float lv_input_2, sp_float lv_input_3, sp_float lv_input_4) {
     sp_float lv_sum = 0.0;
-    sp_float lv_over = 0.0;
-    sp_float lv_under = 0.0;
-    sp_float lv_clamped = 0.0;
-    sp_float lv_above = 0.0;
-    sp_float lv_below = 0.0;
-    sp_float lv_excess = 0.0;
-#line 135 "spms1_mixer.rb"
+#line 131 "spms1_mixer.rb"
   if ((self->iv_sample_counter == 0LL)) {
-#line 136 "spms1_mixer.rb"
+#line 132 "spms1_mixer.rb"
     self->iv_stage_1_1 = sp_Dsp_s_smooth(self->iv_target_1, self->iv_stage_1_1, self->iv_smoothing_target_blend);
-#line 137 "spms1_mixer.rb"
+#line 133 "spms1_mixer.rb"
     self->iv_current_1 = sp_Dsp_s_smooth(self->iv_stage_1_1, self->iv_current_1, self->iv_smoothing_target_blend);
-#line 138 "spms1_mixer.rb"
+#line 134 "spms1_mixer.rb"
     self->iv_stage_1_2 = sp_Dsp_s_smooth(self->iv_target_2, self->iv_stage_1_2, self->iv_smoothing_target_blend);
-#line 139 "spms1_mixer.rb"
+#line 135 "spms1_mixer.rb"
     self->iv_current_2 = sp_Dsp_s_smooth(self->iv_stage_1_2, self->iv_current_2, self->iv_smoothing_target_blend);
-#line 140 "spms1_mixer.rb"
+#line 136 "spms1_mixer.rb"
     self->iv_stage_1_3 = sp_Dsp_s_smooth(self->iv_target_3, self->iv_stage_1_3, self->iv_smoothing_target_blend);
-#line 141 "spms1_mixer.rb"
+#line 137 "spms1_mixer.rb"
     self->iv_current_3 = sp_Dsp_s_smooth(self->iv_stage_1_3, self->iv_current_3, self->iv_smoothing_target_blend);
-#line 142 "spms1_mixer.rb"
+#line 138 "spms1_mixer.rb"
     self->iv_stage_1_4 = sp_Dsp_s_smooth(self->iv_target_4, self->iv_stage_1_4, self->iv_smoothing_target_blend);
-#line 143 "spms1_mixer.rb"
+#line 139 "spms1_mixer.rb"
     self->iv_current_4 = sp_Dsp_s_smooth(self->iv_stage_1_4, self->iv_current_4, self->iv_smoothing_target_blend);
-#line 144 "spms1_mixer.rb"
+#line 140 "spms1_mixer.rb"
     self->iv_stage_1_out_level = sp_Dsp_s_smooth(self->iv_out_level, self->iv_stage_1_out_level, self->iv_smoothing_target_blend);
-#line 145 "spms1_mixer.rb"
+#line 141 "spms1_mixer.rb"
     self->iv_current_out_level = sp_Dsp_s_smooth(self->iv_stage_1_out_level, self->iv_current_out_level, self->iv_smoothing_target_blend);
   }
-#line 148 "spms1_mixer.rb"
+#line 144 "spms1_mixer.rb"
   self->iv_sample_counter = (sp_int_add(self->iv_sample_counter, 1LL) & cst_Spms1__Mixer__CONTROL_RATE_MASK);
-#line 150 "spms1_mixer.rb"
+#line 146 "spms1_mixer.rb"
   lv_sum = ((((lv_input_1 * self->iv_current_1) + (lv_input_2 * self->iv_current_2)) + (((lv_input_3 * self->iv_current_3) + (lv_input_4 * self->iv_current_4)))) * self->iv_current_out_level);
-#line 154 "spms1_mixer.rb"
-  lv_over = (lv_sum - 1.25);
-#line 155 "spms1_mixer.rb"
-  lv_under = (-1.25 - lv_sum);
-#line 156 "spms1_mixer.rb"
-  lv_clamped = (lv_sum - (((lv_over + fabs(lv_over)) - ((lv_under + fabs(lv_under)))) * 0.5));
-#line 157 "spms1_mixer.rb"
-  lv_above = (lv_clamped - 0.75);
-#line 158 "spms1_mixer.rb"
-  lv_below = (-0.75 - lv_clamped);
-#line 159 "spms1_mixer.rb"
-  lv_excess = ((lv_above + fabs(lv_above)) - ((lv_below + fabs(lv_below))));
-#line 160 "spms1_mixer.rb"
-  return (lv_clamped - ((lv_excess * fabs(lv_excess)) * 0.25));
+#line 152 "spms1_mixer.rb"
+  if (((lv_sum < -1.0))) {
+    return -1.0;
+  }
+  else {
+    return ((((lv_sum > 1.0)) ? 1.0 : lv_sum));
+  }
   return 0.0;
 }
 #line 59 "spms1_chorus.rb"
@@ -4532,7 +4519,7 @@ int main(int argc,char**argv){
     sp_int lv_general_2 = 0;
     sp_int lv_general_3 = 0;
     sp_int lv_general_4 = 0;
-    sp_int lv_i__bp12070 = 0;
+    sp_int lv_i__bp12020 = 0;
 
 #line 1 "spms1_dsp.rb"
 #line 5 "spms1_dsp.rb"
@@ -6459,9 +6446,9 @@ int main(int argc,char**argv){
     (stop_debug_measure(), (sp_int)0);
 #line 662 "spms1_main.rb"
     for (sp_int _t777 = 0; _t777 < cst_AUDIO_BUFFER_WORDS; _t777++) {
-      lv_i__bp12070 = _t777;
+      lv_i__bp12020 = _t777;
 #line 663 "spms1_main.rb"
-      ({ sp_float _t778 = sp_FloatArray_get(lv_audio_buffer_l, lv_i__bp12070); sp_float _t779 = sp_FloatArray_get(lv_audio_buffer_r, lv_i__bp12070); (write_to_audio_buffer(((float)(_t778)), ((float)(_t779))), (sp_int)0); });
+      ({ sp_float _t778 = sp_FloatArray_get(lv_audio_buffer_l, lv_i__bp12020); sp_float _t779 = sp_FloatArray_get(lv_audio_buffer_r, lv_i__bp12020); (write_to_audio_buffer(((float)(_t778)), ((float)(_t779))), (sp_int)0); });
     }
   }
   return 0;

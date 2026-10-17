@@ -123,13 +123,9 @@ module Spms1
     # one here is to overflow to infinity first, which this makes impossible.
     #
     # One unit is the sum of two full-scale bipolar signals, as much as any destination can use; an
-    # audio destination takes up to a unit too. The sum is held to it the way the filter's output
-    # is, as an analog mixer runs out of headroom gradually: exactly linear up to 0.75, then a
-    # quadratic shoulder that reaches 1.0 with zero slope at 1.25. Two oscillators at full level
-    # reach into the shoulder, and the noise on top of them goes past it; a hard clamp there folded
-    # every harmonic of its corner back into the note, where the shoulder's fall much faster. The
-    # default patch peaks at half a unit and passes untouched.
-    # Written as literals rather than constants on purpose: Spinel emits a named Float as a mutable
+    # audio destination takes up to a unit too, so two oscillators at full level want Out Level at
+    # 0.5 to stay inside it.
+    # Written as a literal rather than a constant on purpose: Spinel emits a named Float as a mutable
     # global, and a mixer loading one twice a sample is about 1.8us a buffer.
     def process(input_1 = 0.0, input_2 = 0.0, input_3 = 0.0, input_4 = 0.0)
       if @sample_counter == 0
@@ -148,16 +144,12 @@ module Spms1
       @sample_counter = (@sample_counter + 1) & CONTROL_RATE_MASK
 
       sum = ((input_1 * @current_1 + input_2 * @current_2) + (input_3 * @current_3 + input_4 * @current_4)) * @current_out_level
-      # Built from abs, as Filter#clip_output is, so that it has no branch. It cost 33us a buffer
-      # across both mixers, 1243 against 1210, estimated for a Pico 2 at 48 kHz, 2026-10-17.
-      # The excess is doubled, so the shoulder's 1 / (4 * (1.0 - 0.75)) takes a further quarter.
-      over    = sum - 1.25
-      under   = -1.25 - sum
-      clamped = sum - ((over + over.abs) - (under + under.abs)) * 0.5
-      above   = clamped - 0.75
-      below   = -0.75 - clamped
-      excess  = (above + above.abs) - (below + below.abs)
-      clamped - (excess * excess.abs) * 0.25
+      # One nested ternary, not two statements. Split in two, each comparison compiles to a vsel
+      # when the method stands alone, which is not how it is built: inside the flattened
+      # Spms1_main the branch count does not move and the extra instructions cost 870/875us a
+      # buffer against 854/856. The same holds for the clamps in Amp#process and Osc#process.
+      # Measured on a Pico 2 at 48 kHz, 2026-09-18.
+      (sum < -1.0) ? -1.0 : ((sum > 1.0) ? 1.0 : sum)
     end
   end
 end
