@@ -27,7 +27,7 @@
 |                            89 | x             | o             | Osc Mod 1 Amt                        |
 |                            13 | x             | o             | Osc Mod 2 Amt                        |
 |                           114 | x             | o             | Osc Pulse Width (50% to 0%)          |
-|                           103 | x             | o             | Osc PW Mod Amt                       |
+|                           115 | x             | o             | Osc PW Mod Amt                       |
 |                            85 | x             | o             | Osc 2 Pitch Coarse (+-5 Octaves)     |
 |                            76 | x             | o             | Osc 2 Pitch Fine (+-60 Cents)        |
 |                            23 | x             | o             | Noise Level                          |

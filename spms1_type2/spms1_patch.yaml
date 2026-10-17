@@ -267,7 +267,7 @@ controls:
   - { entry: 12, module: OSC_1,     key: MOD_2_POL, label: Mod 2 Pol, cc: 0,   value: 124, source: POINT_ONE, bipolar: true }
   - { entry: 8,  module: OSC_1,     key: WAVE,     label: Wave,         cc: 102, value: 4 }
   - { entry: 35, module: OSC_1,     key: PULSE_WIDTH,  label: Pulse Width,  cc: 114, value: 4 }
-  - { entry: 36, module: OSC_1,     key: PW_MOD_AMT,   label: PW Mod Amt,      cc: 103, value: 4 }
+  - { entry: 36, module: OSC_1,     key: PW_MOD_AMT,   label: PW Mod Amt,      cc: 115, value: 4 }
   - { entry: 37, module: OSC_1,     key: PW_MOD_POL, label: PW Mod Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
   # Osc 2 came after Noise 1, so its entries follow. Pitch Coarse and Fine are its own, on CC 85 and
   # 76, to tune it against Osc 1: Coarse powers up at CC 64, in unison, and Fine at CC 76, 12 cents
