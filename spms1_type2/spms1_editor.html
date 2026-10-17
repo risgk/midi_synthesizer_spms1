@@ -245,6 +245,15 @@
       .editor-column .panel { padding: 10px 16px; }
       .editor-column .panel h2 { margin-bottom: 6px; }
       #init-values { padding: 6px; }
+      /* A quarter of a full HD window leaves the slider less than a name, so the gaps and the
+         numbers beside it are narrower. */
+      .editor-grid { column-gap: 12px; }
+      .editor-column .panel { padding-left: 12px; padding-right: 12px; }
+      .slider-knob-zone, .slider-input-wrapper { gap: 8px; }
+      .slider-label { min-width: 138px; }
+      .slider-label .cc-num { font-size: 0.7rem; }
+      .slider-value { min-width: 28px; font-size: 0.9rem; }
+      .slider-norm { min-width: 42px; font-size: 0.75rem; }
       /* One row, which takes the extra height of the tab. */
       .editor-grid { align-content: stretch; }
     }
