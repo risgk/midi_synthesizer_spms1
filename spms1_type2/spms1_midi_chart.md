@@ -20,7 +20,7 @@
 | After        Key's            | x             | x             |                                      |
 | Touch        Ch's             | x             | x             |                                      |
 +-------------------------------+---------------+---------------+--------------------------------------+
-| Pitch Bend                    | x             | o             | Pitch Bend In, +-2 Semitones         |
+| Pitch Bend                    | x             | o             | Pitch 1 Bend In, +-2 Semitones       |
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Control                    20 | x             | o             | Osc Wave (Saw to Square)             |
 | Change                     89 | x             | o             | Osc Mod 1 Amt                        |

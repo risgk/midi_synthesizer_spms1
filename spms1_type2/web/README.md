@@ -42,7 +42,7 @@ Specifications
       at other sampling rates, the output is resampled (cubic Hermite interpolation)
     - The MIDI messages are handled at the beginning of the next audio block (128 samples, about 2.7 ms at 48 kHz),
       and the synth reads them once per its own buffer (64 samples), as on the device
-- How it runs: `Spms1_main` never returns, and its `loop do` writes each sample out through
+- How it runs: `Spms1_main` never returns, and its `while true` loop writes each sample out through
   `write_to_audio_buffer`, which waits for room in the output on the device. Here the build runs
   Binaryen's Asyncify on the WebAssembly, so that `write_to_audio_buffer` can unwind `Spms1_main`
   out to the AudioWorkletProcessor once a block is filled, and the next block rewinds it back to the
@@ -89,7 +89,7 @@ node spms1_web_test.js
     - "spms1_web_build.js": the build script
     - "spms1_web_test.js": the test of the built file with Node.js (plays a note at 48 kHz, 44.1 kHz, and 96 kHz,
       and checks the release, that the output does not depend on the block size, and that a patch sent as NRPN is taken)
-- The Arduino IDE does not build the files in this folder (only the files at the top of the sketch folder)
+- The Arduino IDE does not see this folder: it is outside the sketch folder, "spms1"
 
 
 Credits

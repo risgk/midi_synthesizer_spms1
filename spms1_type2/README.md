@@ -176,7 +176,8 @@ flowchart LR
 ```
 
 Each module is processed once per sample, in the run order below. Their parameters -- waveform,
-cutoff, gain and the rest -- arrive from CC and are left out of the diagram.
+cutoff, gain and the rest -- arrive from CC and are left out of the diagram. Parameter names
+shorten Amount to Amt and Polarity to Pol.
 
 The note's pitch reaches the oscillator through Pitch 1, which glides from one note to the next:
 portamento. Pitch 1 Glide is on CC 5, Portamento Time in the MIDI spec, and powers up at 0.0, where
@@ -186,16 +187,17 @@ oscillator and the filter's keyboard tracking alike. Pitch 1 Bend Amt (CC 57) is
 half a semitone a step: 2 semitones either way at CC 8, where it powers up, an octave at CC 28 and
 5 octaves at the top.
 
-Parameter names shorten Amount to Amt and Polarity to Pol.
-
 The LFO goes straight to the oscillator, both to its pitch and to its pulse width, at its full
 level, and to the filter, where Filter 1 Mod 2 Amt (CC 25) powers up at 0.0 and leaves the cutoff
 to the envelope until it is turned up. Osc 1 Mod 2 Pol and Filter 1 Mod 2 Pol read the constant
 0.1, which brings it down to a vibrato depth on the pitch and a like depth on the cutoff, while Osc 1 PW Mod Pol reads 0.5 and
 takes the LFO whole. The pitch from Pitch 1 reaches the filter too, on Filter 1 Mod 3 In, for keyboard tracking: Mod 3
 Pol reads +0.5, so CC 9 (Mod 3 Amt) at its top has the cutoff follow the note a semitone for a
-semitone, unmoved at note 60. Mod 3 Amt powers up at 0.0, with the tracking off. Each modulation depth spans the whole range of what it moves, so bringing a
-source down to a musical depth is left to the patch rather than built into the oscillator.
+semitone, unmoved at note 60. Mod 3 Amt powers up at 0.0, with the tracking off.
+The envelope reaches the oscillator's pitch too, on Osc 1 Mod 1 In, for a pitch envelope: Mod 1 Pol
+reads +0.5, and Mod 1 Amt (CC 89) powers up at 0.0, with it off. Each modulation depth spans the
+whole range of what it moves, so bringing a source down to a musical depth is left to the patch
+rather than built into the modules.
 
 The voice is mono up to the amp. The chorus takes it and puts out a left and a right, the delay
 takes the two sides and keeps them apart, and its two outputs are the two sides of the final
@@ -376,8 +378,8 @@ CC it had before, so the patch alone sets what the parameter reads.
 
 There is one of every module that makes a sound, one mixer, one chorus, one delay and one pitch module,
 and **all nine are in the default run order**, so a patch only ever has to route, never to switch something
-on first. Taking the chorus or the delay out of the order saves its share of the time, which
-leaves what read it to be pointed elsewhere; see the examples below.
+on first. Taking the chorus or the delay out of the order saves its share of the time; whatever
+read its output then has to be pointed elsewhere (see the examples below).
 A mixer is the only kind with no CC on any of its parameters: the default patch points them at
 constants instead, each level and Out Level at 1.0 and each polarity at +0.5, so a mixer with one input routed
 passes it through rather than muting it.
@@ -408,7 +410,8 @@ falls back. A pitch, as Note Pitch carries one to Pitch In, is -0.5 to +0.5 acro
 0 to 120, so 0.0 is note 60 and a tenth of a unit is an octave. And a Mod In is taken as it arrives:
 nothing is held to a range on the way in, and what gets clamped is the value the module ends up with
 -- cutoff to the ends of its dial, pitch to -0.5 and +0.5, pulse width to 0.0 and 1.0. The
-oscillator's Pitch In, Mod 1 In, Mod 2 In and PW Mod In are Mod Ins too. A mixer adds without a ceiling, so a loud modulation pins its destination at one
+oscillator's Pitch In, Mod 1 In, Mod 2 In and PW Mod In are Mod Ins too. A mixer adds without a
+ceiling, so a loud modulation pins its destination at one
 end rather than being trimmed on the way in. The amp is the exception, and holds its modulation
 input to -1.0 and +1.0: it is an attenuator, so a modulation may scale its gain down but never up.
 The chorus and the delay hold their audio inputs to the same one unit. Pitch 1 Pitch In takes anything,
@@ -519,7 +522,7 @@ scale, a bipolar control slot runs -0.5 to +0.5, and a mixer sums two of them an
 Everything unmarked runs 0.0 to 1.0 -- the envelope, Note Gate and every unipolar control slot. The bus carries both kinds under one numbering, so the range belongs to the slot
 rather than to the sort of thing that wrote it.
 
-Slots 19-47, 61, 62-64 and 69-82 hold the values arriving from CC, so a parameter reads its own CC
+Slots 19-47, 61-64 and 69-85 (but for the unused 21, 26, 71 and 72) hold the values arriving from CC, so a parameter reads its own CC
 by default. Each parameter is unipolar or bipolar, and its slot takes the same range. A unipolar one
 runs 0.0 to 1.0 from CC 4 to CC 124, the span of an envelope, so an envelope pointed at one sweeps
 the whole of its dial. A bipolar one runs -0.5 to +0.5 with CC 64 at 0.0, the span of an LFO, so a
@@ -586,7 +589,7 @@ oscillator's pitch: a unit of input times depth is the whole rate range, ten oct
 octave. Neither has a CC, and the default patch points them at 1.0 and +0.5, a depth of 1.0, and
 leaves Rate Mod In unrouted, so routing a source to it is all it takes. Both of the LFO's Mod Ins
 are read every fourth sample,
-where the LFO works out its rate, rather than every sample as the other module inputs are.
+where the LFO works out its rate, rather than every sample as most module inputs are.
 
 EG 1 Level scales the envelope's output the same way, over the same range. It has no CC, and the
 default patch points it at the constant 1.0, which passes the envelope through as it is. The
@@ -601,8 +604,8 @@ a depth in one direction, Mod Pol for one that crosses zero.
 
 Osc 1 Mod 2 Amt is a depth, not an offset, and it reaches the whole pitch range: at its top a
 bipolar source swings the pitch five octaves up and five down. That is a coarse dial for vibrato,
-half a semitone per CC step, which is why the default patch brings the LFO down to a fifth with Osc
-1 Mod 2 Pol. There a semitone of vibrato sits at CC 14 and an octave at the top of the
+half a semitone per CC step, which is why the default patch brings the LFO down to a fifth of its depth
+with Osc 1 Mod 2 Pol (0.1). There a semitone of vibrato sits at CC 14 and an octave at the top of the
 dial.
 
 Osc 1 Pitch In is where the note comes in, from Pitch 1 in the default patch. It has no depth:
@@ -610,7 +613,7 @@ the pitch it takes is added whole, so the note plays in tune, a key a semitone.
 
 Osc 1 Mod 1 In moves the pitch as Mod 2 In does, by Mod 1 Amt times Mod 1 Pol, and takes the
 envelope in the default patch, for a pitch envelope. Mod 1 Amt is on CC 89 and powers up at 0.0,
-so the envelope leaves the pitch alone until it is turned up; Mod 1 Pol reads +0.5, not a fifth as
+so the envelope leaves the pitch alone until it is turned up; Mod 1 Pol reads +0.5, not 0.1 as
 Mod 2 Pol does, as the envelope is unipolar and an envelope's sweep is wider than a vibrato's.
 
 Osc 1 Pulse Width shifts the second of the two sawtooths that the morph is made of, from half a
@@ -623,8 +626,7 @@ pulse width half the range either way: with Pulse Width at CC 64, from 50% to ne
 width the modulation adds up to is held to 0.0 to 1.0.
 
 Filter 1 Gain sets how hard the audio input drives the filter, which is also what decides how far
-the filter runs into its own saturation. Its default of CC 64 is the level the oscillator used to
-be scaled to on its own. The saturation sits on the resonance rather than the pass band: a low
+the filter runs into its own saturation. The saturation sits on the resonance rather than the pass band: a low
 cutoff passes a loud note nearly clean, while turning the gain up rounds off the resonant peak.
 
 Filter 1 Resonance raises the resonant peak 6 dB every 30 CC steps, Q doubling each time, up to
@@ -675,7 +677,7 @@ repeats alone at CC 124, half and half at CC 64. Time and Feedback power up at C
 CC 34, 0.25: the dry signal is 2.5 dB down and the first repeat about 16 dB under it.
 
 Pitch 1 Glide is unipolar and moves in steps of 1/120, a semitone of time a step, as EG 1 Decay
-does and over the same range: from 10 ms at CC 5 through 320 ms at CC 64 to 10.24 s at CC 124,
+does and over the same range: from about 10 ms at CC 5 through 320 ms at CC 64 to 10.24 s at CC 124,
 each the time to come within 1/1024 of the way, where a glide of an octave is a hundredth of a
 semitone short; nine tenths of the way take a third of it. At CC 4 and below, 0.0, the portamento
 is off, and its output is its input exactly. The glide is exponential, quick at first and slowing
@@ -708,7 +710,7 @@ changes only how fast the output moves, so it cannot step it.
 - The envelope drives the filter harder as a note starts: CC 99 = 2, CC 98 = 15, CC 6 = 10 takes
   the filter's input level from silence up to the top of its dial and back
 - Portamento is wired by default -- Note Pitch reaches the oscillator through Pitch 1 -- so CC 5
-  sets the time; CC 64 is a glide of about a tenth of a second. Every note glides, played legato
+  sets the time; at CC 64 a glide covers nine tenths of the way in about a tenth of a second. Every note glides, played legato
   or not. CC 99 = 2, CC 98 = 34, CC 6 = 51 takes the time from General Mod Wheel instead, so the
   wheel brings the portamento in
 - A CC that bends pitch both ways through the modulation input. Mixer 1 runs ahead of the
@@ -745,13 +747,14 @@ changes only how fast the output moves, so it cannot step it.
 
 #### Notes
 
-- Module inputs (category 1) are read every sample (LFO 1's two Mod Ins and Filter 1's three every fourth) and are not
+- Module inputs (category 1) are read every sample (EG 1 Gate In, LFO 1's two Mod Ins and Filter 1's three every fourth) and are not
   smoothed; parameters (category 2) are read once per buffer and are smoothed by their
   destination. Route a fast source through a module input, a stepped one through a parameter
 - The smoothing takes two stages (10.7 ms average delay, 99% in 35 ms at 48 kHz), which round off
   the steps of a controller sending sparse CCs (e.g. every 20 ms). Osc 1 Pitch Coarse and Pitch Fine
   and Pitch 1 Coarse and Fine are not smoothed, so that the pitch follows right away, and neither is Pitch 1 Glide, which
-  cannot step what it sets
+  cannot step what it sets, nor EG 1 Attack, Decay and Sustain, which the envelope's own curve
+  already moves between
 - A parameter source may point at any of the 128 slots. Slots above 85 read 0 until something
   writes them, which leaves a parameter pointed at one at the bottom of a unipolar dial or the
   middle of a bipolar one
@@ -780,7 +783,7 @@ there reaches the device and all of them at once. "sim_cruby" keeps a Ruby copy 
 
 The simulators are developed and tested on Windows. macOS and Linux are supported on a best-effort
 basis, written to their APIs but without the machines to try them on. The GitHub Actions workflow
-("SPMS-1 (type-2) Build (UF2 and Web)") builds sim_spinel and sim_render on macOS and Linux and runs
+("SPMS-1 (type-2) Build (UF2 and Web)") builds sim_spinel and sim_render on Windows, macOS and Linux and runs
 the offline renders there, and compares them with CRuby on Linux; neither is tried with audio or MIDI hardware
 (on Linux, sim_spinel was run once with a FIFO standing in for the MIDI device and ALSA's file
 plugin for the audio).
@@ -864,7 +867,8 @@ measures on the device -- with the default patch and a note held.
   UF2 files as an artifact
 - SPMS-1 Web: builds and tests "spms1_web_synth.js", and keeps it as an artifact
 - Simulators: builds "sim_spinel" and "sim_render" on Linux, macOS and Windows, renders, and compares
-  the renders with CRuby on Linux. On Linux it also checks that every function and variable of the
+  the renders with CRuby on Linux. On Linux it first checks that the files generated from
+  "spms1_patch.yaml" are up to date ("patch_gen/spms1_patch_gen.rb --check"). On Linux it also checks that every function and variable of the
   runtime has the same type wherever it is declared ("spinel_mcu/lto_type_check.sh"): a function
   declared with float on one side and double on the other goes unnoticed otherwise, as two did
   when the MCU changes made the runtime float with `#define double float`
