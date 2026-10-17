@@ -360,9 +360,9 @@ a matter of changing slot numbers.
 | CC 99 | CC 98 | Sets | CC 6 value |
 | ----- | ----- | ---- | ---------- |
 | 0 | 0-31 | Run order, slot by slot | Module ID |
-| 1 | 0-14 | What feeds a module input | Signal ID |
-| 2 | 0-28, 34 | Where a parameter takes its value | Signal ID |
-| 3 | 0-34 | Which CC fills a control slot | CC number, or 0 for none |
+| 1 | 0-21 | What feeds a module input | Signal ID |
+| 2 | 0-28, 34-56 | Where a parameter takes its value | Signal ID |
+| 3 | 0-56 | Which CC fills a control slot | CC number, or 0 for none |
 
 The run order is read from slot 0 upwards and stops at the first Module ID 0, so a patch shorter
 than 32 modules ends itself. It is separate from the module numbering: a module only sees the
@@ -531,7 +531,7 @@ slot is what makes a modulation. A slot with no CC holds 0.0.
 Slots 51-59, the General slots, are control slots that no parameter owns: a CC put on the bus for
 any module input or parameter to read. General Mod Wheel reads CC 1, runs 0.0 to 1.0 and powers
 up at CC 4, so it is at 0.0 until the wheel moves; nothing is routed to it by default. General 1-4
-read CC 16, 17, 18 and 113 by default, and each puts its CC on the bus both ways at once: General Unipolar 1-4
+read CC 16, 17, 18 and 19 by default, and each puts its CC on the bus both ways at once: General Unipolar 1-4
 run 0.0 to 1.0 and General Bipolar 1-4 run -0.5 to +0.5. All four power up at CC 64, so the
 unipolar slots start at 0.5 and the bipolar ones at 0.0.
 
@@ -752,7 +752,7 @@ changes only how fast the output moves, so it cannot step it.
   the steps of a controller sending sparse CCs (e.g. every 20 ms). Osc 1 Pitch Coarse and Pitch Fine
   and Pitch 1 Coarse and Fine are not smoothed, so that the pitch follows right away, and neither is Pitch 1 Glide, which
   cannot step what it sets
-- A parameter source may point at any of the 128 slots. Slots above 82 read 0 until something
+- A parameter source may point at any of the 128 slots. Slots above 85 read 0 until something
   writes them, which leaves a parameter pointed at one at the bottom of a unipolar dial or the
   middle of a bipolar one
 - A parameter clamps its value to its own range, 0.0 to 1.0 or -0.5 to +0.5, and its control slot
