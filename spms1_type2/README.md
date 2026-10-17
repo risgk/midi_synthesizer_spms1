@@ -700,17 +700,18 @@ unchanged, so a mixer with one input routed is a buffer; inverting that one inpu
 inverter; and inverting only another makes the mixer a subtractor. Out Level then scales the
 sum, over the same range as Level and also at 1.0 by default, so one control can take a blend of
 two sources up and down together; it is applied before the sum is held to its range, so turning
-it down also brings a sum that would have been cut back inside it.
+it down also brings a sum that would have been rounded off back into the straight part.
 
-The sum is held to -1.0 and +1.0. Two full-scale signals reach exactly that, and an oscillator
-or the noise at full level is half of one, so nothing ordinary is cut -- on Mixer 2, two
-oscillators and the noise all at full level would be, which Out Level is there to prevent; what it stops is a mixer wired back to its own input, which would otherwise double every
-sample until the number stopped being a number and took the oscillator or the filter with it.
-The filter is held to the same one unit, by a curve rather than a corner: its output passes
-untouched up to three quarters of a unit, well above anything the default patch reaches, and
-above that bends smoothly onto the limit. Its resonant peak can climb past one unit on a sweep,
-and rounding that off makes far weaker high harmonics than a hard edge would fold back down into
-the note.
+The sum is held to -1.0 and +1.0, by a curve rather than a corner, as an analog mixer runs out
+of headroom gradually: it passes untouched up to three quarters of a unit, and above that bends
+smoothly onto the limit. Two full-scale signals reach exactly one unit, and an oscillator or the
+noise at full level is half of one, so the default patch passes untouched; on Mixer 2, two
+oscillators at full level reach into the curve and the noise on top of them goes past it, which
+Out Level is there to take back down. What the limit stops is a mixer wired back to its own
+input, which would otherwise double every sample until the number stopped being a number and
+took the oscillator or the filter with it. The filter's output is held to the same one unit by
+the same curve. Its resonant peak can climb past one unit on a sweep, and rounding that off
+makes far weaker high harmonics than a hard edge would fold back down into the note.
 
 The three Chorus 1 parameters are unipolar and move in steps of 1/120. Rate is read as a note
 number, a semitone a step, as LFO 1 Rate is: 0.015 Hz at CC 4, 0.48 Hz at CC 64 and 15.4 Hz at
