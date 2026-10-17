@@ -78,19 +78,16 @@ module Spms1
         @stage_1_level = Dsp.smooth(@level, @stage_1_level, @smoothing_target_blend)
         @current_level = Dsp.smooth(@stage_1_level, @current_level, @smoothing_target_blend)
         @stage_1_red_cutoff = Dsp.smooth(@red_cutoff, @stage_1_red_cutoff, @smoothing_target_blend)
-        red_cutoff = Dsp.smooth(@stage_1_red_cutoff, @current_red_cutoff, @smoothing_target_blend)
-        # Looked up only while the cutoff moves: smoothing lands on its target exactly, so a
-        # cutoff left alone costs nothing here.
-        if red_cutoff != @current_red_cutoff
-          @current_red_cutoff = red_cutoff
-          position = red_cutoff * 120.0
-          index = position.to_i
-          fraction = position - index.to_f
-          c0 = @red_coef_table[index]
-          g0 = @red_gain_table[index]
-          @red_coef = c0 + fraction * (@red_coef_table[index + 1] - c0)
-          @red_gain = g0 + fraction * (@red_gain_table[index + 1] - g0)
-        end
+        @current_red_cutoff = Dsp.smooth(@stage_1_red_cutoff, @current_red_cutoff, @smoothing_target_blend)
+        # Looked up at every update, the cutoff moving or not, so that the load does not change
+        # with it.
+        position = @current_red_cutoff * 120.0
+        index = position.to_i
+        fraction = position - index.to_f
+        c0 = @red_coef_table[index]
+        g0 = @red_gain_table[index]
+        @red_coef = c0 + fraction * (@red_coef_table[index + 1] - c0)
+        @red_gain = g0 + fraction * (@red_gain_table[index + 1] - g0)
       end
 
       @sample_counter = (@sample_counter + 1) & CONTROL_RATE_MASK
