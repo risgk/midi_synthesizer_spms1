@@ -1,5 +1,5 @@
 ```
-  [MIDI Synthesizer]                                              Date: 2026-10-16                      
+  [MIDI Synthesizer]                                              Date: 2026-10-17                      
   Model: SPMS-1 (type-2)          MIDI Implementation Chart       Version: 0.0.3                        
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Function...                   | Transmitted   | Recognized    | Remarks                              |
@@ -30,7 +30,6 @@
 |                           115 | x             | o             | Osc PW Mod Amt                       |
 |                            85 | x             | o             | Osc 2 Pitch Coarse (+-5 Octaves)     |
 |                            76 | x             | o             | Osc 2 Pitch Fine (+-60 Cents)        |
-|                            23 | x             | o             | Noise Level                          |
 |                            74 | x             | o             | Filter Cutoff                        |
 |                            71 | x             | o             | Filter Resonance                     |
 |                            24 | x             | o             | Filter Mod 1 Amt                     |
@@ -39,7 +38,7 @@
 |                           112 | x             | o             | Filter Gain                          |
 |                           116 | x             | o             | Mixer 2 Level 1 (Osc 1 Level)        |
 |                            21 | x             | o             | Mixer 2 Level 2 (Osc 2 Level)        |
-|                           117 | x             | o             | Mixer 2 Level 3 (Noise Level)        |
+|                            23 | x             | o             | Mixer 2 Level 3 (Noise Level)        |
 |                            15 | x             | o             | Amp Gain                             |
 |                            73 | x             | o             | EG Attack (Time)                     |
 |                            75 | x             | o             | EG Decay (Time)                      |

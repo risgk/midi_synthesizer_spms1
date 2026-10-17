@@ -174,10 +174,11 @@ spms1_fill_constant_signals(signals)
 # Mod 2 Amt powers up at 0.0, so the cutoff follows the envelope alone until CC 25 turns it up,
 # and Filter 1 Mod 2 Pol reads 0.1, as Osc 1 Mod 2 Pol does. Filter 1 Mod 3 In takes Pitch 1's
 # pitch too, for keyboard tracking, but Mod 3 Amt powers up at 0.0 and leaves it off until CC 9.
-# Noise 1 runs with the modulation sources, ahead of Mixer 1. Mixer 2 runs after the oscillators,
-# just ahead of the filter, which it feeds: Osc 1 on its In 1, Osc 2 on In 2 and the noise on In 3.
-# Its Level 1 and Level 3, on CC 116 and 117, power up at 1.0, and Level 2, on CC 21, at 0.0, so
-# Osc 2 is silent until CC 21; Noise 1 Level powers up at 0.0, so the noise is until CC 23. Osc 2 plays the note from Pitch 1,
+# Noise 1 runs ahead of the other modulation sources, at full level: its Level has no CC and reads
+# 1.0. Mixer 2 runs after the oscillators, just ahead of the filter, which it feeds: Osc 1 on its
+# In 1, Osc 2 on In 2 and the noise on In 3. Its Level 1, on CC 116, powers up at 1.0, and Level 2
+# and Level 3, on CC 21 and 23, at 0.0, so Osc 2 is silent until CC 21 and the noise until CC 23.
+# Osc 2 plays the note from Pitch 1,
 # as Osc 1 does, tuned by its own Pitch Coarse and Fine (CC 85 and 76), 12 cents sharp at
 # power-up, and has a Wave of its own on CC 104 (Osc 1's on CC 102); it follows Osc 1 in everything
 # else: each of its amounts and its pulse width read Osc 1's control slots.

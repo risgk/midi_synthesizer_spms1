@@ -302,9 +302,9 @@ controls:
   - { entry: 46, module: FILTER_1,  key: MOD_3_AMT, label: Mod 3 Amt,    cc: 9,   value: 4 }
   - { entry: 47, module: FILTER_1,  key: MOD_3_POL, label: Mod 3 Pol,    cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 14, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 94 }
-  # Noise 1 came after Osc 1 Mod 1 Amt and Pol. Level is on CC 23 and powers up at CC 4, 0.0, so the
-  # noise on Mixer 2 In 3 is silent until it is turned up.
-  - { entry: 57, module: NOISE_1,   key: LEVEL,        label: Level,        cc: 23,  value: 4 }
+  # Noise 1 came after Osc 1 Mod 1 Amt and Pol. Level has no CC and reads 1.0: the noise runs at
+  # full level, and Mixer 2 Level 3 (CC 23), or the depth of what it modulates, sets how much is heard.
+  - { entry: 57, module: NOISE_1,   key: LEVEL,        label: Level,        cc: 0,   value: 124, source: ONE }
   - { entry: 18, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 124 }
   - { entry: 19, module: MIXER_1,   key: LEVEL_1,      label: Level 1,      cc: 0,   source: ONE }
   - { entry: 20, module: MIXER_1,   key: POL_1,   label: Pol 1,   cc: 0,   value: 124, source: HALF, bipolar: true }
@@ -320,14 +320,14 @@ controls:
   - { entry: 54, module: MIXER_1,   key: OUT_LEVEL,    label: Out Level,    cc: 0,   source: ONE }
   # Mixer 2 came after Mixer 1's Level 3 to Pol 4: the audio ahead of the filter, Osc 1 on In 1, Osc 2
   # on In 2 and the noise on In 3. Level 1 (CC 116) powers up at 1.0, passing Osc 1 as before;
-  # Level 2 (CC 21) at 0.0, leaving Osc 2 silent; Level 3 (CC 117) at 1.0, with the noise silent at
-  # its own Level until CC 23. In 4 is free, its Level reading 1.0. Each Pol reads +0.5 and Out Level
+  # Level 2 (CC 21) at 0.0, leaving Osc 2 silent; Level 3 (CC 23) at 0.0, leaving the noise, at
+  # full level from Noise 1, silent. In 4 is free, its Level reading 1.0. Each Pol reads +0.5 and Out Level
   # 1.0, with no CC.
   - { entry: 75, module: MIXER_2,   key: LEVEL_1,      label: Level 1,      cc: 116, value: 124 }
   - { entry: 76, module: MIXER_2,   key: POL_1,   label: Pol 1,   cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 77, module: MIXER_2,   key: LEVEL_2,      label: Level 2,      cc: 21,  value: 4 }
   - { entry: 78, module: MIXER_2,   key: POL_2,   label: Pol 2,   cc: 0,   value: 124, source: HALF, bipolar: true }
-  - { entry: 79, module: MIXER_2,   key: LEVEL_3,      label: Level 3,      cc: 117, value: 124 }
+  - { entry: 79, module: MIXER_2,   key: LEVEL_3,      label: Level 3,      cc: 23,  value: 4 }
   - { entry: 80, module: MIXER_2,   key: POL_3,   label: Pol 3,   cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 81, module: MIXER_2,   key: LEVEL_4,      label: Level 4,      cc: 0,   source: ONE }
   - { entry: 82, module: MIXER_2,   key: POL_4,   label: Pol 4,   cc: 0,   value: 124, source: HALF, bipolar: true }

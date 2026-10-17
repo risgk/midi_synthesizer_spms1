@@ -420,7 +420,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_1_OUT_LEVEL  , SIGNAL_ONE)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_1_MOD_1_AMT    , SIGNAL_OSC_1_MOD_1_AMT)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_1_MOD_1_POL    , SIGNAL_HALF)
-  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_NOISE_1_LEVEL      , SIGNAL_NOISE_1_LEVEL)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_NOISE_1_LEVEL      , SIGNAL_ONE)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_2_WAVE         , SIGNAL_OSC_2_WAVE)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_2_PITCH_COARSE , SIGNAL_OSC_2_PITCH_COARSE)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_2_PITCH_FINE   , SIGNAL_OSC_2_PITCH_FINE)
@@ -477,13 +477,12 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_PITCH_1_COARSE    , 86)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_PITCH_1_FINE      , 70)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_MOD_1_AMT   , 89)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_NOISE_1_LEVEL     , 23)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_2_WAVE        , 104)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_2_PITCH_COARSE, 85)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_2_PITCH_FINE  , 76)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_MIXER_2_LEVEL_1   , 116)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_MIXER_2_LEVEL_2   , 21)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_MIXER_2_LEVEL_3   , 117)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_MIXER_2_LEVEL_3   , 23)
 
   C.set_midi_cc_value(midi_ch, 3  , 64 ) # LFO 1 Rate
   C.set_midi_cc_value(midi_ch, 113, 124) # LFO 1 Level
@@ -517,11 +516,10 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 86 , 64 ) # Pitch 1 Coarse
   C.set_midi_cc_value(midi_ch, 70 , 64 ) # Pitch 1 Fine
   C.set_midi_cc_value(midi_ch, 89 , 4  ) # Osc 1 Mod 1 Amt
-  C.set_midi_cc_value(midi_ch, 23 , 4  ) # Noise 1 Level
   C.set_midi_cc_value(midi_ch, 104, 4  ) # Osc 2 Wave
   C.set_midi_cc_value(midi_ch, 85 , 64 ) # Osc 2 Pitch Coarse
   C.set_midi_cc_value(midi_ch, 76 , 76 ) # Osc 2 Pitch Fine
   C.set_midi_cc_value(midi_ch, 116, 124) # Mixer 2 Level 1
   C.set_midi_cc_value(midi_ch, 21 , 4  ) # Mixer 2 Level 2
-  C.set_midi_cc_value(midi_ch, 117, 124) # Mixer 2 Level 3
+  C.set_midi_cc_value(midi_ch, 23 , 4  ) # Mixer 2 Level 3
 end

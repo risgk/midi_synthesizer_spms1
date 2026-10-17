@@ -210,9 +210,8 @@ whole range of what it moves, so bringing a source down to a musical depth is le
 rather than built into the modules.
 
 Mixer 2 sums the audio ahead of the filter: Osc 1 on In 1, Osc 2 on In 2 and Noise 1 on In 3, each
-at its own level, Level 1 (CC 116), Level 2 (CC 21) and Level 3 (CC 117); In 4 is free. Level 2
-powers up at 0.0, and so does Noise 1 Level (CC 23), so the default patch plays Osc 1 alone until
-they are turned up. Osc 2 plays the note from Pitch 1 as Osc
+at its own level, Level 1 (CC 116), Level 2 (CC 21) and Level 3 (CC 23); In 4 is free. Level 2
+and Level 3 power up at 0.0, so the default patch plays Osc 1 alone until they are turned up. Osc 2 plays the note from Pitch 1 as Osc
 1 does, tuned against it by its own Pitch Coarse (CC 85) and Pitch Fine (CC 76), 12 cents sharp at
 power-up for a slow beat. Its Wave is its own as well, on CC 104 beside Osc 1's on CC 102. It
 follows Osc 1 in everything else: its amounts and its pulse width read Osc 1's control slots, so
@@ -672,9 +671,10 @@ width range, so at the top of PW Mod Amt the LFO, which the default patch feeds 
 pulse width half the range either way: with Pulse Width at CC 64, from 50% to nearly 0%. The pulse
 width the modulation adds up to is held to 0.0 to 1.0.
 
-Noise 1 puts out white noise, flat across the spectrum, at Noise 1 Level (CC 23): from silence at
-0.0 (CC 4), where it powers up, to noise filling -0.5 to +0.5 at 1.0 (CC 124), the oscillator's
-range. The level is smoothed as the other levels are. The noise repeats only after 2^32 samples,
+Noise 1 puts out white noise, flat across the spectrum, at Noise 1 Level: from silence at 0.0 to
+noise filling -0.5 to +0.5 at 1.0, the oscillator's range. The level has no CC and reads 1.0, so
+the noise runs at full level and Mixer 2 Level 3 (CC 23), or the depth of whatever it modulates,
+sets how much of it is heard. The level is smoothed as the other levels are. The noise repeats only after 2^32 samples,
 over a day at 48 kHz, and starts the same every time, so a render comes out the same.
 
 Filter 1 Gain sets how hard the audio input drives the filter, which is also what decides how far
@@ -764,8 +764,8 @@ changes only how fast the output moves, so it cannot step it.
   so CC 89 sets its depth. Nothing scales the envelope down on this path, so the note starts a
   semitone sharp at CC 5 and an octave at CC 16, and falls back with the decay
 - Noise as a modulation source, a random wobble of the cutoff: CC 99 = 1, CC 98 = 17, CC 6 = 86
-  puts Noise 1 on the filter's Mod 2 input in the LFO's place, and CC 117 down to CC 4 takes it out
-  of Mixer 2, so it is not heard as well; then CC 23 and CC 25 set how much
+  puts Noise 1 on the filter's Mod 2 input in the LFO's place; with CC 23 left at CC 4 it stays out
+  of Mixer 2, so it is not heard as well, and CC 25 sets how much
 - Filter cutoff driven by the envelope instead of its CC: CC 99 = 2, CC 98 = 13, CC 6 = 10. The
   envelope and the cutoff are both unipolar, so it opens the cutoff from the bottom of its dial
   to the top
