@@ -175,6 +175,9 @@ signals:
   - { key: FILTER_1_AUDIO_1_GAIN, id: 99,  control: FILTER_1_AUDIO_1_GAIN }
   - { key: FILTER_1_AUDIO_2_GAIN, id: 100, control: FILTER_1_AUDIO_2_GAIN }
 
+  # Filter 1 Audio 3 Gain came after Audio 2 Gain.
+  - { key: FILTER_1_AUDIO_3_GAIN, id: 101, control: FILTER_1_AUDIO_3_GAIN }
+
 # Module inputs, NRPN category 1, listed in the editor's order, each by its entry: what feeds each
 # one in the default patch (`source`, a signal key). `label` is the editor's, on the module; `name`
 # the README's, after the module's label. An input with no module is a side of the final output.
@@ -250,12 +253,13 @@ controls:
   - { entry: 36, module: OSC_1,     key: PW_MOD_AMT,   label: PW Mod Amt,      cc: 103, value: 4 }
   - { entry: 37, module: OSC_1,     key: PW_MOD_POL, label: PW Mod Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
   # Osc 2 came after Noise 1, so its entries follow. Pitch Coarse and Fine are its own, on CC 85 and
-  # 76, centred at CC 64, to tune it against Osc 1. Everything else follows Osc 1 by default: each
+  # 76, to tune it against Osc 1: Coarse powers up at CC 64, in unison, and Fine at CC 76, 12 cents
+  # sharp, for a slow beat once Osc 2 is turned up. Everything else follows Osc 1 by default: each
   # amount, the waveform and the pulse width read Osc 1's control slots, so Osc 1's CCs move both
   # oscillators, and each polarity reads the constant Osc 1's does. Osc 2 is heard through Filter 1
   # Audio 2 Gain (CC 21), which powers up at 0.0.
   - { entry: 59, module: OSC_2,     key: PITCH_COARSE,  label: Pitch Coarse,  cc: 85,  value: 64, bipolar: true }
-  - { entry: 60, module: OSC_2,     key: PITCH_FINE,    label: Pitch Fine,    cc: 76,  value: 64, bipolar: true }
+  - { entry: 60, module: OSC_2,     key: PITCH_FINE,    label: Pitch Fine,    cc: 76,  value: 76, bipolar: true }
   - { entry: 61, module: OSC_2,     key: MOD_1_AMT, label: Mod 1 Amt, cc: 0,   value: 4,   source: OSC_1_MOD_1_AMT }
   - { entry: 62, module: OSC_2,     key: MOD_1_POL, label: Mod 1 Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 63, module: OSC_2,     key: MOD_2_AMT, label: Mod 2 Amt, cc: 0,   value: 4,   source: OSC_1_MOD_2_AMT }
@@ -265,8 +269,9 @@ controls:
   - { entry: 66, module: OSC_2,     key: PW_MOD_AMT,   label: PW Mod Amt,      cc: 0,   value: 4,   source: OSC_1_PW_MOD_AMT }
   - { entry: 67, module: OSC_2,     key: PW_MOD_POL, label: PW Mod Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
   # Filter 1 in the editor: Gain and the levels of its first two audio inputs, the cutoff and its
-  # three modulations, then the resonance. Audio 1 Gain (CC 116) powers up at 1.0, passing the
-  # oscillator as before, and Audio 2 Gain (CC 21) at 0.0, leaving Osc 2 silent. Mod 2
+  # three modulations, then the resonance. Audio 1 Gain (CC 116) and Audio 3 Gain (CC 117) power up
+  # at 1.0, passing the oscillator and the noise as before, and Audio 2 Gain (CC 21) at 0.0, leaving
+  # Osc 2 silent. Mod 2
   # Amt and Pol came last of all, so their entries follow every other. Mod 2 Amt powers up at
   # CC 4, 0.0, so the LFO on Mod 2 In leaves the cutoff alone until it is turned up. Mod 2 Pol reads 0.1, as
   # Osc 1 Mod 2 Pol does, which brings the LFO down to a musical depth on the cutoff. Mod 3 is the keyboard
@@ -276,6 +281,7 @@ controls:
   - { entry: 15, module: FILTER_1,  key: GAIN,         label: Gain,         cc: 112, value: 64 }
   - { entry: 68, module: FILTER_1,  key: AUDIO_1_GAIN, label: Audio 1 Gain, cc: 116, value: 124 }
   - { entry: 69, module: FILTER_1,  key: AUDIO_2_GAIN, label: Audio 2 Gain, cc: 21,  value: 4 }
+  - { entry: 70, module: FILTER_1,  key: AUDIO_3_GAIN, label: Audio 3 Gain, cc: 117, value: 124 }
   - { entry: 13, module: FILTER_1,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 100 }
   - { entry: 16, module: FILTER_1,  key: MOD_1_AMT, label: Mod 1 Amt,     cc: 24,  value: 28 }
   - { entry: 17, module: FILTER_1,  key: MOD_1_POL, label: Mod 1 Pol, cc: 0,   value: 124, source: HALF, bipolar: true }

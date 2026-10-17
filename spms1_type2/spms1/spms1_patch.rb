@@ -111,6 +111,7 @@ SIGNAL_OSC_2_PW_MOD_AMT      = 97
 SIGNAL_OSC_2_PW_MOD_POL      = 98
 SIGNAL_FILTER_1_AUDIO_1_GAIN = 99
 SIGNAL_FILTER_1_AUDIO_2_GAIN = 100
+SIGNAL_FILTER_1_AUDIO_3_GAIN = 101
 
 # NRPN parameter numbers: (MSB << 7) | LSB, where the MSB picks a category and the LSB an entry.
 #   0..127   active_modules[slot]
@@ -207,6 +208,7 @@ NRPN_SOURCE_OSC_2_PW_MOD_AMT      = 322
 NRPN_SOURCE_OSC_2_PW_MOD_POL      = 323
 NRPN_SOURCE_FILTER_1_AUDIO_1_GAIN = 324
 NRPN_SOURCE_FILTER_1_AUDIO_2_GAIN = 325
+NRPN_SOURCE_FILTER_1_AUDIO_3_GAIN = 326
 
 # A CC number of 0 means the parameter has no CC: its control slot holds 0.0 -- the bottom of a
 # unipolar dial, the middle of a bipolar one -- whatever CC it had before, so a patch sets it alone.
@@ -274,6 +276,7 @@ NRPN_CC_OSC_2_PW_MOD_AMT      = 450
 NRPN_CC_OSC_2_PW_MOD_POL      = 451
 NRPN_CC_FILTER_1_AUDIO_1_GAIN = 452
 NRPN_CC_FILTER_1_AUDIO_2_GAIN = 453
+NRPN_CC_FILTER_1_AUDIO_3_GAIN = 454
 
 # The constants of the bus, which nothing else ever writes. A slot not written here holds 0.0.
 def spms1_fill_constant_signals(signals)
@@ -389,6 +392,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_2_PW_MOD_POL     , SIGNAL_HALF)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_AUDIO_1_GAIN, SIGNAL_FILTER_1_AUDIO_1_GAIN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_AUDIO_2_GAIN, SIGNAL_FILTER_1_AUDIO_2_GAIN)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_AUDIO_3_GAIN, SIGNAL_FILTER_1_AUDIO_3_GAIN)
 
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_RATE           , 3)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_LEVEL          , 113)
@@ -427,6 +431,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_2_PITCH_FINE     , 76)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_AUDIO_1_GAIN, 116)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_AUDIO_2_GAIN, 21)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_AUDIO_3_GAIN, 117)
 
   C.set_midi_cc_value(midi_ch, 3  , 64 ) # LFO 1 Rate
   C.set_midi_cc_value(midi_ch, 113, 124) # LFO 1 Level
@@ -462,7 +467,8 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 89 , 4  ) # Osc 1 Mod 1 Amt
   C.set_midi_cc_value(midi_ch, 23 , 4  ) # Noise 1 Level
   C.set_midi_cc_value(midi_ch, 85 , 64 ) # Osc 2 Pitch Coarse
-  C.set_midi_cc_value(midi_ch, 76 , 64 ) # Osc 2 Pitch Fine
+  C.set_midi_cc_value(midi_ch, 76 , 76 ) # Osc 2 Pitch Fine
   C.set_midi_cc_value(midi_ch, 116, 124) # Filter 1 Audio 1 Gain
   C.set_midi_cc_value(midi_ch, 21 , 4  ) # Filter 1 Audio 2 Gain
+  C.set_midi_cc_value(midi_ch, 117, 124) # Filter 1 Audio 3 Gain
 end

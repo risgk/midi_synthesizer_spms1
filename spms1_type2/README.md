@@ -208,10 +208,11 @@ whole range of what it moves, so bringing a source down to a musical depth is le
 rather than built into the modules.
 
 The filter takes three audio inputs and sums them: Osc 1 on Audio 1 In, Osc 2 on Audio 2 In and
-Noise 1 on Audio 3 In. Audio 1 Gain (CC 116) and Audio 2 Gain (CC 21) set the level of the first
-two, and Noise 1 Level (CC 23) that of the noise; Audio 2 Gain and Noise 1 Level power up at 0.0,
-so the default patch plays Osc 1 alone until they are turned up. Osc 2 plays the note from Pitch 1
-as Osc 1 does, tuned against it by its own Pitch Coarse (CC 85) and Pitch Fine (CC 76), and
+Noise 1 on Audio 3 In, each at its own level: Audio 1 Gain (CC 116), Audio 2 Gain (CC 21) and
+Audio 3 Gain (CC 117). Audio 2 Gain powers up at 0.0, and so does Noise 1 Level (CC 23), so the
+default patch plays Osc 1 alone until they are turned up. Osc 2 plays the note from Pitch 1 as Osc
+1 does, tuned against it by its own Pitch Coarse (CC 85) and Pitch Fine (CC 76), 12 cents sharp at
+power-up for a slow beat, and
 follows Osc 1 in everything else: its amounts, its waveform and its pulse width read Osc 1's
 control slots, so Osc 1's CCs move both.
 
@@ -380,8 +381,8 @@ a matter of changing slot numbers.
 | ----- | ----- | ---- | ---------- |
 | 0 | 0-31 | Run order, slot by slot | Module ID |
 | 1 | 0-27 | What feeds a module input | Signal ID |
-| 2 | 0-28, 34-69 | Where a parameter takes its value | Signal ID |
-| 3 | 0-69 | Which CC fills a control slot | CC number, or 0 for none |
+| 2 | 0-28, 34-70 | Where a parameter takes its value | Signal ID |
+| 3 | 0-70 | Which CC fills a control slot | CC number, or 0 for none |
 
 The run order is read from slot 0 upwards and stops at the first Module ID 0, so a patch shorter
 than 32 modules ends itself. It is separate from the module numbering: a module only sees the
@@ -465,7 +466,7 @@ both at the same signal for a mono output.
 | 18 | Amp 1 Gain | | 47 | Filter 1 Mod 3 Pol | | 67 | Osc 2 PW Mod Pol |
 | 19 | Mixer 1 Level 1 | | 48 | Pitch 1 Bend Amt | | 68 | Filter 1 Audio 1 Gain |
 | 20 | Mixer 1 Pol 1 | | 49 | Pitch 1 Bend Pol | | 69 | Filter 1 Audio 2 Gain |
-| 21 | Mixer 1 Level 2 | | 50 | LFO 1 Level Mod Amt | |  |  |
+| 21 | Mixer 1 Level 2 | | 50 | LFO 1 Level Mod Amt | | 70 | Filter 1 Audio 3 Gain |
 
 <!-- patch_gen end -->
 
@@ -544,7 +545,7 @@ two slots, a unipolar and a bipolar one. See the General slots below.
 | 30 | Osc 1 Mod 2 Amt | | 62 | Osc 1 Pulse Width | | 98 | Osc 2 PW Mod Pol ± |
 | 31 | Osc 1 Mod 2 Pol ± | | 63 | Osc 1 PW Mod Amt | | 99 | Filter 1 Audio 1 Gain |
 | 32 | Filter 1 Cutoff | | 64 | Osc 1 PW Mod Pol ± | | 100 | Filter 1 Audio 2 Gain |
-| 33 | Filter 1 Resonance | | 65 | Filter 1 Output BP ± | |  |  |
+| 33 | Filter 1 Resonance | | 65 | Filter 1 Output BP ± | | 101 | Filter 1 Audio 3 Gain |
 
 <!-- patch_gen end -->
 
@@ -553,7 +554,7 @@ scale, a bipolar control slot runs -0.5 to +0.5, and a mixer sums two of them an
 Everything unmarked runs 0.0 to 1.0 -- the envelope, Note Gate and every unipolar control slot. The bus carries both kinds under one numbering, so the range belongs to the slot
 rather than to the sort of thing that wrote it.
 
-Slots 19-47, 61-64, 69-85, 87 and 89-100 (but for the unused 21, 26, 71 and 72) hold the values arriving from CC, so a parameter reads its own CC
+Slots 19-47, 61-64, 69-85, 87 and 89-101 (but for the unused 21, 26, 71 and 72) hold the values arriving from CC, so a parameter reads its own CC
 by default. Each parameter is unipolar or bipolar, and its slot takes the same range. A unipolar one
 runs 0.0 to 1.0 from CC 4 to CC 124, the span of an envelope, so an envelope pointed at one sweeps
 the whole of its dial. A bipolar one runs -0.5 to +0.5 with CC 64 at 0.0, the span of an LFO, so a
@@ -662,10 +663,10 @@ range. The level is smoothed as the other levels are. The noise repeats only aft
 over a day at 48 kHz, and starts the same every time, so a render comes out the same.
 
 Filter 1 Gain sets how hard the audio inputs, summed, drive the filter, which is also what decides
-how far the filter runs into its own saturation. Audio 1 Gain and Audio 2 Gain are the levels of
-the two oscillators in that sum, from silence at 0.0 (CC 4) to full at 1.0 (CC 124); together with
-Noise 1 Level they make a small mixer ahead of the filter. Nothing holds the sum to a range, so
-two oscillators at full level drive the filter twice as hard as one: turn Gain down to keep the
+how far the filter runs into its own saturation. Audio 1 Gain, Audio 2 Gain and Audio 3 Gain are
+the levels of the three inputs in that sum, from silence at 0.0 (CC 4) to full at 1.0 (CC 124): a
+small mixer ahead of the filter. Nothing holds the sum to a range, so two oscillators at full
+level drive the filter twice as hard as one: turn Gain down to keep the
 level, or leave it up to drive the saturation. The saturation sits on the resonance rather than the pass band: a low
 cutoff passes a loud note nearly clean, while turning the gain up rounds off the resonant peak.
 
@@ -733,8 +734,9 @@ changes only how fast the output moves, so it cannot step it.
 - The LFO reaches the filter's Mod 2 input by default too, so CC 25 sweeps the cutoff with it, on
   top of the envelope on Mod 1
 - A second oscillator is wired by default too, on the filter's Audio 2 input, so CC 21 brings it
-  in and CC 85 and 76 tune it against Osc 1: CC 85 = 76 an octave up, CC 85 = 71 a fifth, and CC 76
-  a few steps off CC 64 for a slow beat. CC 112 (Gain) down a little keeps the level of one
+  in, beating slowly against Osc 1 from the 12 cents of CC 76's power-up value. CC 85 and 76 tune
+  it: CC 85 = 76 an octave up, CC 85 = 71 a fifth, CC 76 = 64 in unison. CC 112 (Gain) down a
+  little keeps the level of one
 - Noise is wired by default too, on the filter's Audio 3 input beside the oscillator, so CC 23
   brings it in under the note, at a tenth of the oscillator's level at CC 16. Unplugging the
   oscillator (CC 99 = 1, CC 98 = 3, CC 6 = 0) leaves the noise alone, through the filter
@@ -804,7 +806,7 @@ changes only how fast the output moves, so it cannot step it.
   and Pitch 1 Coarse and Fine are not smoothed, so that the pitch follows right away, and neither is Pitch 1 Glide, which
   cannot step what it sets, nor EG 1 Attack, Decay and Sustain, which the envelope's own curve
   already moves between
-- A parameter source may point at any of the 128 slots. Slots above 100 read 0 until something
+- A parameter source may point at any of the 128 slots. Slots above 101 read 0 until something
   writes them, which leaves a parameter pointed at one at the bottom of a unipolar dial or the
   middle of a bipolar one
 - A parameter clamps its value to its own range, 0.0 to 1.0 or -0.5 to +0.5, and its control slot

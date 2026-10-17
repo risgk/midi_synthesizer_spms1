@@ -175,9 +175,10 @@ spms1_fill_constant_signals(signals)
 # Noise 1 runs with the modulation sources, ahead of the mixer, and feeds Filter 1 Audio 3 In, the
 # oscillator its Audio 1 In, and Osc 2 its Audio 2 In. Noise 1 Level powers up at 0.0, so the
 # noise is silent until CC 23, and Filter 1 Audio 2 Gain at 0.0, so Osc 2 is until CC 21; Audio 1
-# Gain, on CC 116, powers up at 1.0. Osc 2 plays the note from Pitch 1, as Osc 1 does, tuned by
-# its own Pitch Coarse and Fine (CC 85 and 76), and follows Osc 1 in everything else: each of its
-# amounts, its waveform and its pulse width read Osc 1's control slots.
+# Gain and Audio 3 Gain, on CC 116 and 117, power up at 1.0. Osc 2 plays the note from Pitch 1,
+# as Osc 1 does, tuned by its own Pitch Coarse and Fine (CC 85 and 76), 12 cents sharp at
+# power-up, and follows Osc 1 in everything else: each of its amounts, its waveform and its pulse
+# width read Osc 1's control slots.
 # A mixer's parameters have no CC, so the default patch points them at constants instead: full
 # level and a polarity of +0.5, which makes a mixer pass its input through rather than mute it.
 # Each modulation polarity has no CC either and reads +0.5, which leaves the amount in charge,
@@ -343,6 +344,7 @@ while true
   source_osc_2_pw_mod_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_PW_MOD_POL)
   source_filter_1_audio_1_gain = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_AUDIO_1_GAIN)
   source_filter_1_audio_2_gain = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_AUDIO_2_GAIN)
+  source_filter_1_audio_3_gain = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_AUDIO_3_GAIN)
 
   # Which CC fills each control slot. The bus is the only thing downstream reads, so this is
   # where MIDI enters and the only place a CC number appears.
@@ -405,6 +407,7 @@ while true
   cc_osc_2_pw_mod_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_2_PW_MOD_POL)
   cc_filter_1_audio_1_gain = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_AUDIO_1_GAIN)
   cc_filter_1_audio_2_gain = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_AUDIO_2_GAIN)
+  cc_filter_1_audio_3_gain = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_AUDIO_3_GAIN)
   cc_general_mod_wheel     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_MOD_WHEEL)
   cc_general_1             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_1)
   cc_general_2             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_2)
@@ -470,6 +473,7 @@ while true
   signals[SIGNAL_OSC_2_PW_MOD_POL] = cc_or_zero(cc_osc_2_pw_mod_pol, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_2_pw_mod_pol)))
   signals[SIGNAL_FILTER_1_AUDIO_1_GAIN] = cc_or_zero(cc_filter_1_audio_1_gain, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_audio_1_gain)))
   signals[SIGNAL_FILTER_1_AUDIO_2_GAIN] = cc_or_zero(cc_filter_1_audio_2_gain, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_audio_2_gain)))
+  signals[SIGNAL_FILTER_1_AUDIO_3_GAIN] = cc_or_zero(cc_filter_1_audio_3_gain, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_audio_3_gain)))
   signals[SIGNAL_GENERAL_MOD_WHEEL] = cc_or_zero(cc_general_mod_wheel, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_general_mod_wheel)))
   # Each General CC fills two slots, the same value taken both ways.
   general_1 = C.get_midi_cc_value(MIDI_CH, cc_general_1)
@@ -526,6 +530,7 @@ while true
   osc_2.set_pw_modulation_polarity(signals[source_osc_2_pw_mod_pol])
   filter_1.set_audio_1_gain(signals[source_filter_1_audio_1_gain])
   filter_1.set_audio_2_gain(signals[source_filter_1_audio_2_gain])
+  filter_1.set_audio_3_gain(signals[source_filter_1_audio_3_gain])
   chorus_1.set_rate(signals[source_chorus_1_rate])
   chorus_1.set_depth(signals[source_chorus_1_depth])
   chorus_1.set_mix(signals[source_chorus_1_mix])

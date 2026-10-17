@@ -187,9 +187,10 @@ module Spms1
       @modulation_3_polarity = 1.0
       @modulation_3_depth = 0.0
       @gain = 0.5
-      # Audio 1 In powers up at full level and Audio 2 In silent; Audio 3 In has no gain of its own.
+      # Audio 1 In and Audio 3 In power up at full level, Audio 2 In silent.
       @audio_1_gain = 1.0
       @audio_2_gain = 0.0
+      @audio_3_gain = 1.0
 
       @stage_1_cutoff = 1.0
       @stage_1_resonance = 0.0
@@ -199,6 +200,7 @@ module Spms1
       @stage_1_gain = 0.5
       @stage_1_audio_1_gain = 1.0
       @stage_1_audio_2_gain = 0.0
+      @stage_1_audio_3_gain = 1.0
       @current_cutoff = 1.0
       @current_resonance = 0.0
       @current_modulation_1_depth = 0.0
@@ -207,6 +209,7 @@ module Spms1
       @current_gain = 0.5
       @current_audio_1_gain = 1.0
       @current_audio_2_gain = 0.0
+      @current_audio_3_gain = 1.0
 
       @g = 0.0
       @g_plus_k = 0.0
@@ -284,7 +287,7 @@ module Spms1
       @gain = (gain < 0.0) ? 0.0 : ((gain > 1.0) ? 1.0 : gain)
     end
 
-    # The levels of Audio 1 In and Audio 2 In, each unipolar, [0.0, 1.0], and used as a plain
+    # The levels of the three audio inputs, each unipolar, [0.0, 1.0], and used as a plain
     # multiplier before the sum, which Gain then drives the filter with: together a small mixer.
     # Nothing holds the sum to a range, so two inputs at full level drive the filter twice as hard
     # as one; Gain is what to turn down then.
@@ -296,14 +299,18 @@ module Spms1
       @audio_2_gain = (gain < 0.0) ? 0.0 : ((gain > 1.0) ? 1.0 : gain)
     end
 
+    def set_audio_3_gain(gain)
+      @audio_3_gain = (gain < 0.0) ? 0.0 : ((gain > 1.0) ? 1.0 : gain)
+    end
+
     # Q range: ~0.7 (0.0), ~2.83 (0.5), ~5.66 (0.75), ~29 (0.875), 256 (0.95); self-oscillation from there,
     # growing to its full level at ~0.992 and staying there to 1.0, fading out at a high cutoff.
     def set_resonance(resonance)
       @resonance = (resonance < 0.0) ? 0.0 : ((resonance > 1.0) ? 1.0 : resonance)
     end
 
-    # The three audio inputs are summed, the first two at their own gains and the third as it
-    # arrives (Noise 1 has a level of its own), and Gain drives the filter with the sum.
+    # The three audio inputs are summed, each at its own gain, and Gain drives the filter with the
+    # sum.
     def process(audio_1_input = 0.0, audio_2_input = 0.0, audio_3_input = 0.0, modulation_1_input = 0.0, modulation_2_input = 0.0, modulation_3_input = 0.0)
       @current_modulation_1_input = modulation_1_input
       @current_modulation_2_input = modulation_2_input
@@ -323,7 +330,7 @@ module Spms1
       @g_plus_k += @g_plus_k_slope
       @one_over_a0 += @one_over_a0_slope
 
-      driven_input = ((audio_1_input * @current_audio_1_gain + audio_2_input * @current_audio_2_gain) + audio_3_input) * @current_gain
+      driven_input = ((audio_1_input * @current_audio_1_gain + audio_2_input * @current_audio_2_gain) + audio_3_input * @current_audio_3_gain) * @current_gain
 
       # The clamp is a guard that ordinary use never reaches: nothing else bounds the low pass
       # state, and a cutoff thrown across its range every step, as audio on the modulation input
@@ -441,6 +448,8 @@ module Spms1
       @current_audio_1_gain = Dsp.smooth(@stage_1_audio_1_gain, @current_audio_1_gain, @smoothing_target_blend)
       @stage_1_audio_2_gain = Dsp.smooth(@audio_2_gain, @stage_1_audio_2_gain, @smoothing_target_blend)
       @current_audio_2_gain = Dsp.smooth(@stage_1_audio_2_gain, @current_audio_2_gain, @smoothing_target_blend)
+      @stage_1_audio_3_gain = Dsp.smooth(@audio_3_gain, @stage_1_audio_3_gain, @smoothing_target_blend)
+      @current_audio_3_gain = Dsp.smooth(@stage_1_audio_3_gain, @current_audio_3_gain, @smoothing_target_blend)
 
       # The modulation inputs arrive as they are; clamping total_cutoff below is what holds the
       # table lookup in range, and a source that swings both ways moves the cutoff both ways.
