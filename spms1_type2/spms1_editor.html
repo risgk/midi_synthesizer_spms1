@@ -242,6 +242,20 @@
       /* One row, which takes the extra height of the tab. */
       .editor-grid { align-content: stretch; }
     }
+    /* On a phone the name would leave the slider only a few dozen pixels, so the name, with the
+       CC number on its line, goes above the slider, which takes the full width of the panel. */
+    @media (max-width: 480px) {
+      .slider-knob-zone {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 2px;
+      }
+      .slider-label { min-width: 0; }
+      .slider-label .cc-num { display: inline; }
+      .slider-input-wrapper { gap: 8px; }
+      .slider-value { font-size: 0.9rem; }
+      .slider-norm { min-width: 44px; font-size: 0.75rem; }
+    }
     .slider-input-wrapper {
       flex-grow: 1;
       min-width: 0;
