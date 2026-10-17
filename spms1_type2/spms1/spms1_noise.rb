@@ -20,12 +20,11 @@ module Spms1
     # constant as a runtime global and does not fold arithmetic on one.
     CONTROL_RATE_MASK = CONTROL_RATE_DIVISOR - 1
 
-    # Red Cutoff 0.0 to 1.0 spans 18 octaves up from 0.1 Hz, an octave every 1/18: 0.1 Hz, slow
-    # enough to wander as a modulation source, at 0.0, 1.2 Hz at 0.2, 51 Hz at 0.5, where the red
-    # falls 6 dB an octave across the audible band, and 26 kHz at 1.0, where the low pass passes
-    # the white nearly as it is. The table holds a point every 0.15 octave, as PRA32-U2's LFO Red
-    # Noise does a coefficient and a gain for each step of its rate.
-    RED_CUTOFF_MIN_HZ = 0.1
+    # Red Cutoff 0.0 to 1.0 spans 10 octaves up from 1.6 Hz, an octave every 0.1: 1.6 Hz at 0.0, a
+    # slow random wander as a modulation source, 51 Hz at 0.5, where the red falls 6 dB an octave
+    # across the audible band, and 1.6 kHz at 1.0. The table holds a point every semitone, as
+    # PRA32-U2's LFO Red Noise does a coefficient and a gain for each step of its rate.
+    RED_CUTOFF_MIN_HZ = 1.6
 
     def initialize(sample_rate)
       @sample_rate = sample_rate
@@ -37,12 +36,11 @@ module Spms1
       # The low pass is red += (white - red) * coef, with coef = 1 - e^(-2 pi fc / fs). It scales
       # the white's power by coef / (2 - coef), so the gain puts it back to half the white's, the
       # RMS 1/sqrt(2) of it, as PRA32-U2 does: the red then stays within -0.5 to +0.5 but for its
-      # rarest swings, which the clamp in process holds there, and at the top of the dial, where
-      # coef nears 1, it is the white at 0.71.
+      # rarest swings, which the clamp in process holds there.
       @red_coef_table = Array.new(122, 0.0)
       @red_gain_table = Array.new(122, 0.0)
       for i in 0...121
-        cutoff_hz = RED_CUTOFF_MIN_HZ * (2.0 ** (i.to_f * 0.15))
+        cutoff_hz = RED_CUTOFF_MIN_HZ * (2.0 ** (i.to_f * (1.0 / 12.0)))
         coef = 1.0 - Math.exp(-2.0 * Math::PI * cutoff_hz / @sample_rate)
         @red_coef_table[i] = coef
         @red_gain_table[i] = Math.sqrt((2.0 - coef) / (2.0 * coef))

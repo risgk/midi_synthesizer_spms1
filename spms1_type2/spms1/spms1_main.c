@@ -3841,23 +3841,23 @@ static inline __attribute__((always_inline)) sp_float sp_Pitch_calculate_exp_fas
   return (lv_e0 + (lv_fraction * ((lv_e1 - lv_e0))));
   return 0.0;
 }
-#line 30 "spms1_noise.rb"
+#line 29 "spms1_noise.rb"
 static void sp_Noise_initialize(sp_Noise *self, sp_int lv_sample_rate) {
     SP_GC_SAVE();
     sp_int lv_i = 0;
     sp_float lv_cutoff_hz = 0.0;
     sp_float lv_coef = 0.0;
-#line 31 "spms1_noise.rb"
+#line 30 "spms1_noise.rb"
   self->iv_sample_rate = lv_sample_rate;
-#line 32 "spms1_noise.rb"
+#line 31 "spms1_noise.rb"
   self->iv_smoothing_target_blend = ((cst_Spms1__Noise__SMOOTHING_TARGET_BLEND_BASE * ((48000.0 / (double)(self->iv_sample_rate)))) * (((double)(cst_Spms1__Noise__CONTROL_RATE_DIVISOR) / 4.0)));
-#line 34 "spms1_noise.rb"
+#line 33 "spms1_noise.rb"
   self->iv_level = 0.0;
-#line 35 "spms1_noise.rb"
+#line 34 "spms1_noise.rb"
   self->iv_stage_1_level = 0.0;
-#line 36 "spms1_noise.rb"
+#line 35 "spms1_noise.rb"
   self->iv_current_level = 0.0;
-#line 42 "spms1_noise.rb"
+#line 40 "spms1_noise.rb"
   sp_int _t118 = 122LL;
   if (_t118 < 0) sp_raise_cls("ArgumentError", "negative array size");
   sp_float _t119 = 0.0;
@@ -3865,7 +3865,7 @@ static void sp_Noise_initialize(sp_Noise *self, sp_int lv_sample_rate) {
   SP_GC_ROOT(_t120);
   for (sp_int _t121 = 0; _t121 < _t118; _t121++) sp_FloatArray_push(_t120, _t119);
   { __typeof__(self) _wb809 = self; _wb809->iv_red_coef_table = _t120; sp_gc_wb((void *)_wb809); }
-#line 43 "spms1_noise.rb"
+#line 41 "spms1_noise.rb"
   sp_int _t123 = 122LL;
   if (_t123 < 0) sp_raise_cls("ArgumentError", "negative array size");
   sp_float _t124 = 0.0;
@@ -3873,57 +3873,57 @@ static void sp_Noise_initialize(sp_Noise *self, sp_int lv_sample_rate) {
   SP_GC_ROOT(_t125);
   for (sp_int _t126 = 0; _t126 < _t123; _t126++) sp_FloatArray_push(_t125, _t124);
   { __typeof__(self) _wb810 = self; _wb810->iv_red_gain_table = _t125; sp_gc_wb((void *)_wb810); }
-#line 44 "spms1_noise.rb"
+#line 42 "spms1_noise.rb"
   { sp_int _t127 = 121LL;
     for (lv_i = 0LL; lv_i < _t127; lv_i++) {
-#line 45 "spms1_noise.rb"
-      lv_cutoff_hz = (cst_RED_CUTOFF_MIN_HZ * (sp_float_pow(2.0, ((({ sp_int _t128 = (lv_i); _t128 == SP_INT_NIL ? 0.0 : ((sp_float)_t128); }) * 0.14999999999999999)))));
-#line 46 "spms1_noise.rb"
+#line 43 "spms1_noise.rb"
+      lv_cutoff_hz = (cst_RED_CUTOFF_MIN_HZ * (sp_float_pow(2.0, ((({ sp_int _t128 = (lv_i); _t128 == SP_INT_NIL ? 0.0 : ((sp_float)_t128); }) * ((1.0 / 12.0)))))));
+#line 44 "spms1_noise.rb"
       lv_coef = (1.0 - exp((sp_float)((((-2.0 * M_PI) * lv_cutoff_hz) / (double)(self->iv_sample_rate)))));
-#line 47 "spms1_noise.rb"
+#line 45 "spms1_noise.rb"
       sp_FloatArray_set(self->iv_red_coef_table, lv_i, lv_coef);
-#line 48 "spms1_noise.rb"
+#line 46 "spms1_noise.rb"
       sp_FloatArray_set(self->iv_red_gain_table, lv_i, sp_math_sqrt((sp_float)(((2.0 - lv_coef) / ((2.0 * lv_coef))))));
     }
   }
-#line 50 "spms1_noise.rb"
+#line 48 "spms1_noise.rb"
   sp_FloatArray_set(self->iv_red_coef_table, 121LL, sp_FloatArray_get(self->iv_red_coef_table, 120LL));
-#line 51 "spms1_noise.rb"
+#line 49 "spms1_noise.rb"
   sp_FloatArray_set(self->iv_red_gain_table, 121LL, sp_FloatArray_get(self->iv_red_gain_table, 120LL));
-#line 52 "spms1_noise.rb"
+#line 50 "spms1_noise.rb"
   self->iv_red_cutoff = 0.0;
-#line 53 "spms1_noise.rb"
+#line 51 "spms1_noise.rb"
   self->iv_stage_1_red_cutoff = 0.0;
-#line 54 "spms1_noise.rb"
+#line 52 "spms1_noise.rb"
   self->iv_current_red_cutoff = 0.0;
-#line 55 "spms1_noise.rb"
+#line 53 "spms1_noise.rb"
   self->iv_red_coef = sp_FloatArray_get(self->iv_red_coef_table, 0LL);
-#line 56 "spms1_noise.rb"
+#line 54 "spms1_noise.rb"
   self->iv_red_gain = sp_FloatArray_get(self->iv_red_gain_table, 0LL);
-#line 57 "spms1_noise.rb"
+#line 55 "spms1_noise.rb"
   self->iv_red = 0.0;
-#line 58 "spms1_noise.rb"
+#line 56 "spms1_noise.rb"
   self->iv_output_red = 0.0;
-#line 61 "spms1_noise.rb"
+#line 59 "spms1_noise.rb"
   self->iv_state = 1LL;
-#line 62 "spms1_noise.rb"
+#line 60 "spms1_noise.rb"
   self->iv_sample_counter = 0LL;
 }
-#line 67 "spms1_noise.rb"
+#line 65 "spms1_noise.rb"
 static inline __attribute__((always_inline)) sp_float sp_Noise_set_level(sp_Noise *self, sp_float lv_level) {
-#line 68 "spms1_noise.rb"
+#line 66 "spms1_noise.rb"
   self->iv_level = (((lv_level < 0.0)) ? 0.0 : ((((lv_level > 1.0)) ? 1.0 : lv_level)));
   return self->iv_level;
   return 0.0;
 }
-#line 72 "spms1_noise.rb"
+#line 70 "spms1_noise.rb"
 static inline __attribute__((always_inline)) sp_float sp_Noise_set_red_cutoff(sp_Noise *self, sp_float lv_red_cutoff) {
-#line 73 "spms1_noise.rb"
+#line 71 "spms1_noise.rb"
   self->iv_red_cutoff = (((lv_red_cutoff < 0.0)) ? 0.0 : ((((lv_red_cutoff > 1.0)) ? 1.0 : lv_red_cutoff)));
   return self->iv_red_cutoff;
   return 0.0;
 }
-#line 76 "spms1_noise.rb"
+#line 74 "spms1_noise.rb"
 static inline __attribute__((always_inline)) sp_float sp_Noise_process(sp_Noise *self) {
     sp_float lv_position = 0.0;
     sp_int lv_index = 0;
@@ -3932,52 +3932,52 @@ static inline __attribute__((always_inline)) sp_float sp_Noise_process(sp_Noise 
     sp_float lv_g0 = 0.0;
     sp_float lv_white = 0.0;
     sp_float lv_red = 0.0;
-#line 77 "spms1_noise.rb"
+#line 75 "spms1_noise.rb"
   if ((self->iv_sample_counter == 0LL)) {
-#line 78 "spms1_noise.rb"
+#line 76 "spms1_noise.rb"
     self->iv_stage_1_level = sp_Dsp_s_smooth(self->iv_level, self->iv_stage_1_level, self->iv_smoothing_target_blend);
-#line 79 "spms1_noise.rb"
+#line 77 "spms1_noise.rb"
     self->iv_current_level = sp_Dsp_s_smooth(self->iv_stage_1_level, self->iv_current_level, self->iv_smoothing_target_blend);
-#line 80 "spms1_noise.rb"
+#line 78 "spms1_noise.rb"
     self->iv_stage_1_red_cutoff = sp_Dsp_s_smooth(self->iv_red_cutoff, self->iv_stage_1_red_cutoff, self->iv_smoothing_target_blend);
-#line 81 "spms1_noise.rb"
+#line 79 "spms1_noise.rb"
     self->iv_current_red_cutoff = sp_Dsp_s_smooth(self->iv_stage_1_red_cutoff, self->iv_current_red_cutoff, self->iv_smoothing_target_blend);
-#line 84 "spms1_noise.rb"
+#line 82 "spms1_noise.rb"
     lv_position = (self->iv_current_red_cutoff * 120.0);
-#line 85 "spms1_noise.rb"
+#line 83 "spms1_noise.rb"
     lv_index = sp_float_to_i_checked(lv_position);
-#line 86 "spms1_noise.rb"
+#line 84 "spms1_noise.rb"
     lv_fraction = (lv_position - ({ sp_int _t135 = (lv_index); _t135 == SP_INT_NIL ? 0.0 : ((sp_float)_t135); }));
-#line 87 "spms1_noise.rb"
+#line 85 "spms1_noise.rb"
     lv_c0 = sp_FloatArray_get(self->iv_red_coef_table, lv_index);
-#line 88 "spms1_noise.rb"
+#line 86 "spms1_noise.rb"
     lv_g0 = sp_FloatArray_get(self->iv_red_gain_table, lv_index);
-#line 89 "spms1_noise.rb"
+#line 87 "spms1_noise.rb"
     self->iv_red_coef = (lv_c0 + (lv_fraction * ((sp_FloatArray_get(self->iv_red_coef_table, sp_int_add(lv_index, 1LL)) - lv_c0))));
-#line 90 "spms1_noise.rb"
+#line 88 "spms1_noise.rb"
     self->iv_red_gain = (lv_g0 + (lv_fraction * ((sp_FloatArray_get(self->iv_red_gain_table, sp_int_add(lv_index, 1LL)) - lv_g0))));
   }
-#line 93 "spms1_noise.rb"
+#line 91 "spms1_noise.rb"
   self->iv_sample_counter = (sp_int_add(self->iv_sample_counter, 1LL) & cst_Spms1__Noise__CONTROL_RATE_MASK);
-#line 100 "spms1_noise.rb"
+#line 98 "spms1_noise.rb"
   self->iv_state = (sp_int_add(sp_int_mul(self->iv_state, 1664525LL), 1013904223LL) & 4294967295LL);
-#line 101 "spms1_noise.rb"
+#line 99 "spms1_noise.rb"
   lv_white = ((({ sp_int _t136 = ((self->iv_state >> 8LL)); _t136 == SP_INT_NIL ? 0.0 : ((sp_float)_t136); }) * ((1.0 / 16777216.0))) - 0.5);
-#line 105 "spms1_noise.rb"
+#line 103 "spms1_noise.rb"
   self->iv_red += ((lv_white - self->iv_red) * self->iv_red_coef);
-#line 106 "spms1_noise.rb"
+#line 104 "spms1_noise.rb"
   lv_red = (self->iv_red * self->iv_red_gain);
-#line 107 "spms1_noise.rb"
+#line 105 "spms1_noise.rb"
   lv_red = (((lv_red < -0.5)) ? -0.5 : ((((lv_red > 0.5)) ? 0.5 : lv_red)));
-#line 108 "spms1_noise.rb"
+#line 106 "spms1_noise.rb"
   self->iv_output_red = (lv_red * self->iv_current_level);
-#line 110 "spms1_noise.rb"
+#line 108 "spms1_noise.rb"
   return (lv_white * self->iv_current_level);
   return 0.0;
 }
-#line 114 "spms1_noise.rb"
+#line 112 "spms1_noise.rb"
 static inline __attribute__((always_inline)) sp_float sp_Noise_output_red(sp_Noise *self) {
-#line 115 "spms1_noise.rb"
+#line 113 "spms1_noise.rb"
   return self->iv_output_red;
   return 0.0;
 }
@@ -4665,7 +4665,7 @@ int main(int argc,char**argv){
     sp_int lv_general_2 = 0;
     sp_int lv_general_3 = 0;
     sp_int lv_general_4 = 0;
-    sp_int lv_i__bp12356 = 0;
+    sp_int lv_i__bp12361 = 0;
 
 #line 1 "spms1_dsp.rb"
 #line 5 "spms1_dsp.rb"
@@ -4956,8 +4956,8 @@ int main(int argc,char**argv){
   cst_Spms1__Noise__CONTROL_RATE_DIVISOR = 4LL;
 #line 21 "spms1_noise.rb"
   cst_Spms1__Noise__CONTROL_RATE_MASK = sp_int_sub(cst_Spms1__Noise__CONTROL_RATE_DIVISOR, 1LL);
-#line 28 "spms1_noise.rb"
-  cst_RED_CUTOFF_MIN_HZ = 0.10000000000000001;
+#line 27 "spms1_noise.rb"
+  cst_RED_CUTOFF_MIN_HZ = 1.6000000000000001;
 #line 28 "spms1_main.rb"
 #line 29 "spms1_main.rb"
 #line 55 "spms1_main.rb"
@@ -6613,9 +6613,9 @@ int main(int argc,char**argv){
     (stop_debug_measure(), (sp_int)0);
 #line 670 "spms1_main.rb"
     for (sp_int _t801 = 0; _t801 < cst_AUDIO_BUFFER_WORDS; _t801++) {
-      lv_i__bp12356 = _t801;
+      lv_i__bp12361 = _t801;
 #line 671 "spms1_main.rb"
-      ({ sp_float _t802 = sp_FloatArray_get(lv_audio_buffer_l, lv_i__bp12356); sp_float _t803 = sp_FloatArray_get(lv_audio_buffer_r, lv_i__bp12356); (write_to_audio_buffer(((float)(_t802)), ((float)(_t803))), (sp_int)0); });
+      ({ sp_float _t802 = sp_FloatArray_get(lv_audio_buffer_l, lv_i__bp12361); sp_float _t803 = sp_FloatArray_get(lv_audio_buffer_r, lv_i__bp12361); (write_to_audio_buffer(((float)(_t802)), ((float)(_t803))), (sp_int)0); });
     }
   }
   return 0;
