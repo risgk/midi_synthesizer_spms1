@@ -1094,7 +1094,7 @@
         MIDI In is passed through to the synth, and a CC on the channel above moves every slot
         assigned to it. Drag from an output (right) to an input (left) to connect. Drag a connected input away to
         unplug it; click a wire and press Delete to remove it. An unplugged parameter reads its own
-        control slot. Drag the background to pan, wheel to zoom.
+        control slot. Drag the background to pan, wheel or pinch to zoom.
       </p>
     </div>
 
@@ -2155,8 +2155,66 @@
     renderWires();
   }
 
+  // Two fingers on the canvas zoom about the point between them and move the view with it. The
+  // second finger ends what the first began: a wire being drawn is dropped, and one picked up from
+  // an input goes back; a node being moved stays where it got to.
+  const touches = new Map();  // pointerId -> where a finger on the canvas is
+  let pinch = null;
+
+  function pinchState() {
+    const [a, b] = [...touches.values()];
+    const r = canvas.getBoundingClientRect();
+    return { cx: (a.x + b.x) / 2 - r.left, cy: (a.y + b.y) / 2 - r.top, d: Math.hypot(a.x - b.x, a.y - b.y) };
+  }
+
+  function cancelDrag() {
+    if (drag.mode === 'wire') {
+      drag.temp.remove();
+      world.querySelectorAll('.port.target').forEach(el => el.classList.remove('target'));
+      if (drag.pushed) restore(undoStack.pop());
+    } else if (drag.mode === 'node') {
+      drag.el.style.zIndex = '';
+      if (drag.moved) {
+        pushHistory(drag.snapshot);
+        saveLocal();
+      }
+    }
+    canvas.classList.remove('panning');
+    drag = null;
+  }
+
+  // In the capture phase, so the second finger is seen before the handler below would start a drag.
   canvas.addEventListener('pointerdown', e => {
-    if (e.button !== 0) return;
+    if (e.pointerType !== 'touch' || e.target.closest('input, button, select, textarea')) return;
+    touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (touches.size !== 2) return;
+    if (drag) cancelDrag();
+    pinch = pinchState();
+    viewTouched = true;
+  }, true);
+
+  window.addEventListener('pointermove', e => {
+    if (!touches.has(e.pointerId)) return;
+    touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (!pinch || touches.size !== 2) return;
+    const next = pinchState();
+    view.x += next.cx - pinch.cx;
+    view.y += next.cy - pinch.cy;
+    zoomAt(pinch.d > 0 ? next.d / pinch.d : 1, next.cx, next.cy);
+    pinch = next;
+  });
+
+  function liftTouch(e) {
+    touches.delete(e.pointerId);
+    if (touches.size < 2) pinch = null;
+  }
+  window.addEventListener('pointerup', liftTouch);
+  window.addEventListener('pointercancel', liftTouch);
+  // Safari's own pinch would zoom the page as well.
+  canvas.addEventListener('gesturestart', e => e.preventDefault());
+
+  canvas.addEventListener('pointerdown', e => {
+    if (e.button !== 0 || pinch) return;
     const t = e.target;
     if (t.closest('input, button, select, textarea')) return;
     const port = t.closest('.port');
