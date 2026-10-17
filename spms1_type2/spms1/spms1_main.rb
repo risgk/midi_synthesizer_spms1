@@ -158,10 +158,10 @@ spms1_fill_constant_signals(signals)
 # it passes its input through as it is, so the patch plays as one without it until CC 5 turns the
 # portamento up. Pitch Bend goes to its Bend In, added past the glide, 2 semitones either way at
 # Bend Amt's power-up value of CC 8, so the bend reaches the oscillator and the filter's keyboard
-# tracking at once. Running after the LFO, the envelope and the mixer
+# tracking at once. Running after the LFO, the envelope, the noise and the mixer
 # lets it take any of them in the same sample, and the oscillator and the filter read it so too. The mixer
-# runs after both modulation sources and ahead of the oscillator, so it sees this sample's LFO and
-# envelope and can feed the oscillator, the filter and the amp without a sample's delay. The
+# runs after the modulation sources and ahead of the oscillator, so it sees this sample's LFO,
+# envelope and noise and can feed the oscillator, the filter and the amp without a sample's delay. The
 # default patch leaves it unused: the LFO goes straight to the oscillator's pitch and pulse
 # width at its full level, and Osc 1 Mod 2 Pol reads the constant 0.1, which brings it
 # down to a vibrato depth on the pitch, so that Osc 1 Mod 2 Amt can span the whole pitch range
@@ -171,8 +171,9 @@ spms1_fill_constant_signals(signals)
 # Mod 2 Amt powers up at 0.0, so the cutoff follows the envelope alone until CC 25 turns it up,
 # and Filter 1 Mod 2 Pol reads 0.1, as Osc 1 Mod 2 Pol does. Filter 1 Mod 3 In takes Pitch 1's
 # pitch too, for keyboard tracking, but Mod 3 Amt powers up at 0.0 and leaves it off until CC 9.
-# Noise 1 runs just ahead of the filter and feeds its Audio 3 In, the oscillator its Audio 1 In,
-# and Audio 2 In is left free; Noise 1 Level powers up at 0.0, so the noise is silent until CC 23.
+# Noise 1 runs with the modulation sources, ahead of the mixer, and feeds Filter 1 Audio 3 In, the
+# oscillator its Audio 1 In, and Audio 2 In is left free; Noise 1 Level powers up at 0.0, so the
+# noise is silent until CC 23.
 # A mixer's parameters have no CC, so the default patch points them at constants instead: full
 # level and a polarity of +0.5, which makes a mixer pass its input through rather than mute it.
 # Each modulation polarity has no CC either and reads +0.5, which leaves the amount in charge,

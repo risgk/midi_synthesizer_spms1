@@ -1,5 +1,6 @@
 module Spms1
-  # White noise source, at a smoothed level. The default patch feeds it to Filter 1 Audio 3 In.
+  # White noise source, at a smoothed level: audio, or a modulation source. The default patch feeds
+  # it to Filter 1 Audio 3 In, and runs it with the LFO and the envelope, ahead of the mixer.
   class Noise
     # Blend at the reference rate on the line below, for each of two cascaded stages. The two move
     # together: their product is what fixes the time constant, so changing one without the other

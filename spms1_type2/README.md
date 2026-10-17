@@ -214,20 +214,20 @@ parameter.
 
 #### The run order
 
-Every module is in it: one of each kind that makes a sound, a mixer between the modulation
-sources and Pitch 1, Pitch 1 just ahead of the oscillator, Noise 1 just ahead of the filter, and
-the chorus and the delay last:
+Every module is in it: one of each kind that makes a sound, the modulation sources first -- Noise
+1 with them, as it is one too -- a mixer between them and Pitch 1, Pitch 1 just ahead of the
+oscillator, and the chorus and the delay last:
 
 ```mermaid
 flowchart LR
-  LFO[LFO 1] ~~~ EG[EG 1] ~~~ MIX1[Mixer 1] ~~~ PITCH[Pitch 1] ~~~ OSC[Osc 1] ~~~ NOISE[Noise 1] ~~~ FILTER[Filter 1] ~~~ AMP[Amp 1] ~~~ CHORUS[Chorus 1] ~~~ DELAY[Delay 1]
+  LFO[LFO 1] ~~~ EG[EG 1] ~~~ NOISE[Noise 1] ~~~ MIX1[Mixer 1] ~~~ PITCH[Pitch 1] ~~~ OSC[Osc 1] ~~~ FILTER[Filter 1] ~~~ AMP[Amp 1] ~~~ CHORUS[Chorus 1] ~~~ DELAY[Delay 1]
 ```
 
 The mixer has nothing routed to it, so it costs its slot every sample and changes nothing until
 a patch gives it something. Where it sits is what it buys: a module sees the current sample's
 value only from something ahead of it in this line, and last sample's from anything behind.
-Mixer 1 can reach the LFO and the envelope, and the oscillator, the filter and the amp can reach
-Mixer 1. Pitch 1 comes after all three, so that a modulation of its own -- a bend from the LFO
+Mixer 1 can reach the LFO, the envelope and the noise, and the oscillator, the filter and the amp
+can reach Mixer 1. Pitch 1 comes after all four, so that a modulation of its own -- a bend from the LFO
 through Bend In, say -- is this sample's, and before the oscillator and the filter, which read
 it in the same sample.
 
@@ -716,6 +716,9 @@ changes only how fast the output moves, so it cannot step it.
 - A pitch envelope is wired by default too -- the envelope on the oscillator's Mod 1 input --
   so CC 89 sets its depth. Nothing scales the envelope down on this path, so the note starts a
   semitone sharp at CC 5 and an octave at CC 16, and falls back with the decay
+- Noise as a modulation source, a random wobble of the cutoff: CC 99 = 1, CC 98 = 17, CC 6 = 86
+  puts Noise 1 on the filter's Mod 2 input in the LFO's place, and CC 98 = 23, CC 6 = 0 takes it off
+  the filter's Audio 3 input, so it is not heard as well; then CC 23 and CC 25 set how much
 - Filter cutoff driven by the envelope instead of its CC: CC 99 = 2, CC 98 = 13, CC 6 = 10. The
   envelope and the cutoff are both unipolar, so it opens the cutoff from the bottom of its dial
   to the top
