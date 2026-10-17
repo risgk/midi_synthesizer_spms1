@@ -693,20 +693,20 @@ changes only how fast the output moves, so it cannot step it.
 - Keyboard tracking is wired by default as well, the pitch from Pitch 1 on the filter's Mod 3 input,
   so CC 9 sets how far the cutoff follows the keys: all the way at CC 124, not at all at CC 4,
   where it powers up
+- A pitch envelope is wired by default too -- the envelope on the oscillator's Mod 1 input --
+  so CC 89 sets its depth. Nothing scales the envelope down on this path, so the note starts a
+  semitone sharp at CC 5 and an octave at CC 16, and falls back with the decay
 - Filter cutoff driven by the envelope instead of its CC: CC 99 = 2, CC 98 = 13, CC 6 = 10. The
   envelope and the cutoff are both unipolar, so it opens the cutoff from the bottom of its dial
   to the top
 - Amp gain and filter cutoff share one CC: CC 99 = 3, CC 98 = 18, CC 6 = 74
 - Amp at full level with no envelope: CC 99 = 1, CC 98 = 6, CC 6 = 1
 - Disconnect the filter's Mod 1 input, and with it the envelope: CC 99 = 1, CC 98 = 4, CC 6 = 0
-- A pitch envelope 60 cents deep: CC 99 = 2, CC 98 = 10, CC 6 = 10 points Osc 1 Pitch Fine at the
+- A finer pitch envelope, 60 cents deep: CC 99 = 2, CC 98 = 10, CC 6 = 10 points Osc 1 Pitch Fine at the
   envelope, which then sweeps the tuning from in tune up to 60 cents sharp, reached at half the
   envelope's peak
 - The envelope drives the filter harder as a note starts: CC 99 = 2, CC 98 = 15, CC 6 = 10 takes
   the filter's input level from silence up to the top of its dial and back
-- A pitch envelope is wired by default too -- the envelope on the oscillator's Mod 1 input --
-  so CC 89 sets its depth. Nothing scales the envelope down on this path, so the note starts a
-  semitone sharp at CC 5 and an octave at CC 16, and falls back with the decay
 - Portamento is wired by default -- Note Pitch reaches the oscillator through Pitch 1 -- so CC 5
   sets the time; CC 64 is a glide of about a tenth of a second. Every note glides, played legato
   or not. CC 99 = 2, CC 98 = 34, CC 6 = 51 takes the time from General Mod Wheel instead, so the
@@ -731,10 +731,10 @@ changes only how fast the output moves, so it cannot step it.
   from General Mod Wheel, which powers up at 0.0, so the output is dry until the wheel moves
 - Chorus that only comes in with the mod wheel: CC 99 = 2, CC 98 = 25, CC 6 = 51 takes Chorus 1
   Mix from General Mod Wheel, so the output stays mono until the wheel moves
-- Take the chorus out, keeping the delay: CC 99 = 0, CC 98 = 6, CC 6 = 8 puts Delay 1 in the
-  chorus's place in the run order and CC 98 = 7, CC 6 = 0 ends it there, and CC 99 = 1,
+- Take the chorus out, keeping the delay: CC 99 = 0, CC 98 = 7, CC 6 = 8 puts Delay 1 in the
+  chorus's place in the run order and CC 98 = 8, CC 6 = 0 ends it there, and CC 99 = 1,
   CC 98 = 10 and 11, CC 6 = 13 feeds both sides of Delay 1 from the amp. The output is then mono
-- Take the chorus and the delay out and save their time: CC 99 = 0, CC 98 = 6, CC 6 = 0 ends the
+- Take the chorus and the delay out and save their time: CC 99 = 0, CC 98 = 7, CC 6 = 0 ends the
   run order after the amp, and CC 99 = 1, CC 98 = 12 and 13, CC 6 = 13 points both sides of the
   final output back at the amp
 - Echoes ahead of the filter: CC 99 = 1, CC 98 = 10, CC 6 = 11 feeds Delay 1's left side from the
