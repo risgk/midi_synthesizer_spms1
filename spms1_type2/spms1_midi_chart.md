@@ -27,6 +27,8 @@
 |                            13 | x             | o             | Osc Mod 2 Amt                        |
 |                           114 | x             | o             | Osc Pulse Width (50% to 0%)          |
 |                           103 | x             | o             | Osc PW Mod Amt                       |
+|                            85 | x             | o             | Osc 2 Pitch Coarse (+-5 Octaves)     |
+|                            76 | x             | o             | Osc 2 Pitch Fine (+-60 Cents)        |
 |                            23 | x             | o             | Noise Level                          |
 |                            74 | x             | o             | Filter Cutoff                        |
 |                            71 | x             | o             | Filter Resonance                     |
@@ -34,6 +36,8 @@
 |                            25 | x             | o             | Filter Mod 2 Amt                     |
 |                             9 | x             | o             | Filter Mod 3 Amt (Key Track)         |
 |                           112 | x             | o             | Filter Gain                          |
+|                           116 | x             | o             | Filter Audio 1 Gain (Osc 1 Level)    |
+|                            21 | x             | o             | Filter Audio 2 Gain (Osc 2 Level)    |
 |                            15 | x             | o             | Amp Gain                             |
 |                            73 | x             | o             | EG Attack (Time)                     |
 |                            75 | x             | o             | EG Decay (Time)                      |

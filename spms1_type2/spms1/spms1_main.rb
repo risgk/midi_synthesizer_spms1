@@ -71,9 +71,9 @@ AUDIO_BUFFER_WORDS = 64
 MODULES_SIZE = 32
 
 # The module ids (MODULE_*), in spms1_patch.rb: one of every module type that makes a sound, one
-# mixer, one chorus, one delay, one pitch module and one noise source. Instances carry their number in the id rather than
-# being indexed by one, so a second oscillator would be MODULE_OSC_2, the next id after
-# MODULE_NOISE_1: numbers only ever get added, at the end of their range (see spms1_patch.yaml),
+# mixer, one chorus, one delay, one pitch module, one noise source and two oscillators. Instances carry their number in the id rather than
+# being indexed by one, so the second oscillator is MODULE_OSC_2, the next id after
+# MODULE_NOISE_1 when it came: numbers only ever get added, at the end of their range (see spms1_patch.yaml),
 # which is also why MODULE_PITCH_1 comes after MODULE_DELAY_1 though it runs before the oscillator.
 
 # The slots of the `signals` bus (SIGNAL_*), in spms1_patch.rb: module outputs, control values
@@ -133,6 +133,7 @@ chorus_1  = Chorus.new(SAMPLE_RATE)
 delay_1   = Delay.new(SAMPLE_RATE)
 pitch_1    = Pitch.new(SAMPLE_RATE)
 noise_1    = Noise.new(SAMPLE_RATE)
+osc_2     = Osc.new(SAMPLE_RATE)
 
 # Allocated once; which slots are filled is decided per buffer, inside the loop.
 active_modules = Array.new(MODULES_SIZE, MODULE_NONE)
@@ -172,8 +173,11 @@ spms1_fill_constant_signals(signals)
 # and Filter 1 Mod 2 Pol reads 0.1, as Osc 1 Mod 2 Pol does. Filter 1 Mod 3 In takes Pitch 1's
 # pitch too, for keyboard tracking, but Mod 3 Amt powers up at 0.0 and leaves it off until CC 9.
 # Noise 1 runs with the modulation sources, ahead of the mixer, and feeds Filter 1 Audio 3 In, the
-# oscillator its Audio 1 In, and Audio 2 In is left free; Noise 1 Level powers up at 0.0, so the
-# noise is silent until CC 23.
+# oscillator its Audio 1 In, and Osc 2 its Audio 2 In. Noise 1 Level powers up at 0.0, so the
+# noise is silent until CC 23, and Filter 1 Audio 2 Gain at 0.0, so Osc 2 is until CC 21; Audio 1
+# Gain, on CC 116, powers up at 1.0. Osc 2 plays the note from Pitch 1, as Osc 1 does, tuned by
+# its own Pitch Coarse and Fine (CC 85 and 76), and follows Osc 1 in everything else: each of its
+# amounts, its waveform and its pulse width read Osc 1's control slots.
 # A mixer's parameters have no CC, so the default patch points them at constants instead: full
 # level and a polarity of +0.5, which makes a mixer pass its input through rather than mute it.
 # Each modulation polarity has no CC either and reads +0.5, which leaves the amount in charge,
@@ -269,6 +273,10 @@ while true
   source_pitch_1_pitch         = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_PITCH)
   source_pitch_1_bend     = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_BEND)
   source_osc_1_pw_mod      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PW_MOD)
+  source_osc_2_pitch = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_PITCH)
+  source_osc_2_mod_1 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_MOD_1)
+  source_osc_2_mod_2 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_MOD_2)
+  source_osc_2_pw_mod = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_PW_MOD)
   source_lfo_1_rate_mod         = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_RATE_MOD)
   source_lfo_1_level_mod   = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_LEVEL_MOD)
 
@@ -323,6 +331,18 @@ while true
   source_osc_1_mod_1_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_MOD_1_AMT)
   source_osc_1_mod_1_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_MOD_1_POL)
   source_noise_1_level = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_NOISE_1_LEVEL)
+  source_osc_2_wave = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_WAVE)
+  source_osc_2_pitch_coarse = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_PITCH_COARSE)
+  source_osc_2_pitch_fine = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_PITCH_FINE)
+  source_osc_2_mod_1_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_MOD_1_AMT)
+  source_osc_2_mod_1_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_MOD_1_POL)
+  source_osc_2_mod_2_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_MOD_2_AMT)
+  source_osc_2_mod_2_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_MOD_2_POL)
+  source_osc_2_pulse_width = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_PULSE_WIDTH)
+  source_osc_2_pw_mod_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_PW_MOD_AMT)
+  source_osc_2_pw_mod_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_PW_MOD_POL)
+  source_filter_1_audio_1_gain = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_AUDIO_1_GAIN)
+  source_filter_1_audio_2_gain = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_AUDIO_2_GAIN)
 
   # Which CC fills each control slot. The bus is the only thing downstream reads, so this is
   # where MIDI enters and the only place a CC number appears.
@@ -373,6 +393,18 @@ while true
   cc_osc_1_mod_1_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_MOD_1_AMT)
   cc_osc_1_mod_1_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_MOD_1_POL)
   cc_noise_1_level = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_NOISE_1_LEVEL)
+  cc_osc_2_wave = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_2_WAVE)
+  cc_osc_2_pitch_coarse = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_2_PITCH_COARSE)
+  cc_osc_2_pitch_fine = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_2_PITCH_FINE)
+  cc_osc_2_mod_1_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_2_MOD_1_AMT)
+  cc_osc_2_mod_1_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_2_MOD_1_POL)
+  cc_osc_2_mod_2_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_2_MOD_2_AMT)
+  cc_osc_2_mod_2_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_2_MOD_2_POL)
+  cc_osc_2_pulse_width = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_2_PULSE_WIDTH)
+  cc_osc_2_pw_mod_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_2_PW_MOD_AMT)
+  cc_osc_2_pw_mod_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_2_PW_MOD_POL)
+  cc_filter_1_audio_1_gain = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_AUDIO_1_GAIN)
+  cc_filter_1_audio_2_gain = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_AUDIO_2_GAIN)
   cc_general_mod_wheel     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_MOD_WHEEL)
   cc_general_1             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_1)
   cc_general_2             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_2)
@@ -426,6 +458,18 @@ while true
   signals[SIGNAL_OSC_1_MOD_1_AMT] = cc_or_zero(cc_osc_1_mod_1_amt, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_mod_1_amt)))
   signals[SIGNAL_OSC_1_MOD_1_POL] = cc_or_zero(cc_osc_1_mod_1_pol, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_mod_1_pol)))
   signals[SIGNAL_NOISE_1_LEVEL] = cc_or_zero(cc_noise_1_level, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_noise_1_level)))
+  signals[SIGNAL_OSC_2_WAVE] = cc_or_zero(cc_osc_2_wave, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_2_wave)))
+  signals[SIGNAL_OSC_2_PITCH_COARSE] = cc_or_zero(cc_osc_2_pitch_coarse, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_2_pitch_coarse)))
+  signals[SIGNAL_OSC_2_PITCH_FINE] = cc_or_zero(cc_osc_2_pitch_fine, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_2_pitch_fine)))
+  signals[SIGNAL_OSC_2_MOD_1_AMT] = cc_or_zero(cc_osc_2_mod_1_amt, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_2_mod_1_amt)))
+  signals[SIGNAL_OSC_2_MOD_1_POL] = cc_or_zero(cc_osc_2_mod_1_pol, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_2_mod_1_pol)))
+  signals[SIGNAL_OSC_2_MOD_2_AMT] = cc_or_zero(cc_osc_2_mod_2_amt, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_2_mod_2_amt)))
+  signals[SIGNAL_OSC_2_MOD_2_POL] = cc_or_zero(cc_osc_2_mod_2_pol, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_2_mod_2_pol)))
+  signals[SIGNAL_OSC_2_PULSE_WIDTH] = cc_or_zero(cc_osc_2_pulse_width, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_2_pulse_width)))
+  signals[SIGNAL_OSC_2_PW_MOD_AMT] = cc_or_zero(cc_osc_2_pw_mod_amt, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_2_pw_mod_amt)))
+  signals[SIGNAL_OSC_2_PW_MOD_POL] = cc_or_zero(cc_osc_2_pw_mod_pol, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_2_pw_mod_pol)))
+  signals[SIGNAL_FILTER_1_AUDIO_1_GAIN] = cc_or_zero(cc_filter_1_audio_1_gain, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_audio_1_gain)))
+  signals[SIGNAL_FILTER_1_AUDIO_2_GAIN] = cc_or_zero(cc_filter_1_audio_2_gain, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_audio_2_gain)))
   signals[SIGNAL_GENERAL_MOD_WHEEL] = cc_or_zero(cc_general_mod_wheel, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_general_mod_wheel)))
   # Each General CC fills two slots, the same value taken both ways.
   general_1 = C.get_midi_cc_value(MIDI_CH, cc_general_1)
@@ -470,6 +514,18 @@ while true
   osc_1.set_modulation_1_amount(signals[source_osc_1_mod_1_amt])
   osc_1.set_modulation_1_polarity(signals[source_osc_1_mod_1_pol])
   noise_1.set_level(signals[source_noise_1_level])
+  osc_2.set_waveform(signals[source_osc_2_wave])
+  osc_2.set_pitch_coarse(signals[source_osc_2_pitch_coarse])
+  osc_2.set_pitch_fine(signals[source_osc_2_pitch_fine])
+  osc_2.set_modulation_1_amount(signals[source_osc_2_mod_1_amt])
+  osc_2.set_modulation_1_polarity(signals[source_osc_2_mod_1_pol])
+  osc_2.set_modulation_2_amount(signals[source_osc_2_mod_2_amt])
+  osc_2.set_modulation_2_polarity(signals[source_osc_2_mod_2_pol])
+  osc_2.set_pulse_width(signals[source_osc_2_pulse_width])
+  osc_2.set_pw_modulation_amount(signals[source_osc_2_pw_mod_amt])
+  osc_2.set_pw_modulation_polarity(signals[source_osc_2_pw_mod_pol])
+  filter_1.set_audio_1_gain(signals[source_filter_1_audio_1_gain])
+  filter_1.set_audio_2_gain(signals[source_filter_1_audio_2_gain])
   chorus_1.set_rate(signals[source_chorus_1_rate])
   chorus_1.set_depth(signals[source_chorus_1_depth])
   chorus_1.set_mix(signals[source_chorus_1_mix])
@@ -496,7 +552,7 @@ while true
       module_id = active_modules[slot]
 
       # Spinel never emits a jump table however the Ruby is written, so a case costs one compare
-      # per id up to the one that matches: 55 a sample at ten modules. Splitting the chain on a
+      # per id up to the one that matches: 66 a sample at eleven modules. Splitting the chain on a
       # kind of module pays only once that kind has several instances. Where a module sits in the
       # chain moves the cost between modules but not the total, so one added later goes at the
       # end whatever its place in the run order, and leaves what the others cost as it was.
@@ -535,6 +591,8 @@ while true
         signals[60] = pitch_1.process(signals[source_pitch_1_pitch], signals[source_pitch_1_bend]) # SIGNAL_PITCH_1_OUTPUT
       when 10 # MODULE_NOISE_1
         signals[86] = noise_1.process # SIGNAL_NOISE_1_OUTPUT
+      when 11 # MODULE_OSC_2
+        signals[88] = osc_2.process(signals[source_osc_2_pitch], signals[source_osc_2_mod_1], signals[source_osc_2_mod_2], signals[source_osc_2_pw_mod]) # SIGNAL_OSC_2_OUTPUT
       end
 
       slot += 1
