@@ -182,7 +182,7 @@ spms1_fill_constant_signals(signals)
 # as Osc 1 does, tuned by its own Pitch Coarse and Fine (CC 85 and 76), 12 cents sharp at
 # power-up, and has a Wave of its own on CC 104 (Osc 1's on CC 102); it follows Osc 1 in everything
 # else: each of its amounts and its pulse width read Osc 1's control slots.
-# Mixer 1 Level 1 and 2 are on CC 118 and 119 and power up at 1.0. Mixer 1's other parameters
+# Mixer 1 Level 1 and 2 are on CC 118 and 119 and power up at 0.0. Mixer 1's other parameters
 # have no CC, and neither have Mixer 2's polarities and Out Level, so the default patch points them
 # at constants instead: full level and a polarity of +0.5, which makes a mixer pass its input
 # through rather than mute it.

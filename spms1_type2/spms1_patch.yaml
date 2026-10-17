@@ -313,9 +313,9 @@ controls:
   # octave across the audible band.
   - { entry: 84, module: NOISE_1,   key: RED_CUTOFF,   label: Red Cutoff,   cc: 0,   value: 64,  source: HALF }
   - { entry: 18, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 124 }
-  - { entry: 19, module: MIXER_1,   key: LEVEL_1,      label: Level 1,      cc: 118, value: 124 }
+  - { entry: 19, module: MIXER_1,   key: LEVEL_1,      label: Level 1,      cc: 118, value: 4 }
   - { entry: 20, module: MIXER_1,   key: POL_1,   label: Pol 1,   cc: 0,   value: 124, source: HALF, bipolar: true }
-  - { entry: 21, module: MIXER_1,   key: LEVEL_2,      label: Level 2,      cc: 119, value: 124 }
+  - { entry: 21, module: MIXER_1,   key: LEVEL_2,      label: Level 2,      cc: 119, value: 4 }
   - { entry: 22, module: MIXER_1,   key: POL_2,   label: Pol 2,   cc: 0,   value: 124, source: HALF, bipolar: true }
   # Level 3, Pol 3, Level 4 and Pol 4 came after Osc 2, so their entries follow its; like the first
   # two they have no CC and read 1.0 and +0.5.

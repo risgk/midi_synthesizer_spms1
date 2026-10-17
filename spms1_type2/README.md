@@ -401,10 +401,10 @@ There are two oscillators, one of every other module that makes a sound, two mix
 one delay, one pitch module and one noise source, and **all twelve are in the default run order**, so a patch only ever has to route, never to switch something
 on first. Taking the chorus or the delay out of the order saves its share of the time; whatever
 read its output then has to be pointed elsewhere (see the examples below).
-Mixer 1 has a CC only on its first two levels, CC 118 and 119, which power up at 1.0, and Mixer 2
-only on its first three: the default patch points the rest at constants instead, each level and
-Out Level at 1.0 and each polarity at +0.5, so a mixer with one input routed passes it through
-rather than muting it.
+Mixer 1 has a CC only on its first two levels, CC 118 and 119, which power up at 0.0, so it is
+silent until they are turned up, and Mixer 2 only on its first three: the default patch points
+the rest at constants instead, each level and Out Level at 1.0 and each polarity at +0.5, so an
+input on one of them passes through rather than being muted.
 
 #### Entries (CC 98), category 1
 
@@ -795,15 +795,16 @@ changes only how fast the output moves, so it cannot step it.
   oscillator and is free: CC 99 = 1, CC 98 = 7, CC 6 = 32 puts the filter cutoff's control slot on
   its first input, CC 98 = 8, CC 6 = 7 the constant -0.5 on its second, and CC 98 = 2, CC 6 = 14
   points the oscillator's Mod 2 input at Mixer 1 in the LFO's place, and CC 99 = 2,
-  CC 98 = 12, CC 6 = 2 sets Osc 1 Mod 2 Pol back to +0.5. The slot is unipolar, so
+  CC 98 = 12, CC 6 = 2 sets Osc 1 Mod 2 Pol back to +0.5; CC 118 and 119 up to CC 124 open the
+  two inputs. The slot is unipolar, so
   that constant is what centres it on CC 64 as the LFO is on zero. CC 74 now bends the pitch down
   and up around the note, as far as CC 13 allows: a semitone either way at CC 6, an octave at
   CC 28
 - A CC that works backwards, which needs a mixer to invert it. Mixer 1 is already running, so it
-  only needs wiring: CC 99 = 1, CC 98 = 7, CC 6 = 32 puts the cutoff's control slot on its first
+  only needs wiring and its levels up: CC 99 = 1, CC 98 = 7, CC 6 = 32 puts the cutoff's control slot on its first
   input and CC 98 = 8, CC 6 = 1 the constant 1.0 on its second, and CC 99 = 2, CC 98 = 20,
-  CC 6 = 7 pins the first input's polarity to -0.5, the negating end of its dial, so the mixer
-  outputs 1.0 less the CC: the CC mirrored about CC 64. Point the cutoff's own source at the
+  CC 6 = 7 pins the first input's polarity to -0.5, the negating end of its dial; with CC 118 and
+  119 up to CC 124, the mixer outputs 1.0 less the CC: the CC mirrored about CC 64. Point the cutoff's own source at the
   mixer with CC 99 = 2, CC 98 = 13, CC 6 = 14 and CC 74 now closes the filter as it rises
 - Take the filter out of the chain: CC 99 = 1, CC 98 = 5, CC 6 = 106 points the amp's audio input
   at Mixer 2. The filter keeps running and keeps its slot; nothing reads it
