@@ -70,8 +70,9 @@ AUDIO_BUFFER_WORDS = 64
 # MODULE_NONE. A module listed more than once runs once, at the slot written last.
 MODULES_SIZE = 32
 
-# The module ids (MODULE_*), in spms1_patch.rb: one of every module type that makes a sound, one
-# mixer, one chorus, one delay, one pitch module, one noise source and two oscillators. Instances carry their number in the id rather than
+# The module ids (MODULE_*), in spms1_patch.rb: one of every module type that makes a sound, two
+# mixers, one chorus, one delay, one pitch module, one noise source and two oscillators. Instances
+# carry their number in the id rather than
 # being indexed by one, so the second oscillator is MODULE_OSC_2, the next id after
 # MODULE_NOISE_1 when it came: numbers only ever get added, at the end of their range (see spms1_patch.yaml),
 # which is also why MODULE_PITCH_1 comes after MODULE_DELAY_1 though it runs before the oscillator.
@@ -129,6 +130,7 @@ osc_1     = Osc.new(SAMPLE_RATE)
 filter_1  = Filter.new(SAMPLE_RATE)
 amp_1     = Amp.new(SAMPLE_RATE)
 mixer_1   = Mixer.new(SAMPLE_RATE)
+mixer_2   = Mixer.new(SAMPLE_RATE)
 chorus_1  = Chorus.new(SAMPLE_RATE)
 delay_1   = Delay.new(SAMPLE_RATE)
 pitch_1    = Pitch.new(SAMPLE_RATE)
@@ -159,10 +161,10 @@ spms1_fill_constant_signals(signals)
 # it passes its input through as it is, so the patch plays as one without it until CC 5 turns the
 # portamento up. Pitch Bend goes to its Bend In, added past the glide, 2 semitones either way at
 # Bend Amt's power-up value of CC 8, so the bend reaches the oscillator and the filter's keyboard
-# tracking at once. Running after the LFO, the envelope, the noise and the mixer
-# lets it take any of them in the same sample, and the oscillator and the filter read it so too. The mixer
-# runs after the modulation sources and ahead of the oscillator, so it sees this sample's LFO,
-# envelope and noise and can feed the oscillator, the filter and the amp without a sample's delay. The
+# tracking at once. Running after the LFO, the envelope, the noise and Mixer 1
+# lets it take any of them in the same sample, and the oscillators and the filter read it so too. Mixer 1
+# runs after the modulation sources and ahead of the oscillators, so it sees this sample's LFO,
+# envelope and noise and can feed the oscillators, the filter and the amp without a sample's delay. The
 # default patch leaves it unused: the LFO goes straight to the oscillator's pitch and pulse
 # width at its full level, and Osc 1 Mod 2 Pol reads the constant 0.1, which brings it
 # down to a vibrato depth on the pitch, so that Osc 1 Mod 2 Amt can span the whole pitch range
@@ -172,15 +174,16 @@ spms1_fill_constant_signals(signals)
 # Mod 2 Amt powers up at 0.0, so the cutoff follows the envelope alone until CC 25 turns it up,
 # and Filter 1 Mod 2 Pol reads 0.1, as Osc 1 Mod 2 Pol does. Filter 1 Mod 3 In takes Pitch 1's
 # pitch too, for keyboard tracking, but Mod 3 Amt powers up at 0.0 and leaves it off until CC 9.
-# Noise 1 runs with the modulation sources, ahead of the mixer, and feeds Filter 1 Audio 3 In, the
-# oscillator its Audio 1 In, and Osc 2 its Audio 2 In. Noise 1 Level powers up at 0.0, so the
-# noise is silent until CC 23, and Filter 1 Audio 2 Gain at 0.0, so Osc 2 is until CC 21; Audio 1
-# Gain and Audio 3 Gain, on CC 116 and 117, power up at 1.0. Osc 2 plays the note from Pitch 1,
+# Noise 1 runs with the modulation sources, ahead of Mixer 1. Mixer 2 runs after the oscillators,
+# just ahead of the filter, which it feeds: Osc 1 on its In 1, Osc 2 on In 2 and the noise on In 3.
+# Its Level 1 and Level 3, on CC 116 and 117, power up at 1.0, and Level 2, on CC 21, at 0.0, so
+# Osc 2 is silent until CC 21; Noise 1 Level powers up at 0.0, so the noise is until CC 23. Osc 2 plays the note from Pitch 1,
 # as Osc 1 does, tuned by its own Pitch Coarse and Fine (CC 85 and 76), 12 cents sharp at
 # power-up, and follows Osc 1 in everything else: each of its amounts, its waveform and its pulse
 # width read Osc 1's control slots.
-# A mixer's parameters have no CC, so the default patch points them at constants instead: full
-# level and a polarity of +0.5, which makes a mixer pass its input through rather than mute it.
+# Mixer 1's parameters have no CC, and neither have Mixer 2's polarities and Out Level, so the
+# default patch points them at constants instead: full level and a polarity of +0.5, which makes a
+# mixer pass its input through rather than mute it.
 # Each modulation polarity has no CC either and reads +0.5, which leaves the amount in charge,
 # but for Osc 1 Mod 2's. LFO 1 Level is on CC 113 and powers up at 1.0, and the mod wheel on its Level
 # Mod In adds to it up to that top; EG 1 Level has no CC and reads 1.0, passing the envelope as it
@@ -193,6 +196,10 @@ C.set_sample_rate(SAMPLE_RATE)
 C.set_audio_buffers(AUDIO_BUFFERS)
 C.set_audio_buffer_words(AUDIO_BUFFER_WORDS)
 C.start_audio
+
+# The mixers start from full level and settle on what the patch sets on the first buffer, rather
+# than gliding there; see Mixer#settle.
+mixers_settled = false
 
 # while rather than loop: Spinel builds a loop block with a setjmp, for the StopIteration that ends
 # one, which makes every local written inside it volatile, so that the per-sample code loaded and
@@ -256,9 +263,7 @@ while true
   source_osc_1_pitch = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PITCH)
   source_osc_1_mod_1 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_MOD_1)
   source_osc_1_mod_2 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_MOD_2)
-  source_filter_1_audio_1  = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_AUDIO_1)
-  source_filter_1_audio_2  = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_AUDIO_2)
-  source_filter_1_audio_3  = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_AUDIO_3)
+  source_filter_1_audio    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_AUDIO)
   source_filter_1_mod_1    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_1)
   source_filter_1_mod_2    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_2)
   source_filter_1_mod_3    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_3)
@@ -266,6 +271,12 @@ while true
   source_amp_1_mod         = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_MOD)
   source_mixer_1_in_1      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_IN_1)
   source_mixer_1_in_2      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_IN_2)
+  source_mixer_1_in_3      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_IN_3)
+  source_mixer_1_in_4      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_IN_4)
+  source_mixer_2_in_1      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_IN_1)
+  source_mixer_2_in_2      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_IN_2)
+  source_mixer_2_in_3      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_IN_3)
+  source_mixer_2_in_4      = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_IN_4)
   source_chorus_1_audio    = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_CHORUS_1_AUDIO)
   source_delay_1_audio_l   = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_AUDIO_L)
   source_delay_1_audio_r   = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_AUDIO_R)
@@ -342,9 +353,19 @@ while true
   source_osc_2_pulse_width = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_PULSE_WIDTH)
   source_osc_2_pw_mod_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_PW_MOD_AMT)
   source_osc_2_pw_mod_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_PW_MOD_POL)
-  source_filter_1_audio_1_gain = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_AUDIO_1_GAIN)
-  source_filter_1_audio_2_gain = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_AUDIO_2_GAIN)
-  source_filter_1_audio_3_gain = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_AUDIO_3_GAIN)
+  source_mixer_1_level_3 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_LEVEL_3)
+  source_mixer_1_pol_3 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_POL_3)
+  source_mixer_1_level_4 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_LEVEL_4)
+  source_mixer_1_pol_4 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_POL_4)
+  source_mixer_2_level_1 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_LEVEL_1)
+  source_mixer_2_pol_1 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_POL_1)
+  source_mixer_2_level_2 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_LEVEL_2)
+  source_mixer_2_pol_2 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_POL_2)
+  source_mixer_2_level_3 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_LEVEL_3)
+  source_mixer_2_pol_3 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_POL_3)
+  source_mixer_2_level_4 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_LEVEL_4)
+  source_mixer_2_pol_4 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_POL_4)
+  source_mixer_2_out_level = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_OUT_LEVEL)
 
   # Which CC fills each control slot. The bus is the only thing downstream reads, so this is
   # where MIDI enters and the only place a CC number appears.
@@ -405,9 +426,19 @@ while true
   cc_osc_2_pulse_width = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_2_PULSE_WIDTH)
   cc_osc_2_pw_mod_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_2_PW_MOD_AMT)
   cc_osc_2_pw_mod_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_2_PW_MOD_POL)
-  cc_filter_1_audio_1_gain = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_AUDIO_1_GAIN)
-  cc_filter_1_audio_2_gain = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_AUDIO_2_GAIN)
-  cc_filter_1_audio_3_gain = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_AUDIO_3_GAIN)
+  cc_mixer_1_level_3 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_1_LEVEL_3)
+  cc_mixer_1_pol_3 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_1_POL_3)
+  cc_mixer_1_level_4 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_1_LEVEL_4)
+  cc_mixer_1_pol_4 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_1_POL_4)
+  cc_mixer_2_level_1 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_LEVEL_1)
+  cc_mixer_2_pol_1 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_POL_1)
+  cc_mixer_2_level_2 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_LEVEL_2)
+  cc_mixer_2_pol_2 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_POL_2)
+  cc_mixer_2_level_3 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_LEVEL_3)
+  cc_mixer_2_pol_3 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_POL_3)
+  cc_mixer_2_level_4 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_LEVEL_4)
+  cc_mixer_2_pol_4 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_POL_4)
+  cc_mixer_2_out_level = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_OUT_LEVEL)
   cc_general_mod_wheel     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_MOD_WHEEL)
   cc_general_1             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_1)
   cc_general_2             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_2)
@@ -471,9 +502,19 @@ while true
   signals[SIGNAL_OSC_2_PULSE_WIDTH] = cc_or_zero(cc_osc_2_pulse_width, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_2_pulse_width)))
   signals[SIGNAL_OSC_2_PW_MOD_AMT] = cc_or_zero(cc_osc_2_pw_mod_amt, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_2_pw_mod_amt)))
   signals[SIGNAL_OSC_2_PW_MOD_POL] = cc_or_zero(cc_osc_2_pw_mod_pol, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_2_pw_mod_pol)))
-  signals[SIGNAL_FILTER_1_AUDIO_1_GAIN] = cc_or_zero(cc_filter_1_audio_1_gain, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_audio_1_gain)))
-  signals[SIGNAL_FILTER_1_AUDIO_2_GAIN] = cc_or_zero(cc_filter_1_audio_2_gain, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_audio_2_gain)))
-  signals[SIGNAL_FILTER_1_AUDIO_3_GAIN] = cc_or_zero(cc_filter_1_audio_3_gain, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_audio_3_gain)))
+  signals[SIGNAL_MIXER_1_LEVEL_3] = cc_or_zero(cc_mixer_1_level_3, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_level_3)))
+  signals[SIGNAL_MIXER_1_POL_3] = cc_or_zero(cc_mixer_1_pol_3, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_pol_3)))
+  signals[SIGNAL_MIXER_1_LEVEL_4] = cc_or_zero(cc_mixer_1_level_4, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_level_4)))
+  signals[SIGNAL_MIXER_1_POL_4] = cc_or_zero(cc_mixer_1_pol_4, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_pol_4)))
+  signals[SIGNAL_MIXER_2_LEVEL_1] = cc_or_zero(cc_mixer_2_level_1, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_2_level_1)))
+  signals[SIGNAL_MIXER_2_POL_1] = cc_or_zero(cc_mixer_2_pol_1, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_2_pol_1)))
+  signals[SIGNAL_MIXER_2_LEVEL_2] = cc_or_zero(cc_mixer_2_level_2, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_2_level_2)))
+  signals[SIGNAL_MIXER_2_POL_2] = cc_or_zero(cc_mixer_2_pol_2, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_2_pol_2)))
+  signals[SIGNAL_MIXER_2_LEVEL_3] = cc_or_zero(cc_mixer_2_level_3, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_2_level_3)))
+  signals[SIGNAL_MIXER_2_POL_3] = cc_or_zero(cc_mixer_2_pol_3, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_2_pol_3)))
+  signals[SIGNAL_MIXER_2_LEVEL_4] = cc_or_zero(cc_mixer_2_level_4, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_2_level_4)))
+  signals[SIGNAL_MIXER_2_POL_4] = cc_or_zero(cc_mixer_2_pol_4, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_2_pol_4)))
+  signals[SIGNAL_MIXER_2_OUT_LEVEL] = cc_or_zero(cc_mixer_2_out_level, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_2_out_level)))
   signals[SIGNAL_GENERAL_MOD_WHEEL] = cc_or_zero(cc_general_mod_wheel, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_general_mod_wheel)))
   # Each General CC fills two slots, the same value taken both ways.
   general_1 = C.get_midi_cc_value(MIDI_CH, cc_general_1)
@@ -528,9 +569,19 @@ while true
   osc_2.set_pulse_width(signals[source_osc_2_pulse_width])
   osc_2.set_pw_modulation_amount(signals[source_osc_2_pw_mod_amt])
   osc_2.set_pw_modulation_polarity(signals[source_osc_2_pw_mod_pol])
-  filter_1.set_audio_1_gain(signals[source_filter_1_audio_1_gain])
-  filter_1.set_audio_2_gain(signals[source_filter_1_audio_2_gain])
-  filter_1.set_audio_3_gain(signals[source_filter_1_audio_3_gain])
+  mixer_1.set_level_3(signals[source_mixer_1_level_3])
+  mixer_1.set_polarity_3(signals[source_mixer_1_pol_3])
+  mixer_1.set_level_4(signals[source_mixer_1_level_4])
+  mixer_1.set_polarity_4(signals[source_mixer_1_pol_4])
+  mixer_2.set_level_1(signals[source_mixer_2_level_1])
+  mixer_2.set_polarity_1(signals[source_mixer_2_pol_1])
+  mixer_2.set_level_2(signals[source_mixer_2_level_2])
+  mixer_2.set_polarity_2(signals[source_mixer_2_pol_2])
+  mixer_2.set_level_3(signals[source_mixer_2_level_3])
+  mixer_2.set_polarity_3(signals[source_mixer_2_pol_3])
+  mixer_2.set_level_4(signals[source_mixer_2_level_4])
+  mixer_2.set_polarity_4(signals[source_mixer_2_pol_4])
+  mixer_2.set_out_level(signals[source_mixer_2_out_level])
   chorus_1.set_rate(signals[source_chorus_1_rate])
   chorus_1.set_depth(signals[source_chorus_1_depth])
   chorus_1.set_mix(signals[source_chorus_1_mix])
@@ -549,6 +600,11 @@ while true
   lfo_1.set_rate_modulation_polarity(signals[source_lfo_1_rate_mod_pol])
   lfo_1.set_level_modulation_amount(signals[source_lfo_1_level_mod_amt])
   lfo_1.set_level_modulation_polarity(signals[source_lfo_1_level_mod_pol])
+  if !mixers_settled
+    mixer_1.settle
+    mixer_2.settle
+    mixers_settled = true
+  end
 
   i = 0
   while i < AUDIO_BUFFER_WORDS
@@ -557,7 +613,7 @@ while true
       module_id = active_modules[slot]
 
       # Spinel never emits a jump table however the Ruby is written, so a case costs one compare
-      # per id up to the one that matches: 66 a sample at eleven modules. Splitting the chain on a
+      # per id up to the one that matches: 78 a sample at twelve modules. Splitting the chain on a
       # kind of module pays only once that kind has several instances. Where a module sits in the
       # chain moves the cost between modules but not the total, so one added later goes at the
       # end whatever its place in the run order, and leaves what the others cost as it was.
@@ -577,13 +633,13 @@ while true
       when 3 # MODULE_OSC_1
         signals[11] = osc_1.process(signals[source_osc_1_pitch], signals[source_osc_1_mod_1], signals[source_osc_1_mod_2], signals[source_osc_1_pw_mod]) # SIGNAL_OSC_1_OUTPUT
       when 4 # MODULE_FILTER_1
-        signals[12] = filter_1.process(signals[source_filter_1_audio_1], signals[source_filter_1_audio_2], signals[source_filter_1_audio_3], signals[source_filter_1_mod_1], signals[source_filter_1_mod_2], signals[source_filter_1_mod_3]) # SIGNAL_FILTER_1_OUTPUT_LP
+        signals[12] = filter_1.process(signals[source_filter_1_audio], signals[source_filter_1_mod_1], signals[source_filter_1_mod_2], signals[source_filter_1_mod_3]) # SIGNAL_FILTER_1_OUTPUT_LP
         signals[65] = filter_1.output_bp # SIGNAL_FILTER_1_OUTPUT_BP
         signals[66] = filter_1.output_hp # SIGNAL_FILTER_1_OUTPUT_HP
       when 5 # MODULE_AMP_1
         signals[13] = amp_1.process(signals[source_amp_1_audio], signals[source_amp_1_mod]) # SIGNAL_AMP_1_OUTPUT
       when 6 # MODULE_MIXER_1
-        signals[14] = mixer_1.process(signals[source_mixer_1_in_1], signals[source_mixer_1_in_2]) # SIGNAL_MIXER_1_OUTPUT
+        signals[14] = mixer_1.process(signals[source_mixer_1_in_1], signals[source_mixer_1_in_2], signals[source_mixer_1_in_3], signals[source_mixer_1_in_4]) # SIGNAL_MIXER_1_OUTPUT
       when 7 # MODULE_CHORUS_1
         chorus_1.process(signals[source_chorus_1_audio])
         signals[15] = chorus_1.output_l # SIGNAL_CHORUS_1_OUTPUT_L
@@ -598,6 +654,8 @@ while true
         signals[86] = noise_1.process # SIGNAL_NOISE_1_OUTPUT
       when 11 # MODULE_OSC_2
         signals[88] = osc_2.process(signals[source_osc_2_pitch], signals[source_osc_2_mod_1], signals[source_osc_2_mod_2], signals[source_osc_2_pw_mod]) # SIGNAL_OSC_2_OUTPUT
+      when 12 # MODULE_MIXER_2
+        signals[106] = mixer_2.process(signals[source_mixer_2_in_1], signals[source_mixer_2_in_2], signals[source_mixer_2_in_3], signals[source_mixer_2_in_4]) # SIGNAL_MIXER_2_OUTPUT
       end
 
       slot += 1

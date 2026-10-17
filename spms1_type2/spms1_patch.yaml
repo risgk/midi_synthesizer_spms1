@@ -35,9 +35,10 @@ modules:
   - { key: PITCH_1,    id: 9, label: Pitch 1 }
   - { key: NOISE_1,    id: 10, label: Noise 1 }
   - { key: OSC_2,      id: 11, label: Osc 2 }
+  - { key: MIXER_2,    id: 12, label: Mixer 2 }
 
 # The run order of the default patch.
-default_order: [LFO_1, EG_1, NOISE_1, MIXER_1, PITCH_1, OSC_1, OSC_2, FILTER_1, AMP_1, CHORUS_1, DELAY_1]
+default_order: [LFO_1, EG_1, NOISE_1, MIXER_1, PITCH_1, OSC_1, OSC_2, MIXER_2, FILTER_1, AMP_1, CHORUS_1, DELAY_1]
 
 # Slots of the signal bus (the values of NRPN categories 1 and 2), each one of:
 #   value:    a constant, which the bus holds from startup; `short` is the editor's label for it
@@ -160,7 +161,7 @@ signals:
   - { key: NOISE_1_OUTPUT, id: 86, module: NOISE_1, output: Out, label: Noise 1 Output, bipolar: true }
   - { key: NOISE_1_LEVEL,  id: 87, control: NOISE_1_LEVEL }
 
-  # Osc 2 came after Noise 1, and Filter 1 Audio 1 Gain and Audio 2 Gain after Osc 2.
+  # Osc 2 came after Noise 1. 99-101, Filter 1's audio gains for a while, are unused.
   - { key: OSC_2_OUTPUT,        id: 88, module: OSC_2, output: Out, label: Osc 2 Output, bipolar: true }
   - { key: OSC_2_WAVE,          id: 89, control: OSC_2_WAVE }
   - { key: OSC_2_PITCH_COARSE,  id: 90, control: OSC_2_PITCH_COARSE }
@@ -172,11 +173,22 @@ signals:
   - { key: OSC_2_PULSE_WIDTH,   id: 96, control: OSC_2_PULSE_WIDTH }
   - { key: OSC_2_PW_MOD_AMT,    id: 97, control: OSC_2_PW_MOD_AMT }
   - { key: OSC_2_PW_MOD_POL,    id: 98, control: OSC_2_PW_MOD_POL }
-  - { key: FILTER_1_AUDIO_1_GAIN, id: 99,  control: FILTER_1_AUDIO_1_GAIN }
-  - { key: FILTER_1_AUDIO_2_GAIN, id: 100, control: FILTER_1_AUDIO_2_GAIN }
 
-  # Filter 1 Audio 3 Gain came after Audio 2 Gain.
-  - { key: FILTER_1_AUDIO_3_GAIN, id: 101, control: FILTER_1_AUDIO_3_GAIN }
+  # Mixer 1 In 3 and In 4, and Mixer 2, came after Osc 2.
+  - { key: MIXER_1_LEVEL_3,   id: 102, control: MIXER_1_LEVEL_3 }
+  - { key: MIXER_1_POL_3,     id: 103, control: MIXER_1_POL_3 }
+  - { key: MIXER_1_LEVEL_4,   id: 104, control: MIXER_1_LEVEL_4 }
+  - { key: MIXER_1_POL_4,     id: 105, control: MIXER_1_POL_4 }
+  - { key: MIXER_2_OUTPUT,    id: 106, module: MIXER_2, output: Out, label: Mixer 2 Output, bipolar: true }
+  - { key: MIXER_2_LEVEL_1,   id: 107, control: MIXER_2_LEVEL_1 }
+  - { key: MIXER_2_POL_1,     id: 108, control: MIXER_2_POL_1 }
+  - { key: MIXER_2_LEVEL_2,   id: 109, control: MIXER_2_LEVEL_2 }
+  - { key: MIXER_2_POL_2,     id: 110, control: MIXER_2_POL_2 }
+  - { key: MIXER_2_LEVEL_3,   id: 111, control: MIXER_2_LEVEL_3 }
+  - { key: MIXER_2_POL_3,     id: 112, control: MIXER_2_POL_3 }
+  - { key: MIXER_2_LEVEL_4,   id: 113, control: MIXER_2_LEVEL_4 }
+  - { key: MIXER_2_POL_4,     id: 114, control: MIXER_2_POL_4 }
+  - { key: MIXER_2_OUT_LEVEL, id: 115, control: MIXER_2_OUT_LEVEL }
 
 # Module inputs, NRPN category 1, listed in the editor's order, each by its entry: what feeds each
 # one in the default patch (`source`, a signal key). `label` is the editor's, on the module; `name`
@@ -190,14 +202,19 @@ inputs:
   - { entry: 25, module: OSC_2,       key: MOD_1,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
   - { entry: 26, module: OSC_2,       key: MOD_2,       label: Mod 2 In,       name: Mod 2 In,       source: LFO_1_OUTPUT }
   - { entry: 27, module: OSC_2,       key: PW_MOD,      label: PW Mod In,      name: PW Mod In,      source: LFO_1_OUTPUT }
-  - { entry: 3,  module: FILTER_1,    key: AUDIO_1,     label: Audio 1 In,     name: Audio 1 In,     source: OSC_1_OUTPUT }
-  - { entry: 22, module: FILTER_1,    key: AUDIO_2,     label: Audio 2 In,     name: Audio 2 In,     source: OSC_2_OUTPUT }
-  - { entry: 23, module: FILTER_1,    key: AUDIO_3,     label: Audio 3 In,     name: Audio 3 In,     source: NOISE_1_OUTPUT }
+  # 22 and 23, Filter 1's Audio 2 In and Audio 3 In for a while, are unused.
+  - { entry: 3,  module: FILTER_1,    key: AUDIO,       label: Audio In,       name: Audio In,       source: MIXER_2_OUTPUT }
   - { entry: 4,  module: FILTER_1,    key: MOD_1,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
   - { entry: 5,  module: AMP_1,       key: AUDIO,       label: Audio In,       name: Audio In,       source: FILTER_1_OUTPUT_LP }
   - { entry: 6,  module: AMP_1,       key: MOD,         label: Mod In,         name: Mod In,         source: EG_1_OUTPUT }
   - { entry: 7,  module: MIXER_1,     key: IN_1,        label: In 1,           name: In 1,           source: NONE }
   - { entry: 8,  module: MIXER_1,     key: IN_2,        label: In 2,           name: In 2,           source: NONE }
+  - { entry: 28, module: MIXER_1,     key: IN_3,        label: In 3,           name: In 3,           source: NONE }
+  - { entry: 29, module: MIXER_1,     key: IN_4,        label: In 4,           name: In 4,           source: NONE }
+  - { entry: 30, module: MIXER_2,     key: IN_1,        label: In 1,           name: In 1,           source: OSC_1_OUTPUT }
+  - { entry: 31, module: MIXER_2,     key: IN_2,        label: In 2,           name: In 2,           source: OSC_2_OUTPUT }
+  - { entry: 32, module: MIXER_2,     key: IN_3,        label: In 3,           name: In 3,           source: NOISE_1_OUTPUT }
+  - { entry: 33, module: MIXER_2,     key: IN_4,        label: In 4,           name: In 4,           source: NONE }
   - { entry: 9,  module: CHORUS_1,    key: AUDIO,       label: Audio In,       name: Audio In,       source: AMP_1_OUTPUT }
   - { entry: 10, module: DELAY_1,     key: AUDIO_L,     label: Audio In L,     name: Audio In L,     source: CHORUS_1_OUTPUT_L }
   - { entry: 11, module: DELAY_1,     key: AUDIO_R,     label: Audio In R,     name: Audio In R,     source: CHORUS_1_OUTPUT_R }
@@ -256,8 +273,8 @@ controls:
   # 76, to tune it against Osc 1: Coarse powers up at CC 64, in unison, and Fine at CC 76, 12 cents
   # sharp, for a slow beat once Osc 2 is turned up. Everything else follows Osc 1 by default: each
   # amount, the waveform and the pulse width read Osc 1's control slots, so Osc 1's CCs move both
-  # oscillators, and each polarity reads the constant Osc 1's does. Osc 2 is heard through Filter 1
-  # Audio 2 Gain (CC 21), which powers up at 0.0.
+  # oscillators, and each polarity reads the constant Osc 1's does. Osc 2 is heard through Mixer 2
+  # Level 2 (CC 21), which powers up at 0.0.
   - { entry: 59, module: OSC_2,     key: PITCH_COARSE,  label: Pitch Coarse,  cc: 85,  value: 64, bipolar: true }
   - { entry: 60, module: OSC_2,     key: PITCH_FINE,    label: Pitch Fine,    cc: 76,  value: 76, bipolar: true }
   - { entry: 61, module: OSC_2,     key: MOD_1_AMT, label: Mod 1 Amt, cc: 0,   value: 4,   source: OSC_1_MOD_1_AMT }
@@ -268,10 +285,8 @@ controls:
   - { entry: 65, module: OSC_2,     key: PULSE_WIDTH,  label: Pulse Width,  cc: 0,   value: 4,   source: OSC_1_PULSE_WIDTH }
   - { entry: 66, module: OSC_2,     key: PW_MOD_AMT,   label: PW Mod Amt,      cc: 0,   value: 4,   source: OSC_1_PW_MOD_AMT }
   - { entry: 67, module: OSC_2,     key: PW_MOD_POL, label: PW Mod Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
-  # Filter 1 in the editor: Gain and the levels of its first two audio inputs, the cutoff and its
-  # three modulations, then the resonance. Audio 1 Gain (CC 116) and Audio 3 Gain (CC 117) power up
-  # at 1.0, passing the oscillator and the noise as before, and Audio 2 Gain (CC 21) at 0.0, leaving
-  # Osc 2 silent. Mod 2
+  # Filter 1 in the editor: Gain, the cutoff and its three modulations, then the resonance. Entries
+  # 68-70, its audio gains for a while, are unused: Mixer 2 levels the audio now. Mod 2
   # Amt and Pol came last of all, so their entries follow every other. Mod 2 Amt powers up at
   # CC 4, 0.0, so the LFO on Mod 2 In leaves the cutoff alone until it is turned up. Mod 2 Pol reads 0.1, as
   # Osc 1 Mod 2 Pol does, which brings the LFO down to a musical depth on the cutoff. Mod 3 is the keyboard
@@ -279,9 +294,6 @@ controls:
   # +0.5, so that Mod 3 Amt (CC 9) at its top makes the cutoff follow the note a semitone for a
   # semitone, unmoved at note 60. Mod 3 Amt powers up at CC 4, 0.0, with the tracking off.
   - { entry: 15, module: FILTER_1,  key: GAIN,         label: Gain,         cc: 112, value: 64 }
-  - { entry: 68, module: FILTER_1,  key: AUDIO_1_GAIN, label: Audio 1 Gain, cc: 116, value: 124 }
-  - { entry: 69, module: FILTER_1,  key: AUDIO_2_GAIN, label: Audio 2 Gain, cc: 21,  value: 4 }
-  - { entry: 70, module: FILTER_1,  key: AUDIO_3_GAIN, label: Audio 3 Gain, cc: 117, value: 124 }
   - { entry: 13, module: FILTER_1,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 100 }
   - { entry: 16, module: FILTER_1,  key: MOD_1_AMT, label: Mod 1 Amt,     cc: 24,  value: 28 }
   - { entry: 17, module: FILTER_1,  key: MOD_1_POL, label: Mod 1 Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
@@ -291,15 +303,35 @@ controls:
   - { entry: 47, module: FILTER_1,  key: MOD_3_POL, label: Mod 3 Pol,    cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 14, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 94 }
   # Noise 1 came after Osc 1 Mod 1 Amt and Pol. Level is on CC 23 and powers up at CC 4, 0.0, so the
-  # noise on Filter 1 Audio 3 In is silent until it is turned up.
+  # noise on Mixer 2 In 3 is silent until it is turned up.
   - { entry: 57, module: NOISE_1,   key: LEVEL,        label: Level,        cc: 23,  value: 4 }
   - { entry: 18, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 124 }
   - { entry: 19, module: MIXER_1,   key: LEVEL_1,      label: Level 1,      cc: 0,   source: ONE }
   - { entry: 20, module: MIXER_1,   key: POL_1,   label: Pol 1,   cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 21, module: MIXER_1,   key: LEVEL_2,      label: Level 2,      cc: 0,   source: ONE }
   - { entry: 22, module: MIXER_1,   key: POL_2,   label: Pol 2,   cc: 0,   value: 124, source: HALF, bipolar: true }
+  # Level 3, Pol 3, Level 4 and Pol 4 came after Osc 2, so their entries follow its; like the first
+  # two they have no CC and read 1.0 and +0.5.
+  - { entry: 71, module: MIXER_1,   key: LEVEL_3,      label: Level 3,      cc: 0,   source: ONE }
+  - { entry: 72, module: MIXER_1,   key: POL_3,   label: Pol 3,   cc: 0,   value: 124, source: HALF, bipolar: true }
+  - { entry: 73, module: MIXER_1,   key: LEVEL_4,      label: Level 4,      cc: 0,   source: ONE }
+  - { entry: 74, module: MIXER_1,   key: POL_4,   label: Pol 4,   cc: 0,   value: 124, source: HALF, bipolar: true }
   # Out Level came after Pitch 1 Coarse and Fine; like the input levels it has no CC and reads 1.0.
   - { entry: 54, module: MIXER_1,   key: OUT_LEVEL,    label: Out Level,    cc: 0,   source: ONE }
+  # Mixer 2 came after Mixer 1's Level 3 to Pol 4: the audio ahead of the filter, Osc 1 on In 1, Osc 2
+  # on In 2 and the noise on In 3. Level 1 (CC 116) powers up at 1.0, passing Osc 1 as before;
+  # Level 2 (CC 21) at 0.0, leaving Osc 2 silent; Level 3 (CC 117) at 1.0, with the noise silent at
+  # its own Level until CC 23. In 4 is free, its Level reading 1.0. Each Pol reads +0.5 and Out Level
+  # 1.0, with no CC.
+  - { entry: 75, module: MIXER_2,   key: LEVEL_1,      label: Level 1,      cc: 116, value: 124 }
+  - { entry: 76, module: MIXER_2,   key: POL_1,   label: Pol 1,   cc: 0,   value: 124, source: HALF, bipolar: true }
+  - { entry: 77, module: MIXER_2,   key: LEVEL_2,      label: Level 2,      cc: 21,  value: 4 }
+  - { entry: 78, module: MIXER_2,   key: POL_2,   label: Pol 2,   cc: 0,   value: 124, source: HALF, bipolar: true }
+  - { entry: 79, module: MIXER_2,   key: LEVEL_3,      label: Level 3,      cc: 117, value: 124 }
+  - { entry: 80, module: MIXER_2,   key: POL_3,   label: Pol 3,   cc: 0,   value: 124, source: HALF, bipolar: true }
+  - { entry: 81, module: MIXER_2,   key: LEVEL_4,      label: Level 4,      cc: 0,   source: ONE }
+  - { entry: 82, module: MIXER_2,   key: POL_4,   label: Pol 4,   cc: 0,   value: 124, source: HALF, bipolar: true }
+  - { entry: 83, module: MIXER_2,   key: OUT_LEVEL,    label: Out Level,    cc: 0,   source: ONE }
   - { entry: 25, module: CHORUS_1,  key: MIX,          label: Mix,          cc: 93,  value: 64 }
   - { entry: 23, module: CHORUS_1,  key: RATE,         label: Rate,         cc: 58,  value: 64 }
   - { entry: 24, module: CHORUS_1,  key: DEPTH,        label: Depth,        cc: 59,  value: 64 }

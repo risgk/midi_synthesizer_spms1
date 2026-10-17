@@ -1,8 +1,8 @@
 module Spms1
-  # Sums two inputs, each at its own level and its own polarity. With one input left unrouted it
-  # is a buffer, an attenuator or an inverter; inverting just one input subtracts it from the
-  # other; and a constant on the second input shifts a unipolar signal, such as the envelope, into
-  # a bipolar one.
+  # Sums four inputs, each at its own level and its own polarity. With one input routed it is a
+  # buffer, an attenuator or an inverter; inverting just one input subtracts it from another; and
+  # a constant on another input shifts a unipolar signal, such as the envelope, into a bipolar
+  # one. Mixer 1 serves the modulation, Mixer 2 the audio ahead of the filter.
   class Mixer
     # Blend at the reference rate on the line below, for each of two cascaded stages. The two move
     # together: their product is what fixes the time constant, so changing one without the other
@@ -30,16 +30,26 @@ module Spms1
       @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (48000.0 / @sample_rate) * (CONTROL_RATE_DIVISOR / 4.0)
       @level_1 = 1.0
       @level_2 = 1.0
+      @level_3 = 1.0
+      @level_4 = 1.0
       @polarity_1 = 1.0
       @polarity_2 = 1.0
+      @polarity_3 = 1.0
+      @polarity_4 = 1.0
       # Each polarity is folded into its own level at the control rate rather than applied per
-      # sample, so the per-sample path is two multiplies and an add and only two states smooth.
+      # sample, so the per-sample path is four multiplies and three adds and only four states smooth.
       @target_1 = 1.0
       @target_2 = 1.0
+      @target_3 = 1.0
+      @target_4 = 1.0
       @stage_1_1 = 1.0
       @stage_1_2 = 1.0
+      @stage_1_3 = 1.0
+      @stage_1_4 = 1.0
       @current_1 = 1.0
       @current_2 = 1.0
+      @current_3 = 1.0
+      @current_4 = 1.0
       # Out Level scales the sum, smoothed as the input levels are.
       @out_level = 1.0
       @stage_1_out_level = 1.0
@@ -56,6 +66,16 @@ module Spms1
     def set_level_2(level)
       @level_2 = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
       @target_2 = @level_2 * @polarity_2
+    end
+
+    def set_level_3(level)
+      @level_3 = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
+      @target_3 = @level_3 * @polarity_3
+    end
+
+    def set_level_4(level)
+      @level_4 = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
+      @target_4 = @level_4 * @polarity_4
     end
 
     # Each polarity is bipolar, [-0.5, 0.5], and doubled into a multiplier on its own input: +0.5
@@ -75,6 +95,18 @@ module Spms1
       @target_2 = @level_2 * @polarity_2
     end
 
+    def set_polarity_3(polarity)
+      clamped_polarity = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
+      @polarity_3 = clamped_polarity + clamped_polarity
+      @target_3 = @level_3 * @polarity_3
+    end
+
+    def set_polarity_4(polarity)
+      clamped_polarity = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
+      @polarity_4 = clamped_polarity + clamped_polarity
+      @target_4 = @level_4 * @polarity_4
+    end
+
     # Out Level is unipolar, [0.0, 1.0], a plain multiplier on the sum, so one control can take a
     # blend of two sources up and down together. It is applied before the sum is held to its range,
     # so it can also bring a sum that would have been clipped back inside it.
@@ -82,28 +114,50 @@ module Spms1
       @out_level = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
     end
 
-    # Both inputs are taken as they are; only the sum is held to a range. A mixer is the one place on
+    # Moves every smoothed level straight to where it is set, as if it had always been there. Called
+    # once, on the first buffer, so that a mixer the default patch sets below its power-up levels
+    # (Mixer 2, with Osc 2 silent) starts there rather than gliding down from them.
+    def settle
+      @stage_1_1 = @target_1
+      @current_1 = @target_1
+      @stage_1_2 = @target_2
+      @current_2 = @target_2
+      @stage_1_3 = @target_3
+      @current_3 = @target_3
+      @stage_1_4 = @target_4
+      @current_4 = @target_4
+      @stage_1_out_level = @out_level
+      @current_out_level = @out_level
+    end
+
+    # The inputs are taken as they are; only the sum is held to a range. A mixer is the one place on
     # the bus where a value can come out bigger than what went in -- every other module is fixed at
     # half a unit, or saturates, or only attenuates -- so this is what keeps every slot finite. That
     # matters beyond tidiness: a comparison lets a NaN through any clamp, and the only way to make
     # one here is to overflow to infinity first, which this makes impossible.
     #
-    # One unit is the sum of two full-scale bipolar signals, as much as any destination can use.
+    # One unit is the sum of two full-scale bipolar signals, as much as any destination can use; an
+    # audio destination takes up to a unit too, so two oscillators at full level want Out Level at
+    # 0.5 to stay inside it.
     # Written as a literal rather than a constant on purpose: Spinel emits a named Float as a mutable
     # global, and a mixer loading one twice a sample is about 1.8us a buffer.
-    def process(input_1 = 0.0, input_2 = 0.0)
+    def process(input_1 = 0.0, input_2 = 0.0, input_3 = 0.0, input_4 = 0.0)
       if @sample_counter == 0
         @stage_1_1 = Dsp.smooth(@target_1, @stage_1_1, @smoothing_target_blend)
         @current_1 = Dsp.smooth(@stage_1_1, @current_1, @smoothing_target_blend)
         @stage_1_2 = Dsp.smooth(@target_2, @stage_1_2, @smoothing_target_blend)
         @current_2 = Dsp.smooth(@stage_1_2, @current_2, @smoothing_target_blend)
+        @stage_1_3 = Dsp.smooth(@target_3, @stage_1_3, @smoothing_target_blend)
+        @current_3 = Dsp.smooth(@stage_1_3, @current_3, @smoothing_target_blend)
+        @stage_1_4 = Dsp.smooth(@target_4, @stage_1_4, @smoothing_target_blend)
+        @current_4 = Dsp.smooth(@stage_1_4, @current_4, @smoothing_target_blend)
         @stage_1_out_level = Dsp.smooth(@out_level, @stage_1_out_level, @smoothing_target_blend)
         @current_out_level = Dsp.smooth(@stage_1_out_level, @current_out_level, @smoothing_target_blend)
       end
 
       @sample_counter = (@sample_counter + 1) & CONTROL_RATE_MASK
 
-      sum = (input_1 * @current_1 + input_2 * @current_2) * @current_out_level
+      sum = ((input_1 * @current_1 + input_2 * @current_2) + (input_3 * @current_3 + input_4 * @current_4)) * @current_out_level
       # One nested ternary, not two statements. Split in two, each comparison compiles to a vsel
       # when the method stands alone, which is not how it is built: inside the flattened
       # Spms1_main the branch count does not move and the extra instructions cost 870/875us a

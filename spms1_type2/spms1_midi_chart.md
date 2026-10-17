@@ -36,9 +36,9 @@
 |                            25 | x             | o             | Filter Mod 2 Amt                     |
 |                             9 | x             | o             | Filter Mod 3 Amt (Key Track)         |
 |                           112 | x             | o             | Filter Gain                          |
-|                           116 | x             | o             | Filter Audio 1 Gain (Osc 1 Level)    |
-|                            21 | x             | o             | Filter Audio 2 Gain (Osc 2 Level)    |
-|                           117 | x             | o             | Filter Audio 3 Gain (Noise Level)    |
+|                           116 | x             | o             | Mixer 2 Level 1 (Osc 1 Level)        |
+|                            21 | x             | o             | Mixer 2 Level 2 (Osc 2 Level)        |
+|                           117 | x             | o             | Mixer 2 Level 3 (Noise Level)        |
 |                            15 | x             | o             | Amp Gain                             |
 |                            73 | x             | o             | EG Attack (Time)                     |
 |                            75 | x             | o             | EG Decay (Time)                      |

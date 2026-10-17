@@ -32,7 +32,7 @@ module Spms1
     end
 
     # Level is unipolar, [0.0, 1.0], and used as a plain multiplier, so 1.0 puts out noise filling
-    # -1.0 to +1.0, the oscillator's range.
+    # -0.5 to +0.5, the oscillator's range, as every audio source in the synth is.
     def set_level(level)
       @level = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
     end
@@ -47,11 +47,11 @@ module Spms1
 
       # Numerical Recipes' constants. The product stays under 2^53, so it is exact in 64 bits and
       # needs no wrap of its own; the mask keeps the state in 32. The low bits of an LCG repeat
-      # with short periods, so only the top 24 are used: 0 to 2^24 - 1, scaled to [-1.0, 1.0).
+      # with short periods, so only the top 24 are used: 0 to 2^24 - 1, scaled to [-0.5, 0.5).
       # The literals are written out rather than named, as a named Integer constant is a runtime
       # global to Spinel.
       @state = (@state * 1664525 + 1013904223) & 0xffffffff
-      white = (@state >> 8).to_f * (1.0 / 8388608.0) - 1.0
+      white = (@state >> 8).to_f * (1.0 / 16777216.0) - 0.5
 
       white * @current_level
     end
