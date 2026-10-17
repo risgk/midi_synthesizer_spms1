@@ -677,8 +677,9 @@ width the modulation adds up to is held to 0.0 to 1.0.
 Noise 1 puts out two noises at Noise 1 Level. Out White is white noise, flat across the spectrum:
 from silence at 0.0 to noise filling -0.5 to +0.5 at 1.0, the oscillator's range. Out Red is the
 same noise through a one-pole low pass at Red Cutoff, falling 6 dB an octave above it. Red Cutoff
-spans 10 octaves, an octave every 0.1: 1.6 Hz at 0.0, a slow random wander for modulation, 51 Hz
-at 0.5, where the red falls across the whole audible band, and 1.6 kHz at 1.0. It has no CC and
+spans 10 octaves, an octave every 0.1, on MIDI note numbers as Filter 1 Cutoff does: note -27
+(1.7 Hz) at 0.0, a slow random wander for modulation, note 33 (A1, 55 Hz) at 0.5, where the red
+falls across the whole audible band, and note 93 (A6, 1.76 kHz) at 1.0. It has no CC and
 reads 0.5. A gain holds the red's RMS at that of the white over the square root of 2 at
 every cutoff, and it is held to -0.5 to +0.5, which at 0.5 cuts the rarest peaks, 1.5% of the
 samples. The level has no CC and reads 1.0, so
@@ -774,7 +775,7 @@ changes only how fast the output moves, so it cannot step it.
   semitone sharp at CC 5 and an octave at CC 16, and falls back with the decay
 - Noise as a modulation source, a slow random wander of the cutoff: CC 99 = 1, CC 98 = 17,
   CC 6 = 116 puts Noise 1's red on the filter's Mod 2 input in the LFO's place, and CC 99 = 2,
-  CC 98 = 84, CC 6 = 0 points Red Cutoff at 0.0, 1.6 Hz; CC 25 sets how much. CC 6 = 86 in the
+  CC 98 = 84, CC 6 = 0 points Red Cutoff at 0.0, 1.7 Hz; CC 25 sets how much. CC 6 = 86 in the
   first takes the white instead, a fast jitter. The red is on no mixer, and the white is heard only
   once CC 23 brings it up, so neither is heard as well
 - Filter cutoff driven by the envelope instead of its CC: CC 99 = 2, CC 98 = 13, CC 6 = 10. The

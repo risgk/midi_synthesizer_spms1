@@ -969,7 +969,6 @@ static sp_float cst_FINE_RANGE = 0.0;
 static sp_float cst_Spms1__Noise__SMOOTHING_TARGET_BLEND_BASE = 0.0;
 static sp_int cst_Spms1__Noise__CONTROL_RATE_DIVISOR = 0;
 static sp_int cst_Spms1__Noise__CONTROL_RATE_MASK = 0;
-static sp_float cst_RED_CUTOFF_MIN_HZ = 0.0;
 static sp_int cst_MODULE_NONE = 0;
 static sp_int cst_MODULE_LFO_1 = 0;
 static sp_int cst_MODULE_EG_1 = 0;
@@ -3877,7 +3876,7 @@ static void sp_Noise_initialize(sp_Noise *self, sp_int lv_sample_rate) {
   { sp_int _t127 = 121LL;
     for (lv_i = 0LL; lv_i < _t127; lv_i++) {
 #line 43 "spms1_noise.rb"
-      lv_cutoff_hz = (cst_RED_CUTOFF_MIN_HZ * (sp_float_pow(2.0, ((({ sp_int _t128 = (lv_i); _t128 == SP_INT_NIL ? 0.0 : ((sp_float)_t128); }) * ((1.0 / 12.0)))))));
+      lv_cutoff_hz = (440.0 * (sp_float_pow(2.0, (((({ sp_int _t128 = (lv_i); _t128 == SP_INT_NIL ? 0.0 : ((sp_float)_t128); }) - 96.0) * ((1.0 / 12.0)))))));
 #line 44 "spms1_noise.rb"
       lv_coef = (1.0 - exp((sp_float)((((-2.0 * M_PI) * lv_cutoff_hz) / (double)(self->iv_sample_rate)))));
 #line 45 "spms1_noise.rb"
@@ -4665,7 +4664,7 @@ int main(int argc,char**argv){
     sp_int lv_general_2 = 0;
     sp_int lv_general_3 = 0;
     sp_int lv_general_4 = 0;
-    sp_int lv_i__bp12361 = 0;
+    sp_int lv_i__bp12364 = 0;
 
 #line 1 "spms1_dsp.rb"
 #line 5 "spms1_dsp.rb"
@@ -4956,8 +4955,6 @@ int main(int argc,char**argv){
   cst_Spms1__Noise__CONTROL_RATE_DIVISOR = 4LL;
 #line 21 "spms1_noise.rb"
   cst_Spms1__Noise__CONTROL_RATE_MASK = sp_int_sub(cst_Spms1__Noise__CONTROL_RATE_DIVISOR, 1LL);
-#line 27 "spms1_noise.rb"
-  cst_RED_CUTOFF_MIN_HZ = 1.6000000000000001;
 #line 28 "spms1_main.rb"
 #line 29 "spms1_main.rb"
 #line 55 "spms1_main.rb"
@@ -6613,9 +6610,9 @@ int main(int argc,char**argv){
     (stop_debug_measure(), (sp_int)0);
 #line 670 "spms1_main.rb"
     for (sp_int _t801 = 0; _t801 < cst_AUDIO_BUFFER_WORDS; _t801++) {
-      lv_i__bp12361 = _t801;
+      lv_i__bp12364 = _t801;
 #line 671 "spms1_main.rb"
-      ({ sp_float _t802 = sp_FloatArray_get(lv_audio_buffer_l, lv_i__bp12361); sp_float _t803 = sp_FloatArray_get(lv_audio_buffer_r, lv_i__bp12361); (write_to_audio_buffer(((float)(_t802)), ((float)(_t803))), (sp_int)0); });
+      ({ sp_float _t802 = sp_FloatArray_get(lv_audio_buffer_l, lv_i__bp12364); sp_float _t803 = sp_FloatArray_get(lv_audio_buffer_r, lv_i__bp12364); (write_to_audio_buffer(((float)(_t802)), ((float)(_t803))), (sp_int)0); });
     }
   }
   return 0;

@@ -309,7 +309,7 @@ controls:
   # Noise 1 came after Osc 1 Mod 1 Amt and Pol. Level has no CC and reads 1.0: the noise runs at
   # full level, and Mixer 2 Level 3 (CC 23), or the depth of what it modulates, sets how much is heard.
   - { entry: 57, module: NOISE_1,   key: LEVEL,        label: Level,        cc: 0,   value: 124, source: ONE }
-  # Red Cutoff came after Mixer 2. It has no CC and reads 0.5, 51 Hz, where the red falls 6 dB an
+  # Red Cutoff came after Mixer 2. It has no CC and reads 0.5, 55 Hz (A1), where the red falls 6 dB an
   # octave across the audible band.
   - { entry: 84, module: NOISE_1,   key: RED_CUTOFF,   label: Red Cutoff,   cc: 0,   value: 64,  source: HALF }
   - { entry: 18, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 124 }
