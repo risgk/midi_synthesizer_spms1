@@ -36,6 +36,8 @@
 |                            25 | x             | o             | Filter Mod 2 Amt                     |
 |                             9 | x             | o             | Filter Mod 3 Amt (Key Track)         |
 |                           112 | x             | o             | Filter Gain                          |
+|                           118 | x             | o             | Mixer 1 Level 1                      |
+|                           119 | x             | o             | Mixer 1 Level 2                      |
 |                           116 | x             | o             | Mixer 2 Level 1 (Osc 1 Level)        |
 |                            21 | x             | o             | Mixer 2 Level 2 (Osc 2 Level)        |
 |                            23 | x             | o             | Mixer 2 Level 3 (Noise Level)        |

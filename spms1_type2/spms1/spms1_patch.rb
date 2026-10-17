@@ -395,9 +395,9 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_MOD_1_AMT , SIGNAL_FILTER_1_MOD_1_AMT)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_MOD_1_POL , SIGNAL_HALF)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_AMP_1_GAIN         , SIGNAL_AMP_1_GAIN)
-  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_1_LEVEL_1    , SIGNAL_ONE)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_1_LEVEL_1    , SIGNAL_MIXER_1_LEVEL_1)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_1_POL_1      , SIGNAL_HALF)
-  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_1_LEVEL_2    , SIGNAL_ONE)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_1_LEVEL_2    , SIGNAL_MIXER_1_LEVEL_2)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_1_POL_2      , SIGNAL_HALF)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_CHORUS_1_RATE      , SIGNAL_CHORUS_1_RATE)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_CHORUS_1_DEPTH     , SIGNAL_CHORUS_1_DEPTH)
@@ -462,6 +462,8 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_GAIN     , 112)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_MOD_1_AMT, 24)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_AMP_1_GAIN        , 15)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_MIXER_1_LEVEL_1   , 118)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_MIXER_1_LEVEL_2   , 119)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_CHORUS_1_RATE     , 58)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_CHORUS_1_DEPTH    , 59)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_CHORUS_1_MIX      , 93)
@@ -501,6 +503,8 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 112, 64 ) # Filter 1 Gain
   C.set_midi_cc_value(midi_ch, 24 , 28 ) # Filter 1 Mod 1 Amt
   C.set_midi_cc_value(midi_ch, 15 , 124) # Amp 1 Gain
+  C.set_midi_cc_value(midi_ch, 118, 124) # Mixer 1 Level 1
+  C.set_midi_cc_value(midi_ch, 119, 124) # Mixer 1 Level 2
   C.set_midi_cc_value(midi_ch, 58 , 64 ) # Chorus 1 Rate
   C.set_midi_cc_value(midi_ch, 59 , 64 ) # Chorus 1 Depth
   C.set_midi_cc_value(midi_ch, 93 , 64 ) # Chorus 1 Mix

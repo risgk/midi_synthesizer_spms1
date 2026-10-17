@@ -401,9 +401,10 @@ There are two oscillators, one of every other module that makes a sound, two mix
 one delay, one pitch module and one noise source, and **all twelve are in the default run order**, so a patch only ever has to route, never to switch something
 on first. Taking the chorus or the delay out of the order saves its share of the time; whatever
 read its output then has to be pointed elsewhere (see the examples below).
-Mixer 1 has no CC on any of its parameters, and Mixer 2 none but on its first three levels: the
-default patch points the rest at constants instead, each level and Out Level at 1.0 and each
-polarity at +0.5, so a mixer with one input routed passes it through rather than muting it.
+Mixer 1 has a CC only on its first two levels, CC 118 and 119, which power up at 1.0, and Mixer 2
+only on its first three: the default patch points the rest at constants instead, each level and
+Out Level at 1.0 and each polarity at +0.5, so a mixer with one input routed passes it through
+rather than muting it.
 
 #### Entries (CC 98), category 1
 
