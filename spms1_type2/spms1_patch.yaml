@@ -245,7 +245,7 @@ controls:
   - { entry: 50, module: LFO_1,     key: LEVEL_MOD_AMT, label: Level Mod Amt, cc: 0,  value: 124, source: ONE }
   - { entry: 51, module: LFO_1,     key: LEVEL_MOD_POL, label: Level Mod Pol, cc: 0,  value: 124, source: HALF, bipolar: true }
   - { entry: 3,  module: EG_1,      key: ATTACK,       label: Attack,       cc: 73,  value: 4 }
-  - { entry: 4,  module: EG_1,      key: DECAY,        label: Decay,        cc: 75,  value: 96 }
+  - { entry: 4,  module: EG_1,      key: DECAY,        label: Decay,        cc: 75,  value: 94 }
   - { entry: 5,  module: EG_1,      key: SUSTAIN,      label: Sustain,      cc: 30,  value: 124 }
   - { entry: 6,  module: EG_1,      key: LEVEL,        label: Level,        cc: 0,   source: ONE }
   # Osc 1 in the editor: the pitch and its two modulations, then the waveform and the pulse

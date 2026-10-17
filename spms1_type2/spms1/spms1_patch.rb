@@ -488,7 +488,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 3  , 64 ) # LFO 1 Rate
   C.set_midi_cc_value(midi_ch, 113, 124) # LFO 1 Level
   C.set_midi_cc_value(midi_ch, 73 , 4  ) # EG 1 Attack
-  C.set_midi_cc_value(midi_ch, 75 , 96 ) # EG 1 Decay
+  C.set_midi_cc_value(midi_ch, 75 , 94 ) # EG 1 Decay
   C.set_midi_cc_value(midi_ch, 30 , 124) # EG 1 Sustain
   C.set_midi_cc_value(midi_ch, 102, 4  ) # Osc 1 Wave
   C.set_midi_cc_value(midi_ch, 13 , 4  ) # Osc 1 Mod 2 Amt

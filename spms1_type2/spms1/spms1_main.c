@@ -4180,7 +4180,7 @@ static void sp_spms1_write_default_patch(sp_int lv_midi_ch) {
 #line 490 "spms1_patch.rb"
   (set_midi_cc_value(((uint8_t)(lv_midi_ch)), ((uint8_t)(73LL)), ((uint8_t)(4LL))), (sp_int)0);
 #line 491 "spms1_patch.rb"
-  (set_midi_cc_value(((uint8_t)(lv_midi_ch)), ((uint8_t)(75LL)), ((uint8_t)(96LL))), (sp_int)0);
+  (set_midi_cc_value(((uint8_t)(lv_midi_ch)), ((uint8_t)(75LL)), ((uint8_t)(94LL))), (sp_int)0);
 #line 492 "spms1_patch.rb"
   (set_midi_cc_value(((uint8_t)(lv_midi_ch)), ((uint8_t)(30LL)), ((uint8_t)(124LL))), (sp_int)0);
 #line 493 "spms1_patch.rb"
