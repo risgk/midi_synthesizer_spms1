@@ -28,28 +28,30 @@ module Spms1
     def initialize(sample_rate)
       @sample_rate = sample_rate
       @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (48000.0 / @sample_rate) * (CONTROL_RATE_DIVISOR / 4.0)
-      @level_1 = 1.0
-      @level_2 = 1.0
-      @level_3 = 1.0
-      @level_4 = 1.0
+      # Every level powers up silent, so an input fades in from nothing when its level is first set
+      # rather than sounding at full level before the patch says otherwise.
+      @level_1 = 0.0
+      @level_2 = 0.0
+      @level_3 = 0.0
+      @level_4 = 0.0
       @polarity_1 = 1.0
       @polarity_2 = 1.0
       @polarity_3 = 1.0
       @polarity_4 = 1.0
       # Each polarity is folded into its own level at the control rate rather than applied per
       # sample, so the per-sample path is four multiplies and three adds and only four states smooth.
-      @target_1 = 1.0
-      @target_2 = 1.0
-      @target_3 = 1.0
-      @target_4 = 1.0
-      @stage_1_1 = 1.0
-      @stage_1_2 = 1.0
-      @stage_1_3 = 1.0
-      @stage_1_4 = 1.0
-      @current_1 = 1.0
-      @current_2 = 1.0
-      @current_3 = 1.0
-      @current_4 = 1.0
+      @target_1 = 0.0
+      @target_2 = 0.0
+      @target_3 = 0.0
+      @target_4 = 0.0
+      @stage_1_1 = 0.0
+      @stage_1_2 = 0.0
+      @stage_1_3 = 0.0
+      @stage_1_4 = 0.0
+      @current_1 = 0.0
+      @current_2 = 0.0
+      @current_3 = 0.0
+      @current_4 = 0.0
       # Out Level scales the sum, smoothed as the input levels are.
       @out_level = 1.0
       @stage_1_out_level = 1.0
@@ -112,22 +114,6 @@ module Spms1
     # so it can also bring a sum that would have been clipped back inside it.
     def set_out_level(level)
       @out_level = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
-    end
-
-    # Moves every smoothed level straight to where it is set, as if it had always been there. Called
-    # once, on the first buffer, so that a mixer the default patch sets below its power-up levels
-    # (Mixer 2, with Osc 2 silent) starts there rather than gliding down from them.
-    def settle
-      @stage_1_1 = @target_1
-      @current_1 = @target_1
-      @stage_1_2 = @target_2
-      @current_2 = @target_2
-      @stage_1_3 = @target_3
-      @current_3 = @target_3
-      @stage_1_4 = @target_4
-      @current_4 = @target_4
-      @stage_1_out_level = @out_level
-      @current_out_level = @out_level
     end
 
     # The inputs are taken as they are; only the sum is held to a range. A mixer is the one place on

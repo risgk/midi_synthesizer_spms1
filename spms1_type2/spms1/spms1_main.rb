@@ -197,10 +197,6 @@ C.set_audio_buffers(AUDIO_BUFFERS)
 C.set_audio_buffer_words(AUDIO_BUFFER_WORDS)
 C.start_audio
 
-# The mixers start from full level and settle on what the patch sets on the first buffer, rather
-# than gliding there; see Mixer#settle.
-mixers_settled = false
-
 # while rather than loop: Spinel builds a loop block with a setjmp, for the StopIteration that ends
 # one, which makes every local written inside it volatile, so that the per-sample code loaded and
 # stored each of them, slot and i included, at every use: 6% of all instructions.
@@ -600,11 +596,6 @@ while true
   lfo_1.set_rate_modulation_polarity(signals[source_lfo_1_rate_mod_pol])
   lfo_1.set_level_modulation_amount(signals[source_lfo_1_level_mod_amt])
   lfo_1.set_level_modulation_polarity(signals[source_lfo_1_level_mod_pol])
-  if !mixers_settled
-    mixer_1.settle
-    mixer_2.settle
-    mixers_settled = true
-  end
 
   i = 0
   while i < AUDIO_BUFFER_WORDS
