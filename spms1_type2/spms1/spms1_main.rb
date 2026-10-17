@@ -179,8 +179,8 @@ spms1_fill_constant_signals(signals)
 # Its Level 1 and Level 3, on CC 116 and 117, power up at 1.0, and Level 2, on CC 21, at 0.0, so
 # Osc 2 is silent until CC 21; Noise 1 Level powers up at 0.0, so the noise is until CC 23. Osc 2 plays the note from Pitch 1,
 # as Osc 1 does, tuned by its own Pitch Coarse and Fine (CC 85 and 76), 12 cents sharp at
-# power-up, and follows Osc 1 in everything else: each of its amounts, its waveform and its pulse
-# width read Osc 1's control slots.
+# power-up, and has a Wave of its own on CC 104 (Osc 1's on CC 102); it follows Osc 1 in everything
+# else: each of its amounts and its pulse width read Osc 1's control slots.
 # Mixer 1's parameters have no CC, and neither have Mixer 2's polarities and Out Level, so the
 # default patch points them at constants instead: full level and a polarity of +0.5, which makes a
 # mixer pass its input through rather than mute it.

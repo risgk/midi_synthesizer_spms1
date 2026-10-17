@@ -214,9 +214,9 @@ at its own level, Level 1 (CC 116), Level 2 (CC 21) and Level 3 (CC 117); In 4 i
 powers up at 0.0, and so does Noise 1 Level (CC 23), so the default patch plays Osc 1 alone until
 they are turned up. Osc 2 plays the note from Pitch 1 as Osc
 1 does, tuned against it by its own Pitch Coarse (CC 85) and Pitch Fine (CC 76), 12 cents sharp at
-power-up for a slow beat, and
-follows Osc 1 in everything else: its amounts, its waveform and its pulse width read Osc 1's
-control slots, so Osc 1's CCs move both.
+power-up for a slow beat. Its Wave is its own as well, on CC 104 beside Osc 1's on CC 102. It
+follows Osc 1 in everything else: its amounts and its pulse width read Osc 1's control slots, so
+Osc 1's CCs move both.
 
 The voice is mono up to the amp. The chorus takes it and puts out a left and a right, the delay
 takes the two sides and keeps them apart, and its two outputs are the two sides of the final

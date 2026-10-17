@@ -265,15 +265,15 @@ controls:
   - { entry: 56, module: OSC_1,     key: MOD_1_POL, label: Mod 1 Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 11, module: OSC_1,     key: MOD_2_AMT, label: Mod 2 Amt, cc: 13,  value: 4 }
   - { entry: 12, module: OSC_1,     key: MOD_2_POL, label: Mod 2 Pol, cc: 0,   value: 124, source: POINT_ONE, bipolar: true }
-  - { entry: 8,  module: OSC_1,     key: WAVE,     label: Wave,         cc: 20,  value: 4 }
+  - { entry: 8,  module: OSC_1,     key: WAVE,     label: Wave,         cc: 102, value: 4 }
   - { entry: 35, module: OSC_1,     key: PULSE_WIDTH,  label: Pulse Width,  cc: 114, value: 4 }
   - { entry: 36, module: OSC_1,     key: PW_MOD_AMT,   label: PW Mod Amt,      cc: 103, value: 4 }
   - { entry: 37, module: OSC_1,     key: PW_MOD_POL, label: PW Mod Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
   # Osc 2 came after Noise 1, so its entries follow. Pitch Coarse and Fine are its own, on CC 85 and
   # 76, to tune it against Osc 1: Coarse powers up at CC 64, in unison, and Fine at CC 76, 12 cents
-  # sharp, for a slow beat once Osc 2 is turned up. Everything else follows Osc 1 by default: each
-  # amount, the waveform and the pulse width read Osc 1's control slots, so Osc 1's CCs move both
-  # oscillators, and each polarity reads the constant Osc 1's does. Osc 2 is heard through Mixer 2
+  # sharp, for a slow beat once Osc 2 is turned up. Wave is its own too, on CC 104 next to Osc 1's on
+  # CC 102, sawtooth at power-up as Osc 1's is. Everything else follows Osc 1 by default: each
+  # amount and the pulse width read Osc 1's control slots, so Osc 1's CCs move both oscillators, and each polarity reads the constant Osc 1's does. Osc 2 is heard through Mixer 2
   # Level 2 (CC 21), which powers up at 0.0.
   - { entry: 59, module: OSC_2,     key: PITCH_COARSE,  label: Pitch Coarse,  cc: 85,  value: 64, bipolar: true }
   - { entry: 60, module: OSC_2,     key: PITCH_FINE,    label: Pitch Fine,    cc: 76,  value: 76, bipolar: true }
@@ -281,7 +281,7 @@ controls:
   - { entry: 62, module: OSC_2,     key: MOD_1_POL, label: Mod 1 Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 63, module: OSC_2,     key: MOD_2_AMT, label: Mod 2 Amt, cc: 0,   value: 4,   source: OSC_1_MOD_2_AMT }
   - { entry: 64, module: OSC_2,     key: MOD_2_POL, label: Mod 2 Pol, cc: 0,   value: 124, source: POINT_ONE, bipolar: true }
-  - { entry: 58, module: OSC_2,     key: WAVE,     label: Wave,         cc: 0,   value: 4,   source: OSC_1_WAVE }
+  - { entry: 58, module: OSC_2,     key: WAVE,     label: Wave,         cc: 104, value: 4 }
   - { entry: 65, module: OSC_2,     key: PULSE_WIDTH,  label: Pulse Width,  cc: 0,   value: 4,   source: OSC_1_PULSE_WIDTH }
   - { entry: 66, module: OSC_2,     key: PW_MOD_AMT,   label: PW Mod Amt,      cc: 0,   value: 4,   source: OSC_1_PW_MOD_AMT }
   - { entry: 67, module: OSC_2,     key: PW_MOD_POL, label: PW Mod Pol, cc: 0,   value: 124, source: HALF, bipolar: true }

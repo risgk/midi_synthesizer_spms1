@@ -421,7 +421,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_1_MOD_1_AMT    , SIGNAL_OSC_1_MOD_1_AMT)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_1_MOD_1_POL    , SIGNAL_HALF)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_NOISE_1_LEVEL      , SIGNAL_NOISE_1_LEVEL)
-  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_2_WAVE         , SIGNAL_OSC_1_WAVE)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_2_WAVE         , SIGNAL_OSC_2_WAVE)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_2_PITCH_COARSE , SIGNAL_OSC_2_PITCH_COARSE)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_2_PITCH_FINE   , SIGNAL_OSC_2_PITCH_FINE)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_2_MOD_1_AMT    , SIGNAL_OSC_1_MOD_1_AMT)
@@ -450,7 +450,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_EG_1_ATTACK       , 73)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_EG_1_DECAY        , 75)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_EG_1_SUSTAIN      , 30)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_WAVE        , 20)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_WAVE        , 102)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_MOD_2_AMT   , 13)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_CUTOFF   , 74)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_RESONANCE, 71)
@@ -478,6 +478,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_PITCH_1_FINE      , 70)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_MOD_1_AMT   , 89)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_NOISE_1_LEVEL     , 23)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_2_WAVE        , 104)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_2_PITCH_COARSE, 85)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_2_PITCH_FINE  , 76)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_MIXER_2_LEVEL_1   , 116)
@@ -489,7 +490,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 73 , 4  ) # EG 1 Attack
   C.set_midi_cc_value(midi_ch, 75 , 96 ) # EG 1 Decay
   C.set_midi_cc_value(midi_ch, 30 , 124) # EG 1 Sustain
-  C.set_midi_cc_value(midi_ch, 20 , 4  ) # Osc 1 Wave
+  C.set_midi_cc_value(midi_ch, 102, 4  ) # Osc 1 Wave
   C.set_midi_cc_value(midi_ch, 13 , 4  ) # Osc 1 Mod 2 Amt
   C.set_midi_cc_value(midi_ch, 74 , 100) # Filter 1 Cutoff
   C.set_midi_cc_value(midi_ch, 71 , 94 ) # Filter 1 Resonance
@@ -517,6 +518,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 70 , 64 ) # Pitch 1 Fine
   C.set_midi_cc_value(midi_ch, 89 , 4  ) # Osc 1 Mod 1 Amt
   C.set_midi_cc_value(midi_ch, 23 , 4  ) # Noise 1 Level
+  C.set_midi_cc_value(midi_ch, 104, 4  ) # Osc 2 Wave
   C.set_midi_cc_value(midi_ch, 85 , 64 ) # Osc 2 Pitch Coarse
   C.set_midi_cc_value(midi_ch, 76 , 76 ) # Osc 2 Pitch Fine
   C.set_midi_cc_value(midi_ch, 116, 124) # Mixer 2 Level 1
