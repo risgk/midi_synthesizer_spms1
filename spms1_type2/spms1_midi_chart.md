@@ -23,7 +23,8 @@
 | Pitch Bend                    | x             | o             | Pitch Bend In, +-2 Semitones         |
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Control                    20 | x             | o             | Osc Wave (Saw to Square)             |
-| Change                     13 | x             | o             | Osc Mod 2 Amt                        |
+| Change                     89 | x             | o             | Osc Mod 1 Amt                        |
+|                            13 | x             | o             | Osc Mod 2 Amt                        |
 |                           114 | x             | o             | Osc Pulse Width (50% to 0%)          |
 |                           103 | x             | o             | Osc PW Mod Amt                       |
 |                            74 | x             | o             | Filter Cutoff                        |

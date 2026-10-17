@@ -165,7 +165,7 @@ spms1_fill_constant_signals(signals)
 # down to a vibrato depth on the pitch, so that Osc 1 Mod 2 Amt can span the whole pitch range
 # the way every other modulation depth does. Osc 1 Pitch In takes the note from Pitch 1 whole,
 # in tune. Osc 1 Mod 1 In takes the envelope, for a pitch envelope, but Mod 1 Amt powers up at
-# 0.0 and leaves it off; Mod 1 Pol reads +0.5. The LFO also reaches Filter 1 Mod 2 In, but Filter 1
+# 0.0 and leaves it off until CC 89; Mod 1 Pol reads +0.5. The LFO also reaches Filter 1 Mod 2 In, but Filter 1
 # Mod 2 Amt powers up at 0.0, so the cutoff follows the envelope alone until CC 25 turns it up,
 # and Filter 1 Mod 2 Pol reads 0.1, as Osc 1 Mod 2 Pol does. Filter 1 Mod 3 In takes Pitch 1's
 # pitch too, for keyboard tracking, but Mod 3 Amt powers up at 0.0 and leaves it off until CC 9.

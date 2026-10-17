@@ -212,9 +212,9 @@ controls:
   - { entry: 10, module: OSC_1,     key: PITCH_FINE,    label: Pitch Fine,    cc: 0,   value: 64, bipolar: true }
   # Entries 42 and 43, Osc 1's old Mod 1 Amt and Pol, are unused: Pitch In takes the note whole.
   # Mod 1 Amt and Pol came after Mixer 1 Out Level, so their entries follow its. Mod 1 In takes
-  # the envelope, for a pitch envelope; Mod 1 Amt has no CC and powers up at 0.0, leaving it off,
-  # and Mod 1 Pol reads +0.5, as Filter 1 Mod 1 Pol does.
-  - { entry: 55, module: OSC_1,     key: MOD_1_AMT, label: Mod 1 Amt, cc: 0,   value: 4 }
+  # the envelope, for a pitch envelope; Mod 1 Amt is on CC 89 and powers up at CC 4, 0.0, leaving
+  # it off, and Mod 1 Pol reads +0.5, as Filter 1 Mod 1 Pol does.
+  - { entry: 55, module: OSC_1,     key: MOD_1_AMT, label: Mod 1 Amt, cc: 89,  value: 4 }
   - { entry: 56, module: OSC_1,     key: MOD_1_POL, label: Mod 1 Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 11, module: OSC_1,     key: MOD_2_AMT, label: Mod 2 Amt, cc: 13,  value: 4 }
   - { entry: 12, module: OSC_1,     key: MOD_2_POL, label: Mod 2 Pol, cc: 0,   value: 124, source: POINT_ONE, bipolar: true }

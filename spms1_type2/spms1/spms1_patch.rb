@@ -351,6 +351,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_PITCH_1_BEND_AMT  , 57)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_PITCH_1_COARSE    , 86)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_PITCH_1_FINE      , 70)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_MOD_1_AMT   , 89)
 
   C.set_midi_cc_value(midi_ch, 3  , 64 ) # LFO 1 Rate
   C.set_midi_cc_value(midi_ch, 113, 124) # LFO 1 Level
@@ -383,4 +384,5 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 57 , 8  ) # Pitch 1 Bend Amt
   C.set_midi_cc_value(midi_ch, 86 , 64 ) # Pitch 1 Coarse
   C.set_midi_cc_value(midi_ch, 70 , 64 ) # Pitch 1 Fine
+  C.set_midi_cc_value(midi_ch, 89 , 4  ) # Osc 1 Mod 1 Amt
 end

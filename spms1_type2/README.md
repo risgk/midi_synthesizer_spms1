@@ -609,8 +609,8 @@ Osc 1 Pitch In is where the note comes in, from Pitch 1 in the default patch. It
 the pitch it takes is added whole, so the note plays in tune, a key a semitone.
 
 Osc 1 Mod 1 In moves the pitch as Mod 2 In does, by Mod 1 Amt times Mod 1 Pol, and takes the
-envelope in the default patch, for a pitch envelope. Mod 1 Amt has no CC and powers up at 0.0, so
-the envelope leaves the pitch alone until it is given one; Mod 1 Pol reads +0.5, not a fifth as
+envelope in the default patch, for a pitch envelope. Mod 1 Amt is on CC 89 and powers up at 0.0,
+so the envelope leaves the pitch alone until it is turned up; Mod 1 Pol reads +0.5, not a fifth as
 Mod 2 Pol does, as the envelope is unipolar and an envelope's sweep is wider than a vibrato's.
 
 Osc 1 Pulse Width shifts the second of the two sawtooths that the morph is made of, from half a
@@ -705,9 +705,8 @@ changes only how fast the output moves, so it cannot step it.
 - The envelope drives the filter harder as a note starts: CC 99 = 2, CC 98 = 15, CC 6 = 10 takes
   the filter's input level from silence up to the top of its dial and back
 - A pitch envelope is wired by default too -- the envelope on the oscillator's Mod 1 input --
-  but Osc 1 Mod 1 Amt has no CC: CC 99 = 3, CC 98 = 55, CC 6 = 14 puts it on CC 14. Nothing scales
-  the envelope down on this path, so the note starts a semitone sharp at CC 5 and an octave at
-  CC 16, and falls back with the decay
+  so CC 89 sets its depth. Nothing scales the envelope down on this path, so the note starts a
+  semitone sharp at CC 5 and an octave at CC 16, and falls back with the decay
 - Portamento is wired by default -- Note Pitch reaches the oscillator through Pitch 1 -- so CC 5
   sets the time; CC 64 is a glide of about a tenth of a second. Every note glides, played legato
   or not. CC 99 = 2, CC 98 = 34, CC 6 = 51 takes the time from General Mod Wheel instead, so the
