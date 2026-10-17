@@ -38,7 +38,7 @@ modules:
   - { key: MIXER_2,    id: 12, label: Mixer 2 }
 
 # The run order of the default patch.
-default_order: [LFO_1, EG_1, NOISE_1, MIXER_1, PITCH_1, OSC_1, OSC_2, MIXER_2, FILTER_1, AMP_1, CHORUS_1, DELAY_1]
+default_order: [NOISE_1, LFO_1, EG_1, MIXER_1, PITCH_1, OSC_1, OSC_2, MIXER_2, FILTER_1, AMP_1, CHORUS_1, DELAY_1]
 
 # Slots of the signal bus (the values of NRPN categories 1 and 2), each one of:
 #   value:    a constant, which the bus holds from startup; `short` is the editor's label for it
