@@ -27,6 +27,7 @@
 |                            13 | x             | o             | Osc Mod 2 Amt                        |
 |                           114 | x             | o             | Osc Pulse Width (50% to 0%)          |
 |                           103 | x             | o             | Osc PW Mod Amt                       |
+|                            23 | x             | o             | Noise Level                          |
 |                            74 | x             | o             | Filter Cutoff                        |
 |                            71 | x             | o             | Filter Resonance                     |
 |                            24 | x             | o             | Filter Mod 1 Amt                     |

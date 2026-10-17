@@ -148,13 +148,15 @@ flowchart LR
   LFO[LFO 1]
   EG[EG 1]
   OSC[Osc 1]
+  NOISE[Noise 1]
   FILTER[Filter 1]
   AMP[Amp 1]
   CHORUS[Chorus 1]
   DELAY[Delay 1]
   OUT([Audio Out])
 
-  OSC --> FILTER
+  OSC -->|Audio 1| FILTER
+  NOISE -->|Audio 3| FILTER
   FILTER --> AMP
   AMP --> CHORUS
   CHORUS -->|L| DELAY
@@ -199,6 +201,10 @@ reads +0.5, and Mod 1 Amt (CC 89) powers up at 0.0, with it off. Each modulation
 whole range of what it moves, so bringing a source down to a musical depth is left to the patch
 rather than built into the modules.
 
+Noise 1 reaches the filter on Audio 3 In, beside the oscillator on Audio 1 In; the filter sums its
+three audio inputs, and Audio 2 In is left free. Noise 1 Level (CC 23) powers up at 0.0, so the
+noise is silent until it is turned up.
+
 The voice is mono up to the amp. The chorus takes it and puts out a left and a right, the delay
 takes the two sides and keeps them apart, and its two outputs are the two sides of the final
 output.
@@ -209,11 +215,12 @@ parameter.
 #### The run order
 
 Every module is in it: one of each kind that makes a sound, a mixer between the modulation
-sources and Pitch 1, Pitch 1 just ahead of the oscillator, and the chorus and the delay last:
+sources and Pitch 1, Pitch 1 just ahead of the oscillator, Noise 1 just ahead of the filter, and
+the chorus and the delay last:
 
 ```mermaid
 flowchart LR
-  LFO[LFO 1] ~~~ EG[EG 1] ~~~ MIX1[Mixer 1] ~~~ PITCH[Pitch 1] ~~~ OSC[Osc 1] ~~~ FILTER[Filter 1] ~~~ AMP[Amp 1] ~~~ CHORUS[Chorus 1] ~~~ DELAY[Delay 1]
+  LFO[LFO 1] ~~~ EG[EG 1] ~~~ MIX1[Mixer 1] ~~~ PITCH[Pitch 1] ~~~ OSC[Osc 1] ~~~ NOISE[Noise 1] ~~~ FILTER[Filter 1] ~~~ AMP[Amp 1] ~~~ CHORUS[Chorus 1] ~~~ DELAY[Delay 1]
 ```
 
 The mixer has nothing routed to it, so it costs its slot every sample and changes nothing until
@@ -362,9 +369,9 @@ a matter of changing slot numbers.
 | CC 99 | CC 98 | Sets | CC 6 value |
 | ----- | ----- | ---- | ---------- |
 | 0 | 0-31 | Run order, slot by slot | Module ID |
-| 1 | 0-21 | What feeds a module input | Signal ID |
-| 2 | 0-28, 34-56 | Where a parameter takes its value | Signal ID |
-| 3 | 0-56 | Which CC fills a control slot | CC number, or 0 for none |
+| 1 | 0-23 | What feeds a module input | Signal ID |
+| 2 | 0-28, 34-57 | Where a parameter takes its value | Signal ID |
+| 3 | 0-57 | Which CC fills a control slot | CC number, or 0 for none |
 
 The run order is read from slot 0 upwards and stops at the first Module ID 0, so a patch shorter
 than 32 modules ends itself. It is separate from the module numbering: a module only sees the
@@ -376,8 +383,8 @@ written to a new slot moves there, and the module that slot held leaves the orde
 In category 3, CC number 0 means the parameter has no CC. Its control slot then holds 0.0, whatever
 CC it had before, so the patch alone sets what the parameter reads.
 
-There is one of every module that makes a sound, one mixer, one chorus, one delay and one pitch module,
-and **all nine are in the default run order**, so a patch only ever has to route, never to switch something
+There is one of every module that makes a sound, one mixer, one chorus, one delay, one pitch module
+and one noise source, and **all ten are in the default run order**, so a patch only ever has to route, never to switch something
 on first. Taking the chorus or the delay out of the order saves its share of the time; whatever
 read its output then has to be pointed elsewhere (see the examples below).
 A mixer is the only kind with no CC on any of its parameters: the default patch points them at
@@ -390,17 +397,18 @@ passes it through rather than muting it.
 
 | CC 98 | Module input | | CC 98 | Module input |
 | ----- | ------ | - | ----- | ------ |
-| 0 | EG 1 Gate In | | 11 | Delay 1 Audio In R |
-| 1 | Osc 1 Pitch In | | 12 | Final Output L |
-| 2 | Osc 1 Mod 2 In | | 13 | Final Output R |
-| 3 | Filter 1 Audio In | | 14 | Pitch 1 Pitch In |
-| 4 | Filter 1 Mod 1 In | | 15 | Osc 1 PW Mod In |
-| 5 | Amp 1 Audio In | | 16 | LFO 1 Rate Mod In |
-| 6 | Amp 1 Mod In | | 17 | Filter 1 Mod 2 In |
-| 7 | Mixer 1 In 1 | | 18 | Filter 1 Mod 3 In |
-| 8 | Mixer 1 In 2 | | 19 | Pitch 1 Bend In |
-| 9 | Chorus 1 Audio In | | 20 | LFO 1 Level Mod In |
-| 10 | Delay 1 Audio In L | | 21 | Osc 1 Mod 1 In |
+| 0 | EG 1 Gate In | | 12 | Final Output L |
+| 1 | Osc 1 Pitch In | | 13 | Final Output R |
+| 2 | Osc 1 Mod 2 In | | 14 | Pitch 1 Pitch In |
+| 3 | Filter 1 Audio 1 In | | 15 | Osc 1 PW Mod In |
+| 4 | Filter 1 Mod 1 In | | 16 | LFO 1 Rate Mod In |
+| 5 | Amp 1 Audio In | | 17 | Filter 1 Mod 2 In |
+| 6 | Amp 1 Mod In | | 18 | Filter 1 Mod 3 In |
+| 7 | Mixer 1 In 1 | | 19 | Pitch 1 Bend In |
+| 8 | Mixer 1 In 2 | | 20 | LFO 1 Level Mod In |
+| 9 | Chorus 1 Audio In | | 21 | Osc 1 Mod 1 In |
+| 10 | Delay 1 Audio In L | | 22 | Filter 1 Audio 2 In |
+| 11 | Delay 1 Audio In R | | 23 | Filter 1 Audio 3 In |
 
 <!-- patch_gen end -->
 
@@ -440,7 +448,7 @@ both at the same signal for a mono output.
 | 13 | Filter 1 Cutoff | | 34 | Pitch 1 Glide | | 54 | Mixer 1 Out Level |
 | 14 | Filter 1 Resonance | | 35 | Osc 1 Pulse Width | | 55 | Osc 1 Mod 1 Amt |
 | 15 | Filter 1 Gain | | 36 | Osc 1 PW Mod Amt | | 56 | Osc 1 Mod 1 Pol |
-| 16 | Filter 1 Mod 1 Amt | | 37 | Osc 1 PW Mod Pol | |  |  |
+| 16 | Filter 1 Mod 1 Amt | | 37 | Osc 1 PW Mod Pol | | 57 | Noise 1 Level |
 | 17 | Filter 1 Mod 1 Pol | | 40 | LFO 1 Rate Mod Amt | |  |  |
 
 <!-- patch_gen end -->
@@ -478,6 +486,7 @@ two slots, a unipolar and a bipolar one. See the General slots below.
 | 7 | Chorus 1 |
 | 8 | Delay 1 |
 | 9 | Pitch 1 |
+| 10 | Noise 1 |
 
 <!-- patch_gen end -->
 
@@ -487,33 +496,34 @@ two slots, a unipolar and a bipolar one. See the General slots below.
 
 | ID | Signal | | ID | Signal | | ID | Signal |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | None (constant 0.0) | | 29 | Osc 1 Pitch Fine ± | | 56 | General Bipolar 1 ± |
-| 1 | Constant 1.0 | | 30 | Osc 1 Mod 2 Amt | | 57 | General Bipolar 2 ± |
-| 2 | Constant 0.5 | | 31 | Osc 1 Mod 2 Pol ± | | 58 | General Bipolar 3 ± |
-| 3 | Constant 0.2 | | 32 | Filter 1 Cutoff | | 59 | General Bipolar 4 ± |
-| 4 | Constant 0.1 | | 33 | Filter 1 Resonance | | 60 | Pitch 1 Output ± |
-| 5 | Constant -0.1 | | 34 | Filter 1 Gain | | 61 | Pitch 1 Glide |
-| 6 | Constant -0.2 | | 35 | Filter 1 Mod 1 Amt | | 62 | Osc 1 Pulse Width |
-| 7 | Constant -0.5 | | 36 | Filter 1 Mod 1 Pol ± | | 63 | Osc 1 PW Mod Amt |
-| 8 | Constant -1.0 | | 37 | Amp 1 Gain | | 64 | Osc 1 PW Mod Pol ± |
-| 9 | LFO 1 Output ± | | 38 | Mixer 1 Level 1 | | 65 | Filter 1 Output BP ± |
-| 10 | EG 1 Output | | 39 | Mixer 1 Pol 1 ± | | 66 | Filter 1 Output HP ± |
-| 11 | Osc 1 Output ± | | 40 | Mixer 1 Level 2 | | 69 | LFO 1 Rate Mod Amt |
-| 12 | Filter 1 Output LP ± | | 41 | Mixer 1 Pol 2 ± | | 70 | LFO 1 Rate Mod Pol ± |
-| 13 | Amp 1 Output ± | | 42 | Chorus 1 Rate | | 73 | Filter 1 Mod 2 Amt |
-| 14 | Mixer 1 Output ± | | 43 | Chorus 1 Depth | | 74 | Filter 1 Mod 2 Pol ± |
-| 15 | Chorus 1 Output L ± | | 44 | Chorus 1 Mix | | 75 | Filter 1 Mod 3 Amt |
-| 16 | Chorus 1 Output R ± | | 45 | Delay 1 Time | | 76 | Filter 1 Mod 3 Pol ± |
-| 17 | Delay 1 Output L ± | | 46 | Delay 1 Feedback | | 77 | Pitch 1 Bend Amt |
-| 18 | Delay 1 Output R ± | | 47 | Delay 1 Mix | | 78 | Pitch 1 Bend Pol ± |
-| 19 | LFO 1 Rate | | 48 | Note Pitch ± | | 79 | LFO 1 Level Mod Amt |
-| 20 | LFO 1 Level | | 49 | Note Gate | | 80 | LFO 1 Level Mod Pol ± |
-| 22 | EG 1 Attack | | 50 | Pitch Bend ± | | 81 | Pitch 1 Coarse ± |
-| 23 | EG 1 Decay | | 51 | General Mod Wheel | | 82 | Pitch 1 Fine ± |
-| 24 | EG 1 Sustain | | 52 | General Unipolar 1 | | 83 | Mixer 1 Out Level |
-| 25 | EG 1 Level | | 53 | General Unipolar 2 | | 84 | Osc 1 Mod 1 Amt |
-| 27 | Osc 1 Wave | | 54 | General Unipolar 3 | | 85 | Osc 1 Mod 1 Pol ± |
-| 28 | Osc 1 Pitch Coarse ± | | 55 | General Unipolar 4 | |  |  |
+| 0 | None (constant 0.0) | | 30 | Osc 1 Mod 2 Amt | | 58 | General Bipolar 3 ± |
+| 1 | Constant 1.0 | | 31 | Osc 1 Mod 2 Pol ± | | 59 | General Bipolar 4 ± |
+| 2 | Constant 0.5 | | 32 | Filter 1 Cutoff | | 60 | Pitch 1 Output ± |
+| 3 | Constant 0.2 | | 33 | Filter 1 Resonance | | 61 | Pitch 1 Glide |
+| 4 | Constant 0.1 | | 34 | Filter 1 Gain | | 62 | Osc 1 Pulse Width |
+| 5 | Constant -0.1 | | 35 | Filter 1 Mod 1 Amt | | 63 | Osc 1 PW Mod Amt |
+| 6 | Constant -0.2 | | 36 | Filter 1 Mod 1 Pol ± | | 64 | Osc 1 PW Mod Pol ± |
+| 7 | Constant -0.5 | | 37 | Amp 1 Gain | | 65 | Filter 1 Output BP ± |
+| 8 | Constant -1.0 | | 38 | Mixer 1 Level 1 | | 66 | Filter 1 Output HP ± |
+| 9 | LFO 1 Output ± | | 39 | Mixer 1 Pol 1 ± | | 69 | LFO 1 Rate Mod Amt |
+| 10 | EG 1 Output | | 40 | Mixer 1 Level 2 | | 70 | LFO 1 Rate Mod Pol ± |
+| 11 | Osc 1 Output ± | | 41 | Mixer 1 Pol 2 ± | | 73 | Filter 1 Mod 2 Amt |
+| 12 | Filter 1 Output LP ± | | 42 | Chorus 1 Rate | | 74 | Filter 1 Mod 2 Pol ± |
+| 13 | Amp 1 Output ± | | 43 | Chorus 1 Depth | | 75 | Filter 1 Mod 3 Amt |
+| 14 | Mixer 1 Output ± | | 44 | Chorus 1 Mix | | 76 | Filter 1 Mod 3 Pol ± |
+| 15 | Chorus 1 Output L ± | | 45 | Delay 1 Time | | 77 | Pitch 1 Bend Amt |
+| 16 | Chorus 1 Output R ± | | 46 | Delay 1 Feedback | | 78 | Pitch 1 Bend Pol ± |
+| 17 | Delay 1 Output L ± | | 47 | Delay 1 Mix | | 79 | LFO 1 Level Mod Amt |
+| 18 | Delay 1 Output R ± | | 48 | Note Pitch ± | | 80 | LFO 1 Level Mod Pol ± |
+| 19 | LFO 1 Rate | | 49 | Note Gate | | 81 | Pitch 1 Coarse ± |
+| 20 | LFO 1 Level | | 50 | Pitch Bend ± | | 82 | Pitch 1 Fine ± |
+| 22 | EG 1 Attack | | 51 | General Mod Wheel | | 83 | Mixer 1 Out Level |
+| 23 | EG 1 Decay | | 52 | General Unipolar 1 | | 84 | Osc 1 Mod 1 Amt |
+| 24 | EG 1 Sustain | | 53 | General Unipolar 2 | | 85 | Osc 1 Mod 1 Pol ± |
+| 25 | EG 1 Level | | 54 | General Unipolar 3 | | 86 | Noise 1 Output ± |
+| 27 | Osc 1 Wave | | 55 | General Unipolar 4 | | 87 | Noise 1 Level |
+| 28 | Osc 1 Pitch Coarse ± | | 56 | General Bipolar 1 ± | |  |  |
+| 29 | Osc 1 Pitch Fine ± | | 57 | General Bipolar 2 ± | |  |  |
 
 <!-- patch_gen end -->
 
@@ -522,7 +532,7 @@ scale, a bipolar control slot runs -0.5 to +0.5, and a mixer sums two of them an
 Everything unmarked runs 0.0 to 1.0 -- the envelope, Note Gate and every unipolar control slot. The bus carries both kinds under one numbering, so the range belongs to the slot
 rather than to the sort of thing that wrote it.
 
-Slots 19-47, 61-64 and 69-85 (but for the unused 21, 26, 71 and 72) hold the values arriving from CC, so a parameter reads its own CC
+Slots 19-47, 61-64, 69-85 and 87 (but for the unused 21, 26, 71 and 72) hold the values arriving from CC, so a parameter reads its own CC
 by default. Each parameter is unipolar or bipolar, and its slot takes the same range. A unipolar one
 runs 0.0 to 1.0 from CC 4 to CC 124, the span of an envelope, so an envelope pointed at one sweeps
 the whole of its dial. A bipolar one runs -0.5 to +0.5 with CC 64 at 0.0, the span of an LFO, so a
@@ -625,6 +635,11 @@ width range, so at the top of PW Mod Amt the LFO, which the default patch feeds 
 pulse width half the range either way: with Pulse Width at CC 64, from 50% to nearly 0%. The pulse
 width the modulation adds up to is held to 0.0 to 1.0.
 
+Noise 1 puts out white noise, flat across the spectrum, at Noise 1 Level (CC 23): from silence at
+0.0 (CC 4), where it powers up, to noise filling -1.0 to +1.0 at 1.0 (CC 124), the oscillator's
+range. The level is smoothed as the other levels are. The noise repeats only after 2^32 samples,
+over a day at 48 kHz, and starts the same every time, so a render comes out the same.
+
 Filter 1 Gain sets how hard the audio input drives the filter, which is also what decides how far
 the filter runs into its own saturation. The saturation sits on the resonance rather than the pass band: a low
 cutoff passes a loud note nearly clean, while turning the gain up rounds off the resonant peak.
@@ -692,6 +707,9 @@ changes only how fast the output moves, so it cannot step it.
   CC 113 turned down to CC 4 the wheel brings the vibrato in, up to the depth CC 13 sets
 - The LFO reaches the filter's Mod 2 input by default too, so CC 25 sweeps the cutoff with it, on
   top of the envelope on Mod 1
+- Noise is wired by default too, on the filter's Audio 3 input beside the oscillator, so CC 23
+  brings it in under the note, at a tenth of the oscillator's level at CC 16. Unplugging the
+  oscillator (CC 99 = 1, CC 98 = 3, CC 6 = 0) leaves the noise alone, through the filter
 - Keyboard tracking is wired by default as well, the pitch from Pitch 1 on the filter's Mod 3 input,
   so CC 9 sets how far the cutoff follows the keys: all the way at CC 124, not at all at CC 4,
   where it powers up
@@ -733,10 +751,10 @@ changes only how fast the output moves, so it cannot step it.
   from General Mod Wheel, which powers up at 0.0, so the output is dry until the wheel moves
 - Chorus that only comes in with the mod wheel: CC 99 = 2, CC 98 = 25, CC 6 = 51 takes Chorus 1
   Mix from General Mod Wheel, so the output stays mono until the wheel moves
-- Take the chorus out, keeping the delay: CC 99 = 0, CC 98 = 7, CC 6 = 8 puts Delay 1 in the
-  chorus's place in the run order and CC 98 = 8, CC 6 = 0 ends it there, and CC 99 = 1,
+- Take the chorus out, keeping the delay: CC 99 = 0, CC 98 = 8, CC 6 = 8 puts Delay 1 in the
+  chorus's place in the run order and CC 98 = 9, CC 6 = 0 ends it there, and CC 99 = 1,
   CC 98 = 10 and 11, CC 6 = 13 feeds both sides of Delay 1 from the amp. The output is then mono
-- Take the chorus and the delay out and save their time: CC 99 = 0, CC 98 = 7, CC 6 = 0 ends the
+- Take the chorus and the delay out and save their time: CC 99 = 0, CC 98 = 8, CC 6 = 0 ends the
   run order after the amp, and CC 99 = 1, CC 98 = 12 and 13, CC 6 = 13 points both sides of the
   final output back at the amp
 - Echoes ahead of the filter: CC 99 = 1, CC 98 = 10, CC 6 = 11 feeds Delay 1's left side from the
@@ -755,7 +773,7 @@ changes only how fast the output moves, so it cannot step it.
   and Pitch 1 Coarse and Fine are not smoothed, so that the pitch follows right away, and neither is Pitch 1 Glide, which
   cannot step what it sets, nor EG 1 Attack, Decay and Sustain, which the envelope's own curve
   already moves between
-- A parameter source may point at any of the 128 slots. Slots above 85 read 0 until something
+- A parameter source may point at any of the 128 slots. Slots above 87 read 0 until something
   writes them, which leaves a parameter pointed at one at the bottom of a unipolar dial or the
   middle of a bipolar one
 - A parameter clamps its value to its own range, 0.0 to 1.0 or -0.5 to +0.5, and its control slot

@@ -270,7 +270,7 @@ module Spms1
       @modulation_3_depth = @modulation_3_amount * @modulation_3_polarity
     end
 
-    # How hard the audio input drives the filter, used as a plain multiplier. It sits on the input
+    # How hard the audio inputs, summed, drive the filter, used as a plain multiplier. It sits on the input
     # rather than the output because that is what decides how far the band pass runs into the
     # leak, which the resonant peak reaches first: the pass band itself stays nearly clean.
     def set_gain(gain)
@@ -283,7 +283,9 @@ module Spms1
       @resonance = (resonance < 0.0) ? 0.0 : ((resonance > 1.0) ? 1.0 : resonance)
     end
 
-    def process(audio_input = 0.0, modulation_1_input = 0.0, modulation_2_input = 0.0, modulation_3_input = 0.0)
+    # The three audio inputs are summed as they arrive, with no level of their own: a source's level
+    # is the source's to set (Noise 1 Level, say), and Gain drives the filter with the sum.
+    def process(audio_1_input = 0.0, audio_2_input = 0.0, audio_3_input = 0.0, modulation_1_input = 0.0, modulation_2_input = 0.0, modulation_3_input = 0.0)
       @current_modulation_1_input = modulation_1_input
       @current_modulation_2_input = modulation_2_input
       @current_modulation_3_input = modulation_3_input
@@ -302,7 +304,7 @@ module Spms1
       @g_plus_k += @g_plus_k_slope
       @one_over_a0 += @one_over_a0_slope
 
-      driven_input = audio_input * @current_gain
+      driven_input = ((audio_1_input + audio_2_input) + audio_3_input) * @current_gain
 
       # The clamp is a guard that ordinary use never reaches: nothing else bounds the low pass
       # state, and a cutoff thrown across its range every step, as audio on the modulation input
