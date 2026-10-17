@@ -704,7 +704,10 @@ it down also brings a sum that would have been cut back inside it.
 
 The sum is held to -1.0 and +1.0. Two full-scale signals reach exactly that, and an oscillator
 or the noise at full level is half of one, so nothing ordinary is cut -- on Mixer 2, two
-oscillators and the noise all at full level would be, which Out Level is there to prevent; what it stops is a mixer wired back to its own input, which would otherwise double every
+oscillators and the noise all at full level would be, which Out Level is there to prevent. A narrow
+pulse is the exception: its peak-to-peak stays one unit, but held round zero it spends most of
+its time just below zero and spikes up to 0.95, so one on top of another source, or two together,
+have their spikes cut off -- turn the levels down when layering them. What the limit stops is a mixer wired back to its own input, which would otherwise double every
 sample until the number stopped being a number and took the oscillator or the filter with it.
 The filter is held to the same one unit, by a curve rather than a corner: its output passes
 untouched up to three quarters of a unit, well above anything the default patch reaches, and
