@@ -404,7 +404,8 @@ read its output then has to be pointed elsewhere (see the examples below).
 Mixer 1 has a CC only on its first two levels, CC 118 and 119, which power up at 0.0, so it is
 silent until they are turned up, and Mixer 2 only on its first three: the default patch points
 the rest at constants instead, each level and Out Level at 1.0 and each polarity at +0.5, so an
-input on one of them passes through rather than being muted.
+input on one of them passes through rather than being muted -- but for Mixer 1 Level 3 and 4,
+which read their own slots, 0.0, so all four of its inputs start closed.
 
 #### Entries (CC 98), category 1
 

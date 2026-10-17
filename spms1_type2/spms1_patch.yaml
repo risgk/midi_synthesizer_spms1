@@ -317,13 +317,13 @@ controls:
   - { entry: 20, module: MIXER_1,   key: POL_1,   label: Pol 1,   cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 21, module: MIXER_1,   key: LEVEL_2,      label: Level 2,      cc: 119, value: 4 }
   - { entry: 22, module: MIXER_1,   key: POL_2,   label: Pol 2,   cc: 0,   value: 124, source: HALF, bipolar: true }
-  # Level 3, Pol 3, Level 4 and Pol 4 came after Osc 2, so their entries follow its; like the first
-  # two they have no CC and read 1.0 and +0.5.
-  - { entry: 71, module: MIXER_1,   key: LEVEL_3,      label: Level 3,      cc: 0,   source: ONE }
+  # Level 3, Pol 3, Level 4 and Pol 4 came after Osc 2, so their entries follow its. They have no
+  # CC: each Level reads its own slot, 0.0, as the first two power up at, and each Pol +0.5.
+  - { entry: 71, module: MIXER_1,   key: LEVEL_3,      label: Level 3,      cc: 0,   value: 4 }
   - { entry: 72, module: MIXER_1,   key: POL_3,   label: Pol 3,   cc: 0,   value: 124, source: HALF, bipolar: true }
-  - { entry: 73, module: MIXER_1,   key: LEVEL_4,      label: Level 4,      cc: 0,   source: ONE }
+  - { entry: 73, module: MIXER_1,   key: LEVEL_4,      label: Level 4,      cc: 0,   value: 4 }
   - { entry: 74, module: MIXER_1,   key: POL_4,   label: Pol 4,   cc: 0,   value: 124, source: HALF, bipolar: true }
-  # Out Level came after Pitch 1 Coarse and Fine; like the input levels it has no CC and reads 1.0.
+  # Out Level came after Pitch 1 Coarse and Fine; it has no CC and reads 1.0.
   - { entry: 54, module: MIXER_1,   key: OUT_LEVEL,    label: Out Level,    cc: 0,   source: ONE }
   # Mixer 2 came after Mixer 1's Level 3 to Pol 4: the audio ahead of the filter, Osc 1 on In 1, Osc 2
   # on In 2 and the noise on In 3. Level 1 (CC 116) powers up at 1.0, passing Osc 1 as before;
