@@ -3876,7 +3876,7 @@ static void sp_Noise_initialize(sp_Noise *self, sp_int lv_sample_rate) {
   { sp_int _t127 = 121LL;
     for (lv_i = 0LL; lv_i < _t127; lv_i++) {
 #line 43 "spms1_noise.rb"
-      lv_cutoff_hz = (440.0 * (sp_float_pow(2.0, (((({ sp_int _t128 = (lv_i); _t128 == SP_INT_NIL ? 0.0 : ((sp_float)_t128); }) - 96.0) * ((1.0 / 12.0)))))));
+      lv_cutoff_hz = (440.0 * (sp_float_pow(2.0, (((({ sp_int _t128 = (lv_i); _t128 == SP_INT_NIL ? 0.0 : ((sp_float)_t128); }) - 108.0) * ((1.0 / 12.0)))))));
 #line 44 "spms1_noise.rb"
       lv_coef = (1.0 - exp((sp_float)((((-2.0 * M_PI) * lv_cutoff_hz) / (double)(self->iv_sample_rate)))));
 #line 45 "spms1_noise.rb"

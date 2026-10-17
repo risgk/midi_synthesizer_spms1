@@ -21,9 +21,9 @@ module Spms1
     CONTROL_RATE_MASK = CONTROL_RATE_DIVISOR - 1
 
     # Red Cutoff 0.0 to 1.0 spans 10 octaves, an octave every 0.1, on MIDI note numbers as Filter 1
-    # Cutoff does: note -27 (1.7 Hz) at 0.0, a slow random wander as a modulation source, note 33
-    # (A1, 55 Hz) at 0.5, where the red falls 6 dB an octave across the audible band, and note 93
-    # (A6, 1.76 kHz) at 1.0. The table holds a point for each note, as PRA32-U2's LFO Red Noise
+    # Cutoff does: note -39 (0.86 Hz) at 0.0, a slow random wander as a modulation source, note 21
+    # (A0, 27.5 Hz) at 0.5, where the red falls 6 dB an octave across the audible band, and note 81
+    # (A5, 880 Hz) at 1.0. The table holds a point for each note, as PRA32-U2's LFO Red Noise
     # does a coefficient and a gain for each step of its rate.
 
     def initialize(sample_rate)
@@ -40,7 +40,7 @@ module Spms1
       @red_coef_table = Array.new(122, 0.0)
       @red_gain_table = Array.new(122, 0.0)
       for i in 0...121
-        cutoff_hz = 440.0 * (2.0 ** ((i.to_f - 96.0) * (1.0 / 12.0)))
+        cutoff_hz = 440.0 * (2.0 ** ((i.to_f - 108.0) * (1.0 / 12.0)))
         coef = 1.0 - Math.exp(-2.0 * Math::PI * cutoff_hz / @sample_rate)
         @red_coef_table[i] = coef
         @red_gain_table[i] = Math.sqrt((2.0 - coef) / (2.0 * coef))
