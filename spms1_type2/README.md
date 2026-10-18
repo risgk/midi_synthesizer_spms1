@@ -277,7 +277,7 @@ the resonance dial k turns negative and the loop oscillates.
 The filter puts out its low pass and high pass at once, as Out LP and Out HP, each through a DC
 blocker and an output clip of its own, and Out, the two crossfaded by Filter 1 Mode (CC 39, Filter
 Mode's in PRA32-U2). Each side stays at full over its own half and falls to nothing over the other,
-as a mixer's Balance does with its Balance Law at +0.2, the law named after this. At 0.0 (CC 4), where it powers up, Out is the low
+as a mixer's Balance does with its Balance Law at +0.2, overlap. At 0.0 (CC 4), where it powers up, Out is the low
 pass alone; at 1.0 (CC 124) the high pass alone; and at 0.5 (CC 64) both at full, whose sum, the
 input less k·BP, is a notch at the cutoff with both sides of it passed whole. In between the notch
 moves off the cutoff, above it toward the low pass and below it toward the high pass, with the
@@ -776,7 +776,7 @@ five zones, 0.125 wide at the ends and 0.25 between, so the constants -0.5, -0.2
 | CC 0-18 (-0.5) | Linear | 2.0 and 0.0 | 1.0 each | 0.5 (Constant 0.5) | the sum of a pair at the same level |
 | CC 19-48 (-0.2) | Reserved, as equal power for now | √2 and 0.0 | 1.0 each | 0.707 (Constant 0.707) | |
 | CC 49-78 (0.0, default) | Equal power, as PRA32-U2's Osc Mix | √2 and 0.0 | 1.0 each | 0.707 (Constant 0.707) | the loudness of two uncorrelated inputs, such as detuned oscillators |
-| CC 79-108 (+0.2) | As Filter 1 Mode | 1.0 and 0.0 | 1.0 each | 1.0 (Constant 1.0) | each input whole over its own half |
+| CC 79-108 (+0.2) | Overlap, as Filter 1 Mode | 1.0 and 0.0 | 1.0 each | 1.0 (Constant 1.0) | each input whole over its own half |
 | CC 109-127 (+0.5) | Split | 1.0 and 0.0 | 0.0 each | 1.0 (Constant 1.0) | one input on each side of the centre, at the balance's distance from it |
 
 The two inputs' levels are multiplied by f(1 - 2b) and f(1 + 2b), with f(u) = u, √u, min(u, 1)
@@ -794,7 +794,7 @@ control for two oscillators, or a switch between two modulation sources. Balance
 mixer is set up so by default, at equal power, on CC 119 and CC 21: at the centre each input is
 at 1/√2, 3 dB down. Two correlated inputs, such as one signal and a filtered copy of it, sum at
 the centre to more than at either end, as they would on a mixer without a balance; the linear
-law is the one that crossfades them in a straight line, and the Filter Mode law takes both to
+law is the one that crossfades them in a straight line, and the overlap law takes both to
 full there. Like every parameter, a balance and its law are read once a buffer, and the factors
 are smoothed, so a selector driven by a gate crossfades in about 35 ms rather than switching on
 the sample, and switching laws does not click. Each factor comes from a table, interpolated, so

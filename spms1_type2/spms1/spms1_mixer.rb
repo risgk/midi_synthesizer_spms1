@@ -24,7 +24,7 @@ module Spms1
     #   0 linear      f(u) = u               the two factors add to 2.0
     #   1 reserved    f(u) = sqrt(u)         as equal power, until a law is put here
     #   2 equal power f(u) = sqrt(u)         their squares add to 2.0
-    #   3 filter Mode f(u) = min(u, 1.0)     each at 1.0 over its own half, as Filter 1 Mode's
+    #   3 overlap     f(u) = min(u, 1.0)     each at 1.0 over its own half, as Filter 1 Mode's
     #   4 split       f(u) = max(u - 1.0, 0) one input on each side, at the balance's distance from
     #                                        the centre: both silent there, each at 1.0 at its end
     # A balance is worked out every buffer whether it has moved or not, never only when it changes,
@@ -34,7 +34,7 @@ module Spms1
     # precision on the Pico 2, with a branch for its domain inside, and a choice between formulas a
     # branch; the law only moves where in the table the factor is read. Every law but split has
     # f(1.0) = 1.0, so the centre leaves its pair as it is, and the entries at u = 1.0 and 2.0 are
-    # exact. The linear, the filter Mode and the split laws are straight between entries, their
+    # exact. The linear, the overlap and the split laws are straight between entries, their
     # corners at u = 1.0 on an entry, so they are exact everywhere; the square root's line runs
     # under its curve, by up to 0.03 in the first entry, near silence, and under 0.001 from
     # u = 0.25 on. The last entry of each run repeats the one before it so that interpolating at
@@ -148,10 +148,10 @@ module Spms1
 
     # Balance Law is bipolar, [-0.5, 0.5], and picks how both balances crossfade, in five zones, the
     # two at the ends 0.125 wide and the three between 0.25: linear (CC 0-18), reserved (CC 19-48,
-    # as equal power for now), equal power (CC 49-78, as PRA32-U2's Osc Mix), as Filter 1 Mode
-    # (CC 79-108) and split (CC 109-127), so the constants -0.5, -0.2, 0.0, +0.2 and +0.5 pick each.
-    # It is bipolar only so that equal power, the default, is the centre, where it rests with no
-    # CC. The zone is the integer part of law * 4 + 2.51, 0.51 to 4.51: the 0.01, a third of a CC
+    # as equal power for now), equal power (CC 49-78, as PRA32-U2's Osc Mix), overlap (CC 79-108,
+    # as Filter 1 Mode) and split (CC 109-127), so the constants -0.5, -0.2, 0.0, +0.2 and +0.5
+    # pick each. It is bipolar only so that equal power, the default, is the centre, where it rests
+    # with no CC. The zone is the integer part of law * 4 + 2.51, 0.51 to 4.51: the 0.01, a third of a CC
     # step, keeps every CC value off an edge, where float rounding could put it either side. No
     # branch either way. It is read once a buffer like any other
     # parameter, ahead of the balances, which are worked out again in the same buffer; their
@@ -165,13 +165,13 @@ module Spms1
     # the factors f(1 - 2b) and f(1 + 2b) of BALANCE_TABLE. 0.0 at the centre leaves both inputs as
     # they are, so the centre is the mixer without a balance, whatever the law but split, which
     # silences both there; -0.5 silences the second input and takes the first to 2.0 (linear), √2
-    # (equal power) or 1.0 (filter Mode, split), and +0.5 the other way round. Split passes only
+    # (equal power) or 1.0 (overlap, split), and +0.5 the other way round. Split passes only
     # the first input below the centre and only the second above, each at twice the distance, so a
     # bipolar source on the balance plays one input with its negative half and the other with its
     # positive half. A crossfader, each input as it is at its own end, wants both levels
     # of the pair at 0.5, 1/√2 or 1.0 by the law: a pair at the same level keeps its total (linear),
     # its loudness when uncorrelated, as detuned oscillators are (equal power), or each input whole
-    # over its own half (filter Mode). The clamp, written as nested ternaries so that it compiles
+    # over its own half (overlap). The clamp, written as nested ternaries so that it compiles
     # to selects rather than branches, keeps what the table is read at in 0.0 to 2.0.
     def set_balance_1_2(balance)
       clamped_balance = (balance < -0.5) ? -0.5 : ((balance > 0.5) ? 0.5 : balance)
