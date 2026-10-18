@@ -6,3 +6,4 @@ B0 62 08 B0 06 0A            ; NRPN 136 Mixer 1 In 2   <- EG 1 (10)
 B0 62 0C B0 06 0E            ; NRPN 140 Output L       <- Mixer 1 (14)
 B0 62 04 B0 06 09            ; NRPN 132 Filter 1 Mod 1 <- LFO 1 (9)
 B0 65 7F B0 64 7F            ; RPN null
+B0 76 7C B0 77 7C            ; CC 118 and 119 (Mixer 1 Level 1 and 2) up to 124, as they power up at 0.0
