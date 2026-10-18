@@ -396,8 +396,8 @@ it from anywhere else.
 | ----- | ----- | ---- | ---------- |
 | 0 | 0-31 | Run order, slot by slot | Module ID |
 | 1 | 0-33 | What feeds a module input | Signal ID |
-| 2 | 0-28, 34-88 | Where a parameter takes its value | Signal ID, or 127 for its own control slot |
-| 3 | 0-88 | Which CC fills a control slot | CC number, or 0 for none |
+| 2 | 0-28, 34-90 | Where a parameter takes its value | Signal ID, or 127 for its own control slot |
+| 3 | 0-90 | Which CC fills a control slot | CC number, or 0 for none |
 
 The run order is read from slot 0 upwards and stops at the first Module ID 0, so a patch shorter
 than 32 modules ends itself. It is separate from the module numbering: a module only sees the
@@ -828,6 +828,23 @@ changes only how fast the output moves, so it cannot step it.
   closes the filter as it rises
 - Take the filter out of the chain: CC 99 = 1, CC 98 = 5, CC 6 = 106 points the amp's audio input
   at Mixer 2. The filter keeps running and keeps its slot; nothing reads it
+- A band pass, and one control sweeping from the dry input through it to the notch, from Filter 1
+  Mode at the notch less the filter's input: LP + HP is the input less k·BP, so what is taken
+  away is the band pass, k = 1/Q times. CC 39 = 64 sets Mode to the notch. Mixer 1 has to run
+  after the filter, so that it reads the filter's output of the same sample: CC 99 = 0, then
+  CC 98 = 3 to 8 with CC 6 = 9, 3, 11, 12, 4 and 6 rewrites slots 3-8 of the run order to Pitch 1,
+  Osc 1, Osc 2, Mixer 2, Filter 1 and Mixer 1. CC 99 = 1, CC 98 = 7, CC 6 = 106 and CC 98 = 8,
+  CC 6 = 12 put Mixer 2, the filter's input, and Filter 1's Out on the mixer's inputs, and
+  CC 98 = 5, CC 6 = 14 the mixer on the amp. CC 99 = 2, CC 98 = 22, CC 6 = 7 turns the second
+  input over, and CC 98 = 85, CC 6 = 56 hands Balance 1/2 to General Bipolar 1 (CC 16). With
+  CC 118 = 34 (0.25, half of Filter 1 Gain's 0.5 at CC 64, as the filter takes its input at that
+  gain) and CC 119 = 64 (0.5), CC 16 sweeps from the dry input at CC 4, through the band pass at
+  CC 64, to the notch, turned over, at CC 124. The band pass peaks at the cutoff at half the level
+  whatever the resonance, narrowing as it rises: rendered with white noise, at Resonance's
+  power-up value, it is 6 dB down at the cutoff and the notch 34 dB down. Below about 100 Hz the
+  filter's DC blockers leave some of the input in it, 23 dB down at 50 Hz, and a level that drives
+  the filter's leak or its output clip leaves more. Narrow as it is, it is far quieter than the
+  dry note, more so with the cutoff high above the harmonics: CC 74 = 64 brings it among them
 - Echoes that only come in with the mod wheel: CC 99 = 2, CC 98 = 28, CC 6 = 51 takes Delay 1 Mix
   from General Mod Wheel, which powers up at 0.0, so the output is dry until the wheel moves
 - Chorus that only comes in with the mod wheel: CC 99 = 2, CC 98 = 25, CC 6 = 51 takes Chorus 1
