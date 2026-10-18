@@ -18,6 +18,23 @@ module Spms1
     # constant if both are changed.
     CONTROL_RATE_DIVISOR = 4
 
+    # Square root lookup for the balances, sqrt(u) for u = i / 64, 0.0 to 2.0, interpolated in a
+    # straight line between entries. A balance is worked out every buffer whether it has moved or
+    # not, never only when it changes, and always by the same few operations with no branch on
+    # its value: the time a buffer takes must not hang on what the patch or the CCs are doing, so
+    # that its worst case is the case measured, and can be guaranteed. A square root would be a
+    # library call in double precision on the Pico 2, with a branch for its domain inside.
+    # The entries at u = 1.0 (the centre) and 2.0 (either end) are exact, so the centre leaves its
+    # pair as it is and an end passes its input at √2. Between the entries the line runs under the
+    # curve, by up to 0.03 in the first, near silence, and under 0.001 from u = 0.25 on. The last
+    # entry repeats the one before it so that interpolating at u = 2.0 reads a real entry rather
+    # than past the end.
+    SQRT_TABLE = Array.new(130, 0.0)
+    for i in 0...129
+      SQRT_TABLE[i] = Math.sqrt(i.to_f * (1.0 / 64.0))
+    end
+    SQRT_TABLE[129] = SQRT_TABLE[128]
+
     def initialize(sample_rate)
       @sample_rate = sample_rate
       @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (48000.0 / @sample_rate) * (CONTROL_RATE_DIVISOR / 4.0)
@@ -107,24 +124,27 @@ module Spms1
       @target_4 = @level_4 * @polarity_4 * @balance_factor_4
     end
 
-    # Each balance is bipolar, [-0.5, 0.5], and crossfades its pair in a straight line, the two
-    # factors always adding to 2.0: 0.0 at the centre leaves both inputs as they are, -0.5 doubles
-    # the first and silences the second, and +0.5 the other way round. So the centre is the mixer
-    # without a balance, a pair at the same levels keeps the same total whichever way it is turned,
-    # and either end selects one input at twice its level: with both levels of the pair at 0.5 it
-    # is a crossfader, half each at the centre and each input as it is at its own end.
+    # Each balance is bipolar, [-0.5, 0.5], and crossfades its pair at equal power, as PRA32-U2's
+    # Osc Mix does: the squares of the two factors always add to 2.0. 0.0 at the centre leaves both
+    # inputs as they are, -0.5 takes the first up by √2 and silences the second, and +0.5 the other
+    # way round. So the centre is the mixer without a balance, two uncorrelated inputs at the same
+    # level, such as detuned oscillators, keep the same loudness whichever way it is turned, and
+    # with both levels of the pair at 1/√2 it is a crossfader, each input as it is at its own end and
+    # 3 dB down at the centre. The square roots are read from SQRT_TABLE; the clamp, written as
+    # nested ternaries so that it compiles to selects rather than branches, keeps what it is read at
+    # in 0.0 to 2.0.
     def set_balance_1_2(balance)
       clamped_balance = (balance < -0.5) ? -0.5 : ((balance > 0.5) ? 0.5 : balance)
-      @balance_factor_1 = 1.0 - (clamped_balance + clamped_balance)
-      @balance_factor_2 = 1.0 + (clamped_balance + clamped_balance)
+      @balance_factor_1 = sqrt_fast(1.0 - (clamped_balance + clamped_balance))
+      @balance_factor_2 = sqrt_fast(1.0 + (clamped_balance + clamped_balance))
       @target_1 = @level_1 * @polarity_1 * @balance_factor_1
       @target_2 = @level_2 * @polarity_2 * @balance_factor_2
     end
 
     def set_balance_3_4(balance)
       clamped_balance = (balance < -0.5) ? -0.5 : ((balance > 0.5) ? 0.5 : balance)
-      @balance_factor_3 = 1.0 - (clamped_balance + clamped_balance)
-      @balance_factor_4 = 1.0 + (clamped_balance + clamped_balance)
+      @balance_factor_3 = sqrt_fast(1.0 - (clamped_balance + clamped_balance))
+      @balance_factor_4 = sqrt_fast(1.0 + (clamped_balance + clamped_balance))
       @target_3 = @level_3 * @polarity_3 * @balance_factor_3
       @target_4 = @level_4 * @polarity_4 * @balance_factor_4
     end
@@ -168,6 +188,22 @@ module Spms1
       # buffer against 854/856. The same holds for the clamps in Amp#process and Osc#process.
       # Measured on a Pico 2 at 48 kHz, 2026-09-18.
       (sum < -1.0) ? -1.0 : ((sum > 1.0) ? 1.0 : sum)
+    end
+
+    private
+
+    # The square root of u, 0.0 to 2.0, from SQRT_TABLE: one multiply, one conversion, two loads and
+    # a multiply-add, with no branch of its own (Spinel's checks on the conversion and the loads,
+    # which never fail here, aside), so it takes the same time whatever u is.
+    def sqrt_fast(u)
+      position = u * 64.0
+      index = position.to_i
+      fraction = position - index.to_f
+
+      s0 = SQRT_TABLE[index]
+      s1 = SQRT_TABLE[index + 1]
+
+      s0 + fraction * (s1 - s0)
     end
   end
 end

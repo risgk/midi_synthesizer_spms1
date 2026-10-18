@@ -53,7 +53,7 @@ default_order: [EG_1, LFO_1, MIXER_1, PITCH_1, OSC_1, OSC_2, NOISE_1, MIXER_2, F
 # holds the value of its CC off the bus (see spms1_main.rb), so no other input or parameter can
 # read it. The numbers the parameters' control slots had on the bus before they moved off it --
 # 19-47, 61-64, 69-85, 87, 89-98, 102-105, 107-115 -- are free, as are 21, 26, 67,
-# 65, 68, 71, 72, 99-101, 125 and 126, unused already.
+# 65, 68, 71, 72, 99-101 and 126, unused already.
 signals:
   - { key: NONE,            id: 0, value: 0.0,  short: "0.0",  label: None (constant 0.0), label_ja: なし（定数 0.0） }
   - { key: ONE,             id: 1, value: 1.0,  short: "+1.0", label: Constant 1.0,  label_ja: 定数 1.0 }
@@ -64,6 +64,11 @@ signals:
   - { key: MINUS_POINT_TWO, id: 6, value: -0.2, short: "-0.2", label: Constant -0.2, label_ja: 定数 -0.2 }
   - { key: MINUS_HALF,      id: 7, value: -0.5, short: "-0.5", label: Constant -0.5, label_ja: 定数 -0.5 }
   - { key: MINUS_ONE,       id: 8, value: -1.0, short: "-1.0", label: Constant -1.0, label_ja: 定数 -1.0 }
+  # 1/√2, the level of each of a pair that a mixer's Balance 1/2 crossfades at equal power: the
+  # pair at the centre, the one at full level at its own end. It is 1/√2 rounded up to the float
+  # whose product with √2 in float is exactly 1.0, so that an input selected at an end passes as
+  # it is.
+  - { key: SQRT_HALF,       id: 125, value: 0.7071068, short: "+0.707", label: Constant 0.707, label_ja: 定数 0.707 }
 
   - { key: LFO_1_OUTPUT,       id: 9,  module: LFO_1,    output: Out,    label: LFO 1 Output,       bipolar: true }
   - { key: EG_1_OUTPUT,        id: 10, module: EG_1,     output: Out,    label: EG 1 Output }
@@ -264,12 +269,13 @@ controls:
   - { entry: 95, module: NOISE_1,   key: COLOR,        label: Color,        cc: 115, value: 4 }
   # Entry 84 held the red's cutoff while it had a control, and is unused.
   - { entry: 18, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 124 }
-  # Level 1 and 2 of each mixer have no CC and read 0.5, so that Balance 1/2, on the CC Level 2 had,
-  # crossfades the pair: In 1 alone at full level at CC 4, half each at CC 64 and In 2 alone at
-  # CC 124. Mixer 1's powers up at the centre, on CC 119; it has nothing on its inputs yet.
-  - { entry: 19, module: MIXER_1,   key: LEVEL_1,      label: Level 1,      cc: 0,   value: 64,  source: HALF }
+  # Level 1 and 2 of each mixer have no CC and read 1/√2, so that Balance 1/2, on the CC Level 2
+  # had, crossfades the pair at equal power, as PRA32-U2's Osc Mix does: In 1 alone at full level
+  # at CC 4, each at 1/√2 (-3 dB) at CC 64 and In 2 alone at CC 124. Mixer 1's powers up at the
+  # centre, on CC 119; it has nothing on its inputs yet.
+  - { entry: 19, module: MIXER_1,   key: LEVEL_1,      label: Level 1,      cc: 0,   value: 89,  source: SQRT_HALF }
   - { entry: 20, module: MIXER_1,   key: POL_1,   label: Pol 1,   cc: 0,   value: 124, source: HALF, bipolar: true }
-  - { entry: 21, module: MIXER_1,   key: LEVEL_2,      label: Level 2,      cc: 0,   value: 64,  source: HALF }
+  - { entry: 21, module: MIXER_1,   key: LEVEL_2,      label: Level 2,      cc: 0,   value: 89,  source: SQRT_HALF }
   - { entry: 22, module: MIXER_1,   key: POL_2,   label: Pol 2,   cc: 0,   value: 124, source: HALF, bipolar: true }
   # Each balance came after the red noise's cutoff, since gone, and is listed after the pair it
   # crosses. Balance 3/4 has no CC: it reads its own slot, 0.0, the centre, where the mixer is as it
@@ -285,13 +291,13 @@ controls:
   # Out Level came after Pitch 1 Coarse and Fine; it has no CC and reads 1.0.
   - { entry: 54, module: MIXER_1,   key: OUT_LEVEL,    label: Out Level,    cc: 0,   source: ONE }
   # Mixer 2 came after Mixer 1's Level 3 to Pol 4: the audio ahead of the filter, Osc 1 on In 1, Osc 2
-  # on In 2 and the noise on In 3. Level 1 and 2 read 0.5 and Balance 1/2 (CC 21) powers up at CC 4,
+  # on In 2 and the noise on In 3. Level 1 and 2 read 1/√2 and Balance 1/2 (CC 21) powers up at CC 4,
   # passing Osc 1 alone at 1.0 as before and leaving Osc 2 silent; Level 3 (CC 23) at 0.0, leaving
   # the noise, at full level from Noise 1, silent. In 4 is free, its Level reading 1.0. Each Pol
   # reads +0.5 and Out Level 1.0, with no CC.
-  - { entry: 75, module: MIXER_2,   key: LEVEL_1,      label: Level 1,      cc: 0,   value: 64,  source: HALF }
+  - { entry: 75, module: MIXER_2,   key: LEVEL_1,      label: Level 1,      cc: 0,   value: 89,  source: SQRT_HALF }
   - { entry: 76, module: MIXER_2,   key: POL_1,   label: Pol 1,   cc: 0,   value: 124, source: HALF, bipolar: true }
-  - { entry: 77, module: MIXER_2,   key: LEVEL_2,      label: Level 2,      cc: 0,   value: 64,  source: HALF }
+  - { entry: 77, module: MIXER_2,   key: LEVEL_2,      label: Level 2,      cc: 0,   value: 89,  source: SQRT_HALF }
   - { entry: 78, module: MIXER_2,   key: POL_2,   label: Pol 2,   cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 87, module: MIXER_2,   key: BALANCE_1_2, label: Balance 1/2, cc: 21,  value: 4,   bipolar: true }
   - { entry: 79, module: MIXER_2,   key: LEVEL_3,      label: Level 3,      cc: 23,  value: 4 }

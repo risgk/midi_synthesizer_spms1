@@ -163,7 +163,7 @@ def patch_rb
   consts = s.signals.select { |sig| sig.key?('value') && sig['value'] != 0.0 }
   width = consts.map { |sig| sig['key'].length }.max
   consts.each do |sig|
-    out << "  signals[SIGNAL_#{sig['key']}]#{' ' * (width - sig['key'].length)} = #{format('%4.1f', sig['value'])}\n"
+    out << "  signals[SIGNAL_#{sig['key']}]#{' ' * (width - sig['key'].length)} = #{sig['value'] == sig['value'].round(1) ? format('%4.1f', sig['value']) : sig['value']}\n"
   end
   out << "end\n\n"
   out << "# The default patch, written into the NRPN table, and the values its CCs power up at.\n"

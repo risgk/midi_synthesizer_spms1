@@ -220,8 +220,9 @@ whole range of what it moves, so bringing a source down to a musical depth is le
 rather than built into the modules.
 
 Mixer 2 sums the audio ahead of the filter: Osc 1 on In 1, Osc 2 on In 2 and Noise 1's Out on In 3, each
-at its own level; In 4 is free. Level 1 and 2 read 0.5, with no CC, so that Balance 1/2 (CC 21)
-crossfades Osc 1 and Osc 2: Osc 1 alone at CC 4, half each at CC 64 and Osc 2 alone at CC 124.
+at its own level; In 4 is free. Level 1 and 2 read 1/√2, with no CC, so that Balance 1/2 (CC 21)
+crossfades Osc 1 and Osc 2 at equal power, as PRA32-U2's Osc Mix does: Osc 1 alone at CC 4, each
+at 1/√2 (-3 dB) at CC 64 and Osc 2 alone at CC 124.
 It powers up at CC 4, and Level 3 (CC 23) at 0.0, so the default patch plays Osc 1 alone until
 they are turned up. Osc 2 plays the note from Pitch 1 as Osc
 1 does, tuned against it by its own Pitch Coarse (CC 85) and Pitch Fine (CC 76), 12 cents sharp at
@@ -276,8 +277,8 @@ the resonance dial k turns negative and the loop oscillates.
 The filter puts out its low pass and high pass at once, as Out LP and Out HP, each through a DC
 blocker and an output clip of its own, and Out, the two crossfaded by Filter 1 Mode (CC 39, Filter
 Mode's in PRA32-U2). Each side stays at full over its own half and falls to nothing over the other,
-which a mixer's Balance, a straight line, cannot do alone: its ends would be at twice the level, or
-its centre at half. At 0.0 (CC 4), where it powers up, Out is the low
+which a mixer's Balance, at equal power, cannot do alone: its ends would be at √2 times the level,
+or its centre at 1/√2. At 0.0 (CC 4), where it powers up, Out is the low
 pass alone; at 1.0 (CC 124) the high pass alone; and at 0.5 (CC 64) both at full, whose sum, the
 input less k·BP, is a notch at the cutoff with both sides of it passed whole. In between the notch
 moves off the cutoff, above it toward the low pass and below it toward the high pass, with the
@@ -429,9 +430,9 @@ on first. The synth is built to keep time with every module running, so taking o
 order is never what makes a patch fit; to leave one out of the sound, route around it and let it
 run unread (see the examples below).
 On each mixer, Balance 1/2 has the CC, CC 119 on Mixer 1 and CC 21 on Mixer 2, where Level 2 had
-it, and Level 1 and 2 have none and read 0.5, so that the balance crossfades the pair. Mixer 1's
-balance powers up at the centre, CC 64, passing each at half, and Mixer 2's at CC 4, Osc 1
-alone. Mixer 2 Level 3 has a CC too (CC 23); the default patch points the other levels and Out
+it, and Level 1 and 2 have none and read 1/√2 (Constant 0.707), so that the balance crossfades
+the pair. Mixer 1's balance powers up at the centre, CC 64, passing each at 1/√2, and Mixer 2's at
+CC 4, Osc 1 alone. Mixer 2 Level 3 has a CC too (CC 23); the default patch points the other levels and Out
 Level at 1.0 and each polarity at +0.5, so an input on one of them passes through rather than
 being muted -- but for Mixer 1 Level 3 and 4, which read their own slots, 0.0, so those two
 inputs start closed.
@@ -560,21 +561,22 @@ two slots, a unipolar and a bipolar one. See the General slots below.
 
 | ID | Signal | | ID | Signal | | ID | Signal |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | None (constant 0.0) | | 15 | Chorus 1 Output L ± | | 59 | General Bipolar 4 ± |
-| 1 | Constant 1.0 | | 16 | Chorus 1 Output R ± | | 60 | Pitch 1 Output ± |
-| 2 | Constant 0.5 | | 17 | Delay 1 Output L ± | | 66 | Filter 1 Output HP ± |
-| 3 | Constant 0.2 | | 18 | Delay 1 Output R ± | | 86 | Noise 1 Output ± |
-| 4 | Constant 0.1 | | 48 | Note Pitch ± | | 88 | Osc 2 Output ± |
-| 5 | Constant -0.1 | | 49 | Note Gate | | 106 | Mixer 2 Output ± |
-| 6 | Constant -0.2 | | 50 | Pitch Bend ± | | 116 | Noise 1 Output Red ± |
-| 7 | Constant -0.5 | | 51 | General Mod Wheel | | 117 | Filter 1 Output LP ± |
-| 8 | Constant -1.0 | | 52 | General Unipolar 1 | | 118 | Osc 1 Output Saw ± |
-| 9 | LFO 1 Output ± | | 53 | General Unipolar 2 | | 119 | Osc 1 Output Pulse ± |
-| 10 | EG 1 Output | | 54 | General Unipolar 3 | | 120 | Osc 2 Output Saw ± |
-| 11 | Osc 1 Output ± | | 55 | General Unipolar 4 | | 121 | Osc 2 Output Pulse ± |
-| 12 | Filter 1 Output ± | | 56 | General Bipolar 1 ± | | 122 | Noise 1 Output White ± |
-| 13 | Amp 1 Output ± | | 57 | General Bipolar 2 ± | | 123 | LFO 1 Output Triangle ± |
-| 14 | Mixer 1 Output ± | | 58 | General Bipolar 3 ± | | 124 | LFO 1 Output Square ± |
+| 0 | None (constant 0.0) | | 16 | Chorus 1 Output R ± | | 66 | Filter 1 Output HP ± |
+| 1 | Constant 1.0 | | 17 | Delay 1 Output L ± | | 86 | Noise 1 Output ± |
+| 2 | Constant 0.5 | | 18 | Delay 1 Output R ± | | 88 | Osc 2 Output ± |
+| 3 | Constant 0.2 | | 48 | Note Pitch ± | | 106 | Mixer 2 Output ± |
+| 4 | Constant 0.1 | | 49 | Note Gate | | 116 | Noise 1 Output Red ± |
+| 5 | Constant -0.1 | | 50 | Pitch Bend ± | | 117 | Filter 1 Output LP ± |
+| 6 | Constant -0.2 | | 51 | General Mod Wheel | | 118 | Osc 1 Output Saw ± |
+| 7 | Constant -0.5 | | 52 | General Unipolar 1 | | 119 | Osc 1 Output Pulse ± |
+| 8 | Constant -1.0 | | 53 | General Unipolar 2 | | 120 | Osc 2 Output Saw ± |
+| 9 | LFO 1 Output ± | | 54 | General Unipolar 3 | | 121 | Osc 2 Output Pulse ± |
+| 10 | EG 1 Output | | 55 | General Unipolar 4 | | 122 | Noise 1 Output White ± |
+| 11 | Osc 1 Output ± | | 56 | General Bipolar 1 ± | | 123 | LFO 1 Output Triangle ± |
+| 12 | Filter 1 Output ± | | 57 | General Bipolar 2 ± | | 124 | LFO 1 Output Square ± |
+| 13 | Amp 1 Output ± | | 58 | General Bipolar 3 ± | | 125 | Constant 0.707 |
+| 14 | Mixer 1 Output ± | | 59 | General Bipolar 4 ± | |  |  |
+| 15 | Chorus 1 Output L ± | | 60 | Pitch 1 Output ± | |  |  |
 
 <!-- patch_gen end -->
 
@@ -764,14 +766,16 @@ sum, over the same range as Level and also at 1.0 by default, so one control can
 two sources up and down together; it is applied before the sum is held to its range, so turning
 it down also brings a sum that would have been cut back inside it.
 
-Balance 1/2 and Balance 3/4 crossfade each pair of inputs in a straight line, from -0.5 (CC 4)
-through 0.0 (CC 64) to +0.5 (CC 124). The two inputs' levels are multiplied by 2.0 and 0.0 at
--0.5, by 1.0 each at 0.0, and by 0.0 and 2.0 at +0.5, always adding up to 2.0. At the centre the
-mixer is as it was without them, and a pair
-at the same level keeps the same total whichever way its balance is turned. For a crossfader, or a
-selector at either end, set both levels of the pair to 0.5 (CC 64): each input then passes at
-half at the centre and as it is at its own end -- a mix control for two oscillators, or a switch
-between two modulation sources. Balance 1/2 of each mixer is set up so by default, on CC 119 and
+Balance 1/2 and Balance 3/4 crossfade each pair of inputs at equal power, as PRA32-U2's Osc Mix
+does, from -0.5 (CC 4) through 0.0 (CC 64) to +0.5 (CC 124). The two inputs' levels are
+multiplied by √(1 - 2b) and √(1 + 2b): √2 and 0.0 at -0.5, 1.0 each at 0.0, and 0.0 and √2 at
++0.5, their squares always adding up to 2.0. At the centre the mixer is as it was without them,
+and two uncorrelated inputs at the same level, such as detuned oscillators, keep the same
+loudness whichever way the balance is turned. For a crossfader, or a selector at either end,
+point both levels of the pair at Constant 0.707 (1/√2): each input then passes at 1/√2, 3 dB
+down, at the centre and as it is at its own end -- a mix control for two oscillators, or a switch
+between two modulation sources. Two correlated inputs, such as one signal and a filtered copy of
+it, sum at the centre to more than at either end, as they would on a mixer without a balance. Balance 1/2 of each mixer is set up so by default, on CC 119 and
 CC 21; Balance 3/4 reads its own slot, the centre, with no CC. Like every parameter, a balance is
 read once a buffer and smoothed, so a selector driven by a gate crossfades in about 35 ms
 rather than switching on the sample.
@@ -824,7 +828,7 @@ changes only how fast the output moves, so it cannot step it.
 - The LFO reaches the filter's Mod 2 input by default too, so CC 25 sweeps the cutoff with it, on
   top of the envelope on Mod 1
 - A second oscillator is wired by default too, on Mixer 2's second input, so CC 21 crossfades to
-  it, half each at CC 64, beating slowly against Osc 1 from the 12 cents of CC 76's power-up
+  it, each at 1/√2 at CC 64, beating slowly against Osc 1 from the 12 cents of CC 76's power-up
   value. CC 85 and 76 tune it: CC 85 = 76 an octave up, CC 85 = 71 a fifth, CC 76 = 64 in unison
 - Noise is wired by default too, its Out on Mixer 2's third input beside the oscillators, so CC 23
   brings it in under the note, at a tenth of the oscillator's level at CC 16. CC 99 = 2,
@@ -880,9 +884,9 @@ changes only how fast the output moves, so it cannot step it.
   CC 6 = 12 put Mixer 2, the filter's input, and Filter 1's Out on the mixer's inputs, and
   CC 98 = 5, CC 6 = 14 the mixer on the amp. CC 99 = 2, CC 98 = 22, CC 6 = 7 turns the second
   input over, CC 98 = 85, CC 6 = 56 hands Balance 1/2 to General Bipolar 1 (CC 16), and CC 98 = 19,
-  CC 6 = 127 has Level 1 read its own slot, which CC 99 = 3, CC 98 = 19, CC 6 = 118 gives CC 118.
-  With CC 118 = 34 (0.25, half of Filter 1 Gain's 0.5 at CC 64, as the filter takes its input at
-  that gain) and Level 2 at the 0.5 it reads, CC 16 sweeps from the dry input at CC 4, through the band pass at
+  CC 6 = 127 has Level 1 read its own slot, which CC 99 = 3, CC 98 = 19, CC 6 = 118 gives CC 118,
+  and CC 99 = 2, CC 98 = 21, CC 6 = 2 points Level 2 at 0.5. With CC 118 = 34 (0.25, half of
+  Filter 1 Gain's 0.5 at CC 64, as the filter takes its input at that gain), CC 16 sweeps from the dry input at CC 4, through the band pass at
   CC 64, to the notch, turned over, at CC 124. The band pass peaks at the cutoff at half the level
   whatever the resonance, narrowing as it rises: rendered with white noise, at Resonance's
   power-up value, it is 6 dB down at the cutoff and the notch 34 dB down. Below about 100 Hz the
