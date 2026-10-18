@@ -31,7 +31,6 @@ module Spms1
     # updated every CONTROL_RATE_DIVISOR samples. See Amp for both.
     SMOOTHING_TARGET_BLEND_BASE = 0.015625
     CONTROL_RATE_DIVISOR = 4
-    CONTROL_RATE_MASK = CONTROL_RATE_DIVISOR - 1
 
     # Coarse and Fine's ranges, the oscillator's Pitch Coarse and Fine's: 60 semitones and 60 cents
     # either way, in the pitch domain's units, where 120 semitones are one.
@@ -52,7 +51,6 @@ module Spms1
       @bend_depth = 0.0
       @stage_1_bend_depth = 0.0
       @current_bend_depth = 0.0
-      @sample_counter = 0
       @coarse = 0.0
       @fine = 0.0
       @offset = 0.0
@@ -134,14 +132,13 @@ module Spms1
     #
     # Bend In and the offset are added last, so that the lag never holds them, and so that at
     # zero they leave the output as it was, bit for bit.
-    def process(input = 0.0, bend_input = 0.0)
-      if @sample_counter == 0
+    def process(control_tick, input = 0.0, bend_input = 0.0)
+      if control_tick
         @stage_1_bend_depth = Dsp.smooth(@bend_depth, @stage_1_bend_depth, @smoothing_target_blend)
         @current_bend_depth = Dsp.smooth(@stage_1_bend_depth, @current_bend_depth, @smoothing_target_blend)
         @stage_1_stretch_factor = Dsp.smooth(@stretch_factor, @stage_1_stretch_factor, @smoothing_target_blend)
         @current_stretch_factor = Dsp.smooth(@stage_1_stretch_factor, @current_stretch_factor, @smoothing_target_blend)
       end
-      @sample_counter = (@sample_counter + 1) & CONTROL_RATE_MASK
 
       # At a factor of 1.0, the product is the input, bit for bit.
       stretched = input * @current_stretch_factor

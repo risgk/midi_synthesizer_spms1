@@ -8,19 +8,11 @@ module Spms1
     # of a controller sending sparse CCs (e.g. every 20 ms) are rounded off rather than heard,
     # and settle sooner, 99% in 35 ms.
     SMOOTHING_TARGET_BLEND_BASE = 0.015625
-    # Number of samples between control-rate updates; smoothing speed is kept approximately
-    # constant if this is changed. It has to stay a power of two: the counter below wraps with a
-    # mask, because Ruby's % is a floor-modulo and sp_imod carries a sign correction the counter
-    # can never need -- one branch a sample in each module, six across the six of them.
+    # Samples between control-rate updates. The main loop sets the cadence, handing every module
+    # the same control tick once every CONTROL_RATE_DIVISOR samples (see spms1_main.rb), and the
+    # rates derived here assume this, so the two have to match; smoothing speed is kept approximately
+    # constant if both are changed.
     CONTROL_RATE_DIVISOR = 4
-    # Its own constant, not CONTROL_RATE_DIVISOR - 1 where it is used: Spinel emits an Integer
-    # constant as a runtime global and does not fold arithmetic on one, so written that way the
-    # subtraction survives into the per-sample path carrying an overflow check of its own, which
-    # measured far worse than the modulo it replaces. What the mask buys is size, not
-    # determinism: the six branches it removes, one per site, are ones that could never be taken.
-    # Together with the LFO's fold it took 11 branches and 60 instructions out of Spms1_main as
-    # linked, and the buffer time did not move (853/857us against 854/856).
-    CONTROL_RATE_MASK = CONTROL_RATE_DIVISOR - 1
     # What a modulation depth of 1.0 is worth: 120 semitones per unit of modulation input, which is
     # the whole pitch range. A bipolar source reaches half a unit either way, so at full depth it
     # swings the pitch five octaves up and five down. Bringing a source down to a musical depth is
@@ -75,7 +67,6 @@ module Spms1
       # Pitch Coarse and Pitch Fine are summed when set, so the per-sample path adds one offset rather
       # than two.
       @tune = 0.0
-      @sample_counter = 0
     end
 
     # Waveform morph is unipolar, [0.0, 1.0].
@@ -157,8 +148,8 @@ module Spms1
     # lookup in bounds. The pulse width its modulation adds up to is held to its own, [0.0, 1.0].
     # The modulation inputs are deliberately not smoothed, so a fast source reaches the pitch and
     # the pulse width unslewed.
-    def process(pitch_input = 0.0, modulation_1_input = 0.0, modulation_2_input = 0.0, pw_modulation_input = 0.0)
-      if @sample_counter == 0
+    def process(control_tick, pitch_input = 0.0, modulation_1_input = 0.0, modulation_2_input = 0.0, pw_modulation_input = 0.0)
+      if control_tick
         # Morph, pulse width and depth are smoothed at the control rate to avoid sudden jumps.
         @stage_1_waveform = Dsp.smooth(@waveform, @stage_1_waveform, @smoothing_target_blend)
         @current_waveform = Dsp.smooth(@stage_1_waveform, @current_waveform, @smoothing_target_blend)
@@ -198,7 +189,6 @@ module Spms1
       output = saw1 - (saw2 * @current_waveform)
       @phase += current_dt
       @phase -= (@phase < 1.0) ? 0.0 : 1.0
-      @sample_counter = (@sample_counter + 1) & CONTROL_RATE_MASK
 
       # Halved so that both ends of the morph come out at one unit peak to peak, the same span
       # as every other bipolar signal on the bus. How loudly it drives what comes next is the

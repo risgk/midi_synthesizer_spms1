@@ -635,6 +635,13 @@ while true
 
   i = 0
   while i < AUDIO_BUFFER_WORDS
+    # The control tick, every module's cue for its control-rate update, once every 4 samples
+    # (CONTROL_RATE_DIVISOR in each module). Taken here once a sample rather than counted by each
+    # module: a counter of each module's own cost an add, a mask and a load and store of a 64-bit
+    # instance variable a sample, about 6% of the buffer at twelve modules (1247us to 1174us,
+    # emulated). The buffer is a multiple of 4 samples, so the tick keeps its phase across buffers,
+    # and every module ticks on the same samples, whenever it joined the run order.
+    control_tick = (i & 3) == 0
     slot = 0
     while slot < active_count
       module_id = active_modules[slot]
@@ -654,37 +661,37 @@ while true
       # with active_count above another 4.4% (to 85.8k).
       case module_id
       when 1 # MODULE_LFO_1
-        signals[9] = lfo_1.process(signals[source_lfo_1_rate_mod], signals[source_lfo_1_level_mod]) # SIGNAL_LFO_1_OUTPUT
+        signals[9] = lfo_1.process(control_tick, signals[source_lfo_1_rate_mod], signals[source_lfo_1_level_mod]) # SIGNAL_LFO_1_OUTPUT
       when 2 # MODULE_EG_1
-        signals[10] = eg_1.process(signals[source_eg_1_gate]) # SIGNAL_EG_1_OUTPUT
+        signals[10] = eg_1.process(control_tick, signals[source_eg_1_gate]) # SIGNAL_EG_1_OUTPUT
       when 3 # MODULE_OSC_1
-        signals[11] = osc_1.process(signals[source_osc_1_pitch], signals[source_osc_1_mod_1], signals[source_osc_1_mod_2], signals[source_osc_1_pw_mod]) # SIGNAL_OSC_1_OUTPUT
+        signals[11] = osc_1.process(control_tick, signals[source_osc_1_pitch], signals[source_osc_1_mod_1], signals[source_osc_1_mod_2], signals[source_osc_1_pw_mod]) # SIGNAL_OSC_1_OUTPUT
       when 4 # MODULE_FILTER_1
-        signals[12] = filter_1.process(signals[source_filter_1_audio], signals[source_filter_1_mod_1], signals[source_filter_1_mod_2], signals[source_filter_1_mod_3]) # SIGNAL_FILTER_1_OUTPUT_LP
+        signals[12] = filter_1.process(control_tick, signals[source_filter_1_audio], signals[source_filter_1_mod_1], signals[source_filter_1_mod_2], signals[source_filter_1_mod_3]) # SIGNAL_FILTER_1_OUTPUT_LP
         signals[65] = filter_1.output_bp # SIGNAL_FILTER_1_OUTPUT_BP
         signals[66] = filter_1.output_hp # SIGNAL_FILTER_1_OUTPUT_HP
       when 5 # MODULE_AMP_1
-        signals[13] = amp_1.process(signals[source_amp_1_audio], signals[source_amp_1_mod]) # SIGNAL_AMP_1_OUTPUT
+        signals[13] = amp_1.process(control_tick, signals[source_amp_1_audio], signals[source_amp_1_mod]) # SIGNAL_AMP_1_OUTPUT
       when 6 # MODULE_MIXER_1
-        signals[14] = mixer_1.process(signals[source_mixer_1_in_1], signals[source_mixer_1_in_2], signals[source_mixer_1_in_3], signals[source_mixer_1_in_4]) # SIGNAL_MIXER_1_OUTPUT
+        signals[14] = mixer_1.process(control_tick, signals[source_mixer_1_in_1], signals[source_mixer_1_in_2], signals[source_mixer_1_in_3], signals[source_mixer_1_in_4]) # SIGNAL_MIXER_1_OUTPUT
       when 7 # MODULE_CHORUS_1
-        chorus_1.process(signals[source_chorus_1_audio])
+        chorus_1.process(control_tick, signals[source_chorus_1_audio])
         signals[15] = chorus_1.output_l # SIGNAL_CHORUS_1_OUTPUT_L
         signals[16] = chorus_1.output_r # SIGNAL_CHORUS_1_OUTPUT_R
       when 8 # MODULE_DELAY_1
-        delay_1.process(signals[source_delay_1_audio_l], signals[source_delay_1_audio_r])
+        delay_1.process(control_tick, signals[source_delay_1_audio_l], signals[source_delay_1_audio_r])
         signals[17] = delay_1.output_l # SIGNAL_DELAY_1_OUTPUT_L
         signals[18] = delay_1.output_r # SIGNAL_DELAY_1_OUTPUT_R
       when 9 # MODULE_PITCH_1
-        signals[60] = pitch_1.process(signals[source_pitch_1_pitch], signals[source_pitch_1_bend]) # SIGNAL_PITCH_1_OUTPUT
+        signals[60] = pitch_1.process(control_tick, signals[source_pitch_1_pitch], signals[source_pitch_1_bend]) # SIGNAL_PITCH_1_OUTPUT
       when 10 # MODULE_NOISE_1
-        signals[86] = noise_1.process # SIGNAL_NOISE_1_OUTPUT_WHITE
+        signals[86] = noise_1.process(control_tick) # SIGNAL_NOISE_1_OUTPUT_WHITE
         signals[116] = noise_1.output_red # SIGNAL_NOISE_1_OUTPUT_RED
         signals[118] = noise_1.output_lf # SIGNAL_NOISE_1_OUTPUT_LF
       when 11 # MODULE_OSC_2
-        signals[88] = osc_2.process(signals[source_osc_2_pitch], signals[source_osc_2_mod_1], signals[source_osc_2_mod_2], signals[source_osc_2_pw_mod]) # SIGNAL_OSC_2_OUTPUT
+        signals[88] = osc_2.process(control_tick, signals[source_osc_2_pitch], signals[source_osc_2_mod_1], signals[source_osc_2_mod_2], signals[source_osc_2_pw_mod]) # SIGNAL_OSC_2_OUTPUT
       when 12 # MODULE_MIXER_2
-        signals[106] = mixer_2.process(signals[source_mixer_2_in_1], signals[source_mixer_2_in_2], signals[source_mixer_2_in_3], signals[source_mixer_2_in_4]) # SIGNAL_MIXER_2_OUTPUT
+        signals[106] = mixer_2.process(control_tick, signals[source_mixer_2_in_1], signals[source_mixer_2_in_2], signals[source_mixer_2_in_3], signals[source_mixer_2_in_4]) # SIGNAL_MIXER_2_OUTPUT
       end
 
       slot += 1

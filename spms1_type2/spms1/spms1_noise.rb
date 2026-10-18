@@ -12,14 +12,11 @@ module Spms1
     # of a controller sending sparse CCs (e.g. every 20 ms) are rounded off rather than heard,
     # and settle sooner, 99% in 35 ms.
     SMOOTHING_TARGET_BLEND_BASE = 0.015625
-    # Number of samples between control-rate updates; smoothing speed is kept approximately
-    # constant if this is changed. It has to stay a power of two: the counter below wraps with a
-    # mask, because Ruby's % is a floor-modulo and sp_imod carries a sign correction the counter
-    # can never need.
+    # Samples between control-rate updates. The main loop sets the cadence, handing every module
+    # the same control tick once every CONTROL_RATE_DIVISOR samples (see spms1_main.rb), and the
+    # rates derived here assume this, so the two have to match; smoothing speed is kept approximately
+    # constant if both are changed.
     CONTROL_RATE_DIVISOR = 4
-    # Its own constant, not CONTROL_RATE_DIVISOR - 1 where it is used: Spinel emits an Integer
-    # constant as a runtime global and does not fold arithmetic on one.
-    CONTROL_RATE_MASK = CONTROL_RATE_DIVISOR - 1
 
     def initialize(sample_rate)
       @sample_rate = sample_rate
@@ -46,7 +43,6 @@ module Spms1
       # The generator's state: a 32-bit linear congruential generator, always in [0, 2^32). Seeded
       # with a fixed value, so that a render is the same every time.
       @state = 1
-      @sample_counter = 0
     end
 
     # Level is unipolar, [0.0, 1.0], and used as a plain multiplier, so 1.0 puts out noise filling
@@ -55,13 +51,11 @@ module Spms1
       @level = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
     end
 
-    def process
-      if @sample_counter == 0
+    def process(control_tick)
+      if control_tick
         @stage_1_level = Dsp.smooth(@level, @stage_1_level, @smoothing_target_blend)
         @current_level = Dsp.smooth(@stage_1_level, @current_level, @smoothing_target_blend)
       end
-
-      @sample_counter = (@sample_counter + 1) & CONTROL_RATE_MASK
 
       # Numerical Recipes' constants. The product stays under 2^53, so it is exact in 64 bits and
       # needs no wrap of its own; the mask keeps the state in 32. The low bits of an LCG repeat

@@ -22,18 +22,14 @@ module Spms1
     # of a controller sending sparse CCs (e.g. every 20 ms) are rounded off rather than heard,
     # and settle sooner, 99% in 35 ms.
     SMOOTHING_TARGET_BLEND_BASE = 0.015625
-    # Number of samples between control-rate updates; smoothing speed is kept approximately
-    # constant if this is changed. It has to stay a power of two: the counter below wraps with a
-    # mask, because Ruby's % is a floor-modulo and sp_imod carries a sign correction the counter
-    # can never need.
+    # Samples between control-rate updates. The main loop sets the cadence, handing every module
+    # the same control tick once every CONTROL_RATE_DIVISOR samples (see spms1_main.rb), and the
+    # rates derived here assume this, so the two have to match; smoothing speed is kept approximately
+    # constant if both are changed.
     CONTROL_RATE_DIVISOR = 4
-    # Its own constant, not CONTROL_RATE_DIVISOR - 1 where it is used: Spinel emits an Integer
-    # constant as a runtime global and does not fold arithmetic on one, so written that way the
-    # subtraction would survive into the per-sample path carrying an overflow check of its own.
-    CONTROL_RATE_MASK = CONTROL_RATE_DIVISOR - 1
 
-    # The delay line, a power of two so that its index wraps with a mask, for the same reason as
-    # the counter above. It holds the longest delay at 48 kHz, 16320 samples, plus the older of
+    # The delay line, a power of two so that its index wraps with a mask: Ruby's % is a
+    # floor-modulo, and sp_imod carries a sign correction the index can never need. It holds the longest delay at 48 kHz, 16320 samples, plus the older of
     # the two samples the interpolation reads; a higher sample rate would need it longer.
     # Reading reaches back 16384 samples at most, to the slot about to be written, which still
     # holds its oldest sample; a delay of 16384 or more would read back the newest one.
@@ -91,7 +87,6 @@ module Spms1
       # moved a step every sample so that it arrives at each control-rate update's value on time.
       @delay = @full_scale_time * @current_time
       @delay_step = 0.0
-      @sample_counter = 0
 
       @output_l = 0.0
       @output_r = 0.0
@@ -117,8 +112,8 @@ module Spms1
       @mix = (mix < 0.0) ? 0.0 : ((mix > 1.0) ? 1.0 : mix)
     end
 
-    def process(audio_input_l = 0.0, audio_input_r = 0.0)
-      if @sample_counter == 0
+    def process(control_tick, audio_input_l = 0.0, audio_input_r = 0.0)
+      if control_tick
         @stage_1_time = Dsp.smooth(@time, @stage_1_time, @smoothing_target_blend)
         @current_time = Dsp.smooth(@stage_1_time, @current_time, @smoothing_target_blend)
         @stage_1_feedback = Dsp.smooth(@feedback, @stage_1_feedback, @smoothing_target_blend)
@@ -134,8 +129,6 @@ module Spms1
         distance = (distance < @time_slew_down) ? @time_slew_down : ((distance > @time_slew_up) ? @time_slew_up : distance)
         @delay_step = distance * 0.25
       end
-
-      @sample_counter = (@sample_counter + 1) & CONTROL_RATE_MASK
 
       # Held to the bus's one unit on the way in, as the amp holds its modulation input: the
       # bound each loop keeps is only as good as what enters it.

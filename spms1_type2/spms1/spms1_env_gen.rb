@@ -11,19 +11,11 @@ module Spms1
     # of a controller sending sparse CCs (e.g. every 20 ms) are rounded off rather than heard,
     # and settle sooner, 99% in 35 ms.
     SMOOTHING_TARGET_BLEND_BASE = 0.015625
-    # Number of samples between control-rate updates; envelope timing is kept approximately constant if this is changed.
-    # It has to stay a power of two: the counter below wraps with a mask, because Ruby's % is a
-    # floor-modulo and sp_imod carries a sign correction the counter can never need -- one branch
-    # a sample in each module, six across the six of them.
+    # Samples between control-rate updates. The main loop sets the cadence, handing every module
+    # the same control tick once every CONTROL_RATE_DIVISOR samples (see spms1_main.rb), and the
+    # rates derived here assume this, so the two have to match; envelope timing is kept approximately
+    # constant if both are changed.
     CONTROL_RATE_DIVISOR = 4
-    # Its own constant, not CONTROL_RATE_DIVISOR - 1 where it is used: Spinel emits an Integer
-    # constant as a runtime global and does not fold arithmetic on one, so written that way the
-    # subtraction survives into the per-sample path carrying an overflow check of its own, which
-    # measured far worse than the modulo it replaces. What the mask buys is size, not
-    # determinism: the six branches it removes, one per site, are ones that could never be taken.
-    # Together with the LFO's fold it took 11 branches and 60 instructions out of Spms1_main as
-    # linked, and the buffer time did not move (853/857us against 854/856).
-    CONTROL_RATE_MASK = CONTROL_RATE_DIVISOR - 1
 
     # Lookup table for exponential time mapping. A twelfth of an octave per index, so one CC step
     # of the 120-step control range moves a time by a semitone and the whole dial spans ten octaves.
@@ -68,7 +60,6 @@ module Spms1
       @was_gate_on = false
       @attack_coef = 1.0
       @decay_coef = 1.0
-      @sample_counter = 0
 
       update_coefficients_full
     end
@@ -97,9 +88,9 @@ module Spms1
       @amount = @level
     end
 
-    def process(gate_input = 0.0)
+    def process(control_tick, gate_input = 0.0)
       # Gate transitions drive the ADS state machine; level changes are stepped at the control rate.
-      if @sample_counter == 0
+      if control_tick
         is_gate_on = gate_input >= 0.25
         gate_rose = is_gate_on && !@was_gate_on
         gate_fell = !is_gate_on && @was_gate_on
@@ -145,8 +136,6 @@ module Spms1
         @slope = (output_level - @last_output_level) * 0.25
         @last_output_level = output_level
       end
-
-      @sample_counter = (@sample_counter + 1) & CONTROL_RATE_MASK
       @output += @slope
       @output
     end

@@ -12,19 +12,11 @@ module Spms1
     # of a controller sending sparse CCs (e.g. every 20 ms) are rounded off rather than heard,
     # and settle sooner, 99% in 35 ms.
     SMOOTHING_TARGET_BLEND_BASE = 0.015625
-    # Number of samples between control-rate updates; smoothing speed is kept approximately constant if this is changed.
-    # It has to stay a power of two: the counter below wraps with a mask, because Ruby's % is a
-    # floor-modulo and sp_imod carries a sign correction the counter can never need -- one branch
-    # a sample in each module, six across the six of them.
+    # Samples between control-rate updates. The main loop sets the cadence, handing every module
+    # the same control tick once every CONTROL_RATE_DIVISOR samples (see spms1_main.rb), and the
+    # rates derived here assume this, so the two have to match; smoothing speed is kept approximately
+    # constant if both are changed.
     CONTROL_RATE_DIVISOR = 4
-    # Its own constant, not CONTROL_RATE_DIVISOR - 1 where it is used: Spinel emits an Integer
-    # constant as a runtime global and does not fold arithmetic on one, so written that way the
-    # subtraction survives into the per-sample path carrying an overflow check of its own, which
-    # measured far worse than the modulo it replaces. What the mask buys is size, not
-    # determinism: the six branches it removes, one per site, are ones that could never be taken.
-    # Together with the LFO's fold it took 11 branches and 60 instructions out of Spms1_main as
-    # linked, and the buffer time did not move (853/857us against 854/856).
-    CONTROL_RATE_MASK = CONTROL_RATE_DIVISOR - 1
 
     # Rate lookup table, one entry per semitone of MIDI note -63 to 57, so 0.215 Hz to 220 Hz.
     # Its own table rather than the oscillator's, which starts at note 0 and cannot reach this low.
@@ -69,7 +61,6 @@ module Spms1
       # Not derived here: process assigns them on its first call, before anything reads them.
       @dt = 0.0
       @blamp_scale = 0.0
-      @sample_counter = 0
     end
 
     # Rate is unipolar, [0.0, 1.0], and read as a note number, so the dial is linear in pitch:
@@ -123,8 +114,8 @@ module Spms1
     # division, which every fourth sample can afford and every sample would be paying for. Rate Mod
     # In is held to the rate range after it is added, which also keeps the lookup in bounds, and
     # Level Mod In to the level's, so the wheel adds to the level up to its top and no further.
-    def process(rate_modulation_input = 0.0, level_modulation_input = 0.0)
-      if @sample_counter == 0
+    def process(control_tick, rate_modulation_input = 0.0, level_modulation_input = 0.0)
+      if control_tick
         # Rate, amount and the two modulation depths are smoothed at the control rate to avoid sudden
         # jumps, and the phase increment is derived here rather than per sample.
         @stage_1_rate = Dsp.smooth(@rate, @stage_1_rate, @smoothing_target_blend)
@@ -146,8 +137,6 @@ module Spms1
         # and process only multiplies. dt is never 0, the lowest rate being 0.215 Hz.
         @blamp_scale = 0.6666667 / (@dt * @dt)
       end
-
-      @sample_counter = (@sample_counter + 1) & CONTROL_RATE_MASK
 
       # Triangle folded out of the phase ramp. The quarter-turn shift puts 0.0 at the start of the
       # cycle, so a destination sees the LFO leave its unmodulated value rather than jump off it.

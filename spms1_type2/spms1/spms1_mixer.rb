@@ -12,19 +12,11 @@ module Spms1
     # of a controller sending sparse CCs (e.g. every 20 ms) are rounded off rather than heard,
     # and settle sooner, 99% in 35 ms.
     SMOOTHING_TARGET_BLEND_BASE = 0.015625
-    # Number of samples between control-rate updates; smoothing speed is kept approximately constant if this is changed.
-    # It has to stay a power of two: the counter below wraps with a mask, because Ruby's % is a
-    # floor-modulo and sp_imod carries a sign correction the counter can never need -- one branch
-    # a sample in each module, six across the six of them.
+    # Samples between control-rate updates. The main loop sets the cadence, handing every module
+    # the same control tick once every CONTROL_RATE_DIVISOR samples (see spms1_main.rb), and the
+    # rates derived here assume this, so the two have to match; smoothing speed is kept approximately
+    # constant if both are changed.
     CONTROL_RATE_DIVISOR = 4
-    # Its own constant, not CONTROL_RATE_DIVISOR - 1 where it is used: Spinel emits an Integer
-    # constant as a runtime global and does not fold arithmetic on one, so written that way the
-    # subtraction survives into the per-sample path carrying an overflow check of its own, which
-    # measured far worse than the modulo it replaces. What the mask buys is size, not
-    # determinism: the six branches it removes, one per site, are ones that could never be taken.
-    # Together with the LFO's fold it took 11 branches and 60 instructions out of Spms1_main as
-    # linked, and the buffer time did not move (853/857us against 854/856).
-    CONTROL_RATE_MASK = CONTROL_RATE_DIVISOR - 1
 
     def initialize(sample_rate)
       @sample_rate = sample_rate
@@ -63,7 +55,6 @@ module Spms1
       @out_level = 1.0
       @stage_1_out_level = 1.0
       @current_out_level = 1.0
-      @sample_counter = 0
     end
 
     # Each level is unipolar, [0.0, 1.0], and used as a plain multiplier on its own input.
@@ -156,8 +147,8 @@ module Spms1
     # 0.5 to stay inside it.
     # Written as a literal rather than a constant on purpose: Spinel emits a named Float as a mutable
     # global, and a mixer loading one twice a sample is about 1.8us a buffer.
-    def process(input_1 = 0.0, input_2 = 0.0, input_3 = 0.0, input_4 = 0.0)
-      if @sample_counter == 0
+    def process(control_tick, input_1 = 0.0, input_2 = 0.0, input_3 = 0.0, input_4 = 0.0)
+      if control_tick
         @stage_1_1 = Dsp.smooth(@target_1, @stage_1_1, @smoothing_target_blend)
         @current_1 = Dsp.smooth(@stage_1_1, @current_1, @smoothing_target_blend)
         @stage_1_2 = Dsp.smooth(@target_2, @stage_1_2, @smoothing_target_blend)
@@ -169,8 +160,6 @@ module Spms1
         @stage_1_out_level = Dsp.smooth(@out_level, @stage_1_out_level, @smoothing_target_blend)
         @current_out_level = Dsp.smooth(@stage_1_out_level, @current_out_level, @smoothing_target_blend)
       end
-
-      @sample_counter = (@sample_counter + 1) & CONTROL_RATE_MASK
 
       sum = ((input_1 * @current_1 + input_2 * @current_2) + (input_3 * @current_3 + input_4 * @current_4)) * @current_out_level
       # One nested ternary, not two statements. Split in two, each comparison compiles to a vsel
