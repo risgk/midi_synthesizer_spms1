@@ -1414,7 +1414,8 @@
   const DEFAULT_ORDER = SPEC.defaultOrder;
 
   // Columns in signal order, each short enough that the whole patch fits a wide canvas at a
-  // readable scale: the oscillators side by side, each in a column of its own.
+  // readable scale: the oscillators, Mixer 2 and the filter each in a column of their own, side by
+  // side, and the output under the delay that feeds it.
   const DEFAULT_LAYOUT = {
     KEYBOARD:  { x: 20,   y: 40 },
     CONST:     { x: 20,   y: 215 },
@@ -1427,11 +1428,11 @@
     OSC_1:     { x: 1060, y: 40 },
     OSC_2:     { x: 1420, y: 40 },
     MIXER_2:   { x: 1780, y: 40 },
-    FILTER_1:  { x: 1780, y: 372 },
-    AMP_1:     { x: 2140, y: 40 },
-    CHORUS_1:  { x: 2140, y: 242 },
-    DELAY_1:   { x: 2140, y: 496 },
-    OUT:       { x: 2500, y: 40 },
+    FILTER_1:  { x: 2140, y: 40 },
+    AMP_1:     { x: 2500, y: 40 },
+    CHORUS_1:  { x: 2500, y: 242 },
+    DELAY_1:   { x: 2500, y: 496 },
+    OUT:       { x: 2500, y: 776 },
   };
 
   function defaultState() {
