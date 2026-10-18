@@ -67,11 +67,12 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.3
     - "spms1_main.c" は "spms1" で `spinel spms1_main.rb -c --rbs sig` を実行して生成します。"spms1/sig" の
       型シードがフィルタの状態とパラメータのスムージングをボックス化させずに保ちます。必要な理由は
       "spms1/sig/spms1_filter.rbs" と "spms1/sig/spms1_dsp.rbs" にあります
-- Ruby (CRuby): パッチの番号や初期パッチを変えるとき。これらは "spms1_patch.yaml" にまとめてあり、
-  `ruby patch_gen/spms1_patch_gen.rb` が "spms1/spms1_patch.rb" ("spms1/spms1_main.rb" が読み込みます)、
-  "spms1_editor.html" のテーブル、この README と "README.md" の NRPN の表、"spms1/spms1_main.rb" の
-  ディスパッチのモジュール ID と出力先スロット (定数名を添えたリテラル) に書き出します。実行したあと、
-  "spms1/spms1_main.c" を生成し直してください。`--check` は、ファイルが最新かどうかを調べるだけです
+- Ruby (CRuby): パッチの番号や初期パッチを変えるとき、モジュールを追加するとき。これらは
+  "spms1_patch.yaml" にまとめてあり、`ruby patch_gen/spms1_patch_gen.rb` が "spms1/spms1_patch.rb"
+  ("spms1/spms1_main.rb" が読み込みます)、"spms1_editor.html" のテーブル、この README と "README.md" の
+  NRPN の表、"spms1/spms1_main.rb" のループの配線 ([モジュールの追加](#モジュールの追加) を参照) に
+  書き出します。実行したあと、"spms1/spms1_main.c" を生成し直してください。`--check` は、ファイルが
+  最新かどうかを調べるだけです
 
 
 使い方
@@ -955,6 +956,66 @@ C のホスト ("sim_spinel"、"sim_render"、"web" の SPMS-1 Web) は、スケ
       float (Spinel の出力) と double (CRuby) ではオシレーターの位相が少しずつずれ、サンプル単位では
       差が出ますが、スペクトルには出ません。精度による差は約 -35 dB 以下、結線の違いや CC 値の 4 段階の
       違いは -10 dB 以上になります。判定の上限は -25 dB です (`ruby sim_cruby/spms1_compare.rb --limit DB` で変更)
+
+
+### モジュールの追加
+
+このシンセはフレームワークとして作られていて、音はその上に載るモジュールが作ります。
+
+- "spms1/spms1_framework.rb": どのシンセでも共通の部分。ホストが提供する関数 (`Spms1::C`。
+  "spms1.ino" と各シミュレーターが実装します)、MIDI からモジュールが受け取る値への変換、下の決まり事
+- "spms1/spms1_main.rb": パッチを動かすループ。実行順、ルーティング、CC、ディスパッチ。
+  大部分は patch_gen が書きます
+- "spms1_patch.yaml" と "patch_gen": パッチのすべての番号と、各モジュールの配線
+- モジュール ("spms1_osc.rb" など): それぞれ 1 つのクラス。MIDI のこともパッチのことも知りません
+
+モジュールは、ループに何も手で書かずに追加できます。
+
+1. クラスを "spms1" の中の専用のファイルに書き、"spms1/spms1_main.rb" の先頭に `require_relative`
+   を足します。いちばん小さい "spms1_amp.rb" から始めるとよいでしょう。クラスに必要なもの:
+    - `initialize(sample_rate)`
+    - パラメータごとの setter。バッファごとに 1 回、ソースの値で呼ばれます。値は YAML での指定に
+      従ってユニポーラ 0.0..1.0 かバイポーラ -0.5..0.5 です。クランプして目標値として持ちます
+    - `process(control_tick, input, ...)`。サンプルごとに 1 回、YAML に並べた順の入力で呼ばれ、
+      メインの出力を返します。`control_tick` は 4 サンプルに 1 回 true で、全モジュールで同じ
+      サンプルです。パラメータはここで `Dsp.smooth` により目標値へ平滑化します
+    - それ以外の出力ごとのメソッド。`process` の直後に読まれます
+2. "spms1_patch.yaml" に追加します。番号は末尾に足すだけです:
+    - `modules`: 次の ID、`class`、`process` (`process` が受け取る順の入力のキー)
+    - `signals`: 出力ごとに空いているスロット。`module` と `output`、さらに `process` が返す
+      もの以外の出力には、それを読むメソッドの `get`
+    - `inputs`: 入力ごとのエントリ
+    - `controls`: パラメータごとのエントリと、その setter の `set`。`early` を付けると他の
+      すべてより先に呼ばれます。別の setter がその値を読む場合用です (Mixer の Balance Law など)
+    - 初期パッチで動かすなら `default_order`
+3. `ruby patch_gen/spms1_patch_gen.rb` を実行し、"spms1/spms1_main.c" を生成し直します
+   (`sh sim_render/build.sh`)。そのあと音を確かめ (ルーティングするパッチファイルでレンダリング)、
+   負荷を測ります (`sh sim_load/estimate.sh`)
+
+patch_gen は、モジュールのインスタンス、ルーティングと CC の読み出し、setter の呼び出し、
+ディスパッチの `when` を "spms1/spms1_main.rb" に書きます。以前ループを手で書いていたときと同じ
+素直な直線的な Ruby なので、Spinel も同じものにコンパイルします。モジュールにかかるのは、
+そのモジュール自身のコードの分だけです。エディタと README の NRPN の表にも反映されます。
+
+#### モジュールの書き方
+
+バッファの最悪実行時間は、期待するものではなく保証するものです。"sim_load" が全モジュールを
+動かして測る時間が、どんなパッチ、CC、ノートが来てもバッファにかかる最長の時間になるように、
+モジュールは次を守ります。
+
+- 値によらず、毎サンプル、毎バッファ同じ処理をする。各パラメータの係数は毎バッファか毎コントロール
+  ティック計算し、変わったときだけ計算することはしない
+- 値で分岐しない。クランプは三項演算子の入れ子 `(x < 0.0) ? 0.0 : ((x > 1.0) ? 1.0 : x)` で書く
+  (select にコンパイルされます)。`control_tick` での分岐はかまいません。全モジュールが同じ
+  サンプルで通り、測定にはそのすべてが含まれます
+- カーブはクラスで一度作るルックアップテーブルと線形補間で求め、入力によって時間が変わる
+  ライブラリ関数 (`Math.sqrt`、`Math.exp` など) は使わない
+- 演奏中に何も確保しない。配列はすべて `initialize` で作る
+- サンプルごとのコードでは名前付き定数よりリテラルを使う。Spinel は名前付きの Integer や Float の
+  定数を実行時のグローバル変数として出力し、読むたびにロードします
+- ゼロへ減衰する状態は `Dsp.flush_tiny` を通し、デノーマルに沈まずゼロに落ちるようにする
+- Spinel が型を決めきれず演算をボックス化する場合は、"spms1/sig" の型シードで直す
+  (やり方は "spms1/sig/spms1_dsp.rbs" にあります)
 
 
 ### 処理負荷の見積もり

@@ -1,6 +1,6 @@
 # Writes what the sketch reads from spms1_patch.yaml: spms1/spms1_patch.rb whole, the parts of
-# spms1_editor.html, README.md and README.ja.md between their "patch_gen" markers, and the module
-# ids and output slots of the dispatch in spms1/spms1_main.rb.
+# spms1_editor.html, README.md, README.ja.md and spms1/spms1_main.rb between their "patch_gen"
+# markers.
 #
 #   ruby patch_gen/spms1_patch_gen.rb [--check]
 #
@@ -283,39 +283,109 @@ end
 
 # ---- spms1_main.rb ----------------------------------------------------------------------------
 
-# The module dispatch of the per-sample loop compares against literal ids, and writes to literal
-# bus slots, rather than the MODULE_* and SIGNAL_* constants, which Spinel emits as runtime globals
-# (see spms1_main.rb). Each literal carries its constant's name in a comment at the end of its
-# line, `when 3 # MODULE_OSC_1` and `signals[11] = ... # SIGNAL_OSC_1_OUTPUT`, and this writes the
-# number from the spec. Every module has to have exactly one `when` and every module output exactly
-# one write, and nothing else may be named.
-def main_rb(content)
+# The wiring of the synth loop, written out from the spec into the blocks between the
+# "# patch_gen NAME" and "# patch_gen end" lines of spms1_main.rb, so that a module is added by
+# its class and its entries in the YAML, not by hand in the loop. It is plain straight-line Ruby,
+# as it would be written by hand: one local per routing, one call per setter, one `when` per
+# module, so that Spinel compiles it to what it compiled the hand-written loop to.
+#
+# A module names its class (`class`), the inputs its `process` takes after the control tick, in
+# order (`process`), and each output it has besides the one `process` returns, by the method that
+# reads it (`get`); a module whose outputs all have one returns nothing that is used. A parameter
+# names the method that takes its value each buffer (`set`). A parameter marked `early` is set
+# ahead of all the others, for a setter that reads what another sets.
+#
+# The dispatch compares against literal ids, and writes to literal bus slots, rather than the
+# MODULE_* and SIGNAL_* constants, which Spinel emits as runtime globals (see spms1_main.rb). Each
+# literal carries its constant's name in a comment at the end of its line.
+def local_name(item) = SPEC.full_key(item).downcase
+
+# What the loop needs of the spec besides what Spec#check asks of every file written from it.
+def check_wiring
   s = SPEC
-  module_ids = s.modules.to_h { |m| [m['key'], m['id']] }
-  signal_ids = s.signals.to_h { |sig| [sig['key'], sig['id']] }
-  seen_modules = Hash.new(0)
-  seen_outputs = Hash.new(0)
-  out = content.gsub(/^(\s*when )\d+( # MODULE_(\w+))$/) do
-    head, tail, key = $1, $2, $3
-    abort "spms1_patch_gen.rb: spms1_main.rb names MODULE_#{key}, no module" unless module_ids.key?(key)
-    seen_modules[key] += 1
-    "#{head}#{module_ids[key]}#{tail}"
-  end
-  out = out.gsub(/^(\s*signals\[)\d+(\] = .* # SIGNAL_(\w+))$/) do
-    head, tail, key = $1, $2, $3
-    abort "spms1_patch_gen.rb: spms1_main.rb names SIGNAL_#{key}, no signal" unless signal_ids.key?(key)
-    seen_outputs[key] += 1
-    "#{head}#{signal_ids[key]}#{tail}"
-  end
   s.modules.each do |m|
-    n = seen_modules[m['key']]
-    abort "spms1_patch_gen.rb: spms1_main.rb has #{n} `when ... # MODULE_#{m['key']}`, not one" unless n == 1
-    s.outputs_of(m).each do |o|
-      n = seen_outputs[o['key']]
-      abort "spms1_patch_gen.rb: spms1_main.rb has #{n} `signals[...] = ... # SIGNAL_#{o['key']}`, not one" unless n == 1
+    fail_spec("module #{m['key']} has no class") unless m['class']
+    fail_spec("module #{m['key']} has no process") unless m['process'].is_a?(Array)
+    m['process'].each do |k|
+      fail_spec("module #{m['key']} processes #{k}, not one of its inputs") unless s.inputs.any? { |i| i['module'] == m['key'] && i['key'] == k }
     end
   end
-  out
+  s.params.each { |c| fail_spec("parameter #{s.full_key(c)} has no set") unless c['set'] }
+  names = (s.inputs + s.params).map { |item| local_name(item) }
+  names.select { |n| names.count(n) > 1 }.uniq.each { |n| fail_spec("an input and a parameter are both #{n.upcase}") }
+end
+
+def main_instances
+  SPEC.modules.map { |m| "#{m['key'].downcase} = #{m.fetch('class')}.new(SAMPLE_RATE)\n" }.join
+end
+
+def main_sources
+  s = SPEC
+  out = []
+  s.inputs.each do |i|
+    out << "  source_#{local_name(i)} = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_#{s.full_key(i)})\n"
+  end
+  s.params.each do |c|
+    out << "  source_#{local_name(c)} = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_#{s.full_key(c)}), SLOT_#{s.full_key(c)})\n"
+  end
+  out.join
+end
+
+def converter(bipolar) = bipolar ? 'cc_to_bipolar' : 'cc_to_unipolar'
+
+def main_controls
+  s = SPEC
+  out = []
+  s.params.each do |c|
+    name = local_name(c)
+    out << "  cc_#{name} = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_#{s.full_key(c)})\n"
+    out << "  signals[SLOT_#{s.full_key(c)}] = cc_or_zero(cc_#{name}, #{converter(c['bipolar'])}(C.get_midi_cc_value(MIDI_CH, cc_#{name})))\n"
+  end
+  s.generals.each do |c|
+    name = local_name(c)
+    out << "  cc_#{name} = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_#{s.full_key(c)})\n"
+    out << "  #{name} = C.get_midi_cc_value(MIDI_CH, cc_#{name})\n"
+    s.slots_of(c).each do |sig|
+      out << "  signals[SIGNAL_#{sig['key']}] = cc_or_zero(cc_#{name}, #{converter(s.bipolar?(sig))}(#{name}))\n"
+    end
+  end
+  out.join
+end
+
+def main_setters
+  s = SPEC
+  params = s.controls_in_list_order.reject { |c| c['general'] }
+  (params.select { |c| c['early'] } + params.reject { |c| c['early'] }).map do |c|
+    "  #{c['module'].downcase}.#{c.fetch('set')}(signals[source_#{local_name(c)}])\n"
+  end.join
+end
+
+def main_dispatch
+  s = SPEC
+  out = []
+  s.modules.each do |m|
+    instance = m['key'].downcase
+    args = ['control_tick'] + m.fetch('process').map { |k| "signals[source_#{instance}_#{k.downcase}]" }
+    call = "#{instance}.process(#{args.join(', ')})"
+    outputs = s.outputs_of(m)
+    returned = outputs.reject { |o| o['get'] }
+    fail_spec("module #{m['key']} has #{returned.size} outputs that `process` returns, not one or none") if returned.size > 1
+    out << "      when #{m['id']} # MODULE_#{m['key']}\n"
+    out << (returned.empty? ? "        #{call}\n" : "        signals[#{returned[0]['id']}] = #{call} # SIGNAL_#{returned[0]['key']}\n")
+    outputs.select { |o| o['get'] }.each do |o|
+      out << "        signals[#{o['id']}] = #{instance}.#{o['get']} # SIGNAL_#{o['key']}\n"
+    end
+  end
+  out.join
+end
+
+def main_rb(content)
+  check_wiring
+  { 'instances' => main_instances, 'sources' => main_sources, 'controls' => main_controls,
+    'setters' => main_setters, 'dispatch' => main_dispatch }.each do |name, text|
+    content = replace_block(content, 'spms1/spms1_main.rb', name, text)
+  end
+  content
 end
 
 # ---- writing -----------------------------------------------------------------------------------

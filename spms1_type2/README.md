@@ -68,12 +68,12 @@ Required Software for Modification
     - "spms1_main.c" is generated in "spms1" with `spinel spms1_main.rb -c --rbs sig`. The type seeds
       in "spms1/sig" keep the filter states and the parameter smoothing unboxed;
       "spms1/sig/spms1_filter.rbs" and "spms1/sig/spms1_dsp.rbs" say why they are needed
-- Ruby (CRuby), to change the patch's numbers or the default patch: they are kept in "spms1_patch.yaml",
-  and `ruby patch_gen/spms1_patch_gen.rb` writes them out to "spms1/spms1_patch.rb" (read by
-  "spms1/spms1_main.rb"), the tables of "spms1_editor.html", the NRPN tables of this README and
-  "README.ja.md", and the module ids and output slots of the dispatch in "spms1/spms1_main.rb"
-  (literals, each marked with its constant's name). Run it, then regenerate "spms1/spms1_main.c";
-  `--check` only says whether the files are up to date
+- Ruby (CRuby), to change the patch's numbers or the default patch, or to add a module: they are
+  kept in "spms1_patch.yaml", and `ruby patch_gen/spms1_patch_gen.rb` writes them out to
+  "spms1/spms1_patch.rb" (read by "spms1/spms1_main.rb"), the tables of "spms1_editor.html", the NRPN
+  tables of this README and "README.ja.md", and the wiring of the loop in "spms1/spms1_main.rb" (see
+  [Adding a Module](#adding-a-module)). Run it, then regenerate "spms1/spms1_main.c"; `--check` only
+  says whether the files are up to date
 
 
 Usage
@@ -1022,6 +1022,71 @@ plugin for the audio).
       phase drift apart, which differs sample by sample but not in the spectra. Precision stays below
       about -35 dB, and a different routing, or a CC value 4 steps away, lands above -10 dB; the limit
       is -25 dB (`ruby sim_cruby/spms1_compare.rb --limit DB` for another)
+
+
+### Adding a Module
+
+The synth is built as a framework, and its sound is the modules on it:
+
+- "spms1/spms1_framework.rb": what any synth on this base shares -- the functions the host provides
+  (`Spms1::C`, implemented by "spms1.ino" and every simulator), the conversions from MIDI to the
+  values a module takes, and the rules below
+- "spms1/spms1_main.rb": the loop that runs a patch -- the run order, the routing, the CCs and the
+  dispatch -- most of it written by patch_gen
+- "spms1_patch.yaml" and "patch_gen": every number of the patch, and the wiring of each module
+- The modules ("spms1_osc.rb" and the rest): a class each, knowing nothing of MIDI or of the patch
+
+A module is added without writing anything in the loop:
+
+1. Write its class in a file of its own in "spms1", and add a `require_relative` for it at the
+   top of "spms1/spms1_main.rb". "spms1_amp.rb" is the smallest to start from. The class has:
+    - `initialize(sample_rate)`
+    - a setter for each parameter, called once a buffer with the value its source holds: unipolar
+      0.0..1.0 or bipolar -0.5..0.5, as the parameter is marked in the YAML. It clamps the value
+      and keeps it as a target
+    - `process(control_tick, input, ...)`, called once a sample with its inputs, in the order the
+      YAML lists them, returning its main output. `control_tick` is true every 4th sample, the
+      same samples for every module: the parameters are smoothed toward their targets there, with
+      `Dsp.smooth`
+    - a method for each further output, read just after `process`
+2. Add it to "spms1_patch.yaml", numbers only ever appended:
+    - under `modules`: the next id, its `class`, and `process`, the keys of its inputs in the
+      order `process` takes them
+    - under `signals`: a free slot for each output, with `module` and `output`, and `get`, the
+      method that reads it, for each output but the one `process` returns
+    - under `inputs`: an entry for each input
+    - under `controls`: an entry for each parameter, with `set`, its setter; `early` sets it ahead
+      of all the others, for a setter another one reads from (as Mixer's Balance Law)
+    - in `default_order`, if the default patch is to run it
+3. Run `ruby patch_gen/spms1_patch_gen.rb` and regenerate "spms1/spms1_main.c"
+   (`sh sim_render/build.sh`), then listen (a render with a patch file that routes it) and
+   measure (`sh sim_load/estimate.sh`)
+
+patch_gen writes the module's instance, the reads of its routing and its CCs, the calls to its
+setters and its `when` in the dispatch into "spms1/spms1_main.rb", as the plain straight-line Ruby
+the loop was written in by hand before, so Spinel compiles it to the same: a module costs what its
+own code costs and no more. The editor and the NRPN tables of the READMEs take it up as well.
+
+#### Writing a Module
+
+The worst case of a buffer is guaranteed, not hoped for: what "sim_load" measures, every module
+running, is the longest a buffer can take, whatever patch, CC or note comes. A module keeps to
+that:
+
+- The same work every sample and every buffer, whatever the values: work out each parameter's
+  coefficients every buffer or every control tick, never only when it changes
+- No branches on values: clamp with nested ternaries, `(x < 0.0) ? 0.0 : ((x > 1.0) ? 1.0 : x)`,
+  which compile to selects. A branch on `control_tick` is fine, every module taking it on the
+  same samples, all of which the measure includes
+- Curves from lookup tables with linear interpolation, worked out once in the class, not library
+  calls (`Math.sqrt`, `Math.exp` and the like), whose time depends on the input
+- Nothing allocated while playing: make every array in `initialize`
+- Literals rather than named constants in the per-sample code: Spinel emits a named Integer or
+  Float constant as a runtime global, loaded each time it is read
+- A state that decays toward zero through `Dsp.flush_tiny`, so that it lands on zero rather than
+  sinking into the denormals
+- If Spinel leaves something untyped and boxes the arithmetic, a type seed in "spms1/sig" fixes it
+  ("spms1/sig/spms1_dsp.rbs" says how)
 
 
 ### Load Estimate
