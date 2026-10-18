@@ -17,49 +17,51 @@ MODULE_OSC_2    = 11
 MODULE_MIXER_2  = 12
 
 # Slots of the signal bus, the values of NRPN categories 1 and 2.
-SIGNAL_NONE                 = 0
-SIGNAL_ONE                  = 1
-SIGNAL_HALF                 = 2
-SIGNAL_POINT_TWO            = 3
-SIGNAL_POINT_ONE            = 4
-SIGNAL_MINUS_POINT_ONE      = 5
-SIGNAL_MINUS_POINT_TWO      = 6
-SIGNAL_MINUS_HALF           = 7
-SIGNAL_MINUS_ONE            = 8
-SIGNAL_LFO_1_OUTPUT         = 9
-SIGNAL_EG_1_OUTPUT          = 10
-SIGNAL_OSC_1_OUTPUT         = 11
-SIGNAL_FILTER_1_OUTPUT      = 12
-SIGNAL_AMP_1_OUTPUT         = 13
-SIGNAL_MIXER_1_OUTPUT       = 14
-SIGNAL_CHORUS_1_OUTPUT_L    = 15
-SIGNAL_CHORUS_1_OUTPUT_R    = 16
-SIGNAL_DELAY_1_OUTPUT_L     = 17
-SIGNAL_DELAY_1_OUTPUT_R     = 18
-SIGNAL_NOTE_PITCH           = 48
-SIGNAL_NOTE_GATE            = 49
-SIGNAL_PITCH_BEND           = 50
-SIGNAL_GENERAL_MOD_WHEEL    = 51
-SIGNAL_GENERAL_UNIPOLAR_1   = 52
-SIGNAL_GENERAL_UNIPOLAR_2   = 53
-SIGNAL_GENERAL_UNIPOLAR_3   = 54
-SIGNAL_GENERAL_UNIPOLAR_4   = 55
-SIGNAL_GENERAL_BIPOLAR_1    = 56
-SIGNAL_GENERAL_BIPOLAR_2    = 57
-SIGNAL_GENERAL_BIPOLAR_3    = 58
-SIGNAL_GENERAL_BIPOLAR_4    = 59
-SIGNAL_PITCH_1_OUTPUT       = 60
-SIGNAL_FILTER_1_OUTPUT_LP   = 117
-SIGNAL_FILTER_1_OUTPUT_HP   = 66
-SIGNAL_NOISE_1_OUTPUT       = 86
-SIGNAL_OSC_2_OUTPUT         = 88
-SIGNAL_MIXER_2_OUTPUT       = 106
-SIGNAL_NOISE_1_OUTPUT_WHITE = 122
-SIGNAL_NOISE_1_OUTPUT_RED   = 116
-SIGNAL_OSC_1_OUTPUT_SAW     = 118
-SIGNAL_OSC_1_OUTPUT_PULSE   = 119
-SIGNAL_OSC_2_OUTPUT_SAW     = 120
-SIGNAL_OSC_2_OUTPUT_PULSE   = 121
+SIGNAL_NONE                  = 0
+SIGNAL_ONE                   = 1
+SIGNAL_HALF                  = 2
+SIGNAL_POINT_TWO             = 3
+SIGNAL_POINT_ONE             = 4
+SIGNAL_MINUS_POINT_ONE       = 5
+SIGNAL_MINUS_POINT_TWO       = 6
+SIGNAL_MINUS_HALF            = 7
+SIGNAL_MINUS_ONE             = 8
+SIGNAL_LFO_1_OUTPUT          = 9
+SIGNAL_EG_1_OUTPUT           = 10
+SIGNAL_OSC_1_OUTPUT          = 11
+SIGNAL_FILTER_1_OUTPUT       = 12
+SIGNAL_AMP_1_OUTPUT          = 13
+SIGNAL_MIXER_1_OUTPUT        = 14
+SIGNAL_CHORUS_1_OUTPUT_L     = 15
+SIGNAL_CHORUS_1_OUTPUT_R     = 16
+SIGNAL_DELAY_1_OUTPUT_L      = 17
+SIGNAL_DELAY_1_OUTPUT_R      = 18
+SIGNAL_NOTE_PITCH            = 48
+SIGNAL_NOTE_GATE             = 49
+SIGNAL_PITCH_BEND            = 50
+SIGNAL_GENERAL_MOD_WHEEL     = 51
+SIGNAL_GENERAL_UNIPOLAR_1    = 52
+SIGNAL_GENERAL_UNIPOLAR_2    = 53
+SIGNAL_GENERAL_UNIPOLAR_3    = 54
+SIGNAL_GENERAL_UNIPOLAR_4    = 55
+SIGNAL_GENERAL_BIPOLAR_1     = 56
+SIGNAL_GENERAL_BIPOLAR_2     = 57
+SIGNAL_GENERAL_BIPOLAR_3     = 58
+SIGNAL_GENERAL_BIPOLAR_4     = 59
+SIGNAL_PITCH_1_OUTPUT        = 60
+SIGNAL_FILTER_1_OUTPUT_LP    = 117
+SIGNAL_FILTER_1_OUTPUT_HP    = 66
+SIGNAL_NOISE_1_OUTPUT        = 86
+SIGNAL_OSC_2_OUTPUT          = 88
+SIGNAL_MIXER_2_OUTPUT        = 106
+SIGNAL_NOISE_1_OUTPUT_WHITE  = 122
+SIGNAL_NOISE_1_OUTPUT_RED    = 116
+SIGNAL_OSC_1_OUTPUT_SAW      = 118
+SIGNAL_OSC_1_OUTPUT_PULSE    = 119
+SIGNAL_OSC_2_OUTPUT_SAW      = 120
+SIGNAL_OSC_2_OUTPUT_PULSE    = 121
+SIGNAL_LFO_1_OUTPUT_TRIANGLE = 123
+SIGNAL_LFO_1_OUTPUT_SQUARE   = 124
 
 # A parameter source of SIGNAL_OWN is the parameter's own control slot, at PARAM_SLOT_BASE + its
 # entry, off the bus: the slots below.
@@ -147,6 +149,7 @@ SLOT_OSC_1_PW_MOD_1_POL  = 220
 SLOT_OSC_2_PW_MOD_1_AMT  = 221
 SLOT_OSC_2_PW_MOD_1_POL  = 222
 SLOT_NOISE_1_COLOR       = 223
+SLOT_LFO_1_WAVE          = 224
 
 # NRPN parameter numbers: (MSB << 7) | LSB, where the MSB picks a category and the LSB an entry.
 #   0..127   active_modules[slot]
@@ -271,6 +274,7 @@ NRPN_SOURCE_OSC_1_PW_MOD_1_POL  = 348
 NRPN_SOURCE_OSC_2_PW_MOD_1_AMT  = 349
 NRPN_SOURCE_OSC_2_PW_MOD_1_POL  = 350
 NRPN_SOURCE_NOISE_1_COLOR       = 351
+NRPN_SOURCE_LFO_1_WAVE          = 352
 
 # A CC number of 0 means the parameter has no CC: its control slot holds 0.0 -- the bottom of a
 # unipolar dial, the middle of a bipolar one -- whatever CC it had before, so a patch sets it alone.
@@ -360,6 +364,7 @@ NRPN_CC_OSC_1_PW_MOD_1_POL  = 476
 NRPN_CC_OSC_2_PW_MOD_1_AMT  = 477
 NRPN_CC_OSC_2_PW_MOD_1_POL  = 478
 NRPN_CC_NOISE_1_COLOR       = 479
+NRPN_CC_LFO_1_WAVE          = 480
 
 # The constants of the bus, which nothing else ever writes. A slot not written here holds 0.0.
 def spms1_fill_constant_signals(signals)
@@ -504,6 +509,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_2_PW_MOD_1_AMT , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_2_PW_MOD_1_POL , SIGNAL_HALF)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_NOISE_1_COLOR      , SIGNAL_OWN)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_LFO_1_WAVE         , SIGNAL_OWN)
 
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_RATE        , 3)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_LEVEL       , 113)
@@ -554,6 +560,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_PW_MOD_1_AMT, 8)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_2_PW_MOD_1_AMT, 8)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_NOISE_1_COLOR     , 115)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_WAVE        , 33)
 
   C.set_midi_cc_value(midi_ch, 3  , 64 ) # LFO 1 Rate
   C.set_midi_cc_value(midi_ch, 113, 124) # LFO 1 Level
@@ -604,4 +611,5 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 8  , 4  ) # Osc 1 PW Mod 1 Amt
   C.set_midi_cc_value(midi_ch, 8  , 4  ) # Osc 2 PW Mod 1 Amt
   C.set_midi_cc_value(midi_ch, 115, 4  ) # Noise 1 Color
+  C.set_midi_cc_value(midi_ch, 33 , 4  ) # LFO 1 Wave
 end

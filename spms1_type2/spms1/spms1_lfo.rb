@@ -1,9 +1,12 @@
 module Spms1
-  # Triangle LFO, band-limited with PolyBLAMP (polynomial band-limited ramp): the slope change at
-  # each corner is rounded off over the two samples around it, as PolyBLEP rounds off a step. A
-  # triangle's harmonics fall off as 1/n^2, so what folds back stays low even without it, but at the
-  # top of the rate range, where the LFO is an audible tone, it takes the aliases at 220 Hz from
-  # -69 dB to -81 dB, in total against the signal.
+  # Triangle and square LFO. The triangle is band-limited with PolyBLAMP (polynomial band-limited
+  # ramp): the slope change at each corner is rounded off over the two samples around it, as
+  # PolyBLEP rounds off a step. A triangle's harmonics fall off as 1/n^2, so what folds back stays
+  # low even without it, but at the top of the rate range, where the LFO is an audible tone, it
+  # takes the aliases at 220 Hz from -69 dB to -81 dB, in total against the signal. The square is
+  # the triangle's sign, with each step rounded off by PolyBLEP, and puts out both at once, each on
+  # an output of its own, with Out, which process returns, crossfading from one to the other by
+  # Wave.
   class LFO
     # Blend at the reference rate on the line below, for each of two cascaded stages. The two move
     # together: their product is what fixes the time constant, so changing one without the other
@@ -58,9 +61,16 @@ module Spms1
       @stage_1_level_modulation_depth = 1.0
       @current_level_modulation_depth = 1.0
       @total_amount = 1.0
+      # Powers up at the triangle, which is what Out was until it had a square.
+      @wave = 0.0
+      @stage_1_wave = 0.0
+      @current_wave = 0.0
+      @output_triangle = 0.0
+      @output_square = 0.0
       # Not derived here: process assigns them on its first call, before anything reads them.
       @dt = 0.0
       @blamp_scale = 0.0
+      @blep_scale = 0.0
     end
 
     # Rate is unipolar, [0.0, 1.0], and read as a note number, so the dial is linear in pitch:
@@ -106,6 +116,12 @@ module Spms1
       @amount = @level
     end
 
+    # Wave is unipolar, [0.0, 1.0], and crossfades Out in a straight line, from the triangle alone
+    # at 0.0 to the square alone at 1.0.
+    def set_wave(wave)
+      @wave = (wave < 0.0) ? 0.0 : ((wave > 1.0) ? 1.0 : wave)
+    end
+
     # Output is bipolar and spans one unit peak to peak at full level, [-0.5, 0.5],
     # the same span as the pitch domain. Every bipolar signal on the bus is scaled that way, so a destination's
     # amount control means the same thing whichever one is routed to it.
@@ -126,6 +142,8 @@ module Spms1
         @current_rate_modulation_depth = Dsp.smooth(@stage_1_rate_modulation_depth, @current_rate_modulation_depth, @smoothing_target_blend)
         @stage_1_level_modulation_depth = Dsp.smooth(@level_modulation_depth, @stage_1_level_modulation_depth, @smoothing_target_blend)
         @current_level_modulation_depth = Dsp.smooth(@stage_1_level_modulation_depth, @current_level_modulation_depth, @smoothing_target_blend)
+        @stage_1_wave = Dsp.smooth(@wave, @stage_1_wave, @smoothing_target_blend)
+        @current_wave = Dsp.smooth(@stage_1_wave, @current_wave, @smoothing_target_blend)
         total_amount = @current_amount + (level_modulation_input * @current_level_modulation_depth)
         @total_amount = (total_amount < 0.0) ? 0.0 : ((total_amount > 1.0) ? 1.0 : total_amount)
         total_rate = @current_rate + (rate_modulation_input * @current_rate_modulation_depth)
@@ -136,6 +154,10 @@ module Spms1
         # phase that is (dt - d)^3 * (2/3) / dt^2: the division is taken here, once per update,
         # and process only multiplies. dt is never 0, the lowest rate being 0.215 Hz.
         @blamp_scale = 0.6666667 / (@dt * @dt)
+        # The PolyBLEP residual is (1 - |x|)^2 of half the step for a step x samples away, and the
+        # square steps by a whole unit, so with d as above it is (dt - d)^2 / dt^2 of the square's
+        # own value: 1 / dt^2, which the scale above already holds two thirds of.
+        @blep_scale = @blamp_scale * 1.5
       end
 
       # Triangle folded out of the phase ramp. The quarter-turn shift puts 0.0 at the start of the
@@ -159,12 +181,30 @@ module Spms1
       gap = (corner_gap > 0.0) ? corner_gap : 0.0
       side = (folded < 0.25) ? -@blamp_scale : @blamp_scale
       triangle += gap * gap * gap * side
-      output = triangle * @total_amount
+      # The square is +0.5 while the triangle is above zero, and steps where it crosses, at folded
+      # 0.25, so a step is |folded - 0.25| away in phase. PolyBLEP: a sample within dt of a step is
+      # pulled toward the middle of it, by the same branchless select as above.
+      square = (folded < 0.25) ? 0.5 : -0.5
+      step_gap = @dt - (folded - 0.25).abs
+      edge = (step_gap > 0.0) ? step_gap : 0.0
+      square -= square * (edge * edge * @blep_scale)
+      @output_triangle = triangle * @total_amount
+      @output_square = square * @total_amount
+      output = @output_triangle + (@output_square - @output_triangle) * @current_wave
 
       @phase += @dt
       @phase -= (@phase < 1.0) ? 0.0 : 1.0
 
       output
+    end
+
+    # The triangle and the square of the last process.
+    def output_triangle
+      @output_triangle
+    end
+
+    def output_square
+      @output_square
     end
 
     private

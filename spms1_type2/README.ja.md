@@ -6,6 +6,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.3
 - 後着優先で 1 ノート分を記憶: 前のノートを押さえたまま新しいノートを離すと、前のノートにレガートで戻ります (トリルなどに)
 - 48 kHz オーディオ出力: I2S DAC による 24 bit、または PWM Audio (DAC 不要)
 - オシレータ: ノコギリ波から矩形波へのモーフ、パルス幅付き (CC 114)。パルス幅専用のモジュレーション入力 2 系統付き (PWM。エンベロープが CC 8、LFO が CC 103 で、最初から結線済み)。ノコギリ波とパルス波の個別出力付き
+- LFO: 三角波 (PolyBLAMP) と矩形波 (PolyBLEP) の個別出力と、その間をクロスフェードするメイン出力 (Wave、CC 33)
 - フィルタ: ZDF/TPT ステート・バリアブル・フィルタ (BP 積分器の非線形リーク付き、1 ステップ・ニュートン法で解く)。LP、HP の 2 出力と、その間をノッチを経てクロスフェードするメイン出力 (Mode、CC 39)
 - コーラス: モノラル入力・ステレオ出力、実行順に入るモジュール
 - ディレイ: ステレオ、フィードバック付き、実行順に入るモジュール (最大 340 ms)
@@ -384,8 +385,8 @@ flowchart LR
 | ----- | ----- | ---- | ---------- |
 | 0 | 0-31 | 実行順、スロットごとに | モジュール ID |
 | 1 | 0-35 | モジュール入力に何を入れるか | シグナル ID |
-| 2 | 0-28, 34-95 | パラメータがどこから値を取るか | シグナル ID、127 なら自分のコントロールスロット |
-| 3 | 0-95 | どの CC がコントロールスロットを埋めるか | CC 番号、0 なら割り当てなし |
+| 2 | 0-28, 34-96 | パラメータがどこから値を取るか | シグナル ID、127 なら自分のコントロールスロット |
+| 3 | 0-96 | どの CC がコントロールスロットを埋めるか | CC 番号、0 なら割り当てなし |
 
 実行順はスロット 0 から上へ読まれ、最初に現れたモジュール ID 0 で止まります。32 個に満たないパッチは
 そこで自ら終わるわけです。実行順はモジュールの番号付けとは別物です。あるモジュールが今サンプルの値を
@@ -451,33 +452,34 @@ Mixer 1 の 4 つの入力はどれも閉じた状態で始まります。
 
 | CC 98 | パラメータ | | CC 98 | パラメータ | | CC 98 | パラメータ |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | LFO 1 Rate | | 34 | Pitch 1 Glide | | 65 | Osc 2 Pulse Width |
-| 1 | LFO 1 Level | | 35 | Osc 1 Pulse Width | | 66 | Osc 2 PW Mod 2 Amt |
-| 3 | EG 1 Attack | | 36 | Osc 1 PW Mod 2 Amt | | 67 | Osc 2 PW Mod 2 Pol |
-| 4 | EG 1 Decay | | 37 | Osc 1 PW Mod 2 Pol | | 71 | Mixer 1 Level 3 |
-| 5 | EG 1 Sustain | | 40 | LFO 1 Rate Mod Amt | | 72 | Mixer 1 Pol 3 |
-| 6 | EG 1 Level | | 41 | LFO 1 Rate Mod Pol | | 73 | Mixer 1 Level 4 |
-| 8 | Osc 1 Wave | | 44 | Filter 1 Mod 2 Amt | | 74 | Mixer 1 Pol 4 |
-| 9 | Osc 1 Pitch Coarse | | 45 | Filter 1 Mod 2 Pol | | 75 | Mixer 2 Level 1 |
-| 10 | Osc 1 Pitch Fine | | 46 | Filter 1 Mod 3 Amt | | 76 | Mixer 2 Pol 1 |
-| 11 | Osc 1 Mod 2 Amt | | 47 | Filter 1 Mod 3 Pol | | 77 | Mixer 2 Level 2 |
-| 12 | Osc 1 Mod 2 Pol | | 48 | Pitch 1 Bend Amt | | 78 | Mixer 2 Pol 2 |
-| 13 | Filter 1 Cutoff | | 49 | Pitch 1 Bend Pol | | 79 | Mixer 2 Level 3 |
-| 14 | Filter 1 Resonance | | 50 | LFO 1 Level Mod Amt | | 80 | Mixer 2 Pol 3 |
-| 15 | Filter 1 Gain | | 51 | LFO 1 Level Mod Pol | | 81 | Mixer 2 Level 4 |
-| 16 | Filter 1 Mod 1 Amt | | 52 | Pitch 1 Coarse | | 82 | Mixer 2 Pol 4 |
-| 17 | Filter 1 Mod 1 Pol | | 53 | Pitch 1 Fine | | 83 | Mixer 2 Out Level |
-| 18 | Amp 1 Gain | | 54 | Mixer 1 Out Level | | 85 | Mixer 1 Balance 1/2 |
-| 19 | Mixer 1 Level 1 | | 55 | Osc 1 Mod 1 Amt | | 86 | Mixer 1 Balance 3/4 |
-| 20 | Mixer 1 Pol 1 | | 56 | Osc 1 Mod 1 Pol | | 87 | Mixer 2 Balance 1/2 |
-| 21 | Mixer 1 Level 2 | | 57 | Noise 1 Level | | 88 | Mixer 2 Balance 3/4 |
-| 22 | Mixer 1 Pol 2 | | 58 | Osc 2 Wave | | 89 | Pitch 1 Stretch |
-| 23 | Chorus 1 Rate | | 59 | Osc 2 Pitch Coarse | | 90 | Filter 1 Mode |
-| 24 | Chorus 1 Depth | | 60 | Osc 2 Pitch Fine | | 91 | Osc 1 PW Mod 1 Amt |
-| 25 | Chorus 1 Mix | | 61 | Osc 2 Mod 1 Amt | | 92 | Osc 1 PW Mod 1 Pol |
-| 26 | Delay 1 Time | | 62 | Osc 2 Mod 1 Pol | | 93 | Osc 2 PW Mod 1 Amt |
-| 27 | Delay 1 Feedback | | 63 | Osc 2 Mod 2 Amt | | 94 | Osc 2 PW Mod 1 Pol |
-| 28 | Delay 1 Mix | | 64 | Osc 2 Mod 2 Pol | | 95 | Noise 1 Color |
+| 0 | LFO 1 Rate | | 35 | Osc 1 Pulse Width | | 67 | Osc 2 PW Mod 2 Pol |
+| 1 | LFO 1 Level | | 36 | Osc 1 PW Mod 2 Amt | | 71 | Mixer 1 Level 3 |
+| 3 | EG 1 Attack | | 37 | Osc 1 PW Mod 2 Pol | | 72 | Mixer 1 Pol 3 |
+| 4 | EG 1 Decay | | 40 | LFO 1 Rate Mod Amt | | 73 | Mixer 1 Level 4 |
+| 5 | EG 1 Sustain | | 41 | LFO 1 Rate Mod Pol | | 74 | Mixer 1 Pol 4 |
+| 6 | EG 1 Level | | 44 | Filter 1 Mod 2 Amt | | 75 | Mixer 2 Level 1 |
+| 8 | Osc 1 Wave | | 45 | Filter 1 Mod 2 Pol | | 76 | Mixer 2 Pol 1 |
+| 9 | Osc 1 Pitch Coarse | | 46 | Filter 1 Mod 3 Amt | | 77 | Mixer 2 Level 2 |
+| 10 | Osc 1 Pitch Fine | | 47 | Filter 1 Mod 3 Pol | | 78 | Mixer 2 Pol 2 |
+| 11 | Osc 1 Mod 2 Amt | | 48 | Pitch 1 Bend Amt | | 79 | Mixer 2 Level 3 |
+| 12 | Osc 1 Mod 2 Pol | | 49 | Pitch 1 Bend Pol | | 80 | Mixer 2 Pol 3 |
+| 13 | Filter 1 Cutoff | | 50 | LFO 1 Level Mod Amt | | 81 | Mixer 2 Level 4 |
+| 14 | Filter 1 Resonance | | 51 | LFO 1 Level Mod Pol | | 82 | Mixer 2 Pol 4 |
+| 15 | Filter 1 Gain | | 52 | Pitch 1 Coarse | | 83 | Mixer 2 Out Level |
+| 16 | Filter 1 Mod 1 Amt | | 53 | Pitch 1 Fine | | 85 | Mixer 1 Balance 1/2 |
+| 17 | Filter 1 Mod 1 Pol | | 54 | Mixer 1 Out Level | | 86 | Mixer 1 Balance 3/4 |
+| 18 | Amp 1 Gain | | 55 | Osc 1 Mod 1 Amt | | 87 | Mixer 2 Balance 1/2 |
+| 19 | Mixer 1 Level 1 | | 56 | Osc 1 Mod 1 Pol | | 88 | Mixer 2 Balance 3/4 |
+| 20 | Mixer 1 Pol 1 | | 57 | Noise 1 Level | | 89 | Pitch 1 Stretch |
+| 21 | Mixer 1 Level 2 | | 58 | Osc 2 Wave | | 90 | Filter 1 Mode |
+| 22 | Mixer 1 Pol 2 | | 59 | Osc 2 Pitch Coarse | | 91 | Osc 1 PW Mod 1 Amt |
+| 23 | Chorus 1 Rate | | 60 | Osc 2 Pitch Fine | | 92 | Osc 1 PW Mod 1 Pol |
+| 24 | Chorus 1 Depth | | 61 | Osc 2 Mod 1 Amt | | 93 | Osc 2 PW Mod 1 Amt |
+| 25 | Chorus 1 Mix | | 62 | Osc 2 Mod 1 Pol | | 94 | Osc 2 PW Mod 1 Pol |
+| 26 | Delay 1 Time | | 63 | Osc 2 Mod 2 Amt | | 95 | Noise 1 Color |
+| 27 | Delay 1 Feedback | | 64 | Osc 2 Mod 2 Pol | | 96 | LFO 1 Wave |
+| 28 | Delay 1 Mix | | 65 | Osc 2 Pulse Width | |  |  |
+| 34 | Pitch 1 Glide | | 66 | Osc 2 PW Mod 2 Amt | |  |  |
 
 <!-- patch_gen end -->
 
@@ -539,8 +541,8 @@ Mixer 1 の 4 つの入力はどれも閉じた状態で始まります。
 | 10 | EG 1 Output | | 54 | General Unipolar 3 | | 120 | Osc 2 Output Saw ± |
 | 11 | Osc 1 Output ± | | 55 | General Unipolar 4 | | 121 | Osc 2 Output Pulse ± |
 | 12 | Filter 1 Output ± | | 56 | General Bipolar 1 ± | | 122 | Noise 1 Output White ± |
-| 13 | Amp 1 Output ± | | 57 | General Bipolar 2 ± | |  |  |
-| 14 | Mixer 1 Output ± | | 58 | General Bipolar 3 ± | |  |  |
+| 13 | Amp 1 Output ± | | 57 | General Bipolar 2 ± | | 123 | LFO 1 Output Triangle ± |
+| 14 | Mixer 1 Output ± | | 58 | General Bipolar 3 ± | | 124 | LFO 1 Output Square ± |
 
 <!-- patch_gen end -->
 
@@ -613,6 +615,14 @@ Pitch 1 Stretch（CC 22）は、グライドの前で Pitch In に係数を掛�
 1 オクターブあたり数セントのピアノのストレッチチューニングにあたります。ベンドと移調はその後なので
 引き伸ばされません。回したときはピッチが段差なく滑らかに動きます。最大では、ノート 60 から 30 半音より
 離れた音がオシレータのレンジを超えます。
+
+LFO 1 は三角波と矩形波を同時に、それぞれ Out Triangle、Out Square として出力し、2 つをクロスフェードしたものを
+Out として出力します。三角波は角を PolyBLAMP で、矩形波は段差を PolyBLEP で丸めているので、LFO が可聴音になる
+レートの上端 220 Hz でも、矩形波の折り返しは信号に対して -41 dB です（丸めなしでは -24 dB）。矩形波は三角波の符号で、
+三角波が 0 より上のあいだ +0.5、0 を横切るところで切り替わります。LFO 1 Wave（CC 33、PRA32-U2 の LFO Wave と同じ）は
+Out を直線でクロスフェードし、起動時の 0.0（CC 4）では三角波、1.0（CC 124）では矩形波です。Level と同じく
+スムージングします。Out は LFO の 1 つだけの出力があったスロットを引き継ぎ、デフォルトのパッチがつないでいるのも Out
+なので、Wave を上げるまでは三角波です。
 
 LFO 1 Level は、ミキサーの Level が入力に掛かるのと同じく、LFO の出力に掛かります。0.0 (CC 4) で無音、
 1.0 (CC 124) で最大です。CC 113 にあり、起動時は 1.0 なので、LFO はそのまま出ます。LFO 1 Level Mod In は

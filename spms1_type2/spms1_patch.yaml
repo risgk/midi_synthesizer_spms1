@@ -53,7 +53,7 @@ default_order: [NOISE_1, EG_1, LFO_1, MIXER_1, PITCH_1, OSC_1, OSC_2, MIXER_2, F
 # holds the value of its CC off the bus (see spms1_main.rb), so no other input or parameter can
 # read it. The numbers the parameters' control slots had on the bus before they moved off it --
 # 19-47, 61-64, 69-85, 87, 89-98, 102-105, 107-115 -- are free, as are 21, 26, 67,
-# 65, 68, 71, 72, 99-101 and 123-126, unused already.
+# 65, 68, 71, 72, 99-101, 125 and 126, unused already.
 signals:
   - { key: NONE,            id: 0, value: 0.0,  short: "0.0",  label: None (constant 0.0), label_ja: なし（定数 0.0） }
   - { key: ONE,             id: 1, value: 1.0,  short: "+1.0", label: Constant 1.0,  label_ja: 定数 1.0 }
@@ -119,6 +119,11 @@ signals:
   - { key: OSC_2_OUTPUT_SAW,   id: 120, module: OSC_2, output: Out Saw,   label: Osc 2 Output Saw,   bipolar: true }
   - { key: OSC_2_OUTPUT_PULSE, id: 121, module: OSC_2, output: Out Pulse, label: Osc 2 Output Pulse, bipolar: true }
 
+  # The LFO's triangle and square outputs came after the noise's Out; Out keeps slot 9 and crossfades
+  # the two by Wave.
+  - { key: LFO_1_OUTPUT_TRIANGLE, id: 123, module: LFO_1, output: Out Triangle, label: LFO 1 Output Triangle, bipolar: true }
+  - { key: LFO_1_OUTPUT_SQUARE,   id: 124, module: LFO_1, output: Out Square,   label: LFO 1 Output Square,   bipolar: true }
+
 # Module inputs, NRPN category 1, listed in the editor's order, each by its entry: what feeds each
 # one in the default patch (`source`, a signal key). `label` is the editor's, on the module; `name`
 # the README's, after the module's label. An input with no module is a side of the final output.
@@ -176,6 +181,9 @@ controls:
   - { entry: 40, module: LFO_1,     key: RATE_MOD_AMT, label: Rate Mod Amt, cc: 0,   value: 124, source: ONE }
   - { entry: 41, module: LFO_1,     key: RATE_MOD_POL, label: Rate Mod Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 1,  module: LFO_1,     key: LEVEL,        label: Level,        cc: 113, value: 124 }
+  # Wave came after Noise 1 Color. It crossfades Out from the triangle (0.0) to the square (1.0), on
+  # CC 33, LFO Wave's in PRA32-U2, and powers up at CC 4, 0.0, the triangle.
+  - { entry: 96, module: LFO_1,     key: WAVE,         label: Wave,         cc: 33,  value: 4 }
   - { entry: 50, module: LFO_1,     key: LEVEL_MOD_AMT, label: Level Mod Amt, cc: 0,  value: 124, source: ONE }
   - { entry: 51, module: LFO_1,     key: LEVEL_MOD_POL, label: Level Mod Pol, cc: 0,  value: 124, source: HALF, bipolar: true }
   - { entry: 3,  module: EG_1,      key: ATTACK,       label: Attack,       cc: 73,  value: 4 }

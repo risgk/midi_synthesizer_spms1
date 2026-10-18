@@ -50,6 +50,7 @@
 |                            30 | x             | o             | EG Sustain (Level)                   |
 |                             3 | x             | o             | LFO Rate                             |
 |                           113 | x             | o             | LFO Level                            |
+|                            33 | x             | o             | LFO Wave (Triangle to Square)        |
 |                            58 | x             | o             | Chorus Rate                          |
 |                            59 | x             | o             | Chorus Depth                         |
 |                            93 | x             | o             | Chorus Mix                           |

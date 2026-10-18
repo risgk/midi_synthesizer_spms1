@@ -6,6 +6,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.3
 - Last-note priority with one note of memory: releasing the newest note while the one before it is still held goes back to that one, legato (for trills)
 - 48 kHz audio output: 24 bit through an I2S DAC, or PWM Audio (no DAC needed)
 - Oscillator: a sawtooth-to-square morph with pulse width (CC 114), and two modulation inputs of its own for the pulse width (PWM): the envelope on CC 8 and the LFO on CC 103, wired by default; and the sawtooth and the pulse on outputs of their own too
+- LFO: triangle (PolyBLAMP) and square (PolyBLEP), each on an output of its own, and a main output crossfading from one to the other (Wave, CC 33)
 - Filter: ZDF/TPT State Variable Filter (with a nonlinear leak on the band pass integrator, solved by the one-step Newton method), with low pass and high pass outputs and a main output crossfading from one to the other through a notch (Mode, CC 39)
 - Chorus: mono in, stereo out, as a module in the run order
 - Delay: stereo, with feedback, as a module in the run order (up to 340 ms)
@@ -399,8 +400,8 @@ it from anywhere else.
 | ----- | ----- | ---- | ---------- |
 | 0 | 0-31 | Run order, slot by slot | Module ID |
 | 1 | 0-35 | What feeds a module input | Signal ID |
-| 2 | 0-28, 34-95 | Where a parameter takes its value | Signal ID, or 127 for its own control slot |
-| 3 | 0-95 | Which CC fills a control slot | CC number, or 0 for none |
+| 2 | 0-28, 34-96 | Where a parameter takes its value | Signal ID, or 127 for its own control slot |
+| 3 | 0-96 | Which CC fills a control slot | CC number, or 0 for none |
 
 The run order is read from slot 0 upwards and stops at the first Module ID 0, so a patch shorter
 than 32 modules ends itself. It is separate from the module numbering: a module only sees the
@@ -471,33 +472,34 @@ both at the same signal for a mono output.
 
 | CC 98 | Parameter | | CC 98 | Parameter | | CC 98 | Parameter |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | LFO 1 Rate | | 34 | Pitch 1 Glide | | 65 | Osc 2 Pulse Width |
-| 1 | LFO 1 Level | | 35 | Osc 1 Pulse Width | | 66 | Osc 2 PW Mod 2 Amt |
-| 3 | EG 1 Attack | | 36 | Osc 1 PW Mod 2 Amt | | 67 | Osc 2 PW Mod 2 Pol |
-| 4 | EG 1 Decay | | 37 | Osc 1 PW Mod 2 Pol | | 71 | Mixer 1 Level 3 |
-| 5 | EG 1 Sustain | | 40 | LFO 1 Rate Mod Amt | | 72 | Mixer 1 Pol 3 |
-| 6 | EG 1 Level | | 41 | LFO 1 Rate Mod Pol | | 73 | Mixer 1 Level 4 |
-| 8 | Osc 1 Wave | | 44 | Filter 1 Mod 2 Amt | | 74 | Mixer 1 Pol 4 |
-| 9 | Osc 1 Pitch Coarse | | 45 | Filter 1 Mod 2 Pol | | 75 | Mixer 2 Level 1 |
-| 10 | Osc 1 Pitch Fine | | 46 | Filter 1 Mod 3 Amt | | 76 | Mixer 2 Pol 1 |
-| 11 | Osc 1 Mod 2 Amt | | 47 | Filter 1 Mod 3 Pol | | 77 | Mixer 2 Level 2 |
-| 12 | Osc 1 Mod 2 Pol | | 48 | Pitch 1 Bend Amt | | 78 | Mixer 2 Pol 2 |
-| 13 | Filter 1 Cutoff | | 49 | Pitch 1 Bend Pol | | 79 | Mixer 2 Level 3 |
-| 14 | Filter 1 Resonance | | 50 | LFO 1 Level Mod Amt | | 80 | Mixer 2 Pol 3 |
-| 15 | Filter 1 Gain | | 51 | LFO 1 Level Mod Pol | | 81 | Mixer 2 Level 4 |
-| 16 | Filter 1 Mod 1 Amt | | 52 | Pitch 1 Coarse | | 82 | Mixer 2 Pol 4 |
-| 17 | Filter 1 Mod 1 Pol | | 53 | Pitch 1 Fine | | 83 | Mixer 2 Out Level |
-| 18 | Amp 1 Gain | | 54 | Mixer 1 Out Level | | 85 | Mixer 1 Balance 1/2 |
-| 19 | Mixer 1 Level 1 | | 55 | Osc 1 Mod 1 Amt | | 86 | Mixer 1 Balance 3/4 |
-| 20 | Mixer 1 Pol 1 | | 56 | Osc 1 Mod 1 Pol | | 87 | Mixer 2 Balance 1/2 |
-| 21 | Mixer 1 Level 2 | | 57 | Noise 1 Level | | 88 | Mixer 2 Balance 3/4 |
-| 22 | Mixer 1 Pol 2 | | 58 | Osc 2 Wave | | 89 | Pitch 1 Stretch |
-| 23 | Chorus 1 Rate | | 59 | Osc 2 Pitch Coarse | | 90 | Filter 1 Mode |
-| 24 | Chorus 1 Depth | | 60 | Osc 2 Pitch Fine | | 91 | Osc 1 PW Mod 1 Amt |
-| 25 | Chorus 1 Mix | | 61 | Osc 2 Mod 1 Amt | | 92 | Osc 1 PW Mod 1 Pol |
-| 26 | Delay 1 Time | | 62 | Osc 2 Mod 1 Pol | | 93 | Osc 2 PW Mod 1 Amt |
-| 27 | Delay 1 Feedback | | 63 | Osc 2 Mod 2 Amt | | 94 | Osc 2 PW Mod 1 Pol |
-| 28 | Delay 1 Mix | | 64 | Osc 2 Mod 2 Pol | | 95 | Noise 1 Color |
+| 0 | LFO 1 Rate | | 35 | Osc 1 Pulse Width | | 67 | Osc 2 PW Mod 2 Pol |
+| 1 | LFO 1 Level | | 36 | Osc 1 PW Mod 2 Amt | | 71 | Mixer 1 Level 3 |
+| 3 | EG 1 Attack | | 37 | Osc 1 PW Mod 2 Pol | | 72 | Mixer 1 Pol 3 |
+| 4 | EG 1 Decay | | 40 | LFO 1 Rate Mod Amt | | 73 | Mixer 1 Level 4 |
+| 5 | EG 1 Sustain | | 41 | LFO 1 Rate Mod Pol | | 74 | Mixer 1 Pol 4 |
+| 6 | EG 1 Level | | 44 | Filter 1 Mod 2 Amt | | 75 | Mixer 2 Level 1 |
+| 8 | Osc 1 Wave | | 45 | Filter 1 Mod 2 Pol | | 76 | Mixer 2 Pol 1 |
+| 9 | Osc 1 Pitch Coarse | | 46 | Filter 1 Mod 3 Amt | | 77 | Mixer 2 Level 2 |
+| 10 | Osc 1 Pitch Fine | | 47 | Filter 1 Mod 3 Pol | | 78 | Mixer 2 Pol 2 |
+| 11 | Osc 1 Mod 2 Amt | | 48 | Pitch 1 Bend Amt | | 79 | Mixer 2 Level 3 |
+| 12 | Osc 1 Mod 2 Pol | | 49 | Pitch 1 Bend Pol | | 80 | Mixer 2 Pol 3 |
+| 13 | Filter 1 Cutoff | | 50 | LFO 1 Level Mod Amt | | 81 | Mixer 2 Level 4 |
+| 14 | Filter 1 Resonance | | 51 | LFO 1 Level Mod Pol | | 82 | Mixer 2 Pol 4 |
+| 15 | Filter 1 Gain | | 52 | Pitch 1 Coarse | | 83 | Mixer 2 Out Level |
+| 16 | Filter 1 Mod 1 Amt | | 53 | Pitch 1 Fine | | 85 | Mixer 1 Balance 1/2 |
+| 17 | Filter 1 Mod 1 Pol | | 54 | Mixer 1 Out Level | | 86 | Mixer 1 Balance 3/4 |
+| 18 | Amp 1 Gain | | 55 | Osc 1 Mod 1 Amt | | 87 | Mixer 2 Balance 1/2 |
+| 19 | Mixer 1 Level 1 | | 56 | Osc 1 Mod 1 Pol | | 88 | Mixer 2 Balance 3/4 |
+| 20 | Mixer 1 Pol 1 | | 57 | Noise 1 Level | | 89 | Pitch 1 Stretch |
+| 21 | Mixer 1 Level 2 | | 58 | Osc 2 Wave | | 90 | Filter 1 Mode |
+| 22 | Mixer 1 Pol 2 | | 59 | Osc 2 Pitch Coarse | | 91 | Osc 1 PW Mod 1 Amt |
+| 23 | Chorus 1 Rate | | 60 | Osc 2 Pitch Fine | | 92 | Osc 1 PW Mod 1 Pol |
+| 24 | Chorus 1 Depth | | 61 | Osc 2 Mod 1 Amt | | 93 | Osc 2 PW Mod 1 Amt |
+| 25 | Chorus 1 Mix | | 62 | Osc 2 Mod 1 Pol | | 94 | Osc 2 PW Mod 1 Pol |
+| 26 | Delay 1 Time | | 63 | Osc 2 Mod 2 Amt | | 95 | Noise 1 Color |
+| 27 | Delay 1 Feedback | | 64 | Osc 2 Mod 2 Pol | | 96 | LFO 1 Wave |
+| 28 | Delay 1 Mix | | 65 | Osc 2 Pulse Width | |  |  |
+| 34 | Pitch 1 Glide | | 66 | Osc 2 PW Mod 2 Amt | |  |  |
 
 <!-- patch_gen end -->
 
@@ -559,8 +561,8 @@ two slots, a unipolar and a bipolar one. See the General slots below.
 | 10 | EG 1 Output | | 54 | General Unipolar 3 | | 120 | Osc 2 Output Saw ± |
 | 11 | Osc 1 Output ± | | 55 | General Unipolar 4 | | 121 | Osc 2 Output Pulse ± |
 | 12 | Filter 1 Output ± | | 56 | General Bipolar 1 ± | | 122 | Noise 1 Output White ± |
-| 13 | Amp 1 Output ± | | 57 | General Bipolar 2 ± | |  |  |
-| 14 | Mixer 1 Output ± | | 58 | General Bipolar 3 ± | |  |  |
+| 13 | Amp 1 Output ± | | 57 | General Bipolar 2 ± | | 123 | LFO 1 Output Triangle ± |
+| 14 | Mixer 1 Output ± | | 58 | General Bipolar 3 ± | | 124 | LFO 1 Output Square ± |
 
 <!-- patch_gen end -->
 
@@ -640,7 +642,17 @@ bend and the transposition come after it and stay as they are, and turning it gl
 rather than stepping it. At its top, notes more than 30 semitones from note 60 run past the
 oscillator's range.
 
-LFO 1 Level scales the LFO's output, as a mixer's Level scales its input: from silent at 0.0
+LFO 1 puts out a triangle and a square at once, each on an output of its own, Out Triangle and
+Out Square, and the two crossfaded on Out. The triangle has its corners rounded off by PolyBLAMP
+and the square its steps by PolyBLEP, so at the top of the rate range, 220 Hz, where the LFO is an
+audible tone, the square's aliases are 41 dB down on it, rather than 24 dB without. The square is
+the triangle's sign: +0.5 while the triangle is above zero, stepping where it crosses. LFO 1 Wave
+(CC 33, LFO Wave's in PRA32-U2) crossfades Out in a straight line from the triangle at 0.0 (CC 4),
+where it powers up, to the square at 1.0 (CC 124), and is smoothed as the level is. Out keeps the
+slot the LFO's one output had, and is what the default patch routes, so the LFO is a triangle
+until Wave is turned up.
+
+LFO 1 Level scales the LFO's outputs, as a mixer's Level scales its input: from silent at 0.0
 (CC 4) to full at 1.0 (CC 124). It is on CC 113 and powers up at 1.0, passing the LFO through as
 it is. LFO 1 Level Mod In adds to it, held to the same range, by Level Mod Amt times Level Mod
 Pol, and it takes General Mod Wheel by default at a depth of 1.0 (neither has a CC; they read 1.0

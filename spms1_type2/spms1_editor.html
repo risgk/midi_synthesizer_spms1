@@ -1182,7 +1182,7 @@
   // patch_gen spec
   const SPEC = {
     modules: [
-      {"key":"LFO_1","id":1,"label":"LFO 1","outs":[{"sig":"LFO_1_OUTPUT","label":"Out"}]},
+      {"key":"LFO_1","id":1,"label":"LFO 1","outs":[{"sig":"LFO_1_OUTPUT","label":"Out"},{"sig":"LFO_1_OUTPUT_TRIANGLE","label":"Out Triangle"},{"sig":"LFO_1_OUTPUT_SQUARE","label":"Out Square"}]},
       {"key":"EG_1","id":2,"label":"EG 1","outs":[{"sig":"EG_1_OUTPUT","label":"Out"}]},
       {"key":"OSC_1","id":3,"label":"Osc 1","outs":[{"sig":"OSC_1_OUTPUT","label":"Out"},{"sig":"OSC_1_OUTPUT_SAW","label":"Out Saw"},{"sig":"OSC_1_OUTPUT_PULSE","label":"Out Pulse"}]},
       {"key":"FILTER_1","id":4,"label":"Filter 1","outs":[{"sig":"FILTER_1_OUTPUT","label":"Out"},{"sig":"FILTER_1_OUTPUT_LP","label":"Out LP"},{"sig":"FILTER_1_OUTPUT_HP","label":"Out HP"}]},
@@ -1236,6 +1236,7 @@
       {"entry":40,"module":"LFO_1","key":"RATE_MOD_AMT","label":"Rate Mod Amt","bipolar":false,"cc":0,"value":124,"source":"ONE","general":false,"slots":[["LFO_1_RATE_MOD_AMT","Rate Mod Amt",false]]},
       {"entry":41,"module":"LFO_1","key":"RATE_MOD_POL","label":"Rate Mod Pol","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["LFO_1_RATE_MOD_POL","Rate Mod Pol",true]]},
       {"entry":1,"module":"LFO_1","key":"LEVEL","label":"Level","bipolar":false,"cc":113,"value":124,"general":false,"slots":[["LFO_1_LEVEL","Level",false]]},
+      {"entry":96,"module":"LFO_1","key":"WAVE","label":"Wave","bipolar":false,"cc":33,"value":4,"general":false,"slots":[["LFO_1_WAVE","Wave",false]]},
       {"entry":50,"module":"LFO_1","key":"LEVEL_MOD_AMT","label":"Level Mod Amt","bipolar":false,"cc":0,"value":124,"source":"ONE","general":false,"slots":[["LFO_1_LEVEL_MOD_AMT","Level Mod Amt",false]]},
       {"entry":51,"module":"LFO_1","key":"LEVEL_MOD_POL","label":"Level Mod Pol","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["LFO_1_LEVEL_MOD_POL","Level Mod Pol",true]]},
       {"entry":3,"module":"EG_1","key":"ATTACK","label":"Attack","bipolar":false,"cc":73,"value":4,"general":false,"slots":[["EG_1_ATTACK","Attack",false]]},
@@ -1363,6 +1364,8 @@
       {"id":119,"key":"OSC_1_OUTPUT_PULSE"},
       {"id":120,"key":"OSC_2_OUTPUT_SAW"},
       {"id":121,"key":"OSC_2_OUTPUT_PULSE"},
+      {"id":123,"key":"LFO_1_OUTPUT_TRIANGLE"},
+      {"id":124,"key":"LFO_1_OUTPUT_SQUARE"},
     ],
     defaultOrder: ["NOISE_1","EG_1","LFO_1","MIXER_1","PITCH_1","OSC_1","OSC_2","MIXER_2","FILTER_1","AMP_1","CHORUS_1","DELAY_1"],
   };

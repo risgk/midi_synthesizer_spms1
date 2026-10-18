@@ -311,6 +311,7 @@ while true
   # above, which are read per sample and not smoothed.
   source_lfo_1_rate            = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_RATE), SLOT_LFO_1_RATE)
   source_lfo_1_level           = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_LEVEL), SLOT_LFO_1_LEVEL)
+  source_lfo_1_wave            = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_WAVE), SLOT_LFO_1_WAVE)
   source_eg_1_attack           = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_EG_1_ATTACK), SLOT_EG_1_ATTACK)
   source_eg_1_decay            = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_EG_1_DECAY), SLOT_EG_1_DECAY)
   source_eg_1_sustain          = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_EG_1_SUSTAIN), SLOT_EG_1_SUSTAIN)
@@ -396,6 +397,7 @@ while true
   # place a CC number appears.
   cc_lfo_1_rate            = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_RATE)
   cc_lfo_1_level           = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_LEVEL)
+  cc_lfo_1_wave            = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_WAVE)
   cc_eg_1_attack           = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_EG_1_ATTACK)
   cc_eg_1_decay            = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_EG_1_DECAY)
   cc_eg_1_sustain          = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_EG_1_SUSTAIN)
@@ -483,6 +485,7 @@ while true
 
   signals[SLOT_LFO_1_RATE] = cc_or_zero(cc_lfo_1_rate, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_rate)))
   signals[SLOT_LFO_1_LEVEL] = cc_or_zero(cc_lfo_1_level, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_level)))
+  signals[SLOT_LFO_1_WAVE] = cc_or_zero(cc_lfo_1_wave, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_lfo_1_wave)))
   signals[SLOT_EG_1_ATTACK] = cc_or_zero(cc_eg_1_attack, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_eg_1_attack)))
   signals[SLOT_EG_1_DECAY] = cc_or_zero(cc_eg_1_decay, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_eg_1_decay)))
   signals[SLOT_EG_1_SUSTAIN] = cc_or_zero(cc_eg_1_sustain, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_eg_1_sustain)))
@@ -579,6 +582,7 @@ while true
 
   lfo_1.set_rate(signals[source_lfo_1_rate])
   lfo_1.set_level(signals[source_lfo_1_level])
+  lfo_1.set_wave(signals[source_lfo_1_wave])
   eg_1.set_attack(signals[source_eg_1_attack])
   eg_1.set_decay(signals[source_eg_1_decay])
   eg_1.set_sustain(signals[source_eg_1_sustain])
@@ -688,6 +692,8 @@ while true
       case module_id
       when 1 # MODULE_LFO_1
         signals[9] = lfo_1.process(control_tick, signals[source_lfo_1_rate_mod], signals[source_lfo_1_level_mod]) # SIGNAL_LFO_1_OUTPUT
+        signals[123] = lfo_1.output_triangle # SIGNAL_LFO_1_OUTPUT_TRIANGLE
+        signals[124] = lfo_1.output_square # SIGNAL_LFO_1_OUTPUT_SQUARE
       when 2 # MODULE_EG_1
         signals[10] = eg_1.process(control_tick, signals[source_eg_1_gate]) # SIGNAL_EG_1_OUTPUT
       when 3 # MODULE_OSC_1
