@@ -251,8 +251,8 @@ controls:
   # full level, and Mixer 2 Level 3 (CC 23), or the depth of what it modulates, sets how much is heard.
   - { entry: 57, module: NOISE_1,   key: LEVEL,        label: Level,        cc: 0,   value: 124, source: ONE }
   # Color came after the oscillators' PW Mod 1 Amt and Pol. It crossfades Out from the white (0.0)
-  # to the red (1.0), on CC 14, and powers up at CC 4, 0.0, the white.
-  - { entry: 95, module: NOISE_1,   key: COLOR,        label: Color,        cc: 14,  value: 4 }
+  # to the red (1.0), on CC 117, and powers up at CC 4, 0.0, the white.
+  - { entry: 95, module: NOISE_1,   key: COLOR,        label: Color,        cc: 117, value: 4 }
   # Entry 84 held the red's cutoff while it had a control, and is unused.
   - { entry: 18, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 124 }
   - { entry: 19, module: MIXER_1,   key: LEVEL_1,      label: Level 1,      cc: 118, value: 4 }
