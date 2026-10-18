@@ -783,6 +783,12 @@
       min-width: 0;
       max-width: none;
     }
+    /* What a parameter with zones picks, as Balance Law's law, on the Controls tab. */
+    .zone {
+      color: var(--text-color);
+      font-style: normal;
+      font-weight: 600;
+    }
     .row .src {
       color: var(--text-muted);
       font-size: 0.7rem;
@@ -1294,7 +1300,7 @@
       {"entry":73,"module":"MIXER_1","key":"LEVEL_4","label":"Level 4","bipolar":false,"cc":0,"value":4,"general":false,"slots":[["MIXER_1_LEVEL_4","Level 4",false]]},
       {"entry":74,"module":"MIXER_1","key":"POL_4","label":"Pol 4","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["MIXER_1_POL_4","Pol 4",true]]},
       {"entry":86,"module":"MIXER_1","key":"BALANCE_3_4","label":"Balance 3/4","bipolar":true,"cc":0,"value":64,"general":false,"slots":[["MIXER_1_BALANCE_3_4","Balance 3/4",true]]},
-      {"entry":97,"module":"MIXER_1","key":"BALANCE_LAW","label":"Balance Law","bipolar":true,"cc":0,"value":64,"general":false,"slots":[["MIXER_1_BALANCE_LAW","Balance Law",true]]},
+      {"entry":97,"module":"MIXER_1","key":"BALANCE_LAW","label":"Balance Law","bipolar":true,"cc":0,"value":64,"general":false,"hint":"How both balances crossfade: Linear below -0.25 (CC 34), Equal Power (each input at 1/√2 at the centre) up to +0.25 (CC 94), Filter Mode (each input whole over its own half) from there. -0.5, 0.0 and +0.5 pick each.","zones":["Linear","Equal Power","Filter Mode"],"zoneEdges":[-0.25,0.25],"slots":[["MIXER_1_BALANCE_LAW","Balance Law",true]]},
       {"entry":54,"module":"MIXER_1","key":"OUT_LEVEL","label":"Out Level","bipolar":false,"cc":0,"source":"ONE","general":false,"slots":[["MIXER_1_OUT_LEVEL","Out Level",false]]},
       {"entry":75,"module":"MIXER_2","key":"LEVEL_1","label":"Level 1","bipolar":false,"cc":0,"value":89,"source":"SQRT_HALF","general":false,"slots":[["MIXER_2_LEVEL_1","Level 1",false]]},
       {"entry":76,"module":"MIXER_2","key":"POL_1","label":"Pol 1","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["MIXER_2_POL_1","Pol 1",true]]},
@@ -1306,7 +1312,7 @@
       {"entry":81,"module":"MIXER_2","key":"LEVEL_4","label":"Level 4","bipolar":false,"cc":0,"source":"ONE","general":false,"slots":[["MIXER_2_LEVEL_4","Level 4",false]]},
       {"entry":82,"module":"MIXER_2","key":"POL_4","label":"Pol 4","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["MIXER_2_POL_4","Pol 4",true]]},
       {"entry":88,"module":"MIXER_2","key":"BALANCE_3_4","label":"Balance 3/4","bipolar":true,"cc":0,"value":64,"general":false,"slots":[["MIXER_2_BALANCE_3_4","Balance 3/4",true]]},
-      {"entry":98,"module":"MIXER_2","key":"BALANCE_LAW","label":"Balance Law","bipolar":true,"cc":0,"value":64,"general":false,"slots":[["MIXER_2_BALANCE_LAW","Balance Law",true]]},
+      {"entry":98,"module":"MIXER_2","key":"BALANCE_LAW","label":"Balance Law","bipolar":true,"cc":0,"value":64,"general":false,"hint":"How both balances crossfade: Linear below -0.25 (CC 34), Equal Power (each input at 1/√2 at the centre) up to +0.25 (CC 94), Filter Mode (each input whole over its own half) from there. -0.5, 0.0 and +0.5 pick each.","zones":["Linear","Equal Power","Filter Mode"],"zoneEdges":[-0.25,0.25],"slots":[["MIXER_2_BALANCE_LAW","Balance Law",true]]},
       {"entry":83,"module":"MIXER_2","key":"OUT_LEVEL","label":"Out Level","bipolar":false,"cc":0,"source":"ONE","general":false,"slots":[["MIXER_2_OUT_LEVEL","Out Level",false]]},
       {"entry":25,"module":"CHORUS_1","key":"MIX","label":"Mix","bipolar":false,"cc":93,"value":64,"general":false,"slots":[["CHORUS_1_MIX","Mix",false]]},
       {"entry":23,"module":"CHORUS_1","key":"RATE","label":"Rate","bipolar":false,"cc":58,"value":64,"general":false,"slots":[["CHORUS_1_RATE","Rate",false]]},
@@ -1396,6 +1402,7 @@
   const CONTROL_ITEMS = SPEC.controls.map(c => ({
     ...toItem(c), entry: c.entry, general: !!c.general, bipolar: c.bipolar, slots: c.slots,
     defaultCC: c.cc, defaultValue: c.value ?? null, defaultSource: c.source || null,
+    hint: c.hint || null, zones: c.zones || null, zoneEdges: c.zoneEdges || null,
   }));
   const PARAM_ITEMS = CONTROL_ITEMS.filter(c => !c.general);
   const GENERAL_ITEMS = CONTROL_ITEMS.filter(c => c.general);
@@ -1785,7 +1792,7 @@
   // parameter's control slot is its own, which only the parameter reads, so it has none.
   function controlRowHTML(c, withInput) {
     const [[slot, label, bipolar], ...more] = c.slots;
-    const tip = bipolar ? 'Bipolar: CC 64 is the centre' : 'Unipolar';
+    const tip = (bipolar ? 'Bipolar: CC 64 is the centre' : 'Unipolar') + (c.hint ? `. ${escapeHTML(c.hint)}` : '');
     return `<div class="row ctrl" data-ctrl="${c.key}">
       ${withInput ? `<span class="port in param" data-dst="PR:${c.key}" title="Where ${escapeHTML(c.full)} takes its value (per buffer)"></span>` : ''}
       <span class="lbl" title="${tip}">${escapeHTML(label)}</span>
@@ -1887,7 +1894,22 @@
     refreshSourceValues();
   }
 
-  // The value each routed input or parameter reads, where the editor can know it.
+  // What a parameter that picks one of a few things by range (its zones, as Balance Law's laws)
+  // picks from the value it reads -- its source's when routed, its own slot's otherwise -- as the
+  // synth does: the zone is how many of its edges the value is at or above. Null where the editor
+  // cannot know the value, or for a parameter with no zones.
+  function zoneName(c) {
+    if (!c.zones) return null;
+    const src = state.params[c.key];
+    const v = signalNorm(src !== undefined && src !== c.key ? src : c.slots[0][0]);
+    if (!v) return null;
+    const x = parseFloat(v.text);
+    return c.zones[c.zoneEdges.filter(e => x >= e).length];
+  }
+
+  // The value each routed input or parameter reads, where the editor can know it. A node has no
+  // room for what a parameter with zones picks, so only its label's tooltip explains them; the
+  // Controls tab shows the one picked.
   function refreshSourceValues() {
     world.querySelectorAll('[data-src-of]').forEach(span => {
       const dst = span.dataset.srcOf;
@@ -3012,7 +3034,7 @@
       panel.className = 'panel';
       panel.innerHTML = `<h2>${p.title}</h2><div class="control-row">` + items.map(c => `
         <div class="slider-knob-zone" data-ctrl="${c.key}">
-          <div class="slider-label">${escapeHTML(/^\d$/.test(c.label) ? c.full : c.label)} <span class="cc-num"></span></div>
+          <div class="slider-label"${c.hint ? ` title="${escapeHTML(c.hint)}"` : ''}>${escapeHTML(/^\d$/.test(c.label) ? c.full : c.label)} <span class="cc-num"></span></div>
           <div class="slider-input-wrapper">
             <input type="range" min="0" max="127"${c.slots.some(([, , bipolar]) => bipolar) ? ' class="bipolar"' : ''}>
             <span class="slider-value"></span>
@@ -3061,6 +3083,8 @@
       ccNum.innerHTML =
         (!cc ? '(no CC)' : RESERVED_CCS.has(cc) ? `(CC ${cc}, reserved)` : `(CC ${cc})`) +
         (routed ? ` ← ${sourceHTML(src)}` : '');
+      const picked = zoneName(c);
+      if (picked) ccNum.innerHTML += ` <span class="zone">${escapeHTML(picked)}</span>`;
       ccNum.classList.toggle('shared', others.length > 0);
       ccNum.title = others.length ? `CC ${cc} also moves ${others.join(', ')}` : '';
       zone.title = routed ? `${c.full} reads ${sigLabel(src)}. This slider sets only its own slot, which other wires may read.` : '';

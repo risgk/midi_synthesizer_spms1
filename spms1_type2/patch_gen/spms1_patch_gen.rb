@@ -212,7 +212,7 @@ def editor_js
     controls: s.controls_in_list_order.map do |c|
       h = { entry: c['entry'], module: c['module'], key: c['key'], label: c['label'],
             bipolar: !!c['bipolar'], cc: c['cc'].to_i, value: c['value'], source: c['source'],
-            general: !!c['general'],
+            general: !!c['general'], hint: c['hint'], zones: c['zones'], zoneEdges: c['zone_edges'],
             slots: if c['general']
                      s.slots_of(c).map do |sig|
                        [sig['key'], sig['label'] ? sig['label'].sub(/\AGeneral /, '') : c['label'], s.bipolar?(sig)]

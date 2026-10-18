@@ -291,8 +291,12 @@ controls:
   # Balance Law came after Noise 1 Color and LFO 1 Wave. It picks how both balances of its mixer
   # crossfade: linear below -0.25, equal power to +0.25, as Filter 1 Mode from there. It is bipolar only
   # so that its default, equal power, is the centre: it has no CC and reads its own slot, 0.0, on
-  # both mixers, and the constants -0.5, 0.0 and +0.5 pick each law.
-  - { entry: 97, module: MIXER_1,   key: BALANCE_LAW, label: Balance Law, cc: 0,   value: 64,  bipolar: true }
+  # both mixers, and the constants -0.5, 0.0 and +0.5 pick each law. `zones` names what each range
+  # between `zone_edges` picks, and the editor shows the one picked; `hint` is the editor's tooltip
+  # for the parameter.
+  - { entry: 97, module: MIXER_1,   key: BALANCE_LAW, label: Balance Law, cc: 0,   value: 64,  bipolar: true,
+      zones: [Linear, Equal Power, Filter Mode], zone_edges: [-0.25, 0.25],
+      hint: "How both balances crossfade: Linear below -0.25 (CC 34), Equal Power (each input at 1/√2 at the centre) up to +0.25 (CC 94), Filter Mode (each input whole over its own half) from there. -0.5, 0.0 and +0.5 pick each." }
   # Out Level came after Pitch 1 Coarse and Fine; it has no CC and reads 1.0.
   - { entry: 54, module: MIXER_1,   key: OUT_LEVEL,    label: Out Level,    cc: 0,   source: ONE }
   # Mixer 2 came after Mixer 1's Level 3 to Pol 4: the audio ahead of the filter, Osc 1 on In 1, Osc 2
@@ -310,7 +314,9 @@ controls:
   - { entry: 81, module: MIXER_2,   key: LEVEL_4,      label: Level 4,      cc: 0,   source: ONE }
   - { entry: 82, module: MIXER_2,   key: POL_4,   label: Pol 4,   cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 88, module: MIXER_2,   key: BALANCE_3_4, label: Balance 3/4, cc: 0,   value: 64,  bipolar: true }
-  - { entry: 98, module: MIXER_2,   key: BALANCE_LAW, label: Balance Law, cc: 0,   value: 64,  bipolar: true }
+  - { entry: 98, module: MIXER_2,   key: BALANCE_LAW, label: Balance Law, cc: 0,   value: 64,  bipolar: true,
+      zones: [Linear, Equal Power, Filter Mode], zone_edges: [-0.25, 0.25],
+      hint: "How both balances crossfade: Linear below -0.25 (CC 34), Equal Power (each input at 1/√2 at the centre) up to +0.25 (CC 94), Filter Mode (each input whole over its own half) from there. -0.5, 0.0 and +0.5 pick each." }
   - { entry: 83, module: MIXER_2,   key: OUT_LEVEL,    label: Out Level,    cc: 0,   source: ONE }
   - { entry: 25, module: CHORUS_1,  key: MIX,          label: Mix,          cc: 93,  value: 64 }
   - { entry: 23, module: CHORUS_1,  key: RATE,         label: Rate,         cc: 58,  value: 64 }
