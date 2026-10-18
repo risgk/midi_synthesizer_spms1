@@ -22,6 +22,12 @@ NRPN_INPUT_BASE         = 128
 NRPN_PARAM_SOURCE_BASE  = 256
 NRPN_CC_BASE            = 384
 
+# A parameter source of 127 is the parameter's own control slot, which is off the bus: the bus
+# carries the outputs, the constants, the notes and the General slots in 0-126, and each
+# parameter's control slot sits at 128 + its entry, where only the parameter reads it.
+SIGNAL_OWN      = 127
+PARAM_SLOT_BASE = 128
+
 def fail_spec(message)
   abort "spms1_patch_gen.rb: spms1_patch.yaml: #{message}"
 end
@@ -63,6 +69,7 @@ class Spec
   def params = @controls.reject { |c| c['general'] }
   def generals = @controls.select { |c| c['general'] }
   def outputs_of(mod) = @signals.select { |s| s['output'] && s['module'] == mod['key'] }
+  # The bus slots a General control's CC fills; a parameter's control slot is its own, off the bus.
   def slots_of(control) = @signals.select { |s| s['control'] == full_key(control) }
 
   def bipolar?(signal)
@@ -95,7 +102,7 @@ class Spec
     unique.call('control', @controls.map { |c| { 'key' => full_key(c) } }, 'key')
     fail_spec('module id 0 is MODULE_NONE') if @module.values.any? { |m| m['id'] == 0 }
     fail_spec('module ids are 1-127') if @modules.any? { |m| m['id'] > 127 }
-    fail_spec('signal ids are 0-127') if @signals.any? { |s| s['id'] > 127 }
+    fail_spec("signal ids are 0-126, #{SIGNAL_OWN} being a parameter's own slot") if @signals.any? { |s| s['id'] >= SIGNAL_OWN }
     fail_spec('signal 0 must be NONE') unless @signals.any? { |s| s['id'] == 0 && s['key'] == 'NONE' }
     fail_spec('input entries are 0-127') if @inputs.any? { |i| i['entry'] > 127 }
     fail_spec('control entries are 0-127') if @controls.any? { |c| c['entry'] > 127 }
@@ -103,13 +110,14 @@ class Spec
     @signals.each do |s|
       fail_spec("signal #{s['key']} names module #{s['module']}") if s['module'] && !@module[s['module']]
       fail_spec("signal #{s['key']} names control #{s['control']}") if s['control'] && !@control[s['control']]
+      fail_spec("signal #{s['key']} is a parameter's control slot, which is off the bus") if s['control'] && !@control[s['control']]['general']
     end
     (@inputs + @controls).each do |item|
       fail_spec("#{full_key(item)} names module #{item['module']}") if item['module'] && !@module[item['module']]
       fail_spec("#{full_key(item)} takes #{item['source']}, no signal") if item['source'] && !@signal[item['source']]
     end
     @controls.each do |c|
-      fail_spec("control #{full_key(c)} fills no slot") if slots_of(c).empty?
+      fail_spec("General control #{full_key(c)} fills no slot") if c['general'] && slots_of(c).empty?
       fail_spec("control #{full_key(c)} has a CC but no value") if c['cc'].to_i != 0 && !c.key?('value')
     end
   end
@@ -136,6 +144,10 @@ def patch_rb
   out << ruby_constants([['MODULE_NONE', 0]] + s.modules.map { |m| ["MODULE_#{m['key']}", m['id']] })
   out << "\n\n# Slots of the signal bus, the values of NRPN categories 1 and 2.\n"
   out << ruby_constants(s.signals.map { |sig| ["SIGNAL_#{sig['key']}", sig['id']] })
+  out << "\n\n# A parameter source of SIGNAL_OWN is the parameter's own control slot, at PARAM_SLOT_BASE + its\n"
+  out << "# entry, off the bus: the slots below.\n"
+  out << "SIGNAL_OWN      = #{SIGNAL_OWN}\nPARAM_SLOT_BASE = #{PARAM_SLOT_BASE}\n\n"
+  out << ruby_constants(s.params.map { |c| ["SLOT_#{s.full_key(c)}", PARAM_SLOT_BASE + c['entry']] })
   out << "\n\n# NRPN parameter numbers: (MSB << 7) | LSB, where the MSB picks a category and the LSB an entry.\n"
   out << "#   0..127   active_modules[slot]\n# 128..255   what feeds each module input\n"
   out << "# 256..383   where each parameter's value comes from\n# 384..511   which CC fills each control slot\n"
@@ -167,7 +179,7 @@ def patch_rb
   out << "\n"
   width = s.params.map { |c| s.full_key(c).length }.max
   s.params.each do |c|
-    out << "  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_#{s.full_key(c).ljust(width)}, SIGNAL_#{c['source'] || s.full_key(c)})\n"
+    out << "  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_#{s.full_key(c).ljust(width)}, SIGNAL_#{c['source'] || 'OWN'})\n"
   end
   out << "\n"
   with_cc = s.controls.select { |c| c['cc'].to_i != 0 }
@@ -201,9 +213,13 @@ def editor_js
       h = { entry: c['entry'], module: c['module'], key: c['key'], label: c['label'],
             bipolar: !!c['bipolar'], cc: c['cc'].to_i, value: c['value'], source: c['source'],
             general: !!c['general'],
-            slots: s.slots_of(c).map do |sig|
-              [sig['key'], sig['label'] ? sig['label'].sub(/\AGeneral /, '') : c['label'], s.bipolar?(sig)]
-            end }
+            slots: if c['general']
+                     s.slots_of(c).map do |sig|
+                       [sig['key'], sig['label'] ? sig['label'].sub(/\AGeneral /, '') : c['label'], s.bipolar?(sig)]
+                     end
+                   else
+                     [[s.full_key(c), c['label'], !!c['bipolar']]]
+                   end }
       h.compact
     end,
     # The editor labels outputs and control slots itself, from their module and control.

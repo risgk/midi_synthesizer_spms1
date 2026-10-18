@@ -91,7 +91,7 @@ Usage
       which, and the keys of the PC keyboard do not play while it is hidden
 - Graphical patch editor on its Patch tab
     - Wires module outputs to inputs and parameters, and sets the run order and CC assignments
-    - Folds away each module's parameters that have no CC and whose slots nothing reads, under a
+    - Folds away each module's parameters that have no CC and read their own slot or a constant, under a
       row that opens and closes them; opening one moves the nodes under it down, and closing it moves
       them back. A wire to a folded one ends on that row, and each module's choice is remembered
     - Saves and loads patches as JSON
@@ -214,8 +214,8 @@ at its own level, Level 1 (CC 116), Level 2 (CC 21) and Level 3 (CC 23); In 4 is
 and Level 3 power up at 0.0, so the default patch plays Osc 1 alone until they are turned up. Osc 2 plays the note from Pitch 1 as Osc
 1 does, tuned against it by its own Pitch Coarse (CC 85) and Pitch Fine (CC 76), 12 cents sharp at
 power-up for a slow beat. Its Wave is its own as well, on CC 104 beside Osc 1's on CC 102. It
-follows Osc 1 in everything else: its amounts and its pulse width read Osc 1's control slots, so
-Osc 1's CCs move both.
+follows Osc 1 in everything else: its amounts and its pulse width are on Osc 1's CCs, so one CC
+moves both.
 
 The voice is mono up to the amp. The chorus takes it and puts out a left and a right, the delay
 takes the two sides and keeps them apart, and its two outputs are the two sides of the final
@@ -367,7 +367,9 @@ is routed to it the bound holds.
 The patch is data, and NRPN rewrites it while the synth is running: which modules run and in what
 order, what feeds each module input, where each parameter takes its value from, and which CC fills
 each control slot. Every module reads from a numbered signal slot and writes to one, so rewiring is
-a matter of changing slot numbers.
+a matter of changing slot numbers. Each parameter also has a control slot of its own, which its CC
+fills and which only it can read: a parameter source of 127 names it, and no slot number reaches
+it from anywhere else.
 
 #### Sending
 
@@ -384,8 +386,8 @@ a matter of changing slot numbers.
 | ----- | ----- | ---- | ---------- |
 | 0 | 0-31 | Run order, slot by slot | Module ID |
 | 1 | 0-33 | What feeds a module input | Signal ID |
-| 2 | 0-28, 34-83 | Where a parameter takes its value | Signal ID |
-| 3 | 0-83 | Which CC fills a control slot | CC number, or 0 for none |
+| 2 | 0-28, 34-88 | Where a parameter takes its value | Signal ID, or 127 for its own control slot |
+| 3 | 0-88 | Which CC fills a control slot | CC number, or 0 for none |
 
 The run order is read from slot 0 upwards and stops at the first Module ID 0, so a patch shorter
 than 32 modules ends itself. It is separate from the module numbering: a module only sees the
@@ -527,60 +529,41 @@ two slots, a unipolar and a bipolar one. See the General slots below.
 
 | ID | Signal | | ID | Signal | | ID | Signal |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | None (constant 0.0) | | 40 | Mixer 1 Level 2 | | 82 | Pitch 1 Fine ± |
-| 1 | Constant 1.0 | | 41 | Mixer 1 Pol 2 ± | | 83 | Mixer 1 Out Level |
-| 2 | Constant 0.5 | | 42 | Chorus 1 Rate | | 84 | Osc 1 Mod 1 Amt |
-| 3 | Constant 0.2 | | 43 | Chorus 1 Depth | | 85 | Osc 1 Mod 1 Pol ± |
-| 4 | Constant 0.1 | | 44 | Chorus 1 Mix | | 86 | Noise 1 Output White ± |
-| 5 | Constant -0.1 | | 45 | Delay 1 Time | | 87 | Noise 1 Level |
-| 6 | Constant -0.2 | | 46 | Delay 1 Feedback | | 88 | Osc 2 Output ± |
-| 7 | Constant -0.5 | | 47 | Delay 1 Mix | | 89 | Osc 2 Wave |
-| 8 | Constant -1.0 | | 48 | Note Pitch ± | | 90 | Osc 2 Pitch Coarse ± |
-| 9 | LFO 1 Output ± | | 49 | Note Gate | | 91 | Osc 2 Pitch Fine ± |
-| 10 | EG 1 Output | | 50 | Pitch Bend ± | | 92 | Osc 2 Mod 1 Amt |
-| 11 | Osc 1 Output ± | | 51 | General Mod Wheel | | 93 | Osc 2 Mod 1 Pol ± |
-| 12 | Filter 1 Output LP ± | | 52 | General Unipolar 1 | | 94 | Osc 2 Mod 2 Amt |
-| 13 | Amp 1 Output ± | | 53 | General Unipolar 2 | | 95 | Osc 2 Mod 2 Pol ± |
-| 14 | Mixer 1 Output ± | | 54 | General Unipolar 3 | | 96 | Osc 2 Pulse Width |
-| 15 | Chorus 1 Output L ± | | 55 | General Unipolar 4 | | 97 | Osc 2 PW Mod Amt |
-| 16 | Chorus 1 Output R ± | | 56 | General Bipolar 1 ± | | 98 | Osc 2 PW Mod Pol ± |
-| 17 | Delay 1 Output L ± | | 57 | General Bipolar 2 ± | | 102 | Mixer 1 Level 3 |
-| 18 | Delay 1 Output R ± | | 58 | General Bipolar 3 ± | | 103 | Mixer 1 Pol 3 ± |
-| 19 | LFO 1 Rate | | 59 | General Bipolar 4 ± | | 104 | Mixer 1 Level 4 |
-| 20 | LFO 1 Level | | 60 | Pitch 1 Output ± | | 105 | Mixer 1 Pol 4 ± |
-| 22 | EG 1 Attack | | 61 | Pitch 1 Glide | | 106 | Mixer 2 Output ± |
-| 23 | EG 1 Decay | | 62 | Osc 1 Pulse Width | | 107 | Mixer 2 Level 1 |
-| 24 | EG 1 Sustain | | 63 | Osc 1 PW Mod Amt | | 108 | Mixer 2 Pol 1 ± |
-| 25 | EG 1 Level | | 64 | Osc 1 PW Mod Pol ± | | 109 | Mixer 2 Level 2 |
-| 27 | Osc 1 Wave | | 65 | Filter 1 Output BP ± | | 110 | Mixer 2 Pol 2 ± |
-| 28 | Osc 1 Pitch Coarse ± | | 66 | Filter 1 Output HP ± | | 111 | Mixer 2 Level 3 |
-| 29 | Osc 1 Pitch Fine ± | | 69 | LFO 1 Rate Mod Amt | | 112 | Mixer 2 Pol 3 ± |
-| 30 | Osc 1 Mod 2 Amt | | 70 | LFO 1 Rate Mod Pol ± | | 113 | Mixer 2 Level 4 |
-| 31 | Osc 1 Mod 2 Pol ± | | 73 | Filter 1 Mod 2 Amt | | 114 | Mixer 2 Pol 4 ± |
-| 32 | Filter 1 Cutoff | | 74 | Filter 1 Mod 2 Pol ± | | 115 | Mixer 2 Out Level |
-| 33 | Filter 1 Resonance | | 75 | Filter 1 Mod 3 Amt | | 116 | Noise 1 Output Red ± |
-| 34 | Filter 1 Gain | | 76 | Filter 1 Mod 3 Pol ± | | 118 | Noise 1 Output LF ± |
-| 35 | Filter 1 Mod 1 Amt | | 77 | Pitch 1 Bend Amt | | 119 | Mixer 1 Balance 1/2 ± |
-| 36 | Filter 1 Mod 1 Pol ± | | 78 | Pitch 1 Bend Pol ± | | 120 | Mixer 1 Balance 3/4 ± |
-| 37 | Amp 1 Gain | | 79 | LFO 1 Level Mod Amt | | 121 | Mixer 2 Balance 1/2 ± |
-| 38 | Mixer 1 Level 1 | | 80 | LFO 1 Level Mod Pol ± | | 122 | Mixer 2 Balance 3/4 ± |
-| 39 | Mixer 1 Pol 1 ± | | 81 | Pitch 1 Coarse ± | |  |  |
+| 0 | None (constant 0.0) | | 13 | Amp 1 Output ± | | 55 | General Unipolar 4 |
+| 1 | Constant 1.0 | | 14 | Mixer 1 Output ± | | 56 | General Bipolar 1 ± |
+| 2 | Constant 0.5 | | 15 | Chorus 1 Output L ± | | 57 | General Bipolar 2 ± |
+| 3 | Constant 0.2 | | 16 | Chorus 1 Output R ± | | 58 | General Bipolar 3 ± |
+| 4 | Constant 0.1 | | 17 | Delay 1 Output L ± | | 59 | General Bipolar 4 ± |
+| 5 | Constant -0.1 | | 18 | Delay 1 Output R ± | | 60 | Pitch 1 Output ± |
+| 6 | Constant -0.2 | | 48 | Note Pitch ± | | 65 | Filter 1 Output BP ± |
+| 7 | Constant -0.5 | | 49 | Note Gate | | 66 | Filter 1 Output HP ± |
+| 8 | Constant -1.0 | | 50 | Pitch Bend ± | | 86 | Noise 1 Output White ± |
+| 9 | LFO 1 Output ± | | 51 | General Mod Wheel | | 88 | Osc 2 Output ± |
+| 10 | EG 1 Output | | 52 | General Unipolar 1 | | 106 | Mixer 2 Output ± |
+| 11 | Osc 1 Output ± | | 53 | General Unipolar 2 | | 116 | Noise 1 Output Red ± |
+| 12 | Filter 1 Output LP ± | | 54 | General Unipolar 3 | | 118 | Noise 1 Output LF ± |
 
 <!-- patch_gen end -->
 
 A **±** marks a signal that swings both ways: a module output reaches -0.5 and +0.5 at full
-scale, a bipolar control slot runs -0.5 to +0.5, and a mixer sums two of them and stops at one.
-Everything unmarked runs 0.0 to 1.0 -- the envelope, Note Gate and every unipolar control slot. The bus carries both kinds under one numbering, so the range belongs to the slot
-rather than to the sort of thing that wrote it.
+scale, a bipolar General slot runs -0.5 to +0.5, and a mixer sums two of them and stops at one.
+Everything unmarked runs 0.0 to 1.0 -- the envelope, Note Gate and the unipolar General slots. The
+bus carries both kinds under one numbering, so the range belongs to the slot rather than to the
+sort of thing that wrote it. The numbers missing from the table are free; 127 is not a slot but a
+parameter's own control slot.
 
-Slots 19-47, 61-64, 69-85, 87, 89-98, 102-105 and 107-115 (but for the unused 21, 26, 71 and 72) hold the values arriving from CC, so a parameter reads its own CC
-by default. Each parameter is unipolar or bipolar, and its slot takes the same range. A unipolar one
+A parameter's own control slot holds the value arriving from its CC, off the bus, and a parameter
+reads it by default: Signal ID 127 in category 2. Each parameter is unipolar or bipolar, and its
+slot takes the same range. A unipolar one
 runs 0.0 to 1.0 from CC 4 to CC 124, the span of an envelope, so an envelope pointed at one sweeps
 the whole of its dial. A bipolar one runs -0.5 to +0.5 with CC 64 at 0.0, the span of an LFO, so a
 bipolar source pointed at one swings it about the middle. Osc 1 Pitch Coarse and Fine and Pitch 1 Coarse and
 Fine are bipolar, since their middle is no change at all, and so is every Pol -- the mixer's two and
-the eight Mod Pol controls and Pitch 1 Bend Pol -- since its sign is what it sets. Pointing a parameter at another
-slot is what makes a modulation. A slot with no CC holds 0.0.
+the eight Mod Pol controls and Pitch 1 Bend Pol -- since its sign is what it sets. Pointing a parameter at a
+slot on the bus is what makes a modulation. A control slot with no CC holds 0.0. No input or other
+parameter can read a parameter's control slot: a CC meant for more than one parameter, or for a
+module input, goes on a General slot, or is given to each parameter in category 3, as Osc 1 and
+Osc 2 share theirs.
 
 Slots 51-59, the General slots, are control slots that no parameter owns: a CC put on the bus for
 any module input or parameter to read. General Mod Wheel reads CC 1, runs 0.0 to 1.0 and powers
@@ -804,21 +787,18 @@ changes only how fast the output moves, so it cannot step it.
   sets the time; at CC 64 a glide covers nine tenths of the way in about a tenth of a second. Every note glides, played legato
   or not. CC 99 = 2, CC 98 = 34, CC 6 = 51 takes the time from General Mod Wheel instead, so the
   wheel brings the portamento in
-- A CC that bends pitch both ways through the modulation input. Mixer 1 runs ahead of the
-  oscillator and is free: CC 99 = 1, CC 98 = 7, CC 6 = 32 puts the filter cutoff's control slot on
-  its first input, CC 98 = 8, CC 6 = 7 the constant -0.5 on its second, and CC 98 = 2, CC 6 = 14
-  points the oscillator's Mod 2 input at Mixer 1 in the LFO's place, and CC 99 = 2,
-  CC 98 = 12, CC 6 = 2 sets Osc 1 Mod 2 Pol back to +0.5; CC 118 and 119 up to CC 124 open the
-  two inputs. The slot is unipolar, so
-  that constant is what centres it on CC 64 as the LFO is on zero. CC 74 now bends the pitch down
-  and up around the note, as far as CC 13 allows: a semitone either way at CC 6, an octave at
-  CC 28
+- A CC that bends pitch both ways through the modulation input: CC 99 = 1, CC 98 = 2, CC 6 = 56
+  points the oscillator's Mod 2 input at General Bipolar 1 in the LFO's place, and CC 99 = 2,
+  CC 98 = 12, CC 6 = 2 sets Osc 1 Mod 2 Pol back to +0.5. The slot is bipolar, centred on CC 64 as
+  the LFO is on zero, so CC 16 now bends the pitch down and up around the note, as far as CC 13
+  allows: a semitone either way at CC 6, an octave at CC 28
 - A CC that works backwards, which needs a mixer to invert it. Mixer 1 is already running, so it
-  only needs wiring and its levels up: CC 99 = 1, CC 98 = 7, CC 6 = 32 puts the cutoff's control slot on its first
-  input and CC 98 = 8, CC 6 = 1 the constant 1.0 on its second, and CC 99 = 2, CC 98 = 20,
-  CC 6 = 7 pins the first input's polarity to -0.5, the negating end of its dial; with CC 118 and
-  119 up to CC 124, the mixer outputs 1.0 less the CC: the CC mirrored about CC 64. Point the cutoff's own source at the
-  mixer with CC 99 = 2, CC 98 = 13, CC 6 = 14 and CC 74 now closes the filter as it rises
+  only needs wiring and its levels up: CC 99 = 1, CC 98 = 7, CC 6 = 52 puts General Unipolar 1
+  (CC 16) on its first input and CC 98 = 8, CC 6 = 1 the constant 1.0 on its second, and CC 99 =
+  2, CC 98 = 20, CC 6 = 7 pins the first input's polarity to -0.5, the negating end of its dial;
+  with CC 118 and 119 up to CC 124, the mixer outputs 1.0 less the CC: the CC mirrored about CC
+  64. Point the cutoff's source at the mixer with CC 99 = 2, CC 98 = 13, CC 6 = 14 and CC 16 now
+  closes the filter as it rises
 - Take the filter out of the chain: CC 99 = 1, CC 98 = 5, CC 6 = 106 points the amp's audio input
   at Mixer 2. The filter keeps running and keeps its slot; nothing reads it
 - Echoes that only come in with the mod wheel: CC 99 = 2, CC 98 = 28, CC 6 = 51 takes Delay 1 Mix
@@ -847,12 +827,12 @@ changes only how fast the output moves, so it cannot step it.
   and Pitch 1 Coarse and Fine are not smoothed, so that the pitch follows right away, and neither is Pitch 1 Glide, which
   cannot step what it sets, nor EG 1 Attack, Decay and Sustain, which the envelope's own curve
   already moves between
-- A parameter source may point at any of the 128 slots. Slots above 115 read 0 until something
-  writes them, which leaves a parameter pointed at one at the bottom of a unipolar dial or the
-  middle of a bipolar one
+- A source may point at any slot number. A free one reads 0 until something writes it, which
+  leaves a parameter pointed at one at the bottom of a unipolar dial or the middle of a bipolar
+  one; 127, a parameter's own control slot, reads 0 as a module input's source
 - A parameter clamps its value to its own range, 0.0 to 1.0 or -0.5 to +0.5, and its control slot
-  carries that same range onto the bus. A unipolar slot routed to a module input runs one way,
-  as an envelope does; it takes a mixer and the constant -0.5 to swing both ways about CC 64
+  holds that same range. A unipolar General slot routed to a module input runs one way, as an
+  envelope does; its bipolar twin swings both ways about CC 64
 - The NRPN CCs are stored as ordinary controls too, so a parameter may be mapped to CC 6 -- which
   then moves it every time a patch edit is sent
 - A feedback loop through the bus -- a mixer wired back to its own input at a level below full,

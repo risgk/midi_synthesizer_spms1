@@ -43,10 +43,16 @@ default_order: [NOISE_1, LFO_1, EG_1, MIXER_1, PITCH_1, OSC_1, OSC_2, MIXER_2, F
 # Slots of the signal bus (the values of NRPN categories 1 and 2), each one of:
 #   value:    a constant, which the bus holds from startup; `short` is the editor's label for it
 #   output:   a module output, `module` writing it, `output` its label on the module in the editor
-#   control:  the control slot that the CC of that control (below) fills
+#   control:  a General slot, which the CC of that General control (below) fills
 #   (none):   a note input, written by the synth from MIDI
-# `bipolar` marks a slot that swings both ways (the README's ±); a control slot takes its
+# `bipolar` marks a slot that swings both ways (the README's ±); a General slot takes its
 # control's.
+#
+# 127 is not a slot: as a parameter's source it means the parameter's own control slot, which
+# holds the value of its CC off the bus (see spms1_main.rb), so no other input or parameter can
+# read it. The numbers the parameters' control slots had on the bus before they moved off it --
+# 19-47, 61-64, 69-85, 87, 89-98, 102-105, 107-115 and 119-122 -- are free, as are 21, 26, 67,
+# 68, 71, 72, 99-101, 117 and 123-126, unused already.
 signals:
   - { key: NONE,            id: 0, value: 0.0,  short: "0.0",  label: None (constant 0.0), label_ja: なし（定数 0.0） }
   - { key: ONE,             id: 1, value: 1.0,  short: "+1.0", label: Constant 1.0,  label_ja: 定数 1.0 }
@@ -58,44 +64,16 @@ signals:
   - { key: MINUS_HALF,      id: 7, value: -0.5, short: "-0.5", label: Constant -0.5, label_ja: 定数 -0.5 }
   - { key: MINUS_ONE,       id: 8, value: -1.0, short: "-1.0", label: Constant -1.0, label_ja: 定数 -1.0 }
 
-  - { key: LFO_1_OUTPUT,      id: 9,  module: LFO_1,     output: Out,   label: LFO 1 Output,      bipolar: true }
-  - { key: EG_1_OUTPUT,  id: 10, module: EG_1,      output: Out,   label: EG 1 Output }
-  - { key: OSC_1_OUTPUT,      id: 11, module: OSC_1,     output: Out,   label: Osc 1 Output,      bipolar: true }
-  - { key: FILTER_1_OUTPUT_LP, id: 12, module: FILTER_1,  output: Out LP, label: Filter 1 Output LP, bipolar: true }
-  - { key: AMP_1_OUTPUT,      id: 13, module: AMP_1,     output: Out,   label: Amp 1 Output,      bipolar: true }
-  - { key: MIXER_1_OUTPUT,    id: 14, module: MIXER_1,   output: Out,   label: Mixer 1 Output,    bipolar: true }
-  - { key: CHORUS_1_OUTPUT_L, id: 15, module: CHORUS_1,  output: Out L, label: Chorus 1 Output L, bipolar: true }
-  - { key: CHORUS_1_OUTPUT_R, id: 16, module: CHORUS_1,  output: Out R, label: Chorus 1 Output R, bipolar: true }
-  - { key: DELAY_1_OUTPUT_L,  id: 17, module: DELAY_1,   output: Out L, label: Delay 1 Output L,  bipolar: true }
-  - { key: DELAY_1_OUTPUT_R,  id: 18, module: DELAY_1,   output: Out R, label: Delay 1 Output R,  bipolar: true }
-
-  - { key: LFO_1_RATE,            id: 19, control: LFO_1_RATE }
-  - { key: LFO_1_LEVEL,           id: 20, control: LFO_1_LEVEL }
-  - { key: EG_1_ATTACK,      id: 22, control: EG_1_ATTACK }
-  - { key: EG_1_DECAY,       id: 23, control: EG_1_DECAY }
-  - { key: EG_1_SUSTAIN,     id: 24, control: EG_1_SUSTAIN }
-  - { key: EG_1_LEVEL,       id: 25, control: EG_1_LEVEL }
-  - { key: OSC_1_WAVE,        id: 27, control: OSC_1_WAVE }
-  - { key: OSC_1_PITCH_COARSE,     id: 28, control: OSC_1_PITCH_COARSE }
-  - { key: OSC_1_PITCH_FINE,       id: 29, control: OSC_1_PITCH_FINE }
-  - { key: OSC_1_MOD_2_AMT, id: 30, control: OSC_1_MOD_2_AMT }
-  - { key: OSC_1_MOD_2_POL, id: 31, control: OSC_1_MOD_2_POL }
-  - { key: FILTER_1_CUTOFF,       id: 32, control: FILTER_1_CUTOFF }
-  - { key: FILTER_1_RESONANCE,    id: 33, control: FILTER_1_RESONANCE }
-  - { key: FILTER_1_GAIN,         id: 34, control: FILTER_1_GAIN }
-  - { key: FILTER_1_MOD_1_AMT,   id: 35, control: FILTER_1_MOD_1_AMT }
-  - { key: FILTER_1_MOD_1_POL, id: 36, control: FILTER_1_MOD_1_POL }
-  - { key: AMP_1_GAIN,            id: 37, control: AMP_1_GAIN }
-  - { key: MIXER_1_LEVEL_1,       id: 38, control: MIXER_1_LEVEL_1 }
-  - { key: MIXER_1_POL_1,    id: 39, control: MIXER_1_POL_1 }
-  - { key: MIXER_1_LEVEL_2,       id: 40, control: MIXER_1_LEVEL_2 }
-  - { key: MIXER_1_POL_2,    id: 41, control: MIXER_1_POL_2 }
-  - { key: CHORUS_1_RATE,         id: 42, control: CHORUS_1_RATE }
-  - { key: CHORUS_1_DEPTH,        id: 43, control: CHORUS_1_DEPTH }
-  - { key: CHORUS_1_MIX,          id: 44, control: CHORUS_1_MIX }
-  - { key: DELAY_1_TIME,          id: 45, control: DELAY_1_TIME }
-  - { key: DELAY_1_FEEDBACK,      id: 46, control: DELAY_1_FEEDBACK }
-  - { key: DELAY_1_MIX,           id: 47, control: DELAY_1_MIX }
+  - { key: LFO_1_OUTPUT,       id: 9,  module: LFO_1,    output: Out,    label: LFO 1 Output,       bipolar: true }
+  - { key: EG_1_OUTPUT,        id: 10, module: EG_1,     output: Out,    label: EG 1 Output }
+  - { key: OSC_1_OUTPUT,       id: 11, module: OSC_1,    output: Out,    label: Osc 1 Output,       bipolar: true }
+  - { key: FILTER_1_OUTPUT_LP, id: 12, module: FILTER_1, output: Out LP, label: Filter 1 Output LP, bipolar: true }
+  - { key: AMP_1_OUTPUT,       id: 13, module: AMP_1,    output: Out,    label: Amp 1 Output,       bipolar: true }
+  - { key: MIXER_1_OUTPUT,     id: 14, module: MIXER_1,  output: Out,    label: Mixer 1 Output,     bipolar: true }
+  - { key: CHORUS_1_OUTPUT_L,  id: 15, module: CHORUS_1, output: Out L,  label: Chorus 1 Output L,  bipolar: true }
+  - { key: CHORUS_1_OUTPUT_R,  id: 16, module: CHORUS_1, output: Out R,  label: Chorus 1 Output R,  bipolar: true }
+  - { key: DELAY_1_OUTPUT_L,   id: 17, module: DELAY_1,  output: Out L,  label: Delay 1 Output L,   bipolar: true }
+  - { key: DELAY_1_OUTPUT_R,   id: 18, module: DELAY_1,  output: Out R,  label: Delay 1 Output R,   bipolar: true }
 
   - { key: NOTE_PITCH, id: 48, label: Note Pitch, bipolar: true }
   - { key: NOTE_GATE,  id: 49, label: Note Gate }
@@ -116,90 +94,19 @@ signals:
   - { key: GENERAL_BIPOLAR_4,  id: 59, control: GENERAL_4, label: General Bipolar 4, bipolar: true }
 
   - { key: PITCH_1_OUTPUT, id: 60, module: PITCH_1, output: Out, label: Pitch 1 Output, bipolar: true }
-  - { key: PITCH_1_GLIDE,   id: 61, control: PITCH_1_GLIDE }
-
-  - { key: OSC_1_PULSE_WIDTH,     id: 62, control: OSC_1_PULSE_WIDTH }
-  - { key: OSC_1_PW_MOD_AMT,   id: 63, control: OSC_1_PW_MOD_AMT }
-  - { key: OSC_1_PW_MOD_POL, id: 64, control: OSC_1_PW_MOD_POL }
 
   # The filter's band pass and high pass came after its low pass, which keeps slot 12.
   - { key: FILTER_1_OUTPUT_BP, id: 65, module: FILTER_1, output: Out BP, label: Filter 1 Output BP, bipolar: true }
   - { key: FILTER_1_OUTPUT_HP, id: 66, module: FILTER_1, output: Out HP, label: Filter 1 Output HP, bipolar: true }
 
-
-  - { key: LFO_1_RATE_MOD_AMT,   id: 69, control: LFO_1_RATE_MOD_AMT }
-  - { key: LFO_1_RATE_MOD_POL, id: 70, control: LFO_1_RATE_MOD_POL }
-
-  # Filter 1 Mod 2 Amt and Pol came after Osc 1's old Mod 1 Amt and Pol, in 71 and 72, now unused.
-  - { key: FILTER_1_MOD_2_AMT,   id: 73, control: FILTER_1_MOD_2_AMT }
-  - { key: FILTER_1_MOD_2_POL, id: 74, control: FILTER_1_MOD_2_POL }
-
-  # Filter 1 Mod 3 Amt and Pol came after Mod 2 Amt and Pol.
-  - { key: FILTER_1_MOD_3_AMT,   id: 75, control: FILTER_1_MOD_3_AMT }
-  - { key: FILTER_1_MOD_3_POL, id: 76, control: FILTER_1_MOD_3_POL }
-
-  # Pitch 1 Bend Amt and Pol came after Filter 1 Mod 3 Amt and Pol.
-  - { key: PITCH_1_BEND_AMT,   id: 77, control: PITCH_1_BEND_AMT }
-  - { key: PITCH_1_BEND_POL, id: 78, control: PITCH_1_BEND_POL }
-
-  # LFO 1 Level Mod Amt and Pol came after Pitch 1 Bend Amt and Pol.
-  - { key: LFO_1_LEVEL_MOD_AMT, id: 79, control: LFO_1_LEVEL_MOD_AMT }
-  - { key: LFO_1_LEVEL_MOD_POL, id: 80, control: LFO_1_LEVEL_MOD_POL }
-
-  # Pitch 1 Coarse and Fine came after LFO 1 Level Mod Amt and Pol.
-  - { key: PITCH_1_COARSE, id: 81, control: PITCH_1_COARSE }
-  - { key: PITCH_1_FINE,   id: 82, control: PITCH_1_FINE }
-
-  # Mixer 1 Out Level came after Pitch 1 Coarse and Fine.
-  - { key: MIXER_1_OUT_LEVEL, id: 83, control: MIXER_1_OUT_LEVEL }
-
-  # Osc 1 Mod 1 Amt and Pol came after Mixer 1 Out Level.
-  - { key: OSC_1_MOD_1_AMT, id: 84, control: OSC_1_MOD_1_AMT }
-  - { key: OSC_1_MOD_1_POL, id: 85, control: OSC_1_MOD_1_POL }
-
-  # Noise 1 came after Osc 1 Mod 1 Amt and Pol.
   - { key: NOISE_1_OUTPUT_WHITE, id: 86, module: NOISE_1, output: Out White, label: Noise 1 Output White, bipolar: true }
-  - { key: NOISE_1_LEVEL,  id: 87, control: NOISE_1_LEVEL }
-
-  # Osc 2 came after Noise 1. 99-101, Filter 1's audio gains for a while, are unused.
-  - { key: OSC_2_OUTPUT,        id: 88, module: OSC_2, output: Out, label: Osc 2 Output, bipolar: true }
-  - { key: OSC_2_WAVE,          id: 89, control: OSC_2_WAVE }
-  - { key: OSC_2_PITCH_COARSE,  id: 90, control: OSC_2_PITCH_COARSE }
-  - { key: OSC_2_PITCH_FINE,    id: 91, control: OSC_2_PITCH_FINE }
-  - { key: OSC_2_MOD_1_AMT,     id: 92, control: OSC_2_MOD_1_AMT }
-  - { key: OSC_2_MOD_1_POL,     id: 93, control: OSC_2_MOD_1_POL }
-  - { key: OSC_2_MOD_2_AMT,     id: 94, control: OSC_2_MOD_2_AMT }
-  - { key: OSC_2_MOD_2_POL,     id: 95, control: OSC_2_MOD_2_POL }
-  - { key: OSC_2_PULSE_WIDTH,   id: 96, control: OSC_2_PULSE_WIDTH }
-  - { key: OSC_2_PW_MOD_AMT,    id: 97, control: OSC_2_PW_MOD_AMT }
-  - { key: OSC_2_PW_MOD_POL,    id: 98, control: OSC_2_PW_MOD_POL }
-
-  # Mixer 1 In 3 and In 4, and Mixer 2, came after Osc 2.
-  - { key: MIXER_1_LEVEL_3,   id: 102, control: MIXER_1_LEVEL_3 }
-  - { key: MIXER_1_POL_3,     id: 103, control: MIXER_1_POL_3 }
-  - { key: MIXER_1_LEVEL_4,   id: 104, control: MIXER_1_LEVEL_4 }
-  - { key: MIXER_1_POL_4,     id: 105, control: MIXER_1_POL_4 }
-  - { key: MIXER_2_OUTPUT,    id: 106, module: MIXER_2, output: Out, label: Mixer 2 Output, bipolar: true }
-  - { key: MIXER_2_LEVEL_1,   id: 107, control: MIXER_2_LEVEL_1 }
-  - { key: MIXER_2_POL_1,     id: 108, control: MIXER_2_POL_1 }
-  - { key: MIXER_2_LEVEL_2,   id: 109, control: MIXER_2_LEVEL_2 }
-  - { key: MIXER_2_POL_2,     id: 110, control: MIXER_2_POL_2 }
-  - { key: MIXER_2_LEVEL_3,   id: 111, control: MIXER_2_LEVEL_3 }
-  - { key: MIXER_2_POL_3,     id: 112, control: MIXER_2_POL_3 }
-  - { key: MIXER_2_LEVEL_4,   id: 113, control: MIXER_2_LEVEL_4 }
-  - { key: MIXER_2_POL_4,     id: 114, control: MIXER_2_POL_4 }
-  - { key: MIXER_2_OUT_LEVEL, id: 115, control: MIXER_2_OUT_LEVEL }
+  - { key: OSC_2_OUTPUT,         id: 88, module: OSC_2,   output: Out,       label: Osc 2 Output,         bipolar: true }
+  - { key: MIXER_2_OUTPUT,       id: 106, module: MIXER_2, output: Out,      label: Mixer 2 Output,       bipolar: true }
 
   # The noise's red output came after Mixer 2, and its LF output after that; the white keeps slot
-  # 86. 117 held the red's cutoff while it had a control, and is unused.
+  # 86.
   - { key: NOISE_1_OUTPUT_RED, id: 116, module: NOISE_1, output: Out Red, label: Noise 1 Output Red, bipolar: true }
   - { key: NOISE_1_OUTPUT_LF,  id: 118, module: NOISE_1, output: Out LF,  label: Noise 1 Output LF,  bipolar: true }
-
-  # The mixers' balances came after the noise's LF output.
-  - { key: MIXER_1_BALANCE_1_2, id: 119, control: MIXER_1_BALANCE_1_2 }
-  - { key: MIXER_1_BALANCE_3_4, id: 120, control: MIXER_1_BALANCE_3_4 }
-  - { key: MIXER_2_BALANCE_1_2, id: 121, control: MIXER_2_BALANCE_1_2 }
-  - { key: MIXER_2_BALANCE_3_4, id: 122, control: MIXER_2_BALANCE_3_4 }
 
 # Module inputs, NRPN category 1, listed in the editor's order, each by its entry: what feeds each
 # one in the default patch (`source`, a signal key). `label` is the editor's, on the module; `name`
@@ -243,7 +150,8 @@ inputs:
 # the same entry of category 3 (which CC fills its control slot); a General control is in
 # category 3 only. `cc` is the CC of the default patch, 0 for none, and `value` what that CC
 # powers up at; for a control with no CC, what the editor's Init Values sets the CC given to it
-# to. A parameter takes its own control slot unless `source` (a signal key) says otherwise. Why the defaults are what they are is in spms1_main.rb, above the default patch.
+# to. A parameter takes its own control slot, off the bus, unless `source` (a signal key) says
+# otherwise. Why the defaults are what they are is in spms1_main.rb, above the default patch.
 controls:
   - { entry: 0,  module: LFO_1,     key: RATE,         label: Rate,         cc: 3,   value: 64 }
   # LFO 1 Rate Mod Amt and Pol came after Amp 1's old modulation controls, and Level Mod Amt and
@@ -284,17 +192,18 @@ controls:
   # 76, to tune it against Osc 1: Coarse powers up at CC 64, in unison, and Fine at CC 76, 12 cents
   # sharp, for a slow beat once Osc 2 is turned up. Wave is its own too, on CC 104 next to Osc 1's on
   # CC 102, sawtooth at power-up as Osc 1's is. Everything else follows Osc 1 by default: each
-  # amount and the pulse width read Osc 1's control slots, so Osc 1's CCs move both oscillators, and each polarity reads the constant Osc 1's does. Osc 2 is heard through Mixer 2
-  # Level 2 (CC 21), which powers up at 0.0.
+  # amount and the pulse width is on Osc 1's CC, so one CC moves both oscillators, and each polarity
+  # reads the constant Osc 1's does. Osc 2 is heard through Mixer 2 Level 2 (CC 21), which powers
+  # up at 0.0.
   - { entry: 59, module: OSC_2,     key: PITCH_COARSE,  label: Pitch Coarse,  cc: 85,  value: 64, bipolar: true }
   - { entry: 60, module: OSC_2,     key: PITCH_FINE,    label: Pitch Fine,    cc: 76,  value: 76, bipolar: true }
-  - { entry: 61, module: OSC_2,     key: MOD_1_AMT, label: Mod 1 Amt, cc: 0,   value: 4,   source: OSC_1_MOD_1_AMT }
+  - { entry: 61, module: OSC_2,     key: MOD_1_AMT, label: Mod 1 Amt, cc: 89,  value: 4 }
   - { entry: 62, module: OSC_2,     key: MOD_1_POL, label: Mod 1 Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
-  - { entry: 63, module: OSC_2,     key: MOD_2_AMT, label: Mod 2 Amt, cc: 0,   value: 4,   source: OSC_1_MOD_2_AMT }
+  - { entry: 63, module: OSC_2,     key: MOD_2_AMT, label: Mod 2 Amt, cc: 13,  value: 4 }
   - { entry: 64, module: OSC_2,     key: MOD_2_POL, label: Mod 2 Pol, cc: 0,   value: 124, source: POINT_ONE, bipolar: true }
   - { entry: 58, module: OSC_2,     key: WAVE,     label: Wave,         cc: 104, value: 4 }
-  - { entry: 65, module: OSC_2,     key: PULSE_WIDTH,  label: Pulse Width,  cc: 0,   value: 4,   source: OSC_1_PULSE_WIDTH }
-  - { entry: 66, module: OSC_2,     key: PW_MOD_AMT,   label: PW Mod Amt,      cc: 0,   value: 4,   source: OSC_1_PW_MOD_AMT }
+  - { entry: 65, module: OSC_2,     key: PULSE_WIDTH,  label: Pulse Width,  cc: 114, value: 4 }
+  - { entry: 66, module: OSC_2,     key: PW_MOD_AMT,   label: PW Mod Amt,      cc: 115, value: 4 }
   - { entry: 67, module: OSC_2,     key: PW_MOD_POL, label: PW Mod Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
   # Filter 1 in the editor: Gain, the cutoff and its three modulations, then the resonance. Entries
   # 68-70, its audio gains for a while, are unused: Mixer 2 levels the audio now. Mod 2
