@@ -222,12 +222,13 @@ NRPN が書き換えます。
 #### 実行順
 
 すべてのモジュールが入っています。音を作る型が 1 つずつで、先頭にモジュレーションのソース（Noise 1 も
-その 1 つで、LFO とエンベロープが同じサンプルで読めるよう、いちばん前に置きます）、それと Pitch 1 の間に Mixer 1、オシレータの直前に Pitch 1、オシレータとフィルタの
+その 1 つで、エンベロープと LFO が同じサンプルで読めるよう、いちばん前に置きます。次にエンベロープ、その後に LFO を置くのは、
+エンベロープでビブラートを掛けていくときのように、LFO の Mod In がエンベロープを同じサンプルで読めるようにするためです）、それと Pitch 1 の間に Mixer 1、オシレータの直前に Pitch 1、オシレータとフィルタの
 間に Mixer 2、最後にコーラスとディレイです。
 
 ```mermaid
 flowchart LR
-  NOISE[Noise 1] ~~~ LFO[LFO 1] ~~~ EG[EG 1] ~~~ MIX1[Mixer 1] ~~~ PITCH[Pitch 1] ~~~ OSC[Osc 1] ~~~ OSC2[Osc 2] ~~~ MIX2[Mixer 2] ~~~ FILTER[Filter 1] ~~~ AMP[Amp 1] ~~~ CHORUS[Chorus 1] ~~~ DELAY[Delay 1]
+  NOISE[Noise 1] ~~~ EG[EG 1] ~~~ LFO[LFO 1] ~~~ MIX1[Mixer 1] ~~~ PITCH[Pitch 1] ~~~ OSC[Osc 1] ~~~ OSC2[Osc 2] ~~~ MIX2[Mixer 2] ~~~ FILTER[Filter 1] ~~~ AMP[Amp 1] ~~~ CHORUS[Chorus 1] ~~~ DELAY[Delay 1]
 ```
 
 ミキサーには何も結線されていないので、毎サンプル自分のスロットぶんのコストを払うだけで、パッチが

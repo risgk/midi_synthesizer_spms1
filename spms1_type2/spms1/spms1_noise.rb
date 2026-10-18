@@ -3,7 +3,7 @@ module Spms1
   # generator: white, flat across the spectrum, and red, filtered from it through a one-pole low
   # pass at a fixed cutoff, falling 6 dB an octave above it. Each has an output of its own, and
   # Out, which process returns, crossfades from one to the other by Color. The default patch feeds the white to Mixer 2 In 3, and runs the
-  # module ahead of the LFO and the envelope.
+  # module ahead of the envelope and the LFO.
   class Noise
     # Blend at the reference rate on the line below, for each of two cascaded stages. The two move
     # together: their product is what fixes the time constant, so changing one without the other

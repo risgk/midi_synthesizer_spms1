@@ -1364,7 +1364,7 @@
       {"id":120,"key":"OSC_2_OUTPUT_SAW"},
       {"id":121,"key":"OSC_2_OUTPUT_PULSE"},
     ],
-    defaultOrder: ["NOISE_1","LFO_1","EG_1","MIXER_1","PITCH_1","OSC_1","OSC_2","MIXER_2","FILTER_1","AMP_1","CHORUS_1","DELAY_1"],
+    defaultOrder: ["NOISE_1","EG_1","LFO_1","MIXER_1","PITCH_1","OSC_1","OSC_2","MIXER_2","FILTER_1","AMP_1","CHORUS_1","DELAY_1"],
   };
   // patch_gen end
 
@@ -1423,8 +1423,8 @@
     CONST:     { x: 20,   y: 215 },
     GENERAL:   { x: 20,   y: 546 },
     NOISE_1:   { x: 340,  y: 40 },
-    LFO_1:     { x: 340,  y: 268 },
-    EG_1:      { x: 340,  y: 522 },
+    EG_1:      { x: 340,  y: 268 },
+    LFO_1:     { x: 340,  y: 522 },
     MIXER_1:   { x: 700,  y: 40 },
     PITCH_1:   { x: 700,  y: 346 },
     OSC_1:     { x: 1060, y: 40 },
@@ -2891,8 +2891,8 @@
   const CONTROL_PANELS = [
     { col: 0, title: 'General', general: true },
     { col: 0, title: 'Noise 1', module: 'NOISE_1' },
-    { col: 0, title: 'LFO 1', module: 'LFO_1' },
     { col: 0, title: 'EG 1', module: 'EG_1' },
+    { col: 0, title: 'LFO 1', module: 'LFO_1' },
     { col: 1, title: 'Mixer 1', module: 'MIXER_1' },
     { col: 1, title: 'Pitch 1', module: 'PITCH_1' },
     { col: 1, title: 'Osc 1', module: 'OSC_1' },

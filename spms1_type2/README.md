@@ -229,13 +229,14 @@ parameter.
 #### The run order
 
 Every module is in it: one of each kind that makes a sound, the modulation sources first -- Noise
-1 at their head, as it is one too and so that the LFO and the envelope can read it in the same
-sample -- Mixer 1 between them and Pitch 1, Pitch 1 just ahead of the
+1 at their head, as it is one too and so that the envelope and the LFO can read it in the same
+sample, then the envelope ahead of the LFO, so that the LFO's Mod Ins can read it in the same
+sample too, as a vibrato fading in with the envelope does -- Mixer 1 between them and Pitch 1, Pitch 1 just ahead of the
 oscillators, Mixer 2 between the oscillators and the filter, and the chorus and the delay last:
 
 ```mermaid
 flowchart LR
-  NOISE[Noise 1] ~~~ LFO[LFO 1] ~~~ EG[EG 1] ~~~ MIX1[Mixer 1] ~~~ PITCH[Pitch 1] ~~~ OSC[Osc 1] ~~~ OSC2[Osc 2] ~~~ MIX2[Mixer 2] ~~~ FILTER[Filter 1] ~~~ AMP[Amp 1] ~~~ CHORUS[Chorus 1] ~~~ DELAY[Delay 1]
+  NOISE[Noise 1] ~~~ EG[EG 1] ~~~ LFO[LFO 1] ~~~ MIX1[Mixer 1] ~~~ PITCH[Pitch 1] ~~~ OSC[Osc 1] ~~~ OSC2[Osc 2] ~~~ MIX2[Mixer 2] ~~~ FILTER[Filter 1] ~~~ AMP[Amp 1] ~~~ CHORUS[Chorus 1] ~~~ DELAY[Delay 1]
 ```
 
 The mixer has nothing routed to it, so it costs its slot every sample and changes nothing until
