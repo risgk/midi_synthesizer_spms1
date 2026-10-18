@@ -261,8 +261,9 @@ the resonance dial k turns negative and the loop oscillates.
 
 The filter puts out its low pass and high pass at once, as Out LP and Out HP, each through a DC
 blocker and an output clip of its own, and Out, the two crossfaded by Filter 1 Mode (CC 39, Filter
-Mode's in PRA32-U2). Mode crossfades as a mixer's Balance does: each side stays at full over its
-own half and falls to nothing over the other. At 0.0 (CC 4), where it powers up, Out is the low
+Mode's in PRA32-U2). Each side stays at full over its own half and falls to nothing over the other,
+which a mixer's Balance, a straight line, cannot do alone: its ends would be at twice the level, or
+its centre at half. At 0.0 (CC 4), where it powers up, Out is the low
 pass alone; at 1.0 (CC 124) the high pass alone; and at 0.5 (CC 64) both at full, whose sum, the
 input less k·BP, is a notch at the cutoff with both sides of it passed whole. In between the notch
 moves off the cutoff, above it toward the low pass and below it toward the high pass, with the
