@@ -190,9 +190,10 @@ signals:
   - { key: MIXER_2_POL_4,     id: 114, control: MIXER_2_POL_4 }
   - { key: MIXER_2_OUT_LEVEL, id: 115, control: MIXER_2_OUT_LEVEL }
 
-  # The noise's red output and its cutoff came after Mixer 2; the white keeps slot 86.
+  # The noise's red output came after Mixer 2, and its LF output after that; the white keeps slot
+  # 86. 117 held the red's cutoff while it had a control, and is unused.
   - { key: NOISE_1_OUTPUT_RED, id: 116, module: NOISE_1, output: Out Red, label: Noise 1 Output Red, bipolar: true }
-  - { key: NOISE_1_RED_CUTOFF, id: 117, control: NOISE_1_RED_CUTOFF }
+  - { key: NOISE_1_OUTPUT_LF,  id: 118, module: NOISE_1, output: Out LF,  label: Noise 1 Output LF,  bipolar: true }
 
 # Module inputs, NRPN category 1, listed in the editor's order, each by its entry: what feeds each
 # one in the default patch (`source`, a signal key). `label` is the editor's, on the module; `name`
@@ -309,9 +310,7 @@ controls:
   # Noise 1 came after Osc 1 Mod 1 Amt and Pol. Level has no CC and reads 1.0: the noise runs at
   # full level, and Mixer 2 Level 3 (CC 23), or the depth of what it modulates, sets how much is heard.
   - { entry: 57, module: NOISE_1,   key: LEVEL,        label: Level,        cc: 0,   value: 124, source: ONE }
-  # Red Cutoff came after Mixer 2. It has no CC and reads 0.5, 27.5 Hz (A0), where the red falls 6 dB an
-  # octave across the audible band.
-  - { entry: 84, module: NOISE_1,   key: RED_CUTOFF,   label: Red Cutoff,   cc: 0,   value: 64,  source: HALF }
+  # Entry 84 held the red's cutoff while it had a control, and is unused.
   - { entry: 18, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 124 }
   - { entry: 19, module: MIXER_1,   key: LEVEL_1,      label: Level 1,      cc: 118, value: 4 }
   - { entry: 20, module: MIXER_1,   key: POL_1,   label: Pol 1,   cc: 0,   value: 124, source: HALF, bipolar: true }

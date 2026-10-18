@@ -476,7 +476,7 @@ both at the same signal for a mono output.
 | 21 | Mixer 1 Level 2 | | 54 | Mixer 1 Out Level | | 81 | Mixer 2 Level 4 |
 | 22 | Mixer 1 Pol 2 | | 55 | Osc 1 Mod 1 Amt | | 82 | Mixer 2 Pol 4 |
 | 23 | Chorus 1 Rate | | 56 | Osc 1 Mod 1 Pol | | 83 | Mixer 2 Out Level |
-| 24 | Chorus 1 Depth | | 57 | Noise 1 Level | | 84 | Noise 1 Red Cutoff |
+| 24 | Chorus 1 Depth | | 57 | Noise 1 Level | |  |  |
 | 25 | Chorus 1 Mix | | 58 | Osc 2 Wave | |  |  |
 
 <!-- patch_gen end -->
@@ -560,7 +560,7 @@ two slots, a unipolar and a bipolar one. See the General slots below.
 | 33 | Filter 1 Resonance | | 74 | Filter 1 Mod 2 Pol ± | | 114 | Mixer 2 Pol 4 ± |
 | 34 | Filter 1 Gain | | 75 | Filter 1 Mod 3 Amt | | 115 | Mixer 2 Out Level |
 | 35 | Filter 1 Mod 1 Amt | | 76 | Filter 1 Mod 3 Pol ± | | 116 | Noise 1 Output Red ± |
-| 36 | Filter 1 Mod 1 Pol ± | | 77 | Pitch 1 Bend Amt | | 117 | Noise 1 Red Cutoff |
+| 36 | Filter 1 Mod 1 Pol ± | | 77 | Pitch 1 Bend Amt | | 118 | Noise 1 Output LF ± |
 | 37 | Amp 1 Gain | | 78 | Pitch 1 Bend Pol ± | |  |  |
 | 38 | Mixer 1 Level 1 | | 79 | LFO 1 Level Mod Amt | |  |  |
 
@@ -674,15 +674,14 @@ width range, so at the top of PW Mod Amt the LFO, which the default patch feeds 
 pulse width half the range either way: with Pulse Width at CC 64, from 50% to nearly 0%. The pulse
 width the modulation adds up to is held to 0.0 to 1.0.
 
-Noise 1 puts out two noises at Noise 1 Level. Out White is white noise, flat across the spectrum:
-from silence at 0.0 to noise filling -0.5 to +0.5 at 1.0, the oscillator's range. Out Red is the
-same noise through a one-pole low pass at Red Cutoff, falling 6 dB an octave above it. Red Cutoff
-spans 10 octaves, an octave every 0.1, on MIDI note numbers as Filter 1 Cutoff does: note -39
-(0.86 Hz) at 0.0, a slow random wander for modulation, note 21 (A0, 27.5 Hz) at 0.5, where the red
-falls across the whole audible band, and note 81 (A5, 880 Hz) at 1.0. It has no CC and
-reads 0.5. A gain holds the red's RMS at that of the white over the square root of 2 at
-every cutoff, and it is held to -0.5 to +0.5, which at 0.5 cuts the rarest peaks, 1.7% of the
-samples. The level has no CC and reads 1.0, so
+Noise 1 puts out three noises from one generator, at Noise 1 Level. Out White is white noise,
+flat across the spectrum: from silence at 0.0 to noise filling -0.5 to +0.5 at 1.0, the
+oscillator's range. Out Red and Out LF are the same noise through a one-pole low pass each,
+falling 6 dB an octave above a fixed cutoff on the A of a MIDI note number: Out Red at note 21 (A0,
+27.5 Hz), falling across the whole audible band, for audio, and Out LF at note -63 (0.21 Hz), a
+random wander of a few seconds, for modulation, slow enough for a drift. A gain holds each at the
+white's RMS over the square root of 2, and each is held to -0.5 to +0.5, which cuts the rarest
+peaks, 1.5% of the samples of the red and 0.7% of the LF. The level has no CC and reads 1.0, so
 the noise runs at full level and Mixer 2 Level 3 (CC 23), or the depth of whatever it modulates,
 sets how much of it is heard. The level is smoothed as the other levels are. The noise repeats only after 2^32 samples,
 over a day at 48 kHz, and starts the same every time, so a render comes out the same.
@@ -774,10 +773,9 @@ changes only how fast the output moves, so it cannot step it.
   so CC 89 sets its depth. Nothing scales the envelope down on this path, so the note starts a
   semitone sharp at CC 5 and an octave at CC 16, and falls back with the decay
 - Noise as a modulation source, a slow random wander of the cutoff: CC 99 = 1, CC 98 = 17,
-  CC 6 = 116 puts Noise 1's red on the filter's Mod 2 input in the LFO's place, and CC 99 = 2,
-  CC 98 = 84, CC 6 = 0 points Red Cutoff at 0.0, 0.86 Hz; CC 25 sets how much. CC 6 = 86 in the
-  first takes the white instead, a fast jitter. The red is on no mixer, and the white is heard only
-  once CC 23 brings it up, so neither is heard as well
+  CC 6 = 118 puts Noise 1's LF output on the filter's Mod 2 input in the LFO's place, and CC 25
+  sets how much. CC 6 = 86 takes the white instead, a fast jitter. The LF is on no mixer, and the
+  white is heard only once CC 23 brings it up, so neither is heard as well
 - Filter cutoff driven by the envelope instead of its CC: CC 99 = 2, CC 98 = 13, CC 6 = 10. The
   envelope and the cutoff are both unipolar, so it opens the cutoff from the bottom of its dial
   to the top

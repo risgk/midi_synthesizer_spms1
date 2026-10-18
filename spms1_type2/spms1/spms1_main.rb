@@ -365,7 +365,6 @@ while true
   source_mixer_2_level_4 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_LEVEL_4)
   source_mixer_2_pol_4 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_POL_4)
   source_mixer_2_out_level = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_OUT_LEVEL)
-  source_noise_1_red_cutoff = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_NOISE_1_RED_CUTOFF)
 
   # Which CC fills each control slot. The bus is the only thing downstream reads, so this is
   # where MIDI enters and the only place a CC number appears.
@@ -439,7 +438,6 @@ while true
   cc_mixer_2_level_4 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_LEVEL_4)
   cc_mixer_2_pol_4 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_POL_4)
   cc_mixer_2_out_level = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_OUT_LEVEL)
-  cc_noise_1_red_cutoff = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_NOISE_1_RED_CUTOFF)
   cc_general_mod_wheel     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_MOD_WHEEL)
   cc_general_1             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_1)
   cc_general_2             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_2)
@@ -516,7 +514,6 @@ while true
   signals[SIGNAL_MIXER_2_LEVEL_4] = cc_or_zero(cc_mixer_2_level_4, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_2_level_4)))
   signals[SIGNAL_MIXER_2_POL_4] = cc_or_zero(cc_mixer_2_pol_4, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_2_pol_4)))
   signals[SIGNAL_MIXER_2_OUT_LEVEL] = cc_or_zero(cc_mixer_2_out_level, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_2_out_level)))
-  signals[SIGNAL_NOISE_1_RED_CUTOFF] = cc_or_zero(cc_noise_1_red_cutoff, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_noise_1_red_cutoff)))
   signals[SIGNAL_GENERAL_MOD_WHEEL] = cc_or_zero(cc_general_mod_wheel, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_general_mod_wheel)))
   # Each General CC fills two slots, the same value taken both ways.
   general_1 = C.get_midi_cc_value(MIDI_CH, cc_general_1)
@@ -584,7 +581,6 @@ while true
   mixer_2.set_level_4(signals[source_mixer_2_level_4])
   mixer_2.set_polarity_4(signals[source_mixer_2_pol_4])
   mixer_2.set_out_level(signals[source_mixer_2_out_level])
-  noise_1.set_red_cutoff(signals[source_noise_1_red_cutoff])
   chorus_1.set_rate(signals[source_chorus_1_rate])
   chorus_1.set_depth(signals[source_chorus_1_depth])
   chorus_1.set_mix(signals[source_chorus_1_mix])
@@ -651,6 +647,7 @@ while true
       when 10 # MODULE_NOISE_1
         signals[86] = noise_1.process # SIGNAL_NOISE_1_OUTPUT_WHITE
         signals[116] = noise_1.output_red # SIGNAL_NOISE_1_OUTPUT_RED
+        signals[118] = noise_1.output_lf # SIGNAL_NOISE_1_OUTPUT_LF
       when 11 # MODULE_OSC_2
         signals[88] = osc_2.process(signals[source_osc_2_pitch], signals[source_osc_2_mod_1], signals[source_osc_2_mod_2], signals[source_osc_2_pw_mod]) # SIGNAL_OSC_2_OUTPUT
       when 12 # MODULE_MIXER_2
