@@ -71,6 +71,7 @@ module Spms1
       @dt = 0.0
       @blamp_scale = 0.0
       @blep_scale = 0.0
+      @blamp_side = 0.0
     end
 
     # Rate is unipolar, [0.0, 1.0], and read as a note number, so the dial is linear in pitch:
@@ -158,6 +159,7 @@ module Spms1
         # square steps by a whole unit, so with d as above it is (dt - d)^2 / dt^2 of the square's
         # own value: 1 / dt^2, which the scale above already holds two thirds of.
         @blep_scale = @blamp_scale * 1.5
+        @blamp_side = @blamp_scale * -2.0
       end
 
       # Triangle folded out of the phase ramp. The quarter-turn shift puts 0.0 at the start of the
@@ -176,15 +178,18 @@ module Spms1
       # Branchless, as the oscillator's selects are meant to be, and unlike them it survives the C
       # compiler: each select here only picks a value, with nothing on either side for GCC to move
       # inside a branch, so the correction is computed every sample and comes out as 0.0 away from
-      # a corner. The cost is the same at every phase.
+      # a corner. The cost is the same at every phase. The square below is +0.5 while the triangle
+      # is above zero, the side of the top corner, so the side is taken from it, by a multiply
+      # rather than a select of its own: two selects on one condition, GCC turns into a branch.
+      # Halving and doubling are exact, so the side is the same either way.
+      square = (folded < 0.25) ? 0.5 : -0.5
       corner_gap = @dt - (0.25 - (folded - 0.25).abs)
       gap = (corner_gap > 0.0) ? corner_gap : 0.0
-      side = (folded < 0.25) ? -@blamp_scale : @blamp_scale
+      side = square * @blamp_side
       triangle += gap * gap * gap * side
-      # The square is +0.5 while the triangle is above zero, and steps where it crosses, at folded
-      # 0.25, so a step is |folded - 0.25| away in phase. PolyBLEP: a sample within dt of a step is
-      # pulled toward the middle of it, by the same branchless select as above.
-      square = (folded < 0.25) ? 0.5 : -0.5
+      # The square steps where the triangle crosses zero, at folded 0.25, so a step is
+      # |folded - 0.25| away in phase. PolyBLEP: a sample within dt of a step is pulled toward the
+      # middle of it, by the same branchless select as above.
       step_gap = @dt - (folded - 0.25).abs
       edge = (step_gap > 0.0) ? step_gap : 0.0
       square -= square * (edge * edge * @blep_scale)
