@@ -2492,8 +2492,9 @@
   document.getElementById('btn-init').addEventListener('click', () => {
     pushHistory();
     state = defaultState();
-    // The default layout is packed to the folded heights, so Init folds every node again, and
-    // hides the parameters with no CC on the Controls tab as well.
+    // The default layout is packed to the folded heights, so Init lays the nodes out folded and
+    // then opens every one as Show All does, each pushing the nodes under it down, so that the
+    // whole patch is in sight. The parameters with no CC on the Controls tab are hidden again.
     unfolded.clear();
     showNoCC = false;
     document.getElementById('show-no-cc').checked = false;
@@ -2502,6 +2503,7 @@
       localStorage.setItem(SHOW_NO_CC_KEY, '');
     } catch (e) { /* storage unavailable */ }
     renderAll();
+    setAllFolds(true);
     fitView();
   });
 
