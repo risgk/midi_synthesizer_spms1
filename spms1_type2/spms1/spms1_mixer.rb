@@ -146,19 +146,19 @@ module Spms1
       @target_4 = @level_4 * @polarity_4 * @balance_factor_4
     end
 
-    # Balance Law is bipolar, [-0.5, 0.5], and picks how both balances crossfade, in five zones of
-    # 0.2: linear (CC 0-27), reserved (CC 28-51, as equal power for now), equal power (CC 52-75,
-    # as PRA32-U2's Osc Mix), as Filter 1 Mode (CC 76-99) and split (CC 100-127), so the constants
-    # -0.5, -0.2, 0.0, +0.2 and +0.5 pick each. It is bipolar only so that equal power, the default,
-    # is the centre, where it rests with no CC. The zone is the integer part of law * 5 + 2.51: the
-    # 0.01, a quarter of a CC step, keeps every CC value off an edge, where float rounding could put
-    # it either side, and the clamp stops at 0.4, inside the last zone, so that +0.5 does not make
-    # a sixth. No branch either way. It is read once a buffer like any other
+    # Balance Law is bipolar, [-0.5, 0.5], and picks how both balances crossfade, in five zones, the
+    # two at the ends 0.125 wide and the three between 0.25: linear (CC 0-18), reserved (CC 19-48,
+    # as equal power for now), equal power (CC 49-78, as PRA32-U2's Osc Mix), as Filter 1 Mode
+    # (CC 79-108) and split (CC 109-127), so the constants -0.5, -0.2, 0.0, +0.2 and +0.5 pick each.
+    # It is bipolar only so that equal power, the default, is the centre, where it rests with no
+    # CC. The zone is the integer part of law * 4 + 2.51, 0.51 to 4.51: the 0.01, a third of a CC
+    # step, keeps every CC value off an edge, where float rounding could put it either side. No
+    # branch either way. It is read once a buffer like any other
     # parameter, ahead of the balances, which are worked out again in the same buffer; their
     # factors are smoothed on the way to the inputs, so switching laws does not click.
     def set_balance_law(law)
-      clamped_law = (law < -0.5) ? -0.5 : ((law > 0.4) ? 0.4 : law)
-      @balance_law_offset = (clamped_law * 5.0 + 2.51).to_i * BALANCE_TABLE_RUN
+      clamped_law = (law < -0.5) ? -0.5 : ((law > 0.5) ? 0.5 : law)
+      @balance_law_offset = (clamped_law * 4.0 + 2.51).to_i * BALANCE_TABLE_RUN
     end
 
     # Each balance is bipolar, [-0.5, 0.5], and crossfades its pair by the law Balance Law picks,

@@ -3497,9 +3497,9 @@ static inline __attribute__((always_inline)) sp_float sp_Mixer_set_polarity_4(sp
 static inline __attribute__((always_inline)) sp_int sp_Mixer_set_balance_law(sp_Mixer *self, sp_float lv_law) {
     sp_float lv_clamped_law = 0.0;
 #line 160 "spms1_mixer.rb"
-  lv_clamped_law = (((lv_law < -0.5)) ? -0.5 : ((((lv_law > 0.40000000000000002)) ? 0.40000000000000002 : lv_law)));
+  lv_clamped_law = (((lv_law < -0.5)) ? -0.5 : ((((lv_law > 0.5)) ? 0.5 : lv_law)));
 #line 161 "spms1_mixer.rb"
-  self->iv_balance_law_offset = sp_int_mul(sp_float_to_i_checked(((lv_clamped_law * 5.0) + 2.5099999999999998)), cst_BALANCE_TABLE_RUN);
+  self->iv_balance_law_offset = sp_int_mul(sp_float_to_i_checked(((lv_clamped_law * 4.0) + 2.5099999999999998)), cst_BALANCE_TABLE_RUN);
   return self->iv_balance_law_offset;
   return 0;
 }
