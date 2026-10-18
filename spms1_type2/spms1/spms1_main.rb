@@ -578,8 +578,8 @@ while true
   signals[SLOT_MIXER_1_BALANCE_3_4] = cc_or_zero(cc_mixer_1_balance_3_4, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_balance_3_4)))
   signals[SLOT_MIXER_2_BALANCE_1_2] = cc_or_zero(cc_mixer_2_balance_1_2, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_2_balance_1_2)))
   signals[SLOT_MIXER_2_BALANCE_3_4] = cc_or_zero(cc_mixer_2_balance_3_4, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_2_balance_3_4)))
-  signals[SLOT_MIXER_1_BALANCE_LAW] = cc_or_zero(cc_mixer_1_balance_law, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_balance_law)))
-  signals[SLOT_MIXER_2_BALANCE_LAW] = cc_or_zero(cc_mixer_2_balance_law, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_2_balance_law)))
+  signals[SLOT_MIXER_1_BALANCE_LAW] = cc_or_zero(cc_mixer_1_balance_law, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_balance_law)))
+  signals[SLOT_MIXER_2_BALANCE_LAW] = cc_or_zero(cc_mixer_2_balance_law, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_2_balance_law)))
   signals[SLOT_PITCH_1_STRETCH] = cc_or_zero(cc_pitch_1_stretch, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_pitch_1_stretch)))
   signals[SIGNAL_GENERAL_MOD_WHEEL] = cc_or_zero(cc_general_mod_wheel, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_general_mod_wheel)))
   # Each General CC fills two slots, the same value taken both ways.
