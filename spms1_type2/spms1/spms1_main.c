@@ -1967,18 +1967,10 @@ static inline __attribute__((always_inline)) sp_float sp_Dsp_s_flush_tiny(sp_flo
   return (((lv_above + fabs(lv_above)) - ((lv_below + fabs(lv_below)))) * 0.5);
   return 0.0;
 }
-#line 27 "spms1_dsp.rb"
+#line 31 "spms1_dsp.rb"
 static sp_float sp_Dsp_s_smooth(sp_float lv_target, sp_float lv_value, sp_float lv_blend) {
-    sp_float lv_distance = 0.0;
-#line 28 "spms1_dsp.rb"
-  lv_distance = (lv_target - lv_value);
-#line 29 "spms1_dsp.rb"
-  if (((fabs(lv_distance) < 9.9999999999999995e-21))) {
-    return lv_target;
-  }
-  else {
-    return (lv_value + (lv_distance * lv_blend));
-  }
+#line 32 "spms1_dsp.rb"
+  return (lv_value + ((lv_target - lv_value) * lv_blend));
   return 0.0;
 }
 #line 34 "spms1_osc.rb"
@@ -4976,7 +4968,7 @@ int main(int argc,char**argv){
     sp_int lv_general_3 = 0;
     sp_int lv_general_4 = 0;
     sp_bool lv_control_tick = 0;
-    sp_int lv_i__bp13687 = 0;
+    sp_int lv_i__bp13675 = 0;
 
 #line 1 "spms1_dsp.rb"
 #line 5 "spms1_dsp.rb"
@@ -7124,9 +7116,9 @@ int main(int argc,char**argv){
     (stop_debug_measure(), (sp_int)0);
 #line 743 "spms1_main.rb"
     for (sp_int _t891 = 0; _t891 < cst_AUDIO_BUFFER_WORDS; _t891++) {
-      lv_i__bp13687 = _t891;
+      lv_i__bp13675 = _t891;
 #line 744 "spms1_main.rb"
-      ({ sp_float _t892 = sp_FloatArray_get(lv_audio_buffer_l, lv_i__bp13687); sp_float _t893 = sp_FloatArray_get(lv_audio_buffer_r, lv_i__bp13687); (write_to_audio_buffer(((float)(_t892)), ((float)(_t893))), (sp_int)0); });
+      ({ sp_float _t892 = sp_FloatArray_get(lv_audio_buffer_l, lv_i__bp13675); sp_float _t893 = sp_FloatArray_get(lv_audio_buffer_r, lv_i__bp13675); (write_to_audio_buffer(((float)(_t892)), ((float)(_t893))), (sp_int)0); });
     }
   }
   return 0;

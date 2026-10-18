@@ -906,8 +906,10 @@ changes only how fast the output moves, so it cannot step it.
 - The NRPN CCs are stored as ordinary controls too, so a parameter may be mapped to CC 6 -- which
   then moves it every time a patch edit is sent
 - A feedback loop through the bus -- a mixer wired back to its own input at a level below full,
-  directly or through other modules -- decays toward zero and can settle on a denormal, which
-  x86 computes slowly, so the PC simulator there may slow down. Nothing in the loop flushes it
+  directly or through other modules -- decays toward zero and lands on it: the synth runs with
+  flush-to-zero, on the device and in the C simulators alike, so a denormal comes out as 0.0. The
+  CRuby simulator has no such mode, and there it can settle on a denormal, which x86 computes
+  slowly
 
 ### Debug Print
 

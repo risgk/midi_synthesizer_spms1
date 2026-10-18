@@ -19,14 +19,17 @@ module Spms1
     end
 
     # One stage of the control-rate parameter smoothing: value moves toward target by the blend,
-    # as value += (target - value) * blend, and lands on the target exactly once it is within 1e-20
-    # of it. Without that a stage heading for 0.0 would sink into the denormals and stay there, at
-    # about 4e-44, where the step rounds to nothing -- and Mixer Level, Amp Gain, Delay and Chorus
-    # Mix and the like multiply the audio by their stage every sample. Away from zero the test
-    # never passes before the step has rounded to nothing, so every other value is what it was.
+    # as value += (target - value) * blend. A stage heading for 0.0 would sink into the denormals,
+    # and Mixer Level, Amp Gain, Delay and Chorus Mix and the like multiply the audio by their stage
+    # every sample; the floating point unit runs with flush-to-zero instead, on the device (FPSCR.FZ,
+    # set in setup1 in spms1.ino, where the synth runs) and in the simulators (FTZ and DAZ), so the
+    # stage reaches 0.0 itself once it falls below the smallest normal float. That leaves this
+    # with no test and no branch: this is expanded 94 times and runs every fourth sample, and a
+    # test that landed the stage on its target took more than the step it saved, 32 us a buffer,
+    # and made the time depend on which way each one went. Away from zero the step rounds to
+    # nothing long before the stage could come within such a test, so nothing else changes.
     def self.smooth(target, value, blend)
-      distance = target - value
-      (distance.abs < 1e-20) ? target : value + distance * blend
+      value + (target - value) * blend
     end
   end
 end

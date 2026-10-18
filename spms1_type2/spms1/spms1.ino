@@ -242,6 +242,13 @@ void stop_debug_measure(void) {
 }
 
 void setup1() {
+  // The synth runs on this core, with flush-to-zero: a denormal result is 0.0, so a smoothing stage
+  // or a decaying state heading for 0.0 lands on it rather than sinking into the denormals (see
+  // Dsp.smooth in spms1_dsp.rb). FPSCR is per core, so it is set here, ahead of Spms1_main.
+  uint32_t fpscr;
+  __asm volatile("vmrs %0, fpscr" : "=r"(fpscr));
+  fpscr |= (1u << 24);  // FZ
+  __asm volatile("vmsr fpscr, %0" : : "r"(fpscr));
 }
 
 void loop1() {
