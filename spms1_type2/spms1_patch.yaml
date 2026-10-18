@@ -126,7 +126,8 @@ inputs:
   - { entry: 24, module: OSC_2,       key: PITCH,       label: Pitch In,       name: Pitch In,       source: PITCH_1_OUTPUT }
   - { entry: 25, module: OSC_2,       key: MOD_1,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
   - { entry: 26, module: OSC_2,       key: MOD_2,       label: Mod 2 In,       name: Mod 2 In,       source: LFO_1_OUTPUT }
-  - { entry: 27, module: OSC_2,       key: PW_MOD,      label: PW Mod In,      name: PW Mod In,      source: LFO_1_OUTPUT }
+  - { entry: 35, module: OSC_2,       key: PW_MOD_1,    label: PW Mod 1 In,    name: PW Mod 1 In,    source: EG_1_OUTPUT }
+  - { entry: 27, module: OSC_2,       key: PW_MOD_2,    label: PW Mod 2 In,    name: PW Mod 2 In,    source: LFO_1_OUTPUT }
   # 22 and 23, Filter 1's Audio 2 In and Audio 3 In for a while, are unused.
   - { entry: 3,  module: FILTER_1,    key: AUDIO,       label: Audio In,       name: Audio In,       source: MIXER_2_OUTPUT }
   - { entry: 4,  module: FILTER_1,    key: MOD_1,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
@@ -146,7 +147,10 @@ inputs:
   - { entry: 12,                      key: OUTPUT_L,    label: L,              name: Final Output L, name_ja: 最終出力 L, source: DELAY_1_OUTPUT_L }
   - { entry: 13,                      key: OUTPUT_R,    label: R,              name: Final Output R, name_ja: 最終出力 R, source: DELAY_1_OUTPUT_R }
   - { entry: 14, module: PITCH_1,      key: PITCH,       label: Pitch In,       name: Pitch In,       source: NOTE_PITCH }
-  - { entry: 15, module: OSC_1,       key: PW_MOD,      label: PW Mod In,      name: PW Mod In,      source: LFO_1_OUTPUT }
+  # Each oscillator's PW Mod 1 In came after Mixer 2 In 4, and its PW Mod In became PW Mod 2 In: the
+  # envelope and the LFO wired to the pulse width as Mod 1 In and Mod 2 In are to the pitch.
+  - { entry: 34, module: OSC_1,       key: PW_MOD_1,    label: PW Mod 1 In,    name: PW Mod 1 In,    source: EG_1_OUTPUT }
+  - { entry: 15, module: OSC_1,       key: PW_MOD_2,    label: PW Mod 2 In,    name: PW Mod 2 In,    source: LFO_1_OUTPUT }
   - { entry: 16, module: LFO_1,       key: RATE_MOD,    label: Rate Mod In,    name: Rate Mod In,    source: NONE }
   - { entry: 17, module: FILTER_1,    key: MOD_2,       label: Mod 2 In,       name: Mod 2 In,       source: LFO_1_OUTPUT }
   - { entry: 18, module: FILTER_1,    key: MOD_3,       label: Mod 3 In,       name: Mod 3 In,       source: PITCH_1_OUTPUT }
@@ -175,12 +179,12 @@ controls:
   - { entry: 5,  module: EG_1,      key: SUSTAIN,      label: Sustain,      cc: 30,  value: 124 }
   - { entry: 6,  module: EG_1,      key: LEVEL,        label: Level,        cc: 0,   source: ONE }
   # Osc 1 in the editor: the pitch and its two modulations, then the waveform and the pulse
-  # width's modulation, each target next to what moves it. Pulse Width, PW Mod Amt and PW Mod Pol
+  # width's two modulations, each target next to what moves it. Pulse Width, PW Mod 2 Amt and Pol
   # came after Pitch 1, so their entries follow its, but they are listed here. Pitch Coarse and Fine
   # have no CC and stay at 0.0 by default: the transposition is Pitch 1's Coarse and Fine,
-  # on CC 86 and 70. Pulse Width and PW Mod
-  # Amt power up at CC 4, 0.0: a pulse of 50% and no modulation of it, so the default patch renders
-  # as before. PW Mod Pol has no CC and reads +0.5, as each modulation polarity does.
+  # on CC 86 and 70. Pulse Width and the PW Mod
+  # Amts power up at CC 4, 0.0: a pulse of 50% and no modulation of it, so the default patch renders
+  # as before. The PW Mod Pols have no CC and read +0.5, as each modulation polarity does.
   - { entry: 9,  module: OSC_1,     key: PITCH_COARSE,  label: Pitch Coarse,  cc: 0,   value: 64, bipolar: true }
   - { entry: 10, module: OSC_1,     key: PITCH_FINE,    label: Pitch Fine,    cc: 0,   value: 64, bipolar: true }
   # Entries 42 and 43, Osc 1's old Mod 1 Amt and Pol, are unused: Pitch In takes the note whole.
@@ -193,8 +197,14 @@ controls:
   - { entry: 12, module: OSC_1,     key: MOD_2_POL, label: Mod 2 Pol, cc: 0,   value: 124, source: POINT_ONE, bipolar: true }
   - { entry: 8,  module: OSC_1,     key: WAVE,     label: Wave,         cc: 102, value: 4 }
   - { entry: 35, module: OSC_1,     key: PULSE_WIDTH,  label: Pulse Width,  cc: 114, value: 4 }
-  - { entry: 36, module: OSC_1,     key: PW_MOD_AMT,   label: PW Mod Amt,      cc: 115, value: 4 }
-  - { entry: 37, module: OSC_1,     key: PW_MOD_POL, label: PW Mod Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
+  # PW Mod 1 Amt and Pol came after Filter 1 Mode, and PW Mod Amt and Pol became PW Mod 2 Amt and
+  # Pol. The two Amts are on CC 8 and 103, EG Mod Dst's and LFO Mod Dst's in PRA32-U2, whose
+  # Mod Amts are on 89 and 13 as Mod 1 Amt and Mod 2 Amt are here: in place of a destination
+  # switch, each destination has an Amt of its own. Both power up at CC 4, 0.0.
+  - { entry: 91, module: OSC_1,     key: PW_MOD_1_AMT, label: PW Mod 1 Amt,    cc: 8,   value: 4 }
+  - { entry: 92, module: OSC_1,     key: PW_MOD_1_POL, label: PW Mod 1 Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
+  - { entry: 36, module: OSC_1,     key: PW_MOD_2_AMT, label: PW Mod 2 Amt,    cc: 103, value: 4 }
+  - { entry: 37, module: OSC_1,     key: PW_MOD_2_POL, label: PW Mod 2 Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
   # Osc 2 came after Noise 1, so its entries follow. Pitch Coarse and Fine are its own, on CC 85 and
   # 76, to tune it against Osc 1: Coarse powers up at CC 64, in unison, and Fine at CC 76, 12 cents
   # sharp, for a slow beat once Osc 2 is turned up. Wave is its own too, on CC 104 next to Osc 1's on
@@ -210,8 +220,10 @@ controls:
   - { entry: 64, module: OSC_2,     key: MOD_2_POL, label: Mod 2 Pol, cc: 0,   value: 124, source: POINT_ONE, bipolar: true }
   - { entry: 58, module: OSC_2,     key: WAVE,     label: Wave,         cc: 104, value: 4 }
   - { entry: 65, module: OSC_2,     key: PULSE_WIDTH,  label: Pulse Width,  cc: 114, value: 4 }
-  - { entry: 66, module: OSC_2,     key: PW_MOD_AMT,   label: PW Mod Amt,      cc: 115, value: 4 }
-  - { entry: 67, module: OSC_2,     key: PW_MOD_POL, label: PW Mod Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
+  - { entry: 93, module: OSC_2,     key: PW_MOD_1_AMT, label: PW Mod 1 Amt,    cc: 8,   value: 4 }
+  - { entry: 94, module: OSC_2,     key: PW_MOD_1_POL, label: PW Mod 1 Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
+  - { entry: 66, module: OSC_2,     key: PW_MOD_2_AMT, label: PW Mod 2 Amt,    cc: 103, value: 4 }
+  - { entry: 67, module: OSC_2,     key: PW_MOD_2_POL, label: PW Mod 2 Pol, cc: 0,   value: 124, source: HALF, bipolar: true }
   # Filter 1 in the editor: Gain, the cutoff and its three modulations, then the resonance. Entries
   # 68-70, its audio gains for a while, are unused: Mixer 2 levels the audio now. Mod 2
   # Amt and Pol came last of all, so their entries follow every other. Mod 2 Amt powers up at
