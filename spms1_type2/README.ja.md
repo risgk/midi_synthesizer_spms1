@@ -512,19 +512,20 @@ Mixer 1 の 4 つの入力はどれも閉じた状態で始まります。
 
 | ID | シグナル | | ID | シグナル | | ID | シグナル |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | なし（定数 0.0） | | 13 | Amp 1 Output ± | | 55 | General Unipolar 4 |
-| 1 | 定数 1.0 | | 14 | Mixer 1 Output ± | | 56 | General Bipolar 1 ± |
-| 2 | 定数 0.5 | | 15 | Chorus 1 Output L ± | | 57 | General Bipolar 2 ± |
-| 3 | 定数 0.2 | | 16 | Chorus 1 Output R ± | | 58 | General Bipolar 3 ± |
-| 4 | 定数 0.1 | | 17 | Delay 1 Output L ± | | 59 | General Bipolar 4 ± |
-| 5 | 定数 -0.1 | | 18 | Delay 1 Output R ± | | 60 | Pitch 1 Output ± |
-| 6 | 定数 -0.2 | | 48 | Note Pitch ± | | 65 | Filter 1 Output BP ± |
-| 7 | 定数 -0.5 | | 49 | Note Gate | | 66 | Filter 1 Output HP ± |
-| 8 | 定数 -1.0 | | 50 | Pitch Bend ± | | 86 | Noise 1 Output White ± |
-| 9 | LFO 1 Output ± | | 51 | General Mod Wheel | | 88 | Osc 2 Output ± |
-| 10 | EG 1 Output | | 52 | General Unipolar 1 | | 106 | Mixer 2 Output ± |
-| 11 | Osc 1 Output ± | | 53 | General Unipolar 2 | | 116 | Noise 1 Output Red ± |
-| 12 | Filter 1 Output LP ± | | 54 | General Unipolar 3 | | 118 | Noise 1 Output LF ± |
+| 0 | なし（定数 0.0） | | 14 | Mixer 1 Output ± | | 57 | General Bipolar 2 ± |
+| 1 | 定数 1.0 | | 15 | Chorus 1 Output L ± | | 58 | General Bipolar 3 ± |
+| 2 | 定数 0.5 | | 16 | Chorus 1 Output R ± | | 59 | General Bipolar 4 ± |
+| 3 | 定数 0.2 | | 17 | Delay 1 Output L ± | | 60 | Pitch 1 Output ± |
+| 4 | 定数 0.1 | | 18 | Delay 1 Output R ± | | 65 | Filter 1 Output BP ± |
+| 5 | 定数 -0.1 | | 48 | Note Pitch ± | | 66 | Filter 1 Output HP ± |
+| 6 | 定数 -0.2 | | 49 | Note Gate | | 86 | Noise 1 Output White ± |
+| 7 | 定数 -0.5 | | 50 | Pitch Bend ± | | 88 | Osc 2 Output ± |
+| 8 | 定数 -1.0 | | 51 | General Mod Wheel | | 106 | Mixer 2 Output ± |
+| 9 | LFO 1 Output ± | | 52 | General Unipolar 1 | | 116 | Noise 1 Output Red ± |
+| 10 | EG 1 Output | | 53 | General Unipolar 2 | | 118 | Noise 1 Output LF 1 ± |
+| 11 | Osc 1 Output ± | | 54 | General Unipolar 3 | | 119 | Noise 1 Output LF 2 ± |
+| 12 | Filter 1 Output LP ± | | 55 | General Unipolar 4 | |  |  |
+| 13 | Amp 1 Output ± | | 56 | General Bipolar 1 ± | |  |  |
 
 <!-- patch_gen end -->
 
@@ -642,13 +643,15 @@ Mod 2 In が自分の Amt と Pol でピッチを動かすのと同じ仕組み�
 デフォルトのパッチでつながっている LFO がパルス幅をレンジの半分ずつ上下に振ります。Pulse Width が CC 64
 なら 50% からほぼ 0% までです。モジュレーションを足したパルス幅は 0.0〜1.0 に収められます。
 
-Noise 1 は 1 つの発生器から 3 種類のノイズを Noise 1 Level の大きさで出します。Out White はスペクトルの平坦な
-ホワイトノイズで、0.0 では無音、1.0 ではオシレータと同じ -0.5〜+0.5 いっぱいのノイズです。Out Red と Out LF は
+Noise 1 は 1 つの発生器から 4 種類のノイズを Noise 1 Level の大きさで出します。Out White はスペクトルの平坦な
+ホワイトノイズで、0.0 では無音、1.0 ではオシレータと同じ -0.5〜+0.5 いっぱいのノイズです。Out Red、Out LF 1、Out LF 2 は
 同じノイズをそれぞれ 1 次ローパスに通したもので、MIDI ノート番号の A に合わせた固定のカットオフから上は 1 オクターブに
 つき 6 dB 下がります。Out Red はノート 21（A0、27.5 Hz）で、可聴帯域全体で下がっていくオーディオ向けのノイズ、
-Out LF（low frequency、低周波）はノート -63（0.21 Hz）で、数秒単位でゆっくり揺れるモジュレーション向けのノイズです。ドリフトにも使えます。
-どちらもゲインで RMS をホワイトの 1/√2 にそろえ、-0.5〜+0.5 に収めます。まれなピークが切られ、レッドで
-サンプルの 1.5%、LF で 0.7% にあたります。Level には CC がなく 1.0 を読むので、
+2 つの LF（low frequency、低周波）はノート -63（0.21 Hz）で、数秒単位でゆっくり揺れるモジュレーション向けのノイズです。ドリフトにも使えます。
+2 つの LF はホワイトを交互に受け取り、偶数番目のサンプルを LF 1、奇数番目を LF 2 が使うので、1 つ分の処理で、
+同じように、ただし互いに無関係に揺れます（オシレータごとのドリフトなど）。
+どれもゲインで RMS をホワイトの 1/√2 にそろえ、-0.5〜+0.5 に収めます。まれなピークが切られ、レッドで
+サンプルの 1.5%、LF でも長く見ればそれぞれ同じくらいです。Level には CC がなく 1.0 を読むので、
 ノイズは常にフルレベルで出ていて、どれだけ聞こえるかは Mixer 2 Level 3（CC 23）か、変調先の深さで決めます。レベルはほかのレベルと同じく
 スムージングします。ノイズが繰り返すのは 2^32 サンプル後（48 kHz で 1 日以上）で、毎回同じところから始まるので、
 レンダリング結果は毎回同じです。
@@ -738,7 +741,7 @@ Pitch 1 Glide はユニポーラで、1/120 刻み、1 ステップで時間が�
   CC 89 で深さを決められます。この経路ではエンベロープを絞るものがないので、CC 5 で半音、CC 16 で 1 オクターブ高く始まり、
   ディケイとともに戻ります
 - ノイズをモジュレーションソースにして、カットオフをゆっくりランダムに揺らす: CC 99 = 1, CC 98 = 17, CC 6 = 118 で
-  LFO の代わりに Noise 1 の LF 出力をフィルタの Mod 2 入力に置きます。あとは CC 25 で量を決めます。CC 6 を 86 に
+  LFO の代わりに Noise 1 の LF 1 出力をフィルタの Mod 2 入力に置きます。あとは CC 25 で量を決めます。CC 6 を 86 に
   すればホワイトになり、細かく震えます。LF はどのミキサーにも入っておらず、ホワイトも CC 23 を上げるまでは鳴らないので、
   どちらも音としては聞こえません
 - フィルタのカットオフを、自分の CC ではなくエンベロープで動かす: CC 99 = 2, CC 98 = 13, CC 6 = 10。

@@ -687,7 +687,8 @@ while true
       when 10 # MODULE_NOISE_1
         signals[86] = noise_1.process(control_tick) # SIGNAL_NOISE_1_OUTPUT_WHITE
         signals[116] = noise_1.output_red # SIGNAL_NOISE_1_OUTPUT_RED
-        signals[118] = noise_1.output_lf # SIGNAL_NOISE_1_OUTPUT_LF
+        signals[118] = noise_1.output_lf_1 # SIGNAL_NOISE_1_OUTPUT_LF_1
+        signals[119] = noise_1.output_lf_2 # SIGNAL_NOISE_1_OUTPUT_LF_2
       when 11 # MODULE_OSC_2
         signals[88] = osc_2.process(control_tick, signals[source_osc_2_pitch], signals[source_osc_2_mod_1], signals[source_osc_2_mod_2], signals[source_osc_2_pw_mod]) # SIGNAL_OSC_2_OUTPUT
       when 12 # MODULE_MIXER_2

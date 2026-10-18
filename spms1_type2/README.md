@@ -530,19 +530,20 @@ two slots, a unipolar and a bipolar one. See the General slots below.
 
 | ID | Signal | | ID | Signal | | ID | Signal |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | None (constant 0.0) | | 13 | Amp 1 Output ± | | 55 | General Unipolar 4 |
-| 1 | Constant 1.0 | | 14 | Mixer 1 Output ± | | 56 | General Bipolar 1 ± |
-| 2 | Constant 0.5 | | 15 | Chorus 1 Output L ± | | 57 | General Bipolar 2 ± |
-| 3 | Constant 0.2 | | 16 | Chorus 1 Output R ± | | 58 | General Bipolar 3 ± |
-| 4 | Constant 0.1 | | 17 | Delay 1 Output L ± | | 59 | General Bipolar 4 ± |
-| 5 | Constant -0.1 | | 18 | Delay 1 Output R ± | | 60 | Pitch 1 Output ± |
-| 6 | Constant -0.2 | | 48 | Note Pitch ± | | 65 | Filter 1 Output BP ± |
-| 7 | Constant -0.5 | | 49 | Note Gate | | 66 | Filter 1 Output HP ± |
-| 8 | Constant -1.0 | | 50 | Pitch Bend ± | | 86 | Noise 1 Output White ± |
-| 9 | LFO 1 Output ± | | 51 | General Mod Wheel | | 88 | Osc 2 Output ± |
-| 10 | EG 1 Output | | 52 | General Unipolar 1 | | 106 | Mixer 2 Output ± |
-| 11 | Osc 1 Output ± | | 53 | General Unipolar 2 | | 116 | Noise 1 Output Red ± |
-| 12 | Filter 1 Output LP ± | | 54 | General Unipolar 3 | | 118 | Noise 1 Output LF ± |
+| 0 | None (constant 0.0) | | 14 | Mixer 1 Output ± | | 57 | General Bipolar 2 ± |
+| 1 | Constant 1.0 | | 15 | Chorus 1 Output L ± | | 58 | General Bipolar 3 ± |
+| 2 | Constant 0.5 | | 16 | Chorus 1 Output R ± | | 59 | General Bipolar 4 ± |
+| 3 | Constant 0.2 | | 17 | Delay 1 Output L ± | | 60 | Pitch 1 Output ± |
+| 4 | Constant 0.1 | | 18 | Delay 1 Output R ± | | 65 | Filter 1 Output BP ± |
+| 5 | Constant -0.1 | | 48 | Note Pitch ± | | 66 | Filter 1 Output HP ± |
+| 6 | Constant -0.2 | | 49 | Note Gate | | 86 | Noise 1 Output White ± |
+| 7 | Constant -0.5 | | 50 | Pitch Bend ± | | 88 | Osc 2 Output ± |
+| 8 | Constant -1.0 | | 51 | General Mod Wheel | | 106 | Mixer 2 Output ± |
+| 9 | LFO 1 Output ± | | 52 | General Unipolar 1 | | 116 | Noise 1 Output Red ± |
+| 10 | EG 1 Output | | 53 | General Unipolar 2 | | 118 | Noise 1 Output LF 1 ± |
+| 11 | Osc 1 Output ± | | 54 | General Unipolar 3 | | 119 | Noise 1 Output LF 2 ± |
+| 12 | Filter 1 Output LP ± | | 55 | General Unipolar 4 | |  |  |
+| 13 | Amp 1 Output ± | | 56 | General Bipolar 1 ± | |  |  |
 
 <!-- patch_gen end -->
 
@@ -670,14 +671,16 @@ width range, so at the top of PW Mod Amt the LFO, which the default patch feeds 
 pulse width half the range either way: with Pulse Width at CC 64, from 50% to nearly 0%. The pulse
 width the modulation adds up to is held to 0.0 to 1.0.
 
-Noise 1 puts out three noises from one generator, at Noise 1 Level. Out White is white noise,
+Noise 1 puts out four noises from one generator, at Noise 1 Level. Out White is white noise,
 flat across the spectrum: from silence at 0.0 to noise filling -0.5 to +0.5 at 1.0, the
-oscillator's range. Out Red and Out LF are the same noise through a one-pole low pass each,
+oscillator's range. Out Red, Out LF 1 and Out LF 2 are the same noise through a one-pole low pass each,
 falling 6 dB an octave above a fixed cutoff on the A of a MIDI note number: Out Red at note 21 (A0,
-27.5 Hz), falling across the whole audible band, for audio, and Out LF (low frequency) at note -63 (0.21 Hz), a
-random wander of a few seconds, for modulation, slow enough for a drift. A gain holds each at the
+27.5 Hz), falling across the whole audible band, for audio, and the two LFs (low frequency) at note -63 (0.21 Hz), a
+random wander of a few seconds, for modulation, slow enough for a drift. The two LFs take turns at
+the white, LF 1 the even samples and LF 2 the odd, so they wander alike but independently of each
+other -- a drift for each oscillator, say -- for the work of one. A gain holds each at the
 white's RMS over the square root of 2, and each is held to -0.5 to +0.5, which cuts the rarest
-peaks, 1.5% of the samples of the red and 0.7% of the LF. The level has no CC and reads 1.0, so
+peaks, 1.5% of the samples of the red, and about as many of each LF over a long run. The level has no CC and reads 1.0, so
 the noise runs at full level and Mixer 2 Level 3 (CC 23), or the depth of whatever it modulates,
 sets how much of it is heard. The level is smoothed as the other levels are. The noise repeats only after 2^32 samples,
 over a day at 48 kHz, and starts the same every time, so a render comes out the same.
@@ -780,8 +783,8 @@ changes only how fast the output moves, so it cannot step it.
   so CC 89 sets its depth. Nothing scales the envelope down on this path, so the note starts a
   semitone sharp at CC 5 and an octave at CC 16, and falls back with the decay
 - Noise as a modulation source, a slow random wander of the cutoff: CC 99 = 1, CC 98 = 17,
-  CC 6 = 118 puts Noise 1's LF output on the filter's Mod 2 input in the LFO's place, and CC 25
-  sets how much. CC 6 = 86 takes the white instead, a fast jitter. The LF is on no mixer, and the
+  CC 6 = 118 puts Noise 1's LF 1 output on the filter's Mod 2 input in the LFO's place, and CC 25
+  sets how much. CC 6 = 86 takes the white instead, a fast jitter. The LFs are on no mixer, and the
   white is heard only once CC 23 brings it up, so neither is heard as well
 - Filter cutoff driven by the envelope instead of its CC: CC 99 = 2, CC 98 = 13, CC 6 = 10. The
   envelope and the cutoff are both unipolar, so it opens the cutoff from the bottom of its dial

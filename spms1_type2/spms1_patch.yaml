@@ -51,7 +51,7 @@ default_order: [NOISE_1, LFO_1, EG_1, MIXER_1, PITCH_1, OSC_1, OSC_2, MIXER_2, F
 # 127 is not a slot: as a parameter's source it means the parameter's own control slot, which
 # holds the value of its CC off the bus (see spms1_main.rb), so no other input or parameter can
 # read it. The numbers the parameters' control slots had on the bus before they moved off it --
-# 19-47, 61-64, 69-85, 87, 89-98, 102-105, 107-115 and 119-122 -- are free, as are 21, 26, 67,
+# 19-47, 61-64, 69-85, 87, 89-98, 102-105, 107-115 and 120-122 -- are free, as are 21, 26, 67,
 # 68, 71, 72, 99-101, 117 and 123-126, unused already.
 signals:
   - { key: NONE,            id: 0, value: 0.0,  short: "0.0",  label: None (constant 0.0), label_ja: なし（定数 0.0） }
@@ -103,10 +103,11 @@ signals:
   - { key: OSC_2_OUTPUT,         id: 88, module: OSC_2,   output: Out,       label: Osc 2 Output,         bipolar: true }
   - { key: MIXER_2_OUTPUT,       id: 106, module: MIXER_2, output: Out,      label: Mixer 2 Output,       bipolar: true }
 
-  # The noise's red output came after Mixer 2, and its LF output after that; the white keeps slot
-  # 86.
-  - { key: NOISE_1_OUTPUT_RED, id: 116, module: NOISE_1, output: Out Red, label: Noise 1 Output Red, bipolar: true }
-  - { key: NOISE_1_OUTPUT_LF,  id: 118, module: NOISE_1, output: Out LF,  label: Noise 1 Output LF,  bipolar: true }
+  # The noise's red output came after Mixer 2, its LF 1 output after that and LF 2 after LF 1; the
+  # white keeps slot 86.
+  - { key: NOISE_1_OUTPUT_RED,  id: 116, module: NOISE_1, output: Out Red,  label: Noise 1 Output Red,  bipolar: true }
+  - { key: NOISE_1_OUTPUT_LF_1, id: 118, module: NOISE_1, output: Out LF 1, label: Noise 1 Output LF 1, bipolar: true }
+  - { key: NOISE_1_OUTPUT_LF_2, id: 119, module: NOISE_1, output: Out LF 2, label: Noise 1 Output LF 2, bipolar: true }
 
 # Module inputs, NRPN category 1, listed in the editor's order, each by its entry: what feeds each
 # one in the default patch (`source`, a signal key). `label` is the editor's, on the module; `name`
