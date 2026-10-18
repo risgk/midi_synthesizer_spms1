@@ -1,8 +1,9 @@
 module Spms1
   # ZDF (zero-delay feedback) / TPT (topology-preserving transform) state variable filter, with a
   # nonlinear leak on the band pass integrator, solved within the sample by one step of Newton's
-  # method. It puts out its low pass and high pass at once: process returns the low pass, and
-  # output_hp holds the high pass, each through a DC blocker and the output clip of its own.
+  # method. It puts out its low pass and high pass at once, each through a DC blocker and the
+  # output clip of its own, and the two crossfaded by Mode: process returns the crossfade, and
+  # output_lp and output_hp hold the low pass and the high pass.
   # This implementation is not oversampled; the nonlinear behavior is kept intentionally simple.
   # Reference: https://www.discodsp.net/VAFilterDesign_2.1.2.pdf (The Art of VA Filter Design)
   # Reference: https://www.kvraudio.com/forum/viewtopic.php?t=349859 (Cheap non-linear zero-delay filters)
@@ -178,6 +179,8 @@ module Spms1
       @modulation_3_polarity = 1.0
       @modulation_3_depth = 0.0
       @gain = 0.5
+      @mode_lp = 1.0
+      @mode_hp = 0.0
 
       @stage_1_cutoff = 1.0
       @stage_1_resonance = 0.0
@@ -185,12 +188,16 @@ module Spms1
       @stage_1_modulation_2_depth = 0.0
       @stage_1_modulation_3_depth = 0.0
       @stage_1_gain = 0.5
+      @stage_1_mode_lp = 1.0
+      @stage_1_mode_hp = 0.0
       @current_cutoff = 1.0
       @current_resonance = 0.0
       @current_modulation_1_depth = 0.0
       @current_modulation_2_depth = 0.0
       @current_modulation_3_depth = 0.0
       @current_gain = 0.5
+      @current_mode_lp = 1.0
+      @current_mode_hp = 0.0
 
       @g = 0.0
       @g_plus_k = 0.0
@@ -205,6 +212,7 @@ module Spms1
       @s2 = 0.0
       @dc_blocker = 0.0
       @dc_blocker_hp = 0.0
+      @output_lp = 0.0
       @output_hp = 0.0
 
       @current_modulation_1_input = 0.0
@@ -269,6 +277,19 @@ module Spms1
     # growing to its full level at ~0.992 and staying there to 1.0, fading out at a high cutoff.
     def set_resonance(resonance)
       @resonance = (resonance < 0.0) ? 0.0 : ((resonance > 1.0) ? 1.0 : resonance)
+    end
+
+    # Mode is unipolar, [0.0, 1.0], and crossfades Out from the low pass to the high pass as a
+    # mixer's Balance crossfades a pair: each side at 1.0 over its own half and falling to 0.0 over
+    # the other, so 0.0 is the low pass alone, 1.0 the high pass alone, and 0.5 both at 1.0, whose
+    # sum is the input less k times the band pass: a notch at the cutoff, the pass band whole.
+    # Only the two factors are smoothed.
+    def set_mode(mode)
+      clamped = (mode < 0.0) ? 0.0 : ((mode > 1.0) ? 1.0 : mode)
+      lp = 2.0 - (clamped + clamped)
+      hp = clamped + clamped
+      @mode_lp = (lp > 1.0) ? 1.0 : lp
+      @mode_hp = (hp > 1.0) ? 1.0 : hp
     end
 
     def process(control_tick, audio_input = 0.0, modulation_1_input = 0.0, modulation_2_input = 0.0, modulation_3_input = 0.0)
@@ -342,10 +363,18 @@ module Spms1
       @dc_blocker_hp += (high_pass - @dc_blocker_hp) * @dc_blocker_coefficient
       @output_hp = clip_output(high_pass - @dc_blocker_hp)
       @dc_blocker += (low_pass - @dc_blocker) * @dc_blocker_coefficient
-      clip_output(low_pass - @dc_blocker)
+      @output_lp = clip_output(low_pass - @dc_blocker)
+      # Taken from the two outputs as they leave, so not clipped again: in the pass band one side
+      # is all there is, and around the cutoff, where both are, the notch takes them down.
+      @output_lp * @current_mode_lp + @output_hp * @current_mode_hp
     end
 
-    # The high pass of the last sample process took, read after it as Chorus's outputs are.
+    # The low pass and the high pass of the last sample process took, read after it as Chorus's
+    # outputs are.
+    def output_lp
+      @output_lp
+    end
+
     def output_hp
       @output_hp
     end
@@ -394,6 +423,10 @@ module Spms1
       @current_modulation_3_depth = Dsp.smooth(@stage_1_modulation_3_depth, @current_modulation_3_depth, @smoothing_target_blend)
       @stage_1_gain = Dsp.smooth(@gain, @stage_1_gain, @smoothing_target_blend)
       @current_gain = Dsp.smooth(@stage_1_gain, @current_gain, @smoothing_target_blend)
+      @stage_1_mode_lp = Dsp.smooth(@mode_lp, @stage_1_mode_lp, @smoothing_target_blend)
+      @current_mode_lp = Dsp.smooth(@stage_1_mode_lp, @current_mode_lp, @smoothing_target_blend)
+      @stage_1_mode_hp = Dsp.smooth(@mode_hp, @stage_1_mode_hp, @smoothing_target_blend)
+      @current_mode_hp = Dsp.smooth(@stage_1_mode_hp, @current_mode_hp, @smoothing_target_blend)
 
       # The modulation inputs arrive as they are; clamping total_cutoff below is what holds the
       # table lookup in range, and a source that swings both ways moves the cutoff both ways.

@@ -320,6 +320,7 @@ while true
   source_osc_1_mod_2_pol = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_MOD_2_POL), SLOT_OSC_1_MOD_2_POL)
   source_filter_1_cutoff       = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_CUTOFF), SLOT_FILTER_1_CUTOFF)
   source_filter_1_resonance    = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_RESONANCE), SLOT_FILTER_1_RESONANCE)
+  source_filter_1_mode         = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MODE), SLOT_FILTER_1_MODE)
   source_filter_1_gain         = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_GAIN), SLOT_FILTER_1_GAIN)
   source_filter_1_mod_1_amt    = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_1_AMT), SLOT_FILTER_1_MOD_1_AMT)
   source_filter_1_mod_1_pol    = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_1_POL), SLOT_FILTER_1_MOD_1_POL)
@@ -399,6 +400,7 @@ while true
   cc_osc_1_mod_2_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_MOD_2_POL)
   cc_filter_1_cutoff       = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_CUTOFF)
   cc_filter_1_resonance    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_RESONANCE)
+  cc_filter_1_mode         = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_MODE)
   cc_filter_1_gain         = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_GAIN)
   cc_filter_1_mod_1_amt    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_MOD_1_AMT)
   cc_filter_1_mod_1_pol    = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_MOD_1_POL)
@@ -480,6 +482,7 @@ while true
   signals[SLOT_OSC_1_MOD_2_POL] = cc_or_zero(cc_osc_1_mod_2_pol, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_mod_2_pol)))
   signals[SLOT_FILTER_1_CUTOFF] = cc_or_zero(cc_filter_1_cutoff, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_cutoff)))
   signals[SLOT_FILTER_1_RESONANCE] = cc_or_zero(cc_filter_1_resonance, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_resonance)))
+  signals[SLOT_FILTER_1_MODE] = cc_or_zero(cc_filter_1_mode, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_mode)))
   signals[SLOT_FILTER_1_GAIN] = cc_or_zero(cc_filter_1_gain, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_gain)))
   signals[SLOT_FILTER_1_MOD_1_AMT] = cc_or_zero(cc_filter_1_mod_1_amt, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_mod_1_amt)))
   signals[SLOT_FILTER_1_MOD_1_POL] = cc_or_zero(cc_filter_1_mod_1_pol, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_mod_1_pol)))
@@ -570,6 +573,7 @@ while true
   osc_1.set_modulation_2_polarity(signals[source_osc_1_mod_2_pol])
   filter_1.set_cutoff(signals[source_filter_1_cutoff])
   filter_1.set_resonance(signals[source_filter_1_resonance])
+  filter_1.set_mode(signals[source_filter_1_mode])
   filter_1.set_gain(signals[source_filter_1_gain])
   filter_1.set_modulation_1_amount(signals[source_filter_1_mod_1_amt])
   filter_1.set_modulation_1_polarity(signals[source_filter_1_mod_1_pol])
@@ -667,7 +671,8 @@ while true
       when 3 # MODULE_OSC_1
         signals[11] = osc_1.process(control_tick, signals[source_osc_1_pitch], signals[source_osc_1_mod_1], signals[source_osc_1_mod_2], signals[source_osc_1_pw_mod]) # SIGNAL_OSC_1_OUTPUT
       when 4 # MODULE_FILTER_1
-        signals[12] = filter_1.process(control_tick, signals[source_filter_1_audio], signals[source_filter_1_mod_1], signals[source_filter_1_mod_2], signals[source_filter_1_mod_3]) # SIGNAL_FILTER_1_OUTPUT_LP
+        signals[12] = filter_1.process(control_tick, signals[source_filter_1_audio], signals[source_filter_1_mod_1], signals[source_filter_1_mod_2], signals[source_filter_1_mod_3]) # SIGNAL_FILTER_1_OUTPUT
+        signals[117] = filter_1.output_lp # SIGNAL_FILTER_1_OUTPUT_LP
         signals[66] = filter_1.output_hp # SIGNAL_FILTER_1_OUTPUT_HP
       when 5 # MODULE_AMP_1
         signals[13] = amp_1.process(control_tick, signals[source_amp_1_audio], signals[source_amp_1_mod]) # SIGNAL_AMP_1_OUTPUT

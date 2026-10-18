@@ -6,7 +6,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.3
 - Last-note priority with one note of memory: releasing the newest note while the one before it is still held goes back to that one, legato (for trills)
 - 48 kHz audio output: 24 bit through an I2S DAC, or PWM Audio (no DAC needed)
 - Oscillator: a sawtooth-to-square morph with pulse width (CC 114), and a modulation input of its own for the pulse width (PWM, CC 115)
-- Filter: ZDF/TPT State Variable Filter (with a nonlinear leak on the band pass integrator, solved by the one-step Newton method), with low pass and high pass outputs
+- Filter: ZDF/TPT State Variable Filter (with a nonlinear leak on the band pass integrator, solved by the one-step Newton method), with low pass and high pass outputs and a main output crossfading from one to the other through a notch (Mode, CC 39)
 - Chorus: mono in, stereo out, as a module in the run order
 - Delay: stereo, with feedback, as a module in the run order (up to 340 ms)
 - Pitch: the note's pitch as a module in the run order, with portamento as an exponential lag (CC 5), pitch bend past it (range on CC 57), a transposition (CC 86 and 70) and a stretch of the keys (CC 22)
@@ -260,8 +260,17 @@ clamp at 16 as a guard that ordinary use never reaches. The output clip comes la
 the resonance dial k turns negative and the loop oscillates.
 
 The filter puts out its low pass and high pass at once, as Out LP and Out HP, each through a DC
-blocker and an output clip of its own. Out LP is the one the default patch uses, in the slot the
-single output had.
+blocker and an output clip of its own, and Out, the two crossfaded by Filter 1 Mode (CC 39, Filter
+Mode's in PRA32-U2). Mode crossfades as a mixer's Balance does: each side stays at full over its
+own half and falls to nothing over the other. At 0.0 (CC 4), where it powers up, Out is the low
+pass alone; at 1.0 (CC 124) the high pass alone; and at 0.5 (CC 64) both at full, whose sum, the
+input less k·BP, is a notch at the cutoff with both sides of it passed whole. In between the notch
+moves off the cutoff, above it toward the low pass and below it toward the high pass, with the
+other side at up to 6 dB down. Out is the one the default patch uses, feeding Amp 1, in the slot
+the single output had, so a patch that reads that slot hears the low pass until Mode is turned
+up. Out is not clipped again: in the pass band one side is all there is, and around the cutoff,
+where both are, the notch takes them down. The two factors are smoothed as the other levels
+are.
 
 ```mermaid
 flowchart LR
@@ -272,6 +281,9 @@ flowchart LR
   SUM -->|HP| OC
   OC -->|LP| OUT_LP([Out LP])
   OC -->|HP| OUT_HP([Out HP])
+  OC -->|LP| XF["Mode<br/>LP / notch / HP"]
+  OC -->|HP| XF
+  XF --> OUT([Out])
   SC["Nonlinear leak<br/>ceiling 4.0, one-step Newton"] -.- I1
   L2["s2 is linear<br/>guard clamp at 16"] -.- I2
   I1 -->|"−k·BP"| SUM
@@ -294,6 +306,9 @@ flowchart LR
   A1 -->|HP| LIM
   LIM -->|LP| OUT_LP([Out LP])
   LIM -->|HP| OUT_HP([Out HP])
+  LIM -->|LP| XF["Crossfader<br/>Mode"]
+  LIM -->|HP| XF
+  XF --> OUT([Out])
   A2 -->|"R/k (resonance)"| A1
   A3 -->|R| A1
   classDef nl fill:#FAECE7,stroke:#D85A30,color:#712B13
@@ -451,31 +466,32 @@ both at the same signal for a mono output.
 
 | CC 98 | Parameter | | CC 98 | Parameter | | CC 98 | Parameter |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | LFO 1 Rate | | 27 | Delay 1 Feedback | | 61 | Osc 2 Mod 1 Amt |
-| 1 | LFO 1 Level | | 28 | Delay 1 Mix | | 62 | Osc 2 Mod 1 Pol |
-| 3 | EG 1 Attack | | 34 | Pitch 1 Glide | | 63 | Osc 2 Mod 2 Amt |
-| 4 | EG 1 Decay | | 35 | Osc 1 Pulse Width | | 64 | Osc 2 Mod 2 Pol |
-| 5 | EG 1 Sustain | | 36 | Osc 1 PW Mod Amt | | 65 | Osc 2 Pulse Width |
-| 6 | EG 1 Level | | 37 | Osc 1 PW Mod Pol | | 66 | Osc 2 PW Mod Amt |
-| 8 | Osc 1 Wave | | 40 | LFO 1 Rate Mod Amt | | 67 | Osc 2 PW Mod Pol |
-| 9 | Osc 1 Pitch Coarse | | 41 | LFO 1 Rate Mod Pol | | 71 | Mixer 1 Level 3 |
-| 10 | Osc 1 Pitch Fine | | 44 | Filter 1 Mod 2 Amt | | 72 | Mixer 1 Pol 3 |
-| 11 | Osc 1 Mod 2 Amt | | 45 | Filter 1 Mod 2 Pol | | 73 | Mixer 1 Level 4 |
-| 12 | Osc 1 Mod 2 Pol | | 46 | Filter 1 Mod 3 Amt | | 74 | Mixer 1 Pol 4 |
-| 13 | Filter 1 Cutoff | | 47 | Filter 1 Mod 3 Pol | | 75 | Mixer 2 Level 1 |
-| 14 | Filter 1 Resonance | | 48 | Pitch 1 Bend Amt | | 76 | Mixer 2 Pol 1 |
-| 15 | Filter 1 Gain | | 49 | Pitch 1 Bend Pol | | 77 | Mixer 2 Level 2 |
-| 16 | Filter 1 Mod 1 Amt | | 50 | LFO 1 Level Mod Amt | | 78 | Mixer 2 Pol 2 |
-| 17 | Filter 1 Mod 1 Pol | | 51 | LFO 1 Level Mod Pol | | 79 | Mixer 2 Level 3 |
-| 18 | Amp 1 Gain | | 52 | Pitch 1 Coarse | | 80 | Mixer 2 Pol 3 |
-| 19 | Mixer 1 Level 1 | | 53 | Pitch 1 Fine | | 81 | Mixer 2 Level 4 |
-| 20 | Mixer 1 Pol 1 | | 54 | Mixer 1 Out Level | | 82 | Mixer 2 Pol 4 |
-| 21 | Mixer 1 Level 2 | | 55 | Osc 1 Mod 1 Amt | | 83 | Mixer 2 Out Level |
-| 22 | Mixer 1 Pol 2 | | 56 | Osc 1 Mod 1 Pol | | 85 | Mixer 1 Balance 1/2 |
-| 23 | Chorus 1 Rate | | 57 | Noise 1 Level | | 86 | Mixer 1 Balance 3/4 |
-| 24 | Chorus 1 Depth | | 58 | Osc 2 Wave | | 87 | Mixer 2 Balance 1/2 |
-| 25 | Chorus 1 Mix | | 59 | Osc 2 Pitch Coarse | | 88 | Mixer 2 Balance 3/4 |
-| 26 | Delay 1 Time | | 60 | Osc 2 Pitch Fine | | 89 | Pitch 1 Stretch |
+| 0 | LFO 1 Rate | | 28 | Delay 1 Mix | | 63 | Osc 2 Mod 2 Amt |
+| 1 | LFO 1 Level | | 34 | Pitch 1 Glide | | 64 | Osc 2 Mod 2 Pol |
+| 3 | EG 1 Attack | | 35 | Osc 1 Pulse Width | | 65 | Osc 2 Pulse Width |
+| 4 | EG 1 Decay | | 36 | Osc 1 PW Mod Amt | | 66 | Osc 2 PW Mod Amt |
+| 5 | EG 1 Sustain | | 37 | Osc 1 PW Mod Pol | | 67 | Osc 2 PW Mod Pol |
+| 6 | EG 1 Level | | 40 | LFO 1 Rate Mod Amt | | 71 | Mixer 1 Level 3 |
+| 8 | Osc 1 Wave | | 41 | LFO 1 Rate Mod Pol | | 72 | Mixer 1 Pol 3 |
+| 9 | Osc 1 Pitch Coarse | | 44 | Filter 1 Mod 2 Amt | | 73 | Mixer 1 Level 4 |
+| 10 | Osc 1 Pitch Fine | | 45 | Filter 1 Mod 2 Pol | | 74 | Mixer 1 Pol 4 |
+| 11 | Osc 1 Mod 2 Amt | | 46 | Filter 1 Mod 3 Amt | | 75 | Mixer 2 Level 1 |
+| 12 | Osc 1 Mod 2 Pol | | 47 | Filter 1 Mod 3 Pol | | 76 | Mixer 2 Pol 1 |
+| 13 | Filter 1 Cutoff | | 48 | Pitch 1 Bend Amt | | 77 | Mixer 2 Level 2 |
+| 14 | Filter 1 Resonance | | 49 | Pitch 1 Bend Pol | | 78 | Mixer 2 Pol 2 |
+| 15 | Filter 1 Gain | | 50 | LFO 1 Level Mod Amt | | 79 | Mixer 2 Level 3 |
+| 16 | Filter 1 Mod 1 Amt | | 51 | LFO 1 Level Mod Pol | | 80 | Mixer 2 Pol 3 |
+| 17 | Filter 1 Mod 1 Pol | | 52 | Pitch 1 Coarse | | 81 | Mixer 2 Level 4 |
+| 18 | Amp 1 Gain | | 53 | Pitch 1 Fine | | 82 | Mixer 2 Pol 4 |
+| 19 | Mixer 1 Level 1 | | 54 | Mixer 1 Out Level | | 83 | Mixer 2 Out Level |
+| 20 | Mixer 1 Pol 1 | | 55 | Osc 1 Mod 1 Amt | | 85 | Mixer 1 Balance 1/2 |
+| 21 | Mixer 1 Level 2 | | 56 | Osc 1 Mod 1 Pol | | 86 | Mixer 1 Balance 3/4 |
+| 22 | Mixer 1 Pol 2 | | 57 | Noise 1 Level | | 87 | Mixer 2 Balance 1/2 |
+| 23 | Chorus 1 Rate | | 58 | Osc 2 Wave | | 88 | Mixer 2 Balance 3/4 |
+| 24 | Chorus 1 Depth | | 59 | Osc 2 Pitch Coarse | | 89 | Pitch 1 Stretch |
+| 25 | Chorus 1 Mix | | 60 | Osc 2 Pitch Fine | | 90 | Filter 1 Mode |
+| 26 | Delay 1 Time | | 61 | Osc 2 Mod 1 Amt | |  |  |
+| 27 | Delay 1 Feedback | | 62 | Osc 2 Mod 1 Pol | |  |  |
 
 <!-- patch_gen end -->
 
@@ -535,8 +551,8 @@ two slots, a unipolar and a bipolar one. See the General slots below.
 | 8 | Constant -1.0 | | 50 | Pitch Bend ± | | 88 | Osc 2 Output ± |
 | 9 | LFO 1 Output ± | | 51 | General Mod Wheel | | 106 | Mixer 2 Output ± |
 | 10 | EG 1 Output | | 52 | General Unipolar 1 | | 116 | Noise 1 Output Red ± |
-| 11 | Osc 1 Output ± | | 53 | General Unipolar 2 | |  |  |
-| 12 | Filter 1 Output LP ± | | 54 | General Unipolar 3 | |  |  |
+| 11 | Osc 1 Output ± | | 53 | General Unipolar 2 | | 117 | Filter 1 Output LP ± |
+| 12 | Filter 1 Output ± | | 54 | General Unipolar 3 | |  |  |
 
 <!-- patch_gen end -->
 

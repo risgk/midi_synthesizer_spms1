@@ -1,5 +1,5 @@
 ```
-  [MIDI Synthesizer]                                              Date: 2026-10-17                      
+  [MIDI Synthesizer]                                              Date: 2026-10-18                      
   Model: SPMS-1 (type-2)          MIDI Implementation Chart       Version: 0.0.3                        
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Function...                   | Transmitted   | Recognized    | Remarks                              |
@@ -36,6 +36,7 @@
 |                            25 | x             | o             | Filter Mod 2 Amt                     |
 |                             9 | x             | o             | Filter Mod 3 Amt (Key Track)         |
 |                           112 | x             | o             | Filter Gain                          |
+|                            39 | x             | o             | Filter Mode (LP, Notch, HP)          |
 |                           118 | x             | o             | Mixer 1 Level 1                      |
 |                           119 | x             | o             | Mixer 1 Level 2                      |
 |                           116 | x             | o             | Mixer 2 Level 1 (Osc 1 Level)        |

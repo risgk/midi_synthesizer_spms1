@@ -52,7 +52,7 @@ default_order: [NOISE_1, LFO_1, EG_1, MIXER_1, PITCH_1, OSC_1, OSC_2, MIXER_2, F
 # holds the value of its CC off the bus (see spms1_main.rb), so no other input or parameter can
 # read it. The numbers the parameters' control slots had on the bus before they moved off it --
 # 19-47, 61-64, 69-85, 87, 89-98, 102-105, 107-115 and 119-122 -- are free, as are 21, 26, 67,
-# 65, 68, 71, 72, 99-101, 117, 118 and 123-126, unused already.
+# 65, 68, 71, 72, 99-101, 118 and 123-126, unused already.
 signals:
   - { key: NONE,            id: 0, value: 0.0,  short: "0.0",  label: None (constant 0.0), label_ja: なし（定数 0.0） }
   - { key: ONE,             id: 1, value: 1.0,  short: "+1.0", label: Constant 1.0,  label_ja: 定数 1.0 }
@@ -67,7 +67,7 @@ signals:
   - { key: LFO_1_OUTPUT,       id: 9,  module: LFO_1,    output: Out,    label: LFO 1 Output,       bipolar: true }
   - { key: EG_1_OUTPUT,        id: 10, module: EG_1,     output: Out,    label: EG 1 Output }
   - { key: OSC_1_OUTPUT,       id: 11, module: OSC_1,    output: Out,    label: Osc 1 Output,       bipolar: true }
-  - { key: FILTER_1_OUTPUT_LP, id: 12, module: FILTER_1, output: Out LP, label: Filter 1 Output LP, bipolar: true }
+  - { key: FILTER_1_OUTPUT,    id: 12, module: FILTER_1, output: Out,    label: Filter 1 Output,    bipolar: true }
   - { key: AMP_1_OUTPUT,       id: 13, module: AMP_1,    output: Out,    label: Amp 1 Output,       bipolar: true }
   - { key: MIXER_1_OUTPUT,     id: 14, module: MIXER_1,  output: Out,    label: Mixer 1 Output,     bipolar: true }
   - { key: CHORUS_1_OUTPUT_L,  id: 15, module: CHORUS_1, output: Out L,  label: Chorus 1 Output L,  bipolar: true }
@@ -95,8 +95,11 @@ signals:
 
   - { key: PITCH_1_OUTPUT, id: 60, module: PITCH_1, output: Out, label: Pitch 1 Output, bipolar: true }
 
-  # The filter's high pass came after its low pass, which keeps slot 12.
-  - { key: FILTER_1_OUTPUT_HP, id: 66, module: FILTER_1, output: Out HP, label: Filter 1 Output HP, bipolar: true }
+  # The filter's high pass came after its low pass, and its Out, the two crossfaded by Mode, after
+  # Stretch: Out took slot 12, the low pass's until then, as with Mode at its power-up value it is
+  # the low pass, and the low pass moved to 117.
+  - { key: FILTER_1_OUTPUT_LP, id: 117, module: FILTER_1, output: Out LP, label: Filter 1 Output LP, bipolar: true }
+  - { key: FILTER_1_OUTPUT_HP, id: 66,  module: FILTER_1, output: Out HP, label: Filter 1 Output HP, bipolar: true }
 
   - { key: NOISE_1_OUTPUT_WHITE, id: 86, module: NOISE_1, output: Out White, label: Noise 1 Output White, bipolar: true }
   - { key: OSC_2_OUTPUT,         id: 88, module: OSC_2,   output: Out,       label: Osc 2 Output,         bipolar: true }
@@ -120,7 +123,7 @@ inputs:
   # 22 and 23, Filter 1's Audio 2 In and Audio 3 In for a while, are unused.
   - { entry: 3,  module: FILTER_1,    key: AUDIO,       label: Audio In,       name: Audio In,       source: MIXER_2_OUTPUT }
   - { entry: 4,  module: FILTER_1,    key: MOD_1,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
-  - { entry: 5,  module: AMP_1,       key: AUDIO,       label: Audio In,       name: Audio In,       source: FILTER_1_OUTPUT_LP }
+  - { entry: 5,  module: AMP_1,       key: AUDIO,       label: Audio In,       name: Audio In,       source: FILTER_1_OUTPUT }
   - { entry: 6,  module: AMP_1,       key: MOD,         label: Mod In,         name: Mod In,         source: EG_1_OUTPUT }
   - { entry: 7,  module: MIXER_1,     key: IN_1,        label: In 1,           name: In 1,           source: NONE }
   - { entry: 8,  module: MIXER_1,     key: IN_2,        label: In 2,           name: In 2,           source: NONE }
@@ -219,6 +222,9 @@ controls:
   - { entry: 46, module: FILTER_1,  key: MOD_3_AMT, label: Mod 3 Amt,    cc: 9,   value: 4 }
   - { entry: 47, module: FILTER_1,  key: MOD_3_POL, label: Mod 3 Pol,    cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 14, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 94 }
+  # Mode came after Stretch. It crossfades Out from the low pass (0.0) through a notch (0.5) to the
+  # high pass (1.0), on CC 39, Filter Mode's in PRA32-U2, and powers up at CC 4, 0.0, the low pass.
+  - { entry: 90, module: FILTER_1,  key: MODE,         label: Mode,         cc: 39,  value: 4 }
   # Noise 1 came after Osc 1 Mod 1 Amt and Pol. Level has no CC and reads 1.0: the noise runs at
   # full level, and Mixer 2 Level 3 (CC 23), or the depth of what it modulates, sets how much is heard.
   - { entry: 57, module: NOISE_1,   key: LEVEL,        label: Level,        cc: 0,   value: 124, source: ONE }

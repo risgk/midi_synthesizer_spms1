@@ -29,7 +29,7 @@ SIGNAL_MINUS_ONE            = 8
 SIGNAL_LFO_1_OUTPUT         = 9
 SIGNAL_EG_1_OUTPUT          = 10
 SIGNAL_OSC_1_OUTPUT         = 11
-SIGNAL_FILTER_1_OUTPUT_LP   = 12
+SIGNAL_FILTER_1_OUTPUT      = 12
 SIGNAL_AMP_1_OUTPUT         = 13
 SIGNAL_MIXER_1_OUTPUT       = 14
 SIGNAL_CHORUS_1_OUTPUT_L    = 15
@@ -49,6 +49,7 @@ SIGNAL_GENERAL_BIPOLAR_2    = 57
 SIGNAL_GENERAL_BIPOLAR_3    = 58
 SIGNAL_GENERAL_BIPOLAR_4    = 59
 SIGNAL_PITCH_1_OUTPUT       = 60
+SIGNAL_FILTER_1_OUTPUT_LP   = 117
 SIGNAL_FILTER_1_OUTPUT_HP   = 66
 SIGNAL_NOISE_1_OUTPUT_WHITE = 86
 SIGNAL_OSC_2_OUTPUT         = 88
@@ -135,6 +136,7 @@ SLOT_MIXER_1_BALANCE_3_4 = 214
 SLOT_MIXER_2_BALANCE_1_2 = 215
 SLOT_MIXER_2_BALANCE_3_4 = 216
 SLOT_PITCH_1_STRETCH     = 217
+SLOT_FILTER_1_MODE       = 218
 
 # NRPN parameter numbers: (MSB << 7) | LSB, where the MSB picks a category and the LSB an entry.
 #   0..127   active_modules[slot]
@@ -251,6 +253,7 @@ NRPN_SOURCE_MIXER_1_BALANCE_3_4 = 342
 NRPN_SOURCE_MIXER_2_BALANCE_1_2 = 343
 NRPN_SOURCE_MIXER_2_BALANCE_3_4 = 344
 NRPN_SOURCE_PITCH_1_STRETCH     = 345
+NRPN_SOURCE_FILTER_1_MODE       = 346
 
 # A CC number of 0 means the parameter has no CC: its control slot holds 0.0 -- the bottom of a
 # unipolar dial, the middle of a bipolar one -- whatever CC it had before, so a patch sets it alone.
@@ -334,6 +337,7 @@ NRPN_CC_MIXER_1_BALANCE_3_4 = 470
 NRPN_CC_MIXER_2_BALANCE_1_2 = 471
 NRPN_CC_MIXER_2_BALANCE_3_4 = 472
 NRPN_CC_PITCH_1_STRETCH     = 473
+NRPN_CC_FILTER_1_MODE       = 474
 
 # The constants of the bus, which nothing else ever writes. A slot not written here holds 0.0.
 def spms1_fill_constant_signals(signals)
@@ -367,7 +371,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_1_MOD_2    , SIGNAL_LFO_1_OUTPUT)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_AUDIO , SIGNAL_MIXER_2_OUTPUT)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_MOD_1 , SIGNAL_EG_1_OUTPUT)
-  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_AMP_1_AUDIO    , SIGNAL_FILTER_1_OUTPUT_LP)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_AMP_1_AUDIO    , SIGNAL_FILTER_1_OUTPUT)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_AMP_1_MOD      , SIGNAL_EG_1_OUTPUT)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_1_IN_1   , SIGNAL_NONE)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_1_IN_2   , SIGNAL_NONE)
@@ -470,6 +474,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_2_BALANCE_1_2, SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_2_BALANCE_3_4, SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_PITCH_1_STRETCH    , SIGNAL_OWN)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_MODE      , SIGNAL_OWN)
 
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_RATE        , 3)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_LEVEL       , 113)
@@ -516,6 +521,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_MIXER_2_LEVEL_2   , 21)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_MIXER_2_LEVEL_3   , 23)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_PITCH_1_STRETCH   , 22)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_MODE     , 39)
 
   C.set_midi_cc_value(midi_ch, 3  , 64 ) # LFO 1 Rate
   C.set_midi_cc_value(midi_ch, 113, 124) # LFO 1 Level
@@ -562,4 +568,5 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 21 , 4  ) # Mixer 2 Level 2
   C.set_midi_cc_value(midi_ch, 23 , 4  ) # Mixer 2 Level 3
   C.set_midi_cc_value(midi_ch, 22 , 4  ) # Pitch 1 Stretch
+  C.set_midi_cc_value(midi_ch, 39 , 4  ) # Filter 1 Mode
 end
