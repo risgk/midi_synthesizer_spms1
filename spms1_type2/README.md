@@ -6,7 +6,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.3
 - Last-note priority with one note of memory: releasing the newest note while the one before it is still held goes back to that one, legato (for trills)
 - 48 kHz audio output: 24 bit through an I2S DAC, or PWM Audio (no DAC needed)
 - Oscillator: a sawtooth-to-square morph with pulse width (CC 114), and a modulation input of its own for the pulse width (PWM, CC 115)
-- Filter: ZDF/TPT State Variable Filter (with a nonlinear leak on the band pass integrator, solved by the one-step Newton method), with low pass, band pass and high pass outputs
+- Filter: ZDF/TPT State Variable Filter (with a nonlinear leak on the band pass integrator, solved by the one-step Newton method), with low pass and high pass outputs
 - Chorus: mono in, stereo out, as a module in the run order
 - Delay: stereo, with feedback, as a module in the run order (up to 340 ms)
 - Pitch: the note's pitch as a module in the run order, with portamento as an exponential lag (CC 5), pitch bend past it (range on CC 57), a transposition (CC 86 and 70) and a stretch of the keys (CC 22)
@@ -259,11 +259,9 @@ sample rate. The low pass state stays linear, with a
 clamp at 16 as a guard that ordinary use never reaches. The output clip comes last. At the top of
 the resonance dial k turns negative and the loop oscillates.
 
-The filter puts out its low pass, band pass and high pass at once, as Out LP, Out BP and Out HP,
-each through a DC blocker and an output clip of its own. Out LP is the one the default patch
-uses, in the slot the single output had. The three add up as a state variable filter's do, the
-input being LP + k·BP + HP, so the band pass peaks at Q times the input at the cutoff, as the
-low pass does; with the resonance up it is the loudest of the three.
+The filter puts out its low pass and high pass at once, as Out LP and Out HP, each through a DC
+blocker and an output clip of its own. Out LP is the one the default patch uses, in the slot the
+single output had.
 
 ```mermaid
 flowchart LR
@@ -271,10 +269,8 @@ flowchart LR
   SUM -->|HP| I1["Integrator 1<br/>BP, state s1"]
   I1 -->|BP| I2["Integrator 2<br/>LP, state s2"]
   I2 -->|LP| OC["Output clips<br/>linear up to 0.75"]
-  I1 -->|BP| OC
   SUM -->|HP| OC
   OC -->|LP| OUT_LP([Out LP])
-  OC -->|BP| OUT_BP([Out BP])
   OC -->|HP| OUT_HP([Out HP])
   SC["Nonlinear leak<br/>ceiling 4.0, one-step Newton"] -.- I1
   L2["s2 is linear<br/>guard clamp at 16"] -.- I2
@@ -295,10 +291,8 @@ flowchart LR
   D["Diode pair"] -.-|across C1| A2
   A2 -->|BP| A3["Integrator ∫<br/>C2, linear"]
   A3 -->|LP| LIM["Output limiters"]
-  A2 -->|BP| LIM
   A1 -->|HP| LIM
   LIM -->|LP| OUT_LP([Out LP])
-  LIM -->|BP| OUT_BP([Out BP])
   LIM -->|HP| OUT_HP([Out HP])
   A2 -->|"R/k (resonance)"| A1
   A3 -->|R| A1
@@ -536,12 +530,12 @@ two slots, a unipolar and a bipolar one. See the General slots below.
 | 3 | Constant 0.2 | | 16 | Chorus 1 Output R ± | | 58 | General Bipolar 3 ± |
 | 4 | Constant 0.1 | | 17 | Delay 1 Output L ± | | 59 | General Bipolar 4 ± |
 | 5 | Constant -0.1 | | 18 | Delay 1 Output R ± | | 60 | Pitch 1 Output ± |
-| 6 | Constant -0.2 | | 48 | Note Pitch ± | | 65 | Filter 1 Output BP ± |
-| 7 | Constant -0.5 | | 49 | Note Gate | | 66 | Filter 1 Output HP ± |
-| 8 | Constant -1.0 | | 50 | Pitch Bend ± | | 86 | Noise 1 Output White ± |
-| 9 | LFO 1 Output ± | | 51 | General Mod Wheel | | 88 | Osc 2 Output ± |
-| 10 | EG 1 Output | | 52 | General Unipolar 1 | | 106 | Mixer 2 Output ± |
-| 11 | Osc 1 Output ± | | 53 | General Unipolar 2 | | 116 | Noise 1 Output Red ± |
+| 6 | Constant -0.2 | | 48 | Note Pitch ± | | 66 | Filter 1 Output HP ± |
+| 7 | Constant -0.5 | | 49 | Note Gate | | 86 | Noise 1 Output White ± |
+| 8 | Constant -1.0 | | 50 | Pitch Bend ± | | 88 | Osc 2 Output ± |
+| 9 | LFO 1 Output ± | | 51 | General Mod Wheel | | 106 | Mixer 2 Output ± |
+| 10 | EG 1 Output | | 52 | General Unipolar 1 | | 116 | Noise 1 Output Red ± |
+| 11 | Osc 1 Output ± | | 53 | General Unipolar 2 | |  |  |
 | 12 | Filter 1 Output LP ± | | 54 | General Unipolar 3 | |  |  |
 
 <!-- patch_gen end -->

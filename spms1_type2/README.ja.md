@@ -6,7 +6,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.3
 - 後着優先で 1 ノート分を記憶: 前のノートを押さえたまま新しいノートを離すと、前のノートにレガートで戻ります (トリルなどに)
 - 48 kHz オーディオ出力: I2S DAC による 24 bit、または PWM Audio (DAC 不要)
 - オシレータ: ノコギリ波から矩形波へのモーフ、パルス幅付き (CC 114)。パルス幅専用のモジュレーション入力付き (PWM、CC 115)
-- フィルタ: ZDF/TPT ステート・バリアブル・フィルタ (BP 積分器の非線形リーク付き、1 ステップ・ニュートン法で解く)。LP、BP、HP の 3 出力
+- フィルタ: ZDF/TPT ステート・バリアブル・フィルタ (BP 積分器の非線形リーク付き、1 ステップ・ニュートン法で解く)。LP、HP の 2 出力
 - コーラス: モノラル入力・ステレオ出力、実行順に入るモジュール
 - ディレイ: ステレオ、フィードバック付き、実行順に入るモジュール (最大 340 ms)
 - ピッチ: ノートのピッチを扱う、実行順に入るモジュール。指数カーブのラグによるポルタメント (CC 5)、その後に足すピッチベンド (レンジは CC 57)、移調 (CC 86 と 70)、鍵盤のストレッチ (CC 22)
@@ -249,11 +249,9 @@ Pitch 1 がその 4 つの後にあるのは、自分への変調（LFO を Bend
 LP の状態は線形のままで、通常の使い方では届かない保険として ±16 のクランプだけがあります。出力
 クリップはフィルタの最後にあります。レゾナンスのつまみの上端では k が負になり、ループが発振します。
 
-フィルタはローパス、バンドパス、ハイパスを Out LP、Out BP、Out HP として同時に出力し、それぞれに専用の
+フィルタはローパスとハイパスを Out LP、Out HP として同時に出力し、それぞれに専用の
 DC ブロッカーと出力クリップがあります。デフォルトのパッチが使うのは Out LP で、以前の 1 つだけの出力と
-同じスロットにあります。3 つは状態変数フィルタのとおり足し合わせると入力になり (入力 = LP + k·BP + HP)、
-バンドパスはローパスと同じくカットオフで入力の Q 倍のピークを持ちます。レゾナンスを上げると 3 つのうち
-いちばん大きくなります。
+同じスロットにあります。
 
 ```mermaid
 flowchart LR
@@ -261,10 +259,8 @@ flowchart LR
   SUM -->|HP| I1["積分器1<br/>BP・状態 s1"]
   I1 -->|BP| I2["積分器2<br/>LP・状態 s2"]
   I2 -->|LP| OC["出力クリップ<br/>0.75まで線形"]
-  I1 -->|BP| OC
   SUM -->|HP| OC
   OC -->|LP| OUT_LP([Out LP])
-  OC -->|BP| OUT_BP([Out BP])
   OC -->|HP| OUT_HP([Out HP])
   SC["非線形リーク<br/>上限4.0・1ステップ・ニュートン法"] -.- I1
   L2["s2 は線形<br/>保険のクランプ ±16"] -.- I2
@@ -285,10 +281,8 @@ flowchart LR
   D["ダイオード対"] -.-|C1 に並列| A2
   A2 -->|BP| A3["積分器 ∫<br/>C2・線形"]
   A3 -->|LP| LIM["出力リミッタ"]
-  A2 -->|BP| LIM
   A1 -->|HP| LIM
   LIM -->|LP| OUT_LP([Out LP])
-  LIM -->|BP| OUT_BP([Out BP])
   LIM -->|HP| OUT_HP([Out HP])
   A2 -->|"R/k（共振）"| A1
   A3 -->|R| A1
@@ -518,12 +512,12 @@ Mixer 1 の 4 つの入力はどれも閉じた状態で始まります。
 | 3 | 定数 0.2 | | 16 | Chorus 1 Output R ± | | 58 | General Bipolar 3 ± |
 | 4 | 定数 0.1 | | 17 | Delay 1 Output L ± | | 59 | General Bipolar 4 ± |
 | 5 | 定数 -0.1 | | 18 | Delay 1 Output R ± | | 60 | Pitch 1 Output ± |
-| 6 | 定数 -0.2 | | 48 | Note Pitch ± | | 65 | Filter 1 Output BP ± |
-| 7 | 定数 -0.5 | | 49 | Note Gate | | 66 | Filter 1 Output HP ± |
-| 8 | 定数 -1.0 | | 50 | Pitch Bend ± | | 86 | Noise 1 Output White ± |
-| 9 | LFO 1 Output ± | | 51 | General Mod Wheel | | 88 | Osc 2 Output ± |
-| 10 | EG 1 Output | | 52 | General Unipolar 1 | | 106 | Mixer 2 Output ± |
-| 11 | Osc 1 Output ± | | 53 | General Unipolar 2 | | 116 | Noise 1 Output Red ± |
+| 6 | 定数 -0.2 | | 48 | Note Pitch ± | | 66 | Filter 1 Output HP ± |
+| 7 | 定数 -0.5 | | 49 | Note Gate | | 86 | Noise 1 Output White ± |
+| 8 | 定数 -1.0 | | 50 | Pitch Bend ± | | 88 | Osc 2 Output ± |
+| 9 | LFO 1 Output ± | | 51 | General Mod Wheel | | 106 | Mixer 2 Output ± |
+| 10 | EG 1 Output | | 52 | General Unipolar 1 | | 116 | Noise 1 Output Red ± |
+| 11 | Osc 1 Output ± | | 53 | General Unipolar 2 | |  |  |
 | 12 | Filter 1 Output LP ± | | 54 | General Unipolar 3 | |  |  |
 
 <!-- patch_gen end -->

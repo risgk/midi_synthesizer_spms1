@@ -1,9 +1,8 @@
 module Spms1
   # ZDF (zero-delay feedback) / TPT (topology-preserving transform) state variable filter, with a
   # nonlinear leak on the band pass integrator, solved within the sample by one step of Newton's
-  # method. It puts out its low pass, band pass and high pass at once: process returns the low
-  # pass, and output_bp and output_hp hold the other two, each through a DC blocker and the output
-  # clip of its own.
+  # method. It puts out its low pass and high pass at once: process returns the low pass, and
+  # output_hp holds the high pass, each through a DC blocker and the output clip of its own.
   # This implementation is not oversampled; the nonlinear behavior is kept intentionally simple.
   # Reference: https://www.discodsp.net/VAFilterDesign_2.1.2.pdf (The Art of VA Filter Design)
   # Reference: https://www.kvraudio.com/forum/viewtopic.php?t=349859 (Cheap non-linear zero-delay filters)
@@ -205,9 +204,7 @@ module Spms1
       @s1 = 0.0
       @s2 = 0.0
       @dc_blocker = 0.0
-      @dc_blocker_bp = 0.0
       @dc_blocker_hp = 0.0
-      @output_bp = 0.0
       @output_hp = 0.0
 
       @current_modulation_1_input = 0.0
@@ -284,7 +281,6 @@ module Spms1
         @s1 = Dsp.flush_tiny(@s1) + @self_osc_seed
         @s2 = Dsp.flush_tiny(@s2)
         @dc_blocker = Dsp.flush_tiny(@dc_blocker)
-        @dc_blocker_bp = Dsp.flush_tiny(@dc_blocker_bp)
         @dc_blocker_hp = Dsp.flush_tiny(@dc_blocker_hp)
         @self_osc_seed = 0.0 - @self_osc_seed
       end
@@ -335,28 +331,21 @@ module Spms1
       # step took it, which is what makes y satisfy its equation to the last bit.
       low_pass = s2 + @g * band_pass
       # The high pass as the loop has it, x - s2 - (g + k) * y, taken from the solved band pass,
-      # so the three outputs add up as a state variable filter's do: x = lp + k * bp + hp.
+      # so that with the band pass the three add up as a state variable filter's do:
+      # x = lp + k * bp + hp.
       high_pass = driven_input - s2 - @g_plus_k * band_pass
       @s1 = band_pass + band_pass - @s1
       @s2 = low_pass + low_pass - s2
 
-      # Ahead of clip_output, so that the output limit holds on what actually leaves. The band
-      # pass carries the DC that the leak's bias gives the state, and the high pass a share of it,
-      # so each output has a blocker of its own.
-      @dc_blocker_bp += (band_pass - @dc_blocker_bp) * @dc_blocker_coefficient
-      @output_bp = clip_output(band_pass - @dc_blocker_bp)
+      # Ahead of clip_output, so that the output limit holds on what actually leaves. The leak's
+      # bias gives the state a DC that reaches both outputs, so each has a blocker of its own.
       @dc_blocker_hp += (high_pass - @dc_blocker_hp) * @dc_blocker_coefficient
       @output_hp = clip_output(high_pass - @dc_blocker_hp)
       @dc_blocker += (low_pass - @dc_blocker) * @dc_blocker_coefficient
       clip_output(low_pass - @dc_blocker)
     end
 
-    # The band pass and the high pass of the last sample process took, read after it as Chorus's
-    # outputs are.
-    def output_bp
-      @output_bp
-    end
-
+    # The high pass of the last sample process took, read after it as Chorus's outputs are.
     def output_hp
       @output_hp
     end

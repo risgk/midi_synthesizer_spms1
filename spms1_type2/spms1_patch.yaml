@@ -52,7 +52,7 @@ default_order: [NOISE_1, LFO_1, EG_1, MIXER_1, PITCH_1, OSC_1, OSC_2, MIXER_2, F
 # holds the value of its CC off the bus (see spms1_main.rb), so no other input or parameter can
 # read it. The numbers the parameters' control slots had on the bus before they moved off it --
 # 19-47, 61-64, 69-85, 87, 89-98, 102-105, 107-115 and 119-122 -- are free, as are 21, 26, 67,
-# 68, 71, 72, 99-101, 117, 118 and 123-126, unused already.
+# 65, 68, 71, 72, 99-101, 117, 118 and 123-126, unused already.
 signals:
   - { key: NONE,            id: 0, value: 0.0,  short: "0.0",  label: None (constant 0.0), label_ja: なし（定数 0.0） }
   - { key: ONE,             id: 1, value: 1.0,  short: "+1.0", label: Constant 1.0,  label_ja: 定数 1.0 }
@@ -95,8 +95,7 @@ signals:
 
   - { key: PITCH_1_OUTPUT, id: 60, module: PITCH_1, output: Out, label: Pitch 1 Output, bipolar: true }
 
-  # The filter's band pass and high pass came after its low pass, which keeps slot 12.
-  - { key: FILTER_1_OUTPUT_BP, id: 65, module: FILTER_1, output: Out BP, label: Filter 1 Output BP, bipolar: true }
+  # The filter's high pass came after its low pass, which keeps slot 12.
   - { key: FILTER_1_OUTPUT_HP, id: 66, module: FILTER_1, output: Out HP, label: Filter 1 Output HP, bipolar: true }
 
   - { key: NOISE_1_OUTPUT_WHITE, id: 86, module: NOISE_1, output: Out White, label: Noise 1 Output White, bipolar: true }
