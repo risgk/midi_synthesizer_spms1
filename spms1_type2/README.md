@@ -401,8 +401,9 @@ CC it had before, so the patch alone sets what the parameter reads.
 
 There are two oscillators, one of every other module that makes a sound, two mixers, one chorus,
 one delay, one pitch module and one noise source, and **all twelve are in the default run order**, so a patch only ever has to route, never to switch something
-on first. Taking the chorus or the delay out of the order saves its share of the time; whatever
-read its output then has to be pointed elsewhere (see the examples below).
+on first. The synth is built to keep time with every module running, so taking one out of the
+order is never what makes a patch fit; to leave one out of the sound, route around it and let it
+run unread (see the examples below).
 Mixer 1 has a CC only on its first two levels, CC 118 and 119, which power up at 0.0, so it is
 silent until they are turned up, and Mixer 2 only on its first three: the default patch points
 the rest at constants instead, each level and Out Level at 1.0 and each polarity at +0.5, so an
@@ -815,12 +816,9 @@ changes only how fast the output moves, so it cannot step it.
   from General Mod Wheel, which powers up at 0.0, so the output is dry until the wheel moves
 - Chorus that only comes in with the mod wheel: CC 99 = 2, CC 98 = 25, CC 6 = 51 takes Chorus 1
   Mix from General Mod Wheel, so the output stays mono until the wheel moves
-- Take the chorus out, keeping the delay: CC 99 = 0, CC 98 = 10, CC 6 = 8 puts Delay 1 in the
-  chorus's place in the run order and CC 98 = 11, CC 6 = 0 ends it there, and CC 99 = 1,
-  CC 98 = 10 and 11, CC 6 = 13 feeds both sides of Delay 1 from the amp. The output is then mono
-- Take the chorus and the delay out and save their time: CC 99 = 0, CC 98 = 10, CC 6 = 0 ends the
-  run order after the amp, and CC 99 = 1, CC 98 = 12 and 13, CC 6 = 13 points both sides of the
-  final output back at the amp
+- Leave the chorus out of the sound, keeping the delay: CC 99 = 1, CC 98 = 10 and 11, CC 6 = 13
+  feeds both sides of Delay 1 from the amp. The chorus keeps running and nothing reads it, and the
+  output is then mono
 - Echoes ahead of the filter: CC 99 = 1, CC 98 = 10, CC 6 = 11 feeds Delay 1's left side from the
   oscillator, CC 98 = 3, CC 6 = 17 feeds the filter from it, and CC 98 = 12 and 13, CC 6 = 15 and
   16 points the final output at the chorus, which still takes the amp. The repeats then go
