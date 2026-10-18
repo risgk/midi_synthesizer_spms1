@@ -277,7 +277,7 @@ the resonance dial k turns negative and the loop oscillates.
 The filter puts out its low pass and high pass at once, as Out LP and Out HP, each through a DC
 blocker and an output clip of its own, and Out, the two crossfaded by Filter 1 Mode (CC 39, Filter
 Mode's in PRA32-U2). Each side stays at full over its own half and falls to nothing over the other,
-as a mixer's Balance does with its Balance Law at +0.5, the law named after this. At 0.0 (CC 4), where it powers up, Out is the low
+as a mixer's Balance does with its Balance Law at +0.2, the law named after this. At 0.0 (CC 4), where it powers up, Out is the low
 pass alone; at 1.0 (CC 124) the high pass alone; and at 0.5 (CC 64) both at full, whose sum, the
 input less k·BP, is a notch at the cutoff with both sides of it passed whole. In between the notch
 moves off the cutoff, above it toward the low pass and below it toward the high pass, with the
@@ -768,18 +768,26 @@ it down also brings a sum that would have been cut back inside it.
 Balance 1/2 and Balance 3/4 crossfade each pair of inputs, from -0.5 (CC 4) through 0.0 (CC 64) to
 +0.5 (CC 124), by the law Balance Law picks for both pairs of its mixer. Balance Law is bipolar
 only so that the default is its centre: it has no CC and reads its own slot, 0.0. It picks in
-three zones, the centre's the widest, so the constants -0.5, 0.0 and +0.5 pick each law:
+five zones, so the constants -0.5, -0.2, 0.0, +0.2 and +0.5 pick each law:
 
 | Balance Law | Law | At -0.5 | At 0.0 | Crossfader levels | Keeps |
 | --- | --- | --- | --- | --- | --- |
-| below -0.25, CC 34 (-0.5) | Linear | 2.0 and 0.0 | 1.0 each | 0.5 (Constant 0.5) | the sum of a pair at the same level |
-| -0.25 to +0.25 (0.0, default) | Equal power, as PRA32-U2's Osc Mix | √2 and 0.0 | 1.0 each | 0.707 (Constant 0.707) | the loudness of two uncorrelated inputs, such as detuned oscillators |
-| +0.25, CC 94, and above (+0.5) | As Filter 1 Mode | 1.0 and 0.0 | 1.0 each | 1.0 (Constant 1.0) | each input whole over its own half |
+| CC 0-27 (-0.5) | Linear | 2.0 and 0.0 | 1.0 each | 0.5 (Constant 0.5) | the sum of a pair at the same level |
+| CC 28-51 (-0.2) | Reserved, as equal power for now | √2 and 0.0 | 1.0 each | 0.707 (Constant 0.707) | |
+| CC 52-75 (0.0, default) | Equal power, as PRA32-U2's Osc Mix | √2 and 0.0 | 1.0 each | 0.707 (Constant 0.707) | the loudness of two uncorrelated inputs, such as detuned oscillators |
+| CC 76-99 (+0.2) | As Filter 1 Mode | 1.0 and 0.0 | 1.0 each | 1.0 (Constant 1.0) | each input whole over its own half |
+| CC 100-127 (+0.5) | Split | 1.0 and 0.0 | 0.0 each | 1.0 (Constant 1.0) | one input on each side of the centre, at the balance's distance from it |
 
-The two inputs' levels are multiplied by f(1 - 2b) and f(1 + 2b), with f(u) = u, √u or min(u, 1)
-by the law, so +0.5 is -0.5 the other way round. Whatever the law, the centre leaves the mixer
-as it was without a balance, so Balance 3/4, which reads its own slot, the centre, with no CC,
-leaves its pair alone. For a crossfader, or a selector at either end, point both levels of the
+The two inputs' levels are multiplied by f(1 - 2b) and f(1 + 2b), with f(u) = u, √u, min(u, 1)
+or max(u - 1, 0) by the law, so +0.5 is -0.5 the other way round. Whatever the law but split, the
+centre leaves the mixer as it was without a balance, so Balance 3/4, which reads its own slot,
+the centre, with no CC, leaves its pair alone. Split turns the balance into a level for one
+input or the other: below the centre the first input alone, at twice the balance's distance
+from it, above it the second, and both silent at the centre -- so a bipolar source on the
+balance, such as the LFO, plays one input with its negative half and the other with its
+positive half. It takes the centre's pass from the other pair as well, so on a mixer set to
+split, Balance 3/4 has to be turned, or its levels reached another way, for In 3 and In 4 to be
+heard. For a crossfader, or a selector at either end, point both levels of the
 pair at the constant in the table: each input then passes as it is at its own end -- a mix
 control for two oscillators, or a switch between two modulation sources. Balance 1/2 of each
 mixer is set up so by default, at equal power, on CC 119 and CC 21: at the centre each input is

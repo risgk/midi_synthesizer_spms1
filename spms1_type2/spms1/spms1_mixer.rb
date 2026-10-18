@@ -18,41 +18,48 @@ module Spms1
     # constant if both are changed.
     CONTROL_RATE_DIVISOR = 4
 
-    # Lookup for the balances, one run of 130 entries for each of the three laws Balance Law picks,
+    # Lookup for the balances, one run of 130 entries for each of the five laws Balance Law picks,
     # each a factor f(u) for u = i / 64, 0.0 to 2.0, interpolated in a straight line between
     # entries:
     #   0 linear      f(u) = u               the two factors add to 2.0
-    #   1 equal power f(u) = sqrt(u)         their squares add to 2.0
-    #   2 filter Mode f(u) = min(u, 1.0)     each at 1.0 over its own half, as Filter 1 Mode's
+    #   1 reserved    f(u) = sqrt(u)         as equal power, until a law is put here
+    #   2 equal power f(u) = sqrt(u)         their squares add to 2.0
+    #   3 filter Mode f(u) = min(u, 1.0)     each at 1.0 over its own half, as Filter 1 Mode's
+    #   4 split       f(u) = max(u - 1.0, 0) one input on each side, at the balance's distance from
+    #                                        the centre: both silent there, each at 1.0 at its end
     # A balance is worked out every buffer whether it has moved or not, never only when it changes,
     # and always by the same few operations with no branch on its value or on the law: the time a
     # buffer takes must not hang on what the patch or the CCs are doing, so that its worst case is
     # the case measured, and can be guaranteed. A square root would be a library call in double
-    # precision on the Pico 2, with a branch for its domain inside, and a choice between three
-    # formulas a branch; the law only moves where in the table the factor is read. Every law has
-    # f(1.0) = 1.0, so the centre leaves its pair as it is whatever the law, and the entries at
-    # u = 1.0 and 2.0 are exact. The linear and the filter Mode laws are straight between entries,
-    # their corner at u = 1.0 on an entry, so they are exact everywhere; the square root's line runs
+    # precision on the Pico 2, with a branch for its domain inside, and a choice between formulas a
+    # branch; the law only moves where in the table the factor is read. Every law but split has
+    # f(1.0) = 1.0, so the centre leaves its pair as it is, and the entries at u = 1.0 and 2.0 are
+    # exact. The linear, the filter Mode and the split laws are straight between entries, their
+    # corners at u = 1.0 on an entry, so they are exact everywhere; the square root's line runs
     # under its curve, by up to 0.03 in the first entry, near silence, and under 0.001 from
     # u = 0.25 on. The last entry of each run repeats the one before it so that interpolating at
     # u = 2.0 reads a real entry of the same run rather than the next run's first.
     BALANCE_TABLE_RUN = 130
-    BALANCE_TABLE = Array.new(390, 0.0)
+    BALANCE_TABLE = Array.new(650, 0.0)
     for i in 0...129
       u = i.to_f * (1.0 / 64.0)
       BALANCE_TABLE[i] = u
       BALANCE_TABLE[130 + i] = Math.sqrt(u)
-      BALANCE_TABLE[260 + i] = (u < 1.0) ? u : 1.0
+      BALANCE_TABLE[260 + i] = Math.sqrt(u)
+      BALANCE_TABLE[390 + i] = (u < 1.0) ? u : 1.0
+      BALANCE_TABLE[520 + i] = (u > 1.0) ? u - 1.0 : 0.0
     end
     BALANCE_TABLE[129] = BALANCE_TABLE[128]
     BALANCE_TABLE[259] = BALANCE_TABLE[258]
     BALANCE_TABLE[389] = BALANCE_TABLE[388]
+    BALANCE_TABLE[519] = BALANCE_TABLE[518]
+    BALANCE_TABLE[649] = BALANCE_TABLE[648]
 
     def initialize(sample_rate)
       @sample_rate = sample_rate
       @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (48000.0 / @sample_rate) * (CONTROL_RATE_DIVISOR / 4.0)
       # Where the law Balance Law picks starts in BALANCE_TABLE; equal power at power-up.
-      @balance_law_offset = 130
+      @balance_law_offset = 260
       # Every level powers up silent, so an input fades in from nothing when its level is first set
       # rather than sounding at full level before the patch says otherwise.
       @level_1 = 0.0
@@ -139,24 +146,29 @@ module Spms1
       @target_4 = @level_4 * @polarity_4 * @balance_factor_4
     end
 
-    # Balance Law is bipolar, [-0.5, 0.5], and picks how both balances crossfade, in three zones:
-    # linear below -0.25 (CC 34), equal power (as PRA32-U2's Osc Mix) to +0.25 (CC 94), and as
-    # Filter 1 Mode from there, so the constants -0.5, 0.0 and +0.5 pick each, and the default, the
-    # centre, has the widest zone. (clamped + 0.75) * 2 runs 0.5 to 2.5, so its integer part is the
-    # zone without a branch. It is bipolar only so that equal power,
-    # the default, is the centre, where it rests with no CC. It is read once a buffer like any other
+    # Balance Law is bipolar, [-0.5, 0.5], and picks how both balances crossfade, in five zones of
+    # 0.2: linear (CC 0-27), reserved (CC 28-51, as equal power for now), equal power (CC 52-75,
+    # as PRA32-U2's Osc Mix), as Filter 1 Mode (CC 76-99) and split (CC 100-127), so the constants
+    # -0.5, -0.2, 0.0, +0.2 and +0.5 pick each. It is bipolar only so that equal power, the default,
+    # is the centre, where it rests with no CC. The zone is the integer part of law * 5 + 2.51: the
+    # 0.01, a quarter of a CC step, keeps every CC value off an edge, where float rounding could put
+    # it either side, and the clamp stops at 0.4, inside the last zone, so that +0.5 does not make
+    # a sixth. No branch either way. It is read once a buffer like any other
     # parameter, ahead of the balances, which are worked out again in the same buffer; their
     # factors are smoothed on the way to the inputs, so switching laws does not click.
     def set_balance_law(law)
-      clamped_law = (law < -0.5) ? -0.5 : ((law > 0.5) ? 0.5 : law)
-      @balance_law_offset = ((clamped_law + 0.75) * 2.0).to_i * BALANCE_TABLE_RUN
+      clamped_law = (law < -0.5) ? -0.5 : ((law > 0.4) ? 0.4 : law)
+      @balance_law_offset = (clamped_law * 5.0 + 2.51).to_i * BALANCE_TABLE_RUN
     end
 
     # Each balance is bipolar, [-0.5, 0.5], and crossfades its pair by the law Balance Law picks,
     # the factors f(1 - 2b) and f(1 + 2b) of BALANCE_TABLE. 0.0 at the centre leaves both inputs as
-    # they are whatever the law, so the centre is the mixer without a balance; -0.5 silences the
-    # second input and takes the first to 2.0 (linear), √2 (equal power) or 1.0 (filter Mode), and
-    # +0.5 the other way round. A crossfader, each input as it is at its own end, wants both levels
+    # they are, so the centre is the mixer without a balance, whatever the law but split, which
+    # silences both there; -0.5 silences the second input and takes the first to 2.0 (linear), √2
+    # (equal power) or 1.0 (filter Mode, split), and +0.5 the other way round. Split passes only
+    # the first input below the centre and only the second above, each at twice the distance, so a
+    # bipolar source on the balance plays one input with its negative half and the other with its
+    # positive half. A crossfader, each input as it is at its own end, wants both levels
     # of the pair at 0.5, 1/√2 or 1.0 by the law: a pair at the same level keeps its total (linear),
     # its loudness when uncorrelated, as detuned oscillators are (equal power), or each input whole
     # over its own half (filter Mode). The clamp, written as nested ternaries so that it compiles
