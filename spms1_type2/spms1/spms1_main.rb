@@ -365,6 +365,10 @@ while true
   source_mixer_2_level_4 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_LEVEL_4)
   source_mixer_2_pol_4 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_POL_4)
   source_mixer_2_out_level = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_OUT_LEVEL)
+  source_mixer_1_balance_1_2 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_BALANCE_1_2)
+  source_mixer_1_balance_3_4 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_BALANCE_3_4)
+  source_mixer_2_balance_1_2 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_BALANCE_1_2)
+  source_mixer_2_balance_3_4 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_BALANCE_3_4)
 
   # Which CC fills each control slot. The bus is the only thing downstream reads, so this is
   # where MIDI enters and the only place a CC number appears.
@@ -438,6 +442,10 @@ while true
   cc_mixer_2_level_4 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_LEVEL_4)
   cc_mixer_2_pol_4 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_POL_4)
   cc_mixer_2_out_level = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_OUT_LEVEL)
+  cc_mixer_1_balance_1_2 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_1_BALANCE_1_2)
+  cc_mixer_1_balance_3_4 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_1_BALANCE_3_4)
+  cc_mixer_2_balance_1_2 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_BALANCE_1_2)
+  cc_mixer_2_balance_3_4 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_BALANCE_3_4)
   cc_general_mod_wheel     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_MOD_WHEEL)
   cc_general_1             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_1)
   cc_general_2             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_2)
@@ -514,6 +522,10 @@ while true
   signals[SIGNAL_MIXER_2_LEVEL_4] = cc_or_zero(cc_mixer_2_level_4, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_2_level_4)))
   signals[SIGNAL_MIXER_2_POL_4] = cc_or_zero(cc_mixer_2_pol_4, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_2_pol_4)))
   signals[SIGNAL_MIXER_2_OUT_LEVEL] = cc_or_zero(cc_mixer_2_out_level, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_2_out_level)))
+  signals[SIGNAL_MIXER_1_BALANCE_1_2] = cc_or_zero(cc_mixer_1_balance_1_2, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_balance_1_2)))
+  signals[SIGNAL_MIXER_1_BALANCE_3_4] = cc_or_zero(cc_mixer_1_balance_3_4, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_balance_3_4)))
+  signals[SIGNAL_MIXER_2_BALANCE_1_2] = cc_or_zero(cc_mixer_2_balance_1_2, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_2_balance_1_2)))
+  signals[SIGNAL_MIXER_2_BALANCE_3_4] = cc_or_zero(cc_mixer_2_balance_3_4, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_2_balance_3_4)))
   signals[SIGNAL_GENERAL_MOD_WHEEL] = cc_or_zero(cc_general_mod_wheel, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_general_mod_wheel)))
   # Each General CC fills two slots, the same value taken both ways.
   general_1 = C.get_midi_cc_value(MIDI_CH, cc_general_1)
@@ -581,6 +593,10 @@ while true
   mixer_2.set_level_4(signals[source_mixer_2_level_4])
   mixer_2.set_polarity_4(signals[source_mixer_2_pol_4])
   mixer_2.set_out_level(signals[source_mixer_2_out_level])
+  mixer_1.set_balance_1_2(signals[source_mixer_1_balance_1_2])
+  mixer_1.set_balance_3_4(signals[source_mixer_1_balance_3_4])
+  mixer_2.set_balance_1_2(signals[source_mixer_2_balance_1_2])
+  mixer_2.set_balance_3_4(signals[source_mixer_2_balance_3_4])
   chorus_1.set_rate(signals[source_chorus_1_rate])
   chorus_1.set_depth(signals[source_chorus_1_depth])
   chorus_1.set_mix(signals[source_chorus_1_mix])

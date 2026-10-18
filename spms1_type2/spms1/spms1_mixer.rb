@@ -1,8 +1,9 @@
 module Spms1
-  # Sums four inputs, each at its own level and its own polarity. With one input routed it is a
-  # buffer, an attenuator or an inverter; inverting just one input subtracts it from another; and
-  # a constant on another input shifts a unipolar signal, such as the envelope, into a bipolar
-  # one. Mixer 1 serves the modulation, Mixer 2 the audio ahead of the filter.
+  # Sums four inputs, each at its own level and its own polarity, with a balance across each pair,
+  # 1 and 2, 3 and 4. With one input routed it is a buffer, an attenuator or an inverter; inverting
+  # just one input subtracts it from another; a constant on another input shifts a unipolar
+  # signal, such as the envelope, into a bipolar one; and a balance turned to one end selects one
+  # input of its pair. Mixer 1 serves the modulation, Mixer 2 the audio ahead of the filter.
   class Mixer
     # Blend at the reference rate on the line below, for each of two cascaded stages. The two move
     # together: their product is what fixes the time constant, so changing one without the other
@@ -38,8 +39,14 @@ module Spms1
       @polarity_2 = 1.0
       @polarity_3 = 1.0
       @polarity_4 = 1.0
-      # Each polarity is folded into its own level at the control rate rather than applied per
-      # sample, so the per-sample path is four multiplies and three adds and only four states smooth.
+      # The balance of each pair as a multiplier on each of its two inputs, 1.0 at the centre.
+      @balance_factor_1 = 1.0
+      @balance_factor_2 = 1.0
+      @balance_factor_3 = 1.0
+      @balance_factor_4 = 1.0
+      # Each polarity and balance is folded into its own level when it is set rather than applied
+      # per sample, so the per-sample path is four multiplies and three adds and only four states
+      # smooth.
       @target_1 = 0.0
       @target_2 = 0.0
       @target_3 = 0.0
@@ -62,22 +69,22 @@ module Spms1
     # Each level is unipolar, [0.0, 1.0], and used as a plain multiplier on its own input.
     def set_level_1(level)
       @level_1 = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
-      @target_1 = @level_1 * @polarity_1
+      @target_1 = @level_1 * @polarity_1 * @balance_factor_1
     end
 
     def set_level_2(level)
       @level_2 = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
-      @target_2 = @level_2 * @polarity_2
+      @target_2 = @level_2 * @polarity_2 * @balance_factor_2
     end
 
     def set_level_3(level)
       @level_3 = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
-      @target_3 = @level_3 * @polarity_3
+      @target_3 = @level_3 * @polarity_3 * @balance_factor_3
     end
 
     def set_level_4(level)
       @level_4 = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
-      @target_4 = @level_4 * @polarity_4
+      @target_4 = @level_4 * @polarity_4 * @balance_factor_4
     end
 
     # Each polarity is bipolar, [-0.5, 0.5], and doubled into a multiplier on its own input: +0.5
@@ -88,25 +95,47 @@ module Spms1
     def set_polarity_1(polarity)
       clamped_polarity = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
       @polarity_1 = clamped_polarity + clamped_polarity
-      @target_1 = @level_1 * @polarity_1
+      @target_1 = @level_1 * @polarity_1 * @balance_factor_1
     end
 
     def set_polarity_2(polarity)
       clamped_polarity = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
       @polarity_2 = clamped_polarity + clamped_polarity
-      @target_2 = @level_2 * @polarity_2
+      @target_2 = @level_2 * @polarity_2 * @balance_factor_2
     end
 
     def set_polarity_3(polarity)
       clamped_polarity = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
       @polarity_3 = clamped_polarity + clamped_polarity
-      @target_3 = @level_3 * @polarity_3
+      @target_3 = @level_3 * @polarity_3 * @balance_factor_3
     end
 
     def set_polarity_4(polarity)
       clamped_polarity = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
       @polarity_4 = clamped_polarity + clamped_polarity
-      @target_4 = @level_4 * @polarity_4
+      @target_4 = @level_4 * @polarity_4 * @balance_factor_4
+    end
+
+    # Each balance is bipolar, [-0.5, 0.5], and crossfades its pair in a straight line, the two
+    # factors always adding to 2.0: 0.0 at the centre leaves both inputs as they are, -0.5 doubles
+    # the first and silences the second, and +0.5 the other way round. So the centre is the mixer
+    # without a balance, a pair at the same levels keeps the same total whichever way it is turned,
+    # and either end selects one input -- at twice its level, which a level of 0.5 brings back to
+    # as it was.
+    def set_balance_1_2(balance)
+      clamped_balance = (balance < -0.5) ? -0.5 : ((balance > 0.5) ? 0.5 : balance)
+      @balance_factor_1 = 1.0 - (clamped_balance + clamped_balance)
+      @balance_factor_2 = 1.0 + (clamped_balance + clamped_balance)
+      @target_1 = @level_1 * @polarity_1 * @balance_factor_1
+      @target_2 = @level_2 * @polarity_2 * @balance_factor_2
+    end
+
+    def set_balance_3_4(balance)
+      clamped_balance = (balance < -0.5) ? -0.5 : ((balance > 0.5) ? 0.5 : balance)
+      @balance_factor_3 = 1.0 - (clamped_balance + clamped_balance)
+      @balance_factor_4 = 1.0 + (clamped_balance + clamped_balance)
+      @target_3 = @level_3 * @polarity_3 * @balance_factor_3
+      @target_4 = @level_4 * @polarity_4 * @balance_factor_4
     end
 
     # Out Level is unipolar, [0.0, 1.0], a plain multiplier on the sum, so one control can take a

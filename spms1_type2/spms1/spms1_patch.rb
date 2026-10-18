@@ -126,6 +126,10 @@ SIGNAL_MIXER_2_POL_4        = 114
 SIGNAL_MIXER_2_OUT_LEVEL    = 115
 SIGNAL_NOISE_1_OUTPUT_RED   = 116
 SIGNAL_NOISE_1_OUTPUT_LF    = 118
+SIGNAL_MIXER_1_BALANCE_1_2  = 119
+SIGNAL_MIXER_1_BALANCE_3_4  = 120
+SIGNAL_MIXER_2_BALANCE_1_2  = 121
+SIGNAL_MIXER_2_BALANCE_3_4  = 122
 
 # NRPN parameter numbers: (MSB << 7) | LSB, where the MSB picks a category and the LSB an entry.
 #   0..127   active_modules[slot]
@@ -237,6 +241,10 @@ NRPN_SOURCE_MIXER_2_POL_3       = 336
 NRPN_SOURCE_MIXER_2_LEVEL_4     = 337
 NRPN_SOURCE_MIXER_2_POL_4       = 338
 NRPN_SOURCE_MIXER_2_OUT_LEVEL   = 339
+NRPN_SOURCE_MIXER_1_BALANCE_1_2 = 341
+NRPN_SOURCE_MIXER_1_BALANCE_3_4 = 342
+NRPN_SOURCE_MIXER_2_BALANCE_1_2 = 343
+NRPN_SOURCE_MIXER_2_BALANCE_3_4 = 344
 
 # A CC number of 0 means the parameter has no CC: its control slot holds 0.0 -- the bottom of a
 # unipolar dial, the middle of a bipolar one -- whatever CC it had before, so a patch sets it alone.
@@ -315,6 +323,10 @@ NRPN_CC_MIXER_2_POL_3       = 464
 NRPN_CC_MIXER_2_LEVEL_4     = 465
 NRPN_CC_MIXER_2_POL_4       = 466
 NRPN_CC_MIXER_2_OUT_LEVEL   = 467
+NRPN_CC_MIXER_1_BALANCE_1_2 = 469
+NRPN_CC_MIXER_1_BALANCE_3_4 = 470
+NRPN_CC_MIXER_2_BALANCE_1_2 = 471
+NRPN_CC_MIXER_2_BALANCE_3_4 = 472
 
 # The constants of the bus, which nothing else ever writes. A slot not written here holds 0.0.
 def spms1_fill_constant_signals(signals)
@@ -446,6 +458,10 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_2_LEVEL_4    , SIGNAL_ONE)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_2_POL_4      , SIGNAL_HALF)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_2_OUT_LEVEL  , SIGNAL_ONE)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_1_BALANCE_1_2, SIGNAL_MIXER_1_BALANCE_1_2)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_1_BALANCE_3_4, SIGNAL_MIXER_1_BALANCE_3_4)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_2_BALANCE_1_2, SIGNAL_MIXER_2_BALANCE_1_2)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_2_BALANCE_3_4, SIGNAL_MIXER_2_BALANCE_3_4)
 
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_RATE        , 3)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_LEVEL       , 113)
