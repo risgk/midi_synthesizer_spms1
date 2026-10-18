@@ -5,7 +5,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.3
 - 音源モジュールとして MIDI で制御します
 - 後着優先で 1 ノート分を記憶: 前のノートを押さえたまま新しいノートを離すと、前のノートにレガートで戻ります (トリルなどに)
 - 48 kHz オーディオ出力: I2S DAC による 24 bit、または PWM Audio (DAC 不要)
-- オシレータ: ノコギリ波から矩形波へのモーフ、パルス幅付き (CC 114)。パルス幅専用のモジュレーション入力付き (PWM、CC 115)
+- オシレータ: ノコギリ波から矩形波へのモーフ、パルス幅付き (CC 114)。パルス幅専用のモジュレーション入力付き (PWM、CC 115)。ノコギリ波とパルス波の個別出力付き
 - フィルタ: ZDF/TPT ステート・バリアブル・フィルタ (BP 積分器の非線形リーク付き、1 ステップ・ニュートン法で解く)。LP、HP の 2 出力と、その間をノッチを経てクロスフェードするメイン出力 (Mode、CC 39)
 - コーラス: モノラル入力・ステレオ出力、実行順に入るモジュール
 - ディレイ: ステレオ、フィードバック付き、実行順に入るモジュール (最大 340 ms)
@@ -521,19 +521,20 @@ Mixer 1 の 4 つの入力はどれも閉じた状態で始まります。
 
 | ID | シグナル | | ID | シグナル | | ID | シグナル |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | なし（定数 0.0） | | 13 | Amp 1 Output ± | | 55 | General Unipolar 4 |
-| 1 | 定数 1.0 | | 14 | Mixer 1 Output ± | | 56 | General Bipolar 1 ± |
-| 2 | 定数 0.5 | | 15 | Chorus 1 Output L ± | | 57 | General Bipolar 2 ± |
-| 3 | 定数 0.2 | | 16 | Chorus 1 Output R ± | | 58 | General Bipolar 3 ± |
-| 4 | 定数 0.1 | | 17 | Delay 1 Output L ± | | 59 | General Bipolar 4 ± |
-| 5 | 定数 -0.1 | | 18 | Delay 1 Output R ± | | 60 | Pitch 1 Output ± |
-| 6 | 定数 -0.2 | | 48 | Note Pitch ± | | 66 | Filter 1 Output HP ± |
-| 7 | 定数 -0.5 | | 49 | Note Gate | | 86 | Noise 1 Output White ± |
-| 8 | 定数 -1.0 | | 50 | Pitch Bend ± | | 88 | Osc 2 Output ± |
-| 9 | LFO 1 Output ± | | 51 | General Mod Wheel | | 106 | Mixer 2 Output ± |
-| 10 | EG 1 Output | | 52 | General Unipolar 1 | | 116 | Noise 1 Output Red ± |
-| 11 | Osc 1 Output ± | | 53 | General Unipolar 2 | | 117 | Filter 1 Output LP ± |
-| 12 | Filter 1 Output ± | | 54 | General Unipolar 3 | |  |  |
+| 0 | なし（定数 0.0） | | 14 | Mixer 1 Output ± | | 57 | General Bipolar 2 ± |
+| 1 | 定数 1.0 | | 15 | Chorus 1 Output L ± | | 58 | General Bipolar 3 ± |
+| 2 | 定数 0.5 | | 16 | Chorus 1 Output R ± | | 59 | General Bipolar 4 ± |
+| 3 | 定数 0.2 | | 17 | Delay 1 Output L ± | | 60 | Pitch 1 Output ± |
+| 4 | 定数 0.1 | | 18 | Delay 1 Output R ± | | 66 | Filter 1 Output HP ± |
+| 5 | 定数 -0.1 | | 48 | Note Pitch ± | | 86 | Noise 1 Output White ± |
+| 6 | 定数 -0.2 | | 49 | Note Gate | | 88 | Osc 2 Output ± |
+| 7 | 定数 -0.5 | | 50 | Pitch Bend ± | | 106 | Mixer 2 Output ± |
+| 8 | 定数 -1.0 | | 51 | General Mod Wheel | | 116 | Noise 1 Output Red ± |
+| 9 | LFO 1 Output ± | | 52 | General Unipolar 1 | | 117 | Filter 1 Output LP ± |
+| 10 | EG 1 Output | | 53 | General Unipolar 2 | | 118 | Osc 1 Output Saw ± |
+| 11 | Osc 1 Output ± | | 54 | General Unipolar 3 | | 119 | Osc 1 Output Pulse ± |
+| 12 | Filter 1 Output ± | | 55 | General Unipolar 4 | | 120 | Osc 2 Output Saw ± |
+| 13 | Amp 1 Output ± | | 56 | General Bipolar 1 ± | | 121 | Osc 2 Output Pulse ± |
 
 <!-- patch_gen end -->
 
@@ -650,6 +651,11 @@ Osc 1 Pulse Width は、モーフを作る 2 つのノコギリ波のうち 2 �
 Mod 2 In が自分の Amt と Pol でピッチを動かすのと同じ仕組みです。モジュレーション 1 単位がパルス幅のレンジ全体なので、PW Mod Amt を最大にすると、
 デフォルトのパッチでつながっている LFO がパルス幅をレンジの半分ずつ上下に振ります。Pulse Width が CC 64
 なら 50% からほぼ 0% までです。モジュレーションを足したパルス幅は 0.0〜1.0 に収められます。
+
+各オシレータは、Wave の値にかかわらず、モーフの両端を個別にも出力します。Out Saw はノコギリ波、
+Out Pulse はパルス幅に応じたパルス波で、Wave を矩形波側の端にしたときの Out と同じです。どちらも Out と同じく
+-0.5〜+0.5 で、デフォルトのパッチでは使っていません。1 つのオシレータの 2 つをミキサーで別々のレベルで混ぜたり、
+ノコギリ波とパルス波を別々の行き先に送ったりできます。
 
 Noise 1 は 1 つの発生器から 2 種類のノイズを Noise 1 Level の大きさで出します。Out White はスペクトルの平坦な
 ホワイトノイズで、0.0 では無音、1.0 ではオシレータと同じ -0.5〜+0.5 いっぱいのノイズです。Out Red は

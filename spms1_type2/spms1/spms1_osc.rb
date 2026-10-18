@@ -1,5 +1,7 @@
 module Spms1
-  # PolyBLEP-based saw/square morph oscillator for anti-aliased waveform transitions.
+  # PolyBLEP-based saw/square morph oscillator for anti-aliased waveform transitions. Besides the
+  # morph, which process returns, it puts out its two ends on their own: output_saw, the sawtooth,
+  # and output_pulse, the pulse at its pulse width, as the morph is at 1.0, whatever Wave is.
   class Osc
     # Blend at the reference rate on the line below, for each of two cascaded stages. The two move
     # together: their product is what fixes the time constant, so changing one without the other
@@ -67,6 +69,8 @@ module Spms1
       # Pitch Coarse and Pitch Fine are summed when set, so the per-sample path adds one offset rather
       # than two.
       @tune = 0.0
+      @output_saw = 0.0
+      @output_pulse = 0.0
     end
 
     # Waveform morph is unipolar, [0.0, 1.0].
@@ -192,8 +196,20 @@ module Spms1
 
       # Halved so that both ends of the morph come out at one unit peak to peak, the same span
       # as every other bipolar signal on the bus. How loudly it drives what comes next is the
-      # receiving module's business, not this one's.
+      # receiving module's business, not this one's. The two ends on their own are halved alike.
+      @output_saw = saw1 * 0.5
+      @output_pulse = (saw1 - saw2) * 0.5
       output * 0.5
+    end
+
+    # The sawtooth and the pulse of the last sample process took, read after it as Chorus's
+    # outputs are.
+    def output_saw
+      @output_saw
+    end
+
+    def output_pulse
+      @output_pulse
     end
 
     private

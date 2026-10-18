@@ -51,8 +51,8 @@ default_order: [NOISE_1, LFO_1, EG_1, MIXER_1, PITCH_1, OSC_1, OSC_2, MIXER_2, F
 # 127 is not a slot: as a parameter's source it means the parameter's own control slot, which
 # holds the value of its CC off the bus (see spms1_main.rb), so no other input or parameter can
 # read it. The numbers the parameters' control slots had on the bus before they moved off it --
-# 19-47, 61-64, 69-85, 87, 89-98, 102-105, 107-115 and 119-122 -- are free, as are 21, 26, 67,
-# 65, 68, 71, 72, 99-101, 118 and 123-126, unused already.
+# 19-47, 61-64, 69-85, 87, 89-98, 102-105, 107-115 and 122 -- are free, as are 21, 26, 67,
+# 65, 68, 71, 72, 99-101 and 123-126, unused already.
 signals:
   - { key: NONE,            id: 0, value: 0.0,  short: "0.0",  label: None (constant 0.0), label_ja: なし（定数 0.0） }
   - { key: ONE,             id: 1, value: 1.0,  short: "+1.0", label: Constant 1.0,  label_ja: 定数 1.0 }
@@ -107,6 +107,13 @@ signals:
 
   # The noise's red output came after Mixer 2; the white keeps slot 86.
   - { key: NOISE_1_OUTPUT_RED, id: 116, module: NOISE_1, output: Out Red, label: Noise 1 Output Red, bipolar: true }
+
+  # The oscillators' saw and pulse outputs came after the filter's Out; each Out keeps its slot and
+  # the morph between the two.
+  - { key: OSC_1_OUTPUT_SAW,   id: 118, module: OSC_1, output: Out Saw,   label: Osc 1 Output Saw,   bipolar: true }
+  - { key: OSC_1_OUTPUT_PULSE, id: 119, module: OSC_1, output: Out Pulse, label: Osc 1 Output Pulse, bipolar: true }
+  - { key: OSC_2_OUTPUT_SAW,   id: 120, module: OSC_2, output: Out Saw,   label: Osc 2 Output Saw,   bipolar: true }
+  - { key: OSC_2_OUTPUT_PULSE, id: 121, module: OSC_2, output: Out Pulse, label: Osc 2 Output Pulse, bipolar: true }
 
 # Module inputs, NRPN category 1, listed in the editor's order, each by its entry: what feeds each
 # one in the default patch (`source`, a signal key). `label` is the editor's, on the module; `name`

@@ -670,6 +670,8 @@ while true
         signals[10] = eg_1.process(control_tick, signals[source_eg_1_gate]) # SIGNAL_EG_1_OUTPUT
       when 3 # MODULE_OSC_1
         signals[11] = osc_1.process(control_tick, signals[source_osc_1_pitch], signals[source_osc_1_mod_1], signals[source_osc_1_mod_2], signals[source_osc_1_pw_mod]) # SIGNAL_OSC_1_OUTPUT
+        signals[118] = osc_1.output_saw # SIGNAL_OSC_1_OUTPUT_SAW
+        signals[119] = osc_1.output_pulse # SIGNAL_OSC_1_OUTPUT_PULSE
       when 4 # MODULE_FILTER_1
         signals[12] = filter_1.process(control_tick, signals[source_filter_1_audio], signals[source_filter_1_mod_1], signals[source_filter_1_mod_2], signals[source_filter_1_mod_3]) # SIGNAL_FILTER_1_OUTPUT
         signals[117] = filter_1.output_lp # SIGNAL_FILTER_1_OUTPUT_LP
@@ -693,6 +695,8 @@ while true
         signals[116] = noise_1.output_red # SIGNAL_NOISE_1_OUTPUT_RED
       when 11 # MODULE_OSC_2
         signals[88] = osc_2.process(control_tick, signals[source_osc_2_pitch], signals[source_osc_2_mod_1], signals[source_osc_2_mod_2], signals[source_osc_2_pw_mod]) # SIGNAL_OSC_2_OUTPUT
+        signals[120] = osc_2.output_saw # SIGNAL_OSC_2_OUTPUT_SAW
+        signals[121] = osc_2.output_pulse # SIGNAL_OSC_2_OUTPUT_PULSE
       when 12 # MODULE_MIXER_2
         signals[106] = mixer_2.process(control_tick, signals[source_mixer_2_in_1], signals[source_mixer_2_in_2], signals[source_mixer_2_in_3], signals[source_mixer_2_in_4]) # SIGNAL_MIXER_2_OUTPUT
       end

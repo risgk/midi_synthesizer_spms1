@@ -5,7 +5,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.3
 - Controlled by MIDI as a sound module
 - Last-note priority with one note of memory: releasing the newest note while the one before it is still held goes back to that one, legato (for trills)
 - 48 kHz audio output: 24 bit through an I2S DAC, or PWM Audio (no DAC needed)
-- Oscillator: a sawtooth-to-square morph with pulse width (CC 114), and a modulation input of its own for the pulse width (PWM, CC 115)
+- Oscillator: a sawtooth-to-square morph with pulse width (CC 114), and a modulation input of its own for the pulse width (PWM, CC 115), with the sawtooth and the pulse on outputs of their own too
 - Filter: ZDF/TPT State Variable Filter (with a nonlinear leak on the band pass integrator, solved by the one-step Newton method), with low pass and high pass outputs and a main output crossfading from one to the other through a notch (Mode, CC 39)
 - Chorus: mono in, stereo out, as a module in the run order
 - Delay: stereo, with feedback, as a module in the run order (up to 340 ms)
@@ -541,19 +541,20 @@ two slots, a unipolar and a bipolar one. See the General slots below.
 
 | ID | Signal | | ID | Signal | | ID | Signal |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | None (constant 0.0) | | 13 | Amp 1 Output ± | | 55 | General Unipolar 4 |
-| 1 | Constant 1.0 | | 14 | Mixer 1 Output ± | | 56 | General Bipolar 1 ± |
-| 2 | Constant 0.5 | | 15 | Chorus 1 Output L ± | | 57 | General Bipolar 2 ± |
-| 3 | Constant 0.2 | | 16 | Chorus 1 Output R ± | | 58 | General Bipolar 3 ± |
-| 4 | Constant 0.1 | | 17 | Delay 1 Output L ± | | 59 | General Bipolar 4 ± |
-| 5 | Constant -0.1 | | 18 | Delay 1 Output R ± | | 60 | Pitch 1 Output ± |
-| 6 | Constant -0.2 | | 48 | Note Pitch ± | | 66 | Filter 1 Output HP ± |
-| 7 | Constant -0.5 | | 49 | Note Gate | | 86 | Noise 1 Output White ± |
-| 8 | Constant -1.0 | | 50 | Pitch Bend ± | | 88 | Osc 2 Output ± |
-| 9 | LFO 1 Output ± | | 51 | General Mod Wheel | | 106 | Mixer 2 Output ± |
-| 10 | EG 1 Output | | 52 | General Unipolar 1 | | 116 | Noise 1 Output Red ± |
-| 11 | Osc 1 Output ± | | 53 | General Unipolar 2 | | 117 | Filter 1 Output LP ± |
-| 12 | Filter 1 Output ± | | 54 | General Unipolar 3 | |  |  |
+| 0 | None (constant 0.0) | | 14 | Mixer 1 Output ± | | 57 | General Bipolar 2 ± |
+| 1 | Constant 1.0 | | 15 | Chorus 1 Output L ± | | 58 | General Bipolar 3 ± |
+| 2 | Constant 0.5 | | 16 | Chorus 1 Output R ± | | 59 | General Bipolar 4 ± |
+| 3 | Constant 0.2 | | 17 | Delay 1 Output L ± | | 60 | Pitch 1 Output ± |
+| 4 | Constant 0.1 | | 18 | Delay 1 Output R ± | | 66 | Filter 1 Output HP ± |
+| 5 | Constant -0.1 | | 48 | Note Pitch ± | | 86 | Noise 1 Output White ± |
+| 6 | Constant -0.2 | | 49 | Note Gate | | 88 | Osc 2 Output ± |
+| 7 | Constant -0.5 | | 50 | Pitch Bend ± | | 106 | Mixer 2 Output ± |
+| 8 | Constant -1.0 | | 51 | General Mod Wheel | | 116 | Noise 1 Output Red ± |
+| 9 | LFO 1 Output ± | | 52 | General Unipolar 1 | | 117 | Filter 1 Output LP ± |
+| 10 | EG 1 Output | | 53 | General Unipolar 2 | | 118 | Osc 1 Output Saw ± |
+| 11 | Osc 1 Output ± | | 54 | General Unipolar 3 | | 119 | Osc 1 Output Pulse ± |
+| 12 | Filter 1 Output ± | | 55 | General Unipolar 4 | | 120 | Osc 2 Output Saw ± |
+| 13 | Amp 1 Output ± | | 56 | General Bipolar 1 ± | | 121 | Osc 2 Output Pulse ± |
 
 <!-- patch_gen end -->
 
@@ -680,6 +681,12 @@ way as Mod 2 In, with its Amt and Pol, moves the pitch. A unit of modulation is 
 width range, so at the top of PW Mod Amt the LFO, which the default patch feeds it, swings the
 pulse width half the range either way: with Pulse Width at CC 64, from 50% to nearly 0%. The pulse
 width the modulation adds up to is held to 0.0 to 1.0.
+
+Each oscillator puts out the two ends of its morph on their own as well, whatever Wave is: Out
+Saw, the sawtooth, and Out Pulse, the pulse at the pulse width, as Out is at the square end of
+Wave. Both run at the same level as Out, -0.5 to +0.5, and the default patch uses neither, so a
+mixer can take the two from one oscillator at levels of their own, or one oscillator can feed a
+saw to one place and a pulse to another.
 
 Noise 1 puts out two noises from one generator, at Noise 1 Level. Out White is white noise,
 flat across the spectrum: from silence at 0.0 to noise filling -0.5 to +0.5 at 1.0, the

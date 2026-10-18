@@ -55,6 +55,10 @@ SIGNAL_NOISE_1_OUTPUT_WHITE = 86
 SIGNAL_OSC_2_OUTPUT         = 88
 SIGNAL_MIXER_2_OUTPUT       = 106
 SIGNAL_NOISE_1_OUTPUT_RED   = 116
+SIGNAL_OSC_1_OUTPUT_SAW     = 118
+SIGNAL_OSC_1_OUTPUT_PULSE   = 119
+SIGNAL_OSC_2_OUTPUT_SAW     = 120
+SIGNAL_OSC_2_OUTPUT_PULSE   = 121
 
 # A parameter source of SIGNAL_OWN is the parameter's own control slot, at PARAM_SLOT_BASE + its
 # entry, off the bus: the slots below.
