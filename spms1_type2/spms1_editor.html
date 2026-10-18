@@ -808,6 +808,16 @@
       border-color: var(--wire-feedback);
       background: #fdf2e3;
     }
+    /* A CC that also fills another parameter's slot, as Osc 2's amounts are on Osc 1's CCs: moving
+       one moves the other, so the number stands out a little. */
+    .row input.shared {
+      border-color: var(--primary-color);
+      background: #fbecee;
+    }
+    .slider-label .cc-num.shared {
+      color: var(--primary-color);
+      font-weight: 600;
+    }
     /* A routed parameter reads its wire, but its CC still fills its own slot and so still feeds
        the output port: the fields stay live, only set back. */
     .row.routed input[type="number"] {
@@ -1840,9 +1850,12 @@
       const ccIn = row.querySelector('.cc');
       const valIn = row.querySelector('.val');
       if (document.activeElement !== ccIn) ccIn.value = cc;
+      const others = sharingCC(c);
       ccIn.classList.toggle('warn', RESERVED_CCS.has(cc));
+      ccIn.classList.toggle('shared', !RESERVED_CCS.has(cc) && others.length > 0);
       ccIn.title = RESERVED_CCS.has(cc)
         ? `CC ${cc} carries NRPN selection or data: its value is not sent`
+        : others.length ? `CC number, 0 for none. CC ${cc} also moves ${others.join(', ')}`
         : 'CC number, 0 for none';
       valIn.disabled = !cc;
       if (document.activeElement !== valIn) valIn.value = cc ? ccValue(cc) : '';
@@ -2990,6 +3003,13 @@
     refreshSliders();
   }
 
+  // The other parameters on c's CC, by their full names, none when it has no CC of its own.
+  function sharingCC(c) {
+    const cc = state.cc[c.key];
+    if (!cc) return [];
+    return CONTROL_ITEMS.filter(o => o !== c && state.cc[o.key] === cc).map(o => o.full);
+  }
+
   function refreshSliders() {
     document.querySelectorAll('#controls .slider-knob-zone').forEach(zone => {
       const c = CONTROL[zone.dataset.ctrl];
@@ -2999,9 +3019,13 @@
       const src = state.params[c.key];
       const routed = src !== undefined && src !== c.key;
       zone.classList.toggle('routed', routed);
-      zone.querySelector('.cc-num').innerHTML =
+      const others = sharingCC(c);
+      const ccNum = zone.querySelector('.cc-num');
+      ccNum.innerHTML =
         (!cc ? '(no CC)' : RESERVED_CCS.has(cc) ? `(CC ${cc}, reserved)` : `(CC ${cc})`) +
         (routed ? ` ← ${sourceHTML(src)}` : '');
+      ccNum.classList.toggle('shared', others.length > 0);
+      ccNum.title = others.length ? `CC ${cc} also moves ${others.join(', ')}` : '';
       zone.title = routed ? `${c.full} reads ${sigLabel(src)}. This slider sets only its own slot, which other wires may read.` : '';
       slider.disabled = !usable;
       const value = usable ? ccValue(cc) : 64;
