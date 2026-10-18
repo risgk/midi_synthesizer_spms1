@@ -220,8 +220,10 @@ whole range of what it moves, so bringing a source down to a musical depth is le
 rather than built into the modules.
 
 Mixer 2 sums the audio ahead of the filter: Osc 1 on In 1, Osc 2 on In 2 and Noise 1's Out on In 3, each
-at its own level, Level 1 (CC 116), Level 2 (CC 21) and Level 3 (CC 23); In 4 is free. Level 2
-and Level 3 power up at 0.0, so the default patch plays Osc 1 alone until they are turned up. Osc 2 plays the note from Pitch 1 as Osc
+at its own level; In 4 is free. Level 1 and 2 read 0.5, with no CC, so that Balance 1/2 (CC 21)
+crossfades Osc 1 and Osc 2: Osc 1 alone at CC 4, half each at CC 64 and Osc 2 alone at CC 124.
+It powers up at CC 4, and Level 3 (CC 23) at 0.0, so the default patch plays Osc 1 alone until
+they are turned up. Osc 2 plays the note from Pitch 1 as Osc
 1 does, tuned against it by its own Pitch Coarse (CC 85) and Pitch Fine (CC 76), 12 cents sharp at
 power-up for a slow beat. Its Wave is its own as well, on CC 104 beside Osc 1's on CC 102. It
 follows Osc 1 in everything else: its amounts and its pulse width are on Osc 1's CCs, so one CC
@@ -426,11 +428,13 @@ one delay, one pitch module and one noise source, and **all twelve are in the de
 on first. The synth is built to keep time with every module running, so taking one out of the
 order is never what makes a patch fit; to leave one out of the sound, route around it and let it
 run unread (see the examples below).
-Mixer 1 has a CC only on its first two levels, CC 118 and 119, which power up at 0.0, so it is
-silent until they are turned up, and Mixer 2 only on its first three: the default patch points
-the rest at constants instead, each level and Out Level at 1.0 and each polarity at +0.5, so an
-input on one of them passes through rather than being muted -- but for Mixer 1 Level 3 and 4,
-which read their own slots, 0.0, so all four of its inputs start closed.
+On each mixer, Balance 1/2 has the CC, CC 119 on Mixer 1 and CC 21 on Mixer 2, where Level 2 had
+it, and Level 1 and 2 have none and read 0.5, so that the balance crossfades the pair. Mixer 1's
+balance powers up at the centre, CC 64, passing each at half, and Mixer 2's at CC 4, Osc 1
+alone. Mixer 2 Level 3 has a CC too (CC 23); the default patch points the other levels and Out
+Level at 1.0 and each polarity at +0.5, so an input on one of them passes through rather than
+being muted -- but for Mixer 1 Level 3 and 4, which read their own slots, 0.0, so those two
+inputs start closed.
 
 #### Entries (CC 98), category 1
 
@@ -762,12 +766,13 @@ it down also brings a sum that would have been cut back inside it.
 
 Balance 1/2 and Balance 3/4 crossfade each pair of inputs in a straight line, from -0.5 (CC 4)
 through 0.0 (CC 64) to +0.5 (CC 124). The two inputs' levels are multiplied by 2.0 and 0.0 at
--0.5, by 1.0 each at 0.0, and by 0.0 and 2.0 at +0.5, always adding up to 2.0. At the centre, where
-both read their own slots by default with no CC, the mixer is as it was without them, and a pair
+-0.5, by 1.0 each at 0.0, and by 0.0 and 2.0 at +0.5, always adding up to 2.0. At the centre the
+mixer is as it was without them, and a pair
 at the same level keeps the same total whichever way its balance is turned. For a crossfader, or a
 selector at either end, set both levels of the pair to 0.5 (CC 64): each input then passes at
 half at the centre and as it is at its own end -- a mix control for two oscillators, or a switch
-between two modulation sources. Like every parameter, a balance is
+between two modulation sources. Balance 1/2 of each mixer is set up so by default, on CC 119 and
+CC 21; Balance 3/4 reads its own slot, the centre, with no CC. Like every parameter, a balance is
 read once a buffer and smoothed, so a selector driven by a gate crossfades in about 35 ms
 rather than switching on the sample.
 
@@ -818,13 +823,13 @@ changes only how fast the output moves, so it cannot step it.
   CC 113 turned down to CC 4 the wheel brings the vibrato in, up to the depth CC 13 sets
 - The LFO reaches the filter's Mod 2 input by default too, so CC 25 sweeps the cutoff with it, on
   top of the envelope on Mod 1
-- A second oscillator is wired by default too, on Mixer 2's second input, so CC 21 brings it
-  in, beating slowly against Osc 1 from the 12 cents of CC 76's power-up value. CC 85 and 76 tune
-  it: CC 85 = 76 an octave up, CC 85 = 71 a fifth, CC 76 = 64 in unison. CC 112 (Gain) down a
-  little keeps the level of one
+- A second oscillator is wired by default too, on Mixer 2's second input, so CC 21 crossfades to
+  it, half each at CC 64, beating slowly against Osc 1 from the 12 cents of CC 76's power-up
+  value. CC 85 and 76 tune it: CC 85 = 76 an octave up, CC 85 = 71 a fifth, CC 76 = 64 in unison
 - Noise is wired by default too, its Out on Mixer 2's third input beside the oscillators, so CC 23
-  brings it in under the note, at a tenth of the oscillator's level at CC 16. CC 116 down to CC 4
-  takes Osc 1 out and leaves the noise alone, through the filter. CC 115 (Color) turns it from
+  brings it in under the note, at a tenth of the oscillator's level at CC 16. CC 99 = 2,
+  CC 98 = 75, CC 6 = 0 points Mixer 2 Level 1 at 0.0, taking Osc 1 out and leaving the noise alone,
+  through the filter. CC 115 (Color) turns it from
   white to red
 - Keyboard tracking is wired by default as well, the pitch from Pitch 1 on the filter's Mod 3 input,
   so CC 9 sets how far the cutoff follows the keys: all the way at CC 124, not at all at CC 4,
@@ -860,8 +865,9 @@ changes only how fast the output moves, so it cannot step it.
   only needs wiring and its levels up: CC 99 = 1, CC 98 = 7, CC 6 = 52 puts General Unipolar 1
   (CC 16) on its first input and CC 98 = 8, CC 6 = 1 the constant 1.0 on its second, and CC 99 =
   2, CC 98 = 20, CC 6 = 7 pins the first input's polarity to -0.5, the negating end of its dial;
-  with CC 118 and 119 up to CC 124, the mixer outputs 1.0 less the CC: the CC mirrored about CC
-  64. Point the cutoff's source at the mixer with CC 99 = 2, CC 98 = 13, CC 6 = 14 and CC 16 now
+  with CC 98 = 19, CC 6 = 1 and CC 98 = 21, CC 6 = 1 pointing Level 1 and 2 at 1.0, and CC 119,
+  Balance 1/2, at the centre it powers up at, the mixer outputs 1.0 less the CC: the CC mirrored
+  about CC 64. Point the cutoff's source at the mixer with CC 99 = 2, CC 98 = 13, CC 6 = 14 and CC 16 now
   closes the filter as it rises
 - Take the filter out of the chain: CC 99 = 1, CC 98 = 5, CC 6 = 106 points the amp's audio input
   at Mixer 2. The filter keeps running and keeps its slot; nothing reads it
@@ -873,9 +879,10 @@ changes only how fast the output moves, so it cannot step it.
   Osc 1, Osc 2, Noise 1, Mixer 2, Filter 1 and Mixer 1. CC 99 = 1, CC 98 = 7, CC 6 = 106 and CC 98 = 8,
   CC 6 = 12 put Mixer 2, the filter's input, and Filter 1's Out on the mixer's inputs, and
   CC 98 = 5, CC 6 = 14 the mixer on the amp. CC 99 = 2, CC 98 = 22, CC 6 = 7 turns the second
-  input over, and CC 98 = 85, CC 6 = 56 hands Balance 1/2 to General Bipolar 1 (CC 16). With
-  CC 118 = 34 (0.25, half of Filter 1 Gain's 0.5 at CC 64, as the filter takes its input at that
-  gain) and CC 119 = 64 (0.5), CC 16 sweeps from the dry input at CC 4, through the band pass at
+  input over, CC 98 = 85, CC 6 = 56 hands Balance 1/2 to General Bipolar 1 (CC 16), and CC 98 = 19,
+  CC 6 = 127 has Level 1 read its own slot, which CC 99 = 3, CC 98 = 19, CC 6 = 118 gives CC 118.
+  With CC 118 = 34 (0.25, half of Filter 1 Gain's 0.5 at CC 64, as the filter takes its input at
+  that gain) and Level 2 at the 0.5 it reads, CC 16 sweeps from the dry input at CC 4, through the band pass at
   CC 64, to the notch, turned over, at CC 124. The band pass peaks at the cutoff at half the level
   whatever the resonance, narrowing as it rises: rendered with white noise, at Resonance's
   power-up value, it is 6 dB down at the cutoff and the notch 34 dB down. Below about 100 Hz the

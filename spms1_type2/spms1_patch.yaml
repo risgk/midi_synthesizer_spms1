@@ -222,8 +222,8 @@ controls:
   # sharp, for a slow beat once Osc 2 is turned up. Wave is its own too, on CC 104 next to Osc 1's on
   # CC 102, sawtooth at power-up as Osc 1's is. Everything else follows Osc 1 by default: each
   # amount and the pulse width is on Osc 1's CC, so one CC moves both oscillators, and each polarity
-  # reads the constant Osc 1's does. Osc 2 is heard through Mixer 2 Level 2 (CC 21), which powers
-  # up at 0.0.
+  # reads the constant Osc 1's does. Osc 2 is heard through Mixer 2 Balance 1/2 (CC 21), which
+  # powers up at Osc 1's end.
   - { entry: 59, module: OSC_2,     key: PITCH_COARSE,  label: Pitch Coarse,  cc: 85,  value: 64, bipolar: true }
   - { entry: 60, module: OSC_2,     key: PITCH_FINE,    label: Pitch Fine,    cc: 76,  value: 76, bipolar: true }
   - { entry: 61, module: OSC_2,     key: MOD_1_AMT, label: Mod 1 Amt, cc: 89,  value: 4 }
@@ -264,13 +264,17 @@ controls:
   - { entry: 95, module: NOISE_1,   key: COLOR,        label: Color,        cc: 115, value: 4 }
   # Entry 84 held the red's cutoff while it had a control, and is unused.
   - { entry: 18, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 124 }
-  - { entry: 19, module: MIXER_1,   key: LEVEL_1,      label: Level 1,      cc: 118, value: 4 }
+  # Level 1 and 2 of each mixer have no CC and read 0.5, so that Balance 1/2, on the CC Level 2 had,
+  # crossfades the pair: In 1 alone at full level at CC 4, half each at CC 64 and In 2 alone at
+  # CC 124. Mixer 1's powers up at the centre, on CC 119; it has nothing on its inputs yet.
+  - { entry: 19, module: MIXER_1,   key: LEVEL_1,      label: Level 1,      cc: 0,   value: 64,  source: HALF }
   - { entry: 20, module: MIXER_1,   key: POL_1,   label: Pol 1,   cc: 0,   value: 124, source: HALF, bipolar: true }
-  - { entry: 21, module: MIXER_1,   key: LEVEL_2,      label: Level 2,      cc: 119, value: 4 }
+  - { entry: 21, module: MIXER_1,   key: LEVEL_2,      label: Level 2,      cc: 0,   value: 64,  source: HALF }
   - { entry: 22, module: MIXER_1,   key: POL_2,   label: Pol 2,   cc: 0,   value: 124, source: HALF, bipolar: true }
-  # Each balance came after the red noise's cutoff, since gone, and is listed after the pair it crosses. None has a CC:
-  # each reads its own slot, 0.0, the centre, where the mixer is as it was without one.
-  - { entry: 85, module: MIXER_1,   key: BALANCE_1_2, label: Balance 1/2, cc: 0,   value: 64,  bipolar: true }
+  # Each balance came after the red noise's cutoff, since gone, and is listed after the pair it
+  # crosses. Balance 3/4 has no CC: it reads its own slot, 0.0, the centre, where the mixer is as it
+  # was without one.
+  - { entry: 85, module: MIXER_1,   key: BALANCE_1_2, label: Balance 1/2, cc: 119, value: 64,  bipolar: true }
   # Level 3, Pol 3, Level 4 and Pol 4 came after Osc 2, so their entries follow its. They have no
   # CC: each Level reads its own slot, 0.0, as the first two power up at, and each Pol +0.5.
   - { entry: 71, module: MIXER_1,   key: LEVEL_3,      label: Level 3,      cc: 0,   value: 4 }
@@ -281,15 +285,15 @@ controls:
   # Out Level came after Pitch 1 Coarse and Fine; it has no CC and reads 1.0.
   - { entry: 54, module: MIXER_1,   key: OUT_LEVEL,    label: Out Level,    cc: 0,   source: ONE }
   # Mixer 2 came after Mixer 1's Level 3 to Pol 4: the audio ahead of the filter, Osc 1 on In 1, Osc 2
-  # on In 2 and the noise on In 3. Level 1 (CC 116) powers up at 1.0, passing Osc 1 as before;
-  # Level 2 (CC 21) at 0.0, leaving Osc 2 silent; Level 3 (CC 23) at 0.0, leaving the noise, at
-  # full level from Noise 1, silent. In 4 is free, its Level reading 1.0. Each Pol reads +0.5 and Out Level
-  # 1.0, with no CC.
-  - { entry: 75, module: MIXER_2,   key: LEVEL_1,      label: Level 1,      cc: 116, value: 124 }
+  # on In 2 and the noise on In 3. Level 1 and 2 read 0.5 and Balance 1/2 (CC 21) powers up at CC 4,
+  # passing Osc 1 alone at 1.0 as before and leaving Osc 2 silent; Level 3 (CC 23) at 0.0, leaving
+  # the noise, at full level from Noise 1, silent. In 4 is free, its Level reading 1.0. Each Pol
+  # reads +0.5 and Out Level 1.0, with no CC.
+  - { entry: 75, module: MIXER_2,   key: LEVEL_1,      label: Level 1,      cc: 0,   value: 64,  source: HALF }
   - { entry: 76, module: MIXER_2,   key: POL_1,   label: Pol 1,   cc: 0,   value: 124, source: HALF, bipolar: true }
-  - { entry: 77, module: MIXER_2,   key: LEVEL_2,      label: Level 2,      cc: 21,  value: 4 }
+  - { entry: 77, module: MIXER_2,   key: LEVEL_2,      label: Level 2,      cc: 0,   value: 64,  source: HALF }
   - { entry: 78, module: MIXER_2,   key: POL_2,   label: Pol 2,   cc: 0,   value: 124, source: HALF, bipolar: true }
-  - { entry: 87, module: MIXER_2,   key: BALANCE_1_2, label: Balance 1/2, cc: 0,   value: 64,  bipolar: true }
+  - { entry: 87, module: MIXER_2,   key: BALANCE_1_2, label: Balance 1/2, cc: 21,  value: 4,   bipolar: true }
   - { entry: 79, module: MIXER_2,   key: LEVEL_3,      label: Level 3,      cc: 23,  value: 4 }
   - { entry: 80, module: MIXER_2,   key: POL_3,   label: Pol 3,   cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 81, module: MIXER_2,   key: LEVEL_4,      label: Level 4,      cc: 0,   source: ONE }

@@ -189,14 +189,15 @@ spms1_fill_constant_signals(signals)
 # Noise 1 runs after the oscillators, as it is mostly a sound of its own (a modulation taking it
 # is a sample late, which it does not hear), at full level: its Level has no CC and reads 1.0.
 # Mixer 2 runs after it, just ahead of the filter, which it feeds: Osc 1 on its
-# In 1, Osc 2 on In 2 and the noise on In 3. Its Level 1, on CC 116, powers up at 1.0, and Level 2
-# and Level 3, on CC 21 and 23, at 0.0, so Osc 2 is silent until CC 21 and the noise until CC 23.
+# In 1, Osc 2 on In 2 and the noise on In 3. Its Level 1 and 2 read 0.5 and its Balance 1/2, on
+# CC 21, crossfades the two, powering up at Osc 1 alone; Level 3, on CC 23, powers up at 0.0, so
+# Osc 2 is silent until CC 21 and the noise until CC 23.
 # Osc 2 plays the note from Pitch 1,
 # as Osc 1 does, tuned by its own Pitch Coarse and Fine (CC 85 and 76), 12 cents sharp at
 # power-up, and has a Wave of its own on CC 104 (Osc 1's on CC 102); it follows Osc 1 in everything
 # else: each of its amounts and its pulse width is on Osc 1's CC, so one CC moves both.
-# Mixer 1 Level 1 and 2 are on CC 118 and 119 and power up at 0.0, and Level 3 and 4, with no CC,
-# read their own slots, 0.0, so all four of its inputs start closed. Mixer 1's polarities and Out
+# Mixer 1 Level 1 and 2 read 0.5 too, and its Balance 1/2, on CC 119, powers up at the centre;
+# Level 3 and 4, with no CC, read their own slots, 0.0, so those inputs start closed. Mixer 1's polarities and Out
 # Level have no CC, and neither have Mixer 2's, so the default patch points them at constants
 # instead: full level and a polarity of +0.5, which makes a mixer pass its input through rather
 # than mute it.

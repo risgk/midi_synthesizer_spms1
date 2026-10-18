@@ -38,10 +38,8 @@
 |                             9 | x             | o             | Filter Mod 3 Amt (Key Track)         |
 |                           112 | x             | o             | Filter Gain                          |
 |                            39 | x             | o             | Filter Mode (LP, Notch, HP)          |
-|                           118 | x             | o             | Mixer 1 Level 1                      |
-|                           119 | x             | o             | Mixer 1 Level 2                      |
-|                           116 | x             | o             | Mixer 2 Level 1 (Osc 1 Level)        |
-|                            21 | x             | o             | Mixer 2 Level 2 (Osc 2 Level)        |
+|                           119 | x             | o             | Mixer 1 Balance 1/2                  |
+|                            21 | x             | o             | Mixer 2 Balance 1/2 (Osc 1 to Osc 2) |
 |                            23 | x             | o             | Mixer 2 Level 3 (Noise Level)        |
 |                           115 | x             | o             | Noise Color (White to Red)           |
 |                            15 | x             | o             | Amp Gain                             |
