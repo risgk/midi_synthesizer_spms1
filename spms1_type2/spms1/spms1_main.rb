@@ -27,10 +27,9 @@ require_relative 'spms1_noise'
 # note makes a buffer take more work than every module running, which is what is measured, so the
 # time measured is the worst time. Every module in the run order runs every sample and every
 # parameter is worked out every buffer, whether or not it has moved, never only when it changes;
-# branches on values are avoided where
-# they can be (clamps as nested ternaries that compile to selects, curves from lookup tables with
-# interpolation rather than library calls such as a square root), so that no input takes a slower
-# path than the one measured.
+# branches on values are avoided where they can be (clamps as nested ternaries that compile to
+# selects, curves from lookup tables with interpolation rather than library calls such as a square
+# root), so that no input takes a slower path than the one measured.
 #
 # Claims below about the generated C hold for the Spinel version vendored in spinel_rt.h.
 # Re-check them on updating it.
