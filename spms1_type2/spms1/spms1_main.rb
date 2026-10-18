@@ -359,6 +359,7 @@ while true
   source_osc_1_mod_1_amt = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_MOD_1_AMT), SLOT_OSC_1_MOD_1_AMT)
   source_osc_1_mod_1_pol = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_MOD_1_POL), SLOT_OSC_1_MOD_1_POL)
   source_noise_1_level = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_NOISE_1_LEVEL), SLOT_NOISE_1_LEVEL)
+  source_noise_1_color = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_NOISE_1_COLOR), SLOT_NOISE_1_COLOR)
   source_osc_2_wave = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_WAVE), SLOT_OSC_2_WAVE)
   source_osc_2_pitch_coarse = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_PITCH_COARSE), SLOT_OSC_2_PITCH_COARSE)
   source_osc_2_pitch_fine = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_PITCH_FINE), SLOT_OSC_2_PITCH_FINE)
@@ -443,6 +444,7 @@ while true
   cc_osc_1_mod_1_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_MOD_1_AMT)
   cc_osc_1_mod_1_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_MOD_1_POL)
   cc_noise_1_level = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_NOISE_1_LEVEL)
+  cc_noise_1_color = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_NOISE_1_COLOR)
   cc_osc_2_wave = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_2_WAVE)
   cc_osc_2_pitch_coarse = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_2_PITCH_COARSE)
   cc_osc_2_pitch_fine = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_2_PITCH_FINE)
@@ -529,6 +531,7 @@ while true
   signals[SLOT_OSC_1_MOD_1_AMT] = cc_or_zero(cc_osc_1_mod_1_amt, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_mod_1_amt)))
   signals[SLOT_OSC_1_MOD_1_POL] = cc_or_zero(cc_osc_1_mod_1_pol, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_1_mod_1_pol)))
   signals[SLOT_NOISE_1_LEVEL] = cc_or_zero(cc_noise_1_level, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_noise_1_level)))
+  signals[SLOT_NOISE_1_COLOR] = cc_or_zero(cc_noise_1_color, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_noise_1_color)))
   signals[SLOT_OSC_2_WAVE] = cc_or_zero(cc_osc_2_wave, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_2_wave)))
   signals[SLOT_OSC_2_PITCH_COARSE] = cc_or_zero(cc_osc_2_pitch_coarse, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_2_pitch_coarse)))
   signals[SLOT_OSC_2_PITCH_FINE] = cc_or_zero(cc_osc_2_pitch_fine, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_osc_2_pitch_fine)))
@@ -604,6 +607,7 @@ while true
   osc_1.set_modulation_1_amount(signals[source_osc_1_mod_1_amt])
   osc_1.set_modulation_1_polarity(signals[source_osc_1_mod_1_pol])
   noise_1.set_level(signals[source_noise_1_level])
+  noise_1.set_color(signals[source_noise_1_color])
   osc_2.set_waveform(signals[source_osc_2_wave])
   osc_2.set_pitch_coarse(signals[source_osc_2_pitch_coarse])
   osc_2.set_pitch_fine(signals[source_osc_2_pitch_fine])
@@ -709,7 +713,8 @@ while true
       when 9 # MODULE_PITCH_1
         signals[60] = pitch_1.process(control_tick, signals[source_pitch_1_pitch], signals[source_pitch_1_bend]) # SIGNAL_PITCH_1_OUTPUT
       when 10 # MODULE_NOISE_1
-        signals[86] = noise_1.process(control_tick) # SIGNAL_NOISE_1_OUTPUT_WHITE
+        signals[86] = noise_1.process(control_tick) # SIGNAL_NOISE_1_OUTPUT
+        signals[122] = noise_1.output_white # SIGNAL_NOISE_1_OUTPUT_WHITE
         signals[116] = noise_1.output_red # SIGNAL_NOISE_1_OUTPUT_RED
       when 11 # MODULE_OSC_2
         signals[88] = osc_2.process(control_tick, signals[source_osc_2_pitch], signals[source_osc_2_mod_1], signals[source_osc_2_mod_2], signals[source_osc_2_pw_mod_1], signals[source_osc_2_pw_mod_2]) # SIGNAL_OSC_2_OUTPUT

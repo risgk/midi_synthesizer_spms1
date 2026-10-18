@@ -43,6 +43,7 @@
 |                           116 | x             | o             | Mixer 2 Level 1 (Osc 1 Level)        |
 |                            21 | x             | o             | Mixer 2 Level 2 (Osc 2 Level)        |
 |                            23 | x             | o             | Mixer 2 Level 3 (Noise Level)        |
+|                            14 | x             | o             | Noise Color (White to Red)           |
 |                            15 | x             | o             | Amp Gain                             |
 |                            73 | x             | o             | EG Attack (Time)                     |
 |                            75 | x             | o             | EG Decay (Time)                      |

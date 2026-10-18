@@ -51,9 +51,10 @@ SIGNAL_GENERAL_BIPOLAR_4    = 59
 SIGNAL_PITCH_1_OUTPUT       = 60
 SIGNAL_FILTER_1_OUTPUT_LP   = 117
 SIGNAL_FILTER_1_OUTPUT_HP   = 66
-SIGNAL_NOISE_1_OUTPUT_WHITE = 86
+SIGNAL_NOISE_1_OUTPUT       = 86
 SIGNAL_OSC_2_OUTPUT         = 88
 SIGNAL_MIXER_2_OUTPUT       = 106
+SIGNAL_NOISE_1_OUTPUT_WHITE = 122
 SIGNAL_NOISE_1_OUTPUT_RED   = 116
 SIGNAL_OSC_1_OUTPUT_SAW     = 118
 SIGNAL_OSC_1_OUTPUT_PULSE   = 119
@@ -145,6 +146,7 @@ SLOT_OSC_1_PW_MOD_1_AMT  = 219
 SLOT_OSC_1_PW_MOD_1_POL  = 220
 SLOT_OSC_2_PW_MOD_1_AMT  = 221
 SLOT_OSC_2_PW_MOD_1_POL  = 222
+SLOT_NOISE_1_COLOR       = 223
 
 # NRPN parameter numbers: (MSB << 7) | LSB, where the MSB picks a category and the LSB an entry.
 #   0..127   active_modules[slot]
@@ -268,6 +270,7 @@ NRPN_SOURCE_OSC_1_PW_MOD_1_AMT  = 347
 NRPN_SOURCE_OSC_1_PW_MOD_1_POL  = 348
 NRPN_SOURCE_OSC_2_PW_MOD_1_AMT  = 349
 NRPN_SOURCE_OSC_2_PW_MOD_1_POL  = 350
+NRPN_SOURCE_NOISE_1_COLOR       = 351
 
 # A CC number of 0 means the parameter has no CC: its control slot holds 0.0 -- the bottom of a
 # unipolar dial, the middle of a bipolar one -- whatever CC it had before, so a patch sets it alone.
@@ -356,6 +359,7 @@ NRPN_CC_OSC_1_PW_MOD_1_AMT  = 475
 NRPN_CC_OSC_1_PW_MOD_1_POL  = 476
 NRPN_CC_OSC_2_PW_MOD_1_AMT  = 477
 NRPN_CC_OSC_2_PW_MOD_1_POL  = 478
+NRPN_CC_NOISE_1_COLOR       = 479
 
 # The constants of the bus, which nothing else ever writes. A slot not written here holds 0.0.
 def spms1_fill_constant_signals(signals)
@@ -414,7 +418,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_1_IN_4   , SIGNAL_NONE)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_2_IN_1   , SIGNAL_OSC_1_OUTPUT)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_2_IN_2   , SIGNAL_OSC_2_OUTPUT)
-  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_2_IN_3   , SIGNAL_NOISE_1_OUTPUT_WHITE)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_2_IN_3   , SIGNAL_NOISE_1_OUTPUT)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_2_IN_4   , SIGNAL_NONE)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_1_PW_MOD_1 , SIGNAL_EG_1_OUTPUT)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_2_PW_MOD_1 , SIGNAL_EG_1_OUTPUT)
@@ -499,6 +503,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_1_PW_MOD_1_POL , SIGNAL_HALF)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_2_PW_MOD_1_AMT , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_2_PW_MOD_1_POL , SIGNAL_HALF)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_NOISE_1_COLOR      , SIGNAL_OWN)
 
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_RATE        , 3)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_LEVEL       , 113)
@@ -548,6 +553,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_MODE     , 39)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_PW_MOD_1_AMT, 8)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_2_PW_MOD_1_AMT, 8)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_NOISE_1_COLOR     , 14)
 
   C.set_midi_cc_value(midi_ch, 3  , 64 ) # LFO 1 Rate
   C.set_midi_cc_value(midi_ch, 113, 124) # LFO 1 Level
@@ -597,4 +603,5 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 39 , 4  ) # Filter 1 Mode
   C.set_midi_cc_value(midi_ch, 8  , 4  ) # Osc 1 PW Mod 1 Amt
   C.set_midi_cc_value(midi_ch, 8  , 4  ) # Osc 2 PW Mod 1 Amt
+  C.set_midi_cc_value(midi_ch, 14 , 4  ) # Noise 1 Color
 end

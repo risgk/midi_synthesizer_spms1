@@ -1,7 +1,8 @@
 module Spms1
-  # Noise source, at a smoothed level: audio, or a modulation source. Two outputs from one
+  # Noise source, at a smoothed level: audio, or a modulation source. Two noises from one
   # generator: white, flat across the spectrum, and red, filtered from it through a one-pole low
-  # pass at a fixed cutoff, falling 6 dB an octave above it. The default patch feeds the white to Mixer 2 In 3, and runs the
+  # pass at a fixed cutoff, falling 6 dB an octave above it. Each has an output of its own, and
+  # Out, which process returns, crossfades from one to the other by Color. The default patch feeds the white to Mixer 2 In 3, and runs the
   # module ahead of the LFO and the envelope.
   class Noise
     # Blend at the reference rate on the line below, for each of two cascaded stages. The two move
@@ -24,6 +25,11 @@ module Spms1
       @level = 0.0
       @stage_1_level = 0.0
       @current_level = 0.0
+      # Powers up at the white, which is what Out was until it had Color.
+      @color = 0.0
+      @stage_1_color = 0.0
+      @current_color = 0.0
+      @output_white = 0.0
       # The red's cutoff is fixed, on the A of a MIDI note number, as Filter 1 Cutoff's dial is on
       # note numbers: note 21 (A0, 27.5 Hz), so that it falls 6 dB an octave across the audible
       # band. The low pass is state += (white - state) * coef, with coef = 1 - e^(-2 pi fc / fs).
@@ -45,10 +51,19 @@ module Spms1
       @level = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
     end
 
+    # Color is unipolar, [0.0, 1.0], and crossfades Out in a straight line, from the white alone at
+    # 0.0 to the red alone at 1.0. Each end is as its own output is, so the red end is 3 dB down
+    # on the white, at the RMS the red's gain gives it.
+    def set_color(color)
+      @color = (color < 0.0) ? 0.0 : ((color > 1.0) ? 1.0 : color)
+    end
+
     def process(control_tick)
       if control_tick
         @stage_1_level = Dsp.smooth(@level, @stage_1_level, @smoothing_target_blend)
         @current_level = Dsp.smooth(@stage_1_level, @current_level, @smoothing_target_blend)
+        @stage_1_color = Dsp.smooth(@color, @stage_1_color, @smoothing_target_blend)
+        @current_color = Dsp.smooth(@stage_1_color, @current_color, @smoothing_target_blend)
       end
 
       # Numerical Recipes' constants. The product stays under 2^53, so it is exact in 64 bits and
@@ -65,8 +80,14 @@ module Spms1
       red = @red * @red_gain
       red = (red < -0.5) ? -0.5 : ((red > 0.5) ? 0.5 : red)
       @output_red = red * @current_level
+      @output_white = white * @current_level
 
-      white * @current_level
+      @output_white + (@output_red - @output_white) * @current_color
+    end
+
+    # The white output of the last process.
+    def output_white
+      @output_white
     end
 
     # The red output of the last process.
