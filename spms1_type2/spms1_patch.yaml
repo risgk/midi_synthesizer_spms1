@@ -39,7 +39,7 @@ modules:
 
 # The run order of the default patch. The envelope runs ahead of the LFO, so that the LFO's Mod Ins
 # can read it in the same sample, as for a vibrato that fades in.
-default_order: [NOISE_1, EG_1, LFO_1, MIXER_1, PITCH_1, OSC_1, OSC_2, MIXER_2, FILTER_1, AMP_1, CHORUS_1, DELAY_1]
+default_order: [EG_1, LFO_1, MIXER_1, PITCH_1, OSC_1, OSC_2, NOISE_1, MIXER_2, FILTER_1, AMP_1, CHORUS_1, DELAY_1]
 
 # Slots of the signal bus (the values of NRPN categories 1 and 2), each one of:
 #   value:    a constant, which the bus holds from startup; `short` is the editor's label for it

@@ -173,10 +173,10 @@ spms1_fill_constant_signals(signals)
 # it passes its input through as it is, so the patch plays as one without it until CC 5 turns the
 # portamento up. Pitch Bend goes to its Bend In, added past the glide, 2 semitones either way at
 # Bend Amt's power-up value of CC 8, so the bend reaches the oscillator and the filter's keyboard
-# tracking at once. Running after the LFO, the envelope, the noise and Mixer 1
+# tracking at once. Running after the LFO, the envelope and Mixer 1
 # lets it take any of them in the same sample, and the oscillators and the filter read it so too. Mixer 1
-# runs after the modulation sources and ahead of the oscillators, so it sees this sample's LFO,
-# envelope and noise and can feed the oscillators, the filter and the amp without a sample's delay. The
+# runs after the modulation sources and ahead of the oscillators, so it sees this sample's LFO
+# and envelope and can feed the oscillators, the filter and the amp without a sample's delay. The
 # default patch leaves it unused: the LFO goes straight to the oscillator's pitch and pulse
 # width at its full level, and Osc 1 Mod 2 Pol reads the constant 0.1, which brings it
 # down to a vibrato depth on the pitch, so that Osc 1 Mod 2 Amt can span the whole pitch range
@@ -186,8 +186,9 @@ spms1_fill_constant_signals(signals)
 # Mod 2 Amt powers up at 0.0, so the cutoff follows the envelope alone until CC 25 turns it up,
 # and Filter 1 Mod 2 Pol reads 0.1, as Osc 1 Mod 2 Pol does. Filter 1 Mod 3 In takes Pitch 1's
 # pitch too, for keyboard tracking, but Mod 3 Amt powers up at 0.0 and leaves it off until CC 9.
-# Noise 1 runs ahead of the other modulation sources, at full level: its Level has no CC and reads
-# 1.0. Mixer 2 runs after the oscillators, just ahead of the filter, which it feeds: Osc 1 on its
+# Noise 1 runs after the oscillators, as it is mostly a sound of its own (a modulation taking it
+# is a sample late, which it does not hear), at full level: its Level has no CC and reads 1.0.
+# Mixer 2 runs after it, just ahead of the filter, which it feeds: Osc 1 on its
 # In 1, Osc 2 on In 2 and the noise on In 3. Its Level 1, on CC 116, powers up at 1.0, and Level 2
 # and Level 3, on CC 21 and 23, at 0.0, so Osc 2 is silent until CC 21 and the noise until CC 23.
 # Osc 2 plays the note from Pitch 1,

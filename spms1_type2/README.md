@@ -235,22 +235,23 @@ parameter.
 
 #### The run order
 
-Every module is in it: one of each kind that makes a sound, the modulation sources first -- Noise
-1 at their head, as it is one too and so that the envelope and the LFO can read it in the same
-sample, then the envelope ahead of the LFO, so that the LFO's Mod Ins can read it in the same
-sample too, as a vibrato fading in with the envelope does -- Mixer 1 between them and Pitch 1, Pitch 1 just ahead of the
-oscillators, Mixer 2 between the oscillators and the filter, and the chorus and the delay last:
+Every module is in it: one of each kind that makes a sound, the modulation sources first -- the
+envelope ahead of the LFO, so that the LFO's Mod Ins can read it in the same sample, as a vibrato
+fading in with the envelope does -- Mixer 1 between them and Pitch 1, Pitch 1 just ahead of the
+oscillators, Noise 1 after the oscillators, as it is mostly a sound of its own (a modulation
+taking it is a sample late, which it does not hear), Mixer 2 between them and the filter, and the
+chorus and the delay last:
 
 ```mermaid
 flowchart LR
-  NOISE[Noise 1] ~~~ EG[EG 1] ~~~ LFO[LFO 1] ~~~ MIX1[Mixer 1] ~~~ PITCH[Pitch 1] ~~~ OSC[Osc 1] ~~~ OSC2[Osc 2] ~~~ MIX2[Mixer 2] ~~~ FILTER[Filter 1] ~~~ AMP[Amp 1] ~~~ CHORUS[Chorus 1] ~~~ DELAY[Delay 1]
+  EG[EG 1] ~~~ LFO[LFO 1] ~~~ MIX1[Mixer 1] ~~~ PITCH[Pitch 1] ~~~ OSC[Osc 1] ~~~ OSC2[Osc 2] ~~~ NOISE[Noise 1] ~~~ MIX2[Mixer 2] ~~~ FILTER[Filter 1] ~~~ AMP[Amp 1] ~~~ CHORUS[Chorus 1] ~~~ DELAY[Delay 1]
 ```
 
 The mixer has nothing routed to it, so it costs its slot every sample and changes nothing until
 a patch gives it something. Where it sits is what it buys: a module sees the current sample's
 value only from something ahead of it in this line, and last sample's from anything behind.
-Mixer 1 can reach the LFO, the envelope and the noise, and the oscillators, the filter and the amp
-can reach Mixer 1. Pitch 1 comes after all four, so that a modulation of its own -- a bend from the LFO
+Mixer 1 can reach the LFO and the envelope, and the oscillators, the filter and the amp can reach
+Mixer 1. Pitch 1 comes after all three, so that a modulation of its own -- a bend from the LFO
 through Bend In, say -- is this sample's, and before the oscillators and the filter, which read
 it in the same sample. Mixer 2 sits between the oscillators and the filter, where it gathers the
 audio.
@@ -867,8 +868,8 @@ changes only how fast the output moves, so it cannot step it.
   Mode at the notch less the filter's input: LP + HP is the input less k·BP, so what is taken
   away is the band pass, k = 1/Q times. CC 39 = 64 sets Mode to the notch. Mixer 1 has to run
   after the filter, so that it reads the filter's output of the same sample: CC 99 = 0, then
-  CC 98 = 3 to 8 with CC 6 = 9, 3, 11, 12, 4 and 6 rewrites slots 3-8 of the run order to Pitch 1,
-  Osc 1, Osc 2, Mixer 2, Filter 1 and Mixer 1. CC 99 = 1, CC 98 = 7, CC 6 = 106 and CC 98 = 8,
+  CC 98 = 2 to 8 with CC 6 = 9, 3, 11, 10, 12, 4 and 6 rewrites slots 2-8 of the run order to Pitch 1,
+  Osc 1, Osc 2, Noise 1, Mixer 2, Filter 1 and Mixer 1. CC 99 = 1, CC 98 = 7, CC 6 = 106 and CC 98 = 8,
   CC 6 = 12 put Mixer 2, the filter's input, and Filter 1's Out on the mixer's inputs, and
   CC 98 = 5, CC 6 = 14 the mixer on the amp. CC 99 = 2, CC 98 = 22, CC 6 = 7 turns the second
   input over, and CC 98 = 85, CC 6 = 56 hands Balance 1/2 to General Bipolar 1 (CC 16). With
