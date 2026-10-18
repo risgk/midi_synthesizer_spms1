@@ -284,6 +284,9 @@ controls:
   # transposition, on the CCs the oscillator's Pitch Coarse and Fine had, 64 at the centre.
   - { entry: 52, module: PITCH_1,    key: COARSE, label: Coarse, cc: 86, value: 64, bipolar: true }
   - { entry: 53, module: PITCH_1,    key: FINE, label: Fine,  cc: 70,  value: 64, bipolar: true }
+  # Stretch came after the mixers' balances. It is on CC 22, Stretch Tune's in PRA32-U2, and powers
+  # up at CC 4, 0.0, where the keys are as they are.
+  - { entry: 89, module: PITCH_1,    key: STRETCH, label: Stretch, cc: 22,  value: 4 }
   # Bend Amt and Pol came last of all. Bend Amt is the bend range, half a semitone a step:
   # CC 8, its power-up value, is 2 semitones either way. Bend Pol has no CC and reads +0.5.
   - { entry: 48, module: PITCH_1,    key: BEND_AMT,  label: Bend Amt,   cc: 57,  value: 8 }

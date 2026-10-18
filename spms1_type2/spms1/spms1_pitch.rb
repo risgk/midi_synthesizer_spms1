@@ -8,7 +8,8 @@ module Spms1
   # pitch at once rather than glide, as a pitch bend should, and Coarse and Fine shift the
   # output in the same place: a transposition that takes effect at once, ahead of everything the
   # module feeds, so two oscillators on it move together and keep their own Pitch Coarse and Fine as
-  # the interval between them.
+  # the interval between them. Stretch widens the input about note 60 before the lag, so that the
+  # keys spread out while a bend and the transposition stay as they are.
   class Pitch
     # Lookup table for exponential time mapping, the envelope's: a twelfth of an octave per index,
     # so one CC step of the 120-step control range moves the time by a semitone and the whole dial
@@ -55,6 +56,10 @@ module Spms1
       @coarse = 0.0
       @fine = 0.0
       @offset = 0.0
+      @stretch = 0.0
+      @stretch_factor = 1.0
+      @stage_1_stretch_factor = 1.0
+      @current_stretch_factor = 1.0
     end
 
     # Glide, the portamento time, is unipolar, [0.0, 1.0]; see TIME_BASE for scaling details. 0.0 turns the portamento off.
@@ -100,6 +105,19 @@ module Spms1
       @offset = @coarse + @fine
     end
 
+    # Stretch is unipolar, [0.0, 1.0], and multiplies the input, whose 0.0 is note 60, by 1 plus a
+    # stretch that grows a semitone's ratio each CC step from the second, as Glide's time does:
+    # 0.0 (CC 4) leaves the input as it is, CC 5 widens an octave by 1.2 cents, CC 64 by 38 and
+    # CC 124 by a whole octave, which doubles every interval. So a piano's few cents an octave and a
+    # keyboard spread to whole tones are both on the one dial. The factor is smoothed, as a depth
+    # is, so that turning it glides the pitch rather than stepping it.
+    def set_stretch(stretch)
+      @stretch = (stretch < 0.0) ? 0.0 : ((stretch > 1.0) ? 1.0 : stretch)
+      # calculate_exp_fast spans 1/32 to 32 over the dial, so the stretch reaches 1.0 at its top.
+      stretch_factor = 1.0 + calculate_exp_fast(@stretch) * (1.0 / 32.0)
+      @stretch_factor = (@stretch > 0.0) ? stretch_factor : 1.0
+    end
+
     # The distance left is what is carried from sample to sample, and the output is the input plus
     # it. Carrying the output instead, as a one-pole filter usually does, rounds every step to the
     # spacing of floats at the output, and at the longest time a step of an octave's glide is only
@@ -120,14 +138,18 @@ module Spms1
       if @sample_counter == 0
         @stage_1_bend_depth = Dsp.smooth(@bend_depth, @stage_1_bend_depth, @smoothing_target_blend)
         @current_bend_depth = Dsp.smooth(@stage_1_bend_depth, @current_bend_depth, @smoothing_target_blend)
+        @stage_1_stretch_factor = Dsp.smooth(@stretch_factor, @stage_1_stretch_factor, @smoothing_target_blend)
+        @current_stretch_factor = Dsp.smooth(@stage_1_stretch_factor, @current_stretch_factor, @smoothing_target_blend)
       end
       @sample_counter = (@sample_counter + 1) & CONTROL_RATE_MASK
 
-      distance = @distance + (@last_input - input)
-      @last_input = input
+      # At a factor of 1.0, the product is the input, bit for bit.
+      stretched = input * @current_stretch_factor
+      distance = @distance + (@last_input - stretched)
+      @last_input = stretched
       flushed = Dsp.flush_tiny(distance)
       @distance = flushed - flushed * @blend
-      ((input + @distance) + (bend_input * @current_bend_depth)) + @offset
+      ((stretched + @distance) + (bend_input * @current_bend_depth)) + @offset
     end
 
     private

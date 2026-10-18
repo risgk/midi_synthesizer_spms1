@@ -57,6 +57,7 @@
 |                            57 | x             | o             | Pitch Bend Amt (Pitch Bend Range)    |
 |                            86 | x             | o             | Pitch Coarse (+-5 Octaves)           |
 |                            70 | x             | o             | Pitch Fine (+-60 Cents)              |
+|                            22 | x             | o             | Pitch Stretch (x1 to x2)             |
 |                             1 | x             | o             | General Mod Wheel (Unipolar)         |
 |                            16 | x             | o             | General 1 (Unipolar and Bipolar)     |
 |                            17 | x             | o             | General 2 (Unipolar and Bipolar)     |

@@ -9,7 +9,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.3
 - Filter: ZDF/TPT State Variable Filter (with a nonlinear leak on the band pass integrator, solved by the one-step Newton method), with low pass, band pass and high pass outputs
 - Chorus: mono in, stereo out, as a module in the run order
 - Delay: stereo, with feedback, as a module in the run order (up to 340 ms)
-- Pitch: the note's pitch as a module in the run order, with portamento as an exponential lag (CC 5), pitch bend past it (range on CC 57) and a transposition (CC 86 and 70)
+- Pitch: the note's pitch as a module in the run order, with portamento as an exponential lag (CC 5), pitch bend past it (range on CC 57), a transposition (CC 86 and 70) and a stretch of the keys (CC 22)
 - Stereo output: the chorus spreads the mono voice into a left and a right, and the delay keeps them apart
 - Developed by ISGK Instruments (Ryo Ishigaki)
 - <https://github.com/risgk/midi_synthesizer_spms1>
@@ -480,7 +480,7 @@ both at the same signal for a mono output.
 | 23 | Chorus 1 Rate | | 57 | Noise 1 Level | | 86 | Mixer 1 Balance 3/4 |
 | 24 | Chorus 1 Depth | | 58 | Osc 2 Wave | | 87 | Mixer 2 Balance 1/2 |
 | 25 | Chorus 1 Mix | | 59 | Osc 2 Pitch Coarse | | 88 | Mixer 2 Balance 3/4 |
-| 26 | Delay 1 Time | | 60 | Osc 2 Pitch Fine | |  |  |
+| 26 | Delay 1 Time | | 60 | Osc 2 Pitch Fine | | 89 | Pitch 1 Stretch |
 
 <!-- patch_gen end -->
 
@@ -610,6 +610,16 @@ reaching 5 octaves either way, and Fine a cent, reaching 60 either way. They are
 any pitch is reachable. Osc 1 Pitch Coarse and Pitch Fine have the same ranges and add to the
 oscillator alone; they have no CC and stay at 0.0 by default, for an interval or a detune between
 oscillators.
+
+Pitch 1 Stretch (CC 22) widens the keys about note 60, ahead of the glide, by multiplying Pitch
+In: every interval from note 60 grows by the same share, so the stretch is often given as how
+much an octave widens. At 0.0 (CC 4), where it powers up, the keys are as they are; from CC 5 the
+widening grows by a semitone's ratio a step, as the envelope's times do: 1.2 cents an octave at
+CC 5, 38 at CC 64, and a whole octave at CC 124, which doubles every interval and turns the
+keyboard into whole tones. The low end is a piano's stretch tuning, a few cents an octave. The
+bend and the transposition come after it and stay as they are, and turning it glides the pitch
+rather than stepping it. At its top, notes more than 30 semitones from note 60 run past the
+oscillator's range.
 
 LFO 1 Level scales the LFO's output, as a mixer's Level scales its input: from silent at 0.0
 (CC 4) to full at 1.0 (CC 124). It is on CC 113 and powers up at 1.0, passing the LFO through as
