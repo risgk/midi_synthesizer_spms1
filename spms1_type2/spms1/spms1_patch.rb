@@ -553,7 +553,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_MODE     , 39)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_PW_MOD_1_AMT, 8)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_2_PW_MOD_1_AMT, 8)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_NOISE_1_COLOR     , 117)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_NOISE_1_COLOR     , 115)
 
   C.set_midi_cc_value(midi_ch, 3  , 64 ) # LFO 1 Rate
   C.set_midi_cc_value(midi_ch, 113, 124) # LFO 1 Level
@@ -603,5 +603,5 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 39 , 4  ) # Filter 1 Mode
   C.set_midi_cc_value(midi_ch, 8  , 4  ) # Osc 1 PW Mod 1 Amt
   C.set_midi_cc_value(midi_ch, 8  , 4  ) # Osc 2 PW Mod 1 Amt
-  C.set_midi_cc_value(midi_ch, 117, 4  ) # Noise 1 Color
+  C.set_midi_cc_value(midi_ch, 115, 4  ) # Noise 1 Color
 end

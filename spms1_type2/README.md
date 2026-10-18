@@ -704,7 +704,7 @@ flat across the spectrum: from silence at 0.0 to noise filling -0.5 to +0.5 at 1
 oscillator's range. Out Red is the same noise through a one-pole low pass, falling 6 dB an octave
 above a fixed cutoff on the A of a MIDI note number, note 21 (A0, 27.5 Hz), so across the whole
 audible band. A gain holds it at the white's RMS over the square root of 2, and it is held to -0.5
-to +0.5, which cuts the rarest peaks, 1.5% of the samples. Noise 1 Color (CC 117) crossfades Out
+to +0.5, which cuts the rarest peaks, 1.5% of the samples. Noise 1 Color (CC 115) crossfades Out
 in a straight line from the white at 0.0 (CC 4), where it powers up, to the red at 1.0 (CC 124),
 each end as its own output is, so the red end is 3 dB down. Out keeps the slot the white had, and
 is what the default patch puts on Mixer 2, so the noise there is white until Color is turned up,
@@ -803,7 +803,7 @@ changes only how fast the output moves, so it cannot step it.
   little keeps the level of one
 - Noise is wired by default too, its Out on Mixer 2's third input beside the oscillators, so CC 23
   brings it in under the note, at a tenth of the oscillator's level at CC 16. CC 116 down to CC 4
-  takes Osc 1 out and leaves the noise alone, through the filter. CC 117 (Color) turns it from
+  takes Osc 1 out and leaves the noise alone, through the filter. CC 115 (Color) turns it from
   white to red
 - Keyboard tracking is wired by default as well, the pitch from Pitch 1 on the filter's Mod 3 input,
   so CC 9 sets how far the cutoff follows the keys: all the way at CC 124, not at all at CC 4,
