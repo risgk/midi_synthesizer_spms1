@@ -61,6 +61,10 @@ Required Software for Modification
       included at the top of "spinel_rt.h", carries `#define main __attribute__((section(".time_critical"), flatten)) Spms1_main`,
       which renames it and puts the synth core in RAM at the same time. Renaming it by hand
       instead leaves the macro with nothing to match, and the core runs from flash
+    - What the core calls while it plays, the MIDI accessors in "spms1_midi_state.h" and the audio
+      output in "spms1.ino", is put in RAM as well, with `SPMS1_RAM_FUNC`. From flash it would be
+      fetched through the XIP cache, which core 0's MIDI and USB code shares, and a burst of MIDI
+      would slow the synth's buffer by evicting it
     - "spms1_main.c" is generated in "spms1" with `spinel spms1_main.rb -c --rbs sig`. The type seeds
       in "spms1/sig" keep the filter states and the parameter smoothing unboxed;
       "spms1/sig/spms1_filter.rbs" and "spms1/sig/spms1_dsp.rbs" say why they are needed

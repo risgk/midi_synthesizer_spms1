@@ -13,6 +13,13 @@
 
 #include <stdint.h>
 
+// Where the accessors the synth calls go. The sketch defines it to put them in RAM, next to the
+// synth's own code: in flash they would be fetched through the XIP cache, which core 0's MIDI and
+// USB code shares and evicts. The simulators leave it empty.
+#ifndef SPMS1_RAM_FUNC
+#define SPMS1_RAM_FUNC
+#endif
+
 uint8_t  g_midi_note_on_pitch[16]  = {60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60};
 uint8_t  g_midi_note_on_state[16]  = {0};
 // The note held before the one sounding, which comes back when that one is let go, or
@@ -42,7 +49,7 @@ uint8_t  g_midi_nrpn_selected[16]       = {0};  // 0 until CC 99 or 98 arrives, 
 uint32_t g_midi_run_order_writes[16]                       = {0};
 uint32_t g_midi_run_order_written[16][SPMS1_RUN_ORDER_SIZE] = {{0}};
 
-void set_midi_note_on_pitch(uint8_t midi_ch, uint8_t midi_note_on_pitch) {
+SPMS1_RAM_FUNC void set_midi_note_on_pitch(uint8_t midi_ch, uint8_t midi_note_on_pitch) {
   if (midi_ch >= 16) {
     return;
   }
@@ -50,7 +57,7 @@ void set_midi_note_on_pitch(uint8_t midi_ch, uint8_t midi_note_on_pitch) {
   g_midi_note_on_pitch[midi_ch] = midi_note_on_pitch;
 }
 
-uint8_t get_midi_note_on_pitch(uint8_t midi_ch) {
+SPMS1_RAM_FUNC uint8_t get_midi_note_on_pitch(uint8_t midi_ch) {
   if (midi_ch >= 16) {
     return 0;
   }
@@ -58,7 +65,7 @@ uint8_t get_midi_note_on_pitch(uint8_t midi_ch) {
   return g_midi_note_on_pitch[midi_ch];
 }
 
-void set_midi_note_on_state(uint8_t midi_ch, uint8_t midi_note_on_state) {
+SPMS1_RAM_FUNC void set_midi_note_on_state(uint8_t midi_ch, uint8_t midi_note_on_state) {
   if (midi_ch >= 16) {
     return;
   }
@@ -66,7 +73,7 @@ void set_midi_note_on_state(uint8_t midi_ch, uint8_t midi_note_on_state) {
   g_midi_note_on_state[midi_ch] = midi_note_on_state;
 }
 
-uint8_t get_midi_note_on_state(uint8_t midi_ch) {
+SPMS1_RAM_FUNC uint8_t get_midi_note_on_state(uint8_t midi_ch) {
   if (midi_ch >= 16) {
     return 0;
   }
@@ -74,7 +81,7 @@ uint8_t get_midi_note_on_state(uint8_t midi_ch) {
   return g_midi_note_on_state[midi_ch];
 }
 
-void set_midi_pitch_bend(uint8_t midi_ch, int32_t midi_pitch_bend) {
+SPMS1_RAM_FUNC void set_midi_pitch_bend(uint8_t midi_ch, int32_t midi_pitch_bend) {
   if (midi_ch >= 16) {
     return;
   }
@@ -82,7 +89,7 @@ void set_midi_pitch_bend(uint8_t midi_ch, int32_t midi_pitch_bend) {
   g_midi_pitch_bend[midi_ch] = (int16_t)midi_pitch_bend;
 }
 
-int32_t get_midi_pitch_bend(uint8_t midi_ch) {
+SPMS1_RAM_FUNC int32_t get_midi_pitch_bend(uint8_t midi_ch) {
   if (midi_ch >= 16) {
     return 0;
   }
@@ -90,7 +97,7 @@ int32_t get_midi_pitch_bend(uint8_t midi_ch) {
   return g_midi_pitch_bend[midi_ch];
 }
 
-void set_midi_cc_value(uint8_t midi_ch, uint8_t cc_number, uint8_t cc_value) {
+SPMS1_RAM_FUNC void set_midi_cc_value(uint8_t midi_ch, uint8_t cc_number, uint8_t cc_value) {
   if (midi_ch >= 16) {
     return;
   }
@@ -102,7 +109,7 @@ void set_midi_cc_value(uint8_t midi_ch, uint8_t cc_number, uint8_t cc_value) {
   g_midi_cc_values[midi_ch][cc_number] = cc_value;
 }
 
-uint8_t get_midi_cc_value(uint8_t midi_ch, uint8_t cc_number) {
+SPMS1_RAM_FUNC uint8_t get_midi_cc_value(uint8_t midi_ch, uint8_t cc_number) {
   if (midi_ch >= 16) {
     return 0;
   }
@@ -114,7 +121,7 @@ uint8_t get_midi_cc_value(uint8_t midi_ch, uint8_t cc_number) {
   return g_midi_cc_values[midi_ch][cc_number];
 }
 
-void set_midi_nrpn_value(uint8_t midi_ch, int32_t index, uint8_t value) {
+SPMS1_RAM_FUNC void set_midi_nrpn_value(uint8_t midi_ch, int32_t index, uint8_t value) {
   if (midi_ch >= 16) {
     return;
   }
@@ -129,7 +136,7 @@ void set_midi_nrpn_value(uint8_t midi_ch, int32_t index, uint8_t value) {
   }
 }
 
-uint8_t get_midi_nrpn_value(uint8_t midi_ch, int32_t index) {
+SPMS1_RAM_FUNC uint8_t get_midi_nrpn_value(uint8_t midi_ch, int32_t index) {
   if (midi_ch >= 16) {
     return 0;
   }
@@ -141,7 +148,7 @@ uint8_t get_midi_nrpn_value(uint8_t midi_ch, int32_t index) {
   return g_midi_nrpn_values[midi_ch][index];
 }
 
-int32_t get_midi_run_order_written(uint8_t midi_ch, int32_t slot) {
+SPMS1_RAM_FUNC int32_t get_midi_run_order_written(uint8_t midi_ch, int32_t slot) {
   if (midi_ch >= 16) {
     return 0;
   }

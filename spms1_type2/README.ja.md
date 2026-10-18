@@ -61,6 +61,9 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.3
       `#define main __attribute__((section(".time_critical"), flatten)) Spms1_main` を持っており、改名と
       シンセ本体の RAM 配置を同時に行います。手で改名すると、このマクロが一致しなく
       なって属性が付かず、本体が flash から実行されます
+    - 本体が演奏中に呼ぶ関数 ("spms1_midi_state.h" の MIDI 読み出しと "spms1.ino" の音声出力) も
+      `SPMS1_RAM_FUNC` で RAM に置きます。flash にあると、core 0 の MIDI と USB のコードと共有の
+      XIP キャッシュ経由で読まれ、MIDI が続くとキャッシュが追い出されてシンセのバッファ処理が遅れます
     - "spms1_main.c" は "spms1" で `spinel spms1_main.rb -c --rbs sig` を実行して生成します。"spms1/sig" の
       型シードがフィルタの状態とパラメータのスムージングをボックス化させずに保ちます。必要な理由は
       "spms1/sig/spms1_filter.rbs" と "spms1/sig/spms1_dsp.rbs" にあります
