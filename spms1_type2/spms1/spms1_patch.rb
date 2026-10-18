@@ -151,6 +151,8 @@ SLOT_OSC_2_PW_MOD_1_AMT  = 221
 SLOT_OSC_2_PW_MOD_1_POL  = 222
 SLOT_NOISE_1_COLOR       = 223
 SLOT_LFO_1_WAVE          = 224
+SLOT_MIXER_1_BALANCE_LAW = 225
+SLOT_MIXER_2_BALANCE_LAW = 226
 
 # NRPN parameter numbers: (MSB << 7) | LSB, where the MSB picks a category and the LSB an entry.
 #   0..127   active_modules[slot]
@@ -276,6 +278,8 @@ NRPN_SOURCE_OSC_2_PW_MOD_1_AMT  = 349
 NRPN_SOURCE_OSC_2_PW_MOD_1_POL  = 350
 NRPN_SOURCE_NOISE_1_COLOR       = 351
 NRPN_SOURCE_LFO_1_WAVE          = 352
+NRPN_SOURCE_MIXER_1_BALANCE_LAW = 353
+NRPN_SOURCE_MIXER_2_BALANCE_LAW = 354
 
 # A CC number of 0 means the parameter has no CC: its control slot holds 0.0 -- the bottom of a
 # unipolar dial, the middle of a bipolar one -- whatever CC it had before, so a patch sets it alone.
@@ -366,6 +370,8 @@ NRPN_CC_OSC_2_PW_MOD_1_AMT  = 477
 NRPN_CC_OSC_2_PW_MOD_1_POL  = 478
 NRPN_CC_NOISE_1_COLOR       = 479
 NRPN_CC_LFO_1_WAVE          = 480
+NRPN_CC_MIXER_1_BALANCE_LAW = 481
+NRPN_CC_MIXER_2_BALANCE_LAW = 482
 
 # The constants of the bus, which nothing else ever writes. A slot not written here holds 0.0.
 def spms1_fill_constant_signals(signals)
@@ -512,6 +518,8 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_2_PW_MOD_1_POL , SIGNAL_HALF)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_NOISE_1_COLOR      , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_LFO_1_WAVE         , SIGNAL_OWN)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_1_BALANCE_LAW, SIGNAL_HALF)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_2_BALANCE_LAW, SIGNAL_HALF)
 
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_RATE         , 3)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_LEVEL        , 113)

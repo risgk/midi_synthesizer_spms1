@@ -18,26 +18,41 @@ module Spms1
     # constant if both are changed.
     CONTROL_RATE_DIVISOR = 4
 
-    # Square root lookup for the balances, sqrt(u) for u = i / 64, 0.0 to 2.0, interpolated in a
-    # straight line between entries. A balance is worked out every buffer whether it has moved or
-    # not, never only when it changes, and always by the same few operations with no branch on
-    # its value: the time a buffer takes must not hang on what the patch or the CCs are doing, so
-    # that its worst case is the case measured, and can be guaranteed. A square root would be a
-    # library call in double precision on the Pico 2, with a branch for its domain inside.
-    # The entries at u = 1.0 (the centre) and 2.0 (either end) are exact, so the centre leaves its
-    # pair as it is and an end passes its input at √2. Between the entries the line runs under the
-    # curve, by up to 0.03 in the first, near silence, and under 0.001 from u = 0.25 on. The last
-    # entry repeats the one before it so that interpolating at u = 2.0 reads a real entry rather
-    # than past the end.
-    SQRT_TABLE = Array.new(130, 0.0)
+    # Lookup for the balances, one run of 130 entries for each of the three laws Balance Law picks,
+    # each a factor f(u) for u = i / 64, 0.0 to 2.0, interpolated in a straight line between
+    # entries:
+    #   0 linear      f(u) = u               the two factors add to 2.0
+    #   1 equal power f(u) = sqrt(u)         their squares add to 2.0
+    #   2 filter Mode f(u) = min(u, 1.0)     each at 1.0 over its own half, as Filter 1 Mode's
+    # A balance is worked out every buffer whether it has moved or not, never only when it changes,
+    # and always by the same few operations with no branch on its value or on the law: the time a
+    # buffer takes must not hang on what the patch or the CCs are doing, so that its worst case is
+    # the case measured, and can be guaranteed. A square root would be a library call in double
+    # precision on the Pico 2, with a branch for its domain inside, and a choice between three
+    # formulas a branch; the law only moves where in the table the factor is read. Every law has
+    # f(1.0) = 1.0, so the centre leaves its pair as it is whatever the law, and the entries at
+    # u = 1.0 and 2.0 are exact. The linear and the filter Mode laws are straight between entries,
+    # their corner at u = 1.0 on an entry, so they are exact everywhere; the square root's line runs
+    # under its curve, by up to 0.03 in the first entry, near silence, and under 0.001 from
+    # u = 0.25 on. The last entry of each run repeats the one before it so that interpolating at
+    # u = 2.0 reads a real entry of the same run rather than the next run's first.
+    BALANCE_TABLE_RUN = 130
+    BALANCE_TABLE = Array.new(390, 0.0)
     for i in 0...129
-      SQRT_TABLE[i] = Math.sqrt(i.to_f * (1.0 / 64.0))
+      u = i.to_f * (1.0 / 64.0)
+      BALANCE_TABLE[i] = u
+      BALANCE_TABLE[130 + i] = Math.sqrt(u)
+      BALANCE_TABLE[260 + i] = (u < 1.0) ? u : 1.0
     end
-    SQRT_TABLE[129] = SQRT_TABLE[128]
+    BALANCE_TABLE[129] = BALANCE_TABLE[128]
+    BALANCE_TABLE[259] = BALANCE_TABLE[258]
+    BALANCE_TABLE[389] = BALANCE_TABLE[388]
 
     def initialize(sample_rate)
       @sample_rate = sample_rate
       @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (48000.0 / @sample_rate) * (CONTROL_RATE_DIVISOR / 4.0)
+      # Where the law Balance Law picks starts in BALANCE_TABLE; equal power at power-up.
+      @balance_law_offset = 130
       # Every level powers up silent, so an input fades in from nothing when its level is first set
       # rather than sounding at full level before the patch says otherwise.
       @level_1 = 0.0
@@ -124,27 +139,37 @@ module Spms1
       @target_4 = @level_4 * @polarity_4 * @balance_factor_4
     end
 
-    # Each balance is bipolar, [-0.5, 0.5], and crossfades its pair at equal power, as PRA32-U2's
-    # Osc Mix does: the squares of the two factors always add to 2.0. 0.0 at the centre leaves both
-    # inputs as they are, -0.5 takes the first up by √2 and silences the second, and +0.5 the other
-    # way round. So the centre is the mixer without a balance, two uncorrelated inputs at the same
-    # level, such as detuned oscillators, keep the same loudness whichever way it is turned, and
-    # with both levels of the pair at 1/√2 it is a crossfader, each input as it is at its own end and
-    # 3 dB down at the centre. The square roots are read from SQRT_TABLE; the clamp, written as
-    # nested ternaries so that it compiles to selects rather than branches, keeps what it is read at
-    # in 0.0 to 2.0.
+    # Balance Law is unipolar, [0.0, 1.0], and picks how both balances crossfade, in three equal
+    # zones: linear below 1/3, equal power (as PRA32-U2's Osc Mix) to 2/3, and as Filter 1 Mode
+    # above, so the constants 0.0, 0.5 and 1.0 pick each. It is read once a buffer like any other
+    # parameter, ahead of the balances, which are worked out again in the same buffer; their
+    # factors are smoothed on the way to the inputs, so switching laws does not click.
+    def set_balance_law(law)
+      clamped_law = (law < 0.0) ? 0.0 : ((law > 1.0) ? 1.0 : law)
+      @balance_law_offset = (clamped_law * 2.999).to_i * BALANCE_TABLE_RUN
+    end
+
+    # Each balance is bipolar, [-0.5, 0.5], and crossfades its pair by the law Balance Law picks,
+    # the factors f(1 - 2b) and f(1 + 2b) of BALANCE_TABLE. 0.0 at the centre leaves both inputs as
+    # they are whatever the law, so the centre is the mixer without a balance; -0.5 silences the
+    # second input and takes the first to 2.0 (linear), √2 (equal power) or 1.0 (filter Mode), and
+    # +0.5 the other way round. A crossfader, each input as it is at its own end, wants both levels
+    # of the pair at 0.5, 1/√2 or 1.0 by the law: a pair at the same level keeps its total (linear),
+    # its loudness when uncorrelated, as detuned oscillators are (equal power), or each input whole
+    # over its own half (filter Mode). The clamp, written as nested ternaries so that it compiles
+    # to selects rather than branches, keeps what the table is read at in 0.0 to 2.0.
     def set_balance_1_2(balance)
       clamped_balance = (balance < -0.5) ? -0.5 : ((balance > 0.5) ? 0.5 : balance)
-      @balance_factor_1 = sqrt_fast(1.0 - (clamped_balance + clamped_balance))
-      @balance_factor_2 = sqrt_fast(1.0 + (clamped_balance + clamped_balance))
+      @balance_factor_1 = balance_factor_fast(1.0 - (clamped_balance + clamped_balance))
+      @balance_factor_2 = balance_factor_fast(1.0 + (clamped_balance + clamped_balance))
       @target_1 = @level_1 * @polarity_1 * @balance_factor_1
       @target_2 = @level_2 * @polarity_2 * @balance_factor_2
     end
 
     def set_balance_3_4(balance)
       clamped_balance = (balance < -0.5) ? -0.5 : ((balance > 0.5) ? 0.5 : balance)
-      @balance_factor_3 = sqrt_fast(1.0 - (clamped_balance + clamped_balance))
-      @balance_factor_4 = sqrt_fast(1.0 + (clamped_balance + clamped_balance))
+      @balance_factor_3 = balance_factor_fast(1.0 - (clamped_balance + clamped_balance))
+      @balance_factor_4 = balance_factor_fast(1.0 + (clamped_balance + clamped_balance))
       @target_3 = @level_3 * @polarity_3 * @balance_factor_3
       @target_4 = @level_4 * @polarity_4 * @balance_factor_4
     end
@@ -192,16 +217,18 @@ module Spms1
 
     private
 
-    # The square root of u, 0.0 to 2.0, from SQRT_TABLE: one multiply, one conversion, two loads and
-    # a multiply-add, with no branch of its own (Spinel's checks on the conversion and the loads,
-    # which never fail here, aside), so it takes the same time whatever u is.
-    def sqrt_fast(u)
+    # The factor for u, 0.0 to 2.0, by the law picked, from BALANCE_TABLE: one multiply, one
+    # conversion, an add, two loads and a multiply-add, with no branch of its own (Spinel's checks
+    # on the conversion and the loads, which never fail here, aside), so it takes the same time
+    # whatever u and the law are.
+    def balance_factor_fast(u)
       position = u * 64.0
-      index = position.to_i
-      fraction = position - index.to_f
+      whole = position.to_i
+      fraction = position - whole.to_f
+      index = whole + @balance_law_offset
 
-      s0 = SQRT_TABLE[index]
-      s1 = SQRT_TABLE[index + 1]
+      s0 = BALANCE_TABLE[index]
+      s1 = BALANCE_TABLE[index + 1]
 
       s0 + fraction * (s1 - s0)
     end

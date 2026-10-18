@@ -400,6 +400,8 @@ while true
   source_mixer_1_balance_3_4 = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_BALANCE_3_4), SLOT_MIXER_1_BALANCE_3_4)
   source_mixer_2_balance_1_2 = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_BALANCE_1_2), SLOT_MIXER_2_BALANCE_1_2)
   source_mixer_2_balance_3_4 = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_BALANCE_3_4), SLOT_MIXER_2_BALANCE_3_4)
+  source_mixer_1_balance_law = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_BALANCE_LAW), SLOT_MIXER_1_BALANCE_LAW)
+  source_mixer_2_balance_law = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_BALANCE_LAW), SLOT_MIXER_2_BALANCE_LAW)
   source_pitch_1_stretch = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_STRETCH), SLOT_PITCH_1_STRETCH)
 
   # Which CC fills each control slot. The signals array -- the bus and the parameters' own slots
@@ -486,6 +488,8 @@ while true
   cc_mixer_1_balance_3_4 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_1_BALANCE_3_4)
   cc_mixer_2_balance_1_2 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_BALANCE_1_2)
   cc_mixer_2_balance_3_4 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_BALANCE_3_4)
+  cc_mixer_1_balance_law = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_1_BALANCE_LAW)
+  cc_mixer_2_balance_law = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_BALANCE_LAW)
   cc_pitch_1_stretch = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_PITCH_1_STRETCH)
   cc_general_mod_wheel     = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_MOD_WHEEL)
   cc_general_1             = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_1)
@@ -574,6 +578,8 @@ while true
   signals[SLOT_MIXER_1_BALANCE_3_4] = cc_or_zero(cc_mixer_1_balance_3_4, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_balance_3_4)))
   signals[SLOT_MIXER_2_BALANCE_1_2] = cc_or_zero(cc_mixer_2_balance_1_2, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_2_balance_1_2)))
   signals[SLOT_MIXER_2_BALANCE_3_4] = cc_or_zero(cc_mixer_2_balance_3_4, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_2_balance_3_4)))
+  signals[SLOT_MIXER_1_BALANCE_LAW] = cc_or_zero(cc_mixer_1_balance_law, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_1_balance_law)))
+  signals[SLOT_MIXER_2_BALANCE_LAW] = cc_or_zero(cc_mixer_2_balance_law, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_mixer_2_balance_law)))
   signals[SLOT_PITCH_1_STRETCH] = cc_or_zero(cc_pitch_1_stretch, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_pitch_1_stretch)))
   signals[SIGNAL_GENERAL_MOD_WHEEL] = cc_or_zero(cc_general_mod_wheel, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_general_mod_wheel)))
   # Each General CC fills two slots, the same value taken both ways.
@@ -647,6 +653,9 @@ while true
   mixer_2.set_level_4(signals[source_mixer_2_level_4])
   mixer_2.set_polarity_4(signals[source_mixer_2_pol_4])
   mixer_2.set_out_level(signals[source_mixer_2_out_level])
+  # Each Balance Law ahead of the balances, which read the law it sets.
+  mixer_1.set_balance_law(signals[source_mixer_1_balance_law])
+  mixer_2.set_balance_law(signals[source_mixer_2_balance_law])
   mixer_1.set_balance_1_2(signals[source_mixer_1_balance_1_2])
   mixer_1.set_balance_3_4(signals[source_mixer_1_balance_3_4])
   mixer_2.set_balance_1_2(signals[source_mixer_2_balance_1_2])

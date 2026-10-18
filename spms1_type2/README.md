@@ -277,8 +277,7 @@ the resonance dial k turns negative and the loop oscillates.
 The filter puts out its low pass and high pass at once, as Out LP and Out HP, each through a DC
 blocker and an output clip of its own, and Out, the two crossfaded by Filter 1 Mode (CC 39, Filter
 Mode's in PRA32-U2). Each side stays at full over its own half and falls to nothing over the other,
-which a mixer's Balance, at equal power, cannot do alone: its ends would be at √2 times the level,
-or its centre at 1/√2. At 0.0 (CC 4), where it powers up, Out is the low
+as a mixer's Balance does with its Balance Law at 1.0, the law named after this. At 0.0 (CC 4), where it powers up, Out is the low
 pass alone; at 1.0 (CC 124) the high pass alone; and at 0.5 (CC 64) both at full, whose sum, the
 input less k·BP, is a notch at the cutoff with both sides of it passed whole. In between the notch
 moves off the cutoff, above it toward the low pass and below it toward the high pass, with the
@@ -511,8 +510,8 @@ both at the same signal for a mono output.
 | 25 | Chorus 1 Mix | | 62 | Osc 2 Mod 1 Pol | | 94 | Osc 2 PW Mod 1 Pol |
 | 26 | Delay 1 Time | | 63 | Osc 2 Mod 2 Amt | | 95 | Noise 1 Color |
 | 27 | Delay 1 Feedback | | 64 | Osc 2 Mod 2 Pol | | 96 | LFO 1 Wave |
-| 28 | Delay 1 Mix | | 65 | Osc 2 Pulse Width | |  |  |
-| 34 | Pitch 1 Glide | | 66 | Osc 2 PW Mod 2 Amt | |  |  |
+| 28 | Delay 1 Mix | | 65 | Osc 2 Pulse Width | | 97 | Mixer 1 Balance Law |
+| 34 | Pitch 1 Glide | | 66 | Osc 2 PW Mod 2 Amt | | 98 | Mixer 2 Balance Law |
 
 <!-- patch_gen end -->
 
@@ -766,19 +765,31 @@ sum, over the same range as Level and also at 1.0 by default, so one control can
 two sources up and down together; it is applied before the sum is held to its range, so turning
 it down also brings a sum that would have been cut back inside it.
 
-Balance 1/2 and Balance 3/4 crossfade each pair of inputs at equal power, as PRA32-U2's Osc Mix
-does, from -0.5 (CC 4) through 0.0 (CC 64) to +0.5 (CC 124). The two inputs' levels are
-multiplied by √(1 - 2b) and √(1 + 2b): √2 and 0.0 at -0.5, 1.0 each at 0.0, and 0.0 and √2 at
-+0.5, their squares always adding up to 2.0. At the centre the mixer is as it was without them,
-and two uncorrelated inputs at the same level, such as detuned oscillators, keep the same
-loudness whichever way the balance is turned. For a crossfader, or a selector at either end,
-point both levels of the pair at Constant 0.707 (1/√2): each input then passes at 1/√2, 3 dB
-down, at the centre and as it is at its own end -- a mix control for two oscillators, or a switch
-between two modulation sources. Two correlated inputs, such as one signal and a filtered copy of
-it, sum at the centre to more than at either end, as they would on a mixer without a balance. Balance 1/2 of each mixer is set up so by default, on CC 119 and
-CC 21; Balance 3/4 reads its own slot, the centre, with no CC. Like every parameter, a balance is
-read once a buffer and smoothed, so a selector driven by a gate crossfades in about 35 ms
-rather than switching on the sample.
+Balance 1/2 and Balance 3/4 crossfade each pair of inputs, from -0.5 (CC 4) through 0.0 (CC 64) to
++0.5 (CC 124), by the law Balance Law picks for both pairs of its mixer. Balance Law has no CC
+and reads 0.5 by default; it picks in three equal zones, so the constants 0.0, 0.5 and 1.0 pick
+each law:
+
+| Balance Law | Law | At -0.5 | At 0.0 | Crossfader levels | Keeps |
+| --- | --- | --- | --- | --- | --- |
+| below 1/3 (0.0) | Linear | 2.0 and 0.0 | 1.0 each | 0.5 (Constant 0.5) | the sum of a pair at the same level |
+| 1/3 to 2/3 (0.5, default) | Equal power, as PRA32-U2's Osc Mix | √2 and 0.0 | 1.0 each | 0.707 (Constant 0.707) | the loudness of two uncorrelated inputs, such as detuned oscillators |
+| above 2/3 (1.0) | As Filter 1 Mode | 1.0 and 0.0 | 1.0 each | 1.0 (Constant 1.0) | each input whole over its own half |
+
+The two inputs' levels are multiplied by f(1 - 2b) and f(1 + 2b), with f(u) = u, √u or min(u, 1)
+by the law, so +0.5 is -0.5 the other way round. Whatever the law, the centre leaves the mixer
+as it was without a balance, so Balance 3/4, which reads its own slot, the centre, with no CC,
+leaves its pair alone. For a crossfader, or a selector at either end, point both levels of the
+pair at the constant in the table: each input then passes as it is at its own end -- a mix
+control for two oscillators, or a switch between two modulation sources. Balance 1/2 of each
+mixer is set up so by default, at equal power, on CC 119 and CC 21: at the centre each input is
+at 1/√2, 3 dB down. Two correlated inputs, such as one signal and a filtered copy of it, sum at
+the centre to more than at either end, as they would on a mixer without a balance; the linear
+law is the one that crossfades them in a straight line, and the Filter Mode law takes both to
+full there. Like every parameter, a balance and its law are read once a buffer, and the factors
+are smoothed, so a selector driven by a gate crossfades in about 35 ms rather than switching on
+the sample, and switching laws does not click. Each factor comes from a table, interpolated, so
+a balance takes the same time whatever it and its law are set to.
 
 The sum is held to -1.0 and +1.0. Two full-scale signals reach exactly that, and an oscillator
 or the noise at full level is half of one, so nothing ordinary is cut -- on Mixer 2, two
@@ -885,7 +896,8 @@ changes only how fast the output moves, so it cannot step it.
   CC 98 = 5, CC 6 = 14 the mixer on the amp. CC 99 = 2, CC 98 = 22, CC 6 = 7 turns the second
   input over, CC 98 = 85, CC 6 = 56 hands Balance 1/2 to General Bipolar 1 (CC 16), and CC 98 = 19,
   CC 6 = 127 has Level 1 read its own slot, which CC 99 = 3, CC 98 = 19, CC 6 = 118 gives CC 118,
-  and CC 99 = 2, CC 98 = 21, CC 6 = 2 points Level 2 at 0.5. With CC 118 = 34 (0.25, half of
+  and CC 99 = 2, CC 98 = 21, CC 6 = 2 points Level 2 at 0.5 and CC 98 = 97, CC 6 = 0 sets Balance
+  Law to linear, so that the two cross in a straight line. With CC 118 = 34 (0.25, half of
   Filter 1 Gain's 0.5 at CC 64, as the filter takes its input at that gain), CC 16 sweeps from the dry input at CC 4, through the band pass at
   CC 64, to the notch, turned over, at CC 124. The band pass peaks at the cutoff at half the level
   whatever the resonance, narrowing as it rises: rendered with white noise, at Resonance's

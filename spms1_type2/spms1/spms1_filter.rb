@@ -282,9 +282,8 @@ module Spms1
     # Mode is unipolar, [0.0, 1.0], and crossfades Out from the low pass to the high pass: each side
     # at 1.0 over its own half and falling to 0.0 over the other, so 0.0 is the low pass alone, 1.0
     # the high pass alone, and 0.5 both at 1.0, whose sum is the input less k times the band pass: a
-    # notch at the cutoff, the pass band whole. A mixer's Balance, at equal power, cannot do this
-    # alone: the ends would be at √2 times the level, or the centre at 1/√2. Only the two factors are
-    # smoothed.
+    # notch at the cutoff, the pass band whole. A mixer's Balance does the same with its Balance
+    # Law at 1.0, the law named after this. Only the two factors are smoothed.
     def set_mode(mode)
       clamped = (mode < 0.0) ? 0.0 : ((mode > 1.0) ? 1.0 : mode)
       lp = 2.0 - (clamped + clamped)
