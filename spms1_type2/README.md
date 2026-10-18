@@ -1038,8 +1038,9 @@ The synth is built as a framework, and its sound is the modules on it:
 
 A module is added without writing anything in the loop:
 
-1. Write its class in a file of its own in "spms1", and add a `require_relative` for it at the
-   top of "spms1/spms1_main.rb". "spms1_amp.rb" is the smallest to start from. The class has:
+1. Write its class in "spms1", in a file named after it: "spms1_" and the class name in snake
+   case, as `EnvGen` is in "spms1_env_gen.rb". "spms1_amp.rb" is the smallest to start from. The
+   class has:
     - `initialize(sample_rate)`
     - a setter for each parameter, called once a buffer with the value its source holds: unipolar
       0.0..1.0 or bipolar -0.5..0.5, as the parameter is marked in the YAML. It clamps the value
@@ -1062,7 +1063,7 @@ A module is added without writing anything in the loop:
    (`sh sim_render/build.sh`), then listen (a render with a patch file that routes it) and
    measure (`sh sim_load/estimate.sh`)
 
-patch_gen writes the module's instance, the reads of its routing and its CCs, the calls to its
+patch_gen writes the `require_relative` of the module's file, its instance, the reads of its routing and its CCs, the calls to its
 setters and its `when` in the dispatch into "spms1/spms1_main.rb", as the plain straight-line Ruby
 the loop was written in by hand before, so Spinel compiles it to the same: a module costs what its
 own code costs and no more. The editor and the NRPN tables of the READMEs take it up as well.

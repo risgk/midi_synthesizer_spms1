@@ -971,8 +971,9 @@ C のホスト ("sim_spinel"、"sim_render"、"web" の SPMS-1 Web) は、スケ
 
 モジュールは、ループに何も手で書かずに追加できます。
 
-1. クラスを "spms1" の中の専用のファイルに書き、"spms1/spms1_main.rb" の先頭に `require_relative`
-   を足します。いちばん小さい "spms1_amp.rb" から始めるとよいでしょう。クラスに必要なもの:
+1. クラスを "spms1" の中に、クラス名にちなんだファイル名で書きます。"spms1_" にクラス名を
+   スネークケースにしたものを続けた名前で、`EnvGen` なら "spms1_env_gen.rb" です。いちばん小さい
+   "spms1_amp.rb" から始めるとよいでしょう。クラスに必要なもの:
     - `initialize(sample_rate)`
     - パラメータごとの setter。バッファごとに 1 回、ソースの値で呼ばれます。値は YAML での指定に
       従ってユニポーラ 0.0..1.0 かバイポーラ -0.5..0.5 です。クランプして目標値として持ちます
@@ -992,7 +993,7 @@ C のホスト ("sim_spinel"、"sim_render"、"web" の SPMS-1 Web) は、スケ
    (`sh sim_render/build.sh`)。そのあと音を確かめ (ルーティングするパッチファイルでレンダリング)、
    負荷を測ります (`sh sim_load/estimate.sh`)
 
-patch_gen は、モジュールのインスタンス、ルーティングと CC の読み出し、setter の呼び出し、
+patch_gen は、モジュールのファイルの `require_relative`、インスタンス、ルーティングと CC の読み出し、setter の呼び出し、
 ディスパッチの `when` を "spms1/spms1_main.rb" に書きます。以前ループを手で書いていたときと同じ
 素直な直線的な Ruby なので、Spinel も同じものにコンパイルします。モジュールにかかるのは、
 そのモジュール自身のコードの分だけです。エディタと README の NRPN の表にも反映されます。

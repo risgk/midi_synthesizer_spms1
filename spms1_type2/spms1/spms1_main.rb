@@ -1,15 +1,19 @@
 require_relative 'spms1_framework'
 require_relative 'spms1_dsp'
+# The file of each module class in spms1_patch.yaml, spms1_ and the class in snake case. Written by
+# patch_gen.
+# patch_gen requires
+require_relative 'spms1_lfo'
+require_relative 'spms1_env_gen'
 require_relative 'spms1_osc'
 require_relative 'spms1_filter'
 require_relative 'spms1_amp'
-require_relative 'spms1_env_gen'
-require_relative 'spms1_lfo'
 require_relative 'spms1_mixer'
 require_relative 'spms1_chorus'
 require_relative 'spms1_delay'
 require_relative 'spms1_pitch'
 require_relative 'spms1_noise'
+# patch_gen end
 
 # The loop that runs the patch. The framework rules -- the invariants of the patch and the worst
 # case of a buffer -- are in spms1_framework.rb, with the functions the host provides.

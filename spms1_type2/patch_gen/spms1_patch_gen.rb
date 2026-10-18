@@ -283,7 +283,7 @@ end
 
 # ---- spms1_main.rb ----------------------------------------------------------------------------
 
-# The wiring of the synth loop, written out from the spec into the blocks between the
+# The wiring of the synth loop, from the requires of the module files on, written out from the spec into the blocks between the
 # "# patch_gen NAME" and "# patch_gen end" lines of spms1_main.rb, so that a module is added by
 # its class and its entries in the YAML, not by hand in the loop. It is plain straight-line Ruby,
 # as it would be written by hand: one local per routing, one call per setter, one `when` per
@@ -313,6 +313,18 @@ def check_wiring
   s.params.each { |c| fail_spec("parameter #{s.full_key(c)} has no set") unless c['set'] }
   names = (s.inputs + s.params).map { |item| local_name(item) }
   names.select { |n| names.count(n) > 1 }.uniq.each { |n| fail_spec("an input and a parameter are both #{n.upcase}") }
+end
+
+# A module's class lives in spms1/spms1_<class in snake case>.rb: EnvGen in spms1_env_gen.rb, LFO in
+# spms1_lfo.rb.
+def class_file(name) = "spms1_#{name.gsub(/([a-z\d])([A-Z])/, '\\1_\\2').downcase}"
+
+def main_requires
+  SPEC.modules.map { |m| m['class'] }.uniq.map do |name|
+    file = class_file(name)
+    fail_spec("class #{name} is not in spms1/#{file}.rb") unless File.exist?(File.join(DIR, 'spms1', "#{file}.rb"))
+    "require_relative '#{file}'\n"
+  end.join
 end
 
 def main_instances
@@ -381,7 +393,7 @@ end
 
 def main_rb(content)
   check_wiring
-  { 'instances' => main_instances, 'sources' => main_sources, 'controls' => main_controls,
+  { 'requires' => main_requires, 'instances' => main_instances, 'sources' => main_sources, 'controls' => main_controls,
     'setters' => main_setters, 'dispatch' => main_dispatch }.each do |name, text|
     content = replace_block(content, 'spms1/spms1_main.rb', name, text)
   end
