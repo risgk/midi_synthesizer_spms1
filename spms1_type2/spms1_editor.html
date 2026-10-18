@@ -2884,21 +2884,22 @@
   // ---- Controls tab --------------------------------------------------------------------------
 
   // Each slider follows its slot's CC assignment in the patch, and moves the value of that CC.
+  // The panels in the signal order of the patch's default layout, top to bottom, then left to right.
   const CONTROL_PANELS = [
     { col: 0, title: 'General', general: true },
     { col: 0, title: 'Noise 1', module: 'NOISE_1' },
     { col: 0, title: 'LFO 1', module: 'LFO_1' },
     { col: 0, title: 'EG 1', module: 'EG_1' },
+    { col: 1, title: 'Mixer 1', module: 'MIXER_1' },
     { col: 1, title: 'Pitch 1', module: 'PITCH_1' },
     { col: 1, title: 'Osc 1', module: 'OSC_1' },
-    { col: 1, title: 'Osc 2', module: 'OSC_2' },
+    { col: 2, title: 'Osc 2', module: 'OSC_2' },
     { col: 2, title: 'Mixer 2', module: 'MIXER_2' },
-    { col: 2, title: 'Filter 1', module: 'FILTER_1' },
+    { col: 3, title: 'Filter 1', module: 'FILTER_1' },
     { col: 3, title: 'Amp 1', module: 'AMP_1' },
     { col: 3, title: 'Chorus 1', module: 'CHORUS_1' },
     { col: 3, title: 'Delay 1', module: 'DELAY_1' },
   ];
-  CONTROL_PANELS.push({ col: 0, title: 'Mixer 1', module: 'MIXER_1' });
 
   function panelItems(p) {
     return p.general ? GENERAL_ITEMS : PARAM_ITEMS.filter(c => c.module === p.module);
