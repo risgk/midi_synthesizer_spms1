@@ -91,6 +91,8 @@ Usage
 - Cross-platform web-based parameter controller via Web MIDI API: "spms1_editor.html"
     - Its Controls tab shows a slider for each parameter with a CC; those with none are hidden until
       "Show parameters with no CC" is ticked or a CC is given to one, and the choice is remembered
+    - Its Patch tab folds the same parameters away in each node, unless something reads their slots;
+      the row at the bottom of a node opens it, and Show All and Hide All open or fold every node
 - Built-in software keyboard for note input and testing
     - Click its heading to hide it, so the patch editor or the controls take its height; the editor remembers
       which, and the keys of the PC keyboard do not play while it is hidden

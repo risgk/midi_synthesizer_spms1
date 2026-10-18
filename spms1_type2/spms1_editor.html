@@ -1103,10 +1103,14 @@
         <button class="btn" id="btn-load">Load JSON</button>
         <input type="file" id="file-load" accept=".json,application/json" hidden>
       </div>
-      <div class="btn-row">
+      <div class="btn-row" style="margin-bottom: 6px;">
         <button class="btn" id="btn-undo" title="Ctrl+Z">Undo</button>
         <button class="btn" id="btn-redo" title="Ctrl+Y">Redo</button>
         <button class="btn" id="btn-init">Init</button>
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="btn-show-all" title="Show the parameters with no CC in every node">Show All</button>
+        <button class="btn" id="btn-hide-all" title="Hide the parameters with no CC in every node">Hide All</button>
       </div>
       <p class="hint" style="margin-top: 8px;">
         MIDI In is passed through to the synth, and a CC on the channel above moves every slot
@@ -1990,6 +1994,23 @@
     if (unfolded.has(key)) el.classList.add('lifted');
   }
 
+  // Every node at once, one after another as if each were clicked, so that each pushes the nodes
+  // under it as far as it grew and none lands on another. A node with nothing to show is left as
+  // it is when opening, and forgotten when closing, so it does not come up open later.
+  function setAllFolds(open) {
+    world.querySelectorAll('.node').forEach(el => {
+      const fold = el.querySelector('.row.fold');
+      if (!fold || unfolded.has(el.dataset.node) === open) return;
+      if (fold.hidden) {
+        if (!open) unfolded.delete(el.dataset.node);
+        return;
+      }
+      toggleFold(el);
+    });
+    try { localStorage.setItem(UNFOLDED_KEY, JSON.stringify([...unfolded])); } catch (e) { /* storage unavailable */ }
+    world.querySelectorAll('.node.lifted').forEach(n => n.classList.remove('lifted'));
+  }
+
   function renderWires() {
     if (!canvas.clientWidth) return;
     svg.querySelectorAll('path:not(.temp)').forEach(p => p.remove());
@@ -2466,6 +2487,8 @@
 
   document.getElementById('btn-undo').addEventListener('click', undo);
   document.getElementById('btn-redo').addEventListener('click', redo);
+  document.getElementById('btn-show-all').addEventListener('click', () => setAllFolds(true));
+  document.getElementById('btn-hide-all').addEventListener('click', () => setAllFolds(false));
   document.getElementById('btn-init').addEventListener('click', () => {
     pushHistory();
     state = defaultState();
