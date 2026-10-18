@@ -289,7 +289,7 @@ controls:
   - { entry: 74, module: MIXER_1,   key: POL_4,   label: Pol 4,   cc: 0,   value: 124, source: HALF, bipolar: true }
   - { entry: 86, module: MIXER_1,   key: BALANCE_3_4, label: Balance 3/4, cc: 0,   value: 64,  bipolar: true }
   # Balance Law came after Noise 1 Color and LFO 1 Wave. It picks how both balances of its mixer
-  # crossfade: linear below -1/6, equal power to +1/6, as Filter 1 Mode above. It is bipolar only
+  # crossfade: linear below -0.25, equal power to +0.25, as Filter 1 Mode from there. It is bipolar only
   # so that its default, equal power, is the centre: it has no CC and reads its own slot, 0.0, on
   # both mixers, and the constants -0.5, 0.0 and +0.5 pick each law.
   - { entry: 97, module: MIXER_1,   key: BALANCE_LAW, label: Balance Law, cc: 0,   value: 64,  bipolar: true }

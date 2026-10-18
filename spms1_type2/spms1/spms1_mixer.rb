@@ -139,15 +139,17 @@ module Spms1
       @target_4 = @level_4 * @polarity_4 * @balance_factor_4
     end
 
-    # Balance Law is bipolar, [-0.5, 0.5], and picks how both balances crossfade, in three equal
-    # zones: linear below -1/6, equal power (as PRA32-U2's Osc Mix) to +1/6, and as Filter 1 Mode
-    # above, so the constants -0.5, 0.0 and +0.5 pick each. It is bipolar only so that equal power,
+    # Balance Law is bipolar, [-0.5, 0.5], and picks how both balances crossfade, in three zones:
+    # linear below -0.25 (CC 34), equal power (as PRA32-U2's Osc Mix) to +0.25 (CC 94), and as
+    # Filter 1 Mode from there, so the constants -0.5, 0.0 and +0.5 pick each, and the default, the
+    # centre, has the widest zone. (clamped + 0.75) * 2 runs 0.5 to 2.5, so its integer part is the
+    # zone without a branch. It is bipolar only so that equal power,
     # the default, is the centre, where it rests with no CC. It is read once a buffer like any other
     # parameter, ahead of the balances, which are worked out again in the same buffer; their
     # factors are smoothed on the way to the inputs, so switching laws does not click.
     def set_balance_law(law)
       clamped_law = (law < -0.5) ? -0.5 : ((law > 0.5) ? 0.5 : law)
-      @balance_law_offset = ((clamped_law + 0.5) * 2.999).to_i * BALANCE_TABLE_RUN
+      @balance_law_offset = ((clamped_law + 0.75) * 2.0).to_i * BALANCE_TABLE_RUN
     end
 
     # Each balance is bipolar, [-0.5, 0.5], and crossfades its pair by the law Balance Law picks,

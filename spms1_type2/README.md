@@ -768,13 +768,13 @@ it down also brings a sum that would have been cut back inside it.
 Balance 1/2 and Balance 3/4 crossfade each pair of inputs, from -0.5 (CC 4) through 0.0 (CC 64) to
 +0.5 (CC 124), by the law Balance Law picks for both pairs of its mixer. Balance Law is bipolar
 only so that the default is its centre: it has no CC and reads its own slot, 0.0. It picks in
-three equal zones, so the constants -0.5, 0.0 and +0.5 pick each law:
+three zones, the centre's the widest, so the constants -0.5, 0.0 and +0.5 pick each law:
 
 | Balance Law | Law | At -0.5 | At 0.0 | Crossfader levels | Keeps |
 | --- | --- | --- | --- | --- | --- |
-| below -1/6 (-0.5) | Linear | 2.0 and 0.0 | 1.0 each | 0.5 (Constant 0.5) | the sum of a pair at the same level |
-| -1/6 to +1/6 (0.0, default) | Equal power, as PRA32-U2's Osc Mix | √2 and 0.0 | 1.0 each | 0.707 (Constant 0.707) | the loudness of two uncorrelated inputs, such as detuned oscillators |
-| above +1/6 (+0.5) | As Filter 1 Mode | 1.0 and 0.0 | 1.0 each | 1.0 (Constant 1.0) | each input whole over its own half |
+| below -0.25, CC 34 (-0.5) | Linear | 2.0 and 0.0 | 1.0 each | 0.5 (Constant 0.5) | the sum of a pair at the same level |
+| -0.25 to +0.25 (0.0, default) | Equal power, as PRA32-U2's Osc Mix | √2 and 0.0 | 1.0 each | 0.707 (Constant 0.707) | the loudness of two uncorrelated inputs, such as detuned oscillators |
+| +0.25, CC 94, and above (+0.5) | As Filter 1 Mode | 1.0 and 0.0 | 1.0 each | 1.0 (Constant 1.0) | each input whole over its own half |
 
 The two inputs' levels are multiplied by f(1 - 2b) and f(1 + 2b), with f(u) = u, √u or min(u, 1)
 by the law, so +0.5 is -0.5 the other way round. Whatever the law, the centre leaves the mixer

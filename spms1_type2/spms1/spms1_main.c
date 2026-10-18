@@ -3493,88 +3493,88 @@ static inline __attribute__((always_inline)) sp_float sp_Mixer_set_polarity_4(sp
   return self->iv_target_4;
   return 0.0;
 }
-#line 148 "spms1_mixer.rb"
+#line 150 "spms1_mixer.rb"
 static inline __attribute__((always_inline)) sp_int sp_Mixer_set_balance_law(sp_Mixer *self, sp_float lv_law) {
     sp_float lv_clamped_law = 0.0;
-#line 149 "spms1_mixer.rb"
+#line 151 "spms1_mixer.rb"
   lv_clamped_law = (((lv_law < -0.5)) ? -0.5 : ((((lv_law > 0.5)) ? 0.5 : lv_law)));
-#line 150 "spms1_mixer.rb"
-  self->iv_balance_law_offset = sp_int_mul(sp_float_to_i_checked(((lv_clamped_law + 0.5) * 2.9990000000000001)), cst_BALANCE_TABLE_RUN);
+#line 152 "spms1_mixer.rb"
+  self->iv_balance_law_offset = sp_int_mul(sp_float_to_i_checked(((lv_clamped_law + 0.75) * 2.0)), cst_BALANCE_TABLE_RUN);
   return self->iv_balance_law_offset;
   return 0;
 }
-#line 162 "spms1_mixer.rb"
+#line 164 "spms1_mixer.rb"
 static inline __attribute__((always_inline)) sp_float sp_Mixer_set_balance_1_2(sp_Mixer *self, sp_float lv_balance) {
     sp_float lv_clamped_balance = 0.0;
-#line 163 "spms1_mixer.rb"
+#line 165 "spms1_mixer.rb"
   lv_clamped_balance = (((lv_balance < -0.5)) ? -0.5 : ((((lv_balance > 0.5)) ? 0.5 : lv_balance)));
-#line 164 "spms1_mixer.rb"
+#line 166 "spms1_mixer.rb"
   sp_float _t75 = (1.0 - ((lv_clamped_balance + lv_clamped_balance)));
   self->iv_balance_factor_1 = sp_Mixer_balance_factor_fast((sp_Mixer *)self, _t75);
-#line 165 "spms1_mixer.rb"
+#line 167 "spms1_mixer.rb"
   sp_float _t76 = (1.0 + ((lv_clamped_balance + lv_clamped_balance)));
   self->iv_balance_factor_2 = sp_Mixer_balance_factor_fast((sp_Mixer *)self, _t76);
-#line 166 "spms1_mixer.rb"
+#line 168 "spms1_mixer.rb"
   self->iv_target_1 = ((self->iv_level_1 * self->iv_polarity_1) * self->iv_balance_factor_1);
-#line 167 "spms1_mixer.rb"
+#line 169 "spms1_mixer.rb"
   self->iv_target_2 = ((self->iv_level_2 * self->iv_polarity_2) * self->iv_balance_factor_2);
   return self->iv_target_2;
   return 0.0;
 }
-#line 170 "spms1_mixer.rb"
+#line 172 "spms1_mixer.rb"
 static inline __attribute__((always_inline)) sp_float sp_Mixer_set_balance_3_4(sp_Mixer *self, sp_float lv_balance) {
     sp_float lv_clamped_balance = 0.0;
-#line 171 "spms1_mixer.rb"
+#line 173 "spms1_mixer.rb"
   lv_clamped_balance = (((lv_balance < -0.5)) ? -0.5 : ((((lv_balance > 0.5)) ? 0.5 : lv_balance)));
-#line 172 "spms1_mixer.rb"
+#line 174 "spms1_mixer.rb"
   sp_float _t77 = (1.0 - ((lv_clamped_balance + lv_clamped_balance)));
   self->iv_balance_factor_3 = sp_Mixer_balance_factor_fast((sp_Mixer *)self, _t77);
-#line 173 "spms1_mixer.rb"
+#line 175 "spms1_mixer.rb"
   sp_float _t78 = (1.0 + ((lv_clamped_balance + lv_clamped_balance)));
   self->iv_balance_factor_4 = sp_Mixer_balance_factor_fast((sp_Mixer *)self, _t78);
-#line 174 "spms1_mixer.rb"
+#line 176 "spms1_mixer.rb"
   self->iv_target_3 = ((self->iv_level_3 * self->iv_polarity_3) * self->iv_balance_factor_3);
-#line 175 "spms1_mixer.rb"
+#line 177 "spms1_mixer.rb"
   self->iv_target_4 = ((self->iv_level_4 * self->iv_polarity_4) * self->iv_balance_factor_4);
   return self->iv_target_4;
   return 0.0;
 }
-#line 181 "spms1_mixer.rb"
+#line 183 "spms1_mixer.rb"
 static inline __attribute__((always_inline)) sp_float sp_Mixer_set_out_level(sp_Mixer *self, sp_float lv_level) {
-#line 182 "spms1_mixer.rb"
+#line 184 "spms1_mixer.rb"
   self->iv_out_level = (((lv_level < 0.0)) ? 0.0 : ((((lv_level > 1.0)) ? 1.0 : lv_level)));
   return self->iv_out_level;
   return 0.0;
 }
-#line 196 "spms1_mixer.rb"
+#line 198 "spms1_mixer.rb"
 static inline __attribute__((always_inline)) sp_float sp_Mixer_process(sp_Mixer *self, sp_bool lv_control_tick, sp_float lv_input_1, sp_float lv_input_2, sp_float lv_input_3, sp_float lv_input_4) {
     sp_float lv_sum = 0.0;
-#line 197 "spms1_mixer.rb"
-  if (lv_control_tick) {
-#line 198 "spms1_mixer.rb"
-    self->iv_stage_1_1 = sp_Dsp_s_smooth(self->iv_target_1, self->iv_stage_1_1, self->iv_smoothing_target_blend);
 #line 199 "spms1_mixer.rb"
-    self->iv_current_1 = sp_Dsp_s_smooth(self->iv_stage_1_1, self->iv_current_1, self->iv_smoothing_target_blend);
+  if (lv_control_tick) {
 #line 200 "spms1_mixer.rb"
-    self->iv_stage_1_2 = sp_Dsp_s_smooth(self->iv_target_2, self->iv_stage_1_2, self->iv_smoothing_target_blend);
+    self->iv_stage_1_1 = sp_Dsp_s_smooth(self->iv_target_1, self->iv_stage_1_1, self->iv_smoothing_target_blend);
 #line 201 "spms1_mixer.rb"
-    self->iv_current_2 = sp_Dsp_s_smooth(self->iv_stage_1_2, self->iv_current_2, self->iv_smoothing_target_blend);
+    self->iv_current_1 = sp_Dsp_s_smooth(self->iv_stage_1_1, self->iv_current_1, self->iv_smoothing_target_blend);
 #line 202 "spms1_mixer.rb"
-    self->iv_stage_1_3 = sp_Dsp_s_smooth(self->iv_target_3, self->iv_stage_1_3, self->iv_smoothing_target_blend);
+    self->iv_stage_1_2 = sp_Dsp_s_smooth(self->iv_target_2, self->iv_stage_1_2, self->iv_smoothing_target_blend);
 #line 203 "spms1_mixer.rb"
-    self->iv_current_3 = sp_Dsp_s_smooth(self->iv_stage_1_3, self->iv_current_3, self->iv_smoothing_target_blend);
+    self->iv_current_2 = sp_Dsp_s_smooth(self->iv_stage_1_2, self->iv_current_2, self->iv_smoothing_target_blend);
 #line 204 "spms1_mixer.rb"
-    self->iv_stage_1_4 = sp_Dsp_s_smooth(self->iv_target_4, self->iv_stage_1_4, self->iv_smoothing_target_blend);
+    self->iv_stage_1_3 = sp_Dsp_s_smooth(self->iv_target_3, self->iv_stage_1_3, self->iv_smoothing_target_blend);
 #line 205 "spms1_mixer.rb"
-    self->iv_current_4 = sp_Dsp_s_smooth(self->iv_stage_1_4, self->iv_current_4, self->iv_smoothing_target_blend);
+    self->iv_current_3 = sp_Dsp_s_smooth(self->iv_stage_1_3, self->iv_current_3, self->iv_smoothing_target_blend);
 #line 206 "spms1_mixer.rb"
-    self->iv_stage_1_out_level = sp_Dsp_s_smooth(self->iv_out_level, self->iv_stage_1_out_level, self->iv_smoothing_target_blend);
+    self->iv_stage_1_4 = sp_Dsp_s_smooth(self->iv_target_4, self->iv_stage_1_4, self->iv_smoothing_target_blend);
 #line 207 "spms1_mixer.rb"
+    self->iv_current_4 = sp_Dsp_s_smooth(self->iv_stage_1_4, self->iv_current_4, self->iv_smoothing_target_blend);
+#line 208 "spms1_mixer.rb"
+    self->iv_stage_1_out_level = sp_Dsp_s_smooth(self->iv_out_level, self->iv_stage_1_out_level, self->iv_smoothing_target_blend);
+#line 209 "spms1_mixer.rb"
     self->iv_current_out_level = sp_Dsp_s_smooth(self->iv_stage_1_out_level, self->iv_current_out_level, self->iv_smoothing_target_blend);
   }
-#line 210 "spms1_mixer.rb"
+#line 212 "spms1_mixer.rb"
   lv_sum = ((((lv_input_1 * self->iv_current_1) + (lv_input_2 * self->iv_current_2)) + (((lv_input_3 * self->iv_current_3) + (lv_input_4 * self->iv_current_4)))) * self->iv_current_out_level);
-#line 216 "spms1_mixer.rb"
+#line 218 "spms1_mixer.rb"
   if (((lv_sum < -1.0))) {
     return -1.0;
   }
@@ -3583,7 +3583,7 @@ static inline __attribute__((always_inline)) sp_float sp_Mixer_process(sp_Mixer 
   }
   return 0.0;
 }
-#line 225 "spms1_mixer.rb"
+#line 227 "spms1_mixer.rb"
 static inline __attribute__((always_inline)) sp_float sp_Mixer_balance_factor_fast(sp_Mixer *self, sp_float lv_u) {
     sp_float lv_position = 0.0;
     sp_int lv_whole = 0;
@@ -3591,19 +3591,19 @@ static inline __attribute__((always_inline)) sp_float sp_Mixer_balance_factor_fa
     sp_int lv_index = 0;
     sp_float lv_s0 = 0.0;
     sp_float lv_s1 = 0.0;
-#line 226 "spms1_mixer.rb"
-  lv_position = (lv_u * 64.0);
-#line 227 "spms1_mixer.rb"
-  lv_whole = sp_float_to_i_checked(lv_position);
 #line 228 "spms1_mixer.rb"
-  lv_fraction = (lv_position - ({ sp_int _t89 = (lv_whole); _t89 == SP_INT_NIL ? 0.0 : ((sp_float)_t89); }));
+  lv_position = (lv_u * 64.0);
 #line 229 "spms1_mixer.rb"
-  lv_index = sp_int_add(lv_whole, self->iv_balance_law_offset);
+  lv_whole = sp_float_to_i_checked(lv_position);
+#line 230 "spms1_mixer.rb"
+  lv_fraction = (lv_position - ({ sp_int _t89 = (lv_whole); _t89 == SP_INT_NIL ? 0.0 : ((sp_float)_t89); }));
 #line 231 "spms1_mixer.rb"
+  lv_index = sp_int_add(lv_whole, self->iv_balance_law_offset);
+#line 233 "spms1_mixer.rb"
   lv_s0 = sp_FloatArray_get(cst_BALANCE_TABLE, lv_index);
-#line 232 "spms1_mixer.rb"
-  lv_s1 = sp_FloatArray_get(cst_BALANCE_TABLE, sp_int_add(lv_index, 1LL));
 #line 234 "spms1_mixer.rb"
+  lv_s1 = sp_FloatArray_get(cst_BALANCE_TABLE, sp_int_add(lv_index, 1LL));
+#line 236 "spms1_mixer.rb"
   return (lv_s0 + (lv_fraction * ((lv_s1 - lv_s0))));
   return 0.0;
 }
