@@ -717,10 +717,11 @@ it down also brings a sum that would have been cut back inside it.
 Balance 1/2 and Balance 3/4 crossfade each pair of inputs in a straight line, from -0.5 (CC 4)
 through 0.0 (CC 64) to +0.5 (CC 124). The two inputs' levels are multiplied by 2.0 and 0.0 at
 -0.5, by 1.0 each at 0.0, and by 0.0 and 2.0 at +0.5, always adding up to 2.0. At the centre, where
-both read their own slots by default with no CC, the mixer is as it was without them; a pair at
-the same level keeps the same total whichever way its balance is turned, so a balance is a mix
-control for two oscillators; and at either end it selects one input of the pair -- at twice its
-level, which a level of 0.5 (CC 64) brings back to as it was. Like every parameter, a balance is
+both read their own slots by default with no CC, the mixer is as it was without them, and a pair
+at the same level keeps the same total whichever way its balance is turned. For a crossfader, or a
+selector at either end, set both levels of the pair to 0.5 (CC 64): each input then passes at
+half at the centre and as it is at its own end -- a mix control for two oscillators, or a switch
+between two modulation sources. Like every parameter, a balance is
 read once a buffer and smoothed, so a selector driven by a gate crossfades in about 35 ms
 rather than switching on the sample.
 

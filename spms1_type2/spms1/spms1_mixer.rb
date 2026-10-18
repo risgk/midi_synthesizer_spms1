@@ -120,8 +120,8 @@ module Spms1
     # factors always adding to 2.0: 0.0 at the centre leaves both inputs as they are, -0.5 doubles
     # the first and silences the second, and +0.5 the other way round. So the centre is the mixer
     # without a balance, a pair at the same levels keeps the same total whichever way it is turned,
-    # and either end selects one input -- at twice its level, which a level of 0.5 brings back to
-    # as it was.
+    # and either end selects one input at twice its level: with both levels of the pair at 0.5 it
+    # is a crossfader, half each at the centre and each input as it is at its own end.
     def set_balance_1_2(balance)
       clamped_balance = (balance < -0.5) ? -0.5 : ((balance > 0.5) ? 0.5 : balance)
       @balance_factor_1 = 1.0 - (clamped_balance + clamped_balance)
