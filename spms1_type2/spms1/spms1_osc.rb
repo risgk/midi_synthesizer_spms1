@@ -244,21 +244,21 @@ module Spms1
 
     # PolyBLEP correction for discontinuity smoothing at the waveform wrap point.
     # dt_inv (1.0 / dt) comes from the caller so this multiplies instead of dividing; see process.
-    # Both corrections are written as selects rather than conditionals, and this is the one place
-    # in the per-sample path where that does not survive the C compiler. Each correction is five
-    # or six operations, so GCC would rather branch around one than compute it and throw it away,
-    # and it does: in the sketch each call comes out as two branches with the arithmetic moved
-    # inside them. The cost here therefore does vary with the phase -- a sample next to a wrap
-    # pays for a correction, one away from both wraps skips them -- and no way of writing this in
-    # Ruby changes that, because the decision is the compiler's cost model, not the shape of the
-    # source. Only the two comparisons are unconditional.
+    # Written as the LFO's PolyBLAMP is, so that the C compiler keeps it branchless: each select
+    # only clamps a distance at zero, with nothing on either side for GCC to move inside a branch,
+    # and the correction is computed every sample whatever the phase, so the cost is the same at
+    # every sample and the worst case is the usual one. The residual is -(1 - t/dt)^2 just past a
+    # wrap and (1 - (1 - t)/dt)^2 just before one, that is, the square of how far within dt of the
+    # wrap the sample is, in units of dt: zero away from both wraps. The pitch range keeps dt
+    # under 0.5, so the two never overlap.
     def poly_blep(t, dt, dt_inv)
-      num_start = t * dt_inv
-      blep_start = num_start + num_start - num_start * num_start - 1.0
-      num_end = (t - 1.0) * dt_inv
-      blep_end = num_end * num_end + num_end + num_end + 1.0
-      val = (t < dt) ? blep_start : 0.0
-      (t > 1.0 - dt) ? blep_end : val
+      start_gap = dt - t
+      start = (start_gap > 0.0) ? start_gap : 0.0
+      end_gap = t - (1.0 - dt)
+      ending = (end_gap > 0.0) ? end_gap : 0.0
+      num_start = start * dt_inv
+      num_end = ending * dt_inv
+      num_end * num_end - num_start * num_start
     end
   end
 end

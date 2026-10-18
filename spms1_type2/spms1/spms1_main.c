@@ -2310,30 +2310,28 @@ static inline __attribute__((always_inline)) sp_float sp_Osc_pitch_to_freq_fast(
   return (lv_f0 + (lv_fraction * ((lv_f1 - lv_f0))));
   return 0.0;
 }
-#line 255 "spms1_osc.rb"
+#line 254 "spms1_osc.rb"
 static inline __attribute__((always_inline)) sp_float sp_Osc_poly_blep(sp_Osc *self, sp_float lv_t, sp_float lv_dt, sp_float lv_dt_inv) {
+    sp_float lv_start_gap = 0.0;
+    sp_float lv_start = 0.0;
+    sp_float lv_end_gap = 0.0;
+    sp_float lv_ending = 0.0;
     sp_float lv_num_start = 0.0;
-    sp_float lv_blep_start = 0.0;
     sp_float lv_num_end = 0.0;
-    sp_float lv_blep_end = 0.0;
-    sp_float lv_val = 0.0;
+#line 255 "spms1_osc.rb"
+  lv_start_gap = (lv_dt - lv_t);
 #line 256 "spms1_osc.rb"
-  lv_num_start = (lv_t * lv_dt_inv);
+  lv_start = (((lv_start_gap > 0.0)) ? lv_start_gap : 0.0);
 #line 257 "spms1_osc.rb"
-  lv_blep_start = (((lv_num_start + lv_num_start) - (lv_num_start * lv_num_start)) - 1.0);
+  lv_end_gap = (lv_t - ((1.0 - lv_dt)));
 #line 258 "spms1_osc.rb"
-  lv_num_end = ((lv_t - 1.0) * lv_dt_inv);
+  lv_ending = (((lv_end_gap > 0.0)) ? lv_end_gap : 0.0);
 #line 259 "spms1_osc.rb"
-  lv_blep_end = ((((lv_num_end * lv_num_end) + lv_num_end) + lv_num_end) + 1.0);
+  lv_num_start = (lv_start * lv_dt_inv);
 #line 260 "spms1_osc.rb"
-  lv_val = (((lv_t < lv_dt)) ? lv_blep_start : 0.0);
+  lv_num_end = (lv_ending * lv_dt_inv);
 #line 261 "spms1_osc.rb"
-  if (((lv_t > (1.0 - lv_dt)))) {
-    return lv_blep_end;
-  }
-  else {
-    return lv_val;
-  }
+  return ((lv_num_end * lv_num_end) - (lv_num_start * lv_num_start));
   return 0.0;
 }
 #line 139 "spms1_filter.rb"
@@ -4978,7 +4976,7 @@ int main(int argc,char**argv){
     sp_int lv_general_3 = 0;
     sp_int lv_general_4 = 0;
     sp_bool lv_control_tick = 0;
-    sp_int lv_i__bp13697 = 0;
+    sp_int lv_i__bp13687 = 0;
 
 #line 1 "spms1_dsp.rb"
 #line 5 "spms1_dsp.rb"
@@ -7126,9 +7124,9 @@ int main(int argc,char**argv){
     (stop_debug_measure(), (sp_int)0);
 #line 743 "spms1_main.rb"
     for (sp_int _t891 = 0; _t891 < cst_AUDIO_BUFFER_WORDS; _t891++) {
-      lv_i__bp13697 = _t891;
+      lv_i__bp13687 = _t891;
 #line 744 "spms1_main.rb"
-      ({ sp_float _t892 = sp_FloatArray_get(lv_audio_buffer_l, lv_i__bp13697); sp_float _t893 = sp_FloatArray_get(lv_audio_buffer_r, lv_i__bp13697); (write_to_audio_buffer(((float)(_t892)), ((float)(_t893))), (sp_int)0); });
+      ({ sp_float _t892 = sp_FloatArray_get(lv_audio_buffer_l, lv_i__bp13687); sp_float _t893 = sp_FloatArray_get(lv_audio_buffer_r, lv_i__bp13687); (write_to_audio_buffer(((float)(_t892)), ((float)(_t893))), (sp_int)0); });
     }
   }
   return 0;
