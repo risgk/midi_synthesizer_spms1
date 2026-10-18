@@ -678,7 +678,7 @@ Noise 1 puts out three noises from one generator, at Noise 1 Level. Out White is
 flat across the spectrum: from silence at 0.0 to noise filling -0.5 to +0.5 at 1.0, the
 oscillator's range. Out Red and Out LF are the same noise through a one-pole low pass each,
 falling 6 dB an octave above a fixed cutoff on the A of a MIDI note number: Out Red at note 21 (A0,
-27.5 Hz), falling across the whole audible band, for audio, and Out LF at note -63 (0.21 Hz), a
+27.5 Hz), falling across the whole audible band, for audio, and Out LF (low frequency) at note -63 (0.21 Hz), a
 random wander of a few seconds, for modulation, slow enough for a drift. A gain holds each at the
 white's RMS over the square root of 2, and each is held to -0.5 to +0.5, which cuts the rarest
 peaks, 1.5% of the samples of the red and 0.7% of the LF. The level has no CC and reads 1.0, so
