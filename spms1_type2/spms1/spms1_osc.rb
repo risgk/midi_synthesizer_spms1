@@ -84,12 +84,13 @@ module Spms1
       @waveform = (waveform < 0.0) ? 0.0 : ((waveform > 1.0) ? 1.0 : waveform)
     end
 
-    # Pulse width is unipolar, [0.0, 1.0]: how far the second sawtooth is shifted from half a cycle
-    # toward a whole one. At the square end of the morph, 0.0 is a pulse of 50%, 0.5 one of 25% and
-    # 1.0 one of 0%, which is silence, as the two sawtooths then cancel. Between the two ends of the
-    # morph it moves the second sawtooth of the blend in the same way.
+    # Pulse width is bipolar, [-0.5, 0.5]: how far the second sawtooth is shifted from half a cycle.
+    # At the square end of the morph, 0.0 is a pulse of 50%, +0.25 one of 25% and +0.5 one of 0%,
+    # -0.25 one of 75% and -0.5 one of 100%; both ends are silence, as the two sawtooths then
+    # cancel. Between the two ends of the morph it moves the second sawtooth of the blend in the
+    # same way.
     def set_pulse_width(pulse_width)
-      @pulse_width = (pulse_width < 0.0) ? 0.0 : ((pulse_width > 1.0) ? 1.0 : pulse_width)
+      @pulse_width = (pulse_width < -0.5) ? -0.5 : ((pulse_width > 0.5) ? 0.5 : pulse_width)
     end
 
     # Each pitch modulation depth is amount times polarity. Amount is unipolar, [0.0, 1.0].
@@ -166,7 +167,7 @@ module Spms1
 
     # The inputs are taken as they arrive; what is held to a range is the pitch they add up to.
     # [-0.5, 0.5] is that range, covering MIDI notes 0 to 120, and it is what keeps the table
-    # lookup in bounds. The pulse width its modulations add up to is held to its own, [0.0, 1.0].
+    # lookup in bounds. The pulse width its modulations add up to is held to its own, [-0.5, 0.5].
     # The modulation inputs are deliberately not smoothed, so a fast source reaches the pitch and
     # the pulse width unslewed.
     def process(control_tick, pitch_input = 0.0, modulation_1_input = 0.0, modulation_2_input = 0.0, pw_modulation_1_input = 0.0, pw_modulation_2_input = 0.0)
@@ -201,8 +202,8 @@ module Spms1
       # The pulse width is held to its range after the modulation is added, which also keeps the
       # shift within one cycle, so that a single wrap below brings phase2 back under 1.0.
       total_pulse_width = @current_pulse_width + (pw_modulation_1_input * @current_pw_modulation_1_depth) + (pw_modulation_2_input * @current_pw_modulation_2_depth)
-      pulse_width = (total_pulse_width < 0.0) ? 0.0 : ((total_pulse_width > 1.0) ? 1.0 : total_pulse_width)
-      phase2 = @phase + (0.5 + pulse_width * 0.5)
+      pulse_width = (total_pulse_width < -0.5) ? -0.5 : ((total_pulse_width > 0.5) ? 0.5 : total_pulse_width)
+      phase2 = @phase + (0.5 + pulse_width)
       phase2 -= (phase2 < 1.0) ? 0.0 : 1.0
 
       naive_saw2 = -2.0 * phase2 + 1.0

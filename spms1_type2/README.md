@@ -472,7 +472,7 @@ threshold rather than a level: an envelope triggers as the signal reaches 0.25 a
 falls back. A pitch, as Note Pitch carries one to Pitch In, is -0.5 to +0.5 across MIDI notes
 0 to 120, so 0.0 is note 60 and a tenth of a unit is an octave. And a Mod In is taken as it arrives:
 nothing is held to a range on the way in, and what gets clamped is the value the module ends up with
--- cutoff to the ends of its dial, pitch to -0.5 and +0.5, pulse width to 0.0 and 1.0. The
+-- cutoff to the ends of its dial, pitch to -0.5 and +0.5, pulse width to -0.5 and +0.5. The
 oscillator's Pitch In, Mod 1 In, Mod 2 In, PW Mod 1 In and PW Mod 2 In are Mod Ins too. A mixer adds without a
 ceiling, so a loud modulation pins its destination at one
 end rather than being trimmed on the way in. The amp is the exception, and holds its modulation
@@ -712,9 +712,10 @@ envelope in the default patch, for a pitch envelope. Mod 1 Amt is on CC 89 and p
 so the envelope leaves the pitch alone until it is turned up; Mod 1 Pol reads +0.5, not 0.1 as
 Mod 2 Pol does, as the envelope is unipolar and an envelope's sweep is wider than a vibrato's.
 
-Osc 1 Pulse Width shifts the second of the two sawtooths that the morph is made of, from half a
-cycle at 0.0 (CC 4) toward a whole one at 1.0 (CC 124). At the square end of Osc 1 Wave that is a
-pulse of 50% at CC 4, 25% at CC 64 and 0%, silence, at CC 124; it is on CC 114.
+Osc 1 Pulse Width shifts the second of the two sawtooths that the morph is made of, either way
+from half a cycle: it is bipolar, -0.5 (CC 4) to +0.5 (CC 124), and powers up at 0.0 (CC 64). At
+the square end of Osc 1 Wave that is a pulse of 50% at CC 64, 25% at CC 94 and 75% at CC 34, and
+silence at either end, a pulse of 0% or 100%; it is on CC 114.
 Two modulations move it as Mod 1 In and Mod 2 In move the pitch, each by its Amt times its Pol:
 Osc 1 PW Mod 1 In, which the default patch feeds the envelope, by PW Mod 1 Amt (CC 8), and PW Mod
 2 In, which it feeds the LFO, by PW Mod 2 Amt (CC 103). The two CCs are EG Mod Dst's and LFO Mod
@@ -723,8 +724,9 @@ are here: rather than switch one amount between the pitch and the pulse width, e
 has an amount of its own, so the envelope and the LFO can each move both at once with no rewiring.
 Both power up at 0.0. A unit of modulation is the whole pulse width range, so at the top of PW
 Mod 2 Amt the LFO swings the pulse width half the range either way: with Pulse Width at CC 64,
-from 50% to nearly 0%; and at the top of PW Mod 1 Amt the envelope sweeps it across the whole
-range, from Pulse Width up. The pulse width the modulations add up to is held to 0.0 to 1.0.
+from nearly 100% to nearly 0%; and at the top of PW Mod 1 Amt the envelope sweeps it across the
+whole range, from Pulse Width up, or down at a negative PW Mod 1 Pol. The pulse width the
+modulations add up to is held to -0.5 to +0.5.
 
 Each oscillator puts out the two ends of its morph on their own as well, whatever Wave is: Out
 Saw, the sawtooth, and Out Pulse, the pulse at the pulse width, as Out is at the square end of

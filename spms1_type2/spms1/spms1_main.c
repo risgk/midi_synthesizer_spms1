@@ -2976,128 +2976,128 @@ static inline __attribute__((always_inline)) sp_float sp_Osc_set_waveform(sp_Osc
   return self->iv_waveform;
   return 0.0;
 }
-#line 91 "spms1_osc.rb"
-static inline __attribute__((always_inline)) sp_float sp_Osc_set_pulse_width(sp_Osc *self, sp_float lv_pulse_width) {
 #line 92 "spms1_osc.rb"
-  self->iv_pulse_width = (((lv_pulse_width < 0.0)) ? 0.0 : ((((lv_pulse_width > 1.0)) ? 1.0 : lv_pulse_width)));
+static inline __attribute__((always_inline)) sp_float sp_Osc_set_pulse_width(sp_Osc *self, sp_float lv_pulse_width) {
+#line 93 "spms1_osc.rb"
+  self->iv_pulse_width = (((lv_pulse_width < -0.5)) ? -0.5 : ((((lv_pulse_width > 0.5)) ? 0.5 : lv_pulse_width)));
   return self->iv_pulse_width;
   return 0.0;
 }
-#line 100 "spms1_osc.rb"
+#line 101 "spms1_osc.rb"
 static inline __attribute__((always_inline)) sp_float sp_Osc_set_modulation_1_amount(sp_Osc *self, sp_float lv_amount) {
     sp_float lv_clamped_amount = 0.0;
-#line 101 "spms1_osc.rb"
-  lv_clamped_amount = (((lv_amount < 0.0)) ? 0.0 : ((((lv_amount > 1.0)) ? 1.0 : lv_amount)));
 #line 102 "spms1_osc.rb"
-  self->iv_modulation_1_amount = (lv_clamped_amount * cst_MODULATION_RANGE);
+  lv_clamped_amount = (((lv_amount < 0.0)) ? 0.0 : ((((lv_amount > 1.0)) ? 1.0 : lv_amount)));
 #line 103 "spms1_osc.rb"
+  self->iv_modulation_1_amount = (lv_clamped_amount * cst_MODULATION_RANGE);
+#line 104 "spms1_osc.rb"
   self->iv_modulation_1_depth = (self->iv_modulation_1_amount * self->iv_modulation_1_polarity);
   return self->iv_modulation_1_depth;
   return 0.0;
 }
-#line 106 "spms1_osc.rb"
+#line 107 "spms1_osc.rb"
 static inline __attribute__((always_inline)) sp_float sp_Osc_set_modulation_1_polarity(sp_Osc *self, sp_float lv_polarity) {
     sp_float lv_clamped_polarity = 0.0;
-#line 107 "spms1_osc.rb"
-  lv_clamped_polarity = (((lv_polarity < -0.5)) ? -0.5 : ((((lv_polarity > 0.5)) ? 0.5 : lv_polarity)));
 #line 108 "spms1_osc.rb"
-  self->iv_modulation_1_polarity = (lv_clamped_polarity + lv_clamped_polarity);
+  lv_clamped_polarity = (((lv_polarity < -0.5)) ? -0.5 : ((((lv_polarity > 0.5)) ? 0.5 : lv_polarity)));
 #line 109 "spms1_osc.rb"
+  self->iv_modulation_1_polarity = (lv_clamped_polarity + lv_clamped_polarity);
+#line 110 "spms1_osc.rb"
   self->iv_modulation_1_depth = (self->iv_modulation_1_amount * self->iv_modulation_1_polarity);
   return self->iv_modulation_1_depth;
   return 0.0;
 }
-#line 112 "spms1_osc.rb"
+#line 113 "spms1_osc.rb"
 static inline __attribute__((always_inline)) sp_float sp_Osc_set_modulation_2_amount(sp_Osc *self, sp_float lv_amount) {
     sp_float lv_clamped_amount = 0.0;
-#line 113 "spms1_osc.rb"
-  lv_clamped_amount = (((lv_amount < 0.0)) ? 0.0 : ((((lv_amount > 1.0)) ? 1.0 : lv_amount)));
 #line 114 "spms1_osc.rb"
-  self->iv_modulation_2_amount = (lv_clamped_amount * cst_MODULATION_RANGE);
+  lv_clamped_amount = (((lv_amount < 0.0)) ? 0.0 : ((((lv_amount > 1.0)) ? 1.0 : lv_amount)));
 #line 115 "spms1_osc.rb"
+  self->iv_modulation_2_amount = (lv_clamped_amount * cst_MODULATION_RANGE);
+#line 116 "spms1_osc.rb"
   self->iv_modulation_2_depth = (self->iv_modulation_2_amount * self->iv_modulation_2_polarity);
   return self->iv_modulation_2_depth;
   return 0.0;
 }
-#line 118 "spms1_osc.rb"
+#line 119 "spms1_osc.rb"
 static inline __attribute__((always_inline)) sp_float sp_Osc_set_modulation_2_polarity(sp_Osc *self, sp_float lv_polarity) {
     sp_float lv_clamped_polarity = 0.0;
-#line 119 "spms1_osc.rb"
-  lv_clamped_polarity = (((lv_polarity < -0.5)) ? -0.5 : ((((lv_polarity > 0.5)) ? 0.5 : lv_polarity)));
 #line 120 "spms1_osc.rb"
-  self->iv_modulation_2_polarity = (lv_clamped_polarity + lv_clamped_polarity);
+  lv_clamped_polarity = (((lv_polarity < -0.5)) ? -0.5 : ((((lv_polarity > 0.5)) ? 0.5 : lv_polarity)));
 #line 121 "spms1_osc.rb"
+  self->iv_modulation_2_polarity = (lv_clamped_polarity + lv_clamped_polarity);
+#line 122 "spms1_osc.rb"
   self->iv_modulation_2_depth = (self->iv_modulation_2_amount * self->iv_modulation_2_polarity);
   return self->iv_modulation_2_depth;
   return 0.0;
 }
-#line 128 "spms1_osc.rb"
-static inline __attribute__((always_inline)) sp_float sp_Osc_set_pw_modulation_1_amount(sp_Osc *self, sp_float lv_amount) {
 #line 129 "spms1_osc.rb"
-  self->iv_pw_modulation_1_amount = (((lv_amount < 0.0)) ? 0.0 : ((((lv_amount > 1.0)) ? 1.0 : lv_amount)));
+static inline __attribute__((always_inline)) sp_float sp_Osc_set_pw_modulation_1_amount(sp_Osc *self, sp_float lv_amount) {
 #line 130 "spms1_osc.rb"
+  self->iv_pw_modulation_1_amount = (((lv_amount < 0.0)) ? 0.0 : ((((lv_amount > 1.0)) ? 1.0 : lv_amount)));
+#line 131 "spms1_osc.rb"
   self->iv_pw_modulation_1_depth = (self->iv_pw_modulation_1_amount * self->iv_pw_modulation_1_polarity);
   return self->iv_pw_modulation_1_depth;
   return 0.0;
 }
-#line 133 "spms1_osc.rb"
+#line 134 "spms1_osc.rb"
 static inline __attribute__((always_inline)) sp_float sp_Osc_set_pw_modulation_1_polarity(sp_Osc *self, sp_float lv_polarity) {
     sp_float lv_clamped_polarity = 0.0;
-#line 134 "spms1_osc.rb"
-  lv_clamped_polarity = (((lv_polarity < -0.5)) ? -0.5 : ((((lv_polarity > 0.5)) ? 0.5 : lv_polarity)));
 #line 135 "spms1_osc.rb"
-  self->iv_pw_modulation_1_polarity = (lv_clamped_polarity + lv_clamped_polarity);
+  lv_clamped_polarity = (((lv_polarity < -0.5)) ? -0.5 : ((((lv_polarity > 0.5)) ? 0.5 : lv_polarity)));
 #line 136 "spms1_osc.rb"
+  self->iv_pw_modulation_1_polarity = (lv_clamped_polarity + lv_clamped_polarity);
+#line 137 "spms1_osc.rb"
   self->iv_pw_modulation_1_depth = (self->iv_pw_modulation_1_amount * self->iv_pw_modulation_1_polarity);
   return self->iv_pw_modulation_1_depth;
   return 0.0;
 }
-#line 139 "spms1_osc.rb"
-static inline __attribute__((always_inline)) sp_float sp_Osc_set_pw_modulation_2_amount(sp_Osc *self, sp_float lv_amount) {
 #line 140 "spms1_osc.rb"
-  self->iv_pw_modulation_2_amount = (((lv_amount < 0.0)) ? 0.0 : ((((lv_amount > 1.0)) ? 1.0 : lv_amount)));
+static inline __attribute__((always_inline)) sp_float sp_Osc_set_pw_modulation_2_amount(sp_Osc *self, sp_float lv_amount) {
 #line 141 "spms1_osc.rb"
+  self->iv_pw_modulation_2_amount = (((lv_amount < 0.0)) ? 0.0 : ((((lv_amount > 1.0)) ? 1.0 : lv_amount)));
+#line 142 "spms1_osc.rb"
   self->iv_pw_modulation_2_depth = (self->iv_pw_modulation_2_amount * self->iv_pw_modulation_2_polarity);
   return self->iv_pw_modulation_2_depth;
   return 0.0;
 }
-#line 144 "spms1_osc.rb"
+#line 145 "spms1_osc.rb"
 static inline __attribute__((always_inline)) sp_float sp_Osc_set_pw_modulation_2_polarity(sp_Osc *self, sp_float lv_polarity) {
     sp_float lv_clamped_polarity = 0.0;
-#line 145 "spms1_osc.rb"
-  lv_clamped_polarity = (((lv_polarity < -0.5)) ? -0.5 : ((((lv_polarity > 0.5)) ? 0.5 : lv_polarity)));
 #line 146 "spms1_osc.rb"
-  self->iv_pw_modulation_2_polarity = (lv_clamped_polarity + lv_clamped_polarity);
+  lv_clamped_polarity = (((lv_polarity < -0.5)) ? -0.5 : ((((lv_polarity > 0.5)) ? 0.5 : lv_polarity)));
 #line 147 "spms1_osc.rb"
+  self->iv_pw_modulation_2_polarity = (lv_clamped_polarity + lv_clamped_polarity);
+#line 148 "spms1_osc.rb"
   self->iv_pw_modulation_2_depth = (self->iv_pw_modulation_2_amount * self->iv_pw_modulation_2_polarity);
   return self->iv_pw_modulation_2_depth;
   return 0.0;
 }
-#line 155 "spms1_osc.rb"
+#line 156 "spms1_osc.rb"
 static inline __attribute__((always_inline)) sp_float sp_Osc_set_pitch_coarse(sp_Osc *self, sp_float lv_pitch_coarse) {
     sp_float lv_clamped = 0.0;
-#line 156 "spms1_osc.rb"
-  lv_clamped = (((lv_pitch_coarse < -0.5)) ? -0.5 : ((((lv_pitch_coarse > 0.5)) ? 0.5 : lv_pitch_coarse)));
 #line 157 "spms1_osc.rb"
-  self->iv_pitch_coarse = ((lv_clamped + lv_clamped) * cst_PITCH_COARSE_RANGE);
+  lv_clamped = (((lv_pitch_coarse < -0.5)) ? -0.5 : ((((lv_pitch_coarse > 0.5)) ? 0.5 : lv_pitch_coarse)));
 #line 158 "spms1_osc.rb"
+  self->iv_pitch_coarse = ((lv_clamped + lv_clamped) * cst_PITCH_COARSE_RANGE);
+#line 159 "spms1_osc.rb"
   self->iv_tune = (self->iv_pitch_coarse + self->iv_pitch_fine);
   return self->iv_tune;
   return 0.0;
 }
-#line 161 "spms1_osc.rb"
+#line 162 "spms1_osc.rb"
 static inline __attribute__((always_inline)) sp_float sp_Osc_set_pitch_fine(sp_Osc *self, sp_float lv_pitch_fine) {
     sp_float lv_clamped = 0.0;
-#line 162 "spms1_osc.rb"
-  lv_clamped = (((lv_pitch_fine < -0.5)) ? -0.5 : ((((lv_pitch_fine > 0.5)) ? 0.5 : lv_pitch_fine)));
 #line 163 "spms1_osc.rb"
-  self->iv_pitch_fine = ((lv_clamped + lv_clamped) * cst_PITCH_FINE_RANGE);
+  lv_clamped = (((lv_pitch_fine < -0.5)) ? -0.5 : ((((lv_pitch_fine > 0.5)) ? 0.5 : lv_pitch_fine)));
 #line 164 "spms1_osc.rb"
+  self->iv_pitch_fine = ((lv_clamped + lv_clamped) * cst_PITCH_FINE_RANGE);
+#line 165 "spms1_osc.rb"
   self->iv_tune = (self->iv_pitch_coarse + self->iv_pitch_fine);
   return self->iv_tune;
   return 0.0;
 }
-#line 172 "spms1_osc.rb"
+#line 173 "spms1_osc.rb"
 static sp_float sp_Osc_process(sp_Osc *self, sp_bool lv_control_tick, sp_float lv_pitch_input, sp_float lv_modulation_1_input, sp_float lv_modulation_2_input, sp_float lv_pw_modulation_1_input, sp_float lv_pw_modulation_2_input) {
     sp_float lv_total_pitch = 0.0;
     sp_float lv_pitch = 0.0;
@@ -3114,118 +3114,118 @@ static sp_float sp_Osc_process(sp_Osc *self, sp_bool lv_control_tick, sp_float l
     sp_float lv_blep2 = 0.0;
     sp_float lv_saw2 = 0.0;
     sp_float lv_output = 0.0;
-#line 173 "spms1_osc.rb"
+#line 174 "spms1_osc.rb"
   if (lv_control_tick) {
-#line 175 "spms1_osc.rb"
-    self->iv_stage_1_waveform = sp_Dsp_s_smooth(self->iv_waveform, self->iv_stage_1_waveform, self->iv_smoothing_target_blend);
 #line 176 "spms1_osc.rb"
-    self->iv_current_waveform = sp_Dsp_s_smooth(self->iv_stage_1_waveform, self->iv_current_waveform, self->iv_smoothing_target_blend);
+    self->iv_stage_1_waveform = sp_Dsp_s_smooth(self->iv_waveform, self->iv_stage_1_waveform, self->iv_smoothing_target_blend);
 #line 177 "spms1_osc.rb"
-    self->iv_stage_1_pulse_width = sp_Dsp_s_smooth(self->iv_pulse_width, self->iv_stage_1_pulse_width, self->iv_smoothing_target_blend);
+    self->iv_current_waveform = sp_Dsp_s_smooth(self->iv_stage_1_waveform, self->iv_current_waveform, self->iv_smoothing_target_blend);
 #line 178 "spms1_osc.rb"
-    self->iv_current_pulse_width = sp_Dsp_s_smooth(self->iv_stage_1_pulse_width, self->iv_current_pulse_width, self->iv_smoothing_target_blend);
+    self->iv_stage_1_pulse_width = sp_Dsp_s_smooth(self->iv_pulse_width, self->iv_stage_1_pulse_width, self->iv_smoothing_target_blend);
 #line 179 "spms1_osc.rb"
-    self->iv_stage_1_modulation_1_depth = sp_Dsp_s_smooth(self->iv_modulation_1_depth, self->iv_stage_1_modulation_1_depth, self->iv_smoothing_target_blend);
+    self->iv_current_pulse_width = sp_Dsp_s_smooth(self->iv_stage_1_pulse_width, self->iv_current_pulse_width, self->iv_smoothing_target_blend);
 #line 180 "spms1_osc.rb"
-    self->iv_current_modulation_1_depth = sp_Dsp_s_smooth(self->iv_stage_1_modulation_1_depth, self->iv_current_modulation_1_depth, self->iv_smoothing_target_blend);
+    self->iv_stage_1_modulation_1_depth = sp_Dsp_s_smooth(self->iv_modulation_1_depth, self->iv_stage_1_modulation_1_depth, self->iv_smoothing_target_blend);
 #line 181 "spms1_osc.rb"
-    self->iv_stage_1_modulation_2_depth = sp_Dsp_s_smooth(self->iv_modulation_2_depth, self->iv_stage_1_modulation_2_depth, self->iv_smoothing_target_blend);
+    self->iv_current_modulation_1_depth = sp_Dsp_s_smooth(self->iv_stage_1_modulation_1_depth, self->iv_current_modulation_1_depth, self->iv_smoothing_target_blend);
 #line 182 "spms1_osc.rb"
-    self->iv_current_modulation_2_depth = sp_Dsp_s_smooth(self->iv_stage_1_modulation_2_depth, self->iv_current_modulation_2_depth, self->iv_smoothing_target_blend);
+    self->iv_stage_1_modulation_2_depth = sp_Dsp_s_smooth(self->iv_modulation_2_depth, self->iv_stage_1_modulation_2_depth, self->iv_smoothing_target_blend);
 #line 183 "spms1_osc.rb"
-    self->iv_stage_1_pw_modulation_1_depth = sp_Dsp_s_smooth(self->iv_pw_modulation_1_depth, self->iv_stage_1_pw_modulation_1_depth, self->iv_smoothing_target_blend);
+    self->iv_current_modulation_2_depth = sp_Dsp_s_smooth(self->iv_stage_1_modulation_2_depth, self->iv_current_modulation_2_depth, self->iv_smoothing_target_blend);
 #line 184 "spms1_osc.rb"
-    self->iv_current_pw_modulation_1_depth = sp_Dsp_s_smooth(self->iv_stage_1_pw_modulation_1_depth, self->iv_current_pw_modulation_1_depth, self->iv_smoothing_target_blend);
+    self->iv_stage_1_pw_modulation_1_depth = sp_Dsp_s_smooth(self->iv_pw_modulation_1_depth, self->iv_stage_1_pw_modulation_1_depth, self->iv_smoothing_target_blend);
 #line 185 "spms1_osc.rb"
-    self->iv_stage_1_pw_modulation_2_depth = sp_Dsp_s_smooth(self->iv_pw_modulation_2_depth, self->iv_stage_1_pw_modulation_2_depth, self->iv_smoothing_target_blend);
+    self->iv_current_pw_modulation_1_depth = sp_Dsp_s_smooth(self->iv_stage_1_pw_modulation_1_depth, self->iv_current_pw_modulation_1_depth, self->iv_smoothing_target_blend);
 #line 186 "spms1_osc.rb"
+    self->iv_stage_1_pw_modulation_2_depth = sp_Dsp_s_smooth(self->iv_pw_modulation_2_depth, self->iv_stage_1_pw_modulation_2_depth, self->iv_smoothing_target_blend);
+#line 187 "spms1_osc.rb"
     self->iv_current_pw_modulation_2_depth = sp_Dsp_s_smooth(self->iv_stage_1_pw_modulation_2_depth, self->iv_current_pw_modulation_2_depth, self->iv_smoothing_target_blend);
   }
-#line 189 "spms1_osc.rb"
-  lv_total_pitch = (((lv_pitch_input + self->iv_tune) + ((lv_modulation_1_input * self->iv_current_modulation_1_depth))) + ((lv_modulation_2_input * self->iv_current_modulation_2_depth)));
 #line 190 "spms1_osc.rb"
-  lv_pitch = (((lv_total_pitch < -0.5)) ? -0.5 : ((((lv_total_pitch > 0.5)) ? 0.5 : lv_total_pitch)));
+  lv_total_pitch = (((lv_pitch_input + self->iv_tune) + ((lv_modulation_1_input * self->iv_current_modulation_1_depth))) + ((lv_modulation_2_input * self->iv_current_modulation_2_depth)));
 #line 191 "spms1_osc.rb"
+  lv_pitch = (((lv_total_pitch < -0.5)) ? -0.5 : ((((lv_total_pitch > 0.5)) ? 0.5 : lv_total_pitch)));
+#line 192 "spms1_osc.rb"
   sp_float _t55 = lv_pitch;
   lv_freq = sp_Osc_pitch_to_freq_fast((sp_Osc *)self, _t55);
-#line 192 "spms1_osc.rb"
+#line 193 "spms1_osc.rb"
   lv_current_dt = (lv_freq * self->iv_inv_sample_rate);
-#line 195 "spms1_osc.rb"
+#line 196 "spms1_osc.rb"
   lv_current_dt_inv = (1.0 / lv_current_dt);
-#line 197 "spms1_osc.rb"
-  lv_naive_saw1 = ((-2.0 * self->iv_phase) + 1.0);
 #line 198 "spms1_osc.rb"
+  lv_naive_saw1 = ((-2.0 * self->iv_phase) + 1.0);
+#line 199 "spms1_osc.rb"
   sp_float _t56 = self->iv_phase;
   sp_float _t57 = lv_current_dt;
   sp_float _t58 = lv_current_dt_inv;
   lv_blep1 = sp_Osc_poly_blep((sp_Osc *)self, _t56, _t57, _t58);
-#line 199 "spms1_osc.rb"
+#line 200 "spms1_osc.rb"
   lv_saw1 = (lv_naive_saw1 + lv_blep1);
-#line 203 "spms1_osc.rb"
-  lv_total_pulse_width = ((self->iv_current_pulse_width + ((lv_pw_modulation_1_input * self->iv_current_pw_modulation_1_depth))) + ((lv_pw_modulation_2_input * self->iv_current_pw_modulation_2_depth)));
 #line 204 "spms1_osc.rb"
-  lv_pulse_width = (((lv_total_pulse_width < 0.0)) ? 0.0 : ((((lv_total_pulse_width > 1.0)) ? 1.0 : lv_total_pulse_width)));
+  lv_total_pulse_width = ((self->iv_current_pulse_width + ((lv_pw_modulation_1_input * self->iv_current_pw_modulation_1_depth))) + ((lv_pw_modulation_2_input * self->iv_current_pw_modulation_2_depth)));
 #line 205 "spms1_osc.rb"
-  lv_phase2 = (self->iv_phase + ((0.5 + (lv_pulse_width * 0.5))));
+  lv_pulse_width = (((lv_total_pulse_width < -0.5)) ? -0.5 : ((((lv_total_pulse_width > 0.5)) ? 0.5 : lv_total_pulse_width)));
 #line 206 "spms1_osc.rb"
+  lv_phase2 = (self->iv_phase + ((0.5 + lv_pulse_width)));
+#line 207 "spms1_osc.rb"
   lv_phase2 -= (((lv_phase2 < 1.0)) ? 0.0 : 1.0);
-#line 208 "spms1_osc.rb"
-  lv_naive_saw2 = ((-2.0 * lv_phase2) + 1.0);
 #line 209 "spms1_osc.rb"
+  lv_naive_saw2 = ((-2.0 * lv_phase2) + 1.0);
+#line 210 "spms1_osc.rb"
   sp_float _t59 = lv_phase2;
   sp_float _t60 = lv_current_dt;
   sp_float _t61 = lv_current_dt_inv;
   lv_blep2 = sp_Osc_poly_blep((sp_Osc *)self, _t59, _t60, _t61);
-#line 210 "spms1_osc.rb"
+#line 211 "spms1_osc.rb"
   lv_saw2 = (lv_naive_saw2 + lv_blep2);
-#line 212 "spms1_osc.rb"
-  lv_output = (lv_saw1 - ((lv_saw2 * self->iv_current_waveform)));
 #line 213 "spms1_osc.rb"
-  self->iv_phase += lv_current_dt;
+  lv_output = (lv_saw1 - ((lv_saw2 * self->iv_current_waveform)));
 #line 214 "spms1_osc.rb"
+  self->iv_phase += lv_current_dt;
+#line 215 "spms1_osc.rb"
   self->iv_phase -= (((self->iv_phase < 1.0)) ? 0.0 : 1.0);
-#line 219 "spms1_osc.rb"
-  self->iv_output_saw = (lv_saw1 * 0.5);
 #line 220 "spms1_osc.rb"
-  self->iv_output_pulse = ((lv_saw1 - lv_saw2) * 0.5);
+  self->iv_output_saw = (lv_saw1 * 0.5);
 #line 221 "spms1_osc.rb"
+  self->iv_output_pulse = ((lv_saw1 - lv_saw2) * 0.5);
+#line 222 "spms1_osc.rb"
   return (lv_output * 0.5);
   return 0.0;
 }
-#line 226 "spms1_osc.rb"
-static inline __attribute__((always_inline)) sp_float sp_Osc_output_saw(sp_Osc *self) {
 #line 227 "spms1_osc.rb"
+static inline __attribute__((always_inline)) sp_float sp_Osc_output_saw(sp_Osc *self) {
+#line 228 "spms1_osc.rb"
   return self->iv_output_saw;
   return 0.0;
 }
-#line 230 "spms1_osc.rb"
-static inline __attribute__((always_inline)) sp_float sp_Osc_output_pulse(sp_Osc *self) {
 #line 231 "spms1_osc.rb"
+static inline __attribute__((always_inline)) sp_float sp_Osc_output_pulse(sp_Osc *self) {
+#line 232 "spms1_osc.rb"
   return self->iv_output_pulse;
   return 0.0;
 }
-#line 236 "spms1_osc.rb"
+#line 237 "spms1_osc.rb"
 static inline __attribute__((always_inline)) sp_float sp_Osc_pitch_to_freq_fast(sp_Osc *self, sp_float lv_pitch) {
     sp_float lv_internal_pitch = 0.0;
     sp_int lv_index = 0;
     sp_float lv_fraction = 0.0;
     sp_float lv_f0 = 0.0;
     sp_float lv_f1 = 0.0;
-#line 237 "spms1_osc.rb"
-  lv_internal_pitch = ((lv_pitch + 0.5) * 120.0);
 #line 238 "spms1_osc.rb"
-  lv_index = sp_float_to_i_checked(lv_internal_pitch);
+  lv_internal_pitch = ((lv_pitch + 0.5) * 120.0);
 #line 239 "spms1_osc.rb"
-  lv_fraction = (lv_internal_pitch - ({ sp_int _t62 = (lv_index); _t62 == SP_INT_NIL ? 0.0 : ((sp_float)_t62); }));
+  lv_index = sp_float_to_i_checked(lv_internal_pitch);
 #line 240 "spms1_osc.rb"
-  lv_f0 = sp_FloatArray_get(cst_Spms1__Osc__FREQ_TABLE, lv_index);
+  lv_fraction = (lv_internal_pitch - ({ sp_int _t62 = (lv_index); _t62 == SP_INT_NIL ? 0.0 : ((sp_float)_t62); }));
 #line 241 "spms1_osc.rb"
-  lv_f1 = sp_FloatArray_get(cst_Spms1__Osc__FREQ_TABLE, sp_int_add(lv_index, 1LL));
+  lv_f0 = sp_FloatArray_get(cst_Spms1__Osc__FREQ_TABLE, lv_index);
 #line 242 "spms1_osc.rb"
+  lv_f1 = sp_FloatArray_get(cst_Spms1__Osc__FREQ_TABLE, sp_int_add(lv_index, 1LL));
+#line 243 "spms1_osc.rb"
   return (lv_f0 + (lv_fraction * ((lv_f1 - lv_f0))));
   return 0.0;
 }
-#line 254 "spms1_osc.rb"
+#line 255 "spms1_osc.rb"
 static inline __attribute__((always_inline)) sp_float sp_Osc_poly_blep(sp_Osc *self, sp_float lv_t, sp_float lv_dt, sp_float lv_dt_inv) {
     sp_float lv_start_gap = 0.0;
     sp_float lv_start = 0.0;
@@ -3233,19 +3233,19 @@ static inline __attribute__((always_inline)) sp_float sp_Osc_poly_blep(sp_Osc *s
     sp_float lv_ending = 0.0;
     sp_float lv_num_start = 0.0;
     sp_float lv_num_end = 0.0;
-#line 255 "spms1_osc.rb"
-  lv_start_gap = (lv_dt - lv_t);
 #line 256 "spms1_osc.rb"
-  lv_start = (((lv_start_gap > 0.0)) ? lv_start_gap : 0.0);
+  lv_start_gap = (lv_dt - lv_t);
 #line 257 "spms1_osc.rb"
-  lv_end_gap = (lv_t - ((1.0 - lv_dt)));
+  lv_start = (((lv_start_gap > 0.0)) ? lv_start_gap : 0.0);
 #line 258 "spms1_osc.rb"
-  lv_ending = (((lv_end_gap > 0.0)) ? lv_end_gap : 0.0);
+  lv_end_gap = (lv_t - ((1.0 - lv_dt)));
 #line 259 "spms1_osc.rb"
-  lv_num_start = (lv_start * lv_dt_inv);
+  lv_ending = (((lv_end_gap > 0.0)) ? lv_end_gap : 0.0);
 #line 260 "spms1_osc.rb"
-  lv_num_end = (lv_ending * lv_dt_inv);
+  lv_num_start = (lv_start * lv_dt_inv);
 #line 261 "spms1_osc.rb"
+  lv_num_end = (lv_ending * lv_dt_inv);
+#line 262 "spms1_osc.rb"
   return ((lv_num_end * lv_num_end) - (lv_num_start * lv_num_start));
   return 0.0;
 }
@@ -4717,7 +4717,7 @@ static void sp_spms1_write_default_patch(sp_int lv_midi_ch) {
 #line 589 "spms1_patch.rb"
   (set_midi_cc_value(((uint8_t)(lv_midi_ch)), ((uint8_t)(102LL)), ((uint8_t)(4LL))), (sp_int)0);
 #line 590 "spms1_patch.rb"
-  (set_midi_cc_value(((uint8_t)(lv_midi_ch)), ((uint8_t)(114LL)), ((uint8_t)(4LL))), (sp_int)0);
+  (set_midi_cc_value(((uint8_t)(lv_midi_ch)), ((uint8_t)(114LL)), ((uint8_t)(64LL))), (sp_int)0);
 #line 591 "spms1_patch.rb"
   (set_midi_cc_value(((uint8_t)(lv_midi_ch)), ((uint8_t)(8LL)), ((uint8_t)(4LL))), (sp_int)0);
 #line 592 "spms1_patch.rb"
@@ -4733,7 +4733,7 @@ static void sp_spms1_write_default_patch(sp_int lv_midi_ch) {
 #line 597 "spms1_patch.rb"
   (set_midi_cc_value(((uint8_t)(lv_midi_ch)), ((uint8_t)(104LL)), ((uint8_t)(4LL))), (sp_int)0);
 #line 598 "spms1_patch.rb"
-  (set_midi_cc_value(((uint8_t)(lv_midi_ch)), ((uint8_t)(114LL)), ((uint8_t)(4LL))), (sp_int)0);
+  (set_midi_cc_value(((uint8_t)(lv_midi_ch)), ((uint8_t)(114LL)), ((uint8_t)(64LL))), (sp_int)0);
 #line 599 "spms1_patch.rb"
   (set_midi_cc_value(((uint8_t)(lv_midi_ch)), ((uint8_t)(8LL)), ((uint8_t)(4LL))), (sp_int)0);
 #line 600 "spms1_patch.rb"
@@ -5044,7 +5044,7 @@ int main(int argc,char**argv){
     sp_int lv_cc_general_4 = 0;
     sp_int lv_general_4 = 0;
     sp_bool lv_control_tick = 0;
-    sp_int lv_i__bp14030 = 0;
+    sp_int lv_i__bp14027 = 0;
 
 #line 35 "spms1_framework.rb"
 #line 36 "spms1_framework.rb"
@@ -6614,7 +6614,7 @@ int main(int argc,char**argv){
 #line 374 "spms1_main.rb"
     lv_cc_osc_1_pulse_width = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_PULSE_WIDTH)))));
 #line 375 "spms1_main.rb"
-    sp_FloatArray_set(lv_signals, cst_SLOT_OSC_1_PULSE_WIDTH, sp_cc_or_zero(lv_cc_osc_1_pulse_width, sp_cc_to_unipolar(((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_1_pulse_width))))))));
+    sp_FloatArray_set(lv_signals, cst_SLOT_OSC_1_PULSE_WIDTH, sp_cc_or_zero(lv_cc_osc_1_pulse_width, sp_cc_to_bipolar(((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_1_pulse_width))))))));
 #line 376 "spms1_main.rb"
     lv_cc_osc_1_pw_mod_1_amt = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_PW_MOD_1_AMT)))));
 #line 377 "spms1_main.rb"
@@ -6662,7 +6662,7 @@ int main(int argc,char**argv){
 #line 398 "spms1_main.rb"
     lv_cc_osc_2_pulse_width = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_2_PULSE_WIDTH)))));
 #line 399 "spms1_main.rb"
-    sp_FloatArray_set(lv_signals, cst_SLOT_OSC_2_PULSE_WIDTH, sp_cc_or_zero(lv_cc_osc_2_pulse_width, sp_cc_to_unipolar(((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_2_pulse_width))))))));
+    sp_FloatArray_set(lv_signals, cst_SLOT_OSC_2_PULSE_WIDTH, sp_cc_or_zero(lv_cc_osc_2_pulse_width, sp_cc_to_bipolar(((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_2_pulse_width))))))));
 #line 400 "spms1_main.rb"
     lv_cc_osc_2_pw_mod_1_amt = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_2_PW_MOD_1_AMT)))));
 #line 401 "spms1_main.rb"
@@ -7271,9 +7271,9 @@ int main(int argc,char**argv){
     (stop_debug_measure(), (sp_int)0);
 #line 661 "spms1_main.rb"
     for (sp_int _t911 = 0; _t911 < cst_AUDIO_BUFFER_WORDS; _t911++) {
-      lv_i__bp14030 = _t911;
+      lv_i__bp14027 = _t911;
 #line 662 "spms1_main.rb"
-      ({ sp_float _t912 = sp_FloatArray_get(lv_audio_buffer_l, lv_i__bp14030); sp_float _t913 = sp_FloatArray_get(lv_audio_buffer_r, lv_i__bp14030); (write_to_audio_buffer(((float)(_t912)), ((float)(_t913))), (sp_int)0); });
+      ({ sp_float _t912 = sp_FloatArray_get(lv_audio_buffer_l, lv_i__bp14027); sp_float _t913 = sp_FloatArray_get(lv_audio_buffer_r, lv_i__bp14027); (write_to_audio_buffer(((float)(_t912)), ((float)(_t913))), (sp_int)0); });
     }
   }
   return 0;

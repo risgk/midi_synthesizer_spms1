@@ -276,7 +276,8 @@ controls:
   # at 0.0: the transposition is Pitch 1's. Mod 1 In takes the envelope, for a pitch envelope;
   # Mod 1 Amt is on CC 89 and powers up at CC 4, 0.0, leaving it off. Mod 2 Pol reads 0.1, which
   # brings the LFO down to a vibrato depth. Wave is on CC 102 and powers up at the saw. Pulse Width
-  # and the PW Mod Amts power up at CC 4, 0.0: a pulse of 50% and no modulation of it. The PW Mod
+  # is bipolar and powers up at CC 64, 0.0, a pulse of 50%, and the PW Mod Amts at CC 4, 0.0, no
+  # modulation of it. The PW Mod
   # Amts are on CC 8 and 103, EG Mod Dst's and LFO Mod Dst's in PRA32-U2, whose Mod Amts are on 89
   # and 13 as Mod 1 Amt and Mod 2 Amt are here: in place of a destination switch, each
   # destination has an Amt of its own. Each other Pol has no CC and reads +0.5.
@@ -287,7 +288,7 @@ controls:
   - { entry: 33, module: OSC_1,     key: MOD_2_AMT, label: Mod 2 Amt, cc: 13,  value: 4, set: set_modulation_2_amount }
   - { entry: 34, module: OSC_1,     key: MOD_2_POL, label: Mod 2 Pol, cc: 0,   value: 124, source: POINT_ONE, bipolar: true, set: set_modulation_2_polarity }
   - { entry: 35, module: OSC_1,     key: WAVE,     label: Wave,         cc: 102, value: 4, set: set_waveform }
-  - { entry: 36, module: OSC_1,     key: PULSE_WIDTH,  label: Pulse Width,  cc: 114, value: 4, set: set_pulse_width }
+  - { entry: 36, module: OSC_1,     key: PULSE_WIDTH,  label: Pulse Width,  cc: 114, value: 64, bipolar: true, set: set_pulse_width }
   - { entry: 37, module: OSC_1,     key: PW_MOD_1_AMT, label: PW Mod 1 Amt,    cc: 8,   value: 4, set: set_pw_modulation_1_amount }
   - { entry: 38, module: OSC_1,     key: PW_MOD_1_POL, label: PW Mod 1 Pol, cc: 0,   value: 124, source: HALF, bipolar: true, set: set_pw_modulation_1_polarity }
   - { entry: 39, module: OSC_1,     key: PW_MOD_2_AMT, label: PW Mod 2 Amt,    cc: 103, value: 4, set: set_pw_modulation_2_amount }
@@ -305,7 +306,7 @@ controls:
   - { entry: 45, module: OSC_2,     key: MOD_2_AMT, label: Mod 2 Amt, cc: 13,  value: 4, set: set_modulation_2_amount }
   - { entry: 46, module: OSC_2,     key: MOD_2_POL, label: Mod 2 Pol, cc: 0,   value: 124, source: POINT_ONE, bipolar: true, set: set_modulation_2_polarity }
   - { entry: 47, module: OSC_2,     key: WAVE,     label: Wave,         cc: 104, value: 4, set: set_waveform }
-  - { entry: 48, module: OSC_2,     key: PULSE_WIDTH,  label: Pulse Width,  cc: 114, value: 4, set: set_pulse_width }
+  - { entry: 48, module: OSC_2,     key: PULSE_WIDTH,  label: Pulse Width,  cc: 114, value: 64, bipolar: true, set: set_pulse_width }
   - { entry: 49, module: OSC_2,     key: PW_MOD_1_AMT, label: PW Mod 1 Amt,    cc: 8,   value: 4, set: set_pw_modulation_1_amount }
   - { entry: 50, module: OSC_2,     key: PW_MOD_1_POL, label: PW Mod 1 Pol, cc: 0,   value: 124, source: HALF, bipolar: true, set: set_pw_modulation_1_polarity }
   - { entry: 51, module: OSC_2,     key: PW_MOD_2_AMT, label: PW Mod 2 Amt,    cc: 103, value: 4, set: set_pw_modulation_2_amount }
