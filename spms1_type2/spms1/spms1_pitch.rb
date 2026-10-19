@@ -40,6 +40,9 @@ module Spms1
     def initialize(sample_rate)
       @sample_rate = sample_rate
       @time = 0.0
+      # The share Glide sets, and whether Glide Switch lets it through: 1.0 on, 0.0 off.
+      @glide_blend = 1.0
+      @glide_on = 1.0
       # The share of the distance left that is covered each sample. 1.0 is no slew at all.
       @blend = 1.0
       # The state is the distance from the output to the input, not the output itself; see process.
@@ -69,7 +72,16 @@ module Spms1
     def set_glide(time)
       @time = (time < 0.0) ? 0.0 : ((time > 1.0) ? 1.0 : time)
       blend = 1.0 / (TIME_BASE * calculate_exp_fast(@time) * @sample_rate)
-      @blend = (@time > 0.0) ? blend : 1.0
+      @glide_blend = (@time > 0.0) ? blend : 1.0
+      @blend = (@glide_on > 0.0) ? @glide_blend : 1.0
+    end
+
+    # Glide Switch is unipolar, [0.0, 1.0], and turns the portamento on from 0.5 (CC 64) up, as a
+    # MIDI switch is on from 64. Off, the output follows the input at once, as at Glide 0.0, mid-glide
+    # too, and Glide keeps its time for when it is on again.
+    def set_glide_switch(switch)
+      @glide_on = (switch >= 0.5) ? 1.0 : 0.0
+      @blend = (@glide_on > 0.0) ? @glide_blend : 1.0
     end
 
     # The depth of Bend In is amount times polarity, as a modulation depth is. Amount is unipolar,
