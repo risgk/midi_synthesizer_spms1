@@ -210,8 +210,8 @@ level, and to the filter, where Filter 1 Mod 2 Amt (CC 25) powers up at 0.0 and 
 to the envelope until it is turned up. Osc 1 Pitch Mod Amt reads the constant 0.2, which brings
 the oscillator's modulations down to a vibrato depth on the pitch, and Filter 1 Mod 2 Pol reads
 0.1, a like depth on the cutoff; Osc 1 PW Mod Amt (CC 103) takes the LFO to the pulse width. The pitch from Pitch 1 reaches the filter too, on Filter 1 Pitch In, for keyboard tracking: CC 9
-(Pitch Track) at its top has the cutoff follow the note a semitone for a semitone, unmoved at note
-60. Pitch Track powers up at 0.0, with the tracking off.
+(Cutoff Pitch Track) at its top has the cutoff follow the note a semitone for a semitone,
+unmoved at note 60. Cutoff Pitch Track powers up at 0.0, with the tracking off.
 The envelope reaches the oscillator's pitch too, on Osc 1 Mod 1 In, for a pitch envelope: Mod 1 Pol
 reads +0.5, and Mod 1 Amt (CC 89) powers up at 0.0, with it off. Each modulation depth spans the
 whole range of what it moves, so bringing a source down to a musical depth is left to the patch
@@ -488,7 +488,7 @@ both at the same signal for a mono output.
 | 4 | EG 1 Level | | 29 | Osc 1 Mod 1 Pol | | 54 | Mixer 2 Out Level |
 | 5 | LFO 1 Rate | | 30 | Osc 1 Mod 2 Amt | | 55 | Filter 1 Gain |
 | 6 | LFO 1 Rate Mod Amt | | 31 | Osc 1 Mod 2 Pol | | 56 | Filter 1 Cutoff |
-| 7 | LFO 1 Rate Mod Pol | | 32 | Osc 1 Pitch Mod Amt | | 57 | Filter 1 Pitch Track |
+| 7 | LFO 1 Rate Mod Pol | | 32 | Osc 1 Pitch Mod Amt | | 57 | Filter 1 Cutoff Pitch Track |
 | 8 | LFO 1 Level | | 33 | Osc 1 Wave | | 58 | Filter 1 Mod 1 Amt |
 | 9 | LFO 1 Wave | | 34 | Osc 1 Pulse Width | | 59 | Filter 1 Mod 1 Pol |
 | 10 | LFO 1 Level Mod Amt | | 35 | Osc 1 PW Mod Amt | | 60 | Filter 1 Mod 2 Amt |
@@ -754,9 +754,9 @@ Filter 1 sums its two modulations, each In by its Amt times its Pol, and the sum
 by Cutoff Mod Amt, as Osc 1 PW Mod Amt moves the pulse width. It is on CC 117 and powers up at
 1.0 (CC 124), where the sum is added as it is, so one dial scales the envelope and the LFO
 together, and CC 117 at CC 4 leaves the cutoff at Filter 1 Cutoff and the keyboard tracking.
-Pitch In, the keyboard tracking, is added on its own by Pitch Track (CC 9), outside the sum, as
-an oscillator's Pitch In is outside its Pitch Mod Amt: unipolar, a semitone for a semitone at the
-top, unmoved at note 60.
+Pitch In, the keyboard tracking, is added on its own by Cutoff Pitch Track (CC 9), outside the
+sum, as an oscillator's Pitch In is outside its Pitch Mod Amt: unipolar, a semitone for a
+semitone at the top, unmoved at note 60.
 
 Filter 1 Resonance raises the resonant peak 6 dB every 30 CC steps, Q doubling each time, up to
 Q 5.66 at CC 94, and from there Q rises faster and faster, without a sudden step, through Q 29

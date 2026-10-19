@@ -60,8 +60,8 @@ modules:
 # at 0.0 and leaves it off until CC 89; Mod 1 Pol reads +0.5. The LFO also reaches Filter 1 Mod 2
 # In, but Filter 1 Mod 2 Amt powers up at 0.0, so the cutoff follows the envelope alone until CC 25
 # turns it up, and Filter 1 Mod 2 Pol reads 0.1, which brings the LFO down to a vibrato's depth.
-# Filter 1 Pitch In takes Pitch 1's pitch too, for keyboard tracking, but Pitch Track powers up at
-# 0.0 and leaves it off until CC 9. Noise 1 runs after the oscillators, as it is mostly a sound of its own (a modulation taking
+# Filter 1 Pitch In takes Pitch 1's pitch too, for keyboard tracking, but Cutoff Pitch Track
+# powers up at 0.0 and leaves it off until CC 9. Noise 1 runs after the oscillators, as it is mostly a sound of its own (a modulation taking
 # it is a sample late, which it does not hear), at full level: its Level has no CC and reads 1.0.
 # Mixer 2 runs after it, just ahead of the filter, which it feeds: Osc 1 on its In 1, Osc 2 on In 2
 # and the noise on In 3. Its Level 1, on CC 116, powers up at 1.0, and Level 2 and 3, on CC 21 and
@@ -294,8 +294,8 @@ controls:
   - { entry: 54, module: MIXER_2,   key: OUT_LEVEL,    label: Out Level,    cc: 0,   value: 124, source: ONE, set: set_out_level }
   # Filter 1 in the editor: Gain, the cutoff, its keyboard tracking and its two modulations, then
   # the resonance and Mode. Pitch In takes the pitch from Pitch 1, as Osc 1 Pitch In does, and
-  # Pitch Track (CC 9) at its top makes the cutoff follow the note a semitone for a semitone,
-  # unmoved at note 60; it powers up at CC 4, 0.0, with the tracking off. Mod 2 Amt powers up at
+  # Cutoff Pitch Track (CC 9) at its top makes the cutoff follow the note a semitone for a
+  # semitone, unmoved at note 60; it powers up at CC 4, 0.0, with the tracking off. Mod 2 Amt powers up at
   # CC 4, 0.0, so the LFO on Mod 2 In leaves the cutoff alone until it is turned up. Mod 2 Pol reads
   # 0.1, which brings the LFO down to a musical depth on the cutoff. Cutoff Mod Amt, on CC 117, is
   # how far the sum of the two modulations moves the cutoff, as Osc 1 PW Mod Amt is for the pulse
@@ -304,7 +304,7 @@ controls:
   # 0.0, the low pass.
   - { entry: 55, module: FILTER_1,  key: GAIN,         label: Gain,         cc: 112, value: 64, set: set_gain }
   - { entry: 56, module: FILTER_1,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 100, set: set_cutoff }
-  - { entry: 57, module: FILTER_1,  key: PITCH_TRACK,  label: Pitch Track,  cc: 9,   value: 4, set: set_pitch_track }
+  - { entry: 57, module: FILTER_1,  key: CUTOFF_PITCH_TRACK, label: Cutoff Pitch Track, cc: 9, value: 4, set: set_cutoff_pitch_track }
   - { entry: 58, module: FILTER_1,  key: MOD_1_AMT, label: Mod 1 Amt,     cc: 24,  value: 28, set: set_modulation_1_amount }
   - { entry: 59, module: FILTER_1,  key: MOD_1_POL, label: Mod 1 Pol, cc: 0,   value: 124, source: HALF, bipolar: true, set: set_modulation_1_polarity }
   - { entry: 60, module: FILTER_1,  key: MOD_2_AMT, label: Mod 2 Amt,    cc: 25,  value: 4, set: set_modulation_2_amount }

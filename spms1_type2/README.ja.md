@@ -205,8 +205,8 @@ LFO はオシレータのピッチとパルス幅に直接、フルレベルで�
 Osc 1 Pitch Mod Amt が定数 0.2 を読んでオシレータのモジュレーションをピッチではビブラートの深さまで絞り、
 Filter 1 Mod 2 Pol が 0.1 を読んでカットオフへの変調も同じくらいまで絞ります。パルス幅へは Osc 1 PW Mod Amt
 （CC 103）で LFO を入れます。Pitch 1 からのピッチはフィルタの Filter 1 Pitch In にも入ります。キーボードトラッキング用です。
-CC 9（Pitch Track）を最大にするとカットオフがノートに半音ずつ追従し、ノート 60 では動きません。
-Pitch Track は起動時 0.0 で、トラッキングはオフです。
+CC 9（Cutoff Pitch Track）を最大にするとカットオフがノートに半音ずつ追従し、ノート 60 では動きません。
+Cutoff Pitch Track は起動時 0.0 で、トラッキングはオフです。
 エンベロープはオシレータの Osc 1 Mod 1 In にも入ります。ピッチエンベロープ用です。Mod 1 Pol は +0.5、Mod 1 Amt
 （CC 89）は起動時 0.0 で、オフです。モジュレーションの深さはどれも動かす先のレンジ全体に届くので、
 ソースを音楽的な深さまで絞る仕事はモジュールに作り込まず、パッチの側に任せています。
@@ -463,7 +463,7 @@ Out Level はデフォルトのパッチで定数 1.0、極性は +0.5 を指し
 | 4 | EG 1 Level | | 29 | Osc 1 Mod 1 Pol | | 54 | Mixer 2 Out Level |
 | 5 | LFO 1 Rate | | 30 | Osc 1 Mod 2 Amt | | 55 | Filter 1 Gain |
 | 6 | LFO 1 Rate Mod Amt | | 31 | Osc 1 Mod 2 Pol | | 56 | Filter 1 Cutoff |
-| 7 | LFO 1 Rate Mod Pol | | 32 | Osc 1 Pitch Mod Amt | | 57 | Filter 1 Pitch Track |
+| 7 | LFO 1 Rate Mod Pol | | 32 | Osc 1 Pitch Mod Amt | | 57 | Filter 1 Cutoff Pitch Track |
 | 8 | LFO 1 Level | | 33 | Osc 1 Wave | | 58 | Filter 1 Mod 1 Amt |
 | 9 | LFO 1 Wave | | 34 | Osc 1 Pulse Width | | 59 | Filter 1 Mod 1 Pol |
 | 10 | LFO 1 Level Mod Amt | | 35 | Osc 1 PW Mod Amt | | 60 | Filter 1 Mod 2 Amt |
@@ -714,7 +714,7 @@ Filter 1 は 2 つのモジュレーション、それぞれの In を Amt と P
 カットオフを Cutoff Mod Amt だけ動かします。Osc 1 PW Mod Amt がパルス幅を動かすのと同じです。CC は 117 で、
 起動時は 1.0（CC 124）、和がそのまま足されます。1 つのつまみでエンベロープと LFO をまとめて絞れ、CC 117 を
 CC 4 にするとカットオフは Filter 1 Cutoff とキーボードトラッキングだけで決まります。キーボードトラッキングの
-Pitch In は和の外で、Pitch Track（CC 9）だけ足されます。オシレータの Pitch In が Pitch Mod Amt の外にあるのと
+Pitch In は和の外で、Cutoff Pitch Track（CC 9）だけ足されます。オシレータの Pitch In が Pitch Mod Amt の外にあるのと
 同じです。ユニポーラで、最大でノートに半音ずつ追従し、ノート 60 では動きません。
 
 Filter 1 Resonance は CC 94 の Q 5.66 までは CC 30 段ごとにピークが 6 dB（Q が 2 倍）上がり、そこから
