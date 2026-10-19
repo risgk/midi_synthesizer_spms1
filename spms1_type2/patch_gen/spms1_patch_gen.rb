@@ -246,7 +246,7 @@ def editor_js
     controls: s.controls_in_list_order.map do |c|
       h = { entry: c['entry'], module: c['module'], key: c['key'], label: c['label'],
             bipolar: !!c['bipolar'], cc: c['cc'].to_i, value: c['value'], source: c['source'],
-            general: !!c['general'], hint: c['hint'], zones: c['zones'], zoneEdges: c['zone_edges'],
+            general: !!c['general'],
             slots: if c['general']
                      s.slots_of(c).map do |sig|
                        [sig['key'], sig['label'] ? sig['label'].sub(/\AGeneral /, '') : c['label'], s.bipolar?(sig)]
@@ -326,8 +326,7 @@ end
 # A module names its class (`class`), the inputs its `process` takes after the control tick, in
 # order (`process`), and each output it has besides the one `process` returns, by the method that
 # reads it (`get`); a module whose outputs all have one returns nothing that is used. A parameter
-# names the method that takes its value each buffer (`set`). A parameter marked `early` is set
-# ahead of all the others, for a setter that reads what another sets.
+# names the method that takes its value each buffer (`set`).
 #
 # The dispatch compares against literal ids, and writes to literal bus slots, rather than the
 # MODULE_* and SIGNAL_* constants, which Spinel emits as runtime globals (see spms1_main.rb). Each
@@ -400,8 +399,7 @@ end
 
 def main_setters
   s = SPEC
-  params = s.controls_in_list_order.reject { |c| c['general'] }
-  (params.select { |c| c['early'] } + params.reject { |c| c['early'] }).map do |c|
+  s.controls_in_list_order.reject { |c| c['general'] }.map do |c|
     "  #{c['module'].downcase}.#{c.fetch('set')}(signals[source_#{local_name(c)}])\n"
   end.join
 end
