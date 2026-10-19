@@ -637,18 +637,19 @@ while true
         signals[38] = filter_1.process(control_tick, signals[source_filter_1_audio], signals[source_filter_1_mod_1], signals[source_filter_1_mod_2], signals[source_filter_1_mod_3]) # SIGNAL_FILTER_1_OUTPUT
         signals[39] = filter_1.output_lp # SIGNAL_FILTER_1_OUTPUT_LP
         signals[40] = filter_1.output_hp # SIGNAL_FILTER_1_OUTPUT_HP
+        signals[41] = filter_1.output_bp # SIGNAL_FILTER_1_OUTPUT_BP
       when 10 # MODULE_AMP_1
-        signals[41] = amp_1.process(control_tick, signals[source_amp_1_audio], signals[source_amp_1_mod]) # SIGNAL_AMP_1_OUTPUT
+        signals[42] = amp_1.process(control_tick, signals[source_amp_1_audio], signals[source_amp_1_mod]) # SIGNAL_AMP_1_OUTPUT
       when 11 # MODULE_CHORUS_1
         chorus_1.process(control_tick, signals[source_chorus_1_audio])
-        signals[42] = chorus_1.output_l # SIGNAL_CHORUS_1_OUTPUT_L
-        signals[43] = chorus_1.output_r # SIGNAL_CHORUS_1_OUTPUT_R
-        signals[44] = chorus_1.output_mono # SIGNAL_CHORUS_1_OUTPUT_MONO
+        signals[43] = chorus_1.output_l # SIGNAL_CHORUS_1_OUTPUT_L
+        signals[44] = chorus_1.output_r # SIGNAL_CHORUS_1_OUTPUT_R
+        signals[45] = chorus_1.output_mono # SIGNAL_CHORUS_1_OUTPUT_MONO
       when 12 # MODULE_DELAY_1
         delay_1.process(control_tick, signals[source_delay_1_audio_l], signals[source_delay_1_audio_r])
-        signals[45] = delay_1.output_l # SIGNAL_DELAY_1_OUTPUT_L
-        signals[46] = delay_1.output_r # SIGNAL_DELAY_1_OUTPUT_R
-        signals[47] = delay_1.output_mono # SIGNAL_DELAY_1_OUTPUT_MONO
+        signals[46] = delay_1.output_l # SIGNAL_DELAY_1_OUTPUT_L
+        signals[47] = delay_1.output_r # SIGNAL_DELAY_1_OUTPUT_R
+        signals[48] = delay_1.output_mono # SIGNAL_DELAY_1_OUTPUT_MONO
       # patch_gen end
       end
 

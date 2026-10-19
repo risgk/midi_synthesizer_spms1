@@ -272,6 +272,11 @@ DC ブロッカーと出力クリップがあります。さらに、この 2 �
 Out はもう一度クリップしません。通過帯域ではどちらか一方しかなく、両方があるカットオフ付近ではノッチが
 それを下げるからです。2 つの係数はほかのレベルと同じくスムージングします。
 
+バンドパスも Out BP として出力し、専用の DC ブロッカーと出力クリップがあります。Mode のクロスフェードには
+入りません。積分器の状態をそのまま出すもので正規化していないため、カットオフでのピークは入力の Q 倍です。
+Resonance 0.0 では 0.707 倍、高いレゾナンスで大きな入力を入れると出力クリップの肩に深く入るので、
+そのときは Filter 1 Gain (CC 112) で下げます。デフォルトのパッチでは何にもつながっていません。
+
 ```mermaid
 flowchart LR
   IN([入力]) --> SUM((Σ))
@@ -279,8 +284,10 @@ flowchart LR
   I1 -->|BP| I2["積分器2<br/>LP・状態 s2"]
   I2 -->|LP| OC["出力クリップ<br/>0.75まで線形"]
   SUM -->|HP| OC
+  I1 -->|BP| OC
   OC -->|LP| OUT_LP([Out LP])
   OC -->|HP| OUT_HP([Out HP])
+  OC -->|BP| OUT_BP([Out BP])
   OC -->|LP| XF["Mode<br/>LP / ノッチ / HP"]
   OC -->|HP| XF
   XF --> OUT([Out])
@@ -304,8 +311,10 @@ flowchart LR
   A2 -->|BP| A3["積分器 ∫<br/>C2・線形"]
   A3 -->|LP| LIM["出力リミッタ"]
   A1 -->|HP| LIM
+  A2 -->|BP| LIM
   LIM -->|LP| OUT_LP([Out LP])
   LIM -->|HP| OUT_HP([Out HP])
+  LIM -->|BP| OUT_BP([Out BP])
   LIM -->|LP| XF["クロスフェーダ<br/>Mode"]
   LIM -->|HP| XF
   XF --> OUT([Out])
@@ -544,22 +553,23 @@ Mixer 2 は Level 3 にも CC（CC 23）があります。ほかのレベルと 
 
 | ID | シグナル | | ID | シグナル | | ID | シグナル |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | なし（定数 0.0） | | 16 | General Unipolar 3 | | 32 | Osc 2 Output Saw ± |
-| 1 | 定数 1.0 | | 17 | General Unipolar 4 | | 33 | Osc 2 Output Pulse ± |
-| 2 | 定数 0.707 | | 18 | General Bipolar 1 ± | | 34 | Noise 1 Output ± |
-| 3 | 定数 0.5 | | 19 | General Bipolar 2 ± | | 35 | Noise 1 Output White ± |
-| 4 | 定数 0.2 | | 20 | General Bipolar 3 ± | | 36 | Noise 1 Output Red ± |
-| 5 | 定数 0.1 | | 21 | General Bipolar 4 ± | | 37 | Mixer 2 Output ± |
-| 6 | 定数 -0.1 | | 22 | EG 1 Output | | 38 | Filter 1 Output ± |
-| 7 | 定数 -0.2 | | 23 | LFO 1 Output ± | | 39 | Filter 1 Output LP ± |
-| 8 | 定数 -0.5 | | 24 | LFO 1 Output Triangle ± | | 40 | Filter 1 Output HP ± |
-| 9 | 定数 -1.0 | | 25 | LFO 1 Output Square ± | | 41 | Amp 1 Output ± |
-| 10 | Note Pitch ± | | 26 | Mixer 1 Output ± | | 42 | Chorus 1 Output L ± |
-| 11 | Note Gate | | 27 | Pitch 1 Output ± | | 43 | Chorus 1 Output R ± |
-| 12 | Pitch Bend ± | | 28 | Osc 1 Output ± | | 44 | Chorus 1 Output Mono ± |
-| 13 | General Mod Wheel | | 29 | Osc 1 Output Saw ± | | 45 | Delay 1 Output L ± |
-| 14 | General Unipolar 1 | | 30 | Osc 1 Output Pulse ± | | 46 | Delay 1 Output R ± |
-| 15 | General Unipolar 2 | | 31 | Osc 2 Output ± | | 47 | Delay 1 Output Mono ± |
+| 0 | なし（定数 0.0） | | 17 | General Unipolar 4 | | 34 | Noise 1 Output ± |
+| 1 | 定数 1.0 | | 18 | General Bipolar 1 ± | | 35 | Noise 1 Output White ± |
+| 2 | 定数 0.707 | | 19 | General Bipolar 2 ± | | 36 | Noise 1 Output Red ± |
+| 3 | 定数 0.5 | | 20 | General Bipolar 3 ± | | 37 | Mixer 2 Output ± |
+| 4 | 定数 0.2 | | 21 | General Bipolar 4 ± | | 38 | Filter 1 Output ± |
+| 5 | 定数 0.1 | | 22 | EG 1 Output | | 39 | Filter 1 Output LP ± |
+| 6 | 定数 -0.1 | | 23 | LFO 1 Output ± | | 40 | Filter 1 Output HP ± |
+| 7 | 定数 -0.2 | | 24 | LFO 1 Output Triangle ± | | 41 | Filter 1 Output BP ± |
+| 8 | 定数 -0.5 | | 25 | LFO 1 Output Square ± | | 42 | Amp 1 Output ± |
+| 9 | 定数 -1.0 | | 26 | Mixer 1 Output ± | | 43 | Chorus 1 Output L ± |
+| 10 | Note Pitch ± | | 27 | Pitch 1 Output ± | | 44 | Chorus 1 Output R ± |
+| 11 | Note Gate | | 28 | Osc 1 Output ± | | 45 | Chorus 1 Output Mono ± |
+| 12 | Pitch Bend ± | | 29 | Osc 1 Output Saw ± | | 46 | Delay 1 Output L ± |
+| 13 | General Mod Wheel | | 30 | Osc 1 Output Pulse ± | | 47 | Delay 1 Output R ± |
+| 14 | General Unipolar 1 | | 31 | Osc 2 Output ± | | 48 | Delay 1 Output Mono ± |
+| 15 | General Unipolar 2 | | 32 | Osc 2 Output Saw ± | |  |  |
+| 16 | General Unipolar 3 | | 33 | Osc 2 Output Pulse ± | |  |  |
 
 <!-- patch_gen end -->
 
@@ -866,10 +876,10 @@ Pitch 1 Glide はユニポーラで、1/120 刻み、1 ステップで時間が�
   Wheel から取ります。起動時は 0.0 なので、ホイールを動かすまで出力はドライです
 - モジュレーションホイールで掛かるコーラス: CC 99 = 2, CC 98 = 79, CC 6 = 13 で Chorus 1 Mix を General
   Mod Wheel から取ります。ホイールを動かすまで出力はモノラルのままです
-- ディレイを残してコーラスを音から外す: CC 99 = 1, CC 98 = 30 と 31 に CC 6 = 41 を送って Delay 1 の左右に
+- ディレイを残してコーラスを音から外す: CC 99 = 1, CC 98 = 30 と 31 に CC 6 = 42 を送って Delay 1 の左右に
   アンプを入れます。コーラスは走り続けますが誰も読まず、出力はモノラルになります
 - フィルタの前に置くエコー: CC 99 = 1, CC 98 = 30, CC 6 = 28 で Delay 1 の左にオシレータを入れ、CC 98 = 23,
-  CC 6 = 45 でフィルタにその出力を入れ、CC 98 = 32 と 33 に CC 6 = 42 と 43 を送って最終出力を、アンプを
+  CC 6 = 46 でフィルタにその出力を入れ、CC 98 = 32 と 33 に CC 6 = 43 と 44 を送って最終出力を、アンプを
   受け取ったままのコーラスに向けます。繰り返しもノートと同じくフィルタとアンプのエンベロープを通るので、
   音と一緒に消えていきます。Delay 1 はフィルタの後ろで走ったままなので、フィルタは 1 サンプル遅れて読み
   ますが、エコーには関係ありません

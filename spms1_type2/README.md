@@ -286,6 +286,12 @@ low pass until Mode is turned up. Out is not clipped again: in the pass band one
 where both are, the notch takes them down. The two factors are smoothed as the other levels
 are.
 
+The band pass leaves too, as Out BP, through a DC blocker and an output clip of its own, outside
+the Mode crossfade. It is the integrator's state as it is, not normalized, so its peak at the
+cutoff is Q times the input: 0.707 times at Resonance 0.0, and well into the output clip's
+shoulder at a high resonance on a loud input, which Filter 1 Gain (CC 112) takes down. The default
+patch leaves it unconnected.
+
 ```mermaid
 flowchart LR
   IN([Input]) --> SUM((Σ))
@@ -293,8 +299,10 @@ flowchart LR
   I1 -->|BP| I2["Integrator 2<br/>LP, state s2"]
   I2 -->|LP| OC["Output clips<br/>linear up to 0.75"]
   SUM -->|HP| OC
+  I1 -->|BP| OC
   OC -->|LP| OUT_LP([Out LP])
   OC -->|HP| OUT_HP([Out HP])
+  OC -->|BP| OUT_BP([Out BP])
   OC -->|LP| XF["Mode<br/>LP / notch / HP"]
   OC -->|HP| XF
   XF --> OUT([Out])
@@ -318,8 +326,10 @@ flowchart LR
   A2 -->|BP| A3["Integrator ∫<br/>C2, linear"]
   A3 -->|LP| LIM["Output limiters"]
   A1 -->|HP| LIM
+  A2 -->|BP| LIM
   LIM -->|LP| OUT_LP([Out LP])
   LIM -->|HP| OUT_HP([Out HP])
+  LIM -->|BP| OUT_BP([Out BP])
   LIM -->|LP| XF["Crossfader<br/>Mode"]
   LIM -->|HP| XF
   XF --> OUT([Out])
@@ -568,22 +578,23 @@ two slots, a unipolar and a bipolar one. See the General slots below.
 
 | ID | Signal | | ID | Signal | | ID | Signal |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | None (constant 0.0) | | 16 | General Unipolar 3 | | 32 | Osc 2 Output Saw ± |
-| 1 | Constant 1.0 | | 17 | General Unipolar 4 | | 33 | Osc 2 Output Pulse ± |
-| 2 | Constant 0.707 | | 18 | General Bipolar 1 ± | | 34 | Noise 1 Output ± |
-| 3 | Constant 0.5 | | 19 | General Bipolar 2 ± | | 35 | Noise 1 Output White ± |
-| 4 | Constant 0.2 | | 20 | General Bipolar 3 ± | | 36 | Noise 1 Output Red ± |
-| 5 | Constant 0.1 | | 21 | General Bipolar 4 ± | | 37 | Mixer 2 Output ± |
-| 6 | Constant -0.1 | | 22 | EG 1 Output | | 38 | Filter 1 Output ± |
-| 7 | Constant -0.2 | | 23 | LFO 1 Output ± | | 39 | Filter 1 Output LP ± |
-| 8 | Constant -0.5 | | 24 | LFO 1 Output Triangle ± | | 40 | Filter 1 Output HP ± |
-| 9 | Constant -1.0 | | 25 | LFO 1 Output Square ± | | 41 | Amp 1 Output ± |
-| 10 | Note Pitch ± | | 26 | Mixer 1 Output ± | | 42 | Chorus 1 Output L ± |
-| 11 | Note Gate | | 27 | Pitch 1 Output ± | | 43 | Chorus 1 Output R ± |
-| 12 | Pitch Bend ± | | 28 | Osc 1 Output ± | | 44 | Chorus 1 Output Mono ± |
-| 13 | General Mod Wheel | | 29 | Osc 1 Output Saw ± | | 45 | Delay 1 Output L ± |
-| 14 | General Unipolar 1 | | 30 | Osc 1 Output Pulse ± | | 46 | Delay 1 Output R ± |
-| 15 | General Unipolar 2 | | 31 | Osc 2 Output ± | | 47 | Delay 1 Output Mono ± |
+| 0 | None (constant 0.0) | | 17 | General Unipolar 4 | | 34 | Noise 1 Output ± |
+| 1 | Constant 1.0 | | 18 | General Bipolar 1 ± | | 35 | Noise 1 Output White ± |
+| 2 | Constant 0.707 | | 19 | General Bipolar 2 ± | | 36 | Noise 1 Output Red ± |
+| 3 | Constant 0.5 | | 20 | General Bipolar 3 ± | | 37 | Mixer 2 Output ± |
+| 4 | Constant 0.2 | | 21 | General Bipolar 4 ± | | 38 | Filter 1 Output ± |
+| 5 | Constant 0.1 | | 22 | EG 1 Output | | 39 | Filter 1 Output LP ± |
+| 6 | Constant -0.1 | | 23 | LFO 1 Output ± | | 40 | Filter 1 Output HP ± |
+| 7 | Constant -0.2 | | 24 | LFO 1 Output Triangle ± | | 41 | Filter 1 Output BP ± |
+| 8 | Constant -0.5 | | 25 | LFO 1 Output Square ± | | 42 | Amp 1 Output ± |
+| 9 | Constant -1.0 | | 26 | Mixer 1 Output ± | | 43 | Chorus 1 Output L ± |
+| 10 | Note Pitch ± | | 27 | Pitch 1 Output ± | | 44 | Chorus 1 Output R ± |
+| 11 | Note Gate | | 28 | Osc 1 Output ± | | 45 | Chorus 1 Output Mono ± |
+| 12 | Pitch Bend ± | | 29 | Osc 1 Output Saw ± | | 46 | Delay 1 Output L ± |
+| 13 | General Mod Wheel | | 30 | Osc 1 Output Pulse ± | | 47 | Delay 1 Output R ± |
+| 14 | General Unipolar 1 | | 31 | Osc 2 Output ± | | 48 | Delay 1 Output Mono ± |
+| 15 | General Unipolar 2 | | 32 | Osc 2 Output Saw ± | |  |  |
+| 16 | General Unipolar 3 | | 33 | Osc 2 Output Pulse ± | |  |  |
 
 <!-- patch_gen end -->
 
@@ -931,12 +942,12 @@ changes only how fast the output moves, so it cannot step it.
   from General Mod Wheel, which powers up at 0.0, so the output is dry until the wheel moves
 - Chorus that only comes in with the mod wheel: CC 99 = 2, CC 98 = 79, CC 6 = 13 takes Chorus 1
   Mix from General Mod Wheel, so the output stays mono until the wheel moves
-- Leave the chorus out of the sound, keeping the delay: CC 99 = 1, CC 98 = 30 and 31, CC 6 = 41
+- Leave the chorus out of the sound, keeping the delay: CC 99 = 1, CC 98 = 30 and 31, CC 6 = 42
   feeds both sides of Delay 1 from the amp. The chorus keeps running and nothing reads it, and the
   output is then mono
 - Echoes ahead of the filter: CC 99 = 1, CC 98 = 30, CC 6 = 28 feeds Delay 1's left side from the
-  oscillator, CC 98 = 23, CC 6 = 45 feeds the filter from it, and CC 98 = 32 and 33, CC 6 = 42 and
-  43 points the final output at the chorus, which still takes the amp. The repeats then go
+  oscillator, CC 98 = 23, CC 6 = 46 feeds the filter from it, and CC 98 = 32 and 33, CC 6 = 43 and
+  44 points the final output at the chorus, which still takes the amp. The repeats then go
   through the filter and the amp's envelope as the note does, so they die away with it. Delay 1
   still runs after the filter, which reads it a sample late; for an echo that does not matter
 
