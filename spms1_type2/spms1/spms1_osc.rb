@@ -122,8 +122,9 @@ module Spms1
       @modulation_2_depth = @modulation_2_amount * @modulation_2_polarity
     end
 
-    # Each pulse width modulation depth is amount times polarity, as the pitch's are. A unit of
-    # pulse width modulation input times depth is the whole pulse width range, so at full depth a
+    # Each pulse width modulation depth is amount times polarity, as the pitch's are, on the same
+    # input: PW Mod 1 on Mod 1 In and PW Mod 2 on Mod 2 In, so that one source moves the pitch and
+    # the pulse width each by a depth of its own. A unit of input times depth is the whole pulse width range, so at full depth a
     # bipolar source swings it half the range either way, and a unipolar one across all of it. The
     # two are alike.
     def set_pw_modulation_1_amount(amount)
@@ -170,7 +171,7 @@ module Spms1
     # lookup in bounds. The pulse width its modulations add up to is held to its own, [-0.5, 0.5].
     # The modulation inputs are deliberately not smoothed, so a fast source reaches the pitch and
     # the pulse width unslewed.
-    def process(control_tick, pitch_input = 0.0, modulation_1_input = 0.0, modulation_2_input = 0.0, pw_modulation_1_input = 0.0, pw_modulation_2_input = 0.0)
+    def process(control_tick, pitch_input = 0.0, modulation_1_input = 0.0, modulation_2_input = 0.0)
       if control_tick
         # Morph, pulse width and depth are smoothed at the control rate to avoid sudden jumps.
         @stage_1_waveform = Dsp.smooth(@waveform, @stage_1_waveform, @smoothing_target_blend)
@@ -201,7 +202,7 @@ module Spms1
 
       # The pulse width is held to its range after the modulation is added, which also keeps the
       # shift within one cycle, so that a single wrap below brings phase2 back under 1.0.
-      total_pulse_width = @current_pulse_width + (pw_modulation_1_input * @current_pw_modulation_1_depth) + (pw_modulation_2_input * @current_pw_modulation_2_depth)
+      total_pulse_width = @current_pulse_width + (modulation_1_input * @current_pw_modulation_1_depth) + (modulation_2_input * @current_pw_modulation_2_depth)
       pulse_width = (total_pulse_width < -0.5) ? -0.5 : ((total_pulse_width > 0.5) ? 0.5 : total_pulse_width)
       phase2 = @phase + (0.5 + pulse_width)
       phase2 -= (phase2 < 1.0) ? 0.0 : 1.0

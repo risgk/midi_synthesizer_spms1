@@ -34,8 +34,8 @@ modules:
   - { key: LFO_1,     id: 2, label: LFO 1, class: LFO, process: [RATE_MOD, LEVEL_MOD] }
   - { key: MIXER_1,   id: 3, label: Mixer 1, class: Mixer, process: [IN_1, IN_2, IN_3] }
   - { key: PITCH_1,    id: 4, label: Pitch 1, class: Pitch, process: [PITCH, BEND] }
-  - { key: OSC_1,     id: 5, label: Osc 1, class: Osc, process: [PITCH, MOD_1, MOD_2, PW_MOD_1, PW_MOD_2] }
-  - { key: OSC_2,      id: 6, label: Osc 2, class: Osc, process: [PITCH, MOD_1, MOD_2, PW_MOD_1, PW_MOD_2] }
+  - { key: OSC_1,     id: 5, label: Osc 1, class: Osc, process: [PITCH, MOD_1, MOD_2] }
+  - { key: OSC_2,      id: 6, label: Osc 2, class: Osc, process: [PITCH, MOD_1, MOD_2] }
   - { key: NOISE_1,    id: 7, label: Noise 1, class: Noise, process: [] }
   - { key: MIXER_2,    id: 8, label: Mixer 2, class: Mixer, process: [IN_1, IN_2, IN_3] }
   - { key: FILTER_1,  id: 9, label: Filter 1, class: Filter, process: [AUDIO, MOD_1, MOD_2, MOD_3] }
@@ -173,29 +173,23 @@ inputs:
   - { entry: 8, module: OSC_1,       key: PITCH,       label: Pitch In,       name: Pitch In,       source: PITCH_1_OUTPUT }
   - { entry: 9, module: OSC_1,       key: MOD_1,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
   - { entry: 10, module: OSC_1,       key: MOD_2,       label: Mod 2 In,   name: Mod 2 In,   source: LFO_1_OUTPUT }
-  # PW Mod 1 In and PW Mod 2 In: the envelope and the LFO wired to the pulse width as Mod 1 In and
-  # Mod 2 In are to the pitch.
-  - { entry: 11, module: OSC_1,       key: PW_MOD_1,    label: PW Mod 1 In,    name: PW Mod 1 In,    source: EG_1_OUTPUT }
-  - { entry: 12, module: OSC_1,       key: PW_MOD_2,    label: PW Mod 2 In,    name: PW Mod 2 In,    source: LFO_1_OUTPUT }
-  - { entry: 13, module: OSC_2,       key: PITCH,       label: Pitch In,       name: Pitch In,       source: PITCH_1_OUTPUT }
-  - { entry: 14, module: OSC_2,       key: MOD_1,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
-  - { entry: 15, module: OSC_2,       key: MOD_2,       label: Mod 2 In,       name: Mod 2 In,       source: LFO_1_OUTPUT }
-  - { entry: 16, module: OSC_2,       key: PW_MOD_1,    label: PW Mod 1 In,    name: PW Mod 1 In,    source: EG_1_OUTPUT }
-  - { entry: 17, module: OSC_2,       key: PW_MOD_2,    label: PW Mod 2 In,    name: PW Mod 2 In,    source: LFO_1_OUTPUT }
-  - { entry: 18, module: MIXER_2,     key: IN_1,        label: In 1,           name: In 1,           source: OSC_1_OUTPUT }
-  - { entry: 19, module: MIXER_2,     key: IN_2,        label: In 2,           name: In 2,           source: OSC_2_OUTPUT }
-  - { entry: 20, module: MIXER_2,     key: IN_3,        label: In 3,           name: In 3,           source: NOISE_1_OUTPUT }
-  - { entry: 21, module: FILTER_1,    key: AUDIO,       label: Audio In,       name: Audio In,       source: MIXER_2_OUTPUT }
-  - { entry: 22, module: FILTER_1,    key: MOD_1,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
-  - { entry: 23, module: FILTER_1,    key: MOD_2,       label: Mod 2 In,       name: Mod 2 In,       source: LFO_1_OUTPUT }
-  - { entry: 24, module: FILTER_1,    key: MOD_3,       label: Mod 3 In,       name: Mod 3 In,       source: PITCH_1_OUTPUT }
-  - { entry: 25, module: AMP_1,       key: AUDIO,       label: Audio In,       name: Audio In,       source: FILTER_1_OUTPUT }
-  - { entry: 26, module: AMP_1,       key: MOD,         label: Mod In,         name: Mod In,         source: EG_1_OUTPUT }
-  - { entry: 27, module: CHORUS_1,    key: AUDIO,       label: Audio In,       name: Audio In,       source: AMP_1_OUTPUT }
-  - { entry: 28, module: DELAY_1,     key: AUDIO_L,     label: Audio In L,     name: Audio In L,     source: CHORUS_1_OUTPUT_L }
-  - { entry: 29, module: DELAY_1,     key: AUDIO_R,     label: Audio In R,     name: Audio In R,     source: CHORUS_1_OUTPUT_R }
-  - { entry: 30, key: OUTPUT_L,    label: L,              name: Final Output L, name_ja: 最終出力 L, source: DELAY_1_OUTPUT_L }
-  - { entry: 31, key: OUTPUT_R,    label: R,              name: Final Output R, name_ja: 最終出力 R, source: DELAY_1_OUTPUT_R }
+  - { entry: 11, module: OSC_2,       key: PITCH,       label: Pitch In,       name: Pitch In,       source: PITCH_1_OUTPUT }
+  - { entry: 12, module: OSC_2,       key: MOD_1,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
+  - { entry: 13, module: OSC_2,       key: MOD_2,       label: Mod 2 In,       name: Mod 2 In,       source: LFO_1_OUTPUT }
+  - { entry: 14, module: MIXER_2,     key: IN_1,        label: In 1,           name: In 1,           source: OSC_1_OUTPUT }
+  - { entry: 15, module: MIXER_2,     key: IN_2,        label: In 2,           name: In 2,           source: OSC_2_OUTPUT }
+  - { entry: 16, module: MIXER_2,     key: IN_3,        label: In 3,           name: In 3,           source: NOISE_1_OUTPUT }
+  - { entry: 17, module: FILTER_1,    key: AUDIO,       label: Audio In,       name: Audio In,       source: MIXER_2_OUTPUT }
+  - { entry: 18, module: FILTER_1,    key: MOD_1,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
+  - { entry: 19, module: FILTER_1,    key: MOD_2,       label: Mod 2 In,       name: Mod 2 In,       source: LFO_1_OUTPUT }
+  - { entry: 20, module: FILTER_1,    key: MOD_3,       label: Mod 3 In,       name: Mod 3 In,       source: PITCH_1_OUTPUT }
+  - { entry: 21, module: AMP_1,       key: AUDIO,       label: Audio In,       name: Audio In,       source: FILTER_1_OUTPUT }
+  - { entry: 22, module: AMP_1,       key: MOD,         label: Mod In,         name: Mod In,         source: EG_1_OUTPUT }
+  - { entry: 23, module: CHORUS_1,    key: AUDIO,       label: Audio In,       name: Audio In,       source: AMP_1_OUTPUT }
+  - { entry: 24, module: DELAY_1,     key: AUDIO_L,     label: Audio In L,     name: Audio In L,     source: CHORUS_1_OUTPUT_L }
+  - { entry: 25, module: DELAY_1,     key: AUDIO_R,     label: Audio In R,     name: Audio In R,     source: CHORUS_1_OUTPUT_R }
+  - { entry: 26, key: OUTPUT_L,    label: L,              name: Final Output L, name_ja: 最終出力 L, source: DELAY_1_OUTPUT_L }
+  - { entry: 27, key: OUTPUT_R,    label: R,              name: Final Output R, name_ja: 最終出力 R, source: DELAY_1_OUTPUT_R }
 
 # Controls, listed in the editor's order, each by its entry: a parameter is one entry of NRPN
 # category 2 (where it takes its value) and the same entry of category 3 (which CC fills its
