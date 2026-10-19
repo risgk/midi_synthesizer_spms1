@@ -1,9 +1,9 @@
 module Spms1
-  # Sums four inputs, each at its own level and its own polarity, with a balance across each pair,
-  # 1 and 2, 3 and 4. With one input routed it is a buffer, an attenuator or an inverter; inverting
-  # just one input subtracts it from another; a constant on another input shifts a unipolar
-  # signal, such as the envelope, into a bipolar one; and a balance turned to one end selects one
-  # input of its pair. Mixer 1 serves the modulation, Mixer 2 the audio ahead of the filter.
+  # Sums three inputs, each at its own level and its own polarity, with a balance across the pair
+  # 1 and 2. With one input routed it is a buffer, an attenuator or an inverter; inverting just one
+  # input subtracts it from another; a constant on another input shifts a unipolar signal, such as
+  # the envelope, into a bipolar one; and the balance turned to one end selects one input of its
+  # pair. Mixer 1 serves the modulation, Mixer 2 the audio ahead of the filter.
   class Mixer
     # Blend at the reference rate on the line below, for each of two cascaded stages. The two move
     # together: their product is what fixes the time constant, so changing one without the other
@@ -18,7 +18,7 @@ module Spms1
     # constant if both are changed.
     CONTROL_RATE_DIVISOR = 4
 
-    # Lookup for the balances, one run of 130 entries for each of the five laws Balance Law picks,
+    # Lookup for the balance, one run of 130 entries for each of the five laws Balance Law picks,
     # each a factor f(u) for u = i / 64, 0.0 to 2.0, interpolated in a straight line between
     # entries:
     #   0 linear      f(u) = u               the two factors add to 2.0
@@ -27,7 +27,7 @@ module Spms1
     #   3 overlap     f(u) = min(u, 1.0)     each at 1.0 over its own half, as Filter 1 Mode's
     #   4 split       f(u) = max(u - 1.0, 0) one input on each side, at the balance's distance from
     #                                        the centre: both silent there, each at 1.0 at its end
-    # A balance is worked out every buffer whether it has moved or not, never only when it changes,
+    # The balance is worked out every buffer whether it has moved or not, never only when it changes,
     # and always by the same few operations with no branch on its value or on the law: the time a
     # buffer takes must not hang on what the patch or the CCs are doing, so that its worst case is
     # the case measured, and can be guaranteed. A square root would be a library call in double
@@ -65,31 +65,24 @@ module Spms1
       @level_1 = 0.0
       @level_2 = 0.0
       @level_3 = 0.0
-      @level_4 = 0.0
       @polarity_1 = 1.0
       @polarity_2 = 1.0
       @polarity_3 = 1.0
-      @polarity_4 = 1.0
-      # The balance of each pair as a multiplier on each of its two inputs, 1.0 at the centre.
+      # The balance of the pair as a multiplier on each of its two inputs, 1.0 at the centre.
       @balance_factor_1 = 1.0
       @balance_factor_2 = 1.0
-      @balance_factor_3 = 1.0
-      @balance_factor_4 = 1.0
-      # Each polarity and balance is folded into its own level when it is set rather than applied
-      # per sample, so the per-sample path is four multiplies and three adds and only four states
-      # smooth.
+      # Each polarity and the balance are folded into their own levels when they are set rather
+      # than applied per sample, so the per-sample path is three multiplies and two adds and only
+      # three states smooth.
       @target_1 = 0.0
       @target_2 = 0.0
       @target_3 = 0.0
-      @target_4 = 0.0
       @stage_1_1 = 0.0
       @stage_1_2 = 0.0
       @stage_1_3 = 0.0
-      @stage_1_4 = 0.0
       @current_1 = 0.0
       @current_2 = 0.0
       @current_3 = 0.0
-      @current_4 = 0.0
       # Out Level scales the sum, smoothed as the input levels are.
       @out_level = 1.0
       @stage_1_out_level = 1.0
@@ -109,12 +102,7 @@ module Spms1
 
     def set_level_3(level)
       @level_3 = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
-      @target_3 = @level_3 * @polarity_3 * @balance_factor_3
-    end
-
-    def set_level_4(level)
-      @level_4 = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
-      @target_4 = @level_4 * @polarity_4 * @balance_factor_4
+      @target_3 = @level_3 * @polarity_3
     end
 
     # Each polarity is bipolar, [-0.5, 0.5], and doubled into a multiplier on its own input: +0.5
@@ -137,16 +125,10 @@ module Spms1
     def set_polarity_3(polarity)
       clamped_polarity = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
       @polarity_3 = clamped_polarity + clamped_polarity
-      @target_3 = @level_3 * @polarity_3 * @balance_factor_3
+      @target_3 = @level_3 * @polarity_3
     end
 
-    def set_polarity_4(polarity)
-      clamped_polarity = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
-      @polarity_4 = clamped_polarity + clamped_polarity
-      @target_4 = @level_4 * @polarity_4 * @balance_factor_4
-    end
-
-    # Balance Law is bipolar, [-0.5, 0.5], and picks how both balances crossfade, in five zones, the
+    # Balance Law is bipolar, [-0.5, 0.5], and picks how Balance 1/2 crossfades, in five zones, the
     # two at the ends 0.125 wide and the three between 0.25: linear (CC 0-18), reserved (CC 19-48,
     # as equal power for now), equal power (CC 49-78, as PRA32-U2's Osc Mix), overlap (CC 79-108,
     # as Filter 1 Mode) and split (CC 109-127), so the constants -0.5, -0.2, 0.0, +0.2 and +0.5
@@ -154,14 +136,14 @@ module Spms1
     # with no CC. The zone is the integer part of law * 4 + 2.51, 0.51 to 4.51: the 0.01, a third of a CC
     # step, keeps every CC value off an edge, where float rounding could put it either side. No
     # branch either way. It is read once a buffer like any other
-    # parameter, ahead of the balances, which are worked out again in the same buffer; their
-    # factors are smoothed on the way to the inputs, so switching laws does not click.
+    # parameter, ahead of the balance, which is worked out again in the same buffer; its factors
+    # are smoothed on the way to the inputs, so switching laws does not click.
     def set_balance_law(law)
       clamped_law = (law < -0.5) ? -0.5 : ((law > 0.5) ? 0.5 : law)
       @balance_law_offset = (clamped_law * 4.0 + 2.51).to_i * BALANCE_TABLE_RUN
     end
 
-    # Each balance is bipolar, [-0.5, 0.5], and crossfades its pair by the law Balance Law picks,
+    # The balance is bipolar, [-0.5, 0.5], and crossfades its pair by the law Balance Law picks,
     # the factors f(1 - 2b) and f(1 + 2b) of BALANCE_TABLE. 0.0 at the centre leaves both inputs as
     # they are, so the centre is the mixer without a balance, whatever the law but split, which
     # silences both there; -0.5 silences the second input and takes the first to 2.0 (linear), √2
@@ -179,14 +161,6 @@ module Spms1
       @balance_factor_2 = balance_factor_fast(1.0 + (clamped_balance + clamped_balance))
       @target_1 = @level_1 * @polarity_1 * @balance_factor_1
       @target_2 = @level_2 * @polarity_2 * @balance_factor_2
-    end
-
-    def set_balance_3_4(balance)
-      clamped_balance = (balance < -0.5) ? -0.5 : ((balance > 0.5) ? 0.5 : balance)
-      @balance_factor_3 = balance_factor_fast(1.0 - (clamped_balance + clamped_balance))
-      @balance_factor_4 = balance_factor_fast(1.0 + (clamped_balance + clamped_balance))
-      @target_3 = @level_3 * @polarity_3 * @balance_factor_3
-      @target_4 = @level_4 * @polarity_4 * @balance_factor_4
     end
 
     # Out Level is unipolar, [0.0, 1.0], a plain multiplier on the sum, so one control can take a
@@ -207,7 +181,7 @@ module Spms1
     # 0.5 to stay inside it.
     # Written as a literal rather than a constant on purpose: Spinel emits a named Float as a mutable
     # global, and a mixer loading one twice a sample is about 1.8us a buffer.
-    def process(control_tick, input_1 = 0.0, input_2 = 0.0, input_3 = 0.0, input_4 = 0.0)
+    def process(control_tick, input_1 = 0.0, input_2 = 0.0, input_3 = 0.0)
       if control_tick
         @stage_1_1 = Dsp.smooth(@target_1, @stage_1_1, @smoothing_target_blend)
         @current_1 = Dsp.smooth(@stage_1_1, @current_1, @smoothing_target_blend)
@@ -215,13 +189,11 @@ module Spms1
         @current_2 = Dsp.smooth(@stage_1_2, @current_2, @smoothing_target_blend)
         @stage_1_3 = Dsp.smooth(@target_3, @stage_1_3, @smoothing_target_blend)
         @current_3 = Dsp.smooth(@stage_1_3, @current_3, @smoothing_target_blend)
-        @stage_1_4 = Dsp.smooth(@target_4, @stage_1_4, @smoothing_target_blend)
-        @current_4 = Dsp.smooth(@stage_1_4, @current_4, @smoothing_target_blend)
         @stage_1_out_level = Dsp.smooth(@out_level, @stage_1_out_level, @smoothing_target_blend)
         @current_out_level = Dsp.smooth(@stage_1_out_level, @current_out_level, @smoothing_target_blend)
       end
 
-      sum = ((input_1 * @current_1 + input_2 * @current_2) + (input_3 * @current_3 + input_4 * @current_4)) * @current_out_level
+      sum = ((input_1 * @current_1 + input_2 * @current_2) + input_3 * @current_3) * @current_out_level
       # One nested ternary, not two statements. Split in two, each comparison compiles to a vsel
       # when the method stands alone, which is not how it is built: inside the flattened
       # Spms1_main the branch count does not move and the extra instructions cost 870/875us a
