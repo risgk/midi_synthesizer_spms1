@@ -63,6 +63,8 @@ SIGNAL_OSC_2_OUTPUT_SAW      = 120
 SIGNAL_OSC_2_OUTPUT_PULSE    = 121
 SIGNAL_LFO_1_OUTPUT_TRIANGLE = 123
 SIGNAL_LFO_1_OUTPUT_SQUARE   = 124
+SIGNAL_CHORUS_1_OUTPUT_MONO  = 126
+SIGNAL_DELAY_1_OUTPUT_MONO   = 19
 
 # A parameter source of SIGNAL_OWN is the parameter's own control slot, at PARAM_SLOT_BASE + its
 # entry, off the bus: the slots below.

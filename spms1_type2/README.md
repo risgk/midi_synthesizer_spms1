@@ -357,6 +357,10 @@ It needs no limiter and no clip after it: the input is held to one unit on the w
 filter, the reading between two samples and the crossfades are all weighted averages, which cannot
 reach past what they average. The delay the taps swing about is fixed.
 
+Out Mono, a sub output, is the average of Out L and Out R, for a mono destination such as a
+mixer input or the filter. The two taps summed make a gentler chorus than the spread, with some
+comb filtering where they meet.
+
 #### Delay 1
 
 A stereo delay with feedback, after PRA32-U2's Delay FX in its Stereo Delay mode. Each side has a
@@ -385,6 +389,8 @@ filter, the reading between two samples and the crossfade are all weighted avera
 reach past what they average. The price is that the first repeat comes 6 dB under the dry signal.
 Each input is held to one unit on the way in, as the amp holds its modulation input, so whatever
 is routed to it the bound holds.
+
+Out Mono, a sub output, is the average of Out L and Out R, for a mono destination.
 
 ### Patch Editing (NRPN)
 
@@ -560,22 +566,22 @@ two slots, a unipolar and a bipolar one. See the General slots below.
 
 | ID | Signal | | ID | Signal | | ID | Signal |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | None (constant 0.0) | | 16 | Chorus 1 Output R ± | | 66 | Filter 1 Output HP ± |
-| 1 | Constant 1.0 | | 17 | Delay 1 Output L ± | | 86 | Noise 1 Output ± |
-| 2 | Constant 0.5 | | 18 | Delay 1 Output R ± | | 88 | Osc 2 Output ± |
-| 3 | Constant 0.2 | | 48 | Note Pitch ± | | 106 | Mixer 2 Output ± |
-| 4 | Constant 0.1 | | 49 | Note Gate | | 116 | Noise 1 Output Red ± |
-| 5 | Constant -0.1 | | 50 | Pitch Bend ± | | 117 | Filter 1 Output LP ± |
-| 6 | Constant -0.2 | | 51 | General Mod Wheel | | 118 | Osc 1 Output Saw ± |
-| 7 | Constant -0.5 | | 52 | General Unipolar 1 | | 119 | Osc 1 Output Pulse ± |
-| 8 | Constant -1.0 | | 53 | General Unipolar 2 | | 120 | Osc 2 Output Saw ± |
-| 9 | LFO 1 Output ± | | 54 | General Unipolar 3 | | 121 | Osc 2 Output Pulse ± |
-| 10 | EG 1 Output | | 55 | General Unipolar 4 | | 122 | Noise 1 Output White ± |
-| 11 | Osc 1 Output ± | | 56 | General Bipolar 1 ± | | 123 | LFO 1 Output Triangle ± |
-| 12 | Filter 1 Output ± | | 57 | General Bipolar 2 ± | | 124 | LFO 1 Output Square ± |
-| 13 | Amp 1 Output ± | | 58 | General Bipolar 3 ± | | 125 | Constant 0.707 |
-| 14 | Mixer 1 Output ± | | 59 | General Bipolar 4 ± | |  |  |
-| 15 | Chorus 1 Output L ± | | 60 | Pitch 1 Output ± | |  |  |
+| 0 | None (constant 0.0) | | 16 | Chorus 1 Output R ± | | 60 | Pitch 1 Output ± |
+| 1 | Constant 1.0 | | 17 | Delay 1 Output L ± | | 66 | Filter 1 Output HP ± |
+| 2 | Constant 0.5 | | 18 | Delay 1 Output R ± | | 86 | Noise 1 Output ± |
+| 3 | Constant 0.2 | | 19 | Delay 1 Output Mono ± | | 88 | Osc 2 Output ± |
+| 4 | Constant 0.1 | | 48 | Note Pitch ± | | 106 | Mixer 2 Output ± |
+| 5 | Constant -0.1 | | 49 | Note Gate | | 116 | Noise 1 Output Red ± |
+| 6 | Constant -0.2 | | 50 | Pitch Bend ± | | 117 | Filter 1 Output LP ± |
+| 7 | Constant -0.5 | | 51 | General Mod Wheel | | 118 | Osc 1 Output Saw ± |
+| 8 | Constant -1.0 | | 52 | General Unipolar 1 | | 119 | Osc 1 Output Pulse ± |
+| 9 | LFO 1 Output ± | | 53 | General Unipolar 2 | | 120 | Osc 2 Output Saw ± |
+| 10 | EG 1 Output | | 54 | General Unipolar 3 | | 121 | Osc 2 Output Pulse ± |
+| 11 | Osc 1 Output ± | | 55 | General Unipolar 4 | | 122 | Noise 1 Output White ± |
+| 12 | Filter 1 Output ± | | 56 | General Bipolar 1 ± | | 123 | LFO 1 Output Triangle ± |
+| 13 | Amp 1 Output ± | | 57 | General Bipolar 2 ± | | 124 | LFO 1 Output Square ± |
+| 14 | Mixer 1 Output ± | | 58 | General Bipolar 3 ± | | 125 | Constant 0.707 |
+| 15 | Chorus 1 Output L ± | | 59 | General Bipolar 4 ± | | 126 | Chorus 1 Output Mono ± |
 
 <!-- patch_gen end -->
 

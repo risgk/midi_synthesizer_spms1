@@ -342,6 +342,10 @@ flowchart LR
 クロスフェードも重み付き平均で、平均するもの以上にはなりません。タップが揺れる中心の遅延は
 固定です。
 
+サブ出力の Out Mono は Out L と Out R の平均で、ミキサーの入力やフィルタなどモノラルの行き先に
+使います。2 つのタップを足すので、ステレオに広げたときよりおとなしいコーラスになり、タップが重なる
+ところで多少コムフィルタがかかります。
+
 #### Delay 1
 
 PRA32-U2 の Delay FX の Stereo Delay モードにならった、フィードバック付きのステレオディレイです。左右
@@ -367,6 +371,8 @@ flowchart LR
 2 サンプル間の読み出しもクロスフェードも重み付き平均で、平均するもの以上にはなりません。代わりに、最初の
 繰り返しはドライ信号より 6 dB 小さくなります。入力は、アンプが Mod In にするのと同じく入口で 1.0 に収める
 ので、何を結線してもこの上限は保たれます。
+
+サブ出力の Out Mono は Out L と Out R の平均で、モノラルの行き先に使います。
 
 ### パッチの編集 (NRPN)
 
@@ -537,22 +543,22 @@ Mixer 2 は Level 3 にも CC（CC 23）があります。ほかのレベルと 
 
 | ID | シグナル | | ID | シグナル | | ID | シグナル |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | なし（定数 0.0） | | 16 | Chorus 1 Output R ± | | 66 | Filter 1 Output HP ± |
-| 1 | 定数 1.0 | | 17 | Delay 1 Output L ± | | 86 | Noise 1 Output ± |
-| 2 | 定数 0.5 | | 18 | Delay 1 Output R ± | | 88 | Osc 2 Output ± |
-| 3 | 定数 0.2 | | 48 | Note Pitch ± | | 106 | Mixer 2 Output ± |
-| 4 | 定数 0.1 | | 49 | Note Gate | | 116 | Noise 1 Output Red ± |
-| 5 | 定数 -0.1 | | 50 | Pitch Bend ± | | 117 | Filter 1 Output LP ± |
-| 6 | 定数 -0.2 | | 51 | General Mod Wheel | | 118 | Osc 1 Output Saw ± |
-| 7 | 定数 -0.5 | | 52 | General Unipolar 1 | | 119 | Osc 1 Output Pulse ± |
-| 8 | 定数 -1.0 | | 53 | General Unipolar 2 | | 120 | Osc 2 Output Saw ± |
-| 9 | LFO 1 Output ± | | 54 | General Unipolar 3 | | 121 | Osc 2 Output Pulse ± |
-| 10 | EG 1 Output | | 55 | General Unipolar 4 | | 122 | Noise 1 Output White ± |
-| 11 | Osc 1 Output ± | | 56 | General Bipolar 1 ± | | 123 | LFO 1 Output Triangle ± |
-| 12 | Filter 1 Output ± | | 57 | General Bipolar 2 ± | | 124 | LFO 1 Output Square ± |
-| 13 | Amp 1 Output ± | | 58 | General Bipolar 3 ± | | 125 | 定数 0.707 |
-| 14 | Mixer 1 Output ± | | 59 | General Bipolar 4 ± | |  |  |
-| 15 | Chorus 1 Output L ± | | 60 | Pitch 1 Output ± | |  |  |
+| 0 | なし（定数 0.0） | | 16 | Chorus 1 Output R ± | | 60 | Pitch 1 Output ± |
+| 1 | 定数 1.0 | | 17 | Delay 1 Output L ± | | 66 | Filter 1 Output HP ± |
+| 2 | 定数 0.5 | | 18 | Delay 1 Output R ± | | 86 | Noise 1 Output ± |
+| 3 | 定数 0.2 | | 19 | Delay 1 Output Mono ± | | 88 | Osc 2 Output ± |
+| 4 | 定数 0.1 | | 48 | Note Pitch ± | | 106 | Mixer 2 Output ± |
+| 5 | 定数 -0.1 | | 49 | Note Gate | | 116 | Noise 1 Output Red ± |
+| 6 | 定数 -0.2 | | 50 | Pitch Bend ± | | 117 | Filter 1 Output LP ± |
+| 7 | 定数 -0.5 | | 51 | General Mod Wheel | | 118 | Osc 1 Output Saw ± |
+| 8 | 定数 -1.0 | | 52 | General Unipolar 1 | | 119 | Osc 1 Output Pulse ± |
+| 9 | LFO 1 Output ± | | 53 | General Unipolar 2 | | 120 | Osc 2 Output Saw ± |
+| 10 | EG 1 Output | | 54 | General Unipolar 3 | | 121 | Osc 2 Output Pulse ± |
+| 11 | Osc 1 Output ± | | 55 | General Unipolar 4 | | 122 | Noise 1 Output White ± |
+| 12 | Filter 1 Output ± | | 56 | General Bipolar 1 ± | | 123 | LFO 1 Output Triangle ± |
+| 13 | Amp 1 Output ± | | 57 | General Bipolar 2 ± | | 124 | LFO 1 Output Square ± |
+| 14 | Mixer 1 Output ± | | 58 | General Bipolar 3 ± | | 125 | 定数 0.707 |
+| 15 | Chorus 1 Output L ± | | 59 | General Bipolar 4 ± | | 126 | Chorus 1 Output Mono ± |
 
 <!-- patch_gen end -->
 

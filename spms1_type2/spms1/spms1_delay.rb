@@ -13,7 +13,7 @@ module Spms1
   # price of the half is that the first repeat is 6 dB under the dry signal.
   #
   # The outputs are read after process, from output_l and output_r: returning both would build an
-  # Array every sample.
+  # Array every sample. output_mono, a sub output, is the two averaged, for a mono destination.
   class Delay
     # Blend at the reference rate on the line below, for each of two cascaded stages. The two move
     # together: their product is what fixes the time constant, so changing one without the other
@@ -53,6 +53,11 @@ module Spms1
     TIME_SLEW = 0.25
 
     attr_reader :output_l, :output_r
+
+    # The average of the two sides, worked out when read, which the loop does every sample.
+    def output_mono
+      (@output_l + @output_r) * 0.5
+    end
 
     def initialize(sample_rate)
       @sample_rate = sample_rate

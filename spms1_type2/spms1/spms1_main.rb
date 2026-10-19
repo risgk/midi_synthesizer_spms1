@@ -630,10 +630,12 @@ while true
         chorus_1.process(control_tick, signals[source_chorus_1_audio])
         signals[15] = chorus_1.output_l # SIGNAL_CHORUS_1_OUTPUT_L
         signals[16] = chorus_1.output_r # SIGNAL_CHORUS_1_OUTPUT_R
+        signals[126] = chorus_1.output_mono # SIGNAL_CHORUS_1_OUTPUT_MONO
       when 8 # MODULE_DELAY_1
         delay_1.process(control_tick, signals[source_delay_1_audio_l], signals[source_delay_1_audio_r])
         signals[17] = delay_1.output_l # SIGNAL_DELAY_1_OUTPUT_L
         signals[18] = delay_1.output_r # SIGNAL_DELAY_1_OUTPUT_R
+        signals[19] = delay_1.output_mono # SIGNAL_DELAY_1_OUTPUT_MONO
       when 9 # MODULE_PITCH_1
         signals[60] = pitch_1.process(control_tick, signals[source_pitch_1_pitch], signals[source_pitch_1_bend]) # SIGNAL_PITCH_1_OUTPUT
       when 10 # MODULE_NOISE_1
