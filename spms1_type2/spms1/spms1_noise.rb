@@ -25,7 +25,7 @@ module Spms1
       @level = 0.0
       @stage_1_level = 0.0
       @current_level = 0.0
-      # Powers up at the white, which is what Out was until it had Color.
+      # Powers up at the white.
       @color = 0.0
       @stage_1_color = 0.0
       @current_color = 0.0

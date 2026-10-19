@@ -14,9 +14,9 @@ module Spms1
   class Filter
     # What leaves the filter, as opposed to what circulates inside it: exactly linear up to
     # OUTPUT_KNEE, then a quadratic shoulder that reaches OUTPUT_LIMIT with zero slope at
-    # OUTPUT_CEILING. The limit is one unit, the widest thing the bus carries. A cubic here had no
-    # linear region and bent everything it passed -- 0.3 dB and a 1% third harmonic at half a unit
-    # -- which put the output clip ahead of the loop as the filter's main source of distortion. The
+    # OUTPUT_CEILING. The limit is one unit, the widest thing the bus carries. A cubic here would have
+    # no linear region and bend everything it passed -- 0.3 dB and a 1% third harmonic at half a
+    # unit -- making the output clip, not the loop, the filter's main source of distortion. The
     # default patch peaks near 0.3, under the knee, so it leaves untouched. The shoulder's curvature
     # steps at the knee, so what crosses it gains odd harmonics of every order rather than just the
     # third, falling as 1/n^3; a hard clamp, stepping in slope, falls as 1/n^2.
@@ -33,10 +33,9 @@ module Spms1
     # integrates, y being the band pass: nothing at small levels, more and more as y bends into the
     # cubic below. In continuous time,
     #   dy/dt = w_c * high_pass - LEAK_RATE * (y - soft_clip_biased(y))
-    # which is an integrator with a soft limiter across its capacitor. The rate is the one the
-    # filter used to have implicitly, when it soft-clipped the state once a sample at 48 kHz, and
-    # it keeps that sound: what is now fixed in time was then fixed per sample, so the distortion
-    # no longer grows with the sample rate and needs no blend to hold it. That leak is what holds
+    # which is an integrator with a soft limiter across its capacitor. The rate is that of
+    # soft-clipping the state once a sample at 48 kHz, fixed in time rather than per sample, so
+    # the distortion does not grow with the sample rate and needs no blend to hold it. That leak is what holds
     # the resonant peak down; the pass band, where y stays small, passes nearly clean.
     LEAK_RATE = 48000.0
     # The cubic is self-similar: scaling the ceiling scales the flat value, two thirds of it, with

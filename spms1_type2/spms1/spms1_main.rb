@@ -594,8 +594,7 @@ while true
       # Spinel never emits a jump table however the Ruby is written, so a case costs one compare
       # per id up to the one that matches: 78 a sample at twelve modules. Splitting the chain on a
       # kind of module pays only once that kind has several instances. Where a module sits in the
-      # chain moves the cost between modules but not the total, so one added later goes at the
-      # end whatever its place in the run order, and leaves what the others cost as it was.
+      # chain moves the cost between modules but not the total, which is what the measure takes.
       #
       # The ids are literals, each with its constant's name after it, and so are the bus slots the
       # outputs go to; patch_gen writes the whole dispatch from spms1_patch.yaml, a `when` for each

@@ -61,7 +61,7 @@ module Spms1
       @stage_1_level_modulation_depth = 1.0
       @current_level_modulation_depth = 1.0
       @total_amount = 1.0
-      # Powers up at the triangle, which is what Out was until it had a square.
+      # Powers up at the triangle.
       @wave = 0.0
       @stage_1_wave = 0.0
       @current_wave = 0.0
@@ -167,9 +167,8 @@ module Spms1
       shifted = @phase + 0.25
       shifted -= (shifted < 1.0) ? 0.0 : 1.0
       distance = shifted - 0.5
-      # abs rather than a ternary: Spinel emits fabs, which is one vabs.f32 instruction, and the
-      # branch it replaces was the only one in the per-sample path that actually alternated --
-      # taken for half of every LFO cycle.
+      # abs rather than a ternary: Spinel emits fabs, which is one vabs.f32 instruction, where a
+      # branch would alternate, taken for half of every LFO cycle.
       folded = distance.abs
       triangle = 0.5 - (2.0 * folded)
       # PolyBLAMP: folded is the distance in phase to the top corner, and 0.5 - folded to the

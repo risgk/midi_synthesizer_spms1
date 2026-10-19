@@ -281,9 +281,8 @@ as a mixer's Balance does with its Balance Law at +0.2, overlap. At 0.0 (CC 4), 
 pass alone; at 1.0 (CC 124) the high pass alone; and at 0.5 (CC 64) both at full, whose sum, the
 input less k·BP, is a notch at the cutoff with both sides of it passed whole. In between the notch
 moves off the cutoff, above it toward the low pass and below it toward the high pass, with the
-other side at up to 6 dB down. Out is the one the default patch uses, feeding Amp 1, in the slot
-the single output had, so a patch that reads that slot hears the low pass until Mode is turned
-up. Out is not clipped again: in the pass band one side is all there is, and around the cutoff,
+other side at up to 6 dB down. Out is the one the default patch uses, feeding Amp 1, so it plays the
+low pass until Mode is turned up. Out is not clipped again: in the pass band one side is all there is, and around the cutoff,
 where both are, the notch takes them down. The two factors are smoothed as the other levels
 are.
 
@@ -434,8 +433,8 @@ one delay, one pitch module and one noise source, and **all twelve are in the de
 on first. The synth is built to keep time with every module running, so taking one out of the
 order is never what makes a patch fit; to leave one out of the sound, route around it and let it
 run unread (see the examples below).
-On each mixer, Balance 1/2 has the CC, CC 119 on Mixer 1 and CC 21 on Mixer 2, where Level 2 had
-it, and Level 1 and 2 have none and read 1/√2 (Constant 0.707), so that the balance crossfades
+On each mixer, Balance 1/2 has the CC, CC 119 on Mixer 1 and CC 21 on Mixer 2, and Level 1 and 2
+have none and read 1/√2 (Constant 0.707), so that the balance crossfades
 the pair. Mixer 1's balance powers up at the centre, CC 64, passing each at 1/√2, and Mixer 2's at
 CC 4, Osc 1 alone. Mixer 2 Level 3 has a CC too (CC 23); the default patch points the other levels and Out
 Level at 1.0 and each polarity at +0.5, so an input on one of them passes through rather than
@@ -671,9 +670,8 @@ and the square its steps by PolyBLEP, so at the top of the rate range, 220 Hz, w
 audible tone, the square's aliases are 41 dB down on it, rather than 24 dB without. The square is
 the triangle's sign: +0.5 while the triangle is above zero, stepping where it crosses. LFO 1 Wave
 (CC 33, LFO Wave's in PRA32-U2) crossfades Out in a straight line from the triangle at 0.0 (CC 4),
-where it powers up, to the square at 1.0 (CC 124), and is smoothed as the level is. Out keeps the
-slot the LFO's one output had, and is what the default patch routes, so the LFO is a triangle
-until Wave is turned up.
+where it powers up, to the square at 1.0 (CC 124), and is smoothed as the level is. Out is what
+the default patch routes, so the LFO is a triangle until Wave is turned up.
 
 LFO 1 Level scales the LFO's outputs, as a mixer's Level scales its input: from silent at 0.0
 (CC 4) to full at 1.0 (CC 124). It is on CC 113 and powers up at 1.0, passing the LFO through as
@@ -1077,8 +1075,8 @@ A module is added without writing anything in the loop:
    measure (`sh sim_load/estimate.sh`)
 
 patch_gen writes the `require_relative` of the module's file, its instance, the reads of its routing and its CCs, the calls to its
-setters and its `when` in the dispatch into "spms1/spms1_main.rb", as the plain straight-line Ruby
-the loop was written in by hand before, so Spinel compiles it to the same: a module costs what its
+setters and its `when` in the dispatch into "spms1/spms1_main.rb", as plain straight-line Ruby, the
+same as it would be written by hand, so Spinel compiles it to the same: a module costs what its
 own code costs and no more. The editor and the NRPN tables of the READMEs take it up as well.
 
 #### Writing a Module
@@ -1133,8 +1131,8 @@ measures on the device -- with the default patch and a note held.
   the renders with CRuby on Linux. On Linux it first checks that the files generated from
   "spms1_patch.yaml" are up to date ("patch_gen/spms1_patch_gen.rb --check"). On Linux it also checks that every function and variable of the
   runtime has the same type wherever it is declared ("spinel_mcu/lto_type_check.sh"): a function
-  declared with float on one side and double on the other goes unnoticed otherwise, as two did
-  when the MCU changes made the runtime float with `#define double float`
+  declared with float on one side and double on the other goes unnoticed otherwise, which the
+  runtime is prone to, made float for the MCU with `#define double float`
 - Spinel: builds the release named above and checks that "spms1_main.c" is what it makes of the .rb files,
   and that the runtime files are the release with "spinel_mcu/spinel_mcu.patch" applied (see below)
 - With "commit_package" checked, and when all of the above pass, the UF2 files ("bin") and
