@@ -200,10 +200,10 @@ inputs:
 # Controls, listed in the editor's order, each by its entry: a parameter is one entry of NRPN
 # category 2 (where it takes its value) and the same entry of category 3 (which CC fills its
 # control slot); a General control is in category 3 only. `cc` is the CC of the default patch, 0
-# for none, and `value` what that CC powers up at; for a control with no CC, what the editor's Init
-# Values sets the CC given to it to. A parameter takes its own control slot, off the bus, unless
-# `source` (a signal key) says otherwise. `set` is the method of the module that takes a
-# parameter's value each buffer. Why the defaults are what they are is above default_order.
+# for none, and `value` what that CC powers up at; for a control with no CC, what the editor's
+# Initialize & Send All sets the CC given to it to. A parameter takes its own control slot, off
+# the bus, unless `source` (a signal key) says otherwise. `set` is the method of the module that
+# takes a parameter's value each buffer. Why the defaults are what they are is above default_order.
 controls:
   # EG 1: Release Switch is on CC 105 and powers up on, at CC 124, the release following the
   # decay; below CC 64 the release is the shortest decay's, 10 ms. Level has no CC and reads 1.0,
@@ -212,7 +212,7 @@ controls:
   - { entry: 1, module: EG_1,      key: DECAY,        label: Decay,        cc: 75,  value: 94, set: set_decay }
   - { entry: 2, module: EG_1,      key: SUSTAIN,      label: Sustain,      cc: 30,  value: 124, set: set_sustain }
   - { entry: 3, module: EG_1,      key: RELEASE_SW,   label: Release Switch, cc: 105, value: 124, set: set_release_switch }
-  - { entry: 4, module: EG_1,      key: LEVEL,        label: Level,        cc: 0,   source: ONE, set: set_level }
+  - { entry: 4, module: EG_1,      key: LEVEL,        label: Level,        cc: 0,   value: 124, source: ONE, set: set_level }
   # LFO 1: Wave crossfades Out from the triangle (0.0) to the square (1.0), on CC 33, LFO Wave's in
   # PRA32-U2, and powers up at CC 4, 0.0, the triangle. Each modulation's Amt and Pol, listed after
   # what it moves, has no CC: the default patch points each at 1.0 and +0.5, a depth of 1.0. Rate
@@ -234,7 +234,7 @@ controls:
   - { entry: 15, module: MIXER_1,   key: POL_2,   label: Pol 2,   cc: 0,   value: 124, source: HALF, bipolar: true, set: set_polarity_2 }
   - { entry: 16, module: MIXER_1,   key: LEVEL_3,      label: Level 3,      cc: 0,   value: 4, set: set_level_3 }
   - { entry: 17, module: MIXER_1,   key: POL_3,   label: Pol 3,   cc: 0,   value: 124, source: HALF, bipolar: true, set: set_polarity_3 }
-  - { entry: 18, module: MIXER_1,   key: OUT_LEVEL,    label: Out Level,    cc: 0,   source: ONE, set: set_out_level }
+  - { entry: 18, module: MIXER_1,   key: OUT_LEVEL,    label: Out Level,    cc: 0,   value: 124, source: ONE, set: set_out_level }
   # Pitch 1: Glide is on CC 5, Portamento Time in the MIDI spec, and powers up at CC 4, 0.0, where
   # the portamento is off. Glide Switch is on CC 34 and powers up on, at CC 124, so Glide alone
   # sets the portamento until the switch turns it off, below CC 64. Coarse and Fine, on CC 86 and 70, are the transposition, 64 at the
@@ -302,7 +302,7 @@ controls:
   - { entry: 55, module: MIXER_2,   key: POL_2,   label: Pol 2,   cc: 0,   value: 124, source: HALF, bipolar: true, set: set_polarity_2 }
   - { entry: 56, module: MIXER_2,   key: LEVEL_3,      label: Level 3,      cc: 23,  value: 4, set: set_level_3 }
   - { entry: 57, module: MIXER_2,   key: POL_3,   label: Pol 3,   cc: 0,   value: 124, source: HALF, bipolar: true, set: set_polarity_3 }
-  - { entry: 58, module: MIXER_2,   key: OUT_LEVEL,    label: Out Level,    cc: 0,   source: ONE, set: set_out_level }
+  - { entry: 58, module: MIXER_2,   key: OUT_LEVEL,    label: Out Level,    cc: 0,   value: 124, source: ONE, set: set_out_level }
   # Filter 1 in the editor: Gain, the cutoff and its three modulations, then the resonance and
   # Mode. Mod 2 Amt powers up at CC 4, 0.0, so the LFO on Mod 2 In leaves the cutoff alone until it
   # is turned up. Mod 2 Pol reads 0.1, as Osc 1 Mod 2 Pol does, which brings the LFO down to a
