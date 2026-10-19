@@ -169,11 +169,7 @@ module Spms1
       @cutoff = 1.0
       @resonance = 0.0
       @modulation_1_amount = 0.0
-      @modulation_1_polarity = 1.0
-      @modulation_1_depth = 0.0
       @modulation_2_amount = 0.0
-      @modulation_2_polarity = 1.0
-      @modulation_2_depth = 0.0
       @cutoff_pitch_track = 0.0
       # Powers up at 1.0, as the default patch sets it, so that the sum is not faded in at startup.
       @cutoff_modulation_amount = 1.0
@@ -183,8 +179,8 @@ module Spms1
 
       @stage_1_cutoff = 1.0
       @stage_1_resonance = 0.0
-      @stage_1_modulation_1_depth = 0.0
-      @stage_1_modulation_2_depth = 0.0
+      @stage_1_modulation_1_amount = 0.0
+      @stage_1_modulation_2_amount = 0.0
       @stage_1_cutoff_pitch_track = 0.0
       @stage_1_cutoff_modulation_amount = 1.0
       @stage_1_gain = 0.5
@@ -192,8 +188,8 @@ module Spms1
       @stage_1_mode_hp = 0.0
       @current_cutoff = 1.0
       @current_resonance = 0.0
-      @current_modulation_1_depth = 0.0
-      @current_modulation_2_depth = 0.0
+      @current_modulation_1_amount = 0.0
+      @current_modulation_2_amount = 0.0
       @current_cutoff_pitch_track = 0.0
       @current_cutoff_modulation_amount = 1.0
       @current_gain = 0.5
@@ -223,37 +219,21 @@ module Spms1
       update_coefficients
     end
 
-    # Every parameter but the modulation polarity is unipolar, [0.0, 1.0], which is what the
-    # smoothing, the modulation sum and the table lookups below are written against.
+    # Every parameter but Cutoff Mod Amt is unipolar, [0.0, 1.0], which is what the smoothing, the
+    # modulation sum and the table lookups below are written against.
     # Cutoff range: MIDI note 15 (19 Hz) at 0.0, MIDI note 75 (622 Hz) at 0.5, MIDI note 135 (20 kHz) at 1.0.
     def set_cutoff(cutoff)
       @cutoff = (cutoff < 0.0) ? 0.0 : ((cutoff > 1.0) ? 1.0 : cutoff)
     end
 
-    # Each modulation depth is amount times polarity. Amount is unipolar, [0.0, 1.0]. Polarity is
-    # bipolar, [-0.5, 0.5], and doubled, so +0.5 leaves the amount as it is, -0.5 negates it and
-    # the way between scales it, crossing zero; it sets depth as well as direction. Multiplied here
-    # so that only the product is smoothed.
+    # Each modulation amount is unipolar, [0.0, 1.0], a plain multiplier on its input; which way
+    # the sum moves the cutoff is Cutoff Mod Amt's.
     def set_modulation_1_amount(amount)
       @modulation_1_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
-      @modulation_1_depth = @modulation_1_amount * @modulation_1_polarity
-    end
-
-    def set_modulation_1_polarity(polarity)
-      clamped_polarity = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
-      @modulation_1_polarity = clamped_polarity + clamped_polarity
-      @modulation_1_depth = @modulation_1_amount * @modulation_1_polarity
     end
 
     def set_modulation_2_amount(amount)
       @modulation_2_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
-      @modulation_2_depth = @modulation_2_amount * @modulation_2_polarity
-    end
-
-    def set_modulation_2_polarity(polarity)
-      clamped_polarity = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
-      @modulation_2_polarity = clamped_polarity + clamped_polarity
-      @modulation_2_depth = @modulation_2_amount * @modulation_2_polarity
     end
 
     # Cutoff Pitch Track is unipolar, [0.0, 1.0], how far the cutoff follows Pitch In, the keyboard
@@ -265,11 +245,13 @@ module Spms1
       @cutoff_pitch_track = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
     end
 
-    # Cutoff Mod Amt is unipolar, [0.0, 1.0], how far the sum of the two modulations moves the
-    # cutoff, as Osc's PW Mod Amt is for the pulse width: at 1.0 the sum is added as it is, at 0.0
-    # the cutoff is left at Cutoff. Turning a modulation the other way up is for its Pol.
+    # Cutoff Mod Amt is bipolar, [-0.5, 0.5], and doubled, as a polarity is: how far, and which
+    # way, the sum of the two modulations moves the cutoff. At +0.5 the sum is added as it is, at
+    # 0.0 the cutoff is left at Cutoff, and at -0.5 the sum is taken off it, closing the filter
+    # as the envelope rises.
     def set_cutoff_modulation_amount(amount)
-      @cutoff_modulation_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
+      clamped_amount = (amount < -0.5) ? -0.5 : ((amount > 0.5) ? 0.5 : amount)
+      @cutoff_modulation_amount = clamped_amount + clamped_amount
     end
 
     # How hard the audio input drives the filter, used as a plain multiplier. It sits on the input
@@ -420,10 +402,10 @@ module Spms1
       @current_cutoff = Dsp.smooth(@stage_1_cutoff, @current_cutoff, @smoothing_target_blend)
       @stage_1_resonance = Dsp.smooth(@resonance, @stage_1_resonance, @smoothing_target_blend)
       @current_resonance = Dsp.smooth(@stage_1_resonance, @current_resonance, @smoothing_target_blend)
-      @stage_1_modulation_1_depth = Dsp.smooth(@modulation_1_depth, @stage_1_modulation_1_depth, @smoothing_target_blend)
-      @current_modulation_1_depth = Dsp.smooth(@stage_1_modulation_1_depth, @current_modulation_1_depth, @smoothing_target_blend)
-      @stage_1_modulation_2_depth = Dsp.smooth(@modulation_2_depth, @stage_1_modulation_2_depth, @smoothing_target_blend)
-      @current_modulation_2_depth = Dsp.smooth(@stage_1_modulation_2_depth, @current_modulation_2_depth, @smoothing_target_blend)
+      @stage_1_modulation_1_amount = Dsp.smooth(@modulation_1_amount, @stage_1_modulation_1_amount, @smoothing_target_blend)
+      @current_modulation_1_amount = Dsp.smooth(@stage_1_modulation_1_amount, @current_modulation_1_amount, @smoothing_target_blend)
+      @stage_1_modulation_2_amount = Dsp.smooth(@modulation_2_amount, @stage_1_modulation_2_amount, @smoothing_target_blend)
+      @current_modulation_2_amount = Dsp.smooth(@stage_1_modulation_2_amount, @current_modulation_2_amount, @smoothing_target_blend)
       @stage_1_cutoff_pitch_track = Dsp.smooth(@cutoff_pitch_track, @stage_1_cutoff_pitch_track, @smoothing_target_blend)
       @current_cutoff_pitch_track = Dsp.smooth(@stage_1_cutoff_pitch_track, @current_cutoff_pitch_track, @smoothing_target_blend)
       @stage_1_cutoff_modulation_amount = Dsp.smooth(@cutoff_modulation_amount, @stage_1_cutoff_modulation_amount, @smoothing_target_blend)
@@ -438,7 +420,7 @@ module Spms1
       # The pitch and modulation inputs arrive as they are; clamping total_cutoff below is what holds
       # the table lookup in range, and a source that swings both ways moves the cutoff both ways.
       # Clamped without a comparison, as clip_output does it.
-      modulation = (@current_modulation_1_input * @current_modulation_1_depth) + (@current_modulation_2_input * @current_modulation_2_depth)
+      modulation = (@current_modulation_1_input * @current_modulation_1_amount) + (@current_modulation_2_input * @current_modulation_2_amount)
       total_cutoff = @current_cutoff + @current_pitch_input * @current_cutoff_pitch_track + modulation * @current_cutoff_modulation_amount
       over  = total_cutoff - 1.0
       under = 0.0 - total_cutoff

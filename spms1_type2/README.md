@@ -208,12 +208,12 @@ half a semitone a step: 2 semitones either way at CC 8, where it powers up, an o
 The LFO goes straight to the oscillator, both to its pitch and to its pulse width, at its full
 level, and to the filter, where Filter 1 Mod 2 Amt (CC 25) powers up at 0.0 and leaves the cutoff
 to the envelope until it is turned up. Osc 1 Pitch Mod Amt reads the constant 0.2, which brings
-the oscillator's modulations down to a vibrato depth on the pitch, and Filter 1 Mod 2 Pol reads
-0.1, a like depth on the cutoff; Osc 1 PW Mod Amt (CC 103) takes the LFO to the pulse width. The pitch from Pitch 1 reaches the filter too, on Filter 1 Pitch In, for keyboard tracking: CC 9
+the oscillator's modulations down to a vibrato depth on the pitch, and Osc 1 PW Mod Amt (CC 103)
+takes the LFO to the pulse width. The pitch from Pitch 1 reaches the filter too, on Filter 1 Pitch In, for keyboard tracking: CC 9
 (Cutoff Pitch Track) at its top has the cutoff follow the note a semitone for a semitone,
 unmoved at note 60. Cutoff Pitch Track powers up at 0.0, with the tracking off.
-The envelope reaches the oscillator's pitch too, on Osc 1 Mod 1 In, for a pitch envelope: Mod 1 Pol
-reads +0.5, and Mod 1 Amt (CC 89) powers up at 0.0, with it off. Each modulation depth spans the
+The envelope reaches the oscillator's pitch too, on Osc 1 Mod 1 In, for a pitch envelope: Mod 1
+Amt (CC 89) powers up at 0.0, with it off. Each modulation depth spans the
 whole range of what it moves, so bringing a source down to a musical depth is left to the patch
 rather than built into the modules.
 
@@ -410,8 +410,8 @@ it from anywhere else.
 | ----- | ----- | ---- | ---------- |
 | 0 | 0-31 | Run order, slot by slot | Module ID |
 | 1 | 0-27 | What feeds a module input | Signal ID |
-| 2 | 0-72 | Where a parameter takes its value | Signal ID, or 127 for its own control slot |
-| 3 | 0-77 | Which CC fills a control slot | CC number, or 0 for none |
+| 2 | 0-66 | Where a parameter takes its value | Signal ID, or 127 for its own control slot |
+| 3 | 0-71 | Which CC fills a control slot | CC number, or 0 for none |
 
 The run order is read from slot 0 upwards and stops at the first Module ID 0, so a patch shorter
 than 32 modules ends itself. It is separate from the module numbering: a module only sees the
@@ -481,31 +481,29 @@ both at the same signal for a mono output.
 
 | CC 98 | Parameter | | CC 98 | Parameter | | CC 98 | Parameter |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | EG 1 Attack | | 25 | Pitch 1 Bend Pol | | 50 | Mixer 2 Level 2 |
-| 1 | EG 1 Decay | | 26 | Osc 1 Pitch Coarse | | 51 | Mixer 2 Pol 2 |
-| 2 | EG 1 Sustain | | 27 | Osc 1 Pitch Fine | | 52 | Mixer 2 Level 3 |
-| 3 | EG 1 Release Switch | | 28 | Osc 1 Mod 1 Amt | | 53 | Mixer 2 Pol 3 |
-| 4 | EG 1 Level | | 29 | Osc 1 Mod 1 Pol | | 54 | Mixer 2 Out Level |
-| 5 | LFO 1 Rate | | 30 | Osc 1 Mod 2 Amt | | 55 | Filter 1 Gain |
-| 6 | LFO 1 Rate Mod Amt | | 31 | Osc 1 Mod 2 Pol | | 56 | Filter 1 Cutoff |
-| 7 | LFO 1 Rate Mod Pol | | 32 | Osc 1 Pitch Mod Amt | | 57 | Filter 1 Cutoff Pitch Track |
-| 8 | LFO 1 Level | | 33 | Osc 1 Wave | | 58 | Filter 1 Mod 1 Amt |
-| 9 | LFO 1 Wave | | 34 | Osc 1 Pulse Width | | 59 | Filter 1 Mod 1 Pol |
-| 10 | LFO 1 Level Mod Amt | | 35 | Osc 1 PW Mod Amt | | 60 | Filter 1 Mod 2 Amt |
-| 11 | LFO 1 Level Mod Pol | | 36 | Osc 2 Pitch Coarse | | 61 | Filter 1 Mod 2 Pol |
-| 12 | Mixer 1 Level 1 | | 37 | Osc 2 Pitch Fine | | 62 | Filter 1 Cutoff Mod Amt |
-| 13 | Mixer 1 Pol 1 | | 38 | Osc 2 Mod 1 Amt | | 63 | Filter 1 Resonance |
-| 14 | Mixer 1 Level 2 | | 39 | Osc 2 Mod 1 Pol | | 64 | Filter 1 Mode |
-| 15 | Mixer 1 Pol 2 | | 40 | Osc 2 Mod 2 Amt | | 65 | Amp 1 Gain |
-| 16 | Mixer 1 Level 3 | | 41 | Osc 2 Mod 2 Pol | | 66 | Amp 1 Gain Pol |
-| 17 | Mixer 1 Pol 3 | | 42 | Osc 2 Pitch Mod Amt | | 67 | Chorus 1 Mix |
-| 18 | Mixer 1 Out Level | | 43 | Osc 2 Wave | | 68 | Chorus 1 Rate |
-| 19 | Pitch 1 Glide | | 44 | Osc 2 Pulse Width | | 69 | Chorus 1 Depth |
-| 20 | Pitch 1 Glide Switch | | 45 | Osc 2 PW Mod Amt | | 70 | Delay 1 Mix |
-| 21 | Pitch 1 Coarse | | 46 | Noise 1 Level | | 71 | Delay 1 Time |
-| 22 | Pitch 1 Fine | | 47 | Noise 1 Color | | 72 | Delay 1 Feedback |
-| 23 | Pitch 1 Stretch | | 48 | Mixer 2 Level 1 | |  |  |
-| 24 | Pitch 1 Bend Amt | | 49 | Mixer 2 Pol 1 | |  |  |
+| 0 | EG 1 Attack | | 23 | Pitch 1 Stretch | | 46 | Mixer 2 Level 2 |
+| 1 | EG 1 Decay | | 24 | Pitch 1 Bend Amt | | 47 | Mixer 2 Pol 2 |
+| 2 | EG 1 Sustain | | 25 | Pitch 1 Bend Pol | | 48 | Mixer 2 Level 3 |
+| 3 | EG 1 Release Switch | | 26 | Osc 1 Pitch Coarse | | 49 | Mixer 2 Pol 3 |
+| 4 | EG 1 Level | | 27 | Osc 1 Pitch Fine | | 50 | Mixer 2 Out Level |
+| 5 | LFO 1 Rate | | 28 | Osc 1 Mod 1 Amt | | 51 | Filter 1 Gain |
+| 6 | LFO 1 Rate Mod Amt | | 29 | Osc 1 Mod 2 Amt | | 52 | Filter 1 Cutoff |
+| 7 | LFO 1 Rate Mod Pol | | 30 | Osc 1 Pitch Mod Amt | | 53 | Filter 1 Cutoff Pitch Track |
+| 8 | LFO 1 Level | | 31 | Osc 1 Wave | | 54 | Filter 1 Mod 1 Amt |
+| 9 | LFO 1 Wave | | 32 | Osc 1 Pulse Width | | 55 | Filter 1 Mod 2 Amt |
+| 10 | LFO 1 Level Mod Amt | | 33 | Osc 1 PW Mod Amt | | 56 | Filter 1 Cutoff Mod Amt |
+| 11 | LFO 1 Level Mod Pol | | 34 | Osc 2 Pitch Coarse | | 57 | Filter 1 Resonance |
+| 12 | Mixer 1 Level 1 | | 35 | Osc 2 Pitch Fine | | 58 | Filter 1 Mode |
+| 13 | Mixer 1 Pol 1 | | 36 | Osc 2 Mod 1 Amt | | 59 | Amp 1 Gain |
+| 14 | Mixer 1 Level 2 | | 37 | Osc 2 Mod 2 Amt | | 60 | Amp 1 Gain Pol |
+| 15 | Mixer 1 Pol 2 | | 38 | Osc 2 Pitch Mod Amt | | 61 | Chorus 1 Mix |
+| 16 | Mixer 1 Level 3 | | 39 | Osc 2 Wave | | 62 | Chorus 1 Rate |
+| 17 | Mixer 1 Pol 3 | | 40 | Osc 2 Pulse Width | | 63 | Chorus 1 Depth |
+| 18 | Mixer 1 Out Level | | 41 | Osc 2 PW Mod Amt | | 64 | Delay 1 Mix |
+| 19 | Pitch 1 Glide | | 42 | Noise 1 Level | | 65 | Delay 1 Time |
+| 20 | Pitch 1 Glide Switch | | 43 | Noise 1 Color | | 66 | Delay 1 Feedback |
+| 21 | Pitch 1 Coarse | | 44 | Mixer 2 Level 1 | |  |  |
+| 22 | Pitch 1 Fine | | 45 | Mixer 2 Pol 1 | |  |  |
 
 <!-- patch_gen end -->
 
@@ -518,11 +516,11 @@ two slots, a unipolar and a bipolar one. See the General slots below.
 
 | CC 98 | CC for | Fills |
 | ----- | ------ | ----- |
-| 73 | General Mod Wheel | General Mod Wheel |
-| 74 | General 1 | General Unipolar 1, General Bipolar 1 |
-| 75 | General 2 | General Unipolar 2, General Bipolar 2 |
-| 76 | General 3 | General Unipolar 3, General Bipolar 3 |
-| 77 | General 4 | General Unipolar 4, General Bipolar 4 |
+| 67 | General Mod Wheel | General Mod Wheel |
+| 68 | General 1 | General Unipolar 1, General Bipolar 1 |
+| 69 | General 2 | General Unipolar 2, General Bipolar 2 |
+| 70 | General 3 | General Unipolar 3, General Bipolar 3 |
+| 71 | General 4 | General Unipolar 4, General Bipolar 4 |
 
 <!-- patch_gen end -->
 
@@ -586,8 +584,9 @@ slot takes the same range. A unipolar one
 runs 0.0 to 1.0 from CC 4 to CC 124, the span of an envelope, so an envelope pointed at one sweeps
 the whole of its dial. A bipolar one runs -0.5 to +0.5 with CC 64 at 0.0, the span of an LFO, so a
 bipolar source pointed at one swings it about the middle. Osc 1 Pitch Coarse and Fine and Pitch 1 Coarse and
-Fine are bipolar, since their middle is no change at all, and so is every Pol -- the mixer's two and
-the eight Mod Pol controls and Pitch 1 Bend Pol -- since its sign is what it sets. Pointing a parameter at a
+Fine are bipolar, since their middle is no change at all, and so is every Pol -- the mixers', LFO 1's
+two Mod Pols, Amp 1 Gain Pol and Pitch 1 Bend Pol -- and Filter 1 Cutoff Mod Amt, since its sign is
+what it sets. Pointing a parameter at a
 slot on the bus is what makes a modulation. A control slot with no CC holds 0.0. No input or other
 parameter can read a parameter's control slot: a CC meant for more than one parameter, or for a
 module input, goes on a General slot, or is given to each parameter in category 3, as Osc 1 and
@@ -621,8 +620,7 @@ unmodulated input wants: routing an amp's modulation input to it leaves the amp 
 Signals 0 and 1 are the two ends of a unipolar parameter's range and Signals 7 and 2 of a bipolar
 one, for pinning one there; Signal 2 is also the middle of a unipolar dial. Signal 3 is a fifth
 of full scale and Signal 6 its negative; Signal 3 is also the Osc 1 Pitch Mod Amt the default
-patch uses. Signal 4 is the Filter 1 Mod 2 Pol it uses, which brings the LFO down to a like depth
-on the cutoff, and Signal 5 its negative. A constant on a mixer's second input shifts
+patch uses. Signal 4 is a tenth of full scale and Signal 5 its negative. A constant on a mixer's second input shifts
 a signal between the two kinds: -0.5 turns one that runs one way into one that swings both, and +0.5
 the other way round.
 
@@ -666,8 +664,8 @@ LFO 1 Level scales the LFO's outputs, as a mixer's Level scales its input: from 
 (CC 4) to full at 1.0 (CC 124). It is on CC 113 and powers up at 1.0, passing the LFO through as
 it is. LFO 1 Level Mod In adds to it, held to the same range, by Level Mod Amt times Level Mod
 Pol, and it takes General Mod Wheel by default at a depth of 1.0 (neither has a CC; they read 1.0
-and +0.5). With Level turned down, the wheel brings the LFO in, up to full at its top. Turning the LFO the other way up is for the destination's
-Mod Pol, or a mixer's Pol.
+and +0.5). With Level turned down, the wheel brings the LFO in, up to full at its top. Turning the LFO the other way up is for a mixer's
+Pol, or for Filter 1 Cutoff Mod Amt on the cutoff.
 
 LFO 1 Rate Mod In moves the rate by LFO 1 Rate Mod Amt times Rate Mod Pol, as Osc 1 Mod 2 In moves the
 oscillator's pitch: a unit of input times depth is the whole rate range, ten octaves, so 0.1 is an
@@ -678,24 +676,26 @@ where the LFO works out its rate, rather than every sample as most module inputs
 
 EG 1 Level scales the envelope's output the same way, over the same range. It has no CC, and the
 default patch points it at the constant 1.0, which passes the envelope through as it is. The
-envelope runs one way, 0.0 to 1.0; turning it the other way up is for the destination's Mod Pol,
-or a mixer's Pol.
+envelope runs one way, 0.0 to 1.0; turning it the other way up is for a mixer's Pol, or for
+Filter 1 Cutoff Mod Amt on the cutoff.
 
 EG 1 Release Switch, on CC 105, picks the release, after the note's gate falls: on from CC 64,
 as a MIDI switch is, it runs at the decay's rate, set by EG 1 Decay; off, below CC 64, it runs at
 the shortest decay's, 10 ms, whatever the decay is, so a long decay still ends a note short. It
 powers up on, at CC 124. It is a switch, so it is not smoothed.
 
-Each modulation depth is Mod Amt times Mod Pol, the second doubled: Mod Pol passes
+Where a modulation has a Mod Pol, as LFO 1's two do, its depth is Mod Amt times
+Mod Pol, the second doubled: Mod Pol passes
 Mod Amt through at +0.5 (CC 124), silences it at 0.0 (CC 64) and negates it at -0.5 (CC 4), and
 the way between scales it, so it sets depth as well as direction. Mod Pol has no CC and the
 default patch points it at a constant, so either can be the one that is turned: Mod Amt for
 a depth in one direction, Mod Pol for one that crosses zero.
 
-Osc 1 sums its two modulations, Mod 1 In by Mod 1 Amt times Mod 1 Pol and Mod 2 In by Mod 2 Amt
-times Mod 2 Pol, and the sum moves both the pitch, by Pitch Mod Amt, and the pulse width, by PW
-Mod Amt. Mod 1 Amt and Mod 2 Amt are on CC 89 and 13, EG Mod Amt's and LFO Mod Amt's in PRA32-U2,
-and power up at 0.0; each Pol has no CC and reads +0.5. So one dial for each source sets how much
+Osc 1 sums its two modulations, Mod 1 In by Mod 1 Amt and Mod 2 In by Mod 2 Amt, and the sum
+moves both the pitch, by Pitch Mod Amt, and the pulse width, by PW Mod Amt. Mod 1 Amt and Mod 2
+Amt are on CC 89 and 13, EG Mod Amt's and LFO Mod Amt's in PRA32-U2, and power up at 0.0. They
+have no Pol: each modulation runs the way its source does, and one the other way up takes an
+inverted source, such as Mixer 1's Out with its Pol at -0.5. So one dial for each source sets how much
 of it there is, and one for each destination how far the sum goes there: moving a source to the
 pulse width as well as the pitch takes no rewiring, and the two destinations always move together.
 
@@ -720,7 +720,7 @@ The modulation sum moves it by PW Mod Amt, on CC 103, LFO Mod Dst's in PRA32-U2,
 at 0.0. A unit of the sum is the whole pulse width range, so with PW Mod Amt and Mod 2 Amt at the
 top the LFO swings the pulse width half the range either way: with Pulse Width at CC 64, from
 nearly 100% to nearly 0%; and with Mod 1 Amt at the top the envelope sweeps it across the whole
-range, from Pulse Width up, or down at a negative Mod 1 Pol. The pulse width the modulation adds
+range, from Pulse Width up, or down from an inverted envelope. The pulse width the modulation adds
 up to is held to -0.5 to +0.5.
 
 Each oscillator puts out the two ends of its morph on their own as well, whatever Wave is: Out
@@ -750,10 +750,13 @@ twice as hard as one: turn Gain down to keep the level, or leave it up to drive 
 The saturation sits on the resonance rather than the pass band: a low
 cutoff passes a loud note nearly clean, while turning the gain up rounds off the resonant peak.
 
-Filter 1 sums its two modulations, each In by its Amt times its Pol, and the sum moves the cutoff
-by Cutoff Mod Amt, as Osc 1 PW Mod Amt moves the pulse width. It is on CC 117 and powers up at
-1.0 (CC 124), where the sum is added as it is, so one dial scales the envelope and the LFO
-together, and CC 117 at CC 4 leaves the cutoff at Filter 1 Cutoff and the keyboard tracking.
+Filter 1 sums its two modulations, each In by its Amt, and the sum moves the cutoff by Cutoff
+Mod Amt, as Osc 1 PW Mod Amt moves the pulse width. Mod 1 Amt (CC 24) and Mod 2 Amt (CC 25) have
+no Pol, and at their top a unit of input is the whole cutoff range, so the LFO swings the cutoff
+five octaves either way. Cutoff Mod Amt is bipolar, so it sets the direction too: it is on CC 117
+and powers up at +0.5 (CC 124), where the sum is added as it is; CC 64 leaves the cutoff at Filter
+1 Cutoff and the keyboard tracking, and CC 4 takes the sum off, so the envelope closes the filter
+as it rises. One dial scales the envelope and the LFO together.
 Pitch In, the keyboard tracking, is added on its own by Cutoff Pitch Track (CC 9), outside the
 sum, as an oscillator's Pitch In is outside its Pitch Mod Amt: unipolar, a semitone for a
 semitone at the top, unmoved at note 60.
@@ -831,7 +834,7 @@ takes the output to the input at once, mid-glide too, as Glide at 0.0 does.
   value. CC 85 and 76 tune it: CC 85 = 76 an octave up, CC 85 = 71 a fifth, CC 76 = 64 in unison
 - Noise is wired by default too, its Out on Mixer 2's third input beside the oscillators, so CC 23
   brings it in under the note, at a tenth of the oscillator's level at CC 16. CC 99 = 2,
-  CC 98 = 48, CC 6 = 0 points Mixer 2 Level 1 at 0.0, taking Osc 1 out and leaving the noise alone,
+  CC 98 = 44, CC 6 = 0 points Mixer 2 Level 1 at 0.0, taking Osc 1 out and leaving the noise alone,
   through the filter. CC 115 (Color) turns it from
   white to red
 - Keyboard tracking is wired by default as well, the pitch from Pitch 1 on the filter's Pitch input,
@@ -844,16 +847,16 @@ takes the output to the input at once, mid-glide too, as Glide at 0.0 does.
   CC 6 = 35 puts Noise 1's red output on the filter's Mod 2 input in the LFO's place, and CC 25
   sets how much. CC 6 = 34 takes the white instead, finer still. The red is on no mixer, and the
   white is heard only once CC 23 brings it up, so neither is heard as well
-- Filter cutoff driven by the envelope instead of its CC: CC 99 = 2, CC 98 = 56, CC 6 = 21. The
+- Filter cutoff driven by the envelope instead of its CC: CC 99 = 2, CC 98 = 52, CC 6 = 21. The
   envelope and the cutoff are both unipolar, so it opens the cutoff from the bottom of its dial
   to the top
-- Amp gain and filter cutoff share one CC: CC 99 = 3, CC 98 = 65, CC 6 = 74
+- Amp gain and filter cutoff share one CC: CC 99 = 3, CC 98 = 59, CC 6 = 74
 - Amp at full level with no envelope: CC 99 = 1, CC 98 = 22, CC 6 = 1
 - Disconnect the filter's Mod 1 input, and with it the envelope: CC 99 = 1, CC 98 = 19, CC 6 = 0
 - A finer pitch envelope, 60 cents deep: CC 99 = 2, CC 98 = 27, CC 6 = 21 points Osc 1 Pitch Fine at the
   envelope, which then sweeps the tuning from in tune up to 60 cents sharp, reached at half the
   envelope's peak
-- The envelope drives the filter harder as a note starts: CC 99 = 2, CC 98 = 55, CC 6 = 21 takes
+- The envelope drives the filter harder as a note starts: CC 99 = 2, CC 98 = 51, CC 6 = 21 takes
   the filter's input level from silence up to the top of its dial and back
 - Portamento is wired by default -- Note Pitch reaches the oscillator through Pitch 1 -- so CC 5
   sets the time; at CC 64 a glide covers nine tenths of the way in about a tenth of a second. Every note glides, played legato
@@ -868,7 +871,7 @@ takes the output to the input at once, mid-glide too, as Glide at 0.0 does.
   (CC 16) on its first input and CC 98 = 4, CC 6 = 1 the constant 1.0 on its second, and CC 99 =
   2, CC 98 = 13, CC 6 = 7 pins the first input's polarity to -0.5, the negating end of its dial;
   with CC 118 and 119 up to CC 124, the mixer outputs 1.0 less the CC: the CC mirrored about
-  CC 64. Point the cutoff's source at the mixer with CC 99 = 2, CC 98 = 56, CC 6 = 25 and CC 16 now
+  CC 64. Point the cutoff's source at the mixer with CC 99 = 2, CC 98 = 52, CC 6 = 25 and CC 16 now
   closes the filter as it rises
 - Take the filter out of the chain: CC 99 = 1, CC 98 = 21, CC 6 = 36 points the amp's audio input
   at Mixer 2. The filter keeps running and keeps its slot; nothing reads it
@@ -887,9 +890,9 @@ takes the output to the input at once, mid-glide too, as Glide at 0.0 does.
   filter's DC blockers leave some of the input in it, 23 dB down at 50 Hz, and a level that drives
   the filter's leak or its output clip leaves more. Narrow as it is, it is far quieter than the
   dry note, more so with the cutoff high above the harmonics: CC 74 = 64 brings it among them
-- Echoes that only come in with the mod wheel: CC 99 = 2, CC 98 = 70, CC 6 = 12 takes Delay 1 Mix
+- Echoes that only come in with the mod wheel: CC 99 = 2, CC 98 = 64, CC 6 = 12 takes Delay 1 Mix
   from General Mod Wheel, which powers up at 0.0, so the output is dry until the wheel moves
-- Chorus that only comes in with the mod wheel: CC 99 = 2, CC 98 = 67, CC 6 = 12 takes Chorus 1
+- Chorus that only comes in with the mod wheel: CC 99 = 2, CC 98 = 61, CC 6 = 12 takes Chorus 1
   Mix from General Mod Wheel, so the output stays mono until the wheel moves
 - Leave the chorus out of the sound, keeping the delay: CC 99 = 1, CC 98 = 24 and 25, CC 6 = 40
   feeds both sides of Delay 1 from the amp. The chorus keeps running and nothing reads it, and the
