@@ -1487,7 +1487,7 @@
     };
   }
 
-  // Anything missing or unknown falls back to the default patch, so an older file still loads.
+  // Anything missing or unknown falls back to the default patch.
   function deserialize(obj) {
     if (!obj || typeof obj !== 'object') throw new Error('Not a patch');
     if (obj.format && obj.format !== 'spms1-type2-patch') throw new Error('Unknown format: ' + obj.format);
@@ -1499,18 +1499,7 @@
       s.order = obj.order.slice(0, MODULES_SIZE).filter((k, i, a) => MOD[k] && a.lastIndexOf(k) === i);
     }
     const src = v => (typeof v === 'string' && v in SIG) ? v : null;
-    // Version 1 had a mono Delay 1 and a mono Final Output. Each of its inputs feeds both sides
-    // now, and its output is read from the side of the input reading it, so an old patch sounds
-    // as it did: without the chorus, which it does not run.
-    const inputs = obj.inputs && typeof obj.inputs === 'object' ? { ...obj.inputs } : null;
-    if (inputs && !(obj.version >= 2)) {
-      for (const [old, side] of [['DELAY_1_AUDIO', 'DELAY_1_AUDIO_'], ['OUTPUT', 'OUTPUT_']]) {
-        if (old in inputs) for (const lr of ['L', 'R']) if (!(side + lr in inputs)) inputs[side + lr] = inputs[old];
-      }
-      for (const k in inputs) {
-        if (inputs[k] === 'DELAY_1_OUTPUT') inputs[k] = k.endsWith('_R') ? 'DELAY_1_OUTPUT_R' : 'DELAY_1_OUTPUT_L';
-      }
-    }
+    const inputs = obj.inputs && typeof obj.inputs === 'object' ? obj.inputs : null;
     INPUT_ITEMS.forEach(i => { if (inputs && i.key in inputs) s.inputs[i.key] = src(inputs[i.key]) || 'NONE'; });
     PARAM_ITEMS.forEach(p => { if (obj.params && p.key in obj.params) s.params[p.key] = src(obj.params[p.key]) || p.key; });
     CONTROL_ITEMS.forEach(c => { if (obj.cc && c.key in obj.cc) s.cc[c.key] = clamp7(obj.cc[c.key]); });
