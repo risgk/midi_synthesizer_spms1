@@ -2,9 +2,11 @@
 # spms1_editor.html, README.md, README.ja.md and spms1/spms1_main.rb between their "patch_gen"
 # markers.
 #
-#   ruby patch_gen/spms1_patch_gen.rb [--check]
+#   ruby patch_gen/spms1_patch_gen.rb [--check | --renumber]
 #
-# --check writes nothing, and exits with 1 if a file is not what it would write. Needs CRuby only
+# --check writes nothing, and exits with 1 if a file is not what it would write. --renumber first
+# numbers every list of spms1_patch.yaml again in its order, as the YAML says they are, for after
+# something was added or moved, then writes the rest. Needs CRuby only
 # (YAML and JSON are in its standard library). Run from anywhere.
 
 require 'yaml'
@@ -100,6 +102,16 @@ class Spec
     unique.call('input', @inputs, 'entry')
     unique.call('control', @controls, 'entry')
     unique.call('control', @controls.map { |c| { 'key' => full_key(c) } }, 'key')
+    # Each list numbered in its order with no gaps (see the top of the YAML).
+    in_order = lambda do |what, list, field, first|
+      list.each_with_index do |item, n|
+        fail_spec("#{what} #{item['key']} is #{field} #{item[field]}, not #{first + n}, its place in the list") unless item[field] == first + n
+      end
+    end
+    in_order.call('module', @modules, 'id', 1)
+    in_order.call('signal', @signals, 'id', 0)
+    in_order.call('input', @inputs_in_list_order, 'entry', 0)
+    in_order.call('control', @controls_in_list_order, 'entry', 0)
     fail_spec('module id 0 is MODULE_NONE') if @module.values.any? { |m| m['id'] == 0 }
     fail_spec('module ids are 1-127') if @modules.any? { |m| m['id'] > 127 }
     fail_spec("signal ids are 0-126, #{SIGNAL_OWN} being a parameter's own slot") if @signals.any? { |s| s['id'] >= SIGNAL_OWN }
@@ -123,6 +135,28 @@ class Spec
   end
 end
 
+# Writes each item's number in the YAML as its place in its list: `id` from 0 on the bus and from 1
+# for the modules, `entry` from 0 for the inputs and the controls. Only the number is touched, so
+# the comments and the layout stay as they are.
+def renumber_spec
+  first = { 'modules' => 1, 'signals' => 0, 'inputs' => 0, 'controls' => 0 }
+  field = { 'modules' => 'id', 'signals' => 'id', 'inputs' => 'entry', 'controls' => 'entry' }
+  section = nil
+  count = 0
+  text = File.read(SPEC_FILE).lines.map do |line|
+    if line =~ /^(\w+):/
+      section = $1
+      count = first[section] || 0
+    end
+    next line unless first.key?(section) && line.start_with?('  - {')
+    number = count
+    count += 1
+    line.sub(/\b#{field[section]}: *\d+/) { "#{field[section]}: #{number}" }
+  end.join
+  File.write(SPEC_FILE, text)
+end
+
+renumber_spec if ARGV.include?('--renumber')
 SPEC = Spec.new(YAML.load_file(SPEC_FILE))
 
 # ---- spms1_patch.rb ----------------------------------------------------------------------------
