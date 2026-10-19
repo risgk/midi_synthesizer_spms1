@@ -1476,7 +1476,7 @@
     CONTROL_ITEMS.forEach(c => { const cc = s.cc[c.key]; if (cc) used[cc] = s.values[cc] ?? 64; });
     return {
       format: 'spms1-type2-patch',
-      version: 2,
+      version: 0,
       name: s.name,
       order: s.order.slice(),
       inputs: { ...s.inputs },
