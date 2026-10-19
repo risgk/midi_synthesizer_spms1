@@ -192,9 +192,9 @@ while true
   source_mixer_2_in_2 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_IN_2)
   source_mixer_2_in_3 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_IN_3)
   source_filter_1_audio = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_AUDIO)
+  source_filter_1_pitch = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_PITCH)
   source_filter_1_mod_1 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_1)
   source_filter_1_mod_2 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_2)
-  source_filter_1_mod_3 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_3)
   source_amp_1_audio = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_AUDIO)
   source_amp_1_mod = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_MOD)
   source_chorus_1_audio = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_CHORUS_1_AUDIO)
@@ -259,12 +259,11 @@ while true
   source_mixer_2_out_level = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_OUT_LEVEL), SLOT_MIXER_2_OUT_LEVEL)
   source_filter_1_gain = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_GAIN), SLOT_FILTER_1_GAIN)
   source_filter_1_cutoff = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_CUTOFF), SLOT_FILTER_1_CUTOFF)
+  source_filter_1_pitch_track = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_PITCH_TRACK), SLOT_FILTER_1_PITCH_TRACK)
   source_filter_1_mod_1_amt = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_1_AMT), SLOT_FILTER_1_MOD_1_AMT)
   source_filter_1_mod_1_pol = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_1_POL), SLOT_FILTER_1_MOD_1_POL)
   source_filter_1_mod_2_amt = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_2_AMT), SLOT_FILTER_1_MOD_2_AMT)
   source_filter_1_mod_2_pol = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_2_POL), SLOT_FILTER_1_MOD_2_POL)
-  source_filter_1_mod_3_amt = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_3_AMT), SLOT_FILTER_1_MOD_3_AMT)
-  source_filter_1_mod_3_pol = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_3_POL), SLOT_FILTER_1_MOD_3_POL)
   source_filter_1_cutoff_mod_amt = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_CUTOFF_MOD_AMT), SLOT_FILTER_1_CUTOFF_MOD_AMT)
   source_filter_1_resonance = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_RESONANCE), SLOT_FILTER_1_RESONANCE)
   source_filter_1_mode = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MODE), SLOT_FILTER_1_MODE)
@@ -397,6 +396,8 @@ while true
   signals[SLOT_FILTER_1_GAIN] = cc_or_zero(cc_filter_1_gain, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_gain)))
   cc_filter_1_cutoff = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_CUTOFF)
   signals[SLOT_FILTER_1_CUTOFF] = cc_or_zero(cc_filter_1_cutoff, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_cutoff)))
+  cc_filter_1_pitch_track = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_PITCH_TRACK)
+  signals[SLOT_FILTER_1_PITCH_TRACK] = cc_or_zero(cc_filter_1_pitch_track, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_pitch_track)))
   cc_filter_1_mod_1_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_MOD_1_AMT)
   signals[SLOT_FILTER_1_MOD_1_AMT] = cc_or_zero(cc_filter_1_mod_1_amt, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_mod_1_amt)))
   cc_filter_1_mod_1_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_MOD_1_POL)
@@ -405,10 +406,6 @@ while true
   signals[SLOT_FILTER_1_MOD_2_AMT] = cc_or_zero(cc_filter_1_mod_2_amt, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_mod_2_amt)))
   cc_filter_1_mod_2_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_MOD_2_POL)
   signals[SLOT_FILTER_1_MOD_2_POL] = cc_or_zero(cc_filter_1_mod_2_pol, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_mod_2_pol)))
-  cc_filter_1_mod_3_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_MOD_3_AMT)
-  signals[SLOT_FILTER_1_MOD_3_AMT] = cc_or_zero(cc_filter_1_mod_3_amt, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_mod_3_amt)))
-  cc_filter_1_mod_3_pol = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_MOD_3_POL)
-  signals[SLOT_FILTER_1_MOD_3_POL] = cc_or_zero(cc_filter_1_mod_3_pol, cc_to_bipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_mod_3_pol)))
   cc_filter_1_cutoff_mod_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_CUTOFF_MOD_AMT)
   signals[SLOT_FILTER_1_CUTOFF_MOD_AMT] = cc_or_zero(cc_filter_1_cutoff_mod_amt, cc_to_unipolar(C.get_midi_cc_value(MIDI_CH, cc_filter_1_cutoff_mod_amt)))
   cc_filter_1_resonance = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_RESONANCE)
@@ -512,12 +509,11 @@ while true
   mixer_2.set_out_level(signals[source_mixer_2_out_level])
   filter_1.set_gain(signals[source_filter_1_gain])
   filter_1.set_cutoff(signals[source_filter_1_cutoff])
+  filter_1.set_pitch_track(signals[source_filter_1_pitch_track])
   filter_1.set_modulation_1_amount(signals[source_filter_1_mod_1_amt])
   filter_1.set_modulation_1_polarity(signals[source_filter_1_mod_1_pol])
   filter_1.set_modulation_2_amount(signals[source_filter_1_mod_2_amt])
   filter_1.set_modulation_2_polarity(signals[source_filter_1_mod_2_pol])
-  filter_1.set_modulation_3_amount(signals[source_filter_1_mod_3_amt])
-  filter_1.set_modulation_3_polarity(signals[source_filter_1_mod_3_pol])
   filter_1.set_cutoff_modulation_amount(signals[source_filter_1_cutoff_mod_amt])
   filter_1.set_resonance(signals[source_filter_1_resonance])
   filter_1.set_mode(signals[source_filter_1_mode])
@@ -583,7 +579,7 @@ while true
       when 8 # MODULE_MIXER_2
         signals[36] = mixer_2.process(control_tick, signals[source_mixer_2_in_1], signals[source_mixer_2_in_2], signals[source_mixer_2_in_3]) # SIGNAL_MIXER_2_OUTPUT
       when 9 # MODULE_FILTER_1
-        signals[37] = filter_1.process(control_tick, signals[source_filter_1_audio], signals[source_filter_1_mod_1], signals[source_filter_1_mod_2], signals[source_filter_1_mod_3]) # SIGNAL_FILTER_1_OUTPUT
+        signals[37] = filter_1.process(control_tick, signals[source_filter_1_audio], signals[source_filter_1_pitch], signals[source_filter_1_mod_1], signals[source_filter_1_mod_2]) # SIGNAL_FILTER_1_OUTPUT
         signals[38] = filter_1.output_lp # SIGNAL_FILTER_1_OUTPUT_LP
         signals[39] = filter_1.output_hp # SIGNAL_FILTER_1_OUTPUT_HP
       when 10 # MODULE_AMP_1

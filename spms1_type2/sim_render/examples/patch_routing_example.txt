@@ -4,7 +4,7 @@
 B0 63 01 B0 62 03 B0 06 1B   ; NRPN 131 Mixer 1 In 1   <- Osc 1 (27)
 B0 62 04 B0 06 15            ; NRPN 132 Mixer 1 In 2   <- EG 1 (21)
 B0 62 1A B0 06 19            ; NRPN 154 Output L       <- Mixer 1 (25)
-B0 62 12 B0 06 16            ; NRPN 146 Filter 1 Mod 1 <- LFO 1 (22)
+B0 62 13 B0 06 16            ; NRPN 147 Filter 1 Mod 1 <- LFO 1 (22)
 B0 63 02 B0 62 0C B0 06 01   ; NRPN 268 Mixer 1 Level 1 <- 1.0 (1), from CC 118
 B0 62 0E B0 06 01            ; NRPN 270 Mixer 1 Level 2 <- 1.0 (1), from CC 119
 B0 65 7F B0 64 7F            ; RPN null

@@ -38,7 +38,7 @@ modules:
   - { key: OSC_2,      id: 6, label: Osc 2, class: Osc, process: [PITCH, MOD_1, MOD_2] }
   - { key: NOISE_1,    id: 7, label: Noise 1, class: Noise, process: [] }
   - { key: MIXER_2,    id: 8, label: Mixer 2, class: Mixer, process: [IN_1, IN_2, IN_3] }
-  - { key: FILTER_1,  id: 9, label: Filter 1, class: Filter, process: [AUDIO, MOD_1, MOD_2, MOD_3] }
+  - { key: FILTER_1,  id: 9, label: Filter 1, class: Filter, process: [AUDIO, PITCH, MOD_1, MOD_2] }
   - { key: AMP_1,     id: 10, label: Amp 1, class: Amp, process: [AUDIO, MOD] }
   - { key: CHORUS_1,  id: 11, label: Chorus 1, stereo: true, class: Chorus, process: [AUDIO] }
   - { key: DELAY_1,   id: 12, label: Delay 1,  stereo: true, class: Delay, process: [AUDIO_L, AUDIO_R] }
@@ -59,9 +59,9 @@ modules:
 # whole, in tune. Osc 1 Mod 1 In takes the envelope, for a pitch envelope, but Mod 1 Amt powers up
 # at 0.0 and leaves it off until CC 89; Mod 1 Pol reads +0.5. The LFO also reaches Filter 1 Mod 2
 # In, but Filter 1 Mod 2 Amt powers up at 0.0, so the cutoff follows the envelope alone until CC 25
-# turns it up, and Filter 1 Mod 2 Pol reads 0.1, which brings the LFO down to a vibrato's depth. Filter 1 Mod 3 In takes
-# Pitch 1's pitch too, for keyboard tracking, but Mod 3 Amt powers up at 0.0 and leaves it off until
-# CC 9. Noise 1 runs after the oscillators, as it is mostly a sound of its own (a modulation taking
+# turns it up, and Filter 1 Mod 2 Pol reads 0.1, which brings the LFO down to a vibrato's depth.
+# Filter 1 Pitch In takes Pitch 1's pitch too, for keyboard tracking, but Pitch Track powers up at
+# 0.0 and leaves it off until CC 9. Noise 1 runs after the oscillators, as it is mostly a sound of its own (a modulation taking
 # it is a sample late, which it does not hear), at full level: its Level has no CC and reads 1.0.
 # Mixer 2 runs after it, just ahead of the filter, which it feeds: Osc 1 on its In 1, Osc 2 on In 2
 # and the noise on In 3. Its Level 1, on CC 116, powers up at 1.0, and Level 2 and 3, on CC 21 and
@@ -180,9 +180,9 @@ inputs:
   - { entry: 15, module: MIXER_2,     key: IN_2,        label: In 2,           name: In 2,           source: OSC_2_OUTPUT }
   - { entry: 16, module: MIXER_2,     key: IN_3,        label: In 3,           name: In 3,           source: NOISE_1_OUTPUT }
   - { entry: 17, module: FILTER_1,    key: AUDIO,       label: Audio In,       name: Audio In,       source: MIXER_2_OUTPUT }
-  - { entry: 18, module: FILTER_1,    key: MOD_1,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
-  - { entry: 19, module: FILTER_1,    key: MOD_2,       label: Mod 2 In,       name: Mod 2 In,       source: LFO_1_OUTPUT }
-  - { entry: 20, module: FILTER_1,    key: MOD_3,       label: Mod 3 In,       name: Mod 3 In,       source: PITCH_1_OUTPUT }
+  - { entry: 18, module: FILTER_1,    key: PITCH,       label: Pitch In,       name: Pitch In,       source: PITCH_1_OUTPUT }
+  - { entry: 19, module: FILTER_1,    key: MOD_1,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
+  - { entry: 20, module: FILTER_1,    key: MOD_2,       label: Mod 2 In,       name: Mod 2 In,       source: LFO_1_OUTPUT }
   - { entry: 21, module: AMP_1,       key: AUDIO,       label: Audio In,       name: Audio In,       source: FILTER_1_OUTPUT }
   - { entry: 22, module: AMP_1,       key: MOD,         label: Mod In,         name: Mod In,         source: EG_1_OUTPUT }
   - { entry: 23, module: CHORUS_1,    key: AUDIO,       label: Audio In,       name: Audio In,       source: AMP_1_OUTPUT }
@@ -292,44 +292,42 @@ controls:
   - { entry: 52, module: MIXER_2,   key: LEVEL_3,      label: Level 3,      cc: 23,  value: 4, set: set_level_3 }
   - { entry: 53, module: MIXER_2,   key: POL_3,   label: Pol 3,   cc: 0,   value: 124, source: HALF, bipolar: true, set: set_polarity_3 }
   - { entry: 54, module: MIXER_2,   key: OUT_LEVEL,    label: Out Level,    cc: 0,   value: 124, source: ONE, set: set_out_level }
-  # Filter 1 in the editor: Gain, the cutoff and its three modulations, then the resonance and
-  # Mode. Mod 2 Amt powers up at CC 4, 0.0, so the LFO on Mod 2 In leaves the cutoff alone until it
-  # is turned up. Mod 2 Pol reads 0.1, which brings the LFO down to a
-  # musical depth on the cutoff. Mod 3 is the keyboard tracking: Mod 3 In takes the pitch from
-  # Pitch 1, as Osc 1 Pitch In does, and Mod 3 Pol reads +0.5, so that Mod 3 Amt (CC 9) at its top
-  # makes the cutoff follow the note a semitone for a semitone, unmoved at note 60. Mod 3 Amt powers
-  # up at CC 4, 0.0, with the tracking off. Cutoff Mod Amt, on CC 117, is how far the sum of the
-  # three moves the cutoff, as Osc 1 PW Mod Amt is for the pulse width, and powers up at CC 124,
-  # 1.0, the sum as it is. Mode crossfades Out from the low pass (0.0) through a
+  # Filter 1 in the editor: Gain, the cutoff, its keyboard tracking and its two modulations, then
+  # the resonance and Mode. Pitch In takes the pitch from Pitch 1, as Osc 1 Pitch In does, and
+  # Pitch Track (CC 9) at its top makes the cutoff follow the note a semitone for a semitone,
+  # unmoved at note 60; it powers up at CC 4, 0.0, with the tracking off. Mod 2 Amt powers up at
+  # CC 4, 0.0, so the LFO on Mod 2 In leaves the cutoff alone until it is turned up. Mod 2 Pol reads
+  # 0.1, which brings the LFO down to a musical depth on the cutoff. Cutoff Mod Amt, on CC 117, is
+  # how far the sum of the two modulations moves the cutoff, as Osc 1 PW Mod Amt is for the pulse
+  # width, and powers up at CC 124, 1.0, the sum as it is. Mode crossfades Out from the low pass (0.0) through a
   # notch (0.5) to the high pass (1.0), on CC 39, Filter Mode's in PRA32-U2, and powers up at CC 4,
   # 0.0, the low pass.
   - { entry: 55, module: FILTER_1,  key: GAIN,         label: Gain,         cc: 112, value: 64, set: set_gain }
   - { entry: 56, module: FILTER_1,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 100, set: set_cutoff }
-  - { entry: 57, module: FILTER_1,  key: MOD_1_AMT, label: Mod 1 Amt,     cc: 24,  value: 28, set: set_modulation_1_amount }
-  - { entry: 58, module: FILTER_1,  key: MOD_1_POL, label: Mod 1 Pol, cc: 0,   value: 124, source: HALF, bipolar: true, set: set_modulation_1_polarity }
-  - { entry: 59, module: FILTER_1,  key: MOD_2_AMT, label: Mod 2 Amt,    cc: 25,  value: 4, set: set_modulation_2_amount }
-  - { entry: 60, module: FILTER_1,  key: MOD_2_POL, label: Mod 2 Pol,    cc: 0,   value: 124, source: POINT_ONE, bipolar: true, set: set_modulation_2_polarity }
-  - { entry: 61, module: FILTER_1,  key: MOD_3_AMT, label: Mod 3 Amt,    cc: 9,   value: 4, set: set_modulation_3_amount }
-  - { entry: 62, module: FILTER_1,  key: MOD_3_POL, label: Mod 3 Pol,    cc: 0,   value: 124, source: HALF, bipolar: true, set: set_modulation_3_polarity }
-  - { entry: 63, module: FILTER_1,  key: CUTOFF_MOD_AMT, label: Cutoff Mod Amt, cc: 117, value: 124, set: set_cutoff_modulation_amount }
-  - { entry: 64, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 94, set: set_resonance }
-  - { entry: 65, module: FILTER_1,  key: MODE,         label: Mode,         cc: 39,  value: 4, set: set_mode }
-  - { entry: 66, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 124, set: set_gain }
-  - { entry: 67, module: AMP_1,     key: GAIN_POL,     label: Gain Pol,     cc: 0,   value: 124, source: HALF, bipolar: true, set: set_gain_polarity }
-  - { entry: 68, module: CHORUS_1,  key: MIX,          label: Mix,          cc: 93,  value: 64, set: set_mix }
-  - { entry: 69, module: CHORUS_1,  key: RATE,         label: Rate,         cc: 58,  value: 64, set: set_rate }
-  - { entry: 70, module: CHORUS_1,  key: DEPTH,        label: Depth,        cc: 59,  value: 64, set: set_depth }
-  - { entry: 71, module: DELAY_1,   key: MIX,          label: Mix,          cc: 94,  value: 34, set: set_mix }
-  - { entry: 72, module: DELAY_1,   key: TIME,         label: Time,         cc: 90,  value: 64, set: set_time }
-  - { entry: 73, module: DELAY_1,   key: FEEDBACK,     label: Feedback,     cc: 92,  value: 64, set: set_feedback }
+  - { entry: 57, module: FILTER_1,  key: PITCH_TRACK,  label: Pitch Track,  cc: 9,   value: 4, set: set_pitch_track }
+  - { entry: 58, module: FILTER_1,  key: MOD_1_AMT, label: Mod 1 Amt,     cc: 24,  value: 28, set: set_modulation_1_amount }
+  - { entry: 59, module: FILTER_1,  key: MOD_1_POL, label: Mod 1 Pol, cc: 0,   value: 124, source: HALF, bipolar: true, set: set_modulation_1_polarity }
+  - { entry: 60, module: FILTER_1,  key: MOD_2_AMT, label: Mod 2 Amt,    cc: 25,  value: 4, set: set_modulation_2_amount }
+  - { entry: 61, module: FILTER_1,  key: MOD_2_POL, label: Mod 2 Pol,    cc: 0,   value: 124, source: POINT_ONE, bipolar: true, set: set_modulation_2_polarity }
+  - { entry: 62, module: FILTER_1,  key: CUTOFF_MOD_AMT, label: Cutoff Mod Amt, cc: 117, value: 124, set: set_cutoff_modulation_amount }
+  - { entry: 63, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 94, set: set_resonance }
+  - { entry: 64, module: FILTER_1,  key: MODE,         label: Mode,         cc: 39,  value: 4, set: set_mode }
+  - { entry: 65, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 124, set: set_gain }
+  - { entry: 66, module: AMP_1,     key: GAIN_POL,     label: Gain Pol,     cc: 0,   value: 124, source: HALF, bipolar: true, set: set_gain_polarity }
+  - { entry: 67, module: CHORUS_1,  key: MIX,          label: Mix,          cc: 93,  value: 64, set: set_mix }
+  - { entry: 68, module: CHORUS_1,  key: RATE,         label: Rate,         cc: 58,  value: 64, set: set_rate }
+  - { entry: 69, module: CHORUS_1,  key: DEPTH,        label: Depth,        cc: 59,  value: 64, set: set_depth }
+  - { entry: 70, module: DELAY_1,   key: MIX,          label: Mix,          cc: 94,  value: 34, set: set_mix }
+  - { entry: 71, module: DELAY_1,   key: TIME,         label: Time,         cc: 90,  value: 64, set: set_time }
+  - { entry: 72, module: DELAY_1,   key: FEEDBACK,     label: Feedback,     cc: 92,  value: 64, set: set_feedback }
 
   # General controls: a CC put on the bus for any input or parameter to read, the mod wheel
   # unipolar and each of General 1-4 filling a unipolar and a bipolar slot (see `signals`). Each
   # of General 1-4 powers up at CC 64, the one value that puts neither slot at an end: the
   # unipolar slot at 0.5, the bipolar at 0.0. General 1-4 are on CC 16-19, the MIDI spec's
   # General Purpose Controllers 1-4.
-  - { entry: 74, general: true, key: GENERAL_MOD_WHEEL, label: Mod Wheel, cc: 1,   value: 4 }
-  - { entry: 75, general: true, key: GENERAL_1,         label: "1",       cc: 16,  value: 64 }
-  - { entry: 76, general: true, key: GENERAL_2,         label: "2",       cc: 17,  value: 64 }
-  - { entry: 77, general: true, key: GENERAL_3,         label: "3",       cc: 18,  value: 64 }
-  - { entry: 78, general: true, key: GENERAL_4,         label: "4",       cc: 19,  value: 64 }
+  - { entry: 73, general: true, key: GENERAL_MOD_WHEEL, label: Mod Wheel, cc: 1,   value: 4 }
+  - { entry: 74, general: true, key: GENERAL_1,         label: "1",       cc: 16,  value: 64 }
+  - { entry: 75, general: true, key: GENERAL_2,         label: "2",       cc: 17,  value: 64 }
+  - { entry: 76, general: true, key: GENERAL_3,         label: "3",       cc: 18,  value: 64 }
+  - { entry: 77, general: true, key: GENERAL_4,         label: "4",       cc: 19,  value: 64 }

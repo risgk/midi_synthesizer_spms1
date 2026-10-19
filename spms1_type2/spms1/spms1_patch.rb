@@ -127,23 +127,22 @@ SLOT_MIXER_2_POL_3           = 181
 SLOT_MIXER_2_OUT_LEVEL       = 182
 SLOT_FILTER_1_GAIN           = 183
 SLOT_FILTER_1_CUTOFF         = 184
-SLOT_FILTER_1_MOD_1_AMT      = 185
-SLOT_FILTER_1_MOD_1_POL      = 186
-SLOT_FILTER_1_MOD_2_AMT      = 187
-SLOT_FILTER_1_MOD_2_POL      = 188
-SLOT_FILTER_1_MOD_3_AMT      = 189
-SLOT_FILTER_1_MOD_3_POL      = 190
-SLOT_FILTER_1_CUTOFF_MOD_AMT = 191
-SLOT_FILTER_1_RESONANCE      = 192
-SLOT_FILTER_1_MODE           = 193
-SLOT_AMP_1_GAIN              = 194
-SLOT_AMP_1_GAIN_POL          = 195
-SLOT_CHORUS_1_MIX            = 196
-SLOT_CHORUS_1_RATE           = 197
-SLOT_CHORUS_1_DEPTH          = 198
-SLOT_DELAY_1_MIX             = 199
-SLOT_DELAY_1_TIME            = 200
-SLOT_DELAY_1_FEEDBACK        = 201
+SLOT_FILTER_1_PITCH_TRACK    = 185
+SLOT_FILTER_1_MOD_1_AMT      = 186
+SLOT_FILTER_1_MOD_1_POL      = 187
+SLOT_FILTER_1_MOD_2_AMT      = 188
+SLOT_FILTER_1_MOD_2_POL      = 189
+SLOT_FILTER_1_CUTOFF_MOD_AMT = 190
+SLOT_FILTER_1_RESONANCE      = 191
+SLOT_FILTER_1_MODE           = 192
+SLOT_AMP_1_GAIN              = 193
+SLOT_AMP_1_GAIN_POL          = 194
+SLOT_CHORUS_1_MIX            = 195
+SLOT_CHORUS_1_RATE           = 196
+SLOT_CHORUS_1_DEPTH          = 197
+SLOT_DELAY_1_MIX             = 198
+SLOT_DELAY_1_TIME            = 199
+SLOT_DELAY_1_FEEDBACK        = 200
 
 # NRPN parameter numbers: (MSB << 7) | LSB, where the MSB picks a category and the LSB an entry.
 #   0..127   active_modules[slot]
@@ -170,9 +169,9 @@ NRPN_SOURCE_MIXER_2_IN_1    = 142
 NRPN_SOURCE_MIXER_2_IN_2    = 143
 NRPN_SOURCE_MIXER_2_IN_3    = 144
 NRPN_SOURCE_FILTER_1_AUDIO  = 145
-NRPN_SOURCE_FILTER_1_MOD_1  = 146
-NRPN_SOURCE_FILTER_1_MOD_2  = 147
-NRPN_SOURCE_FILTER_1_MOD_3  = 148
+NRPN_SOURCE_FILTER_1_PITCH  = 146
+NRPN_SOURCE_FILTER_1_MOD_1  = 147
+NRPN_SOURCE_FILTER_1_MOD_2  = 148
 NRPN_SOURCE_AMP_1_AUDIO     = 149
 NRPN_SOURCE_AMP_1_MOD       = 150
 NRPN_SOURCE_CHORUS_1_AUDIO  = 151
@@ -238,23 +237,22 @@ NRPN_SOURCE_MIXER_2_POL_3           = 309
 NRPN_SOURCE_MIXER_2_OUT_LEVEL       = 310
 NRPN_SOURCE_FILTER_1_GAIN           = 311
 NRPN_SOURCE_FILTER_1_CUTOFF         = 312
-NRPN_SOURCE_FILTER_1_MOD_1_AMT      = 313
-NRPN_SOURCE_FILTER_1_MOD_1_POL      = 314
-NRPN_SOURCE_FILTER_1_MOD_2_AMT      = 315
-NRPN_SOURCE_FILTER_1_MOD_2_POL      = 316
-NRPN_SOURCE_FILTER_1_MOD_3_AMT      = 317
-NRPN_SOURCE_FILTER_1_MOD_3_POL      = 318
-NRPN_SOURCE_FILTER_1_CUTOFF_MOD_AMT = 319
-NRPN_SOURCE_FILTER_1_RESONANCE      = 320
-NRPN_SOURCE_FILTER_1_MODE           = 321
-NRPN_SOURCE_AMP_1_GAIN              = 322
-NRPN_SOURCE_AMP_1_GAIN_POL          = 323
-NRPN_SOURCE_CHORUS_1_MIX            = 324
-NRPN_SOURCE_CHORUS_1_RATE           = 325
-NRPN_SOURCE_CHORUS_1_DEPTH          = 326
-NRPN_SOURCE_DELAY_1_MIX             = 327
-NRPN_SOURCE_DELAY_1_TIME            = 328
-NRPN_SOURCE_DELAY_1_FEEDBACK        = 329
+NRPN_SOURCE_FILTER_1_PITCH_TRACK    = 313
+NRPN_SOURCE_FILTER_1_MOD_1_AMT      = 314
+NRPN_SOURCE_FILTER_1_MOD_1_POL      = 315
+NRPN_SOURCE_FILTER_1_MOD_2_AMT      = 316
+NRPN_SOURCE_FILTER_1_MOD_2_POL      = 317
+NRPN_SOURCE_FILTER_1_CUTOFF_MOD_AMT = 318
+NRPN_SOURCE_FILTER_1_RESONANCE      = 319
+NRPN_SOURCE_FILTER_1_MODE           = 320
+NRPN_SOURCE_AMP_1_GAIN              = 321
+NRPN_SOURCE_AMP_1_GAIN_POL          = 322
+NRPN_SOURCE_CHORUS_1_MIX            = 323
+NRPN_SOURCE_CHORUS_1_RATE           = 324
+NRPN_SOURCE_CHORUS_1_DEPTH          = 325
+NRPN_SOURCE_DELAY_1_MIX             = 326
+NRPN_SOURCE_DELAY_1_TIME            = 327
+NRPN_SOURCE_DELAY_1_FEEDBACK        = 328
 
 # A CC number of 0 means the parameter has no CC: its control slot holds 0.0 -- the bottom of a
 # unipolar dial, the middle of a bipolar one -- whatever CC it had before, so a patch sets it alone.
@@ -315,28 +313,27 @@ NRPN_CC_MIXER_2_POL_3           = 437
 NRPN_CC_MIXER_2_OUT_LEVEL       = 438
 NRPN_CC_FILTER_1_GAIN           = 439
 NRPN_CC_FILTER_1_CUTOFF         = 440
-NRPN_CC_FILTER_1_MOD_1_AMT      = 441
-NRPN_CC_FILTER_1_MOD_1_POL      = 442
-NRPN_CC_FILTER_1_MOD_2_AMT      = 443
-NRPN_CC_FILTER_1_MOD_2_POL      = 444
-NRPN_CC_FILTER_1_MOD_3_AMT      = 445
-NRPN_CC_FILTER_1_MOD_3_POL      = 446
-NRPN_CC_FILTER_1_CUTOFF_MOD_AMT = 447
-NRPN_CC_FILTER_1_RESONANCE      = 448
-NRPN_CC_FILTER_1_MODE           = 449
-NRPN_CC_AMP_1_GAIN              = 450
-NRPN_CC_AMP_1_GAIN_POL          = 451
-NRPN_CC_CHORUS_1_MIX            = 452
-NRPN_CC_CHORUS_1_RATE           = 453
-NRPN_CC_CHORUS_1_DEPTH          = 454
-NRPN_CC_DELAY_1_MIX             = 455
-NRPN_CC_DELAY_1_TIME            = 456
-NRPN_CC_DELAY_1_FEEDBACK        = 457
-NRPN_CC_GENERAL_MOD_WHEEL       = 458
-NRPN_CC_GENERAL_1               = 459
-NRPN_CC_GENERAL_2               = 460
-NRPN_CC_GENERAL_3               = 461
-NRPN_CC_GENERAL_4               = 462
+NRPN_CC_FILTER_1_PITCH_TRACK    = 441
+NRPN_CC_FILTER_1_MOD_1_AMT      = 442
+NRPN_CC_FILTER_1_MOD_1_POL      = 443
+NRPN_CC_FILTER_1_MOD_2_AMT      = 444
+NRPN_CC_FILTER_1_MOD_2_POL      = 445
+NRPN_CC_FILTER_1_CUTOFF_MOD_AMT = 446
+NRPN_CC_FILTER_1_RESONANCE      = 447
+NRPN_CC_FILTER_1_MODE           = 448
+NRPN_CC_AMP_1_GAIN              = 449
+NRPN_CC_AMP_1_GAIN_POL          = 450
+NRPN_CC_CHORUS_1_MIX            = 451
+NRPN_CC_CHORUS_1_RATE           = 452
+NRPN_CC_CHORUS_1_DEPTH          = 453
+NRPN_CC_DELAY_1_MIX             = 454
+NRPN_CC_DELAY_1_TIME            = 455
+NRPN_CC_DELAY_1_FEEDBACK        = 456
+NRPN_CC_GENERAL_MOD_WHEEL       = 457
+NRPN_CC_GENERAL_1               = 458
+NRPN_CC_GENERAL_2               = 459
+NRPN_CC_GENERAL_3               = 460
+NRPN_CC_GENERAL_4               = 461
 
 # The constants of the bus, which nothing else ever writes. A slot not written here holds 0.0.
 def spms1_fill_constant_signals(signals)
@@ -383,9 +380,9 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_2_IN_2   , SIGNAL_OSC_2_OUTPUT)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_2_IN_3   , SIGNAL_NOISE_1_OUTPUT)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_AUDIO , SIGNAL_MIXER_2_OUTPUT)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_PITCH , SIGNAL_PITCH_1_OUTPUT)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_MOD_1 , SIGNAL_EG_1_OUTPUT)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_MOD_2 , SIGNAL_LFO_1_OUTPUT)
-  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_MOD_3 , SIGNAL_PITCH_1_OUTPUT)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_AMP_1_AUDIO    , SIGNAL_FILTER_1_OUTPUT)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_AMP_1_MOD      , SIGNAL_EG_1_OUTPUT)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_CHORUS_1_AUDIO , SIGNAL_AMP_1_OUTPUT)
@@ -451,12 +448,11 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_2_OUT_LEVEL      , SIGNAL_ONE)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_GAIN          , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_CUTOFF        , SIGNAL_OWN)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_PITCH_TRACK   , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_MOD_1_AMT     , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_MOD_1_POL     , SIGNAL_HALF)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_MOD_2_AMT     , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_MOD_2_POL     , SIGNAL_POINT_ONE)
-  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_MOD_3_AMT     , SIGNAL_OWN)
-  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_MOD_3_POL     , SIGNAL_HALF)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_CUTOFF_MOD_AMT, SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_RESONANCE     , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_MODE          , SIGNAL_OWN)
@@ -502,9 +498,9 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_MIXER_2_LEVEL_3        , 23)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_GAIN          , 112)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_CUTOFF        , 74)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_PITCH_TRACK   , 9)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_MOD_1_AMT     , 24)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_MOD_2_AMT     , 25)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_MOD_3_AMT     , 9)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_CUTOFF_MOD_AMT, 117)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_RESONANCE     , 71)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_MODE          , 39)
@@ -554,9 +550,9 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 23 , 4  ) # Mixer 2 Level 3
   C.set_midi_cc_value(midi_ch, 112, 64 ) # Filter 1 Gain
   C.set_midi_cc_value(midi_ch, 74 , 100) # Filter 1 Cutoff
+  C.set_midi_cc_value(midi_ch, 9  , 4  ) # Filter 1 Pitch Track
   C.set_midi_cc_value(midi_ch, 24 , 28 ) # Filter 1 Mod 1 Amt
   C.set_midi_cc_value(midi_ch, 25 , 4  ) # Filter 1 Mod 2 Amt
-  C.set_midi_cc_value(midi_ch, 9  , 4  ) # Filter 1 Mod 3 Amt
   C.set_midi_cc_value(midi_ch, 117, 124) # Filter 1 Cutoff Mod Amt
   C.set_midi_cc_value(midi_ch, 71 , 94 ) # Filter 1 Resonance
   C.set_midi_cc_value(midi_ch, 39 , 4  ) # Filter 1 Mode
