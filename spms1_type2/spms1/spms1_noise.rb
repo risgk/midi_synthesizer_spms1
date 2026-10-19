@@ -40,9 +40,11 @@ module Spms1
       @red_gain = Math.sqrt((2.0 - @red_coef) / (2.0 * @red_coef))
       @red = 0.0
       @output_red = 0.0
-      # The generator's state: a 32-bit linear congruential generator, always in [0, 2^32). Seeded
-      # with a fixed value, so that a render is the same every time.
-      @state = 1
+      # The generator's state: a 32-bit linear congruential generator, held as two 16-bit halves,
+      # each in [0, 2^16), as Integer is 32 bits on the Pico 2 and the whole state would not fit
+      # it. Seeded with a fixed value, so that a render is the same every time.
+      @state_high = 0
+      @state_low = 1
     end
 
     # Level is unipolar, [0.0, 1.0], and used as a plain multiplier, so 1.0 puts out noise filling
@@ -66,13 +68,17 @@ module Spms1
         @current_color = Dsp.smooth(@stage_1_color, @current_color, @smoothing_target_blend)
       end
 
-      # Numerical Recipes' constants. The product stays under 2^53, so it is exact in 64 bits and
-      # needs no wrap of its own; the mask keeps the state in 32. The low bits of an LCG repeat
-      # with short periods, so only the top 24 are used: 0 to 2^24 - 1, scaled to [-0.5, 0.5).
-      # The literals are written out rather than named, as a named Integer constant is a runtime
-      # global to Spinel.
-      @state = (@state * 1664525 + 1013904223) & 0xffffffff
-      white = (@state >> 8).to_f * (1.0 / 16777216.0) - 0.5
+      # Numerical Recipes' constants, state * 1664525 + 1013904223 mod 2^32, worked a half at a
+      # time: the multiplier is 25 * 2^16 + 26125 and the increment 15470 * 2^16 + 62303. Every
+      # product and sum stays under 2^31, so it is exact in a 32-bit Integer as in a 64-bit one,
+      # and the Pico 2 plays the sequence a render does. The low bits of an LCG repeat with short
+      # periods, so only the top 24 are used: 0 to 2^24 - 1, scaled to [-0.5, 0.5). The literals
+      # are written out rather than named, as a named Integer constant is a runtime global to
+      # Spinel.
+      low = @state_low * 26125 + 62303
+      @state_high = (@state_high * 26125 + @state_low * 25 + 15470 + (low >> 16)) & 0xffff
+      @state_low = low & 0xffff
+      white = ((@state_high << 8) + (@state_low >> 8)).to_f * (1.0 / 16777216.0) - 0.5
 
       # Driven by the noise every sample, the state never settles toward zero, so it needs no
       # flush_tiny.
