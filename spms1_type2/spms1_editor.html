@@ -813,6 +813,14 @@
       border-color: var(--wire-feedback);
       background: #fdf2e3;
     }
+    /* No CC: the slot holds the value beside it, which only the patch sets, so the 0 stands out
+       from the CCs a little. */
+    .row input.none {
+      border-color: #9bb5d2;
+      background: #edf2f8;
+      color: var(--wire-param);
+      font-weight: 600;
+    }
     /* A CC that also fills another parameter's slot, as Osc 2's amounts are on Osc 1's CCs: moving
        one moves the other, so the number stands out a little. */
     .row input.shared {
@@ -1852,6 +1860,7 @@
       if (document.activeElement !== ccIn) ccIn.value = cc;
       const others = sharingCC(c);
       ccIn.classList.toggle('warn', RESERVED_CCS.has(cc));
+      ccIn.classList.toggle('none', !cc);
       ccIn.classList.toggle('shared', !RESERVED_CCS.has(cc) && others.length > 0);
       ccIn.title = RESERVED_CCS.has(cc)
         ? `CC ${cc} carries NRPN selection or data: its value is not sent`
@@ -3066,7 +3075,7 @@
       const others = sharingCC(c);
       const ccNum = zone.querySelector('.cc-num');
       ccNum.innerHTML =
-        (!cc ? (ownValue ? '(no CC, NRPN)' : '(no CC)') : RESERVED_CCS.has(cc) ? `(CC ${cc}, reserved)` : `(CC ${cc})`) +
+        (!cc ? (ownValue ? '' : '(no CC)') : RESERVED_CCS.has(cc) ? `(CC ${cc}, reserved)` : `(CC ${cc})`) +
         (routed ? ` ← ${sourceHTML(src)}` : '');
       ccNum.classList.toggle('shared', others.length > 0);
       ccNum.title = others.length ? `CC ${cc} also moves ${others.join(', ')}` : '';
