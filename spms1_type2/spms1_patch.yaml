@@ -324,7 +324,7 @@ controls:
   - { entry: 68, module: FILTER_1,  key: MODE,         label: Mode,         cc: 39,  value: 4, set: set_mode }
   - { entry: 69, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 124, set: set_gain }
   - { entry: 70, module: AMP_1,     key: GAIN_POL,     label: Gain Pol,     cc: 0,   value: 124, source: HALF, bipolar: true, set: set_gain_polarity }
-  - { entry: 71, module: CHORUS_1,  key: MIX,          label: Mix,          cc: 93,  value: 34, set: set_mix }
+  - { entry: 71, module: CHORUS_1,  key: MIX,          label: Mix,          cc: 93,  value: 64, set: set_mix }
   - { entry: 72, module: CHORUS_1,  key: RATE,         label: Rate,         cc: 58,  value: 64, set: set_rate }
   - { entry: 73, module: CHORUS_1,  key: DEPTH,        label: Depth,        cc: 59,  value: 64, set: set_depth }
   - { entry: 74, module: DELAY_1,   key: MIX,          label: Mix,          cc: 94,  value: 34, set: set_mix }

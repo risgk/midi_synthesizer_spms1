@@ -793,9 +793,8 @@ number, a semitone a step, as LFO 1 Rate is: 0.015 Hz at CC 4, 0.48 Hz at CC 64 
 CC 124, the default divided and multiplied by 32. Depth is how far each tap swings either side of 5.33 ms, in a straight line from not at
 all at CC 4, through 2.63 ms at CC 64, to 5.25 ms at CC 124. Mix is each tap's share of its side's
 crossfade: the dry input alone at CC 4, half and half at CC 64, and only the taps at CC 124, a vibrato on each side, the two moving opposite ways.
-Rate and Depth power up at CC 64, and Mix at CC 34, a quarter: the dry signal 2.5 dB down and
-the tap a third of it. The crossfade is what holds the chorus to one unit; at half and half the dry
-signal would be 6 dB down, with the sum with the tap making up some of it.
+All three power up at CC 64. The halves of the crossfade are what hold the chorus to one unit, so
+at the default the dry signal is 6 dB down, and the sum with the tap makes up some of it.
 
 The three Delay 1 parameters are unipolar and move in steps of 1/120, as every unipolar dial
 does. Time runs in a straight line, 2.83 ms a step, from 0 at CC 4 to 340 ms at CC 124, and is
