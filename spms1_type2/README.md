@@ -565,22 +565,23 @@ two slots, a unipolar and a bipolar one. See the General slots below.
 
 | ID | Signal | | ID | Signal | | ID | Signal |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | None (constant 0.0) | | 16 | General Unipolar 3 | | 32 | Osc 2 Output Saw ± |
-| 1 | Constant 1.0 | | 17 | General Unipolar 4 | | 33 | Osc 2 Output Pulse ± |
-| 2 | Constant 0.7 | | 18 | General Bipolar 1 ± | | 34 | Noise 1 Output ± |
-| 3 | Constant 0.5 | | 19 | General Bipolar 2 ± | | 35 | Noise 1 Output White ± |
-| 4 | Constant 0.2 | | 20 | General Bipolar 3 ± | | 36 | Noise 1 Output Red ± |
-| 5 | Constant 0.1 | | 21 | General Bipolar 4 ± | | 37 | Mixer 2 Output ± |
-| 6 | Constant -0.1 | | 22 | EG 1 Output | | 38 | Filter 1 Output ± |
-| 7 | Constant -0.2 | | 23 | LFO 1 Output ± | | 39 | Filter 1 Output LP ± |
-| 8 | Constant -0.5 | | 24 | LFO 1 Output Triangle ± | | 40 | Filter 1 Output HP ± |
-| 9 | Constant -1.0 | | 25 | LFO 1 Output Square ± | | 41 | Amp 1 Output ± |
-| 10 | Note Pitch ± | | 26 | Mixer 1 Output ± | | 42 | Chorus 1 Output L ± |
-| 11 | Note Gate | | 27 | Pitch 1 Output ± | | 43 | Chorus 1 Output R ± |
-| 12 | Pitch Bend ± | | 28 | Osc 1 Output ± | | 44 | Chorus 1 Output Mono ± |
-| 13 | General Mod Wheel | | 29 | Osc 1 Output Saw ± | | 45 | Delay 1 Output L ± |
-| 14 | General Unipolar 1 | | 30 | Osc 1 Output Pulse ± | | 46 | Delay 1 Output R ± |
-| 15 | General Unipolar 2 | | 31 | Osc 2 Output ± | | 47 | Delay 1 Output Mono ± |
+| 0 | None (constant 0.0) | | 17 | General Unipolar 2 | | 34 | Osc 2 Output Saw ± |
+| 1 | Constant 1.0 | | 18 | General Unipolar 3 | | 35 | Osc 2 Output Pulse ± |
+| 2 | Constant 0.7 | | 19 | General Unipolar 4 | | 36 | Noise 1 Output ± |
+| 3 | Constant 0.5 | | 20 | General Bipolar 1 ± | | 37 | Noise 1 Output White ± |
+| 4 | Constant 0.25 | | 21 | General Bipolar 2 ± | | 38 | Noise 1 Output Red ± |
+| 5 | Constant 0.2 | | 22 | General Bipolar 3 ± | | 39 | Mixer 2 Output ± |
+| 6 | Constant 0.1 | | 23 | General Bipolar 4 ± | | 40 | Filter 1 Output ± |
+| 7 | Constant -0.1 | | 24 | EG 1 Output | | 41 | Filter 1 Output LP ± |
+| 8 | Constant -0.2 | | 25 | LFO 1 Output ± | | 42 | Filter 1 Output HP ± |
+| 9 | Constant -0.25 | | 26 | LFO 1 Output Triangle ± | | 43 | Amp 1 Output ± |
+| 10 | Constant -0.5 | | 27 | LFO 1 Output Square ± | | 44 | Chorus 1 Output L ± |
+| 11 | Constant -1.0 | | 28 | Mixer 1 Output ± | | 45 | Chorus 1 Output R ± |
+| 12 | Note Pitch ± | | 29 | Pitch 1 Output ± | | 46 | Chorus 1 Output Mono ± |
+| 13 | Note Gate | | 30 | Osc 1 Output ± | | 47 | Delay 1 Output L ± |
+| 14 | Pitch Bend ± | | 31 | Osc 1 Output Saw ± | | 48 | Delay 1 Output R ± |
+| 15 | General Mod Wheel | | 32 | Osc 1 Output Pulse ± | | 49 | Delay 1 Output Mono ± |
+| 16 | General Unipolar 1 | | 33 | Osc 2 Output ± | |  |  |
 
 <!-- patch_gen end -->
 
@@ -604,7 +605,7 @@ parameter can read a parameter's control slot: a CC meant for more than one para
 module input, goes on a General slot, or is given to each parameter in category 3, as Osc 1 and
 Osc 2 share theirs.
 
-Slots 13-21, the General slots, are control slots that no parameter owns: a CC put on the bus for
+Slots 15-23, the General slots, are control slots that no parameter owns: a CC put on the bus for
 any module input or parameter to read. General Mod Wheel reads CC 1, runs 0.0 to 1.0 and powers
 up at CC 4, so it is at 0.0 until the wheel moves; nothing is routed to it by default. General 1-4
 read CC 16, 17, 18 and 19 by default, and each puts its CC on the bus both ways at once: General Unipolar 1-4
@@ -625,15 +626,17 @@ another plays a trill. Releasing the remembered note only forgets it, and with t
 releasing the newest goes back to the second, and releasing that closes the gate, even with the
 first still held.
 
-Slots 0-9 are constants that nothing writes, for inputs that want a fixed value rather than a
+Slots 0-11 are constants that nothing writes, for inputs that want a fixed value rather than a
 source, from the top down. Signal 0 is also what an entry nobody has set reads as, so an unrouted
 input is silent rather than wired to whatever sits in the first slot. Signal 1 is the value an
 unmodulated input wants: routing an amp's modulation input to it leaves the amp at full level.
-Signals 0 and 1 are the two ends of a unipolar parameter's range and Signals 8 and 3 of a bipolar
-one, for pinning one there; Signal 3 is also the middle of a unipolar dial. Signal 2 is 0.7, close to 1/√2, the
-level each mixer's Level 1 and 2 read so that Balance 1/2 crossfades them at equal power. Signal 4
-is a fifth of full scale and Signal 7 its negative. Signal 5 is the Osc 1 and Filter 1 Mod 2 Pol
-the default patch uses, which brings the LFO down to a vibrato depth, and Signal 6 its negative. A constant on a mixer's second input shifts
+Signals 0 and 1 are the two ends of a unipolar parameter's range and Signals 10 and 3 of a bipolar
+one, for pinning one there; Signal 3 is also the middle of a unipolar dial. Signal 2 is 0.7, close
+to 1/√2, the level each mixer's Level 1 and 2 read so that Balance 1/2 crossfades them at equal
+power. Signal 4 is a quarter of full scale and Signal 9 its negative, which as a polarity give
+half the depth, either way. Signal 5 is a fifth of full scale and Signal 8 its negative. Signal 6
+is the Osc 1 and Filter 1 Mod 2 Pol the default patch uses, which brings the LFO down to a
+vibrato depth, and Signal 7 its negative. A constant on a mixer's second input shifts
 a signal between the two kinds: -0.5 turns one that runs one way into one that swings both, and +0.5
 the other way round.
 
@@ -869,50 +872,50 @@ changes only how fast the output moves, so it cannot step it.
   so CC 89 sets its depth. Nothing scales the envelope down on this path, so the note starts a
   semitone sharp at CC 5 and an octave at CC 16, and falls back with the decay
 - Noise as a modulation source, a random jitter of the cutoff: CC 99 = 1, CC 98 = 23,
-  CC 6 = 36 puts Noise 1's red output on the filter's Mod 2 input in the LFO's place, and CC 25
-  sets how much. CC 6 = 35 takes the white instead, finer still. The red is on no mixer, and the
+  CC 6 = 38 puts Noise 1's red output on the filter's Mod 2 input in the LFO's place, and CC 25
+  sets how much. CC 6 = 37 takes the white instead, finer still. The red is on no mixer, and the
   white is heard only once CC 23 brings it up, so neither is heard as well
-- Filter cutoff driven by the envelope instead of its CC: CC 99 = 2, CC 98 = 62, CC 6 = 22. The
+- Filter cutoff driven by the envelope instead of its CC: CC 99 = 2, CC 98 = 62, CC 6 = 24. The
   envelope and the cutoff are both unipolar, so it opens the cutoff from the bottom of its dial
   to the top
 - Amp gain and filter cutoff share one CC: CC 99 = 3, CC 98 = 71, CC 6 = 74
 - Amp at full level with no envelope: CC 99 = 1, CC 98 = 26, CC 6 = 1
 - Disconnect the filter's Mod 1 input, and with it the envelope: CC 99 = 1, CC 98 = 22, CC 6 = 0
-- A finer pitch envelope, 60 cents deep: CC 99 = 2, CC 98 = 27, CC 6 = 22 points Osc 1 Pitch Fine at the
+- A finer pitch envelope, 60 cents deep: CC 99 = 2, CC 98 = 27, CC 6 = 24 points Osc 1 Pitch Fine at the
   envelope, which then sweeps the tuning from in tune up to 60 cents sharp, reached at half the
   envelope's peak
-- The envelope drives the filter harder as a note starts: CC 99 = 2, CC 98 = 61, CC 6 = 22 takes
+- The envelope drives the filter harder as a note starts: CC 99 = 2, CC 98 = 61, CC 6 = 24 takes
   the filter's input level from silence up to the top of its dial and back
 - Portamento is wired by default -- Note Pitch reaches the oscillator through Pitch 1 -- so CC 5
   sets the time; at CC 64 a glide covers nine tenths of the way in about a tenth of a second. Every note glides, played legato
-  or not. CC 99 = 2, CC 98 = 20, CC 6 = 13 takes the time from General Mod Wheel instead, so the
+  or not. CC 99 = 2, CC 98 = 20, CC 6 = 15 takes the time from General Mod Wheel instead, so the
   wheel brings the portamento in
-- A CC that bends pitch both ways through the modulation input: CC 99 = 1, CC 98 = 10, CC 6 = 18
+- A CC that bends pitch both ways through the modulation input: CC 99 = 1, CC 98 = 10, CC 6 = 20
   points the oscillator's Mod 2 input at General Bipolar 1 in the LFO's place, and CC 99 = 2,
   CC 98 = 31, CC 6 = 3 sets Osc 1 Mod 2 Pol back to +0.5. The slot is bipolar, centred on CC 64 as
   the LFO is on zero, so CC 16 now bends the pitch down and up around the note, as far as CC 13
   allows: a semitone either way at CC 6, an octave at CC 28
 - A CC that works backwards, which needs a mixer to invert it. Mixer 1 is already running, so it
-  only needs wiring and its levels up: CC 99 = 1, CC 98 = 3, CC 6 = 14 puts General Unipolar 1
+  only needs wiring and its levels up: CC 99 = 1, CC 98 = 3, CC 6 = 16 puts General Unipolar 1
   (CC 16) on its first input and CC 98 = 4, CC 6 = 1 the constant 1.0 on its second, and CC 99 =
-  2, CC 98 = 12, CC 6 = 8 pins the first input's polarity to -0.5, the negating end of its dial;
+  2, CC 98 = 12, CC 6 = 10 pins the first input's polarity to -0.5, the negating end of its dial;
   with CC 98 = 11, CC 6 = 1 and CC 98 = 13, CC 6 = 1 pointing Level 1 and 2 at 1.0, and CC 119,
   Balance 1/2, at the centre it powers up at, the mixer outputs 1.0 less the CC: the CC mirrored
-  about CC 64. Point the cutoff's source at the mixer with CC 99 = 2, CC 98 = 62, CC 6 = 26 and CC 16 now
+  about CC 64. Point the cutoff's source at the mixer with CC 99 = 2, CC 98 = 62, CC 6 = 28 and CC 16 now
   closes the filter as it rises
-- Take the filter out of the chain: CC 99 = 1, CC 98 = 25, CC 6 = 37 points the amp's audio input
+- Take the filter out of the chain: CC 99 = 1, CC 98 = 25, CC 6 = 39 points the amp's audio input
   at Mixer 2. The filter keeps running and keeps its slot; nothing reads it
 - A band pass, and one control sweeping from the dry input through it to the notch, from Filter 1
   Mode at the notch less the filter's input: LP + HP is the input less k·BP, so what is taken
   away is the band pass, k = 1/Q times. CC 39 = 64 sets Mode to the notch. Mixer 1 has to run
   after the filter, so that it reads the filter's output of the same sample: CC 99 = 0, then
   CC 98 = 2 to 8 with CC 6 = 4, 5, 6, 7, 8, 9 and 3 rewrites slots 2-8 of the run order to Pitch 1,
-  Osc 1, Osc 2, Noise 1, Mixer 2, Filter 1 and Mixer 1. CC 99 = 1, CC 98 = 3, CC 6 = 37 and CC 98 = 4,
-  CC 6 = 38 put Mixer 2, the filter's input, and Filter 1's Out on the mixer's inputs, and
-  CC 98 = 25, CC 6 = 26 the mixer on the amp. CC 99 = 2, CC 98 = 14, CC 6 = 8 turns the second
-  input over, CC 98 = 15, CC 6 = 18 hands Balance 1/2 to General Bipolar 1 (CC 16), and CC 98 = 11,
+  Osc 1, Osc 2, Noise 1, Mixer 2, Filter 1 and Mixer 1. CC 99 = 1, CC 98 = 3, CC 6 = 39 and CC 98 = 4,
+  CC 6 = 40 put Mixer 2, the filter's input, and Filter 1's Out on the mixer's inputs, and
+  CC 98 = 25, CC 6 = 28 the mixer on the amp. CC 99 = 2, CC 98 = 14, CC 6 = 10 turns the second
+  input over, CC 98 = 15, CC 6 = 20 hands Balance 1/2 to General Bipolar 1 (CC 16), and CC 98 = 11,
   CC 6 = 127 has Level 1 read its own slot, which CC 99 = 3, CC 98 = 11, CC 6 = 118 gives CC 118,
-  and CC 99 = 2, CC 98 = 13, CC 6 = 3 points Level 2 at 0.5 and CC 98 = 18, CC 6 = 8 sets Balance
+  and CC 99 = 2, CC 98 = 13, CC 6 = 3 points Level 2 at 0.5 and CC 98 = 18, CC 6 = 10 sets Balance
   Law to linear, so that the two cross in a straight line. With CC 118 = 34 (0.25, half of
   Filter 1 Gain's 0.5 at CC 64, as the filter takes its input at that gain), CC 16 sweeps from the dry input at CC 4, through the band pass at
   CC 64, to the notch, turned over, at CC 124. The band pass peaks at the cutoff at half the level
@@ -921,16 +924,16 @@ changes only how fast the output moves, so it cannot step it.
   filter's DC blockers leave some of the input in it, 23 dB down at 50 Hz, and a level that drives
   the filter's leak or its output clip leaves more. Narrow as it is, it is far quieter than the
   dry note, more so with the cutoff high above the harmonics: CC 74 = 64 brings it among them
-- Echoes that only come in with the mod wheel: CC 99 = 2, CC 98 = 76, CC 6 = 13 takes Delay 1 Mix
+- Echoes that only come in with the mod wheel: CC 99 = 2, CC 98 = 76, CC 6 = 15 takes Delay 1 Mix
   from General Mod Wheel, which powers up at 0.0, so the output is dry until the wheel moves
-- Chorus that only comes in with the mod wheel: CC 99 = 2, CC 98 = 73, CC 6 = 13 takes Chorus 1
+- Chorus that only comes in with the mod wheel: CC 99 = 2, CC 98 = 73, CC 6 = 15 takes Chorus 1
   Mix from General Mod Wheel, so the output stays mono until the wheel moves
-- Leave the chorus out of the sound, keeping the delay: CC 99 = 1, CC 98 = 28 and 29, CC 6 = 41
+- Leave the chorus out of the sound, keeping the delay: CC 99 = 1, CC 98 = 28 and 29, CC 6 = 43
   feeds both sides of Delay 1 from the amp. The chorus keeps running and nothing reads it, and the
   output is then mono
-- Echoes ahead of the filter: CC 99 = 1, CC 98 = 28, CC 6 = 28 feeds Delay 1's left side from the
-  oscillator, CC 98 = 21, CC 6 = 45 feeds the filter from it, and CC 98 = 30 and 31, CC 6 = 42 and
-  43 points the final output at the chorus, which still takes the amp. The repeats then go
+- Echoes ahead of the filter: CC 99 = 1, CC 98 = 28, CC 6 = 30 feeds Delay 1's left side from the
+  oscillator, CC 98 = 21, CC 6 = 47 feeds the filter from it, and CC 98 = 30 and 31, CC 6 = 44 and
+  45 points the final output at the chorus, which still takes the amp. The repeats then go
   through the filter and the amp's envelope as the note does, so they die away with it. Delay 1
   still runs after the filter, which reads it a sample late; for an echo that does not matter
 
