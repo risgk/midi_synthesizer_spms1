@@ -53,7 +53,7 @@ modules:
 # filter read it so too. Mixer 1 runs after the modulation sources and ahead of the oscillators, so
 # it sees this sample's LFO and envelope and can feed the oscillators, the filter and the amp
 # without a sample's delay. The default patch leaves it unused: the LFO goes straight to the
-# oscillator at its full level, and Osc 1 Pitch Mod Range reads the constant 0.2, which brings the
+# oscillator at its full level, and Osc 1 Pitch Mod Range holds 0.2, which brings the
 # sum of its two modulations down to a vibrato depth on the pitch at the top of Pitch Mod Amt (CC
 # 8), while PW Mod Amt, on CC 103, takes the sum to the pulse width; both power up at 0.0. Osc 1 Pitch In takes the note from Pitch 1
 # whole, in tune. Osc 1 Mod 1 In takes the envelope, for a pitch envelope, but Mod 1 Amt powers up
@@ -61,19 +61,19 @@ modules:
 # Amt powers up at 0.0, so the cutoff follows the envelope alone until CC 25 turns it up.
 # Filter 1 Pitch In takes Pitch 1's pitch too, for keyboard tracking, but Cutoff Pitch Track
 # powers up at 0.0 and leaves it off until CC 9. Noise 1 runs after the oscillators, as it is mostly a sound of its own (a modulation taking
-# it is a sample late, which it does not hear), at full level: its Level has no CC and reads 1.0.
+# it is a sample late, which it does not hear), at full level: its Level has no CC and holds 1.0.
 # Mixer 2 runs after it, just ahead of the filter, which it feeds: Osc 1 on its In 1, Osc 2 on In 2
 # and the noise on In 3. Its Level 1, on CC 116, powers up at 1.0, and Level 2 and 3, on CC 21 and
 # 23, at 0.0, so Osc 2 is silent until CC 21 and the noise until CC 23. Osc 2 plays the note from Pitch 1, as Osc 1 does, tuned by its own
 # Pitch Coarse and Fine (CC 85 and 76), 12 cents sharp at power-up, and has a Wave of its own on CC
 # 104 (Osc 1's on CC 102); it follows Osc 1 in everything else: each of its amounts and its pulse
 # width is on Osc 1's CC, so one CC moves both. Mixer 1 Level 1 and 2, on CC 118 and 119, power up at
-# 0.0, and Level 3, with no CC, reads its own slot, 0.0, so its inputs start closed. Mixer 1's polarities and Out Level have no CC, and neither have Mixer
-# 2's, so the default patch points them at constants instead: full level and a polarity of +0.5,
-# which makes a mixer pass its input through rather than mute it. Each modulation polarity has no CC
-# either and reads +0.5, which leaves the amount in charge. LFO 1 Level is on
+# 0.0, and Level 3, with no CC, holds 0.0, so its inputs start closed. Mixer 1's polarities and Out
+# Level have no CC, and neither have Mixer 2's, so their slots hold full level and a polarity of
+# +0.5, which makes a mixer pass its input through rather than mute it. Each modulation polarity
+# has no CC either and holds +0.5, which leaves the amount in charge. LFO 1 Level is on
 # CC 113 and powers up at 1.0, and the mod wheel on its Level Mod In adds to it up to that top; EG 1
-# Level has no CC and reads 1.0, passing the envelope as it is. The chorus and the delay run last,
+# Level has no CC and holds 1.0, passing the envelope as it is. The chorus and the delay run last,
 # after the amp: the chorus takes the mono amp and spreads it into a left and a right, the delay
 # takes the two sides, and its two outputs are what the final output's left and right read.
 #
@@ -191,56 +191,57 @@ inputs:
   - { entry: 27, key: OUTPUT_R,    label: R,              name: Final Output R, name_ja: 最終出力 R, source: DELAY_1_OUTPUT_R }
 
 # Controls, listed in the editor's order, each by its entry: a parameter is one entry of NRPN
-# category 2 (where it takes its value) and the same entry of category 3 (which CC fills its
-# control slot); a General control is in category 3 only. `cc` is the CC of the default patch, 0
-# for none, and `value` what that CC powers up at; for a control with no CC, what the editor's
-# Initialize & Send All sets the CC given to it to. A parameter takes its own control slot, off
-# the bus, unless `source` (a signal key) says otherwise. `set` is the method of the module that
+# category 2 (where it takes its value), the same entry of category 3 (which CC fills its control
+# slot) and of category 4 (what its control slot holds while it has no CC); a General control is
+# in category 3 only. `cc` is the CC of the default patch, 0 for none, and `value`, as a CC value,
+# what that CC powers up at; a parameter's category 4 entry powers up at it too, and the editor's
+# Initialize & Send All sets both back to it. A parameter takes its own control slot, off the
+# bus, unless `source` (a signal key) says otherwise. `set` is the method of the module that
 # takes a parameter's value each buffer. Why the defaults are what they are is above default_order.
 controls:
   # EG 1: Release Switch is on CC 105 and powers up on, at CC 124, the release following the
-  # decay; below CC 64 the release is the shortest decay's, 10 ms. Level has no CC and reads 1.0,
+  # decay; below CC 64 the release is the shortest decay's, 10 ms. Level has no CC and holds 1.0,
   # passing the envelope as it is.
   - { entry: 0, module: EG_1,      key: ATTACK,       label: Attack,       cc: 73,  value: 4, set: set_attack }
   - { entry: 1, module: EG_1,      key: DECAY,        label: Decay,        cc: 75,  value: 94, set: set_decay }
   - { entry: 2, module: EG_1,      key: SUSTAIN,      label: Sustain,      cc: 30,  value: 124, set: set_sustain }
   - { entry: 3, module: EG_1,      key: RELEASE_SW,   label: Release Switch, cc: 105, value: 124, set: set_release_switch }
-  - { entry: 4, module: EG_1,      key: LEVEL,        label: Level,        cc: 0,   value: 124, source: ONE, set: set_level }
+  - { entry: 4, module: EG_1,      key: LEVEL,        label: Level,        cc: 0,   value: 124, set: set_level }
   # LFO 1: Wave crossfades Out from the triangle (0.0) to the square (1.0), on CC 33, LFO Wave's in
   # PRA32-U2, and powers up at CC 4, 0.0, the triangle. Each modulation's Amt and Pol, listed after
-  # what it moves, has no CC: the default patch points each at 1.0 and +0.5, a depth of 1.0. Rate
+  # what it moves, has no CC and holds 1.0 and +0.5, a depth of 1.0. Rate
   # Mod In is left unrouted, so routing a source to it is enough; Level Mod In takes the mod wheel,
   # which adds to Level (CC 113) up to its top.
   - { entry: 5, module: LFO_1,     key: RATE,         label: Rate,         cc: 3,   value: 64, set: set_rate }
-  - { entry: 6, module: LFO_1,     key: RATE_MOD_AMT, label: Rate Mod Amt, cc: 0,   value: 124, source: ONE, set: set_rate_modulation_amount }
-  - { entry: 7, module: LFO_1,     key: RATE_MOD_POL, label: Rate Mod Pol, cc: 0,   value: 124, source: HALF, bipolar: true, set: set_rate_modulation_polarity }
+  - { entry: 6, module: LFO_1,     key: RATE_MOD_AMT, label: Rate Mod Amt, cc: 0,   value: 124, set: set_rate_modulation_amount }
+  - { entry: 7, module: LFO_1,     key: RATE_MOD_POL, label: Rate Mod Pol, cc: 0,   value: 124, bipolar: true, set: set_rate_modulation_polarity }
   - { entry: 8, module: LFO_1,     key: LEVEL,        label: Level,        cc: 113, value: 124, set: set_level }
   - { entry: 9, module: LFO_1,     key: WAVE,         label: Wave,         cc: 33,  value: 4, set: set_wave }
-  - { entry: 10, module: LFO_1,     key: LEVEL_MOD_AMT, label: Level Mod Amt, cc: 0,  value: 124, source: ONE, set: set_level_modulation_amount }
-  - { entry: 11, module: LFO_1,     key: LEVEL_MOD_POL, label: Level Mod Pol, cc: 0,  value: 124, source: HALF, bipolar: true, set: set_level_modulation_polarity }
+  - { entry: 10, module: LFO_1,     key: LEVEL_MOD_AMT, label: Level Mod Amt, cc: 0,  value: 124, set: set_level_modulation_amount }
+  - { entry: 11, module: LFO_1,     key: LEVEL_MOD_POL, label: Level Mod Pol, cc: 0,  value: 124, bipolar: true, set: set_level_modulation_polarity }
   # Mixer 1: Level 1 and 2 are on CC 118 and 119 and power up at 0.0; the mixer has nothing on its
-  # inputs yet. Level 3 has no CC and reads its own slot, 0.0. Each Pol reads +0.5 and Out Level
+  # inputs yet. Level 3 has no CC and holds 0.0. Each Pol holds +0.5 and Out Level
   # 1.0, with no CC.
   - { entry: 12, module: MIXER_1,   key: LEVEL_1,      label: Level 1,      cc: 118, value: 4, set: set_level_1 }
-  - { entry: 13, module: MIXER_1,   key: POL_1,   label: Pol 1,   cc: 0,   value: 124, source: HALF, bipolar: true, set: set_polarity_1 }
+  - { entry: 13, module: MIXER_1,   key: POL_1,   label: Pol 1,   cc: 0,   value: 124, bipolar: true, set: set_polarity_1 }
   - { entry: 14, module: MIXER_1,   key: LEVEL_2,      label: Level 2,      cc: 119, value: 4, set: set_level_2 }
-  - { entry: 15, module: MIXER_1,   key: POL_2,   label: Pol 2,   cc: 0,   value: 124, source: HALF, bipolar: true, set: set_polarity_2 }
+  - { entry: 15, module: MIXER_1,   key: POL_2,   label: Pol 2,   cc: 0,   value: 124, bipolar: true, set: set_polarity_2 }
   - { entry: 16, module: MIXER_1,   key: LEVEL_3,      label: Level 3,      cc: 0,   value: 4, set: set_level_3 }
-  - { entry: 17, module: MIXER_1,   key: POL_3,   label: Pol 3,   cc: 0,   value: 124, source: HALF, bipolar: true, set: set_polarity_3 }
-  - { entry: 18, module: MIXER_1,   key: OUT_LEVEL,    label: Out Level,    cc: 0,   value: 124, source: ONE, set: set_out_level }
+  - { entry: 17, module: MIXER_1,   key: POL_3,   label: Pol 3,   cc: 0,   value: 124, bipolar: true, set: set_polarity_3 }
+  - { entry: 18, module: MIXER_1,   key: OUT_LEVEL,    label: Out Level,    cc: 0,   value: 124, set: set_out_level }
   # Pitch 1: Glide is on CC 5, Portamento Time in the MIDI spec, and powers up at CC 4, 0.0, where
   # the portamento is off. Glide Switch is on CC 34 and powers up on, at CC 124, so Glide alone
   # sets the portamento until the switch turns it off, below CC 64. Coarse and Fine, on CC 86 and 70, are the transposition, 64 at the
   # centre. Stretch is on CC 22, Stretch Tune's in PRA32-U2, and powers up at CC 4, 0.0, where the
   # keys are as they are. Bend Amt is the bend range, half a semitone a step: CC 8, its power-up
-  # value, is 2 semitones either way. Bend Pol has no CC and reads +0.5.
+  # value, is 2 semitones either way. Bend Pol has no CC and holds +0.5.
   - { entry: 19, module: PITCH_1,   key: GLIDE,        label: Glide,        cc: 5, value: 4, set: set_glide }
   - { entry: 20, module: PITCH_1,   key: GLIDE_SW,     label: Glide Switch, cc: 34, value: 124, set: set_glide_switch }
   - { entry: 21, module: PITCH_1,    key: COARSE, label: Coarse, cc: 86, value: 64, bipolar: true, set: set_coarse }
   - { entry: 22, module: PITCH_1,    key: FINE, label: Fine,  cc: 70,  value: 64, bipolar: true, set: set_fine }
   - { entry: 23, module: PITCH_1,    key: STRETCH, label: Stretch, cc: 22,  value: 4, set: set_stretch }
   - { entry: 24, module: PITCH_1,    key: BEND_AMT,  label: Bend Amt,   cc: 57,  value: 8, set: set_bend_amount }
-  - { entry: 25, module: PITCH_1,    key: BEND_POL,  label: Bend Pol,   cc: 0,   value: 124, source: HALF, bipolar: true, set: set_bend_polarity }
+  - { entry: 25, module: PITCH_1,    key: BEND_POL,  label: Bend Pol,   cc: 0,   value: 124, bipolar: true, set: set_bend_polarity }
   # Osc 1 in the editor: the pitch, its two modulations and how far their sum moves the pitch,
   # then the waveform, the pulse width and how far the sum moves it. Pitch Coarse and Fine have no
   # CC and stay at 0.0: the transposition is Pitch 1's. Mod 1 In takes the envelope and Mod 2 In
@@ -248,7 +249,7 @@ controls:
   # PRA32-U2, and power up at CC 4, 0.0, leaving both off. Each runs the way its source does: a
   # modulation the other way up takes an inverted source, such as a mixer's at Pol -0.5.
   # Pitch Mod Amt is on CC 8, EG Mod Dst's in PRA32-U2, and powers up at CC 4, 0.0, leaving the
-  # pitch alone; Pitch Mod Range has no CC and reads 0.2, the depth at the top of Pitch Mod Amt,
+  # pitch alone; Pitch Mod Range has no CC and holds 0.2, the depth at the top of Pitch Mod Amt,
   # which brings the sum down to a vibrato depth for the LFO and two octaves for the envelope. Wave is on CC 102 and powers up at the saw. Pulse Width is
   # bipolar and powers up at CC 64, 0.0, a pulse of 50%. PW Mod Amt is on CC 103, LFO Mod Dst's in
   # PRA32-U2, and powers up at CC 4, 0.0, no modulation of the pulse width.
@@ -257,7 +258,7 @@ controls:
   - { entry: 28, module: OSC_1,     key: MOD_1_AMT, label: Mod 1 Amt, cc: 89,  value: 4, set: set_modulation_1_amount }
   - { entry: 29, module: OSC_1,     key: MOD_2_AMT, label: Mod 2 Amt, cc: 13,  value: 4, set: set_modulation_2_amount }
   - { entry: 30, module: OSC_1,     key: PITCH_MOD_AMT, label: Pitch Mod Amt, cc: 8,   value: 4, set: set_pitch_modulation_amount }
-  - { entry: 31, module: OSC_1,     key: PITCH_MOD_RANGE, label: Pitch Mod Range, cc: 0, value: 28, source: POINT_TWO, set: set_pitch_modulation_range }
+  - { entry: 31, module: OSC_1,     key: PITCH_MOD_RANGE, label: Pitch Mod Range, cc: 0, value: 28, set: set_pitch_modulation_range }
   - { entry: 32, module: OSC_1,     key: WAVE,     label: Wave,         cc: 102, value: 4, set: set_waveform }
   - { entry: 33, module: OSC_1,     key: PULSE_WIDTH,  label: Pulse Width,  cc: 114, value: 64, bipolar: true, set: set_pulse_width }
   - { entry: 34, module: OSC_1,     key: PW_MOD_AMT, label: PW Mod Amt,    cc: 103, value: 4, set: set_pw_modulation_amount }
@@ -265,32 +266,32 @@ controls:
   # powers up at CC 64, in unison, and Fine at CC 76, 12 cents sharp, for a slow beat once Osc 2
   # is turned up. Wave is its own too, on CC 104 next to Osc 1's on CC 102, sawtooth at power-up as
   # Osc 1's is. Everything else follows Osc 1 by default: each amount and the pulse width is on
-  # Osc 1's CC, so one CC moves both oscillators, and Pitch Mod Range reads the
-  # constant Osc 1's does. Osc 2 is heard through Mixer 2 Level 2 (CC 21), which powers up at 0.0.
+  # Osc 1's CC, so one CC moves both oscillators, and Pitch Mod Range holds the
+  # value Osc 1's does. Osc 2 is heard through Mixer 2 Level 2 (CC 21), which powers up at 0.0.
   - { entry: 35, module: OSC_2,     key: PITCH_COARSE,  label: Pitch Coarse,  cc: 85,  value: 64, bipolar: true, set: set_pitch_coarse }
   - { entry: 36, module: OSC_2,     key: PITCH_FINE,    label: Pitch Fine,    cc: 76,  value: 76, bipolar: true, set: set_pitch_fine }
   - { entry: 37, module: OSC_2,     key: MOD_1_AMT, label: Mod 1 Amt, cc: 89,  value: 4, set: set_modulation_1_amount }
   - { entry: 38, module: OSC_2,     key: MOD_2_AMT, label: Mod 2 Amt, cc: 13,  value: 4, set: set_modulation_2_amount }
   - { entry: 39, module: OSC_2,     key: PITCH_MOD_AMT, label: Pitch Mod Amt, cc: 8,   value: 4, set: set_pitch_modulation_amount }
-  - { entry: 40, module: OSC_2,     key: PITCH_MOD_RANGE, label: Pitch Mod Range, cc: 0, value: 28, source: POINT_TWO, set: set_pitch_modulation_range }
+  - { entry: 40, module: OSC_2,     key: PITCH_MOD_RANGE, label: Pitch Mod Range, cc: 0, value: 28, set: set_pitch_modulation_range }
   - { entry: 41, module: OSC_2,     key: WAVE,     label: Wave,         cc: 104, value: 4, set: set_waveform }
   - { entry: 42, module: OSC_2,     key: PULSE_WIDTH,  label: Pulse Width,  cc: 114, value: 64, bipolar: true, set: set_pulse_width }
   - { entry: 43, module: OSC_2,     key: PW_MOD_AMT, label: PW Mod Amt,    cc: 103, value: 4, set: set_pw_modulation_amount }
-  # Noise 1: Level has no CC and reads 1.0: the noise runs at full level, and Mixer 2 Level 3
+  # Noise 1: Level has no CC and holds 1.0: the noise runs at full level, and Mixer 2 Level 3
   # (CC 23), or the depth of what it modulates, sets how much is heard. Color crossfades Out from
   # the white (0.0) to the red (1.0), on CC 115, and powers up at CC 4, 0.0, the white.
-  - { entry: 44, module: NOISE_1,   key: LEVEL,        label: Level,        cc: 0,   value: 124, source: ONE, set: set_level }
+  - { entry: 44, module: NOISE_1,   key: LEVEL,        label: Level,        cc: 0,   value: 124, set: set_level }
   - { entry: 45, module: NOISE_1,   key: COLOR,        label: Color,        cc: 115, value: 4, set: set_color }
   # Mixer 2, the audio ahead of the filter: Osc 1 on In 1, Osc 2 on In 2 and the noise on In 3.
   # Level 1 (CC 116) powers up at 1.0, passing Osc 1 as it is, and Level 2 and 3 (CC 21 and 23) at
-  # 0.0, leaving Osc 2 and the noise, at full level from Noise 1, silent. Each Pol reads +0.5 and Out Level 1.0, with no CC.
+  # 0.0, leaving Osc 2 and the noise, at full level from Noise 1, silent. Each Pol holds +0.5 and Out Level 1.0, with no CC.
   - { entry: 46, module: MIXER_2,   key: LEVEL_1,      label: Level 1,      cc: 116, value: 124, set: set_level_1 }
-  - { entry: 47, module: MIXER_2,   key: POL_1,   label: Pol 1,   cc: 0,   value: 124, source: HALF, bipolar: true, set: set_polarity_1 }
+  - { entry: 47, module: MIXER_2,   key: POL_1,   label: Pol 1,   cc: 0,   value: 124, bipolar: true, set: set_polarity_1 }
   - { entry: 48, module: MIXER_2,   key: LEVEL_2,      label: Level 2,      cc: 21,  value: 4, set: set_level_2 }
-  - { entry: 49, module: MIXER_2,   key: POL_2,   label: Pol 2,   cc: 0,   value: 124, source: HALF, bipolar: true, set: set_polarity_2 }
+  - { entry: 49, module: MIXER_2,   key: POL_2,   label: Pol 2,   cc: 0,   value: 124, bipolar: true, set: set_polarity_2 }
   - { entry: 50, module: MIXER_2,   key: LEVEL_3,      label: Level 3,      cc: 23,  value: 4, set: set_level_3 }
-  - { entry: 51, module: MIXER_2,   key: POL_3,   label: Pol 3,   cc: 0,   value: 124, source: HALF, bipolar: true, set: set_polarity_3 }
-  - { entry: 52, module: MIXER_2,   key: OUT_LEVEL,    label: Out Level,    cc: 0,   value: 124, source: ONE, set: set_out_level }
+  - { entry: 51, module: MIXER_2,   key: POL_3,   label: Pol 3,   cc: 0,   value: 124, bipolar: true, set: set_polarity_3 }
+  - { entry: 52, module: MIXER_2,   key: OUT_LEVEL,    label: Out Level,    cc: 0,   value: 124, set: set_out_level }
   # Filter 1 in the editor: Gain, the cutoff, its keyboard tracking and its two modulations, then
   # the resonance and Mode. Pitch In takes the pitch from Pitch 1, as Osc 1 Pitch In does, and
   # Cutoff Pitch Track (CC 9) at its top makes the cutoff follow the note a semitone for a

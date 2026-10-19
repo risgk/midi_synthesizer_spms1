@@ -1070,7 +1070,7 @@
   <div class="editor-grid" id="controls"></div>
   <!-- Moved under the Delay panel each time the controls are drawn. -->
   <div id="controls-foot">
-    <label class="check" title="A parameter with no CC has no slider to move; it reads its own slot or what the patch points it at. Hidden, it shows up as soon as a CC is given to it."><input type="checkbox" id="show-no-cc"> Show parameters with no CC</label>
+    <label class="check" title="A parameter with no CC holds the value the patch gives it, which its slider sets through NRPN. Hidden, it shows up as soon as a CC is given to it."><input type="checkbox" id="show-no-cc"> Show parameters with no CC</label>
     <button class="btn primary" id="init-values">Initialize & Send All</button>
   </div>
 </div>
@@ -1239,34 +1239,34 @@
       {"entry":1,"module":"EG_1","key":"DECAY","label":"Decay","bipolar":false,"cc":75,"value":94,"general":false,"slots":[["EG_1_DECAY","Decay",false]]},
       {"entry":2,"module":"EG_1","key":"SUSTAIN","label":"Sustain","bipolar":false,"cc":30,"value":124,"general":false,"slots":[["EG_1_SUSTAIN","Sustain",false]]},
       {"entry":3,"module":"EG_1","key":"RELEASE_SW","label":"Release Switch","bipolar":false,"cc":105,"value":124,"general":false,"slots":[["EG_1_RELEASE_SW","Release Switch",false]]},
-      {"entry":4,"module":"EG_1","key":"LEVEL","label":"Level","bipolar":false,"cc":0,"value":124,"source":"ONE","general":false,"slots":[["EG_1_LEVEL","Level",false]]},
+      {"entry":4,"module":"EG_1","key":"LEVEL","label":"Level","bipolar":false,"cc":0,"value":124,"general":false,"slots":[["EG_1_LEVEL","Level",false]]},
       {"entry":5,"module":"LFO_1","key":"RATE","label":"Rate","bipolar":false,"cc":3,"value":64,"general":false,"slots":[["LFO_1_RATE","Rate",false]]},
-      {"entry":6,"module":"LFO_1","key":"RATE_MOD_AMT","label":"Rate Mod Amt","bipolar":false,"cc":0,"value":124,"source":"ONE","general":false,"slots":[["LFO_1_RATE_MOD_AMT","Rate Mod Amt",false]]},
-      {"entry":7,"module":"LFO_1","key":"RATE_MOD_POL","label":"Rate Mod Pol","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["LFO_1_RATE_MOD_POL","Rate Mod Pol",true]]},
+      {"entry":6,"module":"LFO_1","key":"RATE_MOD_AMT","label":"Rate Mod Amt","bipolar":false,"cc":0,"value":124,"general":false,"slots":[["LFO_1_RATE_MOD_AMT","Rate Mod Amt",false]]},
+      {"entry":7,"module":"LFO_1","key":"RATE_MOD_POL","label":"Rate Mod Pol","bipolar":true,"cc":0,"value":124,"general":false,"slots":[["LFO_1_RATE_MOD_POL","Rate Mod Pol",true]]},
       {"entry":8,"module":"LFO_1","key":"LEVEL","label":"Level","bipolar":false,"cc":113,"value":124,"general":false,"slots":[["LFO_1_LEVEL","Level",false]]},
       {"entry":9,"module":"LFO_1","key":"WAVE","label":"Wave","bipolar":false,"cc":33,"value":4,"general":false,"slots":[["LFO_1_WAVE","Wave",false]]},
-      {"entry":10,"module":"LFO_1","key":"LEVEL_MOD_AMT","label":"Level Mod Amt","bipolar":false,"cc":0,"value":124,"source":"ONE","general":false,"slots":[["LFO_1_LEVEL_MOD_AMT","Level Mod Amt",false]]},
-      {"entry":11,"module":"LFO_1","key":"LEVEL_MOD_POL","label":"Level Mod Pol","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["LFO_1_LEVEL_MOD_POL","Level Mod Pol",true]]},
+      {"entry":10,"module":"LFO_1","key":"LEVEL_MOD_AMT","label":"Level Mod Amt","bipolar":false,"cc":0,"value":124,"general":false,"slots":[["LFO_1_LEVEL_MOD_AMT","Level Mod Amt",false]]},
+      {"entry":11,"module":"LFO_1","key":"LEVEL_MOD_POL","label":"Level Mod Pol","bipolar":true,"cc":0,"value":124,"general":false,"slots":[["LFO_1_LEVEL_MOD_POL","Level Mod Pol",true]]},
       {"entry":12,"module":"MIXER_1","key":"LEVEL_1","label":"Level 1","bipolar":false,"cc":118,"value":4,"general":false,"slots":[["MIXER_1_LEVEL_1","Level 1",false]]},
-      {"entry":13,"module":"MIXER_1","key":"POL_1","label":"Pol 1","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["MIXER_1_POL_1","Pol 1",true]]},
+      {"entry":13,"module":"MIXER_1","key":"POL_1","label":"Pol 1","bipolar":true,"cc":0,"value":124,"general":false,"slots":[["MIXER_1_POL_1","Pol 1",true]]},
       {"entry":14,"module":"MIXER_1","key":"LEVEL_2","label":"Level 2","bipolar":false,"cc":119,"value":4,"general":false,"slots":[["MIXER_1_LEVEL_2","Level 2",false]]},
-      {"entry":15,"module":"MIXER_1","key":"POL_2","label":"Pol 2","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["MIXER_1_POL_2","Pol 2",true]]},
+      {"entry":15,"module":"MIXER_1","key":"POL_2","label":"Pol 2","bipolar":true,"cc":0,"value":124,"general":false,"slots":[["MIXER_1_POL_2","Pol 2",true]]},
       {"entry":16,"module":"MIXER_1","key":"LEVEL_3","label":"Level 3","bipolar":false,"cc":0,"value":4,"general":false,"slots":[["MIXER_1_LEVEL_3","Level 3",false]]},
-      {"entry":17,"module":"MIXER_1","key":"POL_3","label":"Pol 3","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["MIXER_1_POL_3","Pol 3",true]]},
-      {"entry":18,"module":"MIXER_1","key":"OUT_LEVEL","label":"Out Level","bipolar":false,"cc":0,"value":124,"source":"ONE","general":false,"slots":[["MIXER_1_OUT_LEVEL","Out Level",false]]},
+      {"entry":17,"module":"MIXER_1","key":"POL_3","label":"Pol 3","bipolar":true,"cc":0,"value":124,"general":false,"slots":[["MIXER_1_POL_3","Pol 3",true]]},
+      {"entry":18,"module":"MIXER_1","key":"OUT_LEVEL","label":"Out Level","bipolar":false,"cc":0,"value":124,"general":false,"slots":[["MIXER_1_OUT_LEVEL","Out Level",false]]},
       {"entry":19,"module":"PITCH_1","key":"GLIDE","label":"Glide","bipolar":false,"cc":5,"value":4,"general":false,"slots":[["PITCH_1_GLIDE","Glide",false]]},
       {"entry":20,"module":"PITCH_1","key":"GLIDE_SW","label":"Glide Switch","bipolar":false,"cc":34,"value":124,"general":false,"slots":[["PITCH_1_GLIDE_SW","Glide Switch",false]]},
       {"entry":21,"module":"PITCH_1","key":"COARSE","label":"Coarse","bipolar":true,"cc":86,"value":64,"general":false,"slots":[["PITCH_1_COARSE","Coarse",true]]},
       {"entry":22,"module":"PITCH_1","key":"FINE","label":"Fine","bipolar":true,"cc":70,"value":64,"general":false,"slots":[["PITCH_1_FINE","Fine",true]]},
       {"entry":23,"module":"PITCH_1","key":"STRETCH","label":"Stretch","bipolar":false,"cc":22,"value":4,"general":false,"slots":[["PITCH_1_STRETCH","Stretch",false]]},
       {"entry":24,"module":"PITCH_1","key":"BEND_AMT","label":"Bend Amt","bipolar":false,"cc":57,"value":8,"general":false,"slots":[["PITCH_1_BEND_AMT","Bend Amt",false]]},
-      {"entry":25,"module":"PITCH_1","key":"BEND_POL","label":"Bend Pol","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["PITCH_1_BEND_POL","Bend Pol",true]]},
+      {"entry":25,"module":"PITCH_1","key":"BEND_POL","label":"Bend Pol","bipolar":true,"cc":0,"value":124,"general":false,"slots":[["PITCH_1_BEND_POL","Bend Pol",true]]},
       {"entry":26,"module":"OSC_1","key":"PITCH_COARSE","label":"Pitch Coarse","bipolar":true,"cc":0,"value":64,"general":false,"slots":[["OSC_1_PITCH_COARSE","Pitch Coarse",true]]},
       {"entry":27,"module":"OSC_1","key":"PITCH_FINE","label":"Pitch Fine","bipolar":true,"cc":0,"value":64,"general":false,"slots":[["OSC_1_PITCH_FINE","Pitch Fine",true]]},
       {"entry":28,"module":"OSC_1","key":"MOD_1_AMT","label":"Mod 1 Amt","bipolar":false,"cc":89,"value":4,"general":false,"slots":[["OSC_1_MOD_1_AMT","Mod 1 Amt",false]]},
       {"entry":29,"module":"OSC_1","key":"MOD_2_AMT","label":"Mod 2 Amt","bipolar":false,"cc":13,"value":4,"general":false,"slots":[["OSC_1_MOD_2_AMT","Mod 2 Amt",false]]},
       {"entry":30,"module":"OSC_1","key":"PITCH_MOD_AMT","label":"Pitch Mod Amt","bipolar":false,"cc":8,"value":4,"general":false,"slots":[["OSC_1_PITCH_MOD_AMT","Pitch Mod Amt",false]]},
-      {"entry":31,"module":"OSC_1","key":"PITCH_MOD_RANGE","label":"Pitch Mod Range","bipolar":false,"cc":0,"value":28,"source":"POINT_TWO","general":false,"slots":[["OSC_1_PITCH_MOD_RANGE","Pitch Mod Range",false]]},
+      {"entry":31,"module":"OSC_1","key":"PITCH_MOD_RANGE","label":"Pitch Mod Range","bipolar":false,"cc":0,"value":28,"general":false,"slots":[["OSC_1_PITCH_MOD_RANGE","Pitch Mod Range",false]]},
       {"entry":32,"module":"OSC_1","key":"WAVE","label":"Wave","bipolar":false,"cc":102,"value":4,"general":false,"slots":[["OSC_1_WAVE","Wave",false]]},
       {"entry":33,"module":"OSC_1","key":"PULSE_WIDTH","label":"Pulse Width","bipolar":true,"cc":114,"value":64,"general":false,"slots":[["OSC_1_PULSE_WIDTH","Pulse Width",true]]},
       {"entry":34,"module":"OSC_1","key":"PW_MOD_AMT","label":"PW Mod Amt","bipolar":false,"cc":103,"value":4,"general":false,"slots":[["OSC_1_PW_MOD_AMT","PW Mod Amt",false]]},
@@ -1275,19 +1275,19 @@
       {"entry":37,"module":"OSC_2","key":"MOD_1_AMT","label":"Mod 1 Amt","bipolar":false,"cc":89,"value":4,"general":false,"slots":[["OSC_2_MOD_1_AMT","Mod 1 Amt",false]]},
       {"entry":38,"module":"OSC_2","key":"MOD_2_AMT","label":"Mod 2 Amt","bipolar":false,"cc":13,"value":4,"general":false,"slots":[["OSC_2_MOD_2_AMT","Mod 2 Amt",false]]},
       {"entry":39,"module":"OSC_2","key":"PITCH_MOD_AMT","label":"Pitch Mod Amt","bipolar":false,"cc":8,"value":4,"general":false,"slots":[["OSC_2_PITCH_MOD_AMT","Pitch Mod Amt",false]]},
-      {"entry":40,"module":"OSC_2","key":"PITCH_MOD_RANGE","label":"Pitch Mod Range","bipolar":false,"cc":0,"value":28,"source":"POINT_TWO","general":false,"slots":[["OSC_2_PITCH_MOD_RANGE","Pitch Mod Range",false]]},
+      {"entry":40,"module":"OSC_2","key":"PITCH_MOD_RANGE","label":"Pitch Mod Range","bipolar":false,"cc":0,"value":28,"general":false,"slots":[["OSC_2_PITCH_MOD_RANGE","Pitch Mod Range",false]]},
       {"entry":41,"module":"OSC_2","key":"WAVE","label":"Wave","bipolar":false,"cc":104,"value":4,"general":false,"slots":[["OSC_2_WAVE","Wave",false]]},
       {"entry":42,"module":"OSC_2","key":"PULSE_WIDTH","label":"Pulse Width","bipolar":true,"cc":114,"value":64,"general":false,"slots":[["OSC_2_PULSE_WIDTH","Pulse Width",true]]},
       {"entry":43,"module":"OSC_2","key":"PW_MOD_AMT","label":"PW Mod Amt","bipolar":false,"cc":103,"value":4,"general":false,"slots":[["OSC_2_PW_MOD_AMT","PW Mod Amt",false]]},
-      {"entry":44,"module":"NOISE_1","key":"LEVEL","label":"Level","bipolar":false,"cc":0,"value":124,"source":"ONE","general":false,"slots":[["NOISE_1_LEVEL","Level",false]]},
+      {"entry":44,"module":"NOISE_1","key":"LEVEL","label":"Level","bipolar":false,"cc":0,"value":124,"general":false,"slots":[["NOISE_1_LEVEL","Level",false]]},
       {"entry":45,"module":"NOISE_1","key":"COLOR","label":"Color","bipolar":false,"cc":115,"value":4,"general":false,"slots":[["NOISE_1_COLOR","Color",false]]},
       {"entry":46,"module":"MIXER_2","key":"LEVEL_1","label":"Level 1","bipolar":false,"cc":116,"value":124,"general":false,"slots":[["MIXER_2_LEVEL_1","Level 1",false]]},
-      {"entry":47,"module":"MIXER_2","key":"POL_1","label":"Pol 1","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["MIXER_2_POL_1","Pol 1",true]]},
+      {"entry":47,"module":"MIXER_2","key":"POL_1","label":"Pol 1","bipolar":true,"cc":0,"value":124,"general":false,"slots":[["MIXER_2_POL_1","Pol 1",true]]},
       {"entry":48,"module":"MIXER_2","key":"LEVEL_2","label":"Level 2","bipolar":false,"cc":21,"value":4,"general":false,"slots":[["MIXER_2_LEVEL_2","Level 2",false]]},
-      {"entry":49,"module":"MIXER_2","key":"POL_2","label":"Pol 2","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["MIXER_2_POL_2","Pol 2",true]]},
+      {"entry":49,"module":"MIXER_2","key":"POL_2","label":"Pol 2","bipolar":true,"cc":0,"value":124,"general":false,"slots":[["MIXER_2_POL_2","Pol 2",true]]},
       {"entry":50,"module":"MIXER_2","key":"LEVEL_3","label":"Level 3","bipolar":false,"cc":23,"value":4,"general":false,"slots":[["MIXER_2_LEVEL_3","Level 3",false]]},
-      {"entry":51,"module":"MIXER_2","key":"POL_3","label":"Pol 3","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["MIXER_2_POL_3","Pol 3",true]]},
-      {"entry":52,"module":"MIXER_2","key":"OUT_LEVEL","label":"Out Level","bipolar":false,"cc":0,"value":124,"source":"ONE","general":false,"slots":[["MIXER_2_OUT_LEVEL","Out Level",false]]},
+      {"entry":51,"module":"MIXER_2","key":"POL_3","label":"Pol 3","bipolar":true,"cc":0,"value":124,"general":false,"slots":[["MIXER_2_POL_3","Pol 3",true]]},
+      {"entry":52,"module":"MIXER_2","key":"OUT_LEVEL","label":"Out Level","bipolar":false,"cc":0,"value":124,"general":false,"slots":[["MIXER_2_OUT_LEVEL","Out Level",false]]},
       {"entry":53,"module":"FILTER_1","key":"GAIN","label":"Gain","bipolar":false,"cc":112,"value":64,"general":false,"slots":[["FILTER_1_GAIN","Gain",false]]},
       {"entry":54,"module":"FILTER_1","key":"CUTOFF","label":"Cutoff","bipolar":false,"cc":74,"value":100,"general":false,"slots":[["FILTER_1_CUTOFF","Cutoff",false]]},
       {"entry":55,"module":"FILTER_1","key":"CUTOFF_PITCH_TRACK","label":"Cutoff Pitch Track","bipolar":false,"cc":9,"value":4,"general":false,"slots":[["FILTER_1_CUTOFF_PITCH_TRACK","Cutoff Pitch Track",false]]},
@@ -1432,9 +1432,12 @@
   };
 
   function defaultState() {
-    const s = { name: 'Init', order: DEFAULT_ORDER.slice(), inputs: {}, params: {}, cc: {}, values: {}, layout: {} };
+    const s = { name: 'Init', order: DEFAULT_ORDER.slice(), inputs: {}, params: {}, cc: {}, values: {}, paramValues: {}, layout: {} };
     INPUT_ITEMS.forEach(i => { s.inputs[i.key] = i.defaultSource; });
-    PARAM_ITEMS.forEach(p => { s.params[p.key] = p.defaultSource || p.key; });
+    PARAM_ITEMS.forEach(p => {
+      s.params[p.key] = p.defaultSource || p.key;
+      s.paramValues[p.key] = p.defaultValue;
+    });
     CONTROL_ITEMS.forEach(c => {
       s.cc[c.key] = c.defaultCC;
       if (c.defaultCC) s.values[c.defaultCC] = c.defaultValue;
@@ -1445,6 +1448,8 @@
 
   const clamp7 = v => Math.max(0, Math.min(127, Math.round(Number(v) || 0)));
   const ccValue = cc => (state.values[cc] ?? 64);
+  // What a parameter's control slot holds while it has no CC, as a CC value: NRPN category 4.
+  const paramValue = key => (state.paramValues[key] ?? CONTROL[key].defaultValue);
 
   function serialize(s) {
     const used = {};
@@ -1458,6 +1463,7 @@
       params: { ...s.params },
       cc: { ...s.cc },
       values: used,
+      paramValues: { ...s.paramValues },
       layout: JSON.parse(JSON.stringify(s.layout)),
     };
   }
@@ -1480,6 +1486,9 @@
     CONTROL_ITEMS.forEach(c => { if (obj.cc && c.key in obj.cc) s.cc[c.key] = clamp7(obj.cc[c.key]); });
     if (obj.values && typeof obj.values === 'object') {
       for (const k in obj.values) s.values[clamp7(k)] = clamp7(obj.values[k]);
+    }
+    if (obj.paramValues && typeof obj.paramValues === 'object') {
+      PARAM_ITEMS.forEach(p => { if (p.key in obj.paramValues) s.paramValues[p.key] = clamp7(obj.paramValues[p.key]); });
     }
     if (obj.layout && typeof obj.layout === 'object') {
       for (const k in s.layout) {
@@ -1512,6 +1521,9 @@
     CONTROL_ITEMS.forEach(c => {
       const cc = state.cc[c.key];
       e.push({ nrpn: 384 + c.entry, value: cc, comment: `${c.full} CC = ${cc || 'none'}` });
+    });
+    PARAM_ITEMS.forEach(p => {
+      e.push({ nrpn: 512 + p.entry, value: paramValue(p.key), comment: `${p.full} value with no CC = ${paramValue(p.key)}` });
     });
     return e;
   }
@@ -1845,12 +1857,12 @@
         ? `CC ${cc} carries NRPN selection or data: its value is not sent`
         : others.length ? `CC number, 0 for none. CC ${cc} also moves ${others.join(', ')}`
         : 'CC number, 0 for none';
-      valIn.disabled = !cc;
-      if (document.activeElement !== valIn) valIn.value = cc ? ccValue(cc) : '';
-      valIn.placeholder = cc ? '' : '—';
+      valIn.disabled = !cc && c.general;
+      if (document.activeElement !== valIn) valIn.value = cc ? ccValue(cc) : c.general ? '' : paramValue(c.key);
+      valIn.placeholder = valIn.disabled ? '—' : '';
       valIn.title = cc
         ? `Value of CC ${cc}, shared by every slot on it`
-        : 'No CC: the slot holds 0.0';
+        : c.general ? 'No CC: the slot holds 0.0' : 'No CC: the slot holds this value, sent as NRPN';
     });
     world.querySelectorAll('.norm[data-slot]').forEach(norm => {
       const own = signalNorm(norm.dataset.slot);
@@ -1884,7 +1896,7 @@
         input.addEventListener('change', () => {
           if (before && before !== JSON.stringify(serialize(state))) pushHistory(before);
           before = JSON.stringify(serialize(state));
-          input.value = input === ccIn ? state.cc[key] : ccValue(state.cc[key]);
+          input.value = input === ccIn ? state.cc[key] : state.cc[key] ? ccValue(state.cc[key]) : CONTROL[key].general ? '' : paramValue(key);
         });
       }
       ccIn.addEventListener('input', () => {
@@ -1895,8 +1907,9 @@
       });
       valIn.addEventListener('input', () => {
         const cc = state.cc[key];
-        if (!cc || valIn.value === '') return;
-        setCCValue(cc, clamp7(valIn.value), true);
+        if (valIn.value === '') return;
+        if (cc) setCCValue(cc, clamp7(valIn.value), true);
+        else if (!CONTROL[key].general) setParamValue(key, clamp7(valIn.value), true);
       });
     });
   }
@@ -2795,6 +2808,8 @@
       state.params[p.key] = SIGNAL_NAMES[value] || p.key;
     } else if (nrpn >= 384 && nrpn < 512 && CONTROL_BY_ENTRY[nrpn - 384]) {
       state.cc[CONTROL_BY_ENTRY[nrpn - 384].key] = value;
+    } else if (nrpn >= 512 && nrpn < 640 && PARAM_BY_ENTRY[nrpn - 512]) {
+      state.paramValues[PARAM_BY_ENTRY[nrpn - 512].key] = value;
     } else {
       return;
     }
@@ -2818,6 +2833,21 @@
     state.values[cc] = value;
     if (send && midiOutput) midiOutput.send([0xB0 | exportOptions().ch, cc, value]);
     if (lastSent) lastSent.set('c' + cc, value);
+    refreshControls();
+    updateExport();
+    saveLocal();
+  }
+
+  // A parameter's value with no CC is part of the patch, but moved like a knob, so it goes out
+  // whether or not Live is on too, as one NRPN write.
+  function setParamValue(key, value, send) {
+    state.paramValues[key] = value;
+    const nrpn = 512 + CONTROL[key].entry;
+    if (send && midiOutput) {
+      const st = 0xB0 | exportOptions().ch;
+      midiOutput.send([st, 99, nrpn >> 7, st, 98, nrpn & 0x7F, st, 6, value, st, 101, 127, st, 100, 127]);
+    }
+    if (lastSent) lastSent.set('n' + nrpn, value);
     refreshControls();
     updateExport();
     saveLocal();
@@ -2913,11 +2943,12 @@
   }
 
   // What the synth writes to a control slot, as a CC value: the CC's own value while one is
-  // assigned, and 0.0 while none is, as cc_or_zero in spms1_main.rb does. null is a slot written
-  // from a reserved CC, whose value the editor does not track.
+  // assigned, and while none is, a parameter's value from NRPN category 4 and 0.0 for a General
+  // slot, as cc_or_nrpn and cc_or_zero in spms1_main.rb do. null is a slot written from a reserved
+  // CC, whose value the editor does not track.
   function slotValue(c, bipolar) {
     const cc = state.cc[c.key];
-    if (!cc) return bipolar ? 64 : 4;
+    if (!cc) return c.general ? (bipolar ? 64 : 4) : paramValue(c.key);
     return RESERVED_CCS.has(cc) ? null : ccValue(cc);
   }
 
@@ -2956,8 +2987,9 @@
 
   let sliderBefore = null;
 
-  // Parameters with no CC are left out of the controls unless asked for: they have no slider to
-  // move, and a CC given to one brings it back. The choice is kept, as the tab is.
+  // Parameters with no CC are left out of the controls unless asked for, and a CC given to one
+  // brings it back. Shown, its slider sets the value its slot holds, through NRPN. The choice is
+  // kept, as the tab is.
   const SHOW_NO_CC_KEY = 'spms1-type2-editor-show-no-cc';
   let showNoCC = false;
   try { showNoCC = localStorage.getItem(SHOW_NO_CC_KEY) === '1'; } catch (e) { /* storage unavailable */ }
@@ -3004,6 +3036,7 @@
       slider.addEventListener('input', () => {
         const cc = state.cc[c.key];
         if (ccInUse(cc)) setCCValue(cc, parseInt(slider.value), true);
+        else if (!cc && !c.general) setParamValue(c.key, parseInt(slider.value), true);
       });
       slider.addEventListener('change', () => {
         if (sliderBefore && sliderBefore !== JSON.stringify(serialize(state))) pushHistory(sliderBefore);
@@ -3025,20 +3058,21 @@
       const c = CONTROL[zone.dataset.ctrl];
       const cc = state.cc[c.key];
       const slider = zone.querySelector('input');
-      const usable = ccInUse(cc);
+      const ownValue = !cc && !c.general;
+      const usable = ccInUse(cc) || ownValue;
       const src = state.params[c.key];
       const routed = src !== undefined && src !== c.key;
       zone.classList.toggle('routed', routed);
       const others = sharingCC(c);
       const ccNum = zone.querySelector('.cc-num');
       ccNum.innerHTML =
-        (!cc ? '(no CC)' : RESERVED_CCS.has(cc) ? `(CC ${cc}, reserved)` : `(CC ${cc})`) +
+        (!cc ? (ownValue ? '(no CC, NRPN)' : '(no CC)') : RESERVED_CCS.has(cc) ? `(CC ${cc}, reserved)` : `(CC ${cc})`) +
         (routed ? ` ← ${sourceHTML(src)}` : '');
       ccNum.classList.toggle('shared', others.length > 0);
       ccNum.title = others.length ? `CC ${cc} also moves ${others.join(', ')}` : '';
       zone.title = routed ? `${c.full} reads ${sigLabel(src)}. This slider sets only its own slot, which other wires may read.` : '';
       slider.disabled = !usable;
-      const value = usable ? ccValue(cc) : 64;
+      const value = ownValue ? paramValue(c.key) : usable ? ccValue(cc) : 64;
       if (document.activeElement !== slider) slider.value = value;
       zone.querySelector('.slider-value').textContent = usable ? String(value) : '—';
       const own = signalNorm(c.slots[0][0]);
@@ -3054,10 +3088,19 @@
       const cc = state.cc[c.key];
       if (ccInUse(cc) && c.defaultValue != null) state.values[cc] = c.defaultValue;
     });
+    PARAM_ITEMS.forEach(p => { state.paramValues[p.key] = p.defaultValue; });
     if (midiOutput) {
       const st = 0xB0 | exportOptions().ch;
       ccEntries().forEach(e => midiOutput.send([st, e.cc, e.value]));
-      if (lastSent) ccEntries().forEach(e => lastSent.set('c' + e.cc, e.value));
+      PARAM_ITEMS.forEach(p => {
+        const nrpn = 512 + p.entry;
+        midiOutput.send([st, 99, nrpn >> 7, st, 98, nrpn & 0x7F, st, 6, p.defaultValue]);
+      });
+      midiOutput.send([st, 101, 127, st, 100, 127]);
+      if (lastSent) {
+        ccEntries().forEach(e => lastSent.set('c' + e.cc, e.value));
+        PARAM_ITEMS.forEach(p => lastSent.set('n' + (512 + p.entry), p.defaultValue));
+      }
     }
     refreshControls();
     updateExport();

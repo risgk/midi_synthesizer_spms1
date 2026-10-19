@@ -90,7 +90,10 @@ Usage
 
 - Cross-platform web-based parameter controller via Web MIDI API: "spms1_editor.html"
     - Its Controls tab shows a slider for each parameter with a CC; those with none are hidden until
-      "Show parameters with no CC" is ticked or a CC is given to one, and the choice is remembered
+      "Show parameters with no CC" is ticked or a CC is given to one, and the choice is remembered.
+      Shown, the slider of one with no CC sets the value its slot holds, sent as NRPN
+    - Its Initialize & Send All sets each CC value and each parameter's value with no CC back to
+      what it powers up at, and sends them
     - Its Patch tab folds the same parameters away in each node, unless something reads their slots;
       the row at the bottom of a node opens it, and Show All and Hide All open or fold every node;
       Init leaves every node open
@@ -208,7 +211,7 @@ half a semitone a step: 2 semitones either way at CC 8, where it powers up, an o
 The LFO goes straight to the oscillator, both to its pitch and to its pulse width, at its full
 level, and to the filter, where Filter 1 Mod 2 Amt (CC 25) powers up at 0.0 and leaves the cutoff
 to the envelope until it is turned up. Osc 1 Pitch Mod Amt (CC 8) takes the oscillator's
-modulations to the pitch, and Osc 1 Pitch Mod Range reads the constant 0.2, which brings them down
+modulations to the pitch, and Osc 1 Pitch Mod Range holds 0.2, which brings them down
 to a vibrato depth there; Osc 1 PW Mod Amt (CC 103) takes them to the pulse width. Both Amts
 power up at 0.0. The pitch from Pitch 1 reaches the filter too, on Filter 1 Pitch In, for keyboard tracking: CC 9
 (Cutoff Pitch Track) at its top has the cutoff follow the note a semitone for a semitone,
@@ -390,10 +393,10 @@ Out Mono, a sub output, is the average of Out L and Out R, for a mono destinatio
 ### Patch Editing (NRPN)
 
 The patch is data, and NRPN rewrites it while the synth is running: which modules run and in what
-order, what feeds each module input, where each parameter takes its value from, and which CC fills
-each control slot. Every module reads from a numbered signal slot and writes to one, so rewiring is
+order, what feeds each module input, where each parameter takes its value from, which CC fills
+each control slot, and the value of each parameter that has no CC. Every module reads from a numbered signal slot and writes to one, so rewiring is
 a matter of changing slot numbers. Each parameter also has a control slot of its own, which its CC
-fills and which only it can read: a parameter source of 127 names it, and no slot number reaches
+fills, or with no CC its value in category 4, and which only it can read: a parameter source of 127 names it, and no slot number reaches
 it from anywhere else.
 
 #### Sending
@@ -413,6 +416,7 @@ it from anywhere else.
 | 1 | 0-27 | What feeds a module input | Signal ID |
 | 2 | 0-67 | Where a parameter takes its value | Signal ID, or 127 for its own control slot |
 | 3 | 0-72 | Which CC fills a control slot | CC number, or 0 for none |
+| 4 | 0-67 | What a parameter's control slot holds while it has no CC | CC value |
 
 The run order is read from slot 0 upwards and stops at the first Module ID 0, so a patch shorter
 than 32 modules ends itself. It is separate from the module numbering: a module only sees the
@@ -421,8 +425,11 @@ A module listed more than once runs once, at the slot written last, as if its ot
 not there: the last write wins, whether its slot is ahead of the others or after them. A module
 written to a new slot moves there, and the module that slot held leaves the order.
 
-In category 3, CC number 0 means the parameter has no CC. Its control slot then holds 0.0, whatever
-CC it had before, so the patch alone sets what the parameter reads.
+In category 3, CC number 0 means the control has no CC. A parameter's control slot then holds its
+value in category 4, whatever CC it had before, so the patch alone sets what the parameter reads; a
+General slot holds 0.0. Category 4 takes a value as a CC would and is read the same way, so CC 64
+is 0.0 on a bipolar parameter. While the parameter has a CC, its category 4 value is kept but not
+read. Each powers up at the parameter's power-up value.
 
 There are two oscillators, one of every other module that makes a sound, two mixers, one chorus,
 one delay, one pitch module and one noise source, and **all twelve are in the default run order**, so a patch only ever has to route, never to switch something
@@ -431,9 +438,9 @@ order is never what makes a patch fit; to leave one out of the sound, route arou
 run unread (see the examples below).
 Mixer 1 has a CC only on its first two levels, CC 118 and 119, which power up at 0.0, so it is
 silent until they are turned up, and Mixer 2 on all three, CC 116, 21 and 23, of which only Level 1
-powers up at 1.0. Mixer 1 Level 3 has no CC and reads its own slot, 0.0, so that input starts
-closed too. The default patch points Out Level at 1.0 and each polarity at +0.5, so a level that
-is turned up passes its input through rather than muting it.
+powers up at 1.0. Mixer 1 Level 3 has no CC and holds 0.0, so that input starts closed too. Out
+Level has no CC and holds 1.0, and each polarity +0.5, so a level that is turned up passes its
+input through rather than muting it.
 
 #### Entries (CC 98), category 1
 
@@ -475,7 +482,7 @@ as a mixer's output is.
 The two sides of the final output are read separately, so either can be pointed anywhere; point
 both at the same signal for a mono output.
 
-#### Entries (CC 98), categories 2 and 3
+#### Entries (CC 98), categories 2, 3 and 4
 
 <!-- patch_gen params -->
 
@@ -578,8 +585,8 @@ bus carries both kinds under one numbering, so the range belongs to the slot rat
 sort of thing that wrote it. The numbers missing from the table are free; 127 is not a slot but a
 parameter's own control slot.
 
-A parameter's own control slot holds the value arriving from its CC, off the bus, and a parameter
-reads it by default: Signal ID 127 in category 2. Each parameter is unipolar or bipolar, and its
+A parameter's own control slot holds the value arriving from its CC, or with no CC its value in
+category 4, off the bus, and a parameter reads it by default: Signal ID 127 in category 2. Each parameter is unipolar or bipolar, and its
 slot takes the same range. A unipolar one
 runs 0.0 to 1.0 from CC 4 to CC 124, the span of an envelope, so an envelope pointed at one sweeps
 the whole of its dial. A bipolar one runs -0.5 to +0.5 with CC 64 at 0.0, the span of an LFO, so a
@@ -587,7 +594,7 @@ bipolar source pointed at one swings it about the middle. Osc 1 Pitch Coarse and
 Fine are bipolar, since their middle is no change at all, and so is every Pol -- the mixers', LFO 1's
 two Mod Pols and Pitch 1 Bend Pol -- and Filter 1 Cutoff Mod Amt, since its sign is
 what it sets. Pointing a parameter at a
-slot on the bus is what makes a modulation. A control slot with no CC holds 0.0. No input or other
+slot on the bus is what makes a modulation. No input or other
 parameter can read a parameter's control slot: a CC meant for more than one parameter, or for a
 module input, goes on a General slot, or is given to each parameter in category 3, as Osc 1 and
 Osc 2 share theirs.
@@ -638,7 +645,7 @@ the glide, so a change acts at once and reaches the oscillator and the filter's 
 alike. Both are centred on CC 64 and move one whole unit per CC step: Coarse a semitone,
 reaching 5 octaves either way, and Fine a cent, reaching 60 either way. They are summed, so
 any pitch is reachable. Osc 1 Pitch Coarse and Pitch Fine have the same ranges and add to the
-oscillator alone; they have no CC and stay at 0.0 by default, for an interval or a detune between
+oscillator alone; they have no CC and hold 0.0 by default, for an interval or a detune between
 oscillators.
 
 Pitch 1 Stretch (CC 22) widens the keys about note 60, ahead of the glide, by multiplying Pitch
@@ -663,19 +670,19 @@ the default patch routes, so the LFO is a triangle until Wave is turned up.
 LFO 1 Level scales the LFO's outputs, as a mixer's Level scales its input: from silent at 0.0
 (CC 4) to full at 1.0 (CC 124). It is on CC 113 and powers up at 1.0, passing the LFO through as
 it is. LFO 1 Level Mod In adds to it, held to the same range, by Level Mod Amt times Level Mod
-Pol, and it takes General Mod Wheel by default at a depth of 1.0 (neither has a CC; they read 1.0
+Pol, and it takes General Mod Wheel by default at a depth of 1.0 (neither has a CC; they hold 1.0
 and +0.5). With Level turned down, the wheel brings the LFO in, up to full at its top. Turning the LFO the other way up is for a mixer's
 Pol, or for Filter 1 Cutoff Mod Amt on the cutoff.
 
 LFO 1 Rate Mod In moves the rate by LFO 1 Rate Mod Amt times Rate Mod Pol, as Osc 1 Mod 2 In moves the
 oscillator's pitch: a unit of input times depth is the whole rate range, ten octaves, so 0.1 is an
-octave. Neither has a CC, and the default patch points them at 1.0 and +0.5, a depth of 1.0, and
+octave. Neither has a CC, and they hold 1.0 and +0.5, a depth of 1.0, and the default patch
 leaves Rate Mod In unrouted, so routing a source to it is all it takes. Both of the LFO's Mod Ins
 are read every fourth sample,
 where the LFO works out its rate, rather than every sample as most module inputs are.
 
-EG 1 Level scales the envelope's output the same way, over the same range. It has no CC, and the
-default patch points it at the constant 1.0, which passes the envelope through as it is. The
+EG 1 Level scales the envelope's output the same way, over the same range. It has no CC, and
+holds 1.0, which passes the envelope through as it is. The
 envelope runs one way, 0.0 to 1.0; turning it the other way up is for a mixer's Pol, or for
 Filter 1 Cutoff Mod Amt on the cutoff.
 
@@ -687,8 +694,8 @@ powers up on, at CC 124. It is a switch, so it is not smoothed.
 Where a modulation has a Mod Pol, as LFO 1's two do, its depth is Mod Amt times
 Mod Pol, the second doubled: Mod Pol passes
 Mod Amt through at +0.5 (CC 124), silences it at 0.0 (CC 64) and negates it at -0.5 (CC 4), and
-the way between scales it, so it sets depth as well as direction. Mod Pol has no CC and the
-default patch points it at a constant, so either can be the one that is turned: Mod Amt for
+the way between scales it, so it sets depth as well as direction. Mod Pol has no CC and holds
++0.5, so either can be the one that is turned: Mod Amt for
 a depth in one direction, Mod Pol for one that crosses zero.
 
 Osc 1 sums its two modulations, Mod 1 In by Mod 1 Amt and Mod 2 In by Mod 2 Amt, and the sum
@@ -702,8 +709,8 @@ pulse width as well as the pitch takes no rewiring, and the two destinations alw
 The pitch's depth is Pitch Mod Amt times Pitch Mod Range, both unipolar and plain multipliers:
 Pitch Mod Range is what the top of Pitch Mod Amt is worth. At a depth of 1.0 the sum reaches the
 whole pitch range: a bipolar source at full depth swings the pitch five octaves up and five down.
-That is a coarse range for vibrato, which is why Pitch Mod Range has no CC and the default patch
-points it at the constant 0.2, the depth at the top of Pitch Mod Amt. Pitch Mod Amt is on CC 8, EG Mod Dst's in PRA32-U2, and powers up at 0.0, so the
+That is a coarse range for vibrato, which is why Pitch Mod Range has no CC and holds 0.2 (CC
+value 28), the depth at the top of Pitch Mod Amt. Pitch Mod Amt is on CC 8, EG Mod Dst's in PRA32-U2, and powers up at 0.0, so the
 pitch is left alone until it is turned up. With it at the top, Mod 2 Amt puts a semitone of
 vibrato at CC 14 and an octave at the top of the dial, and Mod 1 Amt sweeps the pitch from the
 envelope a semitone at CC 9, an octave at CC 64 and two octaves at the top.
@@ -742,7 +749,7 @@ to +0.5, which cuts the rarest peaks, 1.5% of the samples. Noise 1 Color (CC 115
 in a straight line from the white at 0.0 (CC 4), where it powers up, to the red at 1.0 (CC 124),
 each end as its own output is, so the red end is 3 dB down. Out keeps the slot the white had, and
 is what the default patch puts on Mixer 2, so the noise there is white until Color is turned up,
-and darkens as it is. Color is smoothed as the level is. The level has no CC and reads 1.0, so
+and darkens as it is. Color is smoothed as the level is. The level has no CC and holds 1.0, so
 the noise runs at full level and Mixer 2 Level 3 (CC 23), or the depth of whatever it modulates,
 sets how much of it is heard. The level is smoothed as the other levels are. The noise repeats only after 2^32 samples,
 over a day at 48 kHz, and starts the same every time, so a render comes out the same.

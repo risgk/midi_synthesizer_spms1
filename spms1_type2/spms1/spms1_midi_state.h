@@ -34,9 +34,9 @@ uint8_t  g_midi_cc_values[16][128] = {{0}};
 // so it is kept that way rather than folded into the 7-bit tables above.
 int16_t  g_midi_pitch_bend[16]     = {0};
 
-// NRPN parameter numbers are (MSB << 7) | LSB; the synth uses MSB 0-3 as categories, so 512
+// NRPN parameter numbers are (MSB << 7) | LSB; the synth uses MSB 0-4 as categories, so 640
 // entries cover it. Values are 7-bit, filled from CC 6.
-#define SPMS1_NRPN_SIZE (512)
+#define SPMS1_NRPN_SIZE (640)
 uint8_t  g_midi_nrpn_values[16][SPMS1_NRPN_SIZE] = {{0}};
 uint8_t  g_midi_nrpn_msb[16]            = {0};
 uint8_t  g_midi_nrpn_lsb[16]            = {0};

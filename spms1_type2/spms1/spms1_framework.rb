@@ -80,10 +80,18 @@ def cc_to_bipolar(value)
   (scaled < -0.5) ? -0.5 : ((scaled > 0.5) ? 0.5 : scaled)
 end
 
-# What a control slot is filled with. CC number 0 means no CC is assigned, and the slot gets 0.0.
-# Selecting the value rather than skipping the write keeps the cost the same whatever the patch says.
+# What a General control slot is filled with. CC number 0 means no CC is assigned, and the slot
+# gets 0.0. Selecting the value rather than skipping the write keeps the cost the same whatever the
+# patch says.
 def cc_or_zero(cc_number, value)
   (cc_number == 0) ? 0.0 : value
+end
+
+# The 7-bit value a parameter's control slot is filled from: its CC's while one is assigned, and
+# the value NRPN category 4 holds for it while none is. Selected the same way, before the one
+# conversion.
+def cc_or_nrpn(cc_number, cc_value, nrpn_value)
+  (cc_number == 0) ? nrpn_value : cc_value
 end
 
 # Where a parameter reads: the bus slot its source names, or, for SIGNAL_OWN, its own control slot.

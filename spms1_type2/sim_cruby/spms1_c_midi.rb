@@ -8,7 +8,7 @@ module Spms1
     @note_prev_pitch = Array.new(16, nil)  # the note that comes back on a note off, or nil
     @pitch_bend    = Array.new(16, 0)
     @cc_values     = Array.new(16) { Array.new(128, 0) }
-    @nrpn_values   = Array.new(16) { Array.new(512, 0) }
+    @nrpn_values   = Array.new(16) { Array.new(640, 0) }
     @nrpn_msb      = Array.new(16, 0)
     @nrpn_lsb      = Array.new(16, 0)
     @nrpn_selected = Array.new(16, false)
@@ -40,12 +40,12 @@ module Spms1
       def set_midi_cc_value(ch, n, v) = (@cc_values[ch][n] = v)
       def get_midi_cc_value(ch, n) = @cc_values[ch][n]
       def set_midi_nrpn_value(ch, i, v)
-        return unless i >= 0 && i < 512
+        return unless i >= 0 && i < 640
         @nrpn_values[ch][i] = v
         @run_order_written[ch][i] = (@run_order_writes[ch] += 1) if i < 32
       end
       def get_midi_run_order_written(ch, slot) = ((slot >= 0 && slot < 32) ? @run_order_written[ch][slot] : 0)
-      def get_midi_nrpn_value(ch, i) = ((i >= 0 && i < 512) ? @nrpn_values[ch][i] : 0)
+      def get_midi_nrpn_value(ch, i) = ((i >= 0 && i < 640) ? @nrpn_values[ch][i] : 0)
       def set_sample_rate(v) = (@sample_rate = v)
       def get_sample_rate = @sample_rate
       def set_audio_buffers(v) = (@audio_buffers = v)

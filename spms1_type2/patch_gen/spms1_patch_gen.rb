@@ -23,6 +23,7 @@ NRPN_ACTIVE_MODULE_BASE = 0
 NRPN_INPUT_BASE         = 128
 NRPN_PARAM_SOURCE_BASE  = 256
 NRPN_CC_BASE            = 384
+NRPN_VALUE_BASE         = 512
 
 # A parameter source of 127 is the parameter's own control slot, which is off the bus: the bus
 # carries the outputs, the constants, the notes and the General slots in 0-126, and each
@@ -131,6 +132,7 @@ class Spec
     @controls.each do |c|
       fail_spec("General control #{full_key(c)} fills no slot") if c['general'] && slots_of(c).empty?
       fail_spec("control #{full_key(c)} has a CC but no value") if c['cc'].to_i != 0 && !c.key?('value')
+      fail_spec("parameter #{full_key(c)} has no value") if !c['general'] && !c.key?('value')
     end
   end
 end
@@ -185,13 +187,16 @@ def patch_rb
   out << "\n\n# NRPN parameter numbers: (MSB << 7) | LSB, where the MSB picks a category and the LSB an entry.\n"
   out << "#   0..127   active_modules[slot]\n# 128..255   what feeds each module input\n"
   out << "# 256..383   where each parameter's value comes from\n# 384..511   which CC fills each control slot\n"
+  out << "# 512..639   the value of each parameter's control slot while it has no CC\n"
   out << "NRPN_ACTIVE_MODULE_BASE = #{NRPN_ACTIVE_MODULE_BASE}\n\n"
   out << ruby_constants(s.inputs.map { |i| ["NRPN_SOURCE_#{s.full_key(i)}", NRPN_INPUT_BASE + i['entry']] })
   out << "\n\n"
   out << ruby_constants(s.params.map { |c| ["NRPN_SOURCE_#{s.full_key(c)}", NRPN_PARAM_SOURCE_BASE + c['entry']] })
-  out << "\n\n# A CC number of 0 means the parameter has no CC: its control slot holds 0.0 -- the bottom of a\n"
-  out << "# unipolar dial, the middle of a bipolar one -- whatever CC it had before, so a patch sets it alone.\n"
+  out << "\n\n# A CC number of 0 means the control has no CC: a parameter's control slot then holds its NRPN_VALUE_*\n"
+  out << "# below, whatever CC it had before, so a patch sets it alone, and a General slot holds 0.0.\n"
   out << ruby_constants(s.controls.map { |c| ["NRPN_CC_#{s.full_key(c)}", NRPN_CC_BASE + c['entry']] })
+  out << "\n\n# The value of each parameter's control slot while it has no CC, as a CC value.\n"
+  out << ruby_constants(s.params.map { |c| ["NRPN_VALUE_#{s.full_key(c)}", NRPN_VALUE_BASE + c['entry']] })
   out << "\n\n# The constants of the bus, which nothing else ever writes. A slot not written here holds 0.0.\n"
   out << "def spms1_fill_constant_signals(signals)\n"
   consts = s.signals.select { |sig| sig.key?('value') && sig['value'] != 0.0 }
@@ -200,7 +205,8 @@ def patch_rb
     out << "  signals[SIGNAL_#{sig['key']}]#{' ' * (width - sig['key'].length)} = #{sig['value'] == sig['value'].round(1) ? format('%4.1f', sig['value']) : sig['value']}\n"
   end
   out << "end\n\n"
-  out << "# The default patch, written into the NRPN table, and the values its CCs power up at.\n"
+  out << "# The default patch, written into the NRPN table, and the values its CCs power up at. Each\n"
+  out << "# parameter's NRPN value is its power-up value too, which its slot holds while it has no CC.\n"
   out << "def spms1_write_default_patch(midi_ch)\n"
   s.default_order.each_with_index do |k, i|
     out << "  C.set_midi_nrpn_value(midi_ch, NRPN_ACTIVE_MODULE_BASE + #{i}, MODULE_#{k})\n"
@@ -220,6 +226,11 @@ def patch_rb
   width = with_cc.map { |c| s.full_key(c).length }.max
   with_cc.each do |c|
     out << "  C.set_midi_nrpn_value(midi_ch, NRPN_CC_#{s.full_key(c).ljust(width)}, #{c['cc']})\n"
+  end
+  out << "\n"
+  width = s.params.map { |c| s.full_key(c).length }.max
+  s.params.each do |c|
+    out << "  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_#{s.full_key(c).ljust(width)}, #{c['value']})\n"
   end
   out << "\n"
   with_cc.each do |c|
@@ -384,7 +395,7 @@ def main_controls
   s.params.each do |c|
     name = local_name(c)
     out << "  cc_#{name} = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_#{s.full_key(c)})\n"
-    out << "  signals[SLOT_#{s.full_key(c)}] = cc_or_zero(cc_#{name}, #{converter(c['bipolar'])}(C.get_midi_cc_value(MIDI_CH, cc_#{name})))\n"
+    out << "  signals[SLOT_#{s.full_key(c)}] = #{converter(c['bipolar'])}(cc_or_nrpn(cc_#{name}, C.get_midi_cc_value(MIDI_CH, cc_#{name}), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_#{s.full_key(c)})))\n"
   end
   s.generals.each do |c|
     name = local_name(c)
