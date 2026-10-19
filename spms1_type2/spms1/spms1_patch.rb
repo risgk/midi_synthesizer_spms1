@@ -583,7 +583,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 71 , 94 ) # Filter 1 Resonance
   C.set_midi_cc_value(midi_ch, 39 , 4  ) # Filter 1 Mode
   C.set_midi_cc_value(midi_ch, 15 , 124) # Amp 1 Gain
-  C.set_midi_cc_value(midi_ch, 93 , 64 ) # Chorus 1 Mix
+  C.set_midi_cc_value(midi_ch, 93 , 34 ) # Chorus 1 Mix
   C.set_midi_cc_value(midi_ch, 58 , 64 ) # Chorus 1 Rate
   C.set_midi_cc_value(midi_ch, 59 , 64 ) # Chorus 1 Depth
   C.set_midi_cc_value(midi_ch, 94 , 34 ) # Delay 1 Mix
