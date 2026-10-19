@@ -177,6 +177,8 @@ module Spms1
       @modulation_3_amount = 0.0
       @modulation_3_polarity = 1.0
       @modulation_3_depth = 0.0
+      # Powers up at 1.0, as the default patch sets it, so that the sum is not faded in at startup.
+      @cutoff_modulation_amount = 1.0
       @gain = 0.5
       @mode_lp = 1.0
       @mode_hp = 0.0
@@ -186,6 +188,7 @@ module Spms1
       @stage_1_modulation_1_depth = 0.0
       @stage_1_modulation_2_depth = 0.0
       @stage_1_modulation_3_depth = 0.0
+      @stage_1_cutoff_modulation_amount = 1.0
       @stage_1_gain = 0.5
       @stage_1_mode_lp = 1.0
       @stage_1_mode_hp = 0.0
@@ -194,6 +197,7 @@ module Spms1
       @current_modulation_1_depth = 0.0
       @current_modulation_2_depth = 0.0
       @current_modulation_3_depth = 0.0
+      @current_cutoff_modulation_amount = 1.0
       @current_gain = 0.5
       @current_mode_lp = 1.0
       @current_mode_hp = 0.0
@@ -263,6 +267,13 @@ module Spms1
       clamped_polarity = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
       @modulation_3_polarity = clamped_polarity + clamped_polarity
       @modulation_3_depth = @modulation_3_amount * @modulation_3_polarity
+    end
+
+    # Cutoff Mod Amt is unipolar, [0.0, 1.0], how far the sum of the three modulations moves the
+    # cutoff, as Osc's PW Mod Amt is for the pulse width: at 1.0 the sum is added as it is, at 0.0
+    # the cutoff is left at Cutoff. Turning a modulation the other way up is for its Pol.
+    def set_cutoff_modulation_amount(amount)
+      @cutoff_modulation_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
     end
 
     # How hard the audio input drives the filter, used as a plain multiplier. It sits on the input
@@ -419,6 +430,8 @@ module Spms1
       @current_modulation_2_depth = Dsp.smooth(@stage_1_modulation_2_depth, @current_modulation_2_depth, @smoothing_target_blend)
       @stage_1_modulation_3_depth = Dsp.smooth(@modulation_3_depth, @stage_1_modulation_3_depth, @smoothing_target_blend)
       @current_modulation_3_depth = Dsp.smooth(@stage_1_modulation_3_depth, @current_modulation_3_depth, @smoothing_target_blend)
+      @stage_1_cutoff_modulation_amount = Dsp.smooth(@cutoff_modulation_amount, @stage_1_cutoff_modulation_amount, @smoothing_target_blend)
+      @current_cutoff_modulation_amount = Dsp.smooth(@stage_1_cutoff_modulation_amount, @current_cutoff_modulation_amount, @smoothing_target_blend)
       @stage_1_gain = Dsp.smooth(@gain, @stage_1_gain, @smoothing_target_blend)
       @current_gain = Dsp.smooth(@stage_1_gain, @current_gain, @smoothing_target_blend)
       @stage_1_mode_lp = Dsp.smooth(@mode_lp, @stage_1_mode_lp, @smoothing_target_blend)
@@ -429,7 +442,8 @@ module Spms1
       # The modulation inputs arrive as they are; clamping total_cutoff below is what holds the
       # table lookup in range, and a source that swings both ways moves the cutoff both ways.
       # Clamped without a comparison, as clip_output does it.
-      total_cutoff = @current_cutoff + (@current_modulation_1_input * @current_modulation_1_depth) + (@current_modulation_2_input * @current_modulation_2_depth) + (@current_modulation_3_input * @current_modulation_3_depth)
+      modulation = (@current_modulation_1_input * @current_modulation_1_depth) + (@current_modulation_2_input * @current_modulation_2_depth) + (@current_modulation_3_input * @current_modulation_3_depth)
+      total_cutoff = @current_cutoff + modulation * @current_cutoff_modulation_amount
       over  = total_cutoff - 1.0
       under = 0.0 - total_cutoff
       clamped_cutoff = total_cutoff - ((over + over.abs) - (under + under.abs)) * 0.5

@@ -392,8 +392,8 @@ flowchart LR
 | ----- | ----- | ---- | ---------- |
 | 0 | 0-31 | 実行順、スロットごとに | モジュール ID |
 | 1 | 0-27 | モジュール入力に何を入れるか | シグナル ID |
-| 2 | 0-72 | パラメータがどこから値を取るか | シグナル ID、127 なら自分のコントロールスロット |
-| 3 | 0-77 | どの CC がコントロールスロットを埋めるか | CC 番号、0 なら割り当てなし |
+| 2 | 0-73 | パラメータがどこから値を取るか | シグナル ID、127 なら自分のコントロールスロット |
+| 3 | 0-78 | どの CC がコントロールスロットを埋めるか | CC 番号、0 なら割り当てなし |
 
 実行順はスロット 0 から上へ読まれ、最初に現れたモジュール ID 0 で止まります。32 個に満たないパッチは
 そこで自ら終わるわけです。実行順はモジュールの番号付けとは別物です。あるモジュールが今サンプルの値を
@@ -469,17 +469,17 @@ Out Level はデフォルトのパッチで定数 1.0、極性は +0.5 を指し
 | 10 | LFO 1 Level Mod Amt | | 35 | Osc 1 PW Mod Amt | | 60 | Filter 1 Mod 2 Pol |
 | 11 | LFO 1 Level Mod Pol | | 36 | Osc 2 Pitch Coarse | | 61 | Filter 1 Mod 3 Amt |
 | 12 | Mixer 1 Level 1 | | 37 | Osc 2 Pitch Fine | | 62 | Filter 1 Mod 3 Pol |
-| 13 | Mixer 1 Pol 1 | | 38 | Osc 2 Mod 1 Amt | | 63 | Filter 1 Resonance |
-| 14 | Mixer 1 Level 2 | | 39 | Osc 2 Mod 1 Pol | | 64 | Filter 1 Mode |
-| 15 | Mixer 1 Pol 2 | | 40 | Osc 2 Mod 2 Amt | | 65 | Amp 1 Gain |
-| 16 | Mixer 1 Level 3 | | 41 | Osc 2 Mod 2 Pol | | 66 | Amp 1 Gain Pol |
-| 17 | Mixer 1 Pol 3 | | 42 | Osc 2 Pitch Mod Amt | | 67 | Chorus 1 Mix |
-| 18 | Mixer 1 Out Level | | 43 | Osc 2 Wave | | 68 | Chorus 1 Rate |
-| 19 | Pitch 1 Glide | | 44 | Osc 2 Pulse Width | | 69 | Chorus 1 Depth |
-| 20 | Pitch 1 Glide Switch | | 45 | Osc 2 PW Mod Amt | | 70 | Delay 1 Mix |
-| 21 | Pitch 1 Coarse | | 46 | Noise 1 Level | | 71 | Delay 1 Time |
-| 22 | Pitch 1 Fine | | 47 | Noise 1 Color | | 72 | Delay 1 Feedback |
-| 23 | Pitch 1 Stretch | | 48 | Mixer 2 Level 1 | |  |  |
+| 13 | Mixer 1 Pol 1 | | 38 | Osc 2 Mod 1 Amt | | 63 | Filter 1 Cutoff Mod Amt |
+| 14 | Mixer 1 Level 2 | | 39 | Osc 2 Mod 1 Pol | | 64 | Filter 1 Resonance |
+| 15 | Mixer 1 Pol 2 | | 40 | Osc 2 Mod 2 Amt | | 65 | Filter 1 Mode |
+| 16 | Mixer 1 Level 3 | | 41 | Osc 2 Mod 2 Pol | | 66 | Amp 1 Gain |
+| 17 | Mixer 1 Pol 3 | | 42 | Osc 2 Pitch Mod Amt | | 67 | Amp 1 Gain Pol |
+| 18 | Mixer 1 Out Level | | 43 | Osc 2 Wave | | 68 | Chorus 1 Mix |
+| 19 | Pitch 1 Glide | | 44 | Osc 2 Pulse Width | | 69 | Chorus 1 Rate |
+| 20 | Pitch 1 Glide Switch | | 45 | Osc 2 PW Mod Amt | | 70 | Chorus 1 Depth |
+| 21 | Pitch 1 Coarse | | 46 | Noise 1 Level | | 71 | Delay 1 Mix |
+| 22 | Pitch 1 Fine | | 47 | Noise 1 Color | | 72 | Delay 1 Time |
+| 23 | Pitch 1 Stretch | | 48 | Mixer 2 Level 1 | | 73 | Delay 1 Feedback |
 | 24 | Pitch 1 Bend Amt | | 49 | Mixer 2 Pol 1 | |  |  |
 
 <!-- patch_gen end -->
@@ -493,11 +493,11 @@ Out Level はデフォルトのパッチで定数 1.0、極性は +0.5 を指し
 
 | CC 98 | CC の割り当て先 | 埋めるスロット |
 | ----- | ------ | ----- |
-| 73 | General Mod Wheel | General Mod Wheel |
-| 74 | General 1 | General Unipolar 1、General Bipolar 1 |
-| 75 | General 2 | General Unipolar 2、General Bipolar 2 |
-| 76 | General 3 | General Unipolar 3、General Bipolar 3 |
-| 77 | General 4 | General Unipolar 4、General Bipolar 4 |
+| 74 | General Mod Wheel | General Mod Wheel |
+| 75 | General 1 | General Unipolar 1、General Bipolar 1 |
+| 76 | General 2 | General Unipolar 2、General Bipolar 2 |
+| 77 | General 3 | General Unipolar 3、General Bipolar 3 |
+| 78 | General 4 | General Unipolar 4、General Bipolar 4 |
 
 <!-- patch_gen end -->
 
@@ -710,6 +710,11 @@ Filter 1 Gain はオーディオ入力がフィルタをどれだけ強く駆動
 強く駆動します。レベルを保つなら Gain を下げ、サチュレーションを深くするなら上げたままにします。サチュレーションが掛かるのは通過帯域ではなくレゾナンスです。カットオフが低くても大きな音はほぼ
 そのまま通り、ゲインを上げるとレゾナンスのピークが丸くなります。
 
+Filter 1 は 3 つのモジュレーション、それぞれの In を Amt と Pol の積で掛けたものを足し合わせ、その和で
+カットオフを Cutoff Mod Amt だけ動かします。Osc 1 PW Mod Amt がパルス幅を動かすのと同じです。CC は 117 で、
+起動時は 1.0（CC 124）、和がそのまま足されます。1 つのつまみでエンベロープ、LFO、キーボードトラッキングを
+まとめて絞れ、CC 117 を CC 4 にするとカットオフは Filter 1 Cutoff のままになります。
+
 Filter 1 Resonance は CC 94 の Q 5.66 までは CC 30 段ごとにピークが 6 dB（Q が 2 倍）上がり、そこから
 Q は段差なしに次第に速く上がって、CC 109 で Q 29、CC 118 で Q 256 になります。それより上ではフィルタが
 自己発振し、カットオフ周波数のサイン波を出します。発振は CC 123 までに約 0.5 の最大レベルに達し、
@@ -786,7 +791,7 @@ Pitch 1 Glide はユニポーラで、1/120 刻み、1 ステップで時間が�
   どちらも音としては聞こえません
 - フィルタのカットオフを、自分の CC ではなくエンベロープで動かす: CC 99 = 2, CC 98 = 56, CC 6 = 21。
   エンベロープもカットオフもユニポーラなので、カットオフはつまみの下端から上端まで開きます
-- アンプのゲインとフィルタのカットオフで 1 つの CC を共有する: CC 99 = 3, CC 98 = 65, CC 6 = 74
+- アンプのゲインとフィルタのカットオフで 1 つの CC を共有する: CC 99 = 3, CC 98 = 66, CC 6 = 74
 - エンベロープなしでアンプをフルレベルにする: CC 99 = 1, CC 98 = 22, CC 6 = 1
 - フィルタの Mod 1 入力を切り離し、エンベロープを外す: CC 99 = 1, CC 98 = 18, CC 6 = 0
 - より細かい、深さ 60 セントのピッチエンベロープ: CC 99 = 2, CC 98 = 27, CC 6 = 21 で Osc 1 Pitch Fine をエンベロープに
@@ -824,9 +829,9 @@ Pitch 1 Glide はユニポーラで、1/120 刻み、1 ステップで時間が�
   DC ブロッカーのせいで入力が少し残り（50 Hz で -23 dB）、フィルタのリークや出力クリップに届くレベルでは
   もっと残ります。帯域が狭いので原音よりずっと小さく、カットオフが倍音より高いとなおさらです。CC 74 = 64 で
   倍音の中に持ってこられます
-- モジュレーションホイールで掛かるエコー: CC 99 = 2, CC 98 = 70, CC 6 = 12 で Delay 1 Mix を General Mod
+- モジュレーションホイールで掛かるエコー: CC 99 = 2, CC 98 = 71, CC 6 = 12 で Delay 1 Mix を General Mod
   Wheel から取ります。起動時は 0.0 なので、ホイールを動かすまで出力はドライです
-- モジュレーションホイールで掛かるコーラス: CC 99 = 2, CC 98 = 67, CC 6 = 12 で Chorus 1 Mix を General
+- モジュレーションホイールで掛かるコーラス: CC 99 = 2, CC 98 = 68, CC 6 = 12 で Chorus 1 Mix を General
   Mod Wheel から取ります。ホイールを動かすまで出力はモノラルのままです
 - ディレイを残してコーラスを音から外す: CC 99 = 1, CC 98 = 24 と 25 に CC 6 = 40 を送って Delay 1 の左右に
   アンプを入れます。コーラスは走り続けますが誰も読まず、出力はモノラルになります

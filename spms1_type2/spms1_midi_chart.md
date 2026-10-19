@@ -35,6 +35,7 @@
 |                            24 | x             | o             | Filter Mod 1 Amt                     |
 |                            25 | x             | o             | Filter Mod 2 Amt                     |
 |                             9 | x             | o             | Filter Mod 3 Amt (Key Track)         |
+|                           117 | x             | o             | Filter Cutoff Mod Amt                |
 |                           112 | x             | o             | Filter Gain                          |
 |                            39 | x             | o             | Filter Mode (LP, Notch, HP)          |
 |                           118 | x             | o             | Mixer 1 Level 1                      |
