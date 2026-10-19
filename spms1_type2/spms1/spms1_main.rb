@@ -170,9 +170,9 @@ while true
   # What feeds each module input, then where each parameter takes its value: a bus slot, or its
   # own control slot. Written by patch_gen from the inputs and the controls of spms1_patch.yaml.
   # The parameter sources are read once per buffer rather than per sample: each destination
-  # smooths at the control rate with a 2.67 ms time constant, which swallows the difference
-  # between feeding it at 48 kHz and at the 750 Hz buffer rate. Faster modulation goes through the
-  # module inputs, which are read per sample and not smoothed.
+  # smooths at the control rate in two stages of 5.3 ms each (10.7 ms on average), which swallows
+  # the difference between feeding it at 48 kHz and at the 750 Hz buffer rate. Faster modulation
+  # goes through the module inputs, which are read per sample and not smoothed.
   # patch_gen sources
   source_eg_1_gate = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_EG_1_GATE)
   source_lfo_1_rate_mod = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_RATE_MOD)
