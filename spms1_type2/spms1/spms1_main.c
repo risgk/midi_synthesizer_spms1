@@ -2845,54 +2845,62 @@ static inline __attribute__((always_inline)) sp_float sp_Pitch_set_stretch(sp_Pi
   return self->iv_stretch_factor;
   return 0.0;
 }
-#line 135 "spms1_pitch.rb"
+#line 138 "spms1_pitch.rb"
 static inline __attribute__((always_inline)) sp_float sp_Pitch_process(sp_Pitch *self, sp_bool lv_control_tick, sp_float lv_input, sp_float lv_bend_input) {
     sp_float lv_stretched = 0.0;
     sp_float lv_distance = 0.0;
     sp_float lv_flushed = 0.0;
-#line 136 "spms1_pitch.rb"
-  if (lv_control_tick) {
-#line 137 "spms1_pitch.rb"
-    self->iv_stage_1_bend_depth = sp_Dsp_s_smooth(self->iv_bend_depth, self->iv_stage_1_bend_depth, self->iv_smoothing_target_blend);
-#line 138 "spms1_pitch.rb"
-    self->iv_current_bend_depth = sp_Dsp_s_smooth(self->iv_stage_1_bend_depth, self->iv_current_bend_depth, self->iv_smoothing_target_blend);
+    sp_float lv_output = 0.0;
 #line 139 "spms1_pitch.rb"
-    self->iv_stage_1_stretch_factor = sp_Dsp_s_smooth(self->iv_stretch_factor, self->iv_stage_1_stretch_factor, self->iv_smoothing_target_blend);
+  if (lv_control_tick) {
 #line 140 "spms1_pitch.rb"
+    self->iv_stage_1_bend_depth = sp_Dsp_s_smooth(self->iv_bend_depth, self->iv_stage_1_bend_depth, self->iv_smoothing_target_blend);
+#line 141 "spms1_pitch.rb"
+    self->iv_current_bend_depth = sp_Dsp_s_smooth(self->iv_stage_1_bend_depth, self->iv_current_bend_depth, self->iv_smoothing_target_blend);
+#line 142 "spms1_pitch.rb"
+    self->iv_stage_1_stretch_factor = sp_Dsp_s_smooth(self->iv_stretch_factor, self->iv_stage_1_stretch_factor, self->iv_smoothing_target_blend);
+#line 143 "spms1_pitch.rb"
     self->iv_current_stretch_factor = sp_Dsp_s_smooth(self->iv_stage_1_stretch_factor, self->iv_current_stretch_factor, self->iv_smoothing_target_blend);
   }
-#line 144 "spms1_pitch.rb"
-  lv_stretched = (lv_input * self->iv_current_stretch_factor);
-#line 145 "spms1_pitch.rb"
-  lv_distance = (self->iv_distance + ((self->iv_last_input - lv_stretched)));
-#line 146 "spms1_pitch.rb"
-  self->iv_last_input = lv_stretched;
 #line 147 "spms1_pitch.rb"
-  lv_flushed = sp_Dsp_s_flush_tiny(lv_distance);
+  lv_stretched = (lv_input * self->iv_current_stretch_factor);
 #line 148 "spms1_pitch.rb"
-  self->iv_distance = (lv_flushed - (lv_flushed * self->iv_blend));
+  lv_distance = (self->iv_distance + ((self->iv_last_input - lv_stretched)));
 #line 149 "spms1_pitch.rb"
-  return (((lv_stretched + self->iv_distance) + ((lv_bend_input * self->iv_current_bend_depth))) + self->iv_offset);
+  self->iv_last_input = lv_stretched;
+#line 150 "spms1_pitch.rb"
+  lv_flushed = sp_Dsp_s_flush_tiny(lv_distance);
+#line 151 "spms1_pitch.rb"
+  self->iv_distance = (lv_flushed - (lv_flushed * self->iv_blend));
+#line 152 "spms1_pitch.rb"
+  lv_output = (((lv_stretched + self->iv_distance) + ((lv_bend_input * self->iv_current_bend_depth))) + self->iv_offset);
+#line 153 "spms1_pitch.rb"
+  if (((lv_output < -1.0))) {
+    return -1.0;
+  }
+  else {
+    return ((((lv_output > 1.0)) ? 1.0 : lv_output));
+  }
   return 0.0;
 }
-#line 154 "spms1_pitch.rb"
+#line 158 "spms1_pitch.rb"
 static inline __attribute__((always_inline)) sp_float sp_Pitch_calculate_exp_fast(sp_Pitch *self, sp_float lv_value) {
     sp_float lv_v_scale = 0.0;
     sp_int lv_index = 0;
     sp_float lv_fraction = 0.0;
     sp_float lv_e0 = 0.0;
     sp_float lv_e1 = 0.0;
-#line 155 "spms1_pitch.rb"
-  lv_v_scale = (lv_value * 120.0);
-#line 156 "spms1_pitch.rb"
-  lv_index = sp_float_to_i_checked(lv_v_scale);
-#line 157 "spms1_pitch.rb"
-  lv_fraction = (lv_v_scale - ({ sp_int _t42 = (lv_index); _t42 == SP_INT_NIL ? 0.0 : ((sp_float)_t42); }));
 #line 159 "spms1_pitch.rb"
-  lv_e0 = sp_FloatArray_get(cst_Spms1__Pitch__EXP_TABLE, lv_index);
+  lv_v_scale = (lv_value * 120.0);
 #line 160 "spms1_pitch.rb"
+  lv_index = sp_float_to_i_checked(lv_v_scale);
+#line 161 "spms1_pitch.rb"
+  lv_fraction = (lv_v_scale - ({ sp_int _t42 = (lv_index); _t42 == SP_INT_NIL ? 0.0 : ((sp_float)_t42); }));
+#line 163 "spms1_pitch.rb"
+  lv_e0 = sp_FloatArray_get(cst_Spms1__Pitch__EXP_TABLE, lv_index);
+#line 164 "spms1_pitch.rb"
   lv_e1 = sp_FloatArray_get(cst_Spms1__Pitch__EXP_TABLE, sp_int_add(lv_index, 1LL));
-#line 162 "spms1_pitch.rb"
+#line 166 "spms1_pitch.rb"
   return (lv_e0 + (lv_fraction * ((lv_e1 - lv_e0))));
   return 0.0;
 }
@@ -5044,7 +5052,7 @@ int main(int argc,char**argv){
     sp_int lv_cc_general_4 = 0;
     sp_int lv_general_4 = 0;
     sp_bool lv_control_tick = 0;
-    sp_int lv_i__bp14027 = 0;
+    sp_int lv_i__bp14053 = 0;
 
 #line 35 "spms1_framework.rb"
 #line 36 "spms1_framework.rb"
@@ -7271,9 +7279,9 @@ int main(int argc,char**argv){
     (stop_debug_measure(), (sp_int)0);
 #line 661 "spms1_main.rb"
     for (sp_int _t911 = 0; _t911 < cst_AUDIO_BUFFER_WORDS; _t911++) {
-      lv_i__bp14027 = _t911;
+      lv_i__bp14053 = _t911;
 #line 662 "spms1_main.rb"
-      ({ sp_float _t912 = sp_FloatArray_get(lv_audio_buffer_l, lv_i__bp14027); sp_float _t913 = sp_FloatArray_get(lv_audio_buffer_r, lv_i__bp14027); (write_to_audio_buffer(((float)(_t912)), ((float)(_t913))), (sp_int)0); });
+      ({ sp_float _t912 = sp_FloatArray_get(lv_audio_buffer_l, lv_i__bp14053); sp_float _t913 = sp_FloatArray_get(lv_audio_buffer_r, lv_i__bp14053); (write_to_audio_buffer(((float)(_t912)), ((float)(_t913))), (sp_int)0); });
     }
   }
   return 0;

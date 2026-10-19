@@ -478,7 +478,8 @@ ceiling, so a loud modulation pins its destination at one
 end rather than being trimmed on the way in. The amp is the exception, and holds its modulation
 input to -1.0 and +1.0: it is an attenuator, so a modulation may scale its gain down but never up.
 The chorus and the delay hold their audio inputs to the same one unit. Pitch 1 Pitch In takes anything,
-as a Mod In does, and puts out what it takes, glided, bent and transposed.
+as a Mod In does, and puts out what it takes, glided, bent and transposed, held to -1.0 and +1.0
+as a mixer's output is.
 
 The two sides of the final output are read separately, so either can be pointed anywhere; point
 both at the same signal for a mono output.

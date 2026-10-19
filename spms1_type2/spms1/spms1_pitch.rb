@@ -132,6 +132,9 @@ module Spms1
     #
     # Bend In and the offset are added last, so that the lag never holds them, and so that at
     # zero they leave the output as it was, bit for bit.
+    #
+    # The output is held to -1.0 to +1.0, as a mixer's is: twice the pitch range, so whatever
+    # the oscillator and the filter clamp to their own range is still reached at either end.
     def process(control_tick, input = 0.0, bend_input = 0.0)
       if control_tick
         @stage_1_bend_depth = Dsp.smooth(@bend_depth, @stage_1_bend_depth, @smoothing_target_blend)
@@ -146,7 +149,8 @@ module Spms1
       @last_input = stretched
       flushed = Dsp.flush_tiny(distance)
       @distance = flushed - flushed * @blend
-      ((stretched + @distance) + (bend_input * @current_bend_depth)) + @offset
+      output = ((stretched + @distance) + (bend_input * @current_bend_depth)) + @offset
+      (output < -1.0) ? -1.0 : ((output > 1.0) ? 1.0 : output)
     end
 
     private
