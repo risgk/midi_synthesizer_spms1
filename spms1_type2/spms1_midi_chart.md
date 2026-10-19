@@ -1,5 +1,5 @@
 ```
-  [MIDI Synthesizer]                                              Date: 2026-10-18                      
+  [MIDI Synthesizer]                                              Date: 2026-10-19                      
   Model: SPMS-1 (type-2)          MIDI Implementation Chart       Version: 0.0.3                        
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Function...                   | Transmitted   | Recognized    | Remarks                              |
@@ -38,14 +38,17 @@
 |                             9 | x             | o             | Filter Mod 3 Amt (Key Track)         |
 |                           112 | x             | o             | Filter Gain                          |
 |                            39 | x             | o             | Filter Mode (LP, Notch, HP)          |
-|                           119 | x             | o             | Mixer 1 Balance 1/2                  |
-|                            21 | x             | o             | Mixer 2 Balance 1/2 (Osc 1 to Osc 2) |
+|                           118 | x             | o             | Mixer 1 Level 1                      |
+|                           119 | x             | o             | Mixer 1 Level 2                      |
+|                           116 | x             | o             | Mixer 2 Level 1 (Osc 1 Level)        |
+|                            21 | x             | o             | Mixer 2 Level 2 (Osc 2 Level)        |
 |                            23 | x             | o             | Mixer 2 Level 3 (Noise Level)        |
 |                           115 | x             | o             | Noise Color (White to Red)           |
 |                            15 | x             | o             | Amp Gain                             |
 |                            73 | x             | o             | EG Attack (Time)                     |
 |                            75 | x             | o             | EG Decay (Time)                      |
 |                            30 | x             | o             | EG Sustain (Level)                   |
+|                           105 | x             | o             | EG Release Switch [Off|On]           |
 |                             3 | x             | o             | LFO Rate                             |
 |                           113 | x             | o             | LFO Level                            |
 |                            33 | x             | o             | LFO Wave (Triangle to Square)        |
@@ -56,6 +59,7 @@
 |                            92 | x             | o             | Delay Feedback                       |
 |                            94 | x             | o             | Delay Mix                            |
 |                             5 | x             | o             | Pitch Glide (Portamento Time)        |
+|                            34 | x             | o             | Pitch Glide Switch [Off|On]          |
 |                            57 | x             | o             | Pitch Bend Amt (Pitch Bend Range)    |
 |                            86 | x             | o             | Pitch Coarse (+-5 Octaves)           |
 |                            70 | x             | o             | Pitch Fine (+-60 Cents)              |
