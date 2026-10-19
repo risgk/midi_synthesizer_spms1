@@ -1011,7 +1011,7 @@ static sp_int cst_MODULE_CHORUS_1 = 0;
 static sp_int cst_MODULE_DELAY_1 = 0;
 static sp_int cst_SIGNAL_NONE = 0;
 static sp_int cst_SIGNAL_ONE = 0;
-static sp_int cst_SIGNAL_SQRT_HALF = 0;
+static sp_int cst_SIGNAL_POINT_SEVEN = 0;
 static sp_int cst_SIGNAL_HALF = 0;
 static sp_int cst_SIGNAL_POINT_TWO = 0;
 static sp_int cst_SIGNAL_POINT_ONE = 0;
@@ -4246,7 +4246,7 @@ static inline __attribute__((always_inline)) sp_float sp_spms1_fill_constant_sig
 #line 363 "spms1_patch.rb"
   sp_FloatArray_set(lv_signals, cst_SIGNAL_ONE, 1.0);
 #line 364 "spms1_patch.rb"
-  sp_FloatArray_set(lv_signals, cst_SIGNAL_SQRT_HALF, 0.70710680000000004);
+  sp_FloatArray_set(lv_signals, cst_SIGNAL_POINT_SEVEN, 0.69999999999999996);
 #line 365 "spms1_patch.rb"
   sp_FloatArray_set(lv_signals, cst_SIGNAL_HALF, 0.5);
 #line 366 "spms1_patch.rb"
@@ -4376,11 +4376,11 @@ static void sp_spms1_write_default_patch(sp_int lv_midi_ch) {
 #line 432 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_LFO_1_LEVEL_MOD_POL)), ((uint8_t)(cst_SIGNAL_HALF))), (sp_int)0);
 #line 433 "spms1_patch.rb"
-  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_MIXER_1_LEVEL_1)), ((uint8_t)(cst_SIGNAL_SQRT_HALF))), (sp_int)0);
+  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_MIXER_1_LEVEL_1)), ((uint8_t)(cst_SIGNAL_POINT_SEVEN))), (sp_int)0);
 #line 434 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_MIXER_1_POL_1)), ((uint8_t)(cst_SIGNAL_HALF))), (sp_int)0);
 #line 435 "spms1_patch.rb"
-  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_MIXER_1_LEVEL_2)), ((uint8_t)(cst_SIGNAL_SQRT_HALF))), (sp_int)0);
+  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_MIXER_1_LEVEL_2)), ((uint8_t)(cst_SIGNAL_POINT_SEVEN))), (sp_int)0);
 #line 436 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_MIXER_1_POL_2)), ((uint8_t)(cst_SIGNAL_HALF))), (sp_int)0);
 #line 437 "spms1_patch.rb"
@@ -4458,11 +4458,11 @@ static void sp_spms1_write_default_patch(sp_int lv_midi_ch) {
 #line 473 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_NOISE_1_COLOR)), ((uint8_t)(cst_SIGNAL_OWN))), (sp_int)0);
 #line 474 "spms1_patch.rb"
-  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_MIXER_2_LEVEL_1)), ((uint8_t)(cst_SIGNAL_SQRT_HALF))), (sp_int)0);
+  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_MIXER_2_LEVEL_1)), ((uint8_t)(cst_SIGNAL_POINT_SEVEN))), (sp_int)0);
 #line 475 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_MIXER_2_POL_1)), ((uint8_t)(cst_SIGNAL_HALF))), (sp_int)0);
 #line 476 "spms1_patch.rb"
-  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_MIXER_2_LEVEL_2)), ((uint8_t)(cst_SIGNAL_SQRT_HALF))), (sp_int)0);
+  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_MIXER_2_LEVEL_2)), ((uint8_t)(cst_SIGNAL_POINT_SEVEN))), (sp_int)0);
 #line 477 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_MIXER_2_POL_2)), ((uint8_t)(cst_SIGNAL_HALF))), (sp_int)0);
 #line 478 "spms1_patch.rb"
@@ -5299,7 +5299,7 @@ int main(int argc,char**argv){
 #line 21 "spms1_patch.rb"
   cst_SIGNAL_ONE = 1LL;
 #line 22 "spms1_patch.rb"
-  cst_SIGNAL_SQRT_HALF = 2LL;
+  cst_SIGNAL_POINT_SEVEN = 2LL;
 #line 23 "spms1_patch.rb"
   cst_SIGNAL_HALF = 3LL;
 #line 24 "spms1_patch.rb"
