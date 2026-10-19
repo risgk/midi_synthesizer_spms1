@@ -33,6 +33,15 @@
       display: flex;
       flex-direction: column;
       gap: 16px;
+      /* Nothing on the page selects as text, so that a drag that misses a slider or a node, or a
+         long press, does not catch the labels; what is typed or copied still does, below. */
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+    input[type="text"], input[type="number"], textarea {
+      user-select: text;
+      -webkit-user-select: text;
     }
     header {
       border-bottom: 3px solid var(--primary-color);
@@ -434,8 +443,6 @@
       border-radius: 6px;
       background: #222;
       padding: 10px 5px 5px 5px;
-      user-select: none;
-      -webkit-user-select: none;
     }
     /* The native scroll bar is hidden, since Safari cannot color it; .kbd-scrollbar stands in. */
     .keyboard-scroll-container {
@@ -615,8 +622,6 @@
       background-size: 20px 20px;
       cursor: grab;
       touch-action: none;
-      user-select: none;
-      -webkit-user-select: none;
     }
     .canvas-panel.panning {
       cursor: grabbing;
