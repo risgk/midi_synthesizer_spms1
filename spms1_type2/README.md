@@ -415,8 +415,8 @@ it from anywhere else.
 | ----- | ----- | ---- | ---------- |
 | 0 | 0-31 | Run order, slot by slot | Module ID |
 | 1 | 0-33 | What feeds a module input | Signal ID |
-| 2 | 0-83 | Where a parameter takes its value | Signal ID, or 127 for its own control slot |
-| 3 | 0-88 | Which CC fills a control slot | CC number, or 0 for none |
+| 2 | 0-84 | Where a parameter takes its value | Signal ID, or 127 for its own control slot |
+| 3 | 0-89 | Which CC fills a control slot | CC number, or 0 for none |
 
 The run order is read from slot 0 upwards and stops at the first Module ID 0, so a patch shorter
 than 32 modules ends itself. It is separate from the module numbering: a module only sees the
@@ -476,7 +476,8 @@ nothing is held to a range on the way in, and what gets clamped is the value the
 oscillator's Pitch In, Mod 1 In, Mod 2 In, PW Mod 1 In and PW Mod 2 In are Mod Ins too. A mixer adds without a
 ceiling, so a loud modulation pins its destination at one
 end rather than being trimmed on the way in. The amp is the exception, and holds its modulation
-input to -1.0 and +1.0: it is an attenuator, so a modulation may scale its gain down but never up.
+input to -1.0 and +1.0: it is an attenuator, so a modulation may scale its gain down but never up. Amp 1 Gain Pol, with
+no CC, reads +0.5 and multiplies Gain by -1.0 to +1.0, as a Pol does an Amt: at -0.5 it inverts.
 The chorus and the delay hold their audio inputs to the same one unit. Pitch 1 Pitch In takes anything,
 as a Mod In does, and puts out what it takes, glided, bent and transposed, held to -1.0 and +1.0
 as a mixer's output is.
@@ -490,34 +491,35 @@ both at the same signal for a mono output.
 
 | CC 98 | Parameter | | CC 98 | Parameter | | CC 98 | Parameter |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | EG 1 Attack | | 28 | Pitch 1 Bend Pol | | 56 | Mixer 2 Pol 1 |
-| 1 | EG 1 Decay | | 29 | Osc 1 Pitch Coarse | | 57 | Mixer 2 Level 2 |
-| 2 | EG 1 Sustain | | 30 | Osc 1 Pitch Fine | | 58 | Mixer 2 Pol 2 |
-| 3 | EG 1 Level | | 31 | Osc 1 Mod 1 Amt | | 59 | Mixer 2 Balance 1/2 |
-| 4 | LFO 1 Rate | | 32 | Osc 1 Mod 1 Pol | | 60 | Mixer 2 Level 3 |
-| 5 | LFO 1 Rate Mod Amt | | 33 | Osc 1 Mod 2 Amt | | 61 | Mixer 2 Pol 3 |
-| 6 | LFO 1 Rate Mod Pol | | 34 | Osc 1 Mod 2 Pol | | 62 | Mixer 2 Level 4 |
-| 7 | LFO 1 Level | | 35 | Osc 1 Wave | | 63 | Mixer 2 Pol 4 |
-| 8 | LFO 1 Wave | | 36 | Osc 1 Pulse Width | | 64 | Mixer 2 Balance 3/4 |
-| 9 | LFO 1 Level Mod Amt | | 37 | Osc 1 PW Mod 1 Amt | | 65 | Mixer 2 Balance Law |
-| 10 | LFO 1 Level Mod Pol | | 38 | Osc 1 PW Mod 1 Pol | | 66 | Mixer 2 Out Level |
-| 11 | Mixer 1 Level 1 | | 39 | Osc 1 PW Mod 2 Amt | | 67 | Filter 1 Gain |
-| 12 | Mixer 1 Pol 1 | | 40 | Osc 1 PW Mod 2 Pol | | 68 | Filter 1 Cutoff |
-| 13 | Mixer 1 Level 2 | | 41 | Osc 2 Pitch Coarse | | 69 | Filter 1 Mod 1 Amt |
-| 14 | Mixer 1 Pol 2 | | 42 | Osc 2 Pitch Fine | | 70 | Filter 1 Mod 1 Pol |
-| 15 | Mixer 1 Balance 1/2 | | 43 | Osc 2 Mod 1 Amt | | 71 | Filter 1 Mod 2 Amt |
-| 16 | Mixer 1 Level 3 | | 44 | Osc 2 Mod 1 Pol | | 72 | Filter 1 Mod 2 Pol |
-| 17 | Mixer 1 Pol 3 | | 45 | Osc 2 Mod 2 Amt | | 73 | Filter 1 Mod 3 Amt |
-| 18 | Mixer 1 Level 4 | | 46 | Osc 2 Mod 2 Pol | | 74 | Filter 1 Mod 3 Pol |
-| 19 | Mixer 1 Pol 4 | | 47 | Osc 2 Wave | | 75 | Filter 1 Resonance |
-| 20 | Mixer 1 Balance 3/4 | | 48 | Osc 2 Pulse Width | | 76 | Filter 1 Mode |
-| 21 | Mixer 1 Balance Law | | 49 | Osc 2 PW Mod 1 Amt | | 77 | Amp 1 Gain |
-| 22 | Mixer 1 Out Level | | 50 | Osc 2 PW Mod 1 Pol | | 78 | Chorus 1 Mix |
-| 23 | Pitch 1 Glide | | 51 | Osc 2 PW Mod 2 Amt | | 79 | Chorus 1 Rate |
-| 24 | Pitch 1 Coarse | | 52 | Osc 2 PW Mod 2 Pol | | 80 | Chorus 1 Depth |
-| 25 | Pitch 1 Fine | | 53 | Noise 1 Level | | 81 | Delay 1 Mix |
-| 26 | Pitch 1 Stretch | | 54 | Noise 1 Color | | 82 | Delay 1 Time |
-| 27 | Pitch 1 Bend Amt | | 55 | Mixer 2 Level 1 | | 83 | Delay 1 Feedback |
+| 0 | EG 1 Attack | | 29 | Osc 1 Pitch Coarse | | 58 | Mixer 2 Pol 2 |
+| 1 | EG 1 Decay | | 30 | Osc 1 Pitch Fine | | 59 | Mixer 2 Balance 1/2 |
+| 2 | EG 1 Sustain | | 31 | Osc 1 Mod 1 Amt | | 60 | Mixer 2 Level 3 |
+| 3 | EG 1 Level | | 32 | Osc 1 Mod 1 Pol | | 61 | Mixer 2 Pol 3 |
+| 4 | LFO 1 Rate | | 33 | Osc 1 Mod 2 Amt | | 62 | Mixer 2 Level 4 |
+| 5 | LFO 1 Rate Mod Amt | | 34 | Osc 1 Mod 2 Pol | | 63 | Mixer 2 Pol 4 |
+| 6 | LFO 1 Rate Mod Pol | | 35 | Osc 1 Wave | | 64 | Mixer 2 Balance 3/4 |
+| 7 | LFO 1 Level | | 36 | Osc 1 Pulse Width | | 65 | Mixer 2 Balance Law |
+| 8 | LFO 1 Wave | | 37 | Osc 1 PW Mod 1 Amt | | 66 | Mixer 2 Out Level |
+| 9 | LFO 1 Level Mod Amt | | 38 | Osc 1 PW Mod 1 Pol | | 67 | Filter 1 Gain |
+| 10 | LFO 1 Level Mod Pol | | 39 | Osc 1 PW Mod 2 Amt | | 68 | Filter 1 Cutoff |
+| 11 | Mixer 1 Level 1 | | 40 | Osc 1 PW Mod 2 Pol | | 69 | Filter 1 Mod 1 Amt |
+| 12 | Mixer 1 Pol 1 | | 41 | Osc 2 Pitch Coarse | | 70 | Filter 1 Mod 1 Pol |
+| 13 | Mixer 1 Level 2 | | 42 | Osc 2 Pitch Fine | | 71 | Filter 1 Mod 2 Amt |
+| 14 | Mixer 1 Pol 2 | | 43 | Osc 2 Mod 1 Amt | | 72 | Filter 1 Mod 2 Pol |
+| 15 | Mixer 1 Balance 1/2 | | 44 | Osc 2 Mod 1 Pol | | 73 | Filter 1 Mod 3 Amt |
+| 16 | Mixer 1 Level 3 | | 45 | Osc 2 Mod 2 Amt | | 74 | Filter 1 Mod 3 Pol |
+| 17 | Mixer 1 Pol 3 | | 46 | Osc 2 Mod 2 Pol | | 75 | Filter 1 Resonance |
+| 18 | Mixer 1 Level 4 | | 47 | Osc 2 Wave | | 76 | Filter 1 Mode |
+| 19 | Mixer 1 Pol 4 | | 48 | Osc 2 Pulse Width | | 77 | Amp 1 Gain |
+| 20 | Mixer 1 Balance 3/4 | | 49 | Osc 2 PW Mod 1 Amt | | 78 | Amp 1 Gain Pol |
+| 21 | Mixer 1 Balance Law | | 50 | Osc 2 PW Mod 1 Pol | | 79 | Chorus 1 Mix |
+| 22 | Mixer 1 Out Level | | 51 | Osc 2 PW Mod 2 Amt | | 80 | Chorus 1 Rate |
+| 23 | Pitch 1 Glide | | 52 | Osc 2 PW Mod 2 Pol | | 81 | Chorus 1 Depth |
+| 24 | Pitch 1 Coarse | | 53 | Noise 1 Level | | 82 | Delay 1 Mix |
+| 25 | Pitch 1 Fine | | 54 | Noise 1 Color | | 83 | Delay 1 Time |
+| 26 | Pitch 1 Stretch | | 55 | Mixer 2 Level 1 | | 84 | Delay 1 Feedback |
+| 27 | Pitch 1 Bend Amt | | 56 | Mixer 2 Pol 1 | |  |  |
+| 28 | Pitch 1 Bend Pol | | 57 | Mixer 2 Level 2 | |  |  |
 
 <!-- patch_gen end -->
 
@@ -530,11 +532,11 @@ two slots, a unipolar and a bipolar one. See the General slots below.
 
 | CC 98 | CC for | Fills |
 | ----- | ------ | ----- |
-| 84 | General Mod Wheel | General Mod Wheel |
-| 85 | General 1 | General Unipolar 1, General Bipolar 1 |
-| 86 | General 2 | General Unipolar 2, General Bipolar 2 |
-| 87 | General 3 | General Unipolar 3, General Bipolar 3 |
-| 88 | General 4 | General Unipolar 4, General Bipolar 4 |
+| 85 | General Mod Wheel | General Mod Wheel |
+| 86 | General 1 | General Unipolar 1, General Bipolar 1 |
+| 87 | General 2 | General Unipolar 2, General Bipolar 2 |
+| 88 | General 3 | General Unipolar 3, General Bipolar 3 |
+| 89 | General 4 | General Unipolar 4, General Bipolar 4 |
 
 <!-- patch_gen end -->
 

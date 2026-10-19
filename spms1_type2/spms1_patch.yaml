@@ -356,20 +356,21 @@ controls:
   - { entry: 75, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 94, set: set_resonance }
   - { entry: 76, module: FILTER_1,  key: MODE,         label: Mode,         cc: 39,  value: 4, set: set_mode }
   - { entry: 77, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 124, set: set_gain }
-  - { entry: 78, module: CHORUS_1,  key: MIX,          label: Mix,          cc: 93,  value: 64, set: set_mix }
-  - { entry: 79, module: CHORUS_1,  key: RATE,         label: Rate,         cc: 58,  value: 64, set: set_rate }
-  - { entry: 80, module: CHORUS_1,  key: DEPTH,        label: Depth,        cc: 59,  value: 64, set: set_depth }
-  - { entry: 81, module: DELAY_1,   key: MIX,          label: Mix,          cc: 94,  value: 34, set: set_mix }
-  - { entry: 82, module: DELAY_1,   key: TIME,         label: Time,         cc: 90,  value: 64, set: set_time }
-  - { entry: 83, module: DELAY_1,   key: FEEDBACK,     label: Feedback,     cc: 92,  value: 64, set: set_feedback }
+  - { entry: 78, module: AMP_1,     key: GAIN_POL,     label: Gain Pol,     cc: 0,   value: 124, source: HALF, bipolar: true, set: set_gain_polarity }
+  - { entry: 79, module: CHORUS_1,  key: MIX,          label: Mix,          cc: 93,  value: 64, set: set_mix }
+  - { entry: 80, module: CHORUS_1,  key: RATE,         label: Rate,         cc: 58,  value: 64, set: set_rate }
+  - { entry: 81, module: CHORUS_1,  key: DEPTH,        label: Depth,        cc: 59,  value: 64, set: set_depth }
+  - { entry: 82, module: DELAY_1,   key: MIX,          label: Mix,          cc: 94,  value: 34, set: set_mix }
+  - { entry: 83, module: DELAY_1,   key: TIME,         label: Time,         cc: 90,  value: 64, set: set_time }
+  - { entry: 84, module: DELAY_1,   key: FEEDBACK,     label: Feedback,     cc: 92,  value: 64, set: set_feedback }
 
   # General controls: a CC put on the bus for any input or parameter to read, the mod wheel
   # unipolar and each of General 1-4 filling a unipolar and a bipolar slot (see `signals`). Each
   # of General 1-4 powers up at CC 64, the one value that puts neither slot at an end: the
   # unipolar slot at 0.5, the bipolar at 0.0. General 1-4 are on CC 16-19, the MIDI spec's
   # General Purpose Controllers 1-4.
-  - { entry: 84, general: true, key: GENERAL_MOD_WHEEL, label: Mod Wheel, cc: 1,   value: 4 }
-  - { entry: 85, general: true, key: GENERAL_1,         label: "1",       cc: 16,  value: 64 }
-  - { entry: 86, general: true, key: GENERAL_2,         label: "2",       cc: 17,  value: 64 }
-  - { entry: 87, general: true, key: GENERAL_3,         label: "3",       cc: 18,  value: 64 }
-  - { entry: 88, general: true, key: GENERAL_4,         label: "4",       cc: 19,  value: 64 }
+  - { entry: 85, general: true, key: GENERAL_MOD_WHEEL, label: Mod Wheel, cc: 1,   value: 4 }
+  - { entry: 86, general: true, key: GENERAL_1,         label: "1",       cc: 16,  value: 64 }
+  - { entry: 87, general: true, key: GENERAL_2,         label: "2",       cc: 17,  value: 64 }
+  - { entry: 88, general: true, key: GENERAL_3,         label: "3",       cc: 18,  value: 64 }
+  - { entry: 89, general: true, key: GENERAL_4,         label: "4",       cc: 19,  value: 64 }
