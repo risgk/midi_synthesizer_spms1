@@ -411,8 +411,8 @@ it from anywhere else.
 | ----- | ----- | ---- | ---------- |
 | 0 | 0-31 | Run order, slot by slot | Module ID |
 | 1 | 0-27 | What feeds a module input | Signal ID |
-| 2 | 0-68 | Where a parameter takes its value | Signal ID, or 127 for its own control slot |
-| 3 | 0-73 | Which CC fills a control slot | CC number, or 0 for none |
+| 2 | 0-67 | Where a parameter takes its value | Signal ID, or 127 for its own control slot |
+| 3 | 0-72 | Which CC fills a control slot | CC number, or 0 for none |
 
 The run order is read from slot 0 upwards and stops at the first Module ID 0, so a patch shorter
 than 32 modules ends itself. It is separate from the module numbering: a module only sees the
@@ -467,9 +467,8 @@ nothing is held to a range on the way in, and what gets clamped is the value the
 oscillator's Pitch In, Mod 1 In and Mod 2 In are Mod Ins too. A mixer adds without a
 ceiling, so a loud modulation pins its destination at one
 end rather than being trimmed on the way in. The amp is the exception, and holds its modulation
-input to -1.0 and +1.0: it is an attenuator, so a modulation may scale its gain down but never up. Amp 1 Gain Pol, with
-no CC, reads +0.5 and multiplies Gain by -1.0 to +1.0, as a Pol does an Amt: at -0.5 it inverts.
-The chorus and the delay hold their audio inputs to the same one unit. Pitch 1 Pitch In takes anything,
+input to -1.0 and +1.0: it is an attenuator, so a modulation may scale its gain down but never up;
+a negative one inverts. The chorus and the delay hold their audio inputs to the same one unit. Pitch 1 Pitch In takes anything,
 as a Mod In does, and puts out what it takes, glided, bent and transposed, held to -1.0 and +1.0
 as a mixer's output is.
 
@@ -498,13 +497,13 @@ both at the same signal for a mono output.
 | 13 | Mixer 1 Pol 1 | | 36 | Osc 2 Pitch Fine | | 59 | Filter 1 Resonance |
 | 14 | Mixer 1 Level 2 | | 37 | Osc 2 Mod 1 Amt | | 60 | Filter 1 Mode |
 | 15 | Mixer 1 Pol 2 | | 38 | Osc 2 Mod 2 Amt | | 61 | Amp 1 Gain |
-| 16 | Mixer 1 Level 3 | | 39 | Osc 2 Pitch Mod Amt | | 62 | Amp 1 Gain Pol |
-| 17 | Mixer 1 Pol 3 | | 40 | Osc 2 Pitch Mod Range | | 63 | Chorus 1 Mix |
-| 18 | Mixer 1 Out Level | | 41 | Osc 2 Wave | | 64 | Chorus 1 Rate |
-| 19 | Pitch 1 Glide | | 42 | Osc 2 Pulse Width | | 65 | Chorus 1 Depth |
-| 20 | Pitch 1 Glide Switch | | 43 | Osc 2 PW Mod Amt | | 66 | Delay 1 Mix |
-| 21 | Pitch 1 Coarse | | 44 | Noise 1 Level | | 67 | Delay 1 Time |
-| 22 | Pitch 1 Fine | | 45 | Noise 1 Color | | 68 | Delay 1 Feedback |
+| 16 | Mixer 1 Level 3 | | 39 | Osc 2 Pitch Mod Amt | | 62 | Chorus 1 Mix |
+| 17 | Mixer 1 Pol 3 | | 40 | Osc 2 Pitch Mod Range | | 63 | Chorus 1 Rate |
+| 18 | Mixer 1 Out Level | | 41 | Osc 2 Wave | | 64 | Chorus 1 Depth |
+| 19 | Pitch 1 Glide | | 42 | Osc 2 Pulse Width | | 65 | Delay 1 Mix |
+| 20 | Pitch 1 Glide Switch | | 43 | Osc 2 PW Mod Amt | | 66 | Delay 1 Time |
+| 21 | Pitch 1 Coarse | | 44 | Noise 1 Level | | 67 | Delay 1 Feedback |
+| 22 | Pitch 1 Fine | | 45 | Noise 1 Color | |  |  |
 
 <!-- patch_gen end -->
 
@@ -517,11 +516,11 @@ two slots, a unipolar and a bipolar one. See the General slots below.
 
 | CC 98 | CC for | Fills |
 | ----- | ------ | ----- |
-| 69 | General Mod Wheel | General Mod Wheel |
-| 70 | General 1 | General Unipolar 1, General Bipolar 1 |
-| 71 | General 2 | General Unipolar 2, General Bipolar 2 |
-| 72 | General 3 | General Unipolar 3, General Bipolar 3 |
-| 73 | General 4 | General Unipolar 4, General Bipolar 4 |
+| 68 | General Mod Wheel | General Mod Wheel |
+| 69 | General 1 | General Unipolar 1, General Bipolar 1 |
+| 70 | General 2 | General Unipolar 2, General Bipolar 2 |
+| 71 | General 3 | General Unipolar 3, General Bipolar 3 |
+| 72 | General 4 | General Unipolar 4, General Bipolar 4 |
 
 <!-- patch_gen end -->
 
@@ -586,7 +585,7 @@ runs 0.0 to 1.0 from CC 4 to CC 124, the span of an envelope, so an envelope poi
 the whole of its dial. A bipolar one runs -0.5 to +0.5 with CC 64 at 0.0, the span of an LFO, so a
 bipolar source pointed at one swings it about the middle. Osc 1 Pitch Coarse and Fine and Pitch 1 Coarse and
 Fine are bipolar, since their middle is no change at all, and so is every Pol -- the mixers', LFO 1's
-two Mod Pols, Amp 1 Gain Pol and Pitch 1 Bend Pol -- and Filter 1 Cutoff Mod Amt, since its sign is
+two Mod Pols and Pitch 1 Bend Pol -- and Filter 1 Cutoff Mod Amt, since its sign is
 what it sets. Pointing a parameter at a
 slot on the bus is what makes a modulation. A control slot with no CC holds 0.0. No input or other
 parameter can read a parameter's control slot: a CC meant for more than one parameter, or for a
@@ -895,9 +894,9 @@ takes the output to the input at once, mid-glide too, as Glide at 0.0 does.
   filter's DC blockers leave some of the input in it, 23 dB down at 50 Hz, and a level that drives
   the filter's leak or its output clip leaves more. Narrow as it is, it is far quieter than the
   dry note, more so with the cutoff high above the harmonics: CC 74 = 64 brings it among them
-- Echoes that only come in with the mod wheel: CC 99 = 2, CC 98 = 66, CC 6 = 12 takes Delay 1 Mix
+- Echoes that only come in with the mod wheel: CC 99 = 2, CC 98 = 65, CC 6 = 12 takes Delay 1 Mix
   from General Mod Wheel, which powers up at 0.0, so the output is dry until the wheel moves
-- Chorus that only comes in with the mod wheel: CC 99 = 2, CC 98 = 63, CC 6 = 12 takes Chorus 1
+- Chorus that only comes in with the mod wheel: CC 99 = 2, CC 98 = 62, CC 6 = 12 takes Chorus 1
   Mix from General Mod Wheel, so the output stays mono until the wheel moves
 - Leave the chorus out of the sound, keeping the delay: CC 99 = 1, CC 98 = 24 and 25, CC 6 = 40
   feeds both sides of Delay 1 from the amp. The chorus keeps running and nothing reads it, and the

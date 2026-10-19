@@ -132,13 +132,12 @@ SLOT_FILTER_1_CUTOFF_MOD_AMT     = 186
 SLOT_FILTER_1_RESONANCE          = 187
 SLOT_FILTER_1_MODE               = 188
 SLOT_AMP_1_GAIN                  = 189
-SLOT_AMP_1_GAIN_POL              = 190
-SLOT_CHORUS_1_MIX                = 191
-SLOT_CHORUS_1_RATE               = 192
-SLOT_CHORUS_1_DEPTH              = 193
-SLOT_DELAY_1_MIX                 = 194
-SLOT_DELAY_1_TIME                = 195
-SLOT_DELAY_1_FEEDBACK            = 196
+SLOT_CHORUS_1_MIX                = 190
+SLOT_CHORUS_1_RATE               = 191
+SLOT_CHORUS_1_DEPTH              = 192
+SLOT_DELAY_1_MIX                 = 193
+SLOT_DELAY_1_TIME                = 194
+SLOT_DELAY_1_FEEDBACK            = 195
 
 # NRPN parameter numbers: (MSB << 7) | LSB, where the MSB picks a category and the LSB an entry.
 #   0..127   active_modules[slot]
@@ -238,13 +237,12 @@ NRPN_SOURCE_FILTER_1_CUTOFF_MOD_AMT     = 314
 NRPN_SOURCE_FILTER_1_RESONANCE          = 315
 NRPN_SOURCE_FILTER_1_MODE               = 316
 NRPN_SOURCE_AMP_1_GAIN                  = 317
-NRPN_SOURCE_AMP_1_GAIN_POL              = 318
-NRPN_SOURCE_CHORUS_1_MIX                = 319
-NRPN_SOURCE_CHORUS_1_RATE               = 320
-NRPN_SOURCE_CHORUS_1_DEPTH              = 321
-NRPN_SOURCE_DELAY_1_MIX                 = 322
-NRPN_SOURCE_DELAY_1_TIME                = 323
-NRPN_SOURCE_DELAY_1_FEEDBACK            = 324
+NRPN_SOURCE_CHORUS_1_MIX                = 318
+NRPN_SOURCE_CHORUS_1_RATE               = 319
+NRPN_SOURCE_CHORUS_1_DEPTH              = 320
+NRPN_SOURCE_DELAY_1_MIX                 = 321
+NRPN_SOURCE_DELAY_1_TIME                = 322
+NRPN_SOURCE_DELAY_1_FEEDBACK            = 323
 
 # A CC number of 0 means the parameter has no CC: its control slot holds 0.0 -- the bottom of a
 # unipolar dial, the middle of a bipolar one -- whatever CC it had before, so a patch sets it alone.
@@ -310,18 +308,17 @@ NRPN_CC_FILTER_1_CUTOFF_MOD_AMT     = 442
 NRPN_CC_FILTER_1_RESONANCE          = 443
 NRPN_CC_FILTER_1_MODE               = 444
 NRPN_CC_AMP_1_GAIN                  = 445
-NRPN_CC_AMP_1_GAIN_POL              = 446
-NRPN_CC_CHORUS_1_MIX                = 447
-NRPN_CC_CHORUS_1_RATE               = 448
-NRPN_CC_CHORUS_1_DEPTH              = 449
-NRPN_CC_DELAY_1_MIX                 = 450
-NRPN_CC_DELAY_1_TIME                = 451
-NRPN_CC_DELAY_1_FEEDBACK            = 452
-NRPN_CC_GENERAL_MOD_WHEEL           = 453
-NRPN_CC_GENERAL_1                   = 454
-NRPN_CC_GENERAL_2                   = 455
-NRPN_CC_GENERAL_3                   = 456
-NRPN_CC_GENERAL_4                   = 457
+NRPN_CC_CHORUS_1_MIX                = 446
+NRPN_CC_CHORUS_1_RATE               = 447
+NRPN_CC_CHORUS_1_DEPTH              = 448
+NRPN_CC_DELAY_1_MIX                 = 449
+NRPN_CC_DELAY_1_TIME                = 450
+NRPN_CC_DELAY_1_FEEDBACK            = 451
+NRPN_CC_GENERAL_MOD_WHEEL           = 452
+NRPN_CC_GENERAL_1                   = 453
+NRPN_CC_GENERAL_2                   = 454
+NRPN_CC_GENERAL_3                   = 455
+NRPN_CC_GENERAL_4                   = 456
 
 # The constants of the bus, which nothing else ever writes. A slot not written here holds 0.0.
 def spms1_fill_constant_signals(signals)
@@ -441,7 +438,6 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_RESONANCE         , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_MODE              , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_AMP_1_GAIN                 , SIGNAL_OWN)
-  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_AMP_1_GAIN_POL             , SIGNAL_HALF)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_CHORUS_1_MIX               , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_CHORUS_1_RATE              , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_CHORUS_1_DEPTH             , SIGNAL_OWN)

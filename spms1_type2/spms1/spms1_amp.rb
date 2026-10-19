@@ -18,8 +18,6 @@ module Spms1
     def initialize(sample_rate)
       @sample_rate = sample_rate
       @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (48000.0 / @sample_rate) * (CONTROL_RATE_DIVISOR / 4.0)
-      @gain_amount = 1.0
-      @gain_polarity = 1.0
       @gain = 1.0
       @stage_1_gain = 1.0
       @current_gain = 1.0
@@ -28,19 +26,9 @@ module Spms1
     # Gain is unipolar, [0.0, 1.0].
     # Range: -∞ dB (0.0), -6 dB (0.5), 0 dB (1.0).
     # Used as a plain multiplier, so @gain is an amplitude and the smoothing below works in the
-    # amplitude domain. @gain is Gain times Gain Pol, as a depth is amount times polarity.
+    # amplitude domain.
     def set_gain(gain)
-      @gain_amount = (gain < 0.0) ? 0.0 : ((gain > 1.0) ? 1.0 : gain)
-      @gain = @gain_amount * @gain_polarity
-    end
-
-    # Gain Pol is bipolar, [-0.5, 0.5], doubled to [-1.0, 1.0] as every polarity is: +0.5 passes
-    # the input as it is, -0.5 inverts it, and between the two it scales the gain down to nothing
-    # at 0.0.
-    def set_gain_polarity(polarity)
-      clamped_polarity = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
-      @gain_polarity = clamped_polarity + clamped_polarity
-      @gain = @gain_amount * @gain_polarity
+      @gain = (gain < 0.0) ? 0.0 : ((gain > 1.0) ? 1.0 : gain)
     end
 
     def process(control_tick, audio_input = 0.0, modulation_input = 1.0)
@@ -52,7 +40,7 @@ module Spms1
 
       # The one modulation input in the synth that is clamped on the way in, because an amp is an
       # attenuator: a modulation scales the gain down, and must not be able to scale it up however
-      # loud it arrives. Negative still inverts. @gain is already [-1.0, 1.0], so the product needs
+      # loud it arrives. Negative still inverts. @gain is already [0.0, 1.0], so the product needs
       # no clamp of its own.
       mod = (modulation_input < -1.0) ? -1.0 : ((modulation_input > 1.0) ? 1.0 : modulation_input)
       total_gain = @current_gain * mod
