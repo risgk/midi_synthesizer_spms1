@@ -39,7 +39,7 @@
 |                            39 | x             | o             | Filter Mode (LP, Notch, HP)          |
 |                            20 | x             | o             | Mixer 2 Level 1 (Osc 1 Level)        |
 |                            21 | x             | o             | Mixer 2 Level 2 (Osc 2 Level)        |
-|                            23 | x             | o             | Mixer 2 Level 3 (Noise Level)        |
+|                            23 | x             | o             | Mixer 2 Level 4 (Noise Level)        |
 |                           115 | x             | o             | Noise Color (White to Red)           |
 |                            15 | x             | o             | Amp Gain                             |
 |                            73 | x             | o             | EG Attack (Time)                     |
@@ -53,7 +53,7 @@
 |                            94 | x             | o             | Delay Mix                            |
 |                             5 | x             | o             | Pitch Glide (Portamento Time)        |
 |                            57 | x             | o             | Pitch Bend Amt (Pitch Bend Range)    |
-|                            22 | x             | o             | Pitch Stretch (x1 to x2)             |
+|                            81 | x             | o             | Pitch Stretch (x1 to x2)             |
 |                             1 | x             | o             | General Mod Wheel (Unipolar)         |
 |                            16 | x             | o             | General 1 (Unipolar and Bipolar)     |
 |                            17 | x             | o             | General 2 (Unipolar and Bipolar)     |

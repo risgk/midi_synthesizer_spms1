@@ -10,7 +10,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.3
 - Filter: ZDF/TPT State Variable Filter (with a nonlinear leak on the band pass integrator, solved by the one-step Newton method), with low pass and high pass outputs and a main output crossfading from one to the other through a notch (Mode, CC 39)
 - Chorus: mono in, stereo out, as a module in the run order
 - Delay: stereo, with feedback, as a module in the run order (up to 340 ms)
-- Pitch: the note's pitch as a module in the run order, with portamento as an exponential lag (CC 5), pitch bend past it (range on CC 57) and a stretch of the keys (CC 22)
+- Pitch: the note's pitch as a module in the run order, with portamento as an exponential lag (CC 5), pitch bend past it (range on CC 57) and a stretch of the keys (CC 81)
 - Stereo output: the chorus spreads the mono voice into a left and a right, and the delay keeps them apart
 - Developed by ISGK Instruments (Ryo Ishigaki)
 - <https://github.com/risgk/midi_synthesizer_spms1>
@@ -170,7 +170,7 @@ flowchart LR
 
   OSC -->|In 1| MIX2
   OSC2 -->|In 2| MIX2
-  NOISE -->|In 3| MIX2
+  NOISE -->|In 4| MIX2
   MIX2 --> FILTER
   FILTER --> AMP
   AMP --> CHORUS
@@ -221,9 +221,9 @@ Amt (CC 89) and PW Mod 1 Amt (CC 8) power up at 0.0, with it off. Each modulatio
 whole range of what it moves, so bringing a source down to a musical depth is left to the patch
 rather than built into the modules.
 
-Mixer 2 sums the audio ahead of the filter: Osc 1 on In 1, Osc 2 on In 2 and Noise 1's Out on In 3, each
-at its own level: Level 1 (CC 20) and Level 2 (CC 21) power up at 0.7, so the default patch
-plays both oscillators, about as loud together as one at full level, and Level 3 (CC 23) at 0.0,
+Mixer 2 sums the audio ahead of the filter: Osc 1 on In 1, Osc 2 on In 2 and Noise 1's Out on In 4, each
+at its own level, with In 3 left open: Level 1 (CC 20) and Level 2 (CC 21) power up at 0.7, so the default patch
+plays both oscillators, about as loud together as one at full level, and Level 4 (CC 23) at 0.0,
 so the noise is silent until it is turned up. Osc 2 plays the note from Pitch 1 as Osc
 1 does, tuned against it by its own Pitch Coarse (CC 85) and Pitch Fine (CC 76), 12 cents sharp at
 power-up for a slow beat. Its Wave is its own as well, on CC 104 beside Osc 1's on CC 102. It
@@ -438,8 +438,8 @@ on first. The synth is built to keep time with every module running, so taking o
 order is never what makes a patch fit; to leave one out of the sound, route around it and let it
 run unread (see the examples below).
 Mixer 1 has no CC: its levels hold 0.0, so it is silent until a patch turns them up, as its
-category 4 values or by giving them CCs. Mixer 2 has a CC on its first three levels, CC 20, 21
-and 23, of which Level 1 and 2 power up at 0.7 and Level 3 at 0.0; its Level 4 has no CC and holds 0.0, so that
+category 4 values or by giving them CCs. Mixer 2 has a CC on Level 1, 2 and 4, CC 20, 21 and
+23, of which Level 1 and 2 power up at 0.7 and Level 4 at 0.0; its Level 3 has no CC and holds 0.0, so that
 input starts closed. Each mixer's Out Level has no CC and holds 0.5; Mixer 2's sets how hard the
 audio drives the filter.
 
@@ -641,7 +641,7 @@ whole unit per CC step: Coarse a semitone, reaching 5 octaves either way, and Fi
 reaching 60 either way. They are summed, so any pitch is reachable. They have no CC and hold 0.0
 by default; Osc 2's, on CC 85 and 76, set the interval or the detune between the oscillators.
 
-Pitch 1 Stretch (CC 22) widens the keys about note 60, ahead of the glide, by multiplying Pitch
+Pitch 1 Stretch (CC 81) widens the keys about note 60, ahead of the glide, by multiplying Pitch
 In: every interval from note 60 grows by the same share, so the stretch is often given as how
 much an octave widens. At 0.0 (CC 4), where it powers up, the keys are as they are; from CC 5 the
 widening grows by a semitone's ratio a step, as the envelope's times do: 1.2 cents an octave at
@@ -741,7 +741,7 @@ in a straight line from the white at 0.0 (CC 4), where it powers up, to the red 
 each end as its own output is, so the red end is 3 dB down. Out keeps the slot the white had, and
 is what the default patch puts on Mixer 2, so the noise there is white until Color is turned up,
 and darkens as it is. Color is smoothed as the level is. The level has no CC and holds 1.0, so
-the noise runs at full level and Mixer 2 Level 3 (CC 23), or the depth of whatever it modulates,
+the noise runs at full level and Mixer 2 Level 4 (CC 23), or the depth of whatever it modulates,
 sets how much of it is heard. The level is smoothed as the other levels are. The noise repeats only after 2^32 samples,
 over a day at 48 kHz, and starts the same every time, so a render comes out the same.
 
@@ -843,7 +843,7 @@ takes the output to the input at once, mid-glide too, as Glide at 0.0 does.
 - A second oscillator plays by default too, on Mixer 2's second input at the level of the first,
   CC 20 and CC 21 both at 0.7, beating slowly against Osc 1 from the 12 cents of CC 76's power-up
   value; CC 21 = 4 takes it out. CC 85 and 76 tune it: CC 85 = 76 an octave up, CC 85 = 71 a fifth, CC 76 = 64 in unison
-- Noise is wired by default too, its Out on Mixer 2's third input beside the oscillators, so CC 23
+- Noise is wired by default too, its Out on Mixer 2's fourth input beside the oscillators, so CC 23
   brings it in under the note, at a level of 0.1 at CC 16. CC 20 = 4 and CC 21 = 4 take the
   oscillators out, leaving the noise alone, through the filter. CC 115 (Color) turns it from
   white to red
