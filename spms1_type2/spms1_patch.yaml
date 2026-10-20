@@ -64,7 +64,7 @@ modules:
 # powers up at 0.0 and leaves it off until CC 9. Noise 1 runs after the oscillators, as it is mostly a sound of its own (a modulation taking
 # it is a sample late, which it does not hear), at full level: its Level has no CC and holds 1.0.
 # Mixer 2 runs after it, just ahead of the filter, which it feeds: Osc 1 on its In 1, Osc 2 on In 2
-# and the noise on In 3. Its Level 1 and 2, on CC 116 and 21, power up at 0.7, so the two
+# and the noise on In 3. Its Level 1 and 2, on CC 20 and 21, power up at 0.7, so the two
 # oscillators sound together about as loud as one at full level, and Level 3, on CC 23, at 0.0,
 # so the noise is silent until CC 23. Osc 2 plays the note from Pitch 1, as Osc 1 does, tuned by its own
 # Pitch Coarse and Fine (CC 85 and 76), 12 cents sharp at power-up, and has a Wave of its own on CC
@@ -284,13 +284,13 @@ controls:
   - { entry: 37, module: NOISE_1,   key: COLOR,        label: Color,        cc: 115, value: 4, set: set_color }
   - { entry: 38, module: NOISE_1,   key: LEVEL,        label: Level,        cc: 0,   value: 124, set: set_level }
   # Mixer 2, the audio ahead of the filter: Osc 1 on In 1, Osc 2 on In 2 and the noise on In 3.
-  # Level 1 and 2 (CC 116 and 21) power up at CC 88, 0.7: two saws 12 cents apart come out about
+  # Level 1 and 2 (CC 20 and 21) power up at CC 88, 0.7: two saws 12 cents apart come out about
   # as loud as one at 1.0, as 0.7 is about one over the square root of 2. Level 3 (CC 23) powers up
   # at 0.0, leaving the noise, at full level from Noise 1, silent. Level 4 has no CC and
   # holds 0.0, In 4 being left unrouted. Out Level is on CC 112 and powers up at CC 64, 0.5: how
   # hard the sum drives the filter, the one Mixer 2 feeds, and what keeps two oscillators and the
   # noise all at full level, a sum of 1.5 at most, inside the mixer's range.
-  - { entry: 39, module: MIXER_2,   key: LEVEL_1,      label: Level 1,      cc: 116, value: 88, set: set_level_1 }
+  - { entry: 39, module: MIXER_2,   key: LEVEL_1,      label: Level 1,      cc: 20,  value: 88, set: set_level_1 }
   - { entry: 40, module: MIXER_2,   key: LEVEL_2,      label: Level 2,      cc: 21,  value: 88, set: set_level_2 }
   - { entry: 41, module: MIXER_2,   key: LEVEL_3,      label: Level 3,      cc: 23,  value: 4, set: set_level_3 }
   - { entry: 42, module: MIXER_2,   key: LEVEL_4,      label: Level 4,      cc: 0,   value: 4, set: set_level_4 }

@@ -221,7 +221,7 @@ whole range of what it moves, so bringing a source down to a musical depth is le
 rather than built into the modules.
 
 Mixer 2 sums the audio ahead of the filter: Osc 1 on In 1, Osc 2 on In 2 and Noise 1's Out on In 3, each
-at its own level: Level 1 (CC 116) and Level 2 (CC 21) power up at 0.7, so the default patch
+at its own level: Level 1 (CC 20) and Level 2 (CC 21) power up at 0.7, so the default patch
 plays both oscillators, about as loud together as one at full level, and Level 3 (CC 23) at 0.0,
 so the noise is silent until it is turned up. Osc 2 plays the note from Pitch 1 as Osc
 1 does, tuned against it by its own Pitch Coarse (CC 85) and Pitch Fine (CC 76), 12 cents sharp at
@@ -437,7 +437,7 @@ on first. The synth is built to keep time with every module running, so taking o
 order is never what makes a patch fit; to leave one out of the sound, route around it and let it
 run unread (see the examples below).
 Mixer 1 has no CC: its levels hold 0.0, so it is silent until a patch turns them up, as its
-category 4 values or by giving them CCs. Mixer 2 has a CC on its first three levels, CC 116, 21
+category 4 values or by giving them CCs. Mixer 2 has a CC on its first three levels, CC 20, 21
 and 23, of which Level 1 and 2 power up at 0.7 and Level 3 at 0.0; its Level 4 has no CC and holds 0.0, so that
 input starts closed. Each mixer's Out Level is at 0.5: Mixer 1's has no CC and holds it, and
 Mixer 2's is on CC 112 and powers up at it, which sets how hard the audio drives the filter.
@@ -825,10 +825,10 @@ takes the output to the input at once, mid-glide too, as Glide at 0.0 does.
 - The LFO reaches the filter's Mod 2 input by default too, so CC 25 sweeps the cutoff with it, on
   top of the envelope on Mod 1
 - A second oscillator plays by default too, on Mixer 2's second input at the level of the first,
-  CC 21 and CC 116 both at 0.7, beating slowly against Osc 1 from the 12 cents of CC 76's power-up
+  CC 20 and CC 21 both at 0.7, beating slowly against Osc 1 from the 12 cents of CC 76's power-up
   value; CC 21 = 4 takes it out. CC 85 and 76 tune it: CC 85 = 76 an octave up, CC 85 = 71 a fifth, CC 76 = 64 in unison
 - Noise is wired by default too, its Out on Mixer 2's third input beside the oscillators, so CC 23
-  brings it in under the note, at a level of 0.1 at CC 16. CC 116 = 4 and CC 21 = 4 take the
+  brings it in under the note, at a level of 0.1 at CC 16. CC 20 = 4 and CC 21 = 4 take the
   oscillators out, leaving the noise alone, through the filter. CC 115 (Color) turns it from
   white to red
 - Keyboard tracking is wired by default as well, the pitch from Pitch 1 on the filter's Pitch input,
@@ -837,7 +837,7 @@ takes the output to the input at once, mid-glide too, as Glide at 0.0 does.
 - The filter as a sine voice, playing its own oscillation in tune: CC 71 = 124 makes it oscillate,
   CC 9 = 124 has the cutoff follow the keys, and CC 74 = 49 puts it on note 60 at note 60, and so
   on the note played everywhere. CC 24 = 4 takes the envelope off the cutoff, which would
-  otherwise take it up to two octaves sharp, and CC 116 = 4 and CC 21 = 4 take the oscillators out,
+  otherwise take it up to two octaves sharp, and CC 20 = 4 and CC 21 = 4 take the oscillators out,
   leaving the sine alone. It is within 5 cents of the note from middle C up, and 17 cents flat an octave below
 - A pitch envelope is wired by default too -- the envelope on the oscillator's Mod 1 input --
   so CC 89 (Osc 1 Pitch Mod 1 Amt) sets its depth: the note starts a semitone sharp at CC 9, an
