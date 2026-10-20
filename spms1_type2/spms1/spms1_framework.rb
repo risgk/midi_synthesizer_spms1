@@ -62,7 +62,7 @@ end
 # CC value normalization. Each control slot is unipolar or bipolar, matching the range its
 # parameter clamps to, and takes the converter of its kind: unipolar is 0.0..1.0, the span of an
 # envelope, and bipolar is -0.5..0.5, the span of an LFO, with 0.0 at CC 64 where a MIDI
-# controller puts its detent. Pitch Coarse, Pitch Fine and Pitch 1 Coarse and Fine are
+# controller puts its detent. Pitch Coarse and Pitch Fine are
 # bipolar, being offsets about that detent, and so are the polarities, whose sign is what they set. Both map CC 4..124 to the full range and
 # clamp anything outside. Every lookup table in the synth is spaced to match --
 # FREQ_TABLE is semitone-spaced across 120, and EXP_TABLE and Q_TABLE are 121 entries over their

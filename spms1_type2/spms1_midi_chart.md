@@ -60,8 +60,6 @@
 |                             5 | x             | o             | Pitch Glide (Portamento Time)        |
 |                            34 | x             | o             | Pitch Glide Switch [Off|On]          |
 |                            57 | x             | o             | Pitch Bend Amt (Pitch Bend Range)    |
-|                            86 | x             | o             | Pitch Coarse (+-5 Octaves)           |
-|                            70 | x             | o             | Pitch Fine (+-60 Cents)              |
 |                            22 | x             | o             | Pitch Stretch (x1 to x2)             |
 |                             1 | x             | o             | General Mod Wheel (Unipolar)         |
 |                            16 | x             | o             | General 1 (Unipolar and Bipolar)     |

@@ -5,11 +5,8 @@ module Spms1
   # pitch domain being linear in semitones makes the glide an exponential one in pitch, which is
   # what an analog synth's portamento is. It takes any signal, though, so it rounds off the steps of
   # a stepped one as well. Bend In is added to the output past the lag, for what should move the
-  # pitch at once rather than glide, as a pitch bend should, and Coarse and Fine shift the
-  # output in the same place: a transposition that takes effect at once, ahead of everything the
-  # module feeds, so two oscillators on it move together and keep their own Pitch Coarse and Fine as
-  # the interval between them. Stretch widens the input about note 60 before the lag, so that the
-  # keys spread out while a bend and the transposition stay as they are.
+  # pitch at once rather than glide, as a pitch bend should. Stretch widens the input about note 60
+  # before the lag, so that the keys spread out while a bend stays as it is.
   class Pitch
     # Lookup table for exponential time mapping, the envelope's: a twelfth of an octave per index,
     # so one CC step of the 120-step control range moves the time by a semitone and the whole dial
@@ -27,15 +24,10 @@ module Spms1
     # the table's lowest entry: value at 0.0 / (EXP_TABLE min * 10 * ln(2)).
     TIME_BASE = 0.010 / ((1.0 / 32.0) * 10 * Math::log(2))
 
-    # Bend Amt and Pol are smoothed as every other module's depths are: two stages at this blend,
+    # Bend Amt is smoothed as every other module's depths are: two stages at this blend,
     # updated every CONTROL_RATE_DIVISOR samples. See Amp for both.
     SMOOTHING_TARGET_BLEND_BASE = 0.015625
     CONTROL_RATE_DIVISOR = 4
-
-    # Coarse and Fine's ranges, the oscillator's Pitch Coarse and Fine's: 60 semitones and 60 cents
-    # either way, in the pitch domain's units, where 120 semitones are one.
-    COARSE_RANGE = 60.0 / 120.0
-    FINE_RANGE   = 0.6 / 120.0
 
     def initialize(sample_rate)
       @sample_rate = sample_rate
@@ -49,14 +41,9 @@ module Spms1
       @distance = 0.0
       @last_input = 0.0
       @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (48000.0 / @sample_rate) * (CONTROL_RATE_DIVISOR / 4.0)
-      @bend_amount = 0.0
-      @bend_polarity = 1.0
       @bend_depth = 0.0
       @stage_1_bend_depth = 0.0
       @current_bend_depth = 0.0
-      @coarse = 0.0
-      @fine = 0.0
-      @offset = 0.0
       @stretch = 0.0
       @stretch_factor = 1.0
       @stage_1_stretch_factor = 1.0
@@ -84,35 +71,12 @@ module Spms1
       @blend = (@glide_on > 0.0) ? @glide_blend : 1.0
     end
 
-    # The depth of Bend In is amount times polarity, as a modulation depth is. Amount is unipolar,
-    # [0.0, 1.0], and at 1.0 Bend In is added as it arrives; polarity is bipolar, [-0.5, 0.5], and
-    # doubled, so +0.5 leaves the amount as it is and -0.5 negates it. Pitch Bend is one unit across
-    # the wheel, the pitch range's whole width, so the bend range is the amount times 60 semitones
-    # either way: half a semitone a CC step, and 2 semitones at CC 8.
+    # Bend Amt is unipolar, [0.0, 1.0], the depth of Bend In: at 1.0 Bend In is added as it
+    # arrives. Pitch Bend is one unit across the wheel, the pitch range's whole width, so the bend
+    # range is the amount times 60 semitones either way: half a semitone a CC step, and 2 semitones
+    # at CC 8.
     def set_bend_amount(amount)
-      @bend_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
-      @bend_depth = @bend_amount * @bend_polarity
-    end
-
-    def set_bend_polarity(polarity)
-      clamped_polarity = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
-      @bend_polarity = clamped_polarity + clamped_polarity
-      @bend_depth = @bend_amount * @bend_polarity
-    end
-
-    # Coarse and Fine are bipolar, [-0.5, 0.5], 0.0 at a controller's centre detent,
-    # and linear about it, so every step lands on a whole semitone or a whole cent, as the
-    # oscillator's Pitch Coarse and Fine do. Not smoothed, for the reasons the oscillator gives.
-    def set_coarse(coarse)
-      clamped = (coarse < -0.5) ? -0.5 : ((coarse > 0.5) ? 0.5 : coarse)
-      @coarse = (clamped + clamped) * COARSE_RANGE
-      @offset = @coarse + @fine
-    end
-
-    def set_fine(fine)
-      clamped = (fine < -0.5) ? -0.5 : ((fine > 0.5) ? 0.5 : fine)
-      @fine = (clamped + clamped) * FINE_RANGE
-      @offset = @coarse + @fine
+      @bend_depth = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
     end
 
     # Stretch is unipolar, [0.0, 1.0], and multiplies the input, whose 0.0 is note 60, by 1 plus a
@@ -142,8 +106,8 @@ module Spms1
     # share each sample, it would otherwise sink into denormals and stick at the smallest one,
     # which x86 computes slowly.
     #
-    # Bend In and the offset are added last, so that the lag never holds them, and so that at
-    # zero they leave the output as it was, bit for bit.
+    # Bend In is added last, so that the lag never holds it, and so that at zero it leaves the
+    # output as it was, bit for bit.
     #
     # The output is held to -1.0 to +1.0, as a mixer's is: twice the pitch range, so whatever
     # the oscillator and the filter clamp to their own range is still reached at either end.
@@ -161,7 +125,7 @@ module Spms1
       @last_input = stretched
       flushed = Dsp.flush_tiny(distance)
       @distance = flushed - flushed * @blend
-      output = ((stretched + @distance) + (bend_input * @current_bend_depth)) + @offset
+      output = (stretched + @distance) + (bend_input * @current_bend_depth)
       (output < -1.0) ? -1.0 : ((output > 1.0) ? 1.0 : output)
     end
 
