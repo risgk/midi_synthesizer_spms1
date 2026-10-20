@@ -6,7 +6,7 @@ module Spms1
   # takes the aliases at 220 Hz from -69 dB to -81 dB, in total against the signal. The square is
   # the triangle's sign, with each step rounded off by PolyBLEP, and puts out both at once, each on
   # an output of its own, with Out, which process returns, crossfading from one to the other by
-  # Wave, and Out Inv, Out negated.
+  # Wave. Each of the three has an inverted output beside it, the same negated.
   class LFO
     # Blend at the reference rate on the line below, for each of two cascaded stages. The two move
     # together: their product is what fixes the time constant, so changing one without the other
@@ -196,6 +196,15 @@ module Spms1
 
     def output_square
       @output_square
+    end
+
+    # Out Triangle Inv and Out Square Inv: the triangle and the square, negated.
+    def output_triangle_inverted
+      -@output_triangle
+    end
+
+    def output_square_inverted
+      -@output_square
     end
 
     private
