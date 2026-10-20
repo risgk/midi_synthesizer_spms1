@@ -50,8 +50,7 @@ module Spms1
       @level_3 = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
     end
 
-    # Out Pol is bipolar, [-0.5, 0.5], and doubled into a multiplier on the sum, as a polarity
-    # is: +0.5 passes the sum through, -0.5 negates it, and the way between scales it, crossing
+    # Out Pol is bipolar, [-0.5, 0.5], and doubled into a multiplier on the sum: +0.5 passes the sum through, -0.5 negates it, and the way between scales it, crossing
     # silence at 0.0. So one control can take a blend of two sources up and down together, or turn
     # it over. It is applied before the sum is held to its range, so it can also bring a sum that
     # would have been clipped back inside it.

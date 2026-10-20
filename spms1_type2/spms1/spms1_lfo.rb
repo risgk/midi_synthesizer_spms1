@@ -46,17 +46,12 @@ module Spms1
       @amount = 1.0
       @stage_1_amount = 1.0
       @current_amount = 1.0
-      # Modulation depth is amount times polarity, as the other modules' are, multiplied before
-      # smoothing so that only one smoothing state has to be carried.
-      @rate_modulation_amount = 1.0
-      @rate_modulation_polarity = 1.0
+      # Each modulation depth is its amount, smoothed as the other modules' are.
       @rate_modulation_depth = 1.0
       @stage_1_rate_modulation_depth = 1.0
       @current_rate_modulation_depth = 1.0
       # The level's modulation depth likewise. The level and what Level Mod In adds to it are
       # summed and held to [0.0, 1.0] at each control-rate step.
-      @level_modulation_amount = 1.0
-      @level_modulation_polarity = 1.0
       @level_modulation_depth = 1.0
       @stage_1_level_modulation_depth = 1.0
       @current_level_modulation_depth = 1.0
@@ -81,38 +76,23 @@ module Spms1
       @rate = (rate < 0.0) ? 0.0 : ((rate > 1.0) ? 1.0 : rate)
     end
 
-    # Rate Mod depth is amount times polarity. Amount is unipolar, [0.0, 1.0]. Polarity is
-    # bipolar, [-0.5, 0.5], and doubled, so +0.5 leaves the amount as it is, -0.5 negates it and
-    # the way between scales it, crossing zero. A unit of modulation input times depth is the
-    # whole rate range, ten octaves, so at full depth a bipolar source swings the rate five octaves
-    # either way.
+    # Rate Mod Amt is unipolar, [0.0, 1.0], the depth of Rate Mod In. A unit of modulation input
+    # times depth is the whole rate range, ten octaves, so at full depth a bipolar source swings the
+    # rate five octaves either way. A modulation the other way up takes an inverted source.
     def set_rate_modulation_amount(amount)
-      @rate_modulation_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
-      @rate_modulation_depth = @rate_modulation_amount * @rate_modulation_polarity
+      @rate_modulation_depth = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
     end
 
-    def set_rate_modulation_polarity(polarity)
-      clamped_polarity = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
-      @rate_modulation_polarity = clamped_polarity + clamped_polarity
-      @rate_modulation_depth = @rate_modulation_amount * @rate_modulation_polarity
-    end
-
-    # Level Mod depth is amount times polarity in the same way. A unit of Level Mod In times depth
-    # is the whole level, so the mod wheel at its top adds a full level at full depth.
+    # Level Mod Amt is unipolar, [0.0, 1.0], the depth of Level Mod In, in the same way. A unit of
+    # Level Mod In times depth is the whole level, so the mod wheel at its top adds a full level at
+    # full depth.
     def set_level_modulation_amount(amount)
-      @level_modulation_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
-      @level_modulation_depth = @level_modulation_amount * @level_modulation_polarity
-    end
-
-    def set_level_modulation_polarity(polarity)
-      clamped_polarity = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
-      @level_modulation_polarity = clamped_polarity + clamped_polarity
-      @level_modulation_depth = @level_modulation_amount * @level_modulation_polarity
+      @level_modulation_depth = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
     end
 
     # The output is scaled by level, unipolar, [0.0, 1.0], a plain multiplier, so a destination
     # can take the LFO at less than full scale without a mixer in between. Turning it the other
-    # way up is for the destination's own Mod Pol, or a mixer's Pol.
+    # way up is for Out Inv, or a mixer's Out Pol.
     def set_level(level)
       @level = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
       @amount = @level
