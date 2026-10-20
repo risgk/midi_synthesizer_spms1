@@ -544,7 +544,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_CUTOFF      , 100)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_PITCH_AMT   , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_MOD_MIX     , 4)
-  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_MOD_AMT     , 76)
+  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_MOD_AMT     , 28)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_RESONANCE   , 94)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_MODE        , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_AMP_1_GAIN           , 124)
@@ -586,7 +586,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 74 , 100) # Filter 1 Cutoff
   C.set_midi_cc_value(midi_ch, 9  , 4  ) # Filter 1 Pitch Amt
   C.set_midi_cc_value(midi_ch, 25 , 4  ) # Filter 1 Mod 1/2 Mix
-  C.set_midi_cc_value(midi_ch, 117, 76 ) # Filter 1 Mod Amt
+  C.set_midi_cc_value(midi_ch, 117, 28 ) # Filter 1 Mod Amt
   C.set_midi_cc_value(midi_ch, 71 , 94 ) # Filter 1 Resonance
   C.set_midi_cc_value(midi_ch, 39 , 4  ) # Filter 1 Mode
   C.set_midi_cc_value(midi_ch, 15 , 124) # Amp 1 Gain

@@ -586,8 +586,8 @@ slot takes the same range. A unipolar one
 runs 0.0 to 1.0 from CC 4 to CC 124, the span of an envelope, so an envelope pointed at one sweeps
 the whole of its dial. A bipolar one runs -0.5 to +0.5 with CC 64 at 0.0, the span of an LFO, so a
 bipolar source pointed at one swings it about the middle. Osc 1 Pitch Coarse and Fine are
-bipolar, since their middle is no change at all, and so are the mixers' Out Pols, LFO 1's two Mod Pols and Filter 1 Mod
-Amt, since their sign is
+bipolar, since their middle is no change at all, and so are the mixers' Out Pols and LFO 1's two Mod Pols, since their
+sign is
 what it sets. Pointing a parameter at a
 slot on the bus is what makes a modulation. No input or other
 parameter can read a parameter's control slot: a CC meant for more than one parameter, or for a
@@ -663,7 +663,7 @@ LFO 1 Level scales the LFO's outputs, as a mixer's Level scales its input: from 
 it is. LFO 1 Level Mod In adds to it, held to the same range, by Level Mod Amt times Level Mod
 Pol, and it takes General Mod Wheel by default at a depth of 1.0 (neither has a CC; they hold 1.0
 and +0.5). With Level turned down, the wheel brings the LFO in, up to full at its top. Turning the LFO the
-other way up is for Out Inv, Out negated, or for Filter 1 Mod Amt on the cutoff. The default patch
+other way up is for Out Inv, Out negated, or for a mixer's Out Pol. The default patch
 leaves Out Inv unrouted.
 
 LFO 1 Rate Mod In moves the rate by LFO 1 Rate Mod Amt times Rate Mod Pol, as Osc 1 Mod 2 In moves the
@@ -676,7 +676,7 @@ where the LFO works out its rate, rather than every sample as most module inputs
 EG 1 Level scales the envelope's output the same way, over the same range. It has no CC, and
 holds 1.0, which passes the envelope through as it is. The
 envelope runs one way, 0.0 to 1.0; turning it the other way up is for Out Inv, the envelope
-negated, from 0.0 down to -1.0, or for Filter 1 Mod Amt on the cutoff. The default patch leaves
+negated, from 0.0 down to -1.0, or for a mixer's Out Pol. The default patch leaves
 Out Inv unrouted.
 
 EG 1 Release Switch picks the release, after the note's gate falls: on from a value of 64, as a
@@ -760,11 +760,10 @@ Filter 1 crossfades its two modulations by Mod 1/2 Mix, as Osc 1 does, and the m
 cutoff by Mod Amt, as Osc 1 PW Mod Amt moves the pulse width. Mod 1/2 Mix is on CC 25 and
 powers up at -0.5 (CC 4), the envelope alone; CC 64 takes half of each and CC 124 the LFO alone.
 A unit of the mix is the whole cutoff range, so with Mod Amt at the top the LFO alone
-swings the cutoff five octaves either way. Mod Amt is bipolar, doubled, so it sets the
-direction too: it is on CC 117 and powers up at +0.1 (CC 76), where 0.2 of the mix is added;
-CC 124 adds the mix as it is, CC 64 leaves the cutoff at Filter 1 Cutoff and the keyboard
-tracking, and CC 4 takes the mix off, so the envelope closes the filter as it rises. One dial
-scales the envelope and the LFO together.
+swings the cutoff five octaves either way. Mod Amt is unipolar: it is on CC 117 and powers up at
+0.2 (CC 28); CC 124 adds the mix as it is, and CC 4 leaves the cutoff at Filter 1 Cutoff and the
+keyboard tracking. One dial scales the envelope and the LFO together. An envelope that closes the
+filter as it rises is EG 1 Out Inv on Mod 1 In.
 Pitch In, the keyboard tracking, is added on its own by Pitch Amt (CC 9), outside the
 sum, as an oscillator's Pitch In is outside its Pitch Mod Amt: unipolar, a semitone for a
 semitone at the top, unmoved at note 60.
@@ -880,10 +879,11 @@ takes the output to the input at once, mid-glide too, as Glide at 0.0 does.
   the envelope negated, on the oscillator's Mod 1 input. With CC 8 at the top and CC 13 at CC 4,
   the envelope alone, the note starts two octaves flat, and with CC 30 (Sustain) turned down it
   rises back to pitch with the decay
-- A CC that closes the filter as it rises: CC 99 = 1, CC 98 = 20, CC 6 = 9 puts General Unipolar
-  1 (CC 16) on the filter's Mod 2 input in the LFO's place. With CC 25 at CC 124 the mix takes it
-  alone, and CC 117 = 4 takes the mix off the cutoff, so CC 16 closes the filter from Filter 1
-  Cutoff down
+- A CC that closes the filter as it rises, turned over by Mixer 1: CC 99 = 1, CC 98 = 3, CC 6 = 9
+  puts General Unipolar 1 (CC 16) on the mixer's first input, and CC 118 up to CC 124 passes it.
+  CC 99 = 4, CC 98 = 15, CC 6 = 4 sets the mixer's Out Pol to -0.5, which negates it, and CC 99 =
+  1, CC 98 = 20, CC 6 = 23 puts the mixer on the filter's Mod 2 input in the LFO's place. With
+  CC 25 and CC 117 at CC 124, CC 16 closes the filter from Filter 1 Cutoff down
 - Take the filter out of the chain: CC 99 = 1, CC 98 = 21, CC 6 = 34 points the amp's audio input
   at Mixer 2. The filter keeps running and keeps its slot; nothing reads it
 - Echoes that only come in with the mod wheel: CC 99 = 2, CC 98 = 53, CC 6 = 8 takes Delay 1 Mix

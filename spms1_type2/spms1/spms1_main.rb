@@ -359,7 +359,7 @@ while true
   cc_filter_1_mod_mix = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_MOD_MIX)
   signals[SLOT_FILTER_1_MOD_MIX] = cc_to_bipolar(cc_or_nrpn(cc_filter_1_mod_mix, C.get_midi_cc_value(MIDI_CH, cc_filter_1_mod_mix), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_FILTER_1_MOD_MIX)))
   cc_filter_1_mod_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_MOD_AMT)
-  signals[SLOT_FILTER_1_MOD_AMT] = cc_to_bipolar(cc_or_nrpn(cc_filter_1_mod_amt, C.get_midi_cc_value(MIDI_CH, cc_filter_1_mod_amt), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_FILTER_1_MOD_AMT)))
+  signals[SLOT_FILTER_1_MOD_AMT] = cc_to_unipolar(cc_or_nrpn(cc_filter_1_mod_amt, C.get_midi_cc_value(MIDI_CH, cc_filter_1_mod_amt), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_FILTER_1_MOD_AMT)))
   cc_filter_1_resonance = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_RESONANCE)
   signals[SLOT_FILTER_1_RESONANCE] = cc_to_unipolar(cc_or_nrpn(cc_filter_1_resonance, C.get_midi_cc_value(MIDI_CH, cc_filter_1_resonance), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_FILTER_1_RESONANCE)))
   cc_filter_1_mode = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_MODE)

@@ -220,7 +220,7 @@ module Spms1
       update_coefficients
     end
 
-    # Every parameter but Mod 1/2 Mix and Mod Amt is unipolar, [0.0, 1.0], which is what the
+    # Every parameter but Mod 1/2 Mix is unipolar, [0.0, 1.0], which is what the
     # smoothing, the modulation sum and the table lookups below are written against.
     # Cutoff range: MIDI note 15 (19 Hz) at 0.0, MIDI note 75 (622 Hz) at 0.5, MIDI note 135 (20 kHz) at 1.0.
     def set_cutoff(cutoff)
@@ -246,13 +246,11 @@ module Spms1
       @pitch_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
     end
 
-    # Mod Amt is bipolar, [-0.5, 0.5], and doubled, as a polarity is: how far, and which
-    # way, the sum of the two modulations moves the cutoff. At +0.5 the sum is added as it is, at
-    # 0.0 the cutoff is left at Cutoff, and at -0.5 the sum is taken off it, closing the filter
-    # as the envelope rises.
+    # Mod Amt is unipolar, [0.0, 1.0], a plain multiplier on the mix of the two modulations: how
+    # far it moves the cutoff. At 1.0 the mix is added as it is, and at 0.0 the cutoff is left at
+    # Cutoff. A modulation that closes the filter takes an inverted source, such as EG 1 Out Inv.
     def set_modulation_amount(amount)
-      clamped_amount = (amount < -0.5) ? -0.5 : ((amount > 0.5) ? 0.5 : amount)
-      @modulation_amount = clamped_amount + clamped_amount
+      @modulation_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
     end
 
     # How hard the audio input drives the filter, used as a plain multiplier. It sits on the input
