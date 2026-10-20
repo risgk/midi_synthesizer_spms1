@@ -218,16 +218,16 @@ controls:
   - { entry: 2, module: EG_1,      key: SUSTAIN,      label: Sustain,      cc: 30,  value: 124, set: set_sustain }
   - { entry: 3, module: EG_1,      key: RELEASE_SW,   label: Release Switch, cc: 0,   value: 124, set: set_release_switch }
   - { entry: 4, module: EG_1,      key: LEVEL,        label: Level,        cc: 0,   value: 124, set: set_level }
-  # LFO 1 in the editor: the rate and its modulation, the waveform, then the level and its
+  # LFO 1 in the editor: the waveform, the rate and its modulation, then the level and its
   # modulation. Wave crossfades Out from the triangle (0.0) to the square (1.0), on CC 33, LFO
   # Wave's in PRA32-U2, and powers up at CC 4, 0.0, the triangle. Each modulation's Amt, listed
   # after what it moves, has no CC and holds 1.0, a depth of 1.0. Rate Mod In is left unrouted, so
   # routing a source to it is enough; Level Mod In takes the mod wheel, which adds to Level
   # (CC 113) up to its top. Level powers up at CC 4, 0.0, so the LFO is still until the wheel
   # moves.
-  - { entry: 5, module: LFO_1,     key: RATE,         label: Rate,         cc: 3,   value: 64, set: set_rate }
-  - { entry: 6, module: LFO_1,     key: RATE_MOD_AMT, label: Rate Mod Amt, cc: 0,   value: 124, set: set_rate_modulation_amount }
-  - { entry: 7, module: LFO_1,     key: WAVE,         label: Wave,         cc: 33,  value: 4, set: set_wave }
+  - { entry: 5, module: LFO_1,     key: WAVE,         label: Wave,         cc: 33,  value: 4, set: set_wave }
+  - { entry: 6, module: LFO_1,     key: RATE,         label: Rate,         cc: 3,   value: 64, set: set_rate }
+  - { entry: 7, module: LFO_1,     key: RATE_MOD_AMT, label: Rate Mod Amt, cc: 0,   value: 124, set: set_rate_modulation_amount }
   - { entry: 8, module: LFO_1,     key: LEVEL,        label: Level,        cc: 113, value: 4, set: set_level }
   - { entry: 9, module: LFO_1,     key: LEVEL_MOD_AMT, label: Level Mod Amt, cc: 0,  value: 124, set: set_level_modulation_amount }
   # Mixer 1: nothing has a CC; the levels hold 0.0, as the mixer has nothing on its inputs yet,
@@ -246,8 +246,8 @@ controls:
   - { entry: 16, module: PITCH_1,   key: GLIDE_SW,     label: Glide Switch, cc: 0,  value: 124, set: set_glide_switch }
   - { entry: 17, module: PITCH_1,    key: STRETCH, label: Stretch, cc: 22,  value: 4, set: set_stretch }
   - { entry: 18, module: PITCH_1,    key: BEND_AMT,  label: Bend Amt,   cc: 57,  value: 8, set: set_bend_amount }
-  # Osc 1 in the editor: the pitch, how far each modulation moves it and what the top of that is
-  # worth, then the waveform, the pulse width and how far each modulation moves it. Pitch Coarse
+  # Osc 1 in the editor: the waveform, the pitch, how far each modulation moves it and what the
+  # top of that is worth, then the pulse width and how far each modulation moves it. Pitch Coarse
   # and Fine have no CC and stay at 0.0. Mod 1 In takes the envelope and Mod 2 In the LFO, and
   # every depth is unipolar: a modulation runs the way its source does, and one the other way up
   # takes an inverted source, such as EG 1 Out Inv. Pitch Mod 1 Amt and Pitch Mod 2 Amt are on
@@ -258,12 +258,12 @@ controls:
   # of a Pitch Mod Amt, which brings the LFO down to a vibrato depth and the envelope to two
   # octaves; a step of a Pitch Mod Amt is then 10 cents of the LFO. Wave is on
   # CC 102 and powers up at the saw. PW is bipolar and powers up at CC 64, 0.0, a pulse of 50%.
-  - { entry: 19, module: OSC_1,     key: PITCH_COARSE,  label: Pitch Coarse,  cc: 0,   value: 64, bipolar: true, set: set_pitch_coarse }
-  - { entry: 20, module: OSC_1,     key: PITCH_FINE,    label: Pitch Fine,    cc: 0,   value: 64, bipolar: true, set: set_pitch_fine }
-  - { entry: 21, module: OSC_1,     key: PITCH_MOD_1_AMT, label: Pitch Mod 1 Amt, cc: 89, value: 4, set: set_pitch_modulation_1_amount }
-  - { entry: 22, module: OSC_1,     key: PITCH_MOD_2_AMT, label: Pitch Mod 2 Amt, cc: 13, value: 9, set: set_pitch_modulation_2_amount }
-  - { entry: 23, module: OSC_1,     key: PITCH_MOD_RANGE, label: Pitch Mod Range, cc: 0, value: 28, set: set_pitch_modulation_range }
-  - { entry: 24, module: OSC_1,     key: WAVE,     label: Wave,         cc: 102, value: 4, set: set_waveform }
+  - { entry: 19, module: OSC_1,     key: WAVE,     label: Wave,         cc: 102, value: 4, set: set_waveform }
+  - { entry: 20, module: OSC_1,     key: PITCH_COARSE,  label: Pitch Coarse,  cc: 0,   value: 64, bipolar: true, set: set_pitch_coarse }
+  - { entry: 21, module: OSC_1,     key: PITCH_FINE,    label: Pitch Fine,    cc: 0,   value: 64, bipolar: true, set: set_pitch_fine }
+  - { entry: 22, module: OSC_1,     key: PITCH_MOD_1_AMT, label: Pitch Mod 1 Amt, cc: 89, value: 4, set: set_pitch_modulation_1_amount }
+  - { entry: 23, module: OSC_1,     key: PITCH_MOD_2_AMT, label: Pitch Mod 2 Amt, cc: 13, value: 9, set: set_pitch_modulation_2_amount }
+  - { entry: 24, module: OSC_1,     key: PITCH_MOD_RANGE, label: Pitch Mod Range, cc: 0, value: 28, set: set_pitch_modulation_range }
   - { entry: 25, module: OSC_1,     key: PW,           label: PW,  cc: 114, value: 64, bipolar: true, set: set_pulse_width }
   - { entry: 26, module: OSC_1,     key: PW_MOD_1_AMT, label: PW Mod 1 Amt,  cc: 8,   value: 4, set: set_pw_modulation_1_amount }
   - { entry: 27, module: OSC_1,     key: PW_MOD_2_AMT, label: PW Mod 2 Amt,  cc: 103, value: 4, set: set_pw_modulation_2_amount }
@@ -274,12 +274,12 @@ controls:
   # so one CC moves both oscillators, and Pitch Mod Range holds the
   # value Osc 1's does. Osc 2 is heard through Mixer 2 Level 2 (CC 21), which powers up at 0.7, as
   # Level 1 does for Osc 1.
-  - { entry: 28, module: OSC_2,     key: PITCH_COARSE,  label: Pitch Coarse,  cc: 85,  value: 64, bipolar: true, set: set_pitch_coarse }
-  - { entry: 29, module: OSC_2,     key: PITCH_FINE,    label: Pitch Fine,    cc: 76,  value: 76, bipolar: true, set: set_pitch_fine }
-  - { entry: 30, module: OSC_2,     key: PITCH_MOD_1_AMT, label: Pitch Mod 1 Amt, cc: 89, value: 4, set: set_pitch_modulation_1_amount }
-  - { entry: 31, module: OSC_2,     key: PITCH_MOD_2_AMT, label: Pitch Mod 2 Amt, cc: 13, value: 9, set: set_pitch_modulation_2_amount }
-  - { entry: 32, module: OSC_2,     key: PITCH_MOD_RANGE, label: Pitch Mod Range, cc: 0, value: 28, set: set_pitch_modulation_range }
-  - { entry: 33, module: OSC_2,     key: WAVE,     label: Wave,         cc: 104, value: 4, set: set_waveform }
+  - { entry: 28, module: OSC_2,     key: WAVE,     label: Wave,         cc: 104, value: 4, set: set_waveform }
+  - { entry: 29, module: OSC_2,     key: PITCH_COARSE,  label: Pitch Coarse,  cc: 85,  value: 64, bipolar: true, set: set_pitch_coarse }
+  - { entry: 30, module: OSC_2,     key: PITCH_FINE,    label: Pitch Fine,    cc: 76,  value: 76, bipolar: true, set: set_pitch_fine }
+  - { entry: 31, module: OSC_2,     key: PITCH_MOD_1_AMT, label: Pitch Mod 1 Amt, cc: 89, value: 4, set: set_pitch_modulation_1_amount }
+  - { entry: 32, module: OSC_2,     key: PITCH_MOD_2_AMT, label: Pitch Mod 2 Amt, cc: 13, value: 9, set: set_pitch_modulation_2_amount }
+  - { entry: 33, module: OSC_2,     key: PITCH_MOD_RANGE, label: Pitch Mod Range, cc: 0, value: 28, set: set_pitch_modulation_range }
   - { entry: 34, module: OSC_2,     key: PW,           label: PW,  cc: 114, value: 64, bipolar: true, set: set_pulse_width }
   - { entry: 35, module: OSC_2,     key: PW_MOD_1_AMT, label: PW Mod 1 Amt,  cc: 8,   value: 4, set: set_pw_modulation_1_amount }
   - { entry: 36, module: OSC_2,     key: PW_MOD_2_AMT, label: PW Mod 2 Amt,  cc: 103, value: 4, set: set_pw_modulation_2_amount }
@@ -300,8 +300,8 @@ controls:
   - { entry: 41, module: MIXER_2,   key: LEVEL_3,      label: Level 3,      cc: 23,  value: 4, set: set_level_3 }
   - { entry: 42, module: MIXER_2,   key: LEVEL_4,      label: Level 4,      cc: 0,   value: 4, set: set_level_4 }
   - { entry: 43, module: MIXER_2,   key: OUT_LEVEL,  label: Out Level,  cc: 0,   value: 64, set: set_out_level }
-  # Filter 1 in the editor: the cutoff, its keyboard tracking and its two modulations, then
-  # the resonance and Mode. Pitch In takes the pitch from Pitch 1, as Osc 1 Pitch In does, and
+  # Filter 1 in the editor: Mode, the cutoff, its keyboard tracking and its two modulations,
+  # then the resonance. Pitch In takes the pitch from Pitch 1, as Osc 1 Pitch In does, and
   # Pitch Amt (CC 9) at its top makes the cutoff follow the note a semitone for a
   # semitone, unmoved at note 60; it powers up at CC 4, 0.0, with the tracking off. Mod 1 Amt and
   # Mod 2 Amt, on CC 24 and 25, Filter EG Amt's and LFO Filter Amt's in PRA32-U2, are how far the
@@ -311,12 +311,12 @@ controls:
   # inverted source, such as EG 1 Out Inv. Mode crossfades Out from the low pass (0.0) through a
   # notch (0.5) to the high pass (1.0), on CC 39, Filter Mode's in PRA32-U2, and powers up at CC 4,
   # 0.0, the low pass.
-  - { entry: 44, module: FILTER_1,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 100, set: set_cutoff }
-  - { entry: 45, module: FILTER_1,  key: PITCH_AMT, label: Pitch Amt, cc: 9, value: 4, set: set_pitch_amount }
-  - { entry: 46, module: FILTER_1,  key: MOD_1_AMT,    label: Mod 1 Amt,    cc: 24,  value: 28, set: set_modulation_1_amount }
-  - { entry: 47, module: FILTER_1,  key: MOD_2_AMT,    label: Mod 2 Amt,    cc: 25,  value: 4, set: set_modulation_2_amount }
-  - { entry: 48, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 94, set: set_resonance }
-  - { entry: 49, module: FILTER_1,  key: MODE,         label: Mode,         cc: 39,  value: 4, set: set_mode }
+  - { entry: 44, module: FILTER_1,  key: MODE,         label: Mode,         cc: 39,  value: 4, set: set_mode }
+  - { entry: 45, module: FILTER_1,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 100, set: set_cutoff }
+  - { entry: 46, module: FILTER_1,  key: PITCH_AMT, label: Pitch Amt, cc: 9, value: 4, set: set_pitch_amount }
+  - { entry: 47, module: FILTER_1,  key: MOD_1_AMT,    label: Mod 1 Amt,    cc: 24,  value: 28, set: set_modulation_1_amount }
+  - { entry: 48, module: FILTER_1,  key: MOD_2_AMT,    label: Mod 2 Amt,    cc: 25,  value: 4, set: set_modulation_2_amount }
+  - { entry: 49, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 94, set: set_resonance }
   # Amp 1: Gain, on CC 15, Amp Gain's in PRA32-U2, is doubled, so it powers up at CC 64, a gain of
   # 1.0, and CC 124 brings the sound up by 6 dB; the amp holds its output to one unit.
   - { entry: 50, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 64, set: set_gain }

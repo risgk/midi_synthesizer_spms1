@@ -464,21 +464,21 @@ Level 4 は CC がなく 0.0 を保持するので、この入力は閉じた状
 
 | CC 98 | パラメータ | | CC 98 | パラメータ | | CC 98 | パラメータ |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | EG 1 Attack | | 19 | Osc 1 Pitch Coarse | | 38 | Noise 1 Level |
-| 1 | EG 1 Decay | | 20 | Osc 1 Pitch Fine | | 39 | Mixer 2 Level 1 |
-| 2 | EG 1 Sustain | | 21 | Osc 1 Pitch Mod 1 Amt | | 40 | Mixer 2 Level 2 |
-| 3 | EG 1 Release Switch | | 22 | Osc 1 Pitch Mod 2 Amt | | 41 | Mixer 2 Level 3 |
-| 4 | EG 1 Level | | 23 | Osc 1 Pitch Mod Range | | 42 | Mixer 2 Level 4 |
-| 5 | LFO 1 Rate | | 24 | Osc 1 Wave | | 43 | Mixer 2 Out Level |
-| 6 | LFO 1 Rate Mod Amt | | 25 | Osc 1 PW | | 44 | Filter 1 Cutoff |
-| 7 | LFO 1 Wave | | 26 | Osc 1 PW Mod 1 Amt | | 45 | Filter 1 Pitch Amt |
-| 8 | LFO 1 Level | | 27 | Osc 1 PW Mod 2 Amt | | 46 | Filter 1 Mod 1 Amt |
-| 9 | LFO 1 Level Mod Amt | | 28 | Osc 2 Pitch Coarse | | 47 | Filter 1 Mod 2 Amt |
-| 10 | Mixer 1 Level 1 | | 29 | Osc 2 Pitch Fine | | 48 | Filter 1 Resonance |
-| 11 | Mixer 1 Level 2 | | 30 | Osc 2 Pitch Mod 1 Amt | | 49 | Filter 1 Mode |
-| 12 | Mixer 1 Level 3 | | 31 | Osc 2 Pitch Mod 2 Amt | | 50 | Amp 1 Gain |
-| 13 | Mixer 1 Level 4 | | 32 | Osc 2 Pitch Mod Range | | 51 | Chorus 1 Mix |
-| 14 | Mixer 1 Out Level | | 33 | Osc 2 Wave | | 52 | Chorus 1 Rate |
+| 0 | EG 1 Attack | | 19 | Osc 1 Wave | | 38 | Noise 1 Level |
+| 1 | EG 1 Decay | | 20 | Osc 1 Pitch Coarse | | 39 | Mixer 2 Level 1 |
+| 2 | EG 1 Sustain | | 21 | Osc 1 Pitch Fine | | 40 | Mixer 2 Level 2 |
+| 3 | EG 1 Release Switch | | 22 | Osc 1 Pitch Mod 1 Amt | | 41 | Mixer 2 Level 3 |
+| 4 | EG 1 Level | | 23 | Osc 1 Pitch Mod 2 Amt | | 42 | Mixer 2 Level 4 |
+| 5 | LFO 1 Wave | | 24 | Osc 1 Pitch Mod Range | | 43 | Mixer 2 Out Level |
+| 6 | LFO 1 Rate | | 25 | Osc 1 PW | | 44 | Filter 1 Mode |
+| 7 | LFO 1 Rate Mod Amt | | 26 | Osc 1 PW Mod 1 Amt | | 45 | Filter 1 Cutoff |
+| 8 | LFO 1 Level | | 27 | Osc 1 PW Mod 2 Amt | | 46 | Filter 1 Pitch Amt |
+| 9 | LFO 1 Level Mod Amt | | 28 | Osc 2 Wave | | 47 | Filter 1 Mod 1 Amt |
+| 10 | Mixer 1 Level 1 | | 29 | Osc 2 Pitch Coarse | | 48 | Filter 1 Mod 2 Amt |
+| 11 | Mixer 1 Level 2 | | 30 | Osc 2 Pitch Fine | | 49 | Filter 1 Resonance |
+| 12 | Mixer 1 Level 3 | | 31 | Osc 2 Pitch Mod 1 Amt | | 50 | Amp 1 Gain |
+| 13 | Mixer 1 Level 4 | | 32 | Osc 2 Pitch Mod 2 Amt | | 51 | Chorus 1 Mix |
+| 14 | Mixer 1 Out Level | | 33 | Osc 2 Pitch Mod Range | | 52 | Chorus 1 Rate |
 | 15 | Pitch 1 Glide | | 34 | Osc 2 PW | | 53 | Chorus 1 Depth |
 | 16 | Pitch 1 Glide Switch | | 35 | Osc 2 PW Mod 1 Amt | | 54 | Delay 1 Mix |
 | 17 | Pitch 1 Stretch | | 36 | Osc 2 PW Mod 2 Amt | | 55 | Delay 1 Time |
@@ -801,12 +801,12 @@ Pitch 1 Glide はユニポーラで、1/120 刻み、1 ステップで時間が�
   LFO の代わりに Noise 1 のレッド出力をフィルタの Mod 2 入力に置きます。あとは CC 25 で量を決めます。CC 6 を 35 に
   すればホワイトになり、さらに細かく震えます。レッドはどのミキサーにも入っておらず、ホワイトも CC 23 を上げるまでは鳴らないので、
   どちらも音としては聞こえません
-- フィルタのカットオフを、自分の CC ではなくエンベロープで動かす: CC 99 = 2, CC 98 = 44, CC 6 = 17。
+- フィルタのカットオフを、自分の CC ではなくエンベロープで動かす: CC 99 = 2, CC 98 = 45, CC 6 = 17。
   エンベロープもカットオフもユニポーラなので、カットオフはつまみの下端から上端まで開きます
 - アンプのゲインとフィルタのカットオフで 1 つの CC を共有する: CC 99 = 3, CC 98 = 50, CC 6 = 74
 - エンベロープなしでアンプをフルレベルにする: CC 99 = 1, CC 98 = 24, CC 6 = 1
 - フィルタの Mod 1 入力を切り離し、エンベロープを外す: CC 99 = 1, CC 98 = 21, CC 6 = 0
-- より細かい、深さ 60 セントのピッチエンベロープ: CC 99 = 2, CC 98 = 20, CC 6 = 17 で Osc 1 Pitch Fine をエンベロープに
+- より細かい、深さ 60 セントのピッチエンベロープ: CC 99 = 2, CC 98 = 21, CC 6 = 17 で Osc 1 Pitch Fine をエンベロープに
   向けると、チューニングが元の音程から 60 セント高いところまで動き、エンベロープのピークの半分でそこに
   届きます
 - ノートの出だしでエンベロープがフィルタをより強く駆動する: CC 99 = 2, CC 98 = 43, CC 6 = 17 で、フィルタの

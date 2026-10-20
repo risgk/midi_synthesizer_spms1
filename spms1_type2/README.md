@@ -490,21 +490,21 @@ both at the same signal for a mono output.
 
 | CC 98 | Parameter | | CC 98 | Parameter | | CC 98 | Parameter |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | EG 1 Attack | | 19 | Osc 1 Pitch Coarse | | 38 | Noise 1 Level |
-| 1 | EG 1 Decay | | 20 | Osc 1 Pitch Fine | | 39 | Mixer 2 Level 1 |
-| 2 | EG 1 Sustain | | 21 | Osc 1 Pitch Mod 1 Amt | | 40 | Mixer 2 Level 2 |
-| 3 | EG 1 Release Switch | | 22 | Osc 1 Pitch Mod 2 Amt | | 41 | Mixer 2 Level 3 |
-| 4 | EG 1 Level | | 23 | Osc 1 Pitch Mod Range | | 42 | Mixer 2 Level 4 |
-| 5 | LFO 1 Rate | | 24 | Osc 1 Wave | | 43 | Mixer 2 Out Level |
-| 6 | LFO 1 Rate Mod Amt | | 25 | Osc 1 PW | | 44 | Filter 1 Cutoff |
-| 7 | LFO 1 Wave | | 26 | Osc 1 PW Mod 1 Amt | | 45 | Filter 1 Pitch Amt |
-| 8 | LFO 1 Level | | 27 | Osc 1 PW Mod 2 Amt | | 46 | Filter 1 Mod 1 Amt |
-| 9 | LFO 1 Level Mod Amt | | 28 | Osc 2 Pitch Coarse | | 47 | Filter 1 Mod 2 Amt |
-| 10 | Mixer 1 Level 1 | | 29 | Osc 2 Pitch Fine | | 48 | Filter 1 Resonance |
-| 11 | Mixer 1 Level 2 | | 30 | Osc 2 Pitch Mod 1 Amt | | 49 | Filter 1 Mode |
-| 12 | Mixer 1 Level 3 | | 31 | Osc 2 Pitch Mod 2 Amt | | 50 | Amp 1 Gain |
-| 13 | Mixer 1 Level 4 | | 32 | Osc 2 Pitch Mod Range | | 51 | Chorus 1 Mix |
-| 14 | Mixer 1 Out Level | | 33 | Osc 2 Wave | | 52 | Chorus 1 Rate |
+| 0 | EG 1 Attack | | 19 | Osc 1 Wave | | 38 | Noise 1 Level |
+| 1 | EG 1 Decay | | 20 | Osc 1 Pitch Coarse | | 39 | Mixer 2 Level 1 |
+| 2 | EG 1 Sustain | | 21 | Osc 1 Pitch Fine | | 40 | Mixer 2 Level 2 |
+| 3 | EG 1 Release Switch | | 22 | Osc 1 Pitch Mod 1 Amt | | 41 | Mixer 2 Level 3 |
+| 4 | EG 1 Level | | 23 | Osc 1 Pitch Mod 2 Amt | | 42 | Mixer 2 Level 4 |
+| 5 | LFO 1 Wave | | 24 | Osc 1 Pitch Mod Range | | 43 | Mixer 2 Out Level |
+| 6 | LFO 1 Rate | | 25 | Osc 1 PW | | 44 | Filter 1 Mode |
+| 7 | LFO 1 Rate Mod Amt | | 26 | Osc 1 PW Mod 1 Amt | | 45 | Filter 1 Cutoff |
+| 8 | LFO 1 Level | | 27 | Osc 1 PW Mod 2 Amt | | 46 | Filter 1 Pitch Amt |
+| 9 | LFO 1 Level Mod Amt | | 28 | Osc 2 Wave | | 47 | Filter 1 Mod 1 Amt |
+| 10 | Mixer 1 Level 1 | | 29 | Osc 2 Pitch Coarse | | 48 | Filter 1 Mod 2 Amt |
+| 11 | Mixer 1 Level 2 | | 30 | Osc 2 Pitch Fine | | 49 | Filter 1 Resonance |
+| 12 | Mixer 1 Level 3 | | 31 | Osc 2 Pitch Mod 1 Amt | | 50 | Amp 1 Gain |
+| 13 | Mixer 1 Level 4 | | 32 | Osc 2 Pitch Mod 2 Amt | | 51 | Chorus 1 Mix |
+| 14 | Mixer 1 Out Level | | 33 | Osc 2 Pitch Mod Range | | 52 | Chorus 1 Rate |
 | 15 | Pitch 1 Glide | | 34 | Osc 2 PW | | 53 | Chorus 1 Depth |
 | 16 | Pitch 1 Glide Switch | | 35 | Osc 2 PW Mod 1 Amt | | 54 | Delay 1 Mix |
 | 17 | Pitch 1 Stretch | | 36 | Osc 2 PW Mod 2 Amt | | 55 | Delay 1 Time |
@@ -861,13 +861,13 @@ takes the output to the input at once, mid-glide too, as Glide at 0.0 does.
   CC 6 = 36 puts Noise 1's red output on the filter's Mod 2 input in the LFO's place, and CC 25
   sets how much. CC 6 = 35 takes the white instead, finer still. The red is on no mixer, and the
   white is heard only once CC 23 brings it up, so neither is heard as well
-- Filter cutoff driven by the envelope instead of its CC: CC 99 = 2, CC 98 = 44, CC 6 = 17. The
+- Filter cutoff driven by the envelope instead of its CC: CC 99 = 2, CC 98 = 45, CC 6 = 17. The
   envelope and the cutoff are both unipolar, so it opens the cutoff from the bottom of its dial
   to the top
 - Amp gain and filter cutoff share one CC: CC 99 = 3, CC 98 = 50, CC 6 = 74
 - Amp at full level with no envelope: CC 99 = 1, CC 98 = 24, CC 6 = 1
 - Disconnect the filter's Mod 1 input, and with it the envelope: CC 99 = 1, CC 98 = 21, CC 6 = 0
-- A finer pitch envelope, 60 cents deep: CC 99 = 2, CC 98 = 20, CC 6 = 17 points Osc 1 Pitch Fine at the
+- A finer pitch envelope, 60 cents deep: CC 99 = 2, CC 98 = 21, CC 6 = 17 points Osc 1 Pitch Fine at the
   envelope, which then sweeps the tuning from in tune up to 60 cents sharp, reached at half the
   envelope's peak
 - The envelope drives the filter harder as a note starts: CC 99 = 2, CC 98 = 43, CC 6 = 17 takes
