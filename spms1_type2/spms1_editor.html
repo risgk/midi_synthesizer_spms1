@@ -180,11 +180,9 @@
       align-items: start;
       align-content: start;
     }
-    /* A slider row needs about 390px, so the last columns wrap under the first ones before then. */
+    /* A slider row needs about 390px, so below four of them the columns go two to a row, the last
+       two under the first two, rather than three to a row with the fourth left alone under them. */
     @media (max-width: 1640px) {
-      .editor-grid { grid-template-columns: 1fr 1fr 1fr; }
-    }
-    @media (max-width: 1240px) {
       .editor-grid { grid-template-columns: 1fr 1fr; }
     }
     @media (max-width: 768px) {
