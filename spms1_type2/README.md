@@ -5,7 +5,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.4
 - Controlled by MIDI as a sound module
 - Last-note priority with one note of memory: releasing the newest note while the one before it is still held goes back to that one, legato (for trills)
 - 48 kHz audio output: 24 bit through an I2S DAC, or PWM Audio (no DAC needed)
-- Oscillator: a sawtooth-to-square morph with pulse width (CC#114), and pulse width modulation (PWM) by the same two modulations as the pitch, the envelope and the LFO by default, on CC#8 and 103; and the sawtooth and the pulse on outputs of their own too
+- Oscillator: a sawtooth-to-square morph with pulse width (CC#114), and pulse width modulation (PWM) by the same two modulations as the pitch, the envelope and the LFO by default, on CC#8 and 103; and the sawtooth, the pulse and a sine sub an octave down on outputs of their own too
 - LFO: triangle (PolyBLAMP) and unipolar square (PolyBLEP), each on an output of its own, and a main output crossfading from one to the other (Wave, CC#33)
 - Filter: ZDF/TPT State Variable Filter (with a nonlinear leak on the band pass integrator, solved by the one-step Newton method), with low pass, high pass and band pass outputs and a main output crossfading from the low pass to the high pass through a notch (Mode, CC#39)
 - Chorus: mono in, stereo out, as a module in the run order
@@ -172,6 +172,7 @@ flowchart LR
 
   OSC -->|In 1| MIX2
   OSC2 -->|In 2| MIX2
+  OSC -->|In 3, Sub| MIX2
   NOISE -->|In 4| MIX2
   MIX2 --> FILTER
   FILTER --> AMP
@@ -225,10 +226,10 @@ Amt (CC#89) and PW Mod 1 Amt (CC#8) power up at 0.0, with it off. Each modulatio
 whole range of what it moves, so bringing a source down to a musical depth is left to the patch
 rather than built into the modules.
 
-Mixer 2 sums the audio ahead of the filter: Osc 1 on In 1, Osc 2 on In 2 and Noise 1's Out on In 4, each
-at its own level, with In 3 left open: Level 1 (CC#20) and Level 2 (CC#21) power up at 0.7, so the default patch
-plays both oscillators, about as loud together as one at full level, and Level 4 (CC#23) at 0.0,
-so the noise is silent until it is turned up. Osc 2 plays the note from Pitch 1 as Osc
+Mixer 2 sums the audio ahead of the filter: Osc 1 on In 1, Osc 2 on In 2, Osc 1's sub on In 3 and
+Noise 1's Out on In 4, each at its own level: Level 1 (CC#19) and Level 2 (CC#20) power up at 0.7, so the default patch
+plays both oscillators, about as loud together as one at full level, and Level 3 (CC#21) and
+Level 4 (CC#23) at 0.0, so the sub and the noise are silent until they are turned up. Osc 2 plays the note from Pitch 1 as Osc
 1 does, tuned against it by its own Pitch Coarse (CC#85) and Pitch Fine (CC#76), 12 cents sharp at
 power-up for a slow beat. Its Wave is its own as well, on CC#104 beside Osc 1's on CC#102. It
 follows Osc 1 in everything else: its Mod Amts and its PW are on Osc 1's CCs, so one CC moves
@@ -453,7 +454,7 @@ on first. The synth is built to keep time with every module running, so taking o
 order is never what makes a patch fit; to leave one out of the sound, route around it and let it
 run unread (see the examples below).
 Mixer 1 has no CC: its levels hold 0.0, so it is silent until a patch turns them up, as its
-category 4 values or by giving them CCs. Mixer 2 has a CC on each level, CC#20 to 23, of which
+category 4 values or by giving them CCs. Mixer 2 has a CC on each level, CC#19 to 21 and 23, of which
 Level 1 and 2 power up at 0.7 and Level 3 and 4 at 0.0, so those inputs start closed. Each mixer's Out Level has no CC and holds 0.5; Mixer 2's sets how hard the
 audio drives the filter.
 
@@ -569,20 +570,21 @@ the bus; see below.
 
 | ID | Signal | | ID | Signal | | ID | Signal |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | None (constant 0.0) | | 14 | LFO 1 Output Triangle ± | | 28 | Noise 1 Output Red ± |
-| 1 | Constant 1.0 | | 15 | LFO 1 Output Triangle Inv ± | | 29 | Mixer 2 Output ± |
-| 2 | Constant 0.5 | | 16 | LFO 1 Output Square | | 30 | Mixer 2 Output Inv ± |
-| 3 | Constant -0.5 | | 17 | LFO 1 Output Square Inv | | 31 | Filter 1 Output ± |
-| 4 | Constant -1.0 | | 18 | Mixer 1 Output ± | | 32 | Filter 1 Output LP ± |
-| 5 | Note Pitch ± | | 19 | Mixer 1 Output Inv ± | | 33 | Filter 1 Output HP ± |
-| 6 | Note Gate | | 20 | Osc 1 Output ± | | 34 | Filter 1 Output BP ± |
-| 7 | Pitch Bend ± | | 21 | Osc 1 Output Saw ± | | 35 | Amp 1 Output ± |
-| 8 | Mod Wheel | | 22 | Osc 1 Output Pulse ± | | 36 | Chorus 1 Output L ± |
-| 9 | Pitch 1 Output ± | | 23 | Osc 2 Output ± | | 37 | Chorus 1 Output R ± |
-| 10 | EG 1 Output | | 24 | Osc 2 Output Saw ± | | 38 | Chorus 1 Output Mono ± |
-| 11 | EG 1 Output Inv | | 25 | Osc 2 Output Pulse ± | | 39 | Delay 1 Output L ± |
-| 12 | LFO 1 Output ± | | 26 | Noise 1 Output ± | | 40 | Delay 1 Output R ± |
-| 13 | LFO 1 Output Inv ± | | 27 | Noise 1 Output White ± | | 41 | Delay 1 Output Mono ± |
+| 0 | None (constant 0.0) | | 15 | LFO 1 Output Triangle Inv ± | | 30 | Noise 1 Output Red ± |
+| 1 | Constant 1.0 | | 16 | LFO 1 Output Square | | 31 | Mixer 2 Output ± |
+| 2 | Constant 0.5 | | 17 | LFO 1 Output Square Inv | | 32 | Mixer 2 Output Inv ± |
+| 3 | Constant -0.5 | | 18 | Mixer 1 Output ± | | 33 | Filter 1 Output ± |
+| 4 | Constant -1.0 | | 19 | Mixer 1 Output Inv ± | | 34 | Filter 1 Output LP ± |
+| 5 | Note Pitch ± | | 20 | Osc 1 Output ± | | 35 | Filter 1 Output HP ± |
+| 6 | Note Gate | | 21 | Osc 1 Output Saw ± | | 36 | Filter 1 Output BP ± |
+| 7 | Pitch Bend ± | | 22 | Osc 1 Output Pulse ± | | 37 | Amp 1 Output ± |
+| 8 | Mod Wheel | | 23 | Osc 1 Output Sub ± | | 38 | Chorus 1 Output L ± |
+| 9 | Pitch 1 Output ± | | 24 | Osc 2 Output ± | | 39 | Chorus 1 Output R ± |
+| 10 | EG 1 Output | | 25 | Osc 2 Output Saw ± | | 40 | Chorus 1 Output Mono ± |
+| 11 | EG 1 Output Inv | | 26 | Osc 2 Output Pulse ± | | 41 | Delay 1 Output L ± |
+| 12 | LFO 1 Output ± | | 27 | Osc 2 Output Sub ± | | 42 | Delay 1 Output R ± |
+| 13 | LFO 1 Output Inv ± | | 28 | Noise 1 Output ± | | 43 | Delay 1 Output Mono ± |
+| 14 | LFO 1 Output Triangle ± | | 29 | Noise 1 Output White ± | |  |  |
 
 <!-- patch_gen end -->
 
@@ -738,6 +740,13 @@ Wave. Both run at the same level as Out, -0.5 to +0.5, and the default patch use
 mixer can take the two from one oscillator at levels of their own, or one oscillator can feed a
 saw to one place and a pulse to another.
 
+Each oscillator also puts out a sub, Out Sub: a sine an octave down, at the same level, -0.5 to
++0.5. It is locked to the oscillator's phase, starting each of its cycles where every other cycle
+of the sawtooth starts, so it follows the pitch, the glide and the modulation exactly. A sine has
+nothing to alias, so it is clean however high it goes. The default patch puts Osc 1's on Mixer 2
+In 3, whose Level 3 (CC#21) powers up at 0.0: turning it up brings the sub in under the note.
+Osc 2's is left unconnected.
+
 Noise 1 puts out two noises from one generator, at Noise 1 Level, each on an output of its own
 and the two crossfaded on Out. Out White is white noise,
 flat across the spectrum: from silence at 0.0 to noise filling -0.5 to +0.5 at 1.0, the
@@ -858,10 +867,10 @@ takes the output to the input at once, mid-glide too, as Glide at 0.0 does.
 - The LFO reaches the filter's Mod 2 input by default too, so CC#25 sweeps the cutoff with it, on
   top of the envelope on Mod 1
 - A second oscillator plays by default too, on Mixer 2's second input at the level of the first,
-  CC#20 and CC#21 both at 0.7, beating slowly against Osc 1 from the 12 cents of CC#76's power-up
-  value; CC#21 = 4 takes it out. CC#85 and 76 tune it: CC#85 = 76 an octave up, CC#85 = 71 a fifth, CC#76 = 64 in unison
+  CC#19 and CC#20 both at 0.7, beating slowly against Osc 1 from the 12 cents of CC#76's power-up
+  value; CC#20 = 4 takes it out. CC#85 and 76 tune it: CC#85 = 76 an octave up, CC#85 = 71 a fifth, CC#76 = 64 in unison
 - Noise is wired by default too, its Out on Mixer 2's fourth input beside the oscillators, so CC#23
-  brings it in under the note, at a level of 0.1 at value 16. CC#20 = 4 and CC#21 = 4 take the
+  brings it in under the note, at a level of 0.1 at value 16. CC#19 = 4 and CC#20 = 4 take the
   oscillators out, leaving the noise alone, through the filter. CC#115 (Color) turns it from
   white to red
 - Keyboard tracking is wired by default as well, the pitch from Pitch 1 on the filter's Pitch input,
@@ -870,15 +879,15 @@ takes the output to the input at once, mid-glide too, as Glide at 0.0 does.
 - The filter as a sine voice, playing its own oscillation in tune: CC#71 = 124 makes it oscillate,
   CC#9 = 124 has the cutoff follow the keys, and CC#74 = 49 puts it on note 60 at note 60, and so
   on the note played everywhere. CC#24 stays at value 4, where it powers up, keeping the envelope
-  off the cutoff, and CC#20 = 4 and CC#21 = 4 take the oscillators out,
+  off the cutoff, and CC#19 = 4 and CC#20 = 4 take the oscillators out,
   leaving the sine alone. It is within 5 cents of the note from middle C up, and 17 cents flat an octave below
 - A pitch envelope is wired by default too -- the envelope on the oscillator's Mod 1 input --
   so CC#89 (Osc 1 Pitch Mod 1 Amt) sets its depth: the note starts a semitone sharp at value 9, an
   octave at value 64 and two octaves at the top, and with CC#30 (Sustain) turned down it falls back
   to pitch with the decay
 - Noise as a modulation source, a random jitter of the cutoff: CC#99 = 1, CC#98 = 22,
-  CC#6 = 28 puts Noise 1's red output on the filter's Mod 2 input in the LFO's place, and CC#25
-  sets how much. CC#6 = 27 takes the white instead, finer still. The red is on no mixer, and the
+  CC#6 = 30 puts Noise 1's red output on the filter's Mod 2 input in the LFO's place, and CC#25
+  sets how much. CC#6 = 29 takes the white instead, finer still. The red is on no mixer, and the
   white is heard only once CC#23 brings it up, so neither is heard as well
 - Filter cutoff driven by the envelope instead of its CC: CC#99 = 2, CC#98 = 44, CC#6 = 10. The
   envelope and the cutoff are both unipolar, so it opens the cutoff from the bottom of its dial
@@ -909,18 +918,18 @@ takes the output to the input at once, mid-glide too, as Glide at 0.0 does.
   CC#6 = 8 puts Mod Wheel on the mixer's first input, and CC#99 = 4, CC#98 = 14, CC#6 =
   124 sets its Level 1 to 1.0, which passes it at half, the mixer's Out Level. CC#99 = 1, CC#98 = 22, CC#6 = 19 puts the mixer's Out Inv on the filter's Mod 2 input in the LFO's place. With
   CC#25 at value 124, the wheel closes the filter from Filter 1 Cutoff down, five octaves at its top
-- Take the filter out of the chain: CC#99 = 1, CC#98 = 23, CC#6 = 29 points the amp's audio input
+- Take the filter out of the chain: CC#99 = 1, CC#98 = 23, CC#6 = 31 points the amp's audio input
   at Mixer 2. The filter keeps running and keeps its slot; nothing reads it
 - Echoes that only come in with the mod wheel: CC#99 = 2, CC#98 = 56, CC#6 = 8 takes Delay 1 Mix
   from Mod Wheel, which powers up at 0.0, so the output is dry until the wheel moves
 - Chorus that only comes in with the mod wheel: CC#99 = 2, CC#98 = 53, CC#6 = 8 takes Chorus 1
   Mix from Mod Wheel, so the output stays mono until the wheel moves
-- Leave the chorus out of the sound, keeping the delay: CC#99 = 1, CC#98 = 27 and 28, CC#6 = 35
+- Leave the chorus out of the sound, keeping the delay: CC#99 = 1, CC#98 = 27 and 28, CC#6 = 37
   feeds both sides of Delay 1 from the amp. The chorus keeps running and nothing reads it, and the
   output is then mono
 - Echoes ahead of the filter: CC#99 = 1, CC#98 = 27, CC#6 = 20 feeds Delay 1's left side from the
-  oscillator, CC#98 = 19, CC#6 = 39 feeds the filter from it, and CC#98 = 29 and 30, CC#6 = 36 and
-  37 points the final output at the chorus, which still takes the amp. The repeats then go
+  oscillator, CC#98 = 19, CC#6 = 41 feeds the filter from it, and CC#98 = 29 and 30, CC#6 = 38 and
+  39 points the final output at the chorus, which still takes the amp. The repeats then go
   through the filter and the amp's envelope as the note does, so they die away with it. Delay 1
   still runs after the filter, which reads it a sample late; for an echo that does not matter
 

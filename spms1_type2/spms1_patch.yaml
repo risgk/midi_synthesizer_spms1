@@ -65,14 +65,14 @@ modules:
 # Filter 1 Pitch In takes Pitch 1's pitch too, for keyboard tracking, but Filter 1 Pitch Amt
 # powers up at 0.0 and leaves it off until CC 9. Noise 1 runs after the oscillators, as it is mostly a sound of its own (a modulation taking
 # it is a sample late, which it does not hear), at full level: its Level has no CC and holds 1.0.
-# Mixer 2 runs after it, just ahead of the filter, which it feeds: Osc 1 on its In 1, Osc 2 on In 2
-# and the noise on In 4, leaving In 3 open. Its Level 1 and 2, on CC 20 and 21, power up at 0.7,
+# Mixer 2 runs after it, just ahead of the filter, which it feeds: Osc 1 on its In 1, Osc 2 on In 2,
+# Osc 1's sub on In 3 and the noise on In 4. Its Level 1 and 2, on CC 19 and 20, power up at 0.7,
 # so the two oscillators sound together about as loud as one at full level, and Level 4, on CC 23,
 # at 0.0, so the noise is silent until CC 23. Osc 2 plays the note from Pitch 1, as Osc 1 does, tuned by its own
 # Pitch Coarse and Fine (CC 85 and 76), 12 cents sharp at power-up, and has a Wave of its own on CC
 # 104 (Osc 1's on CC 102); it follows Osc 1 in everything else: each of its Mod Amts and its PW
 # are on Osc 1's CCs, so one CC moves both. Mixer 1 has no CC, its levels holding 0.0, so its
-# inputs start closed, and Mixer 2 Level 3, on CC 22, powers up at 0.0. Each mixer's Out Level has no
+# inputs start closed, and Mixer 2 Level 3, on CC 21, powers up at 0.0. Each mixer's Out Level has no
 # CC and holds 0.5, which keeps two full-scale signals and a third at half inside its range;
 # Mixer 2's also sets how hard the audio drives the filter. EG 1, LFO 1 and
 # the mixers each put out an inverted output as well, Out Inv, which the default patch leaves
@@ -135,28 +135,30 @@ signals:
   - { key: OSC_1_OUTPUT,       id: 20, module: OSC_1,    output: Out,    label: Osc 1 Output,       bipolar: true }
   - { key: OSC_1_OUTPUT_SAW,   id: 21, module: OSC_1, output: Out Saw,   label: Osc 1 Output Saw,   bipolar: true, get: output_saw }
   - { key: OSC_1_OUTPUT_PULSE, id: 22, module: OSC_1, output: Out Pulse, label: Osc 1 Output Pulse, bipolar: true, get: output_pulse }
-  - { key: OSC_2_OUTPUT,         id: 23, module: OSC_2,   output: Out,       label: Osc 2 Output,         bipolar: true }
-  - { key: OSC_2_OUTPUT_SAW,   id: 24, module: OSC_2, output: Out Saw,   label: Osc 2 Output Saw,   bipolar: true, get: output_saw }
-  - { key: OSC_2_OUTPUT_PULSE, id: 25, module: OSC_2, output: Out Pulse, label: Osc 2 Output Pulse, bipolar: true, get: output_pulse }
+  - { key: OSC_1_OUTPUT_SUB,   id: 23, module: OSC_1, output: Out Sub,   label: Osc 1 Output Sub,   bipolar: true, get: output_sub }
+  - { key: OSC_2_OUTPUT,         id: 24, module: OSC_2,   output: Out,       label: Osc 2 Output,         bipolar: true }
+  - { key: OSC_2_OUTPUT_SAW,   id: 25, module: OSC_2, output: Out Saw,   label: Osc 2 Output Saw,   bipolar: true, get: output_saw }
+  - { key: OSC_2_OUTPUT_PULSE, id: 26, module: OSC_2, output: Out Pulse, label: Osc 2 Output Pulse, bipolar: true, get: output_pulse }
+  - { key: OSC_2_OUTPUT_SUB,   id: 27, module: OSC_2, output: Out Sub,   label: Osc 2 Output Sub,   bipolar: true, get: output_sub }
   # Out is the white and the red crossfaded by Color.
-  - { key: NOISE_1_OUTPUT,       id: 26, module: NOISE_1, output: Out,       label: Noise 1 Output,       bipolar: true }
-  - { key: NOISE_1_OUTPUT_WHITE, id: 27, module: NOISE_1, output: Out White, label: Noise 1 Output White, bipolar: true, get: output_white }
-  - { key: NOISE_1_OUTPUT_RED,   id: 28, module: NOISE_1, output: Out Red,   label: Noise 1 Output Red,   bipolar: true, get: output_red }
-  - { key: MIXER_2_OUTPUT,       id: 29, module: MIXER_2, output: Out,      label: Mixer 2 Output,       bipolar: true }
-  - { key: MIXER_2_OUTPUT_INV,   id: 30, module: MIXER_2,  output: Out Inv, label: Mixer 2 Output Inv, bipolar: true, get: output_inverted }
+  - { key: NOISE_1_OUTPUT,       id: 28, module: NOISE_1, output: Out,       label: Noise 1 Output,       bipolar: true }
+  - { key: NOISE_1_OUTPUT_WHITE, id: 29, module: NOISE_1, output: Out White, label: Noise 1 Output White, bipolar: true, get: output_white }
+  - { key: NOISE_1_OUTPUT_RED,   id: 30, module: NOISE_1, output: Out Red,   label: Noise 1 Output Red,   bipolar: true, get: output_red }
+  - { key: MIXER_2_OUTPUT,       id: 31, module: MIXER_2, output: Out,      label: Mixer 2 Output,       bipolar: true }
+  - { key: MIXER_2_OUTPUT_INV,   id: 32, module: MIXER_2,  output: Out Inv, label: Mixer 2 Output Inv, bipolar: true, get: output_inverted }
   # Out is the low pass and the high pass crossfaded by Mode, through a notch.
-  - { key: FILTER_1_OUTPUT,    id: 31, module: FILTER_1, output: Out,    label: Filter 1 Output,    bipolar: true }
-  - { key: FILTER_1_OUTPUT_LP, id: 32, module: FILTER_1, output: Out LP, label: Filter 1 Output LP, bipolar: true, get: output_lp }
-  - { key: FILTER_1_OUTPUT_HP, id: 33, module: FILTER_1, output: Out HP, label: Filter 1 Output HP, bipolar: true, get: output_hp }
-  - { key: FILTER_1_OUTPUT_BP, id: 34, module: FILTER_1, output: Out BP, label: Filter 1 Output BP, bipolar: true, get: output_bp }
-  - { key: AMP_1_OUTPUT,       id: 35, module: AMP_1,    output: Out,    label: Amp 1 Output,       bipolar: true }
+  - { key: FILTER_1_OUTPUT,    id: 33, module: FILTER_1, output: Out,    label: Filter 1 Output,    bipolar: true }
+  - { key: FILTER_1_OUTPUT_LP, id: 34, module: FILTER_1, output: Out LP, label: Filter 1 Output LP, bipolar: true, get: output_lp }
+  - { key: FILTER_1_OUTPUT_HP, id: 35, module: FILTER_1, output: Out HP, label: Filter 1 Output HP, bipolar: true, get: output_hp }
+  - { key: FILTER_1_OUTPUT_BP, id: 36, module: FILTER_1, output: Out BP, label: Filter 1 Output BP, bipolar: true, get: output_bp }
+  - { key: AMP_1_OUTPUT,       id: 37, module: AMP_1,    output: Out,    label: Amp 1 Output,       bipolar: true }
   # Out Mono, of the chorus and of the delay, is the average of the two sides, a sub output.
-  - { key: CHORUS_1_OUTPUT_L,  id: 36, module: CHORUS_1, output: Out L,  label: Chorus 1 Output L,  bipolar: true, get: output_l }
-  - { key: CHORUS_1_OUTPUT_R,  id: 37, module: CHORUS_1, output: Out R,  label: Chorus 1 Output R,  bipolar: true, get: output_r }
-  - { key: CHORUS_1_OUTPUT_MONO, id: 38, module: CHORUS_1, output: Out Mono, label: Chorus 1 Output Mono, bipolar: true, get: output_mono }
-  - { key: DELAY_1_OUTPUT_L,   id: 39, module: DELAY_1,  output: Out L,  label: Delay 1 Output L,   bipolar: true, get: output_l }
-  - { key: DELAY_1_OUTPUT_R,   id: 40, module: DELAY_1,  output: Out R,  label: Delay 1 Output R,   bipolar: true, get: output_r }
-  - { key: DELAY_1_OUTPUT_MONO,  id: 41, module: DELAY_1,  output: Out Mono, label: Delay 1 Output Mono,  bipolar: true, get: output_mono }
+  - { key: CHORUS_1_OUTPUT_L,  id: 38, module: CHORUS_1, output: Out L,  label: Chorus 1 Output L,  bipolar: true, get: output_l }
+  - { key: CHORUS_1_OUTPUT_R,  id: 39, module: CHORUS_1, output: Out R,  label: Chorus 1 Output R,  bipolar: true, get: output_r }
+  - { key: CHORUS_1_OUTPUT_MONO, id: 40, module: CHORUS_1, output: Out Mono, label: Chorus 1 Output Mono, bipolar: true, get: output_mono }
+  - { key: DELAY_1_OUTPUT_L,   id: 41, module: DELAY_1,  output: Out L,  label: Delay 1 Output L,   bipolar: true, get: output_l }
+  - { key: DELAY_1_OUTPUT_R,   id: 42, module: DELAY_1,  output: Out R,  label: Delay 1 Output R,   bipolar: true, get: output_r }
+  - { key: DELAY_1_OUTPUT_MONO,  id: 43, module: DELAY_1,  output: Out Mono, label: Delay 1 Output Mono,  bipolar: true, get: output_mono }
 
 # Module inputs, NRPN category 1, listed in the editor's order, each by its entry: what feeds each
 # one in the default patch (`source`, a signal key). `label` is the editor's, on the module; `name`
@@ -179,7 +181,7 @@ inputs:
   - { entry: 14, module: OSC_2,       key: MOD_2,       label: Mod 2 In,       name: Mod 2 In,       source: LFO_1_OUTPUT }
   - { entry: 15, module: MIXER_2,     key: IN_1,        label: In 1,           name: In 1,           source: OSC_1_OUTPUT }
   - { entry: 16, module: MIXER_2,     key: IN_2,        label: In 2,           name: In 2,           source: OSC_2_OUTPUT }
-  - { entry: 17, module: MIXER_2,     key: IN_3,        label: In 3,           name: In 3,           source: NONE }
+  - { entry: 17, module: MIXER_2,     key: IN_3,        label: In 3,           name: In 3,           source: OSC_1_OUTPUT_SUB }
   - { entry: 18, module: MIXER_2,     key: IN_4,        label: In 4,           name: In 4,           source: NOISE_1_OUTPUT }
   - { entry: 19, module: FILTER_1,    key: AUDIO,       label: Audio In,       name: Audio In,       source: MIXER_2_OUTPUT }
   - { entry: 20, module: FILTER_1,    key: PITCH,       label: Pitch In,       name: Pitch In,       source: PITCH_1_OUTPUT }
@@ -265,7 +267,7 @@ controls:
   # is turned up. Wave is its own too, on CC 104 next to Osc 1's on CC 102, sawtooth at power-up as
   # Osc 1's is. Everything else follows Osc 1 by default: each Mod Amt and PW are on Osc 1's CCs,
   # so one CC moves both oscillators, and Pitch Mod Range holds the
-  # value Osc 1's does. Osc 2 is heard through Mixer 2 Level 2 (CC 21), which powers up at 0.7, as
+  # value Osc 1's does. Osc 2 is heard through Mixer 2 Level 2 (CC 20), which powers up at 0.7, as
   # Level 1 does for Osc 1.
   - { entry: 28, module: OSC_2,     key: WAVE,     label: Wave,         cc: 104, value: 4, set: set_waveform }
   - { entry: 29, module: OSC_2,     key: PW,           label: PW,  cc: 114, value: 64, bipolar: true, set: set_pulse_width }
@@ -281,16 +283,17 @@ controls:
   # Mixer 2 Level 4 (CC 23), or the depth of what it modulates, sets how much is heard.
   - { entry: 37, module: NOISE_1,   key: COLOR,        label: Color,        cc: 115, value: 4, set: set_color }
   - { entry: 38, module: NOISE_1,   key: LEVEL,        label: Level,        cc: 0,   value: 124, set: set_level }
-  # Mixer 2, the audio ahead of the filter: Osc 1 on In 1, Osc 2 on In 2 and the noise on In 4.
-  # Level 1 and 2 (CC 20 and 21) power up at CC 88, 0.7: two saws 12 cents apart come out about
-  # as loud as one at 1.0, as 0.7 is about one over the square root of 2. Level 3, on CC 22,
-  # powers up at 0.0, In 3 being left unrouted. Level 4 (CC 23) powers up at 0.0, leaving the noise, at
+  # Mixer 2, the audio ahead of the filter: Osc 1 on In 1, Osc 2 on In 2, Osc 1's sub on In 3 and
+  # the noise on In 4.
+  # Level 1 and 2 (CC 19 and 20) power up at CC 88, 0.7: two saws 12 cents apart come out about
+  # as loud as one at 1.0, as 0.7 is about one over the square root of 2. Level 3, on CC 21,
+  # powers up at 0.0, leaving Osc 1's sub on In 3 silent. Level 4 (CC 23) powers up at 0.0, leaving the noise, at
   # full level from Noise 1, silent. Out Level has no CC and holds 0.5: how
   # hard the sum drives the filter, the one Mixer 2 feeds, and what keeps two oscillators and the
   # noise all at full level, a sum of 1.5 at most, inside the mixer's range.
-  - { entry: 39, module: MIXER_2,   key: LEVEL_1,      label: Level 1,      cc: 20,  value: 88, set: set_level_1 }
-  - { entry: 40, module: MIXER_2,   key: LEVEL_2,      label: Level 2,      cc: 21,  value: 88, set: set_level_2 }
-  - { entry: 41, module: MIXER_2,   key: LEVEL_3,      label: Level 3,      cc: 22,  value: 4, set: set_level_3 }
+  - { entry: 39, module: MIXER_2,   key: LEVEL_1,      label: Level 1,      cc: 19,  value: 88, set: set_level_1 }
+  - { entry: 40, module: MIXER_2,   key: LEVEL_2,      label: Level 2,      cc: 20,  value: 88, set: set_level_2 }
+  - { entry: 41, module: MIXER_2,   key: LEVEL_3,      label: Level 3,      cc: 21,  value: 4, set: set_level_3 }
   - { entry: 42, module: MIXER_2,   key: LEVEL_4,      label: Level 4,      cc: 23,  value: 4, set: set_level_4 }
   - { entry: 43, module: MIXER_2,   key: OUT_LEVEL,  label: Out Level,  cc: 0,   value: 64, set: set_out_level }
   # Filter 1 in the editor: the cutoff, the resonance and Mode, then the cutoff's keyboard

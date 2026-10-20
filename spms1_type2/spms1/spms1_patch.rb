@@ -40,25 +40,27 @@ SIGNAL_MIXER_1_OUTPUT_INV        = 19
 SIGNAL_OSC_1_OUTPUT              = 20
 SIGNAL_OSC_1_OUTPUT_SAW          = 21
 SIGNAL_OSC_1_OUTPUT_PULSE        = 22
-SIGNAL_OSC_2_OUTPUT              = 23
-SIGNAL_OSC_2_OUTPUT_SAW          = 24
-SIGNAL_OSC_2_OUTPUT_PULSE        = 25
-SIGNAL_NOISE_1_OUTPUT            = 26
-SIGNAL_NOISE_1_OUTPUT_WHITE      = 27
-SIGNAL_NOISE_1_OUTPUT_RED        = 28
-SIGNAL_MIXER_2_OUTPUT            = 29
-SIGNAL_MIXER_2_OUTPUT_INV        = 30
-SIGNAL_FILTER_1_OUTPUT           = 31
-SIGNAL_FILTER_1_OUTPUT_LP        = 32
-SIGNAL_FILTER_1_OUTPUT_HP        = 33
-SIGNAL_FILTER_1_OUTPUT_BP        = 34
-SIGNAL_AMP_1_OUTPUT              = 35
-SIGNAL_CHORUS_1_OUTPUT_L         = 36
-SIGNAL_CHORUS_1_OUTPUT_R         = 37
-SIGNAL_CHORUS_1_OUTPUT_MONO      = 38
-SIGNAL_DELAY_1_OUTPUT_L          = 39
-SIGNAL_DELAY_1_OUTPUT_R          = 40
-SIGNAL_DELAY_1_OUTPUT_MONO       = 41
+SIGNAL_OSC_1_OUTPUT_SUB          = 23
+SIGNAL_OSC_2_OUTPUT              = 24
+SIGNAL_OSC_2_OUTPUT_SAW          = 25
+SIGNAL_OSC_2_OUTPUT_PULSE        = 26
+SIGNAL_OSC_2_OUTPUT_SUB          = 27
+SIGNAL_NOISE_1_OUTPUT            = 28
+SIGNAL_NOISE_1_OUTPUT_WHITE      = 29
+SIGNAL_NOISE_1_OUTPUT_RED        = 30
+SIGNAL_MIXER_2_OUTPUT            = 31
+SIGNAL_MIXER_2_OUTPUT_INV        = 32
+SIGNAL_FILTER_1_OUTPUT           = 33
+SIGNAL_FILTER_1_OUTPUT_LP        = 34
+SIGNAL_FILTER_1_OUTPUT_HP        = 35
+SIGNAL_FILTER_1_OUTPUT_BP        = 36
+SIGNAL_AMP_1_OUTPUT              = 37
+SIGNAL_CHORUS_1_OUTPUT_L         = 38
+SIGNAL_CHORUS_1_OUTPUT_R         = 39
+SIGNAL_CHORUS_1_OUTPUT_MONO      = 40
+SIGNAL_DELAY_1_OUTPUT_L          = 41
+SIGNAL_DELAY_1_OUTPUT_R          = 42
+SIGNAL_DELAY_1_OUTPUT_MONO       = 43
 
 # A parameter source of SIGNAL_OWN is the parameter's own control slot, at PARAM_SLOT_BASE + its
 # entry, off the bus: the slots below.
@@ -390,7 +392,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_2_MOD_2    , SIGNAL_LFO_1_OUTPUT)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_2_IN_1   , SIGNAL_OSC_1_OUTPUT)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_2_IN_2   , SIGNAL_OSC_2_OUTPUT)
-  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_2_IN_3   , SIGNAL_NONE)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_2_IN_3   , SIGNAL_OSC_1_OUTPUT_SUB)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_2_IN_4   , SIGNAL_NOISE_1_OUTPUT)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_AUDIO , SIGNAL_MIXER_2_OUTPUT)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_PITCH , SIGNAL_PITCH_1_OUTPUT)
@@ -491,9 +493,9 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_2_PW_MOD_1_AMT   , 8)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_2_PW_MOD_2_AMT   , 103)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_NOISE_1_COLOR        , 115)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_MIXER_2_LEVEL_1      , 20)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_MIXER_2_LEVEL_2      , 21)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_MIXER_2_LEVEL_3      , 22)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_MIXER_2_LEVEL_1      , 19)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_MIXER_2_LEVEL_2      , 20)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_MIXER_2_LEVEL_3      , 21)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_MIXER_2_LEVEL_4      , 23)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_CUTOFF      , 74)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_RESONANCE   , 71)
@@ -598,9 +600,9 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 8  , 4  ) # Osc 2 PW Mod 1 Amt
   C.set_midi_cc_value(midi_ch, 103, 4  ) # Osc 2 PW Mod 2 Amt
   C.set_midi_cc_value(midi_ch, 115, 4  ) # Noise 1 Color
-  C.set_midi_cc_value(midi_ch, 20 , 88 ) # Mixer 2 Level 1
-  C.set_midi_cc_value(midi_ch, 21 , 88 ) # Mixer 2 Level 2
-  C.set_midi_cc_value(midi_ch, 22 , 4  ) # Mixer 2 Level 3
+  C.set_midi_cc_value(midi_ch, 19 , 88 ) # Mixer 2 Level 1
+  C.set_midi_cc_value(midi_ch, 20 , 88 ) # Mixer 2 Level 2
+  C.set_midi_cc_value(midi_ch, 21 , 4  ) # Mixer 2 Level 3
   C.set_midi_cc_value(midi_ch, 23 , 4  ) # Mixer 2 Level 4
   C.set_midi_cc_value(midi_ch, 74 , 112) # Filter 1 Cutoff
   C.set_midi_cc_value(midi_ch, 71 , 64 ) # Filter 1 Resonance
