@@ -60,7 +60,7 @@ modules:
 # powers up at the LFO alone and leaves it out until CC 13 turns it down. The LFO also reaches
 # Filter 1 Mod 2 In, but Filter 1 Mod 1/2 Mix powers up at the envelope alone, so the cutoff
 # follows the envelope until CC 25 turns it up.
-# Filter 1 Pitch In takes Pitch 1's pitch too, for keyboard tracking, but Cutoff Pitch Track
+# Filter 1 Pitch In takes Pitch 1's pitch too, for keyboard tracking, but Cutoff Pitch Amt
 # powers up at 0.0 and leaves it off until CC 9. Noise 1 runs after the oscillators, as it is mostly a sound of its own (a modulation taking
 # it is a sample late, which it does not hear), at full level: its Level has no CC and holds 1.0.
 # Mixer 2 runs after it, just ahead of the filter, which it feeds: Osc 1 on its In 1, Osc 2 on In 2
@@ -294,7 +294,7 @@ controls:
   - { entry: 50, module: MIXER_2,   key: OUT_LEVEL,    label: Out Level,    cc: 0,   value: 124, set: set_out_level }
   # Filter 1 in the editor: Gain, the cutoff, its keyboard tracking and its two modulations, then
   # the resonance and Mode. Pitch In takes the pitch from Pitch 1, as Osc 1 Pitch In does, and
-  # Cutoff Pitch Track (CC 9) at its top makes the cutoff follow the note a semitone for a
+  # Cutoff Pitch Amt (CC 9) at its top makes the cutoff follow the note a semitone for a
   # semitone, unmoved at note 60; it powers up at CC 4, 0.0, with the tracking off. Mod 1/2 Mix,
   # on CC 25, crossfades the envelope on Mod 1 In and the LFO on Mod 2 In linearly, as Osc 1's
   # does, and powers up at CC 4, -0.5, the envelope alone, so the LFO leaves the cutoff alone until
@@ -306,7 +306,7 @@ controls:
   # 0.0, the low pass.
   - { entry: 51, module: FILTER_1,  key: GAIN,         label: Gain,         cc: 112, value: 64, set: set_gain }
   - { entry: 52, module: FILTER_1,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 100, set: set_cutoff }
-  - { entry: 53, module: FILTER_1,  key: CUTOFF_PITCH_TRACK, label: Cutoff Pitch Track, cc: 9, value: 4, set: set_cutoff_pitch_track }
+  - { entry: 53, module: FILTER_1,  key: CUTOFF_PITCH_AMT, label: Cutoff Pitch Amt, cc: 9, value: 4, set: set_cutoff_pitch_amount }
   - { entry: 54, module: FILTER_1,  key: MOD_MIX,  label: Mod 1/2 Mix,  cc: 25,  value: 4, bipolar: true, set: set_modulation_mix }
   - { entry: 55, module: FILTER_1,  key: CUTOFF_MOD_AMT, label: Cutoff Mod Amt, cc: 117, value: 76, bipolar: true, set: set_cutoff_modulation_amount }
   - { entry: 56, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 94, set: set_resonance }

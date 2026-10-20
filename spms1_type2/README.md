@@ -214,8 +214,8 @@ leaves the cutoff to it until it is turned up. Osc 1 Pitch Mod Amt (CC 8) takes 
 modulations to the pitch, and Osc 1 Pitch Mod Range holds 0.2, which brings them down
 to a vibrato depth there; Osc 1 PW Mod Amt (CC 103) takes them to the pulse width. Both Amts
 power up at 0.0. The pitch from Pitch 1 reaches the filter too, on Filter 1 Pitch In, for keyboard tracking: CC 9
-(Cutoff Pitch Track) at its top has the cutoff follow the note a semitone for a semitone,
-unmoved at note 60. Cutoff Pitch Track powers up at 0.0, with the tracking off.
+(Cutoff Pitch Amt) at its top has the cutoff follow the note a semitone for a semitone,
+unmoved at note 60. Cutoff Pitch Amt powers up at 0.0, with the tracking off.
 The envelope reaches the oscillator's pitch too, on Osc 1 Mod 1 In, for a pitch envelope: Osc 1
 Mod 1/2 Mix (CC 13) powers up at the LFO alone, with it out. Each modulation depth spans the
 whole range of what it moves, so bringing a source down to a musical depth is left to the patch
@@ -497,7 +497,7 @@ both at the same signal for a mono output.
 | 6 | LFO 1 Rate Mod Amt | | 28 | Osc 1 Mod 1/2 Mix | | 50 | Mixer 2 Out Level |
 | 7 | LFO 1 Rate Mod Pol | | 29 | Osc 1 Pitch Mod Amt | | 51 | Filter 1 Gain |
 | 8 | LFO 1 Level | | 30 | Osc 1 Pitch Mod Range | | 52 | Filter 1 Cutoff |
-| 9 | LFO 1 Wave | | 31 | Osc 1 Wave | | 53 | Filter 1 Cutoff Pitch Track |
+| 9 | LFO 1 Wave | | 31 | Osc 1 Wave | | 53 | Filter 1 Cutoff Pitch Amt |
 | 10 | LFO 1 Level Mod Amt | | 32 | Osc 1 Pulse Width | | 54 | Filter 1 Mod 1/2 Mix |
 | 11 | LFO 1 Level Mod Pol | | 33 | Osc 1 PW Mod Amt | | 55 | Filter 1 Cutoff Mod Amt |
 | 12 | Mixer 1 Level 1 | | 34 | Osc 2 Pitch Coarse | | 56 | Filter 1 Resonance |
@@ -771,7 +771,7 @@ direction too: it is on CC 117 and powers up at +0.1 (CC 76), where 0.2 of the m
 CC 124 adds the mix as it is, CC 64 leaves the cutoff at Filter 1 Cutoff and the keyboard
 tracking, and CC 4 takes the mix off, so the envelope closes the filter as it rises. One dial
 scales the envelope and the LFO together.
-Pitch In, the keyboard tracking, is added on its own by Cutoff Pitch Track (CC 9), outside the
+Pitch In, the keyboard tracking, is added on its own by Cutoff Pitch Amt (CC 9), outside the
 sum, as an oscillator's Pitch In is outside its Pitch Mod Amt: unipolar, a semitone for a
 semitone at the top, unmoved at note 60.
 

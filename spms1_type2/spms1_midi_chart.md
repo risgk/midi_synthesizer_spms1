@@ -33,7 +33,7 @@
 |                            74 | x             | o             | Filter Cutoff                        |
 |                            71 | x             | o             | Filter Resonance                     |
 |                            25 | x             | o             | Filter Mod 1/2 Mix (EG to LFO)       |
-|                             9 | x             | o             | Filter Cutoff Pitch Track            |
+|                             9 | x             | o             | Filter Cutoff Pitch Amt              |
 |                           117 | x             | o             | Filter Cutoff Mod Amt                |
 |                           112 | x             | o             | Filter Gain                          |
 |                            39 | x             | o             | Filter Mode (LP, Notch, HP)          |
