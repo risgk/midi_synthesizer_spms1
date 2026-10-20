@@ -23,12 +23,13 @@ module Spms1
       @current_gain = 1.0
     end
 
-    # Gain is unipolar, [0.0, 1.0].
-    # Range: -∞ dB (0.0), -6 dB (0.5), 0 dB (1.0).
-    # Used as a plain multiplier, so @gain is an amplitude and the smoothing below works in the
-    # amplitude domain.
+    # Gain is unipolar, [0.0, 1.0], and doubled into a multiplier, so that the middle of the dial
+    # is unity and the top can bring a quiet sound up as well as the bottom take it down.
+    # Range: -∞ dB (0.0), 0 dB (0.5), +6 dB (1.0).
+    # @gain is an amplitude, so the smoothing below works in the amplitude domain.
     def set_gain(gain)
-      @gain = (gain < 0.0) ? 0.0 : ((gain > 1.0) ? 1.0 : gain)
+      clamped_gain = (gain < 0.0) ? 0.0 : ((gain > 1.0) ? 1.0 : gain)
+      @gain = clamped_gain + clamped_gain
     end
 
     def process(control_tick, audio_input = 0.0, modulation_input = 1.0)
@@ -38,14 +39,16 @@ module Spms1
         @current_gain = Dsp.smooth(@stage_1_gain, @current_gain, @smoothing_target_blend)
       end
 
-      # The one modulation input in the synth that is clamped on the way in, because an amp is an
-      # attenuator: a modulation scales the gain down, and must not be able to scale it up however
-      # loud it arrives. Negative still inverts. @gain is already [0.0, 1.0], so the product needs
-      # no clamp of its own.
+      # The one modulation input in the synth that is clamped on the way in: a modulation scales
+      # the gain down, and must not be able to scale it up however loud it arrives. Negative still
+      # inverts. Gain reaches 2.0, so the output is held to -1.0 and +1.0, as a mixer's is, which
+      # the default patch, at a gain of 1.0, never reaches. One nested ternary, for the reason
+      # Mixer#process gives.
       mod = (modulation_input < -1.0) ? -1.0 : ((modulation_input > 1.0) ? 1.0 : modulation_input)
       total_gain = @current_gain * mod
 
-      audio_input * total_gain
+      output = audio_input * total_gain
+      (output < -1.0) ? -1.0 : ((output > 1.0) ? 1.0 : output)
     end
   end
 end

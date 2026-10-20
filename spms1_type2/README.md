@@ -769,6 +769,12 @@ folds back as an inharmonic tone: at 48 kHz, from 8 kHz (CC 108) to 10 kHz (CC 1
 included. Above that the resonance acts as at Q 256. With the cutoff following the keyboard, as
 in the examples below, it plays as a sine voice.
 
+Amp 1 Gain (CC 15, Amp Gain's in PRA32-U2) is doubled into the gain: silent at CC 4, unity at
+CC 64, where it powers up, and twice, 6 dB up, at CC 124, so a quiet sound can be brought up as
+well as a loud one taken down. The amp holds its output to -1.0 and +1.0, as a mixer holds its
+sum, so the gain cannot take the output past one unit, which the default patch, peaking near a
+quarter of it, is far below.
+
 A mixer takes each of its four inputs at its own level, then adds them. Level runs from silent
 at 0.0 (CC 4) to full at 1.0 (CC 124). Out Level then scales the sum, over the same range and at
 0.5 by default, so one control can take a blend of two sources up and down together; it is
