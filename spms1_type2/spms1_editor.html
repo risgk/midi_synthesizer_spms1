@@ -484,7 +484,7 @@
     /* The sizes of the keys are times the scale of the text, --kbd-scale, set by kbdFitScale. */
     .keyboard-frame {
       --kbd-scale: 1;
-      --kbd-key-width: calc(21px * var(--kbd-scale));  /* KB_KEY_WIDTH: a semitone in the upper half */
+      --kbd-key-width: calc(20px * var(--kbd-scale));  /* KB_KEY_WIDTH: a semitone in the upper half */
       --kbd-half-height: calc(70px * var(--kbd-scale));
       border: 1px solid var(--border-color);
       border-radius: 6px;
@@ -494,7 +494,8 @@
     /* The pitch bend and mod wheels on the left of the keys, as on a keyboard, sliders standing as
        tall as they are. The bend springs back to the centre; the mod wheel's value is that of the
        CC Mod Wheel is on in the patch. */
-    /* Narrow enough that the keys keep the 37 that KB_KEY_WIDTH fits a 960px window, with room. */
+    /* Each wheel as wide as a white key from C to E, 5/3 of a semitone, and the keys keeping the 37
+       that KB_KEY_WIDTH fits a 960px window beside them, with room. */
     .kbd-body {
       display: flex;
       gap: 4px;
@@ -508,12 +509,13 @@
       flex-direction: column;
       align-items: center;
       gap: 4px;
-      width: calc(18px * var(--kbd-scale));
+      flex: 0 0 auto;
+      width: calc(var(--kbd-key-width) * 5 / 3);
     }
     .mod-wheel input {
       writing-mode: vertical-lr;
       direction: rtl;
-      width: calc(18px * var(--kbd-scale));
+      width: 100%;
       height: calc(var(--kbd-half-height) * 2);
       margin: 0;
       accent-color: var(--primary-color);
@@ -523,7 +525,7 @@
       cursor: default;
     }
     .mod-wheel-label {
-      font-size: 0.6rem;
+      font-size: 0.65rem;
       color: #ccc;
       white-space: nowrap;
     }
@@ -1244,11 +1246,11 @@
     <div class="kbd-body">
       <div class="mod-wheel" id="bend-wheel-zone" title="Pitch Bend: back to the centre when let go">
         <input type="range" id="bend-wheel" min="-8192" max="8191" value="0" aria-label="Pitch Bend">
-        <span class="mod-wheel-label">PB</span>
+        <span class="mod-wheel-label">Bend</span>
       </div>
       <div class="mod-wheel" id="mod-wheel-zone">
         <input type="range" id="mod-wheel" min="4" max="124" aria-label="Mod Wheel">
-        <span class="mod-wheel-label">MW</span>
+        <span class="mod-wheel-label">Mod</span>
       </div>
       <div class="kbd-keys">
         <div class="keyboard-scroll-container" id="kb-scroll">
@@ -3191,7 +3193,7 @@
   }
 
   const KB_NOTE_MAX = 120;
-  const KB_KEY_WIDTH = 21;  // a semitone in the upper half, times kbScale; 37 keys fit 960px, with room
+  const KB_KEY_WIDTH = 20;  // a semitone in the upper half, times kbScale; 37 keys fit 960px, with room
   // The center of 37 keys from a C (C3 - C6 by default), in semitones from the left end of the C.
   const KB_CENTER_OFFSET = (36 + 5 / 3) / 2;
   const KB_DEFAULT_C = 48;  // C3
