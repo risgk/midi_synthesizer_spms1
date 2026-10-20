@@ -20,7 +20,7 @@
 | After        Key's            | x             | x             |                                      |
 | Touch        Ch's             | x             | x             |                                      |
 +-------------------------------+---------------+---------------+--------------------------------------+
-| Pitch Bend                    | x             | o             | Pitch 1 Bend In, +-2 Semitones       |
+| Pitch Bend                    | x             | o             | Pitch 1 Bend In, +-12 Semitones      |
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Control                   102 | x             | o             | Osc 1 Wave (Saw to Square)           |
 | Change                    104 | x             | o             | Osc 2 Wave (Saw to Square)           |

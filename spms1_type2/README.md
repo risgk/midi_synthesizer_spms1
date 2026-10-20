@@ -205,15 +205,15 @@ turns the portamento on and off without moving Glide: on from a value of 64, as 
 It has no CC and holds on, the value 124. Pitch Bend comes in on Pitch 1
 Bend In, which is added to the output past the glide, so the bend acts at once and reaches the
 oscillator and the filter's keyboard tracking alike. Pitch 1 Bend Amt (CC 57) is the bend range,
-half a semitone a step: 2 semitones either way at CC 8, where it powers up, an octave at CC 28 and
-5 octaves at the top.
+half a semitone a step: 2 semitones either way at CC 8, an octave at CC 28, where it powers up,
+and 5 octaves at the top.
 
 The LFO goes straight to the oscillator, both to its pitch and to its pulse width, on Mod 2 In, and to the filter, where Filter 1 Mod 2 Amt (CC 25) powers up at 0.0 and
 leaves the cutoff to the envelope until it is turned up. Osc 1 Pitch Mod 2 Amt (CC 13) takes the
-LFO to the pitch and powers up at CC 9, which with Osc 1 Pitch Mod Range at 0.2 makes the LFO at
-full level swing the pitch 50 cents either way, the Modulation Depth Range a GM2 sound module
-powers up at; Osc 1 PW Mod 2 Amt (CC 103) takes it to the pulse width and powers up at 0.0. LFO 1
-Level powers up at 0.0, so the vibrato is the mod wheel's, from none to 50 cents. The pitch from Pitch 1 reaches the filter too, on Filter 1 Pitch In, for keyboard tracking: CC 9
+LFO to the pitch and powers up at its top, CC 124, which with Osc 1 Pitch Mod Range at 0.2 makes
+the LFO at full level swing the pitch an octave either way; Osc 1 PW Mod 2 Amt (CC 103) takes it
+to the pulse width and powers up at 0.0. LFO 1 Level powers up at 0.0, so the swing is the mod
+wheel's, from none to an octave. The pitch from Pitch 1 reaches the filter too, on Filter 1 Pitch In, for keyboard tracking: CC 9
 (Filter 1 Pitch Amt) at its top has the cutoff follow the note a semitone for a semitone,
 unmoved at note 60. Filter 1 Pitch Amt powers up at 0.0, with the tracking off.
 The envelope reaches the oscillator too, on Osc 1 Mod 1 In, for a pitch envelope: Pitch Mod 1
@@ -701,16 +701,16 @@ multipliers: Pitch Mod Range is what the top of a Pitch Mod Amt is worth. At a d
 modulation reaches the whole pitch range: a bipolar source at full depth swings the pitch five
 octaves up and five down. That is a coarse range for vibrato, which is why Pitch Mod Range has no
 CC and holds 0.2 (CC value 28), the depth at the top of a Pitch Mod Amt. So Pitch Mod 2 Amt puts
-50 cents of vibrato at its power-up CC 9, a semitone at CC 14 and an octave at the top of the
-dial, a step being 10 cents, and Pitch Mod 1 Amt sweeps
+50 cents of vibrato at CC 9, a semitone at CC 14 and an octave at the top of the dial, where it
+powers up, a step being 10 cents, and Pitch Mod 1 Amt sweeps
 the pitch from the envelope a semitone at CC 9, an octave at CC 64 and two octaves at the top.
 
 Osc 1 Pitch In is where the note comes in, from Pitch 1 in the default patch. It has no depth:
 the pitch it takes is added whole, so the note plays in tune, a key a semitone.
 
 Osc 1 Mod 1 In takes the envelope in the default patch, for a pitch envelope, and Mod 2 In the
-LFO, for vibrato. Pitch Mod 2 Amt powers up at CC 9, the GM2 vibrato depth, and the LFO at Level
-0.0, so the vibrato waits for the mod wheel; every other Mod Amt powers up at 0.0, so the envelope
+LFO, for vibrato. Pitch Mod 2 Amt powers up at its top, an octave, and the LFO at Level 0.0, so
+the vibrato waits for the mod wheel; every other Mod Amt powers up at 0.0, so the envelope
 leaves the oscillator alone until one is turned up.
 
 Osc 1 PW, the pulse width, shifts the second of the two sawtooths that the morph is made of, either way
@@ -832,10 +832,12 @@ takes the output to the input at once, mid-glide too, as Glide at 0.0 does.
 #### Examples
 
 - Vibrato is wired by default -- the LFO goes straight to the oscillator's Mod 2 input --
-  and the mod wheel brings it in, as on a GM2 sound module: LFO 1 Level (CC 113) powers up at
-  CC 4, and the wheel adds to it, up to the depth CC 13 (Osc 1 Pitch Mod 2 Amt) sets, 50 cents
-  either way at its power-up CC 9, a semitone at CC 14 and an octave at the top. CC 3 sets the
-  rate, and CC 113 turned up gives a vibrato without the wheel
+  and the mod wheel brings it in: LFO 1 Level (CC 113) powers up at CC 4, and the wheel adds to
+  it, up to the depth CC 13 (Osc 1 Pitch Mod 2 Amt) sets, an octave either way at its power-up
+  CC 124. CC 3 sets the rate, and CC 113 turned up gives a vibrato without the wheel
+- A vibrato as deep as a GM2 sound module's: CC 13 = 9 brings the wheel's top down to 50 cents
+  either way, the Modulation Depth Range GM2 powers up at, and CC 13 = 14 to a semitone
+- A bend range of 2 semitones, as a GM sound module's: CC 57 = 8
 - The LFO reaches the filter's Mod 2 input by default too, so CC 25 sweeps the cutoff with it, on
   top of the envelope on Mod 1
 - A second oscillator plays by default too, on Mixer 2's second input at the level of the first,
@@ -879,8 +881,8 @@ takes the output to the input at once, mid-glide too, as Glide at 0.0 does.
 - A CC that bends pitch both ways through the modulation input: CC 99 = 1, CC 98 = 11, CC 6 = 13
   points the oscillator's Mod 2 input at General Bipolar 1 in the LFO's place. The slot is
   bipolar, centred on CC 64 as the LFO is on zero, so CC 16 now bends the pitch down and up around
-  the note, as far as CC 13 allows: 50 cents either way at its power-up CC 9, a semitone at
-  CC 14, an octave at the top
+  the note, as far as CC 13 allows: an octave either way at its power-up CC 124, a semitone at
+  CC 14
 - A pitch envelope that rises into the note: CC 99 = 1, CC 98 = 10, CC 6 = 18 puts EG 1 Out Inv,
   the envelope negated, on the oscillator's Mod 1 input. With CC 89 at the top the note starts two
   octaves flat, and with CC 30 (Sustain) turned down it

@@ -47,16 +47,15 @@ modules:
 # switch something on first. Pitch 1 runs just ahead of the oscillator, taking Note Pitch and
 # handing it to the oscillator: its Glide powers up at 0.0, where it passes its input through as it
 # is, so the patch plays as one without it until CC 5 turns the portamento up. Pitch Bend goes to
-# its Bend In, added past the glide, 2 semitones either way at Bend Amt's power-up value of CC 8, so
+# its Bend In, added past the glide, an octave either way at Bend Amt's power-up value of CC 28, so
 # the bend reaches the oscillator and the filter's keyboard tracking at once. Running after the LFO,
 # the envelope and Mixer 1 lets it take any of them in the same sample, and the oscillators and the
 # filter read it so too. Mixer 1 runs after the modulation sources and ahead of the oscillators, so
 # it sees this sample's LFO and envelope and can feed the oscillators, the filter and the amp
 # without a sample's delay. The default patch leaves it unused: the LFO goes straight to the
-# oscillator, on Mod 2 In, at a vibrato depth: Pitch Mod 2 Amt (CC 13) powers up at CC 9, which
-# with Osc 1 Pitch Mod Range at 0.2 makes the LFO at full level swing the pitch 50 cents either
-# way, the Modulation Depth Range a GM2 sound module powers up at. The LFO itself powers up at
-# Level 0.0, so the vibrato is the mod wheel's, from none to 50 cents. PW Mod 2 Amt, on CC 103,
+# oscillator, on Mod 2 In: Pitch Mod 2 Amt (CC 13) powers up at its top, which with Osc 1 Pitch
+# Mod Range at 0.2 makes the LFO at full level swing the pitch an octave either way. The LFO
+# itself powers up at Level 0.0, so the swing is the mod wheel's, from none to an octave. PW Mod 2 Amt, on CC 103,
 # takes the LFO to the pulse width and powers up at 0.0. Osc 1 Pitch In takes the note from
 # Pitch 1 whole, in tune. Osc 1 Mod 1 In takes the envelope, for a pitch envelope, but Pitch Mod 1
 # Amt (CC 89) and PW Mod 1 Amt (CC 8) power up at 0.0 too. The LFO also reaches Filter 1 Mod 2 In,
@@ -241,20 +240,19 @@ controls:
   # the portamento is off. Glide Switch has no CC and holds on, the value 124, so Glide alone
   # sets the portamento unless the switch is set off, below 64. Stretch is on CC 22, Stretch
   # Tune's in PRA32-U2, and powers up at CC 4, 0.0, where the keys are as they are. Bend Amt is the
-  # bend range, half a semitone a step: CC 8, its power-up value, is 2 semitones either way.
+  # bend range, half a semitone a step: CC 28, its power-up value, is an octave either way.
   - { entry: 15, module: PITCH_1,   key: GLIDE,        label: Glide,        cc: 5, value: 4, set: set_glide }
   - { entry: 16, module: PITCH_1,   key: GLIDE_SW,     label: Glide Switch, cc: 0,  value: 124, set: set_glide_switch }
   - { entry: 17, module: PITCH_1,    key: STRETCH, label: Stretch, cc: 22,  value: 4, set: set_stretch }
-  - { entry: 18, module: PITCH_1,    key: BEND_AMT,  label: Bend Amt,   cc: 57,  value: 8, set: set_bend_amount }
+  - { entry: 18, module: PITCH_1,    key: BEND_AMT,  label: Bend Amt,   cc: 57,  value: 28, set: set_bend_amount }
   # Osc 1 in the editor: the waveform, the pitch, how far each modulation moves it and what the
   # top of that is worth, then the pulse width and how far each modulation moves it. Pitch Coarse
   # and Fine have no CC and stay at 0.0. Mod 1 In takes the envelope and Mod 2 In the LFO, and
   # every depth is unipolar: a modulation runs the way its source does, and one the other way up
   # takes an inverted source, such as EG 1 Out Inv. Pitch Mod 1 Amt and Pitch Mod 2 Amt are on
   # CC 89 and 13, EG Mod Amt's and LFO Mod Amt's in PRA32-U2, and PW Mod 1 Amt and PW Mod 2 Amt
-  # on CC 8 and 103, EG Mod Dst's and LFO Mod Dst's. Pitch Mod 2 Amt powers up at CC 9, a vibrato
-  # of 50 cents either way at full LFO level, as a GM2 sound module's Modulation Depth Range does,
-  # and the other three at CC 4, 0.0. Pitch Mod Range has no CC and holds 0.2, the depth at the top
+  # on CC 8 and 103, EG Mod Dst's and LFO Mod Dst's. Pitch Mod 2 Amt powers up at CC 124, an
+  # octave either way at full LFO level, and the other three at CC 4, 0.0. Pitch Mod Range has no CC and holds 0.2, the depth at the top
   # of a Pitch Mod Amt, which brings the LFO down to a vibrato depth and the envelope to two
   # octaves; a step of a Pitch Mod Amt is then 10 cents of the LFO. Wave is on
   # CC 102 and powers up at the saw. PW is bipolar and powers up at CC 64, 0.0, a pulse of 50%.
@@ -262,7 +260,7 @@ controls:
   - { entry: 20, module: OSC_1,     key: PITCH_COARSE,  label: Pitch Coarse,  cc: 0,   value: 64, bipolar: true, set: set_pitch_coarse }
   - { entry: 21, module: OSC_1,     key: PITCH_FINE,    label: Pitch Fine,    cc: 0,   value: 64, bipolar: true, set: set_pitch_fine }
   - { entry: 22, module: OSC_1,     key: PITCH_MOD_1_AMT, label: Pitch Mod 1 Amt, cc: 89, value: 4, set: set_pitch_modulation_1_amount }
-  - { entry: 23, module: OSC_1,     key: PITCH_MOD_2_AMT, label: Pitch Mod 2 Amt, cc: 13, value: 9, set: set_pitch_modulation_2_amount }
+  - { entry: 23, module: OSC_1,     key: PITCH_MOD_2_AMT, label: Pitch Mod 2 Amt, cc: 13, value: 124, set: set_pitch_modulation_2_amount }
   - { entry: 24, module: OSC_1,     key: PITCH_MOD_RANGE, label: Pitch Mod Range, cc: 0, value: 28, set: set_pitch_modulation_range }
   - { entry: 25, module: OSC_1,     key: PW,           label: PW,  cc: 114, value: 64, bipolar: true, set: set_pulse_width }
   - { entry: 26, module: OSC_1,     key: PW_MOD_1_AMT, label: PW Mod 1 Amt,  cc: 8,   value: 4, set: set_pw_modulation_1_amount }
@@ -278,7 +276,7 @@ controls:
   - { entry: 29, module: OSC_2,     key: PITCH_COARSE,  label: Pitch Coarse,  cc: 85,  value: 64, bipolar: true, set: set_pitch_coarse }
   - { entry: 30, module: OSC_2,     key: PITCH_FINE,    label: Pitch Fine,    cc: 76,  value: 76, bipolar: true, set: set_pitch_fine }
   - { entry: 31, module: OSC_2,     key: PITCH_MOD_1_AMT, label: Pitch Mod 1 Amt, cc: 89, value: 4, set: set_pitch_modulation_1_amount }
-  - { entry: 32, module: OSC_2,     key: PITCH_MOD_2_AMT, label: Pitch Mod 2 Amt, cc: 13, value: 9, set: set_pitch_modulation_2_amount }
+  - { entry: 32, module: OSC_2,     key: PITCH_MOD_2_AMT, label: Pitch Mod 2 Amt, cc: 13, value: 124, set: set_pitch_modulation_2_amount }
   - { entry: 33, module: OSC_2,     key: PITCH_MOD_RANGE, label: Pitch Mod Range, cc: 0, value: 28, set: set_pitch_modulation_range }
   - { entry: 34, module: OSC_2,     key: PW,           label: PW,  cc: 114, value: 64, bipolar: true, set: set_pulse_width }
   - { entry: 35, module: OSC_2,     key: PW_MOD_1_AMT, label: PW Mod 1 Amt,  cc: 8,   value: 4, set: set_pw_modulation_1_amount }
