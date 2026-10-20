@@ -180,12 +180,14 @@
       align-items: start;
       align-content: start;
     }
-    /* A slider row needs about 390px, so below four of them the columns go two to a row, the last
-       two under the first two, rather than three to a row with the fourth left alone under them. */
-    @media (max-width: 1640px) {
+    /* A slider row needs about 430px for its thumb to travel 120 pixels, a pixel a step from 4 to
+       124, with the longest name and its note beside it, so below four of them the columns go two
+       to a row, the last two under the first two, rather than three to a row with the fourth left
+       alone under them, and below two of 450px, one. */
+    @media (max-width: 1871px) {
       .editor-grid { grid-template-columns: 1fr 1fr; }
     }
-    @media (max-width: 768px) {
+    @media (max-width: 919px) {
       .editor-grid { grid-template-columns: 1fr; }
     }
     /* Spaced a little tighter than the other panels, so the columns fit a full HD window without
@@ -242,35 +244,46 @@
       color: var(--text-muted);
       display: block;
     }
-    /* A note on the range, or what feeds the inputs the parameter scales, as muted as the CC. */
+    /* A note on the range, or what feeds the inputs the parameter scales, as muted as the CC, and
+       moved to the next line whole rather than broken. */
     .slider-label .ctl-hint {
       font-size: 0.75rem;
       color: var(--text-muted);
+      white-space: nowrap;
+    }
+    /* In one or two columns the name takes one width, wrapping the note under it if need be, so
+       every slider is as long as the others and its thumb travels at least 120 pixels. */
+    @media (min-width: 481px) and (max-width: 1871px) {
+      .slider-label { flex: 0 0 140px; min-width: 0; }
     }
     /* In four columns the CC number goes on the line of the name, and the panels are packed
        tighter, so the soft keyboard fits a full HD window under them even with a bookmarks bar. */
-    @media (min-width: 1641px) {
+    @media (min-width: 1872px) {
       .slider-label { white-space: nowrap; }
       .slider-label .cc-num { display: inline; }
       .control-row { gap: 6px; }
       .editor-column { gap: 12px; }
-      .editor-column .panel { padding: 8px 12px; }
+      .editor-column .panel { padding: 8px 10px; }
       .editor-column .panel h2 { margin-bottom: 4px; }
       #init-values { padding: 6px; }
       /* A quarter of a full HD window leaves the slider less than a name, so the gaps and the
-         numbers beside it are narrower. */
-      .editor-grid { column-gap: 12px; }
-      .slider-knob-zone, .slider-input-wrapper { gap: 8px; }
+         numbers beside it are narrower: enough that the thumb travels at least 120 pixels, a
+         pixel a step from 4 to 124. */
+      .editor-grid { column-gap: 10px; }
+      .slider-knob-zone, .slider-input-wrapper { gap: 4px; }
       /* One width for every name, the longest's, so every slider is as long as the others; a
          name longer still, with the source of a routed parameter, is cut short rather than
          shortening its slider. */
-      .slider-label { flex: 0 0 210px; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-      .slider-label .cc-num, .slider-label .ctl-hint { font-size: 0.7rem; }
-      .slider-value { min-width: 28px; font-size: 0.9rem; }
-      .slider-norm { min-width: 42px; font-size: 0.75rem; }
+      .slider-label { flex: 0 0 200px; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+      .slider-label .cc-num, .slider-label .ctl-hint { font-size: 0.65rem; }
+      /* Under the wrapper, so as to outrank the rules for the two further down. */
+      .slider-input-wrapper .slider-value { min-width: 24px; font-size: 0.85rem; }
+      .slider-input-wrapper .slider-norm { min-width: 34px; font-size: 0.65rem; }
       /* One row, which takes the extra height of the tab. */
       .editor-grid { align-content: stretch; }
-      /* The page around the panels is packed tighter too, so that the controls and the soft
+    }
+    @media (min-width: 1641px) {
+      /* The page around the panels is packed tighter, so that the controls and the soft
          keyboard fit the window Chrome leaves of a full HD screen on Windows, under its tabs, its
          address bar and its bookmarks bar, above the taskbar: about 910 pixels. */
       body { padding: 14px 20px; gap: 10px; }
