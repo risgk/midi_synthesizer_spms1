@@ -4,9 +4,11 @@ module Spms1
   # PolyBLEP rounds off a step. A triangle's harmonics fall off as 1/n^2, so what folds back stays
   # low even without it, but at the top of the rate range, where the LFO is an audible tone, it
   # takes the aliases at 220 Hz from -69 dB to -81 dB, in total against the signal. The square is
-  # the triangle's sign, with each step rounded off by PolyBLEP, and puts out both at once, each on
-  # an output of its own, with Out, which process returns, crossfading from one to the other by
-  # Wave. Each of the three has an inverted output beside it, the same negated.
+  # the triangle's side, with each step rounded off by PolyBLEP, and unipolar: 1.0 while the
+  # triangle is above zero and 0.0 while it is below, so it gates, or trills up from the note,
+  # rather than swinging about zero as the triangle does. It puts out both at once, each on an
+  # output of its own, with Out, which process returns, crossfading from one to the other by Wave.
+  # Each of the three has an inverted output beside it, the same negated.
   class LFO
     # Blend at the reference rate on the line below, for each of two cascaded stages. The two move
     # together: their product is what fixes the time constant, so changing one without the other
@@ -174,7 +176,8 @@ module Spms1
       edge = (step_gap > 0.0) ? step_gap : 0.0
       square -= square * (edge * edge * @blep_scale)
       @output_triangle = triangle * @total_amount
-      @output_square = square * @total_amount
+      # +0.5 and -0.5 shifted up to 1.0 and 0.0, the step rounded off as it was.
+      @output_square = (square + 0.5) * @total_amount
       output = @output_triangle + (@output_square - @output_triangle) * @current_wave
       @output = output
 

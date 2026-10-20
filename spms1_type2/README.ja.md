@@ -6,7 +6,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.3
 - 後着優先で 1 ノート分を記憶: 前のノートを押さえたまま新しいノートを離すと、前のノートにレガートで戻ります (トリルなどに)
 - 48 kHz オーディオ出力: I2S DAC による 24 bit、または PWM Audio (DAC 不要)
 - オシレータ: ノコギリ波から矩形波へのモーフ、パルス幅付き (CC 114)。パルス幅のモジュレーション付き (PWM。ピッチと同じ 2 つのモジュレーション、デフォルトではエンベロープと LFO で、CC 8 と 103)。ノコギリ波とパルス波の個別出力付き
-- LFO: 三角波 (PolyBLAMP) と矩形波 (PolyBLEP) の個別出力と、その間をクロスフェードするメイン出力 (Wave、CC 33)
+- LFO: 三角波 (PolyBLAMP) とユニポーラの矩形波 (PolyBLEP) の個別出力と、その間をクロスフェードするメイン出力 (Wave、CC 33)
 - フィルタ: ZDF/TPT ステート・バリアブル・フィルタ (BP 積分器の非線形リーク付き、1 ステップ・ニュートン法で解く)。LP、HP の 2 出力と、その間をノッチを経てクロスフェードするメイン出力 (Mode、CC 39)
 - コーラス: モノラル入力・ステレオ出力、実行順に入るモジュール
 - ディレイ: ステレオ、フィードバック付き、実行順に入るモジュール (最大 340 ms)
@@ -536,8 +536,8 @@ Level 4 は CC がなく 0.0 を保持するので、この入力は閉じた状
 | 3 | 定数 -0.5 | | 20 | LFO 1 Output Inv ± | | 37 | Mixer 2 Output ± |
 | 4 | 定数 -1.0 | | 21 | LFO 1 Output Triangle ± | | 38 | Mixer 2 Output Inv ± |
 | 5 | Note Pitch ± | | 22 | LFO 1 Output Triangle Inv ± | | 39 | Filter 1 Output ± |
-| 6 | Note Gate | | 23 | LFO 1 Output Square ± | | 40 | Filter 1 Output LP ± |
-| 7 | Pitch Bend ± | | 24 | LFO 1 Output Square Inv ± | | 41 | Filter 1 Output HP ± |
+| 6 | Note Gate | | 23 | LFO 1 Output Square | | 40 | Filter 1 Output LP ± |
+| 7 | Pitch Bend ± | | 24 | LFO 1 Output Square Inv | | 41 | Filter 1 Output HP ± |
 | 8 | General Mod Wheel | | 25 | Mixer 1 Output ± | | 42 | Amp 1 Output ± |
 | 9 | General Unipolar 1 | | 26 | Mixer 1 Output Inv ± | | 43 | Chorus 1 Output L ± |
 | 10 | General Unipolar 2 | | 27 | Pitch 1 Output ± | | 44 | Chorus 1 Output R ± |
@@ -620,10 +620,12 @@ Pitch 1 Stretch（CC 22）は、グライドの前で Pitch In に係数を掛�
 
 LFO 1 は三角波と矩形波を同時に、それぞれ Out Triangle、Out Square として出力し、2 つをクロスフェードしたものを
 Out として出力します。三角波は角を PolyBLAMP で、矩形波は段差を PolyBLEP で丸めているので、LFO が可聴音になる
-レートの上端 220 Hz でも、矩形波の折り返しは信号に対して -41 dB です（丸めなしでは -24 dB）。矩形波は三角波の符号で、
-三角波が 0 より上のあいだ +0.5、0 を横切るところで切り替わります。LFO 1 Wave（CC 33、PRA32-U2 の LFO Wave と同じ）は
-Out を直線でクロスフェードし、起動時の 0.0（CC 4）では三角波、1.0（CC 124）では矩形波です。Level と同じく
-スムージングします。デフォルトのパッチがつないでいるのは Out なので、Wave を
+レートの上端 220 Hz でも、矩形波の折り返しは信号に対して -41 dB です（丸めなしでは -24 dB）。矩形波はユニポーラで、
+三角波が 0 より上のあいだ 1.0、下のあいだ 0.0 で、0 を横切るところで切り替わります。そのため、0 を中心に揺れる
+三角波がビブラートになるのに対し、矩形波はゲートとして、またオシレータのピッチではノートから上へのトリルとして
+働きます。反転出力は 0.0 と -1.0 です。LFO 1 Wave（CC 33、PRA32-U2 の LFO Wave と同じ）は Out を直線で
+クロスフェードし、起動時の 0.0（CC 4）では三角波、1.0（CC 124）では矩形波です。Level と同じくスムージングし、
+途中では揺れの中心が 0 から 0.5 へ上がっていきます。デフォルトのパッチがつないでいるのは Out なので、Wave を
 上げるまでは三角波です。
 
 LFO 1 Level は、ミキサーの Level が入力に掛かるのと同じく、LFO の出力に掛かります。0.0 (CC 4) で無音、

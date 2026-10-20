@@ -128,13 +128,13 @@ signals:
   # Out Inv, of the envelope, the LFO and the mixers, is Out negated.
   - { key: EG_1_OUTPUT_INV,    id: 18, module: EG_1,     output: Out Inv, label: EG 1 Output Inv, get: output_inverted }
   # Out is the triangle and the square crossfaded by Wave; each of the three has its inverted output
-  # beside it.
+  # beside it. The square is unipolar, 0.0 and 1.0, and its inverted output 0.0 and -1.0.
   - { key: LFO_1_OUTPUT,       id: 19, module: LFO_1,    output: Out,    label: LFO 1 Output,       bipolar: true }
   - { key: LFO_1_OUTPUT_INV,   id: 20, module: LFO_1,    output: Out Inv, label: LFO 1 Output Inv,  bipolar: true, get: output_inverted }
   - { key: LFO_1_OUTPUT_TRIANGLE, id: 21, module: LFO_1, output: Out Triangle, label: LFO 1 Output Triangle, bipolar: true, get: output_triangle }
   - { key: LFO_1_OUTPUT_TRIANGLE_INV, id: 22, module: LFO_1, output: Out Triangle Inv, label: LFO 1 Output Triangle Inv, bipolar: true, get: output_triangle_inverted }
-  - { key: LFO_1_OUTPUT_SQUARE,   id: 23, module: LFO_1, output: Out Square,   label: LFO 1 Output Square,   bipolar: true, get: output_square }
-  - { key: LFO_1_OUTPUT_SQUARE_INV, id: 24, module: LFO_1, output: Out Square Inv, label: LFO 1 Output Square Inv, bipolar: true, get: output_square_inverted }
+  - { key: LFO_1_OUTPUT_SQUARE,   id: 23, module: LFO_1, output: Out Square,   label: LFO 1 Output Square,   get: output_square }
+  - { key: LFO_1_OUTPUT_SQUARE_INV, id: 24, module: LFO_1, output: Out Square Inv, label: LFO 1 Output Square Inv, get: output_square_inverted }
   - { key: MIXER_1_OUTPUT,     id: 25, module: MIXER_1,  output: Out,    label: Mixer 1 Output,     bipolar: true }
   - { key: MIXER_1_OUTPUT_INV,   id: 26, module: MIXER_1,  output: Out Inv, label: Mixer 1 Output Inv, bipolar: true, get: output_inverted }
   - { key: PITCH_1_OUTPUT, id: 27, module: PITCH_1, output: Out, label: Pitch 1 Output, bipolar: true }
