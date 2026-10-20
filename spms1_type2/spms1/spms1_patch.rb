@@ -472,7 +472,6 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_LEVEL          , 113)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_PITCH_1_GLIDE        , 5)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_PITCH_1_STRETCH      , 81)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_PITCH_1_BEND_AMT     , 57)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_WAVE           , 102)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_PITCH_MOD_1_AMT, 89)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_PITCH_MOD_2_AMT, 13)
@@ -573,7 +572,6 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 113, 4  ) # LFO 1 Level
   C.set_midi_cc_value(midi_ch, 5  , 4  ) # Pitch 1 Glide
   C.set_midi_cc_value(midi_ch, 81 , 4  ) # Pitch 1 Stretch
-  C.set_midi_cc_value(midi_ch, 57 , 28 ) # Pitch 1 Bend Amt
   C.set_midi_cc_value(midi_ch, 102, 4  ) # Osc 1 Wave
   C.set_midi_cc_value(midi_ch, 89 , 4  ) # Osc 1 Pitch Mod 1 Amt
   C.set_midi_cc_value(midi_ch, 13 , 124) # Osc 1 Pitch Mod 2 Amt

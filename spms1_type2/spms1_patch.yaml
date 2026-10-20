@@ -238,12 +238,13 @@ controls:
   - { entry: 14, module: MIXER_1,   key: OUT_LEVEL,  label: Out Level,  cc: 0,   value: 64, set: set_out_level }
   # Pitch 1: Glide is on CC 5, Portamento Time in the MIDI spec, and powers up at CC 4, 0.0, where
   # the portamento is off. Glide Switch has no CC and holds on, the value 124, so Glide alone
-  # sets the portamento unless the switch is set off, below 64. Stretch is on CC 81 and powers up at CC 4, 0.0, where the keys are as they are. Bend Amt is the
-  # bend range, half a semitone a step: CC 28, its power-up value, is an octave either way.
+  # sets the portamento unless the switch is set off, below 64. Stretch is on CC 81 and powers
+  # up at CC 4, 0.0, where the keys are as they are. Bend Amt is the bend range, half a semitone a
+  # step; it has no CC and holds the value 28, an octave either way.
   - { entry: 15, module: PITCH_1,   key: GLIDE,        label: Glide,        cc: 5, value: 4, set: set_glide }
   - { entry: 16, module: PITCH_1,   key: GLIDE_SW,     label: Glide Switch, cc: 0,  value: 124, set: set_glide_switch }
   - { entry: 17, module: PITCH_1,    key: STRETCH, label: Stretch, cc: 81,  value: 4, set: set_stretch }
-  - { entry: 18, module: PITCH_1,    key: BEND_AMT,  label: Bend Amt,   cc: 57,  value: 28, set: set_bend_amount }
+  - { entry: 18, module: PITCH_1,    key: BEND_AMT,  label: Bend Amt,   cc: 0,   value: 28, set: set_bend_amount }
   # Osc 1 in the editor: the waveform, the pitch, how far each modulation moves it and what the
   # top of that is worth, then the pulse width and how far each modulation moves it. Pitch Coarse
   # and Fine have no CC and stay at 0.0. Mod 1 In takes the envelope and Mod 2 In the LFO, and

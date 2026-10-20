@@ -73,8 +73,8 @@ module Spms1
 
     # Bend Amt is unipolar, [0.0, 1.0], the depth of Bend In: at 1.0 Bend In is added as it
     # arrives. Pitch Bend is one unit across the wheel, the pitch range's whole width, so the bend
-    # range is the amount times 60 semitones either way: half a semitone a CC step, 2 semitones at
-    # CC 8 and an octave at CC 28.
+    # range is the amount times 60 semitones either way: half a semitone a step of the 7-bit value,
+    # 2 semitones at 8 and an octave at 28.
     def set_bend_amount(amount)
       @bend_depth = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
     end

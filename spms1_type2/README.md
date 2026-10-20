@@ -10,7 +10,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.3
 - Filter: ZDF/TPT State Variable Filter (with a nonlinear leak on the band pass integrator, solved by the one-step Newton method), with low pass and high pass outputs and a main output crossfading from one to the other through a notch (Mode, CC 39)
 - Chorus: mono in, stereo out, as a module in the run order
 - Delay: stereo, with feedback, as a module in the run order (up to 340 ms)
-- Pitch: the note's pitch as a module in the run order, with portamento as an exponential lag (CC 5), pitch bend past it (range on CC 57) and a stretch of the keys (CC 81)
+- Pitch: the note's pitch as a module in the run order, with portamento as an exponential lag (CC 5), pitch bend past it (range as a value with no CC) and a stretch of the keys (CC 81)
 - Stereo output: the chorus spreads the mono voice into a left and a right, and the delay keeps them apart
 - Developed by ISGK Instruments (Ryo Ishigaki)
 - <https://github.com/risgk/midi_synthesizer_spms1>
@@ -204,9 +204,9 @@ the portamento is off and passes the pitch through exactly as it arrives. Pitch 
 turns the portamento on and off without moving Glide: on from a value of 64, as a MIDI switch is.
 It has no CC and holds on, the value 124. Pitch Bend comes in on Pitch 1
 Bend In, which is added to the output past the glide, so the bend acts at once and reaches the
-oscillator and the filter's keyboard tracking alike. Pitch 1 Bend Amt (CC 57) is the bend range,
-half a semitone a step: 2 semitones either way at CC 8, an octave at CC 28, where it powers up,
-and 5 octaves at the top.
+oscillator and the filter's keyboard tracking alike. Pitch 1 Bend Amt is the bend range, half a
+semitone a step: 2 semitones either way at a value of 8, an octave at 28, which it has no CC and
+holds, and 5 octaves at 124.
 
 The LFO goes straight to the oscillator, both to its pitch and to its pulse width, on Mod 2 In, and to the filter, where Filter 1 Mod 2 Amt (CC 25) powers up at 0.0 and
 leaves the cutoff to the envelope until it is turned up. Osc 1 Pitch Mod 2 Amt (CC 13) takes the
@@ -837,7 +837,8 @@ takes the output to the input at once, mid-glide too, as Glide at 0.0 does.
   CC 124. CC 3 sets the rate, and CC 113 turned up gives a vibrato without the wheel
 - A vibrato as deep as a GM2 sound module's: CC 13 = 9 brings the wheel's top down to 50 cents
   either way, the Modulation Depth Range GM2 powers up at, and CC 13 = 14 to a semitone
-- A bend range of 2 semitones, as a GM sound module's: CC 57 = 8
+- A bend range of 2 semitones, as a GM sound module's: CC 99 = 4, CC 98 = 18, CC 6 = 8 sets
+  Pitch 1 Bend Amt to 8
 - The LFO reaches the filter's Mod 2 input by default too, so CC 25 sweeps the cutoff with it, on
   top of the envelope on Mod 1
 - A second oscillator plays by default too, on Mixer 2's second input at the level of the first,
