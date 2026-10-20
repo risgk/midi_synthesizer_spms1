@@ -249,10 +249,10 @@
     @media (min-width: 1641px) {
       .slider-label { white-space: nowrap; }
       .slider-label .cc-num { display: inline; }
-      .control-row { gap: 10px; }
+      .control-row { gap: 6px; }
       .editor-column { gap: 12px; }
-      .editor-column .panel { padding: 10px 12px; }
-      .editor-column .panel h2 { margin-bottom: 6px; }
+      .editor-column .panel { padding: 8px 12px; }
+      .editor-column .panel h2 { margin-bottom: 4px; }
       #init-values { padding: 6px; }
       /* A quarter of a full HD window leaves the slider less than a name, so the gaps and the
          numbers beside it are narrower. */
@@ -2994,6 +2994,10 @@
     fitTabArea();
   });
 
+  // The width from which the panels stand in four columns, as the stylesheet sets it.
+  const FOUR_COLUMNS = window.matchMedia('(min-width: 1641px)');
+  FOUR_COLUMNS.addEventListener('change', () => { renderControls(); fitTabArea(); });
+
   function renderControls() {
     const root = document.getElementById('controls');
     const active = document.activeElement;
@@ -3019,7 +3023,10 @@
         </div>`).join('') + '</div>';
       cols[p.col].appendChild(panel);
     }
-    cols[3].appendChild(document.getElementById('controls-foot'));
+    // In four columns the foot goes under Mixer 2, in the third column, which is the shortest,
+    // so that the tallest column, and with it the page, is not lengthened by it and the soft
+    // keyboard fits a full HD window under the panels; in fewer columns it ends the last one.
+    cols[FOUR_COLUMNS.matches ? 2 : 3].appendChild(document.getElementById('controls-foot'));
     root.replaceChildren(...cols);
     root.querySelectorAll('.slider-knob-zone').forEach(zone => {
       const c = CONTROL[zone.dataset.ctrl];
