@@ -491,8 +491,9 @@
       background: #222;
       padding: 10px 5px 5px 5px;
     }
-    /* The mod wheel on the left of the keys, as on a keyboard, a slider standing as tall as they
-       are; its value is that of the CC Mod Wheel is on in the patch. */
+    /* The pitch bend and mod wheels on the left of the keys, as on a keyboard, sliders standing as
+       tall as they are. The bend springs back to the centre; the mod wheel's value is that of the
+       CC Mod Wheel is on in the patch. */
     .kbd-body {
       display: flex;
       gap: 6px;
@@ -1238,6 +1239,10 @@
   </div>
   <div class="keyboard-frame">
     <div class="kbd-body">
+      <div class="mod-wheel" id="bend-wheel-zone" title="Pitch Bend: back to the centre when let go">
+        <input type="range" id="bend-wheel" min="-8192" max="8191" value="0" aria-label="Pitch Bend">
+        <span class="mod-wheel-label">Bend</span>
+      </div>
       <div class="mod-wheel" id="mod-wheel-zone">
         <input type="range" id="mod-wheel" min="4" max="124" aria-label="Mod Wheel">
         <span class="mod-wheel-label">Mod</span>
@@ -2691,6 +2696,8 @@
     });
     refreshSourceValues();
     refreshSliders();
+    const bendWheel = document.getElementById('bend-wheel');
+    if (!bendWheel.matches(':active')) bendWheel.value = n.bend;
   }
 
   // withPending shows a pitch still waiting for its gate, which the synth does not have yet.
@@ -3119,6 +3126,18 @@
       ? `Mod Wheel (CC ${cc}): ${ccValue(cc)}${v ? `, ${v.text}` : ''}`
       : 'Mod Wheel: no CC in the patch, so the slot holds 0.0';
   }
+
+  // The pitch bend wheel sends Pitch Bend as it moves, -8192 at the bottom to +8191 at the top,
+  // and springs back to the centre, sending 0, when it is let go.
+  const bendWheel = document.getElementById('bend-wheel');
+  bendWheel.addEventListener('input', () => sendBend(parseInt(bendWheel.value)));
+  const bendRelease = () => {
+    if (parseInt(bendWheel.value) === 0 && noteStates[exportOptions().ch].bend === 0) return;
+    bendWheel.value = 0;
+    sendBend(0);
+    refreshNoteNode();
+  };
+  for (const type of ['pointerup', 'pointercancel', 'keyup', 'blur']) bendWheel.addEventListener(type, bendRelease);
 
   const modWheel = document.getElementById('mod-wheel');
   let modWheelBefore = null;

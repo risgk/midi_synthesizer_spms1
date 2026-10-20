@@ -99,7 +99,8 @@ Usage
     - Its Initialize & Send All sets each CC value and each parameter's value with no CC back to
       what it powers up at, and sends them
 - Built-in software keyboard for note input and testing
-    - A mod wheel beside the keys moves the CC that Mod Wheel is on in the patch
+    - Beside the keys, a pitch bend wheel, from -8192 to +8191, springs back to the centre when let go,
+      and a mod wheel moves the CC that Mod Wheel is on in the patch
     - Click its heading to hide it, so the patch editor or the controls take its height; the editor remembers
       which, and the keys of the PC keyboard do not play while it is hidden
 - Graphical patch editor on its Patch tab
