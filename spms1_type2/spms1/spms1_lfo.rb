@@ -43,11 +43,13 @@ module Spms1
       @rate = 0.5
       @stage_1_rate = 0.5
       @current_rate = 0.5
-      @level = 1.0
+      # The level powers up at 0.0, as the default patch sets it, so that the LFO is still at
+      # startup rather than fading out.
+      @level = 0.0
       # The level, smoothed; the per-sample path takes one multiply by it.
-      @amount = 1.0
-      @stage_1_amount = 1.0
-      @current_amount = 1.0
+      @amount = 0.0
+      @stage_1_amount = 0.0
+      @current_amount = 0.0
       # Each modulation depth is its amount, smoothed as the other modules' are.
       @rate_modulation_depth = 1.0
       @stage_1_rate_modulation_depth = 1.0
@@ -57,7 +59,7 @@ module Spms1
       @level_modulation_depth = 1.0
       @stage_1_level_modulation_depth = 1.0
       @current_level_modulation_depth = 1.0
-      @total_amount = 1.0
+      @total_amount = 0.0
       # Powers up at the triangle.
       @wave = 0.0
       @stage_1_wave = 0.0
