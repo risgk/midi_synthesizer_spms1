@@ -463,7 +463,7 @@ Level 4 は CC がなく 0.0 を保持するので、この入力は閉じた状
 
 | CC 98 | パラメータ | | CC 98 | パラメータ | | CC 98 | パラメータ |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | EG 1 Attack | | 19 | Osc 1 Pitch Coarse | | 38 | Noise 1 Color |
+| 0 | EG 1 Attack | | 19 | Osc 1 Pitch Coarse | | 38 | Noise 1 Level |
 | 1 | EG 1 Decay | | 20 | Osc 1 Pitch Fine | | 39 | Mixer 2 Level 1 |
 | 2 | EG 1 Sustain | | 21 | Osc 1 Pitch Mod 1 Amt | | 40 | Mixer 2 Level 2 |
 | 3 | EG 1 Release Switch | | 22 | Osc 1 Pitch Mod 2 Amt | | 41 | Mixer 2 Level 3 |
@@ -481,7 +481,7 @@ Level 4 は CC がなく 0.0 を保持するので、この入力は閉じた状
 | 15 | Pitch 1 Glide | | 34 | Osc 2 PW | | 53 | Chorus 1 Depth |
 | 16 | Pitch 1 Glide Switch | | 35 | Osc 2 PW Mod 1 Amt | | 54 | Delay 1 Mix |
 | 17 | Pitch 1 Stretch | | 36 | Osc 2 PW Mod 2 Amt | | 55 | Delay 1 Time |
-| 18 | Pitch 1 Bend Amt | | 37 | Noise 1 Level | | 56 | Delay 1 Feedback |
+| 18 | Pitch 1 Bend Amt | | 37 | Noise 1 Color | | 56 | Delay 1 Feedback |
 
 <!-- patch_gen end -->
 

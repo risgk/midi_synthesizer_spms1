@@ -276,11 +276,11 @@ controls:
   - { entry: 34, module: OSC_2,     key: PW,           label: PW,  cc: 114, value: 64, bipolar: true, set: set_pulse_width }
   - { entry: 35, module: OSC_2,     key: PW_MOD_1_AMT, label: PW Mod 1 Amt,  cc: 8,   value: 4, set: set_pw_modulation_1_amount }
   - { entry: 36, module: OSC_2,     key: PW_MOD_2_AMT, label: PW Mod 2 Amt,  cc: 103, value: 4, set: set_pw_modulation_2_amount }
-  # Noise 1: Level has no CC and holds 1.0: the noise runs at full level, and Mixer 2 Level 3
-  # (CC 23), or the depth of what it modulates, sets how much is heard. Color crossfades Out from
-  # the white (0.0) to the red (1.0), on CC 115, and powers up at CC 4, 0.0, the white.
-  - { entry: 37, module: NOISE_1,   key: LEVEL,        label: Level,        cc: 0,   value: 124, set: set_level }
-  - { entry: 38, module: NOISE_1,   key: COLOR,        label: Color,        cc: 115, value: 4, set: set_color }
+  # Noise 1: Color crossfades Out from the white (0.0) to the red (1.0), on CC 115, and powers up
+  # at CC 4, 0.0, the white. Level has no CC and holds 1.0: the noise runs at full level, and
+  # Mixer 2 Level 3 (CC 23), or the depth of what it modulates, sets how much is heard.
+  - { entry: 37, module: NOISE_1,   key: COLOR,        label: Color,        cc: 115, value: 4, set: set_color }
+  - { entry: 38, module: NOISE_1,   key: LEVEL,        label: Level,        cc: 0,   value: 124, set: set_level }
   # Mixer 2, the audio ahead of the filter: Osc 1 on In 1, Osc 2 on In 2 and the noise on In 3.
   # Level 1 (CC 116) powers up at 1.0, passing Osc 1 as it is, and Level 2 and 3 (CC 21 and 23) at
   # 0.0, leaving Osc 2 and the noise, at full level from Noise 1, silent. Level 4 has no CC and

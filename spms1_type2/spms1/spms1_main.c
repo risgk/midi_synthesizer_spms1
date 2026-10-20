@@ -1037,8 +1037,8 @@ static sp_int cst_SLOT_OSC_2_WAVE = 0;
 static sp_int cst_SLOT_OSC_2_PW = 0;
 static sp_int cst_SLOT_OSC_2_PW_MOD_1_AMT = 0;
 static sp_int cst_SLOT_OSC_2_PW_MOD_2_AMT = 0;
-static sp_int cst_SLOT_NOISE_1_LEVEL = 0;
 static sp_int cst_SLOT_NOISE_1_COLOR = 0;
+static sp_int cst_SLOT_NOISE_1_LEVEL = 0;
 static sp_int cst_SLOT_MIXER_2_LEVEL_1 = 0;
 static sp_int cst_SLOT_MIXER_2_LEVEL_2 = 0;
 static sp_int cst_SLOT_MIXER_2_LEVEL_3 = 0;
@@ -1125,8 +1125,8 @@ static sp_int cst_NRPN_SOURCE_OSC_2_WAVE = 0;
 static sp_int cst_NRPN_SOURCE_OSC_2_PW = 0;
 static sp_int cst_NRPN_SOURCE_OSC_2_PW_MOD_1_AMT = 0;
 static sp_int cst_NRPN_SOURCE_OSC_2_PW_MOD_2_AMT = 0;
-static sp_int cst_NRPN_SOURCE_NOISE_1_LEVEL = 0;
 static sp_int cst_NRPN_SOURCE_NOISE_1_COLOR = 0;
+static sp_int cst_NRPN_SOURCE_NOISE_1_LEVEL = 0;
 static sp_int cst_NRPN_SOURCE_MIXER_2_LEVEL_1 = 0;
 static sp_int cst_NRPN_SOURCE_MIXER_2_LEVEL_2 = 0;
 static sp_int cst_NRPN_SOURCE_MIXER_2_LEVEL_3 = 0;
@@ -1182,8 +1182,8 @@ static sp_int cst_NRPN_CC_OSC_2_WAVE = 0;
 static sp_int cst_NRPN_CC_OSC_2_PW = 0;
 static sp_int cst_NRPN_CC_OSC_2_PW_MOD_1_AMT = 0;
 static sp_int cst_NRPN_CC_OSC_2_PW_MOD_2_AMT = 0;
-static sp_int cst_NRPN_CC_NOISE_1_LEVEL = 0;
 static sp_int cst_NRPN_CC_NOISE_1_COLOR = 0;
+static sp_int cst_NRPN_CC_NOISE_1_LEVEL = 0;
 static sp_int cst_NRPN_CC_MIXER_2_LEVEL_1 = 0;
 static sp_int cst_NRPN_CC_MIXER_2_LEVEL_2 = 0;
 static sp_int cst_NRPN_CC_MIXER_2_LEVEL_3 = 0;
@@ -1244,8 +1244,8 @@ static sp_int cst_NRPN_VALUE_OSC_2_WAVE = 0;
 static sp_int cst_NRPN_VALUE_OSC_2_PW = 0;
 static sp_int cst_NRPN_VALUE_OSC_2_PW_MOD_1_AMT = 0;
 static sp_int cst_NRPN_VALUE_OSC_2_PW_MOD_2_AMT = 0;
-static sp_int cst_NRPN_VALUE_NOISE_1_LEVEL = 0;
 static sp_int cst_NRPN_VALUE_NOISE_1_COLOR = 0;
+static sp_int cst_NRPN_VALUE_NOISE_1_LEVEL = 0;
 static sp_int cst_NRPN_VALUE_MIXER_2_LEVEL_1 = 0;
 static sp_int cst_NRPN_VALUE_MIXER_2_LEVEL_2 = 0;
 static sp_int cst_NRPN_VALUE_MIXER_2_LEVEL_3 = 0;
@@ -4091,9 +4091,9 @@ static void sp_spms1_write_default_patch(sp_int lv_midi_ch) {
 #line 445 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_PW_MOD_2_AMT)), ((uint8_t)(cst_SIGNAL_OWN))), (sp_int)0);
 #line 446 "spms1_patch.rb"
-  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_NOISE_1_LEVEL)), ((uint8_t)(cst_SIGNAL_OWN))), (sp_int)0);
-#line 447 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_NOISE_1_COLOR)), ((uint8_t)(cst_SIGNAL_OWN))), (sp_int)0);
+#line 447 "spms1_patch.rb"
+  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_NOISE_1_LEVEL)), ((uint8_t)(cst_SIGNAL_OWN))), (sp_int)0);
 #line 448 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_MIXER_2_LEVEL_1)), ((uint8_t)(cst_SIGNAL_OWN))), (sp_int)0);
 #line 449 "spms1_patch.rb"
@@ -4297,9 +4297,9 @@ static void sp_spms1_write_default_patch(sp_int lv_midi_ch) {
 #line 550 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_VALUE_OSC_2_PW_MOD_2_AMT)), ((uint8_t)(4LL))), (sp_int)0);
 #line 551 "spms1_patch.rb"
-  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_VALUE_NOISE_1_LEVEL)), ((uint8_t)(124LL))), (sp_int)0);
-#line 552 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_VALUE_NOISE_1_COLOR)), ((uint8_t)(4LL))), (sp_int)0);
+#line 552 "spms1_patch.rb"
+  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_VALUE_NOISE_1_LEVEL)), ((uint8_t)(124LL))), (sp_int)0);
 #line 553 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_VALUE_MIXER_2_LEVEL_1)), ((uint8_t)(124LL))), (sp_int)0);
 #line 554 "spms1_patch.rb"
@@ -4543,8 +4543,8 @@ int main(int argc,char**argv){
     sp_int lv_source_osc_2_pw = 0;
     sp_int lv_source_osc_2_pw_mod_1_amt = 0;
     sp_int lv_source_osc_2_pw_mod_2_amt = 0;
-    sp_int lv_source_noise_1_level = 0;
     sp_int lv_source_noise_1_color = 0;
+    sp_int lv_source_noise_1_level = 0;
     sp_int lv_source_mixer_2_level_1 = 0;
     sp_int lv_source_mixer_2_level_2 = 0;
     sp_int lv_source_mixer_2_level_3 = 0;
@@ -4600,8 +4600,8 @@ int main(int argc,char**argv){
     sp_int lv_cc_osc_2_pw = 0;
     sp_int lv_cc_osc_2_pw_mod_1_amt = 0;
     sp_int lv_cc_osc_2_pw_mod_2_amt = 0;
-    sp_int lv_cc_noise_1_level = 0;
     sp_int lv_cc_noise_1_color = 0;
+    sp_int lv_cc_noise_1_level = 0;
     sp_int lv_cc_mixer_2_level_1 = 0;
     sp_int lv_cc_mixer_2_level_2 = 0;
     sp_int lv_cc_mixer_2_level_3 = 0;
@@ -5109,9 +5109,9 @@ int main(int argc,char**argv){
 #line 111 "spms1_patch.rb"
   cst_SLOT_OSC_2_PW_MOD_2_AMT = 164LL;
 #line 112 "spms1_patch.rb"
-  cst_SLOT_NOISE_1_LEVEL = 165LL;
+  cst_SLOT_NOISE_1_COLOR = 165LL;
 #line 113 "spms1_patch.rb"
-  cst_SLOT_NOISE_1_COLOR = 166LL;
+  cst_SLOT_NOISE_1_LEVEL = 166LL;
 #line 114 "spms1_patch.rb"
   cst_SLOT_MIXER_2_LEVEL_1 = 167LL;
 #line 115 "spms1_patch.rb"
@@ -5285,9 +5285,9 @@ int main(int argc,char**argv){
 #line 208 "spms1_patch.rb"
   cst_NRPN_SOURCE_OSC_2_PW_MOD_2_AMT = 292LL;
 #line 209 "spms1_patch.rb"
-  cst_NRPN_SOURCE_NOISE_1_LEVEL = 293LL;
+  cst_NRPN_SOURCE_NOISE_1_COLOR = 293LL;
 #line 210 "spms1_patch.rb"
-  cst_NRPN_SOURCE_NOISE_1_COLOR = 294LL;
+  cst_NRPN_SOURCE_NOISE_1_LEVEL = 294LL;
 #line 211 "spms1_patch.rb"
   cst_NRPN_SOURCE_MIXER_2_LEVEL_1 = 295LL;
 #line 212 "spms1_patch.rb"
@@ -5399,9 +5399,9 @@ int main(int argc,char**argv){
 #line 268 "spms1_patch.rb"
   cst_NRPN_CC_OSC_2_PW_MOD_2_AMT = 420LL;
 #line 269 "spms1_patch.rb"
-  cst_NRPN_CC_NOISE_1_LEVEL = 421LL;
+  cst_NRPN_CC_NOISE_1_COLOR = 421LL;
 #line 270 "spms1_patch.rb"
-  cst_NRPN_CC_NOISE_1_COLOR = 422LL;
+  cst_NRPN_CC_NOISE_1_LEVEL = 422LL;
 #line 271 "spms1_patch.rb"
   cst_NRPN_CC_MIXER_2_LEVEL_1 = 423LL;
 #line 272 "spms1_patch.rb"
@@ -5523,9 +5523,9 @@ int main(int argc,char**argv){
 #line 332 "spms1_patch.rb"
   cst_NRPN_VALUE_OSC_2_PW_MOD_2_AMT = 548LL;
 #line 333 "spms1_patch.rb"
-  cst_NRPN_VALUE_NOISE_1_LEVEL = 549LL;
+  cst_NRPN_VALUE_NOISE_1_COLOR = 549LL;
 #line 334 "spms1_patch.rb"
-  cst_NRPN_VALUE_NOISE_1_COLOR = 550LL;
+  cst_NRPN_VALUE_NOISE_1_LEVEL = 550LL;
 #line 335 "spms1_patch.rb"
   cst_NRPN_VALUE_MIXER_2_LEVEL_1 = 551LL;
 #line 336 "spms1_patch.rb"
@@ -5859,9 +5859,9 @@ int main(int argc,char**argv){
 #line 244 "spms1_main.rb"
     lv_source_osc_2_pw_mod_2_amt = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_PW_MOD_2_AMT))))), cst_SLOT_OSC_2_PW_MOD_2_AMT);
 #line 245 "spms1_main.rb"
-    lv_source_noise_1_level = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_NOISE_1_LEVEL))))), cst_SLOT_NOISE_1_LEVEL);
-#line 246 "spms1_main.rb"
     lv_source_noise_1_color = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_NOISE_1_COLOR))))), cst_SLOT_NOISE_1_COLOR);
+#line 246 "spms1_main.rb"
+    lv_source_noise_1_level = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_NOISE_1_LEVEL))))), cst_SLOT_NOISE_1_LEVEL);
 #line 247 "spms1_main.rb"
     lv_source_mixer_2_level_1 = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_2_LEVEL_1))))), cst_SLOT_MIXER_2_LEVEL_1);
 #line 248 "spms1_main.rb"
@@ -6084,15 +6084,15 @@ int main(int argc,char**argv){
     sp_int _t723 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_2_pw_mod_2_amt)))));
     sp_FloatArray_set(lv_signals, cst_SLOT_OSC_2_PW_MOD_2_AMT, sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_osc_2_pw_mod_2_amt, _t723, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_2_PW_MOD_2_AMT))))))));
 #line 346 "spms1_main.rb"
-    lv_cc_noise_1_level = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_NOISE_1_LEVEL)))));
-#line 347 "spms1_main.rb"
-    sp_int _t727 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_noise_1_level)))));
-    sp_FloatArray_set(lv_signals, cst_SLOT_NOISE_1_LEVEL, sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_noise_1_level, _t727, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_NOISE_1_LEVEL))))))));
-#line 348 "spms1_main.rb"
     lv_cc_noise_1_color = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_NOISE_1_COLOR)))));
+#line 347 "spms1_main.rb"
+    sp_int _t727 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_noise_1_color)))));
+    sp_FloatArray_set(lv_signals, cst_SLOT_NOISE_1_COLOR, sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_noise_1_color, _t727, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_NOISE_1_COLOR))))))));
+#line 348 "spms1_main.rb"
+    lv_cc_noise_1_level = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_NOISE_1_LEVEL)))));
 #line 349 "spms1_main.rb"
-    sp_int _t731 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_noise_1_color)))));
-    sp_FloatArray_set(lv_signals, cst_SLOT_NOISE_1_COLOR, sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_noise_1_color, _t731, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_NOISE_1_COLOR))))))));
+    sp_int _t731 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_noise_1_level)))));
+    sp_FloatArray_set(lv_signals, cst_SLOT_NOISE_1_LEVEL, sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_noise_1_level, _t731, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_NOISE_1_LEVEL))))))));
 #line 350 "spms1_main.rb"
     lv_cc_mixer_2_level_1 = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_2_LEVEL_1)))));
 #line 351 "spms1_main.rb"
@@ -6333,11 +6333,11 @@ int main(int argc,char**argv){
     sp_float _t852 = sp_FloatArray_get(lv_signals, lv_source_osc_2_pw_mod_2_amt);
     sp_Osc_set_pw_modulation_2_amount((sp_Osc *)lv_osc_2, _t852);
 #line 447 "spms1_main.rb"
-    sp_float _t853 = sp_FloatArray_get(lv_signals, lv_source_noise_1_level);
-    sp_Noise_set_level((sp_Noise *)lv_noise_1, _t853);
+    sp_float _t853 = sp_FloatArray_get(lv_signals, lv_source_noise_1_color);
+    sp_Noise_set_color((sp_Noise *)lv_noise_1, _t853);
 #line 448 "spms1_main.rb"
-    sp_float _t854 = sp_FloatArray_get(lv_signals, lv_source_noise_1_color);
-    sp_Noise_set_color((sp_Noise *)lv_noise_1, _t854);
+    sp_float _t854 = sp_FloatArray_get(lv_signals, lv_source_noise_1_level);
+    sp_Noise_set_level((sp_Noise *)lv_noise_1, _t854);
 #line 449 "spms1_main.rb"
     sp_float _t855 = sp_FloatArray_get(lv_signals, lv_source_mixer_2_level_1);
     sp_Mixer_set_level_1((sp_Mixer *)lv_mixer_2, _t855);

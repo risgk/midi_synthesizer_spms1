@@ -109,8 +109,8 @@ SLOT_OSC_2_WAVE            = 161
 SLOT_OSC_2_PW              = 162
 SLOT_OSC_2_PW_MOD_1_AMT    = 163
 SLOT_OSC_2_PW_MOD_2_AMT    = 164
-SLOT_NOISE_1_LEVEL         = 165
-SLOT_NOISE_1_COLOR         = 166
+SLOT_NOISE_1_COLOR         = 165
+SLOT_NOISE_1_LEVEL         = 166
 SLOT_MIXER_2_LEVEL_1       = 167
 SLOT_MIXER_2_LEVEL_2       = 168
 SLOT_MIXER_2_LEVEL_3       = 169
@@ -206,8 +206,8 @@ NRPN_SOURCE_OSC_2_WAVE            = 289
 NRPN_SOURCE_OSC_2_PW              = 290
 NRPN_SOURCE_OSC_2_PW_MOD_1_AMT    = 291
 NRPN_SOURCE_OSC_2_PW_MOD_2_AMT    = 292
-NRPN_SOURCE_NOISE_1_LEVEL         = 293
-NRPN_SOURCE_NOISE_1_COLOR         = 294
+NRPN_SOURCE_NOISE_1_COLOR         = 293
+NRPN_SOURCE_NOISE_1_LEVEL         = 294
 NRPN_SOURCE_MIXER_2_LEVEL_1       = 295
 NRPN_SOURCE_MIXER_2_LEVEL_2       = 296
 NRPN_SOURCE_MIXER_2_LEVEL_3       = 297
@@ -266,8 +266,8 @@ NRPN_CC_OSC_2_WAVE            = 417
 NRPN_CC_OSC_2_PW              = 418
 NRPN_CC_OSC_2_PW_MOD_1_AMT    = 419
 NRPN_CC_OSC_2_PW_MOD_2_AMT    = 420
-NRPN_CC_NOISE_1_LEVEL         = 421
-NRPN_CC_NOISE_1_COLOR         = 422
+NRPN_CC_NOISE_1_COLOR         = 421
+NRPN_CC_NOISE_1_LEVEL         = 422
 NRPN_CC_MIXER_2_LEVEL_1       = 423
 NRPN_CC_MIXER_2_LEVEL_2       = 424
 NRPN_CC_MIXER_2_LEVEL_3       = 425
@@ -330,8 +330,8 @@ NRPN_VALUE_OSC_2_WAVE            = 545
 NRPN_VALUE_OSC_2_PW              = 546
 NRPN_VALUE_OSC_2_PW_MOD_1_AMT    = 547
 NRPN_VALUE_OSC_2_PW_MOD_2_AMT    = 548
-NRPN_VALUE_NOISE_1_LEVEL         = 549
-NRPN_VALUE_NOISE_1_COLOR         = 550
+NRPN_VALUE_NOISE_1_COLOR         = 549
+NRPN_VALUE_NOISE_1_LEVEL         = 550
 NRPN_VALUE_MIXER_2_LEVEL_1       = 551
 NRPN_VALUE_MIXER_2_LEVEL_2       = 552
 NRPN_VALUE_MIXER_2_LEVEL_3       = 553
@@ -443,8 +443,8 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_2_PW             , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_2_PW_MOD_1_AMT   , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_2_PW_MOD_2_AMT   , SIGNAL_OWN)
-  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_NOISE_1_LEVEL        , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_NOISE_1_COLOR        , SIGNAL_OWN)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_NOISE_1_LEVEL        , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_2_LEVEL_1      , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_2_LEVEL_2      , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_2_LEVEL_3      , SIGNAL_OWN)
@@ -548,8 +548,8 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_OSC_2_PW             , 64)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_OSC_2_PW_MOD_1_AMT   , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_OSC_2_PW_MOD_2_AMT   , 4)
-  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_NOISE_1_LEVEL        , 124)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_NOISE_1_COLOR        , 4)
+  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_NOISE_1_LEVEL        , 124)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_MIXER_2_LEVEL_1      , 124)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_MIXER_2_LEVEL_2      , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_MIXER_2_LEVEL_3      , 4)
