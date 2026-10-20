@@ -3,10 +3,10 @@
 
 # Module ids, the values of NRPN category 0. MODULE_NONE ends the run order.
 MODULE_NONE     = 0
-MODULE_EG_1     = 1
-MODULE_LFO_1    = 2
-MODULE_MIXER_1  = 3
-MODULE_PITCH_1  = 4
+MODULE_PITCH_1  = 1
+MODULE_EG_1     = 2
+MODULE_LFO_1    = 3
+MODULE_MIXER_1  = 4
 MODULE_OSC_1    = 5
 MODULE_OSC_2    = 6
 MODULE_NOISE_1  = 7
@@ -26,17 +26,17 @@ SIGNAL_NOTE_PITCH                = 5
 SIGNAL_NOTE_GATE                 = 6
 SIGNAL_PITCH_BEND                = 7
 SIGNAL_MOD_WHEEL                 = 8
-SIGNAL_EG_1_OUTPUT               = 9
-SIGNAL_EG_1_OUTPUT_INV           = 10
-SIGNAL_LFO_1_OUTPUT              = 11
-SIGNAL_LFO_1_OUTPUT_INV          = 12
-SIGNAL_LFO_1_OUTPUT_TRIANGLE     = 13
-SIGNAL_LFO_1_OUTPUT_TRIANGLE_INV = 14
-SIGNAL_LFO_1_OUTPUT_SQUARE       = 15
-SIGNAL_LFO_1_OUTPUT_SQUARE_INV   = 16
-SIGNAL_MIXER_1_OUTPUT            = 17
-SIGNAL_MIXER_1_OUTPUT_INV        = 18
-SIGNAL_PITCH_1_OUTPUT            = 19
+SIGNAL_PITCH_1_OUTPUT            = 9
+SIGNAL_EG_1_OUTPUT               = 10
+SIGNAL_EG_1_OUTPUT_INV           = 11
+SIGNAL_LFO_1_OUTPUT              = 12
+SIGNAL_LFO_1_OUTPUT_INV          = 13
+SIGNAL_LFO_1_OUTPUT_TRIANGLE     = 14
+SIGNAL_LFO_1_OUTPUT_TRIANGLE_INV = 15
+SIGNAL_LFO_1_OUTPUT_SQUARE       = 16
+SIGNAL_LFO_1_OUTPUT_SQUARE_INV   = 17
+SIGNAL_MIXER_1_OUTPUT            = 18
+SIGNAL_MIXER_1_OUTPUT_INV        = 19
 SIGNAL_OSC_1_OUTPUT              = 20
 SIGNAL_OSC_1_OUTPUT_SAW          = 21
 SIGNAL_OSC_1_OUTPUT_PULSE        = 22
@@ -64,25 +64,25 @@ SIGNAL_DELAY_1_OUTPUT_MONO       = 40
 SIGNAL_OWN      = 127
 PARAM_SLOT_BASE = 128
 
-SLOT_EG_1_ATTACK           = 128
-SLOT_EG_1_DECAY            = 129
-SLOT_EG_1_SUSTAIN          = 130
-SLOT_EG_1_RELEASE_SW       = 131
-SLOT_EG_1_LEVEL            = 132
-SLOT_LFO_1_WAVE            = 133
-SLOT_LFO_1_RATE            = 134
-SLOT_LFO_1_RATE_MOD_AMT    = 135
-SLOT_LFO_1_LEVEL           = 136
-SLOT_LFO_1_LEVEL_MOD_AMT   = 137
-SLOT_MIXER_1_LEVEL_1       = 138
-SLOT_MIXER_1_LEVEL_2       = 139
-SLOT_MIXER_1_LEVEL_3       = 140
-SLOT_MIXER_1_LEVEL_4       = 141
-SLOT_MIXER_1_OUT_LEVEL     = 142
-SLOT_PITCH_1_GLIDE         = 143
-SLOT_PITCH_1_GLIDE_SW      = 144
-SLOT_PITCH_1_STRETCH       = 145
-SLOT_PITCH_1_BEND_AMT      = 146
+SLOT_PITCH_1_GLIDE         = 128
+SLOT_PITCH_1_GLIDE_SW      = 129
+SLOT_PITCH_1_STRETCH       = 130
+SLOT_PITCH_1_BEND_AMT      = 131
+SLOT_EG_1_ATTACK           = 132
+SLOT_EG_1_DECAY            = 133
+SLOT_EG_1_SUSTAIN          = 134
+SLOT_EG_1_RELEASE_SW       = 135
+SLOT_EG_1_LEVEL            = 136
+SLOT_LFO_1_WAVE            = 137
+SLOT_LFO_1_RATE            = 138
+SLOT_LFO_1_RATE_MOD_AMT    = 139
+SLOT_LFO_1_LEVEL           = 140
+SLOT_LFO_1_LEVEL_MOD_AMT   = 141
+SLOT_MIXER_1_LEVEL_1       = 142
+SLOT_MIXER_1_LEVEL_2       = 143
+SLOT_MIXER_1_LEVEL_3       = 144
+SLOT_MIXER_1_LEVEL_4       = 145
+SLOT_MIXER_1_OUT_LEVEL     = 146
 SLOT_OSC_1_WAVE            = 147
 SLOT_OSC_1_PITCH_COARSE    = 148
 SLOT_OSC_1_PITCH_FINE      = 149
@@ -130,15 +130,15 @@ SLOT_DELAY_1_FEEDBACK      = 184
 # 512..639   the value of each parameter's control slot while it has no CC
 NRPN_ACTIVE_MODULE_BASE = 0
 
-NRPN_SOURCE_EG_1_GATE       = 128
-NRPN_SOURCE_LFO_1_RATE_MOD  = 129
-NRPN_SOURCE_LFO_1_LEVEL_MOD = 130
-NRPN_SOURCE_MIXER_1_IN_1    = 131
-NRPN_SOURCE_MIXER_1_IN_2    = 132
-NRPN_SOURCE_MIXER_1_IN_3    = 133
-NRPN_SOURCE_MIXER_1_IN_4    = 134
-NRPN_SOURCE_PITCH_1_PITCH   = 135
-NRPN_SOURCE_PITCH_1_BEND    = 136
+NRPN_SOURCE_PITCH_1_PITCH   = 128
+NRPN_SOURCE_PITCH_1_BEND    = 129
+NRPN_SOURCE_EG_1_GATE       = 130
+NRPN_SOURCE_LFO_1_RATE_MOD  = 131
+NRPN_SOURCE_LFO_1_LEVEL_MOD = 132
+NRPN_SOURCE_MIXER_1_IN_1    = 133
+NRPN_SOURCE_MIXER_1_IN_2    = 134
+NRPN_SOURCE_MIXER_1_IN_3    = 135
+NRPN_SOURCE_MIXER_1_IN_4    = 136
 NRPN_SOURCE_OSC_1_PITCH     = 137
 NRPN_SOURCE_OSC_1_MOD_1     = 138
 NRPN_SOURCE_OSC_1_MOD_2     = 139
@@ -161,25 +161,25 @@ NRPN_SOURCE_DELAY_1_AUDIO_R = 155
 NRPN_SOURCE_OUTPUT_L        = 156
 NRPN_SOURCE_OUTPUT_R        = 157
 
-NRPN_SOURCE_EG_1_ATTACK           = 256
-NRPN_SOURCE_EG_1_DECAY            = 257
-NRPN_SOURCE_EG_1_SUSTAIN          = 258
-NRPN_SOURCE_EG_1_RELEASE_SW       = 259
-NRPN_SOURCE_EG_1_LEVEL            = 260
-NRPN_SOURCE_LFO_1_WAVE            = 261
-NRPN_SOURCE_LFO_1_RATE            = 262
-NRPN_SOURCE_LFO_1_RATE_MOD_AMT    = 263
-NRPN_SOURCE_LFO_1_LEVEL           = 264
-NRPN_SOURCE_LFO_1_LEVEL_MOD_AMT   = 265
-NRPN_SOURCE_MIXER_1_LEVEL_1       = 266
-NRPN_SOURCE_MIXER_1_LEVEL_2       = 267
-NRPN_SOURCE_MIXER_1_LEVEL_3       = 268
-NRPN_SOURCE_MIXER_1_LEVEL_4       = 269
-NRPN_SOURCE_MIXER_1_OUT_LEVEL     = 270
-NRPN_SOURCE_PITCH_1_GLIDE         = 271
-NRPN_SOURCE_PITCH_1_GLIDE_SW      = 272
-NRPN_SOURCE_PITCH_1_STRETCH       = 273
-NRPN_SOURCE_PITCH_1_BEND_AMT      = 274
+NRPN_SOURCE_PITCH_1_GLIDE         = 256
+NRPN_SOURCE_PITCH_1_GLIDE_SW      = 257
+NRPN_SOURCE_PITCH_1_STRETCH       = 258
+NRPN_SOURCE_PITCH_1_BEND_AMT      = 259
+NRPN_SOURCE_EG_1_ATTACK           = 260
+NRPN_SOURCE_EG_1_DECAY            = 261
+NRPN_SOURCE_EG_1_SUSTAIN          = 262
+NRPN_SOURCE_EG_1_RELEASE_SW       = 263
+NRPN_SOURCE_EG_1_LEVEL            = 264
+NRPN_SOURCE_LFO_1_WAVE            = 265
+NRPN_SOURCE_LFO_1_RATE            = 266
+NRPN_SOURCE_LFO_1_RATE_MOD_AMT    = 267
+NRPN_SOURCE_LFO_1_LEVEL           = 268
+NRPN_SOURCE_LFO_1_LEVEL_MOD_AMT   = 269
+NRPN_SOURCE_MIXER_1_LEVEL_1       = 270
+NRPN_SOURCE_MIXER_1_LEVEL_2       = 271
+NRPN_SOURCE_MIXER_1_LEVEL_3       = 272
+NRPN_SOURCE_MIXER_1_LEVEL_4       = 273
+NRPN_SOURCE_MIXER_1_OUT_LEVEL     = 274
 NRPN_SOURCE_OSC_1_WAVE            = 275
 NRPN_SOURCE_OSC_1_PITCH_COARSE    = 276
 NRPN_SOURCE_OSC_1_PITCH_FINE      = 277
@@ -221,25 +221,25 @@ NRPN_SOURCE_DELAY_1_FEEDBACK      = 312
 
 # A CC number of 0 means the control has no CC: a parameter's control slot then holds its NRPN_VALUE_*
 # below, whatever CC it had before, so a patch sets it alone, and a controller slot holds 0.0.
-NRPN_CC_EG_1_ATTACK           = 384
-NRPN_CC_EG_1_DECAY            = 385
-NRPN_CC_EG_1_SUSTAIN          = 386
-NRPN_CC_EG_1_RELEASE_SW       = 387
-NRPN_CC_EG_1_LEVEL            = 388
-NRPN_CC_LFO_1_WAVE            = 389
-NRPN_CC_LFO_1_RATE            = 390
-NRPN_CC_LFO_1_RATE_MOD_AMT    = 391
-NRPN_CC_LFO_1_LEVEL           = 392
-NRPN_CC_LFO_1_LEVEL_MOD_AMT   = 393
-NRPN_CC_MIXER_1_LEVEL_1       = 394
-NRPN_CC_MIXER_1_LEVEL_2       = 395
-NRPN_CC_MIXER_1_LEVEL_3       = 396
-NRPN_CC_MIXER_1_LEVEL_4       = 397
-NRPN_CC_MIXER_1_OUT_LEVEL     = 398
-NRPN_CC_PITCH_1_GLIDE         = 399
-NRPN_CC_PITCH_1_GLIDE_SW      = 400
-NRPN_CC_PITCH_1_STRETCH       = 401
-NRPN_CC_PITCH_1_BEND_AMT      = 402
+NRPN_CC_PITCH_1_GLIDE         = 384
+NRPN_CC_PITCH_1_GLIDE_SW      = 385
+NRPN_CC_PITCH_1_STRETCH       = 386
+NRPN_CC_PITCH_1_BEND_AMT      = 387
+NRPN_CC_EG_1_ATTACK           = 388
+NRPN_CC_EG_1_DECAY            = 389
+NRPN_CC_EG_1_SUSTAIN          = 390
+NRPN_CC_EG_1_RELEASE_SW       = 391
+NRPN_CC_EG_1_LEVEL            = 392
+NRPN_CC_LFO_1_WAVE            = 393
+NRPN_CC_LFO_1_RATE            = 394
+NRPN_CC_LFO_1_RATE_MOD_AMT    = 395
+NRPN_CC_LFO_1_LEVEL           = 396
+NRPN_CC_LFO_1_LEVEL_MOD_AMT   = 397
+NRPN_CC_MIXER_1_LEVEL_1       = 398
+NRPN_CC_MIXER_1_LEVEL_2       = 399
+NRPN_CC_MIXER_1_LEVEL_3       = 400
+NRPN_CC_MIXER_1_LEVEL_4       = 401
+NRPN_CC_MIXER_1_OUT_LEVEL     = 402
 NRPN_CC_OSC_1_WAVE            = 403
 NRPN_CC_OSC_1_PITCH_COARSE    = 404
 NRPN_CC_OSC_1_PITCH_FINE      = 405
@@ -281,25 +281,25 @@ NRPN_CC_DELAY_1_FEEDBACK      = 440
 NRPN_CC_MOD_WHEEL             = 441
 
 # The value of each parameter's control slot while it has no CC, as a CC value.
-NRPN_VALUE_EG_1_ATTACK           = 512
-NRPN_VALUE_EG_1_DECAY            = 513
-NRPN_VALUE_EG_1_SUSTAIN          = 514
-NRPN_VALUE_EG_1_RELEASE_SW       = 515
-NRPN_VALUE_EG_1_LEVEL            = 516
-NRPN_VALUE_LFO_1_WAVE            = 517
-NRPN_VALUE_LFO_1_RATE            = 518
-NRPN_VALUE_LFO_1_RATE_MOD_AMT    = 519
-NRPN_VALUE_LFO_1_LEVEL           = 520
-NRPN_VALUE_LFO_1_LEVEL_MOD_AMT   = 521
-NRPN_VALUE_MIXER_1_LEVEL_1       = 522
-NRPN_VALUE_MIXER_1_LEVEL_2       = 523
-NRPN_VALUE_MIXER_1_LEVEL_3       = 524
-NRPN_VALUE_MIXER_1_LEVEL_4       = 525
-NRPN_VALUE_MIXER_1_OUT_LEVEL     = 526
-NRPN_VALUE_PITCH_1_GLIDE         = 527
-NRPN_VALUE_PITCH_1_GLIDE_SW      = 528
-NRPN_VALUE_PITCH_1_STRETCH       = 529
-NRPN_VALUE_PITCH_1_BEND_AMT      = 530
+NRPN_VALUE_PITCH_1_GLIDE         = 512
+NRPN_VALUE_PITCH_1_GLIDE_SW      = 513
+NRPN_VALUE_PITCH_1_STRETCH       = 514
+NRPN_VALUE_PITCH_1_BEND_AMT      = 515
+NRPN_VALUE_EG_1_ATTACK           = 516
+NRPN_VALUE_EG_1_DECAY            = 517
+NRPN_VALUE_EG_1_SUSTAIN          = 518
+NRPN_VALUE_EG_1_RELEASE_SW       = 519
+NRPN_VALUE_EG_1_LEVEL            = 520
+NRPN_VALUE_LFO_1_WAVE            = 521
+NRPN_VALUE_LFO_1_RATE            = 522
+NRPN_VALUE_LFO_1_RATE_MOD_AMT    = 523
+NRPN_VALUE_LFO_1_LEVEL           = 524
+NRPN_VALUE_LFO_1_LEVEL_MOD_AMT   = 525
+NRPN_VALUE_MIXER_1_LEVEL_1       = 526
+NRPN_VALUE_MIXER_1_LEVEL_2       = 527
+NRPN_VALUE_MIXER_1_LEVEL_3       = 528
+NRPN_VALUE_MIXER_1_LEVEL_4       = 529
+NRPN_VALUE_MIXER_1_OUT_LEVEL     = 530
 NRPN_VALUE_OSC_1_WAVE            = 531
 NRPN_VALUE_OSC_1_PITCH_COARSE    = 532
 NRPN_VALUE_OSC_1_PITCH_FINE      = 533
@@ -350,10 +350,10 @@ end
 # The default patch, written into the NRPN table, and the values its CCs power up at. Each
 # parameter's NRPN value is its power-up value too, which its slot holds while it has no CC.
 def spms1_write_default_patch(midi_ch)
-  C.set_midi_nrpn_value(midi_ch, NRPN_ACTIVE_MODULE_BASE + 0, MODULE_EG_1)
-  C.set_midi_nrpn_value(midi_ch, NRPN_ACTIVE_MODULE_BASE + 1, MODULE_LFO_1)
-  C.set_midi_nrpn_value(midi_ch, NRPN_ACTIVE_MODULE_BASE + 2, MODULE_MIXER_1)
-  C.set_midi_nrpn_value(midi_ch, NRPN_ACTIVE_MODULE_BASE + 3, MODULE_PITCH_1)
+  C.set_midi_nrpn_value(midi_ch, NRPN_ACTIVE_MODULE_BASE + 0, MODULE_PITCH_1)
+  C.set_midi_nrpn_value(midi_ch, NRPN_ACTIVE_MODULE_BASE + 1, MODULE_EG_1)
+  C.set_midi_nrpn_value(midi_ch, NRPN_ACTIVE_MODULE_BASE + 2, MODULE_LFO_1)
+  C.set_midi_nrpn_value(midi_ch, NRPN_ACTIVE_MODULE_BASE + 3, MODULE_MIXER_1)
   C.set_midi_nrpn_value(midi_ch, NRPN_ACTIVE_MODULE_BASE + 4, MODULE_OSC_1)
   C.set_midi_nrpn_value(midi_ch, NRPN_ACTIVE_MODULE_BASE + 5, MODULE_OSC_2)
   C.set_midi_nrpn_value(midi_ch, NRPN_ACTIVE_MODULE_BASE + 6, MODULE_NOISE_1)
@@ -363,6 +363,8 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_ACTIVE_MODULE_BASE + 10, MODULE_CHORUS_1)
   C.set_midi_nrpn_value(midi_ch, NRPN_ACTIVE_MODULE_BASE + 11, MODULE_DELAY_1)
 
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_PITCH_1_PITCH  , SIGNAL_NOTE_PITCH)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_PITCH_1_BEND   , SIGNAL_PITCH_BEND)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_EG_1_GATE      , SIGNAL_NOTE_GATE)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_LFO_1_RATE_MOD , SIGNAL_NONE)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_LFO_1_LEVEL_MOD, SIGNAL_MOD_WHEEL)
@@ -370,8 +372,6 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_1_IN_2   , SIGNAL_NONE)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_1_IN_3   , SIGNAL_NONE)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_1_IN_4   , SIGNAL_NONE)
-  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_PITCH_1_PITCH  , SIGNAL_NOTE_PITCH)
-  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_PITCH_1_BEND   , SIGNAL_PITCH_BEND)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_1_PITCH    , SIGNAL_PITCH_1_OUTPUT)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_1_MOD_1    , SIGNAL_EG_1_OUTPUT)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_1_MOD_2    , SIGNAL_LFO_1_OUTPUT)
@@ -394,6 +394,10 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OUTPUT_L       , SIGNAL_DELAY_1_OUTPUT_L)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OUTPUT_R       , SIGNAL_DELAY_1_OUTPUT_R)
 
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_PITCH_1_GLIDE        , SIGNAL_OWN)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_PITCH_1_GLIDE_SW     , SIGNAL_OWN)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_PITCH_1_STRETCH      , SIGNAL_OWN)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_PITCH_1_BEND_AMT     , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_EG_1_ATTACK          , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_EG_1_DECAY           , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_EG_1_SUSTAIN         , SIGNAL_OWN)
@@ -409,10 +413,6 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_1_LEVEL_3      , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_1_LEVEL_4      , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_1_OUT_LEVEL    , SIGNAL_OWN)
-  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_PITCH_1_GLIDE        , SIGNAL_OWN)
-  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_PITCH_1_GLIDE_SW     , SIGNAL_OWN)
-  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_PITCH_1_STRETCH      , SIGNAL_OWN)
-  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_PITCH_1_BEND_AMT     , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_1_WAVE           , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_1_PITCH_COARSE   , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_1_PITCH_FINE     , SIGNAL_OWN)
@@ -452,12 +452,12 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_DELAY_1_TIME         , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_DELAY_1_FEEDBACK     , SIGNAL_OWN)
 
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_PITCH_1_GLIDE        , 5)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_EG_1_ATTACK          , 73)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_EG_1_DECAY           , 75)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_EG_1_SUSTAIN         , 30)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_RATE           , 3)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_LEVEL          , 113)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_PITCH_1_GLIDE        , 5)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_WAVE           , 102)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_PITCH_MOD_1_AMT, 89)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_PITCH_MOD_2_AMT, 13)
@@ -487,6 +487,10 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_DELAY_1_TIME         , 90)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_MOD_WHEEL            , 1)
 
+  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_PITCH_1_GLIDE        , 4)
+  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_PITCH_1_GLIDE_SW     , 124)
+  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_PITCH_1_STRETCH      , 4)
+  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_PITCH_1_BEND_AMT     , 28)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_EG_1_ATTACK          , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_EG_1_DECAY           , 94)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_EG_1_SUSTAIN         , 124)
@@ -502,10 +506,6 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_MIXER_1_LEVEL_3      , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_MIXER_1_LEVEL_4      , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_MIXER_1_OUT_LEVEL    , 64)
-  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_PITCH_1_GLIDE        , 4)
-  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_PITCH_1_GLIDE_SW     , 124)
-  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_PITCH_1_STRETCH      , 4)
-  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_PITCH_1_BEND_AMT     , 28)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_OSC_1_WAVE           , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_OSC_1_PITCH_COARSE   , 64)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_OSC_1_PITCH_FINE     , 64)
@@ -545,12 +545,12 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_DELAY_1_TIME         , 64)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_DELAY_1_FEEDBACK     , 64)
 
+  C.set_midi_cc_value(midi_ch, 5  , 4  ) # Pitch 1 Glide
   C.set_midi_cc_value(midi_ch, 73 , 4  ) # EG 1 Attack
   C.set_midi_cc_value(midi_ch, 75 , 94 ) # EG 1 Decay
   C.set_midi_cc_value(midi_ch, 30 , 124) # EG 1 Sustain
   C.set_midi_cc_value(midi_ch, 3  , 64 ) # LFO 1 Rate
   C.set_midi_cc_value(midi_ch, 113, 4  ) # LFO 1 Level
-  C.set_midi_cc_value(midi_ch, 5  , 4  ) # Pitch 1 Glide
   C.set_midi_cc_value(midi_ch, 102, 4  ) # Osc 1 Wave
   C.set_midi_cc_value(midi_ch, 89 , 4  ) # Osc 1 Pitch Mod 1 Amt
   C.set_midi_cc_value(midi_ch, 13 , 124) # Osc 1 Pitch Mod 2 Amt

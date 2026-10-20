@@ -3,10 +3,10 @@ require_relative 'spms1_dsp'
 # The file of each module class in spms1_patch.yaml, spms1_ and the class in snake case. Written by
 # patch_gen.
 # patch_gen requires
+require_relative 'spms1_pitch'
 require_relative 'spms1_env_gen'
 require_relative 'spms1_lfo'
 require_relative 'spms1_mixer'
-require_relative 'spms1_pitch'
 require_relative 'spms1_osc'
 require_relative 'spms1_noise'
 require_relative 'spms1_filter'
@@ -69,10 +69,10 @@ SIGNALS_SIZE = 256
 
 # One instance of each module, by its class in spms1_patch.yaml. Written by patch_gen.
 # patch_gen instances
+pitch_1 = Pitch.new(SAMPLE_RATE)
 eg_1 = EnvGen.new(SAMPLE_RATE)
 lfo_1 = LFO.new(SAMPLE_RATE)
 mixer_1 = Mixer.new(SAMPLE_RATE)
-pitch_1 = Pitch.new(SAMPLE_RATE)
 osc_1 = Osc.new(SAMPLE_RATE)
 osc_2 = Osc.new(SAMPLE_RATE)
 noise_1 = Noise.new(SAMPLE_RATE)
@@ -175,6 +175,8 @@ while true
   # the difference between feeding it at 48 kHz and at the 750 Hz buffer rate. Faster modulation
   # goes through the module inputs, which are read per sample and not smoothed.
   # patch_gen sources
+  source_pitch_1_pitch = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_PITCH)
+  source_pitch_1_bend = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_BEND)
   source_eg_1_gate = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_EG_1_GATE)
   source_lfo_1_rate_mod = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_RATE_MOD)
   source_lfo_1_level_mod = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_LEVEL_MOD)
@@ -182,8 +184,6 @@ while true
   source_mixer_1_in_2 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_IN_2)
   source_mixer_1_in_3 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_IN_3)
   source_mixer_1_in_4 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_IN_4)
-  source_pitch_1_pitch = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_PITCH)
-  source_pitch_1_bend = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_BEND)
   source_osc_1_pitch = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PITCH)
   source_osc_1_mod_1 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_MOD_1)
   source_osc_1_mod_2 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_MOD_2)
@@ -205,6 +205,10 @@ while true
   source_delay_1_audio_r = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_AUDIO_R)
   source_output_l = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OUTPUT_L)
   source_output_r = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OUTPUT_R)
+  source_pitch_1_glide = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_GLIDE), SLOT_PITCH_1_GLIDE)
+  source_pitch_1_glide_sw = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_GLIDE_SW), SLOT_PITCH_1_GLIDE_SW)
+  source_pitch_1_stretch = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_STRETCH), SLOT_PITCH_1_STRETCH)
+  source_pitch_1_bend_amt = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_BEND_AMT), SLOT_PITCH_1_BEND_AMT)
   source_eg_1_attack = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_EG_1_ATTACK), SLOT_EG_1_ATTACK)
   source_eg_1_decay = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_EG_1_DECAY), SLOT_EG_1_DECAY)
   source_eg_1_sustain = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_EG_1_SUSTAIN), SLOT_EG_1_SUSTAIN)
@@ -220,10 +224,6 @@ while true
   source_mixer_1_level_3 = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_LEVEL_3), SLOT_MIXER_1_LEVEL_3)
   source_mixer_1_level_4 = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_LEVEL_4), SLOT_MIXER_1_LEVEL_4)
   source_mixer_1_out_level = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_OUT_LEVEL), SLOT_MIXER_1_OUT_LEVEL)
-  source_pitch_1_glide = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_GLIDE), SLOT_PITCH_1_GLIDE)
-  source_pitch_1_glide_sw = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_GLIDE_SW), SLOT_PITCH_1_GLIDE_SW)
-  source_pitch_1_stretch = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_STRETCH), SLOT_PITCH_1_STRETCH)
-  source_pitch_1_bend_amt = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_BEND_AMT), SLOT_PITCH_1_BEND_AMT)
   source_osc_1_wave = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_WAVE), SLOT_OSC_1_WAVE)
   source_osc_1_pitch_coarse = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PITCH_COARSE), SLOT_OSC_1_PITCH_COARSE)
   source_osc_1_pitch_fine = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PITCH_FINE), SLOT_OSC_1_PITCH_FINE)
@@ -270,6 +270,14 @@ while true
   # parameter's CC fills its own slot, and the mod wheel's CC its slot on the bus. Written by
   # patch_gen.
   # patch_gen controls
+  cc_pitch_1_glide = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_PITCH_1_GLIDE)
+  signals[SLOT_PITCH_1_GLIDE] = cc_to_unipolar(cc_or_nrpn(cc_pitch_1_glide, C.get_midi_cc_value(MIDI_CH, cc_pitch_1_glide), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_PITCH_1_GLIDE)))
+  cc_pitch_1_glide_sw = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_PITCH_1_GLIDE_SW)
+  signals[SLOT_PITCH_1_GLIDE_SW] = cc_to_unipolar(cc_or_nrpn(cc_pitch_1_glide_sw, C.get_midi_cc_value(MIDI_CH, cc_pitch_1_glide_sw), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_PITCH_1_GLIDE_SW)))
+  cc_pitch_1_stretch = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_PITCH_1_STRETCH)
+  signals[SLOT_PITCH_1_STRETCH] = cc_to_unipolar(cc_or_nrpn(cc_pitch_1_stretch, C.get_midi_cc_value(MIDI_CH, cc_pitch_1_stretch), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_PITCH_1_STRETCH)))
+  cc_pitch_1_bend_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_PITCH_1_BEND_AMT)
+  signals[SLOT_PITCH_1_BEND_AMT] = cc_to_unipolar(cc_or_nrpn(cc_pitch_1_bend_amt, C.get_midi_cc_value(MIDI_CH, cc_pitch_1_bend_amt), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_PITCH_1_BEND_AMT)))
   cc_eg_1_attack = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_EG_1_ATTACK)
   signals[SLOT_EG_1_ATTACK] = cc_to_unipolar(cc_or_nrpn(cc_eg_1_attack, C.get_midi_cc_value(MIDI_CH, cc_eg_1_attack), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_EG_1_ATTACK)))
   cc_eg_1_decay = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_EG_1_DECAY)
@@ -300,14 +308,6 @@ while true
   signals[SLOT_MIXER_1_LEVEL_4] = cc_to_unipolar(cc_or_nrpn(cc_mixer_1_level_4, C.get_midi_cc_value(MIDI_CH, cc_mixer_1_level_4), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_MIXER_1_LEVEL_4)))
   cc_mixer_1_out_level = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_1_OUT_LEVEL)
   signals[SLOT_MIXER_1_OUT_LEVEL] = cc_to_unipolar(cc_or_nrpn(cc_mixer_1_out_level, C.get_midi_cc_value(MIDI_CH, cc_mixer_1_out_level), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_MIXER_1_OUT_LEVEL)))
-  cc_pitch_1_glide = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_PITCH_1_GLIDE)
-  signals[SLOT_PITCH_1_GLIDE] = cc_to_unipolar(cc_or_nrpn(cc_pitch_1_glide, C.get_midi_cc_value(MIDI_CH, cc_pitch_1_glide), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_PITCH_1_GLIDE)))
-  cc_pitch_1_glide_sw = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_PITCH_1_GLIDE_SW)
-  signals[SLOT_PITCH_1_GLIDE_SW] = cc_to_unipolar(cc_or_nrpn(cc_pitch_1_glide_sw, C.get_midi_cc_value(MIDI_CH, cc_pitch_1_glide_sw), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_PITCH_1_GLIDE_SW)))
-  cc_pitch_1_stretch = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_PITCH_1_STRETCH)
-  signals[SLOT_PITCH_1_STRETCH] = cc_to_unipolar(cc_or_nrpn(cc_pitch_1_stretch, C.get_midi_cc_value(MIDI_CH, cc_pitch_1_stretch), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_PITCH_1_STRETCH)))
-  cc_pitch_1_bend_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_PITCH_1_BEND_AMT)
-  signals[SLOT_PITCH_1_BEND_AMT] = cc_to_unipolar(cc_or_nrpn(cc_pitch_1_bend_amt, C.get_midi_cc_value(MIDI_CH, cc_pitch_1_bend_amt), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_PITCH_1_BEND_AMT)))
   cc_osc_1_wave = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_WAVE)
   signals[SLOT_OSC_1_WAVE] = cc_to_unipolar(cc_or_nrpn(cc_osc_1_wave, C.get_midi_cc_value(MIDI_CH, cc_osc_1_wave), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_OSC_1_WAVE)))
   cc_osc_1_pitch_coarse = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_PITCH_COARSE)
@@ -392,6 +392,10 @@ while true
   # Each parameter takes its value, every buffer, whether or not it moved. Written by patch_gen
   # from each parameter's `set` in spms1_patch.yaml.
   # patch_gen setters
+  pitch_1.set_glide(signals[source_pitch_1_glide])
+  pitch_1.set_glide_switch(signals[source_pitch_1_glide_sw])
+  pitch_1.set_stretch(signals[source_pitch_1_stretch])
+  pitch_1.set_bend_amount(signals[source_pitch_1_bend_amt])
   eg_1.set_attack(signals[source_eg_1_attack])
   eg_1.set_decay(signals[source_eg_1_decay])
   eg_1.set_sustain(signals[source_eg_1_sustain])
@@ -407,10 +411,6 @@ while true
   mixer_1.set_level_3(signals[source_mixer_1_level_3])
   mixer_1.set_level_4(signals[source_mixer_1_level_4])
   mixer_1.set_out_level(signals[source_mixer_1_out_level])
-  pitch_1.set_glide(signals[source_pitch_1_glide])
-  pitch_1.set_glide_switch(signals[source_pitch_1_glide_sw])
-  pitch_1.set_stretch(signals[source_pitch_1_stretch])
-  pitch_1.set_bend_amount(signals[source_pitch_1_bend_amt])
   osc_1.set_waveform(signals[source_osc_1_wave])
   osc_1.set_pitch_coarse(signals[source_osc_1_pitch_coarse])
   osc_1.set_pitch_fine(signals[source_osc_1_pitch_fine])
@@ -478,21 +478,21 @@ while true
       # with active_count above another 4.4% (to 85.8k).
       case module_id
       # patch_gen dispatch
-      when 1 # MODULE_EG_1
-        signals[9] = eg_1.process(control_tick, signals[source_eg_1_gate]) # SIGNAL_EG_1_OUTPUT
-        signals[10] = eg_1.output_inverted # SIGNAL_EG_1_OUTPUT_INV
-      when 2 # MODULE_LFO_1
-        signals[11] = lfo_1.process(control_tick, signals[source_lfo_1_rate_mod], signals[source_lfo_1_level_mod]) # SIGNAL_LFO_1_OUTPUT
-        signals[12] = lfo_1.output_inverted # SIGNAL_LFO_1_OUTPUT_INV
-        signals[13] = lfo_1.output_triangle # SIGNAL_LFO_1_OUTPUT_TRIANGLE
-        signals[14] = lfo_1.output_triangle_inverted # SIGNAL_LFO_1_OUTPUT_TRIANGLE_INV
-        signals[15] = lfo_1.output_square # SIGNAL_LFO_1_OUTPUT_SQUARE
-        signals[16] = lfo_1.output_square_inverted # SIGNAL_LFO_1_OUTPUT_SQUARE_INV
-      when 3 # MODULE_MIXER_1
-        signals[17] = mixer_1.process(control_tick, signals[source_mixer_1_in_1], signals[source_mixer_1_in_2], signals[source_mixer_1_in_3], signals[source_mixer_1_in_4]) # SIGNAL_MIXER_1_OUTPUT
-        signals[18] = mixer_1.output_inverted # SIGNAL_MIXER_1_OUTPUT_INV
-      when 4 # MODULE_PITCH_1
-        signals[19] = pitch_1.process(control_tick, signals[source_pitch_1_pitch], signals[source_pitch_1_bend]) # SIGNAL_PITCH_1_OUTPUT
+      when 1 # MODULE_PITCH_1
+        signals[9] = pitch_1.process(control_tick, signals[source_pitch_1_pitch], signals[source_pitch_1_bend]) # SIGNAL_PITCH_1_OUTPUT
+      when 2 # MODULE_EG_1
+        signals[10] = eg_1.process(control_tick, signals[source_eg_1_gate]) # SIGNAL_EG_1_OUTPUT
+        signals[11] = eg_1.output_inverted # SIGNAL_EG_1_OUTPUT_INV
+      when 3 # MODULE_LFO_1
+        signals[12] = lfo_1.process(control_tick, signals[source_lfo_1_rate_mod], signals[source_lfo_1_level_mod]) # SIGNAL_LFO_1_OUTPUT
+        signals[13] = lfo_1.output_inverted # SIGNAL_LFO_1_OUTPUT_INV
+        signals[14] = lfo_1.output_triangle # SIGNAL_LFO_1_OUTPUT_TRIANGLE
+        signals[15] = lfo_1.output_triangle_inverted # SIGNAL_LFO_1_OUTPUT_TRIANGLE_INV
+        signals[16] = lfo_1.output_square # SIGNAL_LFO_1_OUTPUT_SQUARE
+        signals[17] = lfo_1.output_square_inverted # SIGNAL_LFO_1_OUTPUT_SQUARE_INV
+      when 4 # MODULE_MIXER_1
+        signals[18] = mixer_1.process(control_tick, signals[source_mixer_1_in_1], signals[source_mixer_1_in_2], signals[source_mixer_1_in_3], signals[source_mixer_1_in_4]) # SIGNAL_MIXER_1_OUTPUT
+        signals[19] = mixer_1.output_inverted # SIGNAL_MIXER_1_OUTPUT_INV
       when 5 # MODULE_OSC_1
         signals[20] = osc_1.process(control_tick, signals[source_osc_1_pitch], signals[source_osc_1_mod_1], signals[source_osc_1_mod_2]) # SIGNAL_OSC_1_OUTPUT
         signals[21] = osc_1.output_saw # SIGNAL_OSC_1_OUTPUT_SAW

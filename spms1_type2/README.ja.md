@@ -231,14 +231,15 @@ NRPN が書き換えます。
 
 #### 実行順
 
-すべてのモジュールが入っています。音を作る型が 1 つずつで、先頭にモジュレーションのソース（エンベロープ、その後に LFO を置くのは、
-エンベロープでビブラートを掛けていくときのように、LFO の Mod In がエンベロープを同じサンプルで読めるようにするためです）、それと Pitch 1 の間に Mixer 1、オシレータの直前に Pitch 1、オシレータの後に
+すべてのモジュールが入っています。音を作る型が 1 つずつで、先頭に Pitch 1（後のどのモジュールも同じサンプルでノートを読めるように）、
+次にモジュレーションのソース（エンベロープ、その後に LFO を置くのは、エンベロープでビブラートを掛けていくときのように、
+LFO の Mod In がエンベロープを同じサンプルで読めるようにするためです）、それとオシレータの間に Mixer 1、オシレータの後に
 Noise 1（主に音として使うためで、モジュレーションに使うと 1 サンプル遅れますが、聞き分けられる差ではありません）、
 それとフィルタの間に Mixer 2、最後にコーラスとディレイです。
 
 ```mermaid
 flowchart LR
-  EG[EG 1] ~~~ LFO[LFO 1] ~~~ MIX1[Mixer 1] ~~~ PITCH[Pitch 1] ~~~ OSC[Osc 1] ~~~ OSC2[Osc 2] ~~~ NOISE[Noise 1] ~~~ MIX2[Mixer 2] ~~~ FILTER[Filter 1] ~~~ AMP[Amp 1] ~~~ CHORUS[Chorus 1] ~~~ DELAY[Delay 1]
+  PITCH[Pitch 1] ~~~ EG[EG 1] ~~~ LFO[LFO 1] ~~~ MIX1[Mixer 1] ~~~ OSC[Osc 1] ~~~ OSC2[Osc 2] ~~~ NOISE[Noise 1] ~~~ MIX2[Mixer 2] ~~~ FILTER[Filter 1] ~~~ AMP[Amp 1] ~~~ CHORUS[Chorus 1] ~~~ DELAY[Delay 1]
 ```
 
 ミキサーには何も結線されていないので、毎サンプル自分のスロットぶんのコストを払うだけで、パッチが
@@ -246,8 +247,9 @@ flowchart LR
 値を見られるのは、この列で自分より前にあるものからだけで、後ろにあるものからは前サンプルの値を受け取ります。
 Mixer 1 は LFO とエンベロープに手が届き、オシレータ、フィルタ、アンプは Mixer 1 に手が届きます。
 Mixer 2 はオシレータとフィルタの間で、オーディオをまとめます。
-Pitch 1 がその 3 つの後にあるのは、自分への変調（LFO を Bend In に入れたベンドなど）を今サンプルの値で
-受け取るためで、オシレータとフィルタの前にあるのは、それらが同じサンプルの値を読めるようにするためです。
+Pitch 1 が先頭にあるのは、オシレータやフィルタ、鍵盤に追従させたいモジュレーションのソースなど、どのモジュールも
+同じサンプルでノートを読めるようにするためです。Pitch 1 自身への変調（LFO を Bend In に入れたベンドなど）は
+そのぶん 1 サンプル遅れますが、聞き分けられる差ではありません。
 
 ミキサーは 2 つの信号を合流させるための道具であり、エンベロープのように片側にしか振れない信号を正負
 どちらにも振れるようにする手段でもあります。下の例を参照してください。
@@ -430,15 +432,15 @@ Level 3 は CC がなく 0.0 を保持するので、この入力は閉じた状
 
 | CC 98 | モジュール入力 | | CC 98 | モジュール入力 |
 | ----- | ------ | - | ----- | ------ |
-| 0 | EG 1 Gate In | | 15 | Mixer 2 In 1 |
-| 1 | LFO 1 Rate Mod In | | 16 | Mixer 2 In 2 |
-| 2 | LFO 1 Level Mod In | | 17 | Mixer 2 In 3 |
-| 3 | Mixer 1 In 1 | | 18 | Mixer 2 In 4 |
-| 4 | Mixer 1 In 2 | | 19 | Filter 1 Audio In |
-| 5 | Mixer 1 In 3 | | 20 | Filter 1 Pitch In |
-| 6 | Mixer 1 In 4 | | 21 | Filter 1 Mod 1 In |
-| 7 | Pitch 1 Pitch In | | 22 | Filter 1 Mod 2 In |
-| 8 | Pitch 1 Bend In | | 23 | Amp 1 Audio In |
+| 0 | Pitch 1 Pitch In | | 15 | Mixer 2 In 1 |
+| 1 | Pitch 1 Bend In | | 16 | Mixer 2 In 2 |
+| 2 | EG 1 Gate In | | 17 | Mixer 2 In 3 |
+| 3 | LFO 1 Rate Mod In | | 18 | Mixer 2 In 4 |
+| 4 | LFO 1 Level Mod In | | 19 | Filter 1 Audio In |
+| 5 | Mixer 1 In 1 | | 20 | Filter 1 Pitch In |
+| 6 | Mixer 1 In 2 | | 21 | Filter 1 Mod 1 In |
+| 7 | Mixer 1 In 3 | | 22 | Filter 1 Mod 2 In |
+| 8 | Mixer 1 In 4 | | 23 | Amp 1 Audio In |
 | 9 | Osc 1 Pitch In | | 24 | Amp 1 Mod In |
 | 10 | Osc 1 Mod 1 In | | 25 | Chorus 1 Audio In |
 | 11 | Osc 1 Mod 2 In | | 26 | Delay 1 Audio In L |
@@ -467,25 +469,25 @@ Level 3 は CC がなく 0.0 を保持するので、この入力は閉じた状
 
 | CC 98 | パラメータ | | CC 98 | パラメータ | | CC 98 | パラメータ |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | EG 1 Attack | | 19 | Osc 1 Wave | | 38 | Noise 1 Level |
-| 1 | EG 1 Decay | | 20 | Osc 1 Pitch Coarse | | 39 | Mixer 2 Level 1 |
-| 2 | EG 1 Sustain | | 21 | Osc 1 Pitch Fine | | 40 | Mixer 2 Level 2 |
-| 3 | EG 1 Release Switch | | 22 | Osc 1 Pitch Mod 1 Amt | | 41 | Mixer 2 Level 3 |
-| 4 | EG 1 Level | | 23 | Osc 1 Pitch Mod 2 Amt | | 42 | Mixer 2 Level 4 |
-| 5 | LFO 1 Wave | | 24 | Osc 1 Pitch Mod Range | | 43 | Mixer 2 Out Level |
-| 6 | LFO 1 Rate | | 25 | Osc 1 PW | | 44 | Filter 1 Mode |
-| 7 | LFO 1 Rate Mod Amt | | 26 | Osc 1 PW Mod 1 Amt | | 45 | Filter 1 Cutoff |
-| 8 | LFO 1 Level | | 27 | Osc 1 PW Mod 2 Amt | | 46 | Filter 1 Pitch Amt |
-| 9 | LFO 1 Level Mod Amt | | 28 | Osc 2 Wave | | 47 | Filter 1 Mod 1 Amt |
-| 10 | Mixer 1 Level 1 | | 29 | Osc 2 Pitch Coarse | | 48 | Filter 1 Mod 2 Amt |
-| 11 | Mixer 1 Level 2 | | 30 | Osc 2 Pitch Fine | | 49 | Filter 1 Resonance |
-| 12 | Mixer 1 Level 3 | | 31 | Osc 2 Pitch Mod 1 Amt | | 50 | Amp 1 Gain |
-| 13 | Mixer 1 Level 4 | | 32 | Osc 2 Pitch Mod 2 Amt | | 51 | Chorus 1 Mix |
-| 14 | Mixer 1 Out Level | | 33 | Osc 2 Pitch Mod Range | | 52 | Chorus 1 Rate |
-| 15 | Pitch 1 Glide | | 34 | Osc 2 PW | | 53 | Chorus 1 Depth |
-| 16 | Pitch 1 Glide Switch | | 35 | Osc 2 PW Mod 1 Amt | | 54 | Delay 1 Mix |
-| 17 | Pitch 1 Stretch | | 36 | Osc 2 PW Mod 2 Amt | | 55 | Delay 1 Time |
-| 18 | Pitch 1 Bend Amt | | 37 | Noise 1 Color | | 56 | Delay 1 Feedback |
+| 0 | Pitch 1 Glide | | 19 | Osc 1 Wave | | 38 | Noise 1 Level |
+| 1 | Pitch 1 Glide Switch | | 20 | Osc 1 Pitch Coarse | | 39 | Mixer 2 Level 1 |
+| 2 | Pitch 1 Stretch | | 21 | Osc 1 Pitch Fine | | 40 | Mixer 2 Level 2 |
+| 3 | Pitch 1 Bend Amt | | 22 | Osc 1 Pitch Mod 1 Amt | | 41 | Mixer 2 Level 3 |
+| 4 | EG 1 Attack | | 23 | Osc 1 Pitch Mod 2 Amt | | 42 | Mixer 2 Level 4 |
+| 5 | EG 1 Decay | | 24 | Osc 1 Pitch Mod Range | | 43 | Mixer 2 Out Level |
+| 6 | EG 1 Sustain | | 25 | Osc 1 PW | | 44 | Filter 1 Mode |
+| 7 | EG 1 Release Switch | | 26 | Osc 1 PW Mod 1 Amt | | 45 | Filter 1 Cutoff |
+| 8 | EG 1 Level | | 27 | Osc 1 PW Mod 2 Amt | | 46 | Filter 1 Pitch Amt |
+| 9 | LFO 1 Wave | | 28 | Osc 2 Wave | | 47 | Filter 1 Mod 1 Amt |
+| 10 | LFO 1 Rate | | 29 | Osc 2 Pitch Coarse | | 48 | Filter 1 Mod 2 Amt |
+| 11 | LFO 1 Rate Mod Amt | | 30 | Osc 2 Pitch Fine | | 49 | Filter 1 Resonance |
+| 12 | LFO 1 Level | | 31 | Osc 2 Pitch Mod 1 Amt | | 50 | Amp 1 Gain |
+| 13 | LFO 1 Level Mod Amt | | 32 | Osc 2 Pitch Mod 2 Amt | | 51 | Chorus 1 Mix |
+| 14 | Mixer 1 Level 1 | | 33 | Osc 2 Pitch Mod Range | | 52 | Chorus 1 Rate |
+| 15 | Mixer 1 Level 2 | | 34 | Osc 2 PW | | 53 | Chorus 1 Depth |
+| 16 | Mixer 1 Level 3 | | 35 | Osc 2 PW Mod 1 Amt | | 54 | Delay 1 Mix |
+| 17 | Mixer 1 Level 4 | | 36 | Osc 2 PW Mod 2 Amt | | 55 | Delay 1 Time |
+| 18 | Mixer 1 Out Level | | 37 | Noise 1 Color | | 56 | Delay 1 Feedback |
 
 <!-- patch_gen end -->
 
@@ -509,10 +511,10 @@ Mod Wheel スロットを埋めます。後述を参照してください。
 | ID | モジュール |
 | ----- | ------ |
 | 0 | なし（実行順の終端） |
-| 1 | EG 1 |
-| 2 | LFO 1 |
-| 3 | Mixer 1 |
-| 4 | Pitch 1 |
+| 1 | Pitch 1 |
+| 2 | EG 1 |
+| 3 | LFO 1 |
+| 4 | Mixer 1 |
 | 5 | Osc 1 |
 | 6 | Osc 2 |
 | 7 | Noise 1 |
@@ -530,20 +532,20 @@ Mod Wheel スロットを埋めます。後述を参照してください。
 
 | ID | シグナル | | ID | シグナル | | ID | シグナル |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | なし（定数 0.0） | | 14 | LFO 1 Output Triangle Inv ± | | 28 | Noise 1 Output Red ± |
-| 1 | 定数 1.0 | | 15 | LFO 1 Output Square | | 29 | Mixer 2 Output ± |
-| 2 | 定数 0.5 | | 16 | LFO 1 Output Square Inv | | 30 | Mixer 2 Output Inv ± |
-| 3 | 定数 -0.5 | | 17 | Mixer 1 Output ± | | 31 | Filter 1 Output ± |
-| 4 | 定数 -1.0 | | 18 | Mixer 1 Output Inv ± | | 32 | Filter 1 Output LP ± |
-| 5 | Note Pitch ± | | 19 | Pitch 1 Output ± | | 33 | Filter 1 Output HP ± |
+| 0 | なし（定数 0.0） | | 14 | LFO 1 Output Triangle ± | | 28 | Noise 1 Output Red ± |
+| 1 | 定数 1.0 | | 15 | LFO 1 Output Triangle Inv ± | | 29 | Mixer 2 Output ± |
+| 2 | 定数 0.5 | | 16 | LFO 1 Output Square | | 30 | Mixer 2 Output Inv ± |
+| 3 | 定数 -0.5 | | 17 | LFO 1 Output Square Inv | | 31 | Filter 1 Output ± |
+| 4 | 定数 -1.0 | | 18 | Mixer 1 Output ± | | 32 | Filter 1 Output LP ± |
+| 5 | Note Pitch ± | | 19 | Mixer 1 Output Inv ± | | 33 | Filter 1 Output HP ± |
 | 6 | Note Gate | | 20 | Osc 1 Output ± | | 34 | Amp 1 Output ± |
 | 7 | Pitch Bend ± | | 21 | Osc 1 Output Saw ± | | 35 | Chorus 1 Output L ± |
 | 8 | Mod Wheel | | 22 | Osc 1 Output Pulse ± | | 36 | Chorus 1 Output R ± |
-| 9 | EG 1 Output | | 23 | Osc 2 Output ± | | 37 | Chorus 1 Output Mono ± |
-| 10 | EG 1 Output Inv | | 24 | Osc 2 Output Saw ± | | 38 | Delay 1 Output L ± |
-| 11 | LFO 1 Output ± | | 25 | Osc 2 Output Pulse ± | | 39 | Delay 1 Output R ± |
-| 12 | LFO 1 Output Inv ± | | 26 | Noise 1 Output ± | | 40 | Delay 1 Output Mono ± |
-| 13 | LFO 1 Output Triangle ± | | 27 | Noise 1 Output White ± | |  |  |
+| 9 | Pitch 1 Output ± | | 23 | Osc 2 Output ± | | 37 | Chorus 1 Output Mono ± |
+| 10 | EG 1 Output | | 24 | Osc 2 Output Saw ± | | 38 | Delay 1 Output L ± |
+| 11 | EG 1 Output Inv | | 25 | Osc 2 Output Pulse ± | | 39 | Delay 1 Output R ± |
+| 12 | LFO 1 Output ± | | 26 | Noise 1 Output ± | | 40 | Delay 1 Output Mono ± |
+| 13 | LFO 1 Output Inv ± | | 27 | Noise 1 Output White ± | |  |  |
 
 <!-- patch_gen end -->
 
@@ -777,7 +779,7 @@ Pitch 1 Glide はユニポーラで、1/120 刻み、1 ステップで時間が�
   CC 3 でレートを決められ、CC 113 を上げればホイールなしでビブラートが掛かります
 - GM2 音源と同じ深さのビブラート: CC 13 = 9 でホイール上端の深さが上下 50 セント、GM2 の起動時の
   Modulation Depth Range になります。CC 13 = 14 なら半音です
-- GM 音源と同じ 2 半音のベンドレンジ: CC 99 = 4, CC 98 = 18, CC 6 = 8 で Pitch 1 Bend Amt を 8 にします
+- GM 音源と同じ 2 半音のベンドレンジ: CC 99 = 4, CC 98 = 3, CC 6 = 8 で Pitch 1 Bend Amt を 8 にします
 - LFO はデフォルトでフィルタの Mod 2 入力にも届いているので、CC 25 で、Mod 1 のエンベロープに重ねて
   カットオフを LFO で揺らせます
 - 2 つ目のオシレータもデフォルトで鳴っています。Mixer 2 の 2 番目の入力に 1 つ目と同じレベル（CC 20 と CC 21 は
@@ -798,29 +800,29 @@ Pitch 1 Glide はユニポーラで、1/120 刻み、1 ステップで時間が�
   LFO の代わりに Noise 1 のレッド出力をフィルタの Mod 2 入力に置きます。あとは CC 25 で量を決めます。CC 6 を 27 に
   すればホワイトになり、さらに細かく震えます。レッドはどのミキサーにも入っておらず、ホワイトも CC 23 を上げるまでは鳴らないので、
   どちらも音としては聞こえません
-- フィルタのカットオフを、自分の CC ではなくエンベロープで動かす: CC 99 = 2, CC 98 = 45, CC 6 = 9。
+- フィルタのカットオフを、自分の CC ではなくエンベロープで動かす: CC 99 = 2, CC 98 = 45, CC 6 = 10。
   エンベロープもカットオフもユニポーラなので、カットオフはつまみの下端から上端まで開きます
 - アンプのゲインとフィルタのカットオフで 1 つの CC を共有する: CC 99 = 3, CC 98 = 50, CC 6 = 74
 - エンベロープなしでアンプをフルレベルにする: CC 99 = 1, CC 98 = 24, CC 6 = 1
 - フィルタの Mod 1 入力を切り離し、エンベロープを外す: CC 99 = 1, CC 98 = 21, CC 6 = 0
-- より細かい、深さ 60 セントのピッチエンベロープ: CC 99 = 2, CC 98 = 21, CC 6 = 9 で Osc 1 Pitch Fine をエンベロープに
+- より細かい、深さ 60 セントのピッチエンベロープ: CC 99 = 2, CC 98 = 21, CC 6 = 10 で Osc 1 Pitch Fine をエンベロープに
   向けると、チューニングが元の音程から 60 セント高いところまで動き、エンベロープのピークの半分でそこに
   届きます
-- ノートの出だしでエンベロープがフィルタをより強く駆動する: CC 99 = 2, CC 98 = 43, CC 6 = 9 で、フィルタの
+- ノートの出だしでエンベロープがフィルタをより強く駆動する: CC 99 = 2, CC 98 = 43, CC 6 = 10 で、フィルタの
   入力レベルである Mixer 2 Out Level が無音からつまみの上端まで上がって戻ります
 - ポルタメントはデフォルトで結線済みです。Note Pitch が Pitch 1 を通ってオシレータに届くので、CC 5 で時間を
   決められます。CC 64 では 0.1 秒ほどで 9 割まで進みます。レガートで弾いてもそうでなくても、どのノートも
-  グライドします。CC 99 = 2, CC 98 = 15, CC 6 = 8 で時間を Mod Wheel から取るようにすれば、
+  グライドします。CC 99 = 2, CC 98 = 0, CC 6 = 8 で時間を Mod Wheel から取るようにすれば、
   ホイールでポルタメントを掛けられます
 - ピッチを上に曲げるモジュレーションホイール: CC 99 = 1, CC 98 = 11 と 14 に CC 6 = 8 を送って、LFO の代わりに
   Mod Wheel を両オシレータの Mod 2 入力に向けます。ホイールはユニポーラなので、CC 13 の許す範囲でノートから
   上にだけ曲がります。CC 13 が起動時の CC 124 で 2 オクターブ、CC 14 で 2 半音です
-- 下から上がってくるピッチエンベロープ: CC 99 = 1, CC 98 = 10, CC 6 = 10 で、エンベロープを反転した EG 1 Out Inv を
+- 下から上がってくるピッチエンベロープ: CC 99 = 1, CC 98 = 10, CC 6 = 11 で、エンベロープを反転した EG 1 Out Inv を
   オシレータの Mod 1 入力に置きます。CC 89 を最大にすると、ノートは 2 オクターブ低く
   始まり、CC 30（Sustain）を下げておけばディケイとともに元の音程に戻ります
-- 上げるほどフィルタを閉じるモジュレーションホイール（Mixer 1 で反転）: CC 99 = 1, CC 98 = 3, CC 6 = 8 で Mod Wheel を
-  ミキサーの 1 番目の入力に置き、CC 99 = 4, CC 98 = 10, CC 6 = 124 でその Level 1 を 1.0 にして、ミキサーの Out Level の半分で通します。
-  CC 99 = 1, CC 98 = 22, CC 6 = 18 で LFO の代わりにミキサーの Out Inv をフィルタの Mod 2 入力に置きます。CC 25 を CC 124 にすると、ホイールは上げるほど Filter 1 Cutoff から
+- 上げるほどフィルタを閉じるモジュレーションホイール（Mixer 1 で反転）: CC 99 = 1, CC 98 = 5, CC 6 = 8 で Mod Wheel を
+  ミキサーの 1 番目の入力に置き、CC 99 = 4, CC 98 = 14, CC 6 = 124 でその Level 1 を 1.0 にして、ミキサーの Out Level の半分で通します。
+  CC 99 = 1, CC 98 = 22, CC 6 = 19 で LFO の代わりにミキサーの Out Inv をフィルタの Mod 2 入力に置きます。CC 25 を CC 124 にすると、ホイールは上げるほど Filter 1 Cutoff から
   下へフィルタを閉じ、上端で 5 オクターブ下がります
 - フィルタを経路から外す: CC 99 = 1, CC 98 = 23, CC 6 = 29 でアンプのオーディオ入力を Mixer 2 に向けます。
   フィルタは走り続けスロットも占めたままですが、誰も読みません
