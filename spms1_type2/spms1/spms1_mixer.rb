@@ -1,5 +1,5 @@
 module Spms1
-  # Sums three inputs, each at its own level, and scales the sum by Out Level. Out, which process
+  # Sums four inputs, each at its own level, and scales the sum by Out Level. Out, which process
   # returns, is the sum, and Out Inv the sum negated, so with one input routed it is a buffer, an
   # attenuator or an inverter; a negative constant on another input shifts a unipolar signal, such
   # as the envelope, into a bipolar one.
@@ -26,12 +26,15 @@ module Spms1
       @level_1 = 0.0
       @level_2 = 0.0
       @level_3 = 0.0
+      @level_4 = 0.0
       @stage_1_1 = 0.0
       @stage_1_2 = 0.0
       @stage_1_3 = 0.0
+      @stage_1_4 = 0.0
       @current_1 = 0.0
       @current_2 = 0.0
       @current_3 = 0.0
+      @current_4 = 0.0
       # Out Level scales the sum, smoothed as the input levels are.
       @out_level = 1.0
       @stage_1_out_level = 1.0
@@ -52,6 +55,10 @@ module Spms1
       @level_3 = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
     end
 
+    def set_level_4(level)
+      @level_4 = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
+    end
+
     # Out Level is unipolar, [0.0, 1.0], a plain multiplier on the sum, so one control can take a
     # blend of two sources up and down together. It is applied before the sum is held to its range,
     # so it can also bring a sum that would have been clipped back inside it.
@@ -70,7 +77,7 @@ module Spms1
     # 0.5 to stay inside it.
     # Written as a literal rather than a constant on purpose: Spinel emits a named Float as a mutable
     # global, and a mixer loading one twice a sample is about 1.8us a buffer.
-    def process(control_tick, input_1 = 0.0, input_2 = 0.0, input_3 = 0.0)
+    def process(control_tick, input_1 = 0.0, input_2 = 0.0, input_3 = 0.0, input_4 = 0.0)
       if control_tick
         @stage_1_1 = Dsp.smooth(@level_1, @stage_1_1, @smoothing_target_blend)
         @current_1 = Dsp.smooth(@stage_1_1, @current_1, @smoothing_target_blend)
@@ -78,11 +85,13 @@ module Spms1
         @current_2 = Dsp.smooth(@stage_1_2, @current_2, @smoothing_target_blend)
         @stage_1_3 = Dsp.smooth(@level_3, @stage_1_3, @smoothing_target_blend)
         @current_3 = Dsp.smooth(@stage_1_3, @current_3, @smoothing_target_blend)
+        @stage_1_4 = Dsp.smooth(@level_4, @stage_1_4, @smoothing_target_blend)
+        @current_4 = Dsp.smooth(@stage_1_4, @current_4, @smoothing_target_blend)
         @stage_1_out_level = Dsp.smooth(@out_level, @stage_1_out_level, @smoothing_target_blend)
         @current_out_level = Dsp.smooth(@stage_1_out_level, @current_out_level, @smoothing_target_blend)
       end
 
-      sum = ((input_1 * @current_1 + input_2 * @current_2) + input_3 * @current_3) * @current_out_level
+      sum = (((input_1 * @current_1 + input_2 * @current_2) + input_3 * @current_3) + input_4 * @current_4) * @current_out_level
       # One nested ternary, not two statements. Split in two, each comparison compiles to a vsel
       # when the method stands alone, which is not how it is built: inside the flattened
       # Spms1_main the branch count does not move and the extra instructions cost 870/875us a
