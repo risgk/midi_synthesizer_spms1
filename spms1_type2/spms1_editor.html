@@ -1459,25 +1459,26 @@
   const DEFAULT_ORDER = SPEC.defaultOrder;
 
   // Columns in signal order, each short enough that the whole patch fits a wide canvas at a
-  // readable scale: the oscillators, Mixer 2 and the filter each in a column of their own, side by
-  // side, and the output under the delay that feeds it.
+  // readable scale: the modulation sources, then Mixer 1 over Pitch 1, the oscillators side by side
+  // with the noise under Osc 2, Mixer 2, the filter over the amp, and the effects with the output
+  // under the delay that feeds it. Spaced so that no two nodes meet with every parameter shown.
   const DEFAULT_LAYOUT = {
     KEYBOARD:  { x: 20,   y: 40 },
     CONST:     { x: 20,   y: 215 },
-    GENERAL:   { x: 20,   y: 526 },
-    NOISE_1:   { x: 340,  y: 40 },
-    EG_1:      { x: 340,  y: 268 },
-    LFO_1:     { x: 340,  y: 522 },
+    GENERAL:   { x: 20,   y: 442 },
+    EG_1:      { x: 340,  y: 40 },
+    LFO_1:     { x: 340,  y: 372 },
     MIXER_1:   { x: 700,  y: 40 },
-    PITCH_1:   { x: 700,  y: 346 },
+    PITCH_1:   { x: 700,  y: 450 },
     OSC_1:     { x: 1060, y: 40 },
     OSC_2:     { x: 1420, y: 40 },
+    NOISE_1:   { x: 1420, y: 554 },
     MIXER_2:   { x: 1780, y: 40 },
     FILTER_1:  { x: 2140, y: 40 },
-    AMP_1:     { x: 2500, y: 40 },
-    CHORUS_1:  { x: 2500, y: 242 },
-    DELAY_1:   { x: 2500, y: 496 },
-    OUT:       { x: 2500, y: 776 },
+    AMP_1:     { x: 2140, y: 502 },
+    CHORUS_1:  { x: 2500, y: 40 },
+    DELAY_1:   { x: 2500, y: 320 },
+    OUT:       { x: 2500, y: 626 },
   };
 
   function defaultState() {
