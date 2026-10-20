@@ -1,4 +1,4 @@
-MIDI Synthesizer SPMS-1 (type-2) v0.0.3
+MIDI Synthesizer SPMS-1 (type-2) v0.0.4
 =======================================
 
 - Spinel (Ruby AOT コンパイラ) で作った、Raspberry Pi Pico 2 用のモノフォニック・セミモジュラー MIDI シンセサイザー
