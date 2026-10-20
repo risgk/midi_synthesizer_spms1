@@ -3002,10 +3002,6 @@
     fitTabArea();
   });
 
-  // The width from which the panels stand in four columns, as the stylesheet sets it.
-  const FOUR_COLUMNS = window.matchMedia('(min-width: 1641px)');
-  FOUR_COLUMNS.addEventListener('change', () => { renderControls(); fitTabArea(); });
-
   function renderControls() {
     const root = document.getElementById('controls');
     const active = document.activeElement;
@@ -3031,10 +3027,7 @@
         </div>`).join('') + '</div>';
       cols[p.col].appendChild(panel);
     }
-    // In four columns the foot goes under Mixer 2, in the third column, which is the shortest,
-    // so that the tallest column, and with it the page, is not lengthened by it and the soft
-    // keyboard fits a full HD window under the panels; in fewer columns it ends the last one.
-    cols[FOUR_COLUMNS.matches ? 2 : 3].appendChild(document.getElementById('controls-foot'));
+    cols[3].appendChild(document.getElementById('controls-foot'));
     root.replaceChildren(...cols);
     root.querySelectorAll('.slider-knob-zone').forEach(zone => {
       const c = CONTROL[zone.dataset.ctrl];
