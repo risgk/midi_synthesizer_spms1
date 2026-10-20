@@ -88,7 +88,8 @@ module Spms1
     CONTROL_RATE_DIVISOR = 4
 
     # Damping lookup, k = 1 / Q, one entry per step of the resonance dial, written against the
-    # dial position r = i / 120, i = CC - 4: Q = 0.707 * 2^(4r) up to Q 5.66 at i = 90 (CC 94).
+    # dial position r = i / 120, i = CC - 4: Q = 0.707 * 2^(5r), doubling every 24 steps, up to
+    # Q 9.51 at i = 90 (CC 94).
     # Past that a quadratic term in (i - 90) is added to log2(Q), so that the slope grows smoothly
     # rather than stepping up, reaching Q 256 at i = 114 (CC 118); above that k is zero, and the
     # self-oscillation that update_coefficients adds takes over. The last entry repeats the one
@@ -96,13 +97,13 @@ module Spms1
     # the end.
     K_TABLE = Array.new(122, 0.0)
     BASE_Q = 0.7071067811865476
-    Q_CURVE_C = (8.0 - (114.0 / 30.0 - 0.5)) / ((114.0 - 90.0) * (114.0 - 90.0))
+    Q_CURVE_C = (8.0 - (114.0 / 24.0 - 0.5)) / ((114.0 - 90.0) * (114.0 - 90.0))
     for i in 0...121
       if i <= 90
-        K_TABLE[i] = 1.0 / (BASE_Q * (2.0 ** (i.to_f * (1.0 / 30.0))))
+        K_TABLE[i] = 1.0 / (BASE_Q * (2.0 ** (i.to_f * (1.0 / 24.0))))
       elsif i <= 114
         d = (i - 90).to_f
-        K_TABLE[i] = 1.0 / (2.0 ** (i.to_f * (1.0 / 30.0) - 0.5 + Q_CURVE_C * d * d))
+        K_TABLE[i] = 1.0 / (2.0 ** (i.to_f * (1.0 / 24.0) - 0.5 + Q_CURVE_C * d * d))
       end
     end
     K_TABLE[121] = K_TABLE[120]
@@ -243,7 +244,7 @@ module Spms1
       @pitch_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
     end
 
-    # Q range: ~0.7 (0.0), ~2.83 (0.5), ~5.66 (0.75), ~29 (0.875), 256 (0.95); self-oscillation from there,
+    # Q range: ~0.7 (0.0), 4.0 (0.5), ~9.5 (0.75), ~40 (0.875), 256 (0.95); self-oscillation from there,
     # growing to its full level at ~0.992 and staying there to 1.0, fading out at a high cutoff.
     def set_resonance(resonance)
       @resonance = (resonance < 0.0) ? 0.0 : ((resonance > 1.0) ? 1.0 : resonance)

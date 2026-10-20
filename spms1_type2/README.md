@@ -762,9 +762,9 @@ Pitch In, the keyboard tracking, is added on its own by Pitch Amt (CC 9), as an 
 Pitch In is outside its Pitch Mod Amts: unipolar, a semitone for a
 semitone at the top, unmoved at note 60.
 
-Filter 1 Resonance raises the resonant peak 6 dB every 30 CC steps, Q doubling each time, up to
-Q 5.66 at CC 94, and from there Q rises faster and faster, without a sudden step, through Q 29
-at CC 109 to Q 256 at CC 118. Above that the filter oscillates on its own: a sine at the cutoff
+Filter 1 Resonance raises the resonant peak 6 dB every 24 CC steps, Q doubling each time, from
+Q 0.71 at CC 4 up to Q 9.51 at CC 94, and from there Q rises faster and faster, without a sudden
+step, through Q 35 at CC 108 to Q 256 at CC 118. It powers up at CC 76, Q 5.66. Above that the filter oscillates on its own: a sine at the cutoff
 frequency, growing to its full level of about 0.5 by CC 123 and holding it to the top of the
 dial. Low in that range the oscillation builds slowly and shares the filter with the input; at
 the top it takes the input over. Its level holds across the cutoff range down to about 150 Hz

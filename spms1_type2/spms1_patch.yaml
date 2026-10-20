@@ -316,7 +316,7 @@ controls:
   - { entry: 46, module: FILTER_1,  key: PITCH_AMT, label: Pitch Amt, cc: 9, value: 4, set: set_pitch_amount }
   - { entry: 47, module: FILTER_1,  key: MOD_1_AMT,    label: Mod 1 Amt,    cc: 24,  value: 28, set: set_modulation_1_amount }
   - { entry: 48, module: FILTER_1,  key: MOD_2_AMT,    label: Mod 2 Amt,    cc: 25,  value: 4, set: set_modulation_2_amount }
-  - { entry: 49, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 94, set: set_resonance }
+  - { entry: 49, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 76, set: set_resonance }
   # Amp 1: Gain, on CC 15, Amp Gain's in PRA32-U2, is doubled, so it powers up at CC 64, a gain of
   # 1.0, and CC 124 brings the sound up by 6 dB; the amp holds its output to one unit.
   - { entry: 50, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 64, set: set_gain }
