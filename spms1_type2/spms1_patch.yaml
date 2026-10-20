@@ -39,7 +39,7 @@ modules:
   - { key: NOISE_1,    id: 7, label: Noise 1, class: Noise, process: [] }
   - { key: MIXER_2,    id: 8, label: Mixer 2, class: Mixer, process: [IN_1, IN_2, IN_3, IN_4] }
   - { key: FILTER_1,  id: 9, label: Filter 1, class: Filter, process: [AUDIO, PITCH, MOD_1, MOD_2] }
-  - { key: AMP_1,     id: 10, label: Amp 1, class: Amp, process: [AUDIO, MOD] }
+  - { key: AMP_1,     id: 10, label: Amp 1, class: Amp, process: [AUDIO, MOD_1, MOD_2] }
   - { key: CHORUS_1,  id: 11, label: Chorus 1, stereo: true, class: Chorus, process: [AUDIO] }
   - { key: DELAY_1,   id: 12, label: Delay 1,  stereo: true, class: Delay, process: [AUDIO_L, AUDIO_R] }
 
@@ -185,12 +185,13 @@ inputs:
   - { entry: 21, module: FILTER_1,    key: MOD_1,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
   - { entry: 22, module: FILTER_1,    key: MOD_2,       label: Mod 2 In,       name: Mod 2 In,       source: LFO_1_OUTPUT }
   - { entry: 23, module: AMP_1,       key: AUDIO,       label: Audio In,       name: Audio In,       source: FILTER_1_OUTPUT }
-  - { entry: 24, module: AMP_1,       key: MOD,         label: Mod In,         name: Mod In,         source: EG_1_OUTPUT }
-  - { entry: 25, module: CHORUS_1,    key: AUDIO,       label: Audio In,       name: Audio In,       source: AMP_1_OUTPUT }
-  - { entry: 26, module: DELAY_1,     key: AUDIO_L,     label: Audio In L,     name: Audio In L,     source: CHORUS_1_OUTPUT_L }
-  - { entry: 27, module: DELAY_1,     key: AUDIO_R,     label: Audio In R,     name: Audio In R,     source: CHORUS_1_OUTPUT_R }
-  - { entry: 28, key: OUTPUT_L,    label: L,              name: Final Output L, name_ja: 最終出力 L, source: DELAY_1_OUTPUT_L }
-  - { entry: 29, key: OUTPUT_R,    label: R,              name: Final Output R, name_ja: 最終出力 R, source: DELAY_1_OUTPUT_R }
+  - { entry: 24, module: AMP_1,       key: MOD_1,       label: Mod 1 In,       name: Mod 1 In,       source: NOTE_GATE }
+  - { entry: 25, module: AMP_1,       key: MOD_2,       label: Mod 2 In,       name: Mod 2 In,       source: EG_1_OUTPUT }
+  - { entry: 26, module: CHORUS_1,    key: AUDIO,       label: Audio In,       name: Audio In,       source: AMP_1_OUTPUT }
+  - { entry: 27, module: DELAY_1,     key: AUDIO_L,     label: Audio In L,     name: Audio In L,     source: CHORUS_1_OUTPUT_L }
+  - { entry: 28, module: DELAY_1,     key: AUDIO_R,     label: Audio In R,     name: Audio In R,     source: CHORUS_1_OUTPUT_R }
+  - { entry: 29, key: OUTPUT_L,    label: L,              name: Final Output L, name_ja: 最終出力 L, source: DELAY_1_OUTPUT_L }
+  - { entry: 30, key: OUTPUT_R,    label: R,              name: Final Output R, name_ja: 最終出力 R, source: DELAY_1_OUTPUT_R }
 
 # Controls, listed in the editor's order, each by its entry: a parameter is one entry of NRPN
 # category 2 (where it takes its value), the same entry of category 3 (which CC fills its control
@@ -312,15 +313,18 @@ controls:
   - { entry: 49, module: FILTER_1,  key: MOD_POLARITY, label: Mod Polarity, cc: 51,  value: 124, bipolar: true, set: set_modulation_polarity }
   - { entry: 50, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 64, set: set_resonance }
   # Amp 1: Gain, on CC 15, Amp Gain's in PRA32-U2, is doubled, so it powers up at CC 64, a gain of
-  # 1.0, and CC 124 brings the sound up by 6 dB; the amp holds its output to one unit.
+  # 1.0, and CC 124 brings the sound up by 6 dB; the amp holds its output to one unit. Mod Mix, on
+  # CC 36, crossfades what scales the gain from Mod 1 In, the note's gate, at 0.0 (CC 4) to Mod 2
+  # In, the envelope, at 1.0 (CC 124), where it powers up, so the envelope shapes the note.
   - { entry: 51, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 64, set: set_gain }
-  - { entry: 52, module: CHORUS_1,  key: MIX,          label: Mix,          cc: 93,  value: 64, set: set_mix }
-  - { entry: 53, module: CHORUS_1,  key: RATE,         label: Rate,         cc: 58,  value: 64, set: set_rate }
-  - { entry: 54, module: CHORUS_1,  key: DEPTH,        label: Depth,        cc: 59,  value: 64, set: set_depth }
-  - { entry: 55, module: DELAY_1,   key: MIX,          label: Mix,          cc: 94,  value: 34, set: set_mix }
-  - { entry: 56, module: DELAY_1,   key: TIME,         label: Time,         cc: 90,  value: 64, set: set_time }
-  - { entry: 57, module: DELAY_1,   key: FEEDBACK,     label: Feedback,     cc: 92,  value: 64, set: set_feedback }
+  - { entry: 52, module: AMP_1,     key: MOD_MIX,      label: Mod Mix,      cc: 36,  value: 124, set: set_modulation_mix }
+  - { entry: 53, module: CHORUS_1,  key: MIX,          label: Mix,          cc: 93,  value: 64, set: set_mix }
+  - { entry: 54, module: CHORUS_1,  key: RATE,         label: Rate,         cc: 58,  value: 64, set: set_rate }
+  - { entry: 55, module: CHORUS_1,  key: DEPTH,        label: Depth,        cc: 59,  value: 64, set: set_depth }
+  - { entry: 56, module: DELAY_1,   key: MIX,          label: Mix,          cc: 94,  value: 34, set: set_mix }
+  - { entry: 57, module: DELAY_1,   key: TIME,         label: Time,         cc: 90,  value: 64, set: set_time }
+  - { entry: 58, module: DELAY_1,   key: FEEDBACK,     label: Feedback,     cc: 92,  value: 64, set: set_feedback }
 
   # The mod wheel, a controller control: its CC, CC 1 as in the MIDI spec, put on the bus as a
   # unipolar slot (see `signals`) for any input or parameter to read. It powers up at CC 4, 0.0.
-  - { entry: 58, controller: true, key: MOD_WHEEL, label: Mod Wheel, cc: 1,   value: 4 }
+  - { entry: 59, controller: true, key: MOD_WHEEL, label: Mod Wheel, cc: 1,   value: 4 }

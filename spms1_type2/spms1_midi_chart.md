@@ -44,6 +44,7 @@
 |                            23 | x             | o             | Mixer 2 Level 4 (Noise Level)        |
 |                           115 | x             | o             | Noise Color (White to Red)           |
 |                            15 | x             | o             | Amp Gain                             |
+|                            36 | x             | o             | Amp Mod Mix (Gate to EG)             |
 |                            73 | x             | o             | EG Attack (Time)                     |
 |                            75 | x             | o             | EG Decay (Time)                      |
 |                            30 | x             | o             | EG Sustain (Level)                   |

@@ -116,12 +116,13 @@ SLOT_FILTER_1_MOD_2_AMT    = 176
 SLOT_FILTER_1_MOD_POLARITY = 177
 SLOT_FILTER_1_RESONANCE    = 178
 SLOT_AMP_1_GAIN            = 179
-SLOT_CHORUS_1_MIX          = 180
-SLOT_CHORUS_1_RATE         = 181
-SLOT_CHORUS_1_DEPTH        = 182
-SLOT_DELAY_1_MIX           = 183
-SLOT_DELAY_1_TIME          = 184
-SLOT_DELAY_1_FEEDBACK      = 185
+SLOT_AMP_1_MOD_MIX         = 180
+SLOT_CHORUS_1_MIX          = 181
+SLOT_CHORUS_1_RATE         = 182
+SLOT_CHORUS_1_DEPTH        = 183
+SLOT_DELAY_1_MIX           = 184
+SLOT_DELAY_1_TIME          = 185
+SLOT_DELAY_1_FEEDBACK      = 186
 
 # NRPN parameter numbers: (MSB << 7) | LSB, where the MSB picks a category and the LSB an entry.
 #   0..127   active_modules[slot]
@@ -155,12 +156,13 @@ NRPN_SOURCE_FILTER_1_PITCH  = 148
 NRPN_SOURCE_FILTER_1_MOD_1  = 149
 NRPN_SOURCE_FILTER_1_MOD_2  = 150
 NRPN_SOURCE_AMP_1_AUDIO     = 151
-NRPN_SOURCE_AMP_1_MOD       = 152
-NRPN_SOURCE_CHORUS_1_AUDIO  = 153
-NRPN_SOURCE_DELAY_1_AUDIO_L = 154
-NRPN_SOURCE_DELAY_1_AUDIO_R = 155
-NRPN_SOURCE_OUTPUT_L        = 156
-NRPN_SOURCE_OUTPUT_R        = 157
+NRPN_SOURCE_AMP_1_MOD_1     = 152
+NRPN_SOURCE_AMP_1_MOD_2     = 153
+NRPN_SOURCE_CHORUS_1_AUDIO  = 154
+NRPN_SOURCE_DELAY_1_AUDIO_L = 155
+NRPN_SOURCE_DELAY_1_AUDIO_R = 156
+NRPN_SOURCE_OUTPUT_L        = 157
+NRPN_SOURCE_OUTPUT_R        = 158
 
 NRPN_SOURCE_PITCH_1_GLIDE         = 256
 NRPN_SOURCE_PITCH_1_GLIDE_SW      = 257
@@ -214,12 +216,13 @@ NRPN_SOURCE_FILTER_1_MOD_2_AMT    = 304
 NRPN_SOURCE_FILTER_1_MOD_POLARITY = 305
 NRPN_SOURCE_FILTER_1_RESONANCE    = 306
 NRPN_SOURCE_AMP_1_GAIN            = 307
-NRPN_SOURCE_CHORUS_1_MIX          = 308
-NRPN_SOURCE_CHORUS_1_RATE         = 309
-NRPN_SOURCE_CHORUS_1_DEPTH        = 310
-NRPN_SOURCE_DELAY_1_MIX           = 311
-NRPN_SOURCE_DELAY_1_TIME          = 312
-NRPN_SOURCE_DELAY_1_FEEDBACK      = 313
+NRPN_SOURCE_AMP_1_MOD_MIX         = 308
+NRPN_SOURCE_CHORUS_1_MIX          = 309
+NRPN_SOURCE_CHORUS_1_RATE         = 310
+NRPN_SOURCE_CHORUS_1_DEPTH        = 311
+NRPN_SOURCE_DELAY_1_MIX           = 312
+NRPN_SOURCE_DELAY_1_TIME          = 313
+NRPN_SOURCE_DELAY_1_FEEDBACK      = 314
 
 # A CC number of 0 means the control has no CC: a parameter's control slot then holds its NRPN_VALUE_*
 # below, whatever CC it had before, so a patch sets it alone, and a controller slot holds 0.0.
@@ -275,13 +278,14 @@ NRPN_CC_FILTER_1_MOD_2_AMT    = 432
 NRPN_CC_FILTER_1_MOD_POLARITY = 433
 NRPN_CC_FILTER_1_RESONANCE    = 434
 NRPN_CC_AMP_1_GAIN            = 435
-NRPN_CC_CHORUS_1_MIX          = 436
-NRPN_CC_CHORUS_1_RATE         = 437
-NRPN_CC_CHORUS_1_DEPTH        = 438
-NRPN_CC_DELAY_1_MIX           = 439
-NRPN_CC_DELAY_1_TIME          = 440
-NRPN_CC_DELAY_1_FEEDBACK      = 441
-NRPN_CC_MOD_WHEEL             = 442
+NRPN_CC_AMP_1_MOD_MIX         = 436
+NRPN_CC_CHORUS_1_MIX          = 437
+NRPN_CC_CHORUS_1_RATE         = 438
+NRPN_CC_CHORUS_1_DEPTH        = 439
+NRPN_CC_DELAY_1_MIX           = 440
+NRPN_CC_DELAY_1_TIME          = 441
+NRPN_CC_DELAY_1_FEEDBACK      = 442
+NRPN_CC_MOD_WHEEL             = 443
 
 # The value of each parameter's control slot while it has no CC, as a CC value.
 NRPN_VALUE_PITCH_1_GLIDE         = 512
@@ -336,12 +340,13 @@ NRPN_VALUE_FILTER_1_MOD_2_AMT    = 560
 NRPN_VALUE_FILTER_1_MOD_POLARITY = 561
 NRPN_VALUE_FILTER_1_RESONANCE    = 562
 NRPN_VALUE_AMP_1_GAIN            = 563
-NRPN_VALUE_CHORUS_1_MIX          = 564
-NRPN_VALUE_CHORUS_1_RATE         = 565
-NRPN_VALUE_CHORUS_1_DEPTH        = 566
-NRPN_VALUE_DELAY_1_MIX           = 567
-NRPN_VALUE_DELAY_1_TIME          = 568
-NRPN_VALUE_DELAY_1_FEEDBACK      = 569
+NRPN_VALUE_AMP_1_MOD_MIX         = 564
+NRPN_VALUE_CHORUS_1_MIX          = 565
+NRPN_VALUE_CHORUS_1_RATE         = 566
+NRPN_VALUE_CHORUS_1_DEPTH        = 567
+NRPN_VALUE_DELAY_1_MIX           = 568
+NRPN_VALUE_DELAY_1_TIME          = 569
+NRPN_VALUE_DELAY_1_FEEDBACK      = 570
 
 # The constants of the bus, which nothing else ever writes. A slot not written here holds 0.0.
 def spms1_fill_constant_signals(signals)
@@ -391,7 +396,8 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_MOD_1 , SIGNAL_EG_1_OUTPUT)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_MOD_2 , SIGNAL_LFO_1_OUTPUT)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_AMP_1_AUDIO    , SIGNAL_FILTER_1_OUTPUT)
-  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_AMP_1_MOD      , SIGNAL_EG_1_OUTPUT)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_AMP_1_MOD_1    , SIGNAL_NOTE_GATE)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_AMP_1_MOD_2    , SIGNAL_EG_1_OUTPUT)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_CHORUS_1_AUDIO , SIGNAL_AMP_1_OUTPUT)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_DELAY_1_AUDIO_L, SIGNAL_CHORUS_1_OUTPUT_L)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_DELAY_1_AUDIO_R, SIGNAL_CHORUS_1_OUTPUT_R)
@@ -450,6 +456,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_MOD_POLARITY, SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_RESONANCE   , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_AMP_1_GAIN           , SIGNAL_OWN)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_AMP_1_MOD_MIX        , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_CHORUS_1_MIX         , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_CHORUS_1_RATE        , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_CHORUS_1_DEPTH       , SIGNAL_OWN)
@@ -495,6 +502,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_MOD_POLARITY, 51)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_RESONANCE   , 71)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_AMP_1_GAIN           , 15)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_AMP_1_MOD_MIX        , 36)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_CHORUS_1_MIX         , 93)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_CHORUS_1_RATE        , 58)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_CHORUS_1_DEPTH       , 59)
@@ -555,6 +563,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_MOD_POLARITY, 124)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_RESONANCE   , 64)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_AMP_1_GAIN           , 64)
+  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_AMP_1_MOD_MIX        , 124)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_CHORUS_1_MIX         , 64)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_CHORUS_1_RATE        , 64)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_CHORUS_1_DEPTH       , 64)
@@ -600,6 +609,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 51 , 124) # Filter 1 Mod Polarity
   C.set_midi_cc_value(midi_ch, 71 , 64 ) # Filter 1 Resonance
   C.set_midi_cc_value(midi_ch, 15 , 64 ) # Amp 1 Gain
+  C.set_midi_cc_value(midi_ch, 36 , 124) # Amp 1 Mod Mix
   C.set_midi_cc_value(midi_ch, 93 , 64 ) # Chorus 1 Mix
   C.set_midi_cc_value(midi_ch, 58 , 64 ) # Chorus 1 Rate
   C.set_midi_cc_value(midi_ch, 59 , 64 ) # Chorus 1 Depth

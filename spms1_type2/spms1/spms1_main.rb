@@ -199,7 +199,8 @@ while true
   source_filter_1_mod_1 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_1)
   source_filter_1_mod_2 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_2)
   source_amp_1_audio = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_AUDIO)
-  source_amp_1_mod = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_MOD)
+  source_amp_1_mod_1 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_MOD_1)
+  source_amp_1_mod_2 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_MOD_2)
   source_chorus_1_audio = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_CHORUS_1_AUDIO)
   source_delay_1_audio_l = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_AUDIO_L)
   source_delay_1_audio_r = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_AUDIO_R)
@@ -257,6 +258,7 @@ while true
   source_filter_1_mod_polarity = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_POLARITY), SLOT_FILTER_1_MOD_POLARITY)
   source_filter_1_resonance = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_RESONANCE), SLOT_FILTER_1_RESONANCE)
   source_amp_1_gain = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_GAIN), SLOT_AMP_1_GAIN)
+  source_amp_1_mod_mix = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_MOD_MIX), SLOT_AMP_1_MOD_MIX)
   source_chorus_1_mix = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_CHORUS_1_MIX), SLOT_CHORUS_1_MIX)
   source_chorus_1_rate = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_CHORUS_1_RATE), SLOT_CHORUS_1_RATE)
   source_chorus_1_depth = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_CHORUS_1_DEPTH), SLOT_CHORUS_1_DEPTH)
@@ -375,6 +377,8 @@ while true
   signals[SLOT_FILTER_1_RESONANCE] = cc_to_unipolar(cc_or_nrpn(cc_filter_1_resonance, C.get_midi_cc_value(MIDI_CH, cc_filter_1_resonance), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_FILTER_1_RESONANCE)))
   cc_amp_1_gain = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_AMP_1_GAIN)
   signals[SLOT_AMP_1_GAIN] = cc_to_unipolar(cc_or_nrpn(cc_amp_1_gain, C.get_midi_cc_value(MIDI_CH, cc_amp_1_gain), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_AMP_1_GAIN)))
+  cc_amp_1_mod_mix = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_AMP_1_MOD_MIX)
+  signals[SLOT_AMP_1_MOD_MIX] = cc_to_unipolar(cc_or_nrpn(cc_amp_1_mod_mix, C.get_midi_cc_value(MIDI_CH, cc_amp_1_mod_mix), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_AMP_1_MOD_MIX)))
   cc_chorus_1_mix = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_CHORUS_1_MIX)
   signals[SLOT_CHORUS_1_MIX] = cc_to_unipolar(cc_or_nrpn(cc_chorus_1_mix, C.get_midi_cc_value(MIDI_CH, cc_chorus_1_mix), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_CHORUS_1_MIX)))
   cc_chorus_1_rate = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_CHORUS_1_RATE)
@@ -447,6 +451,7 @@ while true
   filter_1.set_modulation_polarity(signals[source_filter_1_mod_polarity])
   filter_1.set_resonance(signals[source_filter_1_resonance])
   amp_1.set_gain(signals[source_amp_1_gain])
+  amp_1.set_modulation_mix(signals[source_amp_1_mod_mix])
   chorus_1.set_mix(signals[source_chorus_1_mix])
   chorus_1.set_rate(signals[source_chorus_1_rate])
   chorus_1.set_depth(signals[source_chorus_1_depth])
@@ -517,7 +522,7 @@ while true
         signals[32] = filter_1.output_lp # SIGNAL_FILTER_1_OUTPUT_LP
         signals[33] = filter_1.output_hp # SIGNAL_FILTER_1_OUTPUT_HP
       when 10 # MODULE_AMP_1
-        signals[34] = amp_1.process(control_tick, signals[source_amp_1_audio], signals[source_amp_1_mod]) # SIGNAL_AMP_1_OUTPUT
+        signals[34] = amp_1.process(control_tick, signals[source_amp_1_audio], signals[source_amp_1_mod_1], signals[source_amp_1_mod_2]) # SIGNAL_AMP_1_OUTPUT
       when 11 # MODULE_CHORUS_1
         chorus_1.process(control_tick, signals[source_chorus_1_audio])
         signals[35] = chorus_1.output_l # SIGNAL_CHORUS_1_OUTPUT_L
