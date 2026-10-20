@@ -214,8 +214,8 @@ leaves the cutoff to it until it is turned up. Osc 1 Pitch Mod Amt (CC 8) takes 
 modulations to the pitch, and Osc 1 Pitch Mod Range holds 0.2, which brings them down
 to a vibrato depth there; Osc 1 PW Mod Amt (CC 103) takes them to the pulse width. Both Amts
 power up at 0.0. The pitch from Pitch 1 reaches the filter too, on Filter 1 Pitch In, for keyboard tracking: CC 9
-(Cutoff Pitch Amt) at its top has the cutoff follow the note a semitone for a semitone,
-unmoved at note 60. Cutoff Pitch Amt powers up at 0.0, with the tracking off.
+(Filter 1 Pitch Amt) at its top has the cutoff follow the note a semitone for a semitone,
+unmoved at note 60. Filter 1 Pitch Amt powers up at 0.0, with the tracking off.
 The envelope reaches the oscillator's pitch too, on Osc 1 Mod 1 In, for a pitch envelope: Osc 1
 Mod 1/2 Mix (CC 13) powers up at the LFO alone, with it out. Each modulation depth spans the
 whole range of what it moves, so bringing a source down to a musical depth is left to the patch
@@ -497,9 +497,9 @@ both at the same signal for a mono output.
 | 6 | LFO 1 Rate Mod Amt | | 28 | Osc 1 Mod 1/2 Mix | | 50 | Mixer 2 Out Level |
 | 7 | LFO 1 Rate Mod Pol | | 29 | Osc 1 Pitch Mod Amt | | 51 | Filter 1 Gain |
 | 8 | LFO 1 Level | | 30 | Osc 1 Pitch Mod Range | | 52 | Filter 1 Cutoff |
-| 9 | LFO 1 Wave | | 31 | Osc 1 Wave | | 53 | Filter 1 Cutoff Pitch Amt |
+| 9 | LFO 1 Wave | | 31 | Osc 1 Wave | | 53 | Filter 1 Pitch Amt |
 | 10 | LFO 1 Level Mod Amt | | 32 | Osc 1 Pulse Width | | 54 | Filter 1 Mod 1/2 Mix |
-| 11 | LFO 1 Level Mod Pol | | 33 | Osc 1 PW Mod Amt | | 55 | Filter 1 Cutoff Mod Amt |
+| 11 | LFO 1 Level Mod Pol | | 33 | Osc 1 PW Mod Amt | | 55 | Filter 1 Mod Amt |
 | 12 | Mixer 1 Level 1 | | 34 | Osc 2 Pitch Coarse | | 56 | Filter 1 Resonance |
 | 13 | Mixer 1 Pol 1 | | 35 | Osc 2 Pitch Fine | | 57 | Filter 1 Mode |
 | 14 | Mixer 1 Level 2 | | 36 | Osc 2 Mod 1/2 Mix | | 58 | Amp 1 Gain |
@@ -591,7 +591,7 @@ runs 0.0 to 1.0 from CC 4 to CC 124, the span of an envelope, so an envelope poi
 the whole of its dial. A bipolar one runs -0.5 to +0.5 with CC 64 at 0.0, the span of an LFO, so a
 bipolar source pointed at one swings it about the middle. Osc 1 Pitch Coarse and Fine and Pitch 1 Coarse and
 Fine are bipolar, since their middle is no change at all, and so is every Pol -- the mixers', LFO 1's
-two Mod Pols and Pitch 1 Bend Pol -- and Filter 1 Cutoff Mod Amt, since its sign is
+two Mod Pols and Pitch 1 Bend Pol -- and Filter 1 Mod Amt, since its sign is
 what it sets. Pointing a parameter at a
 slot on the bus is what makes a modulation. No input or other
 parameter can read a parameter's control slot: a CC meant for more than one parameter, or for a
@@ -671,7 +671,7 @@ LFO 1 Level scales the LFO's outputs, as a mixer's Level scales its input: from 
 it is. LFO 1 Level Mod In adds to it, held to the same range, by Level Mod Amt times Level Mod
 Pol, and it takes General Mod Wheel by default at a depth of 1.0 (neither has a CC; they hold 1.0
 and +0.5). With Level turned down, the wheel brings the LFO in, up to full at its top. Turning the LFO the other way up is for a mixer's
-Pol, or for Filter 1 Cutoff Mod Amt on the cutoff.
+Pol, or for Filter 1 Mod Amt on the cutoff.
 
 LFO 1 Rate Mod In moves the rate by LFO 1 Rate Mod Amt times Rate Mod Pol, as Osc 1 Mod 2 In moves the
 oscillator's pitch: a unit of input times depth is the whole rate range, ten octaves, so 0.1 is an
@@ -683,7 +683,7 @@ where the LFO works out its rate, rather than every sample as most module inputs
 EG 1 Level scales the envelope's output the same way, over the same range. It has no CC, and
 holds 1.0, which passes the envelope through as it is. The
 envelope runs one way, 0.0 to 1.0; turning it the other way up is for a mixer's Pol, or for
-Filter 1 Cutoff Mod Amt on the cutoff.
+Filter 1 Mod Amt on the cutoff.
 
 EG 1 Release Switch, on CC 105, picks the release, after the note's gate falls: on from CC 64,
 as a MIDI switch is, it runs at the decay's rate, set by EG 1 Decay; off, below CC 64, it runs at
@@ -763,15 +763,15 @@ The saturation sits on the resonance rather than the pass band: a low
 cutoff passes a loud note nearly clean, while turning the gain up rounds off the resonant peak.
 
 Filter 1 crossfades its two modulations by Mod 1/2 Mix, as Osc 1 does, and the mix moves the
-cutoff by Cutoff Mod Amt, as Osc 1 PW Mod Amt moves the pulse width. Mod 1/2 Mix is on CC 25 and
+cutoff by Mod Amt, as Osc 1 PW Mod Amt moves the pulse width. Mod 1/2 Mix is on CC 25 and
 powers up at -0.5 (CC 4), the envelope alone; CC 64 takes half of each and CC 124 the LFO alone.
-A unit of the mix is the whole cutoff range, so with Cutoff Mod Amt at the top the LFO alone
-swings the cutoff five octaves either way. Cutoff Mod Amt is bipolar, doubled, so it sets the
+A unit of the mix is the whole cutoff range, so with Mod Amt at the top the LFO alone
+swings the cutoff five octaves either way. Mod Amt is bipolar, doubled, so it sets the
 direction too: it is on CC 117 and powers up at +0.1 (CC 76), where 0.2 of the mix is added;
 CC 124 adds the mix as it is, CC 64 leaves the cutoff at Filter 1 Cutoff and the keyboard
 tracking, and CC 4 takes the mix off, so the envelope closes the filter as it rises. One dial
 scales the envelope and the LFO together.
-Pitch In, the keyboard tracking, is added on its own by Cutoff Pitch Amt (CC 9), outside the
+Pitch In, the keyboard tracking, is added on its own by Pitch Amt (CC 9), outside the
 sum, as an oscillator's Pitch In is outside its Pitch Mod Amt: unipolar, a semitone for a
 semitone at the top, unmoved at note 60.
 

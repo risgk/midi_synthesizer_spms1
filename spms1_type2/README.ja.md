@@ -207,8 +207,8 @@ LFO はオシレータのピッチとパルス幅に直接、フルレベルで�
 オシレータのモジュレーションは Osc 1 Pitch Mod Amt（CC 8）でピッチへ入り、Osc 1 Pitch Mod Range が保持する 0.2 で
 ビブラートの深さまで絞ります。パルス幅へは Osc 1 PW Mod Amt（CC 103）で入ります。どちらの Amt も起動時は
 0.0 です。Pitch 1 からのピッチはフィルタの Filter 1 Pitch In にも入ります。キーボードトラッキング用です。
-CC 9（Cutoff Pitch Amt）を最大にするとカットオフがノートに半音ずつ追従し、ノート 60 では動きません。
-Cutoff Pitch Amt は起動時 0.0 で、トラッキングはオフです。
+CC 9（Filter 1 Pitch Amt）を最大にするとカットオフがノートに半音ずつ追従し、ノート 60 では動きません。
+Filter 1 Pitch Amt は起動時 0.0 で、トラッキングはオフです。
 エンベロープはオシレータの Osc 1 Mod 1 In にも入ります。ピッチエンベロープ用です。Osc 1 Mod 1/2 Mix
 （CC 13）は起動時 LFO だけで、エンベロープは入っていません。モジュレーションの深さはどれも動かす先のレンジ全体に届くので、
 ソースを音楽的な深さまで絞る仕事はモジュールに作り込まず、パッチの側に任せています。
@@ -471,9 +471,9 @@ Out Level は CC がなく 1.0、極性は +0.5 を保持するので、レベ�
 | 6 | LFO 1 Rate Mod Amt | | 28 | Osc 1 Mod 1/2 Mix | | 50 | Mixer 2 Out Level |
 | 7 | LFO 1 Rate Mod Pol | | 29 | Osc 1 Pitch Mod Amt | | 51 | Filter 1 Gain |
 | 8 | LFO 1 Level | | 30 | Osc 1 Pitch Mod Range | | 52 | Filter 1 Cutoff |
-| 9 | LFO 1 Wave | | 31 | Osc 1 Wave | | 53 | Filter 1 Cutoff Pitch Amt |
+| 9 | LFO 1 Wave | | 31 | Osc 1 Wave | | 53 | Filter 1 Pitch Amt |
 | 10 | LFO 1 Level Mod Amt | | 32 | Osc 1 Pulse Width | | 54 | Filter 1 Mod 1/2 Mix |
-| 11 | LFO 1 Level Mod Pol | | 33 | Osc 1 PW Mod Amt | | 55 | Filter 1 Cutoff Mod Amt |
+| 11 | LFO 1 Level Mod Pol | | 33 | Osc 1 PW Mod Amt | | 55 | Filter 1 Mod Amt |
 | 12 | Mixer 1 Level 1 | | 34 | Osc 2 Pitch Coarse | | 56 | Filter 1 Resonance |
 | 13 | Mixer 1 Pol 1 | | 35 | Osc 2 Pitch Fine | | 57 | Filter 1 Mode |
 | 14 | Mixer 1 Level 2 | | 36 | Osc 2 Mod 1/2 Mix | | 58 | Amp 1 Gain |
@@ -563,7 +563,7 @@ Out Level は CC がなく 1.0、極性は +0.5 を保持するので、レベ�
 0.0〜1.0 と、エンベロープと同じ幅なので、エンベロープを向ければつまみの全域を動かせます。バイポーラは
 CC 64 を 0.0 とする -0.5〜+0.5 と、LFO と同じ幅なので、バイポーラのソースを向ければ中央を挟んで上下に
 振れます。Osc 1 Pitch Coarse と Pitch Fine、Pitch 1 Coarse と Fine は中央が「変化なし」を意味するのでバイポーラです。Pol も、ミキサーの 2 つ、
-LFO 1 の 2 つの Mod Pol、Pitch 1 Bend Pol のいずれも、そして Filter 1 Cutoff Mod Amt も、符号そのものが設定する値なのでバイポーラです。パラメータにバス上の
+LFO 1 の 2 つの Mod Pol、Pitch 1 Bend Pol のいずれも、そして Filter 1 Mod Amt も、符号そのものが設定する値なのでバイポーラです。パラメータにバス上の
 スロットを指させることがモジュレーションになります。パラメータの
 コントロールスロットは、モジュール入力からもほかのパラメータからも読めません。1 つの CC を複数のパラメータや
 モジュール入力に届けたいときは General スロットに載せるか、Osc 1 と Osc 2 のように、カテゴリ 3 でそれぞれの
@@ -637,7 +637,7 @@ LFO 1 Level は、ミキサーの Level が入力に掛かるのと同じく、L
 Level Mod Amt と Level Mod Pol の積だけ Level に足され、同じレンジに収められます。デフォルトでは General
 Mod Wheel が深さ 1.0 で入ります（どちらも CC はなく、1.0 と +0.5 を保持します）。Level を下げておけば、
 ホイールで LFO を掛けられ、ホイールの上端で最大レベルになります。
-LFO を反転させたいときは、ミキサーの Pol か、カットオフなら Filter 1 Cutoff Mod Amt を使います。
+LFO を反転させたいときは、ミキサーの Pol か、カットオフなら Filter 1 Mod Amt を使います。
 
 LFO 1 Rate Mod In は、Mod 2 In がオシレータのピッチを動かすのと同じく、Rate Mod Amt と Rate Mod Pol
 の積だけ周波数を動かします。入力と深さの積の 1 単位が周波数の全域 (10 オクターブ) なので、0.1 で 1 オクターブ
@@ -647,7 +647,7 @@ LFO 1 Rate Mod In は、Mod 2 In がオシレータのピッチを動かすの�
 
 EG 1 Level も、同じレンジで同じようにエンベロープの出力に掛かります。CC がなく、
 1.0 を保持するので、エンベロープはそのまま出ます。エンベロープは 0.0〜1.0 の片側にだけ振れます。
-反転させたいときは、ミキサーの Pol か、カットオフなら Filter 1 Cutoff Mod Amt を使います。
+反転させたいときは、ミキサーの Pol か、カットオフなら Filter 1 Mod Amt を使います。
 
 EG 1 Release Switch（CC 105）はノートのゲートが落ちた後のリリースを選びます。MIDI のスイッチと同じく
 CC 64 以上でオンになり、EG 1 Decay で決まるディケイの速さでリリースします。CC 64 未満でオフになり、
@@ -718,14 +718,14 @@ Filter 1 Gain はオーディオ入力がフィルタをどれだけ強く駆動
 そのまま通り、ゲインを上げるとレゾナンスのピークが丸くなります。
 
 Filter 1 は Osc 1 と同じく 2 つのモジュレーションを Mod 1/2 Mix でクロスフェードし、その結果でカットオフを
-Cutoff Mod Amt だけ動かします。Osc 1 PW Mod Amt がパルス幅を動かすのと同じです。Mod 1/2 Mix は CC 25 で、
+Mod Amt だけ動かします。Osc 1 PW Mod Amt がパルス幅を動かすのと同じです。Mod 1/2 Mix は CC 25 で、
 起動時は -0.5 (CC 4)、エンベロープだけです。CC 64 で半分ずつ、CC 124 で LFO だけです。ミックスの 1 単位が
-カットオフのレンジ全体なので、Cutoff Mod Amt を最大にすると LFO だけでカットオフを上下に 5 オクターブ振ります。
-Cutoff Mod Amt はバイポーラで 2 倍して掛かり、向きも決めます。CC は 117 で、起動時は +0.1（CC 76）、
+カットオフのレンジ全体なので、Mod Amt を最大にすると LFO だけでカットオフを上下に 5 オクターブ振ります。
+Mod Amt はバイポーラで 2 倍して掛かり、向きも決めます。CC は 117 で、起動時は +0.1（CC 76）、
 ミックスの 0.2 倍が足されます。CC 124 ではミックスがそのまま足され、CC 64 ではカットオフは Filter 1 Cutoff と
 キーボードトラッキングだけで決まり、CC 4 ではミックスが引かれるので、エンベロープが上がるほどフィルタが
 閉じます。1 つのつまみでエンベロープと LFO をまとめて絞れます。キーボードトラッキングの
-Pitch In はミックスの外で、Cutoff Pitch Amt（CC 9）だけ足されます。オシレータの Pitch In が Pitch Mod Amt の外にあるのと
+Pitch In はミックスの外で、Pitch Amt（CC 9）だけ足されます。オシレータの Pitch In が Pitch Mod Amt の外にあるのと
 同じです。ユニポーラで、最大でノートに半音ずつ追従し、ノート 60 では動きません。
 
 Filter 1 Resonance は CC 94 の Q 5.66 までは CC 30 段ごとにピークが 6 dB（Q が 2 倍）上がり、そこから
