@@ -300,9 +300,10 @@
     }
     /* The slider runs from CC 4 to CC 124, the ends of the range the synth uses: cc_to_unipolar
        and cc_to_bipolar map them to the ends of their ranges and clamp anything past them. A
-       bipolar one has a tick at CC 64, where the centre of the dial means no change, drawn over
-       the slider rather than declared as a <datalist>, which some browsers turn into a snap point,
-       and taller than the thumb, so it shows when the thumb sits on it. The thumb's centre travels
+       bipolar one has a tick at CC 64, where the centre of the dial means no change, drawn beside
+       the slider rather than declared as a <datalist>, which some browsers turn into a snap point.
+       It runs under the thumb and is taller than it, so it shows above and below the thumb when
+       the thumb sits on it. The thumb's centre travels
        from half a thumb in to half a thumb from the far end, so CC 64, the middle of CC 4 to
        CC 124, is halfway along what is left of the track. */
     .range-wrap {
@@ -311,6 +312,22 @@
       min-width: 0;
       display: flex;
       align-items: center;
+    }
+    .range-wrap input[type="range"] {
+      position: relative;
+      z-index: 1;
+      background-color: transparent;
+    }
+    .range-wrap::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      height: 6px;
+      transform: translateY(-50%);
+      border-radius: 3px;
+      background: var(--border-color);
     }
     .range-wrap .centre-tick {
       position: absolute;
