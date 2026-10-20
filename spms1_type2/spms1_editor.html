@@ -287,12 +287,11 @@
       gap: 12px;
     }
     :root {
-      /* Slider ticks. The thumb's centre travels from half a thumb in to half a thumb from the
-         far end, so a tick for CC n sits at that fraction of what is left of the track. */
+      /* The slider tick. The thumb's centre travels from half a thumb in to half a thumb from the
+         far end, so the tick for CC 64, the middle of CC 4 to CC 124, sits halfway along what is
+         left of the track. */
       --tick: linear-gradient(var(--text-muted), var(--text-muted));
-      --tick-4: calc(9px + (100% - 18px) * 0.031496 - 1px);
-      --tick-64: calc(9px + (100% - 18px) * 0.503937 - 1px);
-      --tick-124: calc(9px + (100% - 18px) * 0.976378 - 1px);
+      --tick-64: calc(9px + (100% - 18px) * 0.5 - 1px);
     }
     /* Chrome gives a range input a minimum width of about 130px, which would push two columns past
        a window under about 880px wide. */
@@ -305,20 +304,16 @@
       background-color: var(--border-color);
       border-radius: 3px;
       outline: none;
-      /* CC 4 and CC 124 are the ends of the range the synth uses: cc_to_unipolar and
-         cc_to_bipolar map them to the ends of their ranges and clamp anything past them, so the
-         track outside the ticks does nothing. */
-      background-image: var(--tick), var(--tick);
-      background-size: 2px 100%, 2px 100%;
-      background-position: var(--tick-4) center, var(--tick-124) center;
-      background-repeat: no-repeat;
     }
-    /* A third tick at CC 64 where the centre of the dial means no change. Drawn rather than
-       declared as a <datalist>, which some browsers turn into a snap point. */
+    /* The slider runs from CC 4 to CC 124, the ends of the range the synth uses: cc_to_unipolar
+       and cc_to_bipolar map them to the ends of their ranges and clamp anything past them. A tick
+       at CC 64 where the centre of the dial means no change, drawn rather than declared as a
+       <datalist>, which some browsers turn into a snap point. */
     input[type="range"].bipolar {
-      background-image: var(--tick), var(--tick), var(--tick);
-      background-size: 2px 100%, 2px 100%, 2px 100%;
-      background-position: var(--tick-4) center, var(--tick-64) center, var(--tick-124) center;
+      background-image: var(--tick);
+      background-size: 2px 100%;
+      background-position: var(--tick-64) center;
+      background-repeat: no-repeat;
     }
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
@@ -1460,6 +1455,9 @@
   }
 
   const clamp7 = v => Math.max(0, Math.min(127, Math.round(Number(v) || 0)));
+  // A value the editor sets or shows: CC 4 and CC 124 are the ends of the range the synth uses,
+  // and anything past them reads as the end it is nearest, so a value outside is drawn in.
+  const clampValue = v => Math.max(4, Math.min(124, Math.round(Number(v) || 0)));
   const ccValue = cc => (state.values[cc] ?? 64);
   // What a parameter's control slot holds while it has no CC, as a CC value: NRPN category 4.
   const paramValue = key => (state.paramValues[key] ?? CONTROL[key].defaultValue);
@@ -1498,10 +1496,10 @@
     PARAM_ITEMS.forEach(p => { if (obj.params && p.key in obj.params) s.params[p.key] = src(obj.params[p.key]) || p.key; });
     CONTROL_ITEMS.forEach(c => { if (obj.cc && c.key in obj.cc) s.cc[c.key] = clamp7(obj.cc[c.key]); });
     if (obj.values && typeof obj.values === 'object') {
-      for (const k in obj.values) s.values[clamp7(k)] = clamp7(obj.values[k]);
+      for (const k in obj.values) s.values[clamp7(k)] = clampValue(obj.values[k]);
     }
     if (obj.paramValues && typeof obj.paramValues === 'object') {
-      PARAM_ITEMS.forEach(p => { if (p.key in obj.paramValues) s.paramValues[p.key] = clamp7(obj.paramValues[p.key]); });
+      PARAM_ITEMS.forEach(p => { if (p.key in obj.paramValues) s.paramValues[p.key] = clampValue(obj.paramValues[p.key]); });
     }
     if (obj.layout && typeof obj.layout === 'object') {
       for (const k in s.layout) {
@@ -1789,7 +1787,7 @@
       <span class="lbl" title="${tip}">${escapeHTML(label)}</span>
       <span class="src"${withInput ? ` data-src-of="PR:${c.key}"` : ''}></span>
       <input type="number" class="cc" min="0" max="127" title="CC number, 0 for none">
-      <input type="number" class="val" min="0" max="127" title="CC value">
+      <input type="number" class="val" min="4" max="124" title="CC value">
       <span class="norm" data-slot="${slot}" title="The value the synth sees in the slot"></span>
       ${withInput ? '' : `<span class="port out param" data-src="${slot}" title="${escapeHTML(SLOT[slot].full)} control slot"></span>`}
     </div>` + more.map(([slot, label, bipolar]) => `<div class="row">
@@ -1923,8 +1921,8 @@
       valIn.addEventListener('input', () => {
         const cc = state.cc[key];
         if (valIn.value === '') return;
-        if (cc) setCCValue(cc, clamp7(valIn.value), true);
-        else if (!CONTROL[key].general) setParamValue(key, clamp7(valIn.value), true);
+        if (cc) setCCValue(cc, clampValue(valIn.value), true);
+        else if (!CONTROL[key].general) setParamValue(key, clampValue(valIn.value), true);
       });
     });
   }
@@ -2824,7 +2822,7 @@
     } else if (nrpn >= 384 && nrpn < 512 && CONTROL_BY_ENTRY[nrpn - 384]) {
       state.cc[CONTROL_BY_ENTRY[nrpn - 384].key] = value;
     } else if (nrpn >= 512 && nrpn < 640 && PARAM_BY_ENTRY[nrpn - 512]) {
-      state.paramValues[PARAM_BY_ENTRY[nrpn - 512].key] = value;
+      state.paramValues[PARAM_BY_ENTRY[nrpn - 512].key] = clampValue(value);
     } else {
       return;
     }
@@ -2845,6 +2843,7 @@
   // A CC value is a knob position rather than part of the routing, so it goes out whether or not
   // Live is on, as the old slider page did.
   function setCCValue(cc, value, send) {
+    value = clampValue(value);
     state.values[cc] = value;
     if (send && midiOutput) midiOutput.send([0xB0 | exportOptions().ch, cc, value]);
     if (lastSent) lastSent.set('c' + cc, value);
@@ -2856,6 +2855,7 @@
   // A parameter's value with no CC is part of the patch, but moved like a knob, so it goes out
   // whether or not Live is on too, as one NRPN write.
   function setParamValue(key, value, send) {
+    value = clampValue(value);
     state.paramValues[key] = value;
     const nrpn = 512 + CONTROL[key].entry;
     if (send && midiOutput) {
@@ -3034,7 +3034,7 @@
         <div class="slider-knob-zone" data-ctrl="${c.key}">
           <div class="slider-label">${escapeHTML(/^\d$/.test(c.label) ? c.full : c.label)} <span class="cc-num"></span></div>
           <div class="slider-input-wrapper">
-            <input type="range" min="0" max="127"${c.slots.some(([, , bipolar]) => bipolar) ? ' class="bipolar"' : ''}>
+            <input type="range" min="4" max="124"${c.slots.some(([, , bipolar]) => bipolar) ? ' class="bipolar"' : ''}>
             <span class="slider-value"></span>
             <span class="slider-norm" title="The value the synth sees in the slot"></span>
           </div>
