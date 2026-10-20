@@ -20,6 +20,7 @@
       --wire-feedback: #d68910;
       --wire-inactive: #b8c0c4;
       --favorite: #d4a017;
+      --favorite-bg: #fbf3d9;
     }
     * {
       box-sizing: border-box;
@@ -232,6 +233,7 @@
     }
     .slider-knob-zone {
       position: relative;
+      isolation: isolate;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -241,13 +243,13 @@
        takes nothing from the name or the slider at any width; faint until it is set. */
     .fav-toggle {
       position: absolute;
-      left: -13px;
+      left: -15px;
       top: 50%;
       transform: translateY(-50%);
       padding: 0;
       border: 0;
       background: none;
-      font-size: 0.65rem;
+      font-size: 0.85rem;
       line-height: 1;
       color: var(--text-muted);
       opacity: 0.35;
@@ -259,6 +261,14 @@
     .slider-knob-zone.fav .fav-toggle {
       color: var(--favorite);
       opacity: 1;
+    }
+    /* A light gold behind a favourite's row, out to the edges of its panel. */
+    .slider-knob-zone.fav::before {
+      content: '';
+      position: absolute;
+      z-index: -1;
+      inset: -3px -16px;
+      background: var(--favorite-bg);
     }
     .slider-label {
       min-width: 140px;
@@ -288,8 +298,10 @@
       .slider-label .cc-num { display: inline; }
       .control-row { gap: 6px; }
       .editor-column { gap: 12px; }
-      .editor-column .panel { padding: 8px 10px; }
-      .fav-toggle { left: -9px; font-size: 0.55rem; }
+      /* More on the left than the right, for the favourite's star, and as much in all. */
+      .editor-column .panel { padding: 8px 8px 8px 12px; }
+      .fav-toggle { left: -12px; font-size: 0.7rem; }
+      .slider-knob-zone.fav::before { inset: -3px -8px -3px -12px; }
       .editor-column .panel h2 { margin-bottom: 4px; }
       #init-values { padding: 6px; }
       /* A quarter of a full HD window leaves the slider less than a name, so the gaps and the
@@ -962,6 +974,7 @@
     /* A favourite on the Controls tab: a line down the left of its row, and the node's border. */
     .row.ctrl.fav {
       box-shadow: inset 3px 0 0 var(--favorite);
+      background: var(--favorite-bg);
     }
     .node.fav {
       border-color: var(--favorite);
