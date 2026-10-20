@@ -495,21 +495,21 @@ both at the same signal for a mono output.
 
 | CC#98 | Parameter | | CC#98 | Parameter | | CC#98 | Parameter |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | Pitch 1 Glide | | 20 | Osc 1 Pitch Coarse | | 40 | Mixer 2 Level 2 |
-| 1 | Pitch 1 Glide Switch | | 21 | Osc 1 Pitch Fine | | 41 | Mixer 2 Level 3 |
-| 2 | Pitch 1 Bend Amt | | 22 | Osc 1 Pitch Mod 1 Amt | | 42 | Mixer 2 Level 4 |
-| 3 | Pitch 1 Stretch | | 23 | Osc 1 Pitch Mod 2 Amt | | 43 | Mixer 2 Out Level |
-| 4 | EG 1 Attack | | 24 | Osc 1 Pitch Mod Range | | 44 | Filter 1 Mode |
-| 5 | EG 1 Decay | | 25 | Osc 1 PW | | 45 | Filter 1 Cutoff |
-| 6 | EG 1 Sustain | | 26 | Osc 1 PW Mod 1 Amt | | 46 | Filter 1 Pitch Amt |
-| 7 | EG 1 Release Switch | | 27 | Osc 1 PW Mod 2 Amt | | 47 | Filter 1 Mod 1 Amt |
-| 8 | EG 1 Level | | 28 | Osc 2 Wave | | 48 | Filter 1 Mod 2 Amt |
-| 9 | LFO 1 Wave | | 29 | Osc 2 Pitch Coarse | | 49 | Filter 1 Mod Polarity |
-| 10 | LFO 1 Rate | | 30 | Osc 2 Pitch Fine | | 50 | Filter 1 Resonance |
-| 11 | LFO 1 Rate Mod Amt | | 31 | Osc 2 Pitch Mod 1 Amt | | 51 | Amp 1 Gain |
-| 12 | LFO 1 Level | | 32 | Osc 2 Pitch Mod 2 Amt | | 52 | Amp 1 Mod 1/2 Mix |
-| 13 | LFO 1 Level Mod Amt | | 33 | Osc 2 Pitch Mod Range | | 53 | Chorus 1 Mix |
-| 14 | Mixer 1 Level 1 | | 34 | Osc 2 PW | | 54 | Chorus 1 Rate |
+| 0 | Pitch 1 Glide | | 20 | Osc 1 PW | | 40 | Mixer 2 Level 2 |
+| 1 | Pitch 1 Glide Switch | | 21 | Osc 1 Pitch Coarse | | 41 | Mixer 2 Level 3 |
+| 2 | Pitch 1 Bend Amt | | 22 | Osc 1 Pitch Fine | | 42 | Mixer 2 Level 4 |
+| 3 | Pitch 1 Stretch | | 23 | Osc 1 Pitch Mod 1 Amt | | 43 | Mixer 2 Out Level |
+| 4 | EG 1 Attack | | 24 | Osc 1 Pitch Mod 2 Amt | | 44 | Filter 1 Cutoff |
+| 5 | EG 1 Decay | | 25 | Osc 1 Pitch Mod Range | | 45 | Filter 1 Resonance |
+| 6 | EG 1 Sustain | | 26 | Osc 1 PW Mod 1 Amt | | 46 | Filter 1 Mode |
+| 7 | EG 1 Release Switch | | 27 | Osc 1 PW Mod 2 Amt | | 47 | Filter 1 Pitch Amt |
+| 8 | EG 1 Level | | 28 | Osc 2 Wave | | 48 | Filter 1 Mod 1 Amt |
+| 9 | LFO 1 Wave | | 29 | Osc 2 PW | | 49 | Filter 1 Mod 2 Amt |
+| 10 | LFO 1 Rate | | 30 | Osc 2 Pitch Coarse | | 50 | Filter 1 Mod Polarity |
+| 11 | LFO 1 Rate Mod Amt | | 31 | Osc 2 Pitch Fine | | 51 | Amp 1 Gain |
+| 12 | LFO 1 Level | | 32 | Osc 2 Pitch Mod 1 Amt | | 52 | Amp 1 Mod 1/2 Mix |
+| 13 | LFO 1 Level Mod Amt | | 33 | Osc 2 Pitch Mod 2 Amt | | 53 | Chorus 1 Mix |
+| 14 | Mixer 1 Level 1 | | 34 | Osc 2 Pitch Mod Range | | 54 | Chorus 1 Rate |
 | 15 | Mixer 1 Level 2 | | 35 | Osc 2 PW Mod 1 Amt | | 55 | Chorus 1 Depth |
 | 16 | Mixer 1 Level 3 | | 36 | Osc 2 PW Mod 2 Amt | | 56 | Delay 1 Mix |
 | 17 | Mixer 1 Level 4 | | 37 | Noise 1 Color | | 57 | Delay 1 Time |
@@ -870,7 +870,7 @@ takes the output to the input at once, mid-glide too, as Glide at 0.0 does.
   CC#6 = 28 puts Noise 1's red output on the filter's Mod 2 input in the LFO's place, and CC#25
   sets how much. CC#6 = 27 takes the white instead, finer still. The red is on no mixer, and the
   white is heard only once CC#23 brings it up, so neither is heard as well
-- Filter cutoff driven by the envelope instead of its CC: CC#99 = 2, CC#98 = 45, CC#6 = 10. The
+- Filter cutoff driven by the envelope instead of its CC: CC#99 = 2, CC#98 = 44, CC#6 = 10. The
   envelope and the cutoff are both unipolar, so it opens the cutoff from the bottom of its dial
   to the top
 - Amp gain and filter cutoff share one CC: CC#99 = 3, CC#98 = 51, CC#6 = 74
@@ -878,7 +878,7 @@ takes the output to the input at once, mid-glide too, as Glide at 0.0 does.
 - Amp switched by the note's gate alone, as an organ's: CC#36 = 4 crossfades Amp 1's
   modulation to Mod 1 In, Note Gate
 - Disconnect the filter's Mod 1 input, and with it the envelope: CC#99 = 1, CC#98 = 21, CC#6 = 0
-- A finer pitch envelope, 60 cents deep: CC#99 = 2, CC#98 = 21, CC#6 = 10 points Osc 1 Pitch Fine at the
+- A finer pitch envelope, 60 cents deep: CC#99 = 2, CC#98 = 22, CC#6 = 10 points Osc 1 Pitch Fine at the
   envelope, which then sweeps the tuning from in tune up to 60 cents sharp, reached at half the
   envelope's peak
 - The envelope drives the filter harder as a note starts: CC#99 = 2, CC#98 = 43, CC#6 = 10 takes

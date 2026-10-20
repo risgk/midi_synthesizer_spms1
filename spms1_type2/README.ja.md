@@ -471,21 +471,21 @@ Mod Wheel スロットは 0.0 になります。カテゴリ 4 の値は CC の�
 
 | CC#98 | パラメータ | | CC#98 | パラメータ | | CC#98 | パラメータ |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | Pitch 1 Glide | | 20 | Osc 1 Pitch Coarse | | 40 | Mixer 2 Level 2 |
-| 1 | Pitch 1 Glide Switch | | 21 | Osc 1 Pitch Fine | | 41 | Mixer 2 Level 3 |
-| 2 | Pitch 1 Bend Amt | | 22 | Osc 1 Pitch Mod 1 Amt | | 42 | Mixer 2 Level 4 |
-| 3 | Pitch 1 Stretch | | 23 | Osc 1 Pitch Mod 2 Amt | | 43 | Mixer 2 Out Level |
-| 4 | EG 1 Attack | | 24 | Osc 1 Pitch Mod Range | | 44 | Filter 1 Mode |
-| 5 | EG 1 Decay | | 25 | Osc 1 PW | | 45 | Filter 1 Cutoff |
-| 6 | EG 1 Sustain | | 26 | Osc 1 PW Mod 1 Amt | | 46 | Filter 1 Pitch Amt |
-| 7 | EG 1 Release Switch | | 27 | Osc 1 PW Mod 2 Amt | | 47 | Filter 1 Mod 1 Amt |
-| 8 | EG 1 Level | | 28 | Osc 2 Wave | | 48 | Filter 1 Mod 2 Amt |
-| 9 | LFO 1 Wave | | 29 | Osc 2 Pitch Coarse | | 49 | Filter 1 Mod Polarity |
-| 10 | LFO 1 Rate | | 30 | Osc 2 Pitch Fine | | 50 | Filter 1 Resonance |
-| 11 | LFO 1 Rate Mod Amt | | 31 | Osc 2 Pitch Mod 1 Amt | | 51 | Amp 1 Gain |
-| 12 | LFO 1 Level | | 32 | Osc 2 Pitch Mod 2 Amt | | 52 | Amp 1 Mod 1/2 Mix |
-| 13 | LFO 1 Level Mod Amt | | 33 | Osc 2 Pitch Mod Range | | 53 | Chorus 1 Mix |
-| 14 | Mixer 1 Level 1 | | 34 | Osc 2 PW | | 54 | Chorus 1 Rate |
+| 0 | Pitch 1 Glide | | 20 | Osc 1 PW | | 40 | Mixer 2 Level 2 |
+| 1 | Pitch 1 Glide Switch | | 21 | Osc 1 Pitch Coarse | | 41 | Mixer 2 Level 3 |
+| 2 | Pitch 1 Bend Amt | | 22 | Osc 1 Pitch Fine | | 42 | Mixer 2 Level 4 |
+| 3 | Pitch 1 Stretch | | 23 | Osc 1 Pitch Mod 1 Amt | | 43 | Mixer 2 Out Level |
+| 4 | EG 1 Attack | | 24 | Osc 1 Pitch Mod 2 Amt | | 44 | Filter 1 Cutoff |
+| 5 | EG 1 Decay | | 25 | Osc 1 Pitch Mod Range | | 45 | Filter 1 Resonance |
+| 6 | EG 1 Sustain | | 26 | Osc 1 PW Mod 1 Amt | | 46 | Filter 1 Mode |
+| 7 | EG 1 Release Switch | | 27 | Osc 1 PW Mod 2 Amt | | 47 | Filter 1 Pitch Amt |
+| 8 | EG 1 Level | | 28 | Osc 2 Wave | | 48 | Filter 1 Mod 1 Amt |
+| 9 | LFO 1 Wave | | 29 | Osc 2 PW | | 49 | Filter 1 Mod 2 Amt |
+| 10 | LFO 1 Rate | | 30 | Osc 2 Pitch Coarse | | 50 | Filter 1 Mod Polarity |
+| 11 | LFO 1 Rate Mod Amt | | 31 | Osc 2 Pitch Fine | | 51 | Amp 1 Gain |
+| 12 | LFO 1 Level | | 32 | Osc 2 Pitch Mod 1 Amt | | 52 | Amp 1 Mod 1/2 Mix |
+| 13 | LFO 1 Level Mod Amt | | 33 | Osc 2 Pitch Mod 2 Amt | | 53 | Chorus 1 Mix |
+| 14 | Mixer 1 Level 1 | | 34 | Osc 2 Pitch Mod Range | | 54 | Chorus 1 Rate |
 | 15 | Mixer 1 Level 2 | | 35 | Osc 2 PW Mod 1 Amt | | 55 | Chorus 1 Depth |
 | 16 | Mixer 1 Level 3 | | 36 | Osc 2 PW Mod 2 Amt | | 56 | Delay 1 Mix |
 | 17 | Mixer 1 Level 4 | | 37 | Noise 1 Color | | 57 | Delay 1 Time |
@@ -813,14 +813,14 @@ Pitch 1 Glide はユニポーラで、1/120 刻み、1 ステップで時間が�
   LFO の代わりに Noise 1 のレッド出力をフィルタの Mod 2 入力に置きます。あとは CC#25 で量を決めます。CC#6 を 27 に
   すればホワイトになり、さらに細かく震えます。レッドはどのミキサーにも入っておらず、ホワイトも CC#23 を上げるまでは鳴らないので、
   どちらも音としては聞こえません
-- フィルタのカットオフを、自分の CC ではなくエンベロープで動かす: CC#99 = 2, CC#98 = 45, CC#6 = 10。
+- フィルタのカットオフを、自分の CC ではなくエンベロープで動かす: CC#99 = 2, CC#98 = 44, CC#6 = 10。
   エンベロープもカットオフもユニポーラなので、カットオフはつまみの下端から上端まで開きます
 - アンプのゲインとフィルタのカットオフで 1 つの CC を共有する: CC#99 = 3, CC#98 = 51, CC#6 = 74
 - エンベロープなしでアンプをフルレベルにする: CC#99 = 1, CC#98 = 25, CC#6 = 1
 - オルガンのように、ノートのゲートだけでアンプを開閉する: CC#36 = 4 で Amp 1 のモジュレーションを
   Mod 1 In の Note Gate に切り替えます
 - フィルタの Mod 1 入力を切り離し、エンベロープを外す: CC#99 = 1, CC#98 = 21, CC#6 = 0
-- より細かい、深さ 60 セントのピッチエンベロープ: CC#99 = 2, CC#98 = 21, CC#6 = 10 で Osc 1 Pitch Fine をエンベロープに
+- より細かい、深さ 60 セントのピッチエンベロープ: CC#99 = 2, CC#98 = 22, CC#6 = 10 で Osc 1 Pitch Fine をエンベロープに
   向けると、チューニングが元の音程から 60 セント高いところまで動き、エンベロープのピークの半分でそこに
   届きます
 - ノートの出だしでエンベロープがフィルタをより強く駆動する: CC#99 = 2, CC#98 = 43, CC#6 = 10 で、フィルタの
