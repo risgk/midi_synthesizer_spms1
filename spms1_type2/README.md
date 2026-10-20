@@ -833,6 +833,11 @@ takes the output to the input at once, mid-glide too, as Glide at 0.0 does.
 - Keyboard tracking is wired by default as well, the pitch from Pitch 1 on the filter's Pitch input,
   so CC 9 sets how far the cutoff follows the keys: all the way at CC 124, not at all at CC 4,
   where it powers up
+- The filter as a sine voice, playing its own oscillation in tune: CC 71 = 124 makes it oscillate,
+  CC 9 = 124 has the cutoff follow the keys, and CC 74 = 49 puts it on note 60 at note 60, and so
+  on the note played everywhere. CC 24 = 4 takes the envelope off the cutoff, which would
+  otherwise take it up to two octaves sharp, and CC 116 = 4 takes Osc 1 out, leaving the sine
+  alone. It is within 5 cents of the note from middle C up, and 17 cents flat an octave below
 - A pitch envelope is wired by default too -- the envelope on the oscillator's Mod 1 input --
   so CC 89 (Osc 1 Pitch Mod 1 Amt) sets its depth: the note starts a semitone sharp at CC 9, an
   octave at CC 64 and two octaves at the top, and with CC 30 (Sustain) turned down it falls back
