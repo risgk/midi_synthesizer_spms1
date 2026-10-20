@@ -819,6 +819,13 @@
       font-family: monospace;
       color: var(--text-color);
     }
+    .row input.val:not(:disabled) {
+      cursor: ns-resize;
+    }
+    body.value-drag, body.value-drag * {
+      cursor: ns-resize !important;
+      user-select: none;
+    }
     .row input[type="number"]:disabled {
       background: #f2f4f5;
       color: var(--text-muted);
@@ -1148,7 +1155,8 @@
         MIDI In is passed through to the synth, and a CC on the channel above moves every slot
         assigned to it. Drag from an output (right) to an input (left) to connect. Drag a connected input away to
         unplug it; click a wire and press Delete to remove it. An unplugged parameter reads its own
-        control slot. Drag the background to pan, wheel or pinch to zoom.
+        control slot. Drag a value up or down to change it, with Shift for fine steps, or turn the
+        wheel over the one being edited. Drag the background to pan, wheel or pinch to zoom.
       </p>
     </div>
 
@@ -1934,6 +1942,61 @@
         if (valIn.value === '') return;
         if (cc) setCCValue(cc, clampValue(valIn.value), true);
         else if (!CONTROL[key].general) setParamValue(key, clampValue(valIn.value), true);
+      });
+      const currentValue = () => (state.cc[key] ? ccValue(state.cc[key]) : paramValue(key));
+      const setValue = v => {
+        const cc = state.cc[key];
+        if (cc) setCCValue(cc, v, true);
+        else setParamValue(key, v, true);
+        valIn.value = currentValue();
+      };
+      // Dragged up and down like a knob: a step every 2 pixels, or every 8 with Shift held for a
+      // fine move. A press that does not move leaves the field to be typed in.
+      valIn.addEventListener('pointerdown', e => {
+        if (valIn.disabled || e.button !== 0) return;
+        const hist = JSON.stringify(serialize(state));
+        const y0 = e.clientY;
+        let lastY = y0;
+        let acc = 0;
+        let moved = false;
+        const move = ev => {
+          if (!moved && Math.abs(ev.clientY - y0) < 3) return;
+          if (!moved) {
+            moved = true;
+            valIn.blur();
+            document.body.classList.add('value-drag');
+          }
+          ev.preventDefault();
+          acc += (lastY - ev.clientY) / (ev.shiftKey ? 8 : 2);
+          lastY = ev.clientY;
+          const step = Math.trunc(acc);
+          if (!step) return;
+          acc -= step;
+          setValue(clampValue(currentValue() + step));
+        };
+        const up = () => {
+          window.removeEventListener('pointermove', move);
+          window.removeEventListener('pointerup', up);
+          window.removeEventListener('pointercancel', up);
+          document.body.classList.remove('value-drag');
+          if (moved && hist !== JSON.stringify(serialize(state))) pushHistory(hist);
+        };
+        window.addEventListener('pointermove', move);
+        window.addEventListener('pointerup', up);
+        window.addEventListener('pointercancel', up);
+      });
+      // The wheel moves the value a step a notch while the field has the focus; elsewhere it
+      // zooms the canvas, so a scroll over the graph does not change a value by accident.
+      valIn.addEventListener('wheel', e => {
+        if (document.activeElement !== valIn || valIn.disabled) return;
+        e.preventDefault();
+        e.stopPropagation();
+        if (!e.deltaY) return;
+        setValue(clampValue(currentValue() + (e.deltaY < 0 ? 1 : -1)));
+      }, { passive: false });
+      valIn.addEventListener('blur', () => {
+        if (before && before !== JSON.stringify(serialize(state))) pushHistory(before);
+        before = JSON.stringify(serialize(state));
       });
     });
   }

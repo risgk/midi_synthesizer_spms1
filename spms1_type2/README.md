@@ -92,6 +92,8 @@ Usage
     - Its Controls tab shows a slider for each parameter with a CC; those with none are hidden until
       "Show parameters with no CC" is ticked or a CC is given to one, and the choice is remembered.
       Shown, the slider of one with no CC sets the value its slot holds, sent as NRPN
+    - On its Patch tab a value is dragged up or down like a knob, with Shift for fine steps, or
+      stepped by the wheel while it is being edited
     - Every value it sets or shows runs from 4 to 124, the range the synth uses; one outside it,
       from MIDI In or a patch file, is drawn in to the nearer end, which reads the same
     - Its Initialize & Send All sets each CC value and each parameter's value with no CC back to
