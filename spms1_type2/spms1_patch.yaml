@@ -221,17 +221,17 @@ controls:
   - { entry: 6, module: EG_1,      key: SUSTAIN,      label: Sustain,      cc: 30,  value: 124, set: set_sustain }
   - { entry: 7, module: EG_1,      key: RELEASE_SW,   label: Release Switch, cc: 105, value: 124, set: set_release_switch }
   - { entry: 8, module: EG_1,      key: LEVEL,        label: Level,        cc: 0,   value: 124, set: set_level }
-  # LFO 1 in the editor: the waveform, the rate and its modulation, then the level and its
-  # modulation. Wave crossfades Out from the triangle (0.0) to the square (1.0), on CC 33, LFO
-  # Wave's in PRA32-U2, and powers up at CC 4, 0.0, the triangle. Each modulation's Amt, listed
-  # after what it moves, has no CC and holds 1.0, a depth of 1.0. Rate Mod In is left unrouted, so
+  # LFO 1 in the editor: the waveform, the rate and the level, then the modulation of each. Wave
+  # crossfades Out from the triangle (0.0) to the square (1.0), on CC 33, LFO Wave's in PRA32-U2,
+  # and powers up at CC 4, 0.0, the triangle. Each modulation's Amt, listed in the order of what
+  # it moves, has no CC and holds 1.0, a depth of 1.0. Rate Mod In is left unrouted, so
   # routing a source to it is enough; Level Mod In takes the mod wheel, which adds to Level
   # (CC 113) up to its top. Level powers up at CC 4, 0.0, so the LFO is still until the wheel
   # moves.
   - { entry: 9, module: LFO_1,     key: WAVE,         label: Wave,         cc: 33,  value: 4, set: set_wave }
   - { entry: 10, module: LFO_1,     key: RATE,         label: Rate,         cc: 3,   value: 64, set: set_rate }
-  - { entry: 11, module: LFO_1,     key: RATE_MOD_AMT, label: Rate Mod Amt, cc: 0,   value: 124, set: set_rate_modulation_amount }
-  - { entry: 12, module: LFO_1,     key: LEVEL,        label: Level,        cc: 113, value: 4, set: set_level }
+  - { entry: 11, module: LFO_1,     key: LEVEL,        label: Level,        cc: 113, value: 4, set: set_level }
+  - { entry: 12, module: LFO_1,     key: RATE_MOD_AMT, label: Rate Mod Amt, cc: 0,   value: 124, set: set_rate_modulation_amount }
   - { entry: 13, module: LFO_1,     key: LEVEL_MOD_AMT, label: Level Mod Amt, cc: 0,  value: 124, set: set_level_modulation_amount }
   # Mixer 1: nothing has a CC; the levels hold 0.0, as the mixer has nothing on its inputs yet,
   # and Out Level holds 0.5, as Mixer 2's powers up.

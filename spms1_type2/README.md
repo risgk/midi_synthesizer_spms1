@@ -516,8 +516,8 @@ both at the same signal for a mono output.
 | 8 | EG 1 Level | | 28 | Osc 2 Wave | | 48 | Filter 1 Mod 1 Amt |
 | 9 | LFO 1 Wave | | 29 | Osc 2 PW | | 49 | Filter 1 Mod 2 Amt |
 | 10 | LFO 1 Rate | | 30 | Osc 2 Pitch Coarse | | 50 | Filter 1 Mod Polarity |
-| 11 | LFO 1 Rate Mod Amt | | 31 | Osc 2 Pitch Fine | | 51 | Amp 1 Gain |
-| 12 | LFO 1 Level | | 32 | Osc 2 Pitch Mod 1 Amt | | 52 | Amp 1 Mod 1/2 Mix |
+| 11 | LFO 1 Level | | 31 | Osc 2 Pitch Fine | | 51 | Amp 1 Gain |
+| 12 | LFO 1 Rate Mod Amt | | 32 | Osc 2 Pitch Mod 1 Amt | | 52 | Amp 1 Mod 1/2 Mix |
 | 13 | LFO 1 Level Mod Amt | | 33 | Osc 2 Pitch Mod 2 Amt | | 53 | Chorus 1 Mix |
 | 14 | Mixer 1 Level 1 | | 34 | Osc 2 Pitch Mod Range | | 54 | Chorus 1 Rate |
 | 15 | Mixer 1 Level 2 | | 35 | Osc 2 PW Mod 1 Amt | | 55 | Chorus 1 Depth |

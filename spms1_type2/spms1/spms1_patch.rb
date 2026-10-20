@@ -76,8 +76,8 @@ SLOT_EG_1_RELEASE_SW       = 135
 SLOT_EG_1_LEVEL            = 136
 SLOT_LFO_1_WAVE            = 137
 SLOT_LFO_1_RATE            = 138
-SLOT_LFO_1_RATE_MOD_AMT    = 139
-SLOT_LFO_1_LEVEL           = 140
+SLOT_LFO_1_LEVEL           = 139
+SLOT_LFO_1_RATE_MOD_AMT    = 140
 SLOT_LFO_1_LEVEL_MOD_AMT   = 141
 SLOT_MIXER_1_LEVEL_1       = 142
 SLOT_MIXER_1_LEVEL_2       = 143
@@ -176,8 +176,8 @@ NRPN_SOURCE_EG_1_RELEASE_SW       = 263
 NRPN_SOURCE_EG_1_LEVEL            = 264
 NRPN_SOURCE_LFO_1_WAVE            = 265
 NRPN_SOURCE_LFO_1_RATE            = 266
-NRPN_SOURCE_LFO_1_RATE_MOD_AMT    = 267
-NRPN_SOURCE_LFO_1_LEVEL           = 268
+NRPN_SOURCE_LFO_1_LEVEL           = 267
+NRPN_SOURCE_LFO_1_RATE_MOD_AMT    = 268
 NRPN_SOURCE_LFO_1_LEVEL_MOD_AMT   = 269
 NRPN_SOURCE_MIXER_1_LEVEL_1       = 270
 NRPN_SOURCE_MIXER_1_LEVEL_2       = 271
@@ -238,8 +238,8 @@ NRPN_CC_EG_1_RELEASE_SW       = 391
 NRPN_CC_EG_1_LEVEL            = 392
 NRPN_CC_LFO_1_WAVE            = 393
 NRPN_CC_LFO_1_RATE            = 394
-NRPN_CC_LFO_1_RATE_MOD_AMT    = 395
-NRPN_CC_LFO_1_LEVEL           = 396
+NRPN_CC_LFO_1_LEVEL           = 395
+NRPN_CC_LFO_1_RATE_MOD_AMT    = 396
 NRPN_CC_LFO_1_LEVEL_MOD_AMT   = 397
 NRPN_CC_MIXER_1_LEVEL_1       = 398
 NRPN_CC_MIXER_1_LEVEL_2       = 399
@@ -300,8 +300,8 @@ NRPN_VALUE_EG_1_RELEASE_SW       = 519
 NRPN_VALUE_EG_1_LEVEL            = 520
 NRPN_VALUE_LFO_1_WAVE            = 521
 NRPN_VALUE_LFO_1_RATE            = 522
-NRPN_VALUE_LFO_1_RATE_MOD_AMT    = 523
-NRPN_VALUE_LFO_1_LEVEL           = 524
+NRPN_VALUE_LFO_1_LEVEL           = 523
+NRPN_VALUE_LFO_1_RATE_MOD_AMT    = 524
 NRPN_VALUE_LFO_1_LEVEL_MOD_AMT   = 525
 NRPN_VALUE_MIXER_1_LEVEL_1       = 526
 NRPN_VALUE_MIXER_1_LEVEL_2       = 527
@@ -416,8 +416,8 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_EG_1_LEVEL           , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_LFO_1_WAVE           , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_LFO_1_RATE           , SIGNAL_OWN)
-  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_LFO_1_RATE_MOD_AMT   , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_LFO_1_LEVEL          , SIGNAL_OWN)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_LFO_1_RATE_MOD_AMT   , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_LFO_1_LEVEL_MOD_AMT  , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_1_LEVEL_1      , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_1_LEVEL_2      , SIGNAL_OWN)
@@ -523,8 +523,8 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_EG_1_LEVEL           , 124)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_LFO_1_WAVE           , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_LFO_1_RATE           , 64)
-  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_LFO_1_RATE_MOD_AMT   , 124)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_LFO_1_LEVEL          , 4)
+  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_LFO_1_RATE_MOD_AMT   , 124)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_LFO_1_LEVEL_MOD_AMT  , 124)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_MIXER_1_LEVEL_1      , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_MIXER_1_LEVEL_2      , 4)
