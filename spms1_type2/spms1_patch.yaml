@@ -216,7 +216,7 @@ controls:
   # below CC 64 the release is the shortest decay's, 10 ms. Level has no CC and holds 1.0,
   # passing the envelope as it is.
   - { entry: 4, module: EG_1,      key: ATTACK,       label: Attack,       cc: 73,  value: 4, set: set_attack }
-  - { entry: 5, module: EG_1,      key: DECAY,        label: Decay,        cc: 75,  value: 94, set: set_decay }
+  - { entry: 5, module: EG_1,      key: DECAY,        label: Decay,        cc: 75,  value: 100, set: set_decay }
   - { entry: 6, module: EG_1,      key: SUSTAIN,      label: Sustain,      cc: 30,  value: 124, set: set_sustain }
   - { entry: 7, module: EG_1,      key: RELEASE_SW,   label: Release Switch, cc: 105, value: 124, set: set_release_switch }
   - { entry: 8, module: EG_1,      key: LEVEL,        label: Level,        cc: 0,   value: 124, set: set_level }

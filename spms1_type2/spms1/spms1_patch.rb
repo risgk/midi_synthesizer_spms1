@@ -516,7 +516,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_PITCH_1_BEND_AMT     , 28)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_PITCH_1_STRETCH      , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_EG_1_ATTACK          , 4)
-  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_EG_1_DECAY           , 94)
+  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_EG_1_DECAY           , 100)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_EG_1_SUSTAIN         , 124)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_EG_1_RELEASE_SW      , 124)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_EG_1_LEVEL           , 124)
@@ -576,7 +576,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 57 , 28 ) # Pitch 1 Bend Amt
   C.set_midi_cc_value(midi_ch, 81 , 4  ) # Pitch 1 Stretch
   C.set_midi_cc_value(midi_ch, 73 , 4  ) # EG 1 Attack
-  C.set_midi_cc_value(midi_ch, 75 , 94 ) # EG 1 Decay
+  C.set_midi_cc_value(midi_ch, 75 , 100) # EG 1 Decay
   C.set_midi_cc_value(midi_ch, 30 , 124) # EG 1 Sustain
   C.set_midi_cc_value(midi_ch, 105, 124) # EG 1 Release Switch
   C.set_midi_cc_value(midi_ch, 33 , 4  ) # LFO 1 Wave
