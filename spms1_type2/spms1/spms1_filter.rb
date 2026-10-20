@@ -1,9 +1,10 @@
 module Spms1
   # ZDF (zero-delay feedback) / TPT (topology-preserving transform) state variable filter, with a
   # nonlinear leak on the band pass integrator, solved within the sample by one step of Newton's
-  # method. It puts out its low pass and high pass at once, each through a DC blocker and the
-  # output clip of its own, and the two crossfaded by Mode: process returns the crossfade, and
-  # output_lp and output_hp hold the low pass and the high pass. The audio input drives it as it
+  # method. It puts out its low pass, high pass and band pass at once, each through a DC blocker
+  # and the output clip of its own, and the first two crossfaded by Mode: process returns the
+  # crossfade, and output_lp, output_hp and output_bp hold the low pass, the high pass and the
+  # band pass. The audio input drives it as it
   # arrives, so how hard is set ahead of it: by Mixer 2 Out Level in the default patch. That is
   # what decides how far the band pass runs into the leak, which the resonant peak reaches first:
   # the pass band itself stays nearly clean.
@@ -209,8 +210,10 @@ module Spms1
       @s2 = 0.0
       @dc_blocker = 0.0
       @dc_blocker_hp = 0.0
+      @dc_blocker_bp = 0.0
       @output_lp = 0.0
       @output_hp = 0.0
+      @output_bp = 0.0
 
       @current_pitch_input = 0.0
       @current_modulation_1_input = 0.0
@@ -282,6 +285,7 @@ module Spms1
         @s2 = Dsp.flush_tiny(@s2)
         @dc_blocker = Dsp.flush_tiny(@dc_blocker)
         @dc_blocker_hp = Dsp.flush_tiny(@dc_blocker_hp)
+        @dc_blocker_bp = Dsp.flush_tiny(@dc_blocker_bp)
         @self_osc_seed = 0.0 - @self_osc_seed
       end
 
@@ -336,24 +340,31 @@ module Spms1
       @s2 = low_pass + low_pass - s2
 
       # Ahead of clip_output, so that the output limit holds on what actually leaves. The leak's
-      # bias gives the state a DC that reaches both outputs, so each has a blocker of its own.
+      # bias gives the state a DC that reaches every output, so each has a blocker of its own. The
+      # band pass is the state itself, unnormalized: its peak at the cutoff is Q times the input.
       @dc_blocker_hp += (high_pass - @dc_blocker_hp) * @dc_blocker_coefficient
       @output_hp = clip_output(high_pass - @dc_blocker_hp)
       @dc_blocker += (low_pass - @dc_blocker) * @dc_blocker_coefficient
       @output_lp = clip_output(low_pass - @dc_blocker)
+      @dc_blocker_bp += (band_pass - @dc_blocker_bp) * @dc_blocker_coefficient
+      @output_bp = clip_output(band_pass - @dc_blocker_bp)
       # Taken from the two outputs as they leave, so not clipped again: in the pass band one side
       # is all there is, and around the cutoff, where both are, the notch takes them down.
       @output_lp * @current_mode_lp + @output_hp * @current_mode_hp
     end
 
-    # The low pass and the high pass of the last sample process took, read after it as Chorus's
-    # outputs are.
+    # The low pass, the high pass and the band pass of the last sample process took, read after it
+    # as Chorus's outputs are.
     def output_lp
       @output_lp
     end
 
     def output_hp
       @output_hp
+    end
+
+    def output_bp
+      @output_bp
     end
 
     private

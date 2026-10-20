@@ -7,7 +7,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.4
 - 48 kHz オーディオ出力: I2S DAC による 24 bit、または PWM Audio (DAC 不要)
 - オシレータ: ノコギリ波から矩形波へのモーフ、パルス幅付き (CC#114)。パルス幅のモジュレーション付き (PWM。ピッチと同じ 2 つのモジュレーション、デフォルトではエンベロープと LFO で、CC#8 と 103)。ノコギリ波とパルス波の個別出力付き
 - LFO: 三角波 (PolyBLAMP) とユニポーラの矩形波 (PolyBLEP) の個別出力と、その間をクロスフェードするメイン出力 (Wave、CC#33)
-- フィルタ: ZDF/TPT ステート・バリアブル・フィルタ (BP 積分器の非線形リーク付き、1 ステップ・ニュートン法で解く)。LP、HP の 2 出力と、その間をノッチを経てクロスフェードするメイン出力 (Mode、CC#39)
+- フィルタ: ZDF/TPT ステート・バリアブル・フィルタ (BP 積分器の非線形リーク付き、1 ステップ・ニュートン法で解く)。LP、HP、BP の 3 出力と、LP と HP の間をノッチを経てクロスフェードするメイン出力 (Mode、CC#39)
 - コーラス: モノラル入力・ステレオ出力、実行順に入るモジュール
 - ディレイ: ステレオ、フィードバック付き、実行順に入るモジュール (最大 340 ms)
 - ピッチ: ノートのピッチを扱う、実行順に入るモジュール。指数カーブのラグによるポルタメント (CC#5)、その後に足すピッチベンド、鍵盤のストレッチ (ベンドレンジは CC#57、ストレッチは CC#81)
@@ -276,15 +276,22 @@ DC ブロッカーと出力クリップがあります。さらに、この 2 �
 Out はもう一度クリップしません。通過帯域ではどちらか一方しかなく、両方があるカットオフ付近ではノッチが
 それを下げるからです。2 つの係数はほかのレベルと同じくスムージングします。
 
+バンドパスも Out BP として、専用の DC ブロッカーと出力クリップを通って出力されます。Mode のクロスフェードには
+入りません。積分器の状態そのままで正規化していないので、カットオフでのピークは入力の Q 倍です。Resonance 0.0 では
+0.707 倍で、レゾナンスが高く入力が大きいと出力クリップの肩に入ります。そのときは Mixer 2 Out Level で下げます。
+デフォルトのパッチではつながっていません。
+
 ```mermaid
 flowchart LR
   IN([入力]) --> SUM((Σ))
   SUM -->|HP| I1["積分器1<br/>BP・状態 s1"]
+  I1 -->|BP| OC
   I1 -->|BP| I2["積分器2<br/>LP・状態 s2"]
   I2 -->|LP| OC["出力クリップ<br/>0.75まで線形"]
   SUM -->|HP| OC
   OC -->|LP| OUT_LP([Out LP])
   OC -->|HP| OUT_HP([Out HP])
+  OC -->|BP| OUT_BP([Out BP])
   OC -->|LP| XF["Mode<br/>LP / ノッチ / HP"]
   OC -->|HP| XF
   XF --> OUT([Out])
@@ -305,11 +312,13 @@ flowchart LR
   IN([入力]) --> A1["加算アンプ Σ"]
   A1 -->|HP| A2["積分器 ∫<br/>C1"]
   D["ダイオード対"] -.-|C1 に並列| A2
+  A2 -->|BP| LIM
   A2 -->|BP| A3["積分器 ∫<br/>C2・線形"]
   A3 -->|LP| LIM["出力リミッタ"]
   A1 -->|HP| LIM
   LIM -->|LP| OUT_LP([Out LP])
   LIM -->|HP| OUT_HP([Out HP])
+  LIM -->|BP| OUT_BP([Out BP])
   LIM -->|LP| XF["クロスフェーダ<br/>Mode"]
   LIM -->|HP| XF
   XF --> OUT([Out])
@@ -541,14 +550,14 @@ Mod Wheel スロットを埋めます。後述を参照してください。
 | 3 | 定数 -0.5 | | 17 | LFO 1 Output Square Inv | | 31 | Filter 1 Output ± |
 | 4 | 定数 -1.0 | | 18 | Mixer 1 Output ± | | 32 | Filter 1 Output LP ± |
 | 5 | Note Pitch ± | | 19 | Mixer 1 Output Inv ± | | 33 | Filter 1 Output HP ± |
-| 6 | Note Gate | | 20 | Osc 1 Output ± | | 34 | Amp 1 Output ± |
-| 7 | Pitch Bend ± | | 21 | Osc 1 Output Saw ± | | 35 | Chorus 1 Output L ± |
-| 8 | Mod Wheel | | 22 | Osc 1 Output Pulse ± | | 36 | Chorus 1 Output R ± |
-| 9 | Pitch 1 Output ± | | 23 | Osc 2 Output ± | | 37 | Chorus 1 Output Mono ± |
-| 10 | EG 1 Output | | 24 | Osc 2 Output Saw ± | | 38 | Delay 1 Output L ± |
-| 11 | EG 1 Output Inv | | 25 | Osc 2 Output Pulse ± | | 39 | Delay 1 Output R ± |
-| 12 | LFO 1 Output ± | | 26 | Noise 1 Output ± | | 40 | Delay 1 Output Mono ± |
-| 13 | LFO 1 Output Inv ± | | 27 | Noise 1 Output White ± | |  |  |
+| 6 | Note Gate | | 20 | Osc 1 Output ± | | 34 | Filter 1 Output BP ± |
+| 7 | Pitch Bend ± | | 21 | Osc 1 Output Saw ± | | 35 | Amp 1 Output ± |
+| 8 | Mod Wheel | | 22 | Osc 1 Output Pulse ± | | 36 | Chorus 1 Output L ± |
+| 9 | Pitch 1 Output ± | | 23 | Osc 2 Output ± | | 37 | Chorus 1 Output R ± |
+| 10 | EG 1 Output | | 24 | Osc 2 Output Saw ± | | 38 | Chorus 1 Output Mono ± |
+| 11 | EG 1 Output Inv | | 25 | Osc 2 Output Pulse ± | | 39 | Delay 1 Output L ± |
+| 12 | LFO 1 Output ± | | 26 | Noise 1 Output ± | | 40 | Delay 1 Output R ± |
+| 13 | LFO 1 Output Inv ± | | 27 | Noise 1 Output White ± | | 41 | Delay 1 Output Mono ± |
 
 <!-- patch_gen end -->
 
@@ -845,10 +854,10 @@ Pitch 1 Glide はユニポーラで、1/120 刻み、1 ステップで時間が�
   から取ります。起動時は 0.0 なので、ホイールを動かすまで出力はドライです
 - モジュレーションホイールで掛かるコーラス: CC#99 = 2, CC#98 = 53, CC#6 = 8 で Chorus 1 Mix を Mod Wheel
   から取ります。ホイールを動かすまで出力はモノラルのままです
-- ディレイを残してコーラスを音から外す: CC#99 = 1, CC#98 = 27 と 28 に CC#6 = 34 を送って Delay 1 の左右に
+- ディレイを残してコーラスを音から外す: CC#99 = 1, CC#98 = 27 と 28 に CC#6 = 35 を送って Delay 1 の左右に
   アンプを入れます。コーラスは走り続けますが誰も読まず、出力はモノラルになります
 - フィルタの前に置くエコー: CC#99 = 1, CC#98 = 27, CC#6 = 20 で Delay 1 の左にオシレータを入れ、CC#98 = 19,
-  CC#6 = 38 でフィルタにその出力を入れ、CC#98 = 29 と 30 に CC#6 = 35 と 36 を送って最終出力を、アンプを
+  CC#6 = 39 でフィルタにその出力を入れ、CC#98 = 29 と 30 に CC#6 = 36 と 37 を送って最終出力を、アンプを
   受け取ったままのコーラスに向けます。繰り返しもノートと同じくフィルタとアンプのエンベロープを通るので、
   音と一緒に消えていきます。Delay 1 はフィルタの後ろで走ったままなので、フィルタは 1 サンプル遅れて読み
   ますが、エコーには関係ありません

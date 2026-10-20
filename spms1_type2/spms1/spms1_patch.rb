@@ -51,13 +51,14 @@ SIGNAL_MIXER_2_OUTPUT_INV        = 30
 SIGNAL_FILTER_1_OUTPUT           = 31
 SIGNAL_FILTER_1_OUTPUT_LP        = 32
 SIGNAL_FILTER_1_OUTPUT_HP        = 33
-SIGNAL_AMP_1_OUTPUT              = 34
-SIGNAL_CHORUS_1_OUTPUT_L         = 35
-SIGNAL_CHORUS_1_OUTPUT_R         = 36
-SIGNAL_CHORUS_1_OUTPUT_MONO      = 37
-SIGNAL_DELAY_1_OUTPUT_L          = 38
-SIGNAL_DELAY_1_OUTPUT_R          = 39
-SIGNAL_DELAY_1_OUTPUT_MONO       = 40
+SIGNAL_FILTER_1_OUTPUT_BP        = 34
+SIGNAL_AMP_1_OUTPUT              = 35
+SIGNAL_CHORUS_1_OUTPUT_L         = 36
+SIGNAL_CHORUS_1_OUTPUT_R         = 37
+SIGNAL_CHORUS_1_OUTPUT_MONO      = 38
+SIGNAL_DELAY_1_OUTPUT_L          = 39
+SIGNAL_DELAY_1_OUTPUT_R          = 40
+SIGNAL_DELAY_1_OUTPUT_MONO       = 41
 
 # A parameter source of SIGNAL_OWN is the parameter's own control slot, at PARAM_SLOT_BASE + its
 # entry, off the bus: the slots below.

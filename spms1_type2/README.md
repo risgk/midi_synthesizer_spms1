@@ -7,7 +7,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.4
 - 48 kHz audio output: 24 bit through an I2S DAC, or PWM Audio (no DAC needed)
 - Oscillator: a sawtooth-to-square morph with pulse width (CC#114), and pulse width modulation (PWM) by the same two modulations as the pitch, the envelope and the LFO by default, on CC#8 and 103; and the sawtooth and the pulse on outputs of their own too
 - LFO: triangle (PolyBLAMP) and unipolar square (PolyBLEP), each on an output of its own, and a main output crossfading from one to the other (Wave, CC#33)
-- Filter: ZDF/TPT State Variable Filter (with a nonlinear leak on the band pass integrator, solved by the one-step Newton method), with low pass and high pass outputs and a main output crossfading from one to the other through a notch (Mode, CC#39)
+- Filter: ZDF/TPT State Variable Filter (with a nonlinear leak on the band pass integrator, solved by the one-step Newton method), with low pass, high pass and band pass outputs and a main output crossfading from the low pass to the high pass through a notch (Mode, CC#39)
 - Chorus: mono in, stereo out, as a module in the run order
 - Delay: stereo, with feedback, as a module in the run order (up to 340 ms)
 - Pitch: the note's pitch as a module in the run order, with portamento as an exponential lag (CC#5), pitch bend past it (range on CC#57) and a stretch of the keys (CC#81)
@@ -291,15 +291,23 @@ low pass until Mode is turned up. Out is not clipped again: in the pass band one
 where both are, the notch takes them down. The two factors are smoothed as the other levels
 are.
 
+The band pass leaves too, as Out BP, through a DC blocker and an output clip of its own, outside
+the Mode crossfade. It is the integrator's state as it is, not normalized, so its peak at the
+cutoff is Q times the input: 0.707 times at Resonance 0.0, and into the output clip's shoulder at
+a high resonance on a loud input, which Mixer 2 Out Level takes down. The default patch leaves it
+unconnected.
+
 ```mermaid
 flowchart LR
   IN([Input]) --> SUM((Σ))
   SUM -->|HP| I1["Integrator 1<br/>BP, state s1"]
+  I1 -->|BP| OC
   I1 -->|BP| I2["Integrator 2<br/>LP, state s2"]
   I2 -->|LP| OC["Output clips<br/>linear up to 0.75"]
   SUM -->|HP| OC
   OC -->|LP| OUT_LP([Out LP])
   OC -->|HP| OUT_HP([Out HP])
+  OC -->|BP| OUT_BP([Out BP])
   OC -->|LP| XF["Mode<br/>LP / notch / HP"]
   OC -->|HP| XF
   XF --> OUT([Out])
@@ -320,11 +328,13 @@ flowchart LR
   IN([Input]) --> A1["Summing amp Σ"]
   A1 -->|HP| A2["Integrator ∫<br/>C1"]
   D["Diode pair"] -.-|across C1| A2
+  A2 -->|BP| LIM
   A2 -->|BP| A3["Integrator ∫<br/>C2, linear"]
   A3 -->|LP| LIM["Output limiters"]
   A1 -->|HP| LIM
   LIM -->|LP| OUT_LP([Out LP])
   LIM -->|HP| OUT_HP([Out HP])
+  LIM -->|BP| OUT_BP([Out BP])
   LIM -->|LP| XF["Crossfader<br/>Mode"]
   LIM -->|HP| XF
   XF --> OUT([Out])
@@ -565,14 +575,14 @@ the bus; see below.
 | 3 | Constant -0.5 | | 17 | LFO 1 Output Square Inv | | 31 | Filter 1 Output ± |
 | 4 | Constant -1.0 | | 18 | Mixer 1 Output ± | | 32 | Filter 1 Output LP ± |
 | 5 | Note Pitch ± | | 19 | Mixer 1 Output Inv ± | | 33 | Filter 1 Output HP ± |
-| 6 | Note Gate | | 20 | Osc 1 Output ± | | 34 | Amp 1 Output ± |
-| 7 | Pitch Bend ± | | 21 | Osc 1 Output Saw ± | | 35 | Chorus 1 Output L ± |
-| 8 | Mod Wheel | | 22 | Osc 1 Output Pulse ± | | 36 | Chorus 1 Output R ± |
-| 9 | Pitch 1 Output ± | | 23 | Osc 2 Output ± | | 37 | Chorus 1 Output Mono ± |
-| 10 | EG 1 Output | | 24 | Osc 2 Output Saw ± | | 38 | Delay 1 Output L ± |
-| 11 | EG 1 Output Inv | | 25 | Osc 2 Output Pulse ± | | 39 | Delay 1 Output R ± |
-| 12 | LFO 1 Output ± | | 26 | Noise 1 Output ± | | 40 | Delay 1 Output Mono ± |
-| 13 | LFO 1 Output Inv ± | | 27 | Noise 1 Output White ± | |  |  |
+| 6 | Note Gate | | 20 | Osc 1 Output ± | | 34 | Filter 1 Output BP ± |
+| 7 | Pitch Bend ± | | 21 | Osc 1 Output Saw ± | | 35 | Amp 1 Output ± |
+| 8 | Mod Wheel | | 22 | Osc 1 Output Pulse ± | | 36 | Chorus 1 Output L ± |
+| 9 | Pitch 1 Output ± | | 23 | Osc 2 Output ± | | 37 | Chorus 1 Output R ± |
+| 10 | EG 1 Output | | 24 | Osc 2 Output Saw ± | | 38 | Chorus 1 Output Mono ± |
+| 11 | EG 1 Output Inv | | 25 | Osc 2 Output Pulse ± | | 39 | Delay 1 Output L ± |
+| 12 | LFO 1 Output ± | | 26 | Noise 1 Output ± | | 40 | Delay 1 Output R ± |
+| 13 | LFO 1 Output Inv ± | | 27 | Noise 1 Output White ± | | 41 | Delay 1 Output Mono ± |
 
 <!-- patch_gen end -->
 
@@ -905,12 +915,12 @@ takes the output to the input at once, mid-glide too, as Glide at 0.0 does.
   from Mod Wheel, which powers up at 0.0, so the output is dry until the wheel moves
 - Chorus that only comes in with the mod wheel: CC#99 = 2, CC#98 = 53, CC#6 = 8 takes Chorus 1
   Mix from Mod Wheel, so the output stays mono until the wheel moves
-- Leave the chorus out of the sound, keeping the delay: CC#99 = 1, CC#98 = 27 and 28, CC#6 = 34
+- Leave the chorus out of the sound, keeping the delay: CC#99 = 1, CC#98 = 27 and 28, CC#6 = 35
   feeds both sides of Delay 1 from the amp. The chorus keeps running and nothing reads it, and the
   output is then mono
 - Echoes ahead of the filter: CC#99 = 1, CC#98 = 27, CC#6 = 20 feeds Delay 1's left side from the
-  oscillator, CC#98 = 19, CC#6 = 38 feeds the filter from it, and CC#98 = 29 and 30, CC#6 = 35 and
-  36 points the final output at the chorus, which still takes the amp. The repeats then go
+  oscillator, CC#98 = 19, CC#6 = 39 feeds the filter from it, and CC#98 = 29 and 30, CC#6 = 36 and
+  37 points the final output at the chorus, which still takes the amp. The repeats then go
   through the filter and the amp's envelope as the note does, so they die away with it. Delay 1
   still runs after the filter, which reads it a sample late; for an echo that does not matter
 
