@@ -491,6 +491,38 @@
       background: #222;
       padding: 10px 5px 5px 5px;
     }
+    /* The mod wheel on the left of the keys, as on a keyboard, a slider standing as tall as they
+       are; its value is that of the CC Mod Wheel is on in the patch. */
+    .kbd-body {
+      display: flex;
+      gap: 6px;
+    }
+    .kbd-keys {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+    .mod-wheel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .mod-wheel input {
+      writing-mode: vertical-lr;
+      direction: rtl;
+      width: calc(20px * var(--kbd-scale));
+      height: calc(var(--kbd-half-height) * 2);
+      margin: 0;
+      accent-color: var(--primary-color);
+      cursor: pointer;
+    }
+    .mod-wheel input:disabled {
+      cursor: default;
+    }
+    .mod-wheel-label {
+      font-size: 0.7rem;
+      color: #ccc;
+    }
     /* The native scroll bar is hidden, since Safari cannot color it; .kbd-scrollbar stands in. */
     .keyboard-scroll-container {
       width: 100%;
@@ -740,7 +772,7 @@
     .node.aux {
       width: 200px;
     }
-    .node.general {
+    .node.controller {
       width: 250px;
     }
     .node.const {
@@ -1205,10 +1237,18 @@
     <button class="btn kbd-panic" id="kbd-panic" title="Note Off on every note, Pitch Bend to the center, and the keys held let go">Panic</button>
   </div>
   <div class="keyboard-frame">
-    <div class="keyboard-scroll-container" id="kb-scroll">
-      <div class="keyboard-wrapper" id="keyboard"></div>
+    <div class="kbd-body">
+      <div class="mod-wheel" id="mod-wheel-zone">
+        <input type="range" id="mod-wheel" min="4" max="124" aria-label="Mod Wheel">
+        <span class="mod-wheel-label">Mod</span>
+      </div>
+      <div class="kbd-keys">
+        <div class="keyboard-scroll-container" id="kb-scroll">
+          <div class="keyboard-wrapper" id="keyboard"></div>
+        </div>
+        <div class="kbd-scrollbar" id="kbd-scrollbar"><div class="kbd-scrollbar-thumb" id="kbd-scrollbar-thumb"></div></div>
+      </div>
     </div>
-    <div class="kbd-scrollbar" id="kbd-scrollbar"><div class="kbd-scrollbar-thumb" id="kbd-scrollbar-thumb"></div></div>
   </div>
 </div>
 
@@ -1244,7 +1284,7 @@
     inputs: [
       {"entry":0,"module":"EG_1","key":"GATE","label":"Gate In","source":"NOTE_GATE"},
       {"entry":1,"module":"LFO_1","key":"RATE_MOD","label":"Rate Mod In","source":"NONE"},
-      {"entry":2,"module":"LFO_1","key":"LEVEL_MOD","label":"Level Mod In","source":"GENERAL_MOD_WHEEL"},
+      {"entry":2,"module":"LFO_1","key":"LEVEL_MOD","label":"Level Mod In","source":"MOD_WHEEL"},
       {"entry":3,"module":"MIXER_1","key":"IN_1","label":"In 1","source":"NONE"},
       {"entry":4,"module":"MIXER_1","key":"IN_2","label":"In 2","source":"NONE"},
       {"entry":5,"module":"MIXER_1","key":"IN_3","label":"In 3","source":"NONE"},
@@ -1274,68 +1314,64 @@
       {"entry":29,"module":null,"key":"OUTPUT_R","label":"R","source":"DELAY_1_OUTPUT_R"},
     ],
     controls: [
-      {"entry":0,"module":"EG_1","key":"ATTACK","label":"Attack","bipolar":false,"cc":73,"value":4,"general":false,"slots":[["EG_1_ATTACK","Attack",false]]},
-      {"entry":1,"module":"EG_1","key":"DECAY","label":"Decay","bipolar":false,"cc":75,"value":94,"general":false,"slots":[["EG_1_DECAY","Decay",false]]},
-      {"entry":2,"module":"EG_1","key":"SUSTAIN","label":"Sustain","bipolar":false,"cc":30,"value":124,"general":false,"slots":[["EG_1_SUSTAIN","Sustain",false]]},
-      {"entry":3,"module":"EG_1","key":"RELEASE_SW","label":"Release Switch","bipolar":false,"cc":0,"value":124,"general":false,"slots":[["EG_1_RELEASE_SW","Release Switch",false]]},
-      {"entry":4,"module":"EG_1","key":"LEVEL","label":"Level","bipolar":false,"cc":0,"value":124,"general":false,"slots":[["EG_1_LEVEL","Level",false]]},
-      {"entry":5,"module":"LFO_1","key":"WAVE","label":"Wave","bipolar":false,"cc":0,"value":4,"general":false,"slots":[["LFO_1_WAVE","Wave",false]]},
-      {"entry":6,"module":"LFO_1","key":"RATE","label":"Rate","bipolar":false,"cc":3,"value":64,"general":false,"slots":[["LFO_1_RATE","Rate",false]]},
-      {"entry":7,"module":"LFO_1","key":"RATE_MOD_AMT","label":"Rate Mod Amt","bipolar":false,"cc":0,"value":124,"general":false,"slots":[["LFO_1_RATE_MOD_AMT","Rate Mod Amt",false]]},
-      {"entry":8,"module":"LFO_1","key":"LEVEL","label":"Level","bipolar":false,"cc":113,"value":4,"general":false,"slots":[["LFO_1_LEVEL","Level",false]]},
-      {"entry":9,"module":"LFO_1","key":"LEVEL_MOD_AMT","label":"Level Mod Amt","bipolar":false,"cc":0,"value":124,"general":false,"slots":[["LFO_1_LEVEL_MOD_AMT","Level Mod Amt",false]]},
-      {"entry":10,"module":"MIXER_1","key":"LEVEL_1","label":"Level 1","bipolar":false,"cc":0,"value":4,"general":false,"slots":[["MIXER_1_LEVEL_1","Level 1",false]]},
-      {"entry":11,"module":"MIXER_1","key":"LEVEL_2","label":"Level 2","bipolar":false,"cc":0,"value":4,"general":false,"slots":[["MIXER_1_LEVEL_2","Level 2",false]]},
-      {"entry":12,"module":"MIXER_1","key":"LEVEL_3","label":"Level 3","bipolar":false,"cc":0,"value":4,"general":false,"slots":[["MIXER_1_LEVEL_3","Level 3",false]]},
-      {"entry":13,"module":"MIXER_1","key":"LEVEL_4","label":"Level 4","bipolar":false,"cc":0,"value":4,"general":false,"slots":[["MIXER_1_LEVEL_4","Level 4",false]]},
-      {"entry":14,"module":"MIXER_1","key":"OUT_LEVEL","label":"Out Level","bipolar":false,"cc":0,"value":64,"general":false,"slots":[["MIXER_1_OUT_LEVEL","Out Level",false]]},
-      {"entry":15,"module":"PITCH_1","key":"GLIDE","label":"Glide","bipolar":false,"cc":5,"value":4,"general":false,"slots":[["PITCH_1_GLIDE","Glide",false]]},
-      {"entry":16,"module":"PITCH_1","key":"GLIDE_SW","label":"Glide Switch","bipolar":false,"cc":0,"value":124,"general":false,"slots":[["PITCH_1_GLIDE_SW","Glide Switch",false]]},
-      {"entry":17,"module":"PITCH_1","key":"STRETCH","label":"Stretch","bipolar":false,"cc":0,"value":4,"general":false,"slots":[["PITCH_1_STRETCH","Stretch",false]]},
-      {"entry":18,"module":"PITCH_1","key":"BEND_AMT","label":"Bend Amt","bipolar":false,"cc":0,"value":28,"general":false,"slots":[["PITCH_1_BEND_AMT","Bend Amt",false]]},
-      {"entry":19,"module":"OSC_1","key":"WAVE","label":"Wave","bipolar":false,"cc":102,"value":4,"general":false,"slots":[["OSC_1_WAVE","Wave",false]]},
-      {"entry":20,"module":"OSC_1","key":"PITCH_COARSE","label":"Pitch Coarse","bipolar":true,"cc":0,"value":64,"general":false,"slots":[["OSC_1_PITCH_COARSE","Pitch Coarse",true]]},
-      {"entry":21,"module":"OSC_1","key":"PITCH_FINE","label":"Pitch Fine","bipolar":true,"cc":0,"value":64,"general":false,"slots":[["OSC_1_PITCH_FINE","Pitch Fine",true]]},
-      {"entry":22,"module":"OSC_1","key":"PITCH_MOD_1_AMT","label":"Pitch Mod 1 Amt","bipolar":false,"cc":89,"value":4,"general":false,"slots":[["OSC_1_PITCH_MOD_1_AMT","Pitch Mod 1 Amt",false]]},
-      {"entry":23,"module":"OSC_1","key":"PITCH_MOD_2_AMT","label":"Pitch Mod 2 Amt","bipolar":false,"cc":13,"value":124,"general":false,"slots":[["OSC_1_PITCH_MOD_2_AMT","Pitch Mod 2 Amt",false]]},
-      {"entry":24,"module":"OSC_1","key":"PITCH_MOD_RANGE","label":"Pitch Mod Range","bipolar":false,"cc":0,"value":28,"general":false,"slots":[["OSC_1_PITCH_MOD_RANGE","Pitch Mod Range",false]]},
-      {"entry":25,"module":"OSC_1","key":"PW","label":"PW","bipolar":true,"cc":114,"value":64,"general":false,"slots":[["OSC_1_PW","PW",true]]},
-      {"entry":26,"module":"OSC_1","key":"PW_MOD_1_AMT","label":"PW Mod 1 Amt","bipolar":false,"cc":8,"value":4,"general":false,"slots":[["OSC_1_PW_MOD_1_AMT","PW Mod 1 Amt",false]]},
-      {"entry":27,"module":"OSC_1","key":"PW_MOD_2_AMT","label":"PW Mod 2 Amt","bipolar":false,"cc":103,"value":4,"general":false,"slots":[["OSC_1_PW_MOD_2_AMT","PW Mod 2 Amt",false]]},
-      {"entry":28,"module":"OSC_2","key":"WAVE","label":"Wave","bipolar":false,"cc":104,"value":4,"general":false,"slots":[["OSC_2_WAVE","Wave",false]]},
-      {"entry":29,"module":"OSC_2","key":"PITCH_COARSE","label":"Pitch Coarse","bipolar":true,"cc":85,"value":64,"general":false,"slots":[["OSC_2_PITCH_COARSE","Pitch Coarse",true]]},
-      {"entry":30,"module":"OSC_2","key":"PITCH_FINE","label":"Pitch Fine","bipolar":true,"cc":76,"value":76,"general":false,"slots":[["OSC_2_PITCH_FINE","Pitch Fine",true]]},
-      {"entry":31,"module":"OSC_2","key":"PITCH_MOD_1_AMT","label":"Pitch Mod 1 Amt","bipolar":false,"cc":89,"value":4,"general":false,"slots":[["OSC_2_PITCH_MOD_1_AMT","Pitch Mod 1 Amt",false]]},
-      {"entry":32,"module":"OSC_2","key":"PITCH_MOD_2_AMT","label":"Pitch Mod 2 Amt","bipolar":false,"cc":13,"value":124,"general":false,"slots":[["OSC_2_PITCH_MOD_2_AMT","Pitch Mod 2 Amt",false]]},
-      {"entry":33,"module":"OSC_2","key":"PITCH_MOD_RANGE","label":"Pitch Mod Range","bipolar":false,"cc":0,"value":28,"general":false,"slots":[["OSC_2_PITCH_MOD_RANGE","Pitch Mod Range",false]]},
-      {"entry":34,"module":"OSC_2","key":"PW","label":"PW","bipolar":true,"cc":114,"value":64,"general":false,"slots":[["OSC_2_PW","PW",true]]},
-      {"entry":35,"module":"OSC_2","key":"PW_MOD_1_AMT","label":"PW Mod 1 Amt","bipolar":false,"cc":8,"value":4,"general":false,"slots":[["OSC_2_PW_MOD_1_AMT","PW Mod 1 Amt",false]]},
-      {"entry":36,"module":"OSC_2","key":"PW_MOD_2_AMT","label":"PW Mod 2 Amt","bipolar":false,"cc":103,"value":4,"general":false,"slots":[["OSC_2_PW_MOD_2_AMT","PW Mod 2 Amt",false]]},
-      {"entry":37,"module":"NOISE_1","key":"COLOR","label":"Color","bipolar":false,"cc":115,"value":4,"general":false,"slots":[["NOISE_1_COLOR","Color",false]]},
-      {"entry":38,"module":"NOISE_1","key":"LEVEL","label":"Level","bipolar":false,"cc":0,"value":124,"general":false,"slots":[["NOISE_1_LEVEL","Level",false]]},
-      {"entry":39,"module":"MIXER_2","key":"LEVEL_1","label":"Level 1","bipolar":false,"cc":20,"value":88,"general":false,"slots":[["MIXER_2_LEVEL_1","Level 1",false]]},
-      {"entry":40,"module":"MIXER_2","key":"LEVEL_2","label":"Level 2","bipolar":false,"cc":21,"value":88,"general":false,"slots":[["MIXER_2_LEVEL_2","Level 2",false]]},
-      {"entry":41,"module":"MIXER_2","key":"LEVEL_3","label":"Level 3","bipolar":false,"cc":0,"value":4,"general":false,"slots":[["MIXER_2_LEVEL_3","Level 3",false]]},
-      {"entry":42,"module":"MIXER_2","key":"LEVEL_4","label":"Level 4","bipolar":false,"cc":23,"value":4,"general":false,"slots":[["MIXER_2_LEVEL_4","Level 4",false]]},
-      {"entry":43,"module":"MIXER_2","key":"OUT_LEVEL","label":"Out Level","bipolar":false,"cc":0,"value":64,"general":false,"slots":[["MIXER_2_OUT_LEVEL","Out Level",false]]},
-      {"entry":44,"module":"FILTER_1","key":"MODE","label":"Mode","bipolar":false,"cc":0,"value":4,"general":false,"slots":[["FILTER_1_MODE","Mode",false]]},
-      {"entry":45,"module":"FILTER_1","key":"CUTOFF","label":"Cutoff","bipolar":false,"cc":74,"value":112,"general":false,"slots":[["FILTER_1_CUTOFF","Cutoff",false]]},
-      {"entry":46,"module":"FILTER_1","key":"PITCH_AMT","label":"Pitch Amt","bipolar":false,"cc":9,"value":4,"general":false,"slots":[["FILTER_1_PITCH_AMT","Pitch Amt",false]]},
-      {"entry":47,"module":"FILTER_1","key":"MOD_1_AMT","label":"Mod 1 Amt","bipolar":false,"cc":24,"value":4,"general":false,"slots":[["FILTER_1_MOD_1_AMT","Mod 1 Amt",false]]},
-      {"entry":48,"module":"FILTER_1","key":"MOD_2_AMT","label":"Mod 2 Amt","bipolar":false,"cc":25,"value":4,"general":false,"slots":[["FILTER_1_MOD_2_AMT","Mod 2 Amt",false]]},
-      {"entry":49,"module":"FILTER_1","key":"RESONANCE","label":"Resonance","bipolar":false,"cc":71,"value":64,"general":false,"slots":[["FILTER_1_RESONANCE","Resonance",false]]},
-      {"entry":50,"module":"AMP_1","key":"GAIN","label":"Gain","bipolar":false,"cc":15,"value":64,"general":false,"slots":[["AMP_1_GAIN","Gain",false]]},
-      {"entry":51,"module":"CHORUS_1","key":"MIX","label":"Mix","bipolar":false,"cc":93,"value":64,"general":false,"slots":[["CHORUS_1_MIX","Mix",false]]},
-      {"entry":52,"module":"CHORUS_1","key":"RATE","label":"Rate","bipolar":false,"cc":0,"value":64,"general":false,"slots":[["CHORUS_1_RATE","Rate",false]]},
-      {"entry":53,"module":"CHORUS_1","key":"DEPTH","label":"Depth","bipolar":false,"cc":0,"value":64,"general":false,"slots":[["CHORUS_1_DEPTH","Depth",false]]},
-      {"entry":54,"module":"DELAY_1","key":"MIX","label":"Mix","bipolar":false,"cc":94,"value":34,"general":false,"slots":[["DELAY_1_MIX","Mix",false]]},
-      {"entry":55,"module":"DELAY_1","key":"TIME","label":"Time","bipolar":false,"cc":90,"value":64,"general":false,"slots":[["DELAY_1_TIME","Time",false]]},
-      {"entry":56,"module":"DELAY_1","key":"FEEDBACK","label":"Feedback","bipolar":false,"cc":0,"value":64,"general":false,"slots":[["DELAY_1_FEEDBACK","Feedback",false]]},
-      {"entry":57,"key":"GENERAL_MOD_WHEEL","label":"Mod Wheel","bipolar":false,"cc":1,"value":4,"general":true,"slots":[["GENERAL_MOD_WHEEL","Mod Wheel",false]]},
-      {"entry":58,"key":"GENERAL_1","label":"1","bipolar":false,"cc":16,"value":64,"general":true,"slots":[["GENERAL_UNIPOLAR_1","Unipolar 1",false],["GENERAL_BIPOLAR_1","Bipolar 1",true]]},
-      {"entry":59,"key":"GENERAL_2","label":"2","bipolar":false,"cc":17,"value":64,"general":true,"slots":[["GENERAL_UNIPOLAR_2","Unipolar 2",false],["GENERAL_BIPOLAR_2","Bipolar 2",true]]},
-      {"entry":60,"key":"GENERAL_3","label":"3","bipolar":false,"cc":18,"value":64,"general":true,"slots":[["GENERAL_UNIPOLAR_3","Unipolar 3",false],["GENERAL_BIPOLAR_3","Bipolar 3",true]]},
-      {"entry":61,"key":"GENERAL_4","label":"4","bipolar":false,"cc":19,"value":64,"general":true,"slots":[["GENERAL_UNIPOLAR_4","Unipolar 4",false],["GENERAL_BIPOLAR_4","Bipolar 4",true]]},
+      {"entry":0,"module":"EG_1","key":"ATTACK","label":"Attack","bipolar":false,"cc":73,"value":4,"controller":false,"slots":[["EG_1_ATTACK","Attack",false]]},
+      {"entry":1,"module":"EG_1","key":"DECAY","label":"Decay","bipolar":false,"cc":75,"value":94,"controller":false,"slots":[["EG_1_DECAY","Decay",false]]},
+      {"entry":2,"module":"EG_1","key":"SUSTAIN","label":"Sustain","bipolar":false,"cc":30,"value":124,"controller":false,"slots":[["EG_1_SUSTAIN","Sustain",false]]},
+      {"entry":3,"module":"EG_1","key":"RELEASE_SW","label":"Release Switch","bipolar":false,"cc":0,"value":124,"controller":false,"slots":[["EG_1_RELEASE_SW","Release Switch",false]]},
+      {"entry":4,"module":"EG_1","key":"LEVEL","label":"Level","bipolar":false,"cc":0,"value":124,"controller":false,"slots":[["EG_1_LEVEL","Level",false]]},
+      {"entry":5,"module":"LFO_1","key":"WAVE","label":"Wave","bipolar":false,"cc":0,"value":4,"controller":false,"slots":[["LFO_1_WAVE","Wave",false]]},
+      {"entry":6,"module":"LFO_1","key":"RATE","label":"Rate","bipolar":false,"cc":3,"value":64,"controller":false,"slots":[["LFO_1_RATE","Rate",false]]},
+      {"entry":7,"module":"LFO_1","key":"RATE_MOD_AMT","label":"Rate Mod Amt","bipolar":false,"cc":0,"value":124,"controller":false,"slots":[["LFO_1_RATE_MOD_AMT","Rate Mod Amt",false]]},
+      {"entry":8,"module":"LFO_1","key":"LEVEL","label":"Level","bipolar":false,"cc":113,"value":4,"controller":false,"slots":[["LFO_1_LEVEL","Level",false]]},
+      {"entry":9,"module":"LFO_1","key":"LEVEL_MOD_AMT","label":"Level Mod Amt","bipolar":false,"cc":0,"value":124,"controller":false,"slots":[["LFO_1_LEVEL_MOD_AMT","Level Mod Amt",false]]},
+      {"entry":10,"module":"MIXER_1","key":"LEVEL_1","label":"Level 1","bipolar":false,"cc":0,"value":4,"controller":false,"slots":[["MIXER_1_LEVEL_1","Level 1",false]]},
+      {"entry":11,"module":"MIXER_1","key":"LEVEL_2","label":"Level 2","bipolar":false,"cc":0,"value":4,"controller":false,"slots":[["MIXER_1_LEVEL_2","Level 2",false]]},
+      {"entry":12,"module":"MIXER_1","key":"LEVEL_3","label":"Level 3","bipolar":false,"cc":0,"value":4,"controller":false,"slots":[["MIXER_1_LEVEL_3","Level 3",false]]},
+      {"entry":13,"module":"MIXER_1","key":"LEVEL_4","label":"Level 4","bipolar":false,"cc":0,"value":4,"controller":false,"slots":[["MIXER_1_LEVEL_4","Level 4",false]]},
+      {"entry":14,"module":"MIXER_1","key":"OUT_LEVEL","label":"Out Level","bipolar":false,"cc":0,"value":64,"controller":false,"slots":[["MIXER_1_OUT_LEVEL","Out Level",false]]},
+      {"entry":15,"module":"PITCH_1","key":"GLIDE","label":"Glide","bipolar":false,"cc":5,"value":4,"controller":false,"slots":[["PITCH_1_GLIDE","Glide",false]]},
+      {"entry":16,"module":"PITCH_1","key":"GLIDE_SW","label":"Glide Switch","bipolar":false,"cc":0,"value":124,"controller":false,"slots":[["PITCH_1_GLIDE_SW","Glide Switch",false]]},
+      {"entry":17,"module":"PITCH_1","key":"STRETCH","label":"Stretch","bipolar":false,"cc":0,"value":4,"controller":false,"slots":[["PITCH_1_STRETCH","Stretch",false]]},
+      {"entry":18,"module":"PITCH_1","key":"BEND_AMT","label":"Bend Amt","bipolar":false,"cc":0,"value":28,"controller":false,"slots":[["PITCH_1_BEND_AMT","Bend Amt",false]]},
+      {"entry":19,"module":"OSC_1","key":"WAVE","label":"Wave","bipolar":false,"cc":102,"value":4,"controller":false,"slots":[["OSC_1_WAVE","Wave",false]]},
+      {"entry":20,"module":"OSC_1","key":"PITCH_COARSE","label":"Pitch Coarse","bipolar":true,"cc":0,"value":64,"controller":false,"slots":[["OSC_1_PITCH_COARSE","Pitch Coarse",true]]},
+      {"entry":21,"module":"OSC_1","key":"PITCH_FINE","label":"Pitch Fine","bipolar":true,"cc":0,"value":64,"controller":false,"slots":[["OSC_1_PITCH_FINE","Pitch Fine",true]]},
+      {"entry":22,"module":"OSC_1","key":"PITCH_MOD_1_AMT","label":"Pitch Mod 1 Amt","bipolar":false,"cc":89,"value":4,"controller":false,"slots":[["OSC_1_PITCH_MOD_1_AMT","Pitch Mod 1 Amt",false]]},
+      {"entry":23,"module":"OSC_1","key":"PITCH_MOD_2_AMT","label":"Pitch Mod 2 Amt","bipolar":false,"cc":13,"value":124,"controller":false,"slots":[["OSC_1_PITCH_MOD_2_AMT","Pitch Mod 2 Amt",false]]},
+      {"entry":24,"module":"OSC_1","key":"PITCH_MOD_RANGE","label":"Pitch Mod Range","bipolar":false,"cc":0,"value":28,"controller":false,"slots":[["OSC_1_PITCH_MOD_RANGE","Pitch Mod Range",false]]},
+      {"entry":25,"module":"OSC_1","key":"PW","label":"PW","bipolar":true,"cc":114,"value":64,"controller":false,"slots":[["OSC_1_PW","PW",true]]},
+      {"entry":26,"module":"OSC_1","key":"PW_MOD_1_AMT","label":"PW Mod 1 Amt","bipolar":false,"cc":8,"value":4,"controller":false,"slots":[["OSC_1_PW_MOD_1_AMT","PW Mod 1 Amt",false]]},
+      {"entry":27,"module":"OSC_1","key":"PW_MOD_2_AMT","label":"PW Mod 2 Amt","bipolar":false,"cc":103,"value":4,"controller":false,"slots":[["OSC_1_PW_MOD_2_AMT","PW Mod 2 Amt",false]]},
+      {"entry":28,"module":"OSC_2","key":"WAVE","label":"Wave","bipolar":false,"cc":104,"value":4,"controller":false,"slots":[["OSC_2_WAVE","Wave",false]]},
+      {"entry":29,"module":"OSC_2","key":"PITCH_COARSE","label":"Pitch Coarse","bipolar":true,"cc":85,"value":64,"controller":false,"slots":[["OSC_2_PITCH_COARSE","Pitch Coarse",true]]},
+      {"entry":30,"module":"OSC_2","key":"PITCH_FINE","label":"Pitch Fine","bipolar":true,"cc":76,"value":76,"controller":false,"slots":[["OSC_2_PITCH_FINE","Pitch Fine",true]]},
+      {"entry":31,"module":"OSC_2","key":"PITCH_MOD_1_AMT","label":"Pitch Mod 1 Amt","bipolar":false,"cc":89,"value":4,"controller":false,"slots":[["OSC_2_PITCH_MOD_1_AMT","Pitch Mod 1 Amt",false]]},
+      {"entry":32,"module":"OSC_2","key":"PITCH_MOD_2_AMT","label":"Pitch Mod 2 Amt","bipolar":false,"cc":13,"value":124,"controller":false,"slots":[["OSC_2_PITCH_MOD_2_AMT","Pitch Mod 2 Amt",false]]},
+      {"entry":33,"module":"OSC_2","key":"PITCH_MOD_RANGE","label":"Pitch Mod Range","bipolar":false,"cc":0,"value":28,"controller":false,"slots":[["OSC_2_PITCH_MOD_RANGE","Pitch Mod Range",false]]},
+      {"entry":34,"module":"OSC_2","key":"PW","label":"PW","bipolar":true,"cc":114,"value":64,"controller":false,"slots":[["OSC_2_PW","PW",true]]},
+      {"entry":35,"module":"OSC_2","key":"PW_MOD_1_AMT","label":"PW Mod 1 Amt","bipolar":false,"cc":8,"value":4,"controller":false,"slots":[["OSC_2_PW_MOD_1_AMT","PW Mod 1 Amt",false]]},
+      {"entry":36,"module":"OSC_2","key":"PW_MOD_2_AMT","label":"PW Mod 2 Amt","bipolar":false,"cc":103,"value":4,"controller":false,"slots":[["OSC_2_PW_MOD_2_AMT","PW Mod 2 Amt",false]]},
+      {"entry":37,"module":"NOISE_1","key":"COLOR","label":"Color","bipolar":false,"cc":115,"value":4,"controller":false,"slots":[["NOISE_1_COLOR","Color",false]]},
+      {"entry":38,"module":"NOISE_1","key":"LEVEL","label":"Level","bipolar":false,"cc":0,"value":124,"controller":false,"slots":[["NOISE_1_LEVEL","Level",false]]},
+      {"entry":39,"module":"MIXER_2","key":"LEVEL_1","label":"Level 1","bipolar":false,"cc":20,"value":88,"controller":false,"slots":[["MIXER_2_LEVEL_1","Level 1",false]]},
+      {"entry":40,"module":"MIXER_2","key":"LEVEL_2","label":"Level 2","bipolar":false,"cc":21,"value":88,"controller":false,"slots":[["MIXER_2_LEVEL_2","Level 2",false]]},
+      {"entry":41,"module":"MIXER_2","key":"LEVEL_3","label":"Level 3","bipolar":false,"cc":0,"value":4,"controller":false,"slots":[["MIXER_2_LEVEL_3","Level 3",false]]},
+      {"entry":42,"module":"MIXER_2","key":"LEVEL_4","label":"Level 4","bipolar":false,"cc":23,"value":4,"controller":false,"slots":[["MIXER_2_LEVEL_4","Level 4",false]]},
+      {"entry":43,"module":"MIXER_2","key":"OUT_LEVEL","label":"Out Level","bipolar":false,"cc":0,"value":64,"controller":false,"slots":[["MIXER_2_OUT_LEVEL","Out Level",false]]},
+      {"entry":44,"module":"FILTER_1","key":"MODE","label":"Mode","bipolar":false,"cc":0,"value":4,"controller":false,"slots":[["FILTER_1_MODE","Mode",false]]},
+      {"entry":45,"module":"FILTER_1","key":"CUTOFF","label":"Cutoff","bipolar":false,"cc":74,"value":112,"controller":false,"slots":[["FILTER_1_CUTOFF","Cutoff",false]]},
+      {"entry":46,"module":"FILTER_1","key":"PITCH_AMT","label":"Pitch Amt","bipolar":false,"cc":9,"value":4,"controller":false,"slots":[["FILTER_1_PITCH_AMT","Pitch Amt",false]]},
+      {"entry":47,"module":"FILTER_1","key":"MOD_1_AMT","label":"Mod 1 Amt","bipolar":false,"cc":24,"value":4,"controller":false,"slots":[["FILTER_1_MOD_1_AMT","Mod 1 Amt",false]]},
+      {"entry":48,"module":"FILTER_1","key":"MOD_2_AMT","label":"Mod 2 Amt","bipolar":false,"cc":25,"value":4,"controller":false,"slots":[["FILTER_1_MOD_2_AMT","Mod 2 Amt",false]]},
+      {"entry":49,"module":"FILTER_1","key":"RESONANCE","label":"Resonance","bipolar":false,"cc":71,"value":64,"controller":false,"slots":[["FILTER_1_RESONANCE","Resonance",false]]},
+      {"entry":50,"module":"AMP_1","key":"GAIN","label":"Gain","bipolar":false,"cc":15,"value":64,"controller":false,"slots":[["AMP_1_GAIN","Gain",false]]},
+      {"entry":51,"module":"CHORUS_1","key":"MIX","label":"Mix","bipolar":false,"cc":93,"value":64,"controller":false,"slots":[["CHORUS_1_MIX","Mix",false]]},
+      {"entry":52,"module":"CHORUS_1","key":"RATE","label":"Rate","bipolar":false,"cc":0,"value":64,"controller":false,"slots":[["CHORUS_1_RATE","Rate",false]]},
+      {"entry":53,"module":"CHORUS_1","key":"DEPTH","label":"Depth","bipolar":false,"cc":0,"value":64,"controller":false,"slots":[["CHORUS_1_DEPTH","Depth",false]]},
+      {"entry":54,"module":"DELAY_1","key":"MIX","label":"Mix","bipolar":false,"cc":94,"value":34,"controller":false,"slots":[["DELAY_1_MIX","Mix",false]]},
+      {"entry":55,"module":"DELAY_1","key":"TIME","label":"Time","bipolar":false,"cc":90,"value":64,"controller":false,"slots":[["DELAY_1_TIME","Time",false]]},
+      {"entry":56,"module":"DELAY_1","key":"FEEDBACK","label":"Feedback","bipolar":false,"cc":0,"value":64,"controller":false,"slots":[["DELAY_1_FEEDBACK","Feedback",false]]},
+      {"entry":57,"key":"MOD_WHEEL","label":"Mod Wheel","bipolar":false,"cc":1,"value":4,"controller":true,"slots":[["MOD_WHEEL","Mod Wheel",false]]},
     ],
     signals: [
       {"id":0,"key":"NONE","label":"0.0"},
@@ -1346,47 +1382,39 @@
       {"id":5,"key":"NOTE_PITCH","label":"Note Pitch"},
       {"id":6,"key":"NOTE_GATE","label":"Note Gate"},
       {"id":7,"key":"PITCH_BEND","label":"Pitch Bend"},
-      {"id":8,"key":"GENERAL_MOD_WHEEL"},
-      {"id":9,"key":"GENERAL_UNIPOLAR_1"},
-      {"id":10,"key":"GENERAL_UNIPOLAR_2"},
-      {"id":11,"key":"GENERAL_UNIPOLAR_3"},
-      {"id":12,"key":"GENERAL_UNIPOLAR_4"},
-      {"id":13,"key":"GENERAL_BIPOLAR_1"},
-      {"id":14,"key":"GENERAL_BIPOLAR_2"},
-      {"id":15,"key":"GENERAL_BIPOLAR_3"},
-      {"id":16,"key":"GENERAL_BIPOLAR_4"},
-      {"id":17,"key":"EG_1_OUTPUT"},
-      {"id":18,"key":"EG_1_OUTPUT_INV"},
-      {"id":19,"key":"LFO_1_OUTPUT"},
-      {"id":20,"key":"LFO_1_OUTPUT_INV"},
-      {"id":21,"key":"LFO_1_OUTPUT_TRIANGLE"},
-      {"id":22,"key":"LFO_1_OUTPUT_TRIANGLE_INV"},
-      {"id":23,"key":"LFO_1_OUTPUT_SQUARE"},
-      {"id":24,"key":"LFO_1_OUTPUT_SQUARE_INV"},
-      {"id":25,"key":"MIXER_1_OUTPUT"},
-      {"id":26,"key":"MIXER_1_OUTPUT_INV"},
-      {"id":27,"key":"PITCH_1_OUTPUT"},
-      {"id":28,"key":"OSC_1_OUTPUT"},
-      {"id":29,"key":"OSC_1_OUTPUT_SAW"},
-      {"id":30,"key":"OSC_1_OUTPUT_PULSE"},
-      {"id":31,"key":"OSC_2_OUTPUT"},
-      {"id":32,"key":"OSC_2_OUTPUT_SAW"},
-      {"id":33,"key":"OSC_2_OUTPUT_PULSE"},
-      {"id":34,"key":"NOISE_1_OUTPUT"},
-      {"id":35,"key":"NOISE_1_OUTPUT_WHITE"},
-      {"id":36,"key":"NOISE_1_OUTPUT_RED"},
-      {"id":37,"key":"MIXER_2_OUTPUT"},
-      {"id":38,"key":"MIXER_2_OUTPUT_INV"},
-      {"id":39,"key":"FILTER_1_OUTPUT"},
-      {"id":40,"key":"FILTER_1_OUTPUT_LP"},
-      {"id":41,"key":"FILTER_1_OUTPUT_HP"},
-      {"id":42,"key":"AMP_1_OUTPUT"},
-      {"id":43,"key":"CHORUS_1_OUTPUT_L"},
-      {"id":44,"key":"CHORUS_1_OUTPUT_R"},
-      {"id":45,"key":"CHORUS_1_OUTPUT_MONO"},
-      {"id":46,"key":"DELAY_1_OUTPUT_L"},
-      {"id":47,"key":"DELAY_1_OUTPUT_R"},
-      {"id":48,"key":"DELAY_1_OUTPUT_MONO"},
+      {"id":8,"key":"MOD_WHEEL"},
+      {"id":9,"key":"EG_1_OUTPUT"},
+      {"id":10,"key":"EG_1_OUTPUT_INV"},
+      {"id":11,"key":"LFO_1_OUTPUT"},
+      {"id":12,"key":"LFO_1_OUTPUT_INV"},
+      {"id":13,"key":"LFO_1_OUTPUT_TRIANGLE"},
+      {"id":14,"key":"LFO_1_OUTPUT_TRIANGLE_INV"},
+      {"id":15,"key":"LFO_1_OUTPUT_SQUARE"},
+      {"id":16,"key":"LFO_1_OUTPUT_SQUARE_INV"},
+      {"id":17,"key":"MIXER_1_OUTPUT"},
+      {"id":18,"key":"MIXER_1_OUTPUT_INV"},
+      {"id":19,"key":"PITCH_1_OUTPUT"},
+      {"id":20,"key":"OSC_1_OUTPUT"},
+      {"id":21,"key":"OSC_1_OUTPUT_SAW"},
+      {"id":22,"key":"OSC_1_OUTPUT_PULSE"},
+      {"id":23,"key":"OSC_2_OUTPUT"},
+      {"id":24,"key":"OSC_2_OUTPUT_SAW"},
+      {"id":25,"key":"OSC_2_OUTPUT_PULSE"},
+      {"id":26,"key":"NOISE_1_OUTPUT"},
+      {"id":27,"key":"NOISE_1_OUTPUT_WHITE"},
+      {"id":28,"key":"NOISE_1_OUTPUT_RED"},
+      {"id":29,"key":"MIXER_2_OUTPUT"},
+      {"id":30,"key":"MIXER_2_OUTPUT_INV"},
+      {"id":31,"key":"FILTER_1_OUTPUT"},
+      {"id":32,"key":"FILTER_1_OUTPUT_LP"},
+      {"id":33,"key":"FILTER_1_OUTPUT_HP"},
+      {"id":34,"key":"AMP_1_OUTPUT"},
+      {"id":35,"key":"CHORUS_1_OUTPUT_L"},
+      {"id":36,"key":"CHORUS_1_OUTPUT_R"},
+      {"id":37,"key":"CHORUS_1_OUTPUT_MONO"},
+      {"id":38,"key":"DELAY_1_OUTPUT_L"},
+      {"id":39,"key":"DELAY_1_OUTPUT_R"},
+      {"id":40,"key":"DELAY_1_OUTPUT_MONO"},
     ],
     defaultOrder: ["EG_1","LFO_1","MIXER_1","PITCH_1","OSC_1","OSC_2","NOISE_1","MIXER_2","FILTER_1","AMP_1","CHORUS_1","DELAY_1"],
   };
@@ -1398,21 +1426,20 @@
 
   function toItem({ module, key: suffix, label }) {
     const key = module ? `${module}_${suffix}` : suffix;
-    const full = module ? `${MOD[module].label} ${label}` : (suffix.startsWith('OUTPUT') ? `Final Output ${label}` : `General ${label}`);
+    const full = module ? `${MOD[module].label} ${label}` : (suffix.startsWith('OUTPUT') ? `Final Output ${label}` : label);
     return { module, key, label, full };
   }
   // NRPN category 1: each module input, and the two sides of the final output.
   const INPUT_ITEMS = SPEC.inputs.map(i => ({ ...toItem(i), entry: i.entry, defaultSource: i.source }));
-  // NRPN categories 2 and 3 share entry numbers for the parameters; the General controls are in
-  // category 3 only, and each of General 1-4 fills two slots from one CC, a unipolar and a
-  // bipolar one, as spms1_main.rb does. A control's slots are the bus slots its CC fills, each
-  // with its own range: [slot, label, bipolar].
+  // NRPN categories 2 and 3 share entry numbers for the parameters; the mod wheel, a controller
+  // control, is in category 3 only, its CC filling a slot on the bus, as spms1_main.rb does. A
+  // control's slots are the slots its CC fills, each with its own range: [slot, label, bipolar].
   const CONTROL_ITEMS = SPEC.controls.map(c => ({
-    ...toItem(c), entry: c.entry, general: !!c.general, bipolar: c.bipolar, slots: c.slots,
+    ...toItem(c), entry: c.entry, controller: !!c.controller, bipolar: c.bipolar, slots: c.slots,
     defaultCC: c.cc, defaultValue: c.value ?? null, defaultSource: c.source || null,
   }));
-  const PARAM_ITEMS = CONTROL_ITEMS.filter(c => !c.general);
-  const GENERAL_ITEMS = CONTROL_ITEMS.filter(c => c.general);
+  const PARAM_ITEMS = CONTROL_ITEMS.filter(c => !c.controller);
+  const CONTROLLER_ITEMS = CONTROL_ITEMS.filter(c => c.controller);
   const CONTROL = Object.fromEntries(CONTROL_ITEMS.map(c => [c.key, c]));
   // By NRPN entry, for what the synth sends back.
   const INPUT_BY_ENTRY = Object.fromEntries(INPUT_ITEMS.map(i => [i.entry, i]));
@@ -1421,7 +1448,7 @@
   // Each control slot, with the item whose CC fills it and the range it takes.
   const SLOT = {};
   CONTROL_ITEMS.forEach(c => c.slots.forEach(([slot, label, bipolar]) => {
-    SLOT[slot] = { c, bipolar, full: c.module ? c.full : `General ${label}` };
+    SLOT[slot] = { c, bipolar, full: c.module ? c.full : label };
   }));
 
   // The signals bus: each slot's name by its number, and each name's number.
@@ -1444,9 +1471,8 @@
   // with the noise under Osc 2, Mixer 2, the filter over the amp, and the effects with the output
   // under the delay that feeds it. Spaced so that no two nodes meet with every parameter shown.
   const DEFAULT_LAYOUT = {
-    KEYBOARD:  { x: 20,   y: 40 },
-    CONST:     { x: 20,   y: 215 },
-    GENERAL:   { x: 20,   y: 442 },
+    CONTROLLER: { x: 20,  y: 40 },
+    CONST:     { x: 20,   y: 263 },
     EG_1:      { x: 340,  y: 40 },
     LFO_1:     { x: 340,  y: 372 },
     MIXER_1:   { x: 700,  y: 40 },
@@ -1784,9 +1810,8 @@
   let selectedWire = null;
 
   const NODES = [
-    { key: 'KEYBOARD', label: 'Keyboard', aux: true, notes: [['NOTE_PITCH', 'Note Pitch', 0, 127], ['NOTE_GATE', 'Note Gate', 0, 1], ['PITCH_BEND', 'Pitch Bend', -8192, 8191]] },
+    { key: 'CONTROLLER', label: 'Controller', aux: true, notes: [['NOTE_PITCH', 'Note Pitch', 0, 127], ['NOTE_GATE', 'Note Gate', 0, 1], ['PITCH_BEND', 'Pitch Bend', -8192, 8191]], controls: CONTROLLER_ITEMS },
     { key: 'CONST', label: 'Constants', aux: true, normed: true, outs: ['ONE', 'HALF', 'NONE', 'MINUS_HALF', 'MINUS_ONE'] },
-    { key: 'GENERAL', label: 'General', aux: true, controls: GENERAL_ITEMS },
     ...MODULES.map(m => ({
       key: m.key, label: m.label, module: m,
       inputs: INPUT_ITEMS.filter(i => i.module === m.key),
@@ -1799,11 +1824,10 @@
     return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
 
-  // An item with two slots takes a second row for the second one, under the CC it shares. Only a
-  // General control's slots are on the bus, with an output for inputs and parameters to read; a
+  // Only the mod wheel's slot is on the bus, with an output for inputs and parameters to read; a
   // parameter's control slot is its own, which only the parameter reads, so it has none.
   function controlRowHTML(c, withInput) {
-    const [[slot, label, bipolar], ...more] = c.slots;
+    const [[slot, label, bipolar]] = c.slots;
     const tip = bipolar ? 'Bipolar: CC 64 is the centre' : 'Unipolar';
     return `<div class="row ctrl" data-ctrl="${c.key}">
       ${withInput ? `<span class="port in param" data-dst="PR:${c.key}" title="Where ${escapeHTML(c.full)} takes its value (per buffer)"></span>` : ''}
@@ -1813,11 +1837,7 @@
       <input type="number" class="val" min="4" max="124" title="CC value">
       <span class="norm" data-slot="${slot}" title="The value the synth sees in the slot"></span>
       ${withInput ? '' : `<span class="port out param" data-src="${slot}" title="${escapeHTML(SLOT[slot].full)} control slot"></span>`}
-    </div>` + more.map(([slot, label, bipolar]) => `<div class="row">
-      <span class="lbl" title="${bipolar ? 'Bipolar: CC 64 is the centre' : 'Unipolar'}, on the CC above">${escapeHTML(label)}</span>
-      <span class="norm" data-slot="${slot}" title="The value the synth sees in the slot"></span>
-      <span class="port out param" data-src="${slot}" title="${escapeHTML(SLOT[slot].full)} control slot"></span>
-    </div>`).join('');
+    </div>`;
   }
 
   function nodeHTML(node) {
@@ -1848,7 +1868,7 @@
       }
     }
     if (node.controls && node.controls.length) {
-      h += `<div class="sep"><span>${node.module ? 'Parameters' : 'Signals'}</span><span>CC</span><span>Value</span><span class="norm-head">Norm</span></div>`;
+      h += `<div class="sep"><span>${node.module ? 'Parameters' : 'Controls'}</span><span>CC</span><span>Value</span><span class="norm-head">Norm</span></div>`;
       for (const c of node.controls) h += controlRowHTML(c, !!node.module);
     }
     return h + '<div class="rows-end"></div>';
@@ -1859,7 +1879,7 @@
     portEls = {};
     for (const node of NODES) {
       const el = document.createElement('div');
-      el.className = 'node' + (node.aux ? ' aux' : '') + (node.key === 'GENERAL' ? ' general' : '') + (node.key === 'CONST' ? ' const' : '');
+      el.className = 'node' + (node.aux ? ' aux' : '') + (node.key === 'CONTROLLER' ? ' controller' : '') + (node.key === 'CONST' ? ' const' : '');
       el.dataset.node = node.key;
       el.innerHTML = nodeHTML(node);
       const pos = state.layout[node.key];
@@ -1886,18 +1906,18 @@
       const others = sharingCC(c);
       ccIn.classList.toggle('warn', RESERVED_CCS.has(cc));
       ccIn.classList.toggle('none', !cc);
-      row.classList.toggle('own', !cc && !c.general);
+      row.classList.toggle('own', !cc && !c.controller);
       ccIn.classList.toggle('shared', !RESERVED_CCS.has(cc) && others.length > 0);
       ccIn.title = RESERVED_CCS.has(cc)
         ? `CC ${cc} carries NRPN selection or data: its value is not sent`
         : others.length ? `CC number, 0 for none. CC ${cc} also moves ${others.join(', ')}`
         : 'CC number, 0 for none';
-      valIn.disabled = !cc && c.general;
-      if (document.activeElement !== valIn) valIn.value = cc ? ccValue(cc) : c.general ? '' : paramValue(c.key);
+      valIn.disabled = !cc && c.controller;
+      if (document.activeElement !== valIn) valIn.value = cc ? ccValue(cc) : c.controller ? '' : paramValue(c.key);
       valIn.placeholder = valIn.disabled ? '—' : '';
       valIn.title = cc
         ? `Value of CC ${cc}, shared by every slot on it`
-        : c.general ? 'No CC: the slot holds 0.0' : 'No CC: the slot holds this value, sent as NRPN';
+        : c.controller ? 'No CC: the slot holds 0.0' : 'No CC: the slot holds this value, sent as NRPN';
     });
     world.querySelectorAll('.norm[data-slot]').forEach(norm => {
       const own = signalNorm(norm.dataset.slot);
@@ -1931,7 +1951,7 @@
         input.addEventListener('change', () => {
           if (before && before !== JSON.stringify(serialize(state))) pushHistory(before);
           before = JSON.stringify(serialize(state));
-          input.value = input === ccIn ? state.cc[key] : state.cc[key] ? ccValue(state.cc[key]) : CONTROL[key].general ? '' : paramValue(key);
+          input.value = input === ccIn ? state.cc[key] : state.cc[key] ? ccValue(state.cc[key]) : CONTROL[key].controller ? '' : paramValue(key);
         });
       }
       ccIn.addEventListener('input', () => {
@@ -1944,7 +1964,7 @@
         const cc = state.cc[key];
         if (valIn.value === '') return;
         if (cc) setCCValue(cc, clampValue(valIn.value), true);
-        else if (!CONTROL[key].general) setParamValue(key, clampValue(valIn.value), true);
+        else if (!CONTROL[key].controller) setParamValue(key, clampValue(valIn.value), true);
       });
       const currentValue = () => (state.cc[key] ? ccValue(state.cc[key]) : paramValue(key));
       const setValue = v => {
@@ -2925,7 +2945,6 @@
   // Each slider follows its slot's CC assignment in the patch, and moves the value of that CC.
   // The panels in the signal order of the patch's default layout, top to bottom, then left to right.
   const CONTROL_PANELS = [
-    { col: 0, title: 'General', general: true },
     { col: 0, title: 'EG 1', module: 'EG_1' },
     { col: 0, title: 'LFO 1', module: 'LFO_1' },
     { col: 1, title: 'Mixer 1', module: 'MIXER_1' },
@@ -2941,16 +2960,16 @@
   ];
 
   function panelItems(p) {
-    return p.general ? GENERAL_ITEMS : PARAM_ITEMS.filter(c => c.module === p.module);
+    return PARAM_ITEMS.filter(c => c.module === p.module);
   }
 
   // What the synth writes to a control slot, as a CC value: the CC's own value while one is
-  // assigned, and while none is, a parameter's value from NRPN category 4 and 0.0 for a General
-  // slot, as cc_or_nrpn and cc_or_zero in spms1_main.rb do. null is a slot written from a reserved
+  // assigned, and while none is, a parameter's value from NRPN category 4 and 0.0 for the mod
+  // wheel's slot, as cc_or_nrpn and cc_or_zero in spms1_main.rb do. null is a slot written from a reserved
   // CC, whose value the editor does not track.
   function slotValue(c, bipolar) {
     const cc = state.cc[c.key];
-    if (!cc) return c.general ? (bipolar ? 64 : 4) : paramValue(c.key);
+    if (!cc) return c.controller ? (bipolar ? 64 : 4) : paramValue(c.key);
     return RESERVED_CCS.has(cc) ? null : ccValue(cc);
   }
 
@@ -3019,7 +3038,7 @@
       panel.className = 'panel';
       panel.innerHTML = `<h2>${p.title}</h2><div class="control-row">` + items.map(c => `
         <div class="slider-knob-zone" data-ctrl="${c.key}">
-          <div class="slider-label">${escapeHTML(/^\d$/.test(c.label) ? c.full : c.label)} <span class="cc-num"></span></div>
+          <div class="slider-label">${escapeHTML(c.label)} <span class="cc-num"></span></div>
           <div class="slider-input-wrapper">
             <span class="range-wrap"><input type="range" min="4" max="124">${c.slots.some(([, , bipolar]) => bipolar) ? '<span class="centre-tick"></span>' : ''}</span>
             <span class="slider-value"></span>
@@ -3038,7 +3057,7 @@
       slider.addEventListener('input', () => {
         const cc = state.cc[c.key];
         if (ccInUse(cc)) setCCValue(cc, parseInt(slider.value), true);
-        else if (!cc && !c.general) setParamValue(c.key, parseInt(slider.value), true);
+        else if (!cc && !c.controller) setParamValue(c.key, parseInt(slider.value), true);
       });
       slider.addEventListener('change', () => {
         if (sliderBefore && sliderBefore !== JSON.stringify(serialize(state))) pushHistory(sliderBefore);
@@ -3060,7 +3079,7 @@
       const c = CONTROL[zone.dataset.ctrl];
       const cc = state.cc[c.key];
       const slider = zone.querySelector('input');
-      const ownValue = !cc && !c.general;
+      const ownValue = !cc && !c.controller;
       const usable = ccInUse(cc) || ownValue;
       const src = state.params[c.key];
       const routed = src !== undefined && src !== c.key;
@@ -3078,15 +3097,41 @@
       const value = ownValue ? paramValue(c.key) : usable ? ccValue(cc) : 64;
       if (document.activeElement !== slider) slider.value = value;
       zone.querySelector('.slider-value').textContent = usable ? String(value) : '—';
-      // A General control fills a unipolar and a bipolar slot from one CC; its value shows as the
-      // bipolar one, centred on CC 64 as its tick is.
-      const shown = c.slots.find(([, , bipolar]) => bipolar) || c.slots[0];
-      const own = signalNorm(shown[0]);
+      const own = signalNorm(c.slots[0][0]);
       const norm = zone.querySelector('.slider-norm');
       norm.textContent = own ? own.text : '';
       norm.title = 'The value the synth sees in the slot';
     });
+    refreshModWheel();
   }
+
+  // The mod wheel by the soft keyboard moves the value of the CC Mod Wheel is on in the patch, as
+  // a slider does its parameter's. With no CC, or a reserved one, the slot holds 0.0 and the wheel
+  // is held at its bottom.
+  function refreshModWheel() {
+    const modWheel = document.getElementById('mod-wheel');
+    const cc = state.cc.MOD_WHEEL;
+    const usable = ccInUse(cc);
+    modWheel.disabled = !usable;
+    if (document.activeElement !== modWheel) modWheel.value = usable ? ccValue(cc) : 4;
+    const v = signalNorm('MOD_WHEEL');
+    document.getElementById('mod-wheel-zone').title = usable
+      ? `Mod Wheel (CC ${cc}): ${ccValue(cc)}${v ? `, ${v.text}` : ''}`
+      : 'Mod Wheel: no CC in the patch, so the slot holds 0.0';
+  }
+
+  const modWheel = document.getElementById('mod-wheel');
+  let modWheelBefore = null;
+  modWheel.addEventListener('pointerdown', () => { modWheelBefore = JSON.stringify(serialize(state)); });
+  modWheel.addEventListener('focus', () => { modWheelBefore = JSON.stringify(serialize(state)); });
+  modWheel.addEventListener('input', () => {
+    const cc = state.cc.MOD_WHEEL;
+    if (ccInUse(cc)) setCCValue(cc, parseInt(modWheel.value), true);
+  });
+  modWheel.addEventListener('change', () => {
+    if (modWheelBefore && modWheelBefore !== JSON.stringify(serialize(state))) pushHistory(modWheelBefore);
+    modWheelBefore = JSON.stringify(serialize(state));
+  });
 
   document.getElementById('init-values').addEventListener('click', () => {
     pushHistory();

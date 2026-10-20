@@ -25,47 +25,39 @@ SIGNAL_MINUS_ONE                 = 4
 SIGNAL_NOTE_PITCH                = 5
 SIGNAL_NOTE_GATE                 = 6
 SIGNAL_PITCH_BEND                = 7
-SIGNAL_GENERAL_MOD_WHEEL         = 8
-SIGNAL_GENERAL_UNIPOLAR_1        = 9
-SIGNAL_GENERAL_UNIPOLAR_2        = 10
-SIGNAL_GENERAL_UNIPOLAR_3        = 11
-SIGNAL_GENERAL_UNIPOLAR_4        = 12
-SIGNAL_GENERAL_BIPOLAR_1         = 13
-SIGNAL_GENERAL_BIPOLAR_2         = 14
-SIGNAL_GENERAL_BIPOLAR_3         = 15
-SIGNAL_GENERAL_BIPOLAR_4         = 16
-SIGNAL_EG_1_OUTPUT               = 17
-SIGNAL_EG_1_OUTPUT_INV           = 18
-SIGNAL_LFO_1_OUTPUT              = 19
-SIGNAL_LFO_1_OUTPUT_INV          = 20
-SIGNAL_LFO_1_OUTPUT_TRIANGLE     = 21
-SIGNAL_LFO_1_OUTPUT_TRIANGLE_INV = 22
-SIGNAL_LFO_1_OUTPUT_SQUARE       = 23
-SIGNAL_LFO_1_OUTPUT_SQUARE_INV   = 24
-SIGNAL_MIXER_1_OUTPUT            = 25
-SIGNAL_MIXER_1_OUTPUT_INV        = 26
-SIGNAL_PITCH_1_OUTPUT            = 27
-SIGNAL_OSC_1_OUTPUT              = 28
-SIGNAL_OSC_1_OUTPUT_SAW          = 29
-SIGNAL_OSC_1_OUTPUT_PULSE        = 30
-SIGNAL_OSC_2_OUTPUT              = 31
-SIGNAL_OSC_2_OUTPUT_SAW          = 32
-SIGNAL_OSC_2_OUTPUT_PULSE        = 33
-SIGNAL_NOISE_1_OUTPUT            = 34
-SIGNAL_NOISE_1_OUTPUT_WHITE      = 35
-SIGNAL_NOISE_1_OUTPUT_RED        = 36
-SIGNAL_MIXER_2_OUTPUT            = 37
-SIGNAL_MIXER_2_OUTPUT_INV        = 38
-SIGNAL_FILTER_1_OUTPUT           = 39
-SIGNAL_FILTER_1_OUTPUT_LP        = 40
-SIGNAL_FILTER_1_OUTPUT_HP        = 41
-SIGNAL_AMP_1_OUTPUT              = 42
-SIGNAL_CHORUS_1_OUTPUT_L         = 43
-SIGNAL_CHORUS_1_OUTPUT_R         = 44
-SIGNAL_CHORUS_1_OUTPUT_MONO      = 45
-SIGNAL_DELAY_1_OUTPUT_L          = 46
-SIGNAL_DELAY_1_OUTPUT_R          = 47
-SIGNAL_DELAY_1_OUTPUT_MONO       = 48
+SIGNAL_MOD_WHEEL                 = 8
+SIGNAL_EG_1_OUTPUT               = 9
+SIGNAL_EG_1_OUTPUT_INV           = 10
+SIGNAL_LFO_1_OUTPUT              = 11
+SIGNAL_LFO_1_OUTPUT_INV          = 12
+SIGNAL_LFO_1_OUTPUT_TRIANGLE     = 13
+SIGNAL_LFO_1_OUTPUT_TRIANGLE_INV = 14
+SIGNAL_LFO_1_OUTPUT_SQUARE       = 15
+SIGNAL_LFO_1_OUTPUT_SQUARE_INV   = 16
+SIGNAL_MIXER_1_OUTPUT            = 17
+SIGNAL_MIXER_1_OUTPUT_INV        = 18
+SIGNAL_PITCH_1_OUTPUT            = 19
+SIGNAL_OSC_1_OUTPUT              = 20
+SIGNAL_OSC_1_OUTPUT_SAW          = 21
+SIGNAL_OSC_1_OUTPUT_PULSE        = 22
+SIGNAL_OSC_2_OUTPUT              = 23
+SIGNAL_OSC_2_OUTPUT_SAW          = 24
+SIGNAL_OSC_2_OUTPUT_PULSE        = 25
+SIGNAL_NOISE_1_OUTPUT            = 26
+SIGNAL_NOISE_1_OUTPUT_WHITE      = 27
+SIGNAL_NOISE_1_OUTPUT_RED        = 28
+SIGNAL_MIXER_2_OUTPUT            = 29
+SIGNAL_MIXER_2_OUTPUT_INV        = 30
+SIGNAL_FILTER_1_OUTPUT           = 31
+SIGNAL_FILTER_1_OUTPUT_LP        = 32
+SIGNAL_FILTER_1_OUTPUT_HP        = 33
+SIGNAL_AMP_1_OUTPUT              = 34
+SIGNAL_CHORUS_1_OUTPUT_L         = 35
+SIGNAL_CHORUS_1_OUTPUT_R         = 36
+SIGNAL_CHORUS_1_OUTPUT_MONO      = 37
+SIGNAL_DELAY_1_OUTPUT_L          = 38
+SIGNAL_DELAY_1_OUTPUT_R          = 39
+SIGNAL_DELAY_1_OUTPUT_MONO       = 40
 
 # A parameter source of SIGNAL_OWN is the parameter's own control slot, at PARAM_SLOT_BASE + its
 # entry, off the bus: the slots below.
@@ -228,7 +220,7 @@ NRPN_SOURCE_DELAY_1_TIME          = 311
 NRPN_SOURCE_DELAY_1_FEEDBACK      = 312
 
 # A CC number of 0 means the control has no CC: a parameter's control slot then holds its NRPN_VALUE_*
-# below, whatever CC it had before, so a patch sets it alone, and a General slot holds 0.0.
+# below, whatever CC it had before, so a patch sets it alone, and a controller slot holds 0.0.
 NRPN_CC_EG_1_ATTACK           = 384
 NRPN_CC_EG_1_DECAY            = 385
 NRPN_CC_EG_1_SUSTAIN          = 386
@@ -286,11 +278,7 @@ NRPN_CC_CHORUS_1_DEPTH        = 437
 NRPN_CC_DELAY_1_MIX           = 438
 NRPN_CC_DELAY_1_TIME          = 439
 NRPN_CC_DELAY_1_FEEDBACK      = 440
-NRPN_CC_GENERAL_MOD_WHEEL     = 441
-NRPN_CC_GENERAL_1             = 442
-NRPN_CC_GENERAL_2             = 443
-NRPN_CC_GENERAL_3             = 444
-NRPN_CC_GENERAL_4             = 445
+NRPN_CC_MOD_WHEEL             = 441
 
 # The value of each parameter's control slot while it has no CC, as a CC value.
 NRPN_VALUE_EG_1_ATTACK           = 512
@@ -377,7 +365,7 @@ def spms1_write_default_patch(midi_ch)
 
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_EG_1_GATE      , SIGNAL_NOTE_GATE)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_LFO_1_RATE_MOD , SIGNAL_NONE)
-  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_LFO_1_LEVEL_MOD, SIGNAL_GENERAL_MOD_WHEEL)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_LFO_1_LEVEL_MOD, SIGNAL_MOD_WHEEL)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_1_IN_1   , SIGNAL_NONE)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_1_IN_2   , SIGNAL_NONE)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_MIXER_1_IN_3   , SIGNAL_NONE)
@@ -497,11 +485,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_CHORUS_1_MIX         , 93)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_DELAY_1_MIX          , 94)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_DELAY_1_TIME         , 90)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_GENERAL_MOD_WHEEL    , 1)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_GENERAL_1            , 16)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_GENERAL_2            , 17)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_GENERAL_3            , 18)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_GENERAL_4            , 19)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_MOD_WHEEL            , 1)
 
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_EG_1_ATTACK          , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_EG_1_DECAY           , 94)
@@ -594,9 +578,5 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 93 , 64 ) # Chorus 1 Mix
   C.set_midi_cc_value(midi_ch, 94 , 34 ) # Delay 1 Mix
   C.set_midi_cc_value(midi_ch, 90 , 64 ) # Delay 1 Time
-  C.set_midi_cc_value(midi_ch, 1  , 4  ) # General Mod Wheel
-  C.set_midi_cc_value(midi_ch, 16 , 64 ) # General 1
-  C.set_midi_cc_value(midi_ch, 17 , 64 ) # General 2
-  C.set_midi_cc_value(midi_ch, 18 , 64 ) # General 3
-  C.set_midi_cc_value(midi_ch, 19 , 64 ) # General 4
+  C.set_midi_cc_value(midi_ch, 1  , 4  ) # Mod Wheel
 end

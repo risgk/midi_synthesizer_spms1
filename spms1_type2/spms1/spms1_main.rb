@@ -42,12 +42,12 @@ MODULES_SIZE = 32
 # than being indexed by one, so the second oscillator is MODULE_OSC_2.
 
 # The slots of the `signals` bus (SIGNAL_*), in spms1_patch.rb: the constants, the note inputs,
-# the General control values and the module outputs in one namespace, 0-126, so a routing is just a
+# the mod wheel and the module outputs in one namespace, 0-126, so a routing is just a
 # slot number and one source can feed as many destinations as read its slot. Each parameter's own
 # control slot (SLOT_*) is in the same array but above it, at 128 + the parameter's entry, where no
 # routing can name it: a parameter reaches its own through a source of 127, SIGNAL_OWN, and
 # nothing else reaches it at all. A CC that should feed a module input or another parameter goes
-# through a General slot. So the parameters, however many, take nothing from the numbers a
+# through the mod wheel's slot. So the parameters, however many, take nothing from the numbers a
 # routing names. A slot is a plain float; its range is whatever the destination expects. Indexing an array
 # is what holds a routed input to one read whatever the module count: passing the candidates in as
 # arguments instead costs picks x candidates per sample, which grows quadratically.
@@ -65,7 +65,7 @@ SIGNALS_SIZE = 256
 # 384..511   which CC fills each control slot
 # 512..639   the value of each parameter's control slot while it has no CC
 # A CC number of 0 means the control has no CC: a parameter's control slot then holds its value
-# from 512.., whatever CC it had before, so a patch sets it alone, and a General slot holds 0.0.
+# from 512.., whatever CC it had before, so a patch sets it alone, and the mod wheel's slot holds 0.0.
 
 # One instance of each module, by its class in spms1_patch.yaml. Written by patch_gen.
 # patch_gen instances
@@ -267,7 +267,8 @@ while true
   # Which CC fills each control slot, or, for a parameter with none, its value from NRPN category
   # 4. The signals array -- the bus and the parameters' own slots above it -- is the only thing
   # downstream reads, so this is where MIDI enters and the only place a CC number appears. Each
-  # General CC fills one slot or two, the same value taken both ways. Written by patch_gen.
+  # parameter's CC fills its own slot, and the mod wheel's CC its slot on the bus. Written by
+  # patch_gen.
   # patch_gen controls
   cc_eg_1_attack = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_EG_1_ATTACK)
   signals[SLOT_EG_1_ATTACK] = cc_to_unipolar(cc_or_nrpn(cc_eg_1_attack, C.get_midi_cc_value(MIDI_CH, cc_eg_1_attack), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_EG_1_ATTACK)))
@@ -383,25 +384,9 @@ while true
   signals[SLOT_DELAY_1_TIME] = cc_to_unipolar(cc_or_nrpn(cc_delay_1_time, C.get_midi_cc_value(MIDI_CH, cc_delay_1_time), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_DELAY_1_TIME)))
   cc_delay_1_feedback = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_DELAY_1_FEEDBACK)
   signals[SLOT_DELAY_1_FEEDBACK] = cc_to_unipolar(cc_or_nrpn(cc_delay_1_feedback, C.get_midi_cc_value(MIDI_CH, cc_delay_1_feedback), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_DELAY_1_FEEDBACK)))
-  cc_general_mod_wheel = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_MOD_WHEEL)
-  general_mod_wheel = C.get_midi_cc_value(MIDI_CH, cc_general_mod_wheel)
-  signals[SIGNAL_GENERAL_MOD_WHEEL] = cc_or_zero(cc_general_mod_wheel, cc_to_unipolar(general_mod_wheel))
-  cc_general_1 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_1)
-  general_1 = C.get_midi_cc_value(MIDI_CH, cc_general_1)
-  signals[SIGNAL_GENERAL_UNIPOLAR_1] = cc_or_zero(cc_general_1, cc_to_unipolar(general_1))
-  signals[SIGNAL_GENERAL_BIPOLAR_1] = cc_or_zero(cc_general_1, cc_to_bipolar(general_1))
-  cc_general_2 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_2)
-  general_2 = C.get_midi_cc_value(MIDI_CH, cc_general_2)
-  signals[SIGNAL_GENERAL_UNIPOLAR_2] = cc_or_zero(cc_general_2, cc_to_unipolar(general_2))
-  signals[SIGNAL_GENERAL_BIPOLAR_2] = cc_or_zero(cc_general_2, cc_to_bipolar(general_2))
-  cc_general_3 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_3)
-  general_3 = C.get_midi_cc_value(MIDI_CH, cc_general_3)
-  signals[SIGNAL_GENERAL_UNIPOLAR_3] = cc_or_zero(cc_general_3, cc_to_unipolar(general_3))
-  signals[SIGNAL_GENERAL_BIPOLAR_3] = cc_or_zero(cc_general_3, cc_to_bipolar(general_3))
-  cc_general_4 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_4)
-  general_4 = C.get_midi_cc_value(MIDI_CH, cc_general_4)
-  signals[SIGNAL_GENERAL_UNIPOLAR_4] = cc_or_zero(cc_general_4, cc_to_unipolar(general_4))
-  signals[SIGNAL_GENERAL_BIPOLAR_4] = cc_or_zero(cc_general_4, cc_to_bipolar(general_4))
+  cc_mod_wheel = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MOD_WHEEL)
+  mod_wheel = C.get_midi_cc_value(MIDI_CH, cc_mod_wheel)
+  signals[SIGNAL_MOD_WHEEL] = cc_or_zero(cc_mod_wheel, cc_to_unipolar(mod_wheel))
   # patch_gen end
 
   # Each parameter takes its value, every buffer, whether or not it moved. Written by patch_gen
@@ -494,51 +479,51 @@ while true
       case module_id
       # patch_gen dispatch
       when 1 # MODULE_EG_1
-        signals[17] = eg_1.process(control_tick, signals[source_eg_1_gate]) # SIGNAL_EG_1_OUTPUT
-        signals[18] = eg_1.output_inverted # SIGNAL_EG_1_OUTPUT_INV
+        signals[9] = eg_1.process(control_tick, signals[source_eg_1_gate]) # SIGNAL_EG_1_OUTPUT
+        signals[10] = eg_1.output_inverted # SIGNAL_EG_1_OUTPUT_INV
       when 2 # MODULE_LFO_1
-        signals[19] = lfo_1.process(control_tick, signals[source_lfo_1_rate_mod], signals[source_lfo_1_level_mod]) # SIGNAL_LFO_1_OUTPUT
-        signals[20] = lfo_1.output_inverted # SIGNAL_LFO_1_OUTPUT_INV
-        signals[21] = lfo_1.output_triangle # SIGNAL_LFO_1_OUTPUT_TRIANGLE
-        signals[22] = lfo_1.output_triangle_inverted # SIGNAL_LFO_1_OUTPUT_TRIANGLE_INV
-        signals[23] = lfo_1.output_square # SIGNAL_LFO_1_OUTPUT_SQUARE
-        signals[24] = lfo_1.output_square_inverted # SIGNAL_LFO_1_OUTPUT_SQUARE_INV
+        signals[11] = lfo_1.process(control_tick, signals[source_lfo_1_rate_mod], signals[source_lfo_1_level_mod]) # SIGNAL_LFO_1_OUTPUT
+        signals[12] = lfo_1.output_inverted # SIGNAL_LFO_1_OUTPUT_INV
+        signals[13] = lfo_1.output_triangle # SIGNAL_LFO_1_OUTPUT_TRIANGLE
+        signals[14] = lfo_1.output_triangle_inverted # SIGNAL_LFO_1_OUTPUT_TRIANGLE_INV
+        signals[15] = lfo_1.output_square # SIGNAL_LFO_1_OUTPUT_SQUARE
+        signals[16] = lfo_1.output_square_inverted # SIGNAL_LFO_1_OUTPUT_SQUARE_INV
       when 3 # MODULE_MIXER_1
-        signals[25] = mixer_1.process(control_tick, signals[source_mixer_1_in_1], signals[source_mixer_1_in_2], signals[source_mixer_1_in_3], signals[source_mixer_1_in_4]) # SIGNAL_MIXER_1_OUTPUT
-        signals[26] = mixer_1.output_inverted # SIGNAL_MIXER_1_OUTPUT_INV
+        signals[17] = mixer_1.process(control_tick, signals[source_mixer_1_in_1], signals[source_mixer_1_in_2], signals[source_mixer_1_in_3], signals[source_mixer_1_in_4]) # SIGNAL_MIXER_1_OUTPUT
+        signals[18] = mixer_1.output_inverted # SIGNAL_MIXER_1_OUTPUT_INV
       when 4 # MODULE_PITCH_1
-        signals[27] = pitch_1.process(control_tick, signals[source_pitch_1_pitch], signals[source_pitch_1_bend]) # SIGNAL_PITCH_1_OUTPUT
+        signals[19] = pitch_1.process(control_tick, signals[source_pitch_1_pitch], signals[source_pitch_1_bend]) # SIGNAL_PITCH_1_OUTPUT
       when 5 # MODULE_OSC_1
-        signals[28] = osc_1.process(control_tick, signals[source_osc_1_pitch], signals[source_osc_1_mod_1], signals[source_osc_1_mod_2]) # SIGNAL_OSC_1_OUTPUT
-        signals[29] = osc_1.output_saw # SIGNAL_OSC_1_OUTPUT_SAW
-        signals[30] = osc_1.output_pulse # SIGNAL_OSC_1_OUTPUT_PULSE
+        signals[20] = osc_1.process(control_tick, signals[source_osc_1_pitch], signals[source_osc_1_mod_1], signals[source_osc_1_mod_2]) # SIGNAL_OSC_1_OUTPUT
+        signals[21] = osc_1.output_saw # SIGNAL_OSC_1_OUTPUT_SAW
+        signals[22] = osc_1.output_pulse # SIGNAL_OSC_1_OUTPUT_PULSE
       when 6 # MODULE_OSC_2
-        signals[31] = osc_2.process(control_tick, signals[source_osc_2_pitch], signals[source_osc_2_mod_1], signals[source_osc_2_mod_2]) # SIGNAL_OSC_2_OUTPUT
-        signals[32] = osc_2.output_saw # SIGNAL_OSC_2_OUTPUT_SAW
-        signals[33] = osc_2.output_pulse # SIGNAL_OSC_2_OUTPUT_PULSE
+        signals[23] = osc_2.process(control_tick, signals[source_osc_2_pitch], signals[source_osc_2_mod_1], signals[source_osc_2_mod_2]) # SIGNAL_OSC_2_OUTPUT
+        signals[24] = osc_2.output_saw # SIGNAL_OSC_2_OUTPUT_SAW
+        signals[25] = osc_2.output_pulse # SIGNAL_OSC_2_OUTPUT_PULSE
       when 7 # MODULE_NOISE_1
-        signals[34] = noise_1.process(control_tick) # SIGNAL_NOISE_1_OUTPUT
-        signals[35] = noise_1.output_white # SIGNAL_NOISE_1_OUTPUT_WHITE
-        signals[36] = noise_1.output_red # SIGNAL_NOISE_1_OUTPUT_RED
+        signals[26] = noise_1.process(control_tick) # SIGNAL_NOISE_1_OUTPUT
+        signals[27] = noise_1.output_white # SIGNAL_NOISE_1_OUTPUT_WHITE
+        signals[28] = noise_1.output_red # SIGNAL_NOISE_1_OUTPUT_RED
       when 8 # MODULE_MIXER_2
-        signals[37] = mixer_2.process(control_tick, signals[source_mixer_2_in_1], signals[source_mixer_2_in_2], signals[source_mixer_2_in_3], signals[source_mixer_2_in_4]) # SIGNAL_MIXER_2_OUTPUT
-        signals[38] = mixer_2.output_inverted # SIGNAL_MIXER_2_OUTPUT_INV
+        signals[29] = mixer_2.process(control_tick, signals[source_mixer_2_in_1], signals[source_mixer_2_in_2], signals[source_mixer_2_in_3], signals[source_mixer_2_in_4]) # SIGNAL_MIXER_2_OUTPUT
+        signals[30] = mixer_2.output_inverted # SIGNAL_MIXER_2_OUTPUT_INV
       when 9 # MODULE_FILTER_1
-        signals[39] = filter_1.process(control_tick, signals[source_filter_1_audio], signals[source_filter_1_pitch], signals[source_filter_1_mod_1], signals[source_filter_1_mod_2]) # SIGNAL_FILTER_1_OUTPUT
-        signals[40] = filter_1.output_lp # SIGNAL_FILTER_1_OUTPUT_LP
-        signals[41] = filter_1.output_hp # SIGNAL_FILTER_1_OUTPUT_HP
+        signals[31] = filter_1.process(control_tick, signals[source_filter_1_audio], signals[source_filter_1_pitch], signals[source_filter_1_mod_1], signals[source_filter_1_mod_2]) # SIGNAL_FILTER_1_OUTPUT
+        signals[32] = filter_1.output_lp # SIGNAL_FILTER_1_OUTPUT_LP
+        signals[33] = filter_1.output_hp # SIGNAL_FILTER_1_OUTPUT_HP
       when 10 # MODULE_AMP_1
-        signals[42] = amp_1.process(control_tick, signals[source_amp_1_audio], signals[source_amp_1_mod]) # SIGNAL_AMP_1_OUTPUT
+        signals[34] = amp_1.process(control_tick, signals[source_amp_1_audio], signals[source_amp_1_mod]) # SIGNAL_AMP_1_OUTPUT
       when 11 # MODULE_CHORUS_1
         chorus_1.process(control_tick, signals[source_chorus_1_audio])
-        signals[43] = chorus_1.output_l # SIGNAL_CHORUS_1_OUTPUT_L
-        signals[44] = chorus_1.output_r # SIGNAL_CHORUS_1_OUTPUT_R
-        signals[45] = chorus_1.output_mono # SIGNAL_CHORUS_1_OUTPUT_MONO
+        signals[35] = chorus_1.output_l # SIGNAL_CHORUS_1_OUTPUT_L
+        signals[36] = chorus_1.output_r # SIGNAL_CHORUS_1_OUTPUT_R
+        signals[37] = chorus_1.output_mono # SIGNAL_CHORUS_1_OUTPUT_MONO
       when 12 # MODULE_DELAY_1
         delay_1.process(control_tick, signals[source_delay_1_audio_l], signals[source_delay_1_audio_r])
-        signals[46] = delay_1.output_l # SIGNAL_DELAY_1_OUTPUT_L
-        signals[47] = delay_1.output_r # SIGNAL_DELAY_1_OUTPUT_R
-        signals[48] = delay_1.output_mono # SIGNAL_DELAY_1_OUTPUT_MONO
+        signals[38] = delay_1.output_l # SIGNAL_DELAY_1_OUTPUT_L
+        signals[39] = delay_1.output_r # SIGNAL_DELAY_1_OUTPUT_R
+        signals[40] = delay_1.output_mono # SIGNAL_DELAY_1_OUTPUT_MONO
       # patch_gen end
       end
 

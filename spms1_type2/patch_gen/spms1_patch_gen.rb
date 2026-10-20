@@ -26,7 +26,7 @@ NRPN_CC_BASE            = 384
 NRPN_VALUE_BASE         = 512
 
 # A parameter source of 127 is the parameter's own control slot, which is off the bus: the bus
-# carries the outputs, the constants, the notes and the General slots in 0-126, and each
+# carries the outputs, the constants, the notes and the mod wheel in 0-126, and each
 # parameter's control slot sits at 128 + its entry, where only the parameter reads it.
 SIGNAL_OWN      = 127
 PARAM_SLOT_BASE = 128
@@ -62,17 +62,12 @@ class Spec
   # A module input's or control's own name, with its module's in front: OSC_1_PITCH, OUTPUT_L.
   def full_key(item) = item['module'] ? "#{item['module']}_#{item['key']}" : item['key']
 
-  def full_label(item, name = item['label'])
-    if item['module'] then "#{self.module(item['module'])['label']} #{name}"
-    elsif item['general'] then "General #{name}"
-    else name
-    end
-  end
+  def full_label(item, name = item['label']) = item['module'] ? "#{self.module(item['module'])['label']} #{name}" : name
 
-  def params = @controls.reject { |c| c['general'] }
-  def generals = @controls.select { |c| c['general'] }
+  def params = @controls.reject { |c| c['controller'] }
+  def controllers = @controls.select { |c| c['controller'] }
   def outputs_of(mod) = @signals.select { |s| s['output'] && s['module'] == mod['key'] }
-  # The bus slots a General control's CC fills; a parameter's control slot is its own, off the bus.
+  # The bus slots a controller control's CC fills; a parameter's control slot is its own, off the bus.
   def slots_of(control) = @signals.select { |s| s['control'] == full_key(control) }
 
   def bipolar?(signal)
@@ -123,16 +118,16 @@ class Spec
     @signals.each do |s|
       fail_spec("signal #{s['key']} names module #{s['module']}") if s['module'] && !@module[s['module']]
       fail_spec("signal #{s['key']} names control #{s['control']}") if s['control'] && !@control[s['control']]
-      fail_spec("signal #{s['key']} is a parameter's control slot, which is off the bus") if s['control'] && !@control[s['control']]['general']
+      fail_spec("signal #{s['key']} is a parameter's control slot, which is off the bus") if s['control'] && !@control[s['control']]['controller']
     end
     (@inputs + @controls).each do |item|
       fail_spec("#{full_key(item)} names module #{item['module']}") if item['module'] && !@module[item['module']]
       fail_spec("#{full_key(item)} takes #{item['source']}, no signal") if item['source'] && !@signal[item['source']]
     end
     @controls.each do |c|
-      fail_spec("General control #{full_key(c)} fills no slot") if c['general'] && slots_of(c).empty?
+      fail_spec("controller control #{full_key(c)} fills no slot") if c['controller'] && slots_of(c).empty?
       fail_spec("control #{full_key(c)} has a CC but no value") if c['cc'].to_i != 0 && !c.key?('value')
-      fail_spec("parameter #{full_key(c)} has no value") if !c['general'] && !c.key?('value')
+      fail_spec("parameter #{full_key(c)} has no value") if !c['controller'] && !c.key?('value')
     end
   end
 end
@@ -193,7 +188,7 @@ def patch_rb
   out << "\n\n"
   out << ruby_constants(s.params.map { |c| ["NRPN_SOURCE_#{s.full_key(c)}", NRPN_PARAM_SOURCE_BASE + c['entry']] })
   out << "\n\n# A CC number of 0 means the control has no CC: a parameter's control slot then holds its NRPN_VALUE_*\n"
-  out << "# below, whatever CC it had before, so a patch sets it alone, and a General slot holds 0.0.\n"
+  out << "# below, whatever CC it had before, so a patch sets it alone, and a controller slot holds 0.0.\n"
   out << ruby_constants(s.controls.map { |c| ["NRPN_CC_#{s.full_key(c)}", NRPN_CC_BASE + c['entry']] })
   out << "\n\n# The value of each parameter's control slot while it has no CC, as a CC value.\n"
   out << ruby_constants(s.params.map { |c| ["NRPN_VALUE_#{s.full_key(c)}", NRPN_VALUE_BASE + c['entry']] })
@@ -257,11 +252,9 @@ def editor_js
     controls: s.controls_in_list_order.map do |c|
       h = { entry: c['entry'], module: c['module'], key: c['key'], label: c['label'],
             bipolar: !!c['bipolar'], cc: c['cc'].to_i, value: c['value'], source: c['source'],
-            general: !!c['general'],
-            slots: if c['general']
-                     s.slots_of(c).map do |sig|
-                       [sig['key'], sig['label'] ? sig['label'].sub(/\AGeneral /, '') : c['label'], s.bipolar?(sig)]
-                     end
+            controller: !!c['controller'],
+            slots: if c['controller']
+                     s.slots_of(c).map { |sig| [sig['key'], sig['label'] || c['label'], s.bipolar?(sig)] }
                    else
                      [[s.full_key(c), c['label'], !!c['bipolar']]]
                    end }
@@ -313,10 +306,10 @@ def readme_tables(ja:)
   t['params'] = side_by_side(['CC 98', ja ? 'パラメータ' : 'Parameter'],
     s.params.map { |c| [c['entry'], s.full_label(c)] }, 3)
   sep = ja ? '、' : ', '
-  rows = s.generals.map do |c|
+  rows = s.controllers.map do |c|
     "| #{c['entry']} | #{s.full_label(c)} | #{s.slots_of(c).map { |sig| sig['label'] || s.full_label(c) }.join(sep)} |"
   end
-  t['generals'] = (["| CC 98 | #{ja ? 'CC の割り当て先' : 'CC for'} | #{ja ? '埋めるスロット' : 'Fills'} |",
+  t['controllers'] = (["| CC 98 | #{ja ? 'CC の割り当て先' : 'CC for'} | #{ja ? '埋めるスロット' : 'Fills'} |",
                     '| ----- | ------ | ----- |'] + rows).join("\n") + "\n"
   rows = ["| 0 | #{ja ? 'なし（実行順の終端）' : 'None (ends the run order)'} |"] +
          s.modules.map { |m| "| #{m['id']} | #{m['label']} |" }
@@ -397,7 +390,7 @@ def main_controls
     out << "  cc_#{name} = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_#{s.full_key(c)})\n"
     out << "  signals[SLOT_#{s.full_key(c)}] = #{converter(c['bipolar'])}(cc_or_nrpn(cc_#{name}, C.get_midi_cc_value(MIDI_CH, cc_#{name}), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_#{s.full_key(c)})))\n"
   end
-  s.generals.each do |c|
+  s.controllers.each do |c|
     name = local_name(c)
     out << "  cc_#{name} = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_#{s.full_key(c)})\n"
     out << "  #{name} = C.get_midi_cc_value(MIDI_CH, cc_#{name})\n"
@@ -410,7 +403,7 @@ end
 
 def main_setters
   s = SPEC
-  s.controls_in_list_order.reject { |c| c['general'] }.map do |c|
+  s.controls_in_list_order.reject { |c| c['controller'] }.map do |c|
     "  #{c['module'].downcase}.#{c.fetch('set')}(signals[source_#{local_name(c)}])\n"
   end.join
 end
