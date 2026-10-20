@@ -219,7 +219,7 @@ module Spms1
       update_coefficients
     end
 
-    # Every parameter but Mod Pol is unipolar, [0.0, 1.0], which is what the smoothing, the
+    # Every parameter but Mod Polarity is unipolar, [0.0, 1.0], which is what the smoothing, the
     # modulation sum and the table lookups below are written against.
     # Cutoff range: MIDI note 15 (19 Hz) at 0.0, MIDI note 75 (622 Hz) at 0.5, MIDI note 135 (20 kHz) at 1.0.
     def set_cutoff(cutoff)
@@ -237,9 +237,9 @@ module Spms1
       @modulation_2_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
     end
 
-    # Mod Pol is bipolar, [-0.5, 0.5], and doubled into a multiplier on both modulations: at +0.5
-    # they move the cutoff as their amounts say, at -0.5 the other way, so the envelope closes the
-    # filter, and at 0.0 not at all.
+    # Mod Polarity is bipolar, [-0.5, 0.5], and doubled into a multiplier on both modulations: at
+    # +0.5 they move the cutoff as their amounts say, at -0.5 the other way, so the envelope closes
+    # the filter, and at 0.0 not at all.
     def set_modulation_polarity(polarity)
       clamped = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
       @modulation_polarity = clamped + clamped

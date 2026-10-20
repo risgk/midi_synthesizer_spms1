@@ -6,8 +6,8 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.3
 - Last-note priority with one note of memory: releasing the newest note while the one before it is still held goes back to that one, legato (for trills)
 - 48 kHz audio output: 24 bit through an I2S DAC, or PWM Audio (no DAC needed)
 - Oscillator: a sawtooth-to-square morph with pulse width (CC 114), and pulse width modulation (PWM) by the same two modulations as the pitch, the envelope and the LFO by default, on CC 8 and 103; and the sawtooth and the pulse on outputs of their own too
-- LFO: triangle (PolyBLAMP) and unipolar square (PolyBLEP), each on an output of its own, and a main output crossfading from one to the other (Wave)
-- Filter: ZDF/TPT State Variable Filter (with a nonlinear leak on the band pass integrator, solved by the one-step Newton method), with low pass and high pass outputs and a main output crossfading from one to the other through a notch (Mode)
+- LFO: triangle (PolyBLAMP) and unipolar square (PolyBLEP), each on an output of its own, and a main output crossfading from one to the other (Wave, CC 33)
+- Filter: ZDF/TPT State Variable Filter (with a nonlinear leak on the band pass integrator, solved by the one-step Newton method), with low pass and high pass outputs and a main output crossfading from one to the other through a notch (Mode, CC 39)
 - Chorus: mono in, stereo out, as a module in the run order
 - Delay: stereo, with feedback, as a module in the run order (up to 340 ms)
 - Pitch: the note's pitch as a module in the run order, with portamento as an exponential lag (CC 5), pitch bend past it and a stretch of the keys, the two set as values with no CC
@@ -198,7 +198,7 @@ flowchart LR
 
 Each module is processed once per sample, in the run order below. Their parameters -- waveform,
 cutoff, gain and the rest -- arrive from CC and are left out of the diagram. Parameter names
-shorten Amount to Amt and Polarity to Pol.
+shorten Amount to Amt.
 
 The note's pitch reaches the oscillator through Pitch 1, which glides from one note to the next:
 portamento. Pitch 1 Glide is on CC 5, Portamento Time in the MIDI spec, and powers up at 0.0, where
@@ -279,8 +279,8 @@ clamp at 16 as a guard that ordinary use never reaches. The output clip comes la
 the resonance dial k turns negative and the loop oscillates.
 
 The filter puts out its low pass and high pass at once, as Out LP and Out HP, each through a DC
-blocker and an output clip of its own, and Out, the two crossfaded by Filter 1 Mode, which has
-no CC. Each side stays at full over its own half and falls to nothing over the other.
+blocker and an output clip of its own, and Out, the two crossfaded by Filter 1 Mode (CC 39, Filter
+Mode's in PRA32-U2). Each side stays at full over its own half and falls to nothing over the other.
 At 0.0 (CC 4), where it powers up, Out is the low
 pass alone; at 1.0 (CC 124) the high pass alone; and at 0.5 (CC 64) both at full, whose sum, the
 input less k·BP, is a notch at the cutoff with both sides of it passed whole. In between the notch
@@ -503,7 +503,7 @@ both at the same signal for a mono output.
 | 6 | EG 1 Sustain | | 26 | Osc 1 PW Mod 1 Amt | | 46 | Filter 1 Pitch Amt |
 | 7 | EG 1 Release Switch | | 27 | Osc 1 PW Mod 2 Amt | | 47 | Filter 1 Mod 1 Amt |
 | 8 | EG 1 Level | | 28 | Osc 2 Wave | | 48 | Filter 1 Mod 2 Amt |
-| 9 | LFO 1 Wave | | 29 | Osc 2 Pitch Coarse | | 49 | Filter 1 Mod Pol |
+| 9 | LFO 1 Wave | | 29 | Osc 2 Pitch Coarse | | 49 | Filter 1 Mod Polarity |
 | 10 | LFO 1 Rate | | 30 | Osc 2 Pitch Fine | | 50 | Filter 1 Resonance |
 | 11 | LFO 1 Rate Mod Amt | | 31 | Osc 2 Pitch Mod 1 Amt | | 51 | Amp 1 Gain |
 | 12 | LFO 1 Level | | 32 | Osc 2 Pitch Mod 2 Amt | | 52 | Chorus 1 Mix |
@@ -654,8 +654,8 @@ and the square its steps by PolyBLEP, so at the top of the rate range, 220 Hz, w
 audible tone, the square's aliases are 41 dB down on it, rather than 24 dB without. The square is
 unipolar: 1.0 while the triangle is above zero and 0.0 while it is below, stepping where it
 crosses, so it gates, or trills up from the note on an oscillator's pitch, where the triangle
-swings about zero for a vibrato; its inverted output runs 0.0 and -1.0. LFO 1 Wave, which has no
-CC, crossfades Out in a straight line from the triangle at 0.0 (CC 4), where it
+swings about zero for a vibrato; its inverted output runs 0.0 and -1.0. LFO 1 Wave (CC 33, LFO
+Wave's in PRA32-U2) crossfades Out in a straight line from the triangle at 0.0 (CC 4), where it
 powers up, to the square at 1.0 (CC 124), and is smoothed as the level is, so on the way the
 middle of the swing moves up from zero to 0.5. Out is what the default patch routes, so the LFO
 is a triangle until Wave is turned up.
@@ -689,7 +689,7 @@ Osc 1 takes each of its two modulations, Mod 1 In and Mod 2 In, to the pitch and
 width by a depth of its own: Pitch Mod 1 Amt and Pitch Mod 2 Amt, PW Mod 1 Amt and PW Mod 2 Amt,
 all unipolar. Pitch Mod 1 Amt and Pitch Mod 2 Amt are on CC 89 and 13, EG Mod Amt's and LFO Mod
 Amt's in PRA32-U2, and PW Mod 1 Amt and PW Mod 2 Amt on CC 8 and 103, EG Mod Dst's and LFO Mod
-Dst's; all four power up at 0.0. There is no Pol: each modulation runs the way its source does,
+Dst's; all four power up at 0.0. There is no Polarity: each modulation runs the way its source does,
 and one the other way up takes an inverted source, such as EG 1 Out Inv or LFO 1 Out Inv. So a
 source goes to the pulse width as well as the pitch, or to either alone, with no rewiring.
 
@@ -752,7 +752,7 @@ passes a loud note nearly clean, while turning the drive up rounds off the reson
 Filter 1 moves the cutoff by each of its two modulations at a depth of its own, Mod 1 Amt and
 Mod 2 Amt, as Osc 1's PW Mod Amts move the pulse width. They are unipolar, on CC 24 and 25,
 Filter EG Amt's and LFO Filter Amt's in PRA32-U2: both power up at 0.0 (CC 4). A unit of input is the whole cutoff range, so with Mod 2 Amt at the top the
-LFO swings the cutoff five octaves either way. Mod Pol, on CC 51, multiplies both at once, from
+LFO swings the cutoff five octaves either way. Mod Polarity, on CC 51, multiplies both at once, from
 -1.0 at CC 4 through none at CC 64 to +1.0 at CC 124, where it powers up: below CC 64 the
 envelope closes the filter as it rises, and the LFO swings the other way. To turn over only
 one of the two, take an inverted source instead, such as EG 1 Out Inv on Mod 1 In.

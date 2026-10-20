@@ -35,8 +35,9 @@
 |                            71 | x             | o             | Filter Resonance                     |
 |                            24 | x             | o             | Filter Mod 1 Amt (EG)                |
 |                            25 | x             | o             | Filter Mod 2 Amt (LFO)               |
-|                            51 | x             | o             | Filter Mod Pol (-1 to +1)            |
+|                            51 | x             | o             | Filter Mod Polarity (-1 to +1)       |
 |                             9 | x             | o             | Filter Pitch Amt                     |
+|                            39 | x             | o             | Filter Mode (LP, Notch, HP)          |
 |                            20 | x             | o             | Mixer 2 Level 1 (Osc 1 Level)        |
 |                            21 | x             | o             | Mixer 2 Level 2 (Osc 2 Level)        |
 |                            23 | x             | o             | Mixer 2 Level 4 (Noise Level)        |
@@ -47,9 +48,13 @@
 |                            30 | x             | o             | EG Sustain (Level)                   |
 |                             3 | x             | o             | LFO Rate                             |
 |                           113 | x             | o             | LFO Level                            |
+|                            33 | x             | o             | LFO Wave (Triangle to Square)        |
 |                            93 | x             | o             | Chorus Mix                           |
+|                            58 | x             | o             | Chorus Rate                          |
+|                            59 | x             | o             | Chorus Depth                         |
 |                            90 | x             | o             | Delay Time                           |
 |                            94 | x             | o             | Delay Mix                            |
+|                            92 | x             | o             | Delay Feedback                       |
 |                             5 | x             | o             | Pitch Glide (Portamento Time)        |
 |                             1 | x             | o             | Mod Wheel (Unipolar)                 |
 |                            99 | x             | o             | NRPN MSB                             |
