@@ -24,8 +24,7 @@
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Control                   102 | x             | o             | Osc 1 Wave (Saw to Square)           |
 | Change                    104 | x             | o             | Osc 2 Wave (Saw to Square)           |
-|                            89 | x             | o             | Osc Mod 1 Amt                        |
-|                            13 | x             | o             | Osc Mod 2 Amt                        |
+|                            13 | x             | o             | Osc Mod 1/2 Mix (EG to LFO)          |
 |                             8 | x             | o             | Osc Pitch Mod Amt                    |
 |                           114 | x             | o             | Osc Pulse Width (50% to 0%)          |
 |                           103 | x             | o             | Osc PW Mod Amt                       |
@@ -33,8 +32,7 @@
 |                            76 | x             | o             | Osc 2 Pitch Fine (+-60 Cents)        |
 |                            74 | x             | o             | Filter Cutoff                        |
 |                            71 | x             | o             | Filter Resonance                     |
-|                            24 | x             | o             | Filter Mod 1 Amt                     |
-|                            25 | x             | o             | Filter Mod 2 Amt                     |
+|                            25 | x             | o             | Filter Mod 1/2 Mix (EG to LFO)       |
 |                             9 | x             | o             | Filter Cutoff Pitch Track            |
 |                           117 | x             | o             | Filter Cutoff Mod Amt                |
 |                           112 | x             | o             | Filter Gain                          |

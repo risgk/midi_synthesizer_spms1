@@ -98,46 +98,43 @@ SLOT_PITCH_1_BEND_AMT            = 152
 SLOT_PITCH_1_BEND_POL            = 153
 SLOT_OSC_1_PITCH_COARSE          = 154
 SLOT_OSC_1_PITCH_FINE            = 155
-SLOT_OSC_1_MOD_1_AMT             = 156
-SLOT_OSC_1_MOD_2_AMT             = 157
-SLOT_OSC_1_PITCH_MOD_AMT         = 158
-SLOT_OSC_1_PITCH_MOD_RANGE       = 159
-SLOT_OSC_1_WAVE                  = 160
-SLOT_OSC_1_PULSE_WIDTH           = 161
-SLOT_OSC_1_PW_MOD_AMT            = 162
-SLOT_OSC_2_PITCH_COARSE          = 163
-SLOT_OSC_2_PITCH_FINE            = 164
-SLOT_OSC_2_MOD_1_AMT             = 165
-SLOT_OSC_2_MOD_2_AMT             = 166
-SLOT_OSC_2_PITCH_MOD_AMT         = 167
-SLOT_OSC_2_PITCH_MOD_RANGE       = 168
-SLOT_OSC_2_WAVE                  = 169
-SLOT_OSC_2_PULSE_WIDTH           = 170
-SLOT_OSC_2_PW_MOD_AMT            = 171
-SLOT_NOISE_1_LEVEL               = 172
-SLOT_NOISE_1_COLOR               = 173
-SLOT_MIXER_2_LEVEL_1             = 174
-SLOT_MIXER_2_POL_1               = 175
-SLOT_MIXER_2_LEVEL_2             = 176
-SLOT_MIXER_2_POL_2               = 177
-SLOT_MIXER_2_LEVEL_3             = 178
-SLOT_MIXER_2_POL_3               = 179
-SLOT_MIXER_2_OUT_LEVEL           = 180
-SLOT_FILTER_1_GAIN               = 181
-SLOT_FILTER_1_CUTOFF             = 182
-SLOT_FILTER_1_CUTOFF_PITCH_TRACK = 183
-SLOT_FILTER_1_MOD_1_AMT          = 184
-SLOT_FILTER_1_MOD_2_AMT          = 185
-SLOT_FILTER_1_CUTOFF_MOD_AMT     = 186
-SLOT_FILTER_1_RESONANCE          = 187
-SLOT_FILTER_1_MODE               = 188
-SLOT_AMP_1_GAIN                  = 189
-SLOT_CHORUS_1_MIX                = 190
-SLOT_CHORUS_1_RATE               = 191
-SLOT_CHORUS_1_DEPTH              = 192
-SLOT_DELAY_1_MIX                 = 193
-SLOT_DELAY_1_TIME                = 194
-SLOT_DELAY_1_FEEDBACK            = 195
+SLOT_OSC_1_MOD_MIX               = 156
+SLOT_OSC_1_PITCH_MOD_AMT         = 157
+SLOT_OSC_1_PITCH_MOD_RANGE       = 158
+SLOT_OSC_1_WAVE                  = 159
+SLOT_OSC_1_PULSE_WIDTH           = 160
+SLOT_OSC_1_PW_MOD_AMT            = 161
+SLOT_OSC_2_PITCH_COARSE          = 162
+SLOT_OSC_2_PITCH_FINE            = 163
+SLOT_OSC_2_MOD_MIX               = 164
+SLOT_OSC_2_PITCH_MOD_AMT         = 165
+SLOT_OSC_2_PITCH_MOD_RANGE       = 166
+SLOT_OSC_2_WAVE                  = 167
+SLOT_OSC_2_PULSE_WIDTH           = 168
+SLOT_OSC_2_PW_MOD_AMT            = 169
+SLOT_NOISE_1_LEVEL               = 170
+SLOT_NOISE_1_COLOR               = 171
+SLOT_MIXER_2_LEVEL_1             = 172
+SLOT_MIXER_2_POL_1               = 173
+SLOT_MIXER_2_LEVEL_2             = 174
+SLOT_MIXER_2_POL_2               = 175
+SLOT_MIXER_2_LEVEL_3             = 176
+SLOT_MIXER_2_POL_3               = 177
+SLOT_MIXER_2_OUT_LEVEL           = 178
+SLOT_FILTER_1_GAIN               = 179
+SLOT_FILTER_1_CUTOFF             = 180
+SLOT_FILTER_1_CUTOFF_PITCH_TRACK = 181
+SLOT_FILTER_1_MOD_MIX            = 182
+SLOT_FILTER_1_CUTOFF_MOD_AMT     = 183
+SLOT_FILTER_1_RESONANCE          = 184
+SLOT_FILTER_1_MODE               = 185
+SLOT_AMP_1_GAIN                  = 186
+SLOT_CHORUS_1_MIX                = 187
+SLOT_CHORUS_1_RATE               = 188
+SLOT_CHORUS_1_DEPTH              = 189
+SLOT_DELAY_1_MIX                 = 190
+SLOT_DELAY_1_TIME                = 191
+SLOT_DELAY_1_FEEDBACK            = 192
 
 # NRPN parameter numbers: (MSB << 7) | LSB, where the MSB picks a category and the LSB an entry.
 #   0..127   active_modules[slot]
@@ -204,46 +201,43 @@ NRPN_SOURCE_PITCH_1_BEND_AMT            = 280
 NRPN_SOURCE_PITCH_1_BEND_POL            = 281
 NRPN_SOURCE_OSC_1_PITCH_COARSE          = 282
 NRPN_SOURCE_OSC_1_PITCH_FINE            = 283
-NRPN_SOURCE_OSC_1_MOD_1_AMT             = 284
-NRPN_SOURCE_OSC_1_MOD_2_AMT             = 285
-NRPN_SOURCE_OSC_1_PITCH_MOD_AMT         = 286
-NRPN_SOURCE_OSC_1_PITCH_MOD_RANGE       = 287
-NRPN_SOURCE_OSC_1_WAVE                  = 288
-NRPN_SOURCE_OSC_1_PULSE_WIDTH           = 289
-NRPN_SOURCE_OSC_1_PW_MOD_AMT            = 290
-NRPN_SOURCE_OSC_2_PITCH_COARSE          = 291
-NRPN_SOURCE_OSC_2_PITCH_FINE            = 292
-NRPN_SOURCE_OSC_2_MOD_1_AMT             = 293
-NRPN_SOURCE_OSC_2_MOD_2_AMT             = 294
-NRPN_SOURCE_OSC_2_PITCH_MOD_AMT         = 295
-NRPN_SOURCE_OSC_2_PITCH_MOD_RANGE       = 296
-NRPN_SOURCE_OSC_2_WAVE                  = 297
-NRPN_SOURCE_OSC_2_PULSE_WIDTH           = 298
-NRPN_SOURCE_OSC_2_PW_MOD_AMT            = 299
-NRPN_SOURCE_NOISE_1_LEVEL               = 300
-NRPN_SOURCE_NOISE_1_COLOR               = 301
-NRPN_SOURCE_MIXER_2_LEVEL_1             = 302
-NRPN_SOURCE_MIXER_2_POL_1               = 303
-NRPN_SOURCE_MIXER_2_LEVEL_2             = 304
-NRPN_SOURCE_MIXER_2_POL_2               = 305
-NRPN_SOURCE_MIXER_2_LEVEL_3             = 306
-NRPN_SOURCE_MIXER_2_POL_3               = 307
-NRPN_SOURCE_MIXER_2_OUT_LEVEL           = 308
-NRPN_SOURCE_FILTER_1_GAIN               = 309
-NRPN_SOURCE_FILTER_1_CUTOFF             = 310
-NRPN_SOURCE_FILTER_1_CUTOFF_PITCH_TRACK = 311
-NRPN_SOURCE_FILTER_1_MOD_1_AMT          = 312
-NRPN_SOURCE_FILTER_1_MOD_2_AMT          = 313
-NRPN_SOURCE_FILTER_1_CUTOFF_MOD_AMT     = 314
-NRPN_SOURCE_FILTER_1_RESONANCE          = 315
-NRPN_SOURCE_FILTER_1_MODE               = 316
-NRPN_SOURCE_AMP_1_GAIN                  = 317
-NRPN_SOURCE_CHORUS_1_MIX                = 318
-NRPN_SOURCE_CHORUS_1_RATE               = 319
-NRPN_SOURCE_CHORUS_1_DEPTH              = 320
-NRPN_SOURCE_DELAY_1_MIX                 = 321
-NRPN_SOURCE_DELAY_1_TIME                = 322
-NRPN_SOURCE_DELAY_1_FEEDBACK            = 323
+NRPN_SOURCE_OSC_1_MOD_MIX               = 284
+NRPN_SOURCE_OSC_1_PITCH_MOD_AMT         = 285
+NRPN_SOURCE_OSC_1_PITCH_MOD_RANGE       = 286
+NRPN_SOURCE_OSC_1_WAVE                  = 287
+NRPN_SOURCE_OSC_1_PULSE_WIDTH           = 288
+NRPN_SOURCE_OSC_1_PW_MOD_AMT            = 289
+NRPN_SOURCE_OSC_2_PITCH_COARSE          = 290
+NRPN_SOURCE_OSC_2_PITCH_FINE            = 291
+NRPN_SOURCE_OSC_2_MOD_MIX               = 292
+NRPN_SOURCE_OSC_2_PITCH_MOD_AMT         = 293
+NRPN_SOURCE_OSC_2_PITCH_MOD_RANGE       = 294
+NRPN_SOURCE_OSC_2_WAVE                  = 295
+NRPN_SOURCE_OSC_2_PULSE_WIDTH           = 296
+NRPN_SOURCE_OSC_2_PW_MOD_AMT            = 297
+NRPN_SOURCE_NOISE_1_LEVEL               = 298
+NRPN_SOURCE_NOISE_1_COLOR               = 299
+NRPN_SOURCE_MIXER_2_LEVEL_1             = 300
+NRPN_SOURCE_MIXER_2_POL_1               = 301
+NRPN_SOURCE_MIXER_2_LEVEL_2             = 302
+NRPN_SOURCE_MIXER_2_POL_2               = 303
+NRPN_SOURCE_MIXER_2_LEVEL_3             = 304
+NRPN_SOURCE_MIXER_2_POL_3               = 305
+NRPN_SOURCE_MIXER_2_OUT_LEVEL           = 306
+NRPN_SOURCE_FILTER_1_GAIN               = 307
+NRPN_SOURCE_FILTER_1_CUTOFF             = 308
+NRPN_SOURCE_FILTER_1_CUTOFF_PITCH_TRACK = 309
+NRPN_SOURCE_FILTER_1_MOD_MIX            = 310
+NRPN_SOURCE_FILTER_1_CUTOFF_MOD_AMT     = 311
+NRPN_SOURCE_FILTER_1_RESONANCE          = 312
+NRPN_SOURCE_FILTER_1_MODE               = 313
+NRPN_SOURCE_AMP_1_GAIN                  = 314
+NRPN_SOURCE_CHORUS_1_MIX                = 315
+NRPN_SOURCE_CHORUS_1_RATE               = 316
+NRPN_SOURCE_CHORUS_1_DEPTH              = 317
+NRPN_SOURCE_DELAY_1_MIX                 = 318
+NRPN_SOURCE_DELAY_1_TIME                = 319
+NRPN_SOURCE_DELAY_1_FEEDBACK            = 320
 
 # A CC number of 0 means the control has no CC: a parameter's control slot then holds its NRPN_VALUE_*
 # below, whatever CC it had before, so a patch sets it alone, and a General slot holds 0.0.
@@ -275,51 +269,48 @@ NRPN_CC_PITCH_1_BEND_AMT            = 408
 NRPN_CC_PITCH_1_BEND_POL            = 409
 NRPN_CC_OSC_1_PITCH_COARSE          = 410
 NRPN_CC_OSC_1_PITCH_FINE            = 411
-NRPN_CC_OSC_1_MOD_1_AMT             = 412
-NRPN_CC_OSC_1_MOD_2_AMT             = 413
-NRPN_CC_OSC_1_PITCH_MOD_AMT         = 414
-NRPN_CC_OSC_1_PITCH_MOD_RANGE       = 415
-NRPN_CC_OSC_1_WAVE                  = 416
-NRPN_CC_OSC_1_PULSE_WIDTH           = 417
-NRPN_CC_OSC_1_PW_MOD_AMT            = 418
-NRPN_CC_OSC_2_PITCH_COARSE          = 419
-NRPN_CC_OSC_2_PITCH_FINE            = 420
-NRPN_CC_OSC_2_MOD_1_AMT             = 421
-NRPN_CC_OSC_2_MOD_2_AMT             = 422
-NRPN_CC_OSC_2_PITCH_MOD_AMT         = 423
-NRPN_CC_OSC_2_PITCH_MOD_RANGE       = 424
-NRPN_CC_OSC_2_WAVE                  = 425
-NRPN_CC_OSC_2_PULSE_WIDTH           = 426
-NRPN_CC_OSC_2_PW_MOD_AMT            = 427
-NRPN_CC_NOISE_1_LEVEL               = 428
-NRPN_CC_NOISE_1_COLOR               = 429
-NRPN_CC_MIXER_2_LEVEL_1             = 430
-NRPN_CC_MIXER_2_POL_1               = 431
-NRPN_CC_MIXER_2_LEVEL_2             = 432
-NRPN_CC_MIXER_2_POL_2               = 433
-NRPN_CC_MIXER_2_LEVEL_3             = 434
-NRPN_CC_MIXER_2_POL_3               = 435
-NRPN_CC_MIXER_2_OUT_LEVEL           = 436
-NRPN_CC_FILTER_1_GAIN               = 437
-NRPN_CC_FILTER_1_CUTOFF             = 438
-NRPN_CC_FILTER_1_CUTOFF_PITCH_TRACK = 439
-NRPN_CC_FILTER_1_MOD_1_AMT          = 440
-NRPN_CC_FILTER_1_MOD_2_AMT          = 441
-NRPN_CC_FILTER_1_CUTOFF_MOD_AMT     = 442
-NRPN_CC_FILTER_1_RESONANCE          = 443
-NRPN_CC_FILTER_1_MODE               = 444
-NRPN_CC_AMP_1_GAIN                  = 445
-NRPN_CC_CHORUS_1_MIX                = 446
-NRPN_CC_CHORUS_1_RATE               = 447
-NRPN_CC_CHORUS_1_DEPTH              = 448
-NRPN_CC_DELAY_1_MIX                 = 449
-NRPN_CC_DELAY_1_TIME                = 450
-NRPN_CC_DELAY_1_FEEDBACK            = 451
-NRPN_CC_GENERAL_MOD_WHEEL           = 452
-NRPN_CC_GENERAL_1                   = 453
-NRPN_CC_GENERAL_2                   = 454
-NRPN_CC_GENERAL_3                   = 455
-NRPN_CC_GENERAL_4                   = 456
+NRPN_CC_OSC_1_MOD_MIX               = 412
+NRPN_CC_OSC_1_PITCH_MOD_AMT         = 413
+NRPN_CC_OSC_1_PITCH_MOD_RANGE       = 414
+NRPN_CC_OSC_1_WAVE                  = 415
+NRPN_CC_OSC_1_PULSE_WIDTH           = 416
+NRPN_CC_OSC_1_PW_MOD_AMT            = 417
+NRPN_CC_OSC_2_PITCH_COARSE          = 418
+NRPN_CC_OSC_2_PITCH_FINE            = 419
+NRPN_CC_OSC_2_MOD_MIX               = 420
+NRPN_CC_OSC_2_PITCH_MOD_AMT         = 421
+NRPN_CC_OSC_2_PITCH_MOD_RANGE       = 422
+NRPN_CC_OSC_2_WAVE                  = 423
+NRPN_CC_OSC_2_PULSE_WIDTH           = 424
+NRPN_CC_OSC_2_PW_MOD_AMT            = 425
+NRPN_CC_NOISE_1_LEVEL               = 426
+NRPN_CC_NOISE_1_COLOR               = 427
+NRPN_CC_MIXER_2_LEVEL_1             = 428
+NRPN_CC_MIXER_2_POL_1               = 429
+NRPN_CC_MIXER_2_LEVEL_2             = 430
+NRPN_CC_MIXER_2_POL_2               = 431
+NRPN_CC_MIXER_2_LEVEL_3             = 432
+NRPN_CC_MIXER_2_POL_3               = 433
+NRPN_CC_MIXER_2_OUT_LEVEL           = 434
+NRPN_CC_FILTER_1_GAIN               = 435
+NRPN_CC_FILTER_1_CUTOFF             = 436
+NRPN_CC_FILTER_1_CUTOFF_PITCH_TRACK = 437
+NRPN_CC_FILTER_1_MOD_MIX            = 438
+NRPN_CC_FILTER_1_CUTOFF_MOD_AMT     = 439
+NRPN_CC_FILTER_1_RESONANCE          = 440
+NRPN_CC_FILTER_1_MODE               = 441
+NRPN_CC_AMP_1_GAIN                  = 442
+NRPN_CC_CHORUS_1_MIX                = 443
+NRPN_CC_CHORUS_1_RATE               = 444
+NRPN_CC_CHORUS_1_DEPTH              = 445
+NRPN_CC_DELAY_1_MIX                 = 446
+NRPN_CC_DELAY_1_TIME                = 447
+NRPN_CC_DELAY_1_FEEDBACK            = 448
+NRPN_CC_GENERAL_MOD_WHEEL           = 449
+NRPN_CC_GENERAL_1                   = 450
+NRPN_CC_GENERAL_2                   = 451
+NRPN_CC_GENERAL_3                   = 452
+NRPN_CC_GENERAL_4                   = 453
 
 # The value of each parameter's control slot while it has no CC, as a CC value.
 NRPN_VALUE_EG_1_ATTACK                 = 512
@@ -350,46 +341,43 @@ NRPN_VALUE_PITCH_1_BEND_AMT            = 536
 NRPN_VALUE_PITCH_1_BEND_POL            = 537
 NRPN_VALUE_OSC_1_PITCH_COARSE          = 538
 NRPN_VALUE_OSC_1_PITCH_FINE            = 539
-NRPN_VALUE_OSC_1_MOD_1_AMT             = 540
-NRPN_VALUE_OSC_1_MOD_2_AMT             = 541
-NRPN_VALUE_OSC_1_PITCH_MOD_AMT         = 542
-NRPN_VALUE_OSC_1_PITCH_MOD_RANGE       = 543
-NRPN_VALUE_OSC_1_WAVE                  = 544
-NRPN_VALUE_OSC_1_PULSE_WIDTH           = 545
-NRPN_VALUE_OSC_1_PW_MOD_AMT            = 546
-NRPN_VALUE_OSC_2_PITCH_COARSE          = 547
-NRPN_VALUE_OSC_2_PITCH_FINE            = 548
-NRPN_VALUE_OSC_2_MOD_1_AMT             = 549
-NRPN_VALUE_OSC_2_MOD_2_AMT             = 550
-NRPN_VALUE_OSC_2_PITCH_MOD_AMT         = 551
-NRPN_VALUE_OSC_2_PITCH_MOD_RANGE       = 552
-NRPN_VALUE_OSC_2_WAVE                  = 553
-NRPN_VALUE_OSC_2_PULSE_WIDTH           = 554
-NRPN_VALUE_OSC_2_PW_MOD_AMT            = 555
-NRPN_VALUE_NOISE_1_LEVEL               = 556
-NRPN_VALUE_NOISE_1_COLOR               = 557
-NRPN_VALUE_MIXER_2_LEVEL_1             = 558
-NRPN_VALUE_MIXER_2_POL_1               = 559
-NRPN_VALUE_MIXER_2_LEVEL_2             = 560
-NRPN_VALUE_MIXER_2_POL_2               = 561
-NRPN_VALUE_MIXER_2_LEVEL_3             = 562
-NRPN_VALUE_MIXER_2_POL_3               = 563
-NRPN_VALUE_MIXER_2_OUT_LEVEL           = 564
-NRPN_VALUE_FILTER_1_GAIN               = 565
-NRPN_VALUE_FILTER_1_CUTOFF             = 566
-NRPN_VALUE_FILTER_1_CUTOFF_PITCH_TRACK = 567
-NRPN_VALUE_FILTER_1_MOD_1_AMT          = 568
-NRPN_VALUE_FILTER_1_MOD_2_AMT          = 569
-NRPN_VALUE_FILTER_1_CUTOFF_MOD_AMT     = 570
-NRPN_VALUE_FILTER_1_RESONANCE          = 571
-NRPN_VALUE_FILTER_1_MODE               = 572
-NRPN_VALUE_AMP_1_GAIN                  = 573
-NRPN_VALUE_CHORUS_1_MIX                = 574
-NRPN_VALUE_CHORUS_1_RATE               = 575
-NRPN_VALUE_CHORUS_1_DEPTH              = 576
-NRPN_VALUE_DELAY_1_MIX                 = 577
-NRPN_VALUE_DELAY_1_TIME                = 578
-NRPN_VALUE_DELAY_1_FEEDBACK            = 579
+NRPN_VALUE_OSC_1_MOD_MIX               = 540
+NRPN_VALUE_OSC_1_PITCH_MOD_AMT         = 541
+NRPN_VALUE_OSC_1_PITCH_MOD_RANGE       = 542
+NRPN_VALUE_OSC_1_WAVE                  = 543
+NRPN_VALUE_OSC_1_PULSE_WIDTH           = 544
+NRPN_VALUE_OSC_1_PW_MOD_AMT            = 545
+NRPN_VALUE_OSC_2_PITCH_COARSE          = 546
+NRPN_VALUE_OSC_2_PITCH_FINE            = 547
+NRPN_VALUE_OSC_2_MOD_MIX               = 548
+NRPN_VALUE_OSC_2_PITCH_MOD_AMT         = 549
+NRPN_VALUE_OSC_2_PITCH_MOD_RANGE       = 550
+NRPN_VALUE_OSC_2_WAVE                  = 551
+NRPN_VALUE_OSC_2_PULSE_WIDTH           = 552
+NRPN_VALUE_OSC_2_PW_MOD_AMT            = 553
+NRPN_VALUE_NOISE_1_LEVEL               = 554
+NRPN_VALUE_NOISE_1_COLOR               = 555
+NRPN_VALUE_MIXER_2_LEVEL_1             = 556
+NRPN_VALUE_MIXER_2_POL_1               = 557
+NRPN_VALUE_MIXER_2_LEVEL_2             = 558
+NRPN_VALUE_MIXER_2_POL_2               = 559
+NRPN_VALUE_MIXER_2_LEVEL_3             = 560
+NRPN_VALUE_MIXER_2_POL_3               = 561
+NRPN_VALUE_MIXER_2_OUT_LEVEL           = 562
+NRPN_VALUE_FILTER_1_GAIN               = 563
+NRPN_VALUE_FILTER_1_CUTOFF             = 564
+NRPN_VALUE_FILTER_1_CUTOFF_PITCH_TRACK = 565
+NRPN_VALUE_FILTER_1_MOD_MIX            = 566
+NRPN_VALUE_FILTER_1_CUTOFF_MOD_AMT     = 567
+NRPN_VALUE_FILTER_1_RESONANCE          = 568
+NRPN_VALUE_FILTER_1_MODE               = 569
+NRPN_VALUE_AMP_1_GAIN                  = 570
+NRPN_VALUE_CHORUS_1_MIX                = 571
+NRPN_VALUE_CHORUS_1_RATE               = 572
+NRPN_VALUE_CHORUS_1_DEPTH              = 573
+NRPN_VALUE_DELAY_1_MIX                 = 574
+NRPN_VALUE_DELAY_1_TIME                = 575
+NRPN_VALUE_DELAY_1_FEEDBACK            = 576
 
 # The constants of the bus, which nothing else ever writes. A slot not written here holds 0.0.
 def spms1_fill_constant_signals(signals)
@@ -476,8 +464,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_PITCH_1_BEND_POL           , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_1_PITCH_COARSE         , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_1_PITCH_FINE           , SIGNAL_OWN)
-  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_1_MOD_1_AMT            , SIGNAL_OWN)
-  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_1_MOD_2_AMT            , SIGNAL_OWN)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_1_MOD_MIX              , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_1_PITCH_MOD_AMT        , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_1_PITCH_MOD_RANGE      , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_1_WAVE                 , SIGNAL_OWN)
@@ -485,8 +472,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_1_PW_MOD_AMT           , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_2_PITCH_COARSE         , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_2_PITCH_FINE           , SIGNAL_OWN)
-  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_2_MOD_1_AMT            , SIGNAL_OWN)
-  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_2_MOD_2_AMT            , SIGNAL_OWN)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_2_MOD_MIX              , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_2_PITCH_MOD_AMT        , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_2_PITCH_MOD_RANGE      , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OSC_2_WAVE                 , SIGNAL_OWN)
@@ -504,8 +490,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_GAIN              , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_CUTOFF            , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_CUTOFF_PITCH_TRACK, SIGNAL_OWN)
-  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_MOD_1_AMT         , SIGNAL_OWN)
-  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_MOD_2_AMT         , SIGNAL_OWN)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_MOD_MIX           , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_CUTOFF_MOD_AMT    , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_RESONANCE         , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_MODE              , SIGNAL_OWN)
@@ -532,16 +517,14 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_PITCH_1_FINE               , 70)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_PITCH_1_STRETCH            , 22)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_PITCH_1_BEND_AMT           , 57)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_MOD_1_AMT            , 89)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_MOD_2_AMT            , 13)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_MOD_MIX              , 13)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_PITCH_MOD_AMT        , 8)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_WAVE                 , 102)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_PULSE_WIDTH          , 114)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_PW_MOD_AMT           , 103)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_2_PITCH_COARSE         , 85)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_2_PITCH_FINE           , 76)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_2_MOD_1_AMT            , 89)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_2_MOD_2_AMT            , 13)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_2_MOD_MIX              , 13)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_2_PITCH_MOD_AMT        , 8)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_2_WAVE                 , 104)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_2_PULSE_WIDTH          , 114)
@@ -553,8 +536,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_GAIN              , 112)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_CUTOFF            , 74)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_CUTOFF_PITCH_TRACK, 9)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_MOD_1_AMT         , 24)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_MOD_2_AMT         , 25)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_MOD_MIX           , 25)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_CUTOFF_MOD_AMT    , 117)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_RESONANCE         , 71)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_MODE              , 39)
@@ -599,8 +581,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_PITCH_1_BEND_POL           , 124)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_OSC_1_PITCH_COARSE         , 64)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_OSC_1_PITCH_FINE           , 64)
-  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_OSC_1_MOD_1_AMT            , 4)
-  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_OSC_1_MOD_2_AMT            , 4)
+  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_OSC_1_MOD_MIX              , 124)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_OSC_1_PITCH_MOD_AMT        , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_OSC_1_PITCH_MOD_RANGE      , 28)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_OSC_1_WAVE                 , 4)
@@ -608,8 +589,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_OSC_1_PW_MOD_AMT           , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_OSC_2_PITCH_COARSE         , 64)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_OSC_2_PITCH_FINE           , 76)
-  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_OSC_2_MOD_1_AMT            , 4)
-  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_OSC_2_MOD_2_AMT            , 4)
+  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_OSC_2_MOD_MIX              , 124)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_OSC_2_PITCH_MOD_AMT        , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_OSC_2_PITCH_MOD_RANGE      , 28)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_OSC_2_WAVE                 , 4)
@@ -627,9 +607,8 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_GAIN              , 64)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_CUTOFF            , 100)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_CUTOFF_PITCH_TRACK, 4)
-  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_MOD_1_AMT         , 28)
-  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_MOD_2_AMT         , 4)
-  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_CUTOFF_MOD_AMT    , 124)
+  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_MOD_MIX           , 4)
+  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_CUTOFF_MOD_AMT    , 76)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_RESONANCE         , 94)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_MODE              , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_AMP_1_GAIN                 , 124)
@@ -655,16 +634,14 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 70 , 64 ) # Pitch 1 Fine
   C.set_midi_cc_value(midi_ch, 22 , 4  ) # Pitch 1 Stretch
   C.set_midi_cc_value(midi_ch, 57 , 8  ) # Pitch 1 Bend Amt
-  C.set_midi_cc_value(midi_ch, 89 , 4  ) # Osc 1 Mod 1 Amt
-  C.set_midi_cc_value(midi_ch, 13 , 4  ) # Osc 1 Mod 2 Amt
+  C.set_midi_cc_value(midi_ch, 13 , 124) # Osc 1 Mod 1/2 Mix
   C.set_midi_cc_value(midi_ch, 8  , 4  ) # Osc 1 Pitch Mod Amt
   C.set_midi_cc_value(midi_ch, 102, 4  ) # Osc 1 Wave
   C.set_midi_cc_value(midi_ch, 114, 64 ) # Osc 1 Pulse Width
   C.set_midi_cc_value(midi_ch, 103, 4  ) # Osc 1 PW Mod Amt
   C.set_midi_cc_value(midi_ch, 85 , 64 ) # Osc 2 Pitch Coarse
   C.set_midi_cc_value(midi_ch, 76 , 76 ) # Osc 2 Pitch Fine
-  C.set_midi_cc_value(midi_ch, 89 , 4  ) # Osc 2 Mod 1 Amt
-  C.set_midi_cc_value(midi_ch, 13 , 4  ) # Osc 2 Mod 2 Amt
+  C.set_midi_cc_value(midi_ch, 13 , 124) # Osc 2 Mod 1/2 Mix
   C.set_midi_cc_value(midi_ch, 8  , 4  ) # Osc 2 Pitch Mod Amt
   C.set_midi_cc_value(midi_ch, 104, 4  ) # Osc 2 Wave
   C.set_midi_cc_value(midi_ch, 114, 64 ) # Osc 2 Pulse Width
@@ -676,9 +653,8 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 112, 64 ) # Filter 1 Gain
   C.set_midi_cc_value(midi_ch, 74 , 100) # Filter 1 Cutoff
   C.set_midi_cc_value(midi_ch, 9  , 4  ) # Filter 1 Cutoff Pitch Track
-  C.set_midi_cc_value(midi_ch, 24 , 28 ) # Filter 1 Mod 1 Amt
-  C.set_midi_cc_value(midi_ch, 25 , 4  ) # Filter 1 Mod 2 Amt
-  C.set_midi_cc_value(midi_ch, 117, 124) # Filter 1 Cutoff Mod Amt
+  C.set_midi_cc_value(midi_ch, 25 , 4  ) # Filter 1 Mod 1/2 Mix
+  C.set_midi_cc_value(midi_ch, 117, 76 ) # Filter 1 Cutoff Mod Amt
   C.set_midi_cc_value(midi_ch, 71 , 94 ) # Filter 1 Resonance
   C.set_midi_cc_value(midi_ch, 39 , 4  ) # Filter 1 Mode
   C.set_midi_cc_value(midi_ch, 15 , 124) # Amp 1 Gain

@@ -46,15 +46,15 @@ module Spms1
       @pulse_width = 0.0
       @stage_1_pulse_width = 0.0
       @current_pulse_width = 0.0
-      # Mod 1 In and Mod 2 In are summed, each at its amount, and the sum moves the pitch by Pitch
-      # Mod Amt and the pulse width by PW Mod Amt. Pitch In has no depth: the note it carries is
+      # Mod 1 In and Mod 2 In are summed, each at its share of Mod 1/2 Mix, and the sum moves the
+      # pitch by Pitch Mod Amt and the pulse width by PW Mod Amt. Pitch In has no depth: the note it carries is
       # added whole, a key a semitone, and plays in tune from the first sample.
       @modulation_1_amount = 0.0
       @stage_1_modulation_1_amount = 0.0
       @current_modulation_1_amount = 0.0
-      @modulation_2_amount = 0.0
-      @stage_1_modulation_2_amount = 0.0
-      @current_modulation_2_amount = 0.0
+      @modulation_2_amount = 1.0
+      @stage_1_modulation_2_amount = 1.0
+      @current_modulation_2_amount = 1.0
       # Pitch Mod Amt and Pitch Mod Range are multiplied before smoothing, so only their product,
       # the depth, carries a smoothing state.
       @pitch_modulation_amount = 0.0
@@ -89,16 +89,14 @@ module Spms1
       @pulse_width = (pulse_width < -0.5) ? -0.5 : ((pulse_width > 0.5) ? 0.5 : pulse_width)
     end
 
-    # Each modulation amount is unipolar, [0.0, 1.0], a plain multiplier on its input, so a
-    # modulation runs the way its source does; one the other way up takes an inverted source, such
-    # as a mixer's at Pol -0.5.
-    # The two are alike.
-    def set_modulation_1_amount(amount)
-      @modulation_1_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
-    end
-
-    def set_modulation_2_amount(amount)
-      @modulation_2_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
+    # Mod 1/2 Mix is bipolar, [-0.5, 0.5], a linear crossfade between the two modulation inputs:
+    # Mod 1 In is taken at 0.5 - mix and Mod 2 In at 0.5 + mix, so -0.5 is Mod 1 alone, +0.5 Mod 2
+    # alone and 0.0 half of each. A modulation runs the way its source does; one the other way up
+    # takes an inverted source, such as a mixer's at Pol -0.5.
+    def set_modulation_mix(mix)
+      clamped_mix = (mix < -0.5) ? -0.5 : ((mix > 0.5) ? 0.5 : mix)
+      @modulation_1_amount = 0.5 - clamped_mix
+      @modulation_2_amount = 0.5 + clamped_mix
     end
 
     # Pitch Mod Amt and PW Mod Amt are unipolar, [0.0, 1.0], how far the modulation sum moves

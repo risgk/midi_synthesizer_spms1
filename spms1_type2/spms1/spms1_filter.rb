@@ -168,30 +168,31 @@ module Spms1
 
       @cutoff = 1.0
       @resonance = 0.0
-      @modulation_1_amount = 0.0
+      # Mod 1/2 Mix powers up at -0.5, Mod 1 alone, and Cutoff Mod Amt at 0.2, as the default patch
+      # sets them, so that the sum is not faded in at startup.
+      @modulation_1_amount = 1.0
       @modulation_2_amount = 0.0
       @cutoff_pitch_track = 0.0
-      # Powers up at 1.0, as the default patch sets it, so that the sum is not faded in at startup.
-      @cutoff_modulation_amount = 1.0
+      @cutoff_modulation_amount = 0.2
       @gain = 0.5
       @mode_lp = 1.0
       @mode_hp = 0.0
 
       @stage_1_cutoff = 1.0
       @stage_1_resonance = 0.0
-      @stage_1_modulation_1_amount = 0.0
+      @stage_1_modulation_1_amount = 1.0
       @stage_1_modulation_2_amount = 0.0
       @stage_1_cutoff_pitch_track = 0.0
-      @stage_1_cutoff_modulation_amount = 1.0
+      @stage_1_cutoff_modulation_amount = 0.2
       @stage_1_gain = 0.5
       @stage_1_mode_lp = 1.0
       @stage_1_mode_hp = 0.0
       @current_cutoff = 1.0
       @current_resonance = 0.0
-      @current_modulation_1_amount = 0.0
+      @current_modulation_1_amount = 1.0
       @current_modulation_2_amount = 0.0
       @current_cutoff_pitch_track = 0.0
-      @current_cutoff_modulation_amount = 1.0
+      @current_cutoff_modulation_amount = 0.2
       @current_gain = 0.5
       @current_mode_lp = 1.0
       @current_mode_hp = 0.0
@@ -219,21 +220,21 @@ module Spms1
       update_coefficients
     end
 
-    # Every parameter but Cutoff Mod Amt is unipolar, [0.0, 1.0], which is what the smoothing, the
-    # modulation sum and the table lookups below are written against.
+    # Every parameter but Mod 1/2 Mix and Cutoff Mod Amt is unipolar, [0.0, 1.0], which is what the
+    # smoothing, the modulation sum and the table lookups below are written against.
     # Cutoff range: MIDI note 15 (19 Hz) at 0.0, MIDI note 75 (622 Hz) at 0.5, MIDI note 135 (20 kHz) at 1.0.
     def set_cutoff(cutoff)
       @cutoff = (cutoff < 0.0) ? 0.0 : ((cutoff > 1.0) ? 1.0 : cutoff)
     end
 
-    # Each modulation amount is unipolar, [0.0, 1.0], a plain multiplier on its input; which way
-    # the sum moves the cutoff is Cutoff Mod Amt's.
-    def set_modulation_1_amount(amount)
-      @modulation_1_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
-    end
-
-    def set_modulation_2_amount(amount)
-      @modulation_2_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
+    # Mod 1/2 Mix is bipolar, [-0.5, 0.5], a linear crossfade between the two modulation inputs:
+    # Mod 1 In is taken at 0.5 - mix and Mod 2 In at 0.5 + mix, so -0.5 is Mod 1 alone, +0.5 Mod 2
+    # alone and 0.0 half of each. How far, and which way, the sum moves the cutoff is Cutoff Mod
+    # Amt's.
+    def set_modulation_mix(mix)
+      clamped_mix = (mix < -0.5) ? -0.5 : ((mix > 0.5) ? 0.5 : mix)
+      @modulation_1_amount = 0.5 - clamped_mix
+      @modulation_2_amount = 0.5 + clamped_mix
     end
 
     # Cutoff Pitch Track is unipolar, [0.0, 1.0], how far the cutoff follows Pitch In, the keyboard
