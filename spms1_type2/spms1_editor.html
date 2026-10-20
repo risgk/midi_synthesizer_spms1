@@ -3077,7 +3077,10 @@
       const value = ownValue ? paramValue(c.key) : usable ? ccValue(cc) : 64;
       if (document.activeElement !== slider) slider.value = value;
       zone.querySelector('.slider-value').textContent = usable ? String(value) : '—';
-      const own = signalNorm(c.slots[0][0]);
+      // A General control fills a unipolar and a bipolar slot from one CC; its value shows as the
+      // bipolar one, centred on CC 64 as its tick is.
+      const shown = c.slots.find(([, , bipolar]) => bipolar) || c.slots[0];
+      const own = signalNorm(shown[0]);
       const norm = zone.querySelector('.slider-norm');
       norm.textContent = own ? own.text : '';
       norm.title = 'The value the synth sees in the slot';
