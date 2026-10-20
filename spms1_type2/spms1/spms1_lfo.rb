@@ -92,7 +92,7 @@ module Spms1
 
     # The output is scaled by level, unipolar, [0.0, 1.0], a plain multiplier, so a destination
     # can take the LFO at less than full scale without a mixer in between. Turning it the other
-    # way up is for Out Inv, or a mixer's Out Pol.
+    # way up is for Out Inv, or a mixer's Out Inv.
     def set_level(level)
       @level = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
       @amount = @level

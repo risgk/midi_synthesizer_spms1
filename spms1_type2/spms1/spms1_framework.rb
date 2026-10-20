@@ -63,7 +63,7 @@ end
 # parameter clamps to, and takes the converter of its kind: unipolar is 0.0..1.0, the span of an
 # envelope, and bipolar is -0.5..0.5, the span of an LFO, with 0.0 at CC 64 where a MIDI
 # controller puts its detent. Pitch Coarse and Pitch Fine are
-# bipolar, being offsets about that detent, and so is the mixers' Out Pol, whose sign is what it sets. Both map CC 4..124 to the full range and
+# bipolar, being offsets about that detent. Both map CC 4..124 to the full range and
 # clamp anything outside. Every lookup table in the synth is spaced to match --
 # FREQ_TABLE is semitone-spaced across 120, and EXP_TABLE and Q_TABLE are 121 entries over their
 # ranges -- so a CC value lands on an integer table index, and CC 64 is the exact mid-value of
