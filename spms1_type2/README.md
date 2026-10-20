@@ -10,7 +10,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.3
 - Filter: ZDF/TPT State Variable Filter (with a nonlinear leak on the band pass integrator, solved by the one-step Newton method), with low pass and high pass outputs and a main output crossfading from one to the other through a notch (Mode, CC 39)
 - Chorus: mono in, stereo out, as a module in the run order
 - Delay: stereo, with feedback, as a module in the run order (up to 340 ms)
-- Pitch: the note's pitch as a module in the run order, with portamento as an exponential lag (CC 5), pitch bend past it and a stretch of the keys, the two set as values with no CC
+- Pitch: the note's pitch as a module in the run order, with portamento as an exponential lag (CC 5), pitch bend past it (range on CC 57) and a stretch of the keys (CC 81)
 - Stereo output: the chorus spreads the mono voice into a left and a right, and the delay keeps them apart
 - Developed by ISGK Instruments (Ryo Ishigaki)
 - <https://github.com/risgk/midi_synthesizer_spms1>
@@ -203,12 +203,12 @@ shorten Amount to Amt.
 The note's pitch reaches the oscillator through Pitch 1, which glides from one note to the next:
 portamento. Pitch 1 Glide is on CC 5, Portamento Time in the MIDI spec, and powers up at 0.0, where
 the portamento is off and passes the pitch through exactly as it arrives. Pitch 1 Glide Switch
-turns the portamento on and off without moving Glide: on from a value of 64, as a MIDI switch is.
-It has no CC and holds on, the value 124. Pitch Bend comes in on Pitch 1
+(CC 34) turns the portamento on and off without moving Glide: on from CC 64, as a MIDI switch is,
+and on at power-up, at CC 124. Pitch Bend comes in on Pitch 1
 Bend In, which is added to the output past the glide, so the bend acts at once and reaches the
 oscillator and the filter's keyboard tracking alike. Pitch 1 Bend Amt is the bend range, half a
-semitone a step: 2 semitones either way at a value of 8, an octave at 28, which it has no CC and
-holds, and 5 octaves at 124.
+semitone a step: on CC 57, 2 semitones either way at CC 8, an octave at CC
+28, where it powers up, and 5 octaves at CC 124.
 
 The LFO goes straight to the oscillator, both to its pitch and to its pulse width, on Mod 2 In, and to the filter, where Filter 1 Mod 2 Amt (CC 25) powers up at 0.0 and
 leaves the cutoff alone until it is turned up, as Filter 1 Mod 1 Amt (CC 24) does the envelope's;
@@ -419,9 +419,9 @@ it from anywhere else.
 | ----- | ----- | ---- | ---------- |
 | 0 | 0-31 | Run order, slot by slot | Module ID |
 | 1 | 0-29 | What feeds a module input | Signal ID |
-| 2 | 0-56 | Where a parameter takes its value | Signal ID, or 127 for its own control slot |
-| 3 | 0-61 | Which CC fills a control slot | CC number, or 0 for none |
-| 4 | 0-56 | What a parameter's control slot holds while it has no CC | CC value |
+| 2 | 0-57 | Where a parameter takes its value | Signal ID, or 127 for its own control slot |
+| 3 | 0-58 | Which CC fills a control slot | CC number, or 0 for none |
+| 4 | 0-57 | What a parameter's control slot holds while it has no CC | CC value |
 
 The run order is read from slot 0 upwards and stops at the first Module ID 0, so a patch shorter
 than 32 modules ends itself. It is separate from the module numbering: a module only sees the
@@ -442,9 +442,8 @@ on first. The synth is built to keep time with every module running, so taking o
 order is never what makes a patch fit; to leave one out of the sound, route around it and let it
 run unread (see the examples below).
 Mixer 1 has no CC: its levels hold 0.0, so it is silent until a patch turns them up, as its
-category 4 values or by giving them CCs. Mixer 2 has a CC on Level 1, 2 and 4, CC 20, 21 and
-23, of which Level 1 and 2 power up at 0.7 and Level 4 at 0.0; its Level 3 has no CC and holds 0.0, so that
-input starts closed. Each mixer's Out Level has no CC and holds 0.5; Mixer 2's sets how hard the
+category 4 values or by giving them CCs. Mixer 2 has a CC on each level, CC 20 to 23, of which
+Level 1 and 2 power up at 0.7 and Level 3 and 4 at 0.0, so those inputs start closed. Each mixer's Out Level has no CC and holds 0.5; Mixer 2's sets how hard the
 audio drives the filter.
 
 #### Entries (CC 98), category 1
@@ -638,7 +637,7 @@ whole unit per CC step: Coarse a semitone, reaching 5 octaves either way, and Fi
 reaching 60 either way. They are summed, so any pitch is reachable. They have no CC and hold 0.0
 by default; Osc 2's, on CC 85 and 76, set the interval or the detune between the oscillators.
 
-Pitch 1 Stretch, which has no CC, widens the keys about note 60, last, by multiplying the pitch
+Pitch 1 Stretch, on CC 81, widens the keys about note 60, last, by multiplying the pitch
 after the glide and the bend, as PRA32-U2's Stretch Tune does: every interval from note 60 grows by the same share, so the stretch is often given as how
 much an octave widens. At 0.0 (CC 4), where it powers up, the keys are as they are; from CC 5 the
 widening grows by a semitone's ratio a step, as the envelope's times do: 1.2 cents an octave at
@@ -680,10 +679,10 @@ envelope runs one way, 0.0 to 1.0; turning it the other way up is for Out Inv, t
 negated, from 0.0 down to -1.0, or for a mixer's Out Inv. The default patch leaves
 Out Inv unrouted.
 
-EG 1 Release Switch picks the release, after the note's gate falls: on from a value of 64, as a
-MIDI switch is, it runs at the decay's rate, set by EG 1 Decay; off, below 64, it runs at the
-shortest decay's, 10 ms, whatever the decay is, so a long decay still ends a note short. It has
-no CC and holds on, the value 124. It is a switch, so it is not smoothed.
+EG 1 Release Switch, on CC 105, picks the release, after the note's gate falls: on from CC 64,
+as a MIDI switch is, it runs at the decay's rate, set by EG 1 Decay; off, below CC 64, it runs at
+the shortest decay's, 10 ms, whatever the decay is, so a long decay still ends a note short. It
+powers up on, at CC 124. It is a switch, so it is not smoothed.
 
 Osc 1 takes each of its two modulations, Mod 1 In and Mod 2 In, to the pitch and to the pulse
 width by a depth of its own: Pitch Mod 1 Amt and Pitch Mod 2 Amt, PW Mod 1 Amt and PW Mod 2 Amt,
@@ -824,7 +823,7 @@ semitone short; nine tenths of the way take a third of it. At CC 4 and below, 0.
 is off, and its output is its input exactly. The glide is exponential, quick at first and slowing
 as it lands, as an analog synth's portamento is, and it starts from wherever the output is, so a
 note played during a glide takes it over from there. The time is not smoothed: a change in it
-changes only how fast the output moves, so it cannot step it. Glide Switch off, below 64,
+changes only how fast the output moves, so it cannot step it. Glide Switch off, below CC 64,
 takes the output to the input at once, mid-glide too, as Glide at 0.0 does.
 
 #### Examples
@@ -835,8 +834,7 @@ takes the output to the input at once, mid-glide too, as Glide at 0.0 does.
   CC 124. CC 3 sets the rate, and CC 113 turned up gives a vibrato without the wheel
 - A vibrato as deep as a GM2 sound module's: CC 13 = 9 brings the wheel's top down to 50 cents
   either way, the Modulation Depth Range GM2 powers up at, and CC 13 = 14 to a semitone
-- A bend range of 2 semitones, as a GM sound module's: CC 99 = 4, CC 98 = 2, CC 6 = 8 sets
-  Pitch 1 Bend Amt to 8
+- A bend range of 2 semitones, as a GM sound module's: CC 57 = 8 sets Pitch 1 Bend Amt to 8
 - The LFO reaches the filter's Mod 2 input by default too, so CC 25 sweeps the cutoff with it, on
   top of the envelope on Mod 1
 - A second oscillator plays by default too, on Mixer 2's second input at the level of the first,
