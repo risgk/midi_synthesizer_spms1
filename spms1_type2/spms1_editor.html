@@ -484,7 +484,7 @@
     /* The sizes of the keys are times the scale of the text, --kbd-scale, set by kbdFitScale. */
     .keyboard-frame {
       --kbd-scale: 1;
-      --kbd-key-width: calc(22px * var(--kbd-scale));  /* KB_KEY_WIDTH: a semitone in the upper half */
+      --kbd-key-width: calc(21px * var(--kbd-scale));  /* KB_KEY_WIDTH: a semitone in the upper half */
       --kbd-half-height: calc(70px * var(--kbd-scale));
       border: 1px solid var(--border-color);
       border-radius: 6px;
@@ -494,7 +494,7 @@
     /* The pitch bend and mod wheels on the left of the keys, as on a keyboard, sliders standing as
        tall as they are. The bend springs back to the centre; the mod wheel's value is that of the
        CC Mod Wheel is on in the patch. */
-    /* Narrow enough that the keys keep the 37 that KB_KEY_WIDTH fits a 960px window. */
+    /* Narrow enough that the keys keep the 37 that KB_KEY_WIDTH fits a 960px window, with room. */
     .kbd-body {
       display: flex;
       gap: 4px;
@@ -3191,7 +3191,7 @@
   }
 
   const KB_NOTE_MAX = 120;
-  const KB_KEY_WIDTH = 22;  // a semitone in the upper half, times kbScale; 37 keys fit a 960px window
+  const KB_KEY_WIDTH = 21;  // a semitone in the upper half, times kbScale; 37 keys fit 960px, with room
   // The center of 37 keys from a C (C3 - C6 by default), in semitones from the left end of the C.
   const KB_CENTER_OFFSET = (36 + 5 / 3) / 2;
   const KB_DEFAULT_C = 48;  // C3
