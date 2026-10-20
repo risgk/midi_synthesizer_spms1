@@ -315,7 +315,9 @@ controls:
   # Amp 1: Gain, on CC 15, Amp Gain's in PRA32-U2, is doubled, so it powers up at CC 64, a gain of
   # 1.0, and CC 124 brings the sound up by 6 dB; the amp holds its output to one unit.
   - { entry: 50, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 64, set: set_gain }
-  - { entry: 51, module: CHORUS_1,  key: MIX,          label: Mix,          cc: 93,  value: 64, set: set_mix }
+  # Chorus 1: Mix, on CC 93, Chorus Level's in PRA32-U2, powers up at CC 34, 0.25, a light chorus
+  # over the two oscillators' own beat; Rate and Depth power up at CC 64.
+  - { entry: 51, module: CHORUS_1,  key: MIX,          label: Mix,          cc: 93,  value: 34, set: set_mix }
   - { entry: 52, module: CHORUS_1,  key: RATE,         label: Rate,         cc: 58,  value: 64, set: set_rate }
   - { entry: 53, module: CHORUS_1,  key: DEPTH,        label: Depth,        cc: 59,  value: 64, set: set_depth }
   - { entry: 54, module: DELAY_1,   key: MIX,          label: Mix,          cc: 94,  value: 34, set: set_mix }
