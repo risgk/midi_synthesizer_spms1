@@ -316,11 +316,11 @@ controls:
   # 1.0, and CC 124 brings the sound up by 6 dB; the amp holds its output to one unit.
   - { entry: 50, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 64, set: set_gain }
   - { entry: 51, module: CHORUS_1,  key: MIX,          label: Mix,          cc: 93,  value: 64, set: set_mix }
-  - { entry: 52, module: CHORUS_1,  key: RATE,         label: Rate,         cc: 58,  value: 64, set: set_rate }
-  - { entry: 53, module: CHORUS_1,  key: DEPTH,        label: Depth,        cc: 59,  value: 64, set: set_depth }
+  - { entry: 52, module: CHORUS_1,  key: RATE,         label: Rate,         cc: 0,   value: 64, set: set_rate }
+  - { entry: 53, module: CHORUS_1,  key: DEPTH,        label: Depth,        cc: 0,   value: 64, set: set_depth }
   - { entry: 54, module: DELAY_1,   key: MIX,          label: Mix,          cc: 94,  value: 34, set: set_mix }
   - { entry: 55, module: DELAY_1,   key: TIME,         label: Time,         cc: 90,  value: 64, set: set_time }
-  - { entry: 56, module: DELAY_1,   key: FEEDBACK,     label: Feedback,     cc: 92,  value: 64, set: set_feedback }
+  - { entry: 56, module: DELAY_1,   key: FEEDBACK,     label: Feedback,     cc: 0,   value: 64, set: set_feedback }
 
   # General controls: a CC put on the bus for any input or parameter to read, the mod wheel
   # unipolar and each of General 1-4 filling a unipolar and a bipolar slot (see `signals`). Each

@@ -48,11 +48,8 @@
 |                             3 | x             | o             | LFO Rate                             |
 |                           113 | x             | o             | LFO Level                            |
 |                            33 | x             | o             | LFO Wave (Triangle to Square)        |
-|                            58 | x             | o             | Chorus Rate                          |
-|                            59 | x             | o             | Chorus Depth                         |
 |                            93 | x             | o             | Chorus Mix                           |
 |                            90 | x             | o             | Delay Time                           |
-|                            92 | x             | o             | Delay Feedback                       |
 |                            94 | x             | o             | Delay Mix                            |
 |                             5 | x             | o             | Pitch Glide (Portamento Time)        |
 |                            57 | x             | o             | Pitch Bend Amt (Pitch Bend Range)    |
