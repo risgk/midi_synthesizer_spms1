@@ -286,13 +286,6 @@
       align-items: center;
       gap: 12px;
     }
-    :root {
-      /* The slider tick. The thumb's centre travels from half a thumb in to half a thumb from the
-         far end, so the tick for CC 64, the middle of CC 4 to CC 124, sits halfway along what is
-         left of the track. */
-      --tick: linear-gradient(var(--text-muted), var(--text-muted));
-      --tick-64: calc(9px + (100% - 18px) * 0.5 - 1px);
-    }
     /* Chrome gives a range input a minimum width of about 130px, which would push two columns past
        a window under about 880px wide. */
     input[type="range"] {
@@ -306,14 +299,28 @@
       outline: none;
     }
     /* The slider runs from CC 4 to CC 124, the ends of the range the synth uses: cc_to_unipolar
-       and cc_to_bipolar map them to the ends of their ranges and clamp anything past them. A tick
-       at CC 64 where the centre of the dial means no change, drawn rather than declared as a
-       <datalist>, which some browsers turn into a snap point. */
-    input[type="range"].bipolar {
-      background-image: var(--tick);
-      background-size: 2px 100%;
-      background-position: var(--tick-64) center;
-      background-repeat: no-repeat;
+       and cc_to_bipolar map them to the ends of their ranges and clamp anything past them. A
+       bipolar one has a tick at CC 64, where the centre of the dial means no change, drawn over
+       the slider rather than declared as a <datalist>, which some browsers turn into a snap point,
+       and taller than the thumb, so it shows when the thumb sits on it. The thumb's centre travels
+       from half a thumb in to half a thumb from the far end, so CC 64, the middle of CC 4 to
+       CC 124, is halfway along what is left of the track. */
+    .range-wrap {
+      position: relative;
+      flex-grow: 1;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+    }
+    .range-wrap .centre-tick {
+      position: absolute;
+      left: calc(9px + (100% - 18px) * 0.5 - 1px);
+      top: 50%;
+      width: 2px;
+      height: 24px;
+      transform: translateY(-50%);
+      background: var(--text-muted);
+      pointer-events: none;
     }
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
@@ -3038,7 +3045,7 @@
         <div class="slider-knob-zone" data-ctrl="${c.key}">
           <div class="slider-label">${escapeHTML(/^\d$/.test(c.label) ? c.full : c.label)} <span class="cc-num"></span></div>
           <div class="slider-input-wrapper">
-            <input type="range" min="4" max="124"${c.slots.some(([, , bipolar]) => bipolar) ? ' class="bipolar"' : ''}>
+            <span class="range-wrap"><input type="range" min="4" max="124">${c.slots.some(([, , bipolar]) => bipolar) ? '<span class="centre-tick"></span>' : ''}</span>
             <span class="slider-value"></span>
             <span class="slider-norm" title="The value the synth sees in the slot"></span>
           </div>
