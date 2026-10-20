@@ -272,6 +272,10 @@
       header { padding-bottom: 8px; }
       header h1 { font-size: 1.5rem; }
       .panel.midi-panel { padding-top: 4px; padding-bottom: 4px; }
+      /* The MIDI settings in the header, between the title and the tabs (see placeMIDIPanel). */
+      header.with-midi { align-items: center; flex-wrap: nowrap; }
+      header.with-midi .midi-panel { flex: 1 1 auto; min-width: 0; }
+      header.with-midi h1, header.with-midi .tabs { flex: 0 0 auto; }
       #kbd-panel { padding: 10px 16px; }
       .kbd-bar { margin-bottom: 8px; }
       #kbd-panel .keyboard-frame { --kbd-half-height: calc(60px * var(--kbd-scale)); padding-top: 6px; }
@@ -3447,6 +3451,19 @@
 
   const TAB_KEY = 'spms1-type2-editor-tab';
 
+  // From the width at which the controls stand in four columns, the MIDI settings go up into the
+  // header, between the title and the tabs, so they take no line of their own; below it they keep
+  // their own line under the header.
+  const WIDE_HEADER = window.matchMedia('(min-width: 1641px)');
+  function placeMIDIPanel() {
+    const header = document.querySelector('header');
+    const panel = document.querySelector('.midi-panel');
+    if (WIDE_HEADER.matches) header.insertBefore(panel, header.querySelector('.tabs'));
+    else header.after(panel);
+    header.classList.toggle('with-midi', WIDE_HEADER.matches);
+  }
+  WIDE_HEADER.addEventListener('change', () => { placeMIDIPanel(); fitTabArea(); });
+
   function showTab(name) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
     document.getElementById('tab-controls').hidden = name !== 'controls';
@@ -3553,6 +3570,7 @@
   // ---- Start ---------------------------------------------------------------------------------
 
   window.addEventListener('DOMContentLoaded', () => {
+    placeMIDIPanel();
     loadLocal();
     applyMIDISettings(loadMIDISettings());
     renderAll();
