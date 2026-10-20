@@ -971,13 +971,10 @@
       color: var(--wire-param);
       font-style: italic;
     }
-    /* A favourite on the Controls tab: a line down the left of its row, and the node's border. */
+    /* A favourite on the Controls tab: a line down the left of its row, and a light gold behind it. */
     .row.ctrl.fav {
       box-shadow: inset 3px 0 0 var(--favorite);
       background: var(--favorite-bg);
-    }
-    .node.fav {
-      border-color: var(--favorite);
     }
     .sep {
       display: flex;
@@ -3222,9 +3219,6 @@
       const hint = controlHint(c);
       lbl.title = (hint ? `${c.label} (${hint}). ` : '') + (c.bipolar ? 'Bipolar: value 64 is the centre' : 'Unipolar');
       lbl.closest('.row').classList.toggle('fav', state.favorites.has(c.key));
-    });
-    world.querySelectorAll('.node').forEach(node => {
-      node.classList.toggle('fav', !!node.querySelector('.row.ctrl.fav'));
     });
   }
 
