@@ -258,7 +258,10 @@
          numbers beside it are narrower. */
       .editor-grid { column-gap: 12px; }
       .slider-knob-zone, .slider-input-wrapper { gap: 8px; }
-      .slider-label { min-width: 138px; }
+      /* One width for every name, the longest's, so every slider is as long as the others; a
+         name longer still, with the source of a routed parameter, is cut short rather than
+         shortening its slider. */
+      .slider-label { flex: 0 0 158px; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
       .slider-label .cc-num { font-size: 0.7rem; }
       .slider-value { min-width: 28px; font-size: 0.9rem; }
       .slider-norm { min-width: 42px; font-size: 0.75rem; }
