@@ -494,9 +494,10 @@
     /* The pitch bend and mod wheels on the left of the keys, as on a keyboard, sliders standing as
        tall as they are. The bend springs back to the centre; the mod wheel's value is that of the
        CC Mod Wheel is on in the patch. */
+    /* Narrow enough that the keys keep the 37 that KB_KEY_WIDTH fits a 960px window. */
     .kbd-body {
       display: flex;
-      gap: 6px;
+      gap: 4px;
     }
     .kbd-keys {
       flex: 1 1 auto;
@@ -507,11 +508,12 @@
       flex-direction: column;
       align-items: center;
       gap: 4px;
+      width: calc(18px * var(--kbd-scale));
     }
     .mod-wheel input {
       writing-mode: vertical-lr;
       direction: rtl;
-      width: calc(20px * var(--kbd-scale));
+      width: calc(18px * var(--kbd-scale));
       height: calc(var(--kbd-half-height) * 2);
       margin: 0;
       accent-color: var(--primary-color);
@@ -521,8 +523,9 @@
       cursor: default;
     }
     .mod-wheel-label {
-      font-size: 0.7rem;
+      font-size: 0.6rem;
       color: #ccc;
+      white-space: nowrap;
     }
     /* The native scroll bar is hidden, since Safari cannot color it; .kbd-scrollbar stands in. */
     .keyboard-scroll-container {
@@ -1241,11 +1244,11 @@
     <div class="kbd-body">
       <div class="mod-wheel" id="bend-wheel-zone" title="Pitch Bend: back to the centre when let go">
         <input type="range" id="bend-wheel" min="-8192" max="8191" value="0" aria-label="Pitch Bend">
-        <span class="mod-wheel-label">Bend</span>
+        <span class="mod-wheel-label">PB</span>
       </div>
       <div class="mod-wheel" id="mod-wheel-zone">
         <input type="range" id="mod-wheel" min="4" max="124" aria-label="Mod Wheel">
-        <span class="mod-wheel-label">Mod</span>
+        <span class="mod-wheel-label">MW</span>
       </div>
       <div class="kbd-keys">
         <div class="keyboard-scroll-container" id="kb-scroll">
