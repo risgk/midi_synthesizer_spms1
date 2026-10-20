@@ -265,6 +265,17 @@
       .slider-norm { min-width: 42px; font-size: 0.75rem; }
       /* One row, which takes the extra height of the tab. */
       .editor-grid { align-content: stretch; }
+      /* The page around the panels is packed tighter too, so that the controls and the soft
+         keyboard fit the window Chrome leaves of a full HD screen on Windows, under its tabs, its
+         address bar and its bookmarks bar, above the taskbar: about 910 pixels. */
+      body { padding: 14px 20px; gap: 10px; }
+      header { padding-bottom: 8px; }
+      header h1 { font-size: 1.5rem; }
+      .panel.midi-panel { padding-top: 4px; padding-bottom: 4px; }
+      #kbd-panel { padding: 10px 16px; }
+      .kbd-bar { margin-bottom: 8px; }
+      #kbd-panel .keyboard-frame { --kbd-half-height: calc(60px * var(--kbd-scale)); padding-top: 6px; }
+      #kbd-panel .keyboard-wrapper { height: calc(120px * var(--kbd-scale)); }
     }
     /* On a phone the name would leave the slider only a few dozen pixels, so the name, with the
        CC number on its line, goes above the slider, which takes the full width of the panel. */
