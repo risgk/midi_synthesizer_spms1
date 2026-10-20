@@ -20,7 +20,7 @@ module Spms1
     # OUTPUT_CEILING. The limit is one unit, the widest thing the bus carries. A cubic here would have
     # no linear region and bend everything it passed -- 0.3 dB and a 1% third harmonic at half a
     # unit -- making the output clip, not the loop, the filter's main source of distortion. The
-    # default patch peaks near 0.45, under the knee, so it leaves untouched. The shoulder's curvature
+    # default patch peaks near 0.65, under the knee, so it leaves untouched. The shoulder's curvature
     # steps at the knee, so what crosses it gains odd harmonics of every order rather than just the
     # third, falling as 1/n^3; a hard clamp, stepping in slope, falls as 1/n^2.
     OUTPUT_LIMIT       = 1.0
@@ -172,9 +172,7 @@ module Spms1
 
       @cutoff = 1.0
       @resonance = 0.0
-      # Mod 1 Amt powers up at 0.2, as the default patch sets it, so that the envelope is not faded
-      # in at startup.
-      @modulation_1_amount = 0.2
+      @modulation_1_amount = 0.0
       @modulation_2_amount = 0.0
       @pitch_amount = 0.0
       @mode_lp = 1.0
@@ -182,14 +180,14 @@ module Spms1
 
       @stage_1_cutoff = 1.0
       @stage_1_resonance = 0.0
-      @stage_1_modulation_1_amount = 0.2
+      @stage_1_modulation_1_amount = 0.0
       @stage_1_modulation_2_amount = 0.0
       @stage_1_pitch_amount = 0.0
       @stage_1_mode_lp = 1.0
       @stage_1_mode_hp = 0.0
       @current_cutoff = 1.0
       @current_resonance = 0.0
-      @current_modulation_1_amount = 0.2
+      @current_modulation_1_amount = 0.0
       @current_modulation_2_amount = 0.0
       @current_pitch_amount = 0.0
       @current_mode_lp = 1.0

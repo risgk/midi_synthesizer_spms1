@@ -209,7 +209,8 @@ semitone a step: 2 semitones either way at a value of 8, an octave at 28, which 
 holds, and 5 octaves at 124.
 
 The LFO goes straight to the oscillator, both to its pitch and to its pulse width, on Mod 2 In, and to the filter, where Filter 1 Mod 2 Amt (CC 25) powers up at 0.0 and
-leaves the cutoff to the envelope until it is turned up. Osc 1 Pitch Mod 2 Amt (CC 13) takes the
+leaves the cutoff alone until it is turned up, as Filter 1 Mod 1 Amt (CC 24) does the envelope's;
+Filter 1 Cutoff (CC 74) powers up at 0.5 (CC 64). Osc 1 Pitch Mod 2 Amt (CC 13) takes the
 LFO to the pitch and powers up at its top, CC 124, which with Osc 1 Pitch Mod Range at 0.2 makes
 the LFO at full level swing the pitch an octave either way; Osc 1 PW Mod 2 Amt (CC 103) takes it
 to the pulse width and powers up at 0.0. LFO 1 Level powers up at 0.0, so the swing is the mod
@@ -754,8 +755,7 @@ passes a loud note nearly clean, while turning the drive up rounds off the reson
 
 Filter 1 moves the cutoff by each of its two modulations at a depth of its own, Mod 1 Amt and
 Mod 2 Amt, as Osc 1's PW Mod Amts move the pulse width. They are unipolar, on CC 24 and 25,
-Filter EG Amt's and LFO Filter Amt's in PRA32-U2: Mod 1 Amt powers up at 0.2 (CC 28) and Mod 2
-Amt at 0.0 (CC 4). A unit of input is the whole cutoff range, so with Mod 2 Amt at the top the
+Filter EG Amt's and LFO Filter Amt's in PRA32-U2: both power up at 0.0 (CC 4). A unit of input is the whole cutoff range, so with Mod 2 Amt at the top the
 LFO swings the cutoff five octaves either way. An envelope that closes the filter as it rises is
 EG 1 Out Inv on Mod 1 In.
 Pitch In, the keyboard tracking, is added on its own by Pitch Amt (CC 9), as an oscillator's
@@ -776,8 +776,8 @@ in the examples below, it plays as a sine voice.
 Amp 1 Gain (CC 15, Amp Gain's in PRA32-U2) is doubled into the gain: silent at CC 4, unity at
 CC 64, where it powers up, and twice, 6 dB up, at CC 124, so a quiet sound can be brought up as
 well as a loud one taken down. The amp holds its output to -1.0 and +1.0, as a mixer holds its
-sum, so the gain cannot take the output past one unit, which the default patch, peaking near a
-quarter of it, is far below.
+sum, so the gain cannot take the output past one unit, which the default patch, peaking near
+0.65 there, stays below.
 
 A mixer takes each of its four inputs at its own level, then adds them. Level runs from silent
 at 0.0 (CC 4) to full at 1.0 (CC 124). Out Level then scales the sum, over the same range and at
@@ -853,8 +853,8 @@ takes the output to the input at once, mid-glide too, as Glide at 0.0 does.
   where it powers up
 - The filter as a sine voice, playing its own oscillation in tune: CC 71 = 124 makes it oscillate,
   CC 9 = 124 has the cutoff follow the keys, and CC 74 = 49 puts it on note 60 at note 60, and so
-  on the note played everywhere. CC 24 = 4 takes the envelope off the cutoff, which would
-  otherwise take it up to two octaves sharp, and CC 20 = 4 and CC 21 = 4 take the oscillators out,
+  on the note played everywhere. CC 24 stays at CC 4, where it powers up, keeping the envelope
+  off the cutoff, and CC 20 = 4 and CC 21 = 4 take the oscillators out,
   leaving the sine alone. It is within 5 cents of the note from middle C up, and 17 cents flat an octave below
 - A pitch envelope is wired by default too -- the envelope on the oscillator's Mod 1 input --
   so CC 89 (Osc 1 Pitch Mod 1 Amt) sets its depth: the note starts a semitone sharp at CC 9, an
