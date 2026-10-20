@@ -19,6 +19,7 @@
       --wire-param: #4f7cac;
       --wire-feedback: #d68910;
       --wire-inactive: #b8c0c4;
+      --favorite: #d4a017;
     }
     * {
       box-sizing: border-box;
@@ -230,10 +231,34 @@
       gap: 12px;
     }
     .slider-knob-zone {
+      position: relative;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
+    }
+    /* The star that marks a favourite, in the padding of the panel to the left of the name, so it
+       takes nothing from the name or the slider at any width; faint until it is set. */
+    .fav-toggle {
+      position: absolute;
+      left: -13px;
+      top: 50%;
+      transform: translateY(-50%);
+      padding: 0;
+      border: 0;
+      background: none;
+      font-size: 0.65rem;
+      line-height: 1;
+      color: var(--text-muted);
+      opacity: 0.35;
+      cursor: pointer;
+    }
+    .fav-toggle:hover {
+      opacity: 1;
+    }
+    .slider-knob-zone.fav .fav-toggle {
+      color: var(--favorite);
+      opacity: 1;
     }
     .slider-label {
       min-width: 140px;
@@ -264,6 +289,7 @@
       .control-row { gap: 6px; }
       .editor-column { gap: 12px; }
       .editor-column .panel { padding: 8px 10px; }
+      .fav-toggle { left: -9px; font-size: 0.55rem; }
       .editor-column .panel h2 { margin-bottom: 4px; }
       #init-values { padding: 6px; }
       /* A quarter of a full HD window leaves the slider less than a name, so the gaps and the
@@ -933,6 +959,13 @@
       color: var(--wire-param);
       font-style: italic;
     }
+    /* A favourite on the Controls tab: a line down the left of its row, and the node's border. */
+    .row.ctrl.fav {
+      box-shadow: inset 3px 0 0 var(--favorite);
+    }
+    .node.fav {
+      border-color: var(--favorite);
+    }
     .sep {
       display: flex;
       gap: 6px;
@@ -1525,7 +1558,7 @@
   };
 
   function defaultState() {
-    const s = { name: 'Init', order: DEFAULT_ORDER.slice(), inputs: {}, params: {}, cc: {}, values: {}, paramValues: {}, layout: {} };
+    const s = { name: 'Init', order: DEFAULT_ORDER.slice(), inputs: {}, params: {}, cc: {}, values: {}, paramValues: {}, favorites: new Set(), layout: {} };
     INPUT_ITEMS.forEach(i => { s.inputs[i.key] = i.defaultSource; });
     PARAM_ITEMS.forEach(p => {
       s.params[p.key] = p.defaultSource || p.key;
@@ -1560,6 +1593,7 @@
       cc: { ...s.cc },
       values: used,
       paramValues: { ...s.paramValues },
+      favorites: CONTROL_ITEMS.filter(c => s.favorites.has(c.key)).map(c => c.key),
       layout: JSON.parse(JSON.stringify(s.layout)),
     };
   }
@@ -1585,6 +1619,9 @@
     }
     if (obj.paramValues && typeof obj.paramValues === 'object') {
       PARAM_ITEMS.forEach(p => { if (p.key in obj.paramValues) s.paramValues[p.key] = clampValue(obj.paramValues[p.key]); });
+    }
+    if (Array.isArray(obj.favorites)) {
+      CONTROL_ITEMS.forEach(c => { if (obj.favorites.includes(c.key)) s.favorites.add(c.key); });
     }
     if (obj.layout && typeof obj.layout === 'object') {
       for (const k in s.layout) {
@@ -3076,6 +3113,7 @@
       panel.className = 'panel';
       panel.innerHTML = `<h2>${p.title}</h2><div class="control-row">` + items.map(c => `
         <div class="slider-knob-zone" data-ctrl="${c.key}">
+          <button type="button" class="fav-toggle" aria-pressed="false">&#9733;</button>
           <div class="slider-label">${escapeHTML(c.label)} <span class="ctl-hint"></span><span class="cc-num"></span></div>
           <div class="slider-input-wrapper">
             <span class="range-wrap"><input type="range" min="4" max="124">${c.slots.some(([, , bipolar]) => bipolar) ? '<span class="centre-tick"></span>' : ''}</span>
@@ -3090,6 +3128,12 @@
     root.querySelectorAll('.slider-knob-zone').forEach(zone => {
       const c = CONTROL[zone.dataset.ctrl];
       const slider = zone.querySelector('input');
+      zone.querySelector('.fav-toggle').addEventListener('click', () => {
+        pushHistory();
+        if (state.favorites.has(c.key)) state.favorites.delete(c.key);
+        else state.favorites.add(c.key);
+        commit();
+      });
       slider.addEventListener('pointerdown', () => { sliderBefore = JSON.stringify(serialize(state)); });
       slider.addEventListener('focus', () => { sliderBefore = JSON.stringify(serialize(state)); });
       slider.addEventListener('input', () => {
@@ -3133,6 +3177,11 @@
       const routed = src !== undefined && src !== c.key;
       zone.classList.toggle('routed', routed);
       zone.classList.toggle('own', ownValue);
+      const fav = state.favorites.has(c.key);
+      zone.classList.toggle('fav', fav);
+      const star = zone.querySelector('.fav-toggle');
+      star.setAttribute('aria-pressed', String(fav));
+      star.title = fav ? 'Favorite: click to unmark' : 'Mark as a favorite';
       const others = sharingCC(c);
       const hint = controlHint(c);
       zone.querySelector(".ctl-hint").textContent = hint ? `(${hint}) ` : '';
@@ -3159,6 +3208,10 @@
       const c = CONTROL[lbl.closest('.row').dataset.ctrl];
       const hint = controlHint(c);
       lbl.title = (hint ? `${c.label} (${hint}). ` : '') + (c.bipolar ? 'Bipolar: value 64 is the centre' : 'Unipolar');
+      lbl.closest('.row').classList.toggle('fav', state.favorites.has(c.key));
+    });
+    world.querySelectorAll('.node').forEach(node => {
+      node.classList.toggle('fav', !!node.querySelector('.row.ctrl.fav'));
     });
   }
 
