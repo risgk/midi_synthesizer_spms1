@@ -764,7 +764,7 @@ semitone at the top, unmoved at note 60.
 
 Filter 1 Resonance raises the resonant peak 6 dB every 24 CC steps, Q doubling each time, from
 Q 0.71 at CC 4 up to Q 9.51 at CC 94, and from there Q rises faster and faster, without a sudden
-step, through Q 35 at CC 108 to Q 256 at CC 118. It powers up at CC 76, Q 5.66. Above that the filter oscillates on its own: a sine at the cutoff
+step, through Q 35 at CC 108 to Q 256 at CC 118. It powers up at CC 64, Q 4.0. Above CC 118 the filter oscillates on its own: a sine at the cutoff
 frequency, growing to its full level of about 0.5 by CC 123 and holding it to the top of the
 dial. Low in that range the oscillation builds slowly and shares the filter with the input; at
 the top it takes the input over. Its level holds across the cutoff range down to about 150 Hz
@@ -777,7 +777,7 @@ Amp 1 Gain (CC 15, Amp Gain's in PRA32-U2) is doubled into the gain: silent at C
 CC 64, where it powers up, and twice, 6 dB up, at CC 124, so a quiet sound can be brought up as
 well as a loud one taken down. The amp holds its output to -1.0 and +1.0, as a mixer holds its
 sum, so the gain cannot take the output past one unit, which the default patch, peaking near
-0.71 there, stays below.
+0.68 there, stays below.
 
 A mixer takes each of its four inputs at its own level, then adds them. Level runs from silent
 at 0.0 (CC 4) to full at 1.0 (CC 124). Out Level then scales the sum, over the same range and at
