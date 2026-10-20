@@ -496,8 +496,8 @@ both at the same signal for a mono output.
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
 | 0 | Pitch 1 Glide | | 19 | Osc 1 Wave | | 38 | Noise 1 Level |
 | 1 | Pitch 1 Glide Switch | | 20 | Osc 1 Pitch Coarse | | 39 | Mixer 2 Level 1 |
-| 2 | Pitch 1 Stretch | | 21 | Osc 1 Pitch Fine | | 40 | Mixer 2 Level 2 |
-| 3 | Pitch 1 Bend Amt | | 22 | Osc 1 Pitch Mod 1 Amt | | 41 | Mixer 2 Level 3 |
+| 2 | Pitch 1 Bend Amt | | 21 | Osc 1 Pitch Fine | | 40 | Mixer 2 Level 2 |
+| 3 | Pitch 1 Stretch | | 22 | Osc 1 Pitch Mod 1 Amt | | 41 | Mixer 2 Level 3 |
 | 4 | EG 1 Attack | | 23 | Osc 1 Pitch Mod 2 Amt | | 42 | Mixer 2 Level 4 |
 | 5 | EG 1 Decay | | 24 | Osc 1 Pitch Mod Range | | 43 | Mixer 2 Out Level |
 | 6 | EG 1 Sustain | | 25 | Osc 1 PW | | 44 | Filter 1 Mode |
@@ -637,14 +637,14 @@ whole unit per CC step: Coarse a semitone, reaching 5 octaves either way, and Fi
 reaching 60 either way. They are summed, so any pitch is reachable. They have no CC and hold 0.0
 by default; Osc 2's, on CC 85 and 76, set the interval or the detune between the oscillators.
 
-Pitch 1 Stretch, which has no CC, widens the keys about note 60, ahead of the glide, by multiplying Pitch
-In: every interval from note 60 grows by the same share, so the stretch is often given as how
+Pitch 1 Stretch, which has no CC, widens the keys about note 60, last, by multiplying the pitch
+after the glide and the bend, as PRA32-U2's Stretch Tune does: every interval from note 60 grows by the same share, so the stretch is often given as how
 much an octave widens. At 0.0 (CC 4), where it powers up, the keys are as they are; from CC 5 the
 widening grows by a semitone's ratio a step, as the envelope's times do: 1.2 cents an octave at
 CC 5, 38 at CC 64, and a whole octave at CC 124, which doubles every interval and turns the
 keyboard into whole tones. The low end is a piano's stretch tuning, a few cents an octave. The
-bend comes after it and stays as it is, and turning it glides the pitch
-rather than stepping it. At its top, notes more than 30 semitones from note 60 run past the
+glide and the bend are widened with the keys, so a bend of an octave becomes two at the top, and
+turning it glides the pitch rather than stepping it. At its top, notes more than 30 semitones from note 60 run past the
 oscillator's range.
 
 LFO 1 puts out a triangle and a square at once, each on an output of its own, Out Triangle and
@@ -832,7 +832,7 @@ takes the output to the input at once, mid-glide too, as Glide at 0.0 does.
   CC 124. CC 3 sets the rate, and CC 113 turned up gives a vibrato without the wheel
 - A vibrato as deep as a GM2 sound module's: CC 13 = 9 brings the wheel's top down to 50 cents
   either way, the Modulation Depth Range GM2 powers up at, and CC 13 = 14 to a semitone
-- A bend range of 2 semitones, as a GM sound module's: CC 99 = 4, CC 98 = 3, CC 6 = 8 sets
+- A bend range of 2 semitones, as a GM sound module's: CC 99 = 4, CC 98 = 2, CC 6 = 8 sets
   Pitch 1 Bend Amt to 8
 - The LFO reaches the filter's Mod 2 input by default too, so CC 25 sweeps the cutoff with it, on
   top of the envelope on Mod 1

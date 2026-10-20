@@ -994,8 +994,8 @@ static sp_int cst_SIGNAL_OWN = 0;
 static sp_int cst_PARAM_SLOT_BASE = 0;
 static sp_int cst_SLOT_PITCH_1_GLIDE = 0;
 static sp_int cst_SLOT_PITCH_1_GLIDE_SW = 0;
-static sp_int cst_SLOT_PITCH_1_STRETCH = 0;
 static sp_int cst_SLOT_PITCH_1_BEND_AMT = 0;
+static sp_int cst_SLOT_PITCH_1_STRETCH = 0;
 static sp_int cst_SLOT_EG_1_ATTACK = 0;
 static sp_int cst_SLOT_EG_1_DECAY = 0;
 static sp_int cst_SLOT_EG_1_SUSTAIN = 0;
@@ -1082,8 +1082,8 @@ static sp_int cst_NRPN_SOURCE_OUTPUT_L = 0;
 static sp_int cst_NRPN_SOURCE_OUTPUT_R = 0;
 static sp_int cst_NRPN_SOURCE_PITCH_1_GLIDE = 0;
 static sp_int cst_NRPN_SOURCE_PITCH_1_GLIDE_SW = 0;
-static sp_int cst_NRPN_SOURCE_PITCH_1_STRETCH = 0;
 static sp_int cst_NRPN_SOURCE_PITCH_1_BEND_AMT = 0;
+static sp_int cst_NRPN_SOURCE_PITCH_1_STRETCH = 0;
 static sp_int cst_NRPN_SOURCE_EG_1_ATTACK = 0;
 static sp_int cst_NRPN_SOURCE_EG_1_DECAY = 0;
 static sp_int cst_NRPN_SOURCE_EG_1_SUSTAIN = 0;
@@ -1139,8 +1139,8 @@ static sp_int cst_NRPN_SOURCE_DELAY_1_TIME = 0;
 static sp_int cst_NRPN_SOURCE_DELAY_1_FEEDBACK = 0;
 static sp_int cst_NRPN_CC_PITCH_1_GLIDE = 0;
 static sp_int cst_NRPN_CC_PITCH_1_GLIDE_SW = 0;
-static sp_int cst_NRPN_CC_PITCH_1_STRETCH = 0;
 static sp_int cst_NRPN_CC_PITCH_1_BEND_AMT = 0;
+static sp_int cst_NRPN_CC_PITCH_1_STRETCH = 0;
 static sp_int cst_NRPN_CC_EG_1_ATTACK = 0;
 static sp_int cst_NRPN_CC_EG_1_DECAY = 0;
 static sp_int cst_NRPN_CC_EG_1_SUSTAIN = 0;
@@ -1197,8 +1197,8 @@ static sp_int cst_NRPN_CC_DELAY_1_FEEDBACK = 0;
 static sp_int cst_NRPN_CC_MOD_WHEEL = 0;
 static sp_int cst_NRPN_VALUE_PITCH_1_GLIDE = 0;
 static sp_int cst_NRPN_VALUE_PITCH_1_GLIDE_SW = 0;
-static sp_int cst_NRPN_VALUE_PITCH_1_STRETCH = 0;
 static sp_int cst_NRPN_VALUE_PITCH_1_BEND_AMT = 0;
+static sp_int cst_NRPN_VALUE_PITCH_1_STRETCH = 0;
 static sp_int cst_NRPN_VALUE_EG_1_ATTACK = 0;
 static sp_int cst_NRPN_VALUE_EG_1_DECAY = 0;
 static sp_int cst_NRPN_VALUE_EG_1_SUSTAIN = 0;
@@ -1991,36 +1991,33 @@ static inline __attribute__((always_inline)) sp_float sp_Pitch_set_stretch(sp_Pi
   return self->iv_stretch_factor;
   return 0.0;
 }
-#line 114 "spms1_pitch.rb"
+#line 115 "spms1_pitch.rb"
 static inline __attribute__((always_inline)) sp_float sp_Pitch_process(sp_Pitch *self, sp_bool lv_control_tick, sp_float lv_input, sp_float lv_bend_input) {
-    sp_float lv_stretched = 0.0;
     sp_float lv_distance = 0.0;
     sp_float lv_flushed = 0.0;
     sp_float lv_output = 0.0;
-#line 115 "spms1_pitch.rb"
-  if (lv_control_tick) {
 #line 116 "spms1_pitch.rb"
-    self->iv_stage_1_bend_depth = sp_Dsp_s_smooth(self->iv_bend_depth, self->iv_stage_1_bend_depth, self->iv_smoothing_target_blend);
+  if (lv_control_tick) {
 #line 117 "spms1_pitch.rb"
-    self->iv_current_bend_depth = sp_Dsp_s_smooth(self->iv_stage_1_bend_depth, self->iv_current_bend_depth, self->iv_smoothing_target_blend);
+    self->iv_stage_1_bend_depth = sp_Dsp_s_smooth(self->iv_bend_depth, self->iv_stage_1_bend_depth, self->iv_smoothing_target_blend);
 #line 118 "spms1_pitch.rb"
-    self->iv_stage_1_stretch_factor = sp_Dsp_s_smooth(self->iv_stretch_factor, self->iv_stage_1_stretch_factor, self->iv_smoothing_target_blend);
+    self->iv_current_bend_depth = sp_Dsp_s_smooth(self->iv_stage_1_bend_depth, self->iv_current_bend_depth, self->iv_smoothing_target_blend);
 #line 119 "spms1_pitch.rb"
+    self->iv_stage_1_stretch_factor = sp_Dsp_s_smooth(self->iv_stretch_factor, self->iv_stage_1_stretch_factor, self->iv_smoothing_target_blend);
+#line 120 "spms1_pitch.rb"
     self->iv_current_stretch_factor = sp_Dsp_s_smooth(self->iv_stage_1_stretch_factor, self->iv_current_stretch_factor, self->iv_smoothing_target_blend);
   }
 #line 123 "spms1_pitch.rb"
-  lv_stretched = (lv_input * self->iv_current_stretch_factor);
+  lv_distance = (self->iv_distance + ((self->iv_last_input - lv_input)));
 #line 124 "spms1_pitch.rb"
-  lv_distance = (self->iv_distance + ((self->iv_last_input - lv_stretched)));
+  self->iv_last_input = lv_input;
 #line 125 "spms1_pitch.rb"
-  self->iv_last_input = lv_stretched;
-#line 126 "spms1_pitch.rb"
   lv_flushed = sp_Dsp_s_flush_tiny(lv_distance);
-#line 127 "spms1_pitch.rb"
+#line 126 "spms1_pitch.rb"
   self->iv_distance = (lv_flushed - (lv_flushed * self->iv_blend));
+#line 127 "spms1_pitch.rb"
+  lv_output = (((lv_input + self->iv_distance) + ((lv_bend_input * self->iv_current_bend_depth))) * self->iv_current_stretch_factor);
 #line 128 "spms1_pitch.rb"
-  lv_output = ((lv_stretched + self->iv_distance) + ((lv_bend_input * self->iv_current_bend_depth)));
-#line 129 "spms1_pitch.rb"
   if (((lv_output < -1.0))) {
     return -1.0;
   }
@@ -2029,24 +2026,24 @@ static inline __attribute__((always_inline)) sp_float sp_Pitch_process(sp_Pitch 
   }
   return 0.0;
 }
-#line 134 "spms1_pitch.rb"
+#line 133 "spms1_pitch.rb"
 static inline __attribute__((always_inline)) sp_float sp_Pitch_calculate_exp_fast(sp_Pitch *self, sp_float lv_value) {
     sp_float lv_v_scale = 0.0;
     sp_int lv_index = 0;
     sp_float lv_fraction = 0.0;
     sp_float lv_e0 = 0.0;
     sp_float lv_e1 = 0.0;
-#line 135 "spms1_pitch.rb"
+#line 134 "spms1_pitch.rb"
   lv_v_scale = (lv_value * 120.0);
-#line 136 "spms1_pitch.rb"
+#line 135 "spms1_pitch.rb"
   lv_index = sp_float_to_i_checked(lv_v_scale);
-#line 137 "spms1_pitch.rb"
+#line 136 "spms1_pitch.rb"
   lv_fraction = (lv_v_scale - ({ sp_int _t10 = (lv_index); _t10 == SP_INT_NIL ? 0.0 : ((sp_float)_t10); }));
-#line 139 "spms1_pitch.rb"
+#line 138 "spms1_pitch.rb"
   lv_e0 = sp_FloatArray_get(cst_Spms1__Pitch__EXP_TABLE, lv_index);
-#line 140 "spms1_pitch.rb"
+#line 139 "spms1_pitch.rb"
   lv_e1 = sp_FloatArray_get(cst_Spms1__Pitch__EXP_TABLE, sp_int_add(lv_index, 1LL));
-#line 142 "spms1_pitch.rb"
+#line 141 "spms1_pitch.rb"
   return (lv_e0 + (lv_fraction * ((lv_e1 - lv_e0))));
   return 0.0;
 }
@@ -4020,9 +4017,9 @@ static void sp_spms1_write_default_patch(sp_int lv_midi_ch) {
 #line 398 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_GLIDE_SW)), ((uint8_t)(cst_SIGNAL_OWN))), (sp_int)0);
 #line 399 "spms1_patch.rb"
-  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_STRETCH)), ((uint8_t)(cst_SIGNAL_OWN))), (sp_int)0);
-#line 400 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_BEND_AMT)), ((uint8_t)(cst_SIGNAL_OWN))), (sp_int)0);
+#line 400 "spms1_patch.rb"
+  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_STRETCH)), ((uint8_t)(cst_SIGNAL_OWN))), (sp_int)0);
 #line 401 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_EG_1_ATTACK)), ((uint8_t)(cst_SIGNAL_OWN))), (sp_int)0);
 #line 402 "spms1_patch.rb"
@@ -4202,9 +4199,9 @@ static void sp_spms1_write_default_patch(sp_int lv_midi_ch) {
 #line 491 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_VALUE_PITCH_1_GLIDE_SW)), ((uint8_t)(124LL))), (sp_int)0);
 #line 492 "spms1_patch.rb"
-  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_VALUE_PITCH_1_STRETCH)), ((uint8_t)(4LL))), (sp_int)0);
-#line 493 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_VALUE_PITCH_1_BEND_AMT)), ((uint8_t)(28LL))), (sp_int)0);
+#line 493 "spms1_patch.rb"
+  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_VALUE_PITCH_1_STRETCH)), ((uint8_t)(4LL))), (sp_int)0);
 #line 494 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_VALUE_EG_1_ATTACK)), ((uint8_t)(4LL))), (sp_int)0);
 #line 495 "spms1_patch.rb"
@@ -4459,8 +4456,8 @@ int main(int argc,char**argv){
     sp_int lv_source_output_r = 0;
     sp_int lv_source_pitch_1_glide = 0;
     sp_int lv_source_pitch_1_glide_sw = 0;
-    sp_int lv_source_pitch_1_stretch = 0;
     sp_int lv_source_pitch_1_bend_amt = 0;
+    sp_int lv_source_pitch_1_stretch = 0;
     sp_int lv_source_eg_1_attack = 0;
     sp_int lv_source_eg_1_decay = 0;
     sp_int lv_source_eg_1_sustain = 0;
@@ -4516,8 +4513,8 @@ int main(int argc,char**argv){
     sp_int lv_source_delay_1_feedback = 0;
     sp_int lv_cc_pitch_1_glide = 0;
     sp_int lv_cc_pitch_1_glide_sw = 0;
-    sp_int lv_cc_pitch_1_stretch = 0;
     sp_int lv_cc_pitch_1_bend_amt = 0;
+    sp_int lv_cc_pitch_1_stretch = 0;
     sp_int lv_cc_eg_1_attack = 0;
     sp_int lv_cc_eg_1_decay = 0;
     sp_int lv_cc_eg_1_sustain = 0;
@@ -4966,9 +4963,9 @@ int main(int argc,char**argv){
 #line 68 "spms1_patch.rb"
   cst_SLOT_PITCH_1_GLIDE_SW = 129LL;
 #line 69 "spms1_patch.rb"
-  cst_SLOT_PITCH_1_STRETCH = 130LL;
+  cst_SLOT_PITCH_1_BEND_AMT = 130LL;
 #line 70 "spms1_patch.rb"
-  cst_SLOT_PITCH_1_BEND_AMT = 131LL;
+  cst_SLOT_PITCH_1_STRETCH = 131LL;
 #line 71 "spms1_patch.rb"
   cst_SLOT_EG_1_ATTACK = 132LL;
 #line 72 "spms1_patch.rb"
@@ -5142,9 +5139,9 @@ int main(int argc,char**argv){
 #line 165 "spms1_patch.rb"
   cst_NRPN_SOURCE_PITCH_1_GLIDE_SW = 257LL;
 #line 166 "spms1_patch.rb"
-  cst_NRPN_SOURCE_PITCH_1_STRETCH = 258LL;
+  cst_NRPN_SOURCE_PITCH_1_BEND_AMT = 258LL;
 #line 167 "spms1_patch.rb"
-  cst_NRPN_SOURCE_PITCH_1_BEND_AMT = 259LL;
+  cst_NRPN_SOURCE_PITCH_1_STRETCH = 259LL;
 #line 168 "spms1_patch.rb"
   cst_NRPN_SOURCE_EG_1_ATTACK = 260LL;
 #line 169 "spms1_patch.rb"
@@ -5256,9 +5253,9 @@ int main(int argc,char**argv){
 #line 225 "spms1_patch.rb"
   cst_NRPN_CC_PITCH_1_GLIDE_SW = 385LL;
 #line 226 "spms1_patch.rb"
-  cst_NRPN_CC_PITCH_1_STRETCH = 386LL;
+  cst_NRPN_CC_PITCH_1_BEND_AMT = 386LL;
 #line 227 "spms1_patch.rb"
-  cst_NRPN_CC_PITCH_1_BEND_AMT = 387LL;
+  cst_NRPN_CC_PITCH_1_STRETCH = 387LL;
 #line 228 "spms1_patch.rb"
   cst_NRPN_CC_EG_1_ATTACK = 388LL;
 #line 229 "spms1_patch.rb"
@@ -5372,9 +5369,9 @@ int main(int argc,char**argv){
 #line 285 "spms1_patch.rb"
   cst_NRPN_VALUE_PITCH_1_GLIDE_SW = 513LL;
 #line 286 "spms1_patch.rb"
-  cst_NRPN_VALUE_PITCH_1_STRETCH = 514LL;
+  cst_NRPN_VALUE_PITCH_1_BEND_AMT = 514LL;
 #line 287 "spms1_patch.rb"
-  cst_NRPN_VALUE_PITCH_1_BEND_AMT = 515LL;
+  cst_NRPN_VALUE_PITCH_1_STRETCH = 515LL;
 #line 288 "spms1_patch.rb"
   cst_NRPN_VALUE_EG_1_ATTACK = 516LL;
 #line 289 "spms1_patch.rb"
@@ -5708,9 +5705,9 @@ int main(int argc,char**argv){
 #line 209 "spms1_main.rb"
     lv_source_pitch_1_glide_sw = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_GLIDE_SW))))), cst_SLOT_PITCH_1_GLIDE_SW);
 #line 210 "spms1_main.rb"
-    lv_source_pitch_1_stretch = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_STRETCH))))), cst_SLOT_PITCH_1_STRETCH);
-#line 211 "spms1_main.rb"
     lv_source_pitch_1_bend_amt = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_BEND_AMT))))), cst_SLOT_PITCH_1_BEND_AMT);
+#line 211 "spms1_main.rb"
+    lv_source_pitch_1_stretch = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_STRETCH))))), cst_SLOT_PITCH_1_STRETCH);
 #line 212 "spms1_main.rb"
     lv_source_eg_1_attack = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_EG_1_ATTACK))))), cst_SLOT_EG_1_ATTACK);
 #line 213 "spms1_main.rb"
@@ -5828,15 +5825,15 @@ int main(int argc,char**argv){
     sp_int _t559 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_pitch_1_glide_sw)))));
     sp_FloatArray_set(lv_signals, cst_SLOT_PITCH_1_GLIDE_SW, sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_pitch_1_glide_sw, _t559, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_PITCH_1_GLIDE_SW))))))));
 #line 277 "spms1_main.rb"
-    lv_cc_pitch_1_stretch = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_PITCH_1_STRETCH)))));
-#line 278 "spms1_main.rb"
-    sp_int _t563 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_pitch_1_stretch)))));
-    sp_FloatArray_set(lv_signals, cst_SLOT_PITCH_1_STRETCH, sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_pitch_1_stretch, _t563, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_PITCH_1_STRETCH))))))));
-#line 279 "spms1_main.rb"
     lv_cc_pitch_1_bend_amt = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_PITCH_1_BEND_AMT)))));
+#line 278 "spms1_main.rb"
+    sp_int _t563 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_pitch_1_bend_amt)))));
+    sp_FloatArray_set(lv_signals, cst_SLOT_PITCH_1_BEND_AMT, sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_pitch_1_bend_amt, _t563, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_PITCH_1_BEND_AMT))))))));
+#line 279 "spms1_main.rb"
+    lv_cc_pitch_1_stretch = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_PITCH_1_STRETCH)))));
 #line 280 "spms1_main.rb"
-    sp_int _t567 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_pitch_1_bend_amt)))));
-    sp_FloatArray_set(lv_signals, cst_SLOT_PITCH_1_BEND_AMT, sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_pitch_1_bend_amt, _t567, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_PITCH_1_BEND_AMT))))))));
+    sp_int _t567 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_pitch_1_stretch)))));
+    sp_FloatArray_set(lv_signals, cst_SLOT_PITCH_1_STRETCH, sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_pitch_1_stretch, _t567, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_PITCH_1_STRETCH))))))));
 #line 281 "spms1_main.rb"
     lv_cc_eg_1_attack = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_EG_1_ATTACK)))));
 #line 282 "spms1_main.rb"
@@ -6115,11 +6112,11 @@ int main(int argc,char**argv){
     sp_float _t785 = sp_FloatArray_get(lv_signals, lv_source_pitch_1_glide_sw);
     sp_Pitch_set_glide_switch((sp_Pitch *)lv_pitch_1, _t785);
 #line 397 "spms1_main.rb"
-    sp_float _t786 = sp_FloatArray_get(lv_signals, lv_source_pitch_1_stretch);
-    sp_Pitch_set_stretch((sp_Pitch *)lv_pitch_1, _t786);
+    sp_float _t786 = sp_FloatArray_get(lv_signals, lv_source_pitch_1_bend_amt);
+    sp_Pitch_set_bend_amount((sp_Pitch *)lv_pitch_1, _t786);
 #line 398 "spms1_main.rb"
-    sp_float _t787 = sp_FloatArray_get(lv_signals, lv_source_pitch_1_bend_amt);
-    sp_Pitch_set_bend_amount((sp_Pitch *)lv_pitch_1, _t787);
+    sp_float _t787 = sp_FloatArray_get(lv_signals, lv_source_pitch_1_stretch);
+    sp_Pitch_set_stretch((sp_Pitch *)lv_pitch_1, _t787);
 #line 399 "spms1_main.rb"
     sp_float _t788 = sp_FloatArray_get(lv_signals, lv_source_eg_1_attack);
     sp_EnvGen_set_attack((sp_EnvGen *)lv_eg_1, _t788);

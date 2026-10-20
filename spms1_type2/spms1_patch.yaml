@@ -203,13 +203,13 @@ inputs:
 controls:
   # Pitch 1: Glide is on CC 5, Portamento Time in the MIDI spec, and powers up at CC 4, 0.0, where
   # the portamento is off. Glide Switch has no CC and holds on, the value 124, so Glide alone
-  # sets the portamento unless the switch is set off, below 64. Stretch has no CC and holds 0.0,
-  # where the keys are as they are. Bend Amt is the bend range, half a semitone a
-  # step; it has no CC and holds the value 28, an octave either way.
+  # sets the portamento unless the switch is set off, below 64. Bend Amt is the bend range, half a
+  # semitone a step; it has no CC and holds the value 28, an octave either way. Stretch, last as
+  # it widens what the others make, has no CC and holds 0.0, where the keys are as they are.
   - { entry: 0, module: PITCH_1,   key: GLIDE,        label: Glide,        cc: 5, value: 4, set: set_glide }
   - { entry: 1, module: PITCH_1,   key: GLIDE_SW,     label: Glide Switch, cc: 0,  value: 124, set: set_glide_switch }
-  - { entry: 2, module: PITCH_1,    key: STRETCH, label: Stretch, cc: 0,   value: 4, set: set_stretch }
-  - { entry: 3, module: PITCH_1,    key: BEND_AMT,  label: Bend Amt,   cc: 0,   value: 28, set: set_bend_amount }
+  - { entry: 2, module: PITCH_1,    key: BEND_AMT,  label: Bend Amt,   cc: 0,   value: 28, set: set_bend_amount }
+  - { entry: 3, module: PITCH_1,    key: STRETCH, label: Stretch, cc: 0,   value: 4, set: set_stretch }
   # EG 1: Release Switch has no CC and holds on, the value 124, the release following the decay;
   # below 64 the release is the shortest decay's, 10 ms. Level has no CC and holds 1.0,
   # passing the envelope as it is.

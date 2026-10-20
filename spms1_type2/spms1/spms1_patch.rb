@@ -66,8 +66,8 @@ PARAM_SLOT_BASE = 128
 
 SLOT_PITCH_1_GLIDE         = 128
 SLOT_PITCH_1_GLIDE_SW      = 129
-SLOT_PITCH_1_STRETCH       = 130
-SLOT_PITCH_1_BEND_AMT      = 131
+SLOT_PITCH_1_BEND_AMT      = 130
+SLOT_PITCH_1_STRETCH       = 131
 SLOT_EG_1_ATTACK           = 132
 SLOT_EG_1_DECAY            = 133
 SLOT_EG_1_SUSTAIN          = 134
@@ -163,8 +163,8 @@ NRPN_SOURCE_OUTPUT_R        = 157
 
 NRPN_SOURCE_PITCH_1_GLIDE         = 256
 NRPN_SOURCE_PITCH_1_GLIDE_SW      = 257
-NRPN_SOURCE_PITCH_1_STRETCH       = 258
-NRPN_SOURCE_PITCH_1_BEND_AMT      = 259
+NRPN_SOURCE_PITCH_1_BEND_AMT      = 258
+NRPN_SOURCE_PITCH_1_STRETCH       = 259
 NRPN_SOURCE_EG_1_ATTACK           = 260
 NRPN_SOURCE_EG_1_DECAY            = 261
 NRPN_SOURCE_EG_1_SUSTAIN          = 262
@@ -223,8 +223,8 @@ NRPN_SOURCE_DELAY_1_FEEDBACK      = 312
 # below, whatever CC it had before, so a patch sets it alone, and a controller slot holds 0.0.
 NRPN_CC_PITCH_1_GLIDE         = 384
 NRPN_CC_PITCH_1_GLIDE_SW      = 385
-NRPN_CC_PITCH_1_STRETCH       = 386
-NRPN_CC_PITCH_1_BEND_AMT      = 387
+NRPN_CC_PITCH_1_BEND_AMT      = 386
+NRPN_CC_PITCH_1_STRETCH       = 387
 NRPN_CC_EG_1_ATTACK           = 388
 NRPN_CC_EG_1_DECAY            = 389
 NRPN_CC_EG_1_SUSTAIN          = 390
@@ -283,8 +283,8 @@ NRPN_CC_MOD_WHEEL             = 441
 # The value of each parameter's control slot while it has no CC, as a CC value.
 NRPN_VALUE_PITCH_1_GLIDE         = 512
 NRPN_VALUE_PITCH_1_GLIDE_SW      = 513
-NRPN_VALUE_PITCH_1_STRETCH       = 514
-NRPN_VALUE_PITCH_1_BEND_AMT      = 515
+NRPN_VALUE_PITCH_1_BEND_AMT      = 514
+NRPN_VALUE_PITCH_1_STRETCH       = 515
 NRPN_VALUE_EG_1_ATTACK           = 516
 NRPN_VALUE_EG_1_DECAY            = 517
 NRPN_VALUE_EG_1_SUSTAIN          = 518
@@ -396,8 +396,8 @@ def spms1_write_default_patch(midi_ch)
 
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_PITCH_1_GLIDE        , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_PITCH_1_GLIDE_SW     , SIGNAL_OWN)
-  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_PITCH_1_STRETCH      , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_PITCH_1_BEND_AMT     , SIGNAL_OWN)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_PITCH_1_STRETCH      , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_EG_1_ATTACK          , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_EG_1_DECAY           , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_EG_1_SUSTAIN         , SIGNAL_OWN)
@@ -489,8 +489,8 @@ def spms1_write_default_patch(midi_ch)
 
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_PITCH_1_GLIDE        , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_PITCH_1_GLIDE_SW     , 124)
-  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_PITCH_1_STRETCH      , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_PITCH_1_BEND_AMT     , 28)
+  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_PITCH_1_STRETCH      , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_EG_1_ATTACK          , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_EG_1_DECAY           , 94)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_EG_1_SUSTAIN         , 124)
