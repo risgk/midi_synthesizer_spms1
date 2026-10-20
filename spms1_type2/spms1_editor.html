@@ -1102,8 +1102,7 @@
         <option value="">Select SPMS-1 Device...</option>
       </select>
     </div>
-    <label class="check" title="Send each routing, run order or CC assignment change as it is made. CC values are always sent."><input type="checkbox" id="live"> Live patch</label>
-    <button class="btn primary" id="btn-send" title="Send the whole patch: NRPN and CC values">Send Patch</button>
+    <button class="btn primary" id="btn-send" title="Send the whole patch again: NRPN and CC values. Every change is sent as it is made.">Send Patch</button>
   </div>
 </div>
 
@@ -1716,7 +1715,7 @@
     renderOrder();
     updateExport();
     saveLocal();
-    liveSend();
+    sendChanges();
   }
 
   // ---- Connections ---------------------------------------------------------------------------
@@ -2096,7 +2095,7 @@
     renderOrder();
     updateExport();
     saveLocal();
-    liveSend();
+    sendChanges();
   }
 
   // ---- View: pan and zoom --------------------------------------------------------------------
@@ -2519,7 +2518,7 @@
     if (webSynthOutput && id === webSynthOutput.id) return webSynthOutput;
     return (midiAccess && midiAccess.outputs.get(id)) || null;
   }
-  // What the device was last sent, so Live mode can send only what changed.
+  // What the device was last sent, so that a change sends only what it changed.
   let lastSent = null;
 
   const chSelect = document.getElementById('midi-ch');
@@ -2601,9 +2600,7 @@
     const next = outputById(document.getElementById('midi-out').value);
     if (next !== midiOutput) lastSent = null;
     midiOutput = next;
-    // SPMS-1 Web starts with the default patch, so it is given the patch shown, Live or not.
-    if (midiOutput && midiOutput === webSynthOutput && !lastSent) sendAll();
-    liveSend();
+    sendChanges();
   }
 
   // What the synth holds for each channel, kept by the same rules as spms1_midi_state.h: a note on
@@ -2816,7 +2813,7 @@
     } else {
       return;
     }
-    // The synth already has it, so Live mode must not send it back.
+    // The synth already has it, so it must not be sent back.
     if (lastSent) lastSent.set('n' + nrpn, value);
     renderControls();
     renderWires();
@@ -2830,8 +2827,8 @@
     return cc && !RESERVED_CCS.has(cc) && CONTROL_ITEMS.some(c => state.cc[c.key] === cc);
   }
 
-  // A CC value is a knob position rather than part of the routing, so it goes out whether or not
-  // Live is on, as the old slider page did.
+  // A CC value is a knob position rather than part of the routing, so it goes out as a CC of its
+  // own.
   function setCCValue(cc, value, send) {
     value = clampValue(value);
     state.values[cc] = value;
@@ -2842,8 +2839,8 @@
     saveLocal();
   }
 
-  // A parameter's value with no CC is part of the patch, but moved like a knob, so it goes out
-  // whether or not Live is on too, as one NRPN write.
+  // A parameter's value with no CC is part of the patch, but moved like a knob, so it goes out at
+  // once too, as one NRPN write.
   function setParamValue(key, value, send) {
     value = clampValue(value);
     state.paramValues[key] = value;
@@ -2873,8 +2870,11 @@
     lastSent = snapshotTable();
   }
 
-  function liveSend() {
-    if (!midiOutput || !document.getElementById('live').checked) return;
+  // Every routing, run order or CC assignment change goes out as it is made, as what differs from
+  // what the device was last sent. A device that has been sent nothing yet, being newly chosen or
+  // on a newly chosen channel, is sent the whole patch first, so that it plays what is shown.
+  function sendChanges() {
+    if (!midiOutput) return;
     if (!lastSent) {
       sendAll();
       return;
@@ -2898,10 +2898,7 @@
 
   document.getElementById('midi-in').addEventListener('change', () => { handleDeviceChange(); saveMIDISettings(); });
   document.getElementById('midi-out').addEventListener('change', () => { handleDeviceChange(); saveMIDISettings(); });
-  chSelect.addEventListener('change', () => { lastSent = null; nrpnSelect.selected = false; updateExport(); refreshNoteNode(); saveMIDISettings(); liveSend(); });
-  document.getElementById('live').addEventListener('change', e => {
-    if (e.target.checked) sendAll();
-  });
+  chSelect.addEventListener('change', () => { lastSent = null; nrpnSelect.selected = false; updateExport(); refreshNoteNode(); saveMIDISettings(); sendChanges(); });
   document.getElementById('btn-send').addEventListener('click', sendAll);
 
   // ---- Export panel --------------------------------------------------------------------------
