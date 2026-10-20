@@ -776,32 +776,6 @@
       flex: 1;
       white-space: nowrap;
     }
-    /* A module's parameters with no CC and nothing on their slots fold away under one row,
-       which opens and closes them; a wire to one of them ends on that row while it is folded. */
-    .node.folded .row.ctrl.quiet {
-      display: none;
-    }
-    /* The node last opened stands over the others, and opaque, should it still meet one. */
-    .node.lifted {
-      z-index: 2;
-      background: rgba(255, 255, 255, 0.96);
-    }
-    .row.fold {
-      cursor: pointer;
-      color: var(--text-muted);
-      font-size: 0.7rem;
-      font-style: italic;
-    }
-    .row.fold:hover {
-      color: var(--primary-color);
-    }
-    .row.fold .fold-anchor {
-      position: absolute;
-      left: 0;
-      top: 50%;
-      width: 1px;
-      height: 1px;
-    }
     .row .lbl.right {
       text-align: right;
     }
@@ -1162,14 +1136,10 @@
         <button class="btn" id="btn-load">Load JSON</button>
         <input type="file" id="file-load" accept=".json,application/json" hidden>
       </div>
-      <div class="btn-row" style="margin-bottom: 6px;">
+      <div class="btn-row">
         <button class="btn" id="btn-undo" title="Ctrl+Z">Undo</button>
         <button class="btn" id="btn-redo" title="Ctrl+Y">Redo</button>
         <button class="btn" id="btn-init">Init</button>
-      </div>
-      <div class="btn-row">
-        <button class="btn" id="btn-show-all" title="Show the parameters with no CC in every node">Show All</button>
-        <button class="btn" id="btn-hide-all" title="Hide the parameters with no CC in every node">Hide All</button>
       </div>
       <p class="hint" style="margin-top: 8px;">
         MIDI In is passed through to the synth, and a CC on the channel above moves every slot
@@ -1869,7 +1839,6 @@
     if (node.controls && node.controls.length) {
       h += `<div class="sep"><span>${node.module ? 'Parameters' : 'Signals'}</span><span>CC</span><span>Value</span><span class="norm-head">Norm</span></div>`;
       for (const c of node.controls) h += controlRowHTML(c, !!node.module);
-      if (node.module) h += `<div class="row fold" title="Show or hide the parameters with no CC whose slots nothing reads"><span class="fold-anchor"></span><span class="lbl"></span></div>`;
     }
     return h + '<div class="rows-end"></div>';
   }
@@ -2038,78 +2007,6 @@
     return `M ${a.x} ${a.y} C ${a.x + dx} ${a.y}, ${b.x - dx} ${b.y}, ${b.x} ${b.y}`;
   }
 
-  // Which module nodes have their quiet parameters open; folded is the default, and it is kept.
-  const UNFOLDED_KEY = 'spms1-type2-editor-unfolded';
-  let unfolded = new Set();
-  try { unfolded = new Set(JSON.parse(localStorage.getItem(UNFOLDED_KEY) || '[]')); } catch (e) { /* storage unavailable */ }
-
-  // A parameter is quiet when it has no CC and reads its own slot or a constant: a fixed setting
-  // that wiring a patch need not see. Nothing else can read its slot, which is off the bus.
-  function isQuiet(c) {
-    if (state.cc[c.key]) return false;
-    const src = state.params[c.key];
-    return src === undefined || src === c.key || src in CONSTANT_NORMS;
-  }
-
-  function refreshFolds() {
-    world.querySelectorAll('.node').forEach(el => {
-      const fold = el.querySelector('.row.fold');
-      if (!fold) return;
-      let quiet = 0;
-      el.querySelectorAll('.row.ctrl').forEach(row => {
-        const q = isQuiet(CONTROL[row.dataset.ctrl]);
-        row.classList.toggle('quiet', q);
-        if (q) quiet++;
-      });
-      const open = unfolded.has(el.dataset.node);
-      el.classList.toggle('folded', !open);
-      fold.hidden = !quiet;
-      fold.querySelector('.lbl').textContent = open ? `Hide ${quiet} with no CC` : `${quiet} more with no CC`;
-    });
-  }
-
-  // Opening a node pushes the nodes under it in its column down by what it grew, and closing it
-  // pulls them back up, so the opened rows never land on a neighbour.
-  function toggleFold(el) {
-    const key = el.dataset.node;
-    const before = el.offsetHeight;
-    const bottom = state.layout[key].y + before;
-    if (unfolded.has(key)) unfolded.delete(key); else unfolded.add(key);
-    try { localStorage.setItem(UNFOLDED_KEY, JSON.stringify([...unfolded])); } catch (e) { /* storage unavailable */ }
-    renderWires();
-    const delta = el.offsetHeight - before;
-    if (delta) {
-      const x0 = state.layout[key].x, x1 = x0 + el.offsetWidth;
-      world.querySelectorAll('.node').forEach(n => {
-        const pos = state.layout[n.dataset.node];
-        if (n === el || pos.x >= x1 || pos.x + n.offsetWidth <= x0 || pos.y < bottom - 1) return;
-        pos.y += delta;
-        n.style.top = pos.y + 'px';
-      });
-      saveLocal();
-      renderWires();
-    }
-    world.querySelectorAll('.node.lifted').forEach(n => n.classList.remove('lifted'));
-    if (unfolded.has(key)) el.classList.add('lifted');
-  }
-
-  // Every node at once, one after another as if each were clicked, so that each pushes the nodes
-  // under it as far as it grew and none lands on another. A node with nothing to show is left as
-  // it is when opening, and forgotten when closing, so it does not come up open later.
-  function setAllFolds(open) {
-    world.querySelectorAll('.node').forEach(el => {
-      const fold = el.querySelector('.row.fold');
-      if (!fold || unfolded.has(el.dataset.node) === open) return;
-      if (fold.hidden) {
-        if (!open) unfolded.delete(el.dataset.node);
-        return;
-      }
-      toggleFold(el);
-    });
-    try { localStorage.setItem(UNFOLDED_KEY, JSON.stringify([...unfolded])); } catch (e) { /* storage unavailable */ }
-    world.querySelectorAll('.node.lifted').forEach(n => n.classList.remove('lifted'));
-  }
-
   function renderWires() {
     if (!canvas.clientWidth) return;
     svg.querySelectorAll('path:not(.temp)').forEach(p => p.remove());
@@ -2117,7 +2014,6 @@
     world.querySelectorAll('.row.routed').forEach(r => { r.classList.remove('routed'); r.title = ''; });
     world.querySelectorAll('[data-src-of]').forEach(s => { s.textContent = ''; });
     const conns = connections();
-    refreshFolds();
     if (selectedWire && !conns.some(c => c.dst === selectedWire)) selectedWire = null;
     // Parameter wires first, so the signal wires are drawn over them.
     const ordered = conns.filter(c => c.kind.startsWith('param')).concat(conns.filter(c => !c.kind.startsWith('param')));
@@ -2125,8 +2021,7 @@
       const from = portEls['o:' + c.src];
       let to = portEls['i:' + c.dst];
       if (!from || !to) continue;
-      const folded = to.closest('.row.quiet') && to.closest('.node.folded');
-      const d = curve(portPos(from), portPos(folded ? to.closest('.node').querySelector('.fold-anchor') : to));
+      const d = curve(portPos(from), portPos(to));
       const vis = document.createElementNS(SVG_NS, 'path');
       vis.setAttribute('d', d);
       vis.setAttribute('class', `wire ${c.kind}` + (c.dst === selectedWire ? ' selected' : ''));
@@ -2446,11 +2341,6 @@
   });
 
   world.addEventListener('click', e => {
-    const fold = e.target.closest('.row.fold');
-    if (fold) {
-      toggleFold(fold.closest('.node'));
-      return;
-    }
     const badge = e.target.closest('.badge');
     if (!badge) return;
     const key = badge.closest('.node').dataset.node;
@@ -2586,23 +2476,14 @@
 
   document.getElementById('btn-undo').addEventListener('click', undo);
   document.getElementById('btn-redo').addEventListener('click', redo);
-  document.getElementById('btn-show-all').addEventListener('click', () => setAllFolds(true));
-  document.getElementById('btn-hide-all').addEventListener('click', () => setAllFolds(false));
   document.getElementById('btn-init').addEventListener('click', () => {
     pushHistory();
     state = defaultState();
-    // The default layout is packed to the folded heights, so Init lays the nodes out folded and
-    // then opens every one as Show All does, each pushing the nodes under it down, so that the
-    // whole patch is in sight. The parameters with no CC on the Controls tab are hidden again.
-    unfolded.clear();
+    // The parameters with no CC on the Controls tab are hidden again.
     showNoCC = false;
     document.getElementById('show-no-cc').checked = false;
-    try {
-      localStorage.setItem(UNFOLDED_KEY, '[]');
-      localStorage.setItem(SHOW_NO_CC_KEY, '');
-    } catch (e) { /* storage unavailable */ }
+    try { localStorage.setItem(SHOW_NO_CC_KEY, ''); } catch (e) { /* storage unavailable */ }
     renderAll();
-    setAllFolds(true);
     fitView();
   });
 

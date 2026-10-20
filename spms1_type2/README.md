@@ -98,17 +98,13 @@ Usage
       from MIDI In or a patch file, is drawn in to the nearer end, which reads the same
     - Its Initialize & Send All sets each CC value and each parameter's value with no CC back to
       what it powers up at, and sends them
-    - Its Patch tab folds the same parameters away in each node, unless something reads their slots;
-      the row at the bottom of a node opens it, and Show All and Hide All open or fold every node;
-      Init leaves every node open
 - Built-in software keyboard for note input and testing
     - Click its heading to hide it, so the patch editor or the controls take its height; the editor remembers
       which, and the keys of the PC keyboard do not play while it is hidden
 - Graphical patch editor on its Patch tab
     - Wires module outputs to inputs and parameters, and sets the run order and CC assignments
-    - Folds away each module's parameters that have no CC and read their own slot or a constant, under a
-      row that opens and closes them; opening one moves the nodes under it down, and closing it moves
-      them back. A wire to a folded one ends on that row, and each module's choice is remembered
+    - Shows every parameter of every module, those with no CC in blue, so a wire always ends on what
+      it feeds
     - Saves and loads patches as JSON
     - Copies the patch as MIDI bytes or as an NRPN list, or sends it through Web MIDI
     - The side panels (Patch, Run Order, Export) fold to their headings with a click, each remembered;
