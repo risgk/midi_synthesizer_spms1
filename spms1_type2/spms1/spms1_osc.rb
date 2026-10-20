@@ -92,7 +92,7 @@ module Spms1
     # Mod 1/2 Mix is bipolar, [-0.5, 0.5], a linear crossfade between the two modulation inputs:
     # Mod 1 In is taken at 0.5 - mix and Mod 2 In at 0.5 + mix, so -0.5 is Mod 1 alone, +0.5 Mod 2
     # alone and 0.0 half of each. A modulation runs the way its source does; one the other way up
-    # takes an inverted source, such as a mixer's at Pol -0.5.
+    # takes an inverted source, such as EG 1 Out Inv.
     def set_modulation_mix(mix)
       clamped_mix = (mix < -0.5) ? -0.5 : ((mix > 0.5) ? 0.5 : mix)
       @modulation_1_amount = 0.5 - clamped_mix

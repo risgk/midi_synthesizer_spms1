@@ -216,11 +216,8 @@ while true
   source_lfo_1_level_mod_amt = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_LEVEL_MOD_AMT), SLOT_LFO_1_LEVEL_MOD_AMT)
   source_lfo_1_level_mod_pol = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_LEVEL_MOD_POL), SLOT_LFO_1_LEVEL_MOD_POL)
   source_mixer_1_level_1 = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_LEVEL_1), SLOT_MIXER_1_LEVEL_1)
-  source_mixer_1_pol_1 = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_POL_1), SLOT_MIXER_1_POL_1)
   source_mixer_1_level_2 = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_LEVEL_2), SLOT_MIXER_1_LEVEL_2)
-  source_mixer_1_pol_2 = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_POL_2), SLOT_MIXER_1_POL_2)
   source_mixer_1_level_3 = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_LEVEL_3), SLOT_MIXER_1_LEVEL_3)
-  source_mixer_1_pol_3 = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_POL_3), SLOT_MIXER_1_POL_3)
   source_mixer_1_out_level = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_OUT_LEVEL), SLOT_MIXER_1_OUT_LEVEL)
   source_pitch_1_glide = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_GLIDE), SLOT_PITCH_1_GLIDE)
   source_pitch_1_glide_sw = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_GLIDE_SW), SLOT_PITCH_1_GLIDE_SW)
@@ -248,11 +245,8 @@ while true
   source_noise_1_level = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_NOISE_1_LEVEL), SLOT_NOISE_1_LEVEL)
   source_noise_1_color = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_NOISE_1_COLOR), SLOT_NOISE_1_COLOR)
   source_mixer_2_level_1 = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_LEVEL_1), SLOT_MIXER_2_LEVEL_1)
-  source_mixer_2_pol_1 = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_POL_1), SLOT_MIXER_2_POL_1)
   source_mixer_2_level_2 = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_LEVEL_2), SLOT_MIXER_2_LEVEL_2)
-  source_mixer_2_pol_2 = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_POL_2), SLOT_MIXER_2_POL_2)
   source_mixer_2_level_3 = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_LEVEL_3), SLOT_MIXER_2_LEVEL_3)
-  source_mixer_2_pol_3 = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_POL_3), SLOT_MIXER_2_POL_3)
   source_mixer_2_out_level = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_OUT_LEVEL), SLOT_MIXER_2_OUT_LEVEL)
   source_filter_1_gain = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_GAIN), SLOT_FILTER_1_GAIN)
   source_filter_1_cutoff = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_CUTOFF), SLOT_FILTER_1_CUTOFF)
@@ -301,16 +295,10 @@ while true
   signals[SLOT_LFO_1_LEVEL_MOD_POL] = cc_to_bipolar(cc_or_nrpn(cc_lfo_1_level_mod_pol, C.get_midi_cc_value(MIDI_CH, cc_lfo_1_level_mod_pol), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_LFO_1_LEVEL_MOD_POL)))
   cc_mixer_1_level_1 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_1_LEVEL_1)
   signals[SLOT_MIXER_1_LEVEL_1] = cc_to_unipolar(cc_or_nrpn(cc_mixer_1_level_1, C.get_midi_cc_value(MIDI_CH, cc_mixer_1_level_1), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_MIXER_1_LEVEL_1)))
-  cc_mixer_1_pol_1 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_1_POL_1)
-  signals[SLOT_MIXER_1_POL_1] = cc_to_bipolar(cc_or_nrpn(cc_mixer_1_pol_1, C.get_midi_cc_value(MIDI_CH, cc_mixer_1_pol_1), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_MIXER_1_POL_1)))
   cc_mixer_1_level_2 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_1_LEVEL_2)
   signals[SLOT_MIXER_1_LEVEL_2] = cc_to_unipolar(cc_or_nrpn(cc_mixer_1_level_2, C.get_midi_cc_value(MIDI_CH, cc_mixer_1_level_2), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_MIXER_1_LEVEL_2)))
-  cc_mixer_1_pol_2 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_1_POL_2)
-  signals[SLOT_MIXER_1_POL_2] = cc_to_bipolar(cc_or_nrpn(cc_mixer_1_pol_2, C.get_midi_cc_value(MIDI_CH, cc_mixer_1_pol_2), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_MIXER_1_POL_2)))
   cc_mixer_1_level_3 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_1_LEVEL_3)
   signals[SLOT_MIXER_1_LEVEL_3] = cc_to_unipolar(cc_or_nrpn(cc_mixer_1_level_3, C.get_midi_cc_value(MIDI_CH, cc_mixer_1_level_3), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_MIXER_1_LEVEL_3)))
-  cc_mixer_1_pol_3 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_1_POL_3)
-  signals[SLOT_MIXER_1_POL_3] = cc_to_bipolar(cc_or_nrpn(cc_mixer_1_pol_3, C.get_midi_cc_value(MIDI_CH, cc_mixer_1_pol_3), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_MIXER_1_POL_3)))
   cc_mixer_1_out_level = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_1_OUT_LEVEL)
   signals[SLOT_MIXER_1_OUT_LEVEL] = cc_to_unipolar(cc_or_nrpn(cc_mixer_1_out_level, C.get_midi_cc_value(MIDI_CH, cc_mixer_1_out_level), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_MIXER_1_OUT_LEVEL)))
   cc_pitch_1_glide = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_PITCH_1_GLIDE)
@@ -365,16 +353,10 @@ while true
   signals[SLOT_NOISE_1_COLOR] = cc_to_unipolar(cc_or_nrpn(cc_noise_1_color, C.get_midi_cc_value(MIDI_CH, cc_noise_1_color), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_NOISE_1_COLOR)))
   cc_mixer_2_level_1 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_LEVEL_1)
   signals[SLOT_MIXER_2_LEVEL_1] = cc_to_unipolar(cc_or_nrpn(cc_mixer_2_level_1, C.get_midi_cc_value(MIDI_CH, cc_mixer_2_level_1), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_MIXER_2_LEVEL_1)))
-  cc_mixer_2_pol_1 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_POL_1)
-  signals[SLOT_MIXER_2_POL_1] = cc_to_bipolar(cc_or_nrpn(cc_mixer_2_pol_1, C.get_midi_cc_value(MIDI_CH, cc_mixer_2_pol_1), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_MIXER_2_POL_1)))
   cc_mixer_2_level_2 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_LEVEL_2)
   signals[SLOT_MIXER_2_LEVEL_2] = cc_to_unipolar(cc_or_nrpn(cc_mixer_2_level_2, C.get_midi_cc_value(MIDI_CH, cc_mixer_2_level_2), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_MIXER_2_LEVEL_2)))
-  cc_mixer_2_pol_2 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_POL_2)
-  signals[SLOT_MIXER_2_POL_2] = cc_to_bipolar(cc_or_nrpn(cc_mixer_2_pol_2, C.get_midi_cc_value(MIDI_CH, cc_mixer_2_pol_2), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_MIXER_2_POL_2)))
   cc_mixer_2_level_3 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_LEVEL_3)
   signals[SLOT_MIXER_2_LEVEL_3] = cc_to_unipolar(cc_or_nrpn(cc_mixer_2_level_3, C.get_midi_cc_value(MIDI_CH, cc_mixer_2_level_3), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_MIXER_2_LEVEL_3)))
-  cc_mixer_2_pol_3 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_POL_3)
-  signals[SLOT_MIXER_2_POL_3] = cc_to_bipolar(cc_or_nrpn(cc_mixer_2_pol_3, C.get_midi_cc_value(MIDI_CH, cc_mixer_2_pol_3), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_MIXER_2_POL_3)))
   cc_mixer_2_out_level = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_OUT_LEVEL)
   signals[SLOT_MIXER_2_OUT_LEVEL] = cc_to_unipolar(cc_or_nrpn(cc_mixer_2_out_level, C.get_midi_cc_value(MIDI_CH, cc_mixer_2_out_level), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_MIXER_2_OUT_LEVEL)))
   cc_filter_1_gain = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_GAIN)
@@ -442,11 +424,8 @@ while true
   lfo_1.set_level_modulation_amount(signals[source_lfo_1_level_mod_amt])
   lfo_1.set_level_modulation_polarity(signals[source_lfo_1_level_mod_pol])
   mixer_1.set_level_1(signals[source_mixer_1_level_1])
-  mixer_1.set_polarity_1(signals[source_mixer_1_pol_1])
   mixer_1.set_level_2(signals[source_mixer_1_level_2])
-  mixer_1.set_polarity_2(signals[source_mixer_1_pol_2])
   mixer_1.set_level_3(signals[source_mixer_1_level_3])
-  mixer_1.set_polarity_3(signals[source_mixer_1_pol_3])
   mixer_1.set_out_level(signals[source_mixer_1_out_level])
   pitch_1.set_glide(signals[source_pitch_1_glide])
   pitch_1.set_glide_switch(signals[source_pitch_1_glide_sw])
@@ -474,11 +453,8 @@ while true
   noise_1.set_level(signals[source_noise_1_level])
   noise_1.set_color(signals[source_noise_1_color])
   mixer_2.set_level_1(signals[source_mixer_2_level_1])
-  mixer_2.set_polarity_1(signals[source_mixer_2_pol_1])
   mixer_2.set_level_2(signals[source_mixer_2_level_2])
-  mixer_2.set_polarity_2(signals[source_mixer_2_pol_2])
   mixer_2.set_level_3(signals[source_mixer_2_level_3])
-  mixer_2.set_polarity_3(signals[source_mixer_2_pol_3])
   mixer_2.set_out_level(signals[source_mixer_2_out_level])
   filter_1.set_gain(signals[source_filter_1_gain])
   filter_1.set_cutoff(signals[source_filter_1_cutoff])
@@ -525,44 +501,46 @@ while true
       # patch_gen dispatch
       when 1 # MODULE_EG_1
         signals[21] = eg_1.process(control_tick, signals[source_eg_1_gate]) # SIGNAL_EG_1_OUTPUT
+        signals[22] = eg_1.output_inverted # SIGNAL_EG_1_OUTPUT_INV
       when 2 # MODULE_LFO_1
-        signals[22] = lfo_1.process(control_tick, signals[source_lfo_1_rate_mod], signals[source_lfo_1_level_mod]) # SIGNAL_LFO_1_OUTPUT
-        signals[23] = lfo_1.output_triangle # SIGNAL_LFO_1_OUTPUT_TRIANGLE
-        signals[24] = lfo_1.output_square # SIGNAL_LFO_1_OUTPUT_SQUARE
+        signals[23] = lfo_1.process(control_tick, signals[source_lfo_1_rate_mod], signals[source_lfo_1_level_mod]) # SIGNAL_LFO_1_OUTPUT
+        signals[24] = lfo_1.output_inverted # SIGNAL_LFO_1_OUTPUT_INV
+        signals[25] = lfo_1.output_triangle # SIGNAL_LFO_1_OUTPUT_TRIANGLE
+        signals[26] = lfo_1.output_square # SIGNAL_LFO_1_OUTPUT_SQUARE
       when 3 # MODULE_MIXER_1
-        signals[25] = mixer_1.process(control_tick, signals[source_mixer_1_in_1], signals[source_mixer_1_in_2], signals[source_mixer_1_in_3]) # SIGNAL_MIXER_1_OUTPUT
+        signals[27] = mixer_1.process(control_tick, signals[source_mixer_1_in_1], signals[source_mixer_1_in_2], signals[source_mixer_1_in_3]) # SIGNAL_MIXER_1_OUTPUT
       when 4 # MODULE_PITCH_1
-        signals[26] = pitch_1.process(control_tick, signals[source_pitch_1_pitch], signals[source_pitch_1_bend]) # SIGNAL_PITCH_1_OUTPUT
+        signals[28] = pitch_1.process(control_tick, signals[source_pitch_1_pitch], signals[source_pitch_1_bend]) # SIGNAL_PITCH_1_OUTPUT
       when 5 # MODULE_OSC_1
-        signals[27] = osc_1.process(control_tick, signals[source_osc_1_pitch], signals[source_osc_1_mod_1], signals[source_osc_1_mod_2]) # SIGNAL_OSC_1_OUTPUT
-        signals[28] = osc_1.output_saw # SIGNAL_OSC_1_OUTPUT_SAW
-        signals[29] = osc_1.output_pulse # SIGNAL_OSC_1_OUTPUT_PULSE
+        signals[29] = osc_1.process(control_tick, signals[source_osc_1_pitch], signals[source_osc_1_mod_1], signals[source_osc_1_mod_2]) # SIGNAL_OSC_1_OUTPUT
+        signals[30] = osc_1.output_saw # SIGNAL_OSC_1_OUTPUT_SAW
+        signals[31] = osc_1.output_pulse # SIGNAL_OSC_1_OUTPUT_PULSE
       when 6 # MODULE_OSC_2
-        signals[30] = osc_2.process(control_tick, signals[source_osc_2_pitch], signals[source_osc_2_mod_1], signals[source_osc_2_mod_2]) # SIGNAL_OSC_2_OUTPUT
-        signals[31] = osc_2.output_saw # SIGNAL_OSC_2_OUTPUT_SAW
-        signals[32] = osc_2.output_pulse # SIGNAL_OSC_2_OUTPUT_PULSE
+        signals[32] = osc_2.process(control_tick, signals[source_osc_2_pitch], signals[source_osc_2_mod_1], signals[source_osc_2_mod_2]) # SIGNAL_OSC_2_OUTPUT
+        signals[33] = osc_2.output_saw # SIGNAL_OSC_2_OUTPUT_SAW
+        signals[34] = osc_2.output_pulse # SIGNAL_OSC_2_OUTPUT_PULSE
       when 7 # MODULE_NOISE_1
-        signals[33] = noise_1.process(control_tick) # SIGNAL_NOISE_1_OUTPUT
-        signals[34] = noise_1.output_white # SIGNAL_NOISE_1_OUTPUT_WHITE
-        signals[35] = noise_1.output_red # SIGNAL_NOISE_1_OUTPUT_RED
+        signals[35] = noise_1.process(control_tick) # SIGNAL_NOISE_1_OUTPUT
+        signals[36] = noise_1.output_white # SIGNAL_NOISE_1_OUTPUT_WHITE
+        signals[37] = noise_1.output_red # SIGNAL_NOISE_1_OUTPUT_RED
       when 8 # MODULE_MIXER_2
-        signals[36] = mixer_2.process(control_tick, signals[source_mixer_2_in_1], signals[source_mixer_2_in_2], signals[source_mixer_2_in_3]) # SIGNAL_MIXER_2_OUTPUT
+        signals[38] = mixer_2.process(control_tick, signals[source_mixer_2_in_1], signals[source_mixer_2_in_2], signals[source_mixer_2_in_3]) # SIGNAL_MIXER_2_OUTPUT
       when 9 # MODULE_FILTER_1
-        signals[37] = filter_1.process(control_tick, signals[source_filter_1_audio], signals[source_filter_1_pitch], signals[source_filter_1_mod_1], signals[source_filter_1_mod_2]) # SIGNAL_FILTER_1_OUTPUT
-        signals[38] = filter_1.output_lp # SIGNAL_FILTER_1_OUTPUT_LP
-        signals[39] = filter_1.output_hp # SIGNAL_FILTER_1_OUTPUT_HP
+        signals[39] = filter_1.process(control_tick, signals[source_filter_1_audio], signals[source_filter_1_pitch], signals[source_filter_1_mod_1], signals[source_filter_1_mod_2]) # SIGNAL_FILTER_1_OUTPUT
+        signals[40] = filter_1.output_lp # SIGNAL_FILTER_1_OUTPUT_LP
+        signals[41] = filter_1.output_hp # SIGNAL_FILTER_1_OUTPUT_HP
       when 10 # MODULE_AMP_1
-        signals[40] = amp_1.process(control_tick, signals[source_amp_1_audio], signals[source_amp_1_mod]) # SIGNAL_AMP_1_OUTPUT
+        signals[42] = amp_1.process(control_tick, signals[source_amp_1_audio], signals[source_amp_1_mod]) # SIGNAL_AMP_1_OUTPUT
       when 11 # MODULE_CHORUS_1
         chorus_1.process(control_tick, signals[source_chorus_1_audio])
-        signals[41] = chorus_1.output_l # SIGNAL_CHORUS_1_OUTPUT_L
-        signals[42] = chorus_1.output_r # SIGNAL_CHORUS_1_OUTPUT_R
-        signals[43] = chorus_1.output_mono # SIGNAL_CHORUS_1_OUTPUT_MONO
+        signals[43] = chorus_1.output_l # SIGNAL_CHORUS_1_OUTPUT_L
+        signals[44] = chorus_1.output_r # SIGNAL_CHORUS_1_OUTPUT_R
+        signals[45] = chorus_1.output_mono # SIGNAL_CHORUS_1_OUTPUT_MONO
       when 12 # MODULE_DELAY_1
         delay_1.process(control_tick, signals[source_delay_1_audio_l], signals[source_delay_1_audio_r])
-        signals[44] = delay_1.output_l # SIGNAL_DELAY_1_OUTPUT_L
-        signals[45] = delay_1.output_r # SIGNAL_DELAY_1_OUTPUT_R
-        signals[46] = delay_1.output_mono # SIGNAL_DELAY_1_OUTPUT_MONO
+        signals[46] = delay_1.output_l # SIGNAL_DELAY_1_OUTPUT_L
+        signals[47] = delay_1.output_r # SIGNAL_DELAY_1_OUTPUT_R
+        signals[48] = delay_1.output_mono # SIGNAL_DELAY_1_OUTPUT_MONO
       # patch_gen end
       end
 

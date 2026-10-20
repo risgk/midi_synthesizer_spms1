@@ -1,7 +1,7 @@
 module Spms1
-  # Sums three inputs, each at its own level and its own polarity. With one input routed it is a
-  # buffer, an attenuator or an inverter; inverting just one input subtracts it from another; and a
-  # constant on another input shifts a unipolar signal, such as the envelope, into a bipolar one.
+  # Sums three inputs, each at its own level. With one input routed it is a buffer or an
+  # attenuator; a negative constant on another input shifts a unipolar signal, such as the
+  # envelope, into a bipolar one. Inverting a signal is for the inverted outputs of EG 1 and LFO 1.
   # Mixer 1 serves the modulation, Mixer 2 the audio ahead of the filter.
   class Mixer
     # Blend at the reference rate on the line below, for each of two cascaded stages. The two move
@@ -25,15 +25,6 @@ module Spms1
       @level_1 = 0.0
       @level_2 = 0.0
       @level_3 = 0.0
-      @polarity_1 = 1.0
-      @polarity_2 = 1.0
-      @polarity_3 = 1.0
-      # Each polarity is folded into its own level when either is set rather than applied per
-      # sample, so the per-sample path is three multiplies and two adds and only
-      # three states smooth.
-      @target_1 = 0.0
-      @target_2 = 0.0
-      @target_3 = 0.0
       @stage_1_1 = 0.0
       @stage_1_2 = 0.0
       @stage_1_3 = 0.0
@@ -49,40 +40,14 @@ module Spms1
     # Each level is unipolar, [0.0, 1.0], and used as a plain multiplier on its own input.
     def set_level_1(level)
       @level_1 = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
-      @target_1 = @level_1 * @polarity_1
     end
 
     def set_level_2(level)
       @level_2 = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
-      @target_2 = @level_2 * @polarity_2
     end
 
     def set_level_3(level)
       @level_3 = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
-      @target_3 = @level_3 * @polarity_3
-    end
-
-    # Each polarity is bipolar, [-0.5, 0.5], and doubled into a multiplier on its own input: +0.5
-    # passes it through, -0.5 negates it, and the way between scales it, crossing silence at 0.0.
-    # Continuous rather than a switch so that smoothing carries it across zero without a step.
-    # Inverting one input is what makes a difference rather than a sum; inverting both negates the
-    # output.
-    def set_polarity_1(polarity)
-      clamped_polarity = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
-      @polarity_1 = clamped_polarity + clamped_polarity
-      @target_1 = @level_1 * @polarity_1
-    end
-
-    def set_polarity_2(polarity)
-      clamped_polarity = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
-      @polarity_2 = clamped_polarity + clamped_polarity
-      @target_2 = @level_2 * @polarity_2
-    end
-
-    def set_polarity_3(polarity)
-      clamped_polarity = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
-      @polarity_3 = clamped_polarity + clamped_polarity
-      @target_3 = @level_3 * @polarity_3
     end
 
     # Out Level is unipolar, [0.0, 1.0], a plain multiplier on the sum, so one control can take a
@@ -105,11 +70,11 @@ module Spms1
     # global, and a mixer loading one twice a sample is about 1.8us a buffer.
     def process(control_tick, input_1 = 0.0, input_2 = 0.0, input_3 = 0.0)
       if control_tick
-        @stage_1_1 = Dsp.smooth(@target_1, @stage_1_1, @smoothing_target_blend)
+        @stage_1_1 = Dsp.smooth(@level_1, @stage_1_1, @smoothing_target_blend)
         @current_1 = Dsp.smooth(@stage_1_1, @current_1, @smoothing_target_blend)
-        @stage_1_2 = Dsp.smooth(@target_2, @stage_1_2, @smoothing_target_blend)
+        @stage_1_2 = Dsp.smooth(@level_2, @stage_1_2, @smoothing_target_blend)
         @current_2 = Dsp.smooth(@stage_1_2, @current_2, @smoothing_target_blend)
-        @stage_1_3 = Dsp.smooth(@target_3, @stage_1_3, @smoothing_target_blend)
+        @stage_1_3 = Dsp.smooth(@level_3, @stage_1_3, @smoothing_target_blend)
         @current_3 = Dsp.smooth(@stage_1_3, @current_3, @smoothing_target_blend)
         @stage_1_out_level = Dsp.smooth(@out_level, @stage_1_out_level, @smoothing_target_blend)
         @current_out_level = Dsp.smooth(@stage_1_out_level, @current_out_level, @smoothing_target_blend)

@@ -1,6 +1,6 @@
 module Spms1
   # ADS envelope updated at 4-sample control-rate grid, its release either the decay's or the
-  # shortest decay's (the release switch).
+  # shortest decay's (the release switch). Out Inv puts out the envelope negated as well.
   class EnvGen
     STATE_ATTACK = 0
     STATE_SUSTAIN = 1
@@ -98,7 +98,7 @@ module Spms1
     end
 
     # The output is scaled by level, as the LFO's is: unipolar, [0.0, 1.0], a plain multiplier.
-    # Turning it the other way up is for the destination's own Mod Pol, or a mixer's Pol.
+    # Turning it the other way up is for the destination's own Mod Pol, or for Out Inv.
     def set_level(level)
       @level = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
       @amount = @level
@@ -155,6 +155,11 @@ module Spms1
       end
       @output += @slope
       @output
+    end
+
+    # Out Inv: the output of the last process, negated, from 0.0 down to -1.0.
+    def output_inverted
+      -@output
     end
 
     private
