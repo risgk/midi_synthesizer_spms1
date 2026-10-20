@@ -10,7 +10,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.3
 - Filter: ZDF/TPT State Variable Filter (with a nonlinear leak on the band pass integrator, solved by the one-step Newton method), with low pass and high pass outputs and a main output crossfading from one to the other through a notch (Mode)
 - Chorus: mono in, stereo out, as a module in the run order
 - Delay: stereo, with feedback, as a module in the run order (up to 340 ms)
-- Pitch: the note's pitch as a module in the run order, with portamento as an exponential lag (CC 5), pitch bend past it (range as a value with no CC) and a stretch of the keys (CC 81)
+- Pitch: the note's pitch as a module in the run order, with portamento as an exponential lag (CC 5), pitch bend past it and a stretch of the keys, the two set as values with no CC
 - Stereo output: the chorus spreads the mono voice into a left and a right, and the delay keeps them apart
 - Developed by ISGK Instruments (Ryo Ishigaki)
 - <https://github.com/risgk/midi_synthesizer_spms1>
@@ -642,7 +642,7 @@ whole unit per CC step: Coarse a semitone, reaching 5 octaves either way, and Fi
 reaching 60 either way. They are summed, so any pitch is reachable. They have no CC and hold 0.0
 by default; Osc 2's, on CC 85 and 76, set the interval or the detune between the oscillators.
 
-Pitch 1 Stretch (CC 81) widens the keys about note 60, ahead of the glide, by multiplying Pitch
+Pitch 1 Stretch, which has no CC, widens the keys about note 60, ahead of the glide, by multiplying Pitch
 In: every interval from note 60 grows by the same share, so the stretch is often given as how
 much an octave widens. At 0.0 (CC 4), where it powers up, the keys are as they are; from CC 5 the
 widening grows by a semitone's ratio a step, as the envelope's times do: 1.2 cents an octave at

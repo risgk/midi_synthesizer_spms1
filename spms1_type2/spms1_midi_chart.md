@@ -50,7 +50,6 @@
 |                            90 | x             | o             | Delay Time                           |
 |                            94 | x             | o             | Delay Mix                            |
 |                             5 | x             | o             | Pitch Glide (Portamento Time)        |
-|                            81 | x             | o             | Pitch Stretch (x1 to x2)             |
 |                             1 | x             | o             | General Mod Wheel (Unipolar)         |
 |                            16 | x             | o             | General 1 (Unipolar and Bipolar)     |
 |                            17 | x             | o             | General 2 (Unipolar and Bipolar)     |
