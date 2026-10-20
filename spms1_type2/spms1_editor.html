@@ -833,6 +833,11 @@
       color: var(--wire-param);
       font-weight: 600;
     }
+    /* A parameter with no CC is blue as on the Controls tab: its name and the value its slot holds. */
+    .row.own .lbl,
+    .row.own input.val {
+      color: var(--wire-param);
+    }
     /* A CC that also fills another parameter's slot, as Osc 2's amounts are on Osc 1's CCs: moving
        one moves the other, so the number stands out a little. */
     .row input.shared {
@@ -1859,6 +1864,7 @@
       const others = sharingCC(c);
       ccIn.classList.toggle('warn', RESERVED_CCS.has(cc));
       ccIn.classList.toggle('none', !cc);
+      row.classList.toggle('own', !cc && !c.general);
       ccIn.classList.toggle('shared', !RESERVED_CCS.has(cc) && others.length > 0);
       ccIn.title = RESERVED_CCS.has(cc)
         ? `CC ${cc} carries NRPN selection or data: its value is not sent`
