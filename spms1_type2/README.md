@@ -858,8 +858,8 @@ takes the output to the input at once, mid-glide too, as Glide at 0.0 does.
   where it powers up
 - A pitch envelope is wired by default too -- the envelope on the oscillator's Mod 1 input --
   so with CC 8 at the top, turning CC 13 down brings it in as the LFO goes out: the note starts a
-  semitone sharp at CC 119, an octave at CC 64 and two octaves at CC 4, and falls back with the
-  decay
+  semitone sharp at CC 119, an octave at CC 64 and two octaves at CC 4, and with CC 30 (Sustain)
+  turned down it falls back to pitch with the decay
 - Noise as a modulation source, a random jitter of the cutoff: CC 99 = 1, CC 98 = 20,
   CC 6 = 37 puts Noise 1's red output on the filter's Mod 2 input in the LFO's place, and CC 25
   crossfades it with the envelope. CC 6 = 36 takes the white instead, finer still. The red is on no mixer, and the
