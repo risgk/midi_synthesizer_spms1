@@ -439,8 +439,8 @@ run unread (see the examples below).
 Mixer 1 has no CC: its levels hold 0.0, so it is silent until a patch turns them up, as its
 category 4 values or by giving them CCs. Mixer 2 has a CC on its first three levels, CC 20, 21
 and 23, of which Level 1 and 2 power up at 0.7 and Level 3 at 0.0; its Level 4 has no CC and holds 0.0, so that
-input starts closed. Each mixer's Out Level is at 0.5: Mixer 1's has no CC and holds it, and
-Mixer 2's is on CC 112 and powers up at it, which sets how hard the audio drives the filter.
+input starts closed. Each mixer's Out Level has no CC and holds 0.5; Mixer 2's sets how hard the
+audio drives the filter.
 
 #### Entries (CC 98), category 1
 
@@ -739,8 +739,8 @@ sets how much of it is heard. The level is smoothed as the other levels are. The
 over a day at 48 kHz, and starts the same every time, so a render comes out the same.
 
 Filter 1 takes its audio input as it arrives, so how hard the input drives it, which is also what
-decides how far it runs into its own saturation, is set ahead of it: by Mixer 2 Out Level (CC
-112) in the default patch, which powers up at 0.5. Two oscillators at full level on Mixer 2 drive
+decides how far it runs into its own saturation, is set ahead of it: by Mixer 2 Out Level in the
+default patch, which has no CC and holds 0.5. Two oscillators at full level on Mixer 2 drive
 the filter twice as hard as one: turn Out Level down to keep the level, or leave it up to drive
 the saturation. The saturation sits on the resonance rather than the pass band: a low cutoff
 passes a loud note nearly clean, while turning the drive up rounds off the resonant peak.
