@@ -24,17 +24,18 @@
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Control                   102 | x             | o             | Osc 1 Wave (Saw to Square)           |
 | Change                    104 | x             | o             | Osc 2 Wave (Saw to Square)           |
-|                            13 | x             | o             | Osc Mod 1/2 Mix (EG to LFO)          |
-|                             8 | x             | o             | Osc Pitch Mod Amt                    |
-|                           114 | x             | o             | Osc Pulse Width (50% to 0%)          |
-|                           103 | x             | o             | Osc PW Mod Amt                       |
+|                            89 | x             | o             | Osc Pitch Mod 1 Amt (EG)             |
+|                            13 | x             | o             | Osc Pitch Mod 2 Amt (LFO)            |
+|                           114 | x             | o             | Osc PW (50% to 0%)                   |
+|                             8 | x             | o             | Osc PW Mod 1 Amt (EG)                |
+|                           103 | x             | o             | Osc PW Mod 2 Amt (LFO)               |
 |                            85 | x             | o             | Osc 2 Pitch Coarse (+-5 Octaves)     |
 |                            76 | x             | o             | Osc 2 Pitch Fine (+-60 Cents)        |
 |                            74 | x             | o             | Filter Cutoff                        |
 |                            71 | x             | o             | Filter Resonance                     |
-|                            25 | x             | o             | Filter Mod 1/2 Mix (EG to LFO)       |
+|                            24 | x             | o             | Filter Mod 1 Amt (EG)                |
+|                            25 | x             | o             | Filter Mod 2 Amt (LFO)               |
 |                             9 | x             | o             | Filter Pitch Amt                     |
-|                           117 | x             | o             | Filter Mod Amt                       |
 |                           112 | x             | o             | Filter Gain                          |
 |                            39 | x             | o             | Filter Mode (LP, Notch, HP)          |
 |                           118 | x             | o             | Mixer 1 Level 1                      |
