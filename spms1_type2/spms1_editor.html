@@ -348,6 +348,18 @@
       background: transparent;
       cursor: default;
     }
+    /* A parameter with no CC sets the value its own slot holds, sent as NRPN: blue, the colour of
+       a parameter's wire and of CC 0 on the Patch tab, so it stands apart from one a CC moves. */
+    .slider-knob-zone.own .slider-label,
+    .slider-knob-zone.own .slider-value {
+      color: var(--wire-param);
+    }
+    .slider-knob-zone.own input[type="range"]::-webkit-slider-thumb {
+      background: var(--wire-param);
+    }
+    .slider-knob-zone.own input[type="range"]::-moz-range-thumb {
+      background: var(--wire-param);
+    }
     .slider-value {
       min-width: 32px;
       text-align: right;
@@ -3058,6 +3070,7 @@
       const src = state.params[c.key];
       const routed = src !== undefined && src !== c.key;
       zone.classList.toggle('routed', routed);
+      zone.classList.toggle('own', ownValue);
       const others = sharingCC(c);
       const ccNum = zone.querySelector('.cc-num');
       ccNum.innerHTML =
