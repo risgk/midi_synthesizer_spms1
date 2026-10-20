@@ -2546,10 +2546,10 @@
   document.getElementById('btn-init').addEventListener('click', () => {
     pushHistory();
     state = defaultState();
-    // The parameters with no CC on the Controls tab are hidden again.
-    showNoCC = false;
-    document.getElementById('show-no-cc').checked = false;
-    try { localStorage.setItem(SHOW_NO_CC_KEY, ''); } catch (e) { /* storage unavailable */ }
+    // The parameters with no CC on the Controls tab are shown again.
+    showNoCC = true;
+    document.getElementById('show-no-cc').checked = true;
+    try { localStorage.setItem(SHOW_NO_CC_KEY, '1'); } catch (e) { /* storage unavailable */ }
     renderAll();
     fitView();
   });
@@ -3046,12 +3046,12 @@
 
   let sliderBefore = null;
 
-  // Parameters with no CC are left out of the controls unless asked for, and a CC given to one
+  // Parameters with no CC are shown on the controls unless asked not to, and a CC given to one
   // brings it back. Shown, its slider sets the value its slot holds, through NRPN. The choice is
   // kept, as the tab is.
   const SHOW_NO_CC_KEY = 'spms1-type2-editor-show-no-cc';
-  let showNoCC = false;
-  try { showNoCC = localStorage.getItem(SHOW_NO_CC_KEY) === '1'; } catch (e) { /* storage unavailable */ }
+  let showNoCC = true;
+  try { showNoCC = localStorage.getItem(SHOW_NO_CC_KEY) !== ''; } catch (e) { /* storage unavailable */ }
   document.getElementById('show-no-cc').checked = showNoCC;
   document.getElementById('show-no-cc').addEventListener('change', e => {
     showNoCC = e.target.checked;

@@ -89,9 +89,10 @@ Usage
 ### Web Editor
 
 - Cross-platform web-based parameter controller via Web MIDI API: "spms1_editor.html"
-    - Its Controls tab shows a slider for each parameter with a CC; those with none are hidden until
-      "Show parameters with no CC" is ticked or a CC is given to one, and the choice is remembered.
-      Shown, the slider of one with no CC sets the value its slot holds, sent as NRPN
+    - Its Controls tab shows a slider for each parameter, those with no CC in blue; they are hidden
+      when "Show parameters with no CC", ticked by default, is cleared, until a CC is given to one,
+      and the choice is remembered. The slider of one with no CC sets the value its slot holds,
+      sent as NRPN
     - A note in parentheses follows a parameter's name there: its range, as "(White to Red)" on
       Noise 1 Color, or, on a level or a modulation amount, what the patch routes to the input it
       scales, as "(Osc 1 Sub)" on Mixer 2 Level 3, kept up to date as the routing changes. On the
