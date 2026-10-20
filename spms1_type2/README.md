@@ -6,8 +6,8 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.3
 - Last-note priority with one note of memory: releasing the newest note while the one before it is still held goes back to that one, legato (for trills)
 - 48 kHz audio output: 24 bit through an I2S DAC, or PWM Audio (no DAC needed)
 - Oscillator: a sawtooth-to-square morph with pulse width (CC 114), and pulse width modulation (PWM) by the same two modulations as the pitch, the envelope and the LFO by default, on CC 8 and 103; and the sawtooth and the pulse on outputs of their own too
-- LFO: triangle (PolyBLAMP) and unipolar square (PolyBLEP), each on an output of its own, and a main output crossfading from one to the other (Wave, CC 33)
-- Filter: ZDF/TPT State Variable Filter (with a nonlinear leak on the band pass integrator, solved by the one-step Newton method), with low pass and high pass outputs and a main output crossfading from one to the other through a notch (Mode, CC 39)
+- LFO: triangle (PolyBLAMP) and unipolar square (PolyBLEP), each on an output of its own, and a main output crossfading from one to the other (Wave)
+- Filter: ZDF/TPT State Variable Filter (with a nonlinear leak on the band pass integrator, solved by the one-step Newton method), with low pass and high pass outputs and a main output crossfading from one to the other through a notch (Mode)
 - Chorus: mono in, stereo out, as a module in the run order
 - Delay: stereo, with feedback, as a module in the run order (up to 340 ms)
 - Pitch: the note's pitch as a module in the run order, with portamento as an exponential lag (CC 5), pitch bend past it (range as a value with no CC) and a stretch of the keys (CC 81)
@@ -276,8 +276,8 @@ clamp at 16 as a guard that ordinary use never reaches. The output clip comes la
 the resonance dial k turns negative and the loop oscillates.
 
 The filter puts out its low pass and high pass at once, as Out LP and Out HP, each through a DC
-blocker and an output clip of its own, and Out, the two crossfaded by Filter 1 Mode (CC 39, Filter
-Mode's in PRA32-U2). Each side stays at full over its own half and falls to nothing over the other.
+blocker and an output clip of its own, and Out, the two crossfaded by Filter 1 Mode, which has
+no CC. Each side stays at full over its own half and falls to nothing over the other.
 At 0.0 (CC 4), where it powers up, Out is the low
 pass alone; at 1.0 (CC 124) the high pass alone; and at 0.5 (CC 64) both at full, whose sum, the
 input less k·BP, is a notch at the cutoff with both sides of it passed whole. In between the notch
@@ -658,8 +658,8 @@ and the square its steps by PolyBLEP, so at the top of the rate range, 220 Hz, w
 audible tone, the square's aliases are 41 dB down on it, rather than 24 dB without. The square is
 unipolar: 1.0 while the triangle is above zero and 0.0 while it is below, stepping where it
 crosses, so it gates, or trills up from the note on an oscillator's pitch, where the triangle
-swings about zero for a vibrato; its inverted output runs 0.0 and -1.0. LFO 1 Wave (CC 33, LFO
-Wave's in PRA32-U2) crossfades Out in a straight line from the triangle at 0.0 (CC 4), where it
+swings about zero for a vibrato; its inverted output runs 0.0 and -1.0. LFO 1 Wave, which has no
+CC, crossfades Out in a straight line from the triangle at 0.0 (CC 4), where it
 powers up, to the square at 1.0 (CC 124), and is smoothed as the level is, so on the way the
 middle of the swing moves up from zero to 0.5. Out is what the default patch routes, so the LFO
 is a triangle until Wave is turned up.

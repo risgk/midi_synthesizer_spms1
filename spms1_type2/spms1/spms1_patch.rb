@@ -467,7 +467,6 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_EG_1_ATTACK          , 73)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_EG_1_DECAY           , 75)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_EG_1_SUSTAIN         , 30)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_WAVE           , 33)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_RATE           , 3)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_LEVEL          , 113)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_PITCH_1_GLIDE        , 5)
@@ -490,7 +489,6 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_MIXER_2_LEVEL_1      , 20)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_MIXER_2_LEVEL_2      , 21)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_MIXER_2_LEVEL_4      , 23)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_MODE        , 39)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_CUTOFF      , 74)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_PITCH_AMT   , 9)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_MOD_1_AMT   , 24)
@@ -567,7 +565,6 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 73 , 4  ) # EG 1 Attack
   C.set_midi_cc_value(midi_ch, 75 , 94 ) # EG 1 Decay
   C.set_midi_cc_value(midi_ch, 30 , 124) # EG 1 Sustain
-  C.set_midi_cc_value(midi_ch, 33 , 4  ) # LFO 1 Wave
   C.set_midi_cc_value(midi_ch, 3  , 64 ) # LFO 1 Rate
   C.set_midi_cc_value(midi_ch, 113, 4  ) # LFO 1 Level
   C.set_midi_cc_value(midi_ch, 5  , 4  ) # Pitch 1 Glide
@@ -590,7 +587,6 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 20 , 88 ) # Mixer 2 Level 1
   C.set_midi_cc_value(midi_ch, 21 , 88 ) # Mixer 2 Level 2
   C.set_midi_cc_value(midi_ch, 23 , 4  ) # Mixer 2 Level 4
-  C.set_midi_cc_value(midi_ch, 39 , 4  ) # Filter 1 Mode
   C.set_midi_cc_value(midi_ch, 74 , 64 ) # Filter 1 Cutoff
   C.set_midi_cc_value(midi_ch, 9  , 4  ) # Filter 1 Pitch Amt
   C.set_midi_cc_value(midi_ch, 24 , 4  ) # Filter 1 Mod 1 Amt

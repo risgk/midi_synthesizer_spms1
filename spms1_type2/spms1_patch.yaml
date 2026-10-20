@@ -218,13 +218,13 @@ controls:
   - { entry: 3, module: EG_1,      key: RELEASE_SW,   label: Release Switch, cc: 0,   value: 124, set: set_release_switch }
   - { entry: 4, module: EG_1,      key: LEVEL,        label: Level,        cc: 0,   value: 124, set: set_level }
   # LFO 1 in the editor: the waveform, the rate and its modulation, then the level and its
-  # modulation. Wave crossfades Out from the triangle (0.0) to the square (1.0), on CC 33, LFO
-  # Wave's in PRA32-U2, and powers up at CC 4, 0.0, the triangle. Each modulation's Amt, listed
+  # modulation. Wave crossfades Out from the triangle (0.0) to the square (1.0); it has no CC and
+  # holds 0.0, the triangle. Each modulation's Amt, listed
   # after what it moves, has no CC and holds 1.0, a depth of 1.0. Rate Mod In is left unrouted, so
   # routing a source to it is enough; Level Mod In takes the mod wheel, which adds to Level
   # (CC 113) up to its top. Level powers up at CC 4, 0.0, so the LFO is still until the wheel
   # moves.
-  - { entry: 5, module: LFO_1,     key: WAVE,         label: Wave,         cc: 33,  value: 4, set: set_wave }
+  - { entry: 5, module: LFO_1,     key: WAVE,         label: Wave,         cc: 0,   value: 4, set: set_wave }
   - { entry: 6, module: LFO_1,     key: RATE,         label: Rate,         cc: 3,   value: 64, set: set_rate }
   - { entry: 7, module: LFO_1,     key: RATE_MOD_AMT, label: Rate Mod Amt, cc: 0,   value: 124, set: set_rate_modulation_amount }
   - { entry: 8, module: LFO_1,     key: LEVEL,        label: Level,        cc: 113, value: 4, set: set_level }
@@ -307,9 +307,8 @@ controls:
   # the pulse width. Both power up at CC 4, 0.0, so neither moves the cutoff until it is turned
   # up. Cutoff powers up at CC 64, 0.5. A modulation that closes the filter takes an
   # inverted source, such as EG 1 Out Inv. Mode crossfades Out from the low pass (0.0) through a
-  # notch (0.5) to the high pass (1.0), on CC 39, Filter Mode's in PRA32-U2, and powers up at CC 4,
-  # 0.0, the low pass.
-  - { entry: 44, module: FILTER_1,  key: MODE,         label: Mode,         cc: 39,  value: 4, set: set_mode }
+  # notch (0.5) to the high pass (1.0); it has no CC and holds 0.0, the low pass.
+  - { entry: 44, module: FILTER_1,  key: MODE,         label: Mode,         cc: 0,   value: 4, set: set_mode }
   - { entry: 45, module: FILTER_1,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 64, set: set_cutoff }
   - { entry: 46, module: FILTER_1,  key: PITCH_AMT, label: Pitch Amt, cc: 9, value: 4, set: set_pitch_amount }
   - { entry: 47, module: FILTER_1,  key: MOD_1_AMT,    label: Mod 1 Amt,    cc: 24,  value: 4, set: set_modulation_1_amount }
