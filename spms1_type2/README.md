@@ -201,8 +201,8 @@ shorten Amount to Amt and Polarity to Pol.
 The note's pitch reaches the oscillator through Pitch 1, which glides from one note to the next:
 portamento. Pitch 1 Glide is on CC 5, Portamento Time in the MIDI spec, and powers up at 0.0, where
 the portamento is off and passes the pitch through exactly as it arrives. Pitch 1 Glide Switch
-(CC 34) turns the portamento on and off without moving Glide: on from CC 64, as a MIDI switch is,
-and on at power-up, at CC 124. Pitch Bend comes in on Pitch 1
+turns the portamento on and off without moving Glide: on from a value of 64, as a MIDI switch is.
+It has no CC and holds on, the value 124. Pitch Bend comes in on Pitch 1
 Bend In, which is added to the output past the glide, so the bend acts at once and reaches the
 oscillator and the filter's keyboard tracking alike. Pitch 1 Bend Amt (CC 57) is the bend range,
 half a semitone a step: 2 semitones either way at CC 8, where it powers up, an octave at CC 28 and
@@ -679,10 +679,10 @@ envelope runs one way, 0.0 to 1.0; turning it the other way up is for Out Inv, t
 negated, from 0.0 down to -1.0, or for Filter 1 Mod Amt on the cutoff. The default patch leaves
 Out Inv unrouted.
 
-EG 1 Release Switch, on CC 105, picks the release, after the note's gate falls: on from CC 64,
-as a MIDI switch is, it runs at the decay's rate, set by EG 1 Decay; off, below CC 64, it runs at
-the shortest decay's, 10 ms, whatever the decay is, so a long decay still ends a note short. It
-powers up on, at CC 124. It is a switch, so it is not smoothed.
+EG 1 Release Switch picks the release, after the note's gate falls: on from a value of 64, as a
+MIDI switch is, it runs at the decay's rate, set by EG 1 Decay; off, below 64, it runs at the
+shortest decay's, 10 ms, whatever the decay is, so a long decay still ends a note short. It has
+no CC and holds on, the value 124. It is a switch, so it is not smoothed.
 
 Where a modulation has a Mod Pol, as LFO 1's two do, its depth is Mod Amt times
 Mod Pol, the second doubled: Mod Pol passes
@@ -827,7 +827,7 @@ semitone short; nine tenths of the way take a third of it. At CC 4 and below, 0.
 is off, and its output is its input exactly. The glide is exponential, quick at first and slowing
 as it lands, as an analog synth's portamento is, and it starts from wherever the output is, so a
 note played during a glide takes it over from there. The time is not smoothed: a change in it
-changes only how fast the output moves, so it cannot step it. Glide Switch off, below CC 64,
+changes only how fast the output moves, so it cannot step it. Glide Switch off, below 64,
 takes the output to the input at once, mid-glide too, as Glide at 0.0 does.
 
 #### Examples

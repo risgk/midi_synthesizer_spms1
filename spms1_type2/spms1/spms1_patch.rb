@@ -454,14 +454,12 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_EG_1_ATTACK        , 73)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_EG_1_DECAY         , 75)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_EG_1_SUSTAIN       , 30)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_EG_1_RELEASE_SW    , 105)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_RATE         , 3)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_LEVEL        , 113)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_WAVE         , 33)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_MIXER_1_LEVEL_1    , 118)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_MIXER_1_LEVEL_2    , 119)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_PITCH_1_GLIDE      , 5)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_PITCH_1_GLIDE_SW   , 34)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_PITCH_1_STRETCH    , 22)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_PITCH_1_BEND_AMT   , 57)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_MOD_MIX      , 13)
@@ -560,14 +558,12 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 73 , 4  ) # EG 1 Attack
   C.set_midi_cc_value(midi_ch, 75 , 94 ) # EG 1 Decay
   C.set_midi_cc_value(midi_ch, 30 , 124) # EG 1 Sustain
-  C.set_midi_cc_value(midi_ch, 105, 124) # EG 1 Release Switch
   C.set_midi_cc_value(midi_ch, 3  , 64 ) # LFO 1 Rate
   C.set_midi_cc_value(midi_ch, 113, 124) # LFO 1 Level
   C.set_midi_cc_value(midi_ch, 33 , 4  ) # LFO 1 Wave
   C.set_midi_cc_value(midi_ch, 118, 4  ) # Mixer 1 Level 1
   C.set_midi_cc_value(midi_ch, 119, 4  ) # Mixer 1 Level 2
   C.set_midi_cc_value(midi_ch, 5  , 4  ) # Pitch 1 Glide
-  C.set_midi_cc_value(midi_ch, 34 , 124) # Pitch 1 Glide Switch
   C.set_midi_cc_value(midi_ch, 22 , 4  ) # Pitch 1 Stretch
   C.set_midi_cc_value(midi_ch, 57 , 8  ) # Pitch 1 Bend Amt
   C.set_midi_cc_value(midi_ch, 13 , 124) # Osc 1 Mod 1/2 Mix

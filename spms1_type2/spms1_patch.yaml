@@ -200,13 +200,13 @@ inputs:
 # bus, unless `source` (a signal key) says otherwise. `set` is the method of the module that
 # takes a parameter's value each buffer. Why the defaults are what they are is above default_order.
 controls:
-  # EG 1: Release Switch is on CC 105 and powers up on, at CC 124, the release following the
-  # decay; below CC 64 the release is the shortest decay's, 10 ms. Level has no CC and holds 1.0,
+  # EG 1: Release Switch has no CC and holds on, the value 124, the release following the decay;
+  # below 64 the release is the shortest decay's, 10 ms. Level has no CC and holds 1.0,
   # passing the envelope as it is.
   - { entry: 0, module: EG_1,      key: ATTACK,       label: Attack,       cc: 73,  value: 4, set: set_attack }
   - { entry: 1, module: EG_1,      key: DECAY,        label: Decay,        cc: 75,  value: 94, set: set_decay }
   - { entry: 2, module: EG_1,      key: SUSTAIN,      label: Sustain,      cc: 30,  value: 124, set: set_sustain }
-  - { entry: 3, module: EG_1,      key: RELEASE_SW,   label: Release Switch, cc: 105, value: 124, set: set_release_switch }
+  - { entry: 3, module: EG_1,      key: RELEASE_SW,   label: Release Switch, cc: 0,   value: 124, set: set_release_switch }
   - { entry: 4, module: EG_1,      key: LEVEL,        label: Level,        cc: 0,   value: 124, set: set_level }
   # LFO 1: Wave crossfades Out from the triangle (0.0) to the square (1.0), on CC 33, LFO Wave's in
   # PRA32-U2, and powers up at CC 4, 0.0, the triangle. Each modulation's Amt and Pol, listed after
@@ -228,12 +228,12 @@ controls:
   - { entry: 14, module: MIXER_1,   key: LEVEL_3,      label: Level 3,      cc: 0,   value: 4, set: set_level_3 }
   - { entry: 15, module: MIXER_1,   key: OUT_POL,    label: Out Pol,    cc: 0,   value: 124, bipolar: true, set: set_out_polarity }
   # Pitch 1: Glide is on CC 5, Portamento Time in the MIDI spec, and powers up at CC 4, 0.0, where
-  # the portamento is off. Glide Switch is on CC 34 and powers up on, at CC 124, so Glide alone
-  # sets the portamento until the switch turns it off, below CC 64. Stretch is on CC 22, Stretch
+  # the portamento is off. Glide Switch has no CC and holds on, the value 124, so Glide alone
+  # sets the portamento unless the switch is set off, below 64. Stretch is on CC 22, Stretch
   # Tune's in PRA32-U2, and powers up at CC 4, 0.0, where the keys are as they are. Bend Amt is the
   # bend range, half a semitone a step: CC 8, its power-up value, is 2 semitones either way.
   - { entry: 16, module: PITCH_1,   key: GLIDE,        label: Glide,        cc: 5, value: 4, set: set_glide }
-  - { entry: 17, module: PITCH_1,   key: GLIDE_SW,     label: Glide Switch, cc: 34, value: 124, set: set_glide_switch }
+  - { entry: 17, module: PITCH_1,   key: GLIDE_SW,     label: Glide Switch, cc: 0,  value: 124, set: set_glide_switch }
   - { entry: 18, module: PITCH_1,    key: STRETCH, label: Stretch, cc: 22,  value: 4, set: set_stretch }
   - { entry: 19, module: PITCH_1,    key: BEND_AMT,  label: Bend Amt,   cc: 57,  value: 8, set: set_bend_amount }
   # Osc 1 in the editor: the pitch, its two modulations and how far their sum moves the pitch,

@@ -47,7 +47,6 @@
 |                            73 | x             | o             | EG Attack (Time)                     |
 |                            75 | x             | o             | EG Decay (Time)                      |
 |                            30 | x             | o             | EG Sustain (Level)                   |
-|                           105 | x             | o             | EG Release Switch [Off|On]           |
 |                             3 | x             | o             | LFO Rate                             |
 |                           113 | x             | o             | LFO Level                            |
 |                            33 | x             | o             | LFO Wave (Triangle to Square)        |
@@ -58,7 +57,6 @@
 |                            92 | x             | o             | Delay Feedback                       |
 |                            94 | x             | o             | Delay Mix                            |
 |                             5 | x             | o             | Pitch Glide (Portamento Time)        |
-|                            34 | x             | o             | Pitch Glide Switch [Off|On]          |
 |                            57 | x             | o             | Pitch Bend Amt (Pitch Bend Range)    |
 |                            22 | x             | o             | Pitch Stretch (x1 to x2)             |
 |                             1 | x             | o             | General Mod Wheel (Unipolar)         |
