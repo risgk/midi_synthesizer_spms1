@@ -1,6 +1,6 @@
 module Spms1
   # Amplifier that smooths the gain parameter to avoid zipper noise. Its two modulation inputs are
-  # crossfaded by Mod Mix and applied directly without smoothing.
+  # crossfaded by Mod 1/2 Mix and applied directly without smoothing.
   class Amp
     # Blend at the reference rate on the line below, for each of two cascaded stages. The two move
     # together: their product is what fixes the time constant, so changing one without the other
@@ -35,9 +35,9 @@ module Spms1
       @gain = clamped_gain + clamped_gain
     end
 
-    # Mod Mix is unipolar, [0.0, 1.0], and crossfades the gain's modulation in a straight line from
-    # Mod 1 In alone at 0.0 to Mod 2 In alone at 1.0. Smoothed as the gain is, so that a sparse CC
-    # does not step it.
+    # Mod 1/2 Mix is unipolar, [0.0, 1.0], and crossfades the gain's modulation in a straight line
+    # from Mod 1 In alone at 0.0 to Mod 2 In alone at 1.0. Smoothed as the gain is, so that a sparse
+    # CC does not step it.
     def set_modulation_mix(mix)
       @modulation_mix = (mix < 0.0) ? 0.0 : ((mix > 1.0) ? 1.0 : mix)
     end
@@ -51,8 +51,8 @@ module Spms1
         @current_modulation_mix = Dsp.smooth(@stage_1_modulation_mix, @current_modulation_mix, @smoothing_target_blend)
       end
 
-      # Each side weighted on its own, so that at either end of Mod Mix the one input passes
-      # exactly as it is. The amp's modulation is the one in the synth that is clamped on the way
+      # Each side weighted on its own, so that at either end of Mod 1/2 Mix the one input
+      # passes exactly as it is. The amp's modulation is the one in the synth that is clamped on the way
       # in: a modulation scales the gain down, and must not be able to scale it up however loud it
       # arrives. Negative still inverts. Gain reaches 2.0, so the output is held to -1.0 and +1.0, as a mixer's is, which
       # the default patch, at a gain of 1.0, never reaches. One nested ternary, for the reason

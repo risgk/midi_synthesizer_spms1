@@ -1223,7 +1223,7 @@
         </select>
       </div>
       <label class="check"><input type="checkbox" id="opt-cc" checked> Include CC values</label>
-      <label class="check"><input type="checkbox" id="opt-omit-msb" checked> Omit CC 99 when unchanged</label>
+      <label class="check"><input type="checkbox" id="opt-omit-msb" checked> Omit CC#99 when unchanged</label>
       <label class="check"><input type="checkbox" id="opt-comments" checked> Comments</label>
       <label class="check"><input type="checkbox" id="opt-one-line"> One line (hex, no comments)</label>
       <textarea id="export-text" readonly spellcheck="false"></textarea>
@@ -1377,7 +1377,7 @@
       {"entry":49,"module":"FILTER_1","key":"MOD_POLARITY","label":"Mod Polarity","bipolar":true,"cc":51,"value":124,"controller":false,"slots":[["FILTER_1_MOD_POLARITY","Mod Polarity",true]]},
       {"entry":50,"module":"FILTER_1","key":"RESONANCE","label":"Resonance","bipolar":false,"cc":71,"value":64,"controller":false,"slots":[["FILTER_1_RESONANCE","Resonance",false]]},
       {"entry":51,"module":"AMP_1","key":"GAIN","label":"Gain","bipolar":false,"cc":15,"value":64,"controller":false,"slots":[["AMP_1_GAIN","Gain",false]]},
-      {"entry":52,"module":"AMP_1","key":"MOD_MIX","label":"Mod Mix","bipolar":false,"cc":36,"value":124,"controller":false,"slots":[["AMP_1_MOD_MIX","Mod Mix",false]]},
+      {"entry":52,"module":"AMP_1","key":"MOD_1_2_MIX","label":"Mod 1/2 Mix","bipolar":false,"cc":36,"value":124,"controller":false,"slots":[["AMP_1_MOD_1_2_MIX","Mod 1/2 Mix",false]]},
       {"entry":53,"module":"CHORUS_1","key":"MIX","label":"Mix","bipolar":false,"cc":93,"value":64,"controller":false,"slots":[["CHORUS_1_MIX","Mix",false]]},
       {"entry":54,"module":"CHORUS_1","key":"RATE","label":"Rate","bipolar":false,"cc":58,"value":64,"controller":false,"slots":[["CHORUS_1_RATE","Rate",false]]},
       {"entry":55,"module":"CHORUS_1","key":"DEPTH","label":"Depth","bipolar":false,"cc":59,"value":64,"controller":false,"slots":[["CHORUS_1_DEPTH","Depth",false]]},
@@ -1594,7 +1594,7 @@
     });
     CONTROL_ITEMS.forEach(c => {
       const cc = state.cc[c.key];
-      e.push({ nrpn: 384 + c.entry, value: cc, comment: `${c.full} CC = ${cc || 'none'}` });
+      e.push({ nrpn: 384 + c.entry, value: cc, comment: `${c.full} CC# = ${cc || 'none'}` });
     });
     PARAM_ITEMS.forEach(p => {
       e.push({ nrpn: 512 + p.entry, value: paramValue(p.key), comment: `${p.full} value with no CC = ${paramValue(p.key)}` });
@@ -1611,7 +1611,7 @@
       users.get(cc).push(c.full);
     });
     return [...users.keys()].sort((a, b) => a - b)
-      .map(cc => ({ cc, value: ccValue(cc), comment: `CC ${cc}: ${users.get(cc).join(', ')}` }));
+      .map(cc => ({ cc, value: ccValue(cc), comment: `CC#${cc}: ${users.get(cc).join(', ')}` }));
   }
 
   // Each item is one line: the bytes of one NRPN write or one CC, with its comment.
@@ -1656,7 +1656,7 @@
       }
     } else {
       const rows = [];
-      if (comments) rows.push(`; SPMS-1 (type-2) patch "${state.name}"`, '; NRPN MSB (CC 99), LSB (CC 98), value (CC 6)');
+      if (comments) rows.push(`; SPMS-1 (type-2) patch "${state.name}"`, '; NRPN MSB (CC#99), LSB (CC#98), value (CC#6)');
       for (const l of lines) {
         if (!l.nrpn) continue;
         const r = l.nrpn.map(v => String(v).padStart(3)).join(', ');
@@ -1842,7 +1842,7 @@
   // parameter's control slot is its own, which only the parameter reads, so it has none.
   function controlRowHTML(c, withInput) {
     const [[slot, label, bipolar]] = c.slots;
-    const tip = bipolar ? 'Bipolar: CC 64 is the centre' : 'Unipolar';
+    const tip = bipolar ? 'Bipolar: value 64 is the centre' : 'Unipolar';
     return `<div class="row ctrl" data-ctrl="${c.key}">
       ${withInput ? `<span class="port in param" data-dst="PR:${c.key}" title="Where ${escapeHTML(c.full)} takes its value (per buffer)"></span>` : ''}
       <span class="lbl" title="${tip}">${escapeHTML(label)}</span>
@@ -1882,7 +1882,7 @@
       }
     }
     if (node.controls && node.controls.length) {
-      h += `<div class="sep"><span>${node.module ? 'Parameters' : 'Controls'}</span><span>CC</span><span>Value</span><span class="norm-head">Norm</span></div>`;
+      h += `<div class="sep"><span>${node.module ? 'Parameters' : 'Controls'}</span><span>CC#</span><span>Value</span><span class="norm-head">Norm</span></div>`;
       for (const c of node.controls) h += controlRowHTML(c, !!node.module);
     }
     return h + '<div class="rows-end"></div>';
@@ -1923,14 +1923,14 @@
       row.classList.toggle('own', !cc && !c.controller);
       ccIn.classList.toggle('shared', !RESERVED_CCS.has(cc) && others.length > 0);
       ccIn.title = RESERVED_CCS.has(cc)
-        ? `CC ${cc} carries NRPN selection or data: its value is not sent`
-        : others.length ? `CC number, 0 for none. CC ${cc} also moves ${others.join(', ')}`
+        ? `CC#${cc} carries NRPN selection or data: its value is not sent`
+        : others.length ? `CC number, 0 for none. CC#${cc} also moves ${others.join(', ')}`
         : 'CC number, 0 for none';
       valIn.disabled = !cc && c.controller;
       if (document.activeElement !== valIn) valIn.value = cc ? ccValue(cc) : c.controller ? '' : paramValue(c.key);
       valIn.placeholder = valIn.disabled ? '—' : '';
       valIn.title = cc
-        ? `Value of CC ${cc}, shared by every slot on it`
+        ? `Value of CC#${cc}, shared by every slot on it`
         : c.controller ? 'No CC: the slot holds 0.0' : 'No CC: the slot holds this value, sent as NRPN';
     });
     world.querySelectorAll('.norm[data-slot]').forEach(norm => {
@@ -3104,10 +3104,10 @@
       const others = sharingCC(c);
       const ccNum = zone.querySelector('.cc-num');
       ccNum.innerHTML =
-        (!cc ? (ownValue ? '' : '(no CC)') : RESERVED_CCS.has(cc) ? `(CC ${cc}, reserved)` : `(CC ${cc})`) +
+        (!cc ? (ownValue ? '' : '(no CC)') : RESERVED_CCS.has(cc) ? `(CC#${cc}, reserved)` : `(CC#${cc})`) +
         (routed ? ` ← ${sourceHTML(src)}` : '');
       ccNum.classList.toggle('shared', others.length > 0);
-      ccNum.title = others.length ? `CC ${cc} also moves ${others.join(', ')}` : '';
+      ccNum.title = others.length ? `CC#${cc} also moves ${others.join(', ')}` : '';
       zone.title = routed ? `${c.full} reads ${sigLabel(src)}. This slider sets only its own slot, which other wires may read.` : '';
       slider.disabled = !usable;
       const value = ownValue ? paramValue(c.key) : usable ? ccValue(cc) : 64;
@@ -3132,7 +3132,7 @@
     if (document.activeElement !== modWheel) modWheel.value = usable ? ccValue(cc) : 4;
     const v = signalNorm('MOD_WHEEL');
     document.getElementById('mod-wheel-zone').title = usable
-      ? `Mod Wheel (CC ${cc}): ${ccValue(cc)}${v ? `, ${v.text}` : ''}`
+      ? `Mod Wheel (CC#${cc}): ${ccValue(cc)}${v ? `, ${v.text}` : ''}`
       : 'Mod Wheel: no CC in the patch, so the slot holds 0.0';
   }
 

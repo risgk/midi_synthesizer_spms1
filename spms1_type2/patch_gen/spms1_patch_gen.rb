@@ -301,15 +301,15 @@ end
 def readme_tables(ja:)
   s = SPEC
   t = {}
-  t['inputs'] = side_by_side(['CC 98', ja ? 'モジュール入力' : 'Module input'],
+  t['inputs'] = side_by_side(['CC#98', ja ? 'モジュール入力' : 'Module input'],
     s.inputs.map { |i| [i['entry'], s.full_label(i, (ja && i['name_ja']) || i['name'])] }, 2)
-  t['params'] = side_by_side(['CC 98', ja ? 'パラメータ' : 'Parameter'],
+  t['params'] = side_by_side(['CC#98', ja ? 'パラメータ' : 'Parameter'],
     s.params.map { |c| [c['entry'], s.full_label(c)] }, 3)
   sep = ja ? '、' : ', '
   rows = s.controllers.map do |c|
     "| #{c['entry']} | #{s.full_label(c)} | #{s.slots_of(c).map { |sig| sig['label'] || s.full_label(c) }.join(sep)} |"
   end
-  t['controllers'] = (["| CC 98 | #{ja ? 'CC の割り当て先' : 'CC for'} | #{ja ? '埋めるスロット' : 'Fills'} |",
+  t['controllers'] = (["| CC#98 | #{ja ? 'CC の割り当て先' : 'CC for'} | #{ja ? '埋めるスロット' : 'Fills'} |",
                     '| ----- | ------ | ----- |'] + rows).join("\n") + "\n"
   rows = ["| 0 | #{ja ? 'なし（実行順の終端）' : 'None (ends the run order)'} |"] +
          s.modules.map { |m| "| #{m['id']} | #{m['label']} |" }
