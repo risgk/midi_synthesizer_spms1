@@ -174,6 +174,7 @@ module Spms1
       @resonance = 0.0
       @modulation_1_amount = 0.0
       @modulation_2_amount = 0.0
+      @modulation_polarity = 1.0
       @pitch_amount = 0.0
       @mode_lp = 1.0
       @mode_hp = 0.0
@@ -182,6 +183,7 @@ module Spms1
       @stage_1_resonance = 0.0
       @stage_1_modulation_1_amount = 0.0
       @stage_1_modulation_2_amount = 0.0
+      @stage_1_modulation_polarity = 1.0
       @stage_1_pitch_amount = 0.0
       @stage_1_mode_lp = 1.0
       @stage_1_mode_hp = 0.0
@@ -189,6 +191,7 @@ module Spms1
       @current_resonance = 0.0
       @current_modulation_1_amount = 0.0
       @current_modulation_2_amount = 0.0
+      @current_modulation_polarity = 1.0
       @current_pitch_amount = 0.0
       @current_mode_lp = 1.0
       @current_mode_hp = 0.0
@@ -216,22 +219,30 @@ module Spms1
       update_coefficients
     end
 
-    # Every parameter is unipolar, [0.0, 1.0], which is what the smoothing, the modulation sum and
-    # the table lookups below are written against.
+    # Every parameter but Mod Pol is unipolar, [0.0, 1.0], which is what the smoothing, the
+    # modulation sum and the table lookups below are written against.
     # Cutoff range: MIDI note 15 (19 Hz) at 0.0, MIDI note 75 (622 Hz) at 0.5, MIDI note 135 (20 kHz) at 1.0.
     def set_cutoff(cutoff)
       @cutoff = (cutoff < 0.0) ? 0.0 : ((cutoff > 1.0) ? 1.0 : cutoff)
     end
 
     # Each modulation amount is unipolar, [0.0, 1.0], a plain multiplier on its input: at 1.0 a
-    # unit of input is the whole cutoff range, and at 0.0 the input leaves the cutoff alone. A
-    # modulation that closes the filter takes an inverted source, such as EG 1 Out Inv.
+    # unit of input is the whole cutoff range, and at 0.0 the input leaves the cutoff alone. The
+    # polarity multiplies their sum.
     def set_modulation_1_amount(amount)
       @modulation_1_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
     end
 
     def set_modulation_2_amount(amount)
       @modulation_2_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
+    end
+
+    # Mod Pol is bipolar, [-0.5, 0.5], and doubled into a multiplier on both modulations: at +0.5
+    # they move the cutoff as their amounts say, at -0.5 the other way, so the envelope closes the
+    # filter, and at 0.0 not at all.
+    def set_modulation_polarity(polarity)
+      clamped = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
+      @modulation_polarity = clamped + clamped
     end
 
     # Pitch Amt is unipolar, [0.0, 1.0], how far the cutoff follows Pitch In, the keyboard
@@ -385,6 +396,8 @@ module Spms1
       @current_modulation_1_amount = Dsp.smooth(@stage_1_modulation_1_amount, @current_modulation_1_amount, @smoothing_target_blend)
       @stage_1_modulation_2_amount = Dsp.smooth(@modulation_2_amount, @stage_1_modulation_2_amount, @smoothing_target_blend)
       @current_modulation_2_amount = Dsp.smooth(@stage_1_modulation_2_amount, @current_modulation_2_amount, @smoothing_target_blend)
+      @stage_1_modulation_polarity = Dsp.smooth(@modulation_polarity, @stage_1_modulation_polarity, @smoothing_target_blend)
+      @current_modulation_polarity = Dsp.smooth(@stage_1_modulation_polarity, @current_modulation_polarity, @smoothing_target_blend)
       @stage_1_pitch_amount = Dsp.smooth(@pitch_amount, @stage_1_pitch_amount, @smoothing_target_blend)
       @current_pitch_amount = Dsp.smooth(@stage_1_pitch_amount, @current_pitch_amount, @smoothing_target_blend)
       @stage_1_mode_lp = Dsp.smooth(@mode_lp, @stage_1_mode_lp, @smoothing_target_blend)
@@ -395,7 +408,7 @@ module Spms1
       # The pitch and modulation inputs arrive as they are; clamping total_cutoff below is what holds
       # the table lookup in range, and a source that swings both ways moves the cutoff both ways.
       # Clamped without a comparison, as clip_output does it.
-      modulation = (@current_modulation_1_input * @current_modulation_1_amount) + (@current_modulation_2_input * @current_modulation_2_amount)
+      modulation = ((@current_modulation_1_input * @current_modulation_1_amount) + (@current_modulation_2_input * @current_modulation_2_amount)) * @current_modulation_polarity
       total_cutoff = @current_cutoff + @current_pitch_input * @current_pitch_amount + modulation
       over  = total_cutoff - 1.0
       under = 0.0 - total_cutoff

@@ -113,14 +113,15 @@ SLOT_FILTER_1_CUTOFF       = 173
 SLOT_FILTER_1_PITCH_AMT    = 174
 SLOT_FILTER_1_MOD_1_AMT    = 175
 SLOT_FILTER_1_MOD_2_AMT    = 176
-SLOT_FILTER_1_RESONANCE    = 177
-SLOT_AMP_1_GAIN            = 178
-SLOT_CHORUS_1_MIX          = 179
-SLOT_CHORUS_1_RATE         = 180
-SLOT_CHORUS_1_DEPTH        = 181
-SLOT_DELAY_1_MIX           = 182
-SLOT_DELAY_1_TIME          = 183
-SLOT_DELAY_1_FEEDBACK      = 184
+SLOT_FILTER_1_MOD_POL      = 177
+SLOT_FILTER_1_RESONANCE    = 178
+SLOT_AMP_1_GAIN            = 179
+SLOT_CHORUS_1_MIX          = 180
+SLOT_CHORUS_1_RATE         = 181
+SLOT_CHORUS_1_DEPTH        = 182
+SLOT_DELAY_1_MIX           = 183
+SLOT_DELAY_1_TIME          = 184
+SLOT_DELAY_1_FEEDBACK      = 185
 
 # NRPN parameter numbers: (MSB << 7) | LSB, where the MSB picks a category and the LSB an entry.
 #   0..127   active_modules[slot]
@@ -210,14 +211,15 @@ NRPN_SOURCE_FILTER_1_CUTOFF       = 301
 NRPN_SOURCE_FILTER_1_PITCH_AMT    = 302
 NRPN_SOURCE_FILTER_1_MOD_1_AMT    = 303
 NRPN_SOURCE_FILTER_1_MOD_2_AMT    = 304
-NRPN_SOURCE_FILTER_1_RESONANCE    = 305
-NRPN_SOURCE_AMP_1_GAIN            = 306
-NRPN_SOURCE_CHORUS_1_MIX          = 307
-NRPN_SOURCE_CHORUS_1_RATE         = 308
-NRPN_SOURCE_CHORUS_1_DEPTH        = 309
-NRPN_SOURCE_DELAY_1_MIX           = 310
-NRPN_SOURCE_DELAY_1_TIME          = 311
-NRPN_SOURCE_DELAY_1_FEEDBACK      = 312
+NRPN_SOURCE_FILTER_1_MOD_POL      = 305
+NRPN_SOURCE_FILTER_1_RESONANCE    = 306
+NRPN_SOURCE_AMP_1_GAIN            = 307
+NRPN_SOURCE_CHORUS_1_MIX          = 308
+NRPN_SOURCE_CHORUS_1_RATE         = 309
+NRPN_SOURCE_CHORUS_1_DEPTH        = 310
+NRPN_SOURCE_DELAY_1_MIX           = 311
+NRPN_SOURCE_DELAY_1_TIME          = 312
+NRPN_SOURCE_DELAY_1_FEEDBACK      = 313
 
 # A CC number of 0 means the control has no CC: a parameter's control slot then holds its NRPN_VALUE_*
 # below, whatever CC it had before, so a patch sets it alone, and a controller slot holds 0.0.
@@ -270,15 +272,16 @@ NRPN_CC_FILTER_1_CUTOFF       = 429
 NRPN_CC_FILTER_1_PITCH_AMT    = 430
 NRPN_CC_FILTER_1_MOD_1_AMT    = 431
 NRPN_CC_FILTER_1_MOD_2_AMT    = 432
-NRPN_CC_FILTER_1_RESONANCE    = 433
-NRPN_CC_AMP_1_GAIN            = 434
-NRPN_CC_CHORUS_1_MIX          = 435
-NRPN_CC_CHORUS_1_RATE         = 436
-NRPN_CC_CHORUS_1_DEPTH        = 437
-NRPN_CC_DELAY_1_MIX           = 438
-NRPN_CC_DELAY_1_TIME          = 439
-NRPN_CC_DELAY_1_FEEDBACK      = 440
-NRPN_CC_MOD_WHEEL             = 441
+NRPN_CC_FILTER_1_MOD_POL      = 433
+NRPN_CC_FILTER_1_RESONANCE    = 434
+NRPN_CC_AMP_1_GAIN            = 435
+NRPN_CC_CHORUS_1_MIX          = 436
+NRPN_CC_CHORUS_1_RATE         = 437
+NRPN_CC_CHORUS_1_DEPTH        = 438
+NRPN_CC_DELAY_1_MIX           = 439
+NRPN_CC_DELAY_1_TIME          = 440
+NRPN_CC_DELAY_1_FEEDBACK      = 441
+NRPN_CC_MOD_WHEEL             = 442
 
 # The value of each parameter's control slot while it has no CC, as a CC value.
 NRPN_VALUE_PITCH_1_GLIDE         = 512
@@ -330,14 +333,15 @@ NRPN_VALUE_FILTER_1_CUTOFF       = 557
 NRPN_VALUE_FILTER_1_PITCH_AMT    = 558
 NRPN_VALUE_FILTER_1_MOD_1_AMT    = 559
 NRPN_VALUE_FILTER_1_MOD_2_AMT    = 560
-NRPN_VALUE_FILTER_1_RESONANCE    = 561
-NRPN_VALUE_AMP_1_GAIN            = 562
-NRPN_VALUE_CHORUS_1_MIX          = 563
-NRPN_VALUE_CHORUS_1_RATE         = 564
-NRPN_VALUE_CHORUS_1_DEPTH        = 565
-NRPN_VALUE_DELAY_1_MIX           = 566
-NRPN_VALUE_DELAY_1_TIME          = 567
-NRPN_VALUE_DELAY_1_FEEDBACK      = 568
+NRPN_VALUE_FILTER_1_MOD_POL      = 561
+NRPN_VALUE_FILTER_1_RESONANCE    = 562
+NRPN_VALUE_AMP_1_GAIN            = 563
+NRPN_VALUE_CHORUS_1_MIX          = 564
+NRPN_VALUE_CHORUS_1_RATE         = 565
+NRPN_VALUE_CHORUS_1_DEPTH        = 566
+NRPN_VALUE_DELAY_1_MIX           = 567
+NRPN_VALUE_DELAY_1_TIME          = 568
+NRPN_VALUE_DELAY_1_FEEDBACK      = 569
 
 # The constants of the bus, which nothing else ever writes. A slot not written here holds 0.0.
 def spms1_fill_constant_signals(signals)
@@ -443,6 +447,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_PITCH_AMT   , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_MOD_1_AMT   , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_MOD_2_AMT   , SIGNAL_OWN)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_MOD_POL     , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_RESONANCE   , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_AMP_1_GAIN           , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_CHORUS_1_MIX         , SIGNAL_OWN)
@@ -480,6 +485,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_PITCH_AMT   , 9)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_MOD_1_AMT   , 24)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_MOD_2_AMT   , 25)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_MOD_POL     , 51)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_RESONANCE   , 71)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_AMP_1_GAIN           , 15)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_CHORUS_1_MIX         , 93)
@@ -536,6 +542,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_PITCH_AMT   , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_MOD_1_AMT   , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_MOD_2_AMT   , 4)
+  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_MOD_POL     , 124)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_RESONANCE   , 64)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_AMP_1_GAIN           , 64)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_CHORUS_1_MIX         , 64)
@@ -573,6 +580,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 9  , 4  ) # Filter 1 Pitch Amt
   C.set_midi_cc_value(midi_ch, 24 , 4  ) # Filter 1 Mod 1 Amt
   C.set_midi_cc_value(midi_ch, 25 , 4  ) # Filter 1 Mod 2 Amt
+  C.set_midi_cc_value(midi_ch, 51 , 124) # Filter 1 Mod Pol
   C.set_midi_cc_value(midi_ch, 71 , 64 ) # Filter 1 Resonance
   C.set_midi_cc_value(midi_ch, 15 , 64 ) # Amp 1 Gain
   C.set_midi_cc_value(midi_ch, 93 , 64 ) # Chorus 1 Mix

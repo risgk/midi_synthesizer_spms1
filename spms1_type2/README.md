@@ -494,25 +494,26 @@ both at the same signal for a mono output.
 
 | CC 98 | Parameter | | CC 98 | Parameter | | CC 98 | Parameter |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | Pitch 1 Glide | | 19 | Osc 1 Wave | | 38 | Noise 1 Level |
-| 1 | Pitch 1 Glide Switch | | 20 | Osc 1 Pitch Coarse | | 39 | Mixer 2 Level 1 |
-| 2 | Pitch 1 Bend Amt | | 21 | Osc 1 Pitch Fine | | 40 | Mixer 2 Level 2 |
-| 3 | Pitch 1 Stretch | | 22 | Osc 1 Pitch Mod 1 Amt | | 41 | Mixer 2 Level 3 |
-| 4 | EG 1 Attack | | 23 | Osc 1 Pitch Mod 2 Amt | | 42 | Mixer 2 Level 4 |
-| 5 | EG 1 Decay | | 24 | Osc 1 Pitch Mod Range | | 43 | Mixer 2 Out Level |
-| 6 | EG 1 Sustain | | 25 | Osc 1 PW | | 44 | Filter 1 Mode |
-| 7 | EG 1 Release Switch | | 26 | Osc 1 PW Mod 1 Amt | | 45 | Filter 1 Cutoff |
-| 8 | EG 1 Level | | 27 | Osc 1 PW Mod 2 Amt | | 46 | Filter 1 Pitch Amt |
-| 9 | LFO 1 Wave | | 28 | Osc 2 Wave | | 47 | Filter 1 Mod 1 Amt |
-| 10 | LFO 1 Rate | | 29 | Osc 2 Pitch Coarse | | 48 | Filter 1 Mod 2 Amt |
-| 11 | LFO 1 Rate Mod Amt | | 30 | Osc 2 Pitch Fine | | 49 | Filter 1 Resonance |
-| 12 | LFO 1 Level | | 31 | Osc 2 Pitch Mod 1 Amt | | 50 | Amp 1 Gain |
-| 13 | LFO 1 Level Mod Amt | | 32 | Osc 2 Pitch Mod 2 Amt | | 51 | Chorus 1 Mix |
-| 14 | Mixer 1 Level 1 | | 33 | Osc 2 Pitch Mod Range | | 52 | Chorus 1 Rate |
-| 15 | Mixer 1 Level 2 | | 34 | Osc 2 PW | | 53 | Chorus 1 Depth |
-| 16 | Mixer 1 Level 3 | | 35 | Osc 2 PW Mod 1 Amt | | 54 | Delay 1 Mix |
-| 17 | Mixer 1 Level 4 | | 36 | Osc 2 PW Mod 2 Amt | | 55 | Delay 1 Time |
-| 18 | Mixer 1 Out Level | | 37 | Noise 1 Color | | 56 | Delay 1 Feedback |
+| 0 | Pitch 1 Glide | | 20 | Osc 1 Pitch Coarse | | 40 | Mixer 2 Level 2 |
+| 1 | Pitch 1 Glide Switch | | 21 | Osc 1 Pitch Fine | | 41 | Mixer 2 Level 3 |
+| 2 | Pitch 1 Bend Amt | | 22 | Osc 1 Pitch Mod 1 Amt | | 42 | Mixer 2 Level 4 |
+| 3 | Pitch 1 Stretch | | 23 | Osc 1 Pitch Mod 2 Amt | | 43 | Mixer 2 Out Level |
+| 4 | EG 1 Attack | | 24 | Osc 1 Pitch Mod Range | | 44 | Filter 1 Mode |
+| 5 | EG 1 Decay | | 25 | Osc 1 PW | | 45 | Filter 1 Cutoff |
+| 6 | EG 1 Sustain | | 26 | Osc 1 PW Mod 1 Amt | | 46 | Filter 1 Pitch Amt |
+| 7 | EG 1 Release Switch | | 27 | Osc 1 PW Mod 2 Amt | | 47 | Filter 1 Mod 1 Amt |
+| 8 | EG 1 Level | | 28 | Osc 2 Wave | | 48 | Filter 1 Mod 2 Amt |
+| 9 | LFO 1 Wave | | 29 | Osc 2 Pitch Coarse | | 49 | Filter 1 Mod Pol |
+| 10 | LFO 1 Rate | | 30 | Osc 2 Pitch Fine | | 50 | Filter 1 Resonance |
+| 11 | LFO 1 Rate Mod Amt | | 31 | Osc 2 Pitch Mod 1 Amt | | 51 | Amp 1 Gain |
+| 12 | LFO 1 Level | | 32 | Osc 2 Pitch Mod 2 Amt | | 52 | Chorus 1 Mix |
+| 13 | LFO 1 Level Mod Amt | | 33 | Osc 2 Pitch Mod Range | | 53 | Chorus 1 Rate |
+| 14 | Mixer 1 Level 1 | | 34 | Osc 2 PW | | 54 | Chorus 1 Depth |
+| 15 | Mixer 1 Level 2 | | 35 | Osc 2 PW Mod 1 Amt | | 55 | Delay 1 Mix |
+| 16 | Mixer 1 Level 3 | | 36 | Osc 2 PW Mod 2 Amt | | 56 | Delay 1 Time |
+| 17 | Mixer 1 Level 4 | | 37 | Noise 1 Color | | 57 | Delay 1 Feedback |
+| 18 | Mixer 1 Out Level | | 38 | Noise 1 Level | |  |  |
+| 19 | Osc 1 Wave | | 39 | Mixer 2 Level 1 | |  |  |
 
 <!-- patch_gen end -->
 
@@ -525,7 +526,7 @@ the bus; see below.
 
 | CC 98 | CC for | Fills |
 | ----- | ------ | ----- |
-| 57 | Mod Wheel | Mod Wheel |
+| 58 | Mod Wheel | Mod Wheel |
 
 <!-- patch_gen end -->
 
@@ -751,8 +752,10 @@ passes a loud note nearly clean, while turning the drive up rounds off the reson
 Filter 1 moves the cutoff by each of its two modulations at a depth of its own, Mod 1 Amt and
 Mod 2 Amt, as Osc 1's PW Mod Amts move the pulse width. They are unipolar, on CC 24 and 25,
 Filter EG Amt's and LFO Filter Amt's in PRA32-U2: both power up at 0.0 (CC 4). A unit of input is the whole cutoff range, so with Mod 2 Amt at the top the
-LFO swings the cutoff five octaves either way. An envelope that closes the filter as it rises is
-EG 1 Out Inv on Mod 1 In.
+LFO swings the cutoff five octaves either way. Mod Pol, on CC 51, multiplies both at once, from
+-1.0 at CC 4 through none at CC 64 to +1.0 at CC 124, where it powers up: below CC 64 the
+envelope closes the filter as it rises, and the LFO swings the other way. To turn over only
+one of the two, take an inverted source instead, such as EG 1 Out Inv on Mod 1 In.
 Pitch In, the keyboard tracking, is added on its own by Pitch Amt (CC 9), as an oscillator's
 Pitch In is outside its Pitch Mod Amts: unipolar, a semitone for a
 semitone at the top, unmoved at note 60.
@@ -862,7 +865,7 @@ takes the output to the input at once, mid-glide too, as Glide at 0.0 does.
 - Filter cutoff driven by the envelope instead of its CC: CC 99 = 2, CC 98 = 45, CC 6 = 10. The
   envelope and the cutoff are both unipolar, so it opens the cutoff from the bottom of its dial
   to the top
-- Amp gain and filter cutoff share one CC: CC 99 = 3, CC 98 = 50, CC 6 = 74
+- Amp gain and filter cutoff share one CC: CC 99 = 3, CC 98 = 51, CC 6 = 74
 - Amp at full level with no envelope: CC 99 = 1, CC 98 = 24, CC 6 = 1
 - Disconnect the filter's Mod 1 input, and with it the envelope: CC 99 = 1, CC 98 = 21, CC 6 = 0
 - A finer pitch envelope, 60 cents deep: CC 99 = 2, CC 98 = 21, CC 6 = 10 points Osc 1 Pitch Fine at the
@@ -888,9 +891,9 @@ takes the output to the input at once, mid-glide too, as Glide at 0.0 does.
   CC 25 at CC 124, the wheel closes the filter from Filter 1 Cutoff down, five octaves at its top
 - Take the filter out of the chain: CC 99 = 1, CC 98 = 23, CC 6 = 29 points the amp's audio input
   at Mixer 2. The filter keeps running and keeps its slot; nothing reads it
-- Echoes that only come in with the mod wheel: CC 99 = 2, CC 98 = 54, CC 6 = 8 takes Delay 1 Mix
+- Echoes that only come in with the mod wheel: CC 99 = 2, CC 98 = 55, CC 6 = 8 takes Delay 1 Mix
   from Mod Wheel, which powers up at 0.0, so the output is dry until the wheel moves
-- Chorus that only comes in with the mod wheel: CC 99 = 2, CC 98 = 51, CC 6 = 8 takes Chorus 1
+- Chorus that only comes in with the mod wheel: CC 99 = 2, CC 98 = 52, CC 6 = 8 takes Chorus 1
   Mix from Mod Wheel, so the output stays mono until the wheel moves
 - Leave the chorus out of the sound, keeping the delay: CC 99 = 1, CC 98 = 26 and 27, CC 6 = 34
   feeds both sides of Delay 1 from the amp. The chorus keeps running and nothing reads it, and the

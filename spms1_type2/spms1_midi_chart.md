@@ -35,6 +35,7 @@
 |                            71 | x             | o             | Filter Resonance                     |
 |                            24 | x             | o             | Filter Mod 1 Amt (EG)                |
 |                            25 | x             | o             | Filter Mod 2 Amt (LFO)               |
+|                            51 | x             | o             | Filter Mod Pol (-1 to +1)            |
 |                             9 | x             | o             | Filter Pitch Amt                     |
 |                            20 | x             | o             | Mixer 2 Level 1 (Osc 1 Level)        |
 |                            21 | x             | o             | Mixer 2 Level 2 (Osc 2 Level)        |

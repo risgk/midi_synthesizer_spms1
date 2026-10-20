@@ -290,32 +290,35 @@ controls:
   - { entry: 41, module: MIXER_2,   key: LEVEL_3,      label: Level 3,      cc: 0,   value: 4, set: set_level_3 }
   - { entry: 42, module: MIXER_2,   key: LEVEL_4,      label: Level 4,      cc: 23,  value: 4, set: set_level_4 }
   - { entry: 43, module: MIXER_2,   key: OUT_LEVEL,  label: Out Level,  cc: 0,   value: 64, set: set_out_level }
-  # Filter 1 in the editor: Mode, the cutoff, its keyboard tracking and its two modulations,
-  # then the resonance. Pitch In takes the pitch from Pitch 1, as Osc 1 Pitch In does, and
-  # Pitch Amt (CC 9) at its top makes the cutoff follow the note a semitone for a
+  # Filter 1 in the editor: Mode, the cutoff, its keyboard tracking, its two modulations and
+  # their polarity, then the resonance. Pitch In takes the pitch from Pitch 1, as Osc 1 Pitch In
+  # does, and Pitch Amt (CC 9) at its top makes the cutoff follow the note a semitone for a
   # semitone, unmoved at note 60; it powers up at CC 4, 0.0, with the tracking off. Mod 1 Amt and
   # Mod 2 Amt, on CC 24 and 25, Filter EG Amt's and LFO Filter Amt's in PRA32-U2, are how far the
   # envelope on Mod 1 In and the LFO on Mod 2 In move the cutoff, as Osc 1's PW Mod Amts are for
   # the pulse width. Both power up at CC 4, 0.0, so neither moves the cutoff until it is turned
-  # up. Cutoff powers up at CC 112, 0.9. A modulation that closes the filter takes an
-  # inverted source, such as EG 1 Out Inv. Mode crossfades Out from the low pass (0.0) through a
+  # up. Cutoff powers up at CC 112, 0.9. Mod Pol, on CC 51, sets the sign and the depth of
+  # both modulations at once, from -1.0 at CC 4 through none at CC 64 to +1.0 at CC 124; it
+  # powers up at CC 124, so the two move the cutoff as their Amts say, and turned below CC 64 it
+  # makes the envelope close the filter. Mode crossfades Out from the low pass (0.0) through a
   # notch (0.5) to the high pass (1.0); it has no CC and holds 0.0, the low pass.
   - { entry: 44, module: FILTER_1,  key: MODE,         label: Mode,         cc: 0,   value: 4, set: set_mode }
   - { entry: 45, module: FILTER_1,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 112, set: set_cutoff }
   - { entry: 46, module: FILTER_1,  key: PITCH_AMT, label: Pitch Amt, cc: 9, value: 4, set: set_pitch_amount }
   - { entry: 47, module: FILTER_1,  key: MOD_1_AMT,    label: Mod 1 Amt,    cc: 24,  value: 4, set: set_modulation_1_amount }
   - { entry: 48, module: FILTER_1,  key: MOD_2_AMT,    label: Mod 2 Amt,    cc: 25,  value: 4, set: set_modulation_2_amount }
-  - { entry: 49, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 64, set: set_resonance }
+  - { entry: 49, module: FILTER_1,  key: MOD_POL,      label: Mod Pol,      cc: 51,  value: 124, bipolar: true, set: set_modulation_polarity }
+  - { entry: 50, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 64, set: set_resonance }
   # Amp 1: Gain, on CC 15, Amp Gain's in PRA32-U2, is doubled, so it powers up at CC 64, a gain of
   # 1.0, and CC 124 brings the sound up by 6 dB; the amp holds its output to one unit.
-  - { entry: 50, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 64, set: set_gain }
-  - { entry: 51, module: CHORUS_1,  key: MIX,          label: Mix,          cc: 93,  value: 64, set: set_mix }
-  - { entry: 52, module: CHORUS_1,  key: RATE,         label: Rate,         cc: 0,   value: 64, set: set_rate }
-  - { entry: 53, module: CHORUS_1,  key: DEPTH,        label: Depth,        cc: 0,   value: 64, set: set_depth }
-  - { entry: 54, module: DELAY_1,   key: MIX,          label: Mix,          cc: 94,  value: 34, set: set_mix }
-  - { entry: 55, module: DELAY_1,   key: TIME,         label: Time,         cc: 90,  value: 64, set: set_time }
-  - { entry: 56, module: DELAY_1,   key: FEEDBACK,     label: Feedback,     cc: 0,   value: 64, set: set_feedback }
+  - { entry: 51, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 64, set: set_gain }
+  - { entry: 52, module: CHORUS_1,  key: MIX,          label: Mix,          cc: 93,  value: 64, set: set_mix }
+  - { entry: 53, module: CHORUS_1,  key: RATE,         label: Rate,         cc: 0,   value: 64, set: set_rate }
+  - { entry: 54, module: CHORUS_1,  key: DEPTH,        label: Depth,        cc: 0,   value: 64, set: set_depth }
+  - { entry: 55, module: DELAY_1,   key: MIX,          label: Mix,          cc: 94,  value: 34, set: set_mix }
+  - { entry: 56, module: DELAY_1,   key: TIME,         label: Time,         cc: 90,  value: 64, set: set_time }
+  - { entry: 57, module: DELAY_1,   key: FEEDBACK,     label: Feedback,     cc: 0,   value: 64, set: set_feedback }
 
   # The mod wheel, a controller control: its CC, CC 1 as in the MIDI spec, put on the bus as a
   # unipolar slot (see `signals`) for any input or parameter to read. It powers up at CC 4, 0.0.
-  - { entry: 57, controller: true, key: MOD_WHEEL, label: Mod Wheel, cc: 1,   value: 4 }
+  - { entry: 58, controller: true, key: MOD_WHEEL, label: Mod Wheel, cc: 1,   value: 4 }
