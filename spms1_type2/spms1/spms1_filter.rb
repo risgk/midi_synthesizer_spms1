@@ -3,7 +3,10 @@ module Spms1
   # nonlinear leak on the band pass integrator, solved within the sample by one step of Newton's
   # method. It puts out its low pass and high pass at once, each through a DC blocker and the
   # output clip of its own, and the two crossfaded by Mode: process returns the crossfade, and
-  # output_lp and output_hp hold the low pass and the high pass.
+  # output_lp and output_hp hold the low pass and the high pass. The audio input drives it as it
+  # arrives, so how hard is set ahead of it: by Mixer 2 Out Level in the default patch. That is
+  # what decides how far the band pass runs into the leak, which the resonant peak reaches first:
+  # the pass band itself stays nearly clean.
   # This implementation is not oversampled; the nonlinear behavior is kept intentionally simple.
   # Reference: https://www.discodsp.net/VAFilterDesign_2.1.2.pdf (The Art of VA Filter Design)
   # Reference: https://www.kvraudio.com/forum/viewtopic.php?t=349859 (Cheap non-linear zero-delay filters)
@@ -173,7 +176,6 @@ module Spms1
       @modulation_1_amount = 0.2
       @modulation_2_amount = 0.0
       @pitch_amount = 0.0
-      @gain = 0.5
       @mode_lp = 1.0
       @mode_hp = 0.0
 
@@ -182,7 +184,6 @@ module Spms1
       @stage_1_modulation_1_amount = 0.2
       @stage_1_modulation_2_amount = 0.0
       @stage_1_pitch_amount = 0.0
-      @stage_1_gain = 0.5
       @stage_1_mode_lp = 1.0
       @stage_1_mode_hp = 0.0
       @current_cutoff = 1.0
@@ -190,7 +191,6 @@ module Spms1
       @current_modulation_1_amount = 0.2
       @current_modulation_2_amount = 0.0
       @current_pitch_amount = 0.0
-      @current_gain = 0.5
       @current_mode_lp = 1.0
       @current_mode_hp = 0.0
 
@@ -243,13 +243,6 @@ module Spms1
       @pitch_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
     end
 
-    # How hard the audio input drives the filter, used as a plain multiplier. It sits on the input
-    # rather than the output because that is what decides how far the band pass runs into the
-    # leak, which the resonant peak reaches first: the pass band itself stays nearly clean.
-    def set_gain(gain)
-      @gain = (gain < 0.0) ? 0.0 : ((gain > 1.0) ? 1.0 : gain)
-    end
-
     # Q range: ~0.7 (0.0), ~2.83 (0.5), ~5.66 (0.75), ~29 (0.875), 256 (0.95); self-oscillation from there,
     # growing to its full level at ~0.992 and staying there to 1.0, fading out at a high cutoff.
     def set_resonance(resonance)
@@ -286,8 +279,6 @@ module Spms1
       @g_plus_k += @g_plus_k_slope
       @one_over_a0 += @one_over_a0_slope
 
-      driven_input = audio_input * @current_gain
-
       # The clamp is a guard that ordinary use never reaches: nothing else bounds the low pass
       # state, and a cutoff thrown across its range every step, as audio on the modulation input
       # at full depth does, with k negative at the top of the resonance dial, is where to expect
@@ -311,7 +302,7 @@ module Spms1
       # the previous sample before the linear solve, nor the "gain prediction" of the KVR thread,
       # which puts a gain predicted from the previous sample into the linear solve: the leak is
       # evaluated at this sample's linear solution, and Newton's step takes it off.
-      b =@s1 + @g * (driven_input - s2)
+      b =@s1 + @g * (audio_input - s2)
       a0 = 1.0 + @g * @g_plus_k
       guess = b * @one_over_a0
       shifted = guess + SOFT_CLIP_BIAS
@@ -330,7 +321,7 @@ module Spms1
       # The high pass as the loop has it, x - s2 - (g + k) * y, taken from the solved band pass,
       # so that with the band pass the three add up as a state variable filter's do:
       # x = lp + k * bp + hp.
-      high_pass = driven_input - s2 - @g_plus_k * band_pass
+      high_pass = audio_input - s2 - @g_plus_k * band_pass
       @s1 = band_pass + band_pass - @s1
       @s2 = low_pass + low_pass - s2
 
@@ -397,8 +388,6 @@ module Spms1
       @current_modulation_2_amount = Dsp.smooth(@stage_1_modulation_2_amount, @current_modulation_2_amount, @smoothing_target_blend)
       @stage_1_pitch_amount = Dsp.smooth(@pitch_amount, @stage_1_pitch_amount, @smoothing_target_blend)
       @current_pitch_amount = Dsp.smooth(@stage_1_pitch_amount, @current_pitch_amount, @smoothing_target_blend)
-      @stage_1_gain = Dsp.smooth(@gain, @stage_1_gain, @smoothing_target_blend)
-      @current_gain = Dsp.smooth(@stage_1_gain, @current_gain, @smoothing_target_blend)
       @stage_1_mode_lp = Dsp.smooth(@mode_lp, @stage_1_mode_lp, @smoothing_target_blend)
       @current_mode_lp = Dsp.smooth(@stage_1_mode_lp, @current_mode_lp, @smoothing_target_blend)
       @stage_1_mode_hp = Dsp.smooth(@mode_hp, @stage_1_mode_hp, @smoothing_target_blend)
