@@ -92,6 +92,10 @@ Usage
     - Its Controls tab shows a slider for each parameter with a CC; those with none are hidden until
       "Show parameters with no CC" is ticked or a CC is given to one, and the choice is remembered.
       Shown, the slider of one with no CC sets the value its slot holds, sent as NRPN
+    - A note in parentheses follows a parameter's name there: its range, as "(White to Red)" on
+      Noise 1 Color, or, on a level or a modulation amount, what the patch routes to the input it
+      scales, as "(Osc 1 Sub)" on Mixer 2 Level 3, kept up to date as the routing changes. On the
+      Patch tab it is in the name's tooltip
     - On its Patch tab a value is dragged up or down like a knob, with Shift for fine steps, or
       stepped by the wheel while it is being edited
     - Every value it sets or shows runs from 4 to 124, the range the synth uses; one outside it,

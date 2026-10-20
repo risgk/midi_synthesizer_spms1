@@ -242,6 +242,11 @@
       color: var(--text-muted);
       display: block;
     }
+    /* A note on the range, or what feeds the inputs the parameter scales, as muted as the CC. */
+    .slider-label .ctl-hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
     /* In four columns the CC number goes on the line of the name, and the panels are packed
        tighter, so the soft keyboard fits a full HD window under them even with a bookmarks bar. */
     @media (min-width: 1641px) {
@@ -259,8 +264,8 @@
       /* One width for every name, the longest's, so every slider is as long as the others; a
          name longer still, with the source of a routed parameter, is cut short rather than
          shortening its slider. */
-      .slider-label { flex: 0 0 162px; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-      .slider-label .cc-num { font-size: 0.7rem; }
+      .slider-label { flex: 0 0 210px; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+      .slider-label .cc-num, .slider-label .ctl-hint { font-size: 0.7rem; }
       .slider-value { min-width: 28px; font-size: 0.9rem; }
       .slider-norm { min-width: 42px; font-size: 0.75rem; }
       /* One row, which takes the extra height of the tab. */
@@ -1326,58 +1331,58 @@
     ],
     controls: [
       {"entry":0,"module":"PITCH_1","key":"GLIDE","label":"Glide","bipolar":false,"cc":5,"value":4,"controller":false,"slots":[["PITCH_1_GLIDE","Glide",false]]},
-      {"entry":1,"module":"PITCH_1","key":"GLIDE_SW","label":"Glide Switch","bipolar":false,"cc":34,"value":124,"controller":false,"slots":[["PITCH_1_GLIDE_SW","Glide Switch",false]]},
-      {"entry":2,"module":"PITCH_1","key":"BEND_AMT","label":"Bend Amt","bipolar":false,"cc":57,"value":28,"controller":false,"slots":[["PITCH_1_BEND_AMT","Bend Amt",false]]},
-      {"entry":3,"module":"PITCH_1","key":"STRETCH","label":"Stretch","bipolar":false,"cc":81,"value":4,"controller":false,"slots":[["PITCH_1_STRETCH","Stretch",false]]},
-      {"entry":4,"module":"EG_1","key":"ATTACK","label":"Attack","bipolar":false,"cc":73,"value":4,"controller":false,"slots":[["EG_1_ATTACK","Attack",false]]},
-      {"entry":5,"module":"EG_1","key":"DECAY","label":"Decay","bipolar":false,"cc":75,"value":100,"controller":false,"slots":[["EG_1_DECAY","Decay",false]]},
-      {"entry":6,"module":"EG_1","key":"SUSTAIN","label":"Sustain","bipolar":false,"cc":30,"value":124,"controller":false,"slots":[["EG_1_SUSTAIN","Sustain",false]]},
-      {"entry":7,"module":"EG_1","key":"RELEASE_SW","label":"Release Switch","bipolar":false,"cc":105,"value":124,"controller":false,"slots":[["EG_1_RELEASE_SW","Release Switch",false]]},
+      {"entry":1,"module":"PITCH_1","key":"GLIDE_SW","label":"Glide Switch","bipolar":false,"cc":34,"value":124,"controller":false,"hint":"Off/On","slots":[["PITCH_1_GLIDE_SW","Glide Switch",false]]},
+      {"entry":2,"module":"PITCH_1","key":"BEND_AMT","label":"Bend Amt","bipolar":false,"cc":57,"value":28,"controller":false,"hint":"Bend Range","slots":[["PITCH_1_BEND_AMT","Bend Amt",false]]},
+      {"entry":3,"module":"PITCH_1","key":"STRETCH","label":"Stretch","bipolar":false,"cc":81,"value":4,"controller":false,"hint":"x1 to x2","slots":[["PITCH_1_STRETCH","Stretch",false]]},
+      {"entry":4,"module":"EG_1","key":"ATTACK","label":"Attack","bipolar":false,"cc":73,"value":4,"controller":false,"hint":"Time","slots":[["EG_1_ATTACK","Attack",false]]},
+      {"entry":5,"module":"EG_1","key":"DECAY","label":"Decay","bipolar":false,"cc":75,"value":100,"controller":false,"hint":"Time","slots":[["EG_1_DECAY","Decay",false]]},
+      {"entry":6,"module":"EG_1","key":"SUSTAIN","label":"Sustain","bipolar":false,"cc":30,"value":124,"controller":false,"hint":"Level","slots":[["EG_1_SUSTAIN","Sustain",false]]},
+      {"entry":7,"module":"EG_1","key":"RELEASE_SW","label":"Release Switch","bipolar":false,"cc":105,"value":124,"controller":false,"hint":"Off/On","slots":[["EG_1_RELEASE_SW","Release Switch",false]]},
       {"entry":8,"module":"EG_1","key":"LEVEL","label":"Level","bipolar":false,"cc":0,"value":124,"controller":false,"slots":[["EG_1_LEVEL","Level",false]]},
-      {"entry":9,"module":"LFO_1","key":"WAVE","label":"Wave","bipolar":false,"cc":33,"value":4,"controller":false,"slots":[["LFO_1_WAVE","Wave",false]]},
+      {"entry":9,"module":"LFO_1","key":"WAVE","label":"Wave","bipolar":false,"cc":33,"value":4,"controller":false,"hint":"Tri to Sq","slots":[["LFO_1_WAVE","Wave",false]]},
       {"entry":10,"module":"LFO_1","key":"RATE","label":"Rate","bipolar":false,"cc":3,"value":64,"controller":false,"slots":[["LFO_1_RATE","Rate",false]]},
       {"entry":11,"module":"LFO_1","key":"LEVEL","label":"Level","bipolar":false,"cc":113,"value":4,"controller":false,"slots":[["LFO_1_LEVEL","Level",false]]},
-      {"entry":12,"module":"LFO_1","key":"RATE_MOD_AMT","label":"Rate Mod Amt","bipolar":false,"cc":0,"value":124,"controller":false,"slots":[["LFO_1_RATE_MOD_AMT","Rate Mod Amt",false]]},
-      {"entry":13,"module":"LFO_1","key":"LEVEL_MOD_AMT","label":"Level Mod Amt","bipolar":false,"cc":0,"value":124,"controller":false,"slots":[["LFO_1_LEVEL_MOD_AMT","Level Mod Amt",false]]},
-      {"entry":14,"module":"MIXER_1","key":"LEVEL_1","label":"Level 1","bipolar":false,"cc":0,"value":4,"controller":false,"slots":[["MIXER_1_LEVEL_1","Level 1",false]]},
-      {"entry":15,"module":"MIXER_1","key":"LEVEL_2","label":"Level 2","bipolar":false,"cc":0,"value":4,"controller":false,"slots":[["MIXER_1_LEVEL_2","Level 2",false]]},
-      {"entry":16,"module":"MIXER_1","key":"LEVEL_3","label":"Level 3","bipolar":false,"cc":0,"value":4,"controller":false,"slots":[["MIXER_1_LEVEL_3","Level 3",false]]},
-      {"entry":17,"module":"MIXER_1","key":"LEVEL_4","label":"Level 4","bipolar":false,"cc":0,"value":4,"controller":false,"slots":[["MIXER_1_LEVEL_4","Level 4",false]]},
+      {"entry":12,"module":"LFO_1","key":"RATE_MOD_AMT","label":"Rate Mod Amt","bipolar":false,"cc":0,"value":124,"controller":false,"hintInputs":["RATE_MOD"],"slots":[["LFO_1_RATE_MOD_AMT","Rate Mod Amt",false]]},
+      {"entry":13,"module":"LFO_1","key":"LEVEL_MOD_AMT","label":"Level Mod Amt","bipolar":false,"cc":0,"value":124,"controller":false,"hintInputs":["LEVEL_MOD"],"slots":[["LFO_1_LEVEL_MOD_AMT","Level Mod Amt",false]]},
+      {"entry":14,"module":"MIXER_1","key":"LEVEL_1","label":"Level 1","bipolar":false,"cc":0,"value":4,"controller":false,"hintInputs":["IN_1"],"slots":[["MIXER_1_LEVEL_1","Level 1",false]]},
+      {"entry":15,"module":"MIXER_1","key":"LEVEL_2","label":"Level 2","bipolar":false,"cc":0,"value":4,"controller":false,"hintInputs":["IN_2"],"slots":[["MIXER_1_LEVEL_2","Level 2",false]]},
+      {"entry":16,"module":"MIXER_1","key":"LEVEL_3","label":"Level 3","bipolar":false,"cc":0,"value":4,"controller":false,"hintInputs":["IN_3"],"slots":[["MIXER_1_LEVEL_3","Level 3",false]]},
+      {"entry":17,"module":"MIXER_1","key":"LEVEL_4","label":"Level 4","bipolar":false,"cc":0,"value":4,"controller":false,"hintInputs":["IN_4"],"slots":[["MIXER_1_LEVEL_4","Level 4",false]]},
       {"entry":18,"module":"MIXER_1","key":"OUT_LEVEL","label":"Out Level","bipolar":false,"cc":0,"value":64,"controller":false,"slots":[["MIXER_1_OUT_LEVEL","Out Level",false]]},
-      {"entry":19,"module":"OSC_1","key":"WAVE","label":"Wave","bipolar":false,"cc":102,"value":4,"controller":false,"slots":[["OSC_1_WAVE","Wave",false]]},
-      {"entry":20,"module":"OSC_1","key":"PW","label":"PW","bipolar":true,"cc":114,"value":64,"controller":false,"slots":[["OSC_1_PW","PW",true]]},
-      {"entry":21,"module":"OSC_1","key":"PITCH_COARSE","label":"Pitch Coarse","bipolar":true,"cc":0,"value":64,"controller":false,"slots":[["OSC_1_PITCH_COARSE","Pitch Coarse",true]]},
-      {"entry":22,"module":"OSC_1","key":"PITCH_FINE","label":"Pitch Fine","bipolar":true,"cc":0,"value":64,"controller":false,"slots":[["OSC_1_PITCH_FINE","Pitch Fine",true]]},
-      {"entry":23,"module":"OSC_1","key":"PITCH_MOD_1_AMT","label":"Pitch Mod 1 Amt","bipolar":false,"cc":89,"value":4,"controller":false,"slots":[["OSC_1_PITCH_MOD_1_AMT","Pitch Mod 1 Amt",false]]},
-      {"entry":24,"module":"OSC_1","key":"PITCH_MOD_2_AMT","label":"Pitch Mod 2 Amt","bipolar":false,"cc":13,"value":124,"controller":false,"slots":[["OSC_1_PITCH_MOD_2_AMT","Pitch Mod 2 Amt",false]]},
+      {"entry":19,"module":"OSC_1","key":"WAVE","label":"Wave","bipolar":false,"cc":102,"value":4,"controller":false,"hint":"Saw to Sq","slots":[["OSC_1_WAVE","Wave",false]]},
+      {"entry":20,"module":"OSC_1","key":"PW","label":"PW","bipolar":true,"cc":114,"value":64,"controller":false,"hint":"50% to 0%","slots":[["OSC_1_PW","PW",true]]},
+      {"entry":21,"module":"OSC_1","key":"PITCH_COARSE","label":"Pitch Coarse","bipolar":true,"cc":0,"value":64,"controller":false,"hint":"±5 Oct","slots":[["OSC_1_PITCH_COARSE","Pitch Coarse",true]]},
+      {"entry":22,"module":"OSC_1","key":"PITCH_FINE","label":"Pitch Fine","bipolar":true,"cc":0,"value":64,"controller":false,"hint":"±60 Cent","slots":[["OSC_1_PITCH_FINE","Pitch Fine",true]]},
+      {"entry":23,"module":"OSC_1","key":"PITCH_MOD_1_AMT","label":"Pitch Mod 1 Amt","bipolar":false,"cc":89,"value":4,"controller":false,"hintInputs":["MOD_1"],"slots":[["OSC_1_PITCH_MOD_1_AMT","Pitch Mod 1 Amt",false]]},
+      {"entry":24,"module":"OSC_1","key":"PITCH_MOD_2_AMT","label":"Pitch Mod 2 Amt","bipolar":false,"cc":13,"value":124,"controller":false,"hintInputs":["MOD_2"],"slots":[["OSC_1_PITCH_MOD_2_AMT","Pitch Mod 2 Amt",false]]},
       {"entry":25,"module":"OSC_1","key":"PITCH_MOD_RANGE","label":"Pitch Mod Range","bipolar":false,"cc":0,"value":28,"controller":false,"slots":[["OSC_1_PITCH_MOD_RANGE","Pitch Mod Range",false]]},
-      {"entry":26,"module":"OSC_1","key":"PW_MOD_1_AMT","label":"PW Mod 1 Amt","bipolar":false,"cc":8,"value":4,"controller":false,"slots":[["OSC_1_PW_MOD_1_AMT","PW Mod 1 Amt",false]]},
-      {"entry":27,"module":"OSC_1","key":"PW_MOD_2_AMT","label":"PW Mod 2 Amt","bipolar":false,"cc":103,"value":4,"controller":false,"slots":[["OSC_1_PW_MOD_2_AMT","PW Mod 2 Amt",false]]},
-      {"entry":28,"module":"OSC_2","key":"WAVE","label":"Wave","bipolar":false,"cc":104,"value":4,"controller":false,"slots":[["OSC_2_WAVE","Wave",false]]},
-      {"entry":29,"module":"OSC_2","key":"PW","label":"PW","bipolar":true,"cc":114,"value":64,"controller":false,"slots":[["OSC_2_PW","PW",true]]},
-      {"entry":30,"module":"OSC_2","key":"PITCH_COARSE","label":"Pitch Coarse","bipolar":true,"cc":85,"value":64,"controller":false,"slots":[["OSC_2_PITCH_COARSE","Pitch Coarse",true]]},
-      {"entry":31,"module":"OSC_2","key":"PITCH_FINE","label":"Pitch Fine","bipolar":true,"cc":76,"value":76,"controller":false,"slots":[["OSC_2_PITCH_FINE","Pitch Fine",true]]},
-      {"entry":32,"module":"OSC_2","key":"PITCH_MOD_1_AMT","label":"Pitch Mod 1 Amt","bipolar":false,"cc":89,"value":4,"controller":false,"slots":[["OSC_2_PITCH_MOD_1_AMT","Pitch Mod 1 Amt",false]]},
-      {"entry":33,"module":"OSC_2","key":"PITCH_MOD_2_AMT","label":"Pitch Mod 2 Amt","bipolar":false,"cc":13,"value":124,"controller":false,"slots":[["OSC_2_PITCH_MOD_2_AMT","Pitch Mod 2 Amt",false]]},
+      {"entry":26,"module":"OSC_1","key":"PW_MOD_1_AMT","label":"PW Mod 1 Amt","bipolar":false,"cc":8,"value":4,"controller":false,"hintInputs":["MOD_1"],"slots":[["OSC_1_PW_MOD_1_AMT","PW Mod 1 Amt",false]]},
+      {"entry":27,"module":"OSC_1","key":"PW_MOD_2_AMT","label":"PW Mod 2 Amt","bipolar":false,"cc":103,"value":4,"controller":false,"hintInputs":["MOD_2"],"slots":[["OSC_1_PW_MOD_2_AMT","PW Mod 2 Amt",false]]},
+      {"entry":28,"module":"OSC_2","key":"WAVE","label":"Wave","bipolar":false,"cc":104,"value":4,"controller":false,"hint":"Saw to Sq","slots":[["OSC_2_WAVE","Wave",false]]},
+      {"entry":29,"module":"OSC_2","key":"PW","label":"PW","bipolar":true,"cc":114,"value":64,"controller":false,"hint":"50% to 0%","slots":[["OSC_2_PW","PW",true]]},
+      {"entry":30,"module":"OSC_2","key":"PITCH_COARSE","label":"Pitch Coarse","bipolar":true,"cc":85,"value":64,"controller":false,"hint":"±5 Oct","slots":[["OSC_2_PITCH_COARSE","Pitch Coarse",true]]},
+      {"entry":31,"module":"OSC_2","key":"PITCH_FINE","label":"Pitch Fine","bipolar":true,"cc":76,"value":76,"controller":false,"hint":"±60 Cent","slots":[["OSC_2_PITCH_FINE","Pitch Fine",true]]},
+      {"entry":32,"module":"OSC_2","key":"PITCH_MOD_1_AMT","label":"Pitch Mod 1 Amt","bipolar":false,"cc":89,"value":4,"controller":false,"hintInputs":["MOD_1"],"slots":[["OSC_2_PITCH_MOD_1_AMT","Pitch Mod 1 Amt",false]]},
+      {"entry":33,"module":"OSC_2","key":"PITCH_MOD_2_AMT","label":"Pitch Mod 2 Amt","bipolar":false,"cc":13,"value":124,"controller":false,"hintInputs":["MOD_2"],"slots":[["OSC_2_PITCH_MOD_2_AMT","Pitch Mod 2 Amt",false]]},
       {"entry":34,"module":"OSC_2","key":"PITCH_MOD_RANGE","label":"Pitch Mod Range","bipolar":false,"cc":0,"value":28,"controller":false,"slots":[["OSC_2_PITCH_MOD_RANGE","Pitch Mod Range",false]]},
-      {"entry":35,"module":"OSC_2","key":"PW_MOD_1_AMT","label":"PW Mod 1 Amt","bipolar":false,"cc":8,"value":4,"controller":false,"slots":[["OSC_2_PW_MOD_1_AMT","PW Mod 1 Amt",false]]},
-      {"entry":36,"module":"OSC_2","key":"PW_MOD_2_AMT","label":"PW Mod 2 Amt","bipolar":false,"cc":103,"value":4,"controller":false,"slots":[["OSC_2_PW_MOD_2_AMT","PW Mod 2 Amt",false]]},
-      {"entry":37,"module":"NOISE_1","key":"COLOR","label":"Color","bipolar":false,"cc":115,"value":4,"controller":false,"slots":[["NOISE_1_COLOR","Color",false]]},
+      {"entry":35,"module":"OSC_2","key":"PW_MOD_1_AMT","label":"PW Mod 1 Amt","bipolar":false,"cc":8,"value":4,"controller":false,"hintInputs":["MOD_1"],"slots":[["OSC_2_PW_MOD_1_AMT","PW Mod 1 Amt",false]]},
+      {"entry":36,"module":"OSC_2","key":"PW_MOD_2_AMT","label":"PW Mod 2 Amt","bipolar":false,"cc":103,"value":4,"controller":false,"hintInputs":["MOD_2"],"slots":[["OSC_2_PW_MOD_2_AMT","PW Mod 2 Amt",false]]},
+      {"entry":37,"module":"NOISE_1","key":"COLOR","label":"Color","bipolar":false,"cc":115,"value":4,"controller":false,"hint":"White to Red","slots":[["NOISE_1_COLOR","Color",false]]},
       {"entry":38,"module":"NOISE_1","key":"LEVEL","label":"Level","bipolar":false,"cc":0,"value":124,"controller":false,"slots":[["NOISE_1_LEVEL","Level",false]]},
-      {"entry":39,"module":"MIXER_2","key":"LEVEL_1","label":"Level 1","bipolar":false,"cc":19,"value":88,"controller":false,"slots":[["MIXER_2_LEVEL_1","Level 1",false]]},
-      {"entry":40,"module":"MIXER_2","key":"LEVEL_2","label":"Level 2","bipolar":false,"cc":20,"value":88,"controller":false,"slots":[["MIXER_2_LEVEL_2","Level 2",false]]},
-      {"entry":41,"module":"MIXER_2","key":"LEVEL_3","label":"Level 3","bipolar":false,"cc":21,"value":4,"controller":false,"slots":[["MIXER_2_LEVEL_3","Level 3",false]]},
-      {"entry":42,"module":"MIXER_2","key":"LEVEL_4","label":"Level 4","bipolar":false,"cc":23,"value":4,"controller":false,"slots":[["MIXER_2_LEVEL_4","Level 4",false]]},
+      {"entry":39,"module":"MIXER_2","key":"LEVEL_1","label":"Level 1","bipolar":false,"cc":19,"value":88,"controller":false,"hintInputs":["IN_1"],"slots":[["MIXER_2_LEVEL_1","Level 1",false]]},
+      {"entry":40,"module":"MIXER_2","key":"LEVEL_2","label":"Level 2","bipolar":false,"cc":20,"value":88,"controller":false,"hintInputs":["IN_2"],"slots":[["MIXER_2_LEVEL_2","Level 2",false]]},
+      {"entry":41,"module":"MIXER_2","key":"LEVEL_3","label":"Level 3","bipolar":false,"cc":21,"value":4,"controller":false,"hintInputs":["IN_3"],"slots":[["MIXER_2_LEVEL_3","Level 3",false]]},
+      {"entry":42,"module":"MIXER_2","key":"LEVEL_4","label":"Level 4","bipolar":false,"cc":23,"value":4,"controller":false,"hintInputs":["IN_4"],"slots":[["MIXER_2_LEVEL_4","Level 4",false]]},
       {"entry":43,"module":"MIXER_2","key":"OUT_LEVEL","label":"Out Level","bipolar":false,"cc":0,"value":64,"controller":false,"slots":[["MIXER_2_OUT_LEVEL","Out Level",false]]},
       {"entry":44,"module":"FILTER_1","key":"CUTOFF","label":"Cutoff","bipolar":false,"cc":74,"value":112,"controller":false,"slots":[["FILTER_1_CUTOFF","Cutoff",false]]},
       {"entry":45,"module":"FILTER_1","key":"RESONANCE","label":"Resonance","bipolar":false,"cc":71,"value":64,"controller":false,"slots":[["FILTER_1_RESONANCE","Resonance",false]]},
-      {"entry":46,"module":"FILTER_1","key":"MODE","label":"Mode","bipolar":false,"cc":39,"value":4,"controller":false,"slots":[["FILTER_1_MODE","Mode",false]]},
-      {"entry":47,"module":"FILTER_1","key":"PITCH_AMT","label":"Pitch Amt","bipolar":false,"cc":9,"value":4,"controller":false,"slots":[["FILTER_1_PITCH_AMT","Pitch Amt",false]]},
-      {"entry":48,"module":"FILTER_1","key":"MOD_1_AMT","label":"Mod 1 Amt","bipolar":false,"cc":24,"value":4,"controller":false,"slots":[["FILTER_1_MOD_1_AMT","Mod 1 Amt",false]]},
-      {"entry":49,"module":"FILTER_1","key":"MOD_2_AMT","label":"Mod 2 Amt","bipolar":false,"cc":25,"value":4,"controller":false,"slots":[["FILTER_1_MOD_2_AMT","Mod 2 Amt",false]]},
-      {"entry":50,"module":"FILTER_1","key":"MOD_POLARITY","label":"Mod Polarity","bipolar":true,"cc":51,"value":124,"controller":false,"slots":[["FILTER_1_MOD_POLARITY","Mod Polarity",true]]},
+      {"entry":46,"module":"FILTER_1","key":"MODE","label":"Mode","bipolar":false,"cc":39,"value":4,"controller":false,"hint":"LP to Notch to HP","slots":[["FILTER_1_MODE","Mode",false]]},
+      {"entry":47,"module":"FILTER_1","key":"PITCH_AMT","label":"Pitch Amt","bipolar":false,"cc":9,"value":4,"controller":false,"hintInputs":["PITCH"],"slots":[["FILTER_1_PITCH_AMT","Pitch Amt",false]]},
+      {"entry":48,"module":"FILTER_1","key":"MOD_1_AMT","label":"Mod 1 Amt","bipolar":false,"cc":24,"value":4,"controller":false,"hintInputs":["MOD_1"],"slots":[["FILTER_1_MOD_1_AMT","Mod 1 Amt",false]]},
+      {"entry":49,"module":"FILTER_1","key":"MOD_2_AMT","label":"Mod 2 Amt","bipolar":false,"cc":25,"value":4,"controller":false,"hintInputs":["MOD_2"],"slots":[["FILTER_1_MOD_2_AMT","Mod 2 Amt",false]]},
+      {"entry":50,"module":"FILTER_1","key":"MOD_POLARITY","label":"Mod Polarity","bipolar":true,"cc":51,"value":124,"controller":false,"hint":"− to +","slots":[["FILTER_1_MOD_POLARITY","Mod Polarity",true]]},
       {"entry":51,"module":"AMP_1","key":"GAIN","label":"Gain","bipolar":false,"cc":15,"value":64,"controller":false,"slots":[["AMP_1_GAIN","Gain",false]]},
-      {"entry":52,"module":"AMP_1","key":"MOD_1_2_MIX","label":"Mod 1/2 Mix","bipolar":false,"cc":36,"value":124,"controller":false,"slots":[["AMP_1_MOD_1_2_MIX","Mod 1/2 Mix",false]]},
+      {"entry":52,"module":"AMP_1","key":"MOD_1_2_MIX","label":"Mod 1/2 Mix","bipolar":false,"cc":36,"value":124,"controller":false,"hintInputs":["MOD_1","MOD_2"],"slots":[["AMP_1_MOD_1_2_MIX","Mod 1/2 Mix",false]]},
       {"entry":53,"module":"CHORUS_1","key":"MIX","label":"Mix","bipolar":false,"cc":93,"value":64,"controller":false,"slots":[["CHORUS_1_MIX","Mix",false]]},
       {"entry":54,"module":"CHORUS_1","key":"RATE","label":"Rate","bipolar":false,"cc":58,"value":64,"controller":false,"slots":[["CHORUS_1_RATE","Rate",false]]},
       {"entry":55,"module":"CHORUS_1","key":"DEPTH","label":"Depth","bipolar":false,"cc":59,"value":64,"controller":false,"slots":[["CHORUS_1_DEPTH","Depth",false]]},
@@ -1453,6 +1458,7 @@
   const CONTROL_ITEMS = SPEC.controls.map(c => ({
     ...toItem(c), entry: c.entry, controller: !!c.controller, bipolar: c.bipolar, slots: c.slots,
     defaultCC: c.cc, defaultValue: c.value ?? null, defaultSource: c.source || null,
+    hint: c.hint || null, hintInputs: c.hintInputs || null,
   }));
   const PARAM_ITEMS = CONTROL_ITEMS.filter(c => !c.controller);
   const CONTROLLER_ITEMS = CONTROL_ITEMS.filter(c => c.controller);
@@ -3057,7 +3063,7 @@
       panel.className = 'panel';
       panel.innerHTML = `<h2>${p.title}</h2><div class="control-row">` + items.map(c => `
         <div class="slider-knob-zone" data-ctrl="${c.key}">
-          <div class="slider-label">${escapeHTML(c.label)} <span class="cc-num"></span></div>
+          <div class="slider-label">${escapeHTML(c.label)} <span class="ctl-hint"></span><span class="cc-num"></span></div>
           <div class="slider-input-wrapper">
             <span class="range-wrap"><input type="range" min="4" max="124">${c.slots.some(([, , bipolar]) => bipolar) ? '<span class="centre-tick"></span>' : ''}</span>
             <span class="slider-value"></span>
@@ -3086,6 +3092,16 @@
     refreshSliders();
   }
 
+  // What goes in parentheses after c's name: a fixed note on its range, or what feeds the inputs
+  // it scales, as the patch routes them, by the module's name and the output's past "Out", and a
+  // note signal without its "Note".
+  function controlHint(c) {
+    if (!c.hintInputs) return c.hint || '';
+    const srcs = c.hintInputs.map(k => state.inputs[`${c.module}_${k}`]);
+    if (srcs.every(s => s === 'NONE')) return '';
+    return srcs.map(s => s === 'NONE' ? 'none' : sigLabel(s).replace(/ Out(?= |$)/, '').replace(/^Note /, '')).join(' to ');
+  }
+
   // The other parameters on c's CC, by their full names, none when it has no CC of its own.
   function sharingCC(c) {
     const cc = state.cc[c.key];
@@ -3105,6 +3121,8 @@
       zone.classList.toggle('routed', routed);
       zone.classList.toggle('own', ownValue);
       const others = sharingCC(c);
+      const hint = controlHint(c);
+      zone.querySelector(".ctl-hint").textContent = hint ? `(${hint}) ` : '';
       const ccNum = zone.querySelector('.cc-num');
       ccNum.innerHTML =
         (!cc ? (ownValue ? '' : '(no CC)') : RESERVED_CCS.has(cc) ? `(CC#${cc}, reserved)` : `(CC#${cc})`) +
@@ -3112,6 +3130,8 @@
       ccNum.classList.toggle('shared', others.length > 0);
       ccNum.title = others.length ? `CC#${cc} also moves ${others.join(', ')}` : '';
       zone.title = routed ? `${c.full} reads ${sigLabel(src)}. This slider sets only its own slot, which other wires may read.` : '';
+      // A name cut short in four columns can be read whole here.
+      zone.querySelector('.slider-label').title = zone.querySelector('.slider-label').textContent.trim();
       slider.disabled = !usable;
       const value = ownValue ? paramValue(c.key) : usable ? ccValue(cc) : 64;
       if (document.activeElement !== slider) slider.value = value;
@@ -3122,6 +3142,11 @@
       norm.title = 'The value the synth sees in the slot';
     });
     refreshModWheel();
+    world.querySelectorAll('.row.ctrl .lbl').forEach(lbl => {
+      const c = CONTROL[lbl.closest('.row').dataset.ctrl];
+      const hint = controlHint(c);
+      lbl.title = (hint ? `${c.label} (${hint}). ` : '') + (c.bipolar ? 'Bipolar: value 64 is the centre' : 'Unipolar');
+    });
   }
 
   // The mod wheel by the soft keyboard moves the value of the CC Mod Wheel is on in the patch, as

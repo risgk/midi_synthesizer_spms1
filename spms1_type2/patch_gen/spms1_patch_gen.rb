@@ -252,7 +252,7 @@ def editor_js
     controls: s.controls_in_list_order.map do |c|
       h = { entry: c['entry'], module: c['module'], key: c['key'], label: c['label'],
             bipolar: !!c['bipolar'], cc: c['cc'].to_i, value: c['value'], source: c['source'],
-            controller: !!c['controller'],
+            controller: !!c['controller'], hint: c['hint'], hintInputs: c['hint_inputs'],
             slots: if c['controller']
                      s.slots_of(c).map { |sig| [sig['key'], sig['label'] || c['label'], s.bipolar?(sig)] }
                    else
