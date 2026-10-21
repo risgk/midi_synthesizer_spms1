@@ -100,7 +100,7 @@ module Spms1
       end
 
       # The Channel Mode messages, as spms1_midi_state.h takes them: Reset All Controllers (121)
-      # centres the bend, sets CC 1 to 0 and leaves no NRPN selected; Local Control (122) does
+      # centers the bend, sets CC 1 to 0 and leaves no NRPN selected; Local Control (122) does
       # nothing; the rest end every note.
       def handle_channel_mode(ch, number)
         if number == 121

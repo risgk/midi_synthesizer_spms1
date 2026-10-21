@@ -102,7 +102,7 @@ default_order: [PITCH_1, EG_1, EG_2, LFO_1, MIXER_1, OSC_1, OSC_2, NOISE_1, MIXE
 #             `get` the method that reads it after process, or none for the one process returns
 #   control:  a controller's slot, which the CC of that control (below) fills; `form` makes it a
 #             shape of that CC's value u, 0.0 to 1.0: rev 1 - u, inv -u, rev_inv u - 1, bipolar
-#             u - 0.5 and bipolar_inv 0.5 - u, each labelled by `label`; with no form it is u itself
+#             u - 0.5 and bipolar_inv 0.5 - u, each labeled by `label`; with no form it is u itself
 #   (none):   a note input, written by the synth from MIDI
 # `bipolar` marks a slot that swings both ways (the README's ±); a controller slot takes its
 # control's.
@@ -130,7 +130,7 @@ signals:
   - { key: MOD_WHEEL_INV,     id: 10, control: MOD_WHEEL, form: inv,     label: Mod Wheel Inv }
   - { key: MOD_WHEEL_REV_INV, id: 11, control: MOD_WHEEL, form: rev_inv, label: Mod Wheel Rev Inv }
   # The general controls, General 1 and 2, each a CC put on the bus as it is and in five more
-  # shapes: turned round, negated, both, and centred on zero either way up. A switch or a
+  # shapes: turned round, negated, both, and centered on zero either way up. A switch or a
   # parameter taking Rev moves the other way from one taking the CC itself, so one CC can turn a
   # switch on while it turns another off.
   - { key: GENERAL_1,             id: 12, control: GENERAL_1 }

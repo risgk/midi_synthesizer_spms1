@@ -110,7 +110,7 @@ module Spms1
     K_TABLE[121] = K_TABLE[120]
 
     # Negative damping at the top of the resonance dial, as k = -t * kappa / g with t the amount
-    # dialled in. The leak settles the oscillation where it takes out what the negative damping
+    # dialed in. The leak settles the oscillation where it takes out what the negative damping
     # puts in: g * |k| against h * A^2 / (4 * ceiling^2) for a band pass of amplitude A, with h the
     # leak's step that initialize sets, so at about 2 * ceiling * sqrt(|k| * g / h), 11.3 *
     # sqrt(|k| * g) at 48 kHz (11.4 as measured). Both sit in the same implicit equation, so the

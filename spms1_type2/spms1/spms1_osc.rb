@@ -181,7 +181,7 @@ module Spms1
     # Pitch is unipolar, [0.0, 1.0], from no offset up an octave, so it only raises the pitch, as a
     # sync sweep does.
     # Pitch Coarse and Pitch Fine are bipolar, [-0.5, 0.5], with 0.0 meaning no offset, so a controller's
-    # centre detent lands there. Linear about that centre, which is what puts every step on a whole
+    # center detent lands there. Linear about that center, which is what puts every step on a whole
     # semitone or a whole cent; a curve here would make exact intervals unreachable.
     # Not smoothed: a semitone step is part of the sound, a cent step is too small to hear as one,
     # and a step in pitch does not click, as the phase runs on unbroken.

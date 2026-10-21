@@ -30,7 +30,7 @@ uint8_t  g_midi_note_prev_pitch[16] = {SPMS1_NO_NOTE, SPMS1_NO_NOTE, SPMS1_NO_NO
                                        SPMS1_NO_NOTE, SPMS1_NO_NOTE, SPMS1_NO_NOTE, SPMS1_NO_NOTE,
                                        SPMS1_NO_NOTE, SPMS1_NO_NOTE, SPMS1_NO_NOTE, SPMS1_NO_NOTE};
 uint8_t  g_midi_cc_values[16][128] = {{0}};
-// Pitch bend arrives 14-bit and centred, and the MIDI library hands it over already signed,
+// Pitch bend arrives 14-bit and centered, and the MIDI library hands it over already signed,
 // so it is kept that way rather than folded into the 7-bit tables above.
 int16_t  g_midi_pitch_bend[16]     = {0};
 
@@ -229,7 +229,7 @@ void spms1_handle_note_on(uint8_t midi_ch, uint8_t pitch, uint8_t velocity) {
 // All Sound Off (120), All Notes Off (123) and Omni Off, Omni On, Mono On and Poly On (124 to 127),
 // which end every note as All Notes Off does, close the gate and forget the remembered note, as a
 // note off of every note would: the envelopes release as they do at a note off. Reset All
-// Controllers (121) centres Pitch Bend, sets the Modulation Wheel (CC 1) to 0 and leaves no NRPN
+// Controllers (121) centers Pitch Bend, sets the Modulation Wheel (CC 1) to 0 and leaves no NRPN
 // selected, and leaves every other CC as it is, the parameters among them. Local Control (122) has
 // no keyboard here to act on.
 void spms1_handle_channel_mode(uint8_t midi_ch, uint8_t number) {

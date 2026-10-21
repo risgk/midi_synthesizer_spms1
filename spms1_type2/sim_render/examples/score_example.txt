@@ -4,6 +4,6 @@
 0.5  B0 4A 20     ; CC 74 (Filter Cutoff) down
 1.0  E0 00 60     ; Pitch Bend up, half way
 1.5  80 30 40     ; Note Off C3
-2.0  E0 00 40     ; Pitch Bend back to the centre
+2.0  E0 00 40     ; Pitch Bend back to the center
 2.0  90 37 64     ; Note On G3
 2.5  80 37 40     ; Note Off G3

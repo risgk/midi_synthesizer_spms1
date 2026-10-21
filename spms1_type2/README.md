@@ -109,11 +109,11 @@ Usage
     - Its Initialize & Send All sets each CC value and each parameter's value with no CC back to
       what it powers up at, and sends them
 - Built-in software keyboard for note input and testing
-    - Beside the keys, a pitch bend wheel, from -8192 to +8191, springs back to the centre when let go,
+    - Beside the keys, a pitch bend wheel, from -8192 to +8191, springs back to the center when let go,
       and a mod wheel moves the CC that Mod Wheel is on in the patch
     - Click its heading to hide it, so the patch editor or the controls take its height; the editor remembers
       which, and the keys of the PC keyboard do not play while it is hidden
-    - Panic sends All Sound Off and centres Pitch Bend. The editor follows the Channel Mode messages
+    - Panic sends All Sound Off and centers Pitch Bend. The editor follows the Channel Mode messages
       arriving at MIDI In as the synth takes them (below), and CC#120 to 127 cannot be given to a
       parameter
 - Graphical patch editor on its Patch tab
@@ -135,7 +135,7 @@ Usage
 - MIDI Channel: Channel 1
 - Channel Mode messages: All Sound Off (CC#120), All Notes Off (CC#123), and Omni Off, Omni On, Mono On
   and Poly On (CC#124 to 127), end every note as letting it go would, so the envelopes release;
-  Reset All Controllers (CC#121) centres Pitch Bend, sets the Modulation Wheel (CC#1) to 0 and
+  Reset All Controllers (CC#121) centers Pitch Bend, sets the Modulation Wheel (CC#1) to 0 and
   leaves no NRPN selected, and leaves the other CCs, the parameters', as they are. CC#120 to 127
   are not controls and are not stored as CC values
 - USB MIDI Input
@@ -677,7 +677,7 @@ outputs below each, and as sliders in the Controls tab.
 Note Pitch, Note Gate and Pitch Bend are what the keyboard puts on the bus. Note Pitch carries
 MIDI notes 0 to 120 as -0.5 to +0.5, the same span the oscillator reads as its whole pitch
 range, and Pitch Bend is bipolar too, one unit across the whole wheel: exactly -0.5 and +0.5 at
-the ends of its travel and exactly zero at the centre detent, so it can feed a module input
+the ends of its travel and exactly zero at the center detent, so it can feed a module input
 without a mixer to shift it. Note Gate is 0.0 or 1.0, and an envelope triggers at 0.25. Pitch Bend
 is routed to Pitch 1 Bend In by default.
 
@@ -707,7 +707,7 @@ it is built with. Read these tables again after an update.
 
 #### Ranges worth knowing
 
-Osc 1 Pitch Coarse and Pitch Fine transpose the oscillator. Both are centred on value 64 and move one
+Osc 1 Pitch Coarse and Pitch Fine transpose the oscillator. Both are centered on value 64 and move one
 whole unit per CC step: Coarse a semitone, reaching 5 octaves either way, and Fine a cent,
 reaching 60 either way. They are summed, so any pitch is reachable. Pitch, on each oscillator,
 adds up to an octave up on top, a tenth of a semitone a step, for a pitch swept by hand, as for a
@@ -1221,8 +1221,8 @@ measures on the device -- with the default patch and a note held.
 - `--profile` lists the functions the cycles go to; `--elf FILE` estimates an ELF built elsewhere, from
   another commit say, so two versions can be compared; `--help` shows the rest
 - Needs Python 3 and `pip install unicorn capstone pyelftools numpy`, installed by you and not shipped
-  here: Unicorn's Python binding is under the BSD licence and its emulator under the GPLv2, Capstone
-  and NumPy under the BSD licence, and pyelftools is in the public domain
+  here: Unicorn's Python binding is under the BSD license and its emulator under the GPLv2, Capstone
+  and NumPy under the BSD license, and pyelftools is in the public domain
 
 
 ### GitHub Actions
@@ -1366,7 +1366,7 @@ Four things to know before reading the output:
   is about 12000 instructions. Measure the change in the real file, not in a small one
 
 
-SPMS-1 (type-2) Licence
+SPMS-1 (type-2) License
 -----------------------
 
 ```
@@ -1377,7 +1377,7 @@ To view a copy of this license, visit https://creativecommons.org/publicdomain/z
 - Target files: `spms1_*.*`, `spms1/spms1.ino`, `spms1/spms1_*.*`
 
 
-Spinel Licence
+Spinel License
 --------------
 
 ```

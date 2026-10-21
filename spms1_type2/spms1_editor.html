@@ -239,7 +239,7 @@
       justify-content: space-between;
       gap: 12px;
     }
-    /* The star that marks a favourite, in the padding of the panel to the left of the name, so it
+    /* The star that marks a favorite, in the padding of the panel to the left of the name, so it
        takes nothing from the name or the slider at any width; faint until it is set. */
     .fav-toggle {
       position: absolute;
@@ -262,7 +262,7 @@
       color: var(--favorite);
       opacity: 1;
     }
-    /* A light gold behind a favourite's row, out to the edges of its panel. */
+    /* A light gold behind a favorite's row, out to the edges of its panel. */
     .slider-knob-zone.fav::before {
       content: '';
       position: absolute;
@@ -302,7 +302,7 @@
       .slider-label .ctl-sub { display: inline; }
       .control-row { gap: 6px; }
       .editor-column { gap: 12px; }
-      /* More on the left than the right, for the favourite's star, and as much in all. */
+      /* More on the left than the right, for the favorite's star, and as much in all. */
       .editor-column .panel { padding: 8px 8px 8px 12px; }
       .fav-toggle { left: -12px; font-size: 0.7rem; }
       .slider-knob-zone.fav::before { inset: -3px -8px -3px -12px; }
@@ -376,10 +376,10 @@
     }
     /* The slider runs from CC 4 to CC 124, the ends of the range the synth uses: cc_to_unipolar
        and cc_to_bipolar map them to the ends of their ranges and clamp anything past them. A
-       bipolar one has a tick at CC 64, where the centre of the dial means no change, drawn beside
+       bipolar one has a tick at CC 64, where the center of the dial means no change, drawn beside
        the slider rather than declared as a <datalist>, which some browsers turn into a snap point.
        It runs under the thumb and is taller than it, so it shows above and below the thumb when
-       the thumb sits on it. The thumb's centre travels
+       the thumb sits on it. The thumb's center travels
        from half a thumb in to half a thumb from the far end, so CC 64, the middle of CC 4 to
        CC 124, is halfway along what is left of the track. */
     .range-wrap {
@@ -405,7 +405,7 @@
       border-radius: 3px;
       background: var(--border-color);
     }
-    .range-wrap .centre-tick {
+    .range-wrap .center-tick {
       position: absolute;
       left: calc(9px + (100% - 18px) * 0.5 - 1px);
       top: 50%;
@@ -443,7 +443,7 @@
       background: transparent;
       cursor: default;
     }
-    /* A parameter with no CC sets the value its own slot holds, sent as NRPN: blue, the colour of
+    /* A parameter with no CC sets the value its own slot holds, sent as NRPN: blue, the color of
        a parameter's wire and of CC 0 on the Patch tab, so it stands apart from one a CC moves. */
     .slider-knob-zone.own .slider-label,
     .slider-knob-zone.own .slider-value {
@@ -551,7 +551,7 @@
       padding: 10px 5px 5px 5px;
     }
     /* The pitch bend and mod wheels on the left of the keys, as on a keyboard, sliders standing as
-       tall as they are. The bend springs back to the centre; the mod wheel's value is that of the
+       tall as they are. The bend springs back to the center; the mod wheel's value is that of the
        CC Mod Wheel is on in the patch. */
     /* Each wheel as wide as a white key from C to E, 5/3 of a semitone, and the keys keeping the 37
        that KB_KEY_WIDTH fits a 960px window beside them, with room. */
@@ -974,7 +974,7 @@
       color: var(--wire-param);
       font-style: italic;
     }
-    /* A favourite on the Patch tab: a light gold behind its row. */
+    /* A favorite on the Patch tab: a light gold behind its row. */
     .row.ctrl.fav {
       background: var(--favorite-bg);
     }
@@ -1303,11 +1303,11 @@
     <button class="btn" id="kbd-oct-up" title="Octave Up">&#9654;</button>
     <span class="kbd-hint">PC Keys: A - K, Z / X</span>
     <button class="btn kbd-hold" id="kbd-hold" aria-pressed="false" title="The key released keeps its note on, until Hold is turned off">Hold</button>
-    <button class="btn kbd-panic" id="kbd-panic" title="All Sound Off, Pitch Bend to the centre, and the keys held let go">Panic</button>
+    <button class="btn kbd-panic" id="kbd-panic" title="All Sound Off, Pitch Bend to the center, and the keys held let go">Panic</button>
   </div>
   <div class="keyboard-frame">
     <div class="kbd-body">
-      <div class="mod-wheel" id="bend-wheel-zone" title="Pitch Bend: back to the centre when let go">
+      <div class="mod-wheel" id="bend-wheel-zone" title="Pitch Bend: back to the center when let go">
         <input type="range" id="bend-wheel" min="-8192" max="8191" value="0" aria-label="Pitch Bend">
         <span class="mod-wheel-label">Bend</span>
       </div>
@@ -1967,7 +1967,7 @@
   // own, which only the parameter reads, so it has none.
   function controlRowHTML(c, withInput) {
     const [[slot, label, bipolar], ...forms] = c.slots;
-    const tip = bipolar ? 'Bipolar: value 64 is the centre' : 'Unipolar';
+    const tip = bipolar ? 'Bipolar: value 64 is the center' : 'Unipolar';
     return `<div class="row ctrl" data-ctrl="${c.key}">
       ${withInput ? `<span class="port in param" data-dst="PR:${c.key}" title="Where ${escapeHTML(c.full)} takes its value (per buffer)"></span>` : ''}
       <span class="lbl" title="${tip}">${escapeHTML(label)}</span>
@@ -3226,7 +3226,7 @@
           <button type="button" class="fav-toggle" aria-pressed="false">&#9733;</button>
           <div class="slider-label">${escapeHTML(c.label)} <span class="ctl-sub"><span class="ctl-hint"></span><span class="cc-num"></span></span></div>
           <div class="slider-input-wrapper">
-            <span class="range-wrap"><input type="range" min="4" max="124">${c.bipolar ? '<span class="centre-tick"></span>' : ''}</span>
+            <span class="range-wrap"><input type="range" min="4" max="124">${c.bipolar ? '<span class="center-tick"></span>' : ''}</span>
             <span class="slider-value"></span>
             <span class="slider-norm" title="The value the synth sees in the slot"></span>
           </div>
@@ -3317,7 +3317,7 @@
     world.querySelectorAll('.row.ctrl .lbl').forEach(lbl => {
       const c = CONTROL[lbl.closest('.row').dataset.ctrl];
       const hint = controlHint(c);
-      lbl.title = (hint ? `${c.label} (${hint}). ` : '') + (c.bipolar ? 'Bipolar: value 64 is the centre' : 'Unipolar');
+      lbl.title = (hint ? `${c.label} (${hint}). ` : '') + (c.bipolar ? 'Bipolar: value 64 is the center' : 'Unipolar');
       lbl.closest('.row').classList.toggle('fav', state.favorites.has(c.key));
     });
   }
@@ -3338,7 +3338,7 @@
   }
 
   // The pitch bend wheel sends Pitch Bend as it moves, -8192 at the bottom to +8191 at the top,
-  // and springs back to the centre, sending 0, when it is let go.
+  // and springs back to the center, sending 0, when it is let go.
   const bendWheel = document.getElementById('bend-wheel');
   bendWheel.addEventListener('input', () => sendBend(parseInt(bendWheel.value)));
   const bendRelease = () => {
@@ -3470,7 +3470,7 @@
     if (!on) [...kbHeld].forEach(n => { kbHeld.delete(n); sendNote(0x80, n, 0); });
   }
 
-  // Panic sends All Sound Off, which ends every note, and centres Pitch Bend.
+  // Panic sends All Sound Off, which ends every note, and centers Pitch Bend.
   function kbPanic() {
     kbPointers.clear();
     kbHeld.clear();
