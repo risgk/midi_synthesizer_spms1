@@ -8,7 +8,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.4
 - Oscillator: a sawtooth-to-square morph with pulse width (CC#114), and pulse width modulation (PWM) by the same two modulations as the pitch, the envelope and the LFO by default, on CC#8 and 103; and the sawtooth and the pulse on outputs of their own too, and on Osc 1 a sine sub an octave down
 - Hard sync: Osc 2 restarts where Sync In, Osc 1's sawtooth by default, rises through zero, at the point between two samples it crosses (Sync Switch, CC#112)
 - Envelopes: two ADS envelopes, EG 2 on the amp's Mod 2 In, an organ's at power-up, on PRA32-U2's amp envelope CCs (CC#52, 53 and 54), with the release switch of both on CC#105
-- LFO: triangle (PolyBLAMP) and unipolar square (PolyBLEP), each on an output of its own, and a main output crossfading from one to the other (Wave, CC#33); a reset input, on Note Gate by default, that restarts it at each note with Reset Switch (CC#111) on
+- LFO: triangle (PolyBLAMP) and unipolar square (PolyBLEP), each on an output of its own, and a main output crossfading from one to the other (Wave, CC#33); a reset input, on Note Gate by default, that restarts it at each note with Reset Switch (CC#113) on
 - Filter: ZDF/TPT State Variable Filter (with a nonlinear leak on the band pass integrator, solved by the one-step Newton method), with low pass, high pass and band pass outputs and a main output crossfading from the low pass to the high pass through a notch (Mode, CC#39)
 - Chorus: mono in, stereo out, as a module in the run order
 - Delay: stereo, with feedback, as a module in the run order (up to 340 ms)
@@ -710,7 +710,7 @@ where the LFO works out its rate, rather than every sample as most module inputs
 
 LFO 1 Reset In restarts the LFO's cycle where it rises above zero, from the start, where Out is
 0.0 and the triangle on its way up. It takes Note Gate by default, so every note starts its
-vibrato the same way (key sync), but only with LFO 1 Reset Switch on: on CC#111, it takes Reset In
+vibrato the same way (key sync), but only with LFO 1 Reset Switch on: on CC#113, it takes Reset In
 at value 64 and above and ignores it below, and powers up off (value 4), so the LFO runs free until
 it is turned on. Reset In is read every fourth sample too, where a gate changes only between
 buffers, which are a whole number of those steps; an audio signal on it is read only at those

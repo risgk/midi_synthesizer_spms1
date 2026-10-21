@@ -4497,7 +4497,7 @@ static void sp_spms1_write_default_patch(sp_int lv_midi_ch) {
 #line 528 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_CC_LFO_1_LEVEL)), ((uint8_t)(17LL))), (sp_int)0);
 #line 529 "spms1_patch.rb"
-  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_CC_LFO_1_RESET_SW)), ((uint8_t)(111LL))), (sp_int)0);
+  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_CC_LFO_1_RESET_SW)), ((uint8_t)(113LL))), (sp_int)0);
 #line 530 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_CC_OSC_1_WAVE)), ((uint8_t)(102LL))), (sp_int)0);
 #line 531 "spms1_patch.rb"
@@ -4733,7 +4733,7 @@ static void sp_spms1_write_default_patch(sp_int lv_midi_ch) {
 #line 648 "spms1_patch.rb"
   (set_midi_cc_value(((uint8_t)(lv_midi_ch)), ((uint8_t)(17LL)), ((uint8_t)(4LL))), (sp_int)0);
 #line 649 "spms1_patch.rb"
-  (set_midi_cc_value(((uint8_t)(lv_midi_ch)), ((uint8_t)(111LL)), ((uint8_t)(4LL))), (sp_int)0);
+  (set_midi_cc_value(((uint8_t)(lv_midi_ch)), ((uint8_t)(113LL)), ((uint8_t)(4LL))), (sp_int)0);
 #line 650 "spms1_patch.rb"
   (set_midi_cc_value(((uint8_t)(lv_midi_ch)), ((uint8_t)(102LL)), ((uint8_t)(4LL))), (sp_int)0);
 #line 651 "spms1_patch.rb"

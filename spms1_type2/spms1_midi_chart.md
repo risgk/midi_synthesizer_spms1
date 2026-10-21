@@ -56,7 +56,7 @@
 |                             3 | x             | o             | LFO Rate                             |
 |                            17 | x             | o             | LFO Level                            |
 |                            33 | x             | o             | LFO Wave (Triangle to Square)        |
-|                           111 | x             | o             | LFO Reset Switch [Off|On]            |
+|                           113 | x             | o             | LFO Reset Switch [Off|On]            |
 |                            93 | x             | o             | Chorus Mix                           |
 |                            58 | x             | o             | Chorus Rate                          |
 |                            59 | x             | o             | Chorus Depth                         |

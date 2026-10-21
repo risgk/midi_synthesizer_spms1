@@ -526,7 +526,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_WAVE           , 33)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_RATE           , 3)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_LEVEL          , 17)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_RESET_SW       , 111)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_RESET_SW       , 113)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_WAVE           , 102)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_PW             , 114)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_PITCH_MOD_1_AMT, 89)
@@ -646,7 +646,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 33 , 4  ) # LFO 1 Wave
   C.set_midi_cc_value(midi_ch, 3  , 64 ) # LFO 1 Rate
   C.set_midi_cc_value(midi_ch, 17 , 4  ) # LFO 1 Level
-  C.set_midi_cc_value(midi_ch, 111, 4  ) # LFO 1 Reset Switch
+  C.set_midi_cc_value(midi_ch, 113, 4  ) # LFO 1 Reset Switch
   C.set_midi_cc_value(midi_ch, 102, 4  ) # Osc 1 Wave
   C.set_midi_cc_value(midi_ch, 114, 64 ) # Osc 1 PW
   C.set_midi_cc_value(midi_ch, 89 , 4  ) # Osc 1 Pitch Mod 1 Amt
