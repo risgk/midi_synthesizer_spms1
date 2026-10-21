@@ -2111,7 +2111,9 @@
         else if (!CONTROL[key].controller) setParamValue(key, clampValue(valIn.value), true);
       });
       const currentValue = () => (state.cc[key] ? ccValue(state.cc[key]) : paramValue(key));
+      // Only a value that moves is set and sent, so a drag held past either end sends nothing more.
       const setValue = v => {
+        if (v === currentValue()) return;
         const cc = state.cc[key];
         if (cc) setCCValue(cc, v, true);
         else setParamValue(key, v, true);
