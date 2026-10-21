@@ -1,10 +1,10 @@
 ; An example patch for sim_render and sim_cruby/spms1_render.rb, written as the editor copies one
 ; with Format "MIDI bytes (hex)": NRPN writes on MIDI channel 1, taken after the default patch.
 ; It rewires a few inputs of the default patch:
-B0 63 01 B0 62 07 B0 06 23   ; NRPN 135 Mixer 1 In 1   <- Osc 1 (35)
-B0 62 08 B0 06 17            ; NRPN 136 Mixer 1 In 2   <- EG 1 (23)
-B0 62 20 B0 06 21            ; NRPN 160 Output L       <- Mixer 1 (33)
-B0 62 18 B0 06 1B            ; NRPN 152 Filter 1 Mod 1 <- LFO 1 (27)
+B0 63 01 B0 62 08 B0 06 23   ; NRPN 136 Mixer 1 In 1   <- Osc 1 (35)
+B0 62 09 B0 06 17            ; NRPN 137 Mixer 1 In 2   <- EG 1 (23)
+B0 62 21 B0 06 21            ; NRPN 161 Output L       <- Mixer 1 (33)
+B0 62 19 B0 06 1B            ; NRPN 153 Filter 1 Mod 1 <- LFO 1 (27)
 B0 63 02 B0 62 17 B0 06 01   ; NRPN 279 Mixer 1 Level 1 <- 1.0 (1)
 B0 62 18 B0 06 01            ; NRPN 280 Mixer 1 Level 2 <- 1.0 (1)
 B0 65 7F B0 64 7F            ; RPN null

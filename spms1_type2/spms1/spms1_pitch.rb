@@ -8,6 +8,9 @@ module Spms1
   # pitch at once rather than glide, as a pitch bend should. Stretch then widens the sum about note
   # 60, so that the keys, the glide and the bend spread out alike.
   #
+  # The glide moves only while Gate In is on, from 0.25 up, as an envelope's gate is: with the gate
+  # off, it holds where it is, and the next note goes on from there.
+  #
   # There are two outputs, Out 1 and Out 2, from the one lag and the one bend: each has a glide
   # switch and a bend switch of its own, so the glide or the bend can reach one oscillator only.
   class Pitch
@@ -35,8 +38,10 @@ module Spms1
     def initialize(sample_rate)
       @sample_rate = sample_rate
       @time = 0.0
-      # The share of the distance left that is covered each sample. 1.0 is no slew at all.
+      # The share of the distance left that is covered each sample. 1.0 is no slew at all. With
+      # the gate off, the share is 0.0, holding the glide, unless the slew is off.
       @blend = 1.0
+      @gate_off_blend = 1.0
       # Whether each output takes the glide and the bend: 1.0 on, 0.0 off.
       @glide_1_on = 1.0
       @glide_2_on = 1.0
@@ -66,6 +71,7 @@ module Spms1
       @time = (time < 0.0) ? 0.0 : ((time > 1.0) ? 1.0 : time)
       blend = 1.0 / (TIME_BASE * calculate_exp_fast(@time) * @sample_rate)
       @blend = (@time > 0.0) ? blend : 1.0
+      @gate_off_blend = (@time > 0.0) ? 0.0 : 1.0
     end
 
     # Out 1 Glide Switch and Out 2 Glide Switch are unipolar, [0.0, 1.0], and each turns the
@@ -125,6 +131,10 @@ module Spms1
     # share each sample, it would otherwise sink into denormals and stick at the smallest one,
     # which x86 computes slowly.
     #
+    # Gate In picks the share each sample: Glide's while it is on, and while it is off 0.0, which
+    # leaves the distance as it is, or 1.0 at Glide 0.0, so that no slew stays no slew whatever
+    # the gate does.
+    #
     # Bend In is added past the lag, so that the lag never holds it, and so that at zero it leaves
     # the output as it was, bit for bit. Stretch multiplies the sum last, so a bend is widened with
     # the keys; at a factor of 1.0 the product is the sum, bit for bit. Each output takes the
@@ -134,7 +144,7 @@ module Spms1
     # The outputs are held to -1.0 to +1.0, as a mixer's is: twice the pitch range, so whatever
     # the oscillator and the filter clamp to their own range is still reached at either end.
     # Out 1 is returned, and Out 2 is read with output_2.
-    def process(control_tick, input = 0.0, bend_input = 0.0)
+    def process(control_tick, input = 0.0, bend_input = 0.0, gate_input = 0.0)
       if control_tick
         @stage_1_bend_depth = Dsp.smooth(@bend_depth, @stage_1_bend_depth, @smoothing_target_blend)
         @current_bend_depth = Dsp.smooth(@stage_1_bend_depth, @current_bend_depth, @smoothing_target_blend)
@@ -145,7 +155,8 @@ module Spms1
       distance = @distance + (@last_input - input)
       @last_input = input
       flushed = Dsp.flush_tiny(distance)
-      @distance = flushed - flushed * @blend
+      blend = (gate_input >= 0.25) ? @blend : @gate_off_blend
+      @distance = flushed - flushed * blend
       bend = bend_input * @current_bend_depth
       output_2 = ((input + @distance * @glide_2_on) + (bend * @bend_2_on)) * @current_stretch_factor
       @output_2 = (output_2 < -1.0) ? -1.0 : ((output_2 > 1.0) ? 1.0 : output_2)

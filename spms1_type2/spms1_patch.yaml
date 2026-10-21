@@ -32,7 +32,7 @@
 # `method`, where given, is the method the loop calls in place of process, with the same inputs. The
 # loop is written from these (see patch_gen/spms1_patch_gen.rb).
 modules:
-  - { key: PITCH_1,    id: 1, label: Pitch 1, class: Pitch, process: [PITCH, BEND] }
+  - { key: PITCH_1,    id: 1, label: Pitch 1, class: Pitch, process: [PITCH, BEND, GATE] }
   - { key: EG_1, id: 2, label: EG 1, class: EnvGen, process: [GATE] }
   - { key: EG_2, id: 3, label: EG 2, class: EnvGen, process: [GATE] }
   - { key: LFO_1,     id: 4, label: LFO 1, class: LFO, process: [RATE_MOD, LEVEL_MOD, RESET] }
@@ -49,7 +49,8 @@ modules:
 # The default patch. Every module is in the run order, so a patch only ever has to route, never to
 # switch something on first. Pitch 1 runs first, taking Note Pitch and handing it to the
 # oscillators, Out 1 to Osc 1 and the filter and Out 2 to Osc 2: its Glide powers up at 0.0, where it passes its input through as it
-# is, so the patch plays as one without it until CC 5 turns the portamento up. Pitch Bend goes to
+# is, so the patch plays as one without it until CC 5 turns the portamento up, and its Gate In
+# takes Note Gate, so that the glide moves only while a key is held. Pitch Bend goes to
 # its Bend In, added past the glide, an octave either way at Bend Amt's (CC 57) power-up of CC 28, so
 # the bend reaches the oscillators and the filter's keyboard tracking at once. Running first lets
 # every other module read it in the same sample, the modulation sources as well as the
@@ -195,38 +196,39 @@ signals:
 inputs:
   - { entry: 0, module: PITCH_1,      key: PITCH,       label: Pitch In,       name: Pitch In,       source: NOTE_PITCH }
   - { entry: 1, module: PITCH_1,      key: BEND,        label: Bend In,      name: Bend In,      source: PITCH_BEND }
-  - { entry: 2, module: EG_1,        key: GATE,        label: Gate In,        name: Gate In,        source: NOTE_GATE }
-  - { entry: 3, module: EG_2,        key: GATE,        label: Gate In,        name: Gate In,        source: NOTE_GATE }
-  - { entry: 4, module: LFO_1,       key: RATE_MOD,    label: Rate Mod In,    name: Rate Mod In,    source: NONE }
-  - { entry: 5, module: LFO_1,       key: LEVEL_MOD,   label: Level Mod In,   name: Level Mod In,   source: MOD_WHEEL }
-  - { entry: 6, module: LFO_1,       key: RESET,       label: Reset In,       name: Reset In,       source: NOTE_GATE }
-  - { entry: 7, module: MIXER_1,     key: IN_1,        label: In 1,           name: In 1,           source: NONE }
-  - { entry: 8, module: MIXER_1,     key: IN_2,        label: In 2,           name: In 2,           source: NONE }
-  - { entry: 9, module: MIXER_1,     key: IN_3,        label: In 3,           name: In 3,           source: NONE }
-  - { entry: 10, module: MIXER_1,     key: IN_4,        label: In 4,           name: In 4,           source: NONE }
-  - { entry: 11, module: OSC_1,       key: PITCH,       label: Pitch In,       name: Pitch In,       source: PITCH_1_OUTPUT_1 }
-  - { entry: 12, module: OSC_1,       key: MOD_1,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
-  - { entry: 13, module: OSC_1,       key: MOD_2,       label: Mod 2 In,   name: Mod 2 In,   source: LFO_1_OUTPUT }
-  - { entry: 14, module: OSC_2,       key: PITCH,       label: Pitch In,       name: Pitch In,       source: PITCH_1_OUTPUT_2 }
-  - { entry: 15, module: OSC_2,       key: MOD_1,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
-  - { entry: 16, module: OSC_2,       key: MOD_2,       label: Mod 2 In,       name: Mod 2 In,       source: LFO_1_OUTPUT }
-  - { entry: 17, module: OSC_2,       key: SYNC,        label: Sync In,        name: Sync In,        source: OSC_1_OUTPUT_SAW }
-  - { entry: 18, module: MIXER_2,     key: IN_1,        label: In 1,           name: In 1,           source: OSC_1_OUTPUT }
-  - { entry: 19, module: MIXER_2,     key: IN_2,        label: In 2,           name: In 2,           source: OSC_2_OUTPUT }
-  - { entry: 20, module: MIXER_2,     key: IN_3,        label: In 3,           name: In 3,           source: OSC_1_OUTPUT_SUB }
-  - { entry: 21, module: MIXER_2,     key: IN_4,        label: In 4,           name: In 4,           source: NOISE_1_OUTPUT }
-  - { entry: 22, module: FILTER_1,    key: AUDIO,       label: Audio In,       name: Audio In,       source: MIXER_2_OUTPUT }
-  - { entry: 23, module: FILTER_1,    key: PITCH,       label: Pitch In,       name: Pitch In,       source: PITCH_1_OUTPUT_1 }
-  - { entry: 24, module: FILTER_1,    key: MOD_1,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
-  - { entry: 25, module: FILTER_1,    key: MOD_2,       label: Mod 2 In,       name: Mod 2 In,       source: LFO_1_OUTPUT }
-  - { entry: 26, module: AMP_1,       key: AUDIO,       label: Audio In,       name: Audio In,       source: FILTER_1_OUTPUT }
-  - { entry: 27, module: AMP_1,       key: MOD_1,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
-  - { entry: 28, module: AMP_1,       key: MOD_2,       label: Mod 2 In,       name: Mod 2 In,       source: EG_2_OUTPUT }
-  - { entry: 29, module: CHORUS_1,    key: AUDIO,       label: Audio In,       name: Audio In,       source: AMP_1_OUTPUT }
-  - { entry: 30, module: DELAY_1,     key: AUDIO_L,     label: Audio In L,     name: Audio In L,     source: CHORUS_1_OUTPUT_L }
-  - { entry: 31, module: DELAY_1,     key: AUDIO_R,     label: Audio In R,     name: Audio In R,     source: CHORUS_1_OUTPUT_R }
-  - { entry: 32, key: OUTPUT_L,    label: L,              name: Final Output L, name_ja: 最終出力 L, source: DELAY_1_OUTPUT_L }
-  - { entry: 33, key: OUTPUT_R,    label: R,              name: Final Output R, name_ja: 最終出力 R, source: DELAY_1_OUTPUT_R }
+  - { entry: 2, module: PITCH_1,      key: GATE,        label: Gate In,      name: Gate In,      source: NOTE_GATE }
+  - { entry: 3, module: EG_1,        key: GATE,        label: Gate In,        name: Gate In,        source: NOTE_GATE }
+  - { entry: 4, module: EG_2,        key: GATE,        label: Gate In,        name: Gate In,        source: NOTE_GATE }
+  - { entry: 5, module: LFO_1,       key: RATE_MOD,    label: Rate Mod In,    name: Rate Mod In,    source: NONE }
+  - { entry: 6, module: LFO_1,       key: LEVEL_MOD,   label: Level Mod In,   name: Level Mod In,   source: MOD_WHEEL }
+  - { entry: 7, module: LFO_1,       key: RESET,       label: Reset In,       name: Reset In,       source: NOTE_GATE }
+  - { entry: 8, module: MIXER_1,     key: IN_1,        label: In 1,           name: In 1,           source: NONE }
+  - { entry: 9, module: MIXER_1,     key: IN_2,        label: In 2,           name: In 2,           source: NONE }
+  - { entry: 10, module: MIXER_1,     key: IN_3,        label: In 3,           name: In 3,           source: NONE }
+  - { entry: 11, module: MIXER_1,     key: IN_4,        label: In 4,           name: In 4,           source: NONE }
+  - { entry: 12, module: OSC_1,       key: PITCH,       label: Pitch In,       name: Pitch In,       source: PITCH_1_OUTPUT_1 }
+  - { entry: 13, module: OSC_1,       key: MOD_1,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
+  - { entry: 14, module: OSC_1,       key: MOD_2,       label: Mod 2 In,   name: Mod 2 In,   source: LFO_1_OUTPUT }
+  - { entry: 15, module: OSC_2,       key: PITCH,       label: Pitch In,       name: Pitch In,       source: PITCH_1_OUTPUT_2 }
+  - { entry: 16, module: OSC_2,       key: MOD_1,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
+  - { entry: 17, module: OSC_2,       key: MOD_2,       label: Mod 2 In,       name: Mod 2 In,       source: LFO_1_OUTPUT }
+  - { entry: 18, module: OSC_2,       key: SYNC,        label: Sync In,        name: Sync In,        source: OSC_1_OUTPUT_SAW }
+  - { entry: 19, module: MIXER_2,     key: IN_1,        label: In 1,           name: In 1,           source: OSC_1_OUTPUT }
+  - { entry: 20, module: MIXER_2,     key: IN_2,        label: In 2,           name: In 2,           source: OSC_2_OUTPUT }
+  - { entry: 21, module: MIXER_2,     key: IN_3,        label: In 3,           name: In 3,           source: OSC_1_OUTPUT_SUB }
+  - { entry: 22, module: MIXER_2,     key: IN_4,        label: In 4,           name: In 4,           source: NOISE_1_OUTPUT }
+  - { entry: 23, module: FILTER_1,    key: AUDIO,       label: Audio In,       name: Audio In,       source: MIXER_2_OUTPUT }
+  - { entry: 24, module: FILTER_1,    key: PITCH,       label: Pitch In,       name: Pitch In,       source: PITCH_1_OUTPUT_1 }
+  - { entry: 25, module: FILTER_1,    key: MOD_1,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
+  - { entry: 26, module: FILTER_1,    key: MOD_2,       label: Mod 2 In,       name: Mod 2 In,       source: LFO_1_OUTPUT }
+  - { entry: 27, module: AMP_1,       key: AUDIO,       label: Audio In,       name: Audio In,       source: FILTER_1_OUTPUT }
+  - { entry: 28, module: AMP_1,       key: MOD_1,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
+  - { entry: 29, module: AMP_1,       key: MOD_2,       label: Mod 2 In,       name: Mod 2 In,       source: EG_2_OUTPUT }
+  - { entry: 30, module: CHORUS_1,    key: AUDIO,       label: Audio In,       name: Audio In,       source: AMP_1_OUTPUT }
+  - { entry: 31, module: DELAY_1,     key: AUDIO_L,     label: Audio In L,     name: Audio In L,     source: CHORUS_1_OUTPUT_L }
+  - { entry: 32, module: DELAY_1,     key: AUDIO_R,     label: Audio In R,     name: Audio In R,     source: CHORUS_1_OUTPUT_R }
+  - { entry: 33, key: OUTPUT_L,    label: L,              name: Final Output L, name_ja: 最終出力 L, source: DELAY_1_OUTPUT_L }
+  - { entry: 34, key: OUTPUT_R,    label: R,              name: Final Output R, name_ja: 最終出力 R, source: DELAY_1_OUTPUT_R }
 
 # Controls, listed in the editor's order, each by its entry: a parameter is one entry of NRPN
 # category 2 (where it takes its value), the same entry of category 3 (which CC fills its control

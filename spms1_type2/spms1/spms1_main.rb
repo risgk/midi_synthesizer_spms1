@@ -178,6 +178,7 @@ while true
   # patch_gen sources
   source_pitch_1_pitch = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_PITCH)
   source_pitch_1_bend = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_BEND)
+  source_pitch_1_gate = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_GATE)
   source_eg_1_gate = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_EG_1_GATE)
   source_eg_2_gate = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_EG_2_GATE)
   source_lfo_1_rate_mod = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_RATE_MOD)
@@ -563,7 +564,7 @@ while true
       case module_id
       # patch_gen dispatch
       when 1 # MODULE_PITCH_1
-        signals[21] = pitch_1.process(control_tick, signals[source_pitch_1_pitch], signals[source_pitch_1_bend]) # SIGNAL_PITCH_1_OUTPUT_1
+        signals[21] = pitch_1.process(control_tick, signals[source_pitch_1_pitch], signals[source_pitch_1_bend], signals[source_pitch_1_gate]) # SIGNAL_PITCH_1_OUTPUT_1
         signals[22] = pitch_1.output_2 # SIGNAL_PITCH_1_OUTPUT_2
       when 2 # MODULE_EG_1
         signals[23] = eg_1.process(control_tick, signals[source_eg_1_gate]) # SIGNAL_EG_1_OUTPUT
