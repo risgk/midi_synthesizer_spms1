@@ -12,7 +12,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.4
 - Filter: ZDF/TPT State Variable Filter (with a nonlinear leak on the band pass integrator, solved by the one-step Newton method), with low pass, high pass and band pass outputs and a main output crossfading from the low pass to the high pass through a notch (Mode, CC#39)
 - Chorus: mono in, stereo out, as a module in the run order
 - Delay: stereo, with feedback, as a module in the run order (up to 340 ms)
-- Pitch: the note's pitch as a module in the run order, with portamento as an exponential lag (CC#5), pitch bend past it (range on CC#57) and a stretch of the keys (CC#81)
+- Pitch: the note's pitch as a module in the run order, with portamento as an exponential lag (CC#5), pitch bend past it (range on CC#57) and a stretch of the keys (CC#22)
 - Stereo output: the chorus spreads the mono voice into a left and a right, and the delay keeps them apart
 - Developed by ISGK Instruments (Ryo Ishigaki)
 - <https://github.com/risgk/midi_synthesizer_spms1>
@@ -672,7 +672,7 @@ whole unit per CC step: Coarse a semitone, reaching 5 octaves either way, and Fi
 reaching 60 either way. They are summed, so any pitch is reachable. They have no CC and hold 0.0
 by default; Osc 2's, on CC#85 and 76, set the interval or the detune between the oscillators.
 
-Pitch 1 Stretch, on CC#81, widens the keys about note 60, last, by multiplying the pitch
+Pitch 1 Stretch, on CC#22, widens the keys about note 60, last, by multiplying the pitch
 after the glide and the bend, as PRA32-U2's Stretch Tune does: every interval from note 60 grows by the same share, so the stretch is often given as how
 much an octave widens. At 0.0 (value 4), where it powers up, the keys are as they are; from value 5 the
 widening grows by a semitone's ratio a step, as the envelope's times do: 1.2 cents an octave at
@@ -695,7 +695,7 @@ middle of the swing moves up from zero to 0.5. Out is what the default patch rou
 is a triangle until Wave is turned up.
 
 LFO 1 Level scales the LFO's outputs, as a mixer's Level scales its input: from silent at 0.0
-(value 4) to full at 1.0 (value 124). It is on CC#113 and powers up at 0.0, so the LFO is still until
+(value 4) to full at 1.0 (value 124). It is on CC#17 and powers up at 0.0, so the LFO is still until
 something brings it in. LFO 1 Level Mod In adds to it, held to the same range, by Level Mod Amt, and it takes
 Mod Wheel by default at a depth of 1.0 (Level Mod Amt has no CC and holds 1.0), so the
 wheel brings the LFO in, up to full at its top. Turning the LFO the
@@ -910,9 +910,9 @@ takes the output to the input at once, mid-glide too, as Glide at 0.0 does.
 #### Examples
 
 - Vibrato is wired by default -- the LFO goes straight to the oscillator's Mod 2 input --
-  and the mod wheel brings it in: LFO 1 Level (CC#113) powers up at value 4, and the wheel adds to
+  and the mod wheel brings it in: LFO 1 Level (CC#17) powers up at value 4, and the wheel adds to
   it, up to the depth CC#13 (Osc 1 Pitch Mod 2 Amt) sets, an octave either way at its power-up
-  value 124. CC#3 sets the rate, and CC#113 turned up gives a vibrato without the wheel
+  value 124. CC#3 sets the rate, and CC#17 turned up gives a vibrato without the wheel
 - A vibrato as deep as a GM2 sound module's: CC#13 = 9 brings the wheel's top down to 50 cents
   either way, the Modulation Depth Range GM2 powers up at, and CC#13 = 14 to a semitone
 - A bend range of 2 semitones, as a GM sound module's: CC#57 = 8 sets Pitch 1 Bend Amt to 8

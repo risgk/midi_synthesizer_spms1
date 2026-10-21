@@ -54,7 +54,7 @@
 |                            53 | x             | o             | EG 2 Decay (Time)                    |
 |                            54 | x             | o             | EG 2 Sustain (Level)                 |
 |                             3 | x             | o             | LFO Rate                             |
-|                           113 | x             | o             | LFO Level                            |
+|                            17 | x             | o             | LFO Level                            |
 |                            33 | x             | o             | LFO Wave (Triangle to Square)        |
 |                           111 | x             | o             | LFO Reset Switch [Off|On]            |
 |                            93 | x             | o             | Chorus Mix                           |
@@ -66,7 +66,7 @@
 |                             5 | x             | o             | Pitch Glide (Portamento Time)        |
 |                            34 | x             | o             | Pitch Glide Switch [Off|On]          |
 |                            57 | x             | o             | Pitch Bend Amt (Pitch Bend Range)    |
-|                            81 | x             | o             | Pitch Stretch                        |
+|                            22 | x             | o             | Pitch Stretch                        |
 |                             1 | x             | o             | Mod Wheel (Unipolar)                 |
 |                            99 | x             | o             | NRPN MSB                             |
 |                            98 | x             | o             | NRPN LSB                             |
