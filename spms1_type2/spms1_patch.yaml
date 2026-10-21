@@ -287,11 +287,11 @@ controls:
   # (CC 116) up to its top. Level powers up at CC 124, 1.0, so the LFO runs at full level, and
   # what it moves sets the depth.
   - { entry: 17, module: LFO_1,     key: WAVE,         label: Wave,         cc: 33,  value: 4, hint: Tri to Sq, set: set_wave }
-  - { entry: 18, module: LFO_1,     key: RATE,         label: Rate,         cc: 3,   value: 64, favorite: true, set: set_rate }
-  - { entry: 19, module: LFO_1,     key: LEVEL,        label: Level,        cc: 116, value: 124, set: set_level }
-  - { entry: 20, module: LFO_1,     key: RATE_MOD_AMT, label: Rate Mod Amt, cc: 0,   value: 124, hint_inputs: [RATE_MOD], set: set_rate_modulation_amount }
-  - { entry: 21, module: LFO_1,     key: LEVEL_MOD_AMT, label: Level Mod Amt, cc: 0,  value: 124, hint_inputs: [LEVEL_MOD], set: set_level_modulation_amount }
-  - { entry: 22, module: LFO_1,     key: RESET_SW,     label: Reset Sw, cc: 113, value: 4, hint: Off/On, set: set_reset_switch }
+  - { entry: 18, module: LFO_1,     key: RESET_SW,     label: Reset Sw, cc: 113, value: 4, hint: Off/On, set: set_reset_switch }
+  - { entry: 19, module: LFO_1,     key: RATE,         label: Rate,         cc: 3,   value: 64, favorite: true, set: set_rate }
+  - { entry: 20, module: LFO_1,     key: LEVEL,        label: Level,        cc: 116, value: 124, set: set_level }
+  - { entry: 21, module: LFO_1,     key: RATE_MOD_AMT, label: Rate Mod Amt, cc: 0,   value: 124, hint_inputs: [RATE_MOD], set: set_rate_modulation_amount }
+  - { entry: 22, module: LFO_1,     key: LEVEL_MOD_AMT, label: Level Mod Amt, cc: 0,  value: 124, hint_inputs: [LEVEL_MOD], set: set_level_modulation_amount }
   # Mixer 1: nothing has a CC; the levels hold 0.0, as the mixer has nothing on its inputs yet,
   # and Out Level holds 0.5, as Mixer 2's powers up.
   - { entry: 23, module: MIXER_1,   key: LEVEL_1,      label: Level 1,      cc: 0,   value: 4, hint_inputs: [IN_1], set: set_level_1 }

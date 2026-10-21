@@ -529,11 +529,11 @@ Mod Wheel と General のスロットは 0.0 になります。カテゴリ 4 �
 | 15 | EG 2 Release Sw | | 43 | Osc 2 Wave | | 71 | Filter 1 Mod 1 Pol |
 | 16 | EG 2 Level | | 44 | Osc 2 PW | | 72 | Filter 1 Mod 2 Amt |
 | 17 | LFO 1 Wave | | 45 | Osc 2 Pitch Coarse | | 73 | Filter 1 Mod 2 Pol |
-| 18 | LFO 1 Rate | | 46 | Osc 2 Pitch | | 74 | Amp 1 Gain |
-| 19 | LFO 1 Level | | 47 | Osc 2 Pitch Fine | | 75 | Amp 1 Mod 1/2 Mix |
-| 20 | LFO 1 Rate Mod Amt | | 48 | Osc 2 Pitch Mod 1 Amt | | 76 | Chorus 1 Mix |
-| 21 | LFO 1 Level Mod Amt | | 49 | Osc 2 Pitch Mod 1 Pol | | 77 | Chorus 1 Rate |
-| 22 | LFO 1 Reset Sw | | 50 | Osc 2 Pitch Mod 1 Sw | | 78 | Chorus 1 Depth |
+| 18 | LFO 1 Reset Sw | | 46 | Osc 2 Pitch | | 74 | Amp 1 Gain |
+| 19 | LFO 1 Rate | | 47 | Osc 2 Pitch Fine | | 75 | Amp 1 Mod 1/2 Mix |
+| 20 | LFO 1 Level | | 48 | Osc 2 Pitch Mod 1 Amt | | 76 | Chorus 1 Mix |
+| 21 | LFO 1 Rate Mod Amt | | 49 | Osc 2 Pitch Mod 1 Pol | | 77 | Chorus 1 Rate |
+| 22 | LFO 1 Level Mod Amt | | 50 | Osc 2 Pitch Mod 1 Sw | | 78 | Chorus 1 Depth |
 | 23 | Mixer 1 Level 1 | | 51 | Osc 2 Pitch Mod 2 Amt | | 79 | Delay 1 Mix |
 | 24 | Mixer 1 Level 2 | | 52 | Osc 2 Pitch Mod 2 Pol | | 80 | Delay 1 Time |
 | 25 | Mixer 1 Level 3 | | 53 | Osc 2 Pitch Mod 2 Sw | | 81 | Delay 1 Feedback |
