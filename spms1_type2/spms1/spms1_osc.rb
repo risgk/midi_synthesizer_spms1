@@ -25,7 +25,7 @@ module Spms1
     MODULATION_RANGE = 120.0 / 120.0
     # How far Pitch Coarse and Pitch Fine reach at either end of their dials. Both are spaced so that one step
     # of a 7-bit control is one whole unit: a semitone for coarse, a cent for fine. Pitch, between
-    # the two, reaches an octave either way, a fifth of a semitone a step, for a sweep by hand.
+    # the two, reaches an octave up, a tenth of a semitone a step, for a sweep by hand.
     PITCH_RANGE        = 12.0 / 120.0
     PITCH_COARSE_RANGE = 60.0 / 120.0
     PITCH_FINE_RANGE   = 0.6 / 120.0
@@ -153,14 +153,16 @@ module Spms1
       @pw_modulation_2_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
     end
 
-    # Pitch, Pitch Coarse and Pitch Fine are bipolar, [-0.5, 0.5], with 0.0 meaning no offset, so a controller's
+    # Pitch is unipolar, [0.0, 1.0], from no offset up an octave, so it only raises the pitch, as a
+    # sync sweep does.
+    # Pitch Coarse and Pitch Fine are bipolar, [-0.5, 0.5], with 0.0 meaning no offset, so a controller's
     # centre detent lands there. Linear about that centre, which is what puts every step on a whole
     # semitone or a whole cent; a curve here would make exact intervals unreachable.
     # Not smoothed: a semitone step is part of the sound, a cent step is too small to hear as one,
     # and a step in pitch does not click, as the phase runs on unbroken.
     def set_pitch(pitch)
-      clamped = (pitch < -0.5) ? -0.5 : ((pitch > 0.5) ? 0.5 : pitch)
-      @pitch = (clamped + clamped) * PITCH_RANGE
+      clamped = (pitch < 0.0) ? 0.0 : ((pitch > 1.0) ? 1.0 : pitch)
+      @pitch = clamped * PITCH_RANGE
       @tune = (@pitch_coarse + @pitch_fine) + @pitch
     end
 

@@ -300,7 +300,7 @@ controls:
   - { entry: 27, module: MIXER_1,   key: OUT_LEVEL,  label: Out Level,  cc: 0,   value: 64, set: set_out_level }
   # Osc 1 in the editor: the waveform and the pulse width, the pitch, how far each modulation
   # moves it and what the top of that is worth, then how far each modulation moves the pulse width. Pitch,
-  # an octave either way for a sweep by hand, has no CC and stays at 0.0 on both oscillators, as Osc 1's
+  # unipolar, up to an octave up for a sweep by hand, has no CC and powers up at CC 4, 0.0, as Osc 1's
   # Pitch Coarse and Fine do. Mod 1 In takes EG 1 and Mod 2 In the LFO, and
   # every depth is unipolar: a modulation runs the way its source does, and one the other way up
   # takes an inverted source, such as EG 1 Out Inv. Pitch Mod 1 Amt and Pitch Mod 2 Amt are on
@@ -314,7 +314,7 @@ controls:
   - { entry: 28, module: OSC_1,     key: WAVE,     label: Wave,         cc: 102, value: 4, hint: Saw to Sq, favorite: true, set: set_waveform }
   - { entry: 29, module: OSC_1,     key: PW,           label: PW,  cc: 114, value: 64, bipolar: true, hint: 50% to 0%, favorite: true, set: set_pulse_width }
   - { entry: 30, module: OSC_1,     key: PITCH_COARSE,  label: Pitch Coarse,  cc: 0,   value: 64, bipolar: true, hint: ±5 Oct, set: set_pitch_coarse }
-  - { entry: 31, module: OSC_1,     key: PITCH_SHIFT,   label: Pitch,         cc: 0,   value: 64, bipolar: true, hint: ±1 Oct, set: set_pitch }
+  - { entry: 31, module: OSC_1,     key: PITCH_SHIFT,   label: Pitch,         cc: 0,   value: 4, hint: 0 to +1 Oct, set: set_pitch }
   - { entry: 32, module: OSC_1,     key: PITCH_FINE,    label: Pitch Fine,    cc: 0,   value: 64, bipolar: true, hint: ±60 Cent, set: set_pitch_fine }
   - { entry: 33, module: OSC_1,     key: PITCH_MOD_1_AMT, label: Pitch Mod 1 Amt, cc: 89, value: 4, hint_inputs: [MOD_1], set: set_pitch_modulation_1_amount }
   - { entry: 34, module: OSC_1,     key: PITCH_MOD_2_AMT, label: Pitch Mod 2 Amt, cc: 13, value: 124, hint_inputs: [MOD_2], favorite: true, set: set_pitch_modulation_2_amount }
@@ -323,8 +323,8 @@ controls:
   - { entry: 37, module: OSC_1,     key: PITCH_MOD_RANGE, label: Pitch Mod Range, cc: 0, value: 28, set: set_pitch_modulation_range }
   - { entry: 38, module: OSC_1,     key: PW_MOD_1_AMT, label: PW Mod 1 Amt,  cc: 8,   value: 4, hint_inputs: [MOD_1], set: set_pw_modulation_1_amount }
   - { entry: 39, module: OSC_1,     key: PW_MOD_2_AMT, label: PW Mod 2 Amt,  cc: 103, value: 4, hint_inputs: [MOD_2], set: set_pw_modulation_2_amount }
-  # Osc 2: Pitch and Pitch Fine are its own, on CC 85 and 76, to tune it against Osc 1, an octave
-  # either way, and to sweep it for a hard sync: Pitch powers up at CC 64, in unison, and Fine at
+  # Osc 2: Pitch and Pitch Fine are its own, on CC 85 and 76, to tune it against Osc 1, up to an
+  # octave up, and to sweep it for a hard sync: Pitch powers up at CC 4, in unison, and Fine at
   # CC 76, 12 cents sharp, for a slow beat once Osc 2 is turned up. Pitch Coarse has no CC and
   # stays at 0.0, as Osc 1's does. Wave is its own too, on CC 104 next to Osc 1's on CC 102, sawtooth at power-up as
   # Osc 1's is. Everything else follows Osc 1 by default: each Mod Amt and PW are on Osc 1's CCs,
@@ -335,7 +335,7 @@ controls:
   - { entry: 40, module: OSC_2,     key: WAVE,     label: Wave,         cc: 104, value: 4, hint: Saw to Sq, set: set_waveform }
   - { entry: 41, module: OSC_2,     key: PW,           label: PW,  cc: 114, value: 64, bipolar: true, hint: 50% to 0%, set: set_pulse_width }
   - { entry: 42, module: OSC_2,     key: PITCH_COARSE,  label: Pitch Coarse,  cc: 0,   value: 64, bipolar: true, hint: ±5 Oct, set: set_pitch_coarse }
-  - { entry: 43, module: OSC_2,     key: PITCH_SHIFT,   label: Pitch,         cc: 85,  value: 64, bipolar: true, hint: ±1 Oct, set: set_pitch }
+  - { entry: 43, module: OSC_2,     key: PITCH_SHIFT,   label: Pitch,         cc: 85,  value: 4, hint: 0 to +1 Oct, set: set_pitch }
   - { entry: 44, module: OSC_2,     key: PITCH_FINE,    label: Pitch Fine,    cc: 76,  value: 76, bipolar: true, hint: ±60 Cent, set: set_pitch_fine }
   - { entry: 45, module: OSC_2,     key: PITCH_MOD_1_AMT, label: Pitch Mod 1 Amt, cc: 89, value: 4, hint_inputs: [MOD_1], set: set_pitch_modulation_1_amount }
   - { entry: 46, module: OSC_2,     key: PITCH_MOD_2_AMT, label: Pitch Mod 2 Amt, cc: 13, value: 124, hint_inputs: [MOD_2], set: set_pitch_modulation_2_amount }

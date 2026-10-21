@@ -29,7 +29,7 @@
 |                           114 | x             | o             | Osc PW (50% to 0%)                   |
 |                             8 | x             | o             | Osc PW Mod 1 Amt (EG)                |
 |                           103 | x             | o             | Osc PW Mod 2 Amt (LFO)               |
-|                            85 | x             | o             | Osc 2 Pitch (+-1 Octave)             |
+|                            85 | x             | o             | Osc 2 Pitch (0 to +1 Octave)         |
 |                            76 | x             | o             | Osc 2 Pitch Fine (+-60 Cents)        |
 |                           112 | x             | o             | Osc 2 Sync Sw [Off|On]               |
 |                            74 | x             | o             | Filter Cutoff                        |

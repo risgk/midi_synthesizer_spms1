@@ -704,8 +704,9 @@ it is built with. Read these tables again after an update.
 Osc 1 Pitch Coarse and Pitch Fine transpose the oscillator. Both are centred on value 64 and move one
 whole unit per CC step: Coarse a semitone, reaching 5 octaves either way, and Fine a cent,
 reaching 60 either way. They are summed, so any pitch is reachable. Pitch, on each oscillator,
-adds an octave either way on top, a fifth of a semitone a step, for a pitch swept by hand, as for
-a sync sweep. All three are centred on value 64 and hold 0.0 by default. Osc 1's have no CC; Osc
+adds up to an octave up on top, a tenth of a semitone a step, for a pitch swept by hand, as for a
+sync sweep; it is unipolar, 0.0 at value 4, where it powers up. All three hold 0.0 by default.
+Osc 1's have no CC; Osc
 2's Pitch and Pitch Fine, on CC#85 and 76, set the interval or the detune between the
 oscillators, and its Pitch Coarse has no CC. None of them is smoothed.
 
@@ -961,7 +962,7 @@ sweep while Osc 1 holds the note.
   top of the envelope on Mod 1
 - A second oscillator plays by default too, on Mixer 2's second input at the level of the first,
   CC#19 and CC#20 both at 0.7, beating slowly against Osc 1 from the 12 cents of CC#76's power-up
-  value; CC#20 = 4 takes it out. CC#85 and 76 tune it: CC#85 = 124 an octave up, CC#85 = 99 a fifth, CC#76 = 64 in unison
+  value; CC#20 = 4 takes it out. CC#85 and 76 tune it: CC#85 = 124 an octave up, CC#85 = 74 a fifth, CC#85 = 4 and CC#76 = 64 in unison
 - Noise is wired by default too, its Out on Mixer 2's fourth input beside the oscillators, so CC#23
   brings it in under the note, at a level of 0.1 at value 16. CC#19 = 4 and CC#20 = 4 take the
   oscillators out, leaving the noise alone, through the filter. CC#115 (Color) turns it from
