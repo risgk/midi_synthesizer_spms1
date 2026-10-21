@@ -312,7 +312,7 @@ controls:
   # on, so each Pitch Mod Amt and Pol alone set its depth. Wave is on
   # CC 102 and powers up at the saw. PW is bipolar and powers up at CC 64, 0.0, a pulse of 50%.
   - { entry: 28, module: OSC_1,     key: WAVE,     label: Wave,         cc: 102, value: 4, hint: Saw to Sq, favorite: true, set: set_waveform }
-  - { entry: 29, module: OSC_1,     key: PW,           label: PW,  cc: 114, value: 64, bipolar: true, hint: 100% to 0%, set: set_pulse_width }
+  - { entry: 29, module: OSC_1,     key: PW,           label: PW,  cc: 114, value: 64, bipolar: true, hint: 0% to 100%, set: set_pulse_width }
   - { entry: 30, module: OSC_1,     key: PITCH_COARSE,  label: Pitch Coarse,  cc: 0,   value: 64, bipolar: true, hint: ±5 Oct, set: set_pitch_coarse }
   - { entry: 31, module: OSC_1,     key: PITCH_SHIFT,   label: Pitch,         cc: 0,   value: 4, hint: 0 to +1 Oct, set: set_pitch }
   - { entry: 32, module: OSC_1,     key: PITCH_FINE,    label: Pitch Fine,    cc: 0,   value: 64, bipolar: true, hint: ±60 Cent, set: set_pitch_fine }
@@ -336,7 +336,7 @@ controls:
   # In, Osc 1 Out Saw, is ignored until it is turned on. Osc 2 is heard through Mixer 2 Level 2 (CC 20), which powers up at 0.7, as
   # Level 1 does for Osc 1.
   - { entry: 43, module: OSC_2,     key: WAVE,     label: Wave,         cc: 104, value: 4, hint: Saw to Sq, favorite: true, set: set_waveform }
-  - { entry: 44, module: OSC_2,     key: PW,           label: PW,  cc: 114, value: 64, bipolar: true, hint: 100% to 0%, set: set_pulse_width }
+  - { entry: 44, module: OSC_2,     key: PW,           label: PW,  cc: 114, value: 64, bipolar: true, hint: 0% to 100%, set: set_pulse_width }
   - { entry: 45, module: OSC_2,     key: PITCH_COARSE,  label: Pitch Coarse,  cc: 0,   value: 64, bipolar: true, hint: ±5 Oct, set: set_pitch_coarse }
   - { entry: 46, module: OSC_2,     key: PITCH_SHIFT,   label: Pitch,         cc: 85,  value: 5, hint: 0 to +1 Oct, favorite: true, set: set_pitch }
   - { entry: 47, module: OSC_2,     key: PITCH_FINE,    label: Pitch Fine,    cc: 76,  value: 65, bipolar: true, hint: ±60 Cent, set: set_pitch_fine }

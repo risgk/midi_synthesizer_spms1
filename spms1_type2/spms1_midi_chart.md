@@ -26,7 +26,7 @@
 | Change                    104 | x             | o             | Osc 2 Wave (Saw to Square)           |
 |                            89 | x             | o             | Osc Pitch Mod 1 Amt (EG)             |
 |                            13 | x             | o             | Osc Pitch Mod 2 Amt (LFO)            |
-|                           114 | x             | o             | Osc PW (100% to 0%)                  |
+|                           114 | x             | o             | Osc PW (0% to 100%)                  |
 |                             8 | x             | o             | Osc PW Mod 1 Amt (EG)                |
 |                           103 | x             | o             | Osc PW Mod 2 Amt (LFO)               |
 |                            85 | x             | o             | Osc 2 Pitch (0 to +1 Octave)         |

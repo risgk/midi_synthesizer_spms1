@@ -3255,7 +3255,7 @@ static sp_float sp_Osc_process(sp_Osc *self, sp_bool lv_control_tick, sp_float l
 #line 231 "spms1_osc.rb"
   lv_pulse_width = (((lv_total_pulse_width < -0.5)) ? -0.5 : ((((lv_total_pulse_width > 0.5)) ? 0.5 : lv_total_pulse_width)));
 #line 232 "spms1_osc.rb"
-  lv_phase2 = (self->iv_phase + ((0.5 + lv_pulse_width)));
+  lv_phase2 = (self->iv_phase + ((0.5 - lv_pulse_width)));
 #line 233 "spms1_osc.rb"
   lv_phase2 -= (((lv_phase2 < 1.0)) ? 0.0 : 1.0);
 #line 235 "spms1_osc.rb"
@@ -3365,7 +3365,7 @@ static sp_float sp_Osc_process_synced(sp_Osc *self, sp_bool lv_control_tick, sp_
 #line 301 "spms1_osc.rb"
   lv_pulse_width = (((lv_total_pulse_width < -0.5)) ? -0.5 : ((((lv_total_pulse_width > 0.5)) ? 0.5 : lv_total_pulse_width)));
 #line 302 "spms1_osc.rb"
-  lv_phase2 = (self->iv_phase + ((0.5 + lv_pulse_width)));
+  lv_phase2 = (self->iv_phase + ((0.5 - lv_pulse_width)));
 #line 303 "spms1_osc.rb"
   lv_phase2 -= (((lv_phase2 < 1.0)) ? 0.0 : 1.0);
 #line 305 "spms1_osc.rb"

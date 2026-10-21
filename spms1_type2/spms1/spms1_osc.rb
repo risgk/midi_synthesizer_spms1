@@ -103,9 +103,9 @@ module Spms1
       @waveform = (waveform < 0.0) ? 0.0 : ((waveform > 1.0) ? 1.0 : waveform)
     end
 
-    # Pulse width is bipolar, [-0.5, 0.5]: how far the second sawtooth is shifted from half a cycle.
-    # At the square end of the morph, 0.0 is a pulse of 50%, +0.25 one of 25% and +0.5 one of 0%,
-    # -0.25 one of 75% and -0.5 one of 100%; both ends are silence, as the two sawtooths then
+    # Pulse width is bipolar, [-0.5, 0.5]: how far the second sawtooth is shifted back from half a
+    # cycle. At the square end of the morph, 0.0 is a pulse of 50%, +0.25 one of 75% and +0.5 one of
+    # 100%, -0.25 one of 25% and -0.5 one of 0%; both ends are silence, as the two sawtooths then
     # cancel. Between the two ends of the morph it moves the second sawtooth of the blend in the
     # same way.
     def set_pulse_width(pulse_width)
@@ -229,7 +229,7 @@ module Spms1
       pw_modulation = (modulation_1_input * @current_pw_modulation_1_depth) + (modulation_2_input * @current_pw_modulation_2_depth)
       total_pulse_width = @current_pulse_width + pw_modulation
       pulse_width = (total_pulse_width < -0.5) ? -0.5 : ((total_pulse_width > 0.5) ? 0.5 : total_pulse_width)
-      phase2 = @phase + (0.5 + pulse_width)
+      phase2 = @phase + (0.5 - pulse_width)
       phase2 -= (phase2 < 1.0) ? 0.0 : 1.0
 
       naive_saw2 = -2.0 * phase2 + 1.0
@@ -299,7 +299,7 @@ module Spms1
       pw_modulation = (modulation_1_input * @current_pw_modulation_1_depth) + (modulation_2_input * @current_pw_modulation_2_depth)
       total_pulse_width = @current_pulse_width + pw_modulation
       pulse_width = (total_pulse_width < -0.5) ? -0.5 : ((total_pulse_width > 0.5) ? 0.5 : total_pulse_width)
-      phase2 = @phase + (0.5 + pulse_width)
+      phase2 = @phase + (0.5 - pulse_width)
       phase2 -= (phase2 < 1.0) ? 0.0 : 1.0
 
       naive_saw2 = -2.0 * phase2 + 1.0

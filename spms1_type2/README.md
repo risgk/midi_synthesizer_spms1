@@ -802,11 +802,11 @@ leave the oscillator alone until one is turned up: CC#13 brings the vibrato in.
 
 Osc 1 PW, the pulse width, shifts the second of the two sawtooths that the morph is made of, either way
 from half a cycle: it is bipolar, -0.5 (value 4) to +0.5 (value 124), and powers up at 0.0 (value 64). At
-the square end of Osc 1 Wave that is a pulse of 50% at value 64, 25% at value 94 and 75% at value 34, and
+the square end of Osc 1 Wave that is a pulse of 50% at value 64, 75% at value 94 and 25% at value 34, and
 silence at either end, a pulse of 0% or 100%; it is on CC#114.
 The modulations move it by PW Mod 1 Amt (CC#8) and PW Mod 2 Amt (CC#103), which power up at 0.0.
 A unit of input is the whole pulse width range, so with PW Mod 2 Amt at the top the LFO swings
-the pulse width half the range either way: with PW at value 64, from nearly 100% to nearly 0%; and
+the pulse width half the range either way: with PW at value 64, from nearly 0% to nearly 100%; and
 with PW Mod 1 Amt at the top the envelope sweeps it across the whole range, from PW up, or down
 from an inverted envelope. The pulse width the modulation adds
 up to is held to -0.5 to +0.5.
