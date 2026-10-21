@@ -536,31 +536,31 @@ both at the same signal for a mono output.
 
 | CC#98 | Parameter | | CC#98 | Parameter | | CC#98 | Parameter |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | Pitch 1 Glide | | 25 | Mixer 1 Level 3 | | 50 | Osc 2 Sync Sw |
-| 1 | Pitch 1 Out 1 Glide Sw | | 26 | Mixer 1 Level 4 | | 51 | Noise 1 Color |
-| 2 | Pitch 1 Out 2 Glide Sw | | 27 | Mixer 1 Out Level | | 52 | Noise 1 Level |
-| 3 | Pitch 1 Bend Amt | | 28 | Osc 1 Wave | | 53 | Mixer 2 Level 1 |
-| 4 | Pitch 1 Out 1 Bend Sw | | 29 | Osc 1 PW | | 54 | Mixer 2 Level 2 |
-| 5 | Pitch 1 Out 2 Bend Sw | | 30 | Osc 1 Pitch Coarse | | 55 | Mixer 2 Level 3 |
-| 6 | Pitch 1 Stretch | | 31 | Osc 1 Pitch Fine | | 56 | Mixer 2 Level 4 |
-| 7 | EG 1 Attack | | 32 | Osc 1 Pitch Mod 1 Amt | | 57 | Mixer 2 Out Level |
-| 8 | EG 1 Decay | | 33 | Osc 1 Pitch Mod 2 Amt | | 58 | Filter 1 Cutoff |
-| 9 | EG 1 Sustain | | 34 | Osc 1 Pitch Mod 1 Sw | | 59 | Filter 1 Resonance |
-| 10 | EG 1 Release Sw | | 35 | Osc 1 Pitch Mod 2 Sw | | 60 | Filter 1 Mode |
-| 11 | EG 1 Level | | 36 | Osc 1 Pitch Mod Range | | 61 | Filter 1 Pitch Amt |
-| 12 | EG 2 Attack | | 37 | Osc 1 PW Mod 1 Amt | | 62 | Filter 1 Mod 1 Amt |
-| 13 | EG 2 Decay | | 38 | Osc 1 PW Mod 2 Amt | | 63 | Filter 1 Mod 2 Amt |
-| 14 | EG 2 Sustain | | 39 | Osc 2 Wave | | 64 | Filter 1 Mod Polarity |
-| 15 | EG 2 Release Sw | | 40 | Osc 2 PW | | 65 | Amp 1 Gain |
-| 16 | EG 2 Level | | 41 | Osc 2 Pitch Coarse | | 66 | Amp 1 Mod 1/2 Mix |
-| 17 | LFO 1 Wave | | 42 | Osc 2 Pitch Fine | | 67 | Chorus 1 Mix |
-| 18 | LFO 1 Rate | | 43 | Osc 2 Pitch Mod 1 Amt | | 68 | Chorus 1 Rate |
-| 19 | LFO 1 Level | | 44 | Osc 2 Pitch Mod 2 Amt | | 69 | Chorus 1 Depth |
-| 20 | LFO 1 Rate Mod Amt | | 45 | Osc 2 Pitch Mod 1 Sw | | 70 | Delay 1 Mix |
-| 21 | LFO 1 Level Mod Amt | | 46 | Osc 2 Pitch Mod 2 Sw | | 71 | Delay 1 Time |
-| 22 | LFO 1 Reset Sw | | 47 | Osc 2 Pitch Mod Range | | 72 | Delay 1 Feedback |
-| 23 | Mixer 1 Level 1 | | 48 | Osc 2 PW Mod 1 Amt | |  |  |
-| 24 | Mixer 1 Level 2 | | 49 | Osc 2 PW Mod 2 Amt | |  |  |
+| 0 | Pitch 1 Glide | | 25 | Mixer 1 Level 3 | | 50 | Osc 2 PW Mod 1 Amt |
+| 1 | Pitch 1 Out 1 Glide Sw | | 26 | Mixer 1 Level 4 | | 51 | Osc 2 PW Mod 2 Amt |
+| 2 | Pitch 1 Out 2 Glide Sw | | 27 | Mixer 1 Out Level | | 52 | Osc 2 Sync Sw |
+| 3 | Pitch 1 Bend Amt | | 28 | Osc 1 Wave | | 53 | Noise 1 Color |
+| 4 | Pitch 1 Out 1 Bend Sw | | 29 | Osc 1 PW | | 54 | Noise 1 Level |
+| 5 | Pitch 1 Out 2 Bend Sw | | 30 | Osc 1 Pitch Coarse | | 55 | Mixer 2 Level 1 |
+| 6 | Pitch 1 Stretch | | 31 | Osc 1 Pitch | | 56 | Mixer 2 Level 2 |
+| 7 | EG 1 Attack | | 32 | Osc 1 Pitch Fine | | 57 | Mixer 2 Level 3 |
+| 8 | EG 1 Decay | | 33 | Osc 1 Pitch Mod 1 Amt | | 58 | Mixer 2 Level 4 |
+| 9 | EG 1 Sustain | | 34 | Osc 1 Pitch Mod 2 Amt | | 59 | Mixer 2 Out Level |
+| 10 | EG 1 Release Sw | | 35 | Osc 1 Pitch Mod 1 Sw | | 60 | Filter 1 Cutoff |
+| 11 | EG 1 Level | | 36 | Osc 1 Pitch Mod 2 Sw | | 61 | Filter 1 Resonance |
+| 12 | EG 2 Attack | | 37 | Osc 1 Pitch Mod Range | | 62 | Filter 1 Mode |
+| 13 | EG 2 Decay | | 38 | Osc 1 PW Mod 1 Amt | | 63 | Filter 1 Pitch Amt |
+| 14 | EG 2 Sustain | | 39 | Osc 1 PW Mod 2 Amt | | 64 | Filter 1 Mod 1 Amt |
+| 15 | EG 2 Release Sw | | 40 | Osc 2 Wave | | 65 | Filter 1 Mod 2 Amt |
+| 16 | EG 2 Level | | 41 | Osc 2 PW | | 66 | Filter 1 Mod Polarity |
+| 17 | LFO 1 Wave | | 42 | Osc 2 Pitch Coarse | | 67 | Amp 1 Gain |
+| 18 | LFO 1 Rate | | 43 | Osc 2 Pitch | | 68 | Amp 1 Mod 1/2 Mix |
+| 19 | LFO 1 Level | | 44 | Osc 2 Pitch Fine | | 69 | Chorus 1 Mix |
+| 20 | LFO 1 Rate Mod Amt | | 45 | Osc 2 Pitch Mod 1 Amt | | 70 | Chorus 1 Rate |
+| 21 | LFO 1 Level Mod Amt | | 46 | Osc 2 Pitch Mod 2 Amt | | 71 | Chorus 1 Depth |
+| 22 | LFO 1 Reset Sw | | 47 | Osc 2 Pitch Mod 1 Sw | | 72 | Delay 1 Mix |
+| 23 | Mixer 1 Level 1 | | 48 | Osc 2 Pitch Mod 2 Sw | | 73 | Delay 1 Time |
+| 24 | Mixer 1 Level 2 | | 49 | Osc 2 Pitch Mod Range | | 74 | Delay 1 Feedback |
 
 <!-- patch_gen end -->
 
@@ -573,9 +573,9 @@ slot and the general slots on the bus; see below.
 
 | CC#98 | CC for | Fills |
 | ----- | ------ | ----- |
-| 73 | Mod Wheel | Mod Wheel, Mod Wheel Rev, Mod Wheel Inv, Mod Wheel Rev Inv |
-| 74 | General 1 | General 1, General 1 Rev, General 1 Inv, General 1 Rev Inv, General 1 Bipolar, General 1 Bipolar Inv |
-| 75 | General 2 | General 2, General 2 Rev, General 2 Inv, General 2 Rev Inv, General 2 Bipolar, General 2 Bipolar Inv |
+| 75 | Mod Wheel | Mod Wheel, Mod Wheel Rev, Mod Wheel Inv, Mod Wheel Rev Inv |
+| 76 | General 1 | General 1, General 1 Rev, General 1 Inv, General 1 Rev Inv, General 1 Bipolar, General 1 Bipolar Inv |
+| 77 | General 2 | General 2, General 2 Rev, General 2 Inv, General 2 Rev Inv, General 2 Bipolar, General 2 Bipolar Inv |
 
 <!-- patch_gen end -->
 
@@ -705,6 +705,9 @@ Osc 1 Pitch Coarse and Pitch Fine transpose the oscillator. Both are centred on 
 whole unit per CC step: Coarse a semitone, reaching 5 octaves either way, and Fine a cent,
 reaching 60 either way. They are summed, so any pitch is reachable. They have no CC and hold 0.0
 by default; Osc 2's, on CC#85 and 76, set the interval or the detune between the oscillators.
+Pitch, on each oscillator, adds an octave either way on top, a fifth of a semitone a step, for a
+pitch swept by hand, as Osc 2's for a sync sweep. It is centred on value 64, has no CC and holds
+0.0 by default, and is not smoothed either.
 
 Pitch 1 Stretch, on CC#22, widens the keys about note 60, last, by multiplying the pitch
 after the glide and the bend: every interval from note 60 grows by the same share, so the stretch is often given as how
@@ -826,7 +829,7 @@ smoothed. Any signal can be routed there instead: a pulse rises once a cycle too
 ends of its width it has no step to rise at; a wave that rises through zero more than once a
 cycle restarts Osc 2 each time. Osc 2 Sync Sw, on CC#112, takes Sync In at value 64 and above
 and ignores it below; it powers up off (value 4), so the default patch is unsynced until it is
-turned on. Raise Osc 2's pitch above Osc 1's (Pitch Coarse, CC#85, or a pitch modulation) to hear
+turned on. Raise Osc 2's pitch above Osc 1's (Pitch Coarse, CC#85, Pitch, or a pitch modulation) to hear
 the sync sweep. A gate on Sync In, which rises from 0.0 to 1.0, restarts Osc 2 on that sample:
 Note Gate there, with the switch on, starts every note at the same point of the wave.
 
@@ -979,18 +982,18 @@ sweep while Osc 1 holds the note.
   CC#6 = 47 puts Noise 1's red output on the filter's Mod 2 input in the LFO's place, and CC#25
   sets how much. CC#6 = 46 takes the white instead, finer still. The red is on no mixer, and the
   white is heard only once CC#23 brings it up, so neither is heard as well
-- Filter cutoff driven by the envelope instead of its CC: CC#99 = 2, CC#98 = 58, CC#6 = 26. The
+- Filter cutoff driven by the envelope instead of its CC: CC#99 = 2, CC#98 = 60, CC#6 = 26. The
   envelope and the cutoff are both unipolar, so it opens the cutoff from the bottom of its dial
   to the top
-- Amp gain and filter cutoff share one CC: CC#99 = 3, CC#98 = 65, CC#6 = 74
+- Amp gain and filter cutoff share one CC: CC#99 = 3, CC#98 = 67, CC#6 = 74
 - Amp at full level with no envelope: CC#99 = 1, CC#98 = 28, CC#6 = 1
 - Amp opened and closed by the note as an organ's, while EG 1 still sweeps the filter: CC#36 = 124
   crossfades Amp 1's modulation to Mod 2 In, EG 2
 - Disconnect the filter's Mod 1 input, and with it the envelope: CC#99 = 1, CC#98 = 25, CC#6 = 0
-- A finer pitch envelope, 60 cents deep: CC#99 = 2, CC#98 = 31, CC#6 = 26 points Osc 1 Pitch Fine at the
+- A finer pitch envelope, 60 cents deep: CC#99 = 2, CC#98 = 32, CC#6 = 26 points Osc 1 Pitch Fine at the
   envelope, which then sweeps the tuning from in tune up to 60 cents sharp, reached at half the
   envelope's peak
-- The envelope drives the filter harder as a note starts: CC#99 = 2, CC#98 = 57, CC#6 = 26 takes
+- The envelope drives the filter harder as a note starts: CC#99 = 2, CC#98 = 59, CC#6 = 26 takes
   Mixer 2 Out Level, the filter's input level, from silence up to the top of its dial and back
 - Portamento is wired by default -- Note Pitch reaches the oscillator through Pitch 1 -- so CC#5
   sets the time; at value 64 a glide covers nine tenths of the way in about a tenth of a second. Every note glides, played legato
@@ -1007,21 +1010,21 @@ sweep while Osc 1 holds the note.
 - A mod wheel that closes the filter as it rises: CC#99 = 1, CC#98 = 26, CC#6 = 10 puts Mod Wheel
   Inv on the filter's Mod 2 input in the LFO's place. With CC#25 at value 64, the wheel closes the
   filter from Filter 1 Cutoff down, five octaves at its top
-- A knob that detunes Osc 2: CC#99 = 2, CC#98 = 42, CC#6 = 16 points Osc 2 Pitch Fine at
+- A knob that detunes Osc 2: CC#99 = 2, CC#98 = 44, CC#6 = 16 points Osc 2 Pitch Fine at
   General 1 Bipolar, so CC#16 moves it from -60 to +60 cents, in tune at value 64
-- A knob that crossfades the oscillators: CC#99 = 2, CC#98 = 53, CC#6 = 12 and CC#98 = 54,
+- A knob that crossfades the oscillators: CC#99 = 2, CC#98 = 55, CC#6 = 12 and CC#98 = 56,
   CC#6 = 13 point Mixer 2 Level 1 at General 1 and Level 2 at General 1 Rev, so CC#16 takes Osc 2
   out as it brings Osc 1 in
 - A pitch bend for Osc 2 alone: CC#99 = 4, CC#98 = 4, CC#6 = 4 sets Pitch 1 Out 1 Bend Sw
   off, so the wheel bends Osc 2 against Osc 1, which holds its note with the filter
-- A sync sweep: CC#112 at value 124 turns Osc 2 Sync Sw on, CC#99 = 4, CC#98 = 34, CC#6 = 4
+- A sync sweep: CC#112 at value 124 turns Osc 2 Sync Sw on, CC#99 = 4, CC#98 = 35, CC#6 = 4
   sets Osc 1 Pitch Mod 1 Sw off, and CC#89 turned up then sweeps Osc 2 alone with the
   envelope, Osc 1 holding the note it is synced to
 - Take the filter out of the chain: CC#99 = 1, CC#98 = 27, CC#6 = 48 points the amp's audio input
   at Mixer 2. The filter keeps running and keeps its slot; nothing reads it
-- Echoes that only come in with the mod wheel: CC#99 = 2, CC#98 = 70, CC#6 = 8 takes Delay 1 Mix
+- Echoes that only come in with the mod wheel: CC#99 = 2, CC#98 = 72, CC#6 = 8 takes Delay 1 Mix
   from Mod Wheel, which powers up at 0.0, so the output is dry until the wheel moves
-- Chorus that only comes in with the mod wheel: CC#99 = 2, CC#98 = 67, CC#6 = 8 takes Chorus 1
+- Chorus that only comes in with the mod wheel: CC#99 = 2, CC#98 = 69, CC#6 = 8 takes Chorus 1
   Mix from Mod Wheel, so the output stays mono until the wheel moves
 - Leave the chorus out of the sound, keeping the delay: CC#99 = 1, CC#98 = 31 and 32, CC#6 = 54
   feeds both sides of Delay 1 from the amp. The chorus keeps running and nothing reads it, and the
