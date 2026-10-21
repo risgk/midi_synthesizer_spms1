@@ -1587,18 +1587,18 @@
   const DEFAULT_ORDER = SPEC.defaultOrder;
 
   // Columns in signal order, each short enough that the whole patch fits a wide canvas at a
-  // readable scale: the controller over Pitch 1, which reads it, and the constants, the modulation
-  // sources, Mixer 1, the oscillators side by side
+  // readable scale: the controller over the constants, the sources of fixed and played values,
+  // Pitch 1 over the envelopes, the LFO over Mixer 1, the oscillators side by side
   // with the noise under Osc 2, Mixer 2, the filter over the amp, and the effects with the output
   // under the delay that feeds it. Spaced so that no two nodes meet with every parameter shown.
   const DEFAULT_LAYOUT = {
     CONTROLLER: { x: 20,  y: 40 },
-    PITCH_1:   { x: 20,   y: 653 },
-    CONST:     { x: 20,   y: 1063 },
-    EG_1:      { x: 380,  y: 40 },
-    EG_2:      { x: 380,  y: 346 },
-    LFO_1:     { x: 380,  y: 652 },
-    MIXER_1:   { x: 740,  y: 40 },
+    CONST:     { x: 20,   y: 653 },
+    PITCH_1:   { x: 380,  y: 40 },
+    EG_1:      { x: 380,  y: 450 },
+    EG_2:      { x: 380,  y: 756 },
+    LFO_1:     { x: 740,  y: 40 },
+    MIXER_1:   { x: 740,  y: 528 },
     OSC_1:     { x: 1100, y: 40 },
     OSC_2:     { x: 1460, y: 40 },
     NOISE_1:   { x: 1460, y: 632 },
