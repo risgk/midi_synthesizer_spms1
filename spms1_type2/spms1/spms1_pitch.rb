@@ -83,7 +83,7 @@ module Spms1
       update_blends
     end
 
-    # Out 1 Glide Switch and Out 2 Glide Switch are unipolar, [0.0, 1.0], and each turns the
+    # Out 1 Glide Sw and Out 2 Glide Sw are unipolar, [0.0, 1.0], and each turns the
     # portamento on for its output from 0.5 (CC 64) up, as a MIDI switch is on from 64. Off, the
     # output's lag runs at no slew, so the output follows the input at once, as at Glide 0.0,
     # mid-glide too, and switched on again it glides from where it is to the next note, with no
@@ -98,7 +98,7 @@ module Spms1
       update_blends
     end
 
-    # Out 1 Bend Switch and Out 2 Bend Switch are unipolar, [0.0, 1.0], and each adds Bend In to
+    # Out 1 Bend Sw and Out 2 Bend Sw are unipolar, [0.0, 1.0], and each adds Bend In to
     # its output from 0.5 (CC 64) up. Off, the output is not bent, and the bend steps out at once.
     def set_bend_1_switch(switch)
       @bend_1_on = (switch >= 0.5) ? 1.0 : 0.0

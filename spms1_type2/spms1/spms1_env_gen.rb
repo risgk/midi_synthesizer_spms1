@@ -84,7 +84,7 @@ module Spms1
       @decay = (decay < 0.0) ? 0.0 : ((decay > 1.0) ? 1.0 : decay)
     end
 
-    # Release Switch is unipolar, [0.0, 1.0], and taken as a switch, on from 0.5 (CC 64) up, as a
+    # Release Sw is unipolar, [0.0, 1.0], and taken as a switch, on from 0.5 (CC 64) up, as a
     # MIDI switch is on from 64: on, the release, after the gate falls, runs at the decay's rate;
     # off, it runs at the shortest decay's, 10 ms, whatever the decay is. Not smoothed: there is
     # nothing between its two settings to pass through.

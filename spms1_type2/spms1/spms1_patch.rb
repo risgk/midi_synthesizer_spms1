@@ -697,22 +697,22 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_DELAY_1_FEEDBACK      , 64)
 
   C.set_midi_cc_value(midi_ch, 5  , 4  ) # Pitch 1 Glide
-  C.set_midi_cc_value(midi_ch, 34 , 124) # Pitch 1 Out 1 Glide Switch
-  C.set_midi_cc_value(midi_ch, 34 , 124) # Pitch 1 Out 2 Glide Switch
+  C.set_midi_cc_value(midi_ch, 34 , 124) # Pitch 1 Out 1 Glide Sw
+  C.set_midi_cc_value(midi_ch, 34 , 124) # Pitch 1 Out 2 Glide Sw
   C.set_midi_cc_value(midi_ch, 57 , 28 ) # Pitch 1 Bend Amt
   C.set_midi_cc_value(midi_ch, 22 , 4  ) # Pitch 1 Stretch
   C.set_midi_cc_value(midi_ch, 73 , 4  ) # EG 1 Attack
   C.set_midi_cc_value(midi_ch, 75 , 88 ) # EG 1 Decay
   C.set_midi_cc_value(midi_ch, 30 , 124) # EG 1 Sustain
-  C.set_midi_cc_value(midi_ch, 105, 124) # EG 1 Release Switch
+  C.set_midi_cc_value(midi_ch, 105, 124) # EG 1 Release Sw
   C.set_midi_cc_value(midi_ch, 52 , 4  ) # EG 2 Attack
   C.set_midi_cc_value(midi_ch, 53 , 4  ) # EG 2 Decay
   C.set_midi_cc_value(midi_ch, 54 , 124) # EG 2 Sustain
-  C.set_midi_cc_value(midi_ch, 105, 124) # EG 2 Release Switch
+  C.set_midi_cc_value(midi_ch, 105, 124) # EG 2 Release Sw
   C.set_midi_cc_value(midi_ch, 33 , 4  ) # LFO 1 Wave
   C.set_midi_cc_value(midi_ch, 3  , 64 ) # LFO 1 Rate
   C.set_midi_cc_value(midi_ch, 116, 4  ) # LFO 1 Level
-  C.set_midi_cc_value(midi_ch, 113, 4  ) # LFO 1 Reset Switch
+  C.set_midi_cc_value(midi_ch, 113, 4  ) # LFO 1 Reset Sw
   C.set_midi_cc_value(midi_ch, 102, 4  ) # Osc 1 Wave
   C.set_midi_cc_value(midi_ch, 114, 64 ) # Osc 1 PW
   C.set_midi_cc_value(midi_ch, 89 , 4  ) # Osc 1 Pitch Mod 1 Amt
@@ -727,7 +727,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 13 , 124) # Osc 2 Pitch Mod 2 Amt
   C.set_midi_cc_value(midi_ch, 8  , 4  ) # Osc 2 PW Mod 1 Amt
   C.set_midi_cc_value(midi_ch, 103, 4  ) # Osc 2 PW Mod 2 Amt
-  C.set_midi_cc_value(midi_ch, 112, 4  ) # Osc 2 Sync Switch
+  C.set_midi_cc_value(midi_ch, 112, 4  ) # Osc 2 Sync Sw
   C.set_midi_cc_value(midi_ch, 115, 4  ) # Noise 1 Color
   C.set_midi_cc_value(midi_ch, 19 , 88 ) # Mixer 2 Level 1
   C.set_midi_cc_value(midi_ch, 20 , 88 ) # Mixer 2 Level 2

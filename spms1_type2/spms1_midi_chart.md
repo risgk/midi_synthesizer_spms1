@@ -31,7 +31,7 @@
 |                           103 | x             | o             | Osc PW Mod 2 Amt (LFO)               |
 |                            85 | x             | o             | Osc 2 Pitch Coarse (+-5 Octaves)     |
 |                            76 | x             | o             | Osc 2 Pitch Fine (+-60 Cents)        |
-|                           112 | x             | o             | Osc 2 Sync Switch [Off|On]           |
+|                           112 | x             | o             | Osc 2 Sync Sw [Off|On]               |
 |                            74 | x             | o             | Filter Cutoff                        |
 |                            71 | x             | o             | Filter Resonance                     |
 |                            24 | x             | o             | Filter Mod 1 Amt (EG)                |
@@ -49,14 +49,14 @@
 |                            73 | x             | o             | EG 1 Attack (Time)                   |
 |                            75 | x             | o             | EG 1 Decay (Time)                    |
 |                            30 | x             | o             | EG 1 Sustain (Level)                 |
-|                           105 | x             | o             | EG 1/2 Release Switch [Off|On]       |
+|                           105 | x             | o             | EG 1/2 Release Sw [Off|On]           |
 |                            52 | x             | o             | EG 2 Attack (Time)                   |
 |                            53 | x             | o             | EG 2 Decay (Time)                    |
 |                            54 | x             | o             | EG 2 Sustain (Level)                 |
 |                             3 | x             | o             | LFO Rate                             |
 |                           116 | x             | o             | LFO Level                            |
 |                            33 | x             | o             | LFO Wave (Triangle to Square)        |
-|                           113 | x             | o             | LFO Reset Switch [Off|On]            |
+|                           113 | x             | o             | LFO Reset Sw [Off|On]                |
 |                            93 | x             | o             | Chorus Mix                           |
 |                            58 | x             | o             | Chorus Rate                          |
 |                            59 | x             | o             | Chorus Depth                         |
@@ -64,7 +64,7 @@
 |                            94 | x             | o             | Delay Mix                            |
 |                            92 | x             | o             | Delay Feedback                       |
 |                             5 | x             | o             | Pitch Glide (Portamento Time)        |
-|                            34 | x             | o             | Pitch Out 1/2 Glide Switch [Off|On]  |
+|                            34 | x             | o             | Pitch Out 1/2 Glide Sw [Off|On]      |
 |                            57 | x             | o             | Pitch Bend Amt (Pitch Bend Range)    |
 |                            22 | x             | o             | Pitch Stretch                        |
 |                             1 | x             | o             | Mod Wheel (Unipolar)                 |

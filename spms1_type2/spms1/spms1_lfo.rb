@@ -96,7 +96,7 @@ module Spms1
       @level_modulation_depth = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
     end
 
-    # Reset Switch: Reset In is taken at 0.5 and above, and ignored below.
+    # Reset Sw: Reset In is taken at 0.5 and above, and ignored below.
     def set_reset_switch(switch)
       @reset_switch = (switch >= 0.5) ? 1.0 : 0.0
     end
@@ -124,7 +124,7 @@ module Spms1
     # In is held to the rate range after it is added, which also keeps the lookup in bounds, and
     # Level Mod In to the level's, so the wheel adds to the level up to its top and no further.
     # Reset In restarts the cycle where it rises above zero, as a gate does at a note on, with Reset
-    # Switch on: read at the control-rate step, as a gate only changes between buffers, which are a
+    # Sw on: read at the control-rate step, as a gate only changes between buffers, which are a
     # whole number of steps.
     def process(control_tick, rate_modulation_input = 0.0, level_modulation_input = 0.0, reset_input = 0.0)
       if control_tick

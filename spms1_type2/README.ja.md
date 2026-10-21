@@ -6,9 +6,9 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.4
 - 後着優先で 1 ノート分を記憶: 前のノートを押さえたまま新しいノートを離すと、前のノートにレガートで戻ります (トリルなどに)
 - 48 kHz オーディオ出力: I2S DAC による 24 bit、または PWM Audio (DAC 不要)
 - オシレータ: ノコギリ波から矩形波へのモーフ、パルス幅付き (CC#114)。パルス幅のモジュレーション付き (PWM。ピッチと同じ 2 つのモジュレーション、デフォルトではエンベロープと LFO で、CC#8 と 103)。ノコギリ波、パルス波の個別出力付き。Osc 1 は 1 オクターブ下のサイン波のサブ出力も
-- ハードシンク: Sync In (デフォルトで Osc 1 のノコギリ波) が 0 を上へ横切ったところで、Osc 2 がサンプルの間のその位置からやり直します (Sync Switch、CC#112)
+- ハードシンク: Sync In (デフォルトで Osc 1 のノコギリ波) が 0 を上へ横切ったところで、Osc 2 がサンプルの間のその位置からやり直します (Sync Sw、CC#112)
 - エンベロープ: ADS エンベロープ 2 つ。EG 2 はアンプの Mod 2 In 用で、起動時はオルガン型。CC#52、53、54。リリースのスイッチは 2 つとも CC#105
-- LFO: 三角波 (PolyBLAMP) とユニポーラの矩形波 (PolyBLEP) の個別出力と、その間をクロスフェードするメイン出力 (Wave、CC#33)。リセット入力付き (デフォルトで Note Gate。Reset Switch、CC#113 をオンにするとノートごとにやり直す)
+- LFO: 三角波 (PolyBLAMP) とユニポーラの矩形波 (PolyBLEP) の個別出力と、その間をクロスフェードするメイン出力 (Wave、CC#33)。リセット入力付き (デフォルトで Note Gate。Reset Sw、CC#113 をオンにするとノートごとにやり直す)
 - フィルタ: ZDF/TPT ステート・バリアブル・フィルタ (BP 積分器の非線形リーク付き、1 ステップ・ニュートン法で解く)。LP、HP、BP の 3 出力と、LP と HP の間をノッチを経てクロスフェードするメイン出力 (Mode、CC#39)
 - コーラス: モノラル入力・ステレオ出力、実行順に入るモジュール
 - ディレイ: ステレオ、フィードバック付き、実行順に入るモジュール (最大 340 ms)
@@ -220,17 +220,17 @@ Osc 2 のシンクと LFO 1 のリセットは、Osc 1 のノコギリ波と Not
 オンにするまで効きません。モジュレーションホイールは LFO 1 の Level Mod In に入ります。
 
 モジュールは下の実行順で、1 サンプルずつ処理されます。波形やカットオフ、ゲインといったパラメータは CC
-から届くもので、この図では省いています。パラメータ名では Amount を Amt と略しています。
+から届くもので、この図では省いています。パラメータ名では Amount を Amt、Switch を Sw と略しています。
 
 ノートのピッチは Pitch 1 を通ってオシレータに届き、ノートからノートへ滑らかに移ります。ポルタメントです。
 Pitch 1 Glide は CC#5 (MIDI 規格の Portamento Time) にあり、起動時は 0.0 です。そこではポルタメントはオフで、
 ピッチを届いたとおりそのまま通します。Pitch 1 は 1 つのグライドから 2 つの出力を出します。Out 1 は Osc 1 と
-フィルタのキーボードトラッキングへ、Out 2 は Osc 2 へ届きます。Out 1 Glide Switch と Out 2 Glide Switch は
+フィルタのキーボードトラッキングへ、Out 2 は Osc 2 へ届きます。Out 1 Glide Sw と Out 2 Glide Sw は
 Glide を動かさずに、それぞれの出力のポルタメントをオン・オフします。どちらも CC#34 にあり、MIDI のスイッチと
 同じく値 64 以上でオン、起動時は値 124 でオンです。グライドは Pitch 1 Gate In（デフォルトは Note Gate）が
 オンの間だけ進みます。ノートとノートの間は止まっているので、休符の後のノートはそこから続きます。Pitch Bend は Pitch 1 Bend In に入ります。Bend In は
 グライドの後で出力に足されるので、ベンドはすぐに効き、オシレータにもフィルタのキーボードトラッキングにも
-同じように届きます。Out 1 Bend Switch と Out 2 Bend Switch は CC を持たず、起動時はオンです。カテゴリ 4 で
+同じように届きます。Out 1 Bend Sw と Out 2 Bend Sw は CC を持たず、起動時はオンです。カテゴリ 4 で
 片方をオフにすると、その出力にはベンドが掛からないので、Osc 2 だけをベンドできます。
 Pitch 1 Bend Amt（CC#57）がベンドレンジで、1 目盛り半音ずつです。値 8 で上下 2 半音、値 28 で 1 オクターブ、
 値 124 で 5 オクターブで、起動時は値 28 です。
@@ -511,29 +511,29 @@ Mod Wheel と General のスロットは 0.0 になります。カテゴリ 4 �
 
 | CC#98 | パラメータ | | CC#98 | パラメータ | | CC#98 | パラメータ |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | Pitch 1 Glide | | 25 | Mixer 1 Level 3 | | 50 | Osc 2 Sync Switch |
-| 1 | Pitch 1 Out 1 Glide Switch | | 26 | Mixer 1 Level 4 | | 51 | Noise 1 Color |
-| 2 | Pitch 1 Out 2 Glide Switch | | 27 | Mixer 1 Out Level | | 52 | Noise 1 Level |
+| 0 | Pitch 1 Glide | | 25 | Mixer 1 Level 3 | | 50 | Osc 2 Sync Sw |
+| 1 | Pitch 1 Out 1 Glide Sw | | 26 | Mixer 1 Level 4 | | 51 | Noise 1 Color |
+| 2 | Pitch 1 Out 2 Glide Sw | | 27 | Mixer 1 Out Level | | 52 | Noise 1 Level |
 | 3 | Pitch 1 Bend Amt | | 28 | Osc 1 Wave | | 53 | Mixer 2 Level 1 |
-| 4 | Pitch 1 Out 1 Bend Switch | | 29 | Osc 1 PW | | 54 | Mixer 2 Level 2 |
-| 5 | Pitch 1 Out 2 Bend Switch | | 30 | Osc 1 Pitch Coarse | | 55 | Mixer 2 Level 3 |
+| 4 | Pitch 1 Out 1 Bend Sw | | 29 | Osc 1 PW | | 54 | Mixer 2 Level 2 |
+| 5 | Pitch 1 Out 2 Bend Sw | | 30 | Osc 1 Pitch Coarse | | 55 | Mixer 2 Level 3 |
 | 6 | Pitch 1 Stretch | | 31 | Osc 1 Pitch Fine | | 56 | Mixer 2 Level 4 |
 | 7 | EG 1 Attack | | 32 | Osc 1 Pitch Mod 1 Amt | | 57 | Mixer 2 Out Level |
 | 8 | EG 1 Decay | | 33 | Osc 1 Pitch Mod 2 Amt | | 58 | Filter 1 Cutoff |
-| 9 | EG 1 Sustain | | 34 | Osc 1 Pitch Mod 1 Switch | | 59 | Filter 1 Resonance |
-| 10 | EG 1 Release Switch | | 35 | Osc 1 Pitch Mod 2 Switch | | 60 | Filter 1 Mode |
+| 9 | EG 1 Sustain | | 34 | Osc 1 Pitch Mod 1 Sw | | 59 | Filter 1 Resonance |
+| 10 | EG 1 Release Sw | | 35 | Osc 1 Pitch Mod 2 Sw | | 60 | Filter 1 Mode |
 | 11 | EG 1 Level | | 36 | Osc 1 Pitch Mod Range | | 61 | Filter 1 Pitch Amt |
 | 12 | EG 2 Attack | | 37 | Osc 1 PW Mod 1 Amt | | 62 | Filter 1 Mod 1 Amt |
 | 13 | EG 2 Decay | | 38 | Osc 1 PW Mod 2 Amt | | 63 | Filter 1 Mod 2 Amt |
 | 14 | EG 2 Sustain | | 39 | Osc 2 Wave | | 64 | Filter 1 Mod Polarity |
-| 15 | EG 2 Release Switch | | 40 | Osc 2 PW | | 65 | Amp 1 Gain |
+| 15 | EG 2 Release Sw | | 40 | Osc 2 PW | | 65 | Amp 1 Gain |
 | 16 | EG 2 Level | | 41 | Osc 2 Pitch Coarse | | 66 | Amp 1 Mod 1/2 Mix |
 | 17 | LFO 1 Wave | | 42 | Osc 2 Pitch Fine | | 67 | Chorus 1 Mix |
 | 18 | LFO 1 Rate | | 43 | Osc 2 Pitch Mod 1 Amt | | 68 | Chorus 1 Rate |
 | 19 | LFO 1 Level | | 44 | Osc 2 Pitch Mod 2 Amt | | 69 | Chorus 1 Depth |
-| 20 | LFO 1 Rate Mod Amt | | 45 | Osc 2 Pitch Mod 1 Switch | | 70 | Delay 1 Mix |
-| 21 | LFO 1 Level Mod Amt | | 46 | Osc 2 Pitch Mod 2 Switch | | 71 | Delay 1 Time |
-| 22 | LFO 1 Reset Switch | | 47 | Osc 2 Pitch Mod Range | | 72 | Delay 1 Feedback |
+| 20 | LFO 1 Rate Mod Amt | | 45 | Osc 2 Pitch Mod 1 Sw | | 70 | Delay 1 Mix |
+| 21 | LFO 1 Level Mod Amt | | 46 | Osc 2 Pitch Mod 2 Sw | | 71 | Delay 1 Time |
+| 22 | LFO 1 Reset Sw | | 47 | Osc 2 Pitch Mod Range | | 72 | Delay 1 Feedback |
 | 23 | Mixer 1 Level 1 | | 48 | Osc 2 PW Mod 1 Amt | |  |  |
 | 24 | Mixer 1 Level 2 | | 49 | Osc 2 PW Mod 2 Amt | |  |  |
 
@@ -710,7 +710,7 @@ LFO 1 Rate Mod In は、Mod 2 In がオシレータのピッチを動かすの�
 
 LFO 1 Reset In は、0 から上がったところで LFO の周期を最初からやり直させます。最初は Out が 0.0 で、
 三角波が上がっていくところです。デフォルトでは Note Gate につながっているので、どのノートでもビブラートが
-同じように始まります (キーシンク)。ただし LFO 1 Reset Switch がオンのときだけです。CC#113 で、値 64 以上で
+同じように始まります (キーシンク)。ただし LFO 1 Reset Sw がオンのときだけです。CC#113 で、値 64 以上で
 Reset In を受け、それ未満では無視します。起動時はオフ（値 4）なので、オンにするまで LFO は自由に回ります。
 Reset In も 4 サンプルごとに読まれます。ゲートはバッファの切れ目でしか変わらず、バッファはその倍数なので
 取りこぼしません。オーディオをつないでも、読まれるのはその時点の値だけです。
@@ -720,14 +720,14 @@ EG 1 Level も、同じレンジで同じようにエンベロープの出力に
 反転させたいときは、エンベロープを反転した Out Inv（0.0 から -1.0 まで）か、ミキサーの Out Inv を
 使います。デフォルトのパッチでは Out Inv は何にもつながっていません。
 
-EG 1 Release Switch（CC#105）はノートのゲートが落ちた後のリリースを選びます。MIDI のスイッチと同じく
+EG 1 Release Sw（CC#105）はノートのゲートが落ちた後のリリースを選びます。MIDI のスイッチと同じく
 値 64 以上でオンになり、EG 1 Decay で決まるディケイの速さでリリースします。値 64 未満でオフになり、
 ディケイの値にかかわらず最短のディケイ、10 ms でリリースするので、ディケイが長くてもノートは短く切れます。
 起動時は値 124 でオンです。スイッチなのでスムージングしません。
 
 EG 2 は同じ種類の 2 つ目のエンベロープで、これも Note Gate を受け、アンプに使います。デフォルトのパッチは
 Amp 1 Mod 2 In につなぎます (後述)。Attack、Decay、Sustain は CC#52、53、54 です。起動時はオルガン型で、Attack と Decay は 0.0（値 4）、Sustain は 1.0（値 124）なので、すぐに最大まで開き、
-鍵盤を押している間そのまま保ちます。Release Switch は EG 1 と同じ CC#105 で、1 つのスイッチが 2 つのエンベロープに効きます。起動時はオンなので、リリースは Decay の速さ、起動時は 10 ms で、
+鍵盤を押している間そのまま保ちます。Release Sw は EG 1 と同じ CC#105 で、1 つのスイッチが 2 つのエンベロープに効きます。起動時はオンなので、リリースは Decay の速さ、起動時は 10 ms で、
 オルガンのように音がすぐ止まります。Level は EG 1 と同じく CC がなく、1.0 を保持します。
 
 Osc 1 は 2 つのモジュレーション、Mod 1 In と Mod 2 In を、それぞれ自分の深さでピッチとパルス幅に掛けます。
@@ -779,7 +779,7 @@ Osc 1 の Out Saw につながっていて、これは 1 周期に 1 回、周�
 均等に丸められているので、直線はその近くで横切ります。やり直しで Osc 2 の波形にできる段差は、
 なめらかにせずそのままです。ほかの信号をつなぐこともできます。パルス波も 1 周期に 1 回上へ横切りますが、
 パルス幅が端に寄ると横切る段差がなくなります。1 周期に何度も 0 を上へ横切る波形では、そのたびにやり直します。Osc 2 の
-Sync Switch（CC#112）は、値 64 以上で Sync In を受け、それ未満では無視します。起動時はオフ（値 4）なので、
+Sync Sw（CC#112）は、値 64 以上で Sync In を受け、それ未満では無視します。起動時はオフ（値 4）なので、
 デフォルトのパッチはオンにするまでシンクしません。Osc 2 のピッチを Osc 1 より上げると (Pitch Coarse の
 CC#85 や、ピッチのモジュレーションで) シンクらしい音になります。Sync In にゲートをつなぐと、0.0 から 1.0 に上がった
 サンプルで Osc 2 をやり直させます。スイッチをオンにして Note Gate をつなげば、どのノートも波形の
@@ -880,11 +880,11 @@ Pitch 1 Glide はユニポーラで、1/120 刻み、1 ステップで時間が�
 そこから引き継ぎます。グライドは、エンベロープのゲートと同じく Gate In が 0.25 以上のオンの間だけ進み、オフの間は
 止まります。Glide が 0.0 なら、ゲートに関係なく入力をそのまま通します。Gate In を Constant 1.0 にすると、休符の間も
 グライドが進みます。時間はスムージングしません。時間を変えても出力の動く速さが変わるだけなので、出力に
-段差は生じません。出力の Glide Switch を値 64 未満にしてオフにすると、Glide が 0.0 のときと同じく、グライドの
+段差は生じません。出力の Glide Sw を値 64 未満にしてオフにすると、Glide が 0.0 のときと同じく、グライドの
 途中でもその出力はすぐに入力に移ります。グライドは出力ごとに持っているので、オンに戻した出力は、その時いる所から
 段差なく滑り始めます。
 
-Osc 1 と Osc 2 には、それぞれ Pitch Mod 1 Switch と Pitch Mod 2 Switch があります。CC は持たず、起動時は
+Osc 1 と Osc 2 には、それぞれ Pitch Mod 1 Sw と Pitch Mod 2 Sw があります。CC は持たず、起動時は
 オンです。値 64 未満にしてオフにすると、その Mod In はピッチに掛からなくなります。深さは Pitch Mod Amt と
 同じく滑らかに 0.0 へ移り、Pitch Mod Amt はオンに戻すときのために保たれます。パルス幅のモジュレーションは
 切り替わりません。これで Mod 1 In のエンベロープで Osc 2 だけを動かし、Osc 1 はノートを保ったまま
@@ -949,10 +949,10 @@ Osc 1 と Osc 2 には、それぞれ Pitch Mod 1 Switch と Pitch Mod 2 Switch 
 - オシレータをクロスフェードするつまみ: CC#99 = 2, CC#98 = 53, CC#6 = 12 と CC#98 = 54, CC#6 = 13 で
   Mixer 2 Level 1 を General 1 に、Level 2 を General 1 Rev に向けます。CC#16 を上げるほど Osc 1 が入り、
   Osc 2 が抜けます
-- Osc 2 だけのピッチベンド: CC#99 = 4, CC#98 = 4, CC#6 = 4 で Pitch 1 Out 1 Bend Switch をオフにします。
+- Osc 2 だけのピッチベンド: CC#99 = 4, CC#98 = 4, CC#6 = 4 で Pitch 1 Out 1 Bend Sw をオフにします。
   ホイールは Osc 2 だけを Osc 1 に対してベンドし、Osc 1 はフィルタとともにノートを保ちます
-- シンクスイープ: CC#112 を値 124 にして Osc 2 Sync Switch をオンにし、CC#99 = 4, CC#98 = 34, CC#6 = 4 で
-  Osc 1 Pitch Mod 1 Switch をオフにします。CC#89 を上げると、エンベロープが Osc 2 だけをスイープし、
+- シンクスイープ: CC#112 を値 124 にして Osc 2 Sync Sw をオンにし、CC#99 = 4, CC#98 = 34, CC#6 = 4 で
+  Osc 1 Pitch Mod 1 Sw をオフにします。CC#89 を上げると、エンベロープが Osc 2 だけをスイープし、
   Osc 1 はシンク元のノートを保ちます
 - フィルタを経路から外す: CC#99 = 1, CC#98 = 27, CC#6 = 48 でアンプのオーディオ入力を Mixer 2 に向けます。
   フィルタは走り続けスロットも占めたままですが、誰も読みません
