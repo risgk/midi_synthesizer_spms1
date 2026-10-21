@@ -1,9 +1,8 @@
 module Spms1
-  # Stereo delay with feedback, after PRA32-U2's Delay FX in its Stereo Delay mode: two audio
+  # Stereo delay with feedback: two audio
   # inputs, left and right, each with a delay line and a loop of its own, and two outputs, each a
   # crossfade of its dry input with its delayed signal. Time, Feedback and Mix are shared, so the
   # two sides repeat together and the stereo image going in is the one the repeats keep.
-  # Reference: https://github.com/risgk/digital-synth-pra32-u2 (pra32-u2-delay-fx.h)
   #
   # It keeps the bus's one unit without a limiter or a clip. What enters each loop is half its
   # input, plus its delayed signal at a feedback of at most a half, so as long as the delayed
@@ -13,7 +12,7 @@ module Spms1
   # price of the half is that the first repeat is 6 dB under the dry signal.
   #
   # The outputs are read after process, from output_l and output_r: returning both would build an
-  # Array every sample.
+  # Array every sample. output_mono, a sub output, is the two averaged, for a mono destination.
   class Delay
     # Blend at the reference rate on the line below, for each of two cascaded stages. The two move
     # together: their product is what fixes the time constant, so changing one without the other
@@ -22,18 +21,14 @@ module Spms1
     # of a controller sending sparse CCs (e.g. every 20 ms) are rounded off rather than heard,
     # and settle sooner, 99% in 35 ms.
     SMOOTHING_TARGET_BLEND_BASE = 0.015625
-    # Number of samples between control-rate updates; smoothing speed is kept approximately
-    # constant if this is changed. It has to stay a power of two: the counter below wraps with a
-    # mask, because Ruby's % is a floor-modulo and sp_imod carries a sign correction the counter
-    # can never need.
+    # Samples between control-rate updates. The main loop sets the cadence, handing every module
+    # the same control tick once every CONTROL_RATE_DIVISOR samples (see spms1_main.rb), and the
+    # rates derived here assume this, so the two have to match; smoothing speed is kept approximately
+    # constant if both are changed.
     CONTROL_RATE_DIVISOR = 4
-    # Its own constant, not CONTROL_RATE_DIVISOR - 1 where it is used: Spinel emits an Integer
-    # constant as a runtime global and does not fold arithmetic on one, so written that way the
-    # subtraction would survive into the per-sample path carrying an overflow check of its own.
-    CONTROL_RATE_MASK = CONTROL_RATE_DIVISOR - 1
 
-    # The delay line, a power of two so that its index wraps with a mask, for the same reason as
-    # the counter above. It holds the longest delay at 48 kHz, 16320 samples, plus the older of
+    # The delay line, a power of two so that its index wraps with a mask: Ruby's % is a
+    # floor-modulo, and sp_imod carries a sign correction the index can never need. It holds the longest delay at 48 kHz, 16320 samples, plus the older of
     # the two samples the interpolation reads; a higher sample rate would need it longer.
     # Reading reaches back 16384 samples at most, to the slot about to be written, which still
     # holds its oldest sample; a delay of 16384 or more would read back the newest one.
@@ -45,18 +40,23 @@ module Spms1
 
     # The Time dial, in samples at 48 kHz: a straight line from 0 at 0.0 to 16320 (340 ms) at 1.0,
     # 136 samples a CC step, clipped to 136 (2.83 ms) at the bottom. The bottom keeps the read clear
-    # of the sample about to be written. The top is PRA32-U2's 340 ms, which fits the line above
+    # of the sample about to be written. The top is 340 ms, which fits the line above
     # with room left for the slew to overshoot by rounding; its clip only guards the line.
     FULL_SCALE_TIME_AT_48K = 16320.0
     MIN_TIME_AT_48K        = 136.0
     MAX_TIME_AT_48K        = 16320.0
-    # How far the read position may move per sample while Time is turned, in samples: a quarter,
-    # as PRA32-U2 allows. Moving it faster would read the line at many times its speed, which is
-    # heard as noise; held to this, the repeats bend in pitch by at most 25%, as a tape delay's do,
-    # and arrive at the new time a moment later.
+    # How far the read position may move per sample while Time is turned, in samples: a quarter.
+    # Moving it faster would read the line at many times its speed, which is heard as noise; held
+    # to this, the repeats bend in pitch by at most 25%, as a tape delay's do, and arrive at the new
+    # time a moment later.
     TIME_SLEW = 0.25
 
     attr_reader :output_l, :output_r
+
+    # The average of the two sides, worked out when read, which the loop does every sample.
+    def output_mono
+      (@output_l + @output_r) * 0.5
+    end
 
     def initialize(sample_rate)
       @sample_rate = sample_rate
@@ -91,7 +91,6 @@ module Spms1
       # moved a step every sample so that it arrives at each control-rate update's value on time.
       @delay = @full_scale_time * @current_time
       @delay_step = 0.0
-      @sample_counter = 0
 
       @output_l = 0.0
       @output_r = 0.0
@@ -117,14 +116,14 @@ module Spms1
       @mix = (mix < 0.0) ? 0.0 : ((mix > 1.0) ? 1.0 : mix)
     end
 
-    def process(audio_input_l = 0.0, audio_input_r = 0.0)
-      if @sample_counter == 0
-        @stage_1_time += (@time - @stage_1_time) * @smoothing_target_blend
-        @current_time += (@stage_1_time - @current_time) * @smoothing_target_blend
-        @stage_1_feedback += (@feedback - @stage_1_feedback) * @smoothing_target_blend
-        @current_feedback += (@stage_1_feedback - @current_feedback) * @smoothing_target_blend
-        @stage_1_mix += (@mix - @stage_1_mix) * @smoothing_target_blend
-        @current_mix += (@stage_1_mix - @current_mix) * @smoothing_target_blend
+    def process(control_tick, audio_input_l = 0.0, audio_input_r = 0.0)
+      if control_tick
+        @stage_1_time = Dsp.smooth(@time, @stage_1_time, @smoothing_target_blend)
+        @current_time = Dsp.smooth(@stage_1_time, @current_time, @smoothing_target_blend)
+        @stage_1_feedback = Dsp.smooth(@feedback, @stage_1_feedback, @smoothing_target_blend)
+        @current_feedback = Dsp.smooth(@stage_1_feedback, @current_feedback, @smoothing_target_blend)
+        @stage_1_mix = Dsp.smooth(@mix, @stage_1_mix, @smoothing_target_blend)
+        @current_mix = Dsp.smooth(@stage_1_mix, @current_mix, @smoothing_target_blend)
 
         # Where the read position should be by the next update, at most the slew away, and a
         # quarter of the way there each sample.
@@ -135,9 +134,7 @@ module Spms1
         @delay_step = distance * 0.25
       end
 
-      @sample_counter = (@sample_counter + 1) & CONTROL_RATE_MASK
-
-      # Held to the bus's one unit on the way in, as the amp holds its modulation input: the
+      # Held to the bus's one unit on the way in, as the amp holds its modulation: the
       # bound each loop keeps is only as good as what enters it.
       input_l = (audio_input_l < -1.0) ? -1.0 : ((audio_input_l > 1.0) ? 1.0 : audio_input_l)
       input_r = (audio_input_r < -1.0) ? -1.0 : ((audio_input_r > 1.0) ? 1.0 : audio_input_r)
@@ -158,7 +155,7 @@ module Spms1
       older_r = @delay_line_r[older_index]
       delayed_r = newer_r + fraction * (older_r - newer_r)
 
-      # A gentle low pass in each loop, as PRA32-U2 has: 0.75 of what goes in and 0.25 of the last
+      # A gentle low pass in each loop: 0.75 of what goes in and 0.25 of the last
       # value, so each repeat comes back a little darker than the one before.
       loop_input_l = input_l * 0.5 + delayed_l * @current_feedback
       @filtered_l = loop_input_l + (@filtered_l - loop_input_l) * 0.25

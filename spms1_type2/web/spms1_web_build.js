@@ -10,11 +10,12 @@ const path = require("path");
 const { execSync } = require("child_process");
 
 const HERE   = __dirname;
-const SKETCH = path.join(HERE, "..");
-const OUTPUT = path.join(SKETCH, "spms1_web_synth.js");
+const ROOT   = path.join(HERE, "..");
+const SKETCH = path.join(ROOT, "spms1");
+const OUTPUT = path.join(ROOT, "spms1_web_synth.js");
 
 // The version is the same as SPMS-1 (type-2) (the title of README.md)
-const readme = fs.readFileSync(path.join(SKETCH, "README.md"), "utf8");
+const readme = fs.readFileSync(path.join(ROOT, "README.md"), "utf8");
 const versionMatch = readme.match(/^MIDI Synthesizer SPMS-1 \(type-2\) (v[0-9]+\.[0-9]+\.[0-9]+)/m);
 if (!versionMatch) {
   throw new Error("The version is not found in the title of README.md");

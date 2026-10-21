@@ -3,10 +3,10 @@
  * (spms1_web_synth_processor.js)
  *
  * Runs spms1_main.c, the Spinel output the sketch runs, as WebAssembly. This file stands in for
- * spms1_type2.ino: the MIDI tables and handlers are the sketch's, and write_to_audio_buffer hands
+ * spms1.ino: the MIDI tables and handlers are the sketch's, and write_to_audio_buffer hands
  * the samples to the AudioWorkletProcessor.
  *
- * Spms1_main never returns: its `loop do` writes each sample out and, on the device, blocks while
+ * Spms1_main never returns: its `while true` loop writes each sample out and, on the device, blocks while
  * the output is full. Here the build runs Binaryen's Asyncify on the WebAssembly, so that
  * spms1_web_yield, imported from the AudioWorkletProcessor, can unwind Spms1_main out to it once
  * a block is filled, and rewind it back to the same place for the next block.

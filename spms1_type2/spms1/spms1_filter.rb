@@ -1,7 +1,13 @@
 module Spms1
-  # ZDF (zero-delay feedback) / TPT (topology-preserving transform) state variable filter, low
-  # pass, with a nonlinear leak on the band pass integrator, solved within the sample by one step
-  # of Newton's method.
+  # ZDF (zero-delay feedback) / TPT (topology-preserving transform) state variable filter, with a
+  # nonlinear leak on the band pass integrator, solved within the sample by one step of Newton's
+  # method. It puts out its low pass, high pass and band pass at once, each through a DC blocker
+  # and the output clip of its own, and the first two crossfaded by Mode: process returns the
+  # crossfade, and output_lp, output_hp and output_bp hold the low pass, the high pass and the
+  # band pass. The audio input drives it as it
+  # arrives, so how hard is set ahead of it: by Mixer 2 Out Level in the default patch. That is
+  # what decides how far the band pass runs into the leak, which the resonant peak reaches first:
+  # the pass band itself stays nearly clean.
   # This implementation is not oversampled; the nonlinear behavior is kept intentionally simple.
   # Reference: https://www.discodsp.net/VAFilterDesign_2.1.2.pdf (The Art of VA Filter Design)
   # Reference: https://www.kvraudio.com/forum/viewtopic.php?t=349859 (Cheap non-linear zero-delay filters)
@@ -12,10 +18,10 @@ module Spms1
   class Filter
     # What leaves the filter, as opposed to what circulates inside it: exactly linear up to
     # OUTPUT_KNEE, then a quadratic shoulder that reaches OUTPUT_LIMIT with zero slope at
-    # OUTPUT_CEILING. The limit is one unit, the widest thing the bus carries. A cubic here had no
-    # linear region and bent everything it passed -- 0.3 dB and a 1% third harmonic at half a unit
-    # -- which put the output clip ahead of the loop as the filter's main source of distortion. The
-    # default patch peaks near 0.3, under the knee, so it leaves untouched. The shoulder's curvature
+    # OUTPUT_CEILING. The limit is one unit, the widest thing the bus carries. A cubic here would have
+    # no linear region and bend everything it passed -- 0.3 dB and a 1% third harmonic at half a
+    # unit -- making the output clip, not the loop, the filter's main source of distortion. The
+    # default patch peaks near 0.68, under the knee, so it leaves untouched. The shoulder's curvature
     # steps at the knee, so what crosses it gains odd harmonics of every order rather than just the
     # third, falling as 1/n^3; a hard clamp, stepping in slope, falls as 1/n^2.
     OUTPUT_LIMIT       = 1.0
@@ -31,10 +37,9 @@ module Spms1
     # integrates, y being the band pass: nothing at small levels, more and more as y bends into the
     # cubic below. In continuous time,
     #   dy/dt = w_c * high_pass - LEAK_RATE * (y - soft_clip_biased(y))
-    # which is an integrator with a soft limiter across its capacitor. The rate is the one the
-    # filter used to have implicitly, when it soft-clipped the state once a sample at 48 kHz, and
-    # it keeps that sound: what is now fixed in time was then fixed per sample, so the distortion
-    # no longer grows with the sample rate and needs no blend to hold it. That leak is what holds
+    # which is an integrator with a soft limiter across its capacitor. The rate is that of
+    # soft-clipping the state once a sample at 48 kHz, fixed in time rather than per sample, so
+    # the distortion does not grow with the sample rate and needs no blend to hold it. That leak is what holds
     # the resonant peak down; the pass band, where y stays small, passes nearly clean.
     LEAK_RATE = 48000.0
     # The cubic is self-similar: scaling the ceiling scales the flat value, two thirds of it, with
@@ -77,22 +82,15 @@ module Spms1
     # of a controller sending sparse CCs (e.g. every 20 ms) are rounded off rather than heard,
     # and settle sooner, 99% in 35 ms.
     SMOOTHING_TARGET_BLEND_BASE = 0.015625
-    # Number of samples between control-rate updates; smoothing speed is kept approximately
-    # constant if this is changed. It has to stay a power of two: the counter below wraps with a
-    # mask, because Ruby's % is a floor-modulo and sp_imod carries a sign correction the counter
-    # can never need -- one branch a sample in each module, six across the six of them.
+    # Samples between control-rate updates. The main loop sets the cadence, handing every module
+    # the same control tick once every CONTROL_RATE_DIVISOR samples (see spms1_main.rb), and the
+    # rates derived here assume this, so the two have to match; smoothing speed is kept approximately
+    # constant if both are changed.
     CONTROL_RATE_DIVISOR = 4
-    # Its own constant, not CONTROL_RATE_DIVISOR - 1 where it is used: Spinel emits an Integer
-    # constant as a runtime global and does not fold arithmetic on one, so written that way the
-    # subtraction survives into the per-sample path carrying an overflow check of its own, which
-    # measured far worse than the modulo it replaces. What the mask buys is size, not
-    # determinism: the six branches it removes, one per site, are ones that could never be taken.
-    # Together with the LFO's fold it took 11 branches and 60 instructions out of Spms1_main as
-    # linked, and the buffer time did not move (853/857us against 854/856).
-    CONTROL_RATE_MASK = CONTROL_RATE_DIVISOR - 1
 
     # Damping lookup, k = 1 / Q, one entry per step of the resonance dial, written against the
-    # dial position r = i / 120, i = CC - 4: Q = 0.707 * 2^(4r) up to Q 5.66 at i = 90 (CC 94).
+    # dial position r = i / 120, i = CC - 4: Q = 0.707 * 2^(5r), doubling every 24 steps, up to
+    # Q 9.51 at i = 90 (CC 94).
     # Past that a quadratic term in (i - 90) is added to log2(Q), so that the slope grows smoothly
     # rather than stepping up, reaching Q 256 at i = 114 (CC 118); above that k is zero, and the
     # self-oscillation that update_coefficients adds takes over. The last entry repeats the one
@@ -100,13 +98,13 @@ module Spms1
     # the end.
     K_TABLE = Array.new(122, 0.0)
     BASE_Q = 0.7071067811865476
-    Q_CURVE_C = (8.0 - (114.0 / 30.0 - 0.5)) / ((114.0 - 90.0) * (114.0 - 90.0))
+    Q_CURVE_C = (8.0 - (114.0 / 24.0 - 0.5)) / ((114.0 - 90.0) * (114.0 - 90.0))
     for i in 0...121
       if i <= 90
-        K_TABLE[i] = 1.0 / (BASE_Q * (2.0 ** (i.to_f * (1.0 / 30.0))))
+        K_TABLE[i] = 1.0 / (BASE_Q * (2.0 ** (i.to_f * (1.0 / 24.0))))
       elsif i <= 114
         d = (i - 90).to_f
-        K_TABLE[i] = 1.0 / (2.0 ** (i.to_f * (1.0 / 30.0) - 0.5 + Q_CURVE_C * d * d))
+        K_TABLE[i] = 1.0 / (2.0 ** (i.to_f * (1.0 / 24.0) - 0.5 + Q_CURVE_C * d * d))
       end
     end
     K_TABLE[121] = K_TABLE[120]
@@ -175,19 +173,32 @@ module Spms1
 
       @cutoff = 1.0
       @resonance = 0.0
-      @modulation_amount = 0.0
-      @modulation_polarity = 1.0
-      @modulation_depth = 0.0
-      @gain = 0.5
+      # Each Mod Amt and its Mod Pol are multiplied before smoothing, so only their product,
+      # the depth, carries a smoothing state.
+      @modulation_1_amount = 0.0
+      @modulation_2_amount = 0.0
+      @modulation_1_polarity = 1.0
+      @modulation_2_polarity = 1.0
+      @modulation_1_depth = 0.0
+      @modulation_2_depth = 0.0
+      @pitch_amount = 0.0
+      @mode_lp = 1.0
+      @mode_hp = 0.0
 
       @stage_1_cutoff = 1.0
       @stage_1_resonance = 0.0
-      @stage_1_modulation_depth = 0.0
-      @stage_1_gain = 0.5
+      @stage_1_modulation_1_depth = 0.0
+      @stage_1_modulation_2_depth = 0.0
+      @stage_1_pitch_amount = 0.0
+      @stage_1_mode_lp = 1.0
+      @stage_1_mode_hp = 0.0
       @current_cutoff = 1.0
       @current_resonance = 0.0
-      @current_modulation_depth = 0.0
-      @current_gain = 0.5
+      @current_modulation_1_depth = 0.0
+      @current_modulation_2_depth = 0.0
+      @current_pitch_amount = 0.0
+      @current_mode_lp = 1.0
+      @current_mode_hp = 0.0
 
       @g = 0.0
       @g_plus_k = 0.0
@@ -201,64 +212,98 @@ module Spms1
       @s1 = 0.0
       @s2 = 0.0
       @dc_blocker = 0.0
+      @dc_blocker_hp = 0.0
+      @dc_blocker_bp = 0.0
+      @output_lp = 0.0
+      @output_hp = 0.0
+      @output_bp = 0.0
 
-      @current_modulation_input = 0.0
-      @sample_counter = 0
+      @current_pitch_input = 0.0
+      @current_modulation_1_input = 0.0
+      @current_modulation_2_input = 0.0
 
       update_coefficients
     end
 
-    # Every parameter but the modulation polarity is unipolar, [0.0, 1.0], which is what the
-    # smoothing, the modulation sum and the table lookups below are written against.
+    # Every parameter but the two Mod Pols is unipolar, [0.0, 1.0], which is what the smoothing, the
+    # modulation sum and the table lookups below are written against.
     # Cutoff range: MIDI note 15 (19 Hz) at 0.0, MIDI note 75 (622 Hz) at 0.5, MIDI note 135 (20 kHz) at 1.0.
     def set_cutoff(cutoff)
       @cutoff = (cutoff < 0.0) ? 0.0 : ((cutoff > 1.0) ? 1.0 : cutoff)
     end
 
-    # Modulation depth is amount times polarity. Amount is unipolar, [0.0, 1.0]. Polarity is
-    # bipolar, [-0.5, 0.5], and doubled, so +0.5 leaves the amount as it is, -0.5 negates it and
-    # the way between scales it, crossing zero; it sets depth as well as direction. Multiplied here
-    # so that only the product is smoothed.
-    def set_modulation_amount(amount)
-      @modulation_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
-      @modulation_depth = @modulation_amount * @modulation_polarity
+    # Each modulation amount is unipolar, [0.0, 1.0], a plain multiplier on its input: at 1.0 a
+    # unit of input is the whole cutoff range, and at 0.0 the input leaves the cutoff alone. Each
+    # modulation's polarity multiplies its amount.
+    def set_modulation_1_amount(amount)
+      @modulation_1_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
+      @modulation_1_depth = @modulation_1_amount * @modulation_1_polarity
     end
 
-    def set_modulation_polarity(polarity)
-      clamped_polarity = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
-      @modulation_polarity = clamped_polarity + clamped_polarity
-      @modulation_depth = @modulation_amount * @modulation_polarity
+    def set_modulation_2_amount(amount)
+      @modulation_2_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
+      @modulation_2_depth = @modulation_2_amount * @modulation_2_polarity
     end
 
-    # How hard the audio input drives the filter, used as a plain multiplier. It sits on the input
-    # rather than the output because that is what decides how far the band pass runs into the
-    # leak, which the resonant peak reaches first: the pass band itself stays nearly clean.
-    def set_gain(gain)
-      @gain = (gain < 0.0) ? 0.0 : ((gain > 1.0) ? 1.0 : gain)
+    # Mod 1 Pol and Mod 2 Pol are bipolar, [-0.5, 0.5], each doubled into a multiplier on
+    # its modulation: at +0.5 it moves the cutoff as its amount says, at -0.5 the other way, so the
+    # envelope closes the filter, and at 0.0 not at all.
+    def set_modulation_1_polarity(polarity)
+      clamped = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
+      @modulation_1_polarity = clamped + clamped
+      @modulation_1_depth = @modulation_1_amount * @modulation_1_polarity
     end
 
-    # Q range: ~0.7 (0.0), ~2.83 (0.5), ~5.66 (0.75), ~29 (0.875), 256 (0.95); self-oscillation from there,
+    def set_modulation_2_polarity(polarity)
+      clamped = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
+      @modulation_2_polarity = clamped + clamped
+      @modulation_2_depth = @modulation_2_amount * @modulation_2_polarity
+    end
+
+    # Pitch Amt is unipolar, [0.0, 1.0], how far the cutoff follows Pitch In, the keyboard
+    # tracking: the cutoff dial and the pitch both span 120 semitones a unit, so at 1.0 the cutoff
+    # follows the note a semitone for a semitone, unmoved at note 60, and at 0.0 not at all. It is
+    # added on its own, as an oscillator's Pitch In is outside its Pitch Mod Amts.
+    def set_pitch_amount(amount)
+      @pitch_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
+    end
+
+    # Q range: ~0.7 (0.0), 4.0 (0.5), ~9.5 (0.75), ~40 (0.875), 256 (0.95); self-oscillation from there,
     # growing to its full level at ~0.992 and staying there to 1.0, fading out at a high cutoff.
     def set_resonance(resonance)
       @resonance = (resonance < 0.0) ? 0.0 : ((resonance > 1.0) ? 1.0 : resonance)
     end
 
-    def process(audio_input = 0.0, modulation_input = 0.0)
-      @current_modulation_input = modulation_input
+    # Mode is unipolar, [0.0, 1.0], and crossfades Out from the low pass to the high pass: each side
+    # at 1.0 over its own half and falling to 0.0 over the other, so 0.0 is the low pass alone, 1.0
+    # the high pass alone, and 0.5 both at 1.0, whose sum is the input less k times the band pass: a
+    # notch at the cutoff, the pass band whole. Only the two factors are smoothed.
+    def set_mode(mode)
+      clamped = (mode < 0.0) ? 0.0 : ((mode > 1.0) ? 1.0 : mode)
+      lp = 2.0 - (clamped + clamped)
+      hp = clamped + clamped
+      @mode_lp = (lp > 1.0) ? 1.0 : lp
+      @mode_hp = (hp > 1.0) ? 1.0 : hp
+    end
 
-      if @sample_counter == 0
+    def process(control_tick, audio_input = 0.0, pitch_input = 0.0, modulation_1_input = 0.0, modulation_2_input = 0.0)
+      @current_pitch_input = pitch_input
+      @current_modulation_1_input = modulation_1_input
+      @current_modulation_2_input = modulation_2_input
+
+      if control_tick
         update_coefficients
-        @s1 = flush_tiny(@s1) + @self_osc_seed
-        @s2 = flush_tiny(@s2)
-        @dc_blocker = flush_tiny(@dc_blocker)
+        @s1 = Dsp.flush_tiny(@s1) + @self_osc_seed
+        @s2 = Dsp.flush_tiny(@s2)
+        @dc_blocker = Dsp.flush_tiny(@dc_blocker)
+        @dc_blocker_hp = Dsp.flush_tiny(@dc_blocker_hp)
+        @dc_blocker_bp = Dsp.flush_tiny(@dc_blocker_bp)
         @self_osc_seed = 0.0 - @self_osc_seed
       end
 
       @g += @g_slope
       @g_plus_k += @g_plus_k_slope
       @one_over_a0 += @one_over_a0_slope
-
-      driven_input = audio_input * @current_gain
 
       # The clamp is a guard that ordinary use never reaches: nothing else bounds the low pass
       # state, and a cutoff thrown across its range every step, as audio on the modulation input
@@ -283,7 +328,7 @@ module Spms1
       # the previous sample before the linear solve, nor the "gain prediction" of the KVR thread,
       # which puts a gain predicted from the previous sample into the linear solve: the leak is
       # evaluated at this sample's linear solution, and Newton's step takes it off.
-      b =@s1 + @g * (driven_input - s2)
+      b =@s1 + @g * (audio_input - s2)
       a0 = 1.0 + @g * @g_plus_k
       guess = b * @one_over_a0
       shifted = guess + SOFT_CLIP_BIAS
@@ -299,14 +344,39 @@ module Spms1
       # state, s1 + 2 * (g * high_pass - h * leak) and s2 + 2 * g * y, the leak taken as Newton's
       # step took it, which is what makes y satisfy its equation to the last bit.
       low_pass = s2 + @g * band_pass
+      # The high pass as the loop has it, x - s2 - (g + k) * y, taken from the solved band pass,
+      # so that with the band pass the three add up as a state variable filter's do:
+      # x = lp + k * bp + hp.
+      high_pass = audio_input - s2 - @g_plus_k * band_pass
       @s1 = band_pass + band_pass - @s1
       @s2 = low_pass + low_pass - s2
 
-      @sample_counter = (@sample_counter + 1) & CONTROL_RATE_MASK
-
-      # Ahead of clip_output, so that the output limit holds on what actually leaves.
+      # Ahead of clip_output, so that the output limit holds on what actually leaves. The leak's
+      # bias gives the state a DC that reaches every output, so each has a blocker of its own. The
+      # band pass is the state itself, unnormalized: its peak at the cutoff is Q times the input.
+      @dc_blocker_hp += (high_pass - @dc_blocker_hp) * @dc_blocker_coefficient
+      @output_hp = clip_output(high_pass - @dc_blocker_hp)
       @dc_blocker += (low_pass - @dc_blocker) * @dc_blocker_coefficient
-      clip_output(low_pass - @dc_blocker)
+      @output_lp = clip_output(low_pass - @dc_blocker)
+      @dc_blocker_bp += (band_pass - @dc_blocker_bp) * @dc_blocker_coefficient
+      @output_bp = clip_output(band_pass - @dc_blocker_bp)
+      # Taken from the two outputs as they leave, so not clipped again: in the pass band one side
+      # is all there is, and around the cutoff, where both are, the notch takes them down.
+      @output_lp * @current_mode_lp + @output_hp * @current_mode_hp
+    end
+
+    # The low pass, the high pass and the band pass of the last sample process took, read after it
+    # as Chorus's outputs are.
+    def output_lp
+      @output_lp
+    end
+
+    def output_hp
+      @output_hp
+    end
+
+    def output_bp
+      @output_bp
     end
 
     private
@@ -341,19 +411,26 @@ module Spms1
     # rather than from where the additions got to, so rounding does not build up. 0.25 is
     # 1 / CONTROL_RATE_DIVISOR, written out for the reason Mixer#process gives.
     def update_coefficients
-      @stage_1_cutoff += (@cutoff - @stage_1_cutoff) * @smoothing_target_blend
-      @current_cutoff += (@stage_1_cutoff - @current_cutoff) * @smoothing_target_blend
-      @stage_1_resonance += (@resonance - @stage_1_resonance) * @smoothing_target_blend
-      @current_resonance += (@stage_1_resonance - @current_resonance) * @smoothing_target_blend
-      @stage_1_modulation_depth += (@modulation_depth - @stage_1_modulation_depth) * @smoothing_target_blend
-      @current_modulation_depth += (@stage_1_modulation_depth - @current_modulation_depth) * @smoothing_target_blend
-      @stage_1_gain += (@gain - @stage_1_gain) * @smoothing_target_blend
-      @current_gain += (@stage_1_gain - @current_gain) * @smoothing_target_blend
+      @stage_1_cutoff = Dsp.smooth(@cutoff, @stage_1_cutoff, @smoothing_target_blend)
+      @current_cutoff = Dsp.smooth(@stage_1_cutoff, @current_cutoff, @smoothing_target_blend)
+      @stage_1_resonance = Dsp.smooth(@resonance, @stage_1_resonance, @smoothing_target_blend)
+      @current_resonance = Dsp.smooth(@stage_1_resonance, @current_resonance, @smoothing_target_blend)
+      @stage_1_modulation_1_depth = Dsp.smooth(@modulation_1_depth, @stage_1_modulation_1_depth, @smoothing_target_blend)
+      @current_modulation_1_depth = Dsp.smooth(@stage_1_modulation_1_depth, @current_modulation_1_depth, @smoothing_target_blend)
+      @stage_1_modulation_2_depth = Dsp.smooth(@modulation_2_depth, @stage_1_modulation_2_depth, @smoothing_target_blend)
+      @current_modulation_2_depth = Dsp.smooth(@stage_1_modulation_2_depth, @current_modulation_2_depth, @smoothing_target_blend)
+      @stage_1_pitch_amount = Dsp.smooth(@pitch_amount, @stage_1_pitch_amount, @smoothing_target_blend)
+      @current_pitch_amount = Dsp.smooth(@stage_1_pitch_amount, @current_pitch_amount, @smoothing_target_blend)
+      @stage_1_mode_lp = Dsp.smooth(@mode_lp, @stage_1_mode_lp, @smoothing_target_blend)
+      @current_mode_lp = Dsp.smooth(@stage_1_mode_lp, @current_mode_lp, @smoothing_target_blend)
+      @stage_1_mode_hp = Dsp.smooth(@mode_hp, @stage_1_mode_hp, @smoothing_target_blend)
+      @current_mode_hp = Dsp.smooth(@stage_1_mode_hp, @current_mode_hp, @smoothing_target_blend)
 
-      # The modulation input arrives as it is; clamping total_cutoff below is what holds the
-      # table lookup in range, and a source that swings both ways moves the cutoff both ways.
+      # The pitch and modulation inputs arrive as they are; clamping total_cutoff below is what holds
+      # the table lookup in range, and a source that swings both ways moves the cutoff both ways.
       # Clamped without a comparison, as clip_output does it.
-      total_cutoff = @current_cutoff + (@current_modulation_input * @current_modulation_depth)
+      modulation = (@current_modulation_1_input * @current_modulation_1_depth) + (@current_modulation_2_input * @current_modulation_2_depth)
+      total_cutoff = @current_cutoff + @current_pitch_input * @current_pitch_amount + modulation
       over  = total_cutoff - 1.0
       under = 0.0 - total_cutoff
       clamped_cutoff = total_cutoff - ((over + over.abs) - (under + under.abs)) * 0.5
@@ -415,20 +492,6 @@ module Spms1
       below   = OUTPUT_KNEE_FLOOR - clamped
       excess  = (above + above.abs) - (below + below.abs)
       clamped - (excess * excess.abs) * OUTPUT_KNEE_SCALE
-    end
-
-    # A dead zone of 1e-20 about zero, so that a state decaying on a silent input lands on exactly
-    # zero instead of sinking into denormals, which x86 computes slowly. It shifts every other
-    # value toward zero by 1e-20, which rounds away at any audible level. Built from a + |a| as
-    # clip_output is, rather than as (s + c) - c: -ffast-math may fold that one to s, while this
-    # is a dead zone in exact arithmetic, so any rewrite it allows still is one. What comes out is
-    # zero or at least 8e-28, the spacing of floats near 1e-20: never a denormal. Rewritten under
-    # -ffast-math it rounds at that spacing and may leave a remnant of that size instead of zero,
-    # still far above the denormals. A literal, for the reason given above.
-    def flush_tiny(state)
-      above = state - 1e-20
-      below = (0.0 - state) - 1e-20
-      ((above + above.abs) - (below + below.abs)) * 0.5
     end
   end
 end

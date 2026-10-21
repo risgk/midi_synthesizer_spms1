@@ -19,6 +19,8 @@
       --wire-param: #4f7cac;
       --wire-feedback: #d68910;
       --wire-inactive: #b8c0c4;
+      --favorite: #d4a017;
+      --favorite-bg: #fdf8e8;
     }
     * {
       box-sizing: border-box;
@@ -33,6 +35,15 @@
       display: flex;
       flex-direction: column;
       gap: 16px;
+      /* Nothing on the page selects as text, so that a drag that misses a slider or a node, or a
+         long press, does not catch the labels; what is typed or copied still does, below. */
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+    input[type="text"], input[type="number"], textarea {
+      user-select: text;
+      -webkit-user-select: text;
     }
     header {
       border-bottom: 3px solid var(--primary-color);
@@ -61,6 +72,12 @@
     }
     header .github-link a {
       color: var(--primary-color);
+    }
+    /* On a phone the title takes one line and the margins less of the width. */
+    @media (max-width: 480px) {
+      body { padding: 12px; gap: 12px; }
+      header h1 { font-size: 1.35rem; }
+      header .version, header .github-link { font-size: 0.8rem; margin-left: 6px; }
     }
     [hidden] {
       display: none !important;
@@ -128,6 +145,11 @@
       grid-template-columns: 1fr 340px;
       gap: 20px;
     }
+    /* With every side panel folded the side column is only as wide as its headings, and the
+       canvas takes the rest. */
+    .app.side-folded {
+      grid-template-columns: 1fr max-content;
+    }
     /* In one column the soft keyboard comes right under the canvas: the canvas and the side
        panels become items of the body, so order can put the keyboard between them. Not on a
        hidden tab, where display: contents would win over [hidden]. The Wide button gives the same
@@ -160,14 +182,14 @@
       align-items: start;
       align-content: start;
     }
-    /* A slider row needs about 390px, so the last columns wrap under the first ones before then. */
-    @media (max-width: 1640px) {
-      .editor-grid { grid-template-columns: 1fr 1fr 1fr; }
-    }
-    @media (max-width: 1240px) {
+    /* A slider row needs about 430px for its thumb to travel 120 pixels, a pixel a step from 4 to
+       124, with the longest name and its note beside it, so below four of them the columns go two
+       to a row, the last two under the first two, rather than three to a row with the fourth left
+       alone under them, and below two of 450px, one. */
+    @media (max-width: 1871px) {
       .editor-grid { grid-template-columns: 1fr 1fr; }
     }
-    @media (max-width: 768px) {
+    @media (max-width: 919px) {
       .editor-grid { grid-template-columns: 1fr; }
     }
     /* Spaced a little tighter than the other panels, so the columns fit a full HD window without
@@ -181,13 +203,22 @@
     .editor-column .panel {
       padding: 12px 16px;
     }
-    /* The Amp column runs the full height of its row, so the Init button under it sits at the
+    /* The last column, Filter 1 to Delay 1, runs the full height of its row, so the Init button under it sits at the
        bottom, just above the keyboard. */
     .editor-column:last-child {
       align-self: stretch;
     }
-    #init-values {
+    /* The no-CC toggle and the Init button, at the bottom of the last column. */
+    #controls-foot {
       margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    #controls-foot .check {
+      margin-bottom: 0;
+    }
+    #init-values {
       width: 100%;
       padding: 12px;
       font-size: 1rem;
@@ -201,10 +232,43 @@
       gap: 12px;
     }
     .slider-knob-zone {
+      position: relative;
+      isolation: isolate;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
+    }
+    /* The star that marks a favourite, in the padding of the panel to the left of the name, so it
+       takes nothing from the name or the slider at any width; faint until it is set. */
+    .fav-toggle {
+      position: absolute;
+      left: -15px;
+      top: 50%;
+      transform: translateY(-50%);
+      padding: 0;
+      border: 0;
+      background: none;
+      font-size: 0.85rem;
+      line-height: 1;
+      color: var(--text-muted);
+      opacity: 0.35;
+      cursor: pointer;
+    }
+    .fav-toggle:hover {
+      opacity: 1;
+    }
+    .slider-knob-zone.fav .fav-toggle {
+      color: var(--favorite);
+      opacity: 1;
+    }
+    /* A light gold behind a favourite's row, out to the edges of its panel. */
+    .slider-knob-zone.fav::before {
+      content: '';
+      position: absolute;
+      z-index: -1;
+      inset: -3px -16px;
+      background: var(--favorite-bg);
     }
     .slider-label {
       min-width: 140px;
@@ -213,20 +277,83 @@
     .slider-label .cc-num {
       font-size: 0.75rem;
       color: var(--text-muted);
+    }
+    /* The note and the CC number go on a line of their own under the name, so a name takes two
+       lines at most. */
+    .slider-label .ctl-sub {
       display: block;
+    }
+    /* A note on the range, or what feeds the inputs the parameter scales, as muted as the CC, and
+       moved to the next line whole rather than broken. */
+    .slider-label .ctl-hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    /* In one or two columns the name takes one width, wrapping the note under it if need be, so
+       every slider is as long as the others and its thumb travels at least 120 pixels. */
+    @media (min-width: 481px) and (max-width: 1871px) {
+      .slider-label { flex: 0 0 140px; min-width: 0; }
     }
     /* In four columns the CC number goes on the line of the name, and the panels are packed
        tighter, so the soft keyboard fits a full HD window under them even with a bookmarks bar. */
-    @media (min-width: 1641px) {
+    @media (min-width: 1872px) {
       .slider-label { white-space: nowrap; }
-      .slider-label .cc-num { display: inline; }
-      .control-row { gap: 10px; }
+      .slider-label .ctl-sub { display: inline; }
+      .control-row { gap: 6px; }
       .editor-column { gap: 12px; }
-      .editor-column .panel { padding: 10px 16px; }
-      .editor-column .panel h2 { margin-bottom: 6px; }
+      /* More on the left than the right, for the favourite's star, and as much in all. */
+      .editor-column .panel { padding: 8px 8px 8px 12px; }
+      .fav-toggle { left: -12px; font-size: 0.7rem; }
+      .slider-knob-zone.fav::before { inset: -3px -8px -3px -12px; }
+      .editor-column .panel h2 { margin-bottom: 4px; }
       #init-values { padding: 6px; }
+      /* A quarter of a full HD window leaves the slider less than a name, so the gaps and the
+         numbers beside it are narrower: enough that the thumb travels at least 120 pixels, a
+         pixel a step from 4 to 124. */
+      .editor-grid { column-gap: 10px; }
+      .slider-knob-zone, .slider-input-wrapper { gap: 4px; }
+      /* One width for every name, the longest's, so every slider is as long as the others; a
+         name longer still, with the source of a routed parameter, is cut short rather than
+         shortening its slider. */
+      .slider-label { flex: 0 0 200px; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+      .slider-label .cc-num, .slider-label .ctl-hint { font-size: 0.65rem; }
+      /* Under the wrapper, so as to outrank the rules for the two further down. */
+      .slider-input-wrapper .slider-value { min-width: 24px; font-size: 0.85rem; }
+      .slider-input-wrapper .slider-norm { min-width: 34px; font-size: 0.65rem; }
       /* One row, which takes the extra height of the tab. */
       .editor-grid { align-content: stretch; }
+    }
+    @media (min-width: 1641px) {
+      /* The page around the panels is packed tighter, so that the controls and the soft
+         keyboard fit the window Chrome leaves of a full HD screen on Windows, under its tabs, its
+         address bar and its bookmarks bar, above the taskbar: about 910 pixels. */
+      body { padding: 14px 20px; gap: 10px; }
+      header { padding-bottom: 8px; }
+      header h1 { font-size: 1.5rem; }
+      .panel.midi-panel { padding-top: 4px; padding-bottom: 4px; }
+      /* The MIDI settings in the header, between the title and the tabs (see placeMIDIPanel). */
+      header.with-midi { align-items: center; flex-wrap: nowrap; }
+      header.with-midi .midi-panel { flex: 1 1 auto; min-width: 0; }
+      header.with-midi h1, header.with-midi .tabs { flex: 0 0 auto; }
+      #kbd-panel { padding: 10px 16px; }
+      .kbd-bar { margin-bottom: 8px; }
+      #kbd-panel .keyboard-frame { --kbd-half-height: calc(60px * var(--kbd-scale)); padding-top: 6px; }
+      #kbd-panel .keyboard-wrapper { height: calc(120px * var(--kbd-scale)); }
+    }
+    /* On a phone the name would leave the slider only a few dozen pixels, so the name, with the
+       CC number on its line, goes above the slider, which takes the full width of the panel. */
+    @media (max-width: 480px) {
+      .slider-knob-zone {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 2px;
+      }
+      .slider-label { min-width: 0; }
+      .slider-label .ctl-sub { display: inline; }
+      .slider-input-wrapper { gap: 8px; }
+      .slider-value { font-size: 0.9rem; }
+      .slider-norm { min-width: 44px; font-size: 0.75rem; }
     }
     .slider-input-wrapper {
       flex-grow: 1;
@@ -234,14 +361,6 @@
       display: flex;
       align-items: center;
       gap: 12px;
-    }
-    :root {
-      /* Slider ticks. The thumb's centre travels from half a thumb in to half a thumb from the
-         far end, so a tick for CC n sits at that fraction of what is left of the track. */
-      --tick: linear-gradient(var(--text-muted), var(--text-muted));
-      --tick-4: calc(9px + (100% - 18px) * 0.031496 - 1px);
-      --tick-64: calc(9px + (100% - 18px) * 0.503937 - 1px);
-      --tick-124: calc(9px + (100% - 18px) * 0.976378 - 1px);
     }
     /* Chrome gives a range input a minimum width of about 130px, which would push two columns past
        a window under about 880px wide. */
@@ -254,20 +373,47 @@
       background-color: var(--border-color);
       border-radius: 3px;
       outline: none;
-      /* CC 4 and CC 124 are the ends of the range the synth uses: cc_to_unipolar and
-         cc_to_bipolar map them to the ends of their ranges and clamp anything past them, so the
-         track outside the ticks does nothing. */
-      background-image: var(--tick), var(--tick);
-      background-size: 2px 100%, 2px 100%;
-      background-position: var(--tick-4) center, var(--tick-124) center;
-      background-repeat: no-repeat;
     }
-    /* A third tick at CC 64 where the centre of the dial means no change. Drawn rather than
-       declared as a <datalist>, which some browsers turn into a snap point. */
-    input[type="range"].bipolar {
-      background-image: var(--tick), var(--tick), var(--tick);
-      background-size: 2px 100%, 2px 100%, 2px 100%;
-      background-position: var(--tick-4) center, var(--tick-64) center, var(--tick-124) center;
+    /* The slider runs from CC 4 to CC 124, the ends of the range the synth uses: cc_to_unipolar
+       and cc_to_bipolar map them to the ends of their ranges and clamp anything past them. A
+       bipolar one has a tick at CC 64, where the centre of the dial means no change, drawn beside
+       the slider rather than declared as a <datalist>, which some browsers turn into a snap point.
+       It runs under the thumb and is taller than it, so it shows above and below the thumb when
+       the thumb sits on it. The thumb's centre travels
+       from half a thumb in to half a thumb from the far end, so CC 64, the middle of CC 4 to
+       CC 124, is halfway along what is left of the track. */
+    .range-wrap {
+      position: relative;
+      flex-grow: 1;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+    }
+    .range-wrap input[type="range"] {
+      position: relative;
+      z-index: 1;
+      background-color: transparent;
+    }
+    .range-wrap::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      height: 6px;
+      transform: translateY(-50%);
+      border-radius: 3px;
+      background: var(--border-color);
+    }
+    .range-wrap .centre-tick {
+      position: absolute;
+      left: calc(9px + (100% - 18px) * 0.5 - 1px);
+      top: 50%;
+      width: 2px;
+      height: 24px;
+      transform: translateY(-50%);
+      background: var(--text-muted);
+      pointer-events: none;
     }
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
@@ -297,6 +443,18 @@
       background: transparent;
       cursor: default;
     }
+    /* A parameter with no CC sets the value its own slot holds, sent as NRPN: blue, the colour of
+       a parameter's wire and of CC 0 on the Patch tab, so it stands apart from one a CC moves. */
+    .slider-knob-zone.own .slider-label,
+    .slider-knob-zone.own .slider-value {
+      color: var(--wire-param);
+    }
+    .slider-knob-zone.own input[type="range"]::-webkit-slider-thumb {
+      background: var(--wire-param);
+    }
+    .slider-knob-zone.own input[type="range"]::-moz-range-thumb {
+      background: var(--wire-param);
+    }
     .slider-value {
       min-width: 32px;
       text-align: right;
@@ -323,6 +481,50 @@
     .kbd-bar h2 {
       margin-bottom: 0;
     }
+    /* A heading that is the button that shows and hides its panel: the soft keyboard and the side panels of the patch tab. */
+    .fold-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0;
+      border: 0;
+      background: none;
+      color: inherit;
+      font: inherit;
+      cursor: pointer;
+    }
+    .fold-caret {
+      display: inline-block;
+      font-size: 0.7em;
+      transition: transform 0.15s;
+    }
+    .collapsed .fold-caret {
+      transform: rotate(-90deg);
+    }
+    /* A side panel folded keeps only its heading. */
+    .side .panel.collapsed > :not(h2) {
+      display: none;
+    }
+    .side .panel.collapsed > h2 {
+      margin-bottom: 0;
+    }
+    .side .panel > h2 .fold-toggle {
+      white-space: nowrap;
+    }
+    /* Hidden, the bar keeps only the heading and Panic, which a note left on still needs. */
+    #kbd-panel.collapsed .keyboard-frame,
+    #kbd-panel.collapsed #kbd-oct-down,
+    #kbd-panel.collapsed #kbd-oct-up,
+    #kbd-panel.collapsed .kbd-hint,
+    #kbd-panel.collapsed .kbd-hold {
+      display: none;
+    }
+    #kbd-panel.collapsed .kbd-bar {
+      margin-bottom: 0;
+    }
+    #kbd-panel.collapsed .kbd-panic {
+      margin-left: auto;
+    }
     /* A ResizeObserver sees no size on an inline box, so kbFitScale would never hear of a change. */
     #kbd-label {
       display: inline-block;
@@ -341,14 +543,50 @@
     /* The sizes of the keys are times the scale of the text, --kbd-scale, set by kbdFitScale. */
     .keyboard-frame {
       --kbd-scale: 1;
-      --kbd-key-width: calc(22px * var(--kbd-scale));  /* KB_KEY_WIDTH: a semitone in the upper half */
+      --kbd-key-width: calc(20px * var(--kbd-scale));  /* KB_KEY_WIDTH: a semitone in the upper half */
       --kbd-half-height: calc(70px * var(--kbd-scale));
       border: 1px solid var(--border-color);
       border-radius: 6px;
       background: #222;
       padding: 10px 5px 5px 5px;
-      user-select: none;
-      -webkit-user-select: none;
+    }
+    /* The pitch bend and mod wheels on the left of the keys, as on a keyboard, sliders standing as
+       tall as they are. The bend springs back to the centre; the mod wheel's value is that of the
+       CC Mod Wheel is on in the patch. */
+    /* Each wheel as wide as a white key from C to E, 5/3 of a semitone, and the keys keeping the 37
+       that KB_KEY_WIDTH fits a 960px window beside them, with room. */
+    .kbd-body {
+      display: flex;
+      gap: 4px;
+    }
+    .kbd-keys {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+    .mod-wheel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      flex: 0 0 auto;
+      width: calc(var(--kbd-key-width) * 5 / 3);
+    }
+    .mod-wheel input {
+      writing-mode: vertical-lr;
+      direction: rtl;
+      width: 100%;
+      height: calc(var(--kbd-half-height) * 2);
+      margin: 0;
+      accent-color: var(--primary-color);
+      cursor: pointer;
+    }
+    .mod-wheel input:disabled {
+      cursor: default;
+    }
+    .mod-wheel-label {
+      font-size: 0.65rem;
+      color: #ccc;
+      white-space: nowrap;
     }
     /* The native scroll bar is hidden, since Safari cannot color it; .kbd-scrollbar stands in. */
     .keyboard-scroll-container {
@@ -528,8 +766,6 @@
       background-size: 20px 20px;
       cursor: grab;
       touch-action: none;
-      user-select: none;
-      -webkit-user-select: none;
     }
     .canvas-panel.panning {
       cursor: grabbing;
@@ -601,7 +837,7 @@
     .node.aux {
       width: 200px;
     }
-    .node.general {
+    .node.controller {
       width: 250px;
     }
     .node.const {
@@ -687,6 +923,13 @@
       font-family: monospace;
       color: var(--text-color);
     }
+    .row input.val:not(:disabled) {
+      cursor: ns-resize;
+    }
+    body.value-drag, body.value-drag * {
+      cursor: ns-resize !important;
+      user-select: none;
+    }
     .row input[type="number"]:disabled {
       background: #f2f4f5;
       color: var(--text-muted);
@@ -694,6 +937,29 @@
     .row input.warn {
       border-color: var(--wire-feedback);
       background: #fdf2e3;
+    }
+    /* No CC: the slot holds the value beside it, which only the patch sets, so the 0 stands out
+       from the CCs a little. */
+    .row input.none {
+      border-color: #9bb5d2;
+      background: #edf2f8;
+      color: var(--wire-param);
+      font-weight: 600;
+    }
+    /* A parameter with no CC is blue as on the Controls tab: its name and the value its slot holds. */
+    .row.own .lbl,
+    .row.own input.val {
+      color: var(--wire-param);
+    }
+    /* A CC that also fills another parameter's slot, as Osc 2's amounts are on Osc 1's CCs: moving
+       one moves the other, so the number stands out a little. */
+    .row input.shared {
+      border-color: #eea3aa;
+      background: #fdebed;
+    }
+    .slider-label .cc-num.shared {
+      color: #db5c68;
+      font-weight: 600;
     }
     /* A routed parameter reads its wire, but its CC still fills its own slot and so still feeds
        the output port: the fields stay live, only set back. */
@@ -707,6 +973,10 @@
     .row.routed .lbl {
       color: var(--wire-param);
       font-style: italic;
+    }
+    /* A favourite on the Patch tab: a light gold behind its row. */
+    .row.ctrl.fav {
+      background: var(--favorite-bg);
     }
     .sep {
       display: flex;
@@ -824,6 +1094,19 @@
       vertical-align: middle;
       margin-right: 4px;
     }
+    /* On a phone the legend beside the buttons would wrap to four lines over most of the canvas,
+       so it gets a line of its own under them, in smaller type. */
+    @media (max-width: 480px) {
+      .canvas-bar { flex-wrap: wrap; justify-content: flex-end; }
+      .zoom-controls { order: -1; }
+      .legend {
+        flex-basis: 100%;
+        gap: 2px 10px;
+        padding: 3px 6px;
+        font-size: 0.62rem;
+      }
+      .legend svg { width: 16px; margin-right: 3px; }
+    }
 
     /* Run order */
     #order-list {
@@ -895,7 +1178,7 @@
 <body>
 
 <header>
-  <h1>SPMS-1 (type-2) Editor<span class="version">v0.0.3</span><span class="github-link">(<a href="https://github.com/risgk/midi_synthesizer_spms1" target="_blank" rel="noopener">View on GitHub</a>)</span></h1>
+  <h1>SPMS-1 (type-2) Editor<span class="version">v0.0.5</span><span class="github-link">(<a href="https://github.com/risgk/midi_synthesizer_spms1" target="_blank" rel="noopener">View on GitHub</a>)</span></h1>
   <nav class="tabs">
     <button class="tab-btn active" data-tab="controls">Controls</button>
     <button class="tab-btn" data-tab="patch">Patch</button>
@@ -920,15 +1203,17 @@
         <option value="">Select SPMS-1 Device...</option>
       </select>
     </div>
-    <label class="check" title="Send each routing, run order or CC assignment change as it is made. CC values are always sent."><input type="checkbox" id="live"> Live patch</label>
-    <button class="btn primary" id="btn-send" title="Send the whole patch: NRPN and CC values">Send Patch</button>
+    <button class="btn primary" id="btn-send" title="Send the whole patch again: NRPN and CC values. Every change is sent as it is made.">Send Patch</button>
   </div>
 </div>
 
 <div id="tab-controls">
   <div class="editor-grid" id="controls"></div>
   <!-- Moved under the Delay panel each time the controls are drawn. -->
-  <button class="btn primary" id="init-values">Initialize & Send All</button>
+  <div id="controls-foot">
+    <label class="check" title="A parameter with no CC holds the value the patch gives it, which its slider sets through NRPN. Hidden, it shows up as soon as a CC is given to it."><input type="checkbox" id="show-no-cc"> Show parameters with no CC</label>
+    <button class="btn primary" id="init-values">Initialize & Send All</button>
+  </div>
 </div>
 
 <div class="app" id="tab-patch" hidden>
@@ -953,8 +1238,8 @@
   </div>
 
   <div class="side">
-    <div class="panel">
-      <h2>Patch</h2>
+    <div class="panel" id="side-patch">
+      <h2><button type="button" class="fold-toggle" aria-expanded="true" title="Show or hide this panel"><span class="fold-caret" aria-hidden="true">&#9660;</span>Patch</button></h2>
       <div class="form-group">
         <label for="patch-name">Name</label>
         <input type="text" id="patch-name" maxlength="64">
@@ -973,12 +1258,13 @@
         MIDI In is passed through to the synth, and a CC on the channel above moves every slot
         assigned to it. Drag from an output (right) to an input (left) to connect. Drag a connected input away to
         unplug it; click a wire and press Delete to remove it. An unplugged parameter reads its own
-        control slot. Drag the background to pan, wheel to zoom.
+        control slot. Drag a value up or down to change it, with Shift for fine steps, or turn the
+        wheel over the one being edited. Drag the background to pan, wheel or pinch to zoom.
       </p>
     </div>
 
-    <div class="panel">
-      <h2>Run Order</h2>
+    <div class="panel" id="side-order">
+      <h2><button type="button" class="fold-toggle" aria-expanded="true" title="Show or hide this panel"><span class="fold-caret" aria-hidden="true">&#9660;</span>Run Order</button></h2>
       <ol id="order-list"></ol>
       <div class="add-row">
         <select id="order-add"></select>
@@ -990,8 +1276,8 @@
       </p>
     </div>
 
-    <div class="panel">
-      <h2>Export</h2>
+    <div class="panel" id="side-export">
+      <h2><button type="button" class="fold-toggle" aria-expanded="true" title="Show or hide this panel"><span class="fold-caret" aria-hidden="true">&#9660;</span>Export</button></h2>
       <div class="form-group">
         <label for="export-format">Format</label>
         <select id="export-format">
@@ -1000,7 +1286,7 @@
         </select>
       </div>
       <label class="check"><input type="checkbox" id="opt-cc" checked> Include CC values</label>
-      <label class="check"><input type="checkbox" id="opt-omit-msb" checked> Omit CC 99 when unchanged</label>
+      <label class="check"><input type="checkbox" id="opt-omit-msb" checked> Omit CC#99 when unchanged</label>
       <label class="check"><input type="checkbox" id="opt-comments" checked> Comments</label>
       <label class="check"><input type="checkbox" id="opt-one-line"> One line (hex, no comments)</label>
       <textarea id="export-text" readonly spellcheck="false"></textarea>
@@ -1012,30 +1298,43 @@
 
 <div class="panel" id="kbd-panel">
   <div class="kbd-bar">
-    <h2><span id="kbd-label">Soft Keyboard</span></h2>
+    <h2><button type="button" class="fold-toggle" id="kbd-toggle" aria-expanded="true" title="Show or hide the soft keyboard"><span class="fold-caret" aria-hidden="true">&#9660;</span><span id="kbd-label">Soft Keyboard</span></button></h2>
     <button class="btn" id="kbd-oct-down" title="Octave Down">&#9664;</button>
     <button class="btn" id="kbd-oct-up" title="Octave Up">&#9654;</button>
     <span class="kbd-hint">PC Keys: A - K, Z / X</span>
     <button class="btn kbd-hold" id="kbd-hold" aria-pressed="false" title="The key released keeps its note on, until Hold is turned off">Hold</button>
-    <button class="btn kbd-panic" id="kbd-panic" title="Note Off on every note, Pitch Bend to the center, and the keys held let go">Panic</button>
+    <button class="btn kbd-panic" id="kbd-panic" title="All Sound Off, Pitch Bend to the center, and the keys held let go">Panic</button>
   </div>
   <div class="keyboard-frame">
-    <div class="keyboard-scroll-container" id="kb-scroll">
-      <div class="keyboard-wrapper" id="keyboard"></div>
+    <div class="kbd-body">
+      <div class="mod-wheel" id="bend-wheel-zone" title="Pitch Bend: back to the centre when let go">
+        <input type="range" id="bend-wheel" min="-8192" max="8191" value="0" aria-label="Pitch Bend">
+        <span class="mod-wheel-label">Bend</span>
+      </div>
+      <div class="mod-wheel" id="mod-wheel-zone">
+        <input type="range" id="mod-wheel" min="4" max="124" aria-label="Mod Wheel">
+        <span class="mod-wheel-label">Mod</span>
+      </div>
+      <div class="kbd-keys">
+        <div class="keyboard-scroll-container" id="kb-scroll">
+          <div class="keyboard-wrapper" id="keyboard"></div>
+        </div>
+        <div class="kbd-scrollbar" id="kbd-scrollbar"><div class="kbd-scrollbar-thumb" id="kbd-scrollbar-thumb"></div></div>
+      </div>
     </div>
-    <div class="kbd-scrollbar" id="kbd-scrollbar"><div class="kbd-scrollbar-thumb" id="kbd-scrollbar-thumb"></div></div>
   </div>
 </div>
 
 <script>
   'use strict';
 
-  // ---- Patch model: mirrors the NRPN table in spms1_main.rb --------------------------------
+  // ---- Patch model: mirrors the NRPN table of spms1_patch.yaml -----------------------------
 
   const MODULES_SIZE = 32;
   // CC 6 and 38 carry NRPN data and 98-101 select a parameter, so a control mapped to one of
-  // them would edit the patch every time its value was sent.
-  const RESERVED_CCS = new Set([6, 38, 98, 99, 100, 101]);
+  // them would edit the patch every time its value was sent; 120-127 are the Channel Mode
+  // messages, which the synth takes as such and never stores as a control's value.
+  const RESERVED_CCS = new Set([6, 38, 98, 99, 100, 101, 120, 121, 122, 123, 124, 125, 126, 127]);
 
   // Every number of the patch -- module ids, bus slots, NRPN entries -- and the default patch,
   // from spms1_patch.yaml, which patch_gen/spms1_patch_gen.rb writes in here. Edit the YAML, not
@@ -1043,130 +1342,208 @@
   // patch_gen spec
   const SPEC = {
     modules: [
-      {"key":"LFO_1","id":1,"label":"LFO 1","outs":[{"sig":"LFO_1_OUTPUT","label":"Out"}]},
-      {"key":"ENV_GEN_1","id":2,"label":"EG 1","outs":[{"sig":"ENV_GEN_1_OUTPUT","label":"Out"}]},
-      {"key":"OSC_1","id":3,"label":"Osc 1","outs":[{"sig":"OSC_1_OUTPUT","label":"Out"}]},
-      {"key":"FILTER_1","id":4,"label":"Filter 1","outs":[{"sig":"FILTER_1_OUTPUT","label":"Out"}]},
-      {"key":"AMP_1","id":5,"label":"Amp 1","outs":[{"sig":"AMP_1_OUTPUT","label":"Out"}]},
-      {"key":"MIXER_1","id":6,"label":"Mixer 1","outs":[{"sig":"MIXER_1_OUTPUT","label":"Out"}]},
-      {"key":"CHORUS_1","id":7,"label":"Chorus 1","outs":[{"sig":"CHORUS_1_OUTPUT_L","label":"Out L"},{"sig":"CHORUS_1_OUTPUT_R","label":"Out R"}]},
-      {"key":"DELAY_1","id":8,"label":"Delay 1","outs":[{"sig":"DELAY_1_OUTPUT_L","label":"Out L"},{"sig":"DELAY_1_OUTPUT_R","label":"Out R"}]},
+      {"key":"PITCH_1","id":1,"label":"Pitch 1","outs":[{"sig":"PITCH_1_OUTPUT_1","label":"Out 1"},{"sig":"PITCH_1_OUTPUT_2","label":"Out 2"}]},
+      {"key":"EG_1","id":2,"label":"EG 1","outs":[{"sig":"EG_1_OUTPUT","label":"Out"},{"sig":"EG_1_OUTPUT_INV","label":"Out Inv"}]},
+      {"key":"EG_2","id":3,"label":"EG 2","outs":[{"sig":"EG_2_OUTPUT","label":"Out"},{"sig":"EG_2_OUTPUT_INV","label":"Out Inv"}]},
+      {"key":"LFO_1","id":4,"label":"LFO 1","outs":[{"sig":"LFO_1_OUTPUT","label":"Out"},{"sig":"LFO_1_OUTPUT_INV","label":"Out Inv"},{"sig":"LFO_1_OUTPUT_TRIANGLE","label":"Out Triangle"},{"sig":"LFO_1_OUTPUT_TRIANGLE_INV","label":"Out Triangle Inv"},{"sig":"LFO_1_OUTPUT_SQUARE","label":"Out Square"},{"sig":"LFO_1_OUTPUT_SQUARE_INV","label":"Out Square Inv"}]},
+      {"key":"MIXER_1","id":5,"label":"Mixer 1","outs":[{"sig":"MIXER_1_OUTPUT","label":"Out"},{"sig":"MIXER_1_OUTPUT_INV","label":"Out Inv"}]},
+      {"key":"OSC_1","id":6,"label":"Osc 1","outs":[{"sig":"OSC_1_OUTPUT","label":"Out"},{"sig":"OSC_1_OUTPUT_SAW","label":"Out Saw"},{"sig":"OSC_1_OUTPUT_PULSE","label":"Out Pulse"},{"sig":"OSC_1_OUTPUT_SUB","label":"Out Sub"}]},
+      {"key":"OSC_2","id":7,"label":"Osc 2","outs":[{"sig":"OSC_2_OUTPUT","label":"Out"},{"sig":"OSC_2_OUTPUT_SAW","label":"Out Saw"},{"sig":"OSC_2_OUTPUT_PULSE","label":"Out Pulse"}]},
+      {"key":"NOISE_1","id":8,"label":"Noise 1","outs":[{"sig":"NOISE_1_OUTPUT","label":"Out"},{"sig":"NOISE_1_OUTPUT_WHITE","label":"Out White"},{"sig":"NOISE_1_OUTPUT_RED","label":"Out Red"}]},
+      {"key":"MIXER_2","id":9,"label":"Mixer 2","outs":[{"sig":"MIXER_2_OUTPUT","label":"Out"},{"sig":"MIXER_2_OUTPUT_INV","label":"Out Inv"}]},
+      {"key":"FILTER_1","id":10,"label":"Filter 1","outs":[{"sig":"FILTER_1_OUTPUT","label":"Out"},{"sig":"FILTER_1_OUTPUT_LP","label":"Out LP"},{"sig":"FILTER_1_OUTPUT_HP","label":"Out HP"},{"sig":"FILTER_1_OUTPUT_BP","label":"Out BP"}]},
+      {"key":"AMP_1","id":11,"label":"Amp 1","outs":[{"sig":"AMP_1_OUTPUT","label":"Out"}]},
+      {"key":"CHORUS_1","id":12,"label":"Chorus 1","outs":[{"sig":"CHORUS_1_OUTPUT_L","label":"Out L"},{"sig":"CHORUS_1_OUTPUT_R","label":"Out R"},{"sig":"CHORUS_1_OUTPUT_MONO","label":"Out Mono"}]},
+      {"key":"DELAY_1","id":13,"label":"Delay 1","outs":[{"sig":"DELAY_1_OUTPUT_L","label":"Out L"},{"sig":"DELAY_1_OUTPUT_R","label":"Out R"},{"sig":"DELAY_1_OUTPUT_MONO","label":"Out Mono"}]},
     ],
     inputs: [
-      {"entry":0,"module":"ENV_GEN_1","key":"GATE","label":"Gate","source":"GATE"},
-      {"entry":1,"module":"OSC_1","key":"PITCH","label":"Pitch","source":"PITCH"},
-      {"entry":2,"module":"OSC_1","key":"MOD","label":"Mod","source":"LFO_1_OUTPUT"},
-      {"entry":3,"module":"FILTER_1","key":"AUDIO","label":"Audio","source":"OSC_1_OUTPUT"},
-      {"entry":4,"module":"FILTER_1","key":"MOD","label":"Mod","source":"ENV_GEN_1_OUTPUT"},
-      {"entry":5,"module":"AMP_1","key":"AUDIO","label":"Audio","source":"FILTER_1_OUTPUT"},
-      {"entry":6,"module":"AMP_1","key":"MOD","label":"Mod","source":"ENV_GEN_1_OUTPUT"},
-      {"entry":7,"module":"MIXER_1","key":"IN_1","label":"In 1","source":"NONE"},
-      {"entry":8,"module":"MIXER_1","key":"IN_2","label":"In 2","source":"NONE"},
-      {"entry":9,"module":"CHORUS_1","key":"AUDIO","label":"Audio","source":"AMP_1_OUTPUT"},
-      {"entry":10,"module":"DELAY_1","key":"AUDIO_L","label":"Audio L","source":"CHORUS_1_OUTPUT_L"},
-      {"entry":11,"module":"DELAY_1","key":"AUDIO_R","label":"Audio R","source":"CHORUS_1_OUTPUT_R"},
-      {"entry":12,"module":null,"key":"OUTPUT_L","label":"L","source":"DELAY_1_OUTPUT_L"},
-      {"entry":13,"module":null,"key":"OUTPUT_R","label":"R","source":"DELAY_1_OUTPUT_R"},
+      {"entry":0,"module":"PITCH_1","key":"PITCH","label":"Pitch In","source":"NOTE_PITCH"},
+      {"entry":1,"module":"PITCH_1","key":"BEND","label":"Bend In","source":"PITCH_BEND"},
+      {"entry":2,"module":"PITCH_1","key":"GATE","label":"Gate In","source":"NOTE_GATE"},
+      {"entry":3,"module":"EG_1","key":"GATE","label":"Gate In","source":"NOTE_GATE"},
+      {"entry":4,"module":"EG_2","key":"GATE","label":"Gate In","source":"NOTE_GATE"},
+      {"entry":5,"module":"LFO_1","key":"RATE_MOD","label":"Rate Mod In","source":"NONE"},
+      {"entry":6,"module":"LFO_1","key":"LEVEL_MOD","label":"Level Mod In","source":"MOD_WHEEL"},
+      {"entry":7,"module":"LFO_1","key":"RESET","label":"Reset In","source":"NOTE_GATE"},
+      {"entry":8,"module":"MIXER_1","key":"IN_1","label":"In 1","source":"NONE"},
+      {"entry":9,"module":"MIXER_1","key":"IN_2","label":"In 2","source":"NONE"},
+      {"entry":10,"module":"MIXER_1","key":"IN_3","label":"In 3","source":"NONE"},
+      {"entry":11,"module":"MIXER_1","key":"IN_4","label":"In 4","source":"NONE"},
+      {"entry":12,"module":"OSC_1","key":"PITCH","label":"Pitch In","source":"PITCH_1_OUTPUT_1"},
+      {"entry":13,"module":"OSC_1","key":"MOD_1","label":"Mod 1 In","source":"EG_1_OUTPUT"},
+      {"entry":14,"module":"OSC_1","key":"MOD_2","label":"Mod 2 In","source":"LFO_1_OUTPUT"},
+      {"entry":15,"module":"OSC_2","key":"PITCH","label":"Pitch In","source":"PITCH_1_OUTPUT_2"},
+      {"entry":16,"module":"OSC_2","key":"MOD_1","label":"Mod 1 In","source":"EG_1_OUTPUT"},
+      {"entry":17,"module":"OSC_2","key":"MOD_2","label":"Mod 2 In","source":"LFO_1_OUTPUT"},
+      {"entry":18,"module":"OSC_2","key":"SYNC","label":"Sync In","source":"OSC_1_OUTPUT_SAW"},
+      {"entry":19,"module":"MIXER_2","key":"IN_1","label":"In 1","source":"OSC_1_OUTPUT"},
+      {"entry":20,"module":"MIXER_2","key":"IN_2","label":"In 2","source":"OSC_2_OUTPUT"},
+      {"entry":21,"module":"MIXER_2","key":"IN_3","label":"In 3","source":"OSC_1_OUTPUT_SUB"},
+      {"entry":22,"module":"MIXER_2","key":"IN_4","label":"In 4","source":"NOISE_1_OUTPUT"},
+      {"entry":23,"module":"FILTER_1","key":"AUDIO","label":"Audio In","source":"MIXER_2_OUTPUT"},
+      {"entry":24,"module":"FILTER_1","key":"PITCH","label":"Pitch In","source":"PITCH_1_OUTPUT_1"},
+      {"entry":25,"module":"FILTER_1","key":"MOD_1","label":"Mod 1 In","source":"EG_1_OUTPUT"},
+      {"entry":26,"module":"FILTER_1","key":"MOD_2","label":"Mod 2 In","source":"LFO_1_OUTPUT"},
+      {"entry":27,"module":"AMP_1","key":"AUDIO","label":"Audio In","source":"FILTER_1_OUTPUT"},
+      {"entry":28,"module":"AMP_1","key":"MOD_1","label":"Mod 1 In","source":"EG_1_OUTPUT"},
+      {"entry":29,"module":"AMP_1","key":"MOD_2","label":"Mod 2 In","source":"EG_2_OUTPUT"},
+      {"entry":30,"module":"CHORUS_1","key":"AUDIO","label":"Audio In","source":"AMP_1_OUTPUT"},
+      {"entry":31,"module":"DELAY_1","key":"AUDIO_L","label":"Audio In L","source":"CHORUS_1_OUTPUT_L"},
+      {"entry":32,"module":"DELAY_1","key":"AUDIO_R","label":"Audio In R","source":"CHORUS_1_OUTPUT_R"},
+      {"entry":33,"module":null,"key":"OUTPUT_L","label":"L","source":"DELAY_1_OUTPUT_L"},
+      {"entry":34,"module":null,"key":"OUTPUT_R","label":"R","source":"DELAY_1_OUTPUT_R"},
     ],
     controls: [
-      {"entry":0,"module":"LFO_1","key":"RATE","label":"Rate","bipolar":false,"cc":3,"value":64,"general":false,"slots":[["LFO_1_RATE","Rate",false]]},
-      {"entry":1,"module":"LFO_1","key":"LEVEL","label":"Level","bipolar":false,"cc":0,"source":"ONE","general":false,"slots":[["LFO_1_LEVEL","Level",false]]},
-      {"entry":2,"module":"LFO_1","key":"POLARITY","label":"Polarity","bipolar":true,"cc":0,"value":124,"source":"POINT_ONE","general":false,"slots":[["LFO_1_POLARITY","Polarity",true]]},
-      {"entry":3,"module":"ENV_GEN_1","key":"ATTACK","label":"Attack","bipolar":false,"cc":73,"value":4,"general":false,"slots":[["ENV_GEN_1_ATTACK","Attack",false]]},
-      {"entry":4,"module":"ENV_GEN_1","key":"DECAY","label":"Decay","bipolar":false,"cc":75,"value":96,"general":false,"slots":[["ENV_GEN_1_DECAY","Decay",false]]},
-      {"entry":5,"module":"ENV_GEN_1","key":"SUSTAIN","label":"Sustain","bipolar":false,"cc":30,"value":124,"general":false,"slots":[["ENV_GEN_1_SUSTAIN","Sustain",false]]},
-      {"entry":6,"module":"ENV_GEN_1","key":"LEVEL","label":"Level","bipolar":false,"cc":0,"source":"ONE","general":false,"slots":[["ENV_GEN_1_LEVEL","Level",false]]},
-      {"entry":7,"module":"ENV_GEN_1","key":"POLARITY","label":"Polarity","bipolar":true,"cc":0,"source":"HALF","general":false,"slots":[["ENV_GEN_1_POLARITY","Polarity",true]]},
-      {"entry":8,"module":"OSC_1","key":"WAVEFORM","label":"Wave","bipolar":false,"cc":20,"value":4,"general":false,"slots":[["OSC_1_WAVEFORM","Wave",false]]},
-      {"entry":9,"module":"OSC_1","key":"COARSE_TUNE","label":"Coarse Tune","bipolar":true,"cc":86,"value":64,"general":false,"slots":[["OSC_1_COARSE_TUNE","Coarse Tune",true]]},
-      {"entry":10,"module":"OSC_1","key":"FINE_TUNE","label":"Fine Tune","bipolar":true,"cc":70,"value":64,"general":false,"slots":[["OSC_1_FINE_TUNE","Fine Tune",true]]},
-      {"entry":11,"module":"OSC_1","key":"MOD_AMOUNT","label":"Mod Amt","bipolar":false,"cc":13,"value":4,"general":false,"slots":[["OSC_1_MOD_AMOUNT","Mod Amt",false]]},
-      {"entry":12,"module":"OSC_1","key":"MOD_POLARITY","label":"Mod Polarity","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["OSC_1_MOD_POLARITY","Mod Polarity",true]]},
-      {"entry":13,"module":"FILTER_1","key":"CUTOFF","label":"Cutoff","bipolar":false,"cc":74,"value":100,"general":false,"slots":[["FILTER_1_CUTOFF","Cutoff",false]]},
-      {"entry":14,"module":"FILTER_1","key":"RESONANCE","label":"Resonance","bipolar":false,"cc":71,"value":94,"general":false,"slots":[["FILTER_1_RESONANCE","Resonance",false]]},
-      {"entry":15,"module":"FILTER_1","key":"GAIN","label":"Gain","bipolar":false,"cc":112,"value":64,"general":false,"slots":[["FILTER_1_GAIN","Gain",false]]},
-      {"entry":16,"module":"FILTER_1","key":"MOD_AMOUNT","label":"Mod Amt","bipolar":false,"cc":24,"value":28,"general":false,"slots":[["FILTER_1_MOD_AMOUNT","Mod Amt",false]]},
-      {"entry":17,"module":"FILTER_1","key":"MOD_POLARITY","label":"Mod Polarity","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["FILTER_1_MOD_POLARITY","Mod Polarity",true]]},
-      {"entry":18,"module":"AMP_1","key":"GAIN","label":"Gain","bipolar":false,"cc":15,"value":124,"general":false,"slots":[["AMP_1_GAIN","Gain",false]]},
-      {"entry":19,"module":"MIXER_1","key":"LEVEL_1","label":"Level 1","bipolar":false,"cc":0,"source":"ONE","general":false,"slots":[["MIXER_1_LEVEL_1","Level 1",false]]},
-      {"entry":20,"module":"MIXER_1","key":"POLARITY_1","label":"Polarity 1","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["MIXER_1_POLARITY_1","Polarity 1",true]]},
-      {"entry":21,"module":"MIXER_1","key":"LEVEL_2","label":"Level 2","bipolar":false,"cc":0,"source":"ONE","general":false,"slots":[["MIXER_1_LEVEL_2","Level 2",false]]},
-      {"entry":22,"module":"MIXER_1","key":"POLARITY_2","label":"Polarity 2","bipolar":true,"cc":0,"value":124,"source":"HALF","general":false,"slots":[["MIXER_1_POLARITY_2","Polarity 2",true]]},
-      {"entry":23,"module":"CHORUS_1","key":"RATE","label":"Rate","bipolar":false,"cc":58,"value":64,"general":false,"slots":[["CHORUS_1_RATE","Rate",false]]},
-      {"entry":24,"module":"CHORUS_1","key":"DEPTH","label":"Depth","bipolar":false,"cc":59,"value":64,"general":false,"slots":[["CHORUS_1_DEPTH","Depth",false]]},
-      {"entry":25,"module":"CHORUS_1","key":"MIX","label":"Mix","bipolar":false,"cc":93,"value":64,"general":false,"slots":[["CHORUS_1_MIX","Mix",false]]},
-      {"entry":26,"module":"DELAY_1","key":"TIME","label":"Time","bipolar":false,"cc":90,"value":64,"general":false,"slots":[["DELAY_1_TIME","Time",false]]},
-      {"entry":27,"module":"DELAY_1","key":"FEEDBACK","label":"Feedback","bipolar":false,"cc":92,"value":64,"general":false,"slots":[["DELAY_1_FEEDBACK","Feedback",false]]},
-      {"entry":28,"module":"DELAY_1","key":"MIX","label":"Mix","bipolar":false,"cc":94,"value":34,"general":false,"slots":[["DELAY_1_MIX","Mix",false]]},
-      {"entry":29,"key":"GENERAL_MOD_WHEEL","label":"Mod Wheel","bipolar":false,"cc":1,"value":4,"general":true,"slots":[["GENERAL_MOD_WHEEL","Mod Wheel",false]]},
-      {"entry":30,"key":"GENERAL_1","label":"1","bipolar":false,"cc":16,"value":64,"general":true,"slots":[["GENERAL_UNIPOLAR_1","Unipolar 1",false],["GENERAL_BIPOLAR_1","Bipolar 1",true]]},
-      {"entry":31,"key":"GENERAL_2","label":"2","bipolar":false,"cc":17,"value":64,"general":true,"slots":[["GENERAL_UNIPOLAR_2","Unipolar 2",false],["GENERAL_BIPOLAR_2","Bipolar 2",true]]},
-      {"entry":32,"key":"GENERAL_3","label":"3","bipolar":false,"cc":18,"value":64,"general":true,"slots":[["GENERAL_UNIPOLAR_3","Unipolar 3",false],["GENERAL_BIPOLAR_3","Bipolar 3",true]]},
-      {"entry":33,"key":"GENERAL_4","label":"4","bipolar":false,"cc":19,"value":64,"general":true,"slots":[["GENERAL_UNIPOLAR_4","Unipolar 4",false],["GENERAL_BIPOLAR_4","Bipolar 4",true]]},
+      {"entry":0,"module":"PITCH_1","key":"GLIDE","label":"Glide","bipolar":false,"cc":5,"value":4,"controller":false,"favorite":true,"slots":[["PITCH_1_GLIDE","Glide",false]]},
+      {"entry":1,"module":"PITCH_1","key":"OUT_1_GLIDE_SW","label":"Out 1 Glide Sw","bipolar":false,"cc":34,"value":124,"controller":false,"hint":"Off/On","slots":[["PITCH_1_OUT_1_GLIDE_SW","Out 1 Glide Sw",false]]},
+      {"entry":2,"module":"PITCH_1","key":"OUT_2_GLIDE_SW","label":"Out 2 Glide Sw","bipolar":false,"cc":34,"value":124,"controller":false,"hint":"Off/On","slots":[["PITCH_1_OUT_2_GLIDE_SW","Out 2 Glide Sw",false]]},
+      {"entry":3,"module":"PITCH_1","key":"BEND_AMT","label":"Bend Amt","bipolar":false,"cc":57,"value":28,"controller":false,"hint":"Bend Range","slots":[["PITCH_1_BEND_AMT","Bend Amt",false]]},
+      {"entry":4,"module":"PITCH_1","key":"OUT_1_BEND_SW","label":"Out 1 Bend Sw","bipolar":false,"cc":0,"value":124,"controller":false,"hint":"Off/On","slots":[["PITCH_1_OUT_1_BEND_SW","Out 1 Bend Sw",false]]},
+      {"entry":5,"module":"PITCH_1","key":"OUT_2_BEND_SW","label":"Out 2 Bend Sw","bipolar":false,"cc":0,"value":124,"controller":false,"hint":"Off/On","slots":[["PITCH_1_OUT_2_BEND_SW","Out 2 Bend Sw",false]]},
+      {"entry":6,"module":"PITCH_1","key":"STRETCH","label":"Stretch","bipolar":false,"cc":22,"value":4,"controller":false,"hint":"x1 to x2","slots":[["PITCH_1_STRETCH","Stretch",false]]},
+      {"entry":7,"module":"EG_1","key":"ATTACK","label":"Attack","bipolar":false,"cc":73,"value":4,"controller":false,"hint":"Time","favorite":true,"slots":[["EG_1_ATTACK","Attack",false]]},
+      {"entry":8,"module":"EG_1","key":"DECAY","label":"Decay","bipolar":false,"cc":75,"value":94,"controller":false,"hint":"Time","favorite":true,"slots":[["EG_1_DECAY","Decay",false]]},
+      {"entry":9,"module":"EG_1","key":"SUSTAIN","label":"Sustain","bipolar":false,"cc":30,"value":4,"controller":false,"hint":"Level","favorite":true,"slots":[["EG_1_SUSTAIN","Sustain",false]]},
+      {"entry":10,"module":"EG_1","key":"RELEASE_SW","label":"Release Sw","bipolar":false,"cc":105,"value":124,"controller":false,"hint":"Off/On","slots":[["EG_1_RELEASE_SW","Release Sw",false]]},
+      {"entry":11,"module":"EG_1","key":"LEVEL","label":"Level","bipolar":false,"cc":0,"value":124,"controller":false,"slots":[["EG_1_LEVEL","Level",false]]},
+      {"entry":12,"module":"EG_2","key":"ATTACK","label":"Attack","bipolar":false,"cc":52,"value":4,"controller":false,"hint":"Time","slots":[["EG_2_ATTACK","Attack",false]]},
+      {"entry":13,"module":"EG_2","key":"DECAY","label":"Decay","bipolar":false,"cc":53,"value":4,"controller":false,"hint":"Time","slots":[["EG_2_DECAY","Decay",false]]},
+      {"entry":14,"module":"EG_2","key":"SUSTAIN","label":"Sustain","bipolar":false,"cc":54,"value":124,"controller":false,"hint":"Level","slots":[["EG_2_SUSTAIN","Sustain",false]]},
+      {"entry":15,"module":"EG_2","key":"RELEASE_SW","label":"Release Sw","bipolar":false,"cc":105,"value":124,"controller":false,"hint":"Off/On","slots":[["EG_2_RELEASE_SW","Release Sw",false]]},
+      {"entry":16,"module":"EG_2","key":"LEVEL","label":"Level","bipolar":false,"cc":0,"value":124,"controller":false,"slots":[["EG_2_LEVEL","Level",false]]},
+      {"entry":17,"module":"LFO_1","key":"WAVE","label":"Wave","bipolar":false,"cc":33,"value":4,"controller":false,"hint":"Tri to Sq","slots":[["LFO_1_WAVE","Wave",false]]},
+      {"entry":18,"module":"LFO_1","key":"RATE","label":"Rate","bipolar":false,"cc":3,"value":64,"controller":false,"favorite":true,"slots":[["LFO_1_RATE","Rate",false]]},
+      {"entry":19,"module":"LFO_1","key":"LEVEL","label":"Level","bipolar":false,"cc":116,"value":124,"controller":false,"slots":[["LFO_1_LEVEL","Level",false]]},
+      {"entry":20,"module":"LFO_1","key":"RATE_MOD_AMT","label":"Rate Mod Amt","bipolar":false,"cc":0,"value":124,"controller":false,"hintInputs":["RATE_MOD"],"slots":[["LFO_1_RATE_MOD_AMT","Rate Mod Amt",false]]},
+      {"entry":21,"module":"LFO_1","key":"LEVEL_MOD_AMT","label":"Level Mod Amt","bipolar":false,"cc":0,"value":124,"controller":false,"hintInputs":["LEVEL_MOD"],"slots":[["LFO_1_LEVEL_MOD_AMT","Level Mod Amt",false]]},
+      {"entry":22,"module":"LFO_1","key":"RESET_SW","label":"Reset Sw","bipolar":false,"cc":113,"value":4,"controller":false,"hint":"Off/On","slots":[["LFO_1_RESET_SW","Reset Sw",false]]},
+      {"entry":23,"module":"MIXER_1","key":"LEVEL_1","label":"Level 1","bipolar":false,"cc":0,"value":4,"controller":false,"hintInputs":["IN_1"],"slots":[["MIXER_1_LEVEL_1","Level 1",false]]},
+      {"entry":24,"module":"MIXER_1","key":"LEVEL_2","label":"Level 2","bipolar":false,"cc":0,"value":4,"controller":false,"hintInputs":["IN_2"],"slots":[["MIXER_1_LEVEL_2","Level 2",false]]},
+      {"entry":25,"module":"MIXER_1","key":"LEVEL_3","label":"Level 3","bipolar":false,"cc":0,"value":4,"controller":false,"hintInputs":["IN_3"],"slots":[["MIXER_1_LEVEL_3","Level 3",false]]},
+      {"entry":26,"module":"MIXER_1","key":"LEVEL_4","label":"Level 4","bipolar":false,"cc":0,"value":4,"controller":false,"hintInputs":["IN_4"],"slots":[["MIXER_1_LEVEL_4","Level 4",false]]},
+      {"entry":27,"module":"MIXER_1","key":"OUT_LEVEL","label":"Out Level","bipolar":false,"cc":0,"value":64,"controller":false,"slots":[["MIXER_1_OUT_LEVEL","Out Level",false]]},
+      {"entry":28,"module":"OSC_1","key":"WAVE","label":"Wave","bipolar":false,"cc":102,"value":4,"controller":false,"hint":"Saw to Sq","favorite":true,"slots":[["OSC_1_WAVE","Wave",false]]},
+      {"entry":29,"module":"OSC_1","key":"PW","label":"PW","bipolar":true,"cc":114,"value":64,"controller":false,"hint":"50% to 0%","slots":[["OSC_1_PW","PW",true]]},
+      {"entry":30,"module":"OSC_1","key":"PITCH_COARSE","label":"Pitch Coarse","bipolar":true,"cc":0,"value":64,"controller":false,"hint":"±5 Oct","slots":[["OSC_1_PITCH_COARSE","Pitch Coarse",true]]},
+      {"entry":31,"module":"OSC_1","key":"PITCH_SHIFT","label":"Pitch","bipolar":false,"cc":0,"value":4,"controller":false,"hint":"0 to +1 Oct","slots":[["OSC_1_PITCH_SHIFT","Pitch",false]]},
+      {"entry":32,"module":"OSC_1","key":"PITCH_FINE","label":"Pitch Fine","bipolar":true,"cc":0,"value":64,"controller":false,"hint":"±60 Cent","slots":[["OSC_1_PITCH_FINE","Pitch Fine",true]]},
+      {"entry":33,"module":"OSC_1","key":"PITCH_MOD_1_AMT","label":"Pitch Mod 1 Amt","bipolar":false,"cc":89,"value":4,"controller":false,"hintInputs":["MOD_1"],"favorite":true,"slots":[["OSC_1_PITCH_MOD_1_AMT","Pitch Mod 1 Amt",false]]},
+      {"entry":34,"module":"OSC_1","key":"PITCH_MOD_1_POLARITY","label":"Pitch Mod 1 Pol","bipolar":true,"cc":0,"value":76,"controller":false,"hint":"− to +","slots":[["OSC_1_PITCH_MOD_1_POLARITY","Pitch Mod 1 Pol",true]]},
+      {"entry":35,"module":"OSC_1","key":"PITCH_MOD_1_SW","label":"Pitch Mod 1 Sw","bipolar":false,"cc":0,"value":124,"controller":false,"hint":"Off/On","slots":[["OSC_1_PITCH_MOD_1_SW","Pitch Mod 1 Sw",false]]},
+      {"entry":36,"module":"OSC_1","key":"PITCH_MOD_2_AMT","label":"Pitch Mod 2 Amt","bipolar":false,"cc":13,"value":4,"controller":false,"hintInputs":["MOD_2"],"favorite":true,"slots":[["OSC_1_PITCH_MOD_2_AMT","Pitch Mod 2 Amt",false]]},
+      {"entry":37,"module":"OSC_1","key":"PITCH_MOD_2_POLARITY","label":"Pitch Mod 2 Pol","bipolar":true,"cc":0,"value":76,"controller":false,"hint":"− to +","slots":[["OSC_1_PITCH_MOD_2_POLARITY","Pitch Mod 2 Pol",true]]},
+      {"entry":38,"module":"OSC_1","key":"PITCH_MOD_2_SW","label":"Pitch Mod 2 Sw","bipolar":false,"cc":0,"value":124,"controller":false,"hint":"Off/On","slots":[["OSC_1_PITCH_MOD_2_SW","Pitch Mod 2 Sw",false]]},
+      {"entry":39,"module":"OSC_1","key":"PW_MOD_1_AMT","label":"PW Mod 1 Amt","bipolar":false,"cc":8,"value":4,"controller":false,"hintInputs":["MOD_1"],"slots":[["OSC_1_PW_MOD_1_AMT","PW Mod 1 Amt",false]]},
+      {"entry":40,"module":"OSC_1","key":"PW_MOD_1_POLARITY","label":"PW Mod 1 Pol","bipolar":true,"cc":0,"value":124,"controller":false,"hint":"− to +","slots":[["OSC_1_PW_MOD_1_POLARITY","PW Mod 1 Pol",true]]},
+      {"entry":41,"module":"OSC_1","key":"PW_MOD_2_AMT","label":"PW Mod 2 Amt","bipolar":false,"cc":103,"value":4,"controller":false,"hintInputs":["MOD_2"],"slots":[["OSC_1_PW_MOD_2_AMT","PW Mod 2 Amt",false]]},
+      {"entry":42,"module":"OSC_1","key":"PW_MOD_2_POLARITY","label":"PW Mod 2 Pol","bipolar":true,"cc":0,"value":124,"controller":false,"hint":"− to +","slots":[["OSC_1_PW_MOD_2_POLARITY","PW Mod 2 Pol",true]]},
+      {"entry":43,"module":"OSC_2","key":"WAVE","label":"Wave","bipolar":false,"cc":104,"value":4,"controller":false,"hint":"Saw to Sq","favorite":true,"slots":[["OSC_2_WAVE","Wave",false]]},
+      {"entry":44,"module":"OSC_2","key":"PW","label":"PW","bipolar":true,"cc":114,"value":64,"controller":false,"hint":"50% to 0%","slots":[["OSC_2_PW","PW",true]]},
+      {"entry":45,"module":"OSC_2","key":"PITCH_COARSE","label":"Pitch Coarse","bipolar":true,"cc":0,"value":64,"controller":false,"hint":"±5 Oct","slots":[["OSC_2_PITCH_COARSE","Pitch Coarse",true]]},
+      {"entry":46,"module":"OSC_2","key":"PITCH_SHIFT","label":"Pitch","bipolar":false,"cc":85,"value":5,"controller":false,"hint":"0 to +1 Oct","favorite":true,"slots":[["OSC_2_PITCH_SHIFT","Pitch",false]]},
+      {"entry":47,"module":"OSC_2","key":"PITCH_FINE","label":"Pitch Fine","bipolar":true,"cc":76,"value":65,"controller":false,"hint":"±60 Cent","slots":[["OSC_2_PITCH_FINE","Pitch Fine",true]]},
+      {"entry":48,"module":"OSC_2","key":"PITCH_MOD_1_AMT","label":"Pitch Mod 1 Amt","bipolar":false,"cc":89,"value":4,"controller":false,"hintInputs":["MOD_1"],"slots":[["OSC_2_PITCH_MOD_1_AMT","Pitch Mod 1 Amt",false]]},
+      {"entry":49,"module":"OSC_2","key":"PITCH_MOD_1_POLARITY","label":"Pitch Mod 1 Pol","bipolar":true,"cc":0,"value":76,"controller":false,"hint":"− to +","slots":[["OSC_2_PITCH_MOD_1_POLARITY","Pitch Mod 1 Pol",true]]},
+      {"entry":50,"module":"OSC_2","key":"PITCH_MOD_1_SW","label":"Pitch Mod 1 Sw","bipolar":false,"cc":0,"value":124,"controller":false,"hint":"Off/On","slots":[["OSC_2_PITCH_MOD_1_SW","Pitch Mod 1 Sw",false]]},
+      {"entry":51,"module":"OSC_2","key":"PITCH_MOD_2_AMT","label":"Pitch Mod 2 Amt","bipolar":false,"cc":13,"value":4,"controller":false,"hintInputs":["MOD_2"],"slots":[["OSC_2_PITCH_MOD_2_AMT","Pitch Mod 2 Amt",false]]},
+      {"entry":52,"module":"OSC_2","key":"PITCH_MOD_2_POLARITY","label":"Pitch Mod 2 Pol","bipolar":true,"cc":0,"value":76,"controller":false,"hint":"− to +","slots":[["OSC_2_PITCH_MOD_2_POLARITY","Pitch Mod 2 Pol",true]]},
+      {"entry":53,"module":"OSC_2","key":"PITCH_MOD_2_SW","label":"Pitch Mod 2 Sw","bipolar":false,"cc":0,"value":124,"controller":false,"hint":"Off/On","slots":[["OSC_2_PITCH_MOD_2_SW","Pitch Mod 2 Sw",false]]},
+      {"entry":54,"module":"OSC_2","key":"PW_MOD_1_AMT","label":"PW Mod 1 Amt","bipolar":false,"cc":8,"value":4,"controller":false,"hintInputs":["MOD_1"],"slots":[["OSC_2_PW_MOD_1_AMT","PW Mod 1 Amt",false]]},
+      {"entry":55,"module":"OSC_2","key":"PW_MOD_1_POLARITY","label":"PW Mod 1 Pol","bipolar":true,"cc":0,"value":124,"controller":false,"hint":"− to +","slots":[["OSC_2_PW_MOD_1_POLARITY","PW Mod 1 Pol",true]]},
+      {"entry":56,"module":"OSC_2","key":"PW_MOD_2_AMT","label":"PW Mod 2 Amt","bipolar":false,"cc":103,"value":4,"controller":false,"hintInputs":["MOD_2"],"slots":[["OSC_2_PW_MOD_2_AMT","PW Mod 2 Amt",false]]},
+      {"entry":57,"module":"OSC_2","key":"PW_MOD_2_POLARITY","label":"PW Mod 2 Pol","bipolar":true,"cc":0,"value":124,"controller":false,"hint":"− to +","slots":[["OSC_2_PW_MOD_2_POLARITY","PW Mod 2 Pol",true]]},
+      {"entry":58,"module":"OSC_2","key":"SYNC_SW","label":"Sync Sw","bipolar":false,"cc":112,"value":4,"controller":false,"hint":"Off/On","slots":[["OSC_2_SYNC_SW","Sync Sw",false]]},
+      {"entry":59,"module":"NOISE_1","key":"COLOR","label":"Color","bipolar":false,"cc":115,"value":4,"controller":false,"hint":"White to Red","slots":[["NOISE_1_COLOR","Color",false]]},
+      {"entry":60,"module":"NOISE_1","key":"LEVEL","label":"Level","bipolar":false,"cc":0,"value":124,"controller":false,"slots":[["NOISE_1_LEVEL","Level",false]]},
+      {"entry":61,"module":"MIXER_2","key":"LEVEL_1","label":"Level 1","bipolar":false,"cc":19,"value":88,"controller":false,"hintInputs":["IN_1"],"slots":[["MIXER_2_LEVEL_1","Level 1",false]]},
+      {"entry":62,"module":"MIXER_2","key":"LEVEL_2","label":"Level 2","bipolar":false,"cc":20,"value":88,"controller":false,"hintInputs":["IN_2"],"slots":[["MIXER_2_LEVEL_2","Level 2",false]]},
+      {"entry":63,"module":"MIXER_2","key":"LEVEL_3","label":"Level 3","bipolar":false,"cc":21,"value":4,"controller":false,"hintInputs":["IN_3"],"slots":[["MIXER_2_LEVEL_3","Level 3",false]]},
+      {"entry":64,"module":"MIXER_2","key":"LEVEL_4","label":"Level 4","bipolar":false,"cc":23,"value":4,"controller":false,"hintInputs":["IN_4"],"slots":[["MIXER_2_LEVEL_4","Level 4",false]]},
+      {"entry":65,"module":"MIXER_2","key":"OUT_LEVEL","label":"Out Level","bipolar":false,"cc":0,"value":64,"controller":false,"slots":[["MIXER_2_OUT_LEVEL","Out Level",false]]},
+      {"entry":66,"module":"FILTER_1","key":"CUTOFF","label":"Cutoff","bipolar":false,"cc":74,"value":112,"controller":false,"favorite":true,"slots":[["FILTER_1_CUTOFF","Cutoff",false]]},
+      {"entry":67,"module":"FILTER_1","key":"RESONANCE","label":"Resonance","bipolar":false,"cc":71,"value":64,"controller":false,"favorite":true,"slots":[["FILTER_1_RESONANCE","Resonance",false]]},
+      {"entry":68,"module":"FILTER_1","key":"MODE","label":"Mode","bipolar":false,"cc":39,"value":4,"controller":false,"hint":"LP to Notch to HP","slots":[["FILTER_1_MODE","Mode",false]]},
+      {"entry":69,"module":"FILTER_1","key":"PITCH_AMT","label":"Pitch Amt","bipolar":false,"cc":9,"value":64,"controller":false,"hintInputs":["PITCH"],"slots":[["FILTER_1_PITCH_AMT","Pitch Amt",false]]},
+      {"entry":70,"module":"FILTER_1","key":"MOD_1_AMT","label":"Mod 1 Amt","bipolar":false,"cc":24,"value":4,"controller":false,"hintInputs":["MOD_1"],"favorite":true,"slots":[["FILTER_1_MOD_1_AMT","Mod 1 Amt",false]]},
+      {"entry":71,"module":"FILTER_1","key":"MOD_1_POLARITY","label":"Mod 1 Pol","bipolar":true,"cc":117,"value":124,"controller":false,"hint":"− to +","slots":[["FILTER_1_MOD_1_POLARITY","Mod 1 Pol",true]]},
+      {"entry":72,"module":"FILTER_1","key":"MOD_2_AMT","label":"Mod 2 Amt","bipolar":false,"cc":25,"value":4,"controller":false,"hintInputs":["MOD_2"],"favorite":true,"slots":[["FILTER_1_MOD_2_AMT","Mod 2 Amt",false]]},
+      {"entry":73,"module":"FILTER_1","key":"MOD_2_POLARITY","label":"Mod 2 Pol","bipolar":true,"cc":0,"value":76,"controller":false,"hint":"− to +","slots":[["FILTER_1_MOD_2_POLARITY","Mod 2 Pol",true]]},
+      {"entry":74,"module":"AMP_1","key":"GAIN","label":"Gain","bipolar":false,"cc":15,"value":64,"controller":false,"slots":[["AMP_1_GAIN","Gain",false]]},
+      {"entry":75,"module":"AMP_1","key":"MOD_1_2_MIX","label":"Mod 1/2 Mix","bipolar":false,"cc":36,"value":4,"controller":false,"hintInputs":["MOD_1","MOD_2"],"slots":[["AMP_1_MOD_1_2_MIX","Mod 1/2 Mix",false]]},
+      {"entry":76,"module":"CHORUS_1","key":"MIX","label":"Mix","bipolar":false,"cc":93,"value":64,"controller":false,"slots":[["CHORUS_1_MIX","Mix",false]]},
+      {"entry":77,"module":"CHORUS_1","key":"RATE","label":"Rate","bipolar":false,"cc":58,"value":64,"controller":false,"slots":[["CHORUS_1_RATE","Rate",false]]},
+      {"entry":78,"module":"CHORUS_1","key":"DEPTH","label":"Depth","bipolar":false,"cc":59,"value":64,"controller":false,"slots":[["CHORUS_1_DEPTH","Depth",false]]},
+      {"entry":79,"module":"DELAY_1","key":"MIX","label":"Mix","bipolar":false,"cc":94,"value":34,"controller":false,"slots":[["DELAY_1_MIX","Mix",false]]},
+      {"entry":80,"module":"DELAY_1","key":"TIME","label":"Time","bipolar":false,"cc":90,"value":64,"controller":false,"slots":[["DELAY_1_TIME","Time",false]]},
+      {"entry":81,"module":"DELAY_1","key":"FEEDBACK","label":"Feedback","bipolar":false,"cc":92,"value":64,"controller":false,"slots":[["DELAY_1_FEEDBACK","Feedback",false]]},
+      {"entry":82,"key":"MOD_WHEEL","label":"Mod Wheel","bipolar":false,"cc":1,"value":4,"controller":true,"slots":[["MOD_WHEEL","Mod Wheel",false],["MOD_WHEEL_REV","Mod Wheel Rev",false,"rev"],["MOD_WHEEL_INV","Mod Wheel Inv",false,"inv"],["MOD_WHEEL_REV_INV","Mod Wheel Rev Inv",false,"rev_inv"]]},
+      {"entry":83,"key":"GENERAL_1","label":"General 1","bipolar":false,"cc":16,"value":4,"controller":true,"slots":[["GENERAL_1","General 1",false],["GENERAL_1_REV","General 1 Rev",false,"rev"],["GENERAL_1_INV","General 1 Inv",false,"inv"],["GENERAL_1_REV_INV","General 1 Rev Inv",false,"rev_inv"],["GENERAL_1_BIPOLAR","General 1 Bipolar",true,"bipolar"],["GENERAL_1_BIPOLAR_INV","General 1 Bipolar Inv",true,"bipolar_inv"]]},
+      {"entry":84,"key":"GENERAL_2","label":"General 2","bipolar":false,"cc":17,"value":4,"controller":true,"slots":[["GENERAL_2","General 2",false],["GENERAL_2_REV","General 2 Rev",false,"rev"],["GENERAL_2_INV","General 2 Inv",false,"inv"],["GENERAL_2_REV_INV","General 2 Rev Inv",false,"rev_inv"],["GENERAL_2_BIPOLAR","General 2 Bipolar",true,"bipolar"],["GENERAL_2_BIPOLAR_INV","General 2 Bipolar Inv",true,"bipolar_inv"]]},
     ],
     signals: [
       {"id":0,"key":"NONE","label":"0.0"},
       {"id":1,"key":"ONE","label":"+1.0"},
       {"id":2,"key":"HALF","label":"+0.5"},
-      {"id":3,"key":"POINT_TWO","label":"+0.2"},
-      {"id":4,"key":"POINT_ONE","label":"+0.1"},
-      {"id":5,"key":"MINUS_POINT_ONE","label":"-0.1"},
-      {"id":6,"key":"MINUS_POINT_TWO","label":"-0.2"},
-      {"id":7,"key":"MINUS_HALF","label":"-0.5"},
-      {"id":8,"key":"MINUS_ONE","label":"-1.0"},
-      {"id":9,"key":"LFO_1_OUTPUT"},
-      {"id":10,"key":"ENV_GEN_1_OUTPUT"},
-      {"id":11,"key":"OSC_1_OUTPUT"},
-      {"id":12,"key":"FILTER_1_OUTPUT"},
-      {"id":13,"key":"AMP_1_OUTPUT"},
-      {"id":14,"key":"MIXER_1_OUTPUT"},
-      {"id":15,"key":"CHORUS_1_OUTPUT_L"},
-      {"id":16,"key":"CHORUS_1_OUTPUT_R"},
-      {"id":17,"key":"DELAY_1_OUTPUT_L"},
-      {"id":18,"key":"DELAY_1_OUTPUT_R"},
-      {"id":19,"key":"LFO_1_RATE"},
-      {"id":20,"key":"LFO_1_LEVEL"},
-      {"id":21,"key":"LFO_1_POLARITY"},
-      {"id":22,"key":"ENV_GEN_1_ATTACK"},
-      {"id":23,"key":"ENV_GEN_1_DECAY"},
-      {"id":24,"key":"ENV_GEN_1_SUSTAIN"},
-      {"id":25,"key":"ENV_GEN_1_LEVEL"},
-      {"id":26,"key":"ENV_GEN_1_POLARITY"},
-      {"id":27,"key":"OSC_1_WAVEFORM"},
-      {"id":28,"key":"OSC_1_COARSE_TUNE"},
-      {"id":29,"key":"OSC_1_FINE_TUNE"},
-      {"id":30,"key":"OSC_1_MOD_AMOUNT"},
-      {"id":31,"key":"OSC_1_MOD_POLARITY"},
-      {"id":32,"key":"FILTER_1_CUTOFF"},
-      {"id":33,"key":"FILTER_1_RESONANCE"},
-      {"id":34,"key":"FILTER_1_GAIN"},
-      {"id":35,"key":"FILTER_1_MOD_AMOUNT"},
-      {"id":36,"key":"FILTER_1_MOD_POLARITY"},
-      {"id":37,"key":"AMP_1_GAIN"},
-      {"id":38,"key":"MIXER_1_LEVEL_1"},
-      {"id":39,"key":"MIXER_1_POLARITY_1"},
-      {"id":40,"key":"MIXER_1_LEVEL_2"},
-      {"id":41,"key":"MIXER_1_POLARITY_2"},
-      {"id":42,"key":"CHORUS_1_RATE"},
-      {"id":43,"key":"CHORUS_1_DEPTH"},
-      {"id":44,"key":"CHORUS_1_MIX"},
-      {"id":45,"key":"DELAY_1_TIME"},
-      {"id":46,"key":"DELAY_1_FEEDBACK"},
-      {"id":47,"key":"DELAY_1_MIX"},
-      {"id":48,"key":"PITCH","label":"Note Pitch"},
-      {"id":49,"key":"GATE","label":"Note Gate"},
-      {"id":50,"key":"BEND","label":"Pitch Bend"},
-      {"id":51,"key":"GENERAL_MOD_WHEEL"},
-      {"id":52,"key":"GENERAL_UNIPOLAR_1"},
-      {"id":53,"key":"GENERAL_UNIPOLAR_2"},
-      {"id":54,"key":"GENERAL_UNIPOLAR_3"},
-      {"id":55,"key":"GENERAL_UNIPOLAR_4"},
-      {"id":56,"key":"GENERAL_BIPOLAR_1"},
-      {"id":57,"key":"GENERAL_BIPOLAR_2"},
-      {"id":58,"key":"GENERAL_BIPOLAR_3"},
-      {"id":59,"key":"GENERAL_BIPOLAR_4"},
+      {"id":3,"key":"MINUS_HALF","label":"-0.5"},
+      {"id":4,"key":"MINUS_ONE","label":"-1.0"},
+      {"id":5,"key":"NOTE_PITCH","label":"Note Pitch"},
+      {"id":6,"key":"NOTE_GATE","label":"Note Gate"},
+      {"id":7,"key":"PITCH_BEND","label":"Pitch Bend"},
+      {"id":8,"key":"MOD_WHEEL"},
+      {"id":9,"key":"MOD_WHEEL_REV"},
+      {"id":10,"key":"MOD_WHEEL_INV"},
+      {"id":11,"key":"MOD_WHEEL_REV_INV"},
+      {"id":12,"key":"GENERAL_1"},
+      {"id":13,"key":"GENERAL_1_REV"},
+      {"id":14,"key":"GENERAL_1_INV"},
+      {"id":15,"key":"GENERAL_1_REV_INV"},
+      {"id":16,"key":"GENERAL_1_BIPOLAR"},
+      {"id":17,"key":"GENERAL_1_BIPOLAR_INV"},
+      {"id":18,"key":"GENERAL_2"},
+      {"id":19,"key":"GENERAL_2_REV"},
+      {"id":20,"key":"GENERAL_2_INV"},
+      {"id":21,"key":"GENERAL_2_REV_INV"},
+      {"id":22,"key":"GENERAL_2_BIPOLAR"},
+      {"id":23,"key":"GENERAL_2_BIPOLAR_INV"},
+      {"id":24,"key":"PITCH_1_OUTPUT_1"},
+      {"id":25,"key":"PITCH_1_OUTPUT_2"},
+      {"id":26,"key":"EG_1_OUTPUT"},
+      {"id":27,"key":"EG_1_OUTPUT_INV"},
+      {"id":28,"key":"EG_2_OUTPUT"},
+      {"id":29,"key":"EG_2_OUTPUT_INV"},
+      {"id":30,"key":"LFO_1_OUTPUT"},
+      {"id":31,"key":"LFO_1_OUTPUT_INV"},
+      {"id":32,"key":"LFO_1_OUTPUT_TRIANGLE"},
+      {"id":33,"key":"LFO_1_OUTPUT_TRIANGLE_INV"},
+      {"id":34,"key":"LFO_1_OUTPUT_SQUARE"},
+      {"id":35,"key":"LFO_1_OUTPUT_SQUARE_INV"},
+      {"id":36,"key":"MIXER_1_OUTPUT"},
+      {"id":37,"key":"MIXER_1_OUTPUT_INV"},
+      {"id":38,"key":"OSC_1_OUTPUT"},
+      {"id":39,"key":"OSC_1_OUTPUT_SAW"},
+      {"id":40,"key":"OSC_1_OUTPUT_PULSE"},
+      {"id":41,"key":"OSC_1_OUTPUT_SUB"},
+      {"id":42,"key":"OSC_2_OUTPUT"},
+      {"id":43,"key":"OSC_2_OUTPUT_SAW"},
+      {"id":44,"key":"OSC_2_OUTPUT_PULSE"},
+      {"id":45,"key":"NOISE_1_OUTPUT"},
+      {"id":46,"key":"NOISE_1_OUTPUT_WHITE"},
+      {"id":47,"key":"NOISE_1_OUTPUT_RED"},
+      {"id":48,"key":"MIXER_2_OUTPUT"},
+      {"id":49,"key":"MIXER_2_OUTPUT_INV"},
+      {"id":50,"key":"FILTER_1_OUTPUT"},
+      {"id":51,"key":"FILTER_1_OUTPUT_LP"},
+      {"id":52,"key":"FILTER_1_OUTPUT_HP"},
+      {"id":53,"key":"FILTER_1_OUTPUT_BP"},
+      {"id":54,"key":"AMP_1_OUTPUT"},
+      {"id":55,"key":"CHORUS_1_OUTPUT_L"},
+      {"id":56,"key":"CHORUS_1_OUTPUT_R"},
+      {"id":57,"key":"CHORUS_1_OUTPUT_MONO"},
+      {"id":58,"key":"DELAY_1_OUTPUT_L"},
+      {"id":59,"key":"DELAY_1_OUTPUT_R"},
+      {"id":60,"key":"DELAY_1_OUTPUT_MONO"},
     ],
-    defaultOrder: ["LFO_1","ENV_GEN_1","MIXER_1","OSC_1","FILTER_1","AMP_1","CHORUS_1","DELAY_1"],
+    defaultOrder: ["PITCH_1","EG_1","EG_2","LFO_1","MIXER_1","OSC_1","OSC_2","NOISE_1","MIXER_2","FILTER_1","AMP_1","CHORUS_1","DELAY_1"],
   };
   // patch_gen end
 
@@ -1176,36 +1553,39 @@
 
   function toItem({ module, key: suffix, label }) {
     const key = module ? `${module}_${suffix}` : suffix;
-    const full = module ? `${MOD[module].label} ${label}` : (suffix.startsWith('OUTPUT') ? `Final Output ${label}` : `General ${label}`);
+    const full = module ? `${MOD[module].label} ${label}` : (suffix.startsWith('OUTPUT') ? `Final Output ${label}` : label);
     return { module, key, label, full };
   }
   // NRPN category 1: each module input, and the two sides of the final output.
   const INPUT_ITEMS = SPEC.inputs.map(i => ({ ...toItem(i), entry: i.entry, defaultSource: i.source }));
-  // NRPN categories 2 and 3 share entry numbers for the parameters; the General controls are in
-  // category 3 only, and each of General 1-4 fills two slots from one CC, a unipolar and a
-  // bipolar one, as spms1_main.rb does. A control's slots are the bus slots its CC fills, each
-  // with its own range: [slot, label, bipolar].
+  // NRPN categories 2 and 3 share entry numbers for the parameters; the mod wheel, a controller
+  // control, is in category 3 only, its CC filling a slot on the bus, as spms1_main.rb does. A
+  // control's slots are the slots its CC fills, each with its own range: [slot, label, bipolar].
   const CONTROL_ITEMS = SPEC.controls.map(c => ({
-    ...toItem(c), entry: c.entry, general: !!c.general, bipolar: c.bipolar, slots: c.slots,
+    ...toItem(c), entry: c.entry, controller: !!c.controller, bipolar: c.bipolar, slots: c.slots,
     defaultCC: c.cc, defaultValue: c.value ?? null, defaultSource: c.source || null,
+    hint: c.hint || null, hintInputs: c.hintInputs || null, defaultFavorite: !!c.favorite,
   }));
-  const PARAM_ITEMS = CONTROL_ITEMS.filter(c => !c.general);
-  const GENERAL_ITEMS = CONTROL_ITEMS.filter(c => c.general);
+  const PARAM_ITEMS = CONTROL_ITEMS.filter(c => !c.controller);
+  const CONTROLLER_ITEMS = CONTROL_ITEMS.filter(c => c.controller);
   const CONTROL = Object.fromEntries(CONTROL_ITEMS.map(c => [c.key, c]));
   // By NRPN entry, for what the synth sends back.
   const INPUT_BY_ENTRY = Object.fromEntries(INPUT_ITEMS.map(i => [i.entry, i]));
   const PARAM_BY_ENTRY = Object.fromEntries(PARAM_ITEMS.map(p => [p.entry, p]));
   const CONTROL_BY_ENTRY = Object.fromEntries(CONTROL_ITEMS.map(c => [c.entry, c]));
-  // Each control slot, with the item whose CC fills it and the range it takes.
+  // Each control slot, with the item whose CC fills it, the range it takes and the form, if any,
+  // its value takes of the item's own slot.
   const SLOT = {};
-  CONTROL_ITEMS.forEach(c => c.slots.forEach(([slot, label, bipolar]) => {
-    SLOT[slot] = { c, bipolar, full: c.module ? c.full : `General ${label}` };
+  CONTROL_ITEMS.forEach(c => c.slots.forEach(([slot, label, bipolar, form]) => {
+    SLOT[slot] = { c, bipolar, form, full: c.module ? c.full : label };
   }));
 
   // The signals bus: each slot's name by its number, and each name's number.
   const SIGNAL_NAMES = [];
   SPEC.signals.forEach(sg => { SIGNAL_NAMES[sg.id] = sg.key; });
   const SIG = Object.fromEntries(SPEC.signals.map(sg => [sg.key, sg.id]));
+  // A parameter source naming the parameter's own control slot, which is off the bus.
+  const SIGNAL_OWN = 127;
 
   const SIGNAL_LABELS = {};
   SPEC.signals.forEach(sg => { if (sg.label) SIGNAL_LABELS[sg.key] = sg.label; });
@@ -1215,79 +1595,98 @@
 
   const DEFAULT_ORDER = SPEC.defaultOrder;
 
+  // Columns in signal order, each short enough that the whole patch fits a wide canvas at a
+  // readable scale: the controller over the constants, the sources of fixed and played values,
+  // Pitch 1 over the envelopes, the LFO over Mixer 1, the oscillators side by side
+  // with the noise under Osc 2, Mixer 2, the filter over the amp, and the effects with the output
+  // under the delay that feeds it. Spaced so that no two nodes meet with every parameter shown.
   const DEFAULT_LAYOUT = {
-    NOTE:      { x: 180,  y: 358 },
-    CONST:     { x: 20,   y: 40 },
-    GENERAL:   { x: 180,  y: 40 },
-    LFO_1:     { x: 520,  y: 40 },
-    ENV_GEN_1: { x: 520,  y: 228 },
-    MIXER_1:   { x: 520,  y: 518 },
-    OSC_1:     { x: 880,  y: 40 },
-    FILTER_1:  { x: 880,  y: 332 },
-    AMP_1:     { x: 1240, y: 40 },
-    CHORUS_1:  { x: 1240, y: 228 },
-    DELAY_1:   { x: 1600, y: 40 },
-    OUT:       { x: 1600, y: 340 },
+    CONTROLLER: { x: 20,  y: 40 },
+    CONST:     { x: 20,   y: 653 },
+    PITCH_1:   { x: 380,  y: 40 },
+    EG_1:      { x: 380,  y: 450 },
+    EG_2:      { x: 380,  y: 756 },
+    LFO_1:     { x: 740,  y: 40 },
+    MIXER_1:   { x: 740,  y: 528 },
+    OSC_1:     { x: 1100, y: 40 },
+    OSC_2:     { x: 1460, y: 40 },
+    NOISE_1:   { x: 1460, y: 736 },
+    MIXER_2:   { x: 1820, y: 40 },
+    FILTER_1:  { x: 2180, y: 40 },
+    AMP_1:     { x: 2180, y: 554 },
+    CHORUS_1:  { x: 2540, y: 40 },
+    DELAY_1:   { x: 2540, y: 320 },
+    OUT:       { x: 2540, y: 626 },
   };
 
   function defaultState() {
-    const s = { name: 'Init', order: DEFAULT_ORDER.slice(), inputs: {}, params: {}, cc: {}, values: {}, layout: {} };
+    const s = { name: 'Init', order: DEFAULT_ORDER.slice(), inputs: {}, params: {}, cc: {}, values: {}, paramValues: {}, favorites: new Set(), layout: {} };
     INPUT_ITEMS.forEach(i => { s.inputs[i.key] = i.defaultSource; });
-    PARAM_ITEMS.forEach(p => { s.params[p.key] = p.defaultSource || p.key; });
+    PARAM_ITEMS.forEach(p => {
+      s.params[p.key] = p.defaultSource || p.key;
+      s.paramValues[p.key] = p.defaultValue;
+    });
     CONTROL_ITEMS.forEach(c => {
       s.cc[c.key] = c.defaultCC;
       if (c.defaultCC) s.values[c.defaultCC] = c.defaultValue;
     });
+    CONTROL_ITEMS.forEach(c => { if (c.defaultFavorite) s.favorites.add(c.key); });
     for (const k in DEFAULT_LAYOUT) s.layout[k] = { ...DEFAULT_LAYOUT[k] };
     return s;
   }
 
   const clamp7 = v => Math.max(0, Math.min(127, Math.round(Number(v) || 0)));
+  // A value the editor sets or shows: CC 4 and CC 124 are the ends of the range the synth uses,
+  // and anything past them reads as the end it is nearest, so a value outside is drawn in.
+  const clampValue = v => Math.max(4, Math.min(124, Math.round(Number(v) || 0)));
   const ccValue = cc => (state.values[cc] ?? 64);
+  // What a parameter's control slot holds while it has no CC, as a CC value: NRPN category 4.
+  const paramValue = key => (state.paramValues[key] ?? CONTROL[key].defaultValue);
 
   function serialize(s) {
     const used = {};
     CONTROL_ITEMS.forEach(c => { const cc = s.cc[c.key]; if (cc) used[cc] = s.values[cc] ?? 64; });
     return {
       format: 'spms1-type2-patch',
-      version: 2,
+      version: 0,
       name: s.name,
       order: s.order.slice(),
       inputs: { ...s.inputs },
       params: { ...s.params },
       cc: { ...s.cc },
       values: used,
+      paramValues: { ...s.paramValues },
+      favorites: CONTROL_ITEMS.filter(c => s.favorites.has(c.key)).map(c => c.key),
       layout: JSON.parse(JSON.stringify(s.layout)),
     };
   }
 
-  // Anything missing or unknown falls back to the default patch, so an older file still loads.
+  // Anything missing or unknown falls back to the default patch.
   function deserialize(obj) {
     if (!obj || typeof obj !== 'object') throw new Error('Not a patch');
     if (obj.format && obj.format !== 'spms1-type2-patch') throw new Error('Unknown format: ' + obj.format);
     const s = defaultState();
     if (typeof obj.name === 'string') s.name = obj.name.slice(0, 64);
+    // A module listed twice keeps its last place, as the synth runs it there (the last listing
+    // wins), so a hand-edited file loads as the synth plays it.
     if (Array.isArray(obj.order)) {
-      s.order = obj.order.filter((k, i, a) => MOD[k] && a.indexOf(k) === i).slice(0, MODULES_SIZE);
+      s.order = obj.order.slice(0, MODULES_SIZE).filter((k, i, a) => MOD[k] && a.lastIndexOf(k) === i);
     }
     const src = v => (typeof v === 'string' && v in SIG) ? v : null;
-    // Version 1 had a mono Delay 1 and a mono Final Output. Each of its inputs feeds both sides
-    // now, and its output is read from the side of the input reading it, so an old patch sounds
-    // as it did: without the chorus, which it does not run.
-    const inputs = obj.inputs && typeof obj.inputs === 'object' ? { ...obj.inputs } : null;
-    if (inputs && !(obj.version >= 2)) {
-      for (const [old, side] of [['DELAY_1_AUDIO', 'DELAY_1_AUDIO_'], ['OUTPUT', 'OUTPUT_']]) {
-        if (old in inputs) for (const lr of ['L', 'R']) if (!(side + lr in inputs)) inputs[side + lr] = inputs[old];
-      }
-      for (const k in inputs) {
-        if (inputs[k] === 'DELAY_1_OUTPUT') inputs[k] = k.endsWith('_R') ? 'DELAY_1_OUTPUT_R' : 'DELAY_1_OUTPUT_L';
-      }
-    }
+    const inputs = obj.inputs && typeof obj.inputs === 'object' ? obj.inputs : null;
     INPUT_ITEMS.forEach(i => { if (inputs && i.key in inputs) s.inputs[i.key] = src(inputs[i.key]) || 'NONE'; });
     PARAM_ITEMS.forEach(p => { if (obj.params && p.key in obj.params) s.params[p.key] = src(obj.params[p.key]) || p.key; });
     CONTROL_ITEMS.forEach(c => { if (obj.cc && c.key in obj.cc) s.cc[c.key] = clamp7(obj.cc[c.key]); });
     if (obj.values && typeof obj.values === 'object') {
-      for (const k in obj.values) s.values[clamp7(k)] = clamp7(obj.values[k]);
+      for (const k in obj.values) s.values[clamp7(k)] = clampValue(obj.values[k]);
+    }
+    if (obj.paramValues && typeof obj.paramValues === 'object') {
+      PARAM_ITEMS.forEach(p => { if (p.key in obj.paramValues) s.paramValues[p.key] = clampValue(obj.paramValues[p.key]); });
+    }
+    // A patch's own favorites take the default's place; one with none listed keeps the default's.
+    if (Array.isArray(obj.favorites)) {
+      s.favorites.clear();
+      CONTROL_ITEMS.forEach(c => { if (obj.favorites.includes(c.key)) s.favorites.add(c.key); });
     }
     if (obj.layout && typeof obj.layout === 'object') {
       for (const k in s.layout) {
@@ -1314,11 +1713,15 @@
     });
     PARAM_ITEMS.forEach(p => {
       const s = state.params[p.key];
-      e.push({ nrpn: 256 + p.entry, value: SIG[s], comment: `${p.full} <- ${s === p.key ? 'own slot' : sigLabel(s)}` });
+      // A parameter's own control slot is off the bus: 127 names it, from any parameter.
+      e.push({ nrpn: 256 + p.entry, value: s === p.key ? SIGNAL_OWN : SIG[s], comment: `${p.full} <- ${s === p.key ? 'own slot' : sigLabel(s)}` });
     });
     CONTROL_ITEMS.forEach(c => {
       const cc = state.cc[c.key];
-      e.push({ nrpn: 384 + c.entry, value: cc, comment: `${c.full} CC = ${cc || 'none'}` });
+      e.push({ nrpn: 384 + c.entry, value: cc, comment: `${c.full} CC# = ${cc || 'none'}` });
+    });
+    PARAM_ITEMS.forEach(p => {
+      e.push({ nrpn: 512 + p.entry, value: paramValue(p.key), comment: `${p.full} value with no CC = ${paramValue(p.key)}` });
     });
     return e;
   }
@@ -1332,7 +1735,7 @@
       users.get(cc).push(c.full);
     });
     return [...users.keys()].sort((a, b) => a - b)
-      .map(cc => ({ cc, value: ccValue(cc), comment: `CC ${cc}: ${users.get(cc).join(', ')}` }));
+      .map(cc => ({ cc, value: ccValue(cc), comment: `CC#${cc}: ${users.get(cc).join(', ')}` }));
   }
 
   // Each item is one line: the bytes of one NRPN write or one CC, with its comment.
@@ -1377,7 +1780,7 @@
       }
     } else {
       const rows = [];
-      if (comments) rows.push(`; SPMS-1 (type-2) patch "${state.name}"`, '; NRPN MSB (CC 99), LSB (CC 98), value (CC 6)');
+      if (comments) rows.push(`; SPMS-1 (type-2) patch "${state.name}"`, '; NRPN MSB (CC#99), LSB (CC#98), value (CC#6)');
       for (const l of lines) {
         if (!l.nrpn) continue;
         const r = l.nrpn.map(v => String(v).padStart(3)).join(', ');
@@ -1476,7 +1879,7 @@
     renderOrder();
     updateExport();
     saveLocal();
-    liveSend();
+    sendChanges();
   }
 
   // ---- Connections ---------------------------------------------------------------------------
@@ -1545,9 +1948,8 @@
   let selectedWire = null;
 
   const NODES = [
-    { key: 'NOTE', label: 'Note', aux: true, notes: [['PITCH', 'Pitch', 0, 127], ['GATE', 'Gate', 0, 1], ['BEND', 'Bend', -8192, 8191]] },
-    { key: 'CONST', label: 'Constants', aux: true, normed: true, outs: ['ONE', 'HALF', 'POINT_TWO', 'POINT_ONE', 'NONE', 'MINUS_POINT_ONE', 'MINUS_POINT_TWO', 'MINUS_HALF', 'MINUS_ONE'] },
-    { key: 'GENERAL', label: 'General Controls', aux: true, controls: GENERAL_ITEMS },
+    { key: 'CONTROLLER', label: 'Controller', aux: true, notes: [['NOTE_PITCH', 'Note Pitch', 0, 127], ['NOTE_GATE', 'Note Gate', 0, 1], ['PITCH_BEND', 'Pitch Bend', -8192, 8191]], controls: CONTROLLER_ITEMS },
+    { key: 'CONST', label: 'Constants', aux: true, normed: true, outs: ['ONE', 'HALF', 'NONE', 'MINUS_HALF', 'MINUS_ONE'] },
     ...MODULES.map(m => ({
       key: m.key, label: m.label, module: m,
       inputs: INPUT_ITEMS.filter(i => i.module === m.key),
@@ -1560,22 +1962,24 @@
     return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
 
-  // An item with two slots takes a second row for the second one, under the CC it shares.
+  // Only a controller's slots are on the bus, each with an output for inputs and parameters to
+  // read, the forms of its value in rows of their own below it; a parameter's control slot is its
+  // own, which only the parameter reads, so it has none.
   function controlRowHTML(c, withInput) {
-    const [[slot, label, bipolar], ...more] = c.slots;
-    const tip = bipolar ? 'Bipolar: CC 64 is the centre' : 'Unipolar';
+    const [[slot, label, bipolar], ...forms] = c.slots;
+    const tip = bipolar ? 'Bipolar: value 64 is the centre' : 'Unipolar';
     return `<div class="row ctrl" data-ctrl="${c.key}">
       ${withInput ? `<span class="port in param" data-dst="PR:${c.key}" title="Where ${escapeHTML(c.full)} takes its value (per buffer)"></span>` : ''}
       <span class="lbl" title="${tip}">${escapeHTML(label)}</span>
       <span class="src"${withInput ? ` data-src-of="PR:${c.key}"` : ''}></span>
       <input type="number" class="cc" min="0" max="127" title="CC number, 0 for none">
-      <input type="number" class="val" min="0" max="127" title="CC value">
+      <input type="number" class="val" min="4" max="124" title="CC value">
       <span class="norm" data-slot="${slot}" title="The value the synth sees in the slot"></span>
-      <span class="port out param" data-src="${slot}" title="${escapeHTML(SLOT[slot].full)} control slot"></span>
-    </div>` + more.map(([slot, label, bipolar]) => `<div class="row">
-      <span class="lbl" title="${bipolar ? 'Bipolar: CC 64 is the centre' : 'Unipolar'}, on the CC above">${escapeHTML(label)}</span>
-      <span class="norm" data-slot="${slot}" title="The value the synth sees in the slot"></span>
-      <span class="port out param" data-src="${slot}" title="${escapeHTML(SLOT[slot].full)} control slot"></span>
+      ${withInput ? '' : `<span class="port out param" data-src="${slot}" title="${escapeHTML(SLOT[slot].full)} control slot"></span>`}
+    </div>` + forms.map(([form, formLabel]) => `<div class="row form-row">
+      <span class="lbl right">${escapeHTML(formLabel.replace(c.label, 'Out'))}</span>
+      <span class="norm" data-slot="${form}" title="The value the synth sees in the slot"></span>
+      <span class="port out param" data-src="${form}" title="${escapeHTML(SLOT[form].full)} control slot"></span>
     </div>`).join('');
   }
 
@@ -1583,11 +1987,6 @@
     let h = `<div class="node-head"><span>${escapeHTML(node.label)}</span>`;
     if (node.module) h += `<span class="badge" title="Click to add to or remove from the run order"></span>`;
     h += `</div>`;
-    if (node.module) {
-      for (const o of node.module.outs) {
-        h += `<div class="row"><span class="lbl right">${o.label}</span><span class="port out" data-src="${o.sig}"></span></div>`;
-      }
-    }
     if (node.notes) {
       h += `<div class="sep"><span>Signals</span><span>Value</span><span class="norm-head">Norm</span></div>`;
     }
@@ -1605,8 +2004,14 @@
     for (const i of node.inputs || []) {
       h += `<div class="row input-row"><span class="port in" data-dst="IN:${i.key}" title="Read every sample"></span><span class="lbl">${escapeHTML(i.label)}</span><span class="src" data-src-of="IN:${i.key}"></span></div>`;
     }
+    // A module's outputs come after its inputs, so a node reads from what goes in to what comes out.
+    if (node.module) {
+      for (const o of node.module.outs) {
+        h += `<div class="row"><span class="lbl right">${o.label}</span><span class="port out" data-src="${o.sig}"></span></div>`;
+      }
+    }
     if (node.controls && node.controls.length) {
-      h += `<div class="sep"><span>${node.module ? 'Parameters' : 'Signals'}</span><span>CC</span><span>Value</span><span class="norm-head">Norm</span></div>`;
+      h += `<div class="sep"><span>${node.module ? 'Parameters' : 'Controls'}</span><span>CC#</span><span>Value</span><span class="norm-head">Norm</span></div>`;
       for (const c of node.controls) h += controlRowHTML(c, !!node.module);
     }
     return h + '<div class="rows-end"></div>';
@@ -1617,7 +2022,7 @@
     portEls = {};
     for (const node of NODES) {
       const el = document.createElement('div');
-      el.className = 'node' + (node.aux ? ' aux' : '') + (node.key === 'GENERAL' ? ' general' : '') + (node.key === 'CONST' ? ' const' : '');
+      el.className = 'node' + (node.aux ? ' aux' : '') + (node.key === 'CONTROLLER' ? ' controller' : '') + (node.key === 'CONST' ? ' const' : '');
       el.dataset.node = node.key;
       el.innerHTML = nodeHTML(node);
       const pos = state.layout[node.key];
@@ -1641,16 +2046,22 @@
       const ccIn = row.querySelector('.cc');
       const valIn = row.querySelector('.val');
       if (document.activeElement !== ccIn) ccIn.value = cc;
+      const others = sharingCC(c);
       ccIn.classList.toggle('warn', RESERVED_CCS.has(cc));
+      ccIn.classList.toggle('none', !cc);
+      row.classList.toggle('own', !cc && !c.controller);
+      ccIn.classList.toggle('shared', !RESERVED_CCS.has(cc) && others.length > 0);
       ccIn.title = RESERVED_CCS.has(cc)
-        ? `CC ${cc} carries NRPN selection or data: its value is not sent`
+        ? (cc >= 120 ? `CC#${cc} is a Channel Mode message, not a control: its value is not sent`
+          : `CC#${cc} carries NRPN selection or data: its value is not sent`)
+        : others.length ? `CC number, 0 for none. CC#${cc} also moves ${others.join(', ')}`
         : 'CC number, 0 for none';
-      valIn.disabled = !cc;
-      if (document.activeElement !== valIn) valIn.value = cc ? ccValue(cc) : '';
-      valIn.placeholder = cc ? '' : '—';
+      valIn.disabled = !cc && c.controller;
+      if (document.activeElement !== valIn) valIn.value = cc ? ccValue(cc) : c.controller ? '' : paramValue(c.key);
+      valIn.placeholder = valIn.disabled ? '—' : '';
       valIn.title = cc
-        ? `Value of CC ${cc}, shared by every slot on it`
-        : 'No CC: the slot holds 0.0';
+        ? `Value of CC#${cc}, shared by every slot on it`
+        : c.controller ? 'No CC: the slot holds 0.0' : 'No CC: the slot holds this value, sent as NRPN';
     });
     world.querySelectorAll('.norm[data-slot]').forEach(norm => {
       const own = signalNorm(norm.dataset.slot);
@@ -1684,7 +2095,7 @@
         input.addEventListener('change', () => {
           if (before && before !== JSON.stringify(serialize(state))) pushHistory(before);
           before = JSON.stringify(serialize(state));
-          input.value = input === ccIn ? state.cc[key] : ccValue(state.cc[key]);
+          input.value = input === ccIn ? state.cc[key] : state.cc[key] ? ccValue(state.cc[key]) : CONTROL[key].controller ? '' : paramValue(key);
         });
       }
       ccIn.addEventListener('input', () => {
@@ -1695,8 +2106,64 @@
       });
       valIn.addEventListener('input', () => {
         const cc = state.cc[key];
-        if (!cc || valIn.value === '') return;
-        setCCValue(cc, clamp7(valIn.value), true);
+        if (valIn.value === '') return;
+        if (cc) setCCValue(cc, clampValue(valIn.value), true);
+        else if (!CONTROL[key].controller) setParamValue(key, clampValue(valIn.value), true);
+      });
+      const currentValue = () => (state.cc[key] ? ccValue(state.cc[key]) : paramValue(key));
+      const setValue = v => {
+        const cc = state.cc[key];
+        if (cc) setCCValue(cc, v, true);
+        else setParamValue(key, v, true);
+        valIn.value = currentValue();
+      };
+      // Dragged up and down like a knob: a step every 2 pixels, or every 8 with Shift held for a
+      // fine move. A press that does not move leaves the field to be typed in.
+      valIn.addEventListener('pointerdown', e => {
+        if (valIn.disabled || e.button !== 0) return;
+        const hist = JSON.stringify(serialize(state));
+        const y0 = e.clientY;
+        let lastY = y0;
+        let acc = 0;
+        let moved = false;
+        const move = ev => {
+          if (!moved && Math.abs(ev.clientY - y0) < 3) return;
+          if (!moved) {
+            moved = true;
+            valIn.blur();
+            document.body.classList.add('value-drag');
+          }
+          ev.preventDefault();
+          acc += (lastY - ev.clientY) / (ev.shiftKey ? 8 : 2);
+          lastY = ev.clientY;
+          const step = Math.trunc(acc);
+          if (!step) return;
+          acc -= step;
+          setValue(clampValue(currentValue() + step));
+        };
+        const up = () => {
+          window.removeEventListener('pointermove', move);
+          window.removeEventListener('pointerup', up);
+          window.removeEventListener('pointercancel', up);
+          document.body.classList.remove('value-drag');
+          if (moved && hist !== JSON.stringify(serialize(state))) pushHistory(hist);
+        };
+        window.addEventListener('pointermove', move);
+        window.addEventListener('pointerup', up);
+        window.addEventListener('pointercancel', up);
+      });
+      // The wheel moves the value a step a notch while the field has the focus; elsewhere it
+      // zooms the canvas, so a scroll over the graph does not change a value by accident.
+      valIn.addEventListener('wheel', e => {
+        if (document.activeElement !== valIn || valIn.disabled) return;
+        e.preventDefault();
+        e.stopPropagation();
+        if (!e.deltaY) return;
+        setValue(clampValue(currentValue() + (e.deltaY < 0 ? 1 : -1)));
+      }, { passive: false });
+      valIn.addEventListener('blur', () => {
+        if (before && before !== JSON.stringify(serialize(state))) pushHistory(before);
+        before = JSON.stringify(serialize(state));
       });
     });
   }
@@ -1727,7 +2194,7 @@
     const ordered = conns.filter(c => c.kind.startsWith('param')).concat(conns.filter(c => !c.kind.startsWith('param')));
     for (const c of ordered) {
       const from = portEls['o:' + c.src];
-      const to = portEls['i:' + c.dst];
+      let to = portEls['i:' + c.dst];
       if (!from || !to) continue;
       const d = curve(portPos(from), portPos(to));
       const vis = document.createElementNS(SVG_NS, 'path');
@@ -1792,7 +2259,7 @@
     renderOrder();
     updateExport();
     saveLocal();
-    liveSend();
+    sendChanges();
   }
 
   // ---- View: pan and zoom --------------------------------------------------------------------
@@ -1857,8 +2324,66 @@
     renderWires();
   }
 
+  // Two fingers on the canvas zoom about the point between them and move the view with it. The
+  // second finger ends what the first began: a wire being drawn is dropped, and one picked up from
+  // an input goes back; a node being moved stays where it got to.
+  const touches = new Map();  // pointerId -> where a finger on the canvas is
+  let pinch = null;
+
+  function pinchState() {
+    const [a, b] = [...touches.values()];
+    const r = canvas.getBoundingClientRect();
+    return { cx: (a.x + b.x) / 2 - r.left, cy: (a.y + b.y) / 2 - r.top, d: Math.hypot(a.x - b.x, a.y - b.y) };
+  }
+
+  function cancelDrag() {
+    if (drag.mode === 'wire') {
+      drag.temp.remove();
+      world.querySelectorAll('.port.target').forEach(el => el.classList.remove('target'));
+      if (drag.pushed) restore(undoStack.pop());
+    } else if (drag.mode === 'node') {
+      drag.el.style.zIndex = '';
+      if (drag.moved) {
+        pushHistory(drag.snapshot);
+        saveLocal();
+      }
+    }
+    canvas.classList.remove('panning');
+    drag = null;
+  }
+
+  // In the capture phase, so the second finger is seen before the handler below would start a drag.
   canvas.addEventListener('pointerdown', e => {
-    if (e.button !== 0) return;
+    if (e.pointerType !== 'touch' || e.target.closest('input, button, select, textarea')) return;
+    touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (touches.size !== 2) return;
+    if (drag) cancelDrag();
+    pinch = pinchState();
+    viewTouched = true;
+  }, true);
+
+  window.addEventListener('pointermove', e => {
+    if (!touches.has(e.pointerId)) return;
+    touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (!pinch || touches.size !== 2) return;
+    const next = pinchState();
+    view.x += next.cx - pinch.cx;
+    view.y += next.cy - pinch.cy;
+    zoomAt(pinch.d > 0 ? next.d / pinch.d : 1, next.cx, next.cy);
+    pinch = next;
+  });
+
+  function liftTouch(e) {
+    touches.delete(e.pointerId);
+    if (touches.size < 2) pinch = null;
+  }
+  window.addEventListener('pointerup', liftTouch);
+  window.addEventListener('pointercancel', liftTouch);
+  // Safari's own pinch would zoom the page as well.
+  canvas.addEventListener('gesturestart', e => e.preventDefault());
+
+  canvas.addEventListener('pointerdown', e => {
+    if (e.button !== 0 || pinch) return;
     const t = e.target;
     if (t.closest('input, button, select, textarea')) return;
     const port = t.closest('.port');
@@ -2129,6 +2654,10 @@
   document.getElementById('btn-init').addEventListener('click', () => {
     pushHistory();
     state = defaultState();
+    // The parameters with no CC on the Controls tab are hidden again.
+    showNoCC = false;
+    document.getElementById('show-no-cc').checked = false;
+    try { localStorage.setItem(SHOW_NO_CC_KEY, ''); } catch (e) { /* storage unavailable */ }
     renderAll();
     fitView();
   });
@@ -2153,7 +2682,7 @@
     if (webSynthOutput && id === webSynthOutput.id) return webSynthOutput;
     return (midiAccess && midiAccess.outputs.get(id)) || null;
   }
-  // What the device was last sent, so Live mode can send only what changed.
+  // What the device was last sent, so that a change sends only what it changed.
   let lastSent = null;
 
   const chSelect = document.getElementById('midi-ch');
@@ -2235,9 +2764,7 @@
     const next = outputById(document.getElementById('midi-out').value);
     if (next !== midiOutput) lastSent = null;
     midiOutput = next;
-    // SPMS-1 Web starts with the default patch, so it is given the patch shown, Live or not.
-    if (midiOutput && midiOutput === webSynthOutput && !lastSent) sendAll();
-    liveSend();
+    sendChanges();
   }
 
   // What the synth holds for each channel, kept by the same rules as spms1_midi_state.h: a note on
@@ -2280,27 +2807,33 @@
       }
     } else if (cmd === 0xE0) {
       n.bend = ((data2 << 7) | data1) - 8192;
+    } else if (cmd === 0xB0 && data1 === 121) {
+      n.bend = 0;
+    } else if (cmd === 0xB0 && data1 >= 120 && data1 !== 122) {
+      n.gate = 0;
+      n.prev = null;
+      n.heldBy = null;
     } else {
       return;
     }
     if (ch === exportOptions().ch) refreshNoteNode();
   }
 
-  // The values spms1_main.rb writes to SIGNAL_PITCH, SIGNAL_GATE and SIGNAL_BEND.
+  // The values spms1_main.rb writes to SIGNAL_NOTE_PITCH, SIGNAL_NOTE_GATE and SIGNAL_PITCH_BEND.
   function refreshNoteNode() {
     const n = noteStates[exportOptions().ch];
     const norms = noteNorms(n, true);
     const shown = {
-      PITCH: [n.pending ?? n.pitch, norms.PITCH],
-      GATE: [n.gate, norms.GATE],
-      BEND: [n.bend, norms.BEND],
+      NOTE_PITCH: [n.pending ?? n.pitch, norms.NOTE_PITCH],
+      NOTE_GATE: [n.gate, norms.NOTE_GATE],
+      PITCH_BEND: [n.bend, norms.PITCH_BEND],
     };
     world.querySelectorAll('.note-row').forEach(row => {
       const [value, norm] = shown[row.dataset.noteSig];
       const input = row.querySelector('.nv');
       if (document.activeElement !== input) input.value = value;
       row.querySelector('.norm').textContent = norm;
-      if (row.dataset.noteSig === 'PITCH') {
+      if (row.dataset.noteSig === 'NOTE_PITCH') {
         const pending = n.pending !== null;
         row.classList.toggle('pending', pending);
         row.title = pending ? `Sent with the next Gate on. The synth still holds ${n.pitch}.` : '';
@@ -2308,6 +2841,8 @@
     });
     refreshSourceValues();
     refreshSliders();
+    const bendWheel = document.getElementById('bend-wheel');
+    if (!bendWheel.matches(':active')) bendWheel.value = n.bend;
   }
 
   // withPending shows a pitch still waiting for its gate, which the synth does not have yet.
@@ -2315,9 +2850,9 @@
     const signed = v => (v < 0 ? '-' : '+') + Math.abs(v).toFixed(3);
     const pitch = withPending ? (n.pending ?? n.pitch) : n.pitch;
     return {
-      PITCH: signed(pitch / 120 - 0.5),
-      GATE: n.gate.toFixed(3),
-      BEND: signed(Math.floor((n.bend + 1) / 2) / 8192),
+      NOTE_PITCH: signed(pitch / 120 - 0.5),
+      NOTE_GATE: n.gate.toFixed(3),
+      PITCH_BEND: signed(Math.floor((n.bend + 1) / 2) / 8192),
     };
   }
 
@@ -2330,7 +2865,7 @@
         const v = Math.max(+input.min, Math.min(+input.max, Math.round(Number(input.value) || 0)));
         const n = noteStates[exportOptions().ch];
         switch (row.dataset.noteSig) {
-        case 'PITCH':
+        case 'NOTE_PITCH':
           // A glide, as on the soft keyboard: the note off after the note on leaves the synth
           // nothing to come back to, which would keep the gate open when the key is released.
           if (n.gate) {
@@ -2346,7 +2881,7 @@
             refreshNoteNode();
           }
           break;
-        case 'GATE':
+        case 'NOTE_GATE':
           if (v === n.gate) break;
           if (v) {
             sendNote(0x90, n.pending ?? n.pitch, 100);
@@ -2356,7 +2891,7 @@
             sendNote(0x80, n.pitch, 0);
           }
           break;
-        case 'BEND':
+        case 'PITCH_BEND':
           sendBend(v);
           break;
         }
@@ -2383,13 +2918,30 @@
     } else if (cmd === 0xB0) {
       const [, cc, value] = data;
       // The synth already has it from the pass-through.
+      if (cc >= 120) {
+        receiveChannelMode(cc);
+        return;
+      }
       receiveNRPN(cc, value);
       if (ccInUse(cc)) setCCValue(cc, value, false);
     }
   }
 
+  // Follows the Channel Mode messages as spms1_handle_channel_mode in spms1_midi_state.h takes
+  // them; trackNote has already followed the note and the bend. Reset All Controllers sets the
+  // Modulation Wheel, CC 1, to 0 and leaves no NRPN selected; the rest but Local Control end every
+  // note, so no key stays lit.
+  function receiveChannelMode(cc) {
+    if (cc === 121) {
+      nrpnSelect.selected = false;
+      if (ccInUse(1)) setCCValue(1, 0, false);
+    } else if (cc !== 122) {
+      for (let note = 0; note < 128; note++) setKeyActive(note, false);
+    }
+  }
+
   // Follows NRPN edits arriving at MIDI In by the rules of handle_midi_nrpn_cc in
-  // spms1_type2.ino, so the patch shown stays the one the synth was passed.
+  // spms1_midi_state.h, so the patch shown stays the one the synth was passed.
   const nrpnSelect = { msb: 0, lsb: 0, selected: false };
 
   function receiveNRPN(cc, value) {
@@ -2410,25 +2962,33 @@
   // slots past it are remembered here for a later write to reconnect them; the mirror is reset
   // whenever the order was changed from the editor.
   let orderMirror = new Array(MODULES_SIZE).fill(0);
+  // When each slot was last written, as a count of the writes, as the synth keeps it.
+  let orderWritten = new Array(MODULES_SIZE).fill(0);
+  let orderWrites = 0;
 
   function orderFromMirror() {
-    const order = [];
-    for (const id of orderMirror) {
-      if (id === 0) break;
-      const m = MODULES.find(m => m.id === id);
-      // An unknown id or a second copy runs on the synth, but the editor cannot show either.
-      if (m && !order.includes(m.key)) order.push(m.key);
+    const listed = [];
+    for (let i = 0; i < MODULES_SIZE && orderMirror[i] !== 0; i++) {
+      const m = MODULES.find(m => m.id === orderMirror[i]);
+      // An unknown id runs on the synth as nothing, and the editor cannot show it.
+      if (m) listed.push({ key: m.key, written: orderWritten[i] });
     }
-    return order;
+    // A module listed twice runs once on the synth, at the slot written last (the last write
+    // wins), and on a tie at the later slot.
+    return listed.filter((e, i) => listed.every((o, j) =>
+      o.key !== e.key || j === i || (j < i ? o.written <= e.written : o.written < e.written)
+    )).map(e => e.key);
   }
 
   function applyNRPN(nrpn, value) {
     if (nrpn < MODULES_SIZE) {
       if (JSON.stringify(orderFromMirror()) !== JSON.stringify(state.order)) {
         orderMirror = new Array(MODULES_SIZE).fill(0);
+        orderWritten = new Array(MODULES_SIZE).fill(0);
         state.order.forEach((k, i) => { orderMirror[i] = MOD[k].id; });
       }
       orderMirror[nrpn] = value;
+      orderWritten[nrpn] = ++orderWrites;
       state.order = orderFromMirror();
     } else if (nrpn >= 128 && nrpn < 256 && INPUT_BY_ENTRY[nrpn - 128]) {
       state.inputs[INPUT_BY_ENTRY[nrpn - 128].key] = SIGNAL_NAMES[value] || 'NONE';
@@ -2437,10 +2997,12 @@
       state.params[p.key] = SIGNAL_NAMES[value] || p.key;
     } else if (nrpn >= 384 && nrpn < 512 && CONTROL_BY_ENTRY[nrpn - 384]) {
       state.cc[CONTROL_BY_ENTRY[nrpn - 384].key] = value;
+    } else if (nrpn >= 512 && nrpn < 640 && PARAM_BY_ENTRY[nrpn - 512]) {
+      state.paramValues[PARAM_BY_ENTRY[nrpn - 512].key] = clampValue(value);
     } else {
       return;
     }
-    // The synth already has it, so Live mode must not send it back.
+    // The synth already has it, so it must not be sent back.
     if (lastSent) lastSent.set('n' + nrpn, value);
     renderControls();
     renderWires();
@@ -2454,12 +3016,29 @@
     return cc && !RESERVED_CCS.has(cc) && CONTROL_ITEMS.some(c => state.cc[c.key] === cc);
   }
 
-  // A CC value is a knob position rather than part of the routing, so it goes out whether or not
-  // Live is on, as the old slider page did.
+  // A CC value is a knob position rather than part of the routing, so it goes out as a CC of its
+  // own.
   function setCCValue(cc, value, send) {
+    value = clampValue(value);
     state.values[cc] = value;
     if (send && midiOutput) midiOutput.send([0xB0 | exportOptions().ch, cc, value]);
     if (lastSent) lastSent.set('c' + cc, value);
+    refreshControls();
+    updateExport();
+    saveLocal();
+  }
+
+  // A parameter's value with no CC is part of the patch, but moved like a knob, so it goes out at
+  // once too, as one NRPN write.
+  function setParamValue(key, value, send) {
+    value = clampValue(value);
+    state.paramValues[key] = value;
+    const nrpn = 512 + CONTROL[key].entry;
+    if (send && midiOutput) {
+      const st = 0xB0 | exportOptions().ch;
+      midiOutput.send([st, 99, nrpn >> 7, st, 98, nrpn & 0x7F, st, 6, value, st, 101, 127, st, 100, 127]);
+    }
+    if (lastSent) lastSent.set('n' + nrpn, value);
     refreshControls();
     updateExport();
     saveLocal();
@@ -2480,8 +3059,11 @@
     lastSent = snapshotTable();
   }
 
-  function liveSend() {
-    if (!midiOutput || !document.getElementById('live').checked) return;
+  // Every routing, run order or CC assignment change goes out as it is made, as what differs from
+  // what the device was last sent. A device that has been sent nothing yet, being newly chosen or
+  // on a newly chosen channel, is sent the whole patch first, so that it plays what is shown.
+  function sendChanges() {
+    if (!midiOutput) return;
     if (!lastSent) {
       sendAll();
       return;
@@ -2505,10 +3087,7 @@
 
   document.getElementById('midi-in').addEventListener('change', () => { handleDeviceChange(); saveMIDISettings(); });
   document.getElementById('midi-out').addEventListener('change', () => { handleDeviceChange(); saveMIDISettings(); });
-  chSelect.addEventListener('change', () => { lastSent = null; nrpnSelect.selected = false; updateExport(); refreshNoteNode(); saveMIDISettings(); liveSend(); });
-  document.getElementById('live').addEventListener('change', e => {
-    if (e.target.checked) sendAll();
-  });
+  chSelect.addEventListener('change', () => { lastSent = null; nrpnSelect.selected = false; updateExport(); refreshNoteNode(); saveMIDISettings(); sendChanges(); });
   document.getElementById('btn-send').addEventListener('click', sendAll);
 
   // ---- Export panel --------------------------------------------------------------------------
@@ -2533,41 +3112,51 @@
   // ---- Controls tab --------------------------------------------------------------------------
 
   // Each slider follows its slot's CC assignment in the patch, and moves the value of that CC.
+  // The panels in the signal order of the patch's default layout, top to bottom, then left to right.
+  // The general controls have sliders here, and the mod wheel its wheel by the soft keyboard.
   const CONTROL_PANELS = [
-    { col: 0, title: 'General', general: true },
-    { col: 1, title: 'LFO', module: 'LFO_1' },
-    { col: 1, title: 'EG', module: 'ENV_GEN_1' },
-    { col: 2, title: 'Osc', module: 'OSC_1' },
-    { col: 2, title: 'Filter', module: 'FILTER_1' },
-    { col: 3, title: 'Amp', module: 'AMP_1' },
-    { col: 3, title: 'Chorus', module: 'CHORUS_1' },
-    { col: 3, title: 'Delay', module: 'DELAY_1' },
+    { col: 0, title: 'Controller', module: null },
+    { col: 0, title: 'Pitch 1', module: 'PITCH_1' },
+    { col: 0, title: 'EG 1', module: 'EG_1' },
+    { col: 0, title: 'EG 2', module: 'EG_2' },
+    { col: 1, title: 'LFO 1', module: 'LFO_1' },
+    { col: 1, title: 'Mixer 1', module: 'MIXER_1' },
+    { col: 1, title: 'Osc 1', module: 'OSC_1' },
+    { col: 2, title: 'Osc 2', module: 'OSC_2' },
+    { col: 2, title: 'Noise 1', module: 'NOISE_1' },
+    { col: 2, title: 'Mixer 2', module: 'MIXER_2' },
+    { col: 3, title: 'Filter 1', module: 'FILTER_1' },
+    { col: 3, title: 'Amp 1', module: 'AMP_1' },
+    { col: 3, title: 'Chorus 1', module: 'CHORUS_1' },
+    { col: 3, title: 'Delay 1', module: 'DELAY_1' },
   ];
-  CONTROL_PANELS.push({ col: 1, title: 'Mixer 1', module: 'MIXER_1', onlyWithCC: true });
 
   function panelItems(p) {
-    return p.general ? GENERAL_ITEMS : PARAM_ITEMS.filter(c => c.module === p.module);
+    if (!p.module) return CONTROLLER_ITEMS.filter(c => c.key !== 'MOD_WHEEL');
+    return PARAM_ITEMS.filter(c => c.module === p.module);
   }
 
   // What the synth writes to a control slot, as a CC value: the CC's own value while one is
-  // assigned, and 0.0 while none is, as cc_or_zero in spms1_main.rb does. null is a slot written
-  // from a reserved CC, whose value the editor does not track.
+  // assigned, and while none is, a parameter's value from NRPN category 4 and 0.0 for the mod
+  // wheel's slot, as cc_or_nrpn and cc_or_zero in spms1_main.rb do. null is a slot written from a reserved
+  // CC, whose value the editor does not track.
   function slotValue(c, bipolar) {
     const cc = state.cc[c.key];
-    if (!cc) return bipolar ? 64 : 4;
+    if (!cc) return c.controller ? (bipolar ? 64 : 4) : paramValue(c.key);
     return RESERVED_CCS.has(cc) ? null : ccValue(cc);
   }
 
   const CONSTANT_NORMS = {
-    NONE: '0.000', ONE: '+1.000', HALF: '+0.500', POINT_TWO: '+0.200', POINT_ONE: '+0.100', MINUS_POINT_ONE: '-0.100', MINUS_POINT_TWO: '-0.200', MINUS_HALF: '-0.500', MINUS_ONE: '-1.000',
+    NONE: '0.000', ONE: '+1.000', HALF: '+0.500', MINUS_HALF: '-0.500', MINUS_ONE: '-1.000',
   };
 
   // What a signal reads as normalized, or null where the editor cannot know it: a module output.
   function signalNorm(sig) {
     const slot = SLOT[sig];
     if (slot) {
-      const v = slotValue(slot.c, slot.bipolar);
-      return v == null ? null : { text: normalized(slot.bipolar, v) };
+      const v = slotValue(slot.c, slot.form ? false : slot.bipolar);
+      if (v == null) return null;
+      return { text: slot.form ? formed(slot.form, v) : normalized(slot.bipolar, v) };
     }
     if (sig in CONSTANT_NORMS) return { text: CONSTANT_NORMS[sig] };
     const notes = noteNorms(noteStates[exportOptions().ch], false);
@@ -2591,7 +3180,30 @@
     return Math.max(0, Math.min(1, (value - 4) / 120)).toFixed(3);
   }
 
+  // A form of a controller's unipolar value u, as spms1_main.rb writes it to its slot.
+  const FORMS = {
+    rev: u => 1 - u, inv: u => -u, rev_inv: u => u - 1, bipolar: u => u - 0.5, bipolar_inv: u => 0.5 - u,
+  };
+  function formed(form, value) {
+    const v = FORMS[form](Math.max(0, Math.min(1, (value - 4) / 120)));
+    return form === 'rev' ? v.toFixed(3) : (v < 0 ? '-' : '+') + Math.abs(v).toFixed(3);
+  }
+
   let sliderBefore = null;
+
+  // Parameters with no CC are hidden on the controls unless asked for, and a CC given to one
+  // brings it there. Shown, its slider sets the value its slot holds, through NRPN. The choice is
+  // kept, as the tab is.
+  const SHOW_NO_CC_KEY = 'spms1-type2-editor-show-no-cc';
+  let showNoCC = false;
+  try { showNoCC = localStorage.getItem(SHOW_NO_CC_KEY) === '1'; } catch (e) { /* storage unavailable */ }
+  document.getElementById('show-no-cc').checked = showNoCC;
+  document.getElementById('show-no-cc').addEventListener('change', e => {
+    showNoCC = e.target.checked;
+    try { localStorage.setItem(SHOW_NO_CC_KEY, showNoCC ? '1' : ''); } catch (err) { /* storage unavailable */ }
+    renderControls();
+    fitTabArea();
+  });
 
   function renderControls() {
     const root = document.getElementById('controls');
@@ -2601,32 +3213,41 @@
     const cols = [0, 1, 2, 3].map(() => document.createElement('div'));
     cols.forEach(c => { c.className = 'editor-column'; });
     for (const p of CONTROL_PANELS) {
-      const items = panelItems(p);
-      // A mixer has no CC by default, so its panel appears only once a patch gives it one.
-      if (p.onlyWithCC && !items.some(c => state.cc[c.key])) continue;
+      const items = panelItems(p).filter(c => showNoCC || state.cc[c.key]);
+      // Mixer 1 has no CC by default, so its panel appears only once a patch gives it one, or
+      // with the parameters that have none shown.
+      if (!items.length) continue;
       const panel = document.createElement('div');
       panel.className = 'panel';
       panel.innerHTML = `<h2>${p.title}</h2><div class="control-row">` + items.map(c => `
         <div class="slider-knob-zone" data-ctrl="${c.key}">
-          <div class="slider-label">${escapeHTML(/^\d$/.test(c.label) ? c.full : c.label)} <span class="cc-num"></span></div>
+          <button type="button" class="fav-toggle" aria-pressed="false">&#9733;</button>
+          <div class="slider-label">${escapeHTML(c.label)} <span class="ctl-sub"><span class="ctl-hint"></span><span class="cc-num"></span></span></div>
           <div class="slider-input-wrapper">
-            <input type="range" min="0" max="127"${c.slots.some(([, , bipolar]) => bipolar) ? ' class="bipolar"' : ''}>
+            <span class="range-wrap"><input type="range" min="4" max="124">${c.bipolar ? '<span class="centre-tick"></span>' : ''}</span>
             <span class="slider-value"></span>
             <span class="slider-norm" title="The value the synth sees in the slot"></span>
           </div>
         </div>`).join('') + '</div>';
       cols[p.col].appendChild(panel);
     }
-    cols[3].appendChild(document.getElementById('init-values'));
+    cols[3].appendChild(document.getElementById('controls-foot'));
     root.replaceChildren(...cols);
     root.querySelectorAll('.slider-knob-zone').forEach(zone => {
       const c = CONTROL[zone.dataset.ctrl];
       const slider = zone.querySelector('input');
+      zone.querySelector('.fav-toggle').addEventListener('click', () => {
+        pushHistory();
+        if (state.favorites.has(c.key)) state.favorites.delete(c.key);
+        else state.favorites.add(c.key);
+        commit();
+      });
       slider.addEventListener('pointerdown', () => { sliderBefore = JSON.stringify(serialize(state)); });
       slider.addEventListener('focus', () => { sliderBefore = JSON.stringify(serialize(state)); });
       slider.addEventListener('input', () => {
         const cc = state.cc[c.key];
         if (ccInUse(cc)) setCCValue(cc, parseInt(slider.value), true);
+        else if (!cc && !c.controller) setParamValue(c.key, parseInt(slider.value), true);
       });
       slider.addEventListener('change', () => {
         if (sliderBefore && sliderBefore !== JSON.stringify(serialize(state))) pushHistory(sliderBefore);
@@ -2636,21 +3257,53 @@
     refreshSliders();
   }
 
+  // What goes in parentheses after c's name: a fixed note on its range, or what feeds the inputs
+  // it scales, as the patch routes them, by the module's name and the output's past "Out", and a
+  // note signal without its "Note".
+  function controlHint(c) {
+    if (!c.hintInputs) return c.hint || '';
+    const srcs = c.hintInputs.map(k => state.inputs[`${c.module}_${k}`]);
+    if (srcs.every(s => s === 'NONE')) return '';
+    return srcs.map(s => s === 'NONE' ? 'none' : sigLabel(s).replace(/ Out(?=$| [^0-9])/, '').replace(/^Note /, '')).join(' to ');
+  }
+
+  // The other parameters on c's CC, by their full names, none when it has no CC of its own.
+  function sharingCC(c) {
+    const cc = state.cc[c.key];
+    if (!cc) return [];
+    return CONTROL_ITEMS.filter(o => o !== c && state.cc[o.key] === cc).map(o => o.full);
+  }
+
   function refreshSliders() {
     document.querySelectorAll('#controls .slider-knob-zone').forEach(zone => {
       const c = CONTROL[zone.dataset.ctrl];
       const cc = state.cc[c.key];
       const slider = zone.querySelector('input');
-      const usable = ccInUse(cc);
+      const ownValue = !cc && !c.controller;
+      const usable = ccInUse(cc) || ownValue;
       const src = state.params[c.key];
       const routed = src !== undefined && src !== c.key;
       zone.classList.toggle('routed', routed);
-      zone.querySelector('.cc-num').innerHTML =
-        (!cc ? '(no CC)' : RESERVED_CCS.has(cc) ? `(CC ${cc}, reserved)` : `(CC ${cc})`) +
+      zone.classList.toggle('own', ownValue);
+      const fav = state.favorites.has(c.key);
+      zone.classList.toggle('fav', fav);
+      const star = zone.querySelector('.fav-toggle');
+      star.setAttribute('aria-pressed', String(fav));
+      star.title = fav ? 'Favorite: click to unmark' : 'Mark as a favorite';
+      const others = sharingCC(c);
+      const hint = controlHint(c);
+      zone.querySelector(".ctl-hint").textContent = hint ? `(${hint}) ` : '';
+      const ccNum = zone.querySelector('.cc-num');
+      ccNum.innerHTML =
+        (!cc ? (ownValue ? '' : '(no CC)') : RESERVED_CCS.has(cc) ? `(CC#${cc}, reserved)` : `(CC#${cc})`) +
         (routed ? ` ← ${sourceHTML(src)}` : '');
+      ccNum.classList.toggle('shared', others.length > 0);
+      ccNum.title = others.length ? `CC#${cc} also moves ${others.join(', ')}` : '';
       zone.title = routed ? `${c.full} reads ${sigLabel(src)}. This slider sets only its own slot, which other wires may read.` : '';
+      // A name cut short in four columns can be read whole here.
+      zone.querySelector('.slider-label').title = zone.querySelector('.slider-label').textContent.trim();
       slider.disabled = !usable;
-      const value = usable ? ccValue(cc) : 64;
+      const value = ownValue ? paramValue(c.key) : usable ? ccValue(cc) : 64;
       if (document.activeElement !== slider) slider.value = value;
       zone.querySelector('.slider-value').textContent = usable ? String(value) : '—';
       const own = signalNorm(c.slots[0][0]);
@@ -2658,7 +3311,54 @@
       norm.textContent = own ? own.text : '';
       norm.title = 'The value the synth sees in the slot';
     });
+    refreshModWheel();
+    world.querySelectorAll('.row.ctrl .lbl').forEach(lbl => {
+      const c = CONTROL[lbl.closest('.row').dataset.ctrl];
+      const hint = controlHint(c);
+      lbl.title = (hint ? `${c.label} (${hint}). ` : '') + (c.bipolar ? 'Bipolar: value 64 is the centre' : 'Unipolar');
+      lbl.closest('.row').classList.toggle('fav', state.favorites.has(c.key));
+    });
   }
+
+  // The mod wheel by the soft keyboard moves the value of the CC Mod Wheel is on in the patch, as
+  // a slider does its parameter's. With no CC, or a reserved one, the slot holds 0.0 and the wheel
+  // is held at its bottom.
+  function refreshModWheel() {
+    const modWheel = document.getElementById('mod-wheel');
+    const cc = state.cc.MOD_WHEEL;
+    const usable = ccInUse(cc);
+    modWheel.disabled = !usable;
+    if (document.activeElement !== modWheel) modWheel.value = usable ? ccValue(cc) : 4;
+    const v = signalNorm('MOD_WHEEL');
+    document.getElementById('mod-wheel-zone').title = usable
+      ? `Mod Wheel (CC#${cc}): ${ccValue(cc)}${v ? `, ${v.text}` : ''}`
+      : 'Mod Wheel: no CC in the patch, so the slot holds 0.0';
+  }
+
+  // The pitch bend wheel sends Pitch Bend as it moves, -8192 at the bottom to +8191 at the top,
+  // and springs back to the centre, sending 0, when it is let go.
+  const bendWheel = document.getElementById('bend-wheel');
+  bendWheel.addEventListener('input', () => sendBend(parseInt(bendWheel.value)));
+  const bendRelease = () => {
+    if (parseInt(bendWheel.value) === 0 && noteStates[exportOptions().ch].bend === 0) return;
+    bendWheel.value = 0;
+    sendBend(0);
+    refreshNoteNode();
+  };
+  for (const type of ['pointerup', 'pointercancel', 'keyup', 'blur']) bendWheel.addEventListener(type, bendRelease);
+
+  const modWheel = document.getElementById('mod-wheel');
+  let modWheelBefore = null;
+  modWheel.addEventListener('pointerdown', () => { modWheelBefore = JSON.stringify(serialize(state)); });
+  modWheel.addEventListener('focus', () => { modWheelBefore = JSON.stringify(serialize(state)); });
+  modWheel.addEventListener('input', () => {
+    const cc = state.cc.MOD_WHEEL;
+    if (ccInUse(cc)) setCCValue(cc, parseInt(modWheel.value), true);
+  });
+  modWheel.addEventListener('change', () => {
+    if (modWheelBefore && modWheelBefore !== JSON.stringify(serialize(state))) pushHistory(modWheelBefore);
+    modWheelBefore = JSON.stringify(serialize(state));
+  });
 
   document.getElementById('init-values').addEventListener('click', () => {
     pushHistory();
@@ -2666,10 +3366,19 @@
       const cc = state.cc[c.key];
       if (ccInUse(cc) && c.defaultValue != null) state.values[cc] = c.defaultValue;
     });
+    PARAM_ITEMS.forEach(p => { state.paramValues[p.key] = p.defaultValue; });
     if (midiOutput) {
       const st = 0xB0 | exportOptions().ch;
       ccEntries().forEach(e => midiOutput.send([st, e.cc, e.value]));
-      if (lastSent) ccEntries().forEach(e => lastSent.set('c' + e.cc, e.value));
+      PARAM_ITEMS.forEach(p => {
+        const nrpn = 512 + p.entry;
+        midiOutput.send([st, 99, nrpn >> 7, st, 98, nrpn & 0x7F, st, 6, p.defaultValue]);
+      });
+      midiOutput.send([st, 101, 127, st, 100, 127]);
+      if (lastSent) {
+        ccEntries().forEach(e => lastSent.set('c' + e.cc, e.value));
+        PARAM_ITEMS.forEach(p => lastSent.set('n' + (512 + p.entry), p.defaultValue));
+      }
     }
     refreshControls();
     updateExport();
@@ -2686,7 +3395,7 @@
   }
 
   const KB_NOTE_MAX = 120;
-  const KB_KEY_WIDTH = 22;  // a semitone in the upper half, times kbScale; 37 keys fit a 960px window
+  const KB_KEY_WIDTH = 20;  // a semitone in the upper half, times kbScale; 37 keys fit 960px, with room
   // The center of 37 keys from a C (C3 - C6 by default), in semitones from the left end of the C.
   const KB_CENTER_OFFSET = (36 + 5 / 3) / 2;
   const KB_DEFAULT_C = 48;  // C3
@@ -2699,7 +3408,7 @@
   let kbHold = false;
   let kbLast = -1;  // the note of the last press
   let kbScale = 1;
-  const kbPrefs = { center: KB_DEFAULT_C + KB_CENTER_OFFSET };
+  const kbPrefs = { center: KB_DEFAULT_C + KB_CENTER_OFFSET, hidden: false };
 
   function loadKbPrefs() {
     try { Object.assign(kbPrefs, JSON.parse(localStorage.getItem(KB_STORAGE_KEY))); } catch (e) { /* storage unavailable */ }
@@ -2759,18 +3468,14 @@
     if (!on) [...kbHeld].forEach(n => { kbHeld.delete(n); sendNote(0x80, n, 0); });
   }
 
-  // The synth ignores All Notes Off, and a CC 123 would move whatever parameter is mapped to it,
-  // so Panic sends a Note Off on every note instead.
+  // Panic sends All Sound Off, which ends every note, and centres Pitch Bend.
   function kbPanic() {
     kbPointers.clear();
     kbHeld.clear();
     const ch = exportOptions().ch;
-    for (let note = 0; note < 128; note++) {
-      if (midiOutput) midiOutput.send([0x80 | ch, note, 0]);
-      setKeyActive(note, false);
-    }
-    noteStates[ch].prev = null;
-    trackNote(ch, 0x80, noteStates[ch].pitch, 0);
+    if (midiOutput) midiOutput.send([0xB0 | ch, 120, 0]);
+    trackNote(ch, 0xB0, 120, 0);
+    for (let note = 0; note < 128; note++) setKeyActive(note, false);
     sendBend(0);
   }
 
@@ -2844,12 +3549,13 @@
     }
   }
 
-  // Not while typing in a field or choosing in a select, which picks an item by its letter, and
-  // not with Ctrl, Alt or Command, which belong to the browser's shortcuts.
+  // Not while the keyboard is hidden, nor while typing in a field or choosing in a select, which
+  // picks an item by its letter, and not with Ctrl, Alt or Command, which belong to the
+  // browser's shortcuts.
   function kbPcKeyEnabled(e) {
     const t = e.target;
     const tag = t.tagName;
-    return !e.ctrlKey && !e.altKey && !e.metaKey &&
+    return !kbPrefs.hidden && !e.ctrlKey && !e.altKey && !e.metaKey &&
       tag !== 'SELECT' && tag !== 'TEXTAREA' && !t.isContentEditable &&
       !(tag === 'INPUT' && t.type !== 'range' && t.type !== 'button' && t.type !== 'checkbox');
   }
@@ -2944,6 +3650,8 @@
     const scroll = document.getElementById('kb-scroll');
     let saveTimer = null;
     scroll.addEventListener('scroll', () => {
+      // A hidden keyboard has no width, so where it scrolls to then is not a position to keep.
+      if (kbPrefs.hidden) return;
       kbUpdateScrollbar();
       clearTimeout(saveTimer);
       saveTimer = setTimeout(() => { kbPrefs.center = kbGetCenter(); saveKbPrefs(); }, 200);
@@ -2972,15 +3680,54 @@
     });
     ['pointerup', 'pointercancel'].forEach(type => bar.addEventListener(type, () => { drag = null; }));
 
+    document.getElementById('kbd-toggle').addEventListener('click', () => kbSetVisible(kbPrefs.hidden));
+
     kbFitScale();
     kbSetCenter(kbPrefs.center);
     // The text size can change without a resize of the window.
     if (window.ResizeObserver) new ResizeObserver(() => kbFitScale()).observe(document.getElementById('kbd-label'));
+    kbSetVisible(!kbPrefs.hidden);
+  }
+
+  // Shown or hidden, as the last time. Hiding lets go of the keys held and of Hold, so that no
+  // note is left on with nothing in sight to turn it off. A hidden keyboard cannot be scrolled,
+  // so its position is set again when it is shown. The tab above takes the height it leaves.
+  function kbSetVisible(visible) {
+    if (!visible) {
+      [...kbPointers.keys()].forEach(kbRelease);
+      kbSetHold(false);
+    }
+    document.getElementById('kbd-panel').classList.toggle('collapsed', !visible);
+    document.getElementById('kbd-toggle').setAttribute('aria-expanded', String(visible));
+    kbPrefs.hidden = !visible;
+    saveKbPrefs();
+    if (visible) {
+      kbFitScale();
+      kbSetCenter(kbPrefs.center);
+    }
+    fitTabArea();
+    if (!document.getElementById('tab-patch').hidden) {
+      if (!viewTouched) fitView();
+      renderWires();
+    }
   }
 
   // ---- Tabs ----------------------------------------------------------------------------------
 
   const TAB_KEY = 'spms1-type2-editor-tab';
+
+  // From 1641 pixels, where the page around the panels is packed tighter (see the CSS), the MIDI
+  // settings go up into the header, between the title and the tabs, so they take no line of their
+  // own; below it they keep their own line under the header.
+  const WIDE_HEADER = window.matchMedia('(min-width: 1641px)');
+  function placeMIDIPanel() {
+    const header = document.querySelector('header');
+    const panel = document.querySelector('.midi-panel');
+    if (WIDE_HEADER.matches) header.insertBefore(panel, header.querySelector('.tabs'));
+    else header.after(panel);
+    header.classList.toggle('with-midi', WIDE_HEADER.matches);
+  }
+  WIDE_HEADER.addEventListener('change', () => { placeMIDIPanel(); fitTabArea(); });
 
   function showTab(name) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
@@ -2997,7 +3744,11 @@
   // The tab runs from wherever the header and MIDI bar leave it, which moves as they wrap, to
   // the soft keyboard at the bottom of the window. The patch area, or in one column its canvas,
   // takes that height; the controls take at least it, so the keyboard does not move when the tab
-  // changes.
+  // changes. Zoomed in, the patch area keeps the height it has at 100%, as the controls keep
+  // theirs, so the keyboard moves down the page rather than squeezing the canvas. The zoom is the
+  // outer width of the window over the inner: the outer is in screen pixels, which zoom leaves
+  // alone, where the browser says so (Chrome, Edge, Safari); where it does not, the ratio stays
+  // near 1 and the area fits the window as it does at 100%.
   function fitTabArea() {
     const controls = document.getElementById('tab-controls');
     const app = document.getElementById('tab-patch');
@@ -3009,14 +3760,19 @@
     const top = (controls.hidden ? canvas : controls).getBoundingClientRect().top + window.scrollY;
     const keyboard = document.getElementById('kbd-panel').offsetHeight;
     const height = window.innerHeight - top - 16 - keyboard - 20;
+    const zoom = Math.min(5, Math.max(1, Math.round(window.outerWidth / window.innerWidth * 20) / 20));
+    const heightAt100 = Math.round(window.innerHeight * zoom) - top - 16 - keyboard - 20;
     const narrow = matchMedia('(max-width: 800px)').matches;
     if (!controls.hidden) {
       if (!narrow) controls.style.minHeight = height + 'px';
     } else if (!app.hidden) {
       if (app.classList.contains('wide') || narrow) {
-        canvas.style.height = Math.max(240, height) + 'px';
+        // On a phone the header, the MIDI settings and the keyboard leave little of the window,
+        // so the canvas takes most of its height and the page scrolls past it.
+        const least = matchMedia('(max-width: 480px)').matches ? Math.round(window.innerHeight * 0.65) : 240;
+        canvas.style.height = Math.max(least, narrow ? height : Math.max(height, heightAt100)) + 'px';
       } else {
-        app.style.height = Math.max(300, height) + 'px';
+        app.style.height = Math.max(300, height, heightAt100) + 'px';
       }
     }
   }
@@ -3043,13 +3799,48 @@
   });
 
 
+  // ---- Side panels ---------------------------------------------------------------------------
+
+  // Each side panel of the patch tab folds to its heading, as the soft keyboard does, and stays
+  // as it was left. With all of them folded the side column narrows, so the canvas widens.
+  const SIDE_FOLD_KEY = 'spms1-type2-editor-side-folded';
+  const SIDE_PANELS = ['side-patch', 'side-order', 'side-export'];
+  let sideFolded = {};
+
+  function setSideFolded(id, folded) {
+    const panel = document.getElementById(id);
+    panel.classList.toggle('collapsed', folded);
+    panel.querySelector('.fold-toggle').setAttribute('aria-expanded', String(!folded));
+    sideFolded[id] = folded;
+    try { localStorage.setItem(SIDE_FOLD_KEY, JSON.stringify(sideFolded)); } catch (e) { /* storage unavailable */ }
+    const app = document.getElementById('tab-patch');
+    app.classList.toggle('side-folded', SIDE_PANELS.every(p => sideFolded[p]));
+    if (!app.hidden) {
+      fitTabArea();
+      if (!viewTouched) fitView();
+      renderWires();
+    }
+  }
+
+  function initSidePanels() {
+    try { sideFolded = JSON.parse(localStorage.getItem(SIDE_FOLD_KEY)) || {}; } catch (e) { sideFolded = {}; }
+    SIDE_PANELS.forEach(id => {
+      document.getElementById(id).querySelector('.fold-toggle')
+        .addEventListener('click', () => setSideFolded(id, !sideFolded[id]));
+      setSideFolded(id, !!sideFolded[id]);
+    });
+  }
+
+
   // ---- Start ---------------------------------------------------------------------------------
 
   window.addEventListener('DOMContentLoaded', () => {
+    placeMIDIPanel();
     loadLocal();
     applyMIDISettings(loadMIDISettings());
     renderAll();
     createKeyboard();
+    initSidePanels();
     let tab = 'controls';
     try { tab = localStorage.getItem(TAB_KEY) || tab; } catch (e) { /* storage unavailable */ }
     let wide = false;

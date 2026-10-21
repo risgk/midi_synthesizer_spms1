@@ -27,15 +27,15 @@
 #
 # --spinel DIR takes Spinel from a checkout of the release, instead of cloning it from GitHub.
 #
-# Run from anywhere; it works in the sketch folder. Needs git (to clone), diff and GNU patch
+# Run from anywhere; it works in the sketch folder, spms1. Needs git (to clone), diff and GNU patch
 # (Git Bash on Windows has both; on macOS, brew install gpatch).
 
 set -eu
 
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../spms1"
 HERE=$(pwd)
-PATCH=spinel_mcu/spinel_mcu.patch
-# Derived files, DERIVED=RELEASED a pair, each with the patch spinel_mcu/DERIVED-without-.c.patch
+PATCH=../spinel_mcu/spinel_mcu.patch
+# Derived files, DERIVED=RELEASED a pair, each with the patch ../spinel_mcu/DERIVED-without-.c.patch
 DERIVED="sp_cold_bare_metal.c=sp_cold.c"
 
 die() { echo "update.sh: $*" >&2; exit 1; }
@@ -51,7 +51,7 @@ gnu_patch() {
 
 # The release the README names
 readme_release() {
-  grep -m1 -oE 'Release: [0-9]{4}\.[0-9]{2}\.[0-9]{2}' README.md | cut -d' ' -f2
+  grep -m1 -oE 'Release: [0-9]{4}\.[0-9]{2}\.[0-9]{2}' ../README.md | cut -d' ' -f2
 }
 
 # The runtime files of the sketch, without the .orig copies and the derived files
@@ -65,7 +65,7 @@ vendored() {
 
 # The patch of a derived file
 derived_patch() {
-  echo "spinel_mcu/${1%.c}.patch"
+  echo "../spinel_mcu/${1%.c}.patch"
 }
 
 # Makes derived file $1 in folder $3 from the released file $2 there; fails if a hunk does not apply
@@ -165,7 +165,7 @@ update() {
 
   old=$(readme_release)
   if [ "$old" != "$tag" ]; then
-    sed -i.bak "s/$(echo "$old" | sed 's/\./\\./g')/$tag/g" README.md README.ja.md && rm -f README.md.bak README.ja.md.bak
+    sed -i.bak "s/$(echo "$old" | sed 's/\./\\./g')/$tag/g" ../README.md ../README.ja.md && rm -f ../README.md.bak ../README.ja.md.bak
     echo "README.md and README.ja.md now name $tag (was $old)"
   fi
 

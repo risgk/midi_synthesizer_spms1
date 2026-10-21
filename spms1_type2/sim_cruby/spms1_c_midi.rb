@@ -8,10 +8,13 @@ module Spms1
     @note_prev_pitch = Array.new(16, nil)  # the note that comes back on a note off, or nil
     @pitch_bend    = Array.new(16, 0)
     @cc_values     = Array.new(16) { Array.new(128, 0) }
-    @nrpn_values   = Array.new(16) { Array.new(512, 0) }
+    @nrpn_values   = Array.new(16) { Array.new(640, 0) }
     @nrpn_msb      = Array.new(16, 0)
     @nrpn_lsb      = Array.new(16, 0)
     @nrpn_selected = Array.new(16, false)
+    # When each slot of the run order was last written, as in spms1_midi_state.h.
+    @run_order_writes  = Array.new(16, 0)
+    @run_order_written = Array.new(16) { Array.new(32, 0) }
 
     @sample_rate = 48000
     @audio_buffers = 2
@@ -36,8 +39,13 @@ module Spms1
       def get_midi_pitch_bend(ch) = @pitch_bend[ch]
       def set_midi_cc_value(ch, n, v) = (@cc_values[ch][n] = v)
       def get_midi_cc_value(ch, n) = @cc_values[ch][n]
-      def set_midi_nrpn_value(ch, i, v) = (@nrpn_values[ch][i] = v if i >= 0 && i < 512)
-      def get_midi_nrpn_value(ch, i) = ((i >= 0 && i < 512) ? @nrpn_values[ch][i] : 0)
+      def set_midi_nrpn_value(ch, i, v)
+        return unless i >= 0 && i < 640
+        @nrpn_values[ch][i] = v
+        @run_order_written[ch][i] = (@run_order_writes[ch] += 1) if i < 32
+      end
+      def get_midi_run_order_written(ch, slot) = ((slot >= 0 && slot < 32) ? @run_order_written[ch][slot] : 0)
+      def get_midi_nrpn_value(ch, i) = ((i >= 0 && i < 640) ? @nrpn_values[ch][i] : 0)
       def set_sample_rate(v) = (@sample_rate = v)
       def get_sample_rate = @sample_rate
       def set_audio_buffers(v) = (@audio_buffers = v)
@@ -45,7 +53,7 @@ module Spms1
       def set_audio_buffer_words(v) = (@audio_buffer_words = v)
       def get_audio_buffer_words = @audio_buffer_words
 
-      # The handlers of spms1_type2.ino, as the MIDI library calls them: a note-on of velocity 0
+      # The handlers of spms1.ino, as the MIDI library calls them: a note-on of velocity 0
       # is a note-off.
       def handle_midi_message(status, d1, d2)
         ch = status & 0x0F
@@ -65,8 +73,12 @@ module Spms1
             @note_on_state[ch] = 1
           end
         when 0xB0
-          @cc_values[ch][d1] = d2
-          handle_midi_nrpn_cc(ch, d1, d2)
+          if d1 >= 120
+            handle_channel_mode(ch, d1)
+          else
+            @cc_values[ch][d1] = d2
+            handle_midi_nrpn_cc(ch, d1, d2)
+          end
         when 0xE0
           @pitch_bend[ch] = ((d2 << 7) | d1) - 8192
         end
@@ -84,6 +96,20 @@ module Spms1
           end
         elsif pitch == @note_prev_pitch[ch]
           @note_prev_pitch[ch] = nil
+        end
+      end
+
+      # The Channel Mode messages, as spms1_midi_state.h takes them: Reset All Controllers (121)
+      # centres the bend, sets CC 1 to 0 and leaves no NRPN selected; Local Control (122) does
+      # nothing; the rest end every note.
+      def handle_channel_mode(ch, number)
+        if number == 121
+          @pitch_bend[ch] = 0
+          @cc_values[ch][1] = 0
+          @nrpn_selected[ch] = false
+        elsif number != 122
+          @note_prev_pitch[ch] = nil
+          @note_on_state[ch] = 0
         end
       end
 

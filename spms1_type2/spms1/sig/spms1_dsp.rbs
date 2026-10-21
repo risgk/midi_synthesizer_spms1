@@ -1,0 +1,12 @@
+# Type seeds for Spinel (spinel --rbs sig), passed by sim_spinel/build.sh.
+#
+# Every smoothing stage is written back from Dsp.smooth, which takes it as an argument, and
+# Spinel 2026.09.12 does not settle the types around that loop: without these it makes the
+# stages, their arguments and much of the filter untyped, boxing the arithmetic of every module.
+# A seed is trusted, not checked, so this has to stay true: both only ever take and return Floats.
+module Spms1
+  module Dsp
+    def self.flush_tiny: (Float) -> Float
+    def self.smooth: (Float, Float, Float) -> Float
+  end
+end

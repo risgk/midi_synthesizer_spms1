@@ -6,7 +6,7 @@
 #   sh spinel_mcu/size_report.sh BEFORE.elf AFTER.elf
 #
 # The .elf files are the ones the Arduino build leaves (arduino-cli compile --output-dir DIR puts
-# "spms1_type2.ino.elf" in DIR). Prints a Markdown table, and a line starting with "WARNING" for
+# "spms1.ino.elf" in DIR). Prints a Markdown table, and a line starting with "WARNING" for
 # each thing that grew by more than the limit (SPMS1_SIZE_LIMIT_PERCENT, default 2). Exits with 0
 # either way: growth is for a person to judge, not a failure.
 #

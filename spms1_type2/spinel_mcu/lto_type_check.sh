@@ -10,7 +10,7 @@
 #
 #   sh spinel_mcu/lto_type_check.sh
 #
-# Builds spms1_main.c, the runtime and sim_render's own file with gcc (-flto), as sim_render does,
+# Builds spms1/spms1_main.c, the runtime in spms1 and sim_render's own file with gcc (-flto), as sim_render does,
 # into build/lto_type_check, and exits with 1 on a mismatch, or on a pointer passed as another
 # type (the address of a float where a double is written). Needs gcc with LTO (on Linux, as in the
 # GitHub Actions workflow; clang has no such check).
@@ -25,10 +25,10 @@ cc=${CC:-gcc}
 log="$out/log.txt"
 : > "$log"
 
-for src in spms1_main.c sp_*.c re_*.c; do
-  "$cc" -O1 -flto -include sim_spinel/host_compat.h -I. -c "$src" -o "$out/$(basename "$src" .c).o" 2>> "$log"
+for src in spms1/spms1_main.c spms1/sp_*.c spms1/re_*.c; do
+  "$cc" -O1 -flto -include sim_spinel/host_compat.h -Ispms1 -c "$src" -o "$out/$(basename "$src" .c).o" 2>> "$log"
 done
-"$cc" -O1 -flto -I. -c sim_render/spms1_render.c -o "$out/spms1_render_host.o" 2>> "$log"
+"$cc" -O1 -flto -Ispms1 -c sim_render/spms1_render.c -o "$out/spms1_render_host.o" 2>> "$log"
 "$cc" -O1 -flto -Wlto-type-mismatch -o "$out/spms1_render" "$out"/*.o -lm 2>> "$log"
 
 bad=0

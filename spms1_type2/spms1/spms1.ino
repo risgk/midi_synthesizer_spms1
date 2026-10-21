@@ -5,7 +5,6 @@
 #pragma GCC optimize ("O3")
 #if defined(ARDUINO_ARCH_RP2040)
 #pragma GCC target ("thumb")
-#pragma GCC section text=".time_critical"
 #endif  // defined(ARDUINO_ARCH_RP2040)
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-function"
@@ -45,7 +44,6 @@
 
 ////////////////////////////////////////////////////////////////
 
-#include <algorithm>
 #include <cmath>
 
 #include <MIDI.h>
@@ -135,6 +133,15 @@ extern int Spms1_main(int argc, char **argv);
 // writes. Diagnostic only.
 extern int sp_gc_nroots;
 
+// What core 1 calls from the synth while it plays goes in RAM, as Spms1_main does
+// (spinel_rt_mcu_head.h). From flash it would be fetched through the XIP cache, which core 0's
+// MIDI and USB code shares: a burst of MIDI evicts it, and the misses land on the synth's buffer.
+#if defined(ARDUINO_ARCH_RP2040)
+#define SPMS1_RAM_FUNC __attribute__((section(".time_critical.spms1")))
+#else
+#define SPMS1_RAM_FUNC
+#endif
+
 // The MIDI tables the synth reads, and the handlers that fill them, shared with the simulators.
 #include "spms1_midi_state.h"
 
@@ -179,11 +186,11 @@ void start_audio() {
 void stop_audio() {
 }
 
-void write_to_audio_buffer(float l, float r) {
-  int32_t clamped_l = static_cast<int32_t>(std::lroundf(l * 8388607.0f));
-  int32_t clamped_r = static_cast<int32_t>(std::lroundf(r * 8388607.0f));
-  clamped_l = std::clamp(clamped_l, static_cast<int32_t>(-8388608), static_cast<int32_t>(8388607));
-  clamped_r = std::clamp(clamped_r, static_cast<int32_t>(-8388608), static_cast<int32_t>(8388607));
+SPMS1_RAM_FUNC void write_to_audio_buffer(float l, float r) {
+  // Clamped before rounding, where fminf and fmaxf are an instruction each, rather than after,
+  // where std::clamp is left as calls; both ends are whole numbers, so the result is the same.
+  int32_t clamped_l = static_cast<int32_t>(std::lroundf(std::fminf(std::fmaxf(l * 8388607.0f, -8388608.0f), 8388607.0f)));
+  int32_t clamped_r = static_cast<int32_t>(std::lroundf(std::fminf(std::fmaxf(r * 8388607.0f, -8388608.0f), 8388607.0f)));
   g_pwm_output.write24(clamped_l << 8, clamped_r << 8);
 }
 
@@ -207,25 +214,25 @@ void stop_audio() {
   g_i2s_output.end();
 }
 
-void write_to_audio_buffer(float l, float r) {
-  int32_t clamped_l = static_cast<int32_t>(std::lroundf(l * 8388607.0f));
-  int32_t clamped_r = static_cast<int32_t>(std::lroundf(r * 8388607.0f));
-  clamped_l = std::clamp(clamped_l, static_cast<int32_t>(-8388608), static_cast<int32_t>(8388607));
-  clamped_r = std::clamp(clamped_r, static_cast<int32_t>(-8388608), static_cast<int32_t>(8388607));
+SPMS1_RAM_FUNC void write_to_audio_buffer(float l, float r) {
+  // Clamped before rounding, where fminf and fmaxf are an instruction each, rather than after,
+  // where std::clamp is left as calls; both ends are whole numbers, so the result is the same.
+  int32_t clamped_l = static_cast<int32_t>(std::lroundf(std::fminf(std::fmaxf(l * 8388607.0f, -8388608.0f), 8388607.0f)));
+  int32_t clamped_r = static_cast<int32_t>(std::lroundf(std::fminf(std::fmaxf(r * 8388607.0f, -8388608.0f), 8388607.0f)));
   g_i2s_output.write24(clamped_l << 8, clamped_r << 8);
 }
 
 #endif  // !defined(SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO)
 
-void start_debug_measure(void) {
+SPMS1_RAM_FUNC void start_debug_measure(void) {
 #if defined(SPMS1_USE_DEBUG_PRINT)
-  g_debug_measurement_start_us = micros();
+  g_debug_measurement_start_us = time_us_32();  // micros() is in flash
 #endif  // defined(SPMS1_USE_DEBUG_PRINT)
 }
 
-void stop_debug_measure(void) {
+SPMS1_RAM_FUNC void stop_debug_measure(void) {
 #if defined(SPMS1_USE_DEBUG_PRINT)
-  uint32_t debug_measurement_end_us = micros();
+  uint32_t debug_measurement_end_us = time_us_32();
   uint32_t debug_measurement_elapsed_us = debug_measurement_end_us - g_debug_measurement_start_us;
   // The first buffer runs cold and would fix a maximum that never comes down again, so it is
   // multiplied out rather than skipped, keeping both updates branchless.
@@ -242,6 +249,13 @@ void stop_debug_measure(void) {
 }
 
 void setup1() {
+  // The synth runs on this core, with flush-to-zero: a denormal result is 0.0, so a smoothing stage
+  // or a decaying state heading for 0.0 lands on it rather than sinking into the denormals (see
+  // Dsp.smooth in spms1_dsp.rb). FPSCR is per core, so it is set here, ahead of Spms1_main.
+  uint32_t fpscr;
+  __asm volatile("vmrs %0, fpscr" : "=r"(fpscr));
+  fpscr |= (1u << 24);  // FZ
+  __asm volatile("vmsr fpscr, %0" : : "r"(fpscr));
 }
 
 void loop1() {

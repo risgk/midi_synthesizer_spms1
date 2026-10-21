@@ -1,5 +1,6 @@
 module Spms1
-  # ADS envelope updated at 4-sample control-rate grid.
+  # ADS envelope updated on a 4-sample control-rate grid, its release either the decay's or the
+  # shortest decay's (the release switch). Out Inv puts out the envelope negated as well.
   class EnvGen
     STATE_ATTACK = 0
     STATE_SUSTAIN = 1
@@ -11,19 +12,11 @@ module Spms1
     # of a controller sending sparse CCs (e.g. every 20 ms) are rounded off rather than heard,
     # and settle sooner, 99% in 35 ms.
     SMOOTHING_TARGET_BLEND_BASE = 0.015625
-    # Number of samples between control-rate updates; envelope timing is kept approximately constant if this is changed.
-    # It has to stay a power of two: the counter below wraps with a mask, because Ruby's % is a
-    # floor-modulo and sp_imod carries a sign correction the counter can never need -- one branch
-    # a sample in each module, six across the six of them.
+    # Samples between control-rate updates. The main loop sets the cadence, handing every module
+    # the same control tick once every CONTROL_RATE_DIVISOR samples (see spms1_main.rb), and the
+    # rates derived here assume this, so the two have to match; envelope timing is kept approximately
+    # constant if both are changed.
     CONTROL_RATE_DIVISOR = 4
-    # Its own constant, not CONTROL_RATE_DIVISOR - 1 where it is used: Spinel emits an Integer
-    # constant as a runtime global and does not fold arithmetic on one, so written that way the
-    # subtraction survives into the per-sample path carrying an overflow check of its own, which
-    # measured far worse than the modulo it replaces. What the mask buys is size, not
-    # determinism: the six branches it removes, one per site, are ones that could never be taken.
-    # Together with the LFO's fold it took 11 branches and 60 instructions out of Spms1_main as
-    # linked, and the buffer time did not move (853/857us against 854/856).
-    CONTROL_RATE_MASK = CONTROL_RATE_DIVISOR - 1
 
     # Lookup table for exponential time mapping. A twelfth of an octave per index, so one CC step
     # of the 120-step control range moves a time by a semitone and the whole dial spans ten octaves.
@@ -58,11 +51,12 @@ module Spms1
 
       @attack = 0.0
       @decay = 0.0
+      # 1.0 when the release follows the decay, 0.0 when it takes the shortest decay; see
+      # set_release_switch.
+      @release_follows_decay = 1.0
       @sustain = 1.0
       @level = 1.0
-      @polarity = 1.0
-      # Level and polarity are multiplied before smoothing, so the control-rate path takes one
-      # multiply and only one smoothing state has to be carried.
+      # The level, smoothed; the control-rate path takes one multiply by it.
       @amount = 1.0
       @stage_1_amount = 1.0
       @current_amount = 1.0
@@ -70,7 +64,10 @@ module Spms1
       @was_gate_on = false
       @attack_coef = 1.0
       @decay_coef = 1.0
-      @sample_counter = 0
+      @release_coef = 1.0
+      # The shortest decay's coefficient, the release's with the switch off. Fixed once the
+      # sample rate is, as EXP_TABLE's first entry is the bottom of the decay dial.
+      @shortest_decay_coef = 1.0 / (DECAY_BASE * EXP_TABLE[0] * @effective_rate)
 
       update_coefficients_full
     end
@@ -87,28 +84,29 @@ module Spms1
       @decay = (decay < 0.0) ? 0.0 : ((decay > 1.0) ? 1.0 : decay)
     end
 
+    # Release Sw is unipolar, [0.0, 1.0], and taken as a switch, on from 0.5 (CC 64) up, as a
+    # MIDI switch is on from 64: on, the release, after the gate falls, runs at the decay's rate;
+    # off, it runs at the shortest decay's, 10 ms, whatever the decay is. Not smoothed: there is
+    # nothing between its two settings to pass through.
+    def set_release_switch(switch)
+      @release_follows_decay = (switch >= 0.5) ? 1.0 : 0.0
+    end
+
     # Sustain level: silent at 0.0, full at 1.0.
     def set_sustain(sustain)
       @sustain = (sustain < 0.0) ? 0.0 : ((sustain > 1.0) ? 1.0 : sustain)
     end
 
-    # The output is scaled by level and polarity together, as the LFO's is. Level is unipolar,
-    # [0.0, 1.0], a plain multiplier. Polarity is bipolar, [-0.5, 0.5], and doubled: +0.5 passes
-    # the output through, -0.5 negates it, and the way between scales it, crossing silence at 0.0.
+    # The output is scaled by level, as the LFO's is: unipolar, [0.0, 1.0], a plain multiplier.
+    # Turning it the other way up is for Out Inv, or a mixer's Out Inv.
     def set_level(level)
       @level = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
-      @amount = @level * @polarity
+      @amount = @level
     end
 
-    def set_polarity(polarity)
-      clamped_polarity = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
-      @polarity = clamped_polarity + clamped_polarity
-      @amount = @level * @polarity
-    end
-
-    def process(gate_input = 0.0)
+    def process(control_tick, gate_input = 0.0)
       # Gate transitions drive the ADS state machine; level changes are stepped at the control rate.
-      if @sample_counter == 0
+      if control_tick
         is_gate_on = gate_input >= 0.25
         gate_rose = is_gate_on && !@was_gate_on
         gate_fell = !is_gate_on && @was_gate_on
@@ -119,7 +117,8 @@ module Spms1
         update_coefficients_full
 
         target = (@state == STATE_ATTACK) ? ATTACK_TARGET : (((@state == STATE_SUSTAIN) && is_gate_on) ? @sustain : 0.0)
-        coef = (@state == STATE_ATTACK) ? @attack_coef : ((@state == STATE_SUSTAIN) ? @decay_coef : 0.0)
+        # With the gate off, the sustain state is the release, and takes the release's rate.
+        coef = (@state == STATE_ATTACK) ? @attack_coef : ((@state == STATE_SUSTAIN) ? (is_gate_on ? @decay_coef : @release_coef) : 0.0)
 
         # With the gate on, the level follows the sustain both ways at the decay rate, so raising
         # the sustain while a note is held raises the level too.
@@ -141,8 +140,8 @@ module Spms1
 
         # The amount is smoothed here, on the step, so a change in it rides the same ramp as the
         # level does rather than stepping the output.
-        @stage_1_amount += (@amount - @stage_1_amount) * @smoothing_target_blend
-        @current_amount += (@stage_1_amount - @current_amount) * @smoothing_target_blend
+        @stage_1_amount = Dsp.smooth(@amount, @stage_1_amount, @smoothing_target_blend)
+        @current_amount = Dsp.smooth(@stage_1_amount, @current_amount, @smoothing_target_blend)
         output_level = @current_level * @current_amount
 
         # The output ramps from the last step's level to this one's over the next four samples,
@@ -154,10 +153,13 @@ module Spms1
         @slope = (output_level - @last_output_level) * 0.25
         @last_output_level = output_level
       end
-
-      @sample_counter = (@sample_counter + 1) & CONTROL_RATE_MASK
       @output += @slope
       @output
+    end
+
+    # Out Inv: the output of the last process, negated, from 0.0 down to -1.0.
+    def output_inverted
+      -@output
     end
 
     private
@@ -165,6 +167,10 @@ module Spms1
     def update_coefficients_full
       @attack_coef = 1.0 / (ATTACK_BASE * calculate_exp_fast(@attack) * @effective_rate)
       @decay_coef  = 1.0 / (DECAY_BASE  * calculate_exp_fast(@decay)  * @effective_rate)
+      # A blend of the two by a weight of 1.0 or 0.0, so the pick is a multiply, not a branch.
+      # Each term is weighted on its own, rather than as shortest + (decay - shortest) * weight,
+      # so that the release lands on the decay's coefficient exactly, not within a rounding of it.
+      @release_coef = @decay_coef * @release_follows_decay + @shortest_decay_coef * (1.0 - @release_follows_decay)
     end
 
     def calculate_exp_fast(value)

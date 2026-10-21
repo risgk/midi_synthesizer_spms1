@@ -2,7 +2,7 @@
  * MIDI Synthesizer SPMS-1 (type-2) offline renderer
  *
  * Runs spms1_main.c, the Spinel output the sketch runs, faster than real time and writes what it
- * puts out to a WAV file. This file stands in for spms1_type2.ino: the MIDI tables and handlers are
+ * puts out to a WAV file. This file stands in for spms1.ino: the MIDI tables and handlers are
  * the sketch's, and the MIDI comes from a patch and a score instead of a cable. The whole synth
  * runs -- the signals bus, the run order, the NRPN table and the CC assignments -- so a patch is
  * heard as the device would play it.
@@ -24,11 +24,28 @@
 #include <math.h>
 #include <stdbool.h>
 #include <stdint.h>
+#if defined(__x86_64__) || defined(__i386__) || defined(_M_X64) || defined(_M_IX86)
+#include <xmmintrin.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 extern int Spms1_main(int argc, char **argv);
+
+// The device runs the synth with flush-to-zero (FPSCR.FZ, see setup1 in spms1.ino), which makes a
+// denormal result or operand 0.0; the host is set to do the same, so that a render matches it and
+// a smoothing stage heading for 0.0 lands on it here too (see Dsp.smooth in spms1_dsp.rb).
+static void spms1_flush_to_zero(void) {
+#if defined(__x86_64__) || defined(__i386__) || defined(_M_X64) || defined(_M_IX86)
+  _mm_setcsr(_mm_getcsr() | 0x8040);  // FTZ and DAZ
+#elif defined(__aarch64__)
+  uint64_t fpcr;
+  __asm__ volatile("mrs %0, fpcr" : "=r"(fpcr));
+  fpcr |= (1ull << 24);  // FZ
+  __asm__ volatile("msr fpcr, %0" : : "r"(fpcr));
+#endif
+}
 
 
 #if !defined(__APPLE__)
@@ -326,6 +343,7 @@ int main(int argc, char **argv) {
     add_event(1.0, note_off, sizeof(note_off));
   }
 
+  spms1_flush_to_zero();
   char *spinel_argv[] = {argv[0], NULL};
   return Spms1_main(1, spinel_argv);
 }

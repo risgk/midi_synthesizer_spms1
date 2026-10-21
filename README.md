@@ -11,7 +11,7 @@ SPMS-1 (type-2)
 ---------------
 
 - Monophonic semi-modular MIDI Synthesizer for Raspberry Pi Pico 2
-- Filter: ZDF/TPT State Variable Filter (with delayed soft clipping)
+- Filter: ZDF/TPT State Variable Filter (with a nonlinear leak), with low pass, band pass and high pass outputs
 - Chorus (mono to stereo) and Delay (stereo), with stereo output
 - Required Hardware: Raspberry Pi Pico 2 and Pimoroni Pico Audio Pack (or alternative I2S DAC hardware), or Raspberry Pi Pico 2 alone (PWM Audio output, with no DAC)
     - The photo: PWM Audio from Raspberry Pi Pico 2 on a breadboard, through an RC low pass filter on each output, to a 3.5 mm stereo jack with screw terminals

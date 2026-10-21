@@ -71,7 +71,7 @@ jobs:
 
       # The same checkout and path as the build after, so that the two differ only by the release
       - name: Build the UF2 (PWM Audio) before taking the release
-        run: arduino-cli compile --fqbn "$UF2_FQBN" --output-dir "$RUNNER_TEMP/before" .
+        run: arduino-cli compile --fqbn "$UF2_FQBN" --output-dir "$RUNNER_TEMP/before" spms1
 
       # Clones the release by itself, so as not to read the build tree above
       - name: Take the release (spinel_mcu/update.sh update)
@@ -93,12 +93,12 @@ jobs:
         run: sh sim_render/compare_with_cruby.sh --patch sim_render/examples/patch_routing_example.txt --score sim_render/examples/score_example.txt --seconds 3
 
       - name: Build the UF2 (PWM Audio)
-        run: arduino-cli compile --fqbn "$UF2_FQBN" --output-dir "$RUNNER_TEMP/after" . | tee -a "$GITHUB_STEP_SUMMARY"
+        run: arduino-cli compile --fqbn "$UF2_FQBN" --output-dir "$RUNNER_TEMP/after" spms1 | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Compare the sizes with the build before
         run: |
           mkdir -p "$RUNNER_TEMP/try"
-          sh spinel_mcu/size_report.sh "$RUNNER_TEMP/before/spms1_type2.ino.elf" "$RUNNER_TEMP/after/spms1_type2.ino.elf" > "$RUNNER_TEMP/try/size_report.md"
+          sh spinel_mcu/size_report.sh "$RUNNER_TEMP/before/spms1.ino.elf" "$RUNNER_TEMP/after/spms1.ino.elf" > "$RUNNER_TEMP/try/size_report.md"
           { echo "### Sizes, before and after Spinel $SPINEL_TAG"; echo; cat "$RUNNER_TEMP/try/size_report.md"; } >> "$GITHUB_STEP_SUMMARY"
           grep '^WARNING' "$RUNNER_TEMP/try/size_report.md" | sed 's/^WARNING: /::warning::/' || true
 
@@ -109,7 +109,7 @@ jobs:
           mkdir -p "$RUNNER_TEMP/try"
           git add -N .
           git diff --binary -- . ":(exclude)*.rej" > "$RUNNER_TEMP/try/spinel-$SPINEL_TAG.diff"
-          cp *.rej "$RUNNER_TEMP/try/" 2>/dev/null || true
+          cp spms1/*.rej "$RUNNER_TEMP/try/" 2>/dev/null || true
 
       - uses: actions/upload-artifact@v6
         if: always()

@@ -1,0 +1,673 @@
+require_relative 'spms1_framework'
+require_relative 'spms1_dsp'
+# The file of each module class in spms1_patch.yaml, spms1_ and the class in snake case. Written by
+# patch_gen.
+# patch_gen requires
+require_relative 'spms1_pitch'
+require_relative 'spms1_env_gen'
+require_relative 'spms1_lfo'
+require_relative 'spms1_mixer'
+require_relative 'spms1_osc'
+require_relative 'spms1_noise'
+require_relative 'spms1_filter'
+require_relative 'spms1_amp'
+require_relative 'spms1_chorus'
+require_relative 'spms1_delay'
+# patch_gen end
+
+# The loop that runs the patch. The framework rules -- the invariants of the patch and the worst
+# case of a buffer -- are in spms1_framework.rb, with the functions the host provides.
+
+include Spms1
+
+# The numbers of the patch -- module ids, bus slots, NRPN entries -- and the default patch,
+# generated from spms1_patch.yaml.
+require_relative 'spms1_patch'
+
+MIDI_CH            = 0
+SAMPLE_RATE        = 48000
+AUDIO_BUFFERS      = 2
+AUDIO_BUFFER_WORDS = 64
+
+# How many modules a patch can chain, and so the range of NRPN category 0. Every slot is rewritten
+# from NRPN each buffer, so nothing needs a terminator: a shorter patch stops at the first
+# MODULE_NONE, which is what an unset NRPN entry reads as. Only the rewriting is paid for the full
+# length; the per-sample walk runs to active_count, counted once a buffer up to that first
+# MODULE_NONE. A module listed more than once runs once, at the slot written last.
+MODULES_SIZE = 32
+
+# The module ids (MODULE_*), in spms1_patch.rb: thirteen in all, two envelopes, two mixers and two
+# oscillators, and one each of the pitch module, the LFO, the noise source, the filter, the amp, the
+# chorus and the delay, numbered in the default run order (see spms1_patch.yaml). Instances carry their number in the id rather
+# than being indexed by one, so the second oscillator is MODULE_OSC_2.
+
+# The slots of the `signals` bus (SIGNAL_*), in spms1_patch.rb: the constants, the note inputs,
+# the mod wheel, the general controls and the module outputs in one namespace, 0-126, so a routing is just a
+# slot number and one source can feed as many destinations as read its slot. Each parameter's own
+# control slot (SLOT_*) is in the same array but above it, at 128 + the parameter's entry, where no
+# routing can name it: a parameter reaches its own through a source of 127, SIGNAL_OWN, and
+# nothing else reaches it at all. A CC that should feed a module input or another parameter goes
+# through the mod wheel's slot or a general control's. So the parameters, however many, take nothing from the numbers a
+# routing names. A slot is a plain float; its range is whatever the destination expects. Indexing an array
+# is what holds a routed input to one read whatever the module count: passing the candidates in as
+# arguments instead costs picks x candidates per sample, which grows quadratically.
+# The constants come first so that SIGNAL_NONE is 0: an NRPN entry nobody has set reads 0, and an
+# unrouted input should be silent rather than wired to whatever happens to sit in slot 0. Nothing
+# ever writes them, so they hold what the bus was filled with at startup. They are what a routing
+# reaches for when an input wants a fixed value rather than a source.
+SIGNALS_SIZE = 256
+
+# The NRPN parameter numbers (NRPN_*), in spms1_patch.rb: (MSB << 7) | LSB, where the MSB picks
+# a category and the LSB an entry.
+#   0..127   active_modules[slot]
+# 128..255   what feeds each module input
+# 256..383   where each parameter's value comes from
+# 384..511   which CC fills each control slot
+# 512..639   the value of each parameter's control slot while it has no CC
+# A CC number of 0 means the control has no CC: a parameter's control slot then holds its value
+# from 512.., whatever CC it had before, so a patch sets it alone, and a controller's slot holds 0.0.
+
+# One instance of each module, by its class in spms1_patch.yaml. Written by patch_gen.
+# patch_gen instances
+pitch_1 = Pitch.new(SAMPLE_RATE)
+eg_1 = EnvGen.new(SAMPLE_RATE)
+eg_2 = EnvGen.new(SAMPLE_RATE)
+lfo_1 = LFO.new(SAMPLE_RATE)
+mixer_1 = Mixer.new(SAMPLE_RATE)
+osc_1 = Osc.new(SAMPLE_RATE)
+osc_2 = Osc.new(SAMPLE_RATE)
+noise_1 = Noise.new(SAMPLE_RATE)
+mixer_2 = Mixer.new(SAMPLE_RATE)
+filter_1 = Filter.new(SAMPLE_RATE)
+amp_1 = Amp.new(SAMPLE_RATE)
+chorus_1 = Chorus.new(SAMPLE_RATE)
+delay_1 = Delay.new(SAMPLE_RATE)
+# patch_gen end
+
+# Allocated once; which slots are filled is decided per buffer, inside the loop.
+active_modules = Array.new(MODULES_SIZE, MODULE_NONE)
+# The slot of the run order each module id runs at, by id: 128 entries, as an id read from NRPN
+# is 7-bit. Only the entries of the ids listed in the same buffer are read, and those are reset
+# first, so it is never cleared.
+winning_slot = Array.new(128, 0)
+# When each slot was last written, from spms1_midi_state.h, for the slots in the order.
+order_written = Array.new(MODULES_SIZE, 0)
+
+audio_buffer_l = Array.new(AUDIO_BUFFER_WORDS, 0.0)
+audio_buffer_r = Array.new(AUDIO_BUFFER_WORDS, 0.0)
+
+# The signal bus: each module's latest output, in its SIGNAL_* slot. Declared out here so it
+# carries across buffers, since a routing with feedback reads last sample's value and at a buffer
+# edge that is the previous iteration's.
+signals = Array.new(SIGNALS_SIZE, 0.0)
+spms1_fill_constant_signals(signals)
+
+# The default patch, written into the NRPN table the loop reads it back from. Why it is what it is,
+# spms1_patch.yaml says, above default_order.
+spms1_write_default_patch(MIDI_CH)
+
+C.set_sample_rate(SAMPLE_RATE)
+C.set_audio_buffers(AUDIO_BUFFERS)
+C.set_audio_buffer_words(AUDIO_BUFFER_WORDS)
+C.start_audio
+
+# while rather than loop: Spinel builds a loop block with a setjmp, for the StopIteration that ends
+# one, which makes every local written inside it volatile, so that the per-sample code would load
+# and store each of them, slot and i included, at every use: about 6% of all instructions.
+while true
+  C.start_debug_measure
+
+  signals[SIGNAL_NOTE_PITCH] = C.get_midi_note_on_pitch(MIDI_CH).to_f * (1.0 / 120.0) - 0.5
+  signals[SIGNAL_NOTE_GATE]  = C.get_midi_note_on_state(MIDI_CH).to_f
+  # Pitch bend arrives 14-bit and signed, -8192 to 8191, so a whole turn of the wheel is one unit
+  # and half of it lands where the pitch domain's own half does. The count of steps is even, so
+  # the middle of the range falls between -1 and 0 rather than on a value. Pairing the steps off
+  # in the integers first puts -1 and 0 on the same one, which costs half the resolution -- 8193
+  # steps, still far under a cent at any usable bend range -- and buys a centre that is exactly
+  # zero with both ends exactly on -0.5 and +0.5. The division must floor for the bottom end to
+  # land: Integer#/ does, and Spinel's sp_idiv implements it.
+  signals[SIGNAL_PITCH_BEND]  = ((C.get_midi_pitch_bend(MIDI_CH) + 1) / 2).to_f * (1.0 / 8192.0)
+
+  # The patch, read back from the NRPN table. active_modules is packed from the front with no
+  # gaps; every source_* holds a SIGNAL_* bus slot, or a parameter's own SLOT_*.
+  slot = 0
+  while slot < MODULES_SIZE
+    active_modules[slot] = C.get_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + slot)
+    slot += 1
+  end
+  # The order up to the first MODULE_NONE, with when each of its slots was written.
+  listed_count = 0
+  while listed_count < MODULES_SIZE && active_modules[listed_count] != MODULE_NONE
+    order_written[listed_count] = C.get_midi_run_order_written(MIDI_CH, listed_count)
+    winning_slot[active_modules[listed_count]] = -1
+    listed_count += 1
+  end
+  # A module listed twice would run twice a sample -- an LFO at twice its rate, a filter taking
+  # two steps -- so it runs once, at the slot written last, and its other slots are dropped. Last
+  # in time rather than in place, so that a module written to a slot ahead of where it was moves
+  # there, as one written to a slot after it does. On a tie, never written alike, the later slot.
+  slot = 0
+  while slot < listed_count
+    module_id = active_modules[slot]
+    winner = winning_slot[module_id]
+    if winner < 0 || order_written[slot] >= order_written[winner]
+      winning_slot[module_id] = slot
+    end
+    slot += 1
+  end
+  # Packed in place: a slot is only ever written once it has been read. Counted here, once a
+  # buffer, so the per-sample walk neither reads the MODULE_NONE that ends the order nor compares
+  # every id against it.
+  active_count = 0
+  slot = 0
+  while slot < listed_count
+    module_id = active_modules[slot]
+    if winning_slot[module_id] == slot
+      active_modules[active_count] = module_id
+      active_count += 1
+    end
+    slot += 1
+  end
+
+  # What feeds each module input, then where each parameter takes its value: a bus slot, or its
+  # own control slot. Written by patch_gen from the inputs and the controls of spms1_patch.yaml.
+  # The parameter sources are read once per buffer rather than per sample: each destination
+  # smooths at the control rate in two stages of 5.3 ms each (10.7 ms on average), which swallows
+  # the difference between feeding it at 48 kHz and at the 750 Hz buffer rate. Faster modulation
+  # goes through the module inputs, which are read per sample and not smoothed.
+  # patch_gen sources
+  source_pitch_1_pitch = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_PITCH)
+  source_pitch_1_bend = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_BEND)
+  source_pitch_1_gate = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_GATE)
+  source_eg_1_gate = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_EG_1_GATE)
+  source_eg_2_gate = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_EG_2_GATE)
+  source_lfo_1_rate_mod = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_RATE_MOD)
+  source_lfo_1_level_mod = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_LEVEL_MOD)
+  source_lfo_1_reset = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_RESET)
+  source_mixer_1_in_1 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_IN_1)
+  source_mixer_1_in_2 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_IN_2)
+  source_mixer_1_in_3 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_IN_3)
+  source_mixer_1_in_4 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_IN_4)
+  source_osc_1_pitch = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PITCH)
+  source_osc_1_mod_1 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_MOD_1)
+  source_osc_1_mod_2 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_MOD_2)
+  source_osc_2_pitch = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_PITCH)
+  source_osc_2_mod_1 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_MOD_1)
+  source_osc_2_mod_2 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_MOD_2)
+  source_osc_2_sync = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_SYNC)
+  source_mixer_2_in_1 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_IN_1)
+  source_mixer_2_in_2 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_IN_2)
+  source_mixer_2_in_3 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_IN_3)
+  source_mixer_2_in_4 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_IN_4)
+  source_filter_1_audio = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_AUDIO)
+  source_filter_1_pitch = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_PITCH)
+  source_filter_1_mod_1 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_1)
+  source_filter_1_mod_2 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_2)
+  source_amp_1_audio = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_AUDIO)
+  source_amp_1_mod_1 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_MOD_1)
+  source_amp_1_mod_2 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_MOD_2)
+  source_chorus_1_audio = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_CHORUS_1_AUDIO)
+  source_delay_1_audio_l = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_AUDIO_L)
+  source_delay_1_audio_r = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_AUDIO_R)
+  source_output_l = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OUTPUT_L)
+  source_output_r = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OUTPUT_R)
+  source_pitch_1_glide = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_GLIDE), SLOT_PITCH_1_GLIDE)
+  source_pitch_1_out_1_glide_sw = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_OUT_1_GLIDE_SW), SLOT_PITCH_1_OUT_1_GLIDE_SW)
+  source_pitch_1_out_2_glide_sw = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_OUT_2_GLIDE_SW), SLOT_PITCH_1_OUT_2_GLIDE_SW)
+  source_pitch_1_bend_amt = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_BEND_AMT), SLOT_PITCH_1_BEND_AMT)
+  source_pitch_1_out_1_bend_sw = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_OUT_1_BEND_SW), SLOT_PITCH_1_OUT_1_BEND_SW)
+  source_pitch_1_out_2_bend_sw = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_OUT_2_BEND_SW), SLOT_PITCH_1_OUT_2_BEND_SW)
+  source_pitch_1_stretch = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_STRETCH), SLOT_PITCH_1_STRETCH)
+  source_eg_1_attack = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_EG_1_ATTACK), SLOT_EG_1_ATTACK)
+  source_eg_1_decay = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_EG_1_DECAY), SLOT_EG_1_DECAY)
+  source_eg_1_sustain = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_EG_1_SUSTAIN), SLOT_EG_1_SUSTAIN)
+  source_eg_1_release_sw = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_EG_1_RELEASE_SW), SLOT_EG_1_RELEASE_SW)
+  source_eg_1_level = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_EG_1_LEVEL), SLOT_EG_1_LEVEL)
+  source_eg_2_attack = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_EG_2_ATTACK), SLOT_EG_2_ATTACK)
+  source_eg_2_decay = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_EG_2_DECAY), SLOT_EG_2_DECAY)
+  source_eg_2_sustain = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_EG_2_SUSTAIN), SLOT_EG_2_SUSTAIN)
+  source_eg_2_release_sw = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_EG_2_RELEASE_SW), SLOT_EG_2_RELEASE_SW)
+  source_eg_2_level = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_EG_2_LEVEL), SLOT_EG_2_LEVEL)
+  source_lfo_1_wave = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_WAVE), SLOT_LFO_1_WAVE)
+  source_lfo_1_rate = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_RATE), SLOT_LFO_1_RATE)
+  source_lfo_1_level = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_LEVEL), SLOT_LFO_1_LEVEL)
+  source_lfo_1_rate_mod_amt = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_RATE_MOD_AMT), SLOT_LFO_1_RATE_MOD_AMT)
+  source_lfo_1_level_mod_amt = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_LEVEL_MOD_AMT), SLOT_LFO_1_LEVEL_MOD_AMT)
+  source_lfo_1_reset_sw = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_RESET_SW), SLOT_LFO_1_RESET_SW)
+  source_mixer_1_level_1 = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_LEVEL_1), SLOT_MIXER_1_LEVEL_1)
+  source_mixer_1_level_2 = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_LEVEL_2), SLOT_MIXER_1_LEVEL_2)
+  source_mixer_1_level_3 = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_LEVEL_3), SLOT_MIXER_1_LEVEL_3)
+  source_mixer_1_level_4 = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_LEVEL_4), SLOT_MIXER_1_LEVEL_4)
+  source_mixer_1_out_level = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_OUT_LEVEL), SLOT_MIXER_1_OUT_LEVEL)
+  source_osc_1_wave = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_WAVE), SLOT_OSC_1_WAVE)
+  source_osc_1_pw = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PW), SLOT_OSC_1_PW)
+  source_osc_1_pitch_coarse = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PITCH_COARSE), SLOT_OSC_1_PITCH_COARSE)
+  source_osc_1_pitch_shift = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PITCH_SHIFT), SLOT_OSC_1_PITCH_SHIFT)
+  source_osc_1_pitch_fine = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PITCH_FINE), SLOT_OSC_1_PITCH_FINE)
+  source_osc_1_pitch_mod_1_amt = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PITCH_MOD_1_AMT), SLOT_OSC_1_PITCH_MOD_1_AMT)
+  source_osc_1_pitch_mod_1_polarity = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PITCH_MOD_1_POLARITY), SLOT_OSC_1_PITCH_MOD_1_POLARITY)
+  source_osc_1_pitch_mod_1_sw = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PITCH_MOD_1_SW), SLOT_OSC_1_PITCH_MOD_1_SW)
+  source_osc_1_pitch_mod_2_amt = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PITCH_MOD_2_AMT), SLOT_OSC_1_PITCH_MOD_2_AMT)
+  source_osc_1_pitch_mod_2_polarity = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PITCH_MOD_2_POLARITY), SLOT_OSC_1_PITCH_MOD_2_POLARITY)
+  source_osc_1_pitch_mod_2_sw = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PITCH_MOD_2_SW), SLOT_OSC_1_PITCH_MOD_2_SW)
+  source_osc_1_pw_mod_1_amt = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PW_MOD_1_AMT), SLOT_OSC_1_PW_MOD_1_AMT)
+  source_osc_1_pw_mod_1_polarity = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PW_MOD_1_POLARITY), SLOT_OSC_1_PW_MOD_1_POLARITY)
+  source_osc_1_pw_mod_2_amt = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PW_MOD_2_AMT), SLOT_OSC_1_PW_MOD_2_AMT)
+  source_osc_1_pw_mod_2_polarity = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PW_MOD_2_POLARITY), SLOT_OSC_1_PW_MOD_2_POLARITY)
+  source_osc_2_wave = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_WAVE), SLOT_OSC_2_WAVE)
+  source_osc_2_pw = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_PW), SLOT_OSC_2_PW)
+  source_osc_2_pitch_coarse = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_PITCH_COARSE), SLOT_OSC_2_PITCH_COARSE)
+  source_osc_2_pitch_shift = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_PITCH_SHIFT), SLOT_OSC_2_PITCH_SHIFT)
+  source_osc_2_pitch_fine = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_PITCH_FINE), SLOT_OSC_2_PITCH_FINE)
+  source_osc_2_pitch_mod_1_amt = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_PITCH_MOD_1_AMT), SLOT_OSC_2_PITCH_MOD_1_AMT)
+  source_osc_2_pitch_mod_1_polarity = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_PITCH_MOD_1_POLARITY), SLOT_OSC_2_PITCH_MOD_1_POLARITY)
+  source_osc_2_pitch_mod_1_sw = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_PITCH_MOD_1_SW), SLOT_OSC_2_PITCH_MOD_1_SW)
+  source_osc_2_pitch_mod_2_amt = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_PITCH_MOD_2_AMT), SLOT_OSC_2_PITCH_MOD_2_AMT)
+  source_osc_2_pitch_mod_2_polarity = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_PITCH_MOD_2_POLARITY), SLOT_OSC_2_PITCH_MOD_2_POLARITY)
+  source_osc_2_pitch_mod_2_sw = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_PITCH_MOD_2_SW), SLOT_OSC_2_PITCH_MOD_2_SW)
+  source_osc_2_pw_mod_1_amt = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_PW_MOD_1_AMT), SLOT_OSC_2_PW_MOD_1_AMT)
+  source_osc_2_pw_mod_1_polarity = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_PW_MOD_1_POLARITY), SLOT_OSC_2_PW_MOD_1_POLARITY)
+  source_osc_2_pw_mod_2_amt = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_PW_MOD_2_AMT), SLOT_OSC_2_PW_MOD_2_AMT)
+  source_osc_2_pw_mod_2_polarity = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_PW_MOD_2_POLARITY), SLOT_OSC_2_PW_MOD_2_POLARITY)
+  source_osc_2_sync_sw = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_SYNC_SW), SLOT_OSC_2_SYNC_SW)
+  source_noise_1_color = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_NOISE_1_COLOR), SLOT_NOISE_1_COLOR)
+  source_noise_1_level = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_NOISE_1_LEVEL), SLOT_NOISE_1_LEVEL)
+  source_mixer_2_level_1 = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_LEVEL_1), SLOT_MIXER_2_LEVEL_1)
+  source_mixer_2_level_2 = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_LEVEL_2), SLOT_MIXER_2_LEVEL_2)
+  source_mixer_2_level_3 = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_LEVEL_3), SLOT_MIXER_2_LEVEL_3)
+  source_mixer_2_level_4 = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_LEVEL_4), SLOT_MIXER_2_LEVEL_4)
+  source_mixer_2_out_level = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_OUT_LEVEL), SLOT_MIXER_2_OUT_LEVEL)
+  source_filter_1_cutoff = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_CUTOFF), SLOT_FILTER_1_CUTOFF)
+  source_filter_1_resonance = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_RESONANCE), SLOT_FILTER_1_RESONANCE)
+  source_filter_1_mode = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MODE), SLOT_FILTER_1_MODE)
+  source_filter_1_pitch_amt = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_PITCH_AMT), SLOT_FILTER_1_PITCH_AMT)
+  source_filter_1_mod_1_amt = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_1_AMT), SLOT_FILTER_1_MOD_1_AMT)
+  source_filter_1_mod_1_polarity = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_1_POLARITY), SLOT_FILTER_1_MOD_1_POLARITY)
+  source_filter_1_mod_2_amt = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_2_AMT), SLOT_FILTER_1_MOD_2_AMT)
+  source_filter_1_mod_2_polarity = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_2_POLARITY), SLOT_FILTER_1_MOD_2_POLARITY)
+  source_amp_1_gain = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_GAIN), SLOT_AMP_1_GAIN)
+  source_amp_1_mod_1_2_mix = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_MOD_1_2_MIX), SLOT_AMP_1_MOD_1_2_MIX)
+  source_chorus_1_mix = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_CHORUS_1_MIX), SLOT_CHORUS_1_MIX)
+  source_chorus_1_rate = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_CHORUS_1_RATE), SLOT_CHORUS_1_RATE)
+  source_chorus_1_depth = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_CHORUS_1_DEPTH), SLOT_CHORUS_1_DEPTH)
+  source_delay_1_mix = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_MIX), SLOT_DELAY_1_MIX)
+  source_delay_1_time = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_TIME), SLOT_DELAY_1_TIME)
+  source_delay_1_feedback = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_FEEDBACK), SLOT_DELAY_1_FEEDBACK)
+  # patch_gen end
+
+  # Which CC fills each control slot, or, for a parameter with none, its value from NRPN category
+  # 4. The signals array -- the bus and the parameters' own slots above it -- is the only thing
+  # downstream reads, so this is where MIDI enters and the only place a CC number appears. Each
+  # parameter's CC fills its own slot, and the mod wheel's CC its slot on the bus. Written by
+  # patch_gen.
+  # patch_gen controls
+  cc_pitch_1_glide = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_PITCH_1_GLIDE)
+  signals[SLOT_PITCH_1_GLIDE] = cc_to_unipolar(cc_or_nrpn(cc_pitch_1_glide, C.get_midi_cc_value(MIDI_CH, cc_pitch_1_glide), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_PITCH_1_GLIDE)))
+  cc_pitch_1_out_1_glide_sw = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_PITCH_1_OUT_1_GLIDE_SW)
+  signals[SLOT_PITCH_1_OUT_1_GLIDE_SW] = cc_to_unipolar(cc_or_nrpn(cc_pitch_1_out_1_glide_sw, C.get_midi_cc_value(MIDI_CH, cc_pitch_1_out_1_glide_sw), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_PITCH_1_OUT_1_GLIDE_SW)))
+  cc_pitch_1_out_2_glide_sw = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_PITCH_1_OUT_2_GLIDE_SW)
+  signals[SLOT_PITCH_1_OUT_2_GLIDE_SW] = cc_to_unipolar(cc_or_nrpn(cc_pitch_1_out_2_glide_sw, C.get_midi_cc_value(MIDI_CH, cc_pitch_1_out_2_glide_sw), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_PITCH_1_OUT_2_GLIDE_SW)))
+  cc_pitch_1_bend_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_PITCH_1_BEND_AMT)
+  signals[SLOT_PITCH_1_BEND_AMT] = cc_to_unipolar(cc_or_nrpn(cc_pitch_1_bend_amt, C.get_midi_cc_value(MIDI_CH, cc_pitch_1_bend_amt), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_PITCH_1_BEND_AMT)))
+  cc_pitch_1_out_1_bend_sw = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_PITCH_1_OUT_1_BEND_SW)
+  signals[SLOT_PITCH_1_OUT_1_BEND_SW] = cc_to_unipolar(cc_or_nrpn(cc_pitch_1_out_1_bend_sw, C.get_midi_cc_value(MIDI_CH, cc_pitch_1_out_1_bend_sw), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_PITCH_1_OUT_1_BEND_SW)))
+  cc_pitch_1_out_2_bend_sw = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_PITCH_1_OUT_2_BEND_SW)
+  signals[SLOT_PITCH_1_OUT_2_BEND_SW] = cc_to_unipolar(cc_or_nrpn(cc_pitch_1_out_2_bend_sw, C.get_midi_cc_value(MIDI_CH, cc_pitch_1_out_2_bend_sw), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_PITCH_1_OUT_2_BEND_SW)))
+  cc_pitch_1_stretch = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_PITCH_1_STRETCH)
+  signals[SLOT_PITCH_1_STRETCH] = cc_to_unipolar(cc_or_nrpn(cc_pitch_1_stretch, C.get_midi_cc_value(MIDI_CH, cc_pitch_1_stretch), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_PITCH_1_STRETCH)))
+  cc_eg_1_attack = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_EG_1_ATTACK)
+  signals[SLOT_EG_1_ATTACK] = cc_to_unipolar(cc_or_nrpn(cc_eg_1_attack, C.get_midi_cc_value(MIDI_CH, cc_eg_1_attack), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_EG_1_ATTACK)))
+  cc_eg_1_decay = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_EG_1_DECAY)
+  signals[SLOT_EG_1_DECAY] = cc_to_unipolar(cc_or_nrpn(cc_eg_1_decay, C.get_midi_cc_value(MIDI_CH, cc_eg_1_decay), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_EG_1_DECAY)))
+  cc_eg_1_sustain = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_EG_1_SUSTAIN)
+  signals[SLOT_EG_1_SUSTAIN] = cc_to_unipolar(cc_or_nrpn(cc_eg_1_sustain, C.get_midi_cc_value(MIDI_CH, cc_eg_1_sustain), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_EG_1_SUSTAIN)))
+  cc_eg_1_release_sw = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_EG_1_RELEASE_SW)
+  signals[SLOT_EG_1_RELEASE_SW] = cc_to_unipolar(cc_or_nrpn(cc_eg_1_release_sw, C.get_midi_cc_value(MIDI_CH, cc_eg_1_release_sw), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_EG_1_RELEASE_SW)))
+  cc_eg_1_level = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_EG_1_LEVEL)
+  signals[SLOT_EG_1_LEVEL] = cc_to_unipolar(cc_or_nrpn(cc_eg_1_level, C.get_midi_cc_value(MIDI_CH, cc_eg_1_level), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_EG_1_LEVEL)))
+  cc_eg_2_attack = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_EG_2_ATTACK)
+  signals[SLOT_EG_2_ATTACK] = cc_to_unipolar(cc_or_nrpn(cc_eg_2_attack, C.get_midi_cc_value(MIDI_CH, cc_eg_2_attack), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_EG_2_ATTACK)))
+  cc_eg_2_decay = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_EG_2_DECAY)
+  signals[SLOT_EG_2_DECAY] = cc_to_unipolar(cc_or_nrpn(cc_eg_2_decay, C.get_midi_cc_value(MIDI_CH, cc_eg_2_decay), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_EG_2_DECAY)))
+  cc_eg_2_sustain = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_EG_2_SUSTAIN)
+  signals[SLOT_EG_2_SUSTAIN] = cc_to_unipolar(cc_or_nrpn(cc_eg_2_sustain, C.get_midi_cc_value(MIDI_CH, cc_eg_2_sustain), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_EG_2_SUSTAIN)))
+  cc_eg_2_release_sw = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_EG_2_RELEASE_SW)
+  signals[SLOT_EG_2_RELEASE_SW] = cc_to_unipolar(cc_or_nrpn(cc_eg_2_release_sw, C.get_midi_cc_value(MIDI_CH, cc_eg_2_release_sw), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_EG_2_RELEASE_SW)))
+  cc_eg_2_level = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_EG_2_LEVEL)
+  signals[SLOT_EG_2_LEVEL] = cc_to_unipolar(cc_or_nrpn(cc_eg_2_level, C.get_midi_cc_value(MIDI_CH, cc_eg_2_level), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_EG_2_LEVEL)))
+  cc_lfo_1_wave = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_WAVE)
+  signals[SLOT_LFO_1_WAVE] = cc_to_unipolar(cc_or_nrpn(cc_lfo_1_wave, C.get_midi_cc_value(MIDI_CH, cc_lfo_1_wave), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_LFO_1_WAVE)))
+  cc_lfo_1_rate = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_RATE)
+  signals[SLOT_LFO_1_RATE] = cc_to_unipolar(cc_or_nrpn(cc_lfo_1_rate, C.get_midi_cc_value(MIDI_CH, cc_lfo_1_rate), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_LFO_1_RATE)))
+  cc_lfo_1_level = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_LEVEL)
+  signals[SLOT_LFO_1_LEVEL] = cc_to_unipolar(cc_or_nrpn(cc_lfo_1_level, C.get_midi_cc_value(MIDI_CH, cc_lfo_1_level), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_LFO_1_LEVEL)))
+  cc_lfo_1_rate_mod_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_RATE_MOD_AMT)
+  signals[SLOT_LFO_1_RATE_MOD_AMT] = cc_to_unipolar(cc_or_nrpn(cc_lfo_1_rate_mod_amt, C.get_midi_cc_value(MIDI_CH, cc_lfo_1_rate_mod_amt), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_LFO_1_RATE_MOD_AMT)))
+  cc_lfo_1_level_mod_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_LEVEL_MOD_AMT)
+  signals[SLOT_LFO_1_LEVEL_MOD_AMT] = cc_to_unipolar(cc_or_nrpn(cc_lfo_1_level_mod_amt, C.get_midi_cc_value(MIDI_CH, cc_lfo_1_level_mod_amt), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_LFO_1_LEVEL_MOD_AMT)))
+  cc_lfo_1_reset_sw = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_LFO_1_RESET_SW)
+  signals[SLOT_LFO_1_RESET_SW] = cc_to_unipolar(cc_or_nrpn(cc_lfo_1_reset_sw, C.get_midi_cc_value(MIDI_CH, cc_lfo_1_reset_sw), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_LFO_1_RESET_SW)))
+  cc_mixer_1_level_1 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_1_LEVEL_1)
+  signals[SLOT_MIXER_1_LEVEL_1] = cc_to_unipolar(cc_or_nrpn(cc_mixer_1_level_1, C.get_midi_cc_value(MIDI_CH, cc_mixer_1_level_1), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_MIXER_1_LEVEL_1)))
+  cc_mixer_1_level_2 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_1_LEVEL_2)
+  signals[SLOT_MIXER_1_LEVEL_2] = cc_to_unipolar(cc_or_nrpn(cc_mixer_1_level_2, C.get_midi_cc_value(MIDI_CH, cc_mixer_1_level_2), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_MIXER_1_LEVEL_2)))
+  cc_mixer_1_level_3 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_1_LEVEL_3)
+  signals[SLOT_MIXER_1_LEVEL_3] = cc_to_unipolar(cc_or_nrpn(cc_mixer_1_level_3, C.get_midi_cc_value(MIDI_CH, cc_mixer_1_level_3), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_MIXER_1_LEVEL_3)))
+  cc_mixer_1_level_4 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_1_LEVEL_4)
+  signals[SLOT_MIXER_1_LEVEL_4] = cc_to_unipolar(cc_or_nrpn(cc_mixer_1_level_4, C.get_midi_cc_value(MIDI_CH, cc_mixer_1_level_4), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_MIXER_1_LEVEL_4)))
+  cc_mixer_1_out_level = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_1_OUT_LEVEL)
+  signals[SLOT_MIXER_1_OUT_LEVEL] = cc_to_unipolar(cc_or_nrpn(cc_mixer_1_out_level, C.get_midi_cc_value(MIDI_CH, cc_mixer_1_out_level), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_MIXER_1_OUT_LEVEL)))
+  cc_osc_1_wave = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_WAVE)
+  signals[SLOT_OSC_1_WAVE] = cc_to_unipolar(cc_or_nrpn(cc_osc_1_wave, C.get_midi_cc_value(MIDI_CH, cc_osc_1_wave), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_OSC_1_WAVE)))
+  cc_osc_1_pw = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_PW)
+  signals[SLOT_OSC_1_PW] = cc_to_bipolar(cc_or_nrpn(cc_osc_1_pw, C.get_midi_cc_value(MIDI_CH, cc_osc_1_pw), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_OSC_1_PW)))
+  cc_osc_1_pitch_coarse = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_PITCH_COARSE)
+  signals[SLOT_OSC_1_PITCH_COARSE] = cc_to_bipolar(cc_or_nrpn(cc_osc_1_pitch_coarse, C.get_midi_cc_value(MIDI_CH, cc_osc_1_pitch_coarse), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_OSC_1_PITCH_COARSE)))
+  cc_osc_1_pitch_shift = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_PITCH_SHIFT)
+  signals[SLOT_OSC_1_PITCH_SHIFT] = cc_to_unipolar(cc_or_nrpn(cc_osc_1_pitch_shift, C.get_midi_cc_value(MIDI_CH, cc_osc_1_pitch_shift), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_OSC_1_PITCH_SHIFT)))
+  cc_osc_1_pitch_fine = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_PITCH_FINE)
+  signals[SLOT_OSC_1_PITCH_FINE] = cc_to_bipolar(cc_or_nrpn(cc_osc_1_pitch_fine, C.get_midi_cc_value(MIDI_CH, cc_osc_1_pitch_fine), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_OSC_1_PITCH_FINE)))
+  cc_osc_1_pitch_mod_1_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_PITCH_MOD_1_AMT)
+  signals[SLOT_OSC_1_PITCH_MOD_1_AMT] = cc_to_unipolar(cc_or_nrpn(cc_osc_1_pitch_mod_1_amt, C.get_midi_cc_value(MIDI_CH, cc_osc_1_pitch_mod_1_amt), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_OSC_1_PITCH_MOD_1_AMT)))
+  cc_osc_1_pitch_mod_1_polarity = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_PITCH_MOD_1_POLARITY)
+  signals[SLOT_OSC_1_PITCH_MOD_1_POLARITY] = cc_to_bipolar(cc_or_nrpn(cc_osc_1_pitch_mod_1_polarity, C.get_midi_cc_value(MIDI_CH, cc_osc_1_pitch_mod_1_polarity), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_OSC_1_PITCH_MOD_1_POLARITY)))
+  cc_osc_1_pitch_mod_1_sw = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_PITCH_MOD_1_SW)
+  signals[SLOT_OSC_1_PITCH_MOD_1_SW] = cc_to_unipolar(cc_or_nrpn(cc_osc_1_pitch_mod_1_sw, C.get_midi_cc_value(MIDI_CH, cc_osc_1_pitch_mod_1_sw), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_OSC_1_PITCH_MOD_1_SW)))
+  cc_osc_1_pitch_mod_2_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_PITCH_MOD_2_AMT)
+  signals[SLOT_OSC_1_PITCH_MOD_2_AMT] = cc_to_unipolar(cc_or_nrpn(cc_osc_1_pitch_mod_2_amt, C.get_midi_cc_value(MIDI_CH, cc_osc_1_pitch_mod_2_amt), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_OSC_1_PITCH_MOD_2_AMT)))
+  cc_osc_1_pitch_mod_2_polarity = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_PITCH_MOD_2_POLARITY)
+  signals[SLOT_OSC_1_PITCH_MOD_2_POLARITY] = cc_to_bipolar(cc_or_nrpn(cc_osc_1_pitch_mod_2_polarity, C.get_midi_cc_value(MIDI_CH, cc_osc_1_pitch_mod_2_polarity), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_OSC_1_PITCH_MOD_2_POLARITY)))
+  cc_osc_1_pitch_mod_2_sw = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_PITCH_MOD_2_SW)
+  signals[SLOT_OSC_1_PITCH_MOD_2_SW] = cc_to_unipolar(cc_or_nrpn(cc_osc_1_pitch_mod_2_sw, C.get_midi_cc_value(MIDI_CH, cc_osc_1_pitch_mod_2_sw), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_OSC_1_PITCH_MOD_2_SW)))
+  cc_osc_1_pw_mod_1_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_PW_MOD_1_AMT)
+  signals[SLOT_OSC_1_PW_MOD_1_AMT] = cc_to_unipolar(cc_or_nrpn(cc_osc_1_pw_mod_1_amt, C.get_midi_cc_value(MIDI_CH, cc_osc_1_pw_mod_1_amt), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_OSC_1_PW_MOD_1_AMT)))
+  cc_osc_1_pw_mod_1_polarity = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_PW_MOD_1_POLARITY)
+  signals[SLOT_OSC_1_PW_MOD_1_POLARITY] = cc_to_bipolar(cc_or_nrpn(cc_osc_1_pw_mod_1_polarity, C.get_midi_cc_value(MIDI_CH, cc_osc_1_pw_mod_1_polarity), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_OSC_1_PW_MOD_1_POLARITY)))
+  cc_osc_1_pw_mod_2_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_PW_MOD_2_AMT)
+  signals[SLOT_OSC_1_PW_MOD_2_AMT] = cc_to_unipolar(cc_or_nrpn(cc_osc_1_pw_mod_2_amt, C.get_midi_cc_value(MIDI_CH, cc_osc_1_pw_mod_2_amt), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_OSC_1_PW_MOD_2_AMT)))
+  cc_osc_1_pw_mod_2_polarity = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_1_PW_MOD_2_POLARITY)
+  signals[SLOT_OSC_1_PW_MOD_2_POLARITY] = cc_to_bipolar(cc_or_nrpn(cc_osc_1_pw_mod_2_polarity, C.get_midi_cc_value(MIDI_CH, cc_osc_1_pw_mod_2_polarity), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_OSC_1_PW_MOD_2_POLARITY)))
+  cc_osc_2_wave = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_2_WAVE)
+  signals[SLOT_OSC_2_WAVE] = cc_to_unipolar(cc_or_nrpn(cc_osc_2_wave, C.get_midi_cc_value(MIDI_CH, cc_osc_2_wave), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_OSC_2_WAVE)))
+  cc_osc_2_pw = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_2_PW)
+  signals[SLOT_OSC_2_PW] = cc_to_bipolar(cc_or_nrpn(cc_osc_2_pw, C.get_midi_cc_value(MIDI_CH, cc_osc_2_pw), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_OSC_2_PW)))
+  cc_osc_2_pitch_coarse = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_2_PITCH_COARSE)
+  signals[SLOT_OSC_2_PITCH_COARSE] = cc_to_bipolar(cc_or_nrpn(cc_osc_2_pitch_coarse, C.get_midi_cc_value(MIDI_CH, cc_osc_2_pitch_coarse), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_OSC_2_PITCH_COARSE)))
+  cc_osc_2_pitch_shift = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_2_PITCH_SHIFT)
+  signals[SLOT_OSC_2_PITCH_SHIFT] = cc_to_unipolar(cc_or_nrpn(cc_osc_2_pitch_shift, C.get_midi_cc_value(MIDI_CH, cc_osc_2_pitch_shift), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_OSC_2_PITCH_SHIFT)))
+  cc_osc_2_pitch_fine = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_2_PITCH_FINE)
+  signals[SLOT_OSC_2_PITCH_FINE] = cc_to_bipolar(cc_or_nrpn(cc_osc_2_pitch_fine, C.get_midi_cc_value(MIDI_CH, cc_osc_2_pitch_fine), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_OSC_2_PITCH_FINE)))
+  cc_osc_2_pitch_mod_1_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_2_PITCH_MOD_1_AMT)
+  signals[SLOT_OSC_2_PITCH_MOD_1_AMT] = cc_to_unipolar(cc_or_nrpn(cc_osc_2_pitch_mod_1_amt, C.get_midi_cc_value(MIDI_CH, cc_osc_2_pitch_mod_1_amt), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_OSC_2_PITCH_MOD_1_AMT)))
+  cc_osc_2_pitch_mod_1_polarity = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_2_PITCH_MOD_1_POLARITY)
+  signals[SLOT_OSC_2_PITCH_MOD_1_POLARITY] = cc_to_bipolar(cc_or_nrpn(cc_osc_2_pitch_mod_1_polarity, C.get_midi_cc_value(MIDI_CH, cc_osc_2_pitch_mod_1_polarity), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_OSC_2_PITCH_MOD_1_POLARITY)))
+  cc_osc_2_pitch_mod_1_sw = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_2_PITCH_MOD_1_SW)
+  signals[SLOT_OSC_2_PITCH_MOD_1_SW] = cc_to_unipolar(cc_or_nrpn(cc_osc_2_pitch_mod_1_sw, C.get_midi_cc_value(MIDI_CH, cc_osc_2_pitch_mod_1_sw), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_OSC_2_PITCH_MOD_1_SW)))
+  cc_osc_2_pitch_mod_2_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_2_PITCH_MOD_2_AMT)
+  signals[SLOT_OSC_2_PITCH_MOD_2_AMT] = cc_to_unipolar(cc_or_nrpn(cc_osc_2_pitch_mod_2_amt, C.get_midi_cc_value(MIDI_CH, cc_osc_2_pitch_mod_2_amt), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_OSC_2_PITCH_MOD_2_AMT)))
+  cc_osc_2_pitch_mod_2_polarity = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_2_PITCH_MOD_2_POLARITY)
+  signals[SLOT_OSC_2_PITCH_MOD_2_POLARITY] = cc_to_bipolar(cc_or_nrpn(cc_osc_2_pitch_mod_2_polarity, C.get_midi_cc_value(MIDI_CH, cc_osc_2_pitch_mod_2_polarity), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_OSC_2_PITCH_MOD_2_POLARITY)))
+  cc_osc_2_pitch_mod_2_sw = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_2_PITCH_MOD_2_SW)
+  signals[SLOT_OSC_2_PITCH_MOD_2_SW] = cc_to_unipolar(cc_or_nrpn(cc_osc_2_pitch_mod_2_sw, C.get_midi_cc_value(MIDI_CH, cc_osc_2_pitch_mod_2_sw), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_OSC_2_PITCH_MOD_2_SW)))
+  cc_osc_2_pw_mod_1_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_2_PW_MOD_1_AMT)
+  signals[SLOT_OSC_2_PW_MOD_1_AMT] = cc_to_unipolar(cc_or_nrpn(cc_osc_2_pw_mod_1_amt, C.get_midi_cc_value(MIDI_CH, cc_osc_2_pw_mod_1_amt), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_OSC_2_PW_MOD_1_AMT)))
+  cc_osc_2_pw_mod_1_polarity = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_2_PW_MOD_1_POLARITY)
+  signals[SLOT_OSC_2_PW_MOD_1_POLARITY] = cc_to_bipolar(cc_or_nrpn(cc_osc_2_pw_mod_1_polarity, C.get_midi_cc_value(MIDI_CH, cc_osc_2_pw_mod_1_polarity), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_OSC_2_PW_MOD_1_POLARITY)))
+  cc_osc_2_pw_mod_2_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_2_PW_MOD_2_AMT)
+  signals[SLOT_OSC_2_PW_MOD_2_AMT] = cc_to_unipolar(cc_or_nrpn(cc_osc_2_pw_mod_2_amt, C.get_midi_cc_value(MIDI_CH, cc_osc_2_pw_mod_2_amt), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_OSC_2_PW_MOD_2_AMT)))
+  cc_osc_2_pw_mod_2_polarity = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_2_PW_MOD_2_POLARITY)
+  signals[SLOT_OSC_2_PW_MOD_2_POLARITY] = cc_to_bipolar(cc_or_nrpn(cc_osc_2_pw_mod_2_polarity, C.get_midi_cc_value(MIDI_CH, cc_osc_2_pw_mod_2_polarity), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_OSC_2_PW_MOD_2_POLARITY)))
+  cc_osc_2_sync_sw = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_OSC_2_SYNC_SW)
+  signals[SLOT_OSC_2_SYNC_SW] = cc_to_unipolar(cc_or_nrpn(cc_osc_2_sync_sw, C.get_midi_cc_value(MIDI_CH, cc_osc_2_sync_sw), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_OSC_2_SYNC_SW)))
+  cc_noise_1_color = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_NOISE_1_COLOR)
+  signals[SLOT_NOISE_1_COLOR] = cc_to_unipolar(cc_or_nrpn(cc_noise_1_color, C.get_midi_cc_value(MIDI_CH, cc_noise_1_color), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_NOISE_1_COLOR)))
+  cc_noise_1_level = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_NOISE_1_LEVEL)
+  signals[SLOT_NOISE_1_LEVEL] = cc_to_unipolar(cc_or_nrpn(cc_noise_1_level, C.get_midi_cc_value(MIDI_CH, cc_noise_1_level), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_NOISE_1_LEVEL)))
+  cc_mixer_2_level_1 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_LEVEL_1)
+  signals[SLOT_MIXER_2_LEVEL_1] = cc_to_unipolar(cc_or_nrpn(cc_mixer_2_level_1, C.get_midi_cc_value(MIDI_CH, cc_mixer_2_level_1), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_MIXER_2_LEVEL_1)))
+  cc_mixer_2_level_2 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_LEVEL_2)
+  signals[SLOT_MIXER_2_LEVEL_2] = cc_to_unipolar(cc_or_nrpn(cc_mixer_2_level_2, C.get_midi_cc_value(MIDI_CH, cc_mixer_2_level_2), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_MIXER_2_LEVEL_2)))
+  cc_mixer_2_level_3 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_LEVEL_3)
+  signals[SLOT_MIXER_2_LEVEL_3] = cc_to_unipolar(cc_or_nrpn(cc_mixer_2_level_3, C.get_midi_cc_value(MIDI_CH, cc_mixer_2_level_3), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_MIXER_2_LEVEL_3)))
+  cc_mixer_2_level_4 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_LEVEL_4)
+  signals[SLOT_MIXER_2_LEVEL_4] = cc_to_unipolar(cc_or_nrpn(cc_mixer_2_level_4, C.get_midi_cc_value(MIDI_CH, cc_mixer_2_level_4), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_MIXER_2_LEVEL_4)))
+  cc_mixer_2_out_level = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MIXER_2_OUT_LEVEL)
+  signals[SLOT_MIXER_2_OUT_LEVEL] = cc_to_unipolar(cc_or_nrpn(cc_mixer_2_out_level, C.get_midi_cc_value(MIDI_CH, cc_mixer_2_out_level), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_MIXER_2_OUT_LEVEL)))
+  cc_filter_1_cutoff = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_CUTOFF)
+  signals[SLOT_FILTER_1_CUTOFF] = cc_to_unipolar(cc_or_nrpn(cc_filter_1_cutoff, C.get_midi_cc_value(MIDI_CH, cc_filter_1_cutoff), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_FILTER_1_CUTOFF)))
+  cc_filter_1_resonance = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_RESONANCE)
+  signals[SLOT_FILTER_1_RESONANCE] = cc_to_unipolar(cc_or_nrpn(cc_filter_1_resonance, C.get_midi_cc_value(MIDI_CH, cc_filter_1_resonance), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_FILTER_1_RESONANCE)))
+  cc_filter_1_mode = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_MODE)
+  signals[SLOT_FILTER_1_MODE] = cc_to_unipolar(cc_or_nrpn(cc_filter_1_mode, C.get_midi_cc_value(MIDI_CH, cc_filter_1_mode), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_FILTER_1_MODE)))
+  cc_filter_1_pitch_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_PITCH_AMT)
+  signals[SLOT_FILTER_1_PITCH_AMT] = cc_to_unipolar(cc_or_nrpn(cc_filter_1_pitch_amt, C.get_midi_cc_value(MIDI_CH, cc_filter_1_pitch_amt), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_FILTER_1_PITCH_AMT)))
+  cc_filter_1_mod_1_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_MOD_1_AMT)
+  signals[SLOT_FILTER_1_MOD_1_AMT] = cc_to_unipolar(cc_or_nrpn(cc_filter_1_mod_1_amt, C.get_midi_cc_value(MIDI_CH, cc_filter_1_mod_1_amt), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_FILTER_1_MOD_1_AMT)))
+  cc_filter_1_mod_1_polarity = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_MOD_1_POLARITY)
+  signals[SLOT_FILTER_1_MOD_1_POLARITY] = cc_to_bipolar(cc_or_nrpn(cc_filter_1_mod_1_polarity, C.get_midi_cc_value(MIDI_CH, cc_filter_1_mod_1_polarity), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_FILTER_1_MOD_1_POLARITY)))
+  cc_filter_1_mod_2_amt = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_MOD_2_AMT)
+  signals[SLOT_FILTER_1_MOD_2_AMT] = cc_to_unipolar(cc_or_nrpn(cc_filter_1_mod_2_amt, C.get_midi_cc_value(MIDI_CH, cc_filter_1_mod_2_amt), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_FILTER_1_MOD_2_AMT)))
+  cc_filter_1_mod_2_polarity = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_FILTER_1_MOD_2_POLARITY)
+  signals[SLOT_FILTER_1_MOD_2_POLARITY] = cc_to_bipolar(cc_or_nrpn(cc_filter_1_mod_2_polarity, C.get_midi_cc_value(MIDI_CH, cc_filter_1_mod_2_polarity), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_FILTER_1_MOD_2_POLARITY)))
+  cc_amp_1_gain = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_AMP_1_GAIN)
+  signals[SLOT_AMP_1_GAIN] = cc_to_unipolar(cc_or_nrpn(cc_amp_1_gain, C.get_midi_cc_value(MIDI_CH, cc_amp_1_gain), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_AMP_1_GAIN)))
+  cc_amp_1_mod_1_2_mix = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_AMP_1_MOD_1_2_MIX)
+  signals[SLOT_AMP_1_MOD_1_2_MIX] = cc_to_unipolar(cc_or_nrpn(cc_amp_1_mod_1_2_mix, C.get_midi_cc_value(MIDI_CH, cc_amp_1_mod_1_2_mix), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_AMP_1_MOD_1_2_MIX)))
+  cc_chorus_1_mix = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_CHORUS_1_MIX)
+  signals[SLOT_CHORUS_1_MIX] = cc_to_unipolar(cc_or_nrpn(cc_chorus_1_mix, C.get_midi_cc_value(MIDI_CH, cc_chorus_1_mix), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_CHORUS_1_MIX)))
+  cc_chorus_1_rate = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_CHORUS_1_RATE)
+  signals[SLOT_CHORUS_1_RATE] = cc_to_unipolar(cc_or_nrpn(cc_chorus_1_rate, C.get_midi_cc_value(MIDI_CH, cc_chorus_1_rate), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_CHORUS_1_RATE)))
+  cc_chorus_1_depth = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_CHORUS_1_DEPTH)
+  signals[SLOT_CHORUS_1_DEPTH] = cc_to_unipolar(cc_or_nrpn(cc_chorus_1_depth, C.get_midi_cc_value(MIDI_CH, cc_chorus_1_depth), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_CHORUS_1_DEPTH)))
+  cc_delay_1_mix = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_DELAY_1_MIX)
+  signals[SLOT_DELAY_1_MIX] = cc_to_unipolar(cc_or_nrpn(cc_delay_1_mix, C.get_midi_cc_value(MIDI_CH, cc_delay_1_mix), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_DELAY_1_MIX)))
+  cc_delay_1_time = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_DELAY_1_TIME)
+  signals[SLOT_DELAY_1_TIME] = cc_to_unipolar(cc_or_nrpn(cc_delay_1_time, C.get_midi_cc_value(MIDI_CH, cc_delay_1_time), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_DELAY_1_TIME)))
+  cc_delay_1_feedback = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_DELAY_1_FEEDBACK)
+  signals[SLOT_DELAY_1_FEEDBACK] = cc_to_unipolar(cc_or_nrpn(cc_delay_1_feedback, C.get_midi_cc_value(MIDI_CH, cc_delay_1_feedback), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_DELAY_1_FEEDBACK)))
+  cc_mod_wheel = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MOD_WHEEL)
+  mod_wheel = C.get_midi_cc_value(MIDI_CH, cc_mod_wheel)
+  signals[SIGNAL_MOD_WHEEL] = cc_or_zero(cc_mod_wheel, cc_to_unipolar(mod_wheel))
+  signals[SIGNAL_MOD_WHEEL_REV] = 1.0 - signals[SIGNAL_MOD_WHEEL]
+  signals[SIGNAL_MOD_WHEEL_INV] = 0.0 - signals[SIGNAL_MOD_WHEEL]
+  signals[SIGNAL_MOD_WHEEL_REV_INV] = signals[SIGNAL_MOD_WHEEL] - 1.0
+  cc_general_1 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_1)
+  general_1 = C.get_midi_cc_value(MIDI_CH, cc_general_1)
+  signals[SIGNAL_GENERAL_1] = cc_or_zero(cc_general_1, cc_to_unipolar(general_1))
+  signals[SIGNAL_GENERAL_1_REV] = 1.0 - signals[SIGNAL_GENERAL_1]
+  signals[SIGNAL_GENERAL_1_INV] = 0.0 - signals[SIGNAL_GENERAL_1]
+  signals[SIGNAL_GENERAL_1_REV_INV] = signals[SIGNAL_GENERAL_1] - 1.0
+  signals[SIGNAL_GENERAL_1_BIPOLAR] = signals[SIGNAL_GENERAL_1] - 0.5
+  signals[SIGNAL_GENERAL_1_BIPOLAR_INV] = 0.5 - signals[SIGNAL_GENERAL_1]
+  cc_general_2 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_2)
+  general_2 = C.get_midi_cc_value(MIDI_CH, cc_general_2)
+  signals[SIGNAL_GENERAL_2] = cc_or_zero(cc_general_2, cc_to_unipolar(general_2))
+  signals[SIGNAL_GENERAL_2_REV] = 1.0 - signals[SIGNAL_GENERAL_2]
+  signals[SIGNAL_GENERAL_2_INV] = 0.0 - signals[SIGNAL_GENERAL_2]
+  signals[SIGNAL_GENERAL_2_REV_INV] = signals[SIGNAL_GENERAL_2] - 1.0
+  signals[SIGNAL_GENERAL_2_BIPOLAR] = signals[SIGNAL_GENERAL_2] - 0.5
+  signals[SIGNAL_GENERAL_2_BIPOLAR_INV] = 0.5 - signals[SIGNAL_GENERAL_2]
+  # patch_gen end
+
+  # Each parameter takes its value, every buffer, whether or not it moved. Written by patch_gen
+  # from each parameter's `set` in spms1_patch.yaml.
+  # patch_gen setters
+  pitch_1.set_glide(signals[source_pitch_1_glide])
+  pitch_1.set_glide_1_switch(signals[source_pitch_1_out_1_glide_sw])
+  pitch_1.set_glide_2_switch(signals[source_pitch_1_out_2_glide_sw])
+  pitch_1.set_bend_amount(signals[source_pitch_1_bend_amt])
+  pitch_1.set_bend_1_switch(signals[source_pitch_1_out_1_bend_sw])
+  pitch_1.set_bend_2_switch(signals[source_pitch_1_out_2_bend_sw])
+  pitch_1.set_stretch(signals[source_pitch_1_stretch])
+  eg_1.set_attack(signals[source_eg_1_attack])
+  eg_1.set_decay(signals[source_eg_1_decay])
+  eg_1.set_sustain(signals[source_eg_1_sustain])
+  eg_1.set_release_switch(signals[source_eg_1_release_sw])
+  eg_1.set_level(signals[source_eg_1_level])
+  eg_2.set_attack(signals[source_eg_2_attack])
+  eg_2.set_decay(signals[source_eg_2_decay])
+  eg_2.set_sustain(signals[source_eg_2_sustain])
+  eg_2.set_release_switch(signals[source_eg_2_release_sw])
+  eg_2.set_level(signals[source_eg_2_level])
+  lfo_1.set_wave(signals[source_lfo_1_wave])
+  lfo_1.set_rate(signals[source_lfo_1_rate])
+  lfo_1.set_level(signals[source_lfo_1_level])
+  lfo_1.set_rate_modulation_amount(signals[source_lfo_1_rate_mod_amt])
+  lfo_1.set_level_modulation_amount(signals[source_lfo_1_level_mod_amt])
+  lfo_1.set_reset_switch(signals[source_lfo_1_reset_sw])
+  mixer_1.set_level_1(signals[source_mixer_1_level_1])
+  mixer_1.set_level_2(signals[source_mixer_1_level_2])
+  mixer_1.set_level_3(signals[source_mixer_1_level_3])
+  mixer_1.set_level_4(signals[source_mixer_1_level_4])
+  mixer_1.set_out_level(signals[source_mixer_1_out_level])
+  osc_1.set_waveform(signals[source_osc_1_wave])
+  osc_1.set_pulse_width(signals[source_osc_1_pw])
+  osc_1.set_pitch_coarse(signals[source_osc_1_pitch_coarse])
+  osc_1.set_pitch(signals[source_osc_1_pitch_shift])
+  osc_1.set_pitch_fine(signals[source_osc_1_pitch_fine])
+  osc_1.set_pitch_modulation_1_amount(signals[source_osc_1_pitch_mod_1_amt])
+  osc_1.set_pitch_modulation_1_polarity(signals[source_osc_1_pitch_mod_1_polarity])
+  osc_1.set_pitch_modulation_1_switch(signals[source_osc_1_pitch_mod_1_sw])
+  osc_1.set_pitch_modulation_2_amount(signals[source_osc_1_pitch_mod_2_amt])
+  osc_1.set_pitch_modulation_2_polarity(signals[source_osc_1_pitch_mod_2_polarity])
+  osc_1.set_pitch_modulation_2_switch(signals[source_osc_1_pitch_mod_2_sw])
+  osc_1.set_pw_modulation_1_amount(signals[source_osc_1_pw_mod_1_amt])
+  osc_1.set_pw_modulation_1_polarity(signals[source_osc_1_pw_mod_1_polarity])
+  osc_1.set_pw_modulation_2_amount(signals[source_osc_1_pw_mod_2_amt])
+  osc_1.set_pw_modulation_2_polarity(signals[source_osc_1_pw_mod_2_polarity])
+  osc_2.set_waveform(signals[source_osc_2_wave])
+  osc_2.set_pulse_width(signals[source_osc_2_pw])
+  osc_2.set_pitch_coarse(signals[source_osc_2_pitch_coarse])
+  osc_2.set_pitch(signals[source_osc_2_pitch_shift])
+  osc_2.set_pitch_fine(signals[source_osc_2_pitch_fine])
+  osc_2.set_pitch_modulation_1_amount(signals[source_osc_2_pitch_mod_1_amt])
+  osc_2.set_pitch_modulation_1_polarity(signals[source_osc_2_pitch_mod_1_polarity])
+  osc_2.set_pitch_modulation_1_switch(signals[source_osc_2_pitch_mod_1_sw])
+  osc_2.set_pitch_modulation_2_amount(signals[source_osc_2_pitch_mod_2_amt])
+  osc_2.set_pitch_modulation_2_polarity(signals[source_osc_2_pitch_mod_2_polarity])
+  osc_2.set_pitch_modulation_2_switch(signals[source_osc_2_pitch_mod_2_sw])
+  osc_2.set_pw_modulation_1_amount(signals[source_osc_2_pw_mod_1_amt])
+  osc_2.set_pw_modulation_1_polarity(signals[source_osc_2_pw_mod_1_polarity])
+  osc_2.set_pw_modulation_2_amount(signals[source_osc_2_pw_mod_2_amt])
+  osc_2.set_pw_modulation_2_polarity(signals[source_osc_2_pw_mod_2_polarity])
+  osc_2.set_sync_switch(signals[source_osc_2_sync_sw])
+  noise_1.set_color(signals[source_noise_1_color])
+  noise_1.set_level(signals[source_noise_1_level])
+  mixer_2.set_level_1(signals[source_mixer_2_level_1])
+  mixer_2.set_level_2(signals[source_mixer_2_level_2])
+  mixer_2.set_level_3(signals[source_mixer_2_level_3])
+  mixer_2.set_level_4(signals[source_mixer_2_level_4])
+  mixer_2.set_out_level(signals[source_mixer_2_out_level])
+  filter_1.set_cutoff(signals[source_filter_1_cutoff])
+  filter_1.set_resonance(signals[source_filter_1_resonance])
+  filter_1.set_mode(signals[source_filter_1_mode])
+  filter_1.set_pitch_amount(signals[source_filter_1_pitch_amt])
+  filter_1.set_modulation_1_amount(signals[source_filter_1_mod_1_amt])
+  filter_1.set_modulation_1_polarity(signals[source_filter_1_mod_1_polarity])
+  filter_1.set_modulation_2_amount(signals[source_filter_1_mod_2_amt])
+  filter_1.set_modulation_2_polarity(signals[source_filter_1_mod_2_polarity])
+  amp_1.set_gain(signals[source_amp_1_gain])
+  amp_1.set_modulation_mix(signals[source_amp_1_mod_1_2_mix])
+  chorus_1.set_mix(signals[source_chorus_1_mix])
+  chorus_1.set_rate(signals[source_chorus_1_rate])
+  chorus_1.set_depth(signals[source_chorus_1_depth])
+  delay_1.set_mix(signals[source_delay_1_mix])
+  delay_1.set_time(signals[source_delay_1_time])
+  delay_1.set_feedback(signals[source_delay_1_feedback])
+  # patch_gen end
+
+  i = 0
+  while i < AUDIO_BUFFER_WORDS
+    # The control tick, every module's cue for its control-rate update, once every 4 samples
+    # (CONTROL_RATE_DIVISOR in each module). Taken here once a sample rather than counted by each
+    # module: a counter in each module would cost an add, a mask and a load and store of an
+    # instance variable a sample, about 6% of the buffer by the emulated estimate. The buffer is a multiple of 4 samples, so the tick keeps its phase across buffers,
+    # and every module ticks on the same samples, whenever it joined the run order.
+    control_tick = (i & 3) == 0
+    slot = 0
+    while slot < active_count
+      module_id = active_modules[slot]
+
+      # Spinel emits the case as a C switch over the literal ids, which GCC compiles to a jump
+      # table, so the dispatch costs the same whichever module it lands on and wherever that sits
+      # in the run order.
+      #
+      # The ids are literals, each with its constant's name after it, and so are the bus slots the
+      # outputs go to; patch_gen writes the whole dispatch from spms1_patch.yaml, a `when` for each
+      # module calling its `process`, or the `method` the YAML names in its place, with the inputs
+      # the YAML names. Spinel emits an Integer constant as a runtime global, so `when MODULE_LFO_1`
+      # would load its address and then its value, and `signals[SIGNAL_...]` would too before every
+      # write; a literal is an immediate. Literal ids save about a tenth of the instructions of a
+      # buffer of the default patch, and literal slots with active_count above about another 4%
+      # (emulated Cortex-M33).
+      case module_id
+      # patch_gen dispatch
+      when 1 # MODULE_PITCH_1
+        signals[24] = pitch_1.process(control_tick, signals[source_pitch_1_pitch], signals[source_pitch_1_bend], signals[source_pitch_1_gate]) # SIGNAL_PITCH_1_OUTPUT_1
+        signals[25] = pitch_1.output_2 # SIGNAL_PITCH_1_OUTPUT_2
+      when 2 # MODULE_EG_1
+        signals[26] = eg_1.process(control_tick, signals[source_eg_1_gate]) # SIGNAL_EG_1_OUTPUT
+        signals[27] = eg_1.output_inverted # SIGNAL_EG_1_OUTPUT_INV
+      when 3 # MODULE_EG_2
+        signals[28] = eg_2.process(control_tick, signals[source_eg_2_gate]) # SIGNAL_EG_2_OUTPUT
+        signals[29] = eg_2.output_inverted # SIGNAL_EG_2_OUTPUT_INV
+      when 4 # MODULE_LFO_1
+        signals[30] = lfo_1.process(control_tick, signals[source_lfo_1_rate_mod], signals[source_lfo_1_level_mod], signals[source_lfo_1_reset]) # SIGNAL_LFO_1_OUTPUT
+        signals[31] = lfo_1.output_inverted # SIGNAL_LFO_1_OUTPUT_INV
+        signals[32] = lfo_1.output_triangle # SIGNAL_LFO_1_OUTPUT_TRIANGLE
+        signals[33] = lfo_1.output_triangle_inverted # SIGNAL_LFO_1_OUTPUT_TRIANGLE_INV
+        signals[34] = lfo_1.output_square # SIGNAL_LFO_1_OUTPUT_SQUARE
+        signals[35] = lfo_1.output_square_inverted # SIGNAL_LFO_1_OUTPUT_SQUARE_INV
+      when 5 # MODULE_MIXER_1
+        signals[36] = mixer_1.process(control_tick, signals[source_mixer_1_in_1], signals[source_mixer_1_in_2], signals[source_mixer_1_in_3], signals[source_mixer_1_in_4]) # SIGNAL_MIXER_1_OUTPUT
+        signals[37] = mixer_1.output_inverted # SIGNAL_MIXER_1_OUTPUT_INV
+      when 6 # MODULE_OSC_1
+        signals[38] = osc_1.process(control_tick, signals[source_osc_1_pitch], signals[source_osc_1_mod_1], signals[source_osc_1_mod_2]) # SIGNAL_OSC_1_OUTPUT
+        signals[39] = osc_1.output_saw # SIGNAL_OSC_1_OUTPUT_SAW
+        signals[40] = osc_1.output_pulse # SIGNAL_OSC_1_OUTPUT_PULSE
+        signals[41] = osc_1.output_sub # SIGNAL_OSC_1_OUTPUT_SUB
+      when 7 # MODULE_OSC_2
+        signals[42] = osc_2.process_synced(control_tick, signals[source_osc_2_pitch], signals[source_osc_2_mod_1], signals[source_osc_2_mod_2], signals[source_osc_2_sync]) # SIGNAL_OSC_2_OUTPUT
+        signals[43] = osc_2.output_saw # SIGNAL_OSC_2_OUTPUT_SAW
+        signals[44] = osc_2.output_pulse # SIGNAL_OSC_2_OUTPUT_PULSE
+      when 8 # MODULE_NOISE_1
+        signals[45] = noise_1.process(control_tick) # SIGNAL_NOISE_1_OUTPUT
+        signals[46] = noise_1.output_white # SIGNAL_NOISE_1_OUTPUT_WHITE
+        signals[47] = noise_1.output_red # SIGNAL_NOISE_1_OUTPUT_RED
+      when 9 # MODULE_MIXER_2
+        signals[48] = mixer_2.process(control_tick, signals[source_mixer_2_in_1], signals[source_mixer_2_in_2], signals[source_mixer_2_in_3], signals[source_mixer_2_in_4]) # SIGNAL_MIXER_2_OUTPUT
+        signals[49] = mixer_2.output_inverted # SIGNAL_MIXER_2_OUTPUT_INV
+      when 10 # MODULE_FILTER_1
+        signals[50] = filter_1.process(control_tick, signals[source_filter_1_audio], signals[source_filter_1_pitch], signals[source_filter_1_mod_1], signals[source_filter_1_mod_2]) # SIGNAL_FILTER_1_OUTPUT
+        signals[51] = filter_1.output_lp # SIGNAL_FILTER_1_OUTPUT_LP
+        signals[52] = filter_1.output_hp # SIGNAL_FILTER_1_OUTPUT_HP
+        signals[53] = filter_1.output_bp # SIGNAL_FILTER_1_OUTPUT_BP
+      when 11 # MODULE_AMP_1
+        signals[54] = amp_1.process(control_tick, signals[source_amp_1_audio], signals[source_amp_1_mod_1], signals[source_amp_1_mod_2]) # SIGNAL_AMP_1_OUTPUT
+      when 12 # MODULE_CHORUS_1
+        chorus_1.process(control_tick, signals[source_chorus_1_audio])
+        signals[55] = chorus_1.output_l # SIGNAL_CHORUS_1_OUTPUT_L
+        signals[56] = chorus_1.output_r # SIGNAL_CHORUS_1_OUTPUT_R
+        signals[57] = chorus_1.output_mono # SIGNAL_CHORUS_1_OUTPUT_MONO
+      when 13 # MODULE_DELAY_1
+        delay_1.process(control_tick, signals[source_delay_1_audio_l], signals[source_delay_1_audio_r])
+        signals[58] = delay_1.output_l # SIGNAL_DELAY_1_OUTPUT_L
+        signals[59] = delay_1.output_r # SIGNAL_DELAY_1_OUTPUT_R
+        signals[60] = delay_1.output_mono # SIGNAL_DELAY_1_OUTPUT_MONO
+      # patch_gen end
+      end
+
+      slot += 1
+    end
+
+    audio_buffer_l[i] = signals[source_output_l]
+    audio_buffer_r[i] = signals[source_output_r]
+    i += 1
+  end
+
+  C.stop_debug_measure
+
+  AUDIO_BUFFER_WORDS.times do |i|
+    C.write_to_audio_buffer(audio_buffer_l[i], audio_buffer_r[i])
+  end
+end

@@ -60,14 +60,14 @@ jobs:
           mkdir -p "$RUNNER_TEMP/uf2"
 
           # PWM Audio (the default)
-          arduino-cli compile --fqbn "$UF2_FQBN" --output-dir "$RUNNER_TEMP/out/pwm_audio" .
-          cp "$RUNNER_TEMP/out/pwm_audio/spms1_type2.ino.uf2" "$RUNNER_TEMP/uf2/spms1_type2_pwm_audio.ino.uf2"
+          arduino-cli compile --fqbn "$UF2_FQBN" --output-dir "$RUNNER_TEMP/out/pwm_audio" spms1
+          cp "$RUNNER_TEMP/out/pwm_audio/spms1.ino.uf2" "$RUNNER_TEMP/uf2/spms1_pwm_audio.ino.uf2"
 
-          # I2S: "spms1_type2.ino" with SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO uncommented
-          sed -i 's|^//#define SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO|#define SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO|' spms1_type2.ino
-          grep -q '^#define SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO' spms1_type2.ino
-          arduino-cli compile --fqbn "$UF2_FQBN" --output-dir "$RUNNER_TEMP/out/i2s" .
-          cp "$RUNNER_TEMP/out/i2s/spms1_type2.ino.uf2" "$RUNNER_TEMP/uf2/spms1_type2_i2s.ino.uf2"
+          # I2S: "spms1/spms1.ino" with SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO uncommented
+          sed -i 's|^//#define SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO|#define SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO|' spms1/spms1.ino
+          grep -q '^#define SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO' spms1/spms1.ino
+          arduino-cli compile --fqbn "$UF2_FQBN" --output-dir "$RUNNER_TEMP/out/i2s" spms1
+          cp "$RUNNER_TEMP/out/i2s/spms1.ino.uf2" "$RUNNER_TEMP/uf2/spms1_i2s.ino.uf2"
 
       - uses: actions/upload-artifact@v6
         with:
@@ -208,8 +208,8 @@ jobs:
 
       - name: Check that spms1_main.c is the one committed
         run: |
-          if ! git diff --exit-code --stat -- spms1_main.c; then
-            echo "::error file=spms1_type2/spms1_main.c::spms1_main.c is not what Spinel makes of the .rb files: regenerate it (see README.md) and commit it"
+          if ! git diff --exit-code --stat -- spms1/spms1_main.c; then
+            echo "::error file=spms1_type2/spms1/spms1_main.c::spms1_main.c is not what Spinel makes of the .rb files: regenerate it (see README.md) and commit it"
             exit 1
           fi
 

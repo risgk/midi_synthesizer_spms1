@@ -9,9 +9,9 @@ SPMS-1 (type-2) Editor ("spms1_editor.html")
     - The output matches the PC build of the same "spms1_main.c" within the rounding of the math library
 - Version: the same as SPMS-1 (type-2) (the title of "../README.md"), shown in the console of the Web browser
 - "spms1_web_synth.js" (in the parent folder, next to "spms1_editor.html"): the built file
-    - The WebAssembly binary (about 230 KB) and the AudioWorkletProcessor are embedded, so that it works
+    - The WebAssembly binary (about 240 KB) and the AudioWorkletProcessor are embedded, so that it works
       both on a Web server (e.g. GitHub Pages) and with a local file ("file://")
-    - Without this file, the editor works as before (MIDI Out to the devices only)
+    - Without this file, the editor works without SPMS-1 Web (MIDI Out to the devices only)
 
 
 How to Use
@@ -19,7 +19,7 @@ How to Use
 
 - Open "spms1_editor.html" (a local file, or on a Web server) with Google Chrome or Microsoft Edge (recommended)
 - Select "SPMS-1 Web (Built-in)" in the list "MIDI Out"
-    - The editor sends its whole patch (NRPN and CC values) to SPMS-1 Web, Live patch or not
+    - The editor sends its whole patch (NRPN and CC values) to SPMS-1 Web when it is selected, and every change as it is made
 - Play the soft keyboard of the editor, or a MIDI keyboard selected in "MIDI In"
     - Web browsers start the audio only after a user operation in the page (e.g. a click, a tap, or a key press),
       so click the page once before playing a MIDI keyboard (clicking the soft keyboard also starts the audio)
@@ -42,7 +42,7 @@ Specifications
       at other sampling rates, the output is resampled (cubic Hermite interpolation)
     - The MIDI messages are handled at the beginning of the next audio block (128 samples, about 2.7 ms at 48 kHz),
       and the synth reads them once per its own buffer (64 samples), as on the device
-- How it runs: `Spms1_main` never returns, and its `loop do` writes each sample out through
+- How it runs: `Spms1_main` never returns, and its `while true` loop writes each sample out through
   `write_to_audio_buffer`, which waits for room in the output on the device. Here the build runs
   Binaryen's Asyncify on the WebAssembly, so that `write_to_audio_buffer` can unwind `Spms1_main`
   out to the AudioWorkletProcessor once a block is filled, and the next block rewinds it back to the
@@ -81,18 +81,12 @@ node spms1_web_test.js
 - GitHub Actions: "SPMS-1 (type-2) Build (UF2 and Web)" in "../../.github/workflows/spms1-type2.yml"
   builds and tests "spms1_web_synth.js" (and commits it with "commit_package")
 - The source files
-    - "spms1_web_main.c": the C API for the AudioWorkletProcessor, standing in for "spms1_type2.ino"
-      (the MIDI tables and handlers are the sketch's own "../spms1_midi_state.h")
+    - "spms1_web_main.c": the C API for the AudioWorkletProcessor, standing in for "spms1.ino"
+      (the MIDI tables and handlers are the sketch's own "../spms1/spms1_midi_state.h")
     - "spms1_web_compat.h": force-included ahead of the Spinel files, as "../sim_spinel/host_compat.h" is in the PC build
     - "spms1_web_synth_processor.js": the AudioWorkletProcessor (runs the WebAssembly)
     - "spms1_web_synth_main.js": the main thread part (the virtual MIDI output for the editor)
     - "spms1_web_build.js": the build script
     - "spms1_web_test.js": the test of the built file with Node.js (plays a note at 48 kHz, 44.1 kHz, and 96 kHz,
       and checks the release, that the output does not depend on the block size, and that a patch sent as NRPN is taken)
-- The Arduino IDE does not build the files in this folder (only the files at the top of the sketch folder)
-
-
-Credits
--------
-
-- Modeled after PRA32-U2 Web of [Digital Synth PRA32-U2](https://github.com/risgk/digital-synth-pra32-u2)
+- The Arduino IDE does not see this folder: it is outside the sketch folder, "spms1"

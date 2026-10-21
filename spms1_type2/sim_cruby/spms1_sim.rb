@@ -272,7 +272,7 @@ select_midi_input(options[:midi_in])
 
 at_exit { Spms1::C.stop_audio }
 begin
-  load File.join(__dir__, '..', 'spms1_main.rb')
+  load File.join(__dir__, '..', 'spms1', 'spms1_main.rb')
 rescue Interrupt
   $stderr.puts
 end
