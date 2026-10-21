@@ -982,13 +982,13 @@ takes the output to the input at once, mid-glide too, as Glide at 0.0 does.
 
 #### Notes
 
-- Module inputs (category 1) are read every sample (EG 1 Gate In, LFO 1's two Mod Ins and Filter 1's three every fourth) and are not
+- Module inputs (category 1) are read every sample (EG 1's and EG 2's Gate In, LFO 1's three inputs and Filter 1's three every fourth) and are not
   smoothed; parameters (category 2) are read once per buffer and are smoothed by their
   destination. Route a fast source through a module input, a stepped one through a parameter
 - The smoothing takes two stages (10.7 ms average delay, 99% in 35 ms at 48 kHz), which round off
-  the steps of a controller sending sparse CCs (e.g. every 20 ms). Osc 1 Pitch Coarse and Pitch Fine
+  the steps of a controller sending sparse CCs (e.g. every 20 ms). The oscillators' Pitch Coarse and Pitch Fine
   are not smoothed, so that the pitch follows right away, and neither is Pitch 1 Glide, which
-  cannot step what it sets, nor EG 1 Attack, Decay and Sustain, which the envelope's own curve
+  cannot step what it sets, nor the envelopes' Attack, Decay and Sustain, which each envelope's own curve
   already moves between
 - A source may point at any slot number. A free one reads 0 until something writes it, which
   leaves a parameter pointed at one at the bottom of a unipolar dial or the middle of a bipolar
