@@ -80,7 +80,7 @@ def cc_to_bipolar(value)
   (scaled < -0.5) ? -0.5 : ((scaled > 0.5) ? 0.5 : scaled)
 end
 
-# What the mod wheel's slot is filled with. CC number 0 means no CC is assigned, and the slot
+# What a controller's slot, the mod wheel's or a general control's, is filled with. CC number 0 means no CC is assigned, and the slot
 # gets 0.0. Selecting the value rather than skipping the write keeps the cost the same whatever the
 # patch says.
 def cc_or_zero(cc_number, value)

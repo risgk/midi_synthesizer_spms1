@@ -26,7 +26,7 @@ NRPN_CC_BASE            = 384
 NRPN_VALUE_BASE         = 512
 
 # A parameter source of 127 is the parameter's own control slot, which is off the bus: the bus
-# carries the outputs, the constants, the notes and the mod wheel in 0-126, and each
+# carries the outputs, the constants, the notes and the controllers in 0-126, and each
 # parameter's control slot sits at 128 + its entry, where only the parameter reads it.
 SIGNAL_OWN      = 127
 PARAM_SLOT_BASE = 128
@@ -60,6 +60,8 @@ class Spec
   def signal(key) = @signal.fetch(key)
 
   # A module input's or control's own name, with its module's in front: OSC_1_PITCH, OUTPUT_L.
+  FORMS = %w[rev inv rev_inv bipolar bipolar_inv].freeze
+
   def full_key(item) = item['module'] ? "#{item['module']}_#{item['key']}" : item['key']
 
   def full_label(item, name = item['label']) = item['module'] ? "#{self.module(item['module'])['label']} #{name}" : name
@@ -119,6 +121,8 @@ class Spec
       fail_spec("signal #{s['key']} names module #{s['module']}") if s['module'] && !@module[s['module']]
       fail_spec("signal #{s['key']} names control #{s['control']}") if s['control'] && !@control[s['control']]
       fail_spec("signal #{s['key']} is a parameter's control slot, which is off the bus") if s['control'] && !@control[s['control']]['controller']
+      fail_spec("signal #{s['key']} has form #{s['form']}, none of #{FORMS.join(', ')}") if s['form'] && !FORMS.include?(s['form'])
+      fail_spec("signal #{s['key']} has a form but no control") if s['form'] && !s['control']
     end
     (@inputs + @controls).each do |item|
       fail_spec("#{full_key(item)} names module #{item['module']}") if item['module'] && !@module[item['module']]
@@ -126,6 +130,8 @@ class Spec
     end
     @controls.each do |c|
       fail_spec("controller control #{full_key(c)} fills no slot") if c['controller'] && slots_of(c).empty?
+      plain = slots_of(c).find { |s| !s['form'] }
+      fail_spec("controller control #{full_key(c)} has forms but no unipolar plain slot, its key, first") if c['controller'] && slots_of(c).any? { |s| s['form'] } && (slots_of(c).first != plain || plain['key'] != full_key(c) || bipolar?(plain))
       fail_spec("control #{full_key(c)} has a CC but no value") if c['cc'].to_i != 0 && !c.key?('value')
       fail_spec("parameter #{full_key(c)} has no value") if !c['controller'] && !c.key?('value')
     end
@@ -254,7 +260,7 @@ def editor_js
             bipolar: !!c['bipolar'], cc: c['cc'].to_i, value: c['value'], source: c['source'],
             controller: !!c['controller'], hint: c['hint'], hintInputs: c['hint_inputs'],
             slots: if c['controller']
-                     s.slots_of(c).map { |sig| [sig['key'], sig['label'] || c['label'], s.bipolar?(sig)] }
+                     s.slots_of(c).map { |sig| [sig['key'], sig['label'] || c['label'], s.bipolar?(sig), sig['form']].compact }
                    else
                      [[s.full_key(c), c['label'], !!c['bipolar']]]
                    end }
@@ -394,8 +400,17 @@ def main_controls
     name = local_name(c)
     out << "  cc_#{name} = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_#{s.full_key(c)})\n"
     out << "  #{name} = C.get_midi_cc_value(MIDI_CH, cc_#{name})\n"
+    plain = "signals[SIGNAL_#{s.full_key(c)}]"
     s.slots_of(c).each do |sig|
-      out << "  signals[SIGNAL_#{sig['key']}] = cc_or_zero(cc_#{name}, #{converter(s.bipolar?(sig))}(#{name}))\n"
+      expr = case sig['form']
+             when nil then "cc_or_zero(cc_#{name}, #{converter(s.bipolar?(sig))}(#{name}))"
+             when 'rev' then "1.0 - #{plain}"
+             when 'inv' then "0.0 - #{plain}"
+             when 'rev_inv' then "#{plain} - 1.0"
+             when 'bipolar' then "#{plain} - 0.5"
+             when 'bipolar_inv' then "0.5 - #{plain}"
+             end
+      out << "  signals[SIGNAL_#{sig['key']}] = #{expr}\n"
     end
   end
   out.join

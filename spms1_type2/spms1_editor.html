@@ -1405,7 +1405,7 @@
       {"entry":13,"module":"EG_2","key":"LEVEL","label":"Level","bipolar":false,"cc":0,"value":124,"controller":false,"slots":[["EG_2_LEVEL","Level",false]]},
       {"entry":14,"module":"LFO_1","key":"WAVE","label":"Wave","bipolar":false,"cc":33,"value":4,"controller":false,"hint":"Tri to Sq","slots":[["LFO_1_WAVE","Wave",false]]},
       {"entry":15,"module":"LFO_1","key":"RATE","label":"Rate","bipolar":false,"cc":3,"value":64,"controller":false,"slots":[["LFO_1_RATE","Rate",false]]},
-      {"entry":16,"module":"LFO_1","key":"LEVEL","label":"Level","bipolar":false,"cc":17,"value":4,"controller":false,"slots":[["LFO_1_LEVEL","Level",false]]},
+      {"entry":16,"module":"LFO_1","key":"LEVEL","label":"Level","bipolar":false,"cc":116,"value":4,"controller":false,"slots":[["LFO_1_LEVEL","Level",false]]},
       {"entry":17,"module":"LFO_1","key":"RATE_MOD_AMT","label":"Rate Mod Amt","bipolar":false,"cc":0,"value":124,"controller":false,"hintInputs":["RATE_MOD"],"slots":[["LFO_1_RATE_MOD_AMT","Rate Mod Amt",false]]},
       {"entry":18,"module":"LFO_1","key":"LEVEL_MOD_AMT","label":"Level Mod Amt","bipolar":false,"cc":0,"value":124,"controller":false,"hintInputs":["LEVEL_MOD"],"slots":[["LFO_1_LEVEL_MOD_AMT","Level Mod Amt",false]]},
       {"entry":19,"module":"LFO_1","key":"RESET_SW","label":"Reset Switch","bipolar":false,"cc":113,"value":4,"controller":false,"hint":"Off/On","slots":[["LFO_1_RESET_SW","Reset Switch",false]]},
@@ -1456,6 +1456,8 @@
       {"entry":64,"module":"DELAY_1","key":"TIME","label":"Time","bipolar":false,"cc":90,"value":64,"controller":false,"slots":[["DELAY_1_TIME","Time",false]]},
       {"entry":65,"module":"DELAY_1","key":"FEEDBACK","label":"Feedback","bipolar":false,"cc":92,"value":64,"controller":false,"slots":[["DELAY_1_FEEDBACK","Feedback",false]]},
       {"entry":66,"key":"MOD_WHEEL","label":"Mod Wheel","bipolar":false,"cc":1,"value":4,"controller":true,"slots":[["MOD_WHEEL","Mod Wheel",false]]},
+      {"entry":67,"key":"GENERAL_1","label":"General 1","bipolar":false,"cc":16,"value":4,"controller":true,"slots":[["GENERAL_1","General 1",false],["GENERAL_1_REV","General 1 Rev",false,"rev"],["GENERAL_1_INV","General 1 Inv",false,"inv"],["GENERAL_1_REV_INV","General 1 Rev Inv",false,"rev_inv"],["GENERAL_1_BIPOLAR","General 1 Bipolar",true,"bipolar"],["GENERAL_1_BIPOLAR_INV","General 1 Bipolar Inv",true,"bipolar_inv"]]},
+      {"entry":68,"key":"GENERAL_2","label":"General 2","bipolar":false,"cc":17,"value":4,"controller":true,"slots":[["GENERAL_2","General 2",false],["GENERAL_2_REV","General 2 Rev",false,"rev"],["GENERAL_2_INV","General 2 Inv",false,"inv"],["GENERAL_2_REV_INV","General 2 Rev Inv",false,"rev_inv"],["GENERAL_2_BIPOLAR","General 2 Bipolar",true,"bipolar"],["GENERAL_2_BIPOLAR_INV","General 2 Bipolar Inv",true,"bipolar_inv"]]},
     ],
     signals: [
       {"id":0,"key":"NONE","label":"0.0"},
@@ -1467,42 +1469,54 @@
       {"id":6,"key":"NOTE_GATE","label":"Note Gate"},
       {"id":7,"key":"PITCH_BEND","label":"Pitch Bend"},
       {"id":8,"key":"MOD_WHEEL"},
-      {"id":9,"key":"PITCH_1_OUTPUT"},
-      {"id":10,"key":"EG_1_OUTPUT"},
-      {"id":11,"key":"EG_1_OUTPUT_INV"},
-      {"id":12,"key":"EG_2_OUTPUT"},
-      {"id":13,"key":"EG_2_OUTPUT_INV"},
-      {"id":14,"key":"LFO_1_OUTPUT"},
-      {"id":15,"key":"LFO_1_OUTPUT_INV"},
-      {"id":16,"key":"LFO_1_OUTPUT_TRIANGLE"},
-      {"id":17,"key":"LFO_1_OUTPUT_TRIANGLE_INV"},
-      {"id":18,"key":"LFO_1_OUTPUT_SQUARE"},
-      {"id":19,"key":"LFO_1_OUTPUT_SQUARE_INV"},
-      {"id":20,"key":"MIXER_1_OUTPUT"},
-      {"id":21,"key":"MIXER_1_OUTPUT_INV"},
-      {"id":22,"key":"OSC_1_OUTPUT"},
-      {"id":23,"key":"OSC_1_OUTPUT_SAW"},
-      {"id":24,"key":"OSC_1_OUTPUT_PULSE"},
-      {"id":25,"key":"OSC_1_OUTPUT_SUB"},
-      {"id":26,"key":"OSC_2_OUTPUT"},
-      {"id":27,"key":"OSC_2_OUTPUT_SAW"},
-      {"id":28,"key":"OSC_2_OUTPUT_PULSE"},
-      {"id":29,"key":"NOISE_1_OUTPUT"},
-      {"id":30,"key":"NOISE_1_OUTPUT_WHITE"},
-      {"id":31,"key":"NOISE_1_OUTPUT_RED"},
-      {"id":32,"key":"MIXER_2_OUTPUT"},
-      {"id":33,"key":"MIXER_2_OUTPUT_INV"},
-      {"id":34,"key":"FILTER_1_OUTPUT"},
-      {"id":35,"key":"FILTER_1_OUTPUT_LP"},
-      {"id":36,"key":"FILTER_1_OUTPUT_HP"},
-      {"id":37,"key":"FILTER_1_OUTPUT_BP"},
-      {"id":38,"key":"AMP_1_OUTPUT"},
-      {"id":39,"key":"CHORUS_1_OUTPUT_L"},
-      {"id":40,"key":"CHORUS_1_OUTPUT_R"},
-      {"id":41,"key":"CHORUS_1_OUTPUT_MONO"},
-      {"id":42,"key":"DELAY_1_OUTPUT_L"},
-      {"id":43,"key":"DELAY_1_OUTPUT_R"},
-      {"id":44,"key":"DELAY_1_OUTPUT_MONO"},
+      {"id":9,"key":"GENERAL_1"},
+      {"id":10,"key":"GENERAL_1_REV"},
+      {"id":11,"key":"GENERAL_1_INV"},
+      {"id":12,"key":"GENERAL_1_REV_INV"},
+      {"id":13,"key":"GENERAL_1_BIPOLAR"},
+      {"id":14,"key":"GENERAL_1_BIPOLAR_INV"},
+      {"id":15,"key":"GENERAL_2"},
+      {"id":16,"key":"GENERAL_2_REV"},
+      {"id":17,"key":"GENERAL_2_INV"},
+      {"id":18,"key":"GENERAL_2_REV_INV"},
+      {"id":19,"key":"GENERAL_2_BIPOLAR"},
+      {"id":20,"key":"GENERAL_2_BIPOLAR_INV"},
+      {"id":21,"key":"PITCH_1_OUTPUT"},
+      {"id":22,"key":"EG_1_OUTPUT"},
+      {"id":23,"key":"EG_1_OUTPUT_INV"},
+      {"id":24,"key":"EG_2_OUTPUT"},
+      {"id":25,"key":"EG_2_OUTPUT_INV"},
+      {"id":26,"key":"LFO_1_OUTPUT"},
+      {"id":27,"key":"LFO_1_OUTPUT_INV"},
+      {"id":28,"key":"LFO_1_OUTPUT_TRIANGLE"},
+      {"id":29,"key":"LFO_1_OUTPUT_TRIANGLE_INV"},
+      {"id":30,"key":"LFO_1_OUTPUT_SQUARE"},
+      {"id":31,"key":"LFO_1_OUTPUT_SQUARE_INV"},
+      {"id":32,"key":"MIXER_1_OUTPUT"},
+      {"id":33,"key":"MIXER_1_OUTPUT_INV"},
+      {"id":34,"key":"OSC_1_OUTPUT"},
+      {"id":35,"key":"OSC_1_OUTPUT_SAW"},
+      {"id":36,"key":"OSC_1_OUTPUT_PULSE"},
+      {"id":37,"key":"OSC_1_OUTPUT_SUB"},
+      {"id":38,"key":"OSC_2_OUTPUT"},
+      {"id":39,"key":"OSC_2_OUTPUT_SAW"},
+      {"id":40,"key":"OSC_2_OUTPUT_PULSE"},
+      {"id":41,"key":"NOISE_1_OUTPUT"},
+      {"id":42,"key":"NOISE_1_OUTPUT_WHITE"},
+      {"id":43,"key":"NOISE_1_OUTPUT_RED"},
+      {"id":44,"key":"MIXER_2_OUTPUT"},
+      {"id":45,"key":"MIXER_2_OUTPUT_INV"},
+      {"id":46,"key":"FILTER_1_OUTPUT"},
+      {"id":47,"key":"FILTER_1_OUTPUT_LP"},
+      {"id":48,"key":"FILTER_1_OUTPUT_HP"},
+      {"id":49,"key":"FILTER_1_OUTPUT_BP"},
+      {"id":50,"key":"AMP_1_OUTPUT"},
+      {"id":51,"key":"CHORUS_1_OUTPUT_L"},
+      {"id":52,"key":"CHORUS_1_OUTPUT_R"},
+      {"id":53,"key":"CHORUS_1_OUTPUT_MONO"},
+      {"id":54,"key":"DELAY_1_OUTPUT_L"},
+      {"id":55,"key":"DELAY_1_OUTPUT_R"},
+      {"id":56,"key":"DELAY_1_OUTPUT_MONO"},
     ],
     defaultOrder: ["PITCH_1","EG_1","EG_2","LFO_1","MIXER_1","OSC_1","OSC_2","NOISE_1","MIXER_2","FILTER_1","AMP_1","CHORUS_1","DELAY_1"],
   };
@@ -1534,10 +1548,11 @@
   const INPUT_BY_ENTRY = Object.fromEntries(INPUT_ITEMS.map(i => [i.entry, i]));
   const PARAM_BY_ENTRY = Object.fromEntries(PARAM_ITEMS.map(p => [p.entry, p]));
   const CONTROL_BY_ENTRY = Object.fromEntries(CONTROL_ITEMS.map(c => [c.entry, c]));
-  // Each control slot, with the item whose CC fills it and the range it takes.
+  // Each control slot, with the item whose CC fills it, the range it takes and the form, if any,
+  // its value takes of the item's own slot.
   const SLOT = {};
-  CONTROL_ITEMS.forEach(c => c.slots.forEach(([slot, label, bipolar]) => {
-    SLOT[slot] = { c, bipolar, full: c.module ? c.full : label };
+  CONTROL_ITEMS.forEach(c => c.slots.forEach(([slot, label, bipolar, form]) => {
+    SLOT[slot] = { c, bipolar, form, full: c.module ? c.full : label };
   }));
 
   // The signals bus: each slot's name by its number, and each name's number.
@@ -1562,8 +1577,8 @@
   // under the delay that feeds it. Spaced so that no two nodes meet with every parameter shown.
   const DEFAULT_LAYOUT = {
     CONTROLLER: { x: 20,  y: 40 },
-    PITCH_1:   { x: 20,   y: 263 },
-    CONST:     { x: 20,   y: 543 },
+    PITCH_1:   { x: 20,   y: 575 },
+    CONST:     { x: 20,   y: 855 },
     EG_1:      { x: 380,  y: 40 },
     EG_2:      { x: 380,  y: 346 },
     LFO_1:     { x: 380,  y: 652 },
@@ -1919,10 +1934,11 @@
     return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
 
-  // Only the mod wheel's slot is on the bus, with an output for inputs and parameters to read; a
-  // parameter's control slot is its own, which only the parameter reads, so it has none.
+  // Only a controller's slots are on the bus, each with an output for inputs and parameters to
+  // read, the forms of its value in rows of their own below it; a parameter's control slot is its
+  // own, which only the parameter reads, so it has none.
   function controlRowHTML(c, withInput) {
-    const [[slot, label, bipolar]] = c.slots;
+    const [[slot, label, bipolar], ...forms] = c.slots;
     const tip = bipolar ? 'Bipolar: value 64 is the centre' : 'Unipolar';
     return `<div class="row ctrl" data-ctrl="${c.key}">
       ${withInput ? `<span class="port in param" data-dst="PR:${c.key}" title="Where ${escapeHTML(c.full)} takes its value (per buffer)"></span>` : ''}
@@ -1932,7 +1948,11 @@
       <input type="number" class="val" min="4" max="124" title="CC value">
       <span class="norm" data-slot="${slot}" title="The value the synth sees in the slot"></span>
       ${withInput ? '' : `<span class="port out param" data-src="${slot}" title="${escapeHTML(SLOT[slot].full)} control slot"></span>`}
-    </div>`;
+    </div>` + forms.map(([form, formLabel]) => `<div class="row form-row">
+      <span class="lbl right">${escapeHTML(formLabel.replace(c.label, 'Out'))}</span>
+      <span class="norm" data-slot="${form}" title="The value the synth sees in the slot"></span>
+      <span class="port out param" data-src="${form}" title="${escapeHTML(SLOT[form].full)} control slot"></span>
+    </div>`).join('');
   }
 
   function nodeHTML(node) {
@@ -3065,7 +3085,9 @@
 
   // Each slider follows its slot's CC assignment in the patch, and moves the value of that CC.
   // The panels in the signal order of the patch's default layout, top to bottom, then left to right.
+  // The general controls have sliders here, and the mod wheel its wheel by the soft keyboard.
   const CONTROL_PANELS = [
+    { col: 0, title: 'Controller', module: null },
     { col: 0, title: 'Pitch 1', module: 'PITCH_1' },
     { col: 0, title: 'EG 1', module: 'EG_1' },
     { col: 0, title: 'EG 2', module: 'EG_2' },
@@ -3082,6 +3104,7 @@
   ];
 
   function panelItems(p) {
+    if (!p.module) return CONTROLLER_ITEMS.filter(c => c.key !== 'MOD_WHEEL');
     return PARAM_ITEMS.filter(c => c.module === p.module);
   }
 
@@ -3103,8 +3126,9 @@
   function signalNorm(sig) {
     const slot = SLOT[sig];
     if (slot) {
-      const v = slotValue(slot.c, slot.bipolar);
-      return v == null ? null : { text: normalized(slot.bipolar, v) };
+      const v = slotValue(slot.c, slot.form ? false : slot.bipolar);
+      if (v == null) return null;
+      return { text: slot.form ? formed(slot.form, v) : normalized(slot.bipolar, v) };
     }
     if (sig in CONSTANT_NORMS) return { text: CONSTANT_NORMS[sig] };
     const notes = noteNorms(noteStates[exportOptions().ch], false);
@@ -3126,6 +3150,15 @@
       return (v < 0 ? '-' : '+') + Math.abs(v).toFixed(3);
     }
     return Math.max(0, Math.min(1, (value - 4) / 120)).toFixed(3);
+  }
+
+  // A form of a controller's unipolar value u, as spms1_main.rb writes it to its slot.
+  const FORMS = {
+    rev: u => 1 - u, inv: u => -u, rev_inv: u => u - 1, bipolar: u => u - 0.5, bipolar_inv: u => 0.5 - u,
+  };
+  function formed(form, value) {
+    const v = FORMS[form](Math.max(0, Math.min(1, (value - 4) / 120)));
+    return form === 'rev' ? v.toFixed(3) : (v < 0 ? '-' : '+') + Math.abs(v).toFixed(3);
   }
 
   let sliderBefore = null;
@@ -3163,7 +3196,7 @@
           <button type="button" class="fav-toggle" aria-pressed="false">&#9733;</button>
           <div class="slider-label">${escapeHTML(c.label)} <span class="ctl-hint"></span><span class="cc-num"></span></div>
           <div class="slider-input-wrapper">
-            <span class="range-wrap"><input type="range" min="4" max="124">${c.slots.some(([, , bipolar]) => bipolar) ? '<span class="centre-tick"></span>' : ''}</span>
+            <span class="range-wrap"><input type="range" min="4" max="124">${c.bipolar ? '<span class="centre-tick"></span>' : ''}</span>
             <span class="slider-value"></span>
             <span class="slider-norm" title="The value the synth sees in the slot"></span>
           </div>

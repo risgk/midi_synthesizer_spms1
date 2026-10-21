@@ -27,42 +27,54 @@ SIGNAL_NOTE_PITCH                = 5
 SIGNAL_NOTE_GATE                 = 6
 SIGNAL_PITCH_BEND                = 7
 SIGNAL_MOD_WHEEL                 = 8
-SIGNAL_PITCH_1_OUTPUT            = 9
-SIGNAL_EG_1_OUTPUT               = 10
-SIGNAL_EG_1_OUTPUT_INV           = 11
-SIGNAL_EG_2_OUTPUT               = 12
-SIGNAL_EG_2_OUTPUT_INV           = 13
-SIGNAL_LFO_1_OUTPUT              = 14
-SIGNAL_LFO_1_OUTPUT_INV          = 15
-SIGNAL_LFO_1_OUTPUT_TRIANGLE     = 16
-SIGNAL_LFO_1_OUTPUT_TRIANGLE_INV = 17
-SIGNAL_LFO_1_OUTPUT_SQUARE       = 18
-SIGNAL_LFO_1_OUTPUT_SQUARE_INV   = 19
-SIGNAL_MIXER_1_OUTPUT            = 20
-SIGNAL_MIXER_1_OUTPUT_INV        = 21
-SIGNAL_OSC_1_OUTPUT              = 22
-SIGNAL_OSC_1_OUTPUT_SAW          = 23
-SIGNAL_OSC_1_OUTPUT_PULSE        = 24
-SIGNAL_OSC_1_OUTPUT_SUB          = 25
-SIGNAL_OSC_2_OUTPUT              = 26
-SIGNAL_OSC_2_OUTPUT_SAW          = 27
-SIGNAL_OSC_2_OUTPUT_PULSE        = 28
-SIGNAL_NOISE_1_OUTPUT            = 29
-SIGNAL_NOISE_1_OUTPUT_WHITE      = 30
-SIGNAL_NOISE_1_OUTPUT_RED        = 31
-SIGNAL_MIXER_2_OUTPUT            = 32
-SIGNAL_MIXER_2_OUTPUT_INV        = 33
-SIGNAL_FILTER_1_OUTPUT           = 34
-SIGNAL_FILTER_1_OUTPUT_LP        = 35
-SIGNAL_FILTER_1_OUTPUT_HP        = 36
-SIGNAL_FILTER_1_OUTPUT_BP        = 37
-SIGNAL_AMP_1_OUTPUT              = 38
-SIGNAL_CHORUS_1_OUTPUT_L         = 39
-SIGNAL_CHORUS_1_OUTPUT_R         = 40
-SIGNAL_CHORUS_1_OUTPUT_MONO      = 41
-SIGNAL_DELAY_1_OUTPUT_L          = 42
-SIGNAL_DELAY_1_OUTPUT_R          = 43
-SIGNAL_DELAY_1_OUTPUT_MONO       = 44
+SIGNAL_GENERAL_1                 = 9
+SIGNAL_GENERAL_1_REV             = 10
+SIGNAL_GENERAL_1_INV             = 11
+SIGNAL_GENERAL_1_REV_INV         = 12
+SIGNAL_GENERAL_1_BIPOLAR         = 13
+SIGNAL_GENERAL_1_BIPOLAR_INV     = 14
+SIGNAL_GENERAL_2                 = 15
+SIGNAL_GENERAL_2_REV             = 16
+SIGNAL_GENERAL_2_INV             = 17
+SIGNAL_GENERAL_2_REV_INV         = 18
+SIGNAL_GENERAL_2_BIPOLAR         = 19
+SIGNAL_GENERAL_2_BIPOLAR_INV     = 20
+SIGNAL_PITCH_1_OUTPUT            = 21
+SIGNAL_EG_1_OUTPUT               = 22
+SIGNAL_EG_1_OUTPUT_INV           = 23
+SIGNAL_EG_2_OUTPUT               = 24
+SIGNAL_EG_2_OUTPUT_INV           = 25
+SIGNAL_LFO_1_OUTPUT              = 26
+SIGNAL_LFO_1_OUTPUT_INV          = 27
+SIGNAL_LFO_1_OUTPUT_TRIANGLE     = 28
+SIGNAL_LFO_1_OUTPUT_TRIANGLE_INV = 29
+SIGNAL_LFO_1_OUTPUT_SQUARE       = 30
+SIGNAL_LFO_1_OUTPUT_SQUARE_INV   = 31
+SIGNAL_MIXER_1_OUTPUT            = 32
+SIGNAL_MIXER_1_OUTPUT_INV        = 33
+SIGNAL_OSC_1_OUTPUT              = 34
+SIGNAL_OSC_1_OUTPUT_SAW          = 35
+SIGNAL_OSC_1_OUTPUT_PULSE        = 36
+SIGNAL_OSC_1_OUTPUT_SUB          = 37
+SIGNAL_OSC_2_OUTPUT              = 38
+SIGNAL_OSC_2_OUTPUT_SAW          = 39
+SIGNAL_OSC_2_OUTPUT_PULSE        = 40
+SIGNAL_NOISE_1_OUTPUT            = 41
+SIGNAL_NOISE_1_OUTPUT_WHITE      = 42
+SIGNAL_NOISE_1_OUTPUT_RED        = 43
+SIGNAL_MIXER_2_OUTPUT            = 44
+SIGNAL_MIXER_2_OUTPUT_INV        = 45
+SIGNAL_FILTER_1_OUTPUT           = 46
+SIGNAL_FILTER_1_OUTPUT_LP        = 47
+SIGNAL_FILTER_1_OUTPUT_HP        = 48
+SIGNAL_FILTER_1_OUTPUT_BP        = 49
+SIGNAL_AMP_1_OUTPUT              = 50
+SIGNAL_CHORUS_1_OUTPUT_L         = 51
+SIGNAL_CHORUS_1_OUTPUT_R         = 52
+SIGNAL_CHORUS_1_OUTPUT_MONO      = 53
+SIGNAL_DELAY_1_OUTPUT_L          = 54
+SIGNAL_DELAY_1_OUTPUT_R          = 55
+SIGNAL_DELAY_1_OUTPUT_MONO       = 56
 
 # A parameter source of SIGNAL_OWN is the parameter's own control slot, at PARAM_SLOT_BASE + its
 # entry, off the bus: the slots below.
@@ -315,6 +327,8 @@ NRPN_CC_DELAY_1_MIX           = 447
 NRPN_CC_DELAY_1_TIME          = 448
 NRPN_CC_DELAY_1_FEEDBACK      = 449
 NRPN_CC_MOD_WHEEL             = 450
+NRPN_CC_GENERAL_1             = 451
+NRPN_CC_GENERAL_2             = 452
 
 # The value of each parameter's control slot while it has no CC, as a CC value.
 NRPN_VALUE_PITCH_1_GLIDE         = 512
@@ -525,7 +539,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_EG_2_RELEASE_SW      , 105)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_WAVE           , 33)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_RATE           , 3)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_LEVEL          , 17)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_LEVEL          , 116)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_RESET_SW       , 113)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_WAVE           , 102)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_PW             , 114)
@@ -563,6 +577,8 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_DELAY_1_TIME         , 90)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_DELAY_1_FEEDBACK     , 92)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_MOD_WHEEL            , 1)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_GENERAL_1            , 16)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_GENERAL_2            , 17)
 
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_PITCH_1_GLIDE        , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_PITCH_1_GLIDE_SW     , 124)
@@ -645,7 +661,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 105, 124) # EG 2 Release Switch
   C.set_midi_cc_value(midi_ch, 33 , 4  ) # LFO 1 Wave
   C.set_midi_cc_value(midi_ch, 3  , 64 ) # LFO 1 Rate
-  C.set_midi_cc_value(midi_ch, 17 , 4  ) # LFO 1 Level
+  C.set_midi_cc_value(midi_ch, 116, 4  ) # LFO 1 Level
   C.set_midi_cc_value(midi_ch, 113, 4  ) # LFO 1 Reset Switch
   C.set_midi_cc_value(midi_ch, 102, 4  ) # Osc 1 Wave
   C.set_midi_cc_value(midi_ch, 114, 64 ) # Osc 1 PW
@@ -683,4 +699,6 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 90 , 64 ) # Delay 1 Time
   C.set_midi_cc_value(midi_ch, 92 , 64 ) # Delay 1 Feedback
   C.set_midi_cc_value(midi_ch, 1  , 4  ) # Mod Wheel
+  C.set_midi_cc_value(midi_ch, 16 , 4  ) # General 1
+  C.set_midi_cc_value(midi_ch, 17 , 4  ) # General 2
 end
