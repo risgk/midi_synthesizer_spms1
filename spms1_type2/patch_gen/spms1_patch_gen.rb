@@ -59,9 +59,9 @@ class Spec
   def control(key) = @control.fetch(key)
   def signal(key) = @signal.fetch(key)
 
-  # A module input's or control's own name, with its module's in front: OSC_1_PITCH, OUTPUT_L.
   FORMS = %w[rev inv rev_inv bipolar bipolar_inv].freeze
 
+  # A module input's or control's own name, with its module's in front: OSC_1_PITCH, OUTPUT_L.
   def full_key(item) = item['module'] ? "#{item['module']}_#{item['key']}" : item['key']
 
   def full_label(item, name = item['label']) = item['module'] ? "#{self.module(item['module'])['label']} #{name}" : name

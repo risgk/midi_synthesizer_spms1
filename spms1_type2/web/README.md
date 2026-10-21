@@ -9,7 +9,7 @@ SPMS-1 (type-2) Editor ("spms1_editor.html")
     - The output matches the PC build of the same "spms1_main.c" within the rounding of the math library
 - Version: the same as SPMS-1 (type-2) (the title of "../README.md"), shown in the console of the Web browser
 - "spms1_web_synth.js" (in the parent folder, next to "spms1_editor.html"): the built file
-    - The WebAssembly binary (about 240 KB) and the AudioWorkletProcessor are embedded, so that it works
+    - The WebAssembly binary (about 250 KB) and the AudioWorkletProcessor are embedded, so that it works
       both on a Web server (e.g. GitHub Pages) and with a local file ("file://")
     - Without this file, the editor works without SPMS-1 Web (MIDI Out to the devices only)
 

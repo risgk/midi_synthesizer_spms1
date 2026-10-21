@@ -45,8 +45,8 @@ module Spms1
       @rate = 0.5
       @stage_1_rate = 0.5
       @current_rate = 0.5
-      # The level powers up at 0.0, as the default patch sets it, so that the LFO is still at
-      # startup rather than fading out.
+      # The level powers up at 0.0, so that the LFO is silent at startup and fades in to the level
+      # the patch sets, 1.0 by default.
       @level = 0.0
       # The level, smoothed; the per-sample path takes one multiply by it.
       @amount = 0.0
@@ -115,8 +115,8 @@ module Spms1
       @wave = (wave < 0.0) ? 0.0 : ((wave > 1.0) ? 1.0 : wave)
     end
 
-    # Output is bipolar and spans one unit peak to peak at full level, [-0.5, 0.5],
-    # the same span as the pitch domain. Every bipolar signal on the bus is scaled that way, so a destination's
+    # The triangle is bipolar and spans one unit peak to peak at full level, [-0.5, 0.5], the same
+    # span as the pitch domain; the square is unipolar, [0.0, 1.0], and Out crossfades between them. Every bipolar signal on the bus is scaled that way, so a destination's
     # amount control means the same thing whichever one is routed to it.
     # Both modulation inputs are read at the control-rate step, as the filter reads its own, and
     # not smoothed: the phase increment and the PolyBLAMP scale below take a table lookup and a

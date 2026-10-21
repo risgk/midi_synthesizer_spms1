@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -540,7 +540,7 @@
     .kbd-bar .kbd-hold {
       margin-left: auto;
     }
-    /* The sizes of the keys are times the scale of the text, --kbd-scale, set by kbdFitScale. */
+    /* The sizes of the keys are times the scale of the text, --kbd-scale, set by kbFitScale. */
     .keyboard-frame {
       --kbd-scale: 1;
       --kbd-key-width: calc(20px * var(--kbd-scale));  /* KB_KEY_WIDTH: a semitone in the upper half */
@@ -1303,7 +1303,7 @@
     <button class="btn" id="kbd-oct-up" title="Octave Up">&#9654;</button>
     <span class="kbd-hint">PC Keys: A - K, Z / X</span>
     <button class="btn kbd-hold" id="kbd-hold" aria-pressed="false" title="The key released keeps its note on, until Hold is turned off">Hold</button>
-    <button class="btn kbd-panic" id="kbd-panic" title="All Sound Off, Pitch Bend to the center, and the keys held let go">Panic</button>
+    <button class="btn kbd-panic" id="kbd-panic" title="All Sound Off, Pitch Bend to the centre, and the keys held let go">Panic</button>
   </div>
   <div class="keyboard-frame">
     <div class="kbd-body">
@@ -1423,7 +1423,7 @@
       {"entry":26,"module":"MIXER_1","key":"LEVEL_4","label":"Level 4","bipolar":false,"cc":0,"value":4,"controller":false,"hintInputs":["IN_4"],"slots":[["MIXER_1_LEVEL_4","Level 4",false]]},
       {"entry":27,"module":"MIXER_1","key":"OUT_LEVEL","label":"Out Level","bipolar":false,"cc":0,"value":64,"controller":false,"slots":[["MIXER_1_OUT_LEVEL","Out Level",false]]},
       {"entry":28,"module":"OSC_1","key":"WAVE","label":"Wave","bipolar":false,"cc":102,"value":4,"controller":false,"hint":"Saw to Sq","favorite":true,"slots":[["OSC_1_WAVE","Wave",false]]},
-      {"entry":29,"module":"OSC_1","key":"PW","label":"PW","bipolar":true,"cc":114,"value":64,"controller":false,"hint":"50% to 0%","slots":[["OSC_1_PW","PW",true]]},
+      {"entry":29,"module":"OSC_1","key":"PW","label":"PW","bipolar":true,"cc":114,"value":64,"controller":false,"hint":"100% to 0%","slots":[["OSC_1_PW","PW",true]]},
       {"entry":30,"module":"OSC_1","key":"PITCH_COARSE","label":"Pitch Coarse","bipolar":true,"cc":0,"value":64,"controller":false,"hint":"±5 Oct","slots":[["OSC_1_PITCH_COARSE","Pitch Coarse",true]]},
       {"entry":31,"module":"OSC_1","key":"PITCH_SHIFT","label":"Pitch","bipolar":false,"cc":0,"value":4,"controller":false,"hint":"0 to +1 Oct","slots":[["OSC_1_PITCH_SHIFT","Pitch",false]]},
       {"entry":32,"module":"OSC_1","key":"PITCH_FINE","label":"Pitch Fine","bipolar":true,"cc":0,"value":64,"controller":false,"hint":"±60 Cent","slots":[["OSC_1_PITCH_FINE","Pitch Fine",true]]},
@@ -1438,7 +1438,7 @@
       {"entry":41,"module":"OSC_1","key":"PW_MOD_2_AMT","label":"PW Mod 2 Amt","bipolar":false,"cc":103,"value":4,"controller":false,"hintInputs":["MOD_2"],"slots":[["OSC_1_PW_MOD_2_AMT","PW Mod 2 Amt",false]]},
       {"entry":42,"module":"OSC_1","key":"PW_MOD_2_POLARITY","label":"PW Mod 2 Pol","bipolar":true,"cc":0,"value":124,"controller":false,"hint":"− to +","slots":[["OSC_1_PW_MOD_2_POLARITY","PW Mod 2 Pol",true]]},
       {"entry":43,"module":"OSC_2","key":"WAVE","label":"Wave","bipolar":false,"cc":104,"value":4,"controller":false,"hint":"Saw to Sq","favorite":true,"slots":[["OSC_2_WAVE","Wave",false]]},
-      {"entry":44,"module":"OSC_2","key":"PW","label":"PW","bipolar":true,"cc":114,"value":64,"controller":false,"hint":"50% to 0%","slots":[["OSC_2_PW","PW",true]]},
+      {"entry":44,"module":"OSC_2","key":"PW","label":"PW","bipolar":true,"cc":114,"value":64,"controller":false,"hint":"100% to 0%","slots":[["OSC_2_PW","PW",true]]},
       {"entry":45,"module":"OSC_2","key":"PITCH_COARSE","label":"Pitch Coarse","bipolar":true,"cc":0,"value":64,"controller":false,"hint":"±5 Oct","slots":[["OSC_2_PITCH_COARSE","Pitch Coarse",true]]},
       {"entry":46,"module":"OSC_2","key":"PITCH_SHIFT","label":"Pitch","bipolar":false,"cc":85,"value":5,"controller":false,"hint":"0 to +1 Oct","favorite":true,"slots":[["OSC_2_PITCH_SHIFT","Pitch",false]]},
       {"entry":47,"module":"OSC_2","key":"PITCH_FINE","label":"Pitch Fine","bipolar":true,"cc":76,"value":65,"controller":false,"hint":"±60 Cent","slots":[["OSC_2_PITCH_FINE","Pitch Fine",true]]},
@@ -1547,7 +1547,7 @@
   };
   // patch_gen end
 
-  // Each module, with the outputs it writes to the bus: one, or a left and a right.
+  // Each module, with the outputs it writes to the bus.
   const MODULES = SPEC.modules;
   const MOD = Object.fromEntries(MODULES.map(m => [m.key, m]));
 
@@ -1558,8 +1558,8 @@
   }
   // NRPN category 1: each module input, and the two sides of the final output.
   const INPUT_ITEMS = SPEC.inputs.map(i => ({ ...toItem(i), entry: i.entry, defaultSource: i.source }));
-  // NRPN categories 2 and 3 share entry numbers for the parameters; the mod wheel, a controller
-  // control, is in category 3 only, its CC filling a slot on the bus, as spms1_main.rb does. A
+  // NRPN categories 2 and 3 share entry numbers for the parameters; the controllers (Mod Wheel,
+  // General 1 and 2) are in category 3 only, their CCs filling slots on the bus, as spms1_main.rb does. A
   // control's slots are the slots its CC fills, each with its own range: [slot, label, bipolar].
   const CONTROL_ITEMS = SPEC.controls.map(c => ({
     ...toItem(c), entry: c.entry, controller: !!c.controller, bipolar: c.bipolar, slots: c.slots,
@@ -3139,8 +3139,8 @@
   }
 
   // What the synth writes to a control slot, as a CC value: the CC's own value while one is
-  // assigned, and while none is, a parameter's value from NRPN category 4 and 0.0 for the mod
-  // wheel's slot, as cc_or_nrpn and cc_or_zero in spms1_main.rb do. null is a slot written from a reserved
+  // assigned, and while none is, a parameter's value from NRPN category 4 and 0.0 for a
+  // controller's slot, as cc_or_nrpn and cc_or_zero in spms1_main.rb do. null is a slot written from a reserved
   // CC, whose value the editor does not track.
   function slotValue(c, bipolar) {
     const cc = state.cc[c.key];

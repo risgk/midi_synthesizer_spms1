@@ -132,7 +132,7 @@ module Spms1
     # reaches Q 256.
     SELF_OSC_START = 114.0 / 120.0
     # The leak on the band pass gives the oscillation a 3rd harmonic, which folds back
-    # to f_s - 3 * f_0 once 3 * f_0 is above f_s / 2 (an inharmonic 11.8 kHz tone for f_0 = 19.9
+    # to |f_s - 3 * f_0| once 3 * f_0 is above f_s / 2 (an inharmonic 11.8 kHz tone for f_0 = 19.9
     # kHz at 48 kHz). The oscillation therefore fades out as the cutoff, modulation included, rises
     # from f_s / 6 to f_s / 4.8, linearly on the cutoff dial, where the folded tone is still above
     # 0.375 * f_s; above that the resonance past SELF_OSC_START acts as SELF_OSC_START. At 48 kHz

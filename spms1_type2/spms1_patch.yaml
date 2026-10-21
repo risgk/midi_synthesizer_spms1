@@ -17,9 +17,8 @@
 # comes from MIDI, then each module's outputs, module by module in that order, its main output
 # first; the inputs and the controls module by module in the same order, the final output's sides
 # last among the inputs and the controllers, the mod wheel and the general controls, last among the
-# controls. Something added goes
-# where it belongs and the numbers after it move up, so a patch sent as NRPN bytes, which names
-# everything by number, is for the version it was made for; the editor saves a patch by name and
+# controls. Something added goes where it belongs and the numbers after it move up, so a patch
+# sent as NRPN bytes, which names everything by number, is for the version it was made for; the editor saves a patch by name and
 # reads it into any version. Each number is still written out, so that a renumbering shows;
 # `ruby patch_gen/spms1_patch_gen.rb --renumber` writes them again from the order of the lists.
 #
@@ -301,8 +300,8 @@ controls:
   - { entry: 27, module: MIXER_1,   key: OUT_LEVEL,  label: Out Level,  cc: 0,   value: 64, set: set_out_level }
   # Osc 1 in the editor: the waveform and the pulse width, the pitch, how far each modulation
   # moves it and what the top of that is worth, then how far each modulation moves the pulse width. Pitch,
-  # unipolar, up to an octave up for a sweep by hand, has no CC and powers up at CC 4, 0.0, as Osc 1's
-  # Pitch Coarse and Fine do. Mod 1 In takes EG 1 and Mod 2 In the LFO, and
+  # unipolar, up to an octave up for a sweep by hand, has no CC and powers up at CC 4, 0.0, no offset, as
+  # Pitch Coarse and Fine do at CC 64. Mod 1 In takes EG 1 and Mod 2 In the LFO, and
   # every Mod Amt is unipolar and its Mod Pol bipolar, the sign and what the top of the Amt is
   # worth. Pitch Mod 1 Amt and Pitch Mod 2 Amt are on CC 89 and 13, and PW Mod 1 Amt and PW Mod 2
   # Amt on CC 8 and 103; all four power up at CC 4, 0.0. The Mod Pols have no CC: the pitch's
@@ -313,7 +312,7 @@ controls:
   # on, so each Pitch Mod Amt and Pol alone set its depth. Wave is on
   # CC 102 and powers up at the saw. PW is bipolar and powers up at CC 64, 0.0, a pulse of 50%.
   - { entry: 28, module: OSC_1,     key: WAVE,     label: Wave,         cc: 102, value: 4, hint: Saw to Sq, favorite: true, set: set_waveform }
-  - { entry: 29, module: OSC_1,     key: PW,           label: PW,  cc: 114, value: 64, bipolar: true, hint: 50% to 0%, set: set_pulse_width }
+  - { entry: 29, module: OSC_1,     key: PW,           label: PW,  cc: 114, value: 64, bipolar: true, hint: 100% to 0%, set: set_pulse_width }
   - { entry: 30, module: OSC_1,     key: PITCH_COARSE,  label: Pitch Coarse,  cc: 0,   value: 64, bipolar: true, hint: ±5 Oct, set: set_pitch_coarse }
   - { entry: 31, module: OSC_1,     key: PITCH_SHIFT,   label: Pitch,         cc: 0,   value: 4, hint: 0 to +1 Oct, set: set_pitch }
   - { entry: 32, module: OSC_1,     key: PITCH_FINE,    label: Pitch Fine,    cc: 0,   value: 64, bipolar: true, hint: ±60 Cent, set: set_pitch_fine }
@@ -337,7 +336,7 @@ controls:
   # In, Osc 1 Out Saw, is ignored until it is turned on. Osc 2 is heard through Mixer 2 Level 2 (CC 20), which powers up at 0.7, as
   # Level 1 does for Osc 1.
   - { entry: 43, module: OSC_2,     key: WAVE,     label: Wave,         cc: 104, value: 4, hint: Saw to Sq, favorite: true, set: set_waveform }
-  - { entry: 44, module: OSC_2,     key: PW,           label: PW,  cc: 114, value: 64, bipolar: true, hint: 50% to 0%, set: set_pulse_width }
+  - { entry: 44, module: OSC_2,     key: PW,           label: PW,  cc: 114, value: 64, bipolar: true, hint: 100% to 0%, set: set_pulse_width }
   - { entry: 45, module: OSC_2,     key: PITCH_COARSE,  label: Pitch Coarse,  cc: 0,   value: 64, bipolar: true, hint: ±5 Oct, set: set_pitch_coarse }
   - { entry: 46, module: OSC_2,     key: PITCH_SHIFT,   label: Pitch,         cc: 85,  value: 5, hint: 0 to +1 Oct, favorite: true, set: set_pitch }
   - { entry: 47, module: OSC_2,     key: PITCH_FINE,    label: Pitch Fine,    cc: 76,  value: 65, bipolar: true, hint: ±60 Cent, set: set_pitch_fine }

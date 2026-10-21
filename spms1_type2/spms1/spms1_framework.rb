@@ -65,7 +65,7 @@ end
 # controller puts its detent. Pitch Coarse and Pitch Fine are
 # bipolar, being offsets about that detent. Both map CC 4..124 to the full range and
 # clamp anything outside. Every lookup table in the synth is spaced to match --
-# FREQ_TABLE is semitone-spaced across 120, and EXP_TABLE and Q_TABLE are 121 entries over their
+# FREQ_TABLE is semitone-spaced across 120, and EXP_TABLE and K_TABLE are 121 entries over their
 # ranges -- so a CC value lands on an integer table index, and CC 64 is the exact mid-value of
 # each.
 # What a value means -- dimensionless, semitones, seconds -- stays a property of the destination,

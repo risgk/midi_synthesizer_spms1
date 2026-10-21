@@ -98,7 +98,7 @@ module Spms1
     end
 
     # Waveform morph is unipolar, [0.0, 1.0].
-    # 0.0 = sawtooth, 0.5 = 50% morph, 1.0 = square.
+    # 0.0 = sawtooth, 0.5 = 50% morph, 1.0 = pulse (square at PW 0.0).
     def set_waveform(waveform)
       @waveform = (waveform < 0.0) ? 0.0 : ((waveform > 1.0) ? 1.0 : waveform)
     end

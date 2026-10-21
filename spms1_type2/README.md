@@ -204,6 +204,7 @@ flowchart LR
   KBD -. Note Gate .-> EG
   KBD -. Note Gate .-> EG2
   KBD -. Note Pitch .-> PITCH
+  KBD -. Note Gate .-> PITCH
   KBD -. Pitch Bend .-> PITCH
   PITCH -. Out 1 .-> OSC
   EG -. Mod 1 .-> OSC
@@ -285,7 +286,7 @@ flowchart LR
   PITCH[Pitch 1] ~~~ EG[EG 1] ~~~ EG2[EG 2] ~~~ LFO[LFO 1] ~~~ MIX1[Mixer 1] ~~~ OSC[Osc 1] ~~~ OSC2[Osc 2] ~~~ NOISE[Noise 1] ~~~ MIX2[Mixer 2] ~~~ FILTER[Filter 1] ~~~ AMP[Amp 1] ~~~ CHORUS[Chorus 1] ~~~ DELAY[Delay 1]
 ```
 
-The mixer has nothing routed to it, so it costs its slot every sample and changes nothing until
+Mixer 1 has nothing routed to it, so it costs its slot every sample and changes nothing until
 a patch gives it something. Where it sits is what it buys: a module sees the current sample's
 value only from something ahead of it in this line, and last sample's from anything behind.
 Mixer 1 can reach the envelopes and the LFO, and the oscillators, the filter and the amp can reach
@@ -458,10 +459,10 @@ it from anywhere else.
 | CC#99 | CC#98 | Sets | CC#6 value |
 | ----- | ----- | ---- | ---------- |
 | 0 | 0-31 | Run order, slot by slot | Module ID |
-| 1 | 0-33 | What feeds a module input | Signal ID |
-| 2 | 0-65 | Where a parameter takes its value | Signal ID, or 127 for its own control slot |
-| 3 | 0-66 | Which CC fills a control slot | CC number, or 0 for none |
-| 4 | 0-65 | What a parameter's control slot holds while it has no CC | CC value |
+| 1 | 0-34 | What feeds a module input | Signal ID |
+| 2 | 0-81 | Where a parameter takes its value | Signal ID, or 127 for its own control slot |
+| 3 | 0-84 | Which CC fills a control slot | CC number, or 0 for none |
+| 4 | 0-81 | What a parameter's control slot holds while it has no CC | CC value |
 
 The run order is read from slot 0 upwards and stops at the first Module ID 0, so a patch shorter
 than 32 modules ends itself. It is separate from the module numbering: a module only sees the
@@ -524,7 +525,7 @@ ceiling, so a loud modulation pins its destination at one
 end rather than being trimmed on the way in. The amp is the exception, and holds its modulation,
 the crossfade of its two Mod Ins, to -1.0 and +1.0: it is an attenuator, so a modulation may scale its gain down but never up;
 a negative one inverts. The chorus and the delay hold their audio inputs to the same one unit. Pitch 1 Pitch In takes anything,
-as a Mod In does, and puts out what it takes, glided and bent, held to -1.0 and +1.0
+as a Mod In does, and puts out what it takes, glided, bent and stretched, held to -1.0 and +1.0
 as a mixer's output is.
 
 The two sides of the final output are read separately, so either can be pointed anywhere; point
@@ -637,7 +638,8 @@ slot and the general slots on the bus; see below.
 
 A **±** marks a signal that swings both ways: a module output reaches -0.5 and +0.5 at full
 scale, and a mixer sums two of them and stops at one.
-Everything unmarked runs 0.0 to 1.0 -- the envelope, Note Gate and Mod Wheel. The
+Everything unmarked runs one way: 0.0 to 1.0 -- the envelope, Note Gate and Mod Wheel -- or,
+for an Inv form, 0.0 down to -1.0. The
 bus carries both kinds under one numbering, so the range belongs to the slot rather than to the
 sort of thing that wrote it. The numbers missing from the table are free; 127 is not a slot but a
 parameter's own control slot.
@@ -687,7 +689,7 @@ releasing the newest goes back to the second, and releasing that closes the gate
 first still held.
 
 Slots 0-4 are constants that nothing writes, for inputs that want a fixed value rather than a
-source, from the top down. Signal 0 is also what an entry nobody has set reads as, so an unrouted
+source: 0.0, 1.0, 0.5, -0.5 and -1.0. Signal 0 is also what an entry nobody has set reads as, so an unrouted
 input is silent rather than wired to whatever sits in the first slot. Signal 1 is the value an
 unmodulated input wants: routing an amp's modulation input to it leaves that side at full level.
 Signals 0 and 1 are the two ends of a unipolar parameter's range and Signals 3 and 2 of a bipolar
@@ -709,10 +711,9 @@ Osc 1 Pitch Coarse and Pitch Fine transpose the oscillator. Both are centred on 
 whole unit per CC step: Coarse a semitone, reaching 5 octaves either way, and Fine a cent,
 reaching 60 either way. They are summed, so any pitch is reachable. Pitch, on each oscillator,
 adds up to an octave up on top, a tenth of a semitone a step, for a pitch swept by hand, as for a
-sync sweep; it is unipolar, 0.0 at value 4, where it powers up. All three hold 0.0 by default.
-Osc 1's have no CC; Osc
-2's Pitch and Pitch Fine, on CC#85 and 76, set the interval or the detune between the
-oscillators, and its Pitch Coarse has no CC. None of them is smoothed.
+sync sweep; it is unipolar, 0.0 at value 4. Osc 1's three hold 0.0 by default and have no CC; Osc 2's
+Pitch and Pitch Fine, on CC#85 and 76, set the interval or the detune between the oscillators,
+11 cents sharp at power-up (values 5 and 65), and its Pitch Coarse has no CC and holds 0.0. None of them is smoothed.
 
 Pitch 1 Stretch, on CC#22, widens the keys about note 60, last, by multiplying the pitch
 after the glide and the bend: every interval from note 60 grows by the same share, so the stretch is often given as how
@@ -988,8 +989,8 @@ sweep while Osc 1 holds the note.
   falls back to pitch with the decay
 - Noise as a modulation source, a random jitter of the cutoff: CC#99 = 1, CC#98 = 26,
   CC#6 = 47 puts Noise 1's red output on the filter's Mod 2 input in the LFO's place, and CC#25
-  sets how much. CC#6 = 46 takes the white instead, finer still. The red is on no mixer, and the
-  white is heard only once CC#23 brings it up, so neither is heard as well
+  sets how much. CC#6 = 46 takes the white instead, finer still. The red is on no mixer, and Noise
+  1 Out, white at power-up, is heard only once CC#23 brings it up, so neither is heard as well
 - Filter cutoff driven by the envelope instead of its CC: CC#99 = 2, CC#98 = 66, CC#6 = 26. The
   envelope and the cutoff are both unipolar, so it opens the cutoff from the bottom of its dial
   to the top
@@ -1010,13 +1011,13 @@ sweep while Osc 1 holds the note.
 - A mod wheel that bends the pitch up: CC#99 = 1, CC#98 = 14 and 17, CC#6 = 8 points both
   oscillators' Mod 2 input at Mod Wheel in the LFO's place. The wheel is unipolar, so it bends
   only up from the note, as far as CC#13 allows: two octaves at value 124, two semitones at value 14
-- A pitch envelope that rises into the note: CC#99 = 1, CC#98 = 13, CC#6 = 27 puts EG 1 Out Inv,
-  the envelope negated, on the oscillator's Mod 1 input. With CC#89 at the top the note starts two
+- A pitch envelope that rises into the note: CC#99 = 1, CC#98 = 13 and 16, CC#6 = 27 puts EG 1 Out
+  Inv, the envelope negated, on both oscillators' Mod 1 input. With CC#89 at the top the note starts two
   octaves flat, and with Sustain at 0.0, where it powers up, it
   rises back to pitch with the decay
 - A mod wheel that closes the filter as it rises: CC#99 = 1, CC#98 = 26, CC#6 = 10 puts Mod Wheel
   Inv on the filter's Mod 2 input in the LFO's place. With CC#25 at value 64, the wheel closes the
-  filter from Filter 1 Cutoff down, five octaves at its top
+  filter from Filter 1 Cutoff down, an octave at its top (two with CC#25 at the top)
 - A knob that detunes Osc 2: CC#99 = 2, CC#98 = 47, CC#6 = 16 points Osc 2 Pitch Fine at
   General 1 Bipolar, so CC#16 moves it from -60 to +60 cents, in tune at value 64
 - A knob that crossfades the oscillators: CC#99 = 2, CC#98 = 61, CC#6 = 12 and CC#98 = 62,
@@ -1048,8 +1049,8 @@ sweep while Osc 1 holds the note.
   smoothed; parameters (category 2) are read once per buffer and are smoothed by their
   destination. Route a fast source through a module input, a stepped one through a parameter
 - The smoothing takes two stages (10.7 ms average delay, 99% in 35 ms at 48 kHz), which round off
-  the steps of a controller sending sparse CCs (e.g. every 20 ms). The oscillators' Pitch Coarse and Pitch Fine
-  are not smoothed, so that the pitch follows right away, and neither is Pitch 1 Glide, which
+  the steps of a controller sending sparse CCs (e.g. every 20 ms). The oscillators' Pitch Coarse, Pitch and Pitch
+  Fine are not smoothed, so that the pitch follows right away, and neither is Pitch 1 Glide, which
   cannot step what it sets, nor the envelopes' Attack, Decay and Sustain, which each envelope's own curve
   already moves between
 - A source may point at any slot number. A free one reads 0 until something writes it, which
