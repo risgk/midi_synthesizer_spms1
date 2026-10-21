@@ -208,7 +208,13 @@ flowchart LR
   PITCH -. Pitch .-> FILTER
   EG -. Mod 1 .-> AMP
   EG2 -. Mod 2 .-> AMP
+  OSC -. Sync .-> OSC2
+  KBD -. Note Gate .-> LFO
+  KBD -. Mod Wheel .-> LFO
 ```
+
+Osc 2's sync and LFO 1's reset are routed, from Osc 1's sawtooth and Note Gate, but their switches
+power up off, so neither takes effect until it is turned on. The mod wheel reaches LFO 1's Level Mod In.
 
 Each module is processed once per sample, in the run order below. Their parameters -- waveform,
 cutoff, gain and the rest -- arrive from CC and are left out of the diagram. Parameter names
@@ -256,10 +262,9 @@ parameter.
 
 #### The run order
 
-Every module is in it: one of each kind that makes a sound, Pitch 1 first, so that every module
-after it reads the note in the same sample, then the modulation sources -- the envelope ahead of
-the LFO, so that the LFO's Mod Ins can read it in the same sample, as a vibrato fading in with the
-envelope does -- Mixer 1 between them and the oscillators, Noise 1 after the oscillators, as it is mostly a sound of its own (a modulation
+Every module is in it: Pitch 1 first, so that every module after it reads the note in the same
+sample, then the modulation sources -- the envelopes ahead of the LFO, so that the LFO's Mod Ins can
+read them in the same sample, as a vibrato fading in with an envelope does -- Mixer 1 between them and the oscillators, Noise 1 after the oscillators, as it is mostly a sound of its own (a modulation
 taking it is a sample late, which it does not hear), Mixer 2 between them and the filter, and the
 chorus and the delay last:
 
@@ -271,7 +276,7 @@ flowchart LR
 The mixer has nothing routed to it, so it costs its slot every sample and changes nothing until
 a patch gives it something. Where it sits is what it buys: a module sees the current sample's
 value only from something ahead of it in this line, and last sample's from anything behind.
-Mixer 1 can reach the LFO and the envelope, and the oscillators, the filter and the amp can reach
+Mixer 1 can reach the envelopes and the LFO, and the oscillators, the filter and the amp can reach
 Mixer 1. Pitch 1 comes before them all, so that every module reads the note in the same sample:
 the oscillators and the filter, and a modulation source that follows the keys. A modulation of
 Pitch 1 itself -- a bend from the LFO through Bend In, say -- is then a sample late, which it does
@@ -442,10 +447,10 @@ it from anywhere else.
 | CC#99 | CC#98 | Sets | CC#6 value |
 | ----- | ----- | ---- | ---------- |
 | 0 | 0-31 | Run order, slot by slot | Module ID |
-| 1 | 0-30 | What feeds a module input | Signal ID |
-| 2 | 0-58 | Where a parameter takes its value | Signal ID, or 127 for its own control slot |
-| 3 | 0-59 | Which CC fills a control slot | CC number, or 0 for none |
-| 4 | 0-58 | What a parameter's control slot holds while it has no CC | CC value |
+| 1 | 0-33 | What feeds a module input | Signal ID |
+| 2 | 0-65 | Where a parameter takes its value | Signal ID, or 127 for its own control slot |
+| 3 | 0-66 | Which CC fills a control slot | CC number, or 0 for none |
+| 4 | 0-65 | What a parameter's control slot holds while it has no CC | CC value |
 
 The run order is read from slot 0 upwards and stops at the first Module ID 0, so a patch shorter
 than 32 modules ends itself. It is separate from the module numbering: a module only sees the
@@ -460,8 +465,8 @@ Mod Wheel slot holds 0.0. Category 4 takes a value as a CC would and is read the
 is 0.0 on a bipolar parameter. While the parameter has a CC, its category 4 value is kept but not
 read. Each powers up at the parameter's power-up value.
 
-There are two oscillators, one of every other module that makes a sound, two mixers, one chorus,
-one delay, one pitch module and one noise source, and **all twelve are in the default run order**, so a patch only ever has to route, never to switch something
+There are two oscillators, two envelopes, one LFO, one filter, one amp, two mixers, one chorus,
+one delay, one pitch module and one noise source, and **all thirteen are in the default run order**, so a patch only ever has to route, never to switch something
 on first. The synth is built to keep time with every module running, so taking one out of the
 order is never what makes a patch fit; to leave one out of the sound, route around it and let it
 run unread (see the examples below).
@@ -734,7 +739,7 @@ Osc 1 takes each of its two modulations, Mod 1 In and Mod 2 In, to the pitch and
 width by a depth of its own: Pitch Mod 1 Amt and Pitch Mod 2 Amt, PW Mod 1 Amt and PW Mod 2 Amt,
 all unipolar. Pitch Mod 1 Amt and Pitch Mod 2 Amt are on CC#89 and 13, EG Mod Amt's and LFO Mod
 Amt's in PRA32-U2, and PW Mod 1 Amt and PW Mod 2 Amt on CC#8 and 103, EG Mod Dst's and LFO Mod
-Dst's; all four power up at 0.0. There is no Polarity: each modulation runs the way its source does,
+Dst's; Pitch Mod 2 Amt powers up at its top, value 124, and the other three at 0.0. There is no Polarity: each modulation runs the way its source does,
 and one the other way up takes an inverted source, such as EG 1 Out Inv or LFO 1 Out Inv. So a
 source goes to the pulse width as well as the pitch, or to either alone, with no rewiring.
 

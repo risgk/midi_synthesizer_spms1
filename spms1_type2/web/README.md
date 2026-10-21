@@ -11,7 +11,7 @@ SPMS-1 (type-2) Editor ("spms1_editor.html")
 - "spms1_web_synth.js" (in the parent folder, next to "spms1_editor.html"): the built file
     - The WebAssembly binary (about 230 KB) and the AudioWorkletProcessor are embedded, so that it works
       both on a Web server (e.g. GitHub Pages) and with a local file ("file://")
-    - Without this file, the editor works as before (MIDI Out to the devices only)
+    - Without this file, the editor works without SPMS-1 Web (MIDI Out to the devices only)
 
 
 How to Use
