@@ -884,10 +884,10 @@ included. Above that the resonance acts as at Q 256. With the cutoff following t
 in the examples below, it plays as a sine voice.
 
 Amp 1 Gain (CC#15) is doubled into the gain: silent at value 4, unity at
-value 64, where it powers up, and twice, 6 dB up, at value 124, so a quiet sound can be brought up as
+value 64, 1.4, about 3 dB up, at value 88, where it powers up, and twice, 6 dB up, at value 124, so a quiet sound can be brought up as
 well as a loud one taken down. The amp holds its output to -1.0 and +1.0, as a mixer holds its
 sum, so the gain cannot take the output past one unit, which the default patch, peaking near
-0.68 there, stays below.
+0.7 there, stays below.
 
 Amp 1 takes two modulations, Mod 1 In and Mod 2 In, and scales the gain by a crossfade of the
 two: Amp 1 Mod 1/2 Mix (CC#36) runs in a straight line from Mod 1 In alone at 0.0 (value 4) to Mod 2 In

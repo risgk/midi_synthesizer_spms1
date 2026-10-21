@@ -393,11 +393,12 @@ controls:
   - { entry: 71, module: FILTER_1,  key: MOD_1_POLARITY, label: Mod 1 Pol, cc: 117, value: 124, bipolar: true, hint: − to +, set: set_modulation_1_polarity }
   - { entry: 72, module: FILTER_1,  key: MOD_2_AMT,    label: Mod 2 Amt,    cc: 25,  value: 4, hint_inputs: [MOD_2], favorite: true, set: set_modulation_2_amount }
   - { entry: 73, module: FILTER_1,  key: MOD_2_POLARITY, label: Mod 2 Pol, cc: 0,   value: 76, bipolar: true, hint: − to +, set: set_modulation_2_polarity }
-  # Amp 1: Gain, on CC 15, is doubled, so it powers up at CC 64, a gain of
-  # 1.0, and CC 124 brings the sound up by 6 dB; the amp holds its output to one unit. Mod 1/2
+  # Amp 1: Gain, on CC 15, is doubled, so CC 64 is a gain of 1.0 and CC 124 brings the sound up
+  # by 6 dB; it powers up at CC 88, a gain of 1.4, about 3 dB up, which the default patch's quick
+  # decay leaves room for. The amp holds its output to one unit. Mod 1/2
   # Mix, on CC 36, crossfades what scales the gain from Mod 1 In, EG 1, at 0.0 (CC 4), where it
   # powers up, to Mod 2 In, EG 2, the organ envelope, at 1.0 (CC 124).
-  - { entry: 74, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 64, set: set_gain }
+  - { entry: 74, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 88, set: set_gain }
   - { entry: 75, module: AMP_1,     key: MOD_1_2_MIX,  label: Mod 1/2 Mix,  cc: 36,  value: 4, hint_inputs: [MOD_1, MOD_2], set: set_modulation_mix }
   - { entry: 76, module: CHORUS_1,  key: MIX,          label: Mix,          cc: 93,  value: 64, set: set_mix }
   - { entry: 77, module: CHORUS_1,  key: RATE,         label: Rate,         cc: 58,  value: 64, set: set_rate }
