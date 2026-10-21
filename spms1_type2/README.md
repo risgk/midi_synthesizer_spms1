@@ -1174,6 +1174,8 @@ A module is added without writing anything in the loop:
       that reads it, for each output but the one `process` returns
     - under `inputs`: an entry for each input
     - under `controls`: an entry for each parameter, with `set`, its setter
+    - each key is its label in capitals, with `_` between the words ("Pitch Mod 1 Pol" is
+      `PITCH_MOD_1_POL`), as patch_gen checks too
     - in `default_order`, where the default patch is to run it; the modules are numbered in this
       order
 3. Run `ruby patch_gen/spms1_patch_gen.rb` (with `--renumber`) and regenerate "spms1/spms1_main.c"

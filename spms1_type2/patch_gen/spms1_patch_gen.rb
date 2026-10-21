@@ -128,6 +128,14 @@ class Spec
       fail_spec("#{full_key(item)} names module #{item['module']}") if item['module'] && !@module[item['module']]
       fail_spec("#{full_key(item)} takes #{item['source']}, no signal") if item['source'] && !@signal[item['source']]
     end
+    # Each key is its label in capitals with an underscore for each run of anything else, as
+    # "Pitch Mod 1 Pol" is PITCH_MOD_1_POL, so that a key reads as what the editor shows. The sides
+    # of the final output and the constants are named for what they are instead, and a controller's
+    # plain slot, with no label of its own, takes its control's key, as checked below.
+    (@modules + @inputs.select { |i| i['module'] } + @controls + @signals.select { |sig| sig['label'] && (sig['module'] || sig['control']) }).each do |item|
+      want = item['label'].upcase.gsub(/[^A-Z0-9]+/, '_').delete_prefix('_').delete_suffix('_')
+      fail_spec("#{@signals.include?(item) ? item['key'] : full_key(item)} is labeled #{item['label']}, so its key is #{want}") unless item['key'] == want
+    end
     @controls.each do |c|
       fail_spec("controller control #{full_key(c)} fills no slot") if c['controller'] && slots_of(c).empty?
       plain = slots_of(c).find { |s| !s['form'] }

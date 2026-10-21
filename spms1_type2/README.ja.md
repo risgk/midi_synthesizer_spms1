@@ -1100,6 +1100,8 @@ C のホスト ("sim_spinel"、"sim_render"、"web" の SPMS-1 Web) は、スケ
       出力には、それを読むメソッドの `get`
     - `inputs`: 入力ごとのエントリ
     - `controls`: パラメータごとのエントリと、その setter の `set`
+    - キーはラベルを大文字にし、語の間を `_` にしたものにします ("Pitch Mod 1 Pol" なら
+      `PITCH_MOD_1_POL`)。これも patch_gen が確認します
     - 初期パッチで動かすなら `default_order` の動かしたい位置。モジュールはこの順に番号が振られます
 3. `ruby patch_gen/spms1_patch_gen.rb` を (`--renumber` を付けて) 実行し、"spms1/spms1_main.c" を生成し直します
    (`sh sim_render/build.sh`)。そのあと音を確かめ (ルーティングするパッチファイルでレンダリング)、
