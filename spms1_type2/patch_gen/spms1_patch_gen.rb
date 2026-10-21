@@ -328,7 +328,7 @@ end
 # module, so that Spinel compiles it to what it compiled the hand-written loop to.
 #
 # A module names its class (`class`), the inputs its `process` takes after the control tick, in
-# order (`process`), and each output it has besides the one `process` returns, by the method that
+# order (`process`), the method that takes them where it is not `process` (`method`), and each output it has besides the one `process` returns, by the method that
 # reads it (`get`); a module whose outputs all have one returns nothing that is used. A parameter
 # names the method that takes its value each buffer (`set`).
 #
@@ -414,7 +414,7 @@ def main_dispatch
   s.modules.each do |m|
     instance = m['key'].downcase
     args = ['control_tick'] + m.fetch('process').map { |k| "signals[source_#{instance}_#{k.downcase}]" }
-    call = "#{instance}.process(#{args.join(', ')})"
+    call = "#{instance}.#{m.fetch('method', 'process')}(#{args.join(', ')})"
     outputs = s.outputs_of(m)
     returned = outputs.reject { |o| o['get'] }
     fail_spec("module #{m['key']} has #{returned.size} outputs that `process` returns, not one or none") if returned.size > 1

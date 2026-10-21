@@ -77,6 +77,14 @@ module Spms1
       @tune = 0.0
       @output_saw = 0.0
       @output_pulse = 0.0
+      # Sync In of the last sample: a restart is taken where it rises from there through zero.
+      @sync_last = 0.0
+      @sync_switch = 0.0
+    end
+
+    # Sync Switch: Sync In is taken at 0.5 and above, and ignored below.
+    def set_sync_switch(switch)
+      @sync_switch = (switch >= 0.5) ? 1.0 : 0.0
     end
 
     # Waveform morph is unipolar, [0.0, 1.0].
@@ -150,21 +158,7 @@ module Spms1
     # The modulation inputs are deliberately not smoothed, so a fast source reaches the pitch and
     # the pulse width unslewed.
     def process(control_tick, pitch_input = 0.0, modulation_1_input = 0.0, modulation_2_input = 0.0)
-      if control_tick
-        # Morph, pulse width and depth are smoothed at the control rate to avoid sudden jumps.
-        @stage_1_waveform = Dsp.smooth(@waveform, @stage_1_waveform, @smoothing_target_blend)
-        @current_waveform = Dsp.smooth(@stage_1_waveform, @current_waveform, @smoothing_target_blend)
-        @stage_1_pulse_width = Dsp.smooth(@pulse_width, @stage_1_pulse_width, @smoothing_target_blend)
-        @current_pulse_width = Dsp.smooth(@stage_1_pulse_width, @current_pulse_width, @smoothing_target_blend)
-        @stage_1_pitch_modulation_1_depth = Dsp.smooth(@pitch_modulation_1_depth, @stage_1_pitch_modulation_1_depth, @smoothing_target_blend)
-        @current_pitch_modulation_1_depth = Dsp.smooth(@stage_1_pitch_modulation_1_depth, @current_pitch_modulation_1_depth, @smoothing_target_blend)
-        @stage_1_pitch_modulation_2_depth = Dsp.smooth(@pitch_modulation_2_depth, @stage_1_pitch_modulation_2_depth, @smoothing_target_blend)
-        @current_pitch_modulation_2_depth = Dsp.smooth(@stage_1_pitch_modulation_2_depth, @current_pitch_modulation_2_depth, @smoothing_target_blend)
-        @stage_1_pw_modulation_1_amount = Dsp.smooth(@pw_modulation_1_amount, @stage_1_pw_modulation_1_amount, @smoothing_target_blend)
-        @current_pw_modulation_1_amount = Dsp.smooth(@stage_1_pw_modulation_1_amount, @current_pw_modulation_1_amount, @smoothing_target_blend)
-        @stage_1_pw_modulation_2_amount = Dsp.smooth(@pw_modulation_2_amount, @stage_1_pw_modulation_2_amount, @smoothing_target_blend)
-        @current_pw_modulation_2_amount = Dsp.smooth(@stage_1_pw_modulation_2_amount, @current_pw_modulation_2_amount, @smoothing_target_blend)
-      end
+      update_controls if control_tick
 
       pitch_modulation = (modulation_1_input * @current_pitch_modulation_1_depth) + (modulation_2_input * @current_pitch_modulation_2_depth)
       total_pitch = pitch_input + @tune + pitch_modulation
@@ -216,6 +210,61 @@ module Spms1
       output * 0.5
     end
 
+    # process with Sync In, which restarts the phase where it rises through zero, from zero or below
+    # on the last sample to above it on this one, as a comparator on an analog oscillator's sync input
+    # does: another oscillator's sawtooth, at its wrap, or a gate, at a note on. Where between the
+    # two samples it crossed is found by drawing a line between them, and the phase starts this
+    # sample as far past 0.0 as the time since then takes it, so the synced wave repeats with the
+    # period of what it is synced to, where a restart rounded to a sample would make the period
+    # jitter by a sample. A sawtooth's PolyBLEP rounds its step off evenly about where it falls, so
+    # the line crosses close to it. The step the restart makes in the wave is left as it is, not
+    # smoothed. Sync In is taken only with Sync Switch on. The sub is left out, being Osc 1's.
+    # Without a restart the output is the same as process's to the bit.
+    def process_synced(control_tick, pitch_input = 0.0, modulation_1_input = 0.0, modulation_2_input = 0.0, sync_input = 0.0)
+      update_controls if control_tick
+
+      pitch_modulation = (modulation_1_input * @current_pitch_modulation_1_depth) + (modulation_2_input * @current_pitch_modulation_2_depth)
+      total_pitch = pitch_input + @tune + pitch_modulation
+      pitch = (total_pitch < -0.5) ? -0.5 : ((total_pitch > 0.5) ? 0.5 : total_pitch)
+      freq = pitch_to_freq_fast(pitch)
+      current_dt = freq * @inv_sample_rate
+      current_dt_inv = 1.0 / current_dt
+
+      # The crossing, at crossed_at from the last sample, 0.0, to this one, 1.0. The span is held
+      # below zero, so that the division is finite where Sync In has not risen; it is used only
+      # where it has, and a rise is never smaller than the floor but by a step of a millionth.
+      from_below = (@sync_last > 0.0) ? 0.0 : 1.0
+      restart = (sync_input > 0.0) ? from_below * @sync_switch : 0.0
+      span = @sync_last - sync_input
+      span = (span < -0.000001) ? span : -0.000001
+      crossed_at = @sync_last / span
+      @sync_last = sync_input
+      @phase += restart * ((1.0 - crossed_at) * current_dt - @phase)
+
+      naive_saw1 = -2.0 * @phase + 1.0
+      blep1 = poly_blep(@phase, current_dt, current_dt_inv)
+      saw1 = naive_saw1 + blep1
+
+      pw_modulation = (modulation_1_input * @current_pw_modulation_1_amount) + (modulation_2_input * @current_pw_modulation_2_amount)
+      total_pulse_width = @current_pulse_width + pw_modulation
+      pulse_width = (total_pulse_width < -0.5) ? -0.5 : ((total_pulse_width > 0.5) ? 0.5 : total_pulse_width)
+      phase2 = @phase + (0.5 + pulse_width)
+      phase2 -= (phase2 < 1.0) ? 0.0 : 1.0
+
+      naive_saw2 = -2.0 * phase2 + 1.0
+      blep2 = poly_blep(phase2, current_dt, current_dt_inv)
+      saw2 = naive_saw2 + blep2
+
+      output = saw1 - (saw2 * @current_waveform)
+
+      @phase += current_dt
+      @phase -= (@phase < 1.0) ? 0.0 : 1.0
+
+      @output_saw = saw1 * 0.5
+      @output_pulse = (saw1 - saw2) * 0.5
+      output * 0.5
+    end
+
     # The sawtooth, the pulse and the sub of the last sample process took, read after it as
     # Chorus's outputs are.
     def output_saw
@@ -230,7 +279,24 @@ module Spms1
       @output_sub
     end
 
+
     private
+
+    def update_controls
+      # Morph, pulse width and depth are smoothed at the control rate to avoid sudden jumps.
+      @stage_1_waveform = Dsp.smooth(@waveform, @stage_1_waveform, @smoothing_target_blend)
+      @current_waveform = Dsp.smooth(@stage_1_waveform, @current_waveform, @smoothing_target_blend)
+      @stage_1_pulse_width = Dsp.smooth(@pulse_width, @stage_1_pulse_width, @smoothing_target_blend)
+      @current_pulse_width = Dsp.smooth(@stage_1_pulse_width, @current_pulse_width, @smoothing_target_blend)
+      @stage_1_pitch_modulation_1_depth = Dsp.smooth(@pitch_modulation_1_depth, @stage_1_pitch_modulation_1_depth, @smoothing_target_blend)
+      @current_pitch_modulation_1_depth = Dsp.smooth(@stage_1_pitch_modulation_1_depth, @current_pitch_modulation_1_depth, @smoothing_target_blend)
+      @stage_1_pitch_modulation_2_depth = Dsp.smooth(@pitch_modulation_2_depth, @stage_1_pitch_modulation_2_depth, @smoothing_target_blend)
+      @current_pitch_modulation_2_depth = Dsp.smooth(@stage_1_pitch_modulation_2_depth, @current_pitch_modulation_2_depth, @smoothing_target_blend)
+      @stage_1_pw_modulation_1_amount = Dsp.smooth(@pw_modulation_1_amount, @stage_1_pw_modulation_1_amount, @smoothing_target_blend)
+      @current_pw_modulation_1_amount = Dsp.smooth(@stage_1_pw_modulation_1_amount, @current_pw_modulation_1_amount, @smoothing_target_blend)
+      @stage_1_pw_modulation_2_amount = Dsp.smooth(@pw_modulation_2_amount, @stage_1_pw_modulation_2_amount, @smoothing_target_blend)
+      @current_pw_modulation_2_amount = Dsp.smooth(@stage_1_pw_modulation_2_amount, @current_pw_modulation_2_amount, @smoothing_target_blend)
+    end
 
     def pitch_to_freq_fast(pitch)
       internal_pitch = (pitch + 0.5) * 120.0

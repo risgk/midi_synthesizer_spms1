@@ -31,6 +31,7 @@
 |                           103 | x             | o             | Osc PW Mod 2 Amt (LFO)               |
 |                            85 | x             | o             | Osc 2 Pitch Coarse (+-5 Octaves)     |
 |                            76 | x             | o             | Osc 2 Pitch Fine (+-60 Cents)        |
+|                           112 | x             | o             | Osc 2 Sync Switch [Off|On]           |
 |                            74 | x             | o             | Filter Cutoff                        |
 |                            71 | x             | o             | Filter Resonance                     |
 |                            24 | x             | o             | Filter Mod 1 Amt (EG)                |
@@ -52,6 +53,7 @@
 |                             3 | x             | o             | LFO Rate                             |
 |                           113 | x             | o             | LFO Level                            |
 |                            33 | x             | o             | LFO Wave (Triangle to Square)        |
+|                           111 | x             | o             | LFO Reset Switch [Off|On]            |
 |                            93 | x             | o             | Chorus Mix                           |
 |                            58 | x             | o             | Chorus Rate                          |
 |                            59 | x             | o             | Chorus Depth                         |

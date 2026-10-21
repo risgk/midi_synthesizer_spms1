@@ -39,6 +39,8 @@ module Spms1
       @inv_sample_rate = 1.0 / sample_rate
       @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (48000.0 / @sample_rate) * (CONTROL_RATE_DIVISOR / 4.0)
       @phase = 0.0
+      @reset_high = 0.0
+      @reset_switch = 0.0
       # Middle of the range, so the LFO starts where its control does rather than sliding up to it.
       @rate = 0.5
       @stage_1_rate = 0.5
@@ -97,6 +99,11 @@ module Spms1
     # The output is scaled by level, unipolar, [0.0, 1.0], a plain multiplier, so a destination
     # can take the LFO at less than full scale without a mixer in between. Turning it the other
     # way up is for Out Inv, or a mixer's Out Inv.
+    # Reset Switch: Reset In is taken at 0.5 and above, and ignored below.
+    def set_reset_switch(switch)
+      @reset_switch = (switch >= 0.5) ? 1.0 : 0.0
+    end
+
     def set_level(level)
       @level = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
       @amount = @level
@@ -116,8 +123,14 @@ module Spms1
     # division, which every fourth sample can afford and every sample would be paying for. Rate Mod
     # In is held to the rate range after it is added, which also keeps the lookup in bounds, and
     # Level Mod In to the level's, so the wheel adds to the level up to its top and no further.
-    def process(control_tick, rate_modulation_input = 0.0, level_modulation_input = 0.0)
+    # Reset In restarts the cycle where it rises above zero, as a gate does at a note on, with Reset
+    # Switch on: read at the control-rate step, as a gate only changes between buffers, which are a
+    # whole number of steps.
+    def process(control_tick, rate_modulation_input = 0.0, level_modulation_input = 0.0, reset_input = 0.0)
       if control_tick
+        reset_high = (reset_input > 0.0) ? @reset_switch : 0.0
+        @phase -= (reset_high - reset_high * @reset_high) * @phase
+        @reset_high = reset_high
         # Rate, amount and the two modulation depths are smoothed at the control rate to avoid sudden
         # jumps, and the phase increment is derived here rather than per sample.
         @stage_1_rate = Dsp.smooth(@rate, @stage_1_rate, @smoothing_target_blend)
