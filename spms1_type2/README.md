@@ -245,12 +245,12 @@ value 28, where it powers up, and 5 octaves at value 124.
 The LFO goes straight to the oscillator, both to its pitch and to its pulse width, on Mod 2 In, and to the filter, where Filter 1 Mod 2 Amt (CC#25) powers up at 0.0 and
 leaves the cutoff alone until it is turned up, as Filter 1 Mod 1 Amt (CC#24) does the envelope's;
 Filter 1 Cutoff (CC#74) powers up at 0.9 (value 112). Osc 1 Pitch Mod 2 Amt (CC#13) takes the
-LFO to the pitch and powers up at its top, value 124, which with Osc 1 Pitch Mod Range at 0.2 makes
-the LFO at full level swing the pitch an octave either way; Osc 1 PW Mod 2 Amt (CC#103) takes it
-to the pulse width and powers up at 0.0. LFO 1 Level powers up at 0.0, so the swing is the mod
-wheel's, from none to an octave. The pitch from Pitch 1 reaches the filter too, on Filter 1 Pitch In, for keyboard tracking: CC#9
+LFO to the pitch and powers up at 0.0; at its top, value 124, with Osc 1 Pitch Mod Range at 0.2,
+the LFO at full level swings the pitch an octave either way. Osc 1 PW Mod 2 Amt (CC#103) takes it
+to the pulse width and powers up at 0.0. LFO 1 Level powers up at 1.0, so CC#13 alone sets the
+vibrato, from none to an octave. The pitch from Pitch 1 reaches the filter too, on Filter 1 Pitch In, for keyboard tracking: CC#9
 (Filter 1 Pitch Amt) at its top has the cutoff follow the note a semitone for a semitone,
-unmoved at note 60. Filter 1 Pitch Amt powers up at 0.0, with the tracking off.
+unmoved at note 60. Filter 1 Pitch Amt powers up at 0.5 (value 64), half a semitone for a semitone.
 The envelope reaches the oscillator too, on Osc 1 Mod 1 In, for a pitch envelope: Pitch Mod 1
 Amt (CC#89) and PW Mod 1 Amt (CC#8) power up at 0.0, with it off. Each modulation depth spans the
 whole range of what it moves, so bringing a source down to a musical depth is left to the patch
@@ -653,7 +653,8 @@ the mod wheel, goes on the Mod Wheel slot.
 
 Slot 8, Mod Wheel, is a control slot that no parameter owns: a CC put on the bus for any module
 input or parameter to read. It reads CC#1 by default, runs 0.0 to 1.0 and powers up at value 4, so
-it is at 0.0 until the wheel moves; the default patch puts it on LFO 1 Level Mod In. Slots 9 to
+it is at 0.0 until the wheel moves; the default patch puts it on LFO 1 Level Mod In, where it adds nothing while LFO 1 Level is at
+its power-up 1.0. Slots 9 to
 11 carry it in three more forms of its value u: Mod Wheel Rev 1 - u, Inv -u and Rev Inv u - 1,
 so the wheel can take something out, or the other way, with no mixer to turn it round. The editor
 shows it with the keyboard's signals, on its Controller node, the forms as outputs below it, and
@@ -732,10 +733,10 @@ middle of the swing moves up from zero to 0.5. Out is what the default patch rou
 is a triangle until Wave is turned up.
 
 LFO 1 Level scales the LFO's outputs, as a mixer's Level scales its input: from silent at 0.0
-(value 4) to full at 1.0 (value 124). It is on CC#116 and powers up at 0.0, so the LFO is still until
-something brings it in. LFO 1 Level Mod In adds to it, held to the same range, by Level Mod Amt, and it takes
-Mod Wheel by default at a depth of 1.0 (Level Mod Amt has no CC and holds 1.0), so the
-wheel brings the LFO in, up to full at its top. Turning the LFO the
+(value 4) to full at 1.0 (value 124). It is on CC#116 and powers up at 1.0, so the LFO runs at
+full level and what it moves sets the depth. LFO 1 Level Mod In adds to it, held to the same range, by Level Mod Amt, and it takes
+Mod Wheel by default at a depth of 1.0 (Level Mod Amt has no CC and holds 1.0), so with Level
+turned down the wheel brings the LFO in, up to full at its top. Turning the LFO the
 other way up is for Out Inv, Out negated, or for a mixer's Out Inv; the triangle and the square
 have theirs too, Out Triangle Inv and Out Square Inv. The default patch leaves them unrouted.
 
@@ -773,7 +774,7 @@ Level has no CC and holds 1.0, as EG 1's does.
 
 Osc 1 takes each of its two modulations, Mod 1 In and Mod 2 In, to the pitch and to the pulse
 width by a depth of its own: Pitch Mod 1 Amt and Pitch Mod 2 Amt, PW Mod 1 Amt and PW Mod 2 Amt,
-all unipolar. Pitch Mod 1 Amt and Pitch Mod 2 Amt are on CC#89 and 13, and PW Mod 1 Amt and PW Mod 2 Amt on CC#8 and 103; Pitch Mod 2 Amt powers up at its top, value 124, and the other three at 0.0. There is no Polarity: each modulation runs the way its source does,
+all unipolar. Pitch Mod 1 Amt and Pitch Mod 2 Amt are on CC#89 and 13, and PW Mod 1 Amt and PW Mod 2 Amt on CC#8 and 103; all four power up at 0.0. There is no Polarity: each modulation runs the way its source does,
 and one the other way up takes an inverted source, such as EG 1 Out Inv or LFO 1 Out Inv. So a
 source goes to the pulse width as well as the pitch, or to either alone, with no rewiring.
 
@@ -782,17 +783,16 @@ multipliers: Pitch Mod Range is what the top of a Pitch Mod Amt is worth. At a d
 modulation reaches the whole pitch range: a bipolar source at full depth swings the pitch five
 octaves up and five down. That is a coarse range for vibrato, which is why Pitch Mod Range has no
 CC and holds 0.2 (CC value 28), the depth at the top of a Pitch Mod Amt. So Pitch Mod 2 Amt puts
-50 cents of vibrato at value 9, a semitone at value 14 and an octave at the top of the dial, where it
-powers up, a step being 10 cents, and Pitch Mod 1 Amt sweeps
+50 cents of vibrato at value 9, a semitone at value 14 and an octave at the top of the dial, a step
+being 10 cents, and Pitch Mod 1 Amt sweeps
 the pitch from the envelope a semitone at value 9, an octave at value 64 and two octaves at the top.
 
 Osc 1 Pitch In is where the note comes in, from Pitch 1 in the default patch. It has no depth:
 the pitch it takes is added whole, so the note plays in tune, a key a semitone.
 
 Osc 1 Mod 1 In takes the envelope in the default patch, for a pitch envelope, and Mod 2 In the
-LFO, for vibrato. Pitch Mod 2 Amt powers up at its top, an octave, and the LFO at Level 0.0, so
-the vibrato waits for the mod wheel; every other Mod Amt powers up at 0.0, so the envelope
-leaves the oscillator alone until one is turned up.
+LFO, for vibrato. Every Mod Amt powers up at 0.0, so the LFO, at Level 1.0, and the envelope
+leave the oscillator alone until one is turned up: CC#13 brings the vibrato in.
 
 Osc 1 PW, the pulse width, shifts the second of the two sawtooths that the morph is made of, either way
 from half a cycle: it is bipolar, -0.5 (value 4) to +0.5 (value 124), and powers up at 0.0 (value 64). At
@@ -951,12 +951,13 @@ sweep while Osc 1 holds the note.
 
 #### Examples
 
-- Vibrato is wired by default -- the LFO goes straight to the oscillator's Mod 2 input --
-  and the mod wheel brings it in: LFO 1 Level (CC#116) powers up at value 4, and the wheel adds to
-  it, up to the depth CC#13 (Osc 1 Pitch Mod 2 Amt) sets, an octave either way at its power-up
-  value 124. CC#3 sets the rate, and CC#116 turned up gives a vibrato without the wheel
-- A vibrato as deep as a GM2 sound module's: CC#13 = 9 brings the wheel's top down to 50 cents
-  either way, the Modulation Depth Range GM2 powers up at, and CC#13 = 14 to a semitone
+- Vibrato is wired by default -- the LFO, at full level (LFO 1 Level, CC#116, powers up at value
+  124), goes straight to the oscillator's Mod 2 input -- and CC#13 (Osc 1 Pitch Mod 2 Amt) brings
+  it in: none at value 4, where it powers up, 50 cents either way at value 9, a semitone at value
+  14 and an octave at the top. CC#3 sets the rate
+- A vibrato on the mod wheel, as a GM2 sound module's: CC#116 = 4 takes LFO 1 Level down to 0.0,
+  so the wheel on its Level Mod In brings the LFO in, and CC#13 = 9 makes the wheel's top 50 cents
+  either way, the Modulation Depth Range GM2 powers up at, or CC#13 = 14 a semitone
 - A bend range of 2 semitones, as a GM sound module's: CC#57 = 8 sets Pitch 1 Bend Amt to 8
 - The LFO reaches the filter's Mod 2 input by default too, so CC#25 sweeps the cutoff with it, on
   top of the envelope on Mod 1
@@ -968,8 +969,8 @@ sweep while Osc 1 holds the note.
   oscillator out, leaving the noise alone, through the filter. CC#115 (Color) turns it from
   white to red
 - Keyboard tracking is wired by default as well, the pitch from Pitch 1 on the filter's Pitch input,
-  so CC#9 sets how far the cutoff follows the keys: all the way at value 124, not at all at value 4,
-  where it powers up
+  so CC#9 sets how far the cutoff follows the keys: all the way at value 124, half way at value 64,
+  where it powers up, and not at all at value 4
 - The filter as a sine voice, playing its own oscillation in tune: CC#71 = 124 makes it oscillate,
   CC#9 = 124 has the cutoff follow the keys, and CC#74 = 49 puts it on note 60 at note 60, and so
   on the note played everywhere. CC#24 stays at value 4, where it powers up, keeping the envelope
@@ -977,8 +978,8 @@ sweep while Osc 1 holds the note.
   leaving the sine alone. It is within 5 cents of the note from middle C up, and 17 cents flat an octave below
 - A pitch envelope is wired by default too -- the envelope on the oscillator's Mod 1 input --
   so CC#89 (Osc 1 Pitch Mod 1 Amt) sets its depth: the note starts a semitone sharp at value 9, an
-  octave at value 64 and two octaves at the top, and with CC#30 (Sustain) turned down it falls back
-  to pitch with the decay
+  octave at value 64 and two octaves at the top, and with Sustain at 0.0, where it powers up, it
+  falls back to pitch with the decay
 - Noise as a modulation source, a random jitter of the cutoff: CC#99 = 1, CC#98 = 26,
   CC#6 = 47 puts Noise 1's red output on the filter's Mod 2 input in the LFO's place, and CC#25
   sets how much. CC#6 = 46 takes the white instead, finer still. The red is on no mixer, and the
@@ -1002,11 +1003,10 @@ sweep while Osc 1 holds the note.
   wheel brings the portamento in
 - A mod wheel that bends the pitch up: CC#99 = 1, CC#98 = 14 and 17, CC#6 = 8 points both
   oscillators' Mod 2 input at Mod Wheel in the LFO's place. The wheel is unipolar, so it bends
-  only up from the note, as far as CC#13 allows: two octaves at its power-up value 124, two semitones
-  at value 14
+  only up from the note, as far as CC#13 allows: two octaves at value 124, two semitones at value 14
 - A pitch envelope that rises into the note: CC#99 = 1, CC#98 = 13, CC#6 = 27 puts EG 1 Out Inv,
   the envelope negated, on the oscillator's Mod 1 input. With CC#89 at the top the note starts two
-  octaves flat, and with CC#30 (Sustain) turned down it
+  octaves flat, and with Sustain at 0.0, where it powers up, it
   rises back to pitch with the decay
 - A mod wheel that closes the filter as it rises: CC#99 = 1, CC#98 = 26, CC#6 = 10 puts Mod Wheel
   Inv on the filter's Mod 2 input in the LFO's place. With CC#25 at value 64, the wheel closes the
