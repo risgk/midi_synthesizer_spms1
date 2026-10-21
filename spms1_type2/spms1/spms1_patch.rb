@@ -601,7 +601,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_PW_MOD_2_AMT    , 103)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_2_WAVE            , 104)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_2_PW              , 114)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_2_PITCH_COARSE    , 85)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_2_PITCH_SHIFT     , 85)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_2_PITCH_FINE      , 76)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_2_PITCH_MOD_1_AMT , 89)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_2_PITCH_MOD_2_AMT , 13)
@@ -733,7 +733,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 103, 4  ) # Osc 1 PW Mod 2 Amt
   C.set_midi_cc_value(midi_ch, 104, 4  ) # Osc 2 Wave
   C.set_midi_cc_value(midi_ch, 114, 64 ) # Osc 2 PW
-  C.set_midi_cc_value(midi_ch, 85 , 64 ) # Osc 2 Pitch Coarse
+  C.set_midi_cc_value(midi_ch, 85 , 64 ) # Osc 2 Pitch
   C.set_midi_cc_value(midi_ch, 76 , 76 ) # Osc 2 Pitch Fine
   C.set_midi_cc_value(midi_ch, 89 , 4  ) # Osc 2 Pitch Mod 1 Amt
   C.set_midi_cc_value(midi_ch, 13 , 124) # Osc 2 Pitch Mod 2 Amt

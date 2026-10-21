@@ -260,7 +260,7 @@ Mixer 2 sums the audio ahead of the filter: Osc 1 on In 1, Osc 2 on In 2, Osc 1'
 Noise 1's Out on In 4, each at its own level: Level 1 (CC#19) and Level 2 (CC#20) power up at 0.7, so the default patch
 plays both oscillators, about as loud together as one at full level, and Level 3 (CC#21) and
 Level 4 (CC#23) at 0.0, so the sub and the noise are silent until they are turned up. Osc 2 plays the note from Pitch 1 as Osc
-1 does, tuned against it by its own Pitch Coarse (CC#85) and Pitch Fine (CC#76), 12 cents sharp at
+1 does, tuned against it by its own Pitch (CC#85) and Pitch Fine (CC#76), 12 cents sharp at
 power-up for a slow beat. Its Wave is its own as well, on CC#104 beside Osc 1's on CC#102. It
 follows Osc 1 in everything else: its Mod Amts and its PW are on Osc 1's CCs, so one CC moves
 both.
@@ -703,11 +703,11 @@ it is built with. Read these tables again after an update.
 
 Osc 1 Pitch Coarse and Pitch Fine transpose the oscillator. Both are centred on value 64 and move one
 whole unit per CC step: Coarse a semitone, reaching 5 octaves either way, and Fine a cent,
-reaching 60 either way. They are summed, so any pitch is reachable. They have no CC and hold 0.0
-by default; Osc 2's, on CC#85 and 76, set the interval or the detune between the oscillators.
-Pitch, on each oscillator, adds an octave either way on top, a fifth of a semitone a step, for a
-pitch swept by hand, as Osc 2's for a sync sweep. It is centred on value 64, has no CC and holds
-0.0 by default, and is not smoothed either.
+reaching 60 either way. They are summed, so any pitch is reachable. Pitch, on each oscillator,
+adds an octave either way on top, a fifth of a semitone a step, for a pitch swept by hand, as for
+a sync sweep. All three are centred on value 64 and hold 0.0 by default. Osc 1's have no CC; Osc
+2's Pitch and Pitch Fine, on CC#85 and 76, set the interval or the detune between the
+oscillators, and its Pitch Coarse has no CC. None of them is smoothed.
 
 Pitch 1 Stretch, on CC#22, widens the keys about note 60, last, by multiplying the pitch
 after the glide and the bend: every interval from note 60 grows by the same share, so the stretch is often given as how
@@ -829,7 +829,7 @@ smoothed. Any signal can be routed there instead: a pulse rises once a cycle too
 ends of its width it has no step to rise at; a wave that rises through zero more than once a
 cycle restarts Osc 2 each time. Osc 2 Sync Sw, on CC#112, takes Sync In at value 64 and above
 and ignores it below; it powers up off (value 4), so the default patch is unsynced until it is
-turned on. Raise Osc 2's pitch above Osc 1's (Pitch Coarse, CC#85, Pitch, or a pitch modulation) to hear
+turned on. Raise Osc 2's pitch above Osc 1's (Pitch, CC#85, Pitch Coarse, or a pitch modulation) to hear
 the sync sweep. A gate on Sync In, which rises from 0.0 to 1.0, restarts Osc 2 on that sample:
 Note Gate there, with the switch on, starts every note at the same point of the wave.
 
@@ -961,7 +961,7 @@ sweep while Osc 1 holds the note.
   top of the envelope on Mod 1
 - A second oscillator plays by default too, on Mixer 2's second input at the level of the first,
   CC#19 and CC#20 both at 0.7, beating slowly against Osc 1 from the 12 cents of CC#76's power-up
-  value; CC#20 = 4 takes it out. CC#85 and 76 tune it: CC#85 = 76 an octave up, CC#85 = 71 a fifth, CC#76 = 64 in unison
+  value; CC#20 = 4 takes it out. CC#85 and 76 tune it: CC#85 = 124 an octave up, CC#85 = 99 a fifth, CC#76 = 64 in unison
 - Noise is wired by default too, its Out on Mixer 2's fourth input beside the oscillators, so CC#23
   brings it in under the note, at a level of 0.1 at value 16. CC#19 = 4 and CC#20 = 4 take the
   oscillators out, leaving the noise alone, through the filter. CC#115 (Color) turns it from
