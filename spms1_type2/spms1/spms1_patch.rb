@@ -207,8 +207,8 @@ NRPN_SOURCE_AMP_1_AUDIO_IN     = 155
 NRPN_SOURCE_AMP_1_MOD_1_IN     = 156
 NRPN_SOURCE_AMP_1_MOD_2_IN     = 157
 NRPN_SOURCE_CHORUS_1_AUDIO_IN  = 158
-NRPN_SOURCE_DELAY_1_AUDIO_L_IN = 159
-NRPN_SOURCE_DELAY_1_AUDIO_R_IN = 160
+NRPN_SOURCE_DELAY_1_AUDIO_IN_L = 159
+NRPN_SOURCE_DELAY_1_AUDIO_IN_R = 160
 NRPN_SOURCE_OUTPUT_L           = 161
 NRPN_SOURCE_OUTPUT_R           = 162
 
@@ -523,8 +523,8 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_AMP_1_MOD_1_IN    , SIGNAL_EG_1_OUTPUT)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_AMP_1_MOD_2_IN    , SIGNAL_EG_2_OUTPUT)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_CHORUS_1_AUDIO_IN , SIGNAL_AMP_1_OUTPUT)
-  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_DELAY_1_AUDIO_L_IN, SIGNAL_CHORUS_1_OUTPUT_L)
-  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_DELAY_1_AUDIO_R_IN, SIGNAL_CHORUS_1_OUTPUT_R)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_DELAY_1_AUDIO_IN_L, SIGNAL_CHORUS_1_OUTPUT_L)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_DELAY_1_AUDIO_IN_R, SIGNAL_CHORUS_1_OUTPUT_R)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OUTPUT_L          , SIGNAL_DELAY_1_OUTPUT_L)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_OUTPUT_R          , SIGNAL_DELAY_1_OUTPUT_R)
 

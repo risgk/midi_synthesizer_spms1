@@ -1212,8 +1212,8 @@ static sp_int cst_NRPN_SOURCE_AMP_1_AUDIO_IN = 0;
 static sp_int cst_NRPN_SOURCE_AMP_1_MOD_1_IN = 0;
 static sp_int cst_NRPN_SOURCE_AMP_1_MOD_2_IN = 0;
 static sp_int cst_NRPN_SOURCE_CHORUS_1_AUDIO_IN = 0;
-static sp_int cst_NRPN_SOURCE_DELAY_1_AUDIO_L_IN = 0;
-static sp_int cst_NRPN_SOURCE_DELAY_1_AUDIO_R_IN = 0;
+static sp_int cst_NRPN_SOURCE_DELAY_1_AUDIO_IN_L = 0;
+static sp_int cst_NRPN_SOURCE_DELAY_1_AUDIO_IN_R = 0;
 static sp_int cst_NRPN_SOURCE_OUTPUT_L = 0;
 static sp_int cst_NRPN_SOURCE_OUTPUT_R = 0;
 static sp_int cst_NRPN_SOURCE_PITCH_1_GLIDE = 0;
@@ -4663,9 +4663,9 @@ static void sp_spms1_write_default_patch(sp_int lv_midi_ch) {
 #line 525 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_CHORUS_1_AUDIO_IN)), ((uint8_t)(cst_SIGNAL_AMP_1_OUTPUT))), (sp_int)0);
 #line 526 "spms1_patch.rb"
-  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_DELAY_1_AUDIO_L_IN)), ((uint8_t)(cst_SIGNAL_CHORUS_1_OUTPUT_L))), (sp_int)0);
+  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_DELAY_1_AUDIO_IN_L)), ((uint8_t)(cst_SIGNAL_CHORUS_1_OUTPUT_L))), (sp_int)0);
 #line 527 "spms1_patch.rb"
-  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_DELAY_1_AUDIO_R_IN)), ((uint8_t)(cst_SIGNAL_CHORUS_1_OUTPUT_R))), (sp_int)0);
+  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_DELAY_1_AUDIO_IN_R)), ((uint8_t)(cst_SIGNAL_CHORUS_1_OUTPUT_R))), (sp_int)0);
 #line 528 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_OUTPUT_L)), ((uint8_t)(cst_SIGNAL_DELAY_1_OUTPUT_L))), (sp_int)0);
 #line 529 "spms1_patch.rb"
@@ -5303,8 +5303,8 @@ int main(int argc,char**argv){
     sp_int lv_source_amp_1_mod_1_in = 0;
     sp_int lv_source_amp_1_mod_2_in = 0;
     sp_int lv_source_chorus_1_audio_in = 0;
-    sp_int lv_source_delay_1_audio_l_in = 0;
-    sp_int lv_source_delay_1_audio_r_in = 0;
+    sp_int lv_source_delay_1_audio_in_l = 0;
+    sp_int lv_source_delay_1_audio_in_r = 0;
     sp_int lv_source_output_l = 0;
     sp_int lv_source_output_r = 0;
     sp_int lv_source_pitch_1_glide = 0;
@@ -6138,9 +6138,9 @@ int main(int argc,char**argv){
 #line 209 "spms1_patch.rb"
   cst_NRPN_SOURCE_CHORUS_1_AUDIO_IN = 158LL;
 #line 210 "spms1_patch.rb"
-  cst_NRPN_SOURCE_DELAY_1_AUDIO_L_IN = 159LL;
+  cst_NRPN_SOURCE_DELAY_1_AUDIO_IN_L = 159LL;
 #line 211 "spms1_patch.rb"
-  cst_NRPN_SOURCE_DELAY_1_AUDIO_R_IN = 160LL;
+  cst_NRPN_SOURCE_DELAY_1_AUDIO_IN_R = 160LL;
 #line 212 "spms1_patch.rb"
   cst_NRPN_SOURCE_OUTPUT_L = 161LL;
 #line 213 "spms1_patch.rb"
@@ -6870,9 +6870,9 @@ int main(int argc,char**argv){
 #line 209 "spms1_main.rb"
     lv_source_chorus_1_audio_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_CHORUS_1_AUDIO_IN)))));
 #line 210 "spms1_main.rb"
-    lv_source_delay_1_audio_l_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_DELAY_1_AUDIO_L_IN)))));
+    lv_source_delay_1_audio_in_l = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_DELAY_1_AUDIO_IN_L)))));
 #line 211 "spms1_main.rb"
-    lv_source_delay_1_audio_r_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_DELAY_1_AUDIO_R_IN)))));
+    lv_source_delay_1_audio_in_r = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_DELAY_1_AUDIO_IN_R)))));
 #line 212 "spms1_main.rb"
     lv_source_output_l = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OUTPUT_L)))));
 #line 213 "spms1_main.rb"
@@ -7921,8 +7921,8 @@ int main(int argc,char**argv){
         {
 #line 653 "spms1_main.rb"
           sp_bool _t1157 = lv_control_tick;
-          sp_float _t1158 = sp_FloatArray_get(lv_signals, lv_source_delay_1_audio_l_in);
-          sp_float _t1159 = sp_FloatArray_get(lv_signals, lv_source_delay_1_audio_r_in);
+          sp_float _t1158 = sp_FloatArray_get(lv_signals, lv_source_delay_1_audio_in_l);
+          sp_float _t1159 = sp_FloatArray_get(lv_signals, lv_source_delay_1_audio_in_r);
           sp_Delay_process((sp_Delay *)lv_delay_1, _t1157, _t1158, _t1159);
 #line 654 "spms1_main.rb"
           sp_FloatArray_set(lv_signals, 58LL, (lv_delay_1)->iv_output_l);

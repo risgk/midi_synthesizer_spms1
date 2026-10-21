@@ -43,7 +43,7 @@ modules:
   - { key: FILTER_1,  id: 10, label: Filter 1, class: Filter, process: [AUDIO_IN, PITCH_IN, MOD_1_IN, MOD_2_IN] }
   - { key: AMP_1,     id: 11, label: Amp 1, class: Amp, process: [AUDIO_IN, MOD_1_IN, MOD_2_IN] }
   - { key: CHORUS_1,  id: 12, label: Chorus 1, stereo: true, class: Chorus, process: [AUDIO_IN] }
-  - { key: DELAY_1,   id: 13, label: Delay 1,  stereo: true, class: Delay, process: [AUDIO_L_IN, AUDIO_R_IN] }
+  - { key: DELAY_1,   id: 13, label: Delay 1,  stereo: true, class: Delay, process: [AUDIO_IN_L, AUDIO_IN_R] }
 
 # The default patch. Every module is in the run order, so a patch only ever has to route, never to
 # switch something on first. Pitch 1 runs first, taking Note Pitch and handing it to the
@@ -227,8 +227,8 @@ inputs:
   - { entry: 28, module: AMP_1,       key: MOD_1_IN,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
   - { entry: 29, module: AMP_1,       key: MOD_2_IN,       label: Mod 2 In,       name: Mod 2 In,       source: EG_2_OUTPUT }
   - { entry: 30, module: CHORUS_1,    key: AUDIO_IN,       label: Audio In,       name: Audio In,       source: AMP_1_OUTPUT }
-  - { entry: 31, module: DELAY_1,     key: AUDIO_L_IN,     label: Audio In L,     name: Audio In L,     source: CHORUS_1_OUTPUT_L }
-  - { entry: 32, module: DELAY_1,     key: AUDIO_R_IN,     label: Audio In R,     name: Audio In R,     source: CHORUS_1_OUTPUT_R }
+  - { entry: 31, module: DELAY_1,     key: AUDIO_IN_L,     label: Audio In L,     name: Audio In L,     source: CHORUS_1_OUTPUT_L }
+  - { entry: 32, module: DELAY_1,     key: AUDIO_IN_R,     label: Audio In R,     name: Audio In R,     source: CHORUS_1_OUTPUT_R }
   - { entry: 33, key: OUTPUT_L,    label: L,              name: Final Output L, name_ja: 最終出力 L, source: DELAY_1_OUTPUT_L }
   - { entry: 34, key: OUTPUT_R,    label: R,              name: Final Output R, name_ja: 最終出力 R, source: DELAY_1_OUTPUT_R }
 

@@ -207,8 +207,8 @@ while true
   source_amp_1_mod_1_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_MOD_1_IN)
   source_amp_1_mod_2_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_MOD_2_IN)
   source_chorus_1_audio_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_CHORUS_1_AUDIO_IN)
-  source_delay_1_audio_l_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_AUDIO_L_IN)
-  source_delay_1_audio_r_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_AUDIO_R_IN)
+  source_delay_1_audio_in_l = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_AUDIO_IN_L)
+  source_delay_1_audio_in_r = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_AUDIO_IN_R)
   source_output_l = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OUTPUT_L)
   source_output_r = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OUTPUT_R)
   source_pitch_1_glide = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_GLIDE), SLOT_PITCH_1_GLIDE)
@@ -650,7 +650,7 @@ while true
         signals[56] = chorus_1.output_r # SIGNAL_CHORUS_1_OUTPUT_R
         signals[57] = chorus_1.output_mono # SIGNAL_CHORUS_1_OUTPUT_MONO
       when 13 # MODULE_DELAY_1
-        delay_1.process(control_tick, signals[source_delay_1_audio_l_in], signals[source_delay_1_audio_r_in])
+        delay_1.process(control_tick, signals[source_delay_1_audio_in_l], signals[source_delay_1_audio_in_r])
         signals[58] = delay_1.output_l # SIGNAL_DELAY_1_OUTPUT_L
         signals[59] = delay_1.output_r # SIGNAL_DELAY_1_OUTPUT_R
         signals[60] = delay_1.output_mono # SIGNAL_DELAY_1_OUTPUT_MONO
