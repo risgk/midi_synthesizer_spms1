@@ -1,9 +1,8 @@
 module Spms1
-  # Stereo delay with feedback, after PRA32-U2's Delay FX in its Stereo Delay mode: two audio
+  # Stereo delay with feedback: two audio
   # inputs, left and right, each with a delay line and a loop of its own, and two outputs, each a
   # crossfade of its dry input with its delayed signal. Time, Feedback and Mix are shared, so the
   # two sides repeat together and the stereo image going in is the one the repeats keep.
-  # Reference: https://github.com/risgk/digital-synth-pra32-u2 (pra32-u2-delay-fx.h)
   #
   # It keeps the bus's one unit without a limiter or a clip. What enters each loop is half its
   # input, plus its delayed signal at a feedback of at most a half, so as long as the delayed
@@ -41,15 +40,15 @@ module Spms1
 
     # The Time dial, in samples at 48 kHz: a straight line from 0 at 0.0 to 16320 (340 ms) at 1.0,
     # 136 samples a CC step, clipped to 136 (2.83 ms) at the bottom. The bottom keeps the read clear
-    # of the sample about to be written. The top is PRA32-U2's 340 ms, which fits the line above
+    # of the sample about to be written. The top is 340 ms, which fits the line above
     # with room left for the slew to overshoot by rounding; its clip only guards the line.
     FULL_SCALE_TIME_AT_48K = 16320.0
     MIN_TIME_AT_48K        = 136.0
     MAX_TIME_AT_48K        = 16320.0
-    # How far the read position may move per sample while Time is turned, in samples: a quarter,
-    # as PRA32-U2 allows. Moving it faster would read the line at many times its speed, which is
-    # heard as noise; held to this, the repeats bend in pitch by at most 25%, as a tape delay's do,
-    # and arrive at the new time a moment later.
+    # How far the read position may move per sample while Time is turned, in samples: a quarter.
+    # Moving it faster would read the line at many times its speed, which is heard as noise; held
+    # to this, the repeats bend in pitch by at most 25%, as a tape delay's do, and arrive at the new
+    # time a moment later.
     TIME_SLEW = 0.25
 
     attr_reader :output_l, :output_r
@@ -156,7 +155,7 @@ module Spms1
       older_r = @delay_line_r[older_index]
       delayed_r = newer_r + fraction * (older_r - newer_r)
 
-      # A gentle low pass in each loop, as PRA32-U2 has: 0.75 of what goes in and 0.25 of the last
+      # A gentle low pass in each loop: 0.75 of what goes in and 0.25 of the last
       # value, so each repeat comes back a little darker than the one before.
       loop_input_l = input_l * 0.5 + delayed_l * @current_feedback
       @filtered_l = loop_input_l + (@filtered_l - loop_input_l) * 0.25

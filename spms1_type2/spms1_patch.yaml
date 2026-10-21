@@ -238,8 +238,8 @@ controls:
   - { entry: 7, module: EG_1,      key: RELEASE_SW,   label: Release Switch, cc: 105, value: 124, hint: Off/On, set: set_release_switch }
   - { entry: 8, module: EG_1,      key: LEVEL,        label: Level,        cc: 0,   value: 124, set: set_level }
   # EG 2, for the amp, an organ's envelope at power-up: Attack, Decay and Sustain on CC 52, 53 and
-  # 54, the amp envelope's in PRA32-U2, at CC 4, 4 and 124, so it opens at once and holds while a key
-  # is held. Release Switch is on EG 1's CC 105, as PRA32-U2's one switch serves both envelopes, and
+  # 54, at CC 4, 4 and 124, so it opens at once and holds while a key
+  # is held. Release Switch is on EG 1's CC 105, one switch for both envelopes, and
   # powers up on, so the release is the decay's, 10 ms. Level has no CC and holds 1.0.
   - { entry: 9, module: EG_2,      key: ATTACK,       label: Attack,       cc: 52,  value: 4, hint: Time, set: set_attack }
   - { entry: 10, module: EG_2,      key: DECAY,        label: Decay,        cc: 53,  value: 4, hint: Time, set: set_decay }
@@ -249,7 +249,7 @@ controls:
   # LFO 1 in the editor: the waveform, the rate and the level, then the modulation of each, then
   # Reset Switch, on CC 113, which powers up off, at CC 4, so Reset In, Note Gate, is ignored until it
   # is turned on. Wave
-  # crossfades Out from the triangle (0.0) to the square (1.0), on CC 33, LFO Wave's in PRA32-U2,
+  # crossfades Out from the triangle (0.0) to the square (1.0), on CC 33,
   # and powers up at CC 4, 0.0, the triangle. Each modulation's Amt, listed in the order of what
   # it moves, has no CC and holds 1.0, a depth of 1.0. Rate Mod In is left unrouted, so
   # routing a source to it is enough; Level Mod In takes the mod wheel, which adds to Level
@@ -273,8 +273,8 @@ controls:
   # and Fine have no CC and stay at 0.0. Mod 1 In takes EG 1 and Mod 2 In the LFO, and
   # every depth is unipolar: a modulation runs the way its source does, and one the other way up
   # takes an inverted source, such as EG 1 Out Inv. Pitch Mod 1 Amt and Pitch Mod 2 Amt are on
-  # CC 89 and 13, EG Mod Amt's and LFO Mod Amt's in PRA32-U2, and PW Mod 1 Amt and PW Mod 2 Amt
-  # on CC 8 and 103, EG Mod Dst's and LFO Mod Dst's. Pitch Mod 2 Amt powers up at CC 124, an
+  # CC 89 and 13, and PW Mod 1 Amt and PW Mod 2 Amt
+  # on CC 8 and 103. Pitch Mod 2 Amt powers up at CC 124, an
   # octave either way at full LFO level, and the other three at CC 4, 0.0. Pitch Mod Range has no CC and holds 0.2, the depth at the top
   # of a Pitch Mod Amt, which brings the LFO down to a vibrato depth and the envelope to two
   # octaves; a step of a Pitch Mod Amt is then 10 cents of the LFO. Wave is on
@@ -328,14 +328,14 @@ controls:
   # tracking, its two modulations and their polarity. Pitch In takes the pitch from Pitch 1, as Osc 1 Pitch In
   # does, and Pitch Amt (CC 9) at its top makes the cutoff follow the note a semitone for a
   # semitone, unmoved at note 60; it powers up at CC 4, 0.0, with the tracking off. Mod 1 Amt and
-  # Mod 2 Amt, on CC 24 and 25, Filter EG Amt's and LFO Filter Amt's in PRA32-U2, are how far the
+  # Mod 2 Amt, on CC 24 and 25, are how far the
   # envelope on Mod 1 In and the LFO on Mod 2 In move the cutoff, as Osc 1's PW Mod Amts are for
   # the pulse width. Both power up at CC 4, 0.0, so neither moves the cutoff until it is turned
   # up. Cutoff powers up at CC 112, 0.9. Mod Polarity, on CC 51, sets the sign and the depth of
   # both modulations at once, from -1.0 at CC 4 through none at CC 64 to +1.0 at CC 124; it
   # powers up at CC 124, so the two move the cutoff as their Amts say, and turned below CC 64 it
   # makes the envelope close the filter. Mode crossfades Out from the low pass (0.0) through a
-  # notch (0.5) to the high pass (1.0), on CC 39, Filter Mode's in PRA32-U2, and powers up at CC 4,
+  # notch (0.5) to the high pass (1.0), on CC 39, and powers up at CC 4,
   # 0.0, the low pass.
   - { entry: 51, module: FILTER_1,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 112, set: set_cutoff }
   - { entry: 52, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 64, set: set_resonance }
@@ -344,7 +344,7 @@ controls:
   - { entry: 55, module: FILTER_1,  key: MOD_1_AMT,    label: Mod 1 Amt,    cc: 24,  value: 4, hint_inputs: [MOD_1], set: set_modulation_1_amount }
   - { entry: 56, module: FILTER_1,  key: MOD_2_AMT,    label: Mod 2 Amt,    cc: 25,  value: 4, hint_inputs: [MOD_2], set: set_modulation_2_amount }
   - { entry: 57, module: FILTER_1,  key: MOD_POLARITY, label: Mod Polarity, cc: 51,  value: 124, bipolar: true, hint: − to +, set: set_modulation_polarity }
-  # Amp 1: Gain, on CC 15, Amp Gain's in PRA32-U2, is doubled, so it powers up at CC 64, a gain of
+  # Amp 1: Gain, on CC 15, is doubled, so it powers up at CC 64, a gain of
   # 1.0, and CC 124 brings the sound up by 6 dB; the amp holds its output to one unit. Mod 1/2
   # Mix, on CC 36, crossfades what scales the gain from Mod 1 In, EG 1, at 0.0 (CC 4), where it
   # powers up, to Mod 2 In, EG 2, the organ envelope, at 1.0 (CC 124).

@@ -6,7 +6,7 @@ module Spms1
   # what an analog synth's portamento is. It takes any signal, though, so it rounds off the steps of
   # a stepped one as well. Bend In is added to the output past the lag, for what should move the
   # pitch at once rather than glide, as a pitch bend should. Stretch then widens the sum about note
-  # 60, as PRA32-U2's Stretch Tune does, so that the keys, the glide and the bend spread out alike.
+  # 60, so that the keys, the glide and the bend spread out alike.
   class Pitch
     # Lookup table for exponential time mapping, the envelope's: a twelfth of an octave per index,
     # so one CC step of the 120-step control range moves the time by a semitone and the whole dial

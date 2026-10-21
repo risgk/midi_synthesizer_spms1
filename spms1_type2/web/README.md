@@ -90,9 +90,3 @@ node spms1_web_test.js
     - "spms1_web_test.js": the test of the built file with Node.js (plays a note at 48 kHz, 44.1 kHz, and 96 kHz,
       and checks the release, that the output does not depend on the block size, and that a patch sent as NRPN is taken)
 - The Arduino IDE does not see this folder: it is outside the sketch folder, "spms1"
-
-
-Credits
--------
-
-- Modeled after PRA32-U2 Web of [Digital Synth PRA32-U2](https://github.com/risgk/digital-synth-pra32-u2)

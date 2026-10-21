@@ -34,7 +34,7 @@ module Spms1
       # note numbers: note 21 (A0, 27.5 Hz), so that it falls 6 dB an octave across the audible
       # band. The low pass is state += (white - state) * coef, with coef = 1 - e^(-2 pi fc / fs).
       # That scales the white's power by coef / (2 - coef), so the gain puts it back to half the
-      # white's, the RMS 1/sqrt(2) of it, as PRA32-U2's LFO Red Noise does: it then stays within
+      # white's, the RMS 1/sqrt(2) of it: it then stays within
       # -0.5 to +0.5 but for its rarest swings, which the clamp in process holds there.
       @red_coef = low_pass_coef(21.0)
       @red_gain = Math.sqrt((2.0 - @red_coef) / (2.0 * @red_coef))

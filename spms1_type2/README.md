@@ -7,7 +7,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.4
 - 48 kHz audio output: 24 bit through an I2S DAC, or PWM Audio (no DAC needed)
 - Oscillator: a sawtooth-to-square morph with pulse width (CC#114), and pulse width modulation (PWM) by the same two modulations as the pitch, the envelope and the LFO by default, on CC#8 and 103; and the sawtooth and the pulse on outputs of their own too, and on Osc 1 a sine sub an octave down
 - Hard sync: Osc 2 restarts where Sync In, Osc 1's sawtooth by default, rises through zero, at the point between two samples it crosses (Sync Switch, CC#112)
-- Envelopes: two ADS envelopes, EG 2 on the amp's Mod 2 In, an organ's at power-up, on PRA32-U2's amp envelope CCs (CC#52, 53 and 54), with the release switch of both on CC#105
+- Envelopes: two ADS envelopes, EG 2 on the amp's Mod 2 In, an organ's at power-up, on CC#52, 53 and 54, with the release switch of both on CC#105
 - LFO: triangle (PolyBLAMP) and unipolar square (PolyBLEP), each on an output of its own, and a main output crossfading from one to the other (Wave, CC#33); a reset input, on Note Gate by default, that restarts it at each note with Reset Switch (CC#113) on
 - Filter: ZDF/TPT State Variable Filter (with a nonlinear leak on the band pass integrator, solved by the one-step Newton method), with low pass, high pass and band pass outputs and a main output crossfading from the low pass to the high pass through a notch (Mode, CC#39)
 - Chorus: mono in, stereo out, as a module in the run order
@@ -40,7 +40,7 @@ Required Hardware
         - Each sample is split into 4 PWM periods (PWM carrier: 192 kHz instead of 48 kHz), so the carrier is easier to filter out
           and less likely to cause beeps or whines in active speakers (`SPMS1_PWM_AUDIO_SUBPERIODS`: 1, 2, 4, or 8)
     - NOTE: The RP2350 system clock (sysclk) changes to overclocked 153.6 MHz, set by the sketch's own I2S or PWM Audio output
-      ("spms1_pico2_i2s.h" or "spms1_pico2_pwm_audio.h", the same as PRA32-U2's), not by the Arduino-Pico I2S library
+      ("spms1_pico2_i2s.h" or "spms1_pico2_pwm_audio.h"), not by the Arduino-Pico I2S library
 
 
 Required Software for Modification
@@ -298,8 +298,7 @@ clamp at 16 as a guard that ordinary use never reaches. The output clip comes la
 the resonance dial k turns negative and the loop oscillates.
 
 The filter puts out its low pass and high pass at once, as Out LP and Out HP, each through a DC
-blocker and an output clip of its own, and Out, the two crossfaded by Filter 1 Mode (CC#39, Filter
-Mode's in PRA32-U2). Each side stays at full over its own half and falls to nothing over the other.
+blocker and an output clip of its own, and Out, the two crossfaded by Filter 1 Mode (CC#39). Each side stays at full over its own half and falls to nothing over the other.
 At 0.0 (value 4), where it powers up, Out is the low
 pass alone; at 1.0 (value 124) the high pass alone; and at 0.5 (value 64) both at full, whose sum, the
 input less k·BP, is a notch at the cutoff with both sides of it passed whole. In between the notch
@@ -364,7 +363,7 @@ flowchart LR
 
 #### Chorus 1
 
-A mono-in, stereo-out chorus, after PRA32-U2's Chorus FX, put in the chain as an insert, as the
+A mono-in, stereo-out chorus, put in the chain as an insert, as the
 delay is: Mix sets the balance of dry and chorused, rather than a send level. The input goes through a gentle low pass
 filter into one short delay line, which is read at two taps. A triangle LFO swings the two taps in
 opposite directions about 5.33 ms, so the left and right delayed signals bend in pitch against
@@ -395,7 +394,7 @@ comb filtering where they meet.
 
 #### Delay 1
 
-A stereo delay with feedback, after PRA32-U2's Delay FX in its Stereo Delay mode. Each side has a
+A stereo delay with feedback. Each side has a
 delay line and a loop of its own: half its input and its delayed signal at the Feedback gain go
 through a gentle low pass filter into its line, and its output is a crossfade of its input with
 its delayed signal. Time, Feedback and Mix are shared, so the two sides repeat together and keep
@@ -673,7 +672,7 @@ reaching 60 either way. They are summed, so any pitch is reachable. They have no
 by default; Osc 2's, on CC#85 and 76, set the interval or the detune between the oscillators.
 
 Pitch 1 Stretch, on CC#22, widens the keys about note 60, last, by multiplying the pitch
-after the glide and the bend, as PRA32-U2's Stretch Tune does: every interval from note 60 grows by the same share, so the stretch is often given as how
+after the glide and the bend: every interval from note 60 grows by the same share, so the stretch is often given as how
 much an octave widens. At 0.0 (value 4), where it powers up, the keys are as they are; from value 5 the
 widening grows by a semitone's ratio a step, as the envelope's times do: 1.2 cents an octave at
 value 5, 38 at value 64, and a whole octave at value 124, which doubles every interval and turns the
@@ -688,8 +687,7 @@ and the square its steps by PolyBLEP, so at the top of the rate range, 220 Hz, w
 audible tone, the square's aliases are 41 dB down on it, rather than 24 dB without. The square is
 unipolar: 1.0 while the triangle is above zero and 0.0 while it is below, stepping where it
 crosses, so it gates, or trills up from the note on an oscillator's pitch, where the triangle
-swings about zero for a vibrato; its inverted output runs 0.0 and -1.0. LFO 1 Wave (CC#33, LFO
-Wave's in PRA32-U2) crossfades Out in a straight line from the triangle at 0.0 (value 4), where it
+swings about zero for a vibrato; its inverted output runs 0.0 and -1.0. LFO 1 Wave (CC#33) crossfades Out in a straight line from the triangle at 0.0 (value 4), where it
 powers up, to the square at 1.0 (value 124), and is smoothed as the level is, so on the way the
 middle of the swing moves up from zero to 0.5. Out is what the default patch routes, so the LFO
 is a triangle until Wave is turned up.
@@ -728,18 +726,15 @@ the shortest decay's, 10 ms, whatever the decay is, so a long decay still ends a
 powers up on, at value 124. It is a switch, so it is not smoothed.
 
 EG 2 is a second envelope of the same kind, on Note Gate too, for the amp: the default patch puts
-it on Amp 1 Mod 2 In (below). Its Attack, Decay and Sustain are on CC#52, 53 and 54, the amp
-envelope's in PRA32-U2, and power up as an organ's: Attack and Decay at 0.0 (value 4), Sustain at
+it on Amp 1 Mod 2 In (below). Its Attack, Decay and Sustain are on CC#52, 53 and 54, and power up as an organ's: Attack and Decay at 0.0 (value 4), Sustain at
 1.0 (value 124), so it opens at once to full and holds while a key is held. Its Release Switch is
-on EG 1's CC#105 as well, as PRA32-U2's one switch serves both envelopes, and powers up on, so the
+on EG 1's CC#105 as well, one switch for both envelopes, and powers up on, so the
 release runs at its decay's rate, 10 ms at power-up: the note stops short, as an organ's does. Its
 Level has no CC and holds 1.0, as EG 1's does.
 
 Osc 1 takes each of its two modulations, Mod 1 In and Mod 2 In, to the pitch and to the pulse
 width by a depth of its own: Pitch Mod 1 Amt and Pitch Mod 2 Amt, PW Mod 1 Amt and PW Mod 2 Amt,
-all unipolar. Pitch Mod 1 Amt and Pitch Mod 2 Amt are on CC#89 and 13, EG Mod Amt's and LFO Mod
-Amt's in PRA32-U2, and PW Mod 1 Amt and PW Mod 2 Amt on CC#8 and 103, EG Mod Dst's and LFO Mod
-Dst's; Pitch Mod 2 Amt powers up at its top, value 124, and the other three at 0.0. There is no Polarity: each modulation runs the way its source does,
+all unipolar. Pitch Mod 1 Amt and Pitch Mod 2 Amt are on CC#89 and 13, and PW Mod 1 Amt and PW Mod 2 Amt on CC#8 and 103; Pitch Mod 2 Amt powers up at its top, value 124, and the other three at 0.0. There is no Polarity: each modulation runs the way its source does,
 and one the other way up takes an inverted source, such as EG 1 Out Inv or LFO 1 Out Inv. So a
 source goes to the pulse width as well as the pitch, or to either alone, with no rewiring.
 
@@ -823,8 +818,7 @@ the saturation. The saturation sits on the resonance rather than the pass band: 
 passes a loud note nearly clean, while turning the drive up rounds off the resonant peak.
 
 Filter 1 moves the cutoff by each of its two modulations at a depth of its own, Mod 1 Amt and
-Mod 2 Amt, as Osc 1's PW Mod Amts move the pulse width. They are unipolar, on CC#24 and 25,
-Filter EG Amt's and LFO Filter Amt's in PRA32-U2: both power up at 0.0 (value 4). A unit of input is the whole cutoff range, so with Mod 2 Amt at the top the
+Mod 2 Amt, as Osc 1's PW Mod Amts move the pulse width. They are unipolar, on CC#24 and 25: both power up at 0.0 (value 4). A unit of input is the whole cutoff range, so with Mod 2 Amt at the top the
 LFO swings the cutoff five octaves either way. Mod Polarity, on CC#51, multiplies both at once, from
 -1.0 at value 4 through none at value 64 to +1.0 at value 124, where it powers up: below value 64 the
 envelope closes the filter as it rises, and the LFO swings the other way. To turn over only
@@ -844,7 +838,7 @@ folds back as an inharmonic tone: at 48 kHz, from 8 kHz (value 108) to 10 kHz (v
 included. Above that the resonance acts as at Q 256. With the cutoff following the keyboard, as
 in the examples below, it plays as a sine voice.
 
-Amp 1 Gain (CC#15, Amp Gain's in PRA32-U2) is doubled into the gain: silent at value 4, unity at
+Amp 1 Gain (CC#15) is doubled into the gain: silent at value 4, unity at
 value 64, where it powers up, and twice, 6 dB up, at value 124, so a quiet sound can be brought up as
 well as a loud one taken down. The amp holds its output to -1.0 and +1.0, as a mixer holds its
 sum, so the gain cannot take the output past one unit, which the default patch, peaking near
