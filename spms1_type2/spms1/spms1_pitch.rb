@@ -1,5 +1,5 @@
 module Spms1
-  # The note's pitch on its way to the oscillator and the filter. Portamento is a slew limiter of
+  # The note's pitch on its way to the oscillators and the filter. Portamento is a slew limiter of
   # the exponential kind, a lag: the output follows the input along a one-pole
   # curve, as a voltage across an RC network does. Fed with Note Pitch, it is portamento, and the
   # pitch domain being linear in semitones makes the glide an exponential one in pitch, which is

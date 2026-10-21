@@ -24,9 +24,9 @@ module Spms1
     # every sample; the floating point unit runs with flush-to-zero instead, on the device (FPSCR.FZ,
     # set in setup1 in spms1.ino, where the synth runs) and in the simulators (FTZ and DAZ), so the
     # stage reaches 0.0 itself once it falls below the smallest normal float. That leaves this
-    # with no test and no branch: this is expanded 94 times and runs every fourth sample, and a
-    # test that landed the stage on its target took more than the step it saved, 32 us a buffer,
-    # and made the time depend on which way each one went. Away from zero the step rounds to
+    # with no test and no branch: this runs for every smoothed parameter, nearly a hundred, every
+    # fourth sample, and a test that landed the stage on its target would take more than the step
+    # it saves, about 32 us a buffer, and make the time depend on which way each one went. Away from zero the step rounds to
     # nothing long before the stage could come within such a test, so nothing else changes.
     def self.smooth(target, value, blend)
       value + (target - value) * blend

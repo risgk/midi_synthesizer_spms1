@@ -96,14 +96,14 @@ module Spms1
       @level_modulation_depth = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
     end
 
-    # The output is scaled by level, unipolar, [0.0, 1.0], a plain multiplier, so a destination
-    # can take the LFO at less than full scale without a mixer in between. Turning it the other
-    # way up is for Out Inv, or a mixer's Out Inv.
     # Reset Switch: Reset In is taken at 0.5 and above, and ignored below.
     def set_reset_switch(switch)
       @reset_switch = (switch >= 0.5) ? 1.0 : 0.0
     end
 
+    # The output is scaled by level, unipolar, [0.0, 1.0], a plain multiplier, so a destination
+    # can take the LFO at less than full scale without a mixer in between. Turning it the other
+    # way up is for Out Inv, or a mixer's Out Inv.
     def set_level(level)
       @level = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
       @amount = @level
@@ -172,8 +172,7 @@ module Spms1
       # PolyBLAMP: folded is the distance in phase to the top corner, and 0.5 - folded to the
       # bottom one, so the nearer of the two is 0.25 - |folded - 0.25| away. A sample within dt of
       # it is pulled toward the inside of the corner, down at the top and up at the bottom.
-      # Branchless, as the oscillator's selects are meant to be, and unlike them it survives the C
-      # compiler: each select here only picks a value, with nothing on either side for GCC to move
+      # Branchless, as the oscillator's PolyBLEP is: each select here only picks a value, with nothing on either side for GCC to move
       # inside a branch, so the correction is computed every sample and comes out as 0.0 away from
       # a corner. The cost is the same at every phase. The square below is +0.5 while the triangle
       # is above zero, the side of the top corner, so the side is taken from it, by a multiply

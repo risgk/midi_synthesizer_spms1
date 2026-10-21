@@ -9,7 +9,7 @@ SPMS-1 (type-2) Editor ("spms1_editor.html")
     - The output matches the PC build of the same "spms1_main.c" within the rounding of the math library
 - Version: the same as SPMS-1 (type-2) (the title of "../README.md"), shown in the console of the Web browser
 - "spms1_web_synth.js" (in the parent folder, next to "spms1_editor.html"): the built file
-    - The WebAssembly binary (about 230 KB) and the AudioWorkletProcessor are embedded, so that it works
+    - The WebAssembly binary (about 240 KB) and the AudioWorkletProcessor are embedded, so that it works
       both on a Web server (e.g. GitHub Pages) and with a local file ("file://")
     - Without this file, the editor works without SPMS-1 Web (MIDI Out to the devices only)
 
@@ -19,7 +19,7 @@ How to Use
 
 - Open "spms1_editor.html" (a local file, or on a Web server) with Google Chrome or Microsoft Edge (recommended)
 - Select "SPMS-1 Web (Built-in)" in the list "MIDI Out"
-    - The editor sends its whole patch (NRPN and CC values) to SPMS-1 Web, Live patch or not
+    - The editor sends its whole patch (NRPN and CC values) to SPMS-1 Web when it is selected, and every change as it is made
 - Play the soft keyboard of the editor, or a MIDI keyboard selected in "MIDI In"
     - Web browsers start the audio only after a user operation in the page (e.g. a click, a tap, or a key press),
       so click the page once before playing a MIDI keyboard (clicking the soft keyboard also starts the audio)

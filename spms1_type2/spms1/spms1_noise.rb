@@ -2,8 +2,8 @@ module Spms1
   # Noise source, at a smoothed level: audio, or a modulation source. Two noises from one
   # generator: white, flat across the spectrum, and red, filtered from it through a one-pole low
   # pass at a fixed cutoff, falling 6 dB an octave above it. Each has an output of its own, and
-  # Out, which process returns, crossfades from one to the other by Color. The default patch feeds the white to Mixer 2 In 3, and runs the
-  # module ahead of the envelope and the LFO.
+  # Out, which process returns, crossfades from one to the other by Color. The default patch feeds Out, the white at power-up, to Mixer 2
+  # In 4, and runs the module after the oscillators.
   class Noise
     # Blend at the reference rate on the line below, for each of two cascaded stages. The two move
     # together: their product is what fixes the time constant, so changing one without the other

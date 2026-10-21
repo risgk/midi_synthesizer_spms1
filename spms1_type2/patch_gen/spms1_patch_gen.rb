@@ -325,7 +325,7 @@ end
 # "# patch_gen NAME" and "# patch_gen end" lines of spms1_main.rb, so that a module is added by
 # its class and its entries in the YAML, not by hand in the loop. It is plain straight-line Ruby,
 # as it would be written by hand: one local per routing, one call per setter, one `when` per
-# module, so that Spinel compiles it to what it compiled the hand-written loop to.
+# module, so that Spinel compiles it as it would a loop written by hand.
 #
 # A module names its class (`class`), the inputs its `process` takes after the control tick, in
 # order (`process`), the method that takes them where it is not `process` (`method`), and each output it has besides the one `process` returns, by the method that

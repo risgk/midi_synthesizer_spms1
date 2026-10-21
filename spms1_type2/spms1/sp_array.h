@@ -38,9 +38,10 @@ static inline sp_int sp_IntArray_length(sp_IntArray*a){return a->len;}
 static inline sp_bool sp_IntArray_empty(sp_IntArray*a){return a->len==0;}
 /* MCU: the in-range access first, inline, and the rest out of line with the released body
    unchanged, so what an access does is the same and only its cost moves. Inlined as released, every
-   bus read and write in the synth paid for all of its checks in turn (null, negative, length).
-   The inline part does not check for null: a program for the MCU never indexes a nil array, which
-   Ruby would answer with NoMethodError, so the check only cost every access a compare. */
+   read of the run order would pay for all of its checks in turn (null, negative, length).
+   The inline part does not check for null: the sketch never indexes a nil array, which Ruby would
+   answer with NoMethodError, so the check would only cost every access a compare. This is for this
+   sketch only; a program that indexed a nil array would crash rather than raise. */
 static sp_int __attribute__((noinline)) sp_IntArray_get_slow(sp_IntArray*a,sp_int i){if(!a)return SP_INT_NIL;if(i<0)i+=a->len;if(i<0||i>=a->len)return SP_INT_NIL;return a->data[a->start+i];}
 static inline sp_int sp_IntArray_get(sp_IntArray*a,sp_int i){if(__builtin_expect((uintptr_t)i<(uintptr_t)a->len,1))return a->data[a->start+i];return sp_IntArray_get_slow(a,i);}
 /* Issue #769: a very-negative i leaves i negative after the `i += a->len`
@@ -110,7 +111,7 @@ static inline sp_int sp_FloatArray_length(sp_FloatArray*a){return a->len;}
 static inline sp_bool sp_FloatArray_empty(sp_FloatArray*a){return a->len==0;}
 /* MCU: the in-range access first, inline, and the rest out of line with the released body
    unchanged, so what an access does is the same and only its cost moves. Inlined as released, every
-   bus read and write in the synth paid for all of its checks in turn (null, negative, length).
+   bus read in the synth would pay for all of its checks in turn (null, negative, length).
    The inline part does not check for null, as sp_IntArray_get does not. */
 static sp_float __attribute__((noinline)) sp_FloatArray_get_slow(sp_FloatArray*a,sp_int i){if(!a)return sp_float_nil();if(i<0)i+=a->len;if(i<0||i>=a->len)return sp_float_nil();return a->data[i];}
 static inline sp_float sp_FloatArray_get(sp_FloatArray*a,sp_int i){if(__builtin_expect((uintptr_t)i<(uintptr_t)a->len,1))return a->data[i];return sp_FloatArray_get_slow(a,i);}
@@ -121,7 +122,7 @@ static inline sp_float sp_FloatArray_last_opt(sp_FloatArray*a){return (!a||a->le
 /* Issue #769: no-op for negative index after adjustment. */
 /* MCU: the in-range access first, inline, and the rest out of line with the released body
    unchanged, so what an access does is the same and only its cost moves. Inlined as released, every
-   bus read and write in the synth paid for all of its checks in turn (null, frozen, negative, capacity, length).
+   bus write in the synth would pay for all of its checks in turn (null, frozen, negative, capacity, length).
    The inline part does not check for null, as sp_IntArray_get does not; it keeps the frozen check. */
 static void __attribute__((noinline)) sp_FloatArray_set_slow(sp_FloatArray*a,sp_int i,sp_float v){if(!a)return;if(a->frozen){sp_raise_frozen_array_at(a, SP_BUILTIN_FLT_ARRAY);return;}sp_int orig=i;if(i<0)i+=a->len;if(i<0)sp_raise_cls("IndexError",sp_sprintf("index %lld too small for array; minimum: %lld",(long long)orig,(long long)-a->len));while(i>=a->cap){a->cap=((((((a->cap*2))))))+1;a->data=(sp_float*)realloc(a->data,sizeof(sp_float)*a->cap);}while(i>=a->len){a->data[a->len]=sp_float_nil();a->len++;}a->data[i]=v;}  /* the gap is nil, not 0.0 (#3836) */
 static inline void sp_FloatArray_set(sp_FloatArray*a,sp_int i,sp_float v){if(__builtin_expect(!a->frozen&&(uintptr_t)i<(uintptr_t)a->len,1)){a->data[i]=v;return;}sp_FloatArray_set_slow(a,i,v);}

@@ -203,7 +203,7 @@
     .editor-column .panel {
       padding: 12px 16px;
     }
-    /* The Amp column runs the full height of its row, so the Init button under it sits at the
+    /* The last column, Filter 1 to Delay 1, runs the full height of its row, so the Init button under it sits at the
        bottom, just above the keyboard. */
     .editor-column:last-child {
       align-self: stretch;
@@ -971,7 +971,7 @@
       color: var(--wire-param);
       font-style: italic;
     }
-    /* A favourite on the Controls tab: a light gold behind its row. */
+    /* A favourite on the Patch tab: a light gold behind its row. */
     .row.ctrl.fav {
       background: var(--favorite-bg);
     }
@@ -1325,7 +1325,7 @@
 <script>
   'use strict';
 
-  // ---- Patch model: mirrors the NRPN table in spms1_main.rb --------------------------------
+  // ---- Patch model: mirrors the NRPN table of spms1_patch.yaml -----------------------------
 
   const MODULES_SIZE = 32;
   // CC 6 and 38 carry NRPN data and 98-101 select a parameter, so a control mapped to one of
@@ -1573,7 +1573,7 @@
     NOISE_1:   { x: 1420, y: 580 },
     MIXER_2:   { x: 1780, y: 40 },
     FILTER_1:  { x: 2140, y: 40 },
-    AMP_1:     { x: 2140, y: 502 },
+    AMP_1:     { x: 2140, y: 528 },
     CHORUS_1:  { x: 2500, y: 40 },
     DELAY_1:   { x: 2500, y: 320 },
     OUT:       { x: 2500, y: 626 },
@@ -2869,7 +2869,7 @@
   }
 
   // Follows NRPN edits arriving at MIDI In by the rules of handle_midi_nrpn_cc in
-  // spms1.ino, so the patch shown stays the one the synth was passed.
+  // spms1_midi_state.h, so the patch shown stays the one the synth was passed.
   const nrpnSelect = { msb: 0, lsb: 0, selected: false };
 
   function receiveNRPN(cc, value) {
@@ -3045,7 +3045,7 @@
     { col: 0, title: 'Pitch 1', module: 'PITCH_1' },
     { col: 0, title: 'EG 1', module: 'EG_1' },
     { col: 0, title: 'EG 2', module: 'EG_2' },
-    { col: 0, title: 'LFO 1', module: 'LFO_1' },
+    { col: 1, title: 'LFO 1', module: 'LFO_1' },
     { col: 1, title: 'Mixer 1', module: 'MIXER_1' },
     { col: 1, title: 'Osc 1', module: 'OSC_1' },
     { col: 2, title: 'Osc 2', module: 'OSC_2' },
@@ -3129,7 +3129,7 @@
     cols.forEach(c => { c.className = 'editor-column'; });
     for (const p of CONTROL_PANELS) {
       const items = panelItems(p).filter(c => showNoCC || state.cc[c.key]);
-      // A mixer has no CC by default, so its panel appears only once a patch gives it one, or
+      // Mixer 1 has no CC by default, so its panel appears only once a patch gives it one, or
       // with the parameters that have none shown.
       if (!items.length) continue;
       const panel = document.createElement('div');
@@ -3635,9 +3635,9 @@
 
   const TAB_KEY = 'spms1-type2-editor-tab';
 
-  // From the width at which the controls stand in four columns, the MIDI settings go up into the
-  // header, between the title and the tabs, so they take no line of their own; below it they keep
-  // their own line under the header.
+  // From 1641 pixels, where the page around the panels is packed tighter (see the CSS), the MIDI
+  // settings go up into the header, between the title and the tabs, so they take no line of their
+  // own; below it they keep their own line under the header.
   const WIDE_HEADER = window.matchMedia('(min-width: 1641px)');
   function placeMIDIPanel() {
     const header = document.querySelector('header');
@@ -3667,7 +3667,7 @@
   // theirs, so the keyboard moves down the page rather than squeezing the canvas. The zoom is the
   // outer width of the window over the inner: the outer is in screen pixels, which zoom leaves
   // alone, where the browser says so (Chrome, Edge, Safari); where it does not, the ratio stays
-  // near 1 and the area fits the window as before.
+  // near 1 and the area fits the window as it does at 100%.
   function fitTabArea() {
     const controls = document.getElementById('tab-controls');
     const app = document.getElementById('tab-patch');

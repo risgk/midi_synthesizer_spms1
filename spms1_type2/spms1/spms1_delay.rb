@@ -135,7 +135,7 @@ module Spms1
         @delay_step = distance * 0.25
       end
 
-      # Held to the bus's one unit on the way in, as the amp holds its modulation input: the
+      # Held to the bus's one unit on the way in, as the amp holds its modulation: the
       # bound each loop keeps is only as good as what enters it.
       input_l = (audio_input_l < -1.0) ? -1.0 : ((audio_input_l > 1.0) ? 1.0 : audio_input_l)
       input_r = (audio_input_r < -1.0) ? -1.0 : ((audio_input_r > 1.0) ? 1.0 : audio_input_r)

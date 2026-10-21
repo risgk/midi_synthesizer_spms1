@@ -1,5 +1,5 @@
 module Spms1
-  # ADS envelope updated at 4-sample control-rate grid, its release either the decay's or the
+  # ADS envelope updated on a 4-sample control-rate grid, its release either the decay's or the
   # shortest decay's (the release switch). Out Inv puts out the envelope negated as well.
   class EnvGen
     STATE_ATTACK = 0

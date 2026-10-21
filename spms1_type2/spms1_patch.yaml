@@ -27,7 +27,8 @@
 
 # Module ids (NRPN category 0 values). 0 is MODULE_NONE, which ends the run order. A module with
 # `stereo` writes a left and a right output. `class` is the Ruby class of the module, and `process`
-# the inputs its process method takes after the control tick, in order, by their keys below; the
+# the inputs its process method takes after the control tick, in order, by their keys below;
+# `method`, where given, is the method the loop calls in place of process, with the same inputs. The
 # loop is written from these (see patch_gen/spms1_patch_gen.rb).
 modules:
   - { key: PITCH_1,    id: 1, label: Pitch 1, class: Pitch, process: [PITCH, BEND] }
@@ -46,21 +47,21 @@ modules:
 
 # The default patch. Every module is in the run order, so a patch only ever has to route, never to
 # switch something on first. Pitch 1 runs first, taking Note Pitch and handing it to the
-# oscillator: its Glide powers up at 0.0, where it passes its input through as it
+# oscillators: its Glide powers up at 0.0, where it passes its input through as it
 # is, so the patch plays as one without it until CC 5 turns the portamento up. Pitch Bend goes to
 # its Bend In, added past the glide, an octave either way at Bend Amt's (CC 57) power-up of CC 28, so
-# the bend reaches the oscillator and the filter's keyboard tracking at once. Running first lets
+# the bend reaches the oscillators and the filter's keyboard tracking at once. Running first lets
 # every other module read it in the same sample, the modulation sources as well as the
 # oscillators and the filter, as a key-tracked envelope or LFO would; what it takes from them
 # instead comes a sample late. Mixer 1 runs after the modulation sources and ahead of the oscillators, so
-# it sees this sample's LFO and envelope and can feed the oscillators, the filter and the amp
+# it sees this sample's LFO and envelopes and can feed the oscillators, the filter and the amp
 # without a sample's delay. The default patch leaves it unused: the LFO goes straight to the
 # oscillator, on Mod 2 In: Pitch Mod 2 Amt (CC 13) powers up at its top, which with Osc 1 Pitch
 # Mod Range at 0.2 makes the LFO at full level swing the pitch an octave either way. The LFO
 # itself powers up at Level 0.0, so the swing is the mod wheel's, from none to an octave. PW Mod 2 Amt, on CC 103,
 # takes the LFO to the pulse width and powers up at 0.0. Osc 1 Pitch In takes the note from
-# Pitch 1 whole, in tune. Osc 1 Mod 1 In takes the envelope, for a pitch envelope, but Pitch Mod 1
-# Amt (CC 89) and PW Mod 1 Amt (CC 8) power up at 0.0 too. The envelope and the LFO also reach
+# Pitch 1 whole, in tune. Osc 1 Mod 1 In takes EG 1, for a pitch envelope, but Pitch Mod 1
+# Amt (CC 89) and PW Mod 1 Amt (CC 8) power up at 0.0 too. EG 1 and the LFO also reach
 # Filter 1 Mod 1 In and Mod 2 In, but Filter 1 Mod 1 Amt and Mod 2 Amt power up at 0.0, so the
 # cutoff stays where Cutoff (CC 74), at 0.9, puts it until CC 24 or 25 turns one up.
 # Filter 1 Pitch In takes Pitch 1's pitch too, for keyboard tracking, but Filter 1 Pitch Amt
@@ -91,7 +92,7 @@ modules:
 #
 # The run order of the default patch, the order of the module ids too. Pitch 1 runs first, so that
 # everything after it reads the note in the same sample, and the envelopes ahead of the LFO, so that
-# the LFO's Mod Ins can read it in the same sample, as for a vibrato that fades in.
+# the LFO's Mod Ins can read them in the same sample, as for a vibrato that fades in.
 default_order: [PITCH_1, EG_1, EG_2, LFO_1, MIXER_1, OSC_1, OSC_2, NOISE_1, MIXER_2, FILTER_1, AMP_1, CHORUS_1, DELAY_1]
 
 # Slots of the signal bus (the values of NRPN categories 1 and 2), each one of:
@@ -126,7 +127,7 @@ signals:
   # The module outputs, module by module, each module's main output first.
   - { key: PITCH_1_OUTPUT, id: 9, module: PITCH_1, output: Out, label: Pitch 1 Output, bipolar: true }
   - { key: EG_1_OUTPUT,        id: 10, module: EG_1,     output: Out,    label: EG 1 Output }
-  # Out Inv, of the envelope, the LFO and the mixers, is Out negated.
+  # Out Inv, of the envelopes, the LFO and the mixers, is Out negated.
   - { key: EG_1_OUTPUT_INV,    id: 11, module: EG_1,     output: Out Inv, label: EG 1 Output Inv, get: output_inverted }
   - { key: EG_2_OUTPUT,        id: 12, module: EG_2,     output: Out,    label: EG 2 Output }
   - { key: EG_2_OUTPUT_INV,    id: 13, module: EG_2,     output: Out Inv, label: EG 2 Output Inv, get: output_inverted }
@@ -236,12 +237,18 @@ controls:
   - { entry: 6, module: EG_1,      key: SUSTAIN,      label: Sustain,      cc: 30,  value: 124, hint: Level, set: set_sustain }
   - { entry: 7, module: EG_1,      key: RELEASE_SW,   label: Release Switch, cc: 105, value: 124, hint: Off/On, set: set_release_switch }
   - { entry: 8, module: EG_1,      key: LEVEL,        label: Level,        cc: 0,   value: 124, set: set_level }
+  # EG 2, for the amp, an organ's envelope at power-up: Attack, Decay and Sustain on CC 52, 53 and
+  # 54, the amp envelope's in PRA32-U2, at CC 4, 4 and 124, so it opens at once and holds while a key
+  # is held. Release Switch is on EG 1's CC 105, as PRA32-U2's one switch serves both envelopes, and
+  # powers up on, so the release is the decay's, 10 ms. Level has no CC and holds 1.0.
   - { entry: 9, module: EG_2,      key: ATTACK,       label: Attack,       cc: 52,  value: 4, hint: Time, set: set_attack }
   - { entry: 10, module: EG_2,      key: DECAY,        label: Decay,        cc: 53,  value: 4, hint: Time, set: set_decay }
   - { entry: 11, module: EG_2,      key: SUSTAIN,      label: Sustain,      cc: 54,  value: 124, hint: Level, set: set_sustain }
   - { entry: 12, module: EG_2,      key: RELEASE_SW,   label: Release Switch, cc: 105, value: 124, hint: Off/On, set: set_release_switch }
   - { entry: 13, module: EG_2,      key: LEVEL,        label: Level,        cc: 0,   value: 124, set: set_level }
-  # LFO 1 in the editor: the waveform, the rate and the level, then the modulation of each. Wave
+  # LFO 1 in the editor: the waveform, the rate and the level, then the modulation of each, then
+  # Reset Switch, on CC 111, which powers up off, at CC 4, so Reset In, Note Gate, is ignored until it
+  # is turned on. Wave
   # crossfades Out from the triangle (0.0) to the square (1.0), on CC 33, LFO Wave's in PRA32-U2,
   # and powers up at CC 4, 0.0, the triangle. Each modulation's Amt, listed in the order of what
   # it moves, has no CC and holds 1.0, a depth of 1.0. Rate Mod In is left unrouted, so
@@ -263,7 +270,7 @@ controls:
   - { entry: 24, module: MIXER_1,   key: OUT_LEVEL,  label: Out Level,  cc: 0,   value: 64, set: set_out_level }
   # Osc 1 in the editor: the waveform and the pulse width, the pitch, how far each modulation
   # moves it and what the top of that is worth, then how far each modulation moves the pulse width. Pitch Coarse
-  # and Fine have no CC and stay at 0.0. Mod 1 In takes the envelope and Mod 2 In the LFO, and
+  # and Fine have no CC and stay at 0.0. Mod 1 In takes EG 1 and Mod 2 In the LFO, and
   # every depth is unipolar: a modulation runs the way its source does, and one the other way up
   # takes an inverted source, such as EG 1 Out Inv. Pitch Mod 1 Amt and Pitch Mod 2 Amt are on
   # CC 89 and 13, EG Mod Amt's and LFO Mod Amt's in PRA32-U2, and PW Mod 1 Amt and PW Mod 2 Amt
@@ -286,7 +293,8 @@ controls:
   # is turned up. Wave is its own too, on CC 104 next to Osc 1's on CC 102, sawtooth at power-up as
   # Osc 1's is. Everything else follows Osc 1 by default: each Mod Amt and PW are on Osc 1's CCs,
   # so one CC moves both oscillators, and Pitch Mod Range holds the
-  # value Osc 1's does. Osc 2 is heard through Mixer 2 Level 2 (CC 20), which powers up at 0.7, as
+  # value Osc 1's does. Sync Switch is Osc 2's alone, on CC 112, and powers up off, at CC 4, so Sync
+  # In, Osc 1 Out Saw, is ignored until it is turned on. Osc 2 is heard through Mixer 2 Level 2 (CC 20), which powers up at 0.7, as
   # Level 1 does for Osc 1.
   - { entry: 34, module: OSC_2,     key: WAVE,     label: Wave,         cc: 104, value: 4, hint: Saw to Sq, set: set_waveform }
   - { entry: 35, module: OSC_2,     key: PW,           label: PW,  cc: 114, value: 64, bipolar: true, hint: 50% to 0%, set: set_pulse_width }
@@ -338,8 +346,8 @@ controls:
   - { entry: 57, module: FILTER_1,  key: MOD_POLARITY, label: Mod Polarity, cc: 51,  value: 124, bipolar: true, hint: − to +, set: set_modulation_polarity }
   # Amp 1: Gain, on CC 15, Amp Gain's in PRA32-U2, is doubled, so it powers up at CC 64, a gain of
   # 1.0, and CC 124 brings the sound up by 6 dB; the amp holds its output to one unit. Mod 1/2
-  # Mix, on CC 36, crossfades what scales the gain from Mod 1 In, the note's gate, at 0.0 (CC 4) to Mod 2
-  # In, the envelope, at 1.0 (CC 124), where it powers up, so the envelope shapes the note.
+  # Mix, on CC 36, crossfades what scales the gain from Mod 1 In, EG 1, at 0.0 (CC 4), where it
+  # powers up, to Mod 2 In, EG 2, the organ envelope, at 1.0 (CC 124).
   - { entry: 58, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 64, set: set_gain }
   - { entry: 59, module: AMP_1,     key: MOD_1_2_MIX,  label: Mod 1/2 Mix,  cc: 36,  value: 4, hint_inputs: [MOD_1, MOD_2], set: set_modulation_mix }
   - { entry: 60, module: CHORUS_1,  key: MIX,          label: Mix,          cc: 93,  value: 64, set: set_mix }

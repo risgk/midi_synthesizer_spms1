@@ -18,7 +18,7 @@
 /* Integer + - * as plain C, as `spinel --int-overflow=wrap` builds them, rather than with a check
    that raises on overflow. The synth's integers are indices and counters that stay far inside 32
    bits, and a raise on the MCU stops the sound as surely as a wrong index would, so the checks
-   buy nothing there, and in the per-sample code they were 8% of all instructions. */
+   buy nothing there, and in the per-sample code they would be about 8% of all instructions. */
 #define SP_INT_OVERFLOW_MODE_WRAP 1
 #pragma GCC optimize ("O3")
 #if defined(__arm__)

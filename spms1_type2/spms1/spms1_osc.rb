@@ -218,7 +218,7 @@ module Spms1
     # period of what it is synced to, where a restart rounded to a sample would make the period
     # jitter by a sample. A sawtooth's PolyBLEP rounds its step off evenly about where it falls, so
     # the line crosses close to it. The step the restart makes in the wave is left as it is, not
-    # smoothed. Sync In is taken only with Sync Switch on. The sub is left out, being Osc 1's.
+    # smoothed. Sync In is taken only with Sync Switch on. The sub is left out: only an oscillator run by process, Osc 1 in the patch, has Out Sub.
     # Without a restart the output is the same as process's to the bit.
     def process_synced(control_tick, pitch_input = 0.0, modulation_1_input = 0.0, modulation_2_input = 0.0, sync_input = 0.0)
       update_controls if control_tick
@@ -265,8 +265,8 @@ module Spms1
       output * 0.5
     end
 
-    # The sawtooth, the pulse and the sub of the last sample process took, read after it as
-    # Chorus's outputs are.
+    # The sawtooth, the pulse and the sub of the last sample process or process_synced took (the sub
+    # from process alone), read after it as Chorus's outputs are.
     def output_saw
       @output_saw
     end

@@ -36,9 +36,9 @@ AUDIO_BUFFER_WORDS = 64
 # MODULE_NONE. A module listed more than once runs once, at the slot written last.
 MODULES_SIZE = 32
 
-# The module ids (MODULE_*), in spms1_patch.rb: one of every module type that makes a sound, two
-# mixers, one chorus, one delay, one pitch module, one noise source and two oscillators, numbered
-# in the default run order (see spms1_patch.yaml). Instances carry their number in the id rather
+# The module ids (MODULE_*), in spms1_patch.rb: thirteen in all, two envelopes, two mixers and two
+# oscillators, and one each of the pitch module, the LFO, the noise source, the filter, the amp, the
+# chorus and the delay, numbered in the default run order (see spms1_patch.yaml). Instances carry their number in the id rather
 # than being indexed by one, so the second oscillator is MODULE_OSC_2.
 
 # The slots of the `signals` bus (SIGNAL_*), in spms1_patch.rb: the constants, the note inputs,
@@ -112,8 +112,8 @@ C.set_audio_buffer_words(AUDIO_BUFFER_WORDS)
 C.start_audio
 
 # while rather than loop: Spinel builds a loop block with a setjmp, for the StopIteration that ends
-# one, which makes every local written inside it volatile, so that the per-sample code loaded and
-# stored each of them, slot and i included, at every use: 6% of all instructions.
+# one, which makes every local written inside it volatile, so that the per-sample code would load
+# and store each of them, slot and i included, at every use: about 6% of all instructions.
 while true
   C.start_debug_measure
 
@@ -496,27 +496,26 @@ while true
   while i < AUDIO_BUFFER_WORDS
     # The control tick, every module's cue for its control-rate update, once every 4 samples
     # (CONTROL_RATE_DIVISOR in each module). Taken here once a sample rather than counted by each
-    # module: a counter of each module's own cost an add, a mask and a load and store of a 64-bit
-    # instance variable a sample, about 6% of the buffer at twelve modules (1247us to 1174us,
-    # emulated). The buffer is a multiple of 4 samples, so the tick keeps its phase across buffers,
+    # module: a counter in each module would cost an add, a mask and a load and store of an
+    # instance variable a sample, about 6% of the buffer by the emulated estimate. The buffer is a multiple of 4 samples, so the tick keeps its phase across buffers,
     # and every module ticks on the same samples, whenever it joined the run order.
     control_tick = (i & 3) == 0
     slot = 0
     while slot < active_count
       module_id = active_modules[slot]
 
-      # Spinel never emits a jump table however the Ruby is written, so a case costs one compare
-      # per id up to the one that matches: 78 a sample at twelve modules. Splitting the chain on a
-      # kind of module pays only once that kind has several instances. Where a module sits in the
-      # chain moves the cost between modules but not the total, which is what the measure takes.
+      # Spinel emits the case as a C switch over the literal ids, which GCC compiles to a jump
+      # table, so the dispatch costs the same whichever module it lands on and wherever that sits
+      # in the run order.
       #
       # The ids are literals, each with its constant's name after it, and so are the bus slots the
       # outputs go to; patch_gen writes the whole dispatch from spms1_patch.yaml, a `when` for each
-      # module calling its `process` with the inputs the YAML names. Spinel emits an Integer constant as a runtime global, so `when MODULE_LFO_1`
-      # loaded its address and then its value before every compare, and `signals[SIGNAL_...]`
-      # before every write; a literal is an immediate. The ids took 10.6% of the instructions out
-      # of a buffer of the default patch (100.5k to 89.8k, emulated Cortex-M33), and the slots
-      # with active_count above another 4.4% (to 85.8k).
+      # module calling its `process`, or the `method` the YAML names in its place, with the inputs
+      # the YAML names. Spinel emits an Integer constant as a runtime global, so `when MODULE_LFO_1`
+      # would load its address and then its value, and `signals[SIGNAL_...]` would too before every
+      # write; a literal is an immediate. Literal ids save about a tenth of the instructions of a
+      # buffer of the default patch, and literal slots with active_count above about another 4%
+      # (emulated Cortex-M33).
       case module_id
       # patch_gen dispatch
       when 1 # MODULE_PITCH_1
