@@ -362,7 +362,7 @@ controls:
   # Mod 2 Amt, on CC 24 and 25, are how far the
   # envelope on Mod 1 In and the LFO on Mod 2 In move the cutoff, as Osc 1's PW Mod Amts are for
   # the pulse width. Both power up at CC 4, 0.0, so neither moves the cutoff until it is turned
-  # up. Cutoff powers up at CC 112, 0.9. Mod Polarity, on CC 51, sets the sign and the depth of
+  # up. Cutoff powers up at CC 112, 0.9. Mod Polarity, on CC 117, sets the sign and the depth of
   # both modulations at once, from -1.0 at CC 4 through none at CC 64 to +1.0 at CC 124; it
   # powers up at CC 124, so the two move the cutoff as their Amts say, and turned below CC 64 it
   # makes the envelope close the filter. Mode crossfades Out from the low pass (0.0) through a
@@ -374,7 +374,7 @@ controls:
   - { entry: 61, module: FILTER_1,  key: PITCH_AMT, label: Pitch Amt, cc: 9, value: 4, hint_inputs: [PITCH], set: set_pitch_amount }
   - { entry: 62, module: FILTER_1,  key: MOD_1_AMT,    label: Mod 1 Amt,    cc: 24,  value: 4, hint_inputs: [MOD_1], set: set_modulation_1_amount }
   - { entry: 63, module: FILTER_1,  key: MOD_2_AMT,    label: Mod 2 Amt,    cc: 25,  value: 4, hint_inputs: [MOD_2], set: set_modulation_2_amount }
-  - { entry: 64, module: FILTER_1,  key: MOD_POLARITY, label: Mod Polarity, cc: 51,  value: 124, bipolar: true, hint: − to +, set: set_modulation_polarity }
+  - { entry: 64, module: FILTER_1,  key: MOD_POLARITY, label: Mod Polarity, cc: 117, value: 124, bipolar: true, hint: − to +, set: set_modulation_polarity }
   # Amp 1: Gain, on CC 15, is doubled, so it powers up at CC 64, a gain of
   # 1.0, and CC 124 brings the sound up by 6 dB; the amp holds its output to one unit. Mod 1/2
   # Mix, on CC 36, crossfades what scales the gain from Mod 1 In, EG 1, at 0.0 (CC 4), where it

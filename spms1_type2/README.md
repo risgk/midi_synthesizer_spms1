@@ -851,7 +851,7 @@ passes a loud note nearly clean, while turning the drive up rounds off the reson
 
 Filter 1 moves the cutoff by each of its two modulations at a depth of its own, Mod 1 Amt and
 Mod 2 Amt, as Osc 1's PW Mod Amts move the pulse width. They are unipolar, on CC#24 and 25: both power up at 0.0 (value 4). A unit of input is the whole cutoff range, so with Mod 2 Amt at the top the
-LFO swings the cutoff five octaves either way. Mod Polarity, on CC#51, multiplies both at once, from
+LFO swings the cutoff five octaves either way. Mod Polarity, on CC#117, multiplies both at once, from
 -1.0 at value 4 through none at value 64 to +1.0 at value 124, where it powers up: below value 64 the
 envelope closes the filter as it rises, and the LFO swings the other way. To turn over only
 one of the two, take an inverted source instead, such as EG 1 Out Inv on Mod 1 In.
