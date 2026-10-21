@@ -260,7 +260,7 @@ Mixer 2 sums the audio ahead of the filter: Osc 1 on In 1, Osc 2 on In 2, Osc 1'
 Noise 1's Out on In 4, each at its own level: Level 1 (CC#19) powers up at 1.0, so the default
 patch plays Osc 1 at full level, and Level 2 (CC#20), Level 3 (CC#21) and Level 4 (CC#23) at 0.0,
 so Osc 2, the sub and the noise are silent until they are turned up. Osc 2 plays the note from Pitch 1 as Osc
-1 does, tuned against it by its own Pitch (CC#85) and Pitch Fine (CC#76), 12 cents sharp at
+1 does, tuned against it by its own Pitch (CC#85) and Pitch Fine (CC#76), 11 cents sharp at
 power-up for a slow beat once it is turned up. Its Wave is its own as well, on CC#104 beside Osc 1's on CC#102. It
 follows Osc 1 in everything else: its Mod Amts and its PW are on Osc 1's CCs, so one CC moves
 both.
@@ -961,8 +961,8 @@ sweep while Osc 1 holds the note.
 - The LFO reaches the filter's Mod 2 input by default too, so CC#25 sweeps the cutoff with it, on
   top of the envelope on Mod 1
 - A second oscillator is wired by default too, on Mixer 2's second input, and CC#20 brings it in:
-  at value 124 it plays as loud as Osc 1, beating slowly against it from the 12 cents of CC#76's
-  power-up value, and CC#19 and CC#20 both at value 88, 0.7, keep the two about as loud as one. CC#85 and 76 tune it: CC#85 = 124 an octave up, CC#85 = 74 a fifth, CC#85 = 4 and CC#76 = 64 in unison
+  at value 124 it plays as loud as Osc 1, beating slowly against it from the 11 cents of CC#85's
+  and CC#76's power-up values, and CC#19 and CC#20 both at value 88, 0.7, keep the two about as loud as one. CC#85 and 76 tune it: CC#85 = 124 an octave up, CC#85 = 74 a fifth, CC#85 = 4 and CC#76 = 64 in unison
 - Noise is wired by default too, its Out on Mixer 2's fourth input beside the oscillators, so CC#23
   brings it in under the note, at a level of 0.1 at value 16. CC#19 = 4 takes the
   oscillator out, leaving the noise alone, through the filter. CC#115 (Color) turns it from

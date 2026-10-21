@@ -73,7 +73,7 @@ modules:
 # Osc 1's sub on In 3 and the noise on In 4. Its Level 1, on CC 19, powers up at 1.0, so Osc 1
 # sounds at full level, and Level 2 and 4, on CC 20 and 23, at 0.0, so Osc 2 and the noise are
 # silent until CC 20 and 23. Osc 2 plays the note from Pitch 1, as Osc 1 does, tuned by its own
-# Pitch and Pitch Fine (CC 85 and 76), 12 cents sharp at power-up, and has a Wave of its own on CC
+# Pitch and Pitch Fine (CC 85 and 76), 11 cents sharp at power-up, and has a Wave of its own on CC
 # 104 (Osc 1's on CC 102); it follows Osc 1 in everything else: each of its Mod Amts and its PW
 # are on Osc 1's CCs, so one CC moves both. Osc 2 Sync In takes Osc 1 Out Saw, for hard sync, but
 # Osc 2 Sync Sw, on CC 112, powers up off, so it runs free until CC 112; LFO 1 Reset In takes
@@ -324,8 +324,8 @@ controls:
   - { entry: 38, module: OSC_1,     key: PW_MOD_1_AMT, label: PW Mod 1 Amt,  cc: 8,   value: 4, hint_inputs: [MOD_1], set: set_pw_modulation_1_amount }
   - { entry: 39, module: OSC_1,     key: PW_MOD_2_AMT, label: PW Mod 2 Amt,  cc: 103, value: 4, hint_inputs: [MOD_2], set: set_pw_modulation_2_amount }
   # Osc 2: Pitch and Pitch Fine are its own, on CC 85 and 76, to tune it against Osc 1, up to an
-  # octave up, and to sweep it for a hard sync: Pitch powers up at CC 4, in unison, and Fine at
-  # CC 76, 12 cents sharp, for a slow beat once Osc 2 is turned up. Pitch Coarse has no CC and
+  # octave up, and to sweep it for a hard sync: Pitch powers up at CC 5, 10 cents sharp, and Fine
+  # at CC 65, a cent more, for a slow beat once Osc 2 is turned up. Pitch Coarse has no CC and
   # stays at 0.0, as Osc 1's does. Wave is its own too, on CC 104 next to Osc 1's on CC 102, sawtooth at power-up as
   # Osc 1's is. Everything else follows Osc 1 by default: each Mod Amt and PW are on Osc 1's CCs,
   # so one CC moves both oscillators, and Pitch Mod Range holds the
@@ -335,8 +335,8 @@ controls:
   - { entry: 40, module: OSC_2,     key: WAVE,     label: Wave,         cc: 104, value: 4, hint: Saw to Sq, set: set_waveform }
   - { entry: 41, module: OSC_2,     key: PW,           label: PW,  cc: 114, value: 64, bipolar: true, hint: 50% to 0%, set: set_pulse_width }
   - { entry: 42, module: OSC_2,     key: PITCH_COARSE,  label: Pitch Coarse,  cc: 0,   value: 64, bipolar: true, hint: ±5 Oct, set: set_pitch_coarse }
-  - { entry: 43, module: OSC_2,     key: PITCH_SHIFT,   label: Pitch,         cc: 85,  value: 4, hint: 0 to +1 Oct, set: set_pitch }
-  - { entry: 44, module: OSC_2,     key: PITCH_FINE,    label: Pitch Fine,    cc: 76,  value: 76, bipolar: true, hint: ±60 Cent, set: set_pitch_fine }
+  - { entry: 43, module: OSC_2,     key: PITCH_SHIFT,   label: Pitch,         cc: 85,  value: 5, hint: 0 to +1 Oct, set: set_pitch }
+  - { entry: 44, module: OSC_2,     key: PITCH_FINE,    label: Pitch Fine,    cc: 76,  value: 65, bipolar: true, hint: ±60 Cent, set: set_pitch_fine }
   - { entry: 45, module: OSC_2,     key: PITCH_MOD_1_AMT, label: Pitch Mod 1 Amt, cc: 89, value: 4, hint_inputs: [MOD_1], set: set_pitch_modulation_1_amount }
   - { entry: 46, module: OSC_2,     key: PITCH_MOD_2_AMT, label: Pitch Mod 2 Amt, cc: 13, value: 124, hint_inputs: [MOD_2], set: set_pitch_modulation_2_amount }
   - { entry: 47, module: OSC_2,     key: PITCH_MOD_1_SW, label: Pitch Mod 1 Sw, cc: 0, value: 124, hint: Off/On, set: set_pitch_modulation_1_switch }
