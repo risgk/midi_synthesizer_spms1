@@ -265,7 +265,7 @@ controls:
   # passing the envelope as it is.
   - { entry: 7, module: EG_1,      key: ATTACK,       label: Attack,       cc: 73,  value: 4, hint: Time, favorite: true, set: set_attack }
   - { entry: 8, module: EG_1,      key: DECAY,        label: Decay,        cc: 75,  value: 94,  hint: Time, favorite: true, set: set_decay }
-  - { entry: 9, module: EG_1,      key: SUSTAIN,      label: Sustain,      cc: 30,  value: 4,   hint: Level, set: set_sustain }
+  - { entry: 9, module: EG_1,      key: SUSTAIN,      label: Sustain,      cc: 30,  value: 4,   hint: Level, favorite: true, set: set_sustain }
   - { entry: 10, module: EG_1,      key: RELEASE_SW,   label: Release Sw, cc: 105, value: 124, hint: Off/On, set: set_release_switch }
   - { entry: 11, module: EG_1,      key: LEVEL,        label: Level,        cc: 0,   value: 124, set: set_level }
   # EG 2, for the amp, an organ's envelope at power-up: Attack, Decay and Sustain on CC 52, 53 and
@@ -313,7 +313,7 @@ controls:
   # Sw have no CC and hold on, so each Pitch Mod Amt alone sets its depth. Wave is on
   # CC 102 and powers up at the saw. PW is bipolar and powers up at CC 64, 0.0, a pulse of 50%.
   - { entry: 28, module: OSC_1,     key: WAVE,     label: Wave,         cc: 102, value: 4, hint: Saw to Sq, favorite: true, set: set_waveform }
-  - { entry: 29, module: OSC_1,     key: PW,           label: PW,  cc: 114, value: 64, bipolar: true, hint: 50% to 0%, favorite: true, set: set_pulse_width }
+  - { entry: 29, module: OSC_1,     key: PW,           label: PW,  cc: 114, value: 64, bipolar: true, hint: 50% to 0%, set: set_pulse_width }
   - { entry: 30, module: OSC_1,     key: PITCH_COARSE,  label: Pitch Coarse,  cc: 0,   value: 64, bipolar: true, hint: ±5 Oct, set: set_pitch_coarse }
   - { entry: 31, module: OSC_1,     key: PITCH_SHIFT,   label: Pitch,         cc: 0,   value: 4, hint: 0 to +1 Oct, set: set_pitch }
   - { entry: 32, module: OSC_1,     key: PITCH_FINE,    label: Pitch Fine,    cc: 0,   value: 64, bipolar: true, hint: ±60 Cent, set: set_pitch_fine }
@@ -333,10 +333,10 @@ controls:
   # value Osc 1's does. Sync Sw is Osc 2's alone, on CC 112, and powers up off, at CC 4, so Sync
   # In, Osc 1 Out Saw, is ignored until it is turned on. Osc 2 is heard through Mixer 2 Level 2 (CC 20), which powers up at 0.0,
   # so Osc 2 is silent until it is turned up.
-  - { entry: 40, module: OSC_2,     key: WAVE,     label: Wave,         cc: 104, value: 4, hint: Saw to Sq, set: set_waveform }
+  - { entry: 40, module: OSC_2,     key: WAVE,     label: Wave,         cc: 104, value: 4, hint: Saw to Sq, favorite: true, set: set_waveform }
   - { entry: 41, module: OSC_2,     key: PW,           label: PW,  cc: 114, value: 64, bipolar: true, hint: 50% to 0%, set: set_pulse_width }
   - { entry: 42, module: OSC_2,     key: PITCH_COARSE,  label: Pitch Coarse,  cc: 0,   value: 64, bipolar: true, hint: ±5 Oct, set: set_pitch_coarse }
-  - { entry: 43, module: OSC_2,     key: PITCH_SHIFT,   label: Pitch,         cc: 85,  value: 5, hint: 0 to +1 Oct, set: set_pitch }
+  - { entry: 43, module: OSC_2,     key: PITCH_SHIFT,   label: Pitch,         cc: 85,  value: 5, hint: 0 to +1 Oct, favorite: true, set: set_pitch }
   - { entry: 44, module: OSC_2,     key: PITCH_FINE,    label: Pitch Fine,    cc: 76,  value: 65, bipolar: true, hint: ±60 Cent, set: set_pitch_fine }
   - { entry: 45, module: OSC_2,     key: PITCH_MOD_1_AMT, label: Pitch Mod 1 Amt, cc: 89, value: 4, hint_inputs: [MOD_1], set: set_pitch_modulation_1_amount }
   - { entry: 46, module: OSC_2,     key: PITCH_MOD_2_AMT, label: Pitch Mod 2 Amt, cc: 13, value: 4, hint_inputs: [MOD_2], set: set_pitch_modulation_2_amount }
