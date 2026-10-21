@@ -1,4 +1,4 @@
-MIDI Synthesizer SPMS-1 (type-2) v0.0.5
+MIDI Synthesizer SPMS-1 (type-2) v0.0.6
 =======================================
 
 - Monophonic semi-modular MIDI Synthesizer for Raspberry Pi Pico 2, made with Spinel (Ruby AOT Compiler)
@@ -884,10 +884,10 @@ included. Above that the resonance acts as at Q 256. With the cutoff following t
 in the examples below, it plays as a sine voice.
 
 Amp 1 Gain (CC#15) is doubled into the gain: silent at value 4, unity at
-value 64, where it powers up, and twice, 6 dB up, at value 124, so a quiet sound can be brought up as
+value 64, 1.4, about 3 dB up, at value 88, where it powers up, and twice, 6 dB up, at value 124, so a quiet sound can be brought up as
 well as a loud one taken down. The amp holds its output to -1.0 and +1.0, as a mixer holds its
 sum, so the gain cannot take the output past one unit, which the default patch, peaking near
-0.68 there, stays below.
+0.7 there, stays below.
 
 Amp 1 takes two modulations, Mod 1 In and Mod 2 In, and scales the gain by a crossfade of the
 two: Amp 1 Mod 1/2 Mix (CC#36) runs in a straight line from Mod 1 In alone at 0.0 (value 4) to Mod 2 In
@@ -949,8 +949,8 @@ changes only how fast the output moves, so it cannot step it. An output's Glide 
 value 64, takes that output to the input at once, mid-glide too, as Glide at 0.0 does; each
 output has a glide of its own, so one switched on again glides on from where it is, with no step.
 
-Osc 1 and Osc 2 each have a Pitch Mod 1 Sw and a Pitch Mod 2 Sw, with no CC, on at
-power-up. One set off, below value 64, takes its Mod In off the pitch, the depth going to 0.0 as
+Osc 1 and Osc 2 each have a Pitch Mod 1 Sw and a Pitch Mod 2 Sw, on at power-up. Osc 1's Pitch
+Mod 1 Sw is on CC#118, and the rest have no CC. One set off, below value 64, takes its Mod In off the pitch, the depth going to 0.0 as
 smoothly as a Pitch Mod Amt moves, and keeps the Pitch Mod Amt for when it is on again; the pulse
 width's modulation is not switched. So the envelope on Mod 1 In can sweep Osc 2 alone for a sync
 sweep while Osc 1 holds the note.
@@ -1024,8 +1024,8 @@ sweep while Osc 1 holds the note.
   out as it brings Osc 1 in
 - A pitch bend for Osc 2 alone: CC#99 = 4, CC#98 = 4, CC#6 = 4 sets Pitch 1 Out 1 Bend Sw
   off, so the wheel bends Osc 2 against Osc 1, which holds its note with the filter
-- A sync sweep: CC#112 at value 124 turns Osc 2 Sync Sw on, CC#99 = 4, CC#98 = 35, CC#6 = 4
-  sets Osc 1 Pitch Mod 1 Sw off, and CC#89 turned up then sweeps Osc 2 alone with the
+- A sync sweep: CC#112 at value 124 turns Osc 2 Sync Sw on, CC#118 at value 4
+  turns Osc 1 Pitch Mod 1 Sw off, and CC#89 turned up then sweeps Osc 2 alone with the
   envelope, Osc 1 holding the note it is synced to
 - Take the filter out of the chain: CC#99 = 1, CC#98 = 27, CC#6 = 48 points the amp's audio input
   at Mixer 2. The filter keeps running and keeps its slot; nothing reads it
