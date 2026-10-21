@@ -656,13 +656,13 @@ it is at 0.0 until the wheel moves; the default patch puts it on LFO 1 Level Mod
 shows it with the keyboard's signals, on its Controller node, and as a wheel beside the soft
 keyboard.
 
-Slots 9 to 20 are General 1 and General 2, two more control slots that no parameter owns. They
-have no CC by default, so they hold 0.0 until a patch gives them one in category 3, such as CC#16
-and CC#17, General Purpose Controllers 1 and 2. Each CC fills six slots at once, each
+Slots 9 to 20 are General 1 and General 2, two more control slots that no parameter owns, read
+from CC#16 and CC#17, General Purpose Controllers 1 and 2. Each CC fills six slots at once, each
 a form of its value u, which runs 0.0 to 1.0 from value 4 to value 124: General n itself, Rev
 1 - u, Inv -u, Rev Inv u - 1, Bipolar u - 0.5 and Bipolar Inv 0.5 - u. So one knob can bring
 one thing in as it takes another out, or swing a bipolar parameter about its middle, with no
-mixer to turn it round. With no CC u is 0.0, and the default patch routes none of them. The editor shows them on the Controller node, the forms as
+mixer to turn it round. They power up at value 4, so u is 0.0, and with no CC u stays 0.0; the
+default patch routes none of them. The editor shows them on the Controller node, the forms as
 outputs below each, and as sliders in the Controls tab.
 
 Note Pitch, Note Gate and Pitch Bend are what the keyboard puts on the bus. Note Pitch carries
@@ -1005,10 +1005,9 @@ sweep while Osc 1 holds the note.
   CC#6 = 8 puts Mod Wheel on the mixer's first input, and CC#99 = 4, CC#98 = 23, CC#6 =
   124 sets its Level 1 to 1.0, which passes it at half, the mixer's Out Level. CC#99 = 1, CC#98 = 26, CC#6 = 34 puts the mixer's Out Inv on the filter's Mod 2 input in the LFO's place. With
   CC#25 at value 124, the wheel closes the filter from Filter 1 Cutoff down, five octaves at its top
-- A knob that detunes Osc 2: CC#99 = 3, CC#98 = 74, CC#6 = 16 puts General 1 on CC#16, and
-  CC#99 = 2, CC#98 = 42, CC#6 = 13 points Osc 2 Pitch Fine at General 1 Bipolar, so CC#16 moves
-  it from -60 to +60 cents, in tune at value 64
-- A knob that crossfades the oscillators, with General 1 on CC#16 as above: CC#99 = 2, CC#98 = 53, CC#6 = 9 and CC#98 = 54,
+- A knob that detunes Osc 2: CC#99 = 2, CC#98 = 42, CC#6 = 13 points Osc 2 Pitch Fine at
+  General 1 Bipolar, so CC#16 moves it from -60 to +60 cents, in tune at value 64
+- A knob that crossfades the oscillators: CC#99 = 2, CC#98 = 53, CC#6 = 9 and CC#98 = 54,
   CC#6 = 10 point Mixer 2 Level 1 at General 1 and Level 2 at General 1 Rev, so CC#16 takes Osc 2
   out as it brings Osc 1 in
 - A pitch bend for Osc 2 alone: CC#99 = 4, CC#98 = 4, CC#6 = 4 sets Pitch 1 Out 1 Bend Switch
