@@ -949,8 +949,8 @@ changes only how fast the output moves, so it cannot step it. An output's Glide 
 value 64, takes that output to the input at once, mid-glide too, as Glide at 0.0 does; each
 output has a glide of its own, so one switched on again glides on from where it is, with no step.
 
-Osc 1 and Osc 2 each have a Pitch Mod 1 Sw and a Pitch Mod 2 Sw, with no CC, on at
-power-up. One set off, below value 64, takes its Mod In off the pitch, the depth going to 0.0 as
+Osc 1 and Osc 2 each have a Pitch Mod 1 Sw and a Pitch Mod 2 Sw, on at power-up. Osc 1's Pitch
+Mod 1 Sw is on CC#118, and the rest have no CC. One set off, below value 64, takes its Mod In off the pitch, the depth going to 0.0 as
 smoothly as a Pitch Mod Amt moves, and keeps the Pitch Mod Amt for when it is on again; the pulse
 width's modulation is not switched. So the envelope on Mod 1 In can sweep Osc 2 alone for a sync
 sweep while Osc 1 holds the note.
@@ -1024,8 +1024,8 @@ sweep while Osc 1 holds the note.
   out as it brings Osc 1 in
 - A pitch bend for Osc 2 alone: CC#99 = 4, CC#98 = 4, CC#6 = 4 sets Pitch 1 Out 1 Bend Sw
   off, so the wheel bends Osc 2 against Osc 1, which holds its note with the filter
-- A sync sweep: CC#112 at value 124 turns Osc 2 Sync Sw on, CC#99 = 4, CC#98 = 35, CC#6 = 4
-  sets Osc 1 Pitch Mod 1 Sw off, and CC#89 turned up then sweeps Osc 2 alone with the
+- A sync sweep: CC#112 at value 124 turns Osc 2 Sync Sw on, CC#118 at value 4
+  turns Osc 1 Pitch Mod 1 Sw off, and CC#89 turned up then sweeps Osc 2 alone with the
   envelope, Osc 1 holding the note it is synced to
 - Take the filter out of the chain: CC#99 = 1, CC#98 = 27, CC#6 = 48 points the amp's audio input
   at Mixer 2. The filter keeps running and keeps its slot; nothing reads it

@@ -308,8 +308,9 @@ controls:
   # Amt on CC 8 and 103; all four power up at CC 4, 0.0. The Mod Pols have no CC: the pitch's
   # power up at CC 76, +0.2, which brings the LFO at the top of Pitch Mod 2 Amt down to a vibrato
   # an octave either way and the envelope to two octaves, a step of a Pitch Mod Amt being 10
-  # cents of the LFO; the pulse width's at CC 124, +1.0. Pitch Mod 1 Sw and Pitch Mod 2 Sw have no
-  # CC and hold on, so each Pitch Mod Amt and Pol alone set its depth. Wave is on
+  # cents of the LFO; the pulse width's at CC 124, +1.0. Pitch Mod 1 Sw, on CC 118, Osc 1's
+  # alone, so that Osc 2 can sweep against it for a sync, and Pitch Mod 2 Sw, with no CC, power up
+  # on, so each Pitch Mod Amt and Pol alone set its depth. Wave is on
   # CC 102 and powers up at the saw. PW is bipolar and powers up at CC 64, 0.0, a pulse of 50%.
   - { entry: 28, module: OSC_1,     key: WAVE,     label: Wave,         cc: 102, value: 4, hint: Saw to Sq, favorite: true, set: set_waveform }
   - { entry: 29, module: OSC_1,     key: PW,           label: PW,  cc: 114, value: 64, bipolar: true, hint: 50% to 0%, set: set_pulse_width }
@@ -318,7 +319,7 @@ controls:
   - { entry: 32, module: OSC_1,     key: PITCH_FINE,    label: Pitch Fine,    cc: 0,   value: 64, bipolar: true, hint: ±60 Cent, set: set_pitch_fine }
   - { entry: 33, module: OSC_1,     key: PITCH_MOD_1_AMT, label: Pitch Mod 1 Amt, cc: 89, value: 4, hint_inputs: [MOD_1], favorite: true, set: set_pitch_modulation_1_amount }
   - { entry: 34, module: OSC_1,     key: PITCH_MOD_1_POLARITY, label: Pitch Mod 1 Pol, cc: 0, value: 76, bipolar: true, hint: − to +, set: set_pitch_modulation_1_polarity }
-  - { entry: 35, module: OSC_1,     key: PITCH_MOD_1_SW, label: Pitch Mod 1 Sw, cc: 0, value: 124, hint: Off/On, set: set_pitch_modulation_1_switch }
+  - { entry: 35, module: OSC_1,     key: PITCH_MOD_1_SW, label: Pitch Mod 1 Sw, cc: 118, value: 124, hint: Off/On, set: set_pitch_modulation_1_switch }
   - { entry: 36, module: OSC_1,     key: PITCH_MOD_2_AMT, label: Pitch Mod 2 Amt, cc: 13, value: 4, hint_inputs: [MOD_2], favorite: true, set: set_pitch_modulation_2_amount }
   - { entry: 37, module: OSC_1,     key: PITCH_MOD_2_POLARITY, label: Pitch Mod 2 Pol, cc: 0, value: 76, bipolar: true, hint: − to +, set: set_pitch_modulation_2_polarity }
   - { entry: 38, module: OSC_1,     key: PITCH_MOD_2_SW, label: Pitch Mod 2 Sw, cc: 0, value: 124, hint: Off/On, set: set_pitch_modulation_2_switch }
