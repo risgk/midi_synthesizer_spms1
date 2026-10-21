@@ -64,12 +64,10 @@
 |                            94 | x             | o             | Delay Mix                            |
 |                            92 | x             | o             | Delay Feedback                       |
 |                             5 | x             | o             | Pitch Glide (Portamento Time)        |
-|                            34 | x             | o             | Pitch Glide Switch [Off|On]          |
+|                            34 | x             | o             | Pitch Out 1/2 Glide Switch [Off|On]  |
 |                            57 | x             | o             | Pitch Bend Amt (Pitch Bend Range)    |
 |                            22 | x             | o             | Pitch Stretch                        |
 |                             1 | x             | o             | Mod Wheel (Unipolar)                 |
-|                            16 | x             | o             | General 1 (Unipolar, 6 forms)        |
-|                            17 | x             | o             | General 2 (Unipolar, 6 forms)        |
 |                            99 | x             | o             | NRPN MSB                             |
 |                            98 | x             | o             | NRPN LSB                             |
 |                             6 | x             | o             | Data Entry MSB (NRPN value)          |

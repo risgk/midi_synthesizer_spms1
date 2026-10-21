@@ -53,9 +53,11 @@ module Spms1
       # Mod 1 In and Mod 2 In each move the pitch by a Pitch Mod Amt of their own and the pulse
       # width by a PW Mod Amt of their own. Pitch In has no depth: the note it carries is added
       # whole, a key a semitone, and plays in tune from the first sample.
-      # Each Pitch Mod Amt and Pitch Mod Range are multiplied before smoothing, so only their
-      # product, the depth, carries a smoothing state.
+      # Each Pitch Mod Amt, Pitch Mod Range and the Pitch Mod Switch of the input are multiplied
+      # before smoothing, so only their product, the depth, carries a smoothing state.
       @pitch_modulation_range = 1.0
+      @pitch_modulation_1_on = 1.0
+      @pitch_modulation_2_on = 1.0
       @pitch_modulation_1_amount = 0.0
       @pitch_modulation_1_depth = 0.0
       @stage_1_pitch_modulation_1_depth = 0.0
@@ -112,19 +114,32 @@ module Spms1
     def set_pitch_modulation_1_amount(amount)
       clamped_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
       @pitch_modulation_1_amount = clamped_amount * MODULATION_RANGE
-      @pitch_modulation_1_depth = @pitch_modulation_1_amount * @pitch_modulation_range
+      @pitch_modulation_1_depth = @pitch_modulation_1_amount * @pitch_modulation_range * @pitch_modulation_1_on
     end
 
     def set_pitch_modulation_2_amount(amount)
       clamped_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
       @pitch_modulation_2_amount = clamped_amount * MODULATION_RANGE
-      @pitch_modulation_2_depth = @pitch_modulation_2_amount * @pitch_modulation_range
+      @pitch_modulation_2_depth = @pitch_modulation_2_amount * @pitch_modulation_range * @pitch_modulation_2_on
+    end
+
+    # Pitch Mod 1 Switch and Pitch Mod 2 Switch are unipolar, [0.0, 1.0], and each lets its input
+    # move the pitch from 0.5 (CC 64) up. Off, the depth goes to 0.0, smoothed as a depth is, and the
+    # Pitch Mod Amt is kept for when it is on again. The pulse width's modulation is not switched.
+    def set_pitch_modulation_1_switch(switch)
+      @pitch_modulation_1_on = (switch >= 0.5) ? 1.0 : 0.0
+      @pitch_modulation_1_depth = @pitch_modulation_1_amount * @pitch_modulation_range * @pitch_modulation_1_on
+    end
+
+    def set_pitch_modulation_2_switch(switch)
+      @pitch_modulation_2_on = (switch >= 0.5) ? 1.0 : 0.0
+      @pitch_modulation_2_depth = @pitch_modulation_2_amount * @pitch_modulation_range * @pitch_modulation_2_on
     end
 
     def set_pitch_modulation_range(range)
       @pitch_modulation_range = (range < 0.0) ? 0.0 : ((range > 1.0) ? 1.0 : range)
-      @pitch_modulation_1_depth = @pitch_modulation_1_amount * @pitch_modulation_range
-      @pitch_modulation_2_depth = @pitch_modulation_2_amount * @pitch_modulation_range
+      @pitch_modulation_1_depth = @pitch_modulation_1_amount * @pitch_modulation_range * @pitch_modulation_1_on
+      @pitch_modulation_2_depth = @pitch_modulation_2_amount * @pitch_modulation_range * @pitch_modulation_2_on
     end
 
     def set_pw_modulation_1_amount(amount)

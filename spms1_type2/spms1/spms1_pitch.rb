@@ -7,6 +7,9 @@ module Spms1
   # a stepped one as well. Bend In is added to the output past the lag, for what should move the
   # pitch at once rather than glide, as a pitch bend should. Stretch then widens the sum about note
   # 60, so that the keys, the glide and the bend spread out alike.
+  #
+  # There are two outputs, Out 1 and Out 2, from the one lag and the one bend: each has a glide
+  # switch and a bend switch of its own, so the glide or the bend can reach one oscillator only.
   class Pitch
     # Lookup table for exponential time mapping, the envelope's: a twelfth of an octave per index,
     # so one CC step of the 120-step control range moves the time by a semitone and the whole dial
@@ -32,11 +35,14 @@ module Spms1
     def initialize(sample_rate)
       @sample_rate = sample_rate
       @time = 0.0
-      # The share Glide sets, and whether Glide Switch lets it through: 1.0 on, 0.0 off.
-      @glide_blend = 1.0
-      @glide_on = 1.0
       # The share of the distance left that is covered each sample. 1.0 is no slew at all.
       @blend = 1.0
+      # Whether each output takes the glide and the bend: 1.0 on, 0.0 off.
+      @glide_1_on = 1.0
+      @glide_2_on = 1.0
+      @bend_1_on = 1.0
+      @bend_2_on = 1.0
+      @output_2 = 0.0
       # The state is the distance from the output to the input, not the output itself; see process.
       @distance = 0.0
       @last_input = 0.0
@@ -59,16 +65,29 @@ module Spms1
     def set_glide(time)
       @time = (time < 0.0) ? 0.0 : ((time > 1.0) ? 1.0 : time)
       blend = 1.0 / (TIME_BASE * calculate_exp_fast(@time) * @sample_rate)
-      @glide_blend = (@time > 0.0) ? blend : 1.0
-      @blend = (@glide_on > 0.0) ? @glide_blend : 1.0
+      @blend = (@time > 0.0) ? blend : 1.0
     end
 
-    # Glide Switch is unipolar, [0.0, 1.0], and turns the portamento on from 0.5 (CC 64) up, as a
-    # MIDI switch is on from 64. Off, the output follows the input at once, as at Glide 0.0, mid-glide
-    # too, and Glide keeps its time for when it is on again.
-    def set_glide_switch(switch)
-      @glide_on = (switch >= 0.5) ? 1.0 : 0.0
-      @blend = (@glide_on > 0.0) ? @glide_blend : 1.0
+    # Out 1 Glide Switch and Out 2 Glide Switch are unipolar, [0.0, 1.0], and each turns the
+    # portamento on for its output from 0.5 (CC 64) up, as a MIDI switch is on from 64. Off, the
+    # output follows the input at once, as at Glide 0.0, mid-glide too. The lag runs on whatever
+    # the switches say, so an output switched on mid-glide joins the glide where it has got to.
+    def set_glide_1_switch(switch)
+      @glide_1_on = (switch >= 0.5) ? 1.0 : 0.0
+    end
+
+    def set_glide_2_switch(switch)
+      @glide_2_on = (switch >= 0.5) ? 1.0 : 0.0
+    end
+
+    # Out 1 Bend Switch and Out 2 Bend Switch are unipolar, [0.0, 1.0], and each adds Bend In to
+    # its output from 0.5 (CC 64) up. Off, the output is not bent, and the bend steps out at once.
+    def set_bend_1_switch(switch)
+      @bend_1_on = (switch >= 0.5) ? 1.0 : 0.0
+    end
+
+    def set_bend_2_switch(switch)
+      @bend_2_on = (switch >= 0.5) ? 1.0 : 0.0
     end
 
     # Bend Amt is unipolar, [0.0, 1.0], the depth of Bend In: at 1.0 Bend In is added as it
@@ -108,10 +127,13 @@ module Spms1
     #
     # Bend In is added past the lag, so that the lag never holds it, and so that at zero it leaves
     # the output as it was, bit for bit. Stretch multiplies the sum last, so a bend is widened with
-    # the keys; at a factor of 1.0 the product is the sum, bit for bit.
+    # the keys; at a factor of 1.0 the product is the sum, bit for bit. Each output takes the
+    # distance and the bend through its switches, and with both on, the product by 1.0 leaves
+    # each as it is, bit for bit.
     #
-    # The output is held to -1.0 to +1.0, as a mixer's is: twice the pitch range, so whatever
+    # The outputs are held to -1.0 to +1.0, as a mixer's is: twice the pitch range, so whatever
     # the oscillator and the filter clamp to their own range is still reached at either end.
+    # Out 1 is returned, and Out 2 is read with output_2.
     def process(control_tick, input = 0.0, bend_input = 0.0)
       if control_tick
         @stage_1_bend_depth = Dsp.smooth(@bend_depth, @stage_1_bend_depth, @smoothing_target_blend)
@@ -124,8 +146,15 @@ module Spms1
       @last_input = input
       flushed = Dsp.flush_tiny(distance)
       @distance = flushed - flushed * @blend
-      output = ((input + @distance) + (bend_input * @current_bend_depth)) * @current_stretch_factor
+      bend = bend_input * @current_bend_depth
+      output_2 = ((input + @distance * @glide_2_on) + (bend * @bend_2_on)) * @current_stretch_factor
+      @output_2 = (output_2 < -1.0) ? -1.0 : ((output_2 > 1.0) ? 1.0 : output_2)
+      output = ((input + @distance * @glide_1_on) + (bend * @bend_1_on)) * @current_stretch_factor
       (output < -1.0) ? -1.0 : ((output > 1.0) ? 1.0 : output)
+    end
+
+    def output_2
+      @output_2
     end
 
     private

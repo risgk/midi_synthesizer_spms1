@@ -48,7 +48,7 @@ modules:
 
 # The default patch. Every module is in the run order, so a patch only ever has to route, never to
 # switch something on first. Pitch 1 runs first, taking Note Pitch and handing it to the
-# oscillators: its Glide powers up at 0.0, where it passes its input through as it
+# oscillators, Out 1 to Osc 1 and the filter and Out 2 to Osc 2: its Glide powers up at 0.0, where it passes its input through as it
 # is, so the patch plays as one without it until CC 5 turns the portamento up. Pitch Bend goes to
 # its Bend In, added past the glide, an octave either way at Bend Amt's (CC 57) power-up of CC 28, so
 # the bend reaches the oscillators and the filter's keyboard tracking at once. Running first lets
@@ -144,49 +144,50 @@ signals:
   - { key: GENERAL_2_BIPOLAR_INV, id: 20, control: GENERAL_2, form: bipolar_inv, label: General 2 Bipolar Inv, bipolar: true }
 
   # The module outputs, module by module, each module's main output first.
-  - { key: PITCH_1_OUTPUT, id: 21, module: PITCH_1, output: Out, label: Pitch 1 Output, bipolar: true }
-  - { key: EG_1_OUTPUT,        id: 22, module: EG_1,     output: Out,    label: EG 1 Output }
+  - { key: PITCH_1_OUTPUT_1, id: 21, module: PITCH_1, output: Out 1, label: Pitch 1 Output 1, bipolar: true }
+  - { key: PITCH_1_OUTPUT_2, id: 22, module: PITCH_1, output: Out 2, label: Pitch 1 Output 2, bipolar: true, get: output_2 }
+  - { key: EG_1_OUTPUT,        id: 23, module: EG_1,     output: Out,    label: EG 1 Output }
   # Out Inv, of the envelopes, the LFO and the mixers, is Out negated.
-  - { key: EG_1_OUTPUT_INV,    id: 23, module: EG_1,     output: Out Inv, label: EG 1 Output Inv, get: output_inverted }
-  - { key: EG_2_OUTPUT,        id: 24, module: EG_2,     output: Out,    label: EG 2 Output }
-  - { key: EG_2_OUTPUT_INV,    id: 25, module: EG_2,     output: Out Inv, label: EG 2 Output Inv, get: output_inverted }
+  - { key: EG_1_OUTPUT_INV,    id: 24, module: EG_1,     output: Out Inv, label: EG 1 Output Inv, get: output_inverted }
+  - { key: EG_2_OUTPUT,        id: 25, module: EG_2,     output: Out,    label: EG 2 Output }
+  - { key: EG_2_OUTPUT_INV,    id: 26, module: EG_2,     output: Out Inv, label: EG 2 Output Inv, get: output_inverted }
   # Out is the triangle and the square crossfaded by Wave; each of the three has its inverted output
   # beside it. The square is unipolar, 0.0 and 1.0, and its inverted output 0.0 and -1.0.
-  - { key: LFO_1_OUTPUT,       id: 26, module: LFO_1,    output: Out,    label: LFO 1 Output,       bipolar: true }
-  - { key: LFO_1_OUTPUT_INV,   id: 27, module: LFO_1,    output: Out Inv, label: LFO 1 Output Inv,  bipolar: true, get: output_inverted }
-  - { key: LFO_1_OUTPUT_TRIANGLE, id: 28, module: LFO_1, output: Out Triangle, label: LFO 1 Output Triangle, bipolar: true, get: output_triangle }
-  - { key: LFO_1_OUTPUT_TRIANGLE_INV, id: 29, module: LFO_1, output: Out Triangle Inv, label: LFO 1 Output Triangle Inv, bipolar: true, get: output_triangle_inverted }
-  - { key: LFO_1_OUTPUT_SQUARE,   id: 30, module: LFO_1, output: Out Square,   label: LFO 1 Output Square,   get: output_square }
-  - { key: LFO_1_OUTPUT_SQUARE_INV, id: 31, module: LFO_1, output: Out Square Inv, label: LFO 1 Output Square Inv, get: output_square_inverted }
-  - { key: MIXER_1_OUTPUT,     id: 32, module: MIXER_1,  output: Out,    label: Mixer 1 Output,     bipolar: true }
-  - { key: MIXER_1_OUTPUT_INV,   id: 33, module: MIXER_1,  output: Out Inv, label: Mixer 1 Output Inv, bipolar: true, get: output_inverted }
+  - { key: LFO_1_OUTPUT,       id: 27, module: LFO_1,    output: Out,    label: LFO 1 Output,       bipolar: true }
+  - { key: LFO_1_OUTPUT_INV,   id: 28, module: LFO_1,    output: Out Inv, label: LFO 1 Output Inv,  bipolar: true, get: output_inverted }
+  - { key: LFO_1_OUTPUT_TRIANGLE, id: 29, module: LFO_1, output: Out Triangle, label: LFO 1 Output Triangle, bipolar: true, get: output_triangle }
+  - { key: LFO_1_OUTPUT_TRIANGLE_INV, id: 30, module: LFO_1, output: Out Triangle Inv, label: LFO 1 Output Triangle Inv, bipolar: true, get: output_triangle_inverted }
+  - { key: LFO_1_OUTPUT_SQUARE,   id: 31, module: LFO_1, output: Out Square,   label: LFO 1 Output Square,   get: output_square }
+  - { key: LFO_1_OUTPUT_SQUARE_INV, id: 32, module: LFO_1, output: Out Square Inv, label: LFO 1 Output Square Inv, get: output_square_inverted }
+  - { key: MIXER_1_OUTPUT,     id: 33, module: MIXER_1,  output: Out,    label: Mixer 1 Output,     bipolar: true }
+  - { key: MIXER_1_OUTPUT_INV,   id: 34, module: MIXER_1,  output: Out Inv, label: Mixer 1 Output Inv, bipolar: true, get: output_inverted }
   # Each oscillator's Out is the morph from the saw to the pulse, by Wave.
-  - { key: OSC_1_OUTPUT,       id: 34, module: OSC_1,    output: Out,    label: Osc 1 Output,       bipolar: true }
-  - { key: OSC_1_OUTPUT_SAW,   id: 35, module: OSC_1, output: Out Saw,   label: Osc 1 Output Saw,   bipolar: true, get: output_saw }
-  - { key: OSC_1_OUTPUT_PULSE, id: 36, module: OSC_1, output: Out Pulse, label: Osc 1 Output Pulse, bipolar: true, get: output_pulse }
-  - { key: OSC_1_OUTPUT_SUB,   id: 37, module: OSC_1, output: Out Sub,   label: Osc 1 Output Sub,   bipolar: true, get: output_sub }
-  - { key: OSC_2_OUTPUT,         id: 38, module: OSC_2,   output: Out,       label: Osc 2 Output,         bipolar: true }
-  - { key: OSC_2_OUTPUT_SAW,   id: 39, module: OSC_2, output: Out Saw,   label: Osc 2 Output Saw,   bipolar: true, get: output_saw }
-  - { key: OSC_2_OUTPUT_PULSE, id: 40, module: OSC_2, output: Out Pulse, label: Osc 2 Output Pulse, bipolar: true, get: output_pulse }
+  - { key: OSC_1_OUTPUT,       id: 35, module: OSC_1,    output: Out,    label: Osc 1 Output,       bipolar: true }
+  - { key: OSC_1_OUTPUT_SAW,   id: 36, module: OSC_1, output: Out Saw,   label: Osc 1 Output Saw,   bipolar: true, get: output_saw }
+  - { key: OSC_1_OUTPUT_PULSE, id: 37, module: OSC_1, output: Out Pulse, label: Osc 1 Output Pulse, bipolar: true, get: output_pulse }
+  - { key: OSC_1_OUTPUT_SUB,   id: 38, module: OSC_1, output: Out Sub,   label: Osc 1 Output Sub,   bipolar: true, get: output_sub }
+  - { key: OSC_2_OUTPUT,         id: 39, module: OSC_2,   output: Out,       label: Osc 2 Output,         bipolar: true }
+  - { key: OSC_2_OUTPUT_SAW,   id: 40, module: OSC_2, output: Out Saw,   label: Osc 2 Output Saw,   bipolar: true, get: output_saw }
+  - { key: OSC_2_OUTPUT_PULSE, id: 41, module: OSC_2, output: Out Pulse, label: Osc 2 Output Pulse, bipolar: true, get: output_pulse }
   # Out is the white and the red crossfaded by Color.
-  - { key: NOISE_1_OUTPUT,       id: 41, module: NOISE_1, output: Out,       label: Noise 1 Output,       bipolar: true }
-  - { key: NOISE_1_OUTPUT_WHITE, id: 42, module: NOISE_1, output: Out White, label: Noise 1 Output White, bipolar: true, get: output_white }
-  - { key: NOISE_1_OUTPUT_RED,   id: 43, module: NOISE_1, output: Out Red,   label: Noise 1 Output Red,   bipolar: true, get: output_red }
-  - { key: MIXER_2_OUTPUT,       id: 44, module: MIXER_2, output: Out,      label: Mixer 2 Output,       bipolar: true }
-  - { key: MIXER_2_OUTPUT_INV,   id: 45, module: MIXER_2,  output: Out Inv, label: Mixer 2 Output Inv, bipolar: true, get: output_inverted }
+  - { key: NOISE_1_OUTPUT,       id: 42, module: NOISE_1, output: Out,       label: Noise 1 Output,       bipolar: true }
+  - { key: NOISE_1_OUTPUT_WHITE, id: 43, module: NOISE_1, output: Out White, label: Noise 1 Output White, bipolar: true, get: output_white }
+  - { key: NOISE_1_OUTPUT_RED,   id: 44, module: NOISE_1, output: Out Red,   label: Noise 1 Output Red,   bipolar: true, get: output_red }
+  - { key: MIXER_2_OUTPUT,       id: 45, module: MIXER_2, output: Out,      label: Mixer 2 Output,       bipolar: true }
+  - { key: MIXER_2_OUTPUT_INV,   id: 46, module: MIXER_2,  output: Out Inv, label: Mixer 2 Output Inv, bipolar: true, get: output_inverted }
   # Out is the low pass and the high pass crossfaded by Mode, through a notch.
-  - { key: FILTER_1_OUTPUT,    id: 46, module: FILTER_1, output: Out,    label: Filter 1 Output,    bipolar: true }
-  - { key: FILTER_1_OUTPUT_LP, id: 47, module: FILTER_1, output: Out LP, label: Filter 1 Output LP, bipolar: true, get: output_lp }
-  - { key: FILTER_1_OUTPUT_HP, id: 48, module: FILTER_1, output: Out HP, label: Filter 1 Output HP, bipolar: true, get: output_hp }
-  - { key: FILTER_1_OUTPUT_BP, id: 49, module: FILTER_1, output: Out BP, label: Filter 1 Output BP, bipolar: true, get: output_bp }
-  - { key: AMP_1_OUTPUT,       id: 50, module: AMP_1,    output: Out,    label: Amp 1 Output,       bipolar: true }
+  - { key: FILTER_1_OUTPUT,    id: 47, module: FILTER_1, output: Out,    label: Filter 1 Output,    bipolar: true }
+  - { key: FILTER_1_OUTPUT_LP, id: 48, module: FILTER_1, output: Out LP, label: Filter 1 Output LP, bipolar: true, get: output_lp }
+  - { key: FILTER_1_OUTPUT_HP, id: 49, module: FILTER_1, output: Out HP, label: Filter 1 Output HP, bipolar: true, get: output_hp }
+  - { key: FILTER_1_OUTPUT_BP, id: 50, module: FILTER_1, output: Out BP, label: Filter 1 Output BP, bipolar: true, get: output_bp }
+  - { key: AMP_1_OUTPUT,       id: 51, module: AMP_1,    output: Out,    label: Amp 1 Output,       bipolar: true }
   # Out Mono, of the chorus and of the delay, is the average of the two sides, a sub output.
-  - { key: CHORUS_1_OUTPUT_L,  id: 51, module: CHORUS_1, output: Out L,  label: Chorus 1 Output L,  bipolar: true, get: output_l }
-  - { key: CHORUS_1_OUTPUT_R,  id: 52, module: CHORUS_1, output: Out R,  label: Chorus 1 Output R,  bipolar: true, get: output_r }
-  - { key: CHORUS_1_OUTPUT_MONO, id: 53, module: CHORUS_1, output: Out Mono, label: Chorus 1 Output Mono, bipolar: true, get: output_mono }
-  - { key: DELAY_1_OUTPUT_L,   id: 54, module: DELAY_1,  output: Out L,  label: Delay 1 Output L,   bipolar: true, get: output_l }
-  - { key: DELAY_1_OUTPUT_R,   id: 55, module: DELAY_1,  output: Out R,  label: Delay 1 Output R,   bipolar: true, get: output_r }
-  - { key: DELAY_1_OUTPUT_MONO,  id: 56, module: DELAY_1,  output: Out Mono, label: Delay 1 Output Mono,  bipolar: true, get: output_mono }
+  - { key: CHORUS_1_OUTPUT_L,  id: 52, module: CHORUS_1, output: Out L,  label: Chorus 1 Output L,  bipolar: true, get: output_l }
+  - { key: CHORUS_1_OUTPUT_R,  id: 53, module: CHORUS_1, output: Out R,  label: Chorus 1 Output R,  bipolar: true, get: output_r }
+  - { key: CHORUS_1_OUTPUT_MONO, id: 54, module: CHORUS_1, output: Out Mono, label: Chorus 1 Output Mono, bipolar: true, get: output_mono }
+  - { key: DELAY_1_OUTPUT_L,   id: 55, module: DELAY_1,  output: Out L,  label: Delay 1 Output L,   bipolar: true, get: output_l }
+  - { key: DELAY_1_OUTPUT_R,   id: 56, module: DELAY_1,  output: Out R,  label: Delay 1 Output R,   bipolar: true, get: output_r }
+  - { key: DELAY_1_OUTPUT_MONO,  id: 57, module: DELAY_1,  output: Out Mono, label: Delay 1 Output Mono,  bipolar: true, get: output_mono }
 
 # Module inputs, NRPN category 1, listed in the editor's order, each by its entry: what feeds each
 # one in the default patch (`source`, a signal key). `label` is the editor's, on the module; `name`
@@ -203,10 +204,10 @@ inputs:
   - { entry: 8, module: MIXER_1,     key: IN_2,        label: In 2,           name: In 2,           source: NONE }
   - { entry: 9, module: MIXER_1,     key: IN_3,        label: In 3,           name: In 3,           source: NONE }
   - { entry: 10, module: MIXER_1,     key: IN_4,        label: In 4,           name: In 4,           source: NONE }
-  - { entry: 11, module: OSC_1,       key: PITCH,       label: Pitch In,       name: Pitch In,       source: PITCH_1_OUTPUT }
+  - { entry: 11, module: OSC_1,       key: PITCH,       label: Pitch In,       name: Pitch In,       source: PITCH_1_OUTPUT_1 }
   - { entry: 12, module: OSC_1,       key: MOD_1,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
   - { entry: 13, module: OSC_1,       key: MOD_2,       label: Mod 2 In,   name: Mod 2 In,   source: LFO_1_OUTPUT }
-  - { entry: 14, module: OSC_2,       key: PITCH,       label: Pitch In,       name: Pitch In,       source: PITCH_1_OUTPUT }
+  - { entry: 14, module: OSC_2,       key: PITCH,       label: Pitch In,       name: Pitch In,       source: PITCH_1_OUTPUT_2 }
   - { entry: 15, module: OSC_2,       key: MOD_1,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
   - { entry: 16, module: OSC_2,       key: MOD_2,       label: Mod 2 In,       name: Mod 2 In,       source: LFO_1_OUTPUT }
   - { entry: 17, module: OSC_2,       key: SYNC,        label: Sync In,        name: Sync In,        source: OSC_1_OUTPUT_SAW }
@@ -215,7 +216,7 @@ inputs:
   - { entry: 20, module: MIXER_2,     key: IN_3,        label: In 3,           name: In 3,           source: OSC_1_OUTPUT_SUB }
   - { entry: 21, module: MIXER_2,     key: IN_4,        label: In 4,           name: In 4,           source: NOISE_1_OUTPUT }
   - { entry: 22, module: FILTER_1,    key: AUDIO,       label: Audio In,       name: Audio In,       source: MIXER_2_OUTPUT }
-  - { entry: 23, module: FILTER_1,    key: PITCH,       label: Pitch In,       name: Pitch In,       source: PITCH_1_OUTPUT }
+  - { entry: 23, module: FILTER_1,    key: PITCH,       label: Pitch In,       name: Pitch In,       source: PITCH_1_OUTPUT_1 }
   - { entry: 24, module: FILTER_1,    key: MOD_1,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
   - { entry: 25, module: FILTER_1,    key: MOD_2,       label: Mod 2 In,       name: Mod 2 In,       source: LFO_1_OUTPUT }
   - { entry: 26, module: AMP_1,       key: AUDIO,       label: Audio In,       name: Audio In,       source: FILTER_1_OUTPUT }
@@ -239,32 +240,36 @@ inputs:
 # "to", following the patch's routing. Why the defaults are what they are is above default_order.
 controls:
   # Pitch 1: Glide is on CC 5, Portamento Time in the MIDI spec, and powers up at CC 4, 0.0, where
-  # the portamento is off. Glide Switch, on CC 34, powers up on, at CC 124, so Glide alone sets
-  # the portamento unless the switch is set off, below CC 64. Bend Amt, on CC 57, is the bend
-  # range, half a semitone a step, and powers up at CC 28, an octave either way. Stretch, last as
-  # it widens what the others make, is on CC 22 and powers up at CC 4, 0.0, where the keys are as
-  # they are.
+  # the portamento is off. Out 1 Glide Switch and Out 2 Glide Switch, both on CC 34, power up on,
+  # at CC 124, so Glide alone sets the portamento of both outputs unless a switch is set off, below
+  # CC 64. Bend Amt, on CC 57, is the bend range, half a semitone a step, and powers up at CC 28,
+  # an octave either way. Out 1 Bend Switch and Out 2 Bend Switch have no CC and hold on, so both
+  # outputs are bent. Stretch, last as it widens what the others make, is on CC 22 and powers up
+  # at CC 4, 0.0, where the keys are as they are.
   - { entry: 0, module: PITCH_1,   key: GLIDE,        label: Glide,        cc: 5, value: 4, set: set_glide }
-  - { entry: 1, module: PITCH_1,   key: GLIDE_SW,     label: Glide Switch, cc: 34, value: 124, hint: Off/On, set: set_glide_switch }
-  - { entry: 2, module: PITCH_1,    key: BEND_AMT,  label: Bend Amt,   cc: 57,  value: 28, hint: Bend Range, set: set_bend_amount }
-  - { entry: 3, module: PITCH_1,    key: STRETCH, label: Stretch, cc: 22,  value: 4, hint: x1 to x2, set: set_stretch }
+  - { entry: 1, module: PITCH_1,   key: OUT_1_GLIDE_SW, label: Out 1 Glide Switch, cc: 34, value: 124, hint: Off/On, set: set_glide_1_switch }
+  - { entry: 2, module: PITCH_1,   key: OUT_2_GLIDE_SW, label: Out 2 Glide Switch, cc: 34, value: 124, hint: Off/On, set: set_glide_2_switch }
+  - { entry: 3, module: PITCH_1,    key: BEND_AMT,  label: Bend Amt,   cc: 57,  value: 28, hint: Bend Range, set: set_bend_amount }
+  - { entry: 4, module: PITCH_1,   key: OUT_1_BEND_SW, label: Out 1 Bend Switch, cc: 0, value: 124, hint: Off/On, set: set_bend_1_switch }
+  - { entry: 5, module: PITCH_1,   key: OUT_2_BEND_SW, label: Out 2 Bend Switch, cc: 0, value: 124, hint: Off/On, set: set_bend_2_switch }
+  - { entry: 6, module: PITCH_1,    key: STRETCH, label: Stretch, cc: 22,  value: 4, hint: x1 to x2, set: set_stretch }
   # EG 1: Release Switch, on CC 105, powers up on, at CC 124, the release following the decay;
   # below CC 64 the release is the shortest decay's, 10 ms. Level has no CC and holds 1.0,
   # passing the envelope as it is.
-  - { entry: 4, module: EG_1,      key: ATTACK,       label: Attack,       cc: 73,  value: 4, hint: Time, set: set_attack }
-  - { entry: 5, module: EG_1,      key: DECAY,        label: Decay,        cc: 75,  value: 100, hint: Time, set: set_decay }
-  - { entry: 6, module: EG_1,      key: SUSTAIN,      label: Sustain,      cc: 30,  value: 124, hint: Level, set: set_sustain }
-  - { entry: 7, module: EG_1,      key: RELEASE_SW,   label: Release Switch, cc: 105, value: 124, hint: Off/On, set: set_release_switch }
-  - { entry: 8, module: EG_1,      key: LEVEL,        label: Level,        cc: 0,   value: 124, set: set_level }
+  - { entry: 7, module: EG_1,      key: ATTACK,       label: Attack,       cc: 73,  value: 4, hint: Time, set: set_attack }
+  - { entry: 8, module: EG_1,      key: DECAY,        label: Decay,        cc: 75,  value: 100, hint: Time, set: set_decay }
+  - { entry: 9, module: EG_1,      key: SUSTAIN,      label: Sustain,      cc: 30,  value: 124, hint: Level, set: set_sustain }
+  - { entry: 10, module: EG_1,      key: RELEASE_SW,   label: Release Switch, cc: 105, value: 124, hint: Off/On, set: set_release_switch }
+  - { entry: 11, module: EG_1,      key: LEVEL,        label: Level,        cc: 0,   value: 124, set: set_level }
   # EG 2, for the amp, an organ's envelope at power-up: Attack, Decay and Sustain on CC 52, 53 and
   # 54, at CC 4, 4 and 124, so it opens at once and holds while a key
   # is held. Release Switch is on EG 1's CC 105, one switch for both envelopes, and
   # powers up on, so the release is the decay's, 10 ms. Level has no CC and holds 1.0.
-  - { entry: 9, module: EG_2,      key: ATTACK,       label: Attack,       cc: 52,  value: 4, hint: Time, set: set_attack }
-  - { entry: 10, module: EG_2,      key: DECAY,        label: Decay,        cc: 53,  value: 4, hint: Time, set: set_decay }
-  - { entry: 11, module: EG_2,      key: SUSTAIN,      label: Sustain,      cc: 54,  value: 124, hint: Level, set: set_sustain }
-  - { entry: 12, module: EG_2,      key: RELEASE_SW,   label: Release Switch, cc: 105, value: 124, hint: Off/On, set: set_release_switch }
-  - { entry: 13, module: EG_2,      key: LEVEL,        label: Level,        cc: 0,   value: 124, set: set_level }
+  - { entry: 12, module: EG_2,      key: ATTACK,       label: Attack,       cc: 52,  value: 4, hint: Time, set: set_attack }
+  - { entry: 13, module: EG_2,      key: DECAY,        label: Decay,        cc: 53,  value: 4, hint: Time, set: set_decay }
+  - { entry: 14, module: EG_2,      key: SUSTAIN,      label: Sustain,      cc: 54,  value: 124, hint: Level, set: set_sustain }
+  - { entry: 15, module: EG_2,      key: RELEASE_SW,   label: Release Switch, cc: 105, value: 124, hint: Off/On, set: set_release_switch }
+  - { entry: 16, module: EG_2,      key: LEVEL,        label: Level,        cc: 0,   value: 124, set: set_level }
   # LFO 1 in the editor: the waveform, the rate and the level, then the modulation of each, then
   # Reset Switch, on CC 113, which powers up off, at CC 4, so Reset In, Note Gate, is ignored until it
   # is turned on. Wave
@@ -274,19 +279,19 @@ controls:
   # routing a source to it is enough; Level Mod In takes the mod wheel, which adds to Level
   # (CC 116) up to its top. Level powers up at CC 4, 0.0, so the LFO is still until the wheel
   # moves.
-  - { entry: 14, module: LFO_1,     key: WAVE,         label: Wave,         cc: 33,  value: 4, hint: Tri to Sq, set: set_wave }
-  - { entry: 15, module: LFO_1,     key: RATE,         label: Rate,         cc: 3,   value: 64, set: set_rate }
-  - { entry: 16, module: LFO_1,     key: LEVEL,        label: Level,        cc: 116, value: 4, set: set_level }
-  - { entry: 17, module: LFO_1,     key: RATE_MOD_AMT, label: Rate Mod Amt, cc: 0,   value: 124, hint_inputs: [RATE_MOD], set: set_rate_modulation_amount }
-  - { entry: 18, module: LFO_1,     key: LEVEL_MOD_AMT, label: Level Mod Amt, cc: 0,  value: 124, hint_inputs: [LEVEL_MOD], set: set_level_modulation_amount }
-  - { entry: 19, module: LFO_1,     key: RESET_SW,     label: Reset Switch, cc: 113, value: 4, hint: Off/On, set: set_reset_switch }
+  - { entry: 17, module: LFO_1,     key: WAVE,         label: Wave,         cc: 33,  value: 4, hint: Tri to Sq, set: set_wave }
+  - { entry: 18, module: LFO_1,     key: RATE,         label: Rate,         cc: 3,   value: 64, set: set_rate }
+  - { entry: 19, module: LFO_1,     key: LEVEL,        label: Level,        cc: 116, value: 4, set: set_level }
+  - { entry: 20, module: LFO_1,     key: RATE_MOD_AMT, label: Rate Mod Amt, cc: 0,   value: 124, hint_inputs: [RATE_MOD], set: set_rate_modulation_amount }
+  - { entry: 21, module: LFO_1,     key: LEVEL_MOD_AMT, label: Level Mod Amt, cc: 0,  value: 124, hint_inputs: [LEVEL_MOD], set: set_level_modulation_amount }
+  - { entry: 22, module: LFO_1,     key: RESET_SW,     label: Reset Switch, cc: 113, value: 4, hint: Off/On, set: set_reset_switch }
   # Mixer 1: nothing has a CC; the levels hold 0.0, as the mixer has nothing on its inputs yet,
   # and Out Level holds 0.5, as Mixer 2's powers up.
-  - { entry: 20, module: MIXER_1,   key: LEVEL_1,      label: Level 1,      cc: 0,   value: 4, hint_inputs: [IN_1], set: set_level_1 }
-  - { entry: 21, module: MIXER_1,   key: LEVEL_2,      label: Level 2,      cc: 0,   value: 4, hint_inputs: [IN_2], set: set_level_2 }
-  - { entry: 22, module: MIXER_1,   key: LEVEL_3,      label: Level 3,      cc: 0,   value: 4, hint_inputs: [IN_3], set: set_level_3 }
-  - { entry: 23, module: MIXER_1,   key: LEVEL_4,      label: Level 4,      cc: 0,   value: 4, hint_inputs: [IN_4], set: set_level_4 }
-  - { entry: 24, module: MIXER_1,   key: OUT_LEVEL,  label: Out Level,  cc: 0,   value: 64, set: set_out_level }
+  - { entry: 23, module: MIXER_1,   key: LEVEL_1,      label: Level 1,      cc: 0,   value: 4, hint_inputs: [IN_1], set: set_level_1 }
+  - { entry: 24, module: MIXER_1,   key: LEVEL_2,      label: Level 2,      cc: 0,   value: 4, hint_inputs: [IN_2], set: set_level_2 }
+  - { entry: 25, module: MIXER_1,   key: LEVEL_3,      label: Level 3,      cc: 0,   value: 4, hint_inputs: [IN_3], set: set_level_3 }
+  - { entry: 26, module: MIXER_1,   key: LEVEL_4,      label: Level 4,      cc: 0,   value: 4, hint_inputs: [IN_4], set: set_level_4 }
+  - { entry: 27, module: MIXER_1,   key: OUT_LEVEL,  label: Out Level,  cc: 0,   value: 64, set: set_out_level }
   # Osc 1 in the editor: the waveform and the pulse width, the pitch, how far each modulation
   # moves it and what the top of that is worth, then how far each modulation moves the pulse width. Pitch Coarse
   # and Fine have no CC and stay at 0.0. Mod 1 In takes EG 1 and Mod 2 In the LFO, and
@@ -296,17 +301,20 @@ controls:
   # on CC 8 and 103. Pitch Mod 2 Amt powers up at CC 124, an
   # octave either way at full LFO level, and the other three at CC 4, 0.0. Pitch Mod Range has no CC and holds 0.2, the depth at the top
   # of a Pitch Mod Amt, which brings the LFO down to a vibrato depth and the envelope to two
-  # octaves; a step of a Pitch Mod Amt is then 10 cents of the LFO. Wave is on
+  # octaves; a step of a Pitch Mod Amt is then 10 cents of the LFO. Pitch Mod 1 Switch and Pitch Mod 2
+  # Switch have no CC and hold on, so each Pitch Mod Amt alone sets its depth. Wave is on
   # CC 102 and powers up at the saw. PW is bipolar and powers up at CC 64, 0.0, a pulse of 50%.
-  - { entry: 25, module: OSC_1,     key: WAVE,     label: Wave,         cc: 102, value: 4, hint: Saw to Sq, set: set_waveform }
-  - { entry: 26, module: OSC_1,     key: PW,           label: PW,  cc: 114, value: 64, bipolar: true, hint: 50% to 0%, set: set_pulse_width }
-  - { entry: 27, module: OSC_1,     key: PITCH_COARSE,  label: Pitch Coarse,  cc: 0,   value: 64, bipolar: true, hint: ±5 Oct, set: set_pitch_coarse }
-  - { entry: 28, module: OSC_1,     key: PITCH_FINE,    label: Pitch Fine,    cc: 0,   value: 64, bipolar: true, hint: ±60 Cent, set: set_pitch_fine }
-  - { entry: 29, module: OSC_1,     key: PITCH_MOD_1_AMT, label: Pitch Mod 1 Amt, cc: 89, value: 4, hint_inputs: [MOD_1], set: set_pitch_modulation_1_amount }
-  - { entry: 30, module: OSC_1,     key: PITCH_MOD_2_AMT, label: Pitch Mod 2 Amt, cc: 13, value: 124, hint_inputs: [MOD_2], set: set_pitch_modulation_2_amount }
-  - { entry: 31, module: OSC_1,     key: PITCH_MOD_RANGE, label: Pitch Mod Range, cc: 0, value: 28, set: set_pitch_modulation_range }
-  - { entry: 32, module: OSC_1,     key: PW_MOD_1_AMT, label: PW Mod 1 Amt,  cc: 8,   value: 4, hint_inputs: [MOD_1], set: set_pw_modulation_1_amount }
-  - { entry: 33, module: OSC_1,     key: PW_MOD_2_AMT, label: PW Mod 2 Amt,  cc: 103, value: 4, hint_inputs: [MOD_2], set: set_pw_modulation_2_amount }
+  - { entry: 28, module: OSC_1,     key: WAVE,     label: Wave,         cc: 102, value: 4, hint: Saw to Sq, set: set_waveform }
+  - { entry: 29, module: OSC_1,     key: PW,           label: PW,  cc: 114, value: 64, bipolar: true, hint: 50% to 0%, set: set_pulse_width }
+  - { entry: 30, module: OSC_1,     key: PITCH_COARSE,  label: Pitch Coarse,  cc: 0,   value: 64, bipolar: true, hint: ±5 Oct, set: set_pitch_coarse }
+  - { entry: 31, module: OSC_1,     key: PITCH_FINE,    label: Pitch Fine,    cc: 0,   value: 64, bipolar: true, hint: ±60 Cent, set: set_pitch_fine }
+  - { entry: 32, module: OSC_1,     key: PITCH_MOD_1_AMT, label: Pitch Mod 1 Amt, cc: 89, value: 4, hint_inputs: [MOD_1], set: set_pitch_modulation_1_amount }
+  - { entry: 33, module: OSC_1,     key: PITCH_MOD_2_AMT, label: Pitch Mod 2 Amt, cc: 13, value: 124, hint_inputs: [MOD_2], set: set_pitch_modulation_2_amount }
+  - { entry: 34, module: OSC_1,     key: PITCH_MOD_1_SW, label: Pitch Mod 1 Switch, cc: 0, value: 124, hint: Off/On, set: set_pitch_modulation_1_switch }
+  - { entry: 35, module: OSC_1,     key: PITCH_MOD_2_SW, label: Pitch Mod 2 Switch, cc: 0, value: 124, hint: Off/On, set: set_pitch_modulation_2_switch }
+  - { entry: 36, module: OSC_1,     key: PITCH_MOD_RANGE, label: Pitch Mod Range, cc: 0, value: 28, set: set_pitch_modulation_range }
+  - { entry: 37, module: OSC_1,     key: PW_MOD_1_AMT, label: PW Mod 1 Amt,  cc: 8,   value: 4, hint_inputs: [MOD_1], set: set_pw_modulation_1_amount }
+  - { entry: 38, module: OSC_1,     key: PW_MOD_2_AMT, label: PW Mod 2 Amt,  cc: 103, value: 4, hint_inputs: [MOD_2], set: set_pw_modulation_2_amount }
   # Osc 2: Pitch Coarse and Fine are its own, on CC 85 and 76, to tune it against Osc 1: Coarse
   # powers up at CC 64, in unison, and Fine at CC 76, 12 cents sharp, for a slow beat once Osc 2
   # is turned up. Wave is its own too, on CC 104 next to Osc 1's on CC 102, sawtooth at power-up as
@@ -315,21 +323,23 @@ controls:
   # value Osc 1's does. Sync Switch is Osc 2's alone, on CC 112, and powers up off, at CC 4, so Sync
   # In, Osc 1 Out Saw, is ignored until it is turned on. Osc 2 is heard through Mixer 2 Level 2 (CC 20), which powers up at 0.7, as
   # Level 1 does for Osc 1.
-  - { entry: 34, module: OSC_2,     key: WAVE,     label: Wave,         cc: 104, value: 4, hint: Saw to Sq, set: set_waveform }
-  - { entry: 35, module: OSC_2,     key: PW,           label: PW,  cc: 114, value: 64, bipolar: true, hint: 50% to 0%, set: set_pulse_width }
-  - { entry: 36, module: OSC_2,     key: PITCH_COARSE,  label: Pitch Coarse,  cc: 85,  value: 64, bipolar: true, hint: ±5 Oct, set: set_pitch_coarse }
-  - { entry: 37, module: OSC_2,     key: PITCH_FINE,    label: Pitch Fine,    cc: 76,  value: 76, bipolar: true, hint: ±60 Cent, set: set_pitch_fine }
-  - { entry: 38, module: OSC_2,     key: PITCH_MOD_1_AMT, label: Pitch Mod 1 Amt, cc: 89, value: 4, hint_inputs: [MOD_1], set: set_pitch_modulation_1_amount }
-  - { entry: 39, module: OSC_2,     key: PITCH_MOD_2_AMT, label: Pitch Mod 2 Amt, cc: 13, value: 124, hint_inputs: [MOD_2], set: set_pitch_modulation_2_amount }
-  - { entry: 40, module: OSC_2,     key: PITCH_MOD_RANGE, label: Pitch Mod Range, cc: 0, value: 28, set: set_pitch_modulation_range }
-  - { entry: 41, module: OSC_2,     key: PW_MOD_1_AMT, label: PW Mod 1 Amt,  cc: 8,   value: 4, hint_inputs: [MOD_1], set: set_pw_modulation_1_amount }
-  - { entry: 42, module: OSC_2,     key: PW_MOD_2_AMT, label: PW Mod 2 Amt,  cc: 103, value: 4, hint_inputs: [MOD_2], set: set_pw_modulation_2_amount }
-  - { entry: 43, module: OSC_2,     key: SYNC_SW,      label: Sync Switch,  cc: 112, value: 4, hint: Off/On, set: set_sync_switch }
+  - { entry: 39, module: OSC_2,     key: WAVE,     label: Wave,         cc: 104, value: 4, hint: Saw to Sq, set: set_waveform }
+  - { entry: 40, module: OSC_2,     key: PW,           label: PW,  cc: 114, value: 64, bipolar: true, hint: 50% to 0%, set: set_pulse_width }
+  - { entry: 41, module: OSC_2,     key: PITCH_COARSE,  label: Pitch Coarse,  cc: 85,  value: 64, bipolar: true, hint: ±5 Oct, set: set_pitch_coarse }
+  - { entry: 42, module: OSC_2,     key: PITCH_FINE,    label: Pitch Fine,    cc: 76,  value: 76, bipolar: true, hint: ±60 Cent, set: set_pitch_fine }
+  - { entry: 43, module: OSC_2,     key: PITCH_MOD_1_AMT, label: Pitch Mod 1 Amt, cc: 89, value: 4, hint_inputs: [MOD_1], set: set_pitch_modulation_1_amount }
+  - { entry: 44, module: OSC_2,     key: PITCH_MOD_2_AMT, label: Pitch Mod 2 Amt, cc: 13, value: 124, hint_inputs: [MOD_2], set: set_pitch_modulation_2_amount }
+  - { entry: 45, module: OSC_2,     key: PITCH_MOD_1_SW, label: Pitch Mod 1 Switch, cc: 0, value: 124, hint: Off/On, set: set_pitch_modulation_1_switch }
+  - { entry: 46, module: OSC_2,     key: PITCH_MOD_2_SW, label: Pitch Mod 2 Switch, cc: 0, value: 124, hint: Off/On, set: set_pitch_modulation_2_switch }
+  - { entry: 47, module: OSC_2,     key: PITCH_MOD_RANGE, label: Pitch Mod Range, cc: 0, value: 28, set: set_pitch_modulation_range }
+  - { entry: 48, module: OSC_2,     key: PW_MOD_1_AMT, label: PW Mod 1 Amt,  cc: 8,   value: 4, hint_inputs: [MOD_1], set: set_pw_modulation_1_amount }
+  - { entry: 49, module: OSC_2,     key: PW_MOD_2_AMT, label: PW Mod 2 Amt,  cc: 103, value: 4, hint_inputs: [MOD_2], set: set_pw_modulation_2_amount }
+  - { entry: 50, module: OSC_2,     key: SYNC_SW,      label: Sync Switch,  cc: 112, value: 4, hint: Off/On, set: set_sync_switch }
   # Noise 1: Color crossfades Out from the white (0.0) to the red (1.0), on CC 115, and powers up
   # at CC 4, 0.0, the white. Level has no CC and holds 1.0: the noise runs at full level, and
   # Mixer 2 Level 4 (CC 23), or the depth of what it modulates, sets how much is heard.
-  - { entry: 44, module: NOISE_1,   key: COLOR,        label: Color,        cc: 115, value: 4, hint: White to Red, set: set_color }
-  - { entry: 45, module: NOISE_1,   key: LEVEL,        label: Level,        cc: 0,   value: 124, set: set_level }
+  - { entry: 51, module: NOISE_1,   key: COLOR,        label: Color,        cc: 115, value: 4, hint: White to Red, set: set_color }
+  - { entry: 52, module: NOISE_1,   key: LEVEL,        label: Level,        cc: 0,   value: 124, set: set_level }
   # Mixer 2, the audio ahead of the filter: Osc 1 on In 1, Osc 2 on In 2, Osc 1's sub on In 3 and
   # the noise on In 4.
   # Level 1 and 2 (CC 19 and 20) power up at CC 88, 0.7: two saws 12 cents apart come out about
@@ -338,11 +348,11 @@ controls:
   # full level from Noise 1, silent. Out Level has no CC and holds 0.5: how
   # hard the sum drives the filter, the one Mixer 2 feeds, and what keeps two oscillators and the
   # noise all at full level, a sum of 1.5 at most, inside the mixer's range.
-  - { entry: 46, module: MIXER_2,   key: LEVEL_1,      label: Level 1,      cc: 19,  value: 88, hint_inputs: [IN_1], set: set_level_1 }
-  - { entry: 47, module: MIXER_2,   key: LEVEL_2,      label: Level 2,      cc: 20,  value: 88, hint_inputs: [IN_2], set: set_level_2 }
-  - { entry: 48, module: MIXER_2,   key: LEVEL_3,      label: Level 3,      cc: 21,  value: 4, hint_inputs: [IN_3], set: set_level_3 }
-  - { entry: 49, module: MIXER_2,   key: LEVEL_4,      label: Level 4,      cc: 23,  value: 4, hint_inputs: [IN_4], set: set_level_4 }
-  - { entry: 50, module: MIXER_2,   key: OUT_LEVEL,  label: Out Level,  cc: 0,   value: 64, set: set_out_level }
+  - { entry: 53, module: MIXER_2,   key: LEVEL_1,      label: Level 1,      cc: 19,  value: 88, hint_inputs: [IN_1], set: set_level_1 }
+  - { entry: 54, module: MIXER_2,   key: LEVEL_2,      label: Level 2,      cc: 20,  value: 88, hint_inputs: [IN_2], set: set_level_2 }
+  - { entry: 55, module: MIXER_2,   key: LEVEL_3,      label: Level 3,      cc: 21,  value: 4, hint_inputs: [IN_3], set: set_level_3 }
+  - { entry: 56, module: MIXER_2,   key: LEVEL_4,      label: Level 4,      cc: 23,  value: 4, hint_inputs: [IN_4], set: set_level_4 }
+  - { entry: 57, module: MIXER_2,   key: OUT_LEVEL,  label: Out Level,  cc: 0,   value: 64, set: set_out_level }
   # Filter 1 in the editor: the cutoff, the resonance and Mode, then the cutoff's keyboard
   # tracking, its two modulations and their polarity. Pitch In takes the pitch from Pitch 1, as Osc 1 Pitch In
   # does, and Pitch Amt (CC 9) at its top makes the cutoff follow the note a semitone for a
@@ -356,31 +366,31 @@ controls:
   # makes the envelope close the filter. Mode crossfades Out from the low pass (0.0) through a
   # notch (0.5) to the high pass (1.0), on CC 39, and powers up at CC 4,
   # 0.0, the low pass.
-  - { entry: 51, module: FILTER_1,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 112, set: set_cutoff }
-  - { entry: 52, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 64, set: set_resonance }
-  - { entry: 53, module: FILTER_1,  key: MODE,         label: Mode,         cc: 39,  value: 4, hint: LP to Notch to HP, set: set_mode }
-  - { entry: 54, module: FILTER_1,  key: PITCH_AMT, label: Pitch Amt, cc: 9, value: 4, hint_inputs: [PITCH], set: set_pitch_amount }
-  - { entry: 55, module: FILTER_1,  key: MOD_1_AMT,    label: Mod 1 Amt,    cc: 24,  value: 4, hint_inputs: [MOD_1], set: set_modulation_1_amount }
-  - { entry: 56, module: FILTER_1,  key: MOD_2_AMT,    label: Mod 2 Amt,    cc: 25,  value: 4, hint_inputs: [MOD_2], set: set_modulation_2_amount }
-  - { entry: 57, module: FILTER_1,  key: MOD_POLARITY, label: Mod Polarity, cc: 51,  value: 124, bipolar: true, hint: − to +, set: set_modulation_polarity }
+  - { entry: 58, module: FILTER_1,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 112, set: set_cutoff }
+  - { entry: 59, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 64, set: set_resonance }
+  - { entry: 60, module: FILTER_1,  key: MODE,         label: Mode,         cc: 39,  value: 4, hint: LP to Notch to HP, set: set_mode }
+  - { entry: 61, module: FILTER_1,  key: PITCH_AMT, label: Pitch Amt, cc: 9, value: 4, hint_inputs: [PITCH], set: set_pitch_amount }
+  - { entry: 62, module: FILTER_1,  key: MOD_1_AMT,    label: Mod 1 Amt,    cc: 24,  value: 4, hint_inputs: [MOD_1], set: set_modulation_1_amount }
+  - { entry: 63, module: FILTER_1,  key: MOD_2_AMT,    label: Mod 2 Amt,    cc: 25,  value: 4, hint_inputs: [MOD_2], set: set_modulation_2_amount }
+  - { entry: 64, module: FILTER_1,  key: MOD_POLARITY, label: Mod Polarity, cc: 51,  value: 124, bipolar: true, hint: − to +, set: set_modulation_polarity }
   # Amp 1: Gain, on CC 15, is doubled, so it powers up at CC 64, a gain of
   # 1.0, and CC 124 brings the sound up by 6 dB; the amp holds its output to one unit. Mod 1/2
   # Mix, on CC 36, crossfades what scales the gain from Mod 1 In, EG 1, at 0.0 (CC 4), where it
   # powers up, to Mod 2 In, EG 2, the organ envelope, at 1.0 (CC 124).
-  - { entry: 58, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 64, set: set_gain }
-  - { entry: 59, module: AMP_1,     key: MOD_1_2_MIX,  label: Mod 1/2 Mix,  cc: 36,  value: 4, hint_inputs: [MOD_1, MOD_2], set: set_modulation_mix }
-  - { entry: 60, module: CHORUS_1,  key: MIX,          label: Mix,          cc: 93,  value: 64, set: set_mix }
-  - { entry: 61, module: CHORUS_1,  key: RATE,         label: Rate,         cc: 58,  value: 64, set: set_rate }
-  - { entry: 62, module: CHORUS_1,  key: DEPTH,        label: Depth,        cc: 59,  value: 64, set: set_depth }
-  - { entry: 63, module: DELAY_1,   key: MIX,          label: Mix,          cc: 94,  value: 34, set: set_mix }
-  - { entry: 64, module: DELAY_1,   key: TIME,         label: Time,         cc: 90,  value: 64, set: set_time }
-  - { entry: 65, module: DELAY_1,   key: FEEDBACK,     label: Feedback,     cc: 92,  value: 64, set: set_feedback }
+  - { entry: 65, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 64, set: set_gain }
+  - { entry: 66, module: AMP_1,     key: MOD_1_2_MIX,  label: Mod 1/2 Mix,  cc: 36,  value: 4, hint_inputs: [MOD_1, MOD_2], set: set_modulation_mix }
+  - { entry: 67, module: CHORUS_1,  key: MIX,          label: Mix,          cc: 93,  value: 64, set: set_mix }
+  - { entry: 68, module: CHORUS_1,  key: RATE,         label: Rate,         cc: 58,  value: 64, set: set_rate }
+  - { entry: 69, module: CHORUS_1,  key: DEPTH,        label: Depth,        cc: 59,  value: 64, set: set_depth }
+  - { entry: 70, module: DELAY_1,   key: MIX,          label: Mix,          cc: 94,  value: 34, set: set_mix }
+  - { entry: 71, module: DELAY_1,   key: TIME,         label: Time,         cc: 90,  value: 64, set: set_time }
+  - { entry: 72, module: DELAY_1,   key: FEEDBACK,     label: Feedback,     cc: 92,  value: 64, set: set_feedback }
 
   # The mod wheel, a controller control: its CC, CC 1 as in the MIDI spec, put on the bus as a
   # unipolar slot (see `signals`) for any input or parameter to read. It powers up at CC 4, 0.0.
-  - { entry: 66, controller: true, key: MOD_WHEEL, label: Mod Wheel, cc: 1,   value: 4 }
-  # The general controls, on CC 16 and 17, General Purpose Controllers 1 and 2 in the MIDI spec,
-  # each filling its six slots (see `signals`). They power up at CC 4, 0.0, and the default patch
-  # routes none of them.
-  - { entry: 67, controller: true, key: GENERAL_1, label: General 1, cc: 16,  value: 4 }
-  - { entry: 68, controller: true, key: GENERAL_2, label: General 2, cc: 17,  value: 4 }
+  - { entry: 73, controller: true, key: MOD_WHEEL, label: Mod Wheel, cc: 1,   value: 4 }
+  # The general controls, each filling its six slots (see `signals`). They have no CC, so they
+  # hold 0.0 until a patch gives them one, such as CC 16 and 17, General Purpose Controllers 1
+  # and 2 in the MIDI spec, and the default patch routes none of them.
+  - { entry: 74, controller: true, key: GENERAL_1, label: General 1, cc: 0,   value: 4 }
+  - { entry: 75, controller: true, key: GENERAL_2, label: General 2, cc: 0,   value: 4 }
