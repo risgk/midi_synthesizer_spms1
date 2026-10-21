@@ -45,11 +45,14 @@
 |                            23 | x             | o             | Mixer 2 Level 4 (Noise Level)        |
 |                           115 | x             | o             | Noise Color (White to Red)           |
 |                            15 | x             | o             | Amp Gain                             |
-|                            36 | x             | o             | Amp Mod 1/2 Mix (Gate to EG)         |
-|                            73 | x             | o             | EG Attack (Time)                     |
-|                            75 | x             | o             | EG Decay (Time)                      |
-|                            30 | x             | o             | EG Sustain (Level)                   |
-|                           105 | x             | o             | EG Release Switch [Off|On]           |
+|                            36 | x             | o             | Amp Mod 1/2 Mix (EG 1 to EG 2)       |
+|                            73 | x             | o             | EG 1 Attack (Time)                   |
+|                            75 | x             | o             | EG 1 Decay (Time)                    |
+|                            30 | x             | o             | EG 1 Sustain (Level)                 |
+|                           105 | x             | o             | EG 1/2 Release Switch [Off|On]       |
+|                            52 | x             | o             | EG 2 Attack (Time)                   |
+|                            53 | x             | o             | EG 2 Decay (Time)                    |
+|                            54 | x             | o             | EG 2 Sustain (Level)                 |
 |                             3 | x             | o             | LFO Rate                             |
 |                           113 | x             | o             | LFO Level                            |
 |                            33 | x             | o             | LFO Wave (Triangle to Square)        |

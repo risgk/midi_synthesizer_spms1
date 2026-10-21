@@ -21,9 +21,9 @@ module Spms1
       @gain = 1.0
       @stage_1_gain = 1.0
       @current_gain = 1.0
-      @modulation_mix = 1.0
-      @stage_1_modulation_mix = 1.0
-      @current_modulation_mix = 1.0
+      @modulation_mix = 0.0
+      @stage_1_modulation_mix = 0.0
+      @current_modulation_mix = 0.0
     end
 
     # Gain is unipolar, [0.0, 1.0], and doubled into a multiplier, so that the middle of the dial

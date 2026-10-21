@@ -38,9 +38,11 @@ static inline sp_int sp_IntArray_length(sp_IntArray*a){return a->len;}
 static inline sp_bool sp_IntArray_empty(sp_IntArray*a){return a->len==0;}
 /* MCU: the in-range access first, inline, and the rest out of line with the released body
    unchanged, so what an access does is the same and only its cost moves. Inlined as released, every
-   bus read and write in the synth paid for all of its checks in turn (null, negative, length). */
+   bus read and write in the synth paid for all of its checks in turn (null, negative, length).
+   The inline part does not check for null: a program for the MCU never indexes a nil array, which
+   Ruby would answer with NoMethodError, so the check only cost every access a compare. */
 static sp_int __attribute__((noinline)) sp_IntArray_get_slow(sp_IntArray*a,sp_int i){if(!a)return SP_INT_NIL;if(i<0)i+=a->len;if(i<0||i>=a->len)return SP_INT_NIL;return a->data[a->start+i];}
-static inline sp_int sp_IntArray_get(sp_IntArray*a,sp_int i){if(__builtin_expect(a&&(uintptr_t)i<(uintptr_t)a->len,1))return a->data[a->start+i];return sp_IntArray_get_slow(a,i);}
+static inline sp_int sp_IntArray_get(sp_IntArray*a,sp_int i){if(__builtin_expect((uintptr_t)i<(uintptr_t)a->len,1))return a->data[a->start+i];return sp_IntArray_get_slow(a,i);}
 /* Issue #769: a very-negative i leaves i negative after the `i += a->len`
    adjustment. CRuby raises IndexError; spinel no-ops as the safest
    fallback (raising from a typed-array set would need setjmp plumbing
@@ -48,7 +50,8 @@ static inline sp_int sp_IntArray_get(sp_IntArray*a,sp_int i){if(__builtin_expect
 static void sp_IntArray_set_slow(sp_IntArray*a,sp_int i,sp_int v){if(i<0)return;while(a->start+i>=a->cap){sp_gc_hdr*h=(sp_gc_hdr*)((char*)a-sizeof(sp_gc_hdr));sp_gc_bytes_sub(sizeof(sp_int)*a->cap);h->size-=sizeof(sp_int)*a->cap;a->cap=((((((a->cap*2))))))+1;a->data=(sp_int*)realloc(a->data,sizeof(sp_int)*a->cap);h->size+=sizeof(sp_int)*a->cap;sp_gc_bytes_add(sizeof(sp_int)*a->cap);}while(i>=a->len){a->data[a->start+a->len]=SP_INT_NIL;a->len++;}  /* gap slots read as nil */a->data[a->start+i]=v;}
 /* Issue #839: an extreme negative index (still negative after `i += len`)
    raises IndexError per MRI. */
-static inline void sp_IntArray_set(sp_IntArray*a,sp_int i,sp_int v){if(!a)return;if(a->frozen){sp_raise_frozen_array_at(a, SP_BUILTIN_INT_ARRAY);return;}sp_int orig=i;if(i<0)i+=a->len;if(i<0)sp_raise_cls("IndexError",sp_sprintf("index %lld too small for array; minimum: %lld",(long long)orig,(long long)-a->len));if(i<a->len){a->data[a->start+i]=v;return;}sp_IntArray_set_slow(a,i,v);}
+/* MCU: no null check, as for sp_IntArray_get. */
+static inline void sp_IntArray_set(sp_IntArray*a,sp_int i,sp_int v){if(a->frozen){sp_raise_frozen_array_at(a, SP_BUILTIN_INT_ARRAY);return;}sp_int orig=i;if(i<0)i+=a->len;if(i<0)sp_raise_cls("IndexError",sp_sprintf("index %lld too small for array; minimum: %lld",(long long)orig,(long long)-a->len));if(i<a->len){a->data[a->start+i]=v;return;}sp_IntArray_set_slow(a,i,v);}
 
 /* ---- sp_IntArray cold ops (compiled in lib/sp_array.c) ---- */
 sp_IntArray *sp_IntArray_from_range(sp_int s, sp_int e);
@@ -107,9 +110,10 @@ static inline sp_int sp_FloatArray_length(sp_FloatArray*a){return a->len;}
 static inline sp_bool sp_FloatArray_empty(sp_FloatArray*a){return a->len==0;}
 /* MCU: the in-range access first, inline, and the rest out of line with the released body
    unchanged, so what an access does is the same and only its cost moves. Inlined as released, every
-   bus read and write in the synth paid for all of its checks in turn (null, negative, length). */
+   bus read and write in the synth paid for all of its checks in turn (null, negative, length).
+   The inline part does not check for null, as sp_IntArray_get does not. */
 static sp_float __attribute__((noinline)) sp_FloatArray_get_slow(sp_FloatArray*a,sp_int i){if(!a)return sp_float_nil();if(i<0)i+=a->len;if(i<0||i>=a->len)return sp_float_nil();return a->data[i];}
-static inline sp_float sp_FloatArray_get(sp_FloatArray*a,sp_int i){if(__builtin_expect(a&&(uintptr_t)i<(uintptr_t)a->len,1))return a->data[i];return sp_FloatArray_get_slow(a,i);}
+static inline sp_float sp_FloatArray_get(sp_FloatArray*a,sp_int i){if(__builtin_expect((uintptr_t)i<(uintptr_t)a->len,1))return a->data[i];return sp_FloatArray_get_slow(a,i);}
 /* first/last as float? : nil (sentinel) when empty, else the element.
    `[i]` stays non-nullable (0.0 for OOB) -- only first/last produce nil. */
 static inline sp_float sp_FloatArray_first_opt(sp_FloatArray*a){return (!a||a->len<=0)?sp_float_nil():sp_FloatArray_get(a,0);}
@@ -117,9 +121,10 @@ static inline sp_float sp_FloatArray_last_opt(sp_FloatArray*a){return (!a||a->le
 /* Issue #769: no-op for negative index after adjustment. */
 /* MCU: the in-range access first, inline, and the rest out of line with the released body
    unchanged, so what an access does is the same and only its cost moves. Inlined as released, every
-   bus read and write in the synth paid for all of its checks in turn (null, frozen, negative, capacity, length). */
+   bus read and write in the synth paid for all of its checks in turn (null, frozen, negative, capacity, length).
+   The inline part does not check for null, as sp_IntArray_get does not; it keeps the frozen check. */
 static void __attribute__((noinline)) sp_FloatArray_set_slow(sp_FloatArray*a,sp_int i,sp_float v){if(!a)return;if(a->frozen){sp_raise_frozen_array_at(a, SP_BUILTIN_FLT_ARRAY);return;}sp_int orig=i;if(i<0)i+=a->len;if(i<0)sp_raise_cls("IndexError",sp_sprintf("index %lld too small for array; minimum: %lld",(long long)orig,(long long)-a->len));while(i>=a->cap){a->cap=((((((a->cap*2))))))+1;a->data=(sp_float*)realloc(a->data,sizeof(sp_float)*a->cap);}while(i>=a->len){a->data[a->len]=sp_float_nil();a->len++;}a->data[i]=v;}  /* the gap is nil, not 0.0 (#3836) */
-static inline void sp_FloatArray_set(sp_FloatArray*a,sp_int i,sp_float v){if(__builtin_expect(a&&!a->frozen&&(uintptr_t)i<(uintptr_t)a->len,1)){a->data[i]=v;return;}sp_FloatArray_set_slow(a,i,v);}
+static inline void sp_FloatArray_set(sp_FloatArray*a,sp_int i,sp_float v){if(__builtin_expect(!a->frozen&&(uintptr_t)i<(uintptr_t)a->len,1)){a->data[i]=v;return;}sp_FloatArray_set_slow(a,i,v);}
 
 /* One step of CRuby's compensated summation (array.c ary_sum): Kahan-Babuska-
    Neumaier, where `comp` collects the low-order bits each add drops and is
