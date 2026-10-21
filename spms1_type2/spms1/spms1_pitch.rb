@@ -11,8 +11,9 @@ module Spms1
   # The glide moves only while Gate In is on, from 0.25 up, as an envelope's gate is: with the gate
   # off, it holds where it is, and the next note goes on from there.
   #
-  # There are two outputs, Out 1 and Out 2, from the one lag and the one bend: each has a glide
-  # switch and a bend switch of its own, so the glide or the bend can reach one oscillator only.
+  # There are two outputs, Out 1 and Out 2, each with a lag of its own, at the one time, and the
+  # one bend: each has a glide switch and a bend switch of its own, so the glide or the bend can
+  # reach one oscillator only.
   class Pitch
     # Lookup table for exponential time mapping, the envelope's: a twelfth of an octave per index,
     # so one CC step of the 120-step control range moves the time by a semitone and the whole dial
@@ -38,18 +39,25 @@ module Spms1
     def initialize(sample_rate)
       @sample_rate = sample_rate
       @time = 0.0
-      # The share of the distance left that is covered each sample. 1.0 is no slew at all. With
-      # the gate off, the share is 0.0, holding the glide, unless the slew is off.
+      # The share of the distance left that is covered each sample, Glide's, and each output's
+      # with the gate on and off. 1.0 is no slew at all. With the gate off, the share is 0.0,
+      # holding the glide, unless the slew is off; with its glide switch off, an output's is 1.0.
       @blend = 1.0
       @gate_off_blend = 1.0
+      @blend_1 = 1.0
+      @gate_off_blend_1 = 1.0
+      @blend_2 = 1.0
+      @gate_off_blend_2 = 1.0
       # Whether each output takes the glide and the bend: 1.0 on, 0.0 off.
       @glide_1_on = 1.0
       @glide_2_on = 1.0
       @bend_1_on = 1.0
       @bend_2_on = 1.0
       @output_2 = 0.0
-      # The state is the distance from the output to the input, not the output itself; see process.
-      @distance = 0.0
+      # Each output's state is the distance from it to the input, not the output itself; see
+      # process.
+      @distance_1 = 0.0
+      @distance_2 = 0.0
       @last_input = 0.0
       @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (48000.0 / @sample_rate) * (CONTROL_RATE_DIVISOR / 4.0)
       @bend_depth = 0.0
@@ -72,18 +80,22 @@ module Spms1
       blend = 1.0 / (TIME_BASE * calculate_exp_fast(@time) * @sample_rate)
       @blend = (@time > 0.0) ? blend : 1.0
       @gate_off_blend = (@time > 0.0) ? 0.0 : 1.0
+      update_blends
     end
 
     # Out 1 Glide Switch and Out 2 Glide Switch are unipolar, [0.0, 1.0], and each turns the
     # portamento on for its output from 0.5 (CC 64) up, as a MIDI switch is on from 64. Off, the
-    # output follows the input at once, as at Glide 0.0, mid-glide too. The lag runs on whatever
-    # the switches say, so an output switched on mid-glide joins the glide where it has got to.
+    # output's lag runs at no slew, so the output follows the input at once, as at Glide 0.0,
+    # mid-glide too, and switched on again it glides from where it is to the next note, with no
+    # step.
     def set_glide_1_switch(switch)
       @glide_1_on = (switch >= 0.5) ? 1.0 : 0.0
+      update_blends
     end
 
     def set_glide_2_switch(switch)
       @glide_2_on = (switch >= 0.5) ? 1.0 : 0.0
+      update_blends
     end
 
     # Out 1 Bend Switch and Out 2 Bend Switch are unipolar, [0.0, 1.0], and each adds Bend In to
@@ -131,15 +143,14 @@ module Spms1
     # share each sample, it would otherwise sink into denormals and stick at the smallest one,
     # which x86 computes slowly.
     #
-    # Gate In picks the share each sample: Glide's while it is on, and while it is off 0.0, which
-    # leaves the distance as it is, or 1.0 at Glide 0.0, so that no slew stays no slew whatever
-    # the gate does.
+    # Gate In picks each output's share each sample: Glide's while it is on, and while it is off
+    # 0.0, which leaves the distance as it is, or 1.0 at Glide 0.0 or with the output's glide
+    # switch off, so that no slew stays no slew whatever the gate does.
     #
     # Bend In is added past the lag, so that the lag never holds it, and so that at zero it leaves
     # the output as it was, bit for bit. Stretch multiplies the sum last, so a bend is widened with
-    # the keys; at a factor of 1.0 the product is the sum, bit for bit. Each output takes the
-    # distance and the bend through its switches, and with both on, the product by 1.0 leaves
-    # each as it is, bit for bit.
+    # the keys; at a factor of 1.0 the product is the sum, bit for bit. Each output takes the bend
+    # through its switch, and on, the product by 1.0 leaves it as it is, bit for bit.
     #
     # The outputs are held to -1.0 to +1.0, as a mixer's is: twice the pitch range, so whatever
     # the oscillator and the filter clamp to their own range is still reached at either end.
@@ -152,15 +163,19 @@ module Spms1
         @current_stretch_factor = Dsp.smooth(@stage_1_stretch_factor, @current_stretch_factor, @smoothing_target_blend)
       end
 
-      distance = @distance + (@last_input - input)
+      step = @last_input - input
       @last_input = input
-      flushed = Dsp.flush_tiny(distance)
-      blend = (gate_input >= 0.25) ? @blend : @gate_off_blend
-      @distance = flushed - flushed * blend
+      gate_on = gate_input >= 0.25
+      flushed_1 = Dsp.flush_tiny(@distance_1 + step)
+      blend_1 = gate_on ? @blend_1 : @gate_off_blend_1
+      @distance_1 = flushed_1 - flushed_1 * blend_1
+      flushed_2 = Dsp.flush_tiny(@distance_2 + step)
+      blend_2 = gate_on ? @blend_2 : @gate_off_blend_2
+      @distance_2 = flushed_2 - flushed_2 * blend_2
       bend = bend_input * @current_bend_depth
-      output_2 = ((input + @distance * @glide_2_on) + (bend * @bend_2_on)) * @current_stretch_factor
+      output_2 = ((input + @distance_2) + (bend * @bend_2_on)) * @current_stretch_factor
       @output_2 = (output_2 < -1.0) ? -1.0 : ((output_2 > 1.0) ? 1.0 : output_2)
-      output = ((input + @distance * @glide_1_on) + (bend * @bend_1_on)) * @current_stretch_factor
+      output = ((input + @distance_1) + (bend * @bend_1_on)) * @current_stretch_factor
       (output < -1.0) ? -1.0 : ((output > 1.0) ? 1.0 : output)
     end
 
@@ -169,6 +184,14 @@ module Spms1
     end
 
     private
+
+    # Each output's shares, Glide's through its glide switch.
+    def update_blends
+      @blend_1 = (@glide_1_on > 0.0) ? @blend : 1.0
+      @gate_off_blend_1 = (@glide_1_on > 0.0) ? @gate_off_blend : 1.0
+      @blend_2 = (@glide_2_on > 0.0) ? @blend : 1.0
+      @gate_off_blend_2 = (@glide_2_on > 0.0) ? @gate_off_blend : 1.0
+    end
 
     def calculate_exp_fast(value)
       v_scale = value * 120.0

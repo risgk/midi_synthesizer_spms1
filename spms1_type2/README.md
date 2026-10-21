@@ -933,8 +933,8 @@ note played during a glide takes it over from there. It moves only while Gate In
 0.25 up, as an envelope's gate is; with the gate off it holds, and Glide at 0.0 still passes the
 input whatever the gate does. Gate In at Constant 1.0 glides on through the rests. The time is not smoothed: a change in it
 changes only how fast the output moves, so it cannot step it. An output's Glide Switch off, below
-value 64, takes that output to the input at once, mid-glide too, as Glide at 0.0 does; the glide
-runs on, so an output switched on again mid-glide joins it where it has got to.
+value 64, takes that output to the input at once, mid-glide too, as Glide at 0.0 does; each
+output has a glide of its own, so one switched on again glides on from where it is, with no step.
 
 Osc 1 and Osc 2 each have a Pitch Mod 1 Switch and a Pitch Mod 2 Switch, with no CC, on at
 power-up. One set off, below value 64, takes its Mod In off the pitch, the depth going to 0.0 as
