@@ -441,6 +441,9 @@ while true
   cc_mod_wheel = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MOD_WHEEL)
   mod_wheel = C.get_midi_cc_value(MIDI_CH, cc_mod_wheel)
   signals[SIGNAL_MOD_WHEEL] = cc_or_zero(cc_mod_wheel, cc_to_unipolar(mod_wheel))
+  signals[SIGNAL_MOD_WHEEL_REV] = 1.0 - signals[SIGNAL_MOD_WHEEL]
+  signals[SIGNAL_MOD_WHEEL_INV] = 0.0 - signals[SIGNAL_MOD_WHEEL]
+  signals[SIGNAL_MOD_WHEEL_REV_INV] = signals[SIGNAL_MOD_WHEEL] - 1.0
   cc_general_1 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_1)
   general_1 = C.get_midi_cc_value(MIDI_CH, cc_general_1)
   signals[SIGNAL_GENERAL_1] = cc_or_zero(cc_general_1, cc_to_unipolar(general_1))
@@ -564,57 +567,57 @@ while true
       case module_id
       # patch_gen dispatch
       when 1 # MODULE_PITCH_1
-        signals[21] = pitch_1.process(control_tick, signals[source_pitch_1_pitch], signals[source_pitch_1_bend], signals[source_pitch_1_gate]) # SIGNAL_PITCH_1_OUTPUT_1
-        signals[22] = pitch_1.output_2 # SIGNAL_PITCH_1_OUTPUT_2
+        signals[24] = pitch_1.process(control_tick, signals[source_pitch_1_pitch], signals[source_pitch_1_bend], signals[source_pitch_1_gate]) # SIGNAL_PITCH_1_OUTPUT_1
+        signals[25] = pitch_1.output_2 # SIGNAL_PITCH_1_OUTPUT_2
       when 2 # MODULE_EG_1
-        signals[23] = eg_1.process(control_tick, signals[source_eg_1_gate]) # SIGNAL_EG_1_OUTPUT
-        signals[24] = eg_1.output_inverted # SIGNAL_EG_1_OUTPUT_INV
+        signals[26] = eg_1.process(control_tick, signals[source_eg_1_gate]) # SIGNAL_EG_1_OUTPUT
+        signals[27] = eg_1.output_inverted # SIGNAL_EG_1_OUTPUT_INV
       when 3 # MODULE_EG_2
-        signals[25] = eg_2.process(control_tick, signals[source_eg_2_gate]) # SIGNAL_EG_2_OUTPUT
-        signals[26] = eg_2.output_inverted # SIGNAL_EG_2_OUTPUT_INV
+        signals[28] = eg_2.process(control_tick, signals[source_eg_2_gate]) # SIGNAL_EG_2_OUTPUT
+        signals[29] = eg_2.output_inverted # SIGNAL_EG_2_OUTPUT_INV
       when 4 # MODULE_LFO_1
-        signals[27] = lfo_1.process(control_tick, signals[source_lfo_1_rate_mod], signals[source_lfo_1_level_mod], signals[source_lfo_1_reset]) # SIGNAL_LFO_1_OUTPUT
-        signals[28] = lfo_1.output_inverted # SIGNAL_LFO_1_OUTPUT_INV
-        signals[29] = lfo_1.output_triangle # SIGNAL_LFO_1_OUTPUT_TRIANGLE
-        signals[30] = lfo_1.output_triangle_inverted # SIGNAL_LFO_1_OUTPUT_TRIANGLE_INV
-        signals[31] = lfo_1.output_square # SIGNAL_LFO_1_OUTPUT_SQUARE
-        signals[32] = lfo_1.output_square_inverted # SIGNAL_LFO_1_OUTPUT_SQUARE_INV
+        signals[30] = lfo_1.process(control_tick, signals[source_lfo_1_rate_mod], signals[source_lfo_1_level_mod], signals[source_lfo_1_reset]) # SIGNAL_LFO_1_OUTPUT
+        signals[31] = lfo_1.output_inverted # SIGNAL_LFO_1_OUTPUT_INV
+        signals[32] = lfo_1.output_triangle # SIGNAL_LFO_1_OUTPUT_TRIANGLE
+        signals[33] = lfo_1.output_triangle_inverted # SIGNAL_LFO_1_OUTPUT_TRIANGLE_INV
+        signals[34] = lfo_1.output_square # SIGNAL_LFO_1_OUTPUT_SQUARE
+        signals[35] = lfo_1.output_square_inverted # SIGNAL_LFO_1_OUTPUT_SQUARE_INV
       when 5 # MODULE_MIXER_1
-        signals[33] = mixer_1.process(control_tick, signals[source_mixer_1_in_1], signals[source_mixer_1_in_2], signals[source_mixer_1_in_3], signals[source_mixer_1_in_4]) # SIGNAL_MIXER_1_OUTPUT
-        signals[34] = mixer_1.output_inverted # SIGNAL_MIXER_1_OUTPUT_INV
+        signals[36] = mixer_1.process(control_tick, signals[source_mixer_1_in_1], signals[source_mixer_1_in_2], signals[source_mixer_1_in_3], signals[source_mixer_1_in_4]) # SIGNAL_MIXER_1_OUTPUT
+        signals[37] = mixer_1.output_inverted # SIGNAL_MIXER_1_OUTPUT_INV
       when 6 # MODULE_OSC_1
-        signals[35] = osc_1.process(control_tick, signals[source_osc_1_pitch], signals[source_osc_1_mod_1], signals[source_osc_1_mod_2]) # SIGNAL_OSC_1_OUTPUT
-        signals[36] = osc_1.output_saw # SIGNAL_OSC_1_OUTPUT_SAW
-        signals[37] = osc_1.output_pulse # SIGNAL_OSC_1_OUTPUT_PULSE
-        signals[38] = osc_1.output_sub # SIGNAL_OSC_1_OUTPUT_SUB
+        signals[38] = osc_1.process(control_tick, signals[source_osc_1_pitch], signals[source_osc_1_mod_1], signals[source_osc_1_mod_2]) # SIGNAL_OSC_1_OUTPUT
+        signals[39] = osc_1.output_saw # SIGNAL_OSC_1_OUTPUT_SAW
+        signals[40] = osc_1.output_pulse # SIGNAL_OSC_1_OUTPUT_PULSE
+        signals[41] = osc_1.output_sub # SIGNAL_OSC_1_OUTPUT_SUB
       when 7 # MODULE_OSC_2
-        signals[39] = osc_2.process_synced(control_tick, signals[source_osc_2_pitch], signals[source_osc_2_mod_1], signals[source_osc_2_mod_2], signals[source_osc_2_sync]) # SIGNAL_OSC_2_OUTPUT
-        signals[40] = osc_2.output_saw # SIGNAL_OSC_2_OUTPUT_SAW
-        signals[41] = osc_2.output_pulse # SIGNAL_OSC_2_OUTPUT_PULSE
+        signals[42] = osc_2.process_synced(control_tick, signals[source_osc_2_pitch], signals[source_osc_2_mod_1], signals[source_osc_2_mod_2], signals[source_osc_2_sync]) # SIGNAL_OSC_2_OUTPUT
+        signals[43] = osc_2.output_saw # SIGNAL_OSC_2_OUTPUT_SAW
+        signals[44] = osc_2.output_pulse # SIGNAL_OSC_2_OUTPUT_PULSE
       when 8 # MODULE_NOISE_1
-        signals[42] = noise_1.process(control_tick) # SIGNAL_NOISE_1_OUTPUT
-        signals[43] = noise_1.output_white # SIGNAL_NOISE_1_OUTPUT_WHITE
-        signals[44] = noise_1.output_red # SIGNAL_NOISE_1_OUTPUT_RED
+        signals[45] = noise_1.process(control_tick) # SIGNAL_NOISE_1_OUTPUT
+        signals[46] = noise_1.output_white # SIGNAL_NOISE_1_OUTPUT_WHITE
+        signals[47] = noise_1.output_red # SIGNAL_NOISE_1_OUTPUT_RED
       when 9 # MODULE_MIXER_2
-        signals[45] = mixer_2.process(control_tick, signals[source_mixer_2_in_1], signals[source_mixer_2_in_2], signals[source_mixer_2_in_3], signals[source_mixer_2_in_4]) # SIGNAL_MIXER_2_OUTPUT
-        signals[46] = mixer_2.output_inverted # SIGNAL_MIXER_2_OUTPUT_INV
+        signals[48] = mixer_2.process(control_tick, signals[source_mixer_2_in_1], signals[source_mixer_2_in_2], signals[source_mixer_2_in_3], signals[source_mixer_2_in_4]) # SIGNAL_MIXER_2_OUTPUT
+        signals[49] = mixer_2.output_inverted # SIGNAL_MIXER_2_OUTPUT_INV
       when 10 # MODULE_FILTER_1
-        signals[47] = filter_1.process(control_tick, signals[source_filter_1_audio], signals[source_filter_1_pitch], signals[source_filter_1_mod_1], signals[source_filter_1_mod_2]) # SIGNAL_FILTER_1_OUTPUT
-        signals[48] = filter_1.output_lp # SIGNAL_FILTER_1_OUTPUT_LP
-        signals[49] = filter_1.output_hp # SIGNAL_FILTER_1_OUTPUT_HP
-        signals[50] = filter_1.output_bp # SIGNAL_FILTER_1_OUTPUT_BP
+        signals[50] = filter_1.process(control_tick, signals[source_filter_1_audio], signals[source_filter_1_pitch], signals[source_filter_1_mod_1], signals[source_filter_1_mod_2]) # SIGNAL_FILTER_1_OUTPUT
+        signals[51] = filter_1.output_lp # SIGNAL_FILTER_1_OUTPUT_LP
+        signals[52] = filter_1.output_hp # SIGNAL_FILTER_1_OUTPUT_HP
+        signals[53] = filter_1.output_bp # SIGNAL_FILTER_1_OUTPUT_BP
       when 11 # MODULE_AMP_1
-        signals[51] = amp_1.process(control_tick, signals[source_amp_1_audio], signals[source_amp_1_mod_1], signals[source_amp_1_mod_2]) # SIGNAL_AMP_1_OUTPUT
+        signals[54] = amp_1.process(control_tick, signals[source_amp_1_audio], signals[source_amp_1_mod_1], signals[source_amp_1_mod_2]) # SIGNAL_AMP_1_OUTPUT
       when 12 # MODULE_CHORUS_1
         chorus_1.process(control_tick, signals[source_chorus_1_audio])
-        signals[52] = chorus_1.output_l # SIGNAL_CHORUS_1_OUTPUT_L
-        signals[53] = chorus_1.output_r # SIGNAL_CHORUS_1_OUTPUT_R
-        signals[54] = chorus_1.output_mono # SIGNAL_CHORUS_1_OUTPUT_MONO
+        signals[55] = chorus_1.output_l # SIGNAL_CHORUS_1_OUTPUT_L
+        signals[56] = chorus_1.output_r # SIGNAL_CHORUS_1_OUTPUT_R
+        signals[57] = chorus_1.output_mono # SIGNAL_CHORUS_1_OUTPUT_MONO
       when 13 # MODULE_DELAY_1
         delay_1.process(control_tick, signals[source_delay_1_audio_l], signals[source_delay_1_audio_r])
-        signals[55] = delay_1.output_l # SIGNAL_DELAY_1_OUTPUT_L
-        signals[56] = delay_1.output_r # SIGNAL_DELAY_1_OUTPUT_R
-        signals[57] = delay_1.output_mono # SIGNAL_DELAY_1_OUTPUT_MONO
+        signals[58] = delay_1.output_l # SIGNAL_DELAY_1_OUTPUT_L
+        signals[59] = delay_1.output_r # SIGNAL_DELAY_1_OUTPUT_R
+        signals[60] = delay_1.output_mono # SIGNAL_DELAY_1_OUTPUT_MONO
       # patch_gen end
       end
 
