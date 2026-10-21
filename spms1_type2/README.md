@@ -91,9 +91,9 @@ Usage
 ### Web Editor
 
 - Cross-platform web-based parameter controller via Web MIDI API: "spms1_editor.html"
-    - Its Controls tab shows a slider for each parameter, those with no CC in blue; they are hidden
-      when "Show parameters with no CC", ticked by default, is cleared, until a CC is given to one,
-      and the choice is remembered. The slider of one with no CC sets the value its slot holds,
+    - Its Controls tab shows a slider for each parameter, those with no CC in blue; these are
+      hidden until a CC is given to one, unless "Show parameters with no CC", cleared by default, is
+      ticked, and the choice is remembered. The slider of one with no CC sets the value its slot holds,
       sent as NRPN
     - A note in parentheses follows a parameter's name there: its range, as "(White to Red)" on
       Noise 1 Color, or, on a level or a modulation amount, what the patch routes to the input it
@@ -226,7 +226,7 @@ power up off, so neither takes effect until it is turned on. The mod wheel reach
 
 Each module is processed once per sample, in the run order below. Their parameters -- waveform,
 cutoff, gain and the rest -- arrive from CC and are left out of the diagram. Parameter names
-shorten Amount to Amt and Switch to Sw.
+shorten Amount to Amt, Switch to Sw and Polarity to Pol.
 
 The note's pitch reaches the oscillator through Pitch 1, which glides from one note to the next:
 portamento. Pitch 1 Glide is on CC#5, Portamento Time in the MIDI spec, and powers up at 0.0, where
@@ -245,7 +245,7 @@ value 28, where it powers up, and 5 octaves at value 124.
 The LFO goes straight to the oscillator, both to its pitch and to its pulse width, on Mod 2 In, and to the filter, where Filter 1 Mod 2 Amt (CC#25) powers up at 0.0 and
 leaves the cutoff alone until it is turned up, as Filter 1 Mod 1 Amt (CC#24) does the envelope's;
 Filter 1 Cutoff (CC#74) powers up at 0.9 (value 112). Osc 1 Pitch Mod 2 Amt (CC#13) takes the
-LFO to the pitch and powers up at 0.0; at its top, value 124, with Osc 1 Pitch Mod Range at 0.2,
+LFO to the pitch and powers up at 0.0; at its top, value 124, with Osc 1 Pitch Mod 2 Pol at +0.2,
 the LFO at full level swings the pitch an octave either way. Osc 1 PW Mod 2 Amt (CC#103) takes it
 to the pulse width and powers up at 0.0. LFO 1 Level powers up at 1.0, so CC#13 alone sets the
 vibrato, from none to an octave. The pitch from Pitch 1 reaches the filter too, on Filter 1 Pitch In, for keyboard tracking: CC#9
@@ -536,32 +536,34 @@ both at the same signal for a mono output.
 
 | CC#98 | Parameter | | CC#98 | Parameter | | CC#98 | Parameter |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | Pitch 1 Glide | | 26 | Mixer 1 Level 4 | | 52 | Osc 2 Sync Sw |
-| 1 | Pitch 1 Out 1 Glide Sw | | 27 | Mixer 1 Out Level | | 53 | Noise 1 Color |
-| 2 | Pitch 1 Out 2 Glide Sw | | 28 | Osc 1 Wave | | 54 | Noise 1 Level |
-| 3 | Pitch 1 Bend Amt | | 29 | Osc 1 PW | | 55 | Mixer 2 Level 1 |
-| 4 | Pitch 1 Out 1 Bend Sw | | 30 | Osc 1 Pitch Coarse | | 56 | Mixer 2 Level 2 |
-| 5 | Pitch 1 Out 2 Bend Sw | | 31 | Osc 1 Pitch | | 57 | Mixer 2 Level 3 |
-| 6 | Pitch 1 Stretch | | 32 | Osc 1 Pitch Fine | | 58 | Mixer 2 Level 4 |
-| 7 | EG 1 Attack | | 33 | Osc 1 Pitch Mod 1 Amt | | 59 | Mixer 2 Out Level |
-| 8 | EG 1 Decay | | 34 | Osc 1 Pitch Mod 2 Amt | | 60 | Filter 1 Cutoff |
-| 9 | EG 1 Sustain | | 35 | Osc 1 Pitch Mod 1 Sw | | 61 | Filter 1 Resonance |
-| 10 | EG 1 Release Sw | | 36 | Osc 1 Pitch Mod 2 Sw | | 62 | Filter 1 Mode |
-| 11 | EG 1 Level | | 37 | Osc 1 Pitch Mod Range | | 63 | Filter 1 Pitch Amt |
-| 12 | EG 2 Attack | | 38 | Osc 1 PW Mod 1 Amt | | 64 | Filter 1 Mod 1 Amt |
-| 13 | EG 2 Decay | | 39 | Osc 1 PW Mod 2 Amt | | 65 | Filter 1 Mod 2 Amt |
-| 14 | EG 2 Sustain | | 40 | Osc 2 Wave | | 66 | Filter 1 Mod 1 Polarity |
-| 15 | EG 2 Release Sw | | 41 | Osc 2 PW | | 67 | Filter 1 Mod 2 Polarity |
-| 16 | EG 2 Level | | 42 | Osc 2 Pitch Coarse | | 68 | Amp 1 Gain |
-| 17 | LFO 1 Wave | | 43 | Osc 2 Pitch | | 69 | Amp 1 Mod 1/2 Mix |
-| 18 | LFO 1 Rate | | 44 | Osc 2 Pitch Fine | | 70 | Chorus 1 Mix |
-| 19 | LFO 1 Level | | 45 | Osc 2 Pitch Mod 1 Amt | | 71 | Chorus 1 Rate |
-| 20 | LFO 1 Rate Mod Amt | | 46 | Osc 2 Pitch Mod 2 Amt | | 72 | Chorus 1 Depth |
-| 21 | LFO 1 Level Mod Amt | | 47 | Osc 2 Pitch Mod 1 Sw | | 73 | Delay 1 Mix |
-| 22 | LFO 1 Reset Sw | | 48 | Osc 2 Pitch Mod 2 Sw | | 74 | Delay 1 Time |
-| 23 | Mixer 1 Level 1 | | 49 | Osc 2 Pitch Mod Range | | 75 | Delay 1 Feedback |
-| 24 | Mixer 1 Level 2 | | 50 | Osc 2 PW Mod 1 Amt | |  |  |
-| 25 | Mixer 1 Level 3 | | 51 | Osc 2 PW Mod 2 Amt | |  |  |
+| 0 | Pitch 1 Glide | | 28 | Osc 1 Wave | | 56 | Osc 2 PW Mod 2 Amt |
+| 1 | Pitch 1 Out 1 Glide Sw | | 29 | Osc 1 PW | | 57 | Osc 2 PW Mod 2 Pol |
+| 2 | Pitch 1 Out 2 Glide Sw | | 30 | Osc 1 Pitch Coarse | | 58 | Osc 2 Sync Sw |
+| 3 | Pitch 1 Bend Amt | | 31 | Osc 1 Pitch | | 59 | Noise 1 Color |
+| 4 | Pitch 1 Out 1 Bend Sw | | 32 | Osc 1 Pitch Fine | | 60 | Noise 1 Level |
+| 5 | Pitch 1 Out 2 Bend Sw | | 33 | Osc 1 Pitch Mod 1 Amt | | 61 | Mixer 2 Level 1 |
+| 6 | Pitch 1 Stretch | | 34 | Osc 1 Pitch Mod 1 Pol | | 62 | Mixer 2 Level 2 |
+| 7 | EG 1 Attack | | 35 | Osc 1 Pitch Mod 1 Sw | | 63 | Mixer 2 Level 3 |
+| 8 | EG 1 Decay | | 36 | Osc 1 Pitch Mod 2 Amt | | 64 | Mixer 2 Level 4 |
+| 9 | EG 1 Sustain | | 37 | Osc 1 Pitch Mod 2 Pol | | 65 | Mixer 2 Out Level |
+| 10 | EG 1 Release Sw | | 38 | Osc 1 Pitch Mod 2 Sw | | 66 | Filter 1 Cutoff |
+| 11 | EG 1 Level | | 39 | Osc 1 PW Mod 1 Amt | | 67 | Filter 1 Resonance |
+| 12 | EG 2 Attack | | 40 | Osc 1 PW Mod 1 Pol | | 68 | Filter 1 Mode |
+| 13 | EG 2 Decay | | 41 | Osc 1 PW Mod 2 Amt | | 69 | Filter 1 Pitch Amt |
+| 14 | EG 2 Sustain | | 42 | Osc 1 PW Mod 2 Pol | | 70 | Filter 1 Mod 1 Amt |
+| 15 | EG 2 Release Sw | | 43 | Osc 2 Wave | | 71 | Filter 1 Mod 1 Pol |
+| 16 | EG 2 Level | | 44 | Osc 2 PW | | 72 | Filter 1 Mod 2 Amt |
+| 17 | LFO 1 Wave | | 45 | Osc 2 Pitch Coarse | | 73 | Filter 1 Mod 2 Pol |
+| 18 | LFO 1 Rate | | 46 | Osc 2 Pitch | | 74 | Amp 1 Gain |
+| 19 | LFO 1 Level | | 47 | Osc 2 Pitch Fine | | 75 | Amp 1 Mod 1/2 Mix |
+| 20 | LFO 1 Rate Mod Amt | | 48 | Osc 2 Pitch Mod 1 Amt | | 76 | Chorus 1 Mix |
+| 21 | LFO 1 Level Mod Amt | | 49 | Osc 2 Pitch Mod 1 Pol | | 77 | Chorus 1 Rate |
+| 22 | LFO 1 Reset Sw | | 50 | Osc 2 Pitch Mod 1 Sw | | 78 | Chorus 1 Depth |
+| 23 | Mixer 1 Level 1 | | 51 | Osc 2 Pitch Mod 2 Amt | | 79 | Delay 1 Mix |
+| 24 | Mixer 1 Level 2 | | 52 | Osc 2 Pitch Mod 2 Pol | | 80 | Delay 1 Time |
+| 25 | Mixer 1 Level 3 | | 53 | Osc 2 Pitch Mod 2 Sw | | 81 | Delay 1 Feedback |
+| 26 | Mixer 1 Level 4 | | 54 | Osc 2 PW Mod 1 Amt | |  |  |
+| 27 | Mixer 1 Out Level | | 55 | Osc 2 PW Mod 1 Pol | |  |  |
 
 <!-- patch_gen end -->
 
@@ -574,9 +576,9 @@ slot and the general slots on the bus; see below.
 
 | CC#98 | CC for | Fills |
 | ----- | ------ | ----- |
-| 76 | Mod Wheel | Mod Wheel, Mod Wheel Rev, Mod Wheel Inv, Mod Wheel Rev Inv |
-| 77 | General 1 | General 1, General 1 Rev, General 1 Inv, General 1 Rev Inv, General 1 Bipolar, General 1 Bipolar Inv |
-| 78 | General 2 | General 2, General 2 Rev, General 2 Inv, General 2 Rev Inv, General 2 Bipolar, General 2 Bipolar Inv |
+| 82 | Mod Wheel | Mod Wheel, Mod Wheel Rev, Mod Wheel Inv, Mod Wheel Rev Inv |
+| 83 | General 1 | General 1, General 1 Rev, General 1 Inv, General 1 Rev Inv, General 1 Bipolar, General 1 Bipolar Inv |
+| 84 | General 2 | General 2, General 2 Rev, General 2 Inv, General 2 Rev Inv, General 2 Bipolar, General 2 Bipolar Inv |
 
 <!-- patch_gen end -->
 
@@ -775,15 +777,17 @@ Level has no CC and holds 1.0, as EG 1's does.
 
 Osc 1 takes each of its two modulations, Mod 1 In and Mod 2 In, to the pitch and to the pulse
 width by a depth of its own: Pitch Mod 1 Amt and Pitch Mod 2 Amt, PW Mod 1 Amt and PW Mod 2 Amt,
-all unipolar. Pitch Mod 1 Amt and Pitch Mod 2 Amt are on CC#89 and 13, and PW Mod 1 Amt and PW Mod 2 Amt on CC#8 and 103; all four power up at 0.0. There is no Polarity: each modulation runs the way its source does,
-and one the other way up takes an inverted source, such as EG 1 Out Inv or LFO 1 Out Inv. So a
-source goes to the pulse width as well as the pitch, or to either alone, with no rewiring.
+all unipolar. Pitch Mod 1 Amt and Pitch Mod 2 Amt are on CC#89 and 13, and PW Mod 1 Amt and PW Mod 2 Amt on CC#8 and 103; all four power up at 0.0. Each has a Mod Pol after it,
+bipolar and with no CC, which multiplies it from -1.0 at value 4 through none at value 64 to +1.0
+at value 124: the sign, so a modulation runs the way its source does or the other way up, and
+what the top of the Mod Amt is worth. So a source goes to the pulse width as well as the pitch,
+or to either alone, either way up, with no rewiring.
 
-Each pitch depth is its Pitch Mod Amt times Pitch Mod Range, both unipolar and plain
-multipliers: Pitch Mod Range is what the top of a Pitch Mod Amt is worth. At a depth of 1.0 a
+Each pitch depth is its Pitch Mod Amt times its Pitch Mod Pol. At a depth of 1.0 a
 modulation reaches the whole pitch range: a bipolar source at full depth swings the pitch five
-octaves up and five down. That is a coarse range for vibrato, which is why Pitch Mod Range has no
-CC and holds 0.2 (CC value 28), the depth at the top of a Pitch Mod Amt. So Pitch Mod 2 Amt puts
+octaves up and five down. That is a coarse range for vibrato, which is why the Pitch Mod Pols
+power up at +0.2 (value 76), the depth at the top of a Pitch Mod Amt; the PW Mod Pols power up at
++1.0 (value 124). So Pitch Mod 2 Amt puts
 50 cents of vibrato at value 9, a semitone at value 14 and an octave at the top of the dial, a step
 being 10 cents, and Pitch Mod 1 Amt sweeps
 the pitch from the envelope a semitone at value 9, an octave at value 64 and two octaves at the top.
@@ -859,10 +863,10 @@ passes a loud note nearly clean, while turning the drive up rounds off the reson
 
 Filter 1 moves the cutoff by each of its two modulations at a depth of its own, Mod 1 Amt and
 Mod 2 Amt, as Osc 1's PW Mod Amts move the pulse width. They are unipolar, on CC#24 and 25: both power up at 0.0 (value 4). A unit of input is the whole cutoff range, so with Mod 2 Amt at the top the
-LFO would swing the cutoff five octaves either way. Mod 1 Polarity and Mod 2 Polarity multiply
+LFO would swing the cutoff five octaves either way. Mod 1 Pol and Mod 2 Pol multiply
 each modulation, from -1.0 at value 4 through none at value 64 to +1.0 at value 124. Mod 1
-Polarity, on CC#117, powers up at +1.0: below value 64 the envelope closes the filter as it
-rises. Mod 2 Polarity has no CC and powers up at +0.2 (value 76), so Mod 2 Amt at the top swings
+Pol, on CC#117, powers up at +1.0: below value 64 the envelope closes the filter as it
+rises. Mod 2 Pol has no CC and powers up at +0.2 (value 76), so Mod 2 Amt at the top swings
 the cutoff an octave either way with the LFO.
 Pitch In, the keyboard tracking, is added on its own by Pitch Amt (CC#9), as an oscillator's
 Pitch In is outside its Pitch Mod Amts: unipolar, a semitone for a
@@ -986,10 +990,10 @@ sweep while Osc 1 holds the note.
   CC#6 = 47 puts Noise 1's red output on the filter's Mod 2 input in the LFO's place, and CC#25
   sets how much. CC#6 = 46 takes the white instead, finer still. The red is on no mixer, and the
   white is heard only once CC#23 brings it up, so neither is heard as well
-- Filter cutoff driven by the envelope instead of its CC: CC#99 = 2, CC#98 = 60, CC#6 = 26. The
+- Filter cutoff driven by the envelope instead of its CC: CC#99 = 2, CC#98 = 66, CC#6 = 26. The
   envelope and the cutoff are both unipolar, so it opens the cutoff from the bottom of its dial
   to the top
-- Amp gain and filter cutoff share one CC: CC#99 = 3, CC#98 = 68, CC#6 = 74
+- Amp gain and filter cutoff share one CC: CC#99 = 3, CC#98 = 74, CC#6 = 74
 - Amp at full level with no envelope: CC#99 = 1, CC#98 = 28, CC#6 = 1
 - Amp opened and closed by the note as an organ's, while EG 1 still sweeps the filter: CC#36 = 124
   crossfades Amp 1's modulation to Mod 2 In, EG 2
@@ -997,7 +1001,7 @@ sweep while Osc 1 holds the note.
 - A finer pitch envelope, 60 cents deep: CC#99 = 2, CC#98 = 32, CC#6 = 26 points Osc 1 Pitch Fine at the
   envelope, which then sweeps the tuning from in tune up to 60 cents sharp, reached at half the
   envelope's peak
-- The envelope drives the filter harder as a note starts: CC#99 = 2, CC#98 = 59, CC#6 = 26 takes
+- The envelope drives the filter harder as a note starts: CC#99 = 2, CC#98 = 65, CC#6 = 26 takes
   Mixer 2 Out Level, the filter's input level, from silence up to the top of its dial and back
 - Portamento is wired by default -- Note Pitch reaches the oscillator through Pitch 1 -- so CC#5
   sets the time; at value 64 a glide covers nine tenths of the way in about a tenth of a second. Every note glides, played legato
@@ -1013,9 +1017,9 @@ sweep while Osc 1 holds the note.
 - A mod wheel that closes the filter as it rises: CC#99 = 1, CC#98 = 26, CC#6 = 10 puts Mod Wheel
   Inv on the filter's Mod 2 input in the LFO's place. With CC#25 at value 64, the wheel closes the
   filter from Filter 1 Cutoff down, five octaves at its top
-- A knob that detunes Osc 2: CC#99 = 2, CC#98 = 44, CC#6 = 16 points Osc 2 Pitch Fine at
+- A knob that detunes Osc 2: CC#99 = 2, CC#98 = 47, CC#6 = 16 points Osc 2 Pitch Fine at
   General 1 Bipolar, so CC#16 moves it from -60 to +60 cents, in tune at value 64
-- A knob that crossfades the oscillators: CC#99 = 2, CC#98 = 55, CC#6 = 12 and CC#98 = 56,
+- A knob that crossfades the oscillators: CC#99 = 2, CC#98 = 61, CC#6 = 12 and CC#98 = 62,
   CC#6 = 13 point Mixer 2 Level 1 at General 1 and Level 2 at General 1 Rev, so CC#16 takes Osc 2
   out as it brings Osc 1 in
 - A pitch bend for Osc 2 alone: CC#99 = 4, CC#98 = 4, CC#6 = 4 sets Pitch 1 Out 1 Bend Sw
@@ -1025,9 +1029,9 @@ sweep while Osc 1 holds the note.
   envelope, Osc 1 holding the note it is synced to
 - Take the filter out of the chain: CC#99 = 1, CC#98 = 27, CC#6 = 48 points the amp's audio input
   at Mixer 2. The filter keeps running and keeps its slot; nothing reads it
-- Echoes that only come in with the mod wheel: CC#99 = 2, CC#98 = 73, CC#6 = 8 takes Delay 1 Mix
+- Echoes that only come in with the mod wheel: CC#99 = 2, CC#98 = 79, CC#6 = 8 takes Delay 1 Mix
   from Mod Wheel, which powers up at 0.0, so the output is dry until the wheel moves
-- Chorus that only comes in with the mod wheel: CC#99 = 2, CC#98 = 70, CC#6 = 8 takes Chorus 1
+- Chorus that only comes in with the mod wheel: CC#99 = 2, CC#98 = 76, CC#6 = 8 takes Chorus 1
   Mix from Mod Wheel, so the output stays mono until the wheel moves
 - Leave the chorus out of the sound, keeping the delay: CC#99 = 1, CC#98 = 31 and 32, CC#6 = 54
   feeds both sides of Delay 1 from the amp. The chorus keeps running and nothing reads it, and the

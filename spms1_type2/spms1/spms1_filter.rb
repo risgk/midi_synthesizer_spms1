@@ -173,7 +173,7 @@ module Spms1
 
       @cutoff = 1.0
       @resonance = 0.0
-      # Each Mod Amt and its Mod Polarity are multiplied before smoothing, so only their product,
+      # Each Mod Amt and its Mod Pol are multiplied before smoothing, so only their product,
       # the depth, carries a smoothing state.
       @modulation_1_amount = 0.0
       @modulation_2_amount = 0.0
@@ -225,7 +225,7 @@ module Spms1
       update_coefficients
     end
 
-    # Every parameter but the two Mod Polarities is unipolar, [0.0, 1.0], which is what the smoothing, the
+    # Every parameter but the two Mod Pols is unipolar, [0.0, 1.0], which is what the smoothing, the
     # modulation sum and the table lookups below are written against.
     # Cutoff range: MIDI note 15 (19 Hz) at 0.0, MIDI note 75 (622 Hz) at 0.5, MIDI note 135 (20 kHz) at 1.0.
     def set_cutoff(cutoff)
@@ -245,7 +245,7 @@ module Spms1
       @modulation_2_depth = @modulation_2_amount * @modulation_2_polarity
     end
 
-    # Mod 1 Polarity and Mod 2 Polarity are bipolar, [-0.5, 0.5], each doubled into a multiplier on
+    # Mod 1 Pol and Mod 2 Pol are bipolar, [-0.5, 0.5], each doubled into a multiplier on
     # its modulation: at +0.5 it moves the cutoff as its amount says, at -0.5 the other way, so the
     # envelope closes the filter, and at 0.0 not at all.
     def set_modulation_1_polarity(polarity)
