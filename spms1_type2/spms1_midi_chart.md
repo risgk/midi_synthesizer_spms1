@@ -36,7 +36,7 @@
 |                            71 | x             | o             | Filter Resonance                     |
 |                            24 | x             | o             | Filter Mod 1 Amt (EG)                |
 |                            25 | x             | o             | Filter Mod 2 Amt (LFO)               |
-|                           117 | x             | o             | Filter Mod Polarity (-1 to +1)       |
+|                           117 | x             | o             | Filter Mod 1 Polarity (-1 to +1)     |
 |                             9 | x             | o             | Filter Pitch Amt                     |
 |                            39 | x             | o             | Filter Mode (LP, Notch, HP)          |
 |                            19 | x             | o             | Mixer 2 Level 1 (Osc 1 Level)        |

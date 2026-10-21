@@ -371,10 +371,12 @@ controls:
   # Mod 2 Amt, on CC 24 and 25, are how far the
   # envelope on Mod 1 In and the LFO on Mod 2 In move the cutoff, as Osc 1's PW Mod Amts are for
   # the pulse width. Both power up at CC 4, 0.0, so neither moves the cutoff until it is turned
-  # up. Cutoff powers up at CC 112, 0.9. Mod Polarity, on CC 117, sets the sign and the depth of
-  # both modulations at once, from -1.0 at CC 4 through none at CC 64 to +1.0 at CC 124; it
-  # powers up at CC 124, so the two move the cutoff as their Amts say, and turned below CC 64 it
-  # makes the envelope close the filter. Mode crossfades Out from the low pass (0.0) through a
+  # up. Cutoff powers up at CC 112, 0.9. Mod 1 Polarity and Mod 2 Polarity set the sign and the
+  # depth of each modulation, from -1.0 at CC 4 through none at CC 64 to +1.0 at CC 124. Mod 1
+  # Polarity, on CC 117, powers up at CC 124, so the envelope moves the cutoff as Mod 1 Amt says,
+  # and turned below CC 64 it makes the envelope close the filter. Mod 2 Polarity has no CC and
+  # powers up at CC 76, +0.2, so Mod 2 Amt at its top swings the cutoff an octave either way with
+  # the LFO, a vibrato's depth for a filter. Mode crossfades Out from the low pass (0.0) through a
   # notch (0.5) to the high pass (1.0), on CC 39, and powers up at CC 4,
   # 0.0, the low pass.
   - { entry: 60, module: FILTER_1,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 112, favorite: true, set: set_cutoff }
@@ -383,26 +385,27 @@ controls:
   - { entry: 63, module: FILTER_1,  key: PITCH_AMT, label: Pitch Amt, cc: 9, value: 64, hint_inputs: [PITCH], set: set_pitch_amount }
   - { entry: 64, module: FILTER_1,  key: MOD_1_AMT,    label: Mod 1 Amt,    cc: 24,  value: 4, hint_inputs: [MOD_1], favorite: true, set: set_modulation_1_amount }
   - { entry: 65, module: FILTER_1,  key: MOD_2_AMT,    label: Mod 2 Amt,    cc: 25,  value: 4, hint_inputs: [MOD_2], favorite: true, set: set_modulation_2_amount }
-  - { entry: 66, module: FILTER_1,  key: MOD_POLARITY, label: Mod Polarity, cc: 117, value: 124, bipolar: true, hint: − to +, set: set_modulation_polarity }
+  - { entry: 66, module: FILTER_1,  key: MOD_1_POLARITY, label: Mod 1 Polarity, cc: 117, value: 124, bipolar: true, hint: − to +, set: set_modulation_1_polarity }
+  - { entry: 67, module: FILTER_1,  key: MOD_2_POLARITY, label: Mod 2 Polarity, cc: 0,   value: 76, bipolar: true, hint: − to +, set: set_modulation_2_polarity }
   # Amp 1: Gain, on CC 15, is doubled, so it powers up at CC 64, a gain of
   # 1.0, and CC 124 brings the sound up by 6 dB; the amp holds its output to one unit. Mod 1/2
   # Mix, on CC 36, crossfades what scales the gain from Mod 1 In, EG 1, at 0.0 (CC 4), where it
   # powers up, to Mod 2 In, EG 2, the organ envelope, at 1.0 (CC 124).
-  - { entry: 67, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 64, set: set_gain }
-  - { entry: 68, module: AMP_1,     key: MOD_1_2_MIX,  label: Mod 1/2 Mix,  cc: 36,  value: 4, hint_inputs: [MOD_1, MOD_2], set: set_modulation_mix }
-  - { entry: 69, module: CHORUS_1,  key: MIX,          label: Mix,          cc: 93,  value: 64, set: set_mix }
-  - { entry: 70, module: CHORUS_1,  key: RATE,         label: Rate,         cc: 58,  value: 64, set: set_rate }
-  - { entry: 71, module: CHORUS_1,  key: DEPTH,        label: Depth,        cc: 59,  value: 64, set: set_depth }
-  - { entry: 72, module: DELAY_1,   key: MIX,          label: Mix,          cc: 94,  value: 34, set: set_mix }
-  - { entry: 73, module: DELAY_1,   key: TIME,         label: Time,         cc: 90,  value: 64, set: set_time }
-  - { entry: 74, module: DELAY_1,   key: FEEDBACK,     label: Feedback,     cc: 92,  value: 64, set: set_feedback }
+  - { entry: 68, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 64, set: set_gain }
+  - { entry: 69, module: AMP_1,     key: MOD_1_2_MIX,  label: Mod 1/2 Mix,  cc: 36,  value: 4, hint_inputs: [MOD_1, MOD_2], set: set_modulation_mix }
+  - { entry: 70, module: CHORUS_1,  key: MIX,          label: Mix,          cc: 93,  value: 64, set: set_mix }
+  - { entry: 71, module: CHORUS_1,  key: RATE,         label: Rate,         cc: 58,  value: 64, set: set_rate }
+  - { entry: 72, module: CHORUS_1,  key: DEPTH,        label: Depth,        cc: 59,  value: 64, set: set_depth }
+  - { entry: 73, module: DELAY_1,   key: MIX,          label: Mix,          cc: 94,  value: 34, set: set_mix }
+  - { entry: 74, module: DELAY_1,   key: TIME,         label: Time,         cc: 90,  value: 64, set: set_time }
+  - { entry: 75, module: DELAY_1,   key: FEEDBACK,     label: Feedback,     cc: 92,  value: 64, set: set_feedback }
 
   # The mod wheel, a controller control: its CC, CC 1 as in the MIDI spec, put on the bus as a
   # unipolar slot, and in its three shapes (see `signals`), for any input or parameter to read. It
   # powers up at CC 4, 0.0.
-  - { entry: 75, controller: true, key: MOD_WHEEL, label: Mod Wheel, cc: 1,   value: 4 }
+  - { entry: 76, controller: true, key: MOD_WHEEL, label: Mod Wheel, cc: 1,   value: 4 }
   # The general controls, on CC 16 and 17, General Purpose Controllers 1 and 2 in the MIDI spec,
   # each filling its six slots (see `signals`). They power up at CC 4, 0.0, and the default patch
   # routes none of them.
-  - { entry: 76, controller: true, key: GENERAL_1, label: General 1, cc: 16,  value: 4 }
-  - { entry: 77, controller: true, key: GENERAL_2, label: General 2, cc: 17,  value: 4 }
+  - { entry: 77, controller: true, key: GENERAL_1, label: General 1, cc: 16,  value: 4 }
+  - { entry: 78, controller: true, key: GENERAL_2, label: General 2, cc: 17,  value: 4 }
