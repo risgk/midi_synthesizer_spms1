@@ -493,8 +493,8 @@ audio drives the filter.
 | CC#98 | Module input | | CC#98 | Module input |
 | ----- | ------ | - | ----- | ------ |
 | 0 | Pitch 1 Pitch In | | 18 | Osc 2 Sync In |
-| 1 | Pitch 1 Bend In | | 19 | Mixer 2 In 1 |
-| 2 | Pitch 1 Gate In | | 20 | Mixer 2 In 2 |
+| 1 | Pitch 1 Gate In | | 19 | Mixer 2 In 1 |
+| 2 | Pitch 1 Bend In | | 20 | Mixer 2 In 2 |
 | 3 | EG 1 Gate In | | 21 | Mixer 2 In 3 |
 | 4 | EG 2 Gate In | | 22 | Mixer 2 In 4 |
 | 5 | LFO 1 Rate Mod In | | 23 | Filter 1 Audio In |

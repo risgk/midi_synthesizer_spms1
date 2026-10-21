@@ -828,7 +828,7 @@ static inline __attribute__((always_inline)) sp_float sp_Pitch_set_bend_1_switch
 static inline __attribute__((always_inline)) sp_float sp_Pitch_set_bend_2_switch(sp_Pitch *self, sp_float lv_switch);
 static inline __attribute__((always_inline)) sp_float sp_Pitch_set_bend_amount(sp_Pitch *self, sp_float lv_amount);
 static inline __attribute__((always_inline)) sp_float sp_Pitch_set_stretch(sp_Pitch *self, sp_float lv_stretch);
-static inline __attribute__((always_inline)) sp_float sp_Pitch_process(sp_Pitch *self, sp_bool lv_control_tick, sp_float lv_input, sp_float lv_bend_input, sp_float lv_gate_input);
+static inline __attribute__((always_inline)) sp_float sp_Pitch_process(sp_Pitch *self, sp_bool lv_control_tick, sp_float lv_input, sp_float lv_gate_input, sp_float lv_bend_input);
 static inline __attribute__((always_inline)) sp_float sp_Pitch_output_2(sp_Pitch *self);
 static inline __attribute__((always_inline)) sp_float sp_Pitch_update_blends(sp_Pitch *self);
 static inline __attribute__((always_inline)) sp_float sp_Pitch_calculate_exp_fast(sp_Pitch *self, sp_float lv_value);
@@ -1182,8 +1182,8 @@ static sp_int cst_SLOT_DELAY_1_TIME = 0;
 static sp_int cst_SLOT_DELAY_1_FEEDBACK = 0;
 static sp_int cst_NRPN_ACTIVE_MODULE_BASE = 0;
 static sp_int cst_NRPN_SOURCE_PITCH_1_PITCH = 0;
-static sp_int cst_NRPN_SOURCE_PITCH_1_BEND = 0;
 static sp_int cst_NRPN_SOURCE_PITCH_1_GATE = 0;
+static sp_int cst_NRPN_SOURCE_PITCH_1_BEND = 0;
 static sp_int cst_NRPN_SOURCE_EG_1_GATE = 0;
 static sp_int cst_NRPN_SOURCE_EG_2_GATE = 0;
 static sp_int cst_NRPN_SOURCE_LFO_1_RATE_MOD = 0;
@@ -2277,7 +2277,7 @@ static inline __attribute__((always_inline)) sp_float sp_Pitch_set_stretch(sp_Pi
   return 0.0;
 }
 #line 158 "spms1_pitch.rb"
-static inline __attribute__((always_inline)) sp_float sp_Pitch_process(sp_Pitch *self, sp_bool lv_control_tick, sp_float lv_input, sp_float lv_bend_input, sp_float lv_gate_input) {
+static inline __attribute__((always_inline)) sp_float sp_Pitch_process(sp_Pitch *self, sp_bool lv_control_tick, sp_float lv_input, sp_float lv_gate_input, sp_float lv_bend_input) {
     sp_float lv_step = 0.0;
     sp_bool lv_gate_on = 0;
     sp_float lv_flushed_1 = 0.0;
@@ -4603,9 +4603,9 @@ static void sp_spms1_write_default_patch(sp_int lv_midi_ch) {
 #line 495 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_PITCH)), ((uint8_t)(cst_SIGNAL_NOTE_PITCH))), (sp_int)0);
 #line 496 "spms1_patch.rb"
-  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_BEND)), ((uint8_t)(cst_SIGNAL_PITCH_BEND))), (sp_int)0);
-#line 497 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_GATE)), ((uint8_t)(cst_SIGNAL_NOTE_GATE))), (sp_int)0);
+#line 497 "spms1_patch.rb"
+  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_BEND)), ((uint8_t)(cst_SIGNAL_PITCH_BEND))), (sp_int)0);
 #line 498 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_SOURCE_EG_1_GATE)), ((uint8_t)(cst_SIGNAL_NOTE_GATE))), (sp_int)0);
 #line 499 "spms1_patch.rb"
@@ -5273,8 +5273,8 @@ int main(int argc,char**argv){
     sp_int lv_winner = 0;
     sp_int lv_active_count = 0;
     sp_int lv_source_pitch_1_pitch = 0;
-    sp_int lv_source_pitch_1_bend = 0;
     sp_int lv_source_pitch_1_gate = 0;
+    sp_int lv_source_pitch_1_bend = 0;
     sp_int lv_source_eg_1_gate = 0;
     sp_int lv_source_eg_2_gate = 0;
     sp_int lv_source_lfo_1_rate_mod = 0;
@@ -6078,9 +6078,9 @@ int main(int argc,char**argv){
 #line 179 "spms1_patch.rb"
   cst_NRPN_SOURCE_PITCH_1_PITCH = 128LL;
 #line 180 "spms1_patch.rb"
-  cst_NRPN_SOURCE_PITCH_1_BEND = 129LL;
+  cst_NRPN_SOURCE_PITCH_1_GATE = 129LL;
 #line 181 "spms1_patch.rb"
-  cst_NRPN_SOURCE_PITCH_1_GATE = 130LL;
+  cst_NRPN_SOURCE_PITCH_1_BEND = 130LL;
 #line 182 "spms1_patch.rb"
   cst_NRPN_SOURCE_EG_1_GATE = 131LL;
 #line 183 "spms1_patch.rb"
@@ -6810,9 +6810,9 @@ int main(int argc,char**argv){
 #line 179 "spms1_main.rb"
     lv_source_pitch_1_pitch = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_PITCH)))));
 #line 180 "spms1_main.rb"
-    lv_source_pitch_1_bend = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_BEND)))));
-#line 181 "spms1_main.rb"
     lv_source_pitch_1_gate = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_GATE)))));
+#line 181 "spms1_main.rb"
+    lv_source_pitch_1_bend = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_BEND)))));
 #line 182 "spms1_main.rb"
     lv_source_eg_1_gate = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_EG_1_GATE)))));
 #line 183 "spms1_main.rb"
@@ -7761,8 +7761,8 @@ int main(int argc,char**argv){
 #line 606 "spms1_main.rb"
           sp_bool _t1114 = lv_control_tick;
           sp_float _t1115 = sp_FloatArray_get(lv_signals, lv_source_pitch_1_pitch);
-          sp_float _t1116 = sp_FloatArray_get(lv_signals, lv_source_pitch_1_bend);
-          sp_float _t1117 = sp_FloatArray_get(lv_signals, lv_source_pitch_1_gate);
+          sp_float _t1116 = sp_FloatArray_get(lv_signals, lv_source_pitch_1_gate);
+          sp_float _t1117 = sp_FloatArray_get(lv_signals, lv_source_pitch_1_bend);
           sp_FloatArray_set(lv_signals, 24LL, sp_Pitch_process((sp_Pitch *)lv_pitch_1, _t1114, _t1115, _t1116, _t1117));
 #line 607 "spms1_main.rb"
           sp_FloatArray_set(lv_signals, 25LL, sp_Pitch_output_2((sp_Pitch *)lv_pitch_1));

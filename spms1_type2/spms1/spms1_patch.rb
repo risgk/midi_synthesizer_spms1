@@ -177,8 +177,8 @@ SLOT_DELAY_1_FEEDBACK           = 209
 NRPN_ACTIVE_MODULE_BASE = 0
 
 NRPN_SOURCE_PITCH_1_PITCH   = 128
-NRPN_SOURCE_PITCH_1_BEND    = 129
-NRPN_SOURCE_PITCH_1_GATE    = 130
+NRPN_SOURCE_PITCH_1_GATE    = 129
+NRPN_SOURCE_PITCH_1_BEND    = 130
 NRPN_SOURCE_EG_1_GATE       = 131
 NRPN_SOURCE_EG_2_GATE       = 132
 NRPN_SOURCE_LFO_1_RATE_MOD  = 133
@@ -493,8 +493,8 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_ACTIVE_MODULE_BASE + 12, MODULE_DELAY_1)
 
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_PITCH_1_PITCH  , SIGNAL_NOTE_PITCH)
-  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_PITCH_1_BEND   , SIGNAL_PITCH_BEND)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_PITCH_1_GATE   , SIGNAL_NOTE_GATE)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_PITCH_1_BEND   , SIGNAL_PITCH_BEND)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_EG_1_GATE      , SIGNAL_NOTE_GATE)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_EG_2_GATE      , SIGNAL_NOTE_GATE)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_LFO_1_RATE_MOD , SIGNAL_NONE)

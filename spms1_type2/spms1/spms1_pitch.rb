@@ -155,7 +155,7 @@ module Spms1
     # The outputs are held to -1.0 to +1.0, as a mixer's is: twice the pitch range, so whatever
     # the oscillator and the filter clamp to their own range is still reached at either end.
     # Out 1 is returned, and Out 2 is read with output_2.
-    def process(control_tick, input = 0.0, bend_input = 0.0, gate_input = 0.0)
+    def process(control_tick, input = 0.0, gate_input = 0.0, bend_input = 0.0)
       if control_tick
         @stage_1_bend_depth = Dsp.smooth(@bend_depth, @stage_1_bend_depth, @smoothing_target_blend)
         @current_bend_depth = Dsp.smooth(@stage_1_bend_depth, @current_bend_depth, @smoothing_target_blend)
