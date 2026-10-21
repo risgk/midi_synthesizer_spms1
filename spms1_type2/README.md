@@ -113,6 +113,9 @@ Usage
       and a mod wheel moves the CC that Mod Wheel is on in the patch
     - Click its heading to hide it, so the patch editor or the controls take its height; the editor remembers
       which, and the keys of the PC keyboard do not play while it is hidden
+    - Panic sends All Sound Off and centres Pitch Bend. The editor follows the Channel Mode messages
+      arriving at MIDI In as the synth takes them (below), and CC#120 to 127 cannot be given to a
+      parameter
 - Graphical patch editor on its Patch tab
     - Wires module outputs to inputs and parameters, and sets the run order and CC assignments
     - Shows every parameter of every module, those with no CC in blue, so a wire always ends on what
@@ -130,6 +133,11 @@ Usage
 ### MIDI Settings
 
 - MIDI Channel: Channel 1
+- Channel Mode messages: All Sound Off (CC#120), All Notes Off (CC#123), and Omni Off, Omni On, Mono On
+  and Poly On (CC#124 to 127), end every note as letting it go would, so the envelopes release;
+  Reset All Controllers (CC#121) centres Pitch Bend, sets the Modulation Wheel (CC#1) to 0 and
+  leaves no NRPN selected, and leaves the other CCs, the parameters', as they are. CC#120 to 127
+  are not controls and are not stored as CC values
 - USB MIDI Input
     - Manufacturer Descriptor: "ISGK Instruments"
     - Device Name: "SPMS-1 (type-2)"

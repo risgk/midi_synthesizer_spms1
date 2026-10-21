@@ -1299,7 +1299,7 @@
     <button class="btn" id="kbd-oct-up" title="Octave Up">&#9654;</button>
     <span class="kbd-hint">PC Keys: A - K, Z / X</span>
     <button class="btn kbd-hold" id="kbd-hold" aria-pressed="false" title="The key released keeps its note on, until Hold is turned off">Hold</button>
-    <button class="btn kbd-panic" id="kbd-panic" title="Note Off on every note, Pitch Bend to the center, and the keys held let go">Panic</button>
+    <button class="btn kbd-panic" id="kbd-panic" title="All Sound Off, Pitch Bend to the center, and the keys held let go">Panic</button>
   </div>
   <div class="keyboard-frame">
     <div class="kbd-body">
@@ -1328,8 +1328,9 @@
 
   const MODULES_SIZE = 32;
   // CC 6 and 38 carry NRPN data and 98-101 select a parameter, so a control mapped to one of
-  // them would edit the patch every time its value was sent.
-  const RESERVED_CCS = new Set([6, 38, 98, 99, 100, 101]);
+  // them would edit the patch every time its value was sent; 120-127 are the Channel Mode
+  // messages, which the synth takes as such and never stores as a control's value.
+  const RESERVED_CCS = new Set([6, 38, 98, 99, 100, 101, 120, 121, 122, 123, 124, 125, 126, 127]);
 
   // Every number of the patch -- module ids, bus slots, NRPN entries -- and the default patch,
   // from spms1_patch.yaml, which patch_gen/spms1_patch_gen.rb writes in here. Edit the YAML, not
@@ -2003,7 +2004,8 @@
       row.classList.toggle('own', !cc && !c.controller);
       ccIn.classList.toggle('shared', !RESERVED_CCS.has(cc) && others.length > 0);
       ccIn.title = RESERVED_CCS.has(cc)
-        ? `CC#${cc} carries NRPN selection or data: its value is not sent`
+        ? (cc >= 120 ? `CC#${cc} is a Channel Mode message, not a control: its value is not sent`
+          : `CC#${cc} carries NRPN selection or data: its value is not sent`)
         : others.length ? `CC number, 0 for none. CC#${cc} also moves ${others.join(', ')}`
         : 'CC number, 0 for none';
       valIn.disabled = !cc && c.controller;
@@ -2757,6 +2759,12 @@
       }
     } else if (cmd === 0xE0) {
       n.bend = ((data2 << 7) | data1) - 8192;
+    } else if (cmd === 0xB0 && data1 === 121) {
+      n.bend = 0;
+    } else if (cmd === 0xB0 && data1 >= 120 && data1 !== 122) {
+      n.gate = 0;
+      n.prev = null;
+      n.heldBy = null;
     } else {
       return;
     }
@@ -2862,8 +2870,25 @@
     } else if (cmd === 0xB0) {
       const [, cc, value] = data;
       // The synth already has it from the pass-through.
+      if (cc >= 120) {
+        receiveChannelMode(cc);
+        return;
+      }
       receiveNRPN(cc, value);
       if (ccInUse(cc)) setCCValue(cc, value, false);
+    }
+  }
+
+  // Follows the Channel Mode messages as spms1_handle_channel_mode in spms1_midi_state.h takes
+  // them; trackNote has already followed the note and the bend. Reset All Controllers sets the
+  // Modulation Wheel, CC 1, to 0 and leaves no NRPN selected; the rest but Local Control end every
+  // note, so no key stays lit.
+  function receiveChannelMode(cc) {
+    if (cc === 121) {
+      nrpnSelect.selected = false;
+      if (ccInUse(1)) setCCValue(1, 0, false);
+    } else if (cc !== 122) {
+      for (let note = 0; note < 128; note++) setKeyActive(note, false);
     }
   }
 
@@ -3382,18 +3407,14 @@
     if (!on) [...kbHeld].forEach(n => { kbHeld.delete(n); sendNote(0x80, n, 0); });
   }
 
-  // The synth ignores All Notes Off, and a CC 123 would move whatever parameter is mapped to it,
-  // so Panic sends a Note Off on every note instead.
+  // Panic sends All Sound Off, which ends every note, and centres Pitch Bend.
   function kbPanic() {
     kbPointers.clear();
     kbHeld.clear();
     const ch = exportOptions().ch;
-    for (let note = 0; note < 128; note++) {
-      if (midiOutput) midiOutput.send([0x80 | ch, note, 0]);
-      setKeyActive(note, false);
-    }
-    noteStates[ch].prev = null;
-    trackNote(ch, 0x80, noteStates[ch].pitch, 0);
+    if (midiOutput) midiOutput.send([0xB0 | ch, 120, 0]);
+    trackNote(ch, 0xB0, 120, 0);
+    for (let note = 0; note < 128; note++) setKeyActive(note, false);
     sendBend(0);
   }
 

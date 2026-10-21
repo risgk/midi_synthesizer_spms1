@@ -85,10 +85,10 @@
 | System       : Clock          | x             | x             |                                      |
 | Real Time    : Commands       | x             | x             |                                      |
 +-------------------------------+---------------+---------------+--------------------------------------+
-| Aux          : All Sound OFF  | x             | x             |                                      |
-| Messages     : Reset All Ctrl | x             | x             |                                      |
+| Aux          : All Sound OFF  | x             | o 120         | As All Notes OFF                     |
+| Messages     : Reset All Ctrl | x             | o 121         | Pitch Bend, CC 1 and NRPN selection  |
 |              : Local ON/OFF   | x             | x             |                                      |
-|              : All Notes OFF  | x             | x             |                                      |
+|              : All Notes OFF  | x             | o 123-127     |                                      |
 |              : Active Sense   | x             | x             |                                      |
 |              : Reset          | x             | x             |                                      |
 +-------------------------------+---------------+---------------+--------------------------------------+

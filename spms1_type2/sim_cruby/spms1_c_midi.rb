@@ -73,8 +73,12 @@ module Spms1
             @note_on_state[ch] = 1
           end
         when 0xB0
-          @cc_values[ch][d1] = d2
-          handle_midi_nrpn_cc(ch, d1, d2)
+          if d1 >= 120
+            handle_channel_mode(ch, d1)
+          else
+            @cc_values[ch][d1] = d2
+            handle_midi_nrpn_cc(ch, d1, d2)
+          end
         when 0xE0
           @pitch_bend[ch] = ((d2 << 7) | d1) - 8192
         end
@@ -92,6 +96,20 @@ module Spms1
           end
         elsif pitch == @note_prev_pitch[ch]
           @note_prev_pitch[ch] = nil
+        end
+      end
+
+      # The Channel Mode messages, as spms1_midi_state.h takes them: Reset All Controllers (121)
+      # centres the bend, sets CC 1 to 0 and leaves no NRPN selected; Local Control (122) does
+      # nothing; the rest end every note.
+      def handle_channel_mode(ch, number)
+        if number == 121
+          @pitch_bend[ch] = 0
+          @cc_values[ch][1] = 0
+          @nrpn_selected[ch] = false
+        elsif number != 122
+          @note_prev_pitch[ch] = nil
+          @note_on_state[ch] = 0
         end
       end
 
