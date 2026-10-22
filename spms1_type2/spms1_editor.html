@@ -226,6 +226,15 @@
     .editor-column .panel h2 {
       margin-bottom: 8px;
     }
+    /* A panel in the color of its node on the Patch tab, its heading and the thumbs of the
+       sliders a CC moves. */
+    .editor-column .panel.colored {
+      --thumb-color: var(--node-color);
+    }
+    .editor-column .panel.colored h2 {
+      color: var(--node-color);
+      border-left-color: var(--node-color);
+    }
     .control-row {
       display: flex;
       flex-direction: column;
@@ -421,7 +430,7 @@
       width: 18px;
       height: 18px;
       border-radius: 50%;
-      background: var(--primary-color);
+      background: var(--thumb-color, var(--primary-color));
       cursor: pointer;
     }
     /* Same size as the WebKit thumb above, so the tick positions line up here too. */
@@ -430,7 +439,7 @@
       height: 18px;
       border: none;
       border-radius: 50%;
-      background: var(--primary-color);
+      background: var(--thumb-color, var(--primary-color));
       cursor: pointer;
     }
     /* A disabled slider has no CC behind it, so there is no position to show: the value the
@@ -3669,7 +3678,8 @@
       // with the parameters that have none shown.
       if (!items.length) continue;
       const panel = document.createElement('div');
-      panel.className = 'panel';
+      panel.className = 'panel colored';
+      panel.style.setProperty('--node-color', NODE_COLORS[p.module || 'CONTROLLER']);
       panel.innerHTML = `<h2>${p.title}</h2><div class="control-row">` + items.map(c => `
         <div class="slider-knob-zone" data-ctrl="${c.key}">
           <button type="button" class="fav-toggle" aria-pressed="false">&#9733;</button>
