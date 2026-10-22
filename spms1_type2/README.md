@@ -104,9 +104,11 @@ Usage
       in the patch (JSON) and undone like any other change, but not sent to the synth
     - On its Patch tab a value is dragged up or down like a knob, with Shift for fine steps, or
       stepped by the wheel while it is being edited
-    - On the Patch tab, a wire dragged near an edge of the canvas moves the view that way, and a click on
+    - On the Patch tab, far nodes are wired without zooming out: a wire dragged near an edge of the
+      canvas moves the view that way; an output clicked is held, while the view is panned, zoomed or
+      pinched, until an input is clicked (Esc or a click on the background lets go); and a click on
       an input or a parameter, on its port or on what it reads, lists the outputs to pick its source
-      from, node by node, narrowed by what is typed, so far nodes are wired without zooming out
+      from, node by node, narrowed by what is typed
     - Every value it sets or shows runs from 4 to 124, the range the synth uses; one outside it,
       from MIDI In or a patch file, is drawn in to the nearer end, which reads the same
     - Its Initialize & Send All sets each CC value and each parameter's value with no CC back to

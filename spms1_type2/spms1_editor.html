@@ -1142,6 +1142,27 @@
     .port:hover, .port.target {
       transform: scale(1.35);
     }
+    /* An output held by a click, waiting for the input to wire it to. */
+    .port.armed {
+      transform: scale(1.6);
+      box-shadow: 0 0 0 3px rgba(155, 17, 30, 0.35);
+    }
+    .arm-hint {
+      position: absolute;
+      left: 10px;
+      bottom: 10px;
+      z-index: 3;
+      max-width: calc(100% - 20px);
+      padding: 4px 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      background: var(--panel-bg);
+      font-size: 0.75rem;
+      pointer-events: none;
+    }
+    .arm-hint[hidden] {
+      display: none;
+    }
     /* The legend and the zoom buttons share the top of the canvas; the legend wraps short of the
        buttons rather than running under them. */
     .canvas-bar {
@@ -1310,6 +1331,7 @@
     <div class="world" id="world">
       <svg class="wires" id="wires"></svg>
     </div>
+    <div class="arm-hint" id="arm-hint" hidden></div>
     <div class="canvas-bar">
       <div class="legend">
         <span><svg width="28" height="6"><line x1="0" y1="3" x2="28" y2="3" stroke="#9B111E" stroke-width="2.5"/></svg>Module input</span>
@@ -1346,7 +1368,8 @@
       <p class="hint" style="margin-top: 8px;">
         MIDI In is passed through to the synth, and a CC on the channel above moves every slot
         assigned to it. Drag from an output (right) to an input (left) to connect; near an edge, the
-        view moves along. Click an input, or what it reads, to pick its source from a list. Drag a
+        view moves along. Or click the output, move the view, and click the input. Click an input,
+        or what it reads, to pick its source from a list. Drag a
         connected input away to unplug it; click a wire and press Delete to remove it. An unplugged parameter reads its own
         control slot. Drag a value up or down to change it, with Shift for fine steps, or turn the
         wheel over the one being edited. Drag the background to pan, wheel or pinch to zoom.
@@ -1946,6 +1969,7 @@
   }
 
   function restore(json) {
+    if (armed) disarm();
     state = deserialize(JSON.parse(json));
     renderAll();
   }
@@ -2065,6 +2089,8 @@
   let viewTouched = false;
   let portEls = {};
   let selectedWire = null;
+  // An output clicked, waiting for a click on an input to wire it to: { src, temp, last }.
+  let armed = null;
 
   const NODES = [
     { key: 'CONTROLLER', label: 'Controller', aux: true, notes: [['NOTE_PITCH', 'Note Pitch', 0, 127], ['NOTE_GATE', 'Note Gate', 0, 1], ['PITCH_BEND', 'Pitch Bend', -8192, 8191]], controls: CONTROLLER_ITEMS },
@@ -2389,6 +2415,7 @@
     world.style.transform = `translate(${view.x}px, ${view.y}px) scale(${view.s})`;
     canvas.style.backgroundPosition = `${view.x}px ${view.y}px`;
     canvas.style.backgroundSize = `${20 * view.s}px ${20 * view.s}px`;
+    if (armed) drawArmed();
   }
 
   function zoomAt(factor, cx, cy) {
@@ -2510,6 +2537,11 @@
     const t = e.target;
     if (t.closest('input, button, select, textarea')) return;
     const port = t.closest('.port');
+    if (port && armed) {
+      e.preventDefault();
+      clickArmed(port);
+      return;
+    }
     if (port) {
       e.preventDefault();
       startWireDrag(port, e);
@@ -2530,6 +2562,8 @@
     if (t.closest('.node, .zoom-controls')) return;
     if (selectedWire) selectWire(null);
     drag = { mode: 'pan', sx: e.clientX, sy: e.clientY, vx: view.x, vy: view.y };
+    // Set before a pan moves it, so a click that does not pan lets go of a held output.
+    drag.armed = armed;
     viewTouched = true;
     canvas.classList.add('panning');
   });
@@ -2621,6 +2655,7 @@
     if (!drag.moved) {
       const dst = drag.pickUp || drag.clicked;
       if (dst) openSourcePicker(dst, !drag.touch);
+      else arm(drag.src, drag.touch ? null : drag.last);
       return;
     }
     const target = dropTarget(e);
@@ -2633,6 +2668,69 @@
       commit();
     }
   }
+
+  // ---- Click to connect ----------------------------------------------------------------------
+
+  // A click on an output holds it, with a wire to the pointer, while the view is panned, zoomed
+  // or pinched to its input, which a click then wires it to. Another output is held instead;
+  // the same one, Esc or a click on the background lets go.
+  function arm(src, last) {
+    disarm();
+    const temp = document.createElementNS(SVG_NS, 'path');
+    temp.setAttribute('class', 'wire temp');
+    svg.appendChild(temp);
+    armed = { src, temp, last };
+    const hint = document.getElementById('arm-hint');
+    hint.textContent = `${sigLabel(src)}: click an input to wire it to. Esc to cancel`;
+    hint.hidden = false;
+    drawArmed();
+  }
+
+  function disarm() {
+    if (!armed) return;
+    armed.temp.remove();
+    world.querySelectorAll('.port.armed, .port.target').forEach(el => el.classList.remove('armed', 'target'));
+    document.getElementById('arm-hint').hidden = true;
+    armed = null;
+  }
+
+  // The wire runs to where the pointer was last seen over the canvas; a touch leaves none, and
+  // the held output stands out instead.
+  function drawArmed() {
+    const from = portEls['o:' + armed.src];
+    if (!from) return disarm();
+    from.classList.add('armed');
+    world.querySelectorAll('.port.target').forEach(el => el.classList.remove('target'));
+    if (!armed.last) {
+      armed.temp.removeAttribute('d');
+      return;
+    }
+    armed.temp.setAttribute('d', curve(portPos(from), toWorld(armed.last)));
+    const target = portUnder(armed.last);
+    if (target && target.classList.contains('in') && accepts(armed.src, target.dataset.dst)) target.classList.add('target');
+  }
+
+  function clickArmed(port) {
+    const src = armed.src;
+    if (port.classList.contains('out')) {
+      if (port.dataset.src === src) disarm();
+      else arm(port.dataset.src, armed.last);
+      return;
+    }
+    const dst = port.dataset.dst;
+    if (!accepts(src, dst)) return;
+    disarm();
+    if (isConnected(dst) && currentSource(dst) === src) return;
+    pushHistory();
+    connect(src, dst);
+    commit();
+  }
+
+  canvas.addEventListener('pointermove', e => {
+    if (!armed || drag || e.pointerType === 'touch') return;
+    armed.last = { clientX: e.clientX, clientY: e.clientY };
+    drawArmed();
+  });
 
   // ---- Source picker -------------------------------------------------------------------------
 
@@ -2802,6 +2900,8 @@
         pushHistory(drag.snapshot);
         saveLocal();
       }
+    } else if (drag.mode === 'pan' && drag.armed && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) < 4) {
+      disarm();
     }
     canvas.classList.remove('panning');
     drag = null;
@@ -2827,7 +2927,9 @@
 
   document.addEventListener('keydown', e => {
     if (e.target.closest && e.target.closest('input, textarea, select')) return;
-    if ((e.key === 'Delete' || e.key === 'Backspace') && selectedWire) {
+    if (e.key === 'Escape' && armed) {
+      disarm();
+    } else if ((e.key === 'Delete' || e.key === 'Backspace') && selectedWire) {
       e.preventDefault();
       pushHistory();
       disconnect(selectedWire);
