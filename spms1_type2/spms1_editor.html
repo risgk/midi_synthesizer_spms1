@@ -1365,7 +1365,7 @@
   <div class="editor-grid" id="controls"></div>
   <!-- Moved under the Delay panel each time the controls are drawn. -->
   <div id="controls-foot">
-    <label class="check" title="A parameter with no CC holds the value the patch gives it, which its slider sets through NRPN. Hidden, it shows up as soon as a CC is given to it."><input type="checkbox" id="show-no-cc"> Show parameters with no CC</label>
+    <label class="check" title="A parameter with no CC holds the value the patch gives it, which its slider sets through NRPN. Hidden, it shows up as soon as a CC is given to it or it is marked as a favorite."><input type="checkbox" id="show-no-cc"> Show parameters with no CC</label>
     <button class="btn primary" id="init-values">Initialize & Send All</button>
   </div>
 </div>
@@ -3653,8 +3653,8 @@
 
   let sliderBefore = null;
 
-  // Parameters with no CC are hidden on the controls unless asked for, and a CC given to one
-  // brings it there. Shown, its slider sets the value its slot holds, through NRPN. The choice is
+  // Parameters with no CC are hidden on the controls unless asked for, and a CC given to one, or
+  // marking it as a favorite, brings it there. Shown, its slider sets the value its slot holds, through NRPN. The choice is
   // kept, as the tab is.
   const SHOW_NO_CC_KEY = 'spms1-type2-editor-show-no-cc';
   let showNoCC = false;
@@ -3674,7 +3674,7 @@
     const cols = [0, 1, 2, 3].map(() => document.createElement('div'));
     cols.forEach(c => { c.className = 'editor-column'; });
     for (const p of CONTROL_PANELS) {
-      const items = panelItems(p).filter(c => showNoCC || state.cc[c.key]);
+      const items = panelItems(p).filter(c => showNoCC || state.cc[c.key] || state.favorites.has(c.key));
       // Mixer 1 has no CC by default, so its panel appears only once a patch gives it one, or
       // with the parameters that have none shown.
       if (!items.length) continue;
