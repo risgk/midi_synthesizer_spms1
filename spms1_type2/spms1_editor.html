@@ -816,19 +816,16 @@
     .wire.param.selected {
       opacity: 1;
     }
+    /* A wire whose source runs later is a row of round dots, set apart from a solid one and from
+       a parameter's thin dashes however far the view is zoomed out. */
     .wire.feedback {
-      stroke-width: 5;
+      stroke-width: 3.5;
+      stroke-linecap: round;
+      stroke-dasharray: 0 7;
     }
     .wire.feedback.selected {
-      stroke-width: 7;
-    }
-    .wire-core {
-      stroke: #fff;
-      stroke-width: 1.8;
-      pointer-events: none;
-    }
-    .wire-core.selected {
-      stroke-width: 2.5;
+      stroke-width: 5.5;
+      stroke-dasharray: 0 9;
     }
     .wire.inactive {
       stroke: var(--wire-inactive);
@@ -1377,7 +1374,7 @@
     <div class="canvas-bar">
       <div class="legend">
         <span><svg width="28" height="6"><line x1="0" y1="3" x2="9" y2="3" stroke="#9b111e" stroke-width="2.5"/><line x1="9" y1="3" x2="19" y2="3" stroke="#1c7f46" stroke-width="2.5"/><line x1="19" y1="3" x2="28" y2="3" stroke="#2772a4" stroke-width="2.5"/></svg>Module input, in its source's color</span>
-        <span><svg width="28" height="8"><line x1="0" y1="4" x2="28" y2="4" stroke="#9b111e" stroke-width="5"/><line x1="0" y1="4" x2="28" y2="4" stroke="#fff" stroke-width="1.8"/></svg>1-sample delay (runs later)</span>
+        <span><svg width="28" height="6"><line x1="2" y1="3" x2="28" y2="3" stroke="#9b111e" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="0 7"/></svg>1-sample delay (runs later)</span>
         <span><svg width="28" height="6"><line x1="0" y1="3" x2="28" y2="3" stroke="#b8c0c4" stroke-width="2.5"/></svg>Source not running</span>
         <span><svg width="28" height="6"><line x1="0" y1="3" x2="28" y2="3" stroke="#2c3e50" stroke-width="1.5" stroke-dasharray="5 4" opacity="0.6"/></svg>Parameter</span>
       </div>
@@ -2421,13 +2418,6 @@
       title.textContent = tip;
       hit.appendChild(title);
       svg.appendChild(vis);
-      // A wire whose source runs later is drawn hollow, a line of its color with a white core.
-      if (c.kind.includes('feedback')) {
-        const core = document.createElementNS(SVG_NS, 'path');
-        core.setAttribute('d', d);
-        core.setAttribute('class', 'wire-core' + (c.dst === selectedWire ? ' selected' : ''));
-        svg.appendChild(core);
-      }
       svg.appendChild(hit);
       from.classList.add('connected');
       to.classList.add('connected');
