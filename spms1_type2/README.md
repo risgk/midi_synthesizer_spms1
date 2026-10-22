@@ -665,9 +665,7 @@ input or parameter to read. It reads CC#1 by default, runs 0.0 to 1.0 and powers
 it is at 0.0 until the wheel moves; the default patch puts it on LFO 1 Level Mod In, where it adds nothing while LFO 1 Level is at
 its power-up 1.0. Slots 9 to
 11 carry it in three more forms of its value u: Mod Wheel Rev 1 - u, Inv -u and Rev Inv u - 1,
-so the wheel can take something out, or the other way, with no mixer to turn it round. Like
-General 1 and 2 below, none of them is smoothed where it is made; LFO 1 Level Mod In smooths what
-it takes, as a parameter would. The editor
+so the wheel can take something out, or the other way, with no mixer to turn it round. The editor
 shows it with the keyboard's signals, on its Controller node, the forms as outputs below it, and
 as a wheel beside the soft keyboard.
 
@@ -685,10 +683,12 @@ Mode crossfades by: each at 1.0 over its own half and falling to 0.0 over the ot
 1.0 in the middle. Neg and Pos are the two sides of Bipolar doubled: 0.0 in the middle, rising
 to 1.0 at the bottom for Neg and at the top for Pos, so one knob can bring in one thing turned
 down from the middle and another turned up. Mid is 1.0 in the middle and 0.0 at both ends, so
-with Neg and Pos one knob crossfades three things. None of these is smoothed: a parameter taking
-one, a mixer level or a Mod Amt, smooths it as it does its CC, once, the shape taken before the
-smoothing, and a module input takes it as it is, a step once a buffer (1.3 ms), so a level or
-an amount is better set through a parameter. They power up at value 4, so u is 0.0, and with no CC u stays 0.0; the
+with Neg and Pos one knob crossfades three things. A parameter taking one of these slots, a mixer
+level or a Mod Amt, smooths it as it does its CC, the shape taken before the smoothing. A module
+input, which smooths nothing itself, takes a copy smoothed in the same two stages, made once a
+buffer from the smoothed value u, so a wheel or a knob moves it without steps; a gate input,
+Gate In, Reset In or Sync In, takes the slot as it is, so that it acts at once. The same goes for
+Mod Wheel and its forms. They power up at value 4, so u is 0.0, and with no CC u stays 0.0; the
 default patch routes none of them. The editor shows them on the Controller node, the forms as
 outputs below each, and as sliders in the Controls tab.
 
@@ -758,8 +758,7 @@ LFO 1 Level scales the LFO's outputs, as a mixer's Level scales its input: from 
 (value 4) to full at 1.0 (value 124). It is on CC#116 and powers up at 1.0, so the LFO runs at
 full level and what it moves sets the depth. LFO 1 Level Mod In adds to it, held to the same range, by Level Mod Amt, and it takes
 Mod Wheel by default at a depth of 1.0 (Level Mod Amt has no CC and holds 1.0), so with Level
-turned down the wheel brings the LFO in, up to full at its top. Level Mod In is smoothed as
-Level is, so the depth of a vibrato follows the wheel without steps. Turning the LFO the
+turned down the wheel brings the LFO in, up to full at its top. Turning the LFO the
 other way up is for Out Inv, Out negated, or for a mixer's Out Inv; the triangle and the square
 have theirs too, Out Triangle Inv and Out Square Inv. The default patch leaves them unrouted.
 
@@ -1066,7 +1065,8 @@ sweep while Osc 1 holds the note.
 #### Notes
 
 - Module inputs (category 1) are read every sample (EG 1's and EG 2's Gate In, LFO 1's three inputs and Filter 1's three every fourth) and are not
-  smoothed; parameters (category 2) are read once per buffer and are smoothed by their
+  smoothed, but for the mod wheel and the general controls, which a module input other than a gate
+  input takes smoothed; parameters (category 2) are read once per buffer and are smoothed by their
   destination. Route a fast source through a module input, a stepped one through a parameter
 - The smoothing takes two stages (10.7 ms average delay, 99% in 35 ms at 48 kHz), which round off
   the steps of a controller sending sparse CCs (e.g. every 20 ms). The oscillators' Pitch Coarse, Pitch and Pitch

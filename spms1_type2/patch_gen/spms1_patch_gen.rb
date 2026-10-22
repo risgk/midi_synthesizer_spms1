@@ -30,6 +30,9 @@ NRPN_VALUE_BASE         = 512
 # parameter's control slot sits at 128 + its entry, where only the parameter reads it.
 SIGNAL_OWN      = 127
 PARAM_SLOT_BASE = 128
+# The size of the `signals` array, as spms1_main.rb makes it: the smoothed copies of the controller
+# slots go at its top.
+SIGNALS_SIZE = 256
 
 def fail_spec(message)
   abort "spms1_patch_gen.rb: spms1_patch.yaml: #{message}"
@@ -71,6 +74,13 @@ class Spec
   def outputs_of(mod) = @signals.select { |s| s['output'] && s['module'] == mod['key'] }
   # The bus slots a controller control's CC fills; a parameter's control slot is its own, off the bus.
   def slots_of(control) = @signals.select { |s| s['control'] == full_key(control) }
+
+  # Every controller's slots, the mod wheel's and the general controls', in id order.
+  def controller_slots = @signals.select { |s| s['control'] }
+
+  # Where the smoothed copies of the controller slots start, at the top of the array with each
+  # controller's first smoothing stage above them.
+  def smoothed_base = SIGNALS_SIZE - controller_slots.size - controllers.size
 
   def bipolar?(signal)
     return !!signal['bipolar'] unless signal['control'] && !signal.key?('bipolar')
@@ -136,6 +146,9 @@ class Spec
       want = item['label'].upcase.gsub(/[^A-Z0-9]+/, '_').delete_prefix('_').delete_suffix('_')
       fail_spec("#{@signals.include?(item) ? item['key'] : full_key(item)} is labeled #{item['label']}, so its key is #{want}") unless item['key'] == want
     end
+    ids = controller_slots.map { |sig| sig['id'] }
+    fail_spec('the controller slots are not one run of ids') unless ids == (ids.first..ids.last).to_a
+    fail_spec('the smoothed controller slots run into the parameter slots') if smoothed_base <= PARAM_SLOT_BASE + params.map { |c| c['entry'] }.max
     @controls.each do |c|
       fail_spec("controller control #{full_key(c)} fills no slot") if c['controller'] && slots_of(c).empty?
       plain = slots_of(c).find { |s| !s['form'] }
@@ -193,6 +206,13 @@ def patch_rb
   out << "# entry, off the bus: the slots below.\n"
   out << "SIGNAL_OWN      = #{SIGNAL_OWN}\nPARAM_SLOT_BASE = #{PARAM_SLOT_BASE}\n\n"
   out << ruby_constants(s.params.map { |c| ["SLOT_#{s.full_key(c)}", PARAM_SLOT_BASE + c['entry']] })
+  first = s.controller_slots.first['id']
+  out << "\n\n# The controller slots, the mod wheel's and the general controls', and where a smoothed copy of each\n"
+  out << "# sits, off the bus at its slot + SMOOTHED_SLOT_OFFSET, with each controller's first smoothing\n"
+  out << "# stage above them. A module input reads the copy (see spms1_main.rb).\n"
+  out << ruby_constants([['CONTROLLER_SLOT_FIRST', first], ['CONTROLLER_SLOT_LAST', s.controller_slots.last['id']],
+                         ['SMOOTHED_SLOT_OFFSET', s.smoothed_base - first]] +
+                        s.controllers.each_with_index.map { |c, n| ["SMOOTHED_STAGE_1_#{s.full_key(c)}", s.smoothed_base + s.controller_slots.size + n] })
   out << "\n\n# NRPN parameter numbers: (MSB << 7) | LSB, where the MSB picks a category and the LSB an entry.\n"
   out << "#   0..127   active_modules[slot]\n# 128..255   what feeds each module input\n"
   out << "# 256..383   where each parameter's value comes from\n# 384..511   which CC fills each control slot\n"
@@ -387,7 +407,13 @@ def main_sources
   s = SPEC
   out = []
   s.inputs.each do |i|
-    out << "  source_#{local_name(i)} = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_#{s.full_key(i)})\n"
+    name = "source_#{local_name(i)}"
+    out << "  #{name} = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_#{s.full_key(i)})\n"
+    # A controller slot's smoothed copy in its place (see spms1_main.rb), but for a gate input or a
+    # side of the final output: both differences are at least 0 only in the controllers' run of
+    # slots. Written out rather than a function or a table, which cost more as Spinel builds them.
+    next unless i['module'] && !i['gate']
+    out << "  #{name} += ((#{name} - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - #{name})) >= 0 ? SMOOTHED_SLOT_OFFSET : 0\n"
   end
   s.params.each do |c|
     out << "  source_#{local_name(c)} = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_#{s.full_key(c)}), SLOT_#{s.full_key(c)})\n"
@@ -413,23 +439,47 @@ def main_controls
     s.slots_of(c).each do |sig|
       expr = case sig['form']
              when nil then "cc_or_zero(cc_#{name}, #{converter(s.bipolar?(sig))}(#{name}))"
-             when 'rev' then "1.0 - #{plain}"
-             when 'inv' then "0.0 - #{plain}"
-             when 'rev_inv' then "#{plain} - 1.0"
-             when 'bipolar' then "#{plain} - 0.5"
-             when 'bipolar_inv' then "0.5 - #{plain}"
              when 'sin' then "QUARTER_SINE_TABLE[cc_table_index(cc_#{name}, #{name})]"
              when 'cos' then "QUARTER_SINE_TABLE[120 - cc_table_index(cc_#{name}, #{name})]"
-             when 'lo' then "(#{plain} < 0.5) ? 1.0 : (2.0 - (#{plain} + #{plain}))"
-             when 'hi' then "(#{plain} > 0.5) ? 1.0 : (#{plain} + #{plain})"
-             when 'neg' then "(#{plain} > 0.5) ? 0.0 : (1.0 - (#{plain} + #{plain}))"
-             when 'pos' then "(#{plain} < 0.5) ? 0.0 : ((#{plain} + #{plain}) - 1.0)"
-             when 'mid' then "(#{plain} < 0.5) ? (#{plain} + #{plain}) : (2.0 - (#{plain} + #{plain}))"
+             else form_expr(sig['form'], plain)
              end
       out << "  signals[SIGNAL_#{sig['key']}] = #{expr}\n"
     end
   end
+  # The smoothed copies, every buffer for every controller whatever reads them, so that what they
+  # cost is the same for any patch: the controller's value in two stages, then each form of it.
+  s.controllers.each do |c|
+    name = local_name(c)
+    key = s.full_key(c)
+    out << "  signals[SMOOTHED_STAGE_1_#{key}] = Dsp.smooth(signals[SIGNAL_#{key}], signals[SMOOTHED_STAGE_1_#{key}], CONTROLLER_SMOOTHING_BLEND)\n"
+    out << "  smoothed_#{name} = Dsp.smooth(signals[SMOOTHED_STAGE_1_#{key}], signals[SIGNAL_#{key} + SMOOTHED_SLOT_OFFSET], CONTROLLER_SMOOTHING_BLEND)\n"
+    s.slots_of(c).each do |sig|
+      expr = case sig['form']
+             when nil then "smoothed_#{name}"
+             when 'sin' then "quarter_sine(smoothed_#{name})"
+             when 'cos' then "quarter_sine(1.0 - smoothed_#{name})"
+             else form_expr(sig['form'], "smoothed_#{name}")
+             end
+      out << "  signals[SIGNAL_#{sig['key']} + SMOOTHED_SLOT_OFFSET] = #{expr}\n"
+    end
+  end
   out.join
+end
+
+# A form of a controller's value u, written as an expression of `u`.
+def form_expr(form, u)
+  case form
+  when 'rev' then "1.0 - #{u}"
+  when 'inv' then "0.0 - #{u}"
+  when 'rev_inv' then "#{u} - 1.0"
+  when 'bipolar' then "#{u} - 0.5"
+  when 'bipolar_inv' then "0.5 - #{u}"
+  when 'lo' then "(#{u} < 0.5) ? 1.0 : (2.0 - (#{u} + #{u}))"
+  when 'hi' then "(#{u} > 0.5) ? 1.0 : (#{u} + #{u})"
+  when 'neg' then "(#{u} > 0.5) ? 0.0 : (1.0 - (#{u} + #{u}))"
+  when 'pos' then "(#{u} < 0.5) ? 0.0 : ((#{u} + #{u}) - 1.0)"
+  when 'mid' then "(#{u} < 0.5) ? (#{u} + #{u}) : (2.0 - (#{u} + #{u}))"
+  end
 end
 
 def main_setters

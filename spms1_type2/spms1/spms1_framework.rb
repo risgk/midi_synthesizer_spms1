@@ -90,11 +90,23 @@ end
 # sin(u * pi / 2) for each CC step of u, 0.0 at index 0 to 1.0 at index 120, which a controller's
 # Sin form reads as it is and its Cos form from the other end; their squares sum to one at every
 # step, so two levels taking them crossfade at equal power.
-QUARTER_SINE_TABLE = Array.new(121, 0.0)
+QUARTER_SINE_TABLE = Array.new(122, 0.0)
 for i in 0...121
   QUARTER_SINE_TABLE[i] = Math.sin(i.to_f * (Math::PI / 240.0))
 end
 QUARTER_SINE_TABLE[120] = 1.0
+# A guard past the end, for quarter_sine at u = 1.0.
+QUARTER_SINE_TABLE[121] = 1.0
+
+# sin(u * pi / 2) for any u in [0.0, 1.0], between the steps of the table in a straight line,
+# for the smoothed copies of a controller's Sin and Cos, whose u falls between the CC steps. The
+# squares of the pair then sum to one within 0.00002.
+def quarter_sine(u)
+  x = u * 120.0
+  index = x.to_i
+  index = (index < 0) ? 0 : ((index > 120) ? 120 : index)
+  QUARTER_SINE_TABLE[index] + (QUARTER_SINE_TABLE[index + 1] - QUARTER_SINE_TABLE[index]) * (x - index.to_f)
+end
 
 # A controller's CC value as an index of QUARTER_SINE_TABLE, 0 at CC 4 to 120 at CC 124, and 0, as
 # u is 0.0, while no CC is assigned.

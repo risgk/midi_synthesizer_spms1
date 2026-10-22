@@ -57,6 +57,18 @@ MODULES_SIZE = 32
 # reaches for when an input wants a fixed value rather than a source.
 SIGNALS_SIZE = 256
 
+# The controller slots -- the mod wheel's and the general controls' -- are filled once a buffer
+# from their CCs and not smoothed, as a parameter that takes one smooths it itself. A module input
+# reads them per sample with no smoothing of its own, and would step with every CC step, so it
+# reads a copy instead, smoothed as a parameter would smooth it, two stages of 10.7 ms on average,
+# written once a buffer with the rest at the top of `signals`, off the bus (SMOOTHED_SLOT_OFFSET,
+# in spms1_patch.rb). A buffer is AUDIO_BUFFER_WORDS / 4 control-rate steps, 16 at 64 samples, so
+# each stage takes the blend the modules take at each step that many times over, and keeps the
+# same time for any buffer size that is a whole number of steps. The copies of every controller
+# are made every buffer whatever reads them, so that they cost the same for any patch. A gate
+# input -- Gate In, Reset In, Sync In -- acts at a threshold or an edge and takes the slot as it is.
+CONTROLLER_SMOOTHING_BLEND = 1.0 - (1.0 - 0.015625 * (48000.0 / SAMPLE_RATE.to_f)) ** (AUDIO_BUFFER_WORDS.to_f / 4.0)
+
 # The NRPN parameter numbers (NRPN_*), in spms1_patch.rb: (MSB << 7) | LSB, where the MSB picks
 # a category and the LSB an entry.
 #   0..127   active_modules[slot]
@@ -174,41 +186,70 @@ while true
   # The parameter sources are read once per buffer rather than per sample: each destination
   # smooths at the control rate in two stages of 5.3 ms each (10.7 ms on average), which swallows
   # the difference between feeding it at 48 kHz and at the 750 Hz buffer rate. Faster modulation
-  # goes through the module inputs, which are read per sample and not smoothed.
+  # goes through the module inputs, which are read per sample and not smoothed: one that takes a
+  # controller slot reads its smoothed copy instead (see SIGNALS_SIZE), but for a gate input.
   # patch_gen sources
   source_pitch_1_pitch_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_PITCH_IN)
+  source_pitch_1_pitch_in += ((source_pitch_1_pitch_in - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_pitch_1_pitch_in)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
   source_pitch_1_gate_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_GATE_IN)
   source_pitch_1_bend_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_BEND_IN)
+  source_pitch_1_bend_in += ((source_pitch_1_bend_in - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_pitch_1_bend_in)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
   source_eg_1_gate_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_EG_1_GATE_IN)
   source_eg_2_gate_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_EG_2_GATE_IN)
   source_lfo_1_rate_mod_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_RATE_MOD_IN)
+  source_lfo_1_rate_mod_in += ((source_lfo_1_rate_mod_in - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_lfo_1_rate_mod_in)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
   source_lfo_1_level_mod_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_LEVEL_MOD_IN)
+  source_lfo_1_level_mod_in += ((source_lfo_1_level_mod_in - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_lfo_1_level_mod_in)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
   source_lfo_1_reset_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_LFO_1_RESET_IN)
   source_mixer_1_in_1 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_IN_1)
+  source_mixer_1_in_1 += ((source_mixer_1_in_1 - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_mixer_1_in_1)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
   source_mixer_1_in_2 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_IN_2)
+  source_mixer_1_in_2 += ((source_mixer_1_in_2 - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_mixer_1_in_2)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
   source_mixer_1_in_3 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_IN_3)
+  source_mixer_1_in_3 += ((source_mixer_1_in_3 - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_mixer_1_in_3)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
   source_mixer_1_in_4 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_1_IN_4)
+  source_mixer_1_in_4 += ((source_mixer_1_in_4 - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_mixer_1_in_4)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
   source_osc_1_pitch_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PITCH_IN)
+  source_osc_1_pitch_in += ((source_osc_1_pitch_in - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_osc_1_pitch_in)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
   source_osc_1_mod_1_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_MOD_1_IN)
+  source_osc_1_mod_1_in += ((source_osc_1_mod_1_in - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_osc_1_mod_1_in)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
   source_osc_1_mod_2_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_MOD_2_IN)
+  source_osc_1_mod_2_in += ((source_osc_1_mod_2_in - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_osc_1_mod_2_in)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
   source_osc_2_pitch_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_PITCH_IN)
+  source_osc_2_pitch_in += ((source_osc_2_pitch_in - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_osc_2_pitch_in)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
   source_osc_2_mod_1_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_MOD_1_IN)
+  source_osc_2_mod_1_in += ((source_osc_2_mod_1_in - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_osc_2_mod_1_in)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
   source_osc_2_mod_2_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_MOD_2_IN)
+  source_osc_2_mod_2_in += ((source_osc_2_mod_2_in - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_osc_2_mod_2_in)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
   source_osc_2_sync_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_SYNC_IN)
   source_mixer_2_in_1 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_IN_1)
+  source_mixer_2_in_1 += ((source_mixer_2_in_1 - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_mixer_2_in_1)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
   source_mixer_2_in_2 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_IN_2)
+  source_mixer_2_in_2 += ((source_mixer_2_in_2 - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_mixer_2_in_2)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
   source_mixer_2_in_3 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_IN_3)
+  source_mixer_2_in_3 += ((source_mixer_2_in_3 - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_mixer_2_in_3)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
   source_mixer_2_in_4 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_IN_4)
+  source_mixer_2_in_4 += ((source_mixer_2_in_4 - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_mixer_2_in_4)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
   source_filter_1_audio_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_AUDIO_IN)
+  source_filter_1_audio_in += ((source_filter_1_audio_in - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_filter_1_audio_in)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
   source_filter_1_pitch_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_PITCH_IN)
+  source_filter_1_pitch_in += ((source_filter_1_pitch_in - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_filter_1_pitch_in)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
   source_filter_1_mod_1_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_1_IN)
+  source_filter_1_mod_1_in += ((source_filter_1_mod_1_in - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_filter_1_mod_1_in)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
   source_filter_1_mod_2_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_FILTER_1_MOD_2_IN)
+  source_filter_1_mod_2_in += ((source_filter_1_mod_2_in - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_filter_1_mod_2_in)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
   source_amp_1_audio_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_AUDIO_IN)
+  source_amp_1_audio_in += ((source_amp_1_audio_in - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_amp_1_audio_in)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
   source_amp_1_mod_1_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_MOD_1_IN)
+  source_amp_1_mod_1_in += ((source_amp_1_mod_1_in - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_amp_1_mod_1_in)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
   source_amp_1_mod_2_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_MOD_2_IN)
+  source_amp_1_mod_2_in += ((source_amp_1_mod_2_in - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_amp_1_mod_2_in)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
   source_chorus_1_audio_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_CHORUS_1_AUDIO_IN)
+  source_chorus_1_audio_in += ((source_chorus_1_audio_in - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_chorus_1_audio_in)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
   source_delay_1_audio_in_l = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_AUDIO_IN_L)
+  source_delay_1_audio_in_l += ((source_delay_1_audio_in_l - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_delay_1_audio_in_l)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
   source_delay_1_audio_in_r = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_AUDIO_IN_R)
+  source_delay_1_audio_in_r += ((source_delay_1_audio_in_r - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_delay_1_audio_in_r)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
   source_output_l = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OUTPUT_L)
   source_output_r = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OUTPUT_R)
   source_pitch_1_glide = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_PITCH_1_GLIDE), SLOT_PITCH_1_GLIDE)
@@ -501,6 +542,42 @@ while true
   signals[SIGNAL_GENERAL_2_NEG] = (signals[SIGNAL_GENERAL_2] > 0.5) ? 0.0 : (1.0 - (signals[SIGNAL_GENERAL_2] + signals[SIGNAL_GENERAL_2]))
   signals[SIGNAL_GENERAL_2_POS] = (signals[SIGNAL_GENERAL_2] < 0.5) ? 0.0 : ((signals[SIGNAL_GENERAL_2] + signals[SIGNAL_GENERAL_2]) - 1.0)
   signals[SIGNAL_GENERAL_2_MID] = (signals[SIGNAL_GENERAL_2] < 0.5) ? (signals[SIGNAL_GENERAL_2] + signals[SIGNAL_GENERAL_2]) : (2.0 - (signals[SIGNAL_GENERAL_2] + signals[SIGNAL_GENERAL_2]))
+  signals[SMOOTHED_STAGE_1_MOD_WHEEL] = Dsp.smooth(signals[SIGNAL_MOD_WHEEL], signals[SMOOTHED_STAGE_1_MOD_WHEEL], CONTROLLER_SMOOTHING_BLEND)
+  smoothed_mod_wheel = Dsp.smooth(signals[SMOOTHED_STAGE_1_MOD_WHEEL], signals[SIGNAL_MOD_WHEEL + SMOOTHED_SLOT_OFFSET], CONTROLLER_SMOOTHING_BLEND)
+  signals[SIGNAL_MOD_WHEEL + SMOOTHED_SLOT_OFFSET] = smoothed_mod_wheel
+  signals[SIGNAL_MOD_WHEEL_REV + SMOOTHED_SLOT_OFFSET] = 1.0 - smoothed_mod_wheel
+  signals[SIGNAL_MOD_WHEEL_INV + SMOOTHED_SLOT_OFFSET] = 0.0 - smoothed_mod_wheel
+  signals[SIGNAL_MOD_WHEEL_REV_INV + SMOOTHED_SLOT_OFFSET] = smoothed_mod_wheel - 1.0
+  signals[SMOOTHED_STAGE_1_GENERAL_1] = Dsp.smooth(signals[SIGNAL_GENERAL_1], signals[SMOOTHED_STAGE_1_GENERAL_1], CONTROLLER_SMOOTHING_BLEND)
+  smoothed_general_1 = Dsp.smooth(signals[SMOOTHED_STAGE_1_GENERAL_1], signals[SIGNAL_GENERAL_1 + SMOOTHED_SLOT_OFFSET], CONTROLLER_SMOOTHING_BLEND)
+  signals[SIGNAL_GENERAL_1 + SMOOTHED_SLOT_OFFSET] = smoothed_general_1
+  signals[SIGNAL_GENERAL_1_REV + SMOOTHED_SLOT_OFFSET] = 1.0 - smoothed_general_1
+  signals[SIGNAL_GENERAL_1_INV + SMOOTHED_SLOT_OFFSET] = 0.0 - smoothed_general_1
+  signals[SIGNAL_GENERAL_1_REV_INV + SMOOTHED_SLOT_OFFSET] = smoothed_general_1 - 1.0
+  signals[SIGNAL_GENERAL_1_BIPOLAR + SMOOTHED_SLOT_OFFSET] = smoothed_general_1 - 0.5
+  signals[SIGNAL_GENERAL_1_BIPOLAR_INV + SMOOTHED_SLOT_OFFSET] = 0.5 - smoothed_general_1
+  signals[SIGNAL_GENERAL_1_SIN + SMOOTHED_SLOT_OFFSET] = quarter_sine(smoothed_general_1)
+  signals[SIGNAL_GENERAL_1_COS + SMOOTHED_SLOT_OFFSET] = quarter_sine(1.0 - smoothed_general_1)
+  signals[SIGNAL_GENERAL_1_LO + SMOOTHED_SLOT_OFFSET] = (smoothed_general_1 < 0.5) ? 1.0 : (2.0 - (smoothed_general_1 + smoothed_general_1))
+  signals[SIGNAL_GENERAL_1_HI + SMOOTHED_SLOT_OFFSET] = (smoothed_general_1 > 0.5) ? 1.0 : (smoothed_general_1 + smoothed_general_1)
+  signals[SIGNAL_GENERAL_1_NEG + SMOOTHED_SLOT_OFFSET] = (smoothed_general_1 > 0.5) ? 0.0 : (1.0 - (smoothed_general_1 + smoothed_general_1))
+  signals[SIGNAL_GENERAL_1_POS + SMOOTHED_SLOT_OFFSET] = (smoothed_general_1 < 0.5) ? 0.0 : ((smoothed_general_1 + smoothed_general_1) - 1.0)
+  signals[SIGNAL_GENERAL_1_MID + SMOOTHED_SLOT_OFFSET] = (smoothed_general_1 < 0.5) ? (smoothed_general_1 + smoothed_general_1) : (2.0 - (smoothed_general_1 + smoothed_general_1))
+  signals[SMOOTHED_STAGE_1_GENERAL_2] = Dsp.smooth(signals[SIGNAL_GENERAL_2], signals[SMOOTHED_STAGE_1_GENERAL_2], CONTROLLER_SMOOTHING_BLEND)
+  smoothed_general_2 = Dsp.smooth(signals[SMOOTHED_STAGE_1_GENERAL_2], signals[SIGNAL_GENERAL_2 + SMOOTHED_SLOT_OFFSET], CONTROLLER_SMOOTHING_BLEND)
+  signals[SIGNAL_GENERAL_2 + SMOOTHED_SLOT_OFFSET] = smoothed_general_2
+  signals[SIGNAL_GENERAL_2_REV + SMOOTHED_SLOT_OFFSET] = 1.0 - smoothed_general_2
+  signals[SIGNAL_GENERAL_2_INV + SMOOTHED_SLOT_OFFSET] = 0.0 - smoothed_general_2
+  signals[SIGNAL_GENERAL_2_REV_INV + SMOOTHED_SLOT_OFFSET] = smoothed_general_2 - 1.0
+  signals[SIGNAL_GENERAL_2_BIPOLAR + SMOOTHED_SLOT_OFFSET] = smoothed_general_2 - 0.5
+  signals[SIGNAL_GENERAL_2_BIPOLAR_INV + SMOOTHED_SLOT_OFFSET] = 0.5 - smoothed_general_2
+  signals[SIGNAL_GENERAL_2_SIN + SMOOTHED_SLOT_OFFSET] = quarter_sine(smoothed_general_2)
+  signals[SIGNAL_GENERAL_2_COS + SMOOTHED_SLOT_OFFSET] = quarter_sine(1.0 - smoothed_general_2)
+  signals[SIGNAL_GENERAL_2_LO + SMOOTHED_SLOT_OFFSET] = (smoothed_general_2 < 0.5) ? 1.0 : (2.0 - (smoothed_general_2 + smoothed_general_2))
+  signals[SIGNAL_GENERAL_2_HI + SMOOTHED_SLOT_OFFSET] = (smoothed_general_2 > 0.5) ? 1.0 : (smoothed_general_2 + smoothed_general_2)
+  signals[SIGNAL_GENERAL_2_NEG + SMOOTHED_SLOT_OFFSET] = (smoothed_general_2 > 0.5) ? 0.0 : (1.0 - (smoothed_general_2 + smoothed_general_2))
+  signals[SIGNAL_GENERAL_2_POS + SMOOTHED_SLOT_OFFSET] = (smoothed_general_2 < 0.5) ? 0.0 : ((smoothed_general_2 + smoothed_general_2) - 1.0)
+  signals[SIGNAL_GENERAL_2_MID + SMOOTHED_SLOT_OFFSET] = (smoothed_general_2 < 0.5) ? (smoothed_general_2 + smoothed_general_2) : (2.0 - (smoothed_general_2 + smoothed_general_2))
   # patch_gen end
 
   # Each parameter takes its value, every buffer, whether or not it moved. Written by patch_gen

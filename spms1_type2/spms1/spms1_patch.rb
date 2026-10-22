@@ -182,6 +182,16 @@ SLOT_DELAY_1_MIX            = 207
 SLOT_DELAY_1_TIME           = 208
 SLOT_DELAY_1_FEEDBACK       = 209
 
+# The controller slots, the mod wheel's and the general controls', and where a smoothed copy of each
+# sits, off the bus at its slot + SMOOTHED_SLOT_OFFSET, with each controller's first smoothing
+# stage above them. A module input reads the copy (see spms1_main.rb).
+CONTROLLER_SLOT_FIRST      = 8
+CONTROLLER_SLOT_LAST       = 37
+SMOOTHED_SLOT_OFFSET       = 215
+SMOOTHED_STAGE_1_MOD_WHEEL = 253
+SMOOTHED_STAGE_1_GENERAL_1 = 254
+SMOOTHED_STAGE_1_GENERAL_2 = 255
+
 # NRPN parameter numbers: (MSB << 7) | LSB, where the MSB picks a category and the LSB an entry.
 #   0..127   active_modules[slot]
 # 128..255   what feeds each module input

@@ -138,8 +138,8 @@ signals:
   # Filter 1 Mode crossfades by, each at 1.0 over its own half and falling to 0.0 over the other;
   # Neg and Pos, the two sides of Bipolar doubled, 0.0 in the middle and rising to 1.0 at either
   # end; and Mid, 1.0 in the middle and 0.0 at both ends, which with Neg and Pos crossfades
-  # three things on one knob. None of them is smoothed: a parameter taking one smooths it, as it
-  # does its CC, and a module input takes it stepped once a buffer. A switch or a
+  # three things on one knob. A parameter taking one smooths it, as it does its CC, and a
+  # module input but a gate input takes a smoothed copy (see spms1_main.rb). A switch or a
   # parameter taking Rev moves the other way from one taking the CC itself, so one CC can turn a
   # switch on while it turns another off.
   - { key: GENERAL_1,             id: 12, control: GENERAL_1 }
@@ -218,15 +218,18 @@ signals:
 # Module inputs, NRPN category 1, listed in the editor's order, each by its entry: what feeds each
 # one in the default patch (`source`, a signal key). `label` is the editor's, on the module; `name`
 # the README's, after the module's label. An input with no module is a side of the final output.
+# A module input that takes a general control or the mod wheel reads it smoothed, from a copy off
+# the bus (see spms1_main.rb), but for one marked `gate`, which acts at a threshold or an edge and
+# takes the slot as it is.
 inputs:
   - { entry: 0, module: PITCH_1,      key: PITCH_IN,       label: Pitch In,       name: Pitch In,       source: NOTE_PITCH }
-  - { entry: 1, module: PITCH_1,      key: GATE_IN,        label: Gate In,      name: Gate In,      source: NOTE_GATE }
+  - { entry: 1, module: PITCH_1,      key: GATE_IN,        label: Gate In,      name: Gate In,      source: NOTE_GATE, gate: true }
   - { entry: 2, module: PITCH_1,      key: BEND_IN,        label: Bend In,      name: Bend In,      source: PITCH_BEND }
-  - { entry: 3, module: EG_1,        key: GATE_IN,        label: Gate In,        name: Gate In,        source: NOTE_GATE }
-  - { entry: 4, module: EG_2,        key: GATE_IN,        label: Gate In,        name: Gate In,        source: NOTE_GATE }
+  - { entry: 3, module: EG_1,        key: GATE_IN,        label: Gate In,        name: Gate In,        source: NOTE_GATE, gate: true }
+  - { entry: 4, module: EG_2,        key: GATE_IN,        label: Gate In,        name: Gate In,        source: NOTE_GATE, gate: true }
   - { entry: 5, module: LFO_1,       key: RATE_MOD_IN,    label: Rate Mod In,    name: Rate Mod In,    source: NONE }
   - { entry: 6, module: LFO_1,       key: LEVEL_MOD_IN,   label: Level Mod In,   name: Level Mod In,   source: MOD_WHEEL }
-  - { entry: 7, module: LFO_1,       key: RESET_IN,       label: Reset In,       name: Reset In,       source: NOTE_GATE }
+  - { entry: 7, module: LFO_1,       key: RESET_IN,       label: Reset In,       name: Reset In,       source: NOTE_GATE, gate: true }
   - { entry: 8, module: MIXER_1,     key: IN_1,        label: In 1,           name: In 1,           source: NONE }
   - { entry: 9, module: MIXER_1,     key: IN_2,        label: In 2,           name: In 2,           source: NONE }
   - { entry: 10, module: MIXER_1,     key: IN_3,        label: In 3,           name: In 3,           source: NONE }
@@ -237,7 +240,7 @@ inputs:
   - { entry: 15, module: OSC_2,       key: PITCH_IN,       label: Pitch In,       name: Pitch In,       source: PITCH_1_OUTPUT_2 }
   - { entry: 16, module: OSC_2,       key: MOD_1_IN,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
   - { entry: 17, module: OSC_2,       key: MOD_2_IN,       label: Mod 2 In,       name: Mod 2 In,       source: LFO_1_OUTPUT }
-  - { entry: 18, module: OSC_2,       key: SYNC_IN,        label: Sync In,        name: Sync In,        source: OSC_1_OUTPUT_SAW }
+  - { entry: 18, module: OSC_2,       key: SYNC_IN,        label: Sync In,        name: Sync In,        source: OSC_1_OUTPUT_SAW, gate: true }
   - { entry: 19, module: MIXER_2,     key: IN_1,        label: In 1,           name: In 1,           source: OSC_1_OUTPUT }
   - { entry: 20, module: MIXER_2,     key: IN_2,        label: In 2,           name: In 2,           source: OSC_2_OUTPUT }
   - { entry: 21, module: MIXER_2,     key: IN_3,        label: In 3,           name: In 3,           source: OSC_1_OUTPUT_SUB }
