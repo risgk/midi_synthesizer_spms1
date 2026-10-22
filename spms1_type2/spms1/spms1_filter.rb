@@ -143,6 +143,9 @@ module Spms1
     def initialize(sample_rate)
       @sample_rate = sample_rate
       @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (48000.0 / @sample_rate) * (CONTROL_RATE_DIVISOR / 4.0)
+      # The blend of the parameters smoothed once every 16 samples, four control ticks (see
+      # smooth_parameters): the one above taken four times over, for the same time.
+      @smoothing_16_blend = 1.0 - (1.0 - @smoothing_target_blend) ** 4.0
 
       # The leak's rate over the trapezoidal rule's step, LEAK_RATE * T / 2, as g is w_c * T / 2
       # (prewarped); a half at 48 kHz.
@@ -286,6 +289,23 @@ module Spms1
       @mode_hp = (hp > 1.0) ? 1.0 : hp
     end
 
+    # The parameters that scale no audio themselves -- rates, depths, times -- smoothed in two
+    # stages once every 16 samples, four control ticks, by the main loop for every module whatever
+    # runs, so that they cost a quarter as much and the same for any patch. What multiplies the
+    # audio is smoothed at every control tick, where a coarser step would be heard.
+    def smooth_parameters
+      @stage_1_cutoff = Dsp.smooth(@cutoff, @stage_1_cutoff, @smoothing_16_blend)
+      @current_cutoff = Dsp.smooth(@stage_1_cutoff, @current_cutoff, @smoothing_16_blend)
+      @stage_1_resonance = Dsp.smooth(@resonance, @stage_1_resonance, @smoothing_16_blend)
+      @current_resonance = Dsp.smooth(@stage_1_resonance, @current_resonance, @smoothing_16_blend)
+      @stage_1_modulation_1_depth = Dsp.smooth(@modulation_1_depth, @stage_1_modulation_1_depth, @smoothing_16_blend)
+      @current_modulation_1_depth = Dsp.smooth(@stage_1_modulation_1_depth, @current_modulation_1_depth, @smoothing_16_blend)
+      @stage_1_modulation_2_depth = Dsp.smooth(@modulation_2_depth, @stage_1_modulation_2_depth, @smoothing_16_blend)
+      @current_modulation_2_depth = Dsp.smooth(@stage_1_modulation_2_depth, @current_modulation_2_depth, @smoothing_16_blend)
+      @stage_1_pitch_amount = Dsp.smooth(@pitch_amount, @stage_1_pitch_amount, @smoothing_16_blend)
+      @current_pitch_amount = Dsp.smooth(@stage_1_pitch_amount, @current_pitch_amount, @smoothing_16_blend)
+    end
+
     def process(control_tick, audio_input = 0.0, pitch_input = 0.0, modulation_1_input = 0.0, modulation_2_input = 0.0)
       @current_pitch_input = pitch_input
       @current_modulation_1_input = modulation_1_input
@@ -411,16 +431,6 @@ module Spms1
     # rather than from where the additions got to, so rounding does not build up. 0.25 is
     # 1 / CONTROL_RATE_DIVISOR, written out for the reason Mixer#process gives.
     def update_coefficients
-      @stage_1_cutoff = Dsp.smooth(@cutoff, @stage_1_cutoff, @smoothing_target_blend)
-      @current_cutoff = Dsp.smooth(@stage_1_cutoff, @current_cutoff, @smoothing_target_blend)
-      @stage_1_resonance = Dsp.smooth(@resonance, @stage_1_resonance, @smoothing_target_blend)
-      @current_resonance = Dsp.smooth(@stage_1_resonance, @current_resonance, @smoothing_target_blend)
-      @stage_1_modulation_1_depth = Dsp.smooth(@modulation_1_depth, @stage_1_modulation_1_depth, @smoothing_target_blend)
-      @current_modulation_1_depth = Dsp.smooth(@stage_1_modulation_1_depth, @current_modulation_1_depth, @smoothing_target_blend)
-      @stage_1_modulation_2_depth = Dsp.smooth(@modulation_2_depth, @stage_1_modulation_2_depth, @smoothing_target_blend)
-      @current_modulation_2_depth = Dsp.smooth(@stage_1_modulation_2_depth, @current_modulation_2_depth, @smoothing_target_blend)
-      @stage_1_pitch_amount = Dsp.smooth(@pitch_amount, @stage_1_pitch_amount, @smoothing_target_blend)
-      @current_pitch_amount = Dsp.smooth(@stage_1_pitch_amount, @current_pitch_amount, @smoothing_target_blend)
       @stage_1_mode_lp = Dsp.smooth(@mode_lp, @stage_1_mode_lp, @smoothing_target_blend)
       @current_mode_lp = Dsp.smooth(@stage_1_mode_lp, @current_mode_lp, @smoothing_target_blend)
       @stage_1_mode_hp = Dsp.smooth(@mode_hp, @stage_1_mode_hp, @smoothing_target_blend)

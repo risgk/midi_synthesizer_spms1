@@ -1069,7 +1069,10 @@ sweep while Osc 1 holds the note.
   input takes smoothed; parameters (category 2) are read once per buffer and are smoothed by their
   destination. Route a fast source through a module input, a stepped one through a parameter
 - The smoothing takes two stages (10.7 ms average delay, 99% in 35 ms at 48 kHz), which round off
-  the steps of a controller sending sparse CCs (e.g. every 20 ms). The oscillators' Pitch Coarse, Pitch and Pitch
+  the steps of a controller sending sparse CCs (e.g. every 20 ms). What multiplies the audio --
+  levels, gains, mixes, an oscillator's Wave, Filter 1 Mode -- is smoothed every 4 samples; the
+  rates, depths and times every 16, which costs a quarter as much and steps nothing that is heard,
+  in the same time. The oscillators' Pitch Coarse, Pitch and Pitch
   Fine are not smoothed, so that the pitch follows right away, and neither is Pitch 1 Glide, which
   cannot step what it sets, nor the envelopes' Attack, Decay and Sustain, which each envelope's own curve
   already moves between

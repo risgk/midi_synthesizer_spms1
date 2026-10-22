@@ -33,6 +33,8 @@ PARAM_SLOT_BASE = 128
 # The size of the `signals` array, as spms1_main.rb makes it: the smoothed copies of the controller
 # slots go at its top.
 SIGNALS_SIZE = 256
+# The module classes with a smooth_parameters, which the main loop calls once every 16 samples.
+SMOOTHED_EVERY_16 = %w[Pitch LFO Osc Filter Chorus Delay].freeze
 
 def fail_spec(message)
   abort "spms1_patch_gen.rb: spms1_patch.yaml: #{message}"
@@ -399,6 +401,10 @@ def main_requires
   end.join
 end
 
+def main_smoothing
+  SPEC.modules.select { |m| SMOOTHED_EVERY_16.include?(m['class']) }.map { |m| "      #{m['key'].downcase}.smooth_parameters\n" }.join
+end
+
 def main_instances
   SPEC.modules.map { |m| "#{m['key'].downcase} = #{m.fetch('class')}.new(SAMPLE_RATE)\n" }.join
 end
@@ -511,7 +517,7 @@ end
 def main_rb(content)
   check_wiring
   { 'requires' => main_requires, 'instances' => main_instances, 'sources' => main_sources, 'controls' => main_controls,
-    'setters' => main_setters, 'dispatch' => main_dispatch }.each do |name, text|
+    'setters' => main_setters, 'smoothing' => main_smoothing, 'dispatch' => main_dispatch }.each do |name, text|
     content = replace_block(content, 'spms1/spms1_main.rb', name, text)
   end
   content

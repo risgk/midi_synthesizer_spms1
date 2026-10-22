@@ -675,6 +675,19 @@ while true
     # instance variable a sample, about 6% of the buffer by the emulated estimate. The buffer is a multiple of 4 samples, so the tick keeps its phase across buffers,
     # and every module ticks on the same samples, whenever it joined the run order.
     control_tick = (i & 3) == 0
+    # The smoothing of the parameters that scale no audio, every module's that has them, once every
+    # 16 samples whatever runs, so that it costs the same for any patch (see smooth_parameters).
+    if (i & 15) == 0
+      # patch_gen smoothing
+      pitch_1.smooth_parameters
+      lfo_1.smooth_parameters
+      osc_1.smooth_parameters
+      osc_2.smooth_parameters
+      filter_1.smooth_parameters
+      chorus_1.smooth_parameters
+      delay_1.smooth_parameters
+      # patch_gen end
+    end
     slot = 0
     while slot < active_count
       module_id = active_modules[slot]

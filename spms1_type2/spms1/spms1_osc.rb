@@ -43,6 +43,9 @@ module Spms1
       # conversion on top of the division.
       @inv_sample_rate = 1.0 / sample_rate
       @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (48000.0 / @sample_rate) * (CONTROL_RATE_DIVISOR / 4.0)
+      # The blend of the parameters smoothed once every 16 samples, four control ticks (see
+      # smooth_parameters): the one above taken four times over, for the same time.
+      @smoothing_16_blend = 1.0 - (1.0 - @smoothing_target_blend) ** 4.0
       @phase = 0.0
       @sub_toggle = 0.0
       @output_sub = 0.0
@@ -203,6 +206,23 @@ module Spms1
       @tune = (@pitch_coarse + @pitch_fine) + @pitch
     end
 
+    # The parameters that scale no audio themselves -- rates, depths, times -- smoothed in two
+    # stages once every 16 samples, four control ticks, by the main loop for every module whatever
+    # runs, so that they cost a quarter as much and the same for any patch. What multiplies the
+    # audio is smoothed at every control tick, where a coarser step would be heard.
+    def smooth_parameters
+      @stage_1_pulse_width = Dsp.smooth(@pulse_width, @stage_1_pulse_width, @smoothing_16_blend)
+      @current_pulse_width = Dsp.smooth(@stage_1_pulse_width, @current_pulse_width, @smoothing_16_blend)
+      @stage_1_pitch_modulation_1_depth = Dsp.smooth(@pitch_modulation_1_depth, @stage_1_pitch_modulation_1_depth, @smoothing_16_blend)
+      @current_pitch_modulation_1_depth = Dsp.smooth(@stage_1_pitch_modulation_1_depth, @current_pitch_modulation_1_depth, @smoothing_16_blend)
+      @stage_1_pitch_modulation_2_depth = Dsp.smooth(@pitch_modulation_2_depth, @stage_1_pitch_modulation_2_depth, @smoothing_16_blend)
+      @current_pitch_modulation_2_depth = Dsp.smooth(@stage_1_pitch_modulation_2_depth, @current_pitch_modulation_2_depth, @smoothing_16_blend)
+      @stage_1_pw_modulation_1_depth = Dsp.smooth(@pw_modulation_1_depth, @stage_1_pw_modulation_1_depth, @smoothing_16_blend)
+      @current_pw_modulation_1_depth = Dsp.smooth(@stage_1_pw_modulation_1_depth, @current_pw_modulation_1_depth, @smoothing_16_blend)
+      @stage_1_pw_modulation_2_depth = Dsp.smooth(@pw_modulation_2_depth, @stage_1_pw_modulation_2_depth, @smoothing_16_blend)
+      @current_pw_modulation_2_depth = Dsp.smooth(@stage_1_pw_modulation_2_depth, @current_pw_modulation_2_depth, @smoothing_16_blend)
+    end
+
     # The inputs are taken as they arrive; what is held to a range is the pitch they add up to.
     # [-0.5, 0.5] is that range, covering MIDI notes 0 to 120, and it is what keeps the table
     # lookup in bounds. The pulse width its modulations add up to is held to its own, [-0.5, 0.5].
@@ -334,19 +354,9 @@ module Spms1
     private
 
     def update_controls
-      # Morph, pulse width and depth are smoothed at the control rate to avoid sudden jumps.
+      # The morph, which crossfades the audio, is smoothed at the control rate (see smooth_parameters).
       @stage_1_waveform = Dsp.smooth(@waveform, @stage_1_waveform, @smoothing_target_blend)
       @current_waveform = Dsp.smooth(@stage_1_waveform, @current_waveform, @smoothing_target_blend)
-      @stage_1_pulse_width = Dsp.smooth(@pulse_width, @stage_1_pulse_width, @smoothing_target_blend)
-      @current_pulse_width = Dsp.smooth(@stage_1_pulse_width, @current_pulse_width, @smoothing_target_blend)
-      @stage_1_pitch_modulation_1_depth = Dsp.smooth(@pitch_modulation_1_depth, @stage_1_pitch_modulation_1_depth, @smoothing_target_blend)
-      @current_pitch_modulation_1_depth = Dsp.smooth(@stage_1_pitch_modulation_1_depth, @current_pitch_modulation_1_depth, @smoothing_target_blend)
-      @stage_1_pitch_modulation_2_depth = Dsp.smooth(@pitch_modulation_2_depth, @stage_1_pitch_modulation_2_depth, @smoothing_target_blend)
-      @current_pitch_modulation_2_depth = Dsp.smooth(@stage_1_pitch_modulation_2_depth, @current_pitch_modulation_2_depth, @smoothing_target_blend)
-      @stage_1_pw_modulation_1_depth = Dsp.smooth(@pw_modulation_1_depth, @stage_1_pw_modulation_1_depth, @smoothing_target_blend)
-      @current_pw_modulation_1_depth = Dsp.smooth(@stage_1_pw_modulation_1_depth, @current_pw_modulation_1_depth, @smoothing_target_blend)
-      @stage_1_pw_modulation_2_depth = Dsp.smooth(@pw_modulation_2_depth, @stage_1_pw_modulation_2_depth, @smoothing_target_blend)
-      @current_pw_modulation_2_depth = Dsp.smooth(@stage_1_pw_modulation_2_depth, @current_pw_modulation_2_depth, @smoothing_target_blend)
     end
 
     def pitch_to_freq_fast(pitch)

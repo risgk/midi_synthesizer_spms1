@@ -61,6 +61,9 @@ module Spms1
     def initialize(sample_rate)
       @sample_rate = sample_rate
       @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (48000.0 / @sample_rate) * (CONTROL_RATE_DIVISOR / 4.0)
+      # The blend of the parameters smoothed once every 16 samples, four control ticks (see
+      # smooth_parameters): the one above taken four times over, for the same time.
+      @smoothing_16_blend = 1.0 - (1.0 - @smoothing_target_blend) ** 4.0
       @full_scale_time = FULL_SCALE_TIME_AT_48K * (@sample_rate / 48000.0)
       @min_time = MIN_TIME_AT_48K * (@sample_rate / 48000.0)
       @max_time = MAX_TIME_AT_48K * (@sample_rate / 48000.0)
@@ -116,10 +119,17 @@ module Spms1
       @mix = (mix < 0.0) ? 0.0 : ((mix > 1.0) ? 1.0 : mix)
     end
 
+    # The parameters that scale no audio themselves -- rates, depths, times -- smoothed in two
+    # stages once every 16 samples, four control ticks, by the main loop for every module whatever
+    # runs, so that they cost a quarter as much and the same for any patch. What multiplies the
+    # audio is smoothed at every control tick, where a coarser step would be heard.
+    def smooth_parameters
+      @stage_1_time = Dsp.smooth(@time, @stage_1_time, @smoothing_16_blend)
+      @current_time = Dsp.smooth(@stage_1_time, @current_time, @smoothing_16_blend)
+    end
+
     def process(control_tick, audio_input_l = 0.0, audio_input_r = 0.0)
       if control_tick
-        @stage_1_time = Dsp.smooth(@time, @stage_1_time, @smoothing_target_blend)
-        @current_time = Dsp.smooth(@stage_1_time, @current_time, @smoothing_target_blend)
         @stage_1_feedback = Dsp.smooth(@feedback, @stage_1_feedback, @smoothing_target_blend)
         @current_feedback = Dsp.smooth(@stage_1_feedback, @current_feedback, @smoothing_target_blend)
         @stage_1_mix = Dsp.smooth(@mix, @stage_1_mix, @smoothing_target_blend)
