@@ -87,6 +87,23 @@ def cc_or_zero(cc_number, value)
   (cc_number == 0) ? 0.0 : value
 end
 
+# sin(u * pi / 2) for each CC step of u, 0.0 at index 0 to 1.0 at index 120, which a controller's
+# Sin form reads as it is and its Cos form from the other end; their squares sum to one at every
+# step, so two levels taking them crossfade at equal power.
+QUARTER_SINE_TABLE = Array.new(121, 0.0)
+for i in 0...121
+  QUARTER_SINE_TABLE[i] = Math.sin(i.to_f * (Math::PI / 240.0))
+end
+QUARTER_SINE_TABLE[120] = 1.0
+
+# A controller's CC value as an index of QUARTER_SINE_TABLE, 0 at CC 4 to 120 at CC 124, and 0, as
+# u is 0.0, while no CC is assigned.
+def cc_table_index(cc_number, value)
+  index = value - 4
+  index = (index < 0) ? 0 : ((index > 120) ? 120 : index)
+  (cc_number == 0) ? 0 : index
+end
+
 # The 7-bit value a parameter's control slot is filled from: its CC's while one is assigned, and
 # the value NRPN category 4 holds for it while none is. Selected the same way, before the one
 # conversion.

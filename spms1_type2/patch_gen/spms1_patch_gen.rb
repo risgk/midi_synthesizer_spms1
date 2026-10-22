@@ -59,7 +59,7 @@ class Spec
   def control(key) = @control.fetch(key)
   def signal(key) = @signal.fetch(key)
 
-  FORMS = %w[rev inv rev_inv bipolar bipolar_inv].freeze
+  FORMS = %w[rev inv rev_inv bipolar bipolar_inv sin cos].freeze
 
   # A module input's or control's own name, with its module's in front: OSC_1_PITCH_IN, OUTPUT_L.
   def full_key(item) = item['module'] ? "#{item['module']}_#{item['key']}" : item['key']
@@ -418,6 +418,8 @@ def main_controls
              when 'rev_inv' then "#{plain} - 1.0"
              when 'bipolar' then "#{plain} - 0.5"
              when 'bipolar_inv' then "0.5 - #{plain}"
+             when 'sin' then "QUARTER_SINE_TABLE[cc_table_index(cc_#{name}, #{name})]"
+             when 'cos' then "QUARTER_SINE_TABLE[120 - cc_table_index(cc_#{name}, #{name})]"
              end
       out << "  signals[SIGNAL_#{sig['key']}] = #{expr}\n"
     end
