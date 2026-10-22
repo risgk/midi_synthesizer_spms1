@@ -1,6 +1,6 @@
 # Writes what the sketch reads from spms1_patch.yaml: spms1/spms1_patch.rb whole, the parts of
-# spms1_editor.html, README.md, README.ja.md and spms1/spms1_main.rb between their "patch_gen"
-# markers.
+# spms1_editor.html, spms1_patching.md, spms1_patching.ja.md and spms1/spms1_main.rb between their
+# "patch_gen" markers.
 #
 #   ruby patch_gen/spms1_patch_gen.rb [--check | --renumber]
 #
@@ -12,7 +12,7 @@
 require 'yaml'
 require 'json'
 
-# The READMEs are UTF-8 whatever the locale (Windows', or a CI runner's) says.
+# The Markdown documents are UTF-8 whatever the locale (Windows', or a CI runner's) says.
 Encoding.default_external = Encoding::UTF_8
 Encoding.default_internal = Encoding::UTF_8
 
@@ -318,7 +318,7 @@ def editor_js
   lines.join("\n") + "\n"
 end
 
-# ---- README.md, README.ja.md -------------------------------------------------------------------
+# ---- spms1_patching.md, spms1_patching.ja.md ---------------------------------------------------
 
 # A Markdown table of `rows` (each a row's cells) in `columns` groups side by side, filled down
 # each group in turn, with an empty column between groups. A '|' in a cell, as in a label that
@@ -538,7 +538,7 @@ outputs['spms1/spms1_patch.rb'] = patch_rb
 outputs['spms1/spms1_main.rb'] = main_rb(File.read(File.join(DIR, 'spms1/spms1_main.rb')))
 editor = File.read(File.join(DIR, 'spms1_editor.html'))
 outputs['spms1_editor.html'] = replace_block(editor, 'spms1_editor.html', 'spec', editor_js)
-{ 'README.md' => false, 'README.ja.md' => true }.each do |file, ja|
+{ 'spms1_patching.md' => false, 'spms1_patching.ja.md' => true }.each do |file, ja|
   content = File.read(File.join(DIR, file))
   readme_tables(ja: ja).each { |name, text| content = replace_block(content, file, name, "\n#{text}\n") }
   outputs[file] = content

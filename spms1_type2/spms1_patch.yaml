@@ -5,7 +5,8 @@
 #
 #   spms1/spms1_patch.rb  the constants and the default patch, for spms1_main.rb
 #   spms1_editor.html     the tables of the editor, between its "patch_gen" markers
-#   README.md             the NRPN tables, between the "patch_gen" markers, and README.ja.md likewise
+#   spms1_patching.md     the NRPN tables, between the "patch_gen" markers, and spms1_patching.ja.md
+#                         likewise
 #   spms1/spms1_main.rb   the wiring of the loop, between its "patch_gen" markers: the module
 #                         instances, the routing and CC reads, the setters and the dispatch
 #
@@ -22,7 +23,7 @@
 # reads it into any version. Each number is still written out, so that a renumbering shows;
 # `ruby patch_gen/spms1_patch_gen.rb --renumber` writes them again from the order of the lists.
 #
-# Labels: `label` is what the README and the editor call a thing. Where the Japanese README calls
+# Labels: `label` is what the documents and the editor call a thing. Where the Japanese ones call
 # it otherwise, `label_ja` says so.
 
 # Module ids (NRPN category 0 values). 0 is MODULE_NONE, which ends the run order. A module with
@@ -107,7 +108,7 @@ default_order: [PITCH_1, EG_1, EG_2, LFO_1, MIXER_1, OSC_1, OSC_2, NOISE_1, MIXE
 #             min(1, 2 - 2u), hi min(1, 2u), neg max(0, 1 - 2u), mid 1 - |2u - 1| and
 #             pos max(0, 2u - 1), each labeled by `label`; with no form it is u itself
 #   (none):   a note input, written by the synth from MIDI
-# `bipolar` marks a slot that swings both ways (the README's ±); a controller slot takes its
+# `bipolar` marks a slot that swings both ways (the documents' ±); a controller slot takes its
 # control's.
 #
 # 127 is not a slot: as a parameter's source it means the parameter's own control slot, which
@@ -218,7 +219,7 @@ signals:
 
 # Module inputs, NRPN category 1, listed in the editor's order, each by its entry: what feeds each
 # one in the default patch (`source`, a signal key). `label` is the editor's, on the module; `name`
-# the README's, after the module's label. An input with no module is a side of the final output.
+# the documents', after the module's label. An input with no module is a side of the final output.
 # A module input that takes a general control or the mod wheel reads it smoothed, from a copy off
 # the bus (see spms1_main.rb), but for one marked `gate`, which acts at a threshold or an edge and
 # takes the slot as it is.

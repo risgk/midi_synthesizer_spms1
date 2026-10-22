@@ -3,14 +3,14 @@
 # What any synth on this base shares, whatever its modules: the functions the host provides
 # (Spms1::C, implemented by spms1.ino and by every simulator), and the conversions from MIDI to the
 # values the modules take. spms1_main.rb is the loop that runs the patch, and the modules
-# (spms1_osc.rb and the rest) are the sound; README's "Adding a Module" says how a new one is
-# added, which is a class and its entries in spms1_patch.yaml, with nothing written in the loop
-# by hand.
+# (spms1_osc.rb and the rest) are the sound; spms1_development.md's "Adding a Module" says how a
+# new one is added, which is a class and its entries in spms1_patch.yaml, with nothing written in
+# the loop by hand.
 #
 # The patch is data: which modules run and in what order, what feeds each module input, where each
 # parameter takes its value, and which CC fills each control slot all live in the NRPN table, read
-# back every buffer so that MIDI can rewire the synth while it runs. README lists the numbers a
-# controller sends. Two invariants the code leans on:
+# back every buffer so that MIDI can rewire the synth while it runs. spms1_patching.md lists the
+# numbers a controller sends. Two invariants the code leans on:
 #
 # - Every entry is 7-bit and every 7-bit value is legal, so nothing read back is validated. An
 #   unknown module id falls through the dispatch, and any slot number is a real slot because the
@@ -27,7 +27,7 @@
 # branches on values are avoided where they can be (clamps as nested ternaries that compile to
 # selects, curves from lookup tables with interpolation rather than library calls such as a square
 # root), so that no input takes a slower path than the one measured. A module keeps to it as well:
-# README's "Writing a Module" says how.
+# spms1_development.md's "Writing a Module" says how.
 #
 # Claims about the generated C, here and in the rest of the synth, hold for the Spinel version
 # vendored in spinel_rt.h. Re-check them on updating it.

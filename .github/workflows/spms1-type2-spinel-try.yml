@@ -1,6 +1,6 @@
 # SPMS-1 (type-2) Try a Spinel Release: takes a Spinel release into the sketch on the runner, and
 # tells whether it still builds and sounds the same, before the release is taken for real
-# (see "Updating Spinel" in spms1_type2/README.md)
+# (see "Updating Spinel" in spms1_type2/spms1_development.md)
 # - spinel_mcu/update.sh update TAG: the runtime files of the release, with spinel_mcu.patch applied
 # - spms1_main.c regenerated with the release, the types across the runtime checked with LTO, and the
 #   renders compared with CRuby
