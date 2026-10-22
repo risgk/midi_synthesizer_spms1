@@ -874,9 +874,12 @@
     .node.aux .node-head {
       background: var(--text-color);
     }
-    /* A strip of the color its outputs and their wires take. */
-    .node-head {
-      box-shadow: inset 6px 0 0 var(--node-color, transparent);
+    /* The head in the color its outputs and their wires take, gray while the module is not run. */
+    .node.colored .node-head {
+      background: var(--node-color);
+    }
+    .node.colored.off .node-head {
+      background: var(--text-muted);
     }
     .badge {
       font-size: 0.7rem;
@@ -2203,7 +2206,10 @@
       const el = document.createElement('div');
       el.className = 'node' + (node.aux ? ' aux' : '') + (node.key === 'CONTROLLER' ? ' controller' : '') + (node.key === 'CONST' ? ' const' : '');
       el.dataset.node = node.key;
-      if (NODE_COLORS[node.key]) el.style.setProperty('--node-color', NODE_COLORS[node.key]);
+      if (NODE_COLORS[node.key]) {
+        el.classList.add('colored');
+        el.style.setProperty('--node-color', NODE_COLORS[node.key]);
+      }
       el.innerHTML = nodeHTML(node);
       const pos = state.layout[node.key];
       el.style.left = pos.x + 'px';
