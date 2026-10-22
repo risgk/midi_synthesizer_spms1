@@ -665,7 +665,9 @@ input or parameter to read. It reads CC#1 by default, runs 0.0 to 1.0 and powers
 it is at 0.0 until the wheel moves; the default patch puts it on LFO 1 Level Mod In, where it adds nothing while LFO 1 Level is at
 its power-up 1.0. Slots 9 to
 11 carry it in three more forms of its value u: Mod Wheel Rev 1 - u, Inv -u and Rev Inv u - 1,
-so the wheel can take something out, or the other way, with no mixer to turn it round. The editor
+so the wheel can take something out, or the other way, with no mixer to turn it round. Like
+General 1 and 2 below, none of them is smoothed where it is made; LFO 1 Level Mod In smooths what
+it takes, as a parameter would. The editor
 shows it with the keyboard's signals, on its Controller node, the forms as outputs below it, and
 as a wheel beside the soft keyboard.
 
@@ -756,7 +758,8 @@ LFO 1 Level scales the LFO's outputs, as a mixer's Level scales its input: from 
 (value 4) to full at 1.0 (value 124). It is on CC#116 and powers up at 1.0, so the LFO runs at
 full level and what it moves sets the depth. LFO 1 Level Mod In adds to it, held to the same range, by Level Mod Amt, and it takes
 Mod Wheel by default at a depth of 1.0 (Level Mod Amt has no CC and holds 1.0), so with Level
-turned down the wheel brings the LFO in, up to full at its top. Turning the LFO the
+turned down the wheel brings the LFO in, up to full at its top. Level Mod In is smoothed as
+Level is, so the depth of a vibrato follows the wheel without steps. Turning the LFO the
 other way up is for Out Inv, Out negated, or for a mixer's Out Inv; the triangle and the square
 have theirs too, Out Triangle Inv and Out Square Inv. The default patch leaves them unrouted.
 
