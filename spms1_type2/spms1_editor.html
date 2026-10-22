@@ -1831,6 +1831,15 @@
 
   const STORAGE_KEY = 'spms1-type2-patch-editor';
   let state = defaultState();
+  // The slider or wheel held by the pointer, which a value from elsewhere must not move under
+  // the drag. A slider left focused after it is let go still follows CCs received.
+  let heldRange = null;
+  window.addEventListener('pointerdown', e => {
+    if (e.target instanceof HTMLInputElement && e.target.type === 'range') heldRange = e.target;
+  }, true);
+  for (const type of ['pointerup', 'pointercancel']) {
+    window.addEventListener(type, () => { heldRange = null; }, true);
+  }
   const undoStack = [];
   const redoStack = [];
 
@@ -3226,9 +3235,8 @@
 
   function renderControls() {
     const root = document.getElementById('controls');
-    const active = document.activeElement;
     // Rebuilding under a slider being dragged would drop the drag.
-    if (active && active.type === 'range' && root.contains(active)) return;
+    if (heldRange && root.contains(heldRange)) return;
     const cols = [0, 1, 2, 3].map(() => document.createElement('div'));
     cols.forEach(c => { c.className = 'editor-column'; });
     for (const p of CONTROL_PANELS) {
@@ -3323,7 +3331,7 @@
       zone.querySelector('.slider-label').title = zone.querySelector('.slider-label').textContent.trim();
       slider.disabled = !usable;
       const value = ownValue ? paramValue(c.key) : usable ? ccValue(cc) : 64;
-      if (document.activeElement !== slider) slider.value = value;
+      if (heldRange !== slider) slider.value = value;
       zone.querySelector('.slider-value').textContent = usable ? String(value) : '—';
       const own = signalNorm(c.slots[0][0]);
       const norm = zone.querySelector('.slider-norm');
@@ -3347,7 +3355,7 @@
     const cc = state.cc.MOD_WHEEL;
     const usable = ccInUse(cc);
     modWheel.disabled = !usable;
-    if (document.activeElement !== modWheel) modWheel.value = usable ? ccValue(cc) : 4;
+    if (heldRange !== modWheel) modWheel.value = usable ? ccValue(cc) : 4;
     const v = signalNorm('MOD_WHEEL');
     document.getElementById('mod-wheel-zone').title = usable
       ? `Mod Wheel (CC#${cc}): ${ccValue(cc)}${v ? `, ${v.text}` : ''}`
