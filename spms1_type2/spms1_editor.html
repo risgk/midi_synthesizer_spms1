@@ -962,13 +962,26 @@
       font-weight: 600;
     }
     /* A routed parameter reads its wire, but its CC still fills its own slot and so still feeds
-       the output port: the fields stay live, only set back. */
+       the output port: the fields and the slider stay live, only shown as disabled ones are. */
     .row.routed input[type="number"] {
-      opacity: 0.55;
+      background: #f2f4f5;
+      color: var(--text-muted);
     }
     .slider-knob-zone.routed .slider-label {
       color: var(--wire-param);
       font-style: italic;
+    }
+    .slider-knob-zone.routed .slider-value,
+    .slider-knob-zone.routed .slider-norm {
+      color: var(--text-muted);
+    }
+    .slider-knob-zone.routed input[type="range"]::-webkit-slider-thumb {
+      background: var(--text-muted);
+      opacity: 0.55;
+    }
+    .slider-knob-zone.routed input[type="range"]::-moz-range-thumb {
+      background: var(--text-muted);
+      opacity: 0.55;
     }
     .row.routed .lbl {
       color: var(--wire-param);
