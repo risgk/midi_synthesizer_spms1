@@ -458,11 +458,14 @@
     .slider-knob-zone.own .slider-value {
       color: var(--wire-param);
     }
+    /* Its thumb pale, a ring of that blue, so it stands apart from the thumbs in a module's color. */
     .slider-knob-zone.own input[type="range"]::-webkit-slider-thumb {
-      background: var(--wire-param);
+      background: #dce6f1;
+      box-shadow: inset 0 0 0 2px var(--wire-param);
     }
     .slider-knob-zone.own input[type="range"]::-moz-range-thumb {
-      background: var(--wire-param);
+      background: #dce6f1;
+      box-shadow: inset 0 0 0 2px var(--wire-param);
     }
     .slider-value {
       min-width: 32px;
