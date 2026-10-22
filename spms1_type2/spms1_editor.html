@@ -1059,12 +1059,14 @@
     }
     /* A CC that also fills another parameter's slot, as Osc 2's amounts are on Osc 1's CCs: moving
        one moves the other, so the number stands out a little. */
+    /* A CC shared by more than one slot in amber, apart from the red of the Controller and the
+       orange of a reserved CC. */
     .row input.shared {
-      border-color: #eea3aa;
-      background: #fdebed;
+      border-color: #e5c07b;
+      background: #fdf6e3;
     }
     .slider-label .cc-num.shared {
-      color: #db5c68;
+      color: #946000;
       font-weight: 600;
     }
     /* A routed parameter reads its wire, but its CC still fills its own slot and so still feeds
@@ -2133,10 +2135,11 @@
   let armed = null;
 
   // Each node's outputs, and the wires from them, take its color, set apart from its neighbors'.
+  // The constants and the output, which make no sound of their own, are in grays.
   const NODE_COLORS = {
-    CONTROLLER: '#9b111e', CONST: '#785e54',
+    CONTROLLER: '#9b111e', CONST: '#666666', OUT: '#3d3d3d',
     PITCH_1: '#2c3e50', EG_1: '#a65813', EG_2: '#98620b', LFO_1: '#1c7f46', MIXER_1: '#117d68',
-    OSC_1: '#2772a4', OSC_2: '#793a93', NOISE_1: '#6a5707', MIXER_2: '#0c5748', FILTER_1: '#b81752',
+    OSC_1: '#2772a4', OSC_2: '#793a93', NOISE_1: '#557a0e', MIXER_2: '#9c2f86', FILTER_1: '#b81752',
     AMP_1: '#473baf', CHORUS_1: '#007784', DELAY_1: '#5e2500',
   };
   const nodeOfOutput = {};
