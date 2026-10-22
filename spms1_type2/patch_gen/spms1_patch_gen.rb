@@ -59,7 +59,7 @@ class Spec
   def control(key) = @control.fetch(key)
   def signal(key) = @signal.fetch(key)
 
-  FORMS = %w[rev inv rev_inv bipolar bipolar_inv sin cos lo hi neg pos].freeze
+  FORMS = %w[rev inv rev_inv bipolar bipolar_inv sin cos lo hi neg pos mid].freeze
 
   # A module input's or control's own name, with its module's in front: OSC_1_PITCH_IN, OUTPUT_L.
   def full_key(item) = item['module'] ? "#{item['module']}_#{item['key']}" : item['key']
@@ -424,6 +424,7 @@ def main_controls
              when 'hi' then "(#{plain} > 0.5) ? 1.0 : (#{plain} + #{plain})"
              when 'neg' then "(#{plain} > 0.5) ? 0.0 : (1.0 - (#{plain} + #{plain}))"
              when 'pos' then "(#{plain} < 0.5) ? 0.0 : ((#{plain} + #{plain}) - 1.0)"
+             when 'mid' then "(#{plain} < 0.5) ? (#{plain} + #{plain}) : (2.0 - (#{plain} + #{plain}))"
              end
       out << "  signals[SIGNAL_#{sig['key']}] = #{expr}\n"
     end
