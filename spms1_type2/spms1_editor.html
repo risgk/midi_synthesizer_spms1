@@ -231,6 +231,11 @@
     .editor-column .panel.colored {
       --thumb-color: var(--node-color);
     }
+    /* A favorite's star and the tint behind its row in the color of its module, on either tab. */
+    .editor-column .panel.colored, .node.colored {
+      --favorite: var(--node-color);
+      --favorite-bg: color-mix(in srgb, var(--node-color) 9%, #fff);
+    }
     .editor-column .panel.colored h2 {
       color: var(--node-color);
       border-left-color: var(--node-color);
@@ -271,7 +276,7 @@
       color: var(--favorite);
       opacity: 1;
     }
-    /* A light gold behind a favorite's row, out to the edges of its panel. */
+    /* A tint behind a favorite's row, out to the edges of its panel. */
     .slider-knob-zone.fav::before {
       content: '';
       position: absolute;
@@ -1092,7 +1097,7 @@
       color: var(--wire-param);
       font-style: italic;
     }
-    /* A favorite on the Patch tab: a light gold behind its row. */
+    /* A favorite on the Patch tab: a tint behind its row. */
     .row.ctrl.fav {
       background: var(--favorite-bg);
     }

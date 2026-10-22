@@ -100,7 +100,7 @@ Usage
       scales, as "(Osc 1 Sub)" on Mixer 2 Level 3, kept up to date as the routing changes. On the
       Patch tab it is in the name's tooltip
     - A click on the faint star left of a parameter's name marks it as a favorite, and the star turns
-      gold and its row light gold; on the Patch tab its row is light gold too. The favorites are saved
+      the color of its module and its row a light tint of it; on the Patch tab its row is tinted too. The favorites are saved
       in the patch (JSON) and undone like any other change, but not sent to the synth
     - On its Patch tab a value is dragged up or down like a knob, with Shift for fine steps, or
       stepped by the wheel while it is being edited
