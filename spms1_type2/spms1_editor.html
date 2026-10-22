@@ -3796,6 +3796,9 @@
       : 'Mod Wheel: no CC in the patch, so the slot holds 0.0';
   }
 
+  // Both wheels move Controller signals, so they take its color.
+  document.querySelectorAll('.mod-wheel').forEach(el => el.style.setProperty('--thumb-color', NODE_COLORS.CONTROLLER));
+
   // The pitch bend wheel sends Pitch Bend as it moves, -8192 at the bottom to +8191 at the top,
   // and springs back to the center, sending 0, when it is let go.
   const bendWheel = document.getElementById('bend-wheel');
