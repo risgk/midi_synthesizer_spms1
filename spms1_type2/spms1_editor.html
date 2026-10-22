@@ -805,7 +805,18 @@
       opacity: 1;
     }
     .wire.feedback {
-      stroke: var(--wire-feedback);
+      stroke-width: 5;
+    }
+    .wire.feedback.selected {
+      stroke-width: 7;
+    }
+    .wire-core {
+      stroke: #fff;
+      stroke-width: 1.8;
+      pointer-events: none;
+    }
+    .wire-core.selected {
+      stroke-width: 2.5;
     }
     .wire.inactive {
       stroke: var(--wire-inactive);
@@ -862,6 +873,10 @@
     }
     .node.aux .node-head {
       background: var(--text-color);
+    }
+    /* A strip of the color its outputs and their wires take. */
+    .node-head {
+      box-shadow: inset 6px 0 0 var(--node-color, transparent);
     }
     .badge {
       font-size: 0.7rem;
@@ -1139,6 +1154,16 @@
     .port.param.connected {
       background: var(--wire-param);
     }
+    /* An output in its node's color; a wired input filled with its source's. */
+    .node .port.out {
+      border-color: var(--node-color);
+    }
+    .node .port.out.connected {
+      background: var(--node-color);
+    }
+    .port.in.connected {
+      background: var(--src-color);
+    }
     .port:hover, .port.target {
       transform: scale(1.35);
     }
@@ -1334,10 +1359,10 @@
     <div class="arm-hint" id="arm-hint" hidden></div>
     <div class="canvas-bar">
       <div class="legend">
-        <span><svg width="28" height="6"><line x1="0" y1="3" x2="28" y2="3" stroke="#9B111E" stroke-width="2.5"/></svg>Module input</span>
-        <span><svg width="28" height="6"><line x1="0" y1="3" x2="28" y2="3" stroke="#d68910" stroke-width="2.5"/></svg>1-sample delay (runs later)</span>
+        <span><svg width="28" height="6"><line x1="0" y1="3" x2="9" y2="3" stroke="#c0392b" stroke-width="2.5"/><line x1="9" y1="3" x2="19" y2="3" stroke="#27ae60" stroke-width="2.5"/><line x1="19" y1="3" x2="28" y2="3" stroke="#2e86c1" stroke-width="2.5"/></svg>Module input, in its source's color</span>
+        <span><svg width="28" height="8"><line x1="0" y1="4" x2="28" y2="4" stroke="#c0392b" stroke-width="5"/><line x1="0" y1="4" x2="28" y2="4" stroke="#fff" stroke-width="1.8"/></svg>1-sample delay (runs later)</span>
         <span><svg width="28" height="6"><line x1="0" y1="3" x2="28" y2="3" stroke="#b8c0c4" stroke-width="2.5"/></svg>Source not running</span>
-        <span><svg width="28" height="6"><line x1="0" y1="3" x2="28" y2="3" stroke="#4f7cac" stroke-width="2" stroke-dasharray="6 4"/></svg>Parameter</span>
+        <span><svg width="28" height="6"><line x1="0" y1="3" x2="28" y2="3" stroke="#34495e" stroke-width="1.5" stroke-dasharray="5 4" opacity="0.6"/></svg>Parameter</span>
       </div>
       <div class="zoom-controls">
         <button class="btn" id="zoom-out" title="Zoom out">&minus;</button>
@@ -2092,6 +2117,15 @@
   // An output clicked, waiting for a click on an input to wire it to: { src, temp, last }.
   let armed = null;
 
+  // Each node's outputs, and the wires from them, take its color, set apart from its neighbors'.
+  const NODE_COLORS = {
+    CONTROLLER: '#34495e', CONST: '#8d6e63',
+    PITCH_1: '#c0392b', EG_1: '#e67e22', EG_2: '#b9770e', LFO_1: '#27ae60', MIXER_1: '#17a589',
+    OSC_1: '#2e86c1', OSC_2: '#8e44ad', NOISE_1: '#7d6608', MIXER_2: '#0e6655', FILTER_1: '#d81b60',
+    AMP_1: '#5b4fc4', CHORUS_1: '#0097a7', DELAY_1: '#6e2c00',
+  };
+  const nodeOfOutput = {};
+
   const NODES = [
     { key: 'CONTROLLER', label: 'Controller', aux: true, notes: [['NOTE_PITCH', 'Note Pitch', 0, 127], ['NOTE_GATE', 'Note Gate', 0, 1], ['PITCH_BEND', 'Pitch Bend', -8192, 8191]], controls: CONTROLLER_ITEMS },
     { key: 'CONST', label: 'Constants', aux: true, normed: true, outs: ['ONE', 'HALF', 'NONE', 'MINUS_HALF', 'MINUS_ONE'] },
@@ -2169,13 +2203,17 @@
       const el = document.createElement('div');
       el.className = 'node' + (node.aux ? ' aux' : '') + (node.key === 'CONTROLLER' ? ' controller' : '') + (node.key === 'CONST' ? ' const' : '');
       el.dataset.node = node.key;
+      if (NODE_COLORS[node.key]) el.style.setProperty('--node-color', NODE_COLORS[node.key]);
       el.innerHTML = nodeHTML(node);
       const pos = state.layout[node.key];
       el.style.left = pos.x + 'px';
       el.style.top = pos.y + 'px';
       world.appendChild(el);
     }
-    world.querySelectorAll('.port.out').forEach(p => { portEls['o:' + p.dataset.src] = p; });
+    world.querySelectorAll('.port.out').forEach(p => {
+      portEls['o:' + p.dataset.src] = p;
+      nodeOfOutput[p.dataset.src] = p.closest('.node').dataset.node;
+    });
     world.querySelectorAll('.port.in').forEach(p => { portEls['i:' + p.dataset.dst] = p; });
     bindControlInputs();
     bindNoteInputs();
@@ -2347,6 +2385,10 @@
       const vis = document.createElementNS(SVG_NS, 'path');
       vis.setAttribute('d', d);
       vis.setAttribute('class', `wire ${c.kind}` + (c.dst === selectedWire ? ' selected' : ''));
+      // A wire from a source that is not running stays gray.
+      const color = c.kind.includes('inactive') ? null : NODE_COLORS[nodeOfOutput[c.src]];
+      if (color) vis.style.stroke = color;
+      to.style.setProperty('--src-color', color || 'var(--wire-inactive)');
       const hit = document.createElementNS(SVG_NS, 'path');
       hit.setAttribute('d', d);
       hit.setAttribute('class', 'hit');
@@ -2358,6 +2400,13 @@
       title.textContent = tip;
       hit.appendChild(title);
       svg.appendChild(vis);
+      // A wire whose source runs later is drawn hollow, a line of its color with a white core.
+      if (c.kind.includes('feedback')) {
+        const core = document.createElementNS(SVG_NS, 'path');
+        core.setAttribute('d', d);
+        core.setAttribute('class', 'wire-core' + (c.dst === selectedWire ? ' selected' : ''));
+        svg.appendChild(core);
+      }
       svg.appendChild(hit);
       from.classList.add('connected');
       to.classList.add('connected');
