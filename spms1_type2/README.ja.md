@@ -50,7 +50,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.6
       その外側のこのフォルダにあります
 - Arduino-Pico = Raspberry Pi Pico/RP2040/RP2350 (by Earle F. Philhower, III) コア
     - 追加のボードマネージャ URL: <https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json>
-    - このスケッチはバージョン 6.2.0 で動作確認しています: <https://github.com/earlephilhower/arduino-pico/releases/tag/6.2.0>
+    - このスケッチはバージョン 6.3.0 で動作確認しています: <https://github.com/earlephilhower/arduino-pico/releases/tag/6.3.0>
     - 情報: <https://github.com/earlephilhower/arduino-pico>
     - ボード: "Raspberry Pi Pico 2"、"ツール" メニューの USB Stack: "Adafruit TinyUSB"
 - Arduino MIDI Library (by Francois Best, lathoub)
@@ -1176,7 +1176,7 @@ patch_gen は、モジュールのファイルの `require_relative`、インス
 "../.github/workflows/spms1-type2.yml" の "SPMS-1 (type-2) Build (UF2 and Web)" を手動で実行します
 (リリース時など、Actions タブの "Run workflow" で)。毎回、以下をすべて行います:
 
-- UF2: "spms1/spms1.ino" を Arduino-Pico 6.2.0 で PWM Audio 版と I2S 版にコンパイルし、UF2 ファイルを
+- UF2: "spms1/spms1.ino" を Arduino-Pico 6.3.0 で PWM Audio 版と I2S 版にコンパイルし、UF2 ファイルを
   成果物 (artifact) として残します
 - SPMS-1 Web: "spms1_web_synth.js" をビルド・テストし、成果物として残します
 - シミュレーター: "sim_spinel" と "sim_render" を Linux、macOS、Windows でビルドしてレンダリングし、

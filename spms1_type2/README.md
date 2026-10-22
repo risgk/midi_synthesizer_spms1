@@ -51,7 +51,7 @@ Required Software for Modification
       tools stay in this folder, outside it
 - Arduino-Pico = Raspberry Pi Pico/RP2040/RP2350 (by Earle F. Philhower, III) core
     - Additional Board Manager URL: <https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json>
-    - This sketch is tested with version 6.2.0: <https://github.com/earlephilhower/arduino-pico/releases/tag/6.2.0>
+    - This sketch is tested with version 6.3.0: <https://github.com/earlephilhower/arduino-pico/releases/tag/6.3.0>
     - Info: <https://github.com/earlephilhower/arduino-pico>
     - Board: "Raspberry Pi Pico 2", with USB Stack: "Adafruit TinyUSB" in the "Tools" menu
 - Arduino MIDI Library (by Francois Best, lathoub)
@@ -1255,7 +1255,7 @@ measures on the device -- with the default patch and a note held.
 "SPMS-1 (type-2) Build (UF2 and Web)" in "../.github/workflows/spms1-type2.yml", run by hand
 ("Run workflow" in the Actions tab, e.g. at a release); every run does all of the following:
 
-- UF2: compiles "spms1/spms1.ino" for PWM Audio and I2S with Arduino-Pico 6.2.0, and keeps the
+- UF2: compiles "spms1/spms1.ino" for PWM Audio and I2S with Arduino-Pico 6.3.0, and keeps the
   UF2 files as an artifact
 - SPMS-1 Web: builds and tests "spms1_web_synth.js", and keeps it as an artifact
 - Simulators: builds "sim_spinel" and "sim_render" on Linux, macOS and Windows, renders, and compares
