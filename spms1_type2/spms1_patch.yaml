@@ -104,8 +104,8 @@ default_order: [PITCH_1, EG_1, EG_2, LFO_1, MIXER_1, OSC_1, OSC_2, NOISE_1, MIXE
 #   control:  a controller's slot, which the CC of that control (below) fills; `form` makes it a
 #             shape of that CC's value u, 0.0 to 1.0: rev 1 - u, inv -u, rev_inv u - 1, bipolar
 #             u - 0.5, bipolar_inv 0.5 - u, sin sin(u * pi / 2), cos cos(u * pi / 2), lo
-#             min(1, 2 - 2u), hi min(1, 2u), neg max(0, 1 - 2u), pos max(0, 2u - 1) and mid 1 - |2u - 1|, each labeled
-#             by `label`; with no form it is u itself
+#             min(1, 2 - 2u), hi min(1, 2u), neg max(0, 1 - 2u), mid 1 - |2u - 1| and
+#             pos max(0, 2u - 1), each labeled by `label`; with no form it is u itself
 #   (none):   a note input, written by the synth from MIDI
 # `bipolar` marks a slot that swings both ways (the README's ±); a controller slot takes its
 # control's.
@@ -154,8 +154,8 @@ signals:
   - { key: GENERAL_1_LO,          id: 20, control: GENERAL_1, form: lo,          label: General 1 Lo }
   - { key: GENERAL_1_HI,          id: 21, control: GENERAL_1, form: hi,          label: General 1 Hi }
   - { key: GENERAL_1_NEG,         id: 22, control: GENERAL_1, form: neg,         label: General 1 Neg }
-  - { key: GENERAL_1_POS,         id: 23, control: GENERAL_1, form: pos,         label: General 1 Pos }
-  - { key: GENERAL_1_MID,         id: 24, control: GENERAL_1, form: mid,         label: General 1 Mid }
+  - { key: GENERAL_1_MID,         id: 23, control: GENERAL_1, form: mid,         label: General 1 Mid }
+  - { key: GENERAL_1_POS,         id: 24, control: GENERAL_1, form: pos,         label: General 1 Pos }
   - { key: GENERAL_2,             id: 25, control: GENERAL_2 }
   - { key: GENERAL_2_REV,         id: 26, control: GENERAL_2, form: rev,         label: General 2 Rev }
   - { key: GENERAL_2_INV,         id: 27, control: GENERAL_2, form: inv,         label: General 2 Inv }
@@ -167,8 +167,8 @@ signals:
   - { key: GENERAL_2_LO,          id: 33, control: GENERAL_2, form: lo,          label: General 2 Lo }
   - { key: GENERAL_2_HI,          id: 34, control: GENERAL_2, form: hi,          label: General 2 Hi }
   - { key: GENERAL_2_NEG,         id: 35, control: GENERAL_2, form: neg,         label: General 2 Neg }
-  - { key: GENERAL_2_POS,         id: 36, control: GENERAL_2, form: pos,         label: General 2 Pos }
-  - { key: GENERAL_2_MID,         id: 37, control: GENERAL_2, form: mid,         label: General 2 Mid }
+  - { key: GENERAL_2_MID,         id: 36, control: GENERAL_2, form: mid,         label: General 2 Mid }
+  - { key: GENERAL_2_POS,         id: 37, control: GENERAL_2, form: pos,         label: General 2 Pos }
 
   # The module outputs, module by module, each module's main output first.
   - { key: PITCH_1_OUTPUT_1, id: 38, module: PITCH_1, output: Out 1, label: Pitch 1 Output 1, bipolar: true }

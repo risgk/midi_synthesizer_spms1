@@ -525,8 +525,8 @@ while true
   signals[SIGNAL_GENERAL_1_LO] = (signals[SIGNAL_GENERAL_1] < 0.5) ? 1.0 : (2.0 - (signals[SIGNAL_GENERAL_1] + signals[SIGNAL_GENERAL_1]))
   signals[SIGNAL_GENERAL_1_HI] = (signals[SIGNAL_GENERAL_1] > 0.5) ? 1.0 : (signals[SIGNAL_GENERAL_1] + signals[SIGNAL_GENERAL_1])
   signals[SIGNAL_GENERAL_1_NEG] = (signals[SIGNAL_GENERAL_1] > 0.5) ? 0.0 : (1.0 - (signals[SIGNAL_GENERAL_1] + signals[SIGNAL_GENERAL_1]))
-  signals[SIGNAL_GENERAL_1_POS] = (signals[SIGNAL_GENERAL_1] < 0.5) ? 0.0 : ((signals[SIGNAL_GENERAL_1] + signals[SIGNAL_GENERAL_1]) - 1.0)
   signals[SIGNAL_GENERAL_1_MID] = (signals[SIGNAL_GENERAL_1] < 0.5) ? (signals[SIGNAL_GENERAL_1] + signals[SIGNAL_GENERAL_1]) : (2.0 - (signals[SIGNAL_GENERAL_1] + signals[SIGNAL_GENERAL_1]))
+  signals[SIGNAL_GENERAL_1_POS] = (signals[SIGNAL_GENERAL_1] < 0.5) ? 0.0 : ((signals[SIGNAL_GENERAL_1] + signals[SIGNAL_GENERAL_1]) - 1.0)
   cc_general_2 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_2)
   general_2 = C.get_midi_cc_value(MIDI_CH, cc_general_2)
   signals[SIGNAL_GENERAL_2] = cc_or_zero(cc_general_2, cc_to_unipolar(general_2))
@@ -540,8 +540,8 @@ while true
   signals[SIGNAL_GENERAL_2_LO] = (signals[SIGNAL_GENERAL_2] < 0.5) ? 1.0 : (2.0 - (signals[SIGNAL_GENERAL_2] + signals[SIGNAL_GENERAL_2]))
   signals[SIGNAL_GENERAL_2_HI] = (signals[SIGNAL_GENERAL_2] > 0.5) ? 1.0 : (signals[SIGNAL_GENERAL_2] + signals[SIGNAL_GENERAL_2])
   signals[SIGNAL_GENERAL_2_NEG] = (signals[SIGNAL_GENERAL_2] > 0.5) ? 0.0 : (1.0 - (signals[SIGNAL_GENERAL_2] + signals[SIGNAL_GENERAL_2]))
-  signals[SIGNAL_GENERAL_2_POS] = (signals[SIGNAL_GENERAL_2] < 0.5) ? 0.0 : ((signals[SIGNAL_GENERAL_2] + signals[SIGNAL_GENERAL_2]) - 1.0)
   signals[SIGNAL_GENERAL_2_MID] = (signals[SIGNAL_GENERAL_2] < 0.5) ? (signals[SIGNAL_GENERAL_2] + signals[SIGNAL_GENERAL_2]) : (2.0 - (signals[SIGNAL_GENERAL_2] + signals[SIGNAL_GENERAL_2]))
+  signals[SIGNAL_GENERAL_2_POS] = (signals[SIGNAL_GENERAL_2] < 0.5) ? 0.0 : ((signals[SIGNAL_GENERAL_2] + signals[SIGNAL_GENERAL_2]) - 1.0)
   signals[SMOOTHED_STAGE_1_MOD_WHEEL] = Dsp.smooth(signals[SIGNAL_MOD_WHEEL], signals[SMOOTHED_STAGE_1_MOD_WHEEL], CONTROLLER_SMOOTHING_BLEND)
   smoothed_mod_wheel = Dsp.smooth(signals[SMOOTHED_STAGE_1_MOD_WHEEL], signals[SIGNAL_MOD_WHEEL + SMOOTHED_SLOT_OFFSET], CONTROLLER_SMOOTHING_BLEND)
   signals[SIGNAL_MOD_WHEEL + SMOOTHED_SLOT_OFFSET] = smoothed_mod_wheel
@@ -561,8 +561,8 @@ while true
   signals[SIGNAL_GENERAL_1_LO + SMOOTHED_SLOT_OFFSET] = (smoothed_general_1 < 0.5) ? 1.0 : (2.0 - (smoothed_general_1 + smoothed_general_1))
   signals[SIGNAL_GENERAL_1_HI + SMOOTHED_SLOT_OFFSET] = (smoothed_general_1 > 0.5) ? 1.0 : (smoothed_general_1 + smoothed_general_1)
   signals[SIGNAL_GENERAL_1_NEG + SMOOTHED_SLOT_OFFSET] = (smoothed_general_1 > 0.5) ? 0.0 : (1.0 - (smoothed_general_1 + smoothed_general_1))
-  signals[SIGNAL_GENERAL_1_POS + SMOOTHED_SLOT_OFFSET] = (smoothed_general_1 < 0.5) ? 0.0 : ((smoothed_general_1 + smoothed_general_1) - 1.0)
   signals[SIGNAL_GENERAL_1_MID + SMOOTHED_SLOT_OFFSET] = (smoothed_general_1 < 0.5) ? (smoothed_general_1 + smoothed_general_1) : (2.0 - (smoothed_general_1 + smoothed_general_1))
+  signals[SIGNAL_GENERAL_1_POS + SMOOTHED_SLOT_OFFSET] = (smoothed_general_1 < 0.5) ? 0.0 : ((smoothed_general_1 + smoothed_general_1) - 1.0)
   signals[SMOOTHED_STAGE_1_GENERAL_2] = Dsp.smooth(signals[SIGNAL_GENERAL_2], signals[SMOOTHED_STAGE_1_GENERAL_2], CONTROLLER_SMOOTHING_BLEND)
   smoothed_general_2 = Dsp.smooth(signals[SMOOTHED_STAGE_1_GENERAL_2], signals[SIGNAL_GENERAL_2 + SMOOTHED_SLOT_OFFSET], CONTROLLER_SMOOTHING_BLEND)
   signals[SIGNAL_GENERAL_2 + SMOOTHED_SLOT_OFFSET] = smoothed_general_2
@@ -576,8 +576,8 @@ while true
   signals[SIGNAL_GENERAL_2_LO + SMOOTHED_SLOT_OFFSET] = (smoothed_general_2 < 0.5) ? 1.0 : (2.0 - (smoothed_general_2 + smoothed_general_2))
   signals[SIGNAL_GENERAL_2_HI + SMOOTHED_SLOT_OFFSET] = (smoothed_general_2 > 0.5) ? 1.0 : (smoothed_general_2 + smoothed_general_2)
   signals[SIGNAL_GENERAL_2_NEG + SMOOTHED_SLOT_OFFSET] = (smoothed_general_2 > 0.5) ? 0.0 : (1.0 - (smoothed_general_2 + smoothed_general_2))
-  signals[SIGNAL_GENERAL_2_POS + SMOOTHED_SLOT_OFFSET] = (smoothed_general_2 < 0.5) ? 0.0 : ((smoothed_general_2 + smoothed_general_2) - 1.0)
   signals[SIGNAL_GENERAL_2_MID + SMOOTHED_SLOT_OFFSET] = (smoothed_general_2 < 0.5) ? (smoothed_general_2 + smoothed_general_2) : (2.0 - (smoothed_general_2 + smoothed_general_2))
+  signals[SIGNAL_GENERAL_2_POS + SMOOTHED_SLOT_OFFSET] = (smoothed_general_2 < 0.5) ? 0.0 : ((smoothed_general_2 + smoothed_general_2) - 1.0)
   # patch_gen end
 
   # Each parameter takes its value, every buffer, whether or not it moved. Written by patch_gen

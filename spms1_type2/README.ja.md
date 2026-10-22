@@ -554,8 +554,8 @@ Mod Wheel スロットと General スロットを埋めます。後述を参照�
 | CC#98 | CC の割り当て先 | 埋めるスロット |
 | ----- | ------ | ----- |
 | 82 | Mod Wheel | Mod Wheel、Mod Wheel Rev、Mod Wheel Inv、Mod Wheel Rev Inv |
-| 83 | General 1 | General 1、General 1 Rev、General 1 Inv、General 1 Rev Inv、General 1 Bipolar、General 1 Bipolar Inv、General 1 Sin、General 1 Cos、General 1 Lo、General 1 Hi、General 1 Neg、General 1 Pos、General 1 Mid |
-| 84 | General 2 | General 2、General 2 Rev、General 2 Inv、General 2 Rev Inv、General 2 Bipolar、General 2 Bipolar Inv、General 2 Sin、General 2 Cos、General 2 Lo、General 2 Hi、General 2 Neg、General 2 Pos、General 2 Mid |
+| 83 | General 1 | General 1、General 1 Rev、General 1 Inv、General 1 Rev Inv、General 1 Bipolar、General 1 Bipolar Inv、General 1 Sin、General 1 Cos、General 1 Lo、General 1 Hi、General 1 Neg、General 1 Mid、General 1 Pos |
+| 84 | General 2 | General 2、General 2 Rev、General 2 Inv、General 2 Rev Inv、General 2 Bipolar、General 2 Bipolar Inv、General 2 Sin、General 2 Cos、General 2 Lo、General 2 Hi、General 2 Neg、General 2 Mid、General 2 Pos |
 
 <!-- patch_gen end -->
 
@@ -599,8 +599,8 @@ Mod Wheel スロットと General スロットを埋めます。後述を参照�
 | 8 | Mod Wheel | | 33 | General 2 Lo | | 58 | Osc 2 Output Pulse ± |
 | 9 | Mod Wheel Rev | | 34 | General 2 Hi | | 59 | Noise 1 Output ± |
 | 10 | Mod Wheel Inv | | 35 | General 2 Neg | | 60 | Noise 1 Output White ± |
-| 11 | Mod Wheel Rev Inv | | 36 | General 2 Pos | | 61 | Noise 1 Output Red ± |
-| 12 | General 1 | | 37 | General 2 Mid | | 62 | Mixer 2 Output ± |
+| 11 | Mod Wheel Rev Inv | | 36 | General 2 Mid | | 61 | Noise 1 Output Red ± |
+| 12 | General 1 | | 37 | General 2 Pos | | 62 | Mixer 2 Output ± |
 | 13 | General 1 Rev | | 38 | Pitch 1 Output 1 ± | | 63 | Mixer 2 Output Inv ± |
 | 14 | General 1 Inv | | 39 | Pitch 1 Output 2 ± | | 64 | Filter 1 Output ± |
 | 15 | General 1 Rev Inv | | 40 | EG 1 Output | | 65 | Filter 1 Output LP ± |
@@ -611,8 +611,8 @@ Mod Wheel スロットと General スロットを埋めます。後述を参照�
 | 20 | General 1 Lo | | 45 | LFO 1 Output Inv ± | | 70 | Chorus 1 Output R ± |
 | 21 | General 1 Hi | | 46 | LFO 1 Output Triangle ± | | 71 | Chorus 1 Output Mono ± |
 | 22 | General 1 Neg | | 47 | LFO 1 Output Triangle Inv ± | | 72 | Delay 1 Output L ± |
-| 23 | General 1 Pos | | 48 | LFO 1 Output Square | | 73 | Delay 1 Output R ± |
-| 24 | General 1 Mid | | 49 | LFO 1 Output Square Inv | | 74 | Delay 1 Output Mono ± |
+| 23 | General 1 Mid | | 48 | LFO 1 Output Square | | 73 | Delay 1 Output R ± |
+| 24 | General 1 Pos | | 49 | LFO 1 Output Square Inv | | 74 | Delay 1 Output Mono ± |
 
 <!-- patch_gen end -->
 
@@ -645,8 +645,8 @@ Mod Wheel スロットと General スロットを埋めます。後述を参照�
 CC#16 と CC#17（General Purpose Controller 1 と 2）を読みます。1 つの CC が 13 のスロットを同時に埋め、
 それぞれが値 4〜124 で 0.0〜1.0 を取る値 u の形の 1 つです: General n そのもの、Rev 1 - u、Inv -u、
 Rev Inv u - 1、Bipolar u - 0.5、Bipolar Inv 0.5 - u、Sin sin(u * pi / 2)、Cos cos(u * pi / 2)、
-Lo min(1, 2 - 2u)、Hi min(1, 2u)、Neg max(0, 1 - 2u)、Pos max(0, 2u - 1)、
-Mid 1 - |2u - 1|。
+Lo min(1, 2 - 2u)、Hi min(1, 2u)、Neg max(0, 1 - 2u)、Mid 1 - |2u - 1|、
+Pos max(0, 2u - 1)。
 これで 1 つのつまみで何かを入れながら別の何かを抜いたり、バイポーラのパラメータを中央の上下に振ったり
 でき、向きを変えるミキサーは要りません。Sin と Cos は等電力の組で、どの値でも 2 乗の和が 1 なので、
 この 2 つを取る 2 つのレベルは中央でも音量が下がらずにクロスフェードします。値 64 で両方 0.707 です。

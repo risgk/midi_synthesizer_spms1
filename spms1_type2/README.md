@@ -579,8 +579,8 @@ slot and the general slots on the bus; see below.
 | CC#98 | CC for | Fills |
 | ----- | ------ | ----- |
 | 82 | Mod Wheel | Mod Wheel, Mod Wheel Rev, Mod Wheel Inv, Mod Wheel Rev Inv |
-| 83 | General 1 | General 1, General 1 Rev, General 1 Inv, General 1 Rev Inv, General 1 Bipolar, General 1 Bipolar Inv, General 1 Sin, General 1 Cos, General 1 Lo, General 1 Hi, General 1 Neg, General 1 Pos, General 1 Mid |
-| 84 | General 2 | General 2, General 2 Rev, General 2 Inv, General 2 Rev Inv, General 2 Bipolar, General 2 Bipolar Inv, General 2 Sin, General 2 Cos, General 2 Lo, General 2 Hi, General 2 Neg, General 2 Pos, General 2 Mid |
+| 83 | General 1 | General 1, General 1 Rev, General 1 Inv, General 1 Rev Inv, General 1 Bipolar, General 1 Bipolar Inv, General 1 Sin, General 1 Cos, General 1 Lo, General 1 Hi, General 1 Neg, General 1 Mid, General 1 Pos |
+| 84 | General 2 | General 2, General 2 Rev, General 2 Inv, General 2 Rev Inv, General 2 Bipolar, General 2 Bipolar Inv, General 2 Sin, General 2 Cos, General 2 Lo, General 2 Hi, General 2 Neg, General 2 Mid, General 2 Pos |
 
 <!-- patch_gen end -->
 
@@ -624,8 +624,8 @@ slot and the general slots on the bus; see below.
 | 8 | Mod Wheel | | 33 | General 2 Lo | | 58 | Osc 2 Output Pulse ± |
 | 9 | Mod Wheel Rev | | 34 | General 2 Hi | | 59 | Noise 1 Output ± |
 | 10 | Mod Wheel Inv | | 35 | General 2 Neg | | 60 | Noise 1 Output White ± |
-| 11 | Mod Wheel Rev Inv | | 36 | General 2 Pos | | 61 | Noise 1 Output Red ± |
-| 12 | General 1 | | 37 | General 2 Mid | | 62 | Mixer 2 Output ± |
+| 11 | Mod Wheel Rev Inv | | 36 | General 2 Mid | | 61 | Noise 1 Output Red ± |
+| 12 | General 1 | | 37 | General 2 Pos | | 62 | Mixer 2 Output ± |
 | 13 | General 1 Rev | | 38 | Pitch 1 Output 1 ± | | 63 | Mixer 2 Output Inv ± |
 | 14 | General 1 Inv | | 39 | Pitch 1 Output 2 ± | | 64 | Filter 1 Output ± |
 | 15 | General 1 Rev Inv | | 40 | EG 1 Output | | 65 | Filter 1 Output LP ± |
@@ -636,8 +636,8 @@ slot and the general slots on the bus; see below.
 | 20 | General 1 Lo | | 45 | LFO 1 Output Inv ± | | 70 | Chorus 1 Output R ± |
 | 21 | General 1 Hi | | 46 | LFO 1 Output Triangle ± | | 71 | Chorus 1 Output Mono ± |
 | 22 | General 1 Neg | | 47 | LFO 1 Output Triangle Inv ± | | 72 | Delay 1 Output L ± |
-| 23 | General 1 Pos | | 48 | LFO 1 Output Square | | 73 | Delay 1 Output R ± |
-| 24 | General 1 Mid | | 49 | LFO 1 Output Square Inv | | 74 | Delay 1 Output Mono ± |
+| 23 | General 1 Mid | | 48 | LFO 1 Output Square | | 73 | Delay 1 Output R ± |
+| 24 | General 1 Pos | | 49 | LFO 1 Output Square Inv | | 74 | Delay 1 Output Mono ± |
 
 <!-- patch_gen end -->
 
@@ -674,8 +674,8 @@ Slots 12 to 37 are General 1 and General 2, two more control slots that no param
 from CC#16 and CC#17, General Purpose Controllers 1 and 2. Each CC fills thirteen slots at once, each
 a form of its value u, which runs 0.0 to 1.0 from value 4 to value 124: General n itself, Rev
 1 - u, Inv -u, Rev Inv u - 1, Bipolar u - 0.5, Bipolar Inv 0.5 - u, Sin sin(u * pi / 2), Cos
-cos(u * pi / 2), Lo min(1, 2 - 2u), Hi min(1, 2u), Neg max(0, 1 - 2u), Pos max(0, 2u - 1)
-and Mid 1 - |2u - 1|. So one knob can bring one thing in as it takes another out, or swing a bipolar
+cos(u * pi / 2), Lo min(1, 2 - 2u), Hi min(1, 2u), Neg max(0, 1 - 2u), Mid 1 - |2u - 1|
+and Pos max(0, 2u - 1). So one knob can bring one thing in as it takes another out, or swing a bipolar
 parameter about its middle, with no mixer to turn it round. Sin and Cos are an equal-power pair:
 their squares sum to one at every step, so two levels taking them crossfade with no dip in the
 middle, where both are 0.707 at value 64; General n and Rev, a straight crossfade, are both 0.5

@@ -1079,8 +1079,8 @@ static sp_int cst_SIGNAL_GENERAL_1_COS = 0;
 static sp_int cst_SIGNAL_GENERAL_1_LO = 0;
 static sp_int cst_SIGNAL_GENERAL_1_HI = 0;
 static sp_int cst_SIGNAL_GENERAL_1_NEG = 0;
-static sp_int cst_SIGNAL_GENERAL_1_POS = 0;
 static sp_int cst_SIGNAL_GENERAL_1_MID = 0;
+static sp_int cst_SIGNAL_GENERAL_1_POS = 0;
 static sp_int cst_SIGNAL_GENERAL_2 = 0;
 static sp_int cst_SIGNAL_GENERAL_2_REV = 0;
 static sp_int cst_SIGNAL_GENERAL_2_INV = 0;
@@ -1092,8 +1092,8 @@ static sp_int cst_SIGNAL_GENERAL_2_COS = 0;
 static sp_int cst_SIGNAL_GENERAL_2_LO = 0;
 static sp_int cst_SIGNAL_GENERAL_2_HI = 0;
 static sp_int cst_SIGNAL_GENERAL_2_NEG = 0;
-static sp_int cst_SIGNAL_GENERAL_2_POS = 0;
 static sp_int cst_SIGNAL_GENERAL_2_MID = 0;
+static sp_int cst_SIGNAL_GENERAL_2_POS = 0;
 static sp_int cst_SIGNAL_PITCH_1_OUTPUT_1 = 0;
 static sp_int cst_SIGNAL_PITCH_1_OUTPUT_2 = 0;
 static sp_int cst_SIGNAL_EG_1_OUTPUT = 0;
@@ -5972,9 +5972,9 @@ int main(int argc,char**argv){
 #line 43 "spms1_patch.rb"
   cst_SIGNAL_GENERAL_1_NEG = 22LL;
 #line 44 "spms1_patch.rb"
-  cst_SIGNAL_GENERAL_1_POS = 23LL;
+  cst_SIGNAL_GENERAL_1_MID = 23LL;
 #line 45 "spms1_patch.rb"
-  cst_SIGNAL_GENERAL_1_MID = 24LL;
+  cst_SIGNAL_GENERAL_1_POS = 24LL;
 #line 46 "spms1_patch.rb"
   cst_SIGNAL_GENERAL_2 = 25LL;
 #line 47 "spms1_patch.rb"
@@ -5998,9 +5998,9 @@ int main(int argc,char**argv){
 #line 56 "spms1_patch.rb"
   cst_SIGNAL_GENERAL_2_NEG = 35LL;
 #line 57 "spms1_patch.rb"
-  cst_SIGNAL_GENERAL_2_POS = 36LL;
+  cst_SIGNAL_GENERAL_2_MID = 36LL;
 #line 58 "spms1_patch.rb"
-  cst_SIGNAL_GENERAL_2_MID = 37LL;
+  cst_SIGNAL_GENERAL_2_POS = 37LL;
 #line 59 "spms1_patch.rb"
   cst_SIGNAL_PITCH_1_OUTPUT_1 = 38LL;
 #line 60 "spms1_patch.rb"
@@ -7730,9 +7730,9 @@ int main(int argc,char**argv){
 #line 527 "spms1_main.rb"
     sp_FloatArray_set(lv_signals, cst_SIGNAL_GENERAL_1_NEG, (((sp_FloatArray_get(lv_signals, cst_SIGNAL_GENERAL_1) > 0.5)) ? 0.0 : ((1.0 - (({ sp_float _t1048 = sp_FloatArray_get(lv_signals, cst_SIGNAL_GENERAL_1); sp_float _t1049 = sp_FloatArray_get(lv_signals, cst_SIGNAL_GENERAL_1); (_t1048 + _t1049); }))))));
 #line 528 "spms1_main.rb"
-    sp_FloatArray_set(lv_signals, cst_SIGNAL_GENERAL_1_POS, (((sp_FloatArray_get(lv_signals, cst_SIGNAL_GENERAL_1) < 0.5)) ? 0.0 : ((({ sp_float _t1050 = sp_FloatArray_get(lv_signals, cst_SIGNAL_GENERAL_1); sp_float _t1051 = sp_FloatArray_get(lv_signals, cst_SIGNAL_GENERAL_1); (_t1050 + _t1051); }) - 1.0))));
+    sp_FloatArray_set(lv_signals, cst_SIGNAL_GENERAL_1_MID, (((sp_FloatArray_get(lv_signals, cst_SIGNAL_GENERAL_1) < 0.5)) ? (({ sp_float _t1050 = sp_FloatArray_get(lv_signals, cst_SIGNAL_GENERAL_1); sp_float _t1051 = sp_FloatArray_get(lv_signals, cst_SIGNAL_GENERAL_1); (_t1050 + _t1051); })) : ((2.0 - (({ sp_float _t1052 = sp_FloatArray_get(lv_signals, cst_SIGNAL_GENERAL_1); sp_float _t1053 = sp_FloatArray_get(lv_signals, cst_SIGNAL_GENERAL_1); (_t1052 + _t1053); }))))));
 #line 529 "spms1_main.rb"
-    sp_FloatArray_set(lv_signals, cst_SIGNAL_GENERAL_1_MID, (((sp_FloatArray_get(lv_signals, cst_SIGNAL_GENERAL_1) < 0.5)) ? (({ sp_float _t1052 = sp_FloatArray_get(lv_signals, cst_SIGNAL_GENERAL_1); sp_float _t1053 = sp_FloatArray_get(lv_signals, cst_SIGNAL_GENERAL_1); (_t1052 + _t1053); })) : ((2.0 - (({ sp_float _t1054 = sp_FloatArray_get(lv_signals, cst_SIGNAL_GENERAL_1); sp_float _t1055 = sp_FloatArray_get(lv_signals, cst_SIGNAL_GENERAL_1); (_t1054 + _t1055); }))))));
+    sp_FloatArray_set(lv_signals, cst_SIGNAL_GENERAL_1_POS, (((sp_FloatArray_get(lv_signals, cst_SIGNAL_GENERAL_1) < 0.5)) ? 0.0 : ((({ sp_float _t1054 = sp_FloatArray_get(lv_signals, cst_SIGNAL_GENERAL_1); sp_float _t1055 = sp_FloatArray_get(lv_signals, cst_SIGNAL_GENERAL_1); (_t1054 + _t1055); }) - 1.0))));
 #line 530 "spms1_main.rb"
     lv_cc_general_2 = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_GENERAL_2)))));
 #line 531 "spms1_main.rb"
@@ -7760,9 +7760,9 @@ int main(int argc,char**argv){
 #line 542 "spms1_main.rb"
     sp_FloatArray_set(lv_signals, cst_SIGNAL_GENERAL_2_NEG, (((sp_FloatArray_get(lv_signals, cst_SIGNAL_GENERAL_2) > 0.5)) ? 0.0 : ((1.0 - (({ sp_float _t1062 = sp_FloatArray_get(lv_signals, cst_SIGNAL_GENERAL_2); sp_float _t1063 = sp_FloatArray_get(lv_signals, cst_SIGNAL_GENERAL_2); (_t1062 + _t1063); }))))));
 #line 543 "spms1_main.rb"
-    sp_FloatArray_set(lv_signals, cst_SIGNAL_GENERAL_2_POS, (((sp_FloatArray_get(lv_signals, cst_SIGNAL_GENERAL_2) < 0.5)) ? 0.0 : ((({ sp_float _t1064 = sp_FloatArray_get(lv_signals, cst_SIGNAL_GENERAL_2); sp_float _t1065 = sp_FloatArray_get(lv_signals, cst_SIGNAL_GENERAL_2); (_t1064 + _t1065); }) - 1.0))));
+    sp_FloatArray_set(lv_signals, cst_SIGNAL_GENERAL_2_MID, (((sp_FloatArray_get(lv_signals, cst_SIGNAL_GENERAL_2) < 0.5)) ? (({ sp_float _t1064 = sp_FloatArray_get(lv_signals, cst_SIGNAL_GENERAL_2); sp_float _t1065 = sp_FloatArray_get(lv_signals, cst_SIGNAL_GENERAL_2); (_t1064 + _t1065); })) : ((2.0 - (({ sp_float _t1066 = sp_FloatArray_get(lv_signals, cst_SIGNAL_GENERAL_2); sp_float _t1067 = sp_FloatArray_get(lv_signals, cst_SIGNAL_GENERAL_2); (_t1066 + _t1067); }))))));
 #line 544 "spms1_main.rb"
-    sp_FloatArray_set(lv_signals, cst_SIGNAL_GENERAL_2_MID, (((sp_FloatArray_get(lv_signals, cst_SIGNAL_GENERAL_2) < 0.5)) ? (({ sp_float _t1066 = sp_FloatArray_get(lv_signals, cst_SIGNAL_GENERAL_2); sp_float _t1067 = sp_FloatArray_get(lv_signals, cst_SIGNAL_GENERAL_2); (_t1066 + _t1067); })) : ((2.0 - (({ sp_float _t1068 = sp_FloatArray_get(lv_signals, cst_SIGNAL_GENERAL_2); sp_float _t1069 = sp_FloatArray_get(lv_signals, cst_SIGNAL_GENERAL_2); (_t1068 + _t1069); }))))));
+    sp_FloatArray_set(lv_signals, cst_SIGNAL_GENERAL_2_POS, (((sp_FloatArray_get(lv_signals, cst_SIGNAL_GENERAL_2) < 0.5)) ? 0.0 : ((({ sp_float _t1068 = sp_FloatArray_get(lv_signals, cst_SIGNAL_GENERAL_2); sp_float _t1069 = sp_FloatArray_get(lv_signals, cst_SIGNAL_GENERAL_2); (_t1068 + _t1069); }) - 1.0))));
 #line 545 "spms1_main.rb"
     sp_float _t1071 = sp_FloatArray_get(lv_signals, cst_SIGNAL_MOD_WHEEL);
     sp_FloatArray_set(lv_signals, cst_SMOOTHED_STAGE_1_MOD_WHEEL, sp_Dsp_s_smooth(_t1071, sp_FloatArray_get(lv_signals, cst_SMOOTHED_STAGE_1_MOD_WHEEL), cst_CONTROLLER_SMOOTHING_BLEND));
@@ -7806,9 +7806,9 @@ int main(int argc,char**argv){
 #line 563 "spms1_main.rb"
     sp_FloatArray_set(lv_signals, sp_int_add(cst_SIGNAL_GENERAL_1_NEG, cst_SMOOTHED_SLOT_OFFSET), (((lv_smoothed_general_1 > 0.5)) ? 0.0 : ((1.0 - ((lv_smoothed_general_1 + lv_smoothed_general_1))))));
 #line 564 "spms1_main.rb"
-    sp_FloatArray_set(lv_signals, sp_int_add(cst_SIGNAL_GENERAL_1_POS, cst_SMOOTHED_SLOT_OFFSET), (((lv_smoothed_general_1 < 0.5)) ? 0.0 : (((lv_smoothed_general_1 + lv_smoothed_general_1) - 1.0))));
-#line 565 "spms1_main.rb"
     sp_FloatArray_set(lv_signals, sp_int_add(cst_SIGNAL_GENERAL_1_MID, cst_SMOOTHED_SLOT_OFFSET), (((lv_smoothed_general_1 < 0.5)) ? ((lv_smoothed_general_1 + lv_smoothed_general_1)) : ((2.0 - ((lv_smoothed_general_1 + lv_smoothed_general_1))))));
+#line 565 "spms1_main.rb"
+    sp_FloatArray_set(lv_signals, sp_int_add(cst_SIGNAL_GENERAL_1_POS, cst_SMOOTHED_SLOT_OFFSET), (((lv_smoothed_general_1 < 0.5)) ? 0.0 : (((lv_smoothed_general_1 + lv_smoothed_general_1) - 1.0))));
 #line 566 "spms1_main.rb"
     sp_float _t1079 = sp_FloatArray_get(lv_signals, cst_SIGNAL_GENERAL_2);
     sp_FloatArray_set(lv_signals, cst_SMOOTHED_STAGE_1_GENERAL_2, sp_Dsp_s_smooth(_t1079, sp_FloatArray_get(lv_signals, cst_SMOOTHED_STAGE_1_GENERAL_2), cst_CONTROLLER_SMOOTHING_BLEND));
@@ -7838,9 +7838,9 @@ int main(int argc,char**argv){
 #line 578 "spms1_main.rb"
     sp_FloatArray_set(lv_signals, sp_int_add(cst_SIGNAL_GENERAL_2_NEG, cst_SMOOTHED_SLOT_OFFSET), (((lv_smoothed_general_2 > 0.5)) ? 0.0 : ((1.0 - ((lv_smoothed_general_2 + lv_smoothed_general_2))))));
 #line 579 "spms1_main.rb"
-    sp_FloatArray_set(lv_signals, sp_int_add(cst_SIGNAL_GENERAL_2_POS, cst_SMOOTHED_SLOT_OFFSET), (((lv_smoothed_general_2 < 0.5)) ? 0.0 : (((lv_smoothed_general_2 + lv_smoothed_general_2) - 1.0))));
-#line 580 "spms1_main.rb"
     sp_FloatArray_set(lv_signals, sp_int_add(cst_SIGNAL_GENERAL_2_MID, cst_SMOOTHED_SLOT_OFFSET), (((lv_smoothed_general_2 < 0.5)) ? ((lv_smoothed_general_2 + lv_smoothed_general_2)) : ((2.0 - ((lv_smoothed_general_2 + lv_smoothed_general_2))))));
+#line 580 "spms1_main.rb"
+    sp_FloatArray_set(lv_signals, sp_int_add(cst_SIGNAL_GENERAL_2_POS, cst_SMOOTHED_SLOT_OFFSET), (((lv_smoothed_general_2 < 0.5)) ? 0.0 : (((lv_smoothed_general_2 + lv_smoothed_general_2) - 1.0))));
 #line 586 "spms1_main.rb"
     sp_float _t1082 = sp_FloatArray_get(lv_signals, lv_source_pitch_1_glide);
     sp_Pitch_set_glide((sp_Pitch *)lv_pitch_1, _t1082);
