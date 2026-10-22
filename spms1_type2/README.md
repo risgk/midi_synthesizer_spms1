@@ -244,8 +244,9 @@ bend range, half a semitone a step: on CC#57, 2 semitones either way at value 8,
 value 28, where it powers up, and 5 octaves at value 124.
 
 The LFO goes straight to the oscillator, both to its pitch and to its pulse width, on Mod 2 In, and to the filter, where Filter 1 Mod 2 Amt (CC#25) powers up at 0.0 and
-leaves the cutoff alone until it is turned up, as Filter 1 Mod 1 Amt (CC#24) does the envelope's;
-Filter 1 Cutoff (CC#74) powers up at 0.9 (value 112). Osc 1 Pitch Mod 2 Amt (CC#13) takes the
+leaves the cutoff alone until it is turned up. The envelope moves the cutoff by Filter 1 Mod 1 Amt
+(CC#24), which powers up at 0.2 (value 28), two octaves up from Filter 1 Cutoff (CC#74) at its
+peak; the cutoff powers up at 0.8 (value 100). Osc 1 Pitch Mod 2 Amt (CC#13) takes the
 LFO to the pitch and powers up at 0.0; at its top, value 124, with Osc 1 Pitch Mod 2 Pol at +0.2,
 the LFO at full level swings the pitch an octave either way. Osc 1 PW Mod 2 Amt (CC#103) takes it
 to the pulse width and powers up at 0.0. LFO 1 Level powers up at 1.0, so CC#13 alone sets the
@@ -881,7 +882,8 @@ the saturation. The saturation sits on the resonance rather than the pass band: 
 passes a loud note nearly clean, while turning the drive up rounds off the resonant peak.
 
 Filter 1 moves the cutoff by each of its two modulations at a depth of its own, Mod 1 Amt and
-Mod 2 Amt, as Osc 1's PW Mod Amts move the pulse width. They are unipolar, on CC#24 and 25: both power up at 0.0 (value 4). A unit of input is the whole cutoff range, so with Mod 2 Amt at the top the
+Mod 2 Amt, as Osc 1's PW Mod Amts move the pulse width. They are unipolar, on CC#24 and 25: Mod 1 Amt powers up at 0.2 (value 28), two octaves at the
+envelope's peak, and Mod 2 Amt at 0.0 (value 4). A unit of input is the whole cutoff range, so with Mod 2 Amt at the top the
 LFO would swing the cutoff five octaves either way. Mod 1 Pol and Mod 2 Pol multiply
 each modulation, from -1.0 at value 4 through none at value 64 to +1.0 at value 124. Mod 1
 Pol, on CC#117, powers up at +1.0: below value 64 the envelope closes the filter as it
@@ -998,8 +1000,7 @@ sweep while Osc 1 holds the note.
   where it powers up, and not at all at value 4
 - The filter as a sine voice, playing its own oscillation in tune: CC#71 = 124 makes it oscillate,
   CC#9 = 124 has the cutoff follow the keys, and CC#74 = 49 puts it on note 60 at note 60, and so
-  on the note played everywhere. CC#24 stays at value 4, where it powers up, keeping the envelope
-  off the cutoff, and CC#19 = 4 and CC#20 = 4 take the oscillators out,
+  on the note played everywhere. CC#24 = 4 takes the envelope off the cutoff, and CC#19 = 4 and CC#20 = 4 take the oscillators out,
   leaving the sine alone. It is within 5 cents of the note from middle C up, and 17 cents flat an octave below
 - A pitch envelope is wired by default too -- the envelope on the oscillator's Mod 1 input --
   so CC#89 (Osc 1 Pitch Mod 1 Amt) sets its depth: the note starts a semitone sharp at value 9, an
