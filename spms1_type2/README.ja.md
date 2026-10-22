@@ -274,22 +274,19 @@ LFO の Mod In がエンベロープを同じサンプルで読めるように�
 Noise 1（主に音として使うためで、モジュレーションに使うと 1 サンプル遅れますが、聞き分けられる差ではありません）、
 それとフィルタの間に Mixer 2、最後にコーラスとディレイです。
 
-```mermaid
-flowchart TB
-  subgraph NOTE_MOD [ノートとモジュレーション]
-    direction LR
-    PITCH[1 Pitch 1] ~~~ EG[2 EG 1] ~~~ EG2[3 EG 2] ~~~ LFO[4 LFO 1] ~~~ MIX1[5 Mixer 1]
-  end
-  subgraph SOUND [音源]
-    direction LR
-    OSC[6 Osc 1] ~~~ OSC2[7 Osc 2] ~~~ NOISE[8 Noise 1] ~~~ MIX2[9 Mixer 2]
-  end
-  subgraph VOICE [フィルタ・アンプ・エフェクト]
-    direction LR
-    FILTER[10 Filter 1] ~~~ AMP[11 Amp 1] ~~~ CHORUS[12 Chorus 1] ~~~ DELAY[13 Delay 1]
-  end
-  NOTE_MOD ~~~ SOUND ~~~ VOICE
-```
+1. Pitch 1
+2. EG 1
+3. EG 2
+4. LFO 1
+5. Mixer 1
+6. Osc 1
+7. Osc 2
+8. Noise 1
+9. Mixer 2
+10. Filter 1
+11. Amp 1
+12. Chorus 1
+13. Delay 1
 
 Mixer 1 には何も結線されていないので、毎サンプル自分のスロットぶんのコストを払うだけで、パッチが
 何かを与えるまでは何も変えません。意味があるのは置かれている位置です。あるモジュールが今サンプルの

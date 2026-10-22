@@ -287,22 +287,19 @@ read them in the same sample, as a vibrato fading in with an envelope does -- Mi
 taking it is a sample late, which it does not hear), Mixer 2 between them and the filter, and the
 chorus and the delay last:
 
-```mermaid
-flowchart TB
-  subgraph NOTE_MOD [Note and modulation]
-    direction LR
-    PITCH[1 Pitch 1] ~~~ EG[2 EG 1] ~~~ EG2[3 EG 2] ~~~ LFO[4 LFO 1] ~~~ MIX1[5 Mixer 1]
-  end
-  subgraph SOUND [Sound sources]
-    direction LR
-    OSC[6 Osc 1] ~~~ OSC2[7 Osc 2] ~~~ NOISE[8 Noise 1] ~~~ MIX2[9 Mixer 2]
-  end
-  subgraph VOICE [Filter, amp and effects]
-    direction LR
-    FILTER[10 Filter 1] ~~~ AMP[11 Amp 1] ~~~ CHORUS[12 Chorus 1] ~~~ DELAY[13 Delay 1]
-  end
-  NOTE_MOD ~~~ SOUND ~~~ VOICE
-```
+1. Pitch 1
+2. EG 1
+3. EG 2
+4. LFO 1
+5. Mixer 1
+6. Osc 1
+7. Osc 2
+8. Noise 1
+9. Mixer 2
+10. Filter 1
+11. Amp 1
+12. Chorus 1
+13. Delay 1
 
 Mixer 1 has nothing routed to it, so it costs its slot every sample and changes nothing until
 a patch gives it something. Where it sits is what it buys: a module sees the current sample's
