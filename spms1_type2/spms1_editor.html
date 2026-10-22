@@ -897,6 +897,82 @@
       flex: 1;
       max-width: none;
     }
+    /* What an input or a parameter reads opens the list of sources to pick from. */
+    .row .src[data-src-of] {
+      cursor: pointer;
+      min-height: 1.2em;
+    }
+    .row .src[data-src-of]:hover {
+      color: var(--text-color);
+      text-decoration: underline;
+    }
+    .src-picker {
+      position: fixed;
+      z-index: 50;
+      width: 260px;
+      max-width: calc(100vw - 32px);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 8px;
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+      font-size: 0.8rem;
+    }
+    .src-picker[hidden] {
+      display: none;
+    }
+    .src-picker-title {
+      font-weight: 600;
+    }
+    .src-picker input {
+      padding: 4px 6px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font: inherit;
+    }
+    .src-picker-list {
+      max-height: min(420px, 60vh);
+      overflow-y: auto;
+    }
+    .src-picker-group {
+      padding: 6px 4px 2px;
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+    .src-picker-item {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      padding: 3px 4px 3px 12px;
+      border: none;
+      border-radius: 3px;
+      background: none;
+      font: inherit;
+      color: var(--text-color);
+      text-align: left;
+      cursor: pointer;
+    }
+    .src-picker-item .norm {
+      color: var(--text-muted);
+      font-family: monospace;
+    }
+    .src-picker-item:hover, .src-picker-item.active {
+      background: var(--bg-color);
+    }
+    .src-picker-item.current {
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    .src-picker-item.off {
+      color: var(--text-muted);
+    }
+    .src-picker-item[hidden] {
+      display: none;
+    }
     /* What a routed parameter reads, in the space between its label and its fields. */
     .row.ctrl .lbl {
       flex: 0 0 auto;
@@ -1269,8 +1345,9 @@
       </div>
       <p class="hint" style="margin-top: 8px;">
         MIDI In is passed through to the synth, and a CC on the channel above moves every slot
-        assigned to it. Drag from an output (right) to an input (left) to connect. Drag a connected input away to
-        unplug it; click a wire and press Delete to remove it. An unplugged parameter reads its own
+        assigned to it. Drag from an output (right) to an input (left) to connect; near an edge, the
+        view moves along. Click an input, or what it reads, to pick its source from a list. Drag a
+        connected input away to unplug it; click a wire and press Delete to remove it. An unplugged parameter reads its own
         control slot. Drag a value up or down to change it, with Shift for fine steps, or turn the
         wheel over the one being edited. Drag the background to pan, wheel or pinch to zoom.
       </p>
@@ -1336,6 +1413,12 @@
       </div>
     </div>
   </div>
+</div>
+
+<div class="src-picker" id="src-picker" hidden>
+  <div class="src-picker-title"></div>
+  <input type="search" placeholder="Filter, e.g. lfo 1" aria-label="Filter the sources">
+  <div class="src-picker-list"></div>
 </div>
 
 <script>
@@ -2005,7 +2088,7 @@
     const [[slot, label, bipolar], ...forms] = c.slots;
     const tip = bipolar ? 'Bipolar: value 64 is the center' : 'Unipolar';
     return `<div class="row ctrl" data-ctrl="${c.key}">
-      ${withInput ? `<span class="port in param" data-dst="PR:${c.key}" title="Where ${escapeHTML(c.full)} takes its value (per buffer)"></span>` : ''}
+      ${withInput ? `<span class="port in param" data-dst="PR:${c.key}" title="Where ${escapeHTML(c.full)} takes its value (per buffer). Drag to wire, or click to pick a source"></span>` : ''}
       <span class="lbl" title="${tip}">${escapeHTML(label)}</span>
       <span class="src"${withInput ? ` data-src-of="PR:${c.key}"` : ''}></span>
       <input type="number" class="cc" min="0" max="127" title="CC number, 0 for none">
@@ -2038,7 +2121,7 @@
         : `<div class="row"><span class="lbl right">${escapeHTML(sigLabel(o))}</span><span class="port out" data-src="${o}"></span></div>`;
     }
     for (const i of node.inputs || []) {
-      h += `<div class="row input-row"><span class="port in" data-dst="IN:${i.key}" title="Read every sample"></span><span class="lbl">${escapeHTML(i.label)}</span><span class="src" data-src-of="IN:${i.key}"></span></div>`;
+      h += `<div class="row input-row"><span class="port in" data-dst="IN:${i.key}" title="Read every sample. Drag to wire, or click to pick a source"></span><span class="lbl">${escapeHTML(i.label)}</span><span class="src" data-src-of="IN:${i.key}"></span></div>`;
     }
     // A module's outputs come after its inputs, so a node reads from what goes in to what comes out.
     if (node.module) {
@@ -2341,6 +2424,8 @@
     e.preventDefault();
     const r = canvas.getBoundingClientRect();
     zoomAt(Math.exp(-e.deltaY * 0.0015), e.clientX - r.left, e.clientY - r.top);
+    // The end of a wire being drawn stays under the pointer.
+    if (drag && drag.mode === 'wire') moveWireDrag(e);
   }, { passive: false });
 
   document.getElementById('zoom-in').addEventListener('click', () => zoomAt(1.2, canvas.clientWidth / 2, canvas.clientHeight / 2));
@@ -2453,19 +2538,42 @@
     const temp = document.createElementNS(SVG_NS, 'path');
     temp.setAttribute('class', 'wire temp');
     svg.appendChild(temp);
+    const start = { temp, sx: e.clientX, sy: e.clientY, touch: e.pointerType === 'touch' };
     if (port.classList.contains('out')) {
-      drag = { mode: 'wire', src: port.dataset.src, temp };
+      drag = { mode: 'wire', src: port.dataset.src, ...start };
     } else if (isConnected(port.dataset.dst)) {
-      // Pick the wire up by its input end, keeping its source.
-      pushHistory();
-      const src = currentSource(port.dataset.dst);
-      disconnect(port.dataset.dst);
-      drag = { mode: 'wire', src, temp, pushed: true };
-      commit();
+      // Picked up by its input end, keeping its source, once the pointer moves; a click leaves it
+      // in place and opens the list of sources instead.
+      drag = { mode: 'wire', src: currentSource(port.dataset.dst), pickUp: port.dataset.dst, ...start };
     } else {
-      drag = { mode: 'wire', dst: port.dataset.dst, temp };
+      drag = { mode: 'wire', dst: port.dataset.dst, clicked: port.dataset.dst, ...start };
     }
     moveWireDrag(e);
+    edgeScroll(drag);
+  }
+
+  // A wire dragged near an edge of the canvas, or past it, moves the view that way, the faster
+  // the nearer the edge, so a far port is reached without zooming out first.
+  const EDGE_ZONE = 48;
+  const EDGE_SPEED = 14;
+
+  function edgeScroll(d) {
+    if (drag !== d) return;
+    if (d.moved) {
+      const r = canvas.getBoundingClientRect();
+      const e = d.last;
+      const push = gap => Math.max(0, Math.min(1, (EDGE_ZONE - gap) / EDGE_ZONE));
+      const dx = push(e.clientX - r.left) - push(r.right - e.clientX);
+      const dy = push(e.clientY - r.top) - push(r.bottom - e.clientY);
+      if (dx || dy) {
+        view.x += dx * EDGE_SPEED;
+        view.y += dy * EDGE_SPEED;
+        viewTouched = true;
+        applyView();
+        moveWireDrag(e);
+      }
+    }
+    requestAnimationFrame(() => edgeScroll(d));
   }
 
   // An input reading 0.0 is an input with no wire, so a wire from 0.0 to one would not stay drawn.
@@ -2489,6 +2597,16 @@
   }
 
   function moveWireDrag(e) {
+    drag.last = { clientX: e.clientX, clientY: e.clientY };
+    if (!drag.moved && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) >= 4) {
+      drag.moved = true;
+      if (drag.pickUp) {
+        pushHistory();
+        disconnect(drag.pickUp);
+        drag.pushed = true;
+        commit();
+      }
+    }
     const p = toWorld(e);
     const d = drag.src ? curve(portPos(portEls['o:' + drag.src]), p) : curve(p, portPos(portEls['i:' + drag.dst]));
     drag.temp.setAttribute('d', d);
@@ -2500,6 +2618,11 @@
   function endWireDrag(e) {
     drag.temp.remove();
     world.querySelectorAll('.port.target').forEach(el => el.classList.remove('target'));
+    if (!drag.moved) {
+      const dst = drag.pickUp || drag.clicked;
+      if (dst) openSourcePicker(dst, !drag.touch);
+      return;
+    }
     const target = dropTarget(e);
     let src = drag.src, dst = drag.dst;
     if (target && src) dst = target.dataset.dst;
@@ -2510,6 +2633,137 @@
       commit();
     }
   }
+
+  // ---- Source picker -------------------------------------------------------------------------
+
+  // A click on an input or a parameter, on its port or on what it reads, lists every output it
+  // can be wired from, node by node, to be picked from however far apart the two are on the
+  // canvas. Typing narrows the list.
+  const picker = document.getElementById('src-picker');
+  const pickerFilter = picker.querySelector('input');
+  const pickerList = picker.querySelector('.src-picker-list');
+  let pickerDst = null;
+
+  function openSourcePicker(dst, focus) {
+    const anchor = world.querySelector(`.port.in[data-dst="${dst}"]`);
+    if (!anchor) return;
+    pickerDst = dst;
+    const [kind, key] = splitDst(dst);
+    const current = isConnected(dst) ? currentSource(dst) : null;
+    const items = [{ src: null, text: kind === 'IN' ? 'No wire (0.0)' : 'No wire (its own slot)', group: '' }];
+    world.querySelectorAll('.node').forEach(node => {
+      const group = node.querySelector('.node-head span').textContent;
+      const off = !!MOD[node.dataset.node] && !state.order.includes(node.dataset.node);
+      node.querySelectorAll('.port.out').forEach(port => {
+        const src = port.dataset.src;
+        if (!accepts(src, dst)) return;
+        const label = sigLabel(src);
+        const text = label.startsWith(group + ' ') ? label.slice(group.length + 1) : label;
+        items.push({ src, text, group, off, full: ` ${group} ${label}`.toLowerCase() });
+      });
+    });
+    picker.querySelector('.src-picker-title').textContent =
+      (kind === 'IN' ? INPUT_ITEMS.find(i => i.key === key).full : CONTROL[key].full) + ' reads';
+    pickerList.innerHTML = '';
+    let group = null;
+    for (const it of items) {
+      if (it.group && it.group !== group) {
+        group = it.group;
+        const h = document.createElement('div');
+        h.className = 'src-picker-group';
+        h.textContent = group;
+        pickerList.appendChild(h);
+      }
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'src-picker-item' + (it.src === current ? ' current' : '') + (it.off ? ' off' : '');
+      const v = it.src && signalNorm(it.src);
+      b.innerHTML = escapeHTML(it.text) + (v && !(it.src in CONSTANT_NORMS) ? ` <span class="norm">${v.text}</span>` : '');
+      if (it.off) b.title = `${it.group} is not in the run order`;
+      b.dataset.full = it.full || '';
+      b.addEventListener('click', () => pickSource(it.src));
+      pickerList.appendChild(b);
+    }
+    pickerFilter.value = '';
+    filterSources();
+    picker.hidden = false;
+    // Next to the port, kept on the screen.
+    const r = anchor.getBoundingClientRect();
+    const w = picker.offsetWidth, h = picker.offsetHeight;
+    const vw = document.documentElement.clientWidth, vh = document.documentElement.clientHeight;
+    let left = r.left - w - 8;
+    if (left < 16) left = Math.min(r.right + 8, vw - w - 16);
+    picker.style.left = Math.max(16, left) + 'px';
+    picker.style.top = Math.max(8, Math.min(r.top - 40, vh - h - 8)) + 'px';
+    const cur = pickerList.querySelector('.current');
+    if (cur) cur.scrollIntoView({ block: 'center' });
+    // A touch would bring up the on-screen keyboard over the list.
+    if (focus) pickerFilter.focus();
+  }
+
+  function closeSourcePicker() {
+    picker.hidden = true;
+    pickerDst = null;
+  }
+
+  function pickSource(src) {
+    const dst = pickerDst;
+    closeSourcePicker();
+    if ((isConnected(dst) ? currentSource(dst) : null) === src) return;
+    pushHistory();
+    if (src) connect(src, dst);
+    else disconnect(dst);
+    commit();
+  }
+
+  // Shows the items whose node and name have a word starting with each word typed, so "eg 2" finds
+  // EG 2 but not Neg, with a heading over each node left, and marks the first for Enter.
+  function filterSources() {
+    const words = pickerFilter.value.toLowerCase().split(/\s+/).filter(Boolean);
+    let shown = null;
+    for (const el of pickerList.children) {
+      if (el.classList.contains('src-picker-group')) {
+        shown = el;
+        el.hidden = true;
+        continue;
+      }
+      el.classList.remove('active');
+      const hit = !words.length || (el.dataset.full && words.every(w => el.dataset.full.includes(' ' + w)));
+      el.hidden = !hit;
+      if (hit && shown) shown.hidden = false;
+    }
+    const first = [...pickerList.querySelectorAll('.src-picker-item')].find(el => !el.hidden);
+    if (first && words.length) first.classList.add('active');
+  }
+
+  pickerFilter.addEventListener('input', filterSources);
+  picker.addEventListener('keydown', e => {
+    const items = [...pickerList.querySelectorAll('.src-picker-item')].filter(el => !el.hidden);
+    const i = items.findIndex(el => el.classList.contains('active'));
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      closeSourcePicker();
+    } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (!items.length) return;
+      const next = items[(i + (e.key === 'ArrowDown' ? 1 : items.length - 1)) % items.length];
+      if (i >= 0) items[i].classList.remove('active');
+      next.classList.add('active');
+      next.scrollIntoView({ block: 'nearest' });
+    } else if (e.key === 'Enter' && i >= 0) {
+      e.preventDefault();
+      items[i].click();
+    }
+  });
+  document.addEventListener('pointerdown', e => {
+    if (!picker.hidden && !picker.contains(e.target)) closeSourcePicker();
+  }, true);
+  canvas.addEventListener('wheel', () => { if (!picker.hidden) closeSourcePicker(); });
+
+  world.addEventListener('click', e => {
+    const span = e.target.closest('[data-src-of]');
+    if (span) openSourcePicker(span.dataset.srcOf, true);
+  });
 
   function startNodeDrag(el, e) {
     const key = el.dataset.node;
