@@ -288,13 +288,25 @@ taking it is a sample late, which it does not hear), Mixer 2 between them and th
 chorus and the delay last:
 
 ```mermaid
-flowchart LR
-  PITCH[Pitch 1] ~~~ EG[EG 1] ~~~ EG2[EG 2] ~~~ LFO[LFO 1] ~~~ MIX1[Mixer 1] ~~~ OSC[Osc 1] ~~~ OSC2[Osc 2] ~~~ NOISE[Noise 1] ~~~ MIX2[Mixer 2] ~~~ FILTER[Filter 1] ~~~ AMP[Amp 1] ~~~ CHORUS[Chorus 1] ~~~ DELAY[Delay 1]
+flowchart TB
+  subgraph NOTE_MOD [Note and modulation]
+    direction LR
+    PITCH[1 Pitch 1] ~~~ EG[2 EG 1] ~~~ EG2[3 EG 2] ~~~ LFO[4 LFO 1] ~~~ MIX1[5 Mixer 1]
+  end
+  subgraph SOUND [Sound sources]
+    direction LR
+    OSC[6 Osc 1] ~~~ OSC2[7 Osc 2] ~~~ NOISE[8 Noise 1] ~~~ MIX2[9 Mixer 2]
+  end
+  subgraph VOICE [Filter, amp and effects]
+    direction LR
+    FILTER[10 Filter 1] ~~~ AMP[11 Amp 1] ~~~ CHORUS[12 Chorus 1] ~~~ DELAY[13 Delay 1]
+  end
+  NOTE_MOD ~~~ SOUND ~~~ VOICE
 ```
 
 Mixer 1 has nothing routed to it, so it costs its slot every sample and changes nothing until
 a patch gives it something. Where it sits is what it buys: a module sees the current sample's
-value only from something ahead of it in this line, and last sample's from anything behind.
+value only from something ahead of it in this order, and last sample's from anything behind.
 Mixer 1 can reach the envelopes and the LFO, and the oscillators, the filter and the amp can reach
 Mixer 1. Pitch 1 comes before them all, so that every module reads the note in the same sample:
 the oscillators and the filter, and a modulation source that follows the keys. A modulation of

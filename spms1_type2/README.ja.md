@@ -275,13 +275,25 @@ Noise 1（主に音として使うためで、モジュレーションに使う�
 それとフィルタの間に Mixer 2、最後にコーラスとディレイです。
 
 ```mermaid
-flowchart LR
-  PITCH[Pitch 1] ~~~ EG[EG 1] ~~~ EG2[EG 2] ~~~ LFO[LFO 1] ~~~ MIX1[Mixer 1] ~~~ OSC[Osc 1] ~~~ OSC2[Osc 2] ~~~ NOISE[Noise 1] ~~~ MIX2[Mixer 2] ~~~ FILTER[Filter 1] ~~~ AMP[Amp 1] ~~~ CHORUS[Chorus 1] ~~~ DELAY[Delay 1]
+flowchart TB
+  subgraph NOTE_MOD [ノートとモジュレーション]
+    direction LR
+    PITCH[1 Pitch 1] ~~~ EG[2 EG 1] ~~~ EG2[3 EG 2] ~~~ LFO[4 LFO 1] ~~~ MIX1[5 Mixer 1]
+  end
+  subgraph SOUND [音源]
+    direction LR
+    OSC[6 Osc 1] ~~~ OSC2[7 Osc 2] ~~~ NOISE[8 Noise 1] ~~~ MIX2[9 Mixer 2]
+  end
+  subgraph VOICE [フィルタ・アンプ・エフェクト]
+    direction LR
+    FILTER[10 Filter 1] ~~~ AMP[11 Amp 1] ~~~ CHORUS[12 Chorus 1] ~~~ DELAY[13 Delay 1]
+  end
+  NOTE_MOD ~~~ SOUND ~~~ VOICE
 ```
 
 Mixer 1 には何も結線されていないので、毎サンプル自分のスロットぶんのコストを払うだけで、パッチが
 何かを与えるまでは何も変えません。意味があるのは置かれている位置です。あるモジュールが今サンプルの
-値を見られるのは、この列で自分より前にあるものからだけで、後ろにあるものからは前サンプルの値を受け取ります。
+値を見られるのは、この順で自分より前にあるものからだけで、後ろにあるものからは前サンプルの値を受け取ります。
 Mixer 1 は 2 つのエンベロープと LFO に手が届き、オシレータ、フィルタ、アンプは Mixer 1 に手が届きます。
 Mixer 2 はオシレータとフィルタの間で、オーディオをまとめます。
 Pitch 1 が先頭にあるのは、オシレータやフィルタ、鍵盤に追従させたいモジュレーションのソースなど、どのモジュールも
