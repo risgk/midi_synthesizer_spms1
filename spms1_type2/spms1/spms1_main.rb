@@ -335,6 +335,7 @@ while true
   source_delay_1_mix = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_MIX), SLOT_DELAY_1_MIX)
   source_delay_1_time = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_TIME), SLOT_DELAY_1_TIME)
   source_delay_1_feedback = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_FEEDBACK), SLOT_DELAY_1_FEEDBACK)
+  source_amp_1_limiter_sw = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_LIMITER_SW), SLOT_AMP_1_LIMITER_SW)
   # patch_gen end
 
   # Which CC fills each control slot, or, for a parameter with none, its value from NRPN category
@@ -507,6 +508,8 @@ while true
   signals[SLOT_DELAY_1_TIME] = cc_to_unipolar(cc_or_nrpn(cc_delay_1_time, C.get_midi_cc_value(MIDI_CH, cc_delay_1_time), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_DELAY_1_TIME)))
   cc_delay_1_feedback = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_DELAY_1_FEEDBACK)
   signals[SLOT_DELAY_1_FEEDBACK] = cc_to_unipolar(cc_or_nrpn(cc_delay_1_feedback, C.get_midi_cc_value(MIDI_CH, cc_delay_1_feedback), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_DELAY_1_FEEDBACK)))
+  cc_amp_1_limiter_sw = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_AMP_1_LIMITER_SW)
+  signals[SLOT_AMP_1_LIMITER_SW] = cc_to_unipolar(cc_or_nrpn(cc_amp_1_limiter_sw, C.get_midi_cc_value(MIDI_CH, cc_amp_1_limiter_sw), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_AMP_1_LIMITER_SW)))
   cc_mod_wheel = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MOD_WHEEL)
   mod_wheel = C.get_midi_cc_value(MIDI_CH, cc_mod_wheel)
   signals[SIGNAL_MOD_WHEEL] = cc_or_zero(cc_mod_wheel, cc_to_unipolar(mod_wheel))
@@ -666,6 +669,7 @@ while true
   delay_1.set_mix(signals[source_delay_1_mix])
   delay_1.set_time(signals[source_delay_1_time])
   delay_1.set_feedback(signals[source_delay_1_feedback])
+  amp_1.set_limiter_switch(signals[source_amp_1_limiter_sw])
   # patch_gen end
 
   i = 0

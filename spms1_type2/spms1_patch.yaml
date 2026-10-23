@@ -421,11 +421,13 @@ controls:
   - { entry: 71, module: FILTER_1,  key: MOD_1_POL,      label: Mod 1 Pol, cc: 117, value: 124, bipolar: true, hint: − to +, set: set_modulation_1_polarity }
   - { entry: 72, module: FILTER_1,  key: MOD_2_AMT,    label: Mod 2 Amt,    cc: 25,  value: 4, hint_inputs: [MOD_2_IN], favorite: true, set: set_modulation_2_amount }
   - { entry: 73, module: FILTER_1,  key: MOD_2_POL,      label: Mod 2 Pol, cc: 0,   value: 76, bipolar: true, hint: − to +, set: set_modulation_2_polarity }
-  # Amp 1: Gain, on CC 15, is doubled, so it powers up at CC 64, a gain of
-  # 1.0, and CC 124 brings the sound up by 6 dB; the amp holds its output to one unit. Mod 1/2
+  # Amp 1: Gain, on CC 15, is squared and taken four times, a gain of 1.0 at CC 64 and 4.0, 12 dB
+  # up, at CC 124. It powers up at CC 100, 2.56, 8.2 dB up, which brings the default patch's peaks
+  # to about -4 dBFS; its Limiter Sw, below, holds what goes past 0.9 under the amp's one-unit
+  # clamp, so that a higher gain or a louder sound reaches it rounded off rather than cut. Mod 1/2
   # Mix, on CC 36, crossfades what scales the gain from Mod 1 In, EG 1, at 0.0 (CC 4), where it
   # powers up, to Mod 2 In, EG 2, the organ envelope, at 1.0 (CC 124).
-  - { entry: 74, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 64, favorite: true, set: set_gain }
+  - { entry: 74, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 100, favorite: true, set: set_gain }
   - { entry: 75, module: AMP_1,     key: MOD_1_2_MIX,  label: Mod 1/2 Mix,  cc: 36,  value: 4, hint_inputs: [MOD_1_IN, MOD_2_IN], set: set_modulation_mix }
   - { entry: 76, module: CHORUS_1,  key: MIX,          label: Mix,          cc: 93,  value: 64, favorite: true, set: set_mix }
   - { entry: 77, module: CHORUS_1,  key: RATE,         label: Rate,         cc: 58,  value: 64, set: set_rate }
@@ -443,3 +445,7 @@ controls:
   # routes none of them.
   - { entry: 83, controller: true, key: GENERAL_1, label: General 1, cc: 16,  value: 4 }
   - { entry: 84, controller: true, key: GENERAL_2, label: General 2, cc: 17,  value: 4 }
+  # Amp 1 Limiter Sw, after the controllers so that no entry before it moves: the amp's look-ahead
+  # limiter, on at CC 64 and above. It has no CC and powers up on (CC 124); off, the peaks past one
+  # unit reach the clamp. Either way the amp's output comes 1 ms late.
+  - { entry: 85, module: AMP_1,     key: LIMITER_SW,   label: Limiter Sw,   cc: 0,   value: 124, hint: Off/On, set: set_limiter_switch }

@@ -305,7 +305,7 @@ both at the same signal for a mono output.
 | 23 | Mixer 1 Level 1 | | 51 | Osc 2 Pitch Mod 2 Amt | | 79 | Delay 1 Mix |
 | 24 | Mixer 1 Level 2 | | 52 | Osc 2 Pitch Mod 2 Pol | | 80 | Delay 1 Time |
 | 25 | Mixer 1 Level 3 | | 53 | Osc 2 Pitch Mod 2 Sw | | 81 | Delay 1 Feedback |
-| 26 | Mixer 1 Level 4 | | 54 | Osc 2 PW Mod 1 Amt | |  |  |
+| 26 | Mixer 1 Level 4 | | 54 | Osc 2 PW Mod 1 Amt | | 85 | Amp 1 Limiter Sw |
 | 27 | Mixer 1 Out Level | | 55 | Osc 2 PW Mod 1 Pol | |  |  |
 
 <!-- patch_gen end -->
@@ -652,21 +652,26 @@ folds back as an inharmonic tone: at 48 kHz, from 8 kHz (value 108) to 10 kHz (v
 included. Above that the resonance acts as at Q 256. With the cutoff following the keyboard, as
 in the examples below, it plays as a sine voice.
 
-Amp 1 Gain (CC#15) is doubled into the gain: silent at value 4, unity at
-value 64, where it powers up, and twice, 6 dB up, at value 124, so a quiet sound can be brought up as
-well as a loud one taken down. The amp holds its output to -1.0 and +1.0, as a mixer holds its
-sum, so the gain cannot take the output past one unit, which the default patch, peaking near
-0.5 there, stays below.
+Amp 1 Gain (CC#15) is squared and taken four times into the gain: silent at value 4, half,
+6 dB down, at value 46, unity at value 64, twice, 6 dB up, at value 89, and four times, 12 dB up,
+at value 124, so a quiet sound can be brought well up as well as a loud one taken down. It powers
+up at value 100, 2.56 times, 8.2 dB up, which takes the default patch's peaks to about -4 dBFS.
+The amp holds its output to -1.0 and +1.0, as a mixer holds its sum, so the gain cannot take the
+output past one unit.
 
-Held there by a hard clip, as a mixer's sum is, a sound driven past one unit gets corners, and
-their harmonics fold back below the audible band. Just past it the oscillators' own aliases still
-dominate, -55 dB or less under 5 kHz, but a sawtooth driven 6 dB over at A6 to A7 brings them up
-to about -30 dB, heard as a grain under a high note; the filter's output clip, which shares the
-limit, does about the same when driven that far. Nothing rounds this off: antiderivative
-anti-aliasing (ADAA), the usual remedy, takes 7 to 9 dB off at that drive but turns every clean
-sample into the average of two, which would take 0.5 dB at 5 kHz and 2 dB at 10 kHz off every
-sound through each stage, the default patch's included. To overdrive with less of it, keep the
-gain or the levels where the peaks only just reach the limit, or play it lower.
+What would cross that is taken down first by a look-ahead limiter, Amp 1 Limiter Sw, which has no
+CC and powers up on (value 124; off below value 64). Everything the amp puts out comes 1 ms (48
+samples) late, and while it is in that delay the limiter has already seen it: where the level
+would pass 0.9 (-0.9 dB), it brings the gain down over that 1 ms, before the peak arrives, so the
+peak comes out at 0.9, and lets it back up over about 100 ms. The gain moves smoothly, so where the
+clamp would cut corners into a sound and fold their harmonics back below the audible band, the
+limiter does not: a sawtooth taken 12 dB past one unit at A4 to A7 aliases -46 to -53 dB under
+5 kHz with it, and -29 to -37 dB on the clamp. Off, the output is just as late, and the clamp is
+reached. Limiting is heard on a loud passage as its peaks held level, and the release as the
+sound coming back up after one; the default patch stays under 0.9 and is not limited. The
+filter's output clip and a mixer's sum still have the hard limit, past which a sawtooth driven
+6 dB over at A6 to A7 aliases about -30 dB under 5 kHz; keep the levels before the filter where
+the peaks only just reach one unit, and bring the sound up with the amp instead.
 
 Amp 1 takes two modulations, Mod 1 In and Mod 2 In, and scales the gain by a crossfade of the
 two: Amp 1 Mod 1/2 Mix (CC#36) runs in a straight line from Mod 1 In alone at 0.0 (value 4) to Mod 2 In
