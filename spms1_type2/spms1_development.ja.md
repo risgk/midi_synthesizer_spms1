@@ -179,6 +179,26 @@ patch_gen は、モジュールのファイルの `require_relative`、インス
   コミットします (ビルドの後でソースが変わっていた場合と、何も変わっていない場合はコミットしません)
 
 
+## Ruby と違うところ
+
+シンセは CRuby も含め Ruby のとおりに動きます ("sim_cruby" 参照)。ただし MCU では賄えない次の点は別です。
+どれも 1 か所で行い、そこに理由を書いてあります。これ以外の Spinel やそのランタイムへの変更は、
+プログラムの動きを変えません:
+
+- Float は double でなく 32 ビットの float です。RP2350 の FPU は単精度だけなので。"sp_types.h" の
+  `SPINEL_FLOAT32` ("spinel_mcu/spinel_mcu.patch" による) が決め、生成コードの Float リテラルを float に
+  し ("spinel_rt_mcu_head.h")、生成コードの `double` を `float` と読み替えます ("spinel_rt_mcu_cold.h")。
+  結果は CRuby とは精度のぶん違い、sim_cruby の比較はそれを見込んでいます。これがないと、Float の
+  演算はすべてソフトウェアになります
+- Integer の `+ - *` は Bignum に広がらず、ポインタ幅 (RP2350 では 32 ビット) で桁あふれのまま回ります。
+  `spinel --int-overflow=wrap` と同じです ("spinel_rt_mcu_head.h" の `SP_INT_OVERFLOW_MODE_WRAP`)。シンセの
+  整数は 32 ビットに遠く届かない添字やカウンタです。これがないと、検査が毎サンプルのコードの命令の
+  約 8% になります
+- OS が要るもの (ファイル、プロセス、ソケット、Fiber、スレッド。下記の `SPINEL_BARE_METAL` 参照) は
+  ありません。GC のバッファは SRAM に合わせてあり、GC ルートを 1024 より深く重ねるプログラムは
+  残りを失います。sim_render はそれを報告します ("sp_gc.h" 参照)
+
+
 ## Spinel の更新
 
 "spms1" のランタイムのファイルは、README が指定するリリースの Spinel の `lib` (と `lib/regexp`) のすべてです。
@@ -192,10 +212,8 @@ MCU 向けの変更は 2 か所にまとめてあります:
   で書いたランタイム、POSIX 部分の `#if 0` による除外 (中身がリリースで変わってもパッチが
   当たりやすいように)、全体が POSIX 前提のファイルの `SPINEL_BARE_METAL` による除外 (下記)、
   SRAM に収まる GC のバッファ、配列の読み書き (`sp_FloatArray_get`/`set`、`sp_IntArray_get`) で範囲内の
-  場合を他の検査より先に置くこと (残りの検査はそのまま関数の外へ)、そこで nil の配列を調べないこと
-  (スケッチは nil の配列を読み書きしないので。`sp_IntArray_set` も同じく調べません)。最後のものはこの
-  スケッチ専用で、nil の配列を読み書きする Ruby プログラムは例外にならず落ちるので、Spinel にそのまま
-  取り込める変更ではありません。変更するファイルの隣には、
+  場合を他の検査より先に置くこと (残りの検査はそのまま関数の外へ。アクセスの動きは同じで、コストだけが
+  変わります)。変更するファイルの隣には、
   リリースのままのコピー "NAME.orig" があります
 - "sp_cold_bare_metal.c" と "spinel_mcu/sp_cold_bare_metal.patch": ベアメタル向けの "sp_cold.c" (下記)。
   リリースの "sp_cold.c" とは分けてあり、そちらは丸ごと外すこと以外は元のままです
