@@ -265,7 +265,7 @@ inputs:
 # slot) and of category 4 (what its control slot holds while it has no CC); a controller control,
 # the mod wheel or a general control, is in category 3 only. `cc` is the CC of the default patch, 0 for none, and `value`, as a CC value,
 # what that CC powers up at; a parameter's category 4 entry powers up at it too, and the editor's
-# Initialize & Send All sets both back to it. A parameter takes its own control slot, off the
+# Initialize Values sets both back to it. A parameter takes its own control slot, off the
 # bus, unless `source` (a signal key) says otherwise. `set` is the method of the module that
 # takes a parameter's value each buffer. `hint` is what the editor puts in parentheses after the
 # name; `hint_inputs`, inputs of the same module, puts what feeds them there instead, joined by
@@ -368,10 +368,10 @@ controls:
   - { entry: 45, module: OSC_2,     key: PITCH_COARSE,  label: Pitch Coarse,  cc: 0,   value: 64, bipolar: true, hint: ±5 Oct, set: set_pitch_coarse }
   - { entry: 46, module: OSC_2,     key: PITCH,         label: Pitch,         cc: 85,  value: 5, hint: 0 to +1 Oct, favorite: true, set: set_pitch }
   - { entry: 47, module: OSC_2,     key: PITCH_FINE,    label: Pitch Fine,    cc: 76,  value: 65, bipolar: true, hint: ±60 Cent, set: set_pitch_fine }
-  - { entry: 48, module: OSC_2,     key: PITCH_MOD_1_AMT, label: Pitch Mod 1 Amt, cc: 89, value: 4, hint_inputs: [MOD_1_IN], set: set_pitch_modulation_1_amount }
+  - { entry: 48, module: OSC_2,     key: PITCH_MOD_1_AMT, label: Pitch Mod 1 Amt, cc: 89, value: 4, hint_inputs: [MOD_1_IN], favorite: true, set: set_pitch_modulation_1_amount }
   - { entry: 49, module: OSC_2,     key: PITCH_MOD_1_POL,      label: Pitch Mod 1 Pol, cc: 0, value: 76, bipolar: true, hint: − to +, set: set_pitch_modulation_1_polarity }
   - { entry: 50, module: OSC_2,     key: PITCH_MOD_1_SW, label: Pitch Mod 1 Sw, cc: 0, value: 124, hint: Off/On, set: set_pitch_modulation_1_switch }
-  - { entry: 51, module: OSC_2,     key: PITCH_MOD_2_AMT, label: Pitch Mod 2 Amt, cc: 13, value: 4, hint_inputs: [MOD_2_IN], set: set_pitch_modulation_2_amount }
+  - { entry: 51, module: OSC_2,     key: PITCH_MOD_2_AMT, label: Pitch Mod 2 Amt, cc: 13, value: 4, hint_inputs: [MOD_2_IN], favorite: true, set: set_pitch_modulation_2_amount }
   - { entry: 52, module: OSC_2,     key: PITCH_MOD_2_POL,      label: Pitch Mod 2 Pol, cc: 0, value: 76, bipolar: true, hint: − to +, set: set_pitch_modulation_2_polarity }
   - { entry: 53, module: OSC_2,     key: PITCH_MOD_2_SW, label: Pitch Mod 2 Sw, cc: 0, value: 124, hint: Off/On, set: set_pitch_modulation_2_switch }
   - { entry: 54, module: OSC_2,     key: PW_MOD_1_AMT, label: PW Mod 1 Amt,  cc: 8,   value: 4, hint_inputs: [MOD_1_IN], set: set_pw_modulation_1_amount }
@@ -392,8 +392,8 @@ controls:
   # full level from Noise 1, silent. Out Level has no CC and holds 0.5: how
   # hard the sum drives the filter, the one Mixer 2 feeds, and what keeps two oscillators and the
   # noise all at full level, a sum of 1.5 at most, inside the mixer's range.
-  - { entry: 61, module: MIXER_2,   key: LEVEL_1,      label: Level 1,      cc: 19,  value: 88,  hint_inputs: [IN_1], set: set_level_1 }
-  - { entry: 62, module: MIXER_2,   key: LEVEL_2,      label: Level 2,      cc: 20,  value: 88,  hint_inputs: [IN_2], set: set_level_2 }
+  - { entry: 61, module: MIXER_2,   key: LEVEL_1,      label: Level 1,      cc: 19,  value: 88,  hint_inputs: [IN_1], favorite: true, set: set_level_1 }
+  - { entry: 62, module: MIXER_2,   key: LEVEL_2,      label: Level 2,      cc: 20,  value: 88,  hint_inputs: [IN_2], favorite: true, set: set_level_2 }
   - { entry: 63, module: MIXER_2,   key: LEVEL_3,      label: Level 3,      cc: 21,  value: 4, hint_inputs: [IN_3], set: set_level_3 }
   - { entry: 64, module: MIXER_2,   key: LEVEL_4,      label: Level 4,      cc: 23,  value: 4, hint_inputs: [IN_4], set: set_level_4 }
   - { entry: 65, module: MIXER_2,   key: OUT_LEVEL,  label: Out Level,  cc: 0,   value: 64, set: set_out_level }
@@ -425,12 +425,12 @@ controls:
   # 1.0, and CC 124 brings the sound up by 6 dB; the amp holds its output to one unit. Mod 1/2
   # Mix, on CC 36, crossfades what scales the gain from Mod 1 In, EG 1, at 0.0 (CC 4), where it
   # powers up, to Mod 2 In, EG 2, the organ envelope, at 1.0 (CC 124).
-  - { entry: 74, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 64, set: set_gain }
+  - { entry: 74, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 64, favorite: true, set: set_gain }
   - { entry: 75, module: AMP_1,     key: MOD_1_2_MIX,  label: Mod 1/2 Mix,  cc: 36,  value: 4, hint_inputs: [MOD_1_IN, MOD_2_IN], set: set_modulation_mix }
-  - { entry: 76, module: CHORUS_1,  key: MIX,          label: Mix,          cc: 93,  value: 64, set: set_mix }
+  - { entry: 76, module: CHORUS_1,  key: MIX,          label: Mix,          cc: 93,  value: 64, favorite: true, set: set_mix }
   - { entry: 77, module: CHORUS_1,  key: RATE,         label: Rate,         cc: 58,  value: 64, set: set_rate }
   - { entry: 78, module: CHORUS_1,  key: DEPTH,        label: Depth,        cc: 59,  value: 64, set: set_depth }
-  - { entry: 79, module: DELAY_1,   key: MIX,          label: Mix,          cc: 94,  value: 34, set: set_mix }
+  - { entry: 79, module: DELAY_1,   key: MIX,          label: Mix,          cc: 94,  value: 34, favorite: true, set: set_mix }
   - { entry: 80, module: DELAY_1,   key: TIME,         label: Time,         cc: 90,  value: 64, set: set_time }
   - { entry: 81, module: DELAY_1,   key: FEEDBACK,     label: Feedback,     cc: 92,  value: 64, set: set_feedback }
 

@@ -99,7 +99,7 @@ Usage
       hidden until a CC is given to one or it is marked as a favorite, unless "Show parameters with
       no CC", cleared by default, is ticked, and the choice is remembered. The slider of one with no
       CC sets the value its slot holds, sent as NRPN
-    - "Show favorites only", cleared by default, shows the parameters marked as favorites (the star)
+    - "Show favorites only", ticked by default, shows the parameters marked as favorites (the star)
       alone, with or without a CC, and the choice is remembered
     - A note in parentheses follows a parameter's name there: its range, as "(White to Red)" on
       Noise 1 Color, or, on a level or a modulation amount, what the patch routes to the input it
