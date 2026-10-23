@@ -649,6 +649,13 @@
       color: #ccc;
       white-space: nowrap;
     }
+    /* On a phone the keys are narrower, KB_KEY_WIDTH_NARROW, and the wheels narrower still, 3/2 of
+       a semitone, so that a 360px window shows an octave and more. */
+    @media (max-width: 480px) {
+      .keyboard-frame { --kbd-key-width: calc(16px * var(--kbd-scale)); }
+      .mod-wheel { width: calc(var(--kbd-key-width) * 3 / 2); }
+      .mod-wheel-label { font-size: 0.6rem; }
+    }
     /* The native scroll bar is hidden, since Safari cannot color it; .kbd-scrollbar stands in. */
     .keyboard-scroll-container {
       width: 100%;
@@ -4048,6 +4055,8 @@
 
   const KB_NOTE_MAX = 120;
   const KB_KEY_WIDTH = 20;  // a semitone in the upper half, times kbScale; 37 keys fit 960px, with room
+  const KB_KEY_WIDTH_NARROW = 16;  // the same on a phone; an octave and more fits 360px
+  const KB_NARROW = window.matchMedia('(max-width: 480px)');
   // The center of 37 keys from a C (C3 - C6 by default), in semitones from the left end of the C.
   const KB_CENTER_OFFSET = (36 + 5 / 3) / 2;
   const KB_DEFAULT_C = 48;  // C3
@@ -4136,15 +4145,20 @@
     return key ? parseInt(key.dataset.note) : -1;
   }
 
+  // A semitone in the upper half, in pixels, as --kbd-key-width makes it.
+  function kbKeyWidth() {
+    return (KB_NARROW.matches ? KB_KEY_WIDTH_NARROW : KB_KEY_WIDTH) * kbScale;
+  }
+
   // The center of the visible area, in semitones of the upper half from C-1.
   function kbGetCenter() {
     const scroll = document.getElementById('kb-scroll');
-    return (scroll.scrollLeft + scroll.clientWidth / 2) / (KB_KEY_WIDTH * kbScale);
+    return (scroll.scrollLeft + scroll.clientWidth / 2) / kbKeyWidth();
   }
 
   function kbSetCenter(center) {
     const scroll = document.getElementById('kb-scroll');
-    scroll.scrollLeft = center * KB_KEY_WIDTH * kbScale - scroll.clientWidth / 2;
+    scroll.scrollLeft = center * kbKeyWidth() - scroll.clientWidth / 2;
     kbUpdateScrollbar();
   }
 
@@ -4338,6 +4352,8 @@
     kbSetCenter(kbPrefs.center);
     // The text size can change without a resize of the window.
     if (window.ResizeObserver) new ResizeObserver(() => kbFitScale()).observe(document.getElementById('kbd-label'));
+    // The keys change width across the width of a phone.
+    KB_NARROW.addEventListener('change', () => kbSetCenter(kbPrefs.center));
     kbSetVisible(!kbPrefs.hidden);
   }
 
