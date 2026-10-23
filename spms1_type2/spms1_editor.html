@@ -208,7 +208,7 @@
     .editor-column:last-child {
       align-self: stretch;
     }
-    /* The no-CC toggle and the Init button, at the bottom of the last column. */
+    /* The Controls tab's options, Reset Layout and the Init button, at the bottom of the last column. */
     #controls-foot {
       margin-top: auto;
       display: flex;
@@ -221,6 +221,9 @@
     #controls-foot .check:has(input:disabled) {
       opacity: 0.5;
     }
+    #reset-layout {
+      align-self: flex-start;
+    }
     #init-values {
       width: 100%;
       padding: 12px;
@@ -228,6 +231,32 @@
     }
     .editor-column .panel h2 {
       margin-bottom: 8px;
+    }
+    /* A panel is moved by its heading, with the columns two or four to a row. */
+    @media (min-width: 920px) {
+      .editor-column .panel h2 {
+        cursor: grab;
+        touch-action: none;
+        user-select: none;
+      }
+    }
+    /* Where a panel being moved will land, and the panel itself, lifted, following the pointer. */
+    .panel-drop {
+      border: 2px dashed #b8c0ca;
+      border-radius: 8px;
+      background: transparent;
+    }
+    .panel.dragging {
+      position: fixed;
+      z-index: 50;
+      pointer-events: none;
+      opacity: 0.9;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+      cursor: grabbing;
+    }
+    /* An empty column still takes a panel dropped on it. */
+    .editor-column:empty {
+      min-height: 60px;
     }
     /* A panel in the color of its node on the Patch tab, its heading and the thumbs of the
        sliders a CC moves. */
@@ -1370,6 +1399,7 @@
   <div id="controls-foot">
     <label class="check" title="A parameter with no CC holds the value the patch gives it, which its slider sets through NRPN. Hidden, it shows up as soon as a CC is given to it or it is marked as a favorite."><input type="checkbox" id="show-no-cc"> Show parameters with no CC</label>
     <label class="check" title="Only the parameters marked with a star, with or without a CC. Unmarking one here takes it off the tab."><input type="checkbox" id="favorites-only"> Show favorites only</label>
+    <button class="btn" id="reset-layout" title="Put the panels back where they were at first. A panel is moved by dragging its heading, with the columns two or four to a row; where they are is kept in this browser, for every patch.">Reset Layout</button>
     <button class="btn primary" id="init-values" title="Set each CC value and each value of a parameter with no CC back to what the synth powers up at, and send them; the wiring is kept">Initialize Values</button>
   </div>
 </div>
@@ -3598,6 +3628,37 @@
     { col: 3, title: 'LFO 1', module: 'LFO_1' },
   ];
 
+  // Where each panel sits, by column, top to bottom: CONTROL_PANELS's columns until a panel is
+  // dragged by its heading, and then what was dragged, kept in this browser for every patch, as the
+  // Controls tab's options are, rather than in the patch, as it does not change the sound. A panel
+  // a patch hides keeps its place, and one the kept layout does not know goes to its own column.
+  const PANEL_LAYOUT_KEY = 'spms1-type2-editor-controls-layout';
+  const PANEL_BY_ID = Object.fromEntries(CONTROL_PANELS.map(p => [p.module || 'CONTROLLER', p]));
+  function defaultPanelLayout() {
+    const cols = [[], [], [], []];
+    for (const p of CONTROL_PANELS) cols[p.col].push(p.module || 'CONTROLLER');
+    return cols;
+  }
+  function loadPanelLayout() {
+    let kept = null;
+    try { kept = JSON.parse(localStorage.getItem(PANEL_LAYOUT_KEY) || 'null'); } catch (e) { /* storage unavailable, or not JSON */ }
+    if (!Array.isArray(kept) || kept.length !== 4 || !kept.every(Array.isArray)) return defaultPanelLayout();
+    const seen = new Set();
+    const cols = kept.map(col => col.filter(id => PANEL_BY_ID[id] && !seen.has(id) && seen.add(id)));
+    for (const p of CONTROL_PANELS) if (!seen.has(p.module || 'CONTROLLER')) cols[p.col].push(p.module || 'CONTROLLER');
+    return cols;
+  }
+  let panelLayout = loadPanelLayout();
+  function savePanelLayout() {
+    try { localStorage.setItem(PANEL_LAYOUT_KEY, JSON.stringify(panelLayout)); } catch (e) { /* storage unavailable */ }
+  }
+  document.getElementById('reset-layout').addEventListener('click', () => {
+    panelLayout = defaultPanelLayout();
+    try { localStorage.removeItem(PANEL_LAYOUT_KEY); } catch (e) { /* storage unavailable */ }
+    renderControls();
+    fitTabArea();
+  });
+
   function panelItems(p) {
     if (!p.module) return CONTROLLER_ITEMS.filter(c => c.key !== 'MOD_WHEEL');
     return PARAM_ITEMS.filter(c => c.module === p.module);
@@ -3693,19 +3754,101 @@
     fitTabArea();
   });
 
+  // A panel dragged by its heading, with the columns two or four to a row: lifted to follow the
+  // pointer, fixed in place where it stays in its column so that it keeps the column's look, with a dashed box where it will land, in the column under the pointer and above the
+  // first panel there whose middle is below it. In one column the order is as it is laid out.
+  let panelDrag = null;
+  function startPanelDrag(e) {
+    if (e.button !== 0 || matchMedia('(max-width: 919px)').matches) return;
+    const panel = e.currentTarget.closest('.panel');
+    const rect = panel.getBoundingClientRect();
+    const drop = document.createElement('div');
+    drop.className = 'panel-drop';
+    drop.style.height = rect.height + 'px';
+    panel.before(drop);
+    panel.classList.add('dragging');
+    panel.style.width = rect.width + 'px';
+    panel.style.left = rect.left + 'px';
+    panel.style.top = rect.top + 'px';
+    panelDrag = { panel, drop, dx: e.clientX - rect.left, dy: e.clientY - rect.top, pointerId: e.pointerId };
+    e.preventDefault();
+    window.addEventListener('pointermove', movePanelDrag);
+    window.addEventListener('pointerup', endPanelDrag);
+    window.addEventListener('pointercancel', endPanelDrag);
+  }
+  function movePanelDrag(e) {
+    if (!panelDrag || e.pointerId !== panelDrag.pointerId) return;
+    const { panel, drop, dx, dy } = panelDrag;
+    panel.style.left = (e.clientX - dx) + 'px';
+    panel.style.top = (e.clientY - dy) + 'px';
+    const cols = [...document.querySelectorAll('#controls .editor-column')];
+    // The column whose span holds the pointer across, or the nearest, among those of its row.
+    let best = null, bestDist = Infinity;
+    for (const c of cols) {
+      const r = c.getBoundingClientRect();
+      const dxc = e.clientX < r.left ? r.left - e.clientX : (e.clientX > r.right ? e.clientX - r.right : 0);
+      const dyc = e.clientY < r.top ? r.top - e.clientY : (e.clientY > r.bottom ? e.clientY - r.bottom : 0);
+      const d = dxc * 4 + dyc;
+      if (d < bestDist) { bestDist = d; best = c; }
+    }
+    if (!best) return;
+    const foot = document.getElementById('controls-foot');
+    const before = [...best.querySelectorAll(':scope > .panel:not(.dragging)')].find(p => {
+      const r = p.getBoundingClientRect();
+      return e.clientY < r.top + r.height / 2;
+    });
+    if (before) { if (drop.nextSibling !== before) before.before(drop); }
+    else if (foot.parentNode === best) { if (drop.nextSibling !== foot) foot.before(drop); }
+    else if (best.lastChild !== drop) best.appendChild(drop);
+    // Scrolled along near the top or the bottom of the window, as a wire is on the Patch tab.
+    const edge = 48;
+    if (e.clientY < edge) window.scrollBy(0, -14);
+    else if (e.clientY > window.innerHeight - edge) window.scrollBy(0, 14);
+  }
+  function endPanelDrag(e) {
+    if (!panelDrag || e.pointerId !== panelDrag.pointerId) return;
+    const { panel, drop } = panelDrag;
+    window.removeEventListener('pointermove', movePanelDrag);
+    window.removeEventListener('pointerup', endPanelDrag);
+    window.removeEventListener('pointercancel', endPanelDrag);
+    const id = panel.dataset.panel;
+    const cols = [...document.querySelectorAll('#controls .editor-column')];
+    const col = cols.indexOf(drop.parentNode);
+    if (e.type === 'pointerup' && col >= 0) {
+      // Before the next panel shown in the column, in the kept order, which holds the panels a
+      // patch hides as well; at the end of the column if none follows.
+      let next = drop.nextElementSibling;
+      while (next && (!next.dataset.panel || next === panel)) next = next.nextElementSibling;
+      panelLayout = panelLayout.map(ids => ids.filter(x => x !== id));
+      const ids = panelLayout[col];
+      const at = next ? ids.indexOf(next.dataset.panel) : -1;
+      ids.splice(at < 0 ? ids.length : at, 0, id);
+      savePanelLayout();
+    }
+    panel.remove();
+    drop.remove();
+    panelDrag = null;
+    renderControls();
+    fitTabArea();
+  }
+
   function renderControls() {
     const root = document.getElementById('controls');
-    // Rebuilding under a slider being dragged would drop the drag.
+    // Rebuilding under a slider or a panel being dragged would drop the drag; a panel dropped draws
+    // the tab again.
     if (heldRange && root.contains(heldRange)) return;
+    if (panelDrag) return;
     const cols = [0, 1, 2, 3].map(() => document.createElement('div'));
     cols.forEach(c => { c.className = 'editor-column'; });
-    for (const p of CONTROL_PANELS) {
+    panelLayout.forEach((ids, col) => ids.forEach(id => {
+      const p = PANEL_BY_ID[id];
       const items = panelItems(p).filter(c => favoritesOnly ? state.favorites.has(c.key) : (showNoCC || state.cc[c.key] || state.favorites.has(c.key)));
       // Mixer 1 has no CC by default, so its panel appears only once a patch gives it one, or
       // with the parameters that have none shown.
-      if (!items.length) continue;
+      if (!items.length) return;
       const panel = document.createElement('div');
       panel.className = 'panel colored';
+      panel.dataset.panel = id;
       panel.style.setProperty('--node-color', NODE_COLORS[p.module || 'CONTROLLER']);
       panel.innerHTML = `<h2>${p.title}</h2><div class="control-row">` + items.map(c => `
         <div class="slider-knob-zone" data-ctrl="${c.key}">
@@ -3717,10 +3860,11 @@
             <span class="slider-norm" title="The value the synth sees in the slot"></span>
           </div>
         </div>`).join('') + '</div>';
-      cols[p.col].appendChild(panel);
-    }
+      cols[col].appendChild(panel);
+    }));
     cols[3].appendChild(document.getElementById('controls-foot'));
     root.replaceChildren(...cols);
+    root.querySelectorAll('.panel h2').forEach(h => h.addEventListener('pointerdown', startPanelDrag));
     root.querySelectorAll('.slider-knob-zone').forEach(zone => {
       const c = CONTROL[zone.dataset.ctrl];
       const slider = zone.querySelector('input');

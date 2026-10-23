@@ -101,6 +101,10 @@ Usage
       CC sets the value its slot holds, sent as NRPN
     - "Show favorites only", ticked by default, shows the parameters marked as favorites (the star)
       alone, with or without a CC, and the choice is remembered
+    - A panel there is moved by dragging its heading, within its column or to another, with the
+      columns two or four to a row. Where the panels are is kept in the browser, the same for every
+      patch, and Reset Layout puts them back: Osc 1 and Osc 2 heading the first two columns, then
+      Filter 1 to Delay 1, and the modulation, Controller to LFO 1, last
     - A note in parentheses follows a parameter's name there: its range, as "(White to Red)" on
       Noise 1 Color, or, on a level or a modulation amount, what the patch routes to the input it
       scales, as "(Osc 1 Sub)" on Mixer 2 Level 3, kept up to date as the routing changes. On the
