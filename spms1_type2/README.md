@@ -267,7 +267,8 @@ the LFO at full level swings the pitch an octave either way. Osc 1 PW Mod 2 Amt 
 to the pulse width and powers up at 0.0. LFO 1 Level powers up at 1.0, so CC#13 alone sets the
 vibrato, from none to an octave. The pitch from Pitch 1 reaches the filter too, on Filter 1 Pitch In, for keyboard tracking: CC#9
 (Filter 1 Pitch Amt) at its top has the cutoff follow the note a semitone for a semitone,
-unmoved at note 60. Filter 1 Pitch Amt powers up at 0.5 (value 64), half a semitone for a semitone.
+unmoved at note 60. Filter 1 Pitch Amt powers up at 0.0 (value 4), so the cutoff stays where CC#74 puts
+it whatever the note until CC#9 is turned up.
 The envelope reaches the oscillator too, on Osc 1 Mod 1 In, for a pitch envelope: Pitch Mod 1
 Amt (CC#89) and PW Mod 1 Amt (CC#8) power up at 0.0, with it off. Each modulation depth spans the
 whole range of what it moves, so bringing a source down to a musical depth is left to the patch

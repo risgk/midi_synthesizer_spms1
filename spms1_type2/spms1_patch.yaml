@@ -68,7 +68,7 @@ modules:
 # opens the cutoff two octaves above where Cutoff (CC 74), at 0.8, puts it, and Mod 2 Amt (CC 25)
 # at 0.0, so the LFO leaves the cutoff alone until CC 25 turns it up.
 # Filter 1 Pitch In takes Pitch 1's pitch too, for keyboard tracking, and Filter 1 Pitch Amt
-# (CC 9) powers up at 0.5, the cutoff following the note half a semitone for a semitone. Noise 1 runs after the oscillators, as it is mostly a sound of its own (a modulation taking
+# (CC 9) powers up at 0.0, the cutoff staying where Cutoff puts it whatever the note. Noise 1 runs after the oscillators, as it is mostly a sound of its own (a modulation taking
 # it is a sample late, which it does not hear), at full level: its Level has no CC and holds 1.0.
 # Mixer 2 runs after it, just ahead of the filter, which it feeds: Osc 1 on its In 1, Osc 2 on In 2,
 # Osc 1's sub on In 3 and the noise on In 4. Its Level 1 and 2, on CC 19 and 20, power up at 0.7,
@@ -400,7 +400,7 @@ controls:
   # Filter 1 in the editor: the cutoff, the resonance and Mode, then the cutoff's keyboard
   # tracking, its two modulations and their polarity. Pitch In takes the pitch from Pitch 1, as Osc 1 Pitch In
   # does, and Pitch Amt (CC 9) at its top makes the cutoff follow the note a semitone for a
-  # semitone, unmoved at note 60; it powers up at CC 64, 0.5, half a semitone for a semitone. Mod 1 Amt and
+  # semitone, unmoved at note 60; it powers up at CC 4, 0.0, with the cutoff not following the note. Mod 1 Amt and
   # Mod 2 Amt, on CC 24 and 25, are how far the
   # envelope on Mod 1 In and the LFO on Mod 2 In move the cutoff, as Osc 1's PW Mod Amts are for
   # the pulse width. Mod 1 Amt powers up at CC 28, 0.2, the envelope opening the cutoff two
@@ -416,7 +416,7 @@ controls:
   - { entry: 66, module: FILTER_1,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 100, favorite: true, set: set_cutoff }
   - { entry: 67, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 64, favorite: true, set: set_resonance }
   - { entry: 68, module: FILTER_1,  key: MODE,         label: Mode,         cc: 39,  value: 4, hint: LP to Notch to HP, set: set_mode }
-  - { entry: 69, module: FILTER_1,  key: PITCH_AMT, label: Pitch Amt, cc: 9, value: 64, hint_inputs: [PITCH_IN], set: set_pitch_amount }
+  - { entry: 69, module: FILTER_1,  key: PITCH_AMT, label: Pitch Amt, cc: 9, value: 4, hint_inputs: [PITCH_IN], set: set_pitch_amount }
   - { entry: 70, module: FILTER_1,  key: MOD_1_AMT,    label: Mod 1 Amt,    cc: 24,  value: 28, hint_inputs: [MOD_1_IN], favorite: true, set: set_modulation_1_amount }
   - { entry: 71, module: FILTER_1,  key: MOD_1_POL,      label: Mod 1 Pol, cc: 117, value: 124, bipolar: true, hint: − to +, set: set_modulation_1_polarity }
   - { entry: 72, module: FILTER_1,  key: MOD_2_AMT,    label: Mod 2 Amt,    cc: 25,  value: 4, hint_inputs: [MOD_2_IN], favorite: true, set: set_modulation_2_amount }

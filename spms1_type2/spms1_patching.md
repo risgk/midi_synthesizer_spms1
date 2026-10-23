@@ -755,7 +755,7 @@ sweep while Osc 1 holds the note.
   white to red
 - Keyboard tracking is wired by default as well, the pitch from Pitch 1 on the filter's Pitch input,
   so CC#9 sets how far the cutoff follows the keys: all the way at value 124, half way at value 64,
-  where it powers up, and not at all at value 4
+  and not at all at value 4, where it powers up
 - The filter as a sine voice, playing its own oscillation in tune: CC#71 = 124 makes it oscillate,
   CC#9 = 124 has the cutoff follow the keys, and CC#74 = 49 puts it on note 60 at note 60, and so
   on the note played everywhere. CC#24 = 4 takes the envelope off the cutoff, and CC#19 = 4 and CC#20 = 4 take the oscillators out,
