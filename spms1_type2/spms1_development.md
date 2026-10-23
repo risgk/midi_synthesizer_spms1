@@ -75,7 +75,10 @@ plugin for the audio).
       spectra, relative to the signal: float (Spinel's output) and double (CRuby) let the oscillators'
       phase drift apart, which differs sample by sample but not in the spectra. Precision stays below
       about -35 dB, and a different routing, or a CC value 4 steps away, lands above -10 dB; the limit
-      is -25 dB (`ruby sim_cruby/spms1_compare.rb --limit DB` for another)
+      is -25 dB (`ruby sim_cruby/spms1_compare.rb --limit DB` for another). The chorus is the
+      exception: it turns the drift of its LFO's phase into one of the delay it swings, and a high note
+      played some seconds into a render can pass -25 dB from precision alone (C7 at 6 s, about -21 dB).
+      Keep a render that has to pass to about 4 s, or take the chorus out of it with its Mix or Depth
 
 
 ## Adding a Module
