@@ -56,6 +56,22 @@ module Spms1
     ffi_func :write_to_audio_buffer,      [:float, :float],          :void
     ffi_func :start_debug_measure,        [],                        :void
     ffi_func :stop_debug_measure,         [],                        :void
+    ffi_func :get_bus_signal,             [:int32],                  :float
+    ffi_func :set_bus_signal,             [:int32, :float],          :void
+  end
+
+  # The signal bus, indexed as an Array would be. Its slots are a C array of the host's
+  # (spms1_bus.h for the C builds), so that a read or a write is one load or store, where an Array
+  # of Spinel's checks the index against its length and its frozen flag at every access, which
+  # in the per-sample code was about a fifth of all the instructions.
+  class SignalBus
+    def [](slot)
+      C.get_bus_signal(slot)
+    end
+
+    def []=(slot, value)
+      C.set_bus_signal(slot, value)
+    end
   end
 end
 

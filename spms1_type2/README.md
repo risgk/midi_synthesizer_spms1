@@ -67,9 +67,13 @@ Required Software for Modification
       output in "spms1.ino", is put in RAM as well, with `SPMS1_RAM_FUNC`. From flash it would be
       fetched through the XIP cache, which core 0's MIDI and USB code shares, and a burst of MIDI
       would slow the synth's buffer by evicting it
+    - The signal bus is a C array of the sketch's, in "spms1_bus.h", which "spinel_rt_mcu_cold.h"
+      includes at the end of "spinel_rt.h", so that a bus read or write inlines as one load or store
+      rather than going through a checked Spinel Array
     - "spms1_main.c" is generated in "spms1" with `spinel spms1_main.rb -c --rbs sig`. The type seeds
-      in "spms1/sig" keep the filter states and the parameter smoothing unboxed;
-      "spms1/sig/spms1_filter.rbs" and "spms1/sig/spms1_dsp.rbs" say why they are needed
+      in "spms1/sig" keep the filter states, the parameter smoothing and the bus writes unboxed;
+      "spms1/sig/spms1_filter.rbs", "spms1/sig/spms1_dsp.rbs" and "spms1/sig/spms1_framework.rbs" say
+      why they are needed
 - Ruby (CRuby), to change the patch's numbers or the default patch, or to add a module: they are
   kept in "spms1_patch.yaml", and `ruby patch_gen/spms1_patch_gen.rb` writes them out to
   "spms1/spms1_patch.rb" (read by "spms1/spms1_main.rb"), the tables of "spms1_editor.html", the NRPN

@@ -66,9 +66,13 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.8
     - 本体が演奏中に呼ぶ関数 ("spms1_midi_state.h" の MIDI 読み出しと "spms1.ino" の音声出力) も
       `SPMS1_RAM_FUNC` で RAM に置きます。flash にあると、core 0 の MIDI と USB のコードと共有の
       XIP キャッシュ経由で読まれ、MIDI が続くとキャッシュが追い出されてシンセのバッファ処理が遅れます
+    - シグナルバスはスケッチ側の C 配列で、"spms1_bus.h" にあります。"spinel_rt_mcu_cold.h" が
+      "spinel_rt.h" の最後でこれを読み込むので、バスの読み書きは検査付きの Spinel の配列を通らず、
+      ロード 1 つ、ストア 1 つにインライン展開されます
     - "spms1_main.c" は "spms1" で `spinel spms1_main.rb -c --rbs sig` を実行して生成します。"spms1/sig" の
-      型シードがフィルタの状態とパラメータのスムージングをボックス化させずに保ちます。必要な理由は
-      "spms1/sig/spms1_filter.rbs" と "spms1/sig/spms1_dsp.rbs" にあります
+      型シードがフィルタの状態、パラメータのスムージング、バスへの書き込みをボックス化させずに保ちます。
+      必要な理由は "spms1/sig/spms1_filter.rbs"、"spms1/sig/spms1_dsp.rbs"、"spms1/sig/spms1_framework.rbs"
+      にあります
 - Ruby (CRuby): パッチの番号や初期パッチを変えるとき、モジュールを追加するとき。これらは
   "spms1_patch.yaml" にまとめてあり、`ruby patch_gen/spms1_patch_gen.rb` が "spms1/spms1_patch.rb"
   ("spms1/spms1_main.rb" が読み込みます)、"spms1_editor.html" のテーブル、"spms1_patching.ja.md" と
