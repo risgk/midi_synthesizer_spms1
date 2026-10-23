@@ -658,6 +658,16 @@ well as a loud one taken down. The amp holds its output to -1.0 and +1.0, as a m
 sum, so the gain cannot take the output past one unit, which the default patch, peaking near
 0.5 there, stays below.
 
+Held there by a hard clip, as a mixer's sum is, a sound driven past one unit gets corners, and
+their harmonics fold back below the audible band. Just past it the oscillators' own aliases still
+dominate, -55 dB or less under 5 kHz, but a sawtooth driven 6 dB over at A6 to A7 brings them up
+to about -30 dB, heard as a grain under a high note; the filter's output clip, which shares the
+limit, does about the same when driven that far. Nothing rounds this off: antiderivative
+anti-aliasing (ADAA), the usual remedy, takes 7 to 9 dB off at that drive but turns every clean
+sample into the average of two, which would take 0.5 dB at 5 kHz and 2 dB at 10 kHz off every
+sound through each stage, the default patch's included. To overdrive with less of it, keep the
+gain or the levels where the peaks only just reach the limit, or play it lower.
+
 Amp 1 takes two modulations, Mod 1 In and Mod 2 In, and scales the gain by a crossfade of the
 two: Amp 1 Mod 1/2 Mix (CC#36) runs in a straight line from Mod 1 In alone at 0.0 (value 4) to Mod 2 In
 alone at 1.0 (value 124). The default patch puts EG 1 on Mod 1 In and EG 2 on Mod 2 In, and Mod 1/2
