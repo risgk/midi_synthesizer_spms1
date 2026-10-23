@@ -1,6 +1,6 @@
 # SPMS-1 (type-2) Try a Spinel Release: takes a Spinel release into the sketch on the runner, and
 # tells whether it still builds and sounds the same, before the release is taken for real
-# (see "Updating Spinel" in spms1_type2/README.md)
+# (see "Updating Spinel" in spms1_type2/spms1_development.md)
 # - spinel_mcu/update.sh update TAG: the runtime files of the release, with spinel_mcu.patch applied
 # - spms1_main.c regenerated with the release, the types across the runtime checked with LTO, and the
 #   renders compared with CRuby
@@ -23,7 +23,7 @@ permissions:
 
 env:
   ARDUINO_CLI_VERSION: '1.5.1'
-  ARDUINO_PICO_VERSION: '6.2.0'  # The same as in spms1-type2.yml
+  ARDUINO_PICO_VERSION: '6.3.0'  # The same as in spms1-type2.yml
   MIDI_LIBRARY_VERSION: '5.0.2'
   ARDUINO_PICO_INDEX_URL: 'https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json'
   UF2_FQBN: 'rp2040:rp2040:rpipico2:usbstack=tinyusb'

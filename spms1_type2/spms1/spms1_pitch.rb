@@ -60,6 +60,9 @@ module Spms1
       @distance_2 = 0.0
       @last_input = 0.0
       @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (48000.0 / @sample_rate) * (CONTROL_RATE_DIVISOR / 4.0)
+      # The blend of the parameters smoothed once every 16 samples, four control ticks (see
+      # smooth_parameters): the one above taken four times over, for the same time.
+      @smoothing_16_blend = 1.0 - (1.0 - @smoothing_target_blend) ** 4.0
       @bend_depth = 0.0
       @stage_1_bend_depth = 0.0
       @current_bend_depth = 0.0
@@ -129,6 +132,17 @@ module Spms1
       @stretch_factor = (@stretch > 0.0) ? stretch_factor : 1.0
     end
 
+    # The parameters that scale no audio themselves -- rates, depths, times -- smoothed in two
+    # stages once every 16 samples, four control ticks, by the main loop for every module whatever
+    # runs, so that they cost a quarter as much and the same for any patch. What multiplies the
+    # audio is smoothed at every control tick, where a coarser step would be heard.
+    def smooth_parameters
+      @stage_1_bend_depth = Dsp.smooth(@bend_depth, @stage_1_bend_depth, @smoothing_16_blend)
+      @current_bend_depth = Dsp.smooth(@stage_1_bend_depth, @current_bend_depth, @smoothing_16_blend)
+      @stage_1_stretch_factor = Dsp.smooth(@stretch_factor, @stage_1_stretch_factor, @smoothing_16_blend)
+      @current_stretch_factor = Dsp.smooth(@stage_1_stretch_factor, @current_stretch_factor, @smoothing_16_blend)
+    end
+
     # The distance left is what is carried from sample to sample, and the output is the input plus
     # it. Carrying the output instead, as a one-pole filter usually does, rounds every step to the
     # spacing of floats at the output, and at the longest time a step of an octave's glide is only
@@ -155,13 +169,7 @@ module Spms1
     # The outputs are held to -1.0 to +1.0, as a mixer's is: twice the pitch range, so whatever
     # the oscillator and the filter clamp to their own range is still reached at either end.
     # Out 1 is returned, and Out 2 is read with output_2.
-    def process(control_tick, input = 0.0, bend_input = 0.0, gate_input = 0.0)
-      if control_tick
-        @stage_1_bend_depth = Dsp.smooth(@bend_depth, @stage_1_bend_depth, @smoothing_target_blend)
-        @current_bend_depth = Dsp.smooth(@stage_1_bend_depth, @current_bend_depth, @smoothing_target_blend)
-        @stage_1_stretch_factor = Dsp.smooth(@stretch_factor, @stage_1_stretch_factor, @smoothing_target_blend)
-        @current_stretch_factor = Dsp.smooth(@stage_1_stretch_factor, @current_stretch_factor, @smoothing_target_blend)
-      end
+    def process(control_tick, input = 0.0, gate_input = 0.0, bend_input = 0.0)
 
       step = @last_input - input
       @last_input = input

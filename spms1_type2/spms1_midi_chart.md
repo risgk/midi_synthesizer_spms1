@@ -1,6 +1,6 @@
 ```
   [MIDI Synthesizer]                                              Date: 2026-10-19                      
-  Model: SPMS-1 (type-2)          MIDI Implementation Chart       Version: 0.0.6                        
+  Model: SPMS-1 (type-2)          MIDI Implementation Chart       Version: 0.0.8                        
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Function...                   | Transmitted   | Recognized    | Remarks                              |
 +-------------------------------+---------------+---------------+--------------------------------------+
@@ -26,7 +26,7 @@
 | Change                    104 | x             | o             | Osc 2 Wave (Saw to Square)           |
 |                            89 | x             | o             | Osc Pitch Mod 1 Amt (EG)             |
 |                            13 | x             | o             | Osc Pitch Mod 2 Amt (LFO)            |
-|                           114 | x             | o             | Osc PW (50% to 0%)                   |
+|                           114 | x             | o             | Osc PW (0% to 100%)                  |
 |                             8 | x             | o             | Osc PW Mod 1 Amt (EG)                |
 |                           103 | x             | o             | Osc PW Mod 2 Amt (LFO)               |
 |                            85 | x             | o             | Osc 2 Pitch (0 to +1 Octave)         |
@@ -95,7 +95,7 @@
 |              : Active Sense   | x             | x             |                                      |
 |              : Reset          | x             | x             |                                      |
 +-------------------------------+---------------+---------------+--------------------------------------+
-| Notes                         | Control Change 4-124, centred on 64. NRPN is 7-bit, CC 6 only.       |
+| Notes                         | Control Change 4-124, centered on 64. NRPN is 7-bit, CC 6 only.      |
 +-------------------------------+----------------------------------------------------------------------+
   Mode 1: Omni On,  Poly          Mode 2: Omni On,  Mono          o: Yes                                
   Mode 3: Omni Off, Poly          Mode 4: Omni Off, Mono          x: No                                 

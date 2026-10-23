@@ -38,6 +38,9 @@ module Spms1
       # conversion on top of the division.
       @inv_sample_rate = 1.0 / sample_rate
       @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (48000.0 / @sample_rate) * (CONTROL_RATE_DIVISOR / 4.0)
+      # The blend of the parameters smoothed once every 16 samples, four control ticks (see
+      # smooth_parameters): the one above taken four times over, for the same time.
+      @smoothing_16_blend = 1.0 - (1.0 - @smoothing_target_blend) ** 4.0
       @phase = 0.0
       @reset_high = 0.0
       @reset_switch = 0.0
@@ -45,8 +48,8 @@ module Spms1
       @rate = 0.5
       @stage_1_rate = 0.5
       @current_rate = 0.5
-      # The level powers up at 0.0, as the default patch sets it, so that the LFO is still at
-      # startup rather than fading out.
+      # The level powers up at 0.0, so that the LFO is silent at startup and fades in to the level
+      # the patch sets, 1.0 by default.
       @level = 0.0
       # The level, smoothed; the per-sample path takes one multiply by it.
       @amount = 0.0
@@ -115,8 +118,25 @@ module Spms1
       @wave = (wave < 0.0) ? 0.0 : ((wave > 1.0) ? 1.0 : wave)
     end
 
-    # Output is bipolar and spans one unit peak to peak at full level, [-0.5, 0.5],
-    # the same span as the pitch domain. Every bipolar signal on the bus is scaled that way, so a destination's
+    # The parameters that scale no audio themselves -- rates, depths, times -- smoothed in two
+    # stages once every 16 samples, four control ticks, by the main loop for every module whatever
+    # runs, so that they cost a quarter as much and the same for any patch. What multiplies the
+    # audio is smoothed at every control tick, where a coarser step would be heard.
+    def smooth_parameters
+      @stage_1_rate = Dsp.smooth(@rate, @stage_1_rate, @smoothing_16_blend)
+      @current_rate = Dsp.smooth(@stage_1_rate, @current_rate, @smoothing_16_blend)
+      @stage_1_amount = Dsp.smooth(@amount, @stage_1_amount, @smoothing_16_blend)
+      @current_amount = Dsp.smooth(@stage_1_amount, @current_amount, @smoothing_16_blend)
+      @stage_1_rate_modulation_depth = Dsp.smooth(@rate_modulation_depth, @stage_1_rate_modulation_depth, @smoothing_16_blend)
+      @current_rate_modulation_depth = Dsp.smooth(@stage_1_rate_modulation_depth, @current_rate_modulation_depth, @smoothing_16_blend)
+      @stage_1_level_modulation_depth = Dsp.smooth(@level_modulation_depth, @stage_1_level_modulation_depth, @smoothing_16_blend)
+      @current_level_modulation_depth = Dsp.smooth(@stage_1_level_modulation_depth, @current_level_modulation_depth, @smoothing_16_blend)
+      @stage_1_wave = Dsp.smooth(@wave, @stage_1_wave, @smoothing_16_blend)
+      @current_wave = Dsp.smooth(@stage_1_wave, @current_wave, @smoothing_16_blend)
+    end
+
+    # The triangle is bipolar and spans one unit peak to peak at full level, [-0.5, 0.5], the same
+    # span as the pitch domain; the square is unipolar, [0.0, 1.0], and Out crossfades between them. Every bipolar signal on the bus is scaled that way, so a destination's
     # amount control means the same thing whichever one is routed to it.
     # Both modulation inputs are read at the control-rate step, as the filter reads its own, and
     # not smoothed: the phase increment and the PolyBLAMP scale below take a table lookup and a
@@ -133,16 +153,6 @@ module Spms1
         @reset_high = reset_high
         # Rate, amount and the two modulation depths are smoothed at the control rate to avoid sudden
         # jumps, and the phase increment is derived here rather than per sample.
-        @stage_1_rate = Dsp.smooth(@rate, @stage_1_rate, @smoothing_target_blend)
-        @current_rate = Dsp.smooth(@stage_1_rate, @current_rate, @smoothing_target_blend)
-        @stage_1_amount = Dsp.smooth(@amount, @stage_1_amount, @smoothing_target_blend)
-        @current_amount = Dsp.smooth(@stage_1_amount, @current_amount, @smoothing_target_blend)
-        @stage_1_rate_modulation_depth = Dsp.smooth(@rate_modulation_depth, @stage_1_rate_modulation_depth, @smoothing_target_blend)
-        @current_rate_modulation_depth = Dsp.smooth(@stage_1_rate_modulation_depth, @current_rate_modulation_depth, @smoothing_target_blend)
-        @stage_1_level_modulation_depth = Dsp.smooth(@level_modulation_depth, @stage_1_level_modulation_depth, @smoothing_target_blend)
-        @current_level_modulation_depth = Dsp.smooth(@stage_1_level_modulation_depth, @current_level_modulation_depth, @smoothing_target_blend)
-        @stage_1_wave = Dsp.smooth(@wave, @stage_1_wave, @smoothing_target_blend)
-        @current_wave = Dsp.smooth(@stage_1_wave, @current_wave, @smoothing_target_blend)
         total_amount = @current_amount + (level_modulation_input * @current_level_modulation_depth)
         @total_amount = (total_amount < 0.0) ? 0.0 : ((total_amount > 1.0) ? 1.0 : total_amount)
         total_rate = @current_rate + (rate_modulation_input * @current_rate_modulation_depth)

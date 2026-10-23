@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -226,6 +226,20 @@
     .editor-column .panel h2 {
       margin-bottom: 8px;
     }
+    /* A panel in the color of its node on the Patch tab, its heading and the thumbs of the
+       sliders a CC moves. */
+    .editor-column .panel.colored {
+      --thumb-color: var(--node-color);
+    }
+    /* A favorite's star and the tint behind its row in the color of its module, on either tab. */
+    .editor-column .panel.colored, .node.colored {
+      --favorite: var(--node-color);
+      --favorite-bg: color-mix(in srgb, var(--node-color) 5%, #fff);
+    }
+    .editor-column .panel.colored h2 {
+      color: var(--node-color);
+      border-left-color: var(--node-color);
+    }
     .control-row {
       display: flex;
       flex-direction: column;
@@ -239,7 +253,7 @@
       justify-content: space-between;
       gap: 12px;
     }
-    /* The star that marks a favourite, in the padding of the panel to the left of the name, so it
+    /* The star that marks a favorite, in the padding of the panel to the left of the name, so it
        takes nothing from the name or the slider at any width; faint until it is set. */
     .fav-toggle {
       position: absolute;
@@ -262,7 +276,7 @@
       color: var(--favorite);
       opacity: 1;
     }
-    /* A light gold behind a favourite's row, out to the edges of its panel. */
+    /* A tint behind a favorite's row, out to the edges of its panel. */
     .slider-knob-zone.fav::before {
       content: '';
       position: absolute;
@@ -302,7 +316,7 @@
       .slider-label .ctl-sub { display: inline; }
       .control-row { gap: 6px; }
       .editor-column { gap: 12px; }
-      /* More on the left than the right, for the favourite's star, and as much in all. */
+      /* More on the left than the right, for the favorite's star, and as much in all. */
       .editor-column .panel { padding: 8px 8px 8px 12px; }
       .fav-toggle { left: -12px; font-size: 0.7rem; }
       .slider-knob-zone.fav::before { inset: -3px -8px -3px -12px; }
@@ -376,10 +390,10 @@
     }
     /* The slider runs from CC 4 to CC 124, the ends of the range the synth uses: cc_to_unipolar
        and cc_to_bipolar map them to the ends of their ranges and clamp anything past them. A
-       bipolar one has a tick at CC 64, where the centre of the dial means no change, drawn beside
+       bipolar one has a tick at CC 64, where the center of the dial means no change, drawn beside
        the slider rather than declared as a <datalist>, which some browsers turn into a snap point.
        It runs under the thumb and is taller than it, so it shows above and below the thumb when
-       the thumb sits on it. The thumb's centre travels
+       the thumb sits on it. The thumb's center travels
        from half a thumb in to half a thumb from the far end, so CC 64, the middle of CC 4 to
        CC 124, is halfway along what is left of the track. */
     .range-wrap {
@@ -405,7 +419,7 @@
       border-radius: 3px;
       background: var(--border-color);
     }
-    .range-wrap .centre-tick {
+    .range-wrap .center-tick {
       position: absolute;
       left: calc(9px + (100% - 18px) * 0.5 - 1px);
       top: 50%;
@@ -421,7 +435,7 @@
       width: 18px;
       height: 18px;
       border-radius: 50%;
-      background: var(--primary-color);
+      background: var(--thumb-color, var(--primary-color));
       cursor: pointer;
     }
     /* Same size as the WebKit thumb above, so the tick positions line up here too. */
@@ -430,7 +444,7 @@
       height: 18px;
       border: none;
       border-radius: 50%;
-      background: var(--primary-color);
+      background: var(--thumb-color, var(--primary-color));
       cursor: pointer;
     }
     /* A disabled slider has no CC behind it, so there is no position to show: the value the
@@ -443,17 +457,20 @@
       background: transparent;
       cursor: default;
     }
-    /* A parameter with no CC sets the value its own slot holds, sent as NRPN: blue, the colour of
+    /* A parameter with no CC sets the value its own slot holds, sent as NRPN: blue, the color of
        a parameter's wire and of CC 0 on the Patch tab, so it stands apart from one a CC moves. */
     .slider-knob-zone.own .slider-label,
     .slider-knob-zone.own .slider-value {
       color: var(--wire-param);
     }
+    /* Its thumb pale, a ring of that blue, so it stands apart from the thumbs in a module's color. */
     .slider-knob-zone.own input[type="range"]::-webkit-slider-thumb {
-      background: var(--wire-param);
+      background: #dce6f1;
+      box-shadow: inset 0 0 0 2px var(--wire-param);
     }
     .slider-knob-zone.own input[type="range"]::-moz-range-thumb {
-      background: var(--wire-param);
+      background: #dce6f1;
+      box-shadow: inset 0 0 0 2px var(--wire-param);
     }
     .slider-value {
       min-width: 32px;
@@ -540,7 +557,7 @@
     .kbd-bar .kbd-hold {
       margin-left: auto;
     }
-    /* The sizes of the keys are times the scale of the text, --kbd-scale, set by kbdFitScale. */
+    /* The sizes of the keys are times the scale of the text, --kbd-scale, set by kbFitScale. */
     .keyboard-frame {
       --kbd-scale: 1;
       --kbd-key-width: calc(20px * var(--kbd-scale));  /* KB_KEY_WIDTH: a semitone in the upper half */
@@ -551,7 +568,7 @@
       padding: 10px 5px 5px 5px;
     }
     /* The pitch bend and mod wheels on the left of the keys, as on a keyboard, sliders standing as
-       tall as they are. The bend springs back to the centre; the mod wheel's value is that of the
+       tall as they are. The bend springs back to the center; the mod wheel's value is that of the
        CC Mod Wheel is on in the patch. */
     /* Each wheel as wide as a white key from C to E, 5/3 of a semitone, and the keys keeping the 37
        that KB_KEY_WIDTH fits a 960px window beside them, with room. */
@@ -804,8 +821,16 @@
     .wire.param.selected {
       opacity: 1;
     }
+    /* A wire whose source runs later is a row of round dots, set apart from a solid one and from
+       a parameter's thin dashes however far the view is zoomed out. */
     .wire.feedback {
-      stroke: var(--wire-feedback);
+      stroke-width: 3.5;
+      stroke-linecap: round;
+      stroke-dasharray: 0 7;
+    }
+    .wire.feedback.selected {
+      stroke-width: 5.5;
+      stroke-dasharray: 0 9;
     }
     .wire.inactive {
       stroke: var(--wire-inactive);
@@ -863,6 +888,13 @@
     .node.aux .node-head {
       background: var(--text-color);
     }
+    /* The head in the color its outputs and their wires take, gray while the module is not run. */
+    .node.colored .node-head {
+      background: var(--node-color);
+    }
+    .node.colored.off .node-head {
+      background: var(--text-muted);
+    }
     .badge {
       font-size: 0.7rem;
       font-weight: normal;
@@ -896,6 +928,82 @@
     .row.input-row .src {
       flex: 1;
       max-width: none;
+    }
+    /* What an input or a parameter reads opens the list of sources to pick from. */
+    .row .src[data-src-of] {
+      cursor: pointer;
+      min-height: 1.2em;
+    }
+    .row .src[data-src-of]:hover {
+      color: var(--text-color);
+      text-decoration: underline;
+    }
+    .src-picker {
+      position: fixed;
+      z-index: 50;
+      width: 260px;
+      max-width: calc(100vw - 32px);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 8px;
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+      font-size: 0.8rem;
+    }
+    .src-picker[hidden] {
+      display: none;
+    }
+    .src-picker-title {
+      font-weight: 600;
+    }
+    .src-picker input {
+      padding: 4px 6px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font: inherit;
+    }
+    .src-picker-list {
+      max-height: min(420px, 60vh);
+      overflow-y: auto;
+    }
+    .src-picker-group {
+      padding: 6px 4px 2px;
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+    .src-picker-item {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      padding: 3px 4px 3px 12px;
+      border: none;
+      border-radius: 3px;
+      background: none;
+      font: inherit;
+      color: var(--text-color);
+      text-align: left;
+      cursor: pointer;
+    }
+    .src-picker-item .norm {
+      color: var(--text-muted);
+      font-family: monospace;
+    }
+    .src-picker-item:hover, .src-picker-item.active {
+      background: var(--bg-color);
+    }
+    .src-picker-item.current {
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    .src-picker-item.off {
+      color: var(--text-muted);
+    }
+    .src-picker-item[hidden] {
+      display: none;
     }
     /* What a routed parameter reads, in the space between its label and its fields. */
     .row.ctrl .lbl {
@@ -953,28 +1061,43 @@
     }
     /* A CC that also fills another parameter's slot, as Osc 2's amounts are on Osc 1's CCs: moving
        one moves the other, so the number stands out a little. */
+    /* A CC shared by more than one slot in amber, apart from the red of the Controller and the
+       orange of a reserved CC. */
     .row input.shared {
-      border-color: #eea3aa;
-      background: #fdebed;
+      border-color: #e5c07b;
+      background: #fdf6e3;
     }
     .slider-label .cc-num.shared {
-      color: #db5c68;
+      color: #946000;
       font-weight: 600;
     }
     /* A routed parameter reads its wire, but its CC still fills its own slot and so still feeds
-       the output port: the fields stay live, only set back. */
+       the output port: the fields and the slider stay live, only shown as disabled ones are. */
     .row.routed input[type="number"] {
-      opacity: 0.55;
+      background: #f2f4f5;
+      color: var(--text-muted);
     }
     .slider-knob-zone.routed .slider-label {
       color: var(--wire-param);
       font-style: italic;
     }
+    .slider-knob-zone.routed .slider-value,
+    .slider-knob-zone.routed .slider-norm {
+      color: var(--text-muted);
+    }
+    .slider-knob-zone.routed input[type="range"]::-webkit-slider-thumb {
+      background: var(--text-muted);
+      opacity: 0.55;
+    }
+    .slider-knob-zone.routed input[type="range"]::-moz-range-thumb {
+      background: var(--text-muted);
+      opacity: 0.55;
+    }
     .row.routed .lbl {
       color: var(--wire-param);
       font-style: italic;
     }
-    /* A favourite on the Patch tab: a light gold behind its row. */
+    /* A favorite on the Patch tab: a tint behind its row. */
     .row.ctrl.fav {
       background: var(--favorite-bg);
     }
@@ -1050,8 +1173,39 @@
     .port.param.connected {
       background: var(--wire-param);
     }
+    /* An output in its node's color; a wired input filled with its source's. */
+    .node .port.out {
+      border-color: var(--node-color);
+    }
+    .node .port.out.connected {
+      background: var(--node-color);
+    }
+    .port.in.connected {
+      background: var(--src-color);
+    }
     .port:hover, .port.target {
       transform: scale(1.35);
+    }
+    /* An output held by a click, waiting for the input to wire it to. */
+    .port.armed {
+      transform: scale(1.6);
+      box-shadow: 0 0 0 3px rgba(155, 17, 30, 0.35);
+    }
+    .arm-hint {
+      position: absolute;
+      left: 10px;
+      bottom: 10px;
+      z-index: 3;
+      max-width: calc(100% - 20px);
+      padding: 4px 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      background: var(--panel-bg);
+      font-size: 0.75rem;
+      pointer-events: none;
+    }
+    .arm-hint[hidden] {
+      display: none;
     }
     /* The legend and the zoom buttons share the top of the canvas; the legend wraps short of the
        buttons rather than running under them. */
@@ -1178,7 +1332,7 @@
 <body>
 
 <header>
-  <h1>SPMS-1 (type-2) Editor<span class="version">v0.0.6</span><span class="github-link">(<a href="https://github.com/risgk/midi_synthesizer_spms1" target="_blank" rel="noopener">View on GitHub</a>)</span></h1>
+  <h1>SPMS-1 (type-2) Editor<span class="version">v0.0.8</span><span class="github-link">(<a href="https://github.com/risgk/midi_synthesizer_spms1" target="_blank" rel="noopener">View on GitHub</a>)</span></h1>
   <nav class="tabs">
     <button class="tab-btn active" data-tab="controls">Controls</button>
     <button class="tab-btn" data-tab="patch">Patch</button>
@@ -1211,8 +1365,8 @@
   <div class="editor-grid" id="controls"></div>
   <!-- Moved under the Delay panel each time the controls are drawn. -->
   <div id="controls-foot">
-    <label class="check" title="A parameter with no CC holds the value the patch gives it, which its slider sets through NRPN. Hidden, it shows up as soon as a CC is given to it."><input type="checkbox" id="show-no-cc"> Show parameters with no CC</label>
-    <button class="btn primary" id="init-values">Initialize & Send All</button>
+    <label class="check" title="A parameter with no CC holds the value the patch gives it, which its slider sets through NRPN. Hidden, it shows up as soon as a CC is given to it or it is marked as a favorite."><input type="checkbox" id="show-no-cc"> Show parameters with no CC</label>
+    <button class="btn primary" id="init-values" title="Set each CC value and each value of a parameter with no CC back to what the synth powers up at, and send them; the wiring is kept">Initialize Values</button>
   </div>
 </div>
 
@@ -1221,12 +1375,13 @@
     <div class="world" id="world">
       <svg class="wires" id="wires"></svg>
     </div>
+    <div class="arm-hint" id="arm-hint" hidden></div>
     <div class="canvas-bar">
       <div class="legend">
-        <span><svg width="28" height="6"><line x1="0" y1="3" x2="28" y2="3" stroke="#9B111E" stroke-width="2.5"/></svg>Module input</span>
-        <span><svg width="28" height="6"><line x1="0" y1="3" x2="28" y2="3" stroke="#d68910" stroke-width="2.5"/></svg>1-sample delay (runs later)</span>
+        <span><svg width="28" height="6"><line x1="0" y1="3" x2="9" y2="3" stroke="#9b111e" stroke-width="2.5"/><line x1="9" y1="3" x2="19" y2="3" stroke="#1c7f46" stroke-width="2.5"/><line x1="19" y1="3" x2="28" y2="3" stroke="#2772a4" stroke-width="2.5"/></svg>Module input, in its source's color</span>
+        <span><svg width="28" height="6"><line x1="2" y1="3" x2="28" y2="3" stroke="#9b111e" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="0 7"/></svg>1-sample delay (runs later)</span>
         <span><svg width="28" height="6"><line x1="0" y1="3" x2="28" y2="3" stroke="#b8c0c4" stroke-width="2.5"/></svg>Source not running</span>
-        <span><svg width="28" height="6"><line x1="0" y1="3" x2="28" y2="3" stroke="#4f7cac" stroke-width="2" stroke-dasharray="6 4"/></svg>Parameter</span>
+        <span><svg width="28" height="6"><line x1="0" y1="3" x2="28" y2="3" stroke="#2c3e50" stroke-width="1.5" stroke-dasharray="5 4" opacity="0.6"/></svg>Parameter</span>
       </div>
       <div class="zoom-controls">
         <button class="btn" id="zoom-out" title="Zoom out">&minus;</button>
@@ -1256,8 +1411,10 @@
       </div>
       <p class="hint" style="margin-top: 8px;">
         MIDI In is passed through to the synth, and a CC on the channel above moves every slot
-        assigned to it. Drag from an output (right) to an input (left) to connect. Drag a connected input away to
-        unplug it; click a wire and press Delete to remove it. An unplugged parameter reads its own
+        assigned to it. Drag from an output (right) to an input (left) to connect; near an edge, the
+        view moves along. Or click the output, move the view, and click the input. Click an input,
+        or what it reads, to pick its source from a list. Drag a
+        connected input away to unplug it; click a wire and press Delete to remove it. An unplugged parameter reads its own
         control slot. Drag a value up or down to change it, with Shift for fine steps, or turn the
         wheel over the one being edited. Drag the background to pan, wheel or pinch to zoom.
       </p>
@@ -1307,7 +1464,7 @@
   </div>
   <div class="keyboard-frame">
     <div class="kbd-body">
-      <div class="mod-wheel" id="bend-wheel-zone" title="Pitch Bend: back to the centre when let go">
+      <div class="mod-wheel" id="bend-wheel-zone" title="Pitch Bend: back to the center when let go">
         <input type="range" id="bend-wheel" min="-8192" max="8191" value="0" aria-label="Pitch Bend">
         <span class="mod-wheel-label">Bend</span>
       </div>
@@ -1323,6 +1480,12 @@
       </div>
     </div>
   </div>
+</div>
+
+<div class="src-picker" id="src-picker" hidden>
+  <div class="src-picker-title"></div>
+  <input type="search" placeholder="Filter, e.g. lfo 1" aria-label="Filter the sources">
+  <div class="src-picker-list"></div>
 </div>
 
 <script>
@@ -1357,39 +1520,39 @@
       {"key":"DELAY_1","id":13,"label":"Delay 1","outs":[{"sig":"DELAY_1_OUTPUT_L","label":"Out L"},{"sig":"DELAY_1_OUTPUT_R","label":"Out R"},{"sig":"DELAY_1_OUTPUT_MONO","label":"Out Mono"}]},
     ],
     inputs: [
-      {"entry":0,"module":"PITCH_1","key":"PITCH","label":"Pitch In","source":"NOTE_PITCH"},
-      {"entry":1,"module":"PITCH_1","key":"BEND","label":"Bend In","source":"PITCH_BEND"},
-      {"entry":2,"module":"PITCH_1","key":"GATE","label":"Gate In","source":"NOTE_GATE"},
-      {"entry":3,"module":"EG_1","key":"GATE","label":"Gate In","source":"NOTE_GATE"},
-      {"entry":4,"module":"EG_2","key":"GATE","label":"Gate In","source":"NOTE_GATE"},
-      {"entry":5,"module":"LFO_1","key":"RATE_MOD","label":"Rate Mod In","source":"NONE"},
-      {"entry":6,"module":"LFO_1","key":"LEVEL_MOD","label":"Level Mod In","source":"MOD_WHEEL"},
-      {"entry":7,"module":"LFO_1","key":"RESET","label":"Reset In","source":"NOTE_GATE"},
+      {"entry":0,"module":"PITCH_1","key":"PITCH_IN","label":"Pitch In","source":"NOTE_PITCH"},
+      {"entry":1,"module":"PITCH_1","key":"GATE_IN","label":"Gate In","source":"NOTE_GATE"},
+      {"entry":2,"module":"PITCH_1","key":"BEND_IN","label":"Bend In","source":"PITCH_BEND"},
+      {"entry":3,"module":"EG_1","key":"GATE_IN","label":"Gate In","source":"NOTE_GATE"},
+      {"entry":4,"module":"EG_2","key":"GATE_IN","label":"Gate In","source":"NOTE_GATE"},
+      {"entry":5,"module":"LFO_1","key":"RATE_MOD_IN","label":"Rate Mod In","source":"NONE"},
+      {"entry":6,"module":"LFO_1","key":"LEVEL_MOD_IN","label":"Level Mod In","source":"MOD_WHEEL"},
+      {"entry":7,"module":"LFO_1","key":"RESET_IN","label":"Reset In","source":"NOTE_GATE"},
       {"entry":8,"module":"MIXER_1","key":"IN_1","label":"In 1","source":"NONE"},
       {"entry":9,"module":"MIXER_1","key":"IN_2","label":"In 2","source":"NONE"},
       {"entry":10,"module":"MIXER_1","key":"IN_3","label":"In 3","source":"NONE"},
       {"entry":11,"module":"MIXER_1","key":"IN_4","label":"In 4","source":"NONE"},
-      {"entry":12,"module":"OSC_1","key":"PITCH","label":"Pitch In","source":"PITCH_1_OUTPUT_1"},
-      {"entry":13,"module":"OSC_1","key":"MOD_1","label":"Mod 1 In","source":"EG_1_OUTPUT"},
-      {"entry":14,"module":"OSC_1","key":"MOD_2","label":"Mod 2 In","source":"LFO_1_OUTPUT"},
-      {"entry":15,"module":"OSC_2","key":"PITCH","label":"Pitch In","source":"PITCH_1_OUTPUT_2"},
-      {"entry":16,"module":"OSC_2","key":"MOD_1","label":"Mod 1 In","source":"EG_1_OUTPUT"},
-      {"entry":17,"module":"OSC_2","key":"MOD_2","label":"Mod 2 In","source":"LFO_1_OUTPUT"},
-      {"entry":18,"module":"OSC_2","key":"SYNC","label":"Sync In","source":"OSC_1_OUTPUT_SAW"},
+      {"entry":12,"module":"OSC_1","key":"PITCH_IN","label":"Pitch In","source":"PITCH_1_OUTPUT_1"},
+      {"entry":13,"module":"OSC_1","key":"MOD_1_IN","label":"Mod 1 In","source":"EG_1_OUTPUT"},
+      {"entry":14,"module":"OSC_1","key":"MOD_2_IN","label":"Mod 2 In","source":"LFO_1_OUTPUT"},
+      {"entry":15,"module":"OSC_2","key":"PITCH_IN","label":"Pitch In","source":"PITCH_1_OUTPUT_2"},
+      {"entry":16,"module":"OSC_2","key":"MOD_1_IN","label":"Mod 1 In","source":"EG_1_OUTPUT"},
+      {"entry":17,"module":"OSC_2","key":"MOD_2_IN","label":"Mod 2 In","source":"LFO_1_OUTPUT"},
+      {"entry":18,"module":"OSC_2","key":"SYNC_IN","label":"Sync In","source":"OSC_1_OUTPUT_SAW"},
       {"entry":19,"module":"MIXER_2","key":"IN_1","label":"In 1","source":"OSC_1_OUTPUT"},
       {"entry":20,"module":"MIXER_2","key":"IN_2","label":"In 2","source":"OSC_2_OUTPUT"},
       {"entry":21,"module":"MIXER_2","key":"IN_3","label":"In 3","source":"OSC_1_OUTPUT_SUB"},
       {"entry":22,"module":"MIXER_2","key":"IN_4","label":"In 4","source":"NOISE_1_OUTPUT"},
-      {"entry":23,"module":"FILTER_1","key":"AUDIO","label":"Audio In","source":"MIXER_2_OUTPUT"},
-      {"entry":24,"module":"FILTER_1","key":"PITCH","label":"Pitch In","source":"PITCH_1_OUTPUT_1"},
-      {"entry":25,"module":"FILTER_1","key":"MOD_1","label":"Mod 1 In","source":"EG_1_OUTPUT"},
-      {"entry":26,"module":"FILTER_1","key":"MOD_2","label":"Mod 2 In","source":"LFO_1_OUTPUT"},
-      {"entry":27,"module":"AMP_1","key":"AUDIO","label":"Audio In","source":"FILTER_1_OUTPUT"},
-      {"entry":28,"module":"AMP_1","key":"MOD_1","label":"Mod 1 In","source":"EG_1_OUTPUT"},
-      {"entry":29,"module":"AMP_1","key":"MOD_2","label":"Mod 2 In","source":"EG_2_OUTPUT"},
-      {"entry":30,"module":"CHORUS_1","key":"AUDIO","label":"Audio In","source":"AMP_1_OUTPUT"},
-      {"entry":31,"module":"DELAY_1","key":"AUDIO_L","label":"Audio In L","source":"CHORUS_1_OUTPUT_L"},
-      {"entry":32,"module":"DELAY_1","key":"AUDIO_R","label":"Audio In R","source":"CHORUS_1_OUTPUT_R"},
+      {"entry":23,"module":"FILTER_1","key":"AUDIO_IN","label":"Audio In","source":"MIXER_2_OUTPUT"},
+      {"entry":24,"module":"FILTER_1","key":"PITCH_IN","label":"Pitch In","source":"PITCH_1_OUTPUT_1"},
+      {"entry":25,"module":"FILTER_1","key":"MOD_1_IN","label":"Mod 1 In","source":"EG_1_OUTPUT"},
+      {"entry":26,"module":"FILTER_1","key":"MOD_2_IN","label":"Mod 2 In","source":"LFO_1_OUTPUT"},
+      {"entry":27,"module":"AMP_1","key":"AUDIO_IN","label":"Audio In","source":"FILTER_1_OUTPUT"},
+      {"entry":28,"module":"AMP_1","key":"MOD_1_IN","label":"Mod 1 In","source":"EG_1_OUTPUT"},
+      {"entry":29,"module":"AMP_1","key":"MOD_2_IN","label":"Mod 2 In","source":"EG_2_OUTPUT"},
+      {"entry":30,"module":"CHORUS_1","key":"AUDIO_IN","label":"Audio In","source":"AMP_1_OUTPUT"},
+      {"entry":31,"module":"DELAY_1","key":"AUDIO_IN_L","label":"Audio In L","source":"CHORUS_1_OUTPUT_L"},
+      {"entry":32,"module":"DELAY_1","key":"AUDIO_IN_R","label":"Audio In R","source":"CHORUS_1_OUTPUT_R"},
       {"entry":33,"module":null,"key":"OUTPUT_L","label":"L","source":"DELAY_1_OUTPUT_L"},
       {"entry":34,"module":null,"key":"OUTPUT_R","label":"R","source":"DELAY_1_OUTPUT_R"},
     ],
@@ -1414,8 +1577,8 @@
       {"entry":17,"module":"LFO_1","key":"WAVE","label":"Wave","bipolar":false,"cc":33,"value":4,"controller":false,"hint":"Tri to Sq","slots":[["LFO_1_WAVE","Wave",false]]},
       {"entry":18,"module":"LFO_1","key":"RATE","label":"Rate","bipolar":false,"cc":3,"value":64,"controller":false,"favorite":true,"slots":[["LFO_1_RATE","Rate",false]]},
       {"entry":19,"module":"LFO_1","key":"LEVEL","label":"Level","bipolar":false,"cc":116,"value":124,"controller":false,"slots":[["LFO_1_LEVEL","Level",false]]},
-      {"entry":20,"module":"LFO_1","key":"RATE_MOD_AMT","label":"Rate Mod Amt","bipolar":false,"cc":0,"value":124,"controller":false,"hintInputs":["RATE_MOD"],"slots":[["LFO_1_RATE_MOD_AMT","Rate Mod Amt",false]]},
-      {"entry":21,"module":"LFO_1","key":"LEVEL_MOD_AMT","label":"Level Mod Amt","bipolar":false,"cc":0,"value":124,"controller":false,"hintInputs":["LEVEL_MOD"],"slots":[["LFO_1_LEVEL_MOD_AMT","Level Mod Amt",false]]},
+      {"entry":20,"module":"LFO_1","key":"RATE_MOD_AMT","label":"Rate Mod Amt","bipolar":false,"cc":0,"value":124,"controller":false,"hintInputs":["RATE_MOD_IN"],"slots":[["LFO_1_RATE_MOD_AMT","Rate Mod Amt",false]]},
+      {"entry":21,"module":"LFO_1","key":"LEVEL_MOD_AMT","label":"Level Mod Amt","bipolar":false,"cc":0,"value":124,"controller":false,"hintInputs":["LEVEL_MOD_IN"],"slots":[["LFO_1_LEVEL_MOD_AMT","Level Mod Amt",false]]},
       {"entry":22,"module":"LFO_1","key":"RESET_SW","label":"Reset Sw","bipolar":false,"cc":113,"value":4,"controller":false,"hint":"Off/On","slots":[["LFO_1_RESET_SW","Reset Sw",false]]},
       {"entry":23,"module":"MIXER_1","key":"LEVEL_1","label":"Level 1","bipolar":false,"cc":0,"value":4,"controller":false,"hintInputs":["IN_1"],"slots":[["MIXER_1_LEVEL_1","Level 1",false]]},
       {"entry":24,"module":"MIXER_1","key":"LEVEL_2","label":"Level 2","bipolar":false,"cc":0,"value":4,"controller":false,"hintInputs":["IN_2"],"slots":[["MIXER_1_LEVEL_2","Level 2",false]]},
@@ -1423,35 +1586,35 @@
       {"entry":26,"module":"MIXER_1","key":"LEVEL_4","label":"Level 4","bipolar":false,"cc":0,"value":4,"controller":false,"hintInputs":["IN_4"],"slots":[["MIXER_1_LEVEL_4","Level 4",false]]},
       {"entry":27,"module":"MIXER_1","key":"OUT_LEVEL","label":"Out Level","bipolar":false,"cc":0,"value":64,"controller":false,"slots":[["MIXER_1_OUT_LEVEL","Out Level",false]]},
       {"entry":28,"module":"OSC_1","key":"WAVE","label":"Wave","bipolar":false,"cc":102,"value":4,"controller":false,"hint":"Saw to Sq","favorite":true,"slots":[["OSC_1_WAVE","Wave",false]]},
-      {"entry":29,"module":"OSC_1","key":"PW","label":"PW","bipolar":true,"cc":114,"value":64,"controller":false,"hint":"50% to 0%","slots":[["OSC_1_PW","PW",true]]},
+      {"entry":29,"module":"OSC_1","key":"PW","label":"PW","bipolar":true,"cc":114,"value":64,"controller":false,"hint":"0% to 100%","slots":[["OSC_1_PW","PW",true]]},
       {"entry":30,"module":"OSC_1","key":"PITCH_COARSE","label":"Pitch Coarse","bipolar":true,"cc":0,"value":64,"controller":false,"hint":"±5 Oct","slots":[["OSC_1_PITCH_COARSE","Pitch Coarse",true]]},
-      {"entry":31,"module":"OSC_1","key":"PITCH_SHIFT","label":"Pitch","bipolar":false,"cc":0,"value":4,"controller":false,"hint":"0 to +1 Oct","slots":[["OSC_1_PITCH_SHIFT","Pitch",false]]},
+      {"entry":31,"module":"OSC_1","key":"PITCH","label":"Pitch","bipolar":false,"cc":0,"value":4,"controller":false,"hint":"0 to +1 Oct","slots":[["OSC_1_PITCH","Pitch",false]]},
       {"entry":32,"module":"OSC_1","key":"PITCH_FINE","label":"Pitch Fine","bipolar":true,"cc":0,"value":64,"controller":false,"hint":"±60 Cent","slots":[["OSC_1_PITCH_FINE","Pitch Fine",true]]},
-      {"entry":33,"module":"OSC_1","key":"PITCH_MOD_1_AMT","label":"Pitch Mod 1 Amt","bipolar":false,"cc":89,"value":4,"controller":false,"hintInputs":["MOD_1"],"favorite":true,"slots":[["OSC_1_PITCH_MOD_1_AMT","Pitch Mod 1 Amt",false]]},
-      {"entry":34,"module":"OSC_1","key":"PITCH_MOD_1_POLARITY","label":"Pitch Mod 1 Pol","bipolar":true,"cc":0,"value":76,"controller":false,"hint":"− to +","slots":[["OSC_1_PITCH_MOD_1_POLARITY","Pitch Mod 1 Pol",true]]},
+      {"entry":33,"module":"OSC_1","key":"PITCH_MOD_1_AMT","label":"Pitch Mod 1 Amt","bipolar":false,"cc":89,"value":4,"controller":false,"hintInputs":["MOD_1_IN"],"favorite":true,"slots":[["OSC_1_PITCH_MOD_1_AMT","Pitch Mod 1 Amt",false]]},
+      {"entry":34,"module":"OSC_1","key":"PITCH_MOD_1_POL","label":"Pitch Mod 1 Pol","bipolar":true,"cc":0,"value":76,"controller":false,"hint":"− to +","slots":[["OSC_1_PITCH_MOD_1_POL","Pitch Mod 1 Pol",true]]},
       {"entry":35,"module":"OSC_1","key":"PITCH_MOD_1_SW","label":"Pitch Mod 1 Sw","bipolar":false,"cc":118,"value":124,"controller":false,"hint":"Off/On","slots":[["OSC_1_PITCH_MOD_1_SW","Pitch Mod 1 Sw",false]]},
-      {"entry":36,"module":"OSC_1","key":"PITCH_MOD_2_AMT","label":"Pitch Mod 2 Amt","bipolar":false,"cc":13,"value":4,"controller":false,"hintInputs":["MOD_2"],"favorite":true,"slots":[["OSC_1_PITCH_MOD_2_AMT","Pitch Mod 2 Amt",false]]},
-      {"entry":37,"module":"OSC_1","key":"PITCH_MOD_2_POLARITY","label":"Pitch Mod 2 Pol","bipolar":true,"cc":0,"value":76,"controller":false,"hint":"− to +","slots":[["OSC_1_PITCH_MOD_2_POLARITY","Pitch Mod 2 Pol",true]]},
+      {"entry":36,"module":"OSC_1","key":"PITCH_MOD_2_AMT","label":"Pitch Mod 2 Amt","bipolar":false,"cc":13,"value":4,"controller":false,"hintInputs":["MOD_2_IN"],"favorite":true,"slots":[["OSC_1_PITCH_MOD_2_AMT","Pitch Mod 2 Amt",false]]},
+      {"entry":37,"module":"OSC_1","key":"PITCH_MOD_2_POL","label":"Pitch Mod 2 Pol","bipolar":true,"cc":0,"value":76,"controller":false,"hint":"− to +","slots":[["OSC_1_PITCH_MOD_2_POL","Pitch Mod 2 Pol",true]]},
       {"entry":38,"module":"OSC_1","key":"PITCH_MOD_2_SW","label":"Pitch Mod 2 Sw","bipolar":false,"cc":0,"value":124,"controller":false,"hint":"Off/On","slots":[["OSC_1_PITCH_MOD_2_SW","Pitch Mod 2 Sw",false]]},
-      {"entry":39,"module":"OSC_1","key":"PW_MOD_1_AMT","label":"PW Mod 1 Amt","bipolar":false,"cc":8,"value":4,"controller":false,"hintInputs":["MOD_1"],"slots":[["OSC_1_PW_MOD_1_AMT","PW Mod 1 Amt",false]]},
-      {"entry":40,"module":"OSC_1","key":"PW_MOD_1_POLARITY","label":"PW Mod 1 Pol","bipolar":true,"cc":0,"value":124,"controller":false,"hint":"− to +","slots":[["OSC_1_PW_MOD_1_POLARITY","PW Mod 1 Pol",true]]},
-      {"entry":41,"module":"OSC_1","key":"PW_MOD_2_AMT","label":"PW Mod 2 Amt","bipolar":false,"cc":103,"value":4,"controller":false,"hintInputs":["MOD_2"],"slots":[["OSC_1_PW_MOD_2_AMT","PW Mod 2 Amt",false]]},
-      {"entry":42,"module":"OSC_1","key":"PW_MOD_2_POLARITY","label":"PW Mod 2 Pol","bipolar":true,"cc":0,"value":124,"controller":false,"hint":"− to +","slots":[["OSC_1_PW_MOD_2_POLARITY","PW Mod 2 Pol",true]]},
+      {"entry":39,"module":"OSC_1","key":"PW_MOD_1_AMT","label":"PW Mod 1 Amt","bipolar":false,"cc":8,"value":4,"controller":false,"hintInputs":["MOD_1_IN"],"slots":[["OSC_1_PW_MOD_1_AMT","PW Mod 1 Amt",false]]},
+      {"entry":40,"module":"OSC_1","key":"PW_MOD_1_POL","label":"PW Mod 1 Pol","bipolar":true,"cc":0,"value":124,"controller":false,"hint":"− to +","slots":[["OSC_1_PW_MOD_1_POL","PW Mod 1 Pol",true]]},
+      {"entry":41,"module":"OSC_1","key":"PW_MOD_2_AMT","label":"PW Mod 2 Amt","bipolar":false,"cc":103,"value":4,"controller":false,"hintInputs":["MOD_2_IN"],"slots":[["OSC_1_PW_MOD_2_AMT","PW Mod 2 Amt",false]]},
+      {"entry":42,"module":"OSC_1","key":"PW_MOD_2_POL","label":"PW Mod 2 Pol","bipolar":true,"cc":0,"value":124,"controller":false,"hint":"− to +","slots":[["OSC_1_PW_MOD_2_POL","PW Mod 2 Pol",true]]},
       {"entry":43,"module":"OSC_2","key":"WAVE","label":"Wave","bipolar":false,"cc":104,"value":4,"controller":false,"hint":"Saw to Sq","favorite":true,"slots":[["OSC_2_WAVE","Wave",false]]},
-      {"entry":44,"module":"OSC_2","key":"PW","label":"PW","bipolar":true,"cc":114,"value":64,"controller":false,"hint":"50% to 0%","slots":[["OSC_2_PW","PW",true]]},
+      {"entry":44,"module":"OSC_2","key":"PW","label":"PW","bipolar":true,"cc":114,"value":64,"controller":false,"hint":"0% to 100%","slots":[["OSC_2_PW","PW",true]]},
       {"entry":45,"module":"OSC_2","key":"PITCH_COARSE","label":"Pitch Coarse","bipolar":true,"cc":0,"value":64,"controller":false,"hint":"±5 Oct","slots":[["OSC_2_PITCH_COARSE","Pitch Coarse",true]]},
-      {"entry":46,"module":"OSC_2","key":"PITCH_SHIFT","label":"Pitch","bipolar":false,"cc":85,"value":5,"controller":false,"hint":"0 to +1 Oct","favorite":true,"slots":[["OSC_2_PITCH_SHIFT","Pitch",false]]},
+      {"entry":46,"module":"OSC_2","key":"PITCH","label":"Pitch","bipolar":false,"cc":85,"value":5,"controller":false,"hint":"0 to +1 Oct","favorite":true,"slots":[["OSC_2_PITCH","Pitch",false]]},
       {"entry":47,"module":"OSC_2","key":"PITCH_FINE","label":"Pitch Fine","bipolar":true,"cc":76,"value":65,"controller":false,"hint":"±60 Cent","slots":[["OSC_2_PITCH_FINE","Pitch Fine",true]]},
-      {"entry":48,"module":"OSC_2","key":"PITCH_MOD_1_AMT","label":"Pitch Mod 1 Amt","bipolar":false,"cc":89,"value":4,"controller":false,"hintInputs":["MOD_1"],"slots":[["OSC_2_PITCH_MOD_1_AMT","Pitch Mod 1 Amt",false]]},
-      {"entry":49,"module":"OSC_2","key":"PITCH_MOD_1_POLARITY","label":"Pitch Mod 1 Pol","bipolar":true,"cc":0,"value":76,"controller":false,"hint":"− to +","slots":[["OSC_2_PITCH_MOD_1_POLARITY","Pitch Mod 1 Pol",true]]},
+      {"entry":48,"module":"OSC_2","key":"PITCH_MOD_1_AMT","label":"Pitch Mod 1 Amt","bipolar":false,"cc":89,"value":4,"controller":false,"hintInputs":["MOD_1_IN"],"slots":[["OSC_2_PITCH_MOD_1_AMT","Pitch Mod 1 Amt",false]]},
+      {"entry":49,"module":"OSC_2","key":"PITCH_MOD_1_POL","label":"Pitch Mod 1 Pol","bipolar":true,"cc":0,"value":76,"controller":false,"hint":"− to +","slots":[["OSC_2_PITCH_MOD_1_POL","Pitch Mod 1 Pol",true]]},
       {"entry":50,"module":"OSC_2","key":"PITCH_MOD_1_SW","label":"Pitch Mod 1 Sw","bipolar":false,"cc":0,"value":124,"controller":false,"hint":"Off/On","slots":[["OSC_2_PITCH_MOD_1_SW","Pitch Mod 1 Sw",false]]},
-      {"entry":51,"module":"OSC_2","key":"PITCH_MOD_2_AMT","label":"Pitch Mod 2 Amt","bipolar":false,"cc":13,"value":4,"controller":false,"hintInputs":["MOD_2"],"slots":[["OSC_2_PITCH_MOD_2_AMT","Pitch Mod 2 Amt",false]]},
-      {"entry":52,"module":"OSC_2","key":"PITCH_MOD_2_POLARITY","label":"Pitch Mod 2 Pol","bipolar":true,"cc":0,"value":76,"controller":false,"hint":"− to +","slots":[["OSC_2_PITCH_MOD_2_POLARITY","Pitch Mod 2 Pol",true]]},
+      {"entry":51,"module":"OSC_2","key":"PITCH_MOD_2_AMT","label":"Pitch Mod 2 Amt","bipolar":false,"cc":13,"value":4,"controller":false,"hintInputs":["MOD_2_IN"],"slots":[["OSC_2_PITCH_MOD_2_AMT","Pitch Mod 2 Amt",false]]},
+      {"entry":52,"module":"OSC_2","key":"PITCH_MOD_2_POL","label":"Pitch Mod 2 Pol","bipolar":true,"cc":0,"value":76,"controller":false,"hint":"− to +","slots":[["OSC_2_PITCH_MOD_2_POL","Pitch Mod 2 Pol",true]]},
       {"entry":53,"module":"OSC_2","key":"PITCH_MOD_2_SW","label":"Pitch Mod 2 Sw","bipolar":false,"cc":0,"value":124,"controller":false,"hint":"Off/On","slots":[["OSC_2_PITCH_MOD_2_SW","Pitch Mod 2 Sw",false]]},
-      {"entry":54,"module":"OSC_2","key":"PW_MOD_1_AMT","label":"PW Mod 1 Amt","bipolar":false,"cc":8,"value":4,"controller":false,"hintInputs":["MOD_1"],"slots":[["OSC_2_PW_MOD_1_AMT","PW Mod 1 Amt",false]]},
-      {"entry":55,"module":"OSC_2","key":"PW_MOD_1_POLARITY","label":"PW Mod 1 Pol","bipolar":true,"cc":0,"value":124,"controller":false,"hint":"− to +","slots":[["OSC_2_PW_MOD_1_POLARITY","PW Mod 1 Pol",true]]},
-      {"entry":56,"module":"OSC_2","key":"PW_MOD_2_AMT","label":"PW Mod 2 Amt","bipolar":false,"cc":103,"value":4,"controller":false,"hintInputs":["MOD_2"],"slots":[["OSC_2_PW_MOD_2_AMT","PW Mod 2 Amt",false]]},
-      {"entry":57,"module":"OSC_2","key":"PW_MOD_2_POLARITY","label":"PW Mod 2 Pol","bipolar":true,"cc":0,"value":124,"controller":false,"hint":"− to +","slots":[["OSC_2_PW_MOD_2_POLARITY","PW Mod 2 Pol",true]]},
+      {"entry":54,"module":"OSC_2","key":"PW_MOD_1_AMT","label":"PW Mod 1 Amt","bipolar":false,"cc":8,"value":4,"controller":false,"hintInputs":["MOD_1_IN"],"slots":[["OSC_2_PW_MOD_1_AMT","PW Mod 1 Amt",false]]},
+      {"entry":55,"module":"OSC_2","key":"PW_MOD_1_POL","label":"PW Mod 1 Pol","bipolar":true,"cc":0,"value":124,"controller":false,"hint":"− to +","slots":[["OSC_2_PW_MOD_1_POL","PW Mod 1 Pol",true]]},
+      {"entry":56,"module":"OSC_2","key":"PW_MOD_2_AMT","label":"PW Mod 2 Amt","bipolar":false,"cc":103,"value":4,"controller":false,"hintInputs":["MOD_2_IN"],"slots":[["OSC_2_PW_MOD_2_AMT","PW Mod 2 Amt",false]]},
+      {"entry":57,"module":"OSC_2","key":"PW_MOD_2_POL","label":"PW Mod 2 Pol","bipolar":true,"cc":0,"value":124,"controller":false,"hint":"− to +","slots":[["OSC_2_PW_MOD_2_POL","PW Mod 2 Pol",true]]},
       {"entry":58,"module":"OSC_2","key":"SYNC_SW","label":"Sync Sw","bipolar":false,"cc":112,"value":4,"controller":false,"hint":"Off/On","slots":[["OSC_2_SYNC_SW","Sync Sw",false]]},
       {"entry":59,"module":"NOISE_1","key":"COLOR","label":"Color","bipolar":false,"cc":115,"value":4,"controller":false,"hint":"White to Red","slots":[["NOISE_1_COLOR","Color",false]]},
       {"entry":60,"module":"NOISE_1","key":"LEVEL","label":"Level","bipolar":false,"cc":0,"value":124,"controller":false,"slots":[["NOISE_1_LEVEL","Level",false]]},
@@ -1460,16 +1623,16 @@
       {"entry":63,"module":"MIXER_2","key":"LEVEL_3","label":"Level 3","bipolar":false,"cc":21,"value":4,"controller":false,"hintInputs":["IN_3"],"slots":[["MIXER_2_LEVEL_3","Level 3",false]]},
       {"entry":64,"module":"MIXER_2","key":"LEVEL_4","label":"Level 4","bipolar":false,"cc":23,"value":4,"controller":false,"hintInputs":["IN_4"],"slots":[["MIXER_2_LEVEL_4","Level 4",false]]},
       {"entry":65,"module":"MIXER_2","key":"OUT_LEVEL","label":"Out Level","bipolar":false,"cc":0,"value":64,"controller":false,"slots":[["MIXER_2_OUT_LEVEL","Out Level",false]]},
-      {"entry":66,"module":"FILTER_1","key":"CUTOFF","label":"Cutoff","bipolar":false,"cc":74,"value":112,"controller":false,"favorite":true,"slots":[["FILTER_1_CUTOFF","Cutoff",false]]},
+      {"entry":66,"module":"FILTER_1","key":"CUTOFF","label":"Cutoff","bipolar":false,"cc":74,"value":100,"controller":false,"favorite":true,"slots":[["FILTER_1_CUTOFF","Cutoff",false]]},
       {"entry":67,"module":"FILTER_1","key":"RESONANCE","label":"Resonance","bipolar":false,"cc":71,"value":64,"controller":false,"favorite":true,"slots":[["FILTER_1_RESONANCE","Resonance",false]]},
       {"entry":68,"module":"FILTER_1","key":"MODE","label":"Mode","bipolar":false,"cc":39,"value":4,"controller":false,"hint":"LP to Notch to HP","slots":[["FILTER_1_MODE","Mode",false]]},
-      {"entry":69,"module":"FILTER_1","key":"PITCH_AMT","label":"Pitch Amt","bipolar":false,"cc":9,"value":64,"controller":false,"hintInputs":["PITCH"],"slots":[["FILTER_1_PITCH_AMT","Pitch Amt",false]]},
-      {"entry":70,"module":"FILTER_1","key":"MOD_1_AMT","label":"Mod 1 Amt","bipolar":false,"cc":24,"value":4,"controller":false,"hintInputs":["MOD_1"],"favorite":true,"slots":[["FILTER_1_MOD_1_AMT","Mod 1 Amt",false]]},
-      {"entry":71,"module":"FILTER_1","key":"MOD_1_POLARITY","label":"Mod 1 Pol","bipolar":true,"cc":117,"value":124,"controller":false,"hint":"− to +","slots":[["FILTER_1_MOD_1_POLARITY","Mod 1 Pol",true]]},
-      {"entry":72,"module":"FILTER_1","key":"MOD_2_AMT","label":"Mod 2 Amt","bipolar":false,"cc":25,"value":4,"controller":false,"hintInputs":["MOD_2"],"favorite":true,"slots":[["FILTER_1_MOD_2_AMT","Mod 2 Amt",false]]},
-      {"entry":73,"module":"FILTER_1","key":"MOD_2_POLARITY","label":"Mod 2 Pol","bipolar":true,"cc":0,"value":76,"controller":false,"hint":"− to +","slots":[["FILTER_1_MOD_2_POLARITY","Mod 2 Pol",true]]},
-      {"entry":74,"module":"AMP_1","key":"GAIN","label":"Gain","bipolar":false,"cc":15,"value":88,"controller":false,"slots":[["AMP_1_GAIN","Gain",false]]},
-      {"entry":75,"module":"AMP_1","key":"MOD_1_2_MIX","label":"Mod 1/2 Mix","bipolar":false,"cc":36,"value":4,"controller":false,"hintInputs":["MOD_1","MOD_2"],"slots":[["AMP_1_MOD_1_2_MIX","Mod 1/2 Mix",false]]},
+      {"entry":69,"module":"FILTER_1","key":"PITCH_AMT","label":"Pitch Amt","bipolar":false,"cc":9,"value":64,"controller":false,"hintInputs":["PITCH_IN"],"slots":[["FILTER_1_PITCH_AMT","Pitch Amt",false]]},
+      {"entry":70,"module":"FILTER_1","key":"MOD_1_AMT","label":"Mod 1 Amt","bipolar":false,"cc":24,"value":28,"controller":false,"hintInputs":["MOD_1_IN"],"favorite":true,"slots":[["FILTER_1_MOD_1_AMT","Mod 1 Amt",false]]},
+      {"entry":71,"module":"FILTER_1","key":"MOD_1_POL","label":"Mod 1 Pol","bipolar":true,"cc":117,"value":124,"controller":false,"hint":"− to +","slots":[["FILTER_1_MOD_1_POL","Mod 1 Pol",true]]},
+      {"entry":72,"module":"FILTER_1","key":"MOD_2_AMT","label":"Mod 2 Amt","bipolar":false,"cc":25,"value":4,"controller":false,"hintInputs":["MOD_2_IN"],"favorite":true,"slots":[["FILTER_1_MOD_2_AMT","Mod 2 Amt",false]]},
+      {"entry":73,"module":"FILTER_1","key":"MOD_2_POL","label":"Mod 2 Pol","bipolar":true,"cc":0,"value":76,"controller":false,"hint":"− to +","slots":[["FILTER_1_MOD_2_POL","Mod 2 Pol",true]]},
+      {"entry":74,"module":"AMP_1","key":"GAIN","label":"Gain","bipolar":false,"cc":15,"value":64,"controller":false,"slots":[["AMP_1_GAIN","Gain",false]]},
+      {"entry":75,"module":"AMP_1","key":"MOD_1_2_MIX","label":"Mod 1/2 Mix","bipolar":false,"cc":36,"value":4,"controller":false,"hintInputs":["MOD_1_IN","MOD_2_IN"],"slots":[["AMP_1_MOD_1_2_MIX","Mod 1/2 Mix",false]]},
       {"entry":76,"module":"CHORUS_1","key":"MIX","label":"Mix","bipolar":false,"cc":93,"value":64,"controller":false,"slots":[["CHORUS_1_MIX","Mix",false]]},
       {"entry":77,"module":"CHORUS_1","key":"RATE","label":"Rate","bipolar":false,"cc":58,"value":64,"controller":false,"slots":[["CHORUS_1_RATE","Rate",false]]},
       {"entry":78,"module":"CHORUS_1","key":"DEPTH","label":"Depth","bipolar":false,"cc":59,"value":64,"controller":false,"slots":[["CHORUS_1_DEPTH","Depth",false]]},
@@ -1477,8 +1640,8 @@
       {"entry":80,"module":"DELAY_1","key":"TIME","label":"Time","bipolar":false,"cc":90,"value":64,"controller":false,"slots":[["DELAY_1_TIME","Time",false]]},
       {"entry":81,"module":"DELAY_1","key":"FEEDBACK","label":"Feedback","bipolar":false,"cc":92,"value":64,"controller":false,"slots":[["DELAY_1_FEEDBACK","Feedback",false]]},
       {"entry":82,"key":"MOD_WHEEL","label":"Mod Wheel","bipolar":false,"cc":1,"value":4,"controller":true,"slots":[["MOD_WHEEL","Mod Wheel",false],["MOD_WHEEL_REV","Mod Wheel Rev",false,"rev"],["MOD_WHEEL_INV","Mod Wheel Inv",false,"inv"],["MOD_WHEEL_REV_INV","Mod Wheel Rev Inv",false,"rev_inv"]]},
-      {"entry":83,"key":"GENERAL_1","label":"General 1","bipolar":false,"cc":16,"value":4,"controller":true,"slots":[["GENERAL_1","General 1",false],["GENERAL_1_REV","General 1 Rev",false,"rev"],["GENERAL_1_INV","General 1 Inv",false,"inv"],["GENERAL_1_REV_INV","General 1 Rev Inv",false,"rev_inv"],["GENERAL_1_BIPOLAR","General 1 Bipolar",true,"bipolar"],["GENERAL_1_BIPOLAR_INV","General 1 Bipolar Inv",true,"bipolar_inv"]]},
-      {"entry":84,"key":"GENERAL_2","label":"General 2","bipolar":false,"cc":17,"value":4,"controller":true,"slots":[["GENERAL_2","General 2",false],["GENERAL_2_REV","General 2 Rev",false,"rev"],["GENERAL_2_INV","General 2 Inv",false,"inv"],["GENERAL_2_REV_INV","General 2 Rev Inv",false,"rev_inv"],["GENERAL_2_BIPOLAR","General 2 Bipolar",true,"bipolar"],["GENERAL_2_BIPOLAR_INV","General 2 Bipolar Inv",true,"bipolar_inv"]]},
+      {"entry":83,"key":"GENERAL_1","label":"General 1","bipolar":false,"cc":16,"value":4,"controller":true,"slots":[["GENERAL_1","General 1",false],["GENERAL_1_REV","General 1 Rev",false,"rev"],["GENERAL_1_INV","General 1 Inv",false,"inv"],["GENERAL_1_REV_INV","General 1 Rev Inv",false,"rev_inv"],["GENERAL_1_BIPOLAR","General 1 Bipolar",true,"bipolar"],["GENERAL_1_BIPOLAR_INV","General 1 Bipolar Inv",true,"bipolar_inv"],["GENERAL_1_SIN","General 1 Sin",false,"sin"],["GENERAL_1_COS","General 1 Cos",false,"cos"],["GENERAL_1_LO","General 1 Lo",false,"lo"],["GENERAL_1_HI","General 1 Hi",false,"hi"],["GENERAL_1_NEG","General 1 Neg",false,"neg"],["GENERAL_1_MID","General 1 Mid",false,"mid"],["GENERAL_1_POS","General 1 Pos",false,"pos"]]},
+      {"entry":84,"key":"GENERAL_2","label":"General 2","bipolar":false,"cc":17,"value":4,"controller":true,"slots":[["GENERAL_2","General 2",false],["GENERAL_2_REV","General 2 Rev",false,"rev"],["GENERAL_2_INV","General 2 Inv",false,"inv"],["GENERAL_2_REV_INV","General 2 Rev Inv",false,"rev_inv"],["GENERAL_2_BIPOLAR","General 2 Bipolar",true,"bipolar"],["GENERAL_2_BIPOLAR_INV","General 2 Bipolar Inv",true,"bipolar_inv"],["GENERAL_2_SIN","General 2 Sin",false,"sin"],["GENERAL_2_COS","General 2 Cos",false,"cos"],["GENERAL_2_LO","General 2 Lo",false,"lo"],["GENERAL_2_HI","General 2 Hi",false,"hi"],["GENERAL_2_NEG","General 2 Neg",false,"neg"],["GENERAL_2_MID","General 2 Mid",false,"mid"],["GENERAL_2_POS","General 2 Pos",false,"pos"]]},
     ],
     signals: [
       {"id":0,"key":"NONE","label":"0.0"},
@@ -1499,55 +1662,69 @@
       {"id":15,"key":"GENERAL_1_REV_INV"},
       {"id":16,"key":"GENERAL_1_BIPOLAR"},
       {"id":17,"key":"GENERAL_1_BIPOLAR_INV"},
-      {"id":18,"key":"GENERAL_2"},
-      {"id":19,"key":"GENERAL_2_REV"},
-      {"id":20,"key":"GENERAL_2_INV"},
-      {"id":21,"key":"GENERAL_2_REV_INV"},
-      {"id":22,"key":"GENERAL_2_BIPOLAR"},
-      {"id":23,"key":"GENERAL_2_BIPOLAR_INV"},
-      {"id":24,"key":"PITCH_1_OUTPUT_1"},
-      {"id":25,"key":"PITCH_1_OUTPUT_2"},
-      {"id":26,"key":"EG_1_OUTPUT"},
-      {"id":27,"key":"EG_1_OUTPUT_INV"},
-      {"id":28,"key":"EG_2_OUTPUT"},
-      {"id":29,"key":"EG_2_OUTPUT_INV"},
-      {"id":30,"key":"LFO_1_OUTPUT"},
-      {"id":31,"key":"LFO_1_OUTPUT_INV"},
-      {"id":32,"key":"LFO_1_OUTPUT_TRIANGLE"},
-      {"id":33,"key":"LFO_1_OUTPUT_TRIANGLE_INV"},
-      {"id":34,"key":"LFO_1_OUTPUT_SQUARE"},
-      {"id":35,"key":"LFO_1_OUTPUT_SQUARE_INV"},
-      {"id":36,"key":"MIXER_1_OUTPUT"},
-      {"id":37,"key":"MIXER_1_OUTPUT_INV"},
-      {"id":38,"key":"OSC_1_OUTPUT"},
-      {"id":39,"key":"OSC_1_OUTPUT_SAW"},
-      {"id":40,"key":"OSC_1_OUTPUT_PULSE"},
-      {"id":41,"key":"OSC_1_OUTPUT_SUB"},
-      {"id":42,"key":"OSC_2_OUTPUT"},
-      {"id":43,"key":"OSC_2_OUTPUT_SAW"},
-      {"id":44,"key":"OSC_2_OUTPUT_PULSE"},
-      {"id":45,"key":"NOISE_1_OUTPUT"},
-      {"id":46,"key":"NOISE_1_OUTPUT_WHITE"},
-      {"id":47,"key":"NOISE_1_OUTPUT_RED"},
-      {"id":48,"key":"MIXER_2_OUTPUT"},
-      {"id":49,"key":"MIXER_2_OUTPUT_INV"},
-      {"id":50,"key":"FILTER_1_OUTPUT"},
-      {"id":51,"key":"FILTER_1_OUTPUT_LP"},
-      {"id":52,"key":"FILTER_1_OUTPUT_HP"},
-      {"id":53,"key":"FILTER_1_OUTPUT_BP"},
-      {"id":54,"key":"AMP_1_OUTPUT"},
-      {"id":55,"key":"CHORUS_1_OUTPUT_L"},
-      {"id":56,"key":"CHORUS_1_OUTPUT_R"},
-      {"id":57,"key":"CHORUS_1_OUTPUT_MONO"},
-      {"id":58,"key":"DELAY_1_OUTPUT_L"},
-      {"id":59,"key":"DELAY_1_OUTPUT_R"},
-      {"id":60,"key":"DELAY_1_OUTPUT_MONO"},
+      {"id":18,"key":"GENERAL_1_SIN"},
+      {"id":19,"key":"GENERAL_1_COS"},
+      {"id":20,"key":"GENERAL_1_LO"},
+      {"id":21,"key":"GENERAL_1_HI"},
+      {"id":22,"key":"GENERAL_1_NEG"},
+      {"id":23,"key":"GENERAL_1_MID"},
+      {"id":24,"key":"GENERAL_1_POS"},
+      {"id":25,"key":"GENERAL_2"},
+      {"id":26,"key":"GENERAL_2_REV"},
+      {"id":27,"key":"GENERAL_2_INV"},
+      {"id":28,"key":"GENERAL_2_REV_INV"},
+      {"id":29,"key":"GENERAL_2_BIPOLAR"},
+      {"id":30,"key":"GENERAL_2_BIPOLAR_INV"},
+      {"id":31,"key":"GENERAL_2_SIN"},
+      {"id":32,"key":"GENERAL_2_COS"},
+      {"id":33,"key":"GENERAL_2_LO"},
+      {"id":34,"key":"GENERAL_2_HI"},
+      {"id":35,"key":"GENERAL_2_NEG"},
+      {"id":36,"key":"GENERAL_2_MID"},
+      {"id":37,"key":"GENERAL_2_POS"},
+      {"id":38,"key":"PITCH_1_OUTPUT_1"},
+      {"id":39,"key":"PITCH_1_OUTPUT_2"},
+      {"id":40,"key":"EG_1_OUTPUT"},
+      {"id":41,"key":"EG_1_OUTPUT_INV"},
+      {"id":42,"key":"EG_2_OUTPUT"},
+      {"id":43,"key":"EG_2_OUTPUT_INV"},
+      {"id":44,"key":"LFO_1_OUTPUT"},
+      {"id":45,"key":"LFO_1_OUTPUT_INV"},
+      {"id":46,"key":"LFO_1_OUTPUT_TRIANGLE"},
+      {"id":47,"key":"LFO_1_OUTPUT_TRIANGLE_INV"},
+      {"id":48,"key":"LFO_1_OUTPUT_SQUARE"},
+      {"id":49,"key":"LFO_1_OUTPUT_SQUARE_INV"},
+      {"id":50,"key":"MIXER_1_OUTPUT"},
+      {"id":51,"key":"MIXER_1_OUTPUT_INV"},
+      {"id":52,"key":"OSC_1_OUTPUT"},
+      {"id":53,"key":"OSC_1_OUTPUT_SAW"},
+      {"id":54,"key":"OSC_1_OUTPUT_PULSE"},
+      {"id":55,"key":"OSC_1_OUTPUT_SUB"},
+      {"id":56,"key":"OSC_2_OUTPUT"},
+      {"id":57,"key":"OSC_2_OUTPUT_SAW"},
+      {"id":58,"key":"OSC_2_OUTPUT_PULSE"},
+      {"id":59,"key":"NOISE_1_OUTPUT"},
+      {"id":60,"key":"NOISE_1_OUTPUT_WHITE"},
+      {"id":61,"key":"NOISE_1_OUTPUT_RED"},
+      {"id":62,"key":"MIXER_2_OUTPUT"},
+      {"id":63,"key":"MIXER_2_OUTPUT_INV"},
+      {"id":64,"key":"FILTER_1_OUTPUT"},
+      {"id":65,"key":"FILTER_1_OUTPUT_LP"},
+      {"id":66,"key":"FILTER_1_OUTPUT_HP"},
+      {"id":67,"key":"FILTER_1_OUTPUT_BP"},
+      {"id":68,"key":"AMP_1_OUTPUT"},
+      {"id":69,"key":"CHORUS_1_OUTPUT_L"},
+      {"id":70,"key":"CHORUS_1_OUTPUT_R"},
+      {"id":71,"key":"CHORUS_1_OUTPUT_MONO"},
+      {"id":72,"key":"DELAY_1_OUTPUT_L"},
+      {"id":73,"key":"DELAY_1_OUTPUT_R"},
+      {"id":74,"key":"DELAY_1_OUTPUT_MONO"},
     ],
     defaultOrder: ["PITCH_1","EG_1","EG_2","LFO_1","MIXER_1","OSC_1","OSC_2","NOISE_1","MIXER_2","FILTER_1","AMP_1","CHORUS_1","DELAY_1"],
   };
   // patch_gen end
 
-  // Each module, with the outputs it writes to the bus: one, or a left and a right.
+  // Each module, with the outputs it writes to the bus.
   const MODULES = SPEC.modules;
   const MOD = Object.fromEntries(MODULES.map(m => [m.key, m]));
 
@@ -1558,8 +1735,8 @@
   }
   // NRPN category 1: each module input, and the two sides of the final output.
   const INPUT_ITEMS = SPEC.inputs.map(i => ({ ...toItem(i), entry: i.entry, defaultSource: i.source }));
-  // NRPN categories 2 and 3 share entry numbers for the parameters; the mod wheel, a controller
-  // control, is in category 3 only, its CC filling a slot on the bus, as spms1_main.rb does. A
+  // NRPN categories 2 and 3 share entry numbers for the parameters; the controllers (Mod Wheel,
+  // General 1 and 2) are in category 3 only, their CCs filling slots on the bus, as spms1_main.rb does. A
   // control's slots are the slots its CC fills, each with its own range: [slot, label, bipolar].
   const CONTROL_ITEMS = SPEC.controls.map(c => ({
     ...toItem(c), entry: c.entry, controller: !!c.controller, bipolar: c.bipolar, slots: c.slots,
@@ -1602,7 +1779,7 @@
   // under the delay that feeds it. Spaced so that no two nodes meet with every parameter shown.
   const DEFAULT_LAYOUT = {
     CONTROLLER: { x: 20,  y: 40 },
-    CONST:     { x: 20,   y: 653 },
+    CONST:     { x: 20,   y: 1017 },
     PITCH_1:   { x: 380,  y: 40 },
     EG_1:      { x: 380,  y: 450 },
     EG_2:      { x: 380,  y: 756 },
@@ -1817,6 +1994,15 @@
 
   const STORAGE_KEY = 'spms1-type2-patch-editor';
   let state = defaultState();
+  // The slider or wheel held by the pointer, which a value from elsewhere must not move under
+  // the drag. A slider left focused after it is let go still follows CCs received.
+  let heldRange = null;
+  window.addEventListener('pointerdown', e => {
+    if (e.target instanceof HTMLInputElement && e.target.type === 'range') heldRange = e.target;
+  }, true);
+  for (const type of ['pointerup', 'pointercancel']) {
+    window.addEventListener(type, () => { heldRange = null; }, true);
+  }
   const undoStack = [];
   const redoStack = [];
 
@@ -1827,6 +2013,7 @@
   }
 
   function restore(json) {
+    if (armed) disarm();
     state = deserialize(JSON.parse(json));
     renderAll();
   }
@@ -1946,6 +2133,18 @@
   let viewTouched = false;
   let portEls = {};
   let selectedWire = null;
+  // An output clicked, waiting for a click on an input to wire it to: { src, temp, last }.
+  let armed = null;
+
+  // Each node's outputs, and the wires from them, take its color, set apart from its neighbors'.
+  // The constants and the output, which make no sound of their own, are in grays.
+  const NODE_COLORS = {
+    CONTROLLER: '#9b111e', CONST: '#666666', OUT: '#3d3d3d',
+    PITCH_1: '#2c3e50', EG_1: '#a65813', EG_2: '#98620b', LFO_1: '#1c7f46', MIXER_1: '#117d68',
+    OSC_1: '#2772a4', OSC_2: '#793a93', NOISE_1: '#557a0e', MIXER_2: '#9c2f86', FILTER_1: '#b81752',
+    AMP_1: '#473baf', CHORUS_1: '#007784', DELAY_1: '#5e2500',
+  };
+  const nodeOfOutput = {};
 
   const NODES = [
     { key: 'CONTROLLER', label: 'Controller', aux: true, notes: [['NOTE_PITCH', 'Note Pitch', 0, 127], ['NOTE_GATE', 'Note Gate', 0, 1], ['PITCH_BEND', 'Pitch Bend', -8192, 8191]], controls: CONTROLLER_ITEMS },
@@ -1967,9 +2166,9 @@
   // own, which only the parameter reads, so it has none.
   function controlRowHTML(c, withInput) {
     const [[slot, label, bipolar], ...forms] = c.slots;
-    const tip = bipolar ? 'Bipolar: value 64 is the centre' : 'Unipolar';
+    const tip = bipolar ? 'Bipolar: value 64 is the center' : 'Unipolar';
     return `<div class="row ctrl" data-ctrl="${c.key}">
-      ${withInput ? `<span class="port in param" data-dst="PR:${c.key}" title="Where ${escapeHTML(c.full)} takes its value (per buffer)"></span>` : ''}
+      ${withInput ? `<span class="port in param" data-dst="PR:${c.key}" title="Where ${escapeHTML(c.full)} takes its value (per buffer). Drag to wire, or click to pick a source"></span>` : ''}
       <span class="lbl" title="${tip}">${escapeHTML(label)}</span>
       <span class="src"${withInput ? ` data-src-of="PR:${c.key}"` : ''}></span>
       <input type="number" class="cc" min="0" max="127" title="CC number, 0 for none">
@@ -2002,7 +2201,7 @@
         : `<div class="row"><span class="lbl right">${escapeHTML(sigLabel(o))}</span><span class="port out" data-src="${o}"></span></div>`;
     }
     for (const i of node.inputs || []) {
-      h += `<div class="row input-row"><span class="port in" data-dst="IN:${i.key}" title="Read every sample"></span><span class="lbl">${escapeHTML(i.label)}</span><span class="src" data-src-of="IN:${i.key}"></span></div>`;
+      h += `<div class="row input-row"><span class="port in" data-dst="IN:${i.key}" title="Read every sample. Drag to wire, or click to pick a source"></span><span class="lbl">${escapeHTML(i.label)}</span><span class="src" data-src-of="IN:${i.key}"></span></div>`;
     }
     // A module's outputs come after its inputs, so a node reads from what goes in to what comes out.
     if (node.module) {
@@ -2024,13 +2223,20 @@
       const el = document.createElement('div');
       el.className = 'node' + (node.aux ? ' aux' : '') + (node.key === 'CONTROLLER' ? ' controller' : '') + (node.key === 'CONST' ? ' const' : '');
       el.dataset.node = node.key;
+      if (NODE_COLORS[node.key]) {
+        el.classList.add('colored');
+        el.style.setProperty('--node-color', NODE_COLORS[node.key]);
+      }
       el.innerHTML = nodeHTML(node);
       const pos = state.layout[node.key];
       el.style.left = pos.x + 'px';
       el.style.top = pos.y + 'px';
       world.appendChild(el);
     }
-    world.querySelectorAll('.port.out').forEach(p => { portEls['o:' + p.dataset.src] = p; });
+    world.querySelectorAll('.port.out').forEach(p => {
+      portEls['o:' + p.dataset.src] = p;
+      nodeOfOutput[p.dataset.src] = p.closest('.node').dataset.node;
+    });
     world.querySelectorAll('.port.in').forEach(p => { portEls['i:' + p.dataset.dst] = p; });
     bindControlInputs();
     bindNoteInputs();
@@ -2111,7 +2317,9 @@
         else if (!CONTROL[key].controller) setParamValue(key, clampValue(valIn.value), true);
       });
       const currentValue = () => (state.cc[key] ? ccValue(state.cc[key]) : paramValue(key));
+      // Only a value that moves is set and sent, so a drag held past either end sends nothing more.
       const setValue = v => {
+        if (v === currentValue()) return;
         const cc = state.cc[key];
         if (cc) setCCValue(cc, v, true);
         else setParamValue(key, v, true);
@@ -2200,6 +2408,10 @@
       const vis = document.createElementNS(SVG_NS, 'path');
       vis.setAttribute('d', d);
       vis.setAttribute('class', `wire ${c.kind}` + (c.dst === selectedWire ? ' selected' : ''));
+      // A wire from a source that is not running stays gray.
+      const color = c.kind.includes('inactive') ? null : NODE_COLORS[nodeOfOutput[c.src]];
+      if (color) vis.style.stroke = color;
+      to.style.setProperty('--src-color', color || 'var(--wire-inactive)');
       const hit = document.createElementNS(SVG_NS, 'path');
       hit.setAttribute('d', d);
       hit.setAttribute('class', 'hit');
@@ -2268,6 +2480,7 @@
     world.style.transform = `translate(${view.x}px, ${view.y}px) scale(${view.s})`;
     canvas.style.backgroundPosition = `${view.x}px ${view.y}px`;
     canvas.style.backgroundSize = `${20 * view.s}px ${20 * view.s}px`;
+    if (armed) drawArmed();
   }
 
   function zoomAt(factor, cx, cy) {
@@ -2303,6 +2516,8 @@
     e.preventDefault();
     const r = canvas.getBoundingClientRect();
     zoomAt(Math.exp(-e.deltaY * 0.0015), e.clientX - r.left, e.clientY - r.top);
+    // The end of a wire being drawn stays under the pointer.
+    if (drag && drag.mode === 'wire') moveWireDrag(e);
   }, { passive: false });
 
   document.getElementById('zoom-in').addEventListener('click', () => zoomAt(1.2, canvas.clientWidth / 2, canvas.clientHeight / 2));
@@ -2387,6 +2602,11 @@
     const t = e.target;
     if (t.closest('input, button, select, textarea')) return;
     const port = t.closest('.port');
+    if (port && armed) {
+      e.preventDefault();
+      clickArmed(port);
+      return;
+    }
     if (port) {
       e.preventDefault();
       startWireDrag(port, e);
@@ -2407,6 +2627,8 @@
     if (t.closest('.node, .zoom-controls')) return;
     if (selectedWire) selectWire(null);
     drag = { mode: 'pan', sx: e.clientX, sy: e.clientY, vx: view.x, vy: view.y };
+    // Set before a pan moves it, so a click that does not pan lets go of a held output.
+    drag.armed = armed;
     viewTouched = true;
     canvas.classList.add('panning');
   });
@@ -2415,19 +2637,42 @@
     const temp = document.createElementNS(SVG_NS, 'path');
     temp.setAttribute('class', 'wire temp');
     svg.appendChild(temp);
+    const start = { temp, sx: e.clientX, sy: e.clientY, touch: e.pointerType === 'touch' };
     if (port.classList.contains('out')) {
-      drag = { mode: 'wire', src: port.dataset.src, temp };
+      drag = { mode: 'wire', src: port.dataset.src, ...start };
     } else if (isConnected(port.dataset.dst)) {
-      // Pick the wire up by its input end, keeping its source.
-      pushHistory();
-      const src = currentSource(port.dataset.dst);
-      disconnect(port.dataset.dst);
-      drag = { mode: 'wire', src, temp, pushed: true };
-      commit();
+      // Picked up by its input end, keeping its source, once the pointer moves; a click leaves it
+      // in place and opens the list of sources instead.
+      drag = { mode: 'wire', src: currentSource(port.dataset.dst), pickUp: port.dataset.dst, ...start };
     } else {
-      drag = { mode: 'wire', dst: port.dataset.dst, temp };
+      drag = { mode: 'wire', dst: port.dataset.dst, clicked: port.dataset.dst, ...start };
     }
     moveWireDrag(e);
+    edgeScroll(drag);
+  }
+
+  // A wire dragged near an edge of the canvas, or past it, moves the view that way, the faster
+  // the nearer the edge, so a far port is reached without zooming out first.
+  const EDGE_ZONE = 48;
+  const EDGE_SPEED = 14;
+
+  function edgeScroll(d) {
+    if (drag !== d) return;
+    if (d.moved) {
+      const r = canvas.getBoundingClientRect();
+      const e = d.last;
+      const push = gap => Math.max(0, Math.min(1, (EDGE_ZONE - gap) / EDGE_ZONE));
+      const dx = push(e.clientX - r.left) - push(r.right - e.clientX);
+      const dy = push(e.clientY - r.top) - push(r.bottom - e.clientY);
+      if (dx || dy) {
+        view.x += dx * EDGE_SPEED;
+        view.y += dy * EDGE_SPEED;
+        viewTouched = true;
+        applyView();
+        moveWireDrag(e);
+      }
+    }
+    requestAnimationFrame(() => edgeScroll(d));
   }
 
   // An input reading 0.0 is an input with no wire, so a wire from 0.0 to one would not stay drawn.
@@ -2451,6 +2696,16 @@
   }
 
   function moveWireDrag(e) {
+    drag.last = { clientX: e.clientX, clientY: e.clientY };
+    if (!drag.moved && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) >= 4) {
+      drag.moved = true;
+      if (drag.pickUp) {
+        pushHistory();
+        disconnect(drag.pickUp);
+        drag.pushed = true;
+        commit();
+      }
+    }
     const p = toWorld(e);
     const d = drag.src ? curve(portPos(portEls['o:' + drag.src]), p) : curve(p, portPos(portEls['i:' + drag.dst]));
     drag.temp.setAttribute('d', d);
@@ -2462,6 +2717,12 @@
   function endWireDrag(e) {
     drag.temp.remove();
     world.querySelectorAll('.port.target').forEach(el => el.classList.remove('target'));
+    if (!drag.moved) {
+      const dst = drag.pickUp || drag.clicked;
+      if (dst) openSourcePicker(dst, !drag.touch);
+      else arm(drag.src, drag.touch ? null : drag.last);
+      return;
+    }
     const target = dropTarget(e);
     let src = drag.src, dst = drag.dst;
     if (target && src) dst = target.dataset.dst;
@@ -2472,6 +2733,200 @@
       commit();
     }
   }
+
+  // ---- Click to connect ----------------------------------------------------------------------
+
+  // A click on an output holds it, with a wire to the pointer, while the view is panned, zoomed
+  // or pinched to its input, which a click then wires it to. Another output is held instead;
+  // the same one, Esc or a click on the background lets go.
+  function arm(src, last) {
+    disarm();
+    const temp = document.createElementNS(SVG_NS, 'path');
+    temp.setAttribute('class', 'wire temp');
+    svg.appendChild(temp);
+    armed = { src, temp, last };
+    const hint = document.getElementById('arm-hint');
+    hint.textContent = `${sigLabel(src)}: click an input to wire it to. Esc to cancel`;
+    hint.hidden = false;
+    drawArmed();
+  }
+
+  function disarm() {
+    if (!armed) return;
+    armed.temp.remove();
+    world.querySelectorAll('.port.armed, .port.target').forEach(el => el.classList.remove('armed', 'target'));
+    document.getElementById('arm-hint').hidden = true;
+    armed = null;
+  }
+
+  // The wire runs to where the pointer was last seen over the canvas; a touch leaves none, and
+  // the held output stands out instead.
+  function drawArmed() {
+    const from = portEls['o:' + armed.src];
+    if (!from) return disarm();
+    from.classList.add('armed');
+    world.querySelectorAll('.port.target').forEach(el => el.classList.remove('target'));
+    if (!armed.last) {
+      armed.temp.removeAttribute('d');
+      return;
+    }
+    armed.temp.setAttribute('d', curve(portPos(from), toWorld(armed.last)));
+    const target = portUnder(armed.last);
+    if (target && target.classList.contains('in') && accepts(armed.src, target.dataset.dst)) target.classList.add('target');
+  }
+
+  function clickArmed(port) {
+    const src = armed.src;
+    if (port.classList.contains('out')) {
+      if (port.dataset.src === src) disarm();
+      else arm(port.dataset.src, armed.last);
+      return;
+    }
+    const dst = port.dataset.dst;
+    if (!accepts(src, dst)) return;
+    disarm();
+    if (isConnected(dst) && currentSource(dst) === src) return;
+    pushHistory();
+    connect(src, dst);
+    commit();
+  }
+
+  canvas.addEventListener('pointermove', e => {
+    if (!armed || drag || e.pointerType === 'touch') return;
+    armed.last = { clientX: e.clientX, clientY: e.clientY };
+    drawArmed();
+  });
+
+  // ---- Source picker -------------------------------------------------------------------------
+
+  // A click on an input or a parameter, on its port or on what it reads, lists every output it
+  // can be wired from, node by node, to be picked from however far apart the two are on the
+  // canvas. Typing narrows the list.
+  const picker = document.getElementById('src-picker');
+  const pickerFilter = picker.querySelector('input');
+  const pickerList = picker.querySelector('.src-picker-list');
+  let pickerDst = null;
+
+  function openSourcePicker(dst, focus) {
+    const anchor = world.querySelector(`.port.in[data-dst="${dst}"]`);
+    if (!anchor) return;
+    pickerDst = dst;
+    const [kind, key] = splitDst(dst);
+    const current = isConnected(dst) ? currentSource(dst) : null;
+    const items = [{ src: null, text: kind === 'IN' ? 'No wire (0.0)' : 'No wire (its own slot)', group: '' }];
+    world.querySelectorAll('.node').forEach(node => {
+      const group = node.querySelector('.node-head span').textContent;
+      const off = !!MOD[node.dataset.node] && !state.order.includes(node.dataset.node);
+      node.querySelectorAll('.port.out').forEach(port => {
+        const src = port.dataset.src;
+        if (!accepts(src, dst)) return;
+        const label = sigLabel(src);
+        const text = label.startsWith(group + ' ') ? label.slice(group.length + 1) : label;
+        items.push({ src, text, group, off, full: ` ${group} ${label}`.toLowerCase() });
+      });
+    });
+    picker.querySelector('.src-picker-title').textContent =
+      (kind === 'IN' ? INPUT_ITEMS.find(i => i.key === key).full : CONTROL[key].full) + ' reads';
+    pickerList.innerHTML = '';
+    let group = null;
+    for (const it of items) {
+      if (it.group && it.group !== group) {
+        group = it.group;
+        const h = document.createElement('div');
+        h.className = 'src-picker-group';
+        h.textContent = group;
+        pickerList.appendChild(h);
+      }
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'src-picker-item' + (it.src === current ? ' current' : '') + (it.off ? ' off' : '');
+      const v = it.src && signalNorm(it.src);
+      b.innerHTML = escapeHTML(it.text) + (v && !(it.src in CONSTANT_NORMS) ? ` <span class="norm">${v.text}</span>` : '');
+      if (it.off) b.title = `${it.group} is not in the run order`;
+      b.dataset.full = it.full || '';
+      b.addEventListener('click', () => pickSource(it.src));
+      pickerList.appendChild(b);
+    }
+    pickerFilter.value = '';
+    filterSources();
+    picker.hidden = false;
+    // Next to the port, kept on the screen.
+    const r = anchor.getBoundingClientRect();
+    const w = picker.offsetWidth, h = picker.offsetHeight;
+    const vw = document.documentElement.clientWidth, vh = document.documentElement.clientHeight;
+    let left = r.left - w - 8;
+    if (left < 16) left = Math.min(r.right + 8, vw - w - 16);
+    picker.style.left = Math.max(16, left) + 'px';
+    picker.style.top = Math.max(8, Math.min(r.top - 40, vh - h - 8)) + 'px';
+    const cur = pickerList.querySelector('.current');
+    if (cur) cur.scrollIntoView({ block: 'center' });
+    // A touch would bring up the on-screen keyboard over the list.
+    if (focus) pickerFilter.focus();
+  }
+
+  function closeSourcePicker() {
+    picker.hidden = true;
+    pickerDst = null;
+  }
+
+  function pickSource(src) {
+    const dst = pickerDst;
+    closeSourcePicker();
+    if ((isConnected(dst) ? currentSource(dst) : null) === src) return;
+    pushHistory();
+    if (src) connect(src, dst);
+    else disconnect(dst);
+    commit();
+  }
+
+  // Shows the items whose node and name have a word starting with each word typed, so "eg 2" finds
+  // EG 2 but not Neg, with a heading over each node left, and marks the first for Enter.
+  function filterSources() {
+    const words = pickerFilter.value.toLowerCase().split(/\s+/).filter(Boolean);
+    let shown = null;
+    for (const el of pickerList.children) {
+      if (el.classList.contains('src-picker-group')) {
+        shown = el;
+        el.hidden = true;
+        continue;
+      }
+      el.classList.remove('active');
+      const hit = !words.length || (el.dataset.full && words.every(w => el.dataset.full.includes(' ' + w)));
+      el.hidden = !hit;
+      if (hit && shown) shown.hidden = false;
+    }
+    const first = [...pickerList.querySelectorAll('.src-picker-item')].find(el => !el.hidden);
+    if (first && words.length) first.classList.add('active');
+  }
+
+  pickerFilter.addEventListener('input', filterSources);
+  picker.addEventListener('keydown', e => {
+    const items = [...pickerList.querySelectorAll('.src-picker-item')].filter(el => !el.hidden);
+    const i = items.findIndex(el => el.classList.contains('active'));
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      closeSourcePicker();
+    } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (!items.length) return;
+      const next = items[(i + (e.key === 'ArrowDown' ? 1 : items.length - 1)) % items.length];
+      if (i >= 0) items[i].classList.remove('active');
+      next.classList.add('active');
+      next.scrollIntoView({ block: 'nearest' });
+    } else if (e.key === 'Enter' && i >= 0) {
+      e.preventDefault();
+      items[i].click();
+    }
+  });
+  document.addEventListener('pointerdown', e => {
+    if (!picker.hidden && !picker.contains(e.target)) closeSourcePicker();
+  }, true);
+  canvas.addEventListener('wheel', () => { if (!picker.hidden) closeSourcePicker(); });
+
+  world.addEventListener('click', e => {
+    const span = e.target.closest('[data-src-of]');
+    if (span) openSourcePicker(span.dataset.srcOf, true);
+  });
 
   function startNodeDrag(el, e) {
     const key = el.dataset.node;
@@ -2510,6 +2965,8 @@
         pushHistory(drag.snapshot);
         saveLocal();
       }
+    } else if (drag.mode === 'pan' && drag.armed && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) < 4) {
+      disarm();
     }
     canvas.classList.remove('panning');
     drag = null;
@@ -2535,7 +2992,9 @@
 
   document.addEventListener('keydown', e => {
     if (e.target.closest && e.target.closest('input, textarea, select')) return;
-    if ((e.key === 'Delete' || e.key === 'Backspace') && selectedWire) {
+    if (e.key === 'Escape' && armed) {
+      disarm();
+    } else if ((e.key === 'Delete' || e.key === 'Backspace') && selectedWire) {
       e.preventDefault();
       pushHistory();
       disconnect(selectedWire);
@@ -3137,8 +3596,8 @@
   }
 
   // What the synth writes to a control slot, as a CC value: the CC's own value while one is
-  // assigned, and while none is, a parameter's value from NRPN category 4 and 0.0 for the mod
-  // wheel's slot, as cc_or_nrpn and cc_or_zero in spms1_main.rb do. null is a slot written from a reserved
+  // assigned, and while none is, a parameter's value from NRPN category 4 and 0.0 for a
+  // controller's slot, as cc_or_nrpn and cc_or_zero in spms1_main.rb do. null is a slot written from a reserved
   // CC, whose value the editor does not track.
   function slotValue(c, bipolar) {
     const cc = state.cc[c.key];
@@ -3183,16 +3642,19 @@
   // A form of a controller's unipolar value u, as spms1_main.rb writes it to its slot.
   const FORMS = {
     rev: u => 1 - u, inv: u => -u, rev_inv: u => u - 1, bipolar: u => u - 0.5, bipolar_inv: u => 0.5 - u,
+    sin: u => Math.sin(u * Math.PI / 2), cos: u => Math.cos(u * Math.PI / 2),
+    lo: u => Math.min(1, 2 - 2 * u), hi: u => Math.min(1, 2 * u),
+    neg: u => Math.max(0, 1 - 2 * u), pos: u => Math.max(0, 2 * u - 1), mid: u => 1 - Math.abs(2 * u - 1),
   };
   function formed(form, value) {
     const v = FORMS[form](Math.max(0, Math.min(1, (value - 4) / 120)));
-    return form === 'rev' ? v.toFixed(3) : (v < 0 ? '-' : '+') + Math.abs(v).toFixed(3);
+    return ['rev', 'sin', 'cos', 'lo', 'hi', 'neg', 'pos', 'mid'].includes(form) ? v.toFixed(3) : (v < 0 ? '-' : '+') + Math.abs(v).toFixed(3);
   }
 
   let sliderBefore = null;
 
-  // Parameters with no CC are hidden on the controls unless asked for, and a CC given to one
-  // brings it there. Shown, its slider sets the value its slot holds, through NRPN. The choice is
+  // Parameters with no CC are hidden on the controls unless asked for, and a CC given to one, or
+  // marking it as a favorite, brings it there. Shown, its slider sets the value its slot holds, through NRPN. The choice is
   // kept, as the tab is.
   const SHOW_NO_CC_KEY = 'spms1-type2-editor-show-no-cc';
   let showNoCC = false;
@@ -3207,24 +3669,24 @@
 
   function renderControls() {
     const root = document.getElementById('controls');
-    const active = document.activeElement;
     // Rebuilding under a slider being dragged would drop the drag.
-    if (active && active.type === 'range' && root.contains(active)) return;
+    if (heldRange && root.contains(heldRange)) return;
     const cols = [0, 1, 2, 3].map(() => document.createElement('div'));
     cols.forEach(c => { c.className = 'editor-column'; });
     for (const p of CONTROL_PANELS) {
-      const items = panelItems(p).filter(c => showNoCC || state.cc[c.key]);
+      const items = panelItems(p).filter(c => showNoCC || state.cc[c.key] || state.favorites.has(c.key));
       // Mixer 1 has no CC by default, so its panel appears only once a patch gives it one, or
       // with the parameters that have none shown.
       if (!items.length) continue;
       const panel = document.createElement('div');
-      panel.className = 'panel';
+      panel.className = 'panel colored';
+      panel.style.setProperty('--node-color', NODE_COLORS[p.module || 'CONTROLLER']);
       panel.innerHTML = `<h2>${p.title}</h2><div class="control-row">` + items.map(c => `
         <div class="slider-knob-zone" data-ctrl="${c.key}">
           <button type="button" class="fav-toggle" aria-pressed="false">&#9733;</button>
           <div class="slider-label">${escapeHTML(c.label)} <span class="ctl-sub"><span class="ctl-hint"></span><span class="cc-num"></span></span></div>
           <div class="slider-input-wrapper">
-            <span class="range-wrap"><input type="range" min="4" max="124">${c.bipolar ? '<span class="centre-tick"></span>' : ''}</span>
+            <span class="range-wrap"><input type="range" min="4" max="124">${c.bipolar ? '<span class="center-tick"></span>' : ''}</span>
             <span class="slider-value"></span>
             <span class="slider-norm" title="The value the synth sees in the slot"></span>
           </div>
@@ -3304,7 +3766,7 @@
       zone.querySelector('.slider-label').title = zone.querySelector('.slider-label').textContent.trim();
       slider.disabled = !usable;
       const value = ownValue ? paramValue(c.key) : usable ? ccValue(cc) : 64;
-      if (document.activeElement !== slider) slider.value = value;
+      if (heldRange !== slider) slider.value = value;
       zone.querySelector('.slider-value').textContent = usable ? String(value) : '—';
       const own = signalNorm(c.slots[0][0]);
       const norm = zone.querySelector('.slider-norm');
@@ -3315,7 +3777,7 @@
     world.querySelectorAll('.row.ctrl .lbl').forEach(lbl => {
       const c = CONTROL[lbl.closest('.row').dataset.ctrl];
       const hint = controlHint(c);
-      lbl.title = (hint ? `${c.label} (${hint}). ` : '') + (c.bipolar ? 'Bipolar: value 64 is the centre' : 'Unipolar');
+      lbl.title = (hint ? `${c.label} (${hint}). ` : '') + (c.bipolar ? 'Bipolar: value 64 is the center' : 'Unipolar');
       lbl.closest('.row').classList.toggle('fav', state.favorites.has(c.key));
     });
   }
@@ -3328,15 +3790,18 @@
     const cc = state.cc.MOD_WHEEL;
     const usable = ccInUse(cc);
     modWheel.disabled = !usable;
-    if (document.activeElement !== modWheel) modWheel.value = usable ? ccValue(cc) : 4;
+    if (heldRange !== modWheel) modWheel.value = usable ? ccValue(cc) : 4;
     const v = signalNorm('MOD_WHEEL');
     document.getElementById('mod-wheel-zone').title = usable
       ? `Mod Wheel (CC#${cc}): ${ccValue(cc)}${v ? `, ${v.text}` : ''}`
       : 'Mod Wheel: no CC in the patch, so the slot holds 0.0';
   }
 
+  // Both wheels move Controller signals, so they take its color.
+  document.querySelectorAll('.mod-wheel').forEach(el => el.style.setProperty('--thumb-color', NODE_COLORS.CONTROLLER));
+
   // The pitch bend wheel sends Pitch Bend as it moves, -8192 at the bottom to +8191 at the top,
-  // and springs back to the centre, sending 0, when it is let go.
+  // and springs back to the center, sending 0, when it is let go.
   const bendWheel = document.getElementById('bend-wheel');
   bendWheel.addEventListener('input', () => sendBend(parseInt(bendWheel.value)));
   const bendRelease = () => {
@@ -3468,7 +3933,7 @@
     if (!on) [...kbHeld].forEach(n => { kbHeld.delete(n); sendNote(0x80, n, 0); });
   }
 
-  // Panic sends All Sound Off, which ends every note, and centres Pitch Bend.
+  // Panic sends All Sound Off, which ends every note, and centers Pitch Bend.
   function kbPanic() {
     kbPointers.clear();
     kbHeld.clear();

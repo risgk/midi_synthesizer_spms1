@@ -53,7 +53,7 @@ module Spms1
       def set_audio_buffer_words(v) = (@audio_buffer_words = v)
       def get_audio_buffer_words = @audio_buffer_words
 
-      # The handlers of spms1.ino, as the MIDI library calls them: a note-on of velocity 0
+      # The handlers of spms1_midi_state.h, as the MIDI library calls them: a note-on of velocity 0
       # is a note-off.
       def handle_midi_message(status, d1, d2)
         ch = status & 0x0F
@@ -100,7 +100,7 @@ module Spms1
       end
 
       # The Channel Mode messages, as spms1_midi_state.h takes them: Reset All Controllers (121)
-      # centres the bend, sets CC 1 to 0 and leaves no NRPN selected; Local Control (122) does
+      # centers the bend, sets CC 1 to 0 and leaves no NRPN selected; Local Control (122) does
       # nothing; the rest end every note.
       def handle_channel_mode(ch, number)
         if number == 121

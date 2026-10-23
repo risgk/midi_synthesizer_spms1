@@ -29,8 +29,8 @@
 #define fpclassify(x) __builtin_fpclassify(FP_NAN, FP_INFINITE, FP_NORMAL, FP_SUBNORMAL, FP_ZERO, x)
 
 #if defined(__APPLE__)
-/* Mach-O wants "segment,section", so the .time_critical of spinel_rt.h's #define main is not a
-   valid section name there. Nothing else in the runtime spells section(. */
+/* Mach-O wants "segment,section", so the .time_critical of the #define main in
+   spinel_rt_mcu_head.h is not a valid section name there. Nothing else in the runtime spells section(. */
 #define section(x) used
 #endif
 

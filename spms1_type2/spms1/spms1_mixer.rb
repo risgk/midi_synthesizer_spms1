@@ -67,9 +67,9 @@ module Spms1
       @out_level = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
     end
 
-    # The inputs are taken as they are; only the sum is held to a range. A mixer is the one place on
-    # the bus where a value can come out bigger than what went in -- every other module is fixed at
-    # half a unit, or saturates, or only attenuates -- so this is what keeps every slot finite. That
+    # The inputs are taken as they are; only the sum is held to a range. A mixer is one
+    # of the places on the bus where a value can come out bigger than what went in, and like the
+    # others (Amp Gain, Pitch 1 Stretch) it clamps what it puts out -- so this is what keeps every slot finite. That
     # matters beyond tidiness: a comparison lets a NaN through any clamp, and the only way to make
     # one here is to overflow to infinity first, which this makes impossible.
     #

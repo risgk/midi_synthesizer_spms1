@@ -106,7 +106,7 @@ fetch() {
   fi
 }
 
-# Writes the patch from NAME.orig and NAME, labelled a/NAME and b/NAME for patch -p1
+# Writes the patch from NAME.orig and NAME, labeled a/NAME and b/NAME for patch -p1
 save() {
   : > "$PATCH.tmp"
   for o in *.orig; do

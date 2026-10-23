@@ -35,7 +35,7 @@
 /* setjmp and longjmp of Emscripten go through JavaScript (or through Wasm exceptions, which
    Asyncify cannot unwind), so the runtime's setjmp always takes the path of no exception, and a
    longjmp, which only a raised exception reaches, stops the synth with a trap. The synth raises
-   nothing while it runs: the setjmp around `loop do` waits for a StopIteration that never comes. */
+   nothing while it runs, and its own code reaches no setjmp: it loops with `while true`. */
 #include <setjmp.h>
 #undef setjmp
 #undef longjmp

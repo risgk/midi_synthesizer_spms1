@@ -21,7 +21,7 @@ permissions:
 
 env:
   ARDUINO_CLI_VERSION: '1.5.1'
-  ARDUINO_PICO_VERSION: '6.2.0'  # The same as "This sketch is tested with version ..." in spms1_type2/README.md
+  ARDUINO_PICO_VERSION: '6.3.0'  # The same as "This sketch is tested with version ..." in spms1_type2/README.md
   MIDI_LIBRARY_VERSION: '5.0.2'
   ARDUINO_PICO_INDEX_URL: 'https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json'
   EMSDK_VERSION: '6.0.12'  # Emscripten, for SPMS-1 Web (the version spms1_type2/web/README.md names)
