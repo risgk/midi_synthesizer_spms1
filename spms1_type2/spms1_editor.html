@@ -185,11 +185,12 @@
     /* A slider row needs about 430px for its thumb to travel 120 pixels, a pixel a step from 4 to
        124, with the longest name and its note beside it, so below four of them the columns go two
        to a row, the last two under the first two, rather than three to a row with the fourth left
-       alone under them, and below two of 450px, one. */
+       alone under them. Below two of 450px the name goes above the slider, which then needs about
+       260px, so the columns stay two to a row down to 600px, and below that go one. */
     @media (max-width: 1871px) {
       .editor-grid { grid-template-columns: 1fr 1fr; }
     }
-    @media (max-width: 919px) {
+    @media (max-width: 599px) {
       .editor-grid { grid-template-columns: 1fr; }
     }
     /* Spaced a little tighter than the other panels, so the columns fit a full HD window without
@@ -245,7 +246,7 @@
       margin-bottom: 8px;
     }
     /* A panel is moved by its heading, with the columns two or four to a row. */
-    @media (min-width: 920px) {
+    @media (min-width: 600px) {
       .editor-column .panel h2 {
         cursor: grab;
         touch-action: none;
@@ -350,7 +351,7 @@
     }
     /* In one or two columns the name takes one width, wrapping the note under it if need be, so
        every slider is as long as the others and its thumb travels at least 120 pixels. */
-    @media (min-width: 481px) and (max-width: 1871px) {
+    @media (min-width: 920px) and (max-width: 1871px) {
       .slider-label { flex: 0 0 140px; min-width: 0; }
     }
     /* In four columns the CC number goes on the line of the name, and the panels are packed
@@ -382,10 +383,11 @@
       /* One row, which takes the extra height of the tab. */
       .editor-grid { align-content: stretch; }
     }
-    @media (min-width: 1641px) {
+    @media (min-width: 1280px) {
       /* The page around the panels is packed tighter, so that the controls and the soft
          keyboard fit the window Chrome leaves of a full HD screen on Windows, under its tabs, its
-         address bar and its bookmarks bar, above the taskbar: about 910 pixels. */
+         address bar and its bookmarks bar, above the taskbar: about 910 pixels; and so that a
+         1280 x 720 or 800 screen shows as much of the controls as it can. */
       body { padding: 14px 20px; gap: 10px; }
       header { padding-bottom: 8px; }
       header h1 { font-size: 1.5rem; }
@@ -399,9 +401,10 @@
       #kbd-panel .keyboard-frame { --kbd-half-height: calc(60px * var(--kbd-scale)); padding-top: 6px; }
       #kbd-panel .keyboard-wrapper { height: calc(120px * var(--kbd-scale)); }
     }
-    /* On a phone the name would leave the slider only a few dozen pixels, so the name, with the
-       CC number on its line, goes above the slider, which takes the full width of the panel. */
-    @media (max-width: 480px) {
+    /* In a column narrower than 450px, as on a phone or with two columns below 920px, the name
+       would leave the slider only a few dozen pixels, so the name, with the CC number on its line,
+       goes above the slider, which takes the full width of the panel. */
+    @media (max-width: 919px) {
       .slider-knob-zone {
         flex-direction: column;
         align-items: stretch;
@@ -649,10 +652,13 @@
       color: #ccc;
       white-space: nowrap;
     }
-    /* On a phone the keys are narrower, KB_KEY_WIDTH_NARROW, and the wheels narrower still, 3/2 of
-       a semitone, so that a 360px window shows an octave and more. */
-    @media (max-width: 480px) {
+    /* Below 1280px the keys are narrower, KB_KEY_WIDTH_NARROW, so that 640px shows two octaves
+       and more and 960px three; on a phone the wheels are narrower still, 3/2 of a semitone, so
+       that 360px shows an octave and more. */
+    @media (max-width: 1279px) {
       .keyboard-frame { --kbd-key-width: calc(16px * var(--kbd-scale)); }
+    }
+    @media (max-width: 480px) {
       .mod-wheel { width: calc(var(--kbd-key-width) * 3 / 2); }
       .mod-wheel-label { font-size: 0.6rem; }
     }
@@ -3783,7 +3789,7 @@
   // first panel there whose middle is below it. In one column the order is as it is laid out.
   let panelDrag = null;
   function startPanelDrag(e) {
-    if (e.button !== 0 || matchMedia('(max-width: 919px)').matches) return;
+    if (e.button !== 0 || matchMedia('(max-width: 599px)').matches) return;
     const panel = e.currentTarget.closest('.panel');
     const rect = panel.getBoundingClientRect();
     const drop = document.createElement('div');
@@ -4055,8 +4061,8 @@
 
   const KB_NOTE_MAX = 120;
   const KB_KEY_WIDTH = 20;  // a semitone in the upper half, times kbScale; 37 keys fit 960px, with room
-  const KB_KEY_WIDTH_NARROW = 16;  // the same on a phone; an octave and more fits 360px
-  const KB_NARROW = window.matchMedia('(max-width: 480px)');
+  const KB_KEY_WIDTH_NARROW = 16;  // the same below 1280px; two octaves and more fit 640px
+  const KB_NARROW = window.matchMedia('(max-width: 1279px)');
   // The center of 37 keys from a C (C3 - C6 by default), in semitones from the left end of the C.
   const KB_CENTER_OFFSET = (36 + 5 / 3) / 2;
   const KB_DEFAULT_C = 48;  // C3
@@ -4352,7 +4358,7 @@
     kbSetCenter(kbPrefs.center);
     // The text size can change without a resize of the window.
     if (window.ResizeObserver) new ResizeObserver(() => kbFitScale()).observe(document.getElementById('kbd-label'));
-    // The keys change width across the width of a phone.
+    // The keys change width across 1280px.
     KB_NARROW.addEventListener('change', () => kbSetCenter(kbPrefs.center));
     kbSetVisible(!kbPrefs.hidden);
   }
@@ -4384,10 +4390,10 @@
 
   const TAB_KEY = 'spms1-type2-editor-tab';
 
-  // From 1641 pixels, where the page around the panels is packed tighter (see the CSS), the MIDI
+  // From 1280 pixels, where the page around the panels is packed tighter (see the CSS), the MIDI
   // settings go up into the header, between the title and the tabs, so they take no line of their
   // own; below it they keep their own line under the header.
-  const WIDE_HEADER = window.matchMedia('(min-width: 1641px)');
+  const WIDE_HEADER = window.matchMedia('(min-width: 1280px)');
   function placeMIDIPanel() {
     const header = document.querySelector('header');
     const panel = document.querySelector('.midi-panel');
