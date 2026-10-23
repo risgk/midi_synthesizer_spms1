@@ -21,6 +21,14 @@
       --wire-inactive: #b8c0c4;
       --favorite: #d4a017;
       --favorite-bg: #fdf8e8;
+      --thumb-size: 18px;
+    }
+    /* On a touch screen the thumbs are larger, and the star and the wheels take a larger touch,
+       closer to the 44px a finger needs. */
+    @media (pointer: coarse) {
+      :root { --thumb-size: 24px; }
+      .fav-toggle::after { content: ''; position: absolute; inset: -12px -8px; }
+      .mod-wheel { min-width: 28px; }
     }
     * {
       box-sizing: border-box;
@@ -201,8 +209,11 @@
       gap: 16px;
       min-width: 0;
     }
+    /* A container, so that its sliders lay out by the width of the panel, not of the window. The
+       panel, not the column, since a container holds a fixed panel, the one being moved, inside it. */
     .editor-column .panel {
       padding: 12px 16px;
+      container-type: inline-size;
     }
     /* The last column, Controller to LFO 1, runs the full height of its row, so the Init button under it sits at the
        bottom, just above the keyboard. */
@@ -349,9 +360,10 @@
       color: var(--text-muted);
       white-space: nowrap;
     }
-    /* In one or two columns the name takes one width, wrapping the note under it if need be, so
-       every slider is as long as the others and its thumb travels at least 120 pixels. */
-    @media (min-width: 920px) and (max-width: 1871px) {
+    /* In a panel 380px or more inside the name takes one width beside the slider, wrapping the
+       note under it if need be, so every slider is as long as the others and its thumb travels at
+       least 120 pixels; four columns give it a width of their own, below. */
+    @container (min-width: 380px) {
       .slider-label { flex: 0 0 140px; min-width: 0; }
     }
     /* In four columns the CC number goes on the line of the name, and the panels are packed
@@ -401,10 +413,10 @@
       #kbd-panel .keyboard-frame { --kbd-half-height: calc(60px * var(--kbd-scale)); padding-top: 6px; }
       #kbd-panel .keyboard-wrapper { height: calc(120px * var(--kbd-scale)); }
     }
-    /* In a column narrower than 450px, as on a phone or with two columns below 920px, the name
-       would leave the slider only a few dozen pixels, so the name, with the CC number on its line,
-       goes above the slider, which takes the full width of the panel. */
-    @media (max-width: 919px) {
+    /* In a narrower panel, as on a phone or with two columns below about 860px, the name would
+       leave the slider only a few dozen pixels, so the name, with the CC number on its line, goes
+       above the slider, which takes the full width of the panel. */
+    @container (max-width: 379px) {
       .slider-knob-zone {
         flex-direction: column;
         align-items: stretch;
@@ -468,10 +480,10 @@
     }
     .range-wrap .center-tick {
       position: absolute;
-      left: calc(9px + (100% - 18px) * 0.5 - 1px);
+      left: calc(var(--thumb-size) / 2 + (100% - var(--thumb-size)) * 0.5 - 1px);
       top: 50%;
       width: 2px;
-      height: 24px;
+      height: calc(var(--thumb-size) + 6px);
       transform: translateY(-50%);
       background: var(--text-muted);
       pointer-events: none;
@@ -479,16 +491,16 @@
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
       appearance: none;
-      width: 18px;
-      height: 18px;
+      width: var(--thumb-size);
+      height: var(--thumb-size);
       border-radius: 50%;
       background: var(--thumb-color, var(--primary-color));
       cursor: pointer;
     }
     /* Same size as the WebKit thumb above, so the tick positions line up here too. */
     input[type="range"]::-moz-range-thumb {
-      width: 18px;
-      height: 18px;
+      width: var(--thumb-size);
+      height: var(--thumb-size);
       border: none;
       border-radius: 50%;
       background: var(--thumb-color, var(--primary-color));
@@ -535,6 +547,28 @@
     }
 
     /* Soft keyboard */
+    /* On the Controls tab, kept at the bottom of the window while the page scrolls above it, as on
+       a 1280 x 720 screen or a phone, so the keys stay at hand under the controls; not on the Patch
+       tab, where it would cover the canvas, nor where the window is too low for that to leave
+       much above it. */
+    @media (min-height: 560px) {
+      body:has(#tab-controls:not([hidden])) #kbd-panel {
+        position: sticky;
+        bottom: 0;
+        z-index: 5;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.08);
+      }
+    }
+    /* A phone on its side: the page and the keys packed tighter, so the keys leave some of the
+       window to the controls or the patch. */
+    @media (max-height: 480px) and (orientation: landscape) {
+      body { padding: 8px 12px; gap: 8px; }
+      header h1 { font-size: 1.2rem; }
+      #kbd-panel { padding: 8px 12px; }
+      #kbd-panel .kbd-bar { margin-bottom: 6px; }
+      #kbd-panel .keyboard-frame { --kbd-half-height: calc(42px * var(--kbd-scale)); padding-top: 4px; }
+      #kbd-panel .keyboard-wrapper { height: calc(84px * var(--kbd-scale)); }
+    }
     .kbd-bar {
       display: flex;
       flex-wrap: wrap;
@@ -652,12 +686,9 @@
       color: #ccc;
       white-space: nowrap;
     }
-    /* Below 960px the keys are narrower, KB_KEY_WIDTH_NARROW, so that 640px shows two octaves
-       and more, while 960px shows the 37 keys at their full width; on a phone the wheels are narrower still, 3/2 of a semitone, so
-       that 360px shows an octave and more. */
-    @media (max-width: 959px) {
-      .keyboard-frame { --kbd-key-width: calc(16px * var(--kbd-scale)); }
-    }
+    /* Below 960px the keys narrow with the window, down to KB_KEY_WIDTH_NARROW (see kbFitKeys);
+       on a phone the wheels are narrower still, 3/2 of a semitone, so that 360px shows an octave
+       and more. */
     @media (max-width: 480px) {
       .mod-wheel { width: calc(var(--kbd-key-width) * 3 / 2); }
       .mod-wheel-label { font-size: 0.6rem; }
@@ -4061,8 +4092,11 @@
 
   const KB_NOTE_MAX = 120;
   const KB_KEY_WIDTH = 20;  // a semitone in the upper half, times kbScale; 37 keys fit 960px, with room
-  const KB_KEY_WIDTH_NARROW = 16;  // the same below 960px; two octaves and more fit 640px
-  const KB_NARROW = window.matchMedia('(max-width: 959px)');
+  const KB_KEY_WIDTH_NARROW = 16;  // the narrowest, below 800px; two octaves and more fit 640px
+  // Below their full width the keys narrow so as to show no more than this many semitones, as many
+  // as 960px shows at full width: the 37 keys, with room. So a wider window never shows fewer.
+  const KB_SEMITONES = 40;
+  const KB_PHONE = window.matchMedia('(max-width: 480px)');
   // The center of 37 keys from a C (C3 - C6 by default), in semitones from the left end of the C.
   const KB_CENTER_OFFSET = (36 + 5 / 3) / 2;
   const KB_DEFAULT_C = 48;  // C3
@@ -4075,6 +4109,7 @@
   let kbHold = false;
   let kbLast = -1;  // the note of the last press
   let kbScale = 1;
+  let kbKeyPx = KB_KEY_WIDTH;  // --kbd-key-width, set by kbFitKeys
   const kbPrefs = { center: KB_DEFAULT_C + KB_CENTER_OFFSET, hidden: false };
 
   function loadKbPrefs() {
@@ -4153,7 +4188,22 @@
 
   // A semitone in the upper half, in pixels, as --kbd-key-width makes it.
   function kbKeyWidth() {
-    return (KB_NARROW.matches ? KB_KEY_WIDTH_NARROW : KB_KEY_WIDTH) * kbScale;
+    return kbKeyPx;
+  }
+
+  // The width of a semitone, between KB_KEY_WIDTH_NARROW and KB_KEY_WIDTH times the scale: as
+  // wide as shows KB_SEMITONES beside the two wheels, each 5/3 of a semitone (3/2 on a phone),
+  // with the 4px gaps after each. Hidden, the keyboard has no width, and keeps what it had.
+  function kbFitKeys(force) {
+    const width = document.querySelector('.kbd-body').clientWidth;
+    if (!(width > 0)) return;
+    const wheels = 2 * (KB_PHONE.matches ? 3 / 2 : 5 / 3);
+    const fit = (width - 8) / (KB_SEMITONES + wheels);
+    const px = Math.max(KB_KEY_WIDTH_NARROW * kbScale, Math.min(KB_KEY_WIDTH * kbScale, fit));
+    if (px === kbKeyPx && !force) return;
+    kbKeyPx = px;
+    document.querySelector('.keyboard-frame').style.setProperty('--kbd-key-width', px + 'px');
+    kbSetCenter(kbPrefs.center);
   }
 
   // The center of the visible area, in semitones of the upper half from C-1.
@@ -4196,7 +4246,7 @@
     if (scale === kbScale) return;
     kbScale = scale;
     document.querySelector('.keyboard-frame').style.setProperty('--kbd-scale', scale);
-    kbSetCenter(kbPrefs.center);
+    kbFitKeys(true);
   }
 
   function kbUpdateScrollbar() {
@@ -4358,8 +4408,8 @@
     kbSetCenter(kbPrefs.center);
     // The text size can change without a resize of the window.
     if (window.ResizeObserver) new ResizeObserver(() => kbFitScale()).observe(document.getElementById('kbd-label'));
-    // The keys change width across 960px.
-    KB_NARROW.addEventListener('change', () => kbSetCenter(kbPrefs.center));
+    // The keys narrow with the window below 960px.
+    if (window.ResizeObserver) new ResizeObserver(() => kbFitKeys()).observe(document.querySelector('.kbd-body'));
     kbSetVisible(!kbPrefs.hidden);
   }
 
@@ -4377,6 +4427,7 @@
     saveKbPrefs();
     if (visible) {
       kbFitScale();
+      kbFitKeys();
       kbSetCenter(kbPrefs.center);
     }
     fitTabArea();
