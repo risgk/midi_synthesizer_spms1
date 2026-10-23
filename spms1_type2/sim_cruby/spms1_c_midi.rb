@@ -1,6 +1,7 @@
 # The MIDI side of Spms1::C for the CRuby hosts (spms1_sim.rb and spms1_render.rb): the MIDI
 # tables spms1_main.rb reads and the handlers that fill them, as spms1_midi_state.h has them for
-# the sketch and the C hosts. Each host adds the audio side.
+# the sketch and the C hosts, and the signal bus, as spms1_bus.h has it. Each host adds the audio
+# side.
 module Spms1
   module C
     @note_on_pitch = Array.new(16, 60)
@@ -15,6 +16,9 @@ module Spms1
     # When each slot of the run order was last written, as in spms1_midi_state.h.
     @run_order_writes  = Array.new(16, 0)
     @run_order_written = Array.new(16) { Array.new(32, 0) }
+
+    # The signal bus SignalBus reads and writes, as spms1_bus.h has it for the C builds.
+    @bus_signals = Array.new(256, 0.0)
 
     @sample_rate = 48000
     @audio_buffers = 2
@@ -46,6 +50,8 @@ module Spms1
       end
       def get_midi_run_order_written(ch, slot) = ((slot >= 0 && slot < 32) ? @run_order_written[ch][slot] : 0)
       def get_midi_nrpn_value(ch, i) = ((i >= 0 && i < 640) ? @nrpn_values[ch][i] : 0)
+      def get_bus_signal(slot) = @bus_signals[slot & 255]
+      def set_bus_signal(slot, v) = (@bus_signals[slot & 255] = v)
       def set_sample_rate(v) = (@sample_rate = v)
       def get_sample_rate = @sample_rate
       def set_audio_buffers(v) = (@audio_buffers = v)

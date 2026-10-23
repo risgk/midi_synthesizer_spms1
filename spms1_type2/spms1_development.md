@@ -16,7 +16,8 @@ MIDI Synthesizer SPMS-1 (type-2): Development
 
 The C hosts ("sim_spinel", "sim_render", and SPMS-1 Web in "web") keep the MIDI with the sketch's own
 "spms1_midi_state.h", the tables "spms1_main.rb" reads and the handlers that fill them, so a change
-there reaches the device and all of them at once. "sim_cruby" keeps a Ruby copy in "sim_cruby/spms1_c_midi.rb".
+there reaches the device and all of them at once. They take the signal bus from the sketch's "spms1_bus.h"
+as well. "sim_cruby" keeps a Ruby copy of both in "sim_cruby/spms1_c_midi.rb".
 
 The simulators are developed and tested on Windows. macOS and Linux are supported on a best-effort
 basis, written to their APIs but without the machines to try them on. The GitHub Actions workflow
@@ -74,7 +75,10 @@ plugin for the audio).
       spectra, relative to the signal: float (Spinel's output) and double (CRuby) let the oscillators'
       phase drift apart, which differs sample by sample but not in the spectra. Precision stays below
       about -35 dB, and a different routing, or a CC value 4 steps away, lands above -10 dB; the limit
-      is -25 dB (`ruby sim_cruby/spms1_compare.rb --limit DB` for another)
+      is -25 dB (`ruby sim_cruby/spms1_compare.rb --limit DB` for another). The chorus is the
+      exception: it turns the drift of its LFO's phase into one of the delay it swings, and a high note
+      played some seconds into a render can pass -25 dB from precision alone (C7 at 6 s, about -21 dB).
+      Keep a render that has to pass to about 4 s, or take the chorus out of it with its Mix or Depth
 
 
 ## Adding a Module
@@ -186,6 +190,26 @@ measures on the device -- with the default patch and a note held.
   the build, nor if nothing changed)
 
 
+## Where It Departs from Ruby
+
+The synth runs as Ruby says, CRuby included (see "sim_cruby"), but for what the MCU cannot afford.
+Each of these is made in one place and named there, and no other change to Spinel or its runtime
+alters what a program does:
+
+- Float is a 32-bit float, not a double, the RP2350 having a single-precision FPU only:
+  `SPINEL_FLOAT32` in "sp_types.h" (through "spinel_mcu/spinel_mcu.patch"), with the Float
+  literals of the generated code taken as float ("spinel_rt_mcu_head.h") and its `double` spelled
+  `float` ("spinel_rt_mcu_cold.h"). Results differ from CRuby's by the precision; sim_cruby's
+  comparison allows for that. Without it, every Float operation would be done in software
+- Integer `+ - *` wrap at the width of a pointer, 32 bits on the RP2350, rather than growing into a
+  Bignum, as `spinel --int-overflow=wrap` builds them (`SP_INT_OVERFLOW_MODE_WRAP` in
+  "spinel_rt_mcu_head.h"). The synth's integers are indices and counters far inside 32 bits.
+  Without it, the checks are about 8% of the instructions of the per-sample code
+- What needs an OS is not there (files, processes, sockets, fibers, threads; see `SPINEL_BARE_METAL`
+  below), and the GC's buffers are sized for SRAM, so a program that nests more than 1024 GC roots
+  loses the rest, which sim_render reports (see "sp_gc.h")
+
+
 ## Updating Spinel
 
 The runtime files in "spms1" are all of Spinel's `lib` (and `lib/regexp`) of the release the
@@ -195,17 +219,16 @@ README names, with the changes for the MCU kept in two places:
   section and the pragmas of the synth core, Integer arithmetic without the overflow check
   (`SP_INT_OVERFLOW_MODE_WRAP`, as `spinel --int-overflow=wrap` builds it), the float versions of
   the math functions, and, at
-  the end of "spinel_rt.h", what binds the generated code to a float runtime (below).
+  the end of "spinel_rt.h", what binds the generated code to a float runtime (below) and the
+  sketch's "spms1_bus.h".
   "spinel_rt.h" carries only an `#include` line for each
 - "spinel_mcu/spinel_mcu.patch": what is changed in Spinel's own files -- the runtime written in
   `sp_float` where it said `double` for a Float, the POSIX parts left out with `#if 0` (a release
   changing what is inside them seldom stops the patch from applying), the files that need POSIX
   throughout left out whole with `SPINEL_BARE_METAL` (below), the GC's buffers made to fit
   SRAM, and the in-range path of an Array read or write (`sp_FloatArray_get`/`set`,
-  `sp_IntArray_get`) put ahead of the other checks, which go out of line unchanged, and with no
-  check for a nil array, which the sketch never indexes (nor does `sp_IntArray_set` check for one).
-  That last is for this sketch only: a Ruby program indexing a nil array would crash rather than
-  raise, so it is not a change Spinel could take as it is. Each file it
+  `sp_IntArray_get`) put ahead of the other checks, which go out of line unchanged, so that what
+  an access does is the same and only its cost moves. Each file it
   changes sits next to its released copy, "NAME.orig"
 - "sp_cold_bare_metal.c" and "spinel_mcu/sp_cold_bare_metal.patch": "sp_cold.c" for a bare-metal
   build (below), kept apart from the released one, which stays as it is but for its being left

@@ -31,4 +31,8 @@ _Static_assert(!SPINEL_FLOAT32 || sizeof(sp_float) == sizeof(float), "sp_float m
 #define DBL_MIN_EXP FLT_MIN_EXP
 #endif
 
+/* The sketch's own functions that are to inline into the generated code, ahead of its extern
+   declarations of them. */
+#include "spms1_bus.h"
+
 #endif /* SPINEL_RT_MCU_COLD_H */

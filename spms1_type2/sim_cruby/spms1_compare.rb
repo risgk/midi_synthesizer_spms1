@@ -17,6 +17,14 @@
 # routing or a module that does something else lands above -10 dB, and so does a CC value 4 steps
 # away from the other (the cutoff, or the decay heard in the release).
 #
+# The chorus is the exception, as it turns a drift of its LFO's phase into one of the delay it
+# swings, ±126 samples at the default depth, and then mixes the delayed sound with the dry: a
+# phase 0.0003 of a cycle apart after 6 s, a delay 0.2 of a sample apart, moves the notches the mix
+# makes among the high harmonics. A high note under the chorus, played some seconds into a render,
+# can so pass -25 dB from precision alone: C7 at 6 s gives about -21 dB, and -36 dB with the
+# chorus's Mix or Depth at 0. Keep a render that has to pass to about 4 s, as the default score is,
+# or take the chorus out of it.
+#
 # Prints that, and the largest single difference and the RMS over the whole file sample by sample,
 # for information. Exits with 1 if the spectral difference is above --limit (default -25 dB) or
 # the lengths differ.

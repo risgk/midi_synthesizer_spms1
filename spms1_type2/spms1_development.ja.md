@@ -16,7 +16,8 @@ MIDI Synthesizer SPMS-1 (type-2): 開発
 
 C のホスト ("sim_spinel"、"sim_render"、"web" の SPMS-1 Web) は、スケッチ自身の "spms1_midi_state.h"
 ("spms1_main.rb" が読むテーブルと、それを埋めるハンドラ) で MIDI を扱うので、そこを変えれば実機とすべての
-ホストに一度に反映されます。"sim_cruby" は Ruby で書いた写しを "sim_cruby/spms1_c_midi.rb" に持っています。
+ホストに一度に反映されます。シグナルバスもスケッチの "spms1_bus.h" のものを使います。"sim_cruby" は
+両方を Ruby で書いた写しを "sim_cruby/spms1_c_midi.rb" に持っています。
 
 シミュレーターは Windows で開発・テストしています。macOS と Linux は、各 API に沿って書いてはいますが、
 試せる環境が手元にないため、ベストエフォートでの対応です。GitHub Actions のワークフロー
@@ -74,7 +75,10 @@ C のホスト ("sim_spinel"、"sim_render"、"web" の SPMS-1 Web) は、スケ
       作った C が Ruby の書いたとおりに動くかが分かります。比較は短時間スペクトルで、信号に対する相対値です:
       float (Spinel の出力) と double (CRuby) ではオシレータの位相が少しずつずれ、サンプル単位では
       差が出ますが、スペクトルには出ません。精度による差は約 -35 dB 以下、結線の違いや CC 値の 4 段階の
-      違いは -10 dB 以上になります。判定の上限は -25 dB です (`ruby sim_cruby/spms1_compare.rb --limit DB` で変更)
+      違いは -10 dB 以上になります。判定の上限は -25 dB です (`ruby sim_cruby/spms1_compare.rb --limit DB` で変更)。
+      例外はコーラスです。LFO の位相のずれが、揺らしている遅延時間のずれになるので、レンダリングの数秒後に
+      弾いた高い音は、精度の差だけで -25 dB を超えることがあります (6 秒後の C7 で約 -21 dB)。通す必要のある
+      レンダリングは 4 秒程度にするか、コーラスの Mix か Depth を 0 にして外してください
 
 
 ## モジュールの追加
@@ -178,6 +182,26 @@ patch_gen は、モジュールのファイルの `require_relative`、インス
   コミットします (ビルドの後でソースが変わっていた場合と、何も変わっていない場合はコミットしません)
 
 
+## Ruby と違うところ
+
+シンセは CRuby も含め Ruby のとおりに動きます ("sim_cruby" 参照)。ただし MCU では賄えない次の点は別です。
+どれも 1 か所で行い、そこに理由を書いてあります。これ以外の Spinel やそのランタイムへの変更は、
+プログラムの動きを変えません:
+
+- Float は double でなく 32 ビットの float です。RP2350 の FPU は単精度だけなので。"sp_types.h" の
+  `SPINEL_FLOAT32` ("spinel_mcu/spinel_mcu.patch" による) が決め、生成コードの Float リテラルを float に
+  し ("spinel_rt_mcu_head.h")、生成コードの `double` を `float` と読み替えます ("spinel_rt_mcu_cold.h")。
+  結果は CRuby とは精度のぶん違い、sim_cruby の比較はそれを見込んでいます。これがないと、Float の
+  演算はすべてソフトウェアになります
+- Integer の `+ - *` は Bignum に広がらず、ポインタ幅 (RP2350 では 32 ビット) で桁あふれのまま回ります。
+  `spinel --int-overflow=wrap` と同じです ("spinel_rt_mcu_head.h" の `SP_INT_OVERFLOW_MODE_WRAP`)。シンセの
+  整数は 32 ビットに遠く届かない添字やカウンタです。これがないと、検査が毎サンプルのコードの命令の
+  約 8% になります
+- OS が要るもの (ファイル、プロセス、ソケット、Fiber、スレッド。下記の `SPINEL_BARE_METAL` 参照) は
+  ありません。GC のバッファは SRAM に合わせてあり、GC ルートを 1024 より深く重ねるプログラムは
+  残りを失います。sim_render はそれを報告します ("sp_gc.h" 参照)
+
+
 ## Spinel の更新
 
 "spms1" のランタイムのファイルは、README が指定するリリースの Spinel の `lib` (と `lib/regexp`) のすべてです。
@@ -186,15 +210,13 @@ MCU 向けの変更は 2 か所にまとめてあります:
 - "spinel_rt_mcu_head.h"、"spinel_rt_mcu_libm.h"、"spinel_rt_mcu_cold.h": MCU 向けに足すもの --
   シンセ本体のセクションと pragma、オーバーフロー検査なしの Integer 演算 (`SP_INT_OVERFLOW_MODE_WRAP`。
   `spinel --int-overflow=wrap` と同じ)、数学関数の float 版、そして "spinel_rt.h" の最後で生成コードを
-  float のランタイムにつなぐもの (下記)。"spinel_rt.h" にはそれぞれの `#include` 行だけがあります
+  float のランタイムにつなぐもの (下記) とスケッチの "spms1_bus.h"。"spinel_rt.h" にはそれぞれの `#include` 行だけがあります
 - "spinel_mcu/spinel_mcu.patch": Spinel 自身のファイルへの変更 -- Float を表す `double` を `sp_float`
   で書いたランタイム、POSIX 部分の `#if 0` による除外 (中身がリリースで変わってもパッチが
   当たりやすいように)、全体が POSIX 前提のファイルの `SPINEL_BARE_METAL` による除外 (下記)、
   SRAM に収まる GC のバッファ、配列の読み書き (`sp_FloatArray_get`/`set`、`sp_IntArray_get`) で範囲内の
-  場合を他の検査より先に置くこと (残りの検査はそのまま関数の外へ)、そこで nil の配列を調べないこと
-  (スケッチは nil の配列を読み書きしないので。`sp_IntArray_set` も同じく調べません)。最後のものはこの
-  スケッチ専用で、nil の配列を読み書きする Ruby プログラムは例外にならず落ちるので、Spinel にそのまま
-  取り込める変更ではありません。変更するファイルの隣には、
+  場合を他の検査より先に置くこと (残りの検査はそのまま関数の外へ。アクセスの動きは同じで、コストだけが
+  変わります)。変更するファイルの隣には、
   リリースのままのコピー "NAME.orig" があります
 - "sp_cold_bare_metal.c" と "spinel_mcu/sp_cold_bare_metal.patch": ベアメタル向けの "sp_cold.c" (下記)。
   リリースの "sp_cold.c" とは分けてあり、そちらは丸ごと外すこと以外は元のままです

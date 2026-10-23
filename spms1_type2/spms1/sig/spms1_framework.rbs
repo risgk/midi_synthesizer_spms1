@@ -1,0 +1,11 @@
+# Type seeds for Spinel (spinel --rbs sig), passed by sim_spinel/build.sh.
+#
+# Spinel 2026.09.12 takes the value SignalBus#[]= is given as untyped, as `[]=` returns it, which
+# boxes every write to the bus. A seed is trusted, not checked, so this has to stay true: a slot is
+# an Integer and the bus holds only Floats.
+module Spms1
+  class SignalBus
+    def []: (Integer) -> Float
+    def []=: (Integer, Float) -> Float
+  end
+end

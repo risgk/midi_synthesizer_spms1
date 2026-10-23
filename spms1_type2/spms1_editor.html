@@ -203,12 +203,12 @@
     .editor-column .panel {
       padding: 12px 16px;
     }
-    /* The last column, Filter 1 to Delay 1, runs the full height of its row, so the Init button under it sits at the
+    /* The last column, Controller to LFO 1, runs the full height of its row, so the Init button under it sits at the
        bottom, just above the keyboard. */
     .editor-column:last-child {
       align-self: stretch;
     }
-    /* The no-CC toggle and the Init button, at the bottom of the last column. */
+    /* The Controls tab's options, Reset Layout and the Init button, at the bottom of the last column. */
     #controls-foot {
       margin-top: auto;
       display: flex;
@@ -218,6 +218,24 @@
     #controls-foot .check {
       margin-bottom: 0;
     }
+    #controls-foot .check:has(input:disabled) {
+      opacity: 0.5;
+    }
+    /* The two options, and Reset Layout at the right end beside them. */
+    #controls-foot .foot-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    #controls-foot .foot-checks {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    #reset-layout {
+      flex-shrink: 0;
+    }
     #init-values {
       width: 100%;
       padding: 12px;
@@ -225,6 +243,32 @@
     }
     .editor-column .panel h2 {
       margin-bottom: 8px;
+    }
+    /* A panel is moved by its heading, with the columns two or four to a row. */
+    @media (min-width: 920px) {
+      .editor-column .panel h2 {
+        cursor: grab;
+        touch-action: none;
+        user-select: none;
+      }
+    }
+    /* Where a panel being moved will land, and the panel itself, lifted, following the pointer. */
+    .panel-drop {
+      border: 2px dashed #b8c0ca;
+      border-radius: 8px;
+      background: transparent;
+    }
+    .panel.dragging {
+      position: fixed;
+      z-index: 50;
+      pointer-events: none;
+      opacity: 0.9;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+      cursor: grabbing;
+    }
+    /* An empty column still takes a panel dropped on it. */
+    .editor-column:empty {
+      min-height: 60px;
     }
     /* A panel in the color of its node on the Patch tab, its heading and the thumbs of the
        sliders a CC moves. */
@@ -1332,7 +1376,7 @@
 <body>
 
 <header>
-  <h1>SPMS-1 (type-2) Editor<span class="version">v0.0.8</span><span class="github-link">(<a href="https://github.com/risgk/midi_synthesizer_spms1" target="_blank" rel="noopener">View on GitHub</a>)</span></h1>
+  <h1>SPMS-1 (type-2) Editor<span class="version">v0.0.9</span><span class="github-link">(<a href="https://github.com/risgk/midi_synthesizer_spms1" target="_blank" rel="noopener">View on GitHub</a>)</span></h1>
   <nav class="tabs">
     <button class="tab-btn active" data-tab="controls">Controls</button>
     <button class="tab-btn" data-tab="patch">Patch</button>
@@ -1365,7 +1409,13 @@
   <div class="editor-grid" id="controls"></div>
   <!-- Moved under the Delay panel each time the controls are drawn. -->
   <div id="controls-foot">
-    <label class="check" title="A parameter with no CC holds the value the patch gives it, which its slider sets through NRPN. Hidden, it shows up as soon as a CC is given to it or it is marked as a favorite."><input type="checkbox" id="show-no-cc"> Show parameters with no CC</label>
+    <div class="foot-row">
+      <div class="foot-checks">
+        <label class="check" title="A parameter with no CC holds the value the patch gives it, which its slider sets through NRPN. Hidden, it shows up as soon as a CC is given to it or it is marked as a favorite."><input type="checkbox" id="show-no-cc"> Show parameters with no CC</label>
+        <label class="check" title="Only the parameters marked with a star, with or without a CC. Unmarking one here takes it off the tab."><input type="checkbox" id="favorites-only"> Show favorites only</label>
+      </div>
+      <button class="btn" id="reset-layout" title="Put the panels back where they were at first. A panel is moved by dragging its heading, with the columns two or four to a row; where they are is kept in this browser, for every patch.">Reset Layout</button>
+    </div>
     <button class="btn primary" id="init-values" title="Set each CC value and each value of a parameter with no CC back to what the synth powers up at, and send them; the wiring is kept">Initialize Values</button>
   </div>
 </div>
@@ -1605,10 +1655,10 @@
       {"entry":45,"module":"OSC_2","key":"PITCH_COARSE","label":"Pitch Coarse","bipolar":true,"cc":0,"value":64,"controller":false,"hint":"±5 Oct","slots":[["OSC_2_PITCH_COARSE","Pitch Coarse",true]]},
       {"entry":46,"module":"OSC_2","key":"PITCH","label":"Pitch","bipolar":false,"cc":85,"value":5,"controller":false,"hint":"0 to +1 Oct","favorite":true,"slots":[["OSC_2_PITCH","Pitch",false]]},
       {"entry":47,"module":"OSC_2","key":"PITCH_FINE","label":"Pitch Fine","bipolar":true,"cc":76,"value":65,"controller":false,"hint":"±60 Cent","slots":[["OSC_2_PITCH_FINE","Pitch Fine",true]]},
-      {"entry":48,"module":"OSC_2","key":"PITCH_MOD_1_AMT","label":"Pitch Mod 1 Amt","bipolar":false,"cc":89,"value":4,"controller":false,"hintInputs":["MOD_1_IN"],"slots":[["OSC_2_PITCH_MOD_1_AMT","Pitch Mod 1 Amt",false]]},
+      {"entry":48,"module":"OSC_2","key":"PITCH_MOD_1_AMT","label":"Pitch Mod 1 Amt","bipolar":false,"cc":89,"value":4,"controller":false,"hintInputs":["MOD_1_IN"],"favorite":true,"slots":[["OSC_2_PITCH_MOD_1_AMT","Pitch Mod 1 Amt",false]]},
       {"entry":49,"module":"OSC_2","key":"PITCH_MOD_1_POL","label":"Pitch Mod 1 Pol","bipolar":true,"cc":0,"value":76,"controller":false,"hint":"− to +","slots":[["OSC_2_PITCH_MOD_1_POL","Pitch Mod 1 Pol",true]]},
       {"entry":50,"module":"OSC_2","key":"PITCH_MOD_1_SW","label":"Pitch Mod 1 Sw","bipolar":false,"cc":0,"value":124,"controller":false,"hint":"Off/On","slots":[["OSC_2_PITCH_MOD_1_SW","Pitch Mod 1 Sw",false]]},
-      {"entry":51,"module":"OSC_2","key":"PITCH_MOD_2_AMT","label":"Pitch Mod 2 Amt","bipolar":false,"cc":13,"value":4,"controller":false,"hintInputs":["MOD_2_IN"],"slots":[["OSC_2_PITCH_MOD_2_AMT","Pitch Mod 2 Amt",false]]},
+      {"entry":51,"module":"OSC_2","key":"PITCH_MOD_2_AMT","label":"Pitch Mod 2 Amt","bipolar":false,"cc":13,"value":4,"controller":false,"hintInputs":["MOD_2_IN"],"favorite":true,"slots":[["OSC_2_PITCH_MOD_2_AMT","Pitch Mod 2 Amt",false]]},
       {"entry":52,"module":"OSC_2","key":"PITCH_MOD_2_POL","label":"Pitch Mod 2 Pol","bipolar":true,"cc":0,"value":76,"controller":false,"hint":"− to +","slots":[["OSC_2_PITCH_MOD_2_POL","Pitch Mod 2 Pol",true]]},
       {"entry":53,"module":"OSC_2","key":"PITCH_MOD_2_SW","label":"Pitch Mod 2 Sw","bipolar":false,"cc":0,"value":124,"controller":false,"hint":"Off/On","slots":[["OSC_2_PITCH_MOD_2_SW","Pitch Mod 2 Sw",false]]},
       {"entry":54,"module":"OSC_2","key":"PW_MOD_1_AMT","label":"PW Mod 1 Amt","bipolar":false,"cc":8,"value":4,"controller":false,"hintInputs":["MOD_1_IN"],"slots":[["OSC_2_PW_MOD_1_AMT","PW Mod 1 Amt",false]]},
@@ -1618,30 +1668,31 @@
       {"entry":58,"module":"OSC_2","key":"SYNC_SW","label":"Sync Sw","bipolar":false,"cc":112,"value":4,"controller":false,"hint":"Off/On","slots":[["OSC_2_SYNC_SW","Sync Sw",false]]},
       {"entry":59,"module":"NOISE_1","key":"COLOR","label":"Color","bipolar":false,"cc":115,"value":4,"controller":false,"hint":"White to Red","slots":[["NOISE_1_COLOR","Color",false]]},
       {"entry":60,"module":"NOISE_1","key":"LEVEL","label":"Level","bipolar":false,"cc":0,"value":124,"controller":false,"slots":[["NOISE_1_LEVEL","Level",false]]},
-      {"entry":61,"module":"MIXER_2","key":"LEVEL_1","label":"Level 1","bipolar":false,"cc":19,"value":88,"controller":false,"hintInputs":["IN_1"],"slots":[["MIXER_2_LEVEL_1","Level 1",false]]},
-      {"entry":62,"module":"MIXER_2","key":"LEVEL_2","label":"Level 2","bipolar":false,"cc":20,"value":88,"controller":false,"hintInputs":["IN_2"],"slots":[["MIXER_2_LEVEL_2","Level 2",false]]},
+      {"entry":61,"module":"MIXER_2","key":"LEVEL_1","label":"Level 1","bipolar":false,"cc":19,"value":88,"controller":false,"hintInputs":["IN_1"],"favorite":true,"slots":[["MIXER_2_LEVEL_1","Level 1",false]]},
+      {"entry":62,"module":"MIXER_2","key":"LEVEL_2","label":"Level 2","bipolar":false,"cc":20,"value":88,"controller":false,"hintInputs":["IN_2"],"favorite":true,"slots":[["MIXER_2_LEVEL_2","Level 2",false]]},
       {"entry":63,"module":"MIXER_2","key":"LEVEL_3","label":"Level 3","bipolar":false,"cc":21,"value":4,"controller":false,"hintInputs":["IN_3"],"slots":[["MIXER_2_LEVEL_3","Level 3",false]]},
       {"entry":64,"module":"MIXER_2","key":"LEVEL_4","label":"Level 4","bipolar":false,"cc":23,"value":4,"controller":false,"hintInputs":["IN_4"],"slots":[["MIXER_2_LEVEL_4","Level 4",false]]},
       {"entry":65,"module":"MIXER_2","key":"OUT_LEVEL","label":"Out Level","bipolar":false,"cc":0,"value":64,"controller":false,"slots":[["MIXER_2_OUT_LEVEL","Out Level",false]]},
       {"entry":66,"module":"FILTER_1","key":"CUTOFF","label":"Cutoff","bipolar":false,"cc":74,"value":100,"controller":false,"favorite":true,"slots":[["FILTER_1_CUTOFF","Cutoff",false]]},
       {"entry":67,"module":"FILTER_1","key":"RESONANCE","label":"Resonance","bipolar":false,"cc":71,"value":64,"controller":false,"favorite":true,"slots":[["FILTER_1_RESONANCE","Resonance",false]]},
       {"entry":68,"module":"FILTER_1","key":"MODE","label":"Mode","bipolar":false,"cc":39,"value":4,"controller":false,"hint":"LP to Notch to HP","slots":[["FILTER_1_MODE","Mode",false]]},
-      {"entry":69,"module":"FILTER_1","key":"PITCH_AMT","label":"Pitch Amt","bipolar":false,"cc":9,"value":64,"controller":false,"hintInputs":["PITCH_IN"],"slots":[["FILTER_1_PITCH_AMT","Pitch Amt",false]]},
+      {"entry":69,"module":"FILTER_1","key":"PITCH_AMT","label":"Pitch Amt","bipolar":false,"cc":9,"value":4,"controller":false,"hintInputs":["PITCH_IN"],"slots":[["FILTER_1_PITCH_AMT","Pitch Amt",false]]},
       {"entry":70,"module":"FILTER_1","key":"MOD_1_AMT","label":"Mod 1 Amt","bipolar":false,"cc":24,"value":28,"controller":false,"hintInputs":["MOD_1_IN"],"favorite":true,"slots":[["FILTER_1_MOD_1_AMT","Mod 1 Amt",false]]},
       {"entry":71,"module":"FILTER_1","key":"MOD_1_POL","label":"Mod 1 Pol","bipolar":true,"cc":117,"value":124,"controller":false,"hint":"− to +","slots":[["FILTER_1_MOD_1_POL","Mod 1 Pol",true]]},
       {"entry":72,"module":"FILTER_1","key":"MOD_2_AMT","label":"Mod 2 Amt","bipolar":false,"cc":25,"value":4,"controller":false,"hintInputs":["MOD_2_IN"],"favorite":true,"slots":[["FILTER_1_MOD_2_AMT","Mod 2 Amt",false]]},
       {"entry":73,"module":"FILTER_1","key":"MOD_2_POL","label":"Mod 2 Pol","bipolar":true,"cc":0,"value":76,"controller":false,"hint":"− to +","slots":[["FILTER_1_MOD_2_POL","Mod 2 Pol",true]]},
-      {"entry":74,"module":"AMP_1","key":"GAIN","label":"Gain","bipolar":false,"cc":15,"value":64,"controller":false,"slots":[["AMP_1_GAIN","Gain",false]]},
+      {"entry":74,"module":"AMP_1","key":"GAIN","label":"Gain","bipolar":false,"cc":15,"value":100,"controller":false,"favorite":true,"slots":[["AMP_1_GAIN","Gain",false]]},
       {"entry":75,"module":"AMP_1","key":"MOD_1_2_MIX","label":"Mod 1/2 Mix","bipolar":false,"cc":36,"value":4,"controller":false,"hintInputs":["MOD_1_IN","MOD_2_IN"],"slots":[["AMP_1_MOD_1_2_MIX","Mod 1/2 Mix",false]]},
-      {"entry":76,"module":"CHORUS_1","key":"MIX","label":"Mix","bipolar":false,"cc":93,"value":64,"controller":false,"slots":[["CHORUS_1_MIX","Mix",false]]},
+      {"entry":76,"module":"CHORUS_1","key":"MIX","label":"Mix","bipolar":false,"cc":93,"value":64,"controller":false,"favorite":true,"slots":[["CHORUS_1_MIX","Mix",false]]},
       {"entry":77,"module":"CHORUS_1","key":"RATE","label":"Rate","bipolar":false,"cc":58,"value":64,"controller":false,"slots":[["CHORUS_1_RATE","Rate",false]]},
       {"entry":78,"module":"CHORUS_1","key":"DEPTH","label":"Depth","bipolar":false,"cc":59,"value":64,"controller":false,"slots":[["CHORUS_1_DEPTH","Depth",false]]},
-      {"entry":79,"module":"DELAY_1","key":"MIX","label":"Mix","bipolar":false,"cc":94,"value":34,"controller":false,"slots":[["DELAY_1_MIX","Mix",false]]},
+      {"entry":79,"module":"DELAY_1","key":"MIX","label":"Mix","bipolar":false,"cc":94,"value":34,"controller":false,"favorite":true,"slots":[["DELAY_1_MIX","Mix",false]]},
       {"entry":80,"module":"DELAY_1","key":"TIME","label":"Time","bipolar":false,"cc":90,"value":64,"controller":false,"slots":[["DELAY_1_TIME","Time",false]]},
       {"entry":81,"module":"DELAY_1","key":"FEEDBACK","label":"Feedback","bipolar":false,"cc":92,"value":64,"controller":false,"slots":[["DELAY_1_FEEDBACK","Feedback",false]]},
       {"entry":82,"key":"MOD_WHEEL","label":"Mod Wheel","bipolar":false,"cc":1,"value":4,"controller":true,"slots":[["MOD_WHEEL","Mod Wheel",false],["MOD_WHEEL_REV","Mod Wheel Rev",false,"rev"],["MOD_WHEEL_INV","Mod Wheel Inv",false,"inv"],["MOD_WHEEL_REV_INV","Mod Wheel Rev Inv",false,"rev_inv"]]},
       {"entry":83,"key":"GENERAL_1","label":"General 1","bipolar":false,"cc":16,"value":4,"controller":true,"slots":[["GENERAL_1","General 1",false],["GENERAL_1_REV","General 1 Rev",false,"rev"],["GENERAL_1_INV","General 1 Inv",false,"inv"],["GENERAL_1_REV_INV","General 1 Rev Inv",false,"rev_inv"],["GENERAL_1_BIPOLAR","General 1 Bipolar",true,"bipolar"],["GENERAL_1_BIPOLAR_INV","General 1 Bipolar Inv",true,"bipolar_inv"],["GENERAL_1_SIN","General 1 Sin",false,"sin"],["GENERAL_1_COS","General 1 Cos",false,"cos"],["GENERAL_1_LO","General 1 Lo",false,"lo"],["GENERAL_1_HI","General 1 Hi",false,"hi"],["GENERAL_1_NEG","General 1 Neg",false,"neg"],["GENERAL_1_MID","General 1 Mid",false,"mid"],["GENERAL_1_POS","General 1 Pos",false,"pos"]]},
       {"entry":84,"key":"GENERAL_2","label":"General 2","bipolar":false,"cc":17,"value":4,"controller":true,"slots":[["GENERAL_2","General 2",false],["GENERAL_2_REV","General 2 Rev",false,"rev"],["GENERAL_2_INV","General 2 Inv",false,"inv"],["GENERAL_2_REV_INV","General 2 Rev Inv",false,"rev_inv"],["GENERAL_2_BIPOLAR","General 2 Bipolar",true,"bipolar"],["GENERAL_2_BIPOLAR_INV","General 2 Bipolar Inv",true,"bipolar_inv"],["GENERAL_2_SIN","General 2 Sin",false,"sin"],["GENERAL_2_COS","General 2 Cos",false,"cos"],["GENERAL_2_LO","General 2 Lo",false,"lo"],["GENERAL_2_HI","General 2 Hi",false,"hi"],["GENERAL_2_NEG","General 2 Neg",false,"neg"],["GENERAL_2_MID","General 2 Mid",false,"mid"],["GENERAL_2_POS","General 2 Pos",false,"pos"]]},
+      {"entry":85,"module":"AMP_1","key":"LIMITER_SW","label":"Limiter Sw","bipolar":false,"cc":0,"value":124,"controller":false,"hint":"Off/On","slots":[["AMP_1_LIMITER_SW","Limiter Sw",false]]},
     ],
     signals: [
       {"id":0,"key":"NONE","label":"0.0"},
@@ -3113,10 +3164,11 @@
   document.getElementById('btn-init').addEventListener('click', () => {
     pushHistory();
     state = defaultState();
-    // The parameters with no CC on the Controls tab are hidden again.
+    // The Controls tab shows the favorites alone again, and the parameters with no CC are hidden.
     showNoCC = false;
     document.getElementById('show-no-cc').checked = false;
     try { localStorage.setItem(SHOW_NO_CC_KEY, ''); } catch (e) { /* storage unavailable */ }
+    setFavoritesOnly(true);
     renderAll();
     fitView();
   });
@@ -3571,24 +3623,58 @@
   // ---- Controls tab --------------------------------------------------------------------------
 
   // Each slider follows its slot's CC assignment in the patch, and moves the value of that CC.
-  // The panels in the signal order of the patch's default layout, top to bottom, then left to right.
+  // The panels in the order the sound goes, top to bottom, then left to right: the two oscillators
+  // heading the first two columns, so that they sit side by side at the top with the columns two to
+  // a row as well as four, then the filter, the amp and the effects, and the modulation last. Fixed:
+  // a run order sent over NRPN does not move them.
   // The general controls have sliders here, and the mod wheel its wheel by the soft keyboard.
   const CONTROL_PANELS = [
-    { col: 0, title: 'Controller', module: null },
-    { col: 0, title: 'Pitch 1', module: 'PITCH_1' },
-    { col: 0, title: 'EG 1', module: 'EG_1' },
-    { col: 0, title: 'EG 2', module: 'EG_2' },
-    { col: 1, title: 'LFO 1', module: 'LFO_1' },
-    { col: 1, title: 'Mixer 1', module: 'MIXER_1' },
-    { col: 1, title: 'Osc 1', module: 'OSC_1' },
-    { col: 2, title: 'Osc 2', module: 'OSC_2' },
-    { col: 2, title: 'Noise 1', module: 'NOISE_1' },
-    { col: 2, title: 'Mixer 2', module: 'MIXER_2' },
-    { col: 3, title: 'Filter 1', module: 'FILTER_1' },
-    { col: 3, title: 'Amp 1', module: 'AMP_1' },
-    { col: 3, title: 'Chorus 1', module: 'CHORUS_1' },
-    { col: 3, title: 'Delay 1', module: 'DELAY_1' },
+    { col: 0, title: 'Osc 1', module: 'OSC_1' },
+    { col: 0, title: 'Noise 1', module: 'NOISE_1' },
+    { col: 0, title: 'Mixer 1', module: 'MIXER_1' },
+    { col: 1, title: 'Osc 2', module: 'OSC_2' },
+    { col: 1, title: 'Mixer 2', module: 'MIXER_2' },
+    { col: 2, title: 'Filter 1', module: 'FILTER_1' },
+    { col: 2, title: 'Amp 1', module: 'AMP_1' },
+    { col: 2, title: 'Chorus 1', module: 'CHORUS_1' },
+    { col: 2, title: 'Delay 1', module: 'DELAY_1' },
+    { col: 3, title: 'Controller', module: null },
+    { col: 3, title: 'Pitch 1', module: 'PITCH_1' },
+    { col: 3, title: 'EG 1', module: 'EG_1' },
+    { col: 3, title: 'EG 2', module: 'EG_2' },
+    { col: 3, title: 'LFO 1', module: 'LFO_1' },
   ];
+
+  // Where each panel sits, by column, top to bottom: CONTROL_PANELS's columns until a panel is
+  // dragged by its heading, and then what was dragged, kept in this browser for every patch, as the
+  // Controls tab's options are, rather than in the patch, as it does not change the sound. A panel
+  // a patch hides keeps its place, and one the kept layout does not know goes to its own column.
+  const PANEL_LAYOUT_KEY = 'spms1-type2-editor-controls-layout';
+  const PANEL_BY_ID = Object.fromEntries(CONTROL_PANELS.map(p => [p.module || 'CONTROLLER', p]));
+  function defaultPanelLayout() {
+    const cols = [[], [], [], []];
+    for (const p of CONTROL_PANELS) cols[p.col].push(p.module || 'CONTROLLER');
+    return cols;
+  }
+  function loadPanelLayout() {
+    let kept = null;
+    try { kept = JSON.parse(localStorage.getItem(PANEL_LAYOUT_KEY) || 'null'); } catch (e) { /* storage unavailable, or not JSON */ }
+    if (!Array.isArray(kept) || kept.length !== 4 || !kept.every(Array.isArray)) return defaultPanelLayout();
+    const seen = new Set();
+    const cols = kept.map(col => col.filter(id => PANEL_BY_ID[id] && !seen.has(id) && seen.add(id)));
+    for (const p of CONTROL_PANELS) if (!seen.has(p.module || 'CONTROLLER')) cols[p.col].push(p.module || 'CONTROLLER');
+    return cols;
+  }
+  let panelLayout = loadPanelLayout();
+  function savePanelLayout() {
+    try { localStorage.setItem(PANEL_LAYOUT_KEY, JSON.stringify(panelLayout)); } catch (e) { /* storage unavailable */ }
+  }
+  document.getElementById('reset-layout').addEventListener('click', () => {
+    panelLayout = defaultPanelLayout();
+    try { localStorage.removeItem(PANEL_LAYOUT_KEY); } catch (e) { /* storage unavailable */ }
+    renderControls();
+    fitTabArea();
+  });
 
   function panelItems(p) {
     if (!p.module) return CONTROLLER_ITEMS.filter(c => c.key !== 'MOD_WHEEL');
@@ -3667,19 +3753,119 @@
     fitTabArea();
   });
 
+  // Only the favorites, with or without a CC, in place of what Show parameters with no CC picks,
+  // which is set aside while this is on. On until it is turned off, and kept as that is.
+  const FAVORITES_ONLY_KEY = 'spms1-type2-editor-favorites-only';
+  let favoritesOnly = true;
+  try { favoritesOnly = localStorage.getItem(FAVORITES_ONLY_KEY) !== '0'; } catch (e) { /* storage unavailable */ }
+  function setFavoritesOnly(on) {
+    favoritesOnly = on;
+    document.getElementById('favorites-only').checked = on;
+    document.getElementById('show-no-cc').disabled = on;
+    try { localStorage.setItem(FAVORITES_ONLY_KEY, on ? '1' : '0'); } catch (e) { /* storage unavailable */ }
+  }
+  setFavoritesOnly(favoritesOnly);
+  document.getElementById('favorites-only').addEventListener('change', e => {
+    setFavoritesOnly(e.target.checked);
+    renderControls();
+    fitTabArea();
+  });
+
+  // A panel dragged by its heading, with the columns two or four to a row: lifted to follow the
+  // pointer, fixed in place where it stays in its column so that it keeps the column's look, with a dashed box where it will land, in the column under the pointer and above the
+  // first panel there whose middle is below it. In one column the order is as it is laid out.
+  let panelDrag = null;
+  function startPanelDrag(e) {
+    if (e.button !== 0 || matchMedia('(max-width: 919px)').matches) return;
+    const panel = e.currentTarget.closest('.panel');
+    const rect = panel.getBoundingClientRect();
+    const drop = document.createElement('div');
+    drop.className = 'panel-drop';
+    drop.style.height = rect.height + 'px';
+    panel.before(drop);
+    panel.classList.add('dragging');
+    panel.style.width = rect.width + 'px';
+    panel.style.left = rect.left + 'px';
+    panel.style.top = rect.top + 'px';
+    panelDrag = { panel, drop, dx: e.clientX - rect.left, dy: e.clientY - rect.top, pointerId: e.pointerId };
+    e.preventDefault();
+    window.addEventListener('pointermove', movePanelDrag);
+    window.addEventListener('pointerup', endPanelDrag);
+    window.addEventListener('pointercancel', endPanelDrag);
+  }
+  function movePanelDrag(e) {
+    if (!panelDrag || e.pointerId !== panelDrag.pointerId) return;
+    const { panel, drop, dx, dy } = panelDrag;
+    panel.style.left = (e.clientX - dx) + 'px';
+    panel.style.top = (e.clientY - dy) + 'px';
+    const cols = [...document.querySelectorAll('#controls .editor-column')];
+    // The column whose span holds the pointer across, or the nearest, among those of its row.
+    let best = null, bestDist = Infinity;
+    for (const c of cols) {
+      const r = c.getBoundingClientRect();
+      const dxc = e.clientX < r.left ? r.left - e.clientX : (e.clientX > r.right ? e.clientX - r.right : 0);
+      const dyc = e.clientY < r.top ? r.top - e.clientY : (e.clientY > r.bottom ? e.clientY - r.bottom : 0);
+      const d = dxc * 4 + dyc;
+      if (d < bestDist) { bestDist = d; best = c; }
+    }
+    if (!best) return;
+    const foot = document.getElementById('controls-foot');
+    const before = [...best.querySelectorAll(':scope > .panel:not(.dragging)')].find(p => {
+      const r = p.getBoundingClientRect();
+      return e.clientY < r.top + r.height / 2;
+    });
+    if (before) { if (drop.nextSibling !== before) before.before(drop); }
+    else if (foot.parentNode === best) { if (drop.nextSibling !== foot) foot.before(drop); }
+    else if (best.lastChild !== drop) best.appendChild(drop);
+    // Scrolled along near the top or the bottom of the window, as a wire is on the Patch tab.
+    const edge = 48;
+    if (e.clientY < edge) window.scrollBy(0, -14);
+    else if (e.clientY > window.innerHeight - edge) window.scrollBy(0, 14);
+  }
+  function endPanelDrag(e) {
+    if (!panelDrag || e.pointerId !== panelDrag.pointerId) return;
+    const { panel, drop } = panelDrag;
+    window.removeEventListener('pointermove', movePanelDrag);
+    window.removeEventListener('pointerup', endPanelDrag);
+    window.removeEventListener('pointercancel', endPanelDrag);
+    const id = panel.dataset.panel;
+    const cols = [...document.querySelectorAll('#controls .editor-column')];
+    const col = cols.indexOf(drop.parentNode);
+    if (e.type === 'pointerup' && col >= 0) {
+      // Before the next panel shown in the column, in the kept order, which holds the panels a
+      // patch hides as well; at the end of the column if none follows.
+      let next = drop.nextElementSibling;
+      while (next && (!next.dataset.panel || next === panel)) next = next.nextElementSibling;
+      panelLayout = panelLayout.map(ids => ids.filter(x => x !== id));
+      const ids = panelLayout[col];
+      const at = next ? ids.indexOf(next.dataset.panel) : -1;
+      ids.splice(at < 0 ? ids.length : at, 0, id);
+      savePanelLayout();
+    }
+    panel.remove();
+    drop.remove();
+    panelDrag = null;
+    renderControls();
+    fitTabArea();
+  }
+
   function renderControls() {
     const root = document.getElementById('controls');
-    // Rebuilding under a slider being dragged would drop the drag.
+    // Rebuilding under a slider or a panel being dragged would drop the drag; a panel dropped draws
+    // the tab again.
     if (heldRange && root.contains(heldRange)) return;
+    if (panelDrag) return;
     const cols = [0, 1, 2, 3].map(() => document.createElement('div'));
     cols.forEach(c => { c.className = 'editor-column'; });
-    for (const p of CONTROL_PANELS) {
-      const items = panelItems(p).filter(c => showNoCC || state.cc[c.key] || state.favorites.has(c.key));
+    panelLayout.forEach((ids, col) => ids.forEach(id => {
+      const p = PANEL_BY_ID[id];
+      const items = panelItems(p).filter(c => favoritesOnly ? state.favorites.has(c.key) : (showNoCC || state.cc[c.key] || state.favorites.has(c.key)));
       // Mixer 1 has no CC by default, so its panel appears only once a patch gives it one, or
       // with the parameters that have none shown.
-      if (!items.length) continue;
+      if (!items.length) return;
       const panel = document.createElement('div');
       panel.className = 'panel colored';
+      panel.dataset.panel = id;
       panel.style.setProperty('--node-color', NODE_COLORS[p.module || 'CONTROLLER']);
       panel.innerHTML = `<h2>${p.title}</h2><div class="control-row">` + items.map(c => `
         <div class="slider-knob-zone" data-ctrl="${c.key}">
@@ -3691,10 +3877,11 @@
             <span class="slider-norm" title="The value the synth sees in the slot"></span>
           </div>
         </div>`).join('') + '</div>';
-      cols[p.col].appendChild(panel);
-    }
+      cols[col].appendChild(panel);
+    }));
     cols[3].appendChild(document.getElementById('controls-foot'));
     root.replaceChildren(...cols);
+    root.querySelectorAll('.panel h2').forEach(h => h.addEventListener('pointerdown', startPanelDrag));
     root.querySelectorAll('.slider-knob-zone').forEach(zone => {
       const c = CONTROL[zone.dataset.ctrl];
       const slider = zone.querySelector('input');

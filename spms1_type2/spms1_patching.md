@@ -305,7 +305,7 @@ both at the same signal for a mono output.
 | 23 | Mixer 1 Level 1 | | 51 | Osc 2 Pitch Mod 2 Amt | | 79 | Delay 1 Mix |
 | 24 | Mixer 1 Level 2 | | 52 | Osc 2 Pitch Mod 2 Pol | | 80 | Delay 1 Time |
 | 25 | Mixer 1 Level 3 | | 53 | Osc 2 Pitch Mod 2 Sw | | 81 | Delay 1 Feedback |
-| 26 | Mixer 1 Level 4 | | 54 | Osc 2 PW Mod 1 Amt | |  |  |
+| 26 | Mixer 1 Level 4 | | 54 | Osc 2 PW Mod 1 Amt | | 85 | Amp 1 Limiter Sw |
 | 27 | Mixer 1 Out Level | | 55 | Osc 2 PW Mod 1 Pol | |  |  |
 
 <!-- patch_gen end -->
@@ -587,12 +587,19 @@ Osc 2 has none: it is the one that syncs, and is lighter without it.
 Osc 2 syncs to Osc 1 (hard sync). Osc 2 Sync In restarts Osc 2's phase where it rises through
 zero, from zero or below on one sample to above zero on the next, as the comparator on an analog
 oscillator's sync input does, and it takes Osc 1 Out Saw by default, which rises through zero
-once a cycle, at its wrap. Where between the two samples it crossed is found by drawing a line
-between them, and Osc 2 starts again from that point, so the synced wave repeats at Osc 1's pitch
-with a period as exact as Osc 1's; a restart rounded to a sample would make the period jitter by
-one, which is heard as roughness. The sawtooth's step is rounded off evenly about where it falls,
-so the line crosses close to it. The step the restart makes in Osc 2's wave is left as it is, not
-smoothed. Any signal can be routed there instead: a pulse rises once a cycle too, though at the
+once a cycle, at its wrap. Osc 2 starts again from the point between the two samples where it
+crossed, so the synced wave repeats at Osc 1's pitch with a period as exact as Osc 1's; a restart
+rounded to a sample would make the period jitter by one, which is heard as roughness. The point is
+found as where a step rounded off by PolyBLEP, as the sawtooth's is, would be: a line drawn between
+the two samples would miss it by up to a twelfth of a sample. The step the restart makes in Osc 2's
+wave is rounded off by PolyBLEP too, on the sample after the crossing and the one before it, which
+is why everything Osc 2 puts out comes one sample (21 us) late. Left as it was, the step folded
+back some 30 dB more than the rest of the oscillator, heard as a grain under a sync sweep from about
+C5 up; now a synced Osc 2 aliases about as little as an unsynced one, -50 dB or less under 5 kHz up
+to C8. The delay is heard only where Osc 2 plays in unison with Osc 1, with no detune: their sum
+then loses 0.5 dB at 5 kHz and 2 dB at 10 kHz. Any signal can be routed there instead, though one
+that is not a step from one level to the same level the other side of zero, a slow wave or a pulse
+off center, is placed a little off, the same each cycle: a pulse rises once a cycle too, though at the
 ends of its width it has no step to rise at; a wave that rises through zero more than once a
 cycle restarts Osc 2 each time. Osc 2 Sync Sw, on CC#112, takes Sync In at value 64 and above
 and ignores it below; it powers up off (value 4), so the default patch is unsynced until it is
@@ -645,11 +652,26 @@ folds back as an inharmonic tone: at 48 kHz, from 8 kHz (value 108) to 10 kHz (v
 included. Above that the resonance acts as at Q 256. With the cutoff following the keyboard, as
 in the examples below, it plays as a sine voice.
 
-Amp 1 Gain (CC#15) is doubled into the gain: silent at value 4, unity at
-value 64, where it powers up, and twice, 6 dB up, at value 124, so a quiet sound can be brought up as
-well as a loud one taken down. The amp holds its output to -1.0 and +1.0, as a mixer holds its
-sum, so the gain cannot take the output past one unit, which the default patch, peaking near
-0.5 there, stays below.
+Amp 1 Gain (CC#15) is squared and taken four times into the gain: silent at value 4, half,
+6 dB down, at value 46, unity at value 64, twice, 6 dB up, at value 89, and four times, 12 dB up,
+at value 124, so a quiet sound can be brought well up as well as a loud one taken down. It powers
+up at value 100, 2.56 times, 8.2 dB up, which takes the default patch's peaks to about -4 dBFS.
+The amp holds its output to -1.0 and +1.0, as a mixer holds its sum, so the gain cannot take the
+output past one unit.
+
+What would cross that is taken down first by a look-ahead limiter, Amp 1 Limiter Sw, which has no
+CC and powers up on (value 124; off below value 64). Everything the amp puts out comes 1 ms (48
+samples) late, and while it is in that delay the limiter has already seen it: where the level
+would pass 0.9 (-0.9 dB), it brings the gain down over that 1 ms, before the peak arrives, so the
+peak comes out at 0.9, and lets it back up over about 100 ms. The gain moves smoothly, so where the
+clamp would cut corners into a sound and fold their harmonics back below the audible band, the
+limiter does not: a sawtooth taken 12 dB past one unit at A4 to A7 aliases -46 to -53 dB under
+5 kHz with it, and -29 to -37 dB on the clamp. Off, the output is just as late, and the clamp is
+reached. Limiting is heard on a loud passage as its peaks held level, and the release as the
+sound coming back up after one; the default patch stays under 0.9 and is not limited. The
+filter's output clip and a mixer's sum still have the hard limit, past which a sawtooth driven
+6 dB over at A6 to A7 aliases about -30 dB under 5 kHz; keep the levels before the filter where
+the peaks only just reach one unit, and bring the sound up with the amp instead.
 
 Amp 1 takes two modulations, Mod 1 In and Mod 2 In, and scales the gain by a crossfade of the
 two: Amp 1 Mod 1/2 Mix (CC#36) runs in a straight line from Mod 1 In alone at 0.0 (value 4) to Mod 2 In
@@ -738,7 +760,7 @@ sweep while Osc 1 holds the note.
   white to red
 - Keyboard tracking is wired by default as well, the pitch from Pitch 1 on the filter's Pitch input,
   so CC#9 sets how far the cutoff follows the keys: all the way at value 124, half way at value 64,
-  where it powers up, and not at all at value 4
+  and not at all at value 4, where it powers up
 - The filter as a sine voice, playing its own oscillation in tune: CC#71 = 124 makes it oscillate,
   CC#9 = 124 has the cutoff follow the keys, and CC#74 = 49 puts it on note 60 at note 60, and so
   on the note played everywhere. CC#24 = 4 takes the envelope off the cutoff, and CC#19 = 4 and CC#20 = 4 take the oscillators out,

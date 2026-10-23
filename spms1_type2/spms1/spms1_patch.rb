@@ -181,6 +181,7 @@ SLOT_CHORUS_1_DEPTH         = 206
 SLOT_DELAY_1_MIX            = 207
 SLOT_DELAY_1_TIME           = 208
 SLOT_DELAY_1_FEEDBACK       = 209
+SLOT_AMP_1_LIMITER_SW       = 213
 
 # The controller slots, the mod wheel's and the general controls', and where a smoothed copy of each
 # sits, off the bus at its slot + SMOOTHED_SLOT_OFFSET, with each controller's first smoothing
@@ -318,6 +319,7 @@ NRPN_SOURCE_CHORUS_1_DEPTH         = 334
 NRPN_SOURCE_DELAY_1_MIX            = 335
 NRPN_SOURCE_DELAY_1_TIME           = 336
 NRPN_SOURCE_DELAY_1_FEEDBACK       = 337
+NRPN_SOURCE_AMP_1_LIMITER_SW       = 341
 
 # A CC number of 0 means the control has no CC: a parameter's control slot then holds its NRPN_VALUE_*
 # below, whatever CC it had before, so a patch sets it alone, and a controller slot holds 0.0.
@@ -406,6 +408,7 @@ NRPN_CC_DELAY_1_FEEDBACK       = 465
 NRPN_CC_MOD_WHEEL              = 466
 NRPN_CC_GENERAL_1              = 467
 NRPN_CC_GENERAL_2              = 468
+NRPN_CC_AMP_1_LIMITER_SW       = 469
 
 # The value of each parameter's control slot while it has no CC, as a CC value.
 NRPN_VALUE_PITCH_1_GLIDE          = 512
@@ -490,6 +493,7 @@ NRPN_VALUE_CHORUS_1_DEPTH         = 590
 NRPN_VALUE_DELAY_1_MIX            = 591
 NRPN_VALUE_DELAY_1_TIME           = 592
 NRPN_VALUE_DELAY_1_FEEDBACK       = 593
+NRPN_VALUE_AMP_1_LIMITER_SW       = 597
 
 # The constants of the bus, which nothing else ever writes. A slot not written here holds 0.0.
 def spms1_fill_constant_signals(signals)
@@ -634,6 +638,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_DELAY_1_MIX           , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_DELAY_1_TIME          , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_DELAY_1_FEEDBACK      , SIGNAL_OWN)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_AMP_1_LIMITER_SW      , SIGNAL_OWN)
 
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_PITCH_1_GLIDE         , 5)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_PITCH_1_OUT_1_GLIDE_SW, 34)
@@ -761,12 +766,12 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_CUTOFF       , 100)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_RESONANCE    , 64)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_MODE         , 4)
-  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_PITCH_AMT    , 64)
+  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_PITCH_AMT    , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_MOD_1_AMT    , 28)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_MOD_1_POL    , 124)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_MOD_2_AMT    , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_MOD_2_POL    , 76)
-  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_AMP_1_GAIN            , 64)
+  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_AMP_1_GAIN            , 100)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_AMP_1_MOD_1_2_MIX     , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_CHORUS_1_MIX          , 64)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_CHORUS_1_RATE         , 64)
@@ -774,6 +779,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_DELAY_1_MIX           , 34)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_DELAY_1_TIME          , 64)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_DELAY_1_FEEDBACK      , 64)
+  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_AMP_1_LIMITER_SW      , 124)
 
   C.set_midi_cc_value(midi_ch, 5  , 4  ) # Pitch 1 Glide
   C.set_midi_cc_value(midi_ch, 34 , 124) # Pitch 1 Out 1 Glide Sw
@@ -816,11 +822,11 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 74 , 100) # Filter 1 Cutoff
   C.set_midi_cc_value(midi_ch, 71 , 64 ) # Filter 1 Resonance
   C.set_midi_cc_value(midi_ch, 39 , 4  ) # Filter 1 Mode
-  C.set_midi_cc_value(midi_ch, 9  , 64 ) # Filter 1 Pitch Amt
+  C.set_midi_cc_value(midi_ch, 9  , 4  ) # Filter 1 Pitch Amt
   C.set_midi_cc_value(midi_ch, 24 , 28 ) # Filter 1 Mod 1 Amt
   C.set_midi_cc_value(midi_ch, 117, 124) # Filter 1 Mod 1 Pol
   C.set_midi_cc_value(midi_ch, 25 , 4  ) # Filter 1 Mod 2 Amt
-  C.set_midi_cc_value(midi_ch, 15 , 64 ) # Amp 1 Gain
+  C.set_midi_cc_value(midi_ch, 15 , 100) # Amp 1 Gain
   C.set_midi_cc_value(midi_ch, 36 , 4  ) # Amp 1 Mod 1/2 Mix
   C.set_midi_cc_value(midi_ch, 93 , 64 ) # Chorus 1 Mix
   C.set_midi_cc_value(midi_ch, 58 , 64 ) # Chorus 1 Rate

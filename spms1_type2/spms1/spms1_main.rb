@@ -55,6 +55,7 @@ MODULES_SIZE = 32
 # unrouted input should be silent rather than wired to whatever happens to sit in slot 0. Nothing
 # ever writes them, so they hold what the bus was filled with at startup. They are what a routing
 # reaches for when an input wants a fixed value rather than a source.
+# SPMS1_BUS_SIZE in spms1_bus.h, the host's array that holds the slots, is the same.
 SIGNALS_SIZE = 256
 
 # The controller slots -- the mod wheel's and the general controls' -- are filled once a buffer
@@ -108,10 +109,10 @@ order_written = Array.new(MODULES_SIZE, 0)
 audio_buffer_l = Array.new(AUDIO_BUFFER_WORDS, 0.0)
 audio_buffer_r = Array.new(AUDIO_BUFFER_WORDS, 0.0)
 
-# The signal bus: each module's latest output, in its SIGNAL_* slot. Declared out here so it
-# carries across buffers, since a routing with feedback reads last sample's value and at a buffer
-# edge that is the previous iteration's.
-signals = Array.new(SIGNALS_SIZE, 0.0)
+# The signal bus: each module's latest output, in its SIGNAL_* slot. Its slots live with the host
+# (SignalBus, in spms1_framework.rb), so they carry across buffers, since a routing with feedback
+# reads last sample's value and at a buffer edge that is the previous iteration's.
+signals = SignalBus.new
 spms1_fill_constant_signals(signals)
 
 # The default patch, written into the NRPN table the loop reads it back from. Why it is what it is,
@@ -334,10 +335,11 @@ while true
   source_delay_1_mix = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_MIX), SLOT_DELAY_1_MIX)
   source_delay_1_time = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_TIME), SLOT_DELAY_1_TIME)
   source_delay_1_feedback = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_DELAY_1_FEEDBACK), SLOT_DELAY_1_FEEDBACK)
+  source_amp_1_limiter_sw = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_AMP_1_LIMITER_SW), SLOT_AMP_1_LIMITER_SW)
   # patch_gen end
 
   # Which CC fills each control slot, or, for a parameter with none, its value from NRPN category
-  # 4. The signals array -- the bus and the parameters' own slots above it -- is the only thing
+  # 4. `signals` -- the bus and the parameters' own slots above it -- is the only thing
   # downstream reads, so this is where MIDI enters and the only place a CC number appears. Each
   # parameter's CC fills its own slot, and the mod wheel's CC its slot on the bus. Written by
   # patch_gen.
@@ -506,6 +508,8 @@ while true
   signals[SLOT_DELAY_1_TIME] = cc_to_unipolar(cc_or_nrpn(cc_delay_1_time, C.get_midi_cc_value(MIDI_CH, cc_delay_1_time), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_DELAY_1_TIME)))
   cc_delay_1_feedback = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_DELAY_1_FEEDBACK)
   signals[SLOT_DELAY_1_FEEDBACK] = cc_to_unipolar(cc_or_nrpn(cc_delay_1_feedback, C.get_midi_cc_value(MIDI_CH, cc_delay_1_feedback), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_DELAY_1_FEEDBACK)))
+  cc_amp_1_limiter_sw = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_AMP_1_LIMITER_SW)
+  signals[SLOT_AMP_1_LIMITER_SW] = cc_to_unipolar(cc_or_nrpn(cc_amp_1_limiter_sw, C.get_midi_cc_value(MIDI_CH, cc_amp_1_limiter_sw), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_AMP_1_LIMITER_SW)))
   cc_mod_wheel = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_MOD_WHEEL)
   mod_wheel = C.get_midi_cc_value(MIDI_CH, cc_mod_wheel)
   signals[SIGNAL_MOD_WHEEL] = cc_or_zero(cc_mod_wheel, cc_to_unipolar(mod_wheel))
@@ -665,6 +669,7 @@ while true
   delay_1.set_mix(signals[source_delay_1_mix])
   delay_1.set_time(signals[source_delay_1_time])
   delay_1.set_feedback(signals[source_delay_1_feedback])
+  amp_1.set_limiter_switch(signals[source_amp_1_limiter_sw])
   # patch_gen end
 
   i = 0

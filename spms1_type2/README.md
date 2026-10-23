@@ -1,4 +1,4 @@
-MIDI Synthesizer SPMS-1 (type-2) v0.0.8
+MIDI Synthesizer SPMS-1 (type-2) v0.0.9
 =======================================
 
 - Monophonic semi-modular MIDI Synthesizer for Raspberry Pi Pico 2, made with Spinel (Ruby AOT Compiler)
@@ -6,10 +6,11 @@ MIDI Synthesizer SPMS-1 (type-2) v0.0.8
 - Last-note priority with one note of memory: releasing the newest note while the one before it is still held goes back to that one, legato (for trills)
 - 48 kHz audio output: 24 bit through an I2S DAC, or PWM Audio (no DAC needed)
 - Oscillator: a sawtooth-to-square morph with pulse width (CC#114), and pulse width modulation (PWM) by the same two modulations as the pitch, the envelope and the LFO by default, on CC#8 and 103; and the sawtooth and the pulse on outputs of their own too, and on Osc 1 a sine sub an octave down
-- Hard sync: Osc 2 restarts where Sync In, Osc 1's sawtooth by default, rises through zero, at the point between two samples it crosses (Sync Sw, CC#112)
+- Hard sync: Osc 2 restarts where Sync In, Osc 1's sawtooth by default, rises through zero, at the point between two samples it crosses, with the step rounded off by PolyBLEP as a wrap's is (Sync Sw, CC#112)
 - Envelopes: two ADS envelopes, EG 2 on the amp's Mod 2 In, an organ's at power-up, on CC#52, 53 and 54, with the release switch of both on CC#105
 - LFO: triangle (PolyBLAMP) and unipolar square (PolyBLEP), each on an output of its own, and a main output crossfading from one to the other (Wave, CC#33); a reset input, on Note Gate by default, that restarts it at each note with Reset Sw (CC#113) on
 - Filter: ZDF/TPT State Variable Filter (with a nonlinear leak on the band pass integrator, solved by the one-step Newton method), with low pass, high pass and band pass outputs and a main output crossfading from the low pass to the high pass through a notch (Mode, CC#39)
+- Amp: a gain of up to +12 dB (CC#15), with a look-ahead limiter that holds the peaks under the one-unit clamp, rounded off rather than cut (Limiter Sw, no CC, on at power-up)
 - Chorus: mono in, stereo out, as a module in the run order
 - Delay: stereo, with feedback, as a module in the run order (up to 340 ms)
 - Pitch: the note's pitch as a module in the run order, with portamento as an exponential lag (CC#5), pitch bend past it (range on CC#57) and a stretch of the keys (CC#22)
@@ -67,9 +68,13 @@ Required Software for Modification
       output in "spms1.ino", is put in RAM as well, with `SPMS1_RAM_FUNC`. From flash it would be
       fetched through the XIP cache, which core 0's MIDI and USB code shares, and a burst of MIDI
       would slow the synth's buffer by evicting it
+    - The signal bus is a C array of the sketch's, in "spms1_bus.h", which "spinel_rt_mcu_cold.h"
+      includes at the end of "spinel_rt.h", so that a bus read or write inlines as one load or store
+      rather than going through a checked Spinel Array
     - "spms1_main.c" is generated in "spms1" with `spinel spms1_main.rb -c --rbs sig`. The type seeds
-      in "spms1/sig" keep the filter states and the parameter smoothing unboxed;
-      "spms1/sig/spms1_filter.rbs" and "spms1/sig/spms1_dsp.rbs" say why they are needed
+      in "spms1/sig" keep the filter states, the parameter smoothing and the bus writes unboxed;
+      "spms1/sig/spms1_filter.rbs", "spms1/sig/spms1_dsp.rbs" and "spms1/sig/spms1_framework.rbs" say
+      why they are needed
 - Ruby (CRuby), to change the patch's numbers or the default patch, or to add a module: they are
   kept in "spms1_patch.yaml", and `ruby patch_gen/spms1_patch_gen.rb` writes them out to
   "spms1/spms1_patch.rb" (read by "spms1/spms1_main.rb"), the tables of "spms1_editor.html", the NRPN
@@ -95,6 +100,12 @@ Usage
       hidden until a CC is given to one or it is marked as a favorite, unless "Show parameters with
       no CC", cleared by default, is ticked, and the choice is remembered. The slider of one with no
       CC sets the value its slot holds, sent as NRPN
+    - "Show favorites only", ticked by default, shows the parameters marked as favorites (the star)
+      alone, with or without a CC, and the choice is remembered
+    - A panel there is moved by dragging its heading, within its column or to another, with the
+      columns two or four to a row. Where the panels are is kept in the browser, the same for every
+      patch, and Reset Layout puts them back: Osc 1 and Osc 2 heading the first two columns, then
+      Filter 1 to Delay 1, and the modulation, Controller to LFO 1, last
     - A note in parentheses follows a parameter's name there: its range, as "(White to Red)" on
       Noise 1 Color, or, on a level or a modulation amount, what the patch routes to the input it
       scales, as "(Osc 1 Sub)" on Mixer 2 Level 3, kept up to date as the routing changes. On the
@@ -257,7 +268,8 @@ the LFO at full level swings the pitch an octave either way. Osc 1 PW Mod 2 Amt 
 to the pulse width and powers up at 0.0. LFO 1 Level powers up at 1.0, so CC#13 alone sets the
 vibrato, from none to an octave. The pitch from Pitch 1 reaches the filter too, on Filter 1 Pitch In, for keyboard tracking: CC#9
 (Filter 1 Pitch Amt) at its top has the cutoff follow the note a semitone for a semitone,
-unmoved at note 60. Filter 1 Pitch Amt powers up at 0.5 (value 64), half a semitone for a semitone.
+unmoved at note 60. Filter 1 Pitch Amt powers up at 0.0 (value 4), so the cutoff stays where CC#74 puts
+it whatever the note until CC#9 is turned up.
 The envelope reaches the oscillator too, on Osc 1 Mod 1 In, for a pitch envelope: Pitch Mod 1
 Amt (CC#89) and PW Mod 1 Amt (CC#8) power up at 0.0, with it off. Each modulation depth spans the
 whole range of what it moves, so bringing a source down to a musical depth is left to the patch

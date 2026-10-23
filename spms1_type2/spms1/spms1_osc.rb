@@ -93,6 +93,11 @@ module Spms1
       # Sync In of the last sample: a restart is taken where it rises from there through zero.
       @sync_last = 0.0
       @sync_switch = 0.0
+      # process_synced puts out each sample one sample late, so that the step a restart makes can be
+      # rounded off on the sample before it too: these are that sample's two sawtooths, waiting to
+      # go out.
+      @held_saw1 = 0.0
+      @held_saw2 = 0.0
     end
 
     # Sync Sw: Sync In is taken at 0.5 and above, and ignored below.
@@ -283,14 +288,26 @@ module Spms1
 
     # process with Sync In, which restarts the phase where it rises through zero, from zero or below
     # on the last sample to above it on this one, as a comparator on an analog oscillator's sync input
-    # does: another oscillator's sawtooth, at its wrap, or a gate, at a note on. Where between the
-    # two samples it crossed is found by drawing a line between them, and the phase starts this
-    # sample as far past 0.0 as the time since then takes it, so the synced wave repeats with the
-    # period of what it is synced to, where a restart rounded to a sample would make the period
-    # jitter by a sample. A sawtooth's PolyBLEP rounds its step off evenly about where it falls, so
-    # the line crosses close to it. The step the restart makes in the wave is left as it is, not
-    # smoothed. Sync In is taken only with Sync Sw on. The sub is left out: only an oscillator run by process, Osc 1 in the patch, has Out Sub.
-    # Without a restart the output is the same as process's to the bit.
+    # does: another oscillator's sawtooth, at its wrap, or a gate, at a note on. The phase starts
+    # this sample as far past 0.0 as the time since the crossing takes it, so the synced wave
+    # repeats with the period of what it is synced to, where a restart rounded to a sample would
+    # make the period jitter by a sample. Where between the two samples it crossed is found as the
+    # place of a step rounded off by PolyBLEP, from one level to the same level the other side of
+    # zero, would be: that is what an oscillator's sawtooth is at its wrap, and a line drawn
+    # between the two samples would miss it by up to a twelfth of a sample, which takes back most
+    # of what the rounding off below gains. A gate, a step between two samples, comes out at the
+    # last sample, as a line would put it. Sync In is taken only with Sync Sw on. The sub is left
+    # out: only an oscillator run by process, Osc 1 in the patch, has Out Sub.
+    #
+    # Every step the two sawtooths make, at a wrap or at a restart, is rounded off by PolyBLEP, on
+    # the sample after it and the one before it. Nothing tells the one before that a restart is
+    # coming, so every sample goes out one sample late, held until the next has been worked out,
+    # and the wraps are rounded off the same way rather than seen coming as process does: a wrap a
+    # restart cuts off is then never rounded off, and one just after a restart is. Left as it was,
+    # a restart's step folds back as much as a sawtooth taken with no correction does, some 30 dB
+    # more than the rest of the oscillator. Without a restart the output is process's, one sample
+    # late, but where the pitch jumps: a phase a wrap left behind can be within the new dt of 0.0,
+    # which both take for a wrap just past, and this one rounds off on the sample before as well.
     def process_synced(control_tick, pitch_input = 0.0, modulation_1_input = 0.0, modulation_2_input = 0.0, sync_input = 0.0)
       update_controls if control_tick
 
@@ -301,39 +318,92 @@ module Spms1
       current_dt = freq * @inv_sample_rate
       current_dt_inv = 1.0 / current_dt
 
-      # The crossing, at crossed_at from the last sample, 0.0, to this one, 1.0. The span is held
-      # below zero, so that the division is finite where Sync In has not risen; it is used only
-      # where it has, and a rise is never smaller than the floor but by a step of a millionth.
-      from_below = (@sync_last > 0.0) ? 0.0 : 1.0
-      restart = (sync_input > 0.0) ? from_below * @sync_switch : 0.0
-      span = @sync_last - sync_input
-      span = (span < -0.000001) ? span : -0.000001
-      crossed_at = @sync_last / span
-      @sync_last = sync_input
-      @phase += restart * ((1.0 - crossed_at) * current_dt - @phase)
-
-      naive_saw1 = -2.0 * @phase + 1.0
-      blep1 = poly_blep(@phase, current_dt, current_dt_inv)
-      saw1 = naive_saw1 + blep1
-
       pw_modulation = (modulation_1_input * @current_pw_modulation_1_depth) + (modulation_2_input * @current_pw_modulation_2_depth)
       total_pulse_width = @current_pulse_width + pw_modulation
       pulse_width = (total_pulse_width < -0.5) ? -0.5 : ((total_pulse_width > 0.5) ? 0.5 : total_pulse_width)
-      phase2 = @phase + (0.5 - pulse_width)
-      phase2 -= (phase2 < 1.0) ? 0.0 : 1.0
+      shift = 0.5 - pulse_width
 
-      naive_saw2 = -2.0 * phase2 + 1.0
-      blep2 = poly_blep(phase2, current_dt, current_dt_inv)
-      saw2 = naive_saw2 + blep2
+      # The crossing, a fraction f past the last sample, since = 1 - f before this one. A step of
+      # height h rounded off by PolyBLEP there leaves the last sample at -h/2 + h(1 - f)^2/2 and
+      # this one at h/2 - hf^2/2: their sum over their difference, r, is
+      # (1/2 - f) / (1/2 + f - f^2), whatever h is. f, the root of that in [0, 1], is
+      # (1 - r) / (1 + r + sqrt(1 + 3r^2)), which is 1/2 less an odd function of r: that function
+      # is taken as a polynomial of the 7th degree, fitted by least squares over [-1, 1], within a
+      # thousandth of a sample, so that no square root and no second division is needed, and since
+      # is 1/2 plus it. r is within [-1, 1] wherever the last sample is at or below zero and this
+      # one above it, the sum being no larger than the rise there; elsewhere the rise is taken as
+      # at least the sum, which holds r there too, and above zero, so that the division is finite.
+      # A rise is never smaller than that floor but by a step of a millionth. Held so, rather than
+      # by clamping r, the compiler finds no end of the clamp to jump past.
+      from_below = (@sync_last > 0.0) ? 0.0 : 1.0
+      restart = ((sync_input > 0.0) ? from_below : 0.0) * @sync_switch
+      sum = sync_input + @sync_last
+      reach = sum.abs
+      rise = sync_input - @sync_last
+      rise = (rise > reach) ? rise : reach
+      rise = (rise > 0.000001) ? rise : 0.000001
+      ratio = sum / rise
+      ratio_2 = ratio * ratio
+      since = 0.5 + ratio * (0.74532 + ratio_2 * (-0.477774 + ratio_2 * (0.361841 + ratio_2 * -0.130411)))
+      @sync_last = sync_input
 
-      output = saw1 - (saw2 * @current_waveform)
+      # Each step is placed by how long before this sample it was, in samples: since for the
+      # restart at the crossing, and a wrap where the phase, wrapped, is less than dt. A wrap that
+      # would have come after the crossing is one the restart cut off. Each step counts only where
+      # it is made, so the steps are worked out whatever happens and multiplied by whether it did.
+      travel = since * current_dt
+      phase2_on = @phase + shift
+      phase2_on -= (phase2_on < 1.0) ? 0.0 : 1.0
+      wrap1_since = @phase * current_dt_inv
+      wrap1 = ((wrap1_since < 1.0) ? 1.0 : 0.0) * (1.0 - ((wrap1_since > since) ? 0.0 : 1.0) * restart)
+      wrap2_since = phase2_on * current_dt_inv
+      wrap2 = ((wrap2_since < 1.0) ? 1.0 : 0.0) * (1.0 - ((wrap2_since > since) ? 0.0 : 1.0) * restart)
+      # The phases the restart cut off, at the crossing, give the steps it makes: each sawtooth
+      # jumps up to where it starts, by twice the phase it had reached.
+      cut_phase = @phase - travel
+      cut_phase += (cut_phase < 0.0) ? 1.0 : 0.0
+      cut_phase2 = cut_phase + shift
+      cut_phase2 -= (cut_phase2 < 1.0) ? 0.0 : 1.0
+      step1 = restart * (cut_phase + cut_phase)
+      step2 = restart * ((cut_phase2 - shift) + (cut_phase2 - shift))
+
+      @phase += restart * (travel - @phase)
+      # After a restart the second sawtooth starts at the shift, and wraps again within this sample
+      # where the shift is within travel of 1.0.
+      phase2 = @phase + shift
+      wraps = (phase2 < 1.0) ? 0.0 : 1.0
+      phase2 -= wraps
+      wraps_after = wraps * restart
+      wrap3_since = phase2 * current_dt_inv
+
+      # PolyBLEP of a step of h, a time s past it: -h(1 - s)^2 / 2 on this sample, and hs^2 / 2 on
+      # the one before. A wrap is a step of two.
+      after_w1 = 1.0 - wrap1_since
+      after_w2 = 1.0 - wrap2_since
+      after_w3 = 1.0 - wrap3_since
+      after_r = 1.0 - since
+      step1 *= 0.5
+      step2 *= 0.5
+      saw1 = -2.0 * @phase + 1.0 - wrap1 * (after_w1 * after_w1) - step1 * (after_r * after_r)
+      saw2 = -2.0 * phase2 + 1.0 - wrap2 * (after_w2 * after_w2) - wraps_after * (after_w3 * after_w3) - step2 * (after_r * after_r)
+      since_2 = since * since
+      before1 = wrap1 * (wrap1_since * wrap1_since) + step1 * since_2
+      before2 = wrap2 * (wrap2_since * wrap2_since) + wraps_after * (wrap3_since * wrap3_since) + step2 * since_2
 
       @phase += current_dt
       @phase -= (@phase < 1.0) ? 0.0 : 1.0
 
-      @output_saw = saw1 * 0.5
-      @output_pulse = (saw1 - saw2) * 0.5
-      output * 0.5
+      # The sample before goes out now, with its share of this sample's steps, and this one is
+      # held. The halving brings the outputs to one unit peak to peak, as process's. Wave, smoothed,
+      # is taken as it is now: it moves too slowly for a sample to tell.
+      held_saw1 = @held_saw1 + before1
+      held_saw2 = @held_saw2 + before2
+      @output_saw = held_saw1 * 0.5
+      @output_pulse = (held_saw1 - held_saw2) * 0.5
+      output = (held_saw1 - held_saw2 * @current_waveform) * 0.5
+      @held_saw1 = saw1
+      @held_saw2 = saw2
+      output
     end
 
     # The sawtooth, the pulse and the sub of the last sample process or process_synced took (the sub
