@@ -577,6 +577,17 @@ Wave. Both run at the same level as Out, -0.5 to +0.5, and the default patch use
 mixer can take the two from one oscillator at levels of their own, or one oscillator can feed a
 saw to one place and a pulse to another.
 
+The sawtooth's steps, and so the pulse's, are rounded off by PolyBLEP over the sample on either
+side, which holds what folds back under 5 kHz to -59 dB or less on any note, and under 10 kHz to
+-47 dB or less. Above that it keeps less back the higher the note: the folded tones gather between
+10 kHz and the top of the band, from C8 (4.2 kHz) up -36 dB under 16 kHz and -24 dB above, and
+at C9 (8.4 kHz) and above, where little of the wave itself is left under 24 kHz, -29 to -31 dB under
+16 kHz and -13 to -18 dB above. They are not in tune with the note, and a glide or a bend moves them
+the other way, so the top octaves can be heard as a whistle above the note. It is left as it is:
+a longer BLEP would delay the oscillator further and dull it lower down, and a fade to a sine at
+the top would cost every note. Kept to C8 and below, or with the filter closing on the top, it is
+not heard.
+
 Osc 1 also puts out a sub, Out Sub: a sine an octave down, at the same level, -0.5 to
 +0.5. It is locked to the oscillator's phase, starting each of its cycles where every other cycle
 of the sawtooth starts, so it follows the pitch, the glide and the modulation exactly. A sine has
