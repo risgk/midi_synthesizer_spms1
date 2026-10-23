@@ -218,6 +218,9 @@
     #controls-foot .check {
       margin-bottom: 0;
     }
+    #controls-foot .check:has(input:disabled) {
+      opacity: 0.5;
+    }
     #init-values {
       width: 100%;
       padding: 12px;
@@ -1366,6 +1369,7 @@
   <!-- Moved under the Delay panel each time the controls are drawn. -->
   <div id="controls-foot">
     <label class="check" title="A parameter with no CC holds the value the patch gives it, which its slider sets through NRPN. Hidden, it shows up as soon as a CC is given to it or it is marked as a favorite."><input type="checkbox" id="show-no-cc"> Show parameters with no CC</label>
+    <label class="check" title="Only the parameters marked with a star, with or without a CC. Unmarking one here takes it off the tab."><input type="checkbox" id="favorites-only"> Show favorites only</label>
     <button class="btn primary" id="init-values" title="Set each CC value and each value of a parameter with no CC back to what the synth powers up at, and send them; the wiring is kept">Initialize Values</button>
   </div>
 </div>
@@ -3117,6 +3121,7 @@
     showNoCC = false;
     document.getElementById('show-no-cc').checked = false;
     try { localStorage.setItem(SHOW_NO_CC_KEY, ''); } catch (e) { /* storage unavailable */ }
+    setFavoritesOnly(false);
     renderAll();
     fitView();
   });
@@ -3667,6 +3672,24 @@
     fitTabArea();
   });
 
+  // Only the favorites, with or without a CC, in place of what Show parameters with no CC picks,
+  // which is set aside while this is on. Kept as that is.
+  const FAVORITES_ONLY_KEY = 'spms1-type2-editor-favorites-only';
+  let favoritesOnly = false;
+  try { favoritesOnly = localStorage.getItem(FAVORITES_ONLY_KEY) === '1'; } catch (e) { /* storage unavailable */ }
+  function setFavoritesOnly(on) {
+    favoritesOnly = on;
+    document.getElementById('favorites-only').checked = on;
+    document.getElementById('show-no-cc').disabled = on;
+    try { localStorage.setItem(FAVORITES_ONLY_KEY, on ? '1' : ''); } catch (e) { /* storage unavailable */ }
+  }
+  setFavoritesOnly(favoritesOnly);
+  document.getElementById('favorites-only').addEventListener('change', e => {
+    setFavoritesOnly(e.target.checked);
+    renderControls();
+    fitTabArea();
+  });
+
   function renderControls() {
     const root = document.getElementById('controls');
     // Rebuilding under a slider being dragged would drop the drag.
@@ -3674,7 +3697,7 @@
     const cols = [0, 1, 2, 3].map(() => document.createElement('div'));
     cols.forEach(c => { c.className = 'editor-column'; });
     for (const p of CONTROL_PANELS) {
-      const items = panelItems(p).filter(c => showNoCC || state.cc[c.key] || state.favorites.has(c.key));
+      const items = panelItems(p).filter(c => favoritesOnly ? state.favorites.has(c.key) : (showNoCC || state.cc[c.key] || state.favorites.has(c.key)));
       // Mixer 1 has no CC by default, so its panel appears only once a patch gives it one, or
       // with the parameters that have none shown.
       if (!items.length) continue;
