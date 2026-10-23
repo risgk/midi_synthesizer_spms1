@@ -221,8 +221,20 @@
     #controls-foot .check:has(input:disabled) {
       opacity: 0.5;
     }
+    /* The two options, and Reset Layout at the right end beside them. */
+    #controls-foot .foot-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    #controls-foot .foot-checks {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
     #reset-layout {
-      align-self: flex-start;
+      flex-shrink: 0;
     }
     #init-values {
       width: 100%;
@@ -1397,9 +1409,13 @@
   <div class="editor-grid" id="controls"></div>
   <!-- Moved under the Delay panel each time the controls are drawn. -->
   <div id="controls-foot">
-    <label class="check" title="A parameter with no CC holds the value the patch gives it, which its slider sets through NRPN. Hidden, it shows up as soon as a CC is given to it or it is marked as a favorite."><input type="checkbox" id="show-no-cc"> Show parameters with no CC</label>
-    <label class="check" title="Only the parameters marked with a star, with or without a CC. Unmarking one here takes it off the tab."><input type="checkbox" id="favorites-only"> Show favorites only</label>
-    <button class="btn" id="reset-layout" title="Put the panels back where they were at first. A panel is moved by dragging its heading, with the columns two or four to a row; where they are is kept in this browser, for every patch.">Reset Layout</button>
+    <div class="foot-row">
+      <div class="foot-checks">
+        <label class="check" title="A parameter with no CC holds the value the patch gives it, which its slider sets through NRPN. Hidden, it shows up as soon as a CC is given to it or it is marked as a favorite."><input type="checkbox" id="show-no-cc"> Show parameters with no CC</label>
+        <label class="check" title="Only the parameters marked with a star, with or without a CC. Unmarking one here takes it off the tab."><input type="checkbox" id="favorites-only"> Show favorites only</label>
+      </div>
+      <button class="btn" id="reset-layout" title="Put the panels back where they were at first. A panel is moved by dragging its heading, with the columns two or four to a row; where they are is kept in this browser, for every patch.">Reset Layout</button>
+    </div>
     <button class="btn primary" id="init-values" title="Set each CC value and each value of a parameter with no CC back to what the synth powers up at, and send them; the wiring is kept">Initialize Values</button>
   </div>
 </div>
