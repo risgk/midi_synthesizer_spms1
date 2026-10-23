@@ -587,12 +587,19 @@ Osc 2 has none: it is the one that syncs, and is lighter without it.
 Osc 2 syncs to Osc 1 (hard sync). Osc 2 Sync In restarts Osc 2's phase where it rises through
 zero, from zero or below on one sample to above zero on the next, as the comparator on an analog
 oscillator's sync input does, and it takes Osc 1 Out Saw by default, which rises through zero
-once a cycle, at its wrap. Where between the two samples it crossed is found by drawing a line
-between them, and Osc 2 starts again from that point, so the synced wave repeats at Osc 1's pitch
-with a period as exact as Osc 1's; a restart rounded to a sample would make the period jitter by
-one, which is heard as roughness. The sawtooth's step is rounded off evenly about where it falls,
-so the line crosses close to it. The step the restart makes in Osc 2's wave is left as it is, not
-smoothed. Any signal can be routed there instead: a pulse rises once a cycle too, though at the
+once a cycle, at its wrap. Osc 2 starts again from the point between the two samples where it
+crossed, so the synced wave repeats at Osc 1's pitch with a period as exact as Osc 1's; a restart
+rounded to a sample would make the period jitter by one, which is heard as roughness. The point is
+found as where a step rounded off by PolyBLEP, as the sawtooth's is, would be: a line drawn between
+the two samples would miss it by up to a twelfth of a sample. The step the restart makes in Osc 2's
+wave is rounded off by PolyBLEP too, on the sample after the crossing and the one before it, which
+is why everything Osc 2 puts out comes one sample (21 us) late. Left as it was, the step folded
+back some 30 dB more than the rest of the oscillator, heard as a grain under a sync sweep from about
+C5 up; now a synced Osc 2 aliases about as little as an unsynced one, -50 dB or less under 5 kHz up
+to C8. The delay is heard only where Osc 2 plays in unison with Osc 1, with no detune: their sum
+then loses 0.5 dB at 5 kHz and 2 dB at 10 kHz. Any signal can be routed there instead, though one
+that is not a step from one level to the same level the other side of zero, a slow wave or a pulse
+off center, is placed a little off, the same each cycle: a pulse rises once a cycle too, though at the
 ends of its width it has no step to rise at; a wave that rises through zero more than once a
 cycle restarts Osc 2 each time. Osc 2 Sync Sw, on CC#112, takes Sync In at value 64 and above
 and ignores it below; it powers up off (value 4), so the default patch is unsynced until it is
