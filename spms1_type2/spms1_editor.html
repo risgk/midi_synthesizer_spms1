@@ -652,10 +652,10 @@
       color: #ccc;
       white-space: nowrap;
     }
-    /* Below 1280px the keys are narrower, KB_KEY_WIDTH_NARROW, so that 640px shows two octaves
-       and more and 960px three; on a phone the wheels are narrower still, 3/2 of a semitone, so
+    /* Below 960px the keys are narrower, KB_KEY_WIDTH_NARROW, so that 640px shows two octaves
+       and more, while 960px shows the 37 keys at their full width; on a phone the wheels are narrower still, 3/2 of a semitone, so
        that 360px shows an octave and more. */
-    @media (max-width: 1279px) {
+    @media (max-width: 959px) {
       .keyboard-frame { --kbd-key-width: calc(16px * var(--kbd-scale)); }
     }
     @media (max-width: 480px) {
@@ -4061,8 +4061,8 @@
 
   const KB_NOTE_MAX = 120;
   const KB_KEY_WIDTH = 20;  // a semitone in the upper half, times kbScale; 37 keys fit 960px, with room
-  const KB_KEY_WIDTH_NARROW = 16;  // the same below 1280px; two octaves and more fit 640px
-  const KB_NARROW = window.matchMedia('(max-width: 1279px)');
+  const KB_KEY_WIDTH_NARROW = 16;  // the same below 960px; two octaves and more fit 640px
+  const KB_NARROW = window.matchMedia('(max-width: 959px)');
   // The center of 37 keys from a C (C3 - C6 by default), in semitones from the left end of the C.
   const KB_CENTER_OFFSET = (36 + 5 / 3) / 2;
   const KB_DEFAULT_C = 48;  // C3
@@ -4358,7 +4358,7 @@
     kbSetCenter(kbPrefs.center);
     // The text size can change without a resize of the window.
     if (window.ResizeObserver) new ResizeObserver(() => kbFitScale()).observe(document.getElementById('kbd-label'));
-    // The keys change width across 1280px.
+    // The keys change width across 960px.
     KB_NARROW.addEventListener('change', () => kbSetCenter(kbPrefs.center));
     kbSetVisible(!kbPrefs.hidden);
   }
