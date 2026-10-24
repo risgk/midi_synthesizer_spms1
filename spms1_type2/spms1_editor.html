@@ -2248,12 +2248,13 @@
   let armed = null;
 
   // Each node's outputs, and the wires from them, take its color, set apart from its neighbors'. The
-  // Controller, the editor's own, takes the primary color, Ruby; Filter 1 a red set apart from it.
+  // Controller, the editor's own, takes the primary color, Ruby; Filter 1 a red set apart from it; Osc 2
+  // gold, set apart from Osc 1's blue, and EG 2 purple, set apart from that gold.
   // The constants and the output, which make no sound of their own, are in grays.
   const NODE_COLORS = {
     CONTROLLER: '#e0115f', CONST: '#666666', OUT: '#3d3d3d',
-    PITCH_1: '#2c3e50', EG_1: '#a65813', EG_2: '#98620b', LFO_1: '#1c7f46', MIXER_1: '#117d68',
-    OSC_1: '#2772a4', OSC_2: '#793a93', NOISE_1: '#557a0e', MIXER_2: '#9c2f86', FILTER_1: '#c0392b',
+    PITCH_1: '#2c3e50', EG_1: '#a65813', EG_2: '#793a93', LFO_1: '#1c7f46', MIXER_1: '#117d68',
+    OSC_1: '#2772a4', OSC_2: '#a37a00', NOISE_1: '#557a0e', MIXER_2: '#9c2f86', FILTER_1: '#c0392b',
     AMP_1: '#473baf', CHORUS_1: '#007784', DELAY_1: '#5e2500',
   };
   const nodeOfOutput = {};
