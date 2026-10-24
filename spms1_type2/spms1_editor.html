@@ -133,19 +133,6 @@
     .midi-bar .form-group.narrow {
       flex: 0 0 auto;
     }
-    /* Below 1280px, where the MIDI settings have a line of their own, they can be hidden by MIDI at the left of
-       the line, which then takes its place alone; in the header, from 1280px, they take no line and stay. */
-    .midi-fold {
-      font-weight: 600;
-      white-space: nowrap;
-    }
-    header .midi-fold {
-      display: none;
-    }
-    .midi-panel.collapsed:not(header .midi-panel) .midi-bar > :not(.midi-fold),
-    .midi-panel.collapsed:not(header .midi-panel) .midi-note {
-      display: none;
-    }
     /* Why no MIDI device is listed, if Web MIDI is not there or not allowed (see showMIDINote). */
     .midi-note {
       margin-top: 6px;
@@ -1457,7 +1444,6 @@
 
 <div class="panel midi-panel">
   <div class="midi-bar">
-    <button type="button" class="fold-toggle midi-fold" aria-expanded="true" title="Show or hide the MIDI settings"><span class="fold-caret" aria-hidden="true">&#9660;</span>MIDI</button>
     <div class="form-group narrow">
       <label for="midi-ch">MIDI Channel</label>
       <select id="midi-ch"></select>
@@ -3349,22 +3335,6 @@
     note.hidden = false;
   }
 
-  // The MIDI settings shown or hidden, as the last time (see .midi-fold).
-  const MIDI_FOLD_KEY = 'spms1-type2-editor-midi-folded';
-  function setMIDIFolded(folded) {
-    document.querySelector('.midi-panel').classList.toggle('collapsed', folded);
-    document.querySelector('.midi-fold').setAttribute('aria-expanded', String(!folded));
-    try { localStorage.setItem(MIDI_FOLD_KEY, folded ? '1' : '0'); } catch (e) { /* storage unavailable */ }
-    fitTabArea();
-  }
-  function initMIDIFold() {
-    let folded = false;
-    try { folded = localStorage.getItem(MIDI_FOLD_KEY) === '1'; } catch (e) { /* storage unavailable */ }
-    document.querySelector('.midi-fold').addEventListener('click', () =>
-      setMIDIFolded(!document.querySelector('.midi-panel').classList.contains('collapsed')));
-    setMIDIFolded(folded);
-  }
-
   function handleDeviceChange() {
     ['midi-in', 'midi-out'].forEach(id => {
       const sel = document.getElementById(id);
@@ -4630,7 +4600,6 @@
     renderAll();
     createKeyboard();
     initSidePanels();
-    initMIDIFold();
     let tab = 'controls';
     try { tab = localStorage.getItem(TAB_KEY) || tab; } catch (e) { /* storage unavailable */ }
     let wide = false;

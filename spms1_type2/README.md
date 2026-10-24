@@ -96,8 +96,8 @@ Usage
 ### Web Editor
 
 - Cross-platform web-based parameter controller via Web MIDI API: "spms1_editor.html"
-    - The MIDI settings can be hidden below a width of 1280px, where they have a line of their own. If Web MIDI is
-      not available or not allowed, a note under them says so; SPMS-1 Web (Built-in) can still be played
+    - If Web MIDI is not available or not allowed, a note under the MIDI settings says so; SPMS-1 Web (Built-in)
+      can still be played
     - Its Controls tab shows a slider for each parameter, those with no CC in blue; these are
       hidden until a CC is given to one or it is marked as a favorite, unless "Show parameters with
       no CC", cleared by default, is ticked, and the choice is remembered. The slider of one with no
