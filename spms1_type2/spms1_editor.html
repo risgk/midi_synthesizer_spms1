@@ -1182,10 +1182,11 @@
       text-underline-offset: 2px;
     }
     /* On the Patch tab the field stands out more than one with no CC: a pale red field and its number
-       in bold red, in a dotted frame as light as that one's, a red apart from the orange of a reserved CC. */
+       in bold red, in a dotted frame as light as that one's, 2px wide for the gaps of the dots, a red
+       apart from the orange of a reserved CC. */
     .row input.shared {
-      border-style: dotted;
-      border-color: #d99aa0;
+      border: 2px dotted #d99aa0;
+      padding: 1px 2px;
       background: #fdecee;
       color: #b71c1c;
       font-weight: 600;
