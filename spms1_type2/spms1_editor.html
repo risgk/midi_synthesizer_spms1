@@ -1174,13 +1174,16 @@
       color: var(--wire-param);
     }
     /* A CC that also fills another parameter's slot, as Osc 2's amounts are on Osc 1's CCs: moving
-       one moves the other, so the number has a dotted underline, in its own muted color on the
-       Controls tab and in the field on the Patch tab, a line rather than a color, which could be
-       taken for a module's (as amber was for Osc 2's gold). */
-    .row input.shared,
+       one moves the other, so the number is marked by a line rather than a color, which could be
+       taken for a module's (as amber was for Osc 2's gold): a dotted underline, in its own muted
+       color, on the Controls tab, and a dotted frame round its field on the Patch tab. */
     .slider-label .cc-num.shared {
       text-decoration: underline dotted;
       text-underline-offset: 2px;
+    }
+    .row input.shared {
+      border-style: dotted;
+      border-color: var(--text-muted);
     }
     /* A routed parameter reads its wire, but its CC still fills its own slot and so still feeds
        the output port: the fields and the slider stay live, only shown as disabled ones are. */
