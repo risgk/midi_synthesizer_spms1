@@ -683,8 +683,8 @@ pitch. The gain moves smoothly, so where the clamp would cut corners into a soun
 harmonics back below the audible band, the limiter does not: a sawtooth taken 12 dB past one unit
 at A4 to A7 aliases -46 to -53 dB under 5 kHz with it, and -29 to -37 dB on the clamp. Off, the
 output is just as late, and the clamp is reached. Limiting is heard on a loud passage as its peaks
-held level, and the release as the sound coming back up after one; the default patch only touches
-it at the start of a note, by 0.5 dB at most for about a quarter of a second. The filter's output
+held level, and the release as the sound coming back up after one; on the default patch, a held
+note 60 has it hold the crests of the two oscillators' beat, by about 1 dB, 1.5 dB at most. The filter's output
 clip and a mixer's sum still have the hard limit, past which a sawtooth driven 6 dB over at A6 to
 A7 aliases about -30 dB under 5 kHz; keep the levels before the filter where the peaks only just
 reach one unit, and bring the sound up with the amp instead.
@@ -783,8 +783,8 @@ sweep while Osc 1 holds the note.
   leaving the sine alone. It is within 5 cents of the note from middle C up, and 17 cents flat an octave below
 - A pitch envelope is wired by default too -- the envelope on the oscillator's Mod 1 input --
   so CC#89 (Osc 1 Pitch Mod 1 Amt) sets its depth: the note starts a semitone sharp at value 9, an
-  octave at value 64 and two octaves at the top, and with Sustain at 0.0, where it powers up, it
-  falls back to pitch with the decay
+  octave at value 64 and two octaves at the top, and with Sustain brought down to 0.0 (CC#30 = 4),
+  it falls back to pitch with the decay
 - Noise as a modulation source, a random jitter of the cutoff: CC#99 = 113, CC#98 = 26,
   CC#6 = 61 puts Noise 1's red output on the filter's Mod 2 input in the LFO's place, and CC#25
   sets how much. CC#6 = 60 takes the white instead, finer still. The red is on no mixer, and Noise
@@ -794,7 +794,7 @@ sweep while Osc 1 holds the note.
   to the top
 - Amp gain and filter cutoff share one CC: CC#99 = 115, CC#98 = 74, CC#6 = 74
 - Amp at full level with no envelope: CC#99 = 113, CC#98 = 28, CC#6 = 1
-- Amp opened and closed by the note as an organ's, while EG 1 still sweeps the filter: CC#36 = 124
+- Amp opened and closed by the note as an organ's, while EG 1 still shapes the filter: CC#36 = 124
   crossfades Amp 1's modulation to Mod 2 In, EG 2
 - Disconnect the filter's Mod 1 input, and with it the envelope: CC#99 = 113, CC#98 = 25, CC#6 = 0
 - A finer pitch envelope, 60 cents deep: CC#99 = 114, CC#98 = 32, CC#6 = 40 points Osc 1 Pitch Fine at the
@@ -811,7 +811,7 @@ sweep while Osc 1 holds the note.
   only up from the note, as far as CC#13 allows: two octaves at value 124, two semitones at value 14
 - A pitch envelope that rises into the note: CC#99 = 113, CC#98 = 13 and 16, CC#6 = 41 puts EG 1 Out
   Inv, the envelope negated, on both oscillators' Mod 1 input. With CC#89 at the top the note starts two
-  octaves flat, and with Sustain at 0.0, where it powers up, it
+  octaves flat, and with Sustain brought down to 0.0 (CC#30 = 4), it
   rises back to pitch with the decay
 - A mod wheel that closes the filter as it rises: CC#99 = 113, CC#98 = 26, CC#6 = 10 puts Mod Wheel
   Inv on the filter's Mod 2 input in the LFO's place. With CC#25 at value 64, the wheel closes the
