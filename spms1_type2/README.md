@@ -160,7 +160,7 @@ Usage
 - Channel Mode messages: All Sound Off (CC#120), All Notes Off (CC#123), and Omni Off, Omni On, Mono On
   and Poly On (CC#124 to 127), end every note as letting it go would, so the envelopes release;
   All Sound Off also cuts the sound at once: the output fades out over 4 ms, the envelopes and the
-  filter are silenced, and the output fades in again (the delay and the chorus keep what they hold);
+  filter are silenced, the delay and the chorus are cleared (11 ms), and the output fades in again;
   Reset All Controllers (CC#121) centers Pitch Bend, sets the Modulation Wheel (CC#1) to 0 and
   leaves no NRPN selected, and leaves the other CCs, the parameters', as they are. CC#120 to 127
   are not controls and are not stored as CC values

@@ -75,12 +75,18 @@ CONTROLLER_SMOOTHING_BLEND = 1.0 - (1.0 - 0.015625 * (48000.0 / SAMPLE_RATE.to_f
 # spms1_midi_state.h) is on, as it is while a patch is sent, and holds the output silent until
 # Mute is off; and at an All Sound Off (CC 120), after which the envelopes and the filter are
 # silenced, out of hearing, before it fades in again. A fade that has begun runs to its end before
-# the next one, and the gain lands on exactly 0 or 1.0 there: it counts in 1/65536ths, as an
-# Integer, with the step rounded up and the count clamped. The delay line and the chorus keep
-# what they hold, and come back with the output. Off a fade the output is written as it is.
-OUTPUT_FADE_BUFFERS = (SAMPLE_RATE * 3 / 1000 + AUDIO_BUFFER_WORDS - 1) / AUDIO_BUFFER_WORDS
-OUTPUT_GAIN_ONE     = 65536
-OUTPUT_FADE_STEP    = (OUTPUT_GAIN_ONE + OUTPUT_FADE_BUFFERS * AUDIO_BUFFER_WORDS - 1) / (OUTPUT_FADE_BUFFERS * AUDIO_BUFFER_WORDS)
+# the next one. Where it is is counted in samples, an Integer, and the gain worked out from it at
+# the start of each buffer, so that it lands on exactly 0.0 or 1.0 at the end of a fade; within a
+# buffer the gain takes a step a sample. The gain multiplies the output as it is written, every
+# sample whether or not it fades, which costs a multiply a side, and a buffer that fades costs the
+# same as one that does not. Once the output is silent, the lines of the delay, the chorus and the
+# amp's limiter are cleared, so that what they held is not heard again, a slice a buffer, in 8
+# buffers (11 ms), in place of running the modules, which are not heard then; a buffer that
+# clears costs less than one that runs them, so the clearing adds nothing to the worst case of a
+# buffer. After that the modules run again, silent, so that the parameters settle on the values of
+# a patch sent meanwhile, until the output fades in.
+OUTPUT_FADE_SAMPLES = (SAMPLE_RATE * 3 / 1000 + AUDIO_BUFFER_WORDS - 1) / AUDIO_BUFFER_WORDS * AUDIO_BUFFER_WORDS
+OUTPUT_FADE_STEP    = 1.0 / OUTPUT_FADE_SAMPLES.to_f
 
 # The NRPN parameter numbers (NRPN_*), in spms1_patch.rb: (category << 7) | LSB, where the MSB,
 # 112 + category, picks a category and the LSB an entry.
@@ -118,14 +124,15 @@ winning_slot = Array.new(128, 0)
 # When each slot was last written, from spms1_midi_state.h, for the slots in the order.
 order_written = Array.new(MODULES_SIZE, 0)
 
-# The output fader's gain, in 1/65536ths, what it adds to the gain each sample (negative fading
-# out, 0 off a fade), the buffers left of the fade after this one, and the count of All Sound
-# Offs it has taken, with one waiting while the output fades out.
-output_gain = OUTPUT_GAIN_ONE
-output_gain_step = 0
-output_fade_buffers = 0
+# The output fader: where the fade is, in samples, from 0 (silent) to OUTPUT_FADE_SAMPLES (the
+# output as it is), and which way it goes, 1 in, -1 out or 0; the count of All Sound Offs it has
+# taken, with one waiting while the output fades out; and whether the lines of the delay, the
+# chorus and the amp's limiter are clear.
+output_fade_position = OUTPUT_FADE_SAMPLES
+output_fade_direction = 0
 sound_off_count = 0
 sound_off_waiting = false
+lines_cleared = true
 
 audio_buffer_l = Array.new(AUDIO_BUFFER_WORDS, 0.0)
 audio_buffer_r = Array.new(AUDIO_BUFFER_WORDS, 0.0)
@@ -163,29 +170,34 @@ while true
   signals[SIGNAL_PITCH_BEND]  = ((C.get_midi_pitch_bend(MIDI_CH) + 1) / 2).to_f * (1.0 / 8192.0)
 
   # The output fader: where a fade ends, the next one is picked. The output silent, an All Sound
-  # Off that waited for it is done, and the fade in starts unless Mute holds the output silent.
+  # Off that waited for it is done, the lines are cleared, and then the fade in starts unless Mute
+  # holds the output silent. The fade in never starts in a buffer that clears.
   if C.get_midi_sound_off_count(MIDI_CH) != sound_off_count
     sound_off_count = C.get_midi_sound_off_count(MIDI_CH)
     sound_off_waiting = true
   end
   muted = C.get_midi_mute(MIDI_CH) != 0
-  if output_fade_buffers > 0
-    output_fade_buffers -= 1
-  elsif output_gain == 0
+  if output_fade_position == 0
     if sound_off_waiting
       eg_1.sound_off
       eg_2.sound_off
       filter_1.sound_off
       sound_off_waiting = false
     end
-    output_gain_step = muted ? 0 : OUTPUT_FADE_STEP
-    output_fade_buffers = muted ? 0 : OUTPUT_FADE_BUFFERS - 1
-  elsif muted || sound_off_waiting
-    output_gain_step = -OUTPUT_FADE_STEP
-    output_fade_buffers = OUTPUT_FADE_BUFFERS - 1
-  else
-    output_gain_step = 0
+    output_fade_direction = (!muted && lines_cleared) ? 1 : 0
+  elsif output_fade_position == OUTPUT_FADE_SAMPLES && (muted || sound_off_waiting)
+    output_fade_direction = -1
+    lines_cleared = false
+    amp_1.start_clear
+    chorus_1.start_clear
+    delay_1.start_clear
+  elsif output_fade_position == OUTPUT_FADE_SAMPLES
+    output_fade_direction = 0
   end
+  output_gain = output_fade_position.to_f / OUTPUT_FADE_SAMPLES.to_f
+  output_gain_step = output_fade_direction.to_f * OUTPUT_FADE_STEP
+  # The lines cleared a slice further, in place of running the modules.
+  clearing_lines = output_fade_position == 0 && !lines_cleared
 
   # The patch, read back from the NRPN table. active_modules is packed from the front with no
   # gaps; every source_* holds a SIGNAL_* bus slot, or a parameter's own SLOT_*.
@@ -718,8 +730,10 @@ while true
   amp_1.set_limiter_switch(signals[source_amp_1_limiter_sw])
   # patch_gen end
 
+  # No samples while the lines are cleared: the modules do not run (see the output fader above).
+  buffer_words = clearing_lines ? 0 : AUDIO_BUFFER_WORDS
   i = 0
-  while i < AUDIO_BUFFER_WORDS
+  while i < buffer_words
     # The control tick, every module's cue for its control-rate update, once every 4 samples
     # (CONTROL_RATE_DIVISOR in each module). Taken here once a sample rather than counted by each
     # module: a counter in each module would cost an add, a mask and a load and store of an
@@ -815,22 +829,26 @@ while true
       slot += 1
     end
 
-    audio_buffer_l[i] = signals[source_output_l]
-    audio_buffer_r[i] = signals[source_output_r]
+    audio_buffer_l[i] = signals[source_output_l] * output_gain
+    audio_buffer_r[i] = signals[source_output_r] * output_gain
+    output_gain += output_gain_step
     i += 1
   end
 
-  if output_gain_step != 0 || output_gain != OUTPUT_GAIN_ONE
+  # The buffers silent, as the modules did not fill them.
+  if clearing_lines
     i = 0
     while i < AUDIO_BUFFER_WORDS
-      output_gain += output_gain_step
-      output_gain = (output_gain < 0) ? 0 : ((output_gain > OUTPUT_GAIN_ONE) ? OUTPUT_GAIN_ONE : output_gain)
-      gain = output_gain.to_f * (1.0 / OUTPUT_GAIN_ONE.to_f)
-      audio_buffer_l[i] = audio_buffer_l[i] * gain
-      audio_buffer_r[i] = audio_buffer_r[i] * gain
+      audio_buffer_l[i] = 0.0
+      audio_buffer_r[i] = 0.0
       i += 1
     end
+    amp_cleared = amp_1.clear_step
+    chorus_cleared = chorus_1.clear_step
+    delay_cleared = delay_1.clear_step
+    lines_cleared = amp_cleared && chorus_cleared && delay_cleared
   end
+  output_fade_position += output_fade_direction * AUDIO_BUFFER_WORDS
 
   C.stop_debug_measure
 

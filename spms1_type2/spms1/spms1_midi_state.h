@@ -61,7 +61,8 @@ uint32_t g_midi_run_order_written[16][SPMS1_RUN_ORDER_SIZE] = {{0}};
 #define SPMS1_NRPN_SYSTEM_RESET (1)
 uint8_t  g_midi_mute[16]            = {0};
 // How many All Sound Offs (CC 120) have arrived, which the synth tells apart by the count changing:
-// it fades the output out, silences the envelopes and the filter, and fades it in again.
+// it fades the output out, silences the envelopes and the filter, clears the delay and the
+// chorus, and fades it in again.
 uint32_t g_midi_sound_off_count[16] = {0};
 
 SPMS1_RAM_FUNC void set_midi_note_on_pitch(uint8_t midi_ch, uint8_t midi_note_on_pitch) {
@@ -307,8 +308,8 @@ void spms1_handle_note_on(uint8_t midi_ch, uint8_t pitch, uint8_t velocity) {
 // All Sound Off (120), All Notes Off (123) and Omni Off, Omni On, Mono On and Poly On (124 to 127),
 // which end every note as All Notes Off does, close the gate and forget the remembered note, as a
 // note off of every note would: the envelopes release as they do at a note off. All Sound Off
-// also has the synth fade the output out and silence the envelopes and the filter, so that the
-// release is cut short (see g_midi_sound_off_count). Reset All
+// also has the synth fade the output out, silence the envelopes and the filter and clear the delay
+// and the chorus, so that the release is cut short (see g_midi_sound_off_count). Reset All
 // Controllers (121) centers Pitch Bend, sets the Modulation Wheel (CC 1) to 0 and leaves no NRPN
 // selected, and leaves every other CC as it is, the parameters among them. Local Control (122) has
 // no keyboard here to act on.

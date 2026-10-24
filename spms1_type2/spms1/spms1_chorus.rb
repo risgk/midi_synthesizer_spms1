@@ -91,6 +91,30 @@ module Spms1
 
       @output_l = 0.0
       @output_r = 0.0
+
+      # Whether clear_step is still to clear the line.
+      @clearing = false
+    end
+
+    # The line, the filter in front of it and the outputs to 0.0, as Delay's start_clear and
+    # clear_step, but the line, 512 samples, at once.
+    def start_clear
+      @clearing = true
+    end
+
+    def clear_step
+      if @clearing
+        i = 0
+        while i < DELAY_LINE_SIZE
+          @delay_line[i] = 0.0
+          i += 1
+        end
+        @filtered = 0.0
+        @output_l = 0.0
+        @output_r = 0.0
+        @clearing = false
+      end
+      true
     end
 
     # Rate is unipolar, [0.0, 1.0], and read as a note number: 0.015 Hz at 0.0, 0.48 Hz at 0.5,

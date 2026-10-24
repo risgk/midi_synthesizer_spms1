@@ -211,8 +211,8 @@ it from anywhere else.
 
 Category 5 has the system entries, which act on the synth rather than set a part of the patch:
 
-- Entry 0, Mute: 64-127 fades the output out over 4 ms and holds it silent, and 0-63 fades it in
-  again. Send a whole patch between Mute on and off, so that what the synth plays while the patch is
+- Entry 0, Mute: 64-127 fades the output out over 4 ms and holds it silent, and clears the delay
+  and the chorus (11 ms), and 0-63 fades it in again. Send a whole patch between Mute on and off, so that what the synth plays while the patch is
   half sent is not heard: wait for the fade out (about 10 ms) before the patch, and for the
   parameters to settle on their new values (about 30 ms) before Mute off, as the editor does.
   Mute is off at power-on

@@ -26,11 +26,11 @@ extern void start_debug_measure(void);
 extern void stop_debug_measure(void);
 extern float get_bus_signal(int32_t);
 extern void set_bus_signal(int32_t, float);
-static const char *const sp_sym_names[132] = {(&("\xff" "i")[1]), (&("\xff" "set_midi_note_on_pitch")[1]), (&("\xff" "uint8")[1]), (&("\xff" "void")[1]), (&("\xff" "get_midi_note_on_pitch")[1]), (&("\xff" "set_midi_note_on_state")[1]), (&("\xff" "get_midi_note_on_state")[1]), (&("\xff" "set_midi_pitch_bend")[1]), (&("\xff" "int32")[1]), (&("\xff" "get_midi_pitch_bend")[1]), (&("\xff" "set_midi_cc_value")[1]), (&("\xff" "get_midi_cc_value")[1]), (&("\xff" "set_midi_nrpn_value")[1]), (&("\xff" "get_midi_nrpn_value")[1]), (&("\xff" "get_midi_run_order_written")[1]), (&("\xff" "get_midi_mute")[1]), (&("\xff" "get_midi_sound_off_count")[1]), (&("\xff" "set_sample_rate")[1]), (&("\xff" "get_sample_rate")[1]), (&("\xff" "set_audio_buffers")[1]), (&("\xff" "get_audio_buffers")[1]), (&("\xff" "set_audio_buffer_words")[1]), (&("\xff" "get_audio_buffer_words")[1]), (&("\xff" "start_audio")[1]), (&("\xff" "stop_audio")[1]), (&("\xff" "write_to_audio_buffer")[1]), (&("\xff" "float")[1]), (&("\xff" "start_debug_measure")[1]), (&("\xff" "stop_debug_measure")[1]), (&("\xff" "get_bus_signal")[1]), (&("\xff" "set_bus_signal")[1]), (&("\xff" "[]")[1]), (&("\xff" "[]=")[1]), (&("\xff" "cc_to_unipolar")[1]), (&("\xff" "cc_to_bipolar")[1]), (&("\xff" "cc_or_zero")[1]), (&("\xff" "quarter_sine")[1]), (&("\xff" "cc_table_index")[1]), (&("\xff" "cc_or_nrpn")[1]), (&("\xff" "source_or_own")[1]), (&("\xff" "flush_tiny")[1]), (&("\xff" "smooth")[1]), (&("\xff" "initialize")[1]), (&("\xff" "set_glide")[1]), (&("\xff" "set_glide_1_switch")[1]), (&("\xff" "set_glide_2_switch")[1]), (&("\xff" "set_bend_1_switch")[1]), (&("\xff" "set_bend_2_switch")[1]), (&("\xff" "set_bend_amount")[1]), (&("\xff" "set_stretch")[1]), (&("\xff" "smooth_parameters")[1]), (&("\xff" "process")[1]), (&("\xff" "output_2")[1]), (&("\xff" "update_blends")[1]), (&("\xff" "calculate_exp_fast")[1]), (&("\xff" "set_attack")[1]), (&("\xff" "set_decay")[1]), (&("\xff" "set_release_switch")[1]), (&("\xff" "set_sustain")[1]), (&("\xff" "set_level")[1]), (&("\xff" "output_inverted")[1]), (&("\xff" "sound_off")[1]), (&("\xff" "update_coefficients_full")[1]), (&("\xff" "set_rate")[1]), (&("\xff" "set_rate_modulation_amount")[1]), (&("\xff" "set_level_modulation_amount")[1]), (&("\xff" "set_reset_switch")[1]), (&("\xff" "set_wave")[1]), (&("\xff" "output_triangle")[1]), (&("\xff" "output_square")[1]), (&("\xff" "output_triangle_inverted")[1]), (&("\xff" "output_square_inverted")[1]), (&("\xff" "rate_to_freq_fast")[1]), (&("\xff" "set_level_1")[1]), (&("\xff" "set_level_2")[1]), (&("\xff" "set_level_3")[1]), (&("\xff" "set_level_4")[1]), (&("\xff" "set_out_level")[1]), (&("\xff" "set_sync_switch")[1]), (&("\xff" "set_waveform")[1]), (&("\xff" "set_pulse_width")[1]), (&("\xff" "set_pitch_modulation_1_amount")[1]), (&("\xff" "set_pitch_modulation_2_amount")[1]), (&("\xff" "set_pitch_modulation_1_switch")[1]), (&("\xff" "set_pitch_modulation_2_switch")[1]), (&("\xff" "set_pitch_modulation_1_polarity")[1]), (&("\xff" "set_pitch_modulation_2_polarity")[1]), (&("\xff" "set_pw_modulation_1_amount")[1]), (&("\xff" "set_pw_modulation_2_amount")[1]), (&("\xff" "set_pw_modulation_1_polarity")[1]), (&("\xff" "set_pw_modulation_2_polarity")[1]), (&("\xff" "set_pitch")[1]), (&("\xff" "set_pitch_coarse")[1]), (&("\xff" "set_pitch_fine")[1]), (&("\xff" "process_synced")[1]), (&("\xff" "output_saw")[1]), (&("\xff" "output_pulse")[1]), (&("\xff" "output_sub")[1]), (&("\xff" "update_controls")[1]), (&("\xff" "pitch_to_freq_fast")[1]), (&("\xff" "poly_blep")[1]), (&("\xff" "set_color")[1]), (&("\xff" "output_white")[1]), (&("\xff" "output_red")[1]), (&("\xff" "low_pass_coef")[1]), (&("\xff" "set_cutoff")[1]), (&("\xff" "set_modulation_1_amount")[1]), (&("\xff" "set_modulation_2_amount")[1]), (&("\xff" "set_modulation_1_polarity")[1]), (&("\xff" "set_modulation_2_polarity")[1]), (&("\xff" "set_pitch_amount")[1]), (&("\xff" "set_resonance")[1]), (&("\xff" "set_mode")[1]), (&("\xff" "output_lp")[1]), (&("\xff" "output_hp")[1]), (&("\xff" "output_bp")[1]), (&("\xff" "cutoff_to_g_fast")[1]), (&("\xff" "resonance_to_k_fast")[1]), (&("\xff" "update_coefficients")[1]), (&("\xff" "clip_output")[1]), (&("\xff" "set_gain")[1]), (&("\xff" "set_limiter_switch")[1]), (&("\xff" "set_modulation_mix")[1]), (&("\xff" "output_l")[1]), (&("\xff" "output_r")[1]), (&("\xff" "output_mono")[1]), (&("\xff" "set_depth")[1]), (&("\xff" "set_mix")[1]), (&("\xff" "set_time")[1]), (&("\xff" "set_feedback")[1]), (&("\xff" "spms1_fill_constant_signals")[1]), (&("\xff" "spms1_write_default_patch")[1])};
+static const char *const sp_sym_names[134] = {(&("\xff" "i")[1]), (&("\xff" "set_midi_note_on_pitch")[1]), (&("\xff" "uint8")[1]), (&("\xff" "void")[1]), (&("\xff" "get_midi_note_on_pitch")[1]), (&("\xff" "set_midi_note_on_state")[1]), (&("\xff" "get_midi_note_on_state")[1]), (&("\xff" "set_midi_pitch_bend")[1]), (&("\xff" "int32")[1]), (&("\xff" "get_midi_pitch_bend")[1]), (&("\xff" "set_midi_cc_value")[1]), (&("\xff" "get_midi_cc_value")[1]), (&("\xff" "set_midi_nrpn_value")[1]), (&("\xff" "get_midi_nrpn_value")[1]), (&("\xff" "get_midi_run_order_written")[1]), (&("\xff" "get_midi_mute")[1]), (&("\xff" "get_midi_sound_off_count")[1]), (&("\xff" "set_sample_rate")[1]), (&("\xff" "get_sample_rate")[1]), (&("\xff" "set_audio_buffers")[1]), (&("\xff" "get_audio_buffers")[1]), (&("\xff" "set_audio_buffer_words")[1]), (&("\xff" "get_audio_buffer_words")[1]), (&("\xff" "start_audio")[1]), (&("\xff" "stop_audio")[1]), (&("\xff" "write_to_audio_buffer")[1]), (&("\xff" "float")[1]), (&("\xff" "start_debug_measure")[1]), (&("\xff" "stop_debug_measure")[1]), (&("\xff" "get_bus_signal")[1]), (&("\xff" "set_bus_signal")[1]), (&("\xff" "[]")[1]), (&("\xff" "[]=")[1]), (&("\xff" "cc_to_unipolar")[1]), (&("\xff" "cc_to_bipolar")[1]), (&("\xff" "cc_or_zero")[1]), (&("\xff" "quarter_sine")[1]), (&("\xff" "cc_table_index")[1]), (&("\xff" "cc_or_nrpn")[1]), (&("\xff" "source_or_own")[1]), (&("\xff" "flush_tiny")[1]), (&("\xff" "smooth")[1]), (&("\xff" "initialize")[1]), (&("\xff" "set_glide")[1]), (&("\xff" "set_glide_1_switch")[1]), (&("\xff" "set_glide_2_switch")[1]), (&("\xff" "set_bend_1_switch")[1]), (&("\xff" "set_bend_2_switch")[1]), (&("\xff" "set_bend_amount")[1]), (&("\xff" "set_stretch")[1]), (&("\xff" "smooth_parameters")[1]), (&("\xff" "process")[1]), (&("\xff" "output_2")[1]), (&("\xff" "update_blends")[1]), (&("\xff" "calculate_exp_fast")[1]), (&("\xff" "set_attack")[1]), (&("\xff" "set_decay")[1]), (&("\xff" "set_release_switch")[1]), (&("\xff" "set_sustain")[1]), (&("\xff" "set_level")[1]), (&("\xff" "output_inverted")[1]), (&("\xff" "sound_off")[1]), (&("\xff" "update_coefficients_full")[1]), (&("\xff" "set_rate")[1]), (&("\xff" "set_rate_modulation_amount")[1]), (&("\xff" "set_level_modulation_amount")[1]), (&("\xff" "set_reset_switch")[1]), (&("\xff" "set_wave")[1]), (&("\xff" "output_triangle")[1]), (&("\xff" "output_square")[1]), (&("\xff" "output_triangle_inverted")[1]), (&("\xff" "output_square_inverted")[1]), (&("\xff" "rate_to_freq_fast")[1]), (&("\xff" "set_level_1")[1]), (&("\xff" "set_level_2")[1]), (&("\xff" "set_level_3")[1]), (&("\xff" "set_level_4")[1]), (&("\xff" "set_out_level")[1]), (&("\xff" "set_sync_switch")[1]), (&("\xff" "set_waveform")[1]), (&("\xff" "set_pulse_width")[1]), (&("\xff" "set_pitch_modulation_1_amount")[1]), (&("\xff" "set_pitch_modulation_2_amount")[1]), (&("\xff" "set_pitch_modulation_1_switch")[1]), (&("\xff" "set_pitch_modulation_2_switch")[1]), (&("\xff" "set_pitch_modulation_1_polarity")[1]), (&("\xff" "set_pitch_modulation_2_polarity")[1]), (&("\xff" "set_pw_modulation_1_amount")[1]), (&("\xff" "set_pw_modulation_2_amount")[1]), (&("\xff" "set_pw_modulation_1_polarity")[1]), (&("\xff" "set_pw_modulation_2_polarity")[1]), (&("\xff" "set_pitch")[1]), (&("\xff" "set_pitch_coarse")[1]), (&("\xff" "set_pitch_fine")[1]), (&("\xff" "process_synced")[1]), (&("\xff" "output_saw")[1]), (&("\xff" "output_pulse")[1]), (&("\xff" "output_sub")[1]), (&("\xff" "update_controls")[1]), (&("\xff" "pitch_to_freq_fast")[1]), (&("\xff" "poly_blep")[1]), (&("\xff" "set_color")[1]), (&("\xff" "output_white")[1]), (&("\xff" "output_red")[1]), (&("\xff" "low_pass_coef")[1]), (&("\xff" "set_cutoff")[1]), (&("\xff" "set_modulation_1_amount")[1]), (&("\xff" "set_modulation_2_amount")[1]), (&("\xff" "set_modulation_1_polarity")[1]), (&("\xff" "set_modulation_2_polarity")[1]), (&("\xff" "set_pitch_amount")[1]), (&("\xff" "set_resonance")[1]), (&("\xff" "set_mode")[1]), (&("\xff" "output_lp")[1]), (&("\xff" "output_hp")[1]), (&("\xff" "output_bp")[1]), (&("\xff" "cutoff_to_g_fast")[1]), (&("\xff" "resonance_to_k_fast")[1]), (&("\xff" "update_coefficients")[1]), (&("\xff" "clip_output")[1]), (&("\xff" "start_clear")[1]), (&("\xff" "clear_step")[1]), (&("\xff" "set_gain")[1]), (&("\xff" "set_limiter_switch")[1]), (&("\xff" "set_modulation_mix")[1]), (&("\xff" "output_l")[1]), (&("\xff" "output_r")[1]), (&("\xff" "output_mono")[1]), (&("\xff" "set_depth")[1]), (&("\xff" "set_mix")[1]), (&("\xff" "set_time")[1]), (&("\xff" "set_feedback")[1]), (&("\xff" "spms1_fill_constant_signals")[1]), (&("\xff" "spms1_write_default_patch")[1])};
 static const char *sp_dyn_syms[SP_DYN_SYMS_MAX]; static int sp_ndyn = 0;
 static void sp_mark_dyn_syms(void){for(int _i=0;_i<sp_ndyn;_i++)sp_mark_string(sp_dyn_syms[_i]);}
-static const char *sp_sym_to_s(sp_sym id){if(id>=0&&id<132)return sp_sym_names[id];if(id>=132&&id<132+sp_ndyn)return sp_dyn_syms[id-132];return sp_str_empty;}
-static sp_sym sp_sym_intern_n(const char *s, size_t n){for(int i=0;i<132;i++){const char*_c=sp_sym_names[i];if(_c[0]==s[0]&&sp_str_byte_len(_c)==n&&memcmp(_c,s,n)==0)return (sp_sym)i;}for(int i=0;i<sp_ndyn;i++){const char*_c=sp_dyn_syms[i];if(_c[0]==s[0]&&sp_str_byte_len(_c)==n&&memcmp(_c,s,n)==0)return (sp_sym)(132+i);}if(sp_ndyn<SP_DYN_SYMS_MAX){sp_dyn_syms[sp_ndyn]=sp_str_from_bytes(s,n);return (sp_sym)(132+sp_ndyn++);}return (sp_sym)0;}
+static const char *sp_sym_to_s(sp_sym id){if(id>=0&&id<134)return sp_sym_names[id];if(id>=134&&id<134+sp_ndyn)return sp_dyn_syms[id-134];return sp_str_empty;}
+static sp_sym sp_sym_intern_n(const char *s, size_t n){for(int i=0;i<134;i++){const char*_c=sp_sym_names[i];if(_c[0]==s[0]&&sp_str_byte_len(_c)==n&&memcmp(_c,s,n)==0)return (sp_sym)i;}for(int i=0;i<sp_ndyn;i++){const char*_c=sp_dyn_syms[i];if(_c[0]==s[0]&&sp_str_byte_len(_c)==n&&memcmp(_c,s,n)==0)return (sp_sym)(134+i);}if(sp_ndyn<SP_DYN_SYMS_MAX){sp_dyn_syms[sp_ndyn]=sp_str_from_bytes(s,n);return (sp_sym)(134+sp_ndyn++);}return (sp_sym)0;}
 static sp_sym sp_sym_intern(const char *s){return sp_sym_intern_n(s,s?strlen(s):0);}
 
 static const char *sp_class_to_s(sp_Class c){if(sp_class_nil_p(c))return SPL("nil");if(c.name)return c.name;switch(c.cls_id){case 0:return SPL("Spms1");case 1:return SPL("Spms1::C");case 2:return SPL("Spms1::SignalBus");case 3:return SPL("Spms1::Dsp");case 4:return SPL("Spms1::Pitch");case 5:return SPL("Spms1::EnvGen");case 6:return SPL("Spms1::LFO");case 7:return SPL("Spms1::Mixer");case 8:return SPL("Spms1::Osc");case 9:return SPL("Spms1::Noise");case 10:return SPL("Spms1::Filter");case 11:return SPL("Spms1::Amp");case 12:return SPL("Spms1::Chorus");case 13:return SPL("Spms1::Delay");case -100:return SPL("Integer");case -101:return SPL("Float");case -102:return SPL("String");case -103:return SPL("Symbol");case -104:return SPL("Array");case -105:return SPL("Hash");case -106:return SPL("Range");case -107:return SPL("Time");case -108:return SPL("Module");case -109:return SPL("Class");case -110:return SPL("NilClass");case -111:return SPL("TrueClass");case -112:return SPL("FalseClass");case -113:return SPL("Numeric");case -114:return SPL("Comparable");case -115:return SPL("Enumerable");case -116:return SPL("Object");case -117:return SPL("BasicObject");case -118:return SPL("Proc");case -119:return SPL("Kernel");case -120:return SPL("IO");case -121:return SPL("File");case -122:return SPL("Exception");case -123:return SPL("StandardError");case -124:return SPL("RuntimeError");case -125:return SPL("TypeError");case -126:return SPL("ArgumentError");case -127:return SPL("NameError");case -128:return SPL("NoMethodError");case -129:return SPL("StopIteration");case -130:return SPL("Math");case -131:return SPL("Complex");case -132:return SPL("IndexError");case -133:return SPL("KeyError");case -134:return SPL("RangeError");case -135:return SPL("FloatDomainError");case -136:return SPL("ZeroDivisionError");case -137:return SPL("FrozenError");case -138:return SPL("IOError");case -139:return SPL("LocalJumpError");case -140:return SPL("NotImplementedError");case -141:return SPL("ScriptError");case -142:return SPL("Rational");case -143:return SPL("Regexp");case -144:return SPL("Enumerator");case -145:return SPL("Struct");case -146:return SPL("Data");case -147:return SPL("SyntaxError");case -148:return SPL("SecurityError");case -149:return SPL("RegexpError");case -150:return SPL("EncodingError");case -151:return SPL("SignalException");case -152:return SPL("Interrupt");case -153:return SPL("ThreadError");case -154:return SPL("FiberError");case -155:return SPL("ClosedQueueError");case -156:return SPL("UncaughtThrowError");case -157:return SPL("NoMatchingPatternError");case -158:return SPL("NoMatchingPatternKeyError");case -159:return SPL("EOFError");case -160:return SPL("Math::DomainError");case -161:return SPL("SystemExit");case -162:return SPL("Signal");case -163:return SPL("Process::Status");case -164:return SPL("Process::Tms");case -165:return SPL("Dir");case -166:return SPL("BasicSocket");case -167:return SPL("IPSocket");case -168:return SPL("TCPSocket");case -169:return SPL("TCPServer");case -170:return SPL("UDPSocket");case -171:return SPL("UNIXSocket");case -172:return SPL("UNIXServer");case -173:return SPL("Socket");case -174:return SPL("Thread");case -175:return SPL("Thread::Mutex");case -176:return SPL("Thread::Queue");case -177:return SPL("Thread::SizedQueue");case -178:return SPL("Thread::ConditionVariable");case -179:return SPL("Fiber");case -180:return SPL("MatchData");default:return sp_str_empty;} }
@@ -503,6 +503,7 @@ struct sp_Amp_s {
   sp_float iv_limiter_last_block_peak;
   sp_float iv_limiter_gain;
   sp_float iv_limiter_switch;
+  sp_bool iv_limiter_clearing;
 };
 struct sp_Chorus_s {
   sp_int cls_id;
@@ -531,6 +532,7 @@ struct sp_Chorus_s {
   sp_float iv_delay_r;
   sp_float iv_delay_step_l;
   sp_float iv_delay_step_r;
+  sp_bool iv_clearing;
 };
 struct sp_Delay_s {
   sp_int cls_id;
@@ -560,6 +562,7 @@ struct sp_Delay_s {
   sp_float iv_current_mix;
   sp_float iv_delay;
   sp_float iv_delay_step;
+  sp_int iv_clear_index;
 };
 static void sp_Filter_scan(void *p) {
   sp_Filter *o = (sp_Filter *)p;
@@ -809,6 +812,7 @@ static sp_float civ_Amp_limiter_block_peak = 0.0;
 static sp_float civ_Amp_limiter_last_block_peak = 0.0;
 static sp_float civ_Amp_limiter_gain = 0.0;
 static sp_float civ_Amp_limiter_switch = 0.0;
+static sp_bool civ_Amp_limiter_clearing = 0;
 static sp_float civ_Chorus_output_l = 0.0;
 static sp_float civ_Chorus_output_r = 0.0;
 static sp_int civ_Chorus_sample_rate = SP_INT_NIL;
@@ -834,6 +838,7 @@ static sp_float civ_Chorus_delay_l = 0.0;
 static sp_float civ_Chorus_delay_r = 0.0;
 static sp_float civ_Chorus_delay_step_l = 0.0;
 static sp_float civ_Chorus_delay_step_r = 0.0;
+static sp_bool civ_Chorus_clearing = 0;
 static sp_float civ_Delay_output_l = 0.0;
 static sp_float civ_Delay_output_r = 0.0;
 static sp_int civ_Delay_sample_rate = SP_INT_NIL;
@@ -860,6 +865,7 @@ static sp_float civ_Delay_stage_1_mix = 0.0;
 static sp_float civ_Delay_current_mix = 0.0;
 static sp_float civ_Delay_delay = 0.0;
 static sp_float civ_Delay_delay_step = 0.0;
+static sp_int civ_Delay_clear_index = SP_INT_NIL;
 static const char *sp_obj_inspect_sw(int cls_id, void *p) __attribute__((cold, noinline));
 static const char *sp_obj_to_s_sw(int cls_id, void *p) __attribute__((cold, noinline));
 static sp_int sp_obj_to_int_sw(int cls_id, void *p, int *ok) __attribute__((cold, noinline));
@@ -977,12 +983,16 @@ static inline __attribute__((always_inline)) sp_float sp_Filter_resonance_to_k_f
 static sp_float sp_Filter_update_coefficients(sp_Filter *self);
 static inline __attribute__((always_inline)) sp_float sp_Filter_clip_output(sp_Filter *self, sp_float lv_sample);
 static void sp_Amp_initialize(sp_Amp *self, sp_int lv_sample_rate);
+static inline __attribute__((always_inline)) sp_bool sp_Amp_start_clear(sp_Amp *self);
+static inline sp_bool sp_Amp_clear_step(sp_Amp *self);
 static inline __attribute__((always_inline)) sp_float sp_Amp_set_gain(sp_Amp *self, sp_float lv_gain);
 static inline __attribute__((always_inline)) sp_float sp_Amp_set_limiter_switch(sp_Amp *self, sp_float lv_switch);
 static inline __attribute__((always_inline)) sp_float sp_Amp_set_modulation_mix(sp_Amp *self, sp_float lv_mix);
 static inline __attribute__((always_inline)) sp_float sp_Amp_process(sp_Amp *self, sp_bool lv_control_tick, sp_float lv_audio_input, sp_float lv_modulation_1_input, sp_float lv_modulation_2_input);
 static inline __attribute__((always_inline)) sp_float sp_Chorus_output_mono(sp_Chorus *self);
 static void sp_Chorus_initialize(sp_Chorus *self, sp_int lv_sample_rate);
+static inline __attribute__((always_inline)) sp_bool sp_Chorus_start_clear(sp_Chorus *self);
+static inline sp_bool sp_Chorus_clear_step(sp_Chorus *self);
 static inline __attribute__((always_inline)) sp_float sp_Chorus_set_rate(sp_Chorus *self, sp_float lv_rate);
 static inline __attribute__((always_inline)) sp_float sp_Chorus_set_depth(sp_Chorus *self, sp_float lv_depth);
 static inline __attribute__((always_inline)) sp_float sp_Chorus_set_mix(sp_Chorus *self, sp_float lv_mix);
@@ -991,6 +1001,8 @@ static sp_float sp_Chorus_process(sp_Chorus *self, sp_bool lv_control_tick, sp_f
 static inline __attribute__((always_inline)) sp_float sp_Chorus_rate_to_freq_fast(sp_Chorus *self, sp_float lv_rate);
 static inline __attribute__((always_inline)) sp_float sp_Delay_output_mono(sp_Delay *self);
 static void sp_Delay_initialize(sp_Delay *self, sp_int lv_sample_rate);
+static inline __attribute__((always_inline)) sp_int sp_Delay_start_clear(sp_Delay *self);
+static inline sp_bool sp_Delay_clear_step(sp_Delay *self);
 static inline __attribute__((always_inline)) sp_float sp_Delay_set_time(sp_Delay *self, sp_float lv_time);
 static inline __attribute__((always_inline)) sp_float sp_Delay_set_feedback(sp_Delay *self, sp_float lv_feedback);
 static inline __attribute__((always_inline)) sp_float sp_Delay_set_mix(sp_Delay *self, sp_float lv_mix);
@@ -1095,6 +1107,7 @@ static sp_float cst_FULL_SCALE_TIME_AT_48K = 0.0;
 static sp_float cst_MIN_TIME_AT_48K = 0.0;
 static sp_float cst_MAX_TIME_AT_48K = 0.0;
 static sp_float cst_TIME_SLEW = 0.0;
+static sp_int cst_CLEAR_STEP = 0;
 static sp_int cst_MODULE_NONE = 0;
 static sp_int cst_MODULE_PITCH_1 = 0;
 static sp_int cst_MODULE_EG_1 = 0;
@@ -1570,9 +1583,8 @@ static sp_int cst_AUDIO_BUFFER_WORDS = 0;
 static sp_int cst_MODULES_SIZE = 0;
 static sp_int cst_SIGNALS_SIZE = 0;
 static sp_float cst_CONTROLLER_SMOOTHING_BLEND = 0.0;
-static sp_int cst_OUTPUT_FADE_BUFFERS = 0;
-static sp_int cst_OUTPUT_GAIN_ONE = 0;
-static sp_int cst_OUTPUT_FADE_STEP = 0;
+static sp_int cst_OUTPUT_FADE_SAMPLES = 0;
+static sp_float cst_OUTPUT_FADE_STEP = 0.0;
 
 const sp_int sp_exc_subclass_count = 0;
 const sp_int sp_exc_subclass_ids[] = { 0 };
@@ -1777,6 +1789,7 @@ static sp_Delay *sp_Delay_new(sp_int lv_sample_rate) {
   self->cls_id = 13;
   self->iv_sample_rate = SP_INT_NIL;
   self->iv_write_index = SP_INT_NIL;
+  self->iv_clear_index = SP_INT_NIL;
   sp_Delay_initialize(self, lv_sample_rate);
   return self;
 }
@@ -2143,6 +2156,7 @@ static const char *sp_obj_inspect_sw(int cls_id, void *p) {
       sp_String_append(_s, ", @limiter_last_block_peak="); sp_String_append(_s, sp_poly_inspect(sp_box_float(o->iv_limiter_last_block_peak)));
       sp_String_append(_s, ", @limiter_gain="); sp_String_append(_s, sp_poly_inspect(sp_box_float(o->iv_limiter_gain)));
       sp_String_append(_s, ", @limiter_switch="); sp_String_append(_s, sp_poly_inspect(sp_box_float(o->iv_limiter_switch)));
+      sp_String_append(_s, ", @limiter_clearing="); sp_String_append(_s, sp_poly_inspect(sp_box_bool(o->iv_limiter_clearing)));
       sp_String_append(_s, ">");
       sp_poly_recur_pop(_rcm);
       return _s->data;
@@ -2179,6 +2193,7 @@ static const char *sp_obj_inspect_sw(int cls_id, void *p) {
       sp_String_append(_s, ", @delay_r="); sp_String_append(_s, sp_poly_inspect(sp_box_float(o->iv_delay_r)));
       sp_String_append(_s, ", @delay_step_l="); sp_String_append(_s, sp_poly_inspect(sp_box_float(o->iv_delay_step_l)));
       sp_String_append(_s, ", @delay_step_r="); sp_String_append(_s, sp_poly_inspect(sp_box_float(o->iv_delay_step_r)));
+      sp_String_append(_s, ", @clearing="); sp_String_append(_s, sp_poly_inspect(sp_box_bool(o->iv_clearing)));
       sp_String_append(_s, ">");
       sp_poly_recur_pop(_rcm);
       return _s->data;
@@ -2216,6 +2231,7 @@ static const char *sp_obj_inspect_sw(int cls_id, void *p) {
       sp_String_append(_s, ", @current_mix="); sp_String_append(_s, sp_poly_inspect(sp_box_float(o->iv_current_mix)));
       sp_String_append(_s, ", @delay="); sp_String_append(_s, sp_poly_inspect(sp_box_float(o->iv_delay)));
       sp_String_append(_s, ", @delay_step="); sp_String_append(_s, sp_poly_inspect(sp_box_float(o->iv_delay_step)));
+      sp_String_append(_s, ", @clear_index="); sp_String_append(_s, sp_poly_inspect((o->iv_clear_index == SP_INT_NIL ? sp_box_nil() : sp_box_int(o->iv_clear_index))));
       sp_String_append(_s, ">");
       sp_poly_recur_pop(_rcm);
       return _s->data;
@@ -3924,7 +3940,7 @@ static void sp_Filter_initialize(sp_Filter *self, sp_int lv_sample_rate) {
   sp_FloatArray *_t80 = sp_FloatArray_new();
   SP_GC_ROOT(_t80);
   for (sp_int _t81 = 0; _t81 < _t78; _t81++) sp_FloatArray_push(_t80, _t79);
-  { __typeof__(self) _wb1794 = self; _wb1794->iv_g_table = _t80; sp_gc_wb((void *)_wb1794); }
+  { __typeof__(self) _wb1798 = self; _wb1798->iv_g_table = _t80; sp_gc_wb((void *)_wb1798); }
 #line 169 "spms1_filter.rb"
   lv_i = 0LL;
 #line 170 "spms1_filter.rb"
@@ -4470,7 +4486,7 @@ static void sp_Amp_initialize(sp_Amp *self, sp_int lv_sample_rate) {
   sp_FloatArray *_t117 = sp_FloatArray_new();
   SP_GC_ROOT(_t117);
   for (sp_int _t118 = 0; _t118 < _t115; _t118++) sp_FloatArray_push(_t117, _t116);
-  { __typeof__(self) _wb1795 = self; _wb1795->iv_limiter_line = _t117; sp_gc_wb((void *)_wb1795); }
+  { __typeof__(self) _wb1799 = self; _wb1799->iv_limiter_line = _t117; sp_gc_wb((void *)_wb1799); }
 #line 57 "spms1_amp.rb"
   self->iv_limiter_write_index = 0LL;
 #line 58 "spms1_amp.rb"
@@ -4481,32 +4497,70 @@ static void sp_Amp_initialize(sp_Amp *self, sp_int lv_sample_rate) {
   self->iv_limiter_gain = 1.0;
 #line 61 "spms1_amp.rb"
   self->iv_limiter_switch = 1.0;
+#line 63 "spms1_amp.rb"
+  self->iv_limiter_clearing = 0;
 }
-#line 69 "spms1_amp.rb"
+#line 73 "spms1_amp.rb"
+static inline __attribute__((always_inline)) sp_bool sp_Amp_start_clear(sp_Amp *self) {
+#line 74 "spms1_amp.rb"
+  self->iv_limiter_clearing = 1;
+  return self->iv_limiter_clearing;
+  return 0;
+}
+#line 77 "spms1_amp.rb"
+static inline sp_bool sp_Amp_clear_step(sp_Amp *self) {
+    sp_int lv_i = 0;
+#line 78 "spms1_amp.rb"
+  if (self->iv_limiter_clearing) {
+#line 79 "spms1_amp.rb"
+    lv_i = 0LL;
+#line 80 "spms1_amp.rb"
+    while ((lv_i < cst_LIMITER_LINE_SIZE)) {
+#line 81 "spms1_amp.rb"
+      sp_FloatArray_set(self->iv_limiter_line, lv_i, 0.0);
+#line 82 "spms1_amp.rb"
+      lv_i = sp_int_add(lv_i, 1LL);
+    }
+#line 84 "spms1_amp.rb"
+    self->iv_limiter_block_peak = 0.0;
+#line 85 "spms1_amp.rb"
+    self->iv_limiter_last_block_peak = 0.0;
+#line 86 "spms1_amp.rb"
+    self->iv_limiter_hold_left = self->iv_limiter_hold;
+#line 87 "spms1_amp.rb"
+    self->iv_limiter_gain = 1.0;
+#line 88 "spms1_amp.rb"
+    self->iv_limiter_clearing = 0;
+  }
+#line 90 "spms1_amp.rb"
+  return 1;
+  return 0;
+}
+#line 93 "spms1_amp.rb"
 static inline __attribute__((always_inline)) sp_float sp_Amp_set_gain(sp_Amp *self, sp_float lv_gain) {
     sp_float lv_clamped_gain = 0.0;
-#line 70 "spms1_amp.rb"
+#line 94 "spms1_amp.rb"
   lv_clamped_gain = (((lv_gain < 0.0)) ? 0.0 : ((((lv_gain > 1.0)) ? 1.0 : lv_gain)));
-#line 71 "spms1_amp.rb"
+#line 95 "spms1_amp.rb"
   self->iv_gain = ((4.0 * lv_clamped_gain) * lv_clamped_gain);
   return self->iv_gain;
   return 0.0;
 }
-#line 76 "spms1_amp.rb"
+#line 100 "spms1_amp.rb"
 static inline __attribute__((always_inline)) sp_float sp_Amp_set_limiter_switch(sp_Amp *self, sp_float lv_switch) {
-#line 77 "spms1_amp.rb"
+#line 101 "spms1_amp.rb"
   self->iv_limiter_switch = (((lv_switch >= 0.5)) ? 1.0 : 0.0);
   return self->iv_limiter_switch;
   return 0.0;
 }
-#line 83 "spms1_amp.rb"
+#line 107 "spms1_amp.rb"
 static inline __attribute__((always_inline)) sp_float sp_Amp_set_modulation_mix(sp_Amp *self, sp_float lv_mix) {
-#line 84 "spms1_amp.rb"
+#line 108 "spms1_amp.rb"
   self->iv_modulation_mix = (((lv_mix < 0.0)) ? 0.0 : ((((lv_mix > 1.0)) ? 1.0 : lv_mix)));
   return self->iv_modulation_mix;
   return 0.0;
 }
-#line 87 "spms1_amp.rb"
+#line 111 "spms1_amp.rb"
 static inline __attribute__((always_inline)) sp_float sp_Amp_process(sp_Amp *self, sp_bool lv_control_tick, sp_float lv_audio_input, sp_float lv_modulation_1_input, sp_float lv_modulation_2_input) {
     sp_float lv_modulation = 0.0;
     sp_float lv_mod = 0.0;
@@ -4519,59 +4573,59 @@ static inline __attribute__((always_inline)) sp_float sp_Amp_process(sp_Amp *sel
     sp_float lv_falling = 0.0;
     sp_float lv_rate = 0.0;
     sp_float lv_output = 0.0;
-#line 89 "spms1_amp.rb"
+#line 113 "spms1_amp.rb"
   if (lv_control_tick) {
-#line 90 "spms1_amp.rb"
+#line 114 "spms1_amp.rb"
     self->iv_stage_1_gain = sp_Dsp_s_smooth(self->iv_gain, self->iv_stage_1_gain, self->iv_smoothing_target_blend);
-#line 91 "spms1_amp.rb"
+#line 115 "spms1_amp.rb"
     self->iv_current_gain = sp_Dsp_s_smooth(self->iv_stage_1_gain, self->iv_current_gain, self->iv_smoothing_target_blend);
-#line 92 "spms1_amp.rb"
+#line 116 "spms1_amp.rb"
     self->iv_stage_1_modulation_mix = sp_Dsp_s_smooth(self->iv_modulation_mix, self->iv_stage_1_modulation_mix, self->iv_smoothing_target_blend);
-#line 93 "spms1_amp.rb"
+#line 117 "spms1_amp.rb"
     self->iv_current_modulation_mix = sp_Dsp_s_smooth(self->iv_stage_1_modulation_mix, self->iv_current_modulation_mix, self->iv_smoothing_target_blend);
   }
-#line 100 "spms1_amp.rb"
+#line 124 "spms1_amp.rb"
   lv_modulation = ((lv_modulation_1_input * ((1.0 - self->iv_current_modulation_mix))) + (lv_modulation_2_input * self->iv_current_modulation_mix));
-#line 101 "spms1_amp.rb"
+#line 125 "spms1_amp.rb"
   lv_mod = (((lv_modulation < -1.0)) ? -1.0 : ((((lv_modulation > 1.0)) ? 1.0 : lv_modulation)));
-#line 102 "spms1_amp.rb"
+#line 126 "spms1_amp.rb"
   lv_total_gain = (self->iv_current_gain * lv_mod);
-#line 103 "spms1_amp.rb"
+#line 127 "spms1_amp.rb"
   lv_amplified = (lv_audio_input * lv_total_gain);
-#line 109 "spms1_amp.rb"
+#line 133 "spms1_amp.rb"
   lv_level = fabs(lv_amplified);
-#line 110 "spms1_amp.rb"
+#line 134 "spms1_amp.rb"
   self->iv_limiter_block_peak = (((lv_level > self->iv_limiter_block_peak)) ? lv_level : self->iv_limiter_block_peak);
-#line 111 "spms1_amp.rb"
+#line 135 "spms1_amp.rb"
   self->iv_limiter_hold_left = sp_int_sub(self->iv_limiter_hold_left, 1LL);
-#line 112 "spms1_amp.rb"
+#line 136 "spms1_amp.rb"
   if ((self->iv_limiter_hold_left == 0LL)) {
-#line 113 "spms1_amp.rb"
+#line 137 "spms1_amp.rb"
     self->iv_limiter_last_block_peak = self->iv_limiter_block_peak;
-#line 114 "spms1_amp.rb"
+#line 138 "spms1_amp.rb"
     self->iv_limiter_block_peak = 0.0;
-#line 115 "spms1_amp.rb"
+#line 139 "spms1_amp.rb"
     self->iv_limiter_hold_left = self->iv_limiter_hold;
   }
-#line 117 "spms1_amp.rb"
+#line 141 "spms1_amp.rb"
   lv_peak = (((self->iv_limiter_block_peak > self->iv_limiter_last_block_peak)) ? self->iv_limiter_block_peak : self->iv_limiter_last_block_peak);
-#line 118 "spms1_amp.rb"
+#line 142 "spms1_amp.rb"
   lv_over = (((lv_peak > self->iv_limiter_threshold)) ? lv_peak : self->iv_limiter_threshold);
-#line 119 "spms1_amp.rb"
+#line 143 "spms1_amp.rb"
   lv_wanted = (1.0 + (((self->iv_limiter_threshold / lv_over) - 1.0) * self->iv_limiter_switch));
-#line 123 "spms1_amp.rb"
+#line 147 "spms1_amp.rb"
   lv_falling = (((lv_wanted < self->iv_limiter_gain)) ? 1.0 : 0.0);
-#line 124 "spms1_amp.rb"
+#line 148 "spms1_amp.rb"
   lv_rate = (self->iv_limiter_release + ((self->iv_limiter_attack - self->iv_limiter_release) * lv_falling));
-#line 125 "spms1_amp.rb"
+#line 149 "spms1_amp.rb"
   self->iv_limiter_gain += ((lv_wanted - self->iv_limiter_gain) * lv_rate);
-#line 126 "spms1_amp.rb"
+#line 150 "spms1_amp.rb"
   self->iv_limiter_write_index = (sp_int_add(self->iv_limiter_write_index, 1LL) & cst_LIMITER_LINE_MASK);
-#line 127 "spms1_amp.rb"
+#line 151 "spms1_amp.rb"
   sp_FloatArray_set(self->iv_limiter_line, self->iv_limiter_write_index, lv_amplified);
-#line 128 "spms1_amp.rb"
+#line 152 "spms1_amp.rb"
   lv_output = (sp_FloatArray_get(self->iv_limiter_line, (sp_int_sub(self->iv_limiter_write_index, self->iv_limiter_lookahead) & cst_LIMITER_LINE_MASK)) * self->iv_limiter_gain);
-#line 133 "spms1_amp.rb"
+#line 157 "spms1_amp.rb"
   if (((lv_output < -1.0))) {
     return -1.0;
   }
@@ -4608,7 +4662,7 @@ static void sp_Chorus_initialize(sp_Chorus *self, sp_int lv_sample_rate) {
   sp_FloatArray *_t127 = sp_FloatArray_new();
   SP_GC_ROOT(_t127);
   for (sp_int _t128 = 0; _t128 < _t125; _t128++) sp_FloatArray_push(_t127, _t126);
-  { __typeof__(self) _wb1796 = self; _wb1796->iv_delay_line = _t127; sp_gc_wb((void *)_wb1796); }
+  { __typeof__(self) _wb1800 = self; _wb1800->iv_delay_line = _t127; sp_gc_wb((void *)_wb1800); }
 #line 69 "spms1_chorus.rb"
   self->iv_write_index = 0LL;
 #line 71 "spms1_chorus.rb"
@@ -4645,42 +4699,78 @@ static void sp_Chorus_initialize(sp_Chorus *self, sp_int lv_sample_rate) {
   self->iv_output_l = 0.0;
 #line 93 "spms1_chorus.rb"
   self->iv_output_r = 0.0;
+#line 96 "spms1_chorus.rb"
+  self->iv_clearing = 0;
 }
-#line 98 "spms1_chorus.rb"
+#line 101 "spms1_chorus.rb"
+static inline __attribute__((always_inline)) sp_bool sp_Chorus_start_clear(sp_Chorus *self) {
+#line 102 "spms1_chorus.rb"
+  self->iv_clearing = 1;
+  return self->iv_clearing;
+  return 0;
+}
+#line 105 "spms1_chorus.rb"
+static inline sp_bool sp_Chorus_clear_step(sp_Chorus *self) {
+    sp_int lv_i = 0;
+#line 106 "spms1_chorus.rb"
+  if (self->iv_clearing) {
+#line 107 "spms1_chorus.rb"
+    lv_i = 0LL;
+#line 108 "spms1_chorus.rb"
+    while ((lv_i < cst_Spms1__Chorus__DELAY_LINE_SIZE)) {
+#line 109 "spms1_chorus.rb"
+      sp_FloatArray_set(self->iv_delay_line, lv_i, 0.0);
+#line 110 "spms1_chorus.rb"
+      lv_i = sp_int_add(lv_i, 1LL);
+    }
+#line 112 "spms1_chorus.rb"
+    self->iv_filtered = 0.0;
+#line 113 "spms1_chorus.rb"
+    self->iv_output_l = 0.0;
+#line 114 "spms1_chorus.rb"
+    self->iv_output_r = 0.0;
+#line 115 "spms1_chorus.rb"
+    self->iv_clearing = 0;
+  }
+#line 117 "spms1_chorus.rb"
+  return 1;
+  return 0;
+}
+#line 122 "spms1_chorus.rb"
 static inline __attribute__((always_inline)) sp_float sp_Chorus_set_rate(sp_Chorus *self, sp_float lv_rate) {
-#line 99 "spms1_chorus.rb"
+#line 123 "spms1_chorus.rb"
   self->iv_rate = (((lv_rate < 0.0)) ? 0.0 : ((((lv_rate > 1.0)) ? 1.0 : lv_rate)));
   return self->iv_rate;
   return 0.0;
 }
-#line 104 "spms1_chorus.rb"
+#line 128 "spms1_chorus.rb"
 static inline __attribute__((always_inline)) sp_float sp_Chorus_set_depth(sp_Chorus *self, sp_float lv_depth) {
-#line 105 "spms1_chorus.rb"
+#line 129 "spms1_chorus.rb"
   self->iv_depth = (((lv_depth < 0.0)) ? 0.0 : ((((lv_depth > 1.0)) ? 1.0 : lv_depth)));
   return self->iv_depth;
   return 0.0;
 }
-#line 111 "spms1_chorus.rb"
+#line 135 "spms1_chorus.rb"
 static inline __attribute__((always_inline)) sp_float sp_Chorus_set_mix(sp_Chorus *self, sp_float lv_mix) {
-#line 112 "spms1_chorus.rb"
+#line 136 "spms1_chorus.rb"
   self->iv_mix = (((lv_mix < 0.0)) ? 0.0 : ((((lv_mix > 1.0)) ? 1.0 : lv_mix)));
   return self->iv_mix;
   return 0.0;
 }
-#line 119 "spms1_chorus.rb"
+#line 143 "spms1_chorus.rb"
 static inline __attribute__((always_inline)) sp_float sp_Chorus_smooth_parameters(sp_Chorus *self) {
-#line 120 "spms1_chorus.rb"
+#line 144 "spms1_chorus.rb"
   self->iv_stage_1_rate = sp_Dsp_s_smooth(self->iv_rate, self->iv_stage_1_rate, self->iv_smoothing_16_blend);
-#line 121 "spms1_chorus.rb"
+#line 145 "spms1_chorus.rb"
   self->iv_current_rate = sp_Dsp_s_smooth(self->iv_stage_1_rate, self->iv_current_rate, self->iv_smoothing_16_blend);
-#line 122 "spms1_chorus.rb"
+#line 146 "spms1_chorus.rb"
   self->iv_stage_1_depth = sp_Dsp_s_smooth(self->iv_depth, self->iv_stage_1_depth, self->iv_smoothing_16_blend);
-#line 123 "spms1_chorus.rb"
+#line 147 "spms1_chorus.rb"
   self->iv_current_depth = sp_Dsp_s_smooth(self->iv_stage_1_depth, self->iv_current_depth, self->iv_smoothing_16_blend);
   return self->iv_current_depth;
   return 0.0;
 }
-#line 126 "spms1_chorus.rb"
+#line 150 "spms1_chorus.rb"
 static sp_float sp_Chorus_process(sp_Chorus *self, sp_bool lv_control_tick, sp_float lv_audio_input) {
     sp_float lv_shifted = 0.0;
     sp_float lv_distance = 0.0;
@@ -4697,200 +4787,238 @@ static sp_float sp_Chorus_process(sp_Chorus *self, sp_bool lv_control_tick, sp_f
     sp_float lv_newer_r = 0.0;
     sp_float lv_older_r = 0.0;
     sp_float lv_delayed_r = 0.0;
-#line 127 "spms1_chorus.rb"
+#line 151 "spms1_chorus.rb"
   if (lv_control_tick) {
-#line 128 "spms1_chorus.rb"
+#line 152 "spms1_chorus.rb"
     self->iv_stage_1_mix = sp_Dsp_s_smooth(self->iv_mix, self->iv_stage_1_mix, self->iv_smoothing_target_blend);
-#line 129 "spms1_chorus.rb"
+#line 153 "spms1_chorus.rb"
     self->iv_current_mix = sp_Dsp_s_smooth(self->iv_stage_1_mix, self->iv_current_mix, self->iv_smoothing_target_blend);
-#line 133 "spms1_chorus.rb"
+#line 157 "spms1_chorus.rb"
     lv_shifted = (self->iv_phase + 0.25);
-#line 134 "spms1_chorus.rb"
+#line 158 "spms1_chorus.rb"
     lv_shifted -= (((lv_shifted < 1.0)) ? 0.0 : 1.0);
-#line 135 "spms1_chorus.rb"
+#line 159 "spms1_chorus.rb"
     lv_distance = (lv_shifted - 0.5);
-#line 136 "spms1_chorus.rb"
+#line 160 "spms1_chorus.rb"
     lv_triangle = (1.0 - (4.0 * fabs(lv_distance)));
-#line 137 "spms1_chorus.rb"
+#line 161 "spms1_chorus.rb"
     sp_float _t135 = self->iv_current_rate;
     self->iv_phase += (sp_Chorus_rate_to_freq_fast((sp_Chorus *)self, _t135) * self->iv_inv_control_rate);
-#line 138 "spms1_chorus.rb"
+#line 162 "spms1_chorus.rb"
     self->iv_phase -= (((self->iv_phase < 1.0)) ? 0.0 : 1.0);
-#line 144 "spms1_chorus.rb"
+#line 168 "spms1_chorus.rb"
     lv_swing = ((lv_triangle * self->iv_current_depth) * self->iv_full_scale_depth);
-#line 145 "spms1_chorus.rb"
+#line 169 "spms1_chorus.rb"
     self->iv_delay_step_l = (((self->iv_base_time - lv_swing) - self->iv_delay_l) * 0.25);
-#line 146 "spms1_chorus.rb"
+#line 170 "spms1_chorus.rb"
     self->iv_delay_step_r = (((self->iv_base_time + lv_swing) - self->iv_delay_r) * 0.25);
   }
-#line 150 "spms1_chorus.rb"
-  lv_input = (((lv_audio_input < -1.0)) ? -1.0 : ((((lv_audio_input > 1.0)) ? 1.0 : lv_audio_input)));
-#line 152 "spms1_chorus.rb"
-  self->iv_delay_l += self->iv_delay_step_l;
-#line 153 "spms1_chorus.rb"
-  self->iv_delay_r += self->iv_delay_step_r;
-#line 154 "spms1_chorus.rb"
-  self->iv_write_index = (sp_int_add(self->iv_write_index, 1LL) & cst_Spms1__Chorus__DELAY_LINE_MASK);
-#line 157 "spms1_chorus.rb"
-  lv_whole_l = sp_float_to_i_checked(self->iv_delay_l);
-#line 158 "spms1_chorus.rb"
-  lv_fraction_l = (self->iv_delay_l - ({ sp_int _t136 = (lv_whole_l); _t136 == SP_INT_NIL ? 0.0 : ((sp_float)_t136); }));
-#line 159 "spms1_chorus.rb"
-  lv_newer_l = sp_FloatArray_get(self->iv_delay_line, (sp_int_sub(self->iv_write_index, lv_whole_l) & cst_Spms1__Chorus__DELAY_LINE_MASK));
-#line 160 "spms1_chorus.rb"
-  lv_older_l = sp_FloatArray_get(self->iv_delay_line, (sp_int_sub(sp_int_sub(self->iv_write_index, lv_whole_l), 1LL) & cst_Spms1__Chorus__DELAY_LINE_MASK));
-#line 161 "spms1_chorus.rb"
-  lv_delayed_l = (lv_newer_l + (lv_fraction_l * ((lv_older_l - lv_newer_l))));
-#line 162 "spms1_chorus.rb"
-  lv_whole_r = sp_float_to_i_checked(self->iv_delay_r);
-#line 163 "spms1_chorus.rb"
-  lv_fraction_r = (self->iv_delay_r - ({ sp_int _t137 = (lv_whole_r); _t137 == SP_INT_NIL ? 0.0 : ((sp_float)_t137); }));
-#line 164 "spms1_chorus.rb"
-  lv_newer_r = sp_FloatArray_get(self->iv_delay_line, (sp_int_sub(self->iv_write_index, lv_whole_r) & cst_Spms1__Chorus__DELAY_LINE_MASK));
-#line 165 "spms1_chorus.rb"
-  lv_older_r = sp_FloatArray_get(self->iv_delay_line, (sp_int_sub(sp_int_sub(self->iv_write_index, lv_whole_r), 1LL) & cst_Spms1__Chorus__DELAY_LINE_MASK));
-#line 166 "spms1_chorus.rb"
-  lv_delayed_r = (lv_newer_r + (lv_fraction_r * ((lv_older_r - lv_newer_r))));
-#line 170 "spms1_chorus.rb"
-  self->iv_filtered = (lv_input + ((self->iv_filtered - lv_input) * 0.25));
-#line 171 "spms1_chorus.rb"
-  sp_FloatArray_set(self->iv_delay_line, self->iv_write_index, self->iv_filtered);
-#line 173 "spms1_chorus.rb"
-  self->iv_output_l = (lv_input + ((lv_delayed_l - lv_input) * self->iv_current_mix));
 #line 174 "spms1_chorus.rb"
+  lv_input = (((lv_audio_input < -1.0)) ? -1.0 : ((((lv_audio_input > 1.0)) ? 1.0 : lv_audio_input)));
+#line 176 "spms1_chorus.rb"
+  self->iv_delay_l += self->iv_delay_step_l;
+#line 177 "spms1_chorus.rb"
+  self->iv_delay_r += self->iv_delay_step_r;
+#line 178 "spms1_chorus.rb"
+  self->iv_write_index = (sp_int_add(self->iv_write_index, 1LL) & cst_Spms1__Chorus__DELAY_LINE_MASK);
+#line 181 "spms1_chorus.rb"
+  lv_whole_l = sp_float_to_i_checked(self->iv_delay_l);
+#line 182 "spms1_chorus.rb"
+  lv_fraction_l = (self->iv_delay_l - ({ sp_int _t136 = (lv_whole_l); _t136 == SP_INT_NIL ? 0.0 : ((sp_float)_t136); }));
+#line 183 "spms1_chorus.rb"
+  lv_newer_l = sp_FloatArray_get(self->iv_delay_line, (sp_int_sub(self->iv_write_index, lv_whole_l) & cst_Spms1__Chorus__DELAY_LINE_MASK));
+#line 184 "spms1_chorus.rb"
+  lv_older_l = sp_FloatArray_get(self->iv_delay_line, (sp_int_sub(sp_int_sub(self->iv_write_index, lv_whole_l), 1LL) & cst_Spms1__Chorus__DELAY_LINE_MASK));
+#line 185 "spms1_chorus.rb"
+  lv_delayed_l = (lv_newer_l + (lv_fraction_l * ((lv_older_l - lv_newer_l))));
+#line 186 "spms1_chorus.rb"
+  lv_whole_r = sp_float_to_i_checked(self->iv_delay_r);
+#line 187 "spms1_chorus.rb"
+  lv_fraction_r = (self->iv_delay_r - ({ sp_int _t137 = (lv_whole_r); _t137 == SP_INT_NIL ? 0.0 : ((sp_float)_t137); }));
+#line 188 "spms1_chorus.rb"
+  lv_newer_r = sp_FloatArray_get(self->iv_delay_line, (sp_int_sub(self->iv_write_index, lv_whole_r) & cst_Spms1__Chorus__DELAY_LINE_MASK));
+#line 189 "spms1_chorus.rb"
+  lv_older_r = sp_FloatArray_get(self->iv_delay_line, (sp_int_sub(sp_int_sub(self->iv_write_index, lv_whole_r), 1LL) & cst_Spms1__Chorus__DELAY_LINE_MASK));
+#line 190 "spms1_chorus.rb"
+  lv_delayed_r = (lv_newer_r + (lv_fraction_r * ((lv_older_r - lv_newer_r))));
+#line 194 "spms1_chorus.rb"
+  self->iv_filtered = (lv_input + ((self->iv_filtered - lv_input) * 0.25));
+#line 195 "spms1_chorus.rb"
+  sp_FloatArray_set(self->iv_delay_line, self->iv_write_index, self->iv_filtered);
+#line 197 "spms1_chorus.rb"
+  self->iv_output_l = (lv_input + ((lv_delayed_l - lv_input) * self->iv_current_mix));
+#line 198 "spms1_chorus.rb"
   self->iv_output_r = (lv_input + ((lv_delayed_r - lv_input) * self->iv_current_mix));
   return self->iv_output_r;
   return 0.0;
 }
-#line 179 "spms1_chorus.rb"
+#line 203 "spms1_chorus.rb"
 static inline __attribute__((always_inline)) sp_float sp_Chorus_rate_to_freq_fast(sp_Chorus *self, sp_float lv_rate) {
     sp_float lv_internal_rate = 0.0;
     sp_int lv_index = 0;
     sp_float lv_fraction = 0.0;
     sp_float lv_f0 = 0.0;
     sp_float lv_f1 = 0.0;
-#line 180 "spms1_chorus.rb"
+#line 204 "spms1_chorus.rb"
   lv_internal_rate = (lv_rate * 120.0);
-#line 181 "spms1_chorus.rb"
+#line 205 "spms1_chorus.rb"
   lv_index = sp_float_to_i_checked(lv_internal_rate);
-#line 182 "spms1_chorus.rb"
+#line 206 "spms1_chorus.rb"
   lv_fraction = (lv_internal_rate - ({ sp_int _t138 = (lv_index); _t138 == SP_INT_NIL ? 0.0 : ((sp_float)_t138); }));
-#line 183 "spms1_chorus.rb"
+#line 207 "spms1_chorus.rb"
   lv_f0 = sp_FloatArray_get(cst_Spms1__Chorus__FREQ_TABLE, lv_index);
-#line 184 "spms1_chorus.rb"
+#line 208 "spms1_chorus.rb"
   lv_f1 = sp_FloatArray_get(cst_Spms1__Chorus__FREQ_TABLE, sp_int_add(lv_index, 1LL));
-#line 185 "spms1_chorus.rb"
+#line 209 "spms1_chorus.rb"
   return (lv_f0 + (lv_fraction * ((lv_f1 - lv_f0))));
   return 0.0;
 }
-#line 57 "spms1_delay.rb"
+#line 59 "spms1_delay.rb"
 static inline __attribute__((always_inline)) sp_float sp_Delay_output_mono(sp_Delay *self) {
-#line 58 "spms1_delay.rb"
+#line 60 "spms1_delay.rb"
   return ((self->iv_output_l + self->iv_output_r) * 0.5);
   return 0.0;
 }
-#line 61 "spms1_delay.rb"
+#line 63 "spms1_delay.rb"
 static void sp_Delay_initialize(sp_Delay *self, sp_int lv_sample_rate) {
     SP_GC_SAVE();
-#line 62 "spms1_delay.rb"
+#line 64 "spms1_delay.rb"
   self->iv_sample_rate = lv_sample_rate;
-#line 63 "spms1_delay.rb"
+#line 65 "spms1_delay.rb"
   self->iv_smoothing_target_blend = ((cst_Spms1__Delay__SMOOTHING_TARGET_BLEND_BASE * ((48000.0 / (double)(self->iv_sample_rate)))) * (((double)(cst_Spms1__Delay__CONTROL_RATE_DIVISOR) / 4.0)));
-#line 66 "spms1_delay.rb"
-  self->iv_smoothing_16_blend = (1.0 - sp_float_pow((1.0 - self->iv_smoothing_target_blend), 4.0));
-#line 67 "spms1_delay.rb"
-  self->iv_full_scale_time = (cst_FULL_SCALE_TIME_AT_48K * (((double)(self->iv_sample_rate) / 48000.0)));
 #line 68 "spms1_delay.rb"
-  self->iv_min_time = (cst_MIN_TIME_AT_48K * (((double)(self->iv_sample_rate) / 48000.0)));
+  self->iv_smoothing_16_blend = (1.0 - sp_float_pow((1.0 - self->iv_smoothing_target_blend), 4.0));
 #line 69 "spms1_delay.rb"
+  self->iv_full_scale_time = (cst_FULL_SCALE_TIME_AT_48K * (((double)(self->iv_sample_rate) / 48000.0)));
+#line 70 "spms1_delay.rb"
+  self->iv_min_time = (cst_MIN_TIME_AT_48K * (((double)(self->iv_sample_rate) / 48000.0)));
+#line 71 "spms1_delay.rb"
   self->iv_max_time = (cst_MAX_TIME_AT_48K * (((double)(self->iv_sample_rate) / 48000.0)));
-#line 72 "spms1_delay.rb"
-  self->iv_time_slew_up = (cst_TIME_SLEW * (double)(cst_Spms1__Delay__CONTROL_RATE_DIVISOR));
-#line 73 "spms1_delay.rb"
-  self->iv_time_slew_down = (-self->iv_time_slew_up);
 #line 74 "spms1_delay.rb"
+  self->iv_time_slew_up = (cst_TIME_SLEW * (double)(cst_Spms1__Delay__CONTROL_RATE_DIVISOR));
+#line 75 "spms1_delay.rb"
+  self->iv_time_slew_down = (-self->iv_time_slew_up);
+#line 76 "spms1_delay.rb"
   sp_int _t140 = cst_Spms1__Delay__DELAY_LINE_SIZE;
   if (_t140 < 0) sp_raise_cls("ArgumentError", "negative array size");
   sp_float _t141 = 0.0;
   sp_FloatArray *_t142 = sp_FloatArray_new();
   SP_GC_ROOT(_t142);
   for (sp_int _t143 = 0; _t143 < _t140; _t143++) sp_FloatArray_push(_t142, _t141);
-  { __typeof__(self) _wb1797 = self; _wb1797->iv_delay_line_l = _t142; sp_gc_wb((void *)_wb1797); }
-#line 75 "spms1_delay.rb"
+  { __typeof__(self) _wb1801 = self; _wb1801->iv_delay_line_l = _t142; sp_gc_wb((void *)_wb1801); }
+#line 77 "spms1_delay.rb"
   sp_int _t145 = cst_Spms1__Delay__DELAY_LINE_SIZE;
   if (_t145 < 0) sp_raise_cls("ArgumentError", "negative array size");
   sp_float _t146 = 0.0;
   sp_FloatArray *_t147 = sp_FloatArray_new();
   SP_GC_ROOT(_t147);
   for (sp_int _t148 = 0; _t148 < _t145; _t148++) sp_FloatArray_push(_t147, _t146);
-  { __typeof__(self) _wb1798 = self; _wb1798->iv_delay_line_r = _t147; sp_gc_wb((void *)_wb1798); }
-#line 77 "spms1_delay.rb"
-  self->iv_write_index = 0LL;
+  { __typeof__(self) _wb1802 = self; _wb1802->iv_delay_line_r = _t147; sp_gc_wb((void *)_wb1802); }
 #line 79 "spms1_delay.rb"
+  self->iv_write_index = 0LL;
+#line 81 "spms1_delay.rb"
   self->iv_filtered_l = 0.0;
-#line 80 "spms1_delay.rb"
+#line 82 "spms1_delay.rb"
   self->iv_filtered_r = 0.0;
-#line 83 "spms1_delay.rb"
-  self->iv_time = 0.5;
-#line 84 "spms1_delay.rb"
-  self->iv_stage_1_time = 0.5;
 #line 85 "spms1_delay.rb"
-  self->iv_current_time = 0.5;
+  self->iv_time = 0.5;
 #line 86 "spms1_delay.rb"
-  self->iv_feedback = 0.25;
+  self->iv_stage_1_time = 0.5;
 #line 87 "spms1_delay.rb"
-  self->iv_stage_1_feedback = 0.25;
+  self->iv_current_time = 0.5;
 #line 88 "spms1_delay.rb"
-  self->iv_current_feedback = 0.25;
+  self->iv_feedback = 0.25;
 #line 89 "spms1_delay.rb"
-  self->iv_mix = 0.25;
+  self->iv_stage_1_feedback = 0.25;
 #line 90 "spms1_delay.rb"
-  self->iv_stage_1_mix = 0.25;
+  self->iv_current_feedback = 0.25;
 #line 91 "spms1_delay.rb"
+  self->iv_mix = 0.25;
+#line 92 "spms1_delay.rb"
+  self->iv_stage_1_mix = 0.25;
+#line 93 "spms1_delay.rb"
   self->iv_current_mix = 0.25;
-#line 95 "spms1_delay.rb"
+#line 97 "spms1_delay.rb"
   self->iv_delay = (self->iv_full_scale_time * self->iv_current_time);
-#line 96 "spms1_delay.rb"
-  self->iv_delay_step = 0.0;
 #line 98 "spms1_delay.rb"
+  self->iv_delay_step = 0.0;
+#line 100 "spms1_delay.rb"
   self->iv_output_l = 0.0;
-#line 99 "spms1_delay.rb"
+#line 101 "spms1_delay.rb"
   self->iv_output_r = 0.0;
-}
 #line 104 "spms1_delay.rb"
+  self->iv_clear_index = cst_Spms1__Delay__DELAY_LINE_SIZE;
+}
+#line 111 "spms1_delay.rb"
+static inline __attribute__((always_inline)) sp_int sp_Delay_start_clear(sp_Delay *self) {
+#line 112 "spms1_delay.rb"
+  self->iv_clear_index = 0LL;
+  return self->iv_clear_index;
+  return 0;
+}
+#line 115 "spms1_delay.rb"
+static inline sp_bool sp_Delay_clear_step(sp_Delay *self) {
+    sp_int lv_last = 0;
+#line 116 "spms1_delay.rb"
+  if ((self->iv_clear_index < cst_Spms1__Delay__DELAY_LINE_SIZE)) {
+#line 117 "spms1_delay.rb"
+    lv_last = sp_int_add(self->iv_clear_index, cst_CLEAR_STEP);
+#line 118 "spms1_delay.rb"
+    while ((self->iv_clear_index < lv_last)) {
+#line 119 "spms1_delay.rb"
+      sp_FloatArray_set(self->iv_delay_line_l, self->iv_clear_index, 0.0);
+#line 120 "spms1_delay.rb"
+      sp_FloatArray_set(self->iv_delay_line_r, self->iv_clear_index, 0.0);
+#line 121 "spms1_delay.rb"
+      self->iv_clear_index = sp_int_add(self->iv_clear_index, 1LL);
+    }
+#line 123 "spms1_delay.rb"
+    self->iv_filtered_l = 0.0;
+#line 124 "spms1_delay.rb"
+    self->iv_filtered_r = 0.0;
+#line 125 "spms1_delay.rb"
+    self->iv_output_l = 0.0;
+#line 126 "spms1_delay.rb"
+    self->iv_output_r = 0.0;
+  }
+#line 128 "spms1_delay.rb"
+  return (self->iv_clear_index >= cst_Spms1__Delay__DELAY_LINE_SIZE);
+  return 0;
+}
+#line 133 "spms1_delay.rb"
 static inline __attribute__((always_inline)) sp_float sp_Delay_set_time(sp_Delay *self, sp_float lv_time) {
-#line 105 "spms1_delay.rb"
+#line 134 "spms1_delay.rb"
   self->iv_time = (((lv_time < 0.0)) ? 0.0 : ((((lv_time > 1.0)) ? 1.0 : lv_time)));
   return self->iv_time;
   return 0.0;
 }
-#line 111 "spms1_delay.rb"
+#line 140 "spms1_delay.rb"
 static inline __attribute__((always_inline)) sp_float sp_Delay_set_feedback(sp_Delay *self, sp_float lv_feedback) {
     sp_float lv_clamped_feedback = 0.0;
-#line 112 "spms1_delay.rb"
+#line 141 "spms1_delay.rb"
   lv_clamped_feedback = (((lv_feedback < 0.0)) ? 0.0 : ((((lv_feedback > 1.0)) ? 1.0 : lv_feedback)));
-#line 113 "spms1_delay.rb"
+#line 142 "spms1_delay.rb"
   self->iv_feedback = (lv_clamped_feedback * 0.5);
   return self->iv_feedback;
   return 0.0;
 }
-#line 118 "spms1_delay.rb"
+#line 147 "spms1_delay.rb"
 static inline __attribute__((always_inline)) sp_float sp_Delay_set_mix(sp_Delay *self, sp_float lv_mix) {
-#line 119 "spms1_delay.rb"
+#line 148 "spms1_delay.rb"
   self->iv_mix = (((lv_mix < 0.0)) ? 0.0 : ((((lv_mix > 1.0)) ? 1.0 : lv_mix)));
   return self->iv_mix;
   return 0.0;
 }
-#line 126 "spms1_delay.rb"
+#line 155 "spms1_delay.rb"
 static inline __attribute__((always_inline)) sp_float sp_Delay_smooth_parameters(sp_Delay *self) {
-#line 127 "spms1_delay.rb"
+#line 156 "spms1_delay.rb"
   self->iv_stage_1_time = sp_Dsp_s_smooth(self->iv_time, self->iv_stage_1_time, self->iv_smoothing_16_blend);
-#line 128 "spms1_delay.rb"
+#line 157 "spms1_delay.rb"
   self->iv_current_time = sp_Dsp_s_smooth(self->iv_stage_1_time, self->iv_current_time, self->iv_smoothing_16_blend);
   return self->iv_current_time;
   return 0.0;
 }
-#line 131 "spms1_delay.rb"
+#line 160 "spms1_delay.rb"
 static sp_float sp_Delay_process(sp_Delay *self, sp_bool lv_control_tick, sp_float lv_audio_input_l, sp_float lv_audio_input_r) {
     sp_float lv_target = 0.0;
     sp_float lv_distance = 0.0;
@@ -4908,70 +5036,70 @@ static sp_float sp_Delay_process(sp_Delay *self, sp_bool lv_control_tick, sp_flo
     sp_float lv_delayed_r = 0.0;
     sp_float lv_loop_input_l = 0.0;
     sp_float lv_loop_input_r = 0.0;
-#line 132 "spms1_delay.rb"
+#line 161 "spms1_delay.rb"
   if (lv_control_tick) {
-#line 133 "spms1_delay.rb"
+#line 162 "spms1_delay.rb"
     self->iv_stage_1_feedback = sp_Dsp_s_smooth(self->iv_feedback, self->iv_stage_1_feedback, self->iv_smoothing_target_blend);
-#line 134 "spms1_delay.rb"
+#line 163 "spms1_delay.rb"
     self->iv_current_feedback = sp_Dsp_s_smooth(self->iv_stage_1_feedback, self->iv_current_feedback, self->iv_smoothing_target_blend);
-#line 135 "spms1_delay.rb"
+#line 164 "spms1_delay.rb"
     self->iv_stage_1_mix = sp_Dsp_s_smooth(self->iv_mix, self->iv_stage_1_mix, self->iv_smoothing_target_blend);
-#line 136 "spms1_delay.rb"
+#line 165 "spms1_delay.rb"
     self->iv_current_mix = sp_Dsp_s_smooth(self->iv_stage_1_mix, self->iv_current_mix, self->iv_smoothing_target_blend);
-#line 140 "spms1_delay.rb"
+#line 169 "spms1_delay.rb"
     lv_target = (self->iv_full_scale_time * self->iv_current_time);
-#line 141 "spms1_delay.rb"
+#line 170 "spms1_delay.rb"
     lv_target = (((lv_target < self->iv_min_time)) ? self->iv_min_time : ((((lv_target > self->iv_max_time)) ? self->iv_max_time : lv_target)));
-#line 142 "spms1_delay.rb"
+#line 171 "spms1_delay.rb"
     lv_distance = (lv_target - self->iv_delay);
-#line 143 "spms1_delay.rb"
+#line 172 "spms1_delay.rb"
     lv_distance = (((lv_distance < self->iv_time_slew_down)) ? self->iv_time_slew_down : ((((lv_distance > self->iv_time_slew_up)) ? self->iv_time_slew_up : lv_distance)));
-#line 144 "spms1_delay.rb"
+#line 173 "spms1_delay.rb"
     self->iv_delay_step = (lv_distance * 0.25);
   }
-#line 149 "spms1_delay.rb"
-  lv_input_l = (((lv_audio_input_l < -1.0)) ? -1.0 : ((((lv_audio_input_l > 1.0)) ? 1.0 : lv_audio_input_l)));
-#line 150 "spms1_delay.rb"
-  lv_input_r = (((lv_audio_input_r < -1.0)) ? -1.0 : ((((lv_audio_input_r > 1.0)) ? 1.0 : lv_audio_input_r)));
-#line 152 "spms1_delay.rb"
-  self->iv_delay += self->iv_delay_step;
-#line 153 "spms1_delay.rb"
-  self->iv_write_index = (sp_int_add(self->iv_write_index, 1LL) & cst_Spms1__Delay__DELAY_LINE_MASK);
-#line 157 "spms1_delay.rb"
-  lv_whole = sp_float_to_i_checked(self->iv_delay);
-#line 158 "spms1_delay.rb"
-  lv_fraction = (self->iv_delay - ({ sp_int _t155 = (lv_whole); _t155 == SP_INT_NIL ? 0.0 : ((sp_float)_t155); }));
-#line 159 "spms1_delay.rb"
-  lv_newer_index = (sp_int_sub(self->iv_write_index, lv_whole) & cst_Spms1__Delay__DELAY_LINE_MASK);
-#line 160 "spms1_delay.rb"
-  lv_older_index = (sp_int_sub(sp_int_sub(self->iv_write_index, lv_whole), 1LL) & cst_Spms1__Delay__DELAY_LINE_MASK);
-#line 161 "spms1_delay.rb"
-  lv_newer_l = sp_FloatArray_get(self->iv_delay_line_l, lv_newer_index);
-#line 162 "spms1_delay.rb"
-  lv_older_l = sp_FloatArray_get(self->iv_delay_line_l, lv_older_index);
-#line 163 "spms1_delay.rb"
-  lv_delayed_l = (lv_newer_l + (lv_fraction * ((lv_older_l - lv_newer_l))));
-#line 164 "spms1_delay.rb"
-  lv_newer_r = sp_FloatArray_get(self->iv_delay_line_r, lv_newer_index);
-#line 165 "spms1_delay.rb"
-  lv_older_r = sp_FloatArray_get(self->iv_delay_line_r, lv_older_index);
-#line 166 "spms1_delay.rb"
-  lv_delayed_r = (lv_newer_r + (lv_fraction * ((lv_older_r - lv_newer_r))));
-#line 170 "spms1_delay.rb"
-  lv_loop_input_l = ((lv_input_l * 0.5) + (lv_delayed_l * self->iv_current_feedback));
-#line 171 "spms1_delay.rb"
-  self->iv_filtered_l = (lv_loop_input_l + ((self->iv_filtered_l - lv_loop_input_l) * 0.25));
-#line 172 "spms1_delay.rb"
-  sp_FloatArray_set(self->iv_delay_line_l, self->iv_write_index, self->iv_filtered_l);
-#line 173 "spms1_delay.rb"
-  lv_loop_input_r = ((lv_input_r * 0.5) + (lv_delayed_r * self->iv_current_feedback));
-#line 174 "spms1_delay.rb"
-  self->iv_filtered_r = (lv_loop_input_r + ((self->iv_filtered_r - lv_loop_input_r) * 0.25));
-#line 175 "spms1_delay.rb"
-  sp_FloatArray_set(self->iv_delay_line_r, self->iv_write_index, self->iv_filtered_r);
-#line 177 "spms1_delay.rb"
-  self->iv_output_l = (lv_input_l + ((lv_delayed_l - lv_input_l) * self->iv_current_mix));
 #line 178 "spms1_delay.rb"
+  lv_input_l = (((lv_audio_input_l < -1.0)) ? -1.0 : ((((lv_audio_input_l > 1.0)) ? 1.0 : lv_audio_input_l)));
+#line 179 "spms1_delay.rb"
+  lv_input_r = (((lv_audio_input_r < -1.0)) ? -1.0 : ((((lv_audio_input_r > 1.0)) ? 1.0 : lv_audio_input_r)));
+#line 181 "spms1_delay.rb"
+  self->iv_delay += self->iv_delay_step;
+#line 182 "spms1_delay.rb"
+  self->iv_write_index = (sp_int_add(self->iv_write_index, 1LL) & cst_Spms1__Delay__DELAY_LINE_MASK);
+#line 186 "spms1_delay.rb"
+  lv_whole = sp_float_to_i_checked(self->iv_delay);
+#line 187 "spms1_delay.rb"
+  lv_fraction = (self->iv_delay - ({ sp_int _t155 = (lv_whole); _t155 == SP_INT_NIL ? 0.0 : ((sp_float)_t155); }));
+#line 188 "spms1_delay.rb"
+  lv_newer_index = (sp_int_sub(self->iv_write_index, lv_whole) & cst_Spms1__Delay__DELAY_LINE_MASK);
+#line 189 "spms1_delay.rb"
+  lv_older_index = (sp_int_sub(sp_int_sub(self->iv_write_index, lv_whole), 1LL) & cst_Spms1__Delay__DELAY_LINE_MASK);
+#line 190 "spms1_delay.rb"
+  lv_newer_l = sp_FloatArray_get(self->iv_delay_line_l, lv_newer_index);
+#line 191 "spms1_delay.rb"
+  lv_older_l = sp_FloatArray_get(self->iv_delay_line_l, lv_older_index);
+#line 192 "spms1_delay.rb"
+  lv_delayed_l = (lv_newer_l + (lv_fraction * ((lv_older_l - lv_newer_l))));
+#line 193 "spms1_delay.rb"
+  lv_newer_r = sp_FloatArray_get(self->iv_delay_line_r, lv_newer_index);
+#line 194 "spms1_delay.rb"
+  lv_older_r = sp_FloatArray_get(self->iv_delay_line_r, lv_older_index);
+#line 195 "spms1_delay.rb"
+  lv_delayed_r = (lv_newer_r + (lv_fraction * ((lv_older_r - lv_newer_r))));
+#line 199 "spms1_delay.rb"
+  lv_loop_input_l = ((lv_input_l * 0.5) + (lv_delayed_l * self->iv_current_feedback));
+#line 200 "spms1_delay.rb"
+  self->iv_filtered_l = (lv_loop_input_l + ((self->iv_filtered_l - lv_loop_input_l) * 0.25));
+#line 201 "spms1_delay.rb"
+  sp_FloatArray_set(self->iv_delay_line_l, self->iv_write_index, self->iv_filtered_l);
+#line 202 "spms1_delay.rb"
+  lv_loop_input_r = ((lv_input_r * 0.5) + (lv_delayed_r * self->iv_current_feedback));
+#line 203 "spms1_delay.rb"
+  self->iv_filtered_r = (lv_loop_input_r + ((self->iv_filtered_r - lv_loop_input_r) * 0.25));
+#line 204 "spms1_delay.rb"
+  sp_FloatArray_set(self->iv_delay_line_r, self->iv_write_index, self->iv_filtered_r);
+#line 206 "spms1_delay.rb"
+  self->iv_output_l = (lv_input_l + ((lv_delayed_l - lv_input_l) * self->iv_current_mix));
+#line 207 "spms1_delay.rb"
   self->iv_output_r = (lv_input_r + ((lv_delayed_r - lv_input_r) * self->iv_current_mix));
   return self->iv_output_r;
   return 0.0;
@@ -5691,11 +5819,11 @@ int main(int argc,char**argv){
     SP_GC_ROOT(lv_winning_slot);
     sp_IntArray * lv_order_written = NULL;
     SP_GC_ROOT(lv_order_written);
-    sp_int lv_output_gain = 0;
-    sp_int lv_output_gain_step = 0;
-    sp_int lv_output_fade_buffers = 0;
+    sp_int lv_output_fade_position = 0;
+    sp_int lv_output_fade_direction = 0;
     sp_int lv_sound_off_count = 0;
     sp_bool lv_sound_off_waiting = 0;
+    sp_bool lv_lines_cleared = 0;
     sp_FloatArray * lv_audio_buffer_l = NULL;
     SP_GC_ROOT(lv_audio_buffer_l);
     sp_FloatArray * lv_audio_buffer_r = NULL;
@@ -5703,6 +5831,9 @@ int main(int argc,char**argv){
     sp_SignalBus * lv_signals = NULL;
     SP_GC_ROOT(lv_signals);
     sp_bool lv_muted = 0;
+    sp_float lv_output_gain = 0.0;
+    sp_float lv_output_gain_step = 0.0;
+    sp_bool lv_clearing_lines = 0;
     sp_int lv_slot = 0;
     sp_int lv_listed_count = 0;
     sp_int lv_module_id = 0;
@@ -5918,9 +6049,12 @@ int main(int argc,char**argv){
     sp_float lv_smoothed_mod_wheel = 0.0;
     sp_float lv_smoothed_general_1 = 0.0;
     sp_float lv_smoothed_general_2 = 0.0;
+    sp_int lv_buffer_words = 0;
     sp_bool lv_control_tick = 0;
-    sp_float lv_gain = 0.0;
-    sp_int lv_i__bp18472 = 0;
+    sp_bool lv_amp_cleared = 0;
+    sp_bool lv_chorus_cleared = 0;
+    sp_bool lv_delay_cleared = 0;
+    sp_int lv_i__bp18577 = 0;
 
 #line 35 "spms1_framework.rb"
 #line 36 "spms1_framework.rb"
@@ -6230,6 +6364,8 @@ int main(int argc,char**argv){
   cst_MAX_TIME_AT_48K = 16320.0;
 #line 52 "spms1_delay.rb"
   cst_TIME_SLEW = 0.25;
+#line 54 "spms1_delay.rb"
+  cst_CLEAR_STEP = 2048LL;
 #line 21 "spms1_main.rb"
 #line 5 "spms1_patch.rb"
   cst_MODULE_NONE = 0LL;
@@ -7183,2162 +7319,2174 @@ int main(int argc,char**argv){
   cst_SIGNALS_SIZE = 256LL;
 #line 71 "spms1_main.rb"
   cst_CONTROLLER_SMOOTHING_BLEND = (1.0 - sp_float_pow((1.0 - (0.015625 * ((48000.0 / ({ sp_int _t547 = (cst_SAMPLE_RATE); _t547 == SP_INT_NIL ? 0.0 : ((sp_float)_t547); }))))), ((({ sp_int _t548 = (cst_AUDIO_BUFFER_WORDS); _t548 == SP_INT_NIL ? 0.0 : ((sp_float)_t548); }) / 4.0))));
-#line 81 "spms1_main.rb"
-  cst_OUTPUT_FADE_BUFFERS = sp_idiv(sp_int_sub(sp_int_add(sp_idiv(sp_int_mul(cst_SAMPLE_RATE, 3LL), 1000LL), cst_AUDIO_BUFFER_WORDS), 1LL), 64LL);
-#line 82 "spms1_main.rb"
-  cst_OUTPUT_GAIN_ONE = 65536LL;
-#line 83 "spms1_main.rb"
-  cst_OUTPUT_FADE_STEP = sp_idiv(sp_int_sub(sp_int_add(cst_OUTPUT_GAIN_ONE, sp_int_mul(cst_OUTPUT_FADE_BUFFERS, cst_AUDIO_BUFFER_WORDS)), 1LL), (sp_int_mul(cst_OUTPUT_FADE_BUFFERS, cst_AUDIO_BUFFER_WORDS)));
-#line 97 "spms1_main.rb"
-  lv_pitch_1 = sp_Pitch_new(cst_SAMPLE_RATE);
-#line 98 "spms1_main.rb"
-  lv_eg_1 = sp_EnvGen_new(cst_SAMPLE_RATE);
-#line 99 "spms1_main.rb"
-  lv_eg_2 = sp_EnvGen_new(cst_SAMPLE_RATE);
-#line 100 "spms1_main.rb"
-  lv_lfo_1 = sp_LFO_new(cst_SAMPLE_RATE);
-#line 101 "spms1_main.rb"
-  lv_mixer_1 = sp_Mixer_new(cst_SAMPLE_RATE);
-#line 102 "spms1_main.rb"
-  lv_osc_1 = sp_Osc_new(cst_SAMPLE_RATE);
+#line 88 "spms1_main.rb"
+  cst_OUTPUT_FADE_SAMPLES = sp_int_mul(sp_idiv(sp_int_sub(sp_int_add(sp_idiv(sp_int_mul(cst_SAMPLE_RATE, 3LL), 1000LL), cst_AUDIO_BUFFER_WORDS), 1LL), 64LL), cst_AUDIO_BUFFER_WORDS);
+#line 89 "spms1_main.rb"
+  cst_OUTPUT_FADE_STEP = (1.0 / ({ sp_int _t549 = (cst_OUTPUT_FADE_SAMPLES); _t549 == SP_INT_NIL ? 0.0 : ((sp_float)_t549); }));
 #line 103 "spms1_main.rb"
-  lv_osc_2 = sp_Osc_new(cst_SAMPLE_RATE);
+  lv_pitch_1 = sp_Pitch_new(cst_SAMPLE_RATE);
 #line 104 "spms1_main.rb"
-  lv_noise_1 = sp_Noise_new(cst_SAMPLE_RATE);
+  lv_eg_1 = sp_EnvGen_new(cst_SAMPLE_RATE);
 #line 105 "spms1_main.rb"
-  lv_mixer_2 = sp_Mixer_new(cst_SAMPLE_RATE);
+  lv_eg_2 = sp_EnvGen_new(cst_SAMPLE_RATE);
 #line 106 "spms1_main.rb"
-  lv_filter_1 = sp_Filter_new(cst_SAMPLE_RATE);
+  lv_lfo_1 = sp_LFO_new(cst_SAMPLE_RATE);
 #line 107 "spms1_main.rb"
-  lv_amp_1 = sp_Amp_new(cst_SAMPLE_RATE);
+  lv_mixer_1 = sp_Mixer_new(cst_SAMPLE_RATE);
 #line 108 "spms1_main.rb"
-  lv_chorus_1 = sp_Chorus_new(cst_SAMPLE_RATE);
+  lv_osc_1 = sp_Osc_new(cst_SAMPLE_RATE);
 #line 109 "spms1_main.rb"
-  lv_delay_1 = sp_Delay_new(cst_SAMPLE_RATE);
+  lv_osc_2 = sp_Osc_new(cst_SAMPLE_RATE);
+#line 110 "spms1_main.rb"
+  lv_noise_1 = sp_Noise_new(cst_SAMPLE_RATE);
+#line 111 "spms1_main.rb"
+  lv_mixer_2 = sp_Mixer_new(cst_SAMPLE_RATE);
+#line 112 "spms1_main.rb"
+  lv_filter_1 = sp_Filter_new(cst_SAMPLE_RATE);
 #line 113 "spms1_main.rb"
-  sp_int _t563 = cst_MODULES_SIZE;
-  if (_t563 < 0) sp_raise_cls("ArgumentError", "negative array size");
-  sp_int _t564 = cst_MODULE_NONE;
-  sp_IntArray *_t565 = sp_IntArray_new();
-  SP_GC_ROOT(_t565);
-  for (sp_int _t566 = 0; _t566 < _t563; _t566++) sp_IntArray_push(_t565, _t564);
-  lv_active_modules = _t565;
-#line 117 "spms1_main.rb"
-  sp_int _t568 = 128LL;
-  if (_t568 < 0) sp_raise_cls("ArgumentError", "negative array size");
-  sp_int _t569 = 0LL;
-  sp_IntArray *_t570 = sp_IntArray_new();
-  SP_GC_ROOT(_t570);
-  for (sp_int _t571 = 0; _t571 < _t568; _t571++) sp_IntArray_push(_t570, _t569);
-  lv_winning_slot = _t570;
+  lv_amp_1 = sp_Amp_new(cst_SAMPLE_RATE);
+#line 114 "spms1_main.rb"
+  lv_chorus_1 = sp_Chorus_new(cst_SAMPLE_RATE);
+#line 115 "spms1_main.rb"
+  lv_delay_1 = sp_Delay_new(cst_SAMPLE_RATE);
 #line 119 "spms1_main.rb"
-  sp_int _t573 = cst_MODULES_SIZE;
-  if (_t573 < 0) sp_raise_cls("ArgumentError", "negative array size");
-  sp_int _t574 = 0LL;
-  sp_IntArray *_t575 = sp_IntArray_new();
-  SP_GC_ROOT(_t575);
-  for (sp_int _t576 = 0; _t576 < _t573; _t576++) sp_IntArray_push(_t575, _t574);
-  lv_order_written = _t575;
-#line 124 "spms1_main.rb"
-  lv_output_gain = cst_OUTPUT_GAIN_ONE;
+  sp_int _t564 = cst_MODULES_SIZE;
+  if (_t564 < 0) sp_raise_cls("ArgumentError", "negative array size");
+  sp_int _t565 = cst_MODULE_NONE;
+  sp_IntArray *_t566 = sp_IntArray_new();
+  SP_GC_ROOT(_t566);
+  for (sp_int _t567 = 0; _t567 < _t564; _t567++) sp_IntArray_push(_t566, _t565);
+  lv_active_modules = _t566;
+#line 123 "spms1_main.rb"
+  sp_int _t569 = 128LL;
+  if (_t569 < 0) sp_raise_cls("ArgumentError", "negative array size");
+  sp_int _t570 = 0LL;
+  sp_IntArray *_t571 = sp_IntArray_new();
+  SP_GC_ROOT(_t571);
+  for (sp_int _t572 = 0; _t572 < _t569; _t572++) sp_IntArray_push(_t571, _t570);
+  lv_winning_slot = _t571;
 #line 125 "spms1_main.rb"
-  lv_output_gain_step = 0LL;
-#line 126 "spms1_main.rb"
-  lv_output_fade_buffers = 0LL;
-#line 127 "spms1_main.rb"
-  lv_sound_off_count = 0LL;
-#line 128 "spms1_main.rb"
-  lv_sound_off_waiting = 0;
-#line 130 "spms1_main.rb"
-  sp_int _t578 = cst_AUDIO_BUFFER_WORDS;
-  if (_t578 < 0) sp_raise_cls("ArgumentError", "negative array size");
-  sp_float _t579 = 0.0;
-  sp_FloatArray *_t580 = sp_FloatArray_new();
-  SP_GC_ROOT(_t580);
-  for (sp_int _t581 = 0; _t581 < _t578; _t581++) sp_FloatArray_push(_t580, _t579);
-  lv_audio_buffer_l = _t580;
+  sp_int _t574 = cst_MODULES_SIZE;
+  if (_t574 < 0) sp_raise_cls("ArgumentError", "negative array size");
+  sp_int _t575 = 0LL;
+  sp_IntArray *_t576 = sp_IntArray_new();
+  SP_GC_ROOT(_t576);
+  for (sp_int _t577 = 0; _t577 < _t574; _t577++) sp_IntArray_push(_t576, _t575);
+  lv_order_written = _t576;
 #line 131 "spms1_main.rb"
-  sp_int _t583 = cst_AUDIO_BUFFER_WORDS;
-  if (_t583 < 0) sp_raise_cls("ArgumentError", "negative array size");
-  sp_float _t584 = 0.0;
-  sp_FloatArray *_t585 = sp_FloatArray_new();
-  SP_GC_ROOT(_t585);
-  for (sp_int _t586 = 0; _t586 < _t583; _t586++) sp_FloatArray_push(_t585, _t584);
-  lv_audio_buffer_r = _t585;
-#line 136 "spms1_main.rb"
-  lv_signals = sp_SignalBus_new();
+  lv_output_fade_position = cst_OUTPUT_FADE_SAMPLES;
+#line 132 "spms1_main.rb"
+  lv_output_fade_direction = 0LL;
+#line 133 "spms1_main.rb"
+  lv_sound_off_count = 0LL;
+#line 134 "spms1_main.rb"
+  lv_sound_off_waiting = 0;
+#line 135 "spms1_main.rb"
+  lv_lines_cleared = 1;
 #line 137 "spms1_main.rb"
-  sp_spms1_fill_constant_signals(lv_signals);
-#line 141 "spms1_main.rb"
-  sp_spms1_write_default_patch(cst_MIDI_CH);
+  sp_int _t579 = cst_AUDIO_BUFFER_WORDS;
+  if (_t579 < 0) sp_raise_cls("ArgumentError", "negative array size");
+  sp_float _t580 = 0.0;
+  sp_FloatArray *_t581 = sp_FloatArray_new();
+  SP_GC_ROOT(_t581);
+  for (sp_int _t582 = 0; _t582 < _t579; _t582++) sp_FloatArray_push(_t581, _t580);
+  lv_audio_buffer_l = _t581;
+#line 138 "spms1_main.rb"
+  sp_int _t584 = cst_AUDIO_BUFFER_WORDS;
+  if (_t584 < 0) sp_raise_cls("ArgumentError", "negative array size");
+  sp_float _t585 = 0.0;
+  sp_FloatArray *_t586 = sp_FloatArray_new();
+  SP_GC_ROOT(_t586);
+  for (sp_int _t587 = 0; _t587 < _t584; _t587++) sp_FloatArray_push(_t586, _t585);
+  lv_audio_buffer_r = _t586;
 #line 143 "spms1_main.rb"
-  (set_sample_rate(((int32_t)(cst_SAMPLE_RATE))), (sp_int)0);
+  lv_signals = sp_SignalBus_new();
 #line 144 "spms1_main.rb"
-  (set_audio_buffers(((int32_t)(cst_AUDIO_BUFFERS))), (sp_int)0);
-#line 145 "spms1_main.rb"
-  (set_audio_buffer_words(((int32_t)(cst_AUDIO_BUFFER_WORDS))), (sp_int)0);
-#line 146 "spms1_main.rb"
-  (start_audio(), (sp_int)0);
+  sp_spms1_fill_constant_signals(lv_signals);
+#line 148 "spms1_main.rb"
+  sp_spms1_write_default_patch(cst_MIDI_CH);
+#line 150 "spms1_main.rb"
+  (set_sample_rate(((int32_t)(cst_SAMPLE_RATE))), (sp_int)0);
 #line 151 "spms1_main.rb"
-  while (1) {
+  (set_audio_buffers(((int32_t)(cst_AUDIO_BUFFERS))), (sp_int)0);
 #line 152 "spms1_main.rb"
+  (set_audio_buffer_words(((int32_t)(cst_AUDIO_BUFFER_WORDS))), (sp_int)0);
+#line 153 "spms1_main.rb"
+  (start_audio(), (sp_int)0);
+#line 158 "spms1_main.rb"
+  while (1) {
+#line 159 "spms1_main.rb"
     (start_debug_measure(), (sp_int)0);
-#line 154 "spms1_main.rb"
-    sp_int _t593 = cst_SIGNAL_NOTE_PITCH;
-    sp_float _t594 = ((({ sp_int _t596 = (((sp_int)(get_midi_note_on_pitch(((uint8_t)(cst_MIDI_CH)))))); _t596 == SP_INT_NIL ? 0.0 : ((sp_float)_t596); }) * ((1.0 / 120.0))) - 0.5);
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t593, _t594);
-#line 155 "spms1_main.rb"
-    sp_int _t597 = cst_SIGNAL_NOTE_GATE;
-    sp_float _t598 = ({ sp_int _t600 = (((sp_int)(get_midi_note_on_state(((uint8_t)(cst_MIDI_CH)))))); _t600 == SP_INT_NIL ? 0.0 : ((sp_float)_t600); });
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t597, _t598);
-#line 163 "spms1_main.rb"
-    sp_int _t601 = cst_SIGNAL_PITCH_BEND;
-    sp_float _t602 = (({ sp_int _t604 = (sp_idiv(sp_int_add(((sp_int)(get_midi_pitch_bend(((uint8_t)(cst_MIDI_CH))))), 1LL), 2LL)); _t604 == SP_INT_NIL ? 0.0 : ((sp_float)_t604); }) * ((1.0 / 8192.0)));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t601, _t602);
-#line 167 "spms1_main.rb"
+#line 161 "spms1_main.rb"
+    sp_int _t594 = cst_SIGNAL_NOTE_PITCH;
+    sp_float _t595 = ((({ sp_int _t597 = (((sp_int)(get_midi_note_on_pitch(((uint8_t)(cst_MIDI_CH)))))); _t597 == SP_INT_NIL ? 0.0 : ((sp_float)_t597); }) * ((1.0 / 120.0))) - 0.5);
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t594, _t595);
+#line 162 "spms1_main.rb"
+    sp_int _t598 = cst_SIGNAL_NOTE_GATE;
+    sp_float _t599 = ({ sp_int _t601 = (((sp_int)(get_midi_note_on_state(((uint8_t)(cst_MIDI_CH)))))); _t601 == SP_INT_NIL ? 0.0 : ((sp_float)_t601); });
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t598, _t599);
+#line 170 "spms1_main.rb"
+    sp_int _t602 = cst_SIGNAL_PITCH_BEND;
+    sp_float _t603 = (({ sp_int _t605 = (sp_idiv(sp_int_add(((sp_int)(get_midi_pitch_bend(((uint8_t)(cst_MIDI_CH))))), 1LL), 2LL)); _t605 == SP_INT_NIL ? 0.0 : ((sp_float)_t605); }) * ((1.0 / 8192.0)));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t602, _t603);
+#line 175 "spms1_main.rb"
     if ((((sp_int)(get_midi_sound_off_count(((uint8_t)(cst_MIDI_CH))))) != lv_sound_off_count)) {
-#line 168 "spms1_main.rb"
+#line 176 "spms1_main.rb"
       lv_sound_off_count = ((sp_int)(get_midi_sound_off_count(((uint8_t)(cst_MIDI_CH)))));
-#line 169 "spms1_main.rb"
+#line 177 "spms1_main.rb"
       lv_sound_off_waiting = 1;
     }
-#line 171 "spms1_main.rb"
+#line 179 "spms1_main.rb"
     lv_muted = (((sp_int)(get_midi_mute(((uint8_t)(cst_MIDI_CH))))) != 0LL);
-#line 172 "spms1_main.rb"
-    if ((lv_output_fade_buffers > 0LL)) {
-#line 173 "spms1_main.rb"
-      lv_output_fade_buffers = sp_int_sub(lv_output_fade_buffers, 1LL);
+#line 180 "spms1_main.rb"
+    if ((lv_output_fade_position == 0LL)) {
+#line 181 "spms1_main.rb"
+      if (lv_sound_off_waiting) {
+#line 182 "spms1_main.rb"
+        sp_EnvGen_sound_off((sp_EnvGen *)lv_eg_1);
+#line 183 "spms1_main.rb"
+        sp_EnvGen_sound_off((sp_EnvGen *)lv_eg_2);
+#line 184 "spms1_main.rb"
+        sp_Filter_sound_off((sp_Filter *)lv_filter_1);
+#line 185 "spms1_main.rb"
+        lv_sound_off_waiting = 0;
+      }
+#line 187 "spms1_main.rb"
+      lv_output_fade_direction = ((((!lv_muted) && lv_lines_cleared)) ? 1LL : 0LL);
     }
     else {
-      if ((lv_output_gain == 0LL)) {
-#line 175 "spms1_main.rb"
-        if (lv_sound_off_waiting) {
-#line 176 "spms1_main.rb"
-          sp_EnvGen_sound_off((sp_EnvGen *)lv_eg_1);
-#line 177 "spms1_main.rb"
-          sp_EnvGen_sound_off((sp_EnvGen *)lv_eg_2);
-#line 178 "spms1_main.rb"
-          sp_Filter_sound_off((sp_Filter *)lv_filter_1);
-#line 179 "spms1_main.rb"
-          lv_sound_off_waiting = 0;
-        }
-#line 181 "spms1_main.rb"
-        lv_output_gain_step = (lv_muted ? 0LL : cst_OUTPUT_FADE_STEP);
-#line 182 "spms1_main.rb"
-        lv_output_fade_buffers = (lv_muted ? 0LL : sp_int_sub(cst_OUTPUT_FADE_BUFFERS, 1LL));
+      if (((lv_output_fade_position == cst_OUTPUT_FADE_SAMPLES) && ((lv_muted || lv_sound_off_waiting)))) {
+#line 189 "spms1_main.rb"
+        lv_output_fade_direction = -1LL;
+#line 190 "spms1_main.rb"
+        lv_lines_cleared = 0;
+#line 191 "spms1_main.rb"
+        sp_Amp_start_clear((sp_Amp *)lv_amp_1);
+#line 192 "spms1_main.rb"
+        sp_Chorus_start_clear((sp_Chorus *)lv_chorus_1);
+#line 193 "spms1_main.rb"
+        sp_Delay_start_clear((sp_Delay *)lv_delay_1);
       }
       else {
-        if ((lv_muted || lv_sound_off_waiting)) {
-#line 184 "spms1_main.rb"
-          lv_output_gain_step = (-cst_OUTPUT_FADE_STEP);
-#line 185 "spms1_main.rb"
-          lv_output_fade_buffers = sp_int_sub(cst_OUTPUT_FADE_BUFFERS, 1LL);
-        }
-        else {
-#line 187 "spms1_main.rb"
-          lv_output_gain_step = 0LL;
+        if ((lv_output_fade_position == cst_OUTPUT_FADE_SAMPLES)) {
+#line 195 "spms1_main.rb"
+          lv_output_fade_direction = 0LL;
         }
       }
     }
-#line 192 "spms1_main.rb"
+#line 197 "spms1_main.rb"
+    lv_output_gain = ({ sp_float _t611 = ({ sp_int _t609 = (lv_output_fade_position); _t609 == SP_INT_NIL ? 0.0 : ((sp_float)_t609); }); sp_float _t612 = ({ sp_int _t610 = (cst_OUTPUT_FADE_SAMPLES); _t610 == SP_INT_NIL ? 0.0 : ((sp_float)_t610); }); (_t611 / _t612); });
+#line 198 "spms1_main.rb"
+    lv_output_gain_step = (({ sp_int _t613 = (lv_output_fade_direction); _t613 == SP_INT_NIL ? 0.0 : ((sp_float)_t613); }) * cst_OUTPUT_FADE_STEP);
+#line 200 "spms1_main.rb"
+    lv_clearing_lines = ((lv_output_fade_position == 0LL) && (!lv_lines_cleared));
+#line 204 "spms1_main.rb"
     lv_slot = 0LL;
-#line 193 "spms1_main.rb"
+#line 205 "spms1_main.rb"
     while ((lv_slot < cst_MODULES_SIZE)) {
-#line 194 "spms1_main.rb"
+#line 206 "spms1_main.rb"
       sp_IntArray_set(lv_active_modules, lv_slot, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(sp_int_add(cst_NRPN_ACTIVE_MODULE_BASE, lv_slot)))))));
-#line 195 "spms1_main.rb"
+#line 207 "spms1_main.rb"
       lv_slot = sp_int_add(lv_slot, 1LL);
     }
-#line 198 "spms1_main.rb"
+#line 210 "spms1_main.rb"
     lv_listed_count = 0LL;
-#line 199 "spms1_main.rb"
+#line 211 "spms1_main.rb"
     while (((lv_listed_count < cst_MODULES_SIZE) && (sp_IntArray_get(lv_active_modules, lv_listed_count) != cst_MODULE_NONE))) {
-#line 200 "spms1_main.rb"
+#line 212 "spms1_main.rb"
       sp_IntArray_set(lv_order_written, lv_listed_count, ((sp_int)(get_midi_run_order_written(((uint8_t)(cst_MIDI_CH)), ((int32_t)(lv_listed_count))))));
-#line 201 "spms1_main.rb"
+#line 213 "spms1_main.rb"
       sp_IntArray_set(lv_winning_slot, sp_IntArray_get(lv_active_modules, lv_listed_count), -1LL);
-#line 202 "spms1_main.rb"
+#line 214 "spms1_main.rb"
       lv_listed_count = sp_int_add(lv_listed_count, 1LL);
     }
-#line 208 "spms1_main.rb"
+#line 220 "spms1_main.rb"
     lv_slot = 0LL;
-#line 209 "spms1_main.rb"
+#line 221 "spms1_main.rb"
     while ((lv_slot < lv_listed_count)) {
-#line 210 "spms1_main.rb"
+#line 222 "spms1_main.rb"
       lv_module_id = sp_IntArray_get(lv_active_modules, lv_slot);
-#line 211 "spms1_main.rb"
+#line 223 "spms1_main.rb"
       lv_winner = sp_IntArray_get(lv_winning_slot, lv_module_id);
-#line 212 "spms1_main.rb"
-      if (((lv_winner < 0LL) || ({ sp_int _t610 = sp_IntArray_get(lv_order_written, lv_slot); sp_int _t611 = sp_IntArray_get(lv_order_written, lv_winner); (_t610 >= _t611); }))) {
-#line 213 "spms1_main.rb"
+#line 224 "spms1_main.rb"
+      if (((lv_winner < 0LL) || ({ sp_int _t616 = sp_IntArray_get(lv_order_written, lv_slot); sp_int _t617 = sp_IntArray_get(lv_order_written, lv_winner); (_t616 >= _t617); }))) {
+#line 225 "spms1_main.rb"
         sp_IntArray_set(lv_winning_slot, lv_module_id, lv_slot);
       }
-#line 215 "spms1_main.rb"
+#line 227 "spms1_main.rb"
       lv_slot = sp_int_add(lv_slot, 1LL);
     }
-#line 220 "spms1_main.rb"
+#line 232 "spms1_main.rb"
     lv_active_count = 0LL;
-#line 221 "spms1_main.rb"
+#line 233 "spms1_main.rb"
     lv_slot = 0LL;
-#line 222 "spms1_main.rb"
+#line 234 "spms1_main.rb"
     while ((lv_slot < lv_listed_count)) {
-#line 223 "spms1_main.rb"
+#line 235 "spms1_main.rb"
       lv_module_id = sp_IntArray_get(lv_active_modules, lv_slot);
-#line 224 "spms1_main.rb"
+#line 236 "spms1_main.rb"
       if ((sp_IntArray_get(lv_winning_slot, lv_module_id) == lv_slot)) {
-#line 225 "spms1_main.rb"
+#line 237 "spms1_main.rb"
         sp_IntArray_set(lv_active_modules, lv_active_count, lv_module_id);
-#line 226 "spms1_main.rb"
+#line 238 "spms1_main.rb"
         lv_active_count = sp_int_add(lv_active_count, 1LL);
       }
-#line 228 "spms1_main.rb"
+#line 240 "spms1_main.rb"
       lv_slot = sp_int_add(lv_slot, 1LL);
     }
-#line 239 "spms1_main.rb"
-    lv_source_pitch_1_pitch_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_PITCH_IN)))));
-#line 240 "spms1_main.rb"
-    lv_source_pitch_1_pitch_in = sp_int_add(lv_source_pitch_1_pitch_in, (((sp_int_sub(lv_source_pitch_1_pitch_in, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_pitch_1_pitch_in))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
-#line 241 "spms1_main.rb"
-    lv_source_pitch_1_gate_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_GATE_IN)))));
-#line 242 "spms1_main.rb"
-    lv_source_pitch_1_bend_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_BEND_IN)))));
-#line 243 "spms1_main.rb"
-    lv_source_pitch_1_bend_in = sp_int_add(lv_source_pitch_1_bend_in, (((sp_int_sub(lv_source_pitch_1_bend_in, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_pitch_1_bend_in))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
-#line 244 "spms1_main.rb"
-    lv_source_eg_1_gate_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_EG_1_GATE_IN)))));
-#line 245 "spms1_main.rb"
-    lv_source_eg_2_gate_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_EG_2_GATE_IN)))));
-#line 246 "spms1_main.rb"
-    lv_source_lfo_1_rate_mod_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_LFO_1_RATE_MOD_IN)))));
-#line 247 "spms1_main.rb"
-    lv_source_lfo_1_rate_mod_in = sp_int_add(lv_source_lfo_1_rate_mod_in, (((sp_int_sub(lv_source_lfo_1_rate_mod_in, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_lfo_1_rate_mod_in))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
-#line 248 "spms1_main.rb"
-    lv_source_lfo_1_level_mod_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_LFO_1_LEVEL_MOD_IN)))));
-#line 249 "spms1_main.rb"
-    lv_source_lfo_1_level_mod_in = sp_int_add(lv_source_lfo_1_level_mod_in, (((sp_int_sub(lv_source_lfo_1_level_mod_in, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_lfo_1_level_mod_in))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
-#line 250 "spms1_main.rb"
-    lv_source_lfo_1_reset_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_LFO_1_RESET_IN)))));
 #line 251 "spms1_main.rb"
-    lv_source_mixer_1_in_1 = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_1_IN_1)))));
+    lv_source_pitch_1_pitch_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_PITCH_IN)))));
 #line 252 "spms1_main.rb"
-    lv_source_mixer_1_in_1 = sp_int_add(lv_source_mixer_1_in_1, (((sp_int_sub(lv_source_mixer_1_in_1, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_mixer_1_in_1))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
+    lv_source_pitch_1_pitch_in = sp_int_add(lv_source_pitch_1_pitch_in, (((sp_int_sub(lv_source_pitch_1_pitch_in, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_pitch_1_pitch_in))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
 #line 253 "spms1_main.rb"
-    lv_source_mixer_1_in_2 = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_1_IN_2)))));
+    lv_source_pitch_1_gate_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_GATE_IN)))));
 #line 254 "spms1_main.rb"
-    lv_source_mixer_1_in_2 = sp_int_add(lv_source_mixer_1_in_2, (((sp_int_sub(lv_source_mixer_1_in_2, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_mixer_1_in_2))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
+    lv_source_pitch_1_bend_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_BEND_IN)))));
 #line 255 "spms1_main.rb"
-    lv_source_mixer_1_in_3 = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_1_IN_3)))));
+    lv_source_pitch_1_bend_in = sp_int_add(lv_source_pitch_1_bend_in, (((sp_int_sub(lv_source_pitch_1_bend_in, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_pitch_1_bend_in))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
 #line 256 "spms1_main.rb"
-    lv_source_mixer_1_in_3 = sp_int_add(lv_source_mixer_1_in_3, (((sp_int_sub(lv_source_mixer_1_in_3, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_mixer_1_in_3))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
+    lv_source_eg_1_gate_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_EG_1_GATE_IN)))));
 #line 257 "spms1_main.rb"
-    lv_source_mixer_1_in_4 = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_1_IN_4)))));
+    lv_source_eg_2_gate_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_EG_2_GATE_IN)))));
 #line 258 "spms1_main.rb"
-    lv_source_mixer_1_in_4 = sp_int_add(lv_source_mixer_1_in_4, (((sp_int_sub(lv_source_mixer_1_in_4, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_mixer_1_in_4))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
+    lv_source_lfo_1_rate_mod_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_LFO_1_RATE_MOD_IN)))));
 #line 259 "spms1_main.rb"
-    lv_source_osc_1_pitch_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_PITCH_IN)))));
+    lv_source_lfo_1_rate_mod_in = sp_int_add(lv_source_lfo_1_rate_mod_in, (((sp_int_sub(lv_source_lfo_1_rate_mod_in, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_lfo_1_rate_mod_in))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
 #line 260 "spms1_main.rb"
-    lv_source_osc_1_pitch_in = sp_int_add(lv_source_osc_1_pitch_in, (((sp_int_sub(lv_source_osc_1_pitch_in, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_osc_1_pitch_in))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
+    lv_source_lfo_1_level_mod_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_LFO_1_LEVEL_MOD_IN)))));
 #line 261 "spms1_main.rb"
-    lv_source_osc_1_mod_1_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_MOD_1_IN)))));
+    lv_source_lfo_1_level_mod_in = sp_int_add(lv_source_lfo_1_level_mod_in, (((sp_int_sub(lv_source_lfo_1_level_mod_in, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_lfo_1_level_mod_in))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
 #line 262 "spms1_main.rb"
-    lv_source_osc_1_mod_1_in = sp_int_add(lv_source_osc_1_mod_1_in, (((sp_int_sub(lv_source_osc_1_mod_1_in, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_osc_1_mod_1_in))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
+    lv_source_lfo_1_reset_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_LFO_1_RESET_IN)))));
 #line 263 "spms1_main.rb"
-    lv_source_osc_1_mod_2_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_MOD_2_IN)))));
+    lv_source_mixer_1_in_1 = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_1_IN_1)))));
 #line 264 "spms1_main.rb"
-    lv_source_osc_1_mod_2_in = sp_int_add(lv_source_osc_1_mod_2_in, (((sp_int_sub(lv_source_osc_1_mod_2_in, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_osc_1_mod_2_in))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
+    lv_source_mixer_1_in_1 = sp_int_add(lv_source_mixer_1_in_1, (((sp_int_sub(lv_source_mixer_1_in_1, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_mixer_1_in_1))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
 #line 265 "spms1_main.rb"
-    lv_source_osc_2_pitch_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_PITCH_IN)))));
+    lv_source_mixer_1_in_2 = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_1_IN_2)))));
 #line 266 "spms1_main.rb"
-    lv_source_osc_2_pitch_in = sp_int_add(lv_source_osc_2_pitch_in, (((sp_int_sub(lv_source_osc_2_pitch_in, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_osc_2_pitch_in))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
+    lv_source_mixer_1_in_2 = sp_int_add(lv_source_mixer_1_in_2, (((sp_int_sub(lv_source_mixer_1_in_2, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_mixer_1_in_2))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
 #line 267 "spms1_main.rb"
-    lv_source_osc_2_mod_1_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_MOD_1_IN)))));
+    lv_source_mixer_1_in_3 = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_1_IN_3)))));
 #line 268 "spms1_main.rb"
-    lv_source_osc_2_mod_1_in = sp_int_add(lv_source_osc_2_mod_1_in, (((sp_int_sub(lv_source_osc_2_mod_1_in, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_osc_2_mod_1_in))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
+    lv_source_mixer_1_in_3 = sp_int_add(lv_source_mixer_1_in_3, (((sp_int_sub(lv_source_mixer_1_in_3, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_mixer_1_in_3))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
 #line 269 "spms1_main.rb"
-    lv_source_osc_2_mod_2_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_MOD_2_IN)))));
+    lv_source_mixer_1_in_4 = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_1_IN_4)))));
 #line 270 "spms1_main.rb"
-    lv_source_osc_2_mod_2_in = sp_int_add(lv_source_osc_2_mod_2_in, (((sp_int_sub(lv_source_osc_2_mod_2_in, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_osc_2_mod_2_in))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
+    lv_source_mixer_1_in_4 = sp_int_add(lv_source_mixer_1_in_4, (((sp_int_sub(lv_source_mixer_1_in_4, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_mixer_1_in_4))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
 #line 271 "spms1_main.rb"
-    lv_source_osc_2_sync_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_SYNC_IN)))));
+    lv_source_osc_1_pitch_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_PITCH_IN)))));
 #line 272 "spms1_main.rb"
-    lv_source_mixer_2_in_1 = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_2_IN_1)))));
+    lv_source_osc_1_pitch_in = sp_int_add(lv_source_osc_1_pitch_in, (((sp_int_sub(lv_source_osc_1_pitch_in, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_osc_1_pitch_in))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
 #line 273 "spms1_main.rb"
-    lv_source_mixer_2_in_1 = sp_int_add(lv_source_mixer_2_in_1, (((sp_int_sub(lv_source_mixer_2_in_1, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_mixer_2_in_1))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
+    lv_source_osc_1_mod_1_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_MOD_1_IN)))));
 #line 274 "spms1_main.rb"
-    lv_source_mixer_2_in_2 = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_2_IN_2)))));
+    lv_source_osc_1_mod_1_in = sp_int_add(lv_source_osc_1_mod_1_in, (((sp_int_sub(lv_source_osc_1_mod_1_in, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_osc_1_mod_1_in))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
 #line 275 "spms1_main.rb"
-    lv_source_mixer_2_in_2 = sp_int_add(lv_source_mixer_2_in_2, (((sp_int_sub(lv_source_mixer_2_in_2, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_mixer_2_in_2))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
+    lv_source_osc_1_mod_2_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_MOD_2_IN)))));
 #line 276 "spms1_main.rb"
-    lv_source_mixer_2_in_3 = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_2_IN_3)))));
+    lv_source_osc_1_mod_2_in = sp_int_add(lv_source_osc_1_mod_2_in, (((sp_int_sub(lv_source_osc_1_mod_2_in, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_osc_1_mod_2_in))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
 #line 277 "spms1_main.rb"
-    lv_source_mixer_2_in_3 = sp_int_add(lv_source_mixer_2_in_3, (((sp_int_sub(lv_source_mixer_2_in_3, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_mixer_2_in_3))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
+    lv_source_osc_2_pitch_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_PITCH_IN)))));
 #line 278 "spms1_main.rb"
-    lv_source_mixer_2_in_4 = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_2_IN_4)))));
+    lv_source_osc_2_pitch_in = sp_int_add(lv_source_osc_2_pitch_in, (((sp_int_sub(lv_source_osc_2_pitch_in, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_osc_2_pitch_in))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
 #line 279 "spms1_main.rb"
-    lv_source_mixer_2_in_4 = sp_int_add(lv_source_mixer_2_in_4, (((sp_int_sub(lv_source_mixer_2_in_4, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_mixer_2_in_4))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
+    lv_source_osc_2_mod_1_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_MOD_1_IN)))));
 #line 280 "spms1_main.rb"
-    lv_source_filter_1_audio_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_1_AUDIO_IN)))));
+    lv_source_osc_2_mod_1_in = sp_int_add(lv_source_osc_2_mod_1_in, (((sp_int_sub(lv_source_osc_2_mod_1_in, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_osc_2_mod_1_in))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
 #line 281 "spms1_main.rb"
-    lv_source_filter_1_audio_in = sp_int_add(lv_source_filter_1_audio_in, (((sp_int_sub(lv_source_filter_1_audio_in, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_filter_1_audio_in))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
+    lv_source_osc_2_mod_2_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_MOD_2_IN)))));
 #line 282 "spms1_main.rb"
-    lv_source_filter_1_pitch_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_1_PITCH_IN)))));
+    lv_source_osc_2_mod_2_in = sp_int_add(lv_source_osc_2_mod_2_in, (((sp_int_sub(lv_source_osc_2_mod_2_in, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_osc_2_mod_2_in))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
 #line 283 "spms1_main.rb"
-    lv_source_filter_1_pitch_in = sp_int_add(lv_source_filter_1_pitch_in, (((sp_int_sub(lv_source_filter_1_pitch_in, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_filter_1_pitch_in))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
+    lv_source_osc_2_sync_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_SYNC_IN)))));
 #line 284 "spms1_main.rb"
-    lv_source_filter_1_mod_1_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_1_MOD_1_IN)))));
+    lv_source_mixer_2_in_1 = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_2_IN_1)))));
 #line 285 "spms1_main.rb"
-    lv_source_filter_1_mod_1_in = sp_int_add(lv_source_filter_1_mod_1_in, (((sp_int_sub(lv_source_filter_1_mod_1_in, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_filter_1_mod_1_in))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
+    lv_source_mixer_2_in_1 = sp_int_add(lv_source_mixer_2_in_1, (((sp_int_sub(lv_source_mixer_2_in_1, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_mixer_2_in_1))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
 #line 286 "spms1_main.rb"
-    lv_source_filter_1_mod_2_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_1_MOD_2_IN)))));
+    lv_source_mixer_2_in_2 = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_2_IN_2)))));
 #line 287 "spms1_main.rb"
-    lv_source_filter_1_mod_2_in = sp_int_add(lv_source_filter_1_mod_2_in, (((sp_int_sub(lv_source_filter_1_mod_2_in, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_filter_1_mod_2_in))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
+    lv_source_mixer_2_in_2 = sp_int_add(lv_source_mixer_2_in_2, (((sp_int_sub(lv_source_mixer_2_in_2, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_mixer_2_in_2))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
 #line 288 "spms1_main.rb"
-    lv_source_amp_1_audio_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_AMP_1_AUDIO_IN)))));
+    lv_source_mixer_2_in_3 = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_2_IN_3)))));
 #line 289 "spms1_main.rb"
-    lv_source_amp_1_audio_in = sp_int_add(lv_source_amp_1_audio_in, (((sp_int_sub(lv_source_amp_1_audio_in, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_amp_1_audio_in))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
+    lv_source_mixer_2_in_3 = sp_int_add(lv_source_mixer_2_in_3, (((sp_int_sub(lv_source_mixer_2_in_3, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_mixer_2_in_3))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
 #line 290 "spms1_main.rb"
-    lv_source_amp_1_mod_1_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_AMP_1_MOD_1_IN)))));
+    lv_source_mixer_2_in_4 = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_2_IN_4)))));
 #line 291 "spms1_main.rb"
-    lv_source_amp_1_mod_1_in = sp_int_add(lv_source_amp_1_mod_1_in, (((sp_int_sub(lv_source_amp_1_mod_1_in, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_amp_1_mod_1_in))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
+    lv_source_mixer_2_in_4 = sp_int_add(lv_source_mixer_2_in_4, (((sp_int_sub(lv_source_mixer_2_in_4, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_mixer_2_in_4))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
 #line 292 "spms1_main.rb"
-    lv_source_amp_1_mod_2_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_AMP_1_MOD_2_IN)))));
+    lv_source_filter_1_audio_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_1_AUDIO_IN)))));
 #line 293 "spms1_main.rb"
-    lv_source_amp_1_mod_2_in = sp_int_add(lv_source_amp_1_mod_2_in, (((sp_int_sub(lv_source_amp_1_mod_2_in, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_amp_1_mod_2_in))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
+    lv_source_filter_1_audio_in = sp_int_add(lv_source_filter_1_audio_in, (((sp_int_sub(lv_source_filter_1_audio_in, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_filter_1_audio_in))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
 #line 294 "spms1_main.rb"
-    lv_source_chorus_1_audio_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_CHORUS_1_AUDIO_IN)))));
+    lv_source_filter_1_pitch_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_1_PITCH_IN)))));
 #line 295 "spms1_main.rb"
-    lv_source_chorus_1_audio_in = sp_int_add(lv_source_chorus_1_audio_in, (((sp_int_sub(lv_source_chorus_1_audio_in, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_chorus_1_audio_in))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
+    lv_source_filter_1_pitch_in = sp_int_add(lv_source_filter_1_pitch_in, (((sp_int_sub(lv_source_filter_1_pitch_in, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_filter_1_pitch_in))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
 #line 296 "spms1_main.rb"
-    lv_source_delay_1_audio_in_l = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_DELAY_1_AUDIO_IN_L)))));
+    lv_source_filter_1_mod_1_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_1_MOD_1_IN)))));
 #line 297 "spms1_main.rb"
-    lv_source_delay_1_audio_in_l = sp_int_add(lv_source_delay_1_audio_in_l, (((sp_int_sub(lv_source_delay_1_audio_in_l, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_delay_1_audio_in_l))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
+    lv_source_filter_1_mod_1_in = sp_int_add(lv_source_filter_1_mod_1_in, (((sp_int_sub(lv_source_filter_1_mod_1_in, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_filter_1_mod_1_in))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
 #line 298 "spms1_main.rb"
-    lv_source_delay_1_audio_in_r = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_DELAY_1_AUDIO_IN_R)))));
+    lv_source_filter_1_mod_2_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_1_MOD_2_IN)))));
 #line 299 "spms1_main.rb"
-    lv_source_delay_1_audio_in_r = sp_int_add(lv_source_delay_1_audio_in_r, (((sp_int_sub(lv_source_delay_1_audio_in_r, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_delay_1_audio_in_r))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
+    lv_source_filter_1_mod_2_in = sp_int_add(lv_source_filter_1_mod_2_in, (((sp_int_sub(lv_source_filter_1_mod_2_in, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_filter_1_mod_2_in))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
 #line 300 "spms1_main.rb"
-    lv_source_output_l = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OUTPUT_L)))));
+    lv_source_amp_1_audio_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_AMP_1_AUDIO_IN)))));
 #line 301 "spms1_main.rb"
-    lv_source_output_r = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OUTPUT_R)))));
+    lv_source_amp_1_audio_in = sp_int_add(lv_source_amp_1_audio_in, (((sp_int_sub(lv_source_amp_1_audio_in, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_amp_1_audio_in))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
 #line 302 "spms1_main.rb"
-    lv_source_pitch_1_glide = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_GLIDE))))), cst_SLOT_PITCH_1_GLIDE);
+    lv_source_amp_1_mod_1_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_AMP_1_MOD_1_IN)))));
 #line 303 "spms1_main.rb"
-    lv_source_pitch_1_out_1_glide_sw = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_OUT_1_GLIDE_SW))))), cst_SLOT_PITCH_1_OUT_1_GLIDE_SW);
+    lv_source_amp_1_mod_1_in = sp_int_add(lv_source_amp_1_mod_1_in, (((sp_int_sub(lv_source_amp_1_mod_1_in, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_amp_1_mod_1_in))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
 #line 304 "spms1_main.rb"
-    lv_source_pitch_1_out_2_glide_sw = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_OUT_2_GLIDE_SW))))), cst_SLOT_PITCH_1_OUT_2_GLIDE_SW);
+    lv_source_amp_1_mod_2_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_AMP_1_MOD_2_IN)))));
 #line 305 "spms1_main.rb"
-    lv_source_pitch_1_bend_amt = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_BEND_AMT))))), cst_SLOT_PITCH_1_BEND_AMT);
+    lv_source_amp_1_mod_2_in = sp_int_add(lv_source_amp_1_mod_2_in, (((sp_int_sub(lv_source_amp_1_mod_2_in, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_amp_1_mod_2_in))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
 #line 306 "spms1_main.rb"
-    lv_source_pitch_1_out_1_bend_sw = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_OUT_1_BEND_SW))))), cst_SLOT_PITCH_1_OUT_1_BEND_SW);
+    lv_source_chorus_1_audio_in = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_CHORUS_1_AUDIO_IN)))));
 #line 307 "spms1_main.rb"
-    lv_source_pitch_1_out_2_bend_sw = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_OUT_2_BEND_SW))))), cst_SLOT_PITCH_1_OUT_2_BEND_SW);
+    lv_source_chorus_1_audio_in = sp_int_add(lv_source_chorus_1_audio_in, (((sp_int_sub(lv_source_chorus_1_audio_in, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_chorus_1_audio_in))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
 #line 308 "spms1_main.rb"
-    lv_source_pitch_1_stretch = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_STRETCH))))), cst_SLOT_PITCH_1_STRETCH);
+    lv_source_delay_1_audio_in_l = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_DELAY_1_AUDIO_IN_L)))));
 #line 309 "spms1_main.rb"
-    lv_source_eg_1_attack = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_EG_1_ATTACK))))), cst_SLOT_EG_1_ATTACK);
+    lv_source_delay_1_audio_in_l = sp_int_add(lv_source_delay_1_audio_in_l, (((sp_int_sub(lv_source_delay_1_audio_in_l, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_delay_1_audio_in_l))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
 #line 310 "spms1_main.rb"
-    lv_source_eg_1_decay = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_EG_1_DECAY))))), cst_SLOT_EG_1_DECAY);
+    lv_source_delay_1_audio_in_r = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_DELAY_1_AUDIO_IN_R)))));
 #line 311 "spms1_main.rb"
-    lv_source_eg_1_sustain = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_EG_1_SUSTAIN))))), cst_SLOT_EG_1_SUSTAIN);
+    lv_source_delay_1_audio_in_r = sp_int_add(lv_source_delay_1_audio_in_r, (((sp_int_sub(lv_source_delay_1_audio_in_r, cst_CONTROLLER_SLOT_FIRST) | (sp_int_sub(cst_CONTROLLER_SLOT_LAST, lv_source_delay_1_audio_in_r))) >= 0LL) ? cst_SMOOTHED_SLOT_OFFSET : 0LL));
 #line 312 "spms1_main.rb"
-    lv_source_eg_1_release_sw = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_EG_1_RELEASE_SW))))), cst_SLOT_EG_1_RELEASE_SW);
+    lv_source_output_l = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OUTPUT_L)))));
 #line 313 "spms1_main.rb"
-    lv_source_eg_1_level = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_EG_1_LEVEL))))), cst_SLOT_EG_1_LEVEL);
+    lv_source_output_r = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OUTPUT_R)))));
 #line 314 "spms1_main.rb"
-    lv_source_eg_2_attack = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_EG_2_ATTACK))))), cst_SLOT_EG_2_ATTACK);
+    lv_source_pitch_1_glide = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_GLIDE))))), cst_SLOT_PITCH_1_GLIDE);
 #line 315 "spms1_main.rb"
-    lv_source_eg_2_decay = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_EG_2_DECAY))))), cst_SLOT_EG_2_DECAY);
+    lv_source_pitch_1_out_1_glide_sw = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_OUT_1_GLIDE_SW))))), cst_SLOT_PITCH_1_OUT_1_GLIDE_SW);
 #line 316 "spms1_main.rb"
-    lv_source_eg_2_sustain = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_EG_2_SUSTAIN))))), cst_SLOT_EG_2_SUSTAIN);
+    lv_source_pitch_1_out_2_glide_sw = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_OUT_2_GLIDE_SW))))), cst_SLOT_PITCH_1_OUT_2_GLIDE_SW);
 #line 317 "spms1_main.rb"
-    lv_source_eg_2_release_sw = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_EG_2_RELEASE_SW))))), cst_SLOT_EG_2_RELEASE_SW);
+    lv_source_pitch_1_bend_amt = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_BEND_AMT))))), cst_SLOT_PITCH_1_BEND_AMT);
 #line 318 "spms1_main.rb"
-    lv_source_eg_2_level = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_EG_2_LEVEL))))), cst_SLOT_EG_2_LEVEL);
+    lv_source_pitch_1_out_1_bend_sw = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_OUT_1_BEND_SW))))), cst_SLOT_PITCH_1_OUT_1_BEND_SW);
 #line 319 "spms1_main.rb"
-    lv_source_lfo_1_wave = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_LFO_1_WAVE))))), cst_SLOT_LFO_1_WAVE);
+    lv_source_pitch_1_out_2_bend_sw = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_OUT_2_BEND_SW))))), cst_SLOT_PITCH_1_OUT_2_BEND_SW);
 #line 320 "spms1_main.rb"
-    lv_source_lfo_1_rate = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_LFO_1_RATE))))), cst_SLOT_LFO_1_RATE);
+    lv_source_pitch_1_stretch = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_PITCH_1_STRETCH))))), cst_SLOT_PITCH_1_STRETCH);
 #line 321 "spms1_main.rb"
-    lv_source_lfo_1_level = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_LFO_1_LEVEL))))), cst_SLOT_LFO_1_LEVEL);
+    lv_source_eg_1_attack = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_EG_1_ATTACK))))), cst_SLOT_EG_1_ATTACK);
 #line 322 "spms1_main.rb"
-    lv_source_lfo_1_rate_mod_amt = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_LFO_1_RATE_MOD_AMT))))), cst_SLOT_LFO_1_RATE_MOD_AMT);
+    lv_source_eg_1_decay = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_EG_1_DECAY))))), cst_SLOT_EG_1_DECAY);
 #line 323 "spms1_main.rb"
-    lv_source_lfo_1_level_mod_amt = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_LFO_1_LEVEL_MOD_AMT))))), cst_SLOT_LFO_1_LEVEL_MOD_AMT);
+    lv_source_eg_1_sustain = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_EG_1_SUSTAIN))))), cst_SLOT_EG_1_SUSTAIN);
 #line 324 "spms1_main.rb"
-    lv_source_lfo_1_reset_sw = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_LFO_1_RESET_SW))))), cst_SLOT_LFO_1_RESET_SW);
+    lv_source_eg_1_release_sw = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_EG_1_RELEASE_SW))))), cst_SLOT_EG_1_RELEASE_SW);
 #line 325 "spms1_main.rb"
-    lv_source_mixer_1_level_1 = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_1_LEVEL_1))))), cst_SLOT_MIXER_1_LEVEL_1);
+    lv_source_eg_1_level = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_EG_1_LEVEL))))), cst_SLOT_EG_1_LEVEL);
 #line 326 "spms1_main.rb"
-    lv_source_mixer_1_level_2 = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_1_LEVEL_2))))), cst_SLOT_MIXER_1_LEVEL_2);
+    lv_source_eg_2_attack = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_EG_2_ATTACK))))), cst_SLOT_EG_2_ATTACK);
 #line 327 "spms1_main.rb"
-    lv_source_mixer_1_level_3 = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_1_LEVEL_3))))), cst_SLOT_MIXER_1_LEVEL_3);
+    lv_source_eg_2_decay = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_EG_2_DECAY))))), cst_SLOT_EG_2_DECAY);
 #line 328 "spms1_main.rb"
-    lv_source_mixer_1_level_4 = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_1_LEVEL_4))))), cst_SLOT_MIXER_1_LEVEL_4);
+    lv_source_eg_2_sustain = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_EG_2_SUSTAIN))))), cst_SLOT_EG_2_SUSTAIN);
 #line 329 "spms1_main.rb"
-    lv_source_mixer_1_out_level = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_1_OUT_LEVEL))))), cst_SLOT_MIXER_1_OUT_LEVEL);
+    lv_source_eg_2_release_sw = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_EG_2_RELEASE_SW))))), cst_SLOT_EG_2_RELEASE_SW);
 #line 330 "spms1_main.rb"
-    lv_source_osc_1_wave = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_WAVE))))), cst_SLOT_OSC_1_WAVE);
+    lv_source_eg_2_level = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_EG_2_LEVEL))))), cst_SLOT_EG_2_LEVEL);
 #line 331 "spms1_main.rb"
-    lv_source_osc_1_pw = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_PW))))), cst_SLOT_OSC_1_PW);
+    lv_source_lfo_1_wave = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_LFO_1_WAVE))))), cst_SLOT_LFO_1_WAVE);
 #line 332 "spms1_main.rb"
-    lv_source_osc_1_pitch_coarse = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_PITCH_COARSE))))), cst_SLOT_OSC_1_PITCH_COARSE);
+    lv_source_lfo_1_rate = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_LFO_1_RATE))))), cst_SLOT_LFO_1_RATE);
 #line 333 "spms1_main.rb"
-    lv_source_osc_1_pitch = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_PITCH))))), cst_SLOT_OSC_1_PITCH);
+    lv_source_lfo_1_level = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_LFO_1_LEVEL))))), cst_SLOT_LFO_1_LEVEL);
 #line 334 "spms1_main.rb"
-    lv_source_osc_1_pitch_fine = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_PITCH_FINE))))), cst_SLOT_OSC_1_PITCH_FINE);
+    lv_source_lfo_1_rate_mod_amt = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_LFO_1_RATE_MOD_AMT))))), cst_SLOT_LFO_1_RATE_MOD_AMT);
 #line 335 "spms1_main.rb"
-    lv_source_osc_1_pitch_mod_1_amt = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_PITCH_MOD_1_AMT))))), cst_SLOT_OSC_1_PITCH_MOD_1_AMT);
+    lv_source_lfo_1_level_mod_amt = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_LFO_1_LEVEL_MOD_AMT))))), cst_SLOT_LFO_1_LEVEL_MOD_AMT);
 #line 336 "spms1_main.rb"
-    lv_source_osc_1_pitch_mod_1_pol = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_PITCH_MOD_1_POL))))), cst_SLOT_OSC_1_PITCH_MOD_1_POL);
+    lv_source_lfo_1_reset_sw = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_LFO_1_RESET_SW))))), cst_SLOT_LFO_1_RESET_SW);
 #line 337 "spms1_main.rb"
-    lv_source_osc_1_pitch_mod_1_sw = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_PITCH_MOD_1_SW))))), cst_SLOT_OSC_1_PITCH_MOD_1_SW);
+    lv_source_mixer_1_level_1 = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_1_LEVEL_1))))), cst_SLOT_MIXER_1_LEVEL_1);
 #line 338 "spms1_main.rb"
-    lv_source_osc_1_pitch_mod_2_amt = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_PITCH_MOD_2_AMT))))), cst_SLOT_OSC_1_PITCH_MOD_2_AMT);
+    lv_source_mixer_1_level_2 = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_1_LEVEL_2))))), cst_SLOT_MIXER_1_LEVEL_2);
 #line 339 "spms1_main.rb"
-    lv_source_osc_1_pitch_mod_2_pol = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_PITCH_MOD_2_POL))))), cst_SLOT_OSC_1_PITCH_MOD_2_POL);
+    lv_source_mixer_1_level_3 = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_1_LEVEL_3))))), cst_SLOT_MIXER_1_LEVEL_3);
 #line 340 "spms1_main.rb"
-    lv_source_osc_1_pitch_mod_2_sw = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_PITCH_MOD_2_SW))))), cst_SLOT_OSC_1_PITCH_MOD_2_SW);
+    lv_source_mixer_1_level_4 = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_1_LEVEL_4))))), cst_SLOT_MIXER_1_LEVEL_4);
 #line 341 "spms1_main.rb"
-    lv_source_osc_1_pw_mod_1_amt = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_PW_MOD_1_AMT))))), cst_SLOT_OSC_1_PW_MOD_1_AMT);
+    lv_source_mixer_1_out_level = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_1_OUT_LEVEL))))), cst_SLOT_MIXER_1_OUT_LEVEL);
 #line 342 "spms1_main.rb"
-    lv_source_osc_1_pw_mod_1_pol = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_PW_MOD_1_POL))))), cst_SLOT_OSC_1_PW_MOD_1_POL);
+    lv_source_osc_1_wave = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_WAVE))))), cst_SLOT_OSC_1_WAVE);
 #line 343 "spms1_main.rb"
-    lv_source_osc_1_pw_mod_2_amt = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_PW_MOD_2_AMT))))), cst_SLOT_OSC_1_PW_MOD_2_AMT);
+    lv_source_osc_1_pw = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_PW))))), cst_SLOT_OSC_1_PW);
 #line 344 "spms1_main.rb"
-    lv_source_osc_1_pw_mod_2_pol = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_PW_MOD_2_POL))))), cst_SLOT_OSC_1_PW_MOD_2_POL);
+    lv_source_osc_1_pitch_coarse = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_PITCH_COARSE))))), cst_SLOT_OSC_1_PITCH_COARSE);
 #line 345 "spms1_main.rb"
-    lv_source_osc_2_wave = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_WAVE))))), cst_SLOT_OSC_2_WAVE);
+    lv_source_osc_1_pitch = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_PITCH))))), cst_SLOT_OSC_1_PITCH);
 #line 346 "spms1_main.rb"
-    lv_source_osc_2_pw = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_PW))))), cst_SLOT_OSC_2_PW);
+    lv_source_osc_1_pitch_fine = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_PITCH_FINE))))), cst_SLOT_OSC_1_PITCH_FINE);
 #line 347 "spms1_main.rb"
-    lv_source_osc_2_pitch_coarse = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_PITCH_COARSE))))), cst_SLOT_OSC_2_PITCH_COARSE);
+    lv_source_osc_1_pitch_mod_1_amt = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_PITCH_MOD_1_AMT))))), cst_SLOT_OSC_1_PITCH_MOD_1_AMT);
 #line 348 "spms1_main.rb"
-    lv_source_osc_2_pitch = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_PITCH))))), cst_SLOT_OSC_2_PITCH);
+    lv_source_osc_1_pitch_mod_1_pol = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_PITCH_MOD_1_POL))))), cst_SLOT_OSC_1_PITCH_MOD_1_POL);
 #line 349 "spms1_main.rb"
-    lv_source_osc_2_pitch_fine = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_PITCH_FINE))))), cst_SLOT_OSC_2_PITCH_FINE);
+    lv_source_osc_1_pitch_mod_1_sw = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_PITCH_MOD_1_SW))))), cst_SLOT_OSC_1_PITCH_MOD_1_SW);
 #line 350 "spms1_main.rb"
-    lv_source_osc_2_pitch_mod_1_amt = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_PITCH_MOD_1_AMT))))), cst_SLOT_OSC_2_PITCH_MOD_1_AMT);
+    lv_source_osc_1_pitch_mod_2_amt = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_PITCH_MOD_2_AMT))))), cst_SLOT_OSC_1_PITCH_MOD_2_AMT);
 #line 351 "spms1_main.rb"
-    lv_source_osc_2_pitch_mod_1_pol = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_PITCH_MOD_1_POL))))), cst_SLOT_OSC_2_PITCH_MOD_1_POL);
+    lv_source_osc_1_pitch_mod_2_pol = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_PITCH_MOD_2_POL))))), cst_SLOT_OSC_1_PITCH_MOD_2_POL);
 #line 352 "spms1_main.rb"
-    lv_source_osc_2_pitch_mod_1_sw = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_PITCH_MOD_1_SW))))), cst_SLOT_OSC_2_PITCH_MOD_1_SW);
+    lv_source_osc_1_pitch_mod_2_sw = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_PITCH_MOD_2_SW))))), cst_SLOT_OSC_1_PITCH_MOD_2_SW);
 #line 353 "spms1_main.rb"
-    lv_source_osc_2_pitch_mod_2_amt = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_PITCH_MOD_2_AMT))))), cst_SLOT_OSC_2_PITCH_MOD_2_AMT);
+    lv_source_osc_1_pw_mod_1_amt = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_PW_MOD_1_AMT))))), cst_SLOT_OSC_1_PW_MOD_1_AMT);
 #line 354 "spms1_main.rb"
-    lv_source_osc_2_pitch_mod_2_pol = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_PITCH_MOD_2_POL))))), cst_SLOT_OSC_2_PITCH_MOD_2_POL);
+    lv_source_osc_1_pw_mod_1_pol = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_PW_MOD_1_POL))))), cst_SLOT_OSC_1_PW_MOD_1_POL);
 #line 355 "spms1_main.rb"
-    lv_source_osc_2_pitch_mod_2_sw = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_PITCH_MOD_2_SW))))), cst_SLOT_OSC_2_PITCH_MOD_2_SW);
+    lv_source_osc_1_pw_mod_2_amt = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_PW_MOD_2_AMT))))), cst_SLOT_OSC_1_PW_MOD_2_AMT);
 #line 356 "spms1_main.rb"
-    lv_source_osc_2_pw_mod_1_amt = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_PW_MOD_1_AMT))))), cst_SLOT_OSC_2_PW_MOD_1_AMT);
+    lv_source_osc_1_pw_mod_2_pol = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_1_PW_MOD_2_POL))))), cst_SLOT_OSC_1_PW_MOD_2_POL);
 #line 357 "spms1_main.rb"
-    lv_source_osc_2_pw_mod_1_pol = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_PW_MOD_1_POL))))), cst_SLOT_OSC_2_PW_MOD_1_POL);
+    lv_source_osc_2_wave = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_WAVE))))), cst_SLOT_OSC_2_WAVE);
 #line 358 "spms1_main.rb"
-    lv_source_osc_2_pw_mod_2_amt = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_PW_MOD_2_AMT))))), cst_SLOT_OSC_2_PW_MOD_2_AMT);
+    lv_source_osc_2_pw = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_PW))))), cst_SLOT_OSC_2_PW);
 #line 359 "spms1_main.rb"
-    lv_source_osc_2_pw_mod_2_pol = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_PW_MOD_2_POL))))), cst_SLOT_OSC_2_PW_MOD_2_POL);
+    lv_source_osc_2_pitch_coarse = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_PITCH_COARSE))))), cst_SLOT_OSC_2_PITCH_COARSE);
 #line 360 "spms1_main.rb"
-    lv_source_osc_2_sync_sw = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_SYNC_SW))))), cst_SLOT_OSC_2_SYNC_SW);
+    lv_source_osc_2_pitch = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_PITCH))))), cst_SLOT_OSC_2_PITCH);
 #line 361 "spms1_main.rb"
-    lv_source_noise_1_color = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_NOISE_1_COLOR))))), cst_SLOT_NOISE_1_COLOR);
+    lv_source_osc_2_pitch_fine = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_PITCH_FINE))))), cst_SLOT_OSC_2_PITCH_FINE);
 #line 362 "spms1_main.rb"
-    lv_source_noise_1_level = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_NOISE_1_LEVEL))))), cst_SLOT_NOISE_1_LEVEL);
+    lv_source_osc_2_pitch_mod_1_amt = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_PITCH_MOD_1_AMT))))), cst_SLOT_OSC_2_PITCH_MOD_1_AMT);
 #line 363 "spms1_main.rb"
-    lv_source_mixer_2_level_1 = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_2_LEVEL_1))))), cst_SLOT_MIXER_2_LEVEL_1);
+    lv_source_osc_2_pitch_mod_1_pol = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_PITCH_MOD_1_POL))))), cst_SLOT_OSC_2_PITCH_MOD_1_POL);
 #line 364 "spms1_main.rb"
-    lv_source_mixer_2_level_2 = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_2_LEVEL_2))))), cst_SLOT_MIXER_2_LEVEL_2);
+    lv_source_osc_2_pitch_mod_1_sw = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_PITCH_MOD_1_SW))))), cst_SLOT_OSC_2_PITCH_MOD_1_SW);
 #line 365 "spms1_main.rb"
-    lv_source_mixer_2_level_3 = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_2_LEVEL_3))))), cst_SLOT_MIXER_2_LEVEL_3);
+    lv_source_osc_2_pitch_mod_2_amt = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_PITCH_MOD_2_AMT))))), cst_SLOT_OSC_2_PITCH_MOD_2_AMT);
 #line 366 "spms1_main.rb"
-    lv_source_mixer_2_level_4 = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_2_LEVEL_4))))), cst_SLOT_MIXER_2_LEVEL_4);
+    lv_source_osc_2_pitch_mod_2_pol = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_PITCH_MOD_2_POL))))), cst_SLOT_OSC_2_PITCH_MOD_2_POL);
 #line 367 "spms1_main.rb"
-    lv_source_mixer_2_out_level = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_2_OUT_LEVEL))))), cst_SLOT_MIXER_2_OUT_LEVEL);
+    lv_source_osc_2_pitch_mod_2_sw = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_PITCH_MOD_2_SW))))), cst_SLOT_OSC_2_PITCH_MOD_2_SW);
 #line 368 "spms1_main.rb"
-    lv_source_filter_1_cutoff = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_1_CUTOFF))))), cst_SLOT_FILTER_1_CUTOFF);
+    lv_source_osc_2_pw_mod_1_amt = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_PW_MOD_1_AMT))))), cst_SLOT_OSC_2_PW_MOD_1_AMT);
 #line 369 "spms1_main.rb"
-    lv_source_filter_1_resonance = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_1_RESONANCE))))), cst_SLOT_FILTER_1_RESONANCE);
+    lv_source_osc_2_pw_mod_1_pol = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_PW_MOD_1_POL))))), cst_SLOT_OSC_2_PW_MOD_1_POL);
 #line 370 "spms1_main.rb"
-    lv_source_filter_1_mode = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_1_MODE))))), cst_SLOT_FILTER_1_MODE);
+    lv_source_osc_2_pw_mod_2_amt = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_PW_MOD_2_AMT))))), cst_SLOT_OSC_2_PW_MOD_2_AMT);
 #line 371 "spms1_main.rb"
-    lv_source_filter_1_pitch_amt = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_1_PITCH_AMT))))), cst_SLOT_FILTER_1_PITCH_AMT);
+    lv_source_osc_2_pw_mod_2_pol = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_PW_MOD_2_POL))))), cst_SLOT_OSC_2_PW_MOD_2_POL);
 #line 372 "spms1_main.rb"
-    lv_source_filter_1_mod_1_amt = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_1_MOD_1_AMT))))), cst_SLOT_FILTER_1_MOD_1_AMT);
+    lv_source_osc_2_sync_sw = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_OSC_2_SYNC_SW))))), cst_SLOT_OSC_2_SYNC_SW);
 #line 373 "spms1_main.rb"
-    lv_source_filter_1_mod_1_pol = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_1_MOD_1_POL))))), cst_SLOT_FILTER_1_MOD_1_POL);
+    lv_source_noise_1_color = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_NOISE_1_COLOR))))), cst_SLOT_NOISE_1_COLOR);
 #line 374 "spms1_main.rb"
-    lv_source_filter_1_mod_2_amt = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_1_MOD_2_AMT))))), cst_SLOT_FILTER_1_MOD_2_AMT);
+    lv_source_noise_1_level = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_NOISE_1_LEVEL))))), cst_SLOT_NOISE_1_LEVEL);
 #line 375 "spms1_main.rb"
-    lv_source_filter_1_mod_2_pol = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_1_MOD_2_POL))))), cst_SLOT_FILTER_1_MOD_2_POL);
+    lv_source_mixer_2_level_1 = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_2_LEVEL_1))))), cst_SLOT_MIXER_2_LEVEL_1);
 #line 376 "spms1_main.rb"
-    lv_source_amp_1_gain = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_AMP_1_GAIN))))), cst_SLOT_AMP_1_GAIN);
+    lv_source_mixer_2_level_2 = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_2_LEVEL_2))))), cst_SLOT_MIXER_2_LEVEL_2);
 #line 377 "spms1_main.rb"
-    lv_source_amp_1_mod_1_2_mix = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_AMP_1_MOD_1_2_MIX))))), cst_SLOT_AMP_1_MOD_1_2_MIX);
+    lv_source_mixer_2_level_3 = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_2_LEVEL_3))))), cst_SLOT_MIXER_2_LEVEL_3);
 #line 378 "spms1_main.rb"
-    lv_source_chorus_1_mix = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_CHORUS_1_MIX))))), cst_SLOT_CHORUS_1_MIX);
+    lv_source_mixer_2_level_4 = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_2_LEVEL_4))))), cst_SLOT_MIXER_2_LEVEL_4);
 #line 379 "spms1_main.rb"
-    lv_source_chorus_1_rate = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_CHORUS_1_RATE))))), cst_SLOT_CHORUS_1_RATE);
+    lv_source_mixer_2_out_level = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_MIXER_2_OUT_LEVEL))))), cst_SLOT_MIXER_2_OUT_LEVEL);
 #line 380 "spms1_main.rb"
-    lv_source_chorus_1_depth = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_CHORUS_1_DEPTH))))), cst_SLOT_CHORUS_1_DEPTH);
+    lv_source_filter_1_cutoff = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_1_CUTOFF))))), cst_SLOT_FILTER_1_CUTOFF);
 #line 381 "spms1_main.rb"
-    lv_source_delay_1_mix = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_DELAY_1_MIX))))), cst_SLOT_DELAY_1_MIX);
+    lv_source_filter_1_resonance = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_1_RESONANCE))))), cst_SLOT_FILTER_1_RESONANCE);
 #line 382 "spms1_main.rb"
-    lv_source_delay_1_time = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_DELAY_1_TIME))))), cst_SLOT_DELAY_1_TIME);
+    lv_source_filter_1_mode = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_1_MODE))))), cst_SLOT_FILTER_1_MODE);
 #line 383 "spms1_main.rb"
-    lv_source_delay_1_feedback = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_DELAY_1_FEEDBACK))))), cst_SLOT_DELAY_1_FEEDBACK);
+    lv_source_filter_1_pitch_amt = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_1_PITCH_AMT))))), cst_SLOT_FILTER_1_PITCH_AMT);
 #line 384 "spms1_main.rb"
-    lv_source_amp_1_limiter_sw = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_AMP_1_LIMITER_SW))))), cst_SLOT_AMP_1_LIMITER_SW);
+    lv_source_filter_1_mod_1_amt = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_1_MOD_1_AMT))))), cst_SLOT_FILTER_1_MOD_1_AMT);
+#line 385 "spms1_main.rb"
+    lv_source_filter_1_mod_1_pol = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_1_MOD_1_POL))))), cst_SLOT_FILTER_1_MOD_1_POL);
+#line 386 "spms1_main.rb"
+    lv_source_filter_1_mod_2_amt = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_1_MOD_2_AMT))))), cst_SLOT_FILTER_1_MOD_2_AMT);
+#line 387 "spms1_main.rb"
+    lv_source_filter_1_mod_2_pol = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_FILTER_1_MOD_2_POL))))), cst_SLOT_FILTER_1_MOD_2_POL);
+#line 388 "spms1_main.rb"
+    lv_source_amp_1_gain = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_AMP_1_GAIN))))), cst_SLOT_AMP_1_GAIN);
+#line 389 "spms1_main.rb"
+    lv_source_amp_1_mod_1_2_mix = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_AMP_1_MOD_1_2_MIX))))), cst_SLOT_AMP_1_MOD_1_2_MIX);
+#line 390 "spms1_main.rb"
+    lv_source_chorus_1_mix = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_CHORUS_1_MIX))))), cst_SLOT_CHORUS_1_MIX);
+#line 391 "spms1_main.rb"
+    lv_source_chorus_1_rate = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_CHORUS_1_RATE))))), cst_SLOT_CHORUS_1_RATE);
+#line 392 "spms1_main.rb"
+    lv_source_chorus_1_depth = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_CHORUS_1_DEPTH))))), cst_SLOT_CHORUS_1_DEPTH);
 #line 393 "spms1_main.rb"
-    lv_cc_pitch_1_glide = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_PITCH_1_GLIDE)))));
+    lv_source_delay_1_mix = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_DELAY_1_MIX))))), cst_SLOT_DELAY_1_MIX);
 #line 394 "spms1_main.rb"
-    sp_int _t731 = cst_SLOT_PITCH_1_GLIDE;
-    sp_int _t733 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_pitch_1_glide)))));
-    sp_float _t732 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_pitch_1_glide, _t733, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_PITCH_1_GLIDE)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t731, _t732);
+    lv_source_delay_1_time = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_DELAY_1_TIME))))), cst_SLOT_DELAY_1_TIME);
 #line 395 "spms1_main.rb"
-    lv_cc_pitch_1_out_1_glide_sw = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_PITCH_1_OUT_1_GLIDE_SW)))));
+    lv_source_delay_1_feedback = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_DELAY_1_FEEDBACK))))), cst_SLOT_DELAY_1_FEEDBACK);
 #line 396 "spms1_main.rb"
-    sp_int _t737 = cst_SLOT_PITCH_1_OUT_1_GLIDE_SW;
-    sp_int _t739 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_pitch_1_out_1_glide_sw)))));
-    sp_float _t738 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_pitch_1_out_1_glide_sw, _t739, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_PITCH_1_OUT_1_GLIDE_SW)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t737, _t738);
-#line 397 "spms1_main.rb"
-    lv_cc_pitch_1_out_2_glide_sw = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_PITCH_1_OUT_2_GLIDE_SW)))));
-#line 398 "spms1_main.rb"
-    sp_int _t743 = cst_SLOT_PITCH_1_OUT_2_GLIDE_SW;
-    sp_int _t745 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_pitch_1_out_2_glide_sw)))));
-    sp_float _t744 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_pitch_1_out_2_glide_sw, _t745, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_PITCH_1_OUT_2_GLIDE_SW)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t743, _t744);
-#line 399 "spms1_main.rb"
-    lv_cc_pitch_1_bend_amt = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_PITCH_1_BEND_AMT)))));
-#line 400 "spms1_main.rb"
-    sp_int _t749 = cst_SLOT_PITCH_1_BEND_AMT;
-    sp_int _t751 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_pitch_1_bend_amt)))));
-    sp_float _t750 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_pitch_1_bend_amt, _t751, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_PITCH_1_BEND_AMT)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t749, _t750);
-#line 401 "spms1_main.rb"
-    lv_cc_pitch_1_out_1_bend_sw = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_PITCH_1_OUT_1_BEND_SW)))));
-#line 402 "spms1_main.rb"
-    sp_int _t755 = cst_SLOT_PITCH_1_OUT_1_BEND_SW;
-    sp_int _t757 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_pitch_1_out_1_bend_sw)))));
-    sp_float _t756 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_pitch_1_out_1_bend_sw, _t757, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_PITCH_1_OUT_1_BEND_SW)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t755, _t756);
-#line 403 "spms1_main.rb"
-    lv_cc_pitch_1_out_2_bend_sw = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_PITCH_1_OUT_2_BEND_SW)))));
-#line 404 "spms1_main.rb"
-    sp_int _t761 = cst_SLOT_PITCH_1_OUT_2_BEND_SW;
-    sp_int _t763 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_pitch_1_out_2_bend_sw)))));
-    sp_float _t762 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_pitch_1_out_2_bend_sw, _t763, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_PITCH_1_OUT_2_BEND_SW)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t761, _t762);
+    lv_source_amp_1_limiter_sw = sp_source_or_own(((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_SOURCE_AMP_1_LIMITER_SW))))), cst_SLOT_AMP_1_LIMITER_SW);
 #line 405 "spms1_main.rb"
-    lv_cc_pitch_1_stretch = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_PITCH_1_STRETCH)))));
+    lv_cc_pitch_1_glide = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_PITCH_1_GLIDE)))));
 #line 406 "spms1_main.rb"
-    sp_int _t767 = cst_SLOT_PITCH_1_STRETCH;
-    sp_int _t769 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_pitch_1_stretch)))));
-    sp_float _t768 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_pitch_1_stretch, _t769, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_PITCH_1_STRETCH)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t767, _t768);
+    sp_int _t737 = cst_SLOT_PITCH_1_GLIDE;
+    sp_int _t739 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_pitch_1_glide)))));
+    sp_float _t738 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_pitch_1_glide, _t739, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_PITCH_1_GLIDE)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t737, _t738);
 #line 407 "spms1_main.rb"
-    lv_cc_eg_1_attack = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_EG_1_ATTACK)))));
+    lv_cc_pitch_1_out_1_glide_sw = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_PITCH_1_OUT_1_GLIDE_SW)))));
 #line 408 "spms1_main.rb"
-    sp_int _t773 = cst_SLOT_EG_1_ATTACK;
-    sp_int _t775 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_eg_1_attack)))));
-    sp_float _t774 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_eg_1_attack, _t775, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_EG_1_ATTACK)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t773, _t774);
+    sp_int _t743 = cst_SLOT_PITCH_1_OUT_1_GLIDE_SW;
+    sp_int _t745 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_pitch_1_out_1_glide_sw)))));
+    sp_float _t744 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_pitch_1_out_1_glide_sw, _t745, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_PITCH_1_OUT_1_GLIDE_SW)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t743, _t744);
 #line 409 "spms1_main.rb"
-    lv_cc_eg_1_decay = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_EG_1_DECAY)))));
+    lv_cc_pitch_1_out_2_glide_sw = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_PITCH_1_OUT_2_GLIDE_SW)))));
 #line 410 "spms1_main.rb"
-    sp_int _t779 = cst_SLOT_EG_1_DECAY;
-    sp_int _t781 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_eg_1_decay)))));
-    sp_float _t780 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_eg_1_decay, _t781, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_EG_1_DECAY)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t779, _t780);
+    sp_int _t749 = cst_SLOT_PITCH_1_OUT_2_GLIDE_SW;
+    sp_int _t751 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_pitch_1_out_2_glide_sw)))));
+    sp_float _t750 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_pitch_1_out_2_glide_sw, _t751, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_PITCH_1_OUT_2_GLIDE_SW)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t749, _t750);
 #line 411 "spms1_main.rb"
-    lv_cc_eg_1_sustain = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_EG_1_SUSTAIN)))));
+    lv_cc_pitch_1_bend_amt = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_PITCH_1_BEND_AMT)))));
 #line 412 "spms1_main.rb"
-    sp_int _t785 = cst_SLOT_EG_1_SUSTAIN;
-    sp_int _t787 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_eg_1_sustain)))));
-    sp_float _t786 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_eg_1_sustain, _t787, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_EG_1_SUSTAIN)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t785, _t786);
+    sp_int _t755 = cst_SLOT_PITCH_1_BEND_AMT;
+    sp_int _t757 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_pitch_1_bend_amt)))));
+    sp_float _t756 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_pitch_1_bend_amt, _t757, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_PITCH_1_BEND_AMT)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t755, _t756);
 #line 413 "spms1_main.rb"
-    lv_cc_eg_1_release_sw = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_EG_1_RELEASE_SW)))));
+    lv_cc_pitch_1_out_1_bend_sw = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_PITCH_1_OUT_1_BEND_SW)))));
 #line 414 "spms1_main.rb"
-    sp_int _t791 = cst_SLOT_EG_1_RELEASE_SW;
-    sp_int _t793 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_eg_1_release_sw)))));
-    sp_float _t792 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_eg_1_release_sw, _t793, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_EG_1_RELEASE_SW)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t791, _t792);
+    sp_int _t761 = cst_SLOT_PITCH_1_OUT_1_BEND_SW;
+    sp_int _t763 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_pitch_1_out_1_bend_sw)))));
+    sp_float _t762 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_pitch_1_out_1_bend_sw, _t763, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_PITCH_1_OUT_1_BEND_SW)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t761, _t762);
 #line 415 "spms1_main.rb"
-    lv_cc_eg_1_level = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_EG_1_LEVEL)))));
+    lv_cc_pitch_1_out_2_bend_sw = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_PITCH_1_OUT_2_BEND_SW)))));
 #line 416 "spms1_main.rb"
-    sp_int _t797 = cst_SLOT_EG_1_LEVEL;
-    sp_int _t799 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_eg_1_level)))));
-    sp_float _t798 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_eg_1_level, _t799, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_EG_1_LEVEL)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t797, _t798);
+    sp_int _t767 = cst_SLOT_PITCH_1_OUT_2_BEND_SW;
+    sp_int _t769 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_pitch_1_out_2_bend_sw)))));
+    sp_float _t768 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_pitch_1_out_2_bend_sw, _t769, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_PITCH_1_OUT_2_BEND_SW)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t767, _t768);
 #line 417 "spms1_main.rb"
-    lv_cc_eg_2_attack = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_EG_2_ATTACK)))));
+    lv_cc_pitch_1_stretch = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_PITCH_1_STRETCH)))));
 #line 418 "spms1_main.rb"
-    sp_int _t803 = cst_SLOT_EG_2_ATTACK;
-    sp_int _t805 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_eg_2_attack)))));
-    sp_float _t804 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_eg_2_attack, _t805, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_EG_2_ATTACK)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t803, _t804);
+    sp_int _t773 = cst_SLOT_PITCH_1_STRETCH;
+    sp_int _t775 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_pitch_1_stretch)))));
+    sp_float _t774 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_pitch_1_stretch, _t775, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_PITCH_1_STRETCH)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t773, _t774);
 #line 419 "spms1_main.rb"
-    lv_cc_eg_2_decay = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_EG_2_DECAY)))));
+    lv_cc_eg_1_attack = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_EG_1_ATTACK)))));
 #line 420 "spms1_main.rb"
-    sp_int _t809 = cst_SLOT_EG_2_DECAY;
-    sp_int _t811 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_eg_2_decay)))));
-    sp_float _t810 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_eg_2_decay, _t811, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_EG_2_DECAY)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t809, _t810);
+    sp_int _t779 = cst_SLOT_EG_1_ATTACK;
+    sp_int _t781 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_eg_1_attack)))));
+    sp_float _t780 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_eg_1_attack, _t781, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_EG_1_ATTACK)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t779, _t780);
 #line 421 "spms1_main.rb"
-    lv_cc_eg_2_sustain = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_EG_2_SUSTAIN)))));
+    lv_cc_eg_1_decay = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_EG_1_DECAY)))));
 #line 422 "spms1_main.rb"
-    sp_int _t815 = cst_SLOT_EG_2_SUSTAIN;
-    sp_int _t817 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_eg_2_sustain)))));
-    sp_float _t816 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_eg_2_sustain, _t817, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_EG_2_SUSTAIN)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t815, _t816);
+    sp_int _t785 = cst_SLOT_EG_1_DECAY;
+    sp_int _t787 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_eg_1_decay)))));
+    sp_float _t786 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_eg_1_decay, _t787, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_EG_1_DECAY)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t785, _t786);
 #line 423 "spms1_main.rb"
-    lv_cc_eg_2_release_sw = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_EG_2_RELEASE_SW)))));
+    lv_cc_eg_1_sustain = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_EG_1_SUSTAIN)))));
 #line 424 "spms1_main.rb"
-    sp_int _t821 = cst_SLOT_EG_2_RELEASE_SW;
-    sp_int _t823 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_eg_2_release_sw)))));
-    sp_float _t822 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_eg_2_release_sw, _t823, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_EG_2_RELEASE_SW)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t821, _t822);
+    sp_int _t791 = cst_SLOT_EG_1_SUSTAIN;
+    sp_int _t793 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_eg_1_sustain)))));
+    sp_float _t792 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_eg_1_sustain, _t793, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_EG_1_SUSTAIN)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t791, _t792);
 #line 425 "spms1_main.rb"
-    lv_cc_eg_2_level = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_EG_2_LEVEL)))));
+    lv_cc_eg_1_release_sw = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_EG_1_RELEASE_SW)))));
 #line 426 "spms1_main.rb"
-    sp_int _t827 = cst_SLOT_EG_2_LEVEL;
-    sp_int _t829 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_eg_2_level)))));
-    sp_float _t828 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_eg_2_level, _t829, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_EG_2_LEVEL)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t827, _t828);
+    sp_int _t797 = cst_SLOT_EG_1_RELEASE_SW;
+    sp_int _t799 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_eg_1_release_sw)))));
+    sp_float _t798 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_eg_1_release_sw, _t799, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_EG_1_RELEASE_SW)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t797, _t798);
 #line 427 "spms1_main.rb"
-    lv_cc_lfo_1_wave = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_LFO_1_WAVE)))));
+    lv_cc_eg_1_level = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_EG_1_LEVEL)))));
 #line 428 "spms1_main.rb"
-    sp_int _t833 = cst_SLOT_LFO_1_WAVE;
-    sp_int _t835 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_lfo_1_wave)))));
-    sp_float _t834 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_lfo_1_wave, _t835, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_LFO_1_WAVE)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t833, _t834);
+    sp_int _t803 = cst_SLOT_EG_1_LEVEL;
+    sp_int _t805 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_eg_1_level)))));
+    sp_float _t804 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_eg_1_level, _t805, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_EG_1_LEVEL)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t803, _t804);
 #line 429 "spms1_main.rb"
-    lv_cc_lfo_1_rate = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_LFO_1_RATE)))));
+    lv_cc_eg_2_attack = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_EG_2_ATTACK)))));
 #line 430 "spms1_main.rb"
-    sp_int _t839 = cst_SLOT_LFO_1_RATE;
-    sp_int _t841 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_lfo_1_rate)))));
-    sp_float _t840 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_lfo_1_rate, _t841, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_LFO_1_RATE)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t839, _t840);
+    sp_int _t809 = cst_SLOT_EG_2_ATTACK;
+    sp_int _t811 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_eg_2_attack)))));
+    sp_float _t810 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_eg_2_attack, _t811, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_EG_2_ATTACK)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t809, _t810);
 #line 431 "spms1_main.rb"
-    lv_cc_lfo_1_level = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_LFO_1_LEVEL)))));
+    lv_cc_eg_2_decay = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_EG_2_DECAY)))));
 #line 432 "spms1_main.rb"
-    sp_int _t845 = cst_SLOT_LFO_1_LEVEL;
-    sp_int _t847 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_lfo_1_level)))));
-    sp_float _t846 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_lfo_1_level, _t847, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_LFO_1_LEVEL)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t845, _t846);
+    sp_int _t815 = cst_SLOT_EG_2_DECAY;
+    sp_int _t817 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_eg_2_decay)))));
+    sp_float _t816 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_eg_2_decay, _t817, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_EG_2_DECAY)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t815, _t816);
 #line 433 "spms1_main.rb"
-    lv_cc_lfo_1_rate_mod_amt = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_LFO_1_RATE_MOD_AMT)))));
+    lv_cc_eg_2_sustain = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_EG_2_SUSTAIN)))));
 #line 434 "spms1_main.rb"
-    sp_int _t851 = cst_SLOT_LFO_1_RATE_MOD_AMT;
-    sp_int _t853 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_lfo_1_rate_mod_amt)))));
-    sp_float _t852 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_lfo_1_rate_mod_amt, _t853, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_LFO_1_RATE_MOD_AMT)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t851, _t852);
+    sp_int _t821 = cst_SLOT_EG_2_SUSTAIN;
+    sp_int _t823 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_eg_2_sustain)))));
+    sp_float _t822 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_eg_2_sustain, _t823, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_EG_2_SUSTAIN)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t821, _t822);
 #line 435 "spms1_main.rb"
-    lv_cc_lfo_1_level_mod_amt = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_LFO_1_LEVEL_MOD_AMT)))));
+    lv_cc_eg_2_release_sw = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_EG_2_RELEASE_SW)))));
 #line 436 "spms1_main.rb"
-    sp_int _t857 = cst_SLOT_LFO_1_LEVEL_MOD_AMT;
-    sp_int _t859 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_lfo_1_level_mod_amt)))));
-    sp_float _t858 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_lfo_1_level_mod_amt, _t859, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_LFO_1_LEVEL_MOD_AMT)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t857, _t858);
+    sp_int _t827 = cst_SLOT_EG_2_RELEASE_SW;
+    sp_int _t829 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_eg_2_release_sw)))));
+    sp_float _t828 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_eg_2_release_sw, _t829, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_EG_2_RELEASE_SW)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t827, _t828);
 #line 437 "spms1_main.rb"
-    lv_cc_lfo_1_reset_sw = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_LFO_1_RESET_SW)))));
+    lv_cc_eg_2_level = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_EG_2_LEVEL)))));
 #line 438 "spms1_main.rb"
-    sp_int _t863 = cst_SLOT_LFO_1_RESET_SW;
-    sp_int _t865 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_lfo_1_reset_sw)))));
-    sp_float _t864 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_lfo_1_reset_sw, _t865, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_LFO_1_RESET_SW)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t863, _t864);
+    sp_int _t833 = cst_SLOT_EG_2_LEVEL;
+    sp_int _t835 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_eg_2_level)))));
+    sp_float _t834 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_eg_2_level, _t835, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_EG_2_LEVEL)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t833, _t834);
 #line 439 "spms1_main.rb"
-    lv_cc_mixer_1_level_1 = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_1_LEVEL_1)))));
+    lv_cc_lfo_1_wave = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_LFO_1_WAVE)))));
 #line 440 "spms1_main.rb"
-    sp_int _t869 = cst_SLOT_MIXER_1_LEVEL_1;
-    sp_int _t871 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_1_level_1)))));
-    sp_float _t870 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_mixer_1_level_1, _t871, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_MIXER_1_LEVEL_1)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t869, _t870);
+    sp_int _t839 = cst_SLOT_LFO_1_WAVE;
+    sp_int _t841 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_lfo_1_wave)))));
+    sp_float _t840 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_lfo_1_wave, _t841, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_LFO_1_WAVE)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t839, _t840);
 #line 441 "spms1_main.rb"
-    lv_cc_mixer_1_level_2 = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_1_LEVEL_2)))));
+    lv_cc_lfo_1_rate = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_LFO_1_RATE)))));
 #line 442 "spms1_main.rb"
-    sp_int _t875 = cst_SLOT_MIXER_1_LEVEL_2;
-    sp_int _t877 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_1_level_2)))));
-    sp_float _t876 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_mixer_1_level_2, _t877, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_MIXER_1_LEVEL_2)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t875, _t876);
+    sp_int _t845 = cst_SLOT_LFO_1_RATE;
+    sp_int _t847 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_lfo_1_rate)))));
+    sp_float _t846 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_lfo_1_rate, _t847, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_LFO_1_RATE)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t845, _t846);
 #line 443 "spms1_main.rb"
-    lv_cc_mixer_1_level_3 = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_1_LEVEL_3)))));
+    lv_cc_lfo_1_level = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_LFO_1_LEVEL)))));
 #line 444 "spms1_main.rb"
-    sp_int _t881 = cst_SLOT_MIXER_1_LEVEL_3;
-    sp_int _t883 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_1_level_3)))));
-    sp_float _t882 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_mixer_1_level_3, _t883, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_MIXER_1_LEVEL_3)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t881, _t882);
+    sp_int _t851 = cst_SLOT_LFO_1_LEVEL;
+    sp_int _t853 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_lfo_1_level)))));
+    sp_float _t852 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_lfo_1_level, _t853, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_LFO_1_LEVEL)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t851, _t852);
 #line 445 "spms1_main.rb"
-    lv_cc_mixer_1_level_4 = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_1_LEVEL_4)))));
+    lv_cc_lfo_1_rate_mod_amt = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_LFO_1_RATE_MOD_AMT)))));
 #line 446 "spms1_main.rb"
-    sp_int _t887 = cst_SLOT_MIXER_1_LEVEL_4;
-    sp_int _t889 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_1_level_4)))));
-    sp_float _t888 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_mixer_1_level_4, _t889, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_MIXER_1_LEVEL_4)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t887, _t888);
+    sp_int _t857 = cst_SLOT_LFO_1_RATE_MOD_AMT;
+    sp_int _t859 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_lfo_1_rate_mod_amt)))));
+    sp_float _t858 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_lfo_1_rate_mod_amt, _t859, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_LFO_1_RATE_MOD_AMT)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t857, _t858);
 #line 447 "spms1_main.rb"
-    lv_cc_mixer_1_out_level = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_1_OUT_LEVEL)))));
+    lv_cc_lfo_1_level_mod_amt = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_LFO_1_LEVEL_MOD_AMT)))));
 #line 448 "spms1_main.rb"
-    sp_int _t893 = cst_SLOT_MIXER_1_OUT_LEVEL;
-    sp_int _t895 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_1_out_level)))));
-    sp_float _t894 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_mixer_1_out_level, _t895, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_MIXER_1_OUT_LEVEL)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t893, _t894);
+    sp_int _t863 = cst_SLOT_LFO_1_LEVEL_MOD_AMT;
+    sp_int _t865 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_lfo_1_level_mod_amt)))));
+    sp_float _t864 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_lfo_1_level_mod_amt, _t865, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_LFO_1_LEVEL_MOD_AMT)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t863, _t864);
 #line 449 "spms1_main.rb"
-    lv_cc_osc_1_wave = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_WAVE)))));
+    lv_cc_lfo_1_reset_sw = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_LFO_1_RESET_SW)))));
 #line 450 "spms1_main.rb"
-    sp_int _t899 = cst_SLOT_OSC_1_WAVE;
-    sp_int _t901 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_1_wave)))));
-    sp_float _t900 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_osc_1_wave, _t901, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_1_WAVE)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t899, _t900);
+    sp_int _t869 = cst_SLOT_LFO_1_RESET_SW;
+    sp_int _t871 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_lfo_1_reset_sw)))));
+    sp_float _t870 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_lfo_1_reset_sw, _t871, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_LFO_1_RESET_SW)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t869, _t870);
 #line 451 "spms1_main.rb"
-    lv_cc_osc_1_pw = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_PW)))));
+    lv_cc_mixer_1_level_1 = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_1_LEVEL_1)))));
 #line 452 "spms1_main.rb"
-    sp_int _t905 = cst_SLOT_OSC_1_PW;
-    sp_int _t907 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_1_pw)))));
-    sp_float _t906 = sp_cc_to_bipolar(sp_cc_or_nrpn(lv_cc_osc_1_pw, _t907, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_1_PW)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t905, _t906);
+    sp_int _t875 = cst_SLOT_MIXER_1_LEVEL_1;
+    sp_int _t877 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_1_level_1)))));
+    sp_float _t876 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_mixer_1_level_1, _t877, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_MIXER_1_LEVEL_1)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t875, _t876);
 #line 453 "spms1_main.rb"
-    lv_cc_osc_1_pitch_coarse = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_PITCH_COARSE)))));
+    lv_cc_mixer_1_level_2 = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_1_LEVEL_2)))));
 #line 454 "spms1_main.rb"
-    sp_int _t911 = cst_SLOT_OSC_1_PITCH_COARSE;
-    sp_int _t913 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_1_pitch_coarse)))));
-    sp_float _t912 = sp_cc_to_bipolar(sp_cc_or_nrpn(lv_cc_osc_1_pitch_coarse, _t913, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_1_PITCH_COARSE)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t911, _t912);
+    sp_int _t881 = cst_SLOT_MIXER_1_LEVEL_2;
+    sp_int _t883 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_1_level_2)))));
+    sp_float _t882 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_mixer_1_level_2, _t883, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_MIXER_1_LEVEL_2)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t881, _t882);
 #line 455 "spms1_main.rb"
-    lv_cc_osc_1_pitch = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_PITCH)))));
+    lv_cc_mixer_1_level_3 = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_1_LEVEL_3)))));
 #line 456 "spms1_main.rb"
-    sp_int _t917 = cst_SLOT_OSC_1_PITCH;
-    sp_int _t919 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_1_pitch)))));
-    sp_float _t918 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_osc_1_pitch, _t919, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_1_PITCH)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t917, _t918);
+    sp_int _t887 = cst_SLOT_MIXER_1_LEVEL_3;
+    sp_int _t889 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_1_level_3)))));
+    sp_float _t888 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_mixer_1_level_3, _t889, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_MIXER_1_LEVEL_3)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t887, _t888);
 #line 457 "spms1_main.rb"
-    lv_cc_osc_1_pitch_fine = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_PITCH_FINE)))));
+    lv_cc_mixer_1_level_4 = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_1_LEVEL_4)))));
 #line 458 "spms1_main.rb"
-    sp_int _t923 = cst_SLOT_OSC_1_PITCH_FINE;
-    sp_int _t925 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_1_pitch_fine)))));
-    sp_float _t924 = sp_cc_to_bipolar(sp_cc_or_nrpn(lv_cc_osc_1_pitch_fine, _t925, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_1_PITCH_FINE)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t923, _t924);
+    sp_int _t893 = cst_SLOT_MIXER_1_LEVEL_4;
+    sp_int _t895 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_1_level_4)))));
+    sp_float _t894 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_mixer_1_level_4, _t895, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_MIXER_1_LEVEL_4)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t893, _t894);
 #line 459 "spms1_main.rb"
-    lv_cc_osc_1_pitch_mod_1_amt = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_PITCH_MOD_1_AMT)))));
+    lv_cc_mixer_1_out_level = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_1_OUT_LEVEL)))));
 #line 460 "spms1_main.rb"
-    sp_int _t929 = cst_SLOT_OSC_1_PITCH_MOD_1_AMT;
-    sp_int _t931 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_1_pitch_mod_1_amt)))));
-    sp_float _t930 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_osc_1_pitch_mod_1_amt, _t931, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_1_PITCH_MOD_1_AMT)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t929, _t930);
+    sp_int _t899 = cst_SLOT_MIXER_1_OUT_LEVEL;
+    sp_int _t901 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_1_out_level)))));
+    sp_float _t900 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_mixer_1_out_level, _t901, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_MIXER_1_OUT_LEVEL)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t899, _t900);
 #line 461 "spms1_main.rb"
-    lv_cc_osc_1_pitch_mod_1_pol = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_PITCH_MOD_1_POL)))));
+    lv_cc_osc_1_wave = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_WAVE)))));
 #line 462 "spms1_main.rb"
-    sp_int _t935 = cst_SLOT_OSC_1_PITCH_MOD_1_POL;
-    sp_int _t937 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_1_pitch_mod_1_pol)))));
-    sp_float _t936 = sp_cc_to_bipolar(sp_cc_or_nrpn(lv_cc_osc_1_pitch_mod_1_pol, _t937, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_1_PITCH_MOD_1_POL)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t935, _t936);
+    sp_int _t905 = cst_SLOT_OSC_1_WAVE;
+    sp_int _t907 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_1_wave)))));
+    sp_float _t906 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_osc_1_wave, _t907, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_1_WAVE)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t905, _t906);
 #line 463 "spms1_main.rb"
-    lv_cc_osc_1_pitch_mod_1_sw = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_PITCH_MOD_1_SW)))));
+    lv_cc_osc_1_pw = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_PW)))));
 #line 464 "spms1_main.rb"
-    sp_int _t941 = cst_SLOT_OSC_1_PITCH_MOD_1_SW;
-    sp_int _t943 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_1_pitch_mod_1_sw)))));
-    sp_float _t942 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_osc_1_pitch_mod_1_sw, _t943, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_1_PITCH_MOD_1_SW)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t941, _t942);
+    sp_int _t911 = cst_SLOT_OSC_1_PW;
+    sp_int _t913 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_1_pw)))));
+    sp_float _t912 = sp_cc_to_bipolar(sp_cc_or_nrpn(lv_cc_osc_1_pw, _t913, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_1_PW)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t911, _t912);
 #line 465 "spms1_main.rb"
-    lv_cc_osc_1_pitch_mod_2_amt = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_PITCH_MOD_2_AMT)))));
+    lv_cc_osc_1_pitch_coarse = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_PITCH_COARSE)))));
 #line 466 "spms1_main.rb"
-    sp_int _t947 = cst_SLOT_OSC_1_PITCH_MOD_2_AMT;
-    sp_int _t949 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_1_pitch_mod_2_amt)))));
-    sp_float _t948 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_osc_1_pitch_mod_2_amt, _t949, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_1_PITCH_MOD_2_AMT)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t947, _t948);
+    sp_int _t917 = cst_SLOT_OSC_1_PITCH_COARSE;
+    sp_int _t919 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_1_pitch_coarse)))));
+    sp_float _t918 = sp_cc_to_bipolar(sp_cc_or_nrpn(lv_cc_osc_1_pitch_coarse, _t919, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_1_PITCH_COARSE)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t917, _t918);
 #line 467 "spms1_main.rb"
-    lv_cc_osc_1_pitch_mod_2_pol = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_PITCH_MOD_2_POL)))));
+    lv_cc_osc_1_pitch = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_PITCH)))));
 #line 468 "spms1_main.rb"
-    sp_int _t953 = cst_SLOT_OSC_1_PITCH_MOD_2_POL;
-    sp_int _t955 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_1_pitch_mod_2_pol)))));
-    sp_float _t954 = sp_cc_to_bipolar(sp_cc_or_nrpn(lv_cc_osc_1_pitch_mod_2_pol, _t955, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_1_PITCH_MOD_2_POL)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t953, _t954);
+    sp_int _t923 = cst_SLOT_OSC_1_PITCH;
+    sp_int _t925 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_1_pitch)))));
+    sp_float _t924 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_osc_1_pitch, _t925, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_1_PITCH)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t923, _t924);
 #line 469 "spms1_main.rb"
-    lv_cc_osc_1_pitch_mod_2_sw = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_PITCH_MOD_2_SW)))));
+    lv_cc_osc_1_pitch_fine = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_PITCH_FINE)))));
 #line 470 "spms1_main.rb"
-    sp_int _t959 = cst_SLOT_OSC_1_PITCH_MOD_2_SW;
-    sp_int _t961 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_1_pitch_mod_2_sw)))));
-    sp_float _t960 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_osc_1_pitch_mod_2_sw, _t961, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_1_PITCH_MOD_2_SW)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t959, _t960);
+    sp_int _t929 = cst_SLOT_OSC_1_PITCH_FINE;
+    sp_int _t931 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_1_pitch_fine)))));
+    sp_float _t930 = sp_cc_to_bipolar(sp_cc_or_nrpn(lv_cc_osc_1_pitch_fine, _t931, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_1_PITCH_FINE)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t929, _t930);
 #line 471 "spms1_main.rb"
-    lv_cc_osc_1_pw_mod_1_amt = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_PW_MOD_1_AMT)))));
+    lv_cc_osc_1_pitch_mod_1_amt = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_PITCH_MOD_1_AMT)))));
 #line 472 "spms1_main.rb"
-    sp_int _t965 = cst_SLOT_OSC_1_PW_MOD_1_AMT;
-    sp_int _t967 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_1_pw_mod_1_amt)))));
-    sp_float _t966 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_osc_1_pw_mod_1_amt, _t967, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_1_PW_MOD_1_AMT)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t965, _t966);
+    sp_int _t935 = cst_SLOT_OSC_1_PITCH_MOD_1_AMT;
+    sp_int _t937 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_1_pitch_mod_1_amt)))));
+    sp_float _t936 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_osc_1_pitch_mod_1_amt, _t937, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_1_PITCH_MOD_1_AMT)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t935, _t936);
 #line 473 "spms1_main.rb"
-    lv_cc_osc_1_pw_mod_1_pol = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_PW_MOD_1_POL)))));
+    lv_cc_osc_1_pitch_mod_1_pol = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_PITCH_MOD_1_POL)))));
 #line 474 "spms1_main.rb"
-    sp_int _t971 = cst_SLOT_OSC_1_PW_MOD_1_POL;
-    sp_int _t973 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_1_pw_mod_1_pol)))));
-    sp_float _t972 = sp_cc_to_bipolar(sp_cc_or_nrpn(lv_cc_osc_1_pw_mod_1_pol, _t973, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_1_PW_MOD_1_POL)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t971, _t972);
+    sp_int _t941 = cst_SLOT_OSC_1_PITCH_MOD_1_POL;
+    sp_int _t943 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_1_pitch_mod_1_pol)))));
+    sp_float _t942 = sp_cc_to_bipolar(sp_cc_or_nrpn(lv_cc_osc_1_pitch_mod_1_pol, _t943, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_1_PITCH_MOD_1_POL)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t941, _t942);
 #line 475 "spms1_main.rb"
-    lv_cc_osc_1_pw_mod_2_amt = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_PW_MOD_2_AMT)))));
+    lv_cc_osc_1_pitch_mod_1_sw = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_PITCH_MOD_1_SW)))));
 #line 476 "spms1_main.rb"
-    sp_int _t977 = cst_SLOT_OSC_1_PW_MOD_2_AMT;
-    sp_int _t979 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_1_pw_mod_2_amt)))));
-    sp_float _t978 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_osc_1_pw_mod_2_amt, _t979, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_1_PW_MOD_2_AMT)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t977, _t978);
+    sp_int _t947 = cst_SLOT_OSC_1_PITCH_MOD_1_SW;
+    sp_int _t949 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_1_pitch_mod_1_sw)))));
+    sp_float _t948 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_osc_1_pitch_mod_1_sw, _t949, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_1_PITCH_MOD_1_SW)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t947, _t948);
 #line 477 "spms1_main.rb"
-    lv_cc_osc_1_pw_mod_2_pol = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_PW_MOD_2_POL)))));
+    lv_cc_osc_1_pitch_mod_2_amt = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_PITCH_MOD_2_AMT)))));
 #line 478 "spms1_main.rb"
-    sp_int _t983 = cst_SLOT_OSC_1_PW_MOD_2_POL;
-    sp_int _t985 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_1_pw_mod_2_pol)))));
-    sp_float _t984 = sp_cc_to_bipolar(sp_cc_or_nrpn(lv_cc_osc_1_pw_mod_2_pol, _t985, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_1_PW_MOD_2_POL)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t983, _t984);
+    sp_int _t953 = cst_SLOT_OSC_1_PITCH_MOD_2_AMT;
+    sp_int _t955 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_1_pitch_mod_2_amt)))));
+    sp_float _t954 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_osc_1_pitch_mod_2_amt, _t955, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_1_PITCH_MOD_2_AMT)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t953, _t954);
 #line 479 "spms1_main.rb"
-    lv_cc_osc_2_wave = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_2_WAVE)))));
+    lv_cc_osc_1_pitch_mod_2_pol = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_PITCH_MOD_2_POL)))));
 #line 480 "spms1_main.rb"
-    sp_int _t989 = cst_SLOT_OSC_2_WAVE;
-    sp_int _t991 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_2_wave)))));
-    sp_float _t990 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_osc_2_wave, _t991, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_2_WAVE)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t989, _t990);
+    sp_int _t959 = cst_SLOT_OSC_1_PITCH_MOD_2_POL;
+    sp_int _t961 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_1_pitch_mod_2_pol)))));
+    sp_float _t960 = sp_cc_to_bipolar(sp_cc_or_nrpn(lv_cc_osc_1_pitch_mod_2_pol, _t961, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_1_PITCH_MOD_2_POL)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t959, _t960);
 #line 481 "spms1_main.rb"
-    lv_cc_osc_2_pw = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_2_PW)))));
+    lv_cc_osc_1_pitch_mod_2_sw = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_PITCH_MOD_2_SW)))));
 #line 482 "spms1_main.rb"
-    sp_int _t995 = cst_SLOT_OSC_2_PW;
-    sp_int _t997 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_2_pw)))));
-    sp_float _t996 = sp_cc_to_bipolar(sp_cc_or_nrpn(lv_cc_osc_2_pw, _t997, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_2_PW)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t995, _t996);
+    sp_int _t965 = cst_SLOT_OSC_1_PITCH_MOD_2_SW;
+    sp_int _t967 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_1_pitch_mod_2_sw)))));
+    sp_float _t966 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_osc_1_pitch_mod_2_sw, _t967, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_1_PITCH_MOD_2_SW)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t965, _t966);
 #line 483 "spms1_main.rb"
-    lv_cc_osc_2_pitch_coarse = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_2_PITCH_COARSE)))));
+    lv_cc_osc_1_pw_mod_1_amt = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_PW_MOD_1_AMT)))));
 #line 484 "spms1_main.rb"
-    sp_int _t1001 = cst_SLOT_OSC_2_PITCH_COARSE;
-    sp_int _t1003 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_2_pitch_coarse)))));
-    sp_float _t1002 = sp_cc_to_bipolar(sp_cc_or_nrpn(lv_cc_osc_2_pitch_coarse, _t1003, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_2_PITCH_COARSE)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1001, _t1002);
+    sp_int _t971 = cst_SLOT_OSC_1_PW_MOD_1_AMT;
+    sp_int _t973 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_1_pw_mod_1_amt)))));
+    sp_float _t972 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_osc_1_pw_mod_1_amt, _t973, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_1_PW_MOD_1_AMT)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t971, _t972);
 #line 485 "spms1_main.rb"
-    lv_cc_osc_2_pitch = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_2_PITCH)))));
+    lv_cc_osc_1_pw_mod_1_pol = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_PW_MOD_1_POL)))));
 #line 486 "spms1_main.rb"
-    sp_int _t1007 = cst_SLOT_OSC_2_PITCH;
-    sp_int _t1009 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_2_pitch)))));
-    sp_float _t1008 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_osc_2_pitch, _t1009, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_2_PITCH)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1007, _t1008);
+    sp_int _t977 = cst_SLOT_OSC_1_PW_MOD_1_POL;
+    sp_int _t979 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_1_pw_mod_1_pol)))));
+    sp_float _t978 = sp_cc_to_bipolar(sp_cc_or_nrpn(lv_cc_osc_1_pw_mod_1_pol, _t979, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_1_PW_MOD_1_POL)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t977, _t978);
 #line 487 "spms1_main.rb"
-    lv_cc_osc_2_pitch_fine = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_2_PITCH_FINE)))));
+    lv_cc_osc_1_pw_mod_2_amt = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_PW_MOD_2_AMT)))));
 #line 488 "spms1_main.rb"
-    sp_int _t1013 = cst_SLOT_OSC_2_PITCH_FINE;
-    sp_int _t1015 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_2_pitch_fine)))));
-    sp_float _t1014 = sp_cc_to_bipolar(sp_cc_or_nrpn(lv_cc_osc_2_pitch_fine, _t1015, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_2_PITCH_FINE)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1013, _t1014);
+    sp_int _t983 = cst_SLOT_OSC_1_PW_MOD_2_AMT;
+    sp_int _t985 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_1_pw_mod_2_amt)))));
+    sp_float _t984 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_osc_1_pw_mod_2_amt, _t985, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_1_PW_MOD_2_AMT)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t983, _t984);
 #line 489 "spms1_main.rb"
-    lv_cc_osc_2_pitch_mod_1_amt = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_2_PITCH_MOD_1_AMT)))));
+    lv_cc_osc_1_pw_mod_2_pol = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_1_PW_MOD_2_POL)))));
 #line 490 "spms1_main.rb"
-    sp_int _t1019 = cst_SLOT_OSC_2_PITCH_MOD_1_AMT;
-    sp_int _t1021 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_2_pitch_mod_1_amt)))));
-    sp_float _t1020 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_osc_2_pitch_mod_1_amt, _t1021, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_2_PITCH_MOD_1_AMT)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1019, _t1020);
+    sp_int _t989 = cst_SLOT_OSC_1_PW_MOD_2_POL;
+    sp_int _t991 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_1_pw_mod_2_pol)))));
+    sp_float _t990 = sp_cc_to_bipolar(sp_cc_or_nrpn(lv_cc_osc_1_pw_mod_2_pol, _t991, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_1_PW_MOD_2_POL)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t989, _t990);
 #line 491 "spms1_main.rb"
-    lv_cc_osc_2_pitch_mod_1_pol = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_2_PITCH_MOD_1_POL)))));
+    lv_cc_osc_2_wave = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_2_WAVE)))));
 #line 492 "spms1_main.rb"
-    sp_int _t1025 = cst_SLOT_OSC_2_PITCH_MOD_1_POL;
-    sp_int _t1027 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_2_pitch_mod_1_pol)))));
-    sp_float _t1026 = sp_cc_to_bipolar(sp_cc_or_nrpn(lv_cc_osc_2_pitch_mod_1_pol, _t1027, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_2_PITCH_MOD_1_POL)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1025, _t1026);
+    sp_int _t995 = cst_SLOT_OSC_2_WAVE;
+    sp_int _t997 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_2_wave)))));
+    sp_float _t996 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_osc_2_wave, _t997, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_2_WAVE)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t995, _t996);
 #line 493 "spms1_main.rb"
-    lv_cc_osc_2_pitch_mod_1_sw = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_2_PITCH_MOD_1_SW)))));
+    lv_cc_osc_2_pw = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_2_PW)))));
 #line 494 "spms1_main.rb"
-    sp_int _t1031 = cst_SLOT_OSC_2_PITCH_MOD_1_SW;
-    sp_int _t1033 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_2_pitch_mod_1_sw)))));
-    sp_float _t1032 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_osc_2_pitch_mod_1_sw, _t1033, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_2_PITCH_MOD_1_SW)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1031, _t1032);
+    sp_int _t1001 = cst_SLOT_OSC_2_PW;
+    sp_int _t1003 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_2_pw)))));
+    sp_float _t1002 = sp_cc_to_bipolar(sp_cc_or_nrpn(lv_cc_osc_2_pw, _t1003, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_2_PW)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1001, _t1002);
 #line 495 "spms1_main.rb"
-    lv_cc_osc_2_pitch_mod_2_amt = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_2_PITCH_MOD_2_AMT)))));
+    lv_cc_osc_2_pitch_coarse = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_2_PITCH_COARSE)))));
 #line 496 "spms1_main.rb"
-    sp_int _t1037 = cst_SLOT_OSC_2_PITCH_MOD_2_AMT;
-    sp_int _t1039 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_2_pitch_mod_2_amt)))));
-    sp_float _t1038 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_osc_2_pitch_mod_2_amt, _t1039, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_2_PITCH_MOD_2_AMT)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1037, _t1038);
+    sp_int _t1007 = cst_SLOT_OSC_2_PITCH_COARSE;
+    sp_int _t1009 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_2_pitch_coarse)))));
+    sp_float _t1008 = sp_cc_to_bipolar(sp_cc_or_nrpn(lv_cc_osc_2_pitch_coarse, _t1009, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_2_PITCH_COARSE)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1007, _t1008);
 #line 497 "spms1_main.rb"
-    lv_cc_osc_2_pitch_mod_2_pol = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_2_PITCH_MOD_2_POL)))));
+    lv_cc_osc_2_pitch = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_2_PITCH)))));
 #line 498 "spms1_main.rb"
-    sp_int _t1043 = cst_SLOT_OSC_2_PITCH_MOD_2_POL;
-    sp_int _t1045 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_2_pitch_mod_2_pol)))));
-    sp_float _t1044 = sp_cc_to_bipolar(sp_cc_or_nrpn(lv_cc_osc_2_pitch_mod_2_pol, _t1045, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_2_PITCH_MOD_2_POL)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1043, _t1044);
+    sp_int _t1013 = cst_SLOT_OSC_2_PITCH;
+    sp_int _t1015 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_2_pitch)))));
+    sp_float _t1014 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_osc_2_pitch, _t1015, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_2_PITCH)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1013, _t1014);
 #line 499 "spms1_main.rb"
-    lv_cc_osc_2_pitch_mod_2_sw = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_2_PITCH_MOD_2_SW)))));
+    lv_cc_osc_2_pitch_fine = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_2_PITCH_FINE)))));
 #line 500 "spms1_main.rb"
-    sp_int _t1049 = cst_SLOT_OSC_2_PITCH_MOD_2_SW;
-    sp_int _t1051 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_2_pitch_mod_2_sw)))));
-    sp_float _t1050 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_osc_2_pitch_mod_2_sw, _t1051, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_2_PITCH_MOD_2_SW)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1049, _t1050);
+    sp_int _t1019 = cst_SLOT_OSC_2_PITCH_FINE;
+    sp_int _t1021 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_2_pitch_fine)))));
+    sp_float _t1020 = sp_cc_to_bipolar(sp_cc_or_nrpn(lv_cc_osc_2_pitch_fine, _t1021, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_2_PITCH_FINE)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1019, _t1020);
 #line 501 "spms1_main.rb"
-    lv_cc_osc_2_pw_mod_1_amt = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_2_PW_MOD_1_AMT)))));
+    lv_cc_osc_2_pitch_mod_1_amt = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_2_PITCH_MOD_1_AMT)))));
 #line 502 "spms1_main.rb"
-    sp_int _t1055 = cst_SLOT_OSC_2_PW_MOD_1_AMT;
-    sp_int _t1057 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_2_pw_mod_1_amt)))));
-    sp_float _t1056 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_osc_2_pw_mod_1_amt, _t1057, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_2_PW_MOD_1_AMT)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1055, _t1056);
+    sp_int _t1025 = cst_SLOT_OSC_2_PITCH_MOD_1_AMT;
+    sp_int _t1027 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_2_pitch_mod_1_amt)))));
+    sp_float _t1026 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_osc_2_pitch_mod_1_amt, _t1027, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_2_PITCH_MOD_1_AMT)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1025, _t1026);
 #line 503 "spms1_main.rb"
-    lv_cc_osc_2_pw_mod_1_pol = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_2_PW_MOD_1_POL)))));
+    lv_cc_osc_2_pitch_mod_1_pol = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_2_PITCH_MOD_1_POL)))));
 #line 504 "spms1_main.rb"
-    sp_int _t1061 = cst_SLOT_OSC_2_PW_MOD_1_POL;
-    sp_int _t1063 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_2_pw_mod_1_pol)))));
-    sp_float _t1062 = sp_cc_to_bipolar(sp_cc_or_nrpn(lv_cc_osc_2_pw_mod_1_pol, _t1063, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_2_PW_MOD_1_POL)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1061, _t1062);
+    sp_int _t1031 = cst_SLOT_OSC_2_PITCH_MOD_1_POL;
+    sp_int _t1033 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_2_pitch_mod_1_pol)))));
+    sp_float _t1032 = sp_cc_to_bipolar(sp_cc_or_nrpn(lv_cc_osc_2_pitch_mod_1_pol, _t1033, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_2_PITCH_MOD_1_POL)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1031, _t1032);
 #line 505 "spms1_main.rb"
-    lv_cc_osc_2_pw_mod_2_amt = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_2_PW_MOD_2_AMT)))));
+    lv_cc_osc_2_pitch_mod_1_sw = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_2_PITCH_MOD_1_SW)))));
 #line 506 "spms1_main.rb"
-    sp_int _t1067 = cst_SLOT_OSC_2_PW_MOD_2_AMT;
-    sp_int _t1069 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_2_pw_mod_2_amt)))));
-    sp_float _t1068 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_osc_2_pw_mod_2_amt, _t1069, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_2_PW_MOD_2_AMT)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1067, _t1068);
+    sp_int _t1037 = cst_SLOT_OSC_2_PITCH_MOD_1_SW;
+    sp_int _t1039 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_2_pitch_mod_1_sw)))));
+    sp_float _t1038 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_osc_2_pitch_mod_1_sw, _t1039, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_2_PITCH_MOD_1_SW)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1037, _t1038);
 #line 507 "spms1_main.rb"
-    lv_cc_osc_2_pw_mod_2_pol = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_2_PW_MOD_2_POL)))));
+    lv_cc_osc_2_pitch_mod_2_amt = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_2_PITCH_MOD_2_AMT)))));
 #line 508 "spms1_main.rb"
-    sp_int _t1073 = cst_SLOT_OSC_2_PW_MOD_2_POL;
-    sp_int _t1075 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_2_pw_mod_2_pol)))));
-    sp_float _t1074 = sp_cc_to_bipolar(sp_cc_or_nrpn(lv_cc_osc_2_pw_mod_2_pol, _t1075, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_2_PW_MOD_2_POL)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1073, _t1074);
+    sp_int _t1043 = cst_SLOT_OSC_2_PITCH_MOD_2_AMT;
+    sp_int _t1045 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_2_pitch_mod_2_amt)))));
+    sp_float _t1044 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_osc_2_pitch_mod_2_amt, _t1045, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_2_PITCH_MOD_2_AMT)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1043, _t1044);
 #line 509 "spms1_main.rb"
-    lv_cc_osc_2_sync_sw = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_2_SYNC_SW)))));
+    lv_cc_osc_2_pitch_mod_2_pol = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_2_PITCH_MOD_2_POL)))));
 #line 510 "spms1_main.rb"
-    sp_int _t1079 = cst_SLOT_OSC_2_SYNC_SW;
-    sp_int _t1081 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_2_sync_sw)))));
-    sp_float _t1080 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_osc_2_sync_sw, _t1081, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_2_SYNC_SW)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1079, _t1080);
+    sp_int _t1049 = cst_SLOT_OSC_2_PITCH_MOD_2_POL;
+    sp_int _t1051 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_2_pitch_mod_2_pol)))));
+    sp_float _t1050 = sp_cc_to_bipolar(sp_cc_or_nrpn(lv_cc_osc_2_pitch_mod_2_pol, _t1051, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_2_PITCH_MOD_2_POL)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1049, _t1050);
 #line 511 "spms1_main.rb"
-    lv_cc_noise_1_color = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_NOISE_1_COLOR)))));
+    lv_cc_osc_2_pitch_mod_2_sw = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_2_PITCH_MOD_2_SW)))));
 #line 512 "spms1_main.rb"
-    sp_int _t1085 = cst_SLOT_NOISE_1_COLOR;
-    sp_int _t1087 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_noise_1_color)))));
-    sp_float _t1086 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_noise_1_color, _t1087, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_NOISE_1_COLOR)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1085, _t1086);
+    sp_int _t1055 = cst_SLOT_OSC_2_PITCH_MOD_2_SW;
+    sp_int _t1057 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_2_pitch_mod_2_sw)))));
+    sp_float _t1056 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_osc_2_pitch_mod_2_sw, _t1057, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_2_PITCH_MOD_2_SW)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1055, _t1056);
 #line 513 "spms1_main.rb"
-    lv_cc_noise_1_level = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_NOISE_1_LEVEL)))));
+    lv_cc_osc_2_pw_mod_1_amt = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_2_PW_MOD_1_AMT)))));
 #line 514 "spms1_main.rb"
-    sp_int _t1091 = cst_SLOT_NOISE_1_LEVEL;
-    sp_int _t1093 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_noise_1_level)))));
-    sp_float _t1092 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_noise_1_level, _t1093, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_NOISE_1_LEVEL)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1091, _t1092);
+    sp_int _t1061 = cst_SLOT_OSC_2_PW_MOD_1_AMT;
+    sp_int _t1063 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_2_pw_mod_1_amt)))));
+    sp_float _t1062 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_osc_2_pw_mod_1_amt, _t1063, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_2_PW_MOD_1_AMT)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1061, _t1062);
 #line 515 "spms1_main.rb"
-    lv_cc_mixer_2_level_1 = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_2_LEVEL_1)))));
+    lv_cc_osc_2_pw_mod_1_pol = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_2_PW_MOD_1_POL)))));
 #line 516 "spms1_main.rb"
-    sp_int _t1097 = cst_SLOT_MIXER_2_LEVEL_1;
-    sp_int _t1099 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_2_level_1)))));
-    sp_float _t1098 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_mixer_2_level_1, _t1099, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_MIXER_2_LEVEL_1)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1097, _t1098);
+    sp_int _t1067 = cst_SLOT_OSC_2_PW_MOD_1_POL;
+    sp_int _t1069 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_2_pw_mod_1_pol)))));
+    sp_float _t1068 = sp_cc_to_bipolar(sp_cc_or_nrpn(lv_cc_osc_2_pw_mod_1_pol, _t1069, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_2_PW_MOD_1_POL)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1067, _t1068);
 #line 517 "spms1_main.rb"
-    lv_cc_mixer_2_level_2 = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_2_LEVEL_2)))));
+    lv_cc_osc_2_pw_mod_2_amt = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_2_PW_MOD_2_AMT)))));
 #line 518 "spms1_main.rb"
-    sp_int _t1103 = cst_SLOT_MIXER_2_LEVEL_2;
-    sp_int _t1105 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_2_level_2)))));
-    sp_float _t1104 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_mixer_2_level_2, _t1105, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_MIXER_2_LEVEL_2)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1103, _t1104);
+    sp_int _t1073 = cst_SLOT_OSC_2_PW_MOD_2_AMT;
+    sp_int _t1075 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_2_pw_mod_2_amt)))));
+    sp_float _t1074 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_osc_2_pw_mod_2_amt, _t1075, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_2_PW_MOD_2_AMT)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1073, _t1074);
 #line 519 "spms1_main.rb"
-    lv_cc_mixer_2_level_3 = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_2_LEVEL_3)))));
+    lv_cc_osc_2_pw_mod_2_pol = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_2_PW_MOD_2_POL)))));
 #line 520 "spms1_main.rb"
-    sp_int _t1109 = cst_SLOT_MIXER_2_LEVEL_3;
-    sp_int _t1111 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_2_level_3)))));
-    sp_float _t1110 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_mixer_2_level_3, _t1111, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_MIXER_2_LEVEL_3)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1109, _t1110);
+    sp_int _t1079 = cst_SLOT_OSC_2_PW_MOD_2_POL;
+    sp_int _t1081 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_2_pw_mod_2_pol)))));
+    sp_float _t1080 = sp_cc_to_bipolar(sp_cc_or_nrpn(lv_cc_osc_2_pw_mod_2_pol, _t1081, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_2_PW_MOD_2_POL)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1079, _t1080);
 #line 521 "spms1_main.rb"
-    lv_cc_mixer_2_level_4 = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_2_LEVEL_4)))));
+    lv_cc_osc_2_sync_sw = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_OSC_2_SYNC_SW)))));
 #line 522 "spms1_main.rb"
-    sp_int _t1115 = cst_SLOT_MIXER_2_LEVEL_4;
-    sp_int _t1117 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_2_level_4)))));
-    sp_float _t1116 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_mixer_2_level_4, _t1117, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_MIXER_2_LEVEL_4)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1115, _t1116);
+    sp_int _t1085 = cst_SLOT_OSC_2_SYNC_SW;
+    sp_int _t1087 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_osc_2_sync_sw)))));
+    sp_float _t1086 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_osc_2_sync_sw, _t1087, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_OSC_2_SYNC_SW)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1085, _t1086);
 #line 523 "spms1_main.rb"
-    lv_cc_mixer_2_out_level = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_2_OUT_LEVEL)))));
+    lv_cc_noise_1_color = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_NOISE_1_COLOR)))));
 #line 524 "spms1_main.rb"
-    sp_int _t1121 = cst_SLOT_MIXER_2_OUT_LEVEL;
-    sp_int _t1123 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_2_out_level)))));
-    sp_float _t1122 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_mixer_2_out_level, _t1123, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_MIXER_2_OUT_LEVEL)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1121, _t1122);
+    sp_int _t1091 = cst_SLOT_NOISE_1_COLOR;
+    sp_int _t1093 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_noise_1_color)))));
+    sp_float _t1092 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_noise_1_color, _t1093, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_NOISE_1_COLOR)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1091, _t1092);
 #line 525 "spms1_main.rb"
-    lv_cc_filter_1_cutoff = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_FILTER_1_CUTOFF)))));
+    lv_cc_noise_1_level = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_NOISE_1_LEVEL)))));
 #line 526 "spms1_main.rb"
-    sp_int _t1127 = cst_SLOT_FILTER_1_CUTOFF;
-    sp_int _t1129 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_filter_1_cutoff)))));
-    sp_float _t1128 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_filter_1_cutoff, _t1129, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_FILTER_1_CUTOFF)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1127, _t1128);
+    sp_int _t1097 = cst_SLOT_NOISE_1_LEVEL;
+    sp_int _t1099 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_noise_1_level)))));
+    sp_float _t1098 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_noise_1_level, _t1099, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_NOISE_1_LEVEL)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1097, _t1098);
 #line 527 "spms1_main.rb"
-    lv_cc_filter_1_resonance = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_FILTER_1_RESONANCE)))));
+    lv_cc_mixer_2_level_1 = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_2_LEVEL_1)))));
 #line 528 "spms1_main.rb"
-    sp_int _t1133 = cst_SLOT_FILTER_1_RESONANCE;
-    sp_int _t1135 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_filter_1_resonance)))));
-    sp_float _t1134 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_filter_1_resonance, _t1135, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_FILTER_1_RESONANCE)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1133, _t1134);
+    sp_int _t1103 = cst_SLOT_MIXER_2_LEVEL_1;
+    sp_int _t1105 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_2_level_1)))));
+    sp_float _t1104 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_mixer_2_level_1, _t1105, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_MIXER_2_LEVEL_1)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1103, _t1104);
 #line 529 "spms1_main.rb"
-    lv_cc_filter_1_mode = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_FILTER_1_MODE)))));
+    lv_cc_mixer_2_level_2 = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_2_LEVEL_2)))));
 #line 530 "spms1_main.rb"
-    sp_int _t1139 = cst_SLOT_FILTER_1_MODE;
-    sp_int _t1141 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_filter_1_mode)))));
-    sp_float _t1140 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_filter_1_mode, _t1141, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_FILTER_1_MODE)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1139, _t1140);
+    sp_int _t1109 = cst_SLOT_MIXER_2_LEVEL_2;
+    sp_int _t1111 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_2_level_2)))));
+    sp_float _t1110 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_mixer_2_level_2, _t1111, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_MIXER_2_LEVEL_2)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1109, _t1110);
 #line 531 "spms1_main.rb"
-    lv_cc_filter_1_pitch_amt = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_FILTER_1_PITCH_AMT)))));
+    lv_cc_mixer_2_level_3 = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_2_LEVEL_3)))));
 #line 532 "spms1_main.rb"
-    sp_int _t1145 = cst_SLOT_FILTER_1_PITCH_AMT;
-    sp_int _t1147 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_filter_1_pitch_amt)))));
-    sp_float _t1146 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_filter_1_pitch_amt, _t1147, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_FILTER_1_PITCH_AMT)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1145, _t1146);
+    sp_int _t1115 = cst_SLOT_MIXER_2_LEVEL_3;
+    sp_int _t1117 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_2_level_3)))));
+    sp_float _t1116 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_mixer_2_level_3, _t1117, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_MIXER_2_LEVEL_3)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1115, _t1116);
 #line 533 "spms1_main.rb"
-    lv_cc_filter_1_mod_1_amt = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_FILTER_1_MOD_1_AMT)))));
+    lv_cc_mixer_2_level_4 = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_2_LEVEL_4)))));
 #line 534 "spms1_main.rb"
-    sp_int _t1151 = cst_SLOT_FILTER_1_MOD_1_AMT;
-    sp_int _t1153 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_filter_1_mod_1_amt)))));
-    sp_float _t1152 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_filter_1_mod_1_amt, _t1153, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_FILTER_1_MOD_1_AMT)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1151, _t1152);
+    sp_int _t1121 = cst_SLOT_MIXER_2_LEVEL_4;
+    sp_int _t1123 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_2_level_4)))));
+    sp_float _t1122 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_mixer_2_level_4, _t1123, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_MIXER_2_LEVEL_4)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1121, _t1122);
 #line 535 "spms1_main.rb"
-    lv_cc_filter_1_mod_1_pol = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_FILTER_1_MOD_1_POL)))));
+    lv_cc_mixer_2_out_level = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MIXER_2_OUT_LEVEL)))));
 #line 536 "spms1_main.rb"
-    sp_int _t1157 = cst_SLOT_FILTER_1_MOD_1_POL;
-    sp_int _t1159 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_filter_1_mod_1_pol)))));
-    sp_float _t1158 = sp_cc_to_bipolar(sp_cc_or_nrpn(lv_cc_filter_1_mod_1_pol, _t1159, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_FILTER_1_MOD_1_POL)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1157, _t1158);
+    sp_int _t1127 = cst_SLOT_MIXER_2_OUT_LEVEL;
+    sp_int _t1129 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mixer_2_out_level)))));
+    sp_float _t1128 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_mixer_2_out_level, _t1129, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_MIXER_2_OUT_LEVEL)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1127, _t1128);
 #line 537 "spms1_main.rb"
-    lv_cc_filter_1_mod_2_amt = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_FILTER_1_MOD_2_AMT)))));
+    lv_cc_filter_1_cutoff = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_FILTER_1_CUTOFF)))));
 #line 538 "spms1_main.rb"
-    sp_int _t1163 = cst_SLOT_FILTER_1_MOD_2_AMT;
-    sp_int _t1165 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_filter_1_mod_2_amt)))));
-    sp_float _t1164 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_filter_1_mod_2_amt, _t1165, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_FILTER_1_MOD_2_AMT)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1163, _t1164);
+    sp_int _t1133 = cst_SLOT_FILTER_1_CUTOFF;
+    sp_int _t1135 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_filter_1_cutoff)))));
+    sp_float _t1134 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_filter_1_cutoff, _t1135, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_FILTER_1_CUTOFF)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1133, _t1134);
 #line 539 "spms1_main.rb"
-    lv_cc_filter_1_mod_2_pol = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_FILTER_1_MOD_2_POL)))));
+    lv_cc_filter_1_resonance = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_FILTER_1_RESONANCE)))));
 #line 540 "spms1_main.rb"
-    sp_int _t1169 = cst_SLOT_FILTER_1_MOD_2_POL;
-    sp_int _t1171 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_filter_1_mod_2_pol)))));
-    sp_float _t1170 = sp_cc_to_bipolar(sp_cc_or_nrpn(lv_cc_filter_1_mod_2_pol, _t1171, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_FILTER_1_MOD_2_POL)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1169, _t1170);
+    sp_int _t1139 = cst_SLOT_FILTER_1_RESONANCE;
+    sp_int _t1141 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_filter_1_resonance)))));
+    sp_float _t1140 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_filter_1_resonance, _t1141, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_FILTER_1_RESONANCE)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1139, _t1140);
 #line 541 "spms1_main.rb"
-    lv_cc_amp_1_gain = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_AMP_1_GAIN)))));
+    lv_cc_filter_1_mode = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_FILTER_1_MODE)))));
 #line 542 "spms1_main.rb"
-    sp_int _t1175 = cst_SLOT_AMP_1_GAIN;
-    sp_int _t1177 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_amp_1_gain)))));
-    sp_float _t1176 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_amp_1_gain, _t1177, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_AMP_1_GAIN)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1175, _t1176);
+    sp_int _t1145 = cst_SLOT_FILTER_1_MODE;
+    sp_int _t1147 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_filter_1_mode)))));
+    sp_float _t1146 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_filter_1_mode, _t1147, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_FILTER_1_MODE)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1145, _t1146);
 #line 543 "spms1_main.rb"
-    lv_cc_amp_1_mod_1_2_mix = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_AMP_1_MOD_1_2_MIX)))));
+    lv_cc_filter_1_pitch_amt = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_FILTER_1_PITCH_AMT)))));
 #line 544 "spms1_main.rb"
-    sp_int _t1181 = cst_SLOT_AMP_1_MOD_1_2_MIX;
-    sp_int _t1183 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_amp_1_mod_1_2_mix)))));
-    sp_float _t1182 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_amp_1_mod_1_2_mix, _t1183, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_AMP_1_MOD_1_2_MIX)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1181, _t1182);
+    sp_int _t1151 = cst_SLOT_FILTER_1_PITCH_AMT;
+    sp_int _t1153 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_filter_1_pitch_amt)))));
+    sp_float _t1152 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_filter_1_pitch_amt, _t1153, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_FILTER_1_PITCH_AMT)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1151, _t1152);
 #line 545 "spms1_main.rb"
-    lv_cc_chorus_1_mix = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_CHORUS_1_MIX)))));
+    lv_cc_filter_1_mod_1_amt = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_FILTER_1_MOD_1_AMT)))));
 #line 546 "spms1_main.rb"
-    sp_int _t1187 = cst_SLOT_CHORUS_1_MIX;
-    sp_int _t1189 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_chorus_1_mix)))));
-    sp_float _t1188 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_chorus_1_mix, _t1189, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_CHORUS_1_MIX)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1187, _t1188);
+    sp_int _t1157 = cst_SLOT_FILTER_1_MOD_1_AMT;
+    sp_int _t1159 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_filter_1_mod_1_amt)))));
+    sp_float _t1158 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_filter_1_mod_1_amt, _t1159, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_FILTER_1_MOD_1_AMT)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1157, _t1158);
 #line 547 "spms1_main.rb"
-    lv_cc_chorus_1_rate = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_CHORUS_1_RATE)))));
+    lv_cc_filter_1_mod_1_pol = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_FILTER_1_MOD_1_POL)))));
 #line 548 "spms1_main.rb"
-    sp_int _t1193 = cst_SLOT_CHORUS_1_RATE;
-    sp_int _t1195 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_chorus_1_rate)))));
-    sp_float _t1194 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_chorus_1_rate, _t1195, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_CHORUS_1_RATE)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1193, _t1194);
+    sp_int _t1163 = cst_SLOT_FILTER_1_MOD_1_POL;
+    sp_int _t1165 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_filter_1_mod_1_pol)))));
+    sp_float _t1164 = sp_cc_to_bipolar(sp_cc_or_nrpn(lv_cc_filter_1_mod_1_pol, _t1165, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_FILTER_1_MOD_1_POL)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1163, _t1164);
 #line 549 "spms1_main.rb"
-    lv_cc_chorus_1_depth = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_CHORUS_1_DEPTH)))));
+    lv_cc_filter_1_mod_2_amt = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_FILTER_1_MOD_2_AMT)))));
 #line 550 "spms1_main.rb"
-    sp_int _t1199 = cst_SLOT_CHORUS_1_DEPTH;
-    sp_int _t1201 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_chorus_1_depth)))));
-    sp_float _t1200 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_chorus_1_depth, _t1201, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_CHORUS_1_DEPTH)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1199, _t1200);
+    sp_int _t1169 = cst_SLOT_FILTER_1_MOD_2_AMT;
+    sp_int _t1171 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_filter_1_mod_2_amt)))));
+    sp_float _t1170 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_filter_1_mod_2_amt, _t1171, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_FILTER_1_MOD_2_AMT)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1169, _t1170);
 #line 551 "spms1_main.rb"
-    lv_cc_delay_1_mix = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_DELAY_1_MIX)))));
+    lv_cc_filter_1_mod_2_pol = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_FILTER_1_MOD_2_POL)))));
 #line 552 "spms1_main.rb"
-    sp_int _t1205 = cst_SLOT_DELAY_1_MIX;
-    sp_int _t1207 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_delay_1_mix)))));
-    sp_float _t1206 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_delay_1_mix, _t1207, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_DELAY_1_MIX)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1205, _t1206);
+    sp_int _t1175 = cst_SLOT_FILTER_1_MOD_2_POL;
+    sp_int _t1177 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_filter_1_mod_2_pol)))));
+    sp_float _t1176 = sp_cc_to_bipolar(sp_cc_or_nrpn(lv_cc_filter_1_mod_2_pol, _t1177, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_FILTER_1_MOD_2_POL)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1175, _t1176);
 #line 553 "spms1_main.rb"
-    lv_cc_delay_1_time = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_DELAY_1_TIME)))));
+    lv_cc_amp_1_gain = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_AMP_1_GAIN)))));
 #line 554 "spms1_main.rb"
-    sp_int _t1211 = cst_SLOT_DELAY_1_TIME;
-    sp_int _t1213 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_delay_1_time)))));
-    sp_float _t1212 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_delay_1_time, _t1213, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_DELAY_1_TIME)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1211, _t1212);
+    sp_int _t1181 = cst_SLOT_AMP_1_GAIN;
+    sp_int _t1183 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_amp_1_gain)))));
+    sp_float _t1182 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_amp_1_gain, _t1183, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_AMP_1_GAIN)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1181, _t1182);
 #line 555 "spms1_main.rb"
-    lv_cc_delay_1_feedback = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_DELAY_1_FEEDBACK)))));
+    lv_cc_amp_1_mod_1_2_mix = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_AMP_1_MOD_1_2_MIX)))));
 #line 556 "spms1_main.rb"
-    sp_int _t1217 = cst_SLOT_DELAY_1_FEEDBACK;
-    sp_int _t1219 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_delay_1_feedback)))));
-    sp_float _t1218 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_delay_1_feedback, _t1219, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_DELAY_1_FEEDBACK)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1217, _t1218);
+    sp_int _t1187 = cst_SLOT_AMP_1_MOD_1_2_MIX;
+    sp_int _t1189 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_amp_1_mod_1_2_mix)))));
+    sp_float _t1188 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_amp_1_mod_1_2_mix, _t1189, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_AMP_1_MOD_1_2_MIX)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1187, _t1188);
 #line 557 "spms1_main.rb"
-    lv_cc_amp_1_limiter_sw = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_AMP_1_LIMITER_SW)))));
+    lv_cc_chorus_1_mix = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_CHORUS_1_MIX)))));
 #line 558 "spms1_main.rb"
-    sp_int _t1223 = cst_SLOT_AMP_1_LIMITER_SW;
-    sp_int _t1225 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_amp_1_limiter_sw)))));
-    sp_float _t1224 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_amp_1_limiter_sw, _t1225, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_AMP_1_LIMITER_SW)))))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1223, _t1224);
+    sp_int _t1193 = cst_SLOT_CHORUS_1_MIX;
+    sp_int _t1195 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_chorus_1_mix)))));
+    sp_float _t1194 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_chorus_1_mix, _t1195, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_CHORUS_1_MIX)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1193, _t1194);
 #line 559 "spms1_main.rb"
-    lv_cc_mod_wheel = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MOD_WHEEL)))));
+    lv_cc_chorus_1_rate = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_CHORUS_1_RATE)))));
 #line 560 "spms1_main.rb"
-    lv_mod_wheel = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mod_wheel)))));
+    sp_int _t1199 = cst_SLOT_CHORUS_1_RATE;
+    sp_int _t1201 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_chorus_1_rate)))));
+    sp_float _t1200 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_chorus_1_rate, _t1201, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_CHORUS_1_RATE)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1199, _t1200);
 #line 561 "spms1_main.rb"
-    sp_int _t1230 = cst_SIGNAL_MOD_WHEEL;
-    sp_float _t1231 = sp_cc_or_zero(lv_cc_mod_wheel, sp_cc_to_unipolar(lv_mod_wheel));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1230, _t1231);
+    lv_cc_chorus_1_depth = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_CHORUS_1_DEPTH)))));
 #line 562 "spms1_main.rb"
-    sp_int _t1232 = cst_SIGNAL_MOD_WHEEL_REV;
-    sp_int _t1234 = cst_SIGNAL_MOD_WHEEL;
-    sp_float _t1233 = (1.0 - sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1234));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1232, _t1233);
+    sp_int _t1205 = cst_SLOT_CHORUS_1_DEPTH;
+    sp_int _t1207 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_chorus_1_depth)))));
+    sp_float _t1206 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_chorus_1_depth, _t1207, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_CHORUS_1_DEPTH)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1205, _t1206);
 #line 563 "spms1_main.rb"
-    sp_int _t1235 = cst_SIGNAL_MOD_WHEEL_INV;
-    sp_int _t1237 = cst_SIGNAL_MOD_WHEEL;
-    sp_float _t1236 = (0.0 - sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1237));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1235, _t1236);
+    lv_cc_delay_1_mix = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_DELAY_1_MIX)))));
 #line 564 "spms1_main.rb"
-    sp_int _t1238 = cst_SIGNAL_MOD_WHEEL_REV_INV;
-    sp_int _t1240 = cst_SIGNAL_MOD_WHEEL;
-    sp_float _t1239 = (sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1240) - 1.0);
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1238, _t1239);
+    sp_int _t1211 = cst_SLOT_DELAY_1_MIX;
+    sp_int _t1213 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_delay_1_mix)))));
+    sp_float _t1212 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_delay_1_mix, _t1213, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_DELAY_1_MIX)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1211, _t1212);
 #line 565 "spms1_main.rb"
-    lv_cc_general_1 = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_GENERAL_1)))));
+    lv_cc_delay_1_time = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_DELAY_1_TIME)))));
 #line 566 "spms1_main.rb"
-    lv_general_1 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_general_1)))));
+    sp_int _t1217 = cst_SLOT_DELAY_1_TIME;
+    sp_int _t1219 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_delay_1_time)))));
+    sp_float _t1218 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_delay_1_time, _t1219, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_DELAY_1_TIME)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1217, _t1218);
 #line 567 "spms1_main.rb"
-    sp_int _t1243 = cst_SIGNAL_GENERAL_1;
-    sp_float _t1244 = sp_cc_or_zero(lv_cc_general_1, sp_cc_to_unipolar(lv_general_1));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1243, _t1244);
+    lv_cc_delay_1_feedback = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_DELAY_1_FEEDBACK)))));
 #line 568 "spms1_main.rb"
-    sp_int _t1245 = cst_SIGNAL_GENERAL_1_REV;
-    sp_int _t1247 = cst_SIGNAL_GENERAL_1;
-    sp_float _t1246 = (1.0 - sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1247));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1245, _t1246);
+    sp_int _t1223 = cst_SLOT_DELAY_1_FEEDBACK;
+    sp_int _t1225 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_delay_1_feedback)))));
+    sp_float _t1224 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_delay_1_feedback, _t1225, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_DELAY_1_FEEDBACK)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1223, _t1224);
 #line 569 "spms1_main.rb"
-    sp_int _t1248 = cst_SIGNAL_GENERAL_1_INV;
-    sp_int _t1250 = cst_SIGNAL_GENERAL_1;
-    sp_float _t1249 = (0.0 - sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1250));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1248, _t1249);
+    lv_cc_amp_1_limiter_sw = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_AMP_1_LIMITER_SW)))));
 #line 570 "spms1_main.rb"
-    sp_int _t1251 = cst_SIGNAL_GENERAL_1_REV_INV;
-    sp_int _t1253 = cst_SIGNAL_GENERAL_1;
-    sp_float _t1252 = (sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1253) - 1.0);
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1251, _t1252);
+    sp_int _t1229 = cst_SLOT_AMP_1_LIMITER_SW;
+    sp_int _t1231 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_amp_1_limiter_sw)))));
+    sp_float _t1230 = sp_cc_to_unipolar(sp_cc_or_nrpn(lv_cc_amp_1_limiter_sw, _t1231, ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_VALUE_AMP_1_LIMITER_SW)))))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1229, _t1230);
 #line 571 "spms1_main.rb"
-    sp_int _t1254 = cst_SIGNAL_GENERAL_1_BIPOLAR;
-    sp_int _t1256 = cst_SIGNAL_GENERAL_1;
-    sp_float _t1255 = (sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1256) - 0.5);
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1254, _t1255);
+    lv_cc_mod_wheel = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_MOD_WHEEL)))));
 #line 572 "spms1_main.rb"
-    sp_int _t1257 = cst_SIGNAL_GENERAL_1_BIPOLAR_INV;
-    sp_int _t1259 = cst_SIGNAL_GENERAL_1;
-    sp_float _t1258 = (0.5 - sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1259));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1257, _t1258);
+    lv_mod_wheel = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_mod_wheel)))));
 #line 573 "spms1_main.rb"
-    sp_int _t1260 = cst_SIGNAL_GENERAL_1_SIN;
-    sp_float _t1261 = sp_FloatArray_get(cst_QUARTER_SINE_TABLE, sp_cc_table_index(lv_cc_general_1, lv_general_1));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1260, _t1261);
+    sp_int _t1236 = cst_SIGNAL_MOD_WHEEL;
+    sp_float _t1237 = sp_cc_or_zero(lv_cc_mod_wheel, sp_cc_to_unipolar(lv_mod_wheel));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1236, _t1237);
 #line 574 "spms1_main.rb"
-    sp_int _t1262 = cst_SIGNAL_GENERAL_1_COS;
-    sp_float _t1263 = sp_FloatArray_get(cst_QUARTER_SINE_TABLE, sp_int_sub(120LL, sp_cc_table_index(lv_cc_general_1, lv_general_1)));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1262, _t1263);
+    sp_int _t1238 = cst_SIGNAL_MOD_WHEEL_REV;
+    sp_int _t1240 = cst_SIGNAL_MOD_WHEEL;
+    sp_float _t1239 = (1.0 - sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1240));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1238, _t1239);
 #line 575 "spms1_main.rb"
-    sp_int _t1264 = cst_SIGNAL_GENERAL_1_LO;
-    sp_int _t1271 = cst_SIGNAL_GENERAL_1;
-    sp_float _t1265 = ({ sp_float _t1270 = {0}; if (((sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1271) < 0.5))) {
- _t1270 = 1.0;
-}
-else {
-    sp_int _t1266 = cst_SIGNAL_GENERAL_1;
-    sp_int _t1267 = cst_SIGNAL_GENERAL_1;
- _t1270 = ((2.0 - (({ sp_float _t1268 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1266); sp_float _t1269 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1267); (_t1268 + _t1269); }))));
-} _t1270; });
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1264, _t1265);
+    sp_int _t1241 = cst_SIGNAL_MOD_WHEEL_INV;
+    sp_int _t1243 = cst_SIGNAL_MOD_WHEEL;
+    sp_float _t1242 = (0.0 - sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1243));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1241, _t1242);
 #line 576 "spms1_main.rb"
-    sp_int _t1272 = cst_SIGNAL_GENERAL_1_HI;
-    sp_int _t1279 = cst_SIGNAL_GENERAL_1;
-    sp_float _t1273 = ({ sp_float _t1278 = {0}; if (((sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1279) > 0.5))) {
- _t1278 = 1.0;
-}
-else {
-    sp_int _t1274 = cst_SIGNAL_GENERAL_1;
-    sp_int _t1275 = cst_SIGNAL_GENERAL_1;
- _t1278 = (({ sp_float _t1276 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1274); sp_float _t1277 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1275); (_t1276 + _t1277); }));
-} _t1278; });
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1272, _t1273);
+    sp_int _t1244 = cst_SIGNAL_MOD_WHEEL_REV_INV;
+    sp_int _t1246 = cst_SIGNAL_MOD_WHEEL;
+    sp_float _t1245 = (sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1246) - 1.0);
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1244, _t1245);
 #line 577 "spms1_main.rb"
-    sp_int _t1280 = cst_SIGNAL_GENERAL_1_NEG;
-    sp_int _t1287 = cst_SIGNAL_GENERAL_1;
-    sp_float _t1281 = ({ sp_float _t1286 = {0}; if (((sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1287) > 0.5))) {
- _t1286 = 0.0;
-}
-else {
-    sp_int _t1282 = cst_SIGNAL_GENERAL_1;
-    sp_int _t1283 = cst_SIGNAL_GENERAL_1;
- _t1286 = ((1.0 - (({ sp_float _t1284 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1282); sp_float _t1285 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1283); (_t1284 + _t1285); }))));
-} _t1286; });
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1280, _t1281);
+    lv_cc_general_1 = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_GENERAL_1)))));
 #line 578 "spms1_main.rb"
-    sp_int _t1288 = cst_SIGNAL_GENERAL_1_MID;
-    sp_int _t1299 = cst_SIGNAL_GENERAL_1;
-    sp_float _t1289 = ({ sp_float _t1298 = {0}; if (((sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1299) < 0.5))) {
-    sp_int _t1290 = cst_SIGNAL_GENERAL_1;
-    sp_int _t1291 = cst_SIGNAL_GENERAL_1;
- _t1298 = (({ sp_float _t1292 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1290); sp_float _t1293 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1291); (_t1292 + _t1293); }));
-}
-else {
-    sp_int _t1294 = cst_SIGNAL_GENERAL_1;
-    sp_int _t1295 = cst_SIGNAL_GENERAL_1;
- _t1298 = ((2.0 - (({ sp_float _t1296 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1294); sp_float _t1297 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1295); (_t1296 + _t1297); }))));
-} _t1298; });
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1288, _t1289);
+    lv_general_1 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_general_1)))));
 #line 579 "spms1_main.rb"
-    sp_int _t1300 = cst_SIGNAL_GENERAL_1_POS;
-    sp_int _t1307 = cst_SIGNAL_GENERAL_1;
-    sp_float _t1301 = ({ sp_float _t1306 = {0}; if (((sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1307) < 0.5))) {
- _t1306 = 0.0;
-}
-else {
-    sp_int _t1302 = cst_SIGNAL_GENERAL_1;
-    sp_int _t1303 = cst_SIGNAL_GENERAL_1;
- _t1306 = ((({ sp_float _t1304 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1302); sp_float _t1305 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1303); (_t1304 + _t1305); }) - 1.0));
-} _t1306; });
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1300, _t1301);
+    sp_int _t1249 = cst_SIGNAL_GENERAL_1;
+    sp_float _t1250 = sp_cc_or_zero(lv_cc_general_1, sp_cc_to_unipolar(lv_general_1));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1249, _t1250);
 #line 580 "spms1_main.rb"
-    lv_cc_general_2 = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_GENERAL_2)))));
+    sp_int _t1251 = cst_SIGNAL_GENERAL_1_REV;
+    sp_int _t1253 = cst_SIGNAL_GENERAL_1;
+    sp_float _t1252 = (1.0 - sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1253));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1251, _t1252);
 #line 581 "spms1_main.rb"
-    lv_general_2 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_general_2)))));
+    sp_int _t1254 = cst_SIGNAL_GENERAL_1_INV;
+    sp_int _t1256 = cst_SIGNAL_GENERAL_1;
+    sp_float _t1255 = (0.0 - sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1256));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1254, _t1255);
 #line 582 "spms1_main.rb"
-    sp_int _t1310 = cst_SIGNAL_GENERAL_2;
-    sp_float _t1311 = sp_cc_or_zero(lv_cc_general_2, sp_cc_to_unipolar(lv_general_2));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1310, _t1311);
+    sp_int _t1257 = cst_SIGNAL_GENERAL_1_REV_INV;
+    sp_int _t1259 = cst_SIGNAL_GENERAL_1;
+    sp_float _t1258 = (sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1259) - 1.0);
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1257, _t1258);
 #line 583 "spms1_main.rb"
-    sp_int _t1312 = cst_SIGNAL_GENERAL_2_REV;
-    sp_int _t1314 = cst_SIGNAL_GENERAL_2;
-    sp_float _t1313 = (1.0 - sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1314));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1312, _t1313);
+    sp_int _t1260 = cst_SIGNAL_GENERAL_1_BIPOLAR;
+    sp_int _t1262 = cst_SIGNAL_GENERAL_1;
+    sp_float _t1261 = (sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1262) - 0.5);
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1260, _t1261);
 #line 584 "spms1_main.rb"
-    sp_int _t1315 = cst_SIGNAL_GENERAL_2_INV;
-    sp_int _t1317 = cst_SIGNAL_GENERAL_2;
-    sp_float _t1316 = (0.0 - sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1317));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1315, _t1316);
+    sp_int _t1263 = cst_SIGNAL_GENERAL_1_BIPOLAR_INV;
+    sp_int _t1265 = cst_SIGNAL_GENERAL_1;
+    sp_float _t1264 = (0.5 - sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1265));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1263, _t1264);
 #line 585 "spms1_main.rb"
-    sp_int _t1318 = cst_SIGNAL_GENERAL_2_REV_INV;
-    sp_int _t1320 = cst_SIGNAL_GENERAL_2;
-    sp_float _t1319 = (sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1320) - 1.0);
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1318, _t1319);
+    sp_int _t1266 = cst_SIGNAL_GENERAL_1_SIN;
+    sp_float _t1267 = sp_FloatArray_get(cst_QUARTER_SINE_TABLE, sp_cc_table_index(lv_cc_general_1, lv_general_1));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1266, _t1267);
 #line 586 "spms1_main.rb"
-    sp_int _t1321 = cst_SIGNAL_GENERAL_2_BIPOLAR;
-    sp_int _t1323 = cst_SIGNAL_GENERAL_2;
-    sp_float _t1322 = (sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1323) - 0.5);
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1321, _t1322);
+    sp_int _t1268 = cst_SIGNAL_GENERAL_1_COS;
+    sp_float _t1269 = sp_FloatArray_get(cst_QUARTER_SINE_TABLE, sp_int_sub(120LL, sp_cc_table_index(lv_cc_general_1, lv_general_1)));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1268, _t1269);
 #line 587 "spms1_main.rb"
-    sp_int _t1324 = cst_SIGNAL_GENERAL_2_BIPOLAR_INV;
-    sp_int _t1326 = cst_SIGNAL_GENERAL_2;
-    sp_float _t1325 = (0.5 - sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1326));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1324, _t1325);
+    sp_int _t1270 = cst_SIGNAL_GENERAL_1_LO;
+    sp_int _t1277 = cst_SIGNAL_GENERAL_1;
+    sp_float _t1271 = ({ sp_float _t1276 = {0}; if (((sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1277) < 0.5))) {
+ _t1276 = 1.0;
+}
+else {
+    sp_int _t1272 = cst_SIGNAL_GENERAL_1;
+    sp_int _t1273 = cst_SIGNAL_GENERAL_1;
+ _t1276 = ((2.0 - (({ sp_float _t1274 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1272); sp_float _t1275 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1273); (_t1274 + _t1275); }))));
+} _t1276; });
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1270, _t1271);
 #line 588 "spms1_main.rb"
-    sp_int _t1327 = cst_SIGNAL_GENERAL_2_SIN;
-    sp_float _t1328 = sp_FloatArray_get(cst_QUARTER_SINE_TABLE, sp_cc_table_index(lv_cc_general_2, lv_general_2));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1327, _t1328);
+    sp_int _t1278 = cst_SIGNAL_GENERAL_1_HI;
+    sp_int _t1285 = cst_SIGNAL_GENERAL_1;
+    sp_float _t1279 = ({ sp_float _t1284 = {0}; if (((sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1285) > 0.5))) {
+ _t1284 = 1.0;
+}
+else {
+    sp_int _t1280 = cst_SIGNAL_GENERAL_1;
+    sp_int _t1281 = cst_SIGNAL_GENERAL_1;
+ _t1284 = (({ sp_float _t1282 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1280); sp_float _t1283 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1281); (_t1282 + _t1283); }));
+} _t1284; });
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1278, _t1279);
 #line 589 "spms1_main.rb"
-    sp_int _t1329 = cst_SIGNAL_GENERAL_2_COS;
-    sp_float _t1330 = sp_FloatArray_get(cst_QUARTER_SINE_TABLE, sp_int_sub(120LL, sp_cc_table_index(lv_cc_general_2, lv_general_2)));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1329, _t1330);
+    sp_int _t1286 = cst_SIGNAL_GENERAL_1_NEG;
+    sp_int _t1293 = cst_SIGNAL_GENERAL_1;
+    sp_float _t1287 = ({ sp_float _t1292 = {0}; if (((sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1293) > 0.5))) {
+ _t1292 = 0.0;
+}
+else {
+    sp_int _t1288 = cst_SIGNAL_GENERAL_1;
+    sp_int _t1289 = cst_SIGNAL_GENERAL_1;
+ _t1292 = ((1.0 - (({ sp_float _t1290 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1288); sp_float _t1291 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1289); (_t1290 + _t1291); }))));
+} _t1292; });
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1286, _t1287);
 #line 590 "spms1_main.rb"
-    sp_int _t1331 = cst_SIGNAL_GENERAL_2_LO;
-    sp_int _t1338 = cst_SIGNAL_GENERAL_2;
-    sp_float _t1332 = ({ sp_float _t1337 = {0}; if (((sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1338) < 0.5))) {
- _t1337 = 1.0;
+    sp_int _t1294 = cst_SIGNAL_GENERAL_1_MID;
+    sp_int _t1305 = cst_SIGNAL_GENERAL_1;
+    sp_float _t1295 = ({ sp_float _t1304 = {0}; if (((sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1305) < 0.5))) {
+    sp_int _t1296 = cst_SIGNAL_GENERAL_1;
+    sp_int _t1297 = cst_SIGNAL_GENERAL_1;
+ _t1304 = (({ sp_float _t1298 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1296); sp_float _t1299 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1297); (_t1298 + _t1299); }));
 }
 else {
-    sp_int _t1333 = cst_SIGNAL_GENERAL_2;
-    sp_int _t1334 = cst_SIGNAL_GENERAL_2;
- _t1337 = ((2.0 - (({ sp_float _t1335 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1333); sp_float _t1336 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1334); (_t1335 + _t1336); }))));
-} _t1337; });
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1331, _t1332);
+    sp_int _t1300 = cst_SIGNAL_GENERAL_1;
+    sp_int _t1301 = cst_SIGNAL_GENERAL_1;
+ _t1304 = ((2.0 - (({ sp_float _t1302 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1300); sp_float _t1303 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1301); (_t1302 + _t1303); }))));
+} _t1304; });
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1294, _t1295);
 #line 591 "spms1_main.rb"
-    sp_int _t1339 = cst_SIGNAL_GENERAL_2_HI;
-    sp_int _t1346 = cst_SIGNAL_GENERAL_2;
-    sp_float _t1340 = ({ sp_float _t1345 = {0}; if (((sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1346) > 0.5))) {
- _t1345 = 1.0;
+    sp_int _t1306 = cst_SIGNAL_GENERAL_1_POS;
+    sp_int _t1313 = cst_SIGNAL_GENERAL_1;
+    sp_float _t1307 = ({ sp_float _t1312 = {0}; if (((sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1313) < 0.5))) {
+ _t1312 = 0.0;
 }
 else {
-    sp_int _t1341 = cst_SIGNAL_GENERAL_2;
-    sp_int _t1342 = cst_SIGNAL_GENERAL_2;
- _t1345 = (({ sp_float _t1343 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1341); sp_float _t1344 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1342); (_t1343 + _t1344); }));
-} _t1345; });
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1339, _t1340);
+    sp_int _t1308 = cst_SIGNAL_GENERAL_1;
+    sp_int _t1309 = cst_SIGNAL_GENERAL_1;
+ _t1312 = ((({ sp_float _t1310 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1308); sp_float _t1311 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1309); (_t1310 + _t1311); }) - 1.0));
+} _t1312; });
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1306, _t1307);
 #line 592 "spms1_main.rb"
-    sp_int _t1347 = cst_SIGNAL_GENERAL_2_NEG;
-    sp_int _t1354 = cst_SIGNAL_GENERAL_2;
-    sp_float _t1348 = ({ sp_float _t1353 = {0}; if (((sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1354) > 0.5))) {
- _t1353 = 0.0;
-}
-else {
-    sp_int _t1349 = cst_SIGNAL_GENERAL_2;
-    sp_int _t1350 = cst_SIGNAL_GENERAL_2;
- _t1353 = ((1.0 - (({ sp_float _t1351 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1349); sp_float _t1352 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1350); (_t1351 + _t1352); }))));
-} _t1353; });
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1347, _t1348);
+    lv_cc_general_2 = ((sp_int)(get_midi_nrpn_value(((uint8_t)(cst_MIDI_CH)), ((int32_t)(cst_NRPN_CC_GENERAL_2)))));
 #line 593 "spms1_main.rb"
-    sp_int _t1355 = cst_SIGNAL_GENERAL_2_MID;
-    sp_int _t1366 = cst_SIGNAL_GENERAL_2;
-    sp_float _t1356 = ({ sp_float _t1365 = {0}; if (((sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1366) < 0.5))) {
-    sp_int _t1357 = cst_SIGNAL_GENERAL_2;
-    sp_int _t1358 = cst_SIGNAL_GENERAL_2;
- _t1365 = (({ sp_float _t1359 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1357); sp_float _t1360 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1358); (_t1359 + _t1360); }));
-}
-else {
-    sp_int _t1361 = cst_SIGNAL_GENERAL_2;
-    sp_int _t1362 = cst_SIGNAL_GENERAL_2;
- _t1365 = ((2.0 - (({ sp_float _t1363 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1361); sp_float _t1364 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1362); (_t1363 + _t1364); }))));
-} _t1365; });
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1355, _t1356);
+    lv_general_2 = ((sp_int)(get_midi_cc_value(((uint8_t)(cst_MIDI_CH)), ((uint8_t)(lv_cc_general_2)))));
 #line 594 "spms1_main.rb"
-    sp_int _t1367 = cst_SIGNAL_GENERAL_2_POS;
-    sp_int _t1374 = cst_SIGNAL_GENERAL_2;
-    sp_float _t1368 = ({ sp_float _t1373 = {0}; if (((sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1374) < 0.5))) {
- _t1373 = 0.0;
+    sp_int _t1316 = cst_SIGNAL_GENERAL_2;
+    sp_float _t1317 = sp_cc_or_zero(lv_cc_general_2, sp_cc_to_unipolar(lv_general_2));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1316, _t1317);
+#line 595 "spms1_main.rb"
+    sp_int _t1318 = cst_SIGNAL_GENERAL_2_REV;
+    sp_int _t1320 = cst_SIGNAL_GENERAL_2;
+    sp_float _t1319 = (1.0 - sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1320));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1318, _t1319);
+#line 596 "spms1_main.rb"
+    sp_int _t1321 = cst_SIGNAL_GENERAL_2_INV;
+    sp_int _t1323 = cst_SIGNAL_GENERAL_2;
+    sp_float _t1322 = (0.0 - sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1323));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1321, _t1322);
+#line 597 "spms1_main.rb"
+    sp_int _t1324 = cst_SIGNAL_GENERAL_2_REV_INV;
+    sp_int _t1326 = cst_SIGNAL_GENERAL_2;
+    sp_float _t1325 = (sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1326) - 1.0);
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1324, _t1325);
+#line 598 "spms1_main.rb"
+    sp_int _t1327 = cst_SIGNAL_GENERAL_2_BIPOLAR;
+    sp_int _t1329 = cst_SIGNAL_GENERAL_2;
+    sp_float _t1328 = (sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1329) - 0.5);
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1327, _t1328);
+#line 599 "spms1_main.rb"
+    sp_int _t1330 = cst_SIGNAL_GENERAL_2_BIPOLAR_INV;
+    sp_int _t1332 = cst_SIGNAL_GENERAL_2;
+    sp_float _t1331 = (0.5 - sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1332));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1330, _t1331);
+#line 600 "spms1_main.rb"
+    sp_int _t1333 = cst_SIGNAL_GENERAL_2_SIN;
+    sp_float _t1334 = sp_FloatArray_get(cst_QUARTER_SINE_TABLE, sp_cc_table_index(lv_cc_general_2, lv_general_2));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1333, _t1334);
+#line 601 "spms1_main.rb"
+    sp_int _t1335 = cst_SIGNAL_GENERAL_2_COS;
+    sp_float _t1336 = sp_FloatArray_get(cst_QUARTER_SINE_TABLE, sp_int_sub(120LL, sp_cc_table_index(lv_cc_general_2, lv_general_2)));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1335, _t1336);
+#line 602 "spms1_main.rb"
+    sp_int _t1337 = cst_SIGNAL_GENERAL_2_LO;
+    sp_int _t1344 = cst_SIGNAL_GENERAL_2;
+    sp_float _t1338 = ({ sp_float _t1343 = {0}; if (((sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1344) < 0.5))) {
+ _t1343 = 1.0;
 }
 else {
-    sp_int _t1369 = cst_SIGNAL_GENERAL_2;
-    sp_int _t1370 = cst_SIGNAL_GENERAL_2;
- _t1373 = ((({ sp_float _t1371 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1369); sp_float _t1372 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1370); (_t1371 + _t1372); }) - 1.0));
-} _t1373; });
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1367, _t1368);
-#line 595 "spms1_main.rb"
-    sp_int _t1375 = cst_SMOOTHED_STAGE_1_MOD_WHEEL;
-    sp_int _t1379 = cst_SIGNAL_MOD_WHEEL;
-    sp_float _t1378 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1379);
-    sp_int _t1380 = cst_SMOOTHED_STAGE_1_MOD_WHEEL;
-    sp_float _t1376 = sp_Dsp_s_smooth(_t1378, sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1380), cst_CONTROLLER_SMOOTHING_BLEND);
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1375, _t1376);
-#line 596 "spms1_main.rb"
-    sp_int _t1383 = cst_SMOOTHED_STAGE_1_MOD_WHEEL;
-    sp_float _t1382 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1383);
-    sp_int _t1384 = sp_int_add(cst_SIGNAL_MOD_WHEEL, cst_SMOOTHED_SLOT_OFFSET);
-    lv_smoothed_mod_wheel = sp_Dsp_s_smooth(_t1382, sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1384), cst_CONTROLLER_SMOOTHING_BLEND);
-#line 597 "spms1_main.rb"
-    sp_int _t1385 = sp_int_add(cst_SIGNAL_MOD_WHEEL, cst_SMOOTHED_SLOT_OFFSET);
-    sp_float _t1386 = lv_smoothed_mod_wheel;
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1385, _t1386);
-#line 598 "spms1_main.rb"
-    sp_int _t1387 = sp_int_add(cst_SIGNAL_MOD_WHEEL_REV, cst_SMOOTHED_SLOT_OFFSET);
-    sp_float _t1388 = (1.0 - lv_smoothed_mod_wheel);
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1387, _t1388);
-#line 599 "spms1_main.rb"
-    sp_int _t1389 = sp_int_add(cst_SIGNAL_MOD_WHEEL_INV, cst_SMOOTHED_SLOT_OFFSET);
-    sp_float _t1390 = (0.0 - lv_smoothed_mod_wheel);
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1389, _t1390);
-#line 600 "spms1_main.rb"
-    sp_int _t1391 = sp_int_add(cst_SIGNAL_MOD_WHEEL_REV_INV, cst_SMOOTHED_SLOT_OFFSET);
-    sp_float _t1392 = (lv_smoothed_mod_wheel - 1.0);
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1391, _t1392);
-#line 601 "spms1_main.rb"
-    sp_int _t1393 = cst_SMOOTHED_STAGE_1_GENERAL_1;
-    sp_int _t1397 = cst_SIGNAL_GENERAL_1;
-    sp_float _t1396 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1397);
-    sp_int _t1398 = cst_SMOOTHED_STAGE_1_GENERAL_1;
-    sp_float _t1394 = sp_Dsp_s_smooth(_t1396, sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1398), cst_CONTROLLER_SMOOTHING_BLEND);
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1393, _t1394);
-#line 602 "spms1_main.rb"
-    sp_int _t1401 = cst_SMOOTHED_STAGE_1_GENERAL_1;
-    sp_float _t1400 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1401);
-    sp_int _t1402 = sp_int_add(cst_SIGNAL_GENERAL_1, cst_SMOOTHED_SLOT_OFFSET);
-    lv_smoothed_general_1 = sp_Dsp_s_smooth(_t1400, sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1402), cst_CONTROLLER_SMOOTHING_BLEND);
+    sp_int _t1339 = cst_SIGNAL_GENERAL_2;
+    sp_int _t1340 = cst_SIGNAL_GENERAL_2;
+ _t1343 = ((2.0 - (({ sp_float _t1341 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1339); sp_float _t1342 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1340); (_t1341 + _t1342); }))));
+} _t1343; });
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1337, _t1338);
 #line 603 "spms1_main.rb"
-    sp_int _t1403 = sp_int_add(cst_SIGNAL_GENERAL_1, cst_SMOOTHED_SLOT_OFFSET);
-    sp_float _t1404 = lv_smoothed_general_1;
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1403, _t1404);
+    sp_int _t1345 = cst_SIGNAL_GENERAL_2_HI;
+    sp_int _t1352 = cst_SIGNAL_GENERAL_2;
+    sp_float _t1346 = ({ sp_float _t1351 = {0}; if (((sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1352) > 0.5))) {
+ _t1351 = 1.0;
+}
+else {
+    sp_int _t1347 = cst_SIGNAL_GENERAL_2;
+    sp_int _t1348 = cst_SIGNAL_GENERAL_2;
+ _t1351 = (({ sp_float _t1349 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1347); sp_float _t1350 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1348); (_t1349 + _t1350); }));
+} _t1351; });
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1345, _t1346);
 #line 604 "spms1_main.rb"
-    sp_int _t1405 = sp_int_add(cst_SIGNAL_GENERAL_1_REV, cst_SMOOTHED_SLOT_OFFSET);
-    sp_float _t1406 = (1.0 - lv_smoothed_general_1);
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1405, _t1406);
+    sp_int _t1353 = cst_SIGNAL_GENERAL_2_NEG;
+    sp_int _t1360 = cst_SIGNAL_GENERAL_2;
+    sp_float _t1354 = ({ sp_float _t1359 = {0}; if (((sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1360) > 0.5))) {
+ _t1359 = 0.0;
+}
+else {
+    sp_int _t1355 = cst_SIGNAL_GENERAL_2;
+    sp_int _t1356 = cst_SIGNAL_GENERAL_2;
+ _t1359 = ((1.0 - (({ sp_float _t1357 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1355); sp_float _t1358 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1356); (_t1357 + _t1358); }))));
+} _t1359; });
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1353, _t1354);
 #line 605 "spms1_main.rb"
-    sp_int _t1407 = sp_int_add(cst_SIGNAL_GENERAL_1_INV, cst_SMOOTHED_SLOT_OFFSET);
-    sp_float _t1408 = (0.0 - lv_smoothed_general_1);
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1407, _t1408);
+    sp_int _t1361 = cst_SIGNAL_GENERAL_2_MID;
+    sp_int _t1372 = cst_SIGNAL_GENERAL_2;
+    sp_float _t1362 = ({ sp_float _t1371 = {0}; if (((sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1372) < 0.5))) {
+    sp_int _t1363 = cst_SIGNAL_GENERAL_2;
+    sp_int _t1364 = cst_SIGNAL_GENERAL_2;
+ _t1371 = (({ sp_float _t1365 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1363); sp_float _t1366 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1364); (_t1365 + _t1366); }));
+}
+else {
+    sp_int _t1367 = cst_SIGNAL_GENERAL_2;
+    sp_int _t1368 = cst_SIGNAL_GENERAL_2;
+ _t1371 = ((2.0 - (({ sp_float _t1369 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1367); sp_float _t1370 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1368); (_t1369 + _t1370); }))));
+} _t1371; });
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1361, _t1362);
 #line 606 "spms1_main.rb"
-    sp_int _t1409 = sp_int_add(cst_SIGNAL_GENERAL_1_REV_INV, cst_SMOOTHED_SLOT_OFFSET);
-    sp_float _t1410 = (lv_smoothed_general_1 - 1.0);
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1409, _t1410);
+    sp_int _t1373 = cst_SIGNAL_GENERAL_2_POS;
+    sp_int _t1380 = cst_SIGNAL_GENERAL_2;
+    sp_float _t1374 = ({ sp_float _t1379 = {0}; if (((sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1380) < 0.5))) {
+ _t1379 = 0.0;
+}
+else {
+    sp_int _t1375 = cst_SIGNAL_GENERAL_2;
+    sp_int _t1376 = cst_SIGNAL_GENERAL_2;
+ _t1379 = ((({ sp_float _t1377 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1375); sp_float _t1378 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1376); (_t1377 + _t1378); }) - 1.0));
+} _t1379; });
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1373, _t1374);
 #line 607 "spms1_main.rb"
-    sp_int _t1411 = sp_int_add(cst_SIGNAL_GENERAL_1_BIPOLAR, cst_SMOOTHED_SLOT_OFFSET);
-    sp_float _t1412 = (lv_smoothed_general_1 - 0.5);
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1411, _t1412);
+    sp_int _t1381 = cst_SMOOTHED_STAGE_1_MOD_WHEEL;
+    sp_int _t1385 = cst_SIGNAL_MOD_WHEEL;
+    sp_float _t1384 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1385);
+    sp_int _t1386 = cst_SMOOTHED_STAGE_1_MOD_WHEEL;
+    sp_float _t1382 = sp_Dsp_s_smooth(_t1384, sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1386), cst_CONTROLLER_SMOOTHING_BLEND);
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1381, _t1382);
 #line 608 "spms1_main.rb"
-    sp_int _t1413 = sp_int_add(cst_SIGNAL_GENERAL_1_BIPOLAR_INV, cst_SMOOTHED_SLOT_OFFSET);
-    sp_float _t1414 = (0.5 - lv_smoothed_general_1);
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1413, _t1414);
+    sp_int _t1389 = cst_SMOOTHED_STAGE_1_MOD_WHEEL;
+    sp_float _t1388 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1389);
+    sp_int _t1390 = sp_int_add(cst_SIGNAL_MOD_WHEEL, cst_SMOOTHED_SLOT_OFFSET);
+    lv_smoothed_mod_wheel = sp_Dsp_s_smooth(_t1388, sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1390), cst_CONTROLLER_SMOOTHING_BLEND);
 #line 609 "spms1_main.rb"
-    sp_int _t1415 = sp_int_add(cst_SIGNAL_GENERAL_1_SIN, cst_SMOOTHED_SLOT_OFFSET);
-    sp_float _t1416 = sp_quarter_sine(lv_smoothed_general_1);
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1415, _t1416);
+    sp_int _t1391 = sp_int_add(cst_SIGNAL_MOD_WHEEL, cst_SMOOTHED_SLOT_OFFSET);
+    sp_float _t1392 = lv_smoothed_mod_wheel;
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1391, _t1392);
 #line 610 "spms1_main.rb"
-    sp_int _t1417 = sp_int_add(cst_SIGNAL_GENERAL_1_COS, cst_SMOOTHED_SLOT_OFFSET);
-    sp_float _t1418 = sp_quarter_sine((1.0 - lv_smoothed_general_1));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1417, _t1418);
+    sp_int _t1393 = sp_int_add(cst_SIGNAL_MOD_WHEEL_REV, cst_SMOOTHED_SLOT_OFFSET);
+    sp_float _t1394 = (1.0 - lv_smoothed_mod_wheel);
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1393, _t1394);
 #line 611 "spms1_main.rb"
-    sp_int _t1419 = sp_int_add(cst_SIGNAL_GENERAL_1_LO, cst_SMOOTHED_SLOT_OFFSET);
-    sp_float _t1420 = (((lv_smoothed_general_1 < 0.5)) ? 1.0 : ((2.0 - ((lv_smoothed_general_1 + lv_smoothed_general_1)))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1419, _t1420);
+    sp_int _t1395 = sp_int_add(cst_SIGNAL_MOD_WHEEL_INV, cst_SMOOTHED_SLOT_OFFSET);
+    sp_float _t1396 = (0.0 - lv_smoothed_mod_wheel);
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1395, _t1396);
 #line 612 "spms1_main.rb"
-    sp_int _t1421 = sp_int_add(cst_SIGNAL_GENERAL_1_HI, cst_SMOOTHED_SLOT_OFFSET);
-    sp_float _t1422 = (((lv_smoothed_general_1 > 0.5)) ? 1.0 : ((lv_smoothed_general_1 + lv_smoothed_general_1)));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1421, _t1422);
+    sp_int _t1397 = sp_int_add(cst_SIGNAL_MOD_WHEEL_REV_INV, cst_SMOOTHED_SLOT_OFFSET);
+    sp_float _t1398 = (lv_smoothed_mod_wheel - 1.0);
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1397, _t1398);
 #line 613 "spms1_main.rb"
-    sp_int _t1423 = sp_int_add(cst_SIGNAL_GENERAL_1_NEG, cst_SMOOTHED_SLOT_OFFSET);
-    sp_float _t1424 = (((lv_smoothed_general_1 > 0.5)) ? 0.0 : ((1.0 - ((lv_smoothed_general_1 + lv_smoothed_general_1)))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1423, _t1424);
+    sp_int _t1399 = cst_SMOOTHED_STAGE_1_GENERAL_1;
+    sp_int _t1403 = cst_SIGNAL_GENERAL_1;
+    sp_float _t1402 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1403);
+    sp_int _t1404 = cst_SMOOTHED_STAGE_1_GENERAL_1;
+    sp_float _t1400 = sp_Dsp_s_smooth(_t1402, sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1404), cst_CONTROLLER_SMOOTHING_BLEND);
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1399, _t1400);
 #line 614 "spms1_main.rb"
-    sp_int _t1425 = sp_int_add(cst_SIGNAL_GENERAL_1_MID, cst_SMOOTHED_SLOT_OFFSET);
-    sp_float _t1426 = (((lv_smoothed_general_1 < 0.5)) ? ((lv_smoothed_general_1 + lv_smoothed_general_1)) : ((2.0 - ((lv_smoothed_general_1 + lv_smoothed_general_1)))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1425, _t1426);
+    sp_int _t1407 = cst_SMOOTHED_STAGE_1_GENERAL_1;
+    sp_float _t1406 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1407);
+    sp_int _t1408 = sp_int_add(cst_SIGNAL_GENERAL_1, cst_SMOOTHED_SLOT_OFFSET);
+    lv_smoothed_general_1 = sp_Dsp_s_smooth(_t1406, sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1408), cst_CONTROLLER_SMOOTHING_BLEND);
 #line 615 "spms1_main.rb"
-    sp_int _t1427 = sp_int_add(cst_SIGNAL_GENERAL_1_POS, cst_SMOOTHED_SLOT_OFFSET);
-    sp_float _t1428 = (((lv_smoothed_general_1 < 0.5)) ? 0.0 : (((lv_smoothed_general_1 + lv_smoothed_general_1) - 1.0)));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1427, _t1428);
+    sp_int _t1409 = sp_int_add(cst_SIGNAL_GENERAL_1, cst_SMOOTHED_SLOT_OFFSET);
+    sp_float _t1410 = lv_smoothed_general_1;
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1409, _t1410);
 #line 616 "spms1_main.rb"
-    sp_int _t1429 = cst_SMOOTHED_STAGE_1_GENERAL_2;
-    sp_int _t1433 = cst_SIGNAL_GENERAL_2;
-    sp_float _t1432 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1433);
-    sp_int _t1434 = cst_SMOOTHED_STAGE_1_GENERAL_2;
-    sp_float _t1430 = sp_Dsp_s_smooth(_t1432, sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1434), cst_CONTROLLER_SMOOTHING_BLEND);
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1429, _t1430);
+    sp_int _t1411 = sp_int_add(cst_SIGNAL_GENERAL_1_REV, cst_SMOOTHED_SLOT_OFFSET);
+    sp_float _t1412 = (1.0 - lv_smoothed_general_1);
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1411, _t1412);
 #line 617 "spms1_main.rb"
-    sp_int _t1437 = cst_SMOOTHED_STAGE_1_GENERAL_2;
-    sp_float _t1436 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1437);
-    sp_int _t1438 = sp_int_add(cst_SIGNAL_GENERAL_2, cst_SMOOTHED_SLOT_OFFSET);
-    lv_smoothed_general_2 = sp_Dsp_s_smooth(_t1436, sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1438), cst_CONTROLLER_SMOOTHING_BLEND);
+    sp_int _t1413 = sp_int_add(cst_SIGNAL_GENERAL_1_INV, cst_SMOOTHED_SLOT_OFFSET);
+    sp_float _t1414 = (0.0 - lv_smoothed_general_1);
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1413, _t1414);
 #line 618 "spms1_main.rb"
-    sp_int _t1439 = sp_int_add(cst_SIGNAL_GENERAL_2, cst_SMOOTHED_SLOT_OFFSET);
-    sp_float _t1440 = lv_smoothed_general_2;
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1439, _t1440);
+    sp_int _t1415 = sp_int_add(cst_SIGNAL_GENERAL_1_REV_INV, cst_SMOOTHED_SLOT_OFFSET);
+    sp_float _t1416 = (lv_smoothed_general_1 - 1.0);
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1415, _t1416);
 #line 619 "spms1_main.rb"
-    sp_int _t1441 = sp_int_add(cst_SIGNAL_GENERAL_2_REV, cst_SMOOTHED_SLOT_OFFSET);
-    sp_float _t1442 = (1.0 - lv_smoothed_general_2);
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1441, _t1442);
+    sp_int _t1417 = sp_int_add(cst_SIGNAL_GENERAL_1_BIPOLAR, cst_SMOOTHED_SLOT_OFFSET);
+    sp_float _t1418 = (lv_smoothed_general_1 - 0.5);
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1417, _t1418);
 #line 620 "spms1_main.rb"
-    sp_int _t1443 = sp_int_add(cst_SIGNAL_GENERAL_2_INV, cst_SMOOTHED_SLOT_OFFSET);
-    sp_float _t1444 = (0.0 - lv_smoothed_general_2);
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1443, _t1444);
+    sp_int _t1419 = sp_int_add(cst_SIGNAL_GENERAL_1_BIPOLAR_INV, cst_SMOOTHED_SLOT_OFFSET);
+    sp_float _t1420 = (0.5 - lv_smoothed_general_1);
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1419, _t1420);
 #line 621 "spms1_main.rb"
-    sp_int _t1445 = sp_int_add(cst_SIGNAL_GENERAL_2_REV_INV, cst_SMOOTHED_SLOT_OFFSET);
-    sp_float _t1446 = (lv_smoothed_general_2 - 1.0);
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1445, _t1446);
+    sp_int _t1421 = sp_int_add(cst_SIGNAL_GENERAL_1_SIN, cst_SMOOTHED_SLOT_OFFSET);
+    sp_float _t1422 = sp_quarter_sine(lv_smoothed_general_1);
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1421, _t1422);
 #line 622 "spms1_main.rb"
-    sp_int _t1447 = sp_int_add(cst_SIGNAL_GENERAL_2_BIPOLAR, cst_SMOOTHED_SLOT_OFFSET);
-    sp_float _t1448 = (lv_smoothed_general_2 - 0.5);
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1447, _t1448);
+    sp_int _t1423 = sp_int_add(cst_SIGNAL_GENERAL_1_COS, cst_SMOOTHED_SLOT_OFFSET);
+    sp_float _t1424 = sp_quarter_sine((1.0 - lv_smoothed_general_1));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1423, _t1424);
 #line 623 "spms1_main.rb"
-    sp_int _t1449 = sp_int_add(cst_SIGNAL_GENERAL_2_BIPOLAR_INV, cst_SMOOTHED_SLOT_OFFSET);
-    sp_float _t1450 = (0.5 - lv_smoothed_general_2);
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1449, _t1450);
+    sp_int _t1425 = sp_int_add(cst_SIGNAL_GENERAL_1_LO, cst_SMOOTHED_SLOT_OFFSET);
+    sp_float _t1426 = (((lv_smoothed_general_1 < 0.5)) ? 1.0 : ((2.0 - ((lv_smoothed_general_1 + lv_smoothed_general_1)))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1425, _t1426);
 #line 624 "spms1_main.rb"
-    sp_int _t1451 = sp_int_add(cst_SIGNAL_GENERAL_2_SIN, cst_SMOOTHED_SLOT_OFFSET);
-    sp_float _t1452 = sp_quarter_sine(lv_smoothed_general_2);
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1451, _t1452);
+    sp_int _t1427 = sp_int_add(cst_SIGNAL_GENERAL_1_HI, cst_SMOOTHED_SLOT_OFFSET);
+    sp_float _t1428 = (((lv_smoothed_general_1 > 0.5)) ? 1.0 : ((lv_smoothed_general_1 + lv_smoothed_general_1)));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1427, _t1428);
 #line 625 "spms1_main.rb"
-    sp_int _t1453 = sp_int_add(cst_SIGNAL_GENERAL_2_COS, cst_SMOOTHED_SLOT_OFFSET);
-    sp_float _t1454 = sp_quarter_sine((1.0 - lv_smoothed_general_2));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1453, _t1454);
+    sp_int _t1429 = sp_int_add(cst_SIGNAL_GENERAL_1_NEG, cst_SMOOTHED_SLOT_OFFSET);
+    sp_float _t1430 = (((lv_smoothed_general_1 > 0.5)) ? 0.0 : ((1.0 - ((lv_smoothed_general_1 + lv_smoothed_general_1)))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1429, _t1430);
 #line 626 "spms1_main.rb"
-    sp_int _t1455 = sp_int_add(cst_SIGNAL_GENERAL_2_LO, cst_SMOOTHED_SLOT_OFFSET);
-    sp_float _t1456 = (((lv_smoothed_general_2 < 0.5)) ? 1.0 : ((2.0 - ((lv_smoothed_general_2 + lv_smoothed_general_2)))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1455, _t1456);
+    sp_int _t1431 = sp_int_add(cst_SIGNAL_GENERAL_1_MID, cst_SMOOTHED_SLOT_OFFSET);
+    sp_float _t1432 = (((lv_smoothed_general_1 < 0.5)) ? ((lv_smoothed_general_1 + lv_smoothed_general_1)) : ((2.0 - ((lv_smoothed_general_1 + lv_smoothed_general_1)))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1431, _t1432);
 #line 627 "spms1_main.rb"
-    sp_int _t1457 = sp_int_add(cst_SIGNAL_GENERAL_2_HI, cst_SMOOTHED_SLOT_OFFSET);
-    sp_float _t1458 = (((lv_smoothed_general_2 > 0.5)) ? 1.0 : ((lv_smoothed_general_2 + lv_smoothed_general_2)));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1457, _t1458);
+    sp_int _t1433 = sp_int_add(cst_SIGNAL_GENERAL_1_POS, cst_SMOOTHED_SLOT_OFFSET);
+    sp_float _t1434 = (((lv_smoothed_general_1 < 0.5)) ? 0.0 : (((lv_smoothed_general_1 + lv_smoothed_general_1) - 1.0)));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1433, _t1434);
 #line 628 "spms1_main.rb"
-    sp_int _t1459 = sp_int_add(cst_SIGNAL_GENERAL_2_NEG, cst_SMOOTHED_SLOT_OFFSET);
-    sp_float _t1460 = (((lv_smoothed_general_2 > 0.5)) ? 0.0 : ((1.0 - ((lv_smoothed_general_2 + lv_smoothed_general_2)))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1459, _t1460);
+    sp_int _t1435 = cst_SMOOTHED_STAGE_1_GENERAL_2;
+    sp_int _t1439 = cst_SIGNAL_GENERAL_2;
+    sp_float _t1438 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1439);
+    sp_int _t1440 = cst_SMOOTHED_STAGE_1_GENERAL_2;
+    sp_float _t1436 = sp_Dsp_s_smooth(_t1438, sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1440), cst_CONTROLLER_SMOOTHING_BLEND);
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1435, _t1436);
 #line 629 "spms1_main.rb"
-    sp_int _t1461 = sp_int_add(cst_SIGNAL_GENERAL_2_MID, cst_SMOOTHED_SLOT_OFFSET);
-    sp_float _t1462 = (((lv_smoothed_general_2 < 0.5)) ? ((lv_smoothed_general_2 + lv_smoothed_general_2)) : ((2.0 - ((lv_smoothed_general_2 + lv_smoothed_general_2)))));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1461, _t1462);
+    sp_int _t1443 = cst_SMOOTHED_STAGE_1_GENERAL_2;
+    sp_float _t1442 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1443);
+    sp_int _t1444 = sp_int_add(cst_SIGNAL_GENERAL_2, cst_SMOOTHED_SLOT_OFFSET);
+    lv_smoothed_general_2 = sp_Dsp_s_smooth(_t1442, sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1444), cst_CONTROLLER_SMOOTHING_BLEND);
 #line 630 "spms1_main.rb"
-    sp_int _t1463 = sp_int_add(cst_SIGNAL_GENERAL_2_POS, cst_SMOOTHED_SLOT_OFFSET);
-    sp_float _t1464 = (((lv_smoothed_general_2 < 0.5)) ? 0.0 : (((lv_smoothed_general_2 + lv_smoothed_general_2) - 1.0)));
-    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1463, _t1464);
+    sp_int _t1445 = sp_int_add(cst_SIGNAL_GENERAL_2, cst_SMOOTHED_SLOT_OFFSET);
+    sp_float _t1446 = lv_smoothed_general_2;
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1445, _t1446);
+#line 631 "spms1_main.rb"
+    sp_int _t1447 = sp_int_add(cst_SIGNAL_GENERAL_2_REV, cst_SMOOTHED_SLOT_OFFSET);
+    sp_float _t1448 = (1.0 - lv_smoothed_general_2);
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1447, _t1448);
+#line 632 "spms1_main.rb"
+    sp_int _t1449 = sp_int_add(cst_SIGNAL_GENERAL_2_INV, cst_SMOOTHED_SLOT_OFFSET);
+    sp_float _t1450 = (0.0 - lv_smoothed_general_2);
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1449, _t1450);
+#line 633 "spms1_main.rb"
+    sp_int _t1451 = sp_int_add(cst_SIGNAL_GENERAL_2_REV_INV, cst_SMOOTHED_SLOT_OFFSET);
+    sp_float _t1452 = (lv_smoothed_general_2 - 1.0);
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1451, _t1452);
+#line 634 "spms1_main.rb"
+    sp_int _t1453 = sp_int_add(cst_SIGNAL_GENERAL_2_BIPOLAR, cst_SMOOTHED_SLOT_OFFSET);
+    sp_float _t1454 = (lv_smoothed_general_2 - 0.5);
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1453, _t1454);
+#line 635 "spms1_main.rb"
+    sp_int _t1455 = sp_int_add(cst_SIGNAL_GENERAL_2_BIPOLAR_INV, cst_SMOOTHED_SLOT_OFFSET);
+    sp_float _t1456 = (0.5 - lv_smoothed_general_2);
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1455, _t1456);
 #line 636 "spms1_main.rb"
-    sp_int _t1466 = lv_source_pitch_1_glide;
-    sp_float _t1465 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1466);
-    sp_Pitch_set_glide((sp_Pitch *)lv_pitch_1, _t1465);
+    sp_int _t1457 = sp_int_add(cst_SIGNAL_GENERAL_2_SIN, cst_SMOOTHED_SLOT_OFFSET);
+    sp_float _t1458 = sp_quarter_sine(lv_smoothed_general_2);
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1457, _t1458);
 #line 637 "spms1_main.rb"
-    sp_int _t1468 = lv_source_pitch_1_out_1_glide_sw;
-    sp_float _t1467 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1468);
-    sp_Pitch_set_glide_1_switch((sp_Pitch *)lv_pitch_1, _t1467);
+    sp_int _t1459 = sp_int_add(cst_SIGNAL_GENERAL_2_COS, cst_SMOOTHED_SLOT_OFFSET);
+    sp_float _t1460 = sp_quarter_sine((1.0 - lv_smoothed_general_2));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1459, _t1460);
 #line 638 "spms1_main.rb"
-    sp_int _t1470 = lv_source_pitch_1_out_2_glide_sw;
-    sp_float _t1469 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1470);
-    sp_Pitch_set_glide_2_switch((sp_Pitch *)lv_pitch_1, _t1469);
+    sp_int _t1461 = sp_int_add(cst_SIGNAL_GENERAL_2_LO, cst_SMOOTHED_SLOT_OFFSET);
+    sp_float _t1462 = (((lv_smoothed_general_2 < 0.5)) ? 1.0 : ((2.0 - ((lv_smoothed_general_2 + lv_smoothed_general_2)))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1461, _t1462);
 #line 639 "spms1_main.rb"
-    sp_int _t1472 = lv_source_pitch_1_bend_amt;
-    sp_float _t1471 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1472);
-    sp_Pitch_set_bend_amount((sp_Pitch *)lv_pitch_1, _t1471);
+    sp_int _t1463 = sp_int_add(cst_SIGNAL_GENERAL_2_HI, cst_SMOOTHED_SLOT_OFFSET);
+    sp_float _t1464 = (((lv_smoothed_general_2 > 0.5)) ? 1.0 : ((lv_smoothed_general_2 + lv_smoothed_general_2)));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1463, _t1464);
 #line 640 "spms1_main.rb"
-    sp_int _t1474 = lv_source_pitch_1_out_1_bend_sw;
-    sp_float _t1473 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1474);
-    sp_Pitch_set_bend_1_switch((sp_Pitch *)lv_pitch_1, _t1473);
+    sp_int _t1465 = sp_int_add(cst_SIGNAL_GENERAL_2_NEG, cst_SMOOTHED_SLOT_OFFSET);
+    sp_float _t1466 = (((lv_smoothed_general_2 > 0.5)) ? 0.0 : ((1.0 - ((lv_smoothed_general_2 + lv_smoothed_general_2)))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1465, _t1466);
 #line 641 "spms1_main.rb"
-    sp_int _t1476 = lv_source_pitch_1_out_2_bend_sw;
-    sp_float _t1475 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1476);
-    sp_Pitch_set_bend_2_switch((sp_Pitch *)lv_pitch_1, _t1475);
+    sp_int _t1467 = sp_int_add(cst_SIGNAL_GENERAL_2_MID, cst_SMOOTHED_SLOT_OFFSET);
+    sp_float _t1468 = (((lv_smoothed_general_2 < 0.5)) ? ((lv_smoothed_general_2 + lv_smoothed_general_2)) : ((2.0 - ((lv_smoothed_general_2 + lv_smoothed_general_2)))));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1467, _t1468);
 #line 642 "spms1_main.rb"
-    sp_int _t1478 = lv_source_pitch_1_stretch;
-    sp_float _t1477 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1478);
-    sp_Pitch_set_stretch((sp_Pitch *)lv_pitch_1, _t1477);
-#line 643 "spms1_main.rb"
-    sp_int _t1480 = lv_source_eg_1_attack;
-    sp_float _t1479 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1480);
-    sp_EnvGen_set_attack((sp_EnvGen *)lv_eg_1, _t1479);
-#line 644 "spms1_main.rb"
-    sp_int _t1482 = lv_source_eg_1_decay;
-    sp_float _t1481 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1482);
-    sp_EnvGen_set_decay((sp_EnvGen *)lv_eg_1, _t1481);
-#line 645 "spms1_main.rb"
-    sp_int _t1484 = lv_source_eg_1_sustain;
-    sp_float _t1483 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1484);
-    sp_EnvGen_set_sustain((sp_EnvGen *)lv_eg_1, _t1483);
-#line 646 "spms1_main.rb"
-    sp_int _t1486 = lv_source_eg_1_release_sw;
-    sp_float _t1485 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1486);
-    sp_EnvGen_set_release_switch((sp_EnvGen *)lv_eg_1, _t1485);
-#line 647 "spms1_main.rb"
-    sp_int _t1488 = lv_source_eg_1_level;
-    sp_float _t1487 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1488);
-    sp_EnvGen_set_level((sp_EnvGen *)lv_eg_1, _t1487);
+    sp_int _t1469 = sp_int_add(cst_SIGNAL_GENERAL_2_POS, cst_SMOOTHED_SLOT_OFFSET);
+    sp_float _t1470 = (((lv_smoothed_general_2 < 0.5)) ? 0.0 : (((lv_smoothed_general_2 + lv_smoothed_general_2) - 1.0)));
+    sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1469, _t1470);
 #line 648 "spms1_main.rb"
-    sp_int _t1490 = lv_source_eg_2_attack;
-    sp_float _t1489 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1490);
-    sp_EnvGen_set_attack((sp_EnvGen *)lv_eg_2, _t1489);
+    sp_int _t1472 = lv_source_pitch_1_glide;
+    sp_float _t1471 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1472);
+    sp_Pitch_set_glide((sp_Pitch *)lv_pitch_1, _t1471);
 #line 649 "spms1_main.rb"
-    sp_int _t1492 = lv_source_eg_2_decay;
-    sp_float _t1491 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1492);
-    sp_EnvGen_set_decay((sp_EnvGen *)lv_eg_2, _t1491);
+    sp_int _t1474 = lv_source_pitch_1_out_1_glide_sw;
+    sp_float _t1473 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1474);
+    sp_Pitch_set_glide_1_switch((sp_Pitch *)lv_pitch_1, _t1473);
 #line 650 "spms1_main.rb"
-    sp_int _t1494 = lv_source_eg_2_sustain;
-    sp_float _t1493 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1494);
-    sp_EnvGen_set_sustain((sp_EnvGen *)lv_eg_2, _t1493);
+    sp_int _t1476 = lv_source_pitch_1_out_2_glide_sw;
+    sp_float _t1475 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1476);
+    sp_Pitch_set_glide_2_switch((sp_Pitch *)lv_pitch_1, _t1475);
 #line 651 "spms1_main.rb"
-    sp_int _t1496 = lv_source_eg_2_release_sw;
-    sp_float _t1495 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1496);
-    sp_EnvGen_set_release_switch((sp_EnvGen *)lv_eg_2, _t1495);
+    sp_int _t1478 = lv_source_pitch_1_bend_amt;
+    sp_float _t1477 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1478);
+    sp_Pitch_set_bend_amount((sp_Pitch *)lv_pitch_1, _t1477);
 #line 652 "spms1_main.rb"
-    sp_int _t1498 = lv_source_eg_2_level;
-    sp_float _t1497 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1498);
-    sp_EnvGen_set_level((sp_EnvGen *)lv_eg_2, _t1497);
+    sp_int _t1480 = lv_source_pitch_1_out_1_bend_sw;
+    sp_float _t1479 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1480);
+    sp_Pitch_set_bend_1_switch((sp_Pitch *)lv_pitch_1, _t1479);
 #line 653 "spms1_main.rb"
-    sp_int _t1500 = lv_source_lfo_1_wave;
-    sp_float _t1499 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1500);
-    sp_LFO_set_wave((sp_LFO *)lv_lfo_1, _t1499);
+    sp_int _t1482 = lv_source_pitch_1_out_2_bend_sw;
+    sp_float _t1481 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1482);
+    sp_Pitch_set_bend_2_switch((sp_Pitch *)lv_pitch_1, _t1481);
 #line 654 "spms1_main.rb"
-    sp_int _t1502 = lv_source_lfo_1_rate;
-    sp_float _t1501 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1502);
-    sp_LFO_set_rate((sp_LFO *)lv_lfo_1, _t1501);
+    sp_int _t1484 = lv_source_pitch_1_stretch;
+    sp_float _t1483 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1484);
+    sp_Pitch_set_stretch((sp_Pitch *)lv_pitch_1, _t1483);
 #line 655 "spms1_main.rb"
-    sp_int _t1504 = lv_source_lfo_1_level;
-    sp_float _t1503 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1504);
-    sp_LFO_set_level((sp_LFO *)lv_lfo_1, _t1503);
+    sp_int _t1486 = lv_source_eg_1_attack;
+    sp_float _t1485 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1486);
+    sp_EnvGen_set_attack((sp_EnvGen *)lv_eg_1, _t1485);
 #line 656 "spms1_main.rb"
-    sp_int _t1506 = lv_source_lfo_1_rate_mod_amt;
-    sp_float _t1505 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1506);
-    sp_LFO_set_rate_modulation_amount((sp_LFO *)lv_lfo_1, _t1505);
+    sp_int _t1488 = lv_source_eg_1_decay;
+    sp_float _t1487 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1488);
+    sp_EnvGen_set_decay((sp_EnvGen *)lv_eg_1, _t1487);
 #line 657 "spms1_main.rb"
-    sp_int _t1508 = lv_source_lfo_1_level_mod_amt;
-    sp_float _t1507 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1508);
-    sp_LFO_set_level_modulation_amount((sp_LFO *)lv_lfo_1, _t1507);
+    sp_int _t1490 = lv_source_eg_1_sustain;
+    sp_float _t1489 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1490);
+    sp_EnvGen_set_sustain((sp_EnvGen *)lv_eg_1, _t1489);
 #line 658 "spms1_main.rb"
-    sp_int _t1510 = lv_source_lfo_1_reset_sw;
-    sp_float _t1509 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1510);
-    sp_LFO_set_reset_switch((sp_LFO *)lv_lfo_1, _t1509);
+    sp_int _t1492 = lv_source_eg_1_release_sw;
+    sp_float _t1491 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1492);
+    sp_EnvGen_set_release_switch((sp_EnvGen *)lv_eg_1, _t1491);
 #line 659 "spms1_main.rb"
-    sp_int _t1512 = lv_source_mixer_1_level_1;
-    sp_float _t1511 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1512);
-    sp_Mixer_set_level_1((sp_Mixer *)lv_mixer_1, _t1511);
+    sp_int _t1494 = lv_source_eg_1_level;
+    sp_float _t1493 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1494);
+    sp_EnvGen_set_level((sp_EnvGen *)lv_eg_1, _t1493);
 #line 660 "spms1_main.rb"
-    sp_int _t1514 = lv_source_mixer_1_level_2;
-    sp_float _t1513 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1514);
-    sp_Mixer_set_level_2((sp_Mixer *)lv_mixer_1, _t1513);
+    sp_int _t1496 = lv_source_eg_2_attack;
+    sp_float _t1495 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1496);
+    sp_EnvGen_set_attack((sp_EnvGen *)lv_eg_2, _t1495);
 #line 661 "spms1_main.rb"
-    sp_int _t1516 = lv_source_mixer_1_level_3;
-    sp_float _t1515 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1516);
-    sp_Mixer_set_level_3((sp_Mixer *)lv_mixer_1, _t1515);
+    sp_int _t1498 = lv_source_eg_2_decay;
+    sp_float _t1497 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1498);
+    sp_EnvGen_set_decay((sp_EnvGen *)lv_eg_2, _t1497);
 #line 662 "spms1_main.rb"
-    sp_int _t1518 = lv_source_mixer_1_level_4;
-    sp_float _t1517 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1518);
-    sp_Mixer_set_level_4((sp_Mixer *)lv_mixer_1, _t1517);
+    sp_int _t1500 = lv_source_eg_2_sustain;
+    sp_float _t1499 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1500);
+    sp_EnvGen_set_sustain((sp_EnvGen *)lv_eg_2, _t1499);
 #line 663 "spms1_main.rb"
-    sp_int _t1520 = lv_source_mixer_1_out_level;
-    sp_float _t1519 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1520);
-    sp_Mixer_set_out_level((sp_Mixer *)lv_mixer_1, _t1519);
+    sp_int _t1502 = lv_source_eg_2_release_sw;
+    sp_float _t1501 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1502);
+    sp_EnvGen_set_release_switch((sp_EnvGen *)lv_eg_2, _t1501);
 #line 664 "spms1_main.rb"
-    sp_int _t1522 = lv_source_osc_1_wave;
-    sp_float _t1521 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1522);
-    sp_Osc_set_waveform((sp_Osc *)lv_osc_1, _t1521);
+    sp_int _t1504 = lv_source_eg_2_level;
+    sp_float _t1503 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1504);
+    sp_EnvGen_set_level((sp_EnvGen *)lv_eg_2, _t1503);
 #line 665 "spms1_main.rb"
-    sp_int _t1524 = lv_source_osc_1_pw;
-    sp_float _t1523 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1524);
-    sp_Osc_set_pulse_width((sp_Osc *)lv_osc_1, _t1523);
+    sp_int _t1506 = lv_source_lfo_1_wave;
+    sp_float _t1505 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1506);
+    sp_LFO_set_wave((sp_LFO *)lv_lfo_1, _t1505);
 #line 666 "spms1_main.rb"
-    sp_int _t1526 = lv_source_osc_1_pitch_coarse;
-    sp_float _t1525 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1526);
-    sp_Osc_set_pitch_coarse((sp_Osc *)lv_osc_1, _t1525);
+    sp_int _t1508 = lv_source_lfo_1_rate;
+    sp_float _t1507 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1508);
+    sp_LFO_set_rate((sp_LFO *)lv_lfo_1, _t1507);
 #line 667 "spms1_main.rb"
-    sp_int _t1528 = lv_source_osc_1_pitch;
-    sp_float _t1527 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1528);
-    sp_Osc_set_pitch((sp_Osc *)lv_osc_1, _t1527);
+    sp_int _t1510 = lv_source_lfo_1_level;
+    sp_float _t1509 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1510);
+    sp_LFO_set_level((sp_LFO *)lv_lfo_1, _t1509);
 #line 668 "spms1_main.rb"
-    sp_int _t1530 = lv_source_osc_1_pitch_fine;
-    sp_float _t1529 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1530);
-    sp_Osc_set_pitch_fine((sp_Osc *)lv_osc_1, _t1529);
+    sp_int _t1512 = lv_source_lfo_1_rate_mod_amt;
+    sp_float _t1511 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1512);
+    sp_LFO_set_rate_modulation_amount((sp_LFO *)lv_lfo_1, _t1511);
 #line 669 "spms1_main.rb"
-    sp_int _t1532 = lv_source_osc_1_pitch_mod_1_amt;
-    sp_float _t1531 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1532);
-    sp_Osc_set_pitch_modulation_1_amount((sp_Osc *)lv_osc_1, _t1531);
+    sp_int _t1514 = lv_source_lfo_1_level_mod_amt;
+    sp_float _t1513 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1514);
+    sp_LFO_set_level_modulation_amount((sp_LFO *)lv_lfo_1, _t1513);
 #line 670 "spms1_main.rb"
-    sp_int _t1534 = lv_source_osc_1_pitch_mod_1_pol;
-    sp_float _t1533 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1534);
-    sp_Osc_set_pitch_modulation_1_polarity((sp_Osc *)lv_osc_1, _t1533);
+    sp_int _t1516 = lv_source_lfo_1_reset_sw;
+    sp_float _t1515 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1516);
+    sp_LFO_set_reset_switch((sp_LFO *)lv_lfo_1, _t1515);
 #line 671 "spms1_main.rb"
-    sp_int _t1536 = lv_source_osc_1_pitch_mod_1_sw;
-    sp_float _t1535 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1536);
-    sp_Osc_set_pitch_modulation_1_switch((sp_Osc *)lv_osc_1, _t1535);
+    sp_int _t1518 = lv_source_mixer_1_level_1;
+    sp_float _t1517 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1518);
+    sp_Mixer_set_level_1((sp_Mixer *)lv_mixer_1, _t1517);
 #line 672 "spms1_main.rb"
-    sp_int _t1538 = lv_source_osc_1_pitch_mod_2_amt;
-    sp_float _t1537 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1538);
-    sp_Osc_set_pitch_modulation_2_amount((sp_Osc *)lv_osc_1, _t1537);
+    sp_int _t1520 = lv_source_mixer_1_level_2;
+    sp_float _t1519 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1520);
+    sp_Mixer_set_level_2((sp_Mixer *)lv_mixer_1, _t1519);
 #line 673 "spms1_main.rb"
-    sp_int _t1540 = lv_source_osc_1_pitch_mod_2_pol;
-    sp_float _t1539 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1540);
-    sp_Osc_set_pitch_modulation_2_polarity((sp_Osc *)lv_osc_1, _t1539);
+    sp_int _t1522 = lv_source_mixer_1_level_3;
+    sp_float _t1521 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1522);
+    sp_Mixer_set_level_3((sp_Mixer *)lv_mixer_1, _t1521);
 #line 674 "spms1_main.rb"
-    sp_int _t1542 = lv_source_osc_1_pitch_mod_2_sw;
-    sp_float _t1541 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1542);
-    sp_Osc_set_pitch_modulation_2_switch((sp_Osc *)lv_osc_1, _t1541);
+    sp_int _t1524 = lv_source_mixer_1_level_4;
+    sp_float _t1523 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1524);
+    sp_Mixer_set_level_4((sp_Mixer *)lv_mixer_1, _t1523);
 #line 675 "spms1_main.rb"
-    sp_int _t1544 = lv_source_osc_1_pw_mod_1_amt;
-    sp_float _t1543 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1544);
-    sp_Osc_set_pw_modulation_1_amount((sp_Osc *)lv_osc_1, _t1543);
+    sp_int _t1526 = lv_source_mixer_1_out_level;
+    sp_float _t1525 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1526);
+    sp_Mixer_set_out_level((sp_Mixer *)lv_mixer_1, _t1525);
 #line 676 "spms1_main.rb"
-    sp_int _t1546 = lv_source_osc_1_pw_mod_1_pol;
-    sp_float _t1545 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1546);
-    sp_Osc_set_pw_modulation_1_polarity((sp_Osc *)lv_osc_1, _t1545);
+    sp_int _t1528 = lv_source_osc_1_wave;
+    sp_float _t1527 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1528);
+    sp_Osc_set_waveform((sp_Osc *)lv_osc_1, _t1527);
 #line 677 "spms1_main.rb"
-    sp_int _t1548 = lv_source_osc_1_pw_mod_2_amt;
-    sp_float _t1547 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1548);
-    sp_Osc_set_pw_modulation_2_amount((sp_Osc *)lv_osc_1, _t1547);
+    sp_int _t1530 = lv_source_osc_1_pw;
+    sp_float _t1529 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1530);
+    sp_Osc_set_pulse_width((sp_Osc *)lv_osc_1, _t1529);
 #line 678 "spms1_main.rb"
-    sp_int _t1550 = lv_source_osc_1_pw_mod_2_pol;
-    sp_float _t1549 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1550);
-    sp_Osc_set_pw_modulation_2_polarity((sp_Osc *)lv_osc_1, _t1549);
+    sp_int _t1532 = lv_source_osc_1_pitch_coarse;
+    sp_float _t1531 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1532);
+    sp_Osc_set_pitch_coarse((sp_Osc *)lv_osc_1, _t1531);
 #line 679 "spms1_main.rb"
-    sp_int _t1552 = lv_source_osc_2_wave;
-    sp_float _t1551 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1552);
-    sp_Osc_set_waveform((sp_Osc *)lv_osc_2, _t1551);
+    sp_int _t1534 = lv_source_osc_1_pitch;
+    sp_float _t1533 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1534);
+    sp_Osc_set_pitch((sp_Osc *)lv_osc_1, _t1533);
 #line 680 "spms1_main.rb"
-    sp_int _t1554 = lv_source_osc_2_pw;
-    sp_float _t1553 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1554);
-    sp_Osc_set_pulse_width((sp_Osc *)lv_osc_2, _t1553);
+    sp_int _t1536 = lv_source_osc_1_pitch_fine;
+    sp_float _t1535 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1536);
+    sp_Osc_set_pitch_fine((sp_Osc *)lv_osc_1, _t1535);
 #line 681 "spms1_main.rb"
-    sp_int _t1556 = lv_source_osc_2_pitch_coarse;
-    sp_float _t1555 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1556);
-    sp_Osc_set_pitch_coarse((sp_Osc *)lv_osc_2, _t1555);
+    sp_int _t1538 = lv_source_osc_1_pitch_mod_1_amt;
+    sp_float _t1537 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1538);
+    sp_Osc_set_pitch_modulation_1_amount((sp_Osc *)lv_osc_1, _t1537);
 #line 682 "spms1_main.rb"
-    sp_int _t1558 = lv_source_osc_2_pitch;
-    sp_float _t1557 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1558);
-    sp_Osc_set_pitch((sp_Osc *)lv_osc_2, _t1557);
+    sp_int _t1540 = lv_source_osc_1_pitch_mod_1_pol;
+    sp_float _t1539 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1540);
+    sp_Osc_set_pitch_modulation_1_polarity((sp_Osc *)lv_osc_1, _t1539);
 #line 683 "spms1_main.rb"
-    sp_int _t1560 = lv_source_osc_2_pitch_fine;
-    sp_float _t1559 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1560);
-    sp_Osc_set_pitch_fine((sp_Osc *)lv_osc_2, _t1559);
+    sp_int _t1542 = lv_source_osc_1_pitch_mod_1_sw;
+    sp_float _t1541 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1542);
+    sp_Osc_set_pitch_modulation_1_switch((sp_Osc *)lv_osc_1, _t1541);
 #line 684 "spms1_main.rb"
-    sp_int _t1562 = lv_source_osc_2_pitch_mod_1_amt;
-    sp_float _t1561 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1562);
-    sp_Osc_set_pitch_modulation_1_amount((sp_Osc *)lv_osc_2, _t1561);
+    sp_int _t1544 = lv_source_osc_1_pitch_mod_2_amt;
+    sp_float _t1543 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1544);
+    sp_Osc_set_pitch_modulation_2_amount((sp_Osc *)lv_osc_1, _t1543);
 #line 685 "spms1_main.rb"
-    sp_int _t1564 = lv_source_osc_2_pitch_mod_1_pol;
-    sp_float _t1563 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1564);
-    sp_Osc_set_pitch_modulation_1_polarity((sp_Osc *)lv_osc_2, _t1563);
+    sp_int _t1546 = lv_source_osc_1_pitch_mod_2_pol;
+    sp_float _t1545 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1546);
+    sp_Osc_set_pitch_modulation_2_polarity((sp_Osc *)lv_osc_1, _t1545);
 #line 686 "spms1_main.rb"
-    sp_int _t1566 = lv_source_osc_2_pitch_mod_1_sw;
-    sp_float _t1565 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1566);
-    sp_Osc_set_pitch_modulation_1_switch((sp_Osc *)lv_osc_2, _t1565);
+    sp_int _t1548 = lv_source_osc_1_pitch_mod_2_sw;
+    sp_float _t1547 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1548);
+    sp_Osc_set_pitch_modulation_2_switch((sp_Osc *)lv_osc_1, _t1547);
 #line 687 "spms1_main.rb"
-    sp_int _t1568 = lv_source_osc_2_pitch_mod_2_amt;
-    sp_float _t1567 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1568);
-    sp_Osc_set_pitch_modulation_2_amount((sp_Osc *)lv_osc_2, _t1567);
+    sp_int _t1550 = lv_source_osc_1_pw_mod_1_amt;
+    sp_float _t1549 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1550);
+    sp_Osc_set_pw_modulation_1_amount((sp_Osc *)lv_osc_1, _t1549);
 #line 688 "spms1_main.rb"
-    sp_int _t1570 = lv_source_osc_2_pitch_mod_2_pol;
-    sp_float _t1569 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1570);
-    sp_Osc_set_pitch_modulation_2_polarity((sp_Osc *)lv_osc_2, _t1569);
+    sp_int _t1552 = lv_source_osc_1_pw_mod_1_pol;
+    sp_float _t1551 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1552);
+    sp_Osc_set_pw_modulation_1_polarity((sp_Osc *)lv_osc_1, _t1551);
 #line 689 "spms1_main.rb"
-    sp_int _t1572 = lv_source_osc_2_pitch_mod_2_sw;
-    sp_float _t1571 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1572);
-    sp_Osc_set_pitch_modulation_2_switch((sp_Osc *)lv_osc_2, _t1571);
+    sp_int _t1554 = lv_source_osc_1_pw_mod_2_amt;
+    sp_float _t1553 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1554);
+    sp_Osc_set_pw_modulation_2_amount((sp_Osc *)lv_osc_1, _t1553);
 #line 690 "spms1_main.rb"
-    sp_int _t1574 = lv_source_osc_2_pw_mod_1_amt;
-    sp_float _t1573 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1574);
-    sp_Osc_set_pw_modulation_1_amount((sp_Osc *)lv_osc_2, _t1573);
+    sp_int _t1556 = lv_source_osc_1_pw_mod_2_pol;
+    sp_float _t1555 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1556);
+    sp_Osc_set_pw_modulation_2_polarity((sp_Osc *)lv_osc_1, _t1555);
 #line 691 "spms1_main.rb"
-    sp_int _t1576 = lv_source_osc_2_pw_mod_1_pol;
-    sp_float _t1575 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1576);
-    sp_Osc_set_pw_modulation_1_polarity((sp_Osc *)lv_osc_2, _t1575);
+    sp_int _t1558 = lv_source_osc_2_wave;
+    sp_float _t1557 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1558);
+    sp_Osc_set_waveform((sp_Osc *)lv_osc_2, _t1557);
 #line 692 "spms1_main.rb"
-    sp_int _t1578 = lv_source_osc_2_pw_mod_2_amt;
-    sp_float _t1577 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1578);
-    sp_Osc_set_pw_modulation_2_amount((sp_Osc *)lv_osc_2, _t1577);
+    sp_int _t1560 = lv_source_osc_2_pw;
+    sp_float _t1559 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1560);
+    sp_Osc_set_pulse_width((sp_Osc *)lv_osc_2, _t1559);
 #line 693 "spms1_main.rb"
-    sp_int _t1580 = lv_source_osc_2_pw_mod_2_pol;
-    sp_float _t1579 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1580);
-    sp_Osc_set_pw_modulation_2_polarity((sp_Osc *)lv_osc_2, _t1579);
+    sp_int _t1562 = lv_source_osc_2_pitch_coarse;
+    sp_float _t1561 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1562);
+    sp_Osc_set_pitch_coarse((sp_Osc *)lv_osc_2, _t1561);
 #line 694 "spms1_main.rb"
-    sp_int _t1582 = lv_source_osc_2_sync_sw;
-    sp_float _t1581 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1582);
-    sp_Osc_set_sync_switch((sp_Osc *)lv_osc_2, _t1581);
+    sp_int _t1564 = lv_source_osc_2_pitch;
+    sp_float _t1563 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1564);
+    sp_Osc_set_pitch((sp_Osc *)lv_osc_2, _t1563);
 #line 695 "spms1_main.rb"
-    sp_int _t1584 = lv_source_noise_1_color;
-    sp_float _t1583 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1584);
-    sp_Noise_set_color((sp_Noise *)lv_noise_1, _t1583);
+    sp_int _t1566 = lv_source_osc_2_pitch_fine;
+    sp_float _t1565 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1566);
+    sp_Osc_set_pitch_fine((sp_Osc *)lv_osc_2, _t1565);
 #line 696 "spms1_main.rb"
-    sp_int _t1586 = lv_source_noise_1_level;
-    sp_float _t1585 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1586);
-    sp_Noise_set_level((sp_Noise *)lv_noise_1, _t1585);
+    sp_int _t1568 = lv_source_osc_2_pitch_mod_1_amt;
+    sp_float _t1567 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1568);
+    sp_Osc_set_pitch_modulation_1_amount((sp_Osc *)lv_osc_2, _t1567);
 #line 697 "spms1_main.rb"
-    sp_int _t1588 = lv_source_mixer_2_level_1;
-    sp_float _t1587 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1588);
-    sp_Mixer_set_level_1((sp_Mixer *)lv_mixer_2, _t1587);
+    sp_int _t1570 = lv_source_osc_2_pitch_mod_1_pol;
+    sp_float _t1569 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1570);
+    sp_Osc_set_pitch_modulation_1_polarity((sp_Osc *)lv_osc_2, _t1569);
 #line 698 "spms1_main.rb"
-    sp_int _t1590 = lv_source_mixer_2_level_2;
-    sp_float _t1589 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1590);
-    sp_Mixer_set_level_2((sp_Mixer *)lv_mixer_2, _t1589);
+    sp_int _t1572 = lv_source_osc_2_pitch_mod_1_sw;
+    sp_float _t1571 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1572);
+    sp_Osc_set_pitch_modulation_1_switch((sp_Osc *)lv_osc_2, _t1571);
 #line 699 "spms1_main.rb"
-    sp_int _t1592 = lv_source_mixer_2_level_3;
-    sp_float _t1591 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1592);
-    sp_Mixer_set_level_3((sp_Mixer *)lv_mixer_2, _t1591);
+    sp_int _t1574 = lv_source_osc_2_pitch_mod_2_amt;
+    sp_float _t1573 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1574);
+    sp_Osc_set_pitch_modulation_2_amount((sp_Osc *)lv_osc_2, _t1573);
 #line 700 "spms1_main.rb"
-    sp_int _t1594 = lv_source_mixer_2_level_4;
-    sp_float _t1593 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1594);
-    sp_Mixer_set_level_4((sp_Mixer *)lv_mixer_2, _t1593);
+    sp_int _t1576 = lv_source_osc_2_pitch_mod_2_pol;
+    sp_float _t1575 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1576);
+    sp_Osc_set_pitch_modulation_2_polarity((sp_Osc *)lv_osc_2, _t1575);
 #line 701 "spms1_main.rb"
-    sp_int _t1596 = lv_source_mixer_2_out_level;
-    sp_float _t1595 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1596);
-    sp_Mixer_set_out_level((sp_Mixer *)lv_mixer_2, _t1595);
+    sp_int _t1578 = lv_source_osc_2_pitch_mod_2_sw;
+    sp_float _t1577 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1578);
+    sp_Osc_set_pitch_modulation_2_switch((sp_Osc *)lv_osc_2, _t1577);
 #line 702 "spms1_main.rb"
-    sp_int _t1598 = lv_source_filter_1_cutoff;
-    sp_float _t1597 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1598);
-    sp_Filter_set_cutoff((sp_Filter *)lv_filter_1, _t1597);
+    sp_int _t1580 = lv_source_osc_2_pw_mod_1_amt;
+    sp_float _t1579 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1580);
+    sp_Osc_set_pw_modulation_1_amount((sp_Osc *)lv_osc_2, _t1579);
 #line 703 "spms1_main.rb"
-    sp_int _t1600 = lv_source_filter_1_resonance;
-    sp_float _t1599 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1600);
-    sp_Filter_set_resonance((sp_Filter *)lv_filter_1, _t1599);
+    sp_int _t1582 = lv_source_osc_2_pw_mod_1_pol;
+    sp_float _t1581 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1582);
+    sp_Osc_set_pw_modulation_1_polarity((sp_Osc *)lv_osc_2, _t1581);
 #line 704 "spms1_main.rb"
-    sp_int _t1602 = lv_source_filter_1_mode;
-    sp_float _t1601 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1602);
-    sp_Filter_set_mode((sp_Filter *)lv_filter_1, _t1601);
+    sp_int _t1584 = lv_source_osc_2_pw_mod_2_amt;
+    sp_float _t1583 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1584);
+    sp_Osc_set_pw_modulation_2_amount((sp_Osc *)lv_osc_2, _t1583);
 #line 705 "spms1_main.rb"
-    sp_int _t1604 = lv_source_filter_1_pitch_amt;
-    sp_float _t1603 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1604);
-    sp_Filter_set_pitch_amount((sp_Filter *)lv_filter_1, _t1603);
+    sp_int _t1586 = lv_source_osc_2_pw_mod_2_pol;
+    sp_float _t1585 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1586);
+    sp_Osc_set_pw_modulation_2_polarity((sp_Osc *)lv_osc_2, _t1585);
 #line 706 "spms1_main.rb"
-    sp_int _t1606 = lv_source_filter_1_mod_1_amt;
-    sp_float _t1605 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1606);
-    sp_Filter_set_modulation_1_amount((sp_Filter *)lv_filter_1, _t1605);
+    sp_int _t1588 = lv_source_osc_2_sync_sw;
+    sp_float _t1587 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1588);
+    sp_Osc_set_sync_switch((sp_Osc *)lv_osc_2, _t1587);
 #line 707 "spms1_main.rb"
-    sp_int _t1608 = lv_source_filter_1_mod_1_pol;
-    sp_float _t1607 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1608);
-    sp_Filter_set_modulation_1_polarity((sp_Filter *)lv_filter_1, _t1607);
+    sp_int _t1590 = lv_source_noise_1_color;
+    sp_float _t1589 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1590);
+    sp_Noise_set_color((sp_Noise *)lv_noise_1, _t1589);
 #line 708 "spms1_main.rb"
-    sp_int _t1610 = lv_source_filter_1_mod_2_amt;
-    sp_float _t1609 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1610);
-    sp_Filter_set_modulation_2_amount((sp_Filter *)lv_filter_1, _t1609);
+    sp_int _t1592 = lv_source_noise_1_level;
+    sp_float _t1591 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1592);
+    sp_Noise_set_level((sp_Noise *)lv_noise_1, _t1591);
 #line 709 "spms1_main.rb"
-    sp_int _t1612 = lv_source_filter_1_mod_2_pol;
-    sp_float _t1611 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1612);
-    sp_Filter_set_modulation_2_polarity((sp_Filter *)lv_filter_1, _t1611);
+    sp_int _t1594 = lv_source_mixer_2_level_1;
+    sp_float _t1593 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1594);
+    sp_Mixer_set_level_1((sp_Mixer *)lv_mixer_2, _t1593);
 #line 710 "spms1_main.rb"
-    sp_int _t1614 = lv_source_amp_1_gain;
-    sp_float _t1613 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1614);
-    sp_Amp_set_gain((sp_Amp *)lv_amp_1, _t1613);
+    sp_int _t1596 = lv_source_mixer_2_level_2;
+    sp_float _t1595 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1596);
+    sp_Mixer_set_level_2((sp_Mixer *)lv_mixer_2, _t1595);
 #line 711 "spms1_main.rb"
-    sp_int _t1616 = lv_source_amp_1_mod_1_2_mix;
-    sp_float _t1615 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1616);
-    sp_Amp_set_modulation_mix((sp_Amp *)lv_amp_1, _t1615);
+    sp_int _t1598 = lv_source_mixer_2_level_3;
+    sp_float _t1597 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1598);
+    sp_Mixer_set_level_3((sp_Mixer *)lv_mixer_2, _t1597);
 #line 712 "spms1_main.rb"
-    sp_int _t1618 = lv_source_chorus_1_mix;
-    sp_float _t1617 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1618);
-    sp_Chorus_set_mix((sp_Chorus *)lv_chorus_1, _t1617);
+    sp_int _t1600 = lv_source_mixer_2_level_4;
+    sp_float _t1599 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1600);
+    sp_Mixer_set_level_4((sp_Mixer *)lv_mixer_2, _t1599);
 #line 713 "spms1_main.rb"
-    sp_int _t1620 = lv_source_chorus_1_rate;
-    sp_float _t1619 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1620);
-    sp_Chorus_set_rate((sp_Chorus *)lv_chorus_1, _t1619);
+    sp_int _t1602 = lv_source_mixer_2_out_level;
+    sp_float _t1601 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1602);
+    sp_Mixer_set_out_level((sp_Mixer *)lv_mixer_2, _t1601);
 #line 714 "spms1_main.rb"
-    sp_int _t1622 = lv_source_chorus_1_depth;
-    sp_float _t1621 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1622);
-    sp_Chorus_set_depth((sp_Chorus *)lv_chorus_1, _t1621);
+    sp_int _t1604 = lv_source_filter_1_cutoff;
+    sp_float _t1603 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1604);
+    sp_Filter_set_cutoff((sp_Filter *)lv_filter_1, _t1603);
 #line 715 "spms1_main.rb"
-    sp_int _t1624 = lv_source_delay_1_mix;
-    sp_float _t1623 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1624);
-    sp_Delay_set_mix((sp_Delay *)lv_delay_1, _t1623);
+    sp_int _t1606 = lv_source_filter_1_resonance;
+    sp_float _t1605 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1606);
+    sp_Filter_set_resonance((sp_Filter *)lv_filter_1, _t1605);
 #line 716 "spms1_main.rb"
-    sp_int _t1626 = lv_source_delay_1_time;
-    sp_float _t1625 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1626);
-    sp_Delay_set_time((sp_Delay *)lv_delay_1, _t1625);
+    sp_int _t1608 = lv_source_filter_1_mode;
+    sp_float _t1607 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1608);
+    sp_Filter_set_mode((sp_Filter *)lv_filter_1, _t1607);
 #line 717 "spms1_main.rb"
-    sp_int _t1628 = lv_source_delay_1_feedback;
-    sp_float _t1627 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1628);
-    sp_Delay_set_feedback((sp_Delay *)lv_delay_1, _t1627);
+    sp_int _t1610 = lv_source_filter_1_pitch_amt;
+    sp_float _t1609 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1610);
+    sp_Filter_set_pitch_amount((sp_Filter *)lv_filter_1, _t1609);
 #line 718 "spms1_main.rb"
-    sp_int _t1630 = lv_source_amp_1_limiter_sw;
-    sp_float _t1629 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1630);
-    sp_Amp_set_limiter_switch((sp_Amp *)lv_amp_1, _t1629);
+    sp_int _t1612 = lv_source_filter_1_mod_1_amt;
+    sp_float _t1611 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1612);
+    sp_Filter_set_modulation_1_amount((sp_Filter *)lv_filter_1, _t1611);
+#line 719 "spms1_main.rb"
+    sp_int _t1614 = lv_source_filter_1_mod_1_pol;
+    sp_float _t1613 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1614);
+    sp_Filter_set_modulation_1_polarity((sp_Filter *)lv_filter_1, _t1613);
+#line 720 "spms1_main.rb"
+    sp_int _t1616 = lv_source_filter_1_mod_2_amt;
+    sp_float _t1615 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1616);
+    sp_Filter_set_modulation_2_amount((sp_Filter *)lv_filter_1, _t1615);
 #line 721 "spms1_main.rb"
-    lv_i = 0LL;
+    sp_int _t1618 = lv_source_filter_1_mod_2_pol;
+    sp_float _t1617 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1618);
+    sp_Filter_set_modulation_2_polarity((sp_Filter *)lv_filter_1, _t1617);
 #line 722 "spms1_main.rb"
-    while ((lv_i < cst_AUDIO_BUFFER_WORDS)) {
+    sp_int _t1620 = lv_source_amp_1_gain;
+    sp_float _t1619 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1620);
+    sp_Amp_set_gain((sp_Amp *)lv_amp_1, _t1619);
+#line 723 "spms1_main.rb"
+    sp_int _t1622 = lv_source_amp_1_mod_1_2_mix;
+    sp_float _t1621 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1622);
+    sp_Amp_set_modulation_mix((sp_Amp *)lv_amp_1, _t1621);
+#line 724 "spms1_main.rb"
+    sp_int _t1624 = lv_source_chorus_1_mix;
+    sp_float _t1623 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1624);
+    sp_Chorus_set_mix((sp_Chorus *)lv_chorus_1, _t1623);
+#line 725 "spms1_main.rb"
+    sp_int _t1626 = lv_source_chorus_1_rate;
+    sp_float _t1625 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1626);
+    sp_Chorus_set_rate((sp_Chorus *)lv_chorus_1, _t1625);
+#line 726 "spms1_main.rb"
+    sp_int _t1628 = lv_source_chorus_1_depth;
+    sp_float _t1627 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1628);
+    sp_Chorus_set_depth((sp_Chorus *)lv_chorus_1, _t1627);
+#line 727 "spms1_main.rb"
+    sp_int _t1630 = lv_source_delay_1_mix;
+    sp_float _t1629 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1630);
+    sp_Delay_set_mix((sp_Delay *)lv_delay_1, _t1629);
 #line 728 "spms1_main.rb"
-      lv_control_tick = ((lv_i & 3LL) == 0LL);
-#line 731 "spms1_main.rb"
-      if (((lv_i & 15LL) == 0LL)) {
-#line 733 "spms1_main.rb"
-        sp_Pitch_smooth_parameters((sp_Pitch *)lv_pitch_1);
+    sp_int _t1632 = lv_source_delay_1_time;
+    sp_float _t1631 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1632);
+    sp_Delay_set_time((sp_Delay *)lv_delay_1, _t1631);
+#line 729 "spms1_main.rb"
+    sp_int _t1634 = lv_source_delay_1_feedback;
+    sp_float _t1633 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1634);
+    sp_Delay_set_feedback((sp_Delay *)lv_delay_1, _t1633);
+#line 730 "spms1_main.rb"
+    sp_int _t1636 = lv_source_amp_1_limiter_sw;
+    sp_float _t1635 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1636);
+    sp_Amp_set_limiter_switch((sp_Amp *)lv_amp_1, _t1635);
 #line 734 "spms1_main.rb"
-        sp_LFO_smooth_parameters((sp_LFO *)lv_lfo_1);
+    lv_buffer_words = (lv_clearing_lines ? 0LL : cst_AUDIO_BUFFER_WORDS);
 #line 735 "spms1_main.rb"
-        sp_Osc_smooth_parameters((sp_Osc *)lv_osc_1);
+    lv_i = 0LL;
 #line 736 "spms1_main.rb"
+    while ((lv_i < lv_buffer_words)) {
+#line 742 "spms1_main.rb"
+      lv_control_tick = ((lv_i & 3LL) == 0LL);
+#line 745 "spms1_main.rb"
+      if (((lv_i & 15LL) == 0LL)) {
+#line 747 "spms1_main.rb"
+        sp_Pitch_smooth_parameters((sp_Pitch *)lv_pitch_1);
+#line 748 "spms1_main.rb"
+        sp_LFO_smooth_parameters((sp_LFO *)lv_lfo_1);
+#line 749 "spms1_main.rb"
+        sp_Osc_smooth_parameters((sp_Osc *)lv_osc_1);
+#line 750 "spms1_main.rb"
         sp_Osc_smooth_parameters((sp_Osc *)lv_osc_2);
-#line 737 "spms1_main.rb"
+#line 751 "spms1_main.rb"
         sp_Filter_smooth_parameters((sp_Filter *)lv_filter_1);
-#line 738 "spms1_main.rb"
+#line 752 "spms1_main.rb"
         sp_Chorus_smooth_parameters((sp_Chorus *)lv_chorus_1);
-#line 739 "spms1_main.rb"
+#line 753 "spms1_main.rb"
         sp_Delay_smooth_parameters((sp_Delay *)lv_delay_1);
       }
-#line 742 "spms1_main.rb"
+#line 756 "spms1_main.rb"
       lv_slot = 0LL;
-#line 743 "spms1_main.rb"
+#line 757 "spms1_main.rb"
       while ((lv_slot < lv_active_count)) {
-#line 744 "spms1_main.rb"
-        lv_module_id = sp_IntArray_get(lv_active_modules, lv_slot);
 #line 758 "spms1_main.rb"
-        sp_int _t1631 = lv_module_id;
-        switch (_t1631) {
+        lv_module_id = sp_IntArray_get(lv_active_modules, lv_slot);
+#line 772 "spms1_main.rb"
+        sp_int _t1637 = lv_module_id;
+        switch (_t1637) {
         case 1LL:
         {
-#line 761 "spms1_main.rb"
-          sp_int _t1632 = 38LL;
-          sp_bool _t1634 = lv_control_tick;
-          sp_int _t1636 = lv_source_pitch_1_pitch_in;
-          sp_float _t1635 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1636);
-          sp_int _t1638 = lv_source_pitch_1_gate_in;
-          sp_float _t1637 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1638);
-          sp_int _t1640 = lv_source_pitch_1_bend_in;
-          sp_float _t1639 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1640);
-          sp_float _t1633 = sp_Pitch_process((sp_Pitch *)lv_pitch_1, _t1634, _t1635, _t1637, _t1639);
-          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1632, _t1633);
-#line 762 "spms1_main.rb"
-          sp_int _t1641 = 39LL;
-          sp_float _t1642 = sp_Pitch_output_2((sp_Pitch *)lv_pitch_1);
-          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1641, _t1642);
+#line 775 "spms1_main.rb"
+          sp_int _t1638 = 38LL;
+          sp_bool _t1640 = lv_control_tick;
+          sp_int _t1642 = lv_source_pitch_1_pitch_in;
+          sp_float _t1641 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1642);
+          sp_int _t1644 = lv_source_pitch_1_gate_in;
+          sp_float _t1643 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1644);
+          sp_int _t1646 = lv_source_pitch_1_bend_in;
+          sp_float _t1645 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1646);
+          sp_float _t1639 = sp_Pitch_process((sp_Pitch *)lv_pitch_1, _t1640, _t1641, _t1643, _t1645);
+          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1638, _t1639);
+#line 776 "spms1_main.rb"
+          sp_int _t1647 = 39LL;
+          sp_float _t1648 = sp_Pitch_output_2((sp_Pitch *)lv_pitch_1);
+          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1647, _t1648);
           break;
         }
         case 2LL:
         {
-#line 764 "spms1_main.rb"
-          sp_int _t1643 = 40LL;
-          sp_bool _t1645 = lv_control_tick;
-          sp_int _t1647 = lv_source_eg_1_gate_in;
-          sp_float _t1646 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1647);
-          sp_float _t1644 = sp_EnvGen_process((sp_EnvGen *)lv_eg_1, _t1645, _t1646);
-          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1643, _t1644);
-#line 765 "spms1_main.rb"
-          sp_int _t1648 = 41LL;
-          sp_float _t1649 = sp_EnvGen_output_inverted((sp_EnvGen *)lv_eg_1);
-          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1648, _t1649);
+#line 778 "spms1_main.rb"
+          sp_int _t1649 = 40LL;
+          sp_bool _t1651 = lv_control_tick;
+          sp_int _t1653 = lv_source_eg_1_gate_in;
+          sp_float _t1652 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1653);
+          sp_float _t1650 = sp_EnvGen_process((sp_EnvGen *)lv_eg_1, _t1651, _t1652);
+          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1649, _t1650);
+#line 779 "spms1_main.rb"
+          sp_int _t1654 = 41LL;
+          sp_float _t1655 = sp_EnvGen_output_inverted((sp_EnvGen *)lv_eg_1);
+          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1654, _t1655);
           break;
         }
         case 3LL:
         {
-#line 767 "spms1_main.rb"
-          sp_int _t1650 = 42LL;
-          sp_bool _t1652 = lv_control_tick;
-          sp_int _t1654 = lv_source_eg_2_gate_in;
-          sp_float _t1653 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1654);
-          sp_float _t1651 = sp_EnvGen_process((sp_EnvGen *)lv_eg_2, _t1652, _t1653);
-          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1650, _t1651);
-#line 768 "spms1_main.rb"
-          sp_int _t1655 = 43LL;
-          sp_float _t1656 = sp_EnvGen_output_inverted((sp_EnvGen *)lv_eg_2);
-          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1655, _t1656);
+#line 781 "spms1_main.rb"
+          sp_int _t1656 = 42LL;
+          sp_bool _t1658 = lv_control_tick;
+          sp_int _t1660 = lv_source_eg_2_gate_in;
+          sp_float _t1659 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1660);
+          sp_float _t1657 = sp_EnvGen_process((sp_EnvGen *)lv_eg_2, _t1658, _t1659);
+          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1656, _t1657);
+#line 782 "spms1_main.rb"
+          sp_int _t1661 = 43LL;
+          sp_float _t1662 = sp_EnvGen_output_inverted((sp_EnvGen *)lv_eg_2);
+          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1661, _t1662);
           break;
         }
         case 4LL:
         {
-#line 770 "spms1_main.rb"
-          sp_int _t1657 = 44LL;
-          sp_bool _t1659 = lv_control_tick;
-          sp_int _t1661 = lv_source_lfo_1_rate_mod_in;
-          sp_float _t1660 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1661);
-          sp_int _t1663 = lv_source_lfo_1_level_mod_in;
-          sp_float _t1662 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1663);
-          sp_int _t1665 = lv_source_lfo_1_reset_in;
-          sp_float _t1664 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1665);
-          sp_float _t1658 = sp_LFO_process((sp_LFO *)lv_lfo_1, _t1659, _t1660, _t1662, _t1664);
-          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1657, _t1658);
-#line 771 "spms1_main.rb"
-          sp_int _t1666 = 45LL;
-          sp_float _t1667 = sp_LFO_output_inverted((sp_LFO *)lv_lfo_1);
-          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1666, _t1667);
-#line 772 "spms1_main.rb"
-          sp_int _t1668 = 46LL;
-          sp_float _t1669 = sp_LFO_output_triangle((sp_LFO *)lv_lfo_1);
-          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1668, _t1669);
-#line 773 "spms1_main.rb"
-          sp_int _t1670 = 47LL;
-          sp_float _t1671 = sp_LFO_output_triangle_inverted((sp_LFO *)lv_lfo_1);
-          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1670, _t1671);
-#line 774 "spms1_main.rb"
-          sp_int _t1672 = 48LL;
-          sp_float _t1673 = sp_LFO_output_square((sp_LFO *)lv_lfo_1);
+#line 784 "spms1_main.rb"
+          sp_int _t1663 = 44LL;
+          sp_bool _t1665 = lv_control_tick;
+          sp_int _t1667 = lv_source_lfo_1_rate_mod_in;
+          sp_float _t1666 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1667);
+          sp_int _t1669 = lv_source_lfo_1_level_mod_in;
+          sp_float _t1668 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1669);
+          sp_int _t1671 = lv_source_lfo_1_reset_in;
+          sp_float _t1670 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1671);
+          sp_float _t1664 = sp_LFO_process((sp_LFO *)lv_lfo_1, _t1665, _t1666, _t1668, _t1670);
+          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1663, _t1664);
+#line 785 "spms1_main.rb"
+          sp_int _t1672 = 45LL;
+          sp_float _t1673 = sp_LFO_output_inverted((sp_LFO *)lv_lfo_1);
           sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1672, _t1673);
-#line 775 "spms1_main.rb"
-          sp_int _t1674 = 49LL;
-          sp_float _t1675 = sp_LFO_output_square_inverted((sp_LFO *)lv_lfo_1);
+#line 786 "spms1_main.rb"
+          sp_int _t1674 = 46LL;
+          sp_float _t1675 = sp_LFO_output_triangle((sp_LFO *)lv_lfo_1);
           sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1674, _t1675);
+#line 787 "spms1_main.rb"
+          sp_int _t1676 = 47LL;
+          sp_float _t1677 = sp_LFO_output_triangle_inverted((sp_LFO *)lv_lfo_1);
+          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1676, _t1677);
+#line 788 "spms1_main.rb"
+          sp_int _t1678 = 48LL;
+          sp_float _t1679 = sp_LFO_output_square((sp_LFO *)lv_lfo_1);
+          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1678, _t1679);
+#line 789 "spms1_main.rb"
+          sp_int _t1680 = 49LL;
+          sp_float _t1681 = sp_LFO_output_square_inverted((sp_LFO *)lv_lfo_1);
+          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1680, _t1681);
           break;
         }
         case 5LL:
         {
-#line 777 "spms1_main.rb"
-          sp_int _t1676 = 50LL;
-          sp_bool _t1678 = lv_control_tick;
-          sp_int _t1680 = lv_source_mixer_1_in_1;
-          sp_float _t1679 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1680);
-          sp_int _t1682 = lv_source_mixer_1_in_2;
-          sp_float _t1681 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1682);
-          sp_int _t1684 = lv_source_mixer_1_in_3;
-          sp_float _t1683 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1684);
-          sp_int _t1686 = lv_source_mixer_1_in_4;
+#line 791 "spms1_main.rb"
+          sp_int _t1682 = 50LL;
+          sp_bool _t1684 = lv_control_tick;
+          sp_int _t1686 = lv_source_mixer_1_in_1;
           sp_float _t1685 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1686);
-          sp_float _t1677 = sp_Mixer_process((sp_Mixer *)lv_mixer_1, _t1678, _t1679, _t1681, _t1683, _t1685);
-          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1676, _t1677);
-#line 778 "spms1_main.rb"
-          sp_int _t1687 = 51LL;
-          sp_float _t1688 = sp_Mixer_output_inverted((sp_Mixer *)lv_mixer_1);
-          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1687, _t1688);
+          sp_int _t1688 = lv_source_mixer_1_in_2;
+          sp_float _t1687 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1688);
+          sp_int _t1690 = lv_source_mixer_1_in_3;
+          sp_float _t1689 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1690);
+          sp_int _t1692 = lv_source_mixer_1_in_4;
+          sp_float _t1691 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1692);
+          sp_float _t1683 = sp_Mixer_process((sp_Mixer *)lv_mixer_1, _t1684, _t1685, _t1687, _t1689, _t1691);
+          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1682, _t1683);
+#line 792 "spms1_main.rb"
+          sp_int _t1693 = 51LL;
+          sp_float _t1694 = sp_Mixer_output_inverted((sp_Mixer *)lv_mixer_1);
+          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1693, _t1694);
           break;
         }
         case 6LL:
         {
-#line 780 "spms1_main.rb"
-          sp_int _t1689 = 52LL;
-          sp_bool _t1691 = lv_control_tick;
-          sp_int _t1693 = lv_source_osc_1_pitch_in;
-          sp_float _t1692 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1693);
-          sp_int _t1695 = lv_source_osc_1_mod_1_in;
-          sp_float _t1694 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1695);
-          sp_int _t1697 = lv_source_osc_1_mod_2_in;
-          sp_float _t1696 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1697);
-          sp_float _t1690 = sp_Osc_process((sp_Osc *)lv_osc_1, _t1691, _t1692, _t1694, _t1696);
-          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1689, _t1690);
-#line 781 "spms1_main.rb"
-          sp_int _t1698 = 53LL;
-          sp_float _t1699 = sp_Osc_output_saw((sp_Osc *)lv_osc_1);
-          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1698, _t1699);
-#line 782 "spms1_main.rb"
-          sp_int _t1700 = 54LL;
-          sp_float _t1701 = sp_Osc_output_pulse((sp_Osc *)lv_osc_1);
-          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1700, _t1701);
-#line 783 "spms1_main.rb"
-          sp_int _t1702 = 55LL;
-          sp_float _t1703 = sp_Osc_output_sub((sp_Osc *)lv_osc_1);
-          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1702, _t1703);
+#line 794 "spms1_main.rb"
+          sp_int _t1695 = 52LL;
+          sp_bool _t1697 = lv_control_tick;
+          sp_int _t1699 = lv_source_osc_1_pitch_in;
+          sp_float _t1698 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1699);
+          sp_int _t1701 = lv_source_osc_1_mod_1_in;
+          sp_float _t1700 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1701);
+          sp_int _t1703 = lv_source_osc_1_mod_2_in;
+          sp_float _t1702 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1703);
+          sp_float _t1696 = sp_Osc_process((sp_Osc *)lv_osc_1, _t1697, _t1698, _t1700, _t1702);
+          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1695, _t1696);
+#line 795 "spms1_main.rb"
+          sp_int _t1704 = 53LL;
+          sp_float _t1705 = sp_Osc_output_saw((sp_Osc *)lv_osc_1);
+          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1704, _t1705);
+#line 796 "spms1_main.rb"
+          sp_int _t1706 = 54LL;
+          sp_float _t1707 = sp_Osc_output_pulse((sp_Osc *)lv_osc_1);
+          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1706, _t1707);
+#line 797 "spms1_main.rb"
+          sp_int _t1708 = 55LL;
+          sp_float _t1709 = sp_Osc_output_sub((sp_Osc *)lv_osc_1);
+          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1708, _t1709);
           break;
         }
         case 7LL:
         {
-#line 785 "spms1_main.rb"
-          sp_int _t1704 = 56LL;
-          sp_bool _t1706 = lv_control_tick;
-          sp_int _t1708 = lv_source_osc_2_pitch_in;
-          sp_float _t1707 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1708);
-          sp_int _t1710 = lv_source_osc_2_mod_1_in;
-          sp_float _t1709 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1710);
-          sp_int _t1712 = lv_source_osc_2_mod_2_in;
-          sp_float _t1711 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1712);
-          sp_int _t1714 = lv_source_osc_2_sync_in;
+#line 799 "spms1_main.rb"
+          sp_int _t1710 = 56LL;
+          sp_bool _t1712 = lv_control_tick;
+          sp_int _t1714 = lv_source_osc_2_pitch_in;
           sp_float _t1713 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1714);
-          sp_float _t1705 = sp_Osc_process_synced((sp_Osc *)lv_osc_2, _t1706, _t1707, _t1709, _t1711, _t1713);
-          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1704, _t1705);
-#line 786 "spms1_main.rb"
-          sp_int _t1715 = 57LL;
-          sp_float _t1716 = sp_Osc_output_saw((sp_Osc *)lv_osc_2);
-          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1715, _t1716);
-#line 787 "spms1_main.rb"
-          sp_int _t1717 = 58LL;
-          sp_float _t1718 = sp_Osc_output_pulse((sp_Osc *)lv_osc_2);
-          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1717, _t1718);
+          sp_int _t1716 = lv_source_osc_2_mod_1_in;
+          sp_float _t1715 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1716);
+          sp_int _t1718 = lv_source_osc_2_mod_2_in;
+          sp_float _t1717 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1718);
+          sp_int _t1720 = lv_source_osc_2_sync_in;
+          sp_float _t1719 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1720);
+          sp_float _t1711 = sp_Osc_process_synced((sp_Osc *)lv_osc_2, _t1712, _t1713, _t1715, _t1717, _t1719);
+          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1710, _t1711);
+#line 800 "spms1_main.rb"
+          sp_int _t1721 = 57LL;
+          sp_float _t1722 = sp_Osc_output_saw((sp_Osc *)lv_osc_2);
+          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1721, _t1722);
+#line 801 "spms1_main.rb"
+          sp_int _t1723 = 58LL;
+          sp_float _t1724 = sp_Osc_output_pulse((sp_Osc *)lv_osc_2);
+          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1723, _t1724);
           break;
         }
         case 8LL:
         {
-#line 789 "spms1_main.rb"
-          sp_int _t1719 = 59LL;
-          sp_bool _t1721 = lv_control_tick;
-          sp_float _t1720 = sp_Noise_process((sp_Noise *)lv_noise_1, _t1721);
-          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1719, _t1720);
-#line 790 "spms1_main.rb"
-          sp_int _t1722 = 60LL;
-          sp_float _t1723 = sp_Noise_output_white((sp_Noise *)lv_noise_1);
-          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1722, _t1723);
-#line 791 "spms1_main.rb"
-          sp_int _t1724 = 61LL;
-          sp_float _t1725 = sp_Noise_output_red((sp_Noise *)lv_noise_1);
-          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1724, _t1725);
+#line 803 "spms1_main.rb"
+          sp_int _t1725 = 59LL;
+          sp_bool _t1727 = lv_control_tick;
+          sp_float _t1726 = sp_Noise_process((sp_Noise *)lv_noise_1, _t1727);
+          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1725, _t1726);
+#line 804 "spms1_main.rb"
+          sp_int _t1728 = 60LL;
+          sp_float _t1729 = sp_Noise_output_white((sp_Noise *)lv_noise_1);
+          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1728, _t1729);
+#line 805 "spms1_main.rb"
+          sp_int _t1730 = 61LL;
+          sp_float _t1731 = sp_Noise_output_red((sp_Noise *)lv_noise_1);
+          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1730, _t1731);
           break;
         }
         case 9LL:
         {
-#line 793 "spms1_main.rb"
-          sp_int _t1726 = 62LL;
-          sp_bool _t1728 = lv_control_tick;
-          sp_int _t1730 = lv_source_mixer_2_in_1;
-          sp_float _t1729 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1730);
-          sp_int _t1732 = lv_source_mixer_2_in_2;
-          sp_float _t1731 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1732);
-          sp_int _t1734 = lv_source_mixer_2_in_3;
-          sp_float _t1733 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1734);
-          sp_int _t1736 = lv_source_mixer_2_in_4;
+#line 807 "spms1_main.rb"
+          sp_int _t1732 = 62LL;
+          sp_bool _t1734 = lv_control_tick;
+          sp_int _t1736 = lv_source_mixer_2_in_1;
           sp_float _t1735 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1736);
-          sp_float _t1727 = sp_Mixer_process((sp_Mixer *)lv_mixer_2, _t1728, _t1729, _t1731, _t1733, _t1735);
-          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1726, _t1727);
-#line 794 "spms1_main.rb"
-          sp_int _t1737 = 63LL;
-          sp_float _t1738 = sp_Mixer_output_inverted((sp_Mixer *)lv_mixer_2);
-          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1737, _t1738);
+          sp_int _t1738 = lv_source_mixer_2_in_2;
+          sp_float _t1737 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1738);
+          sp_int _t1740 = lv_source_mixer_2_in_3;
+          sp_float _t1739 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1740);
+          sp_int _t1742 = lv_source_mixer_2_in_4;
+          sp_float _t1741 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1742);
+          sp_float _t1733 = sp_Mixer_process((sp_Mixer *)lv_mixer_2, _t1734, _t1735, _t1737, _t1739, _t1741);
+          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1732, _t1733);
+#line 808 "spms1_main.rb"
+          sp_int _t1743 = 63LL;
+          sp_float _t1744 = sp_Mixer_output_inverted((sp_Mixer *)lv_mixer_2);
+          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1743, _t1744);
           break;
         }
         case 10LL:
         {
-#line 796 "spms1_main.rb"
-          sp_int _t1739 = 64LL;
-          sp_bool _t1741 = lv_control_tick;
-          sp_int _t1743 = lv_source_filter_1_audio_in;
-          sp_float _t1742 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1743);
-          sp_int _t1745 = lv_source_filter_1_pitch_in;
-          sp_float _t1744 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1745);
-          sp_int _t1747 = lv_source_filter_1_mod_1_in;
-          sp_float _t1746 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1747);
-          sp_int _t1749 = lv_source_filter_1_mod_2_in;
+#line 810 "spms1_main.rb"
+          sp_int _t1745 = 64LL;
+          sp_bool _t1747 = lv_control_tick;
+          sp_int _t1749 = lv_source_filter_1_audio_in;
           sp_float _t1748 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1749);
-          sp_float _t1740 = sp_Filter_process((sp_Filter *)lv_filter_1, _t1741, _t1742, _t1744, _t1746, _t1748);
-          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1739, _t1740);
-#line 797 "spms1_main.rb"
-          sp_int _t1750 = 65LL;
-          sp_float _t1751 = sp_Filter_output_lp((sp_Filter *)lv_filter_1);
-          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1750, _t1751);
-#line 798 "spms1_main.rb"
-          sp_int _t1752 = 66LL;
-          sp_float _t1753 = sp_Filter_output_hp((sp_Filter *)lv_filter_1);
-          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1752, _t1753);
-#line 799 "spms1_main.rb"
-          sp_int _t1754 = 67LL;
-          sp_float _t1755 = sp_Filter_output_bp((sp_Filter *)lv_filter_1);
-          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1754, _t1755);
+          sp_int _t1751 = lv_source_filter_1_pitch_in;
+          sp_float _t1750 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1751);
+          sp_int _t1753 = lv_source_filter_1_mod_1_in;
+          sp_float _t1752 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1753);
+          sp_int _t1755 = lv_source_filter_1_mod_2_in;
+          sp_float _t1754 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1755);
+          sp_float _t1746 = sp_Filter_process((sp_Filter *)lv_filter_1, _t1747, _t1748, _t1750, _t1752, _t1754);
+          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1745, _t1746);
+#line 811 "spms1_main.rb"
+          sp_int _t1756 = 65LL;
+          sp_float _t1757 = sp_Filter_output_lp((sp_Filter *)lv_filter_1);
+          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1756, _t1757);
+#line 812 "spms1_main.rb"
+          sp_int _t1758 = 66LL;
+          sp_float _t1759 = sp_Filter_output_hp((sp_Filter *)lv_filter_1);
+          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1758, _t1759);
+#line 813 "spms1_main.rb"
+          sp_int _t1760 = 67LL;
+          sp_float _t1761 = sp_Filter_output_bp((sp_Filter *)lv_filter_1);
+          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1760, _t1761);
           break;
         }
         case 11LL:
         {
-#line 801 "spms1_main.rb"
-          sp_int _t1756 = 68LL;
-          sp_bool _t1758 = lv_control_tick;
-          sp_int _t1760 = lv_source_amp_1_audio_in;
-          sp_float _t1759 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1760);
-          sp_int _t1762 = lv_source_amp_1_mod_1_in;
-          sp_float _t1761 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1762);
-          sp_int _t1764 = lv_source_amp_1_mod_2_in;
-          sp_float _t1763 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1764);
-          sp_float _t1757 = sp_Amp_process((sp_Amp *)lv_amp_1, _t1758, _t1759, _t1761, _t1763);
-          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1756, _t1757);
+#line 815 "spms1_main.rb"
+          sp_int _t1762 = 68LL;
+          sp_bool _t1764 = lv_control_tick;
+          sp_int _t1766 = lv_source_amp_1_audio_in;
+          sp_float _t1765 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1766);
+          sp_int _t1768 = lv_source_amp_1_mod_1_in;
+          sp_float _t1767 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1768);
+          sp_int _t1770 = lv_source_amp_1_mod_2_in;
+          sp_float _t1769 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1770);
+          sp_float _t1763 = sp_Amp_process((sp_Amp *)lv_amp_1, _t1764, _t1765, _t1767, _t1769);
+          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1762, _t1763);
           break;
         }
         case 12LL:
         {
-#line 803 "spms1_main.rb"
-          sp_bool _t1765 = lv_control_tick;
-          sp_int _t1767 = lv_source_chorus_1_audio_in;
-          sp_float _t1766 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1767);
-          sp_Chorus_process((sp_Chorus *)lv_chorus_1, _t1765, _t1766);
-#line 804 "spms1_main.rb"
-          sp_int _t1768 = 69LL;
-          sp_float _t1769 = (lv_chorus_1)->iv_output_l;
-          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1768, _t1769);
-#line 805 "spms1_main.rb"
-          sp_int _t1770 = 70LL;
-          sp_float _t1771 = (lv_chorus_1)->iv_output_r;
-          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1770, _t1771);
-#line 806 "spms1_main.rb"
-          sp_int _t1772 = 71LL;
-          sp_float _t1773 = sp_Chorus_output_mono((sp_Chorus *)lv_chorus_1);
-          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1772, _t1773);
+#line 817 "spms1_main.rb"
+          sp_bool _t1771 = lv_control_tick;
+          sp_int _t1773 = lv_source_chorus_1_audio_in;
+          sp_float _t1772 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1773);
+          sp_Chorus_process((sp_Chorus *)lv_chorus_1, _t1771, _t1772);
+#line 818 "spms1_main.rb"
+          sp_int _t1774 = 69LL;
+          sp_float _t1775 = (lv_chorus_1)->iv_output_l;
+          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1774, _t1775);
+#line 819 "spms1_main.rb"
+          sp_int _t1776 = 70LL;
+          sp_float _t1777 = (lv_chorus_1)->iv_output_r;
+          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1776, _t1777);
+#line 820 "spms1_main.rb"
+          sp_int _t1778 = 71LL;
+          sp_float _t1779 = sp_Chorus_output_mono((sp_Chorus *)lv_chorus_1);
+          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1778, _t1779);
           break;
         }
         case 13LL:
         {
-#line 808 "spms1_main.rb"
-          sp_bool _t1774 = lv_control_tick;
-          sp_int _t1776 = lv_source_delay_1_audio_in_l;
-          sp_float _t1775 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1776);
-          sp_int _t1778 = lv_source_delay_1_audio_in_r;
-          sp_float _t1777 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1778);
-          sp_Delay_process((sp_Delay *)lv_delay_1, _t1774, _t1775, _t1777);
-#line 809 "spms1_main.rb"
-          sp_int _t1779 = 72LL;
-          sp_float _t1780 = (lv_delay_1)->iv_output_l;
-          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1779, _t1780);
-#line 810 "spms1_main.rb"
-          sp_int _t1781 = 73LL;
-          sp_float _t1782 = (lv_delay_1)->iv_output_r;
-          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1781, _t1782);
-#line 811 "spms1_main.rb"
-          sp_int _t1783 = 74LL;
-          sp_float _t1784 = sp_Delay_output_mono((sp_Delay *)lv_delay_1);
-          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1783, _t1784);
+#line 822 "spms1_main.rb"
+          sp_bool _t1780 = lv_control_tick;
+          sp_int _t1782 = lv_source_delay_1_audio_in_l;
+          sp_float _t1781 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1782);
+          sp_int _t1784 = lv_source_delay_1_audio_in_r;
+          sp_float _t1783 = sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1784);
+          sp_Delay_process((sp_Delay *)lv_delay_1, _t1780, _t1781, _t1783);
+#line 823 "spms1_main.rb"
+          sp_int _t1785 = 72LL;
+          sp_float _t1786 = (lv_delay_1)->iv_output_l;
+          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1785, _t1786);
+#line 824 "spms1_main.rb"
+          sp_int _t1787 = 73LL;
+          sp_float _t1788 = (lv_delay_1)->iv_output_r;
+          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1787, _t1788);
+#line 825 "spms1_main.rb"
+          sp_int _t1789 = 74LL;
+          sp_float _t1790 = sp_Delay_output_mono((sp_Delay *)lv_delay_1);
+          sp_SignalBus__lb_rb_set((sp_SignalBus *)lv_signals, _t1789, _t1790);
           break;
         }
         }
-#line 815 "spms1_main.rb"
+#line 829 "spms1_main.rb"
         lv_slot = sp_int_add(lv_slot, 1LL);
       }
-#line 818 "spms1_main.rb"
-      sp_int _t1785 = lv_source_output_l;
-      sp_FloatArray_set(lv_audio_buffer_l, lv_i, sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1785));
-#line 819 "spms1_main.rb"
-      sp_int _t1786 = lv_source_output_r;
-      sp_FloatArray_set(lv_audio_buffer_r, lv_i, sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1786));
-#line 820 "spms1_main.rb"
+#line 832 "spms1_main.rb"
+      sp_int _t1791 = lv_source_output_l;
+      sp_FloatArray_set(lv_audio_buffer_l, lv_i, (sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1791) * lv_output_gain));
+#line 833 "spms1_main.rb"
+      sp_int _t1792 = lv_source_output_r;
+      sp_FloatArray_set(lv_audio_buffer_r, lv_i, (sp_SignalBus__lb_rb((sp_SignalBus *)lv_signals, _t1792) * lv_output_gain));
+#line 834 "spms1_main.rb"
+      lv_output_gain += lv_output_gain_step;
+#line 835 "spms1_main.rb"
       lv_i = sp_int_add(lv_i, 1LL);
     }
-#line 823 "spms1_main.rb"
-    if (((lv_output_gain_step != 0LL) || (lv_output_gain != cst_OUTPUT_GAIN_ONE))) {
-#line 824 "spms1_main.rb"
+#line 839 "spms1_main.rb"
+    if (lv_clearing_lines) {
+#line 840 "spms1_main.rb"
       lv_i = 0LL;
-#line 825 "spms1_main.rb"
+#line 841 "spms1_main.rb"
       while ((lv_i < cst_AUDIO_BUFFER_WORDS)) {
-#line 826 "spms1_main.rb"
-        lv_output_gain = sp_int_add(lv_output_gain, lv_output_gain_step);
-#line 827 "spms1_main.rb"
-        lv_output_gain = (((lv_output_gain < 0LL)) ? 0LL : ((((lv_output_gain > cst_OUTPUT_GAIN_ONE)) ? cst_OUTPUT_GAIN_ONE : lv_output_gain)));
-#line 828 "spms1_main.rb"
-        lv_gain = (({ sp_int _t1787 = (lv_output_gain); _t1787 == SP_INT_NIL ? 0.0 : ((sp_float)_t1787); }) * ((1.0 / ({ sp_int _t1788 = (cst_OUTPUT_GAIN_ONE); _t1788 == SP_INT_NIL ? 0.0 : ((sp_float)_t1788); }))));
-#line 829 "spms1_main.rb"
-        sp_FloatArray_set(lv_audio_buffer_l, lv_i, (sp_FloatArray_get(lv_audio_buffer_l, lv_i) * lv_gain));
-#line 830 "spms1_main.rb"
-        sp_FloatArray_set(lv_audio_buffer_r, lv_i, (sp_FloatArray_get(lv_audio_buffer_r, lv_i) * lv_gain));
-#line 831 "spms1_main.rb"
+#line 842 "spms1_main.rb"
+        sp_FloatArray_set(lv_audio_buffer_l, lv_i, 0.0);
+#line 843 "spms1_main.rb"
+        sp_FloatArray_set(lv_audio_buffer_r, lv_i, 0.0);
+#line 844 "spms1_main.rb"
         lv_i = sp_int_add(lv_i, 1LL);
       }
+#line 846 "spms1_main.rb"
+      lv_amp_cleared = sp_Amp_clear_step((sp_Amp *)lv_amp_1);
+#line 847 "spms1_main.rb"
+      lv_chorus_cleared = sp_Chorus_clear_step((sp_Chorus *)lv_chorus_1);
+#line 848 "spms1_main.rb"
+      lv_delay_cleared = sp_Delay_clear_step((sp_Delay *)lv_delay_1);
+#line 849 "spms1_main.rb"
+      lv_lines_cleared = ((lv_amp_cleared && lv_chorus_cleared) && lv_delay_cleared);
     }
-#line 835 "spms1_main.rb"
+#line 851 "spms1_main.rb"
+    lv_output_fade_position = sp_int_add(lv_output_fade_position, sp_int_mul(lv_output_fade_direction, cst_AUDIO_BUFFER_WORDS));
+#line 853 "spms1_main.rb"
     (stop_debug_measure(), (sp_int)0);
-#line 837 "spms1_main.rb"
-    for (sp_int _t1790 = 0; _t1790 < cst_AUDIO_BUFFER_WORDS; _t1790++) {
-      lv_i__bp18472 = _t1790;
-#line 838 "spms1_main.rb"
-      ({ sp_float _t1791 = sp_FloatArray_get(lv_audio_buffer_l, lv_i__bp18472); sp_float _t1792 = sp_FloatArray_get(lv_audio_buffer_r, lv_i__bp18472); (write_to_audio_buffer(((float)(_t1791)), ((float)(_t1792))), (sp_int)0); });
+#line 855 "spms1_main.rb"
+    for (sp_int _t1794 = 0; _t1794 < cst_AUDIO_BUFFER_WORDS; _t1794++) {
+      lv_i__bp18577 = _t1794;
+#line 856 "spms1_main.rb"
+      ({ sp_float _t1795 = sp_FloatArray_get(lv_audio_buffer_l, lv_i__bp18577); sp_float _t1796 = sp_FloatArray_get(lv_audio_buffer_r, lv_i__bp18577); (write_to_audio_buffer(((float)(_t1795)), ((float)(_t1796))), (sp_int)0); });
     }
   }
   return 0;
