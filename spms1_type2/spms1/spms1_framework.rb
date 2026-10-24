@@ -50,7 +50,6 @@ module Spms1
     ffi_func :get_midi_save_count,        [:uint8],                  :int32
     ffi_func :store_patch_image,          [:uint8],                  :void
     ffi_func :load_saved_patch,           [:uint8],                  :void
-    ffi_func :get_midi_sound_off_count,   [:uint8],                  :int32
     ffi_func :set_sample_rate,            [:int32],                  :void
     ffi_func :get_sample_rate,            [],                        :int32
     ffi_func :set_audio_buffers,          [:int32],                  :void

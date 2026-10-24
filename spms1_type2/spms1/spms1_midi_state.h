@@ -67,9 +67,6 @@ uint32_t g_midi_run_order_written[16][SPMS1_RUN_ORDER_SIZE] = {{0}};
 // so that a Mute on is never missed, however soon Mute off follows it.
 uint8_t  g_midi_mute[16]            = {0};
 uint32_t g_midi_mute_count[16]      = {0};
-// How many All Sound Offs (CC 120) have arrived, which the synth tells apart by the count changing:
-// it fades the output out, silences the envelopes and the filter, and fades it in again.
-uint32_t g_midi_sound_off_count[16] = {0};
 
 SPMS1_RAM_FUNC void set_midi_note_on_pitch(uint8_t midi_ch, uint8_t midi_note_on_pitch) {
   if (midi_ch >= 16) {
@@ -196,14 +193,6 @@ SPMS1_RAM_FUNC int32_t get_midi_mute_count(uint8_t midi_ch) {
   }
 
   return (int32_t)g_midi_mute_count[midi_ch];
-}
-
-SPMS1_RAM_FUNC int32_t get_midi_sound_off_count(uint8_t midi_ch) {
-  if (midi_ch >= 16) {
-    return 0;
-  }
-
-  return (int32_t)g_midi_sound_off_count[midi_ch];
 }
 
 // The default patch, from spms1_patch.yaml, as spms1_write_default_patch in spms1_patch.rb writes
@@ -496,12 +485,10 @@ void spms1_handle_note_on(uint8_t midi_ch, uint8_t pitch, uint8_t velocity) {
 // The Channel Mode messages, CC 120 to 127, which are not controls and are not stored as CC values.
 // All Sound Off (120), All Notes Off (123) and Omni Off, Omni On, Mono On and Poly On (124 to 127),
 // which end every note as All Notes Off does, close the gate and forget the remembered note, as a
-// note off of every note would: the envelopes release as they do at a note off. All Sound Off
-// also has the synth fade the output out and silence the envelopes and the filter, so that the
-// release is cut short (see g_midi_sound_off_count). Reset All
-// Controllers (121) centers Pitch Bend, sets the Modulation Wheel (CC 1) to 0 and leaves no NRPN
-// selected, and leaves every other CC as it is, the parameters among them. Local Control (122) has
-// no keyboard here to act on.
+// note off of every note would: the envelopes release as they do at a note off, as a modular
+// synth's do when its gate closes, and nothing is cut short. Reset All Controllers (121) centers
+// Pitch Bend, sets the Modulation Wheel (CC 1) to 0 and leaves no NRPN selected, and leaves every
+// other CC as it is, the parameters among them. Local Control (122) has no keyboard here to act on.
 void spms1_handle_channel_mode(uint8_t midi_ch, uint8_t number) {
   if (midi_ch >= 16) {
     return;
@@ -514,9 +501,6 @@ void spms1_handle_channel_mode(uint8_t midi_ch, uint8_t number) {
   } else if (number != 122) {
     g_midi_note_prev_pitch[midi_ch] = SPMS1_NO_NOTE;
     set_midi_note_on_state(midi_ch, 0);
-    if (number == 120) {
-      ++g_midi_sound_off_count[midi_ch];
-    }
   }
 }
 

@@ -16,7 +16,7 @@ module Spms1
     # When each slot of the run order was last written, as in spms1_midi_state.h.
     @run_order_writes  = Array.new(16, 0)
     @run_order_written = Array.new(16) { Array.new(32, 0) }
-    # Mute (NRPN 117/0) and the count of All Sound Offs (CC 120), as in spms1_midi_state.h.
+    # Mute (NRPN 117/0), as in spms1_midi_state.h.
     @mute = Array.new(16, 0)
     @mute_count = Array.new(16, 0)
     # Save (NRPN 117/2) and Load (117/3), as in spms1_midi_state.h, with the patch kept in RAM: the
@@ -25,7 +25,6 @@ module Spms1
     @save_count = Array.new(16, 0)
     @patch_image = nil
     @stored_image = nil
-    @sound_off_count = Array.new(16, 0)
 
     # The signal bus SignalBus reads and writes, as spms1_bus.h has it for the C builds.
     @bus_signals = Array.new(256, 0.0)
@@ -84,7 +83,6 @@ module Spms1
         @run_order_written[ch].fill(0)
         (1..32).each { |rank| 32.times { |slot| set_midi_nrpn_value(ch, slot, nrpn[slot]) if ranks[slot] == rank } }
       end
-      def get_midi_sound_off_count(ch) = @sound_off_count[ch]
 
       # The reset NRPN, as spms1_reset_patch: every entry, the times the run order was written and
       # every CC to 0, then the default patch, written as at power-up by spms1_patch.rb.
@@ -152,7 +150,7 @@ module Spms1
 
       # The Channel Mode messages, as spms1_midi_state.h takes them: Reset All Controllers (121)
       # centers the bend, sets CC 1 to 0 and leaves no NRPN selected; Local Control (122) does
-      # nothing; the rest end every note, and All Sound Off (120) is counted for the synth too.
+      # nothing; the rest end every note.
       def handle_channel_mode(ch, number)
         if number == 121
           @pitch_bend[ch] = 0
@@ -161,7 +159,6 @@ module Spms1
         elsif number != 122
           @note_prev_pitch[ch] = nil
           @note_on_state[ch] = 0
-          @sound_off_count[ch] += 1 if number == 120
         end
       end
 

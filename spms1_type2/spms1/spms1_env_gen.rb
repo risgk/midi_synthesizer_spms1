@@ -162,16 +162,6 @@ module Spms1
       -@output
     end
 
-    # All Sound Off: the level drops to 0.0 at once, with no release, and the envelope waits for
-    # the next gate. Called while the output is faded out, so the step is not heard.
-    def sound_off
-      @state = STATE_IDLE
-      @current_level = 0.0
-      @last_output_level = 0.0
-      @output = 0.0
-      @slope = 0.0
-    end
-
     private
 
     def update_coefficients_full

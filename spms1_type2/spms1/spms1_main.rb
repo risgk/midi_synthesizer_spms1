@@ -72,23 +72,21 @@ CONTROLLER_SMOOTHING_BLEND = 1.0 - (1.0 - 0.015625 * (48000.0 / SAMPLE_RATE.to_f
 
 # The output fader, as PRA32-U2's: a linear fade of the output out and in, of at least 3 ms, in
 # whole buffers, 4 ms at 64 samples. It fades out at Mute on (NRPN 117/0, see spms1_midi_state.h),
-# as a patch is sent, and holds the output silent until Mute is off; and at an All Sound Off (CC
-# 120), after which the envelopes and the filter are silenced, out of hearing, before it fades in
-# again. Every Mute on is taken, however soon Mute off follows it, so a patch sent between them is
-# never heard at full level; what changes during a fade, 4 ms, is let be. A fade that has begun
-# runs to its end before the next one. Where it is is counted in samples, an Integer, and the gain
-# worked out from it at the start of each buffer, so that it lands on exactly 0.0 or 1.0 at the
-# end of a fade; within a buffer the gain takes a step a sample. The gain multiplies the output as
-# it is written, every sample whether or not it fades, which costs a multiply a side, and a buffer
-# that fades costs the same as one that does not. The modules run on while the output is silent,
-# and it stays silent for OUTPUT_HOLD_BUFFERS (11 ms) at least, so that the lines of the chorus
-# and the amp's limiter, 11 ms and less, hold nothing from before: after an All Sound Off they
-# would bring back a moment of the sound it cut. The delay's line, 340 ms, is left as it is, and
-# its repeats come back with the output, as they would from a delay after the synth. A Save (NRPN
-# 117/2), which comes while Mute is on, is written to the flash once the output is silent: writing
-# it stops both cores for up to 100 ms, while the audio plays the silence the host fills its
-# buffer with (see store_patch_image in spms1_midi_state.h). It is written after the buffer is,
-# outside the span that Debug Print measures.
+# as a patch is sent, and holds the output silent until Mute is off. Every Mute on is taken,
+# however soon Mute off follows it, so a patch sent between them is never heard at full level;
+# what changes during a fade, 4 ms, is let be. A fade that has begun runs to its end before the
+# next one. Where it is is counted in samples, an Integer, and the gain worked out from it at the
+# start of each buffer, so that it lands on exactly 0.0 or 1.0 at the end of a fade; within a
+# buffer the gain takes a step a sample. The gain multiplies the output as it is written, every
+# sample whether or not it fades, which costs a multiply a side, and a buffer that fades costs the
+# same as one that does not. The modules run on while the output is silent, and it stays silent
+# for OUTPUT_HOLD_BUFFERS (11 ms) at least, so that the lines of the chorus and the amp's limiter,
+# 11 ms and less, hold nothing of the patch from before Mute on. The delay's line, 340 ms, is left
+# as it is, and its repeats come back with the output, as they would from a delay after the
+# synth. A Save (NRPN 117/2), which comes while Mute is on, is written to the flash once the output
+# is silent: writing it stops both cores for up to 100 ms, while the audio plays the silence the
+# host fills its buffer with (see store_patch_image in spms1_midi_state.h). It is written after
+# the buffer is, outside the span that Debug Print measures.
 OUTPUT_FADE_SAMPLES = (SAMPLE_RATE * 3 / 1000 + AUDIO_BUFFER_WORDS - 1) / AUDIO_BUFFER_WORDS * AUDIO_BUFFER_WORDS
 OUTPUT_FADE_STEP    = 1.0 / OUTPUT_FADE_SAMPLES.to_f
 OUTPUT_HOLD_BUFFERS = (SAMPLE_RATE * 11 / 1000 + AUDIO_BUFFER_WORDS - 1) / AUDIO_BUFFER_WORDS
@@ -130,13 +128,11 @@ winning_slot = Array.new(128, 0)
 order_written = Array.new(MODULES_SIZE, 0)
 
 # The output fader: where the fade is, in samples, from 0 (silent) to OUTPUT_FADE_SAMPLES (the
-# output as it is), and which way it goes, 1 in, -1 out or 0; the count of All Sound Offs it has
-# taken, with one waiting while the output fades out, and so for Mute on; and the buffers left to
+# output as it is), and which way it goes, 1 in, -1 out or 0; the count of Mute ons it has taken,
+# with one waiting while the output fades out, and so for Save; and the buffers left to
 # hold the output silent before it may fade in.
 output_fade_position = OUTPUT_FADE_SAMPLES
 output_fade_direction = 0
-sound_off_count = 0
-sound_off_waiting = false
 mute_count = 0
 mute_waiting = false
 save_count = 0
@@ -180,13 +176,9 @@ while true
   # land: Integer#/ does, and Spinel's sp_idiv implements it.
   signals[SIGNAL_PITCH_BEND]  = ((C.get_midi_pitch_bend(MIDI_CH) + 1) / 2).to_f * (1.0 / 8192.0)
 
-  # The output fader: where a fade ends, the next one is picked. The output silent, an All Sound
-  # Off that waited for it is done, and the fade in starts once the hold is over, unless Mute holds
+  # The output fader: where a fade ends, the next one is picked. The output silent, a Save that
+  # waited for it is done (below), and the fade in starts once the hold is over, unless Mute holds
   # the output silent.
-  if C.get_midi_sound_off_count(MIDI_CH) != sound_off_count
-    sound_off_count = C.get_midi_sound_off_count(MIDI_CH)
-    sound_off_waiting = true
-  end
   if C.get_midi_mute_count(MIDI_CH) != mute_count
     mute_count = C.get_midi_mute_count(MIDI_CH)
     mute_waiting = true
@@ -201,15 +193,9 @@ while true
     mute_waiting = false
     saving = save_waiting
     save_waiting = false
-    if sound_off_waiting
-      eg_1.sound_off
-      eg_2.sound_off
-      filter_1.sound_off
-      sound_off_waiting = false
-    end
     output_hold_buffers -= (output_hold_buffers > 0) ? 1 : 0
     output_fade_direction = (!muted && !saving && output_hold_buffers == 0) ? 1 : 0
-  elsif output_fade_position == OUTPUT_FADE_SAMPLES && (muted || mute_waiting || save_waiting || sound_off_waiting)
+  elsif output_fade_position == OUTPUT_FADE_SAMPLES && (muted || mute_waiting || save_waiting)
     output_fade_direction = -1
     output_hold_buffers = OUTPUT_HOLD_BUFFERS
   elsif output_fade_position == OUTPUT_FADE_SAMPLES
