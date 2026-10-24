@@ -137,6 +137,8 @@ MIDI Synthesizer SPMS-1 (type-2) v0.2.2
     - 各モジュールのパラメータをすべて表示し、CC のないものは青で示します。配線はいつも行き先のパラメータに
       つながります
     - パッチを JSON で保存・読み込みします
+    - JSON で保存したりコピーしたりするパッチでは、Save to Device と同じく、Mod Wheel の CC を起動時の値 (0.0) にします。
+      Mod Wheel は設定するものではなく演奏で動かすものだからです。Send Patch は今の位置を送ります
     - パッチを MIDI バイト列または NRPN リストとしてコピーするか、Web MIDI で送信します
     - パッチ全体 (Send Patch、MIDI Out の選び直し) は Mute のオンとオフ (NRPN の Mute) で挟んで送るので、
       送信途中のパッチの音は聞こえません。"Mute while loading" (デフォルトでオン) にすると、コピーするパッチも同じです。
