@@ -133,6 +133,12 @@
     .midi-bar .form-group.narrow {
       flex: 0 0 auto;
     }
+    /* Why a patch file could not be loaded, under Save JSON and Load JSON, until the next load. */
+    .load-error {
+      margin: 0 0 6px;
+      font-size: 0.85rem;
+      color: var(--primary-color);
+    }
     /* Why no MIDI device is listed, if Web MIDI is not there or not allowed (see showMIDINote). */
     .midi-note {
       margin-top: 6px;
@@ -1454,13 +1460,13 @@
     <div class="form-group">
       <label for="midi-in" title="Keyboard or controller">MIDI In</label>
       <select id="midi-in">
-        <option value="">Select MIDI Input Device...</option>
+        <option value="">(None)</option>
       </select>
     </div>
     <div class="form-group">
       <label for="midi-out" title="SPMS-1 synthesizer">MIDI Out</label>
       <select id="midi-out">
-        <option value="">Select SPMS-1 Device...</option>
+        <option value="">(None)</option>
       </select>
     </div>
     <button class="btn primary" id="btn-send" title="Send the whole patch again: NRPN and CC values. Every change is sent as it is made.">Send Patch</button>
@@ -1517,6 +1523,7 @@
         <button class="btn" id="btn-load">Load JSON</button>
         <input type="file" id="file-load" accept=".json,application/json" hidden>
       </div>
+      <p class="load-error" id="load-error" role="alert" hidden></p>
       <div class="btn-row">
         <button class="btn" id="btn-undo" title="Ctrl+Z">Undo</button>
         <button class="btn" id="btn-redo" title="Ctrl+Y">Redo</button>
@@ -2252,12 +2259,13 @@
 
   // Each node's outputs, and the wires from them, take its color, set apart from its neighbors'. The
   // Controller, the editor's own, takes the primary color, Ruby; Filter 1 a red set apart from it; Osc 2
-  // gold, set apart from Osc 1's blue, and EG 2 purple, set apart from that gold.
+  // gold, set apart from Osc 1's blue (dark enough for the white names on the nodes, 5:1), and EG 2
+  // purple, set apart from that gold.
   // The constants and the output, which make no sound of their own, are in grays.
   const NODE_COLORS = {
     CONTROLLER: '#e0115f', CONST: '#666666', OUT: '#3d3d3d',
     PITCH_1: '#2c3e50', EG_1: '#a65813', EG_2: '#793a93', LFO_1: '#1c7f46', MIXER_1: '#117d68',
-    OSC_1: '#2772a4', OSC_2: '#a37a00', NOISE_1: '#557a0e', MIXER_2: '#9c2f86', FILTER_1: '#c0392b',
+    OSC_1: '#2772a4', OSC_2: '#8c6900', NOISE_1: '#557a0e', MIXER_2: '#9c2f86', FILTER_1: '#c0392b',
     AMP_1: '#473baf', CHORUS_1: '#007784', DELAY_1: '#5e2500',
   };
   const nodeOfOutput = {};
@@ -3214,13 +3222,19 @@
   fileInput.addEventListener('change', () => {
     const file = fileInput.files[0];
     if (!file) return;
+    const error = document.getElementById('load-error');
+    error.hidden = true;
     file.text().then(text => {
       const next = deserialize(JSON.parse(text));
       pushHistory();
       state = next;
       renderAll();
       fitView();
-    }).catch(err => alert('Could not load the patch: ' + err.message));
+    }).catch(err => {
+      // In the panel, under the buttons, as the other notes of the editor, not in a dialog of the browser.
+      error.textContent = `Could not load "${file.name}": ${err.message}`;
+      error.hidden = false;
+    });
     fileInput.value = '';
   });
 
@@ -3311,9 +3325,9 @@
     }
     if (!midiAccess && !webSynthOutput) return;
     if (midiAccess) {
-      fillPortSelect(inSelect, 'Select MIDI Input Device...', midiAccess.inputs, saved.in || current(inSelect));
+      fillPortSelect(inSelect, '(None)', midiAccess.inputs, saved.in || current(inSelect));
     }
-    fillPortSelect(outSelect, 'Select SPMS-1 Device...', outputPorts(), saved.out || current(outSelect));
+    fillPortSelect(outSelect, '(None)', outputPorts(), saved.out || current(outSelect));
     handleDeviceChange();
   }
 
