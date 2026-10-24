@@ -198,7 +198,8 @@ it from anywhere else.
   Send CC#99 or CC#98 again to resume
 - Edits are kept only until power-off, unless the patch is saved (Save, below): at power-on the
   synth loads the patch saved last, or the default patch if none is. Reset (below) puts the
-  default patch back
+  default patch back; to make the default patch the one loaded at power-on again, Reset and then
+  Save
 
 ### Categories (CC#99)
 
@@ -218,7 +219,8 @@ Category 5 has the system entries, which act on the synth rather than set a part
   that it is not heard half sent. No waits are needed between them: every Mute on is taken,
   however soon Mute off follows it, and the output comes back about 15 ms after Mute off at the
   soonest. What the patch changes during the fades, 4 ms each, may be heard faintly. Mute is off
-  at power-on
+  at power-on, and only Mute off or switching the synth off and on turns it off: a sender that
+  stops after Mute on leaves the synth silent, Reset included
 - Entry 1, Reset: 64-127 puts the default patch back: every entry of categories 0-4 and every CC
   value, as the sketch has them. The notes, Pitch Bend and Mute are kept, and so is the patch
   saved. Send it between Mute on and off for it to be heard as silence, since the synth may
@@ -228,7 +230,7 @@ Category 5 has the system entries, which act on the synth rather than set a part
   written once the output is silent, which stops the synth and the MIDI input for about 0.1 s:
   MIDI sent meanwhile may be lost, so send Mute off after it and wait before the next. A patch
   the same as the one saved is not written again. Taken only while Mute is on, so that no stray
-  CC#6 saves; the editor's Save to Device sends Mute on, Save and Mute off
+  CC#6 saves; the editor's Save to Device sends Mute on, the whole patch, Save and Mute off
 - Entry 3, Load: 64-127, while Mute is on, puts the patch saved back, over the default patch, as at
   power-on; with none saved, it does nothing
 

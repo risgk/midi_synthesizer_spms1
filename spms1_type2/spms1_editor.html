@@ -3878,19 +3878,25 @@
   document.getElementById('btn-send').addEventListener('click', sendAll);
   document.getElementById('btn-mute').addEventListener('click', () => setUserMute(!userMuted, true));
 
-  // Save to Device: the patch, as the synth has it, kept in its flash. Save is taken only while
-  // Mute is on, so it goes between Mute on and off; Mute off is left out while the Mute button
-  // holds the synth silent.
+  // Save to Device: the patch shown, kept in the synth's flash. The whole patch goes first, as
+  // Send Patch sends it, since the synth may not have it: switched off and on, it has loaded the
+  // patch saved before. Save is taken only while Mute is on, so all of it goes between Mute on and
+  // off; Mute off is left out while the Mute button holds the synth silent.
   document.getElementById('btn-save-device').addEventListener('click', () => {
     if (!midiOutput) {
       alert('Select the synth in MIDI Out first.');
       return;
     }
     if (!confirm('Save this patch in the synth? It replaces the patch kept there, and the synth loads it at power-up.')) return;
-    sendChanges();
-    const st = 0xB0 | exportOptions().ch;
+    const opts = exportOptions();
+    const st = 0xB0 | opts.ch;
+    opts.includeCC = true;
+    opts.muteBefore = true;
+    opts.muteAfter = false;
+    buildMessages(opts).forEach(l => midiOutput.send(l.bytes));
+    lastSent = snapshotTable();
     const save = [st, 99, NRPN_SYSTEM_MSB, st, 98, 2, st, 6, 127];
-    midiOutput.send([...muteLine(st, true).bytes, ...save, ...(userMuted ? [] : muteLine(st, false).bytes), st, 101, 127, st, 100, 127]);
+    midiOutput.send([...save, ...(userMuted ? [] : muteLine(st, false).bytes), st, 101, 127, st, 100, 127]);
   });
 
   // ---- Export panel --------------------------------------------------------------------------

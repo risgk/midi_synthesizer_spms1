@@ -151,11 +151,10 @@ extern int sp_gc_nroots;
 #define SPMS1_STORAGE_PROVIDED
 #include "spms1_midi_state.h"
 
-void spms1_storage_read(uint8_t* image) {
-  const uint8_t* data = EEPROM.getDataPtr();
-  for (int32_t i = 0; i < SPMS1_PATCH_IMAGE_SIZE; ++i) {
-    image[i] = data ? data[i] : 0;
-  }
+// The EEPROM's copy in RAM, read where it is. getConstDataPtr, not getDataPtr, which marks the
+// EEPROM as changed, so that the next commit would write the flash whether or not anything did.
+const uint8_t* spms1_storage_data(void) {
+  return EEPROM.getConstDataPtr();
 }
 
 // Called by the synth on core 1, with the output faded out, as PRA32-U2 writes its programs: the

@@ -256,15 +256,14 @@ uint8_t  g_spms1_patch_image[SPMS1_PATCH_IMAGE_SIZE] = {0};
 uint32_t g_midi_save_count[16] = {0};
 
 // The host keeps the image: the sketch in its EEPROM (the flash), the simulators in RAM, below,
-// unless the host says it has its own.
-void spms1_storage_read(uint8_t* image);
+// unless the host says it has its own. spms1_storage_data is the image kept, read where it is, or
+// NULL while there is none to read.
+const uint8_t* spms1_storage_data(void);
 void spms1_storage_write(const uint8_t* image);
 #if !defined(SPMS1_STORAGE_PROVIDED)
 static uint8_t s_spms1_storage[SPMS1_PATCH_IMAGE_SIZE] = {0};
-void spms1_storage_read(uint8_t* image) {
-  for (int32_t i = 0; i < SPMS1_PATCH_IMAGE_SIZE; ++i) {
-    image[i] = s_spms1_storage[i];
-  }
+const uint8_t* spms1_storage_data(void) {
+  return s_spms1_storage;
 }
 void spms1_storage_write(const uint8_t* image) {
   for (int32_t i = 0; i < SPMS1_PATCH_IMAGE_SIZE; ++i) {
@@ -374,9 +373,10 @@ int32_t spms1_apply_patch_image(uint8_t midi_ch, const uint8_t* image) {
 
 // Load, and power-up: the patch kept, if one is.
 void load_saved_patch(uint8_t midi_ch) {
-  static uint8_t s_image[SPMS1_PATCH_IMAGE_SIZE];
-  spms1_storage_read(s_image);
-  spms1_apply_patch_image(midi_ch, s_image);
+  const uint8_t* image = spms1_storage_data();
+  if (image) {
+    spms1_apply_patch_image(midi_ch, image);
+  }
 }
 
 // The synth, with the output silent after a Save: the image made then goes to the flash. The
