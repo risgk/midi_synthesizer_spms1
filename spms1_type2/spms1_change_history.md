@@ -4,6 +4,11 @@ MIDI Synthesizer SPMS-1 (type-2) Change History
 The main changes of each version, newest first, gathered before each release. The format may be
 revised.
 
+- v0.3.2 (2026-10-25):
+    - Save (NRPN 117/2): save the General controls' CCs as they are again, as v0.3.0 did, since a
+      General control may set a parameter, Rev or Inv; only a CC that only the Mod Wheel has is
+      saved at 0
+    - Editor: Save JSON and Export keep the General controls' CCs as they are again
 - v0.3.1 (2026-10-25):
     - Save (NRPN 117/2): save a CC that only the controllers (Mod Wheel, General) have at 0, as
       the Mod Wheel's was; a CC that a parameter has too is saved as it is

@@ -240,8 +240,8 @@ void spms1_reset_patch(uint8_t midi_ch) {
 //   16-19  SPMS1_PATCH_SPEC_HASH of the sketch that saved it: its numbers, as patch_gen hashes them
 //   20-31  reserved, 0
 //   32-    the payload: the NRPN table, 128 entries a category; the 128 CC values, those of the
-//          CCs the controls have, but those only the controllers (Mod Wheel, General) have, and
-//          0 for the rest; for each of the 32 run order slots, when it was written as a rank (1 the first, 0
+//          CCs the controls have, but a performance control's (the Mod Wheel's), and 0 for the
+//          rest; for each of the 32 run order slots, when it was written as a rank (1 the first, 0
 //          never); and 32 bytes for a name, reserved, 0
 // The rest of the 4 KB is 0, room for a later layout. An image is loaded only by a sketch with the
 // same layout and the same SPMS1_PATCH_SPEC_HASH, which a sketch numbered otherwise does not have:
@@ -305,7 +305,7 @@ void spms1_make_patch_image(uint8_t midi_ch) {
   for (int32_t i = 0; i < SPMS1_NRPN_SIZE; ++i) {
     *p++ = g_midi_nrpn_values[midi_ch][i];
   }
-  // The CCs of the controls, but those only the controllers have, which stay 0.
+  // The CCs of the controls, but those of the performance controls, which stay 0.
   for (uint32_t i = 0; i < sizeof(g_spms1_saved_cc_entries); ++i) {
     uint8_t cc = g_midi_nrpn_values[midi_ch][384 + g_spms1_saved_cc_entries[i]];
     if (cc > 0 && cc < 128) {
