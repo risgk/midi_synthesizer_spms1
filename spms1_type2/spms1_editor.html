@@ -18,7 +18,7 @@
       --border-color: #e1e4e6;
       --text-color: #2c3e50;
       --text-muted: #6b6b6b;  /* 5.3:1 on white, so that the small notes are easy to read */
-      --wire-signal: #9B111E;
+      --wire-signal: #E0115F;
       --wire-param: #4f7cac;
       --wire-feedback: #d68910;
       --wire-inactive: #b8c0c4;
@@ -1488,8 +1488,8 @@
     <div class="arm-hint" id="arm-hint" hidden></div>
     <div class="canvas-bar">
       <div class="legend">
-        <span><svg width="28" height="6"><line x1="0" y1="3" x2="9" y2="3" stroke="#9b111e" stroke-width="2.5"/><line x1="9" y1="3" x2="19" y2="3" stroke="#1c7f46" stroke-width="2.5"/><line x1="19" y1="3" x2="28" y2="3" stroke="#2772a4" stroke-width="2.5"/></svg>Module input, in its source's color</span>
-        <span><svg width="28" height="6"><line x1="2" y1="3" x2="28" y2="3" stroke="#9b111e" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="0 7"/></svg>1-sample delay (runs later)</span>
+        <span><svg width="28" height="6"><line x1="0" y1="3" x2="9" y2="3" stroke="#e0115f" stroke-width="2.5"/><line x1="9" y1="3" x2="19" y2="3" stroke="#1c7f46" stroke-width="2.5"/><line x1="19" y1="3" x2="28" y2="3" stroke="#2772a4" stroke-width="2.5"/></svg>Module input, in its source's color</span>
+        <span><svg width="28" height="6"><line x1="2" y1="3" x2="28" y2="3" stroke="#e0115f" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="0 7"/></svg>1-sample delay (runs later)</span>
         <span><svg width="28" height="6"><line x1="0" y1="3" x2="28" y2="3" stroke="#b8c0c4" stroke-width="2.5"/></svg>Source not running</span>
         <span><svg width="28" height="6"><line x1="0" y1="3" x2="28" y2="3" stroke="#2c3e50" stroke-width="1.5" stroke-dasharray="5 4" opacity="0.6"/></svg>Parameter</span>
       </div>
@@ -2247,12 +2247,13 @@
   // An output clicked, waiting for a click on an input to wire it to: { src, temp, last }.
   let armed = null;
 
-  // Each node's outputs, and the wires from them, take its color, set apart from its neighbors'.
+  // Each node's outputs, and the wires from them, take its color, set apart from its neighbors'. The
+  // Controller, the editor's own, takes the primary color, Ruby; Filter 1 a red set apart from it.
   // The constants and the output, which make no sound of their own, are in grays.
   const NODE_COLORS = {
-    CONTROLLER: '#9b111e', CONST: '#666666', OUT: '#3d3d3d',
+    CONTROLLER: '#e0115f', CONST: '#666666', OUT: '#3d3d3d',
     PITCH_1: '#2c3e50', EG_1: '#a65813', EG_2: '#98620b', LFO_1: '#1c7f46', MIXER_1: '#117d68',
-    OSC_1: '#2772a4', OSC_2: '#793a93', NOISE_1: '#557a0e', MIXER_2: '#9c2f86', FILTER_1: '#b81752',
+    OSC_1: '#2772a4', OSC_2: '#793a93', NOISE_1: '#557a0e', MIXER_2: '#9c2f86', FILTER_1: '#c0392b',
     AMP_1: '#473baf', CHORUS_1: '#007784', DELAY_1: '#5e2500',
   };
   const nodeOfOutput = {};
