@@ -175,12 +175,15 @@
     }
     /* In one column the soft keyboard comes right under the canvas: the canvas and the side
        panels become items of the body, so order can put the keyboard between them. Not on a
-       hidden tab, where display: contents would win over [hidden]. The Wide button gives the same
-       layout above the breakpoint. */
+       hidden tab, where display: contents would win over [hidden]. The Wide button gives the
+       canvas the full width above the breakpoint too, with the side panels under it and the soft
+       keyboard last, kept at the bottom of the window (below), so that they scroll behind it. */
     .app.wide:not([hidden]) { display: contents; }
-    .app.wide:not([hidden]) > .canvas-panel { order: 1; }
-    .app.wide:not([hidden]) ~ #kbd-panel { order: 2; }
-    .app.wide:not([hidden]) > .side { order: 3; }
+    @media (min-width: 801px) {
+      .app.wide:not([hidden]) > .canvas-panel { order: 1; }
+      .app.wide:not([hidden]) > .side { order: 2; }
+      .app.wide:not([hidden]) ~ #kbd-panel { order: 3; }
+    }
     @media (max-width: 800px) {
       .app:not([hidden]) { display: contents; }
       .canvas-panel { order: 1; }
@@ -588,13 +591,22 @@
     /* Soft keyboard */
     /* On the Controls tab, kept at the bottom of the window while the page scrolls above it, as on
        a 1280 x 720 screen or a phone, upright or on its side, so the keys stay at hand under the
-       controls, with lower keys in a low window (below), as in PRA32-U2 Editor; not on the Patch
-       tab, where it would cover the canvas. */
+       controls, with lower keys in a low window (below), as in PRA32-U2 Editor; on the Patch tab
+       only with Wide, where the canvas ends above it and the side panels scroll behind it, and
+       not in one column (a phone), where it would take much of the window over the canvas. */
     body:has(#tab-controls:not([hidden])) #kbd-panel {
       position: sticky;
       bottom: 0;
       z-index: 5;
       box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.08);
+    }
+    @media (min-width: 801px) {
+      body:has(#tab-patch.wide:not([hidden])) #kbd-panel {
+        position: sticky;
+        bottom: 0;
+        z-index: 5;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.08);
+      }
     }
     /* A phone on its side: the page packed tighter. */
     @media (max-height: 480px) and (orientation: landscape) {
