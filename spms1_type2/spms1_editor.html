@@ -754,6 +754,11 @@
       .mod-wheel { width: calc(var(--kbd-key-width) * 3 / 2); }
       .mod-wheel-label { font-size: 0.6rem; }
     }
+    /* Where the keys are near their narrowest, the wheels are too, and the labels smaller, so that
+       Bend and Mod stay apart. */
+    @media (min-width: 481px) and (max-width: 720px) {
+      .mod-wheel-label { font-size: 0.55rem; }
+    }
     /* The native scroll bar is hidden, since Safari cannot color it; .kbd-scrollbar stands in. */
     .keyboard-scroll-container {
       width: 100%;
