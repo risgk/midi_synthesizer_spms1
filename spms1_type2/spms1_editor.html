@@ -1526,6 +1526,10 @@
     #export-info {
       margin: 4px 0 8px;
     }
+    /* No margin under the page, so that the soft keyboard ends at the bottom of the window on both
+       tabs, and does not move when the tab changes: stuck there on the Controls tab, and with the
+       canvas sized by fitTabArea to end it there on the Patch tab. */
+    body { padding-bottom: 0; }
   </style>
 </head>
 <body>
@@ -4678,9 +4682,12 @@
     // In one column the patch area has no box of its own, but the canvas starts where it would.
     const top = (controls.hidden ? canvas : controls).getBoundingClientRect().top + window.scrollY;
     const keyboard = document.getElementById('kbd-panel').offsetHeight;
-    const height = window.innerHeight - top - 16 - keyboard - 20;
+    // The gap above the keyboard and the margin under the page, as the window size sets them.
+    const body = getComputedStyle(document.body);
+    const around = (parseFloat(body.rowGap) || 0) + (parseFloat(body.paddingBottom) || 0);
+    const height = window.innerHeight - top - around - keyboard;
     const zoom = Math.min(5, Math.max(1, Math.round(window.outerWidth / window.innerWidth * 20) / 20));
-    const heightAt100 = Math.round(window.innerHeight * zoom) - top - 16 - keyboard - 20;
+    const heightAt100 = Math.round(window.innerHeight * zoom) - top - around - keyboard;
     const narrow = matchMedia('(max-width: 800px)').matches;
     if (!controls.hidden) {
       if (!narrow) controls.style.minHeight = height + 'px';
@@ -4696,6 +4703,14 @@
     }
   }
   window.addEventListener('resize', fitTabArea);
+  // The soft keyboard takes its height only once its keys are fitted, and what is above the tabs
+  // may wrap once the fonts are in, both after the first fit; fitted again, the page would
+  // otherwise run past the window by the difference (22 px at 1920 x 1080).
+  if (window.ResizeObserver) {
+    const refit = new ResizeObserver(() => fitTabArea());
+    refit.observe(document.getElementById('kbd-panel'));
+    refit.observe(document.querySelector('header'));
+  }
 
   document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
 
