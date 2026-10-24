@@ -38,6 +38,11 @@
       margin: 0;
       padding: 0;
     }
+    /* The width of a scrollbar kept free even when the page fits the window, so that the page
+       does not widen when the Patch tab, which fits it, follows the Controls tab, which scrolls. */
+    html {
+      scrollbar-gutter: stable;
+    }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background-color: var(--bg-color);
