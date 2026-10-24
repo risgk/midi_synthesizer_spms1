@@ -655,14 +655,14 @@
     @media (hover: none) {
       .kbd-hint { display: none; }
     }
-    /* On a phone the bar takes one line from 375px (as an iPhone SE), its heading, buttons and gaps
-       a little smaller; and in a window up to 640px high, as one upright under the bars of the
+    /* On a phone the bar takes one line from 360px, its heading, buttons and gaps a little
+       smaller; and in a window up to 640px high, as one upright under the bars of the
        browser, the keys are lower, as on a phone on its side, so that the keyboard at the bottom
        leaves more of the window to the controls. */
     @media (max-width: 480px) {
-      #kbd-panel .kbd-bar { column-gap: 4px; }
-      #kbd-panel .kbd-bar h2 { font-size: 1rem; }
-      #kbd-panel .kbd-bar .btn { padding-left: 7px; padding-right: 7px; }
+      #kbd-panel .kbd-bar { column-gap: 3px; }
+      #kbd-panel .kbd-bar h2 { font-size: 0.95rem; }
+      #kbd-panel .kbd-bar .btn { padding-left: 6px; padding-right: 6px; }
     }
     @media (max-width: 480px) and (min-height: 480px) and (max-height: 640px) {
       #kbd-panel .keyboard-frame { --kbd-half-height: calc(42px * var(--kbd-scale)); padding-top: 4px; }
