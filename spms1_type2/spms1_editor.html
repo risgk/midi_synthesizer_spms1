@@ -4,23 +4,34 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SPMS-1 (type-2) Editor</title>
+  <!-- The icon: "t2" in white on the primary color, as shapes (the letters of M+ 1p Black, M PLUS 1p Black under the SIL
+       Open Font License), not as text, so that it is the same in every OS; embedded, so that it needs no file beside the page -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='5'%20fill='%23E0115F'/%3E%3Cpath%20d='M10.13%2024.5Q7.89%2024.5%206.8%2023.47Q5.71%2022.44%205.71%2020.19V15.89H3.33V12.94H5.71V8.63H10.11V12.94H13.76V15.89H10.11V19.51Q10.11%2020.6%2010.36%2020.96Q10.61%2021.33%2011.26%2021.33Q12.26%2021.33%2013.3%2020.99L13.76%2024.05Q12.08%2024.5%2010.13%2024.5ZM16.88%2020.65Q19.92%2018.36%2021.44%2016.96Q22.96%2015.57%2023.43%2014.73Q23.91%2013.89%2023.91%2012.94Q23.91%2011.24%2021.98%2011.24Q20.28%2011.24%2017.56%2012.94L16.43%209.31Q17.59%208.54%2019.35%208.02Q21.12%207.5%2022.66%207.5Q25.5%207.5%2027.03%208.83Q28.56%2010.15%2028.56%2012.49Q28.56%2014.35%2027.38%2016.02Q26.2%2017.7%2022.78%2020.6V20.65H28.67V24.27H16.88Z'%20fill='white'/%3E%3C/svg%3E">
   <!-- SPMS-1 Web: the synth itself, built into the editor as "SPMS-1 Web (Built-in)" in MIDI Out (optional) -->
   <script src="spms1_web_synth.js"></script>
   <style>
     :root {
-      --primary-color: #9B111E;
-      --primary-hover: #7A0D17;
+      --primary-color: #E0115F;  /* Ruby, 4.8:1 with white */
+      --primary-hover: #B30D4C;
       --bg-color: #f7f9fa;
       --panel-bg: #ffffff;
       --border-color: #e1e4e6;
       --text-color: #2c3e50;
-      --text-muted: #7f8c8d;
-      --wire-signal: #9B111E;
+      --text-muted: #6b6b6b;  /* 5.3:1 on white, so that the small notes are easy to read */
+      --wire-signal: #E0115F;
       --wire-param: #4f7cac;
       --wire-feedback: #d68910;
       --wire-inactive: #b8c0c4;
       --favorite: #d4a017;
       --favorite-bg: #fdf8e8;
+      --thumb-size: 18px;
+    }
+    /* On a touch screen the thumbs are larger, and the star and the wheels take a larger touch,
+       closer to the 44px a finger needs. */
+    @media (pointer: coarse) {
+      :root { --thumb-size: 24px; }
+      .fav-toggle::after { content: ''; position: absolute; inset: -12px -8px; }
+      .mod-wheel { min-width: 28px; }
     }
     * {
       box-sizing: border-box;
@@ -54,8 +65,9 @@
       gap: 12px;
       flex-wrap: wrap;
     }
+    /* The title as large as PRA32-U2 Editor's, 20px, at every width. */
     header h1 {
-      font-size: 1.8rem;
+      font-size: 1.25rem;
       color: var(--primary-color);
     }
     header .version {
@@ -76,7 +88,6 @@
     /* On a phone the title takes one line and the margins less of the width. */
     @media (max-width: 480px) {
       body { padding: 12px; gap: 12px; }
-      header h1 { font-size: 1.35rem; }
       header .version, header .github-link { font-size: 0.8rem; margin-left: 6px; }
     }
     [hidden] {
@@ -121,6 +132,18 @@
     }
     .midi-bar .form-group.narrow {
       flex: 0 0 auto;
+    }
+    /* Why a patch file could not be loaded, under Save JSON and Load JSON, until the next load. */
+    .load-error {
+      margin: 0 0 6px;
+      font-size: 0.85rem;
+      color: var(--primary-color);
+    }
+    /* Why no MIDI device is listed, if Web MIDI is not there or not allowed (see showMIDINote). */
+    .midi-note {
+      margin-top: 6px;
+      font-size: 0.85rem;
+      color: var(--primary-color);
     }
     .midi-bar .form-group label {
       margin-bottom: 0;
@@ -185,11 +208,12 @@
     /* A slider row needs about 430px for its thumb to travel 120 pixels, a pixel a step from 4 to
        124, with the longest name and its note beside it, so below four of them the columns go two
        to a row, the last two under the first two, rather than three to a row with the fourth left
-       alone under them, and below two of 450px, one. */
+       alone under them. Below two of 450px the name goes above the slider, which then needs about
+       260px, so the columns stay two to a row down to 600px, and below that go one. */
     @media (max-width: 1871px) {
       .editor-grid { grid-template-columns: 1fr 1fr; }
     }
-    @media (max-width: 919px) {
+    @media (max-width: 599px) {
       .editor-grid { grid-template-columns: 1fr; }
     }
     /* Spaced a little tighter than the other panels, so the columns fit a full HD window without
@@ -200,8 +224,11 @@
       gap: 16px;
       min-width: 0;
     }
+    /* A container, so that its sliders lay out by the width of the panel, not of the window. The
+       panel, not the column, since a container holds a fixed panel, the one being moved, inside it. */
     .editor-column .panel {
       padding: 12px 16px;
+      container-type: inline-size;
     }
     /* The last column, Controller to LFO 1, runs the full height of its row, so the Init button under it sits at the
        bottom, just above the keyboard. */
@@ -245,7 +272,7 @@
       margin-bottom: 8px;
     }
     /* A panel is moved by its heading, with the columns two or four to a row. */
-    @media (min-width: 920px) {
+    @media (min-width: 600px) {
       .editor-column .panel h2 {
         cursor: grab;
         touch-action: none;
@@ -348,9 +375,10 @@
       color: var(--text-muted);
       white-space: nowrap;
     }
-    /* In one or two columns the name takes one width, wrapping the note under it if need be, so
-       every slider is as long as the others and its thumb travels at least 120 pixels. */
-    @media (min-width: 481px) and (max-width: 1871px) {
+    /* In a panel 380px or more inside the name takes one width beside the slider, wrapping the
+       note under it if need be, so every slider is as long as the others and its thumb travels at
+       least 120 pixels; four columns give it a width of their own, below. */
+    @container (min-width: 380px) {
       .slider-label { flex: 0 0 140px; min-width: 0; }
     }
     /* In four columns the CC number goes on the line of the name, and the panels are packed
@@ -382,13 +410,13 @@
       /* One row, which takes the extra height of the tab. */
       .editor-grid { align-content: stretch; }
     }
-    @media (min-width: 1641px) {
+    @media (min-width: 1280px) {
       /* The page around the panels is packed tighter, so that the controls and the soft
          keyboard fit the window Chrome leaves of a full HD screen on Windows, under its tabs, its
-         address bar and its bookmarks bar, above the taskbar: about 910 pixels. */
+         address bar and its bookmarks bar, above the taskbar: about 910 pixels; and so that a
+         1280 x 720 or 800 screen shows as much of the controls as it can. */
       body { padding: 14px 20px; gap: 10px; }
       header { padding-bottom: 8px; }
-      header h1 { font-size: 1.5rem; }
       .panel.midi-panel { padding-top: 4px; padding-bottom: 4px; }
       /* The MIDI settings in the header, between the title and the tabs (see placeMIDIPanel). */
       header.with-midi { align-items: center; flex-wrap: nowrap; }
@@ -399,9 +427,10 @@
       #kbd-panel .keyboard-frame { --kbd-half-height: calc(60px * var(--kbd-scale)); padding-top: 6px; }
       #kbd-panel .keyboard-wrapper { height: calc(120px * var(--kbd-scale)); }
     }
-    /* On a phone the name would leave the slider only a few dozen pixels, so the name, with the
-       CC number on its line, goes above the slider, which takes the full width of the panel. */
-    @media (max-width: 480px) {
+    /* In a narrower panel, as on a phone or with two columns below about 860px, the name would
+       leave the slider only a few dozen pixels, so the name, with the CC number on its line, goes
+       above the slider, which takes the full width of the panel. */
+    @container (max-width: 379px) {
       .slider-knob-zone {
         flex-direction: column;
         align-items: stretch;
@@ -465,10 +494,10 @@
     }
     .range-wrap .center-tick {
       position: absolute;
-      left: calc(9px + (100% - 18px) * 0.5 - 1px);
+      left: calc(var(--thumb-size) / 2 + (100% - var(--thumb-size)) * 0.5 - 1px);
       top: 50%;
       width: 2px;
-      height: 24px;
+      height: calc(var(--thumb-size) + 6px);
       transform: translateY(-50%);
       background: var(--text-muted);
       pointer-events: none;
@@ -476,16 +505,16 @@
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
       appearance: none;
-      width: 18px;
-      height: 18px;
+      width: var(--thumb-size);
+      height: var(--thumb-size);
       border-radius: 50%;
       background: var(--thumb-color, var(--primary-color));
       cursor: pointer;
     }
     /* Same size as the WebKit thumb above, so the tick positions line up here too. */
     input[type="range"]::-moz-range-thumb {
-      width: 18px;
-      height: 18px;
+      width: var(--thumb-size);
+      height: var(--thumb-size);
       border: none;
       border-radius: 50%;
       background: var(--thumb-color, var(--primary-color));
@@ -532,6 +561,27 @@
     }
 
     /* Soft keyboard */
+    /* On the Controls tab, kept at the bottom of the window while the page scrolls above it, as on
+       a 1280 x 720 screen or a phone, so the keys stay at hand under the controls; not on the Patch
+       tab, where it would cover the canvas, nor where the window is too low for that to leave
+       much above it. */
+    @media (min-height: 560px) {
+      body:has(#tab-controls:not([hidden])) #kbd-panel {
+        position: sticky;
+        bottom: 0;
+        z-index: 5;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.08);
+      }
+    }
+    /* A phone on its side: the page and the keys packed tighter, so the keys leave some of the
+       window to the controls or the patch. */
+    @media (max-height: 480px) and (orientation: landscape) {
+      body { padding: 8px 12px; gap: 8px; }
+      #kbd-panel { padding: 8px 12px; }
+      #kbd-panel .kbd-bar { margin-bottom: 6px; }
+      #kbd-panel .keyboard-frame { --kbd-half-height: calc(42px * var(--kbd-scale)); padding-top: 4px; }
+      #kbd-panel .keyboard-wrapper { height: calc(84px * var(--kbd-scale)); }
+    }
     .kbd-bar {
       display: flex;
       flex-wrap: wrap;
@@ -641,6 +691,11 @@
       accent-color: var(--primary-color);
       cursor: pointer;
     }
+    /* A line across the bend wheel at 0, the center it springs back to: -8192 to 8191 puts 0 at
+       the middle of the thumb's travel, so the middle of the wheel. */
+    #bend-wheel {
+      background-image: linear-gradient(to bottom, transparent calc(50% - 1px), var(--text-muted) calc(50% - 1px), var(--text-muted) calc(50% + 1px), transparent calc(50% + 1px));
+    }
     .mod-wheel input:disabled {
       cursor: default;
     }
@@ -648,6 +703,13 @@
       font-size: 0.65rem;
       color: #ccc;
       white-space: nowrap;
+    }
+    /* Below 960px the keys narrow with the window, down to KB_KEY_WIDTH_NARROW (see kbFitKeys);
+       on a phone the wheels are narrower still, 3/2 of a semitone, so that 360px shows an octave
+       and more. */
+    @media (max-width: 480px) {
+      .mod-wheel { width: calc(var(--kbd-key-width) * 3 / 2); }
+      .mod-wheel-label { font-size: 0.6rem; }
     }
     /* The native scroll bar is hidden, since Safari cannot color it; .kbd-scrollbar stands in. */
     .keyboard-scroll-container {
@@ -774,6 +836,12 @@
       border-color: var(--primary-color);
       outline: none;
     }
+    /* The ring of the keyboard focus, in the primary color: the outline is taken off the sliders and the fields above,
+       so without it a key on the keyboard would leave no sign of where it is. */
+    button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus-visible {
+      outline: 2px solid var(--primary-color);
+      outline-offset: 2px;
+    }
     .btn {
       padding: 7px 10px;
       border: 1px solid var(--border-color);
@@ -814,6 +882,38 @@
       font-size: 0.75rem;
       color: var(--text-muted);
       line-height: 1.4;
+    }
+    /* What the colors of the CC# fields mean, with a field of each, for a touch screen, which
+       shows no titles. */
+    .field-key {
+      margin-top: 6px;
+    }
+    .field-key .cc-key {
+      display: inline-block;
+      min-width: 24px;
+      padding: 0 3px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-family: monospace;
+      text-align: center;
+      color: var(--text-color);
+    }
+    .field-key .cc-key.shared {
+      border: 2px dotted #d99aa0;
+      padding: 0 2px;
+      background: #fdecee;
+      color: #b71c1c;
+      font-weight: 600;
+    }
+    .field-key .cc-key.none {
+      border-color: #9bb5d2;
+      background: #edf2f8;
+      color: var(--wire-param);
+      font-weight: 600;
+    }
+    .field-key .cc-key.warn {
+      border-color: var(--wire-feedback);
+      background: #fdf2e3;
     }
 
     /* Canvas */
@@ -1104,15 +1204,21 @@
       color: var(--wire-param);
     }
     /* A CC that also fills another parameter's slot, as Osc 2's amounts are on Osc 1's CCs: moving
-       one moves the other, so the number stands out a little. */
-    /* A CC shared by more than one slot in amber, apart from the red of the Controller and the
-       orange of a reserved CC. */
-    .row input.shared {
-      border-color: #e5c07b;
-      background: #fdf6e3;
-    }
+       one moves the other, so the number is marked by a line rather than a color, which could be
+       taken for a module's (as amber was for Osc 2's gold): a dotted underline, in its own muted
+       color, on the Controls tab, and a red dotted frame round its field on the Patch tab. */
     .slider-label .cc-num.shared {
-      color: #946000;
+      text-decoration: underline dotted;
+      text-underline-offset: 2px;
+    }
+    /* On the Patch tab the field stands out more than one with no CC: a pale red field and its number
+       in bold red, in a dotted frame as light as that one's, 2px wide for the gaps of the dots, a red
+       apart from the orange of a reserved CC. */
+    .row input.shared {
+      border: 2px dotted #d99aa0;
+      padding: 1px 2px;
+      background: #fdecee;
+      color: #b71c1c;
       font-weight: 600;
     }
     /* A routed parameter reads its wire, but its CC still fills its own slot and so still feeds
@@ -1233,7 +1339,7 @@
     /* An output held by a click, waiting for the input to wire it to. */
     .port.armed {
       transform: scale(1.6);
-      box-shadow: 0 0 0 3px rgba(155, 17, 30, 0.35);
+      box-shadow: 0 0 0 3px rgba(224, 17, 95, 0.35);
     }
     .arm-hint {
       position: absolute;
@@ -1376,7 +1482,7 @@
 <body>
 
 <header>
-  <h1>SPMS-1 (type-2) Editor<span class="version">v0.0.9</span><span class="github-link">(<a href="https://github.com/risgk/midi_synthesizer_spms1" target="_blank" rel="noopener">View on GitHub</a>)</span></h1>
+  <h1>SPMS-1 (type-2) Editor<span class="version">v0.1.0</span><span class="github-link">(<a href="https://github.com/risgk/midi_synthesizer_spms1" target="_blank" rel="noopener">View on GitHub</a>)</span></h1>
   <nav class="tabs">
     <button class="tab-btn active" data-tab="controls">Controls</button>
     <button class="tab-btn" data-tab="patch">Patch</button>
@@ -1392,17 +1498,18 @@
     <div class="form-group">
       <label for="midi-in" title="Keyboard or controller">MIDI In</label>
       <select id="midi-in">
-        <option value="">Select MIDI Input Device...</option>
+        <option value="">(None)</option>
       </select>
     </div>
     <div class="form-group">
       <label for="midi-out" title="SPMS-1 synthesizer">MIDI Out</label>
       <select id="midi-out">
-        <option value="">Select SPMS-1 Device...</option>
+        <option value="">(None)</option>
       </select>
     </div>
     <button class="btn primary" id="btn-send" title="Send the whole patch again: NRPN and CC values. Every change is sent as it is made.">Send Patch</button>
   </div>
+  <div class="midi-note" id="midi-note" hidden></div>
 </div>
 
 <div id="tab-controls">
@@ -1428,8 +1535,8 @@
     <div class="arm-hint" id="arm-hint" hidden></div>
     <div class="canvas-bar">
       <div class="legend">
-        <span><svg width="28" height="6"><line x1="0" y1="3" x2="9" y2="3" stroke="#9b111e" stroke-width="2.5"/><line x1="9" y1="3" x2="19" y2="3" stroke="#1c7f46" stroke-width="2.5"/><line x1="19" y1="3" x2="28" y2="3" stroke="#2772a4" stroke-width="2.5"/></svg>Module input, in its source's color</span>
-        <span><svg width="28" height="6"><line x1="2" y1="3" x2="28" y2="3" stroke="#9b111e" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="0 7"/></svg>1-sample delay (runs later)</span>
+        <span><svg width="28" height="6"><line x1="0" y1="3" x2="9" y2="3" stroke="#e0115f" stroke-width="2.5"/><line x1="9" y1="3" x2="19" y2="3" stroke="#1c7f46" stroke-width="2.5"/><line x1="19" y1="3" x2="28" y2="3" stroke="#2772a4" stroke-width="2.5"/></svg>Module input, in its source's color</span>
+        <span><svg width="28" height="6"><line x1="2" y1="3" x2="28" y2="3" stroke="#e0115f" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="0 7"/></svg>1-sample delay (runs later)</span>
         <span><svg width="28" height="6"><line x1="0" y1="3" x2="28" y2="3" stroke="#b8c0c4" stroke-width="2.5"/></svg>Source not running</span>
         <span><svg width="28" height="6"><line x1="0" y1="3" x2="28" y2="3" stroke="#2c3e50" stroke-width="1.5" stroke-dasharray="5 4" opacity="0.6"/></svg>Parameter</span>
       </div>
@@ -1454,6 +1561,7 @@
         <button class="btn" id="btn-load">Load JSON</button>
         <input type="file" id="file-load" accept=".json,application/json" hidden>
       </div>
+      <p class="load-error" id="load-error" role="alert" hidden></p>
       <div class="btn-row">
         <button class="btn" id="btn-undo" title="Ctrl+Z">Undo</button>
         <button class="btn" id="btn-redo" title="Ctrl+Y">Redo</button>
@@ -1467,6 +1575,10 @@
         connected input away to unplug it; click a wire and press Delete to remove it. An unplugged parameter reads its own
         control slot. Drag a value up or down to change it, with Shift for fine steps, or turn the
         wheel over the one being edited. Drag the background to pan, wheel or pinch to zoom.
+      </p>
+      <p class="hint field-key">
+        CC#: <span class="cc-key shared">34</span> shared with another parameter,
+        <span class="cc-key none">0</span> no CC, <span class="cc-key warn">6</span> reserved
       </p>
     </div>
 
@@ -2187,12 +2299,15 @@
   // An output clicked, waiting for a click on an input to wire it to: { src, temp, last }.
   let armed = null;
 
-  // Each node's outputs, and the wires from them, take its color, set apart from its neighbors'.
+  // Each node's outputs, and the wires from them, take its color, set apart from its neighbors'. The
+  // Controller, the editor's own, takes the primary color, Ruby; Filter 1 a red set apart from it; Osc 2
+  // gold, set apart from Osc 1's blue (dark enough for the white names on the nodes, 5:1), and EG 2
+  // purple, set apart from that gold.
   // The constants and the output, which make no sound of their own, are in grays.
   const NODE_COLORS = {
-    CONTROLLER: '#9b111e', CONST: '#666666', OUT: '#3d3d3d',
-    PITCH_1: '#2c3e50', EG_1: '#a65813', EG_2: '#98620b', LFO_1: '#1c7f46', MIXER_1: '#117d68',
-    OSC_1: '#2772a4', OSC_2: '#793a93', NOISE_1: '#557a0e', MIXER_2: '#9c2f86', FILTER_1: '#b81752',
+    CONTROLLER: '#e0115f', CONST: '#666666', OUT: '#3d3d3d',
+    PITCH_1: '#2c3e50', EG_1: '#a65813', EG_2: '#793a93', LFO_1: '#1c7f46', MIXER_1: '#117d68',
+    OSC_1: '#2772a4', OSC_2: '#8c6900', NOISE_1: '#557a0e', MIXER_2: '#9c2f86', FILTER_1: '#c0392b',
     AMP_1: '#473baf', CHORUS_1: '#007784', DELAY_1: '#5e2500',
   };
   const nodeOfOutput = {};
@@ -2222,8 +2337,8 @@
       ${withInput ? `<span class="port in param" data-dst="PR:${c.key}" title="Where ${escapeHTML(c.full)} takes its value (per buffer). Drag to wire, or click to pick a source"></span>` : ''}
       <span class="lbl" title="${tip}">${escapeHTML(label)}</span>
       <span class="src"${withInput ? ` data-src-of="PR:${c.key}"` : ''}></span>
-      <input type="number" class="cc" min="0" max="127" title="CC number, 0 for none">
-      <input type="number" class="val" min="4" max="124" title="CC value">
+      <input type="number" class="cc" min="0" max="127" title="CC number, 0 for none" aria-label="${escapeHTML(c.full)}: CC number">
+      <input type="number" class="val" min="4" max="124" title="CC value" aria-label="${escapeHTML(c.full)}: value">
       <span class="norm" data-slot="${slot}" title="The value the synth sees in the slot"></span>
       ${withInput ? '' : `<span class="port out param" data-src="${slot}" title="${escapeHTML(SLOT[slot].full)} control slot"></span>`}
     </div>` + forms.map(([form, formLabel]) => `<div class="row form-row">
@@ -2241,7 +2356,7 @@
       h += `<div class="sep"><span>Signals</span><span>Value</span><span class="norm-head">Norm</span></div>`;
     }
     for (const [o, label, min, max] of node.notes || []) {
-      h += `<div class="row note-row" data-note-sig="${o}"><span class="lbl">${label}</span><input type="number" class="nv" min="${min}" max="${max}"><span class="norm"></span><span class="port out" data-src="${o}"></span></div>`;
+      h += `<div class="row note-row" data-note-sig="${o}"><span class="lbl">${label}</span><input type="number" class="nv" min="${min}" max="${max}" aria-label="${escapeHTML(node.label)} ${escapeHTML(label)}: value"><span class="norm"></span><span class="port out" data-src="${o}"></span></div>`;
     }
     if (node.normed) {
       h += `<div class="sep"><span>Signals</span><span class="norm-head">Norm</span></div>`;
@@ -3149,13 +3264,19 @@
   fileInput.addEventListener('change', () => {
     const file = fileInput.files[0];
     if (!file) return;
+    const error = document.getElementById('load-error');
+    error.hidden = true;
     file.text().then(text => {
       const next = deserialize(JSON.parse(text));
       pushHistory();
       state = next;
       renderAll();
       fitView();
-    }).catch(err => alert('Could not load the patch: ' + err.message));
+    }).catch(err => {
+      // In the panel, under the buttons, as the other notes of the editor, not in a dialog of the browser.
+      error.textContent = `Could not load "${file.name}": ${err.message}`;
+      error.hidden = false;
+    });
     fileInput.value = '';
   });
 
@@ -3246,19 +3367,33 @@
     }
     if (!midiAccess && !webSynthOutput) return;
     if (midiAccess) {
-      fillPortSelect(inSelect, 'Select MIDI Input Device...', midiAccess.inputs, saved.in || current(inSelect));
+      fillPortSelect(inSelect, '(None)', midiAccess.inputs, saved.in || current(inSelect));
     }
-    fillPortSelect(outSelect, 'Select SPMS-1 Device...', outputPorts(), saved.out || current(outSelect));
+    fillPortSelect(outSelect, '(None)', outputPorts(), saved.out || current(outSelect));
     handleDeviceChange();
   }
 
   function initMIDI() {
-    if (!navigator.requestMIDIAccess) return;
+    if (!navigator.requestMIDIAccess) {
+      showMIDINote('Web MIDI is not available in this browser: no MIDI device can be used');
+      return;
+    }
     navigator.requestMIDIAccess().then(access => {
       midiAccess = access;
       applyMIDISettings(loadMIDISettings());
       midiAccess.onstatechange = () => applyMIDISettings(loadMIDISettings());
-    }, err => console.error('Failed to get MIDI access - ' + err));
+    }, err => {
+      console.error('Failed to get MIDI access - ' + err);
+      showMIDINote('MIDI access is not allowed (or failed): no MIDI device can be used');
+    });
+  }
+
+  // A note under the MIDI settings, so that one sees why no MIDI device is listed (not only in the console),
+  // and that SPMS-1 Web can still be played, if it is there.
+  function showMIDINote(text) {
+    const note = document.getElementById('midi-note');
+    note.textContent = text + (webSynthOutput ? ', but SPMS-1 Web (Built-in) in MIDI Out can be.' : '.');
+    note.hidden = false;
   }
 
   function handleDeviceChange() {
@@ -3776,7 +3911,7 @@
   // first panel there whose middle is below it. In one column the order is as it is laid out.
   let panelDrag = null;
   function startPanelDrag(e) {
-    if (e.button !== 0 || matchMedia('(max-width: 919px)').matches) return;
+    if (e.button !== 0 || matchMedia('(max-width: 599px)').matches) return;
     const panel = e.currentTarget.closest('.panel');
     const rect = panel.getBoundingClientRect();
     const drop = document.createElement('div');
@@ -3938,6 +4073,7 @@
       zone.classList.toggle('fav', fav);
       const star = zone.querySelector('.fav-toggle');
       star.setAttribute('aria-pressed', String(fav));
+      star.setAttribute('aria-label', `Favorite: ${c.full}`);
       star.title = fav ? 'Favorite: click to unmark' : 'Mark as a favorite';
       const others = sharingCC(c);
       const hint = controlHint(c);
@@ -3958,6 +4094,9 @@
       const own = signalNorm(c.slots[0][0]);
       const norm = zone.querySelector('.slider-norm');
       norm.textContent = own ? own.text : '';
+      // For a screen reader: the name of the parameter, and the value with what the synth sees, as shown.
+      slider.setAttribute('aria-label', c.full);
+      slider.setAttribute('aria-valuetext', usable ? (own ? `${value}, ${own.text}` : String(value)) : 'no CC');
       norm.title = 'The value the synth sees in the slot';
     });
     refreshModWheel();
@@ -4048,6 +4187,11 @@
 
   const KB_NOTE_MAX = 120;
   const KB_KEY_WIDTH = 20;  // a semitone in the upper half, times kbScale; 37 keys fit 960px, with room
+  const KB_KEY_WIDTH_NARROW = 16;  // the narrowest, below 800px; two octaves and more fit 640px
+  // Below their full width the keys narrow so as to show no more than this many semitones, as many
+  // as 960px shows at full width: the 37 keys, with room. So a wider window never shows fewer.
+  const KB_SEMITONES = 40;
+  const KB_PHONE = window.matchMedia('(max-width: 480px)');
   // The center of 37 keys from a C (C3 - C6 by default), in semitones from the left end of the C.
   const KB_CENTER_OFFSET = (36 + 5 / 3) / 2;
   const KB_DEFAULT_C = 48;  // C3
@@ -4060,6 +4204,7 @@
   let kbHold = false;
   let kbLast = -1;  // the note of the last press
   let kbScale = 1;
+  let kbKeyPx = KB_KEY_WIDTH;  // --kbd-key-width, set by kbFitKeys
   const kbPrefs = { center: KB_DEFAULT_C + KB_CENTER_OFFSET, hidden: false };
 
   function loadKbPrefs() {
@@ -4136,15 +4281,35 @@
     return key ? parseInt(key.dataset.note) : -1;
   }
 
+  // A semitone in the upper half, in pixels, as --kbd-key-width makes it.
+  function kbKeyWidth() {
+    return kbKeyPx;
+  }
+
+  // The width of a semitone, between KB_KEY_WIDTH_NARROW and KB_KEY_WIDTH times the scale: as
+  // wide as shows KB_SEMITONES beside the two wheels, each 5/3 of a semitone (3/2 on a phone),
+  // with the 4px gaps after each. Hidden, the keyboard has no width, and keeps what it had.
+  function kbFitKeys(force) {
+    const width = document.querySelector('.kbd-body').clientWidth;
+    if (!(width > 0)) return;
+    const wheels = 2 * (KB_PHONE.matches ? 3 / 2 : 5 / 3);
+    const fit = (width - 8) / (KB_SEMITONES + wheels);
+    const px = Math.max(KB_KEY_WIDTH_NARROW * kbScale, Math.min(KB_KEY_WIDTH * kbScale, fit));
+    if (px === kbKeyPx && !force) return;
+    kbKeyPx = px;
+    document.querySelector('.keyboard-frame').style.setProperty('--kbd-key-width', px + 'px');
+    kbSetCenter(kbPrefs.center);
+  }
+
   // The center of the visible area, in semitones of the upper half from C-1.
   function kbGetCenter() {
     const scroll = document.getElementById('kb-scroll');
-    return (scroll.scrollLeft + scroll.clientWidth / 2) / (KB_KEY_WIDTH * kbScale);
+    return (scroll.scrollLeft + scroll.clientWidth / 2) / kbKeyWidth();
   }
 
   function kbSetCenter(center) {
     const scroll = document.getElementById('kb-scroll');
-    scroll.scrollLeft = center * KB_KEY_WIDTH * kbScale - scroll.clientWidth / 2;
+    scroll.scrollLeft = center * kbKeyWidth() - scroll.clientWidth / 2;
     kbUpdateScrollbar();
   }
 
@@ -4176,7 +4341,7 @@
     if (scale === kbScale) return;
     kbScale = scale;
     document.querySelector('.keyboard-frame').style.setProperty('--kbd-scale', scale);
-    kbSetCenter(kbPrefs.center);
+    kbFitKeys(true);
   }
 
   function kbUpdateScrollbar() {
@@ -4338,6 +4503,8 @@
     kbSetCenter(kbPrefs.center);
     // The text size can change without a resize of the window.
     if (window.ResizeObserver) new ResizeObserver(() => kbFitScale()).observe(document.getElementById('kbd-label'));
+    // The keys narrow with the window below 960px.
+    if (window.ResizeObserver) new ResizeObserver(() => kbFitKeys()).observe(document.querySelector('.kbd-body'));
     kbSetVisible(!kbPrefs.hidden);
   }
 
@@ -4355,6 +4522,7 @@
     saveKbPrefs();
     if (visible) {
       kbFitScale();
+      kbFitKeys();
       kbSetCenter(kbPrefs.center);
     }
     fitTabArea();
@@ -4368,10 +4536,10 @@
 
   const TAB_KEY = 'spms1-type2-editor-tab';
 
-  // From 1641 pixels, where the page around the panels is packed tighter (see the CSS), the MIDI
+  // From 1280 pixels, where the page around the panels is packed tighter (see the CSS), the MIDI
   // settings go up into the header, between the title and the tabs, so they take no line of their
   // own; below it they keep their own line under the header.
-  const WIDE_HEADER = window.matchMedia('(min-width: 1641px)');
+  const WIDE_HEADER = window.matchMedia('(min-width: 1280px)');
   function placeMIDIPanel() {
     const header = document.querySelector('header');
     const panel = document.querySelector('.midi-panel');

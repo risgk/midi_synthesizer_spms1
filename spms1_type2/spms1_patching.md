@@ -577,6 +577,17 @@ Wave. Both run at the same level as Out, -0.5 to +0.5, and the default patch use
 mixer can take the two from one oscillator at levels of their own, or one oscillator can feed a
 saw to one place and a pulse to another.
 
+The sawtooth's steps, and so the pulse's, are rounded off by PolyBLEP over the sample on either
+side, which holds what folds back under 5 kHz to -59 dB or less on any note, and under 10 kHz to
+-47 dB or less. Above that it keeps less back the higher the note: the folded tones gather between
+10 kHz and the top of the band, from C8 (4.2 kHz) up -36 dB under 16 kHz and -24 dB above, and
+at C9 (8.4 kHz) and above, where little of the wave itself is left under 24 kHz, -29 to -31 dB under
+16 kHz and -13 to -18 dB above. They are not in tune with the note, and a glide or a bend moves them
+the other way, so the top octaves can be heard as a whistle above the note. It is left as it is:
+a longer BLEP would delay the oscillator further and dull it lower down, and a fade to a sine at
+the top would cost every note. Kept to C8 and below, or with the filter closing on the top, it is
+not heard.
+
 Osc 1 also puts out a sub, Out Sub: a sine an octave down, at the same level, -0.5 to
 +0.5. It is locked to the oscillator's phase, starting each of its cycles where every other cycle
 of the sawtooth starts, so it follows the pitch, the glide and the modulation exactly. A sine has
@@ -663,15 +674,18 @@ What would cross that is taken down first by a look-ahead limiter, Amp 1 Limiter
 CC and powers up on (value 124; off below value 64). Everything the amp puts out comes 1 ms (48
 samples) late, and while it is in that delay the limiter has already seen it: where the level
 would pass 0.9 (-0.9 dB), it brings the gain down over that 1 ms, before the peak arrives, so the
-peak comes out at 0.9, and lets it back up over about 100 ms. The gain moves smoothly, so where the
-clamp would cut corners into a sound and fold their harmonics back below the audible band, the
-limiter does not: a sawtooth taken 12 dB past one unit at A4 to A7 aliases -46 to -53 dB under
-5 kHz with it, and -29 to -37 dB on the clamp. Off, the output is just as late, and the clamp is
-reached. Limiting is heard on a loud passage as its peaks held level, and the release as the
-sound coming back up after one; the default patch stays under 0.9 and is not limited. The
-filter's output clip and a mixer's sum still have the hard limit, past which a sawtooth driven
-6 dB over at A6 to A7 aliases about -30 dB under 5 kHz; keep the levels before the filter where
-the peaks only just reach one unit, and bring the sound up with the amp instead.
+peak comes out at 0.9, and lets it back up over about 100 ms. It takes the peak from the last 25
+to 50 ms, longer than a cycle of a note down to 20 Hz, so that on a held note it does not let the
+gain up between the crests and take it down again at each one, which would ripple the sound at its
+pitch. The gain moves smoothly, so where the clamp would cut corners into a sound and fold their
+harmonics back below the audible band, the limiter does not: a sawtooth taken 12 dB past one unit
+at A4 to A7 aliases -46 to -53 dB under 5 kHz with it, and -29 to -37 dB on the clamp. Off, the
+output is just as late, and the clamp is reached. Limiting is heard on a loud passage as its peaks
+held level, and the release as the sound coming back up after one; the default patch only touches
+it at the start of a note, by 0.5 dB at most for about a quarter of a second. The filter's output
+clip and a mixer's sum still have the hard limit, past which a sawtooth driven 6 dB over at A6 to
+A7 aliases about -30 dB under 5 kHz; keep the levels before the filter where the peaks only just
+reach one unit, and bring the sound up with the amp instead.
 
 Amp 1 takes two modulations, Mod 1 In and Mod 2 In, and scales the gain by a crossfade of the
 two: Amp 1 Mod 1/2 Mix (CC#36) runs in a straight line from Mod 1 In alone at 0.0 (value 4) to Mod 2 In

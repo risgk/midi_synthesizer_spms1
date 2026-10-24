@@ -1,4 +1,4 @@
-MIDI Synthesizer SPMS-1 (type-2) v0.0.9
+MIDI Synthesizer SPMS-1 (type-2) v0.1.0
 =======================================
 
 - Monophonic semi-modular MIDI Synthesizer for Raspberry Pi Pico 2, made with Spinel (Ruby AOT Compiler)
@@ -96,6 +96,8 @@ Usage
 ### Web Editor
 
 - Cross-platform web-based parameter controller via Web MIDI API: "spms1_editor.html"
+    - If Web MIDI is not available or not allowed, a note under the MIDI settings says so; SPMS-1 Web (Built-in)
+      can still be played
     - Its Controls tab shows a slider for each parameter, those with no CC in blue; these are
       hidden until a CC is given to one or it is marked as a favorite, unless "Show parameters with
       no CC", cleared by default, is ticked, and the choice is remembered. The slider of one with no
