@@ -78,6 +78,10 @@ SPMS1_PWMAudioOutput g_pwm_output(SPMS1_PWM_AUDIO_L_PIN, SPMS1_PWM_AUDIO_R_PIN);
 SPMS1_I2SOutput g_i2s_output;
 #endif  // !defined(SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO)
 
+// The patch kept by Save (NRPN 117/2), in the 4 KB sector the core reserves for EEPROM, at the end
+// of the flash.
+#include <EEPROM.h>
+
 #if defined(SPMS1_USE_DEBUG_PRINT) && defined(SPMS1_DEBUG_PRINT_USE_USB_SERIAL)
 // Collects one report so that it goes to USB CDC whole or not at all. A plain Serial.print would
 // wait for room in the CDC FIFO, and with __usb_mutex held nothing would ever make that room.
@@ -143,7 +147,36 @@ extern int sp_gc_nroots;
 #endif
 
 // The MIDI tables the synth reads, and the handlers that fill them, shared with the simulators.
+// The patch image is kept in the EEPROM here, below, not in RAM.
+#define SPMS1_STORAGE_PROVIDED
 #include "spms1_midi_state.h"
+
+// The EEPROM's copy in RAM, read where it is. getConstDataPtr, not getDataPtr, which marks the
+// EEPROM as changed, so that the next commit would write the flash whether or not anything did.
+const uint8_t* spms1_storage_data(void) {
+  return EEPROM.getConstDataPtr();
+}
+
+// Called by the synth on core 1, with the output faded out, as PRA32-U2 writes its programs: the
+// whole ring buffer and a little more of silence first, since the DMA keeps playing the ring
+// while the flash is written; then the EEPROM, written only where it differs, and committed only
+// if anything did, which stops core 0 (the MIDI) for the erase and the program, about 50-100 ms;
+// and the writer resynced after, as it stopped longer than the ring lasts.
+void spms1_storage_write(const uint8_t* image) {
+#if !defined(SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO)
+  SPMS1_AudioRingBuffer& output = g_pwm_output;
+#else  // !defined(SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO)
+  SPMS1_AudioRingBuffer& output = g_i2s_output;
+#endif  // !defined(SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO)
+  for (uint32_t i = 0; i < output.getBufferFrames() + 8; ++i) {
+    output.writeSilence();
+  }
+  for (int32_t i = 0; i < SPMS1_PATCH_IMAGE_SIZE; ++i) {
+    EEPROM.write(i, image[i]);
+  }
+  EEPROM.commit();
+  output.resync();
+}
 
 uint32_t g_sample_rate             = 48000;
 uint32_t g_audio_buffers           = 2;
@@ -256,6 +289,9 @@ void setup1() {
   __asm volatile("vmrs %0, fpscr" : "=r"(fpscr));
   fpscr |= (1u << 24);  // FZ
   __asm volatile("vmsr fpscr, %0" : : "r"(fpscr));
+
+  // The patch kept, read from the flash before the synth loads it at power-up.
+  EEPROM.begin(SPMS1_PATCH_IMAGE_SIZE);
 }
 
 void loop1() {

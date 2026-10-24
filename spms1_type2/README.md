@@ -1,4 +1,4 @@
-MIDI Synthesizer SPMS-1 (type-2) v0.2.2
+MIDI Synthesizer SPMS-1 (type-2) v0.3.0
 =======================================
 
 - Monophonic semi-modular MIDI Synthesizer for Raspberry Pi Pico 2, made with Spinel (Ruby AOT Compiler)
@@ -77,7 +77,8 @@ Required Software for Modification
       why they are needed
 - Ruby (CRuby), to change the patch's numbers or the default patch, or to add a module: they are
   kept in "spms1_patch.yaml", and `ruby patch_gen/spms1_patch_gen.rb` writes them out to
-  "spms1/spms1_patch.rb" (read by "spms1/spms1_main.rb"), the tables of "spms1_editor.html", the NRPN
+  "spms1/spms1_patch.rb" (read by "spms1/spms1_main.rb"), the default patch of "spms1/spms1_default_patch.h"
+  (for Reset, read by "spms1/spms1_midi_state.h"), the tables of "spms1_editor.html", the NRPN
   tables of "spms1_patching.md" and "spms1_patching.ja.md", and the wiring of the loop in
   "spms1/spms1_main.rb" (see [Adding a Module](./spms1_development.md#adding-a-module)). Run it, then regenerate "spms1/spms1_main.c"; `--check` only
   says whether the files are up to date
@@ -141,7 +142,15 @@ Usage
     - Shows every parameter of every module, those with no CC in blue, so a wire always ends on what
       it feeds
     - Saves and loads patches as JSON
+    - A patch saved as JSON or copied keeps the Mod Wheel's CC at what it powers up at, 0.0, as
+      Save to Device does: the mod wheel is played rather than set; Send Patch sends where it is
     - Copies the patch as MIDI bytes or as an NRPN list, or sends it through Web MIDI
+    - Sends the whole patch (Send Patch, or a device newly chosen) between Mute on and off (NRPN
+      Mute), so that the patch is not heard half sent, and so does the patch it copies with "Mute
+      while loading" (on by default); every other change goes out as it is
+    - Its Mute button mutes the synth (NRPN Mute), to change the patch unheard, and shows a Mute
+      arriving at MIDI In; a Reset (NRPN) arriving at MIDI In puts the patch shown back to the default too
+    - Its Save to Device keeps the patch in the synth's flash (NRPN Save), which the synth loads at power-on
     - The side panels (Patch, Run Order, Export) fold to their headings with a click, each remembered;
       with all three folded, the canvas takes the width they leave
 - SPMS-1 Web: the synth itself, built into the editor ("spms1_web_synth.js")

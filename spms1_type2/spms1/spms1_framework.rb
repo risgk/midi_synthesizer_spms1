@@ -45,6 +45,11 @@ module Spms1
     ffi_func :set_midi_nrpn_value,        [:uint8, :int32, :uint8],  :void
     ffi_func :get_midi_nrpn_value,        [:uint8, :int32],          :uint8
     ffi_func :get_midi_run_order_written, [:uint8, :int32],          :int32
+    ffi_func :get_midi_mute,              [:uint8],                  :uint8
+    ffi_func :get_midi_mute_count,        [:uint8],                  :int32
+    ffi_func :get_midi_save_count,        [:uint8],                  :int32
+    ffi_func :store_patch_image,          [:uint8],                  :void
+    ffi_func :load_saved_patch,           [:uint8],                  :void
     ffi_func :set_sample_rate,            [:int32],                  :void
     ffi_func :get_sample_rate,            [],                        :int32
     ffi_func :set_audio_buffers,          [:int32],                  :void

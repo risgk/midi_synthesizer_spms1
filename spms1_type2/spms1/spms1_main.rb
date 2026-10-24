@@ -70,6 +70,27 @@ SIGNALS_SIZE = 256
 # input -- Gate In, Reset In, Sync In -- acts at a threshold or an edge and takes the slot as it is.
 CONTROLLER_SMOOTHING_BLEND = 1.0 - (1.0 - 0.015625 * (48000.0 / SAMPLE_RATE.to_f)) ** (AUDIO_BUFFER_WORDS.to_f / 4.0)
 
+# The output fader, as PRA32-U2's: a linear fade of the output out and in, of at least 3 ms, in
+# whole buffers, 4 ms at 64 samples. It fades out at Mute on (NRPN 117/0, see spms1_midi_state.h),
+# as a patch is sent, and holds the output silent until Mute is off. Every Mute on is taken,
+# however soon Mute off follows it, so a patch sent between them is never heard at full level;
+# what changes during a fade, 4 ms, is let be. A fade that has begun runs to its end before the
+# next one. Where it is is counted in samples, an Integer, and the gain worked out from it at the
+# start of each buffer, so that it lands on exactly 0.0 or 1.0 at the end of a fade; within a
+# buffer the gain takes a step a sample. The gain multiplies the output as it is written, every
+# sample whether or not it fades, which costs a multiply a side, and a buffer that fades costs the
+# same as one that does not. The modules run on while the output is silent, and it stays silent
+# for OUTPUT_HOLD_BUFFERS (11 ms) at least, so that the lines of the chorus and the amp's limiter,
+# 11 ms and less, hold nothing of the patch from before Mute on. The delay's line, 340 ms, is left
+# as it is, and its repeats come back with the output, as they would from a delay after the
+# synth. A Save (NRPN 117/2), which comes while Mute is on, is written to the flash once the output
+# is silent: writing it stops both cores for up to 100 ms, while the audio plays the silence the
+# host fills its buffer with (see store_patch_image in spms1_midi_state.h). It is written after
+# the buffer is, outside the span that Debug Print measures.
+OUTPUT_FADE_SAMPLES = (SAMPLE_RATE * 3 / 1000 + AUDIO_BUFFER_WORDS - 1) / AUDIO_BUFFER_WORDS * AUDIO_BUFFER_WORDS
+OUTPUT_FADE_STEP    = 1.0 / OUTPUT_FADE_SAMPLES.to_f
+OUTPUT_HOLD_BUFFERS = (SAMPLE_RATE * 11 / 1000 + AUDIO_BUFFER_WORDS - 1) / AUDIO_BUFFER_WORDS
+
 # The NRPN parameter numbers (NRPN_*), in spms1_patch.rb: (category << 7) | LSB, where the MSB,
 # 112 + category, picks a category and the LSB an entry.
 #   0..127   active_modules[slot]
@@ -106,6 +127,18 @@ winning_slot = Array.new(128, 0)
 # When each slot was last written, from spms1_midi_state.h, for the slots in the order.
 order_written = Array.new(MODULES_SIZE, 0)
 
+# The output fader: where the fade is, in samples, from 0 (silent) to OUTPUT_FADE_SAMPLES (the
+# output as it is), and which way it goes, 1 in, -1 out or 0; the count of Mute ons it has taken,
+# with one waiting while the output fades out, and so for Save; and the buffers left to
+# hold the output silent before it may fade in.
+output_fade_position = OUTPUT_FADE_SAMPLES
+output_fade_direction = 0
+mute_count = 0
+mute_waiting = false
+save_count = 0
+save_waiting = false
+output_hold_buffers = 0
+
 audio_buffer_l = Array.new(AUDIO_BUFFER_WORDS, 0.0)
 audio_buffer_r = Array.new(AUDIO_BUFFER_WORDS, 0.0)
 
@@ -118,6 +151,8 @@ spms1_fill_constant_signals(signals)
 # The default patch, written into the NRPN table the loop reads it back from. Why it is what it is,
 # spms1_patch.yaml says, above default_order.
 spms1_write_default_patch(MIDI_CH)
+# And over it the patch kept in the flash, if one is.
+C.load_saved_patch(MIDI_CH)
 
 C.set_sample_rate(SAMPLE_RATE)
 C.set_audio_buffers(AUDIO_BUFFERS)
@@ -140,6 +175,34 @@ while true
   # zero with both ends exactly on -0.5 and +0.5. The division must floor for the bottom end to
   # land: Integer#/ does, and Spinel's sp_idiv implements it.
   signals[SIGNAL_PITCH_BEND]  = ((C.get_midi_pitch_bend(MIDI_CH) + 1) / 2).to_f * (1.0 / 8192.0)
+
+  # The output fader: where a fade ends, the next one is picked. The output silent, a Save that
+  # waited for it is done (below), and the fade in starts once the hold is over, unless Mute holds
+  # the output silent.
+  if C.get_midi_mute_count(MIDI_CH) != mute_count
+    mute_count = C.get_midi_mute_count(MIDI_CH)
+    mute_waiting = true
+  end
+  if C.get_midi_save_count(MIDI_CH) != save_count
+    save_count = C.get_midi_save_count(MIDI_CH)
+    save_waiting = true
+  end
+  muted = C.get_midi_mute(MIDI_CH) != 0
+  saving = false
+  if output_fade_position == 0
+    mute_waiting = false
+    saving = save_waiting
+    save_waiting = false
+    output_hold_buffers -= (output_hold_buffers > 0) ? 1 : 0
+    output_fade_direction = (!muted && !saving && output_hold_buffers == 0) ? 1 : 0
+  elsif output_fade_position == OUTPUT_FADE_SAMPLES && (muted || mute_waiting || save_waiting)
+    output_fade_direction = -1
+    output_hold_buffers = OUTPUT_HOLD_BUFFERS
+  elsif output_fade_position == OUTPUT_FADE_SAMPLES
+    output_fade_direction = 0
+  end
+  output_gain = output_fade_position.to_f / OUTPUT_FADE_SAMPLES.to_f
+  output_gain_step = output_fade_direction.to_f * OUTPUT_FADE_STEP
 
   # The patch, read back from the NRPN table. active_modules is packed from the front with no
   # gaps; every source_* holds a SIGNAL_* bus slot, or a parameter's own SLOT_*.
@@ -769,14 +832,23 @@ while true
       slot += 1
     end
 
-    audio_buffer_l[i] = signals[source_output_l]
-    audio_buffer_r[i] = signals[source_output_r]
+    audio_buffer_l[i] = signals[source_output_l] * output_gain
+    audio_buffer_r[i] = signals[source_output_r] * output_gain
+    output_gain += output_gain_step
     i += 1
   end
+
+  output_fade_position += output_fade_direction * AUDIO_BUFFER_WORDS
 
   C.stop_debug_measure
 
   AUDIO_BUFFER_WORDS.times do |i|
     C.write_to_audio_buffer(audio_buffer_l[i], audio_buffer_r[i])
+  end
+
+  # A Save, with the output silent; the output is held silent as long again after it.
+  if saving
+    C.store_patch_image(MIDI_CH)
+    output_hold_buffers = OUTPUT_HOLD_BUFFERS
   end
 end

@@ -196,7 +196,10 @@ it from anywhere else.
 - CC#38 (Data Entry LSB) is ignored: every value here is 7-bit
 - CC#101 and CC#100 (RPN select) suspend data entry, so an RPN is never taken as a patch edit.
   Send CC#99 or CC#98 again to resume
-- Edits are not saved. The default patch is restored at power-on
+- Edits are kept only until power-off, unless the patch is saved (Save, below): at power-on the
+  synth loads the patch saved last, or the default patch if none is. Reset (below) puts the
+  default patch back; to make the default patch the one loaded at power-on again, Reset and then
+  Save
 
 ### Categories (CC#99)
 
@@ -204,9 +207,37 @@ it from anywhere else.
 | ----- | ----- | ---- | ---------- |
 | 112 (0) | 0-31 | Run order, slot by slot | Module ID |
 | 113 (1) | 0-34 | What feeds a module input | Signal ID |
-| 114 (2) | 0-81 | Where a parameter takes its value | Signal ID, or 127 for its own control slot |
-| 115 (3) | 0-84 | Which CC fills a control slot | CC number, or 0 for none |
-| 116 (4) | 0-81 | What a parameter's control slot holds while it has no CC | CC value |
+| 114 (2) | 0-81, 85 | Where a parameter takes its value | Signal ID, or 127 for its own control slot |
+| 115 (3) | 0-85 | Which CC fills a control slot | CC number, or 0 for none |
+| 116 (4) | 0-81, 85 | What a parameter's control slot holds while it has no CC | CC value |
+| 117 (5) | 0-3 | System: Mute, Reset, Save, Load (below), not a part of the patch | 0-63 or 64-127 |
+
+Category 5 has the system entries, which act on the synth rather than set a part of the patch:
+
+- Entry 0, Mute: 64-127 fades the output out over 4 ms and holds it silent, 11 ms at least; 0-63
+  fades it in again (the delay's repeats come back with it). Send a whole patch between Mute on and off, so
+  that it is not heard half sent. No waits are needed between them: every Mute on is taken,
+  however soon Mute off follows it, and the output comes back about 15 ms after Mute off at the
+  soonest. What the patch changes during the fades, 4 ms each, may be heard faintly. Mute is off
+  at power-on, and only Mute off or switching the synth off and on turns it off: a sender that
+  stops after Mute on leaves the synth silent, Reset included
+- Entry 1, Reset: 64-127 puts the default patch back: every entry of categories 0-4 and every CC
+  value, as the sketch has them. The notes, Pitch Bend and Mute are kept, and so is the patch
+  saved. Send it between Mute on and off for it to be heard as silence, since the synth may
+  otherwise play a buffer of the patch half reset
+- Entry 2, Save: 64-127, while Mute is on, keeps the patch in the flash, every entry of categories
+  0-4 and the values of the CCs the controls have, in place of the one saved before; the synth
+  loads it at power-on. The Mod Wheel's CC, whichever it is, is played rather than set, so it is
+  saved at 0, and so is every CC no control has; the General controls' CCs are saved as they are.
+  A sketch numbered otherwise -- a version whose module ids, Signal IDs or entries differ -- does
+  not load a patch saved by another, which it would read as something else: it starts with the
+  default patch, and the patch saved stays in the flash until the next Save. It is
+  written once the output is silent, which stops the synth and the MIDI input for about 0.1 s:
+  MIDI sent meanwhile may be lost, so send Mute off after it and wait before the next. A patch
+  the same as the one saved is not written again. Taken only while Mute is on, so that no stray
+  CC#6 saves; the editor's Save to Device sends Mute on, the whole patch, Save and Mute off
+- Entry 3, Load: 64-127, while Mute is on, puts the patch saved back, over the default patch, as at
+  power-on; with none saved, it does nothing
 
 The run order is read from slot 0 upwards and stops at the first Module ID 0, so a patch shorter
 than 32 modules ends itself. It is separate from the module numbering: a module only sees the
