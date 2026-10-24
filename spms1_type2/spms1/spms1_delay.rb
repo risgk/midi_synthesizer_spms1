@@ -50,8 +50,6 @@ module Spms1
     # to this, the repeats bend in pitch by at most 25%, as a tape delay's do, and arrive at the new
     # time a moment later.
     TIME_SLEW = 0.25
-    # How many samples of each line clear_step clears: the lines in 8 buffers, 11 ms at 64 samples.
-    CLEAR_STEP = 2048
 
     attr_reader :output_l, :output_r
 
@@ -99,33 +97,6 @@ module Spms1
 
       @output_l = 0.0
       @output_r = 0.0
-
-      # How far clear_step has got, DELAY_LINE_SIZE when the lines are clear.
-      @clear_index = DELAY_LINE_SIZE
-    end
-
-    # The lines, the filters in the loops and the outputs to 0.0, a slice of the lines at a time,
-    # while the output is silent and the modules do not run (see the output fader in
-    # spms1_main.rb), so that what they held is not heard again. start_clear begins it, and each
-    # clear_step clears CLEAR_STEP samples of each line and says whether the lines are clear.
-    def start_clear
-      @clear_index = 0
-    end
-
-    def clear_step
-      if @clear_index < DELAY_LINE_SIZE
-        last = @clear_index + CLEAR_STEP
-        while @clear_index < last
-          @delay_line_l[@clear_index] = 0.0
-          @delay_line_r[@clear_index] = 0.0
-          @clear_index += 1
-        end
-        @filtered_l = 0.0
-        @filtered_r = 0.0
-        @output_l = 0.0
-        @output_r = 0.0
-      end
-      @clear_index >= DELAY_LINE_SIZE
     end
 
     # Time is unipolar, [0.0, 1.0], read as 0 to 340 ms in a straight line and clipped to 2.83 ms

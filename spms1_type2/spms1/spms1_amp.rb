@@ -59,8 +59,6 @@ module Spms1
       @limiter_last_block_peak = 0.0
       @limiter_gain = 1.0
       @limiter_switch = 1.0
-      # Whether clear_step is still to clear the line.
-      @limiter_clearing = false
     end
 
     # Gain is unipolar, [0.0, 1.0], and squared and taken four times into a multiplier, so that the
@@ -68,28 +66,6 @@ module Spms1
     # take it down, and the dial moves in steps nearer equal in dB than a straight line's.
     # Range: -∞ dB (0.0), -6 dB (0.354), 0 dB (0.5), +6 dB (0.707), +12 dB (1.0).
     # @gain is an amplitude, so the smoothing below works in the amplitude domain.
-    # The limiter's line, which holds the lookahead, and its peaks to where they start, as Delay's
-    # start_clear and clear_step, but the line, 256 samples, at once.
-    def start_clear
-      @limiter_clearing = true
-    end
-
-    def clear_step
-      if @limiter_clearing
-        i = 0
-        while i < LIMITER_LINE_SIZE
-          @limiter_line[i] = 0.0
-          i += 1
-        end
-        @limiter_block_peak = 0.0
-        @limiter_last_block_peak = 0.0
-        @limiter_hold_left = @limiter_hold
-        @limiter_gain = 1.0
-        @limiter_clearing = false
-      end
-      true
-    end
-
     def set_gain(gain)
       clamped_gain = (gain < 0.0) ? 0.0 : ((gain > 1.0) ? 1.0 : gain)
       @gain = 4.0 * clamped_gain * clamped_gain

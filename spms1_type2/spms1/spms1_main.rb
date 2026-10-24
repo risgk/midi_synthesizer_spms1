@@ -80,13 +80,14 @@ CONTROLLER_SMOOTHING_BLEND = 1.0 - (1.0 - 0.015625 * (48000.0 / SAMPLE_RATE.to_f
 # worked out from it at the start of each buffer, so that it lands on exactly 0.0 or 1.0 at the
 # end of a fade; within a buffer the gain takes a step a sample. The gain multiplies the output as
 # it is written, every sample whether or not it fades, which costs a multiply a side, and a buffer
-# that fades costs the same as one that does not. Once the output is silent, the lines of the
-# delay, the chorus and the amp's limiter are cleared, so that what they held is not heard again,
-# a slice a buffer, in 8 buffers (11 ms), in place of running the modules, which are not heard
-# then; a buffer that clears costs less than one that runs them, so the clearing adds nothing to
-# the worst case of a buffer. After that the modules run again, silent, until Mute is off.
+# that fades costs the same as one that does not. The modules run on while the output is silent,
+# and it stays silent for OUTPUT_HOLD_BUFFERS (11 ms) at least, so that the lines of the chorus
+# and the amp's limiter, 11 ms and less, hold nothing from before: after an All Sound Off they
+# would bring back a moment of the sound it cut. The delay's line, 340 ms, is left as it is, and
+# its repeats come back with the output, as they would from a delay after the synth.
 OUTPUT_FADE_SAMPLES = (SAMPLE_RATE * 3 / 1000 + AUDIO_BUFFER_WORDS - 1) / AUDIO_BUFFER_WORDS * AUDIO_BUFFER_WORDS
 OUTPUT_FADE_STEP    = 1.0 / OUTPUT_FADE_SAMPLES.to_f
+OUTPUT_HOLD_BUFFERS = (SAMPLE_RATE * 11 / 1000 + AUDIO_BUFFER_WORDS - 1) / AUDIO_BUFFER_WORDS
 
 # The NRPN parameter numbers (NRPN_*), in spms1_patch.rb: (category << 7) | LSB, where the MSB,
 # 112 + category, picks a category and the LSB an entry.
@@ -126,15 +127,15 @@ order_written = Array.new(MODULES_SIZE, 0)
 
 # The output fader: where the fade is, in samples, from 0 (silent) to OUTPUT_FADE_SAMPLES (the
 # output as it is), and which way it goes, 1 in, -1 out or 0; the count of All Sound Offs it has
-# taken, with one waiting while the output fades out, and so for Mute on; and whether the lines
-# of the delay, the chorus and the amp's limiter are clear.
+# taken, with one waiting while the output fades out, and so for Mute on; and the buffers left to
+# hold the output silent before it may fade in.
 output_fade_position = OUTPUT_FADE_SAMPLES
 output_fade_direction = 0
 sound_off_count = 0
 sound_off_waiting = false
 mute_count = 0
 mute_waiting = false
-lines_cleared = true
+output_hold_buffers = 0
 
 audio_buffer_l = Array.new(AUDIO_BUFFER_WORDS, 0.0)
 audio_buffer_r = Array.new(AUDIO_BUFFER_WORDS, 0.0)
@@ -172,8 +173,8 @@ while true
   signals[SIGNAL_PITCH_BEND]  = ((C.get_midi_pitch_bend(MIDI_CH) + 1) / 2).to_f * (1.0 / 8192.0)
 
   # The output fader: where a fade ends, the next one is picked. The output silent, an All Sound
-  # Off that waited for it is done, the lines are cleared, and then the fade in starts unless Mute
-  # holds the output silent. The fade in never starts in a buffer that clears.
+  # Off that waited for it is done, and the fade in starts once the hold is over, unless Mute holds
+  # the output silent.
   if C.get_midi_sound_off_count(MIDI_CH) != sound_off_count
     sound_off_count = C.get_midi_sound_off_count(MIDI_CH)
     sound_off_waiting = true
@@ -191,20 +192,16 @@ while true
       filter_1.sound_off
       sound_off_waiting = false
     end
-    output_fade_direction = (!muted && lines_cleared) ? 1 : 0
+    output_hold_buffers -= (output_hold_buffers > 0) ? 1 : 0
+    output_fade_direction = (!muted && output_hold_buffers == 0) ? 1 : 0
   elsif output_fade_position == OUTPUT_FADE_SAMPLES && (muted || mute_waiting || sound_off_waiting)
     output_fade_direction = -1
-    lines_cleared = false
-    amp_1.start_clear
-    chorus_1.start_clear
-    delay_1.start_clear
+    output_hold_buffers = OUTPUT_HOLD_BUFFERS
   elsif output_fade_position == OUTPUT_FADE_SAMPLES
     output_fade_direction = 0
   end
   output_gain = output_fade_position.to_f / OUTPUT_FADE_SAMPLES.to_f
   output_gain_step = output_fade_direction.to_f * OUTPUT_FADE_STEP
-  # The lines cleared a slice further, in place of running the modules.
-  clearing_lines = output_fade_position == 0 && !lines_cleared
 
   # The patch, read back from the NRPN table. active_modules is packed from the front with no
   # gaps; every source_* holds a SIGNAL_* bus slot, or a parameter's own SLOT_*.
@@ -737,10 +734,8 @@ while true
   amp_1.set_limiter_switch(signals[source_amp_1_limiter_sw])
   # patch_gen end
 
-  # No samples while the lines are cleared: the modules do not run (see the output fader above).
-  buffer_words = clearing_lines ? 0 : AUDIO_BUFFER_WORDS
   i = 0
-  while i < buffer_words
+  while i < AUDIO_BUFFER_WORDS
     # The control tick, every module's cue for its control-rate update, once every 4 samples
     # (CONTROL_RATE_DIVISOR in each module). Taken here once a sample rather than counted by each
     # module: a counter in each module would cost an add, a mask and a load and store of an
@@ -842,19 +837,6 @@ while true
     i += 1
   end
 
-  # The buffers silent, as the modules did not fill them.
-  if clearing_lines
-    i = 0
-    while i < AUDIO_BUFFER_WORDS
-      audio_buffer_l[i] = 0.0
-      audio_buffer_r[i] = 0.0
-      i += 1
-    end
-    amp_cleared = amp_1.clear_step
-    chorus_cleared = chorus_1.clear_step
-    delay_cleared = delay_1.clear_step
-    lines_cleared = amp_cleared && chorus_cleared && delay_cleared
-  end
   output_fade_position += output_fade_direction * AUDIO_BUFFER_WORDS
 
   C.stop_debug_measure
