@@ -305,7 +305,7 @@ def default_patch_h
   with_cc.each { |c| nrpn << [NRPN_CC_BASE + c['entry'], c['cc'], "#{s.full_label(c)} CC"] }
   s.params.each { |c| nrpn << [NRPN_VALUE_BASE + c['entry'], c['value'], "#{s.full_label(c)} value"] }
   out = []
-  saved_cc = s.controls.reject { |c| c['controller'] }.map { |c| c['entry'] }
+  saved_cc = s.controls.reject { |c| c['performance'] }.map { |c| c['entry'] }
   out << <<~C
     /*
      * Generated from spms1_patch.yaml by patch_gen/spms1_patch_gen.rb. Do not edit; change the YAML
@@ -325,8 +325,7 @@ def default_patch_h
     #define SPMS1_PATCH_SPEC_HASH (0x#{format('%08X', patch_spec_hash)}u)
 
     // The category 3 entries -- the controls -- whose CCs' values a Save keeps: all but the
-    // controllers' (Mod Wheel, General), which are played rather than set; a CC only they have is
-    // saved at 0.
+    // performance controls', whose CCs are saved at 0.
     static const uint8_t g_spms1_saved_cc_entries[] = {
     #{saved_cc.each_slice(16).map { |row| '  ' + row.join(', ') }.join(",\n")}
     };
@@ -358,7 +357,7 @@ def editor_js
     controls: s.controls_in_list_order.map do |c|
       h = { entry: c['entry'], module: c['module'], key: c['key'], label: c['label'],
             bipolar: !!c['bipolar'], cc: c['cc'].to_i, value: c['value'], source: c['source'],
-            controller: !!c['controller'], hint: c['hint'], hintInputs: c['hint_inputs'],
+            controller: !!c['controller'], performance: !!c['performance'], hint: c['hint'], hintInputs: c['hint_inputs'],
             favorite: c['favorite'],
             slots: if c['controller']
                      s.slots_of(c).map { |sig| [sig['key'], sig['label'] || c['label'], s.bipolar?(sig), sig['form']].compact }

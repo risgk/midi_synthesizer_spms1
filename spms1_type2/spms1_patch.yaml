@@ -449,13 +449,13 @@ controls:
 
   # The mod wheel, a controller control: its CC, CC 1 as in the MIDI spec, put on the bus as a
   # unipolar slot, and in its three shapes (see `signals`), for any input or parameter to read. It
-  # powers up at CC 4, 0.0. A controller is played rather than set: a Save keeps no value for its
-  # CC, whichever it is, unless a control that is not a controller has it too, so that the patch
-  # saved loads with it at 0.
-  - { entry: 82, controller: true, key: MOD_WHEEL, label: Mod Wheel, cc: 1,   value: 4 }
+  # powers up at CC 4, 0.0. `performance` marks it as played rather than set: a Save keeps no value
+  # for its CC, whichever it is, unless a control without the mark has it too, so that the patch
+  # saved loads with it at 0. The general controls, unmarked, are saved as set.
+  - { entry: 82, controller: true, performance: true, key: MOD_WHEEL, label: Mod Wheel, cc: 1,   value: 4 }
   # The general controls, on CC 16 and 17, General Purpose Controllers 1 and 2 in the MIDI spec,
   # each filling its six slots (see `signals`). They power up at CC 4, 0.0, and the default patch
-  # routes none of them. Controllers, they are saved as the mod wheel is.
+  # routes none of them.
   - { entry: 83, controller: true, key: GENERAL_1, label: General 1, cc: 16,  value: 4 }
   - { entry: 84, controller: true, key: GENERAL_2, label: General 2, cc: 17,  value: 4 }
   # Amp 1 Limiter Sw, after the controllers so that no entry before it moves: the amp's look-ahead

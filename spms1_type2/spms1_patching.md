@@ -227,9 +227,9 @@ Category 5 has the system entries, which act on the synth rather than set a part
   otherwise play a buffer of the patch half reset
 - Entry 2, Save: 64-127, while Mute is on, keeps the patch in the flash, every entry of categories
   0-4 and the values of the CCs the controls have, in place of the one saved before; the synth
-  loads it at power-on. The controllers, Mod Wheel and General, are played rather than set, so
-  a CC that only they have, whichever it is, is saved at 0, and so is every CC no control has; a
-  CC that a parameter has too is saved as it is.
+  loads it at power-on. The Mod Wheel is played rather than set, so a CC that only it has,
+  whichever it is, is saved at 0, and so is every CC no control has; a CC that a parameter or a
+  General control has, too or alone, is saved as it is.
   A sketch numbered otherwise -- a version whose module ids, Signal IDs or entries differ -- does
   not load a patch saved by another, which it would read as something else: it starts with the
   default patch, and the patch saved stays in the flash until the next Save. It is
