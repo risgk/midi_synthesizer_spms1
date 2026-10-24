@@ -668,7 +668,7 @@ in the examples below, it plays as a sine voice.
 Amp 1 Gain (CC#15) is squared and taken four times into the gain: silent at value 4, half,
 6 dB down, at value 46, unity at value 64, twice, 6 dB up, at value 89, and four times, 12 dB up,
 at value 124, so a quiet sound can be brought well up as well as a loud one taken down. It powers
-up at value 100, 2.56 times, 8.2 dB up, which takes the default patch's peaks to about -4 dBFS.
+up at value 88, 1.96 times, 5.8 dB up, which takes the default patch's peaks to about -5 dBFS.
 The amp holds its output to -1.0 and +1.0, as a mixer holds its sum, so the gain cannot take the
 output past one unit.
 
@@ -683,8 +683,9 @@ pitch. The gain moves smoothly, so where the clamp would cut corners into a soun
 harmonics back below the audible band, the limiter does not: a sawtooth taken 12 dB past one unit
 at A4 to A7 aliases -46 to -53 dB under 5 kHz with it, and -29 to -37 dB on the clamp. Off, the
 output is just as late, and the clamp is reached. Limiting is heard on a loud passage as its peaks
-held level, and the release as the sound coming back up after one; on the default patch, a held
-note 60 has it hold the crests of the two oscillators' beat, by about 1 dB, 1.5 dB at most. The filter's output
+held level, and the release as the sound coming back up after one. The default patch stays under
+it, with both oscillators on the sawtooth or on the square, and Amp 1 Gain up a few steps from where it
+powers up starts to reach it. The filter's output
 clip and a mixer's sum still have the hard limit, past which a sawtooth driven 6 dB over at A6 to
 A7 aliases about -30 dB under 5 kHz; keep the levels before the filter where the peaks only just
 reach one unit, and bring the sound up with the amp instead.
