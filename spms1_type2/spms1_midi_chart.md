@@ -71,7 +71,7 @@
 |                             1 | x             | o             | Mod Wheel (Unipolar)                 |
 |                            16 | x             | o             | General 1 (Unipolar, 6 forms)        |
 |                            17 | x             | o             | General 2 (Unipolar, 6 forms)        |
-|                            99 | x             | o             | NRPN MSB (112-116)                   |
+|                            99 | x             | o             | NRPN MSB (112-117)                   |
 |                            98 | x             | o             | NRPN LSB                             |
 |                             6 | x             | o             | Data Entry MSB (NRPN value)          |
 |                       101,100 | x             | o             | RPN select: suspends NRPN data entry |
@@ -88,7 +88,7 @@
 | System       : Clock          | x             | x             |                                      |
 | Real Time    : Commands       | x             | x             |                                      |
 +-------------------------------+---------------+---------------+--------------------------------------+
-| Aux          : All Sound OFF  | x             | o 120         | As All Notes OFF                     |
+| Aux          : All Sound OFF  | x             | o 120         | Fades out, cuts the release          |
 | Messages     : Reset All Ctrl | x             | o 121         | Pitch Bend, CC 1 and NRPN selection  |
 |              : Local ON/OFF   | x             | x             |                                      |
 |              : All Notes OFF  | x             | o 123-127     |                                      |

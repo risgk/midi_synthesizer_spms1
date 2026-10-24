@@ -76,7 +76,8 @@ MIDI Synthesizer SPMS-1 (type-2) v0.2.1
       にあります
 - Ruby (CRuby): パッチの番号や初期パッチを変えるとき、モジュールを追加するとき。これらは
   "spms1_patch.yaml" にまとめてあり、`ruby patch_gen/spms1_patch_gen.rb` が "spms1/spms1_patch.rb"
-  ("spms1/spms1_main.rb" が読み込みます)、"spms1_editor.html" のテーブル、"spms1_patching.ja.md" と
+  ("spms1/spms1_main.rb" が読み込みます)、"spms1/spms1_default_patch.h" の初期パッチ (Reset 用に
+  "spms1/spms1_midi_state.h" が読み込みます)、"spms1_editor.html" のテーブル、"spms1_patching.ja.md" と
   "spms1_patching.md" の NRPN の表、"spms1/spms1_main.rb" のループの配線
   ([モジュールの追加](./spms1_development.ja.md#モジュールの追加) を参照) に
   書き出します。実行したあと、"spms1/spms1_main.c" を生成し直してください。`--check` は、ファイルが
@@ -137,6 +138,9 @@ MIDI Synthesizer SPMS-1 (type-2) v0.2.1
       つながります
     - パッチを JSON で保存・読み込みします
     - パッチを MIDI バイト列または NRPN リストとしてコピーするか、Web MIDI で送信します
+    - パッチ全体 (Send Patch、MIDI Out の選び直し) や、一度に多くの結線を変えるとき (Init、Load JSON、Undo、Redo) は、
+      ミュート (NRPN の Mute) して送るので、送信途中のパッチの音は聞こえません。MIDI In に届いたリセット (NRPN の Reset) では、
+      エディタのパッチもデフォルトに戻ります
     - サイドパネル (Patch、Run Order、Export) は見出しのクリックで畳め、それぞれの状態を覚えておきます。
       3 つとも畳むと、空いた幅まで配線図が広がります
 - SPMS-1 Web: エディタに組み込まれたシンセサイザー本体 ("spms1_web_synth.js")
@@ -150,6 +154,8 @@ MIDI Synthesizer SPMS-1 (type-2) v0.2.1
 - MIDI チャンネル: チャンネル 1
 - チャンネルモードメッセージ: All Sound Off (CC#120)、All Notes Off (CC#123)、Omni Off、Omni On、Mono On、
   Poly On (CC#124〜127) は、鍵盤を離したときと同じようにすべてのノートを終え、エンベロープはリリースに入ります。
+  All Sound Off はさらに音をすぐに止めます。出力を 4 ms でフェードアウトし、エンベロープとフィルタを無音にしてから、
+  出力をフェードインします (ディレイとコーラスの中身はそのままです)。
   Reset All Controllers (CC#121) はピッチベンドを中央に、モジュレーションホイール (CC#1) を 0 に戻し、NRPN の
   選択を解除します。ほかの CC (パラメータの CC) はそのままです。CC#120〜127 はコントロールではなく、CC の値として
   保存しません

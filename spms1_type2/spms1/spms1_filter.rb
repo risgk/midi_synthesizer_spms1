@@ -399,6 +399,16 @@ module Spms1
       @output_bp
     end
 
+    # All Sound Off: the state of the filter and of its DC blockers to 0.0, so that a resonance
+    # ringing on stops. Called while the output is faded out, so the step is not heard.
+    def sound_off
+      @s1 = 0.0
+      @s2 = 0.0
+      @dc_blocker = 0.0
+      @dc_blocker_hp = 0.0
+      @dc_blocker_bp = 0.0
+    end
+
     private
 
     def cutoff_to_g_fast(clamped_cutoff)

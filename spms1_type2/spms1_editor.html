@@ -3623,13 +3623,13 @@
   function sendBend(bend) {
     const ch = exportOptions().ch;
     const raw = bend + 8192;
-    if (midiOutput) midiOutput.send([0xE0 | ch, raw & 0x7F, raw >> 7]);
+    midiSend([0xE0 | ch, raw & 0x7F, raw >> 7]);
     trackNote(ch, 0xE0, raw & 0x7F, raw >> 7);
   }
 
   function onMIDIMessage(event) {
     const data = event.data;
-    if (midiOutput) midiOutput.send(data);
+    midiSend(data);
     const cmd = data[0] & 0xF0;
     if (cmd >= 0x80 && cmd <= 0xE0) trackNote(data[0] & 0x0F, data[0], data[1], data[2]);
     if ((data[0] & 0x0F) !== exportOptions().ch) return;
@@ -3673,9 +3673,26 @@
       nrpnSelect.selected = true;
     } else if (cc === 101 || cc === 100) {
       nrpnSelect.selected = false;
+    } else if (cc === 6 && nrpnSelect.selected && nrpnSelect.msb === NRPN_MSB_BASE + 5) {
+      // The system entries: Mute (0) is the synth's alone, and Reset (1) puts the patch shown back
+      // to the default, as it does the synth's.
+      if (nrpnSelect.lsb === 1 && value >= 64) receiveReset();
     } else if (cc === 6 && nrpnSelect.selected && nrpnSelect.msb >= NRPN_MSB_BASE) {
       applyNRPN(((nrpnSelect.msb - NRPN_MSB_BASE) << 7) | nrpnSelect.lsb, value);
     }
+  }
+
+  // The wiring, the CCs and the values back to the default patch's, as Init sets them; the name,
+  // the favorites and the layout are kept. The synth already has it, so nothing is sent.
+  function receiveReset() {
+    pushHistory();
+    const d = defaultState();
+    for (const k of ['order', 'inputs', 'params', 'cc', 'values', 'paramValues']) state[k] = d[k];
+    orderMirror = new Array(MODULES_SIZE).fill(0);
+    orderWritten = new Array(MODULES_SIZE).fill(0);
+    orderWrites = 0;
+    if (lastSent) lastSent = snapshotTable();
+    renderAll();
   }
 
   // The synth's 32 run order slots. The editor keeps only the order up to the first 0, so the
@@ -3741,7 +3758,7 @@
   function setCCValue(cc, value, send) {
     value = clampValue(value);
     state.values[cc] = value;
-    if (send && midiOutput) midiOutput.send([0xB0 | exportOptions().ch, cc, value]);
+    if (send) midiSend([0xB0 | exportOptions().ch, cc, value]);
     if (lastSent) lastSent.set('c' + cc, value);
     refreshControls();
     updateExport();
@@ -3754,9 +3771,9 @@
     value = clampValue(value);
     state.paramValues[key] = value;
     const nrpn = 512 + CONTROL[key].entry;
-    if (send && midiOutput) {
+    if (send) {
       const st = 0xB0 | exportOptions().ch;
-      midiOutput.send([st, 99, nrpnMSB(nrpn), st, 98, nrpn & 0x7F, st, 6, value, st, 101, 127, st, 100, 127]);
+      midiSend([st, 99, nrpnMSB(nrpn), st, 98, nrpn & 0x7F, st, 6, value, st, 101, 127, st, 100, 127]);
     }
     if (lastSent) lastSent.set('n' + nrpn, value);
     refreshControls();
@@ -3771,17 +3788,57 @@
     return t;
   }
 
+  // A whole patch, or a change of many wires at once, goes out between Mute on and off (NRPN 117/0,
+  // which the synth fades its output out and in for), so that what it plays while the patch is
+  // half sent is not heard: Mute, a wait for the fade out (4 ms) and for the message to reach the
+  // synth, the patch, a wait for the parameters to settle on their new values (they are smoothed
+  // over about 10 ms), and Mute off. What is sent in the meantime waits behind it, so that
+  // everything reaches the synth in the order it was sent.
+  const MUTE_FADE_WAIT_MS = 15;
+  const MUTE_SETTLE_WAIT_MS = 30;
+  let sendChain = Promise.resolve();
+  let sendsMuted = 0;  // muted sends not yet done
+  const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+  function midiSend(data) {
+    if (!midiOutput) return;
+    const out = midiOutput;
+    if (sendsMuted) {
+      sendChain = sendChain.then(() => out.send(data)).catch(e => console.log('MIDI Out: ' + e));
+    } else {
+      out.send(data);
+    }
+  }
+
+  function sendMuted(messages) {
+    if (!midiOutput) return;
+    const out = midiOutput;
+    const st = 0xB0 | exportOptions().ch;
+    const mute = on => [st, 99, NRPN_MSB_BASE + 5, st, 98, 0, st, 6, on ? 127 : 0, st, 101, 127, st, 100, 127];
+    sendsMuted++;
+    sendChain = sendChain
+      .then(() => { out.send(mute(true)); return wait(MUTE_FADE_WAIT_MS); })
+      .then(() => { messages.forEach(m => out.send(m)); return wait(MUTE_SETTLE_WAIT_MS); })
+      .then(() => out.send(mute(false)))
+      .catch(e => console.log('MIDI Out: ' + e))
+      .finally(() => { sendsMuted--; });
+  }
+
   function sendAll() {
     if (!midiOutput) return;
     const opts = exportOptions();
     opts.includeCC = true;
-    buildMessages(opts).forEach(l => midiOutput.send(l.bytes));
+    sendMuted(buildMessages(opts).map(l => l.bytes));
     lastSent = snapshotTable();
   }
 
   // Every routing, run order or CC assignment change goes out as it is made, as what differs from
   // what the device was last sent. A device that has been sent nothing yet, being newly chosen or
-  // on a newly chosen channel, is sent the whole patch first, so that it plays what is shown.
+  // on a newly chosen channel, is sent the whole patch first, so that it plays what is shown. A
+  // change of MUTED_WIRING_CHANGES or more wires and run order slots at once, as Init, Load JSON,
+  // Undo and Redo may make, goes out muted, as the whole patch does; one wire, or a few, at once
+  // goes out as it is, so that the patch can be heard as it is wired.
+  const MUTED_WIRING_CHANGES = 4;
   function sendChanges() {
     if (!midiOutput) return;
     if (!lastSent) {
@@ -3790,18 +3847,27 @@
     }
     const st = 0xB0 | exportOptions().ch;
     const now = snapshotTable();
+    const messages = [];
     let nrpnSent = false;
+    let wiringChanges = 0;
     for (const [k, v] of now) {
       if (lastSent.get(k) === v) continue;
       const n = parseInt(k.slice(1));
       if (k[0] === 'n') {
-        midiOutput.send([st, 99, nrpnMSB(n), st, 98, n & 0x7F, st, 6, v]);
+        messages.push([st, 99, nrpnMSB(n), st, 98, n & 0x7F, st, 6, v]);
         nrpnSent = true;
+        // Categories 0-2: the run order, the module inputs and the parameter sources.
+        if (n < 384) wiringChanges++;
       } else {
-        midiOutput.send([st, n, v]);
+        messages.push([st, n, v]);
       }
     }
-    if (nrpnSent) midiOutput.send([st, 101, 127, st, 100, 127]);
+    if (nrpnSent) messages.push([st, 101, 127, st, 100, 127]);
+    if (wiringChanges >= MUTED_WIRING_CHANGES) {
+      sendMuted(messages);
+    } else {
+      messages.forEach(midiSend);
+    }
     lastSent = now;
   }
 
@@ -4265,12 +4331,12 @@
     PARAM_ITEMS.forEach(p => { state.paramValues[p.key] = p.defaultValue; });
     if (midiOutput) {
       const st = 0xB0 | exportOptions().ch;
-      ccEntries().forEach(e => midiOutput.send([st, e.cc, e.value]));
+      ccEntries().forEach(e => midiSend([st, e.cc, e.value]));
       PARAM_ITEMS.forEach(p => {
         const nrpn = 512 + p.entry;
-        midiOutput.send([st, 99, nrpnMSB(nrpn), st, 98, nrpn & 0x7F, st, 6, p.defaultValue]);
+        midiSend([st, 99, nrpnMSB(nrpn), st, 98, nrpn & 0x7F, st, 6, p.defaultValue]);
       });
-      midiOutput.send([st, 101, 127, st, 100, 127]);
+      midiSend([st, 101, 127, st, 100, 127]);
       if (lastSent) {
         ccEntries().forEach(e => lastSent.set('c' + e.cc, e.value));
         PARAM_ITEMS.forEach(p => lastSent.set('n' + (512 + p.entry), p.defaultValue));
@@ -4285,7 +4351,7 @@
 
   function sendNote(status, note, velocity) {
     const ch = exportOptions().ch;
-    if (midiOutput) midiOutput.send([(status & 0xF0) | ch, note, velocity]);
+    midiSend([(status & 0xF0) | ch, note, velocity]);
     setKeyActive(note, (status & 0xF0) === 0x90 && velocity > 0);
     trackNote(ch, status, note, velocity);
   }
@@ -4381,7 +4447,7 @@
     kbPointers.clear();
     kbHeld.clear();
     const ch = exportOptions().ch;
-    if (midiOutput) midiOutput.send([0xB0 | ch, 120, 0]);
+    midiSend([0xB0 | ch, 120, 0]);
     trackNote(ch, 0xB0, 120, 0);
     for (let note = 0; note < 128; note++) setKeyActive(note, false);
     sendBend(0);

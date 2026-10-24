@@ -1,6 +1,6 @@
-# Writes what the sketch reads from spms1_patch.yaml: spms1/spms1_patch.rb whole, the parts of
-# spms1_editor.html, spms1_patching.md, spms1_patching.ja.md and spms1/spms1_main.rb between their
-# "patch_gen" markers.
+# Writes what the sketch reads from spms1_patch.yaml: spms1/spms1_patch.rb and
+# spms1/spms1_default_patch.h whole, the parts of spms1_editor.html, spms1_patching.md,
+# spms1_patching.ja.md and spms1/spms1_main.rb between their "patch_gen" markers.
 #
 #   ruby patch_gen/spms1_patch_gen.rb [--check | --renumber]
 #
@@ -271,6 +271,45 @@ def patch_rb
   out.join
 end
 
+# ---- spms1_default_patch.h ---------------------------------------------------------------------
+
+# The default patch again, as tables for spms1_midi_state.h, which writes it back when the reset
+# NRPN arrives: the same writes as spms1_write_default_patch, in the same order, so that a reset
+# leaves the tables as power-up does, the times the run order was written included.
+def default_patch_h
+  s = SPEC
+  nrpn = []
+  s.default_order.each_with_index { |k, i| nrpn << [NRPN_ACTIVE_MODULE_BASE + i, s.module(k)['id'], "Run order #{i}: #{s.module(k)['label']}"] }
+  s.inputs.each { |i| nrpn << [NRPN_INPUT_BASE + i['entry'], s.signal(i['source'])['id'], "#{s.full_label(i)} <- #{i['source']}"] }
+  s.params.each { |c| nrpn << [NRPN_PARAM_SOURCE_BASE + c['entry'], c['source'] ? s.signal(c['source'])['id'] : SIGNAL_OWN, "#{s.full_label(c)} <- #{c['source'] || 'OWN'}"] }
+  with_cc = s.controls.select { |c| c['cc'].to_i != 0 }
+  with_cc.each { |c| nrpn << [NRPN_CC_BASE + c['entry'], c['cc'], "#{s.full_label(c)} CC"] }
+  s.params.each { |c| nrpn << [NRPN_VALUE_BASE + c['entry'], c['value'], "#{s.full_label(c)} value"] }
+  out = []
+  out << <<~C
+    /*
+     * Generated from spms1_patch.yaml by patch_gen/spms1_patch_gen.rb. Do not edit; change the YAML
+     * and run the generator.
+     *
+     * The default patch, as spms1_write_default_patch in spms1_patch.rb writes it at power-up: the
+     * NRPN entries, then the values its CCs power up at. spms1_midi_state.h writes it back when the
+     * reset NRPN arrives.
+     */
+    #ifndef SPMS1_DEFAULT_PATCH_H
+    #define SPMS1_DEFAULT_PATCH_H
+
+    #include <stdint.h>
+
+    // NRPN parameter number (category << 7 | LSB), value
+    static const uint16_t g_spms1_default_nrpn[][2] = {
+  C
+  nrpn.each { |n, v, label| out << "  {#{(n.to_s + ',').ljust(4)} #{v.to_s.rjust(3)}},  // #{label}\n" }
+  out << "};\n\n// CC number, value\nstatic const uint8_t g_spms1_default_cc[][2] = {\n"
+  with_cc.each { |c| out << "  {#{(c['cc'].to_s + ',').ljust(4)} #{c['value'].to_s.rjust(3)}},  // #{s.full_label(c)}\n" }
+  out << "};\n\n#endif  // SPMS1_DEFAULT_PATCH_H\n"
+  out.join
+end
+
 # ---- spms1_editor.html -------------------------------------------------------------------------
 
 # The tables of the editor, as one object literal: plain data, which the editor turns into the
@@ -535,6 +574,7 @@ end
 
 outputs = {}
 outputs['spms1/spms1_patch.rb'] = patch_rb
+outputs['spms1/spms1_default_patch.h'] = default_patch_h
 outputs['spms1/spms1_main.rb'] = main_rb(File.read(File.join(DIR, 'spms1/spms1_main.rb')))
 editor = File.read(File.join(DIR, 'spms1_editor.html'))
 outputs['spms1_editor.html'] = replace_block(editor, 'spms1_editor.html', 'spec', editor_js)

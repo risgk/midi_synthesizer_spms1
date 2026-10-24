@@ -36,7 +36,8 @@ int16_t  g_midi_pitch_bend[16]     = {0};
 
 // NRPN parameter numbers are (category << 7) | LSB, where the MSB is 112 (0x70) + category: MSB
 // 112-116 for categories 0-4, clear of the NRPNs of GS and XG (MSB 1 and 20-31) and of the low MSBs
-// other synths tend to use, so 640 entries cover it. Values are 7-bit, filled from CC 6.
+// other synths tend to use, so 640 entries cover it. Values are 7-bit, filled from CC 6. MSB 117,
+// category 5, has the system entries, which are not kept in the table (see below).
 #define SPMS1_NRPN_MSB_BASE (112)
 #define SPMS1_NRPN_SIZE (640)
 uint8_t  g_midi_nrpn_values[16][SPMS1_NRPN_SIZE] = {{0}};
@@ -50,6 +51,18 @@ uint8_t  g_midi_nrpn_selected[16]       = {0};  // 0 until CC 99 or 98 arrives, 
 #define SPMS1_RUN_ORDER_SIZE (32)
 uint32_t g_midi_run_order_writes[16]                       = {0};
 uint32_t g_midi_run_order_written[16][SPMS1_RUN_ORDER_SIZE] = {{0}};
+
+// NRPN category 5 (MSB 117), the system entries, which act rather than hold a part of the patch,
+// so they are not kept in the NRPN table and a patch does not include them. Entry 0, Mute, mutes
+// the output at 64-127 and unmutes it at 0-63, for while a patch is sent; entry 1, Reset, puts the
+// patch back to the default at 64-127, as at power-up (spms1_reset_patch).
+#define SPMS1_NRPN_SYSTEM_MSB   (SPMS1_NRPN_MSB_BASE + 5)
+#define SPMS1_NRPN_SYSTEM_MUTE  (0)
+#define SPMS1_NRPN_SYSTEM_RESET (1)
+uint8_t  g_midi_mute[16]            = {0};
+// How many All Sound Offs (CC 120) have arrived, which the synth tells apart by the count changing:
+// it fades the output out, silences the envelopes and the filter, and fades it in again.
+uint32_t g_midi_sound_off_count[16] = {0};
 
 SPMS1_RAM_FUNC void set_midi_note_on_pitch(uint8_t midi_ch, uint8_t midi_note_on_pitch) {
   if (midi_ch >= 16) {
@@ -162,6 +175,63 @@ SPMS1_RAM_FUNC int32_t get_midi_run_order_written(uint8_t midi_ch, int32_t slot)
   return (int32_t)g_midi_run_order_written[midi_ch][slot];
 }
 
+SPMS1_RAM_FUNC uint8_t get_midi_mute(uint8_t midi_ch) {
+  if (midi_ch >= 16) {
+    return 0;
+  }
+
+  return g_midi_mute[midi_ch];
+}
+
+SPMS1_RAM_FUNC int32_t get_midi_sound_off_count(uint8_t midi_ch) {
+  if (midi_ch >= 16) {
+    return 0;
+  }
+
+  return (int32_t)g_midi_sound_off_count[midi_ch];
+}
+
+// The default patch, from spms1_patch.yaml, as spms1_write_default_patch in spms1_patch.rb writes
+// it at power-up.
+#include "spms1_default_patch.h"
+
+// Puts the NRPN table, the times the run order was written and the CC values back as they are at
+// power-up: every entry and CC to 0, and then the default patch and the values its CCs power up at.
+// The notes, Pitch Bend, the NRPN selection and Mute are kept. The synth may read the tables while
+// they are rewritten, so a reset is sent between Mute and unmute to be heard as silence.
+void spms1_reset_patch(uint8_t midi_ch) {
+  if (midi_ch >= 16) {
+    return;
+  }
+
+  for (int32_t i = 0; i < SPMS1_NRPN_SIZE; ++i) {
+    g_midi_nrpn_values[midi_ch][i] = 0;
+  }
+  g_midi_run_order_writes[midi_ch] = 0;
+  for (int32_t i = 0; i < SPMS1_RUN_ORDER_SIZE; ++i) {
+    g_midi_run_order_written[midi_ch][i] = 0;
+  }
+  for (int32_t i = 0; i < 128; ++i) {
+    g_midi_cc_values[midi_ch][i] = 0;
+  }
+
+  for (uint32_t i = 0; i < sizeof(g_spms1_default_nrpn) / sizeof(g_spms1_default_nrpn[0]); ++i) {
+    set_midi_nrpn_value(midi_ch, g_spms1_default_nrpn[i][0], (uint8_t)g_spms1_default_nrpn[i][1]);
+  }
+  for (uint32_t i = 0; i < sizeof(g_spms1_default_cc) / sizeof(g_spms1_default_cc[0]); ++i) {
+    set_midi_cc_value(midi_ch, g_spms1_default_cc[i][0], g_spms1_default_cc[i][1]);
+  }
+}
+
+// The system entries of NRPN category 5.
+void handle_midi_nrpn_system(uint8_t midi_ch, uint8_t lsb, uint8_t value) {
+  if (lsb == SPMS1_NRPN_SYSTEM_MUTE) {
+    g_midi_mute[midi_ch] = (value >= 64) ? 1 : 0;
+  } else if (lsb == SPMS1_NRPN_SYSTEM_RESET && value >= 64) {
+    spms1_reset_patch(midi_ch);
+  }
+}
+
 // CC 99 and 98 select a parameter, in either order, and CC 6 commits a value to it. CC 38 is
 // ignored because every value here is 7-bit, and CC 96/97 are not implemented. CC 101 and 100
 // select an RPN instead, which must not leave a following CC 6 looking like NRPN data. The CCs
@@ -182,7 +252,9 @@ void handle_midi_nrpn_cc(uint8_t midi_ch, uint8_t number, uint8_t value) {
   } else if (number == 6 && g_midi_nrpn_selected[midi_ch]) {
     // An MSB below the base, as another device's NRPN, is ignored (set_midi_nrpn_value ignores one
     // past the last category)
-    if (g_midi_nrpn_msb[midi_ch] >= SPMS1_NRPN_MSB_BASE) {
+    if (g_midi_nrpn_msb[midi_ch] == SPMS1_NRPN_SYSTEM_MSB) {
+      handle_midi_nrpn_system(midi_ch, g_midi_nrpn_lsb[midi_ch], value);
+    } else if (g_midi_nrpn_msb[midi_ch] >= SPMS1_NRPN_MSB_BASE) {
       set_midi_nrpn_value(midi_ch, (((int32_t)g_midi_nrpn_msb[midi_ch] - SPMS1_NRPN_MSB_BASE) << 7) | g_midi_nrpn_lsb[midi_ch], value);
     }
   }
@@ -234,7 +306,9 @@ void spms1_handle_note_on(uint8_t midi_ch, uint8_t pitch, uint8_t velocity) {
 // The Channel Mode messages, CC 120 to 127, which are not controls and are not stored as CC values.
 // All Sound Off (120), All Notes Off (123) and Omni Off, Omni On, Mono On and Poly On (124 to 127),
 // which end every note as All Notes Off does, close the gate and forget the remembered note, as a
-// note off of every note would: the envelopes release as they do at a note off. Reset All
+// note off of every note would: the envelopes release as they do at a note off. All Sound Off
+// also has the synth fade the output out and silence the envelopes and the filter, so that the
+// release is cut short (see g_midi_sound_off_count). Reset All
 // Controllers (121) centers Pitch Bend, sets the Modulation Wheel (CC 1) to 0 and leaves no NRPN
 // selected, and leaves every other CC as it is, the parameters among them. Local Control (122) has
 // no keyboard here to act on.
@@ -250,6 +324,9 @@ void spms1_handle_channel_mode(uint8_t midi_ch, uint8_t number) {
   } else if (number != 122) {
     g_midi_note_prev_pitch[midi_ch] = SPMS1_NO_NOTE;
     set_midi_note_on_state(midi_ch, 0);
+    if (number == 120) {
+      ++g_midi_sound_off_count[midi_ch];
+    }
   }
 }
 

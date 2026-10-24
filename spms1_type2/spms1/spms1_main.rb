@@ -70,6 +70,18 @@ SIGNALS_SIZE = 256
 # input -- Gate In, Reset In, Sync In -- acts at a threshold or an edge and takes the slot as it is.
 CONTROLLER_SMOOTHING_BLEND = 1.0 - (1.0 - 0.015625 * (48000.0 / SAMPLE_RATE.to_f)) ** (AUDIO_BUFFER_WORDS.to_f / 4.0)
 
+# The output fader, as PRA32-U2's: a linear fade of the output out and in, of at least 3 ms, in
+# whole buffers, 4 ms at 64 samples. It fades out while Mute (NRPN 117/0, see
+# spms1_midi_state.h) is on, as it is while a patch is sent, and holds the output silent until
+# Mute is off; and at an All Sound Off (CC 120), after which the envelopes and the filter are
+# silenced, out of hearing, before it fades in again. A fade that has begun runs to its end before
+# the next one, and the gain lands on exactly 0 or 1.0 there: it counts in 1/65536ths, as an
+# Integer, with the step rounded up and the count clamped. The delay line and the chorus keep
+# what they hold, and come back with the output. Off a fade the output is written as it is.
+OUTPUT_FADE_BUFFERS = (SAMPLE_RATE * 3 / 1000 + AUDIO_BUFFER_WORDS - 1) / AUDIO_BUFFER_WORDS
+OUTPUT_GAIN_ONE     = 65536
+OUTPUT_FADE_STEP    = (OUTPUT_GAIN_ONE + OUTPUT_FADE_BUFFERS * AUDIO_BUFFER_WORDS - 1) / (OUTPUT_FADE_BUFFERS * AUDIO_BUFFER_WORDS)
+
 # The NRPN parameter numbers (NRPN_*), in spms1_patch.rb: (category << 7) | LSB, where the MSB,
 # 112 + category, picks a category and the LSB an entry.
 #   0..127   active_modules[slot]
@@ -106,6 +118,15 @@ winning_slot = Array.new(128, 0)
 # When each slot was last written, from spms1_midi_state.h, for the slots in the order.
 order_written = Array.new(MODULES_SIZE, 0)
 
+# The output fader's gain, in 1/65536ths, what it adds to the gain each sample (negative fading
+# out, 0 off a fade), the buffers left of the fade after this one, and the count of All Sound
+# Offs it has taken, with one waiting while the output fades out.
+output_gain = OUTPUT_GAIN_ONE
+output_gain_step = 0
+output_fade_buffers = 0
+sound_off_count = 0
+sound_off_waiting = false
+
 audio_buffer_l = Array.new(AUDIO_BUFFER_WORDS, 0.0)
 audio_buffer_r = Array.new(AUDIO_BUFFER_WORDS, 0.0)
 
@@ -140,6 +161,31 @@ while true
   # zero with both ends exactly on -0.5 and +0.5. The division must floor for the bottom end to
   # land: Integer#/ does, and Spinel's sp_idiv implements it.
   signals[SIGNAL_PITCH_BEND]  = ((C.get_midi_pitch_bend(MIDI_CH) + 1) / 2).to_f * (1.0 / 8192.0)
+
+  # The output fader: where a fade ends, the next one is picked. The output silent, an All Sound
+  # Off that waited for it is done, and the fade in starts unless Mute holds the output silent.
+  if C.get_midi_sound_off_count(MIDI_CH) != sound_off_count
+    sound_off_count = C.get_midi_sound_off_count(MIDI_CH)
+    sound_off_waiting = true
+  end
+  muted = C.get_midi_mute(MIDI_CH) != 0
+  if output_fade_buffers > 0
+    output_fade_buffers -= 1
+  elsif output_gain == 0
+    if sound_off_waiting
+      eg_1.sound_off
+      eg_2.sound_off
+      filter_1.sound_off
+      sound_off_waiting = false
+    end
+    output_gain_step = muted ? 0 : OUTPUT_FADE_STEP
+    output_fade_buffers = muted ? 0 : OUTPUT_FADE_BUFFERS - 1
+  elsif muted || sound_off_waiting
+    output_gain_step = -OUTPUT_FADE_STEP
+    output_fade_buffers = OUTPUT_FADE_BUFFERS - 1
+  else
+    output_gain_step = 0
+  end
 
   # The patch, read back from the NRPN table. active_modules is packed from the front with no
   # gaps; every source_* holds a SIGNAL_* bus slot, or a parameter's own SLOT_*.
@@ -772,6 +818,18 @@ while true
     audio_buffer_l[i] = signals[source_output_l]
     audio_buffer_r[i] = signals[source_output_r]
     i += 1
+  end
+
+  if output_gain_step != 0 || output_gain != OUTPUT_GAIN_ONE
+    i = 0
+    while i < AUDIO_BUFFER_WORDS
+      output_gain += output_gain_step
+      output_gain = (output_gain < 0) ? 0 : ((output_gain > OUTPUT_GAIN_ONE) ? OUTPUT_GAIN_ONE : output_gain)
+      gain = output_gain.to_f * (1.0 / OUTPUT_GAIN_ONE.to_f)
+      audio_buffer_l[i] = audio_buffer_l[i] * gain
+      audio_buffer_r[i] = audio_buffer_r[i] * gain
+      i += 1
+    end
   end
 
   C.stop_debug_measure

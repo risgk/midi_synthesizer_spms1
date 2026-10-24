@@ -77,7 +77,8 @@ Required Software for Modification
       why they are needed
 - Ruby (CRuby), to change the patch's numbers or the default patch, or to add a module: they are
   kept in "spms1_patch.yaml", and `ruby patch_gen/spms1_patch_gen.rb` writes them out to
-  "spms1/spms1_patch.rb" (read by "spms1/spms1_main.rb"), the tables of "spms1_editor.html", the NRPN
+  "spms1/spms1_patch.rb" (read by "spms1/spms1_main.rb"), the default patch of "spms1/spms1_default_patch.h"
+  (for Reset, read by "spms1/spms1_midi_state.h"), the tables of "spms1_editor.html", the NRPN
   tables of "spms1_patching.md" and "spms1_patching.ja.md", and the wiring of the loop in
   "spms1/spms1_main.rb" (see [Adding a Module](./spms1_development.md#adding-a-module)). Run it, then regenerate "spms1/spms1_main.c"; `--check` only
   says whether the files are up to date
@@ -142,6 +143,9 @@ Usage
       it feeds
     - Saves and loads patches as JSON
     - Copies the patch as MIDI bytes or as an NRPN list, or sends it through Web MIDI
+    - Sends the whole patch (Send Patch, or a device newly chosen) and many wiring changes at once
+      (Init, Load JSON, Undo, Redo) muted (NRPN Mute), so that the patch is not heard half sent;
+      a Reset (NRPN) arriving at MIDI In puts the patch shown back to the default too
     - The side panels (Patch, Run Order, Export) fold to their headings with a click, each remembered;
       with all three folded, the canvas takes the width they leave
 - SPMS-1 Web: the synth itself, built into the editor ("spms1_web_synth.js")
@@ -155,6 +159,8 @@ Usage
 - MIDI Channel: Channel 1
 - Channel Mode messages: All Sound Off (CC#120), All Notes Off (CC#123), and Omni Off, Omni On, Mono On
   and Poly On (CC#124 to 127), end every note as letting it go would, so the envelopes release;
+  All Sound Off also cuts the sound at once: the output fades out over 4 ms, the envelopes and the
+  filter are silenced, and the output fades in again (the delay and the chorus keep what they hold);
   Reset All Controllers (CC#121) centers Pitch Bend, sets the Modulation Wheel (CC#1) to 0 and
   leaves no NRPN selected, and leaves the other CCs, the parameters', as they are. CC#120 to 127
   are not controls and are not stored as CC values

@@ -16,6 +16,9 @@ module Spms1
     # When each slot of the run order was last written, as in spms1_midi_state.h.
     @run_order_writes  = Array.new(16, 0)
     @run_order_written = Array.new(16) { Array.new(32, 0) }
+    # Mute (NRPN 117/0) and the count of All Sound Offs (CC 120), as in spms1_midi_state.h.
+    @mute = Array.new(16, 0)
+    @sound_off_count = Array.new(16, 0)
 
     # The signal bus SignalBus reads and writes, as spms1_bus.h has it for the C builds.
     @bus_signals = Array.new(256, 0.0)
@@ -50,6 +53,18 @@ module Spms1
       end
       def get_midi_run_order_written(ch, slot) = ((slot >= 0 && slot < 32) ? @run_order_written[ch][slot] : 0)
       def get_midi_nrpn_value(ch, i) = ((i >= 0 && i < 640) ? @nrpn_values[ch][i] : 0)
+      def get_midi_mute(ch) = @mute[ch]
+      def get_midi_sound_off_count(ch) = @sound_off_count[ch]
+
+      # The reset NRPN, as spms1_reset_patch: every entry, the times the run order was written and
+      # every CC to 0, then the default patch, written as at power-up by spms1_patch.rb.
+      def reset_patch(ch)
+        @nrpn_values[ch].fill(0)
+        @run_order_writes[ch] = 0
+        @run_order_written[ch].fill(0)
+        @cc_values[ch].fill(0)
+        spms1_write_default_patch(ch)
+      end
       def get_bus_signal(slot) = @bus_signals[slot & 255]
       def set_bus_signal(slot, v) = (@bus_signals[slot & 255] = v)
       def set_sample_rate(v) = (@sample_rate = v)
@@ -107,7 +122,7 @@ module Spms1
 
       # The Channel Mode messages, as spms1_midi_state.h takes them: Reset All Controllers (121)
       # centers the bend, sets CC 1 to 0 and leaves no NRPN selected; Local Control (122) does
-      # nothing; the rest end every note.
+      # nothing; the rest end every note, and All Sound Off (120) is counted for the synth too.
       def handle_channel_mode(ch, number)
         if number == 121
           @pitch_bend[ch] = 0
@@ -116,6 +131,7 @@ module Spms1
         elsif number != 122
           @note_prev_pitch[ch] = nil
           @note_on_state[ch] = 0
+          @sound_off_count[ch] += 1 if number == 120
         end
       end
 
@@ -128,6 +144,13 @@ module Spms1
           @nrpn_selected[ch] = true
         elsif number == 101 || number == 100
           @nrpn_selected[ch] = false
+        elsif number == 6 && @nrpn_selected[ch] && @nrpn_msb[ch] == 117
+          # The system entries: Mute (0) and Reset (1).
+          if @nrpn_lsb[ch] == 0
+            @mute[ch] = (value >= 64) ? 1 : 0
+          elsif @nrpn_lsb[ch] == 1 && value >= 64
+            reset_patch(ch)
+          end
         elsif number == 6 && @nrpn_selected[ch] && @nrpn_msb[ch] >= 112
           set_midi_nrpn_value(ch, ((@nrpn_msb[ch] - 112) << 7) | @nrpn_lsb[ch], value)
         end
