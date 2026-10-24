@@ -811,11 +811,13 @@
       border-radius: 0 0 4px 4px;
       z-index: 1;
     }
+    /* A key held lights up whole: a white key pale Ruby, with a thicker line at the bottom and its
+       label in bold, and a black key Ruby with a glow */
     .key.white.active {
-      background: #f0f0f0;
+      background: color-mix(in srgb, var(--primary-color) 23%, #fff);
     }
     .key.lower.active {
-      border-bottom: 4px solid var(--primary-color);
+      border-bottom: 6px solid var(--primary-color);
     }
     .key.black {
       background: #111;
@@ -823,6 +825,7 @@
     }
     .key.black.active {
       background: var(--primary-color);
+      box-shadow: 0 0 8px 2px color-mix(in srgb, var(--primary-color) 80%, transparent);
     }
     .key-label {
       position: absolute;
@@ -833,6 +836,10 @@
       font-size: 0.7rem;
       color: var(--text-muted);
       pointer-events: none;
+    }
+    .key.white.active .key-label {
+      color: var(--primary-hover);
+      font-weight: bold;
     }
     .panel {
       background: var(--panel-bg);
