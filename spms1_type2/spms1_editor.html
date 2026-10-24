@@ -38,6 +38,11 @@
       margin: 0;
       padding: 0;
     }
+    /* The width of a scrollbar kept free even when the page fits the window, so that the page
+       does not widen when the Patch tab, which fits it, follows the Controls tab, which scrolls. */
+    html {
+      scrollbar-gutter: stable;
+    }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background-color: var(--bg-color);
@@ -175,12 +180,15 @@
     }
     /* In one column the soft keyboard comes right under the canvas: the canvas and the side
        panels become items of the body, so order can put the keyboard between them. Not on a
-       hidden tab, where display: contents would win over [hidden]. The Wide button gives the same
-       layout above the breakpoint. */
+       hidden tab, where display: contents would win over [hidden]. The Wide button gives the
+       canvas the full width above the breakpoint too, with the side panels under it and the soft
+       keyboard last, kept at the bottom of the window (below), so that they scroll behind it. */
     .app.wide:not([hidden]) { display: contents; }
-    .app.wide:not([hidden]) > .canvas-panel { order: 1; }
-    .app.wide:not([hidden]) ~ #kbd-panel { order: 2; }
-    .app.wide:not([hidden]) > .side { order: 3; }
+    @media (min-width: 801px) {
+      .app.wide:not([hidden]) > .canvas-panel { order: 1; }
+      .app.wide:not([hidden]) > .side { order: 2; }
+      .app.wide:not([hidden]) ~ #kbd-panel { order: 3; }
+    }
     @media (max-width: 800px) {
       .app:not([hidden]) { display: contents; }
       .canvas-panel { order: 1; }
@@ -588,13 +596,22 @@
     /* Soft keyboard */
     /* On the Controls tab, kept at the bottom of the window while the page scrolls above it, as on
        a 1280 x 720 screen or a phone, upright or on its side, so the keys stay at hand under the
-       controls, with lower keys in a low window (below), as in PRA32-U2 Editor; not on the Patch
-       tab, where it would cover the canvas. */
+       controls, with lower keys in a low window (below), as in PRA32-U2 Editor; on the Patch tab
+       only with Wide, where the canvas ends above it and the side panels scroll behind it, and
+       not in one column (a phone), where it would take much of the window over the canvas. */
     body:has(#tab-controls:not([hidden])) #kbd-panel {
       position: sticky;
       bottom: 0;
       z-index: 5;
       box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.08);
+    }
+    @media (min-width: 801px) {
+      body:has(#tab-patch.wide:not([hidden])) #kbd-panel {
+        position: sticky;
+        bottom: 0;
+        z-index: 5;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.08);
+      }
     }
     /* A phone on its side: the page packed tighter. */
     @media (max-height: 480px) and (orientation: landscape) {
@@ -1526,12 +1543,16 @@
     #export-info {
       margin: 4px 0 8px;
     }
+    /* No margin under the page, so that the soft keyboard ends at the bottom of the window on both
+       tabs, and does not move when the tab changes: stuck there on the Controls tab, and with the
+       canvas sized by fitTabArea to end it there on the Patch tab. */
+    body { padding-bottom: 0; }
   </style>
 </head>
 <body>
 
 <header>
-  <h1>SPMS-1 (type-2) Editor<span class="version">v0.2.0</span><span class="github-link">(<a href="https://github.com/risgk/midi_synthesizer_spms1" target="_blank" rel="noopener">View on GitHub</a>)</span></h1>
+  <h1>SPMS-1 (type-2) Editor<span class="version">v0.2.1</span><span class="github-link">(<a href="https://github.com/risgk/midi_synthesizer_spms1" target="_blank" rel="noopener">View on GitHub</a>)</span></h1>
   <nav class="tabs">
     <button class="tab-btn active" data-tab="controls">Controls</button>
     <button class="tab-btn" data-tab="patch">Patch</button>
@@ -4678,9 +4699,12 @@
     // In one column the patch area has no box of its own, but the canvas starts where it would.
     const top = (controls.hidden ? canvas : controls).getBoundingClientRect().top + window.scrollY;
     const keyboard = document.getElementById('kbd-panel').offsetHeight;
-    const height = window.innerHeight - top - 16 - keyboard - 20;
+    // The gap above the keyboard and the margin under the page, as the window size sets them.
+    const body = getComputedStyle(document.body);
+    const around = (parseFloat(body.rowGap) || 0) + (parseFloat(body.paddingBottom) || 0);
+    const height = window.innerHeight - top - around - keyboard;
     const zoom = Math.min(5, Math.max(1, Math.round(window.outerWidth / window.innerWidth * 20) / 20));
-    const heightAt100 = Math.round(window.innerHeight * zoom) - top - 16 - keyboard - 20;
+    const heightAt100 = Math.round(window.innerHeight * zoom) - top - around - keyboard;
     const narrow = matchMedia('(max-width: 800px)').matches;
     if (!controls.hidden) {
       if (!narrow) controls.style.minHeight = height + 'px';
@@ -4696,6 +4720,14 @@
     }
   }
   window.addEventListener('resize', fitTabArea);
+  // The soft keyboard takes its height only once its keys are fitted, and what is above the tabs
+  // may wrap once the fonts are in, both after the first fit; fitted again, the page would
+  // otherwise run past the window by the difference (22 px at 1920 x 1080).
+  if (window.ResizeObserver) {
+    const refit = new ResizeObserver(() => fitTabArea());
+    refit.observe(document.getElementById('kbd-panel'));
+    refit.observe(document.querySelector('header'));
+  }
 
   document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
 
