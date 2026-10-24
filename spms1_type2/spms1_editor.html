@@ -65,8 +65,9 @@
       gap: 12px;
       flex-wrap: wrap;
     }
+    /* The title as large as PRA32-U2 Editor's, 20px, at every width. */
     header h1 {
-      font-size: 1.8rem;
+      font-size: 1.25rem;
       color: var(--primary-color);
     }
     header .version {
@@ -87,7 +88,6 @@
     /* On a phone the title takes one line and the margins less of the width. */
     @media (max-width: 480px) {
       body { padding: 12px; gap: 12px; }
-      header h1 { font-size: 1.35rem; }
       header .version, header .github-link { font-size: 0.8rem; margin-left: 6px; }
     }
     [hidden] {
@@ -417,7 +417,6 @@
          1280 x 720 or 800 screen shows as much of the controls as it can. */
       body { padding: 14px 20px; gap: 10px; }
       header { padding-bottom: 8px; }
-      header h1 { font-size: 1.5rem; }
       .panel.midi-panel { padding-top: 4px; padding-bottom: 4px; }
       /* The MIDI settings in the header, between the title and the tabs (see placeMIDIPanel). */
       header.with-midi { align-items: center; flex-wrap: nowrap; }
@@ -578,7 +577,6 @@
        window to the controls or the patch. */
     @media (max-height: 480px) and (orientation: landscape) {
       body { padding: 8px 12px; gap: 8px; }
-      header h1 { font-size: 1.2rem; }
       #kbd-panel { padding: 8px 12px; }
       #kbd-panel .kbd-bar { margin-bottom: 6px; }
       #kbd-panel .keyboard-frame { --kbd-half-height: calc(42px * var(--kbd-scale)); padding-top: 4px; }
@@ -884,6 +882,38 @@
       font-size: 0.75rem;
       color: var(--text-muted);
       line-height: 1.4;
+    }
+    /* What the colors of the CC# fields mean, with a field of each, for a touch screen, which
+       shows no titles. */
+    .field-key {
+      margin-top: 6px;
+    }
+    .field-key .cc-key {
+      display: inline-block;
+      min-width: 24px;
+      padding: 0 3px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-family: monospace;
+      text-align: center;
+      color: var(--text-color);
+    }
+    .field-key .cc-key.shared {
+      border: 2px dotted #d99aa0;
+      padding: 0 2px;
+      background: #fdecee;
+      color: #b71c1c;
+      font-weight: 600;
+    }
+    .field-key .cc-key.none {
+      border-color: #9bb5d2;
+      background: #edf2f8;
+      color: var(--wire-param);
+      font-weight: 600;
+    }
+    .field-key .cc-key.warn {
+      border-color: var(--wire-feedback);
+      background: #fdf2e3;
     }
 
     /* Canvas */
@@ -1545,6 +1575,10 @@
         connected input away to unplug it; click a wire and press Delete to remove it. An unplugged parameter reads its own
         control slot. Drag a value up or down to change it, with Shift for fine steps, or turn the
         wheel over the one being edited. Drag the background to pan, wheel or pinch to zoom.
+      </p>
+      <p class="hint field-key">
+        CC#: <span class="cc-key shared">34</span> shared with another parameter,
+        <span class="cc-key none">0</span> no CC, <span class="cc-key warn">6</span> reserved
       </p>
     </div>
 
@@ -2303,8 +2337,8 @@
       ${withInput ? `<span class="port in param" data-dst="PR:${c.key}" title="Where ${escapeHTML(c.full)} takes its value (per buffer). Drag to wire, or click to pick a source"></span>` : ''}
       <span class="lbl" title="${tip}">${escapeHTML(label)}</span>
       <span class="src"${withInput ? ` data-src-of="PR:${c.key}"` : ''}></span>
-      <input type="number" class="cc" min="0" max="127" title="CC number, 0 for none">
-      <input type="number" class="val" min="4" max="124" title="CC value">
+      <input type="number" class="cc" min="0" max="127" title="CC number, 0 for none" aria-label="${escapeHTML(c.full)}: CC number">
+      <input type="number" class="val" min="4" max="124" title="CC value" aria-label="${escapeHTML(c.full)}: value">
       <span class="norm" data-slot="${slot}" title="The value the synth sees in the slot"></span>
       ${withInput ? '' : `<span class="port out param" data-src="${slot}" title="${escapeHTML(SLOT[slot].full)} control slot"></span>`}
     </div>` + forms.map(([form, formLabel]) => `<div class="row form-row">
@@ -2322,7 +2356,7 @@
       h += `<div class="sep"><span>Signals</span><span>Value</span><span class="norm-head">Norm</span></div>`;
     }
     for (const [o, label, min, max] of node.notes || []) {
-      h += `<div class="row note-row" data-note-sig="${o}"><span class="lbl">${label}</span><input type="number" class="nv" min="${min}" max="${max}"><span class="norm"></span><span class="port out" data-src="${o}"></span></div>`;
+      h += `<div class="row note-row" data-note-sig="${o}"><span class="lbl">${label}</span><input type="number" class="nv" min="${min}" max="${max}" aria-label="${escapeHTML(node.label)} ${escapeHTML(label)}: value"><span class="norm"></span><span class="port out" data-src="${o}"></span></div>`;
     }
     if (node.normed) {
       h += `<div class="sep"><span>Signals</span><span class="norm-head">Norm</span></div>`;
