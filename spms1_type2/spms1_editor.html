@@ -1174,17 +1174,11 @@
       color: var(--wire-param);
     }
     /* A CC that also fills another parameter's slot, as Osc 2's amounts are on Osc 1's CCs: moving
-       one moves the other, so the number stands out a little. */
-    /* A CC shared by more than one slot in bold with a dotted underline, in the color of the text, not
-       in a color of its own, which could be taken for a module's (as amber was for Osc 2's gold); on the
-       Patch tab, its field in slate. */
-    .row input.shared {
-      border-color: #8fa3b8;
-      background: #eef2f7;
-    }
+       one moves the other, so the number has a dotted underline, in its own muted color on the
+       Controls tab and in the field on the Patch tab, a line rather than a color, which could be
+       taken for a module's (as amber was for Osc 2's gold). */
+    .row input.shared,
     .slider-label .cc-num.shared {
-      color: var(--text-color);
-      font-weight: 600;
       text-decoration: underline dotted;
       text-underline-offset: 2px;
     }
