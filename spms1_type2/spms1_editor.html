@@ -567,8 +567,9 @@
     /* On the Controls tab, kept at the bottom of the window while the page scrolls above it, as on
        a 1280 x 720 screen or a phone, so the keys stay at hand under the controls; not on the Patch
        tab, where it would cover the canvas, nor where the window is too low for that to leave
-       much above it. */
-    @media (min-height: 560px) {
+       much above it, as a phone on its side; 480px, so that an iPhone SE upright, about 550px
+       under the bars of the browser, has it. */
+    @media (min-height: 480px) {
       body:has(#tab-controls:not([hidden])) #kbd-panel {
         position: sticky;
         bottom: 0;
@@ -649,6 +650,23 @@
     .kbd-hint {
       font-size: 0.75rem;
       color: var(--text-muted);
+    }
+    /* Where nothing hovers, as on a phone or a tablet, there is most likely no PC keyboard either. */
+    @media (hover: none) {
+      .kbd-hint { display: none; }
+    }
+    /* On a phone the bar takes one line from 375px (as an iPhone SE), its heading, buttons and gaps
+       a little smaller; and in a window up to 640px high, as one upright under the bars of the
+       browser, the keys are lower, as on a phone on its side, so that the keyboard at the bottom
+       leaves more of the window to the controls. */
+    @media (max-width: 480px) {
+      #kbd-panel .kbd-bar { column-gap: 4px; }
+      #kbd-panel .kbd-bar h2 { font-size: 1rem; }
+      #kbd-panel .kbd-bar .btn { padding-left: 7px; padding-right: 7px; }
+    }
+    @media (max-width: 480px) and (min-height: 480px) and (max-height: 640px) {
+      #kbd-panel .keyboard-frame { --kbd-half-height: calc(42px * var(--kbd-scale)); padding-top: 4px; }
+      #kbd-panel .keyboard-wrapper { height: calc(84px * var(--kbd-scale)); }
     }
     /* Hold and Panic at the right end. */
     .kbd-bar .kbd-hold {
