@@ -1164,15 +1164,18 @@
     }
     /* A CC that also fills another parameter's slot, as Osc 2's amounts are on Osc 1's CCs: moving
        one moves the other, so the number stands out a little. */
-    /* A CC shared by more than one slot in amber, apart from the red of the Controller and the
-       orange of a reserved CC. */
+    /* A CC shared by more than one slot in bold with a dotted underline, in the color of the text, not
+       in a color of its own, which could be taken for a module's (as amber was for Osc 2's gold); on the
+       Patch tab, its field in slate. */
     .row input.shared {
-      border-color: #e5c07b;
-      background: #fdf6e3;
+      border-color: #8fa3b8;
+      background: #eef2f7;
     }
     .slider-label .cc-num.shared {
-      color: #946000;
+      color: var(--text-color);
       font-weight: 600;
+      text-decoration: underline dotted;
+      text-underline-offset: 2px;
     }
     /* A routed parameter reads its wire, but its CC still fills its own slot and so still feeds
        the output port: the fields and the slider stay live, only shown as disabled ones are. */
