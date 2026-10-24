@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SPMS-1 (type-2) Editor</title>
+  <!-- The icon: "t2" in white on the primary color, as shapes (the letters of M+ 1p Black, M PLUS 1p Black under the SIL
+       Open Font License), not as text, so that it is the same in every OS; embedded, so that it needs no file beside the page -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='5'%20fill='%239B111E'/%3E%3Cpath%20d='M10.13%2024.5Q7.89%2024.5%206.8%2023.47Q5.71%2022.44%205.71%2020.19V15.89H3.33V12.94H5.71V8.63H10.11V12.94H13.76V15.89H10.11V19.51Q10.11%2020.6%2010.36%2020.96Q10.61%2021.33%2011.26%2021.33Q12.26%2021.33%2013.3%2020.99L13.76%2024.05Q12.08%2024.5%2010.13%2024.5ZM16.88%2020.65Q19.92%2018.36%2021.44%2016.96Q22.96%2015.57%2023.43%2014.73Q23.91%2013.89%2023.91%2012.94Q23.91%2011.24%2021.98%2011.24Q20.28%2011.24%2017.56%2012.94L16.43%209.31Q17.59%208.54%2019.35%208.02Q21.12%207.5%2022.66%207.5Q25.5%207.5%2027.03%208.83Q28.56%2010.15%2028.56%2012.49Q28.56%2014.35%2027.38%2016.02Q26.2%2017.7%2022.78%2020.6V20.65H28.67V24.27H16.88Z'%20fill='white'/%3E%3C/svg%3E">
   <!-- SPMS-1 Web: the synth itself, built into the editor as "SPMS-1 Web (Built-in)" in MIDI Out (optional) -->
   <script src="spms1_web_synth.js"></script>
   <style>
@@ -14,7 +17,7 @@
       --panel-bg: #ffffff;
       --border-color: #e1e4e6;
       --text-color: #2c3e50;
-      --text-muted: #7f8c8d;
+      --text-muted: #6b6b6b;  /* 5.3:1 on white, so that the small notes are easy to read */
       --wire-signal: #9B111E;
       --wire-param: #4f7cac;
       --wire-feedback: #d68910;
@@ -66,10 +69,9 @@
       font-size: 1.8rem;
       color: var(--primary-color);
     }
-    /* The version and the link a darker gray than --text-muted, 5.3:1 on white (as in PRA32-U2 Editor). */
     header .version {
       font-size: 0.9rem;
-      color: #6b6b6b;
+      color: var(--text-muted);
       font-weight: normal;
       margin-left: 10px;
     }
@@ -77,7 +79,7 @@
       font-size: 0.9rem;
       font-weight: normal;
       margin-left: 10px;
-      color: #6b6b6b;
+      color: var(--text-muted);
     }
     header .github-link a {
       color: var(--primary-color);
@@ -130,6 +132,25 @@
     }
     .midi-bar .form-group.narrow {
       flex: 0 0 auto;
+    }
+    /* Below 1280px, where the MIDI settings have a line of their own, they can be hidden by MIDI at the left of
+       the line, which then takes its place alone; in the header, from 1280px, they take no line and stay. */
+    .midi-fold {
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    header .midi-fold {
+      display: none;
+    }
+    .midi-panel.collapsed:not(header .midi-panel) .midi-bar > :not(.midi-fold),
+    .midi-panel.collapsed:not(header .midi-panel) .midi-note {
+      display: none;
+    }
+    /* Why no MIDI device is listed, if Web MIDI is not there or not allowed (see showMIDINote). */
+    .midi-note {
+      margin-top: 6px;
+      font-size: 0.85rem;
+      color: var(--primary-color);
     }
     .midi-bar .form-group label {
       margin-bottom: 0;
@@ -819,6 +840,12 @@
       border-color: var(--primary-color);
       outline: none;
     }
+    /* The ring of the keyboard focus, in the primary color: the outline is taken off the sliders and the fields above,
+       so without it a key on the keyboard would leave no sign of where it is. */
+    button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus-visible {
+      outline: 2px solid var(--primary-color);
+      outline-offset: 2px;
+    }
     .btn {
       padding: 7px 10px;
       border: 1px solid var(--border-color);
@@ -1430,6 +1457,7 @@
 
 <div class="panel midi-panel">
   <div class="midi-bar">
+    <button type="button" class="fold-toggle midi-fold" aria-expanded="true" title="Show or hide the MIDI settings"><span class="fold-caret" aria-hidden="true">&#9660;</span>MIDI</button>
     <div class="form-group narrow">
       <label for="midi-ch">MIDI Channel</label>
       <select id="midi-ch"></select>
@@ -1448,6 +1476,7 @@
     </div>
     <button class="btn primary" id="btn-send" title="Send the whole patch again: NRPN and CC values. Every change is sent as it is made.">Send Patch</button>
   </div>
+  <div class="midi-note" id="midi-note" hidden></div>
 </div>
 
 <div id="tab-controls">
@@ -3298,12 +3327,42 @@
   }
 
   function initMIDI() {
-    if (!navigator.requestMIDIAccess) return;
+    if (!navigator.requestMIDIAccess) {
+      showMIDINote('Web MIDI is not available in this browser: no MIDI device can be used');
+      return;
+    }
     navigator.requestMIDIAccess().then(access => {
       midiAccess = access;
       applyMIDISettings(loadMIDISettings());
       midiAccess.onstatechange = () => applyMIDISettings(loadMIDISettings());
-    }, err => console.error('Failed to get MIDI access - ' + err));
+    }, err => {
+      console.error('Failed to get MIDI access - ' + err);
+      showMIDINote('MIDI access is not allowed (or failed): no MIDI device can be used');
+    });
+  }
+
+  // A note under the MIDI settings, so that one sees why no MIDI device is listed (not only in the console),
+  // and that SPMS-1 Web can still be played, if it is there.
+  function showMIDINote(text) {
+    const note = document.getElementById('midi-note');
+    note.textContent = text + (webSynthOutput ? ', but SPMS-1 Web (Built-in) in MIDI Out can be.' : '.');
+    note.hidden = false;
+  }
+
+  // The MIDI settings shown or hidden, as the last time (see .midi-fold).
+  const MIDI_FOLD_KEY = 'spms1-type2-editor-midi-folded';
+  function setMIDIFolded(folded) {
+    document.querySelector('.midi-panel').classList.toggle('collapsed', folded);
+    document.querySelector('.midi-fold').setAttribute('aria-expanded', String(!folded));
+    try { localStorage.setItem(MIDI_FOLD_KEY, folded ? '1' : '0'); } catch (e) { /* storage unavailable */ }
+    fitTabArea();
+  }
+  function initMIDIFold() {
+    let folded = false;
+    try { folded = localStorage.getItem(MIDI_FOLD_KEY) === '1'; } catch (e) { /* storage unavailable */ }
+    document.querySelector('.midi-fold').addEventListener('click', () =>
+      setMIDIFolded(!document.querySelector('.midi-panel').classList.contains('collapsed')));
+    setMIDIFolded(folded);
   }
 
   function handleDeviceChange() {
@@ -3983,6 +4042,7 @@
       zone.classList.toggle('fav', fav);
       const star = zone.querySelector('.fav-toggle');
       star.setAttribute('aria-pressed', String(fav));
+      star.setAttribute('aria-label', `Favorite: ${c.full}`);
       star.title = fav ? 'Favorite: click to unmark' : 'Mark as a favorite';
       const others = sharingCC(c);
       const hint = controlHint(c);
@@ -4003,6 +4063,9 @@
       const own = signalNorm(c.slots[0][0]);
       const norm = zone.querySelector('.slider-norm');
       norm.textContent = own ? own.text : '';
+      // For a screen reader: the name of the parameter, and the value with what the synth sees, as shown.
+      slider.setAttribute('aria-label', c.full);
+      slider.setAttribute('aria-valuetext', usable ? (own ? `${value}, ${own.text}` : String(value)) : 'no CC');
       norm.title = 'The value the synth sees in the slot';
     });
     refreshModWheel();
@@ -4567,6 +4630,7 @@
     renderAll();
     createKeyboard();
     initSidePanels();
+    initMIDIFold();
     let tab = 'controls';
     try { tab = localStorage.getItem(TAB_KEY) || tab; } catch (e) { /* storage unavailable */ }
     let wide = false;
