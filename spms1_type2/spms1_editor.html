@@ -1638,6 +1638,9 @@
         <button class="btn" id="btn-redo" title="Ctrl+Y">Redo</button>
         <button class="btn" id="btn-init">Init</button>
       </div>
+      <div class="btn-row" style="margin-top: 6px;">
+        <button class="btn" id="btn-save-device" title="Keep the patch in the synth's flash (NRPN Save, between Mute on and off), in place of the one kept before; the synth loads it at power-up. The sound stops for about 0.1 s.">Save to Device</button>
+      </div>
       <p class="hint" style="margin-top: 8px;">
         MIDI In is passed through to the synth, and a CC on the channel above moves every slot
         assigned to it. Drag from an output (right) to an input (left) to connect; near an edge, the
@@ -3874,6 +3877,21 @@
   chSelect.addEventListener('change', () => { lastSent = null; nrpnSelect.selected = false; updateExport(); refreshNoteNode(); saveMIDISettings(); sendChanges(); });
   document.getElementById('btn-send').addEventListener('click', sendAll);
   document.getElementById('btn-mute').addEventListener('click', () => setUserMute(!userMuted, true));
+
+  // Save to Device: the patch, as the synth has it, kept in its flash. Save is taken only while
+  // Mute is on, so it goes between Mute on and off; Mute off is left out while the Mute button
+  // holds the synth silent.
+  document.getElementById('btn-save-device').addEventListener('click', () => {
+    if (!midiOutput) {
+      alert('Select the synth in MIDI Out first.');
+      return;
+    }
+    if (!confirm('Save this patch in the synth? It replaces the patch kept there, and the synth loads it at power-up.')) return;
+    sendChanges();
+    const st = 0xB0 | exportOptions().ch;
+    const save = [st, 99, NRPN_SYSTEM_MSB, st, 98, 2, st, 6, 127];
+    midiOutput.send([...muteLine(st, true).bytes, ...save, ...(userMuted ? [] : muteLine(st, false).bytes), st, 101, 127, st, 100, 127]);
+  });
 
   // ---- Export panel --------------------------------------------------------------------------
 

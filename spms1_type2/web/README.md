@@ -32,6 +32,8 @@ How to Use
     - Safari (Mac, iPhone, iPad) and all the Web browsers on iPhone and iPad: Web MIDI API is not supported,
       so only the soft keyboard of the editor can be used to play SPMS-1 Web (MIDI devices cannot be used)
 - Each window (tab) has its own SPMS-1 Web, which starts with the default patch of the sketch
+    - A patch saved (Save to Device, or NRPN Save) is kept until the page is closed or reloaded, and
+      only Load (NRPN) brings it back
 
 
 Specifications

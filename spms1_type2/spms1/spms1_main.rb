@@ -84,7 +84,11 @@ CONTROLLER_SMOOTHING_BLEND = 1.0 - (1.0 - 0.015625 * (48000.0 / SAMPLE_RATE.to_f
 # and it stays silent for OUTPUT_HOLD_BUFFERS (11 ms) at least, so that the lines of the chorus
 # and the amp's limiter, 11 ms and less, hold nothing from before: after an All Sound Off they
 # would bring back a moment of the sound it cut. The delay's line, 340 ms, is left as it is, and
-# its repeats come back with the output, as they would from a delay after the synth.
+# its repeats come back with the output, as they would from a delay after the synth. A Save (NRPN
+# 117/2), which comes while Mute is on, is written to the flash once the output is silent: writing
+# it stops both cores for up to 100 ms, while the audio plays the silence the host fills its
+# buffer with (see store_patch_image in spms1_midi_state.h). It is written after the buffer is,
+# outside the span that Debug Print measures.
 OUTPUT_FADE_SAMPLES = (SAMPLE_RATE * 3 / 1000 + AUDIO_BUFFER_WORDS - 1) / AUDIO_BUFFER_WORDS * AUDIO_BUFFER_WORDS
 OUTPUT_FADE_STEP    = 1.0 / OUTPUT_FADE_SAMPLES.to_f
 OUTPUT_HOLD_BUFFERS = (SAMPLE_RATE * 11 / 1000 + AUDIO_BUFFER_WORDS - 1) / AUDIO_BUFFER_WORDS
@@ -135,6 +139,8 @@ sound_off_count = 0
 sound_off_waiting = false
 mute_count = 0
 mute_waiting = false
+save_count = 0
+save_waiting = false
 output_hold_buffers = 0
 
 audio_buffer_l = Array.new(AUDIO_BUFFER_WORDS, 0.0)
@@ -149,6 +155,8 @@ spms1_fill_constant_signals(signals)
 # The default patch, written into the NRPN table the loop reads it back from. Why it is what it is,
 # spms1_patch.yaml says, above default_order.
 spms1_write_default_patch(MIDI_CH)
+# And over it the patch kept in the flash, if one is.
+C.load_saved_patch(MIDI_CH)
 
 C.set_sample_rate(SAMPLE_RATE)
 C.set_audio_buffers(AUDIO_BUFFERS)
@@ -183,9 +191,16 @@ while true
     mute_count = C.get_midi_mute_count(MIDI_CH)
     mute_waiting = true
   end
+  if C.get_midi_save_count(MIDI_CH) != save_count
+    save_count = C.get_midi_save_count(MIDI_CH)
+    save_waiting = true
+  end
   muted = C.get_midi_mute(MIDI_CH) != 0
+  saving = false
   if output_fade_position == 0
     mute_waiting = false
+    saving = save_waiting
+    save_waiting = false
     if sound_off_waiting
       eg_1.sound_off
       eg_2.sound_off
@@ -193,8 +208,8 @@ while true
       sound_off_waiting = false
     end
     output_hold_buffers -= (output_hold_buffers > 0) ? 1 : 0
-    output_fade_direction = (!muted && output_hold_buffers == 0) ? 1 : 0
-  elsif output_fade_position == OUTPUT_FADE_SAMPLES && (muted || mute_waiting || sound_off_waiting)
+    output_fade_direction = (!muted && !saving && output_hold_buffers == 0) ? 1 : 0
+  elsif output_fade_position == OUTPUT_FADE_SAMPLES && (muted || mute_waiting || save_waiting || sound_off_waiting)
     output_fade_direction = -1
     output_hold_buffers = OUTPUT_HOLD_BUFFERS
   elsif output_fade_position == OUTPUT_FADE_SAMPLES
@@ -843,5 +858,11 @@ while true
 
   AUDIO_BUFFER_WORDS.times do |i|
     C.write_to_audio_buffer(audio_buffer_l[i], audio_buffer_r[i])
+  end
+
+  # A Save, with the output silent; the output is held silent as long again after it.
+  if saving
+    C.store_patch_image(MIDI_CH)
+    output_hold_buffers = OUTPUT_HOLD_BUFFERS
   end
 end

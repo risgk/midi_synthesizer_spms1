@@ -19,6 +19,12 @@ module Spms1
     # Mute (NRPN 117/0) and the count of All Sound Offs (CC 120), as in spms1_midi_state.h.
     @mute = Array.new(16, 0)
     @mute_count = Array.new(16, 0)
+    # Save (NRPN 117/2) and Load (117/3), as in spms1_midi_state.h, with the patch kept in RAM: the
+    # patch made as Save arrives, and the one written when the synth stores it, as [NRPN table, CC
+    # values, run order ranks], or nil.
+    @save_count = Array.new(16, 0)
+    @patch_image = nil
+    @stored_image = nil
     @sound_off_count = Array.new(16, 0)
 
     # The signal bus SignalBus reads and writes, as spms1_bus.h has it for the C builds.
@@ -56,6 +62,28 @@ module Spms1
       def get_midi_nrpn_value(ch, i) = ((i >= 0 && i < 640) ? @nrpn_values[ch][i] : 0)
       def get_midi_mute(ch) = @mute[ch]
       def get_midi_mute_count(ch) = @mute_count[ch]
+      def get_midi_save_count(ch) = @save_count[ch]
+      def store_patch_image(_ch) = (@stored_image = @patch_image)
+
+      # The patch as spms1_make_patch_image takes it: each run order slot's time as a rank, 1 the
+      # first written, 0 never.
+      def make_patch_image(ch)
+        written = @run_order_written[ch]
+        ranks = written.map { |w| w == 0 ? 0 : written.count { |o| o != 0 && o <= w } }
+        @patch_image = [@nrpn_values[ch].dup, @cc_values[ch].dup, ranks]
+      end
+
+      # As spms1_apply_patch_image, over the default patch.
+      def load_saved_patch(ch)
+        return unless @stored_image
+        nrpn, cc, ranks = @stored_image
+        reset_patch(ch)
+        @nrpn_values[ch] = nrpn.dup
+        @cc_values[ch] = cc.dup
+        @run_order_writes[ch] = 0
+        @run_order_written[ch].fill(0)
+        (1..32).each { |rank| 32.times { |slot| set_midi_nrpn_value(ch, slot, nrpn[slot]) if ranks[slot] == rank } }
+      end
       def get_midi_sound_off_count(ch) = @sound_off_count[ch]
 
       # The reset NRPN, as spms1_reset_patch: every entry, the times the run order was written and
@@ -147,12 +175,17 @@ module Spms1
         elsif number == 101 || number == 100
           @nrpn_selected[ch] = false
         elsif number == 6 && @nrpn_selected[ch] && @nrpn_msb[ch] == 117
-          # The system entries: Mute (0) and Reset (1).
+          # The system entries: Mute (0), Reset (1), Save (2) and Load (3).
           if @nrpn_lsb[ch] == 0
             @mute[ch] = (value >= 64) ? 1 : 0
             @mute_count[ch] += 1 if value >= 64
           elsif @nrpn_lsb[ch] == 1 && value >= 64
             reset_patch(ch)
+          elsif @nrpn_lsb[ch] == 2 && value >= 64 && @mute[ch] != 0
+            make_patch_image(ch)
+            @save_count[ch] += 1
+          elsif @nrpn_lsb[ch] == 3 && value >= 64 && @mute[ch] != 0
+            load_saved_patch(ch)
           end
         elsif number == 6 && @nrpn_selected[ch] && @nrpn_msb[ch] >= 112
           set_midi_nrpn_value(ch, ((@nrpn_msb[ch] - 112) << 7) | @nrpn_lsb[ch], value)

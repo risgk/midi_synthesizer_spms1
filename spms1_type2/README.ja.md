@@ -143,6 +143,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.2.2
       それ以外の変更は、そのまま送ります
     - Mute ボタンでシンセをミュート (NRPN の Mute) して、音を出さずにパッチを変えられます。MIDI In に届いた Mute も
       ボタンに表示します。MIDI In に届いたリセット (NRPN の Reset) では、エディタのパッチもデフォルトに戻ります
+    - Save to Device で、パッチをシンセのフラッシュに保存します (NRPN の Save)。シンセは電源投入時にこれを読み込みます
     - サイドパネル (Patch、Run Order、Export) は見出しのクリックで畳め、それぞれの状態を覚えておきます。
       3 つとも畳むと、空いた幅まで配線図が広がります
 - SPMS-1 Web: エディタに組み込まれたシンセサイザー本体 ("spms1_web_synth.js")
