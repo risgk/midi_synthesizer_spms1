@@ -193,7 +193,8 @@ SMOOTHED_STAGE_1_MOD_WHEEL = 253
 SMOOTHED_STAGE_1_GENERAL_1 = 254
 SMOOTHED_STAGE_1_GENERAL_2 = 255
 
-# NRPN parameter numbers: (MSB << 7) | LSB, where the MSB picks a category and the LSB an entry.
+# NRPN parameter numbers: (category << 7) | LSB, where the MSB, 112 + category, picks a category
+# and the LSB an entry.
 #   0..127   active_modules[slot]
 # 128..255   what feeds each module input
 # 256..383   where each parameter's value comes from

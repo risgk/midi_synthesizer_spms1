@@ -71,7 +71,7 @@
 |                             1 | x             | o             | Mod Wheel (Unipolar)                 |
 |                            16 | x             | o             | General 1 (Unipolar, 6 forms)        |
 |                            17 | x             | o             | General 2 (Unipolar, 6 forms)        |
-|                            99 | x             | o             | NRPN MSB                             |
+|                            99 | x             | o             | NRPN MSB (112-116)                   |
 |                            98 | x             | o             | NRPN LSB                             |
 |                             6 | x             | o             | Data Entry MSB (NRPN value)          |
 |                       101,100 | x             | o             | RPN select: suspends NRPN data entry |

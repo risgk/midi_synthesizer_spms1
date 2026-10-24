@@ -70,8 +70,8 @@ SIGNALS_SIZE = 256
 # input -- Gate In, Reset In, Sync In -- acts at a threshold or an edge and takes the slot as it is.
 CONTROLLER_SMOOTHING_BLEND = 1.0 - (1.0 - 0.015625 * (48000.0 / SAMPLE_RATE.to_f)) ** (AUDIO_BUFFER_WORDS.to_f / 4.0)
 
-# The NRPN parameter numbers (NRPN_*), in spms1_patch.rb: (MSB << 7) | LSB, where the MSB picks
-# a category and the LSB an entry.
+# The NRPN parameter numbers (NRPN_*), in spms1_patch.rb: (category << 7) | LSB, where the MSB,
+# 112 + category, picks a category and the LSB an entry.
 #   0..127   active_modules[slot]
 # 128..255   what feeds each module input
 # 256..383   where each parameter's value comes from

@@ -1702,6 +1702,10 @@
   // them would edit the patch every time its value was sent; 120-127 are the Channel Mode
   // messages, which the synth takes as such and never stores as a control's value.
   const RESERVED_CCS = new Set([6, 38, 98, 99, 100, 101, 120, 121, 122, 123, 124, 125, 126, 127]);
+  // The MSB (CC 99) of NRPN category 0; categories 1-4 follow it. A number here is (category << 7)
+  // | LSB, as in the synth.
+  const NRPN_MSB_BASE = 112;
+  const nrpnMSB = nrpn => NRPN_MSB_BASE + (nrpn >> 7);
 
   // Every number of the patch -- module ids, bus slots, NRPN entries -- and the default patch,
   // from spms1_patch.yaml, which patch_gen/spms1_patch_gen.rb writes in here. Edit the YAML, not
@@ -2126,7 +2130,7 @@
     const lines = [];
     let lastMSB = -1;
     for (const { nrpn, value, comment } of nrpnEntries()) {
-      const msb = nrpn >> 7, lsb = nrpn & 0x7F;
+      const msb = nrpnMSB(nrpn), lsb = nrpn & 0x7F;
       const bytes = [];
       if (!omitMSB || msb !== lastMSB) bytes.push(st, 99, msb);
       bytes.push(st, 98, lsb, st, 6, value);
@@ -3641,8 +3645,8 @@
       nrpnSelect.selected = true;
     } else if (cc === 101 || cc === 100) {
       nrpnSelect.selected = false;
-    } else if (cc === 6 && nrpnSelect.selected) {
-      applyNRPN((nrpnSelect.msb << 7) | nrpnSelect.lsb, value);
+    } else if (cc === 6 && nrpnSelect.selected && nrpnSelect.msb >= NRPN_MSB_BASE) {
+      applyNRPN(((nrpnSelect.msb - NRPN_MSB_BASE) << 7) | nrpnSelect.lsb, value);
     }
   }
 
@@ -3724,7 +3728,7 @@
     const nrpn = 512 + CONTROL[key].entry;
     if (send && midiOutput) {
       const st = 0xB0 | exportOptions().ch;
-      midiOutput.send([st, 99, nrpn >> 7, st, 98, nrpn & 0x7F, st, 6, value, st, 101, 127, st, 100, 127]);
+      midiOutput.send([st, 99, nrpnMSB(nrpn), st, 98, nrpn & 0x7F, st, 6, value, st, 101, 127, st, 100, 127]);
     }
     if (lastSent) lastSent.set('n' + nrpn, value);
     refreshControls();
@@ -3763,7 +3767,7 @@
       if (lastSent.get(k) === v) continue;
       const n = parseInt(k.slice(1));
       if (k[0] === 'n') {
-        midiOutput.send([st, 99, n >> 7, st, 98, n & 0x7F, st, 6, v]);
+        midiOutput.send([st, 99, nrpnMSB(n), st, 98, n & 0x7F, st, 6, v]);
         nrpnSent = true;
       } else {
         midiOutput.send([st, n, v]);
@@ -4236,7 +4240,7 @@
       ccEntries().forEach(e => midiOutput.send([st, e.cc, e.value]));
       PARAM_ITEMS.forEach(p => {
         const nrpn = 512 + p.entry;
-        midiOutput.send([st, 99, nrpn >> 7, st, 98, nrpn & 0x7F, st, 6, p.defaultValue]);
+        midiOutput.send([st, 99, nrpnMSB(nrpn), st, 98, nrpn & 0x7F, st, 6, p.defaultValue]);
       });
       midiOutput.send([st, 101, 127, st, 100, 127]);
       if (lastSent) {

@@ -34,8 +34,10 @@ uint8_t  g_midi_cc_values[16][128] = {{0}};
 // so it is kept that way rather than folded into the 7-bit tables above.
 int16_t  g_midi_pitch_bend[16]     = {0};
 
-// NRPN parameter numbers are (MSB << 7) | LSB; the synth uses MSB 0-4 as categories, so 640
-// entries cover it. Values are 7-bit, filled from CC 6.
+// NRPN parameter numbers are (category << 7) | LSB, where the MSB is 112 (0x70) + category: MSB
+// 112-116 for categories 0-4, clear of the NRPNs of GS and XG (MSB 1 and 20-31) and of the low MSBs
+// other synths tend to use, so 640 entries cover it. Values are 7-bit, filled from CC 6.
+#define SPMS1_NRPN_MSB_BASE (112)
 #define SPMS1_NRPN_SIZE (640)
 uint8_t  g_midi_nrpn_values[16][SPMS1_NRPN_SIZE] = {{0}};
 uint8_t  g_midi_nrpn_msb[16]            = {0};
@@ -178,7 +180,11 @@ void handle_midi_nrpn_cc(uint8_t midi_ch, uint8_t number, uint8_t value) {
   } else if (number == 101 || number == 100) {
     g_midi_nrpn_selected[midi_ch] = 0;
   } else if (number == 6 && g_midi_nrpn_selected[midi_ch]) {
-    set_midi_nrpn_value(midi_ch, (((int32_t)g_midi_nrpn_msb[midi_ch]) << 7) | g_midi_nrpn_lsb[midi_ch], value);
+    // An MSB below the base, as another device's NRPN, is ignored (set_midi_nrpn_value ignores one
+    // past the last category)
+    if (g_midi_nrpn_msb[midi_ch] >= SPMS1_NRPN_MSB_BASE) {
+      set_midi_nrpn_value(midi_ch, (((int32_t)g_midi_nrpn_msb[midi_ch] - SPMS1_NRPN_MSB_BASE) << 7) | g_midi_nrpn_lsb[midi_ch], value);
+    }
   }
 }
 
