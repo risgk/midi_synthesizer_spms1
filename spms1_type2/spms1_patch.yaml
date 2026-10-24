@@ -4,6 +4,9 @@
 # in one place. patch_gen/spms1_patch_gen.rb writes what the rest of the sketch reads from here:
 #
 #   spms1/spms1_patch.rb  the constants and the default patch, for spms1_main.rb
+#   spms1/spms1_default_patch.h
+#                         the default patch again, for Reset, and what a saved patch is checked
+#                         against and keeps, for spms1_midi_state.h
 #   spms1_editor.html     the tables of the editor, between its "patch_gen" markers
 #   spms1_patching.md     the NRPN tables, between the "patch_gen" markers, and spms1_patching.ja.md
 #                         likewise
@@ -25,6 +28,14 @@
 #
 # Labels: `label` is what the documents and the editor call a thing. Where the Japanese ones call
 # it otherwise, `label_ja` says so.
+
+# The version of what a saved patch means, beyond its numbers. A patch saved in the flash (NRPN
+# Save) is loaded at power-on only by a sketch whose numbers -- module ids, bus slots, NRPN entries
+# -- and this version are those it was saved with (SPMS1_PATCH_SPEC_HASH, which patch_gen works out
+# from them); any other loads the default patch instead. The numbers are checked by themselves, so
+# raise this only when a change keeps them but makes a saved patch sound otherwise, as turning a
+# parameter's range round would.
+saved_patch_version: 1
 
 # Module ids (NRPN category 0 values). 0 is MODULE_NONE, which ends the run order. A module with
 # `stereo` writes a left and a right output. `class` is the Ruby class of the module, and `process`
@@ -438,8 +449,9 @@ controls:
 
   # The mod wheel, a controller control: its CC, CC 1 as in the MIDI spec, put on the bus as a
   # unipolar slot, and in its three shapes (see `signals`), for any input or parameter to read. It
-  # powers up at CC 4, 0.0.
-  - { entry: 82, controller: true, key: MOD_WHEEL, label: Mod Wheel, cc: 1,   value: 4 }
+  # powers up at CC 4, 0.0. `performance` marks it as played rather than set: a Save keeps no value
+  # for its CC, whichever it is, so that the patch saved loads with it at 0.
+  - { entry: 82, controller: true, performance: true, key: MOD_WHEEL, label: Mod Wheel, cc: 1,   value: 4 }
   # The general controls, on CC 16 and 17, General Purpose Controllers 1 and 2 in the MIDI spec,
   # each filling its six slots (see `signals`). They power up at CC 4, 0.0, and the default patch
   # routes none of them.

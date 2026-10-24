@@ -2,6 +2,8 @@
 # tables spms1_main.rb reads and the handlers that fill them, as spms1_midi_state.h has them for
 # the sketch and the C hosts, and the signal bus, as spms1_bus.h has it. Each host adds the audio
 # side.
+require 'yaml'
+
 module Spms1
   module C
     @note_on_pitch = Array.new(16, 60)
@@ -23,6 +25,10 @@ module Spms1
     # patch made as Save arrives, and the one written when the synth stores it, as [NRPN table, CC
     # values, run order ranks], or nil.
     @save_count = Array.new(16, 0)
+    # The controls whose CCs' values a Save keeps, by entry: all but the performance controls', as
+    # g_spms1_saved_cc_entries in spms1_default_patch.h has them.
+    @saved_cc_entries = YAML.load_file(File.expand_path('../spms1_patch.yaml', __dir__))
+                            .fetch('controls').reject { |c| c['performance'] }.map { |c| c['entry'] }
     @patch_image = nil
     @stored_image = nil
 
@@ -64,12 +70,17 @@ module Spms1
       def get_midi_save_count(ch) = @save_count[ch]
       def store_patch_image(_ch) = (@stored_image = @patch_image)
 
-      # The patch as spms1_make_patch_image takes it: each run order slot's time as a rank, 1 the
-      # first written, 0 never.
+      # The patch as spms1_make_patch_image takes it: the CC values of the controls but the
+      # performance ones, and each run order slot's time as a rank, 1 the first written, 0 never.
       def make_patch_image(ch)
         written = @run_order_written[ch]
         ranks = written.map { |w| w == 0 ? 0 : written.count { |o| o != 0 && o <= w } }
-        @patch_image = [@nrpn_values[ch].dup, @cc_values[ch].dup, ranks]
+        cc = Array.new(128, 0)
+        @saved_cc_entries.each do |entry|
+          number = @nrpn_values[ch][384 + entry]
+          cc[number] = @cc_values[ch][number] if number > 0 && number < 128
+        end
+        @patch_image = [@nrpn_values[ch].dup, cc, ranks]
       end
 
       # As spms1_apply_patch_image, over the default patch.

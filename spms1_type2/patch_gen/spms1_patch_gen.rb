@@ -42,7 +42,8 @@ end
 
 # The spec, read and checked: every number unique, every key it names defined.
 class Spec
-  attr_reader :modules, :signals, :inputs, :inputs_in_list_order, :controls, :controls_in_list_order, :default_order
+  attr_reader :modules, :signals, :inputs, :inputs_in_list_order, :controls, :controls_in_list_order, :default_order,
+              :saved_patch_version
 
   def initialize(yaml)
     @modules  = yaml.fetch('modules')
@@ -54,6 +55,7 @@ class Spec
     @controls_in_list_order = yaml.fetch('controls')
     @controls = @controls_in_list_order.sort_by { |c| c['entry'] }
     @default_order = yaml.fetch('default_order')
+    @saved_patch_version = yaml.fetch('saved_patch_version')
     @module = @modules.to_h { |m| [m['key'], m] }
     @control = @controls.to_h { |c| [full_key(c), c] }
     @signal = @signals.to_h { |s| [s['key'], s] }
@@ -273,6 +275,23 @@ end
 
 # ---- spms1_default_patch.h ---------------------------------------------------------------------
 
+# Every number a saved patch is written in -- each module's id, each bus slot's, each input's and
+# each control's entry, and which controls are controllers -- with saved_patch_version, as one
+# FNV-1a hash of a line each, so that a sketch can tell a patch saved by one numbered otherwise.
+# Names, labels, defaults and the rest a saved patch does not hold are left out: changing them
+# keeps the patches saved.
+def patch_spec_hash
+  s = SPEC
+  lines = ["saved_patch_version #{s.saved_patch_version}"]
+  lines += s.modules.map { |m| "module #{m['key']} #{m['id']}" }
+  lines += s.signals.map { |sig| "signal #{sig['key']} #{sig['id']}" }
+  lines += s.inputs.map { |i| "input #{s.full_key(i)} #{i['entry']}" }
+  lines += s.controls.map { |c| "control #{s.full_key(c)} #{c['entry']}#{c['controller'] ? ' controller' : ''}" }
+  hash = 2166136261
+  lines.join("\n").each_byte { |b| hash = ((hash ^ b) * 16777619) & 0xFFFFFFFF }
+  hash
+end
+
 # The default patch again, as tables for spms1_midi_state.h, which writes it back when the reset
 # NRPN arrives: the same writes as spms1_write_default_patch, in the same order, so that a reset
 # leaves the tables as power-up does, the times the run order was written included.
@@ -286,6 +305,7 @@ def default_patch_h
   with_cc.each { |c| nrpn << [NRPN_CC_BASE + c['entry'], c['cc'], "#{s.full_label(c)} CC"] }
   s.params.each { |c| nrpn << [NRPN_VALUE_BASE + c['entry'], c['value'], "#{s.full_label(c)} value"] }
   out = []
+  saved_cc = s.controls.reject { |c| c['performance'] }.map { |c| c['entry'] }
   out << <<~C
     /*
      * Generated from spms1_patch.yaml by patch_gen/spms1_patch_gen.rb. Do not edit; change the YAML
@@ -293,12 +313,22 @@ def default_patch_h
      *
      * The default patch, as spms1_write_default_patch in spms1_patch.rb writes it at power-up: the
      * NRPN entries, then the values its CCs power up at. spms1_midi_state.h writes it back when the
-     * reset NRPN arrives.
+     * reset NRPN arrives. And what a saved patch is checked against, and keeps of the CC values.
      */
     #ifndef SPMS1_DEFAULT_PATCH_H
     #define SPMS1_DEFAULT_PATCH_H
 
     #include <stdint.h>
+
+    // The numbers of the patch and saved_patch_version, as one hash (see patch_spec_hash in
+    // patch_gen): a saved patch with another is not loaded.
+    #define SPMS1_PATCH_SPEC_HASH (0x#{format('%08X', patch_spec_hash)}u)
+
+    // The category 3 entries -- the controls -- whose CCs' values a Save keeps: all but the
+    // performance controls', whose CCs are saved at 0.
+    static const uint8_t g_spms1_saved_cc_entries[] = {
+    #{saved_cc.each_slice(16).map { |row| '  ' + row.join(', ') }.join(",\n")}
+    };
 
     // NRPN parameter number (category << 7 | LSB), value
     static const uint16_t g_spms1_default_nrpn[][2] = {

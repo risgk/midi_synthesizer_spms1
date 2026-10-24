@@ -207,9 +207,9 @@ it from anywhere else.
 | ----- | ----- | ---- | ---------- |
 | 112 (0) | 0-31 | Run order, slot by slot | Module ID |
 | 113 (1) | 0-34 | What feeds a module input | Signal ID |
-| 114 (2) | 0-81 | Where a parameter takes its value | Signal ID, or 127 for its own control slot |
-| 115 (3) | 0-84 | Which CC fills a control slot | CC number, or 0 for none |
-| 116 (4) | 0-81 | What a parameter's control slot holds while it has no CC | CC value |
+| 114 (2) | 0-81, 85 | Where a parameter takes its value | Signal ID, or 127 for its own control slot |
+| 115 (3) | 0-85 | Which CC fills a control slot | CC number, or 0 for none |
+| 116 (4) | 0-81, 85 | What a parameter's control slot holds while it has no CC | CC value |
 | 117 (5) | 0-3 | System: Mute, Reset, Save, Load (below), not a part of the patch | 0-63 or 64-127 |
 
 Category 5 has the system entries, which act on the synth rather than set a part of the patch:
@@ -226,7 +226,12 @@ Category 5 has the system entries, which act on the synth rather than set a part
   saved. Send it between Mute on and off for it to be heard as silence, since the synth may
   otherwise play a buffer of the patch half reset
 - Entry 2, Save: 64-127, while Mute is on, keeps the patch in the flash, every entry of categories
-  0-4 and every CC value, in place of the one saved before; the synth loads it at power-on. It is
+  0-4 and the values of the CCs the controls have, in place of the one saved before; the synth
+  loads it at power-on. The Mod Wheel's CC, whichever it is, is played rather than set, so it is
+  saved at 0, and so is every CC no control has; the General controls' CCs are saved as they are.
+  A sketch numbered otherwise -- a version whose module ids, Signal IDs or entries differ -- does
+  not load a patch saved by another, which it would read as something else: it starts with the
+  default patch, and the patch saved stays in the flash until the next Save. It is
   written once the output is silent, which stops the synth and the MIDI input for about 0.1 s:
   MIDI sent meanwhile may be lost, so send Mute off after it and wait before the next. A patch
   the same as the one saved is not written again. Taken only while Mute is on, so that no stray

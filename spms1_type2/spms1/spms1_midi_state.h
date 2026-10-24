@@ -235,17 +235,21 @@ void spms1_reset_patch(uint8_t midi_ch) {
 //   4      the version of the layout, 1
 //   5      how many NRPN categories follow, 5 (0-4)
 //   6-7    reserved, 0
-//   8-11   the size of the payload, from 16
+//   8-11   the size of the payload, from 32
 //   12-15  the FNV-1a hash of the payload
-//   16-    the payload: the NRPN table, 128 entries a category; the 128 CC values; for each of
-//          the 32 run order slots, when it was written as a rank (1 the first, 0 never); and 32
-//          bytes for a name, reserved, 0
-// The rest of the 4 KB is 0. A later layout may add categories, or more after these, up to 4 KB;
-// one that adds categories still loads here, the categories this synth knows, and an image with
-// fewer categories than this synth knows loads them over the default patch.
+//   16-19  SPMS1_PATCH_SPEC_HASH of the sketch that saved it: its numbers, as patch_gen hashes them
+//   20-31  reserved, 0
+//   32-    the payload: the NRPN table, 128 entries a category; the 128 CC values, those of the
+//          CCs the controls have, but a performance control's (the Mod Wheel's), and 0 for the
+//          rest; for each of the 32 run order slots, when it was written as a rank (1 the first, 0
+//          never); and 32 bytes for a name, reserved, 0
+// The rest of the 4 KB is 0, room for a later layout. An image is loaded only by a sketch with the
+// same layout and the same SPMS1_PATCH_SPEC_HASH, which a sketch numbered otherwise does not have:
+// its numbers would read the patch as another. Such a sketch starts with the default patch, and
+// the image stays in the flash until the next Save.
 #define SPMS1_PATCH_IMAGE_SIZE       (4096)
 #define SPMS1_PATCH_IMAGE_VERSION    (1)
-#define SPMS1_PATCH_IMAGE_HEADER     (16)
+#define SPMS1_PATCH_IMAGE_HEADER     (32)
 #define SPMS1_PATCH_IMAGE_CATEGORIES (SPMS1_NRPN_SIZE / 128)
 #define SPMS1_PATCH_IMAGE_TAIL       (128 + SPMS1_RUN_ORDER_SIZE + 32)
 
@@ -301,9 +305,14 @@ void spms1_make_patch_image(uint8_t midi_ch) {
   for (int32_t i = 0; i < SPMS1_NRPN_SIZE; ++i) {
     *p++ = g_midi_nrpn_values[midi_ch][i];
   }
-  for (int32_t i = 0; i < 128; ++i) {
-    *p++ = g_midi_cc_values[midi_ch][i];
+  // The CCs of the controls, but those of the performance controls, which stay 0.
+  for (uint32_t i = 0; i < sizeof(g_spms1_saved_cc_entries); ++i) {
+    uint8_t cc = g_midi_nrpn_values[midi_ch][384 + g_spms1_saved_cc_entries[i]];
+    if (cc > 0 && cc < 128) {
+      p[cc] = g_midi_cc_values[midi_ch][cc];
+    }
   }
+  p += 128;
   // Each slot's rank: how many slots were written no later than it, so the first is 1.
   for (int32_t slot = 0; slot < SPMS1_RUN_ORDER_SIZE; ++slot) {
     uint32_t written = g_midi_run_order_written[midi_ch][slot];
@@ -326,28 +335,26 @@ void spms1_make_patch_image(uint8_t midi_ch) {
   image[5] = SPMS1_PATCH_IMAGE_CATEGORIES;
   spms1_put_u32(image + 8, payload);
   spms1_put_u32(image + 12, spms1_fnv1a(image + SPMS1_PATCH_IMAGE_HEADER, payload));
+  spms1_put_u32(image + 16, SPMS1_PATCH_SPEC_HASH);
 }
 
 // Puts the patch in an image on a channel, over the default patch, and says whether the image was
-// one: a patch never saved, or an image damaged, leaves the patch as it was.
+// one this sketch can read: a patch never saved, an image damaged, or one saved by a sketch
+// numbered otherwise, leaves the patch as it was.
 int32_t spms1_apply_patch_image(uint8_t midi_ch, const uint8_t* image) {
+  uint32_t payload = SPMS1_PATCH_IMAGE_CATEGORIES * 128 + SPMS1_PATCH_IMAGE_TAIL;
   if (midi_ch >= 16 || image[0] != 'S' || image[1] != 'P' || image[2] != 'M' || image[3] != '2' ||
-      image[4] < 1 || image[5] < 1) {
-    return 0;
-  }
-  uint32_t categories = image[5];
-  uint32_t payload = spms1_get_u32(image + 8);
-  if (payload < categories * 128 + SPMS1_PATCH_IMAGE_TAIL || payload > SPMS1_PATCH_IMAGE_SIZE - SPMS1_PATCH_IMAGE_HEADER ||
+      image[4] != SPMS1_PATCH_IMAGE_VERSION || image[5] != SPMS1_PATCH_IMAGE_CATEGORIES ||
+      spms1_get_u32(image + 8) != payload || spms1_get_u32(image + 16) != SPMS1_PATCH_SPEC_HASH ||
       spms1_get_u32(image + 12) != spms1_fnv1a(image + SPMS1_PATCH_IMAGE_HEADER, payload)) {
     return 0;
   }
 
   spms1_reset_patch(midi_ch);
   const uint8_t* nrpn = image + SPMS1_PATCH_IMAGE_HEADER;
-  const uint8_t* tail = nrpn + categories * 128;
-  uint32_t known = (categories < SPMS1_PATCH_IMAGE_CATEGORIES) ? categories : SPMS1_PATCH_IMAGE_CATEGORIES;
+  const uint8_t* tail = nrpn + SPMS1_NRPN_SIZE;
   // The table as it is, and the CC values; the run order written again by rank, below.
-  for (uint32_t i = 0; i < known * 128; ++i) {
+  for (int32_t i = 0; i < SPMS1_NRPN_SIZE; ++i) {
     g_midi_nrpn_values[midi_ch][i] = nrpn[i];
   }
   for (int32_t i = 0; i < 128; ++i) {
