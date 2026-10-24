@@ -213,10 +213,10 @@ Category 5 has the system entries, which act on the synth rather than set a part
 
 - Entry 0, Mute: 64-127 fades the output out over 4 ms and holds it silent, and clears the delay
   and the chorus (11 ms); 0-63 fades it in again. Send a whole patch between Mute on and off, so
-  that it is not heard half sent. No waits are needed between them, however fast they come: the
-  synth fades out what it played before Mute on, reads the patch sent since only once it is silent,
-  and fades in only after the parameters have had 30 ms to settle on their new values, so the
-  output comes back about 45 ms after Mute off at the soonest. Mute is off at power-on
+  that it is not heard half sent. No waits are needed between them: every Mute on is taken,
+  however soon Mute off follows it, and the output comes back about 15 ms after Mute off at the
+  soonest. What the patch changes during the fades, 4 ms each, may be heard faintly. Mute is off
+  at power-on
 - Entry 1, Reset: 64-127 puts the patch back to the default, as at power-on: every entry of
   categories 0-4 and every CC value. The notes, Pitch Bend and Mute are kept. Send it between Mute
   on and off for it to be heard as silence, since the synth may otherwise play a buffer of the
