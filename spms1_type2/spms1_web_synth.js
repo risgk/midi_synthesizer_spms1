@@ -39,7 +39,7 @@
       notice = document.createElement("div");
       notice.textContent = "SPMS-1 Web: Click (or tap) to start the audio";
       notice.style.cssText = "position: fixed; bottom: 8px; left: 50%; transform: translateX(-50%); z-index: 1000;" +
-                             "padding: 8px 16px; border-radius: 4px; background: #9B111E; color: #ffffff;" +
+                             "padding: 8px 16px; border-radius: 4px; background: #E0115F; color: #ffffff;" +
                              "font-weight: bold; cursor: pointer; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);";
       notice.addEventListener("click", resume);
       document.body.appendChild(notice);

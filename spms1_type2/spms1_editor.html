@@ -6,13 +6,13 @@
   <title>SPMS-1 (type-2) Editor</title>
   <!-- The icon: "t2" in white on the primary color, as shapes (the letters of M+ 1p Black, M PLUS 1p Black under the SIL
        Open Font License), not as text, so that it is the same in every OS; embedded, so that it needs no file beside the page -->
-  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='5'%20fill='%239B111E'/%3E%3Cpath%20d='M10.13%2024.5Q7.89%2024.5%206.8%2023.47Q5.71%2022.44%205.71%2020.19V15.89H3.33V12.94H5.71V8.63H10.11V12.94H13.76V15.89H10.11V19.51Q10.11%2020.6%2010.36%2020.96Q10.61%2021.33%2011.26%2021.33Q12.26%2021.33%2013.3%2020.99L13.76%2024.05Q12.08%2024.5%2010.13%2024.5ZM16.88%2020.65Q19.92%2018.36%2021.44%2016.96Q22.96%2015.57%2023.43%2014.73Q23.91%2013.89%2023.91%2012.94Q23.91%2011.24%2021.98%2011.24Q20.28%2011.24%2017.56%2012.94L16.43%209.31Q17.59%208.54%2019.35%208.02Q21.12%207.5%2022.66%207.5Q25.5%207.5%2027.03%208.83Q28.56%2010.15%2028.56%2012.49Q28.56%2014.35%2027.38%2016.02Q26.2%2017.7%2022.78%2020.6V20.65H28.67V24.27H16.88Z'%20fill='white'/%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='5'%20fill='%23E0115F'/%3E%3Cpath%20d='M10.13%2024.5Q7.89%2024.5%206.8%2023.47Q5.71%2022.44%205.71%2020.19V15.89H3.33V12.94H5.71V8.63H10.11V12.94H13.76V15.89H10.11V19.51Q10.11%2020.6%2010.36%2020.96Q10.61%2021.33%2011.26%2021.33Q12.26%2021.33%2013.3%2020.99L13.76%2024.05Q12.08%2024.5%2010.13%2024.5ZM16.88%2020.65Q19.92%2018.36%2021.44%2016.96Q22.96%2015.57%2023.43%2014.73Q23.91%2013.89%2023.91%2012.94Q23.91%2011.24%2021.98%2011.24Q20.28%2011.24%2017.56%2012.94L16.43%209.31Q17.59%208.54%2019.35%208.02Q21.12%207.5%2022.66%207.5Q25.5%207.5%2027.03%208.83Q28.56%2010.15%2028.56%2012.49Q28.56%2014.35%2027.38%2016.02Q26.2%2017.7%2022.78%2020.6V20.65H28.67V24.27H16.88Z'%20fill='white'/%3E%3C/svg%3E">
   <!-- SPMS-1 Web: the synth itself, built into the editor as "SPMS-1 Web (Built-in)" in MIDI Out (optional) -->
   <script src="spms1_web_synth.js"></script>
   <style>
     :root {
-      --primary-color: #9B111E;
-      --primary-hover: #7A0D17;
+      --primary-color: #E0115F;  /* Ruby, 4.8:1 with white */
+      --primary-hover: #B30D4C;
       --bg-color: #f7f9fa;
       --panel-bg: #ffffff;
       --border-color: #e1e4e6;
@@ -1305,7 +1305,7 @@
     /* An output held by a click, waiting for the input to wire it to. */
     .port.armed {
       transform: scale(1.6);
-      box-shadow: 0 0 0 3px rgba(155, 17, 30, 0.35);
+      box-shadow: 0 0 0 3px rgba(224, 17, 95, 0.35);
     }
     .arm-hint {
       position: absolute;
