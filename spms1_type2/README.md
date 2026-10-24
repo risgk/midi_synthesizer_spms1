@@ -143,8 +143,9 @@ Usage
     - Shows every parameter of every module, those with no CC in blue, so a wire always ends on what
       it feeds
     - Saves and loads patches as JSON
-    - A patch saved as JSON or copied keeps the Mod Wheel's CC at what it powers up at, 0.0, as
-      Save to Device does: the mod wheel is played rather than set; Send Patch sends where it is
+    - A patch saved as JSON or copied keeps a CC that only the controllers (Mod Wheel, General)
+      have at what it powers up at, 0.0, as Save to Device does: the controllers are played rather
+      than set; Send Patch sends where they are
     - Copies the patch as MIDI bytes or as an NRPN list, or sends it through Web MIDI
     - Sends the whole patch (Send Patch, or a device newly chosen) between Mute on and off (NRPN
       Mute), so that the patch is not heard half sent, and so does the patch it copies with "Mute
