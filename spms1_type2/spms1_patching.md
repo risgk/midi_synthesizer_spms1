@@ -674,15 +674,18 @@ What would cross that is taken down first by a look-ahead limiter, Amp 1 Limiter
 CC and powers up on (value 124; off below value 64). Everything the amp puts out comes 1 ms (48
 samples) late, and while it is in that delay the limiter has already seen it: where the level
 would pass 0.9 (-0.9 dB), it brings the gain down over that 1 ms, before the peak arrives, so the
-peak comes out at 0.9, and lets it back up over about 100 ms. The gain moves smoothly, so where the
-clamp would cut corners into a sound and fold their harmonics back below the audible band, the
-limiter does not: a sawtooth taken 12 dB past one unit at A4 to A7 aliases -46 to -53 dB under
-5 kHz with it, and -29 to -37 dB on the clamp. Off, the output is just as late, and the clamp is
-reached. Limiting is heard on a loud passage as its peaks held level, and the release as the
-sound coming back up after one; the default patch stays under 0.9 and is not limited. The
-filter's output clip and a mixer's sum still have the hard limit, past which a sawtooth driven
-6 dB over at A6 to A7 aliases about -30 dB under 5 kHz; keep the levels before the filter where
-the peaks only just reach one unit, and bring the sound up with the amp instead.
+peak comes out at 0.9, and lets it back up over about 100 ms. It takes the peak from the last 25
+to 50 ms, longer than a cycle of a note down to 20 Hz, so that on a held note it does not let the
+gain up between the crests and take it down again at each one, which would ripple the sound at its
+pitch. The gain moves smoothly, so where the clamp would cut corners into a sound and fold their
+harmonics back below the audible band, the limiter does not: a sawtooth taken 12 dB past one unit
+at A4 to A7 aliases -46 to -53 dB under 5 kHz with it, and -29 to -37 dB on the clamp. Off, the
+output is just as late, and the clamp is reached. Limiting is heard on a loud passage as its peaks
+held level, and the release as the sound coming back up after one; the default patch only touches
+it at the start of a note, by 0.5 dB at most for about a quarter of a second. The filter's output
+clip and a mixer's sum still have the hard limit, past which a sawtooth driven 6 dB over at A6 to
+A7 aliases about -30 dB under 5 kHz; keep the levels before the filter where the peaks only just
+reach one unit, and bring the sound up with the amp instead.
 
 Amp 1 takes two modulations, Mod 1 In and Mod 2 In, and scales the gain by a crossfade of the
 two: Amp 1 Mod 1/2 Mix (CC#36) runs in a straight line from Mod 1 In alone at 0.0 (value 4) to Mod 2 In

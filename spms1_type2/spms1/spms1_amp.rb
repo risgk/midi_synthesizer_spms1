@@ -3,15 +3,21 @@ module Spms1
   # crossfaded by Mod 1/2 Mix and applied directly without smoothing. A look-ahead limiter after
   # the gain holds what leaves under the one-unit clamp, so that the gain can bring a sound well up
   # without the clamp's corners: the output comes LIMITER_LOOKAHEAD_TIME late, and the limiter
-  # takes the gain down over that time before a peak arrives, rather than at it.
+  # takes the gain down over that time before a peak arrives, rather than at it, and lets it back
+  # up slowly, from the highest peak of a window long enough to span a cycle of a low note.
   class Amp
     # Where the limiter holds the peaks, 0.9 (-0.9 dB), under the clamp at one unit, which stays as
-    # the last guard. The gain it needs is taken from a peak envelope that rises at once with the
-    # amplitude and falls back over LIMITER_RELEASE_TIME, and that gain is followed by a one-pole
-    # smoother fast enough to be within 1% of it a look-ahead later; the 1% and the envelope's own
-    # fall over the look-ahead, about 1% more, are what the margin under the clamp is for.
+    # the last guard. The gain it needs is taken from the highest level of the block in progress
+    # and the one before it, blocks of LIMITER_HOLD_TIME, so from the last 25 to 50 ms: that spans
+    # a cycle of a note down to 20 Hz, so the peak does not fall between the crests of a held note
+    # and the gain does not ripple at its pitch, as it did from a peak envelope falling over the
+    # release, by some 7% at C3 with a resonant filter. The gain follows what it needs with a
+    # one-pole smoother, fast enough on the way down to be within 1% of it a look-ahead later,
+    # which is what the margin under the clamp is for, and over LIMITER_RELEASE_TIME on the way
+    # back up, rounding off the step as a block with a lower peak takes over.
     LIMITER_THRESHOLD      = 0.9
     LIMITER_LOOKAHEAD_TIME = 0.001
+    LIMITER_HOLD_TIME      = 0.025
     LIMITER_RELEASE_TIME   = 0.1
     # The delay line, a power of two above the look-ahead at up to 192 kHz.
     LIMITER_LINE_SIZE = 256
@@ -42,12 +48,15 @@ module Spms1
       lookahead = (LIMITER_LOOKAHEAD_TIME * @sample_rate).round
       @limiter_lookahead = (lookahead < LIMITER_LINE_MASK) ? lookahead : LIMITER_LINE_MASK
       @limiter_threshold = LIMITER_THRESHOLD
-      @limiter_release = Math.exp(-1.0 / (LIMITER_RELEASE_TIME * @sample_rate))
+      @limiter_hold = (LIMITER_HOLD_TIME * @sample_rate).round
+      @limiter_hold_left = @limiter_hold
+      @limiter_release = 1.0 - Math.exp(-1.0 / (LIMITER_RELEASE_TIME * @sample_rate))
       # 1% left of a step after the look-ahead.
       @limiter_attack = 1.0 - (0.01 ** (1.0 / @limiter_lookahead.to_f))
       @limiter_line = Array.new(LIMITER_LINE_SIZE, 0.0)
       @limiter_write_index = 0
-      @limiter_peak = 0.0
+      @limiter_block_peak = 0.0
+      @limiter_last_block_peak = 0.0
       @limiter_gain = 1.0
       @limiter_switch = 1.0
     end
@@ -82,7 +91,6 @@ module Spms1
         @current_gain = Dsp.smooth(@stage_1_gain, @current_gain, @smoothing_target_blend)
         @stage_1_modulation_mix = Dsp.smooth(@modulation_mix, @stage_1_modulation_mix, @smoothing_target_blend)
         @current_modulation_mix = Dsp.smooth(@stage_1_modulation_mix, @current_modulation_mix, @smoothing_target_blend)
-        @limiter_peak = Dsp.flush_tiny(@limiter_peak)
       end
 
       # Each side weighted on its own, so that at either end of Mod 1/2 Mix the one input
@@ -94,15 +102,23 @@ module Spms1
       total_gain = @current_gain * mod
       amplified = audio_input * total_gain
 
-      # The limiter. The gain it wants is the threshold over the peak envelope where that is above
-      # it, and 1.0 where not, or always while it is switched off; the one division is taken every
-      # sample, whatever the level, so that a loud passage costs what a quiet one does.
+      # The limiter. The gain it wants is the threshold over the peak of the two blocks where that
+      # is above it, and 1.0 where not, or always while it is switched off; the one division is
+      # taken every sample, whatever the level, so that a loud passage costs what a quiet one does.
+      # A block ends once every LIMITER_HOLD_TIME, the one branch that takes more work.
       level = amplified.abs
-      falling = @limiter_peak * @limiter_release
-      @limiter_peak = (level > falling) ? level : falling
-      over = (@limiter_peak > @limiter_threshold) ? @limiter_peak : @limiter_threshold
+      @limiter_block_peak = (level > @limiter_block_peak) ? level : @limiter_block_peak
+      @limiter_hold_left -= 1
+      if @limiter_hold_left == 0
+        @limiter_last_block_peak = @limiter_block_peak
+        @limiter_block_peak = 0.0
+        @limiter_hold_left = @limiter_hold
+      end
+      peak = (@limiter_block_peak > @limiter_last_block_peak) ? @limiter_block_peak : @limiter_last_block_peak
+      over = (peak > @limiter_threshold) ? peak : @limiter_threshold
       wanted = 1.0 + (@limiter_threshold / over - 1.0) * @limiter_switch
-      @limiter_gain += (wanted - @limiter_gain) * @limiter_attack
+      rate = (wanted < @limiter_gain) ? @limiter_attack : @limiter_release
+      @limiter_gain += (wanted - @limiter_gain) * rate
       @limiter_write_index = (@limiter_write_index + 1) & LIMITER_LINE_MASK
       @limiter_line[@limiter_write_index] = amplified
       output = @limiter_line[(@limiter_write_index - @limiter_lookahead) & LIMITER_LINE_MASK] * @limiter_gain
