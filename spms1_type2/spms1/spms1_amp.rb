@@ -117,7 +117,11 @@ module Spms1
       peak = (@limiter_block_peak > @limiter_last_block_peak) ? @limiter_block_peak : @limiter_last_block_peak
       over = (peak > @limiter_threshold) ? peak : @limiter_threshold
       wanted = 1.0 + (@limiter_threshold / over - 1.0) * @limiter_switch
-      rate = (wanted < @limiter_gain) ? @limiter_attack : @limiter_release
+      # The rate, attack on the way down and release on the way up, picked by a 1.0 or 0.0 rather
+      # than as one of the two: GCC made a choice between two instance variables a branch, to load
+      # only the one, but one between two literals a select.
+      falling = (wanted < @limiter_gain) ? 1.0 : 0.0
+      rate = @limiter_release + (@limiter_attack - @limiter_release) * falling
       @limiter_gain += (wanted - @limiter_gain) * rate
       @limiter_write_index = (@limiter_write_index + 1) & LIMITER_LINE_MASK
       @limiter_line[@limiter_write_index] = amplified

@@ -4479,6 +4479,7 @@ static inline __attribute__((always_inline)) sp_float sp_Amp_process(sp_Amp *sel
     sp_float lv_peak = 0.0;
     sp_float lv_over = 0.0;
     sp_float lv_wanted = 0.0;
+    sp_float lv_falling = 0.0;
     sp_float lv_rate = 0.0;
     sp_float lv_output = 0.0;
 #line 89 "spms1_amp.rb"
@@ -4521,17 +4522,19 @@ static inline __attribute__((always_inline)) sp_float sp_Amp_process(sp_Amp *sel
   lv_over = (((lv_peak > self->iv_limiter_threshold)) ? lv_peak : self->iv_limiter_threshold);
 #line 119 "spms1_amp.rb"
   lv_wanted = (1.0 + (((self->iv_limiter_threshold / lv_over) - 1.0) * self->iv_limiter_switch));
-#line 120 "spms1_amp.rb"
-  lv_rate = (((lv_wanted < self->iv_limiter_gain)) ? self->iv_limiter_attack : self->iv_limiter_release);
-#line 121 "spms1_amp.rb"
-  self->iv_limiter_gain += ((lv_wanted - self->iv_limiter_gain) * lv_rate);
-#line 122 "spms1_amp.rb"
-  self->iv_limiter_write_index = (sp_int_add(self->iv_limiter_write_index, 1LL) & cst_LIMITER_LINE_MASK);
 #line 123 "spms1_amp.rb"
-  sp_FloatArray_set(self->iv_limiter_line, self->iv_limiter_write_index, lv_amplified);
+  lv_falling = (((lv_wanted < self->iv_limiter_gain)) ? 1.0 : 0.0);
 #line 124 "spms1_amp.rb"
+  lv_rate = (self->iv_limiter_release + ((self->iv_limiter_attack - self->iv_limiter_release) * lv_falling));
+#line 125 "spms1_amp.rb"
+  self->iv_limiter_gain += ((lv_wanted - self->iv_limiter_gain) * lv_rate);
+#line 126 "spms1_amp.rb"
+  self->iv_limiter_write_index = (sp_int_add(self->iv_limiter_write_index, 1LL) & cst_LIMITER_LINE_MASK);
+#line 127 "spms1_amp.rb"
+  sp_FloatArray_set(self->iv_limiter_line, self->iv_limiter_write_index, lv_amplified);
+#line 128 "spms1_amp.rb"
   lv_output = (sp_FloatArray_get(self->iv_limiter_line, (sp_int_sub(self->iv_limiter_write_index, self->iv_limiter_lookahead) & cst_LIMITER_LINE_MASK)) * self->iv_limiter_gain);
-#line 129 "spms1_amp.rb"
+#line 133 "spms1_amp.rb"
   if (((lv_output < -1.0))) {
     return -1.0;
   }
@@ -5873,7 +5876,7 @@ int main(int argc,char**argv){
     sp_float lv_smoothed_general_1 = 0.0;
     sp_float lv_smoothed_general_2 = 0.0;
     sp_bool lv_control_tick = 0;
-    sp_int lv_i__bp18203 = 0;
+    sp_int lv_i__bp18216 = 0;
 
 #line 35 "spms1_framework.rb"
 #line 36 "spms1_framework.rb"
@@ -9208,9 +9211,9 @@ else {
     (stop_debug_measure(), (sp_int)0);
 #line 779 "spms1_main.rb"
     for (sp_int _t1785 = 0; _t1785 < cst_AUDIO_BUFFER_WORDS; _t1785++) {
-      lv_i__bp18203 = _t1785;
+      lv_i__bp18216 = _t1785;
 #line 780 "spms1_main.rb"
-      ({ sp_float _t1786 = sp_FloatArray_get(lv_audio_buffer_l, lv_i__bp18203); sp_float _t1787 = sp_FloatArray_get(lv_audio_buffer_r, lv_i__bp18203); (write_to_audio_buffer(((float)(_t1786)), ((float)(_t1787))), (sp_int)0); });
+      ({ sp_float _t1786 = sp_FloatArray_get(lv_audio_buffer_l, lv_i__bp18216); sp_float _t1787 = sp_FloatArray_get(lv_audio_buffer_r, lv_i__bp18216); (write_to_audio_buffer(((float)(_t1786)), ((float)(_t1787))), (sp_int)0); });
     }
   }
   return 0;

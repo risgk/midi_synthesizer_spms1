@@ -131,15 +131,18 @@ own code costs and no more. The editor and the NRPN tables of "spms1_patching.md
 
 ### Writing a Module
 
-The worst case of a buffer is guaranteed, not hoped for: what "sim_load" measures, every module
-running, is the longest a buffer can take, whatever patch, CC or note comes. A module keeps to
-that:
+A buffer should take about the same time whatever comes: what "sim_load" measures, every module
+running, is meant to be the longest a buffer takes, whatever patch, CC or note comes. A module
+keeps to that as far as it can:
 
 - The same work every sample and every buffer, whatever the values: work out each parameter's
   coefficients every buffer or every control tick, never only when it changes
 - No branches on values: clamp with nested ternaries, `(x < 0.0) ? 0.0 : ((x > 1.0) ? 1.0 : x)`,
   which compile to selects. A branch on `control_tick` is fine, every module taking it on the
-  same samples, all of which the measure includes
+  same samples, all of which the measure includes. Whether a ternary becomes a select is GCC's
+  decision, though (see "Checking the Generated Code"): one choosing between two values it has to
+  load, such as two instance variables, may come out as a branch, while one choosing between two
+  literals and multiplying by the result does not (as Amp's limiter picks its rate)
 - Curves from lookup tables with linear interpolation, worked out once in the class, not library
   calls (`Math.sqrt`, `Math.exp` and the like), whose time depends on the input
 - Nothing allocated while playing: make every array in `initialize`
@@ -149,6 +152,11 @@ that:
   sinking into the denormals
 - If Spinel leaves something untyped and boxes the arithmetic, a type seed in "spms1/sig" fixes it
   ("spms1/sig/spms1_dsp.rbs" says how)
+
+Branchless is the aim, not a rule kept to the last instruction: what comes out depends on the
+compiler, and a branch that is rare or cheap is left as it is (as the end of the limiter's hold
+block, once every 25 ms). So the time of a buffer can move a little with the values, and its worst
+case can be a little over what "sim_load" measures; the margin left under the buffer is for that.
 
 
 ## Load Estimate
