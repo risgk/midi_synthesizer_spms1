@@ -693,6 +693,11 @@
       accent-color: var(--primary-color);
       cursor: pointer;
     }
+    /* A line across the bend wheel at 0, the center it springs back to: -8192 to 8191 puts 0 at
+       the middle of the thumb's travel, so the middle of the wheel. */
+    #bend-wheel {
+      background-image: linear-gradient(to bottom, transparent calc(50% - 1px), var(--text-muted) calc(50% - 1px), var(--text-muted) calc(50% + 1px), transparent calc(50% + 1px));
+    }
     .mod-wheel input:disabled {
       cursor: default;
     }
