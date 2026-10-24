@@ -193,7 +193,8 @@ SMOOTHED_STAGE_1_MOD_WHEEL = 253
 SMOOTHED_STAGE_1_GENERAL_1 = 254
 SMOOTHED_STAGE_1_GENERAL_2 = 255
 
-# NRPN parameter numbers: (MSB << 7) | LSB, where the MSB picks a category and the LSB an entry.
+# NRPN parameter numbers: (category << 7) | LSB, where the MSB, 112 + category, picks a category
+# and the LSB an entry.
 #   0..127   active_modules[slot]
 # 128..255   what feeds each module input
 # 256..383   where each parameter's value comes from
@@ -706,7 +707,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_PITCH_1_STRETCH       , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_EG_1_ATTACK           , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_EG_1_DECAY            , 88)
-  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_EG_1_SUSTAIN          , 4)
+  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_EG_1_SUSTAIN          , 124)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_EG_1_RELEASE_SW       , 124)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_EG_1_LEVEL            , 124)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_EG_2_ATTACK           , 4)
@@ -771,7 +772,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_MOD_1_POL    , 124)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_MOD_2_AMT    , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_MOD_2_POL    , 76)
-  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_AMP_1_GAIN            , 100)
+  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_AMP_1_GAIN            , 88)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_AMP_1_MOD_1_2_MIX     , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_CHORUS_1_MIX          , 64)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_CHORUS_1_RATE         , 64)
@@ -788,7 +789,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 22 , 4  ) # Pitch 1 Stretch
   C.set_midi_cc_value(midi_ch, 73 , 4  ) # EG 1 Attack
   C.set_midi_cc_value(midi_ch, 75 , 88 ) # EG 1 Decay
-  C.set_midi_cc_value(midi_ch, 30 , 4  ) # EG 1 Sustain
+  C.set_midi_cc_value(midi_ch, 30 , 124) # EG 1 Sustain
   C.set_midi_cc_value(midi_ch, 105, 124) # EG 1 Release Sw
   C.set_midi_cc_value(midi_ch, 52 , 4  ) # EG 2 Attack
   C.set_midi_cc_value(midi_ch, 53 , 4  ) # EG 2 Decay
@@ -826,7 +827,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 24 , 28 ) # Filter 1 Mod 1 Amt
   C.set_midi_cc_value(midi_ch, 117, 124) # Filter 1 Mod 1 Pol
   C.set_midi_cc_value(midi_ch, 25 , 4  ) # Filter 1 Mod 2 Amt
-  C.set_midi_cc_value(midi_ch, 15 , 100) # Amp 1 Gain
+  C.set_midi_cc_value(midi_ch, 15 , 88 ) # Amp 1 Gain
   C.set_midi_cc_value(midi_ch, 36 , 4  ) # Amp 1 Mod 1/2 Mix
   C.set_midi_cc_value(midi_ch, 93 , 64 ) # Chorus 1 Mix
   C.set_midi_cc_value(midi_ch, 58 , 64 ) # Chorus 1 Rate

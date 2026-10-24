@@ -1,6 +1,6 @@
 ```
-  [MIDI Synthesizer]                                              Date: 2026-10-19                      
-  Model: SPMS-1 (type-2)          MIDI Implementation Chart       Version: 0.1.3                        
+  [MIDI Synthesizer]                                              Date: 2026-10-24                      
+  Model: SPMS-1 (type-2)          MIDI Implementation Chart       Version: 0.2.0                        
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Function...                   | Transmitted   | Recognized    | Remarks                              |
 +-------------------------------+---------------+---------------+--------------------------------------+
@@ -71,7 +71,7 @@
 |                             1 | x             | o             | Mod Wheel (Unipolar)                 |
 |                            16 | x             | o             | General 1 (Unipolar, 6 forms)        |
 |                            17 | x             | o             | General 2 (Unipolar, 6 forms)        |
-|                            99 | x             | o             | NRPN MSB                             |
+|                            99 | x             | o             | NRPN MSB (112-116)                   |
 |                            98 | x             | o             | NRPN LSB                             |
 |                             6 | x             | o             | Data Entry MSB (NRPN value)          |
 |                       101,100 | x             | o             | RPN select: suspends NRPN data entry |

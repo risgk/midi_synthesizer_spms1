@@ -128,8 +128,8 @@ module Spms1
           @nrpn_selected[ch] = true
         elsif number == 101 || number == 100
           @nrpn_selected[ch] = false
-        elsif number == 6 && @nrpn_selected[ch]
-          set_midi_nrpn_value(ch, (@nrpn_msb[ch] << 7) | @nrpn_lsb[ch], value)
+        elsif number == 6 && @nrpn_selected[ch] && @nrpn_msb[ch] >= 112
+          set_midi_nrpn_value(ch, ((@nrpn_msb[ch] - 112) << 7) | @nrpn_lsb[ch], value)
         end
       end
 
