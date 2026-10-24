@@ -439,6 +439,9 @@
       .slider-label { min-width: 0; }
       .slider-label .ctl-sub { display: inline; }
       .slider-input-wrapper { gap: 8px; }
+      /* The track is 6px high and the thumb larger, standing out of the slider's box above and
+         below; room is kept for it, so that under the name it does not cover the name. */
+      .slider-knob-zone input[type="range"] { margin: calc((var(--thumb-size) - 6px) / 2) 0; }
       .slider-value { font-size: 0.9rem; }
       .slider-norm { min-width: 44px; font-size: 0.75rem; }
     }
@@ -4414,6 +4417,13 @@
     kb.style.width = `calc(${lastLeft + lastWidth} * var(--kbd-key-width))`;
 
     kb.addEventListener('contextmenu', e => e.preventDefault());
+    // Safari on iOS scrolls the page under a finger on the keys whatever touch-action says, the
+    // keys being in a scroll container, and the key is then let go; the touch is held here, which
+    // leaves the pointer events below as they are. The same for the scroll bar under the keys.
+    for (const el of [kb, document.getElementById('kbd-scrollbar')]) {
+      el.addEventListener('touchstart', e => e.preventDefault(), { passive: false });
+      el.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+    }
     kb.addEventListener('pointerdown', e => {
       if (e.button !== 0) return;
       const note = kbNoteOf(e);

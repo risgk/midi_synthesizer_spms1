@@ -49,6 +49,11 @@
   }
 
   async function start() {
+    // On an iPhone, the audio as of a player, not as of a web page: the latter is muted by the
+    // ring/silent switch (Safari 16.4 and later)
+    if (navigator.audioSession) {
+      navigator.audioSession.type = "playback";
+    }
     try {
       // The SPMS-1 synth runs at 48 kHz (no resampling at 48 kHz)
       context = new AudioContext({ sampleRate: 48000, latencyHint: "interactive" });
