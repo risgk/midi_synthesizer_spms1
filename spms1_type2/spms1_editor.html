@@ -589,15 +589,14 @@
     /* On the Controls tab, kept at the bottom of the window while the page scrolls above it, as on
        a 1280 x 720 screen or a phone, so the keys stay at hand under the controls; not on the Patch
        tab, where it would cover the canvas, nor where the window is too low for that to leave
-       much above it, as a phone on its side; 480px, so that an iPhone SE upright, about 550px
-       under the bars of the browser, has it. */
-    @media (min-height: 480px) {
-      body:has(#tab-controls:not([hidden])) #kbd-panel {
-        position: sticky;
-        bottom: 0;
-        z-index: 5;
-        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.08);
-      }
+       much above it, as a phone on its side: from 480px high, so that an iPhone SE upright, about
+       550px under the bars of the browser, has it, or where the keyboard takes little more than
+       half the window, as a phone on its side zoomed out (see kbUpdateSticky). */
+    body.kbd-sticky:has(#tab-controls:not([hidden])) #kbd-panel {
+      position: sticky;
+      bottom: 0;
+      z-index: 5;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.08);
     }
     /* A phone on its side: the page packed tighter. The keys keep their height, the keyboard not
        being kept at the bottom of so low a window, so that a finger finds them. */
@@ -4597,6 +4596,7 @@
     if (window.ResizeObserver) new ResizeObserver(() => kbFitScale()).observe(document.getElementById('kbd-label'));
     // The keys narrow with the window below 960px.
     if (window.ResizeObserver) new ResizeObserver(() => kbFitKeys()).observe(document.querySelector('.kbd-body'));
+    if (window.ResizeObserver) new ResizeObserver(() => kbUpdateSticky()).observe(document.getElementById('kbd-panel'));
     kbSetVisible(!kbPrefs.hidden);
   }
 
@@ -4661,7 +4661,17 @@
   // outer width of the window over the inner: the outer is in screen pixels, which zoom leaves
   // alone, where the browser says so (Chrome, Edge, Safari); where it does not, the ratio stays
   // near 1 and the area fits the window as it does at 100%.
+  // Whether the soft keyboard is kept at the bottom of the window (see #kbd-panel's rule): from
+  // 480px high, or lower where it takes little more than half the window, as on a phone on its
+  // side zoomed out to 75%, about 450px high, which it takes 53% of. Its height is the same either
+  // way, so the choice does not change what it is made on.
+  function kbUpdateSticky() {
+    const keyboard = document.getElementById('kbd-panel').offsetHeight;
+    document.body.classList.toggle('kbd-sticky', window.innerHeight >= 480 || keyboard <= window.innerHeight * 0.55);
+  }
+
   function fitTabArea() {
+    kbUpdateSticky();
     const controls = document.getElementById('tab-controls');
     const app = document.getElementById('tab-patch');
     const canvas = document.getElementById('canvas');
