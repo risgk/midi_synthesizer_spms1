@@ -143,9 +143,11 @@ Usage
       it feeds
     - Saves and loads patches as JSON
     - Copies the patch as MIDI bytes or as an NRPN list, or sends it through Web MIDI
-    - Sends the whole patch (Send Patch, or a device newly chosen) and many wiring changes at once
-      (Init, Load JSON, Undo, Redo) muted (NRPN Mute), so that the patch is not heard half sent;
-      a Reset (NRPN) arriving at MIDI In puts the patch shown back to the default too
+    - Sends the whole patch (Send Patch, or a device newly chosen) between Mute on and off (NRPN
+      Mute), so that the patch is not heard half sent, and so does the patch it copies with "Mute
+      while loading" (on by default); every other change goes out as it is
+    - Its Mute button mutes the synth (NRPN Mute), to change the patch unheard, and shows a Mute
+      arriving at MIDI In; a Reset (NRPN) arriving at MIDI In puts the patch shown back to the default too
     - The side panels (Patch, Run Order, Export) fold to their headings with a click, each remembered;
       with all three folded, the canvas takes the width they leave
 - SPMS-1 Web: the synth itself, built into the editor ("spms1_web_synth.js")

@@ -59,7 +59,24 @@ uint32_t g_midi_run_order_written[16][SPMS1_RUN_ORDER_SIZE] = {{0}};
 #define SPMS1_NRPN_SYSTEM_MSB   (SPMS1_NRPN_MSB_BASE + 5)
 #define SPMS1_NRPN_SYSTEM_MUTE  (0)
 #define SPMS1_NRPN_SYSTEM_RESET (1)
+// Mute, and how many times Mute on has arrived, which the synth tells apart by the count changing,
+// so that a Mute on is never missed, however soon Mute off follows it.
 uint8_t  g_midi_mute[16]            = {0};
+uint32_t g_midi_mute_count[16]      = {0};
+// The patch as it was when Mute on arrived, which the synth reads while it fades the output out,
+// so that a patch sent right behind Mute on is not heard: the NRPN table, the CC values and the
+// times the run order was written. The synth reads through g_midi_*_read, which point at the live
+// tables, or at these from Mute on until the output is silent (thaw_midi_patch). Copied before
+// the pointers move, so a read finds the patch as it was either way; one pointer a read is the
+// whole cost of it to the synth.
+uint8_t  g_midi_nrpn_frozen[16][SPMS1_NRPN_SIZE]                = {{0}};
+uint8_t  g_midi_cc_frozen[16][128]                              = {{0}};
+uint32_t g_midi_run_order_written_frozen[16][SPMS1_RUN_ORDER_SIZE] = {{0}};
+#define SPMS1_ROWS_OF(table) {table[0], table[1], table[2], table[3], table[4], table[5], table[6], table[7], \
+                              table[8], table[9], table[10], table[11], table[12], table[13], table[14], table[15]}
+const uint8_t*  volatile g_midi_nrpn_read[16]            = SPMS1_ROWS_OF(g_midi_nrpn_values);
+const uint8_t*  volatile g_midi_cc_read[16]              = SPMS1_ROWS_OF(g_midi_cc_values);
+const uint32_t* volatile g_midi_run_order_written_read[16] = SPMS1_ROWS_OF(g_midi_run_order_written);
 // How many All Sound Offs (CC 120) have arrived, which the synth tells apart by the count changing:
 // it fades the output out, silences the envelopes and the filter, clears the delay and the
 // chorus, and fades it in again.
@@ -134,7 +151,7 @@ SPMS1_RAM_FUNC uint8_t get_midi_cc_value(uint8_t midi_ch, uint8_t cc_number) {
     return 0;
   }
 
-  return g_midi_cc_values[midi_ch][cc_number];
+  return g_midi_cc_read[midi_ch][cc_number];
 }
 
 SPMS1_RAM_FUNC void set_midi_nrpn_value(uint8_t midi_ch, int32_t index, uint8_t value) {
@@ -161,7 +178,7 @@ SPMS1_RAM_FUNC uint8_t get_midi_nrpn_value(uint8_t midi_ch, int32_t index) {
     return 0;
   }
 
-  return g_midi_nrpn_values[midi_ch][index];
+  return g_midi_nrpn_read[midi_ch][index];
 }
 
 SPMS1_RAM_FUNC int32_t get_midi_run_order_written(uint8_t midi_ch, int32_t slot) {
@@ -173,7 +190,7 @@ SPMS1_RAM_FUNC int32_t get_midi_run_order_written(uint8_t midi_ch, int32_t slot)
     return 0;
   }
 
-  return (int32_t)g_midi_run_order_written[midi_ch][slot];
+  return (int32_t)g_midi_run_order_written_read[midi_ch][slot];
 }
 
 SPMS1_RAM_FUNC uint8_t get_midi_mute(uint8_t midi_ch) {
@@ -182,6 +199,46 @@ SPMS1_RAM_FUNC uint8_t get_midi_mute(uint8_t midi_ch) {
   }
 
   return g_midi_mute[midi_ch];
+}
+
+SPMS1_RAM_FUNC int32_t get_midi_mute_count(uint8_t midi_ch) {
+  if (midi_ch >= 16) {
+    return 0;
+  }
+
+  return (int32_t)g_midi_mute_count[midi_ch];
+}
+
+// Mute on: the synth reads a copy of the patch as it is, until it calls thaw_midi_patch. A copy
+// taken already is kept, the patch from before the first Mute on.
+void spms1_freeze_patch(uint8_t midi_ch) {
+  if (midi_ch >= 16 || g_midi_nrpn_read[midi_ch] != g_midi_nrpn_values[midi_ch]) {
+    return;
+  }
+
+  for (int32_t i = 0; i < SPMS1_NRPN_SIZE; ++i) {
+    g_midi_nrpn_frozen[midi_ch][i] = g_midi_nrpn_values[midi_ch][i];
+  }
+  for (int32_t i = 0; i < 128; ++i) {
+    g_midi_cc_frozen[midi_ch][i] = g_midi_cc_values[midi_ch][i];
+  }
+  for (int32_t i = 0; i < SPMS1_RUN_ORDER_SIZE; ++i) {
+    g_midi_run_order_written_frozen[midi_ch][i] = g_midi_run_order_written[midi_ch][i];
+  }
+  g_midi_nrpn_read[midi_ch] = g_midi_nrpn_frozen[midi_ch];
+  g_midi_cc_read[midi_ch] = g_midi_cc_frozen[midi_ch];
+  g_midi_run_order_written_read[midi_ch] = g_midi_run_order_written_frozen[midi_ch];
+}
+
+// The synth, with the output silent: it reads the live tables again, the patch sent since.
+SPMS1_RAM_FUNC void thaw_midi_patch(uint8_t midi_ch) {
+  if (midi_ch >= 16) {
+    return;
+  }
+
+  g_midi_nrpn_read[midi_ch] = g_midi_nrpn_values[midi_ch];
+  g_midi_cc_read[midi_ch] = g_midi_cc_values[midi_ch];
+  g_midi_run_order_written_read[midi_ch] = g_midi_run_order_written[midi_ch];
 }
 
 SPMS1_RAM_FUNC int32_t get_midi_sound_off_count(uint8_t midi_ch) {
@@ -228,6 +285,10 @@ void spms1_reset_patch(uint8_t midi_ch) {
 void handle_midi_nrpn_system(uint8_t midi_ch, uint8_t lsb, uint8_t value) {
   if (lsb == SPMS1_NRPN_SYSTEM_MUTE) {
     g_midi_mute[midi_ch] = (value >= 64) ? 1 : 0;
+    if (value >= 64) {
+      spms1_freeze_patch(midi_ch);
+      ++g_midi_mute_count[midi_ch];
+    }
   } else if (lsb == SPMS1_NRPN_SYSTEM_RESET && value >= 64) {
     spms1_reset_patch(midi_ch);
   }

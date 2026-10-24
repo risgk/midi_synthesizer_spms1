@@ -18,6 +18,10 @@ module Spms1
     @run_order_written = Array.new(16) { Array.new(32, 0) }
     # Mute (NRPN 117/0) and the count of All Sound Offs (CC 120), as in spms1_midi_state.h.
     @mute = Array.new(16, 0)
+    @mute_count = Array.new(16, 0)
+    # The patch as it was at Mute on, which the synth reads until it thaws it, or nil: the NRPN
+    # table, the CC values and the times the run order was written, as in spms1_midi_state.h.
+    @frozen = Array.new(16, nil)
     @sound_off_count = Array.new(16, 0)
 
     # The signal bus SignalBus reads and writes, as spms1_bus.h has it for the C builds.
@@ -45,15 +49,17 @@ module Spms1
       def set_midi_pitch_bend(ch, v) = (@pitch_bend[ch] = v)
       def get_midi_pitch_bend(ch) = @pitch_bend[ch]
       def set_midi_cc_value(ch, n, v) = (@cc_values[ch][n] = v)
-      def get_midi_cc_value(ch, n) = @cc_values[ch][n]
+      def get_midi_cc_value(ch, n) = (@frozen[ch] ? @frozen[ch][1] : @cc_values[ch])[n]
       def set_midi_nrpn_value(ch, i, v)
         return unless i >= 0 && i < 640
         @nrpn_values[ch][i] = v
         @run_order_written[ch][i] = (@run_order_writes[ch] += 1) if i < 32
       end
-      def get_midi_run_order_written(ch, slot) = ((slot >= 0 && slot < 32) ? @run_order_written[ch][slot] : 0)
-      def get_midi_nrpn_value(ch, i) = ((i >= 0 && i < 640) ? @nrpn_values[ch][i] : 0)
+      def get_midi_run_order_written(ch, slot) = ((slot >= 0 && slot < 32) ? (@frozen[ch] ? @frozen[ch][2] : @run_order_written[ch])[slot] : 0)
+      def get_midi_nrpn_value(ch, i) = ((i >= 0 && i < 640) ? (@frozen[ch] ? @frozen[ch][0] : @nrpn_values[ch])[i] : 0)
       def get_midi_mute(ch) = @mute[ch]
+      def get_midi_mute_count(ch) = @mute_count[ch]
+      def thaw_midi_patch(ch) = (@frozen[ch] = nil)
       def get_midi_sound_off_count(ch) = @sound_off_count[ch]
 
       # The reset NRPN, as spms1_reset_patch: every entry, the times the run order was written and
@@ -148,6 +154,10 @@ module Spms1
           # The system entries: Mute (0) and Reset (1).
           if @nrpn_lsb[ch] == 0
             @mute[ch] = (value >= 64) ? 1 : 0
+            if value >= 64
+              @frozen[ch] ||= [@nrpn_values[ch].dup, @cc_values[ch].dup, @run_order_written[ch].dup]
+              @mute_count[ch] += 1
+            end
           elsif @nrpn_lsb[ch] == 1 && value >= 64
             reset_patch(ch)
           end

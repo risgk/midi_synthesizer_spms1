@@ -71,10 +71,13 @@ SIGNALS_SIZE = 256
 CONTROLLER_SMOOTHING_BLEND = 1.0 - (1.0 - 0.015625 * (48000.0 / SAMPLE_RATE.to_f)) ** (AUDIO_BUFFER_WORDS.to_f / 4.0)
 
 # The output fader, as PRA32-U2's: a linear fade of the output out and in, of at least 3 ms, in
-# whole buffers, 4 ms at 64 samples. It fades out while Mute (NRPN 117/0, see
-# spms1_midi_state.h) is on, as it is while a patch is sent, and holds the output silent until
-# Mute is off; and at an All Sound Off (CC 120), after which the envelopes and the filter are
-# silenced, out of hearing, before it fades in again. A fade that has begun runs to its end before
+# whole buffers, 4 ms at 64 samples. It fades out at Mute on (NRPN 117/0, see spms1_midi_state.h),
+# as a patch is sent, and holds the output silent until Mute is off; and at an All Sound Off (CC
+# 120), after which the envelopes and the filter are silenced, out of hearing, before it fades in
+# again. A sender needs no waits: while the output fades out for Mute, the synth reads the patch
+# as it was at Mute on, and only once it is silent the patch sent since; and the output fades in
+# only after the parameters have had OUTPUT_SETTLE_BUFFERS (30 ms) to settle on their new values,
+# silent, however soon Mute off came. A fade that has begun runs to its end before
 # the next one. Where it is is counted in samples, an Integer, and the gain worked out from it at
 # the start of each buffer, so that it lands on exactly 0.0 or 1.0 at the end of a fade; within a
 # buffer the gain takes a step a sample. The gain multiplies the output as it is written, every
@@ -87,6 +90,7 @@ CONTROLLER_SMOOTHING_BLEND = 1.0 - (1.0 - 0.015625 * (48000.0 / SAMPLE_RATE.to_f
 # a patch sent meanwhile, until the output fades in.
 OUTPUT_FADE_SAMPLES = (SAMPLE_RATE * 3 / 1000 + AUDIO_BUFFER_WORDS - 1) / AUDIO_BUFFER_WORDS * AUDIO_BUFFER_WORDS
 OUTPUT_FADE_STEP    = 1.0 / OUTPUT_FADE_SAMPLES.to_f
+OUTPUT_SETTLE_BUFFERS = (SAMPLE_RATE * 30 / 1000 + AUDIO_BUFFER_WORDS - 1) / AUDIO_BUFFER_WORDS
 
 # The NRPN parameter numbers (NRPN_*), in spms1_patch.rb: (category << 7) | LSB, where the MSB,
 # 112 + category, picks a category and the LSB an entry.
@@ -126,13 +130,17 @@ order_written = Array.new(MODULES_SIZE, 0)
 
 # The output fader: where the fade is, in samples, from 0 (silent) to OUTPUT_FADE_SAMPLES (the
 # output as it is), and which way it goes, 1 in, -1 out or 0; the count of All Sound Offs it has
-# taken, with one waiting while the output fades out; and whether the lines of the delay, the
-# chorus and the amp's limiter are clear.
+# taken, with one waiting while the output fades out, and so for Mute on; whether the lines of
+# the delay, the chorus and the amp's limiter are clear; and the buffers left to settle in, silent,
+# before the output fades in.
 output_fade_position = OUTPUT_FADE_SAMPLES
 output_fade_direction = 0
 sound_off_count = 0
 sound_off_waiting = false
+mute_count = 0
+mute_waiting = false
 lines_cleared = true
+settle_buffers = 0
 
 audio_buffer_l = Array.new(AUDIO_BUFFER_WORDS, 0.0)
 audio_buffer_r = Array.new(AUDIO_BUFFER_WORDS, 0.0)
@@ -176,18 +184,33 @@ while true
     sound_off_count = C.get_midi_sound_off_count(MIDI_CH)
     sound_off_waiting = true
   end
+  if C.get_midi_mute_count(MIDI_CH) != mute_count
+    mute_count = C.get_midi_mute_count(MIDI_CH)
+    mute_waiting = true
+  end
   muted = C.get_midi_mute(MIDI_CH) != 0
   if output_fade_position == 0
+    # Silent: the patch sent since Mute on is read from here on, and a Mute on that came while
+    # silent gives what it sent the time to settle as well.
+    C.thaw_midi_patch(MIDI_CH)
+    if mute_waiting
+      settle_buffers = OUTPUT_SETTLE_BUFFERS
+      mute_waiting = false
+    end
     if sound_off_waiting
       eg_1.sound_off
       eg_2.sound_off
       filter_1.sound_off
       sound_off_waiting = false
     end
-    output_fade_direction = (!muted && lines_cleared) ? 1 : 0
-  elsif output_fade_position == OUTPUT_FADE_SAMPLES && (muted || sound_off_waiting)
+    if lines_cleared && settle_buffers > 0
+      settle_buffers -= 1
+    end
+    output_fade_direction = (!muted && lines_cleared && settle_buffers == 0) ? 1 : 0
+  elsif output_fade_position == OUTPUT_FADE_SAMPLES && (muted || mute_waiting || sound_off_waiting)
     output_fade_direction = -1
     lines_cleared = false
+    settle_buffers = OUTPUT_SETTLE_BUFFERS
     amp_1.start_clear
     chorus_1.start_clear
     delay_1.start_clear

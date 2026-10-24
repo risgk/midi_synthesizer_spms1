@@ -212,13 +212,15 @@ it from anywhere else.
 Category 5 has the system entries, which act on the synth rather than set a part of the patch:
 
 - Entry 0, Mute: 64-127 fades the output out over 4 ms and holds it silent, and clears the delay
-  and the chorus (11 ms), and 0-63 fades it in again. Send a whole patch between Mute on and off, so that what the synth plays while the patch is
-  half sent is not heard: wait for the fade out (about 10 ms) before the patch, and for the
-  parameters to settle on their new values (about 30 ms) before Mute off, as the editor does.
-  Mute is off at power-on
+  and the chorus (11 ms); 0-63 fades it in again. Send a whole patch between Mute on and off, so
+  that it is not heard half sent. No waits are needed between them, however fast they come: the
+  synth fades out what it played before Mute on, reads the patch sent since only once it is silent,
+  and fades in only after the parameters have had 30 ms to settle on their new values, so the
+  output comes back about 45 ms after Mute off at the soonest. Mute is off at power-on
 - Entry 1, Reset: 64-127 puts the patch back to the default, as at power-on: every entry of
   categories 0-4 and every CC value. The notes, Pitch Bend and Mute are kept. Send it between Mute
-  on and off for it to be heard as silence, since the synth may play a buffer of the patch half reset
+  on and off for it to be heard as silence, since the synth may otherwise play a buffer of the
+  patch half reset
 
 The run order is read from slot 0 upwards and stops at the first Module ID 0, so a patch shorter
 than 32 modules ends itself. It is separate from the module numbering: a module only sees the
