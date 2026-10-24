@@ -279,6 +279,28 @@
         user-select: none;
       }
     }
+    /* In one column, as on a phone, where a drag would fight the scrolling of the page, a panel is
+       moved by the arrows at the right of its heading instead, a place up or down. */
+    .panel-move {
+      display: none;
+    }
+    @media (max-width: 599px) {
+      .editor-column .panel h2 {
+        display: flex;
+        align-items: center;
+      }
+      .panel-move {
+        display: flex;
+        gap: 6px;
+        margin-left: auto;
+      }
+      .panel-move .btn {
+        min-width: 32px;
+        padding: 2px 8px;
+        font-size: 0.75rem;
+        line-height: 1.4;
+      }
+    }
     /* Where a panel being moved will land, and the panel itself, lifted, following the pointer. */
     .panel-drop {
       border: 2px dashed #b8c0ca;
@@ -725,9 +747,9 @@
       color: #ccc;
       white-space: nowrap;
     }
-    /* Below 960px the keys narrow with the window, down to KB_KEY_WIDTH_NARROW (see kbFitKeys);
-       on a phone the wheels are narrower still, 3/2 of a semitone, so that 360px shows an octave
-       and more. */
+    /* Below 960px the keys narrow with the window, down to KB_KEY_WIDTH_NARROW, still showing the
+       37 keys at 640px; on a phone they are as wide as an octave of 13 keys takes (see kbFitKeys),
+       and the wheels narrower, 3/2 of a semitone. */
     @media (max-width: 480px) {
       .mod-wheel { width: calc(var(--kbd-key-width) * 3 / 2); }
       .mod-wheel-label { font-size: 0.6rem; }
@@ -1542,7 +1564,7 @@
         <label class="check" title="A parameter with no CC holds the value the patch gives it, which its slider sets through NRPN. Hidden, it shows up as soon as a CC is given to it or it is marked as a favorite."><input type="checkbox" id="show-no-cc"> Show parameters with no CC</label>
         <label class="check" title="Only the parameters marked with a star, with or without a CC. Unmarking one here takes it off the tab."><input type="checkbox" id="favorites-only"> Show favorites only</label>
       </div>
-      <button class="btn" id="reset-layout" title="Put the panels back where they were at first. A panel is moved by dragging its heading, with the columns two or four to a row; where they are is kept in this browser, for every patch.">Reset Layout</button>
+      <button class="btn" id="reset-layout" title="Put the panels back where they were at first. A panel is moved by dragging its heading, with the columns two or four to a row, or by its arrows in one column; where they are is kept in this browser, for every patch.">Reset Layout</button>
     </div>
     <button class="btn primary" id="init-values" title="Set each CC value and each value of a parameter with no CC back to what the synth powers up at, and send them; the wiring is kept">Initialize Values</button>
   </div>
@@ -4005,6 +4027,26 @@
     fitTabArea();
   }
 
+  // A panel moved a place up or down, in the order of one column, the columns one after another:
+  // it changes places with the panel shown next to it, so that one moved past the top or the bottom
+  // of a column goes to the next, as it would be seen with the columns two or four to a row, each
+  // column keeps as many panels as it had, and a move back puts both where they were. A panel a
+  // patch hides stays where it is.
+  function movePanel(id, other, delta) {
+    if (!other) return;
+    const a = panelLayout.find(ids => ids.includes(id));
+    const b = panelLayout.find(ids => ids.includes(other));
+    const ai = a.indexOf(id), bi = b.indexOf(other);
+    a[ai] = other;
+    b[bi] = id;
+    savePanelLayout();
+    renderControls();
+    fitTabArea();
+    // The arrow pressed keeps the focus, at the panel's new place, so that it can be pressed again.
+    const btn = document.querySelector(`#controls .panel[data-panel="${id}"] .panel-move .btn[data-move="${delta < 0 ? 'up' : 'down'}"]`);
+    if (btn && !btn.disabled) btn.focus();
+  }
+
   function renderControls() {
     const root = document.getElementById('controls');
     // Rebuilding under a slider or a panel being dragged would drop the drag; a panel dropped draws
@@ -4023,7 +4065,10 @@
       panel.className = 'panel colored';
       panel.dataset.panel = id;
       panel.style.setProperty('--node-color', NODE_COLORS[p.module || 'CONTROLLER']);
-      panel.innerHTML = `<h2>${p.title}</h2><div class="control-row">` + items.map(c => `
+      panel.innerHTML = `<h2>${p.title}<span class="panel-move">` +
+        `<button type="button" class="btn" data-move="up" aria-label="Move ${p.title} up" title="Move up">&#9650;</button>` +
+        `<button type="button" class="btn" data-move="down" aria-label="Move ${p.title} down" title="Move down">&#9660;</button>` +
+        `</span></h2><div class="control-row">` + items.map(c => `
         <div class="slider-knob-zone" data-ctrl="${c.key}">
           <button type="button" class="fav-toggle" aria-pressed="false">&#9733;</button>
           <div class="slider-label">${escapeHTML(c.label)} <span class="ctl-sub"><span class="ctl-hint"></span><span class="cc-num"></span></span></div>
@@ -4038,6 +4083,14 @@
     cols[3].appendChild(document.getElementById('controls-foot'));
     root.replaceChildren(...cols);
     root.querySelectorAll('.panel h2').forEach(h => h.addEventListener('pointerdown', startPanelDrag));
+    const shown = [...root.querySelectorAll('.panel[data-panel]')].map(panel => panel.dataset.panel);
+    root.querySelectorAll('.panel-move .btn').forEach(btn => {
+      const id = btn.closest('.panel').dataset.panel;
+      const delta = btn.dataset.move === 'up' ? -1 : 1;
+      const at = shown.indexOf(id);
+      btn.disabled = !shown[at + delta];
+      btn.addEventListener('click', () => movePanel(id, shown[at + delta], delta));
+    });
     root.querySelectorAll('.slider-knob-zone').forEach(zone => {
       const c = CONTROL[zone.dataset.ctrl];
       const slider = zone.querySelector('input');
@@ -4208,10 +4261,13 @@
 
   const KB_NOTE_MAX = 120;
   const KB_KEY_WIDTH = 20;  // a semitone in the upper half, times kbScale; 37 keys fit 960px, with room
-  const KB_KEY_WIDTH_NARROW = 16;  // the narrowest, below 800px; two octaves and more fit 640px
+  const KB_KEY_WIDTH_NARROW = 12;  // the narrowest, below about 650px; the 37 keys still fit 640px
   // Below their full width the keys narrow so as to show no more than this many semitones, as many
   // as 960px shows at full width: the 37 keys, with room. So a wider window never shows fewer.
   const KB_SEMITONES = 40;
+  // On a phone, as many as an octave of 13 keys, C to C, takes, so that the keys are wide enough
+  // for a finger rather than many.
+  const KB_SEMITONES_PHONE = 14;
   const KB_PHONE = window.matchMedia('(max-width: 480px)');
   // The center of 37 keys from a C (C3 - C6 by default), in semitones from the left end of the C.
   const KB_CENTER_OFFSET = (36 + 5 / 3) / 2;
@@ -4308,13 +4364,13 @@
   }
 
   // The width of a semitone, between KB_KEY_WIDTH_NARROW and KB_KEY_WIDTH times the scale: as
-  // wide as shows KB_SEMITONES beside the two wheels, each 5/3 of a semitone (3/2 on a phone),
+  // wide as shows KB_SEMITONES (KB_SEMITONES_PHONE on a phone) beside the two wheels, each 5/3 of a semitone (3/2 on a phone),
   // with the 4px gaps after each. Hidden, the keyboard has no width, and keeps what it had.
   function kbFitKeys(force) {
     const width = document.querySelector('.kbd-body').clientWidth;
     if (!(width > 0)) return;
     const wheels = 2 * (KB_PHONE.matches ? 3 / 2 : 5 / 3);
-    const fit = (width - 8) / (KB_SEMITONES + wheels);
+    const fit = (width - 8) / ((KB_PHONE.matches ? KB_SEMITONES_PHONE : KB_SEMITONES) + wheels);
     const px = Math.max(KB_KEY_WIDTH_NARROW * kbScale, Math.min(KB_KEY_WIDTH * kbScale, fit));
     if (px === kbKeyPx && !force) return;
     kbKeyPx = px;
