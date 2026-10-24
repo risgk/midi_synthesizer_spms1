@@ -25,10 +25,10 @@ module Spms1
     # patch made as Save arrives, and the one written when the synth stores it, as [NRPN table, CC
     # values, run order ranks], or nil.
     @save_count = Array.new(16, 0)
-    # The controls whose CCs' values a Save keeps, by entry: all but the performance controls', as
+    # The controls whose CCs' values a Save keeps, by entry: all but the controllers', as
     # g_spms1_saved_cc_entries in spms1_default_patch.h has them.
     @saved_cc_entries = YAML.load_file(File.expand_path('../spms1_patch.yaml', __dir__))
-                            .fetch('controls').reject { |c| c['performance'] }.map { |c| c['entry'] }
+                            .fetch('controls').reject { |c| c['controller'] }.map { |c| c['entry'] }
     @patch_image = nil
     @stored_image = nil
 
@@ -71,7 +71,7 @@ module Spms1
       def store_patch_image(_ch) = (@stored_image = @patch_image)
 
       # The patch as spms1_make_patch_image takes it: the CC values of the controls but the
-      # performance ones, and each run order slot's time as a rank, 1 the first written, 0 never.
+      # controllers, and each run order slot's time as a rank, 1 the first written, 0 never.
       def make_patch_image(ch)
         written = @run_order_written[ch]
         ranks = written.map { |w| w == 0 ? 0 : written.count { |o| o != 0 && o <= w } }
