@@ -4,6 +4,10 @@ MIDI Synthesizer SPMS-1 (type-2) Change History
 The main changes of each version, newest first, gathered before each release. The format may be
 revised.
 
+- v0.3.1 (2026-10-25):
+    - Save (NRPN 117/2): save a CC that only the controllers (Mod Wheel, General) have at 0, as
+      the Mod Wheel's was; a CC that a parameter has too is saved as it is
+    - Editor: Save JSON and Export keep such a CC at what it powers up at
 - v0.3.0 (2026-10-25):
     - NRPN: Add the system entries (MSB 117), which are not a part of the patch
         - Mute (117/0): fades the output out over 4 ms and holds it silent, and fades it back in;
