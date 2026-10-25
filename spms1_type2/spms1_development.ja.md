@@ -219,6 +219,20 @@ patch_gen は、モジュールのファイルの `require_relative`、インス
   コミットします (ビルドの後でソースが変わっていた場合と、何も変わっていない場合はコミットしません)
 
 
+## リリース
+
+基本的に、次の順で行います (日付は JST):
+
+1. 実機で確認します (PWM Audio 版と I2S 版)
+2. その版の主な変更を "spms1_change_history.md" にまとめます (新しい順)
+3. バージョンを変えます: "README.md" と "README.ja.md" の 1 行目、エディタの `<span class="version">`、
+   "spms1_midi_chart.md" の Version と Date (MIDI の仕様が変わらなくても毎回)
+4. 負荷を見積もり (`sh sim_load/estimate.sh`、ノートありと `--gate 0`)、「処理負荷の見積もり」の表に追加します
+5. "type-2: Version X.Y.Z" としてコミットします
+6. develop でワークフロー (上記) を "commit_package" 付きで実行し、UF2 ファイルと SPMS-1 Web を更新します
+7. プルリクエスト "type-2 vX.Y.Z" で develop を main にマージします
+
+
 ## Ruby と違うところ
 
 シンセは CRuby も含め Ruby のとおりに動きます ("sim_cruby" 参照)。ただし MCU では賄えない次の点は別です。

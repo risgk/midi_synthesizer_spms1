@@ -228,6 +228,22 @@ buffer takes about the same with a note held or not, as the modules are meant to
   the build, nor if nothing changed)
 
 
+## Release
+
+Basically, a release goes as follows (the dates in JST):
+
+1. Check it on the device, with PWM Audio and with I2S
+2. Gather the main changes of the version in "spms1_change_history.md", newest first
+3. Change the version in the first lines of "README.md" and "README.ja.md", in the editor's
+   `<span class="version">`, and in "spms1_midi_chart.md" with its Date (at every release, even if
+   the MIDI implementation is the same)
+4. Estimate the load (`sh sim_load/estimate.sh`, with a note held and with `--gate 0`), and add
+   the version to the table under Load Estimate
+5. Commit as "type-2: Version X.Y.Z"
+6. Run the workflow (above) on develop with "commit_package", for the UF2 files and SPMS-1 Web
+7. Merge develop into main by a pull request, "type-2 vX.Y.Z"
+
+
 ## Where It Departs from Ruby
 
 The synth runs as Ruby says, CRuby included (see "sim_cruby"), but for what the MCU cannot afford.
