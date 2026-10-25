@@ -153,6 +153,8 @@ Usage
     - Its Mute button mutes the synth (NRPN Mute), to change the patch unheard, and shows a Mute
       arriving at MIDI In; a Reset (NRPN) arriving at MIDI In puts the patch shown back to the default too
     - Its Save to Device keeps the patch in the synth's flash (NRPN Save), which the synth loads at power-on
+    - It does not read the patch from the synth (e.g. the one saved, which the synth loads at power-on): the synth
+      takes the editor's when a device is chosen in "MIDI Out", or by Send Patch, in place of its own
     - The side panels (Patch, Run Order, Export) fold to their headings with a click, each remembered;
       with all three folded, the canvas takes the width they leave
 - SPMS-1 Web: the synth itself, built into the editor ("spms1_web_synth.js")
