@@ -6,7 +6,7 @@
 # by a first-order Cortex-M33 cost model (see cost below).
 #
 #   python3 sim_load/spms1_load_estimate.py ELF [--buffers N] [--skip N] [--note N] [--gate 0|1]
-#                                           [--mhz F] [--profile]
+#                                           [--mhz F] [--profile] [--modules]
 #
 # The instruction count is exact for the code as built; the cycles are an estimate, which a
 # measurement on the device can calibrate. Needs: pip install unicorn capstone pyelftools numpy
@@ -25,6 +25,7 @@ ap.add_argument('--note', type=int, default=69, help='the note held (MIDI note n
 ap.add_argument('--gate', type=int, default=1, help='1 to hold the note, 0 for none')
 ap.add_argument('--mhz', type=float, default=153.6, help='system clock, the sketch\'s 153.6 MHz by default')
 ap.add_argument('--profile', action='store_true', help='print the functions the measured buffers spend the most cycles in')
+ap.add_argument('--modules', action='store_true', help='print the load of each module, also with its share of the common part (from the debug info)')
 args = ap.parse_args()
 
 f = open(args.elf, 'rb')
@@ -231,9 +232,14 @@ def hook_code(uc, addr, size, _):
         last = state['last_end']
         if last is not None and last != addr:
             state['cyc'] += 2  # the branch before this instruction was taken
+            c_taken = c + 2
+        else:
+            c_taken = c
         state['n'] += 1
         state['cyc'] += c
         state['last_end'] = addr + size
+        if args.modules:
+            modules_hook(uc, addr, size, c_taken)
         if args.profile:
             s = sym_of(addr)
             p = state['prof']
@@ -241,6 +247,117 @@ def hook_code(uc, addr, size, _):
     else:
         state['last_end'] = None
 
+# --modules: the load of each module. The cycles of its methods inlined into Spms1_main (process,
+# its outputs, smooth_parameters; their spans from the debug info) are its own; and by the run, the
+# code from the dispatch of the run order (the jump table of `case module_id`) to its last own or bus
+# write instruction (the bus reads of its inputs and the writes of its outputs) is its share of the
+# common part, with the rest of the dispatch loop (the code after it that the modules share) split
+# evenly over them; from the output of a sample (audio_buffer_l[i] = ...) to the dispatch of the
+# first module of the next (the loop of the samples, MIDI, the CCs, smooth_parameters) is the common
+# part left, but the methods of a module there (smooth_parameters) are its own.
+if args.modules:
+    import os, re
+    def die_name(die):
+        for _ in range(5):
+            n = die.attributes.get('DW_AT_name')
+            if n:
+                return n.value.decode()
+            o = die.attributes.get('DW_AT_abstract_origin') or die.attributes.get('DW_AT_specification')
+            if not o:
+                return '?'
+            die = die.get_DIE_from_attribute(o.name)
+        return '?'
+    dw = elf.get_dwarf_info()
+    rl = dw.range_lists()
+    def die_ranges(die, cu):
+        a = die.attributes
+        if 'DW_AT_low_pc' in a and 'DW_AT_high_pc' in a:
+            lo = a['DW_AT_low_pc'].value
+            hi = a['DW_AT_high_pc'].value
+            return [(lo, hi if a['DW_AT_high_pc'].form == 'DW_FORM_addr' else lo + hi)]
+        out = []
+        if 'DW_AT_ranges' in a:
+            base = cu.get_top_DIE().attributes.get('DW_AT_low_pc')
+            base = base.value if base else 0
+            for e in rl.get_range_list_at_offset(a['DW_AT_ranges'].value, cu=cu):
+                if hasattr(e, 'base_address'):
+                    base = e.base_address
+                elif hasattr(e, 'begin_offset'):
+                    out.append((e.begin_offset + base, e.end_offset + base))
+        return out
+    span_of = {}  # address -> name of the method inlined into Spms1_main at its top level
+    for cu in dw.iter_CUs():
+        for top in cu.iter_DIEs():
+            if top.tag == 'DW_TAG_subprogram' and die_name(top) == 'Spms1_main' and die_ranges(top, cu):
+                def walk(die):
+                    for ch in die.iter_children():
+                        if ch.tag == 'DW_TAG_inlined_subroutine':
+                            name = die_name(ch)
+                            for lo, hi in die_ranges(ch, cu):
+                                for a in range(lo & ~1, hi, 2):
+                                    span_of.setdefault(a, name)
+                        elif ch.tag == 'DW_TAG_lexical_block':
+                            walk(ch)
+                walk(top)
+    # The modules of the dispatch, by their ids, as patch_gen writes them in spms1_main.rb
+    src = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'spms1', 'spms1_main.rb')).read()
+    classes = dict(re.findall(r'^(\w+) = (\w+)\.new\(', src, re.M))
+    dispatch_ids = [(int(i), v) for i, v in re.findall(r'^\s*when (\d+) # MODULE_\w+\n\s*(?:signals\[\d+\] = )?(\w+)\.', src, re.M)]
+    dispatch_ids.sort()
+    jump = {}  # jump table instruction -> index register
+    def jump_index_reg(addr, size):
+        if addr not in jump:
+            insn = next(md.disasm(bytes(mu.mem_read(addr, size)), addr), None)
+            reg = None
+            if insn and insn.mnemonic in ('tbb', 'tbh'):
+                reg = insn.operands[0].mem.index
+            jump[addr] = reg
+        return jump[addr]
+    mstate = {'tbb': {}, 'dispatch': None, 'module': None, 'pending': [], 'left': 0}
+    own, shared_own, common, tails = {}, {}, {}, {}
+    def modules_hook(uc, addr, size, c):
+        reg = jump_index_reg(addr, size)
+        if len(state['buffers']) < args.skip:
+            if reg is not None:  # the warm-up finds the dispatch: the jump table of the most indices
+                mstate['tbb'].setdefault(addr, set()).add(uc.reg_read(reg))
+            return
+        if mstate['dispatch'] is None:  # the jump tables of as many indices as the modules (GCC may copy the loop)
+            mstate['dispatch'] = {a: dict(zip(sorted(v), [m for _, m in dispatch_ids]))
+                                  for a, v in mstate['tbb'].items() if len(v) == len(dispatch_ids)}
+        if addr in mstate['dispatch']:
+            m = mstate['module']
+            for a, cc in mstate['pending']:  # the tail of the module before: its dispatch loop
+                tails.setdefault(a, {})
+                tails[a][m] = tails[a].get(m, 0) + cc
+            mstate['pending'] = []
+            mstate['module'] = mstate['dispatch'][addr].get(uc.reg_read(reg))
+        m = mstate['module']
+        name = span_of.get(addr)
+        if m is None:  # out of the dispatch loop: from the output of a sample to the first module of the next
+            mstate['left'] += c
+            return
+        if name == 'sp_FloatArray_set':  # the output of the sample (audio_buffer_l[i] = ...): out of the loop
+            for a, cc in mstate['pending']:
+                tails.setdefault(a, {})
+                tails[a][m] = tails[a].get(m, 0) + cc
+            mstate['pending'] = []
+            mstate['module'] = None
+            mstate['left'] += c
+            return
+        cls = name and re.match(r'sp_([A-Z]\w*?)_', name)
+        if cls and cls.group(1) in classes.values():
+            if m and classes[m] == cls.group(1):
+                own[m] = own.get(m, 0) + c
+            else:  # e.g. smooth_parameters, before the dispatch
+                shared_own[cls.group(1)] = shared_own.get(cls.group(1), 0) + c
+            anchor = True
+        else:
+            anchor = name == 'sp_SignalBus__lb_rb_set'
+            mstate['pending'].append((addr, c))
+        if anchor and m:
+            for a, cc in mstate['pending']:
+                common[m] = common.get(m, 0) + cc
+            mstate['pending'] = []
 mu.hook_add(UC_HOOK_CODE, hook_code)
 
 main = syms['Spms1_main']
@@ -281,3 +398,21 @@ if args.profile:
     allc = sum(tot.values())
     for k, v in sorted(tot.items(), key=lambda kv: -kv[1])[:15]:
         print('  %5.1f%%  %s' % (100 * v / allc, k))
+
+if args.modules:
+    for a, cc in mstate['pending']:
+        mstate['left'] += cc
+    ran = [v for _, v in dispatch_ids if own.get(v)]
+    dispatch = sum(sum(t.values()) for t in tails.values() if len(t) > 1)
+    left = mstate['left'] + sum(sum(t.values()) for t in tails.values() if len(t) <= 1)
+    for cls, cc in shared_own.items():  # by the instances of the class
+        insts = [m for m in ran if classes[m] == cls]
+        for m in insts:
+            own[m] += cc / len(insts)
+    def us(c): return c / len(bufs) / args.mhz
+    def pct(c): return 100 * us(c) / budget_us
+    def with_common(m): return own[m] + common.get(m, 0) + dispatch / len(ran)
+    print('modules, per buffer of %.0f us: own, and with its share of the common part (its bus reads and writes, and the dispatch)' % budget_us)
+    for m in sorted(ran, key=lambda m: -with_common(m)):
+        print('  %-10s %5.1f%% (%4.0f us)  %5.1f%% (%4.0f us)' % ('%s %s' % (classes[m], m.rsplit('_', 1)[1]), pct(own[m]), us(own[m]), pct(with_common(m)), us(with_common(m))))
+    print('  %-10s %5.1f%% (%4.0f us), not of a module (the output, the loop of the samples, MIDI, the CCs)' % ('common', pct(left), us(left)))

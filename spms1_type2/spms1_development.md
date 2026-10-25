@@ -193,8 +193,9 @@ measures on the device -- with the default patch and a note held.
 - It prints the instructions per buffer, which are exact for the code as built, and the cycles and
   the time at 153.6 MHz against the 1333 us a buffer of 64 samples lasts at 48 kHz, which come from a
   first-order cost model and are an estimate (see `cost` in "sim_load/spms1_load_estimate.py")
-- `--profile` lists the functions the cycles go to; `--elf FILE` estimates an ELF built elsewhere, from
-  another commit say, so two versions can be compared; `--help` shows the rest
+- `--profile` lists the functions the cycles go to; `--modules` the load of each module (below), from
+  the debug info of the ELF and the run; `--elf FILE` estimates an ELF built elsewhere, from another
+  commit say, so two versions can be compared; `--help` shows the rest
 - Needs Python 3 and `pip install unicorn capstone pyelftools numpy`, installed by you and not shipped
   here: Unicorn's Python binding is under the BSD license and its emulator under the GPLv2, Capstone
   and NumPy under the BSD license, and pyelftools is in the public domain
@@ -208,6 +209,28 @@ buffer takes about the same with a note held or not, as the modules are meant to
 | v0.3.3 | 185368 / 185563 cycles, 1207 us (91%) | 185544 / 185739 cycles, 1208 us (91%) |
 
 The estimate is about 7% above Debug Print on the device (min 1124 us, max 1129 us, about 85%).
+
+The load of each module, by `--modules` (v0.3.3, the default patch, a note held, of 1333 us): "own" is
+the cycles of its methods (process, its outputs, smooth_parameters), and "with common" adds its share
+of the common part, the bus reads of its inputs and writes of its outputs and the dispatch of the run
+order, split evenly; the common part left is the loop of the samples, the output, MIDI, and the CCs:
+
+| Module | Own | With common |
+| :-- | --: | --: |
+| Filter 1 | 11.4% (152 us) | 13.0% (173 us) |
+| Osc 2 (with Sync) | 9.8% (130 us) | 11.3% (151 us) |
+| Osc 1 | 6.4% (86 us) | 7.8% (105 us) |
+| Delay 1 | 6.4% (85 us) | 7.8% (104 us) |
+| Chorus 1 | 6.2% (83 us) | 7.4% (99 us) |
+| Amp 1 | 4.5% (60 us) | 5.7% (76 us) |
+| LFO 1 | 3.3% (43 us) | 4.4% (58 us) |
+| Pitch 1 | 2.6% (34 us) | 3.9% (52 us) |
+| EG 1 | 2.2% (30 us) | 3.1% (42 us) |
+| EG 2 | 2.2% (29 us) | 3.1% (42 us) |
+| Mixer 1 | 1.6% (22 us) | 3.0% (41 us) |
+| Mixer 2 | 1.6% (22 us) | 3.0% (41 us) |
+| Noise 1 | 2.0% (27 us) | 3.0% (40 us) |
+| The common part left | | 13.8% (184 us) |
 
 
 ## GitHub Actions
