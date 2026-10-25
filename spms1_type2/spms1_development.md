@@ -200,17 +200,17 @@ measures on the device -- with the default patch and a note held.
   here: Unicorn's Python binding is under the BSD license and its emulator under the GPLv2, Capstone
   and NumPy under the BSD license, and pyelftools is in the public domain
 
-The estimates of each version, added at a release (the default patch, at 153.6 MHz, of 1333 us); a
-buffer takes about the same with a note held or not, as the modules are meant to:
+The estimate of the latest version, replaced at each release (the earlier ones are in the history of
+this file; the default patch, at 153.6 MHz, of 1333 us); a buffer takes about the same with a note held
+or not, as the modules are meant to:
 
 | Version | Note held (avg / max) | No note (avg / max) |
 | :-- | --: | --: |
-| v0.3.2 | 185368 / 185563 cycles, 1207 us (91%) | 185544 / 185739 cycles, 1208 us (91%) |
 | v0.3.3 | 185368 / 185563 cycles, 1207 us (91%) | 185544 / 185739 cycles, 1208 us (91%) |
 
-The estimate is about 7% above Debug Print on the device (min 1124 us, max 1129 us, about 85%).
+The estimate is about 7% above Debug Print on the device (v0.3.3: min 1124 us, max 1129 us, about 85%).
 
-The load of each module, by `--modules` (v0.3.3, the default patch, a note held, of 1333 us): "own" is
+The load of each module, by `--modules` (the same version, a note held): "own" is
 the cycles of its methods (process, its outputs, smooth_parameters), and "with common" adds its share
 of the common part, the bus reads of its inputs and writes of its outputs and the dispatch of the run
 order, split evenly; the common part left is the loop of the samples, the output, MIDI, and the CCs:
@@ -263,8 +263,8 @@ Basically, a release goes as follows (the dates in JST):
 3. Change the version in the first lines of "README.md" and "README.ja.md", in the editor's
    `<span class="version">`, and in "spms1_midi_chart.md" with its Date (at every release, even if
    the MIDI implementation is the same)
-4. Estimate the load (`sh sim_load/estimate.sh`, with a note held and with `--gate 0`), and add
-   the version to the table under Load Estimate
+4. Estimate the load (`sh sim_load/estimate.sh`, with a note held and with `--gate 0`, and
+   `--modules`), and replace the tables under Load Estimate with them
 5. Commit as "type-2: Version X.Y.Z"
 6. Run the workflow (above) on develop with "commit_package", for the UF2 files and SPMS-1 Web
 7. Merge develop into main by a pull request, "type-2 vX.Y.Z"
