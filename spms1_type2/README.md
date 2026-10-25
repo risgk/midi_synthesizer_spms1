@@ -97,6 +97,33 @@ Usage
 - "spms1_pwm_audio.ino.uf2" (in the "bin" folder) is for Raspberry Pi Pico 2 with PWM Audio output, built with L on GP28 and R on GP27
 
 
+### Getting Started
+
+A path from the sound the synth powers up with to a patch of your own, a step at a time, with the
+[Block Diagram](#block-diagram) of the default patch at hand: its modules are the panels of the
+editor's Controls tab and the nodes of its Patch tab. Open "spms1_editor.html" (see
+[Web Editor](#web-editor)) and choose the synth, or SPMS-1 Web (Built-in), in "MIDI Out".
+
+1. Favorites: the Controls tab opens with "Show favorites only" ticked, showing the 21 parameters
+   the default patch marks as favorites, those that change the sound the most:
+   Pitch 1 Glide; EG 1 Attack, Decay and Sustain; LFO 1 Rate; Osc 1 Wave, Pitch Mod 1 Amt and
+   Pitch Mod 2 Amt; Osc 2 Wave, Pitch, Pitch Mod 1 Amt and Pitch Mod 2 Amt; Mixer 2 Level 1 and 2;
+   Filter 1 Cutoff, Resonance, Mod 1 Amt and Mod 2 Amt; Amp 1 Gain; Chorus 1 Mix; and Delay 1 Mix.
+   Mark more with the star as you find them
+2. Parameters with a CC: clear "Show favorites only" to show every parameter with a CC. What each
+   does in the default patch, and what it powers up at, is told below the Block Diagram; the knobs
+   of a MIDI controller reach them too
+3. Parameters with no CC: tick "Show parameters with no CC" to show the rest, in blue, such as
+   Mixer 1's levels and Pitch 1's Out 1 and Out 2 Bend Sw; a slider of one sets the value its slot holds, sent
+   as NRPN
+4. Patch changes: the Patch tab shows the patch as a diagram of its own, every input and parameter
+   included; drag a wire from an output to an input or a parameter to change what feeds it. The
+   [Examples](./spms1_patching.md#examples) of Patching give ideas, each with what to wire
+
+Undo takes a change back, Initialize Values puts the values back and keeps the wiring, and Init
+puts the default patch back. Keep a patch with Save JSON, or in the synth with Save to Device.
+
+
 ### Web Editor
 
 - Cross-platform web-based parameter controller via Web MIDI API: "spms1_editor.html"
