@@ -232,7 +232,8 @@ Category 5 has the system entries, which act on the synth rather than set a part
   General control has, too or alone, is saved as it is.
   A sketch numbered otherwise -- a version whose module ids, Signal IDs or entries differ -- does
   not load a patch saved by another, which it would read as something else: it starts with the
-  default patch, and the patch saved stays in the flash until the next Save. It is
+  default patch, and the patch saved stays in the flash until the next Save. Copying a UF2 file
+  (a new version, say) keeps it too: the UF2 file does not write that part of the flash. It is
   written once the output is silent, which stops the synth and the MIDI input for about 0.1 s:
   MIDI sent meanwhile may be lost, so send Mute off after it and wait before the next. A patch
   the same as the one saved is not written again. Taken only while Mute is on, so that no stray

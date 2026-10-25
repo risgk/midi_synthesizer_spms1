@@ -1,4 +1,4 @@
-MIDI Synthesizer SPMS-1 (type-2) v0.3.2
+MIDI Synthesizer SPMS-1 (type-2) v0.3.3
 =======================================
 
 - Monophonic semi-modular MIDI Synthesizer for Raspberry Pi Pico 2, made with Spinel (Ruby AOT Compiler)
@@ -147,12 +147,15 @@ Usage
       at, 0.0, as Save to Device does: the mod wheel is played rather than set; Send Patch sends
       where it is
     - Copies the patch as MIDI bytes or as an NRPN list, or sends it through Web MIDI
-    - Sends the whole patch (Send Patch, or a device newly chosen) between Mute on and off (NRPN
+    - Sends the whole patch (Send Patch, or a device newly chosen), and what Init and Load change (also by Undo and Redo), between Mute on and off (NRPN
       Mute), so that the patch is not heard half sent, and so does the patch it copies with "Mute
-      while loading" (on by default); every other change goes out as it is
+      while loading" (on by default); every other change goes out as it is. The default patch is about
+      2,000 bytes, which take about 0.6 s at 31250 bps (UART MIDI) and about 0.5 s by USB MIDI
     - Its Mute button mutes the synth (NRPN Mute), to change the patch unheard, and shows a Mute
       arriving at MIDI In; a Reset (NRPN) arriving at MIDI In puts the patch shown back to the default too
     - Its Save to Device keeps the patch in the synth's flash (NRPN Save), which the synth loads at power-on
+    - It does not read the patch from the synth (e.g. the one saved, which the synth loads at power-on): the synth
+      takes the editor's when a device is chosen in "MIDI Out", or by Send Patch, in place of its own
     - The side panels (Patch, Run Order, Export) fold to their headings with a click, each remembered;
       with all three folded, the canvas takes the width they leave
 - SPMS-1 Web: the synth itself, built into the editor ("spms1_web_synth.js")

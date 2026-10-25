@@ -4,6 +4,13 @@ MIDI Synthesizer SPMS-1 (type-2) Change History
 The main changes of each version, newest first, gathered before each release. The format may be
 revised.
 
+- v0.3.3 (2026-10-25):
+    - USB MIDI: Read 4 bytes a loop (from 8), still more than UART MIDI brings (about 3.2 bytes)
+    - Editor: Init and Load (and their Undo and Redo) send what they change between Mute on and off,
+      as Send Patch
+    - Editor: Keep the Mute button as wide when on, so that the buttons by it do not move
+    - Documents: Development (Runtime, Release, and the load estimates), and notes on the editor,
+      the time a patch takes to send, and the patch saved
 - v0.3.2 (2026-10-25):
     - Save (NRPN 117/2): save the General controls' CCs as they are again, as v0.3.0 did, since a
       General control may set a parameter, Rev or Inv; only a CC that only the Mod Wheel has is

@@ -10,6 +10,29 @@ MIDI Synthesizer SPMS-1 (type-2): Development
 - UART can be used instead: comment out `SPMS1_DEBUG_PRINT_USE_USB_SERIAL`
     - Speed: 115200 bps
     - GP0 and GP1 pins are used by UART0 TX and UART0 RX
+- On by default (`SPMS1_USE_DEBUG_PRINT`); it costs the synth little, as core 0 prints
+- A report every 256 loops of core 0, about 0.3 s:
+    - `min` and `max`: the time of a buffer of 64 samples in us, since the last report, against
+      the 1333 us it lasts; `min` is the synth alone, and the gap up to `max` is what core 0 and the
+      interrupts take from it
+    - `gc roots` and `peak`: the GC roots in use, sampled, for sizing `sp_gc_roots`
+
+
+## Runtime
+
+- Core 1 runs the synth (`Spms1_main`, in RAM), a buffer of 64 samples (1.33 ms at 48 kHz) at a
+  time, with 2 buffers queued for the output. 64 is kept: fewer would cost more per sample, and
+  leave less room for what core 0 takes
+- A buffer should take less than 1333 us on average, and more only now and then: the output's
+  queue takes up the delay of a slow buffer, but not for long. As a buffer takes about the same
+  time whatever comes (see Writing a Module), the maximum is what to watch
+- Core 0 reads MIDI, then sleeps for 1 ms (`delay(1)`): 4 bytes of USB MIDI and 8 of UART MIDI a
+  loop, more than the about 3.2 bytes that 31250 bps brings; a message is taken at the next buffer
+- Mute (NRPN 117/0) fades the output out and in over 4 ms, and holds it silent for 9 buffers at
+  least, which flushes the chorus and the limiter's look-ahead; the modules keep running
+- Save (NRPN 117/2) is written once the output is silent, by core 1: silence for the whole ring,
+  then the EEPROM, committed only if it differs, which stops core 0 for about 50-100 ms. The image
+  and its checks are described in "spms1_midi_state.h"
 
 
 ## PC Simulators
@@ -176,6 +199,16 @@ measures on the device -- with the default patch and a note held.
   here: Unicorn's Python binding is under the BSD license and its emulator under the GPLv2, Capstone
   and NumPy under the BSD license, and pyelftools is in the public domain
 
+The estimates of each version, added at a release (the default patch, at 153.6 MHz, of 1333 us); a
+buffer takes about the same with a note held or not, as the modules are meant to:
+
+| Version | Note held (avg / max) | No note (avg / max) |
+| :-- | --: | --: |
+| v0.3.2 | 185368 / 185563 cycles, 1207 us (91%) | 185544 / 185739 cycles, 1208 us (91%) |
+| v0.3.3 | 185368 / 185563 cycles, 1207 us (91%) | 185544 / 185739 cycles, 1208 us (91%) |
+
+The estimate is about 7% above Debug Print on the device (min 1124 us, max 1129 us, about 85%).
+
 
 ## GitHub Actions
 
@@ -196,6 +229,22 @@ measures on the device -- with the default patch and a note held.
 - With "commit_package" checked, and when all of the above pass, the UF2 files ("bin") and
   "spms1_web_synth.js" are committed on the selected branch (not if the sources were changed after
   the build, nor if nothing changed)
+
+
+## Release
+
+Basically, a release goes as follows (the dates in JST):
+
+1. Check it on the device, with PWM Audio and with I2S
+2. Gather the main changes of the version in "spms1_change_history.md", newest first
+3. Change the version in the first lines of "README.md" and "README.ja.md", in the editor's
+   `<span class="version">`, and in "spms1_midi_chart.md" with its Date (at every release, even if
+   the MIDI implementation is the same)
+4. Estimate the load (`sh sim_load/estimate.sh`, with a note held and with `--gate 0`), and add
+   the version to the table under Load Estimate
+5. Commit as "type-2: Version X.Y.Z"
+6. Run the workflow (above) on develop with "commit_package", for the UF2 files and SPMS-1 Web
+7. Merge develop into main by a pull request, "type-2 vX.Y.Z"
 
 
 ## Where It Departs from Ruby
