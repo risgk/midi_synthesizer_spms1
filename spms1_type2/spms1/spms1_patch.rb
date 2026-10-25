@@ -195,7 +195,7 @@ SMOOTHED_STAGE_1_GENERAL_2 = 255
 
 # NRPN parameter numbers: (category << 7) | LSB, where the MSB, 112 + category, picks a category
 # and the LSB an entry.
-#   0..127   active_modules[slot]
+#   0..127   the run order, the module of each slot
 # 128..255   what feeds each module input
 # 256..383   where each parameter's value comes from
 # 384..511   which CC fills each control slot

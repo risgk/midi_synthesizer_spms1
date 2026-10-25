@@ -71,7 +71,9 @@ Required Software for Modification
       would slow the synth's buffer by evicting it
     - The signal bus is a C array of the sketch's, in "spms1_bus.h", which "spinel_rt_mcu_cold.h"
       includes at the end of "spinel_rt.h", so that a bus read or write inlines as one load or store
-      rather than going through a checked Spinel Array
+      rather than going through a checked Spinel Array; so is the run order of the modules, which the
+      per-sample dispatch reads for every module, and the reads of the CC values and the NRPN table
+      that the synth makes for every parameter once a buffer inline from "spms1_midi_read.h"
     - "spms1_main.c" is generated in "spms1" with `spinel spms1_main.rb -c --rbs sig`. The type seeds
       in "spms1/sig" keep the filter states, the parameter smoothing and the bus writes unboxed;
       "spms1/sig/spms1_filter.rbs", "spms1/sig/spms1_dsp.rbs" and "spms1/sig/spms1_framework.rbs" say

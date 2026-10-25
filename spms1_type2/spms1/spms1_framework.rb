@@ -63,6 +63,8 @@ module Spms1
     ffi_func :stop_debug_measure,         [],                        :void
     ffi_func :get_bus_signal,             [:int32],                  :float
     ffi_func :set_bus_signal,             [:int32, :float],          :void
+    ffi_func :get_active_module,          [:int32],                  :int32
+    ffi_func :set_active_module,          [:int32, :int32],          :void
   end
 
   # The signal bus, indexed as an Array would be. Its slots are a C array of the host's

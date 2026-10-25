@@ -39,8 +39,9 @@ MIDI Synthesizer SPMS-1 (type-2): Development
 
 The C hosts ("sim_spinel", "sim_render", and SPMS-1 Web in "web") keep the MIDI with the sketch's own
 "spms1_midi_state.h", the tables "spms1_main.rb" reads and the handlers that fill them, so a change
-there reaches the device and all of them at once. They take the signal bus from the sketch's "spms1_bus.h"
-as well. "sim_cruby" keeps a Ruby copy of both in "sim_cruby/spms1_c_midi.rb".
+there reaches the device and all of them at once. They take the signal bus and the run order from the
+sketch's "spms1_bus.h" as well, and the reads of the CC values and the NRPN table from "spms1_midi_read.h",
+which "spms1_midi_state.h" includes. "sim_cruby" keeps a Ruby copy of both in "sim_cruby/spms1_c_midi.rb".
 
 The simulators are developed and tested on Windows. macOS and Linux are supported on a best-effort
 basis, written to their APIs but without the machines to try them on. The GitHub Actions workflow
@@ -300,7 +301,7 @@ README names, with the changes for the MCU kept in two places:
   (`SP_INT_OVERFLOW_MODE_WRAP`, as `spinel --int-overflow=wrap` builds it), the float versions of
   the math functions, and, at
   the end of "spinel_rt.h", what binds the generated code to a float runtime (below) and the
-  sketch's "spms1_bus.h".
+  sketch's "spms1_bus.h" and "spms1_midi_read.h".
   "spinel_rt.h" carries only an `#include` line for each
 - "spinel_mcu/spinel_mcu.patch": what is changed in Spinel's own files -- the runtime written in
   `sp_float` where it said `double` for a Float, the POSIX parts left out with `#if 0` (a release

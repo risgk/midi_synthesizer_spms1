@@ -218,7 +218,7 @@ def patch_rb
                          ['SMOOTHED_SLOT_OFFSET', s.smoothed_base - first]] +
                         s.controllers.each_with_index.map { |c, n| ["SMOOTHED_STAGE_1_#{s.full_key(c)}", s.smoothed_base + s.controller_slots.size + n] })
   out << "\n\n# NRPN parameter numbers: (category << 7) | LSB, where the MSB, 112 + category, picks a category\n# and the LSB an entry.\n"
-  out << "#   0..127   active_modules[slot]\n# 128..255   what feeds each module input\n"
+  out << "#   0..127   the run order, the module of each slot\n# 128..255   what feeds each module input\n"
   out << "# 256..383   where each parameter's value comes from\n# 384..511   which CC fills each control slot\n"
   out << "# 512..639   the value of each parameter's control slot while it has no CC\n"
   out << "NRPN_ACTIVE_MODULE_BASE = #{NRPN_ACTIVE_MODULE_BASE}\n\n"

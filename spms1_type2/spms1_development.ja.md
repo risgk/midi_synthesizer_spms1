@@ -38,7 +38,8 @@ MIDI Synthesizer SPMS-1 (type-2): 開発
 
 C のホスト ("sim_spinel"、"sim_render"、"web" の SPMS-1 Web) は、スケッチ自身の "spms1_midi_state.h"
 ("spms1_main.rb" が読むテーブルと、それを埋めるハンドラ) で MIDI を扱うので、そこを変えれば実機とすべての
-ホストに一度に反映されます。シグナルバスもスケッチの "spms1_bus.h" のものを使います。"sim_cruby" は
+ホストに一度に反映されます。シグナルバスと実行順もスケッチの "spms1_bus.h" のものを、CC の値と NRPN のテーブルの読み出しも
+"spms1_midi_state.h" が読み込む "spms1_midi_read.h" のものを使います。"sim_cruby" は
 両方を Ruby で書いた写しを "sim_cruby/spms1_c_midi.rb" に持っています。
 
 シミュレーターは Windows で開発・テストしています。macOS と Linux は、各 API に沿って書いてはいますが、
@@ -287,7 +288,7 @@ MCU 向けの変更は 2 か所にまとめてあります:
 - "spinel_rt_mcu_head.h"、"spinel_rt_mcu_libm.h"、"spinel_rt_mcu_cold.h": MCU 向けに足すもの --
   シンセ本体のセクションと pragma、オーバーフロー検査なしの Integer 演算 (`SP_INT_OVERFLOW_MODE_WRAP`。
   `spinel --int-overflow=wrap` と同じ)、数学関数の float 版、そして "spinel_rt.h" の最後で生成コードを
-  float のランタイムにつなぐもの (下記) とスケッチの "spms1_bus.h"。"spinel_rt.h" にはそれぞれの `#include` 行だけがあります
+  float のランタイムにつなぐもの (下記) とスケッチの "spms1_bus.h"、"spms1_midi_read.h"。"spinel_rt.h" にはそれぞれの `#include` 行だけがあります
 - "spinel_mcu/spinel_mcu.patch": Spinel 自身のファイルへの変更 -- Float を表す `double` を `sp_float`
   で書いたランタイム、POSIX 部分の `#if 0` による除外 (中身がリリースで変わってもパッチが
   当たりやすいように)、全体が POSIX 前提のファイルの `SPINEL_BARE_METAL` による除外 (下記)、

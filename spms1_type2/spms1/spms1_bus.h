@@ -22,4 +22,19 @@ static inline void set_bus_signal(int32_t slot, float value) {
   spms1_bus_signals[slot & (SPMS1_BUS_SIZE - 1)] = value;
 }
 
+/* The run order of the modules, by slot, as a plain C array for the same reason: the per-sample
+   dispatch reads a slot for every module it runs. The slot is masked to the array, which
+   MODULES_SIZE in spms1_main.rb matches. */
+#define SPMS1_ACTIVE_MODULES_SIZE 32
+
+static int32_t spms1_active_modules[SPMS1_ACTIVE_MODULES_SIZE];
+
+static inline int32_t get_active_module(int32_t slot) {
+  return spms1_active_modules[slot & (SPMS1_ACTIVE_MODULES_SIZE - 1)];
+}
+
+static inline void set_active_module(int32_t slot, int32_t module_id) {
+  spms1_active_modules[slot & (SPMS1_ACTIVE_MODULES_SIZE - 1)] = module_id;
+}
+
 #endif /* SPMS1_BUS_H */
