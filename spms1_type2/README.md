@@ -147,7 +147,7 @@ Usage
       at, 0.0, as Save to Device does: the mod wheel is played rather than set; Send Patch sends
       where it is
     - Copies the patch as MIDI bytes or as an NRPN list, or sends it through Web MIDI
-    - Sends the whole patch (Send Patch, or a device newly chosen) between Mute on and off (NRPN
+    - Sends the whole patch (Send Patch, or a device newly chosen), and what Init and Load change, between Mute on and off (NRPN
       Mute), so that the patch is not heard half sent, and so does the patch it copies with "Mute
       while loading" (on by default); every other change goes out as it is. The default patch is about
       2,000 bytes, which take about 0.6 s at 31250 bps (UART MIDI) and about 0.5 s by USB MIDI

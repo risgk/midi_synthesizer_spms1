@@ -141,7 +141,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.3.2
     - JSON で保存したりコピーしたりするパッチでは、Save to Device と同じく、Mod Wheel だけに割り当てた CC を起動時の値 (0.0) にします。
       Mod Wheel は設定するものではなく演奏で動かすものだからです。Send Patch は今の位置を送ります
     - パッチを MIDI バイト列または NRPN リストとしてコピーするか、Web MIDI で送信します
-    - パッチ全体 (Send Patch、MIDI Out の選び直し) は Mute のオンとオフ (NRPN の Mute) で挟んで送るので、
+    - パッチ全体 (Send Patch、MIDI Out の選び直し) と、Init や Load による変更は、Mute のオンとオフ (NRPN の Mute) で挟んで送るので、
       送信途中のパッチの音は聞こえません。"Mute while loading" (デフォルトでオン) にすると、コピーするパッチも同じです。
       それ以外の変更は、そのまま送ります。デフォルトのパッチは約 2,000 バイトで、31250 bps (UART MIDI) で約 0.6 秒、
       USB MIDI で約 0.5 秒かかります

@@ -929,6 +929,10 @@
     .btn.primary:hover {
       background: var(--primary-hover);
     }
+    /* The Mute button keeps its weight when on, so that it does not widen and move the buttons by it. */
+    #btn-mute.primary {
+      font-weight: normal;
+    }
     .btn-row {
       display: flex;
       gap: 6px;
@@ -3388,6 +3392,7 @@
       const next = deserialize(JSON.parse(text));
       pushHistory();
       state = next;
+      muteNextChanges = true;  // The whole patch may change, as by Send Patch
       renderAll();
       fitView();
     }).catch(err => {
@@ -3408,6 +3413,7 @@
     document.getElementById('show-no-cc').checked = false;
     try { localStorage.setItem(SHOW_NO_CC_KEY, ''); } catch (e) { /* storage unavailable */ }
     setFavoritesOnly(true);
+    muteNextChanges = true;  // The whole patch may change, as by Send Patch
     renderAll();
     fitView();
   });
@@ -3863,7 +3869,13 @@
   // Every routing, run order or CC assignment change goes out as it is made, as what differs from
   // what the device was last sent. A device that has been sent nothing yet, being newly chosen or
   // on a newly chosen channel, is sent the whole patch first, so that it plays what is shown.
+  // With muteNextChanges (set by Init and Load, which may change the whole patch), the changes go
+  // out between Mute on and off, as Send Patch sends the patch; Mute off is left out while the Mute
+  // button holds the synth silent.
+  let muteNextChanges = false;
   function sendChanges() {
+    const mute = muteNextChanges;
+    muteNextChanges = false;
     if (!midiOutput) return;
     if (!lastSent) {
       sendAll();
@@ -3871,19 +3883,27 @@
     }
     const st = 0xB0 | exportOptions().ch;
     const now = snapshotTable();
+    const messages = [];
     let nrpnSent = false;
     for (const [k, v] of now) {
       if (lastSent.get(k) === v) continue;
       const n = parseInt(k.slice(1));
       if (k[0] === 'n') {
-        midiOutput.send([st, 99, nrpnMSB(n), st, 98, n & 0x7F, st, 6, v]);
+        messages.push([st, 99, nrpnMSB(n), st, 98, n & 0x7F, st, 6, v]);
         nrpnSent = true;
       } else {
-        midiOutput.send([st, n, v]);
+        messages.push([st, n, v]);
       }
     }
-    if (nrpnSent) midiOutput.send([st, 101, 127, st, 100, 127]);
     lastSent = now;
+    if (messages.length === 0) return;
+    if (mute) {
+      messages.unshift(muteLine(st, true).bytes);
+      nrpnSent = true;
+      if (!userMuted) messages.push(muteLine(st, false).bytes);
+    }
+    if (nrpnSent) messages.push([st, 101, 127, st, 100, 127]);
+    messages.forEach(m => midiOutput.send(m));
   }
 
   document.getElementById('midi-in').addEventListener('change', () => { handleDeviceChange(); saveMIDISettings(); });
