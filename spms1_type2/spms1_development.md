@@ -196,6 +196,13 @@ measures on the device -- with the default patch and a note held.
   here: Unicorn's Python binding is under the BSD license and its emulator under the GPLv2, Capstone
   and NumPy under the BSD license, and pyelftools is in the public domain
 
+The estimates of each version, added at a release (the default patch, at 153.6 MHz, of 1333 us); a
+buffer takes about the same with a note held or not, as the modules are meant to:
+
+| Version | Note held (avg / max) | No note (avg / max) |
+| :-- | --: | --: |
+| v0.3.2 | 185368 / 185563 cycles, 1207 us (91%) | 185544 / 185739 cycles, 1208 us (91%) |
+
 
 ## GitHub Actions
 
