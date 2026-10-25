@@ -143,7 +143,8 @@ MIDI Synthesizer SPMS-1 (type-2) v0.3.2
     - パッチを MIDI バイト列または NRPN リストとしてコピーするか、Web MIDI で送信します
     - パッチ全体 (Send Patch、MIDI Out の選び直し) は Mute のオンとオフ (NRPN の Mute) で挟んで送るので、
       送信途中のパッチの音は聞こえません。"Mute while loading" (デフォルトでオン) にすると、コピーするパッチも同じです。
-      それ以外の変更は、そのまま送ります
+      それ以外の変更は、そのまま送ります。デフォルトのパッチは約 2,000 バイトで、31250 bps (UART MIDI) で約 0.6 秒、
+      USB MIDI で約 0.5 秒かかります
     - Mute ボタンでシンセをミュート (NRPN の Mute) して、音を出さずにパッチを変えられます。MIDI In に届いた Mute も
       ボタンに表示します。MIDI In に届いたリセット (NRPN の Reset) では、エディタのパッチもデフォルトに戻ります
     - Save to Device で、パッチをシンセのフラッシュに保存します (NRPN の Save)。シンセは電源投入時にこれを読み込みます

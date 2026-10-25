@@ -149,7 +149,8 @@ Usage
     - Copies the patch as MIDI bytes or as an NRPN list, or sends it through Web MIDI
     - Sends the whole patch (Send Patch, or a device newly chosen) between Mute on and off (NRPN
       Mute), so that the patch is not heard half sent, and so does the patch it copies with "Mute
-      while loading" (on by default); every other change goes out as it is
+      while loading" (on by default); every other change goes out as it is. The default patch is about
+      2,000 bytes, which take about 0.6 s at 31250 bps (UART MIDI) and about 0.5 s by USB MIDI
     - Its Mute button mutes the synth (NRPN Mute), to change the patch unheard, and shows a Mute
       arriving at MIDI In; a Reset (NRPN) arriving at MIDI In puts the patch shown back to the default too
     - Its Save to Device keeps the patch in the synth's flash (NRPN Save), which the synth loads at power-on
