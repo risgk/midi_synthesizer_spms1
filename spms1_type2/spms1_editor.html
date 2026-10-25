@@ -4368,13 +4368,16 @@
     });
     PARAM_ITEMS.forEach(p => { state.paramValues[p.key] = p.defaultValue; });
     if (midiOutput) {
+      // Between Mute on and off, as Send Patch, so that the values are not heard half sent; Mute off
+      // is left out while the Mute button holds the synth silent.
       const st = 0xB0 | exportOptions().ch;
+      midiOutput.send(muteLine(st, true).bytes);
       ccEntries().forEach(e => midiOutput.send([st, e.cc, e.value]));
       PARAM_ITEMS.forEach(p => {
         const nrpn = 512 + p.entry;
         midiOutput.send([st, 99, nrpnMSB(nrpn), st, 98, nrpn & 0x7F, st, 6, p.defaultValue]);
       });
-      midiOutput.send([st, 101, 127, st, 100, 127]);
+      midiOutput.send([...(userMuted ? [] : muteLine(st, false).bytes), st, 101, 127, st, 100, 127]);
       if (lastSent) {
         ccEntries().forEach(e => lastSent.set('c' + e.cc, e.value));
         PARAM_ITEMS.forEach(p => lastSent.set('n' + (512 + p.entry), p.defaultValue));

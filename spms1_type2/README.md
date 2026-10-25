@@ -129,7 +129,7 @@ Usage
     - Every value it sets or shows runs from 4 to 124, the range the synth uses; one outside it,
       from MIDI In or a patch file, is drawn in to the nearer end, which reads the same
     - Its Initialize Values sets each CC value and each parameter's value with no CC back to what it
-      powers up at, and sends them, as every change is sent; the wiring is kept
+      powers up at, and sends them between Mute on and off, as Send Patch does; the wiring is kept
 - Built-in software keyboard for note input and testing
     - Beside the keys, a pitch bend wheel, from -8192 to +8191, springs back to the center when let go,
       and a mod wheel moves the CC that Mod Wheel is on in the patch
