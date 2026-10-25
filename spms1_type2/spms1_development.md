@@ -205,6 +205,9 @@ buffer takes about the same with a note held or not, as the modules are meant to
 | Version | Note held (avg / max) | No note (avg / max) |
 | :-- | --: | --: |
 | v0.3.2 | 185368 / 185563 cycles, 1207 us (91%) | 185544 / 185739 cycles, 1208 us (91%) |
+| v0.3.3 | 185368 / 185563 cycles, 1207 us (91%) | 185544 / 185739 cycles, 1208 us (91%) |
+
+The estimate is about 7% above Debug Print on the device (min 1124 us, max 1129 us, about 85%).
 
 
 ## GitHub Actions
