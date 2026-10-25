@@ -129,7 +129,7 @@ Usage
     - Every value it sets or shows runs from 4 to 124, the range the synth uses; one outside it,
       from MIDI In or a patch file, is drawn in to the nearer end, which reads the same
     - Its Initialize Values sets each CC value and each parameter's value with no CC back to what it
-      powers up at, and sends them between Mute on and off, as Send Patch does; the wiring is kept
+      powers up at, and sends them, as every change is sent; the wiring is kept
 - Built-in software keyboard for note input and testing
     - Beside the keys, a pitch bend wheel, from -8192 to +8191, springs back to the center when let go,
       and a mod wheel moves the CC that Mod Wheel is on in the patch
@@ -147,7 +147,7 @@ Usage
       at, 0.0, as Save to Device does: the mod wheel is played rather than set; Send Patch sends
       where it is
     - Copies the patch as MIDI bytes or as an NRPN list, or sends it through Web MIDI
-    - Sends the whole patch (Send Patch, or a device newly chosen), and what Init and Load change, between Mute on and off (NRPN
+    - Sends the whole patch (Send Patch, or a device newly chosen), and what Init and Load change (also by Undo and Redo), between Mute on and off (NRPN
       Mute), so that the patch is not heard half sent, and so does the patch it copies with "Mute
       while loading" (on by default); every other change goes out as it is. The default patch is about
       2,000 bytes, which take about 0.6 s at 31250 bps (UART MIDI) and about 0.5 s by USB MIDI

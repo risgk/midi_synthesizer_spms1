@@ -2286,31 +2286,37 @@
   for (const type of ['pointerup', 'pointercancel']) {
     window.addEventListener(type, () => { heldRange = null; }, true);
   }
+  // Each step of the history is the patch before it ({ json }), and whether it changes the whole
+  // patch ({ mute }: Init, Load, and a Reset arriving at MIDI In), so that its Undo and Redo are sent between
+  // Mute on and off as it was.
   const undoStack = [];
   const redoStack = [];
 
-  function pushHistory(snapshot) {
-    undoStack.push(snapshot || JSON.stringify(serialize(state)));
+  function pushHistory(snapshot, mute = false) {
+    undoStack.push({ json: snapshot || JSON.stringify(serialize(state)), mute });
     if (undoStack.length > 200) undoStack.shift();
     redoStack.length = 0;
   }
 
-  function restore(json) {
+  function restore(step) {
     if (armed) disarm();
-    state = deserialize(JSON.parse(json));
+    state = deserialize(JSON.parse(step.json));
+    muteNextChanges = step.mute;
     renderAll();
   }
 
   function undo() {
     if (!undoStack.length) return;
-    redoStack.push(JSON.stringify(serialize(state)));
-    restore(undoStack.pop());
+    const step = undoStack.pop();
+    redoStack.push({ json: JSON.stringify(serialize(state)), mute: step.mute });
+    restore(step);
   }
 
   function redo() {
     if (!redoStack.length) return;
-    undoStack.push(JSON.stringify(serialize(state)));
-    restore(redoStack.pop());
+    const step = redoStack.pop();
+    undoStack.push({ json: JSON.stringify(serialize(state)), mute: step.mute });
+    restore(step);
   }
 
   function saveLocal() {
@@ -3390,7 +3396,7 @@
     error.hidden = true;
     file.text().then(text => {
       const next = deserialize(JSON.parse(text));
-      pushHistory();
+      pushHistory(undefined, true);
       state = next;
       muteNextChanges = true;  // The whole patch may change, as by Send Patch
       renderAll();
@@ -3406,7 +3412,7 @@
   document.getElementById('btn-undo').addEventListener('click', undo);
   document.getElementById('btn-redo').addEventListener('click', redo);
   document.getElementById('btn-init').addEventListener('click', () => {
-    pushHistory();
+    pushHistory(undefined, true);
     state = defaultState();
     // The Controls tab shows the favorites alone again, and the parameters with no CC are hidden.
     showNoCC = false;
@@ -3736,7 +3742,7 @@
   // The wiring, the CCs and the values back to the default patch's, as Init sets them; the name,
   // the favorites and the layout are kept. The synth already has it, so nothing is sent.
   function receiveReset() {
-    pushHistory();
+    pushHistory(undefined, true);
     const d = defaultState();
     for (const k of ['order', 'inputs', 'params', 'cc', 'values', 'paramValues']) state[k] = d[k];
     orderMirror = new Array(MODULES_SIZE).fill(0);
@@ -3869,7 +3875,8 @@
   // Every routing, run order or CC assignment change goes out as it is made, as what differs from
   // what the device was last sent. A device that has been sent nothing yet, being newly chosen or
   // on a newly chosen channel, is sent the whole patch first, so that it plays what is shown.
-  // With muteNextChanges (set by Init and Load, which may change the whole patch), the changes go
+  // With muteNextChanges (set by Init and Load, which may change the whole patch, and by their Undo
+  // and Redo, and those of a Reset arriving at MIDI In), the changes go
   // out between Mute on and off, as Send Patch sends the patch; Mute off is left out while the Mute
   // button holds the synth silent.
   let muteNextChanges = false;
@@ -4388,16 +4395,13 @@
     });
     PARAM_ITEMS.forEach(p => { state.paramValues[p.key] = p.defaultValue; });
     if (midiOutput) {
-      // Between Mute on and off, as Send Patch, so that the values are not heard half sent; Mute off
-      // is left out while the Mute button holds the synth silent.
       const st = 0xB0 | exportOptions().ch;
-      midiOutput.send(muteLine(st, true).bytes);
       ccEntries().forEach(e => midiOutput.send([st, e.cc, e.value]));
       PARAM_ITEMS.forEach(p => {
         const nrpn = 512 + p.entry;
         midiOutput.send([st, 99, nrpnMSB(nrpn), st, 98, nrpn & 0x7F, st, 6, p.defaultValue]);
       });
-      midiOutput.send([...(userMuted ? [] : muteLine(st, false).bytes), st, 101, 127, st, 100, 127]);
+      midiOutput.send([st, 101, 127, st, 100, 127]);
       if (lastSent) {
         ccEntries().forEach(e => lastSent.set('c' + e.cc, e.value));
         PARAM_ITEMS.forEach(p => lastSent.set('n' + (512 + p.entry), p.defaultValue));
