@@ -344,10 +344,10 @@ void setup() {
 
 void loop() {
 #if defined(SPMS1_USE_USB_MIDI)
-  // 1 byte per read(), as UART_MIDI below: 5 bytes per loop (1 ms or a little more) keep up with
+  // 1 byte per read(), as UART_MIDI below: 4 bytes per loop (1 ms or a little more) keep up with
   // what 31250 bps brings, about 3.2 bytes, so USB MIDI is at least as fast as the UART
   mutex_enter_blocking(&__usb_mutex);
-  for (uint32_t i = 0; i < 5; i++) {
+  for (uint32_t i = 0; i < 4; i++) {
     USB_MIDI.read();
   }
   mutex_exit(&__usb_mutex);
