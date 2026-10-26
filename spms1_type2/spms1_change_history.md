@@ -6,9 +6,9 @@ revised.
 
 - v0.3.4 (2026-10-26):
     - The run order of the modules as a C array of the sketch's, as the signal bus, and the reads
-      of the CC values and the NRPN table inline ("spms1_midi_read.h"), with the same output: 1119 us
-      a buffer from 1207 in the estimate, but about the same on the device (Debug Print: 1126 to
-      1130 us, from 1124 to 1129)
+      of the CC values and the NRPN table inline ("spms1_midi_read.h"), with the same output, so
+      that the common part takes less: about 7% less a buffer on the device (Debug Print: 1046 to
+      1047 us, from 1124 to 1129), as in the estimate (1119 us, from 1207)
     - sim_load: Add `--modules`, the load of each module, also with its share of the common part
     - README: Add Getting Started, the steps from the favorites to the patch; Patching: the wiring
       on the editor's Patch tab beside some of the examples

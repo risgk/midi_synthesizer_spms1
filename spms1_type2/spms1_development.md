@@ -209,7 +209,7 @@ or not, as the modules are meant to:
 | :-- | --: | --: |
 | v0.3.4 | 171920 / 171920 cycles, 1119 us (84%) | 172256 / 172256 cycles, 1121 us (84%) |
 
-The estimate is about 1% below Debug Print on the device (v0.3.4: min 1126 us, max 1130 us, about 85%).
+The estimate is about 7% above Debug Print on the device (v0.3.4: min 1046 us, max 1047 us, about 78%).
 
 The load of each module, by `--modules` (the same version, a note held): "own" is
 the cycles of its methods (process, its outputs, smooth_parameters), and "with common" adds its share
