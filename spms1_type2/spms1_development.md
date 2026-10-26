@@ -207,9 +207,9 @@ or not, as the modules are meant to:
 
 | Version | Note held (avg / max) | No note (avg / max) |
 | :-- | --: | --: |
-| v0.3.3 | 185368 / 185563 cycles, 1207 us (91%) | 185544 / 185739 cycles, 1208 us (91%) |
+| v0.3.4 | 171920 / 171920 cycles, 1119 us (84%) | 172256 / 172256 cycles, 1121 us (84%) |
 
-The estimate is about 7% above Debug Print on the device (v0.3.3: min 1124 us, max 1129 us, about 85%).
+The estimate is about 1% below Debug Print on the device (v0.3.4: min 1126 us, max 1130 us, about 85%).
 
 The load of each module, by `--modules` (the same version, a note held): "own" is
 the cycles of its methods (process, its outputs, smooth_parameters), and "with common" adds its share
@@ -218,20 +218,20 @@ order, split evenly; the common part left is the loop of the samples, the output
 
 | Module | Own | With common |
 | :-- | --: | --: |
-| Filter 1 | 11.4% (152 us) | 13.0% (173 us) |
-| Osc 2 (with Sync) | 9.8% (130 us) | 11.3% (151 us) |
-| Osc 1 | 6.4% (86 us) | 7.8% (105 us) |
-| Delay 1 | 6.4% (85 us) | 7.8% (104 us) |
-| Chorus 1 | 6.2% (83 us) | 7.4% (99 us) |
-| Amp 1 | 4.5% (60 us) | 5.7% (76 us) |
-| LFO 1 | 3.3% (43 us) | 4.4% (58 us) |
-| Pitch 1 | 2.6% (34 us) | 3.9% (52 us) |
-| EG 1 | 2.2% (30 us) | 3.1% (42 us) |
-| EG 2 | 2.2% (29 us) | 3.1% (42 us) |
-| Mixer 1 | 1.6% (22 us) | 3.0% (41 us) |
-| Mixer 2 | 1.6% (22 us) | 3.0% (41 us) |
-| Noise 1 | 2.0% (27 us) | 3.0% (40 us) |
-| The common part left | | 13.8% (184 us) |
+| Filter 1 | 11.3% (150 us) | 12.7% (169 us) |
+| Osc 2 (with Sync) | 9.4% (125 us) | 10.7% (143 us) |
+| Delay 1 | 6.5% (86 us) | 7.7% (102 us) |
+| Chorus 1 | 6.4% (85 us) | 7.4% (99 us) |
+| Osc 1 | 6.2% (82 us) | 7.4% (98 us) |
+| Amp 1 | 4.5% (59 us) | 5.5% (73 us) |
+| Pitch 1 | 2.9% (38 us) | 4.0% (53 us) |
+| LFO 1 | 3.1% (41 us) | 3.9% (53 us) |
+| EG 2 | 2.2% (29 us) | 2.9% (39 us) |
+| EG 1 | 2.2% (29 us) | 2.9% (38 us) |
+| Mixer 1 | 1.6% (22 us) | 2.8% (38 us) |
+| Mixer 2 | 1.6% (22 us) | 2.8% (38 us) |
+| Noise 1 | 2.0% (26 us) | 2.8% (37 us) |
+| The common part left | | 10.5% (141 us) |
 
 
 ## GitHub Actions
