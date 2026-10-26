@@ -93,7 +93,7 @@ OUTPUT_HOLD_BUFFERS = (SAMPLE_RATE * 11 / 1000 + AUDIO_BUFFER_WORDS - 1) / AUDIO
 
 # The NRPN parameter numbers (NRPN_*), in spms1_patch.rb: (category << 7) | LSB, where the MSB,
 # 112 + category, picks a category and the LSB an entry.
-#   0..127   active_modules[slot]
+#   0..127   the run order, the module of each slot
 # 128..255   what feeds each module input
 # 256..383   where each parameter's value comes from
 # 384..511   which CC fills each control slot
@@ -118,8 +118,9 @@ chorus_1 = Chorus.new(SAMPLE_RATE)
 delay_1 = Delay.new(SAMPLE_RATE)
 # patch_gen end
 
-# Allocated once; which slots are filled is decided per buffer, inside the loop.
-active_modules = Array.new(MODULES_SIZE, MODULE_NONE)
+# The run order, the module of each slot, is C.get_active_module and C.set_active_module, a C array
+# of the host's as the signal bus is (spms1_bus.h), as the per-sample dispatch reads it for every
+# module it runs; which slots are filled is decided per buffer, inside the loop.
 # The slot of the run order each module id runs at, by id: 128 entries, as an id read from NRPN
 # is 7-bit. Only the entries of the ids listed in the same buffer are read, and those are reset
 # first, so it is never cleared.
@@ -204,18 +205,18 @@ while true
   output_gain = output_fade_position.to_f / OUTPUT_FADE_SAMPLES.to_f
   output_gain_step = output_fade_direction.to_f * OUTPUT_FADE_STEP
 
-  # The patch, read back from the NRPN table. active_modules is packed from the front with no
+  # The patch, read back from the NRPN table. The run order is packed from the front with no
   # gaps; every source_* holds a SIGNAL_* bus slot, or a parameter's own SLOT_*.
   slot = 0
   while slot < MODULES_SIZE
-    active_modules[slot] = C.get_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + slot)
+    C.set_active_module(slot, C.get_midi_nrpn_value(MIDI_CH, NRPN_ACTIVE_MODULE_BASE + slot))
     slot += 1
   end
   # The order up to the first MODULE_NONE, with when each of its slots was written.
   listed_count = 0
-  while listed_count < MODULES_SIZE && active_modules[listed_count] != MODULE_NONE
+  while listed_count < MODULES_SIZE && C.get_active_module(listed_count) != MODULE_NONE
     order_written[listed_count] = C.get_midi_run_order_written(MIDI_CH, listed_count)
-    winning_slot[active_modules[listed_count]] = -1
+    winning_slot[C.get_active_module(listed_count)] = -1
     listed_count += 1
   end
   # A module listed twice would run twice a sample -- an LFO at twice its rate, a filter taking
@@ -224,7 +225,7 @@ while true
   # there, as one written to a slot after it does. On a tie, never written alike, the later slot.
   slot = 0
   while slot < listed_count
-    module_id = active_modules[slot]
+    module_id = C.get_active_module(slot)
     winner = winning_slot[module_id]
     if winner < 0 || order_written[slot] >= order_written[winner]
       winning_slot[module_id] = slot
@@ -237,9 +238,9 @@ while true
   active_count = 0
   slot = 0
   while slot < listed_count
-    module_id = active_modules[slot]
+    module_id = C.get_active_module(slot)
     if winning_slot[module_id] == slot
-      active_modules[active_count] = module_id
+      C.set_active_module(active_count, module_id)
       active_count += 1
     end
     slot += 1
@@ -758,7 +759,7 @@ while true
     end
     slot = 0
     while slot < active_count
-      module_id = active_modules[slot]
+      module_id = C.get_active_module(slot)
 
       # Spinel emits the case as a C switch over the literal ids, which GCC compiles to a jump
       # table, so the dispatch costs the same whichever module it lands on and wherever that sits

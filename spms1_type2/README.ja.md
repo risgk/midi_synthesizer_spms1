@@ -1,4 +1,4 @@
-MIDI Synthesizer SPMS-1 (type-2) v0.3.3
+MIDI Synthesizer SPMS-1 (type-2) v0.3.4
 =======================================
 
 - Spinel (Ruby AOT コンパイラ) で作った、Raspberry Pi Pico 2 用のモノフォニック・セミモジュラー MIDI シンセサイザー
@@ -70,7 +70,9 @@ MIDI Synthesizer SPMS-1 (type-2) v0.3.3
       XIP キャッシュ経由で読まれ、MIDI が続くとキャッシュが追い出されてシンセのバッファ処理が遅れます
     - シグナルバスはスケッチ側の C 配列で、"spms1_bus.h" にあります。"spinel_rt_mcu_cold.h" が
       "spinel_rt.h" の最後でこれを読み込むので、バスの読み書きは検査付きの Spinel の配列を通らず、
-      ロード 1 つ、ストア 1 つにインライン展開されます
+      ロード 1 つ、ストア 1 つにインライン展開されます。サンプルごとの振り分けがモジュールのたびに読む
+      モジュールの実行順も同じく C 配列で、シンセがバッファごとにパラメータのたびに読む CC の値と NRPN の
+      テーブルの読み出しも "spms1_midi_read.h" からインライン展開されます
     - "spms1_main.c" は "spms1" で `spinel spms1_main.rb -c --rbs sig` を実行して生成します。"spms1/sig" の
       型シードがフィルタの状態、パラメータのスムージング、バスへの書き込みをボックス化させずに保ちます。
       必要な理由は "spms1/sig/spms1_filter.rbs"、"spms1/sig/spms1_dsp.rbs"、"spms1/sig/spms1_framework.rbs"
@@ -93,6 +95,32 @@ MIDI Synthesizer SPMS-1 (type-2) v0.3.3
 - "bin" フォルダの "spms1_i2s.ino.uf2" は Raspberry Pi Pico 2 と、Pimoroni Pico Audio Pack、
   Adafruit PCM5102 I2S DAC、または GY-PCM5102 用です
 - "bin" フォルダの "spms1_pwm_audio.ino.uf2" は Raspberry Pi Pico 2 と PWM Audio 出力用で、L は GP28、R は GP27 でビルドされています
+
+
+### はじめかた
+
+起動時の音から自分のパッチまで、一段ずつ進む道筋です。デフォルトパッチの[ブロック図](#ブロック図)を
+手元に置いて進めます。図のモジュールは、エディタの Controls タブのパネル、Patch タブのノードと同じです。
+"spms1_editor.html" を開き（[Web エディタ](#web-エディタ)を参照）、"MIDI Out" でシンセか SPMS-1 Web (Built-in) を選びます。
+
+1. お気に入り: Controls タブは "Show favorites only" にチェックが入った状態で開き、デフォルトパッチで
+   お気に入りになっている、音を大きく変える 21 個のパラメータを表示します:
+   Pitch 1 Glide、EG 1 Attack・Decay・Sustain、LFO 1 Rate、Osc 1 Wave・Pitch Mod 1 Amt・
+   Pitch Mod 2 Amt、Osc 2 Wave・Pitch・Pitch Mod 1 Amt・Pitch Mod 2 Amt、Mixer 2 Level 1・2、
+   Filter 1 Cutoff・Resonance・Mod 1 Amt・Mod 2 Amt、Amp 1 Gain、Chorus 1 Mix、Delay 1 Mix。
+   気に入ったものは星で追加できます
+2. CC のあるパラメータ: "Show favorites only" のチェックを外すと、CC のあるパラメータがすべて表示されます。
+   デフォルトパッチでの働きと起動時の値は、ブロック図の下に説明があります。MIDI コントローラのつまみでも
+   動かせます
+3. CC のないパラメータ: "Show parameters with no CC" にチェックを入れると、残りが青で表示されます
+   （Mixer 1 の各レベルや Pitch 1 の Out 1・Out 2 Bend Sw など）。そのスライダーはスロットが保持する値を設定し、NRPN で
+   送られます
+4. パッチの変更: Patch タブでは、パッチがすべての入力とパラメータを含む図そのものとして表示されます。
+   出力から入力やパラメータへワイヤーをドラッグすると、その供給元が変わります。パッチングの
+   [例](./spms1_patching.ja.md#例)に、配線の仕方付きのアイデアがあります
+
+Undo で変更を戻せます。Initialize Values は値を戻して配線は保ち、Init はデフォルトパッチに戻します。
+パッチは Save JSON で、またはシンセ本体に Save to Device で保存できます。
 
 
 ### Web エディタ

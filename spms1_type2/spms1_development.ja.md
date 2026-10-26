@@ -38,7 +38,8 @@ MIDI Synthesizer SPMS-1 (type-2): 開発
 
 C のホスト ("sim_spinel"、"sim_render"、"web" の SPMS-1 Web) は、スケッチ自身の "spms1_midi_state.h"
 ("spms1_main.rb" が読むテーブルと、それを埋めるハンドラ) で MIDI を扱うので、そこを変えれば実機とすべての
-ホストに一度に反映されます。シグナルバスもスケッチの "spms1_bus.h" のものを使います。"sim_cruby" は
+ホストに一度に反映されます。シグナルバスと実行順もスケッチの "spms1_bus.h" のものを、CC の値と NRPN のテーブルの読み出しも
+"spms1_midi_state.h" が読み込む "spms1_midi_read.h" のものを使います。"sim_cruby" は
 両方を Ruby で書いた写しを "sim_cruby/spms1_c_midi.rb" に持っています。
 
 シミュレーターは Windows で開発・テストしています。macOS と Linux は、各 API に沿って書いてはいますが、
@@ -186,21 +187,44 @@ patch_gen は、モジュールのファイルの `require_relative`、インス
 - バッファあたりの命令数 (ビルドしたコードについて正確な値) と、153.6 MHz でのサイクル数と時間を表示し、
   48 kHz で 64 サンプルのバッファ 1 つぶんの 1333 us と比べます。サイクル数と時間は 1 次の近似モデルによる
   見積もりです ("sim_load/spms1_load_estimate.py" の `cost` を参照)
-- `--profile` でサイクルの行き先の関数を表示し、`--elf FILE` で別にビルドした ELF (別のコミットのものなど) を
-  見積もれるので、2 つの版を比べられます。そのほかは `--help` を参照してください
+- `--profile` でサイクルの行き先の関数を、`--modules` でモジュールごとの負荷 (下記。ELF のデバッグ情報と
+  実行から求めます) を表示します。`--elf FILE` で別にビルドした ELF (別のコミットのものなど) を見積もれるので、
+  2 つの版を比べられます。そのほかは `--help` を参照してください
 - Python 3 と `pip install unicorn capstone pyelftools numpy` が必要です。各自でインストールするもので、ここには
   含めていません。Unicorn は Python バインディングが BSD ライセンス、エミュレータ本体が GPLv2、Capstone と
   NumPy は BSD ライセンス、pyelftools はパブリックドメインです
 
-各版の見積もりです。リリースのときに追記します (デフォルトのパッチ、153.6 MHz、1333 us に対して)。モジュールの
-設計どおり、ノートを押していてもいなくても、バッファの処理時間はほぼ同じです:
+最新の版の見積もりです。リリースのたびに置き換えます (前の版のものはこのファイルの履歴にあります。デフォルトの
+パッチ、153.6 MHz、1333 us に対して)。モジュールの設計どおり、ノートを押していてもいなくても、バッファの処理時間は
+ほぼ同じです:
 
 | 版 | ノートあり (平均 / 最大) | ノートなし (平均 / 最大) |
 | :-- | --: | --: |
-| v0.3.2 | 185368 / 185563 サイクル、1207 us (91%) | 185544 / 185739 サイクル、1208 us (91%) |
-| v0.3.3 | 185368 / 185563 サイクル、1207 us (91%) | 185544 / 185739 サイクル、1208 us (91%) |
+| v0.3.4 | 171920 / 171920 サイクル、1119 us (84%) | 172256 / 172256 サイクル、1121 us (84%) |
 
-見積もりは、実機の Debug Print (min 1124 us、max 1129 us、約 85%) より 7% ほど大きめです。
+見積もりは、実機の Debug Print (v0.3.4: min 1046 us、max 1047 us、約 78%) より 7% ほど大きめです。
+
+`--modules` による各モジュールの負荷です (同じ版、ノートあり)。「単体」は
+そのモジュールのメソッド (process、出力、smooth_parameters) のサイクル、「共通込み」はそれに共通部分の分担
+(入力の信号バスからの読み出し、出力の書き込み、実行順の振り分けの均等割り) を足したものです。残りの共通部分は、
+サンプルのループ、出力、MIDI、CC です:
+
+| モジュール | 単体 | 共通込み |
+| :-- | --: | --: |
+| Filter 1 | 11.3% (150 us) | 12.7% (169 us) |
+| Osc 2 (Sync あり) | 9.4% (125 us) | 10.7% (143 us) |
+| Delay 1 | 6.5% (86 us) | 7.7% (102 us) |
+| Chorus 1 | 6.4% (85 us) | 7.4% (99 us) |
+| Osc 1 | 6.2% (82 us) | 7.4% (98 us) |
+| Amp 1 | 4.5% (59 us) | 5.5% (73 us) |
+| Pitch 1 | 2.9% (38 us) | 4.0% (53 us) |
+| LFO 1 | 3.1% (41 us) | 3.9% (53 us) |
+| EG 2 | 2.2% (29 us) | 2.9% (39 us) |
+| EG 1 | 2.2% (29 us) | 2.9% (38 us) |
+| Mixer 1 | 1.6% (22 us) | 2.8% (38 us) |
+| Mixer 2 | 1.6% (22 us) | 2.8% (38 us) |
+| Noise 1 | 2.0% (26 us) | 2.8% (37 us) |
+| 残りの共通部分 | | 10.5% (141 us) |
 
 
 ## GitHub Actions
@@ -230,7 +254,7 @@ patch_gen は、モジュールのファイルの `require_relative`、インス
 2. その版の主な変更を "spms1_change_history.md" にまとめます (新しい順)
 3. バージョンを変えます: "README.md" と "README.ja.md" の 1 行目、エディタの `<span class="version">`、
    "spms1_midi_chart.md" の Version と Date (MIDI の仕様が変わらなくても毎回)
-4. 負荷を見積もり (`sh sim_load/estimate.sh`、ノートありと `--gate 0`)、「処理負荷の見積もり」の表に追加します
+4. 負荷を見積もり (`sh sim_load/estimate.sh`、ノートありと `--gate 0`、`--modules`)、「処理負荷の見積もり」の表を置き換えます
 5. "type-2: Version X.Y.Z" としてコミットします
 6. develop でワークフロー (上記) を "commit_package" 付きで実行し、UF2 ファイルと SPMS-1 Web を更新します
 7. プルリクエスト "type-2 vX.Y.Z" で develop を main にマージします
@@ -264,7 +288,7 @@ MCU 向けの変更は 2 か所にまとめてあります:
 - "spinel_rt_mcu_head.h"、"spinel_rt_mcu_libm.h"、"spinel_rt_mcu_cold.h": MCU 向けに足すもの --
   シンセ本体のセクションと pragma、オーバーフロー検査なしの Integer 演算 (`SP_INT_OVERFLOW_MODE_WRAP`。
   `spinel --int-overflow=wrap` と同じ)、数学関数の float 版、そして "spinel_rt.h" の最後で生成コードを
-  float のランタイムにつなぐもの (下記) とスケッチの "spms1_bus.h"。"spinel_rt.h" にはそれぞれの `#include` 行だけがあります
+  float のランタイムにつなぐもの (下記) とスケッチの "spms1_bus.h"、"spms1_midi_read.h"。"spinel_rt.h" にはそれぞれの `#include` 行だけがあります
 - "spinel_mcu/spinel_mcu.patch": Spinel 自身のファイルへの変更 -- Float を表す `double` を `sp_float`
   で書いたランタイム、POSIX 部分の `#if 0` による除外 (中身がリリースで変わってもパッチが
   当たりやすいように)、全体が POSIX 前提のファイルの `SPINEL_BARE_METAL` による除外 (下記)、

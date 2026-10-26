@@ -791,6 +791,9 @@ sweep while Osc 1 holds the note.
 
 ### Examples
 
+Each is given as the MIDI to send; one that wires is also given as what to wire on the Patch tab of
+the editor, which sends the same.
+
 - Vibrato is wired by default -- the LFO, at full level (LFO 1 Level, CC#116, powers up at value
   124), goes straight to the oscillator's Mod 2 input -- and CC#13 (Osc 1 Pitch Mod 2 Amt) brings
   it in: none at value 4, where it powers up, 50 cents either way at value 9, a semitone at value
@@ -820,10 +823,12 @@ sweep while Osc 1 holds the note.
   octave at value 64 and two octaves at the top, and with Sustain brought down to 0.0 (CC#30 = 4),
   it falls back to pitch with the decay
 - Noise as a modulation source, a random jitter of the cutoff: CC#99 = 113, CC#98 = 26,
-  CC#6 = 61 puts Noise 1's red output on the filter's Mod 2 input in the LFO's place, and CC#25
+  CC#6 = 61 puts Noise 1's red output on the filter's Mod 2 input in the LFO's place (on the Patch
+  tab, a wire from Noise 1 Out Red to Filter 1 Mod 2 In), and CC#25
   sets how much. CC#6 = 60 takes the white instead, finer still. The red is on no mixer, and Noise
   1 Out, white at power-up, is heard only once CC#23 brings it up, so neither is heard as well
-- Filter cutoff driven by the envelope instead of its CC: CC#99 = 114, CC#98 = 66, CC#6 = 40. The
+- Filter cutoff driven by the envelope instead of its CC: CC#99 = 114, CC#98 = 66, CC#6 = 40 (on
+  the Patch tab, a wire from EG 1 Out to Filter 1 Cutoff). The
   envelope and the cutoff are both unipolar, so it opens the cutoff from the bottom of its dial
   to the top
 - Amp gain and filter cutoff share one CC: CC#99 = 115, CC#98 = 74, CC#6 = 74
@@ -862,7 +867,7 @@ sweep while Osc 1 holds the note.
   turns Osc 1 Pitch Mod 1 Sw off, and CC#89 turned up then sweeps Osc 2 alone with the
   envelope, Osc 1 holding the note it is synced to
 - Take the filter out of the chain: CC#99 = 113, CC#98 = 27, CC#6 = 62 points the amp's audio input
-  at Mixer 2. The filter keeps running and keeps its slot; nothing reads it
+  at Mixer 2 (on the Patch tab, a wire from Mixer 2 Out to Amp 1 Audio In). The filter keeps running and keeps its slot; nothing reads it
 - Echoes that only come in with the mod wheel: CC#99 = 114, CC#98 = 79, CC#6 = 8 takes Delay 1 Mix
   from Mod Wheel, which powers up at 0.0, so the output is dry until the wheel moves
 - Chorus that only comes in with the mod wheel: CC#99 = 114, CC#98 = 76, CC#6 = 8 takes Chorus 1

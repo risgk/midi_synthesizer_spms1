@@ -39,8 +39,9 @@ MIDI Synthesizer SPMS-1 (type-2): Development
 
 The C hosts ("sim_spinel", "sim_render", and SPMS-1 Web in "web") keep the MIDI with the sketch's own
 "spms1_midi_state.h", the tables "spms1_main.rb" reads and the handlers that fill them, so a change
-there reaches the device and all of them at once. They take the signal bus from the sketch's "spms1_bus.h"
-as well. "sim_cruby" keeps a Ruby copy of both in "sim_cruby/spms1_c_midi.rb".
+there reaches the device and all of them at once. They take the signal bus and the run order from the
+sketch's "spms1_bus.h" as well, and the reads of the CC values and the NRPN table from "spms1_midi_read.h",
+which "spms1_midi_state.h" includes. "sim_cruby" keeps a Ruby copy of both in "sim_cruby/spms1_c_midi.rb".
 
 The simulators are developed and tested on Windows. macOS and Linux are supported on a best-effort
 basis, written to their APIs but without the machines to try them on. The GitHub Actions workflow
@@ -193,21 +194,44 @@ measures on the device -- with the default patch and a note held.
 - It prints the instructions per buffer, which are exact for the code as built, and the cycles and
   the time at 153.6 MHz against the 1333 us a buffer of 64 samples lasts at 48 kHz, which come from a
   first-order cost model and are an estimate (see `cost` in "sim_load/spms1_load_estimate.py")
-- `--profile` lists the functions the cycles go to; `--elf FILE` estimates an ELF built elsewhere, from
-  another commit say, so two versions can be compared; `--help` shows the rest
+- `--profile` lists the functions the cycles go to; `--modules` the load of each module (below), from
+  the debug info of the ELF and the run; `--elf FILE` estimates an ELF built elsewhere, from another
+  commit say, so two versions can be compared; `--help` shows the rest
 - Needs Python 3 and `pip install unicorn capstone pyelftools numpy`, installed by you and not shipped
   here: Unicorn's Python binding is under the BSD license and its emulator under the GPLv2, Capstone
   and NumPy under the BSD license, and pyelftools is in the public domain
 
-The estimates of each version, added at a release (the default patch, at 153.6 MHz, of 1333 us); a
-buffer takes about the same with a note held or not, as the modules are meant to:
+The estimate of the latest version, replaced at each release (the earlier ones are in the history of
+this file; the default patch, at 153.6 MHz, of 1333 us); a buffer takes about the same with a note held
+or not, as the modules are meant to:
 
 | Version | Note held (avg / max) | No note (avg / max) |
 | :-- | --: | --: |
-| v0.3.2 | 185368 / 185563 cycles, 1207 us (91%) | 185544 / 185739 cycles, 1208 us (91%) |
-| v0.3.3 | 185368 / 185563 cycles, 1207 us (91%) | 185544 / 185739 cycles, 1208 us (91%) |
+| v0.3.4 | 171920 / 171920 cycles, 1119 us (84%) | 172256 / 172256 cycles, 1121 us (84%) |
 
-The estimate is about 7% above Debug Print on the device (min 1124 us, max 1129 us, about 85%).
+The estimate is about 7% above Debug Print on the device (v0.3.4: min 1046 us, max 1047 us, about 78%).
+
+The load of each module, by `--modules` (the same version, a note held): "own" is
+the cycles of its methods (process, its outputs, smooth_parameters), and "with common" adds its share
+of the common part, the bus reads of its inputs and writes of its outputs and the dispatch of the run
+order, split evenly; the common part left is the loop of the samples, the output, MIDI, and the CCs:
+
+| Module | Own | With common |
+| :-- | --: | --: |
+| Filter 1 | 11.3% (150 us) | 12.7% (169 us) |
+| Osc 2 (with Sync) | 9.4% (125 us) | 10.7% (143 us) |
+| Delay 1 | 6.5% (86 us) | 7.7% (102 us) |
+| Chorus 1 | 6.4% (85 us) | 7.4% (99 us) |
+| Osc 1 | 6.2% (82 us) | 7.4% (98 us) |
+| Amp 1 | 4.5% (59 us) | 5.5% (73 us) |
+| Pitch 1 | 2.9% (38 us) | 4.0% (53 us) |
+| LFO 1 | 3.1% (41 us) | 3.9% (53 us) |
+| EG 2 | 2.2% (29 us) | 2.9% (39 us) |
+| EG 1 | 2.2% (29 us) | 2.9% (38 us) |
+| Mixer 1 | 1.6% (22 us) | 2.8% (38 us) |
+| Mixer 2 | 1.6% (22 us) | 2.8% (38 us) |
+| Noise 1 | 2.0% (26 us) | 2.8% (37 us) |
+| The common part left | | 10.5% (141 us) |
 
 
 ## GitHub Actions
@@ -240,8 +264,8 @@ Basically, a release goes as follows (the dates in JST):
 3. Change the version in the first lines of "README.md" and "README.ja.md", in the editor's
    `<span class="version">`, and in "spms1_midi_chart.md" with its Date (at every release, even if
    the MIDI implementation is the same)
-4. Estimate the load (`sh sim_load/estimate.sh`, with a note held and with `--gate 0`), and add
-   the version to the table under Load Estimate
+4. Estimate the load (`sh sim_load/estimate.sh`, with a note held and with `--gate 0`, and
+   `--modules`), and replace the tables under Load Estimate with them
 5. Commit as "type-2: Version X.Y.Z"
 6. Run the workflow (above) on develop with "commit_package", for the UF2 files and SPMS-1 Web
 7. Merge develop into main by a pull request, "type-2 vX.Y.Z"
@@ -277,7 +301,7 @@ README names, with the changes for the MCU kept in two places:
   (`SP_INT_OVERFLOW_MODE_WRAP`, as `spinel --int-overflow=wrap` builds it), the float versions of
   the math functions, and, at
   the end of "spinel_rt.h", what binds the generated code to a float runtime (below) and the
-  sketch's "spms1_bus.h".
+  sketch's "spms1_bus.h" and "spms1_midi_read.h".
   "spinel_rt.h" carries only an `#include` line for each
 - "spinel_mcu/spinel_mcu.patch": what is changed in Spinel's own files -- the runtime written in
   `sp_float` where it said `double` for a Float, the POSIX parts left out with `#if 0` (a release

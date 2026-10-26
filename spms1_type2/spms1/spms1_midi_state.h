@@ -13,6 +13,8 @@
 
 #include <stdint.h>
 
+#include "spms1_midi_read.h"  // get_midi_cc_value and get_midi_nrpn_value, inline
+
 // Where the accessors the synth calls go. The sketch defines it to put them in RAM, next to the
 // synth's own code: in flash they would be fetched through the XIP cache, which core 0's MIDI and
 // USB code shares and evicts. The simulators leave it empty.
@@ -39,7 +41,6 @@ int16_t  g_midi_pitch_bend[16]     = {0};
 // other synths tend to use, so 640 entries cover it. Values are 7-bit, filled from CC 6. MSB 117,
 // category 5, has the system entries, which are not kept in the table (see below).
 #define SPMS1_NRPN_MSB_BASE (112)
-#define SPMS1_NRPN_SIZE (640)
 uint8_t  g_midi_nrpn_values[16][SPMS1_NRPN_SIZE] = {{0}};
 uint8_t  g_midi_nrpn_msb[16]            = {0};
 uint8_t  g_midi_nrpn_lsb[16]            = {0};
@@ -128,18 +129,6 @@ SPMS1_RAM_FUNC void set_midi_cc_value(uint8_t midi_ch, uint8_t cc_number, uint8_
   g_midi_cc_values[midi_ch][cc_number] = cc_value;
 }
 
-SPMS1_RAM_FUNC uint8_t get_midi_cc_value(uint8_t midi_ch, uint8_t cc_number) {
-  if (midi_ch >= 16) {
-    return 0;
-  }
-
-  if (cc_number >= 128) {
-    return 0;
-  }
-
-  return g_midi_cc_values[midi_ch][cc_number];
-}
-
 SPMS1_RAM_FUNC void set_midi_nrpn_value(uint8_t midi_ch, int32_t index, uint8_t value) {
   if (midi_ch >= 16) {
     return;
@@ -153,18 +142,6 @@ SPMS1_RAM_FUNC void set_midi_nrpn_value(uint8_t midi_ch, int32_t index, uint8_t 
   if (index < SPMS1_RUN_ORDER_SIZE) {
     g_midi_run_order_written[midi_ch][index] = ++g_midi_run_order_writes[midi_ch];
   }
-}
-
-SPMS1_RAM_FUNC uint8_t get_midi_nrpn_value(uint8_t midi_ch, int32_t index) {
-  if (midi_ch >= 16) {
-    return 0;
-  }
-
-  if (index < 0 || index >= SPMS1_NRPN_SIZE) {
-    return 0;
-  }
-
-  return g_midi_nrpn_values[midi_ch][index];
 }
 
 SPMS1_RAM_FUNC int32_t get_midi_run_order_written(uint8_t midi_ch, int32_t slot) {

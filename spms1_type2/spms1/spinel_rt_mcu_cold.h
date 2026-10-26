@@ -34,5 +34,6 @@ _Static_assert(!SPINEL_FLOAT32 || sizeof(sp_float) == sizeof(float), "sp_float m
 /* The sketch's own functions that are to inline into the generated code, ahead of its extern
    declarations of them. */
 #include "spms1_bus.h"
+#include "spms1_midi_read.h"
 
 #endif /* SPINEL_RT_MCU_COLD_H */
