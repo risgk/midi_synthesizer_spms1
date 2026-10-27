@@ -1679,6 +1679,7 @@
         <label for="export-format">Format</label>
         <select id="export-format">
           <option value="hex">MIDI bytes (hex)</option>
+          <option value="sysex">MIDI bytes, SysEx (hex)</option>
           <option value="nrpn">NRPN list (MSB, LSB, value)</option>
         </select>
       </div>
@@ -1994,6 +1995,7 @@
       {"id":78,"key":"DELAY_1_OUTPUT_MONO"},
     ],
     defaultOrder: ["PITCH_1","EG_1","EG_2","LFO_1","MIXER_1","OSC_1","OSC_2","NOISE_1","MIXER_2","FILTER_1","FILTER_2","AMP_1","CHORUS_1","DELAY_1"],
+    specHash: 0xF55BFD1C,
   };
   // patch_gen end
 
@@ -2207,10 +2209,39 @@
     return { bytes: [st, 99, NRPN_SYSTEM_MSB, st, 98, 0, st, 6, value], comment: on ? 'Mute on' : 'Mute off', nrpn: [NRPN_SYSTEM_MSB, 0, value] };
   }
 
+  // The NRPN entries as SysEx (see spms1_patching.md): a message for each category, or more where
+  // one would pass the 128 bytes the synth takes, each of the values from its first entry on, the
+  // entries between with none written as 0, which nothing reads. The header carries the spec hash,
+  // so that a sketch numbered otherwise ignores the patch.
+  const SYSEX_VALUES_MAX = 112;
+  function sysexLines(ch) {
+    const hash = SPEC.specHash;
+    const head = [0xF0, 0x7D, 0x53, 0x31, ch, 0x01, hash & 0x7F, (hash >>> 7) & 0x7F, (hash >>> 14) & 0x7F, (hash >>> 21) & 0x7F, (hash >>> 28) & 0x7F];
+    const byCategory = new Map();
+    for (const e of nrpnEntries()) {
+      const c = e.nrpn >> 7;
+      if (!byCategory.has(c)) byCategory.set(c, new Map());
+      byCategory.get(c).set(e.nrpn & 0x7F, e.value);
+    }
+    const lines = [];
+    for (const [c, values] of [...byCategory].sort((a, b) => a[0] - b[0])) {
+      const entries = [...values.keys()];
+      const last = Math.max(...entries);
+      for (let first = Math.min(...entries); first <= last; first += SYSEX_VALUES_MAX) {
+        const end = Math.min(first + SYSEX_VALUES_MAX - 1, last);
+        const data = [];
+        for (let i = first; i <= end; i++) data.push(values.get(i) || 0);
+        lines.push({ bytes: [...head, c, first, ...data, 0xF7], comment: `SysEx NRPN ${(c << 7) + first}-${(c << 7) + end} (MSB ${NRPN_MSB_BASE + c}, LSB ${first}-${end})`, sysex: true });
+      }
+    }
+    return lines;
+  }
+
   // Each item is one line: the bytes of one NRPN write or one CC, with its comment. Mute on comes
   // first with muteBefore, and Mute off last with muteAfter, after the CCs, so that the synth is
   // silent while the patch is loaded: it needs no waits between them (see spms1_patching.md).
-  function buildMessages({ includeCC, liveCC, omitMSB, ch, muteBefore, muteAfter }) {
+  // With sysex, the NRPN entries go as SysEx instead (sysexLines); Mute stays an NRPN.
+  function buildMessages({ includeCC, liveCC, omitMSB, ch, muteBefore, muteAfter, sysex }) {
     const st = 0xB0 | ch;
     const lines = [];
     let lastMSB = -1;
@@ -2218,7 +2249,8 @@
       lines.push(muteLine(st, true));
       lastMSB = NRPN_SYSTEM_MSB;
     }
-    for (const { nrpn, value, comment } of nrpnEntries()) {
+    if (sysex) lines.push(...sysexLines(ch));
+    for (const { nrpn, value, comment } of sysex ? [] : nrpnEntries()) {
       const msb = nrpnMSB(nrpn), lsb = nrpn & 0x7F;
       const bytes = [];
       if (!omitMSB || msb !== lastMSB) bytes.push(st, 99, msb);
@@ -2248,7 +2280,7 @@
     const oneLine = document.getElementById('opt-one-line').checked;
     const total = lines.reduce((n, l) => n + l.bytes.length, 0);
     let text;
-    if (format === 'hex') {
+    if (format === 'hex' || format === 'sysex') {
       if (oneLine) {
         text = lines.map(l => l.bytes.map(hex).join(' ')).join(' ');
       } else {
@@ -2279,7 +2311,8 @@
       last.forEach(nrpnRow);
       text = rows.join('\n');
     }
-    return { text, info: `${lines.filter(l => l.nrpn).length} NRPN, ${lines.filter(l => l.cc).length} CC, ${total} bytes` };
+    const sysexCount = lines.filter(l => l.sysex).length;
+    return { text, info: `${sysexCount ? `${sysexCount} SysEx, ` : ''}${lines.filter(l => l.nrpn).length} NRPN, ${lines.filter(l => l.cc).length} CC, ${total} bytes` };
   }
 
   function exportOptions() {
@@ -2290,6 +2323,7 @@
       ch: parseInt(document.getElementById('midi-ch').value) || 0,
       muteBefore: document.getElementById('opt-mute').checked,
       muteAfter: document.getElementById('opt-mute').checked,
+      sysex: document.getElementById('export-format').value === 'sysex',
     };
   }
 
@@ -3535,14 +3569,17 @@
       showMIDINote('Web MIDI is not available in this browser: no MIDI device can be used');
       return;
     }
-    navigator.requestMIDIAccess().then(access => {
+    // SysEx, which sends a patch in a third of the bytes, if it is allowed; NRPN otherwise.
+    const granted = access => {
       midiAccess = access;
       applyMIDISettings(loadMIDISettings());
       midiAccess.onstatechange = () => applyMIDISettings(loadMIDISettings());
-    }, err => {
+    };
+    const failed = err => {
       console.error('Failed to get MIDI access - ' + err);
       showMIDINote('MIDI access is not allowed (or failed): no MIDI device can be used');
-    });
+    };
+    navigator.requestMIDIAccess({ sysex: true }).then(granted, () => navigator.requestMIDIAccess().then(granted, failed));
   }
 
   // A note under the MIDI settings, so that one sees why no MIDI device is listed (not only in the console),
@@ -3872,11 +3909,18 @@
     return t;
   }
 
+  // Whether the whole patch can go to the output as SysEx: SPMS-1 Web takes it always, and a device
+  // if SysEx is allowed.
+  function outputTakesSysEx() {
+    return midiOutput === webSynthOutput || !!(midiAccess && midiAccess.sysexEnabled);
+  }
+
   // The whole patch goes out between Mute on and off, so that it is not heard half sent; Mute off
   // is left out while the Mute button holds the synth silent.
   function sendAll() {
     if (!midiOutput) return;
     const opts = exportOptions();
+    opts.sysex = outputTakesSysEx();
     opts.includeCC = true;
     opts.liveCC = true;
     opts.muteBefore = true;
@@ -3958,6 +4002,7 @@
     if (!confirm('Save this patch in the synth? It replaces the patch kept there, and the synth loads it at power-up.')) return;
     const opts = exportOptions();
     const st = 0xB0 | opts.ch;
+    opts.sysex = outputTakesSysEx();
     opts.includeCC = true;
     opts.liveCC = true;
     opts.muteBefore = true;

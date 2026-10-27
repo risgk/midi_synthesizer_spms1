@@ -122,6 +122,7 @@ void handleNoteOn(byte channel, byte pitch, byte velocity);
 void handleNoteOff(byte channel, byte pitch, byte velocity);
 void handleControlChange(byte channel, byte number, byte value);
 void handlePitchBend(byte channel, int bend);
+void handleSystemExclusive(byte* array, unsigned size);
 
 // Arduino's prototype generator puts its prototypes before the first function defined, so one must
 // come before extern "C", or setup() and loop() get C linkage and Arduino.h rejects them.
@@ -319,6 +320,7 @@ void setup() {
   USB_MIDI.setHandleNoteOff(handleNoteOff);
   USB_MIDI.setHandleControlChange(handleControlChange);
   USB_MIDI.setHandlePitchBend(handlePitchBend);
+  USB_MIDI.setHandleSystemExclusive(handleSystemExclusive);
   USB_MIDI.begin(MIDI_CHANNEL_OMNI);
   USB_MIDI.turnThruOff();
 #endif  // defined(SPMS1_USE_USB_MIDI)
@@ -328,6 +330,7 @@ void setup() {
   UART_MIDI.setHandleNoteOff(handleNoteOff);
   UART_MIDI.setHandleControlChange(handleControlChange);
   UART_MIDI.setHandlePitchBend(handlePitchBend);
+  UART_MIDI.setHandleSystemExclusive(handleSystemExclusive);
   UART_MIDI.begin(MIDI_CHANNEL_OMNI);  // Begins the serial too, and only once: SerialPIO cannot take a second begin
   UART_MIDI.turnThruOff();
   gpio_pull_up(SPMS1_UART_MIDI_RX_PIN);  // After the begin, which leaves the RX pin without pulls
@@ -420,4 +423,11 @@ void handleControlChange(byte channel, byte number, byte value)
 void handlePitchBend(byte channel, int bend)
 {
   spms1_handle_pitch_bend(channel - 1, bend);
+}
+
+// The whole message, F0 and F7 included. One longer than the library takes comes in parts, which
+// spms1_handle_sysex ignores, as none ends in F7 with the header before it.
+void handleSystemExclusive(byte* array, unsigned size)
+{
+  spms1_handle_sysex(array, size);
 }

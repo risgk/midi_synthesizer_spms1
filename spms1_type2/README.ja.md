@@ -170,11 +170,12 @@ Undo で変更を戻せます。Initialize Values は値を戻して配線は保
     - パッチを JSON で保存・読み込みします
     - JSON で保存したりコピーしたりするパッチでは、Save to Device と同じく、Mod Wheel だけに割り当てた CC を起動時の値 (0.0) にします。
       Mod Wheel は設定するものではなく演奏で動かすものだからです。Send Patch は今の位置を送ります
-    - パッチを MIDI バイト列または NRPN リストとしてコピーするか、Web MIDI で送信します
+    - パッチを MIDI バイト列 (NRPN か SysEx) または NRPN リストとしてコピーするか、Web MIDI で送信します
     - パッチ全体 (Send Patch、MIDI Out の選び直し) と、Init や Load による変更 (その Undo と Redo も) は、Mute のオンとオフ (NRPN の Mute) で挟んで送るので、
       送信途中のパッチの音は聞こえません。"Mute while loading" (デフォルトでオン) にすると、コピーするパッチも同じです。
-      それ以外の変更は、そのまま送ります。デフォルトのパッチは約 2,000 バイトで、31250 bps (UART MIDI) で約 0.6 秒、
-      USB MIDI で約 0.5 秒かかります
+      それ以外の変更は、そのまま送ります。パッチ全体は、ブラウザが許せば (SPMS-1 Web にはいつも) SysEx で、それ以外は
+      NRPN で送ります。デフォルトのパッチは、SysEx で約 600 バイト (31250 bps の UART MIDI で約 0.2 秒)、NRPN で約 2,300 バイト
+      (31250 bps で約 0.7 秒、USB MIDI で約 0.5 秒) です
     - Mute ボタンでシンセをミュート (NRPN の Mute) して、音を出さずにパッチを変えられます。MIDI In に届いた Mute も
       ボタンに表示します。MIDI In に届いたリセット (NRPN の Reset) では、エディタのパッチもデフォルトに戻ります
     - Save to Device で、パッチをシンセのフラッシュに保存します (NRPN の Save)。シンセは電源投入時にこれを読み込みます

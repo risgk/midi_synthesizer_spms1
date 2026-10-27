@@ -372,10 +372,14 @@ def editor_js
       { id: sig['id'], key: sig['key'], label: label }.compact
     end,
     defaultOrder: s.default_order,
+    # SPMS1_PATCH_SPEC_HASH, which a SysEx carries, so that a sketch numbered otherwise ignores it.
+    specHash: patch_spec_hash,
   }
   lines = ['  const SPEC = {']
   spec.each do |name, list|
-    if list.first.is_a?(String)
+    if list.is_a?(Integer)
+      lines << "    #{name}: 0x#{format('%08X', list)},"
+    elsif list.first.is_a?(String)
       lines << "    #{name}: #{JSON.generate(list)},"
     else
       lines << "    #{name}: ["

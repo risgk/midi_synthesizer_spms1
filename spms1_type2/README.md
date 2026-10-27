@@ -177,11 +177,13 @@ puts the default patch back. Keep a patch with Save JSON, or in the synth with S
     - A patch saved as JSON or copied keeps a CC that only the Mod Wheel has at what it powers up
       at, 0.0, as Save to Device does: the mod wheel is played rather than set; Send Patch sends
       where it is
-    - Copies the patch as MIDI bytes or as an NRPN list, or sends it through Web MIDI
+    - Copies the patch as MIDI bytes (NRPN or SysEx) or as an NRPN list, or sends it through Web MIDI
     - Sends the whole patch (Send Patch, or a device newly chosen), and what Init and Load change (also by Undo and Redo), between Mute on and off (NRPN
       Mute), so that the patch is not heard half sent, and so does the patch it copies with "Mute
-      while loading" (on by default); every other change goes out as it is. The default patch is about
-      2,000 bytes, which take about 0.6 s at 31250 bps (UART MIDI) and about 0.5 s by USB MIDI
+      while loading" (on by default); every other change goes out as it is. The whole patch goes as SysEx
+      where the browser allows it (and always to SPMS-1 Web), and as NRPN otherwise: the default patch is
+      about 600 bytes as SysEx, about 0.2 s at 31250 bps (UART MIDI), and about 2,300 bytes as NRPN,
+      about 0.7 s at 31250 bps and about 0.5 s by USB MIDI
     - Its Mute button mutes the synth (NRPN Mute), to change the patch unheard, and shows a Mute
       arriving at MIDI In; a Reset (NRPN) arriving at MIDI In puts the patch shown back to the default too
     - Its Save to Device keeps the patch in the synth's flash (NRPN Save), which the synth loads at power-on

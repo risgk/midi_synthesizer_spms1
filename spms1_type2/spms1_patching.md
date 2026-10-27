@@ -220,15 +220,43 @@ it from anywhere else.
   default patch back; to make the default patch the one loaded at power-on again, Reset and then
   Save
 
+### Sending as SysEx
+
+The entries of categories 0-4 can also go as System Exclusive, a value a byte: the default patch is
+about 600 bytes so, CCs and Mute included, where it is about 2,300 as NRPN. NRPN works as before,
+and the two can be mixed. The editor sends SysEx where the browser allows it, and always to SPMS-1
+Web; NRPN otherwise. Format "MIDI bytes, SysEx (hex)" in its Export panel copies the patch so.
+
+```
+F0 7D 53 31 ch 01 h0 h1 h2 h3 h4 category entry value ... F7
+```
+
+- `7D` is the ID for non-commercial use, and `53 31` is "S1"
+- `ch`: the MIDI channel whose patch it writes, 0-15 for channel 1-16
+- `01`: the command, NRPN values
+- `h0`-`h4`: the patch spec hash of the sketch, 7 bits a byte, the lowest first. A sketch
+  numbered otherwise -- whose module ids, Signal IDs or entries differ, as for a patch saved --
+  ignores the message, which it would read as something else. Copy it from the editor (Format
+  "MIDI bytes, SysEx (hex)"), which has the hash of its own version
+- `category`: 0-4, as CC#99 less 112
+- `entry`: the first entry, as CC#98
+- `value ...`: the value of the first entry and of each next one, up to entry 127, written one after
+  another as CC#6 writes them, the run order's included (the last write wins)
+- The message is taken whole or not at all: one that runs past entry 127, has a byte of 128 or
+  more, or is cut short is ignored. The device takes 128 bytes at most, F0 and F7 included, so
+  114 values at most: the editor sends a message a category, and would split one past 112
+- The system entries (category 5) are NRPN only: send Mute on before the patch and Mute off after
+  it, as with NRPN
+
 ### Categories (CC#99)
 
 | CC#99 (category) | CC#98 | Sets | CC#6 value |
 | ----- | ----- | ---- | ---------- |
 | 112 (0) | 0-31 | Run order, slot by slot | Module ID |
-| 113 (1) | 0-34 | What feeds a module input | Signal ID |
-| 114 (2) | 0-81, 85 | Where a parameter takes its value | Signal ID, or 127 for its own control slot |
-| 115 (3) | 0-85 | Which CC fills a control slot | CC number, or 0 for none |
-| 116 (4) | 0-81, 85 | What a parameter's control slot holds while it has no CC | CC value |
+| 113 (1) | 0-41 | What feeds a module input | Signal ID |
+| 114 (2) | 0-94, 98 | Where a parameter takes its value | Signal ID, or 127 for its own control slot |
+| 115 (3) | 0-98 | Which CC fills a control slot | CC number, or 0 for none |
+| 116 (4) | 0-94, 98 | What a parameter's control slot holds while it has no CC | CC value |
 | 117 (5) | 0-3 | System: Mute, Reset, Save, Load (below), not a part of the patch | 0-63 or 64-127 |
 
 Category 5 has the system entries, which act on the synth rather than set a part of the patch:
