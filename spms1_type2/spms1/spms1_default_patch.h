@@ -241,6 +241,8 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {477,  90},  // Delay 1 Time CC
   {478,  92},  // Delay 1 Feedback CC
   {479,   1},  // Mod Wheel CC
+  {480,  16},  // General 1 CC
+  {481,  17},  // General 2 CC
   {512,   4},  // Pitch 1 Glide value
   {513, 124},  // Pitch 1 Out 1 Glide Sw value
   {514, 124},  // Pitch 1 Out 2 Glide Sw value
@@ -403,6 +405,8 @@ static const uint8_t g_spms1_default_cc[][2] = {
   {90,   64},  // Delay 1 Time
   {92,   64},  // Delay 1 Feedback
   {1,     4},  // Mod Wheel
+  {16,    4},  // General 1
+  {17,    4},  // General 2
 };
 
 #endif  // SPMS1_DEFAULT_PATCH_H

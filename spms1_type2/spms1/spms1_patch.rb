@@ -789,6 +789,8 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_DELAY_1_TIME          , 90)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_DELAY_1_FEEDBACK      , 92)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_MOD_WHEEL             , 1)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_GENERAL_1             , 16)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_GENERAL_2             , 17)
 
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_PITCH_1_GLIDE         , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_PITCH_1_OUT_1_GLIDE_SW, 124)
@@ -949,4 +951,6 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 90 , 64 ) # Delay 1 Time
   C.set_midi_cc_value(midi_ch, 92 , 64 ) # Delay 1 Feedback
   C.set_midi_cc_value(midi_ch, 1  , 4  ) # Mod Wheel
+  C.set_midi_cc_value(midi_ch, 16 , 4  ) # General 1
+  C.set_midi_cc_value(midi_ch, 17 , 4  ) # General 2
 end

@@ -104,10 +104,10 @@ MIDI Synthesizer SPMS-1 (type-2) v0.3.4
 "spms1_editor.html" を開き（[Web エディタ](#web-エディタ)を参照）、"MIDI Out" でシンセか SPMS-1 Web (Built-in) を選びます。
 
 1. お気に入り: Controls タブは "Show favorites only" にチェックが入った状態で開き、デフォルトパッチで
-   お気に入りになっている 20 個のパラメータを表示します:
+   お気に入りになっている 19 個のパラメータを表示します:
    Pitch 1 Glide、EG 1 Attack・Decay・Sustain、LFO 1 Rate、Osc 1 Wave・Pitch Mod 1 Amt・Pitch Mod 2 Amt、
    Filter 1 Cutoff・Mod 1 Amt・Mod 2 Amt、Filter 2 Cutoff・Resonance・Mod 1 Amt・Mod 2 Amt、
-   Amp 1 Gain 2・Mod 1/2 Mix、Chorus 1 Mix、Delay 1 Mix・Time。
+   Amp 1 Gain 2、Chorus 1 Mix、Delay 1 Mix・Time。
    気に入ったものは星で追加できます。Osc 2 の PW と各 Mod Amt は Osc 1 と、Filter 1 の Resonance（CC なし）以外の
    各パラメータは Filter 2 と同じ CC なので、片方のスライダーを動かすと、表示されているかどうかに関わらず相手も一緒に動きます
 2. CC のあるパラメータ: "Show favorites only" のチェックを外すと、CC のあるパラメータがすべて表示されます。
