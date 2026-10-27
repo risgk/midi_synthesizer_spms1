@@ -104,11 +104,11 @@ MIDI Synthesizer SPMS-1 (type-2) v0.3.4
 "spms1_editor.html" を開き（[Web エディタ](#web-エディタ)を参照）、"MIDI Out" でシンセか SPMS-1 Web (Built-in) を選びます。
 
 1. お気に入り: Controls タブは "Show favorites only" にチェックが入った状態で開き、デフォルトパッチで
-   お気に入りになっている 29 個のパラメータを表示します:
+   お気に入りになっている 30 個のパラメータを表示します:
    General 1・2（CC なし）、Pitch 1 Glide、EG 1 Attack・Decay・Sustain、LFO 1 Rate、Mixer 1 Level 1・2（CC なし）、
    Osc 1 Wave・Pitch Mod 1 Amt・Pitch Mod 2 Amt、Osc 2 Wave・Pitch・Pitch Mod 1 Amt・Pitch Mod 2 Amt、
    Mixer 2 Level 1・2、Filter 1 Cutoff・Mod 1 Amt・Mod 2 Amt、Filter 2 Cutoff・Resonance・Mod 1 Amt・Mod 2 Amt、
-   Amp 1 Gain 2、Chorus 1 Mix、Delay 1 Mix・Time。
+   Amp 1 Gain 2・Mod 1/2 Mix、Chorus 1 Mix、Delay 1 Mix・Time。
    気に入ったものは星で追加できます。Osc 2 の PW と各 Mod Amt は Osc 1 と、Filter 1 の Resonance（CC なし）以外の
    各パラメータは Filter 2 と同じ CC なので、片方のスライダーを動かすと、表示されているかどうかに関わらず相手も一緒に動きます
 2. CC のあるパラメータ: "Show favorites only" のチェックを外すと、CC のあるパラメータがすべて表示されます。
@@ -333,7 +333,7 @@ Osc 1 に従います。Mod Amt と PW には Osc 1 と同じ CC が割り当て
 Filter 1 と Filter 2 は直列で、4 次（24 dB/oct）のローパスになります。Filter 2 は Filter 1 と同じ CC と起動時の値を持ち、
 それらの CC で両方が動きます。ただし Resonance だけは別で、Filter 2 のもの（CC#71）は起動時 Q 4.0、
 Filter 1 のもの（CC なし）は最小の Q 0.71 なので、レゾナンスのピークは Filter 2 のものになります。それぞれのフィルタは Audio In 1 と Audio In 2 を Gain 1 と Gain 2
-（CC なし、起動時は等倍）で受け取ります。ただし Mixer 2 から入る Filter 2 の Gain 1 は起動時 0.0 で、これを上げ、
+（CC なし、起動時は等倍）で受け取ります。ただし何もつながっていない Filter 1 の Gain 2 と、Mixer 2 から入る Filter 2 の Gain 1 は起動時 0.0 で、これを上げ、
 Filter 2 の Gain 2 を下げ、Amp 1 の Gain 1 を上げると、フィルタが並列になります。Amp 1 は Audio In 1 に Filter 1 を Gain 1（CC なし、起動時 0.0 で無音）で、Audio In 2 に Filter 2 を Gain 2（CC#15）で
 受け取ります。
 

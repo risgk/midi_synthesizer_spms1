@@ -58,9 +58,10 @@ rather than the two of them together. Either can be set apart from the other, by
 
 Each takes two audio inputs, Audio In 1 and Audio In 2, and sums them, each after its own gain,
 Gain 1 and Gain 2, which head its parameters with no CC. A gain is squared and taken four times,
-as Amp 1's are: unity at value 64, where they power up but for Filter 2 Gain 1, at value 4, silent,
-and 12 dB up at value 124, which drives the filter harder. Filter 1's Audio In 2 is unrouted by
-default, so a second source, such as the noise, can be brought in with no mixer.
+as Amp 1's are: unity at value 64, where they power up but for Filter 1 Gain 2 and Filter 2 Gain 1,
+at value 4, silent, and 12 dB up at value 124, which drives the filter harder. Filter 1's Audio In 2
+is unrouted by default, so a second source, such as the noise, can be brought in with no mixer,
+its Gain 2 turned up.
 
 Each filter is a zero-delay feedback state variable filter. The band pass integrator leaks, more and more as the
 band pass bends into a soft clip curve, and that is what holds the resonance down; at small levels

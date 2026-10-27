@@ -449,7 +449,7 @@ controls:
   # low pass (0.0) through a notch (0.5) to the high pass (1.0), on CC 39, and powers up at CC 4,
   # 0.0, the low pass. The favorites are Filter 2's, and Filter 1's Cutoff and Mod Amts beside them.
   - { entry: 66, module: FILTER_1,  key: GAIN_1,       label: Gain 1,       cc: 0,   value: 64, hint_inputs: [AUDIO_IN_1], set: set_gain_1 }
-  - { entry: 67, module: FILTER_1,  key: GAIN_2,       label: Gain 2,       cc: 0,   value: 64, hint_inputs: [AUDIO_IN_2], set: set_gain_2 }
+  - { entry: 67, module: FILTER_1,  key: GAIN_2,       label: Gain 2,       cc: 0,   value: 4,  hint_inputs: [AUDIO_IN_2], set: set_gain_2 }
   - { entry: 68, module: FILTER_1,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 100, favorite: true, set: set_cutoff }
   - { entry: 69, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 0,   value: 4,  set: set_resonance }
   - { entry: 70, module: FILTER_1,  key: MODE,         label: Mode,         cc: 39,  value: 4, hint: LP to Notch to HP, set: set_mode }
@@ -481,7 +481,7 @@ controls:
   # Mod 2 In, EG 2, the organ envelope, at 1.0 (CC 124).
   - { entry: 86, module: AMP_1,     key: GAIN_1,       label: Gain 1,       cc: 0,   value: 4,  hint_inputs: [AUDIO_IN_1], set: set_gain_1 }
   - { entry: 87, module: AMP_1,     key: GAIN_2,       label: Gain 2,       cc: 15,  value: 88, hint_inputs: [AUDIO_IN_2], favorite: true, set: set_gain_2 }
-  - { entry: 88, module: AMP_1,     key: MOD_1_2_MIX,  label: Mod 1/2 Mix,  cc: 36,  value: 4, hint_inputs: [MOD_1_IN, MOD_2_IN], set: set_modulation_mix }
+  - { entry: 88, module: AMP_1,     key: MOD_1_2_MIX,  label: Mod 1/2 Mix,  cc: 36,  value: 4, hint_inputs: [MOD_1_IN, MOD_2_IN], favorite: true, set: set_modulation_mix }
   - { entry: 89, module: CHORUS_1,  key: MIX,          label: Mix,          cc: 93,  value: 64, favorite: true, set: set_mix }
   - { entry: 90, module: CHORUS_1,  key: RATE,         label: Rate,         cc: 58,  value: 64, set: set_rate }
   - { entry: 91, module: CHORUS_1,  key: DEPTH,        label: Depth,        cc: 59,  value: 64, set: set_depth }

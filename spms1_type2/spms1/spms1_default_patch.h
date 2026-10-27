@@ -308,7 +308,7 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {576,   4},  // Mixer 2 Level 4 value
   {577,  64},  // Mixer 2 Out Level value
   {578,  64},  // Filter 1 Gain 1 value
-  {579,  64},  // Filter 1 Gain 2 value
+  {579,   4},  // Filter 1 Gain 2 value
   {580, 100},  // Filter 1 Cutoff value
   {581,   4},  // Filter 1 Resonance value
   {582,   4},  // Filter 1 Mode value
