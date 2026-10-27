@@ -141,8 +141,8 @@ puts the default patch back. Keep a patch with Save JSON, or in the synth with S
       columns two or four to a row, and in one column (as on a phone) by the arrows at the right of
       its heading, changing places with the panel next to it in the order of the columns one after
       another. Where the panels are is kept in the browser, the same for every patch, and Reset Layout puts them back:
-      Osc 1 and Osc 2 heading the first two columns, then Filter 1 to Delay 1, and the modulation,
-      Controller to LFO 1 and then Mixer 1, last. Moving a panel and Reset Layout are undone by Undo, as a change to the patch is
+      the modulation, Controller to LFO 1 and then Mixer 1, in the first column, the sources, Osc 1 to
+      Mixer 2, in the second, Filter 1 and Filter 2 in the third, and Amp 1 to Delay 1 in the last. Moving a panel and Reset Layout are undone by Undo, as a change to the patch is
     - A note in parentheses follows a parameter's name there: its range, as "(White to Red)" on
       Noise 1 Color, or, on a level or a modulation amount, what the patch routes to the input it
       scales, as "(Osc 1 Sub)" on Mixer 2 Level 3, kept up to date as the routing changes. On the
