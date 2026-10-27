@@ -505,8 +505,10 @@ so the wheel can take something out, or the other way, with no mixer to turn it 
 shows it with the keyboard's signals, on its Controller node, the forms as outputs below it, and
 as a wheel beside the soft keyboard.
 
-Slots 12 to 37 are General 1 and General 2, two more control slots that no parameter owns, read
-from CC#16 and CC#17, General Purpose Controllers 1 and 2. Each CC fills thirteen slots at once, each
+Slots 12 to 37 are General 1 and General 2, two more control slots that no parameter owns. They
+have no CC at power-up, so they hold 0.0 until a patch gives them one, CC#16 and CC#17, General
+Purpose Controllers 1 and 2, say: CC#99 = 115, CC#98 = 96, CC#6 = 16 for General 1 and CC#98 = 97,
+CC#6 = 17 for General 2, as the examples below do. Each CC fills thirteen slots at once, each
 a form of its value u, which runs 0.0 to 1.0 from value 4 to value 124: General n itself, Rev
 1 - u, Inv -u, Rev Inv u - 1, Bipolar u - 0.5, Bipolar Inv 0.5 - u, Sin sin(u * pi / 2), Cos
 cos(u * pi / 2), Lo min(1, 2 - 2u), Hi min(1, 2u), Neg max(0, 1 - 2u), Mid 1 - |2u - 1|
@@ -920,10 +922,11 @@ the editor, which sends the same.
 - A mod wheel that closes the filter as it rises: CC#99 = 113, CC#98 = 27 and 32, CC#6 = 10 puts Mod Wheel
   Inv on both filters' Mod 2 inputs in the LFO's place. With CC#25 at value 64, the wheel closes the
   filter from Cutoff down, an octave at its top (two with CC#25 at the top)
-- A knob that detunes Osc 2: CC#99 = 114, CC#98 = 47, CC#6 = 16 points Osc 2 Pitch Fine at
-  General 1 Bipolar, so CC#16 moves it from -60 to +60 cents, in tune at value 64
-- A knob that crossfades the oscillators: CC#99 = 114, CC#98 = 61, CC#6 = 18 and CC#98 = 62,
-  CC#6 = 19 point Mixer 2 Level 1 at General 1 Sin and Level 2 at General 1 Cos, so CC#16 takes
+- A knob that detunes Osc 2: CC#99 = 115, CC#98 = 96, CC#6 = 16 gives General 1 CC#16, and
+  CC#99 = 114, CC#98 = 47, CC#6 = 16 points Osc 2 Pitch Fine at General 1 Bipolar, so CC#16 moves
+  it from -60 to +60 cents, in tune at value 64
+- A knob that crossfades the oscillators: CC#99 = 115, CC#98 = 96, CC#6 = 16 gives General 1
+  CC#16, and CC#99 = 114, CC#98 = 61, CC#6 = 18 and CC#98 = 62, CC#6 = 19 point Mixer 2 Level 1 at General 1 Sin and Level 2 at General 1 Cos, so CC#16 takes
   Osc 2 out as it brings Osc 1 in, at equal power: at value 64 both are at 0.707, as loud as
   the default patch's 0.7
 - A pitch bend for Osc 2 alone: CC#99 = 116, CC#98 = 4, CC#6 = 4 sets Pitch 1 Out 1 Bend Sw

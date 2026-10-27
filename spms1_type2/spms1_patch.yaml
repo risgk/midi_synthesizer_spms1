@@ -495,11 +495,11 @@ controls:
   # for its CC, whichever it is, unless a control without the mark has it too, so that the patch
   # saved loads with it at 0. The general controls, unmarked, are saved as set.
   - { entry: 95, controller: true, performance: true, key: MOD_WHEEL, label: Mod Wheel, cc: 1,   value: 4 }
-  # The general controls, on CC 16 and 17, General Purpose Controllers 1 and 2 in the MIDI spec,
-  # each filling its six slots (see `signals`). They power up at CC 4, 0.0, and the default patch
-  # routes none of them.
-  - { entry: 96, controller: true, key: GENERAL_1, label: General 1, cc: 16,  value: 4 }
-  - { entry: 97, controller: true, key: GENERAL_2, label: General 2, cc: 17,  value: 4 }
+  # The general controls, each filling its slots (see `signals`). They have no CC, so they hold
+  # 0.0 until a patch gives them one, CC 16 and 17 being General Purpose Controllers 1 and 2 in the
+  # MIDI spec, and the default patch routes none of them. Favorites, so that they are at hand.
+  - { entry: 96, controller: true, key: GENERAL_1, label: General 1, cc: 0,   value: 4, favorite: true }
+  - { entry: 97, controller: true, key: GENERAL_2, label: General 2, cc: 0,   value: 4, favorite: true }
   # Amp 1 Limiter Sw, after the controllers so that no entry before it moves: the amp's look-ahead
   # limiter, on at CC 64 and above. It has no CC and powers up on (CC 124); off, the peaks past one
   # unit reach the clamp. Either way the amp's output comes 1 ms late.

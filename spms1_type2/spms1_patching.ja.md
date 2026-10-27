@@ -485,8 +485,10 @@ Mod Wheel スロットと General スロットを埋めます。後述を参照�
 鍵盤のシグナルと並べて Controller ノードに表示し、形はその下に出力として並べ、ソフトキーボードの横に
 ホイールとしても置いています。
 
-スロット 12〜37 の General 1 と General 2 も、どのパラメータにも属さないコントロールスロットで、
-CC#16 と CC#17（General Purpose Controller 1 と 2）を読みます。1 つの CC が 13 のスロットを同時に埋め、
+スロット 12〜37 の General 1 と General 2 も、どのパラメータにも属さないコントロールスロットです。
+起動時は CC がないので、パッチで CC を割り当てるまで 0.0 です。割り当てるには、例えば CC#16 と CC#17
+（General Purpose Controller 1 と 2）を、General 1 は CC#99 = 115, CC#98 = 96, CC#6 = 16、General 2 は
+CC#98 = 97, CC#6 = 17 で割り当てます（下の例もそうしています）。1 つの CC が 13 のスロットを同時に埋め、
 それぞれが値 4〜124 で 0.0〜1.0 を取る値 u の形の 1 つです: General n そのもの、Rev 1 - u、Inv -u、
 Rev Inv u - 1、Bipolar u - 0.5、Bipolar Inv 0.5 - u、Sin sin(u * pi / 2)、Cos cos(u * pi / 2)、
 Lo min(1, 2 - 2u)、Hi min(1, 2u)、Neg max(0, 1 - 2u)、Mid 1 - |2u - 1|、
@@ -854,9 +856,10 @@ Pitch Mod 1 Sw は CC#118 にあり、ほかは CC を持ちません。値 64 �
 - 上げるほどフィルタを閉じるモジュレーションホイール: CC#99 = 113, CC#98 = 27 と 32, CC#6 = 10 で LFO の代わりに
   Mod Wheel Inv を両フィルタの Mod 2 入力に置きます。CC#25 を値 64 にすると、ホイールは上げるほど
   Cutoff から下へフィルタを閉じ、上端で 1 オクターブ下がります（CC#25 も最大なら 2 オクターブ）
-- Osc 2 をデチューンするつまみ: CC#99 = 114, CC#98 = 47, CC#6 = 16 で Osc 2 Pitch Fine を
-  General 1 Bipolar に向けます。CC#16 で -60〜+60 セント動き、値 64 で音程が合います
-- オシレータをクロスフェードするつまみ: CC#99 = 114, CC#98 = 61, CC#6 = 18 と CC#98 = 62, CC#6 = 19 で
+- Osc 2 をデチューンするつまみ: CC#99 = 115, CC#98 = 96, CC#6 = 16 で General 1 に CC#16 を割り当て、
+  CC#99 = 114, CC#98 = 47, CC#6 = 16 で Osc 2 Pitch Fine を General 1 Bipolar に向けます。CC#16 で -60〜+60 セント動き、値 64 で音程が合います
+- オシレータをクロスフェードするつまみ: CC#99 = 115, CC#98 = 96, CC#6 = 16 で General 1 に CC#16 を割り当て、
+  CC#99 = 114, CC#98 = 61, CC#6 = 18 と CC#98 = 62, CC#6 = 19 で
   Mixer 2 Level 1 を General 1 Sin に、Level 2 を General 1 Cos に向けます。CC#16 を上げるほど Osc 1 が入り、
   Osc 2 が抜けます。等電力なので、値 64 では両方 0.707 で、デフォルトのパッチの 0.7 と同じ音量です
 - Osc 2 だけのピッチベンド: CC#99 = 116, CC#98 = 4, CC#6 = 4 で Pitch 1 Out 1 Bend Sw をオフにします。
