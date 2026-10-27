@@ -39,14 +39,13 @@ module Spms1
     def initialize(sample_rate)
       @sample_rate = sample_rate
       @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (48000.0 / @sample_rate) * (CONTROL_RATE_DIVISOR / 4.0)
-      # Audio In 1 starts closed and Audio In 2 open, as the default patch sets them, so that the
-      # smoothing does not sweep either at power-up.
+      # The gains start at 0.0, so that the sound comes in through the smoothing at power-up.
       @gain = 0.0
       @stage_1_gain = 0.0
       @current_gain = 0.0
-      @gain_2 = 1.0
-      @stage_1_gain_2 = 1.0
-      @current_gain_2 = 1.0
+      @gain_2 = 0.0
+      @stage_1_gain_2 = 0.0
+      @current_gain_2 = 0.0
       @modulation_mix = 0.0
       @stage_1_modulation_mix = 0.0
       @current_modulation_mix = 0.0
