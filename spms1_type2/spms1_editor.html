@@ -4076,7 +4076,7 @@
   // Where each panel sits, by column, top to bottom: CONTROL_PANELS's columns until a panel is
   // dragged by its heading, and then what was dragged, kept in this browser for every patch, as the
   // Controls tab's options are, rather than in the patch, as it does not change the sound. A panel
-  // a patch hides keeps its place, and one the kept layout does not know goes to its own column.
+  // the kept layout does not know goes to its own column.
   const PANEL_LAYOUT_KEY = 'spms1-type2-editor-controls-layout';
   const PANEL_BY_ID = Object.fromEntries(CONTROL_PANELS.map(p => [p.module || 'GENERAL', p]));
   function defaultPanelLayout() {
@@ -4263,8 +4263,8 @@
     const cols = [...document.querySelectorAll('#controls .editor-column')];
     const col = cols.indexOf(drop.parentNode);
     if (e.type === 'pointerup' && col >= 0) {
-      // Before the next panel shown in the column, in the kept order, which holds the panels a
-      // patch hides as well; at the end of the column if none follows.
+      // Before the next panel in the column, in the kept order; at the end of the column if none
+      // follows.
       let next = drop.nextElementSibling;
       while (next && (!next.dataset.panel || next === panel)) next = next.nextElementSibling;
       const before = JSON.stringify(panelLayout);
@@ -4285,8 +4285,7 @@
   // A panel moved a place up or down, in the order of one column, the columns one after another:
   // it changes places with the panel shown next to it, so that one moved past the top or the bottom
   // of a column goes to the next, as it would be seen with the columns two or four to a row, each
-  // column keeps as many panels as it had, and a move back puts both where they were. A panel a
-  // patch hides stays where it is.
+  // column keeps as many panels as it had, and a move back puts both where they were.
   function movePanel(id, other, delta) {
     if (!other) return;
     const a = panelLayout.find(ids => ids.includes(id));
@@ -4314,9 +4313,8 @@
     panelLayout.forEach((ids, col) => ids.forEach(id => {
       const p = PANEL_BY_ID[id];
       const items = panelItems(p).filter(c => favoritesOnly ? state.favorites.has(c.key) : (showNoCC || state.cc[c.key] || state.favorites.has(c.key)));
-      // Mixer 1 has no CC by default, so its panel appears only once a patch gives it one, or
-      // with the parameters that have none shown.
-      if (!items.length) return;
+      // A panel with none of its parameters shown keeps its title, so that every module keeps its
+      // place, and can be moved.
       const panel = document.createElement('div');
       panel.className = 'panel colored';
       panel.dataset.panel = id;
@@ -4324,7 +4322,7 @@
       panel.innerHTML = `<h2>${p.title}<span class="panel-move">` +
         `<button type="button" class="btn" data-move="up" aria-label="Move ${p.title} up" title="Move up">&#9650;</button>` +
         `<button type="button" class="btn" data-move="down" aria-label="Move ${p.title} down" title="Move down">&#9660;</button>` +
-        `</span></h2><div class="control-row">` + items.map(c => `
+        `</span></h2>` + (items.length ? '<div class="control-row">' : '') + items.map(c => `
         <div class="slider-knob-zone" data-ctrl="${c.key}">
           <button type="button" class="fav-toggle" aria-pressed="false">&#9733;</button>
           <div class="slider-label">${escapeHTML(c.label)} <span class="ctl-sub"><span class="ctl-hint"></span><span class="cc-num"></span></span></div>
@@ -4333,7 +4331,7 @@
             <span class="slider-value"></span>
             <span class="slider-norm" title="The value the synth sees in the slot"></span>
           </div>
-        </div>`).join('') + '</div>';
+        </div>`).join('') + (items.length ? '</div>' : '');
       cols[col].appendChild(panel);
     }));
     cols[3].appendChild(document.getElementById('controls-foot'));

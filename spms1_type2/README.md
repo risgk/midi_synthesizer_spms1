@@ -135,7 +135,8 @@ puts the default patch back. Keep a patch with Save JSON, or in the synth with S
     - Its Controls tab shows a slider for each parameter, those with no CC in blue; these are
       hidden until a CC is given to one or it is marked as a favorite, unless "Show parameters with
       no CC", cleared by default, is ticked, and the choice is remembered. The slider of one with no
-      CC sets the value its slot holds, sent as NRPN
+      CC sets the value its slot holds, sent as NRPN. A module with none of its parameters shown
+      keeps its panel, its title alone
     - "Show favorites only", ticked by default, shows the parameters marked as favorites (the star)
       alone, with or without a CC, and the choice is remembered
     - A panel there is moved by dragging its heading, within its column or to another, with the
