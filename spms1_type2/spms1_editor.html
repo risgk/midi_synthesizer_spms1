@@ -3408,7 +3408,8 @@
     const blob = new Blob([JSON.stringify(serialize(state, true), null, 2) + '\n'], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = (state.name.trim() || 'patch').replace(/[^\w\-]+/g, '_') + '.json';
+    // The name of the patch, then the synth's, so that a file says which synth it is for.
+    a.download = (state.name.trim() || 'patch').replace(/[^\w\-]+/g, '_') + '-spms1_type2.json';
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   });
