@@ -70,7 +70,8 @@ module Spms1
       # The state of the low pass filter in front of the line.
       @filtered = 0.0
 
-      # Each parameter at its power-on value, and its smoothing at 0.0, as every module's starts.
+      # Each parameter at its power-on value, and its smoothing where the parameter at 0.0 puts it,
+      # as every module's starts.
       @rate = 0.5
       @stage_1_rate = 0.0
       @current_rate = 0.0

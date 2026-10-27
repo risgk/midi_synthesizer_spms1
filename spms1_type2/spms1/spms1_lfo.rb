@@ -44,7 +44,7 @@ module Spms1
       @phase = 0.0
       @reset_high = 0.0
       @reset_switch = 0.0
-      # Middle of the range, its power-on value; its smoothing starts at 0.0, as every module's does.
+      # Middle of the range, its power-on value; its smoothing starts where Rate 0.0 puts it, as every module's does.
       @rate = 0.5
       @stage_1_rate = 0.0
       @current_rate = 0.0

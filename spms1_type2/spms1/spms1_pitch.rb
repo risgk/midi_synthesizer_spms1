@@ -68,8 +68,10 @@ module Spms1
       @current_bend_depth = 0.0
       @stretch = 0.0
       @stretch_factor = 1.0
-      @stage_1_stretch_factor = 0.0
-      @current_stretch_factor = 0.0
+      # The smoothing starts where Stretch 0.0 puts it, a factor of 1.0, as every module's starts
+      # where its parameters at 0.0 put it.
+      @stage_1_stretch_factor = 1.0
+      @current_stretch_factor = 1.0
     end
 
     # Glide, the portamento time, is unipolar, [0.0, 1.0]; see TIME_BASE for scaling details. 0.0 turns the portamento off.

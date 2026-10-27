@@ -79,7 +79,8 @@ module Spms1
       @filtered_l = 0.0
       @filtered_r = 0.0
 
-      # Each parameter at its power-on value, and its smoothing at 0.0, as every module's starts.
+      # Each parameter at its power-on value, and its smoothing where the parameter at 0.0 puts it,
+      # as every module's starts.
       @time = 0.5
       @stage_1_time = 0.0
       @current_time = 0.0

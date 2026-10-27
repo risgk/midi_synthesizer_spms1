@@ -188,19 +188,21 @@ module Spms1
       @mode_lp = 1.0
       @mode_hp = 0.0
 
+      # The smoothing starts where the parameters at 0.0 put it, as every module's does: Mode 0.0 is
+      # the low pass alone.
       @stage_1_cutoff = 0.0
       @stage_1_resonance = 0.0
       @stage_1_modulation_1_depth = 0.0
       @stage_1_modulation_2_depth = 0.0
       @stage_1_pitch_amount = 0.0
-      @stage_1_mode_lp = 0.0
+      @stage_1_mode_lp = 1.0
       @stage_1_mode_hp = 0.0
       @current_cutoff = 0.0
       @current_resonance = 0.0
       @current_modulation_1_depth = 0.0
       @current_modulation_2_depth = 0.0
       @current_pitch_amount = 0.0
-      @current_mode_lp = 0.0
+      @current_mode_lp = 1.0
       @current_mode_hp = 0.0
 
       @g = 0.0
