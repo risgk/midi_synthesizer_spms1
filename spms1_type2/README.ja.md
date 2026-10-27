@@ -105,7 +105,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.3.4
 
 1. お気に入り: Controls タブは "Show favorites only" にチェックが入った状態で開き、デフォルトパッチで
    お気に入りになっている 17 個のパラメータを表示します:
-   Pitch 1 Glide、EG 1 Attack・Decay・Sustain、LFO 1 Rate、Mixer 1 Level 1（CC なし）、Osc 1 Wave・Pitch Mod 1 Amt・Pitch Mod 2 Amt、
+   Pitch 1 Glide、EG 1 Attack・Decay・Sustain、LFO 1 Rate、Osc 1 Wave・Pitch Mod 1 Amt・Pitch Mod 2 Amt、Mixer 2 Level 1、
    Filter 2 Cutoff・Resonance・Mod 1 Amt・Mod 2 Amt、
    Amp 1 Gain 2、Chorus 1 Mix、Delay 1 Mix・Time。
    気に入ったものは星で追加できます。Osc 2 の PW と各 Mod Amt は Osc 1 と、Filter 1 の Resonance（CC なし）以外の
