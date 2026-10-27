@@ -344,8 +344,8 @@ both.
 
 Filter 1 and Filter 2 run in series, one low pass of the fourth order (24 dB/oct): the two are on
 the same CCs and power up alike, so each of those CCs moves both, but for the Resonance:
-Filter 2's, on CC#71, powers up at its bottom, Q 0.71, and Filter 1's, on CC#119, at Q 4.0, so that
-the resonant peak is Filter 1's. Each filter takes Audio In 1 and Audio In 2 at Gain 1 and Gain 2, which have no CC and
+Filter 2's, on CC#71, powers up at Q 4.0, and Filter 1's, on CC#119, at its bottom, Q 0.71, so that
+the resonant peak is Filter 2's. Each filter takes Audio In 1 and Audio In 2 at Gain 1 and Gain 2, which have no CC and
 power up at unity. Amp 1 takes Filter 1 on Audio In 1 at Gain 1, which has no CC and powers up at
 0.0, silent, and Filter 2 on Audio In 2 at Gain 2, on CC#15.
 

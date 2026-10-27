@@ -434,9 +434,9 @@ controls:
   # cutoff, as Osc 1's PW Mod Amts are for the pulse width. Mod 1 Amt powers up at CC 28, 0.2, the
   # envelope opening the cutoff two octaves, and Mod 2 Amt at CC 4, 0.0, the LFO leaving it alone
   # until it is turned up. Cutoff (CC 74) powers up at CC 100, 0.8. Resonance is each filter's
-  # own: Filter 1's on CC 119 powers up at CC 64, Q 4.0, and Filter 2's on CC 71 at CC 4, Q 0.71,
-  # so that the peak at the cutoff is mostly Filter 1's, and the two of them together do not
-  # overdrive the second at the resonance Filter 1 alone was made for. Mod 1 Pol
+  # own: Filter 2's on CC 71 powers up at CC 64, Q 4.0, and Filter 1's on CC 119 at CC 4, Q 0.71,
+  # so that the peak at the cutoff is Filter 2's, the one the favorites and CC 71 adjust, rather
+  # than the two of them together, which overdrives the second at the resonance one alone was made for. Mod 1 Pol
   # and Mod 2 Pol set the sign and the depth of each modulation, from -1.0 at CC 4 through none at
   # CC 64 to +1.0 at CC 124. Mod 1 Pol, on CC 117, powers up at CC 124, so the envelope moves the
   # cutoff as Mod 1 Amt says, and turned below CC 64 it makes the envelope close the filter. Mod 2
@@ -447,7 +447,7 @@ controls:
   - { entry: 66, module: FILTER_1,  key: GAIN_1,       label: Gain 1,       cc: 0,   value: 64, hint_inputs: [AUDIO_IN_1], set: set_gain_1 }
   - { entry: 67, module: FILTER_1,  key: GAIN_2,       label: Gain 2,       cc: 0,   value: 64, hint_inputs: [AUDIO_IN_2], set: set_gain_2 }
   - { entry: 68, module: FILTER_1,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 100, set: set_cutoff }
-  - { entry: 69, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 119, value: 64, set: set_resonance }
+  - { entry: 69, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 119, value: 4,  set: set_resonance }
   - { entry: 70, module: FILTER_1,  key: MODE,         label: Mode,         cc: 39,  value: 4, hint: LP to Notch to HP, set: set_mode }
   - { entry: 71, module: FILTER_1,  key: PITCH_AMT, label: Pitch Amt, cc: 9, value: 4, hint_inputs: [PITCH_IN], set: set_pitch_amount }
   - { entry: 72, module: FILTER_1,  key: MOD_1_AMT,    label: Mod 1 Amt,    cc: 24,  value: 28, hint_inputs: [MOD_1_IN], set: set_modulation_1_amount }
@@ -457,7 +457,7 @@ controls:
   - { entry: 76, module: FILTER_2,  key: GAIN_1,       label: Gain 1,       cc: 0,   value: 64, hint_inputs: [AUDIO_IN_1], set: set_gain_1 }
   - { entry: 77, module: FILTER_2,  key: GAIN_2,       label: Gain 2,       cc: 0,   value: 64, hint_inputs: [AUDIO_IN_2], set: set_gain_2 }
   - { entry: 78, module: FILTER_2,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 100, favorite: true, set: set_cutoff }
-  - { entry: 79, module: FILTER_2,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 4,  favorite: true, set: set_resonance }
+  - { entry: 79, module: FILTER_2,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 64, favorite: true, set: set_resonance }
   - { entry: 80, module: FILTER_2,  key: MODE,         label: Mode,         cc: 39,  value: 4, hint: LP to Notch to HP, set: set_mode }
   - { entry: 81, module: FILTER_2,  key: PITCH_AMT, label: Pitch Amt, cc: 9, value: 4, hint_inputs: [PITCH_IN], set: set_pitch_amount }
   - { entry: 82, module: FILTER_2,  key: MOD_1_AMT,    label: Mod 1 Amt,    cc: 24,  value: 28, hint_inputs: [MOD_1_IN], favorite: true, set: set_modulation_1_amount }

@@ -46,8 +46,8 @@ envelope, swing both ways. See the examples below.
 
 Two filters of the same kind, in series by default, Filter 1 into Filter 2 into Amp 1, as one low
 pass of the fourth order (24 dB/oct): the two take the same CCs and power-up values, so each of
-those CCs moves both, but for the Resonance: Filter 2's, on CC#71, powers up at its bottom, value 4,
-Q 0.71, and Filter 1's, on CC#119, at value 64, Q 4.0, so that the resonant peak is Filter 1's alone
+those CCs moves both, but for the Resonance: Filter 2's, on CC#71, powers up at value 64, Q 4.0, and
+Filter 1's, on CC#119, at its bottom, value 4, Q 0.71, so that the resonant peak is Filter 2's alone
 rather than the two of them together. Either can be set apart from the other, by NRPN or by a CC of its own (see Patch Editing below).
 
 Each takes two audio inputs, Audio In 1 and Audio In 2, and sums them, each after its own gain,
@@ -714,7 +714,7 @@ semitone at the top, unmoved at note 60.
 
 Resonance raises the resonant peak 6 dB every 24 CC steps, Q doubling each time, from
 Q 0.71 at value 4 up to Q 9.51 at value 94, and from there Q rises faster and faster, without a sudden
-step, through Q 35 at value 108 to Q 256 at value 118. Filter 1's, on CC#119, powers up at value 64, Q 4.0, and Filter 2's, on CC#71, at value 4, Q 0.71. Above value 118 the filter oscillates on its own: a sine at the cutoff
+step, through Q 35 at value 108 to Q 256 at value 118. Filter 2's, on CC#71, powers up at value 64, Q 4.0, and Filter 1's, on CC#119, at value 4, Q 0.71. Above value 118 the filter oscillates on its own: a sine at the cutoff
 frequency, growing to its full level of about 0.5 by value 123 and holding it to the top of the
 dial. Low in that range the oscillation builds slowly and shares the filter with the input; at
 the top it takes the input over. Its level holds across the cutoff range down to about 150 Hz

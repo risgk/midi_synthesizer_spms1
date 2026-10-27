@@ -328,8 +328,8 @@ Pitch Fine（CC#76）で Osc 1 に対する音程を決めます。起動時は 
 Osc 1 に従います。Mod Amt と PW には Osc 1 と同じ CC が割り当ててあるので、1 つの CC で両方が動きます。
 
 Filter 1 と Filter 2 は直列で、4 次（24 dB/oct）のローパスになります。Filter 2 は Filter 1 と同じ CC と起動時の値を持ち、
-それらの CC で両方が動きます。ただし Resonance だけは別で、Filter 2 のもの（CC#71）は起動時に最小の Q 0.71、
-Filter 1 のもの（CC#119）は Q 4.0 なので、レゾナンスのピークは Filter 1 のものになります。それぞれのフィルタは Audio In 1 と Audio In 2 を Gain 1 と Gain 2
+それらの CC で両方が動きます。ただし Resonance だけは別で、Filter 2 のもの（CC#71）は起動時 Q 4.0、
+Filter 1 のもの（CC#119）は最小の Q 0.71 なので、レゾナンスのピークは Filter 2 のものになります。それぞれのフィルタは Audio In 1 と Audio In 2 を Gain 1 と Gain 2
 （CC なし、起動時は等倍）で受け取ります。Amp 1 は Audio In 1 に Filter 1 を Gain 1（CC なし、起動時 0.0 で無音）で、Audio In 2 に Filter 2 を Gain 2（CC#15）で
 受け取ります。
 
