@@ -48,8 +48,8 @@ modules:
   - { key: EG_2, id: 3, label: EG 2, class: EnvGen, process: [GATE_IN] }
   - { key: LFO_1,     id: 4, label: LFO 1, class: LFO, process: [RATE_MOD_IN, LEVEL_MOD_IN, RESET_IN] }
   - { key: MIXER_1,   id: 5, label: Mixer 1, class: Mixer, process: [IN_1, IN_2, IN_3, IN_4] }
-  - { key: OSC_1,     id: 6, label: Osc 1, class: Osc, process: [PITCH_IN, MOD_1_IN, MOD_2_IN] }
-  - { key: OSC_2,      id: 7, label: Osc 2, class: Osc, method: process_synced, process: [PITCH_IN, MOD_1_IN, MOD_2_IN, SYNC_IN] }
+  - { key: OSC_1,     id: 6, label: Osc 1, class: Osc, process: [PITCH_IN, PITCH_MOD_1_IN, PITCH_MOD_2_IN, PW_MOD_1_IN, PW_MOD_2_IN] }
+  - { key: OSC_2,      id: 7, label: Osc 2, class: Osc, method: process_synced, process: [PITCH_IN, PITCH_MOD_1_IN, PITCH_MOD_2_IN, PW_MOD_1_IN, PW_MOD_2_IN, SYNC_IN] }
   - { key: NOISE_1,    id: 8, label: Noise 1, class: Noise, process: [] }
   - { key: MIXER_2,    id: 9, label: Mixer 2, class: Mixer, process: [IN_1, IN_2, IN_3, IN_4] }
   - { key: FILTER_1,  id: 10, label: Filter 1, class: Filter, process: [AUDIO_IN_1, AUDIO_IN_2, PITCH_IN, MOD_1_IN, MOD_2_IN] }
@@ -70,11 +70,11 @@ modules:
 # instead comes a sample late. Mixer 1 runs after the modulation sources and ahead of the oscillators, so
 # it sees this sample's LFO and envelopes and can feed the oscillators, the filter and the amp
 # without a sample's delay. The default patch leaves it unused: the LFO goes straight to the
-# oscillator, on Mod 2 In: Pitch Mod 2 Amt (CC 13) powers up at 0.0, and at its top, with Osc 1
+# oscillator, on Pitch Mod 2 In and PW Mod 2 In: Pitch Mod 2 Amt (CC 13) powers up at 0.0, and at its top, with Osc 1
 # Pitch Mod 2 Pol at +0.2, the LFO at full level swings the pitch an octave either way. The LFO
 # itself powers up at Level 1.0, so CC 13 alone sets the vibrato's depth. PW Mod 2 Amt, on CC 103,
 # takes the LFO to the pulse width and powers up at 0.0. Osc 1 Pitch In takes the note from
-# Pitch 1 whole, in tune. Osc 1 Mod 1 In takes EG 1, for a pitch envelope, but Pitch Mod 1
+# Pitch 1 whole, in tune. Osc 1 Pitch Mod 1 In and PW Mod 1 In take EG 1, for a pitch envelope, but Pitch Mod 1
 # Amt (CC 89) and PW Mod 1 Amt (CC 8) power up at 0.0 too. EG 1 and the LFO also reach
 # Mod 1 In and Mod 2 In of both filters: Mod 1 Amt (CC 24) powers up at 0.2, so the envelope
 # opens the cutoff two octaves above where Cutoff (CC 74), at 0.8, puts it, and Mod 2 Amt (CC 25)
@@ -257,35 +257,39 @@ inputs:
   - { entry: 10, module: MIXER_1,     key: IN_3,        label: In 3,           name: In 3,           source: NONE }
   - { entry: 11, module: MIXER_1,     key: IN_4,        label: In 4,           name: In 4,           source: NONE }
   - { entry: 12, module: OSC_1,       key: PITCH_IN,       label: Pitch In,       name: Pitch In,       source: PITCH_1_OUTPUT_1 }
-  - { entry: 13, module: OSC_1,       key: MOD_1_IN,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
-  - { entry: 14, module: OSC_1,       key: MOD_2_IN,       label: Mod 2 In,   name: Mod 2 In,   source: LFO_1_OUTPUT }
-  - { entry: 15, module: OSC_2,       key: PITCH_IN,       label: Pitch In,       name: Pitch In,       source: PITCH_1_OUTPUT_2 }
-  - { entry: 16, module: OSC_2,       key: MOD_1_IN,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
-  - { entry: 17, module: OSC_2,       key: MOD_2_IN,       label: Mod 2 In,       name: Mod 2 In,       source: LFO_1_OUTPUT }
-  - { entry: 18, module: OSC_2,       key: SYNC_IN,        label: Sync In,        name: Sync In,        source: OSC_1_OUTPUT_SAW, gate: true }
-  - { entry: 19, module: MIXER_2,     key: IN_1,        label: In 1,           name: In 1,           source: OSC_1_OUTPUT }
-  - { entry: 20, module: MIXER_2,     key: IN_2,        label: In 2,           name: In 2,           source: OSC_2_OUTPUT }
-  - { entry: 21, module: MIXER_2,     key: IN_3,        label: In 3,           name: In 3,           source: OSC_1_OUTPUT_SUB }
-  - { entry: 22, module: MIXER_2,     key: IN_4,        label: In 4,           name: In 4,           source: NOISE_1_OUTPUT }
-  - { entry: 23, module: FILTER_1,    key: AUDIO_IN_1,     label: Audio In 1,     name: Audio In 1,     source: MIXER_2_OUTPUT }
-  - { entry: 24, module: FILTER_1,    key: AUDIO_IN_2,     label: Audio In 2,     name: Audio In 2,     source: NONE }
-  - { entry: 25, module: FILTER_1,    key: PITCH_IN,       label: Pitch In,       name: Pitch In,       source: PITCH_1_OUTPUT_1 }
-  - { entry: 26, module: FILTER_1,    key: MOD_1_IN,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
-  - { entry: 27, module: FILTER_1,    key: MOD_2_IN,       label: Mod 2 In,       name: Mod 2 In,       source: LFO_1_OUTPUT }
-  - { entry: 28, module: FILTER_2,    key: AUDIO_IN_1,     label: Audio In 1,     name: Audio In 1,     source: MIXER_2_OUTPUT }
-  - { entry: 29, module: FILTER_2,    key: AUDIO_IN_2,     label: Audio In 2,     name: Audio In 2,     source: FILTER_1_OUTPUT }
-  - { entry: 30, module: FILTER_2,    key: PITCH_IN,       label: Pitch In,       name: Pitch In,       source: PITCH_1_OUTPUT_1 }
-  - { entry: 31, module: FILTER_2,    key: MOD_1_IN,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
-  - { entry: 32, module: FILTER_2,    key: MOD_2_IN,       label: Mod 2 In,       name: Mod 2 In,       source: LFO_1_OUTPUT }
-  - { entry: 33, module: AMP_1,       key: AUDIO_IN_1,     label: Audio In 1,     name: Audio In 1,     source: FILTER_1_OUTPUT }
-  - { entry: 34, module: AMP_1,       key: AUDIO_IN_2,     label: Audio In 2,     name: Audio In 2,     source: FILTER_2_OUTPUT }
-  - { entry: 35, module: AMP_1,       key: MOD_1_IN,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
-  - { entry: 36, module: AMP_1,       key: MOD_2_IN,       label: Mod 2 In,       name: Mod 2 In,       source: EG_2_OUTPUT }
-  - { entry: 37, module: CHORUS_1,    key: AUDIO_IN,       label: Audio In,       name: Audio In,       source: AMP_1_OUTPUT }
-  - { entry: 38, module: DELAY_1,     key: AUDIO_IN_L,     label: Audio In L,     name: Audio In L,     source: CHORUS_1_OUTPUT_L }
-  - { entry: 39, module: DELAY_1,     key: AUDIO_IN_R,     label: Audio In R,     name: Audio In R,     source: CHORUS_1_OUTPUT_R }
-  - { entry: 40, key: OUTPUT_L,    label: L,              name: Final Output L, name_ja: 最終出力 L, source: DELAY_1_OUTPUT_L }
-  - { entry: 41, key: OUTPUT_R,    label: R,              name: Final Output R, name_ja: 最終出力 R, source: DELAY_1_OUTPUT_R }
+  - { entry: 13, module: OSC_1,       key: PITCH_MOD_1_IN, label: Pitch Mod 1 In, name: Pitch Mod 1 In, source: EG_1_OUTPUT }
+  - { entry: 14, module: OSC_1,       key: PITCH_MOD_2_IN, label: Pitch Mod 2 In, name: Pitch Mod 2 In, source: LFO_1_OUTPUT }
+  - { entry: 15, module: OSC_1,       key: PW_MOD_1_IN,    label: PW Mod 1 In,    name: PW Mod 1 In,    source: EG_1_OUTPUT }
+  - { entry: 16, module: OSC_1,       key: PW_MOD_2_IN,    label: PW Mod 2 In,    name: PW Mod 2 In,    source: LFO_1_OUTPUT }
+  - { entry: 17, module: OSC_2,       key: PITCH_IN,       label: Pitch In,       name: Pitch In,       source: PITCH_1_OUTPUT_2 }
+  - { entry: 18, module: OSC_2,       key: PITCH_MOD_1_IN, label: Pitch Mod 1 In, name: Pitch Mod 1 In, source: EG_1_OUTPUT }
+  - { entry: 19, module: OSC_2,       key: PITCH_MOD_2_IN, label: Pitch Mod 2 In, name: Pitch Mod 2 In, source: LFO_1_OUTPUT }
+  - { entry: 20, module: OSC_2,       key: PW_MOD_1_IN,    label: PW Mod 1 In,    name: PW Mod 1 In,    source: EG_1_OUTPUT }
+  - { entry: 21, module: OSC_2,       key: PW_MOD_2_IN,    label: PW Mod 2 In,    name: PW Mod 2 In,    source: LFO_1_OUTPUT }
+  - { entry: 22, module: OSC_2,       key: SYNC_IN,        label: Sync In,        name: Sync In,        source: OSC_1_OUTPUT_SAW, gate: true }
+  - { entry: 23, module: MIXER_2,     key: IN_1,        label: In 1,           name: In 1,           source: OSC_1_OUTPUT }
+  - { entry: 24, module: MIXER_2,     key: IN_2,        label: In 2,           name: In 2,           source: OSC_2_OUTPUT }
+  - { entry: 25, module: MIXER_2,     key: IN_3,        label: In 3,           name: In 3,           source: OSC_1_OUTPUT_SUB }
+  - { entry: 26, module: MIXER_2,     key: IN_4,        label: In 4,           name: In 4,           source: NOISE_1_OUTPUT }
+  - { entry: 27, module: FILTER_1,    key: AUDIO_IN_1,     label: Audio In 1,     name: Audio In 1,     source: MIXER_2_OUTPUT }
+  - { entry: 28, module: FILTER_1,    key: AUDIO_IN_2,     label: Audio In 2,     name: Audio In 2,     source: NONE }
+  - { entry: 29, module: FILTER_1,    key: PITCH_IN,       label: Pitch In,       name: Pitch In,       source: PITCH_1_OUTPUT_1 }
+  - { entry: 30, module: FILTER_1,    key: MOD_1_IN,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
+  - { entry: 31, module: FILTER_1,    key: MOD_2_IN,       label: Mod 2 In,       name: Mod 2 In,       source: LFO_1_OUTPUT }
+  - { entry: 32, module: FILTER_2,    key: AUDIO_IN_1,     label: Audio In 1,     name: Audio In 1,     source: MIXER_2_OUTPUT }
+  - { entry: 33, module: FILTER_2,    key: AUDIO_IN_2,     label: Audio In 2,     name: Audio In 2,     source: FILTER_1_OUTPUT }
+  - { entry: 34, module: FILTER_2,    key: PITCH_IN,       label: Pitch In,       name: Pitch In,       source: PITCH_1_OUTPUT_1 }
+  - { entry: 35, module: FILTER_2,    key: MOD_1_IN,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
+  - { entry: 36, module: FILTER_2,    key: MOD_2_IN,       label: Mod 2 In,       name: Mod 2 In,       source: LFO_1_OUTPUT }
+  - { entry: 37, module: AMP_1,       key: AUDIO_IN_1,     label: Audio In 1,     name: Audio In 1,     source: FILTER_1_OUTPUT }
+  - { entry: 38, module: AMP_1,       key: AUDIO_IN_2,     label: Audio In 2,     name: Audio In 2,     source: FILTER_2_OUTPUT }
+  - { entry: 39, module: AMP_1,       key: MOD_1_IN,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
+  - { entry: 40, module: AMP_1,       key: MOD_2_IN,       label: Mod 2 In,       name: Mod 2 In,       source: EG_2_OUTPUT }
+  - { entry: 41, module: CHORUS_1,    key: AUDIO_IN,       label: Audio In,       name: Audio In,       source: AMP_1_OUTPUT }
+  - { entry: 42, module: DELAY_1,     key: AUDIO_IN_L,     label: Audio In L,     name: Audio In L,     source: CHORUS_1_OUTPUT_L }
+  - { entry: 43, module: DELAY_1,     key: AUDIO_IN_R,     label: Audio In R,     name: Audio In R,     source: CHORUS_1_OUTPUT_R }
+  - { entry: 44, key: OUTPUT_L,    label: L,              name: Final Output L, name_ja: 最終出力 L, source: DELAY_1_OUTPUT_L }
+  - { entry: 45, key: OUTPUT_R,    label: R,              name: Final Output R, name_ja: 最終出力 R, source: DELAY_1_OUTPUT_R }
 
 # Controls, listed in the editor's order, each by its entry: a parameter is one entry of NRPN
 # category 2 (where it takes its value), the same entry of category 3 (which CC fills its control
@@ -356,7 +360,8 @@ controls:
   # Osc 1 in the editor: the waveform and the pulse width, the pitch, how far each modulation
   # moves it and what the top of that is worth, then how far each modulation moves the pulse width. Pitch,
   # unipolar, up to an octave up for a sweep by hand, has no CC and powers up at CC 4, 0.0, no offset, as
-  # Pitch Coarse and Fine do at CC 64. Mod 1 In takes EG 1 and Mod 2 In the LFO, and
+  # Pitch Coarse and Fine do at CC 64. Pitch Mod 1 In and PW Mod 1 In take EG 1 and Pitch
+  # Mod 2 In and PW Mod 2 In the LFO, and
   # every Mod Amt is unipolar and its Mod Pol bipolar, the sign and what the top of the Amt is
   # worth. Pitch Mod 1 Amt and Pitch Mod 2 Amt are on CC 89 and 13, and PW Mod 1 Amt and PW Mod 2
   # Amt on CC 8 and 103; all four power up at CC 4, 0.0. The Mod Pols have no CC: the pitch's
@@ -371,15 +376,15 @@ controls:
   - { entry: 30, module: OSC_1,     key: PITCH_COARSE,  label: Pitch Coarse,  cc: 0,   value: 64, bipolar: true, hint: ±5 Oct, set: set_pitch_coarse }
   - { entry: 31, module: OSC_1,     key: PITCH,         label: Pitch,         cc: 0,   value: 4, hint: 0 to +1 Oct, set: set_pitch }
   - { entry: 32, module: OSC_1,     key: PITCH_FINE,    label: Pitch Fine,    cc: 0,   value: 64, bipolar: true, hint: ±60 Cent, set: set_pitch_fine }
-  - { entry: 33, module: OSC_1,     key: PITCH_MOD_1_AMT, label: Pitch Mod 1 Amt, cc: 89, value: 4, hint_inputs: [MOD_1_IN], favorite: true, set: set_pitch_modulation_1_amount }
+  - { entry: 33, module: OSC_1,     key: PITCH_MOD_1_AMT, label: Pitch Mod 1 Amt, cc: 89, value: 4, hint_inputs: [PITCH_MOD_1_IN], favorite: true, set: set_pitch_modulation_1_amount }
   - { entry: 34, module: OSC_1,     key: PITCH_MOD_1_POL,      label: Pitch Mod 1 Pol, cc: 0, value: 76, bipolar: true, hint: − to +, set: set_pitch_modulation_1_polarity }
   - { entry: 35, module: OSC_1,     key: PITCH_MOD_1_SW, label: Pitch Mod 1 Sw, cc: 118, value: 124, hint: Off/On, set: set_pitch_modulation_1_switch }
-  - { entry: 36, module: OSC_1,     key: PITCH_MOD_2_AMT, label: Pitch Mod 2 Amt, cc: 13, value: 4, hint_inputs: [MOD_2_IN], favorite: true, set: set_pitch_modulation_2_amount }
+  - { entry: 36, module: OSC_1,     key: PITCH_MOD_2_AMT, label: Pitch Mod 2 Amt, cc: 13, value: 4, hint_inputs: [PITCH_MOD_2_IN], favorite: true, set: set_pitch_modulation_2_amount }
   - { entry: 37, module: OSC_1,     key: PITCH_MOD_2_POL,      label: Pitch Mod 2 Pol, cc: 0, value: 76, bipolar: true, hint: − to +, set: set_pitch_modulation_2_polarity }
   - { entry: 38, module: OSC_1,     key: PITCH_MOD_2_SW, label: Pitch Mod 2 Sw, cc: 0, value: 124, hint: Off/On, set: set_pitch_modulation_2_switch }
-  - { entry: 39, module: OSC_1,     key: PW_MOD_1_AMT, label: PW Mod 1 Amt,  cc: 8,   value: 4, hint_inputs: [MOD_1_IN], favorite: true, set: set_pw_modulation_1_amount }
+  - { entry: 39, module: OSC_1,     key: PW_MOD_1_AMT, label: PW Mod 1 Amt,  cc: 8,   value: 4, hint_inputs: [PW_MOD_1_IN], favorite: true, set: set_pw_modulation_1_amount }
   - { entry: 40, module: OSC_1,     key: PW_MOD_1_POL,      label: PW Mod 1 Pol, cc: 0, value: 124, bipolar: true, hint: − to +, set: set_pw_modulation_1_polarity }
-  - { entry: 41, module: OSC_1,     key: PW_MOD_2_AMT, label: PW Mod 2 Amt,  cc: 103, value: 4, hint_inputs: [MOD_2_IN], favorite: true, set: set_pw_modulation_2_amount }
+  - { entry: 41, module: OSC_1,     key: PW_MOD_2_AMT, label: PW Mod 2 Amt,  cc: 103, value: 4, hint_inputs: [PW_MOD_2_IN], favorite: true, set: set_pw_modulation_2_amount }
   - { entry: 42, module: OSC_1,     key: PW_MOD_2_POL,      label: PW Mod 2 Pol, cc: 0, value: 124, bipolar: true, hint: − to +, set: set_pw_modulation_2_polarity }
   # Osc 2: Pitch and Pitch Fine are its own, on CC 85 and 76, to tune it against Osc 1, up to an
   # octave up, and to sweep it for a hard sync: Pitch powers up at CC 5, 10 cents sharp, and Fine
@@ -395,15 +400,15 @@ controls:
   - { entry: 45, module: OSC_2,     key: PITCH_COARSE,  label: Pitch Coarse,  cc: 0,   value: 64, bipolar: true, hint: ±5 Oct, set: set_pitch_coarse }
   - { entry: 46, module: OSC_2,     key: PITCH,         label: Pitch,         cc: 85,  value: 5, hint: 0 to +1 Oct, set: set_pitch }
   - { entry: 47, module: OSC_2,     key: PITCH_FINE,    label: Pitch Fine,    cc: 76,  value: 65, bipolar: true, hint: ±60 Cent, set: set_pitch_fine }
-  - { entry: 48, module: OSC_2,     key: PITCH_MOD_1_AMT, label: Pitch Mod 1 Amt, cc: 89, value: 4, hint_inputs: [MOD_1_IN], set: set_pitch_modulation_1_amount }
+  - { entry: 48, module: OSC_2,     key: PITCH_MOD_1_AMT, label: Pitch Mod 1 Amt, cc: 89, value: 4, hint_inputs: [PITCH_MOD_1_IN], set: set_pitch_modulation_1_amount }
   - { entry: 49, module: OSC_2,     key: PITCH_MOD_1_POL,      label: Pitch Mod 1 Pol, cc: 0, value: 76, bipolar: true, hint: − to +, set: set_pitch_modulation_1_polarity }
   - { entry: 50, module: OSC_2,     key: PITCH_MOD_1_SW, label: Pitch Mod 1 Sw, cc: 0, value: 124, hint: Off/On, set: set_pitch_modulation_1_switch }
-  - { entry: 51, module: OSC_2,     key: PITCH_MOD_2_AMT, label: Pitch Mod 2 Amt, cc: 13, value: 4, hint_inputs: [MOD_2_IN], set: set_pitch_modulation_2_amount }
+  - { entry: 51, module: OSC_2,     key: PITCH_MOD_2_AMT, label: Pitch Mod 2 Amt, cc: 13, value: 4, hint_inputs: [PITCH_MOD_2_IN], set: set_pitch_modulation_2_amount }
   - { entry: 52, module: OSC_2,     key: PITCH_MOD_2_POL,      label: Pitch Mod 2 Pol, cc: 0, value: 76, bipolar: true, hint: − to +, set: set_pitch_modulation_2_polarity }
   - { entry: 53, module: OSC_2,     key: PITCH_MOD_2_SW, label: Pitch Mod 2 Sw, cc: 0, value: 124, hint: Off/On, set: set_pitch_modulation_2_switch }
-  - { entry: 54, module: OSC_2,     key: PW_MOD_1_AMT, label: PW Mod 1 Amt,  cc: 8,   value: 4, hint_inputs: [MOD_1_IN], set: set_pw_modulation_1_amount }
+  - { entry: 54, module: OSC_2,     key: PW_MOD_1_AMT, label: PW Mod 1 Amt,  cc: 8,   value: 4, hint_inputs: [PW_MOD_1_IN], set: set_pw_modulation_1_amount }
   - { entry: 55, module: OSC_2,     key: PW_MOD_1_POL,      label: PW Mod 1 Pol, cc: 0, value: 124, bipolar: true, hint: − to +, set: set_pw_modulation_1_polarity }
-  - { entry: 56, module: OSC_2,     key: PW_MOD_2_AMT, label: PW Mod 2 Amt,  cc: 103, value: 4, hint_inputs: [MOD_2_IN], set: set_pw_modulation_2_amount }
+  - { entry: 56, module: OSC_2,     key: PW_MOD_2_AMT, label: PW Mod 2 Amt,  cc: 103, value: 4, hint_inputs: [PW_MOD_2_IN], set: set_pw_modulation_2_amount }
   - { entry: 57, module: OSC_2,     key: PW_MOD_2_POL,      label: PW Mod 2 Pol, cc: 0, value: 124, bipolar: true, hint: − to +, set: set_pw_modulation_2_polarity }
   - { entry: 58, module: OSC_2,     key: SYNC_SW,      label: Sync Sw,  cc: 112, value: 4, hint: Off/On, set: set_sync_switch }
   # Noise 1: Color crossfades Out from the white (0.0) to the red (1.0), on CC 115, and powers up

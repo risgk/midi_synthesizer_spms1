@@ -55,8 +55,8 @@ module Spms1
       @pulse_width = 0.0
       @stage_1_pulse_width = 0.0
       @current_pulse_width = 0.0
-      # Mod 1 In and Mod 2 In each move the pitch by a Pitch Mod Amt of their own and the pulse
-      # width by a PW Mod Amt of their own. Pitch In has no depth: the note it carries is added
+      # Pitch Mod 1 In and Pitch Mod 2 In each move the pitch by a Pitch Mod Amt of their own, and
+      # PW Mod 1 In and PW Mod 2 In the pulse width by a PW Mod Amt of their own. Pitch In has no depth: the note it carries is added
       # whole, a key a semitone, and plays in tune from the first sample.
       # Each Mod Amt, its Mod Pol and, for the pitch, its Pitch Mod Sw are multiplied before
       # smoothing, so only their product, the depth, carries a smoothing state.
@@ -233,10 +233,11 @@ module Spms1
     # lookup in bounds. The pulse width its modulations add up to is held to its own, [-0.5, 0.5].
     # The modulation inputs are deliberately not smoothed, so a fast source reaches the pitch and
     # the pulse width unslewed.
-    def process(control_tick, pitch_input = 0.0, modulation_1_input = 0.0, modulation_2_input = 0.0)
+    def process(control_tick, pitch_input = 0.0, pitch_modulation_1_input = 0.0, pitch_modulation_2_input = 0.0,
+                pw_modulation_1_input = 0.0, pw_modulation_2_input = 0.0)
       update_controls if control_tick
 
-      pitch_modulation = (modulation_1_input * @current_pitch_modulation_1_depth) + (modulation_2_input * @current_pitch_modulation_2_depth)
+      pitch_modulation = (pitch_modulation_1_input * @current_pitch_modulation_1_depth) + (pitch_modulation_2_input * @current_pitch_modulation_2_depth)
       total_pitch = pitch_input + @tune + pitch_modulation
       pitch = (total_pitch < -0.5) ? -0.5 : ((total_pitch > 0.5) ? 0.5 : total_pitch)
       freq = pitch_to_freq_fast(pitch)
@@ -251,7 +252,7 @@ module Spms1
 
       # The pulse width is held to its range after the modulation is added, which also keeps the
       # shift within one cycle, so that a single wrap below brings phase2 back under 1.0.
-      pw_modulation = (modulation_1_input * @current_pw_modulation_1_depth) + (modulation_2_input * @current_pw_modulation_2_depth)
+      pw_modulation = (pw_modulation_1_input * @current_pw_modulation_1_depth) + (pw_modulation_2_input * @current_pw_modulation_2_depth)
       total_pulse_width = @current_pulse_width + pw_modulation
       pulse_width = (total_pulse_width < -0.5) ? -0.5 : ((total_pulse_width > 0.5) ? 0.5 : total_pulse_width)
       phase2 = @phase + (0.5 - pulse_width)
@@ -308,17 +309,18 @@ module Spms1
     # more than the rest of the oscillator. Without a restart the output is process's, one sample
     # late, but where the pitch jumps: a phase a wrap left behind can be within the new dt of 0.0,
     # which both take for a wrap just past, and this one rounds off on the sample before as well.
-    def process_synced(control_tick, pitch_input = 0.0, modulation_1_input = 0.0, modulation_2_input = 0.0, sync_input = 0.0)
+    def process_synced(control_tick, pitch_input = 0.0, pitch_modulation_1_input = 0.0, pitch_modulation_2_input = 0.0,
+                       pw_modulation_1_input = 0.0, pw_modulation_2_input = 0.0, sync_input = 0.0)
       update_controls if control_tick
 
-      pitch_modulation = (modulation_1_input * @current_pitch_modulation_1_depth) + (modulation_2_input * @current_pitch_modulation_2_depth)
+      pitch_modulation = (pitch_modulation_1_input * @current_pitch_modulation_1_depth) + (pitch_modulation_2_input * @current_pitch_modulation_2_depth)
       total_pitch = pitch_input + @tune + pitch_modulation
       pitch = (total_pitch < -0.5) ? -0.5 : ((total_pitch > 0.5) ? 0.5 : total_pitch)
       freq = pitch_to_freq_fast(pitch)
       current_dt = freq * @inv_sample_rate
       current_dt_inv = 1.0 / current_dt
 
-      pw_modulation = (modulation_1_input * @current_pw_modulation_1_depth) + (modulation_2_input * @current_pw_modulation_2_depth)
+      pw_modulation = (pw_modulation_1_input * @current_pw_modulation_1_depth) + (pw_modulation_2_input * @current_pw_modulation_2_depth)
       total_pulse_width = @current_pulse_width + pw_modulation
       pulse_width = (total_pulse_width < -0.5) ? -0.5 : ((total_pulse_width > 0.5) ? 0.5 : total_pulse_width)
       shift = 0.5 - pulse_width

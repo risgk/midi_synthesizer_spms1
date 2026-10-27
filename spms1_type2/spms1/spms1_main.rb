@@ -277,16 +277,24 @@ while true
   source_mixer_1_in_4 += ((source_mixer_1_in_4 - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_mixer_1_in_4)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
   source_osc_1_pitch_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PITCH_IN)
   source_osc_1_pitch_in += ((source_osc_1_pitch_in - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_osc_1_pitch_in)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
-  source_osc_1_mod_1_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_MOD_1_IN)
-  source_osc_1_mod_1_in += ((source_osc_1_mod_1_in - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_osc_1_mod_1_in)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
-  source_osc_1_mod_2_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_MOD_2_IN)
-  source_osc_1_mod_2_in += ((source_osc_1_mod_2_in - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_osc_1_mod_2_in)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
+  source_osc_1_pitch_mod_1_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PITCH_MOD_1_IN)
+  source_osc_1_pitch_mod_1_in += ((source_osc_1_pitch_mod_1_in - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_osc_1_pitch_mod_1_in)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
+  source_osc_1_pitch_mod_2_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PITCH_MOD_2_IN)
+  source_osc_1_pitch_mod_2_in += ((source_osc_1_pitch_mod_2_in - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_osc_1_pitch_mod_2_in)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
+  source_osc_1_pw_mod_1_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PW_MOD_1_IN)
+  source_osc_1_pw_mod_1_in += ((source_osc_1_pw_mod_1_in - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_osc_1_pw_mod_1_in)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
+  source_osc_1_pw_mod_2_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_1_PW_MOD_2_IN)
+  source_osc_1_pw_mod_2_in += ((source_osc_1_pw_mod_2_in - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_osc_1_pw_mod_2_in)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
   source_osc_2_pitch_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_PITCH_IN)
   source_osc_2_pitch_in += ((source_osc_2_pitch_in - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_osc_2_pitch_in)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
-  source_osc_2_mod_1_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_MOD_1_IN)
-  source_osc_2_mod_1_in += ((source_osc_2_mod_1_in - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_osc_2_mod_1_in)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
-  source_osc_2_mod_2_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_MOD_2_IN)
-  source_osc_2_mod_2_in += ((source_osc_2_mod_2_in - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_osc_2_mod_2_in)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
+  source_osc_2_pitch_mod_1_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_PITCH_MOD_1_IN)
+  source_osc_2_pitch_mod_1_in += ((source_osc_2_pitch_mod_1_in - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_osc_2_pitch_mod_1_in)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
+  source_osc_2_pitch_mod_2_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_PITCH_MOD_2_IN)
+  source_osc_2_pitch_mod_2_in += ((source_osc_2_pitch_mod_2_in - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_osc_2_pitch_mod_2_in)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
+  source_osc_2_pw_mod_1_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_PW_MOD_1_IN)
+  source_osc_2_pw_mod_1_in += ((source_osc_2_pw_mod_1_in - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_osc_2_pw_mod_1_in)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
+  source_osc_2_pw_mod_2_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_PW_MOD_2_IN)
+  source_osc_2_pw_mod_2_in += ((source_osc_2_pw_mod_2_in - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_osc_2_pw_mod_2_in)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
   source_osc_2_sync_in = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_OSC_2_SYNC_IN)
   source_mixer_2_in_1 = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_MIXER_2_IN_1)
   source_mixer_2_in_1 += ((source_mixer_2_in_1 - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - source_mixer_2_in_1)) >= 0 ? SMOOTHED_SLOT_OFFSET : 0
@@ -863,12 +871,12 @@ while true
         signals[50] = mixer_1.process(control_tick, signals[source_mixer_1_in_1], signals[source_mixer_1_in_2], signals[source_mixer_1_in_3], signals[source_mixer_1_in_4]) # SIGNAL_MIXER_1_OUTPUT
         signals[51] = mixer_1.output_inverted # SIGNAL_MIXER_1_OUTPUT_INV
       when 6 # MODULE_OSC_1
-        signals[52] = osc_1.process(control_tick, signals[source_osc_1_pitch_in], signals[source_osc_1_mod_1_in], signals[source_osc_1_mod_2_in]) # SIGNAL_OSC_1_OUTPUT
+        signals[52] = osc_1.process(control_tick, signals[source_osc_1_pitch_in], signals[source_osc_1_pitch_mod_1_in], signals[source_osc_1_pitch_mod_2_in], signals[source_osc_1_pw_mod_1_in], signals[source_osc_1_pw_mod_2_in]) # SIGNAL_OSC_1_OUTPUT
         signals[53] = osc_1.output_saw # SIGNAL_OSC_1_OUTPUT_SAW
         signals[54] = osc_1.output_pulse # SIGNAL_OSC_1_OUTPUT_PULSE
         signals[55] = osc_1.output_sub # SIGNAL_OSC_1_OUTPUT_SUB
       when 7 # MODULE_OSC_2
-        signals[56] = osc_2.process_synced(control_tick, signals[source_osc_2_pitch_in], signals[source_osc_2_mod_1_in], signals[source_osc_2_mod_2_in], signals[source_osc_2_sync_in]) # SIGNAL_OSC_2_OUTPUT
+        signals[56] = osc_2.process_synced(control_tick, signals[source_osc_2_pitch_in], signals[source_osc_2_pitch_mod_1_in], signals[source_osc_2_pitch_mod_2_in], signals[source_osc_2_pw_mod_1_in], signals[source_osc_2_pw_mod_2_in], signals[source_osc_2_sync_in]) # SIGNAL_OSC_2_OUTPUT
         signals[57] = osc_2.output_saw # SIGNAL_OSC_2_OUTPUT_SAW
         signals[58] = osc_2.output_pulse # SIGNAL_OSC_2_OUTPUT_PULSE
       when 8 # MODULE_NOISE_1

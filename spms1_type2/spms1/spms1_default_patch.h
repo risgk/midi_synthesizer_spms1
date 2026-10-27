@@ -13,7 +13,7 @@
 
 // The numbers of the patch and saved_patch_version, as one hash (see patch_spec_hash in
 // patch_gen): a saved patch with another is not loaded.
-#define SPMS1_PATCH_SPEC_HASH (0xF55BFD1Cu)
+#define SPMS1_PATCH_SPEC_HASH (0x91E8F530u)
 
 // The category 3 entries -- the controls -- whose CCs' values a Save keeps: all but the
 // performance controls', whose CCs are saved at 0.
@@ -56,35 +56,39 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {138,   0},  // Mixer 1 In 3 <- NONE
   {139,   0},  // Mixer 1 In 4 <- NONE
   {140,  38},  // Osc 1 Pitch In <- PITCH_1_OUTPUT_1
-  {141,  40},  // Osc 1 Mod 1 In <- EG_1_OUTPUT
-  {142,  44},  // Osc 1 Mod 2 In <- LFO_1_OUTPUT
-  {143,  39},  // Osc 2 Pitch In <- PITCH_1_OUTPUT_2
-  {144,  40},  // Osc 2 Mod 1 In <- EG_1_OUTPUT
-  {145,  44},  // Osc 2 Mod 2 In <- LFO_1_OUTPUT
-  {146,  53},  // Osc 2 Sync In <- OSC_1_OUTPUT_SAW
-  {147,  52},  // Mixer 2 In 1 <- OSC_1_OUTPUT
-  {148,  56},  // Mixer 2 In 2 <- OSC_2_OUTPUT
-  {149,  55},  // Mixer 2 In 3 <- OSC_1_OUTPUT_SUB
-  {150,  59},  // Mixer 2 In 4 <- NOISE_1_OUTPUT
-  {151,  62},  // Filter 1 Audio In 1 <- MIXER_2_OUTPUT
-  {152,   0},  // Filter 1 Audio In 2 <- NONE
-  {153,  38},  // Filter 1 Pitch In <- PITCH_1_OUTPUT_1
-  {154,  40},  // Filter 1 Mod 1 In <- EG_1_OUTPUT
-  {155,  44},  // Filter 1 Mod 2 In <- LFO_1_OUTPUT
-  {156,  62},  // Filter 2 Audio In 1 <- MIXER_2_OUTPUT
-  {157,  64},  // Filter 2 Audio In 2 <- FILTER_1_OUTPUT
-  {158,  38},  // Filter 2 Pitch In <- PITCH_1_OUTPUT_1
-  {159,  40},  // Filter 2 Mod 1 In <- EG_1_OUTPUT
-  {160,  44},  // Filter 2 Mod 2 In <- LFO_1_OUTPUT
-  {161,  64},  // Amp 1 Audio In 1 <- FILTER_1_OUTPUT
-  {162,  68},  // Amp 1 Audio In 2 <- FILTER_2_OUTPUT
-  {163,  40},  // Amp 1 Mod 1 In <- EG_1_OUTPUT
-  {164,  42},  // Amp 1 Mod 2 In <- EG_2_OUTPUT
-  {165,  72},  // Chorus 1 Audio In <- AMP_1_OUTPUT
-  {166,  73},  // Delay 1 Audio In L <- CHORUS_1_OUTPUT_L
-  {167,  74},  // Delay 1 Audio In R <- CHORUS_1_OUTPUT_R
-  {168,  76},  // L <- DELAY_1_OUTPUT_L
-  {169,  77},  // R <- DELAY_1_OUTPUT_R
+  {141,  40},  // Osc 1 Pitch Mod 1 In <- EG_1_OUTPUT
+  {142,  44},  // Osc 1 Pitch Mod 2 In <- LFO_1_OUTPUT
+  {143,  40},  // Osc 1 PW Mod 1 In <- EG_1_OUTPUT
+  {144,  44},  // Osc 1 PW Mod 2 In <- LFO_1_OUTPUT
+  {145,  39},  // Osc 2 Pitch In <- PITCH_1_OUTPUT_2
+  {146,  40},  // Osc 2 Pitch Mod 1 In <- EG_1_OUTPUT
+  {147,  44},  // Osc 2 Pitch Mod 2 In <- LFO_1_OUTPUT
+  {148,  40},  // Osc 2 PW Mod 1 In <- EG_1_OUTPUT
+  {149,  44},  // Osc 2 PW Mod 2 In <- LFO_1_OUTPUT
+  {150,  53},  // Osc 2 Sync In <- OSC_1_OUTPUT_SAW
+  {151,  52},  // Mixer 2 In 1 <- OSC_1_OUTPUT
+  {152,  56},  // Mixer 2 In 2 <- OSC_2_OUTPUT
+  {153,  55},  // Mixer 2 In 3 <- OSC_1_OUTPUT_SUB
+  {154,  59},  // Mixer 2 In 4 <- NOISE_1_OUTPUT
+  {155,  62},  // Filter 1 Audio In 1 <- MIXER_2_OUTPUT
+  {156,   0},  // Filter 1 Audio In 2 <- NONE
+  {157,  38},  // Filter 1 Pitch In <- PITCH_1_OUTPUT_1
+  {158,  40},  // Filter 1 Mod 1 In <- EG_1_OUTPUT
+  {159,  44},  // Filter 1 Mod 2 In <- LFO_1_OUTPUT
+  {160,  62},  // Filter 2 Audio In 1 <- MIXER_2_OUTPUT
+  {161,  64},  // Filter 2 Audio In 2 <- FILTER_1_OUTPUT
+  {162,  38},  // Filter 2 Pitch In <- PITCH_1_OUTPUT_1
+  {163,  40},  // Filter 2 Mod 1 In <- EG_1_OUTPUT
+  {164,  44},  // Filter 2 Mod 2 In <- LFO_1_OUTPUT
+  {165,  64},  // Amp 1 Audio In 1 <- FILTER_1_OUTPUT
+  {166,  68},  // Amp 1 Audio In 2 <- FILTER_2_OUTPUT
+  {167,  40},  // Amp 1 Mod 1 In <- EG_1_OUTPUT
+  {168,  42},  // Amp 1 Mod 2 In <- EG_2_OUTPUT
+  {169,  72},  // Chorus 1 Audio In <- AMP_1_OUTPUT
+  {170,  73},  // Delay 1 Audio In L <- CHORUS_1_OUTPUT_L
+  {171,  74},  // Delay 1 Audio In R <- CHORUS_1_OUTPUT_R
+  {172,  76},  // L <- DELAY_1_OUTPUT_L
+  {173,  77},  // R <- DELAY_1_OUTPUT_R
   {256, 127},  // Pitch 1 Glide <- OWN
   {257, 127},  // Pitch 1 Out 1 Glide Sw <- OWN
   {258, 127},  // Pitch 1 Out 2 Glide Sw <- OWN
