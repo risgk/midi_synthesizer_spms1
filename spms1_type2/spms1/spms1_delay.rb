@@ -79,16 +79,17 @@ module Spms1
       @filtered_l = 0.0
       @filtered_r = 0.0
 
-      # Each parameter starts where its control does at power-on, so nothing slides up to it.
+      # The time starts where its control does at power-on, so it does not slide up to it; Feedback
+      # and Mix start at 0.0, as the levels and the gains do, and come up through the smoothing.
       @time = 0.5
       @stage_1_time = 0.5
       @current_time = 0.5
-      @feedback = 0.25
-      @stage_1_feedback = 0.25
-      @current_feedback = 0.25
-      @mix = 0.25
-      @stage_1_mix = 0.25
-      @current_mix = 0.25
+      @feedback = 0.0
+      @stage_1_feedback = 0.0
+      @current_feedback = 0.0
+      @mix = 0.0
+      @stage_1_mix = 0.0
+      @current_mix = 0.0
 
       # The delay the line is read at, in samples, which follows Time no faster than TIME_SLEW,
       # moved a step every sample so that it arrives at each control-rate update's value on time.
