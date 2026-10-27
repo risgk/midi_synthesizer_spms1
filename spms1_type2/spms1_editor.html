@@ -414,7 +414,6 @@
     /* In four columns the CC number goes on the line of the name, and the panels are packed
        tighter, so the soft keyboard fits a full HD window under them even with a bookmarks bar. */
     @media (min-width: 1872px) {
-      .slider-label { white-space: nowrap; }
       .slider-label .ctl-sub { display: inline; }
       .control-row { gap: 6px; }
       .editor-column { gap: 12px; }
@@ -430,9 +429,12 @@
       .editor-grid { column-gap: 10px; }
       .slider-knob-zone, .slider-input-wrapper { gap: 4px; }
       /* One width for every name, the longest's, so every slider is as long as the others; a
-         name longer still, with the source of a routed parameter, is cut short rather than
-         shortening its slider. */
-      .slider-label { flex: 0 0 200px; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+         name longer still, with the source of a routed parameter, wraps onto a second line, and
+         is cut short only past that, rather than shortening its slider. */
+      .slider-label {
+        flex: 0 0 200px; min-width: 0; overflow: hidden;
+        display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2;
+      }
       .slider-label .cc-num, .slider-label .ctl-hint { font-size: 0.65rem; }
       /* Under the wrapper, so as to outrank the rules for the two further down. */
       .slider-input-wrapper .slider-value { min-width: 24px; font-size: 0.85rem; }
@@ -4413,7 +4415,7 @@
       ccNum.classList.toggle('shared', others.length > 0);
       ccNum.title = others.length ? `CC#${cc} also moves ${others.join(', ')}` : '';
       zone.title = routed ? `${c.full} reads ${sigLabel(src)}. This slider sets only its own slot, which other wires may read.` : '';
-      // A name cut short in four columns can be read whole here.
+      // A name cut short past two lines in four columns can be read whole here.
       zone.querySelector('.slider-label').title = zone.querySelector('.slider-label').textContent.trim();
       slider.disabled = !usable;
       const value = ownValue ? paramValue(c.key) : usable ? ccValue(cc) : 64;
