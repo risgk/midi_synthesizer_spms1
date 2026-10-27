@@ -9,7 +9,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.3.4
 - ハードシンク: Sync In (デフォルトで Osc 1 のノコギリ波) が 0 を上へ横切ったところで、Osc 2 がサンプルの間のその位置からやり直します。やり直しの段差も、周期の始まりと同じく PolyBLEP で丸めます (Sync Sw、CC#112)
 - エンベロープ: ADS エンベロープ 2 つ。EG 2 はアンプの Mod 2 In 用で、起動時はオルガン型。CC#52、53、54。リリースのスイッチは 2 つとも CC#105
 - LFO: 三角波 (PolyBLAMP) とユニポーラの矩形波 (PolyBLEP) の個別出力と、その間をクロスフェードするメイン出力 (Wave、CC#33)。リセット入力付き (デフォルトで Note Gate。Reset Sw、CC#113 をオンにするとノートごとにやり直す)
-- フィルタ: 2 つの ZDF/TPT ステート・バリアブル・フィルタ (BP 積分器の非線形リーク付き、1 ステップ・ニュートン法で解く)。それぞれ LP、HP、BP の 3 出力と、LP と HP の間をノッチを経てクロスフェードするメイン出力 (Mode、CC#39)、ゲイン付きの 2 つのオーディオ入力を持つ。デフォルトでは同じ CC で直列につながり、4 次 (24 dB/oct) のローパスになる。1 つ目のレゾナンスは別 (CC#119)
+- フィルタ: 2 つの ZDF/TPT ステート・バリアブル・フィルタ (BP 積分器の非線形リーク付き、1 ステップ・ニュートン法で解く)。それぞれ LP、HP、BP の 3 出力と、LP と HP の間をノッチを経てクロスフェードするメイン出力 (Mode、CC#39)、ゲイン付きの 2 つのオーディオ入力を持つ。デフォルトでは同じ CC で直列につながり、4 次 (24 dB/oct) のローパスになる。1 つ目のレゾナンスは別 (CC なし)
 - アンプ: 2 つのオーディオ入力と、それぞれ最大 +12 dB のゲイン (CC#15)。先読み型のリミッターで、ピークを 1.0 のクランプの手前に、切らずに丸めて収める (Limiter Sw、CC なし、起動時オン)
 - コーラス: モノラル入力・ステレオ出力、実行順に入るモジュール
 - ディレイ: ステレオ、フィードバック付き、実行順に入るモジュール (最大 340 ms)
@@ -104,13 +104,13 @@ MIDI Synthesizer SPMS-1 (type-2) v0.3.4
 "spms1_editor.html" を開き（[Web エディタ](#web-エディタ)を参照）、"MIDI Out" でシンセか SPMS-1 Web (Built-in) を選びます。
 
 1. お気に入り: Controls タブは "Show favorites only" にチェックが入った状態で開き、デフォルトパッチで
-   お気に入りになっている、音を大きく変える 19 個のパラメータを表示します:
-   Pitch 1 Glide、EG 1 Attack・Decay・Sustain、LFO 1 Rate、Osc 1 Wave・Pitch Mod 1 Amt・
-   Pitch Mod 2 Amt、Osc 2 Wave・Pitch、Mixer 2 Level 1・2、
-   Filter 2 Cutoff・Resonance・Mod 1 Amt・Mod 2 Amt、Amp 1 Gain 2、Chorus 1 Mix、Delay 1 Mix。
-   気に入ったものは星で追加できます。Osc 2 の PW と各 Mod Amt は Osc 1 と、Filter 1 の Resonance（CC 119）以外の
-   各パラメータは Filter 2 と同じ CC なので、Osc 1 や Filter 2 のスライダーを動かすと相手も一緒に動きます
-   （お気に入りだけの表示では、相手のスライダーは隠れています）
+   お気に入りになっている 26 個のパラメータを表示します:
+   Pitch 1 Glide、EG 1 Attack・Decay・Sustain、LFO 1 Rate、Mixer 1 Level 1・2（CC なし）、
+   Osc 1 Wave・Pitch Mod 1 Amt・Pitch Mod 2 Amt、Osc 2 Wave・Pitch・Pitch Mod 1 Amt・Pitch Mod 2 Amt、
+   Mixer 2 Level 1・2、Filter 1 Cutoff・Mod 1 Amt・Mod 2 Amt、Filter 2 Cutoff・Resonance・Mod 1 Amt・Mod 2 Amt、
+   Amp 1 Gain 2、Chorus 1 Mix、Delay 1 Mix。
+   気に入ったものは星で追加できます。Osc 2 の PW と各 Mod Amt は Osc 1 と、Filter 1 の Resonance（CC なし）以外の
+   各パラメータは Filter 2 と同じ CC なので、片方のスライダーを動かすと、表示されているかどうかに関わらず相手も一緒に動きます
 2. CC のあるパラメータ: "Show favorites only" のチェックを外すと、CC のあるパラメータがすべて表示されます。
    デフォルトパッチでの働きと起動時の値は、ブロック図の下に説明があります。MIDI コントローラのつまみでも
    動かせます
@@ -332,7 +332,7 @@ Osc 1 に従います。Mod Amt と PW には Osc 1 と同じ CC が割り当て
 
 Filter 1 と Filter 2 は直列で、4 次（24 dB/oct）のローパスになります。Filter 2 は Filter 1 と同じ CC と起動時の値を持ち、
 それらの CC で両方が動きます。ただし Resonance だけは別で、Filter 2 のもの（CC#71）は起動時 Q 4.0、
-Filter 1 のもの（CC#119）は最小の Q 0.71 なので、レゾナンスのピークは Filter 2 のものになります。それぞれのフィルタは Audio In 1 と Audio In 2 を Gain 1 と Gain 2
+Filter 1 のもの（CC なし）は最小の Q 0.71 なので、レゾナンスのピークは Filter 2 のものになります。それぞれのフィルタは Audio In 1 と Audio In 2 を Gain 1 と Gain 2
 （CC なし、起動時は等倍）で受け取ります。ただし Mixer 2 から入る Filter 2 の Gain 1 は起動時 0.0 で、これを上げ、
 Filter 2 の Gain 2 を下げ、Amp 1 の Gain 1 を上げると、フィルタが並列になります。Amp 1 は Audio In 1 に Filter 1 を Gain 1（CC なし、起動時 0.0 で無音）で、Audio In 2 に Filter 2 を Gain 2（CC#15）で
 受け取ります。

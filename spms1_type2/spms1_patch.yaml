@@ -348,8 +348,8 @@ controls:
   - { entry: 22, module: LFO_1,     key: RESET_SW,     label: Reset Sw, cc: 113, value: 4, hint: Off/On, set: set_reset_switch }
   # Mixer 1: nothing has a CC; the levels hold 0.0, as the mixer has nothing on its inputs yet,
   # and Out Level holds 0.5, as Mixer 2's powers up.
-  - { entry: 23, module: MIXER_1,   key: LEVEL_1,      label: Level 1,      cc: 0,   value: 4, hint_inputs: [IN_1], set: set_level_1 }
-  - { entry: 24, module: MIXER_1,   key: LEVEL_2,      label: Level 2,      cc: 0,   value: 4, hint_inputs: [IN_2], set: set_level_2 }
+  - { entry: 23, module: MIXER_1,   key: LEVEL_1,      label: Level 1,      cc: 0,   value: 4, hint_inputs: [IN_1], favorite: true, set: set_level_1 }
+  - { entry: 24, module: MIXER_1,   key: LEVEL_2,      label: Level 2,      cc: 0,   value: 4, hint_inputs: [IN_2], favorite: true, set: set_level_2 }
   - { entry: 25, module: MIXER_1,   key: LEVEL_3,      label: Level 3,      cc: 0,   value: 4, hint_inputs: [IN_3], set: set_level_3 }
   - { entry: 26, module: MIXER_1,   key: LEVEL_4,      label: Level 4,      cc: 0,   value: 4, hint_inputs: [IN_4], set: set_level_4 }
   - { entry: 27, module: MIXER_1,   key: OUT_LEVEL,  label: Out Level,  cc: 0,   value: 64, set: set_out_level }
@@ -395,10 +395,10 @@ controls:
   - { entry: 45, module: OSC_2,     key: PITCH_COARSE,  label: Pitch Coarse,  cc: 0,   value: 64, bipolar: true, hint: ±5 Oct, set: set_pitch_coarse }
   - { entry: 46, module: OSC_2,     key: PITCH,         label: Pitch,         cc: 85,  value: 5, hint: 0 to +1 Oct, favorite: true, set: set_pitch }
   - { entry: 47, module: OSC_2,     key: PITCH_FINE,    label: Pitch Fine,    cc: 76,  value: 65, bipolar: true, hint: ±60 Cent, set: set_pitch_fine }
-  - { entry: 48, module: OSC_2,     key: PITCH_MOD_1_AMT, label: Pitch Mod 1 Amt, cc: 89, value: 4, hint_inputs: [MOD_1_IN], set: set_pitch_modulation_1_amount }
+  - { entry: 48, module: OSC_2,     key: PITCH_MOD_1_AMT, label: Pitch Mod 1 Amt, cc: 89, value: 4, hint_inputs: [MOD_1_IN], favorite: true, set: set_pitch_modulation_1_amount }
   - { entry: 49, module: OSC_2,     key: PITCH_MOD_1_POL,      label: Pitch Mod 1 Pol, cc: 0, value: 76, bipolar: true, hint: − to +, set: set_pitch_modulation_1_polarity }
   - { entry: 50, module: OSC_2,     key: PITCH_MOD_1_SW, label: Pitch Mod 1 Sw, cc: 0, value: 124, hint: Off/On, set: set_pitch_modulation_1_switch }
-  - { entry: 51, module: OSC_2,     key: PITCH_MOD_2_AMT, label: Pitch Mod 2 Amt, cc: 13, value: 4, hint_inputs: [MOD_2_IN], set: set_pitch_modulation_2_amount }
+  - { entry: 51, module: OSC_2,     key: PITCH_MOD_2_AMT, label: Pitch Mod 2 Amt, cc: 13, value: 4, hint_inputs: [MOD_2_IN], favorite: true, set: set_pitch_modulation_2_amount }
   - { entry: 52, module: OSC_2,     key: PITCH_MOD_2_POL,      label: Pitch Mod 2 Pol, cc: 0, value: 76, bipolar: true, hint: − to +, set: set_pitch_modulation_2_polarity }
   - { entry: 53, module: OSC_2,     key: PITCH_MOD_2_SW, label: Pitch Mod 2 Sw, cc: 0, value: 124, hint: Off/On, set: set_pitch_modulation_2_switch }
   - { entry: 54, module: OSC_2,     key: PW_MOD_1_AMT, label: PW Mod 1 Amt,  cc: 8,   value: 4, hint_inputs: [MOD_1_IN], set: set_pw_modulation_1_amount }
@@ -438,7 +438,7 @@ controls:
   # cutoff, as Osc 1's PW Mod Amts are for the pulse width. Mod 1 Amt powers up at CC 28, 0.2, the
   # envelope opening the cutoff two octaves, and Mod 2 Amt at CC 4, 0.0, the LFO leaving it alone
   # until it is turned up. Cutoff (CC 74) powers up at CC 100, 0.8. Resonance is each filter's
-  # own: Filter 2's on CC 71 powers up at CC 64, Q 4.0, and Filter 1's on CC 119 at CC 4, Q 0.71,
+  # own: Filter 2's on CC 71 powers up at CC 64, Q 4.0, and Filter 1's, with no CC, at CC 4, Q 0.71,
   # so that the peak at the cutoff is Filter 2's, the one the favorites and CC 71 adjust, rather
   # than the two of them together, which overdrives the second at the resonance one alone was made for. Mod 1 Pol
   # and Mod 2 Pol set the sign and the depth of each modulation, from -1.0 at CC 4 through none at
@@ -447,16 +447,16 @@ controls:
   # Pol has no CC and powers up at CC 76, +0.2, so Mod 2 Amt at its top swings the cutoff an
   # octave either way with the LFO, a vibrato's depth for a filter. Mode crossfades Out from the
   # low pass (0.0) through a notch (0.5) to the high pass (1.0), on CC 39, and powers up at CC 4,
-  # 0.0, the low pass. The favorites are Filter 2's, the one heard, which Filter 1 follows.
+  # 0.0, the low pass. The favorites are Filter 2's, and Filter 1's Cutoff and Mod Amts beside them.
   - { entry: 66, module: FILTER_1,  key: GAIN_1,       label: Gain 1,       cc: 0,   value: 64, hint_inputs: [AUDIO_IN_1], set: set_gain_1 }
   - { entry: 67, module: FILTER_1,  key: GAIN_2,       label: Gain 2,       cc: 0,   value: 64, hint_inputs: [AUDIO_IN_2], set: set_gain_2 }
-  - { entry: 68, module: FILTER_1,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 100, set: set_cutoff }
-  - { entry: 69, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 119, value: 4,  set: set_resonance }
+  - { entry: 68, module: FILTER_1,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 100, favorite: true, set: set_cutoff }
+  - { entry: 69, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 0,   value: 4,  set: set_resonance }
   - { entry: 70, module: FILTER_1,  key: MODE,         label: Mode,         cc: 39,  value: 4, hint: LP to Notch to HP, set: set_mode }
   - { entry: 71, module: FILTER_1,  key: PITCH_AMT, label: Pitch Amt, cc: 9, value: 4, hint_inputs: [PITCH_IN], set: set_pitch_amount }
-  - { entry: 72, module: FILTER_1,  key: MOD_1_AMT,    label: Mod 1 Amt,    cc: 24,  value: 28, hint_inputs: [MOD_1_IN], set: set_modulation_1_amount }
+  - { entry: 72, module: FILTER_1,  key: MOD_1_AMT,    label: Mod 1 Amt,    cc: 24,  value: 28, hint_inputs: [MOD_1_IN], favorite: true, set: set_modulation_1_amount }
   - { entry: 73, module: FILTER_1,  key: MOD_1_POL,      label: Mod 1 Pol, cc: 117, value: 124, bipolar: true, hint: − to +, set: set_modulation_1_polarity }
-  - { entry: 74, module: FILTER_1,  key: MOD_2_AMT,    label: Mod 2 Amt,    cc: 25,  value: 4, hint_inputs: [MOD_2_IN], set: set_modulation_2_amount }
+  - { entry: 74, module: FILTER_1,  key: MOD_2_AMT,    label: Mod 2 Amt,    cc: 25,  value: 4, hint_inputs: [MOD_2_IN], favorite: true, set: set_modulation_2_amount }
   - { entry: 75, module: FILTER_1,  key: MOD_2_POL,      label: Mod 2 Pol, cc: 0,   value: 76, bipolar: true, hint: − to +, set: set_modulation_2_polarity }
   - { entry: 76, module: FILTER_2,  key: GAIN_1,       label: Gain 1,       cc: 0,   value: 4,  hint_inputs: [AUDIO_IN_1], set: set_gain_1 }
   - { entry: 77, module: FILTER_2,  key: GAIN_2,       label: Gain 2,       cc: 0,   value: 64, hint_inputs: [AUDIO_IN_2], set: set_gain_2 }
