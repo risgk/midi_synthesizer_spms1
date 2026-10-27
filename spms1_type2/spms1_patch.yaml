@@ -367,7 +367,7 @@ controls:
   # on, so each Pitch Mod Amt and Pol alone set its depth. Wave is on
   # CC 102 and powers up at the saw. PW is bipolar and powers up at CC 64, 0.0, a pulse of 50%.
   - { entry: 28, module: OSC_1,     key: WAVE,     label: Wave,         cc: 102, value: 4, hint: Saw to Sq, favorite: true, set: set_waveform }
-  - { entry: 29, module: OSC_1,     key: PW,           label: PW,  cc: 114, value: 64, bipolar: true, hint: 0% to 100%, set: set_pulse_width }
+  - { entry: 29, module: OSC_1,     key: PW,           label: PW,  cc: 114, value: 64, bipolar: true, hint: 0% to 100%, favorite: true, set: set_pulse_width }
   - { entry: 30, module: OSC_1,     key: PITCH_COARSE,  label: Pitch Coarse,  cc: 0,   value: 64, bipolar: true, hint: ±5 Oct, set: set_pitch_coarse }
   - { entry: 31, module: OSC_1,     key: PITCH,         label: Pitch,         cc: 0,   value: 4, hint: 0 to +1 Oct, set: set_pitch }
   - { entry: 32, module: OSC_1,     key: PITCH_FINE,    label: Pitch Fine,    cc: 0,   value: 64, bipolar: true, hint: ±60 Cent, set: set_pitch_fine }
@@ -377,9 +377,9 @@ controls:
   - { entry: 36, module: OSC_1,     key: PITCH_MOD_2_AMT, label: Pitch Mod 2 Amt, cc: 13, value: 4, hint_inputs: [MOD_2_IN], favorite: true, set: set_pitch_modulation_2_amount }
   - { entry: 37, module: OSC_1,     key: PITCH_MOD_2_POL,      label: Pitch Mod 2 Pol, cc: 0, value: 76, bipolar: true, hint: − to +, set: set_pitch_modulation_2_polarity }
   - { entry: 38, module: OSC_1,     key: PITCH_MOD_2_SW, label: Pitch Mod 2 Sw, cc: 0, value: 124, hint: Off/On, set: set_pitch_modulation_2_switch }
-  - { entry: 39, module: OSC_1,     key: PW_MOD_1_AMT, label: PW Mod 1 Amt,  cc: 8,   value: 4, hint_inputs: [MOD_1_IN], set: set_pw_modulation_1_amount }
+  - { entry: 39, module: OSC_1,     key: PW_MOD_1_AMT, label: PW Mod 1 Amt,  cc: 8,   value: 4, hint_inputs: [MOD_1_IN], favorite: true, set: set_pw_modulation_1_amount }
   - { entry: 40, module: OSC_1,     key: PW_MOD_1_POL,      label: PW Mod 1 Pol, cc: 0, value: 124, bipolar: true, hint: − to +, set: set_pw_modulation_1_polarity }
-  - { entry: 41, module: OSC_1,     key: PW_MOD_2_AMT, label: PW Mod 2 Amt,  cc: 103, value: 4, hint_inputs: [MOD_2_IN], set: set_pw_modulation_2_amount }
+  - { entry: 41, module: OSC_1,     key: PW_MOD_2_AMT, label: PW Mod 2 Amt,  cc: 103, value: 4, hint_inputs: [MOD_2_IN], favorite: true, set: set_pw_modulation_2_amount }
   - { entry: 42, module: OSC_1,     key: PW_MOD_2_POL,      label: PW Mod 2 Pol, cc: 0, value: 124, bipolar: true, hint: − to +, set: set_pw_modulation_2_polarity }
   # Osc 2: Pitch and Pitch Fine are its own, on CC 85 and 76, to tune it against Osc 1, up to an
   # octave up, and to sweep it for a hard sync: Pitch powers up at CC 5, 10 cents sharp, and Fine
@@ -482,7 +482,7 @@ controls:
   # Mod 2 In, EG 2, the organ envelope, at 1.0 (CC 124).
   - { entry: 86, module: AMP_1,     key: GAIN_1,       label: Gain 1,       cc: 0,   value: 4,  hint_inputs: [AUDIO_IN_1], set: set_gain_1 }
   - { entry: 87, module: AMP_1,     key: GAIN_2,       label: Gain 2,       cc: 15,  value: 88, hint_inputs: [AUDIO_IN_2], favorite: true, set: set_gain_2 }
-  - { entry: 88, module: AMP_1,     key: MOD_1_2_MIX,  label: Mod 1/2 Mix,  cc: 36,  value: 4, hint_inputs: [MOD_1_IN, MOD_2_IN], set: set_modulation_mix }
+  - { entry: 88, module: AMP_1,     key: MOD_1_2_MIX,  label: Mod 1/2 Mix,  cc: 36,  value: 4, hint_inputs: [MOD_1_IN, MOD_2_IN], favorite: true, set: set_modulation_mix }
   - { entry: 89, module: CHORUS_1,  key: MIX,          label: Mix,          cc: 93,  value: 64, favorite: true, set: set_mix }
   - { entry: 90, module: CHORUS_1,  key: RATE,         label: Rate,         cc: 58,  value: 64, set: set_rate }
   - { entry: 91, module: CHORUS_1,  key: DEPTH,        label: Depth,        cc: 59,  value: 64, set: set_depth }
