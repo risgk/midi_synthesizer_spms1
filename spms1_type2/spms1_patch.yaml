@@ -52,10 +52,11 @@ modules:
   - { key: OSC_2,      id: 7, label: Osc 2, class: Osc, method: process_synced, process: [PITCH_IN, MOD_1_IN, MOD_2_IN, SYNC_IN] }
   - { key: NOISE_1,    id: 8, label: Noise 1, class: Noise, process: [] }
   - { key: MIXER_2,    id: 9, label: Mixer 2, class: Mixer, process: [IN_1, IN_2, IN_3, IN_4] }
-  - { key: FILTER_1,  id: 10, label: Filter 1, class: Filter, process: [AUDIO_IN, PITCH_IN, MOD_1_IN, MOD_2_IN] }
-  - { key: AMP_1,     id: 11, label: Amp 1, class: Amp, process: [AUDIO_IN, MOD_1_IN, MOD_2_IN] }
-  - { key: CHORUS_1,  id: 12, label: Chorus 1, stereo: true, class: Chorus, process: [AUDIO_IN] }
-  - { key: DELAY_1,   id: 13, label: Delay 1,  stereo: true, class: Delay, process: [AUDIO_IN_L, AUDIO_IN_R] }
+  - { key: FILTER_1,  id: 10, label: Filter 1, class: Filter, process: [AUDIO_IN_1, AUDIO_IN_2, PITCH_IN, MOD_1_IN, MOD_2_IN] }
+  - { key: FILTER_2,  id: 11, label: Filter 2, class: Filter, process: [AUDIO_IN_1, AUDIO_IN_2, PITCH_IN, MOD_1_IN, MOD_2_IN] }
+  - { key: AMP_1,     id: 12, label: Amp 1, class: Amp, process: [AUDIO_IN_1, AUDIO_IN_2, MOD_1_IN, MOD_2_IN] }
+  - { key: CHORUS_1,  id: 13, label: Chorus 1, stereo: true, class: Chorus, process: [AUDIO_IN] }
+  - { key: DELAY_1,   id: 14, label: Delay 1,  stereo: true, class: Delay, process: [AUDIO_IN_L, AUDIO_IN_R] }
 
 # The default patch. Every module is in the run order, so a patch only ever has to route, never to
 # switch something on first. Pitch 1 runs first, taking Note Pitch and handing it to the
@@ -75,13 +76,15 @@ modules:
 # takes the LFO to the pulse width and powers up at 0.0. Osc 1 Pitch In takes the note from
 # Pitch 1 whole, in tune. Osc 1 Mod 1 In takes EG 1, for a pitch envelope, but Pitch Mod 1
 # Amt (CC 89) and PW Mod 1 Amt (CC 8) power up at 0.0 too. EG 1 and the LFO also reach
-# Filter 1 Mod 1 In and Mod 2 In: Filter 1 Mod 1 Amt (CC 24) powers up at 0.2, so the envelope
+# Mod 1 In and Mod 2 In of both filters: Mod 1 Amt (CC 24) powers up at 0.2, so the envelope
 # opens the cutoff two octaves above where Cutoff (CC 74), at 0.8, puts it, and Mod 2 Amt (CC 25)
 # at 0.0, so the LFO leaves the cutoff alone until CC 25 turns it up.
-# Filter 1 Pitch In takes Pitch 1's pitch too, for keyboard tracking, and Filter 1 Pitch Amt
-# (CC 9) powers up at 0.0, the cutoff staying where Cutoff puts it whatever the note. Noise 1 runs after the oscillators, as it is mostly a sound of its own (a modulation taking
+# Pitch In of both filters takes Pitch 1's pitch too, for keyboard tracking, and Pitch Amt
+# (CC 9) powers up at 0.0, the cutoff staying where Cutoff puts it whatever the note. Filter 1
+# feeds Filter 2, on the same CCs, a low pass of the fourth order, which feeds the amp (see the
+# controls). Noise 1 runs after the oscillators, as it is mostly a sound of its own (a modulation taking
 # it is a sample late, which it does not hear), at full level: its Level has no CC and holds 1.0.
-# Mixer 2 runs after it, just ahead of the filter, which it feeds: Osc 1 on its In 1, Osc 2 on In 2,
+# Mixer 2 runs after it, just ahead of the filters, which it feeds: Osc 1 on its In 1, Osc 2 on In 2,
 # Osc 1's sub on In 3 and the noise on In 4. Its Level 1 and 2, on CC 19 and 20, power up at 0.7,
 # so the two oscillators sound together about as loud as one at full level, and Level 4, on CC 23,
 # at 0.0, so the noise is silent until CC 23. Osc 2 plays the note from Pitch 1, as Osc 1 does, tuned by its own
@@ -107,7 +110,7 @@ modules:
 # The run order of the default patch, the order of the module ids too. Pitch 1 runs first, so that
 # everything after it reads the note in the same sample, and the envelopes ahead of the LFO, so that
 # the LFO's Mod Ins can read them in the same sample, as for a vibrato that fades in.
-default_order: [PITCH_1, EG_1, EG_2, LFO_1, MIXER_1, OSC_1, OSC_2, NOISE_1, MIXER_2, FILTER_1, AMP_1, CHORUS_1, DELAY_1]
+default_order: [PITCH_1, EG_1, EG_2, LFO_1, MIXER_1, OSC_1, OSC_2, NOISE_1, MIXER_2, FILTER_1, FILTER_2, AMP_1, CHORUS_1, DELAY_1]
 
 # Slots of the signal bus (the values of NRPN categories 1 and 2), each one of:
 #   value:    a constant, which the bus holds from startup; `short` is the editor's label for it
@@ -148,7 +151,7 @@ signals:
   # shapes: turned round, negated, both, centered on zero either way up, a quarter sine and
   # cosine, an equal-power pair: two levels taking Sin and Cos crossfade with no dip in the
   # middle, each at 0.707 at CC 64, as their squares sum to one everywhere; Lo and Hi, the pair
-  # Filter 1 Mode crossfades by, each at 1.0 over its own half and falling to 0.0 over the other;
+  # a filter's Mode crossfades by, each at 1.0 over its own half and falling to 0.0 over the other;
   # Neg and Pos, the two sides of Bipolar doubled, 0.0 in the middle and rising to 1.0 at either
   # end; and Mid, 1.0 in the middle and 0.0 at both ends, which with Neg and Pos crossfades
   # three things on one knob. A parameter taking one smooths it, as it does its CC, and a
@@ -219,14 +222,18 @@ signals:
   - { key: FILTER_1_OUTPUT_LP, id: 65, module: FILTER_1, output: Out LP, label: Filter 1 Output LP, bipolar: true, get: output_lp }
   - { key: FILTER_1_OUTPUT_HP, id: 66, module: FILTER_1, output: Out HP, label: Filter 1 Output HP, bipolar: true, get: output_hp }
   - { key: FILTER_1_OUTPUT_BP, id: 67, module: FILTER_1, output: Out BP, label: Filter 1 Output BP, bipolar: true, get: output_bp }
-  - { key: AMP_1_OUTPUT,       id: 68, module: AMP_1,    output: Out,    label: Amp 1 Output,       bipolar: true }
+  - { key: FILTER_2_OUTPUT,    id: 68, module: FILTER_2, output: Out,    label: Filter 2 Output,    bipolar: true }
+  - { key: FILTER_2_OUTPUT_LP, id: 69, module: FILTER_2, output: Out LP, label: Filter 2 Output LP, bipolar: true, get: output_lp }
+  - { key: FILTER_2_OUTPUT_HP, id: 70, module: FILTER_2, output: Out HP, label: Filter 2 Output HP, bipolar: true, get: output_hp }
+  - { key: FILTER_2_OUTPUT_BP, id: 71, module: FILTER_2, output: Out BP, label: Filter 2 Output BP, bipolar: true, get: output_bp }
+  - { key: AMP_1_OUTPUT,       id: 72, module: AMP_1,    output: Out,    label: Amp 1 Output,       bipolar: true }
   # Out Mono, of the chorus and of the delay, is the average of the two sides, a sub output.
-  - { key: CHORUS_1_OUTPUT_L,  id: 69, module: CHORUS_1, output: Out L,  label: Chorus 1 Output L,  bipolar: true, get: output_l }
-  - { key: CHORUS_1_OUTPUT_R,  id: 70, module: CHORUS_1, output: Out R,  label: Chorus 1 Output R,  bipolar: true, get: output_r }
-  - { key: CHORUS_1_OUTPUT_MONO, id: 71, module: CHORUS_1, output: Out Mono, label: Chorus 1 Output Mono, bipolar: true, get: output_mono }
-  - { key: DELAY_1_OUTPUT_L,   id: 72, module: DELAY_1,  output: Out L,  label: Delay 1 Output L,   bipolar: true, get: output_l }
-  - { key: DELAY_1_OUTPUT_R,   id: 73, module: DELAY_1,  output: Out R,  label: Delay 1 Output R,   bipolar: true, get: output_r }
-  - { key: DELAY_1_OUTPUT_MONO,  id: 74, module: DELAY_1,  output: Out Mono, label: Delay 1 Output Mono,  bipolar: true, get: output_mono }
+  - { key: CHORUS_1_OUTPUT_L,  id: 73, module: CHORUS_1, output: Out L,  label: Chorus 1 Output L,  bipolar: true, get: output_l }
+  - { key: CHORUS_1_OUTPUT_R,  id: 74, module: CHORUS_1, output: Out R,  label: Chorus 1 Output R,  bipolar: true, get: output_r }
+  - { key: CHORUS_1_OUTPUT_MONO, id: 75, module: CHORUS_1, output: Out Mono, label: Chorus 1 Output Mono, bipolar: true, get: output_mono }
+  - { key: DELAY_1_OUTPUT_L,   id: 76, module: DELAY_1,  output: Out L,  label: Delay 1 Output L,   bipolar: true, get: output_l }
+  - { key: DELAY_1_OUTPUT_R,   id: 77, module: DELAY_1,  output: Out R,  label: Delay 1 Output R,   bipolar: true, get: output_r }
+  - { key: DELAY_1_OUTPUT_MONO,  id: 78, module: DELAY_1,  output: Out Mono, label: Delay 1 Output Mono,  bipolar: true, get: output_mono }
 
 # Module inputs, NRPN category 1, listed in the editor's order, each by its entry: what feeds each
 # one in the default patch (`source`, a signal key). `label` is the editor's, on the module; `name`
@@ -258,18 +265,25 @@ inputs:
   - { entry: 20, module: MIXER_2,     key: IN_2,        label: In 2,           name: In 2,           source: OSC_2_OUTPUT }
   - { entry: 21, module: MIXER_2,     key: IN_3,        label: In 3,           name: In 3,           source: OSC_1_OUTPUT_SUB }
   - { entry: 22, module: MIXER_2,     key: IN_4,        label: In 4,           name: In 4,           source: NOISE_1_OUTPUT }
-  - { entry: 23, module: FILTER_1,    key: AUDIO_IN,       label: Audio In,       name: Audio In,       source: MIXER_2_OUTPUT }
-  - { entry: 24, module: FILTER_1,    key: PITCH_IN,       label: Pitch In,       name: Pitch In,       source: PITCH_1_OUTPUT_1 }
-  - { entry: 25, module: FILTER_1,    key: MOD_1_IN,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
-  - { entry: 26, module: FILTER_1,    key: MOD_2_IN,       label: Mod 2 In,       name: Mod 2 In,       source: LFO_1_OUTPUT }
-  - { entry: 27, module: AMP_1,       key: AUDIO_IN,       label: Audio In,       name: Audio In,       source: FILTER_1_OUTPUT }
-  - { entry: 28, module: AMP_1,       key: MOD_1_IN,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
-  - { entry: 29, module: AMP_1,       key: MOD_2_IN,       label: Mod 2 In,       name: Mod 2 In,       source: EG_2_OUTPUT }
-  - { entry: 30, module: CHORUS_1,    key: AUDIO_IN,       label: Audio In,       name: Audio In,       source: AMP_1_OUTPUT }
-  - { entry: 31, module: DELAY_1,     key: AUDIO_IN_L,     label: Audio In L,     name: Audio In L,     source: CHORUS_1_OUTPUT_L }
-  - { entry: 32, module: DELAY_1,     key: AUDIO_IN_R,     label: Audio In R,     name: Audio In R,     source: CHORUS_1_OUTPUT_R }
-  - { entry: 33, key: OUTPUT_L,    label: L,              name: Final Output L, name_ja: 最終出力 L, source: DELAY_1_OUTPUT_L }
-  - { entry: 34, key: OUTPUT_R,    label: R,              name: Final Output R, name_ja: 最終出力 R, source: DELAY_1_OUTPUT_R }
+  - { entry: 23, module: FILTER_1,    key: AUDIO_IN_1,     label: Audio In 1,     name: Audio In 1,     source: MIXER_2_OUTPUT }
+  - { entry: 24, module: FILTER_1,    key: AUDIO_IN_2,     label: Audio In 2,     name: Audio In 2,     source: NONE }
+  - { entry: 25, module: FILTER_1,    key: PITCH_IN,       label: Pitch In,       name: Pitch In,       source: PITCH_1_OUTPUT_1 }
+  - { entry: 26, module: FILTER_1,    key: MOD_1_IN,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
+  - { entry: 27, module: FILTER_1,    key: MOD_2_IN,       label: Mod 2 In,       name: Mod 2 In,       source: LFO_1_OUTPUT }
+  - { entry: 28, module: FILTER_2,    key: AUDIO_IN_1,     label: Audio In 1,     name: Audio In 1,     source: FILTER_1_OUTPUT }
+  - { entry: 29, module: FILTER_2,    key: AUDIO_IN_2,     label: Audio In 2,     name: Audio In 2,     source: NONE }
+  - { entry: 30, module: FILTER_2,    key: PITCH_IN,       label: Pitch In,       name: Pitch In,       source: PITCH_1_OUTPUT_1 }
+  - { entry: 31, module: FILTER_2,    key: MOD_1_IN,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
+  - { entry: 32, module: FILTER_2,    key: MOD_2_IN,       label: Mod 2 In,       name: Mod 2 In,       source: LFO_1_OUTPUT }
+  - { entry: 33, module: AMP_1,       key: AUDIO_IN_1,     label: Audio In 1,     name: Audio In 1,     source: FILTER_2_OUTPUT }
+  - { entry: 34, module: AMP_1,       key: AUDIO_IN_2,     label: Audio In 2,     name: Audio In 2,     source: NONE }
+  - { entry: 35, module: AMP_1,       key: MOD_1_IN,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
+  - { entry: 36, module: AMP_1,       key: MOD_2_IN,       label: Mod 2 In,       name: Mod 2 In,       source: EG_2_OUTPUT }
+  - { entry: 37, module: CHORUS_1,    key: AUDIO_IN,       label: Audio In,       name: Audio In,       source: AMP_1_OUTPUT }
+  - { entry: 38, module: DELAY_1,     key: AUDIO_IN_L,     label: Audio In L,     name: Audio In L,     source: CHORUS_1_OUTPUT_L }
+  - { entry: 39, module: DELAY_1,     key: AUDIO_IN_R,     label: Audio In R,     name: Audio In R,     source: CHORUS_1_OUTPUT_R }
+  - { entry: 40, key: OUTPUT_L,    label: L,              name: Final Output L, name_ja: 最終出力 L, source: DELAY_1_OUTPUT_L }
+  - { entry: 41, key: OUTPUT_R,    label: R,              name: Final Output R, name_ja: 最終出力 R, source: DELAY_1_OUTPUT_R }
 
 # Controls, listed in the editor's order, each by its entry: a parameter is one entry of NRPN
 # category 2 (where it takes its value), the same entry of category 3 (which CC fills its control
@@ -379,10 +393,10 @@ controls:
   - { entry: 45, module: OSC_2,     key: PITCH_COARSE,  label: Pitch Coarse,  cc: 0,   value: 64, bipolar: true, hint: ±5 Oct, set: set_pitch_coarse }
   - { entry: 46, module: OSC_2,     key: PITCH,         label: Pitch,         cc: 85,  value: 5, hint: 0 to +1 Oct, favorite: true, set: set_pitch }
   - { entry: 47, module: OSC_2,     key: PITCH_FINE,    label: Pitch Fine,    cc: 76,  value: 65, bipolar: true, hint: ±60 Cent, set: set_pitch_fine }
-  - { entry: 48, module: OSC_2,     key: PITCH_MOD_1_AMT, label: Pitch Mod 1 Amt, cc: 89, value: 4, hint_inputs: [MOD_1_IN], favorite: true, set: set_pitch_modulation_1_amount }
+  - { entry: 48, module: OSC_2,     key: PITCH_MOD_1_AMT, label: Pitch Mod 1 Amt, cc: 89, value: 4, hint_inputs: [MOD_1_IN], set: set_pitch_modulation_1_amount }
   - { entry: 49, module: OSC_2,     key: PITCH_MOD_1_POL,      label: Pitch Mod 1 Pol, cc: 0, value: 76, bipolar: true, hint: − to +, set: set_pitch_modulation_1_polarity }
   - { entry: 50, module: OSC_2,     key: PITCH_MOD_1_SW, label: Pitch Mod 1 Sw, cc: 0, value: 124, hint: Off/On, set: set_pitch_modulation_1_switch }
-  - { entry: 51, module: OSC_2,     key: PITCH_MOD_2_AMT, label: Pitch Mod 2 Amt, cc: 13, value: 4, hint_inputs: [MOD_2_IN], favorite: true, set: set_pitch_modulation_2_amount }
+  - { entry: 51, module: OSC_2,     key: PITCH_MOD_2_AMT, label: Pitch Mod 2 Amt, cc: 13, value: 4, hint_inputs: [MOD_2_IN], set: set_pitch_modulation_2_amount }
   - { entry: 52, module: OSC_2,     key: PITCH_MOD_2_POL,      label: Pitch Mod 2 Pol, cc: 0, value: 76, bipolar: true, hint: − to +, set: set_pitch_modulation_2_polarity }
   - { entry: 53, module: OSC_2,     key: PITCH_MOD_2_SW, label: Pitch Mod 2 Sw, cc: 0, value: 124, hint: Off/On, set: set_pitch_modulation_2_switch }
   - { entry: 54, module: OSC_2,     key: PW_MOD_1_AMT, label: PW Mod 1 Amt,  cc: 8,   value: 4, hint_inputs: [MOD_1_IN], set: set_pw_modulation_1_amount }
@@ -408,57 +422,80 @@ controls:
   - { entry: 63, module: MIXER_2,   key: LEVEL_3,      label: Level 3,      cc: 21,  value: 4, hint_inputs: [IN_3], set: set_level_3 }
   - { entry: 64, module: MIXER_2,   key: LEVEL_4,      label: Level 4,      cc: 23,  value: 4, hint_inputs: [IN_4], set: set_level_4 }
   - { entry: 65, module: MIXER_2,   key: OUT_LEVEL,  label: Out Level,  cc: 0,   value: 64, set: set_out_level }
-  # Filter 1 in the editor: the cutoff, the resonance and Mode, then the cutoff's keyboard
-  # tracking, its two modulations and their polarity. Pitch In takes the pitch from Pitch 1, as Osc 1 Pitch In
-  # does, and Pitch Amt (CC 9) at its top makes the cutoff follow the note a semitone for a
-  # semitone, unmoved at note 60; it powers up at CC 4, 0.0, with the cutoff not following the note. Mod 1 Amt and
-  # Mod 2 Amt, on CC 24 and 25, are how far the
-  # envelope on Mod 1 In and the LFO on Mod 2 In move the cutoff, as Osc 1's PW Mod Amts are for
-  # the pulse width. Mod 1 Amt powers up at CC 28, 0.2, the envelope opening the cutoff two
-  # octaves, and Mod 2 Amt at CC 4, 0.0, the LFO leaving it alone until it is turned up. Cutoff
-  # powers up at CC 100, 0.8. Mod 1 Pol and Mod 2 Pol set the sign and the
-  # depth of each modulation, from -1.0 at CC 4 through none at CC 64 to +1.0 at CC 124. Mod 1
-  # Pol, on CC 117, powers up at CC 124, so the envelope moves the cutoff as Mod 1 Amt says,
-  # and turned below CC 64 it makes the envelope close the filter. Mod 2 Pol has no CC and
-  # powers up at CC 76, +0.2, so Mod 2 Amt at its top swings the cutoff an octave either way with
-  # the LFO, a vibrato's depth for a filter. Mode crossfades Out from the low pass (0.0) through a
-  # notch (0.5) to the high pass (1.0), on CC 39, and powers up at CC 4,
-  # 0.0, the low pass.
-  - { entry: 66, module: FILTER_1,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 100, favorite: true, set: set_cutoff }
-  - { entry: 67, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 64, favorite: true, set: set_resonance }
-  - { entry: 68, module: FILTER_1,  key: MODE,         label: Mode,         cc: 39,  value: 4, hint: LP to Notch to HP, set: set_mode }
-  - { entry: 69, module: FILTER_1,  key: PITCH_AMT, label: Pitch Amt, cc: 9, value: 4, hint_inputs: [PITCH_IN], set: set_pitch_amount }
-  - { entry: 70, module: FILTER_1,  key: MOD_1_AMT,    label: Mod 1 Amt,    cc: 24,  value: 28, hint_inputs: [MOD_1_IN], favorite: true, set: set_modulation_1_amount }
-  - { entry: 71, module: FILTER_1,  key: MOD_1_POL,      label: Mod 1 Pol, cc: 117, value: 124, bipolar: true, hint: − to +, set: set_modulation_1_polarity }
-  - { entry: 72, module: FILTER_1,  key: MOD_2_AMT,    label: Mod 2 Amt,    cc: 25,  value: 4, hint_inputs: [MOD_2_IN], favorite: true, set: set_modulation_2_amount }
-  - { entry: 73, module: FILTER_1,  key: MOD_2_POL,      label: Mod 2 Pol, cc: 0,   value: 76, bipolar: true, hint: − to +, set: set_modulation_2_polarity }
-  # Amp 1: Gain, on CC 15, is squared and taken four times, a gain of 1.0 at CC 64 and 4.0, 12 dB
-  # up, at CC 124. It powers up at CC 88, 0.7, a gain of 1.96, 5.8 dB up, which brings the default
-  # patch's peaks to about -5 dBFS, under the limiter with either oscillator wave; its Limiter Sw, below, holds what goes past 0.9 under the amp's one-unit
-  # clamp, so that a higher gain or a louder sound reaches it rounded off rather than cut. Mod 1/2
-  # Mix, on CC 36, crossfades what scales the gain from Mod 1 In, EG 1, at 0.0 (CC 4), where it
-  # powers up, to Mod 2 In, EG 2, the organ envelope, at 1.0 (CC 124).
-  - { entry: 74, module: AMP_1,     key: GAIN,         label: Gain,         cc: 15,  value: 88, favorite: true, set: set_gain }
-  - { entry: 75, module: AMP_1,     key: MOD_1_2_MIX,  label: Mod 1/2 Mix,  cc: 36,  value: 4, hint_inputs: [MOD_1_IN, MOD_2_IN], set: set_modulation_mix }
-  - { entry: 76, module: CHORUS_1,  key: MIX,          label: Mix,          cc: 93,  value: 64, favorite: true, set: set_mix }
-  - { entry: 77, module: CHORUS_1,  key: RATE,         label: Rate,         cc: 58,  value: 64, set: set_rate }
-  - { entry: 78, module: CHORUS_1,  key: DEPTH,        label: Depth,        cc: 59,  value: 64, set: set_depth }
-  - { entry: 79, module: DELAY_1,   key: MIX,          label: Mix,          cc: 94,  value: 34, favorite: true, set: set_mix }
-  - { entry: 80, module: DELAY_1,   key: TIME,         label: Time,         cc: 90,  value: 64, set: set_time }
-  - { entry: 81, module: DELAY_1,   key: FEEDBACK,     label: Feedback,     cc: 92,  value: 64, set: set_feedback }
+  # The two filters run in series, Filter 1 into Filter 2 into the amp, as one low pass of the
+  # fourth order (24 dB/oct): Filter 2 takes Filter 1's CCs and powers up as it does, but for its
+  # Resonance (below), so that each CC moves both, as Osc 2's Mod Amts and PW follow Osc 1's. Either takes values of its own by
+  # NRPN, or by CCs of its own set in the editor. The parameters, in the editor's order: the
+  # cutoff, the resonance and Mode, then the cutoff's keyboard tracking, its two modulations and
+  # their polarity. Pitch In takes the pitch from Pitch 1, as Osc 1 Pitch In does, and Pitch Amt
+  # (CC 9) at its top makes the cutoff follow the note a semitone for a semitone, unmoved at note
+  # 60; it powers up at CC 4, 0.0, with the cutoff not following the note. Mod 1 Amt and Mod 2
+  # Amt, on CC 24 and 25, are how far the envelope on Mod 1 In and the LFO on Mod 2 In move the
+  # cutoff, as Osc 1's PW Mod Amts are for the pulse width. Mod 1 Amt powers up at CC 28, 0.2, the
+  # envelope opening the cutoff two octaves, and Mod 2 Amt at CC 4, 0.0, the LFO leaving it alone
+  # until it is turned up. Cutoff (CC 74) powers up at CC 100, 0.8. Resonance is each filter's
+  # own: Filter 1's on CC 71 powers up at CC 64, Q 4.0, and Filter 2's on CC 119 at CC 4, Q 0.71,
+  # so that the peak at the cutoff is mostly Filter 1's, and the two of them together do not
+  # overdrive the second at the resonance Filter 1 alone was made for. Mod 1 Pol
+  # and Mod 2 Pol set the sign and the depth of each modulation, from -1.0 at CC 4 through none at
+  # CC 64 to +1.0 at CC 124. Mod 1 Pol, on CC 117, powers up at CC 124, so the envelope moves the
+  # cutoff as Mod 1 Amt says, and turned below CC 64 it makes the envelope close the filter. Mod 2
+  # Pol has no CC and powers up at CC 76, +0.2, so Mod 2 Amt at its top swings the cutoff an
+  # octave either way with the LFO, a vibrato's depth for a filter. Mode crossfades Out from the
+  # low pass (0.0) through a notch (0.5) to the high pass (1.0), on CC 39, and powers up at CC 4,
+  # 0.0, the low pass. The favorites are Filter 1's, which Filter 2 follows.
+  - { entry: 66, module: FILTER_1,  key: GAIN_1,       label: Gain 1,       cc: 0,   value: 64, hint_inputs: [AUDIO_IN_1], set: set_gain_1 }
+  - { entry: 67, module: FILTER_1,  key: GAIN_2,       label: Gain 2,       cc: 0,   value: 64, hint_inputs: [AUDIO_IN_2], set: set_gain_2 }
+  - { entry: 68, module: FILTER_1,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 100, favorite: true, set: set_cutoff }
+  - { entry: 69, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 64, favorite: true, set: set_resonance }
+  - { entry: 70, module: FILTER_1,  key: MODE,         label: Mode,         cc: 39,  value: 4, hint: LP to Notch to HP, set: set_mode }
+  - { entry: 71, module: FILTER_1,  key: PITCH_AMT, label: Pitch Amt, cc: 9, value: 4, hint_inputs: [PITCH_IN], set: set_pitch_amount }
+  - { entry: 72, module: FILTER_1,  key: MOD_1_AMT,    label: Mod 1 Amt,    cc: 24,  value: 28, hint_inputs: [MOD_1_IN], favorite: true, set: set_modulation_1_amount }
+  - { entry: 73, module: FILTER_1,  key: MOD_1_POL,      label: Mod 1 Pol, cc: 117, value: 124, bipolar: true, hint: − to +, set: set_modulation_1_polarity }
+  - { entry: 74, module: FILTER_1,  key: MOD_2_AMT,    label: Mod 2 Amt,    cc: 25,  value: 4, hint_inputs: [MOD_2_IN], favorite: true, set: set_modulation_2_amount }
+  - { entry: 75, module: FILTER_1,  key: MOD_2_POL,      label: Mod 2 Pol, cc: 0,   value: 76, bipolar: true, hint: − to +, set: set_modulation_2_polarity }
+  - { entry: 76, module: FILTER_2,  key: GAIN_1,       label: Gain 1,       cc: 0,   value: 64, hint_inputs: [AUDIO_IN_1], set: set_gain_1 }
+  - { entry: 77, module: FILTER_2,  key: GAIN_2,       label: Gain 2,       cc: 0,   value: 64, hint_inputs: [AUDIO_IN_2], set: set_gain_2 }
+  - { entry: 78, module: FILTER_2,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 100, set: set_cutoff }
+  - { entry: 79, module: FILTER_2,  key: RESONANCE,    label: Resonance,    cc: 119, value: 4,  set: set_resonance }
+  - { entry: 80, module: FILTER_2,  key: MODE,         label: Mode,         cc: 39,  value: 4, hint: LP to Notch to HP, set: set_mode }
+  - { entry: 81, module: FILTER_2,  key: PITCH_AMT, label: Pitch Amt, cc: 9, value: 4, hint_inputs: [PITCH_IN], set: set_pitch_amount }
+  - { entry: 82, module: FILTER_2,  key: MOD_1_AMT,    label: Mod 1 Amt,    cc: 24,  value: 28, hint_inputs: [MOD_1_IN], set: set_modulation_1_amount }
+  - { entry: 83, module: FILTER_2,  key: MOD_1_POL,      label: Mod 1 Pol, cc: 117, value: 124, bipolar: true, hint: − to +, set: set_modulation_1_polarity }
+  - { entry: 84, module: FILTER_2,  key: MOD_2_AMT,    label: Mod 2 Amt,    cc: 25,  value: 4, hint_inputs: [MOD_2_IN], set: set_modulation_2_amount }
+  - { entry: 85, module: FILTER_2,  key: MOD_2_POL,      label: Mod 2 Pol, cc: 0,   value: 76, bipolar: true, hint: − to +, set: set_modulation_2_polarity }
+  # Amp 1: Audio In 1 and Audio In 2 are summed, each after its own gain, Gain 1 and Gain 2, both
+  # on CC 15, so that a second path, such as one filter beside the other rather than after it,
+  # takes the same envelope and limiter; the default patch leaves Audio In 2 unrouted, and a CC of
+  # its own in the editor sets Gain 2 apart. A gain is squared and taken four times, 1.0 at CC 64
+  # and 4.0, 12 dB up, at CC 124. Both power up at CC 88, 0.7, a gain of 1.96, 5.8 dB up, which
+  # brings the default patch's peaks to about -5 dBFS, under the limiter with either oscillator
+  # wave; its Limiter Sw, below, holds what goes past 0.9 under the amp's one-unit clamp, so that a
+  # higher gain or a louder sound reaches it rounded off rather than cut. Mod 1/2 Mix, on CC 36,
+  # crossfades what scales the gain from Mod 1 In, EG 1, at 0.0 (CC 4), where it powers up, to
+  # Mod 2 In, EG 2, the organ envelope, at 1.0 (CC 124).
+  - { entry: 86, module: AMP_1,     key: GAIN_1,       label: Gain 1,       cc: 15,  value: 88, hint_inputs: [AUDIO_IN_1], favorite: true, set: set_gain_1 }
+  - { entry: 87, module: AMP_1,     key: GAIN_2,       label: Gain 2,       cc: 15,  value: 88, hint_inputs: [AUDIO_IN_2], set: set_gain_2 }
+  - { entry: 88, module: AMP_1,     key: MOD_1_2_MIX,  label: Mod 1/2 Mix,  cc: 36,  value: 4, hint_inputs: [MOD_1_IN, MOD_2_IN], set: set_modulation_mix }
+  - { entry: 89, module: CHORUS_1,  key: MIX,          label: Mix,          cc: 93,  value: 64, favorite: true, set: set_mix }
+  - { entry: 90, module: CHORUS_1,  key: RATE,         label: Rate,         cc: 58,  value: 64, set: set_rate }
+  - { entry: 91, module: CHORUS_1,  key: DEPTH,        label: Depth,        cc: 59,  value: 64, set: set_depth }
+  - { entry: 92, module: DELAY_1,   key: MIX,          label: Mix,          cc: 94,  value: 34, favorite: true, set: set_mix }
+  - { entry: 93, module: DELAY_1,   key: TIME,         label: Time,         cc: 90,  value: 64, set: set_time }
+  - { entry: 94, module: DELAY_1,   key: FEEDBACK,     label: Feedback,     cc: 92,  value: 64, set: set_feedback }
 
   # The mod wheel, a controller control: its CC, CC 1 as in the MIDI spec, put on the bus as a
   # unipolar slot, and in its three shapes (see `signals`), for any input or parameter to read. It
   # powers up at CC 4, 0.0. `performance` marks it as played rather than set: a Save keeps no value
   # for its CC, whichever it is, unless a control without the mark has it too, so that the patch
   # saved loads with it at 0. The general controls, unmarked, are saved as set.
-  - { entry: 82, controller: true, performance: true, key: MOD_WHEEL, label: Mod Wheel, cc: 1,   value: 4 }
+  - { entry: 95, controller: true, performance: true, key: MOD_WHEEL, label: Mod Wheel, cc: 1,   value: 4 }
   # The general controls, on CC 16 and 17, General Purpose Controllers 1 and 2 in the MIDI spec,
   # each filling its six slots (see `signals`). They power up at CC 4, 0.0, and the default patch
   # routes none of them.
-  - { entry: 83, controller: true, key: GENERAL_1, label: General 1, cc: 16,  value: 4 }
-  - { entry: 84, controller: true, key: GENERAL_2, label: General 2, cc: 17,  value: 4 }
+  - { entry: 96, controller: true, key: GENERAL_1, label: General 1, cc: 16,  value: 4 }
+  - { entry: 97, controller: true, key: GENERAL_2, label: General 2, cc: 17,  value: 4 }
   # Amp 1 Limiter Sw, after the controllers so that no entry before it moves: the amp's look-ahead
   # limiter, on at CC 64 and above. It has no CC and powers up on (CC 124); off, the peaks past one
   # unit reach the clamp. Either way the amp's output comes 1 ms late.
-  - { entry: 85, module: AMP_1,     key: LIMITER_SW,   label: Limiter Sw,   cc: 0,   value: 124, hint: Off/On, set: set_limiter_switch }
+  - { entry: 98, module: AMP_1,     key: LIMITER_SW,   label: Limiter Sw,   cc: 0,   value: 124, hint: Off/On, set: set_limiter_switch }

@@ -3,8 +3,8 @@
 ; It rewires a few inputs of the default patch:
 B0 63 71 B0 62 08 B0 06 34   ; NRPN 136 Mixer 1 In 1   <- Osc 1 (52)
 B0 62 09 B0 06 28            ; NRPN 137 Mixer 1 In 2   <- EG 1 (40)
-B0 62 21 B0 06 32            ; NRPN 161 Output L       <- Mixer 1 (50)
-B0 62 19 B0 06 2C            ; NRPN 153 Filter 1 Mod 1 <- LFO 1 (44)
+B0 62 28 B0 06 32            ; NRPN 168 Output L       <- Mixer 1 (50)
+B0 62 1A B0 06 2C            ; NRPN 154 Filter 1 Mod 1 <- LFO 1 (44)
 B0 63 72 B0 62 17 B0 06 01   ; NRPN 279 Mixer 1 Level 1 <- 1.0 (1)
 B0 62 18 B0 06 01            ; NRPN 280 Mixer 1 Level 2 <- 1.0 (1)
 B0 65 7F B0 64 7F            ; RPN null

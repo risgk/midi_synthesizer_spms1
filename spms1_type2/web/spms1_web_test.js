@@ -105,12 +105,12 @@ for (const blockSize of [128, 37, 1000]) {
 }
 
 // A patch sent as NRPN (in one send, as the editor does): Output L and R from nothing
-// (NRPN MSB 113, LSB 33 and 34 = SIGNAL_NONE) silences the default patch
+// (NRPN MSB 113, LSB 40 and 41 = SIGNAL_NONE) silences the default patch
 {
   const level = (nrpn) => {
     const processor = createProcessor(48000);
     if (nrpn) {
-      processor.send([0xB0, 99, 113, 0xB0, 98, 33, 0xB0, 6, 0, 0xB0, 99, 113, 0xB0, 98, 34, 0xB0, 6, 0,
+      processor.send([0xB0, 99, 113, 0xB0, 98, 40, 0xB0, 6, 0, 0xB0, 99, 113, 0xB0, 98, 41, 0xB0, 6, 0,
                       0xB0, 101, 127, 0xB0, 100, 127]);
     }
     processor.send([0x90, 60, 100]);

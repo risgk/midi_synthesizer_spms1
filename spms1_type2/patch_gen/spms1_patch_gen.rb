@@ -32,7 +32,7 @@ SIGNAL_OWN      = 127
 PARAM_SLOT_BASE = 128
 # The size of the `signals` array, as spms1_main.rb makes it: the smoothed copies of the controller
 # slots go at its top.
-SIGNALS_SIZE = 256
+SIGNALS_SIZE = 512
 # The module classes with a smooth_parameters, which the main loop calls once every 16 samples.
 SMOOTHED_EVERY_16 = %w[Pitch LFO Osc Filter Chorus Delay].freeze
 

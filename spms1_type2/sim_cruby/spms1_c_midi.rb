@@ -33,7 +33,7 @@ module Spms1
     @stored_image = nil
 
     # The signal bus SignalBus reads and writes, as spms1_bus.h has it for the C builds.
-    @bus_signals = Array.new(256, 0.0)
+    @bus_signals = Array.new(512, 0.0)
     @active_modules = Array.new(32, 0)
 
     @sample_rate = 48000
@@ -105,8 +105,8 @@ module Spms1
         @cc_values[ch].fill(0)
         spms1_write_default_patch(ch)
       end
-      def get_bus_signal(slot) = @bus_signals[slot & 255]
-      def set_bus_signal(slot, v) = (@bus_signals[slot & 255] = v)
+      def get_bus_signal(slot) = @bus_signals[slot & 511]
+      def set_bus_signal(slot, v) = (@bus_signals[slot & 511] = v)
       def get_active_module(slot) = @active_modules[slot & 31]
       def set_active_module(slot, v) = (@active_modules[slot & 31] = v)
       def set_sample_rate(v) = (@sample_rate = v)

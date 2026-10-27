@@ -9,8 +9,8 @@ MIDI Synthesizer SPMS-1 (type-2) v0.3.4
 - ハードシンク: Sync In (デフォルトで Osc 1 のノコギリ波) が 0 を上へ横切ったところで、Osc 2 がサンプルの間のその位置からやり直します。やり直しの段差も、周期の始まりと同じく PolyBLEP で丸めます (Sync Sw、CC#112)
 - エンベロープ: ADS エンベロープ 2 つ。EG 2 はアンプの Mod 2 In 用で、起動時はオルガン型。CC#52、53、54。リリースのスイッチは 2 つとも CC#105
 - LFO: 三角波 (PolyBLAMP) とユニポーラの矩形波 (PolyBLEP) の個別出力と、その間をクロスフェードするメイン出力 (Wave、CC#33)。リセット入力付き (デフォルトで Note Gate。Reset Sw、CC#113 をオンにするとノートごとにやり直す)
-- フィルタ: ZDF/TPT ステート・バリアブル・フィルタ (BP 積分器の非線形リーク付き、1 ステップ・ニュートン法で解く)。LP、HP、BP の 3 出力と、LP と HP の間をノッチを経てクロスフェードするメイン出力 (Mode、CC#39)
-- アンプ: 最大 +12 dB のゲイン (CC#15)。先読み型のリミッターで、ピークを 1.0 のクランプの手前に、切らずに丸めて収める (Limiter Sw、CC なし、起動時オン)
+- フィルタ: 2 つの ZDF/TPT ステート・バリアブル・フィルタ (BP 積分器の非線形リーク付き、1 ステップ・ニュートン法で解く)。それぞれ LP、HP、BP の 3 出力と、LP と HP の間をノッチを経てクロスフェードするメイン出力 (Mode、CC#39)、ゲイン付きの 2 つのオーディオ入力を持つ。デフォルトでは同じ CC で直列につながり、4 次 (24 dB/oct) のローパスになる。2 つ目のレゾナンスは別 (CC#119)
+- アンプ: 2 つのオーディオ入力と、それぞれ最大 +12 dB のゲイン (CC#15)。先読み型のリミッターで、ピークを 1.0 のクランプの手前に、切らずに丸めて収める (Limiter Sw、CC なし、起動時オン)
 - コーラス: モノラル入力・ステレオ出力、実行順に入るモジュール
 - ディレイ: ステレオ、フィードバック付き、実行順に入るモジュール (最大 340 ms)
 - ピッチ: ノートのピッチを扱う、実行順に入るモジュール。指数カーブのラグによるポルタメント (CC#5)、その後に足すピッチベンド、鍵盤のストレッチ (ベンドレンジは CC#57、ストレッチは CC#22)
@@ -104,11 +104,13 @@ MIDI Synthesizer SPMS-1 (type-2) v0.3.4
 "spms1_editor.html" を開き（[Web エディタ](#web-エディタ)を参照）、"MIDI Out" でシンセか SPMS-1 Web (Built-in) を選びます。
 
 1. お気に入り: Controls タブは "Show favorites only" にチェックが入った状態で開き、デフォルトパッチで
-   お気に入りになっている、音を大きく変える 21 個のパラメータを表示します:
+   お気に入りになっている、音を大きく変える 19 個のパラメータを表示します:
    Pitch 1 Glide、EG 1 Attack・Decay・Sustain、LFO 1 Rate、Osc 1 Wave・Pitch Mod 1 Amt・
-   Pitch Mod 2 Amt、Osc 2 Wave・Pitch・Pitch Mod 1 Amt・Pitch Mod 2 Amt、Mixer 2 Level 1・2、
-   Filter 1 Cutoff・Resonance・Mod 1 Amt・Mod 2 Amt、Amp 1 Gain、Chorus 1 Mix、Delay 1 Mix。
-   気に入ったものは星で追加できます
+   Pitch Mod 2 Amt、Osc 2 Wave・Pitch、Mixer 2 Level 1・2、
+   Filter 1 Cutoff・Resonance・Mod 1 Amt・Mod 2 Amt、Amp 1 Gain 1、Chorus 1 Mix、Delay 1 Mix。
+   気に入ったものは星で追加できます。Osc 2 の PW と各 Mod Amt は Osc 1 と、Filter 2 の Resonance（CC 119）以外の
+   各パラメータは Filter 1 と同じ CC なので、Osc 1 や Filter 1 のスライダーを動かすと相手も一緒に動きます
+   （お気に入りだけの表示では、相手のスライダーは隠れています）
 2. CC のあるパラメータ: "Show favorites only" のチェックを外すと、CC のあるパラメータがすべて表示されます。
    デフォルトパッチでの働きと起動時の値は、ブロック図の下に説明があります。MIDI コントローラのつまみでも
    動かせます
@@ -240,6 +242,7 @@ flowchart LR
   NOISE[Noise 1]
   MIX2[Mixer 2]
   FILTER[Filter 1]
+  FILTER2[Filter 2]
   AMP[Amp 1]
   CHORUS[Chorus 1]
   DELAY[Delay 1]
@@ -249,8 +252,9 @@ flowchart LR
   OSC2 -->|In 2| MIX2
   OSC -->|In 3, Sub| MIX2
   NOISE -->|In 4| MIX2
-  MIX2 --> FILTER
-  FILTER --> AMP
+  MIX2 -->|In 1| FILTER
+  FILTER -->|In 1| FILTER2
+  FILTER2 -->|In 1| AMP
   AMP --> CHORUS
   CHORUS -->|L| DELAY
   CHORUS -->|R| DELAY
@@ -271,6 +275,9 @@ flowchart LR
   EG -. Mod 1 .-> FILTER
   LFO -. Mod 2 .-> FILTER
   PITCH -. Out 1 .-> FILTER
+  EG -. Mod 1 .-> FILTER2
+  LFO -. Mod 2 .-> FILTER2
+  PITCH -. Out 1 .-> FILTER2
   EG -. Mod 1 .-> AMP
   EG2 -. Mod 2 .-> AMP
   OSC -. Sync .-> OSC2
@@ -280,6 +287,7 @@ flowchart LR
 
 Osc 2 のシンクと LFO 1 のリセットは、Osc 1 のノコギリ波と Note Gate から結線されていますが、スイッチが起動時オフなので、
 オンにするまで効きません。モジュレーションホイールは LFO 1 の Level Mod In に入ります。
+2 つのフィルタとアンプには、2 つ目の経路用の Audio In 2 があり、デフォルトでは何もつながっていません。
 
 モジュールは[実行順](./spms1_patching.ja.md#実行順)で、1 サンプルずつ処理されます。波形やカットオフ、ゲインといったパラメータは CC
 から届くもので、この図では省いています。パラメータ名では Amount を Amt、Switch を Sw、Polarity を Pol と略しています。
@@ -287,26 +295,26 @@ Osc 2 のシンクと LFO 1 のリセットは、Osc 1 のノコギリ波と Not
 ノートのピッチは Pitch 1 を通ってオシレータに届き、ノートからノートへ滑らかに移ります。ポルタメントです。
 Pitch 1 Glide は CC#5 (MIDI 規格の Portamento Time) にあり、起動時は 0.0 です。そこではポルタメントはオフで、
 ピッチを届いたとおりそのまま通します。Pitch 1 は 1 つのグライドから 2 つの出力を出します。Out 1 は Osc 1 と
-フィルタのキーボードトラッキングへ、Out 2 は Osc 2 へ届きます。Out 1 Glide Sw と Out 2 Glide Sw は
+両フィルタのキーボードトラッキングへ、Out 2 は Osc 2 へ届きます。Out 1 Glide Sw と Out 2 Glide Sw は
 Glide を動かさずに、それぞれの出力のポルタメントをオン・オフします。どちらも CC#34 にあり、MIDI のスイッチと
 同じく値 64 以上でオン、起動時は値 124 でオンです。グライドは Pitch 1 Gate In（デフォルトは Note Gate）が
 オンの間だけ進みます。ノートとノートの間は止まっているので、休符の後のノートはそこから続きます。Pitch Bend は Pitch 1 Bend In に入ります。Bend In は
-グライドの後で出力に足されるので、ベンドはすぐに効き、オシレータにもフィルタのキーボードトラッキングにも
+グライドの後で出力に足されるので、ベンドはすぐに効き、オシレータにも両フィルタのキーボードトラッキングにも
 同じように届きます。Out 1 Bend Sw と Out 2 Bend Sw は CC を持たず、起動時はオンです。カテゴリ 4 で
 片方をオフにすると、その出力にはベンドが掛からないので、Osc 2 だけをベンドできます。
 Pitch 1 Bend Amt（CC#57）がベンドレンジで、1 目盛り半音ずつです。値 8 で上下 2 半音、値 28 で 1 オクターブ、
 値 124 で 5 オクターブで、起動時は値 28 です。
 
-LFO はオシレータの Mod 2 In に直接入り、ピッチとパルス幅の両方に掛かります。フィルタにも入りますが、Filter 1 Mod 2 Amt
-（CC#25）が起動時 0.0 なので、上げるまでカットオフは動きません。エンベロープは Filter 1 Mod 1 Amt（CC#24）で
-カットオフを動かし、起動時は 0.2（値 28）で、ピークで Filter 1 Cutoff（CC#74）から 2 オクターブ上まで開きます。
+LFO はオシレータの Mod 2 In に直接入り、ピッチとパルス幅の両方に掛かります。フィルタにも入りますが、Mod 2 Amt
+（CC#25）が起動時 0.0 なので、上げるまでカットオフは動きません。エンベロープは Mod 1 Amt（CC#24）で
+カットオフを動かし、起動時は 0.2（値 28）で、ピークで Cutoff（CC#74）から 2 オクターブ上まで開きます。
 カットオフは起動時 0.8（値 100）です。
 LFO は Osc 1 Pitch Mod 2 Amt（CC#13）でピッチへ入ります。起動時は 0.0 で、最大の値 124 では Osc 1 Pitch Mod 2 Pol の
 起動時の +0.2 と合わせて、フルレベルの LFO がピッチを上下 1 オクターブ振ります。パルス幅へは
 Osc 1 PW Mod 2 Amt（CC#103）で入り、起動時は 0.0 です。LFO 1 Level は起動時 1.0 なので、ビブラートは
-CC#13 だけで 0〜1 オクターブ掛かります。Pitch 1 からのピッチはフィルタの Filter 1 Pitch In にも入ります。キーボードトラッキング用です。
-CC#9（Filter 1 Pitch Amt）を最大にするとカットオフがノートに半音ずつ追従し、ノート 60 では動きません。
-Filter 1 Pitch Amt は起動時 0.0（値 4）なので、CC#9 を上げるまでは、カットオフはノートによらず CC#74 の位置のままです。
+CC#13 だけで 0〜1 オクターブ掛かります。Pitch 1 からのピッチは両フィルタの Pitch In にも入ります。キーボードトラッキング用です。
+CC#9（Pitch Amt）を最大にするとカットオフがノートに半音ずつ追従し、ノート 60 では動きません。
+Pitch Amt は起動時 0.0（値 4）なので、CC#9 を上げるまでは、カットオフはノートによらず CC#74 の位置のままです。
 エンベロープはオシレータの Osc 1 Mod 1 In にも入ります。ピッチエンベロープ用です。Pitch Mod 1 Amt
 （CC#89）と PW Mod 1 Amt（CC#8）は起動時 0.0 で、オフです。モジュレーションの深さはどれも動かす先のレンジ全体に届くので、
 ソースを音楽的な深さまで絞る仕事はモジュールに作り込まず、パッチの側に任せています。
@@ -315,6 +323,11 @@ Mixer 2 がフィルタの前でオーディオを足し合わせます。Osc 1 
 それぞれ自分のレベルで足されます。Level 1（CC#19）と Level 2（CC#20）は起動時 0.7 なので、デフォルトのパッチは 2 つのオシレータで鳴り、合わせて 1 つを最大にしたときとほぼ同じ音量です。Level 3（CC#21）と Level 4（CC#23）は起動時 0.0 なので、上げるまでサブとノイズは鳴りません。Osc 2 は Osc 1 と同じく Pitch 1 からノートを受け取り、自分の Pitch（CC#85）と
 Pitch Fine（CC#76）で Osc 1 に対する音程を決めます。起動時は 11 セント高く、ゆっくりうなります。Wave も自分のもので、CC#104 です（Osc 1 は CC#102）。それ以外は
 Osc 1 に従います。Mod Amt と PW には Osc 1 と同じ CC が割り当ててあるので、1 つの CC で両方が動きます。
+
+Filter 1 と Filter 2 は直列で、4 次（24 dB/oct）のローパスになります。Filter 2 は Filter 1 と同じ CC と起動時の値を持ち、
+それらの CC で両方が動きます。ただし Resonance だけは別の CC#119 で、起動時は最小の Q 0.71 なので、レゾナンスのピークは
+Filter 1 のもの（起動時 Q 4.0、CC#71）になります。それぞれのフィルタは Audio In 1 と Audio In 2 を Gain 1 と Gain 2
+（CC なし、起動時は等倍）で受け取ります。Amp 1 も 2 つの入力を Gain 1 と Gain 2（どちらも CC#15）で受け取ります。
 
 アンプまではモノラルです。コーラスがそれを受け取って左右 2 つを出し、ディレイが左右を受け取って分けた
 まま運び、その 2 つの出力が最終出力の左右になります。
@@ -326,7 +339,7 @@ NRPN が書き換えます。[パッチ](./spms1_patching.ja.md)を参照して�
 ドキュメント
 ------------
 
-- [パッチ](./spms1_patching.ja.md): 実行順、Filter 1・Chorus 1・Delay 1 の詳細、NRPN によるパッチの編集
+- [パッチ](./spms1_patching.ja.md): 実行順、フィルタ・Chorus 1・Delay 1 の詳細、NRPN によるパッチの編集
   (表、知っておきたいレンジ、例、注意点)
 - [開発](./spms1_development.ja.md): デバッグプリント、PC シミュレーター、モジュールの追加、処理負荷の見積もり、
   GitHub Actions、Spinel の更新、生成コードの確認

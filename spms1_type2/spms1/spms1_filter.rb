@@ -224,8 +224,28 @@ module Spms1
       @current_pitch_input = 0.0
       @current_modulation_1_input = 0.0
       @current_modulation_2_input = 0.0
+      @gain_1 = 1.0
+      @stage_1_gain_1 = 1.0
+      @current_gain_1 = 1.0
+      @gain_2 = 1.0
+      @stage_1_gain_2 = 1.0
+      @current_gain_2 = 1.0
 
       update_coefficients
+    end
+
+    # Gain 1 and Gain 2, of Audio In 1 and Audio In 2, which are summed into the filter: each
+    # unipolar, [0.0, 1.0], squared and taken four times, as Amp's Gain 1 is, so that the middle of
+    # the dial is unity and the top drives the filter 12 dB harder. Smoothed at the control rate,
+    # as Mode is, being gains on the audio.
+    def set_gain_1(gain)
+      clamped_gain = (gain < 0.0) ? 0.0 : ((gain > 1.0) ? 1.0 : gain)
+      @gain_1 = 4.0 * clamped_gain * clamped_gain
+    end
+
+    def set_gain_2(gain)
+      clamped_gain = (gain < 0.0) ? 0.0 : ((gain > 1.0) ? 1.0 : gain)
+      @gain_2 = 4.0 * clamped_gain * clamped_gain
     end
 
     # Every parameter but the two Mod Pols is unipolar, [0.0, 1.0], which is what the smoothing, the
@@ -306,7 +326,7 @@ module Spms1
       @current_pitch_amount = Dsp.smooth(@stage_1_pitch_amount, @current_pitch_amount, @smoothing_16_blend)
     end
 
-    def process(control_tick, audio_input = 0.0, pitch_input = 0.0, modulation_1_input = 0.0, modulation_2_input = 0.0)
+    def process(control_tick, audio_input_1 = 0.0, audio_input_2 = 0.0, pitch_input = 0.0, modulation_1_input = 0.0, modulation_2_input = 0.0)
       @current_pitch_input = pitch_input
       @current_modulation_1_input = modulation_1_input
       @current_modulation_2_input = modulation_2_input
@@ -320,6 +340,8 @@ module Spms1
         @dc_blocker_bp = Dsp.flush_tiny(@dc_blocker_bp)
         @self_osc_seed = 0.0 - @self_osc_seed
       end
+
+      audio_input = audio_input_1 * @current_gain_1 + audio_input_2 * @current_gain_2
 
       @g += @g_slope
       @g_plus_k += @g_plus_k_slope
@@ -435,6 +457,10 @@ module Spms1
       @current_mode_lp = Dsp.smooth(@stage_1_mode_lp, @current_mode_lp, @smoothing_target_blend)
       @stage_1_mode_hp = Dsp.smooth(@mode_hp, @stage_1_mode_hp, @smoothing_target_blend)
       @current_mode_hp = Dsp.smooth(@stage_1_mode_hp, @current_mode_hp, @smoothing_target_blend)
+      @stage_1_gain_1 = Dsp.smooth(@gain_1, @stage_1_gain_1, @smoothing_target_blend)
+      @current_gain_1 = Dsp.smooth(@stage_1_gain_1, @current_gain_1, @smoothing_target_blend)
+      @stage_1_gain_2 = Dsp.smooth(@gain_2, @stage_1_gain_2, @smoothing_target_blend)
+      @current_gain_2 = Dsp.smooth(@stage_1_gain_2, @current_gain_2, @smoothing_target_blend)
 
       # The pitch and modulation inputs arrive as they are; clamping total_cutoff below is what holds
       # the table lookup in range, and a source that swings both ways moves the cutoff both ways.
