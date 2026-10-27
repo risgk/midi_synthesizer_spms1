@@ -35,9 +35,8 @@ module Spms1
       @current_2 = 0.0
       @current_3 = 0.0
       @current_4 = 0.0
-      # Out Level scales the sum, smoothed as the input levels are. It starts at 0.0, as they do,
-      # and comes up through the smoothing to what the patch sets.
-      @out_level = 0.0
+      # Out Level scales the sum, smoothed as the input levels are.
+      @out_level = 0.5
       @stage_1_out_level = 0.0
       @current_out_level = 0.0
       @output = 0.0

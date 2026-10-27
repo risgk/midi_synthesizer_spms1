@@ -188,19 +188,19 @@ module Spms1
       @mode_lp = 1.0
       @mode_hp = 0.0
 
-      @stage_1_cutoff = 1.0
+      @stage_1_cutoff = 0.0
       @stage_1_resonance = 0.0
       @stage_1_modulation_1_depth = 0.0
       @stage_1_modulation_2_depth = 0.0
       @stage_1_pitch_amount = 0.0
-      @stage_1_mode_lp = 1.0
+      @stage_1_mode_lp = 0.0
       @stage_1_mode_hp = 0.0
-      @current_cutoff = 1.0
+      @current_cutoff = 0.0
       @current_resonance = 0.0
       @current_modulation_1_depth = 0.0
       @current_modulation_2_depth = 0.0
       @current_pitch_amount = 0.0
-      @current_mode_lp = 1.0
+      @current_mode_lp = 0.0
       @current_mode_hp = 0.0
 
       @g = 0.0
@@ -224,11 +224,10 @@ module Spms1
       @current_pitch_input = 0.0
       @current_modulation_1_input = 0.0
       @current_modulation_2_input = 0.0
-      # The gains start at 0.0, as the amp's do, so that the sound comes in through the smoothing.
-      @gain_1 = 0.0
+      @gain_1 = 1.0
       @stage_1_gain_1 = 0.0
       @current_gain_1 = 0.0
-      @gain_2 = 0.0
+      @gain_2 = 1.0
       @stage_1_gain_2 = 0.0
       @current_gain_2 = 0.0
 

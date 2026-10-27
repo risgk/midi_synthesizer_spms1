@@ -70,16 +70,14 @@ module Spms1
       # The state of the low pass filter in front of the line.
       @filtered = 0.0
 
-      # The rate and the depth start where their controls do at power-on, so neither slides up to
-      # it; Mix starts at 0.0, dry, as the levels and the gains do, and comes up through the
-      # smoothing.
+      # Each parameter at its power-on value, and its smoothing at 0.0, as every module's starts.
       @rate = 0.5
-      @stage_1_rate = 0.5
-      @current_rate = 0.5
+      @stage_1_rate = 0.0
+      @current_rate = 0.0
       @depth = 0.5
-      @stage_1_depth = 0.5
-      @current_depth = 0.5
-      @mix = 0.0
+      @stage_1_depth = 0.0
+      @current_depth = 0.0
+      @mix = 0.5
       @stage_1_mix = 0.0
       @current_mix = 0.0
 

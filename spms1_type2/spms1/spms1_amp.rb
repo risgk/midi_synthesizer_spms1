@@ -39,11 +39,10 @@ module Spms1
     def initialize(sample_rate)
       @sample_rate = sample_rate
       @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (48000.0 / @sample_rate) * (CONTROL_RATE_DIVISOR / 4.0)
-      # The gains start at 0.0, so that the sound comes in through the smoothing at power-up.
-      @gain = 0.0
+      @gain = 1.0
       @stage_1_gain = 0.0
       @current_gain = 0.0
-      @gain_2 = 0.0
+      @gain_2 = 1.0
       @stage_1_gain_2 = 0.0
       @current_gain_2 = 0.0
       @modulation_mix = 0.0

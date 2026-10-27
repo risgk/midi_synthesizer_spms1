@@ -79,15 +79,14 @@ module Spms1
       @filtered_l = 0.0
       @filtered_r = 0.0
 
-      # The time starts where its control does at power-on, so it does not slide up to it; Feedback
-      # and Mix start at 0.0, as the levels and the gains do, and come up through the smoothing.
+      # Each parameter at its power-on value, and its smoothing at 0.0, as every module's starts.
       @time = 0.5
-      @stage_1_time = 0.5
-      @current_time = 0.5
-      @feedback = 0.0
+      @stage_1_time = 0.0
+      @current_time = 0.0
+      @feedback = 0.25
       @stage_1_feedback = 0.0
       @current_feedback = 0.0
-      @mix = 0.0
+      @mix = 0.25
       @stage_1_mix = 0.0
       @current_mix = 0.0
 

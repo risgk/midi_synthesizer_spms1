@@ -55,10 +55,9 @@ module Spms1
       # set_release_switch.
       @release_follows_decay = 1.0
       @sustain = 1.0
-      @level = 0.0
-      # The level, smoothed; the control-rate path takes one multiply by it. It starts at 0.0, as
-      # the other levels and the gains do, and comes up through the smoothing to what the patch sets.
-      @amount = 0.0
+      @level = 1.0
+      # The level, smoothed; the control-rate path takes one multiply by it.
+      @amount = 1.0
       @stage_1_amount = 0.0
       @current_amount = 0.0
 
