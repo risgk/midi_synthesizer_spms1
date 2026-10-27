@@ -340,7 +340,7 @@ controls:
   # routing a source to it is enough; Level Mod In takes the mod wheel, which adds to Level
   # (CC 116) up to its top. Level powers up at CC 124, 1.0, so the LFO runs at full level, and
   # what it moves sets the depth.
-  - { entry: 17, module: LFO_1,     key: WAVE,         label: Wave,         cc: 33,  value: 4, hint: Tri to Sq, set: set_wave }
+  - { entry: 17, module: LFO_1,     key: WAVE,         label: Wave,         cc: 33,  value: 4, hint: Tri to Sq, favorite: true, set: set_wave }
   - { entry: 18, module: LFO_1,     key: RATE,         label: Rate,         cc: 3,   value: 64, favorite: true, set: set_rate }
   - { entry: 19, module: LFO_1,     key: LEVEL,        label: Level,        cc: 116, value: 124, set: set_level }
   - { entry: 20, module: LFO_1,     key: RATE_MOD_AMT, label: Rate Mod Amt, cc: 0,   value: 124, hint_inputs: [RATE_MOD_IN], set: set_rate_modulation_amount }
@@ -423,7 +423,7 @@ controls:
   - { entry: 61, module: MIXER_2,   key: LEVEL_1,      label: Level 1,      cc: 19,  value: 124, hint_inputs: [IN_1], favorite: true, set: set_level_1 }
   - { entry: 62, module: MIXER_2,   key: LEVEL_2,      label: Level 2,      cc: 20,  value: 4,   hint_inputs: [IN_2], set: set_level_2 }
   - { entry: 63, module: MIXER_2,   key: LEVEL_3,      label: Level 3,      cc: 21,  value: 4, hint_inputs: [IN_3], set: set_level_3 }
-  - { entry: 64, module: MIXER_2,   key: LEVEL_4,      label: Level 4,      cc: 23,  value: 4, hint_inputs: [IN_4], set: set_level_4 }
+  - { entry: 64, module: MIXER_2,   key: LEVEL_4,      label: Level 4,      cc: 23,  value: 4, hint_inputs: [IN_4], favorite: true, set: set_level_4 }
   - { entry: 65, module: MIXER_2,   key: OUT_LEVEL,  label: Out Level,  cc: 0,   value: 64, set: set_out_level }
   # The two filters run in series, Filter 1 into Filter 2's Audio In 2 into the amp's, as one low
   # pass of the fourth order (24 dB/oct); Mixer 2 also reaches Filter 2's Audio In 1 at Gain 1 0.0
