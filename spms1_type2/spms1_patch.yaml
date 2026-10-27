@@ -423,7 +423,7 @@ controls:
   - { entry: 64, module: MIXER_2,   key: LEVEL_4,      label: Level 4,      cc: 23,  value: 4, hint_inputs: [IN_4], set: set_level_4 }
   - { entry: 65, module: MIXER_2,   key: OUT_LEVEL,  label: Out Level,  cc: 0,   value: 64, set: set_out_level }
   # The two filters run in series, Filter 1 into Filter 2 into the amp, as one low pass of the
-  # fourth order (24 dB/oct): Filter 2 takes Filter 1's CCs and powers up as it does, but for its
+  # fourth order (24 dB/oct): the two take the same CCs and power up alike, but for their
   # Resonance (below), so that each CC moves both, as Osc 2's Mod Amts and PW follow Osc 1's. Either takes values of its own by
   # NRPN, or by CCs of its own set in the editor. The parameters, in the editor's order: the
   # cutoff, the resonance and Mode, then the cutoff's keyboard tracking, its two modulations and
@@ -434,7 +434,7 @@ controls:
   # cutoff, as Osc 1's PW Mod Amts are for the pulse width. Mod 1 Amt powers up at CC 28, 0.2, the
   # envelope opening the cutoff two octaves, and Mod 2 Amt at CC 4, 0.0, the LFO leaving it alone
   # until it is turned up. Cutoff (CC 74) powers up at CC 100, 0.8. Resonance is each filter's
-  # own: Filter 1's on CC 71 powers up at CC 64, Q 4.0, and Filter 2's on CC 119 at CC 4, Q 0.71,
+  # own: Filter 1's on CC 119 powers up at CC 64, Q 4.0, and Filter 2's on CC 71 at CC 4, Q 0.71,
   # so that the peak at the cutoff is mostly Filter 1's, and the two of them together do not
   # overdrive the second at the resonance Filter 1 alone was made for. Mod 1 Pol
   # and Mod 2 Pol set the sign and the depth of each modulation, from -1.0 at CC 4 through none at
@@ -443,26 +443,26 @@ controls:
   # Pol has no CC and powers up at CC 76, +0.2, so Mod 2 Amt at its top swings the cutoff an
   # octave either way with the LFO, a vibrato's depth for a filter. Mode crossfades Out from the
   # low pass (0.0) through a notch (0.5) to the high pass (1.0), on CC 39, and powers up at CC 4,
-  # 0.0, the low pass. The favorites are Filter 1's, which Filter 2 follows.
+  # 0.0, the low pass. The favorites are Filter 2's, the one heard, which Filter 1 follows.
   - { entry: 66, module: FILTER_1,  key: GAIN_1,       label: Gain 1,       cc: 0,   value: 64, hint_inputs: [AUDIO_IN_1], set: set_gain_1 }
   - { entry: 67, module: FILTER_1,  key: GAIN_2,       label: Gain 2,       cc: 0,   value: 64, hint_inputs: [AUDIO_IN_2], set: set_gain_2 }
-  - { entry: 68, module: FILTER_1,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 100, favorite: true, set: set_cutoff }
-  - { entry: 69, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 64, favorite: true, set: set_resonance }
+  - { entry: 68, module: FILTER_1,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 100, set: set_cutoff }
+  - { entry: 69, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 119, value: 64, set: set_resonance }
   - { entry: 70, module: FILTER_1,  key: MODE,         label: Mode,         cc: 39,  value: 4, hint: LP to Notch to HP, set: set_mode }
   - { entry: 71, module: FILTER_1,  key: PITCH_AMT, label: Pitch Amt, cc: 9, value: 4, hint_inputs: [PITCH_IN], set: set_pitch_amount }
-  - { entry: 72, module: FILTER_1,  key: MOD_1_AMT,    label: Mod 1 Amt,    cc: 24,  value: 28, hint_inputs: [MOD_1_IN], favorite: true, set: set_modulation_1_amount }
+  - { entry: 72, module: FILTER_1,  key: MOD_1_AMT,    label: Mod 1 Amt,    cc: 24,  value: 28, hint_inputs: [MOD_1_IN], set: set_modulation_1_amount }
   - { entry: 73, module: FILTER_1,  key: MOD_1_POL,      label: Mod 1 Pol, cc: 117, value: 124, bipolar: true, hint: − to +, set: set_modulation_1_polarity }
-  - { entry: 74, module: FILTER_1,  key: MOD_2_AMT,    label: Mod 2 Amt,    cc: 25,  value: 4, hint_inputs: [MOD_2_IN], favorite: true, set: set_modulation_2_amount }
+  - { entry: 74, module: FILTER_1,  key: MOD_2_AMT,    label: Mod 2 Amt,    cc: 25,  value: 4, hint_inputs: [MOD_2_IN], set: set_modulation_2_amount }
   - { entry: 75, module: FILTER_1,  key: MOD_2_POL,      label: Mod 2 Pol, cc: 0,   value: 76, bipolar: true, hint: − to +, set: set_modulation_2_polarity }
   - { entry: 76, module: FILTER_2,  key: GAIN_1,       label: Gain 1,       cc: 0,   value: 64, hint_inputs: [AUDIO_IN_1], set: set_gain_1 }
   - { entry: 77, module: FILTER_2,  key: GAIN_2,       label: Gain 2,       cc: 0,   value: 64, hint_inputs: [AUDIO_IN_2], set: set_gain_2 }
-  - { entry: 78, module: FILTER_2,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 100, set: set_cutoff }
-  - { entry: 79, module: FILTER_2,  key: RESONANCE,    label: Resonance,    cc: 119, value: 4,  set: set_resonance }
+  - { entry: 78, module: FILTER_2,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 100, favorite: true, set: set_cutoff }
+  - { entry: 79, module: FILTER_2,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 4,  favorite: true, set: set_resonance }
   - { entry: 80, module: FILTER_2,  key: MODE,         label: Mode,         cc: 39,  value: 4, hint: LP to Notch to HP, set: set_mode }
   - { entry: 81, module: FILTER_2,  key: PITCH_AMT, label: Pitch Amt, cc: 9, value: 4, hint_inputs: [PITCH_IN], set: set_pitch_amount }
-  - { entry: 82, module: FILTER_2,  key: MOD_1_AMT,    label: Mod 1 Amt,    cc: 24,  value: 28, hint_inputs: [MOD_1_IN], set: set_modulation_1_amount }
+  - { entry: 82, module: FILTER_2,  key: MOD_1_AMT,    label: Mod 1 Amt,    cc: 24,  value: 28, hint_inputs: [MOD_1_IN], favorite: true, set: set_modulation_1_amount }
   - { entry: 83, module: FILTER_2,  key: MOD_1_POL,      label: Mod 1 Pol, cc: 117, value: 124, bipolar: true, hint: − to +, set: set_modulation_1_polarity }
-  - { entry: 84, module: FILTER_2,  key: MOD_2_AMT,    label: Mod 2 Amt,    cc: 25,  value: 4, hint_inputs: [MOD_2_IN], set: set_modulation_2_amount }
+  - { entry: 84, module: FILTER_2,  key: MOD_2_AMT,    label: Mod 2 Amt,    cc: 25,  value: 4, hint_inputs: [MOD_2_IN], favorite: true, set: set_modulation_2_amount }
   - { entry: 85, module: FILTER_2,  key: MOD_2_POL,      label: Mod 2 Pol, cc: 0,   value: 76, bipolar: true, hint: − to +, set: set_modulation_2_polarity }
   # Amp 1: Audio In 1 and Audio In 2 are summed, each after its own gain, Gain 1 and Gain 2, so
   # that two paths take the same envelope and limiter. The default patch puts Filter 1, the low pass

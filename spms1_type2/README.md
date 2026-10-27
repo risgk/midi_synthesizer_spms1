@@ -9,7 +9,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.3.4
 - Hard sync: Osc 2 restarts where Sync In, Osc 1's sawtooth by default, rises through zero, at the point between two samples it crosses, with the step rounded off by PolyBLEP as a wrap's is (Sync Sw, CC#112)
 - Envelopes: two ADS envelopes, EG 2 on the amp's Mod 2 In, an organ's at power-up, on CC#52, 53 and 54, with the release switch of both on CC#105
 - LFO: triangle (PolyBLAMP) and unipolar square (PolyBLEP), each on an output of its own, and a main output crossfading from one to the other (Wave, CC#33); a reset input, on Note Gate by default, that restarts it at each note with Reset Sw (CC#113) on
-- Filters: two ZDF/TPT State Variable Filters (with a nonlinear leak on the band pass integrator, solved by the one-step Newton method), each with low pass, high pass and band pass outputs and a main output crossfading from the low pass to the high pass through a notch (Mode, CC#39), and two audio inputs, each with a gain; in series on the same CCs by default, a low pass of the fourth order (24 dB/oct), the second with a resonance of its own (CC#119)
+- Filters: two ZDF/TPT State Variable Filters (with a nonlinear leak on the band pass integrator, solved by the one-step Newton method), each with low pass, high pass and band pass outputs and a main output crossfading from the low pass to the high pass through a notch (Mode, CC#39), and two audio inputs, each with a gain; in series on the same CCs by default, a low pass of the fourth order (24 dB/oct), the first with a resonance of its own (CC#119)
 - Amp: two audio inputs, each with a gain of up to +12 dB (CC#15), with a look-ahead limiter that holds the peaks under the one-unit clamp, rounded off rather than cut (Limiter Sw, no CC, on at power-up)
 - Chorus: mono in, stereo out, as a module in the run order
 - Delay: stereo, with feedback, as a module in the run order (up to 340 ms)
@@ -108,9 +108,9 @@ editor's Controls tab and the nodes of its Patch tab. Open "spms1_editor.html" (
    the default patch marks as favorites, those that change the sound the most:
    Pitch 1 Glide; EG 1 Attack, Decay and Sustain; LFO 1 Rate; Osc 1 Wave, Pitch Mod 1 Amt and
    Pitch Mod 2 Amt; Osc 2 Wave and Pitch; Mixer 2 Level 1 and 2;
-   Filter 1 Cutoff, Resonance, Mod 1 Amt and Mod 2 Amt; Amp 1 Gain 2; Chorus 1 Mix; and Delay 1 Mix.
+   Filter 2 Cutoff, Resonance, Mod 1 Amt and Mod 2 Amt; Amp 1 Gain 2; Chorus 1 Mix; and Delay 1 Mix.
    Mark more with the star as you find them. Osc 2's PW and Mod Amts are on Osc 1's CCs, and each
-   parameter of Filter 2 on Filter 1's but its Resonance (CC 119), so a slider of Osc 1 or Filter 1 moves the other's with it,
+   parameter of Filter 1 on Filter 2's but its Resonance (CC 119), so a slider of Osc 1 or Filter 2 moves the other's with it,
    though that one is hidden with favorites only
 2. Parameters with a CC: clear "Show favorites only" to show every parameter with a CC. What each
    does in the default patch, and what it powers up at, is told below the Block Diagram; the knobs
@@ -342,10 +342,10 @@ power-up for a slow beat. Its Wave is its own as well, on CC#104 beside Osc 1's 
 follows Osc 1 in everything else: its Mod Amts and its PW are on Osc 1's CCs, so one CC moves
 both.
 
-Filter 1 and Filter 2 run in series, one low pass of the fourth order (24 dB/oct): Filter 2 is on
-Filter 1's CCs and powers up as it does, so each of those CCs moves both, but for its Resonance,
-on CC#119, which powers up at its bottom, Q 0.71, so that the resonant peak is Filter 1's (Q 4.0 at power-up,
-CC#71). Each filter takes Audio In 1 and Audio In 2 at Gain 1 and Gain 2, which have no CC and
+Filter 1 and Filter 2 run in series, one low pass of the fourth order (24 dB/oct): the two are on
+the same CCs and power up alike, so each of those CCs moves both, but for the Resonance:
+Filter 2's, on CC#71, powers up at its bottom, Q 0.71, and Filter 1's, on CC#119, at Q 4.0, so that
+the resonant peak is Filter 1's. Each filter takes Audio In 1 and Audio In 2 at Gain 1 and Gain 2, which have no CC and
 power up at unity. Amp 1 takes Filter 1 on Audio In 1 at Gain 1, which has no CC and powers up at
 0.0, silent, and Filter 2 on Audio In 2 at Gain 2, on CC#15.
 

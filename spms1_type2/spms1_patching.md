@@ -45,10 +45,10 @@ envelope, swing both ways. See the examples below.
 ### Filter 1 and Filter 2
 
 Two filters of the same kind, in series by default, Filter 1 into Filter 2 into Amp 1, as one low
-pass of the fourth order (24 dB/oct): Filter 2 takes Filter 1's CCs and power-up values, so each
-of those CCs moves both, but for its Resonance, on CC#119, which powers up at its bottom, value 4, Q 0.71, so
-that the resonant peak is Filter 1's alone (Q 4.0 at its power-up) rather than the two of them
-together. Either can be set apart from the other, by NRPN or by a CC of its own (see Patch Editing below).
+pass of the fourth order (24 dB/oct): the two take the same CCs and power-up values, so each of
+those CCs moves both, but for the Resonance: Filter 2's, on CC#71, powers up at its bottom, value 4,
+Q 0.71, and Filter 1's, on CC#119, at value 64, Q 4.0, so that the resonant peak is Filter 1's alone
+rather than the two of them together. Either can be set apart from the other, by NRPN or by a CC of its own (see Patch Editing below).
 
 Each takes two audio inputs, Audio In 1 and Audio In 2, and sums them, each after its own gain,
 Gain 1 and Gain 2, which head its parameters with no CC. A gain is squared and taken four times,
@@ -459,7 +459,7 @@ slot on the bus is what makes a modulation. No input or other
 parameter can read a parameter's control slot: a CC meant for more than one parameter, or for a
 module input, is given to each parameter in category 3, as Osc 1 and Osc 2 share theirs, or, as
 the mod wheel, goes on the Mod Wheel slot. The other way round, a parameter that shares a CC, as
-Osc 2's and Filter 2's do Osc 1's and Filter 1's, is set apart by a CC of its own in category 3:
+Osc 2's and Filter 1's do Osc 1's and Filter 2's, is set apart by a CC of its own in category 3:
 CC#40 and several after it, for example, are free.
 
 Slot 8, Mod Wheel, is a control slot that no parameter owns: a CC put on the bus for any module
@@ -714,7 +714,7 @@ semitone at the top, unmoved at note 60.
 
 Resonance raises the resonant peak 6 dB every 24 CC steps, Q doubling each time, from
 Q 0.71 at value 4 up to Q 9.51 at value 94, and from there Q rises faster and faster, without a sudden
-step, through Q 35 at value 108 to Q 256 at value 118. Filter 1's, on CC#71, powers up at value 64, Q 4.0, and Filter 2's, on CC#119, at value 4, Q 0.71. Above value 118 the filter oscillates on its own: a sine at the cutoff
+step, through Q 35 at value 108 to Q 256 at value 118. Filter 1's, on CC#119, powers up at value 64, Q 4.0, and Filter 2's, on CC#71, at value 4, Q 0.71. Above value 118 the filter oscillates on its own: a sine at the cutoff
 frequency, growing to its full level of about 0.5 by value 123 and holding it to the top of the
 dial. Low in that range the oscillation builds slowly and shares the filter with the input; at
 the top it takes the input over. Its level holds across the cutoff range down to about 150 Hz
@@ -843,7 +843,7 @@ the editor, which sends the same.
 - Keyboard tracking is wired by default as well, the pitch from Pitch 1 on the filters' Pitch inputs,
   so CC#9 sets how far the cutoff follows the keys: all the way at value 124, half way at value 64,
   and not at all at value 4, where it powers up
-- The filter as a sine voice, playing its own oscillation in tune: CC#71 = 124 makes Filter 1 oscillate,
+- The filter as a sine voice, playing its own oscillation in tune: CC#71 = 124 makes Filter 2 oscillate,
   CC#9 = 124 has the cutoff follow the keys, and CC#74 = 49 puts it on note 60 at note 60, and so
   on the note played everywhere. CC#24 = 4 takes the envelope off the cutoff, and CC#19 = 4 and CC#20 = 4 take the oscillators out,
   leaving the sine alone. It is within 5 cents of the note from middle C up, and 17 cents flat an octave below

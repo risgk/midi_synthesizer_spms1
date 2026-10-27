@@ -220,14 +220,14 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {447,  21},  // Mixer 2 Level 3 CC
   {448,  23},  // Mixer 2 Level 4 CC
   {452,  74},  // Filter 1 Cutoff CC
-  {453,  71},  // Filter 1 Resonance CC
+  {453, 119},  // Filter 1 Resonance CC
   {454,  39},  // Filter 1 Mode CC
   {455,   9},  // Filter 1 Pitch Amt CC
   {456,  24},  // Filter 1 Mod 1 Amt CC
   {457, 117},  // Filter 1 Mod 1 Pol CC
   {458,  25},  // Filter 1 Mod 2 Amt CC
   {462,  74},  // Filter 2 Cutoff CC
-  {463, 119},  // Filter 2 Resonance CC
+  {463,  71},  // Filter 2 Resonance CC
   {464,  39},  // Filter 2 Mode CC
   {465,   9},  // Filter 2 Pitch Amt CC
   {466,  24},  // Filter 2 Mod 1 Amt CC
@@ -383,14 +383,14 @@ static const uint8_t g_spms1_default_cc[][2] = {
   {21,    4},  // Mixer 2 Level 3
   {23,    4},  // Mixer 2 Level 4
   {74,  100},  // Filter 1 Cutoff
-  {71,   64},  // Filter 1 Resonance
+  {119,  64},  // Filter 1 Resonance
   {39,    4},  // Filter 1 Mode
   {9,     4},  // Filter 1 Pitch Amt
   {24,   28},  // Filter 1 Mod 1 Amt
   {117, 124},  // Filter 1 Mod 1 Pol
   {25,    4},  // Filter 1 Mod 2 Amt
   {74,  100},  // Filter 2 Cutoff
-  {119,   4},  // Filter 2 Resonance
+  {71,    4},  // Filter 2 Resonance
   {39,    4},  // Filter 2 Mode
   {9,     4},  // Filter 2 Pitch Amt
   {24,   28},  // Filter 2 Mod 1 Amt
