@@ -486,7 +486,7 @@ controls:
   - { entry: 90, module: CHORUS_1,  key: RATE,         label: Rate,         cc: 58,  value: 64, set: set_rate }
   - { entry: 91, module: CHORUS_1,  key: DEPTH,        label: Depth,        cc: 59,  value: 64, set: set_depth }
   - { entry: 92, module: DELAY_1,   key: MIX,          label: Mix,          cc: 94,  value: 34, favorite: true, set: set_mix }
-  - { entry: 93, module: DELAY_1,   key: TIME,         label: Time,         cc: 90,  value: 64, set: set_time }
+  - { entry: 93, module: DELAY_1,   key: TIME,         label: Time,         cc: 90,  value: 64, favorite: true, set: set_time }
   - { entry: 94, module: DELAY_1,   key: FEEDBACK,     label: Feedback,     cc: 92,  value: 64, set: set_feedback }
 
   # The mod wheel, a controller control: its CC, CC 1 as in the MIDI spec, put on the bus as a

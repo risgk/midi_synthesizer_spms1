@@ -104,12 +104,12 @@ A path from the sound the synth powers up with to a patch of your own, a step at
 editor's Controls tab and the nodes of its Patch tab. Open "spms1_editor.html" (see
 [Web Editor](#web-editor)) and choose the synth, or SPMS-1 Web (Built-in), in "MIDI Out".
 
-1. Favorites: the Controls tab opens with "Show favorites only" ticked, showing the 26 parameters
+1. Favorites: the Controls tab opens with "Show favorites only" ticked, showing the 27 parameters
    the default patch marks as favorites:
    Pitch 1 Glide; EG 1 Attack, Decay and Sustain; LFO 1 Rate; Mixer 1 Level 1 and 2 (with no CC);
    Osc 1 Wave, Pitch Mod 1 Amt and Pitch Mod 2 Amt; Osc 2 Wave, Pitch, Pitch Mod 1 Amt and Pitch
    Mod 2 Amt; Mixer 2 Level 1 and 2; Filter 1 Cutoff, Mod 1 Amt and Mod 2 Amt; Filter 2 Cutoff,
-   Resonance, Mod 1 Amt and Mod 2 Amt; Amp 1 Gain 2; Chorus 1 Mix; and Delay 1 Mix.
+   Resonance, Mod 1 Amt and Mod 2 Amt; Amp 1 Gain 2; Chorus 1 Mix; and Delay 1 Mix and Time.
    Mark more with the star as you find them. Osc 2's PW and Mod Amts are on Osc 1's CCs, and each
    parameter of Filter 1 on Filter 2's but its Resonance, which has no CC, so a slider of one moves
    the other's with it, whether or not that one is shown
