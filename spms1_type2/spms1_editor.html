@@ -1596,7 +1596,7 @@
         <label class="check" title="A parameter with no CC holds the value the patch gives it, which its slider sets through NRPN. Hidden, it shows up as soon as a CC is given to it or it is marked as a favorite."><input type="checkbox" id="show-no-cc"> Show parameters with no CC</label>
         <label class="check" title="Only the parameters marked with a star, with or without a CC. Unmarking one here takes it off the tab."><input type="checkbox" id="favorites-only"> Show favorites only</label>
       </div>
-      <button class="btn" id="reset-layout" title="Put the panels back where they were at first. A panel is moved by dragging its heading, with the columns two or four to a row, or by its arrows in one column; where they are is kept in this browser, for every patch.">Reset Layout</button>
+      <button class="btn" id="reset-layout" title="Put the panels back where they were at first. A panel is moved by dragging its heading, with the columns two or four to a row, or by its arrows in one column; where they are is kept in this browser, for every patch. Undo puts them back as they were.">Reset Layout</button>
     </div>
     <button class="btn primary" id="init-values" title="Set each CC value and each value of a parameter with no CC back to what the synth powers up at, and send them; the wiring is kept">Initialize Values</button>
   </div>
@@ -2346,14 +2346,15 @@
   for (const type of ['pointerup', 'pointercancel']) {
     window.addEventListener(type, () => { heldRange = null; }, true);
   }
-  // Each step of the history is the patch before it ({ json }), and whether it changes the whole
-  // patch ({ mute }: Init, Load, and a Reset arriving at MIDI In), so that its Undo and Redo are sent between
-  // Mute on and off as it was.
+  // Each step of the history is the patch before it ({ json }), the Controls tab's panels as they
+  // were then ({ panels }), so that moving a panel and Reset Layout are undone as a patch edit is,
+  // and whether it changes the whole patch ({ mute }: Init, Load, and a Reset arriving at MIDI In),
+  // so that its Undo and Redo are sent between Mute on and off as it was.
   const undoStack = [];
   const redoStack = [];
 
-  function pushHistory(snapshot, mute = false) {
-    undoStack.push({ json: snapshot || JSON.stringify(serialize(state)), mute });
+  function pushHistory(snapshot, mute = false, panels = null) {
+    undoStack.push({ json: snapshot || JSON.stringify(serialize(state)), panels: panels || JSON.stringify(panelLayout), mute });
     if (undoStack.length > 200) undoStack.shift();
     redoStack.length = 0;
   }
@@ -2361,21 +2362,26 @@
   function restore(step) {
     if (armed) disarm();
     state = deserialize(JSON.parse(step.json));
+    if (step.panels !== JSON.stringify(panelLayout)) {
+      panelLayout = JSON.parse(step.panels);
+      savePanelLayout();
+    }
     muteNextChanges = step.mute;
     renderAll();
+    fitTabArea();
   }
 
   function undo() {
     if (!undoStack.length) return;
     const step = undoStack.pop();
-    redoStack.push({ json: JSON.stringify(serialize(state)), mute: step.mute });
+    redoStack.push({ json: JSON.stringify(serialize(state)), panels: JSON.stringify(panelLayout), mute: step.mute });
     restore(step);
   }
 
   function redo() {
     if (!redoStack.length) return;
     const step = redoStack.pop();
-    undoStack.push({ json: JSON.stringify(serialize(state)), mute: step.mute });
+    undoStack.push({ json: JSON.stringify(serialize(state)), panels: JSON.stringify(panelLayout), mute: step.mute });
     restore(step);
   }
 
@@ -4083,7 +4089,9 @@
     try { localStorage.setItem(PANEL_LAYOUT_KEY, JSON.stringify(panelLayout)); } catch (e) { /* storage unavailable */ }
   }
   document.getElementById('reset-layout').addEventListener('click', () => {
+    const before = JSON.stringify(panelLayout);
     panelLayout = defaultPanelLayout();
+    if (JSON.stringify(panelLayout) !== before) pushHistory(null, false, before);
     try { localStorage.removeItem(PANEL_LAYOUT_KEY); } catch (e) { /* storage unavailable */ }
     renderControls();
     fitTabArea();
@@ -4249,10 +4257,12 @@
       // patch hides as well; at the end of the column if none follows.
       let next = drop.nextElementSibling;
       while (next && (!next.dataset.panel || next === panel)) next = next.nextElementSibling;
+      const before = JSON.stringify(panelLayout);
       panelLayout = panelLayout.map(ids => ids.filter(x => x !== id));
       const ids = panelLayout[col];
       const at = next ? ids.indexOf(next.dataset.panel) : -1;
       ids.splice(at < 0 ? ids.length : at, 0, id);
+      if (JSON.stringify(panelLayout) !== before) pushHistory(null, false, before);
       savePanelLayout();
     }
     panel.remove();
@@ -4272,6 +4282,7 @@
     const a = panelLayout.find(ids => ids.includes(id));
     const b = panelLayout.find(ids => ids.includes(other));
     const ai = a.indexOf(id), bi = b.indexOf(other);
+    pushHistory();
     a[ai] = other;
     b[bi] = id;
     savePanelLayout();
