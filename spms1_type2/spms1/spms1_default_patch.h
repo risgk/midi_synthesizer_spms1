@@ -76,8 +76,8 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {158,  38},  // Filter 2 Pitch In <- PITCH_1_OUTPUT_1
   {159,  40},  // Filter 2 Mod 1 In <- EG_1_OUTPUT
   {160,  44},  // Filter 2 Mod 2 In <- LFO_1_OUTPUT
-  {161,  68},  // Amp 1 Audio In 1 <- FILTER_2_OUTPUT
-  {162,   0},  // Amp 1 Audio In 2 <- NONE
+  {161,  64},  // Amp 1 Audio In 1 <- FILTER_1_OUTPUT
+  {162,  68},  // Amp 1 Audio In 2 <- FILTER_2_OUTPUT
   {163,  40},  // Amp 1 Mod 1 In <- EG_1_OUTPUT
   {164,  42},  // Amp 1 Mod 2 In <- EG_2_OUTPUT
   {165,  72},  // Chorus 1 Audio In <- AMP_1_OUTPUT
@@ -233,7 +233,6 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {466,  24},  // Filter 2 Mod 1 Amt CC
   {467, 117},  // Filter 2 Mod 1 Pol CC
   {468,  25},  // Filter 2 Mod 2 Amt CC
-  {470,  15},  // Amp 1 Gain 1 CC
   {471,  15},  // Amp 1 Gain 2 CC
   {472,  36},  // Amp 1 Mod 1/2 Mix CC
   {473,  93},  // Chorus 1 Mix CC
@@ -331,7 +330,7 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {595, 124},  // Filter 2 Mod 1 Pol value
   {596,   4},  // Filter 2 Mod 2 Amt value
   {597,  76},  // Filter 2 Mod 2 Pol value
-  {598,  88},  // Amp 1 Gain 1 value
+  {598,   4},  // Amp 1 Gain 1 value
   {599,  88},  // Amp 1 Gain 2 value
   {600,   4},  // Amp 1 Mod 1/2 Mix value
   {601,  64},  // Chorus 1 Mix value
@@ -397,7 +396,6 @@ static const uint8_t g_spms1_default_cc[][2] = {
   {24,   28},  // Filter 2 Mod 1 Amt
   {117, 124},  // Filter 2 Mod 1 Pol
   {25,    4},  // Filter 2 Mod 2 Amt
-  {15,   88},  // Amp 1 Gain 1
   {15,   88},  // Amp 1 Gain 2
   {36,    4},  // Amp 1 Mod 1/2 Mix
   {93,   64},  // Chorus 1 Mix

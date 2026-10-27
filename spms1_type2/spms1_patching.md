@@ -71,8 +71,8 @@ At 0.0 (value 4), where it powers up, Out is the low
 pass alone; at 1.0 (value 124) the high pass alone; and at 0.5 (value 64) both at full, whose sum, the
 input less k·BP, is a notch at the cutoff with both sides of it passed whole. In between the notch
 moves off the cutoff, above it toward the low pass and below it toward the high pass, with the
-other side at up to 6 dB down. Out is the one the default patch uses, Filter 1's feeding Filter 2 and
-Filter 2's Amp 1, so it plays the low pass until Mode is turned up. Out is not clipped again: in the pass band one side is all there is, and around the cutoff,
+other side at up to 6 dB down. Out is the one the default patch uses, Filter 1's feeding Filter 2 (and
+Amp 1's Audio In 1, at a gain of 0.0) and Filter 2's Amp 1's Audio In 2, so it plays the low pass until Mode is turned up. Out is not clipped again: in the pass band one side is all there is, and around the cutoff,
 where both are, the notch takes them down. The two factors are smoothed as the other levels
 are.
 
@@ -723,11 +723,14 @@ folds back as an inharmonic tone: at 48 kHz, from 8 kHz (value 108) to 10 kHz (v
 included. Above that the resonance acts as at Q 256. With the cutoff following the keyboard, as
 in the examples below, it plays as a sine voice.
 
-Amp 1 Gain 1 and Gain 2 (both CC#15), of Audio In 1 and Audio In 2, which the amp sums, are each squared and taken four times into a gain: silent at value 4, half,
+Amp 1 Gain 1 and Gain 2, of Audio In 1 and Audio In 2, which the amp sums, are each squared and taken four times into a gain: silent at value 4, half,
 6 dB down, at value 46, unity at value 64, twice, 6 dB up, at value 89, and four times, 12 dB up,
-at value 124, so a quiet sound can be brought well up as well as a loud one taken down. Both power
-up at value 88, 1.96 times, 5.8 dB up, which takes the default patch's peaks to about -5 dBFS; Audio In 2 is unrouted by default, a
-second path into the same envelope and limiter, such as one filter beside the other.
+at value 124, so a quiet sound can be brought well up as well as a loud one taken down. The
+default patch puts Filter 2, the fourth order, on Audio In 2: Gain 2, on CC#15, powers up at value
+88, 1.96 times, 5.8 dB up, which takes the default patch's peaks to about -5 dBFS. Filter 1, the
+second order, is on Audio In 1, and Gain 1, which has no CC, powers up at value 4, silent, so the
+fourth order is heard alone until Gain 1 brings the second order in beside it, through the same
+envelope and limiter.
 The amp holds its output to -1.0 and +1.0, as a mixer holds its sum, so the gain cannot take the
 output past one unit.
 
@@ -743,7 +746,7 @@ harmonics back below the audible band, the limiter does not: a sawtooth taken 12
 at A4 to A7 aliases -46 to -53 dB under 5 kHz with it, and -29 to -37 dB on the clamp. Off, the
 output is just as late, and the clamp is reached. Limiting is heard on a loud passage as its peaks
 held level, and the release as the sound coming back up after one. The default patch stays under
-it, with both oscillators on the sawtooth or on the square, and Amp 1 Gain 1 up a few steps from where it
+it, with both oscillators on the sawtooth or on the square, and Amp 1 Gain 2 up a few steps from where it
 powers up starts to reach it. The filter's output
 clip and a mixer's sum still have the hard limit, past which a sawtooth driven 6 dB over at A6 to
 A7 aliases about -30 dB under 5 kHz; keep the levels before the filters where the peaks only just
@@ -857,7 +860,7 @@ the editor, which sends the same.
   the Patch tab, wires from EG 1 Out to Filter 1 and Filter 2 Cutoff). The
   envelope and the cutoff are both unipolar, so it opens the cutoff from the bottom of its dial
   to the top
-- Amp gain and filter cutoff share one CC: CC#99 = 115, CC#98 = 86 and 87, CC#6 = 74
+- Amp gain and filter cutoff share one CC: CC#99 = 115, CC#98 = 87, CC#6 = 74
 - Amp at full level with no envelope: CC#99 = 113, CC#98 = 35, CC#6 = 1
 - Amp opened and closed by the note as an organ's, while EG 1 still shapes the filter: CC#36 = 124
   crossfades Amp 1's modulation to Mod 2 In, EG 2
@@ -892,8 +895,8 @@ the editor, which sends the same.
 - A sync sweep: CC#112 at value 124 turns Osc 2 Sync Sw on, CC#118 at value 4
   turns Osc 1 Pitch Mod 1 Sw off, and CC#89 turned up then sweeps Osc 2 alone with the
   envelope, Osc 1 holding the note it is synced to
-- Take the filters out of the chain: CC#99 = 113, CC#98 = 33, CC#6 = 62 points the amp's audio input
-  at Mixer 2 (on the Patch tab, a wire from Mixer 2 Out to Amp 1 Audio In 1). The filters keep running and keep their slots; nothing reads them
+- Take the filters out of the chain: CC#99 = 113, CC#98 = 34, CC#6 = 62 points the amp's second audio input,
+  the one heard, at Mixer 2 (on the Patch tab, a wire from Mixer 2 Out to Amp 1 Audio In 2). The filters keep running and keep their slots; nothing reads them
 - Echoes that only come in with the mod wheel: CC#99 = 114, CC#98 = 92, CC#6 = 8 takes Delay 1 Mix
   from Mod Wheel, which powers up at 0.0, so the output is dry until the wheel moves
 - Chorus that only comes in with the mod wheel: CC#99 = 114, CC#98 = 89, CC#6 = 8 takes Chorus 1

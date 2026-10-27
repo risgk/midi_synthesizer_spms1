@@ -108,7 +108,7 @@ editor's Controls tab and the nodes of its Patch tab. Open "spms1_editor.html" (
    the default patch marks as favorites, those that change the sound the most:
    Pitch 1 Glide; EG 1 Attack, Decay and Sustain; LFO 1 Rate; Osc 1 Wave, Pitch Mod 1 Amt and
    Pitch Mod 2 Amt; Osc 2 Wave and Pitch; Mixer 2 Level 1 and 2;
-   Filter 1 Cutoff, Resonance, Mod 1 Amt and Mod 2 Amt; Amp 1 Gain 1; Chorus 1 Mix; and Delay 1 Mix.
+   Filter 1 Cutoff, Resonance, Mod 1 Amt and Mod 2 Amt; Amp 1 Gain 2; Chorus 1 Mix; and Delay 1 Mix.
    Mark more with the star as you find them. Osc 2's PW and Mod Amts are on Osc 1's CCs, and each
    parameter of Filter 2 on Filter 1's but its Resonance (CC 119), so a slider of Osc 1 or Filter 1 moves the other's with it,
    though that one is hidden with favorites only
@@ -261,7 +261,8 @@ flowchart LR
   NOISE -->|In 4| MIX2
   MIX2 -->|In 1| FILTER
   FILTER -->|In 1| FILTER2
-  FILTER2 -->|In 1| AMP
+  FILTER -->|In 1, Gain 0| AMP
+  FILTER2 -->|In 2| AMP
   AMP --> CHORUS
   CHORUS -->|L| DELAY
   CHORUS -->|R| DELAY
@@ -294,7 +295,9 @@ flowchart LR
 
 Osc 2's sync and LFO 1's reset are routed, from Osc 1's sawtooth and Note Gate, but their switches
 power up off, so neither takes effect until it is turned on. The mod wheel reaches LFO 1's Level Mod In.
-The two filters and the amp each have an Audio In 2, unrouted, for a second path.
+Each filter has an Audio In 2, unrouted, for a second path. The amp takes Filter 1 on its Audio In 1 at
+a gain of 0.0 and Filter 2 on its Audio In 2, so that the fourth order is heard alone until Gain 1 brings the
+second order in beside it.
 
 Each module is processed once per sample, in the [run order](./spms1_patching.md#the-run-order). Their parameters -- waveform,
 cutoff, gain and the rest -- arrive from CC and are left out of the diagram. Parameter names
@@ -343,7 +346,8 @@ Filter 1 and Filter 2 run in series, one low pass of the fourth order (24 dB/oct
 Filter 1's CCs and powers up as it does, so each of those CCs moves both, but for its Resonance,
 on CC#119, which powers up at its bottom, Q 0.71, so that the resonant peak is Filter 1's (Q 4.0 at power-up,
 CC#71). Each filter takes Audio In 1 and Audio In 2 at Gain 1 and Gain 2, which have no CC and
-power up at unity; Amp 1 takes its two at Gain 1 and Gain 2, both on CC#15.
+power up at unity. Amp 1 takes Filter 1 on Audio In 1 at Gain 1, which has no CC and powers up at
+0.0, silent, and Filter 2 on Audio In 2 at Gain 2, on CC#15.
 
 The voice is mono up to the amp. The chorus takes it and puts out a left and a right, the delay
 takes the two sides and keeps them apart, and its two outputs are the two sides of the final

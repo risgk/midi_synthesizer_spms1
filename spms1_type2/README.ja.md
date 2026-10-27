@@ -107,7 +107,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.3.4
    お気に入りになっている、音を大きく変える 19 個のパラメータを表示します:
    Pitch 1 Glide、EG 1 Attack・Decay・Sustain、LFO 1 Rate、Osc 1 Wave・Pitch Mod 1 Amt・
    Pitch Mod 2 Amt、Osc 2 Wave・Pitch、Mixer 2 Level 1・2、
-   Filter 1 Cutoff・Resonance・Mod 1 Amt・Mod 2 Amt、Amp 1 Gain 1、Chorus 1 Mix、Delay 1 Mix。
+   Filter 1 Cutoff・Resonance・Mod 1 Amt・Mod 2 Amt、Amp 1 Gain 2、Chorus 1 Mix、Delay 1 Mix。
    気に入ったものは星で追加できます。Osc 2 の PW と各 Mod Amt は Osc 1 と、Filter 2 の Resonance（CC 119）以外の
    各パラメータは Filter 1 と同じ CC なので、Osc 1 や Filter 1 のスライダーを動かすと相手も一緒に動きます
    （お気に入りだけの表示では、相手のスライダーは隠れています）
@@ -254,7 +254,8 @@ flowchart LR
   NOISE -->|In 4| MIX2
   MIX2 -->|In 1| FILTER
   FILTER -->|In 1| FILTER2
-  FILTER2 -->|In 1| AMP
+  FILTER -->|In 1, Gain 0| AMP
+  FILTER2 -->|In 2| AMP
   AMP --> CHORUS
   CHORUS -->|L| DELAY
   CHORUS -->|R| DELAY
@@ -287,7 +288,9 @@ flowchart LR
 
 Osc 2 のシンクと LFO 1 のリセットは、Osc 1 のノコギリ波と Note Gate から結線されていますが、スイッチが起動時オフなので、
 オンにするまで効きません。モジュレーションホイールは LFO 1 の Level Mod In に入ります。
-2 つのフィルタとアンプには、2 つ目の経路用の Audio In 2 があり、デフォルトでは何もつながっていません。
+それぞれのフィルタには、2 つ目の経路用の Audio In 2 があり、デフォルトでは何もつながっていません。アンプは
+Audio In 1 に Filter 1 をゲイン 0.0 で、Audio In 2 に Filter 2 を受け取るので、Gain 1 を上げるまでは 4 次の音だけが鳴り、
+上げると 2 次の音が並んで加わります。
 
 モジュールは[実行順](./spms1_patching.ja.md#実行順)で、1 サンプルずつ処理されます。波形やカットオフ、ゲインといったパラメータは CC
 から届くもので、この図では省いています。パラメータ名では Amount を Amt、Switch を Sw、Polarity を Pol と略しています。
@@ -327,7 +330,8 @@ Osc 1 に従います。Mod Amt と PW には Osc 1 と同じ CC が割り当て
 Filter 1 と Filter 2 は直列で、4 次（24 dB/oct）のローパスになります。Filter 2 は Filter 1 と同じ CC と起動時の値を持ち、
 それらの CC で両方が動きます。ただし Resonance だけは別の CC#119 で、起動時は最小の Q 0.71 なので、レゾナンスのピークは
 Filter 1 のもの（起動時 Q 4.0、CC#71）になります。それぞれのフィルタは Audio In 1 と Audio In 2 を Gain 1 と Gain 2
-（CC なし、起動時は等倍）で受け取ります。Amp 1 も 2 つの入力を Gain 1 と Gain 2（どちらも CC#15）で受け取ります。
+（CC なし、起動時は等倍）で受け取ります。Amp 1 は Audio In 1 に Filter 1 を Gain 1（CC なし、起動時 0.0 で無音）で、Audio In 2 に Filter 2 を Gain 2（CC#15）で
+受け取ります。
 
 アンプまではモノラルです。コーラスがそれを受け取って左右 2 つを出し、ディレイが左右を受け取って分けた
 まま運び、その 2 つの出力が最終出力の左右になります。

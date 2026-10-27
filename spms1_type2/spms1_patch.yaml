@@ -81,8 +81,8 @@ modules:
 # at 0.0, so the LFO leaves the cutoff alone until CC 25 turns it up.
 # Pitch In of both filters takes Pitch 1's pitch too, for keyboard tracking, and Pitch Amt
 # (CC 9) powers up at 0.0, the cutoff staying where Cutoff puts it whatever the note. Filter 1
-# feeds Filter 2, on the same CCs, a low pass of the fourth order, which feeds the amp (see the
-# controls). Noise 1 runs after the oscillators, as it is mostly a sound of its own (a modulation taking
+# feeds Filter 2, on the same CCs, a low pass of the fourth order, which feeds the amp's Audio In
+# 2, and Filter 1 its Audio In 1, at a gain of 0.0 (see the controls). Noise 1 runs after the oscillators, as it is mostly a sound of its own (a modulation taking
 # it is a sample late, which it does not hear), at full level: its Level has no CC and holds 1.0.
 # Mixer 2 runs after it, just ahead of the filters, which it feeds: Osc 1 on its In 1, Osc 2 on In 2,
 # Osc 1's sub on In 3 and the noise on In 4. Its Level 1 and 2, on CC 19 and 20, power up at 0.7,
@@ -275,8 +275,8 @@ inputs:
   - { entry: 30, module: FILTER_2,    key: PITCH_IN,       label: Pitch In,       name: Pitch In,       source: PITCH_1_OUTPUT_1 }
   - { entry: 31, module: FILTER_2,    key: MOD_1_IN,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
   - { entry: 32, module: FILTER_2,    key: MOD_2_IN,       label: Mod 2 In,       name: Mod 2 In,       source: LFO_1_OUTPUT }
-  - { entry: 33, module: AMP_1,       key: AUDIO_IN_1,     label: Audio In 1,     name: Audio In 1,     source: FILTER_2_OUTPUT }
-  - { entry: 34, module: AMP_1,       key: AUDIO_IN_2,     label: Audio In 2,     name: Audio In 2,     source: NONE }
+  - { entry: 33, module: AMP_1,       key: AUDIO_IN_1,     label: Audio In 1,     name: Audio In 1,     source: FILTER_1_OUTPUT }
+  - { entry: 34, module: AMP_1,       key: AUDIO_IN_2,     label: Audio In 2,     name: Audio In 2,     source: FILTER_2_OUTPUT }
   - { entry: 35, module: AMP_1,       key: MOD_1_IN,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
   - { entry: 36, module: AMP_1,       key: MOD_2_IN,       label: Mod 2 In,       name: Mod 2 In,       source: EG_2_OUTPUT }
   - { entry: 37, module: CHORUS_1,    key: AUDIO_IN,       label: Audio In,       name: Audio In,       source: AMP_1_OUTPUT }
@@ -464,18 +464,19 @@ controls:
   - { entry: 83, module: FILTER_2,  key: MOD_1_POL,      label: Mod 1 Pol, cc: 117, value: 124, bipolar: true, hint: − to +, set: set_modulation_1_polarity }
   - { entry: 84, module: FILTER_2,  key: MOD_2_AMT,    label: Mod 2 Amt,    cc: 25,  value: 4, hint_inputs: [MOD_2_IN], set: set_modulation_2_amount }
   - { entry: 85, module: FILTER_2,  key: MOD_2_POL,      label: Mod 2 Pol, cc: 0,   value: 76, bipolar: true, hint: − to +, set: set_modulation_2_polarity }
-  # Amp 1: Audio In 1 and Audio In 2 are summed, each after its own gain, Gain 1 and Gain 2, both
-  # on CC 15, so that a second path, such as one filter beside the other rather than after it,
-  # takes the same envelope and limiter; the default patch leaves Audio In 2 unrouted, and a CC of
-  # its own in the editor sets Gain 2 apart. A gain is squared and taken four times, 1.0 at CC 64
-  # and 4.0, 12 dB up, at CC 124. Both power up at CC 88, 0.7, a gain of 1.96, 5.8 dB up, which
-  # brings the default patch's peaks to about -5 dBFS, under the limiter with either oscillator
+  # Amp 1: Audio In 1 and Audio In 2 are summed, each after its own gain, Gain 1 and Gain 2, so
+  # that two paths take the same envelope and limiter. The default patch puts Filter 1, the low pass
+  # of the second order, on Audio In 1 and Filter 2, the two in series, on Audio In 2: Gain 1 has no
+  # CC and powers up at CC 4, 0.0, silent, so the sound is the fourth order's alone until Gain 1
+  # brings the second order's in beside it. A gain is squared and taken four times, 1.0 at CC 64
+  # and 4.0, 12 dB up, at CC 124. Gain 2, on CC 15, powers up at CC 88, 0.7, a gain of 1.96, 5.8 dB
+  # up, which brings the default patch's peaks to about -5 dBFS, under the limiter with either oscillator
   # wave; its Limiter Sw, below, holds what goes past 0.9 under the amp's one-unit clamp, so that a
   # higher gain or a louder sound reaches it rounded off rather than cut. Mod 1/2 Mix, on CC 36,
   # crossfades what scales the gain from Mod 1 In, EG 1, at 0.0 (CC 4), where it powers up, to
   # Mod 2 In, EG 2, the organ envelope, at 1.0 (CC 124).
-  - { entry: 86, module: AMP_1,     key: GAIN_1,       label: Gain 1,       cc: 15,  value: 88, hint_inputs: [AUDIO_IN_1], favorite: true, set: set_gain_1 }
-  - { entry: 87, module: AMP_1,     key: GAIN_2,       label: Gain 2,       cc: 15,  value: 88, hint_inputs: [AUDIO_IN_2], set: set_gain_2 }
+  - { entry: 86, module: AMP_1,     key: GAIN_1,       label: Gain 1,       cc: 0,   value: 4,  hint_inputs: [AUDIO_IN_1], set: set_gain_1 }
+  - { entry: 87, module: AMP_1,     key: GAIN_2,       label: Gain 2,       cc: 15,  value: 88, hint_inputs: [AUDIO_IN_2], favorite: true, set: set_gain_2 }
   - { entry: 88, module: AMP_1,     key: MOD_1_2_MIX,  label: Mod 1/2 Mix,  cc: 36,  value: 4, hint_inputs: [MOD_1_IN, MOD_2_IN], set: set_modulation_mix }
   - { entry: 89, module: CHORUS_1,  key: MIX,          label: Mix,          cc: 93,  value: 64, favorite: true, set: set_mix }
   - { entry: 90, module: CHORUS_1,  key: RATE,         label: Rate,         cc: 58,  value: 64, set: set_rate }
