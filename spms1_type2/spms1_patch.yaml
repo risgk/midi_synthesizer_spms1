@@ -81,8 +81,10 @@ modules:
 # at 0.0, so the LFO leaves the cutoff alone until CC 25 turns it up.
 # Pitch In of both filters takes Pitch 1's pitch too, for keyboard tracking, and Pitch Amt
 # (CC 9) powers up at 0.0, the cutoff staying where Cutoff puts it whatever the note. Filter 1
-# feeds Filter 2, on the same CCs, a low pass of the fourth order, which feeds the amp's Audio In
-# 2, and Filter 1 its Audio In 1, at a gain of 0.0 (see the controls). Noise 1 runs after the oscillators, as it is mostly a sound of its own (a modulation taking
+# feeds Filter 2's Audio In 2, on the same CCs, a low pass of the fourth order, which feeds the
+# amp's Audio In 2; Mixer 2 also reaches Filter 2's Audio In 1 and Filter 1 the amp's Audio In 1,
+# both at a gain of 0.0, so that the gains alone turn the two filters from series to parallel
+# (see the controls). Noise 1 runs after the oscillators, as it is mostly a sound of its own (a modulation taking
 # it is a sample late, which it does not hear), at full level: its Level has no CC and holds 1.0.
 # Mixer 2 runs after it, just ahead of the filters, which it feeds: Osc 1 on its In 1, Osc 2 on In 2,
 # Osc 1's sub on In 3 and the noise on In 4. Its Level 1 and 2, on CC 19 and 20, power up at 0.7,
@@ -270,8 +272,8 @@ inputs:
   - { entry: 25, module: FILTER_1,    key: PITCH_IN,       label: Pitch In,       name: Pitch In,       source: PITCH_1_OUTPUT_1 }
   - { entry: 26, module: FILTER_1,    key: MOD_1_IN,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
   - { entry: 27, module: FILTER_1,    key: MOD_2_IN,       label: Mod 2 In,       name: Mod 2 In,       source: LFO_1_OUTPUT }
-  - { entry: 28, module: FILTER_2,    key: AUDIO_IN_1,     label: Audio In 1,     name: Audio In 1,     source: FILTER_1_OUTPUT }
-  - { entry: 29, module: FILTER_2,    key: AUDIO_IN_2,     label: Audio In 2,     name: Audio In 2,     source: NONE }
+  - { entry: 28, module: FILTER_2,    key: AUDIO_IN_1,     label: Audio In 1,     name: Audio In 1,     source: MIXER_2_OUTPUT }
+  - { entry: 29, module: FILTER_2,    key: AUDIO_IN_2,     label: Audio In 2,     name: Audio In 2,     source: FILTER_1_OUTPUT }
   - { entry: 30, module: FILTER_2,    key: PITCH_IN,       label: Pitch In,       name: Pitch In,       source: PITCH_1_OUTPUT_1 }
   - { entry: 31, module: FILTER_2,    key: MOD_1_IN,       label: Mod 1 In,       name: Mod 1 In,       source: EG_1_OUTPUT }
   - { entry: 32, module: FILTER_2,    key: MOD_2_IN,       label: Mod 2 In,       name: Mod 2 In,       source: LFO_1_OUTPUT }
@@ -422,8 +424,10 @@ controls:
   - { entry: 63, module: MIXER_2,   key: LEVEL_3,      label: Level 3,      cc: 21,  value: 4, hint_inputs: [IN_3], set: set_level_3 }
   - { entry: 64, module: MIXER_2,   key: LEVEL_4,      label: Level 4,      cc: 23,  value: 4, hint_inputs: [IN_4], set: set_level_4 }
   - { entry: 65, module: MIXER_2,   key: OUT_LEVEL,  label: Out Level,  cc: 0,   value: 64, set: set_out_level }
-  # The two filters run in series, Filter 1 into Filter 2 into the amp, as one low pass of the
-  # fourth order (24 dB/oct): the two take the same CCs and power up alike, but for their
+  # The two filters run in series, Filter 1 into Filter 2's Audio In 2 into the amp's, as one low
+  # pass of the fourth order (24 dB/oct); Mixer 2 also reaches Filter 2's Audio In 1 at Gain 1 0.0
+  # (CC 4), and Filter 1 the amp's Audio In 1 at Gain 1 0.0, so that turning those up and Filter
+  # 2's Gain 2 down sets the two side by side, with no rewiring: the two take the same CCs and power up alike, but for their
   # Resonance (below), so that each CC moves both, as Osc 2's Mod Amts and PW follow Osc 1's. Either takes values of its own by
   # NRPN, or by CCs of its own set in the editor. The parameters, in the editor's order: the
   # cutoff, the resonance and Mode, then the cutoff's keyboard tracking, its two modulations and
@@ -454,7 +458,7 @@ controls:
   - { entry: 73, module: FILTER_1,  key: MOD_1_POL,      label: Mod 1 Pol, cc: 117, value: 124, bipolar: true, hint: − to +, set: set_modulation_1_polarity }
   - { entry: 74, module: FILTER_1,  key: MOD_2_AMT,    label: Mod 2 Amt,    cc: 25,  value: 4, hint_inputs: [MOD_2_IN], set: set_modulation_2_amount }
   - { entry: 75, module: FILTER_1,  key: MOD_2_POL,      label: Mod 2 Pol, cc: 0,   value: 76, bipolar: true, hint: − to +, set: set_modulation_2_polarity }
-  - { entry: 76, module: FILTER_2,  key: GAIN_1,       label: Gain 1,       cc: 0,   value: 64, hint_inputs: [AUDIO_IN_1], set: set_gain_1 }
+  - { entry: 76, module: FILTER_2,  key: GAIN_1,       label: Gain 1,       cc: 0,   value: 4,  hint_inputs: [AUDIO_IN_1], set: set_gain_1 }
   - { entry: 77, module: FILTER_2,  key: GAIN_2,       label: Gain 2,       cc: 0,   value: 64, hint_inputs: [AUDIO_IN_2], set: set_gain_2 }
   - { entry: 78, module: FILTER_2,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 100, favorite: true, set: set_cutoff }
   - { entry: 79, module: FILTER_2,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 64, favorite: true, set: set_resonance }

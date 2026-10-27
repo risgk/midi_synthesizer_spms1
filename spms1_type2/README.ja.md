@@ -253,7 +253,8 @@ flowchart LR
   OSC -->|In 3, Sub| MIX2
   NOISE -->|In 4| MIX2
   MIX2 -->|In 1| FILTER
-  FILTER -->|In 1| FILTER2
+  MIX2 -->|In 1, Gain 0| FILTER2
+  FILTER -->|In 2| FILTER2
   FILTER -->|In 1, Gain 0| AMP
   FILTER2 -->|In 2| AMP
   AMP --> CHORUS
@@ -288,9 +289,9 @@ flowchart LR
 
 Osc 2 のシンクと LFO 1 のリセットは、Osc 1 のノコギリ波と Note Gate から結線されていますが、スイッチが起動時オフなので、
 オンにするまで効きません。モジュレーションホイールは LFO 1 の Level Mod In に入ります。
-それぞれのフィルタには、2 つ目の経路用の Audio In 2 があり、デフォルトでは何もつながっていません。アンプは
-Audio In 1 に Filter 1 をゲイン 0.0 で、Audio In 2 に Filter 2 を受け取るので、Gain 1 を上げるまでは 4 次の音だけが鳴り、
-上げると 2 次の音が並んで加わります。
+Filter 2 は Audio In 2 に Filter 1 を、Audio In 1 に Mixer 2 をゲイン 0.0 で受け取り、アンプは Audio In 1 に Filter 1 を
+ゲイン 0.0 で、Audio In 2 に Filter 2 を受け取ります。そのため、これらのゲインを変えるまでは 2 つのフィルタは直列で、
+変えれば結線し直さずに並列にできます。Filter 1 の Audio In 2 には何もつながっていません。
 
 モジュールは[実行順](./spms1_patching.ja.md#実行順)で、1 サンプルずつ処理されます。波形やカットオフ、ゲインといったパラメータは CC
 から届くもので、この図では省いています。パラメータ名では Amount を Amt、Switch を Sw、Polarity を Pol と略しています。
@@ -330,7 +331,8 @@ Osc 1 に従います。Mod Amt と PW には Osc 1 と同じ CC が割り当て
 Filter 1 と Filter 2 は直列で、4 次（24 dB/oct）のローパスになります。Filter 2 は Filter 1 と同じ CC と起動時の値を持ち、
 それらの CC で両方が動きます。ただし Resonance だけは別で、Filter 2 のもの（CC#71）は起動時 Q 4.0、
 Filter 1 のもの（CC#119）は最小の Q 0.71 なので、レゾナンスのピークは Filter 2 のものになります。それぞれのフィルタは Audio In 1 と Audio In 2 を Gain 1 と Gain 2
-（CC なし、起動時は等倍）で受け取ります。Amp 1 は Audio In 1 に Filter 1 を Gain 1（CC なし、起動時 0.0 で無音）で、Audio In 2 に Filter 2 を Gain 2（CC#15）で
+（CC なし、起動時は等倍）で受け取ります。ただし Mixer 2 から入る Filter 2 の Gain 1 は起動時 0.0 で、これを上げ、
+Filter 2 の Gain 2 を下げ、Amp 1 の Gain 1 を上げると、フィルタが並列になります。Amp 1 は Audio In 1 に Filter 1 を Gain 1（CC なし、起動時 0.0 で無音）で、Audio In 2 に Filter 2 を Gain 2（CC#15）で
 受け取ります。
 
 アンプまではモノラルです。コーラスがそれを受け取って左右 2 つを出し、ディレイが左右を受け取って分けた

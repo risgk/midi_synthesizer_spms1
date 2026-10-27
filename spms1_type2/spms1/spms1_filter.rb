@@ -230,6 +230,7 @@ module Spms1
       @gain_2 = 1.0
       @stage_1_gain_2 = 1.0
       @current_gain_2 = 1.0
+      @gains_set = false
 
       update_coefficients
     end
@@ -237,7 +238,9 @@ module Spms1
     # Gain 1 and Gain 2, of Audio In 1 and Audio In 2, which are summed into the filter: each
     # unipolar, [0.0, 1.0], squared and taken four times, as Amp's Gain 1 is, so that the middle of
     # the dial is unity and the top drives the filter 12 dB harder. Smoothed at the control rate,
-    # as Mode is, being gains on the audio.
+    # as Mode is, being gains on the audio, but from where they are first set: one filter may power
+    # up with an input open and the other with it closed, and neither is swept at power-up. The
+    # loop sets Gain 1 and then Gain 2, each buffer.
     def set_gain_1(gain)
       clamped_gain = (gain < 0.0) ? 0.0 : ((gain > 1.0) ? 1.0 : gain)
       @gain_1 = 4.0 * clamped_gain * clamped_gain
@@ -246,6 +249,13 @@ module Spms1
     def set_gain_2(gain)
       clamped_gain = (gain < 0.0) ? 0.0 : ((gain > 1.0) ? 1.0 : gain)
       @gain_2 = 4.0 * clamped_gain * clamped_gain
+      unless @gains_set
+        @stage_1_gain_1 = @gain_1
+        @current_gain_1 = @gain_1
+        @stage_1_gain_2 = @gain_2
+        @current_gain_2 = @gain_2
+        @gains_set = true
+      end
     end
 
     # Every parameter but the two Mod Pols is unipolar, [0.0, 1.0], which is what the smoothing, the

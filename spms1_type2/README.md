@@ -260,7 +260,8 @@ flowchart LR
   OSC -->|In 3, Sub| MIX2
   NOISE -->|In 4| MIX2
   MIX2 -->|In 1| FILTER
-  FILTER -->|In 1| FILTER2
+  MIX2 -->|In 1, Gain 0| FILTER2
+  FILTER -->|In 2| FILTER2
   FILTER -->|In 1, Gain 0| AMP
   FILTER2 -->|In 2| AMP
   AMP --> CHORUS
@@ -295,9 +296,9 @@ flowchart LR
 
 Osc 2's sync and LFO 1's reset are routed, from Osc 1's sawtooth and Note Gate, but their switches
 power up off, so neither takes effect until it is turned on. The mod wheel reaches LFO 1's Level Mod In.
-Each filter has an Audio In 2, unrouted, for a second path. The amp takes Filter 1 on its Audio In 1 at
-a gain of 0.0 and Filter 2 on its Audio In 2, so that the fourth order is heard alone until Gain 1 brings the
-second order in beside it.
+Filter 2 takes Filter 1 on its Audio In 2 and Mixer 2 on its Audio In 1 at a gain of 0.0, and the amp
+Filter 1 on its Audio In 1 at a gain of 0.0 and Filter 2 on its Audio In 2, so the two filters play in
+series until those gains turn them side by side, with no rewiring. Filter 1's Audio In 2 is unrouted.
 
 Each module is processed once per sample, in the [run order](./spms1_patching.md#the-run-order). Their parameters -- waveform,
 cutoff, gain and the rest -- arrive from CC and are left out of the diagram. Parameter names
@@ -346,7 +347,8 @@ Filter 1 and Filter 2 run in series, one low pass of the fourth order (24 dB/oct
 the same CCs and power up alike, so each of those CCs moves both, but for the Resonance:
 Filter 2's, on CC#71, powers up at Q 4.0, and Filter 1's, on CC#119, at its bottom, Q 0.71, so that
 the resonant peak is Filter 2's. Each filter takes Audio In 1 and Audio In 2 at Gain 1 and Gain 2, which have no CC and
-power up at unity. Amp 1 takes Filter 1 on Audio In 1 at Gain 1, which has no CC and powers up at
+power up at unity, but Filter 2's Gain 1, on Mixer 2, at 0.0: turned up, with Filter 2 Gain 2 down
+and Amp 1 Gain 1 up, it sets the filters in parallel. Amp 1 takes Filter 1 on Audio In 1 at Gain 1, which has no CC and powers up at
 0.0, silent, and Filter 2 on Audio In 2 at Gain 2, on CC#15.
 
 The voice is mono up to the amp. The chorus takes it and puts out a left and a right, the delay

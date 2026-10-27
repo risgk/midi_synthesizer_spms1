@@ -35,7 +35,8 @@ Mixer 1. Pitch 1 comes before them all, so that every module reads the note in t
 the oscillators and the filters, and a modulation source that follows the keys. A modulation of
 Pitch 1 itself -- a bend from the LFO through Bend In, say -- is then a sample late, which it does
 not hear. Mixer 2 sits between the oscillators and the filters, where it gathers the
-audio. Filter 1 feeds Filter 2 in the same sample, and Filter 2 the amp.
+audio. Filter 1 feeds Filter 2 in the same sample, and Filter 2 the amp; Mixer 2 also reaches
+Filter 2, and Filter 1 the amp, at a gain of 0.0, so that the filters can be set side by side.
 
 A mixer is what lets two of anything meet, and what makes a signal that runs one way, such as the
 envelope, swing both ways. See the examples below.
@@ -45,16 +46,21 @@ envelope, swing both ways. See the examples below.
 ### Filter 1 and Filter 2
 
 Two filters of the same kind, in series by default, Filter 1 into Filter 2 into Amp 1, as one low
-pass of the fourth order (24 dB/oct): the two take the same CCs and power-up values, so each of
+pass of the fourth order (24 dB/oct). The default patch wires them for parallel too, at a gain of
+0.0: Mixer 2 on Filter 2's Audio In 1 (Filter 1 being on its Audio In 2) and Filter 1 on Amp 1's
+Audio In 1 (Filter 2 being on its Audio In 2). Turning Filter 2 Gain 1 and Amp 1 Gain 1 up and
+Filter 2 Gain 2 down sets them side by side, each on the oscillators, with no rewiring.
+
+The two take the same CCs and power-up values, so each of
 those CCs moves both, but for the Resonance: Filter 2's, on CC#71, powers up at value 64, Q 4.0, and
 Filter 1's, on CC#119, at its bottom, value 4, Q 0.71, so that the resonant peak is Filter 2's alone
 rather than the two of them together. Either can be set apart from the other, by NRPN or by a CC of its own (see Patch Editing below).
 
 Each takes two audio inputs, Audio In 1 and Audio In 2, and sums them, each after its own gain,
 Gain 1 and Gain 2, which head its parameters with no CC. A gain is squared and taken four times,
-as Amp 1's are: unity at value 64, where both power up, and 12 dB up at value 124, which drives the
-filter harder. Audio In 2 is unrouted by default, so a second source, such as the noise or the
-other filter's output, can be brought in with no mixer.
+as Amp 1's are: unity at value 64, where they power up but for Filter 2 Gain 1, at value 4, silent,
+and 12 dB up at value 124, which drives the filter harder. Filter 1's Audio In 2 is unrouted by
+default, so a second source, such as the noise, can be brought in with no mixer.
 
 Each filter is a zero-delay feedback state variable filter. The band pass integrator leaks, more and more as the
 band pass bends into a soft clip curve, and that is what holds the resonance down; at small levels
@@ -71,7 +77,7 @@ At 0.0 (value 4), where it powers up, Out is the low
 pass alone; at 1.0 (value 124) the high pass alone; and at 0.5 (value 64) both at full, whose sum, the
 input less k·BP, is a notch at the cutoff with both sides of it passed whole. In between the notch
 moves off the cutoff, above it toward the low pass and below it toward the high pass, with the
-other side at up to 6 dB down. Out is the one the default patch uses, Filter 1's feeding Filter 2 (and
+other side at up to 6 dB down. Out is the one the default patch uses, Filter 1's feeding Filter 2's Audio In 2 (and
 Amp 1's Audio In 1, at a gain of 0.0) and Filter 2's Amp 1's Audio In 2, so it plays the low pass until Mode is turned up. Out is not clipped again: in the pass band one side is all there is, and around the cutoff,
 where both are, the notch takes them down. The two factors are smoothed as the other levels
 are.
@@ -897,6 +903,11 @@ the editor, which sends the same.
   envelope, Osc 1 holding the note it is synced to
 - Take the filters out of the chain: CC#99 = 113, CC#98 = 34, CC#6 = 62 points the amp's second audio input,
   the one heard, at Mixer 2 (on the Patch tab, a wire from Mixer 2 Out to Amp 1 Audio In 2). The filters keep running and keep their slots; nothing reads them
+- The two filters side by side, a low pass and a high pass: CC#99 = 116, CC#98 = 76, CC#6 = 64 and
+  CC#98 = 77, CC#6 = 4 turn Filter 2 Gain 1 up and Gain 2 down, so that it takes Mixer 2 rather than
+  Filter 1, and CC#98 = 86, CC#6 = 88 turns Amp 1 Gain 1 up to bring Filter 1 in beside it. CC#99 =
+  115, CC#98 = 70, CC#6 = 0 then takes Filter 1 Mode off CC#39, and CC#99 = 116, CC#98 = 70, CC#6 =
+  124 sets it to the high pass, so CC#74 moves a low pass and a high pass at once
 - Echoes that only come in with the mod wheel: CC#99 = 114, CC#98 = 92, CC#6 = 8 takes Delay 1 Mix
   from Mod Wheel, which powers up at 0.0, so the output is dry until the wheel moves
 - Chorus that only comes in with the mod wheel: CC#99 = 114, CC#98 = 89, CC#6 = 8 takes Chorus 1

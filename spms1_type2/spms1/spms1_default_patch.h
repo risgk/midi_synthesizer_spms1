@@ -71,8 +71,8 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {153,  38},  // Filter 1 Pitch In <- PITCH_1_OUTPUT_1
   {154,  40},  // Filter 1 Mod 1 In <- EG_1_OUTPUT
   {155,  44},  // Filter 1 Mod 2 In <- LFO_1_OUTPUT
-  {156,  64},  // Filter 2 Audio In 1 <- FILTER_1_OUTPUT
-  {157,   0},  // Filter 2 Audio In 2 <- NONE
+  {156,  62},  // Filter 2 Audio In 1 <- MIXER_2_OUTPUT
+  {157,  64},  // Filter 2 Audio In 2 <- FILTER_1_OUTPUT
   {158,  38},  // Filter 2 Pitch In <- PITCH_1_OUTPUT_1
   {159,  40},  // Filter 2 Mod 1 In <- EG_1_OUTPUT
   {160,  44},  // Filter 2 Mod 2 In <- LFO_1_OUTPUT
@@ -320,7 +320,7 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {585, 124},  // Filter 1 Mod 1 Pol value
   {586,   4},  // Filter 1 Mod 2 Amt value
   {587,  76},  // Filter 1 Mod 2 Pol value
-  {588,  64},  // Filter 2 Gain 1 value
+  {588,   4},  // Filter 2 Gain 1 value
   {589,  64},  // Filter 2 Gain 2 value
   {590, 100},  // Filter 2 Cutoff value
   {591,  64},  // Filter 2 Resonance value
