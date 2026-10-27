@@ -882,10 +882,10 @@ the editor, which sends the same.
   oscillator out, leaving the noise alone, through the filters. CC#115 (Color) turns it from
   white to red
 - Keyboard tracking is wired by default as well, the pitch from Pitch 1 on the filters' Pitch inputs,
-  so CC#9 sets how far the cutoff follows the keys: all the way at value 124, half way at value 64,
-  and not at all at value 4, where it powers up
+  so CC#9 sets how far the cutoff follows the keys: all the way at value 124, where it powers up,
+  half way at value 64, and not at all at value 4
 - The filter as a sine voice, playing its own oscillation in tune: CC#71 = 124 makes Filter 2 oscillate,
-  CC#9 = 124 has the cutoff follow the keys, and CC#74 = 49 puts it on note 60 at note 60, and so
+  CC#9 at value 124, where it powers up, has the cutoff follow the keys, and CC#74 = 49 puts it on note 60 at note 60, and so
   on the note played everywhere. CC#24 = 4 takes the envelope off the cutoff, and CC#19 = 4 takes the oscillator out,
   leaving the sine alone. It is within 5 cents of the note from middle C up, and 17 cents flat an octave below
 - A pitch envelope is wired by default too -- the envelope on the oscillator's Mod 1 input --

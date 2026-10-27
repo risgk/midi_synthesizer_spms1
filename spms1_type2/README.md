@@ -104,9 +104,9 @@ A path from the sound the synth powers up with to a patch of your own, a step at
 editor's Controls tab and the nodes of its Patch tab. Open "spms1_editor.html" (see
 [Web Editor](#web-editor)) and choose the synth, or SPMS-1 Web (Built-in), in "MIDI Out".
 
-1. Favorites: the Controls tab opens with "Show favorites only" ticked, showing the 16 parameters
+1. Favorites: the Controls tab opens with "Show favorites only" ticked, showing the 17 parameters
    the default patch marks as favorites:
-   Pitch 1 Glide; EG 1 Attack, Decay and Sustain; LFO 1 Rate; Osc 1 Wave, Pitch Mod 1 Amt and
+   Pitch 1 Glide; EG 1 Attack, Decay and Sustain; LFO 1 Rate; Mixer 1 Level 1 (with no CC); Osc 1 Wave, Pitch Mod 1 Amt and
    Pitch Mod 2 Amt; Filter 2 Cutoff, Resonance, Mod 1 Amt and Mod 2 Amt; Amp 1 Gain 2; Chorus 1 Mix; and Delay 1 Mix and Time.
    Mark more with the star as you find them. Osc 2's PW and Mod Amts are on Osc 1's CCs, and each
    parameter of Filter 1 on Filter 2's but its Resonance, which has no CC, so a slider of one moves
@@ -329,8 +329,9 @@ the LFO at full level swings the pitch an octave either way. Osc 1 PW Mod 2 Amt 
 to the pulse width and powers up at 0.0. LFO 1 Level powers up at 1.0, so CC#13 alone sets the
 vibrato, from none to an octave. The pitch from Pitch 1 reaches the filters too, on their Pitch In, for keyboard tracking: CC#9
 (Pitch Amt) at its top has the cutoff follow the note a semitone for a semitone,
-unmoved at note 60. Pitch Amt powers up at 0.0 (value 4), so the cutoff stays where CC#74 puts
-it whatever the note until CC#9 is turned up.
+unmoved at note 60. Pitch Amt powers up there, at 1.0 (value 124), so the tone stays alike up and
+down the keyboard; CC#9 turned down to 0.0 (value 4) leaves the cutoff where CC#74 puts it
+whatever the note.
 The envelope reaches the oscillator too, on Osc 1 Mod 1 In, for a pitch envelope: Pitch Mod 1
 Amt (CC#89) and PW Mod 1 Amt (CC#8) power up at 0.0, with it off. Each modulation depth spans the
 whole range of what it moves, so bringing a source down to a musical depth is left to the patch
