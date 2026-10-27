@@ -104,12 +104,11 @@ A path from the sound the synth powers up with to a patch of your own, a step at
 editor's Controls tab and the nodes of its Patch tab. Open "spms1_editor.html" (see
 [Web Editor](#web-editor)) and choose the synth, or SPMS-1 Web (Built-in), in "MIDI Out".
 
-1. Favorites: the Controls tab opens with "Show favorites only" ticked, showing the 30 parameters
+1. Favorites: the Controls tab opens with "Show favorites only" ticked, showing the 20 parameters
    the default patch marks as favorites:
-   General 1 and 2 (with no CC); Pitch 1 Glide; EG 1 Attack, Decay and Sustain; LFO 1 Rate; Mixer 1 Level 1 and 2 (with no CC);
-   Osc 1 Wave, Pitch Mod 1 Amt and Pitch Mod 2 Amt; Osc 2 Wave, Pitch, Pitch Mod 1 Amt and Pitch
-   Mod 2 Amt; Mixer 2 Level 1 and 2; Filter 1 Cutoff, Mod 1 Amt and Mod 2 Amt; Filter 2 Cutoff,
-   Resonance, Mod 1 Amt and Mod 2 Amt; Amp 1 Gain 2 and Mod 1/2 Mix; Chorus 1 Mix; and Delay 1 Mix and Time.
+   Pitch 1 Glide; EG 1 Attack, Decay and Sustain; LFO 1 Rate; Osc 1 Wave, Pitch Mod 1 Amt and
+   Pitch Mod 2 Amt; Filter 1 Cutoff, Mod 1 Amt and Mod 2 Amt; Filter 2 Cutoff, Resonance, Mod 1
+   Amt and Mod 2 Amt; Amp 1 Gain 2 and Mod 1/2 Mix; Chorus 1 Mix; and Delay 1 Mix and Time.
    Mark more with the star as you find them. Osc 2's PW and Mod Amts are on Osc 1's CCs, and each
    parameter of Filter 1 on Filter 2's but its Resonance, which has no CC, so a slider of one moves
    the other's with it, whether or not that one is shown
@@ -339,11 +338,11 @@ whole range of what it moves, so bringing a source down to a musical depth is le
 rather than built into the modules.
 
 Mixer 2 sums the audio ahead of the filters: Osc 1 on In 1, Osc 2 on In 2, Osc 1's sub on In 3 and
-Noise 1's Out on In 4, each at its own level: Level 1 (CC#19) and Level 2 (CC#20) power up at 0.7, so the default patch
-plays both oscillators, about as loud together as one at full level, and Level 3 (CC#21) and
-Level 4 (CC#23) at 0.0, so the sub and the noise are silent until they are turned up. Osc 2 plays the note from Pitch 1 as Osc
+Noise 1's Out on In 4, each at its own level: Level 1 (CC#19) powers up at 1.0, so the default patch plays Osc 1 at full
+level, and Level 2 (CC#20), Level 3 (CC#21) and Level 4 (CC#23) at 0.0, so Osc 2, the sub and the
+noise are silent until they are turned up. Osc 2 plays the note from Pitch 1 as Osc
 1 does, tuned against it by its own Pitch (CC#85) and Pitch Fine (CC#76), 11 cents sharp at
-power-up for a slow beat. Its Wave is its own as well, on CC#104 beside Osc 1's on CC#102. It
+power-up for a slow beat once it is turned up. Its Wave is its own as well, on CC#104 beside Osc 1's on CC#102. It
 follows Osc 1 in everything else: its Mod Amts and its PW are on Osc 1's CCs, so one CC moves
 both.
 

@@ -87,9 +87,9 @@ modules:
 # (see the controls). Noise 1 runs after the oscillators, as it is mostly a sound of its own (a modulation taking
 # it is a sample late, which it does not hear), at full level: its Level has no CC and holds 1.0.
 # Mixer 2 runs after it, just ahead of the filters, which it feeds: Osc 1 on its In 1, Osc 2 on In 2,
-# Osc 1's sub on In 3 and the noise on In 4. Its Level 1 and 2, on CC 19 and 20, power up at 0.7,
-# so the two oscillators sound together about as loud as one at full level, and Level 4, on CC 23,
-# at 0.0, so the noise is silent until CC 23. Osc 2 plays the note from Pitch 1, as Osc 1 does, tuned by its own
+# Osc 1's sub on In 3 and the noise on In 4. Its Level 1, on CC 19, powers up at 1.0, so
+# Osc 1 sounds at full level, and Level 2 and Level 4, on CC 20 and 23, at 0.0, so Osc 2 and the
+# noise are silent until CC 20 and CC 23. Osc 2 plays the note from Pitch 1, as Osc 1 does, tuned by its own
 # Pitch and Pitch Fine (CC 85 and 76), 11 cents sharp at power-up, and has a Wave of its own on CC
 # 104 (Osc 1's on CC 102); it follows Osc 1 in everything else: each of its Mod Amts and its PW
 # are on Osc 1's CCs, so one CC moves both. Osc 2 Sync In takes Osc 1 Out Saw, for hard sync, but
@@ -348,8 +348,8 @@ controls:
   - { entry: 22, module: LFO_1,     key: RESET_SW,     label: Reset Sw, cc: 113, value: 4, hint: Off/On, set: set_reset_switch }
   # Mixer 1: nothing has a CC; the levels hold 0.0, as the mixer has nothing on its inputs yet,
   # and Out Level holds 0.5, as Mixer 2's powers up.
-  - { entry: 23, module: MIXER_1,   key: LEVEL_1,      label: Level 1,      cc: 0,   value: 4, hint_inputs: [IN_1], favorite: true, set: set_level_1 }
-  - { entry: 24, module: MIXER_1,   key: LEVEL_2,      label: Level 2,      cc: 0,   value: 4, hint_inputs: [IN_2], favorite: true, set: set_level_2 }
+  - { entry: 23, module: MIXER_1,   key: LEVEL_1,      label: Level 1,      cc: 0,   value: 4, hint_inputs: [IN_1], set: set_level_1 }
+  - { entry: 24, module: MIXER_1,   key: LEVEL_2,      label: Level 2,      cc: 0,   value: 4, hint_inputs: [IN_2], set: set_level_2 }
   - { entry: 25, module: MIXER_1,   key: LEVEL_3,      label: Level 3,      cc: 0,   value: 4, hint_inputs: [IN_3], set: set_level_3 }
   - { entry: 26, module: MIXER_1,   key: LEVEL_4,      label: Level 4,      cc: 0,   value: 4, hint_inputs: [IN_4], set: set_level_4 }
   - { entry: 27, module: MIXER_1,   key: OUT_LEVEL,  label: Out Level,  cc: 0,   value: 64, set: set_out_level }
@@ -388,17 +388,17 @@ controls:
   # Osc 1's is. Everything else follows Osc 1 by default: each Mod Amt and PW are on Osc 1's CCs,
   # so one CC moves both oscillators, and each Mod Pol holds the
   # value Osc 1's does. Sync Sw is Osc 2's alone, on CC 112, and powers up off, at CC 4, so Sync
-  # In, Osc 1 Out Saw, is ignored until it is turned on. Osc 2 is heard through Mixer 2 Level 2 (CC 20), which powers up at 0.7, as
-  # Level 1 does for Osc 1.
-  - { entry: 43, module: OSC_2,     key: WAVE,     label: Wave,         cc: 104, value: 4, hint: Saw to Sq, favorite: true, set: set_waveform }
+  # In, Osc 1 Out Saw, is ignored until it is turned on. Osc 2 is heard through Mixer 2 Level 2 (CC 20), which powers up at 0.0, so
+  # that it is silent until turned up.
+  - { entry: 43, module: OSC_2,     key: WAVE,     label: Wave,         cc: 104, value: 4, hint: Saw to Sq, set: set_waveform }
   - { entry: 44, module: OSC_2,     key: PW,           label: PW,  cc: 114, value: 64, bipolar: true, hint: 0% to 100%, set: set_pulse_width }
   - { entry: 45, module: OSC_2,     key: PITCH_COARSE,  label: Pitch Coarse,  cc: 0,   value: 64, bipolar: true, hint: ±5 Oct, set: set_pitch_coarse }
-  - { entry: 46, module: OSC_2,     key: PITCH,         label: Pitch,         cc: 85,  value: 5, hint: 0 to +1 Oct, favorite: true, set: set_pitch }
+  - { entry: 46, module: OSC_2,     key: PITCH,         label: Pitch,         cc: 85,  value: 5, hint: 0 to +1 Oct, set: set_pitch }
   - { entry: 47, module: OSC_2,     key: PITCH_FINE,    label: Pitch Fine,    cc: 76,  value: 65, bipolar: true, hint: ±60 Cent, set: set_pitch_fine }
-  - { entry: 48, module: OSC_2,     key: PITCH_MOD_1_AMT, label: Pitch Mod 1 Amt, cc: 89, value: 4, hint_inputs: [MOD_1_IN], favorite: true, set: set_pitch_modulation_1_amount }
+  - { entry: 48, module: OSC_2,     key: PITCH_MOD_1_AMT, label: Pitch Mod 1 Amt, cc: 89, value: 4, hint_inputs: [MOD_1_IN], set: set_pitch_modulation_1_amount }
   - { entry: 49, module: OSC_2,     key: PITCH_MOD_1_POL,      label: Pitch Mod 1 Pol, cc: 0, value: 76, bipolar: true, hint: − to +, set: set_pitch_modulation_1_polarity }
   - { entry: 50, module: OSC_2,     key: PITCH_MOD_1_SW, label: Pitch Mod 1 Sw, cc: 0, value: 124, hint: Off/On, set: set_pitch_modulation_1_switch }
-  - { entry: 51, module: OSC_2,     key: PITCH_MOD_2_AMT, label: Pitch Mod 2 Amt, cc: 13, value: 4, hint_inputs: [MOD_2_IN], favorite: true, set: set_pitch_modulation_2_amount }
+  - { entry: 51, module: OSC_2,     key: PITCH_MOD_2_AMT, label: Pitch Mod 2 Amt, cc: 13, value: 4, hint_inputs: [MOD_2_IN], set: set_pitch_modulation_2_amount }
   - { entry: 52, module: OSC_2,     key: PITCH_MOD_2_POL,      label: Pitch Mod 2 Pol, cc: 0, value: 76, bipolar: true, hint: − to +, set: set_pitch_modulation_2_polarity }
   - { entry: 53, module: OSC_2,     key: PITCH_MOD_2_SW, label: Pitch Mod 2 Sw, cc: 0, value: 124, hint: Off/On, set: set_pitch_modulation_2_switch }
   - { entry: 54, module: OSC_2,     key: PW_MOD_1_AMT, label: PW Mod 1 Amt,  cc: 8,   value: 4, hint_inputs: [MOD_1_IN], set: set_pw_modulation_1_amount }
@@ -413,14 +413,15 @@ controls:
   - { entry: 60, module: NOISE_1,   key: LEVEL,        label: Level,        cc: 0,   value: 124, set: set_level }
   # Mixer 2, the audio ahead of the filter: Osc 1 on In 1, Osc 2 on In 2, Osc 1's sub on In 3 and
   # the noise on In 4.
-  # Level 1 and 2 (CC 19 and 20) power up at CC 88, 0.7: two saws 11 cents apart come out about
-  # as loud as one at 1.0, as 0.7 is about one over the square root of 2. Level 3, on CC 21,
+  # Level 1 (CC 19) powers up at CC 124, 1.0, and Level 2 (CC 20) at CC 4, 0.0, so Osc 1 is heard
+  # alone; both at CC 88, 0.7, two saws 11 cents apart come out about as loud as one at 1.0, as 0.7
+  # is about one over the square root of 2. Level 3, on CC 21,
   # powers up at 0.0, leaving Osc 1's sub on In 3 silent. Level 4 (CC 23) powers up at 0.0, leaving the noise, at
   # full level from Noise 1, silent. Out Level has no CC and holds 0.5: how
   # hard the sum drives the filter, the one Mixer 2 feeds, and what keeps two oscillators and the
   # noise all at full level, a sum of 1.5 at most, inside the mixer's range.
-  - { entry: 61, module: MIXER_2,   key: LEVEL_1,      label: Level 1,      cc: 19,  value: 88,  hint_inputs: [IN_1], favorite: true, set: set_level_1 }
-  - { entry: 62, module: MIXER_2,   key: LEVEL_2,      label: Level 2,      cc: 20,  value: 88,  hint_inputs: [IN_2], favorite: true, set: set_level_2 }
+  - { entry: 61, module: MIXER_2,   key: LEVEL_1,      label: Level 1,      cc: 19,  value: 124, hint_inputs: [IN_1], set: set_level_1 }
+  - { entry: 62, module: MIXER_2,   key: LEVEL_2,      label: Level 2,      cc: 20,  value: 4,   hint_inputs: [IN_2], set: set_level_2 }
   - { entry: 63, module: MIXER_2,   key: LEVEL_3,      label: Level 3,      cc: 21,  value: 4, hint_inputs: [IN_3], set: set_level_3 }
   - { entry: 64, module: MIXER_2,   key: LEVEL_4,      label: Level 4,      cc: 23,  value: 4, hint_inputs: [IN_4], set: set_level_4 }
   - { entry: 65, module: MIXER_2,   key: OUT_LEVEL,  label: Out Level,  cc: 0,   value: 64, set: set_out_level }
@@ -498,8 +499,8 @@ controls:
   # The general controls, each filling its slots (see `signals`). They have no CC, so they hold
   # 0.0 until a patch gives them one, CC 16 and 17 being General Purpose Controllers 1 and 2 in the
   # MIDI spec, and the default patch routes none of them. Favorites, so that they are at hand.
-  - { entry: 96, controller: true, key: GENERAL_1, label: General 1, cc: 0,   value: 4, favorite: true }
-  - { entry: 97, controller: true, key: GENERAL_2, label: General 2, cc: 0,   value: 4, favorite: true }
+  - { entry: 96, controller: true, key: GENERAL_1, label: General 1, cc: 0,   value: 4 }
+  - { entry: 97, controller: true, key: GENERAL_2, label: General 2, cc: 0,   value: 4 }
   # Amp 1 Limiter Sw, after the controllers so that no entry before it moves: the amp's look-ahead
   # limiter, on at CC 64 and above. It has no CC and powers up on (CC 124); off, the peaks past one
   # unit reach the clamp. Either way the amp's output comes 1 ms late.

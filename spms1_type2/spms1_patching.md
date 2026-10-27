@@ -309,7 +309,7 @@ order is never what makes a patch fit; to leave one out of the sound, route arou
 run unread (see the examples below).
 Mixer 1 has no CC: its levels hold 0.0, so it is silent until a patch turns them up, as its
 category 4 values or by giving them CCs. Mixer 2 has a CC on each level, CC#19 to 21 and 23, of which
-Level 1 and 2 power up at 0.7 and Level 3 and 4 at 0.0, so those inputs start closed. Each mixer's Out Level has no CC and holds 0.5; Mixer 2's sets how hard the
+Level 1 powers up at 1.0 and Level 2 to 4 at 0.0, so Osc 1 alone is heard at first. Each mixer's Out Level has no CC and holds 0.5; Mixer 2's sets how hard the
 audio drives the filters.
 
 ### Entries (CC#98), category 1
@@ -769,7 +769,7 @@ Amp 1 Gain 1 and Gain 2, of Audio In 1 and Audio In 2, which the amp sums, are e
 6 dB down, at value 46, unity at value 64, twice, 6 dB up, at value 89, and four times, 12 dB up,
 at value 124, so a quiet sound can be brought well up as well as a loud one taken down. The
 default patch puts Filter 2, the fourth order, on Audio In 2: Gain 2, on CC#15, powers up at value
-88, 1.96 times, 5.8 dB up, which takes the default patch's peaks to about -5 dBFS. Filter 1, the
+88, 1.96 times, 5.8 dB up, which takes the default patch's peaks to about -7 dBFS. Filter 1, the
 second order, is on Audio In 1, and Gain 1, which has no CC, powers up at value 4, silent, so the
 fourth order is heard alone until Gain 1 brings the second order in beside it, through the same
 envelope and limiter.
@@ -788,8 +788,8 @@ harmonics back below the audible band, the limiter does not: a sawtooth taken 12
 at A4 to A7 aliases -46 to -53 dB under 5 kHz with it, and -29 to -37 dB on the clamp. Off, the
 output is just as late, and the clamp is reached. Limiting is heard on a loud passage as its peaks
 held level, and the release as the sound coming back up after one. The default patch stays under
-it, with both oscillators on the sawtooth or on the square, and Amp 1 Gain 2 up a few steps from where it
-powers up starts to reach it. The filter's output
+it, with Osc 1 on the sawtooth or on the square, and Amp 1 Gain 2 turned up to about value 114
+starts to reach it. The filter's output
 clip and a mixer's sum still have the hard limit, past which a sawtooth driven 6 dB over at A6 to
 A7 aliases about -30 dB under 5 kHz; keep the levels before the filters where the peaks only just
 reach one unit, and bring the sound up with the amp instead.
@@ -875,19 +875,19 @@ the editor, which sends the same.
 - A bend range of 2 semitones, as a GM sound module's: CC#57 = 8 sets Pitch 1 Bend Amt to 8
 - The LFO reaches the filters' Mod 2 inputs by default too, so CC#25 sweeps the cutoff with it, on
   top of the envelope on Mod 1
-- A second oscillator plays by default too, on Mixer 2's second input at the level of the first,
-  CC#19 and CC#20 both at 0.7, beating slowly against Osc 1 from the 11 cents of CC#85's and
-  CC#76's power-up values; CC#20 = 4 takes it out. CC#85 and 76 tune it: CC#85 = 124 an octave up, CC#85 = 74 a fifth, CC#85 = 4 and CC#76 = 64 in unison
+- A second oscillator is wired by default too, on Mixer 2's second input, silent at power-up:
+  CC#19 = 88 and CC#20 = 88 put the two at 0.7 each, about as loud together as one at full level,
+  Osc 2 beating slowly against Osc 1 from the 11 cents of CC#85's and CC#76's power-up values. CC#85 and 76 tune it: CC#85 = 124 an octave up, CC#85 = 74 a fifth, CC#85 = 4 and CC#76 = 64 in unison
 - Noise is wired by default too, its Out on Mixer 2's fourth input beside the oscillators, so CC#23
-  brings it in under the note, at a level of 0.1 at value 16. CC#19 = 4 and CC#20 = 4 take the
-  oscillators out, leaving the noise alone, through the filters. CC#115 (Color) turns it from
+  brings it in under the note, at a level of 0.1 at value 16. CC#19 = 4 takes the
+  oscillator out, leaving the noise alone, through the filters. CC#115 (Color) turns it from
   white to red
 - Keyboard tracking is wired by default as well, the pitch from Pitch 1 on the filters' Pitch inputs,
   so CC#9 sets how far the cutoff follows the keys: all the way at value 124, half way at value 64,
   and not at all at value 4, where it powers up
 - The filter as a sine voice, playing its own oscillation in tune: CC#71 = 124 makes Filter 2 oscillate,
   CC#9 = 124 has the cutoff follow the keys, and CC#74 = 49 puts it on note 60 at note 60, and so
-  on the note played everywhere. CC#24 = 4 takes the envelope off the cutoff, and CC#19 = 4 and CC#20 = 4 take the oscillators out,
+  on the note played everywhere. CC#24 = 4 takes the envelope off the cutoff, and CC#19 = 4 takes the oscillator out,
   leaving the sine alone. It is within 5 cents of the note from middle C up, and 17 cents flat an octave below
 - A pitch envelope is wired by default too -- the envelope on the oscillator's Mod 1 input --
   so CC#89 (Osc 1 Pitch Mod 1 Amt) sets its depth: the note starts a semitone sharp at value 9, an
@@ -928,14 +928,15 @@ the editor, which sends the same.
   filter from Cutoff down, an octave at its top (two with CC#25 at the top)
 - A knob that detunes Osc 2: CC#99 = 115, CC#98 = 96, CC#6 = 16 gives General 1 CC#16, and
   CC#99 = 114, CC#98 = 47, CC#6 = 16 points Osc 2 Pitch Fine at General 1 Bipolar, so CC#16 moves
-  it from -60 to +60 cents, in tune at value 64
+  it from -60 to +60 cents, in tune at value 64, heard with Osc 2 brought in (CC#19 = 88 and
+  CC#20 = 88)
 - A knob that crossfades the oscillators: CC#99 = 115, CC#98 = 96, CC#6 = 16 gives General 1
   CC#16, and CC#99 = 114, CC#98 = 61, CC#6 = 18 and CC#98 = 62, CC#6 = 19 point Mixer 2 Level 1 at General 1 Sin and Level 2 at General 1 Cos, so CC#16 takes
-  Osc 2 out as it brings Osc 1 in, at equal power: at value 64 both are at 0.707, as loud as
-  the default patch's 0.7
-- A pitch bend for Osc 2 alone: CC#99 = 116, CC#98 = 4, CC#6 = 4 sets Pitch 1 Out 1 Bend Sw
-  off, so the wheel bends Osc 2 against Osc 1, which holds its note with the filter
-- A sync sweep: CC#112 at value 124 turns Osc 2 Sync Sw on, CC#118 at value 4
+  Osc 2 out as it brings Osc 1 in, at equal power: at value 64 both are at 0.707, about as loud
+  as one at full level
+- A pitch bend for Osc 2 alone: with Osc 2 brought in (CC#19 = 88 and CC#20 = 88), CC#99 = 116,
+  CC#98 = 4, CC#6 = 4 sets Pitch 1 Out 1 Bend Sw off, so the wheel bends Osc 2 against Osc 1, which holds its note with the filter
+- A sync sweep: CC#19 = 4 and CC#20 = 124 put Osc 2 alone on the mixer, CC#112 at value 124 turns Osc 2 Sync Sw on, CC#118 at value 4
   turns Osc 1 Pitch Mod 1 Sw off, and CC#89 turned up then sweeps Osc 2 alone with the
   envelope, Osc 1 holding the note it is synced to
 - Take the filters out of the chain: CC#99 = 113, CC#98 = 34, CC#6 = 62 points the amp's second audio input,
