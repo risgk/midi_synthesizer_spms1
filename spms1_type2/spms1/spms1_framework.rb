@@ -103,8 +103,8 @@ def cc_to_bipolar(value)
   (scaled < -0.5) ? -0.5 : ((scaled > 0.5) ? 0.5 : scaled)
 end
 
-# What a controller's slot, the mod wheel's or a general control's, is filled with. CC number 0 means no CC is assigned, and the slot
-# gets 0.0. Selecting the value rather than skipping the write keeps the cost the same whatever the
+# What the mod wheel's slot is filled with. CC number 0 means no CC is assigned, and the slot gets
+# 0.0. A general control's slot holds the patch's value instead, as a parameter's does (cc_or_nrpn). Selecting the value rather than skipping the write keeps the cost the same whatever the
 # patch says.
 def cc_or_zero(cc_number, value)
   (cc_number == 0) ? 0.0 : value
@@ -131,12 +131,16 @@ def quarter_sine(u)
   QUARTER_SINE_TABLE[index] + (QUARTER_SINE_TABLE[index + 1] - QUARTER_SINE_TABLE[index]) * (x - index.to_f)
 end
 
-# A controller's CC value as an index of QUARTER_SINE_TABLE, 0 at CC 4 to 120 at CC 124, and 0, as
-# u is 0.0, while no CC is assigned.
-def cc_table_index(cc_number, value)
+# A controller's value as an index of QUARTER_SINE_TABLE, 0 at CC 4 to 120 at CC 124.
+def value_table_index(value)
   index = value - 4
-  index = (index < 0) ? 0 : ((index > 120) ? 120 : index)
-  (cc_number == 0) ? 0 : index
+  (index < 0) ? 0 : ((index > 120) ? 120 : index)
+end
+
+# The mod wheel's CC value as an index of QUARTER_SINE_TABLE, and 0, as u is 0.0, while no CC is
+# assigned.
+def cc_table_index(cc_number, value)
+  (cc_number == 0) ? 0 : value_table_index(value)
 end
 
 # The 7-bit value a parameter's control slot is filled from: its CC's while one is assigned, and

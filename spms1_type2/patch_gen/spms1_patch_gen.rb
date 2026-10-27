@@ -75,6 +75,9 @@ class Spec
 
   def params = @controls.reject { |c| c['controller'] }
   def controllers = @controls.select { |c| c['controller'] }
+  # The controls whose slot holds a value of the patch, from NRPN category 4, while they have no CC:
+  # every parameter, and the controllers but a performance one (the Mod Wheel), which holds 0.0.
+  def valued = @controls.reject { |c| c['performance'] }
   def outputs_of(mod) = @signals.select { |s| s['output'] && s['module'] == mod['key'] }
   # The bus slots a controller control's CC fills; a parameter's control slot is its own, off the bus.
   def slots_of(control) = @signals.select { |s| s['control'] == full_key(control) }
@@ -226,10 +229,11 @@ def patch_rb
   out << "\n\n"
   out << ruby_constants(s.params.map { |c| ["NRPN_SOURCE_#{s.full_key(c)}", NRPN_PARAM_SOURCE_BASE + c['entry']] })
   out << "\n\n# A CC number of 0 means the control has no CC: a parameter's control slot then holds its NRPN_VALUE_*\n"
-  out << "# below, whatever CC it had before, so a patch sets it alone, and a controller slot holds 0.0.\n"
+  out << "# below, whatever CC it had before, so a patch sets it alone, as General 1 and 2 do theirs, and\n"
+  out << "# the Mod Wheel's slot holds 0.0.\n"
   out << ruby_constants(s.controls.map { |c| ["NRPN_CC_#{s.full_key(c)}", NRPN_CC_BASE + c['entry']] })
-  out << "\n\n# The value of each parameter's control slot while it has no CC, as a CC value.\n"
-  out << ruby_constants(s.params.map { |c| ["NRPN_VALUE_#{s.full_key(c)}", NRPN_VALUE_BASE + c['entry']] })
+  out << "\n\n# The value of each control slot while it has no CC, as a CC value, but the Mod Wheel's.\n"
+  out << ruby_constants(s.valued.map { |c| ["NRPN_VALUE_#{s.full_key(c)}", NRPN_VALUE_BASE + c['entry']] })
   out << "\n\n# The constants of the bus, which nothing else ever writes. A slot not written here holds 0.0.\n"
   out << "def spms1_fill_constant_signals(signals)\n"
   consts = s.signals.select { |sig| sig.key?('value') && sig['value'] != 0.0 }
@@ -261,8 +265,8 @@ def patch_rb
     out << "  C.set_midi_nrpn_value(midi_ch, NRPN_CC_#{s.full_key(c).ljust(width)}, #{c['cc']})\n"
   end
   out << "\n"
-  width = s.params.map { |c| s.full_key(c).length }.max
-  s.params.each do |c|
+  width = s.valued.map { |c| s.full_key(c).length }.max
+  s.valued.each do |c|
     out << "  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_#{s.full_key(c).ljust(width)}, #{c['value']})\n"
   end
   out << "\n"
@@ -303,7 +307,7 @@ def default_patch_h
   s.params.each { |c| nrpn << [NRPN_PARAM_SOURCE_BASE + c['entry'], c['source'] ? s.signal(c['source'])['id'] : SIGNAL_OWN, "#{s.full_label(c)} <- #{c['source'] || 'OWN'}"] }
   with_cc = s.controls.select { |c| c['cc'].to_i != 0 }
   with_cc.each { |c| nrpn << [NRPN_CC_BASE + c['entry'], c['cc'], "#{s.full_label(c)} CC"] }
-  s.params.each { |c| nrpn << [NRPN_VALUE_BASE + c['entry'], c['value'], "#{s.full_label(c)} value"] }
+  s.valued.each { |c| nrpn << [NRPN_VALUE_BASE + c['entry'], c['value'], "#{s.full_label(c)} value"] }
   out = []
   saved_cc = s.controls.reject { |c| c['performance'] }.map { |c| c['entry'] }
   out << <<~C
@@ -513,13 +517,22 @@ def main_controls
   s.controllers.each do |c|
     name = local_name(c)
     out << "  cc_#{name} = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_#{s.full_key(c)})\n"
-    out << "  #{name} = C.get_midi_cc_value(MIDI_CH, cc_#{name})\n"
     plain = "signals[SIGNAL_#{s.full_key(c)}]"
+    if c['performance']
+      out << "  #{name} = C.get_midi_cc_value(MIDI_CH, cc_#{name})\n"
+      value = "cc_or_zero(cc_#{name}, #{converter(c['bipolar'])}(#{name}))"
+      index = "cc_table_index(cc_#{name}, #{name})"
+    else
+      # With no CC, the value the patch holds for it, as a parameter's.
+      out << "  #{name} = cc_or_nrpn(cc_#{name}, C.get_midi_cc_value(MIDI_CH, cc_#{name}), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_#{s.full_key(c)}))\n"
+      value = "#{converter(c['bipolar'])}(#{name})"
+      index = "value_table_index(#{name})"
+    end
     s.slots_of(c).each do |sig|
       expr = case sig['form']
-             when nil then "cc_or_zero(cc_#{name}, #{converter(s.bipolar?(sig))}(#{name}))"
-             when 'sin' then "QUARTER_SINE_TABLE[cc_table_index(cc_#{name}, #{name})]"
-             when 'cos' then "QUARTER_SINE_TABLE[120 - cc_table_index(cc_#{name}, #{name})]"
+             when nil then value
+             when 'sin' then "QUARTER_SINE_TABLE[#{index}]"
+             when 'cos' then "QUARTER_SINE_TABLE[120 - #{index}]"
              else form_expr(sig['form'], plain)
              end
       out << "  signals[SIGNAL_#{sig['key']}] = #{expr}\n"

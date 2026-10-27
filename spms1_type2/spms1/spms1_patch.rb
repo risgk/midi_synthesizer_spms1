@@ -361,7 +361,8 @@ NRPN_SOURCE_DELAY_1_FEEDBACK       = 350
 NRPN_SOURCE_AMP_1_LIMITER_SW       = 354
 
 # A CC number of 0 means the control has no CC: a parameter's control slot then holds its NRPN_VALUE_*
-# below, whatever CC it had before, so a patch sets it alone, and a controller slot holds 0.0.
+# below, whatever CC it had before, so a patch sets it alone, as General 1 and 2 do theirs, and
+# the Mod Wheel's slot holds 0.0.
 NRPN_CC_PITCH_1_GLIDE          = 384
 NRPN_CC_PITCH_1_OUT_1_GLIDE_SW = 385
 NRPN_CC_PITCH_1_OUT_2_GLIDE_SW = 386
@@ -462,7 +463,7 @@ NRPN_CC_GENERAL_1              = 480
 NRPN_CC_GENERAL_2              = 481
 NRPN_CC_AMP_1_LIMITER_SW       = 482
 
-# The value of each parameter's control slot while it has no CC, as a CC value.
+# The value of each control slot while it has no CC, as a CC value, but the Mod Wheel's.
 NRPN_VALUE_PITCH_1_GLIDE          = 512
 NRPN_VALUE_PITCH_1_OUT_1_GLIDE_SW = 513
 NRPN_VALUE_PITCH_1_OUT_2_GLIDE_SW = 514
@@ -558,6 +559,8 @@ NRPN_VALUE_CHORUS_1_DEPTH         = 603
 NRPN_VALUE_DELAY_1_MIX            = 604
 NRPN_VALUE_DELAY_1_TIME           = 605
 NRPN_VALUE_DELAY_1_FEEDBACK       = 606
+NRPN_VALUE_GENERAL_1              = 608
+NRPN_VALUE_GENERAL_2              = 609
 NRPN_VALUE_AMP_1_LIMITER_SW       = 610
 
 # The constants of the bus, which nothing else ever writes. A slot not written here holds 0.0.
@@ -882,6 +885,8 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_DELAY_1_MIX           , 34)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_DELAY_1_TIME          , 64)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_DELAY_1_FEEDBACK      , 64)
+  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_GENERAL_1             , 4)
+  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_GENERAL_2             , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_AMP_1_LIMITER_SW      , 124)
 
   C.set_midi_cc_value(midi_ch, 5  , 4  ) # Pitch 1 Glide

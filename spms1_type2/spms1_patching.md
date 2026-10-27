@@ -256,7 +256,7 @@ F0 7D 53 31 ch 01 h0 h1 h2 h3 h4 category entry value ... F7
 | 113 (1) | 0-41 | What feeds a module input | Signal ID |
 | 114 (2) | 0-94, 98 | Where a parameter takes its value | Signal ID, or 127 for its own control slot |
 | 115 (3) | 0-98 | Which CC fills a control slot | CC number, or 0 for none |
-| 116 (4) | 0-94, 98 | What a parameter's control slot holds while it has no CC | CC value |
+| 116 (4) | 0-94, 96-98 | What a control slot holds while it has no CC, but the Mod Wheel's | CC value |
 | 117 (5) | 0-3 | System: Mute, Reset, Save, Load (below), not a part of the patch | 0-63 or 64-127 |
 
 Category 5 has the system entries, which act on the synth rather than set a part of the patch:
@@ -296,8 +296,8 @@ not there: the last write wins, whether its slot is ahead of the others or after
 written to a new slot moves there, and the module that slot held leaves the order.
 
 In category 3, CC number 0 means the control has no CC. A parameter's control slot then holds its
-value in category 4, whatever CC it had before, so the patch alone sets what the parameter reads; the
-Mod Wheel and General slots hold 0.0. Category 4 takes a value as a CC would and is read the same way, so value 64
+value in category 4, whatever CC it had before, so the patch alone sets what the parameter reads; so
+do General 1 and 2, and the Mod Wheel slot holds 0.0. Category 4 takes a value as a CC would and is read the same way, so value 64
 is 0.0 on a bipolar parameter. While the parameter has a CC, its category 4 value is kept but not
 read. Each powers up at the parameter's power-up value.
 
@@ -399,10 +399,12 @@ both at the same signal for a mono output.
 
 <!-- patch_gen end -->
 
-### Entries (CC#98), category 3 only
+### Entries (CC#98), categories 3 and 4, for the controllers
 
-These CCs belong to no parameter, so category 2 has no entry for them. They fill the Mod Wheel
-slot and the general slots on the bus; see below.
+These belong to no parameter, so category 2 has no entry for them. Category 3 gives each a CC,
+which fills the Mod Wheel slot or the general slots on the bus, and category 4 holds General 1's
+and General 2's values while they have no CC; the Mod Wheel, played rather than set, has none
+there. See below.
 
 <!-- patch_gen controllers -->
 
@@ -506,9 +508,10 @@ shows it with the keyboard's signals, on its Controller node, the forms as outpu
 as a wheel beside the soft keyboard.
 
 Slots 12 to 37 are General 1 and General 2, two more control slots that no parameter owns. They
-have no CC at power-up, so they hold 0.0 until a patch gives them one, CC#16 and CC#17, General
-Purpose Controllers 1 and 2, say: CC#99 = 115, CC#98 = 96, CC#6 = 16 for General 1 and CC#98 = 97,
-CC#6 = 17 for General 2, as the examples below do. Each CC fills thirteen slots at once, each
+have no CC at power-up, so each holds its value in category 4 (CC#99 = 116, CC#98 = 96 and 97), as
+a parameter with no CC does, 0.0 at power-up, which the editor's slider sets. For a knob, give
+them a CC, CC#16 and CC#17, General Purpose Controllers 1 and 2, say: CC#99 = 115, CC#98 = 96,
+CC#6 = 16 for General 1 and CC#98 = 97, CC#6 = 17 for General 2, as the examples below do. Each CC fills thirteen slots at once, each
 a form of its value u, which runs 0.0 to 1.0 from value 4 to value 124: General n itself, Rev
 1 - u, Inv -u, Rev Inv u - 1, Bipolar u - 0.5, Bipolar Inv 0.5 - u, Sin sin(u * pi / 2), Cos
 cos(u * pi / 2), Lo min(1, 2 - 2u), Hi min(1, 2u), Neg max(0, 1 - 2u), Mid 1 - |2u - 1|
@@ -526,8 +529,8 @@ level or a Mod Amt, smooths it as it does its CC, the shape taken before the smo
 input, which smooths nothing itself, takes a copy smoothed in the same two stages, made once a
 buffer from the smoothed value u, so a wheel or a knob moves it without steps; a gate input,
 Gate In, Reset In or Sync In, takes the slot as it is, so that it acts at once. The same goes for
-Mod Wheel and its forms. They power up at value 4, so u is 0.0, and with no CC u stays 0.0; the
-default patch routes none of them. Their values are a part of the patch, which the Mod Wheel's is
+Mod Wheel and its forms. They power up at value 4, so u is 0.0, and with no CC the Mod Wheel's u
+stays 0.0; the default patch routes none of them. Their values are a part of the patch, which the Mod Wheel's is
 not, so the editor shows them apart from the Controller, as a module of their own, General, which
 the synth does not have: on the General node, the forms as outputs below each, and as sliders on
 the General panel of the Controls tab.

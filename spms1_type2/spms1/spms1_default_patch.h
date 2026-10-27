@@ -336,6 +336,8 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {604,  34},  // Delay 1 Mix value
   {605,  64},  // Delay 1 Time value
   {606,  64},  // Delay 1 Feedback value
+  {608,   4},  // General 1 value
+  {609,   4},  // General 2 value
   {610, 124},  // Amp 1 Limiter Sw value
 };
 
