@@ -238,7 +238,7 @@
       padding: 12px 16px;
       container-type: inline-size;
     }
-    /* The last column, Controller to LFO 1, runs the full height of its row, so the Init button under it sits at the
+    /* The last column, Amp 1 to Delay 1, runs the full height of its row, so the Init button under it sits at the
        bottom, just above the keyboard. */
     .editor-column:last-child {
       align-self: stretch;
@@ -2054,7 +2054,8 @@
   // under the delay that feeds it. Spaced so that no two nodes meet with every parameter shown.
   const DEFAULT_LAYOUT = {
     CONTROLLER: { x: 20,  y: 40 },
-    CONST:     { x: 20,   y: 1017 },
+    GENERAL:   { x: 20,   y: 341 },
+    CONST:     { x: 20,   y: 1114 },
     PITCH_1:   { x: 380,  y: 40 },
     EG_1:      { x: 380,  y: 450 },
     EG_2:      { x: 380,  y: 756 },
@@ -2494,12 +2495,13 @@
   let armed = null;
 
   // Each node's outputs, and the wires from them, take its color, set apart from its neighbors'. The
-  // Controller, the editor's own, takes the primary color, Ruby; Filter 1 a red set apart from it; Osc 2
+  // Controller, the editor's own, takes the primary color, Ruby, and General, split from it, a darker
+  // wine; Filter 1 a red set apart from it; Osc 2
   // gold, set apart from Osc 1's blue (dark enough for the white names on the nodes, 5:1), and EG 2
   // purple, set apart from that gold.
   // The constants and the output, which make no sound of their own, are in grays.
   const NODE_COLORS = {
-    CONTROLLER: '#e0115f', CONST: '#666666', OUT: '#3d3d3d',
+    CONTROLLER: '#e0115f', GENERAL: '#8a1c4a', CONST: '#666666', OUT: '#3d3d3d',
     PITCH_1: '#2c3e50', EG_1: '#a65813', EG_2: '#793a93', LFO_1: '#1c7f46', MIXER_1: '#117d68',
     OSC_1: '#2772a4', OSC_2: '#8c6900', NOISE_1: '#557a0e', MIXER_2: '#9c2f86', FILTER_1: '#c0392b', FILTER_2: '#7b241c',
     AMP_1: '#473baf', CHORUS_1: '#007784', DELAY_1: '#5e2500',
@@ -2507,7 +2509,11 @@
   const nodeOfOutput = {};
 
   const NODES = [
-    { key: 'CONTROLLER', label: 'Controller', aux: true, notes: [['NOTE_PITCH', 'Note Pitch', 0, 127], ['NOTE_GATE', 'Note Gate', 0, 1], ['PITCH_BEND', 'Pitch Bend', -8192, 8191]], controls: CONTROLLER_ITEMS },
+    // The controllers played (the keyboard's signals and the Mod Wheel), and General 1 and 2, whose
+    // values a patch keeps, as a module of their own, though the synth has no such module: shown
+    // apart, so that one sees which are a part of the patch.
+    { key: 'CONTROLLER', label: 'Controller', aux: true, notes: [['NOTE_PITCH', 'Note Pitch', 0, 127], ['NOTE_GATE', 'Note Gate', 0, 1], ['PITCH_BEND', 'Pitch Bend', -8192, 8191]], controls: CONTROLLER_ITEMS.filter(c => c.performance) },
+    { key: 'GENERAL', label: 'General', aux: true, controls: CONTROLLER_ITEMS.filter(c => !c.performance) },
     { key: 'CONST', label: 'Constants', aux: true, normed: true, outs: ['ONE', 'HALF', 'NONE', 'MINUS_HALF', 'MINUS_ONE'] },
     ...MODULES.map(m => ({
       key: m.key, label: m.label, module: m,
@@ -2581,7 +2587,7 @@
     portEls = {};
     for (const node of NODES) {
       const el = document.createElement('div');
-      el.className = 'node' + (node.aux ? ' aux' : '') + (node.key === 'CONTROLLER' ? ' controller' : '') + (node.key === 'CONST' ? ' const' : '');
+      el.className = 'node' + (node.aux ? ' aux' : '') + (node.key === 'CONTROLLER' || node.key === 'GENERAL' ? ' controller' : '') + (node.key === 'CONST' ? ' const' : '');
       el.dataset.node = node.key;
       if (NODE_COLORS[node.key]) {
         el.classList.add('colored');
@@ -4047,7 +4053,7 @@
   // a run order sent over NRPN does not move them.
   // The general controls have sliders here, and the mod wheel its wheel by the soft keyboard.
   const CONTROL_PANELS = [
-    { col: 0, title: 'Controller', module: null },
+    { col: 0, title: 'General', module: null },
     { col: 0, title: 'Pitch 1', module: 'PITCH_1' },
     { col: 0, title: 'EG 1', module: 'EG_1' },
     { col: 0, title: 'EG 2', module: 'EG_2' },
@@ -4069,10 +4075,10 @@
   // Controls tab's options are, rather than in the patch, as it does not change the sound. A panel
   // a patch hides keeps its place, and one the kept layout does not know goes to its own column.
   const PANEL_LAYOUT_KEY = 'spms1-type2-editor-controls-layout';
-  const PANEL_BY_ID = Object.fromEntries(CONTROL_PANELS.map(p => [p.module || 'CONTROLLER', p]));
+  const PANEL_BY_ID = Object.fromEntries(CONTROL_PANELS.map(p => [p.module || 'GENERAL', p]));
   function defaultPanelLayout() {
     const cols = [[], [], [], []];
-    for (const p of CONTROL_PANELS) cols[p.col].push(p.module || 'CONTROLLER');
+    for (const p of CONTROL_PANELS) cols[p.col].push(p.module || 'GENERAL');
     return cols;
   }
   function loadPanelLayout() {
@@ -4080,8 +4086,9 @@
     try { kept = JSON.parse(localStorage.getItem(PANEL_LAYOUT_KEY) || 'null'); } catch (e) { /* storage unavailable, or not JSON */ }
     if (!Array.isArray(kept) || kept.length !== 4 || !kept.every(Array.isArray)) return defaultPanelLayout();
     const seen = new Set();
-    const cols = kept.map(col => col.filter(id => PANEL_BY_ID[id] && !seen.has(id) && seen.add(id)));
-    for (const p of CONTROL_PANELS) if (!seen.has(p.module || 'CONTROLLER')) cols[p.col].push(p.module || 'CONTROLLER');
+    // General's panel was Controller's before, and keeps its place.
+    const cols = kept.map(col => col.map(id => id === 'CONTROLLER' ? 'GENERAL' : id).filter(id => PANEL_BY_ID[id] && !seen.has(id) && seen.add(id)));
+    for (const p of CONTROL_PANELS) if (!seen.has(p.module || 'GENERAL')) cols[p.col].push(p.module || 'GENERAL');
     return cols;
   }
   let panelLayout = loadPanelLayout();
@@ -4310,7 +4317,7 @@
       const panel = document.createElement('div');
       panel.className = 'panel colored';
       panel.dataset.panel = id;
-      panel.style.setProperty('--node-color', NODE_COLORS[p.module || 'CONTROLLER']);
+      panel.style.setProperty('--node-color', NODE_COLORS[p.module || 'GENERAL']);
       panel.innerHTML = `<h2>${p.title}<span class="panel-move">` +
         `<button type="button" class="btn" data-move="up" aria-label="Move ${p.title} up" title="Move up">&#9650;</button>` +
         `<button type="button" class="btn" data-move="down" aria-label="Move ${p.title} down" title="Move down">&#9660;</button>` +

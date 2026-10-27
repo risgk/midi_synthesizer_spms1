@@ -525,8 +525,10 @@ input, which smooths nothing itself, takes a copy smoothed in the same two stage
 buffer from the smoothed value u, so a wheel or a knob moves it without steps; a gate input,
 Gate In, Reset In or Sync In, takes the slot as it is, so that it acts at once. The same goes for
 Mod Wheel and its forms. They power up at value 4, so u is 0.0, and with no CC u stays 0.0; the
-default patch routes none of them. The editor shows them on the Controller node, the forms as
-outputs below each, and as sliders in the Controls tab.
+default patch routes none of them. Their values are a part of the patch, which the Mod Wheel's is
+not, so the editor shows them apart from the Controller, as a module of their own, General, which
+the synth does not have: on the General node, the forms as outputs below each, and as sliders on
+the General panel of the Controls tab.
 
 Note Pitch, Note Gate and Pitch Bend are what the keyboard puts on the bus. Note Pitch carries
 MIDI notes 0 to 120 as -0.5 to +0.5, the same span the oscillator reads as its whole pitch
