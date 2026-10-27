@@ -5,7 +5,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.3.4
 - Controlled by MIDI as a sound module
 - Last-note priority with one note of memory: releasing the newest note while the one before it is still held goes back to that one, legato (for trills)
 - 48 kHz audio output: 24 bit through an I2S DAC, or PWM Audio (no DAC needed)
-- Oscillator: a sawtooth-to-square morph with pulse width (CC#114), and pulse width modulation (PWM) by the same two modulations as the pitch, the envelope and the LFO by default, on CC#8 and 103; and the sawtooth and the pulse on outputs of their own too, and on Osc 1 a sine sub an octave down
+- Oscillator: a sawtooth-to-square morph with pulse width (CC#114), and pulse width modulation (PWM) on two inputs of its own, beside the pitch's two, the envelope and the LFO by default on each pair, on CC#8 and 103; and the sawtooth and the pulse on outputs of their own too, and on Osc 1 a sine sub an octave down
 - Hard sync: Osc 2 restarts where Sync In, Osc 1's sawtooth by default, rises through zero, at the point between two samples it crosses, with the step rounded off by PolyBLEP as a wrap's is (Sync Sw, CC#112)
 - Envelopes: two ADS envelopes, EG 2 on the amp's Mod 2 In, an organ's at power-up, on CC#52, 53 and 54, with the release switch of both on CC#105
 - LFO: triangle (PolyBLAMP) and unipolar square (PolyBLEP), each on an output of its own, and a main output crossfading from one to the other (Wave, CC#33); a reset input, on Note Gate by default, that restarts it at each note with Reset Sw (CC#113) on
@@ -141,7 +141,7 @@ puts the default patch back. Keep a patch with Save JSON, or in the synth with S
       columns two or four to a row, and in one column (as on a phone) by the arrows at the right of
       its heading, changing places with the panel next to it in the order of the columns one after
       another. Where the panels are is kept in the browser, the same for every patch, and Reset Layout puts them back:
-      the modulation, Controller to LFO 1 and then Mixer 1, in the first column, the sources, Osc 1 to
+      the modulation, General and Pitch 1 to LFO 1 and then Mixer 1, in the first column, the sources, Osc 1 to
       Mixer 2, in the second, Filter 1 and Filter 2 in the third, and Amp 1 to Delay 1 in the last. Moving a panel and Reset Layout are undone by Undo, as a change to the patch is
     - A note in parentheses follows a parameter's name there: its range, as "(White to Red)" on
       Noise 1 Color, or, on a level or a modulation amount, what the patch routes to the input it
@@ -173,6 +173,9 @@ puts the default patch back. Keep a patch with Save JSON, or in the synth with S
     - Wires module outputs to inputs and parameters, and sets the run order and CC assignments
     - Shows every parameter of every module, those with no CC in blue, so a wire always ends on what
       it feeds
+    - Shows the keyboard's signals and the Mod Wheel on a Controller node, and General 1 and 2,
+      whose values are a part of the patch, on a General node of their own (a General panel on the
+      Controls tab), though the synth has no such module
     - Saves and loads patches as JSON
     - A patch saved as JSON or copied keeps a CC that only the Mod Wheel has at what it powers up
       at, 0.0, as Save to Device does: the mod wheel is played rather than set; Send Patch sends
@@ -278,11 +281,11 @@ flowchart LR
   KBD -. Note Gate .-> PITCH
   KBD -. Pitch Bend .-> PITCH
   PITCH -. Out 1 .-> OSC
-  EG -. Mod 1 .-> OSC
-  LFO -. Mod 2 .-> OSC
+  EG -. Pitch Mod 1, PW Mod 1 .-> OSC
+  LFO -. Pitch Mod 2, PW Mod 2 .-> OSC
   PITCH -. Out 2 .-> OSC2
-  EG -. Mod 1 .-> OSC2
-  LFO -. Mod 2 .-> OSC2
+  EG -. Pitch Mod 1, PW Mod 1 .-> OSC2
+  LFO -. Pitch Mod 2, PW Mod 2 .-> OSC2
   EG -. Mod 1 .-> FILTER
   LFO -. Mod 2 .-> FILTER
   PITCH -. Out 1 .-> FILTER
@@ -298,9 +301,12 @@ flowchart LR
 
 Osc 2's sync and LFO 1's reset are routed, from Osc 1's sawtooth and Note Gate, but their switches
 power up off, so neither takes effect until it is turned on. The mod wheel reaches LFO 1's Level Mod In.
-Filter 2 takes Filter 1 on its Audio In 2 and Mixer 2 on its Audio In 1 at a gain of 0.0, and the amp
-Filter 1 on its Audio In 1 at a gain of 0.0 and Filter 2 on its Audio In 2, so the two filters play in
-series until those gains turn them side by side, with no rewiring. Filter 1's Audio In 2 is unrouted.
+The two filters run in series by default, Mixer 2 into Filter 1 into Filter 2 into the amp, as one
+low pass of the fourth order (24 dB/oct), on the same CCs: Filter 2 takes Filter 1 on its Audio In 2
+and Mixer 2 on its Audio In 1 at a gain of 0.0, and the amp Filter 1 on its Audio In 1 at a gain of
+0.0 and Filter 2 on its Audio In 2, so those gains alone turn the two side by side, with no
+rewiring. Filter 1's Audio In 2 is unrouted. Each oscillator's pitch and pulse width have two
+modulation inputs each, wired alike: EG 1 on each Mod 1 In and LFO 1 on each Mod 2 In.
 
 Each module is processed once per sample, in the [run order](./spms1_patching.md#the-run-order). Their parameters -- waveform,
 cutoff, gain and the rest -- arrive from CC and are left out of the diagram. Parameter names
@@ -320,7 +326,7 @@ category 4, leaves its output unbent, so the bend can move Osc 2 alone. Pitch 1 
 bend range, half a semitone a step: on CC#57, 2 semitones either way at value 8, an octave at
 value 28, where it powers up, and 5 octaves at value 124.
 
-The LFO goes straight to the oscillator, both to its pitch and to its pulse width, on Mod 2 In, and to the filters, where Mod 2 Amt (CC#25) powers up at 0.0 and
+The LFO goes straight to the oscillator, on Pitch Mod 2 In and PW Mod 2 In, and to the filters, where Mod 2 Amt (CC#25) powers up at 0.0 and
 leaves the cutoff alone until it is turned up. The envelope moves the cutoff by Mod 1 Amt
 (CC#24), which powers up at 0.2 (value 28), two octaves up from Cutoff (CC#74) at its
 peak; the cutoff powers up at 0.8 (value 100). Osc 1 Pitch Mod 2 Amt (CC#13) takes the
@@ -332,7 +338,7 @@ vibrato, from none to an octave. The pitch from Pitch 1 reaches the filters too,
 unmoved at note 60. Pitch Amt powers up there, at 1.0 (value 124), so the tone stays alike up and
 down the keyboard; CC#9 turned down to 0.0 (value 4) leaves the cutoff where CC#74 puts it
 whatever the note.
-The envelope reaches the oscillator too, on Osc 1 Mod 1 In, for a pitch envelope: Pitch Mod 1
+The envelope reaches the oscillator too, on Osc 1 Pitch Mod 1 In and PW Mod 1 In, for a pitch envelope: Pitch Mod 1
 Amt (CC#89) and PW Mod 1 Amt (CC#8) power up at 0.0, with it off. Each modulation depth spans the
 whole range of what it moves, so bringing a source down to a musical depth is left to the patch
 rather than built into the modules.

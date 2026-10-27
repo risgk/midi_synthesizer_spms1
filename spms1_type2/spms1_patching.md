@@ -869,7 +869,7 @@ Each is given as the MIDI to send; one that wires is also given as what to wire 
 the editor, which sends the same.
 
 - Vibrato is wired by default -- the LFO, at full level (LFO 1 Level, CC#116, powers up at value
-  124), goes straight to the oscillator's Mod 2 input -- and CC#13 (Osc 1 Pitch Mod 2 Amt) brings
+  124), goes straight to the oscillator's Pitch Mod 2 input -- and CC#13 (Osc 1 Pitch Mod 2 Amt) brings
   it in: none at value 4, where it powers up, 50 cents either way at value 9, a semitone at value
   14 and an octave at the top. CC#3 sets the rate
 - A vibrato on the mod wheel, as a GM2 sound module's: CC#116 = 4 takes LFO 1 Level down to 0.0,
