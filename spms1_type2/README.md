@@ -104,11 +104,11 @@ A path from the sound the synth powers up with to a patch of your own, a step at
 editor's Controls tab and the nodes of its Patch tab. Open "spms1_editor.html" (see
 [Web Editor](#web-editor)) and choose the synth, or SPMS-1 Web (Built-in), in "MIDI Out".
 
-1. Favorites: the Controls tab opens with "Show favorites only" ticked, showing the 37 parameters
+1. Favorites: the Controls tab opens with "Show favorites only" ticked, showing the 39 parameters
    the default patch marks as favorites:
-   Pitch 1 Glide and Stretch; EG 1 Attack, Decay and Sustain; LFO 1 Wave, Rate and Level; Osc 1 Wave, PW, Pitch Mod 1 Amt,
-   Pitch Mod 2 Amt, PW Mod 1 Amt and PW Mod 2 Amt; Osc 2 Wave and Pitch; Noise 1 Color; Mixer 2 Level 1 to 4; Filter 2 Cutoff, Resonance, Mode, Pitch Amt, Pitch Pol, Mod 1 Amt, Mod 1 Pol and Mod 2 Amt; Amp 1 Gain 2 and Mod 1/2 Mix; Chorus 1 Mix, Rate and Depth; and Delay 1 Mix, Time and Feedback.
-   Mark more with the star as you find them. Osc 2's PW and Mod Amts are on Osc 1's CCs, and each
+   Pitch 1 Glide, Out 1 Glide Sw, Bend Amt and Stretch; EG 1 Attack, Decay, Sustain and Release Sw; LFO 1 Wave, Rate and Level; Osc 1 Wave, PW, Pitch Mod 1 Amt,
+   Pitch Mod 2 Amt, PW Mod 1 Amt and PW Mod 2 Amt; Osc 2 Wave and Pitch; Noise 1 Color; Mixer 2 Level 1 to 4; Filter 2 Cutoff, Resonance, Mode, Pitch Pol, Mod 1 Amt, Mod 1 Pol and Mod 2 Amt; Amp 1 Gain 2 and Mod 1/2 Mix; Chorus 1 Mix, Rate and Depth; and Delay 1 Mix, Time and Feedback.
+   Mark more with the star as you find them. Osc 2's Pitch Mod Amts are on Osc 1's CCs, and each
    parameter of Filter 1 on Filter 2's but its Resonance, which has no CC, so a slider of one moves
    the other's with it, whether or not that one is shown
 2. Parameters with a CC: clear "Show favorites only" to show every parameter with a CC. What each
@@ -349,8 +349,8 @@ level, and Level 2 (CC#20), Level 3 (CC#21) and Level 4 (CC#23) at 0.0, so Osc 2
 noise are silent until they are turned up. Osc 2 plays the note from Pitch 1 as Osc
 1 does, tuned against it by its own Pitch (CC#85) and Pitch Fine (CC#76), 11 cents sharp at
 power-up for a slow beat once it is turned up. Its Wave is its own as well, on CC#104 beside Osc 1's on CC#102. It
-follows Osc 1 in everything else: its Mod Amts and its PW are on Osc 1's CCs, so one CC moves
-both.
+follows Osc 1 in its pitch modulation: its Pitch Mod Amts are on Osc 1's CCs, so one CC moves
+both; its PW and PW Mod Amts have no CC.
 
 Filter 1 and Filter 2 run in series, one low pass of the fourth order (24 dB/oct): the two are on
 the same CCs and power up alike, so each of those CCs moves both, but for the Resonance:
