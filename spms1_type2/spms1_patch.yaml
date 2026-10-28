@@ -400,10 +400,10 @@ controls:
   # value Osc 1's does. Sync Sw is Osc 2's alone, on CC 112, and powers up off, at CC 4, so Sync
   # In, Osc 1 Out Saw, is ignored until it is turned on. Osc 2 is heard through Mixer 2 Level 2 (CC 20), which powers up at 0.0, so
   # that it is silent until turned up.
-  - { entry: 43, module: OSC_2,     key: WAVE,     label: Wave,         cc: 104, value: 4, hint: Saw to Sq, set: set_waveform }
+  - { entry: 43, module: OSC_2,     key: WAVE,     label: Wave,         cc: 104, value: 4, hint: Saw to Sq, favorite: true, set: set_waveform }
   - { entry: 44, module: OSC_2,     key: PW,           label: PW,  cc: 114, value: 64, bipolar: true, hint: 0% to 100%, set: set_pulse_width }
   - { entry: 45, module: OSC_2,     key: PITCH_COARSE,  label: Pitch Coarse,  cc: 0,   value: 64, bipolar: true, hint: ±5 Oct, set: set_pitch_coarse }
-  - { entry: 46, module: OSC_2,     key: PITCH,         label: Pitch,         cc: 85,  value: 5, hint: 0 to +1 Oct, set: set_pitch }
+  - { entry: 46, module: OSC_2,     key: PITCH,         label: Pitch,         cc: 85,  value: 5, hint: 0 to +1 Oct, favorite: true, set: set_pitch }
   - { entry: 47, module: OSC_2,     key: PITCH_FINE,    label: Pitch Fine,    cc: 76,  value: 65, bipolar: true, hint: ±60 Cent, set: set_pitch_fine }
   - { entry: 48, module: OSC_2,     key: PITCH_MOD_1_AMT, label: Pitch Mod 1 Amt, cc: 89, value: 4, hint_inputs: [PITCH_MOD_1_IN], set: set_pitch_modulation_1_amount }
   - { entry: 49, module: OSC_2,     key: PITCH_MOD_1_POL,      label: Pitch Mod 1 Pol, cc: 0, value: 76, bipolar: true, hint: − to +, set: set_pitch_modulation_1_polarity }
@@ -431,8 +431,8 @@ controls:
   # hard the sum drives the filter, the one Mixer 2 feeds, and what keeps two oscillators and the
   # noise all at full level, a sum of 1.5 at most, inside the mixer's range.
   - { entry: 61, module: MIXER_2,   key: LEVEL_1,      label: Level 1,      cc: 19,  value: 124, hint_inputs: [IN_1], favorite: true, set: set_level_1 }
-  - { entry: 62, module: MIXER_2,   key: LEVEL_2,      label: Level 2,      cc: 20,  value: 4,   hint_inputs: [IN_2], set: set_level_2 }
-  - { entry: 63, module: MIXER_2,   key: LEVEL_3,      label: Level 3,      cc: 21,  value: 4, hint_inputs: [IN_3], set: set_level_3 }
+  - { entry: 62, module: MIXER_2,   key: LEVEL_2,      label: Level 2,      cc: 20,  value: 4,   hint_inputs: [IN_2], favorite: true, set: set_level_2 }
+  - { entry: 63, module: MIXER_2,   key: LEVEL_3,      label: Level 3,      cc: 21,  value: 4, hint_inputs: [IN_3], favorite: true, set: set_level_3 }
   - { entry: 64, module: MIXER_2,   key: LEVEL_4,      label: Level 4,      cc: 23,  value: 4, hint_inputs: [IN_4], favorite: true, set: set_level_4 }
   - { entry: 65, module: MIXER_2,   key: OUT_LEVEL,  label: Out Level,  cc: 0,   value: 64, set: set_out_level }
   # The two filters run in series, Filter 1 into Filter 2's Audio In 2 into the amp's, as one low
@@ -473,10 +473,10 @@ controls:
   - { entry: 77, module: FILTER_2,  key: GAIN_2,       label: Gain 2,       cc: 0,   value: 64, hint_inputs: [AUDIO_IN_2], set: set_gain_2 }
   - { entry: 78, module: FILTER_2,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 100, favorite: true, set: set_cutoff }
   - { entry: 79, module: FILTER_2,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 64, favorite: true, set: set_resonance }
-  - { entry: 80, module: FILTER_2,  key: MODE,         label: Mode,         cc: 39,  value: 4, hint: LP to Notch to HP, set: set_mode }
-  - { entry: 81, module: FILTER_2,  key: PITCH_AMT, label: Pitch Amt, cc: 9, value: 124, hint_inputs: [PITCH_IN], set: set_pitch_amount }
+  - { entry: 80, module: FILTER_2,  key: MODE,         label: Mode,         cc: 39,  value: 4, hint: LP to Notch to HP, favorite: true, set: set_mode }
+  - { entry: 81, module: FILTER_2,  key: PITCH_AMT, label: Pitch Amt, cc: 9, value: 124, hint_inputs: [PITCH_IN], favorite: true, set: set_pitch_amount }
   - { entry: 82, module: FILTER_2,  key: MOD_1_AMT,    label: Mod 1 Amt,    cc: 24,  value: 28, hint_inputs: [MOD_1_IN], favorite: true, set: set_modulation_1_amount }
-  - { entry: 83, module: FILTER_2,  key: MOD_1_POL,      label: Mod 1 Pol, cc: 117, value: 124, bipolar: true, hint: − to +, set: set_modulation_1_polarity }
+  - { entry: 83, module: FILTER_2,  key: MOD_1_POL,      label: Mod 1 Pol, cc: 117, value: 124, bipolar: true, hint: − to +, favorite: true, set: set_modulation_1_polarity }
   - { entry: 84, module: FILTER_2,  key: MOD_2_AMT,    label: Mod 2 Amt,    cc: 25,  value: 4, hint_inputs: [MOD_2_IN], favorite: true, set: set_modulation_2_amount }
   - { entry: 85, module: FILTER_2,  key: MOD_2_POL,      label: Mod 2 Pol, cc: 0,   value: 76, bipolar: true, hint: − to +, set: set_modulation_2_polarity }
   # Amp 1: Audio In 1 and Audio In 2 are summed, each after its own gain, Gain 1 and Gain 2, so
