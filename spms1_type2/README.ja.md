@@ -105,7 +105,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.3.4
 
 1. お気に入り: Controls タブは "Show favorites only" にチェックが入った状態で開き、デフォルトパッチで
    お気に入りになっている 39 個のパラメータを表示します:
-   Pitch 1 Glide・Out 1 Glide Sw・Bend Amt・Stretch、EG 1 Attack・Decay・Sustain・Release Sw、LFO 1 Wave・Rate・Level、Osc 1 Wave・PW・Pitch Mod 1 Amt・Pitch Mod 2 Amt・PW Mod 1 Amt・PW Mod 2 Amt、Osc 2 Wave・Pitch、Noise 1 Color、Mixer 2 Level 1〜4、
+   Pitch 1 Glide・Out 1 Glide Sw・Bend Amt・Stretch、EG 1 Attack・Decay・Sustain・Release Sw、LFO 1 Wave・Rate・Level、Osc 1 Wave・PW・Pitch Mod 1 Amt・Pitch Mod 2 Amt・PW Mod 1 Amt・PW Mod 2 Amt、Osc 2 Wave・Pitch Fine、Noise 1 Color、Mixer 2 Level 1〜4、
    Filter 2 Cutoff・Resonance・Mode・Pitch Amt・Mod 1 Amt・Mod 1 Pol・Mod 2 Amt、
    Amp 1 Gain 2・Mod 1/2 Mix、Chorus 1 Mix・Rate・Depth、Delay 1 Mix・Time・Feedback。
    気に入ったものは星で追加できます。Osc 2 の各 Pitch Mod Amt は Osc 1 と、Filter 1 の Resonance（CC なし）以外の
@@ -331,7 +331,7 @@ CC のない Pitch Pol は起動時 +1.0 で、値 64 より下にすると追�
 ソースを音楽的な深さまで絞る仕事はモジュールに作り込まず、パッチの側に任せています。
 
 Mixer 2 がフィルタの前でオーディオを足し合わせます。Osc 1 が In 1、Osc 2 が In 2、Osc 1 のサブが In 3、Noise 1 の Out が In 4 です。
-それぞれ自分のレベルで足されます。Level 1（CC#19）は起動時 1.0 なので、デフォルトのパッチは Osc 1 を最大のレベルで鳴らします。Level 2（CC#20）、Level 3（CC#21）、Level 4（CC#23）は起動時 0.0 なので、上げるまで Osc 2、サブ、ノイズは鳴りません。Osc 2 は Osc 1 と同じく Pitch 1 からノートを受け取り、自分の Pitch（CC#85）と
+それぞれ自分のレベルで足されます。Level 1（CC#19）は起動時 1.0 なので、デフォルトのパッチは Osc 1 を最大のレベルで鳴らします。Level 2（CC#20）、Level 3（CC#21）、Level 4（CC#23）は起動時 0.0 なので、上げるまで Osc 2、サブ、ノイズは鳴りません。Osc 2 は Osc 1 と同じく Pitch 1 からノートを受け取り、自分の Pitch Coarse（CC#85）と
 Pitch Fine（CC#76）で Osc 1 に対する音程を決めます。起動時は 11 セント高く、上げるとゆっくりうなります。Wave も自分のもので、CC#104 です（Osc 1 は CC#102）。それ以外は
 Osc 1 に従います。各 Pitch Mod Amt には Osc 1 と同じ CC が割り当ててあるので、1 つの CC で両方が動きます。PW と PW Mod Amt には CC がありません。
 

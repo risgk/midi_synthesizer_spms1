@@ -13,7 +13,7 @@
 
 // The numbers of the patch and saved_patch_version, as one hash (see patch_spec_hash in
 // patch_gen): a saved patch with another is not loaded.
-#define SPMS1_PATCH_SPEC_HASH (0xD0EEB252u)
+#define SPMS1_PATCH_SPEC_HASH (0x4062907Cu)
 
 // The category 3 entries -- the controls -- whose CCs' values a Save keeps: all but the
 // performance controls', whose CCs are saved at 0.
@@ -24,7 +24,7 @@ static const uint8_t g_spms1_saved_cc_entries[] = {
   48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63,
   64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79,
   80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95,
-  96, 97, 100, 101, 102
+  98, 99, 100
 };
 
 // NRPN parameter number (category << 7 | LSB), value
@@ -121,73 +121,71 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {285, 127},  // Osc 1 Wave <- OWN
   {286, 127},  // Osc 1 PW <- OWN
   {287, 127},  // Osc 1 Pitch Coarse <- OWN
-  {288, 127},  // Osc 1 Pitch <- OWN
-  {289, 127},  // Osc 1 Pitch Fine <- OWN
-  {290, 127},  // Osc 1 Pitch Mod 1 Amt <- OWN
-  {291, 127},  // Osc 1 Pitch Mod 1 Pol <- OWN
-  {292, 127},  // Osc 1 Pitch Mod 1 Sw <- OWN
-  {293, 127},  // Osc 1 Pitch Mod 2 Amt <- OWN
-  {294, 127},  // Osc 1 Pitch Mod 2 Pol <- OWN
-  {295, 127},  // Osc 1 Pitch Mod 2 Sw <- OWN
-  {296, 127},  // Osc 1 PW Mod 1 Amt <- OWN
-  {297, 127},  // Osc 1 PW Mod 1 Pol <- OWN
-  {298, 127},  // Osc 1 PW Mod 2 Amt <- OWN
-  {299, 127},  // Osc 1 PW Mod 2 Pol <- OWN
-  {300, 127},  // Osc 2 Wave <- OWN
-  {301, 127},  // Osc 2 PW <- OWN
-  {302, 127},  // Osc 2 Pitch Coarse <- OWN
-  {303, 127},  // Osc 2 Pitch <- OWN
-  {304, 127},  // Osc 2 Pitch Fine <- OWN
-  {305, 127},  // Osc 2 Pitch Mod 1 Amt <- OWN
-  {306, 127},  // Osc 2 Pitch Mod 1 Pol <- OWN
-  {307, 127},  // Osc 2 Pitch Mod 1 Sw <- OWN
-  {308, 127},  // Osc 2 Pitch Mod 2 Amt <- OWN
-  {309, 127},  // Osc 2 Pitch Mod 2 Pol <- OWN
-  {310, 127},  // Osc 2 Pitch Mod 2 Sw <- OWN
-  {311, 127},  // Osc 2 PW Mod 1 Amt <- OWN
-  {312, 127},  // Osc 2 PW Mod 1 Pol <- OWN
-  {313, 127},  // Osc 2 PW Mod 2 Amt <- OWN
-  {314, 127},  // Osc 2 PW Mod 2 Pol <- OWN
-  {315, 127},  // Osc 2 Sync Sw <- OWN
-  {316, 127},  // Noise 1 Color <- OWN
-  {317, 127},  // Noise 1 Level <- OWN
-  {318, 127},  // Mixer 2 Level 1 <- OWN
-  {319, 127},  // Mixer 2 Level 2 <- OWN
-  {320, 127},  // Mixer 2 Level 3 <- OWN
-  {321, 127},  // Mixer 2 Level 4 <- OWN
-  {322, 127},  // Mixer 2 Out Level <- OWN
-  {323, 127},  // Filter 1 Mode <- OWN
-  {324, 127},  // Filter 1 Cutoff <- OWN
-  {325, 127},  // Filter 1 Resonance <- OWN
-  {326, 127},  // Filter 1 Gain 1 <- OWN
-  {327, 127},  // Filter 1 Gain 2 <- OWN
-  {328, 127},  // Filter 1 Pitch Amt <- OWN
-  {329, 127},  // Filter 1 Pitch Pol <- OWN
-  {330, 127},  // Filter 1 Mod 1 Amt <- OWN
-  {331, 127},  // Filter 1 Mod 1 Pol <- OWN
-  {332, 127},  // Filter 1 Mod 2 Amt <- OWN
-  {333, 127},  // Filter 1 Mod 2 Pol <- OWN
-  {334, 127},  // Filter 2 Mode <- OWN
-  {335, 127},  // Filter 2 Cutoff <- OWN
-  {336, 127},  // Filter 2 Resonance <- OWN
-  {337, 127},  // Filter 2 Gain 1 <- OWN
-  {338, 127},  // Filter 2 Gain 2 <- OWN
-  {339, 127},  // Filter 2 Pitch Amt <- OWN
-  {340, 127},  // Filter 2 Pitch Pol <- OWN
-  {341, 127},  // Filter 2 Mod 1 Amt <- OWN
-  {342, 127},  // Filter 2 Mod 1 Pol <- OWN
-  {343, 127},  // Filter 2 Mod 2 Amt <- OWN
-  {344, 127},  // Filter 2 Mod 2 Pol <- OWN
-  {345, 127},  // Amp 1 Gain 1 <- OWN
-  {346, 127},  // Amp 1 Gain 2 <- OWN
-  {347, 127},  // Amp 1 Mod 1/2 Mix <- OWN
-  {348, 127},  // Chorus 1 Mix <- OWN
-  {349, 127},  // Chorus 1 Rate <- OWN
-  {350, 127},  // Chorus 1 Depth <- OWN
-  {351, 127},  // Delay 1 Mix <- OWN
-  {352, 127},  // Delay 1 Time <- OWN
-  {353, 127},  // Delay 1 Feedback <- OWN
-  {358, 127},  // Amp 1 Limiter Sw <- OWN
+  {288, 127},  // Osc 1 Pitch Fine <- OWN
+  {289, 127},  // Osc 1 Pitch Mod 1 Amt <- OWN
+  {290, 127},  // Osc 1 Pitch Mod 1 Pol <- OWN
+  {291, 127},  // Osc 1 Pitch Mod 1 Sw <- OWN
+  {292, 127},  // Osc 1 Pitch Mod 2 Amt <- OWN
+  {293, 127},  // Osc 1 Pitch Mod 2 Pol <- OWN
+  {294, 127},  // Osc 1 Pitch Mod 2 Sw <- OWN
+  {295, 127},  // Osc 1 PW Mod 1 Amt <- OWN
+  {296, 127},  // Osc 1 PW Mod 1 Pol <- OWN
+  {297, 127},  // Osc 1 PW Mod 2 Amt <- OWN
+  {298, 127},  // Osc 1 PW Mod 2 Pol <- OWN
+  {299, 127},  // Osc 2 Wave <- OWN
+  {300, 127},  // Osc 2 PW <- OWN
+  {301, 127},  // Osc 2 Pitch Coarse <- OWN
+  {302, 127},  // Osc 2 Pitch Fine <- OWN
+  {303, 127},  // Osc 2 Pitch Mod 1 Amt <- OWN
+  {304, 127},  // Osc 2 Pitch Mod 1 Pol <- OWN
+  {305, 127},  // Osc 2 Pitch Mod 1 Sw <- OWN
+  {306, 127},  // Osc 2 Pitch Mod 2 Amt <- OWN
+  {307, 127},  // Osc 2 Pitch Mod 2 Pol <- OWN
+  {308, 127},  // Osc 2 Pitch Mod 2 Sw <- OWN
+  {309, 127},  // Osc 2 PW Mod 1 Amt <- OWN
+  {310, 127},  // Osc 2 PW Mod 1 Pol <- OWN
+  {311, 127},  // Osc 2 PW Mod 2 Amt <- OWN
+  {312, 127},  // Osc 2 PW Mod 2 Pol <- OWN
+  {313, 127},  // Osc 2 Sync Sw <- OWN
+  {314, 127},  // Noise 1 Color <- OWN
+  {315, 127},  // Noise 1 Level <- OWN
+  {316, 127},  // Mixer 2 Level 1 <- OWN
+  {317, 127},  // Mixer 2 Level 2 <- OWN
+  {318, 127},  // Mixer 2 Level 3 <- OWN
+  {319, 127},  // Mixer 2 Level 4 <- OWN
+  {320, 127},  // Mixer 2 Out Level <- OWN
+  {321, 127},  // Filter 1 Mode <- OWN
+  {322, 127},  // Filter 1 Cutoff <- OWN
+  {323, 127},  // Filter 1 Resonance <- OWN
+  {324, 127},  // Filter 1 Gain 1 <- OWN
+  {325, 127},  // Filter 1 Gain 2 <- OWN
+  {326, 127},  // Filter 1 Pitch Amt <- OWN
+  {327, 127},  // Filter 1 Pitch Pol <- OWN
+  {328, 127},  // Filter 1 Mod 1 Amt <- OWN
+  {329, 127},  // Filter 1 Mod 1 Pol <- OWN
+  {330, 127},  // Filter 1 Mod 2 Amt <- OWN
+  {331, 127},  // Filter 1 Mod 2 Pol <- OWN
+  {332, 127},  // Filter 2 Mode <- OWN
+  {333, 127},  // Filter 2 Cutoff <- OWN
+  {334, 127},  // Filter 2 Resonance <- OWN
+  {335, 127},  // Filter 2 Gain 1 <- OWN
+  {336, 127},  // Filter 2 Gain 2 <- OWN
+  {337, 127},  // Filter 2 Pitch Amt <- OWN
+  {338, 127},  // Filter 2 Pitch Pol <- OWN
+  {339, 127},  // Filter 2 Mod 1 Amt <- OWN
+  {340, 127},  // Filter 2 Mod 1 Pol <- OWN
+  {341, 127},  // Filter 2 Mod 2 Amt <- OWN
+  {342, 127},  // Filter 2 Mod 2 Pol <- OWN
+  {343, 127},  // Amp 1 Gain 1 <- OWN
+  {344, 127},  // Amp 1 Gain 2 <- OWN
+  {345, 127},  // Amp 1 Mod 1/2 Mix <- OWN
+  {346, 127},  // Chorus 1 Mix <- OWN
+  {347, 127},  // Chorus 1 Rate <- OWN
+  {348, 127},  // Chorus 1 Depth <- OWN
+  {349, 127},  // Delay 1 Mix <- OWN
+  {350, 127},  // Delay 1 Time <- OWN
+  {351, 127},  // Delay 1 Feedback <- OWN
+  {356, 127},  // Amp 1 Limiter Sw <- OWN
   {384,   5},  // Pitch 1 Glide CC
   {385,  34},  // Pitch 1 Out 1 Glide Sw CC
   {386,  34},  // Pitch 1 Out 2 Glide Sw CC
@@ -207,47 +205,47 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {407, 113},  // LFO 1 Reset Sw CC
   {413, 102},  // Osc 1 Wave CC
   {414, 114},  // Osc 1 PW CC
-  {418,  89},  // Osc 1 Pitch Mod 1 Amt CC
-  {420, 118},  // Osc 1 Pitch Mod 1 Sw CC
-  {421,  13},  // Osc 1 Pitch Mod 2 Amt CC
-  {424,   8},  // Osc 1 PW Mod 1 Amt CC
-  {426, 103},  // Osc 1 PW Mod 2 Amt CC
-  {428, 104},  // Osc 2 Wave CC
-  {431,  85},  // Osc 2 Pitch CC
-  {432,  76},  // Osc 2 Pitch Fine CC
-  {433,  89},  // Osc 2 Pitch Mod 1 Amt CC
-  {436,  13},  // Osc 2 Pitch Mod 2 Amt CC
-  {443, 112},  // Osc 2 Sync Sw CC
-  {444, 115},  // Noise 1 Color CC
-  {446,  19},  // Mixer 2 Level 1 CC
-  {447,  20},  // Mixer 2 Level 2 CC
-  {448,  21},  // Mixer 2 Level 3 CC
-  {449,  23},  // Mixer 2 Level 4 CC
-  {451,  39},  // Filter 1 Mode CC
-  {452,  74},  // Filter 1 Cutoff CC
-  {456,   9},  // Filter 1 Pitch Amt CC
-  {458,  24},  // Filter 1 Mod 1 Amt CC
-  {459, 117},  // Filter 1 Mod 1 Pol CC
-  {460,  25},  // Filter 1 Mod 2 Amt CC
-  {462,  39},  // Filter 2 Mode CC
-  {463,  74},  // Filter 2 Cutoff CC
-  {464,  71},  // Filter 2 Resonance CC
-  {467,   9},  // Filter 2 Pitch Amt CC
-  {469,  24},  // Filter 2 Mod 1 Amt CC
-  {470, 117},  // Filter 2 Mod 1 Pol CC
-  {471,  25},  // Filter 2 Mod 2 Amt CC
-  {474,  15},  // Amp 1 Gain 2 CC
-  {475,  36},  // Amp 1 Mod 1/2 Mix CC
-  {476,  93},  // Chorus 1 Mix CC
-  {477,  58},  // Chorus 1 Rate CC
-  {478,  59},  // Chorus 1 Depth CC
-  {479,  94},  // Delay 1 Mix CC
-  {480,  90},  // Delay 1 Time CC
-  {481,  92},  // Delay 1 Feedback CC
-  {482,   1},  // Mod Wheel CC
-  {483,   2},  // Breath CC
-  {484,  16},  // General 1 CC
-  {485,  17},  // General 2 CC
+  {417,  89},  // Osc 1 Pitch Mod 1 Amt CC
+  {419, 118},  // Osc 1 Pitch Mod 1 Sw CC
+  {420,  13},  // Osc 1 Pitch Mod 2 Amt CC
+  {423,   8},  // Osc 1 PW Mod 1 Amt CC
+  {425, 103},  // Osc 1 PW Mod 2 Amt CC
+  {427, 104},  // Osc 2 Wave CC
+  {429,  85},  // Osc 2 Pitch Coarse CC
+  {430,  76},  // Osc 2 Pitch Fine CC
+  {431,  89},  // Osc 2 Pitch Mod 1 Amt CC
+  {434,  13},  // Osc 2 Pitch Mod 2 Amt CC
+  {441, 112},  // Osc 2 Sync Sw CC
+  {442, 115},  // Noise 1 Color CC
+  {444,  19},  // Mixer 2 Level 1 CC
+  {445,  20},  // Mixer 2 Level 2 CC
+  {446,  21},  // Mixer 2 Level 3 CC
+  {447,  23},  // Mixer 2 Level 4 CC
+  {449,  39},  // Filter 1 Mode CC
+  {450,  74},  // Filter 1 Cutoff CC
+  {454,   9},  // Filter 1 Pitch Amt CC
+  {456,  24},  // Filter 1 Mod 1 Amt CC
+  {457, 117},  // Filter 1 Mod 1 Pol CC
+  {458,  25},  // Filter 1 Mod 2 Amt CC
+  {460,  39},  // Filter 2 Mode CC
+  {461,  74},  // Filter 2 Cutoff CC
+  {462,  71},  // Filter 2 Resonance CC
+  {465,   9},  // Filter 2 Pitch Amt CC
+  {467,  24},  // Filter 2 Mod 1 Amt CC
+  {468, 117},  // Filter 2 Mod 1 Pol CC
+  {469,  25},  // Filter 2 Mod 2 Amt CC
+  {472,  15},  // Amp 1 Gain 2 CC
+  {473,  36},  // Amp 1 Mod 1/2 Mix CC
+  {474,  93},  // Chorus 1 Mix CC
+  {475,  58},  // Chorus 1 Rate CC
+  {476,  59},  // Chorus 1 Depth CC
+  {477,  94},  // Delay 1 Mix CC
+  {478,  90},  // Delay 1 Time CC
+  {479,  92},  // Delay 1 Feedback CC
+  {480,   1},  // Mod Wheel CC
+  {481,   2},  // Breath CC
+  {482,  16},  // General 1 CC
+  {483,  17},  // General 2 CC
   {512,   4},  // Pitch 1 Glide value
   {513, 124},  // Pitch 1 Out 1 Glide Sw value
   {514, 124},  // Pitch 1 Out 2 Glide Sw value
@@ -280,75 +278,73 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {541,   4},  // Osc 1 Wave value
   {542,  64},  // Osc 1 PW value
   {543,  64},  // Osc 1 Pitch Coarse value
-  {544,   4},  // Osc 1 Pitch value
-  {545,  64},  // Osc 1 Pitch Fine value
-  {546,   4},  // Osc 1 Pitch Mod 1 Amt value
-  {547,  76},  // Osc 1 Pitch Mod 1 Pol value
-  {548, 124},  // Osc 1 Pitch Mod 1 Sw value
-  {549,   4},  // Osc 1 Pitch Mod 2 Amt value
-  {550,  76},  // Osc 1 Pitch Mod 2 Pol value
-  {551, 124},  // Osc 1 Pitch Mod 2 Sw value
-  {552,   4},  // Osc 1 PW Mod 1 Amt value
-  {553, 124},  // Osc 1 PW Mod 1 Pol value
-  {554,   4},  // Osc 1 PW Mod 2 Amt value
-  {555, 124},  // Osc 1 PW Mod 2 Pol value
-  {556,   4},  // Osc 2 Wave value
-  {557,  64},  // Osc 2 PW value
-  {558,  64},  // Osc 2 Pitch Coarse value
-  {559,   5},  // Osc 2 Pitch value
-  {560,  65},  // Osc 2 Pitch Fine value
-  {561,   4},  // Osc 2 Pitch Mod 1 Amt value
-  {562,  76},  // Osc 2 Pitch Mod 1 Pol value
-  {563, 124},  // Osc 2 Pitch Mod 1 Sw value
-  {564,   4},  // Osc 2 Pitch Mod 2 Amt value
-  {565,  76},  // Osc 2 Pitch Mod 2 Pol value
-  {566, 124},  // Osc 2 Pitch Mod 2 Sw value
-  {567,   4},  // Osc 2 PW Mod 1 Amt value
-  {568, 124},  // Osc 2 PW Mod 1 Pol value
-  {569,   4},  // Osc 2 PW Mod 2 Amt value
-  {570, 124},  // Osc 2 PW Mod 2 Pol value
-  {571,   4},  // Osc 2 Sync Sw value
-  {572,   4},  // Noise 1 Color value
-  {573, 124},  // Noise 1 Level value
-  {574, 124},  // Mixer 2 Level 1 value
-  {575,   4},  // Mixer 2 Level 2 value
-  {576,   4},  // Mixer 2 Level 3 value
-  {577,   4},  // Mixer 2 Level 4 value
-  {578,  64},  // Mixer 2 Out Level value
-  {579,   4},  // Filter 1 Mode value
-  {580, 100},  // Filter 1 Cutoff value
-  {581,   4},  // Filter 1 Resonance value
-  {582,  64},  // Filter 1 Gain 1 value
-  {583,   4},  // Filter 1 Gain 2 value
-  {584,   4},  // Filter 1 Pitch Amt value
-  {585, 124},  // Filter 1 Pitch Pol value
-  {586,  28},  // Filter 1 Mod 1 Amt value
-  {587, 124},  // Filter 1 Mod 1 Pol value
-  {588,   4},  // Filter 1 Mod 2 Amt value
-  {589,  76},  // Filter 1 Mod 2 Pol value
-  {590,   4},  // Filter 2 Mode value
-  {591, 100},  // Filter 2 Cutoff value
-  {592,  64},  // Filter 2 Resonance value
-  {593,   4},  // Filter 2 Gain 1 value
-  {594,  64},  // Filter 2 Gain 2 value
-  {595,   4},  // Filter 2 Pitch Amt value
-  {596, 124},  // Filter 2 Pitch Pol value
-  {597,  28},  // Filter 2 Mod 1 Amt value
-  {598, 124},  // Filter 2 Mod 1 Pol value
-  {599,   4},  // Filter 2 Mod 2 Amt value
-  {600,  76},  // Filter 2 Mod 2 Pol value
-  {601,   4},  // Amp 1 Gain 1 value
-  {602,  88},  // Amp 1 Gain 2 value
-  {603,   4},  // Amp 1 Mod 1/2 Mix value
-  {604,  64},  // Chorus 1 Mix value
-  {605,  64},  // Chorus 1 Rate value
-  {606,  64},  // Chorus 1 Depth value
-  {607,  34},  // Delay 1 Mix value
-  {608,  64},  // Delay 1 Time value
-  {609,  64},  // Delay 1 Feedback value
-  {612,   4},  // General 1 value
-  {613,   4},  // General 2 value
-  {614, 124},  // Amp 1 Limiter Sw value
+  {544,  64},  // Osc 1 Pitch Fine value
+  {545,   4},  // Osc 1 Pitch Mod 1 Amt value
+  {546,  76},  // Osc 1 Pitch Mod 1 Pol value
+  {547, 124},  // Osc 1 Pitch Mod 1 Sw value
+  {548,   4},  // Osc 1 Pitch Mod 2 Amt value
+  {549,  76},  // Osc 1 Pitch Mod 2 Pol value
+  {550, 124},  // Osc 1 Pitch Mod 2 Sw value
+  {551,   4},  // Osc 1 PW Mod 1 Amt value
+  {552, 124},  // Osc 1 PW Mod 1 Pol value
+  {553,   4},  // Osc 1 PW Mod 2 Amt value
+  {554, 124},  // Osc 1 PW Mod 2 Pol value
+  {555,   4},  // Osc 2 Wave value
+  {556,  64},  // Osc 2 PW value
+  {557,  64},  // Osc 2 Pitch Coarse value
+  {558,  75},  // Osc 2 Pitch Fine value
+  {559,   4},  // Osc 2 Pitch Mod 1 Amt value
+  {560,  76},  // Osc 2 Pitch Mod 1 Pol value
+  {561, 124},  // Osc 2 Pitch Mod 1 Sw value
+  {562,   4},  // Osc 2 Pitch Mod 2 Amt value
+  {563,  76},  // Osc 2 Pitch Mod 2 Pol value
+  {564, 124},  // Osc 2 Pitch Mod 2 Sw value
+  {565,   4},  // Osc 2 PW Mod 1 Amt value
+  {566, 124},  // Osc 2 PW Mod 1 Pol value
+  {567,   4},  // Osc 2 PW Mod 2 Amt value
+  {568, 124},  // Osc 2 PW Mod 2 Pol value
+  {569,   4},  // Osc 2 Sync Sw value
+  {570,   4},  // Noise 1 Color value
+  {571, 124},  // Noise 1 Level value
+  {572, 124},  // Mixer 2 Level 1 value
+  {573,   4},  // Mixer 2 Level 2 value
+  {574,   4},  // Mixer 2 Level 3 value
+  {575,   4},  // Mixer 2 Level 4 value
+  {576,  64},  // Mixer 2 Out Level value
+  {577,   4},  // Filter 1 Mode value
+  {578, 100},  // Filter 1 Cutoff value
+  {579,   4},  // Filter 1 Resonance value
+  {580,  64},  // Filter 1 Gain 1 value
+  {581,   4},  // Filter 1 Gain 2 value
+  {582,   4},  // Filter 1 Pitch Amt value
+  {583, 124},  // Filter 1 Pitch Pol value
+  {584,  28},  // Filter 1 Mod 1 Amt value
+  {585, 124},  // Filter 1 Mod 1 Pol value
+  {586,   4},  // Filter 1 Mod 2 Amt value
+  {587,  76},  // Filter 1 Mod 2 Pol value
+  {588,   4},  // Filter 2 Mode value
+  {589, 100},  // Filter 2 Cutoff value
+  {590,  64},  // Filter 2 Resonance value
+  {591,   4},  // Filter 2 Gain 1 value
+  {592,  64},  // Filter 2 Gain 2 value
+  {593,   4},  // Filter 2 Pitch Amt value
+  {594, 124},  // Filter 2 Pitch Pol value
+  {595,  28},  // Filter 2 Mod 1 Amt value
+  {596, 124},  // Filter 2 Mod 1 Pol value
+  {597,   4},  // Filter 2 Mod 2 Amt value
+  {598,  76},  // Filter 2 Mod 2 Pol value
+  {599,   4},  // Amp 1 Gain 1 value
+  {600,  88},  // Amp 1 Gain 2 value
+  {601,   4},  // Amp 1 Mod 1/2 Mix value
+  {602,  64},  // Chorus 1 Mix value
+  {603,  64},  // Chorus 1 Rate value
+  {604,  64},  // Chorus 1 Depth value
+  {605,  34},  // Delay 1 Mix value
+  {606,  64},  // Delay 1 Time value
+  {607,  64},  // Delay 1 Feedback value
+  {610,   4},  // General 1 value
+  {611,   4},  // General 2 value
+  {612, 124},  // Amp 1 Limiter Sw value
 };
 
 // CC number, value
@@ -378,8 +374,8 @@ static const uint8_t g_spms1_default_cc[][2] = {
   {8,     4},  // Osc 1 PW Mod 1 Amt
   {103,   4},  // Osc 1 PW Mod 2 Amt
   {104,   4},  // Osc 2 Wave
-  {85,    5},  // Osc 2 Pitch
-  {76,   65},  // Osc 2 Pitch Fine
+  {85,   64},  // Osc 2 Pitch Coarse
+  {76,   75},  // Osc 2 Pitch Fine
   {89,    4},  // Osc 2 Pitch Mod 1 Amt
   {13,    4},  // Osc 2 Pitch Mod 2 Amt
   {112,   4},  // Osc 2 Sync Sw
