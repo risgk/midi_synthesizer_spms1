@@ -5,6 +5,6 @@ B0 63 71 B0 62 08 B0 06 38   ; NRPN 136 Mixer 1 In 1   <- Osc 1 (56)
 B0 62 09 B0 06 2C            ; NRPN 137 Mixer 1 In 2   <- EG 1 (44)
 B0 62 2C B0 06 36            ; NRPN 172 Output L       <- Mixer 1 (54)
 B0 62 1E B0 06 30            ; NRPN 158 Filter 1 Mod 1 <- LFO 1 (48)
-B0 63 72 B0 62 17 B0 06 01   ; NRPN 279 Mixer 1 Level 1 <- 1.0 (1)
-B0 62 18 B0 06 01            ; NRPN 280 Mixer 1 Level 2 <- 1.0 (1)
+B0 63 72 B0 62 18 B0 06 01   ; NRPN 280 Mixer 1 Level 1 <- 1.0 (1)
+B0 62 19 B0 06 01            ; NRPN 281 Mixer 1 Level 2 <- 1.0 (1)
 B0 65 7F B0 64 7F            ; RPN null

@@ -106,7 +106,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.3.4
 1. お気に入り: Controls タブは "Show favorites only" にチェックが入った状態で開き、デフォルトパッチで
    お気に入りになっている 39 個のパラメータを表示します:
    Pitch 1 Glide・Out 1 Glide Sw・Bend Amt・Stretch、EG 1 Attack・Decay・Sustain・Release Sw、LFO 1 Wave・Rate・Level、Osc 1 Wave・PW・Pitch Mod 1 Amt・Pitch Mod 2 Amt・PW Mod 1 Amt・PW Mod 2 Amt、Osc 2 Wave・Pitch、Noise 1 Color、Mixer 2 Level 1〜4、
-   Filter 2 Cutoff・Resonance・Mode・Pitch Pol・Mod 1 Amt・Mod 1 Pol・Mod 2 Amt、
+   Filter 2 Cutoff・Resonance・Mode・Pitch Amt・Mod 1 Amt・Mod 1 Pol・Mod 2 Amt、
    Amp 1 Gain 2・Mod 1/2 Mix、Chorus 1 Mix・Rate・Depth、Delay 1 Mix・Time・Feedback。
    気に入ったものは星で追加できます。Osc 2 の各 Pitch Mod Amt は Osc 1 と、Filter 1 の Resonance（CC なし）以外の
    各パラメータは Filter 2 と同じ CC なので、片方のスライダーを動かすと、表示されているかどうかに関わらず相手も一緒に動きます
@@ -313,7 +313,7 @@ Glide を動かさずに、それぞれの出力のポルタメントをオン�
 同じように届きます。Out 1 Bend Sw と Out 2 Bend Sw は CC を持たず、起動時はオンです。カテゴリ 4 で
 片方をオフにすると、その出力にはベンドが掛からないので、Osc 2 だけをベンドできます。
 Pitch 1 Bend Amt（CC#57）がベンドレンジで、1 目盛り半音ずつです。値 8 で上下 2 半音、値 28 で 1 オクターブ、
-値 124 で 5 オクターブで、起動時は値 28 です。
+値 124 で 5 オクターブで、起動時は値 28 です。CC のない Bend Pol は起動時 +1.0 で、値 64 より下にするとベンドが逆向きになります。
 
 LFO はオシレータの Pitch Mod 2 In と PW Mod 2 In に直接入ります。フィルタにも入りますが、Mod 2 Amt
 （CC#25）が起動時 0.0 なので、上げるまでカットオフは動きません。エンベロープは Mod 1 Amt（CC#24）で
@@ -323,9 +323,9 @@ LFO は Osc 1 Pitch Mod 2 Amt（CC#13）でピッチへ入ります。起動時�
 起動時の +0.2 と合わせて、フルレベルの LFO がピッチを上下 1 オクターブ振ります。パルス幅へは
 Osc 1 PW Mod 2 Amt（CC#103）で入り、起動時は 0.0 です。LFO 1 Level は起動時 1.0 なので、ビブラートは
 CC#13 だけで 0〜1 オクターブ掛かります。Pitch 1 からのピッチは両フィルタの Pitch In にも入ります。キーボードトラッキング用です。
-追従の量と向きは CC#9（Pitch Pol）で決めます。最大ではカットオフがノートに半音ずつ追従し（ノート 60 では動きません）、
-最小では逆向きに動き、起動時の値 64（0.0）では追従しないので、CC#9 を動かすまでカットオフはノートによらず CC#74 の
-位置のままです。Pitch Pol が掛かる Pitch Amt は CC がなく、起動時は 1.0 です。
+CC#9（Pitch Amt）を最大にするとカットオフがノートに半音ずつ追従し、ノート 60 では動きません。
+Pitch Amt は起動時 0.0（値 4）なので、CC#9 を上げるまでは、カットオフはノートによらず CC#74 の位置のままです。
+CC のない Pitch Pol は起動時 +1.0 で、値 64 より下にすると追従が逆向きになります。
 エンベロープはオシレータの Osc 1 Pitch Mod 1 In と PW Mod 1 In にも入ります。ピッチエンベロープ用です。Pitch Mod 1 Amt
 （CC#89）と PW Mod 1 Amt（CC#8）は起動時 0.0 で、オフです。モジュレーションの深さはどれも動かす先のレンジ全体に届くので、
 ソースを音楽的な深さまで絞る仕事はモジュールに作り込まず、パッチの側に任せています。
