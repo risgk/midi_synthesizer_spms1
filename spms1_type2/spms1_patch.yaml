@@ -318,7 +318,7 @@ controls:
   # a sync sound the wheel sweeps against Osc 1. Stretch, last as it widens what the others make, is on CC 22 and powers up
   # at CC 4, 0.0, where the keys are as they are.
   - { entry: 0, module: PITCH_1,   key: GLIDE,        label: Glide,        cc: 5, value: 4, favorite: true, set: set_glide }
-  - { entry: 1, module: PITCH_1,   key: OUT_1_GLIDE_SW, label: Out 1 Glide Sw, cc: 34, value: 124, hint: Off/On, set: set_glide_1_switch }
+  - { entry: 1, module: PITCH_1,   key: OUT_1_GLIDE_SW, label: Out 1 Glide Sw, cc: 34, value: 124, hint: Off/On, favorite: true, set: set_glide_1_switch }
   - { entry: 2, module: PITCH_1,   key: OUT_2_GLIDE_SW, label: Out 2 Glide Sw, cc: 34, value: 124, hint: Off/On, favorite: true, set: set_glide_2_switch }
   - { entry: 3, module: PITCH_1,    key: BEND_AMT,  label: Bend Amt,   cc: 57,  value: 28, hint: Bend Range, favorite: true, set: set_bend_amount }
   - { entry: 4, module: PITCH_1,   key: BEND_POL,  label: Bend Pol,   cc: 0,   value: 124, bipolar: true, hint: − to +, set: set_bend_polarity }

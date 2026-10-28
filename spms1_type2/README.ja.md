@@ -104,8 +104,8 @@ MIDI Synthesizer SPMS-1 (type-2) v0.3.4
 "spms1_editor.html" を開き（[Web エディタ](#web-エディタ)を参照）、"MIDI Out" でシンセか SPMS-1 Web (Built-in) を選びます。
 
 1. お気に入り: Controls タブは "Show favorites only" にチェックが入った状態で開き、デフォルトパッチで
-   お気に入りになっている 44 個のパラメータを表示します:
-   Pitch 1 Glide・Out 2 Glide Sw・Bend Amt・Out 1 Bend Sw・Stretch、EG 1 Attack・Decay・Sustain・Release Sw、LFO 1 Wave・Rate・Level・Reset Sw、Osc 1 Wave・PW・Pitch Mod 1 Amt・Pitch Mod 1 Sw・Pitch Mod 2 Amt・PW Mod 1 Amt・PW Mod 2 Amt、Osc 2 Wave・Pitch Coarse・Pitch Fine・Sync Sw、Noise 1 Color、Mixer 2 Level 1〜4、
+   お気に入りになっている 45 個のパラメータを表示します:
+   Pitch 1 Glide・Out 1 Glide Sw・Out 2 Glide Sw・Bend Amt・Out 1 Bend Sw・Stretch、EG 1 Attack・Decay・Sustain・Release Sw、LFO 1 Wave・Rate・Level・Reset Sw、Osc 1 Wave・PW・Pitch Mod 1 Amt・Pitch Mod 1 Sw・Pitch Mod 2 Amt・PW Mod 1 Amt・PW Mod 2 Amt、Osc 2 Wave・Pitch Coarse・Pitch Fine・Sync Sw、Noise 1 Color、Mixer 2 Level 1〜4、
    Filter 2 Cutoff・Resonance・Mode・Pitch Amt・Mod 1 Amt・Mod 1 Pol・Mod 2 Amt、
    Amp 1 Gain 2・Mod 1/2 Mix、Chorus 1 Mix・Rate・Depth、Delay 1 Mix・Time・Feedback。
    気に入ったものは星で追加できます。Osc 2 の各 Pitch Mod Amt は Osc 1 と、Filter 1 の Resonance（CC なし）以外の
