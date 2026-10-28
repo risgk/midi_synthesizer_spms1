@@ -56,7 +56,7 @@ Filter 2 の Gain 1 と Amp 1 の Gain 1 を上げ、Filter 2 の Gain 2 を下�
 どちらかを別に動かすこともできます（下のパッチの編集を参照）。
 
 どちらのフィルタも 2 つのオーディオ入力 Audio In 1 と Audio In 2 を持ち、それぞれのゲイン Gain 1 と Gain 2 を
-掛けてから足し合わせます。Gain 1 と Gain 2 はパラメータの先頭にあり、CC はありません。ゲインは Amp 1 と
+掛けてから足し合わせます。Gain 1 と Gain 2 は Mode の次に並び、CC はありません。ゲインは Amp 1 と
 同じく 2 乗して 4 倍したもので、起動時の値 64 で等倍（ただし Filter 1 の Gain 2 と Filter 2 の Gain 1 は値 4 で無音）、値 124 で +12 dB になり、
 フィルタを強く駆動します。Filter 1 の Audio In 2 はデフォルトでは何もつながっていないので、ノイズなどを、ミキサーなしで
 Gain 2 を上げて加えられます。
@@ -352,21 +352,21 @@ General 1 と 2 も同じで、Mod Wheel のスロットは 0.0 になります�
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
 | 0 | Pitch 1 Glide | | 32 | Osc 1 Pitch Fine | | 64 | Mixer 2 Level 4 |
 | 1 | Pitch 1 Out 1 Glide Sw | | 33 | Osc 1 Pitch Mod 1 Amt | | 65 | Mixer 2 Out Level |
-| 2 | Pitch 1 Out 2 Glide Sw | | 34 | Osc 1 Pitch Mod 1 Pol | | 66 | Filter 1 Gain 1 |
-| 3 | Pitch 1 Bend Amt | | 35 | Osc 1 Pitch Mod 1 Sw | | 67 | Filter 1 Gain 2 |
-| 4 | Pitch 1 Out 1 Bend Sw | | 36 | Osc 1 Pitch Mod 2 Amt | | 68 | Filter 1 Cutoff |
-| 5 | Pitch 1 Out 2 Bend Sw | | 37 | Osc 1 Pitch Mod 2 Pol | | 69 | Filter 1 Resonance |
-| 6 | Pitch 1 Stretch | | 38 | Osc 1 Pitch Mod 2 Sw | | 70 | Filter 1 Mode |
+| 2 | Pitch 1 Out 2 Glide Sw | | 34 | Osc 1 Pitch Mod 1 Pol | | 66 | Filter 1 Mode |
+| 3 | Pitch 1 Bend Amt | | 35 | Osc 1 Pitch Mod 1 Sw | | 67 | Filter 1 Gain 1 |
+| 4 | Pitch 1 Out 1 Bend Sw | | 36 | Osc 1 Pitch Mod 2 Amt | | 68 | Filter 1 Gain 2 |
+| 5 | Pitch 1 Out 2 Bend Sw | | 37 | Osc 1 Pitch Mod 2 Pol | | 69 | Filter 1 Cutoff |
+| 6 | Pitch 1 Stretch | | 38 | Osc 1 Pitch Mod 2 Sw | | 70 | Filter 1 Resonance |
 | 7 | EG 1 Attack | | 39 | Osc 1 PW Mod 1 Amt | | 71 | Filter 1 Pitch Amt |
 | 8 | EG 1 Decay | | 40 | Osc 1 PW Mod 1 Pol | | 72 | Filter 1 Mod 1 Amt |
 | 9 | EG 1 Sustain | | 41 | Osc 1 PW Mod 2 Amt | | 73 | Filter 1 Mod 1 Pol |
 | 10 | EG 1 Release Sw | | 42 | Osc 1 PW Mod 2 Pol | | 74 | Filter 1 Mod 2 Amt |
 | 11 | EG 1 Level | | 43 | Osc 2 Wave | | 75 | Filter 1 Mod 2 Pol |
-| 12 | EG 2 Attack | | 44 | Osc 2 PW | | 76 | Filter 2 Gain 1 |
-| 13 | EG 2 Decay | | 45 | Osc 2 Pitch Coarse | | 77 | Filter 2 Gain 2 |
-| 14 | EG 2 Sustain | | 46 | Osc 2 Pitch | | 78 | Filter 2 Cutoff |
-| 15 | EG 2 Release Sw | | 47 | Osc 2 Pitch Fine | | 79 | Filter 2 Resonance |
-| 16 | EG 2 Level | | 48 | Osc 2 Pitch Mod 1 Amt | | 80 | Filter 2 Mode |
+| 12 | EG 2 Attack | | 44 | Osc 2 PW | | 76 | Filter 2 Mode |
+| 13 | EG 2 Decay | | 45 | Osc 2 Pitch Coarse | | 77 | Filter 2 Gain 1 |
+| 14 | EG 2 Sustain | | 46 | Osc 2 Pitch | | 78 | Filter 2 Gain 2 |
+| 15 | EG 2 Release Sw | | 47 | Osc 2 Pitch Fine | | 79 | Filter 2 Cutoff |
+| 16 | EG 2 Level | | 48 | Osc 2 Pitch Mod 1 Amt | | 80 | Filter 2 Resonance |
 | 17 | LFO 1 Wave | | 49 | Osc 2 Pitch Mod 1 Pol | | 81 | Filter 2 Pitch Amt |
 | 18 | LFO 1 Rate | | 50 | Osc 2 Pitch Mod 1 Sw | | 82 | Filter 2 Mod 1 Amt |
 | 19 | LFO 1 Level | | 51 | Osc 2 Pitch Mod 2 Amt | | 83 | Filter 2 Mod 1 Pol |
@@ -828,9 +828,9 @@ Pitch Mod 1 Sw は CC#118 にあり、ほかは CC を持ちません。値 64 �
   ノートの下に混ぜられます。値 16 でレベル 0.1 です。CC#19 = 4 で
   オシレータを外せば、フィルタを通ったノイズだけになります。CC#115（Color）でホワイトからレッドに変わります
 - キーボードトラッキングもデフォルトで結線済みです。Pitch 1 からのピッチが両フィルタの Pitch 入力に届くので、
-  CC#9 でカットオフが鍵盤にどれだけ追従するかを決められます。起動時の値 124 で完全に、値 64 で半分追従し、値 4 では追従しません
-- フィルタの自己発振を、音程の合ったサイン波の音源として弾く: CC#71 = 124 で Filter 2 を発振させ、起動時の CC#9 = 124 でカットオフが
-  鍵盤に追従している状態で、CC#74 = 49 でノート 60 のときカットオフをノート 60 に置けば、どのノートでも弾いた音程になります。
+  CC#9 でカットオフが鍵盤にどれだけ追従するかを決められます。値 124 で完全に、値 64 で半分追従し、起動時の値 4 では追従しません
+- フィルタの自己発振を、音程の合ったサイン波の音源として弾く: CC#71 = 124 で Filter 2 を発振させ、CC#9 = 124 でカットオフを
+  鍵盤に追従させ、CC#74 = 49 でノート 60 のときカットオフをノート 60 に置けば、どのノートでも弾いた音程になります。
   CC#24 = 4 でエンベロープをカットオフから外し、CC#19 = 4 で
   オシレータを外せば、サイン波だけが残ります。中央の C から上ではノートとのずれは 5 セント以内、その 1 オクターブ下では 17 セント低めです
 - ピッチエンベロープもデフォルトで結線済みです（エンベロープがオシレータの Pitch Mod 1 入力に届いています）。
@@ -840,7 +840,7 @@ Pitch Mod 1 Sw は CC#118 にあり、ほかは CC を持ちません。値 64 �
   Filter 1 と Filter 2 の Mod 2 In へのワイヤー）。あとは CC#25 で量を決めます。CC#6 を 64 に
   すればホワイトになり、さらに細かく震えます。レッドはどのミキサーにも入っておらず、Noise 1 Out（起動時はホワイト）も CC#23 を上げるまでは鳴らないので、
   どちらも音としては聞こえません
-- フィルタのカットオフを、自分の CC ではなくエンベロープで動かす: CC#99 = 114, CC#98 = 68 と 78, CC#6 = 44
+- フィルタのカットオフを、自分の CC ではなくエンベロープで動かす: CC#99 = 114, CC#98 = 69 と 79, CC#6 = 44
   （Patch タブでは EG 1 Out から Filter 1 と Filter 2 の Cutoff へのワイヤー）。
   エンベロープもカットオフもユニポーラなので、カットオフはつまみの下端から上端まで開きます
 - アンプのゲインとフィルタのカットオフで 1 つの CC を共有する: CC#99 = 115, CC#98 = 87, CC#6 = 74
@@ -884,10 +884,10 @@ Pitch Mod 1 Sw は CC#118 にあり、ほかは CC を持ちません。値 64 �
 - フィルタを経路から外す: CC#99 = 113, CC#98 = 38, CC#6 = 66 でアンプの 2 つ目のオーディオ入力（鳴っている方）を Mixer 2 に向けます
   （Patch タブでは Mixer 2 Out から Amp 1 Audio In 2 へのワイヤー）。
   2 つのフィルタは走り続けスロットも占めたままですが、誰も読みません
-- 2 つのフィルタを並列にして、ローパスとハイパスを並べる: CC#99 = 116, CC#98 = 76, CC#6 = 64 と CC#98 = 77, CC#6 = 4 で
+- 2 つのフィルタを並列にして、ローパスとハイパスを並べる: CC#99 = 116, CC#98 = 77, CC#6 = 64 と CC#98 = 78, CC#6 = 4 で
   Filter 2 の Gain 1 を上げて Gain 2 を下げ、Filter 1 ではなく Mixer 2 を受け取るようにし、CC#98 = 86, CC#6 = 88 で
-  Amp 1 の Gain 1 を上げて Filter 1 を並べます。さらに CC#99 = 115, CC#98 = 70, CC#6 = 0 で Filter 1 Mode を CC#39 から
-  外し、CC#99 = 116, CC#98 = 70, CC#6 = 124 でハイパスにすれば、CC#74 でローパスとハイパスが同時に動きます
+  Amp 1 の Gain 1 を上げて Filter 1 を並べます。さらに CC#99 = 115, CC#98 = 66, CC#6 = 0 で Filter 1 Mode を CC#39 から
+  外し、CC#99 = 116, CC#98 = 66, CC#6 = 124 でハイパスにすれば、CC#74 でローパスとハイパスが同時に動きます
 - モジュレーションホイールで掛かるエコー: CC#99 = 114, CC#98 = 92, CC#6 = 8 で Delay 1 Mix を Mod Wheel
   から取ります。起動時は 0.0 なので、ホイールを動かすまで出力はドライです
 - モジュレーションホイールで掛かるコーラス: CC#99 = 114, CC#98 = 89, CC#6 = 8 で Chorus 1 Mix を Mod Wheel

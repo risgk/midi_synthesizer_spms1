@@ -13,7 +13,7 @@
 
 // The numbers of the patch and saved_patch_version, as one hash (see patch_spec_hash in
 // patch_gen): a saved patch with another is not loaded.
-#define SPMS1_PATCH_SPEC_HASH (0xB61D52B2u)
+#define SPMS1_PATCH_SPEC_HASH (0xD78CE15Eu)
 
 // The category 3 entries -- the controls -- whose CCs' values a Save keeps: all but the
 // performance controls', whose CCs are saved at 0.
@@ -155,21 +155,21 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {319, 127},  // Mixer 2 Level 3 <- OWN
   {320, 127},  // Mixer 2 Level 4 <- OWN
   {321, 127},  // Mixer 2 Out Level <- OWN
-  {322, 127},  // Filter 1 Gain 1 <- OWN
-  {323, 127},  // Filter 1 Gain 2 <- OWN
-  {324, 127},  // Filter 1 Cutoff <- OWN
-  {325, 127},  // Filter 1 Resonance <- OWN
-  {326, 127},  // Filter 1 Mode <- OWN
+  {322, 127},  // Filter 1 Mode <- OWN
+  {323, 127},  // Filter 1 Gain 1 <- OWN
+  {324, 127},  // Filter 1 Gain 2 <- OWN
+  {325, 127},  // Filter 1 Cutoff <- OWN
+  {326, 127},  // Filter 1 Resonance <- OWN
   {327, 127},  // Filter 1 Pitch Amt <- OWN
   {328, 127},  // Filter 1 Mod 1 Amt <- OWN
   {329, 127},  // Filter 1 Mod 1 Pol <- OWN
   {330, 127},  // Filter 1 Mod 2 Amt <- OWN
   {331, 127},  // Filter 1 Mod 2 Pol <- OWN
-  {332, 127},  // Filter 2 Gain 1 <- OWN
-  {333, 127},  // Filter 2 Gain 2 <- OWN
-  {334, 127},  // Filter 2 Cutoff <- OWN
-  {335, 127},  // Filter 2 Resonance <- OWN
-  {336, 127},  // Filter 2 Mode <- OWN
+  {332, 127},  // Filter 2 Mode <- OWN
+  {333, 127},  // Filter 2 Gain 1 <- OWN
+  {334, 127},  // Filter 2 Gain 2 <- OWN
+  {335, 127},  // Filter 2 Cutoff <- OWN
+  {336, 127},  // Filter 2 Resonance <- OWN
   {337, 127},  // Filter 2 Pitch Amt <- OWN
   {338, 127},  // Filter 2 Mod 1 Amt <- OWN
   {339, 127},  // Filter 2 Mod 1 Pol <- OWN
@@ -223,15 +223,15 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {446,  20},  // Mixer 2 Level 2 CC
   {447,  21},  // Mixer 2 Level 3 CC
   {448,  23},  // Mixer 2 Level 4 CC
-  {452,  74},  // Filter 1 Cutoff CC
-  {454,  39},  // Filter 1 Mode CC
+  {450,  39},  // Filter 1 Mode CC
+  {453,  74},  // Filter 1 Cutoff CC
   {455,   9},  // Filter 1 Pitch Amt CC
   {456,  24},  // Filter 1 Mod 1 Amt CC
   {457, 117},  // Filter 1 Mod 1 Pol CC
   {458,  25},  // Filter 1 Mod 2 Amt CC
-  {462,  74},  // Filter 2 Cutoff CC
-  {463,  71},  // Filter 2 Resonance CC
-  {464,  39},  // Filter 2 Mode CC
+  {460,  39},  // Filter 2 Mode CC
+  {463,  74},  // Filter 2 Cutoff CC
+  {464,  71},  // Filter 2 Resonance CC
   {465,   9},  // Filter 2 Pitch Amt CC
   {466,  24},  // Filter 2 Mod 1 Amt CC
   {467, 117},  // Filter 2 Mod 1 Pol CC
@@ -314,22 +314,22 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {575,   4},  // Mixer 2 Level 3 value
   {576,   4},  // Mixer 2 Level 4 value
   {577,  64},  // Mixer 2 Out Level value
-  {578,  64},  // Filter 1 Gain 1 value
-  {579,   4},  // Filter 1 Gain 2 value
-  {580, 100},  // Filter 1 Cutoff value
-  {581,   4},  // Filter 1 Resonance value
-  {582,   4},  // Filter 1 Mode value
-  {583, 124},  // Filter 1 Pitch Amt value
+  {578,   4},  // Filter 1 Mode value
+  {579,  64},  // Filter 1 Gain 1 value
+  {580,   4},  // Filter 1 Gain 2 value
+  {581, 100},  // Filter 1 Cutoff value
+  {582,   4},  // Filter 1 Resonance value
+  {583,   4},  // Filter 1 Pitch Amt value
   {584,  28},  // Filter 1 Mod 1 Amt value
   {585, 124},  // Filter 1 Mod 1 Pol value
   {586,   4},  // Filter 1 Mod 2 Amt value
   {587,  76},  // Filter 1 Mod 2 Pol value
-  {588,   4},  // Filter 2 Gain 1 value
-  {589,  64},  // Filter 2 Gain 2 value
-  {590, 100},  // Filter 2 Cutoff value
-  {591,  64},  // Filter 2 Resonance value
-  {592,   4},  // Filter 2 Mode value
-  {593, 124},  // Filter 2 Pitch Amt value
+  {588,   4},  // Filter 2 Mode value
+  {589,   4},  // Filter 2 Gain 1 value
+  {590,  64},  // Filter 2 Gain 2 value
+  {591, 100},  // Filter 2 Cutoff value
+  {592,  64},  // Filter 2 Resonance value
+  {593,   4},  // Filter 2 Pitch Amt value
   {594,  28},  // Filter 2 Mod 1 Amt value
   {595, 124},  // Filter 2 Mod 1 Pol value
   {596,   4},  // Filter 2 Mod 2 Amt value
@@ -388,16 +388,16 @@ static const uint8_t g_spms1_default_cc[][2] = {
   {20,    4},  // Mixer 2 Level 2
   {21,    4},  // Mixer 2 Level 3
   {23,    4},  // Mixer 2 Level 4
-  {74,  100},  // Filter 1 Cutoff
   {39,    4},  // Filter 1 Mode
-  {9,   124},  // Filter 1 Pitch Amt
+  {74,  100},  // Filter 1 Cutoff
+  {9,     4},  // Filter 1 Pitch Amt
   {24,   28},  // Filter 1 Mod 1 Amt
   {117, 124},  // Filter 1 Mod 1 Pol
   {25,    4},  // Filter 1 Mod 2 Amt
+  {39,    4},  // Filter 2 Mode
   {74,  100},  // Filter 2 Cutoff
   {71,   64},  // Filter 2 Resonance
-  {39,    4},  // Filter 2 Mode
-  {9,   124},  // Filter 2 Pitch Amt
+  {9,     4},  // Filter 2 Pitch Amt
   {24,   28},  // Filter 2 Mod 1 Amt
   {117, 124},  // Filter 2 Mod 1 Pol
   {25,    4},  // Filter 2 Mod 2 Amt

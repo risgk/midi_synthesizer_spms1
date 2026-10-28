@@ -57,7 +57,7 @@ Filter 1's, with no CC, at its bottom, value 4, Q 0.71, so that the resonant pea
 rather than the two of them together. Either can be set apart from the other, by NRPN or by a CC of its own (see Patch Editing below).
 
 Each takes two audio inputs, Audio In 1 and Audio In 2, and sums them, each after its own gain,
-Gain 1 and Gain 2, which head its parameters with no CC. A gain is squared and taken four times,
+Gain 1 and Gain 2, which follow Mode at the head of its parameters, with no CC. A gain is squared and taken four times,
 as Amp 1's are: unity at value 64, where they power up but for Filter 1 Gain 2 and Filter 2 Gain 1,
 at value 4, silent, and 12 dB up at value 124, which drives the filter harder. Filter 1's Audio In 2
 is unrouted by default, so a second source, such as the noise, can be brought in with no mixer,
@@ -369,21 +369,21 @@ both at the same signal for a mono output.
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
 | 0 | Pitch 1 Glide | | 32 | Osc 1 Pitch Fine | | 64 | Mixer 2 Level 4 |
 | 1 | Pitch 1 Out 1 Glide Sw | | 33 | Osc 1 Pitch Mod 1 Amt | | 65 | Mixer 2 Out Level |
-| 2 | Pitch 1 Out 2 Glide Sw | | 34 | Osc 1 Pitch Mod 1 Pol | | 66 | Filter 1 Gain 1 |
-| 3 | Pitch 1 Bend Amt | | 35 | Osc 1 Pitch Mod 1 Sw | | 67 | Filter 1 Gain 2 |
-| 4 | Pitch 1 Out 1 Bend Sw | | 36 | Osc 1 Pitch Mod 2 Amt | | 68 | Filter 1 Cutoff |
-| 5 | Pitch 1 Out 2 Bend Sw | | 37 | Osc 1 Pitch Mod 2 Pol | | 69 | Filter 1 Resonance |
-| 6 | Pitch 1 Stretch | | 38 | Osc 1 Pitch Mod 2 Sw | | 70 | Filter 1 Mode |
+| 2 | Pitch 1 Out 2 Glide Sw | | 34 | Osc 1 Pitch Mod 1 Pol | | 66 | Filter 1 Mode |
+| 3 | Pitch 1 Bend Amt | | 35 | Osc 1 Pitch Mod 1 Sw | | 67 | Filter 1 Gain 1 |
+| 4 | Pitch 1 Out 1 Bend Sw | | 36 | Osc 1 Pitch Mod 2 Amt | | 68 | Filter 1 Gain 2 |
+| 5 | Pitch 1 Out 2 Bend Sw | | 37 | Osc 1 Pitch Mod 2 Pol | | 69 | Filter 1 Cutoff |
+| 6 | Pitch 1 Stretch | | 38 | Osc 1 Pitch Mod 2 Sw | | 70 | Filter 1 Resonance |
 | 7 | EG 1 Attack | | 39 | Osc 1 PW Mod 1 Amt | | 71 | Filter 1 Pitch Amt |
 | 8 | EG 1 Decay | | 40 | Osc 1 PW Mod 1 Pol | | 72 | Filter 1 Mod 1 Amt |
 | 9 | EG 1 Sustain | | 41 | Osc 1 PW Mod 2 Amt | | 73 | Filter 1 Mod 1 Pol |
 | 10 | EG 1 Release Sw | | 42 | Osc 1 PW Mod 2 Pol | | 74 | Filter 1 Mod 2 Amt |
 | 11 | EG 1 Level | | 43 | Osc 2 Wave | | 75 | Filter 1 Mod 2 Pol |
-| 12 | EG 2 Attack | | 44 | Osc 2 PW | | 76 | Filter 2 Gain 1 |
-| 13 | EG 2 Decay | | 45 | Osc 2 Pitch Coarse | | 77 | Filter 2 Gain 2 |
-| 14 | EG 2 Sustain | | 46 | Osc 2 Pitch | | 78 | Filter 2 Cutoff |
-| 15 | EG 2 Release Sw | | 47 | Osc 2 Pitch Fine | | 79 | Filter 2 Resonance |
-| 16 | EG 2 Level | | 48 | Osc 2 Pitch Mod 1 Amt | | 80 | Filter 2 Mode |
+| 12 | EG 2 Attack | | 44 | Osc 2 PW | | 76 | Filter 2 Mode |
+| 13 | EG 2 Decay | | 45 | Osc 2 Pitch Coarse | | 77 | Filter 2 Gain 1 |
+| 14 | EG 2 Sustain | | 46 | Osc 2 Pitch | | 78 | Filter 2 Gain 2 |
+| 15 | EG 2 Release Sw | | 47 | Osc 2 Pitch Fine | | 79 | Filter 2 Cutoff |
+| 16 | EG 2 Level | | 48 | Osc 2 Pitch Mod 1 Amt | | 80 | Filter 2 Resonance |
 | 17 | LFO 1 Wave | | 49 | Osc 2 Pitch Mod 1 Pol | | 81 | Filter 2 Pitch Amt |
 | 18 | LFO 1 Rate | | 50 | Osc 2 Pitch Mod 1 Sw | | 82 | Filter 2 Mod 1 Amt |
 | 19 | LFO 1 Level | | 51 | Osc 2 Pitch Mod 2 Amt | | 83 | Filter 2 Mod 1 Pol |
@@ -891,10 +891,10 @@ the editor, which sends the same.
   oscillator out, leaving the noise alone, through the filters. CC#115 (Color) turns it from
   white to red
 - Keyboard tracking is wired by default as well, the pitch from Pitch 1 on the filters' Pitch inputs,
-  so CC#9 sets how far the cutoff follows the keys: all the way at value 124, where it powers up,
-  half way at value 64, and not at all at value 4
+  so CC#9 sets how far the cutoff follows the keys: all the way at value 124, half way at value 64,
+  and not at all at value 4, where it powers up
 - The filter as a sine voice, playing its own oscillation in tune: CC#71 = 124 makes Filter 2 oscillate,
-  CC#9 at value 124, where it powers up, has the cutoff follow the keys, and CC#74 = 49 puts it on note 60 at note 60, and so
+  CC#9 = 124 has the cutoff follow the keys, and CC#74 = 49 puts it on note 60 at note 60, and so
   on the note played everywhere. CC#24 = 4 takes the envelope off the cutoff, and CC#19 = 4 takes the oscillator out,
   leaving the sine alone. It is within 5 cents of the note from middle C up, and 17 cents flat an octave below
 - A pitch envelope is wired by default too -- the envelope on the oscillator's Pitch Mod 1 input --
@@ -906,7 +906,7 @@ the editor, which sends the same.
   tab, wires from Noise 1 Out Red to Filter 1 and Filter 2 Mod 2 In), and CC#25
   sets how much. CC#6 = 64 takes the white instead, finer still. The red is on no mixer, and Noise
   1 Out, white at power-up, is heard only once CC#23 brings it up, so neither is heard as well
-- Filter cutoff driven by the envelope instead of its CC: CC#99 = 114, CC#98 = 68 and 78, CC#6 = 44 (on
+- Filter cutoff driven by the envelope instead of its CC: CC#99 = 114, CC#98 = 69 and 79, CC#6 = 44 (on
   the Patch tab, wires from EG 1 Out to Filter 1 and Filter 2 Cutoff). The
   envelope and the cutoff are both unipolar, so it opens the cutoff from the bottom of its dial
   to the top
@@ -952,10 +952,10 @@ the editor, which sends the same.
   envelope, Osc 1 holding the note it is synced to
 - Take the filters out of the chain: CC#99 = 113, CC#98 = 38, CC#6 = 66 points the amp's second audio input,
   the one heard, at Mixer 2 (on the Patch tab, a wire from Mixer 2 Out to Amp 1 Audio In 2). The filters keep running and keep their slots; nothing reads them
-- The two filters side by side, a low pass and a high pass: CC#99 = 116, CC#98 = 76, CC#6 = 64 and
-  CC#98 = 77, CC#6 = 4 turn Filter 2 Gain 1 up and Gain 2 down, so that it takes Mixer 2 rather than
+- The two filters side by side, a low pass and a high pass: CC#99 = 116, CC#98 = 77, CC#6 = 64 and
+  CC#98 = 78, CC#6 = 4 turn Filter 2 Gain 1 up and Gain 2 down, so that it takes Mixer 2 rather than
   Filter 1, and CC#98 = 86, CC#6 = 88 turns Amp 1 Gain 1 up to bring Filter 1 in beside it. CC#99 =
-  115, CC#98 = 70, CC#6 = 0 then takes Filter 1 Mode off CC#39, and CC#99 = 116, CC#98 = 70, CC#6 =
+  115, CC#98 = 66, CC#6 = 0 then takes Filter 1 Mode off CC#39, and CC#99 = 116, CC#98 = 66, CC#6 =
   124 sets it to the high pass, so CC#74 moves a low pass and a high pass at once
 - Echoes that only come in with the mod wheel: CC#99 = 114, CC#98 = 92, CC#6 = 8 takes Delay 1 Mix
   from Mod Wheel, which powers up at 0.0, so the output is dry until the wheel moves
