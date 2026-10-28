@@ -40,6 +40,8 @@ MIDI Synthesizer SPMS-1 (type-2) v0.3.4
         - PWM のレベル (3200 段階) は、1 次のノイズシェーピングと TPDF ディザ付きで量子化されます
         - 1 サンプルを 4 つの PWM 周期に分けて出力します (PWM キャリア: 48 kHz ではなく 192 kHz)。キャリアをフィルタで取り除きやすく、
           アクティブスピーカーで「ピー」という音が出にくくなります (`SPMS1_PWM_AUDIO_SUBPERIODS`: 1、2、4、8)
+        - レイテンシ: およそ 7 ms。I2S より 2.7 ms 長くなります。PWM Audio への書き込みに時間がかかるため、出力バッファを
+          2 つではなく 4 つ積むからです (`SPMS1_PWM_AUDIO_BUFFERS`。後述の「レイテンシ」を参照)
     - 注意: RP2350 のシステムクロック (sysclk) は 153.6 MHz にオーバークロックされます。設定するのはスケッチ自身の I2S または
       PWM Audio 出力 ("spms1_pico2_i2s.h" または "spms1_pico2_pwm_audio.h") で、Arduino-Pico の I2S ライブラリではありません
 

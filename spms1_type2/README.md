@@ -41,6 +41,8 @@ Required Hardware
         - The PWM level (3200 steps) is quantized with 1st-order noise shaping and TPDF dither
         - Each sample is split into 4 PWM periods (PWM carrier: 192 kHz instead of 48 kHz), so the carrier is easier to filter out
           and less likely to cause beeps or whines in active speakers (`SPMS1_PWM_AUDIO_SUBPERIODS`: 1, 2, 4, or 8)
+        - Latency: about 7 ms, 2.7 ms more than with I2S, as 4 output buffers are queued rather than 2
+          (`SPMS1_PWM_AUDIO_BUFFERS`), the writes to PWM Audio taking longer (see Latency below)
     - NOTE: The RP2350 system clock (sysclk) changes to overclocked 153.6 MHz, set by the sketch's own I2S or PWM Audio output
       ("spms1_pico2_i2s.h" or "spms1_pico2_pwm_audio.h"), not by the Arduino-Pico I2S library
 
