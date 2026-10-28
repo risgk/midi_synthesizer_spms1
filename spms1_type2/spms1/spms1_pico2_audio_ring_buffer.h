@@ -209,12 +209,13 @@ private:
     // The frames pending now are what was pending at the last check, plus what was written since,
     // less what the output has played, at its rate, in the time since; a negative count means the
     // DMA passed the writer, and what it reads as pending is the ring it is playing once more.
-    // 2 frames of slack cover the timer's resolution. Not checked after a start or a resync, as
-    // the writer had stopped, and the pending count was lost with it.
+    // 2 frames of slack cover the timer's resolution and the rate taken in whole frames a
+    // millisecond. Not checked after a start or a resync, as the writer had stopped, and the
+    // pending count was lost with it.
     uint32_t now_us = time_us_32();
     uint32_t pending = frames - 1 - writable;
     if (m_check_valid) {
-      uint32_t played = static_cast<uint32_t>((static_cast<uint64_t>(now_us - m_check_us) * m_sampling_rate) / 1000000u);
+      uint32_t played = ((now_us - m_check_us) * (m_sampling_rate / 1000u)) / 1000u;
       int32_t expected = static_cast<int32_t>(m_check_pending + m_check_written) - static_cast<int32_t>(played);
       if (expected < -2) {
         ++m_underruns;

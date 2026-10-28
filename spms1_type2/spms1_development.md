@@ -18,7 +18,7 @@ MIDI Synthesizer SPMS-1 (type-2): Development
     - `gc roots` and `peak`: the GC roots in use, sampled, for sizing `sp_gc_roots`
     - `underruns`: how many times the output's DMA has passed the synth since the start, a click
       each while anything sounds; it should stay at 0. The writes to the output come after the span
-      `min` and `max` measure, about 50 us a buffer with PWM Audio and less with I2S, so a count
+      `min` and `max` measure, about 40 us a buffer with PWM Audio and less with I2S, so a count
       here is the first sign that a buffer runs over
 
 

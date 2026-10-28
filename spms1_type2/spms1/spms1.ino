@@ -221,10 +221,11 @@ void stop_audio() {
 }
 
 SPMS1_RAM_FUNC void write_to_audio_buffer(float l, float r) {
-  // Clamped before rounding, where fminf and fmaxf are an instruction each, rather than after,
-  // where std::clamp is left as calls; both ends are whole numbers, so the result is the same.
-  int32_t clamped_l = static_cast<int32_t>(std::lroundf(std::fminf(std::fmaxf(l * 8388607.0f, -8388608.0f), 8388607.0f)));
-  int32_t clamped_r = static_cast<int32_t>(std::lroundf(std::fminf(std::fmaxf(r * 8388607.0f, -8388608.0f), 8388607.0f)));
+  // Clamped, where fminf and fmaxf are an instruction each, then truncated, which is one too where
+  // a rounding is a call to lroundf; the half bit of a 24-bit sample it gives away is below anything
+  // the output shows.
+  int32_t clamped_l = static_cast<int32_t>(std::fminf(std::fmaxf(l * 8388607.0f, -8388608.0f), 8388607.0f));
+  int32_t clamped_r = static_cast<int32_t>(std::fminf(std::fmaxf(r * 8388607.0f, -8388608.0f), 8388607.0f));
   g_pwm_output.write24(clamped_l << 8, clamped_r << 8);
 }
 
@@ -249,10 +250,11 @@ void stop_audio() {
 }
 
 SPMS1_RAM_FUNC void write_to_audio_buffer(float l, float r) {
-  // Clamped before rounding, where fminf and fmaxf are an instruction each, rather than after,
-  // where std::clamp is left as calls; both ends are whole numbers, so the result is the same.
-  int32_t clamped_l = static_cast<int32_t>(std::lroundf(std::fminf(std::fmaxf(l * 8388607.0f, -8388608.0f), 8388607.0f)));
-  int32_t clamped_r = static_cast<int32_t>(std::lroundf(std::fminf(std::fmaxf(r * 8388607.0f, -8388608.0f), 8388607.0f)));
+  // Clamped, where fminf and fmaxf are an instruction each, then truncated, which is one too where
+  // a rounding is a call to lroundf; the half bit of a 24-bit sample it gives away is below anything
+  // the output shows.
+  int32_t clamped_l = static_cast<int32_t>(std::fminf(std::fmaxf(l * 8388607.0f, -8388608.0f), 8388607.0f));
+  int32_t clamped_r = static_cast<int32_t>(std::fminf(std::fmaxf(r * 8388607.0f, -8388608.0f), 8388607.0f));
   g_i2s_output.write24(clamped_l << 8, clamped_r << 8);
 }
 
