@@ -13,7 +13,7 @@
 
 // The numbers of the patch and saved_patch_version, as one hash (see patch_spec_hash in
 // patch_gen): a saved patch with another is not loaded.
-#define SPMS1_PATCH_SPEC_HASH (0xD78CE15Eu)
+#define SPMS1_PATCH_SPEC_HASH (0x6C6A23F2u)
 
 // The category 3 entries -- the controls -- whose CCs' values a Save keeps: all but the
 // performance controls', whose CCs are saved at 0.
@@ -23,8 +23,8 @@ static const uint8_t g_spms1_saved_cc_entries[] = {
   32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
   48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63,
   64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79,
-  80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 97,
-  98, 99
+  80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95,
+  96, 99, 100, 101
 };
 
 // NRPN parameter number (category << 7 | LSB), value
@@ -161,30 +161,32 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {325, 127},  // Filter 1 Cutoff <- OWN
   {326, 127},  // Filter 1 Resonance <- OWN
   {327, 127},  // Filter 1 Pitch Amt <- OWN
-  {328, 127},  // Filter 1 Mod 1 Amt <- OWN
-  {329, 127},  // Filter 1 Mod 1 Pol <- OWN
-  {330, 127},  // Filter 1 Mod 2 Amt <- OWN
-  {331, 127},  // Filter 1 Mod 2 Pol <- OWN
-  {332, 127},  // Filter 2 Mode <- OWN
-  {333, 127},  // Filter 2 Gain 1 <- OWN
-  {334, 127},  // Filter 2 Gain 2 <- OWN
-  {335, 127},  // Filter 2 Cutoff <- OWN
-  {336, 127},  // Filter 2 Resonance <- OWN
-  {337, 127},  // Filter 2 Pitch Amt <- OWN
-  {338, 127},  // Filter 2 Mod 1 Amt <- OWN
-  {339, 127},  // Filter 2 Mod 1 Pol <- OWN
-  {340, 127},  // Filter 2 Mod 2 Amt <- OWN
-  {341, 127},  // Filter 2 Mod 2 Pol <- OWN
-  {342, 127},  // Amp 1 Gain 1 <- OWN
-  {343, 127},  // Amp 1 Gain 2 <- OWN
-  {344, 127},  // Amp 1 Mod 1/2 Mix <- OWN
-  {345, 127},  // Chorus 1 Mix <- OWN
-  {346, 127},  // Chorus 1 Rate <- OWN
-  {347, 127},  // Chorus 1 Depth <- OWN
-  {348, 127},  // Delay 1 Mix <- OWN
-  {349, 127},  // Delay 1 Time <- OWN
-  {350, 127},  // Delay 1 Feedback <- OWN
-  {355, 127},  // Amp 1 Limiter Sw <- OWN
+  {328, 127},  // Filter 1 Pitch Pol <- OWN
+  {329, 127},  // Filter 1 Mod 1 Amt <- OWN
+  {330, 127},  // Filter 1 Mod 1 Pol <- OWN
+  {331, 127},  // Filter 1 Mod 2 Amt <- OWN
+  {332, 127},  // Filter 1 Mod 2 Pol <- OWN
+  {333, 127},  // Filter 2 Mode <- OWN
+  {334, 127},  // Filter 2 Gain 1 <- OWN
+  {335, 127},  // Filter 2 Gain 2 <- OWN
+  {336, 127},  // Filter 2 Cutoff <- OWN
+  {337, 127},  // Filter 2 Resonance <- OWN
+  {338, 127},  // Filter 2 Pitch Amt <- OWN
+  {339, 127},  // Filter 2 Pitch Pol <- OWN
+  {340, 127},  // Filter 2 Mod 1 Amt <- OWN
+  {341, 127},  // Filter 2 Mod 1 Pol <- OWN
+  {342, 127},  // Filter 2 Mod 2 Amt <- OWN
+  {343, 127},  // Filter 2 Mod 2 Pol <- OWN
+  {344, 127},  // Amp 1 Gain 1 <- OWN
+  {345, 127},  // Amp 1 Gain 2 <- OWN
+  {346, 127},  // Amp 1 Mod 1/2 Mix <- OWN
+  {347, 127},  // Chorus 1 Mix <- OWN
+  {348, 127},  // Chorus 1 Rate <- OWN
+  {349, 127},  // Chorus 1 Depth <- OWN
+  {350, 127},  // Delay 1 Mix <- OWN
+  {351, 127},  // Delay 1 Time <- OWN
+  {352, 127},  // Delay 1 Feedback <- OWN
+  {357, 127},  // Amp 1 Limiter Sw <- OWN
   {384,   5},  // Pitch 1 Glide CC
   {385,  34},  // Pitch 1 Out 1 Glide Sw CC
   {386,  34},  // Pitch 1 Out 2 Glide Sw CC
@@ -225,29 +227,29 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {448,  23},  // Mixer 2 Level 4 CC
   {450,  39},  // Filter 1 Mode CC
   {453,  74},  // Filter 1 Cutoff CC
-  {455,   9},  // Filter 1 Pitch Amt CC
-  {456,  24},  // Filter 1 Mod 1 Amt CC
-  {457, 117},  // Filter 1 Mod 1 Pol CC
-  {458,  25},  // Filter 1 Mod 2 Amt CC
-  {460,  39},  // Filter 2 Mode CC
-  {463,  74},  // Filter 2 Cutoff CC
-  {464,  71},  // Filter 2 Resonance CC
-  {465,   9},  // Filter 2 Pitch Amt CC
-  {466,  24},  // Filter 2 Mod 1 Amt CC
-  {467, 117},  // Filter 2 Mod 1 Pol CC
-  {468,  25},  // Filter 2 Mod 2 Amt CC
-  {471,  15},  // Amp 1 Gain 2 CC
-  {472,  36},  // Amp 1 Mod 1/2 Mix CC
-  {473,  93},  // Chorus 1 Mix CC
-  {474,  58},  // Chorus 1 Rate CC
-  {475,  59},  // Chorus 1 Depth CC
-  {476,  94},  // Delay 1 Mix CC
-  {477,  90},  // Delay 1 Time CC
-  {478,  92},  // Delay 1 Feedback CC
-  {479,   1},  // Mod Wheel CC
-  {480,   2},  // Breath CC
-  {481,  16},  // General 1 CC
-  {482,  17},  // General 2 CC
+  {456,   9},  // Filter 1 Pitch Pol CC
+  {457,  24},  // Filter 1 Mod 1 Amt CC
+  {458, 117},  // Filter 1 Mod 1 Pol CC
+  {459,  25},  // Filter 1 Mod 2 Amt CC
+  {461,  39},  // Filter 2 Mode CC
+  {464,  74},  // Filter 2 Cutoff CC
+  {465,  71},  // Filter 2 Resonance CC
+  {467,   9},  // Filter 2 Pitch Pol CC
+  {468,  24},  // Filter 2 Mod 1 Amt CC
+  {469, 117},  // Filter 2 Mod 1 Pol CC
+  {470,  25},  // Filter 2 Mod 2 Amt CC
+  {473,  15},  // Amp 1 Gain 2 CC
+  {474,  36},  // Amp 1 Mod 1/2 Mix CC
+  {475,  93},  // Chorus 1 Mix CC
+  {476,  58},  // Chorus 1 Rate CC
+  {477,  59},  // Chorus 1 Depth CC
+  {478,  94},  // Delay 1 Mix CC
+  {479,  90},  // Delay 1 Time CC
+  {480,  92},  // Delay 1 Feedback CC
+  {481,   1},  // Mod Wheel CC
+  {482,   2},  // Breath CC
+  {483,  16},  // General 1 CC
+  {484,  17},  // General 2 CC
   {512,   4},  // Pitch 1 Glide value
   {513, 124},  // Pitch 1 Out 1 Glide Sw value
   {514, 124},  // Pitch 1 Out 2 Glide Sw value
@@ -319,33 +321,35 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {580,   4},  // Filter 1 Gain 2 value
   {581, 100},  // Filter 1 Cutoff value
   {582,   4},  // Filter 1 Resonance value
-  {583,   4},  // Filter 1 Pitch Amt value
-  {584,  28},  // Filter 1 Mod 1 Amt value
-  {585, 124},  // Filter 1 Mod 1 Pol value
-  {586,   4},  // Filter 1 Mod 2 Amt value
-  {587,  76},  // Filter 1 Mod 2 Pol value
-  {588,   4},  // Filter 2 Mode value
-  {589,   4},  // Filter 2 Gain 1 value
-  {590,  64},  // Filter 2 Gain 2 value
-  {591, 100},  // Filter 2 Cutoff value
-  {592,  64},  // Filter 2 Resonance value
-  {593,   4},  // Filter 2 Pitch Amt value
-  {594,  28},  // Filter 2 Mod 1 Amt value
-  {595, 124},  // Filter 2 Mod 1 Pol value
-  {596,   4},  // Filter 2 Mod 2 Amt value
-  {597,  76},  // Filter 2 Mod 2 Pol value
-  {598,   4},  // Amp 1 Gain 1 value
-  {599,  88},  // Amp 1 Gain 2 value
-  {600,   4},  // Amp 1 Mod 1/2 Mix value
-  {601,  64},  // Chorus 1 Mix value
-  {602,  64},  // Chorus 1 Rate value
-  {603,  64},  // Chorus 1 Depth value
-  {604,  34},  // Delay 1 Mix value
-  {605,  64},  // Delay 1 Time value
-  {606,  64},  // Delay 1 Feedback value
-  {609,   4},  // General 1 value
-  {610,   4},  // General 2 value
-  {611, 124},  // Amp 1 Limiter Sw value
+  {583, 124},  // Filter 1 Pitch Amt value
+  {584,  64},  // Filter 1 Pitch Pol value
+  {585,  28},  // Filter 1 Mod 1 Amt value
+  {586, 124},  // Filter 1 Mod 1 Pol value
+  {587,   4},  // Filter 1 Mod 2 Amt value
+  {588,  76},  // Filter 1 Mod 2 Pol value
+  {589,   4},  // Filter 2 Mode value
+  {590,   4},  // Filter 2 Gain 1 value
+  {591,  64},  // Filter 2 Gain 2 value
+  {592, 100},  // Filter 2 Cutoff value
+  {593,  64},  // Filter 2 Resonance value
+  {594, 124},  // Filter 2 Pitch Amt value
+  {595,  64},  // Filter 2 Pitch Pol value
+  {596,  28},  // Filter 2 Mod 1 Amt value
+  {597, 124},  // Filter 2 Mod 1 Pol value
+  {598,   4},  // Filter 2 Mod 2 Amt value
+  {599,  76},  // Filter 2 Mod 2 Pol value
+  {600,   4},  // Amp 1 Gain 1 value
+  {601,  88},  // Amp 1 Gain 2 value
+  {602,   4},  // Amp 1 Mod 1/2 Mix value
+  {603,  64},  // Chorus 1 Mix value
+  {604,  64},  // Chorus 1 Rate value
+  {605,  64},  // Chorus 1 Depth value
+  {606,  34},  // Delay 1 Mix value
+  {607,  64},  // Delay 1 Time value
+  {608,  64},  // Delay 1 Feedback value
+  {611,   4},  // General 1 value
+  {612,   4},  // General 2 value
+  {613, 124},  // Amp 1 Limiter Sw value
 };
 
 // CC number, value
@@ -390,14 +394,14 @@ static const uint8_t g_spms1_default_cc[][2] = {
   {23,    4},  // Mixer 2 Level 4
   {39,    4},  // Filter 1 Mode
   {74,  100},  // Filter 1 Cutoff
-  {9,     4},  // Filter 1 Pitch Amt
+  {9,    64},  // Filter 1 Pitch Pol
   {24,   28},  // Filter 1 Mod 1 Amt
   {117, 124},  // Filter 1 Mod 1 Pol
   {25,    4},  // Filter 1 Mod 2 Amt
   {39,    4},  // Filter 2 Mode
   {74,  100},  // Filter 2 Cutoff
   {71,   64},  // Filter 2 Resonance
-  {9,     4},  // Filter 2 Pitch Amt
+  {9,    64},  // Filter 2 Pitch Pol
   {24,   28},  // Filter 2 Mod 1 Amt
   {117, 124},  // Filter 2 Mod 1 Pol
   {25,    4},  // Filter 2 Mod 2 Amt

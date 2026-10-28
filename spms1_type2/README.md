@@ -104,10 +104,10 @@ A path from the sound the synth powers up with to a patch of your own, a step at
 editor's Controls tab and the nodes of its Patch tab. Open "spms1_editor.html" (see
 [Web Editor](#web-editor)) and choose the synth, or SPMS-1 Web (Built-in), in "MIDI Out".
 
-1. Favorites: the Controls tab opens with "Show favorites only" ticked, showing the 36 parameters
+1. Favorites: the Controls tab opens with "Show favorites only" ticked, showing the 37 parameters
    the default patch marks as favorites:
    Pitch 1 Glide and Stretch; EG 1 Attack, Decay and Sustain; LFO 1 Wave, Rate and Level; Osc 1 Wave, PW, Pitch Mod 1 Amt,
-   Pitch Mod 2 Amt, PW Mod 1 Amt and PW Mod 2 Amt; Osc 2 Wave and Pitch; Noise 1 Color; Mixer 2 Level 1 to 4; Filter 2 Cutoff, Resonance, Mode, Pitch Amt, Mod 1 Amt, Mod 1 Pol and Mod 2 Amt; Amp 1 Gain 2 and Mod 1/2 Mix; Chorus 1 Mix, Rate and Depth; and Delay 1 Mix, Time and Feedback.
+   Pitch Mod 2 Amt, PW Mod 1 Amt and PW Mod 2 Amt; Osc 2 Wave and Pitch; Noise 1 Color; Mixer 2 Level 1 to 4; Filter 2 Cutoff, Resonance, Mode, Pitch Amt, Pitch Pol, Mod 1 Amt, Mod 1 Pol and Mod 2 Amt; Amp 1 Gain 2 and Mod 1/2 Mix; Chorus 1 Mix, Rate and Depth; and Delay 1 Mix, Time and Feedback.
    Mark more with the star as you find them. Osc 2's PW and Mod Amts are on Osc 1's CCs, and each
    parameter of Filter 1 on Filter 2's but its Resonance, which has no CC, so a slider of one moves
    the other's with it, whether or not that one is shown
@@ -333,10 +333,11 @@ peak; the cutoff powers up at 0.8 (value 100). Osc 1 Pitch Mod 2 Amt (CC#13) tak
 LFO to the pitch and powers up at 0.0; at its top, value 124, with Osc 1 Pitch Mod 2 Pol at +0.2,
 the LFO at full level swings the pitch an octave either way. Osc 1 PW Mod 2 Amt (CC#103) takes it
 to the pulse width and powers up at 0.0. LFO 1 Level powers up at 1.0, so CC#13 alone sets the
-vibrato, from none to an octave. The pitch from Pitch 1 reaches the filters too, on their Pitch In, for keyboard tracking: CC#9
-(Pitch Amt) at its top has the cutoff follow the note a semitone for a semitone,
-unmoved at note 60. Pitch Amt powers up at 0.0 (value 4), so the cutoff stays where CC#74 puts
-it whatever the note until CC#9 is turned up.
+vibrato, from none to an octave. The pitch from Pitch 1 reaches the filters too, on their Pitch In, for keyboard tracking, which
+CC#9 (Pitch Pol) sets: at its top the cutoff follows the note a semitone for a semitone, unmoved
+at note 60, at the bottom the other way, and at value 64, 0.0, where it powers up, not at all, so
+the cutoff stays where CC#74 puts it whatever the note until CC#9 is turned. Pitch Amt, which it
+multiplies, has no CC and powers up at 1.0.
 The envelope reaches the oscillator too, on Osc 1 Pitch Mod 1 In and PW Mod 1 In, for a pitch envelope: Pitch Mod 1
 Amt (CC#89) and PW Mod 1 Amt (CC#8) power up at 0.0, with it off. Each modulation depth spans the
 whole range of what it moves, so bringing a source down to a musical depth is left to the patch

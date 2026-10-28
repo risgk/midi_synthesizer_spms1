@@ -104,9 +104,9 @@ MIDI Synthesizer SPMS-1 (type-2) v0.3.4
 "spms1_editor.html" を開き（[Web エディタ](#web-エディタ)を参照）、"MIDI Out" でシンセか SPMS-1 Web (Built-in) を選びます。
 
 1. お気に入り: Controls タブは "Show favorites only" にチェックが入った状態で開き、デフォルトパッチで
-   お気に入りになっている 36 個のパラメータを表示します:
+   お気に入りになっている 37 個のパラメータを表示します:
    Pitch 1 Glide・Stretch、EG 1 Attack・Decay・Sustain、LFO 1 Wave・Rate・Level、Osc 1 Wave・PW・Pitch Mod 1 Amt・Pitch Mod 2 Amt・PW Mod 1 Amt・PW Mod 2 Amt、Osc 2 Wave・Pitch、Noise 1 Color、Mixer 2 Level 1〜4、
-   Filter 2 Cutoff・Resonance・Mode・Pitch Amt・Mod 1 Amt・Mod 1 Pol・Mod 2 Amt、
+   Filter 2 Cutoff・Resonance・Mode・Pitch Amt・Pitch Pol・Mod 1 Amt・Mod 1 Pol・Mod 2 Amt、
    Amp 1 Gain 2・Mod 1/2 Mix、Chorus 1 Mix・Rate・Depth、Delay 1 Mix・Time・Feedback。
    気に入ったものは星で追加できます。Osc 2 の PW と各 Mod Amt は Osc 1 と、Filter 1 の Resonance（CC なし）以外の
    各パラメータは Filter 2 と同じ CC なので、片方のスライダーを動かすと、表示されているかどうかに関わらず相手も一緒に動きます
@@ -323,8 +323,9 @@ LFO は Osc 1 Pitch Mod 2 Amt（CC#13）でピッチへ入ります。起動時�
 起動時の +0.2 と合わせて、フルレベルの LFO がピッチを上下 1 オクターブ振ります。パルス幅へは
 Osc 1 PW Mod 2 Amt（CC#103）で入り、起動時は 0.0 です。LFO 1 Level は起動時 1.0 なので、ビブラートは
 CC#13 だけで 0〜1 オクターブ掛かります。Pitch 1 からのピッチは両フィルタの Pitch In にも入ります。キーボードトラッキング用です。
-CC#9（Pitch Amt）を最大にするとカットオフがノートに半音ずつ追従し、ノート 60 では動きません。
-Pitch Amt は起動時 0.0（値 4）なので、CC#9 を上げるまでは、カットオフはノートによらず CC#74 の位置のままです。
+追従の量と向きは CC#9（Pitch Pol）で決めます。最大ではカットオフがノートに半音ずつ追従し（ノート 60 では動きません）、
+最小では逆向きに動き、起動時の値 64（0.0）では追従しないので、CC#9 を動かすまでカットオフはノートによらず CC#74 の
+位置のままです。Pitch Pol が掛かる Pitch Amt は CC がなく、起動時は 1.0 です。
 エンベロープはオシレータの Osc 1 Pitch Mod 1 In と PW Mod 1 In にも入ります。ピッチエンベロープ用です。Pitch Mod 1 Amt
 （CC#89）と PW Mod 1 Amt（CC#8）は起動時 0.0 で、オフです。モジュレーションの深さはどれも動かす先のレンジ全体に届くので、
 ソースを音楽的な深さまで絞る仕事はモジュールに作り込まず、パッチの側に任せています。

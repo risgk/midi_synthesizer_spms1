@@ -185,6 +185,8 @@ module Spms1
       @modulation_1_depth = 0.0
       @modulation_2_depth = 0.0
       @pitch_amount = 0.0
+      @pitch_polarity = 1.0
+      @pitch_depth = 0.0
       @mode_lp = 1.0
       @mode_hp = 0.0
 
@@ -194,14 +196,14 @@ module Spms1
       @stage_1_resonance = 0.0
       @stage_1_modulation_1_depth = 0.0
       @stage_1_modulation_2_depth = 0.0
-      @stage_1_pitch_amount = 0.0
+      @stage_1_pitch_depth = 0.0
       @stage_1_mode_lp = 1.0
       @stage_1_mode_hp = 0.0
       @current_cutoff = 0.0
       @current_resonance = 0.0
       @current_modulation_1_depth = 0.0
       @current_modulation_2_depth = 0.0
-      @current_pitch_amount = 0.0
+      @current_pitch_depth = 0.0
       @current_mode_lp = 1.0
       @current_mode_hp = 0.0
 
@@ -288,9 +290,19 @@ module Spms1
     # Pitch Amt is unipolar, [0.0, 1.0], how far the cutoff follows Pitch In, the keyboard
     # tracking: the cutoff dial and the pitch both span 120 semitones a unit, so at 1.0 the cutoff
     # follows the note a semitone for a semitone, unmoved at note 60, and at 0.0 not at all. It is
-    # added on its own, as an oscillator's Pitch In is outside its Pitch Mod Amts.
+    # added on its own, as an oscillator's Pitch In is outside its Pitch Mod Amts. Pitch Pol
+    # multiplies it as Mod 1 Pol does Mod 1 Amt: bipolar, [-0.5, 0.5], doubled, so at +0.5 the
+    # cutoff follows the note as Pitch Amt says, at -0.5 the other way, and at 0.0 not at all.
+    # Only their product, the depth, is smoothed.
     def set_pitch_amount(amount)
       @pitch_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
+      @pitch_depth = @pitch_amount * @pitch_polarity
+    end
+
+    def set_pitch_polarity(polarity)
+      clamped = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
+      @pitch_polarity = clamped + clamped
+      @pitch_depth = @pitch_amount * @pitch_polarity
     end
 
     # Q range: ~0.7 (0.0), 4.0 (0.5), ~9.5 (0.75), ~40 (0.875), 256 (0.95); self-oscillation from there,
@@ -324,8 +336,8 @@ module Spms1
       @current_modulation_1_depth = Dsp.smooth(@stage_1_modulation_1_depth, @current_modulation_1_depth, @smoothing_16_blend)
       @stage_1_modulation_2_depth = Dsp.smooth(@modulation_2_depth, @stage_1_modulation_2_depth, @smoothing_16_blend)
       @current_modulation_2_depth = Dsp.smooth(@stage_1_modulation_2_depth, @current_modulation_2_depth, @smoothing_16_blend)
-      @stage_1_pitch_amount = Dsp.smooth(@pitch_amount, @stage_1_pitch_amount, @smoothing_16_blend)
-      @current_pitch_amount = Dsp.smooth(@stage_1_pitch_amount, @current_pitch_amount, @smoothing_16_blend)
+      @stage_1_pitch_depth = Dsp.smooth(@pitch_depth, @stage_1_pitch_depth, @smoothing_16_blend)
+      @current_pitch_depth = Dsp.smooth(@stage_1_pitch_depth, @current_pitch_depth, @smoothing_16_blend)
     end
 
     def process(control_tick, audio_input_1 = 0.0, audio_input_2 = 0.0, pitch_input = 0.0, modulation_1_input = 0.0, modulation_2_input = 0.0)
@@ -468,7 +480,7 @@ module Spms1
       # the table lookup in range, and a source that swings both ways moves the cutoff both ways.
       # Clamped without a comparison, as clip_output does it.
       modulation = (@current_modulation_1_input * @current_modulation_1_depth) + (@current_modulation_2_input * @current_modulation_2_depth)
-      total_cutoff = @current_cutoff + @current_pitch_input * @current_pitch_amount + modulation
+      total_cutoff = @current_cutoff + @current_pitch_input * @current_pitch_depth + modulation
       over  = total_cutoff - 1.0
       under = 0.0 - total_cutoff
       clamped_cutoff = total_cutoff - ((over + over.abs) - (under + under.abs)) * 0.5

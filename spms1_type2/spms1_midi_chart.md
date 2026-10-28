@@ -38,7 +38,7 @@
 |                            24 | x             | o             | Filter Mod 1 Amt (EG)                |
 |                            25 | x             | o             | Filter Mod 2 Amt (LFO)               |
 |                           117 | x             | o             | Filter Mod 1 Pol (-1 to +1)          |
-|                             9 | x             | o             | Filter Pitch Amt                     |
+|                             9 | x             | o             | Filter Pitch Pol (-1 to +1)          |
 |                            39 | x             | o             | Filter Mode (LP, Notch, HP)          |
 |                            19 | x             | o             | Mixer 2 Level 1 (Osc 1 Level)        |
 |                            20 | x             | o             | Mixer 2 Level 2 (Osc 2 Level)        |
