@@ -292,7 +292,7 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {555,   4},  // Osc 2 Wave value
   {556,  64},  // Osc 2 PW value
   {557,  64},  // Osc 2 Pitch Coarse value
-  {558,  75},  // Osc 2 Pitch Fine value
+  {558,  74},  // Osc 2 Pitch Fine value
   {559,   4},  // Osc 2 Pitch Mod 1 Amt value
   {560,  76},  // Osc 2 Pitch Mod 1 Pol value
   {561, 124},  // Osc 2 Pitch Mod 1 Sw value
@@ -375,7 +375,7 @@ static const uint8_t g_spms1_default_cc[][2] = {
   {103,   4},  // Osc 1 PW Mod 2 Amt
   {104,   4},  // Osc 2 Wave
   {85,   64},  // Osc 2 Pitch Coarse
-  {76,   75},  // Osc 2 Pitch Fine
+  {76,   74},  // Osc 2 Pitch Fine
   {89,    4},  // Osc 2 Pitch Mod 1 Amt
   {13,    4},  // Osc 2 Pitch Mod 2 Amt
   {112,   4},  // Osc 2 Sync Sw

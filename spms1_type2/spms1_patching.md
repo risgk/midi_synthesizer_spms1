@@ -581,7 +581,7 @@ whole unit per CC step: Coarse a semitone, reaching 60 either way, and Fine a ce
 reaching 60 either way. They are summed, so any pitch is reachable, and Coarse swept by hand
 serves a sync sweep, a semitone a step. Osc 1's two hold 0.0 by default and have no CC; Osc 2's
 Pitch Coarse and Pitch Fine, on CC#85 and 76, set the interval and the detune between the oscillators,
-11 cents sharp at power-up (values 64 and 75). None of them is smoothed.
+10 cents sharp at power-up (values 64 and 74). None of them is smoothed.
 
 Pitch 1 Stretch, on CC#22, widens the keys about note 60, last, by multiplying the pitch
 after the glide and the bend: every interval from note 60 grows by the same share, so the stretch is often given as how
@@ -887,7 +887,7 @@ the editor, which sends the same.
   top of the envelope on Mod 1
 - A second oscillator is wired by default too, on Mixer 2's second input, silent at power-up:
   CC#19 = 88 and CC#20 = 88 put the two at 0.7 each, about as loud together as one at full level,
-  Osc 2 beating slowly against Osc 1 from the 11 cents of CC#76's power-up value. CC#85 and 76 tune it, a semitone and a cent a step: CC#85 = 76 an octave up, CC#85 = 71 a fifth, CC#76 = 64 in unison
+  Osc 2 beating slowly against Osc 1 from the 10 cents of CC#76's power-up value. CC#85 and 76 tune it, a semitone and a cent a step: CC#85 = 76 an octave up, CC#85 = 71 a fifth, CC#76 = 64 in unison
 - Noise is wired by default too, its Out on Mixer 2's fourth input beside the oscillators, so CC#23
   brings it in under the note, at a level of 0.1 at value 16. CC#19 = 4 takes the
   oscillator out, leaving the noise alone, through the filters. CC#115 (Color) turns it from

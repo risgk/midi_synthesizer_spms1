@@ -90,7 +90,7 @@ modules:
 # Osc 1's sub on In 3 and the noise on In 4. Its Level 1, on CC 19, powers up at 1.0, so
 # Osc 1 sounds at full level, and Level 2 and Level 4, on CC 20 and 23, at 0.0, so Osc 2 and the
 # noise are silent until CC 20 and CC 23. Osc 2 plays the note from Pitch 1, as Osc 1 does, tuned by its own
-# Pitch and Pitch Fine (CC 85 and 76), 11 cents sharp at power-up, and has a Wave of its own on CC
+# Pitch Coarse and Pitch Fine (CC 85 and 76), 10 cents sharp at power-up, and has a Wave of its own on CC
 # 104 (Osc 1's on CC 102); it follows Osc 1 in its pitch modulation: each of its Pitch Mod Amts
 # is on Osc 1's CC, so one CC moves both, and its PW and PW Mod Amts have no CC. Osc 2 Sync In takes Osc 1 Out Saw, for hard sync, but
 # Osc 2 Sync Sw, on CC 112, powers up off, so it runs free until CC 112; LFO 1 Reset In takes
@@ -394,7 +394,7 @@ controls:
   - { entry: 42, module: OSC_1,     key: PW_MOD_2_POL,      label: PW Mod 2 Pol, cc: 0, value: 124, bipolar: true, hint: − to +, set: set_pw_modulation_2_polarity }
   # Osc 2: Pitch Coarse and Pitch Fine are its own, on CC 85 and 76, to tune it against Osc 1, a
   # semitone and a cent a step, and to sweep it for a hard sync: Pitch Coarse powers up at CC 64, no
-  # offset, and Fine at CC 75, 11 cents sharp, for a slow beat once Osc 2 is turned up. Wave is its own too, on CC 104 next to Osc 1's on CC 102, sawtooth at power-up as
+  # offset, and Fine at CC 74, 10 cents sharp, for a slow beat once Osc 2 is turned up. Wave is its own too, on CC 104 next to Osc 1's on CC 102, sawtooth at power-up as
   # Osc 1's is. Each Pitch Mod Amt is on Osc 1's CC by default, so one CC moves both
   # oscillators; PW and the PW Mod Amts have no CC, and each Mod Pol holds the
   # value Osc 1's does. Sync Sw is Osc 2's alone, on CC 112, and powers up off, at CC 4, so Sync
@@ -403,7 +403,7 @@ controls:
   - { entry: 43, module: OSC_2,     key: WAVE,     label: Wave,         cc: 104, value: 4, hint: Saw to Sq, favorite: true, set: set_waveform }
   - { entry: 44, module: OSC_2,     key: PW,           label: PW,  cc: 0,   value: 64, bipolar: true, hint: 0% to 100%, set: set_pulse_width }
   - { entry: 45, module: OSC_2,     key: PITCH_COARSE,  label: Pitch Coarse,  cc: 85,  value: 64, bipolar: true, hint: ±60 Semi, set: set_pitch_coarse }
-  - { entry: 46, module: OSC_2,     key: PITCH_FINE,    label: Pitch Fine,    cc: 76,  value: 75, bipolar: true, hint: ±60 Cent, favorite: true, set: set_pitch_fine }
+  - { entry: 46, module: OSC_2,     key: PITCH_FINE,    label: Pitch Fine,    cc: 76,  value: 74, bipolar: true, hint: ±60 Cent, favorite: true, set: set_pitch_fine }
   - { entry: 47, module: OSC_2,     key: PITCH_MOD_1_AMT, label: Pitch Mod 1 Amt, cc: 89, value: 4, hint_inputs: [PITCH_MOD_1_IN], set: set_pitch_modulation_1_amount }
   - { entry: 48, module: OSC_2,     key: PITCH_MOD_1_POL,      label: Pitch Mod 1 Pol, cc: 0, value: 76, bipolar: true, hint: − to +, set: set_pitch_modulation_1_polarity }
   - { entry: 49, module: OSC_2,     key: PITCH_MOD_1_SW, label: Pitch Mod 1 Sw, cc: 0, value: 124, hint: Off/On, set: set_pitch_modulation_1_switch }
@@ -423,7 +423,7 @@ controls:
   # Mixer 2, the audio ahead of the filter: Osc 1 on In 1, Osc 2 on In 2, Osc 1's sub on In 3 and
   # the noise on In 4.
   # Level 1 (CC 19) powers up at CC 124, 1.0, and Level 2 (CC 20) at CC 4, 0.0, so Osc 1 is heard
-  # alone; both at CC 88, 0.7, two saws 11 cents apart come out about as loud as one at 1.0, as 0.7
+  # alone; both at CC 88, 0.7, two saws 10 cents apart come out about as loud as one at 1.0, as 0.7
   # is about one over the square root of 2. Level 3, on CC 21,
   # powers up at 0.0, leaving Osc 1's sub on In 3 silent. Level 4 (CC 23) powers up at 0.0, leaving the noise, at
   # full level from Noise 1, silent. Out Level has no CC and holds 0.5: how
