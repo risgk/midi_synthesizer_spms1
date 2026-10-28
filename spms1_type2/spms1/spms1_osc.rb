@@ -23,10 +23,10 @@ module Spms1
     # bring the depth down to 0.2 at the top of each Pitch Mod Amt, an octave either way, and two
     # octaves up for the envelope.
     MODULATION_RANGE = 120.0 / 120.0
-    # How far Pitch Coarse and Pitch Fine reach at either end of their dials. Both are spaced so that one step
-    # of a 7-bit control is one whole unit: a semitone for coarse, a cent for fine.
+    # How far Pitch Coarse and Pitch Fine reach at either end of their dials: 60 semitones, so that one step
+    # of a 7-bit control is a whole semitone, and 50 cents, so that the dial's quarters are quarter tones.
     PITCH_COARSE_RANGE = 60.0 / 120.0
-    PITCH_FINE_RANGE   = 0.6 / 120.0
+    PITCH_FINE_RANGE   = 0.5 / 120.0
 
     # Pitch lookup table for note-to-frequency conversion.
     FREQ_TABLE = Array.new(129, 0.0)
@@ -184,10 +184,10 @@ module Spms1
     end
 
     # Pitch Coarse and Pitch Fine are bipolar, [-0.5, 0.5], with 0.0 meaning no offset, so a controller's
-    # center detent lands there. Linear about that center, which is what puts every step on a whole
-    # semitone or a whole cent; a curve here would make exact intervals unreachable. Swept by hand,
+    # center detent lands there. Linear about that center, which is what puts every Coarse step on a
+    # whole semitone; a curve here would make exact intervals unreachable. Swept by hand,
     # Coarse also serves a sync sweep, a semitone a step.
-    # Not smoothed: a semitone step is part of the sound, a cent step is too small to hear as one,
+    # Not smoothed: a semitone step is part of the sound, a Fine step is too small to hear as one,
     # and a step in pitch does not click, as the phase runs on unbroken.
     def set_pitch_coarse(pitch_coarse)
       clamped = (pitch_coarse < -0.5) ? -0.5 : ((pitch_coarse > 0.5) ? 0.5 : pitch_coarse)

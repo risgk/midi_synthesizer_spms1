@@ -576,12 +576,12 @@ it is built with. Read these tables again after an update.
 
 ### Ranges worth knowing
 
-Osc 1 Pitch Coarse and Pitch Fine transpose the oscillator. Both are centered on value 64 and move one
-whole unit per CC step: Coarse a semitone, reaching 60 either way, and Fine a cent,
-reaching 60 either way. They are summed, so any pitch is reachable, and Coarse swept by hand
+Osc 1 Pitch Coarse and Pitch Fine transpose the oscillator. Both are centered on value 64: Coarse
+moves a semitone per CC step, reaching 60 either way, and Fine reaches 50 cents either way, a
+quarter tone at each quarter of the dial (values 34 and 94). They are summed, so any pitch is reachable, and Coarse swept by hand
 serves a sync sweep, a semitone a step. Osc 1's two hold 0.0 by default and have no CC; Osc 2's
 Pitch Coarse and Pitch Fine, on CC#85 and 76, set the interval and the detune between the oscillators,
-10 cents sharp at power-up (values 64 and 74). None of them is smoothed.
+10 cents sharp at power-up (values 64 and 76). None of them is smoothed.
 
 Pitch 1 Stretch, on CC#22, widens the keys about note 60, last, by multiplying the pitch
 after the glide and the bend: every interval from note 60 grows by the same share, so the stretch is often given as how
@@ -887,7 +887,7 @@ the editor, which sends the same.
   top of the envelope on Mod 1
 - A second oscillator is wired by default too, on Mixer 2's second input, silent at power-up:
   CC#19 = 88 and CC#20 = 88 put the two at 0.7 each, about as loud together as one at full level,
-  Osc 2 beating slowly against Osc 1 from the 10 cents of CC#76's power-up value. CC#85 and 76 tune it, a semitone and a cent a step: CC#85 = 76 an octave up, CC#85 = 71 a fifth, CC#76 = 64 in unison
+  Osc 2 beating slowly against Osc 1 from the 10 cents of CC#76's power-up value. CC#85 and 76 tune it, a semitone a step and 50 cents either way: CC#85 = 76 an octave up, CC#85 = 71 a fifth, CC#76 = 64 in unison
 - Noise is wired by default too, its Out on Mixer 2's fourth input beside the oscillators, so CC#23
   brings it in under the note, at a level of 0.1 at value 16. CC#19 = 4 takes the
   oscillator out, leaving the noise alone, through the filters. CC#115 (Color) turns it from
@@ -918,8 +918,8 @@ the editor, which sends the same.
 - Amp opened and closed by the note as an organ's, while EG 1 still shapes the filter: CC#36 = 124
   crossfades Amp 1's modulation to Mod 2 In, EG 2
 - Disconnect the filters' Mod 1 inputs, and with them the envelope: CC#99 = 113, CC#98 = 30 and 35, CC#6 = 0
-- A finer pitch envelope, 60 cents deep: CC#99 = 114, CC#98 = 32, CC#6 = 44 points Osc 1 Pitch Fine at the
-  envelope, which then sweeps the tuning from in tune up to 60 cents sharp, reached at half the
+- A finer pitch envelope, 50 cents deep: CC#99 = 114, CC#98 = 32, CC#6 = 44 points Osc 1 Pitch Fine at the
+  envelope, which then sweeps the tuning from in tune up to 50 cents sharp, reached at half the
   envelope's peak
 - The envelope drives the filter harder as a note starts: CC#99 = 114, CC#98 = 64, CC#6 = 44 takes
   Mixer 2 Out Level, the filter's input level, from silence up to the top of its dial and back
@@ -943,7 +943,7 @@ the editor, which sends the same.
   octaves (Mod 1 Pol is +1.0), as far as the top of the range: with CC#74 at the bottom, the
   breath sweeps the whole range
 - A knob that detunes Osc 2: CC#99 = 114, CC#98 = 46, CC#6 = 20 points Osc 2 Pitch Fine at General 1 Bipolar, so CC#16 moves
-  it from -60 to +60 cents, in tune at value 64, heard with Osc 2 brought in (CC#19 = 88 and
+  it from -50 to +50 cents, in tune at value 64, heard with Osc 2 brought in (CC#19 = 88 and
   CC#20 = 88)
 - A knob that crossfades the oscillators: CC#99 = 114, CC#98 = 60, CC#6 = 23 and CC#98 = 61, CC#6 = 22 point Mixer 2 Level 1 at General 1 Sin and Level 2 at General 1 Cos, so CC#16 takes
   Osc 2 out as it brings Osc 1 in, at equal power: at value 64 both are at 0.707, about as loud
