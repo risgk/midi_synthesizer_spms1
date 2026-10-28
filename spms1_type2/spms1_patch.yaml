@@ -402,7 +402,7 @@ controls:
   # that it is silent until turned up.
   - { entry: 43, module: OSC_2,     key: WAVE,     label: Wave,         cc: 104, value: 4, hint: Saw to Sq, favorite: true, set: set_waveform }
   - { entry: 44, module: OSC_2,     key: PW,           label: PW,  cc: 0,   value: 64, bipolar: true, hint: 0% to 100%, set: set_pulse_width }
-  - { entry: 45, module: OSC_2,     key: PITCH_COARSE,  label: Pitch Coarse,  cc: 85,  value: 64, bipolar: true, hint: ±60 Semi, set: set_pitch_coarse }
+  - { entry: 45, module: OSC_2,     key: PITCH_COARSE,  label: Pitch Coarse,  cc: 85,  value: 64, bipolar: true, hint: ±60 Semi, favorite: true, set: set_pitch_coarse }
   - { entry: 46, module: OSC_2,     key: PITCH_FINE,    label: Pitch Fine,    cc: 76,  value: 74, bipolar: true, hint: ±60 Cent, favorite: true, set: set_pitch_fine }
   - { entry: 47, module: OSC_2,     key: PITCH_MOD_1_AMT, label: Pitch Mod 1 Amt, cc: 89, value: 4, hint_inputs: [PITCH_MOD_1_IN], set: set_pitch_modulation_1_amount }
   - { entry: 48, module: OSC_2,     key: PITCH_MOD_1_POL,      label: Pitch Mod 1 Pol, cc: 0, value: 76, bipolar: true, hint: − to +, set: set_pitch_modulation_1_polarity }
