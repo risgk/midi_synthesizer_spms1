@@ -217,7 +217,7 @@ void spms1_reset_patch(uint8_t midi_ch) {
 //   16-19  SPMS1_PATCH_SPEC_HASH of the sketch that saved it: its numbers, as patch_gen hashes them
 //   20-31  reserved, 0
 //   32-    the payload: the NRPN table, 128 entries a category; the 128 CC values, those of the
-//          CCs the controls have, but a performance control's (the Mod Wheel's), and 0 for the
+//          CCs the controls have, but a performance control's (the Mod Wheel's and Breath's), and 0 for the
 //          rest; for each of the 32 run order slots, when it was written as a rank (1 the first, 0
 //          never); and 32 bytes for a name, reserved, 0
 // The rest of the 4 KB is 0, room for a later layout. An image is loaded only by a sketch with the

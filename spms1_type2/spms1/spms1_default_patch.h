@@ -13,7 +13,7 @@
 
 // The numbers of the patch and saved_patch_version, as one hash (see patch_spec_hash in
 // patch_gen): a saved patch with another is not loaded.
-#define SPMS1_PATCH_SPEC_HASH (0x91E8F530u)
+#define SPMS1_PATCH_SPEC_HASH (0xC9DB3842u)
 
 // The category 3 entries -- the controls -- whose CCs' values a Save keeps: all but the
 // performance controls', whose CCs are saved at 0.
@@ -23,8 +23,8 @@ static const uint8_t g_spms1_saved_cc_entries[] = {
   32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
   48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63,
   64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79,
-  80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 96,
-  97, 98
+  80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 97,
+  98, 99
 };
 
 // NRPN parameter number (category << 7 | LSB), value
@@ -55,40 +55,40 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {137,   0},  // Mixer 1 In 2 <- NONE
   {138,   0},  // Mixer 1 In 3 <- NONE
   {139,   0},  // Mixer 1 In 4 <- NONE
-  {140,  38},  // Osc 1 Pitch In <- PITCH_1_OUTPUT_1
-  {141,  40},  // Osc 1 Pitch Mod 1 In <- EG_1_OUTPUT
-  {142,  44},  // Osc 1 Pitch Mod 2 In <- LFO_1_OUTPUT
-  {143,  40},  // Osc 1 PW Mod 1 In <- EG_1_OUTPUT
-  {144,  44},  // Osc 1 PW Mod 2 In <- LFO_1_OUTPUT
-  {145,  39},  // Osc 2 Pitch In <- PITCH_1_OUTPUT_2
-  {146,  40},  // Osc 2 Pitch Mod 1 In <- EG_1_OUTPUT
-  {147,  44},  // Osc 2 Pitch Mod 2 In <- LFO_1_OUTPUT
-  {148,  40},  // Osc 2 PW Mod 1 In <- EG_1_OUTPUT
-  {149,  44},  // Osc 2 PW Mod 2 In <- LFO_1_OUTPUT
-  {150,  53},  // Osc 2 Sync In <- OSC_1_OUTPUT_SAW
-  {151,  52},  // Mixer 2 In 1 <- OSC_1_OUTPUT
-  {152,  56},  // Mixer 2 In 2 <- OSC_2_OUTPUT
-  {153,  55},  // Mixer 2 In 3 <- OSC_1_OUTPUT_SUB
-  {154,  59},  // Mixer 2 In 4 <- NOISE_1_OUTPUT
-  {155,  62},  // Filter 1 Audio In 1 <- MIXER_2_OUTPUT
+  {140,  46},  // Osc 1 Pitch In <- PITCH_1_OUTPUT_1
+  {141,  48},  // Osc 1 Pitch Mod 1 In <- EG_1_OUTPUT
+  {142,  52},  // Osc 1 Pitch Mod 2 In <- LFO_1_OUTPUT
+  {143,  48},  // Osc 1 PW Mod 1 In <- EG_1_OUTPUT
+  {144,  52},  // Osc 1 PW Mod 2 In <- LFO_1_OUTPUT
+  {145,  47},  // Osc 2 Pitch In <- PITCH_1_OUTPUT_2
+  {146,  48},  // Osc 2 Pitch Mod 1 In <- EG_1_OUTPUT
+  {147,  52},  // Osc 2 Pitch Mod 2 In <- LFO_1_OUTPUT
+  {148,  48},  // Osc 2 PW Mod 1 In <- EG_1_OUTPUT
+  {149,  52},  // Osc 2 PW Mod 2 In <- LFO_1_OUTPUT
+  {150,  61},  // Osc 2 Sync In <- OSC_1_OUTPUT_SAW
+  {151,  60},  // Mixer 2 In 1 <- OSC_1_OUTPUT
+  {152,  64},  // Mixer 2 In 2 <- OSC_2_OUTPUT
+  {153,  63},  // Mixer 2 In 3 <- OSC_1_OUTPUT_SUB
+  {154,  67},  // Mixer 2 In 4 <- NOISE_1_OUTPUT
+  {155,  70},  // Filter 1 Audio In 1 <- MIXER_2_OUTPUT
   {156,   0},  // Filter 1 Audio In 2 <- NONE
-  {157,  38},  // Filter 1 Pitch In <- PITCH_1_OUTPUT_1
-  {158,  40},  // Filter 1 Mod 1 In <- EG_1_OUTPUT
-  {159,  44},  // Filter 1 Mod 2 In <- LFO_1_OUTPUT
-  {160,  62},  // Filter 2 Audio In 1 <- MIXER_2_OUTPUT
-  {161,  64},  // Filter 2 Audio In 2 <- FILTER_1_OUTPUT
-  {162,  38},  // Filter 2 Pitch In <- PITCH_1_OUTPUT_1
-  {163,  40},  // Filter 2 Mod 1 In <- EG_1_OUTPUT
-  {164,  44},  // Filter 2 Mod 2 In <- LFO_1_OUTPUT
-  {165,  64},  // Amp 1 Audio In 1 <- FILTER_1_OUTPUT
-  {166,  68},  // Amp 1 Audio In 2 <- FILTER_2_OUTPUT
-  {167,  40},  // Amp 1 Mod 1 In <- EG_1_OUTPUT
-  {168,  42},  // Amp 1 Mod 2 In <- EG_2_OUTPUT
-  {169,  72},  // Chorus 1 Audio In <- AMP_1_OUTPUT
-  {170,  73},  // Delay 1 Audio In L <- CHORUS_1_OUTPUT_L
-  {171,  74},  // Delay 1 Audio In R <- CHORUS_1_OUTPUT_R
-  {172,  76},  // L <- DELAY_1_OUTPUT_L
-  {173,  77},  // R <- DELAY_1_OUTPUT_R
+  {157,  46},  // Filter 1 Pitch In <- PITCH_1_OUTPUT_1
+  {158,  48},  // Filter 1 Mod 1 In <- EG_1_OUTPUT
+  {159,  52},  // Filter 1 Mod 2 In <- LFO_1_OUTPUT
+  {160,  70},  // Filter 2 Audio In 1 <- MIXER_2_OUTPUT
+  {161,  72},  // Filter 2 Audio In 2 <- FILTER_1_OUTPUT
+  {162,  46},  // Filter 2 Pitch In <- PITCH_1_OUTPUT_1
+  {163,  48},  // Filter 2 Mod 1 In <- EG_1_OUTPUT
+  {164,  52},  // Filter 2 Mod 2 In <- LFO_1_OUTPUT
+  {165,  72},  // Amp 1 Audio In 1 <- FILTER_1_OUTPUT
+  {166,  76},  // Amp 1 Audio In 2 <- FILTER_2_OUTPUT
+  {167,  48},  // Amp 1 Mod 1 In <- EG_1_OUTPUT
+  {168,  50},  // Amp 1 Mod 2 In <- EG_2_OUTPUT
+  {169,  80},  // Chorus 1 Audio In <- AMP_1_OUTPUT
+  {170,  81},  // Delay 1 Audio In L <- CHORUS_1_OUTPUT_L
+  {171,  82},  // Delay 1 Audio In R <- CHORUS_1_OUTPUT_R
+  {172,  84},  // L <- DELAY_1_OUTPUT_L
+  {173,  85},  // R <- DELAY_1_OUTPUT_R
   {256, 127},  // Pitch 1 Glide <- OWN
   {257, 127},  // Pitch 1 Out 1 Glide Sw <- OWN
   {258, 127},  // Pitch 1 Out 2 Glide Sw <- OWN
@@ -184,7 +184,7 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {348, 127},  // Delay 1 Mix <- OWN
   {349, 127},  // Delay 1 Time <- OWN
   {350, 127},  // Delay 1 Feedback <- OWN
-  {354, 127},  // Amp 1 Limiter Sw <- OWN
+  {355, 127},  // Amp 1 Limiter Sw <- OWN
   {384,   5},  // Pitch 1 Glide CC
   {385,  34},  // Pitch 1 Out 1 Glide Sw CC
   {386,  34},  // Pitch 1 Out 2 Glide Sw CC
@@ -245,8 +245,9 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {477,  90},  // Delay 1 Time CC
   {478,  92},  // Delay 1 Feedback CC
   {479,   1},  // Mod Wheel CC
-  {480,  16},  // General 1 CC
-  {481,  17},  // General 2 CC
+  {480,   2},  // Breath CC
+  {481,  16},  // General 1 CC
+  {482,  17},  // General 2 CC
   {512,   4},  // Pitch 1 Glide value
   {513, 124},  // Pitch 1 Out 1 Glide Sw value
   {514, 124},  // Pitch 1 Out 2 Glide Sw value
@@ -342,9 +343,9 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {604,  34},  // Delay 1 Mix value
   {605,  64},  // Delay 1 Time value
   {606,  64},  // Delay 1 Feedback value
-  {608,   4},  // General 1 value
-  {609,   4},  // General 2 value
-  {610, 124},  // Amp 1 Limiter Sw value
+  {609,   4},  // General 1 value
+  {610,   4},  // General 2 value
+  {611, 124},  // Amp 1 Limiter Sw value
 };
 
 // CC number, value
@@ -409,6 +410,7 @@ static const uint8_t g_spms1_default_cc[][2] = {
   {90,   64},  // Delay 1 Time
   {92,   64},  // Delay 1 Feedback
   {1,     4},  // Mod Wheel
+  {2,     4},  // Breath
   {16,    4},  // General 1
   {17,    4},  // General 2
 };

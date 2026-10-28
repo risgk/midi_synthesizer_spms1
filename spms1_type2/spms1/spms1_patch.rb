@@ -31,73 +31,81 @@ SIGNAL_MOD_WHEEL                 = 8
 SIGNAL_MOD_WHEEL_REV             = 9
 SIGNAL_MOD_WHEEL_INV             = 10
 SIGNAL_MOD_WHEEL_REV_INV         = 11
-SIGNAL_GENERAL_1                 = 12
-SIGNAL_GENERAL_1_REV             = 13
-SIGNAL_GENERAL_1_INV             = 14
-SIGNAL_GENERAL_1_REV_INV         = 15
-SIGNAL_GENERAL_1_BIPOLAR         = 16
-SIGNAL_GENERAL_1_BIPOLAR_INV     = 17
-SIGNAL_GENERAL_1_SIN             = 18
-SIGNAL_GENERAL_1_COS             = 19
-SIGNAL_GENERAL_1_LO              = 20
-SIGNAL_GENERAL_1_HI              = 21
-SIGNAL_GENERAL_1_NEG             = 22
-SIGNAL_GENERAL_1_MID             = 23
-SIGNAL_GENERAL_1_POS             = 24
-SIGNAL_GENERAL_2                 = 25
-SIGNAL_GENERAL_2_REV             = 26
-SIGNAL_GENERAL_2_INV             = 27
-SIGNAL_GENERAL_2_REV_INV         = 28
-SIGNAL_GENERAL_2_BIPOLAR         = 29
-SIGNAL_GENERAL_2_BIPOLAR_INV     = 30
-SIGNAL_GENERAL_2_SIN             = 31
-SIGNAL_GENERAL_2_COS             = 32
-SIGNAL_GENERAL_2_LO              = 33
-SIGNAL_GENERAL_2_HI              = 34
-SIGNAL_GENERAL_2_NEG             = 35
-SIGNAL_GENERAL_2_MID             = 36
-SIGNAL_GENERAL_2_POS             = 37
-SIGNAL_PITCH_1_OUTPUT_1          = 38
-SIGNAL_PITCH_1_OUTPUT_2          = 39
-SIGNAL_EG_1_OUTPUT               = 40
-SIGNAL_EG_1_OUTPUT_INV           = 41
-SIGNAL_EG_2_OUTPUT               = 42
-SIGNAL_EG_2_OUTPUT_INV           = 43
-SIGNAL_LFO_1_OUTPUT              = 44
-SIGNAL_LFO_1_OUTPUT_INV          = 45
-SIGNAL_LFO_1_OUTPUT_TRIANGLE     = 46
-SIGNAL_LFO_1_OUTPUT_TRIANGLE_INV = 47
-SIGNAL_LFO_1_OUTPUT_SQUARE       = 48
-SIGNAL_LFO_1_OUTPUT_SQUARE_INV   = 49
-SIGNAL_MIXER_1_OUTPUT            = 50
-SIGNAL_MIXER_1_OUTPUT_INV        = 51
-SIGNAL_OSC_1_OUTPUT              = 52
-SIGNAL_OSC_1_OUTPUT_SAW          = 53
-SIGNAL_OSC_1_OUTPUT_PULSE        = 54
-SIGNAL_OSC_1_OUTPUT_SUB          = 55
-SIGNAL_OSC_2_OUTPUT              = 56
-SIGNAL_OSC_2_OUTPUT_SAW          = 57
-SIGNAL_OSC_2_OUTPUT_PULSE        = 58
-SIGNAL_NOISE_1_OUTPUT            = 59
-SIGNAL_NOISE_1_OUTPUT_WHITE      = 60
-SIGNAL_NOISE_1_OUTPUT_RED        = 61
-SIGNAL_MIXER_2_OUTPUT            = 62
-SIGNAL_MIXER_2_OUTPUT_INV        = 63
-SIGNAL_FILTER_1_OUTPUT           = 64
-SIGNAL_FILTER_1_OUTPUT_LP        = 65
-SIGNAL_FILTER_1_OUTPUT_HP        = 66
-SIGNAL_FILTER_1_OUTPUT_BP        = 67
-SIGNAL_FILTER_2_OUTPUT           = 68
-SIGNAL_FILTER_2_OUTPUT_LP        = 69
-SIGNAL_FILTER_2_OUTPUT_HP        = 70
-SIGNAL_FILTER_2_OUTPUT_BP        = 71
-SIGNAL_AMP_1_OUTPUT              = 72
-SIGNAL_CHORUS_1_OUTPUT_L         = 73
-SIGNAL_CHORUS_1_OUTPUT_R         = 74
-SIGNAL_CHORUS_1_OUTPUT_MONO      = 75
-SIGNAL_DELAY_1_OUTPUT_L          = 76
-SIGNAL_DELAY_1_OUTPUT_R          = 77
-SIGNAL_DELAY_1_OUTPUT_MONO       = 78
+SIGNAL_MOD_WHEEL_COS             = 12
+SIGNAL_MOD_WHEEL_SIN             = 13
+SIGNAL_BREATH                    = 14
+SIGNAL_BREATH_REV                = 15
+SIGNAL_BREATH_INV                = 16
+SIGNAL_BREATH_REV_INV            = 17
+SIGNAL_BREATH_COS                = 18
+SIGNAL_BREATH_SIN                = 19
+SIGNAL_GENERAL_1                 = 20
+SIGNAL_GENERAL_1_REV             = 21
+SIGNAL_GENERAL_1_INV             = 22
+SIGNAL_GENERAL_1_REV_INV         = 23
+SIGNAL_GENERAL_1_BIPOLAR         = 24
+SIGNAL_GENERAL_1_BIPOLAR_INV     = 25
+SIGNAL_GENERAL_1_COS             = 26
+SIGNAL_GENERAL_1_SIN             = 27
+SIGNAL_GENERAL_1_LO              = 28
+SIGNAL_GENERAL_1_HI              = 29
+SIGNAL_GENERAL_1_NEG             = 30
+SIGNAL_GENERAL_1_MID             = 31
+SIGNAL_GENERAL_1_POS             = 32
+SIGNAL_GENERAL_2                 = 33
+SIGNAL_GENERAL_2_REV             = 34
+SIGNAL_GENERAL_2_INV             = 35
+SIGNAL_GENERAL_2_REV_INV         = 36
+SIGNAL_GENERAL_2_BIPOLAR         = 37
+SIGNAL_GENERAL_2_BIPOLAR_INV     = 38
+SIGNAL_GENERAL_2_COS             = 39
+SIGNAL_GENERAL_2_SIN             = 40
+SIGNAL_GENERAL_2_LO              = 41
+SIGNAL_GENERAL_2_HI              = 42
+SIGNAL_GENERAL_2_NEG             = 43
+SIGNAL_GENERAL_2_MID             = 44
+SIGNAL_GENERAL_2_POS             = 45
+SIGNAL_PITCH_1_OUTPUT_1          = 46
+SIGNAL_PITCH_1_OUTPUT_2          = 47
+SIGNAL_EG_1_OUTPUT               = 48
+SIGNAL_EG_1_OUTPUT_INV           = 49
+SIGNAL_EG_2_OUTPUT               = 50
+SIGNAL_EG_2_OUTPUT_INV           = 51
+SIGNAL_LFO_1_OUTPUT              = 52
+SIGNAL_LFO_1_OUTPUT_INV          = 53
+SIGNAL_LFO_1_OUTPUT_TRIANGLE     = 54
+SIGNAL_LFO_1_OUTPUT_TRIANGLE_INV = 55
+SIGNAL_LFO_1_OUTPUT_SQUARE       = 56
+SIGNAL_LFO_1_OUTPUT_SQUARE_INV   = 57
+SIGNAL_MIXER_1_OUTPUT            = 58
+SIGNAL_MIXER_1_OUTPUT_INV        = 59
+SIGNAL_OSC_1_OUTPUT              = 60
+SIGNAL_OSC_1_OUTPUT_SAW          = 61
+SIGNAL_OSC_1_OUTPUT_PULSE        = 62
+SIGNAL_OSC_1_OUTPUT_SUB          = 63
+SIGNAL_OSC_2_OUTPUT              = 64
+SIGNAL_OSC_2_OUTPUT_SAW          = 65
+SIGNAL_OSC_2_OUTPUT_PULSE        = 66
+SIGNAL_NOISE_1_OUTPUT            = 67
+SIGNAL_NOISE_1_OUTPUT_WHITE      = 68
+SIGNAL_NOISE_1_OUTPUT_RED        = 69
+SIGNAL_MIXER_2_OUTPUT            = 70
+SIGNAL_MIXER_2_OUTPUT_INV        = 71
+SIGNAL_FILTER_1_OUTPUT           = 72
+SIGNAL_FILTER_1_OUTPUT_LP        = 73
+SIGNAL_FILTER_1_OUTPUT_HP        = 74
+SIGNAL_FILTER_1_OUTPUT_BP        = 75
+SIGNAL_FILTER_2_OUTPUT           = 76
+SIGNAL_FILTER_2_OUTPUT_LP        = 77
+SIGNAL_FILTER_2_OUTPUT_HP        = 78
+SIGNAL_FILTER_2_OUTPUT_BP        = 79
+SIGNAL_AMP_1_OUTPUT              = 80
+SIGNAL_CHORUS_1_OUTPUT_L         = 81
+SIGNAL_CHORUS_1_OUTPUT_R         = 82
+SIGNAL_CHORUS_1_OUTPUT_MONO      = 83
+SIGNAL_DELAY_1_OUTPUT_L          = 84
+SIGNAL_DELAY_1_OUTPUT_R          = 85
+SIGNAL_DELAY_1_OUTPUT_MONO       = 86
 
 # A parameter source of SIGNAL_OWN is the parameter's own control slot, at PARAM_SLOT_BASE + its
 # entry, off the bus: the slots below.
@@ -199,15 +207,16 @@ SLOT_CHORUS_1_DEPTH         = 219
 SLOT_DELAY_1_MIX            = 220
 SLOT_DELAY_1_TIME           = 221
 SLOT_DELAY_1_FEEDBACK       = 222
-SLOT_AMP_1_LIMITER_SW       = 226
+SLOT_AMP_1_LIMITER_SW       = 227
 
 # The controller slots, the mod wheel's and the general controls', and where a smoothed copy of each
 # sits, off the bus at its slot + SMOOTHED_SLOT_OFFSET, with each controller's first smoothing
 # stage above them. A module input reads the copy (see spms1_main.rb).
 CONTROLLER_SLOT_FIRST      = 8
-CONTROLLER_SLOT_LAST       = 37
-SMOOTHED_SLOT_OFFSET       = 471
-SMOOTHED_STAGE_1_MOD_WHEEL = 509
+CONTROLLER_SLOT_LAST       = 45
+SMOOTHED_SLOT_OFFSET       = 462
+SMOOTHED_STAGE_1_MOD_WHEEL = 508
+SMOOTHED_STAGE_1_BREATH    = 509
 SMOOTHED_STAGE_1_GENERAL_1 = 510
 SMOOTHED_STAGE_1_GENERAL_2 = 511
 
@@ -362,7 +371,7 @@ NRPN_SOURCE_CHORUS_1_DEPTH         = 347
 NRPN_SOURCE_DELAY_1_MIX            = 348
 NRPN_SOURCE_DELAY_1_TIME           = 349
 NRPN_SOURCE_DELAY_1_FEEDBACK       = 350
-NRPN_SOURCE_AMP_1_LIMITER_SW       = 354
+NRPN_SOURCE_AMP_1_LIMITER_SW       = 355
 
 # A CC number of 0 means the control has no CC: a parameter's control slot then holds its NRPN_VALUE_*
 # below, whatever CC it had before, so a patch sets it alone, as General 1 and 2 do theirs, and
@@ -463,9 +472,10 @@ NRPN_CC_DELAY_1_MIX            = 476
 NRPN_CC_DELAY_1_TIME           = 477
 NRPN_CC_DELAY_1_FEEDBACK       = 478
 NRPN_CC_MOD_WHEEL              = 479
-NRPN_CC_GENERAL_1              = 480
-NRPN_CC_GENERAL_2              = 481
-NRPN_CC_AMP_1_LIMITER_SW       = 482
+NRPN_CC_BREATH                 = 480
+NRPN_CC_GENERAL_1              = 481
+NRPN_CC_GENERAL_2              = 482
+NRPN_CC_AMP_1_LIMITER_SW       = 483
 
 # The value of each control slot while it has no CC, as a CC value, but the Mod Wheel's.
 NRPN_VALUE_PITCH_1_GLIDE          = 512
@@ -563,9 +573,9 @@ NRPN_VALUE_CHORUS_1_DEPTH         = 603
 NRPN_VALUE_DELAY_1_MIX            = 604
 NRPN_VALUE_DELAY_1_TIME           = 605
 NRPN_VALUE_DELAY_1_FEEDBACK       = 606
-NRPN_VALUE_GENERAL_1              = 608
-NRPN_VALUE_GENERAL_2              = 609
-NRPN_VALUE_AMP_1_LIMITER_SW       = 610
+NRPN_VALUE_GENERAL_1              = 609
+NRPN_VALUE_GENERAL_2              = 610
+NRPN_VALUE_AMP_1_LIMITER_SW       = 611
 
 # The constants of the bus, which nothing else ever writes. A slot not written here holds 0.0.
 def spms1_fill_constant_signals(signals)
@@ -797,6 +807,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_DELAY_1_TIME          , 90)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_DELAY_1_FEEDBACK      , 92)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_MOD_WHEEL             , 1)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_BREATH                , 2)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_GENERAL_1             , 16)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_GENERAL_2             , 17)
 
@@ -959,6 +970,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 90 , 64 ) # Delay 1 Time
   C.set_midi_cc_value(midi_ch, 92 , 64 ) # Delay 1 Feedback
   C.set_midi_cc_value(midi_ch, 1  , 4  ) # Mod Wheel
+  C.set_midi_cc_value(midi_ch, 2  , 4  ) # Breath
   C.set_midi_cc_value(midi_ch, 16 , 4  ) # General 1
   C.set_midi_cc_value(midi_ch, 17 , 4  ) # General 2
 end

@@ -717,9 +717,9 @@
       background: #222;
       padding: 10px 5px 5px 5px;
     }
-    /* The pitch bend and mod wheels on the left of the keys, as on a keyboard, sliders standing as
-       tall as they are. The bend springs back to the center; the mod wheel's value is that of the
-       CC Mod Wheel is on in the patch. */
+    /* The pitch bend, mod and breath wheels on the left of the keys, as on a keyboard, sliders
+       standing as tall as they are. The bend springs back to the center; the mod wheel's value is
+       that of the CC Mod Wheel is on in the patch, and the breath wheel's that of Breath's CC. */
     /* Each wheel as wide as a white key from C to E, 5/3 of a semitone, and the keys keeping the 37
        that KB_KEY_WIDTH fits a 960px window beside them, with room. */
     .kbd-body {
@@ -1716,6 +1716,10 @@
         <input type="range" id="mod-wheel" min="4" max="124" aria-label="Mod Wheel">
         <span class="mod-wheel-label">Mod</span>
       </div>
+      <div class="mod-wheel" id="breath-wheel-zone">
+        <input type="range" id="breath-wheel" min="4" max="124" aria-label="Breath">
+        <span class="mod-wheel-label">Breath</span>
+      </div>
       <div class="kbd-keys">
         <div class="keyboard-scroll-container" id="kb-scroll">
           <div class="keyboard-wrapper" id="keyboard"></div>
@@ -1914,10 +1918,11 @@
       {"entry":92,"module":"DELAY_1","key":"MIX","label":"Mix","bipolar":false,"cc":94,"value":34,"controller":false,"performance":false,"favorite":true,"slots":[["DELAY_1_MIX","Mix",false]]},
       {"entry":93,"module":"DELAY_1","key":"TIME","label":"Time","bipolar":false,"cc":90,"value":64,"controller":false,"performance":false,"favorite":true,"slots":[["DELAY_1_TIME","Time",false]]},
       {"entry":94,"module":"DELAY_1","key":"FEEDBACK","label":"Feedback","bipolar":false,"cc":92,"value":64,"controller":false,"performance":false,"slots":[["DELAY_1_FEEDBACK","Feedback",false]]},
-      {"entry":95,"key":"MOD_WHEEL","label":"Mod Wheel","bipolar":false,"cc":1,"value":4,"controller":true,"performance":true,"slots":[["MOD_WHEEL","Mod Wheel",false],["MOD_WHEEL_REV","Mod Wheel Rev",false,"rev"],["MOD_WHEEL_INV","Mod Wheel Inv",false,"inv"],["MOD_WHEEL_REV_INV","Mod Wheel Rev Inv",false,"rev_inv"]]},
-      {"entry":96,"key":"GENERAL_1","label":"General 1","bipolar":false,"cc":16,"value":4,"controller":true,"performance":false,"slots":[["GENERAL_1","General 1",false],["GENERAL_1_REV","General 1 Rev",false,"rev"],["GENERAL_1_INV","General 1 Inv",false,"inv"],["GENERAL_1_REV_INV","General 1 Rev Inv",false,"rev_inv"],["GENERAL_1_BIPOLAR","General 1 Bipolar",true,"bipolar"],["GENERAL_1_BIPOLAR_INV","General 1 Bipolar Inv",true,"bipolar_inv"],["GENERAL_1_SIN","General 1 Sin",false,"sin"],["GENERAL_1_COS","General 1 Cos",false,"cos"],["GENERAL_1_LO","General 1 Lo",false,"lo"],["GENERAL_1_HI","General 1 Hi",false,"hi"],["GENERAL_1_NEG","General 1 Neg",false,"neg"],["GENERAL_1_MID","General 1 Mid",false,"mid"],["GENERAL_1_POS","General 1 Pos",false,"pos"]]},
-      {"entry":97,"key":"GENERAL_2","label":"General 2","bipolar":false,"cc":17,"value":4,"controller":true,"performance":false,"slots":[["GENERAL_2","General 2",false],["GENERAL_2_REV","General 2 Rev",false,"rev"],["GENERAL_2_INV","General 2 Inv",false,"inv"],["GENERAL_2_REV_INV","General 2 Rev Inv",false,"rev_inv"],["GENERAL_2_BIPOLAR","General 2 Bipolar",true,"bipolar"],["GENERAL_2_BIPOLAR_INV","General 2 Bipolar Inv",true,"bipolar_inv"],["GENERAL_2_SIN","General 2 Sin",false,"sin"],["GENERAL_2_COS","General 2 Cos",false,"cos"],["GENERAL_2_LO","General 2 Lo",false,"lo"],["GENERAL_2_HI","General 2 Hi",false,"hi"],["GENERAL_2_NEG","General 2 Neg",false,"neg"],["GENERAL_2_MID","General 2 Mid",false,"mid"],["GENERAL_2_POS","General 2 Pos",false,"pos"]]},
-      {"entry":98,"module":"AMP_1","key":"LIMITER_SW","label":"Limiter Sw","bipolar":false,"cc":0,"value":124,"controller":false,"performance":false,"hint":"Off/On","slots":[["AMP_1_LIMITER_SW","Limiter Sw",false]]},
+      {"entry":95,"key":"MOD_WHEEL","label":"Mod Wheel","bipolar":false,"cc":1,"value":4,"controller":true,"performance":true,"slots":[["MOD_WHEEL","Mod Wheel",false],["MOD_WHEEL_REV","Mod Wheel Rev",false,"rev"],["MOD_WHEEL_INV","Mod Wheel Inv",false,"inv"],["MOD_WHEEL_REV_INV","Mod Wheel Rev Inv",false,"rev_inv"],["MOD_WHEEL_COS","Mod Wheel Cos",false,"cos"],["MOD_WHEEL_SIN","Mod Wheel Sin",false,"sin"]]},
+      {"entry":96,"key":"BREATH","label":"Breath","bipolar":false,"cc":2,"value":4,"controller":true,"performance":true,"slots":[["BREATH","Breath",false],["BREATH_REV","Breath Rev",false,"rev"],["BREATH_INV","Breath Inv",false,"inv"],["BREATH_REV_INV","Breath Rev Inv",false,"rev_inv"],["BREATH_COS","Breath Cos",false,"cos"],["BREATH_SIN","Breath Sin",false,"sin"]]},
+      {"entry":97,"key":"GENERAL_1","label":"General 1","bipolar":false,"cc":16,"value":4,"controller":true,"performance":false,"slots":[["GENERAL_1","General 1",false],["GENERAL_1_REV","General 1 Rev",false,"rev"],["GENERAL_1_INV","General 1 Inv",false,"inv"],["GENERAL_1_REV_INV","General 1 Rev Inv",false,"rev_inv"],["GENERAL_1_BIPOLAR","General 1 Bipolar",true,"bipolar"],["GENERAL_1_BIPOLAR_INV","General 1 Bipolar Inv",true,"bipolar_inv"],["GENERAL_1_COS","General 1 Cos",false,"cos"],["GENERAL_1_SIN","General 1 Sin",false,"sin"],["GENERAL_1_LO","General 1 Lo",false,"lo"],["GENERAL_1_HI","General 1 Hi",false,"hi"],["GENERAL_1_NEG","General 1 Neg",false,"neg"],["GENERAL_1_MID","General 1 Mid",false,"mid"],["GENERAL_1_POS","General 1 Pos",false,"pos"]]},
+      {"entry":98,"key":"GENERAL_2","label":"General 2","bipolar":false,"cc":17,"value":4,"controller":true,"performance":false,"slots":[["GENERAL_2","General 2",false],["GENERAL_2_REV","General 2 Rev",false,"rev"],["GENERAL_2_INV","General 2 Inv",false,"inv"],["GENERAL_2_REV_INV","General 2 Rev Inv",false,"rev_inv"],["GENERAL_2_BIPOLAR","General 2 Bipolar",true,"bipolar"],["GENERAL_2_BIPOLAR_INV","General 2 Bipolar Inv",true,"bipolar_inv"],["GENERAL_2_COS","General 2 Cos",false,"cos"],["GENERAL_2_SIN","General 2 Sin",false,"sin"],["GENERAL_2_LO","General 2 Lo",false,"lo"],["GENERAL_2_HI","General 2 Hi",false,"hi"],["GENERAL_2_NEG","General 2 Neg",false,"neg"],["GENERAL_2_MID","General 2 Mid",false,"mid"],["GENERAL_2_POS","General 2 Pos",false,"pos"]]},
+      {"entry":99,"module":"AMP_1","key":"LIMITER_SW","label":"Limiter Sw","bipolar":false,"cc":0,"value":124,"controller":false,"performance":false,"hint":"Off/On","slots":[["AMP_1_LIMITER_SW","Limiter Sw",false]]},
     ],
     signals: [
       {"id":0,"key":"NONE","label":"0.0"},
@@ -1932,76 +1937,84 @@
       {"id":9,"key":"MOD_WHEEL_REV"},
       {"id":10,"key":"MOD_WHEEL_INV"},
       {"id":11,"key":"MOD_WHEEL_REV_INV"},
-      {"id":12,"key":"GENERAL_1"},
-      {"id":13,"key":"GENERAL_1_REV"},
-      {"id":14,"key":"GENERAL_1_INV"},
-      {"id":15,"key":"GENERAL_1_REV_INV"},
-      {"id":16,"key":"GENERAL_1_BIPOLAR"},
-      {"id":17,"key":"GENERAL_1_BIPOLAR_INV"},
-      {"id":18,"key":"GENERAL_1_SIN"},
-      {"id":19,"key":"GENERAL_1_COS"},
-      {"id":20,"key":"GENERAL_1_LO"},
-      {"id":21,"key":"GENERAL_1_HI"},
-      {"id":22,"key":"GENERAL_1_NEG"},
-      {"id":23,"key":"GENERAL_1_MID"},
-      {"id":24,"key":"GENERAL_1_POS"},
-      {"id":25,"key":"GENERAL_2"},
-      {"id":26,"key":"GENERAL_2_REV"},
-      {"id":27,"key":"GENERAL_2_INV"},
-      {"id":28,"key":"GENERAL_2_REV_INV"},
-      {"id":29,"key":"GENERAL_2_BIPOLAR"},
-      {"id":30,"key":"GENERAL_2_BIPOLAR_INV"},
-      {"id":31,"key":"GENERAL_2_SIN"},
-      {"id":32,"key":"GENERAL_2_COS"},
-      {"id":33,"key":"GENERAL_2_LO"},
-      {"id":34,"key":"GENERAL_2_HI"},
-      {"id":35,"key":"GENERAL_2_NEG"},
-      {"id":36,"key":"GENERAL_2_MID"},
-      {"id":37,"key":"GENERAL_2_POS"},
-      {"id":38,"key":"PITCH_1_OUTPUT_1"},
-      {"id":39,"key":"PITCH_1_OUTPUT_2"},
-      {"id":40,"key":"EG_1_OUTPUT"},
-      {"id":41,"key":"EG_1_OUTPUT_INV"},
-      {"id":42,"key":"EG_2_OUTPUT"},
-      {"id":43,"key":"EG_2_OUTPUT_INV"},
-      {"id":44,"key":"LFO_1_OUTPUT"},
-      {"id":45,"key":"LFO_1_OUTPUT_INV"},
-      {"id":46,"key":"LFO_1_OUTPUT_TRIANGLE"},
-      {"id":47,"key":"LFO_1_OUTPUT_TRIANGLE_INV"},
-      {"id":48,"key":"LFO_1_OUTPUT_SQUARE"},
-      {"id":49,"key":"LFO_1_OUTPUT_SQUARE_INV"},
-      {"id":50,"key":"MIXER_1_OUTPUT"},
-      {"id":51,"key":"MIXER_1_OUTPUT_INV"},
-      {"id":52,"key":"OSC_1_OUTPUT"},
-      {"id":53,"key":"OSC_1_OUTPUT_SAW"},
-      {"id":54,"key":"OSC_1_OUTPUT_PULSE"},
-      {"id":55,"key":"OSC_1_OUTPUT_SUB"},
-      {"id":56,"key":"OSC_2_OUTPUT"},
-      {"id":57,"key":"OSC_2_OUTPUT_SAW"},
-      {"id":58,"key":"OSC_2_OUTPUT_PULSE"},
-      {"id":59,"key":"NOISE_1_OUTPUT"},
-      {"id":60,"key":"NOISE_1_OUTPUT_WHITE"},
-      {"id":61,"key":"NOISE_1_OUTPUT_RED"},
-      {"id":62,"key":"MIXER_2_OUTPUT"},
-      {"id":63,"key":"MIXER_2_OUTPUT_INV"},
-      {"id":64,"key":"FILTER_1_OUTPUT"},
-      {"id":65,"key":"FILTER_1_OUTPUT_LP"},
-      {"id":66,"key":"FILTER_1_OUTPUT_HP"},
-      {"id":67,"key":"FILTER_1_OUTPUT_BP"},
-      {"id":68,"key":"FILTER_2_OUTPUT"},
-      {"id":69,"key":"FILTER_2_OUTPUT_LP"},
-      {"id":70,"key":"FILTER_2_OUTPUT_HP"},
-      {"id":71,"key":"FILTER_2_OUTPUT_BP"},
-      {"id":72,"key":"AMP_1_OUTPUT"},
-      {"id":73,"key":"CHORUS_1_OUTPUT_L"},
-      {"id":74,"key":"CHORUS_1_OUTPUT_R"},
-      {"id":75,"key":"CHORUS_1_OUTPUT_MONO"},
-      {"id":76,"key":"DELAY_1_OUTPUT_L"},
-      {"id":77,"key":"DELAY_1_OUTPUT_R"},
-      {"id":78,"key":"DELAY_1_OUTPUT_MONO"},
+      {"id":12,"key":"MOD_WHEEL_COS"},
+      {"id":13,"key":"MOD_WHEEL_SIN"},
+      {"id":14,"key":"BREATH"},
+      {"id":15,"key":"BREATH_REV"},
+      {"id":16,"key":"BREATH_INV"},
+      {"id":17,"key":"BREATH_REV_INV"},
+      {"id":18,"key":"BREATH_COS"},
+      {"id":19,"key":"BREATH_SIN"},
+      {"id":20,"key":"GENERAL_1"},
+      {"id":21,"key":"GENERAL_1_REV"},
+      {"id":22,"key":"GENERAL_1_INV"},
+      {"id":23,"key":"GENERAL_1_REV_INV"},
+      {"id":24,"key":"GENERAL_1_BIPOLAR"},
+      {"id":25,"key":"GENERAL_1_BIPOLAR_INV"},
+      {"id":26,"key":"GENERAL_1_COS"},
+      {"id":27,"key":"GENERAL_1_SIN"},
+      {"id":28,"key":"GENERAL_1_LO"},
+      {"id":29,"key":"GENERAL_1_HI"},
+      {"id":30,"key":"GENERAL_1_NEG"},
+      {"id":31,"key":"GENERAL_1_MID"},
+      {"id":32,"key":"GENERAL_1_POS"},
+      {"id":33,"key":"GENERAL_2"},
+      {"id":34,"key":"GENERAL_2_REV"},
+      {"id":35,"key":"GENERAL_2_INV"},
+      {"id":36,"key":"GENERAL_2_REV_INV"},
+      {"id":37,"key":"GENERAL_2_BIPOLAR"},
+      {"id":38,"key":"GENERAL_2_BIPOLAR_INV"},
+      {"id":39,"key":"GENERAL_2_COS"},
+      {"id":40,"key":"GENERAL_2_SIN"},
+      {"id":41,"key":"GENERAL_2_LO"},
+      {"id":42,"key":"GENERAL_2_HI"},
+      {"id":43,"key":"GENERAL_2_NEG"},
+      {"id":44,"key":"GENERAL_2_MID"},
+      {"id":45,"key":"GENERAL_2_POS"},
+      {"id":46,"key":"PITCH_1_OUTPUT_1"},
+      {"id":47,"key":"PITCH_1_OUTPUT_2"},
+      {"id":48,"key":"EG_1_OUTPUT"},
+      {"id":49,"key":"EG_1_OUTPUT_INV"},
+      {"id":50,"key":"EG_2_OUTPUT"},
+      {"id":51,"key":"EG_2_OUTPUT_INV"},
+      {"id":52,"key":"LFO_1_OUTPUT"},
+      {"id":53,"key":"LFO_1_OUTPUT_INV"},
+      {"id":54,"key":"LFO_1_OUTPUT_TRIANGLE"},
+      {"id":55,"key":"LFO_1_OUTPUT_TRIANGLE_INV"},
+      {"id":56,"key":"LFO_1_OUTPUT_SQUARE"},
+      {"id":57,"key":"LFO_1_OUTPUT_SQUARE_INV"},
+      {"id":58,"key":"MIXER_1_OUTPUT"},
+      {"id":59,"key":"MIXER_1_OUTPUT_INV"},
+      {"id":60,"key":"OSC_1_OUTPUT"},
+      {"id":61,"key":"OSC_1_OUTPUT_SAW"},
+      {"id":62,"key":"OSC_1_OUTPUT_PULSE"},
+      {"id":63,"key":"OSC_1_OUTPUT_SUB"},
+      {"id":64,"key":"OSC_2_OUTPUT"},
+      {"id":65,"key":"OSC_2_OUTPUT_SAW"},
+      {"id":66,"key":"OSC_2_OUTPUT_PULSE"},
+      {"id":67,"key":"NOISE_1_OUTPUT"},
+      {"id":68,"key":"NOISE_1_OUTPUT_WHITE"},
+      {"id":69,"key":"NOISE_1_OUTPUT_RED"},
+      {"id":70,"key":"MIXER_2_OUTPUT"},
+      {"id":71,"key":"MIXER_2_OUTPUT_INV"},
+      {"id":72,"key":"FILTER_1_OUTPUT"},
+      {"id":73,"key":"FILTER_1_OUTPUT_LP"},
+      {"id":74,"key":"FILTER_1_OUTPUT_HP"},
+      {"id":75,"key":"FILTER_1_OUTPUT_BP"},
+      {"id":76,"key":"FILTER_2_OUTPUT"},
+      {"id":77,"key":"FILTER_2_OUTPUT_LP"},
+      {"id":78,"key":"FILTER_2_OUTPUT_HP"},
+      {"id":79,"key":"FILTER_2_OUTPUT_BP"},
+      {"id":80,"key":"AMP_1_OUTPUT"},
+      {"id":81,"key":"CHORUS_1_OUTPUT_L"},
+      {"id":82,"key":"CHORUS_1_OUTPUT_R"},
+      {"id":83,"key":"CHORUS_1_OUTPUT_MONO"},
+      {"id":84,"key":"DELAY_1_OUTPUT_L"},
+      {"id":85,"key":"DELAY_1_OUTPUT_R"},
+      {"id":86,"key":"DELAY_1_OUTPUT_MONO"},
     ],
     defaultOrder: ["PITCH_1","EG_1","EG_2","LFO_1","MIXER_1","OSC_1","OSC_2","NOISE_1","MIXER_2","FILTER_1","FILTER_2","AMP_1","CHORUS_1","DELAY_1"],
-    specHash: 0x91E8F530,
+    specHash: 0xC9DB3842,
   };
   // patch_gen end
 
@@ -2064,24 +2077,24 @@
   // with the noise under Osc 2, Mixer 2, the filter over the amp, and the effects with the output
   // under the delay that feeds it. Spaced so that no two nodes meet with every parameter shown.
   const DEFAULT_LAYOUT = {
-    CONTROLLER: { x: 20,  y: 40 },
-    GENERAL:   { x: 20,   y: 341 },
-    CONST:     { x: 20,   y: 1114 },
-    PITCH_1:   { x: 380,  y: 40 },
-    EG_1:      { x: 380,  y: 450 },
-    EG_2:      { x: 380,  y: 756 },
-    LFO_1:     { x: 740,  y: 40 },
-    MIXER_1:   { x: 740,  y: 528 },
-    OSC_1:     { x: 1100, y: 40 },
-    OSC_2:     { x: 1460, y: 40 },
-    NOISE_1:   { x: 1460, y: 788 },
-    MIXER_2:   { x: 1460, y: 1016 },
-    FILTER_1:  { x: 1820, y: 40 },
-    FILTER_2:  { x: 1820, y: 632 },
-    AMP_1:     { x: 2180, y: 40 },
-    CHORUS_1:  { x: 2180, y: 372 },
-    DELAY_1:   { x: 2180, y: 652 },
-    OUT:       { x: 2180, y: 958 },
+    CONTROLLER: { x: 20, y: 40 },
+    GENERAL:   { x: 380, y: 40 },
+    CONST:     { x: 20, y: 549 },
+    PITCH_1:   { x: 740, y: 40 },
+    EG_1:      { x: 740, y: 450 },
+    EG_2:      { x: 740, y: 756 },
+    LFO_1:     { x: 1100, y: 40 },
+    MIXER_1:   { x: 1100, y: 528 },
+    OSC_1:     { x: 1460, y: 40 },
+    OSC_2:     { x: 1820, y: 40 },
+    NOISE_1:   { x: 1820, y: 788 },
+    MIXER_2:   { x: 1820, y: 1016 },
+    FILTER_1:  { x: 2180, y: 40 },
+    FILTER_2:  { x: 2180, y: 632 },
+    AMP_1:     { x: 2540, y: 40 },
+    CHORUS_1:  { x: 2540, y: 372 },
+    DELAY_1:   { x: 2540, y: 652 },
+    OUT:       { x: 2540, y: 958 },
   };
 
   function defaultState() {
@@ -4114,7 +4127,7 @@
   });
 
   function panelItems(p) {
-    if (!p.module) return CONTROLLER_ITEMS.filter(c => c.key !== 'MOD_WHEEL');
+    if (!p.module) return CONTROLLER_ITEMS.filter(c => !c.performance);
     return PARAM_ITEMS.filter(c => c.module === p.module);
   }
 
@@ -4442,22 +4455,26 @@
     });
   }
 
-  // The mod wheel by the soft keyboard moves the value of the CC Mod Wheel is on in the patch, as
-  // a slider does its parameter's. With no CC, or a reserved one, the slot holds 0.0 and the wheel
-  // is held at its bottom.
+  // The mod wheel and the breath wheel by the soft keyboard each move the value of the CC their
+  // control, Mod Wheel or Breath, is on in the patch, as a slider does its parameter's. With no
+  // CC, or a reserved one, the slot holds 0.0 and the wheel is held at its bottom.
+  const PERFORMANCE_WHEELS = [['MOD_WHEEL', 'mod-wheel'], ['BREATH', 'breath-wheel']];
   function refreshModWheel() {
-    const modWheel = document.getElementById('mod-wheel');
-    const cc = state.cc.MOD_WHEEL;
-    const usable = ccInUse(cc);
-    modWheel.disabled = !usable;
-    if (heldRange !== modWheel) modWheel.value = usable ? ccValue(cc) : 4;
-    const v = signalNorm('MOD_WHEEL');
-    document.getElementById('mod-wheel-zone').title = usable
-      ? `Mod Wheel (CC#${cc}): ${ccValue(cc)}${v ? `, ${v.text}` : ''}`
-      : 'Mod Wheel: no CC in the patch, so the slot holds 0.0';
+    for (const [key, id] of PERFORMANCE_WHEELS) {
+      const wheel = document.getElementById(id);
+      const cc = state.cc[key];
+      const usable = ccInUse(cc);
+      wheel.disabled = !usable;
+      if (heldRange !== wheel) wheel.value = usable ? ccValue(cc) : 4;
+      const v = signalNorm(key);
+      const label = CONTROL[key].label;
+      document.getElementById(id + '-zone').title = usable
+        ? `${label} (CC#${cc}): ${ccValue(cc)}${v ? `, ${v.text}` : ''}`
+        : `${label}: no CC in the patch, so the slot holds 0.0`;
+    }
   }
 
-  // Both wheels move Controller signals, so they take its color.
+  // The wheels move Controller signals, so they take its color.
   document.querySelectorAll('.mod-wheel').forEach(el => el.style.setProperty('--thumb-color', NODE_COLORS.CONTROLLER));
 
   // The pitch bend wheel sends Pitch Bend as it moves, -8192 at the bottom to +8191 at the top,
@@ -4472,18 +4489,20 @@
   };
   for (const type of ['pointerup', 'pointercancel', 'keyup', 'blur']) bendWheel.addEventListener(type, bendRelease);
 
-  const modWheel = document.getElementById('mod-wheel');
-  let modWheelBefore = null;
-  modWheel.addEventListener('pointerdown', () => { modWheelBefore = JSON.stringify(serialize(state)); });
-  modWheel.addEventListener('focus', () => { modWheelBefore = JSON.stringify(serialize(state)); });
-  modWheel.addEventListener('input', () => {
-    const cc = state.cc.MOD_WHEEL;
-    if (ccInUse(cc)) setCCValue(cc, parseInt(modWheel.value), true);
-  });
-  modWheel.addEventListener('change', () => {
-    if (modWheelBefore && modWheelBefore !== JSON.stringify(serialize(state))) pushHistory(modWheelBefore);
-    modWheelBefore = JSON.stringify(serialize(state));
-  });
+  for (const [key, id] of PERFORMANCE_WHEELS) {
+    const wheel = document.getElementById(id);
+    let before = null;
+    wheel.addEventListener('pointerdown', () => { before = JSON.stringify(serialize(state)); });
+    wheel.addEventListener('focus', () => { before = JSON.stringify(serialize(state)); });
+    wheel.addEventListener('input', () => {
+      const cc = state.cc[key];
+      if (ccInUse(cc)) setCCValue(cc, parseInt(wheel.value), true);
+    });
+    wheel.addEventListener('change', () => {
+      if (before && before !== JSON.stringify(serialize(state))) pushHistory(before);
+      before = JSON.stringify(serialize(state));
+    });
+  }
 
   document.getElementById('init-values').addEventListener('click', () => {
     pushHistory();
@@ -4628,14 +4647,14 @@
 
   // The width of a semitone, between KB_KEY_WIDTH_NARROW and KB_KEY_WIDTH times the scale: as
   // wide as shows KB_SEMITONES (KB_SEMITONES_PHONE on a phone, KB_SEMITONES_TOUCH on another touch
-  // screen) beside the two wheels, each 5/3 of a semitone (3/2 on a phone),
+  // screen) beside the three wheels, each 5/3 of a semitone (3/2 on a phone),
   // with the 4px gaps after each. Hidden, the keyboard has no width, and keeps what it had.
   function kbFitKeys(force) {
     const width = document.querySelector('.kbd-body').clientWidth;
     if (!(width > 0)) return;
-    const wheels = 2 * (KB_PHONE.matches ? 3 / 2 : 5 / 3);
+    const wheels = 3 * (KB_PHONE.matches ? 3 / 2 : 5 / 3);
     const semitones = KB_PHONE.matches ? KB_SEMITONES_PHONE : KB_TOUCH.matches ? KB_SEMITONES_TOUCH : KB_SEMITONES;
-    const fit = (width - 8) / (semitones + wheels);
+    const fit = (width - 12) / (semitones + wheels);
     const px = Math.max(KB_KEY_WIDTH_NARROW * kbScale, Math.min(KB_KEY_WIDTH * kbScale, fit));
     if (px === kbKeyPx && !force) return;
     kbKeyPx = px;

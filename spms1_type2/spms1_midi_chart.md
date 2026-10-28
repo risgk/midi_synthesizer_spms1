@@ -68,7 +68,8 @@
 |                            34 | x             | o             | Pitch Out 1/2 Glide Sw [Off|On]      |
 |                            57 | x             | o             | Pitch Bend Amt (Pitch Bend Range)    |
 |                            22 | x             | o             | Pitch Stretch                        |
-|                             1 | x             | o             | Mod Wheel (Unipolar)                 |
+|                             1 | x             | o             | Mod Wheel (Unipolar, 6 forms)        |
+|                             2 | x             | o             | Breath (Unipolar, 6 forms)           |
 |                            16 | x             | o             | General 1 (Unipolar, 13 forms)       |
 |                            17 | x             | o             | General 2 (Unipolar, 13 forms)       |
 |                            99 | x             | o             | NRPN MSB (112-117)                   |

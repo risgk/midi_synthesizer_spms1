@@ -163,7 +163,7 @@ puts the default patch back. Keep a patch with Save JSON, or in the synth with S
       powers up at, and sends them, as every change is sent; the wiring is kept
 - Built-in software keyboard for note input and testing
     - Beside the keys, a pitch bend wheel, from -8192 to +8191, springs back to the center when let go,
-      and a mod wheel moves the CC that Mod Wheel is on in the patch
+      a mod wheel moves the CC that Mod Wheel is on in the patch, and a breath wheel the CC that Breath is on
     - Click its heading to hide it, so the patch editor or the controls take its height; the editor remembers
       which, and the keys of the PC keyboard do not play while it is hidden
     - Panic sends All Sound Off and centers Pitch Bend. The editor follows the Channel Mode messages
@@ -173,13 +173,13 @@ puts the default patch back. Keep a patch with Save JSON, or in the synth with S
     - Wires module outputs to inputs and parameters, and sets the run order and CC assignments
     - Shows every parameter of every module, those with no CC in blue, so a wire always ends on what
       it feeds
-    - Shows the keyboard's signals and the Mod Wheel on a Controller node, and General 1 and 2,
+    - Shows the keyboard's signals, the Mod Wheel and Breath on a Controller node, and General 1 and 2,
       whose values are a part of the patch, on a General node of their own (a General panel on the
       Controls tab), though the synth has no such module
     - Saves and loads patches as JSON
-    - A patch saved as JSON or copied keeps a CC that only the Mod Wheel has at what it powers up
-      at, 0.0, as Save to Device does: the mod wheel is played rather than set; Send Patch sends
-      where it is
+    - A patch saved as JSON or copied keeps a CC that only the Mod Wheel or Breath has at what it
+      powers up at, 0.0, as Save to Device does: they are played rather than set; Send Patch sends
+      where they are
     - Copies the patch as MIDI bytes (NRPN or SysEx) or as an NRPN list, or sends it through Web MIDI
     - Sends the whole patch (Send Patch, or a device newly chosen), and what Init and Load change (also by Undo and Redo), between Mute on and off (NRPN
       Mute), so that the patch is not heard half sent, and so does the patch it copies with "Mute

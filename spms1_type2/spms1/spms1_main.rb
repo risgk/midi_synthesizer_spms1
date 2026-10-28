@@ -642,6 +642,16 @@ while true
   signals[SIGNAL_MOD_WHEEL_REV] = 1.0 - signals[SIGNAL_MOD_WHEEL]
   signals[SIGNAL_MOD_WHEEL_INV] = 0.0 - signals[SIGNAL_MOD_WHEEL]
   signals[SIGNAL_MOD_WHEEL_REV_INV] = signals[SIGNAL_MOD_WHEEL] - 1.0
+  signals[SIGNAL_MOD_WHEEL_COS] = QUARTER_SINE_TABLE[120 - cc_table_index(cc_mod_wheel, mod_wheel)]
+  signals[SIGNAL_MOD_WHEEL_SIN] = QUARTER_SINE_TABLE[cc_table_index(cc_mod_wheel, mod_wheel)]
+  cc_breath = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_BREATH)
+  breath = C.get_midi_cc_value(MIDI_CH, cc_breath)
+  signals[SIGNAL_BREATH] = cc_or_zero(cc_breath, cc_to_unipolar(breath))
+  signals[SIGNAL_BREATH_REV] = 1.0 - signals[SIGNAL_BREATH]
+  signals[SIGNAL_BREATH_INV] = 0.0 - signals[SIGNAL_BREATH]
+  signals[SIGNAL_BREATH_REV_INV] = signals[SIGNAL_BREATH] - 1.0
+  signals[SIGNAL_BREATH_COS] = QUARTER_SINE_TABLE[120 - cc_table_index(cc_breath, breath)]
+  signals[SIGNAL_BREATH_SIN] = QUARTER_SINE_TABLE[cc_table_index(cc_breath, breath)]
   cc_general_1 = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_GENERAL_1)
   general_1 = cc_or_nrpn(cc_general_1, C.get_midi_cc_value(MIDI_CH, cc_general_1), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_GENERAL_1))
   signals[SIGNAL_GENERAL_1] = cc_to_unipolar(general_1)
@@ -650,8 +660,8 @@ while true
   signals[SIGNAL_GENERAL_1_REV_INV] = signals[SIGNAL_GENERAL_1] - 1.0
   signals[SIGNAL_GENERAL_1_BIPOLAR] = signals[SIGNAL_GENERAL_1] - 0.5
   signals[SIGNAL_GENERAL_1_BIPOLAR_INV] = 0.5 - signals[SIGNAL_GENERAL_1]
-  signals[SIGNAL_GENERAL_1_SIN] = QUARTER_SINE_TABLE[value_table_index(general_1)]
   signals[SIGNAL_GENERAL_1_COS] = QUARTER_SINE_TABLE[120 - value_table_index(general_1)]
+  signals[SIGNAL_GENERAL_1_SIN] = QUARTER_SINE_TABLE[value_table_index(general_1)]
   signals[SIGNAL_GENERAL_1_LO] = (signals[SIGNAL_GENERAL_1] < 0.5) ? 1.0 : (2.0 - (signals[SIGNAL_GENERAL_1] + signals[SIGNAL_GENERAL_1]))
   signals[SIGNAL_GENERAL_1_HI] = (signals[SIGNAL_GENERAL_1] > 0.5) ? 1.0 : (signals[SIGNAL_GENERAL_1] + signals[SIGNAL_GENERAL_1])
   signals[SIGNAL_GENERAL_1_NEG] = (signals[SIGNAL_GENERAL_1] > 0.5) ? 0.0 : (1.0 - (signals[SIGNAL_GENERAL_1] + signals[SIGNAL_GENERAL_1]))
@@ -665,8 +675,8 @@ while true
   signals[SIGNAL_GENERAL_2_REV_INV] = signals[SIGNAL_GENERAL_2] - 1.0
   signals[SIGNAL_GENERAL_2_BIPOLAR] = signals[SIGNAL_GENERAL_2] - 0.5
   signals[SIGNAL_GENERAL_2_BIPOLAR_INV] = 0.5 - signals[SIGNAL_GENERAL_2]
-  signals[SIGNAL_GENERAL_2_SIN] = QUARTER_SINE_TABLE[value_table_index(general_2)]
   signals[SIGNAL_GENERAL_2_COS] = QUARTER_SINE_TABLE[120 - value_table_index(general_2)]
+  signals[SIGNAL_GENERAL_2_SIN] = QUARTER_SINE_TABLE[value_table_index(general_2)]
   signals[SIGNAL_GENERAL_2_LO] = (signals[SIGNAL_GENERAL_2] < 0.5) ? 1.0 : (2.0 - (signals[SIGNAL_GENERAL_2] + signals[SIGNAL_GENERAL_2]))
   signals[SIGNAL_GENERAL_2_HI] = (signals[SIGNAL_GENERAL_2] > 0.5) ? 1.0 : (signals[SIGNAL_GENERAL_2] + signals[SIGNAL_GENERAL_2])
   signals[SIGNAL_GENERAL_2_NEG] = (signals[SIGNAL_GENERAL_2] > 0.5) ? 0.0 : (1.0 - (signals[SIGNAL_GENERAL_2] + signals[SIGNAL_GENERAL_2]))
@@ -678,6 +688,16 @@ while true
   signals[SIGNAL_MOD_WHEEL_REV + SMOOTHED_SLOT_OFFSET] = 1.0 - smoothed_mod_wheel
   signals[SIGNAL_MOD_WHEEL_INV + SMOOTHED_SLOT_OFFSET] = 0.0 - smoothed_mod_wheel
   signals[SIGNAL_MOD_WHEEL_REV_INV + SMOOTHED_SLOT_OFFSET] = smoothed_mod_wheel - 1.0
+  signals[SIGNAL_MOD_WHEEL_COS + SMOOTHED_SLOT_OFFSET] = quarter_sine(1.0 - smoothed_mod_wheel)
+  signals[SIGNAL_MOD_WHEEL_SIN + SMOOTHED_SLOT_OFFSET] = quarter_sine(smoothed_mod_wheel)
+  signals[SMOOTHED_STAGE_1_BREATH] = Dsp.smooth(signals[SIGNAL_BREATH], signals[SMOOTHED_STAGE_1_BREATH], CONTROLLER_SMOOTHING_BLEND)
+  smoothed_breath = Dsp.smooth(signals[SMOOTHED_STAGE_1_BREATH], signals[SIGNAL_BREATH + SMOOTHED_SLOT_OFFSET], CONTROLLER_SMOOTHING_BLEND)
+  signals[SIGNAL_BREATH + SMOOTHED_SLOT_OFFSET] = smoothed_breath
+  signals[SIGNAL_BREATH_REV + SMOOTHED_SLOT_OFFSET] = 1.0 - smoothed_breath
+  signals[SIGNAL_BREATH_INV + SMOOTHED_SLOT_OFFSET] = 0.0 - smoothed_breath
+  signals[SIGNAL_BREATH_REV_INV + SMOOTHED_SLOT_OFFSET] = smoothed_breath - 1.0
+  signals[SIGNAL_BREATH_COS + SMOOTHED_SLOT_OFFSET] = quarter_sine(1.0 - smoothed_breath)
+  signals[SIGNAL_BREATH_SIN + SMOOTHED_SLOT_OFFSET] = quarter_sine(smoothed_breath)
   signals[SMOOTHED_STAGE_1_GENERAL_1] = Dsp.smooth(signals[SIGNAL_GENERAL_1], signals[SMOOTHED_STAGE_1_GENERAL_1], CONTROLLER_SMOOTHING_BLEND)
   smoothed_general_1 = Dsp.smooth(signals[SMOOTHED_STAGE_1_GENERAL_1], signals[SIGNAL_GENERAL_1 + SMOOTHED_SLOT_OFFSET], CONTROLLER_SMOOTHING_BLEND)
   signals[SIGNAL_GENERAL_1 + SMOOTHED_SLOT_OFFSET] = smoothed_general_1
@@ -686,8 +706,8 @@ while true
   signals[SIGNAL_GENERAL_1_REV_INV + SMOOTHED_SLOT_OFFSET] = smoothed_general_1 - 1.0
   signals[SIGNAL_GENERAL_1_BIPOLAR + SMOOTHED_SLOT_OFFSET] = smoothed_general_1 - 0.5
   signals[SIGNAL_GENERAL_1_BIPOLAR_INV + SMOOTHED_SLOT_OFFSET] = 0.5 - smoothed_general_1
-  signals[SIGNAL_GENERAL_1_SIN + SMOOTHED_SLOT_OFFSET] = quarter_sine(smoothed_general_1)
   signals[SIGNAL_GENERAL_1_COS + SMOOTHED_SLOT_OFFSET] = quarter_sine(1.0 - smoothed_general_1)
+  signals[SIGNAL_GENERAL_1_SIN + SMOOTHED_SLOT_OFFSET] = quarter_sine(smoothed_general_1)
   signals[SIGNAL_GENERAL_1_LO + SMOOTHED_SLOT_OFFSET] = (smoothed_general_1 < 0.5) ? 1.0 : (2.0 - (smoothed_general_1 + smoothed_general_1))
   signals[SIGNAL_GENERAL_1_HI + SMOOTHED_SLOT_OFFSET] = (smoothed_general_1 > 0.5) ? 1.0 : (smoothed_general_1 + smoothed_general_1)
   signals[SIGNAL_GENERAL_1_NEG + SMOOTHED_SLOT_OFFSET] = (smoothed_general_1 > 0.5) ? 0.0 : (1.0 - (smoothed_general_1 + smoothed_general_1))
@@ -701,8 +721,8 @@ while true
   signals[SIGNAL_GENERAL_2_REV_INV + SMOOTHED_SLOT_OFFSET] = smoothed_general_2 - 1.0
   signals[SIGNAL_GENERAL_2_BIPOLAR + SMOOTHED_SLOT_OFFSET] = smoothed_general_2 - 0.5
   signals[SIGNAL_GENERAL_2_BIPOLAR_INV + SMOOTHED_SLOT_OFFSET] = 0.5 - smoothed_general_2
-  signals[SIGNAL_GENERAL_2_SIN + SMOOTHED_SLOT_OFFSET] = quarter_sine(smoothed_general_2)
   signals[SIGNAL_GENERAL_2_COS + SMOOTHED_SLOT_OFFSET] = quarter_sine(1.0 - smoothed_general_2)
+  signals[SIGNAL_GENERAL_2_SIN + SMOOTHED_SLOT_OFFSET] = quarter_sine(smoothed_general_2)
   signals[SIGNAL_GENERAL_2_LO + SMOOTHED_SLOT_OFFSET] = (smoothed_general_2 < 0.5) ? 1.0 : (2.0 - (smoothed_general_2 + smoothed_general_2))
   signals[SIGNAL_GENERAL_2_HI + SMOOTHED_SLOT_OFFSET] = (smoothed_general_2 > 0.5) ? 1.0 : (smoothed_general_2 + smoothed_general_2)
   signals[SIGNAL_GENERAL_2_NEG + SMOOTHED_SLOT_OFFSET] = (smoothed_general_2 > 0.5) ? 0.0 : (1.0 - (smoothed_general_2 + smoothed_general_2))
@@ -852,62 +872,62 @@ while true
       case module_id
       # patch_gen dispatch
       when 1 # MODULE_PITCH_1
-        signals[38] = pitch_1.process(control_tick, signals[source_pitch_1_pitch_in], signals[source_pitch_1_gate_in], signals[source_pitch_1_bend_in]) # SIGNAL_PITCH_1_OUTPUT_1
-        signals[39] = pitch_1.output_2 # SIGNAL_PITCH_1_OUTPUT_2
+        signals[46] = pitch_1.process(control_tick, signals[source_pitch_1_pitch_in], signals[source_pitch_1_gate_in], signals[source_pitch_1_bend_in]) # SIGNAL_PITCH_1_OUTPUT_1
+        signals[47] = pitch_1.output_2 # SIGNAL_PITCH_1_OUTPUT_2
       when 2 # MODULE_EG_1
-        signals[40] = eg_1.process(control_tick, signals[source_eg_1_gate_in]) # SIGNAL_EG_1_OUTPUT
-        signals[41] = eg_1.output_inverted # SIGNAL_EG_1_OUTPUT_INV
+        signals[48] = eg_1.process(control_tick, signals[source_eg_1_gate_in]) # SIGNAL_EG_1_OUTPUT
+        signals[49] = eg_1.output_inverted # SIGNAL_EG_1_OUTPUT_INV
       when 3 # MODULE_EG_2
-        signals[42] = eg_2.process(control_tick, signals[source_eg_2_gate_in]) # SIGNAL_EG_2_OUTPUT
-        signals[43] = eg_2.output_inverted # SIGNAL_EG_2_OUTPUT_INV
+        signals[50] = eg_2.process(control_tick, signals[source_eg_2_gate_in]) # SIGNAL_EG_2_OUTPUT
+        signals[51] = eg_2.output_inverted # SIGNAL_EG_2_OUTPUT_INV
       when 4 # MODULE_LFO_1
-        signals[44] = lfo_1.process(control_tick, signals[source_lfo_1_rate_mod_in], signals[source_lfo_1_level_mod_in], signals[source_lfo_1_reset_in]) # SIGNAL_LFO_1_OUTPUT
-        signals[45] = lfo_1.output_inverted # SIGNAL_LFO_1_OUTPUT_INV
-        signals[46] = lfo_1.output_triangle # SIGNAL_LFO_1_OUTPUT_TRIANGLE
-        signals[47] = lfo_1.output_triangle_inverted # SIGNAL_LFO_1_OUTPUT_TRIANGLE_INV
-        signals[48] = lfo_1.output_square # SIGNAL_LFO_1_OUTPUT_SQUARE
-        signals[49] = lfo_1.output_square_inverted # SIGNAL_LFO_1_OUTPUT_SQUARE_INV
+        signals[52] = lfo_1.process(control_tick, signals[source_lfo_1_rate_mod_in], signals[source_lfo_1_level_mod_in], signals[source_lfo_1_reset_in]) # SIGNAL_LFO_1_OUTPUT
+        signals[53] = lfo_1.output_inverted # SIGNAL_LFO_1_OUTPUT_INV
+        signals[54] = lfo_1.output_triangle # SIGNAL_LFO_1_OUTPUT_TRIANGLE
+        signals[55] = lfo_1.output_triangle_inverted # SIGNAL_LFO_1_OUTPUT_TRIANGLE_INV
+        signals[56] = lfo_1.output_square # SIGNAL_LFO_1_OUTPUT_SQUARE
+        signals[57] = lfo_1.output_square_inverted # SIGNAL_LFO_1_OUTPUT_SQUARE_INV
       when 5 # MODULE_MIXER_1
-        signals[50] = mixer_1.process(control_tick, signals[source_mixer_1_in_1], signals[source_mixer_1_in_2], signals[source_mixer_1_in_3], signals[source_mixer_1_in_4]) # SIGNAL_MIXER_1_OUTPUT
-        signals[51] = mixer_1.output_inverted # SIGNAL_MIXER_1_OUTPUT_INV
+        signals[58] = mixer_1.process(control_tick, signals[source_mixer_1_in_1], signals[source_mixer_1_in_2], signals[source_mixer_1_in_3], signals[source_mixer_1_in_4]) # SIGNAL_MIXER_1_OUTPUT
+        signals[59] = mixer_1.output_inverted # SIGNAL_MIXER_1_OUTPUT_INV
       when 6 # MODULE_OSC_1
-        signals[52] = osc_1.process(control_tick, signals[source_osc_1_pitch_in], signals[source_osc_1_pitch_mod_1_in], signals[source_osc_1_pitch_mod_2_in], signals[source_osc_1_pw_mod_1_in], signals[source_osc_1_pw_mod_2_in]) # SIGNAL_OSC_1_OUTPUT
-        signals[53] = osc_1.output_saw # SIGNAL_OSC_1_OUTPUT_SAW
-        signals[54] = osc_1.output_pulse # SIGNAL_OSC_1_OUTPUT_PULSE
-        signals[55] = osc_1.output_sub # SIGNAL_OSC_1_OUTPUT_SUB
+        signals[60] = osc_1.process(control_tick, signals[source_osc_1_pitch_in], signals[source_osc_1_pitch_mod_1_in], signals[source_osc_1_pitch_mod_2_in], signals[source_osc_1_pw_mod_1_in], signals[source_osc_1_pw_mod_2_in]) # SIGNAL_OSC_1_OUTPUT
+        signals[61] = osc_1.output_saw # SIGNAL_OSC_1_OUTPUT_SAW
+        signals[62] = osc_1.output_pulse # SIGNAL_OSC_1_OUTPUT_PULSE
+        signals[63] = osc_1.output_sub # SIGNAL_OSC_1_OUTPUT_SUB
       when 7 # MODULE_OSC_2
-        signals[56] = osc_2.process_synced(control_tick, signals[source_osc_2_pitch_in], signals[source_osc_2_pitch_mod_1_in], signals[source_osc_2_pitch_mod_2_in], signals[source_osc_2_pw_mod_1_in], signals[source_osc_2_pw_mod_2_in], signals[source_osc_2_sync_in]) # SIGNAL_OSC_2_OUTPUT
-        signals[57] = osc_2.output_saw # SIGNAL_OSC_2_OUTPUT_SAW
-        signals[58] = osc_2.output_pulse # SIGNAL_OSC_2_OUTPUT_PULSE
+        signals[64] = osc_2.process_synced(control_tick, signals[source_osc_2_pitch_in], signals[source_osc_2_pitch_mod_1_in], signals[source_osc_2_pitch_mod_2_in], signals[source_osc_2_pw_mod_1_in], signals[source_osc_2_pw_mod_2_in], signals[source_osc_2_sync_in]) # SIGNAL_OSC_2_OUTPUT
+        signals[65] = osc_2.output_saw # SIGNAL_OSC_2_OUTPUT_SAW
+        signals[66] = osc_2.output_pulse # SIGNAL_OSC_2_OUTPUT_PULSE
       when 8 # MODULE_NOISE_1
-        signals[59] = noise_1.process(control_tick) # SIGNAL_NOISE_1_OUTPUT
-        signals[60] = noise_1.output_white # SIGNAL_NOISE_1_OUTPUT_WHITE
-        signals[61] = noise_1.output_red # SIGNAL_NOISE_1_OUTPUT_RED
+        signals[67] = noise_1.process(control_tick) # SIGNAL_NOISE_1_OUTPUT
+        signals[68] = noise_1.output_white # SIGNAL_NOISE_1_OUTPUT_WHITE
+        signals[69] = noise_1.output_red # SIGNAL_NOISE_1_OUTPUT_RED
       when 9 # MODULE_MIXER_2
-        signals[62] = mixer_2.process(control_tick, signals[source_mixer_2_in_1], signals[source_mixer_2_in_2], signals[source_mixer_2_in_3], signals[source_mixer_2_in_4]) # SIGNAL_MIXER_2_OUTPUT
-        signals[63] = mixer_2.output_inverted # SIGNAL_MIXER_2_OUTPUT_INV
+        signals[70] = mixer_2.process(control_tick, signals[source_mixer_2_in_1], signals[source_mixer_2_in_2], signals[source_mixer_2_in_3], signals[source_mixer_2_in_4]) # SIGNAL_MIXER_2_OUTPUT
+        signals[71] = mixer_2.output_inverted # SIGNAL_MIXER_2_OUTPUT_INV
       when 10 # MODULE_FILTER_1
-        signals[64] = filter_1.process(control_tick, signals[source_filter_1_audio_in_1], signals[source_filter_1_audio_in_2], signals[source_filter_1_pitch_in], signals[source_filter_1_mod_1_in], signals[source_filter_1_mod_2_in]) # SIGNAL_FILTER_1_OUTPUT
-        signals[65] = filter_1.output_lp # SIGNAL_FILTER_1_OUTPUT_LP
-        signals[66] = filter_1.output_hp # SIGNAL_FILTER_1_OUTPUT_HP
-        signals[67] = filter_1.output_bp # SIGNAL_FILTER_1_OUTPUT_BP
+        signals[72] = filter_1.process(control_tick, signals[source_filter_1_audio_in_1], signals[source_filter_1_audio_in_2], signals[source_filter_1_pitch_in], signals[source_filter_1_mod_1_in], signals[source_filter_1_mod_2_in]) # SIGNAL_FILTER_1_OUTPUT
+        signals[73] = filter_1.output_lp # SIGNAL_FILTER_1_OUTPUT_LP
+        signals[74] = filter_1.output_hp # SIGNAL_FILTER_1_OUTPUT_HP
+        signals[75] = filter_1.output_bp # SIGNAL_FILTER_1_OUTPUT_BP
       when 11 # MODULE_FILTER_2
-        signals[68] = filter_2.process(control_tick, signals[source_filter_2_audio_in_1], signals[source_filter_2_audio_in_2], signals[source_filter_2_pitch_in], signals[source_filter_2_mod_1_in], signals[source_filter_2_mod_2_in]) # SIGNAL_FILTER_2_OUTPUT
-        signals[69] = filter_2.output_lp # SIGNAL_FILTER_2_OUTPUT_LP
-        signals[70] = filter_2.output_hp # SIGNAL_FILTER_2_OUTPUT_HP
-        signals[71] = filter_2.output_bp # SIGNAL_FILTER_2_OUTPUT_BP
+        signals[76] = filter_2.process(control_tick, signals[source_filter_2_audio_in_1], signals[source_filter_2_audio_in_2], signals[source_filter_2_pitch_in], signals[source_filter_2_mod_1_in], signals[source_filter_2_mod_2_in]) # SIGNAL_FILTER_2_OUTPUT
+        signals[77] = filter_2.output_lp # SIGNAL_FILTER_2_OUTPUT_LP
+        signals[78] = filter_2.output_hp # SIGNAL_FILTER_2_OUTPUT_HP
+        signals[79] = filter_2.output_bp # SIGNAL_FILTER_2_OUTPUT_BP
       when 12 # MODULE_AMP_1
-        signals[72] = amp_1.process(control_tick, signals[source_amp_1_audio_in_1], signals[source_amp_1_audio_in_2], signals[source_amp_1_mod_1_in], signals[source_amp_1_mod_2_in]) # SIGNAL_AMP_1_OUTPUT
+        signals[80] = amp_1.process(control_tick, signals[source_amp_1_audio_in_1], signals[source_amp_1_audio_in_2], signals[source_amp_1_mod_1_in], signals[source_amp_1_mod_2_in]) # SIGNAL_AMP_1_OUTPUT
       when 13 # MODULE_CHORUS_1
         chorus_1.process(control_tick, signals[source_chorus_1_audio_in])
-        signals[73] = chorus_1.output_l # SIGNAL_CHORUS_1_OUTPUT_L
-        signals[74] = chorus_1.output_r # SIGNAL_CHORUS_1_OUTPUT_R
-        signals[75] = chorus_1.output_mono # SIGNAL_CHORUS_1_OUTPUT_MONO
+        signals[81] = chorus_1.output_l # SIGNAL_CHORUS_1_OUTPUT_L
+        signals[82] = chorus_1.output_r # SIGNAL_CHORUS_1_OUTPUT_R
+        signals[83] = chorus_1.output_mono # SIGNAL_CHORUS_1_OUTPUT_MONO
       when 14 # MODULE_DELAY_1
         delay_1.process(control_tick, signals[source_delay_1_audio_in_l], signals[source_delay_1_audio_in_r])
-        signals[76] = delay_1.output_l # SIGNAL_DELAY_1_OUTPUT_L
-        signals[77] = delay_1.output_r # SIGNAL_DELAY_1_OUTPUT_R
-        signals[78] = delay_1.output_mono # SIGNAL_DELAY_1_OUTPUT_MONO
+        signals[84] = delay_1.output_l # SIGNAL_DELAY_1_OUTPUT_L
+        signals[85] = delay_1.output_r # SIGNAL_DELAY_1_OUTPUT_R
+        signals[86] = delay_1.output_mono # SIGNAL_DELAY_1_OUTPUT_MONO
       # patch_gen end
       end
 

@@ -144,11 +144,21 @@ signals:
   - { key: NOTE_GATE,  id: 6, label: Note Gate }
   - { key: PITCH_BEND, id: 7, label: Pitch Bend, bipolar: true }
   # The mod wheel, a control slot no parameter owns: its CC put on the bus, unipolar, for any
-  # input or parameter to read, and in three more shapes: turned round, negated, and both.
+  # input or parameter to read, and in five more shapes: turned round, negated, and both, and
+  # the quarter sine and cosine of the general controls below, the equal-power pair.
   - { key: MOD_WHEEL,  id: 8, control: MOD_WHEEL }
   - { key: MOD_WHEEL_REV,     id: 9, control: MOD_WHEEL, form: rev,     label: Mod Wheel Rev }
   - { key: MOD_WHEEL_INV,     id: 10, control: MOD_WHEEL, form: inv,     label: Mod Wheel Inv }
   - { key: MOD_WHEEL_REV_INV, id: 11, control: MOD_WHEEL, form: rev_inv, label: Mod Wheel Rev Inv }
+  - { key: MOD_WHEEL_COS,     id: 12, control: MOD_WHEEL, form: cos,    label: Mod Wheel Cos }
+  - { key: MOD_WHEEL_SIN,     id: 13, control: MOD_WHEEL, form: sin,    label: Mod Wheel Sin }
+  # The breath controller, as the mod wheel: its CC on the bus, and in the same five shapes.
+  - { key: BREATH,         id: 14, control: BREATH }
+  - { key: BREATH_REV,     id: 15, control: BREATH, form: rev,     label: Breath Rev }
+  - { key: BREATH_INV,     id: 16, control: BREATH, form: inv,     label: Breath Inv }
+  - { key: BREATH_REV_INV, id: 17, control: BREATH, form: rev_inv, label: Breath Rev Inv }
+  - { key: BREATH_COS,     id: 18, control: BREATH, form: cos,    label: Breath Cos }
+  - { key: BREATH_SIN,     id: 19, control: BREATH, form: sin,    label: Breath Sin }
   # The general controls, General 1 and 2, each a CC put on the bus as it is and in twelve more
   # shapes: turned round, negated, both, centered on zero either way up, a quarter sine and
   # cosine, an equal-power pair: two levels taking Sin and Cos crossfade with no dip in the
@@ -160,82 +170,82 @@ signals:
   # module input but a gate input takes a smoothed copy (see spms1_main.rb). A switch or a
   # parameter taking Rev moves the other way from one taking the CC itself, so one CC can turn a
   # switch on while it turns another off.
-  - { key: GENERAL_1,             id: 12, control: GENERAL_1 }
-  - { key: GENERAL_1_REV,         id: 13, control: GENERAL_1, form: rev,         label: General 1 Rev }
-  - { key: GENERAL_1_INV,         id: 14, control: GENERAL_1, form: inv,         label: General 1 Inv }
-  - { key: GENERAL_1_REV_INV,     id: 15, control: GENERAL_1, form: rev_inv,     label: General 1 Rev Inv }
-  - { key: GENERAL_1_BIPOLAR,     id: 16, control: GENERAL_1, form: bipolar,     label: General 1 Bipolar, bipolar: true }
-  - { key: GENERAL_1_BIPOLAR_INV, id: 17, control: GENERAL_1, form: bipolar_inv, label: General 1 Bipolar Inv, bipolar: true }
-  - { key: GENERAL_1_SIN,         id: 18, control: GENERAL_1, form: sin,         label: General 1 Sin }
-  - { key: GENERAL_1_COS,         id: 19, control: GENERAL_1, form: cos,         label: General 1 Cos }
-  - { key: GENERAL_1_LO,          id: 20, control: GENERAL_1, form: lo,          label: General 1 Lo }
-  - { key: GENERAL_1_HI,          id: 21, control: GENERAL_1, form: hi,          label: General 1 Hi }
-  - { key: GENERAL_1_NEG,         id: 22, control: GENERAL_1, form: neg,         label: General 1 Neg }
-  - { key: GENERAL_1_MID,         id: 23, control: GENERAL_1, form: mid,         label: General 1 Mid }
-  - { key: GENERAL_1_POS,         id: 24, control: GENERAL_1, form: pos,         label: General 1 Pos }
-  - { key: GENERAL_2,             id: 25, control: GENERAL_2 }
-  - { key: GENERAL_2_REV,         id: 26, control: GENERAL_2, form: rev,         label: General 2 Rev }
-  - { key: GENERAL_2_INV,         id: 27, control: GENERAL_2, form: inv,         label: General 2 Inv }
-  - { key: GENERAL_2_REV_INV,     id: 28, control: GENERAL_2, form: rev_inv,     label: General 2 Rev Inv }
-  - { key: GENERAL_2_BIPOLAR,     id: 29, control: GENERAL_2, form: bipolar,     label: General 2 Bipolar, bipolar: true }
-  - { key: GENERAL_2_BIPOLAR_INV, id: 30, control: GENERAL_2, form: bipolar_inv, label: General 2 Bipolar Inv, bipolar: true }
-  - { key: GENERAL_2_SIN,         id: 31, control: GENERAL_2, form: sin,         label: General 2 Sin }
-  - { key: GENERAL_2_COS,         id: 32, control: GENERAL_2, form: cos,         label: General 2 Cos }
-  - { key: GENERAL_2_LO,          id: 33, control: GENERAL_2, form: lo,          label: General 2 Lo }
-  - { key: GENERAL_2_HI,          id: 34, control: GENERAL_2, form: hi,          label: General 2 Hi }
-  - { key: GENERAL_2_NEG,         id: 35, control: GENERAL_2, form: neg,         label: General 2 Neg }
-  - { key: GENERAL_2_MID,         id: 36, control: GENERAL_2, form: mid,         label: General 2 Mid }
-  - { key: GENERAL_2_POS,         id: 37, control: GENERAL_2, form: pos,         label: General 2 Pos }
+  - { key: GENERAL_1,             id: 20, control: GENERAL_1 }
+  - { key: GENERAL_1_REV,         id: 21, control: GENERAL_1, form: rev,         label: General 1 Rev }
+  - { key: GENERAL_1_INV,         id: 22, control: GENERAL_1, form: inv,         label: General 1 Inv }
+  - { key: GENERAL_1_REV_INV,     id: 23, control: GENERAL_1, form: rev_inv,     label: General 1 Rev Inv }
+  - { key: GENERAL_1_BIPOLAR,     id: 24, control: GENERAL_1, form: bipolar,     label: General 1 Bipolar, bipolar: true }
+  - { key: GENERAL_1_BIPOLAR_INV, id: 25, control: GENERAL_1, form: bipolar_inv, label: General 1 Bipolar Inv, bipolar: true }
+  - { key: GENERAL_1_COS,         id: 26, control: GENERAL_1, form: cos,         label: General 1 Cos }
+  - { key: GENERAL_1_SIN,         id: 27, control: GENERAL_1, form: sin,         label: General 1 Sin }
+  - { key: GENERAL_1_LO,          id: 28, control: GENERAL_1, form: lo,          label: General 1 Lo }
+  - { key: GENERAL_1_HI,          id: 29, control: GENERAL_1, form: hi,          label: General 1 Hi }
+  - { key: GENERAL_1_NEG,         id: 30, control: GENERAL_1, form: neg,         label: General 1 Neg }
+  - { key: GENERAL_1_MID,         id: 31, control: GENERAL_1, form: mid,         label: General 1 Mid }
+  - { key: GENERAL_1_POS,         id: 32, control: GENERAL_1, form: pos,         label: General 1 Pos }
+  - { key: GENERAL_2,             id: 33, control: GENERAL_2 }
+  - { key: GENERAL_2_REV,         id: 34, control: GENERAL_2, form: rev,         label: General 2 Rev }
+  - { key: GENERAL_2_INV,         id: 35, control: GENERAL_2, form: inv,         label: General 2 Inv }
+  - { key: GENERAL_2_REV_INV,     id: 36, control: GENERAL_2, form: rev_inv,     label: General 2 Rev Inv }
+  - { key: GENERAL_2_BIPOLAR,     id: 37, control: GENERAL_2, form: bipolar,     label: General 2 Bipolar, bipolar: true }
+  - { key: GENERAL_2_BIPOLAR_INV, id: 38, control: GENERAL_2, form: bipolar_inv, label: General 2 Bipolar Inv, bipolar: true }
+  - { key: GENERAL_2_COS,         id: 39, control: GENERAL_2, form: cos,         label: General 2 Cos }
+  - { key: GENERAL_2_SIN,         id: 40, control: GENERAL_2, form: sin,         label: General 2 Sin }
+  - { key: GENERAL_2_LO,          id: 41, control: GENERAL_2, form: lo,          label: General 2 Lo }
+  - { key: GENERAL_2_HI,          id: 42, control: GENERAL_2, form: hi,          label: General 2 Hi }
+  - { key: GENERAL_2_NEG,         id: 43, control: GENERAL_2, form: neg,         label: General 2 Neg }
+  - { key: GENERAL_2_MID,         id: 44, control: GENERAL_2, form: mid,         label: General 2 Mid }
+  - { key: GENERAL_2_POS,         id: 45, control: GENERAL_2, form: pos,         label: General 2 Pos }
 
   # The module outputs, module by module, each module's main output first.
-  - { key: PITCH_1_OUTPUT_1, id: 38, module: PITCH_1, output: Out 1, label: Pitch 1 Output 1, bipolar: true }
-  - { key: PITCH_1_OUTPUT_2, id: 39, module: PITCH_1, output: Out 2, label: Pitch 1 Output 2, bipolar: true, get: output_2 }
-  - { key: EG_1_OUTPUT,        id: 40, module: EG_1,     output: Out,    label: EG 1 Output }
+  - { key: PITCH_1_OUTPUT_1, id: 46, module: PITCH_1, output: Out 1, label: Pitch 1 Output 1, bipolar: true }
+  - { key: PITCH_1_OUTPUT_2, id: 47, module: PITCH_1, output: Out 2, label: Pitch 1 Output 2, bipolar: true, get: output_2 }
+  - { key: EG_1_OUTPUT,        id: 48, module: EG_1,     output: Out,    label: EG 1 Output }
   # Out Inv, of the envelopes, the LFO and the mixers, is Out negated.
-  - { key: EG_1_OUTPUT_INV,    id: 41, module: EG_1,     output: Out Inv, label: EG 1 Output Inv, get: output_inverted }
-  - { key: EG_2_OUTPUT,        id: 42, module: EG_2,     output: Out,    label: EG 2 Output }
-  - { key: EG_2_OUTPUT_INV,    id: 43, module: EG_2,     output: Out Inv, label: EG 2 Output Inv, get: output_inverted }
+  - { key: EG_1_OUTPUT_INV,    id: 49, module: EG_1,     output: Out Inv, label: EG 1 Output Inv, get: output_inverted }
+  - { key: EG_2_OUTPUT,        id: 50, module: EG_2,     output: Out,    label: EG 2 Output }
+  - { key: EG_2_OUTPUT_INV,    id: 51, module: EG_2,     output: Out Inv, label: EG 2 Output Inv, get: output_inverted }
   # Out is the triangle and the square crossfaded by Wave; each of the three has its inverted output
   # beside it. The square is unipolar, 0.0 and 1.0, and its inverted output 0.0 and -1.0.
-  - { key: LFO_1_OUTPUT,       id: 44, module: LFO_1,    output: Out,    label: LFO 1 Output,       bipolar: true }
-  - { key: LFO_1_OUTPUT_INV,   id: 45, module: LFO_1,    output: Out Inv, label: LFO 1 Output Inv,  bipolar: true, get: output_inverted }
-  - { key: LFO_1_OUTPUT_TRIANGLE, id: 46, module: LFO_1, output: Out Triangle, label: LFO 1 Output Triangle, bipolar: true, get: output_triangle }
-  - { key: LFO_1_OUTPUT_TRIANGLE_INV, id: 47, module: LFO_1, output: Out Triangle Inv, label: LFO 1 Output Triangle Inv, bipolar: true, get: output_triangle_inverted }
-  - { key: LFO_1_OUTPUT_SQUARE,   id: 48, module: LFO_1, output: Out Square,   label: LFO 1 Output Square,   get: output_square }
-  - { key: LFO_1_OUTPUT_SQUARE_INV, id: 49, module: LFO_1, output: Out Square Inv, label: LFO 1 Output Square Inv, get: output_square_inverted }
-  - { key: MIXER_1_OUTPUT,     id: 50, module: MIXER_1,  output: Out,    label: Mixer 1 Output,     bipolar: true }
-  - { key: MIXER_1_OUTPUT_INV,   id: 51, module: MIXER_1,  output: Out Inv, label: Mixer 1 Output Inv, bipolar: true, get: output_inverted }
+  - { key: LFO_1_OUTPUT,       id: 52, module: LFO_1,    output: Out,    label: LFO 1 Output,       bipolar: true }
+  - { key: LFO_1_OUTPUT_INV,   id: 53, module: LFO_1,    output: Out Inv, label: LFO 1 Output Inv,  bipolar: true, get: output_inverted }
+  - { key: LFO_1_OUTPUT_TRIANGLE, id: 54, module: LFO_1, output: Out Triangle, label: LFO 1 Output Triangle, bipolar: true, get: output_triangle }
+  - { key: LFO_1_OUTPUT_TRIANGLE_INV, id: 55, module: LFO_1, output: Out Triangle Inv, label: LFO 1 Output Triangle Inv, bipolar: true, get: output_triangle_inverted }
+  - { key: LFO_1_OUTPUT_SQUARE,   id: 56, module: LFO_1, output: Out Square,   label: LFO 1 Output Square,   get: output_square }
+  - { key: LFO_1_OUTPUT_SQUARE_INV, id: 57, module: LFO_1, output: Out Square Inv, label: LFO 1 Output Square Inv, get: output_square_inverted }
+  - { key: MIXER_1_OUTPUT,     id: 58, module: MIXER_1,  output: Out,    label: Mixer 1 Output,     bipolar: true }
+  - { key: MIXER_1_OUTPUT_INV,   id: 59, module: MIXER_1,  output: Out Inv, label: Mixer 1 Output Inv, bipolar: true, get: output_inverted }
   # Each oscillator's Out is the morph from the saw to the pulse, by Wave.
-  - { key: OSC_1_OUTPUT,       id: 52, module: OSC_1,    output: Out,    label: Osc 1 Output,       bipolar: true }
-  - { key: OSC_1_OUTPUT_SAW,   id: 53, module: OSC_1, output: Out Saw,   label: Osc 1 Output Saw,   bipolar: true, get: output_saw }
-  - { key: OSC_1_OUTPUT_PULSE, id: 54, module: OSC_1, output: Out Pulse, label: Osc 1 Output Pulse, bipolar: true, get: output_pulse }
-  - { key: OSC_1_OUTPUT_SUB,   id: 55, module: OSC_1, output: Out Sub,   label: Osc 1 Output Sub,   bipolar: true, get: output_sub }
-  - { key: OSC_2_OUTPUT,         id: 56, module: OSC_2,   output: Out,       label: Osc 2 Output,         bipolar: true }
-  - { key: OSC_2_OUTPUT_SAW,   id: 57, module: OSC_2, output: Out Saw,   label: Osc 2 Output Saw,   bipolar: true, get: output_saw }
-  - { key: OSC_2_OUTPUT_PULSE, id: 58, module: OSC_2, output: Out Pulse, label: Osc 2 Output Pulse, bipolar: true, get: output_pulse }
+  - { key: OSC_1_OUTPUT,       id: 60, module: OSC_1,    output: Out,    label: Osc 1 Output,       bipolar: true }
+  - { key: OSC_1_OUTPUT_SAW,   id: 61, module: OSC_1, output: Out Saw,   label: Osc 1 Output Saw,   bipolar: true, get: output_saw }
+  - { key: OSC_1_OUTPUT_PULSE, id: 62, module: OSC_1, output: Out Pulse, label: Osc 1 Output Pulse, bipolar: true, get: output_pulse }
+  - { key: OSC_1_OUTPUT_SUB,   id: 63, module: OSC_1, output: Out Sub,   label: Osc 1 Output Sub,   bipolar: true, get: output_sub }
+  - { key: OSC_2_OUTPUT,         id: 64, module: OSC_2,   output: Out,       label: Osc 2 Output,         bipolar: true }
+  - { key: OSC_2_OUTPUT_SAW,   id: 65, module: OSC_2, output: Out Saw,   label: Osc 2 Output Saw,   bipolar: true, get: output_saw }
+  - { key: OSC_2_OUTPUT_PULSE, id: 66, module: OSC_2, output: Out Pulse, label: Osc 2 Output Pulse, bipolar: true, get: output_pulse }
   # Out is the white and the red crossfaded by Color.
-  - { key: NOISE_1_OUTPUT,       id: 59, module: NOISE_1, output: Out,       label: Noise 1 Output,       bipolar: true }
-  - { key: NOISE_1_OUTPUT_WHITE, id: 60, module: NOISE_1, output: Out White, label: Noise 1 Output White, bipolar: true, get: output_white }
-  - { key: NOISE_1_OUTPUT_RED,   id: 61, module: NOISE_1, output: Out Red,   label: Noise 1 Output Red,   bipolar: true, get: output_red }
-  - { key: MIXER_2_OUTPUT,       id: 62, module: MIXER_2, output: Out,      label: Mixer 2 Output,       bipolar: true }
-  - { key: MIXER_2_OUTPUT_INV,   id: 63, module: MIXER_2,  output: Out Inv, label: Mixer 2 Output Inv, bipolar: true, get: output_inverted }
+  - { key: NOISE_1_OUTPUT,       id: 67, module: NOISE_1, output: Out,       label: Noise 1 Output,       bipolar: true }
+  - { key: NOISE_1_OUTPUT_WHITE, id: 68, module: NOISE_1, output: Out White, label: Noise 1 Output White, bipolar: true, get: output_white }
+  - { key: NOISE_1_OUTPUT_RED,   id: 69, module: NOISE_1, output: Out Red,   label: Noise 1 Output Red,   bipolar: true, get: output_red }
+  - { key: MIXER_2_OUTPUT,       id: 70, module: MIXER_2, output: Out,      label: Mixer 2 Output,       bipolar: true }
+  - { key: MIXER_2_OUTPUT_INV,   id: 71, module: MIXER_2,  output: Out Inv, label: Mixer 2 Output Inv, bipolar: true, get: output_inverted }
   # Out is the low pass and the high pass crossfaded by Mode, through a notch.
-  - { key: FILTER_1_OUTPUT,    id: 64, module: FILTER_1, output: Out,    label: Filter 1 Output,    bipolar: true }
-  - { key: FILTER_1_OUTPUT_LP, id: 65, module: FILTER_1, output: Out LP, label: Filter 1 Output LP, bipolar: true, get: output_lp }
-  - { key: FILTER_1_OUTPUT_HP, id: 66, module: FILTER_1, output: Out HP, label: Filter 1 Output HP, bipolar: true, get: output_hp }
-  - { key: FILTER_1_OUTPUT_BP, id: 67, module: FILTER_1, output: Out BP, label: Filter 1 Output BP, bipolar: true, get: output_bp }
-  - { key: FILTER_2_OUTPUT,    id: 68, module: FILTER_2, output: Out,    label: Filter 2 Output,    bipolar: true }
-  - { key: FILTER_2_OUTPUT_LP, id: 69, module: FILTER_2, output: Out LP, label: Filter 2 Output LP, bipolar: true, get: output_lp }
-  - { key: FILTER_2_OUTPUT_HP, id: 70, module: FILTER_2, output: Out HP, label: Filter 2 Output HP, bipolar: true, get: output_hp }
-  - { key: FILTER_2_OUTPUT_BP, id: 71, module: FILTER_2, output: Out BP, label: Filter 2 Output BP, bipolar: true, get: output_bp }
-  - { key: AMP_1_OUTPUT,       id: 72, module: AMP_1,    output: Out,    label: Amp 1 Output,       bipolar: true }
+  - { key: FILTER_1_OUTPUT,    id: 72, module: FILTER_1, output: Out,    label: Filter 1 Output,    bipolar: true }
+  - { key: FILTER_1_OUTPUT_LP, id: 73, module: FILTER_1, output: Out LP, label: Filter 1 Output LP, bipolar: true, get: output_lp }
+  - { key: FILTER_1_OUTPUT_HP, id: 74, module: FILTER_1, output: Out HP, label: Filter 1 Output HP, bipolar: true, get: output_hp }
+  - { key: FILTER_1_OUTPUT_BP, id: 75, module: FILTER_1, output: Out BP, label: Filter 1 Output BP, bipolar: true, get: output_bp }
+  - { key: FILTER_2_OUTPUT,    id: 76, module: FILTER_2, output: Out,    label: Filter 2 Output,    bipolar: true }
+  - { key: FILTER_2_OUTPUT_LP, id: 77, module: FILTER_2, output: Out LP, label: Filter 2 Output LP, bipolar: true, get: output_lp }
+  - { key: FILTER_2_OUTPUT_HP, id: 78, module: FILTER_2, output: Out HP, label: Filter 2 Output HP, bipolar: true, get: output_hp }
+  - { key: FILTER_2_OUTPUT_BP, id: 79, module: FILTER_2, output: Out BP, label: Filter 2 Output BP, bipolar: true, get: output_bp }
+  - { key: AMP_1_OUTPUT,       id: 80, module: AMP_1,    output: Out,    label: Amp 1 Output,       bipolar: true }
   # Out Mono, of the chorus and of the delay, is the average of the two sides, a sub output.
-  - { key: CHORUS_1_OUTPUT_L,  id: 73, module: CHORUS_1, output: Out L,  label: Chorus 1 Output L,  bipolar: true, get: output_l }
-  - { key: CHORUS_1_OUTPUT_R,  id: 74, module: CHORUS_1, output: Out R,  label: Chorus 1 Output R,  bipolar: true, get: output_r }
-  - { key: CHORUS_1_OUTPUT_MONO, id: 75, module: CHORUS_1, output: Out Mono, label: Chorus 1 Output Mono, bipolar: true, get: output_mono }
-  - { key: DELAY_1_OUTPUT_L,   id: 76, module: DELAY_1,  output: Out L,  label: Delay 1 Output L,   bipolar: true, get: output_l }
-  - { key: DELAY_1_OUTPUT_R,   id: 77, module: DELAY_1,  output: Out R,  label: Delay 1 Output R,   bipolar: true, get: output_r }
-  - { key: DELAY_1_OUTPUT_MONO,  id: 78, module: DELAY_1,  output: Out Mono, label: Delay 1 Output Mono,  bipolar: true, get: output_mono }
+  - { key: CHORUS_1_OUTPUT_L,  id: 81, module: CHORUS_1, output: Out L,  label: Chorus 1 Output L,  bipolar: true, get: output_l }
+  - { key: CHORUS_1_OUTPUT_R,  id: 82, module: CHORUS_1, output: Out R,  label: Chorus 1 Output R,  bipolar: true, get: output_r }
+  - { key: CHORUS_1_OUTPUT_MONO, id: 83, module: CHORUS_1, output: Out Mono, label: Chorus 1 Output Mono, bipolar: true, get: output_mono }
+  - { key: DELAY_1_OUTPUT_L,   id: 84, module: DELAY_1,  output: Out L,  label: Delay 1 Output L,   bipolar: true, get: output_l }
+  - { key: DELAY_1_OUTPUT_R,   id: 85, module: DELAY_1,  output: Out R,  label: Delay 1 Output R,   bipolar: true, get: output_r }
+  - { key: DELAY_1_OUTPUT_MONO,  id: 86, module: DELAY_1,  output: Out Mono, label: Delay 1 Output Mono,  bipolar: true, get: output_mono }
 
 # Module inputs, NRPN category 1, listed in the editor's order, each by its entry: what feeds each
 # one in the default patch (`source`, a signal key). `label` is the editor's, on the module; `name`
@@ -497,16 +507,20 @@ controls:
 
   # The mod wheel, a controller control: its CC, CC 1 as in the MIDI spec, put on the bus as a
   # unipolar slot, and in its three shapes (see `signals`), for any input or parameter to read. It
-  # powers up at CC 4, 0.0. `performance` marks it as played rather than set: a Save keeps no value
-  # for its CC, whichever it is, unless a control without the mark has it too, so that the patch
-  # saved loads with it at 0. The general controls, unmarked, are saved as set.
+  # powers up at CC 4, 0.0. `performance` marks it, and the breath controller below, as played
+  # rather than set: a Save keeps no value for its CC, whichever it is, unless a control without
+  # the mark has it too, so that the patch saved loads with it at 0. The general controls,
+  # unmarked, are saved as set.
   - { entry: 95, controller: true, performance: true, key: MOD_WHEEL, label: Mod Wheel, cc: 1,   value: 4 }
+  # The breath controller, CC 2 in the MIDI spec, as the mod wheel: played rather than set, on the
+  # bus in the same shapes, and beside the mod wheel by the soft keyboard.
+  - { entry: 96, controller: true, performance: true, key: BREATH,    label: Breath,    cc: 2,   value: 4 }
   # The general controls, on CC 16 and 17, General Purpose Controllers 1 and 2 in the MIDI spec,
   # each filling its slots (see `signals`). They power up at CC 4, 0.0, and the default patch routes
   # none of them. With no CC, each holds its value in category 4, as a parameter does.
-  - { entry: 96, controller: true, key: GENERAL_1, label: General 1, cc: 16,  value: 4 }
-  - { entry: 97, controller: true, key: GENERAL_2, label: General 2, cc: 17,  value: 4 }
+  - { entry: 97, controller: true, key: GENERAL_1, label: General 1, cc: 16,  value: 4 }
+  - { entry: 98, controller: true, key: GENERAL_2, label: General 2, cc: 17,  value: 4 }
   # Amp 1 Limiter Sw, after the controllers so that no entry before it moves: the amp's look-ahead
   # limiter, on at CC 64 and above. It has no CC and powers up on (CC 124); off, the peaks past one
   # unit reach the clamp. Either way the amp's output comes 1 ms late.
-  - { entry: 98, module: AMP_1,     key: LIMITER_SW,   label: Limiter Sw,   cc: 0,   value: 124, hint: Off/On, set: set_limiter_switch }
+  - { entry: 99, module: AMP_1,     key: LIMITER_SW,   label: Limiter Sw,   cc: 0,   value: 124, hint: Off/On, set: set_limiter_switch }
