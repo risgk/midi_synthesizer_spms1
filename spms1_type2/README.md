@@ -41,8 +41,6 @@ Required Hardware
         - The PWM level (3200 steps) is quantized with 1st-order noise shaping and TPDF dither
         - Each sample is split into 4 PWM periods (PWM carrier: 192 kHz instead of 48 kHz), so the carrier is easier to filter out
           and less likely to cause beeps or whines in active speakers (`SPMS1_PWM_AUDIO_SUBPERIODS`: 1, 2, 4, or 8)
-        - Latency: about 7 ms, 2.7 ms more than with I2S, as 4 output buffers are queued rather than 2
-          (`SPMS1_PWM_AUDIO_BUFFERS`), the writes to PWM Audio taking longer (see Latency below)
     - NOTE: The RP2350 system clock (sysclk) changes to overclocked 153.6 MHz, set by the sketch's own I2S or PWM Audio output
       ("spms1_pico2_i2s.h" or "spms1_pico2_pwm_audio.h"), not by the Arduino-Pico I2S library
 
@@ -229,10 +227,9 @@ puts the default patch back. Keep a patch with Save JSON, or in the synth with S
 
 ### Latency
 
-About 7 ms with PWM Audio, and about 4 ms with I2S, from a MIDI message to the sound that answers it:
+About 4 ms from a MIDI message to the sound that answers it:
 
-- The output buffers of 64 samples each: four with PWM Audio, 5.3 ms, whose writes take longer, and
-  two with I2S, 2.7 ms
+- Two output buffers of 64 samples each: 2.7 ms
 - MIDI is read once per buffer, so a message waits up to one more: 1.3 ms
 
 That is the synth's own; what the MIDI link and the DAC add sits on top of it.

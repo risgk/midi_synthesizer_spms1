@@ -33,11 +33,6 @@
 // for Pimoroni Pico VGA Demo Base (PIM553)
 #define SPMS1_PWM_AUDIO_L_PIN               (28)
 #define SPMS1_PWM_AUDIO_R_PIN               (27)
-// The output buffers queued with PWM Audio, in place of the synth's AUDIO_BUFFERS (2, kept for
-// I2S): the writes to PWM Audio take longer, about 40 us a buffer, and with the synth near 1300 us a
-// buffer, 2 left too little for the delays core 0 and the interrupts add now and then (see
-// "underruns" in Debug Print); 4 take them up, for 2.7 ms more of latency
-#define SPMS1_PWM_AUDIO_BUFFERS             (4)
 
 //#define SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO
 
@@ -218,7 +213,7 @@ void start_audio() {
   g_pwm_output.setSysClk(g_sample_rate);
   pinMode(SPMS1_PWM_AUDIO_L_PIN, OUTPUT_12MA);
   pinMode(SPMS1_PWM_AUDIO_R_PIN, OUTPUT_12MA);
-  g_pwm_output.setBufferFrames(SPMS1_PWM_AUDIO_BUFFERS * g_audio_buffer_words);
+  g_pwm_output.setBufferFrames(g_audio_buffers * g_audio_buffer_words);
   g_pwm_output.begin(g_sample_rate);
 }
 
