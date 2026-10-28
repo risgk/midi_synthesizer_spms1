@@ -31,6 +31,7 @@
 |                           103 | x             | o             | Osc 1 PW Mod 2 Amt (LFO)             |
 |                            85 | x             | o             | Osc 2 Pitch Coarse (+-60 Semitones)  |
 |                            76 | x             | o             | Osc 2 Pitch Fine (+-50 Cents)        |
+|                           119 | x             | o             | Osc 2 Pitch (0 to +2 Octaves)        |
 |                           118 | x             | o             | Osc 1 Pitch Mod 1 Sw [Off|On]        |
 |                           112 | x             | o             | Osc 2 Sync Sw [Off|On]               |
 |                            74 | x             | o             | Filter Cutoff                        |
