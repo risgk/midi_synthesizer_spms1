@@ -934,6 +934,10 @@ the editor, which sends the same.
 - A mod wheel that closes the filter as it rises: CC#99 = 113, CC#98 = 31 and 36, CC#6 = 10 puts Mod Wheel
   Inv on both filters' Mod 2 inputs in the LFO's place. With CC#25 at value 64, the wheel closes the
   filter from Cutoff down, an octave at its top (two with CC#25 at the top)
+- A breath controller that opens the filter: CC#99 = 113, CC#98 = 31 and 36, CC#6 = 12 puts
+  Breath on both filters' Mod 2 inputs in the LFO's place, and CC#25 sets how far: with it at the
+  top, blowing opens the cutoff two octaves above Cutoff (Mod 2 Pol at its power-up +0.2). For
+  the whole range, ten octaves, turn Mod 2 Pol up too: CC#99 = 116, CC#98 = 75 and 85, CC#6 = 124
 - A knob that detunes Osc 2: CC#99 = 114, CC#98 = 47, CC#6 = 20 points Osc 2 Pitch Fine at General 1 Bipolar, so CC#16 moves
   it from -60 to +60 cents, in tune at value 64, heard with Osc 2 brought in (CC#19 = 88 and
   CC#20 = 88)
