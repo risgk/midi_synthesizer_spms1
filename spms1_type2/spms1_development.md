@@ -25,13 +25,14 @@ MIDI Synthesizer SPMS-1 (type-2): Development
 ## Runtime
 
 - Core 1 runs the synth (`Spms1_main`, in RAM), a buffer of 64 samples (1.33 ms at 48 kHz) at a
-  time, with 4 buffers queued for the output. 64 is kept: fewer would cost more per sample, and
-  leave less room for what core 0 takes. 4 buffers rather than 2 now: with the synth near
-  1300 us a buffer, the writes to the output included, 2 left too little for the delays core 0
-  and the interrupts add now and then, and the output's DMA passed the synth a few times a second
+  time, with 2 buffers queued for the output with I2S and 4 with PWM Audio (`SPMS1_PWM_AUDIO_BUFFERS`
+  in `spms1.ino`). 64 is kept: fewer would cost more per sample, and leave less room for what core
+  0 takes. 4 with PWM Audio rather than 2: with the synth near 1300 us a buffer, its writes to the
+  output included, 2 left too little for the delays core 0 and the interrupts add now and then,
+  and the output's DMA passed the synth a few times a second
 - A buffer should take less than 1333 us on average, and more only now and then: the output's
-  queue, 3 buffers beyond the one being written, takes up the delay of a slow buffer, but not for
-  long. As a buffer takes about the same time whatever comes (see Writing a Module), the maximum
+  queue, 1 or 3 buffers beyond the one being written, takes up the delay of a slow buffer, but not
+  for long. As a buffer takes about the same time whatever comes (see Writing a Module), the maximum
   is what to watch, and `underruns` says whether it ever ran over
 - Core 0 reads MIDI, then sleeps for 1 ms (`delay(1)`): 4 bytes of USB MIDI and 8 of UART MIDI a
   loop, more than the about 3.2 bytes that 31250 bps brings; a message is taken at the next buffer
