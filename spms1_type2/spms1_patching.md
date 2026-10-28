@@ -936,8 +936,9 @@ the editor, which sends the same.
   filter from Cutoff down, an octave at its top (two with CC#25 at the top)
 - A breath controller that opens the filter: CC#99 = 113, CC#98 = 30 and 35, CC#6 = 12 puts
   Breath on both filters' Mod 1 inputs in the envelope's place, and CC#24 sets how far: at its
-  power-up value 28, blowing opens the cutoff two octaves above Cutoff, and at the top the whole
-  range, ten octaves (Mod 1 Pol is +1.0)
+  power-up value 28, blowing opens the cutoff two octaves above Cutoff, and at the top ten
+  octaves (Mod 1 Pol is +1.0), as far as the top of the range: with CC#74 at the bottom, the
+  breath sweeps the whole range
 - A knob that detunes Osc 2: CC#99 = 114, CC#98 = 47, CC#6 = 20 points Osc 2 Pitch Fine at General 1 Bipolar, so CC#16 moves
   it from -60 to +60 cents, in tune at value 64, heard with Osc 2 brought in (CC#19 = 88 and
   CC#20 = 88)
