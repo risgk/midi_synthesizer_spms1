@@ -92,7 +92,7 @@ public:
     // If L and R are on the same slice, 1 ring (1 word per frame) has both L (CC A or B) and R (CC B or A)
     // Otherwise, 2 rings for each slice are used (both CC A and B have the same level)
     // 1 frame = SPMS1_PWM_AUDIO_SUBPERIODS words
-    ring_allocate((m_slice[0] == m_slice[1]) ? 1 : 2, subperiods, mid_level | (mid_level << 16));
+    ring_allocate((m_slice[0] == m_slice[1]) ? 1 : 2, subperiods, mid_level | (mid_level << 16), sampling_rate);
 
     uint32_t enable_mask = 0;
     for (uint32_t k = 0; k < m_number_of_rings; ++k) {

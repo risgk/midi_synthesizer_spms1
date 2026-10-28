@@ -385,6 +385,17 @@ void loop() {
     SPMS1_DEBUG_PRINT_SERIAL.print(" peak ");
     SPMS1_DEBUG_PRINT_SERIAL.print(s_gc_nroots_max);
     SPMS1_DEBUG_PRINT_SERIAL.println();
+
+    // The output's DMA passing the writer, since the start: a click each, while anything sounds.
+    // The writes to the output come after the span min and max measure, so they show up here first.
+    SPMS1_DEBUG_PRINT_SERIAL.print("\e[4;1H\e[K");
+    SPMS1_DEBUG_PRINT_SERIAL.print("underruns ");
+#if !defined(SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO)
+    SPMS1_DEBUG_PRINT_SERIAL.print(g_pwm_output.getUnderruns());
+#else  // !defined(SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO)
+    SPMS1_DEBUG_PRINT_SERIAL.print(g_i2s_output.getUnderruns());
+#endif  // !defined(SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO)
+    SPMS1_DEBUG_PRINT_SERIAL.println();
 #if defined(SPMS1_DEBUG_PRINT_USE_USB_SERIAL)
 #if defined(SPMS1_USE_USB_MIDI)
     mutex_enter_blocking(&__usb_mutex);

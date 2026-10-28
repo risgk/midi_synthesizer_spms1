@@ -26,7 +26,7 @@ require_relative 'spms1_patch'
 
 MIDI_CH            = 0
 SAMPLE_RATE        = 48000
-AUDIO_BUFFERS      = 2
+AUDIO_BUFFERS      = 4
 AUDIO_BUFFER_WORDS = 64
 
 # How many modules a patch can chain, and so the range of NRPN category 0. Every slot is rewritten

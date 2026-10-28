@@ -7651,7 +7651,7 @@ int main(int argc,char**argv){
 #line 28 "spms1_main.rb"
   cst_SAMPLE_RATE = 48000LL;
 #line 29 "spms1_main.rb"
-  cst_AUDIO_BUFFERS = 2LL;
+  cst_AUDIO_BUFFERS = 4LL;
 #line 30 "spms1_main.rb"
   cst_AUDIO_BUFFER_WORDS = 64LL;
 #line 37 "spms1_main.rb"

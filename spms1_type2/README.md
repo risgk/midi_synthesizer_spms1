@@ -227,9 +227,9 @@ puts the default patch back. Keep a patch with Save JSON, or in the synth with S
 
 ### Latency
 
-About 4 ms from a MIDI message to the sound that answers it:
+About 7 ms from a MIDI message to the sound that answers it:
 
-- Two output buffers of 64 samples each: 2.7 ms
+- Four output buffers of 64 samples each: 5.3 ms
 - MIDI is read once per buffer, so a message waits up to one more: 1.3 ms
 
 That is the synth's own; what the MIDI link and the DAC add sits on top of it.
