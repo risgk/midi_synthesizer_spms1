@@ -948,8 +948,9 @@ the editor, which sends the same.
 - A knob that crossfades the oscillators: CC#99 = 114, CC#98 = 60, CC#6 = 23 and CC#98 = 61, CC#6 = 22 point Mixer 2 Level 1 at General 1 Sin and Level 2 at General 1 Cos, so CC#16 takes
   Osc 2 out as it brings Osc 1 in, at equal power: at value 64 both are at 0.707, about as loud
   as one at full level
-- A pitch bend for Osc 2 alone: with Osc 2 brought in (CC#19 = 88 and CC#20 = 88), CC#99 = 116,
-  CC#98 = 5, CC#6 = 4 sets Pitch 1 Out 1 Bend Sw off, so the wheel bends Osc 2 against Osc 1, which holds its note with the filter
+- A pitch bend for Osc 2 alone: with Osc 2 brought in (CC#19 = 88 and CC#20 = 88), CC#119 = 4
+  sets Pitch 1 Out 1 Bend Sw off, so the wheel bends Osc 2 against Osc 1, which holds its note with the filter;
+  with Osc 2 Sync Sw on (CC#112 = 124), the wheel sweeps the sync sound
 - A sync sweep: CC#19 = 4 and CC#20 = 124 put Osc 2 alone on the mixer, CC#112 at value 124 turns Osc 2 Sync Sw on, CC#118 at value 4
   turns Osc 1 Pitch Mod 1 Sw off, and CC#89 turned up then sweeps Osc 2 alone with the
   envelope, Osc 1 holding the note it is synced to

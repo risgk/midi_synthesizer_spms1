@@ -104,8 +104,8 @@ MIDI Synthesizer SPMS-1 (type-2) v0.3.4
 "spms1_editor.html" を開き（[Web エディタ](#web-エディタ)を参照）、"MIDI Out" でシンセか SPMS-1 Web (Built-in) を選びます。
 
 1. お気に入り: Controls タブは "Show favorites only" にチェックが入った状態で開き、デフォルトパッチで
-   お気に入りになっている 43 個のパラメータを表示します:
-   Pitch 1 Glide・Out 1 Glide Sw・Bend Amt・Stretch、EG 1 Attack・Decay・Sustain・Release Sw、LFO 1 Wave・Rate・Level・Reset Sw、Osc 1 Wave・PW・Pitch Mod 1 Amt・Pitch Mod 1 Sw・Pitch Mod 2 Amt・PW Mod 1 Amt・PW Mod 2 Amt、Osc 2 Wave・Pitch Coarse・Pitch Fine・Sync Sw、Noise 1 Color、Mixer 2 Level 1〜4、
+   お気に入りになっている 44 個のパラメータを表示します:
+   Pitch 1 Glide・Out 2 Glide Sw・Bend Amt・Out 1 Bend Sw・Stretch、EG 1 Attack・Decay・Sustain・Release Sw、LFO 1 Wave・Rate・Level・Reset Sw、Osc 1 Wave・PW・Pitch Mod 1 Amt・Pitch Mod 1 Sw・Pitch Mod 2 Amt・PW Mod 1 Amt・PW Mod 2 Amt、Osc 2 Wave・Pitch Coarse・Pitch Fine・Sync Sw、Noise 1 Color、Mixer 2 Level 1〜4、
    Filter 2 Cutoff・Resonance・Mode・Pitch Amt・Mod 1 Amt・Mod 1 Pol・Mod 2 Amt、
    Amp 1 Gain 2・Mod 1/2 Mix、Chorus 1 Mix・Rate・Depth、Delay 1 Mix・Time・Feedback。
    気に入ったものは星で追加できます。Osc 2 の各 Pitch Mod Amt は Osc 1 と、Filter 1 の Resonance（CC なし）以外の
@@ -114,7 +114,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.3.4
    デフォルトパッチでの働きと起動時の値は、ブロック図の下に説明があります。MIDI コントローラのつまみでも
    動かせます
 3. CC のないパラメータ: "Show parameters with no CC" にチェックを入れると、残りが青で表示されます
-   （Mixer 1 の各レベルや Pitch 1 の Out 1・Out 2 Bend Sw など）。そのスライダーはスロットが保持する値を設定し、NRPN で
+   （Mixer 1 の各レベルや Pitch 1 の Out 2 Bend Sw など）。そのスライダーはスロットが保持する値を設定し、NRPN で
    送られます
 4. パッチの変更: Patch タブでは、パッチがすべての入力とパラメータを含む図そのものとして表示されます。
    出力から入力やパラメータへワイヤーをドラッグすると、その供給元が変わります。パッチングの
@@ -310,10 +310,16 @@ Glide を動かさずに、それぞれの出力のポルタメントをオン�
 同じく値 64 以上でオン、起動時は値 124 でオンです。グライドは Pitch 1 Gate In（デフォルトは Note Gate）が
 オンの間だけ進みます。ノートとノートの間は止まっているので、休符の後のノートはそこから続きます。Pitch Bend は Pitch 1 Bend In に入ります。Bend In は
 グライドの後で出力に足されるので、ベンドはすぐに効き、オシレータにも両フィルタのキーボードトラッキングにも
-同じように届きます。Out 1 Bend Sw と Out 2 Bend Sw は CC を持たず、起動時はオンです。カテゴリ 4 で
-片方をオフにすると、その出力にはベンドが掛からないので、Osc 2 だけをベンドできます。
+同じように届きます。Out 1 Bend Sw は CC#119、Out 2 Bend Sw は CC なしで、どちらも起動時はオンです。
+片方をオフにすると（Out 1 は CC#119 を 64 未満に、Out 2 はカテゴリ 4 で）、その出力にはベンドが掛からないので、
+Osc 2 だけをベンドできます。ホイールでシンク音色を Osc 1 に対してスイープできます。
 Pitch 1 Bend Amt（CC#57）がベンドレンジで、1 目盛り半音ずつです。値 8 で上下 2 半音、値 28 で 1 オクターブ、
 値 124 で 5 オクターブで、起動時は値 28 です。CC のない Bend Pol は起動時 +1.0 で、値 64 より下にするとベンドが逆向きになります。
+
+例えば、ピッチベンドホイールでスイープするシンク音色は、お気に入りだけで作れます。CC#19 = 4 と CC#20 = 124 で
+ミキサーを Osc 2 だけにし、CC#112 = 124 で Osc 2 Sync Sw をオン、CC#119 = 4 で Out 1 Bend Sw をオフにします。
+Osc 2 のシンク元の Osc 1 はノートを保ち、ホイールは Osc 2 だけをベンドします（起動時の Bend Amt では上端で 1 オクターブ上）。
+Osc 2 Pitch Coarse（CC#85）でスイープの出発点を決めます。Out 1 につながるフィルタもノートに留まります。
 
 LFO はオシレータの Pitch Mod 2 In と PW Mod 2 In に直接入ります。フィルタにも入りますが、Mod 2 Amt
 （CC#25）が起動時 0.0 なので、上げるまでカットオフは動きません。エンベロープは Mod 1 Amt（CC#24）で

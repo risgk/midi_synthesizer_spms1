@@ -67,6 +67,7 @@
 |                             5 | x             | o             | Pitch Glide (Portamento Time)        |
 |                            34 | x             | o             | Pitch Out 1/2 Glide Sw [Off|On]      |
 |                            57 | x             | o             | Pitch Bend Amt (Pitch Bend Range)    |
+|                           119 | x             | o             | Pitch Out 1 Bend Sw [Off|On]         |
 |                            22 | x             | o             | Pitch Stretch                        |
 |                             1 | x             | o             | Mod Wheel (Unipolar)                 |
 |                             2 | x             | o             | Breath (Unipolar)                    |

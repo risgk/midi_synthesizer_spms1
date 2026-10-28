@@ -104,9 +104,9 @@ A path from the sound the synth powers up with to a patch of your own, a step at
 editor's Controls tab and the nodes of its Patch tab. Open "spms1_editor.html" (see
 [Web Editor](#web-editor)) and choose the synth, or SPMS-1 Web (Built-in), in "MIDI Out".
 
-1. Favorites: the Controls tab opens with "Show favorites only" ticked, showing the 43 parameters
+1. Favorites: the Controls tab opens with "Show favorites only" ticked, showing the 44 parameters
    the default patch marks as favorites:
-   Pitch 1 Glide, Out 1 Glide Sw, Bend Amt and Stretch; EG 1 Attack, Decay, Sustain and Release Sw; LFO 1 Wave, Rate, Level and Reset Sw; Osc 1 Wave, PW, Pitch Mod 1 Amt,
+   Pitch 1 Glide, Out 2 Glide Sw, Bend Amt, Out 1 Bend Sw and Stretch; EG 1 Attack, Decay, Sustain and Release Sw; LFO 1 Wave, Rate, Level and Reset Sw; Osc 1 Wave, PW, Pitch Mod 1 Amt,
    Pitch Mod 1 Sw, Pitch Mod 2 Amt, PW Mod 1 Amt and PW Mod 2 Amt; Osc 2 Wave, Pitch Coarse, Pitch Fine and Sync Sw; Noise 1 Color; Mixer 2 Level 1 to 4; Filter 2 Cutoff, Resonance, Mode, Pitch Amt, Mod 1 Amt, Mod 1 Pol and Mod 2 Amt; Amp 1 Gain 2 and Mod 1/2 Mix; Chorus 1 Mix, Rate and Depth; and Delay 1 Mix, Time and Feedback.
    Mark more with the star as you find them. Osc 2's Pitch Mod Amts are on Osc 1's CCs, and each
    parameter of Filter 1 on Filter 2's but its Resonance, which has no CC, so a slider of one moves
@@ -115,7 +115,7 @@ editor's Controls tab and the nodes of its Patch tab. Open "spms1_editor.html" (
    does in the default patch, and what it powers up at, is told below the Block Diagram; the knobs
    of a MIDI controller reach them too
 3. Parameters with no CC: tick "Show parameters with no CC" to show the rest, in blue, such as
-   Mixer 1's levels and Pitch 1's Out 1 and Out 2 Bend Sw; a slider of one sets the value its slot holds, sent
+   Mixer 1's levels and Pitch 1's Out 2 Bend Sw; a slider of one sets the value its slot holds, sent
    as NRPN
 4. Patch changes: the Patch tab shows the patch as a diagram of its own, every input and parameter
    included; drag a wire from an output to an input or a parameter to change what feeds it. The
@@ -321,11 +321,18 @@ for each output without moving Glide: on from value 64, as a MIDI switch is, and
 at value 124. The glide moves only while Pitch 1 Gate In, Note Gate by default, is on: between
 notes it holds where it is, so a note played after a rest goes on from there. Pitch Bend comes in on Pitch 1 Bend In, which is added to the outputs past the
 glide, so the bend acts at once and reaches the oscillators and the filters' keyboard tracking
-alike. Out 1 Bend Sw and Out 2 Bend Sw have no CC and power up on; one set off, in
-category 4, leaves its output unbent, so the bend can move Osc 2 alone. Pitch 1 Bend Amt is the
+alike. Out 1 Bend Sw, on CC#119, and Out 2 Bend Sw, with no CC, power up on; one set off, Out 1's
+below 64 on its CC and Out 2's in category 4, leaves its output unbent, so the bend can move Osc 2
+alone, which sweeps a sync sound against Osc 1 from the wheel. Pitch 1 Bend Amt is the
 bend range, half a semitone a step: on CC#57, 2 semitones either way at value 8, an octave at
 value 28, where it powers up, and 5 octaves at value 124; Bend Pol, with no CC, powers up at
 +1.0, and set below value 64 runs the bend the other way.
+
+For example, a sync sound swept from the pitch bend wheel, all from the favorites: CC#19 = 4 and
+CC#20 = 124 put Osc 2 alone on the mixer, CC#112 = 124 turns Osc 2 Sync Sw on, and CC#119 = 4 turns
+Out 1 Bend Sw off, so Osc 1, which Osc 2 is synced to, holds the note while the wheel bends Osc 2
+alone, an octave up at the top at the power-up Bend Amt; Osc 2 Pitch Coarse (CC#85) sets where the
+sweep starts, and the filters, on Out 1, stay on the note too.
 
 The LFO goes straight to the oscillator, on Pitch Mod 2 In and PW Mod 2 In, and to the filters, where Mod 2 Amt (CC#25) powers up at 0.0 and
 leaves the cutoff alone until it is turned up. The envelope moves the cutoff by Mod 1 Amt

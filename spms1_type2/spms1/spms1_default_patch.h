@@ -190,6 +190,7 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {385,  34},  // Pitch 1 Out 1 Glide Sw CC
   {386,  34},  // Pitch 1 Out 2 Glide Sw CC
   {387,  57},  // Pitch 1 Bend Amt CC
+  {389, 119},  // Pitch 1 Out 1 Bend Sw CC
   {391,  22},  // Pitch 1 Stretch CC
   {392,  73},  // EG 1 Attack CC
   {393,  75},  // EG 1 Decay CC
@@ -353,6 +354,7 @@ static const uint8_t g_spms1_default_cc[][2] = {
   {34,  124},  // Pitch 1 Out 1 Glide Sw
   {34,  124},  // Pitch 1 Out 2 Glide Sw
   {57,   28},  // Pitch 1 Bend Amt
+  {119, 124},  // Pitch 1 Out 1 Bend Sw
   {22,    4},  // Pitch 1 Stretch
   {73,    4},  // EG 1 Attack
   {75,   88},  // EG 1 Decay

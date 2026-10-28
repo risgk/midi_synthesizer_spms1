@@ -752,6 +752,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_PITCH_1_OUT_1_GLIDE_SW, 34)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_PITCH_1_OUT_2_GLIDE_SW, 34)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_PITCH_1_BEND_AMT      , 57)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_PITCH_1_OUT_1_BEND_SW , 119)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_PITCH_1_STRETCH       , 22)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_EG_1_ATTACK           , 73)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_EG_1_DECAY            , 75)
@@ -913,6 +914,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 34 , 124) # Pitch 1 Out 1 Glide Sw
   C.set_midi_cc_value(midi_ch, 34 , 124) # Pitch 1 Out 2 Glide Sw
   C.set_midi_cc_value(midi_ch, 57 , 28 ) # Pitch 1 Bend Amt
+  C.set_midi_cc_value(midi_ch, 119, 124) # Pitch 1 Out 1 Bend Sw
   C.set_midi_cc_value(midi_ch, 22 , 4  ) # Pitch 1 Stretch
   C.set_midi_cc_value(midi_ch, 73 , 4  ) # EG 1 Attack
   C.set_midi_cc_value(midi_ch, 75 , 88 ) # EG 1 Decay
