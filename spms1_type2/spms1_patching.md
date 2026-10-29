@@ -207,6 +207,16 @@ a matter of changing slot numbers. Each parameter also has a control slot of its
 fills, or with no CC its value in category 4, and which only it can read: a parameter source of 127 names it, and no slot number reaches
 it from anywhere else.
 
+An edit is three CCs: CC#99 picks a category, 112 plus its number, CC#98 an entry in it, and CC#6 the
+value. To feed Filter 1 Cutoff from the envelope, for example: CC#99 = 114 (category 2, where each
+parameter takes its value from), CC#98 = 66 (Filter 1 Cutoff, in the entry tables below), CC#6 = 44
+(EG 1 Out, in the Signal IDs); then CC#98 = 77 and CC#6 = 44 do the same for Filter 2 Cutoff, the
+category standing. The editor is the easier way to the same end, a wire dragged from EG 1 Out to
+Filter 1 Cutoff on its Patch tab, and it sends exactly these; its Export panel, with the format
+"MIDI bytes (hex)" or "NRPN list" and comments on, shows the whole patch as them, each named, so
+the NRPN for anything done there can be read off and sent from anything that sends MIDI. The
+examples below give each edit both ways.
+
 ### Sending
 
 - CC#99 selects the category, CC#98 the entry within it, in either order
@@ -872,107 +882,132 @@ sweep while Osc 1 holds the note.
 
 ### Examples
 
-Each is given as the MIDI to send; one that wires is also given as what to wire on the Patch tab of
-the editor, which sends the same.
+Each is given as what to do in the editor, then as the MIDI that does the same, which is what the
+editor sends. A slider is on the Controls tab, and so is a parameter with no CC, with "Show
+parameters with no CC" ticked (it has a value on the Patch tab too); a wire, a CC# field and a run
+order are on the Patch tab, where a wire ends on an input or on a parameter, and a parameter
+unplugged reads its own CC or value again. A value is the 4 to 124 the editor shows.
 
-- Vibrato is wired by default -- the LFO, at full level (LFO 1 Level, CC#116, powers up at value
-  124), goes straight to the oscillator's Pitch Mod 2 input -- and CC#13 (Osc 1 Pitch Mod 2 Amt) brings
-  it in: none at value 4, where it powers up, 50 cents either way at value 9, a semitone at value
-  14 and an octave at the top. CC#3 sets the rate
-- A vibrato on the mod wheel, as a GM2 sound module's: CC#116 = 4 takes LFO 1 Level down to 0.0,
-  so the wheel on its Level Mod In brings the LFO in, and CC#13 = 9 makes the wheel's top 50 cents
-  either way, the Modulation Depth Range GM2 powers up at, or CC#13 = 14 a semitone
-- A bend range of 2 semitones, as a GM sound module's: CC#57 = 8 sets Pitch 1 Bend Amt to 8
-- The LFO reaches the filters' Mod 2 inputs by default too, so CC#25 sweeps the cutoff with it, on
-  top of the envelope on Mod 1
-- A second oscillator is wired by default too, on Mixer 2's second input, silent at power-up:
-  CC#19 = 88 and CC#20 = 88 put the two at 0.7 each, about as loud together as one at full level,
-  Osc 2 beating slowly against Osc 1 from the 10 cents of CC#76's power-up value. CC#85 and 76 tune it, a semitone a step and 50 cents either way: CC#85 = 76 an octave up, CC#85 = 71 a fifth, CC#76 = 64 in unison
-- Noise is wired by default too, its Out on Mixer 2's fourth input beside the oscillators, so CC#23
-  brings it in under the note, at a level of 0.1 at value 16. CC#19 = 4 takes the
-  oscillator out, leaving the noise alone, through the filters. CC#115 (Color) turns it from
-  white to red
-- Keyboard tracking is wired by default as well, the pitch from Pitch 1 on the filters' Pitch inputs,
-  so CC#9 (Pitch Amt) sets how far the cutoff follows the keys: all the way at value 124, half
-  way at value 64, and not at all at value 4, where it powers up; Pitch Pol, with no CC, turned
-  below value 64 runs it the other way
-- The filter as a sine voice, playing its own oscillation in tune: CC#71 = 124 makes Filter 2 oscillate,
-  CC#9 = 124 has the cutoff follow the keys, and CC#74 = 49 puts it on note 60 at note 60, and so
-  on the note played everywhere. CC#24 = 4 takes the envelope off the cutoff, and CC#19 = 4 takes the oscillator out,
-  leaving the sine alone. It is within 5 cents of the note from middle C up, and 17 cents flat an octave below
-- A pitch envelope is wired by default too -- the envelope on the oscillator's Pitch Mod 1 input --
-  so CC#89 (Osc 1 Pitch Mod 1 Amt) sets its depth: the note starts a semitone sharp at value 9, an
-  octave at value 64 and two octaves at the top, and with Sustain brought down to 0.0 (CC#30 = 4),
-  it falls back to pitch with the decay
-- Noise as a modulation source, a random jitter of the cutoff: CC#99 = 113, CC#98 = 31 and 36,
-  CC#6 = 65 puts Noise 1's red output on both filters' Mod 2 inputs in the LFO's place (on the Patch
-  tab, wires from Noise 1 Out Red to Filter 1 and Filter 2 Mod 2 In), and CC#25
-  sets how much. CC#6 = 64 takes the white instead, finer still. The red is on no mixer, and Noise
-  1 Out, white at power-up, is heard only once CC#23 brings it up, so neither is heard as well
-- Filter cutoff driven by the envelope instead of its CC: CC#99 = 114, CC#98 = 66 and 77, CC#6 = 44 (on
-  the Patch tab, wires from EG 1 Out to Filter 1 and Filter 2 Cutoff). The
-  envelope and the cutoff are both unipolar, so it opens the cutoff from the bottom of its dial
-  to the top
-- Amp gain and filter cutoff share one CC: CC#99 = 115, CC#98 = 88, CC#6 = 74
-- Amp at full level with no envelope: CC#99 = 113, CC#98 = 39, CC#6 = 1
-- Amp opened and closed by the note as an organ's, while EG 1 still shapes the filter: CC#36 = 124
-  crossfades Amp 1's modulation to Mod 2 In, EG 2
-- Disconnect the filters' Mod 1 inputs, and with them the envelope: CC#99 = 113, CC#98 = 30 and 35, CC#6 = 0
-- A finer pitch envelope, 50 cents deep: CC#99 = 114, CC#98 = 32, CC#6 = 44 points Osc 1 Pitch Fine at the
-  envelope, which then sweeps the tuning from in tune up to 50 cents sharp, reached at half the
-  envelope's peak
-- The envelope drives the filter harder as a note starts: CC#99 = 114, CC#98 = 64, CC#6 = 44 takes
-  Mixer 2 Out Level, the filter's input level, from silence up to the top of its dial and back
-- Portamento is wired by default -- Note Pitch reaches the oscillator through Pitch 1 -- so CC#5
-  sets the time; at value 64 a glide covers nine tenths of the way in about a tenth of a second. Every note glides, played legato
-  or not. CC#99 = 114, CC#98 = 0, CC#6 = 8 takes the time from Mod Wheel instead, so the
-  wheel brings the portamento in
-- A mod wheel that bends the pitch up: CC#99 = 113, CC#98 = 14 and 19, CC#6 = 8 points both
-  oscillators' Pitch Mod 2 input at Mod Wheel in the LFO's place. The wheel is unipolar, so it bends
-  only up from the note, as far as CC#13 allows: two octaves at value 124, two semitones at value 14
-- A pitch envelope that rises into the note: CC#99 = 113, CC#98 = 13 and 18, CC#6 = 45 puts EG 1 Out
-  Inv, the envelope negated, on both oscillators' Pitch Mod 1 input. With CC#89 at the top the note starts two
-  octaves flat, and with Sustain brought down to 0.0 (CC#30 = 4), it
-  rises back to pitch with the decay
-- A mod wheel that closes the filter as it rises: CC#99 = 113, CC#98 = 31 and 36, CC#6 = 10 puts Mod Wheel
-  Inv on both filters' Mod 2 inputs in the LFO's place. With CC#25 at value 64, the wheel closes the
-  filter from Cutoff down, an octave at its top (two with CC#25 at the top)
-- A breath controller that opens the filter: CC#99 = 113, CC#98 = 30 and 35, CC#6 = 12 puts
-  Breath on both filters' Mod 1 inputs in the envelope's place, and CC#24 sets how far: at its
-  power-up value 28, blowing opens the cutoff two octaves above Cutoff, and at the top ten
-  octaves (Mod 1 Pol is +1.0), as far as the top of the range: with CC#74 at the bottom, the
-  breath sweeps the whole range
-- A knob that detunes Osc 2: CC#99 = 114, CC#98 = 46, CC#6 = 20 points Osc 2 Pitch Fine at General 1 Bipolar, so CC#16 moves
-  it from -50 to +50 cents, in tune at value 64, heard with Osc 2 brought in (CC#19 = 88 and
-  CC#20 = 88)
-- A knob that crossfades the oscillators: CC#99 = 114, CC#98 = 60, CC#6 = 23 and CC#98 = 61, CC#6 = 22 point Mixer 2 Level 1 at General 1 Sin and Level 2 at General 1 Cos, so CC#16 takes
-  Osc 2 out as it brings Osc 1 in, at equal power: at value 64 both are at 0.707, about as loud
-  as one at full level
-- A pitch bend for Osc 2 alone: with Osc 2 brought in (CC#19 = 88 and CC#20 = 88), CC#119 = 4
-  sets Pitch 1 Out 1 Bend Sw off, so the wheel bends Osc 2 against Osc 1, which holds its note with the filter;
-  with Osc 2 Sync Sw on (CC#112 = 124), the wheel sweeps the sync sound
-- A sync sweep: CC#19 = 4 and CC#20 = 124 put Osc 2 alone on the mixer, CC#112 at value 124 turns Osc 2 Sync Sw on, CC#118 at value 4
-  turns Osc 1 Pitch Mod 1 Sw off, and CC#89 turned up then sweeps Osc 2 alone with the
-  envelope, Osc 1 holding the note it is synced to
-- Take the filters out of the chain: CC#99 = 113, CC#98 = 38, CC#6 = 66 points the amp's second audio input,
-  the one heard, at Mixer 2 (on the Patch tab, a wire from Mixer 2 Out to Amp 1 Audio In 2). The filters keep running and keep their slots; nothing reads them
-- The two filters side by side, a low pass and a high pass: CC#99 = 116, CC#98 = 79, CC#6 = 64 and
-  CC#98 = 80, CC#6 = 4 turn Filter 2 Gain 1 up and Gain 2 down, so that it takes Mixer 2 rather than
-  Filter 1, and CC#98 = 87, CC#6 = 88 turns Amp 1 Gain 1 up to bring Filter 1 in beside it. CC#99 =
-  115, CC#98 = 65, CC#6 = 0 then takes Filter 1 Mode off CC#39, and CC#99 = 116, CC#98 = 65, CC#6 =
-  124 sets it to the high pass, so CC#74 moves a low pass and a high pass at once
-- Echoes that only come in with the mod wheel: CC#99 = 114, CC#98 = 93, CC#6 = 8 takes Delay 1 Mix
-  from Mod Wheel, which powers up at 0.0, so the output is dry until the wheel moves
-- Chorus that only comes in with the mod wheel: CC#99 = 114, CC#98 = 90, CC#6 = 8 takes Chorus 1
-  Mix from Mod Wheel, so the output stays mono until the wheel moves
-- Leave the chorus out of the sound, keeping the delay: CC#99 = 113, CC#98 = 42 and 43, CC#6 = 76
-  feeds both sides of Delay 1 from the amp. The chorus keeps running and nothing reads it, and the
-  output is then mono
-- Echoes ahead of the filters: CC#99 = 113, CC#98 = 42, CC#6 = 56 feeds Delay 1's left side from the
-  oscillator, CC#98 = 27, CC#6 = 80 feeds the filters from it, and CC#98 = 44 and 45, CC#6 = 77 and
-  78 points the final output at the chorus, which still takes the amp. The repeats then go
-  through the filters and the amp's envelope as the note does, so they die away with it. Delay 1
-  still runs after the filters, which reads it a sample late; for an echo that does not matter
+- Vibrato: wired by default, the LFO, at full level (LFO 1 Level at value 124, where it powers up),
+  going straight to the oscillator's Pitch Mod 2 input, so Osc 1 Pitch Mod 2 Amt brings it in: none at
+  value 4, where it powers up, 50 cents either way at value 9, a semitone at value 14 and an octave at
+  the top, and LFO 1 Rate sets the rate. As MIDI: CC#13 (the amount) and CC#3 (the rate)
+- A vibrato on the mod wheel, as a GM2 sound module's: LFO 1 Level down to 4, 0.0, so the wheel
+  on its Level Mod In brings the LFO in, and Osc 1 Pitch Mod 2 Amt at 9 makes the wheel's top 50
+  cents either way, the Modulation Depth Range GM2 powers up at, or at 14 a semitone. As MIDI:
+  CC#116 = 4, CC#13 = 9 or 14
+- A bend range of 2 semitones, as a GM sound module's: Pitch 1 Bend Amt at 8. As MIDI: CC#57 = 8
+- The LFO on the cutoff: wired by default too, on the filters' Mod 2 inputs, so Filter 2 Mod 2 Amt
+  sweeps the cutoff with it, on top of the envelope on Mod 1 (Filter 1's follows, on the same CC).
+  As MIDI: CC#25
+- A second oscillator: wired by default too, on Mixer 2's second input, silent at power-up. Mixer 2
+  Level 1 and Level 2 at 88 each put the two at 0.7, about as loud together as one at full level,
+  Osc 2 beating slowly against Osc 1 from the 10 cents of its Pitch Fine at power-up. Osc 2 Pitch
+  Coarse and Pitch Fine tune it, a semitone a step and 50 cents either way: Coarse at 76 an octave
+  up, at 71 a fifth, and Fine at 64 in unison. As MIDI: CC#19 = 88, CC#20 = 88, CC#85 = 76 or 71,
+  CC#76 = 64
+- Noise: wired by default too, its Out on Mixer 2's fourth input beside the oscillators, so Mixer 2
+  Level 4 brings it in under the note, at a level of 0.1 at value 16, and Level 1 at 4 takes the
+  oscillator out, leaving the noise alone, through the filters; Noise 1 Color turns it from white to
+  red. As MIDI: CC#23 = 16, CC#19 = 4, CC#115
+- Keyboard tracking: wired by default as well, the pitch from Pitch 1 on the filters' Pitch inputs,
+  so Filter 2 Pitch Amt sets how far the cutoff follows the keys (Filter 1's follows it): all the way
+  at value 124, half way at value 64, and not at all at value 4, where it powers up; Pitch Pol, with
+  no CC, turned below value 64 runs it the other way. As MIDI: CC#9; Pitch Pol in category 4
+- The filter as a sine voice, playing its own oscillation in tune: Filter 2 Resonance at 124 makes it
+  oscillate, Filter 2 Pitch Amt at 124 has the cutoff follow the keys, and Cutoff at 49 puts it on
+  note 60 at note 60, and so on the note played everywhere; Filter 2 Mod 1 Amt at 4 takes the
+  envelope off the cutoff, and Mixer 2 Level 1 at 4 takes the oscillator out, leaving the sine alone.
+  It is within 5 cents of the note from middle C up, and 17 cents flat an octave below. As MIDI:
+  CC#71 = 124, CC#9 = 124, CC#74 = 49, CC#24 = 4, CC#19 = 4
+- A pitch envelope: wired by default too, the envelope on the oscillator's Pitch Mod 1 input, so
+  Osc 1 Pitch Mod 1 Amt sets its depth: the note starts a semitone sharp at value 9, an octave at
+  value 64 and two octaves at the top, and with EG 1 Sustain brought down to 4, 0.0, it falls back to
+  pitch with the decay. As MIDI: CC#89, CC#30 = 4
+- Noise as a modulation source, a random jitter of the cutoff: on the Patch tab, wire Noise 1 Out
+  Red to Filter 1 and Filter 2 Mod 2 In, in the LFO's place, and Filter 2 Mod 2 Amt sets how much;
+  Out White instead is finer still. The red is on no mixer, and Noise 1 Out, white at power-up, is
+  heard only once Mixer 2 Level 4 brings it up, so neither is heard as well. As MIDI: CC#99 = 113,
+  CC#98 = 31 and 36, CC#6 = 65 (64 for the white), then CC#25
+- Filter cutoff driven by the envelope instead of its CC: on the Patch tab, wire EG 1 Out to Filter
+  1 and Filter 2 Cutoff, the parameter itself. The envelope and the cutoff are both unipolar, so it
+  opens the cutoff from the bottom of its dial to the top. As MIDI: CC#99 = 114, CC#98 = 66 and 77,
+  CC#6 = 44
+- Amp gain and filter cutoff share one CC: on the Patch tab, 74 in the CC# field of Amp 1 Gain 2.
+  As MIDI: CC#99 = 115, CC#98 = 88, CC#6 = 74
+- Amp at full level with no envelope: on the Patch tab, wire the constant +1.0 to Amp 1 Mod 1 In.
+  As MIDI: CC#99 = 113, CC#98 = 39, CC#6 = 1
+- Amp opened and closed by the note as an organ's, while EG 1 still shapes the filter: Amp 1 Mod 1/2
+  Mix at 124 crossfades its modulation to Mod 2 In, EG 2. As MIDI: CC#36 = 124
+- Disconnect the filters' Mod 1 inputs, and with them the envelope: on the Patch tab, unplug Filter
+  1 and Filter 2 Mod 1 In (drag the input away, or click the wire and press Delete). As MIDI: CC#99 = 113, CC#98 = 30 and 35, CC#6 = 0
+- A finer pitch envelope, 50 cents deep: on the Patch tab, wire EG 1 Out to Osc 1 Pitch Fine, which
+  then sweeps the tuning from in tune up to 50 cents sharp, reached at half the envelope's peak. As
+  MIDI: CC#99 = 114, CC#98 = 32, CC#6 = 44
+- The envelope drives the filter harder as a note starts: on the Patch tab, wire EG 1 Out to Mixer 2
+  Out Level, the filter's input level, which then goes from silence up to the top of its dial and
+  back. As MIDI: CC#99 = 114, CC#98 = 64, CC#6 = 44
+- Portamento: wired by default, Note Pitch reaching the oscillator through Pitch 1, so Pitch 1 Glide
+  sets the time; at value 64 a glide covers nine tenths of the way in about a tenth of a second.
+  Every note glides, played legato or not. On the Patch tab, a wire from Mod Wheel to Pitch 1 Glide
+  takes the time from the wheel instead, so the wheel brings the portamento in. As MIDI: CC#5; the
+  wire CC#99 = 114, CC#98 = 0, CC#6 = 8
+- A mod wheel that bends the pitch up: on the Patch tab, wire Mod Wheel to Osc 1 and Osc 2 Pitch Mod
+  2 In, in the LFO's place. The wheel is unipolar, so it bends only up from the note, as far as Osc 1
+  Pitch Mod 2 Amt allows: two octaves at value 124, two semitones at value 14. As MIDI: CC#99 = 113,
+  CC#98 = 14 and 19, CC#6 = 8, then CC#13
+- A pitch envelope that rises into the note: on the Patch tab, wire EG 1 Out Inv, the envelope
+  negated, to Osc 1 and Osc 2 Pitch Mod 1 In. With Osc 1 Pitch Mod 1 Amt at the top the note starts
+  two octaves flat, and with EG 1 Sustain brought down to 4, it rises back to pitch with the decay.
+  As MIDI: CC#99 = 113, CC#98 = 13 and 18, CC#6 = 45, then CC#89 = 124, CC#30 = 4
+- A mod wheel that closes the filter as it rises: on the Patch tab, wire Mod Wheel Inv to Filter 1
+  and Filter 2 Mod 2 In, in the LFO's place. With Filter 2 Mod 2 Amt at 64, the wheel closes the
+  filter from Cutoff down, an octave at its top (two with the amount at the top). As MIDI: CC#99 =
+  113, CC#98 = 31 and 36, CC#6 = 10, then CC#25 = 64
+- A breath controller that opens the filter: on the Patch tab, wire Breath to Filter 1 and Filter 2
+  Mod 1 In, in the envelope's place, and Filter 2 Mod 1 Amt sets how far: at its power-up value 28,
+  blowing opens the cutoff two octaves above Cutoff, and at the top ten octaves (Mod 1 Pol is +1.0),
+  as far as the top of the range: with Cutoff at the bottom, the breath sweeps the whole range. As
+  MIDI: CC#99 = 113, CC#98 = 30 and 35, CC#6 = 12, then CC#24 and CC#74
+- A knob that detunes Osc 2: on the Patch tab, wire General 1 Bipolar to Osc 2 Pitch Fine, so the
+  knob on CC#16 moves it from -50 to +50 cents, in tune at value 64, heard with Osc 2 brought in
+  (Mixer 2 Level 1 and Level 2 at 88). As MIDI: CC#99 = 114, CC#98 = 46, CC#6 = 20, then CC#16
+- A knob that crossfades the oscillators: on the Patch tab, wire General 1 Sin to Mixer 2 Level 1
+  and General 1 Cos to Level 2, so the knob on CC#16 takes Osc 2 out as it brings Osc 1 in, at equal
+  power: at value 64 both are at 0.707, about as loud as one at full level. As MIDI: CC#99 = 114,
+  CC#98 = 60, CC#6 = 23 and CC#98 = 61, CC#6 = 22, then CC#16
+- A pitch bend for Osc 2 alone: with Osc 2 brought in (Mixer 2 Level 1 and Level 2 at 88), Pitch 1
+  Out 1 Bend Sw off, so the wheel bends Osc 2 against Osc 1, which holds its note with the filter;
+  with Osc 2 Sync Sw on, the wheel sweeps the sync sound. As MIDI: CC#19 = 88, CC#20 = 88, CC#119 =
+  4, CC#112 = 124
+- A sync sweep: Mixer 2 Level 1 at 4 and Level 2 at 124 put Osc 2 alone on the mixer, Osc 2 Sync Sw
+  on syncs it, Osc 1 Pitch Mod 1 Sw off keeps Osc 1 on the note it is synced to, and Osc 1 Pitch Mod
+  1 Amt turned up then sweeps Osc 2 alone with the envelope (Osc 2's amount follows it, on the same
+  CC). As MIDI: CC#19 = 4, CC#20 = 124, CC#112 = 124, CC#118 = 4, then CC#89
+- Take the filters out of the chain: on the Patch tab, wire Mixer 2 Out to Amp 1 Audio In 2, the
+  amp's second audio input, the one heard. The filters keep running and keep their slots; nothing
+  reads them. As MIDI: CC#99 = 113, CC#98 = 38, CC#6 = 66
+- The two filters side by side, a low pass and a high pass: with "Show parameters with no CC"
+  ticked, Filter 2 Gain 1 up to 64 and Gain 2 down to 4, so that it takes Mixer 2 rather than Filter
+  1, and Amp 1 Gain 1 up to 88 brings Filter 1 in beside it; then, on the Patch tab, 0 in the CC#
+  field of Filter 1 Mode takes it off CC#39, and its value at 124 makes it the high pass, so
+  that Cutoff moves a low pass and a high pass at once. As MIDI: CC#99 = 116, CC#98 = 79, CC#6 = 64,
+  CC#98 = 80, CC#6 = 4, CC#98 = 87, CC#6 = 88; CC#99 = 115, CC#98 = 65, CC#6 = 0; CC#99 = 116, CC#98
+  = 65, CC#6 = 124
+- Echoes that only come in with the mod wheel: on the Patch tab, wire Mod Wheel to Delay 1 Mix. The
+  wheel powers up at 0.0, so the output is dry until it moves. As MIDI: CC#99 = 114, CC#98 = 93,
+  CC#6 = 8
+- Chorus that only comes in with the mod wheel: on the Patch tab, wire Mod Wheel to Chorus 1 Mix,
+  so the output stays mono until the wheel moves. As MIDI: CC#99 = 114, CC#98 = 90, CC#6 = 8
+- Leave the chorus out of the sound, keeping the delay: on the Patch tab, wire Amp 1 Out to Delay 1
+  Audio In L and Audio In R. The chorus keeps running and nothing reads it, and the output is then
+  mono. As MIDI: CC#99 = 113, CC#98 = 42 and 43, CC#6 = 76
+- Echoes ahead of the filters: on the Patch tab, wire Osc 1 Out to Delay 1 Audio In L, Delay 1 Out L
+  to Filter 1 Audio In 1, and Chorus 1 Out L and Out R to the final output's L and R, the chorus
+  still taking the amp. The repeats then go through the filters and the amp's envelope as the note
+  does, so they die away with it. Delay 1 still runs after the filters, which read it a sample
+  late; for an echo that does not matter. As MIDI: CC#99 = 113, CC#98 = 42, CC#6 = 56; CC#98 = 27,
+  CC#6 = 80; CC#98 = 44 and 45, CC#6 = 77 and 78
 
 ### Notes
 

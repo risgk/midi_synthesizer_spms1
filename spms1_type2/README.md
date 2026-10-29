@@ -328,11 +328,12 @@ bend range, half a semitone a step: on CC#57, 2 semitones either way at value 8,
 value 28, where it powers up, and 5 octaves at value 124; Bend Pol, with no CC, powers up at
 +1.0, and set below value 64 runs the bend the other way.
 
-For example, a sync sound swept from the pitch bend wheel, all from the favorites: CC#19 = 4 and
-CC#20 = 124 put Osc 2 alone on the mixer, CC#112 = 124 turns Osc 2 Sync Sw on, and CC#119 = 4 turns
-Out 1 Bend Sw off, so Osc 1, which Osc 2 is synced to, holds the note while the wheel bends Osc 2
-alone, an octave up at the top at the power-up Bend Amt; Osc 2 Pitch Coarse (CC#85) sets where the
-sweep starts, and the filters, on Out 1, stay on the note too.
+For example, a sync sound swept from the pitch bend wheel, all among the favorites on the editor's
+Controls tab: Mixer 2 Level 1 down and Level 2 up (CC#19 = 4, CC#20 = 124) put Osc 2 alone on the
+mixer, Osc 2 Sync Sw on (CC#112 = 124) syncs it to Osc 1, and Pitch 1 Out 1 Bend Sw off (CC#119 = 4)
+keeps Osc 1 on the note while the wheel bends Osc 2 alone, an octave up at the top at the power-up
+Bend Amt; Osc 2 Pitch Coarse (CC#85) sets where the sweep starts, and the filters, on Out 1, stay
+on the note too.
 
 The LFO goes straight to the oscillator, on Pitch Mod 2 In and PW Mod 2 In, and to the filters, where Mod 2 Amt (CC#25) powers up at 0.0 and
 leaves the cutoff alone until it is turned up. The envelope moves the cutoff by Mod 1 Amt
