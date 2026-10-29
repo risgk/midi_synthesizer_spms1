@@ -215,9 +215,10 @@ or not, as the modules are meant to:
 
 | Version | Note held (avg / max) | No note (avg / max) |
 | :-- | --: | --: |
-| v0.3.4 | 171920 / 171920 cycles, 1119 us (84%) | 172256 / 172256 cycles, 1121 us (84%) |
+| v0.3.5 | 208204 / 208204 cycles, 1355 us (102%) | 208556 / 208556 cycles, 1358 us (102%) |
 
-The estimate is about 7% above Debug Print on the device (v0.3.4: min 1046 us, max 1047 us, about 78%).
+The estimate is about 8% above Debug Print on the device (v0.3.5: min 1253 us, max 1256 us, about 94%),
+so its 102% is not a buffer running over; `underruns` on the device says whether one does.
 
 The load of each module, by `--modules` (the same version, a note held): "own" is
 the cycles of its methods (process, its outputs, smooth_parameters), and "with common" adds its share
@@ -226,20 +227,21 @@ order, split evenly; the common part left is the loop of the samples, the output
 
 | Module | Own | With common |
 | :-- | --: | --: |
-| Filter 1 | 11.3% (150 us) | 12.7% (169 us) |
-| Osc 2 (with Sync) | 9.4% (125 us) | 10.7% (143 us) |
-| Delay 1 | 6.5% (86 us) | 7.7% (102 us) |
+| Filter 2 | 11.9% (159 us) | 13.7% (182 us) |
+| Filter 1 | 11.9% (158 us) | 13.6% (181 us) |
+| Osc 2 (with Sync) | 9.5% (126 us) | 11.3% (151 us) |
+| Osc 1 | 6.3% (84 us) | 7.8% (105 us) |
+| Delay 1 | 6.5% (86 us) | 7.7% (103 us) |
 | Chorus 1 | 6.4% (85 us) | 7.4% (99 us) |
-| Osc 1 | 6.2% (82 us) | 7.4% (98 us) |
-| Amp 1 | 4.5% (59 us) | 5.5% (73 us) |
-| Pitch 1 | 2.9% (38 us) | 4.0% (53 us) |
-| LFO 1 | 3.1% (41 us) | 3.9% (53 us) |
+| Amp 1 | 4.7% (63 us) | 6.0% (80 us) |
+| LFO 1 | 3.1% (41 us) | 4.0% (53 us) |
+| Pitch 1 | 2.7% (37 us) | 3.9% (53 us) |
+| Mixer 1 | 1.6% (22 us) | 2.9% (39 us) |
+| Mixer 2 | 1.6% (22 us) | 2.9% (39 us) |
+| EG 1 | 2.2% (29 us) | 2.9% (39 us) |
 | EG 2 | 2.2% (29 us) | 2.9% (39 us) |
-| EG 1 | 2.2% (29 us) | 2.9% (38 us) |
-| Mixer 1 | 1.6% (22 us) | 2.8% (38 us) |
-| Mixer 2 | 1.6% (22 us) | 2.8% (38 us) |
-| Noise 1 | 2.0% (26 us) | 2.8% (37 us) |
-| The common part left | | 10.5% (141 us) |
+| Noise 1 | 1.9% (26 us) | 2.9% (38 us) |
+| The common part left | | 11.7% (156 us) |
 
 
 ## GitHub Actions

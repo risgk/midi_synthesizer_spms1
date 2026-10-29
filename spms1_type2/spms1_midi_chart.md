@@ -1,6 +1,6 @@
 ```
-  [MIDI Synthesizer]                                              Date: 2026-10-26                      
-  Model: SPMS-1 (type-2)          MIDI Implementation Chart       Version: 0.3.4                        
+  [MIDI Synthesizer]                                              Date: 2026-10-29                      
+  Model: SPMS-1 (type-2)          MIDI Implementation Chart       Version: 0.3.5                        
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Function...                   | Transmitted   | Recognized    | Remarks                              |
 +-------------------------------+---------------+---------------+--------------------------------------+
