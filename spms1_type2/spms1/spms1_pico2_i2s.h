@@ -123,7 +123,7 @@ public:
     pio_sm_exec(m_pio, m_sm, pio_encode_set(pio_y, 32 - 2));
 
     // 1 ring (2 words per frame: L, R)
-    ring_allocate(1, 2, 0);
+    ring_allocate(1, 2, 0, m_freq);
     ring_configure_dma(0, pio_get_dreq(m_pio, m_sm, true), &m_pio->txf[m_sm]);
     ring_start_dma();  // Fills the TX FIFO with silence
 

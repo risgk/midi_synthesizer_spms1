@@ -1,16 +1,16 @@
-MIDI Synthesizer SPMS-1 (type-2) v0.3.4
+MIDI Synthesizer SPMS-1 (type-2) v0.3.5
 =======================================
 
 - Spinel (Ruby AOT コンパイラ) で作った、Raspberry Pi Pico 2 用のモノフォニック・セミモジュラー MIDI シンセサイザー
 - 音源モジュールとして MIDI で制御します
 - 後着優先で 1 ノート分を記憶: 前のノートを押さえたまま新しいノートを離すと、前のノートにレガートで戻ります (トリルなどに)
 - 48 kHz オーディオ出力: I2S DAC による 24 bit、または PWM Audio (DAC 不要)
-- オシレータ: ノコギリ波から矩形波へのモーフ、パルス幅付き (CC#114)。パルス幅のモジュレーション付き (PWM。ピッチと同じ 2 つのモジュレーション、デフォルトではエンベロープと LFO で、CC#8 と 103)。ノコギリ波、パルス波の個別出力付き。Osc 1 は 1 オクターブ下のサイン波のサブ出力も
+- オシレータ: ノコギリ波からパルス波へのモーフ、パルス幅付き (CC#114)。パルス幅のモジュレーション付き (PWM。ピッチ用とは別の 2 つの入力で、デフォルトではどちらの組もエンベロープと LFO。CC#8 と 103)。ノコギリ波、パルス波の個別出力付き。Osc 1 は 1 オクターブ下のサイン波のサブ出力も
 - ハードシンク: Sync In (デフォルトで Osc 1 のノコギリ波) が 0 を上へ横切ったところで、Osc 2 がサンプルの間のその位置からやり直します。やり直しの段差も、周期の始まりと同じく PolyBLEP で丸めます (Sync Sw、CC#112)
 - エンベロープ: ADS エンベロープ 2 つ。EG 2 はアンプの Mod 2 In 用で、起動時はオルガン型。CC#52、53、54。リリースのスイッチは 2 つとも CC#105
 - LFO: 三角波 (PolyBLAMP) とユニポーラの矩形波 (PolyBLEP) の個別出力と、その間をクロスフェードするメイン出力 (Wave、CC#33)。リセット入力付き (デフォルトで Note Gate。Reset Sw、CC#113 をオンにするとノートごとにやり直す)
-- フィルタ: ZDF/TPT ステート・バリアブル・フィルタ (BP 積分器の非線形リーク付き、1 ステップ・ニュートン法で解く)。LP、HP、BP の 3 出力と、LP と HP の間をノッチを経てクロスフェードするメイン出力 (Mode、CC#39)
-- アンプ: 最大 +12 dB のゲイン (CC#15)。先読み型のリミッターで、ピークを 1.0 のクランプの手前に、切らずに丸めて収める (Limiter Sw、CC なし、起動時オン)
+- フィルタ: 2 つの ZDF/TPT ステート・バリアブル・フィルタ (BP 積分器の非線形リーク付き、1 ステップ・ニュートン法で解く)。それぞれ LP、HP、BP の 3 出力と、LP と HP の間をノッチを経てクロスフェードするメイン出力 (Mode、CC#39)、ゲイン付きの 2 つのオーディオ入力を持つ。デフォルトでは同じ CC で直列につながり、4 次 (24 dB/oct) のローパスになる。1 つ目のレゾナンスは別 (CC なし)
+- アンプ: 2 つのオーディオ入力と、それぞれ最大 +12 dB のゲイン (CC#15)。先読み型のリミッターで、ピークを 1.0 のクランプの手前に、切らずに丸めて収める (Limiter Sw、CC なし、起動時オン)
 - コーラス: モノラル入力・ステレオ出力、実行順に入るモジュール
 - ディレイ: ステレオ、フィードバック付き、実行順に入るモジュール (最大 340 ms)
 - ピッチ: ノートのピッチを扱う、実行順に入るモジュール。指数カーブのラグによるポルタメント (CC#5)、その後に足すピッチベンド、鍵盤のストレッチ (ベンドレンジは CC#57、ストレッチは CC#22)
@@ -104,16 +104,17 @@ MIDI Synthesizer SPMS-1 (type-2) v0.3.4
 "spms1_editor.html" を開き（[Web エディタ](#web-エディタ)を参照）、"MIDI Out" でシンセか SPMS-1 Web (Built-in) を選びます。
 
 1. お気に入り: Controls タブは "Show favorites only" にチェックが入った状態で開き、デフォルトパッチで
-   お気に入りになっている、音を大きく変える 21 個のパラメータを表示します:
-   Pitch 1 Glide、EG 1 Attack・Decay・Sustain、LFO 1 Rate、Osc 1 Wave・Pitch Mod 1 Amt・
-   Pitch Mod 2 Amt、Osc 2 Wave・Pitch・Pitch Mod 1 Amt・Pitch Mod 2 Amt、Mixer 2 Level 1・2、
-   Filter 1 Cutoff・Resonance・Mod 1 Amt・Mod 2 Amt、Amp 1 Gain、Chorus 1 Mix、Delay 1 Mix。
-   気に入ったものは星で追加できます
+   お気に入りになっている 47 個のパラメータを表示します:
+   Pitch 1 Glide・Out 1 Glide Sw・Out 2 Glide Sw・Bend Amt・Out 1 Bend Sw・Stretch、EG 1 Attack・Decay・Sustain・Release Sw、LFO 1 Wave・Rate・Level・Reset Sw、Osc 1 Wave・PW・Pitch Mod 1 Amt・Pitch Mod 1 Sw・Pitch Mod 2 Amt・PW Mod 1 Amt・PW Mod 2 Amt、Osc 2 Wave・Pitch Coarse・Pitch Fine・Pitch Mod 1 Amt・Pitch Mod 2 Amt・Sync Sw、Noise 1 Color、Mixer 2 Level 1〜4、
+   Filter 2 Cutoff・Resonance・Mode・Pitch Amt・Mod 1 Amt・Mod 1 Pol・Mod 2 Amt、
+   Amp 1 Gain 2・Mod 1/2 Mix、Chorus 1 Mix・Rate・Depth、Delay 1 Mix・Time・Feedback。
+   気に入ったものは星で追加できます。Osc 2 の各 Pitch Mod Amt は Osc 1 と、Filter 1 の Resonance（CC なし）以外の
+   各パラメータは Filter 2 と同じ CC なので、片方のスライダーを動かすと、表示されているかどうかに関わらず相手も一緒に動きます
 2. CC のあるパラメータ: "Show favorites only" のチェックを外すと、CC のあるパラメータがすべて表示されます。
    デフォルトパッチでの働きと起動時の値は、ブロック図の下に説明があります。MIDI コントローラのつまみでも
    動かせます
 3. CC のないパラメータ: "Show parameters with no CC" にチェックを入れると、残りが青で表示されます
-   （Mixer 1 の各レベルや Pitch 1 の Out 1・Out 2 Bend Sw など）。そのスライダーはスロットが保持する値を設定し、NRPN で
+   （Mixer 1 の各レベルや Pitch 1 の Out 2 Bend Sw など）。そのスライダーはスロットが保持する値を設定し、NRPN で
    送られます
 4. パッチの変更: Patch タブでは、パッチがすべての入力とパラメータを含む図そのものとして表示されます。
    出力から入力やパラメータへワイヤーをドラッグすると、その供給元が変わります。パッチングの
@@ -130,14 +131,16 @@ Undo で変更を戻せます。Initialize Values は値を戻して配線は保
       は鳴らせます
     - Controls タブには各パラメータのスライダーが並び、CC のないものは青で表示され、"Show parameters
       with no CC"（デフォルトはチェックなし）にチェックを入れない限り、CC を割り当てるかお気に入りにするまで隠れます。
-      チェックの状態は覚えておきます。CC のないパラメータのスライダーは、スロットが保持する値を NRPN で送って設定します
+      チェックの状態は覚えておきます。CC のないパラメータのスライダーは、スロットが保持する値を NRPN で送って設定します。
+      表示するパラメータが 1 つもないモジュールも、パネルはタイトルだけ表示します
     - "Show favorites only"（デフォルトはチェックあり）にチェックが入っていると、CC の有無にかかわらず、お気に入り（★）に
       したパラメータだけを表示します。チェックの状態は覚えておきます
     - そこでは、パネルの見出しをドラッグすると、同じ列の中でも別の列へでもパネルを動かせます（列が 2 つか 4 つ
       並ぶ幅のとき）。1 列のとき（スマホなど）は、見出しの右の ▲▼ で、隣のパネルと入れ替えて 1 つずつ上下に
       動かせます。1 列の並びは列を順につなげたものなので、列の端を越えると隣の列に移ります。パネルの位置は
-      ブラウザに覚えておき、どのパッチでも同じです。Reset Layout で最初の並び（1・2 列目の先頭に Osc 1 と
-      Osc 2、続いて Filter 1〜Delay 1、最後にモジュレーションの Controller〜LFO 1）に戻ります
+      ブラウザに覚えておき、どのパッチでも同じです。Reset Layout で最初の並び（1 列目にモジュレーションの
+      General、Pitch 1〜LFO 1 と Mixer 1、2 列目に音源の Osc 1〜Mixer 2、3 列目に Filter 1 と Filter 2、4 列目に Amp 1〜Delay 1）に戻ります。パネルの移動と Reset Layout も、
+      パッチの変更と同じく Undo で戻せます
     - そこではパラメータ名の後ろにカッコで補足が付きます。Noise 1 Color の "(White to Red)" のような範囲か、
       レベルやモジュレーション量では、Mixer 2 Level 3 の "(Osc 1 Sub)" のように、それが掛かる入力に
       パッチでつながっているものです。後者は結線を変えるとそれに従います。Patch タブでは名前のツールチップに出ます
@@ -156,7 +159,7 @@ Undo で変更を戻せます。Initialize Values は値を戻して配線は保
     - Initialize Values は、各 CC の値と、CC のないパラメータの値を起動時の値に戻して送ります。どの変更もすぐ送るのと同じです。結線はそのままです
 - 音を出して試すためのソフトウェア鍵盤を内蔵しています
     - 鍵盤の横にピッチベンドホイール（-8192〜+8191、離すと中央に戻ります）と、パッチで Mod Wheel に割り当てた
-      CC を動かすモジュレーションホイールがあります
+      CC を動かすモジュレーションホイールと、Breath に割り当てた CC を動かすブレスホイールがあります
     - 見出しをクリックすると隠れ、パッチエディタやコントロールがその高さまで広がります。どちらの状態かは
       覚えておき、隠れている間は PC キーボードのキーでは弾けません
     - Panic は All Sound Off を送り、ピッチベンドを中央に戻します。MIDI In に届いたチャンネルモードメッセージには、
@@ -165,14 +168,17 @@ Undo で変更を戻せます。Initialize Values は値を戻して配線は保
     - モジュールの出力を入力やパラメータへ配線し、実行順と CC の割り当てを設定します
     - 各モジュールのパラメータをすべて表示し、CC のないものは青で示します。配線はいつも行き先のパラメータに
       つながります
+    - 鍵盤のシグナルと Mod Wheel、Breath は Controller ノードに、値がパッチの一部になる General 1・2 は、シンセにはない
+      モジュールですが、便宜上 General ノード（Controls タブでは General パネル）に分けて表示します
     - パッチを JSON で保存・読み込みします
-    - JSON で保存したりコピーしたりするパッチでは、Save to Device と同じく、Mod Wheel だけに割り当てた CC を起動時の値 (0.0) にします。
-      Mod Wheel は設定するものではなく演奏で動かすものだからです。Send Patch は今の位置を送ります
-    - パッチを MIDI バイト列または NRPN リストとしてコピーするか、Web MIDI で送信します
+    - JSON で保存したりコピーしたりするパッチでは、Save to Device と同じく、Mod Wheel か Breath だけに割り当てた CC を起動時の値 (0.0) にします。
+      どちらも設定するものではなく演奏で動かすものだからです。Send Patch は今の位置を送ります
+    - パッチを MIDI バイト列 (NRPN か SysEx) または NRPN リストとしてコピーするか、Web MIDI で送信します
     - パッチ全体 (Send Patch、MIDI Out の選び直し) と、Init や Load による変更 (その Undo と Redo も) は、Mute のオンとオフ (NRPN の Mute) で挟んで送るので、
       送信途中のパッチの音は聞こえません。"Mute while loading" (デフォルトでオン) にすると、コピーするパッチも同じです。
-      それ以外の変更は、そのまま送ります。デフォルトのパッチは約 2,000 バイトで、31250 bps (UART MIDI) で約 0.6 秒、
-      USB MIDI で約 0.5 秒かかります
+      それ以外の変更は、そのまま送ります。パッチ全体は、ブラウザが許せば (SPMS-1 Web にはいつも) SysEx で、それ以外は
+      NRPN で送ります。デフォルトのパッチは、SysEx で約 600 バイト (31250 bps の UART MIDI で約 0.2 秒)、NRPN で約 2,300 バイト
+      (31250 bps で約 0.7 秒、USB MIDI で約 0.5 秒) です
     - Mute ボタンでシンセをミュート (NRPN の Mute) して、音を出さずにパッチを変えられます。MIDI In に届いた Mute も
       ボタンに表示します。MIDI In に届いたリセット (NRPN の Reset) では、エディタのパッチもデフォルトに戻ります
     - Save to Device で、パッチをシンセのフラッシュに保存します (NRPN の Save)。シンセは電源投入時にこれを読み込みます
@@ -240,6 +246,7 @@ flowchart LR
   NOISE[Noise 1]
   MIX2[Mixer 2]
   FILTER[Filter 1]
+  FILTER2[Filter 2]
   AMP[Amp 1]
   CHORUS[Chorus 1]
   DELAY[Delay 1]
@@ -249,8 +256,11 @@ flowchart LR
   OSC2 -->|In 2| MIX2
   OSC -->|In 3, Sub| MIX2
   NOISE -->|In 4| MIX2
-  MIX2 --> FILTER
-  FILTER --> AMP
+  MIX2 -->|In 1| FILTER
+  MIX2 -->|In 1, Gain 0| FILTER2
+  FILTER -->|In 2| FILTER2
+  FILTER -->|In 1, Gain 0| AMP
+  FILTER2 -->|In 2| AMP
   AMP --> CHORUS
   CHORUS -->|L| DELAY
   CHORUS -->|R| DELAY
@@ -263,14 +273,17 @@ flowchart LR
   KBD -. Note Gate .-> PITCH
   KBD -. Pitch Bend .-> PITCH
   PITCH -. Out 1 .-> OSC
-  EG -. Mod 1 .-> OSC
-  LFO -. Mod 2 .-> OSC
+  EG -. Pitch Mod 1, PW Mod 1 .-> OSC
+  LFO -. Pitch Mod 2, PW Mod 2 .-> OSC
   PITCH -. Out 2 .-> OSC2
-  EG -. Mod 1 .-> OSC2
-  LFO -. Mod 2 .-> OSC2
+  EG -. Pitch Mod 1, PW Mod 1 .-> OSC2
+  LFO -. Pitch Mod 2, PW Mod 2 .-> OSC2
   EG -. Mod 1 .-> FILTER
   LFO -. Mod 2 .-> FILTER
   PITCH -. Out 1 .-> FILTER
+  EG -. Mod 1 .-> FILTER2
+  LFO -. Mod 2 .-> FILTER2
+  PITCH -. Out 1 .-> FILTER2
   EG -. Mod 1 .-> AMP
   EG2 -. Mod 2 .-> AMP
   OSC -. Sync .-> OSC2
@@ -280,6 +293,11 @@ flowchart LR
 
 Osc 2 のシンクと LFO 1 のリセットは、Osc 1 のノコギリ波と Note Gate から結線されていますが、スイッチが起動時オフなので、
 オンにするまで効きません。モジュレーションホイールは LFO 1 の Level Mod In に入ります。
+2 つのフィルタはデフォルトでは直列で、Mixer 2 → Filter 1 → Filter 2 → アンプとつながり、同じ CC で動く
+4 次（24 dB/oct）のローパス 1 つになります。Filter 2 は Audio In 2 に Filter 1 を、Audio In 1 に Mixer 2 をゲイン 0.0 で
+受け取り、アンプは Audio In 1 に Filter 1 をゲイン 0.0 で、Audio In 2 に Filter 2 を受け取るので、これらのゲインだけで
+結線し直さずに並列にできます。Filter 1 の Audio In 2 には何もつながっていません。各オシレータのピッチとパルス幅には
+モジュレーション入力が 2 つずつあり、どちらの組も同じ結線です（各 Mod 1 In に EG 1、各 Mod 2 In に LFO 1）。
 
 モジュールは[実行順](./spms1_patching.ja.md#実行順)で、1 サンプルずつ処理されます。波形やカットオフ、ゲインといったパラメータは CC
 から届くもので、この図では省いています。パラメータ名では Amount を Amt、Switch を Sw、Polarity を Pol と略しています。
@@ -287,34 +305,49 @@ Osc 2 のシンクと LFO 1 のリセットは、Osc 1 のノコギリ波と Not
 ノートのピッチは Pitch 1 を通ってオシレータに届き、ノートからノートへ滑らかに移ります。ポルタメントです。
 Pitch 1 Glide は CC#5 (MIDI 規格の Portamento Time) にあり、起動時は 0.0 です。そこではポルタメントはオフで、
 ピッチを届いたとおりそのまま通します。Pitch 1 は 1 つのグライドから 2 つの出力を出します。Out 1 は Osc 1 と
-フィルタのキーボードトラッキングへ、Out 2 は Osc 2 へ届きます。Out 1 Glide Sw と Out 2 Glide Sw は
+両フィルタのキーボードトラッキングへ、Out 2 は Osc 2 へ届きます。Out 1 Glide Sw と Out 2 Glide Sw は
 Glide を動かさずに、それぞれの出力のポルタメントをオン・オフします。どちらも CC#34 にあり、MIDI のスイッチと
 同じく値 64 以上でオン、起動時は値 124 でオンです。グライドは Pitch 1 Gate In（デフォルトは Note Gate）が
 オンの間だけ進みます。ノートとノートの間は止まっているので、休符の後のノートはそこから続きます。Pitch Bend は Pitch 1 Bend In に入ります。Bend In は
-グライドの後で出力に足されるので、ベンドはすぐに効き、オシレータにもフィルタのキーボードトラッキングにも
-同じように届きます。Out 1 Bend Sw と Out 2 Bend Sw は CC を持たず、起動時はオンです。カテゴリ 4 で
-片方をオフにすると、その出力にはベンドが掛からないので、Osc 2 だけをベンドできます。
+グライドの後で出力に足されるので、ベンドはすぐに効き、オシレータにも両フィルタのキーボードトラッキングにも
+同じように届きます。Out 1 Bend Sw は CC#119、Out 2 Bend Sw は CC なしで、どちらも起動時はオンです。
+片方をオフにすると（Out 1 は CC#119 を 64 未満に、Out 2 はカテゴリ 4 で）、その出力にはベンドが掛からないので、
+Osc 2 だけをベンドできます。ホイールでシンク音色を Osc 1 に対してスイープできます。
 Pitch 1 Bend Amt（CC#57）がベンドレンジで、1 目盛り半音ずつです。値 8 で上下 2 半音、値 28 で 1 オクターブ、
-値 124 で 5 オクターブで、起動時は値 28 です。
+値 124 で 5 オクターブで、起動時は値 28 です。CC のない Bend Pol は起動時 +1.0 で、値 64 より下にするとベンドが逆向きになります。
 
-LFO はオシレータの Mod 2 In に直接入り、ピッチとパルス幅の両方に掛かります。フィルタにも入りますが、Filter 1 Mod 2 Amt
-（CC#25）が起動時 0.0 なので、上げるまでカットオフは動きません。エンベロープは Filter 1 Mod 1 Amt（CC#24）で
-カットオフを動かし、起動時は 0.2（値 28）で、ピークで Filter 1 Cutoff（CC#74）から 2 オクターブ上まで開きます。
+例えば、ピッチベンドホイールでスイープするシンク音色は、エディタの Controls タブのお気に入りだけで作れます。
+Mixer 2 Level 1 を下げ Level 2 を上げて（CC#19 = 4、CC#20 = 124）ミキサーを Osc 2 だけにし、Osc 2 Sync Sw をオンにして
+（CC#112 = 124）Osc 1 にシンクさせ、Pitch 1 Out 1 Bend Sw をオフにします（CC#119 = 4）。Osc 1 はノートを保ち、
+ホイールは Osc 2 だけをベンドします（起動時の Bend Amt では上端で 1 オクターブ上）。Osc 2 Pitch Coarse（CC#85）で
+スイープの出発点を決めます。Out 1 につながるフィルタもノートに留まります。
+
+LFO はオシレータの Pitch Mod 2 In と PW Mod 2 In に直接入ります。フィルタにも入りますが、Mod 2 Amt
+（CC#25）が起動時 0.0 なので、上げるまでカットオフは動きません。エンベロープは Mod 1 Amt（CC#24）で
+カットオフを動かし、起動時は 0.2（値 28）で、ピークで Cutoff（CC#74）から 2 オクターブ上まで開きます。
 カットオフは起動時 0.8（値 100）です。
 LFO は Osc 1 Pitch Mod 2 Amt（CC#13）でピッチへ入ります。起動時は 0.0 で、最大の値 124 では Osc 1 Pitch Mod 2 Pol の
 起動時の +0.2 と合わせて、フルレベルの LFO がピッチを上下 1 オクターブ振ります。パルス幅へは
 Osc 1 PW Mod 2 Amt（CC#103）で入り、起動時は 0.0 です。LFO 1 Level は起動時 1.0 なので、ビブラートは
-CC#13 だけで 0〜1 オクターブ掛かります。Pitch 1 からのピッチはフィルタの Filter 1 Pitch In にも入ります。キーボードトラッキング用です。
-CC#9（Filter 1 Pitch Amt）を最大にするとカットオフがノートに半音ずつ追従し、ノート 60 では動きません。
-Filter 1 Pitch Amt は起動時 0.0（値 4）なので、CC#9 を上げるまでは、カットオフはノートによらず CC#74 の位置のままです。
-エンベロープはオシレータの Osc 1 Mod 1 In にも入ります。ピッチエンベロープ用です。Pitch Mod 1 Amt
+CC#13 だけで 0〜1 オクターブ掛かります。Pitch 1 からのピッチは両フィルタの Pitch In にも入ります。キーボードトラッキング用です。
+CC#9（Pitch Amt）を最大にするとカットオフがノートに半音ずつ追従し、ノート 60 では動きません。
+Pitch Amt は起動時 0.0（値 4）なので、CC#9 を上げるまでは、カットオフはノートによらず CC#74 の位置のままです。
+CC のない Pitch Pol は起動時 +1.0 で、値 64 より下にすると追従が逆向きになります。
+エンベロープはオシレータの Osc 1 Pitch Mod 1 In と PW Mod 1 In にも入ります。ピッチエンベロープ用です。Pitch Mod 1 Amt
 （CC#89）と PW Mod 1 Amt（CC#8）は起動時 0.0 で、オフです。モジュレーションの深さはどれも動かす先のレンジ全体に届くので、
 ソースを音楽的な深さまで絞る仕事はモジュールに作り込まず、パッチの側に任せています。
 
 Mixer 2 がフィルタの前でオーディオを足し合わせます。Osc 1 が In 1、Osc 2 が In 2、Osc 1 のサブが In 3、Noise 1 の Out が In 4 です。
-それぞれ自分のレベルで足されます。Level 1（CC#19）と Level 2（CC#20）は起動時 0.7 なので、デフォルトのパッチは 2 つのオシレータで鳴り、合わせて 1 つを最大にしたときとほぼ同じ音量です。Level 3（CC#21）と Level 4（CC#23）は起動時 0.0 なので、上げるまでサブとノイズは鳴りません。Osc 2 は Osc 1 と同じく Pitch 1 からノートを受け取り、自分の Pitch（CC#85）と
-Pitch Fine（CC#76）で Osc 1 に対する音程を決めます。起動時は 11 セント高く、ゆっくりうなります。Wave も自分のもので、CC#104 です（Osc 1 は CC#102）。それ以外は
-Osc 1 に従います。Mod Amt と PW には Osc 1 と同じ CC が割り当ててあるので、1 つの CC で両方が動きます。
+それぞれ自分のレベルで足されます。Level 1（CC#19）は起動時 1.0 なので、デフォルトのパッチは Osc 1 を最大のレベルで鳴らします。Level 2（CC#20）、Level 3（CC#21）、Level 4（CC#23）は起動時 0.0 なので、上げるまで Osc 2、サブ、ノイズは鳴りません。Osc 2 は Osc 1 と同じく Pitch 1 からノートを受け取り、自分の Pitch Coarse（CC#85）と
+Pitch Fine（CC#76）で Osc 1 に対する音程を決めます。起動時は 10 セント高く、上げるとゆっくりうなります。Wave も自分のもので、CC#104 です（Osc 1 は CC#102）。それ以外は
+Osc 1 に従います。各 Pitch Mod Amt には Osc 1 と同じ CC が割り当ててあるので、1 つの CC で両方が動きます。PW と PW Mod Amt には CC がありません。
+
+Filter 1 と Filter 2 は直列で、4 次（24 dB/oct）のローパスになります。Filter 2 は Filter 1 と同じ CC と起動時の値を持ち、
+それらの CC で両方が動きます。ただし Resonance だけは別で、Filter 2 のもの（CC#71）は起動時 Q 4.0、
+Filter 1 のもの（CC なし）は最小の Q 0.71 なので、レゾナンスのピークは Filter 2 のものになります。それぞれのフィルタは Audio In 1 と Audio In 2 を Gain 1 と Gain 2
+（CC なし、起動時は等倍）で受け取ります。ただし何もつながっていない Filter 1 の Gain 2 と、Mixer 2 から入る Filter 2 の Gain 1 は起動時 0.0 で、これを上げ、
+Filter 2 の Gain 2 を下げ、Amp 1 の Gain 1 を上げると、フィルタが並列になります。Amp 1 は Audio In 1 に Filter 1 を Gain 1（CC なし、起動時 0.0 で無音）で、Audio In 2 に Filter 2 を Gain 2（CC#15）で
+受け取ります。
 
 アンプまではモノラルです。コーラスがそれを受け取って左右 2 つを出し、ディレイが左右を受け取って分けた
 まま運び、その 2 つの出力が最終出力の左右になります。
@@ -326,7 +359,7 @@ NRPN が書き換えます。[パッチ](./spms1_patching.ja.md)を参照して�
 ドキュメント
 ------------
 
-- [パッチ](./spms1_patching.ja.md): 実行順、Filter 1・Chorus 1・Delay 1 の詳細、NRPN によるパッチの編集
+- [パッチ](./spms1_patching.ja.md): 実行順、フィルタ・Chorus 1・Delay 1 の詳細、NRPN によるパッチの編集
   (表、知っておきたいレンジ、例、注意点)
 - [開発](./spms1_development.ja.md): デバッグプリント、PC シミュレーター、モジュールの追加、処理負荷の見積もり、
   GitHub Actions、Spinel の更新、生成コードの確認

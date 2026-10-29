@@ -1,5 +1,5 @@
 module Spms1
-  # PolyBLEP-based saw/square morph oscillator for anti-aliased waveform transitions. Besides the
+  # PolyBLEP-based saw/pulse morph oscillator for anti-aliased waveform transitions. Besides the
   # morph, which process returns, it puts out its two ends on their own: output_saw, the sawtooth,
   # and output_pulse, the pulse at its pulse width, as the morph is at 1.0, whatever Wave is. And
   # output_sub, a sine an octave down, locked to the sawtooth's phase: it starts each of its cycles
@@ -23,12 +23,10 @@ module Spms1
     # bring the depth down to 0.2 at the top of each Pitch Mod Amt, an octave either way, and two
     # octaves up for the envelope.
     MODULATION_RANGE = 120.0 / 120.0
-    # How far Pitch Coarse and Pitch Fine reach at either end of their dials. Both are spaced so that one step
-    # of a 7-bit control is one whole unit: a semitone for coarse, a cent for fine. Pitch, between
-    # the two, reaches an octave up, a tenth of a semitone a step, for a sweep by hand.
-    PITCH_RANGE        = 12.0 / 120.0
+    # How far Pitch Coarse and Pitch Fine reach at either end of their dials: 60 semitones, so that one step
+    # of a 7-bit control is a whole semitone, and 50 cents, so that the dial's quarters are quarter tones.
     PITCH_COARSE_RANGE = 60.0 / 120.0
-    PITCH_FINE_RANGE   = 0.6 / 120.0
+    PITCH_FINE_RANGE   = 0.5 / 120.0
 
     # Pitch lookup table for note-to-frequency conversion.
     FREQ_TABLE = Array.new(129, 0.0)
@@ -55,8 +53,8 @@ module Spms1
       @pulse_width = 0.0
       @stage_1_pulse_width = 0.0
       @current_pulse_width = 0.0
-      # Mod 1 In and Mod 2 In each move the pitch by a Pitch Mod Amt of their own and the pulse
-      # width by a PW Mod Amt of their own. Pitch In has no depth: the note it carries is added
+      # Pitch Mod 1 In and Pitch Mod 2 In each move the pitch by a Pitch Mod Amt of their own, and
+      # PW Mod 1 In and PW Mod 2 In the pulse width by a PW Mod Amt of their own. Pitch In has no depth: the note it carries is added
       # whole, a key a semitone, and plays in tune from the first sample.
       # Each Mod Amt, its Mod Pol and, for the pitch, its Pitch Mod Sw are multiplied before
       # smoothing, so only their product, the depth, carries a smoothing state.
@@ -82,11 +80,10 @@ module Spms1
       @pw_modulation_2_depth = 0.0
       @stage_1_pw_modulation_2_depth = 0.0
       @current_pw_modulation_2_depth = 0.0
-      @pitch = 0.0
       @pitch_coarse = 0.0
       @pitch_fine = 0.0
-      # Pitch Coarse, Pitch Fine and Pitch are summed when set, so the per-sample path adds one
-      # offset rather than three.
+      # Pitch Coarse and Pitch Fine are summed when set, so the per-sample path adds one
+      # offset rather than two.
       @tune = 0.0
       @output_saw = 0.0
       @output_pulse = 0.0
@@ -112,7 +109,7 @@ module Spms1
     end
 
     # Pulse width is bipolar, [-0.5, 0.5]: how far the second sawtooth is shifted back from half a
-    # cycle. At the square end of the morph, 0.0 is a pulse of 50%, +0.25 one of 75% and +0.5 one of
+    # cycle. At the pulse end of the morph, 0.0 is a pulse of 50%, +0.25 one of 75% and +0.5 one of
     # 100%, -0.25 one of 25% and -0.5 one of 0%; both ends are silence, as the two sawtooths then
     # cancel. Between the two ends of the morph it moves the second sawtooth of the blend in the
     # same way.
@@ -186,29 +183,22 @@ module Spms1
       @pw_modulation_2_depth = @pw_modulation_2_amount * @pw_modulation_2_polarity
     end
 
-    # Pitch is unipolar, [0.0, 1.0], from no offset up an octave, so it only raises the pitch, as a
-    # sync sweep does.
     # Pitch Coarse and Pitch Fine are bipolar, [-0.5, 0.5], with 0.0 meaning no offset, so a controller's
-    # center detent lands there. Linear about that center, which is what puts every step on a whole
-    # semitone or a whole cent; a curve here would make exact intervals unreachable.
-    # Not smoothed: a semitone step is part of the sound, a cent step is too small to hear as one,
+    # center detent lands there. Linear about that center, which is what puts every Coarse step on a
+    # whole semitone; a curve here would make exact intervals unreachable. Swept by hand,
+    # Coarse also serves a sync sweep, a semitone a step.
+    # Not smoothed: a semitone step is part of the sound, a Fine step is too small to hear as one,
     # and a step in pitch does not click, as the phase runs on unbroken.
-    def set_pitch(pitch)
-      clamped = (pitch < 0.0) ? 0.0 : ((pitch > 1.0) ? 1.0 : pitch)
-      @pitch = clamped * PITCH_RANGE
-      @tune = (@pitch_coarse + @pitch_fine) + @pitch
-    end
-
     def set_pitch_coarse(pitch_coarse)
       clamped = (pitch_coarse < -0.5) ? -0.5 : ((pitch_coarse > 0.5) ? 0.5 : pitch_coarse)
       @pitch_coarse = (clamped + clamped) * PITCH_COARSE_RANGE
-      @tune = (@pitch_coarse + @pitch_fine) + @pitch
+      @tune = @pitch_coarse + @pitch_fine
     end
 
     def set_pitch_fine(pitch_fine)
       clamped = (pitch_fine < -0.5) ? -0.5 : ((pitch_fine > 0.5) ? 0.5 : pitch_fine)
       @pitch_fine = (clamped + clamped) * PITCH_FINE_RANGE
-      @tune = (@pitch_coarse + @pitch_fine) + @pitch
+      @tune = @pitch_coarse + @pitch_fine
     end
 
     # The parameters that scale no audio themselves -- rates, depths, times -- smoothed in two
@@ -233,10 +223,11 @@ module Spms1
     # lookup in bounds. The pulse width its modulations add up to is held to its own, [-0.5, 0.5].
     # The modulation inputs are deliberately not smoothed, so a fast source reaches the pitch and
     # the pulse width unslewed.
-    def process(control_tick, pitch_input = 0.0, modulation_1_input = 0.0, modulation_2_input = 0.0)
+    def process(control_tick, pitch_input = 0.0, pitch_modulation_1_input = 0.0, pitch_modulation_2_input = 0.0,
+                pw_modulation_1_input = 0.0, pw_modulation_2_input = 0.0)
       update_controls if control_tick
 
-      pitch_modulation = (modulation_1_input * @current_pitch_modulation_1_depth) + (modulation_2_input * @current_pitch_modulation_2_depth)
+      pitch_modulation = (pitch_modulation_1_input * @current_pitch_modulation_1_depth) + (pitch_modulation_2_input * @current_pitch_modulation_2_depth)
       total_pitch = pitch_input + @tune + pitch_modulation
       pitch = (total_pitch < -0.5) ? -0.5 : ((total_pitch > 0.5) ? 0.5 : total_pitch)
       freq = pitch_to_freq_fast(pitch)
@@ -251,7 +242,7 @@ module Spms1
 
       # The pulse width is held to its range after the modulation is added, which also keeps the
       # shift within one cycle, so that a single wrap below brings phase2 back under 1.0.
-      pw_modulation = (modulation_1_input * @current_pw_modulation_1_depth) + (modulation_2_input * @current_pw_modulation_2_depth)
+      pw_modulation = (pw_modulation_1_input * @current_pw_modulation_1_depth) + (pw_modulation_2_input * @current_pw_modulation_2_depth)
       total_pulse_width = @current_pulse_width + pw_modulation
       pulse_width = (total_pulse_width < -0.5) ? -0.5 : ((total_pulse_width > 0.5) ? 0.5 : total_pulse_width)
       phase2 = @phase + (0.5 - pulse_width)
@@ -308,17 +299,18 @@ module Spms1
     # more than the rest of the oscillator. Without a restart the output is process's, one sample
     # late, but where the pitch jumps: a phase a wrap left behind can be within the new dt of 0.0,
     # which both take for a wrap just past, and this one rounds off on the sample before as well.
-    def process_synced(control_tick, pitch_input = 0.0, modulation_1_input = 0.0, modulation_2_input = 0.0, sync_input = 0.0)
+    def process_synced(control_tick, pitch_input = 0.0, pitch_modulation_1_input = 0.0, pitch_modulation_2_input = 0.0,
+                       pw_modulation_1_input = 0.0, pw_modulation_2_input = 0.0, sync_input = 0.0)
       update_controls if control_tick
 
-      pitch_modulation = (modulation_1_input * @current_pitch_modulation_1_depth) + (modulation_2_input * @current_pitch_modulation_2_depth)
+      pitch_modulation = (pitch_modulation_1_input * @current_pitch_modulation_1_depth) + (pitch_modulation_2_input * @current_pitch_modulation_2_depth)
       total_pitch = pitch_input + @tune + pitch_modulation
       pitch = (total_pitch < -0.5) ? -0.5 : ((total_pitch > 0.5) ? 0.5 : total_pitch)
       freq = pitch_to_freq_fast(pitch)
       current_dt = freq * @inv_sample_rate
       current_dt_inv = 1.0 / current_dt
 
-      pw_modulation = (modulation_1_input * @current_pw_modulation_1_depth) + (modulation_2_input * @current_pw_modulation_2_depth)
+      pw_modulation = (pw_modulation_1_input * @current_pw_modulation_1_depth) + (pw_modulation_2_input * @current_pw_modulation_2_depth)
       total_pulse_width = @current_pulse_width + pw_modulation
       pulse_width = (total_pulse_width < -0.5) ? -0.5 : ((total_pulse_width > 0.5) ? 0.5 : total_pulse_width)
       shift = 0.5 - pulse_width

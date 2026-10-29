@@ -238,7 +238,7 @@
       padding: 12px 16px;
       container-type: inline-size;
     }
-    /* The last column, Controller to LFO 1, runs the full height of its row, so the Init button under it sits at the
+    /* The last column, Amp 1 to Delay 1, runs the full height of its row, so the Init button under it sits at the
        bottom, just above the keyboard. */
     .editor-column:last-child {
       align-self: stretch;
@@ -414,7 +414,6 @@
     /* In four columns the CC number goes on the line of the name, and the panels are packed
        tighter, so the soft keyboard fits a full HD window under them even with a bookmarks bar. */
     @media (min-width: 1872px) {
-      .slider-label { white-space: nowrap; }
       .slider-label .ctl-sub { display: inline; }
       .control-row { gap: 6px; }
       .editor-column { gap: 12px; }
@@ -430,9 +429,12 @@
       .editor-grid { column-gap: 10px; }
       .slider-knob-zone, .slider-input-wrapper { gap: 4px; }
       /* One width for every name, the longest's, so every slider is as long as the others; a
-         name longer still, with the source of a routed parameter, is cut short rather than
-         shortening its slider. */
-      .slider-label { flex: 0 0 200px; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+         name longer still, with the source of a routed parameter, wraps onto a second line, and
+         is cut short only past that, rather than shortening its slider. */
+      .slider-label {
+        flex: 0 0 200px; min-width: 0; overflow: hidden;
+        display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2;
+      }
       .slider-label .cc-num, .slider-label .ctl-hint { font-size: 0.65rem; }
       /* Under the wrapper, so as to outrank the rules for the two further down. */
       .slider-input-wrapper .slider-value { min-width: 24px; font-size: 0.85rem; }
@@ -715,9 +717,9 @@
       background: #222;
       padding: 10px 5px 5px 5px;
     }
-    /* The pitch bend and mod wheels on the left of the keys, as on a keyboard, sliders standing as
-       tall as they are. The bend springs back to the center; the mod wheel's value is that of the
-       CC Mod Wheel is on in the patch. */
+    /* The pitch bend, mod and breath wheels on the left of the keys, as on a keyboard, sliders
+       standing as tall as they are. The bend springs back to the center; the mod wheel's value is
+       that of the CC Mod Wheel is on in the patch, and the breath wheel's that of Breath's CC. */
     /* Each wheel as wide as a white key from C to E, 5/3 of a semitone, and the keys keeping the 37
        that KB_KEY_WIDTH fits a 960px window beside them, with room. */
     .kbd-body {
@@ -1556,7 +1558,7 @@
 <body>
 
 <header>
-  <h1>SPMS-1 (type-2) Editor<span class="version">v0.3.4</span><span class="github-link">(<a href="https://github.com/risgk/midi_synthesizer_spms1" target="_blank" rel="noopener">View on GitHub</a>)</span></h1>
+  <h1>SPMS-1 (type-2) Editor<span class="version">v0.3.5</span><span class="github-link">(<a href="https://github.com/risgk/midi_synthesizer_spms1" target="_blank" rel="noopener">View on GitHub</a>)</span></h1>
   <nav class="tabs">
     <button class="tab-btn active" data-tab="controls">Controls</button>
     <button class="tab-btn" data-tab="patch">Patch</button>
@@ -1596,7 +1598,7 @@
         <label class="check" title="A parameter with no CC holds the value the patch gives it, which its slider sets through NRPN. Hidden, it shows up as soon as a CC is given to it or it is marked as a favorite."><input type="checkbox" id="show-no-cc"> Show parameters with no CC</label>
         <label class="check" title="Only the parameters marked with a star, with or without a CC. Unmarking one here takes it off the tab."><input type="checkbox" id="favorites-only"> Show favorites only</label>
       </div>
-      <button class="btn" id="reset-layout" title="Put the panels back where they were at first. A panel is moved by dragging its heading, with the columns two or four to a row, or by its arrows in one column; where they are is kept in this browser, for every patch.">Reset Layout</button>
+      <button class="btn" id="reset-layout" title="Put the panels back where they were at first. A panel is moved by dragging its heading, with the columns two or four to a row, or by its arrows in one column; where they are is kept in this browser, for every patch. Undo puts them back as they were.">Reset Layout</button>
     </div>
     <button class="btn primary" id="init-values" title="Set each CC value and each value of a parameter with no CC back to what the synth powers up at, and send them; the wiring is kept">Initialize Values</button>
   </div>
@@ -1679,6 +1681,7 @@
         <label for="export-format">Format</label>
         <select id="export-format">
           <option value="hex">MIDI bytes (hex)</option>
+          <option value="sysex">MIDI bytes, SysEx (hex)</option>
           <option value="nrpn">NRPN list (MSB, LSB, value)</option>
         </select>
       </div>
@@ -1712,6 +1715,10 @@
       <div class="mod-wheel" id="mod-wheel-zone">
         <input type="range" id="mod-wheel" min="4" max="124" aria-label="Mod Wheel">
         <span class="mod-wheel-label">Mod</span>
+      </div>
+      <div class="mod-wheel" id="breath-wheel-zone">
+        <input type="range" id="breath-wheel" min="4" max="124" aria-label="Breath">
+        <span class="mod-wheel-label">Breath</span>
       </div>
       <div class="kbd-keys">
         <div class="keyboard-scroll-container" id="kb-scroll">
@@ -1762,9 +1769,10 @@
       {"key":"NOISE_1","id":8,"label":"Noise 1","outs":[{"sig":"NOISE_1_OUTPUT","label":"Out"},{"sig":"NOISE_1_OUTPUT_WHITE","label":"Out White"},{"sig":"NOISE_1_OUTPUT_RED","label":"Out Red"}]},
       {"key":"MIXER_2","id":9,"label":"Mixer 2","outs":[{"sig":"MIXER_2_OUTPUT","label":"Out"},{"sig":"MIXER_2_OUTPUT_INV","label":"Out Inv"}]},
       {"key":"FILTER_1","id":10,"label":"Filter 1","outs":[{"sig":"FILTER_1_OUTPUT","label":"Out"},{"sig":"FILTER_1_OUTPUT_LP","label":"Out LP"},{"sig":"FILTER_1_OUTPUT_HP","label":"Out HP"},{"sig":"FILTER_1_OUTPUT_BP","label":"Out BP"}]},
-      {"key":"AMP_1","id":11,"label":"Amp 1","outs":[{"sig":"AMP_1_OUTPUT","label":"Out"}]},
-      {"key":"CHORUS_1","id":12,"label":"Chorus 1","outs":[{"sig":"CHORUS_1_OUTPUT_L","label":"Out L"},{"sig":"CHORUS_1_OUTPUT_R","label":"Out R"},{"sig":"CHORUS_1_OUTPUT_MONO","label":"Out Mono"}]},
-      {"key":"DELAY_1","id":13,"label":"Delay 1","outs":[{"sig":"DELAY_1_OUTPUT_L","label":"Out L"},{"sig":"DELAY_1_OUTPUT_R","label":"Out R"},{"sig":"DELAY_1_OUTPUT_MONO","label":"Out Mono"}]},
+      {"key":"FILTER_2","id":11,"label":"Filter 2","outs":[{"sig":"FILTER_2_OUTPUT","label":"Out"},{"sig":"FILTER_2_OUTPUT_LP","label":"Out LP"},{"sig":"FILTER_2_OUTPUT_HP","label":"Out HP"},{"sig":"FILTER_2_OUTPUT_BP","label":"Out BP"}]},
+      {"key":"AMP_1","id":12,"label":"Amp 1","outs":[{"sig":"AMP_1_OUTPUT","label":"Out"}]},
+      {"key":"CHORUS_1","id":13,"label":"Chorus 1","outs":[{"sig":"CHORUS_1_OUTPUT_L","label":"Out L"},{"sig":"CHORUS_1_OUTPUT_R","label":"Out R"},{"sig":"CHORUS_1_OUTPUT_MONO","label":"Out Mono"}]},
+      {"key":"DELAY_1","id":14,"label":"Delay 1","outs":[{"sig":"DELAY_1_OUTPUT_L","label":"Out L"},{"sig":"DELAY_1_OUTPUT_R","label":"Out R"},{"sig":"DELAY_1_OUTPUT_MONO","label":"Out Mono"}]},
     ],
     inputs: [
       {"entry":0,"module":"PITCH_1","key":"PITCH_IN","label":"Pitch In","source":"NOTE_PITCH"},
@@ -1780,116 +1788,142 @@
       {"entry":10,"module":"MIXER_1","key":"IN_3","label":"In 3","source":"NONE"},
       {"entry":11,"module":"MIXER_1","key":"IN_4","label":"In 4","source":"NONE"},
       {"entry":12,"module":"OSC_1","key":"PITCH_IN","label":"Pitch In","source":"PITCH_1_OUTPUT_1"},
-      {"entry":13,"module":"OSC_1","key":"MOD_1_IN","label":"Mod 1 In","source":"EG_1_OUTPUT"},
-      {"entry":14,"module":"OSC_1","key":"MOD_2_IN","label":"Mod 2 In","source":"LFO_1_OUTPUT"},
-      {"entry":15,"module":"OSC_2","key":"PITCH_IN","label":"Pitch In","source":"PITCH_1_OUTPUT_2"},
-      {"entry":16,"module":"OSC_2","key":"MOD_1_IN","label":"Mod 1 In","source":"EG_1_OUTPUT"},
-      {"entry":17,"module":"OSC_2","key":"MOD_2_IN","label":"Mod 2 In","source":"LFO_1_OUTPUT"},
-      {"entry":18,"module":"OSC_2","key":"SYNC_IN","label":"Sync In","source":"OSC_1_OUTPUT_SAW"},
-      {"entry":19,"module":"MIXER_2","key":"IN_1","label":"In 1","source":"OSC_1_OUTPUT"},
-      {"entry":20,"module":"MIXER_2","key":"IN_2","label":"In 2","source":"OSC_2_OUTPUT"},
-      {"entry":21,"module":"MIXER_2","key":"IN_3","label":"In 3","source":"OSC_1_OUTPUT_SUB"},
-      {"entry":22,"module":"MIXER_2","key":"IN_4","label":"In 4","source":"NOISE_1_OUTPUT"},
-      {"entry":23,"module":"FILTER_1","key":"AUDIO_IN","label":"Audio In","source":"MIXER_2_OUTPUT"},
-      {"entry":24,"module":"FILTER_1","key":"PITCH_IN","label":"Pitch In","source":"PITCH_1_OUTPUT_1"},
-      {"entry":25,"module":"FILTER_1","key":"MOD_1_IN","label":"Mod 1 In","source":"EG_1_OUTPUT"},
-      {"entry":26,"module":"FILTER_1","key":"MOD_2_IN","label":"Mod 2 In","source":"LFO_1_OUTPUT"},
-      {"entry":27,"module":"AMP_1","key":"AUDIO_IN","label":"Audio In","source":"FILTER_1_OUTPUT"},
-      {"entry":28,"module":"AMP_1","key":"MOD_1_IN","label":"Mod 1 In","source":"EG_1_OUTPUT"},
-      {"entry":29,"module":"AMP_1","key":"MOD_2_IN","label":"Mod 2 In","source":"EG_2_OUTPUT"},
-      {"entry":30,"module":"CHORUS_1","key":"AUDIO_IN","label":"Audio In","source":"AMP_1_OUTPUT"},
-      {"entry":31,"module":"DELAY_1","key":"AUDIO_IN_L","label":"Audio In L","source":"CHORUS_1_OUTPUT_L"},
-      {"entry":32,"module":"DELAY_1","key":"AUDIO_IN_R","label":"Audio In R","source":"CHORUS_1_OUTPUT_R"},
-      {"entry":33,"module":null,"key":"OUTPUT_L","label":"L","source":"DELAY_1_OUTPUT_L"},
-      {"entry":34,"module":null,"key":"OUTPUT_R","label":"R","source":"DELAY_1_OUTPUT_R"},
+      {"entry":13,"module":"OSC_1","key":"PITCH_MOD_1_IN","label":"Pitch Mod 1 In","source":"EG_1_OUTPUT"},
+      {"entry":14,"module":"OSC_1","key":"PITCH_MOD_2_IN","label":"Pitch Mod 2 In","source":"LFO_1_OUTPUT"},
+      {"entry":15,"module":"OSC_1","key":"PW_MOD_1_IN","label":"PW Mod 1 In","source":"EG_1_OUTPUT"},
+      {"entry":16,"module":"OSC_1","key":"PW_MOD_2_IN","label":"PW Mod 2 In","source":"LFO_1_OUTPUT"},
+      {"entry":17,"module":"OSC_2","key":"PITCH_IN","label":"Pitch In","source":"PITCH_1_OUTPUT_2"},
+      {"entry":18,"module":"OSC_2","key":"PITCH_MOD_1_IN","label":"Pitch Mod 1 In","source":"EG_1_OUTPUT"},
+      {"entry":19,"module":"OSC_2","key":"PITCH_MOD_2_IN","label":"Pitch Mod 2 In","source":"LFO_1_OUTPUT"},
+      {"entry":20,"module":"OSC_2","key":"PW_MOD_1_IN","label":"PW Mod 1 In","source":"EG_1_OUTPUT"},
+      {"entry":21,"module":"OSC_2","key":"PW_MOD_2_IN","label":"PW Mod 2 In","source":"LFO_1_OUTPUT"},
+      {"entry":22,"module":"OSC_2","key":"SYNC_IN","label":"Sync In","source":"OSC_1_OUTPUT_SAW"},
+      {"entry":23,"module":"MIXER_2","key":"IN_1","label":"In 1","source":"OSC_1_OUTPUT"},
+      {"entry":24,"module":"MIXER_2","key":"IN_2","label":"In 2","source":"OSC_2_OUTPUT"},
+      {"entry":25,"module":"MIXER_2","key":"IN_3","label":"In 3","source":"OSC_1_OUTPUT_SUB"},
+      {"entry":26,"module":"MIXER_2","key":"IN_4","label":"In 4","source":"NOISE_1_OUTPUT"},
+      {"entry":27,"module":"FILTER_1","key":"AUDIO_IN_1","label":"Audio In 1","source":"MIXER_2_OUTPUT"},
+      {"entry":28,"module":"FILTER_1","key":"AUDIO_IN_2","label":"Audio In 2","source":"NONE"},
+      {"entry":29,"module":"FILTER_1","key":"PITCH_IN","label":"Pitch In","source":"PITCH_1_OUTPUT_1"},
+      {"entry":30,"module":"FILTER_1","key":"MOD_1_IN","label":"Mod 1 In","source":"EG_1_OUTPUT"},
+      {"entry":31,"module":"FILTER_1","key":"MOD_2_IN","label":"Mod 2 In","source":"LFO_1_OUTPUT"},
+      {"entry":32,"module":"FILTER_2","key":"AUDIO_IN_1","label":"Audio In 1","source":"MIXER_2_OUTPUT"},
+      {"entry":33,"module":"FILTER_2","key":"AUDIO_IN_2","label":"Audio In 2","source":"FILTER_1_OUTPUT"},
+      {"entry":34,"module":"FILTER_2","key":"PITCH_IN","label":"Pitch In","source":"PITCH_1_OUTPUT_1"},
+      {"entry":35,"module":"FILTER_2","key":"MOD_1_IN","label":"Mod 1 In","source":"EG_1_OUTPUT"},
+      {"entry":36,"module":"FILTER_2","key":"MOD_2_IN","label":"Mod 2 In","source":"LFO_1_OUTPUT"},
+      {"entry":37,"module":"AMP_1","key":"AUDIO_IN_1","label":"Audio In 1","source":"FILTER_1_OUTPUT"},
+      {"entry":38,"module":"AMP_1","key":"AUDIO_IN_2","label":"Audio In 2","source":"FILTER_2_OUTPUT"},
+      {"entry":39,"module":"AMP_1","key":"MOD_1_IN","label":"Mod 1 In","source":"EG_1_OUTPUT"},
+      {"entry":40,"module":"AMP_1","key":"MOD_2_IN","label":"Mod 2 In","source":"EG_2_OUTPUT"},
+      {"entry":41,"module":"CHORUS_1","key":"AUDIO_IN","label":"Audio In","source":"AMP_1_OUTPUT"},
+      {"entry":42,"module":"DELAY_1","key":"AUDIO_IN_L","label":"Audio In L","source":"CHORUS_1_OUTPUT_L"},
+      {"entry":43,"module":"DELAY_1","key":"AUDIO_IN_R","label":"Audio In R","source":"CHORUS_1_OUTPUT_R"},
+      {"entry":44,"module":null,"key":"OUTPUT_L","label":"L","source":"DELAY_1_OUTPUT_L"},
+      {"entry":45,"module":null,"key":"OUTPUT_R","label":"R","source":"DELAY_1_OUTPUT_R"},
     ],
     controls: [
       {"entry":0,"module":"PITCH_1","key":"GLIDE","label":"Glide","bipolar":false,"cc":5,"value":4,"controller":false,"performance":false,"favorite":true,"slots":[["PITCH_1_GLIDE","Glide",false]]},
-      {"entry":1,"module":"PITCH_1","key":"OUT_1_GLIDE_SW","label":"Out 1 Glide Sw","bipolar":false,"cc":34,"value":124,"controller":false,"performance":false,"hint":"Off/On","slots":[["PITCH_1_OUT_1_GLIDE_SW","Out 1 Glide Sw",false]]},
-      {"entry":2,"module":"PITCH_1","key":"OUT_2_GLIDE_SW","label":"Out 2 Glide Sw","bipolar":false,"cc":34,"value":124,"controller":false,"performance":false,"hint":"Off/On","slots":[["PITCH_1_OUT_2_GLIDE_SW","Out 2 Glide Sw",false]]},
-      {"entry":3,"module":"PITCH_1","key":"BEND_AMT","label":"Bend Amt","bipolar":false,"cc":57,"value":28,"controller":false,"performance":false,"hint":"Bend Range","slots":[["PITCH_1_BEND_AMT","Bend Amt",false]]},
-      {"entry":4,"module":"PITCH_1","key":"OUT_1_BEND_SW","label":"Out 1 Bend Sw","bipolar":false,"cc":0,"value":124,"controller":false,"performance":false,"hint":"Off/On","slots":[["PITCH_1_OUT_1_BEND_SW","Out 1 Bend Sw",false]]},
-      {"entry":5,"module":"PITCH_1","key":"OUT_2_BEND_SW","label":"Out 2 Bend Sw","bipolar":false,"cc":0,"value":124,"controller":false,"performance":false,"hint":"Off/On","slots":[["PITCH_1_OUT_2_BEND_SW","Out 2 Bend Sw",false]]},
-      {"entry":6,"module":"PITCH_1","key":"STRETCH","label":"Stretch","bipolar":false,"cc":22,"value":4,"controller":false,"performance":false,"hint":"x1 to x2","slots":[["PITCH_1_STRETCH","Stretch",false]]},
-      {"entry":7,"module":"EG_1","key":"ATTACK","label":"Attack","bipolar":false,"cc":73,"value":4,"controller":false,"performance":false,"hint":"Time","favorite":true,"slots":[["EG_1_ATTACK","Attack",false]]},
-      {"entry":8,"module":"EG_1","key":"DECAY","label":"Decay","bipolar":false,"cc":75,"value":88,"controller":false,"performance":false,"hint":"Time","favorite":true,"slots":[["EG_1_DECAY","Decay",false]]},
-      {"entry":9,"module":"EG_1","key":"SUSTAIN","label":"Sustain","bipolar":false,"cc":30,"value":124,"controller":false,"performance":false,"hint":"Level","favorite":true,"slots":[["EG_1_SUSTAIN","Sustain",false]]},
-      {"entry":10,"module":"EG_1","key":"RELEASE_SW","label":"Release Sw","bipolar":false,"cc":105,"value":124,"controller":false,"performance":false,"hint":"Off/On","slots":[["EG_1_RELEASE_SW","Release Sw",false]]},
-      {"entry":11,"module":"EG_1","key":"LEVEL","label":"Level","bipolar":false,"cc":0,"value":124,"controller":false,"performance":false,"slots":[["EG_1_LEVEL","Level",false]]},
-      {"entry":12,"module":"EG_2","key":"ATTACK","label":"Attack","bipolar":false,"cc":52,"value":4,"controller":false,"performance":false,"hint":"Time","slots":[["EG_2_ATTACK","Attack",false]]},
-      {"entry":13,"module":"EG_2","key":"DECAY","label":"Decay","bipolar":false,"cc":53,"value":4,"controller":false,"performance":false,"hint":"Time","slots":[["EG_2_DECAY","Decay",false]]},
-      {"entry":14,"module":"EG_2","key":"SUSTAIN","label":"Sustain","bipolar":false,"cc":54,"value":124,"controller":false,"performance":false,"hint":"Level","slots":[["EG_2_SUSTAIN","Sustain",false]]},
-      {"entry":15,"module":"EG_2","key":"RELEASE_SW","label":"Release Sw","bipolar":false,"cc":105,"value":124,"controller":false,"performance":false,"hint":"Off/On","slots":[["EG_2_RELEASE_SW","Release Sw",false]]},
-      {"entry":16,"module":"EG_2","key":"LEVEL","label":"Level","bipolar":false,"cc":0,"value":124,"controller":false,"performance":false,"slots":[["EG_2_LEVEL","Level",false]]},
-      {"entry":17,"module":"LFO_1","key":"WAVE","label":"Wave","bipolar":false,"cc":33,"value":4,"controller":false,"performance":false,"hint":"Tri to Sq","slots":[["LFO_1_WAVE","Wave",false]]},
-      {"entry":18,"module":"LFO_1","key":"RATE","label":"Rate","bipolar":false,"cc":3,"value":64,"controller":false,"performance":false,"favorite":true,"slots":[["LFO_1_RATE","Rate",false]]},
-      {"entry":19,"module":"LFO_1","key":"LEVEL","label":"Level","bipolar":false,"cc":116,"value":124,"controller":false,"performance":false,"slots":[["LFO_1_LEVEL","Level",false]]},
-      {"entry":20,"module":"LFO_1","key":"RATE_MOD_AMT","label":"Rate Mod Amt","bipolar":false,"cc":0,"value":124,"controller":false,"performance":false,"hintInputs":["RATE_MOD_IN"],"slots":[["LFO_1_RATE_MOD_AMT","Rate Mod Amt",false]]},
-      {"entry":21,"module":"LFO_1","key":"LEVEL_MOD_AMT","label":"Level Mod Amt","bipolar":false,"cc":0,"value":124,"controller":false,"performance":false,"hintInputs":["LEVEL_MOD_IN"],"slots":[["LFO_1_LEVEL_MOD_AMT","Level Mod Amt",false]]},
-      {"entry":22,"module":"LFO_1","key":"RESET_SW","label":"Reset Sw","bipolar":false,"cc":113,"value":4,"controller":false,"performance":false,"hint":"Off/On","slots":[["LFO_1_RESET_SW","Reset Sw",false]]},
-      {"entry":23,"module":"MIXER_1","key":"LEVEL_1","label":"Level 1","bipolar":false,"cc":0,"value":4,"controller":false,"performance":false,"hintInputs":["IN_1"],"slots":[["MIXER_1_LEVEL_1","Level 1",false]]},
-      {"entry":24,"module":"MIXER_1","key":"LEVEL_2","label":"Level 2","bipolar":false,"cc":0,"value":4,"controller":false,"performance":false,"hintInputs":["IN_2"],"slots":[["MIXER_1_LEVEL_2","Level 2",false]]},
-      {"entry":25,"module":"MIXER_1","key":"LEVEL_3","label":"Level 3","bipolar":false,"cc":0,"value":4,"controller":false,"performance":false,"hintInputs":["IN_3"],"slots":[["MIXER_1_LEVEL_3","Level 3",false]]},
-      {"entry":26,"module":"MIXER_1","key":"LEVEL_4","label":"Level 4","bipolar":false,"cc":0,"value":4,"controller":false,"performance":false,"hintInputs":["IN_4"],"slots":[["MIXER_1_LEVEL_4","Level 4",false]]},
-      {"entry":27,"module":"MIXER_1","key":"OUT_LEVEL","label":"Out Level","bipolar":false,"cc":0,"value":64,"controller":false,"performance":false,"slots":[["MIXER_1_OUT_LEVEL","Out Level",false]]},
-      {"entry":28,"module":"OSC_1","key":"WAVE","label":"Wave","bipolar":false,"cc":102,"value":4,"controller":false,"performance":false,"hint":"Saw to Sq","favorite":true,"slots":[["OSC_1_WAVE","Wave",false]]},
-      {"entry":29,"module":"OSC_1","key":"PW","label":"PW","bipolar":true,"cc":114,"value":64,"controller":false,"performance":false,"hint":"0% to 100%","slots":[["OSC_1_PW","PW",true]]},
-      {"entry":30,"module":"OSC_1","key":"PITCH_COARSE","label":"Pitch Coarse","bipolar":true,"cc":0,"value":64,"controller":false,"performance":false,"hint":"±5 Oct","slots":[["OSC_1_PITCH_COARSE","Pitch Coarse",true]]},
-      {"entry":31,"module":"OSC_1","key":"PITCH","label":"Pitch","bipolar":false,"cc":0,"value":4,"controller":false,"performance":false,"hint":"0 to +1 Oct","slots":[["OSC_1_PITCH","Pitch",false]]},
-      {"entry":32,"module":"OSC_1","key":"PITCH_FINE","label":"Pitch Fine","bipolar":true,"cc":0,"value":64,"controller":false,"performance":false,"hint":"±60 Cent","slots":[["OSC_1_PITCH_FINE","Pitch Fine",true]]},
-      {"entry":33,"module":"OSC_1","key":"PITCH_MOD_1_AMT","label":"Pitch Mod 1 Amt","bipolar":false,"cc":89,"value":4,"controller":false,"performance":false,"hintInputs":["MOD_1_IN"],"favorite":true,"slots":[["OSC_1_PITCH_MOD_1_AMT","Pitch Mod 1 Amt",false]]},
+      {"entry":1,"module":"PITCH_1","key":"OUT_1_GLIDE_SW","label":"Out 1 Glide Sw","bipolar":false,"cc":34,"value":124,"controller":false,"performance":false,"hint":"Off/On","favorite":true,"slots":[["PITCH_1_OUT_1_GLIDE_SW","Out 1 Glide Sw",false]]},
+      {"entry":2,"module":"PITCH_1","key":"OUT_2_GLIDE_SW","label":"Out 2 Glide Sw","bipolar":false,"cc":34,"value":124,"controller":false,"performance":false,"hint":"Off/On","favorite":true,"slots":[["PITCH_1_OUT_2_GLIDE_SW","Out 2 Glide Sw",false]]},
+      {"entry":3,"module":"PITCH_1","key":"BEND_AMT","label":"Bend Amt","bipolar":false,"cc":57,"value":28,"controller":false,"performance":false,"hint":"Bend Range","favorite":true,"slots":[["PITCH_1_BEND_AMT","Bend Amt",false]]},
+      {"entry":4,"module":"PITCH_1","key":"BEND_POL","label":"Bend Pol","bipolar":true,"cc":0,"value":124,"controller":false,"performance":false,"hint":"− to +","slots":[["PITCH_1_BEND_POL","Bend Pol",true]]},
+      {"entry":5,"module":"PITCH_1","key":"OUT_1_BEND_SW","label":"Out 1 Bend Sw","bipolar":false,"cc":119,"value":124,"controller":false,"performance":false,"hint":"Off/On","favorite":true,"slots":[["PITCH_1_OUT_1_BEND_SW","Out 1 Bend Sw",false]]},
+      {"entry":6,"module":"PITCH_1","key":"OUT_2_BEND_SW","label":"Out 2 Bend Sw","bipolar":false,"cc":0,"value":124,"controller":false,"performance":false,"hint":"Off/On","slots":[["PITCH_1_OUT_2_BEND_SW","Out 2 Bend Sw",false]]},
+      {"entry":7,"module":"PITCH_1","key":"STRETCH","label":"Stretch","bipolar":false,"cc":22,"value":4,"controller":false,"performance":false,"hint":"x1 to x2","favorite":true,"slots":[["PITCH_1_STRETCH","Stretch",false]]},
+      {"entry":8,"module":"EG_1","key":"ATTACK","label":"Attack","bipolar":false,"cc":73,"value":4,"controller":false,"performance":false,"hint":"Time","favorite":true,"slots":[["EG_1_ATTACK","Attack",false]]},
+      {"entry":9,"module":"EG_1","key":"DECAY","label":"Decay","bipolar":false,"cc":75,"value":88,"controller":false,"performance":false,"hint":"Time","favorite":true,"slots":[["EG_1_DECAY","Decay",false]]},
+      {"entry":10,"module":"EG_1","key":"SUSTAIN","label":"Sustain","bipolar":false,"cc":30,"value":124,"controller":false,"performance":false,"hint":"Level","favorite":true,"slots":[["EG_1_SUSTAIN","Sustain",false]]},
+      {"entry":11,"module":"EG_1","key":"RELEASE_SW","label":"Release Sw","bipolar":false,"cc":105,"value":124,"controller":false,"performance":false,"hint":"Off/On","favorite":true,"slots":[["EG_1_RELEASE_SW","Release Sw",false]]},
+      {"entry":12,"module":"EG_1","key":"LEVEL","label":"Level","bipolar":false,"cc":0,"value":124,"controller":false,"performance":false,"slots":[["EG_1_LEVEL","Level",false]]},
+      {"entry":13,"module":"EG_2","key":"ATTACK","label":"Attack","bipolar":false,"cc":52,"value":4,"controller":false,"performance":false,"hint":"Time","slots":[["EG_2_ATTACK","Attack",false]]},
+      {"entry":14,"module":"EG_2","key":"DECAY","label":"Decay","bipolar":false,"cc":53,"value":4,"controller":false,"performance":false,"hint":"Time","slots":[["EG_2_DECAY","Decay",false]]},
+      {"entry":15,"module":"EG_2","key":"SUSTAIN","label":"Sustain","bipolar":false,"cc":54,"value":124,"controller":false,"performance":false,"hint":"Level","slots":[["EG_2_SUSTAIN","Sustain",false]]},
+      {"entry":16,"module":"EG_2","key":"RELEASE_SW","label":"Release Sw","bipolar":false,"cc":105,"value":124,"controller":false,"performance":false,"hint":"Off/On","slots":[["EG_2_RELEASE_SW","Release Sw",false]]},
+      {"entry":17,"module":"EG_2","key":"LEVEL","label":"Level","bipolar":false,"cc":0,"value":124,"controller":false,"performance":false,"slots":[["EG_2_LEVEL","Level",false]]},
+      {"entry":18,"module":"LFO_1","key":"WAVE","label":"Wave","bipolar":false,"cc":33,"value":4,"controller":false,"performance":false,"hint":"Tri to Sq","favorite":true,"slots":[["LFO_1_WAVE","Wave",false]]},
+      {"entry":19,"module":"LFO_1","key":"RATE","label":"Rate","bipolar":false,"cc":3,"value":64,"controller":false,"performance":false,"favorite":true,"slots":[["LFO_1_RATE","Rate",false]]},
+      {"entry":20,"module":"LFO_1","key":"LEVEL","label":"Level","bipolar":false,"cc":116,"value":124,"controller":false,"performance":false,"favorite":true,"slots":[["LFO_1_LEVEL","Level",false]]},
+      {"entry":21,"module":"LFO_1","key":"RATE_MOD_AMT","label":"Rate Mod Amt","bipolar":false,"cc":0,"value":124,"controller":false,"performance":false,"hintInputs":["RATE_MOD_IN"],"slots":[["LFO_1_RATE_MOD_AMT","Rate Mod Amt",false]]},
+      {"entry":22,"module":"LFO_1","key":"LEVEL_MOD_AMT","label":"Level Mod Amt","bipolar":false,"cc":0,"value":124,"controller":false,"performance":false,"hintInputs":["LEVEL_MOD_IN"],"slots":[["LFO_1_LEVEL_MOD_AMT","Level Mod Amt",false]]},
+      {"entry":23,"module":"LFO_1","key":"RESET_SW","label":"Reset Sw","bipolar":false,"cc":113,"value":4,"controller":false,"performance":false,"hint":"Off/On","favorite":true,"slots":[["LFO_1_RESET_SW","Reset Sw",false]]},
+      {"entry":24,"module":"MIXER_1","key":"LEVEL_1","label":"Level 1","bipolar":false,"cc":0,"value":4,"controller":false,"performance":false,"hintInputs":["IN_1"],"slots":[["MIXER_1_LEVEL_1","Level 1",false]]},
+      {"entry":25,"module":"MIXER_1","key":"LEVEL_2","label":"Level 2","bipolar":false,"cc":0,"value":4,"controller":false,"performance":false,"hintInputs":["IN_2"],"slots":[["MIXER_1_LEVEL_2","Level 2",false]]},
+      {"entry":26,"module":"MIXER_1","key":"LEVEL_3","label":"Level 3","bipolar":false,"cc":0,"value":4,"controller":false,"performance":false,"hintInputs":["IN_3"],"slots":[["MIXER_1_LEVEL_3","Level 3",false]]},
+      {"entry":27,"module":"MIXER_1","key":"LEVEL_4","label":"Level 4","bipolar":false,"cc":0,"value":4,"controller":false,"performance":false,"hintInputs":["IN_4"],"slots":[["MIXER_1_LEVEL_4","Level 4",false]]},
+      {"entry":28,"module":"MIXER_1","key":"OUT_LEVEL","label":"Out Level","bipolar":false,"cc":0,"value":64,"controller":false,"performance":false,"slots":[["MIXER_1_OUT_LEVEL","Out Level",false]]},
+      {"entry":29,"module":"OSC_1","key":"WAVE","label":"Wave","bipolar":false,"cc":102,"value":4,"controller":false,"performance":false,"hint":"Saw to Pulse","favorite":true,"slots":[["OSC_1_WAVE","Wave",false]]},
+      {"entry":30,"module":"OSC_1","key":"PW","label":"PW","bipolar":true,"cc":114,"value":64,"controller":false,"performance":false,"hint":"0% to 100%","favorite":true,"slots":[["OSC_1_PW","PW",true]]},
+      {"entry":31,"module":"OSC_1","key":"PITCH_COARSE","label":"Pitch Coarse","bipolar":true,"cc":0,"value":64,"controller":false,"performance":false,"hint":"±60 Semi","slots":[["OSC_1_PITCH_COARSE","Pitch Coarse",true]]},
+      {"entry":32,"module":"OSC_1","key":"PITCH_FINE","label":"Pitch Fine","bipolar":true,"cc":0,"value":64,"controller":false,"performance":false,"hint":"±50 Cent","slots":[["OSC_1_PITCH_FINE","Pitch Fine",true]]},
+      {"entry":33,"module":"OSC_1","key":"PITCH_MOD_1_AMT","label":"Pitch Mod 1 Amt","bipolar":false,"cc":89,"value":4,"controller":false,"performance":false,"hintInputs":["PITCH_MOD_1_IN"],"favorite":true,"slots":[["OSC_1_PITCH_MOD_1_AMT","Pitch Mod 1 Amt",false]]},
       {"entry":34,"module":"OSC_1","key":"PITCH_MOD_1_POL","label":"Pitch Mod 1 Pol","bipolar":true,"cc":0,"value":76,"controller":false,"performance":false,"hint":"− to +","slots":[["OSC_1_PITCH_MOD_1_POL","Pitch Mod 1 Pol",true]]},
-      {"entry":35,"module":"OSC_1","key":"PITCH_MOD_1_SW","label":"Pitch Mod 1 Sw","bipolar":false,"cc":118,"value":124,"controller":false,"performance":false,"hint":"Off/On","slots":[["OSC_1_PITCH_MOD_1_SW","Pitch Mod 1 Sw",false]]},
-      {"entry":36,"module":"OSC_1","key":"PITCH_MOD_2_AMT","label":"Pitch Mod 2 Amt","bipolar":false,"cc":13,"value":4,"controller":false,"performance":false,"hintInputs":["MOD_2_IN"],"favorite":true,"slots":[["OSC_1_PITCH_MOD_2_AMT","Pitch Mod 2 Amt",false]]},
+      {"entry":35,"module":"OSC_1","key":"PITCH_MOD_1_SW","label":"Pitch Mod 1 Sw","bipolar":false,"cc":118,"value":124,"controller":false,"performance":false,"hint":"Off/On","favorite":true,"slots":[["OSC_1_PITCH_MOD_1_SW","Pitch Mod 1 Sw",false]]},
+      {"entry":36,"module":"OSC_1","key":"PITCH_MOD_2_AMT","label":"Pitch Mod 2 Amt","bipolar":false,"cc":13,"value":4,"controller":false,"performance":false,"hintInputs":["PITCH_MOD_2_IN"],"favorite":true,"slots":[["OSC_1_PITCH_MOD_2_AMT","Pitch Mod 2 Amt",false]]},
       {"entry":37,"module":"OSC_1","key":"PITCH_MOD_2_POL","label":"Pitch Mod 2 Pol","bipolar":true,"cc":0,"value":76,"controller":false,"performance":false,"hint":"− to +","slots":[["OSC_1_PITCH_MOD_2_POL","Pitch Mod 2 Pol",true]]},
       {"entry":38,"module":"OSC_1","key":"PITCH_MOD_2_SW","label":"Pitch Mod 2 Sw","bipolar":false,"cc":0,"value":124,"controller":false,"performance":false,"hint":"Off/On","slots":[["OSC_1_PITCH_MOD_2_SW","Pitch Mod 2 Sw",false]]},
-      {"entry":39,"module":"OSC_1","key":"PW_MOD_1_AMT","label":"PW Mod 1 Amt","bipolar":false,"cc":8,"value":4,"controller":false,"performance":false,"hintInputs":["MOD_1_IN"],"slots":[["OSC_1_PW_MOD_1_AMT","PW Mod 1 Amt",false]]},
+      {"entry":39,"module":"OSC_1","key":"PW_MOD_1_AMT","label":"PW Mod 1 Amt","bipolar":false,"cc":8,"value":4,"controller":false,"performance":false,"hintInputs":["PW_MOD_1_IN"],"favorite":true,"slots":[["OSC_1_PW_MOD_1_AMT","PW Mod 1 Amt",false]]},
       {"entry":40,"module":"OSC_1","key":"PW_MOD_1_POL","label":"PW Mod 1 Pol","bipolar":true,"cc":0,"value":124,"controller":false,"performance":false,"hint":"− to +","slots":[["OSC_1_PW_MOD_1_POL","PW Mod 1 Pol",true]]},
-      {"entry":41,"module":"OSC_1","key":"PW_MOD_2_AMT","label":"PW Mod 2 Amt","bipolar":false,"cc":103,"value":4,"controller":false,"performance":false,"hintInputs":["MOD_2_IN"],"slots":[["OSC_1_PW_MOD_2_AMT","PW Mod 2 Amt",false]]},
+      {"entry":41,"module":"OSC_1","key":"PW_MOD_2_AMT","label":"PW Mod 2 Amt","bipolar":false,"cc":103,"value":4,"controller":false,"performance":false,"hintInputs":["PW_MOD_2_IN"],"favorite":true,"slots":[["OSC_1_PW_MOD_2_AMT","PW Mod 2 Amt",false]]},
       {"entry":42,"module":"OSC_1","key":"PW_MOD_2_POL","label":"PW Mod 2 Pol","bipolar":true,"cc":0,"value":124,"controller":false,"performance":false,"hint":"− to +","slots":[["OSC_1_PW_MOD_2_POL","PW Mod 2 Pol",true]]},
-      {"entry":43,"module":"OSC_2","key":"WAVE","label":"Wave","bipolar":false,"cc":104,"value":4,"controller":false,"performance":false,"hint":"Saw to Sq","favorite":true,"slots":[["OSC_2_WAVE","Wave",false]]},
-      {"entry":44,"module":"OSC_2","key":"PW","label":"PW","bipolar":true,"cc":114,"value":64,"controller":false,"performance":false,"hint":"0% to 100%","slots":[["OSC_2_PW","PW",true]]},
-      {"entry":45,"module":"OSC_2","key":"PITCH_COARSE","label":"Pitch Coarse","bipolar":true,"cc":0,"value":64,"controller":false,"performance":false,"hint":"±5 Oct","slots":[["OSC_2_PITCH_COARSE","Pitch Coarse",true]]},
-      {"entry":46,"module":"OSC_2","key":"PITCH","label":"Pitch","bipolar":false,"cc":85,"value":5,"controller":false,"performance":false,"hint":"0 to +1 Oct","favorite":true,"slots":[["OSC_2_PITCH","Pitch",false]]},
-      {"entry":47,"module":"OSC_2","key":"PITCH_FINE","label":"Pitch Fine","bipolar":true,"cc":76,"value":65,"controller":false,"performance":false,"hint":"±60 Cent","slots":[["OSC_2_PITCH_FINE","Pitch Fine",true]]},
-      {"entry":48,"module":"OSC_2","key":"PITCH_MOD_1_AMT","label":"Pitch Mod 1 Amt","bipolar":false,"cc":89,"value":4,"controller":false,"performance":false,"hintInputs":["MOD_1_IN"],"favorite":true,"slots":[["OSC_2_PITCH_MOD_1_AMT","Pitch Mod 1 Amt",false]]},
-      {"entry":49,"module":"OSC_2","key":"PITCH_MOD_1_POL","label":"Pitch Mod 1 Pol","bipolar":true,"cc":0,"value":76,"controller":false,"performance":false,"hint":"− to +","slots":[["OSC_2_PITCH_MOD_1_POL","Pitch Mod 1 Pol",true]]},
-      {"entry":50,"module":"OSC_2","key":"PITCH_MOD_1_SW","label":"Pitch Mod 1 Sw","bipolar":false,"cc":0,"value":124,"controller":false,"performance":false,"hint":"Off/On","slots":[["OSC_2_PITCH_MOD_1_SW","Pitch Mod 1 Sw",false]]},
-      {"entry":51,"module":"OSC_2","key":"PITCH_MOD_2_AMT","label":"Pitch Mod 2 Amt","bipolar":false,"cc":13,"value":4,"controller":false,"performance":false,"hintInputs":["MOD_2_IN"],"favorite":true,"slots":[["OSC_2_PITCH_MOD_2_AMT","Pitch Mod 2 Amt",false]]},
-      {"entry":52,"module":"OSC_2","key":"PITCH_MOD_2_POL","label":"Pitch Mod 2 Pol","bipolar":true,"cc":0,"value":76,"controller":false,"performance":false,"hint":"− to +","slots":[["OSC_2_PITCH_MOD_2_POL","Pitch Mod 2 Pol",true]]},
-      {"entry":53,"module":"OSC_2","key":"PITCH_MOD_2_SW","label":"Pitch Mod 2 Sw","bipolar":false,"cc":0,"value":124,"controller":false,"performance":false,"hint":"Off/On","slots":[["OSC_2_PITCH_MOD_2_SW","Pitch Mod 2 Sw",false]]},
-      {"entry":54,"module":"OSC_2","key":"PW_MOD_1_AMT","label":"PW Mod 1 Amt","bipolar":false,"cc":8,"value":4,"controller":false,"performance":false,"hintInputs":["MOD_1_IN"],"slots":[["OSC_2_PW_MOD_1_AMT","PW Mod 1 Amt",false]]},
-      {"entry":55,"module":"OSC_2","key":"PW_MOD_1_POL","label":"PW Mod 1 Pol","bipolar":true,"cc":0,"value":124,"controller":false,"performance":false,"hint":"− to +","slots":[["OSC_2_PW_MOD_1_POL","PW Mod 1 Pol",true]]},
-      {"entry":56,"module":"OSC_2","key":"PW_MOD_2_AMT","label":"PW Mod 2 Amt","bipolar":false,"cc":103,"value":4,"controller":false,"performance":false,"hintInputs":["MOD_2_IN"],"slots":[["OSC_2_PW_MOD_2_AMT","PW Mod 2 Amt",false]]},
-      {"entry":57,"module":"OSC_2","key":"PW_MOD_2_POL","label":"PW Mod 2 Pol","bipolar":true,"cc":0,"value":124,"controller":false,"performance":false,"hint":"− to +","slots":[["OSC_2_PW_MOD_2_POL","PW Mod 2 Pol",true]]},
-      {"entry":58,"module":"OSC_2","key":"SYNC_SW","label":"Sync Sw","bipolar":false,"cc":112,"value":4,"controller":false,"performance":false,"hint":"Off/On","slots":[["OSC_2_SYNC_SW","Sync Sw",false]]},
-      {"entry":59,"module":"NOISE_1","key":"COLOR","label":"Color","bipolar":false,"cc":115,"value":4,"controller":false,"performance":false,"hint":"White to Red","slots":[["NOISE_1_COLOR","Color",false]]},
-      {"entry":60,"module":"NOISE_1","key":"LEVEL","label":"Level","bipolar":false,"cc":0,"value":124,"controller":false,"performance":false,"slots":[["NOISE_1_LEVEL","Level",false]]},
-      {"entry":61,"module":"MIXER_2","key":"LEVEL_1","label":"Level 1","bipolar":false,"cc":19,"value":88,"controller":false,"performance":false,"hintInputs":["IN_1"],"favorite":true,"slots":[["MIXER_2_LEVEL_1","Level 1",false]]},
-      {"entry":62,"module":"MIXER_2","key":"LEVEL_2","label":"Level 2","bipolar":false,"cc":20,"value":88,"controller":false,"performance":false,"hintInputs":["IN_2"],"favorite":true,"slots":[["MIXER_2_LEVEL_2","Level 2",false]]},
-      {"entry":63,"module":"MIXER_2","key":"LEVEL_3","label":"Level 3","bipolar":false,"cc":21,"value":4,"controller":false,"performance":false,"hintInputs":["IN_3"],"slots":[["MIXER_2_LEVEL_3","Level 3",false]]},
-      {"entry":64,"module":"MIXER_2","key":"LEVEL_4","label":"Level 4","bipolar":false,"cc":23,"value":4,"controller":false,"performance":false,"hintInputs":["IN_4"],"slots":[["MIXER_2_LEVEL_4","Level 4",false]]},
-      {"entry":65,"module":"MIXER_2","key":"OUT_LEVEL","label":"Out Level","bipolar":false,"cc":0,"value":64,"controller":false,"performance":false,"slots":[["MIXER_2_OUT_LEVEL","Out Level",false]]},
-      {"entry":66,"module":"FILTER_1","key":"CUTOFF","label":"Cutoff","bipolar":false,"cc":74,"value":100,"controller":false,"performance":false,"favorite":true,"slots":[["FILTER_1_CUTOFF","Cutoff",false]]},
-      {"entry":67,"module":"FILTER_1","key":"RESONANCE","label":"Resonance","bipolar":false,"cc":71,"value":64,"controller":false,"performance":false,"favorite":true,"slots":[["FILTER_1_RESONANCE","Resonance",false]]},
-      {"entry":68,"module":"FILTER_1","key":"MODE","label":"Mode","bipolar":false,"cc":39,"value":4,"controller":false,"performance":false,"hint":"LP to Notch to HP","slots":[["FILTER_1_MODE","Mode",false]]},
-      {"entry":69,"module":"FILTER_1","key":"PITCH_AMT","label":"Pitch Amt","bipolar":false,"cc":9,"value":4,"controller":false,"performance":false,"hintInputs":["PITCH_IN"],"slots":[["FILTER_1_PITCH_AMT","Pitch Amt",false]]},
-      {"entry":70,"module":"FILTER_1","key":"MOD_1_AMT","label":"Mod 1 Amt","bipolar":false,"cc":24,"value":28,"controller":false,"performance":false,"hintInputs":["MOD_1_IN"],"favorite":true,"slots":[["FILTER_1_MOD_1_AMT","Mod 1 Amt",false]]},
-      {"entry":71,"module":"FILTER_1","key":"MOD_1_POL","label":"Mod 1 Pol","bipolar":true,"cc":117,"value":124,"controller":false,"performance":false,"hint":"− to +","slots":[["FILTER_1_MOD_1_POL","Mod 1 Pol",true]]},
-      {"entry":72,"module":"FILTER_1","key":"MOD_2_AMT","label":"Mod 2 Amt","bipolar":false,"cc":25,"value":4,"controller":false,"performance":false,"hintInputs":["MOD_2_IN"],"favorite":true,"slots":[["FILTER_1_MOD_2_AMT","Mod 2 Amt",false]]},
-      {"entry":73,"module":"FILTER_1","key":"MOD_2_POL","label":"Mod 2 Pol","bipolar":true,"cc":0,"value":76,"controller":false,"performance":false,"hint":"− to +","slots":[["FILTER_1_MOD_2_POL","Mod 2 Pol",true]]},
-      {"entry":74,"module":"AMP_1","key":"GAIN","label":"Gain","bipolar":false,"cc":15,"value":88,"controller":false,"performance":false,"favorite":true,"slots":[["AMP_1_GAIN","Gain",false]]},
-      {"entry":75,"module":"AMP_1","key":"MOD_1_2_MIX","label":"Mod 1/2 Mix","bipolar":false,"cc":36,"value":4,"controller":false,"performance":false,"hintInputs":["MOD_1_IN","MOD_2_IN"],"slots":[["AMP_1_MOD_1_2_MIX","Mod 1/2 Mix",false]]},
-      {"entry":76,"module":"CHORUS_1","key":"MIX","label":"Mix","bipolar":false,"cc":93,"value":64,"controller":false,"performance":false,"favorite":true,"slots":[["CHORUS_1_MIX","Mix",false]]},
-      {"entry":77,"module":"CHORUS_1","key":"RATE","label":"Rate","bipolar":false,"cc":58,"value":64,"controller":false,"performance":false,"slots":[["CHORUS_1_RATE","Rate",false]]},
-      {"entry":78,"module":"CHORUS_1","key":"DEPTH","label":"Depth","bipolar":false,"cc":59,"value":64,"controller":false,"performance":false,"slots":[["CHORUS_1_DEPTH","Depth",false]]},
-      {"entry":79,"module":"DELAY_1","key":"MIX","label":"Mix","bipolar":false,"cc":94,"value":34,"controller":false,"performance":false,"favorite":true,"slots":[["DELAY_1_MIX","Mix",false]]},
-      {"entry":80,"module":"DELAY_1","key":"TIME","label":"Time","bipolar":false,"cc":90,"value":64,"controller":false,"performance":false,"slots":[["DELAY_1_TIME","Time",false]]},
-      {"entry":81,"module":"DELAY_1","key":"FEEDBACK","label":"Feedback","bipolar":false,"cc":92,"value":64,"controller":false,"performance":false,"slots":[["DELAY_1_FEEDBACK","Feedback",false]]},
-      {"entry":82,"key":"MOD_WHEEL","label":"Mod Wheel","bipolar":false,"cc":1,"value":4,"controller":true,"performance":true,"slots":[["MOD_WHEEL","Mod Wheel",false],["MOD_WHEEL_REV","Mod Wheel Rev",false,"rev"],["MOD_WHEEL_INV","Mod Wheel Inv",false,"inv"],["MOD_WHEEL_REV_INV","Mod Wheel Rev Inv",false,"rev_inv"]]},
-      {"entry":83,"key":"GENERAL_1","label":"General 1","bipolar":false,"cc":16,"value":4,"controller":true,"performance":false,"slots":[["GENERAL_1","General 1",false],["GENERAL_1_REV","General 1 Rev",false,"rev"],["GENERAL_1_INV","General 1 Inv",false,"inv"],["GENERAL_1_REV_INV","General 1 Rev Inv",false,"rev_inv"],["GENERAL_1_BIPOLAR","General 1 Bipolar",true,"bipolar"],["GENERAL_1_BIPOLAR_INV","General 1 Bipolar Inv",true,"bipolar_inv"],["GENERAL_1_SIN","General 1 Sin",false,"sin"],["GENERAL_1_COS","General 1 Cos",false,"cos"],["GENERAL_1_LO","General 1 Lo",false,"lo"],["GENERAL_1_HI","General 1 Hi",false,"hi"],["GENERAL_1_NEG","General 1 Neg",false,"neg"],["GENERAL_1_MID","General 1 Mid",false,"mid"],["GENERAL_1_POS","General 1 Pos",false,"pos"]]},
-      {"entry":84,"key":"GENERAL_2","label":"General 2","bipolar":false,"cc":17,"value":4,"controller":true,"performance":false,"slots":[["GENERAL_2","General 2",false],["GENERAL_2_REV","General 2 Rev",false,"rev"],["GENERAL_2_INV","General 2 Inv",false,"inv"],["GENERAL_2_REV_INV","General 2 Rev Inv",false,"rev_inv"],["GENERAL_2_BIPOLAR","General 2 Bipolar",true,"bipolar"],["GENERAL_2_BIPOLAR_INV","General 2 Bipolar Inv",true,"bipolar_inv"],["GENERAL_2_SIN","General 2 Sin",false,"sin"],["GENERAL_2_COS","General 2 Cos",false,"cos"],["GENERAL_2_LO","General 2 Lo",false,"lo"],["GENERAL_2_HI","General 2 Hi",false,"hi"],["GENERAL_2_NEG","General 2 Neg",false,"neg"],["GENERAL_2_MID","General 2 Mid",false,"mid"],["GENERAL_2_POS","General 2 Pos",false,"pos"]]},
-      {"entry":85,"module":"AMP_1","key":"LIMITER_SW","label":"Limiter Sw","bipolar":false,"cc":0,"value":124,"controller":false,"performance":false,"hint":"Off/On","slots":[["AMP_1_LIMITER_SW","Limiter Sw",false]]},
+      {"entry":43,"module":"OSC_2","key":"WAVE","label":"Wave","bipolar":false,"cc":104,"value":4,"controller":false,"performance":false,"hint":"Saw to Pulse","favorite":true,"slots":[["OSC_2_WAVE","Wave",false]]},
+      {"entry":44,"module":"OSC_2","key":"PW","label":"PW","bipolar":true,"cc":0,"value":64,"controller":false,"performance":false,"hint":"0% to 100%","slots":[["OSC_2_PW","PW",true]]},
+      {"entry":45,"module":"OSC_2","key":"PITCH_COARSE","label":"Pitch Coarse","bipolar":true,"cc":85,"value":64,"controller":false,"performance":false,"hint":"±60 Semi","favorite":true,"slots":[["OSC_2_PITCH_COARSE","Pitch Coarse",true]]},
+      {"entry":46,"module":"OSC_2","key":"PITCH_FINE","label":"Pitch Fine","bipolar":true,"cc":76,"value":76,"controller":false,"performance":false,"hint":"±50 Cent","favorite":true,"slots":[["OSC_2_PITCH_FINE","Pitch Fine",true]]},
+      {"entry":47,"module":"OSC_2","key":"PITCH_MOD_1_AMT","label":"Pitch Mod 1 Amt","bipolar":false,"cc":89,"value":4,"controller":false,"performance":false,"hintInputs":["PITCH_MOD_1_IN"],"favorite":true,"slots":[["OSC_2_PITCH_MOD_1_AMT","Pitch Mod 1 Amt",false]]},
+      {"entry":48,"module":"OSC_2","key":"PITCH_MOD_1_POL","label":"Pitch Mod 1 Pol","bipolar":true,"cc":0,"value":76,"controller":false,"performance":false,"hint":"− to +","slots":[["OSC_2_PITCH_MOD_1_POL","Pitch Mod 1 Pol",true]]},
+      {"entry":49,"module":"OSC_2","key":"PITCH_MOD_1_SW","label":"Pitch Mod 1 Sw","bipolar":false,"cc":0,"value":124,"controller":false,"performance":false,"hint":"Off/On","slots":[["OSC_2_PITCH_MOD_1_SW","Pitch Mod 1 Sw",false]]},
+      {"entry":50,"module":"OSC_2","key":"PITCH_MOD_2_AMT","label":"Pitch Mod 2 Amt","bipolar":false,"cc":13,"value":4,"controller":false,"performance":false,"hintInputs":["PITCH_MOD_2_IN"],"favorite":true,"slots":[["OSC_2_PITCH_MOD_2_AMT","Pitch Mod 2 Amt",false]]},
+      {"entry":51,"module":"OSC_2","key":"PITCH_MOD_2_POL","label":"Pitch Mod 2 Pol","bipolar":true,"cc":0,"value":76,"controller":false,"performance":false,"hint":"− to +","slots":[["OSC_2_PITCH_MOD_2_POL","Pitch Mod 2 Pol",true]]},
+      {"entry":52,"module":"OSC_2","key":"PITCH_MOD_2_SW","label":"Pitch Mod 2 Sw","bipolar":false,"cc":0,"value":124,"controller":false,"performance":false,"hint":"Off/On","slots":[["OSC_2_PITCH_MOD_2_SW","Pitch Mod 2 Sw",false]]},
+      {"entry":53,"module":"OSC_2","key":"PW_MOD_1_AMT","label":"PW Mod 1 Amt","bipolar":false,"cc":0,"value":4,"controller":false,"performance":false,"hintInputs":["PW_MOD_1_IN"],"slots":[["OSC_2_PW_MOD_1_AMT","PW Mod 1 Amt",false]]},
+      {"entry":54,"module":"OSC_2","key":"PW_MOD_1_POL","label":"PW Mod 1 Pol","bipolar":true,"cc":0,"value":124,"controller":false,"performance":false,"hint":"− to +","slots":[["OSC_2_PW_MOD_1_POL","PW Mod 1 Pol",true]]},
+      {"entry":55,"module":"OSC_2","key":"PW_MOD_2_AMT","label":"PW Mod 2 Amt","bipolar":false,"cc":0,"value":4,"controller":false,"performance":false,"hintInputs":["PW_MOD_2_IN"],"slots":[["OSC_2_PW_MOD_2_AMT","PW Mod 2 Amt",false]]},
+      {"entry":56,"module":"OSC_2","key":"PW_MOD_2_POL","label":"PW Mod 2 Pol","bipolar":true,"cc":0,"value":124,"controller":false,"performance":false,"hint":"− to +","slots":[["OSC_2_PW_MOD_2_POL","PW Mod 2 Pol",true]]},
+      {"entry":57,"module":"OSC_2","key":"SYNC_SW","label":"Sync Sw","bipolar":false,"cc":112,"value":4,"controller":false,"performance":false,"hint":"Off/On","favorite":true,"slots":[["OSC_2_SYNC_SW","Sync Sw",false]]},
+      {"entry":58,"module":"NOISE_1","key":"COLOR","label":"Color","bipolar":false,"cc":115,"value":4,"controller":false,"performance":false,"hint":"White to Red","favorite":true,"slots":[["NOISE_1_COLOR","Color",false]]},
+      {"entry":59,"module":"NOISE_1","key":"LEVEL","label":"Level","bipolar":false,"cc":0,"value":124,"controller":false,"performance":false,"slots":[["NOISE_1_LEVEL","Level",false]]},
+      {"entry":60,"module":"MIXER_2","key":"LEVEL_1","label":"Level 1","bipolar":false,"cc":19,"value":124,"controller":false,"performance":false,"hintInputs":["IN_1"],"favorite":true,"slots":[["MIXER_2_LEVEL_1","Level 1",false]]},
+      {"entry":61,"module":"MIXER_2","key":"LEVEL_2","label":"Level 2","bipolar":false,"cc":20,"value":4,"controller":false,"performance":false,"hintInputs":["IN_2"],"favorite":true,"slots":[["MIXER_2_LEVEL_2","Level 2",false]]},
+      {"entry":62,"module":"MIXER_2","key":"LEVEL_3","label":"Level 3","bipolar":false,"cc":21,"value":4,"controller":false,"performance":false,"hintInputs":["IN_3"],"favorite":true,"slots":[["MIXER_2_LEVEL_3","Level 3",false]]},
+      {"entry":63,"module":"MIXER_2","key":"LEVEL_4","label":"Level 4","bipolar":false,"cc":23,"value":4,"controller":false,"performance":false,"hintInputs":["IN_4"],"favorite":true,"slots":[["MIXER_2_LEVEL_4","Level 4",false]]},
+      {"entry":64,"module":"MIXER_2","key":"OUT_LEVEL","label":"Out Level","bipolar":false,"cc":0,"value":64,"controller":false,"performance":false,"slots":[["MIXER_2_OUT_LEVEL","Out Level",false]]},
+      {"entry":65,"module":"FILTER_1","key":"MODE","label":"Mode","bipolar":false,"cc":39,"value":4,"controller":false,"performance":false,"hint":"LP to Notch to HP","slots":[["FILTER_1_MODE","Mode",false]]},
+      {"entry":66,"module":"FILTER_1","key":"CUTOFF","label":"Cutoff","bipolar":false,"cc":74,"value":100,"controller":false,"performance":false,"slots":[["FILTER_1_CUTOFF","Cutoff",false]]},
+      {"entry":67,"module":"FILTER_1","key":"RESONANCE","label":"Resonance","bipolar":false,"cc":0,"value":4,"controller":false,"performance":false,"slots":[["FILTER_1_RESONANCE","Resonance",false]]},
+      {"entry":68,"module":"FILTER_1","key":"GAIN_1","label":"Gain 1","bipolar":false,"cc":0,"value":64,"controller":false,"performance":false,"hintInputs":["AUDIO_IN_1"],"slots":[["FILTER_1_GAIN_1","Gain 1",false]]},
+      {"entry":69,"module":"FILTER_1","key":"GAIN_2","label":"Gain 2","bipolar":false,"cc":0,"value":4,"controller":false,"performance":false,"hintInputs":["AUDIO_IN_2"],"slots":[["FILTER_1_GAIN_2","Gain 2",false]]},
+      {"entry":70,"module":"FILTER_1","key":"PITCH_AMT","label":"Pitch Amt","bipolar":false,"cc":9,"value":4,"controller":false,"performance":false,"hintInputs":["PITCH_IN"],"slots":[["FILTER_1_PITCH_AMT","Pitch Amt",false]]},
+      {"entry":71,"module":"FILTER_1","key":"PITCH_POL","label":"Pitch Pol","bipolar":true,"cc":0,"value":124,"controller":false,"performance":false,"hint":"− to +","slots":[["FILTER_1_PITCH_POL","Pitch Pol",true]]},
+      {"entry":72,"module":"FILTER_1","key":"MOD_1_AMT","label":"Mod 1 Amt","bipolar":false,"cc":24,"value":28,"controller":false,"performance":false,"hintInputs":["MOD_1_IN"],"slots":[["FILTER_1_MOD_1_AMT","Mod 1 Amt",false]]},
+      {"entry":73,"module":"FILTER_1","key":"MOD_1_POL","label":"Mod 1 Pol","bipolar":true,"cc":117,"value":124,"controller":false,"performance":false,"hint":"− to +","slots":[["FILTER_1_MOD_1_POL","Mod 1 Pol",true]]},
+      {"entry":74,"module":"FILTER_1","key":"MOD_2_AMT","label":"Mod 2 Amt","bipolar":false,"cc":25,"value":4,"controller":false,"performance":false,"hintInputs":["MOD_2_IN"],"slots":[["FILTER_1_MOD_2_AMT","Mod 2 Amt",false]]},
+      {"entry":75,"module":"FILTER_1","key":"MOD_2_POL","label":"Mod 2 Pol","bipolar":true,"cc":0,"value":76,"controller":false,"performance":false,"hint":"− to +","slots":[["FILTER_1_MOD_2_POL","Mod 2 Pol",true]]},
+      {"entry":76,"module":"FILTER_2","key":"MODE","label":"Mode","bipolar":false,"cc":39,"value":4,"controller":false,"performance":false,"hint":"LP to Notch to HP","favorite":true,"slots":[["FILTER_2_MODE","Mode",false]]},
+      {"entry":77,"module":"FILTER_2","key":"CUTOFF","label":"Cutoff","bipolar":false,"cc":74,"value":100,"controller":false,"performance":false,"favorite":true,"slots":[["FILTER_2_CUTOFF","Cutoff",false]]},
+      {"entry":78,"module":"FILTER_2","key":"RESONANCE","label":"Resonance","bipolar":false,"cc":71,"value":64,"controller":false,"performance":false,"favorite":true,"slots":[["FILTER_2_RESONANCE","Resonance",false]]},
+      {"entry":79,"module":"FILTER_2","key":"GAIN_1","label":"Gain 1","bipolar":false,"cc":0,"value":4,"controller":false,"performance":false,"hintInputs":["AUDIO_IN_1"],"slots":[["FILTER_2_GAIN_1","Gain 1",false]]},
+      {"entry":80,"module":"FILTER_2","key":"GAIN_2","label":"Gain 2","bipolar":false,"cc":0,"value":64,"controller":false,"performance":false,"hintInputs":["AUDIO_IN_2"],"slots":[["FILTER_2_GAIN_2","Gain 2",false]]},
+      {"entry":81,"module":"FILTER_2","key":"PITCH_AMT","label":"Pitch Amt","bipolar":false,"cc":9,"value":4,"controller":false,"performance":false,"hintInputs":["PITCH_IN"],"favorite":true,"slots":[["FILTER_2_PITCH_AMT","Pitch Amt",false]]},
+      {"entry":82,"module":"FILTER_2","key":"PITCH_POL","label":"Pitch Pol","bipolar":true,"cc":0,"value":124,"controller":false,"performance":false,"hint":"− to +","slots":[["FILTER_2_PITCH_POL","Pitch Pol",true]]},
+      {"entry":83,"module":"FILTER_2","key":"MOD_1_AMT","label":"Mod 1 Amt","bipolar":false,"cc":24,"value":28,"controller":false,"performance":false,"hintInputs":["MOD_1_IN"],"favorite":true,"slots":[["FILTER_2_MOD_1_AMT","Mod 1 Amt",false]]},
+      {"entry":84,"module":"FILTER_2","key":"MOD_1_POL","label":"Mod 1 Pol","bipolar":true,"cc":117,"value":124,"controller":false,"performance":false,"hint":"− to +","favorite":true,"slots":[["FILTER_2_MOD_1_POL","Mod 1 Pol",true]]},
+      {"entry":85,"module":"FILTER_2","key":"MOD_2_AMT","label":"Mod 2 Amt","bipolar":false,"cc":25,"value":4,"controller":false,"performance":false,"hintInputs":["MOD_2_IN"],"favorite":true,"slots":[["FILTER_2_MOD_2_AMT","Mod 2 Amt",false]]},
+      {"entry":86,"module":"FILTER_2","key":"MOD_2_POL","label":"Mod 2 Pol","bipolar":true,"cc":0,"value":76,"controller":false,"performance":false,"hint":"− to +","slots":[["FILTER_2_MOD_2_POL","Mod 2 Pol",true]]},
+      {"entry":87,"module":"AMP_1","key":"GAIN_1","label":"Gain 1","bipolar":false,"cc":0,"value":4,"controller":false,"performance":false,"hintInputs":["AUDIO_IN_1"],"slots":[["AMP_1_GAIN_1","Gain 1",false]]},
+      {"entry":88,"module":"AMP_1","key":"GAIN_2","label":"Gain 2","bipolar":false,"cc":15,"value":88,"controller":false,"performance":false,"hintInputs":["AUDIO_IN_2"],"favorite":true,"slots":[["AMP_1_GAIN_2","Gain 2",false]]},
+      {"entry":89,"module":"AMP_1","key":"MOD_1_2_MIX","label":"Mod 1/2 Mix","bipolar":false,"cc":36,"value":4,"controller":false,"performance":false,"hintInputs":["MOD_1_IN","MOD_2_IN"],"favorite":true,"slots":[["AMP_1_MOD_1_2_MIX","Mod 1/2 Mix",false]]},
+      {"entry":90,"module":"CHORUS_1","key":"MIX","label":"Mix","bipolar":false,"cc":93,"value":64,"controller":false,"performance":false,"favorite":true,"slots":[["CHORUS_1_MIX","Mix",false]]},
+      {"entry":91,"module":"CHORUS_1","key":"RATE","label":"Rate","bipolar":false,"cc":58,"value":64,"controller":false,"performance":false,"favorite":true,"slots":[["CHORUS_1_RATE","Rate",false]]},
+      {"entry":92,"module":"CHORUS_1","key":"DEPTH","label":"Depth","bipolar":false,"cc":59,"value":64,"controller":false,"performance":false,"favorite":true,"slots":[["CHORUS_1_DEPTH","Depth",false]]},
+      {"entry":93,"module":"DELAY_1","key":"MIX","label":"Mix","bipolar":false,"cc":94,"value":34,"controller":false,"performance":false,"favorite":true,"slots":[["DELAY_1_MIX","Mix",false]]},
+      {"entry":94,"module":"DELAY_1","key":"TIME","label":"Time","bipolar":false,"cc":90,"value":64,"controller":false,"performance":false,"favorite":true,"slots":[["DELAY_1_TIME","Time",false]]},
+      {"entry":95,"module":"DELAY_1","key":"FEEDBACK","label":"Feedback","bipolar":false,"cc":92,"value":64,"controller":false,"performance":false,"favorite":true,"slots":[["DELAY_1_FEEDBACK","Feedback",false]]},
+      {"entry":96,"key":"MOD_WHEEL","label":"Mod Wheel","bipolar":false,"cc":1,"value":4,"controller":true,"performance":true,"slots":[["MOD_WHEEL","Mod Wheel",false],["MOD_WHEEL_REV","Mod Wheel Rev",false,"rev"],["MOD_WHEEL_INV","Mod Wheel Inv",false,"inv"],["MOD_WHEEL_REV_INV","Mod Wheel Rev Inv",false,"rev_inv"]]},
+      {"entry":97,"key":"BREATH","label":"Breath","bipolar":false,"cc":2,"value":4,"controller":true,"performance":true,"slots":[["BREATH","Breath",false],["BREATH_REV","Breath Rev",false,"rev"],["BREATH_INV","Breath Inv",false,"inv"],["BREATH_REV_INV","Breath Rev Inv",false,"rev_inv"]]},
+      {"entry":98,"key":"GENERAL_1","label":"General 1","bipolar":false,"cc":16,"value":4,"controller":true,"performance":false,"slots":[["GENERAL_1","General 1",false],["GENERAL_1_REV","General 1 Rev",false,"rev"],["GENERAL_1_INV","General 1 Inv",false,"inv"],["GENERAL_1_REV_INV","General 1 Rev Inv",false,"rev_inv"],["GENERAL_1_BIPOLAR","General 1 Bipolar",true,"bipolar"],["GENERAL_1_BIPOLAR_INV","General 1 Bipolar Inv",true,"bipolar_inv"],["GENERAL_1_COS","General 1 Cos",false,"cos"],["GENERAL_1_SIN","General 1 Sin",false,"sin"],["GENERAL_1_LO","General 1 Lo",false,"lo"],["GENERAL_1_HI","General 1 Hi",false,"hi"],["GENERAL_1_NEG","General 1 Neg",false,"neg"],["GENERAL_1_MID","General 1 Mid",false,"mid"],["GENERAL_1_POS","General 1 Pos",false,"pos"]]},
+      {"entry":99,"key":"GENERAL_2","label":"General 2","bipolar":false,"cc":17,"value":4,"controller":true,"performance":false,"slots":[["GENERAL_2","General 2",false],["GENERAL_2_REV","General 2 Rev",false,"rev"],["GENERAL_2_INV","General 2 Inv",false,"inv"],["GENERAL_2_REV_INV","General 2 Rev Inv",false,"rev_inv"],["GENERAL_2_BIPOLAR","General 2 Bipolar",true,"bipolar"],["GENERAL_2_BIPOLAR_INV","General 2 Bipolar Inv",true,"bipolar_inv"],["GENERAL_2_COS","General 2 Cos",false,"cos"],["GENERAL_2_SIN","General 2 Sin",false,"sin"],["GENERAL_2_LO","General 2 Lo",false,"lo"],["GENERAL_2_HI","General 2 Hi",false,"hi"],["GENERAL_2_NEG","General 2 Neg",false,"neg"],["GENERAL_2_MID","General 2 Mid",false,"mid"],["GENERAL_2_POS","General 2 Pos",false,"pos"]]},
+      {"entry":100,"module":"AMP_1","key":"LIMITER_SW","label":"Limiter Sw","bipolar":false,"cc":0,"value":124,"controller":false,"performance":false,"hint":"Off/On","slots":[["AMP_1_LIMITER_SW","Limiter Sw",false]]},
     ],
     signals: [
       {"id":0,"key":"NONE","label":"0.0"},
@@ -1904,71 +1938,80 @@
       {"id":9,"key":"MOD_WHEEL_REV"},
       {"id":10,"key":"MOD_WHEEL_INV"},
       {"id":11,"key":"MOD_WHEEL_REV_INV"},
-      {"id":12,"key":"GENERAL_1"},
-      {"id":13,"key":"GENERAL_1_REV"},
-      {"id":14,"key":"GENERAL_1_INV"},
-      {"id":15,"key":"GENERAL_1_REV_INV"},
-      {"id":16,"key":"GENERAL_1_BIPOLAR"},
-      {"id":17,"key":"GENERAL_1_BIPOLAR_INV"},
-      {"id":18,"key":"GENERAL_1_SIN"},
-      {"id":19,"key":"GENERAL_1_COS"},
-      {"id":20,"key":"GENERAL_1_LO"},
-      {"id":21,"key":"GENERAL_1_HI"},
-      {"id":22,"key":"GENERAL_1_NEG"},
-      {"id":23,"key":"GENERAL_1_MID"},
-      {"id":24,"key":"GENERAL_1_POS"},
-      {"id":25,"key":"GENERAL_2"},
-      {"id":26,"key":"GENERAL_2_REV"},
-      {"id":27,"key":"GENERAL_2_INV"},
-      {"id":28,"key":"GENERAL_2_REV_INV"},
-      {"id":29,"key":"GENERAL_2_BIPOLAR"},
-      {"id":30,"key":"GENERAL_2_BIPOLAR_INV"},
-      {"id":31,"key":"GENERAL_2_SIN"},
-      {"id":32,"key":"GENERAL_2_COS"},
-      {"id":33,"key":"GENERAL_2_LO"},
-      {"id":34,"key":"GENERAL_2_HI"},
-      {"id":35,"key":"GENERAL_2_NEG"},
-      {"id":36,"key":"GENERAL_2_MID"},
-      {"id":37,"key":"GENERAL_2_POS"},
-      {"id":38,"key":"PITCH_1_OUTPUT_1"},
-      {"id":39,"key":"PITCH_1_OUTPUT_2"},
-      {"id":40,"key":"EG_1_OUTPUT"},
-      {"id":41,"key":"EG_1_OUTPUT_INV"},
-      {"id":42,"key":"EG_2_OUTPUT"},
-      {"id":43,"key":"EG_2_OUTPUT_INV"},
-      {"id":44,"key":"LFO_1_OUTPUT"},
-      {"id":45,"key":"LFO_1_OUTPUT_INV"},
-      {"id":46,"key":"LFO_1_OUTPUT_TRIANGLE"},
-      {"id":47,"key":"LFO_1_OUTPUT_TRIANGLE_INV"},
-      {"id":48,"key":"LFO_1_OUTPUT_SQUARE"},
-      {"id":49,"key":"LFO_1_OUTPUT_SQUARE_INV"},
-      {"id":50,"key":"MIXER_1_OUTPUT"},
-      {"id":51,"key":"MIXER_1_OUTPUT_INV"},
-      {"id":52,"key":"OSC_1_OUTPUT"},
-      {"id":53,"key":"OSC_1_OUTPUT_SAW"},
-      {"id":54,"key":"OSC_1_OUTPUT_PULSE"},
-      {"id":55,"key":"OSC_1_OUTPUT_SUB"},
-      {"id":56,"key":"OSC_2_OUTPUT"},
-      {"id":57,"key":"OSC_2_OUTPUT_SAW"},
-      {"id":58,"key":"OSC_2_OUTPUT_PULSE"},
-      {"id":59,"key":"NOISE_1_OUTPUT"},
-      {"id":60,"key":"NOISE_1_OUTPUT_WHITE"},
-      {"id":61,"key":"NOISE_1_OUTPUT_RED"},
-      {"id":62,"key":"MIXER_2_OUTPUT"},
-      {"id":63,"key":"MIXER_2_OUTPUT_INV"},
-      {"id":64,"key":"FILTER_1_OUTPUT"},
-      {"id":65,"key":"FILTER_1_OUTPUT_LP"},
-      {"id":66,"key":"FILTER_1_OUTPUT_HP"},
-      {"id":67,"key":"FILTER_1_OUTPUT_BP"},
-      {"id":68,"key":"AMP_1_OUTPUT"},
-      {"id":69,"key":"CHORUS_1_OUTPUT_L"},
-      {"id":70,"key":"CHORUS_1_OUTPUT_R"},
-      {"id":71,"key":"CHORUS_1_OUTPUT_MONO"},
-      {"id":72,"key":"DELAY_1_OUTPUT_L"},
-      {"id":73,"key":"DELAY_1_OUTPUT_R"},
-      {"id":74,"key":"DELAY_1_OUTPUT_MONO"},
+      {"id":12,"key":"BREATH"},
+      {"id":13,"key":"BREATH_REV"},
+      {"id":14,"key":"BREATH_INV"},
+      {"id":15,"key":"BREATH_REV_INV"},
+      {"id":16,"key":"GENERAL_1"},
+      {"id":17,"key":"GENERAL_1_REV"},
+      {"id":18,"key":"GENERAL_1_INV"},
+      {"id":19,"key":"GENERAL_1_REV_INV"},
+      {"id":20,"key":"GENERAL_1_BIPOLAR"},
+      {"id":21,"key":"GENERAL_1_BIPOLAR_INV"},
+      {"id":22,"key":"GENERAL_1_COS"},
+      {"id":23,"key":"GENERAL_1_SIN"},
+      {"id":24,"key":"GENERAL_1_LO"},
+      {"id":25,"key":"GENERAL_1_HI"},
+      {"id":26,"key":"GENERAL_1_NEG"},
+      {"id":27,"key":"GENERAL_1_MID"},
+      {"id":28,"key":"GENERAL_1_POS"},
+      {"id":29,"key":"GENERAL_2"},
+      {"id":30,"key":"GENERAL_2_REV"},
+      {"id":31,"key":"GENERAL_2_INV"},
+      {"id":32,"key":"GENERAL_2_REV_INV"},
+      {"id":33,"key":"GENERAL_2_BIPOLAR"},
+      {"id":34,"key":"GENERAL_2_BIPOLAR_INV"},
+      {"id":35,"key":"GENERAL_2_COS"},
+      {"id":36,"key":"GENERAL_2_SIN"},
+      {"id":37,"key":"GENERAL_2_LO"},
+      {"id":38,"key":"GENERAL_2_HI"},
+      {"id":39,"key":"GENERAL_2_NEG"},
+      {"id":40,"key":"GENERAL_2_MID"},
+      {"id":41,"key":"GENERAL_2_POS"},
+      {"id":42,"key":"PITCH_1_OUTPUT_1"},
+      {"id":43,"key":"PITCH_1_OUTPUT_2"},
+      {"id":44,"key":"EG_1_OUTPUT"},
+      {"id":45,"key":"EG_1_OUTPUT_INV"},
+      {"id":46,"key":"EG_2_OUTPUT"},
+      {"id":47,"key":"EG_2_OUTPUT_INV"},
+      {"id":48,"key":"LFO_1_OUTPUT"},
+      {"id":49,"key":"LFO_1_OUTPUT_INV"},
+      {"id":50,"key":"LFO_1_OUTPUT_TRIANGLE"},
+      {"id":51,"key":"LFO_1_OUTPUT_TRIANGLE_INV"},
+      {"id":52,"key":"LFO_1_OUTPUT_SQUARE"},
+      {"id":53,"key":"LFO_1_OUTPUT_SQUARE_INV"},
+      {"id":54,"key":"MIXER_1_OUTPUT"},
+      {"id":55,"key":"MIXER_1_OUTPUT_INV"},
+      {"id":56,"key":"OSC_1_OUTPUT"},
+      {"id":57,"key":"OSC_1_OUTPUT_SAW"},
+      {"id":58,"key":"OSC_1_OUTPUT_PULSE"},
+      {"id":59,"key":"OSC_1_OUTPUT_SUB"},
+      {"id":60,"key":"OSC_2_OUTPUT"},
+      {"id":61,"key":"OSC_2_OUTPUT_SAW"},
+      {"id":62,"key":"OSC_2_OUTPUT_PULSE"},
+      {"id":63,"key":"NOISE_1_OUTPUT"},
+      {"id":64,"key":"NOISE_1_OUTPUT_WHITE"},
+      {"id":65,"key":"NOISE_1_OUTPUT_RED"},
+      {"id":66,"key":"MIXER_2_OUTPUT"},
+      {"id":67,"key":"MIXER_2_OUTPUT_INV"},
+      {"id":68,"key":"FILTER_1_OUTPUT"},
+      {"id":69,"key":"FILTER_1_OUTPUT_LP"},
+      {"id":70,"key":"FILTER_1_OUTPUT_HP"},
+      {"id":71,"key":"FILTER_1_OUTPUT_BP"},
+      {"id":72,"key":"FILTER_2_OUTPUT"},
+      {"id":73,"key":"FILTER_2_OUTPUT_LP"},
+      {"id":74,"key":"FILTER_2_OUTPUT_HP"},
+      {"id":75,"key":"FILTER_2_OUTPUT_BP"},
+      {"id":76,"key":"AMP_1_OUTPUT"},
+      {"id":77,"key":"CHORUS_1_OUTPUT_L"},
+      {"id":78,"key":"CHORUS_1_OUTPUT_R"},
+      {"id":79,"key":"CHORUS_1_OUTPUT_MONO"},
+      {"id":80,"key":"DELAY_1_OUTPUT_L"},
+      {"id":81,"key":"DELAY_1_OUTPUT_R"},
+      {"id":82,"key":"DELAY_1_OUTPUT_MONO"},
     ],
-    defaultOrder: ["PITCH_1","EG_1","EG_2","LFO_1","MIXER_1","OSC_1","OSC_2","NOISE_1","MIXER_2","FILTER_1","AMP_1","CHORUS_1","DELAY_1"],
+    defaultOrder: ["PITCH_1","EG_1","EG_2","LFO_1","MIXER_1","OSC_1","OSC_2","NOISE_1","MIXER_2","FILTER_1","FILTER_2","AMP_1","CHORUS_1","DELAY_1"],
+    specHash: 0x4062907C,
   };
   // patch_gen end
 
@@ -1993,10 +2036,15 @@
   }));
   const PARAM_ITEMS = CONTROL_ITEMS.filter(c => !c.controller);
   const CONTROLLER_ITEMS = CONTROL_ITEMS.filter(c => c.controller);
+  // The controls whose slot holds a value of the patch, from NRPN category 4, while they have no CC:
+  // every parameter, and General 1 and 2; not the Mod Wheel, which is played, and holds 0.0.
+  const holdsValue = c => !c.performance;
+  const VALUE_ITEMS = CONTROL_ITEMS.filter(holdsValue);
   const CONTROL = Object.fromEntries(CONTROL_ITEMS.map(c => [c.key, c]));
   // By NRPN entry, for what the synth sends back.
   const INPUT_BY_ENTRY = Object.fromEntries(INPUT_ITEMS.map(i => [i.entry, i]));
   const PARAM_BY_ENTRY = Object.fromEntries(PARAM_ITEMS.map(p => [p.entry, p]));
+  const VALUE_BY_ENTRY = Object.fromEntries(VALUE_ITEMS.map(p => [p.entry, p]));
   const CONTROL_BY_ENTRY = Object.fromEntries(CONTROL_ITEMS.map(c => [c.entry, c]));
   // Each control slot, with the item whose CC fills it, the range it takes and the form, if any,
   // its value takes of the item's own slot.
@@ -2026,31 +2074,31 @@
   // with the noise under Osc 2, Mixer 2, the filter over the amp, and the effects with the output
   // under the delay that feeds it. Spaced so that no two nodes meet with every parameter shown.
   const DEFAULT_LAYOUT = {
-    CONTROLLER: { x: 20,  y: 40 },
-    CONST:     { x: 20,   y: 1017 },
-    PITCH_1:   { x: 380,  y: 40 },
-    EG_1:      { x: 380,  y: 450 },
-    EG_2:      { x: 380,  y: 756 },
-    LFO_1:     { x: 740,  y: 40 },
-    MIXER_1:   { x: 740,  y: 528 },
-    OSC_1:     { x: 1100, y: 40 },
-    OSC_2:     { x: 1460, y: 40 },
-    NOISE_1:   { x: 1460, y: 736 },
-    MIXER_2:   { x: 1820, y: 40 },
-    FILTER_1:  { x: 2180, y: 40 },
-    AMP_1:     { x: 2180, y: 554 },
-    CHORUS_1:  { x: 2540, y: 40 },
-    DELAY_1:   { x: 2540, y: 320 },
-    OUT:       { x: 2540, y: 626 },
+    CONTROLLER: { x: 20, y: 40 },
+    GENERAL:   { x: 330, y: 40 },
+    CONST:     { x: 20, y: 445 },
+    PITCH_1:   { x: 640, y: 40 },
+    EG_1:      { x: 640, y: 476 },
+    EG_2:      { x: 640, y: 782 },
+    LFO_1:     { x: 1000, y: 40 },
+    MIXER_1:   { x: 1000, y: 528 },
+    OSC_1:     { x: 1360, y: 40 },
+    OSC_2:     { x: 1720, y: 40 },
+    NOISE_1:   { x: 1720, y: 762 },
+    MIXER_2:   { x: 1720, y: 990 },
+    FILTER_1:  { x: 2080, y: 40 },
+    FILTER_2:  { x: 2080, y: 658 },
+    AMP_1:     { x: 2440, y: 40 },
+    CHORUS_1:  { x: 2440, y: 372 },
+    DELAY_1:   { x: 2440, y: 652 },
+    OUT:       { x: 2440, y: 958 },
   };
 
   function defaultState() {
     const s = { name: 'Init', order: DEFAULT_ORDER.slice(), inputs: {}, params: {}, cc: {}, values: {}, paramValues: {}, favorites: new Set(), layout: {} };
     INPUT_ITEMS.forEach(i => { s.inputs[i.key] = i.defaultSource; });
-    PARAM_ITEMS.forEach(p => {
-      s.params[p.key] = p.defaultSource || p.key;
-      s.paramValues[p.key] = p.defaultValue;
-    });
+    PARAM_ITEMS.forEach(p => { s.params[p.key] = p.defaultSource || p.key; });
+    VALUE_ITEMS.forEach(p => { s.paramValues[p.key] = p.defaultValue; });
     CONTROL_ITEMS.forEach(c => {
       s.cc[c.key] = c.defaultCC;
       if (c.defaultCC) s.values[c.defaultCC] = c.defaultValue;
@@ -2117,7 +2165,7 @@
       for (const k in obj.values) s.values[clamp7(k)] = clampValue(obj.values[k]);
     }
     if (obj.paramValues && typeof obj.paramValues === 'object') {
-      PARAM_ITEMS.forEach(p => { if (p.key in obj.paramValues) s.paramValues[p.key] = clampValue(obj.paramValues[p.key]); });
+      VALUE_ITEMS.forEach(p => { if (p.key in obj.paramValues) s.paramValues[p.key] = clampValue(obj.paramValues[p.key]); });
     }
     // A patch's own favorites take the default's place; one with none listed keeps the default's.
     if (Array.isArray(obj.favorites)) {
@@ -2156,7 +2204,7 @@
       const cc = state.cc[c.key];
       e.push({ nrpn: 384 + c.entry, value: cc, comment: `${c.full} CC# = ${cc || 'none'}` });
     });
-    PARAM_ITEMS.forEach(p => {
+    VALUE_ITEMS.forEach(p => {
       e.push({ nrpn: 512 + p.entry, value: paramValue(p.key), comment: `${p.full} value with no CC = ${paramValue(p.key)}` });
     });
     return e;
@@ -2181,10 +2229,39 @@
     return { bytes: [st, 99, NRPN_SYSTEM_MSB, st, 98, 0, st, 6, value], comment: on ? 'Mute on' : 'Mute off', nrpn: [NRPN_SYSTEM_MSB, 0, value] };
   }
 
+  // The NRPN entries as SysEx (see spms1_patching.md): a message for each category, or more where
+  // one would pass the 128 bytes the synth takes, each of the values from its first entry on, the
+  // entries between with none written as 0, which nothing reads. The header carries the spec hash,
+  // so that a sketch numbered otherwise ignores the patch.
+  const SYSEX_VALUES_MAX = 112;
+  function sysexLines(ch) {
+    const hash = SPEC.specHash;
+    const head = [0xF0, 0x7D, 0x53, 0x31, ch, 0x01, hash & 0x7F, (hash >>> 7) & 0x7F, (hash >>> 14) & 0x7F, (hash >>> 21) & 0x7F, (hash >>> 28) & 0x7F];
+    const byCategory = new Map();
+    for (const e of nrpnEntries()) {
+      const c = e.nrpn >> 7;
+      if (!byCategory.has(c)) byCategory.set(c, new Map());
+      byCategory.get(c).set(e.nrpn & 0x7F, e.value);
+    }
+    const lines = [];
+    for (const [c, values] of [...byCategory].sort((a, b) => a[0] - b[0])) {
+      const entries = [...values.keys()];
+      const last = Math.max(...entries);
+      for (let first = Math.min(...entries); first <= last; first += SYSEX_VALUES_MAX) {
+        const end = Math.min(first + SYSEX_VALUES_MAX - 1, last);
+        const data = [];
+        for (let i = first; i <= end; i++) data.push(values.get(i) || 0);
+        lines.push({ bytes: [...head, c, first, ...data, 0xF7], comment: `SysEx NRPN ${(c << 7) + first}-${(c << 7) + end} (MSB ${NRPN_MSB_BASE + c}, LSB ${first}-${end})`, sysex: true });
+      }
+    }
+    return lines;
+  }
+
   // Each item is one line: the bytes of one NRPN write or one CC, with its comment. Mute on comes
   // first with muteBefore, and Mute off last with muteAfter, after the CCs, so that the synth is
   // silent while the patch is loaded: it needs no waits between them (see spms1_patching.md).
-  function buildMessages({ includeCC, liveCC, omitMSB, ch, muteBefore, muteAfter }) {
+  // With sysex, the NRPN entries go as SysEx instead (sysexLines); Mute stays an NRPN.
+  function buildMessages({ includeCC, liveCC, omitMSB, ch, muteBefore, muteAfter, sysex }) {
     const st = 0xB0 | ch;
     const lines = [];
     let lastMSB = -1;
@@ -2192,7 +2269,8 @@
       lines.push(muteLine(st, true));
       lastMSB = NRPN_SYSTEM_MSB;
     }
-    for (const { nrpn, value, comment } of nrpnEntries()) {
+    if (sysex) lines.push(...sysexLines(ch));
+    for (const { nrpn, value, comment } of sysex ? [] : nrpnEntries()) {
       const msb = nrpnMSB(nrpn), lsb = nrpn & 0x7F;
       const bytes = [];
       if (!omitMSB || msb !== lastMSB) bytes.push(st, 99, msb);
@@ -2222,7 +2300,7 @@
     const oneLine = document.getElementById('opt-one-line').checked;
     const total = lines.reduce((n, l) => n + l.bytes.length, 0);
     let text;
-    if (format === 'hex') {
+    if (format === 'hex' || format === 'sysex') {
       if (oneLine) {
         text = lines.map(l => l.bytes.map(hex).join(' ')).join(' ');
       } else {
@@ -2253,7 +2331,8 @@
       last.forEach(nrpnRow);
       text = rows.join('\n');
     }
-    return { text, info: `${lines.filter(l => l.nrpn).length} NRPN, ${lines.filter(l => l.cc).length} CC, ${total} bytes` };
+    const sysexCount = lines.filter(l => l.sysex).length;
+    return { text, info: `${sysexCount ? `${sysexCount} SysEx, ` : ''}${lines.filter(l => l.nrpn).length} NRPN, ${lines.filter(l => l.cc).length} CC, ${total} bytes` };
   }
 
   function exportOptions() {
@@ -2264,6 +2343,7 @@
       ch: parseInt(document.getElementById('midi-ch').value) || 0,
       muteBefore: document.getElementById('opt-mute').checked,
       muteAfter: document.getElementById('opt-mute').checked,
+      sysex: document.getElementById('export-format').value === 'sysex',
     };
   }
 
@@ -2286,14 +2366,15 @@
   for (const type of ['pointerup', 'pointercancel']) {
     window.addEventListener(type, () => { heldRange = null; }, true);
   }
-  // Each step of the history is the patch before it ({ json }), and whether it changes the whole
-  // patch ({ mute }: Init, Load, and a Reset arriving at MIDI In), so that its Undo and Redo are sent between
-  // Mute on and off as it was.
+  // Each step of the history is the patch before it ({ json }), the Controls tab's panels as they
+  // were then ({ panels }), so that moving a panel and Reset Layout are undone as a patch edit is,
+  // and whether it changes the whole patch ({ mute }: Init, Load, and a Reset arriving at MIDI In),
+  // so that its Undo and Redo are sent between Mute on and off as it was.
   const undoStack = [];
   const redoStack = [];
 
-  function pushHistory(snapshot, mute = false) {
-    undoStack.push({ json: snapshot || JSON.stringify(serialize(state)), mute });
+  function pushHistory(snapshot, mute = false, panels = null) {
+    undoStack.push({ json: snapshot || JSON.stringify(serialize(state)), panels: panels || JSON.stringify(panelLayout), mute });
     if (undoStack.length > 200) undoStack.shift();
     redoStack.length = 0;
   }
@@ -2301,21 +2382,26 @@
   function restore(step) {
     if (armed) disarm();
     state = deserialize(JSON.parse(step.json));
+    if (step.panels !== JSON.stringify(panelLayout)) {
+      panelLayout = JSON.parse(step.panels);
+      savePanelLayout();
+    }
     muteNextChanges = step.mute;
     renderAll();
+    fitTabArea();
   }
 
   function undo() {
     if (!undoStack.length) return;
     const step = undoStack.pop();
-    redoStack.push({ json: JSON.stringify(serialize(state)), mute: step.mute });
+    redoStack.push({ json: JSON.stringify(serialize(state)), panels: JSON.stringify(panelLayout), mute: step.mute });
     restore(step);
   }
 
   function redo() {
     if (!redoStack.length) return;
     const step = redoStack.pop();
-    undoStack.push({ json: JSON.stringify(serialize(state)), mute: step.mute });
+    undoStack.push({ json: JSON.stringify(serialize(state)), panels: JSON.stringify(panelLayout), mute: step.mute });
     restore(step);
   }
 
@@ -2428,20 +2514,25 @@
   let armed = null;
 
   // Each node's outputs, and the wires from them, take its color, set apart from its neighbors'. The
-  // Controller, the editor's own, takes the primary color, Ruby; Filter 1 a red set apart from it; Osc 2
+  // Controller, the editor's own, takes the primary color, Ruby, and General, split from it, a darker
+  // wine; Filter 1 a red set apart from it; Osc 2
   // gold, set apart from Osc 1's blue (dark enough for the white names on the nodes, 5:1), and EG 2
   // purple, set apart from that gold.
   // The constants and the output, which make no sound of their own, are in grays.
   const NODE_COLORS = {
-    CONTROLLER: '#e0115f', CONST: '#666666', OUT: '#3d3d3d',
+    CONTROLLER: '#e0115f', GENERAL: '#8a1c4a', CONST: '#666666', OUT: '#3d3d3d',
     PITCH_1: '#2c3e50', EG_1: '#a65813', EG_2: '#793a93', LFO_1: '#1c7f46', MIXER_1: '#117d68',
-    OSC_1: '#2772a4', OSC_2: '#8c6900', NOISE_1: '#557a0e', MIXER_2: '#9c2f86', FILTER_1: '#c0392b',
+    OSC_1: '#2772a4', OSC_2: '#8c6900', NOISE_1: '#557a0e', MIXER_2: '#9c2f86', FILTER_1: '#c0392b', FILTER_2: '#7b241c',
     AMP_1: '#473baf', CHORUS_1: '#007784', DELAY_1: '#5e2500',
   };
   const nodeOfOutput = {};
 
   const NODES = [
-    { key: 'CONTROLLER', label: 'Controller', aux: true, notes: [['NOTE_PITCH', 'Note Pitch', 0, 127], ['NOTE_GATE', 'Note Gate', 0, 1], ['PITCH_BEND', 'Pitch Bend', -8192, 8191]], controls: CONTROLLER_ITEMS },
+    // The controllers played (the keyboard's signals and the Mod Wheel), and General 1 and 2, whose
+    // values a patch keeps, as a module of their own, though the synth has no such module: shown
+    // apart, so that one sees which are a part of the patch.
+    { key: 'CONTROLLER', label: 'Controller', aux: true, notes: [['NOTE_PITCH', 'Note Pitch', 0, 127], ['NOTE_GATE', 'Note Gate', 0, 1], ['PITCH_BEND', 'Pitch Bend', -8192, 8191]], controls: CONTROLLER_ITEMS.filter(c => c.performance) },
+    { key: 'GENERAL', label: 'General', aux: true, controls: CONTROLLER_ITEMS.filter(c => !c.performance) },
     { key: 'CONST', label: 'Constants', aux: true, normed: true, outs: ['ONE', 'HALF', 'NONE', 'MINUS_HALF', 'MINUS_ONE'] },
     ...MODULES.map(m => ({
       key: m.key, label: m.label, module: m,
@@ -2515,7 +2606,7 @@
     portEls = {};
     for (const node of NODES) {
       const el = document.createElement('div');
-      el.className = 'node' + (node.aux ? ' aux' : '') + (node.key === 'CONTROLLER' ? ' controller' : '') + (node.key === 'CONST' ? ' const' : '');
+      el.className = 'node' + (node.aux ? ' aux' : '') + (node.key === 'CONTROLLER' || node.key === 'GENERAL' ? ' controller' : '') + (node.key === 'CONST' ? ' const' : '');
       el.dataset.node = node.key;
       if (NODE_COLORS[node.key]) {
         el.classList.add('colored');
@@ -2549,19 +2640,19 @@
       const others = sharingCC(c);
       ccIn.classList.toggle('warn', RESERVED_CCS.has(cc));
       ccIn.classList.toggle('none', !cc);
-      row.classList.toggle('own', !cc && !c.controller);
+      row.classList.toggle('own', !cc && holdsValue(c));
       ccIn.classList.toggle('shared', !RESERVED_CCS.has(cc) && others.length > 0);
       ccIn.title = RESERVED_CCS.has(cc)
         ? (cc >= 120 ? `CC#${cc} is a Channel Mode message, not a control: its value is not sent`
           : `CC#${cc} carries NRPN selection or data: its value is not sent`)
         : others.length ? `CC number, 0 for none. CC#${cc} also moves ${others.join(', ')}`
         : 'CC number, 0 for none';
-      valIn.disabled = !cc && c.controller;
-      if (document.activeElement !== valIn) valIn.value = cc ? ccValue(cc) : c.controller ? '' : paramValue(c.key);
+      valIn.disabled = !cc && !holdsValue(c);
+      if (document.activeElement !== valIn) valIn.value = cc ? ccValue(cc) : !holdsValue(c) ? '' : paramValue(c.key);
       valIn.placeholder = valIn.disabled ? '—' : '';
       valIn.title = cc
         ? `Value of CC#${cc}, shared by every slot on it`
-        : c.controller ? 'No CC: the slot holds 0.0' : 'No CC: the slot holds this value, sent as NRPN';
+        : !holdsValue(c) ? 'No CC: the slot holds 0.0' : 'No CC: the slot holds this value, sent as NRPN';
     });
     world.querySelectorAll('.norm[data-slot]').forEach(norm => {
       const own = signalNorm(norm.dataset.slot);
@@ -2595,7 +2686,7 @@
         input.addEventListener('change', () => {
           if (before && before !== JSON.stringify(serialize(state))) pushHistory(before);
           before = JSON.stringify(serialize(state));
-          input.value = input === ccIn ? state.cc[key] : state.cc[key] ? ccValue(state.cc[key]) : CONTROL[key].controller ? '' : paramValue(key);
+          input.value = input === ccIn ? state.cc[key] : state.cc[key] ? ccValue(state.cc[key]) : !holdsValue(CONTROL[key]) ? '' : paramValue(key);
         });
       }
       ccIn.addEventListener('input', () => {
@@ -2608,7 +2699,7 @@
         const cc = state.cc[key];
         if (valIn.value === '') return;
         if (cc) setCCValue(cc, clampValue(valIn.value), true);
-        else if (!CONTROL[key].controller) setParamValue(key, clampValue(valIn.value), true);
+        else if (holdsValue(CONTROL[key])) setParamValue(key, clampValue(valIn.value), true);
       });
       const currentValue = () => (state.cc[key] ? ccValue(state.cc[key]) : paramValue(key));
       // Only a value that moves is set and sent, so a drag held past either end sends nothing more.
@@ -3382,7 +3473,8 @@
     const blob = new Blob([JSON.stringify(serialize(state, true), null, 2) + '\n'], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = (state.name.trim() || 'patch').replace(/[^\w\-]+/g, '_') + '.json';
+    // The name of the patch, then the synth's, so that a file says which synth it is for.
+    a.download = (state.name.trim() || 'patch').replace(/[^\w\-]+/g, '_') + '-spms1_type2.json';
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   });
@@ -3508,14 +3600,17 @@
       showMIDINote('Web MIDI is not available in this browser: no MIDI device can be used');
       return;
     }
-    navigator.requestMIDIAccess().then(access => {
+    // SysEx, which sends a patch in a third of the bytes, if it is allowed; NRPN otherwise.
+    const granted = access => {
       midiAccess = access;
       applyMIDISettings(loadMIDISettings());
       midiAccess.onstatechange = () => applyMIDISettings(loadMIDISettings());
-    }, err => {
+    };
+    const failed = err => {
       console.error('Failed to get MIDI access - ' + err);
       showMIDINote('MIDI access is not allowed (or failed): no MIDI device can be used');
-    });
+    };
+    navigator.requestMIDIAccess({ sysex: true }).then(granted, () => navigator.requestMIDIAccess().then(granted, failed));
   }
 
   // A note under the MIDI settings, so that one sees why no MIDI device is listed (not only in the console),
@@ -3791,8 +3886,8 @@
       state.params[p.key] = SIGNAL_NAMES[value] || p.key;
     } else if (nrpn >= 384 && nrpn < 512 && CONTROL_BY_ENTRY[nrpn - 384]) {
       state.cc[CONTROL_BY_ENTRY[nrpn - 384].key] = value;
-    } else if (nrpn >= 512 && nrpn < 640 && PARAM_BY_ENTRY[nrpn - 512]) {
-      state.paramValues[PARAM_BY_ENTRY[nrpn - 512].key] = clampValue(value);
+    } else if (nrpn >= 512 && nrpn < 640 && VALUE_BY_ENTRY[nrpn - 512]) {
+      state.paramValues[VALUE_BY_ENTRY[nrpn - 512].key] = clampValue(value);
     } else {
       return;
     }
@@ -3845,11 +3940,18 @@
     return t;
   }
 
+  // Whether the whole patch can go to the output as SysEx: SPMS-1 Web takes it always, and a device
+  // if SysEx is allowed.
+  function outputTakesSysEx() {
+    return midiOutput === webSynthOutput || !!(midiAccess && midiAccess.sysexEnabled);
+  }
+
   // The whole patch goes out between Mute on and off, so that it is not heard half sent; Mute off
   // is left out while the Mute button holds the synth silent.
   function sendAll() {
     if (!midiOutput) return;
     const opts = exportOptions();
+    opts.sysex = outputTakesSysEx();
     opts.includeCC = true;
     opts.liveCC = true;
     opts.muteBefore = true;
@@ -3931,6 +4033,7 @@
     if (!confirm('Save this patch in the synth? It replaces the patch kept there, and the synth loads it at power-up.')) return;
     const opts = exportOptions();
     const st = 0xB0 | opts.ch;
+    opts.sysex = outputTakesSysEx();
     opts.includeCC = true;
     opts.liveCC = true;
     opts.muteBefore = true;
@@ -3969,31 +4072,32 @@
   // a run order sent over NRPN does not move them.
   // The general controls have sliders here, and the mod wheel its wheel by the soft keyboard.
   const CONTROL_PANELS = [
-    { col: 0, title: 'Osc 1', module: 'OSC_1' },
-    { col: 0, title: 'Noise 1', module: 'NOISE_1' },
+    { col: 0, title: 'General', module: null },
+    { col: 0, title: 'Pitch 1', module: 'PITCH_1' },
+    { col: 0, title: 'EG 1', module: 'EG_1' },
+    { col: 0, title: 'EG 2', module: 'EG_2' },
+    { col: 0, title: 'LFO 1', module: 'LFO_1' },
     { col: 0, title: 'Mixer 1', module: 'MIXER_1' },
+    { col: 1, title: 'Osc 1', module: 'OSC_1' },
     { col: 1, title: 'Osc 2', module: 'OSC_2' },
+    { col: 1, title: 'Noise 1', module: 'NOISE_1' },
     { col: 1, title: 'Mixer 2', module: 'MIXER_2' },
     { col: 2, title: 'Filter 1', module: 'FILTER_1' },
-    { col: 2, title: 'Amp 1', module: 'AMP_1' },
-    { col: 2, title: 'Chorus 1', module: 'CHORUS_1' },
-    { col: 2, title: 'Delay 1', module: 'DELAY_1' },
-    { col: 3, title: 'Controller', module: null },
-    { col: 3, title: 'Pitch 1', module: 'PITCH_1' },
-    { col: 3, title: 'EG 1', module: 'EG_1' },
-    { col: 3, title: 'EG 2', module: 'EG_2' },
-    { col: 3, title: 'LFO 1', module: 'LFO_1' },
+    { col: 2, title: 'Filter 2', module: 'FILTER_2' },
+    { col: 3, title: 'Amp 1', module: 'AMP_1' },
+    { col: 3, title: 'Chorus 1', module: 'CHORUS_1' },
+    { col: 3, title: 'Delay 1', module: 'DELAY_1' },
   ];
 
   // Where each panel sits, by column, top to bottom: CONTROL_PANELS's columns until a panel is
   // dragged by its heading, and then what was dragged, kept in this browser for every patch, as the
   // Controls tab's options are, rather than in the patch, as it does not change the sound. A panel
-  // a patch hides keeps its place, and one the kept layout does not know goes to its own column.
+  // the kept layout does not know goes to its own column.
   const PANEL_LAYOUT_KEY = 'spms1-type2-editor-controls-layout';
-  const PANEL_BY_ID = Object.fromEntries(CONTROL_PANELS.map(p => [p.module || 'CONTROLLER', p]));
+  const PANEL_BY_ID = Object.fromEntries(CONTROL_PANELS.map(p => [p.module || 'GENERAL', p]));
   function defaultPanelLayout() {
     const cols = [[], [], [], []];
-    for (const p of CONTROL_PANELS) cols[p.col].push(p.module || 'CONTROLLER');
+    for (const p of CONTROL_PANELS) cols[p.col].push(p.module || 'GENERAL');
     return cols;
   }
   function loadPanelLayout() {
@@ -4001,8 +4105,9 @@
     try { kept = JSON.parse(localStorage.getItem(PANEL_LAYOUT_KEY) || 'null'); } catch (e) { /* storage unavailable, or not JSON */ }
     if (!Array.isArray(kept) || kept.length !== 4 || !kept.every(Array.isArray)) return defaultPanelLayout();
     const seen = new Set();
-    const cols = kept.map(col => col.filter(id => PANEL_BY_ID[id] && !seen.has(id) && seen.add(id)));
-    for (const p of CONTROL_PANELS) if (!seen.has(p.module || 'CONTROLLER')) cols[p.col].push(p.module || 'CONTROLLER');
+    // General's panel was Controller's before, and keeps its place.
+    const cols = kept.map(col => col.map(id => id === 'CONTROLLER' ? 'GENERAL' : id).filter(id => PANEL_BY_ID[id] && !seen.has(id) && seen.add(id)));
+    for (const p of CONTROL_PANELS) if (!seen.has(p.module || 'GENERAL')) cols[p.col].push(p.module || 'GENERAL');
     return cols;
   }
   let panelLayout = loadPanelLayout();
@@ -4010,24 +4115,26 @@
     try { localStorage.setItem(PANEL_LAYOUT_KEY, JSON.stringify(panelLayout)); } catch (e) { /* storage unavailable */ }
   }
   document.getElementById('reset-layout').addEventListener('click', () => {
+    const before = JSON.stringify(panelLayout);
     panelLayout = defaultPanelLayout();
+    if (JSON.stringify(panelLayout) !== before) pushHistory(null, false, before);
     try { localStorage.removeItem(PANEL_LAYOUT_KEY); } catch (e) { /* storage unavailable */ }
     renderControls();
     fitTabArea();
   });
 
   function panelItems(p) {
-    if (!p.module) return CONTROLLER_ITEMS.filter(c => c.key !== 'MOD_WHEEL');
+    if (!p.module) return CONTROLLER_ITEMS.filter(c => !c.performance);
     return PARAM_ITEMS.filter(c => c.module === p.module);
   }
 
   // What the synth writes to a control slot, as a CC value: the CC's own value while one is
-  // assigned, and while none is, a parameter's value from NRPN category 4 and 0.0 for a
-  // controller's slot, as cc_or_nrpn and cc_or_zero in spms1_main.rb do. null is a slot written from a reserved
+  // assigned, and while none is, the value from NRPN category 4, and 0.0 for the Mod Wheel's slot,
+  // as cc_or_nrpn and cc_or_zero in spms1_main.rb do. null is a slot written from a reserved
   // CC, whose value the editor does not track.
   function slotValue(c, bipolar) {
     const cc = state.cc[c.key];
-    if (!cc) return c.controller ? (bipolar ? 64 : 4) : paramValue(c.key);
+    if (!cc) return holdsValue(c) ? paramValue(c.key) : (bipolar ? 64 : 4);
     return RESERVED_CCS.has(cc) ? null : ccValue(cc);
   }
 
@@ -4172,14 +4279,16 @@
     const cols = [...document.querySelectorAll('#controls .editor-column')];
     const col = cols.indexOf(drop.parentNode);
     if (e.type === 'pointerup' && col >= 0) {
-      // Before the next panel shown in the column, in the kept order, which holds the panels a
-      // patch hides as well; at the end of the column if none follows.
+      // Before the next panel in the column, in the kept order; at the end of the column if none
+      // follows.
       let next = drop.nextElementSibling;
       while (next && (!next.dataset.panel || next === panel)) next = next.nextElementSibling;
+      const before = JSON.stringify(panelLayout);
       panelLayout = panelLayout.map(ids => ids.filter(x => x !== id));
       const ids = panelLayout[col];
       const at = next ? ids.indexOf(next.dataset.panel) : -1;
       ids.splice(at < 0 ? ids.length : at, 0, id);
+      if (JSON.stringify(panelLayout) !== before) pushHistory(null, false, before);
       savePanelLayout();
     }
     panel.remove();
@@ -4192,13 +4301,13 @@
   // A panel moved a place up or down, in the order of one column, the columns one after another:
   // it changes places with the panel shown next to it, so that one moved past the top or the bottom
   // of a column goes to the next, as it would be seen with the columns two or four to a row, each
-  // column keeps as many panels as it had, and a move back puts both where they were. A panel a
-  // patch hides stays where it is.
+  // column keeps as many panels as it had, and a move back puts both where they were.
   function movePanel(id, other, delta) {
     if (!other) return;
     const a = panelLayout.find(ids => ids.includes(id));
     const b = panelLayout.find(ids => ids.includes(other));
     const ai = a.indexOf(id), bi = b.indexOf(other);
+    pushHistory();
     a[ai] = other;
     b[bi] = id;
     savePanelLayout();
@@ -4220,17 +4329,16 @@
     panelLayout.forEach((ids, col) => ids.forEach(id => {
       const p = PANEL_BY_ID[id];
       const items = panelItems(p).filter(c => favoritesOnly ? state.favorites.has(c.key) : (showNoCC || state.cc[c.key] || state.favorites.has(c.key)));
-      // Mixer 1 has no CC by default, so its panel appears only once a patch gives it one, or
-      // with the parameters that have none shown.
-      if (!items.length) return;
+      // A panel with none of its parameters shown keeps its title, so that every module keeps its
+      // place, and can be moved.
       const panel = document.createElement('div');
       panel.className = 'panel colored';
       panel.dataset.panel = id;
-      panel.style.setProperty('--node-color', NODE_COLORS[p.module || 'CONTROLLER']);
+      panel.style.setProperty('--node-color', NODE_COLORS[p.module || 'GENERAL']);
       panel.innerHTML = `<h2>${p.title}<span class="panel-move">` +
         `<button type="button" class="btn" data-move="up" aria-label="Move ${p.title} up" title="Move up">&#9650;</button>` +
         `<button type="button" class="btn" data-move="down" aria-label="Move ${p.title} down" title="Move down">&#9660;</button>` +
-        `</span></h2><div class="control-row">` + items.map(c => `
+        `</span></h2>` + (items.length ? '<div class="control-row">' : '') + items.map(c => `
         <div class="slider-knob-zone" data-ctrl="${c.key}">
           <button type="button" class="fav-toggle" aria-pressed="false">&#9733;</button>
           <div class="slider-label">${escapeHTML(c.label)} <span class="ctl-sub"><span class="ctl-hint"></span><span class="cc-num"></span></span></div>
@@ -4239,7 +4347,7 @@
             <span class="slider-value"></span>
             <span class="slider-norm" title="The value the synth sees in the slot"></span>
           </div>
-        </div>`).join('') + '</div>';
+        </div>`).join('') + (items.length ? '</div>' : '');
       cols[col].appendChild(panel);
     }));
     cols[3].appendChild(document.getElementById('controls-foot'));
@@ -4267,7 +4375,7 @@
       slider.addEventListener('input', () => {
         const cc = state.cc[c.key];
         if (ccInUse(cc)) setCCValue(cc, parseInt(slider.value), true);
-        else if (!cc && !c.controller) setParamValue(c.key, parseInt(slider.value), true);
+        else if (!cc && holdsValue(c)) setParamValue(c.key, parseInt(slider.value), true);
       });
       slider.addEventListener('change', () => {
         if (sliderBefore && sliderBefore !== JSON.stringify(serialize(state))) pushHistory(sliderBefore);
@@ -4299,7 +4407,7 @@
       const c = CONTROL[zone.dataset.ctrl];
       const cc = state.cc[c.key];
       const slider = zone.querySelector('input');
-      const ownValue = !cc && !c.controller;
+      const ownValue = !cc && holdsValue(c);
       const usable = ccInUse(cc) || ownValue;
       const src = state.params[c.key];
       const routed = src !== undefined && src !== c.key;
@@ -4321,7 +4429,7 @@
       ccNum.classList.toggle('shared', others.length > 0);
       ccNum.title = others.length ? `CC#${cc} also moves ${others.join(', ')}` : '';
       zone.title = routed ? `${c.full} reads ${sigLabel(src)}. This slider sets only its own slot, which other wires may read.` : '';
-      // A name cut short in four columns can be read whole here.
+      // A name cut short past two lines in four columns can be read whole here.
       zone.querySelector('.slider-label').title = zone.querySelector('.slider-label').textContent.trim();
       slider.disabled = !usable;
       const value = ownValue ? paramValue(c.key) : usable ? ccValue(cc) : 64;
@@ -4344,22 +4452,26 @@
     });
   }
 
-  // The mod wheel by the soft keyboard moves the value of the CC Mod Wheel is on in the patch, as
-  // a slider does its parameter's. With no CC, or a reserved one, the slot holds 0.0 and the wheel
-  // is held at its bottom.
+  // The mod wheel and the breath wheel by the soft keyboard each move the value of the CC their
+  // control, Mod Wheel or Breath, is on in the patch, as a slider does its parameter's. With no
+  // CC, or a reserved one, the slot holds 0.0 and the wheel is held at its bottom.
+  const PERFORMANCE_WHEELS = [['MOD_WHEEL', 'mod-wheel'], ['BREATH', 'breath-wheel']];
   function refreshModWheel() {
-    const modWheel = document.getElementById('mod-wheel');
-    const cc = state.cc.MOD_WHEEL;
-    const usable = ccInUse(cc);
-    modWheel.disabled = !usable;
-    if (heldRange !== modWheel) modWheel.value = usable ? ccValue(cc) : 4;
-    const v = signalNorm('MOD_WHEEL');
-    document.getElementById('mod-wheel-zone').title = usable
-      ? `Mod Wheel (CC#${cc}): ${ccValue(cc)}${v ? `, ${v.text}` : ''}`
-      : 'Mod Wheel: no CC in the patch, so the slot holds 0.0';
+    for (const [key, id] of PERFORMANCE_WHEELS) {
+      const wheel = document.getElementById(id);
+      const cc = state.cc[key];
+      const usable = ccInUse(cc);
+      wheel.disabled = !usable;
+      if (heldRange !== wheel) wheel.value = usable ? ccValue(cc) : 4;
+      const v = signalNorm(key);
+      const label = CONTROL[key].label;
+      document.getElementById(id + '-zone').title = usable
+        ? `${label} (CC#${cc}): ${ccValue(cc)}${v ? `, ${v.text}` : ''}`
+        : `${label}: no CC in the patch, so the slot holds 0.0`;
+    }
   }
 
-  // Both wheels move Controller signals, so they take its color.
+  // The wheels move Controller signals, so they take its color.
   document.querySelectorAll('.mod-wheel').forEach(el => el.style.setProperty('--thumb-color', NODE_COLORS.CONTROLLER));
 
   // The pitch bend wheel sends Pitch Bend as it moves, -8192 at the bottom to +8191 at the top,
@@ -4374,18 +4486,20 @@
   };
   for (const type of ['pointerup', 'pointercancel', 'keyup', 'blur']) bendWheel.addEventListener(type, bendRelease);
 
-  const modWheel = document.getElementById('mod-wheel');
-  let modWheelBefore = null;
-  modWheel.addEventListener('pointerdown', () => { modWheelBefore = JSON.stringify(serialize(state)); });
-  modWheel.addEventListener('focus', () => { modWheelBefore = JSON.stringify(serialize(state)); });
-  modWheel.addEventListener('input', () => {
-    const cc = state.cc.MOD_WHEEL;
-    if (ccInUse(cc)) setCCValue(cc, parseInt(modWheel.value), true);
-  });
-  modWheel.addEventListener('change', () => {
-    if (modWheelBefore && modWheelBefore !== JSON.stringify(serialize(state))) pushHistory(modWheelBefore);
-    modWheelBefore = JSON.stringify(serialize(state));
-  });
+  for (const [key, id] of PERFORMANCE_WHEELS) {
+    const wheel = document.getElementById(id);
+    let before = null;
+    wheel.addEventListener('pointerdown', () => { before = JSON.stringify(serialize(state)); });
+    wheel.addEventListener('focus', () => { before = JSON.stringify(serialize(state)); });
+    wheel.addEventListener('input', () => {
+      const cc = state.cc[key];
+      if (ccInUse(cc)) setCCValue(cc, parseInt(wheel.value), true);
+    });
+    wheel.addEventListener('change', () => {
+      if (before && before !== JSON.stringify(serialize(state))) pushHistory(before);
+      before = JSON.stringify(serialize(state));
+    });
+  }
 
   document.getElementById('init-values').addEventListener('click', () => {
     pushHistory();
@@ -4393,18 +4507,18 @@
       const cc = state.cc[c.key];
       if (ccInUse(cc) && c.defaultValue != null) state.values[cc] = c.defaultValue;
     });
-    PARAM_ITEMS.forEach(p => { state.paramValues[p.key] = p.defaultValue; });
+    VALUE_ITEMS.forEach(p => { state.paramValues[p.key] = p.defaultValue; });
     if (midiOutput) {
       const st = 0xB0 | exportOptions().ch;
       ccEntries().forEach(e => midiOutput.send([st, e.cc, e.value]));
-      PARAM_ITEMS.forEach(p => {
+      VALUE_ITEMS.forEach(p => {
         const nrpn = 512 + p.entry;
         midiOutput.send([st, 99, nrpnMSB(nrpn), st, 98, nrpn & 0x7F, st, 6, p.defaultValue]);
       });
       midiOutput.send([st, 101, 127, st, 100, 127]);
       if (lastSent) {
         ccEntries().forEach(e => lastSent.set('c' + e.cc, e.value));
-        PARAM_ITEMS.forEach(p => lastSent.set('n' + (512 + p.entry), p.defaultValue));
+        VALUE_ITEMS.forEach(p => lastSent.set('n' + (512 + p.entry), p.defaultValue));
       }
     }
     refreshControls();
@@ -4530,14 +4644,14 @@
 
   // The width of a semitone, between KB_KEY_WIDTH_NARROW and KB_KEY_WIDTH times the scale: as
   // wide as shows KB_SEMITONES (KB_SEMITONES_PHONE on a phone, KB_SEMITONES_TOUCH on another touch
-  // screen) beside the two wheels, each 5/3 of a semitone (3/2 on a phone),
+  // screen) beside the three wheels, each 5/3 of a semitone (3/2 on a phone),
   // with the 4px gaps after each. Hidden, the keyboard has no width, and keeps what it had.
   function kbFitKeys(force) {
     const width = document.querySelector('.kbd-body').clientWidth;
     if (!(width > 0)) return;
-    const wheels = 2 * (KB_PHONE.matches ? 3 / 2 : 5 / 3);
+    const wheels = 3 * (KB_PHONE.matches ? 3 / 2 : 5 / 3);
     const semitones = KB_PHONE.matches ? KB_SEMITONES_PHONE : KB_TOUCH.matches ? KB_SEMITONES_TOUCH : KB_SEMITONES;
-    const fit = (width - 8) / (semitones + wheels);
+    const fit = (width - 12) / (semitones + wheels);
     const px = Math.max(KB_KEY_WIDTH_NARROW * kbScale, Math.min(KB_KEY_WIDTH * kbScale, fit));
     if (px === kbKeyPx && !force) return;
     kbKeyPx = px;

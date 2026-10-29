@@ -8,9 +8,12 @@
 // - The writer blocks while the buffer is full, and reads the DMA read address only when the cached writable count is 0
 // - If the writer stops (e.g. while the flash is being written), the DMA keeps playing the ring repeatedly,
 //   so write the whole ring with writeSilence() before stopping, and call resync() after restarting
+// - An underrun, the DMA passing the writer, plays the ring once more before the writer catches up,
+//   a click while anything sounds; getUnderruns() counts them (see wait_for_writable()), for Debug Print
 
 #include <Arduino.h>
 #include <hardware/dma.h>
+#include <hardware/timer.h>
 
 #define SPMS1_INLINE inline __attribute__((always_inline))
 
@@ -31,6 +34,14 @@ protected:
   uint32_t* m_ring[2];
   uint32_t  m_write_index;  // in words
   uint32_t  m_writable;     // in frames
+  uint32_t  m_sampling_rate;
+  // For the underrun count: the frames pending and the time at the last check, and the frames
+  // written since it (the writer checks again once it has written them all)
+  uint32_t  m_check_us;
+  uint32_t  m_check_pending;
+  uint32_t  m_check_written;
+  bool      m_check_valid;
+  uint32_t  m_underruns;
 
   SPMS1_AudioRingBuffer()
   : m_buffer_frames(DEFAULT_BUFFER_FRAMES)
@@ -45,11 +56,18 @@ protected:
   , m_ring{}
   , m_write_index()
   , m_writable()
+  , m_sampling_rate(48000)
+  , m_check_us()
+  , m_check_pending()
+  , m_check_written()
+  , m_check_valid(false)
+  , m_underruns()
   {}
 
-  // words_per_frame: 1, 2, 4, or 8
-  void ring_allocate(uint32_t number_of_rings, uint32_t words_per_frame, uint32_t silence_word) {
+  // words_per_frame: 1, 2, 4, or 8; sampling_rate: the frames the output plays a second, for the underrun count
+  void ring_allocate(uint32_t number_of_rings, uint32_t words_per_frame, uint32_t silence_word, uint32_t sampling_rate) {
     m_number_of_rings = number_of_rings;
+    m_sampling_rate = sampling_rate;
     m_words_per_frame_shift = (words_per_frame >= 8) ? 3 : (words_per_frame >= 4) ? 2 : (words_per_frame >= 2) ? 1 : 0;
     m_ring_words = m_buffer_frames << m_words_per_frame_shift;
     m_silence_word = silence_word;
@@ -93,6 +111,7 @@ protected:
     m_dma_read_addr = &dma_hw->ch[m_dma_data[0]].read_addr;
     m_write_index = 0;
     m_writable = 0;
+    m_check_valid = false;
   }
 
   void ring_free() {
@@ -160,6 +179,12 @@ public:
   // Discards the cached writable count, which is invalid after the writer has stopped longer than the buffer
   void resync() {
     m_writable = 0;
+    m_check_valid = false;
+  }
+
+  // How many times the DMA has passed the writer since the start (read by core 0, so it may lag a count)
+  uint32_t getUnderruns() const {
+    return m_underruns;
   }
 
 private:
@@ -180,6 +205,26 @@ private:
         writable -= frames;
       }
     } while (writable == 0);
+
+    // The frames pending now are what was pending at the last check, plus what was written since,
+    // less what the output has played, at its rate, in the time since; a negative count means the
+    // DMA passed the writer, and what it reads as pending is the ring it is playing once more.
+    // 2 frames of slack cover the timer's resolution and the rate taken in whole frames a
+    // millisecond. Not checked after a start or a resync, as the writer had stopped, and the
+    // pending count was lost with it.
+    uint32_t now_us = time_us_32();
+    uint32_t pending = frames - 1 - writable;
+    if (m_check_valid) {
+      uint32_t played = ((now_us - m_check_us) * (m_sampling_rate / 1000u)) / 1000u;
+      int32_t expected = static_cast<int32_t>(m_check_pending + m_check_written) - static_cast<int32_t>(played);
+      if (expected < -2) {
+        ++m_underruns;
+      }
+    }
+    m_check_us = now_us;
+    m_check_pending = pending;
+    m_check_written = writable;
+    m_check_valid = true;
     m_writable = writable;
   }
 };

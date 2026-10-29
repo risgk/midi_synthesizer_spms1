@@ -58,8 +58,8 @@ module Spms1
       @level = 1.0
       # The level, smoothed; the control-rate path takes one multiply by it.
       @amount = 1.0
-      @stage_1_amount = 1.0
-      @current_amount = 1.0
+      @stage_1_amount = 0.0
+      @current_amount = 0.0
 
       @was_gate_on = false
       @attack_coef = 1.0

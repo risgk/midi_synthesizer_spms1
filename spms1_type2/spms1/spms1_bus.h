@@ -10,7 +10,7 @@
 
 #include <stdint.h>
 
-#define SPMS1_BUS_SIZE 256
+#define SPMS1_BUS_SIZE 512
 
 static float spms1_bus_signals[SPMS1_BUS_SIZE];
 

@@ -4,6 +4,53 @@ MIDI Synthesizer SPMS-1 (type-2) Change History
 The main changes of each version, newest first, gathered before each release. The format may be
 revised.
 
+- v0.3.5 (2026-10-29):
+    - Filters: Filter 2 runs after Filter 1 by default, Mixer 2 into Filter 1 into Filter 2 into the
+      amp, one low pass of the fourth order (24 dB/oct), steeper and darker above the cutoff; the two
+      are on the same CCs and power up alike, but for the Resonance: Filter 2's, on CC#71, at Q 4.0,
+      and Filter 1's, with no CC, at Q 0.71. Each filter and the amp take two audio inputs, at Gain 1
+      and Gain 2 (the filters' with no CC; the amp's Gain 2 on CC#15, its Gain 1 with no CC), wired
+      so that the gains alone set the filters in parallel. Mode heads each filter's parameters, and
+      the gains follow the resonance
+    - Keyboard tracking: each filter's Pitch Amt (CC#9) powers up at 0.0, with a Pitch Pol beside
+      it, with no CC, which runs the tracking the other way below value 64
+    - Oscillators: the pitch and the pulse width take two modulation inputs each, Pitch Mod 1 In and
+      Pitch Mod 2 In, and PW Mod 1 In and PW Mod 2 In, EG 1 on each Mod 1 In and LFO 1 on each Mod 2
+      In by default, with a Pitch Mod 1 Sw and Pitch Mod 2 Sw (Osc 1's Mod 1 Sw on CC#118); Pitch is
+      gone; Pitch Coarse reaches 60 semitones either way, a semitone a step (Osc 2's on CC#85), and
+      Pitch Fine 50 cents either way (Osc 2's on CC#76, 10 cents sharp at power-up); Osc 2's PW and
+      PW Mod Amts have no CC; Wave reads Saw to Pulse
+    - Pitch 1: Bend Pol, with no CC, runs the bend the other way below value 64; Out 1 Bend Sw is on
+      CC#119, so the wheel can bend Osc 2 alone, for a sync sound swept against Osc 1 (README has
+      the example)
+    - Default patch: Osc 1 alone at full level, Mixer 2 Level 1 at 1.0 (CC#19 = 124) and Level 2 at
+      0.0 (CC#20 = 4), so Osc 2 is silent until it is turned up, 10 cents sharp
+    - Controllers: Breath (CC#2), as the Mod Wheel, with a wheel beside the mod wheel by the soft
+      keyboard; the Mod Wheel and Breath each on the bus in four forms (the value, Rev, Inv and Rev
+      Inv); General 1 and 2 on CC#16 and 17, and holding a value of the patch while they have no CC,
+      as a parameter does; the editor shows them as a General node and panel of their own
+    - NRPN: the patch can go as SysEx too, a value a byte, about a quarter of the bytes of NRPN;
+      the editor sends it so where the browser allows it (and always to SPMS-1 Web), and Export has
+      the format "MIDI bytes, SysEx (hex)"
+    - Every module's smoothing starts at 0.0 at power-on, and the levels and gains come up through
+      it; the rates, depths, times and the cutoff start where their controls are
+    - PWM Audio: a sample is written in about 90 instructions, from about 130 and two calls to
+      lroundf, which ran from the flash and now and then held the writes up long enough for the
+      output's DMA to pass the synth, a click each; Debug Print shows `underruns`, the count of those,
+      0 now
+    - Editor: the favorites are 47 (README lists them); the Controls tab's panels in four columns,
+      the modulation first and the effects last, moved by dragging and put back by Reset Layout,
+      both undone by Undo; every module's panel shown, its title alone when none of its parameters
+      is; a long name wraps onto a second line in four columns; the Patch tab's columns keep an even
+      gap; Save JSON names the file after the patch and the synth
+    - The module ids, Signal IDs and NRPN entries are renumbered (Filter 2, the oscillators'
+      inputs, Breath, Bend Pol, Pitch Pol, Pitch), so a patch saved by v0.3.4 is not loaded, and a
+      patch sent as NRPN bytes for it is not taken as it was
+    - Documents: the Patching examples say what to do in the editor first, and then the MIDI; "Patch
+      Editing (NRPN)" opens with a worked example; README walks through the default patch by the
+      block diagram; Development on the runtime, the underruns and the load
+    - Load: Debug Print on the device 1253 to 1256 us (about 94%), from 1046 to 1047, with the second
+      filter, the oscillators' inputs and the controllers; the estimate 1355 us
 - v0.3.4 (2026-10-26):
     - The run order of the modules as a C array of the sketch's, as the signal bus, and the reads
       of the CC values and the NRPN table inline ("spms1_midi_read.h"), with the same output, so

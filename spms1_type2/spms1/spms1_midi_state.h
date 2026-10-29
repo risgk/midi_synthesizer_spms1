@@ -217,7 +217,7 @@ void spms1_reset_patch(uint8_t midi_ch) {
 //   16-19  SPMS1_PATCH_SPEC_HASH of the sketch that saved it: its numbers, as patch_gen hashes them
 //   20-31  reserved, 0
 //   32-    the payload: the NRPN table, 128 entries a category; the 128 CC values, those of the
-//          CCs the controls have, but a performance control's (the Mod Wheel's), and 0 for the
+//          CCs the controls have, but a performance control's (the Mod Wheel's and Breath's), and 0 for the
 //          rest; for each of the 32 run order slots, when it was written as a rank (1 the first, 0
 //          never); and 32 bytes for a name, reserved, 0
 // The rest of the 4 KB is 0, room for a later layout. An image is loaded only by a sketch with the
@@ -423,6 +423,53 @@ void handle_midi_nrpn_cc(uint8_t midi_ch, uint8_t number, uint8_t value) {
   }
 }
 
+// ---- SysEx ----
+//
+// A part of the patch in one message, for the hosts and editors that send SysEx: the same NRPN
+// entries as CC 99, 98 and 6 write, a value a byte, a third or less of the bytes. A message:
+//   F0 7D 53 31     the non-commercial ID, and "S1"
+//   ch              the 0-based MIDI channel, 0-15
+//   01              the command: NRPN values
+//   h0 h1 h2 h3 h4  SPMS1_PATCH_SPEC_HASH, 7 bits a byte, the lowest first
+//   category        the NRPN category, 0-4 (MSB 112-116)
+//   entry           the first entry (LSB), 0-127
+//   values...       the values, the first entry's and each next one's, to 127 at most
+//   F7
+// The values are written as the NRPNs would be, one after another, the run order's included. A
+// message is taken whole or not at all: one with another hash, for a sketch numbered otherwise,
+// one that runs past its category, and one cut short are ignored. The MIDI library the sketch
+// uses takes a SysEx of 128 bytes at most, F0 and F7 included, so 114 values at most a message.
+#define SPMS1_SYSEX_HEADER     (13)
+#define SPMS1_SYSEX_SIZE_MAX   (128)
+#define SPMS1_SYSEX_CMD_NRPN   (1)
+
+void spms1_handle_sysex(const uint8_t* data, uint32_t size) {
+  if (size < SPMS1_SYSEX_HEADER + 1 || data[0] != 0xF0 || data[size - 1] != 0xF7 ||
+      data[1] != 0x7D || data[2] != 0x53 || data[3] != 0x31) {
+    return;
+  }
+
+  uint8_t midi_ch = data[4];
+  uint32_t hash = (uint32_t)data[6] | ((uint32_t)data[7] << 7) | ((uint32_t)data[8] << 14) |
+                  ((uint32_t)data[9] << 21) | ((uint32_t)data[10] << 28);
+  uint32_t category = data[11];
+  uint32_t entry = data[12];
+  uint32_t count = size - 1 - SPMS1_SYSEX_HEADER;
+  if (midi_ch >= 16 || data[5] != SPMS1_SYSEX_CMD_NRPN || hash != SPMS1_PATCH_SPEC_HASH ||
+      category >= SPMS1_NRPN_SIZE / 128 || entry + count > 128) {
+    return;
+  }
+  for (uint32_t i = 0; i < count; ++i) {
+    if (data[SPMS1_SYSEX_HEADER + i] >= 0x80) {
+      return;
+    }
+  }
+
+  for (uint32_t i = 0; i < count; ++i) {
+    set_midi_nrpn_value(midi_ch, (int32_t)((category << 7) + entry + i), data[SPMS1_SYSEX_HEADER + i]);
+  }
+}
+
 // The handlers, by 0-based channel. A note on remembers the note it takes over from, if that one
 // is still held, and a note off of the note sounding brings the remembered one back with the gate
 // left open (legato), or closes the gate if there is none. A note off of the remembered note only
@@ -522,23 +569,36 @@ static inline void spms1_handle_midi_message(uint8_t status, uint8_t data_1, uin
 }
 
 // A byte stream, for the hosts that get raw bytes: running status is resolved here, several
-// messages may come in a row, and real-time bytes may arrive anywhere and are skipped, and so is
-// SysEx.
+// messages may come in a row, and real-time bytes may arrive anywhere and are skipped. A SysEx is
+// kept until its F7, and one longer than the MIDI library takes is skipped as it would be.
 static inline void spms1_midi_parse_byte(uint8_t b) {
-  static uint8_t s_status = 0;
-  static uint8_t s_data[2] = {0, 0};
-  static int     s_count = 0;
-  static int     s_in_sysex = 0;
+  static uint8_t  s_status = 0;
+  static uint8_t  s_data[2] = {0, 0};
+  static int      s_count = 0;
+  static uint8_t  s_sysex[SPMS1_SYSEX_SIZE_MAX];
+  static uint32_t s_sysex_size = 0;  // 0 while no SysEx is being kept
 
   if (b >= 0xF8) {
     return;
-  } else if (b == 0xF0) {
-    s_in_sysex = 1;
+  } else if (b == 0xF7 && s_sysex_size > 0) {
+    if (s_sysex_size < SPMS1_SYSEX_SIZE_MAX) {
+      s_sysex[s_sysex_size++] = b;
+      spms1_handle_sysex(s_sysex, s_sysex_size);
+    }
+    s_sysex_size = 0;
   } else if (b >= 0x80) {
-    s_in_sysex = 0;
+    s_sysex_size = 0;
+    if (b == 0xF0) {
+      s_sysex[s_sysex_size++] = b;
+    }
     s_status = (b < 0xF0) ? b : 0;
     s_count = 0;
-  } else if (!s_in_sysex && s_status) {
+  } else if (s_sysex_size > 0) {
+    if (s_sysex_size < SPMS1_SYSEX_SIZE_MAX) {
+      s_sysex[s_sysex_size] = b;
+    }
+    ++s_sysex_size;
+  } else if (s_status) {
     int length = ((s_status & 0xE0) == 0xC0) ? 1 : 2;
     s_data[s_count++] = b;
     if (s_count == length) {

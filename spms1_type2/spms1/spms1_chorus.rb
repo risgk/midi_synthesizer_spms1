@@ -70,16 +70,17 @@ module Spms1
       # The state of the low pass filter in front of the line.
       @filtered = 0.0
 
-      # Each parameter starts where its control does at power-on, so nothing slides up to it.
+      # Each parameter at its power-on value, and its smoothing where the parameter at 0.0 puts it,
+      # as every module's starts.
       @rate = 0.5
-      @stage_1_rate = 0.5
-      @current_rate = 0.5
+      @stage_1_rate = 0.0
+      @current_rate = 0.0
       @depth = 0.5
-      @stage_1_depth = 0.5
-      @current_depth = 0.5
+      @stage_1_depth = 0.0
+      @current_depth = 0.0
       @mix = 0.5
-      @stage_1_mix = 0.5
-      @current_mix = 0.5
+      @stage_1_mix = 0.0
+      @current_mix = 0.0
 
       @phase = 0.0
       # The delay each tap is read at, in samples, moved a step every sample so that it arrives at

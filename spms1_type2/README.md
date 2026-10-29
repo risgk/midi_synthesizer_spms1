@@ -1,16 +1,16 @@
-MIDI Synthesizer SPMS-1 (type-2) v0.3.4
+MIDI Synthesizer SPMS-1 (type-2) v0.3.5
 =======================================
 
 - Monophonic semi-modular MIDI Synthesizer for Raspberry Pi Pico 2, made with Spinel (Ruby AOT Compiler)
 - Controlled by MIDI as a sound module
 - Last-note priority with one note of memory: releasing the newest note while the one before it is still held goes back to that one, legato (for trills)
 - 48 kHz audio output: 24 bit through an I2S DAC, or PWM Audio (no DAC needed)
-- Oscillator: a sawtooth-to-square morph with pulse width (CC#114), and pulse width modulation (PWM) by the same two modulations as the pitch, the envelope and the LFO by default, on CC#8 and 103; and the sawtooth and the pulse on outputs of their own too, and on Osc 1 a sine sub an octave down
+- Oscillator: a sawtooth-to-pulse morph with pulse width (CC#114), and pulse width modulation (PWM) on two inputs of its own, beside the pitch's two, the envelope and the LFO by default on each pair, on CC#8 and 103; and the sawtooth and the pulse on outputs of their own too, and on Osc 1 a sine sub an octave down
 - Hard sync: Osc 2 restarts where Sync In, Osc 1's sawtooth by default, rises through zero, at the point between two samples it crosses, with the step rounded off by PolyBLEP as a wrap's is (Sync Sw, CC#112)
 - Envelopes: two ADS envelopes, EG 2 on the amp's Mod 2 In, an organ's at power-up, on CC#52, 53 and 54, with the release switch of both on CC#105
 - LFO: triangle (PolyBLAMP) and unipolar square (PolyBLEP), each on an output of its own, and a main output crossfading from one to the other (Wave, CC#33); a reset input, on Note Gate by default, that restarts it at each note with Reset Sw (CC#113) on
-- Filter: ZDF/TPT State Variable Filter (with a nonlinear leak on the band pass integrator, solved by the one-step Newton method), with low pass, high pass and band pass outputs and a main output crossfading from the low pass to the high pass through a notch (Mode, CC#39)
-- Amp: a gain of up to +12 dB (CC#15), with a look-ahead limiter that holds the peaks under the one-unit clamp, rounded off rather than cut (Limiter Sw, no CC, on at power-up)
+- Filters: two ZDF/TPT State Variable Filters (with a nonlinear leak on the band pass integrator, solved by the one-step Newton method), each with low pass, high pass and band pass outputs and a main output crossfading from the low pass to the high pass through a notch (Mode, CC#39), and two audio inputs, each with a gain; in series on the same CCs by default, a low pass of the fourth order (24 dB/oct), the first with a resonance of its own, with no CC
+- Amp: two audio inputs, each with a gain of up to +12 dB (CC#15), with a look-ahead limiter that holds the peaks under the one-unit clamp, rounded off rather than cut (Limiter Sw, no CC, on at power-up)
 - Chorus: mono in, stereo out, as a module in the run order
 - Delay: stereo, with feedback, as a module in the run order (up to 340 ms)
 - Pitch: the note's pitch as a module in the run order, with portamento as an exponential lag (CC#5), pitch bend past it (range on CC#57) and a stretch of the keys (CC#22)
@@ -104,17 +104,18 @@ A path from the sound the synth powers up with to a patch of your own, a step at
 editor's Controls tab and the nodes of its Patch tab. Open "spms1_editor.html" (see
 [Web Editor](#web-editor)) and choose the synth, or SPMS-1 Web (Built-in), in "MIDI Out".
 
-1. Favorites: the Controls tab opens with "Show favorites only" ticked, showing the 21 parameters
-   the default patch marks as favorites, those that change the sound the most:
-   Pitch 1 Glide; EG 1 Attack, Decay and Sustain; LFO 1 Rate; Osc 1 Wave, Pitch Mod 1 Amt and
-   Pitch Mod 2 Amt; Osc 2 Wave, Pitch, Pitch Mod 1 Amt and Pitch Mod 2 Amt; Mixer 2 Level 1 and 2;
-   Filter 1 Cutoff, Resonance, Mod 1 Amt and Mod 2 Amt; Amp 1 Gain; Chorus 1 Mix; and Delay 1 Mix.
-   Mark more with the star as you find them
+1. Favorites: the Controls tab opens with "Show favorites only" ticked, showing the 47 parameters
+   the default patch marks as favorites:
+   Pitch 1 Glide, Out 1 Glide Sw, Out 2 Glide Sw, Bend Amt, Out 1 Bend Sw and Stretch; EG 1 Attack, Decay, Sustain and Release Sw; LFO 1 Wave, Rate, Level and Reset Sw; Osc 1 Wave, PW, Pitch Mod 1 Amt,
+   Pitch Mod 1 Sw, Pitch Mod 2 Amt, PW Mod 1 Amt and PW Mod 2 Amt; Osc 2 Wave, Pitch Coarse, Pitch Fine, Pitch Mod 1 Amt, Pitch Mod 2 Amt and Sync Sw; Noise 1 Color; Mixer 2 Level 1 to 4; Filter 2 Cutoff, Resonance, Mode, Pitch Amt, Mod 1 Amt, Mod 1 Pol and Mod 2 Amt; Amp 1 Gain 2 and Mod 1/2 Mix; Chorus 1 Mix, Rate and Depth; and Delay 1 Mix, Time and Feedback.
+   Mark more with the star as you find them. Osc 2's Pitch Mod Amts are on Osc 1's CCs, and each
+   parameter of Filter 1 on Filter 2's but its Resonance, which has no CC, so a slider of one moves
+   the other's with it, whether or not that one is shown
 2. Parameters with a CC: clear "Show favorites only" to show every parameter with a CC. What each
    does in the default patch, and what it powers up at, is told below the Block Diagram; the knobs
    of a MIDI controller reach them too
 3. Parameters with no CC: tick "Show parameters with no CC" to show the rest, in blue, such as
-   Mixer 1's levels and Pitch 1's Out 1 and Out 2 Bend Sw; a slider of one sets the value its slot holds, sent
+   Mixer 1's levels and Pitch 1's Out 2 Bend Sw; a slider of one sets the value its slot holds, sent
    as NRPN
 4. Patch changes: the Patch tab shows the patch as a diagram of its own, every input and parameter
    included; drag a wire from an output to an input or a parameter to change what feeds it. The
@@ -132,15 +133,16 @@ puts the default patch back. Keep a patch with Save JSON, or in the synth with S
     - Its Controls tab shows a slider for each parameter, those with no CC in blue; these are
       hidden until a CC is given to one or it is marked as a favorite, unless "Show parameters with
       no CC", cleared by default, is ticked, and the choice is remembered. The slider of one with no
-      CC sets the value its slot holds, sent as NRPN
+      CC sets the value its slot holds, sent as NRPN. A module with none of its parameters shown
+      keeps its panel, its title alone
     - "Show favorites only", ticked by default, shows the parameters marked as favorites (the star)
       alone, with or without a CC, and the choice is remembered
     - A panel there is moved by dragging its heading, within its column or to another, with the
       columns two or four to a row, and in one column (as on a phone) by the arrows at the right of
       its heading, changing places with the panel next to it in the order of the columns one after
       another. Where the panels are is kept in the browser, the same for every patch, and Reset Layout puts them back:
-      Osc 1 and Osc 2 heading the first two columns, then Filter 1 to Delay 1, and the modulation,
-      Controller to LFO 1, last
+      the modulation, General and Pitch 1 to LFO 1 and then Mixer 1, in the first column, the sources, Osc 1 to
+      Mixer 2, in the second, Filter 1 and Filter 2 in the third, and Amp 1 to Delay 1 in the last. Moving a panel and Reset Layout are undone by Undo, as a change to the patch is
     - A note in parentheses follows a parameter's name there: its range, as "(White to Red)" on
       Noise 1 Color, or, on a level or a modulation amount, what the patch routes to the input it
       scales, as "(Osc 1 Sub)" on Mixer 2 Level 3, kept up to date as the routing changes. On the
@@ -161,7 +163,7 @@ puts the default patch back. Keep a patch with Save JSON, or in the synth with S
       powers up at, and sends them, as every change is sent; the wiring is kept
 - Built-in software keyboard for note input and testing
     - Beside the keys, a pitch bend wheel, from -8192 to +8191, springs back to the center when let go,
-      and a mod wheel moves the CC that Mod Wheel is on in the patch
+      a mod wheel moves the CC that Mod Wheel is on in the patch, and a breath wheel the CC that Breath is on
     - Click its heading to hide it, so the patch editor or the controls take its height; the editor remembers
       which, and the keys of the PC keyboard do not play while it is hidden
     - Panic sends All Sound Off and centers Pitch Bend. The editor follows the Channel Mode messages
@@ -171,15 +173,20 @@ puts the default patch back. Keep a patch with Save JSON, or in the synth with S
     - Wires module outputs to inputs and parameters, and sets the run order and CC assignments
     - Shows every parameter of every module, those with no CC in blue, so a wire always ends on what
       it feeds
+    - Shows the keyboard's signals, the Mod Wheel and Breath on a Controller node, and General 1 and 2,
+      whose values are a part of the patch, on a General node of their own (a General panel on the
+      Controls tab), though the synth has no such module
     - Saves and loads patches as JSON
-    - A patch saved as JSON or copied keeps a CC that only the Mod Wheel has at what it powers up
-      at, 0.0, as Save to Device does: the mod wheel is played rather than set; Send Patch sends
-      where it is
-    - Copies the patch as MIDI bytes or as an NRPN list, or sends it through Web MIDI
+    - A patch saved as JSON or copied keeps a CC that only the Mod Wheel or Breath has at what it
+      powers up at, 0.0, as Save to Device does: they are played rather than set; Send Patch sends
+      where they are
+    - Copies the patch as MIDI bytes (NRPN or SysEx) or as an NRPN list, or sends it through Web MIDI
     - Sends the whole patch (Send Patch, or a device newly chosen), and what Init and Load change (also by Undo and Redo), between Mute on and off (NRPN
       Mute), so that the patch is not heard half sent, and so does the patch it copies with "Mute
-      while loading" (on by default); every other change goes out as it is. The default patch is about
-      2,000 bytes, which take about 0.6 s at 31250 bps (UART MIDI) and about 0.5 s by USB MIDI
+      while loading" (on by default); every other change goes out as it is. The whole patch goes as SysEx
+      where the browser allows it (and always to SPMS-1 Web), and as NRPN otherwise: the default patch is
+      about 600 bytes as SysEx, about 0.2 s at 31250 bps (UART MIDI), and about 2,300 bytes as NRPN,
+      about 0.7 s at 31250 bps and about 0.5 s by USB MIDI
     - Its Mute button mutes the synth (NRPN Mute), to change the patch unheard, and shows a Mute
       arriving at MIDI In; a Reset (NRPN) arriving at MIDI In puts the patch shown back to the default too
     - Its Save to Device keeps the patch in the synth's flash (NRPN Save), which the synth loads at power-on
@@ -247,6 +254,7 @@ flowchart LR
   NOISE[Noise 1]
   MIX2[Mixer 2]
   FILTER[Filter 1]
+  FILTER2[Filter 2]
   AMP[Amp 1]
   CHORUS[Chorus 1]
   DELAY[Delay 1]
@@ -256,8 +264,11 @@ flowchart LR
   OSC2 -->|In 2| MIX2
   OSC -->|In 3, Sub| MIX2
   NOISE -->|In 4| MIX2
-  MIX2 --> FILTER
-  FILTER --> AMP
+  MIX2 -->|In 1| FILTER
+  MIX2 -->|In 1, Gain 0| FILTER2
+  FILTER -->|In 2| FILTER2
+  FILTER -->|In 1, Gain 0| AMP
+  FILTER2 -->|In 2| AMP
   AMP --> CHORUS
   CHORUS -->|L| DELAY
   CHORUS -->|R| DELAY
@@ -270,14 +281,17 @@ flowchart LR
   KBD -. Note Gate .-> PITCH
   KBD -. Pitch Bend .-> PITCH
   PITCH -. Out 1 .-> OSC
-  EG -. Mod 1 .-> OSC
-  LFO -. Mod 2 .-> OSC
+  EG -. Pitch Mod 1, PW Mod 1 .-> OSC
+  LFO -. Pitch Mod 2, PW Mod 2 .-> OSC
   PITCH -. Out 2 .-> OSC2
-  EG -. Mod 1 .-> OSC2
-  LFO -. Mod 2 .-> OSC2
+  EG -. Pitch Mod 1, PW Mod 1 .-> OSC2
+  LFO -. Pitch Mod 2, PW Mod 2 .-> OSC2
   EG -. Mod 1 .-> FILTER
   LFO -. Mod 2 .-> FILTER
   PITCH -. Out 1 .-> FILTER
+  EG -. Mod 1 .-> FILTER2
+  LFO -. Mod 2 .-> FILTER2
+  PITCH -. Out 1 .-> FILTER2
   EG -. Mod 1 .-> AMP
   EG2 -. Mod 2 .-> AMP
   OSC -. Sync .-> OSC2
@@ -287,6 +301,12 @@ flowchart LR
 
 Osc 2's sync and LFO 1's reset are routed, from Osc 1's sawtooth and Note Gate, but their switches
 power up off, so neither takes effect until it is turned on. The mod wheel reaches LFO 1's Level Mod In.
+The two filters run in series by default, Mixer 2 into Filter 1 into Filter 2 into the amp, as one
+low pass of the fourth order (24 dB/oct), on the same CCs: Filter 2 takes Filter 1 on its Audio In 2
+and Mixer 2 on its Audio In 1 at a gain of 0.0, and the amp Filter 1 on its Audio In 1 at a gain of
+0.0 and Filter 2 on its Audio In 2, so those gains alone turn the two side by side, with no
+rewiring. Filter 1's Audio In 2 is unrouted. Each oscillator's pitch and pulse width have two
+modulation inputs each, wired alike: EG 1 on each Mod 1 In and LFO 1 on each Mod 2 In.
 
 Each module is processed once per sample, in the [run order](./spms1_patching.md#the-run-order). Their parameters -- waveform,
 cutoff, gain and the rest -- arrive from CC and are left out of the diagram. Parameter names
@@ -295,41 +315,59 @@ shorten Amount to Amt, Switch to Sw and Polarity to Pol.
 The note's pitch reaches the oscillator through Pitch 1, which glides from one note to the next:
 portamento. Pitch 1 Glide is on CC#5, Portamento Time in the MIDI spec, and powers up at 0.0, where
 the portamento is off and passes the pitch through exactly as it arrives. Pitch 1 has two
-outputs from the one glide: Out 1 feeds Osc 1 and the filter's keyboard tracking, and Out 2 feeds
+outputs from the one glide: Out 1 feeds Osc 1 and the filters' keyboard tracking, and Out 2 feeds
 Osc 2. Out 1 Glide Sw and Out 2 Glide Sw, both on CC#34, turn the portamento on and off
 for each output without moving Glide: on from value 64, as a MIDI switch is, and on at power-up,
 at value 124. The glide moves only while Pitch 1 Gate In, Note Gate by default, is on: between
 notes it holds where it is, so a note played after a rest goes on from there. Pitch Bend comes in on Pitch 1 Bend In, which is added to the outputs past the
-glide, so the bend acts at once and reaches the oscillators and the filter's keyboard tracking
-alike. Out 1 Bend Sw and Out 2 Bend Sw have no CC and power up on; one set off, in
-category 4, leaves its output unbent, so the bend can move Osc 2 alone. Pitch 1 Bend Amt is the
+glide, so the bend acts at once and reaches the oscillators and the filters' keyboard tracking
+alike. Out 1 Bend Sw, on CC#119, and Out 2 Bend Sw, with no CC, power up on; one set off, Out 1's
+below 64 on its CC and Out 2's in category 4, leaves its output unbent, so the bend can move Osc 2
+alone, which sweeps a sync sound against Osc 1 from the wheel. Pitch 1 Bend Amt is the
 bend range, half a semitone a step: on CC#57, 2 semitones either way at value 8, an octave at
-value 28, where it powers up, and 5 octaves at value 124.
+value 28, where it powers up, and 5 octaves at value 124; Bend Pol, with no CC, powers up at
++1.0, and set below value 64 runs the bend the other way.
 
-The LFO goes straight to the oscillator, both to its pitch and to its pulse width, on Mod 2 In, and to the filter, where Filter 1 Mod 2 Amt (CC#25) powers up at 0.0 and
-leaves the cutoff alone until it is turned up. The envelope moves the cutoff by Filter 1 Mod 1 Amt
-(CC#24), which powers up at 0.2 (value 28), two octaves up from Filter 1 Cutoff (CC#74) at its
+For example, a sync sound swept from the pitch bend wheel, all among the favorites on the editor's
+Controls tab: Mixer 2 Level 1 down and Level 2 up (CC#19 = 4, CC#20 = 124) put Osc 2 alone on the
+mixer, Osc 2 Sync Sw on (CC#112 = 124) syncs it to Osc 1, and Pitch 1 Out 1 Bend Sw off (CC#119 = 4)
+keeps Osc 1 on the note while the wheel bends Osc 2 alone, an octave up at the top at the power-up
+Bend Amt; Osc 2 Pitch Coarse (CC#85) sets where the sweep starts, and the filters, on Out 1, stay
+on the note too.
+
+The LFO goes straight to the oscillator, on Pitch Mod 2 In and PW Mod 2 In, and to the filters, where Mod 2 Amt (CC#25) powers up at 0.0 and
+leaves the cutoff alone until it is turned up. The envelope moves the cutoff by Mod 1 Amt
+(CC#24), which powers up at 0.2 (value 28), two octaves up from Cutoff (CC#74) at its
 peak; the cutoff powers up at 0.8 (value 100). Osc 1 Pitch Mod 2 Amt (CC#13) takes the
 LFO to the pitch and powers up at 0.0; at its top, value 124, with Osc 1 Pitch Mod 2 Pol at +0.2,
 the LFO at full level swings the pitch an octave either way. Osc 1 PW Mod 2 Amt (CC#103) takes it
 to the pulse width and powers up at 0.0. LFO 1 Level powers up at 1.0, so CC#13 alone sets the
-vibrato, from none to an octave. The pitch from Pitch 1 reaches the filter too, on Filter 1 Pitch In, for keyboard tracking: CC#9
-(Filter 1 Pitch Amt) at its top has the cutoff follow the note a semitone for a semitone,
-unmoved at note 60. Filter 1 Pitch Amt powers up at 0.0 (value 4), so the cutoff stays where CC#74 puts
-it whatever the note until CC#9 is turned up.
-The envelope reaches the oscillator too, on Osc 1 Mod 1 In, for a pitch envelope: Pitch Mod 1
+vibrato, from none to an octave. The pitch from Pitch 1 reaches the filters too, on their Pitch In, for keyboard tracking: CC#9
+(Pitch Amt) at its top has the cutoff follow the note a semitone for a semitone,
+unmoved at note 60. Pitch Amt powers up at 0.0 (value 4), so the cutoff stays where CC#74 puts
+it whatever the note until CC#9 is turned up; Pitch Pol, with no CC, powers up at +1.0, and set
+below value 64 runs the tracking the other way.
+The envelope reaches the oscillator too, on Osc 1 Pitch Mod 1 In and PW Mod 1 In, for a pitch envelope: Pitch Mod 1
 Amt (CC#89) and PW Mod 1 Amt (CC#8) power up at 0.0, with it off. Each modulation depth spans the
 whole range of what it moves, so bringing a source down to a musical depth is left to the patch
 rather than built into the modules.
 
-Mixer 2 sums the audio ahead of the filter: Osc 1 on In 1, Osc 2 on In 2, Osc 1's sub on In 3 and
-Noise 1's Out on In 4, each at its own level: Level 1 (CC#19) and Level 2 (CC#20) power up at 0.7, so the default patch
-plays both oscillators, about as loud together as one at full level, and Level 3 (CC#21) and
-Level 4 (CC#23) at 0.0, so the sub and the noise are silent until they are turned up. Osc 2 plays the note from Pitch 1 as Osc
-1 does, tuned against it by its own Pitch (CC#85) and Pitch Fine (CC#76), 11 cents sharp at
-power-up for a slow beat. Its Wave is its own as well, on CC#104 beside Osc 1's on CC#102. It
-follows Osc 1 in everything else: its Mod Amts and its PW are on Osc 1's CCs, so one CC moves
-both.
+Mixer 2 sums the audio ahead of the filters: Osc 1 on In 1, Osc 2 on In 2, Osc 1's sub on In 3 and
+Noise 1's Out on In 4, each at its own level: Level 1 (CC#19) powers up at 1.0, so the default patch plays Osc 1 at full
+level, and Level 2 (CC#20), Level 3 (CC#21) and Level 4 (CC#23) at 0.0, so Osc 2, the sub and the
+noise are silent until they are turned up. Osc 2 plays the note from Pitch 1 as Osc
+1 does, tuned against it by its own Pitch Coarse (CC#85) and Pitch Fine (CC#76), 10 cents sharp at
+power-up for a slow beat once it is turned up. Its Wave is its own as well, on CC#104 beside Osc 1's on CC#102. It
+follows Osc 1 in its pitch modulation: its Pitch Mod Amts are on Osc 1's CCs, so one CC moves
+both; its PW and PW Mod Amts have no CC.
+
+Filter 1 and Filter 2 run in series, one low pass of the fourth order (24 dB/oct): the two are on
+the same CCs and power up alike, so each of those CCs moves both, but for the Resonance:
+Filter 2's, on CC#71, powers up at Q 4.0, and Filter 1's, with no CC, at its bottom, Q 0.71, so that
+the resonant peak is Filter 2's. Each filter takes Audio In 1 and Audio In 2 at Gain 1 and Gain 2, which have no CC and
+power up at unity, but Filter 1's Gain 2, unrouted, and Filter 2's Gain 1, on Mixer 2, at 0.0: turned up, with Filter 2 Gain 2 down
+and Amp 1 Gain 1 up, it sets the filters in parallel. Amp 1 takes Filter 1 on Audio In 1 at Gain 1, which has no CC and powers up at
+0.0, silent, and Filter 2 on Audio In 2 at Gain 2, on CC#15.
 
 The voice is mono up to the amp. The chorus takes it and puts out a left and a right, the delay
 takes the two sides and keeps them apart, and its two outputs are the two sides of the final
@@ -342,7 +380,7 @@ parameter: see [Patching](./spms1_patching.md).
 Documents
 ---------
 
-- [Patching](./spms1_patching.md): the run order, Filter 1, Chorus 1 and Delay 1 in detail, and
+- [Patching](./spms1_patching.md): the run order, the filters, Chorus 1 and Delay 1 in detail, and
   editing the patch by NRPN, with its tables, ranges, examples and notes
 - [Development](./spms1_development.md): the debug print, the PC simulators, adding a module, the
   load estimate, GitHub Actions, updating Spinel and checking the generated code

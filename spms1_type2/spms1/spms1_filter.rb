@@ -185,21 +185,25 @@ module Spms1
       @modulation_1_depth = 0.0
       @modulation_2_depth = 0.0
       @pitch_amount = 0.0
+      @pitch_polarity = 1.0
+      @pitch_depth = 0.0
       @mode_lp = 1.0
       @mode_hp = 0.0
 
-      @stage_1_cutoff = 1.0
+      # The smoothing starts where the parameters at 0.0 put it, as every module's does: Mode 0.0 is
+      # the low pass alone.
+      @stage_1_cutoff = 0.0
       @stage_1_resonance = 0.0
       @stage_1_modulation_1_depth = 0.0
       @stage_1_modulation_2_depth = 0.0
-      @stage_1_pitch_amount = 0.0
+      @stage_1_pitch_depth = 0.0
       @stage_1_mode_lp = 1.0
       @stage_1_mode_hp = 0.0
-      @current_cutoff = 1.0
+      @current_cutoff = 0.0
       @current_resonance = 0.0
       @current_modulation_1_depth = 0.0
       @current_modulation_2_depth = 0.0
-      @current_pitch_amount = 0.0
+      @current_pitch_depth = 0.0
       @current_mode_lp = 1.0
       @current_mode_hp = 0.0
 
@@ -224,8 +228,28 @@ module Spms1
       @current_pitch_input = 0.0
       @current_modulation_1_input = 0.0
       @current_modulation_2_input = 0.0
+      @gain_1 = 1.0
+      @stage_1_gain_1 = 0.0
+      @current_gain_1 = 0.0
+      @gain_2 = 1.0
+      @stage_1_gain_2 = 0.0
+      @current_gain_2 = 0.0
 
       update_coefficients
+    end
+
+    # Gain 1 and Gain 2, of Audio In 1 and Audio In 2, which are summed into the filter: each
+    # unipolar, [0.0, 1.0], squared and taken four times, as Amp's Gain 1 is, so that the middle of
+    # the dial is unity and the top drives the filter 12 dB harder. Smoothed at the control rate,
+    # as Mode is, being gains on the audio.
+    def set_gain_1(gain)
+      clamped_gain = (gain < 0.0) ? 0.0 : ((gain > 1.0) ? 1.0 : gain)
+      @gain_1 = 4.0 * clamped_gain * clamped_gain
+    end
+
+    def set_gain_2(gain)
+      clamped_gain = (gain < 0.0) ? 0.0 : ((gain > 1.0) ? 1.0 : gain)
+      @gain_2 = 4.0 * clamped_gain * clamped_gain
     end
 
     # Every parameter but the two Mod Pols is unipolar, [0.0, 1.0], which is what the smoothing, the
@@ -266,9 +290,19 @@ module Spms1
     # Pitch Amt is unipolar, [0.0, 1.0], how far the cutoff follows Pitch In, the keyboard
     # tracking: the cutoff dial and the pitch both span 120 semitones a unit, so at 1.0 the cutoff
     # follows the note a semitone for a semitone, unmoved at note 60, and at 0.0 not at all. It is
-    # added on its own, as an oscillator's Pitch In is outside its Pitch Mod Amts.
+    # added on its own, as an oscillator's Pitch In is outside its Pitch Mod Amts. Pitch Pol
+    # multiplies it as Mod 1 Pol does Mod 1 Amt: bipolar, [-0.5, 0.5], doubled, so at +0.5 the
+    # cutoff follows the note as Pitch Amt says, at -0.5 the other way, and at 0.0 not at all.
+    # Only their product, the depth, is smoothed.
     def set_pitch_amount(amount)
       @pitch_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
+      @pitch_depth = @pitch_amount * @pitch_polarity
+    end
+
+    def set_pitch_polarity(polarity)
+      clamped = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
+      @pitch_polarity = clamped + clamped
+      @pitch_depth = @pitch_amount * @pitch_polarity
     end
 
     # Q range: ~0.7 (0.0), 4.0 (0.5), ~9.5 (0.75), ~40 (0.875), 256 (0.95); self-oscillation from there,
@@ -302,11 +336,11 @@ module Spms1
       @current_modulation_1_depth = Dsp.smooth(@stage_1_modulation_1_depth, @current_modulation_1_depth, @smoothing_16_blend)
       @stage_1_modulation_2_depth = Dsp.smooth(@modulation_2_depth, @stage_1_modulation_2_depth, @smoothing_16_blend)
       @current_modulation_2_depth = Dsp.smooth(@stage_1_modulation_2_depth, @current_modulation_2_depth, @smoothing_16_blend)
-      @stage_1_pitch_amount = Dsp.smooth(@pitch_amount, @stage_1_pitch_amount, @smoothing_16_blend)
-      @current_pitch_amount = Dsp.smooth(@stage_1_pitch_amount, @current_pitch_amount, @smoothing_16_blend)
+      @stage_1_pitch_depth = Dsp.smooth(@pitch_depth, @stage_1_pitch_depth, @smoothing_16_blend)
+      @current_pitch_depth = Dsp.smooth(@stage_1_pitch_depth, @current_pitch_depth, @smoothing_16_blend)
     end
 
-    def process(control_tick, audio_input = 0.0, pitch_input = 0.0, modulation_1_input = 0.0, modulation_2_input = 0.0)
+    def process(control_tick, audio_input_1 = 0.0, audio_input_2 = 0.0, pitch_input = 0.0, modulation_1_input = 0.0, modulation_2_input = 0.0)
       @current_pitch_input = pitch_input
       @current_modulation_1_input = modulation_1_input
       @current_modulation_2_input = modulation_2_input
@@ -320,6 +354,8 @@ module Spms1
         @dc_blocker_bp = Dsp.flush_tiny(@dc_blocker_bp)
         @self_osc_seed = 0.0 - @self_osc_seed
       end
+
+      audio_input = audio_input_1 * @current_gain_1 + audio_input_2 * @current_gain_2
 
       @g += @g_slope
       @g_plus_k += @g_plus_k_slope
@@ -435,12 +471,16 @@ module Spms1
       @current_mode_lp = Dsp.smooth(@stage_1_mode_lp, @current_mode_lp, @smoothing_target_blend)
       @stage_1_mode_hp = Dsp.smooth(@mode_hp, @stage_1_mode_hp, @smoothing_target_blend)
       @current_mode_hp = Dsp.smooth(@stage_1_mode_hp, @current_mode_hp, @smoothing_target_blend)
+      @stage_1_gain_1 = Dsp.smooth(@gain_1, @stage_1_gain_1, @smoothing_target_blend)
+      @current_gain_1 = Dsp.smooth(@stage_1_gain_1, @current_gain_1, @smoothing_target_blend)
+      @stage_1_gain_2 = Dsp.smooth(@gain_2, @stage_1_gain_2, @smoothing_target_blend)
+      @current_gain_2 = Dsp.smooth(@stage_1_gain_2, @current_gain_2, @smoothing_target_blend)
 
       # The pitch and modulation inputs arrive as they are; clamping total_cutoff below is what holds
       # the table lookup in range, and a source that swings both ways moves the cutoff both ways.
       # Clamped without a comparison, as clip_output does it.
       modulation = (@current_modulation_1_input * @current_modulation_1_depth) + (@current_modulation_2_input * @current_modulation_2_depth)
-      total_cutoff = @current_cutoff + @current_pitch_input * @current_pitch_amount + modulation
+      total_cutoff = @current_cutoff + @current_pitch_input * @current_pitch_depth + modulation
       over  = total_cutoff - 1.0
       under = 0.0 - total_cutoff
       clamped_cutoff = total_cutoff - ((over + over.abs) - (under + under.abs)) * 0.5

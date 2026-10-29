@@ -16,6 +16,10 @@ MIDI Synthesizer SPMS-1 (type-2): Development
       the 1333 us it lasts; `min` is the synth alone, and the gap up to `max` is what core 0 and the
       interrupts take from it
     - `gc roots` and `peak`: the GC roots in use, sampled, for sizing `sp_gc_roots`
+    - `underruns`: how many times the output's DMA has passed the synth since the start, a click
+      each while anything sounds; it should stay at 0. The writes to the output come after the span
+      `min` and `max` measure, about 40 us a buffer with PWM Audio and less with I2S, so a count
+      here is the first sign that a buffer runs over
 
 
 ## Runtime
@@ -24,8 +28,12 @@ MIDI Synthesizer SPMS-1 (type-2): Development
   time, with 2 buffers queued for the output. 64 is kept: fewer would cost more per sample, and
   leave less room for what core 0 takes
 - A buffer should take less than 1333 us on average, and more only now and then: the output's
-  queue takes up the delay of a slow buffer, but not for long. As a buffer takes about the same
-  time whatever comes (see Writing a Module), the maximum is what to watch
+  queue takes up the delay of a slow buffer, but not for long. What writes the output must stay
+  in RAM with the synth: when the samples were rounded with `lroundf`, a library call that runs
+  from the flash, the output's DMA passed the synth a few times a second with PWM Audio at 1255 us
+  a buffer, though `max` never showed it, as core 0's use of the flash held the calls up now and
+  then; truncating them in an instruction instead brought `underruns` to 0. As a buffer takes about the same time whatever comes (see Writing a Module), the maximum
+  is what to watch, and `underruns` says whether it ever ran over
 - Core 0 reads MIDI, then sleeps for 1 ms (`delay(1)`): 4 bytes of USB MIDI and 8 of UART MIDI a
   loop, more than the about 3.2 bytes that 31250 bps brings; a message is taken at the next buffer
 - Mute (NRPN 117/0) fades the output out and in over 4 ms, and holds it silent for 9 buffers at
@@ -207,9 +215,10 @@ or not, as the modules are meant to:
 
 | Version | Note held (avg / max) | No note (avg / max) |
 | :-- | --: | --: |
-| v0.3.4 | 171920 / 171920 cycles, 1119 us (84%) | 172256 / 172256 cycles, 1121 us (84%) |
+| v0.3.5 | 208204 / 208204 cycles, 1355 us (102%) | 208556 / 208556 cycles, 1358 us (102%) |
 
-The estimate is about 7% above Debug Print on the device (v0.3.4: min 1046 us, max 1047 us, about 78%).
+The estimate is about 8% above Debug Print on the device (v0.3.5: min 1253 us, max 1256 us, about 94%),
+so its 102% is not a buffer running over; `underruns` on the device says whether one does.
 
 The load of each module, by `--modules` (the same version, a note held): "own" is
 the cycles of its methods (process, its outputs, smooth_parameters), and "with common" adds its share
@@ -218,20 +227,21 @@ order, split evenly; the common part left is the loop of the samples, the output
 
 | Module | Own | With common |
 | :-- | --: | --: |
-| Filter 1 | 11.3% (150 us) | 12.7% (169 us) |
-| Osc 2 (with Sync) | 9.4% (125 us) | 10.7% (143 us) |
-| Delay 1 | 6.5% (86 us) | 7.7% (102 us) |
+| Filter 2 | 11.9% (159 us) | 13.7% (182 us) |
+| Filter 1 | 11.9% (158 us) | 13.6% (181 us) |
+| Osc 2 (with Sync) | 9.5% (126 us) | 11.3% (151 us) |
+| Osc 1 | 6.3% (84 us) | 7.8% (105 us) |
+| Delay 1 | 6.5% (86 us) | 7.7% (103 us) |
 | Chorus 1 | 6.4% (85 us) | 7.4% (99 us) |
-| Osc 1 | 6.2% (82 us) | 7.4% (98 us) |
-| Amp 1 | 4.5% (59 us) | 5.5% (73 us) |
-| Pitch 1 | 2.9% (38 us) | 4.0% (53 us) |
-| LFO 1 | 3.1% (41 us) | 3.9% (53 us) |
+| Amp 1 | 4.7% (63 us) | 6.0% (80 us) |
+| LFO 1 | 3.1% (41 us) | 4.0% (53 us) |
+| Pitch 1 | 2.7% (37 us) | 3.9% (53 us) |
+| Mixer 1 | 1.6% (22 us) | 2.9% (39 us) |
+| Mixer 2 | 1.6% (22 us) | 2.9% (39 us) |
+| EG 1 | 2.2% (29 us) | 2.9% (39 us) |
 | EG 2 | 2.2% (29 us) | 2.9% (39 us) |
-| EG 1 | 2.2% (29 us) | 2.9% (38 us) |
-| Mixer 1 | 1.6% (22 us) | 2.8% (38 us) |
-| Mixer 2 | 1.6% (22 us) | 2.8% (38 us) |
-| Noise 1 | 2.0% (26 us) | 2.8% (37 us) |
-| The common part left | | 10.5% (141 us) |
+| Noise 1 | 1.9% (26 us) | 2.9% (38 us) |
+| The common part left | | 11.7% (156 us) |
 
 
 ## GitHub Actions

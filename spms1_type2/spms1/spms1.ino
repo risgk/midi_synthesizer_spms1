@@ -122,6 +122,7 @@ void handleNoteOn(byte channel, byte pitch, byte velocity);
 void handleNoteOff(byte channel, byte pitch, byte velocity);
 void handleControlChange(byte channel, byte number, byte value);
 void handlePitchBend(byte channel, int bend);
+void handleSystemExclusive(byte* array, unsigned size);
 
 // Arduino's prototype generator puts its prototypes before the first function defined, so one must
 // come before extern "C", or setup() and loop() get C linkage and Arduino.h rejects them.
@@ -220,10 +221,11 @@ void stop_audio() {
 }
 
 SPMS1_RAM_FUNC void write_to_audio_buffer(float l, float r) {
-  // Clamped before rounding, where fminf and fmaxf are an instruction each, rather than after,
-  // where std::clamp is left as calls; both ends are whole numbers, so the result is the same.
-  int32_t clamped_l = static_cast<int32_t>(std::lroundf(std::fminf(std::fmaxf(l * 8388607.0f, -8388608.0f), 8388607.0f)));
-  int32_t clamped_r = static_cast<int32_t>(std::lroundf(std::fminf(std::fmaxf(r * 8388607.0f, -8388608.0f), 8388607.0f)));
+  // Clamped, where fminf and fmaxf are an instruction each, then truncated, which is one too where
+  // a rounding is a call to lroundf; the half bit of a 24-bit sample it gives away is below anything
+  // the output shows.
+  int32_t clamped_l = static_cast<int32_t>(std::fminf(std::fmaxf(l * 8388607.0f, -8388608.0f), 8388607.0f));
+  int32_t clamped_r = static_cast<int32_t>(std::fminf(std::fmaxf(r * 8388607.0f, -8388608.0f), 8388607.0f));
   g_pwm_output.write24(clamped_l << 8, clamped_r << 8);
 }
 
@@ -248,10 +250,11 @@ void stop_audio() {
 }
 
 SPMS1_RAM_FUNC void write_to_audio_buffer(float l, float r) {
-  // Clamped before rounding, where fminf and fmaxf are an instruction each, rather than after,
-  // where std::clamp is left as calls; both ends are whole numbers, so the result is the same.
-  int32_t clamped_l = static_cast<int32_t>(std::lroundf(std::fminf(std::fmaxf(l * 8388607.0f, -8388608.0f), 8388607.0f)));
-  int32_t clamped_r = static_cast<int32_t>(std::lroundf(std::fminf(std::fmaxf(r * 8388607.0f, -8388608.0f), 8388607.0f)));
+  // Clamped, where fminf and fmaxf are an instruction each, then truncated, which is one too where
+  // a rounding is a call to lroundf; the half bit of a 24-bit sample it gives away is below anything
+  // the output shows.
+  int32_t clamped_l = static_cast<int32_t>(std::fminf(std::fmaxf(l * 8388607.0f, -8388608.0f), 8388607.0f));
+  int32_t clamped_r = static_cast<int32_t>(std::fminf(std::fmaxf(r * 8388607.0f, -8388608.0f), 8388607.0f));
   g_i2s_output.write24(clamped_l << 8, clamped_r << 8);
 }
 
@@ -319,6 +322,7 @@ void setup() {
   USB_MIDI.setHandleNoteOff(handleNoteOff);
   USB_MIDI.setHandleControlChange(handleControlChange);
   USB_MIDI.setHandlePitchBend(handlePitchBend);
+  USB_MIDI.setHandleSystemExclusive(handleSystemExclusive);
   USB_MIDI.begin(MIDI_CHANNEL_OMNI);
   USB_MIDI.turnThruOff();
 #endif  // defined(SPMS1_USE_USB_MIDI)
@@ -328,6 +332,7 @@ void setup() {
   UART_MIDI.setHandleNoteOff(handleNoteOff);
   UART_MIDI.setHandleControlChange(handleControlChange);
   UART_MIDI.setHandlePitchBend(handlePitchBend);
+  UART_MIDI.setHandleSystemExclusive(handleSystemExclusive);
   UART_MIDI.begin(MIDI_CHANNEL_OMNI);  // Begins the serial too, and only once: SerialPIO cannot take a second begin
   UART_MIDI.turnThruOff();
   gpio_pull_up(SPMS1_UART_MIDI_RX_PIN);  // After the begin, which leaves the RX pin without pulls
@@ -382,6 +387,17 @@ void loop() {
     SPMS1_DEBUG_PRINT_SERIAL.print(" peak ");
     SPMS1_DEBUG_PRINT_SERIAL.print(s_gc_nroots_max);
     SPMS1_DEBUG_PRINT_SERIAL.println();
+
+    // The output's DMA passing the writer, since the start: a click each, while anything sounds.
+    // The writes to the output come after the span min and max measure, so they show up here first.
+    SPMS1_DEBUG_PRINT_SERIAL.print("\e[4;1H\e[K");
+    SPMS1_DEBUG_PRINT_SERIAL.print("underruns ");
+#if !defined(SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO)
+    SPMS1_DEBUG_PRINT_SERIAL.print(g_pwm_output.getUnderruns());
+#else  // !defined(SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO)
+    SPMS1_DEBUG_PRINT_SERIAL.print(g_i2s_output.getUnderruns());
+#endif  // !defined(SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO)
+    SPMS1_DEBUG_PRINT_SERIAL.println();
 #if defined(SPMS1_DEBUG_PRINT_USE_USB_SERIAL)
 #if defined(SPMS1_USE_USB_MIDI)
     mutex_enter_blocking(&__usb_mutex);
@@ -420,4 +436,11 @@ void handleControlChange(byte channel, byte number, byte value)
 void handlePitchBend(byte channel, int bend)
 {
   spms1_handle_pitch_bend(channel - 1, bend);
+}
+
+// The whole message, F0 and F7 included. One longer than the library takes comes in parts, which
+// spms1_handle_sysex ignores, as none ends in F7 with the header before it.
+void handleSystemExclusive(byte* array, unsigned size)
+{
+  spms1_handle_sysex(array, size);
 }

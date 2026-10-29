@@ -44,10 +44,10 @@ module Spms1
       @phase = 0.0
       @reset_high = 0.0
       @reset_switch = 0.0
-      # Middle of the range, so the LFO starts where its control does rather than sliding up to it.
+      # Middle of the range, its power-on value; its smoothing starts where Rate 0.0 puts it, as every module's does.
       @rate = 0.5
-      @stage_1_rate = 0.5
-      @current_rate = 0.5
+      @stage_1_rate = 0.0
+      @current_rate = 0.0
       # The level powers up at 0.0, so that the LFO is silent at startup and fades in to the level
       # the patch sets, 1.0 by default.
       @level = 0.0
@@ -57,13 +57,13 @@ module Spms1
       @current_amount = 0.0
       # Each modulation depth is its amount, smoothed as the other modules' are.
       @rate_modulation_depth = 1.0
-      @stage_1_rate_modulation_depth = 1.0
-      @current_rate_modulation_depth = 1.0
+      @stage_1_rate_modulation_depth = 0.0
+      @current_rate_modulation_depth = 0.0
       # The level's modulation depth likewise. The level and what Level Mod In adds to it are
       # summed and held to [0.0, 1.0] at each control-rate step.
       @level_modulation_depth = 1.0
-      @stage_1_level_modulation_depth = 1.0
-      @current_level_modulation_depth = 1.0
+      @stage_1_level_modulation_depth = 0.0
+      @current_level_modulation_depth = 0.0
       @total_amount = 0.0
       # Powers up at the triangle.
       @wave = 0.0

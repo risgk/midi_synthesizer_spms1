@@ -19,7 +19,7 @@ How to Use
 
 - Open "spms1_editor.html" (a local file, or on a Web server) with Google Chrome or Microsoft Edge (recommended)
 - Select "SPMS-1 Web (Built-in)" in the list "MIDI Out"
-    - The editor sends its whole patch (NRPN and CC values) to SPMS-1 Web when it is selected, and every change as it is made
+    - The editor sends its whole patch (SysEx and CC values) to SPMS-1 Web when it is selected, and every change as it is made
 - Play the soft keyboard of the editor, or a MIDI keyboard selected in "MIDI In"
     - Web browsers start the audio only after a user operation in the page (e.g. a click, a tap, or a key press),
       so click the page once before playing a MIDI keyboard (clicking the soft keyboard also starts the audio)
@@ -39,7 +39,7 @@ How to Use
 Specifications
 --------------
 
-- The same as SPMS-1 (type-2) (MIDI, the patch in NRPN, and the 48 kHz sampling rate), except:
+- The same as SPMS-1 (type-2) (MIDI, the patch in NRPN or SysEx, and the 48 kHz sampling rate), except:
     - Sampling rate: 48 kHz is requested to the Web browser (no resampling);
       at other sampling rates, the output is resampled (cubic Hermite interpolation)
     - The MIDI messages are handled at the beginning of the next audio block (128 samples, about 2.7 ms at 48 kHz),

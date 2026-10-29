@@ -35,11 +35,10 @@ module Spms1
       @current_2 = 0.0
       @current_3 = 0.0
       @current_4 = 0.0
-      # Out Level scales the sum, smoothed as the input levels are. It powers up at 0.5, as the
-      # default patch sets it, so that the audio is not faded in at startup.
+      # Out Level scales the sum, smoothed as the input levels are.
       @out_level = 0.5
-      @stage_1_out_level = 0.5
-      @current_out_level = 0.5
+      @stage_1_out_level = 0.0
+      @current_out_level = 0.0
       @output = 0.0
     end
 

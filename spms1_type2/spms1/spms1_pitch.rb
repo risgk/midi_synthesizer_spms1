@@ -63,11 +63,15 @@ module Spms1
       # The blend of the parameters smoothed once every 16 samples, four control ticks (see
       # smooth_parameters): the one above taken four times over, for the same time.
       @smoothing_16_blend = 1.0 - (1.0 - @smoothing_target_blend) ** 4.0
+      @bend_amount = 0.0
+      @bend_polarity = 1.0
       @bend_depth = 0.0
       @stage_1_bend_depth = 0.0
       @current_bend_depth = 0.0
       @stretch = 0.0
       @stretch_factor = 1.0
+      # The smoothing starts where Stretch 0.0 puts it, a factor of 1.0, as every module's starts
+      # where its parameters at 0.0 put it.
       @stage_1_stretch_factor = 1.0
       @current_stretch_factor = 1.0
     end
@@ -114,9 +118,18 @@ module Spms1
     # Bend Amt is unipolar, [0.0, 1.0], the depth of Bend In: at 1.0 Bend In is added as it
     # arrives. Pitch Bend is one unit across the wheel, the pitch range's whole width, so the bend
     # range is the amount times 60 semitones either way: half a semitone a step of the 7-bit value,
-    # 2 semitones at 8 and an octave at 28.
+    # 2 semitones at 8 and an octave at 28. Bend Pol multiplies it, as a filter's Mod Pol does its
+    # Mod Amt: bipolar, [-0.5, 0.5], doubled, so at +0.5 the bend runs as the wheel does, at -0.5
+    # the other way, and at 0.0 not at all. Only their product, the depth, is smoothed.
     def set_bend_amount(amount)
-      @bend_depth = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
+      @bend_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
+      @bend_depth = @bend_amount * @bend_polarity
+    end
+
+    def set_bend_polarity(polarity)
+      clamped = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
+      @bend_polarity = clamped + clamped
+      @bend_depth = @bend_amount * @bend_polarity
     end
 
     # Stretch is unipolar, [0.0, 1.0], and multiplies the pitch, glided and bent, whose 0.0 is note

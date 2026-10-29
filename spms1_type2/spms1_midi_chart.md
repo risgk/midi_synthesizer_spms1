@@ -1,6 +1,6 @@
 ```
-  [MIDI Synthesizer]                                              Date: 2026-10-26                      
-  Model: SPMS-1 (type-2)          MIDI Implementation Chart       Version: 0.3.4                        
+  [MIDI Synthesizer]                                              Date: 2026-10-29                      
+  Model: SPMS-1 (type-2)          MIDI Implementation Chart       Version: 0.3.5                        
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Function...                   | Transmitted   | Recognized    | Remarks                              |
 +-------------------------------+---------------+---------------+--------------------------------------+
@@ -22,19 +22,19 @@
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Pitch Bend                    | x             | o             | Pitch 1 Bend In, +-12 Semitones      |
 +-------------------------------+---------------+---------------+--------------------------------------+
-| Control                   102 | x             | o             | Osc 1 Wave (Saw to Square)           |
-| Change                    104 | x             | o             | Osc 2 Wave (Saw to Square)           |
+| Control                   102 | x             | o             | Osc 1 Wave (Saw to Pulse)            |
+| Change                    104 | x             | o             | Osc 2 Wave (Saw to Pulse)            |
 |                            89 | x             | o             | Osc Pitch Mod 1 Amt (EG)             |
 |                            13 | x             | o             | Osc Pitch Mod 2 Amt (LFO)            |
-|                           114 | x             | o             | Osc PW (0% to 100%)                  |
-|                             8 | x             | o             | Osc PW Mod 1 Amt (EG)                |
-|                           103 | x             | o             | Osc PW Mod 2 Amt (LFO)               |
-|                            85 | x             | o             | Osc 2 Pitch (0 to +1 Octave)         |
-|                            76 | x             | o             | Osc 2 Pitch Fine (+-60 Cents)        |
+|                           114 | x             | o             | Osc 1 PW (0% to 100%)                |
+|                             8 | x             | o             | Osc 1 PW Mod 1 Amt (EG)              |
+|                           103 | x             | o             | Osc 1 PW Mod 2 Amt (LFO)             |
+|                            85 | x             | o             | Osc 2 Pitch Coarse (+-60 Semitones)  |
+|                            76 | x             | o             | Osc 2 Pitch Fine (+-50 Cents)        |
 |                           118 | x             | o             | Osc 1 Pitch Mod 1 Sw [Off|On]        |
 |                           112 | x             | o             | Osc 2 Sync Sw [Off|On]               |
 |                            74 | x             | o             | Filter Cutoff                        |
-|                            71 | x             | o             | Filter Resonance                     |
+|                            71 | x             | o             | Filter 2 Resonance                   |
 |                            24 | x             | o             | Filter Mod 1 Amt (EG)                |
 |                            25 | x             | o             | Filter Mod 2 Amt (LFO)               |
 |                           117 | x             | o             | Filter Mod 1 Pol (-1 to +1)          |
@@ -45,7 +45,7 @@
 |                            21 | x             | o             | Mixer 2 Level 3 (Osc 1 Sub Level)    |
 |                            23 | x             | o             | Mixer 2 Level 4 (Noise Level)        |
 |                           115 | x             | o             | Noise Color (White to Red)           |
-|                            15 | x             | o             | Amp Gain                             |
+|                            15 | x             | o             | Amp Gain 2                           |
 |                            36 | x             | o             | Amp Mod 1/2 Mix (EG 1 to EG 2)       |
 |                            73 | x             | o             | EG 1 Attack (Time)                   |
 |                            75 | x             | o             | EG 1 Decay (Time)                    |
@@ -67,10 +67,12 @@
 |                             5 | x             | o             | Pitch Glide (Portamento Time)        |
 |                            34 | x             | o             | Pitch Out 1/2 Glide Sw [Off|On]      |
 |                            57 | x             | o             | Pitch Bend Amt (Pitch Bend Range)    |
+|                           119 | x             | o             | Pitch Out 1 Bend Sw [Off|On]         |
 |                            22 | x             | o             | Pitch Stretch                        |
 |                             1 | x             | o             | Mod Wheel (Unipolar)                 |
-|                            16 | x             | o             | General 1 (Unipolar, 6 forms)        |
-|                            17 | x             | o             | General 2 (Unipolar, 6 forms)        |
+|                             2 | x             | o             | Breath (Unipolar)                    |
+|                            16 | x             | o             | General 1 (Unipolar, 13 forms)       |
+|                            17 | x             | o             | General 2 (Unipolar, 13 forms)       |
 |                            99 | x             | o             | NRPN MSB (112-117)                   |
 |                            98 | x             | o             | NRPN LSB                             |
 |                             6 | x             | o             | Data Entry MSB (NRPN value)          |
@@ -79,7 +81,7 @@
 | Program                       | x             | x             |                                      |
 | Change       : True #         | ************* | ************* |                                      |
 +-------------------------------+---------------+---------------+--------------------------------------+
-| System Exclusive              | x             | x             |                                      |
+| System Exclusive              | x             | o             | Patch (see Patching)                 |
 +-------------------------------+---------------+---------------+--------------------------------------+
 | System       : Song Pos       | x             | x             |                                      |
 | Common       : Song Sel       | x             | x             |                                      |

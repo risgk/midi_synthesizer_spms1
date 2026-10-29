@@ -33,7 +33,7 @@ module Spms1
     @stored_image = nil
 
     # The signal bus SignalBus reads and writes, as spms1_bus.h has it for the C builds.
-    @bus_signals = Array.new(256, 0.0)
+    @bus_signals = Array.new(512, 0.0)
     @active_modules = Array.new(32, 0)
 
     @sample_rate = 48000
@@ -42,7 +42,10 @@ module Spms1
 
     @parse_status = 0
     @parse_data = []
-    @parse_in_sysex = false
+    @parse_sysex = nil  # the SysEx being kept until its F7, or nil
+
+    # SPMS1_PATCH_SPEC_HASH, which a SysEx carries, as spms1_default_patch.h has it.
+    @patch_spec_hash = Integer(File.read(File.expand_path('../spms1/spms1_default_patch.h', __dir__))[/#define SPMS1_PATCH_SPEC_HASH \((0x\h+)u\)/, 1])
 
     class << self
       # spms1_main.rb declares the functions the sketch provides. They are all defined by the host
@@ -105,8 +108,8 @@ module Spms1
         @cc_values[ch].fill(0)
         spms1_write_default_patch(ch)
       end
-      def get_bus_signal(slot) = @bus_signals[slot & 255]
-      def set_bus_signal(slot, v) = (@bus_signals[slot & 255] = v)
+      def get_bus_signal(slot) = @bus_signals[slot & 511]
+      def set_bus_signal(slot, v) = (@bus_signals[slot & 511] = v)
       def get_active_module(slot) = @active_modules[slot & 31]
       def set_active_module(slot, v) = (@active_modules[slot & 31] = v)
       def set_sample_rate(v) = (@sample_rate = v)
@@ -203,18 +206,36 @@ module Spms1
         end
       end
 
+      # A SysEx of NRPN values, as spms1_handle_sysex: F0 7D 53 31, the channel, 01, the spec
+      # hash in five bytes, the category, the first entry, the values and F7, whole or not at all.
+      def handle_sysex(data)
+        return unless data.size >= 14 && data[0] == 0xF0 && data[-1] == 0xF7 && data[1, 3] == [0x7D, 0x53, 0x31]
+        ch, cmd = data[4], data[5]
+        hash = (0...5).sum { |i| data[6 + i] << (7 * i) }
+        category, entry = data[11], data[12]
+        values = data[13...-1]
+        return unless ch < 16 && cmd == 1 && hash == @patch_spec_hash && category < 5 &&
+                      entry + values.size <= 128 && values.all? { |v| v < 0x80 }
+        values.each_with_index { |v, i| set_midi_nrpn_value(ch, (category << 7) + entry + i, v) }
+      end
+
       # A byte stream: running status is resolved here, several messages may come in a row, and
-      # real-time bytes may arrive anywhere and are skipped, and so is SysEx.
+      # real-time bytes may arrive anywhere and are skipped. A SysEx is kept until its F7, and one
+      # longer than 128 bytes is skipped, as in spms1_midi_parse_byte.
       def parse_midi_byte(byte)
         if byte >= 0xF8
           nil
-        elsif byte == 0xF0
-          @parse_in_sysex = true
+        elsif byte == 0xF7 && @parse_sysex
+          @parse_sysex << byte
+          handle_sysex(@parse_sysex) if @parse_sysex.size <= 128
+          @parse_sysex = nil
         elsif byte >= 0x80
-          @parse_in_sysex = false
+          @parse_sysex = (byte == 0xF0) ? [byte] : nil
           @parse_status = (byte < 0xF0) ? byte : 0
           @parse_data.clear
-        elsif !@parse_in_sysex && @parse_status != 0
+        elsif @parse_sysex
+          @parse_sysex << byte
+        elsif @parse_status != 0
           @parse_data << byte
           length = (@parse_status & 0xE0) == 0xC0 ? 1 : 2
           return if @parse_data.size < length
