@@ -22,8 +22,8 @@
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Pitch Bend                    | x             | o             | Pitch 1 Bend In, +-12 Semitones      |
 +-------------------------------+---------------+---------------+--------------------------------------+
-| Control                   102 | x             | o             | Osc 1 Wave (Saw to Square)           |
-| Change                    104 | x             | o             | Osc 2 Wave (Saw to Square)           |
+| Control                   102 | x             | o             | Osc 1 Wave (Saw to Pulse)            |
+| Change                    104 | x             | o             | Osc 2 Wave (Saw to Pulse)            |
 |                            89 | x             | o             | Osc Pitch Mod 1 Amt (EG)             |
 |                            13 | x             | o             | Osc Pitch Mod 2 Amt (LFO)            |
 |                           114 | x             | o             | Osc 1 PW (0% to 100%)                |

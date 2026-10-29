@@ -1,5 +1,5 @@
 module Spms1
-  # PolyBLEP-based saw/square morph oscillator for anti-aliased waveform transitions. Besides the
+  # PolyBLEP-based saw/pulse morph oscillator for anti-aliased waveform transitions. Besides the
   # morph, which process returns, it puts out its two ends on their own: output_saw, the sawtooth,
   # and output_pulse, the pulse at its pulse width, as the morph is at 1.0, whatever Wave is. And
   # output_sub, a sine an octave down, locked to the sawtooth's phase: it starts each of its cycles
@@ -109,7 +109,7 @@ module Spms1
     end
 
     # Pulse width is bipolar, [-0.5, 0.5]: how far the second sawtooth is shifted back from half a
-    # cycle. At the square end of the morph, 0.0 is a pulse of 50%, +0.25 one of 75% and +0.5 one of
+    # cycle. At the pulse end of the morph, 0.0 is a pulse of 50%, +0.25 one of 75% and +0.5 one of
     # 100%, -0.25 one of 25% and -0.5 one of 0%; both ends are silence, as the two sawtooths then
     # cancel. Between the two ends of the morph it moves the second sawtooth of the blend in the
     # same way.

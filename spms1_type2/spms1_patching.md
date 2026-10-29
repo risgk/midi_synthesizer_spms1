@@ -672,7 +672,7 @@ leave the oscillator alone until one is turned up: CC#13 brings the vibrato in.
 
 Osc 1 PW, the pulse width, shifts the second of the two sawtooths that the morph is made of, either way
 from half a cycle: it is bipolar, -0.5 (value 4) to +0.5 (value 124), and powers up at 0.0 (value 64). At
-the square end of Osc 1 Wave that is a pulse of 50% at value 64, 75% at value 94 and 25% at value 34, and
+the pulse end of Osc 1 Wave that is a pulse of 50% at value 64, 75% at value 94 and 25% at value 34, and
 silence at either end, a pulse of 0% or 100%; it is on CC#114.
 The modulations move it by PW Mod 1 Amt (CC#8) and PW Mod 2 Amt (CC#103), which power up at 0.0.
 A unit of input is the whole pulse width range, so with PW Mod 2 Amt at the top the LFO swings
@@ -682,7 +682,7 @@ from an inverted envelope. The pulse width the modulation adds
 up to is held to -0.5 to +0.5.
 
 Each oscillator puts out the two ends of its morph on their own as well, whatever Wave is: Out
-Saw, the sawtooth, and Out Pulse, the pulse at the pulse width, as Out is at the square end of
+Saw, the sawtooth, and Out Pulse, the pulse at the pulse width, as Out is at the pulse end of
 Wave. Both run at the same level as Out, -0.5 to +0.5, and the default patch uses neither, so a
 mixer can take the two from one oscillator at levels of their own, or one oscillator can feed a
 saw to one place and a pulse to another.
@@ -798,7 +798,7 @@ harmonics back below the audible band, the limiter does not: a sawtooth taken 12
 at A4 to A7 aliases -46 to -53 dB under 5 kHz with it, and -29 to -37 dB on the clamp. Off, the
 output is just as late, and the clamp is reached. Limiting is heard on a loud passage as its peaks
 held level, and the release as the sound coming back up after one. The default patch stays under
-it, with Osc 1 on the sawtooth or on the square, and Amp 1 Gain 2 turned up to about value 114
+it, with Osc 1 on the sawtooth or on the pulse, and Amp 1 Gain 2 turned up to about value 114
 starts to reach it. The filter's output
 clip and a mixer's sum still have the hard limit, past which a sawtooth driven 6 dB over at A6 to
 A7 aliases about -30 dB under 5 kHz; keep the levels before the filters where the peaks only just
