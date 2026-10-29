@@ -4,7 +4,7 @@ MIDI Synthesizer SPMS-1 (type-2) Change History
 The main changes of each version, newest first, gathered before each release. The format may be
 revised.
 
-- v0.3.5 (2026-10-29):
+- v0.4.0 (2026-10-29):
     - Filters: Filter 2 runs after Filter 1 by default, Mixer 2 into Filter 1 into Filter 2 into the
       amp, one low pass of the fourth order (24 dB/oct), steeper and darker above the cutoff; the two
       are on the same CCs and power up alike, but for the Resonance: Filter 2's, on CC#71, at Q 4.0,
