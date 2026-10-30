@@ -522,3 +522,9 @@ controls:
   # limiter, on at CC 64 and above. It has no CC and powers up on (CC 124); off, the peaks past one
   # unit reach the clamp. Either way the amp's output comes 1 ms late.
   - { entry: 100, module: AMP_1,     key: LIMITER_SW,   label: Limiter Sw,   cc: 0,   value: 124, hint: Off/On, set: set_limiter_switch }
+  # Filter 1 Drive and Filter 2 Drive, after Limiter Sw so that no entry before them moves: the
+  # leak's ceiling down by 2^(4 * drive), x1 to x16, 6 dB every 30 values, which bends the
+  # resonance sooner while the level and the output clip stay. No CC; they power up at CC 4, x1,
+  # where the filters are as they were.
+  - { entry: 101, module: FILTER_1,  key: DRIVE,        label: Drive,        cc: 0,   value: 4, hint: x1 to x16, set: set_drive }
+  - { entry: 102, module: FILTER_2,  key: DRIVE,        label: Drive,        cc: 0,   value: 4, hint: x1 to x16, set: set_drive }

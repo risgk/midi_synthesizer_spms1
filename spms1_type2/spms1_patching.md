@@ -72,6 +72,15 @@ sample rate. The low pass state stays linear, with a
 clamp at 16 as a guard that ordinary use never reaches. The output clip comes last. At the top of
 the resonance dial k turns negative and the loop oscillates.
 
+Drive, with no CC, brings the leak's ceiling down, from x1 at value 4, where it powers up and the
+filter is as it was, to x16 at value 124, 6 dB every 30 values. That is the same as driving the
+loop that much harder and taking what leaves it down by as much ahead of the output clip: the
+resonance runs into the leak sooner and saturates, with its even harmonics, while the pass band
+stays clean, the level stays and the output clip stays where it is. A signal at the cutoff is held
+down with the peak, so a cutoff on the notes' fundamentals comes out quieter as Drive goes up, and
+the self-oscillation comes out lower by the Drive too. Unlike turning Gain 1 or Gain 2 up, it does
+not drive the output clip, which would bend the whole band past the resonance.
+
 The filter puts out its low pass and high pass at once, as Out LP and Out HP, each through a DC
 blocker and an output clip of its own, and Out, the two crossfaded by Mode (CC#39). Each side stays at full over its own half and falls to nothing over the other.
 At 0.0 (value 4), where it powers up, Out is the low
@@ -409,8 +418,8 @@ both at the same signal for a mono output.
 | 28 | Mixer 1 Out Level | | 61 | Mixer 2 Level 2 | | 94 | Delay 1 Time |
 | 29 | Osc 1 Wave | | 62 | Mixer 2 Level 3 | | 95 | Delay 1 Feedback |
 | 30 | Osc 1 PW | | 63 | Mixer 2 Level 4 | | 100 | Amp 1 Limiter Sw |
-| 31 | Osc 1 Pitch Coarse | | 64 | Mixer 2 Out Level | |  |  |
-| 32 | Osc 1 Pitch Fine | | 65 | Filter 1 Mode | |  |  |
+| 31 | Osc 1 Pitch Coarse | | 64 | Mixer 2 Out Level | | 101 | Filter 1 Drive |
+| 32 | Osc 1 Pitch Fine | | 65 | Filter 1 Mode | | 102 | Filter 2 Drive |
 
 <!-- patch_gen end -->
 
