@@ -158,7 +158,7 @@ const uint8_t* spms1_storage_data(void) {
   return EEPROM.getConstDataPtr();
 }
 
-// Called by the synth on core 1, with the output faded out, as PRA32-U2 writes its programs: the
+// Called by the synth on core 1, with the output faded out, to write the patch to the flash: the
 // whole ring buffer and a little more of silence first, since the DMA keeps playing the ring
 // while the flash is written; then the EEPROM, written only where it differs, and committed only
 // if anything did, which stops core 0 (the MIDI) for the erase and the program, about 50-100 ms;

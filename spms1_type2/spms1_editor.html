@@ -70,7 +70,7 @@
       gap: 12px;
       flex-wrap: wrap;
     }
-    /* The title as large as PRA32-U2 Editor's, 20px, at every width. */
+    /* The title at 20px, at every width. */
     header h1 {
       font-size: 1.25rem;
       color: var(--primary-color);
@@ -598,7 +598,7 @@
     /* Soft keyboard */
     /* On the Controls tab, kept at the bottom of the window while the page scrolls above it, as on
        a 1280 x 720 screen or a phone, upright or on its side, so the keys stay at hand under the
-       controls, with lower keys in a low window (below), as in PRA32-U2 Editor; on the Patch tab
+       controls, with lower keys in a low window (below); on the Patch tab
        only with Wide, where the canvas ends above it and the side panels scroll behind it, and
        not in one column (a phone), where it would take much of the window over the canvas. */
     body:has(#tab-controls:not([hidden])) #kbd-panel {
@@ -692,7 +692,7 @@
     }
     /* On a phone the bar takes one line from 360px, its heading, buttons and gaps a little
        smaller; and in a window up to 640px high, as a phone upright or on its side under the bars
-       of the browser, the keys are lower, 100px as in PRA32-U2 Editor, so that the keyboard at the
+       of the browser, the keys are lower, 100px, so that the keyboard at the
        bottom leaves more of the window to the controls. */
     @media (max-width: 480px) {
       #kbd-panel .kbd-bar { column-gap: 3px; }

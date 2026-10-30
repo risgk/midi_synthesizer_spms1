@@ -70,7 +70,7 @@ SIGNALS_SIZE = 512
 # input -- Gate In, Reset In, Sync In -- acts at a threshold or an edge and takes the slot as it is.
 CONTROLLER_SMOOTHING_BLEND = 1.0 - (1.0 - 0.015625 * (48000.0 / SAMPLE_RATE.to_f)) ** (AUDIO_BUFFER_WORDS.to_f / 4.0)
 
-# The output fader, as PRA32-U2's: a linear fade of the output out and in, of at least 3 ms, in
+# The output fader: a linear fade of the output out and in, of at least 3 ms, in
 # whole buffers, 4 ms at 64 samples. It fades out at Mute on (NRPN 117/0, see spms1_midi_state.h),
 # as a patch is sent, and holds the output silent until Mute is off. Every Mute on is taken,
 # however soon Mute off follows it, so a patch sent between them is never heard at full level;
