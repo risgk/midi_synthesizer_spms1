@@ -4,7 +4,7 @@ MIDI Synthesizer SPMS-1 (type-2) Change History
 The main changes of each version, newest first, gathered before each release. The format may be
 revised.
 
-- v0.4.1 (2026-??-??):
+- v0.4.1 (2026-10-30):
     - Default patch: Mixer 2 Out Level powers up at 1.0 (value 124) instead of 0.5, and Amp 1 Gain 2
       (CC#15) at unity (value 64) instead of 1.96 times (value 88), so the level is as it was, but the
       filters are driven 6 dB harder, 0.5 at Filter 1 with Osc 1 alone: the leak's saturation at the
