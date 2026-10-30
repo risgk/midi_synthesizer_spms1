@@ -434,7 +434,7 @@ controls:
   - { entry: 61, module: MIXER_2,   key: LEVEL_2,      label: Level 2,      cc: 20,  value: 4,   hint_inputs: [IN_2], favorite: true, set: set_level_2 }
   - { entry: 62, module: MIXER_2,   key: LEVEL_3,      label: Level 3,      cc: 21,  value: 4, hint_inputs: [IN_3], favorite: true, set: set_level_3 }
   - { entry: 63, module: MIXER_2,   key: LEVEL_4,      label: Level 4,      cc: 23,  value: 4, hint_inputs: [IN_4], favorite: true, set: set_level_4 }
-  - { entry: 64, module: MIXER_2,   key: OUT_LEVEL,  label: Out Level,  cc: 0,   value: 64, set: set_out_level }
+  - { entry: 64, module: MIXER_2,   key: OUT_LEVEL,  label: Out Level,  cc: 0,   value: 124, set: set_out_level }
   # The two filters run in series, Filter 1 into Filter 2's Audio In 2 into the amp's, as one low
   # pass of the fourth order (24 dB/oct); Mixer 2 also reaches Filter 2's Audio In 1 at Gain 1 0.0
   # (CC 4), and Filter 1 the amp's Audio In 1 at Gain 1 0.0, so that turning those up and Filter
@@ -494,7 +494,7 @@ controls:
   # crossfades what scales the gain from Mod 1 In, EG 1, at 0.0 (CC 4), where it powers up, to
   # Mod 2 In, EG 2, the organ envelope, at 1.0 (CC 124).
   - { entry: 87, module: AMP_1,     key: GAIN_1,       label: Gain 1,       cc: 0,   value: 4,  hint_inputs: [AUDIO_IN_1], set: set_gain_1 }
-  - { entry: 88, module: AMP_1,     key: GAIN_2,       label: Gain 2,       cc: 15,  value: 88, hint_inputs: [AUDIO_IN_2], favorite: true, set: set_gain_2 }
+  - { entry: 88, module: AMP_1,     key: GAIN_2,       label: Gain 2,       cc: 15,  value: 64, hint_inputs: [AUDIO_IN_2], favorite: true, set: set_gain_2 }
   - { entry: 89, module: AMP_1,     key: MOD_1_2_MIX,  label: Mod 1/2 Mix,  cc: 36,  value: 4, hint_inputs: [MOD_1_IN, MOD_2_IN], favorite: true, set: set_modulation_mix }
   - { entry: 90, module: CHORUS_1,  key: MIX,          label: Mix,          cc: 93,  value: 64, favorite: true, set: set_mix }
   - { entry: 91, module: CHORUS_1,  key: RATE,         label: Rate,         cc: 58,  value: 64, favorite: true, set: set_rate }

@@ -319,8 +319,9 @@ order is never what makes a patch fit; to leave one out of the sound, route arou
 run unread (see the examples below).
 Mixer 1 has no CC: its levels hold 0.0, so it is silent until a patch turns them up, as its
 category 4 values or by giving them CCs. Mixer 2 has a CC on each level, CC#19 to 21 and 23, of which
-Level 1 powers up at 1.0 and Level 2 to 4 at 0.0, so Osc 1 alone is heard at first. Each mixer's Out Level has no CC and holds 0.5; Mixer 2's sets how hard the
-audio drives the filters.
+Level 1 powers up at 1.0 and Level 2 to 4 at 0.0, so Osc 1 alone is heard at first. Each mixer's Out Level has no CC: Mixer 1's holds 0.5, and Mixer 2's
+1.0 (value 124), which sets how hard the audio drives the filters (0.5 until v0.4.0; the filters are
+driven 6 dB harder now, and Amp 1 Gain 2 is down by the same, so the level is as it was).
 
 ### Entries (CC#98), category 1
 
@@ -755,9 +756,10 @@ over a day at 48 kHz, and starts the same every time, so a render comes out the 
 
 How hard the input drives a filter, which is also what decides how far it runs into its own
 saturation, is set by its Gain 1 and Gain 2 and ahead of it: by Mixer 2 Out Level in the default
-patch, which has no CC and holds 0.5, and Filter 1's Gain 1 at unity. Two oscillators at full
-level on Mixer 2 drive the filter twice as hard as one: turn Out Level or Gain 1 down to keep the
-level, or leave them up to drive the saturation. The saturation sits on the resonance rather than the pass band: a low cutoff
+patch, which has no CC and holds 1.0, and Filter 1's Gain 1 at unity, so Osc 1 alone reaches 0.5 at
+the filter. Two oscillators at full level on Mixer 2 drive the filter twice as hard as one, to
+1.0, where Filter 1's output clip begins to round the peaks: turn Out Level or Gain 1 down to keep
+the level, or leave them up to drive the saturation. The saturation sits on the resonance rather than the pass band: a low cutoff
 passes a loud note nearly clean, while turning the drive up rounds off the resonant peak.
 
 A filter moves the cutoff by each of its two modulations at a depth of its own, Mod 1 Amt and
@@ -789,7 +791,9 @@ Amp 1 Gain 1 and Gain 2, of Audio In 1 and Audio In 2, which the amp sums, are e
 6 dB down, at value 46, unity at value 64, twice, 6 dB up, at value 89, and four times, 12 dB up,
 at value 124, so a quiet sound can be brought well up as well as a loud one taken down. The
 default patch puts Filter 2, the fourth order, on Audio In 2: Gain 2, on CC#15, powers up at value
-88, 1.96 times, 5.8 dB up, which takes the default patch's peaks to about -7 dBFS. Filter 1, the
+64, unity, and the default patch's peaks come to about -7 dBFS (until v0.4.0 it powered up at 88,
+1.96 times, with Mixer 2 Out Level at 0.5 ahead of the filters: the same level, the filters driven
+6 dB less). Filter 1, the
 second order, is on Audio In 1, and Gain 1, which has no CC, powers up at value 4, silent, so the
 fourth order is heard alone until Gain 1 brings the second order in beside it, through the same
 envelope and limiter.
@@ -830,10 +834,12 @@ mixer with one input routed is a buffer, an attenuator or an inverter. A negativ
 another input shifts a unipolar signal down.
 
 The sum, after Out Level, is held to -1.0 and +1.0. An oscillator or the noise at full level
-reaches half of that, so at Out Level's 0.5 even three of them at full level, 1.5 at most, come
-to 0.75 and nothing ordinary is cut; Out Level keeps that up to 0.67 (value 84). A narrow pulse is
+reaches half of that, so at an Out Level of 0.5 (Mixer 1's power-up) even three of them at full
+level, 1.5 at most, come to 0.75 and nothing ordinary is cut; Out Level keeps that up to 0.67
+(value 84). At Mixer 2's 1.0 two of them at full level just reach the limit and a third is cut, so
+with Osc 2 or the noise brought up to full as well, take a Level or Out Level down. A narrow pulse is
 the exception: its peak-to-peak stays one unit, but held round zero it spends most of its time
-just below zero and spikes up to 0.95. Two of them stay inside at 0.5, but with the noise at full
+just below zero and spikes up to 0.95. Two of them stay inside at an Out Level of 0.5, but with the noise at full
 level as well their spikes can meet its peaks and be cut, which an Out Level of 0.42 (value 54) or
 less, or lower levels, prevents. What the limit stops is a mixer wired back to its own input, which would otherwise double every
 sample until the number stopped being a number and took the oscillator or the filter with it.
@@ -989,7 +995,7 @@ unplugged reads its own CC or value again. A value is the 4 to 124 the editor sh
   reads them. As MIDI: CC#99 = 113, CC#98 = 38, CC#6 = 66
 - The two filters side by side, a low pass and a high pass: with "Show parameters with no CC"
   ticked, Filter 2 Gain 1 up to 64 and Gain 2 down to 4, so that it takes Mixer 2 rather than Filter
-  1, and Amp 1 Gain 1 up to 88 brings Filter 1 in beside it; then, on the Patch tab, 0 in the CC#
+  1, and Amp 1 Gain 1 up to 64 brings Filter 1 in beside it; then, on the Patch tab, 0 in the CC#
   field of Filter 1 Mode takes it off CC#39, and its value at 124 makes it the high pass, so
   that Cutoff moves a low pass and a high pass at once. As MIDI: CC#99 = 116, CC#98 = 79, CC#6 = 64,
   CC#98 = 80, CC#6 = 4, CC#98 = 87, CC#6 = 88; CC#99 = 115, CC#98 = 65, CC#6 = 0; CC#99 = 116, CC#98
