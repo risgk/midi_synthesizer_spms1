@@ -4,10 +4,11 @@ module Spms1
   # method. It puts out its low pass, high pass and band pass at once, each through a DC blocker
   # and the output clip of its own, and the first two crossfaded by Mode: process returns the
   # crossfade, and output_lp, output_hp and output_bp hold the low pass, the high pass and the
-  # band pass. The audio input drives it as it
-  # arrives, so how hard is set ahead of it: by Mixer 2 Out Level in the default patch. That is
-  # what decides how far the band pass runs into the leak, which the resonant peak reaches first:
-  # the pass band itself stays nearly clean.
+  # band pass. The two audio inputs are summed after Gain 1 and Gain 2 and pass an input
+  # clip, biased like the leak's, before the loop: how hard the loop is driven is set by the gains
+  # and, ahead of them, by Mixer 2 Out Level in the default patch. That decides how far the band
+  # pass runs into the leak, which the resonant peak reaches first, and how far the input runs into
+  # its clip; the pass band itself stays nearly clean at the default levels.
   # This implementation is not oversampled; the nonlinear behavior is kept intentionally simple.
   # Reference: https://www.discodsp.net/VAFilterDesign_2.1.2.pdf (The Art of VA Filter Design)
   # Reference: https://www.kvraudio.com/forum/viewtopic.php?t=349859 (Cheap non-linear zero-delay filters)
@@ -32,6 +33,22 @@ module Spms1
     # 1 / (4 * (limit - knee)) for the shoulder, and a further quarter because clip_output's
     # excess is doubled.
     OUTPUT_KNEE_SCALE  = 1.0 / (16.0 * (OUTPUT_LIMIT - OUTPUT_KNEE))
+
+    # What enters the loop: the inputs summed after Gain 1 and Gain 2, through a clip of the output
+    # clip's shape, shifted down by INPUT_BIAS, so that the positive half bends from INPUT_KNEE and
+    # tops out at OUTPUT_LIMIT - INPUT_BIAS and the negative half from -(OUTPUT_KNEE + INPUT_BIAS)
+    # to -(OUTPUT_LIMIT + INPUT_BIAS): clip_input(x) = clip_output(x + B) - B. The gains are linear
+    # and reach four times, so without this the loop takes up to four units from each input, and
+    # the output clip is all that bends it; with it, the gains drive the input stage as an analog
+    # filter's input amplifier is driven, and the loop takes a bounded signal. The bias gives the
+    # bent waveform even harmonics as the leak's gives the state, and a DC that follows the level;
+    # the DC blocker on the input takes that DC back out before the loop (see process). The
+    # default patch's inputs peak near 0.25 and 0.31, well under the knee, so they pass untouched.
+    INPUT_BIAS         = 0.125
+    INPUT_CEILING      = OUTPUT_CEILING - INPUT_BIAS
+    INPUT_FLOOR        = -(OUTPUT_CEILING + INPUT_BIAS)
+    INPUT_KNEE         = OUTPUT_KNEE - INPUT_BIAS
+    INPUT_KNEE_FLOOR   = -(OUTPUT_KNEE + INPUT_BIAS)
 
     # The band pass integrator leaks at LEAK_RATE * (y - soft_clip_biased(y)) on top of what it
     # integrates, y being the band pass: nothing at small levels, more and more as y bends into the
@@ -221,6 +238,7 @@ module Spms1
       @dc_blocker = 0.0
       @dc_blocker_hp = 0.0
       @dc_blocker_bp = 0.0
+      @dc_blocker_in = 0.0
       @output_lp = 0.0
       @output_hp = 0.0
       @output_bp = 0.0
@@ -352,10 +370,20 @@ module Spms1
         @dc_blocker = Dsp.flush_tiny(@dc_blocker)
         @dc_blocker_hp = Dsp.flush_tiny(@dc_blocker_hp)
         @dc_blocker_bp = Dsp.flush_tiny(@dc_blocker_bp)
+        @dc_blocker_in = Dsp.flush_tiny(@dc_blocker_in)
         @self_osc_seed = 0.0 - @self_osc_seed
       end
 
-      audio_input = audio_input_1 * @current_gain_1 + audio_input_2 * @current_gain_2
+      # The input clip, and a DC blocker on what it adds: the clip's deviation from the sum, which is
+      # exactly zero inside the knees, so the blocker's state stays at zero and an input under
+      # them enters the loop to the bit, with no high pass on it. Bent past a knee, the biased
+      # clip's deviation carries a DC along with the harmonics, and the blocker takes the DC off
+      # and lets the harmonics through, so the loop stays centered and the leak's bias and the
+      # output clips meet the same operating point whatever the drive.
+      summed = audio_input_1 * @current_gain_1 + audio_input_2 * @current_gain_2
+      clipped = clip_input(summed)
+      @dc_blocker_in += ((clipped - summed) - @dc_blocker_in) * @dc_blocker_coefficient
+      audio_input = clipped - @dc_blocker_in
 
       @g += @g_slope
       @g_plus_k += @g_plus_k_slope
@@ -534,6 +562,18 @@ module Spms1
     # OUTPUT_LIMIT. An infinity would come out as NaN where a comparison would have clamped it;
     # the filter's input is a bus slot and its states are bounded, so none arrives. Both floors
     # are stored constants rather than negated ones, for the reason the constants above give.
+    # clip_output's curve shifted by INPUT_BIAS (see the constants), on the same scale, so the
+    # shoulders have the output clip's shape; the comments on clip_output hold here too.
+    def clip_input(sample)
+      over    = sample - INPUT_CEILING
+      under   = INPUT_FLOOR - sample
+      clamped = sample - ((over + over.abs) - (under + under.abs)) * 0.5
+      above   = clamped - INPUT_KNEE
+      below   = INPUT_KNEE_FLOOR - clamped
+      excess  = (above + above.abs) - (below + below.abs)
+      clamped - (excess * excess.abs) * OUTPUT_KNEE_SCALE
+    end
+
     def clip_output(sample)
       over    = sample - OUTPUT_CEILING
       under   = OUTPUT_FLOOR - sample

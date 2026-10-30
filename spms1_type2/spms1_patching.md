@@ -63,14 +63,28 @@ at value 4, silent, and 12 dB up at value 124, which drives the filter harder. F
 is unrouted by default, so a second source, such as the noise, can be brought in with no mixer,
 its Gain 2 turned up.
 
+The sum passes an input clip before the loop: the output clip's curve, linear up to a knee and
+bending to a limit, shifted down by a bias of 0.125, so that the positive half is linear up to
+0.625 and bends to a top of 0.875, and the negative half is linear up to 0.875 and bends to a
+bottom of 1.125. Inside the knees the clip adds nothing, and the default patch stays there (its
+filters' inputs peak near 0.25 and 0.31), so it enters the loop to the bit. Driven past them, by
+Gain 1 and Gain 2 or by a hot source, the waveform bends more on one side than the other and takes
+on even harmonics along with the odd, as the leak's bias gives the state: a second harmonic 25 to
+30 dB under the fundamental from about 1.5 times unity to the top, where the third is at 10 dB. The
+bias also leaves a DC that follows the level, and a DC blocker on what the clip adds takes it back
+out, so the loop stays centered and the leak and the output clips meet the same operating point
+whatever the drive; on a signal inside the knees, the blocker holds at zero. The gains thus drive
+the input stage as an analog filter's input amplifier is driven, and what enters the loop stays
+within 1.125 however they are set, where four times two inputs could reach 8.0 before.
+
 Each filter is a zero-delay feedback state variable filter. The band pass integrator leaks, more and more as the
 band pass bends into a soft clip curve, and that is what holds the resonance down; at small levels
 the leak is next to nothing, so the pass band passes nearly clean. The loop equation, leak
 included, is solved every sample by the one-step Newton method from the linear solution, which
 lands almost on the root. The leak's rate is fixed in time, so the sound does not change with the
 sample rate. The low pass state stays linear, with a
-clamp at 16 as a guard that ordinary use never reaches. The output clip comes last. At the top of
-the resonance dial k turns negative and the loop oscillates.
+clamp at 16 as a guard that ordinary use never reaches. The input clip comes first and the output
+clip last. At the top of the resonance dial k turns negative and the loop oscillates.
 
 The filter puts out its low pass and high pass at once, as Out LP and Out HP, each through a DC
 blocker and an output clip of its own, and Out, the two crossfaded by Mode (CC#39). Each side stays at full over its own half and falls to nothing over the other.
@@ -91,7 +105,9 @@ unconnected.
 
 ```mermaid
 flowchart LR
-  IN([Input]) --> SUM((Σ))
+  IN([In 1 × Gain 1<br/>+ In 2 × Gain 2]) --> IC["Input clip<br/>linear to 0.625 / −0.875, biased"]
+  IC --> DCB["DC blocker<br/>on what the clip adds"]
+  DCB --> SUM((Σ))
   SUM -->|HP| I1["Integrator 1<br/>BP, state s1"]
   I1 -->|BP| OC
   I1 -->|BP| I2["Integrator 2<br/>LP, state s2"]
@@ -108,16 +124,20 @@ flowchart LR
   I1 -->|"−k·BP"| SUM
   I2 -->|"−LP"| SUM
   classDef nl fill:#FAECE7,stroke:#D85A30,color:#712B13
-  class SC,OC nl
+  class IC,SC,OC nl
 ```
 
-The same structure redrawn as an op-amp integrator filter. The diode pair stands for the
-nonlinear leak and the output limiter for the output clip. It is an interpretation, not a reproduction of
-an actual circuit.
+The same structure redrawn as an op-amp integrator filter. The biased diode limiter on the input
+amplifier stands for the input clip, the coupling capacitor after it for its DC blocker, the diode
+pair across C1 for the nonlinear leak and the output limiter for the output clip. It is an
+interpretation, not a reproduction of an actual circuit.
 
 ```mermaid
 flowchart LR
-  IN([Input]) --> A1["Summing amp Σ"]
+  IN([In 1, In 2]) --> IA["Input amp Σ<br/>Gain 1, Gain 2"]
+  DI["Diode limiter<br/>biased"] -.-|across the amp| IA
+  IA --> CC["Coupling<br/>capacitor"]
+  CC --> A1["Summing amp Σ"]
   A1 -->|HP| A2["Integrator ∫<br/>C1"]
   D["Diode pair"] -.-|across C1| A2
   A2 -->|BP| LIM
@@ -133,7 +153,7 @@ flowchart LR
   A2 -->|"R/k (resonance)"| A1
   A3 -->|R| A1
   classDef nl fill:#FAECE7,stroke:#D85A30,color:#712B13
-  class D,LIM nl
+  class DI,D,LIM nl
 ```
 
 ### Chorus 1

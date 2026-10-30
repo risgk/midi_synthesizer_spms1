@@ -216,6 +216,12 @@ or not, as the modules are meant to:
 | Version | Note held (avg / max) | No note (avg / max) |
 | :-- | --: | --: |
 | v0.4.0 | 208204 / 208204 cycles, 1355 us (102%) | 208556 / 208556 cycles, 1358 us (102%) |
+| filter-input-clip branch | 214327 / 214327 cycles, 1395 us (105%) | 214679 / 214679 cycles, 1398 us (105%) |
+
+The branch adds the filters' input clip and its DC blocker: about 20 us a filter, 40 us a buffer in
+the estimate, 37 us or so on the device, where the synth would take about 1293 us; with the 40 us
+PWM Audio's writes take after it, that is right at the 1333 us, so it is not for PWM Audio as it
+stands. The clip alone, without the blocker, is 4 us less.
 
 The estimate is about 8% above Debug Print on the device (v0.4.0: min 1253 us, max 1256 us, about 94%),
 so its 102% is not a buffer running over; `underruns` on the device says whether one does.

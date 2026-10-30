@@ -1,14 +1,15 @@
 # Type seeds for Spinel (spinel --rbs sig), passed by sim_spinel/build.sh.
 #
-# Spinel 2026.09.12 infers the filter's two integrator states and its DC blocker's state as
-# untyped, which turns flush_tiny, clip_output and process into boxed arithmetic on
+# Spinel 2026.09.12 infers the filter's two integrator states and its DC blockers' states as
+# untyped, which turns flush_tiny, clip_input, clip_output and process into boxed arithmetic on
 # every sample (and makes the C compile take tens of minutes). Declared Float, they compile as
-# before. A seed is trusted, not checked, so this has to stay true: all three only ever hold a
+# before. A seed is trusted, not checked, so this has to stay true: all of them only ever hold a
 # Float.
 module Spms1
   class Filter
     @s1: Float
     @s2: Float
     @dc_blocker: Float
+    @dc_blocker_in: Float
   end
 end
