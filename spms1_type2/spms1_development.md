@@ -215,7 +215,7 @@ or not, as the modules are meant to:
 
 | Version | Note held (avg / max) | No note (avg / max) |
 | :-- | --: | --: |
-| v0.4.0 | 208204 / 208204 cycles, 1355 us (102%) | 208556 / 208556 cycles, 1358 us (102%) |
+| v0.4.1 | 208204 / 208204 cycles, 1355 us (102%) | 208556 / 208556 cycles, 1358 us (102%) |
 
 The estimate is about 8% above Debug Print on the device (v0.4.0: min 1253 us, max 1256 us, about 94%),
 so its 102% is not a buffer running over; `underruns` on the device says whether one does.
