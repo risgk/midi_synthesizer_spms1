@@ -311,7 +311,7 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {573,   4},  // Mixer 2 Level 2 value
   {574,   4},  // Mixer 2 Level 3 value
   {575,   4},  // Mixer 2 Level 4 value
-  {576,  64},  // Mixer 2 Out Level value
+  {576, 124},  // Mixer 2 Out Level value
   {577,   4},  // Filter 1 Mode value
   {578, 100},  // Filter 1 Cutoff value
   {579,   4},  // Filter 1 Resonance value
@@ -335,7 +335,7 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {597,   4},  // Filter 2 Mod 2 Amt value
   {598,  76},  // Filter 2 Mod 2 Pol value
   {599,   4},  // Amp 1 Gain 1 value
-  {600,  88},  // Amp 1 Gain 2 value
+  {600,  64},  // Amp 1 Gain 2 value
   {601,   4},  // Amp 1 Mod 1/2 Mix value
   {602,  64},  // Chorus 1 Mix value
   {603,  64},  // Chorus 1 Rate value
@@ -399,7 +399,7 @@ static const uint8_t g_spms1_default_cc[][2] = {
   {24,   28},  // Filter 2 Mod 1 Amt
   {117, 124},  // Filter 2 Mod 1 Pol
   {25,    4},  // Filter 2 Mod 2 Amt
-  {15,   88},  // Amp 1 Gain 2
+  {15,   64},  // Amp 1 Gain 2
   {36,    4},  // Amp 1 Mod 1/2 Mix
   {93,   64},  // Chorus 1 Mix
   {58,   64},  // Chorus 1 Rate
