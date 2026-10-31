@@ -180,9 +180,11 @@ keeps to that as far as it can:
   load, such as two instance variables, may come out as a branch, while one choosing between two
   literals and multiplying by the result does not (as Amp's limiter picks its rate). Even that
   is not certain: the oscillators' phase wraps, `x -= (x < 1.0) ? 0.0 : 1.0`, come out as a short
-  branch over the subtraction in the current build, so a buffer varies by up to about 370 cycles
-  (2.4 us, 0.2%) with how many wraps it holds, most at mid notes; the maximum is still what the
-  estimate gives as its max. Written otherwise (`x -= x.to_i.to_f`, or with GCC's branch guesses
+  branch over the subtraction in the current build, so a buffer varies by up to about 540 cycles
+  (3.5 us, 0.3%) with where in their cycles the phases are: most at low notes, whose cycles are
+  longer than a buffer, so that a buffer can fall wholly on one side of a wrap or the other, and
+  least at high notes, whose buffers each hold many cycles; the maximum is still what the estimate
+  gives as its max (`--note`, with `--buffers 40` to see enough of them). Written otherwise (`x -= x.to_i.to_f`, or with GCC's branch guesses
   turned off) they stay the same every buffer but cost 46 us or more, so they are left as they are
 - Curves from lookup tables with linear interpolation, worked out once in the class, not library
   calls (`Math.sqrt`, `Math.exp` and the like), whose time depends on the input
