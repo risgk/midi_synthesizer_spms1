@@ -2478,27 +2478,27 @@ static sp_int sp_source_or_own(sp_int lv_source, sp_int lv_own_slot) {
   }
   return 0;
 }
-#line 16 "spms1_dsp.rb"
+#line 15 "spms1_dsp.rb"
 static inline __attribute__((always_inline)) sp_float sp_Dsp_s_flush_tiny(sp_float lv_state) {
     sp_float lv_above = 0.0;
     sp_float lv_below = 0.0;
-#line 17 "spms1_dsp.rb"
+#line 16 "spms1_dsp.rb"
   lv_above = (lv_state - 9.9999999999999995e-21);
-#line 18 "spms1_dsp.rb"
+#line 17 "spms1_dsp.rb"
   lv_below = ((0.0 - lv_state) - 9.9999999999999995e-21);
-#line 19 "spms1_dsp.rb"
+#line 18 "spms1_dsp.rb"
   return ({ sp_float _t14 = ((sp_float)(float_max(((float)(lv_above)), ((float)(0.0))))); sp_float _t15 = ((sp_float)(float_max(((float)(lv_below)), ((float)(0.0))))); (_t14 - _t15); });
   return 0.0;
 }
-#line 25 "spms1_dsp.rb"
+#line 24 "spms1_dsp.rb"
 static sp_float sp_Dsp_s_clamp(sp_float lv_value, sp_float lv_low, sp_float lv_high) {
-#line 26 "spms1_dsp.rb"
+#line 25 "spms1_dsp.rb"
   return ((sp_float)(float_min(((float)(((sp_float)(float_max(((float)(lv_value)), ((float)(lv_low))))))), ((float)(lv_high)))));
   return 0.0;
 }
-#line 39 "spms1_dsp.rb"
+#line 38 "spms1_dsp.rb"
 static sp_float sp_Dsp_s_smooth(sp_float lv_target, sp_float lv_value, sp_float lv_blend) {
-#line 40 "spms1_dsp.rb"
+#line 39 "spms1_dsp.rb"
   return (lv_value + ((lv_target - lv_value) * lv_blend));
   return 0.0;
 }
@@ -3270,46 +3270,46 @@ static inline __attribute__((always_inline)) sp_float sp_Mixer_set_out_level(sp_
   return self->iv_out_level;
   return 0.0;
 }
-#line 80 "spms1_mixer.rb"
+#line 81 "spms1_mixer.rb"
 static sp_float sp_Mixer_process(sp_Mixer *self, sp_bool lv_control_tick, sp_float lv_input_1, sp_float lv_input_2, sp_float lv_input_3, sp_float lv_input_4) {
     sp_float lv_sum = 0.0;
     sp_float lv_output = 0.0;
-#line 81 "spms1_mixer.rb"
-  if (lv_control_tick) {
 #line 82 "spms1_mixer.rb"
-    self->iv_stage_1_1 = sp_Dsp_s_smooth(self->iv_level_1, self->iv_stage_1_1, self->iv_smoothing_target_blend);
+  if (lv_control_tick) {
 #line 83 "spms1_mixer.rb"
-    self->iv_current_1 = sp_Dsp_s_smooth(self->iv_stage_1_1, self->iv_current_1, self->iv_smoothing_target_blend);
+    self->iv_stage_1_1 = sp_Dsp_s_smooth(self->iv_level_1, self->iv_stage_1_1, self->iv_smoothing_target_blend);
 #line 84 "spms1_mixer.rb"
-    self->iv_stage_1_2 = sp_Dsp_s_smooth(self->iv_level_2, self->iv_stage_1_2, self->iv_smoothing_target_blend);
+    self->iv_current_1 = sp_Dsp_s_smooth(self->iv_stage_1_1, self->iv_current_1, self->iv_smoothing_target_blend);
 #line 85 "spms1_mixer.rb"
-    self->iv_current_2 = sp_Dsp_s_smooth(self->iv_stage_1_2, self->iv_current_2, self->iv_smoothing_target_blend);
+    self->iv_stage_1_2 = sp_Dsp_s_smooth(self->iv_level_2, self->iv_stage_1_2, self->iv_smoothing_target_blend);
 #line 86 "spms1_mixer.rb"
-    self->iv_stage_1_3 = sp_Dsp_s_smooth(self->iv_level_3, self->iv_stage_1_3, self->iv_smoothing_target_blend);
+    self->iv_current_2 = sp_Dsp_s_smooth(self->iv_stage_1_2, self->iv_current_2, self->iv_smoothing_target_blend);
 #line 87 "spms1_mixer.rb"
-    self->iv_current_3 = sp_Dsp_s_smooth(self->iv_stage_1_3, self->iv_current_3, self->iv_smoothing_target_blend);
+    self->iv_stage_1_3 = sp_Dsp_s_smooth(self->iv_level_3, self->iv_stage_1_3, self->iv_smoothing_target_blend);
 #line 88 "spms1_mixer.rb"
-    self->iv_stage_1_4 = sp_Dsp_s_smooth(self->iv_level_4, self->iv_stage_1_4, self->iv_smoothing_target_blend);
+    self->iv_current_3 = sp_Dsp_s_smooth(self->iv_stage_1_3, self->iv_current_3, self->iv_smoothing_target_blend);
 #line 89 "spms1_mixer.rb"
-    self->iv_current_4 = sp_Dsp_s_smooth(self->iv_stage_1_4, self->iv_current_4, self->iv_smoothing_target_blend);
+    self->iv_stage_1_4 = sp_Dsp_s_smooth(self->iv_level_4, self->iv_stage_1_4, self->iv_smoothing_target_blend);
 #line 90 "spms1_mixer.rb"
-    self->iv_stage_1_out_level = sp_Dsp_s_smooth(self->iv_out_level, self->iv_stage_1_out_level, self->iv_smoothing_target_blend);
+    self->iv_current_4 = sp_Dsp_s_smooth(self->iv_stage_1_4, self->iv_current_4, self->iv_smoothing_target_blend);
 #line 91 "spms1_mixer.rb"
+    self->iv_stage_1_out_level = sp_Dsp_s_smooth(self->iv_out_level, self->iv_stage_1_out_level, self->iv_smoothing_target_blend);
+#line 92 "spms1_mixer.rb"
     self->iv_current_out_level = sp_Dsp_s_smooth(self->iv_stage_1_out_level, self->iv_current_out_level, self->iv_smoothing_target_blend);
   }
-#line 94 "spms1_mixer.rb"
-  lv_sum = (((((lv_input_1 * self->iv_current_1) + (lv_input_2 * self->iv_current_2)) + (lv_input_3 * self->iv_current_3)) + (lv_input_4 * self->iv_current_4)) * self->iv_current_out_level);
 #line 95 "spms1_mixer.rb"
-  lv_output = sp_Dsp_s_clamp(lv_sum, -1.0, 1.0);
+  lv_sum = (((((lv_input_1 * self->iv_current_1) + (lv_input_2 * self->iv_current_2)) + (lv_input_3 * self->iv_current_3)) + (lv_input_4 * self->iv_current_4)) * self->iv_current_out_level);
 #line 96 "spms1_mixer.rb"
-  self->iv_output = lv_output;
+  lv_output = sp_Dsp_s_clamp(lv_sum, -1.0, 1.0);
 #line 97 "spms1_mixer.rb"
+  self->iv_output = lv_output;
+#line 98 "spms1_mixer.rb"
   return lv_output;
   return 0.0;
 }
-#line 101 "spms1_mixer.rb"
-static inline __attribute__((always_inline)) sp_float sp_Mixer_output_inverted(sp_Mixer *self) {
 #line 102 "spms1_mixer.rb"
+static inline __attribute__((always_inline)) sp_float sp_Mixer_output_inverted(sp_Mixer *self) {
+#line 103 "spms1_mixer.rb"
   return (-self->iv_output);
   return 0.0;
 }

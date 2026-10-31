@@ -16,7 +16,8 @@
 # order's writes, Pitch Bend) and the note the stubs give, as spms1_midi_state.h handles them; Note
 # On and Off move the note from --note and --gate. --per-buffer prints each measured buffer.
 # --lines N prints the N source lines the measured buffers spend the most cycles in, by the line
-# table of the debug info: the .rb lines Spinel's #line directives name, or the C runtime's.
+# table of the debug info: the .rb lines Spinel's #line directives name, or the C runtime's, a line
+# of a runtime header or of Dsp told by the .rb line it is inlined at.
 #
 # The instruction count is exact for the code as built; the cycles are an estimate, which a
 # measurement on the device can calibrate. Needs: pip install unicorn capstone pyelftools numpy

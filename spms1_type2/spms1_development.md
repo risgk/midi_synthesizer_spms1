@@ -183,8 +183,8 @@ keeps to that as far as it can:
   load, such as two instance variables, may come out as a branch, while one choosing between two
   literals and multiplying by the result does not (as Amp's limiter picks its rate). Even that
   is not certain: the oscillators' phase wraps, `x -= (x < 1.0) ? 0.0 : 1.0`, come out as a short
-  branch over the subtraction in the current build, so a buffer varies by up to about 540 cycles
-  (3.5 us, 0.3%) with where in their cycles the phases are: most at low notes, whose cycles are
+  branch over the subtraction in the current build, so a buffer varies by up to about 510 cycles
+  (3.3 us, 0.3%) with where in their cycles the phases are: most at low notes, whose cycles are
   longer than a buffer, so that a buffer can fall wholly on one side of a wrap or the other, and
   least at high notes, whose buffers each hold many cycles; the maximum is still what the estimate
   gives as its max (`--note`, with `--buffers 40` to see enough of them). Written otherwise (`x -= x.to_i.to_f`, or with GCC's branch guesses
@@ -228,9 +228,11 @@ measures on the device -- with the default patch and a note held.
   more buffers (`--buffers 60`) they show how far a buffer moves with the values: the files in
   "sim_load/scenarios" hold Mixer 2 at its limit, the limiter off, the modulations at the top, a
   self-oscillating filter, the delay at its shortest, and a note every 10 ms with glide and bend
-  (`--gate 0`). As measured at the commit that added them, the last moves a buffer the most, by
-  about 700 cycles (207599 to 208300; v0.4.1, 208145 to 208676), the envelopes and the glide
-  changing state; the others stay within the default patch's 207366 to 207969
+  (`--gate 0`). Over 60 buffers, as measured on the way to v0.4.2 (with the clamps as a max and a
+  min), every one of them stays within 177503 to 178016 cycles, the range of a note held at a low
+  note: the self-oscillating filter, the limiter off and Mixer 2 at its limit take exactly the
+  cycles of the default patch (177567 to 177936), nothing in them branching on a value, and what
+  moves a buffer at all is the oscillators' phase wraps (see "Writing a Module")
 - Needs Python 3 and `pip install unicorn capstone pyelftools numpy`, installed by you and not shipped
   here: Unicorn's Python binding is under the BSD license and its emulator under the GPLv2, Capstone
   and NumPy under the BSD license, and pyelftools is in the public domain

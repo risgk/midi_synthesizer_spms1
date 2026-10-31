@@ -6,10 +6,10 @@ revised.
 
 - v0.4.2 (2026-??-??):
     - Filters: Drive, Filter 1's and Filter 2's, on CC#31 and among the favorites (NRPN entries 101
-      and 102, after Amp 1 Limiter Sw so that no entry before them moves): the leak's ceiling down by x1 at value 4, where
-      they power up and the filters are as they were, to x16 at value 124, so that the resonance
-      saturates sooner while the level and the output clip stay. A patch saved by v0.4.1 loads the
-      default patch, as the entries have changed
+      and 102, after Amp 1 Limiter Sw so that no entry before them moves): the leak's ceiling
+      brought down from x1 at value 4, where they power up and the filters are as they were, to
+      1/16 at value 124, so that the resonance saturates sooner while the level and the output clip
+      stay. A patch saved by v0.4.1 loads the default patch, as the entries have changed
     - Lighter: about 200 us less of the 1333 us of a buffer (estimated), from the clamps (a max
       and a min, one instruction each), the parameters' reads and Float#to_i
 

@@ -8,11 +8,10 @@ module Spms1
     # value toward zero by 1e-20, which rounds away at any audible level. Built from the larger of
     # each side's distance past 1e-20 and zero, rather than as (s + c) - c: -ffast-math may fold
     # that one to s, while this is a dead zone in exact arithmetic, so any rewrite it allows still
-    # is one. What comes
-    # out is zero or at least 8e-28, the spacing of floats near 1e-20: never a denormal. Rewritten
-    # under -ffast-math it rounds at that spacing and may leave a remnant of that size instead of
-    # zero, still far above the denormals. A literal, as the vendored Spinel emits a Float constant
-    # as a runtime global rather than a compile-time literal.
+    # is one. What comes out is zero or at least 8e-28, the spacing of floats near 1e-20: never a
+    # denormal. Rewritten under -ffast-math it rounds at that spacing and may leave a remnant of
+    # that size instead of zero, still far above the denormals. A literal, as the vendored Spinel
+    # emits a Float constant as a runtime global rather than a compile-time literal.
     def self.flush_tiny(state)
       above = state - 1e-20
       below = (0.0 - state) - 1e-20

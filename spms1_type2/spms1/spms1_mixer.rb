@@ -68,9 +68,10 @@ module Spms1
 
     # The inputs are taken as they are; only the sum is held to a range. A mixer is one
     # of the places on the bus where a value can come out bigger than what went in, and like the
-    # others (Amp Gain, Pitch 1 Stretch) it clamps what it puts out -- so this is what keeps every slot finite. That
-    # matters beyond tidiness: a NaN would pass through the modules that read it, and the only way to make
-    # one here is to overflow to infinity first, which this makes impossible.
+    # others (Amp Gain, Pitch 1 Stretch) it clamps what it puts out -- so this is what keeps every
+    # slot finite. That matters beyond tidiness: a NaN would pass through the modules that read it,
+    # and the only way to make one here is to overflow to infinity first, which this makes
+    # impossible.
     #
     # One unit is the sum of two full-scale bipolar signals, as much as any destination can use; an
     # audio destination takes up to a unit too, so two oscillators at full level want Out Level at
