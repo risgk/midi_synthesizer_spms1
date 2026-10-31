@@ -216,6 +216,15 @@ measures on the device -- with the default patch and a note held.
 - `--profile` lists the functions the cycles go to; `--modules` the load of each module (below), from
   the debug info of the ELF and the run; `--elf FILE` estimates an ELF built elsewhere, from another
   commit say, so two versions can be compared; `--help` shows the rest
+- `--patch FILE` and `--score FILE` play what sim_render plays: a patch as MIDI bytes in hex, applied
+  before the first buffer, and MIDI at times in seconds, each applied before the buffer it falls in,
+  written into the tables the sketch's MIDI handlers fill; `--per-buffer` prints each buffer. With
+  more buffers (`--buffers 60`) they show how far a buffer moves with the values: the files in
+  "sim_load/scenarios" hold Mixer 2 at its limit, the limiter off, the modulations at the top, a
+  self-oscillating filter, the delay at its shortest, and a note every 10 ms with glide and bend
+  (`--gate 0`). As measured at the commit that added them, the last moves a buffer the most, by
+  about 700 cycles (207599 to 208300; v0.4.1, 208145 to 208676), the envelopes and the glide
+  changing state; the others stay within the default patch's 207366 to 207969
 - Needs Python 3 and `pip install unicorn capstone pyelftools numpy`, installed by you and not shipped
   here: Unicorn's Python binding is under the BSD license and its emulator under the GPLv2, Capstone
   and NumPy under the BSD license, and pyelftools is in the public domain

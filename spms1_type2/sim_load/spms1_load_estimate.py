@@ -6,7 +6,15 @@
 # by a first-order Cortex-M33 cost model (see cost below).
 #
 #   python3 sim_load/spms1_load_estimate.py ELF [--buffers N] [--skip N] [--note N] [--gate 0|1]
+#                                           [--patch FILE] [--score FILE] [--per-buffer]
 #                                           [--mhz F] [--profile] [--modules]
+#
+# --patch and --score take the files sim_render takes (see sim_render/examples): the patch as MIDI
+# bytes in hex, applied before the first buffer, and the score, MIDI bytes in hex at a time in
+# seconds, each applied before the buffer that time falls in (48 kHz, 64 samples a buffer). They
+# reach the tables the sketch's MIDI handlers fill (the CC values, the NRPN table and the run
+# order's writes, Pitch Bend) and the note the stubs give, as spms1_midi_state.h handles them; Note
+# On and Off move the note from --note and --gate. --per-buffer prints each measured buffer.
 #
 # The instruction count is exact for the code as built; the cycles are an estimate, which a
 # measurement on the device can calibrate. Needs: pip install unicorn capstone pyelftools numpy
@@ -23,6 +31,9 @@ ap.add_argument('--buffers', type=int, default=12, help='buffers to run in all')
 ap.add_argument('--skip', type=int, default=4, help='buffers left out of the statistics (warm-up)')
 ap.add_argument('--note', type=int, default=69, help='the note held (MIDI note number)')
 ap.add_argument('--gate', type=int, default=1, help='1 to hold the note, 0 for none')
+ap.add_argument('--patch', help='a patch, MIDI bytes in hex (as sim_render --patch), applied before the first buffer')
+ap.add_argument('--score', help='MIDI bytes in hex at times in seconds (as sim_render --score), each before its buffer')
+ap.add_argument('--per-buffer', action='store_true', help='print the instructions and cycles of each measured buffer')
 ap.add_argument('--mhz', type=float, default=153.6, help='system clock, the sketch\'s 153.6 MHz by default')
 ap.add_argument('--profile', action='store_true', help='print the functions the measured buffers spend the most cycles in')
 ap.add_argument('--modules', action='store_true', help='print the load of each module, also with its share of the common part (from the debug info)')
@@ -31,6 +42,7 @@ args = ap.parse_args()
 f = open(args.elf, 'rb')
 elf = ELFFile(f)
 syms = {}
+objs = {}
 symlist = []
 for sec in elf.iter_sections():
     if sec.name == '.symtab':
@@ -38,6 +50,8 @@ for sec in elf.iter_sections():
             if s['st_info']['type'] == 'STT_FUNC' and s['st_value']:
                 syms[s.name] = s['st_value'] & ~1
                 symlist.append((s['st_value'] & ~1, s['st_size'], s.name))
+            elif s['st_info']['type'] == 'STT_OBJECT' and s['st_value']:
+                objs[s.name] = s['st_value']
 symlist.sort()
 symaddrs = [a for a, _, _ in symlist]
 def sym_of(addr):
@@ -119,7 +133,81 @@ def ret(uc, value=None):
     lr = uc.reg_read(UC_ARM_REG_LR)
     uc.reg_write(UC_ARM_REG_PC, lr | 1)
 
+# --patch and --score: the MIDI the sketch's handlers would have taken (spms1_midi_state.h), written
+# into its tables in the emulated RAM. The note is the stubs' (below), from --note and --gate.
+SAMPLE_RATE, BUFFER_WORDS = 48000, 64
+NRPN_SIZE, NRPN_MSB_BASE, NRPN_SYSTEM_MSB, RUN_ORDER_SIZE, NO_NOTE = 640, 112, 117, 32, 0xFF
+def hex_bytes(text):
+    return [int(b, 16) for b in text.split(';', 1)[0].replace(',', ' ').split()]
+events = []  # (buffer, order, bytes)
+if args.patch:
+    events += [(0, i, hex_bytes(line)) for i, line in enumerate(open(args.patch))]
+if args.score:
+    for i, line in enumerate(open(args.score)):
+        line = line.split(';', 1)[0].strip()
+        if line:
+            t, _, rest = line.partition(' ')
+            events.append((int(float(t) * SAMPLE_RATE) // BUFFER_WORDS, len(events) + i, hex_bytes(rest)))
+events.sort()
+midi = {'status': 0, 'data': [], 'msb': [0] * 16, 'lsb': [0] * 16, 'selected': [0] * 16,
+        'note': [args.note] * 16, 'on': [args.gate] * 16, 'prev': [NO_NOTE] * 16}
+def mem_u8(name, index, value): mu.mem_write(objs[name] + index, bytes([value & 0xff]))
+def mem_read_u32(name, index): return struct.unpack('<I', bytes(mu.mem_read(objs[name] + 4 * index, 4)))[0]
+def mem_u32(name, index, value): mu.mem_write(objs[name] + 4 * index, struct.pack('<I', value & 0xffffffff))
+def set_nrpn(ch, index, value):
+    if 0 <= index < NRPN_SIZE:
+        mem_u8('g_midi_nrpn_values', ch * NRPN_SIZE + index, value)
+        if index < RUN_ORDER_SIZE:
+            writes = mem_read_u32('g_midi_run_order_writes', ch) + 1
+            mem_u32('g_midi_run_order_writes', ch, writes)
+            mem_u32('g_midi_run_order_written', ch * RUN_ORDER_SIZE + index, writes)
+def note_off(ch, pitch):
+    if pitch == midi['note'][ch]:
+        if midi['prev'][ch] != NO_NOTE:
+            midi['note'][ch], midi['prev'][ch] = midi['prev'][ch], NO_NOTE
+        else:
+            midi['on'][ch] = 0
+    elif pitch == midi['prev'][ch]:
+        midi['prev'][ch] = NO_NOTE
+def message(status, d1, d2):
+    ch, kind = status & 0x0F, status & 0xF0
+    if kind == 0x80 or (kind == 0x90 and d2 == 0):
+        note_off(ch, d1)
+    elif kind == 0x90:
+        if not midi['on'][ch]:
+            midi['prev'][ch] = NO_NOTE
+        elif d1 != midi['note'][ch]:
+            midi['prev'][ch] = midi['note'][ch]
+        midi['note'][ch], midi['on'][ch] = d1, 1
+    elif kind == 0xB0 and d1 < 120:
+        mem_u8('g_midi_cc_values', ch * 128 + d1, d2)
+        if d1 == 99:
+            midi['msb'][ch], midi['selected'][ch] = d2, 1
+        elif d1 == 98:
+            midi['lsb'][ch], midi['selected'][ch] = d2, 1
+        elif d1 in (100, 101):
+            midi['selected'][ch] = 0
+        elif d1 == 6 and midi['selected'][ch] and NRPN_MSB_BASE <= midi['msb'][ch] != NRPN_SYSTEM_MSB:
+            set_nrpn(ch, ((midi['msb'][ch] - NRPN_MSB_BASE) << 7) | midi['lsb'][ch], d2)
+    elif kind == 0xE0:
+        mu.mem_write(objs['g_midi_pitch_bend'] + 2 * ch, struct.pack('<h', ((d2 << 7) | d1) - 8192))
+def midi_byte(b):
+    if b >= 0xF8:
+        return
+    if b >= 0x80:
+        midi['status'], midi['data'] = (b if b < 0xF0 else 0), []
+        return
+    if midi['status']:
+        midi['data'].append(b)
+        length = 1 if (midi['status'] & 0xE0) == 0xC0 else 2
+        if len(midi['data']) == length:
+            message(midi['status'], midi['data'][0], midi['data'][1] if length == 2 else 0)
+            midi['data'] = []
+
 def stub_start_debug(uc):
+    while events and events[0][0] <= len(state['buffers']):
+        for b in events.pop(0)[2]:
+            midi_byte(b)
     state['measuring'] = True
     state['n'] = 0
     state['cyc'] = 0
@@ -134,8 +222,8 @@ def stub_stop_debug(uc):
 def stub_void(uc):
     ret(uc)
 
-def stub_note_pitch(uc): ret(uc, args.note)
-def stub_note_state(uc): ret(uc, args.gate)
+def stub_note_pitch(uc): ret(uc, midi['note'][regs(uc, 1)[0] & 15])
+def stub_note_state(uc): ret(uc, midi['on'][regs(uc, 1)[0] & 15])
 
 for name, fn in [('start_debug_measure', stub_start_debug), ('stop_debug_measure', stub_stop_debug),
                  ('write_to_audio_buffer', stub_void), ('start_audio', stub_void), ('stop_audio', stub_void),
@@ -386,6 +474,9 @@ print('estimated cycles per buffer: min %d, avg %.0f, max %d' % (min(cs), avg_c,
 print('estimated time per buffer at %.1f MHz: avg %.0f us, max %.0f us, of %.0f us (%.0f%% / %.0f%%)' % (
     args.mhz, avg_c / args.mhz, max(cs) / args.mhz, budget_us, 100 * avg_c / args.mhz / budget_us, 100 * max(cs) / args.mhz / budget_us))
 print('per sample: %.0f instructions, %.0f cycles' % (sum(ns) / len(ns) / 64, avg_c / 64))
+if args.per_buffer:
+    for i, (n, c, _) in enumerate(bufs):
+        print('  buffer %d: %d instructions, %d cycles, %.0f us' % (args.skip + i, n, c, c / args.mhz))
 if helper_calls:
     print('library helpers called inside measured buffers (counted at a rough cost):')
     for k, v in sorted(helper_calls.items()):
