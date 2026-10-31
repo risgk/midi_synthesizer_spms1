@@ -1,5 +1,5 @@
-# Writes what the sketch reads from spms1_patch.yaml: spms1/spms1_patch.rb and
-# spms1/spms1_default_patch.h whole, the parts of spms1_editor.html, spms1_patching.md,
+# Writes what the sketch reads from spms1_patch.yaml: spms1/spms1_patch.rb,
+# spms1/spms1_default_patch.h and spms1/spms1_parameters.h whole, the parts of spms1_editor.html, spms1_patching.md,
 # spms1_patching.ja.md and spms1/spms1_main.rb between their "patch_gen" markers.
 #
 #   ruby patch_gen/spms1_patch_gen.rb [--check | --renumber]
@@ -498,10 +498,14 @@ def main_sources
     next unless i['module'] && !i['gate']
     out << "  #{name} += ((#{name} - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - #{name})) >= 0 ? SMOOTHED_SLOT_OFFSET : 0\n"
   end
-  s.params.each do |c|
-    out << "  source_#{local_name(c)} = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_#{s.full_key(c)}), SLOT_#{s.full_key(c)})\n"
-  end
   out.join
+end
+
+def param_sources
+  s = SPEC
+  s.params.map do |c|
+    "  source_#{local_name(c)} = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_#{s.full_key(c)}), SLOT_#{s.full_key(c)})\n"
+  end.join
 end
 
 def converter(bipolar) = bipolar ? 'cc_to_bipolar' : 'cc_to_unipolar'
@@ -600,10 +604,45 @@ def main_dispatch
   out.join
 end
 
+# The instances that spms1_apply_parameters takes, in the order of `modules`.
+def apply_instances = SPEC.modules.map { |m| m['key'].downcase }
+
+# spms1_apply_parameters: the parameters' sources, the control slots and the setters, once per
+# buffer, in a function of its own (see spms1_main.rb and spms1_parameters.h).
+def main_parameters
+  body = param_sources + main_controls + main_setters
+  "def spms1_apply_parameters(#{(['signals'] + apply_instances).join(', ')})\n" + body + "  0.0\nend\n"
+end
+
+def main_apply
+  "  spms1_apply_parameters(#{(['signals'] + apply_instances).join(', ')})\n"
+end
+
+# spms1_parameters.h: the declaration of spms1_apply_parameters as Spinel emits it, with what keeps
+# it out of Spms1_main. Spinel names a class's struct sp_<class>_s and its typedef sp_<class>, and
+# the function sp_ and its Ruby name, with one parameter per argument and sp_float for the 0.0 it
+# returns; a declaration that did not match the one Spinel writes would stop the build.
+def parameters_h
+  s = SPEC
+  classes = s.modules.map { |m| m.fetch('class') }.uniq
+  params = ['struct sp_SignalBus_s *'] + s.modules.map { |m| "struct sp_#{m.fetch('class')}_s *" }
+  out = +''
+  out << "/* Written by patch_gen/spms1_patch_gen.rb from spms1_patch.yaml: do not edit. The declaration of\n"
+  out << "   spms1_apply_parameters (spms1_main.rb), ahead of the one in spms1_main.c, so that it stays a\n"
+  out << "   function of its own rather than flattened into Spms1_main, in RAM as Spms1_main is, and\n"
+  out << "   flattened itself. spinel_rt_mcu_cold.h includes this, at the end of spinel_rt.h. */\n"
+  out << "#ifndef SPMS1_PARAMETERS_H\n#define SPMS1_PARAMETERS_H\n\n"
+  (['SignalBus'] + classes).each { |c| out << "struct sp_#{c}_s;\n" }
+  out << "static sp_float sp_spms1_apply_parameters(#{params.join(', ')})\n"
+  out << "  __attribute__((noinline, flatten, section(\".time_critical\")));\n\n"
+  out << "#endif /* SPMS1_PARAMETERS_H */\n"
+  out
+end
+
 def main_rb(content)
   check_wiring
-  { 'requires' => main_requires, 'instances' => main_instances, 'sources' => main_sources, 'controls' => main_controls,
-    'setters' => main_setters, 'smoothing' => main_smoothing, 'dispatch' => main_dispatch }.each do |name, text|
+  { 'requires' => main_requires, 'instances' => main_instances, 'parameters' => main_parameters, 'sources' => main_sources,
+    'apply' => main_apply, 'smoothing' => main_smoothing, 'dispatch' => main_dispatch }.each do |name, text|
     content = replace_block(content, 'spms1/spms1_main.rb', name, text)
   end
   content
@@ -622,6 +661,7 @@ end
 outputs = {}
 outputs['spms1/spms1_patch.rb'] = patch_rb
 outputs['spms1/spms1_default_patch.h'] = default_patch_h
+outputs['spms1/spms1_parameters.h'] = parameters_h
 outputs['spms1/spms1_main.rb'] = main_rb(File.read(File.join(DIR, 'spms1/spms1_main.rb')))
 editor = File.read(File.join(DIR, 'spms1_editor.html'))
 outputs['spms1_editor.html'] = replace_block(editor, 'spms1_editor.html', 'spec', editor_js)

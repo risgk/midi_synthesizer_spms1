@@ -205,6 +205,8 @@ SLOT_DELAY_1_MIX            = 221
 SLOT_DELAY_1_TIME           = 222
 SLOT_DELAY_1_FEEDBACK       = 223
 SLOT_AMP_1_LIMITER_SW       = 228
+SLOT_FILTER_1_DRIVE         = 229
+SLOT_FILTER_2_DRIVE         = 230
 
 # The controller slots, the mod wheel's and the general controls', and where a smoothed copy of each
 # sits, off the bus at its slot + SMOOTHED_SLOT_OFFSET, with each controller's first smoothing
@@ -370,6 +372,8 @@ NRPN_SOURCE_DELAY_1_MIX            = 349
 NRPN_SOURCE_DELAY_1_TIME           = 350
 NRPN_SOURCE_DELAY_1_FEEDBACK       = 351
 NRPN_SOURCE_AMP_1_LIMITER_SW       = 356
+NRPN_SOURCE_FILTER_1_DRIVE         = 357
+NRPN_SOURCE_FILTER_2_DRIVE         = 358
 
 # A CC number of 0 means the control has no CC: a parameter's control slot then holds its NRPN_VALUE_*
 # below, whatever CC it had before, so a patch sets it alone, as General 1 and 2 do theirs, and
@@ -475,6 +479,8 @@ NRPN_CC_BREATH                 = 481
 NRPN_CC_GENERAL_1              = 482
 NRPN_CC_GENERAL_2              = 483
 NRPN_CC_AMP_1_LIMITER_SW       = 484
+NRPN_CC_FILTER_1_DRIVE         = 485
+NRPN_CC_FILTER_2_DRIVE         = 486
 
 # The value of each control slot while it has no CC, as a CC value, but the Mod Wheel's.
 NRPN_VALUE_PITCH_1_GLIDE          = 512
@@ -576,6 +582,8 @@ NRPN_VALUE_DELAY_1_FEEDBACK       = 607
 NRPN_VALUE_GENERAL_1              = 610
 NRPN_VALUE_GENERAL_2              = 611
 NRPN_VALUE_AMP_1_LIMITER_SW       = 612
+NRPN_VALUE_FILTER_1_DRIVE         = 613
+NRPN_VALUE_FILTER_2_DRIVE         = 614
 
 # The constants of the bus, which nothing else ever writes. A slot not written here holds 0.0.
 def spms1_fill_constant_signals(signals)
@@ -747,6 +755,8 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_DELAY_1_TIME          , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_DELAY_1_FEEDBACK      , SIGNAL_OWN)
   C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_AMP_1_LIMITER_SW      , SIGNAL_OWN)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_1_DRIVE        , SIGNAL_OWN)
+  C.set_midi_nrpn_value(midi_ch, NRPN_SOURCE_FILTER_2_DRIVE        , SIGNAL_OWN)
 
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_PITCH_1_GLIDE         , 5)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_PITCH_1_OUT_1_GLIDE_SW, 34)
@@ -809,6 +819,8 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_BREATH                , 2)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_GENERAL_1             , 16)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_GENERAL_2             , 17)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_DRIVE        , 31)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_2_DRIVE        , 31)
 
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_PITCH_1_GLIDE         , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_PITCH_1_OUT_1_GLIDE_SW, 124)
@@ -909,6 +921,8 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_GENERAL_1             , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_GENERAL_2             , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_AMP_1_LIMITER_SW      , 124)
+  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_DRIVE        , 4)
+  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_2_DRIVE        , 4)
 
   C.set_midi_cc_value(midi_ch, 5  , 4  ) # Pitch 1 Glide
   C.set_midi_cc_value(midi_ch, 34 , 124) # Pitch 1 Out 1 Glide Sw
@@ -971,4 +985,6 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 2  , 4  ) # Breath
   C.set_midi_cc_value(midi_ch, 16 , 4  ) # General 1
   C.set_midi_cc_value(midi_ch, 17 , 4  ) # General 2
+  C.set_midi_cc_value(midi_ch, 31 , 4  ) # Filter 1 Drive
+  C.set_midi_cc_value(midi_ch, 31 , 4  ) # Filter 2 Drive
 end

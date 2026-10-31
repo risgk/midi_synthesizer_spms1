@@ -68,6 +68,20 @@ module Spms1
     LEAK_CLIP_OFFSET     = SOFT_CLIP_BIAS_GAIN * SOFT_CLIP_BIAS_OUTPUT
     LEAK_SLOPE_OFFSET    = 1.0 - SOFT_CLIP_BIAS_GAIN
     LEAK_SLOPE_SCALE     = 3.0 * LEAK_CLIP_GAIN_SCALE
+    # Drive brings the leak's ceiling and its bias down by its gain D, 2^(4 * drive), 1.0 to 16.0
+    # (6 dB every quarter of the dial): the same as driving the loop D times harder and taking what
+    # leaves it D times down ahead of the output clip, as the curve is self-similar and the bias
+    # comes down with the ceiling. So the leak bends sooner, at the resonance first, while the level
+    # stays and the output clip stays where it is. With the ceiling C / D and the bias B / D, the
+    # make-up gain G is the same whatever D; the leak's offset comes down by D, and its gain and
+    # slope scales, which go as 1 / C^2, go up by D^2. smooth_parameters works these out from the
+    # smoothed Drive every 16 samples, whatever it is, so the load is the same; process reads them
+    # where it read the constants. The gain is read from DRIVE_TABLE, 2^(i / 8), between entries.
+    DRIVE_TABLE = Array.new(34, 0.0)
+    for i in 0...33
+      DRIVE_TABLE[i] = 2.0 ** (i.to_f * (1.0 / 8.0))
+    end
+    DRIVE_TABLE[33] = DRIVE_TABLE[32]
     # One-pole high pass on the output at f_s * coefficient / (2 * pi), 7.5 Hz at 48 kHz; initialize
     # scales the coefficient with the sample rate to hold that frequency.
     DC_BLOCKER_COEFFICIENT_BASE = 1.0 / 1024.0
@@ -234,8 +248,22 @@ module Spms1
       @gain_2 = 1.0
       @stage_1_gain_2 = 0.0
       @current_gain_2 = 0.0
+      @drive = 0.0
+      @stage_1_drive = 0.0
+      @current_drive = 0.0
+      @leak_bias = SOFT_CLIP_BIAS
+      @leak_ceiling = SOFT_CLIP_CEILING
+      @leak_floor = SOFT_CLIP_FLOOR
+      @leak_gain_scale = LEAK_CLIP_GAIN_SCALE
+      @leak_offset = LEAK_CLIP_OFFSET
+      @leak_slope_scale = LEAK_SLOPE_SCALE
 
       update_coefficients
+    end
+
+    # Drive: unipolar, [0.0, 1.0], the leak's ceiling down by 2^(4 * drive) (see DRIVE_TABLE).
+    def set_drive(drive)
+      @drive = (drive < 0.0) ? 0.0 : ((drive > 1.0) ? 1.0 : drive)
     end
 
     # Gain 1 and Gain 2, of Audio In 1 and Audio In 2, which are summed into the filter: each
@@ -338,6 +366,21 @@ module Spms1
       @current_modulation_2_depth = Dsp.smooth(@stage_1_modulation_2_depth, @current_modulation_2_depth, @smoothing_16_blend)
       @stage_1_pitch_depth = Dsp.smooth(@pitch_depth, @stage_1_pitch_depth, @smoothing_16_blend)
       @current_pitch_depth = Dsp.smooth(@stage_1_pitch_depth, @current_pitch_depth, @smoothing_16_blend)
+      @stage_1_drive = Dsp.smooth(@drive, @stage_1_drive, @smoothing_16_blend)
+      @current_drive = Dsp.smooth(@stage_1_drive, @current_drive, @smoothing_16_blend)
+      # The leak's ceiling, bias, offset and scales at the Drive's gain (see DRIVE_TABLE), every
+      # time, so that the load does not depend on the Drive.
+      position = @current_drive * 32.0
+      index = position.to_i
+      drive_gain = DRIVE_TABLE[index] + (position - index.to_f) * (DRIVE_TABLE[index + 1] - DRIVE_TABLE[index])
+      one_over_drive = 1.0 / drive_gain
+      drive_squared = drive_gain * drive_gain
+      @leak_bias = SOFT_CLIP_BIAS * one_over_drive
+      @leak_ceiling = SOFT_CLIP_CEILING * one_over_drive
+      @leak_floor = SOFT_CLIP_FLOOR * one_over_drive
+      @leak_offset = LEAK_CLIP_OFFSET * one_over_drive
+      @leak_gain_scale = LEAK_CLIP_GAIN_SCALE * drive_squared
+      @leak_slope_scale = LEAK_SLOPE_SCALE * drive_squared
     end
 
     def process(control_tick, audio_input_1 = 0.0, audio_input_2 = 0.0, pitch_input = 0.0, modulation_1_input = 0.0, modulation_2_input = 0.0)
@@ -387,13 +430,13 @@ module Spms1
       b =@s1 + @g * (audio_input - s2)
       a0 = 1.0 + @g * @g_plus_k
       guess = b * @one_over_a0
-      shifted = guess + SOFT_CLIP_BIAS
-      over    = shifted - SOFT_CLIP_CEILING
-      under   = SOFT_CLIP_FLOOR - shifted
+      shifted = guess + @leak_bias
+      over    = shifted - @leak_ceiling
+      under   = @leak_floor - shifted
       clamped = shifted - ((over + over.abs) - (under + under.abs)) * 0.5
       clamped_squared = clamped * clamped
-      leak = guess - clamped * (SOFT_CLIP_BIAS_GAIN - clamped_squared * LEAK_CLIP_GAIN_SCALE) + LEAK_CLIP_OFFSET
-      leak_slope = LEAK_SLOPE_OFFSET + clamped_squared * LEAK_SLOPE_SCALE
+      leak = guess - clamped * (SOFT_CLIP_BIAS_GAIN - clamped_squared * @leak_gain_scale) + @leak_offset
+      leak_slope = LEAK_SLOPE_OFFSET + clamped_squared * @leak_slope_scale
       band_pass = guess - (a0 * guess + @leak_step * leak - b) / (a0 + @leak_step * leak_slope)
 
       # Two trapezoidal integrators in series. Each new state is twice the output less the old

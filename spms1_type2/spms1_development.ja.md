@@ -152,7 +152,11 @@ C のホスト ("sim_spinel"、"sim_render"、"web" の SPMS-1 Web) は、スケ
 patch_gen は、モジュールのファイルの `require_relative`、インスタンス、ルーティングと CC の読み出し、setter の呼び出し、
 ディスパッチの `when` を "spms1/spms1_main.rb" に書きます。手で書いた場合と同じ
 素直な直線的な Ruby なので、Spinel も同じものにコンパイルします。モジュールにかかるのは、
-そのモジュール自身のコードの分だけです。エディタと "spms1_patching.ja.md"、"spms1_patching.md" の NRPN の表にも反映されます。
+そのモジュール自身のコードの分だけです。そのうちパラメータの部分 (ソース、CC、setter。バッファごとに 1 回) は
+独立した関数 `spms1_apply_parameters` に入り、同じく patch_gen が書く "spms1/spms1_parameters.h" が、
+これを `Spms1_main` の外に置き (`noinline`)、RAM に置き、それ自体を flatten します。`Spms1_main` に
+その flatten でインライン展開されると、これがレジスタに抱える値がサンプルごとのループを圧迫し、
+パラメータを足すたびにループが長くなっていました。エディタと "spms1_patching.ja.md"、"spms1_patching.md" の NRPN の表にも反映されます。
 
 ### モジュールの書き方
 
@@ -167,7 +171,12 @@ patch_gen は、モジュールのファイルの `require_relative`、インス
   サンプルで通り、測定にはそのすべてが含まれます。ただし、三項演算子が select になるかは GCC が
   決めます (「生成コードの確認」を参照)。インスタンス変数 2 つのように、読み込みが要る値の間で選ぶと
   分岐になることがあり、リテラル 2 つの間で選んでその結果を掛ける形なら分岐になりません
-  (Amp のリミッターが速さを選ぶやり方)
+  (Amp のリミッターが速さを選ぶやり方)。ただし、それも確実ではありません。今のビルドでは、オシレータの
+  位相の折り返し `x -= (x < 1.0) ? 0.0 : 1.0` が引き算を飛び越す短い分岐になっていて、位相が周期のどこに
+  あるかによって、バッファごとに最大約 540 サイクル (3.5 us、0.3%) ばらつきます。周期がバッファより長い低い音で
+  最も大きく (バッファ全体が折り返しの片側に収まることがあるため)、1 バッファに多くの周期が入る高い音で最も
+  小さくなります。最大値は見積もりの max に表れます (`--note` で音を変え、`--buffers 40` で十分な数を測ります)。別の書き方 (`x -= x.to_i.to_f`、または GCC の分岐の推定を止める) にすると
+  毎バッファ同じになりますが、46 us 以上重くなるので、そのままにしています
 - カーブはクラスで一度作るルックアップテーブルと線形補間で求め、入力によって時間が変わる
   ライブラリ関数 (`Math.sqrt`、`Math.exp` など) は使わない
 - 演奏中に何も確保しない。配列はすべて `initialize` で作る
@@ -297,7 +306,7 @@ MCU 向けの変更は 2 か所にまとめてあります:
 - "spinel_rt_mcu_head.h"、"spinel_rt_mcu_libm.h"、"spinel_rt_mcu_cold.h": MCU 向けに足すもの --
   シンセ本体のセクションと pragma、オーバーフロー検査なしの Integer 演算 (`SP_INT_OVERFLOW_MODE_WRAP`。
   `spinel --int-overflow=wrap` と同じ)、数学関数の float 版、そして "spinel_rt.h" の最後で生成コードを
-  float のランタイムにつなぐもの (下記) とスケッチの "spms1_bus.h"、"spms1_midi_read.h"。"spinel_rt.h" にはそれぞれの `#include` 行だけがあります
+  float のランタイムにつなぐもの (下記) とスケッチの "spms1_bus.h"、"spms1_midi_read.h"、"spms1_parameters.h"。"spinel_rt.h" にはそれぞれの `#include` 行だけがあります
 - "spinel_mcu/spinel_mcu.patch": Spinel 自身のファイルへの変更 -- Float を表す `double` を `sp_float`
   で書いたランタイム、POSIX 部分の `#if 0` による除外 (中身がリリースで変わってもパッチが
   当たりやすいように)、全体が POSIX 前提のファイルの `SPINEL_BARE_METAL` による除外 (下記)、

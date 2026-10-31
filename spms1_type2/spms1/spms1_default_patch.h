@@ -13,7 +13,7 @@
 
 // The numbers of the patch and saved_patch_version, as one hash (see patch_spec_hash in
 // patch_gen): a saved patch with another is not loaded.
-#define SPMS1_PATCH_SPEC_HASH (0x4062907Cu)
+#define SPMS1_PATCH_SPEC_HASH (0x225BCC08u)
 
 // The category 3 entries -- the controls -- whose CCs' values a Save keeps: all but the
 // performance controls', whose CCs are saved at 0.
@@ -24,7 +24,7 @@ static const uint8_t g_spms1_saved_cc_entries[] = {
   48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63,
   64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79,
   80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95,
-  98, 99, 100
+  98, 99, 100, 101, 102
 };
 
 // NRPN parameter number (category << 7 | LSB), value
@@ -186,6 +186,8 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {350, 127},  // Delay 1 Time <- OWN
   {351, 127},  // Delay 1 Feedback <- OWN
   {356, 127},  // Amp 1 Limiter Sw <- OWN
+  {357, 127},  // Filter 1 Drive <- OWN
+  {358, 127},  // Filter 2 Drive <- OWN
   {384,   5},  // Pitch 1 Glide CC
   {385,  34},  // Pitch 1 Out 1 Glide Sw CC
   {386,  34},  // Pitch 1 Out 2 Glide Sw CC
@@ -247,6 +249,8 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {481,   2},  // Breath CC
   {482,  16},  // General 1 CC
   {483,  17},  // General 2 CC
+  {485,  31},  // Filter 1 Drive CC
+  {486,  31},  // Filter 2 Drive CC
   {512,   4},  // Pitch 1 Glide value
   {513, 124},  // Pitch 1 Out 1 Glide Sw value
   {514, 124},  // Pitch 1 Out 2 Glide Sw value
@@ -346,6 +350,8 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {610,   4},  // General 1 value
   {611,   4},  // General 2 value
   {612, 124},  // Amp 1 Limiter Sw value
+  {613,   4},  // Filter 1 Drive value
+  {614,   4},  // Filter 2 Drive value
 };
 
 // CC number, value
@@ -411,6 +417,8 @@ static const uint8_t g_spms1_default_cc[][2] = {
   {2,     4},  // Breath
   {16,    4},  // General 1
   {17,    4},  // General 2
+  {31,    4},  // Filter 1 Drive
+  {31,    4},  // Filter 2 Drive
 };
 
 #endif  // SPMS1_DEFAULT_PATCH_H

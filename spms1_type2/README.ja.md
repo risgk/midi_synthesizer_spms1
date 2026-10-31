@@ -80,7 +80,8 @@ MIDI Synthesizer SPMS-1 (type-2) v0.4.1
 - Ruby (CRuby): パッチの番号や初期パッチを変えるとき、モジュールを追加するとき。これらは
   "spms1_patch.yaml" にまとめてあり、`ruby patch_gen/spms1_patch_gen.rb` が "spms1/spms1_patch.rb"
   ("spms1/spms1_main.rb" が読み込みます)、"spms1/spms1_default_patch.h" の初期パッチ (Reset 用に
-  "spms1/spms1_midi_state.h" が読み込みます)、"spms1_editor.html" のテーブル、"spms1_patching.ja.md" と
+  "spms1/spms1_midi_state.h" が読み込みます)、"spms1/spms1_parameters.h" (パラメータのバッファごとの関数を、
+  サンプルごとのループの関数の外に置く宣言)、"spms1_editor.html" のテーブル、"spms1_patching.ja.md" と
   "spms1_patching.md" の NRPN の表、"spms1/spms1_main.rb" のループの配線
   ([モジュールの追加](./spms1_development.ja.md#モジュールの追加) を参照) に
   書き出します。実行したあと、"spms1/spms1_main.c" を生成し直してください。`--check` は、ファイルが
@@ -104,9 +105,9 @@ MIDI Synthesizer SPMS-1 (type-2) v0.4.1
 "spms1_editor.html" を開き（[Web エディタ](#web-エディタ)を参照）、"MIDI Out" でシンセか SPMS-1 Web (Built-in) を選びます。
 
 1. お気に入り: Controls タブは "Show favorites only" にチェックが入った状態で開き、デフォルトパッチで
-   お気に入りになっている 47 個のパラメータを表示します:
+   お気に入りになっている 48 個のパラメータを表示します:
    Pitch 1 Glide・Out 1 Glide Sw・Out 2 Glide Sw・Bend Amt・Out 1 Bend Sw・Stretch、EG 1 Attack・Decay・Sustain・Release Sw、LFO 1 Wave・Rate・Level・Reset Sw、Osc 1 Wave・PW・Pitch Mod 1 Amt・Pitch Mod 1 Sw・Pitch Mod 2 Amt・PW Mod 1 Amt・PW Mod 2 Amt、Osc 2 Wave・Pitch Coarse・Pitch Fine・Pitch Mod 1 Amt・Pitch Mod 2 Amt・Sync Sw、Noise 1 Color、Mixer 2 Level 1〜4、
-   Filter 2 Cutoff・Resonance・Mode・Pitch Amt・Mod 1 Amt・Mod 1 Pol・Mod 2 Amt、
+   Filter 2 Cutoff・Resonance・Mode・Pitch Amt・Mod 1 Amt・Mod 1 Pol・Mod 2 Amt・Drive、
    Amp 1 Gain 2・Mod 1/2 Mix、Chorus 1 Mix・Rate・Depth、Delay 1 Mix・Time・Feedback。
    気に入ったものは星で追加できます。Osc 2 の各 Pitch Mod Amt は Osc 1 と、Filter 1 の Resonance（CC なし）以外の
    各パラメータは Filter 2 と同じ CC なので、片方のスライダーを動かすと、表示されているかどうかに関わらず相手も一緒に動きます

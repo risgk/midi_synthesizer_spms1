@@ -159,7 +159,11 @@ A module is added without writing anything in the loop:
 patch_gen writes the `require_relative` of the module's file, its instance, the reads of its routing and its CCs, the calls to its
 setters and its `when` in the dispatch into "spms1/spms1_main.rb", as plain straight-line Ruby, the
 same as it would be written by hand, so Spinel compiles it to the same: a module costs what its
-own code costs and no more. The editor and the NRPN tables of "spms1_patching.md" and "spms1_patching.ja.md" take it up as well.
+own code costs and no more. The parameters' part of it -- their sources, the CCs and the setters,
+once per buffer -- goes into a function of its own, `spms1_apply_parameters`, which
+"spms1/spms1_parameters.h", written by patch_gen too, declares out of `Spms1_main` (`noinline`), in
+RAM and flattened itself: inlined into `Spms1_main`, as its `flatten` would have it, what it holds
+in registers crowded the per-sample loop, which ran longer for every parameter added. The editor and the NRPN tables of "spms1_patching.md" and "spms1_patching.ja.md" take it up as well.
 
 ### Writing a Module
 
@@ -174,7 +178,14 @@ keeps to that as far as it can:
   same samples, all of which the measure includes. Whether a ternary becomes a select is GCC's
   decision, though (see "Checking the Generated Code"): one choosing between two values it has to
   load, such as two instance variables, may come out as a branch, while one choosing between two
-  literals and multiplying by the result does not (as Amp's limiter picks its rate)
+  literals and multiplying by the result does not (as Amp's limiter picks its rate). Even that
+  is not certain: the oscillators' phase wraps, `x -= (x < 1.0) ? 0.0 : 1.0`, come out as a short
+  branch over the subtraction in the current build, so a buffer varies by up to about 540 cycles
+  (3.5 us, 0.3%) with where in their cycles the phases are: most at low notes, whose cycles are
+  longer than a buffer, so that a buffer can fall wholly on one side of a wrap or the other, and
+  least at high notes, whose buffers each hold many cycles; the maximum is still what the estimate
+  gives as its max (`--note`, with `--buffers 40` to see enough of them). Written otherwise (`x -= x.to_i.to_f`, or with GCC's branch guesses
+  turned off) they stay the same every buffer but cost 46 us or more, so they are left as they are
 - Curves from lookup tables with linear interpolation, worked out once in the class, not library
   calls (`Math.sqrt`, `Math.exp` and the like), whose time depends on the input
 - Nothing allocated while playing: make every array in `initialize`
@@ -311,7 +322,7 @@ README names, with the changes for the MCU kept in two places:
   (`SP_INT_OVERFLOW_MODE_WRAP`, as `spinel --int-overflow=wrap` builds it), the float versions of
   the math functions, and, at
   the end of "spinel_rt.h", what binds the generated code to a float runtime (below) and the
-  sketch's "spms1_bus.h" and "spms1_midi_read.h".
+  sketch's "spms1_bus.h", "spms1_midi_read.h" and "spms1_parameters.h".
   "spinel_rt.h" carries only an `#include` line for each
 - "spinel_mcu/spinel_mcu.patch": what is changed in Spinel's own files -- the runtime written in
   `sp_float` where it said `double` for a Float, the POSIX parts left out with `#if 0` (a release

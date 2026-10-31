@@ -81,7 +81,8 @@ Required Software for Modification
 - Ruby (CRuby), to change the patch's numbers or the default patch, or to add a module: they are
   kept in "spms1_patch.yaml", and `ruby patch_gen/spms1_patch_gen.rb` writes them out to
   "spms1/spms1_patch.rb" (read by "spms1/spms1_main.rb"), the default patch of "spms1/spms1_default_patch.h"
-  (for Reset, read by "spms1/spms1_midi_state.h"), the tables of "spms1_editor.html", the NRPN
+  (for Reset, read by "spms1/spms1_midi_state.h"), "spms1/spms1_parameters.h" (the declaration that
+  keeps the parameters' per-buffer function out of the per-sample loop's), the tables of "spms1_editor.html", the NRPN
   tables of "spms1_patching.md" and "spms1_patching.ja.md", and the wiring of the loop in
   "spms1/spms1_main.rb" (see [Adding a Module](./spms1_development.md#adding-a-module)). Run it, then regenerate "spms1/spms1_main.c"; `--check` only
   says whether the files are up to date
@@ -104,10 +105,10 @@ A path from the sound the synth powers up with to a patch of your own, a step at
 editor's Controls tab and the nodes of its Patch tab. Open "spms1_editor.html" (see
 [Web Editor](#web-editor)) and choose the synth, or SPMS-1 Web (Built-in), in "MIDI Out".
 
-1. Favorites: the Controls tab opens with "Show favorites only" ticked, showing the 47 parameters
+1. Favorites: the Controls tab opens with "Show favorites only" ticked, showing the 48 parameters
    the default patch marks as favorites:
    Pitch 1 Glide, Out 1 Glide Sw, Out 2 Glide Sw, Bend Amt, Out 1 Bend Sw and Stretch; EG 1 Attack, Decay, Sustain and Release Sw; LFO 1 Wave, Rate, Level and Reset Sw; Osc 1 Wave, PW, Pitch Mod 1 Amt,
-   Pitch Mod 1 Sw, Pitch Mod 2 Amt, PW Mod 1 Amt and PW Mod 2 Amt; Osc 2 Wave, Pitch Coarse, Pitch Fine, Pitch Mod 1 Amt, Pitch Mod 2 Amt and Sync Sw; Noise 1 Color; Mixer 2 Level 1 to 4; Filter 2 Cutoff, Resonance, Mode, Pitch Amt, Mod 1 Amt, Mod 1 Pol and Mod 2 Amt; Amp 1 Gain 2 and Mod 1/2 Mix; Chorus 1 Mix, Rate and Depth; and Delay 1 Mix, Time and Feedback.
+   Pitch Mod 1 Sw, Pitch Mod 2 Amt, PW Mod 1 Amt and PW Mod 2 Amt; Osc 2 Wave, Pitch Coarse, Pitch Fine, Pitch Mod 1 Amt, Pitch Mod 2 Amt and Sync Sw; Noise 1 Color; Mixer 2 Level 1 to 4; Filter 2 Cutoff, Resonance, Mode, Pitch Amt, Mod 1 Amt, Mod 1 Pol, Mod 2 Amt and Drive; Amp 1 Gain 2 and Mod 1/2 Mix; Chorus 1 Mix, Rate and Depth; and Delay 1 Mix, Time and Feedback.
    Mark more with the star as you find them. Osc 2's Pitch Mod Amts are on Osc 1's CCs, and each
    parameter of Filter 1 on Filter 2's but its Resonance, which has no CC, so a slider of one moves
    the other's with it, whether or not that one is shown
