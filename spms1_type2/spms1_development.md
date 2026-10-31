@@ -339,7 +339,11 @@ README names, with the changes for the MCU kept in two places:
   throughout left out whole with `SPINEL_BARE_METAL` (below), the GC's buffers made to fit
   SRAM, and the in-range path of an Array read or write (`sp_FloatArray_get`/`set`,
   `sp_IntArray_get`) put ahead of the other checks, which go out of line unchanged, so that what
-  an access does is the same and only its cost moves. Each file it
+  an access does is the same and only its cost moves, and Float#to_i (`sp_float_to_i_checked`, in
+  "sp_alloc.h") inline and without its checks, as Integer arithmetic goes without its overflow
+  check: a NaN, an infinity or a Float past the range of Integer no longer raises (a raise stops
+  the sound on the MCU all the same) but comes out as the processor converts it, and the checks no
+  longer take their 31 us of a buffer. Each file it
   changes sits next to its released copy, "NAME.orig"
 - "sp_cold_bare_metal.c" and "spinel_mcu/sp_cold_bare_metal.patch": "sp_cold.c" for a bare-metal
   build (below), kept apart from the released one, which stays as it is but for its being left
