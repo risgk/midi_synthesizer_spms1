@@ -10,6 +10,8 @@ revised.
       they power up and the filters are as they were, to x16 at value 124, so that the resonance
       saturates sooner while the level and the output clip stay. A patch saved by v0.4.1 loads the
       default patch, as the entries have changed
+    - Lighter: about 90 us less of the 1333 us of a buffer (estimated), from the parameters'
+      reads and Float#to_i
 
 - v0.4.1 (2026-10-30):
     - Default patch: Mixer 2 Out Level powers up at 1.0 (value 124) instead of 0.5, and Amp 1 Gain 2

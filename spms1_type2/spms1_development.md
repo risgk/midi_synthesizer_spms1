@@ -189,8 +189,9 @@ keeps to that as far as it can:
 - Curves from lookup tables with linear interpolation, worked out once in the class, not library
   calls (`Math.sqrt`, `Math.exp` and the like), whose time depends on the input
 - Nothing allocated while playing: make every array in `initialize`
-- Literals rather than named constants in the per-sample code: Spinel emits a named Integer or
-  Float constant as a runtime global, loaded each time it is read
+- Literals rather than named constants in the per-sample and per-buffer code: Spinel emits a named
+  Integer or Float constant as a runtime global, loaded each time it is read, and a check against
+  it is not folded away
 - A state that decays toward zero through `Dsp.flush_tiny`, so that it lands on zero rather than
   sinking into the denormals
 - If Spinel leaves something untyped and boxes the arithmetic, a type seed in "spms1/sig" fixes it
