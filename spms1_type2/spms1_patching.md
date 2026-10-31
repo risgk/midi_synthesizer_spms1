@@ -72,7 +72,7 @@ sample rate. The low pass state stays linear, with a
 clamp at 16 as a guard that ordinary use never reaches. The output clip comes last. At the top of
 the resonance dial k turns negative and the loop oscillates.
 
-Drive, with no CC, brings the leak's ceiling down, from x1 at value 4, where it powers up and the
+Drive, on CC#31 for both filters, brings the leak's ceiling down, from x1 at value 4, where it powers up and the
 filter is as it was, to x16 at value 124, 6 dB every 30 values. That is the same as driving the
 loop that much harder and taking what leaves it down by as much ahead of the output clip: the
 resonance runs into the leak sooner and saturates, with its even harmonics, while the pass band

@@ -819,6 +819,8 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_BREATH                , 2)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_GENERAL_1             , 16)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_GENERAL_2             , 17)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_1_DRIVE        , 31)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_FILTER_2_DRIVE        , 31)
 
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_PITCH_1_GLIDE         , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_PITCH_1_OUT_1_GLIDE_SW, 124)
@@ -983,4 +985,6 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 2  , 4  ) # Breath
   C.set_midi_cc_value(midi_ch, 16 , 4  ) # General 1
   C.set_midi_cc_value(midi_ch, 17 , 4  ) # General 2
+  C.set_midi_cc_value(midi_ch, 31 , 4  ) # Filter 1 Drive
+  C.set_midi_cc_value(midi_ch, 31 , 4  ) # Filter 2 Drive
 end

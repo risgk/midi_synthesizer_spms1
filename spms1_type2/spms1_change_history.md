@@ -5,8 +5,8 @@ The main changes of each version, newest first, gathered before each release. Th
 revised.
 
 - v0.4.2 (2026-??-??):
-    - Filters: Drive, Filter 1's and Filter 2's, with no CC (NRPN entries 101 and 102, after Amp 1
-      Limiter Sw so that no entry before them moves): the leak's ceiling down by x1 at value 4, where
+    - Filters: Drive, Filter 1's and Filter 2's, on CC#31 and among the favorites (NRPN entries 101
+      and 102, after Amp 1 Limiter Sw so that no entry before them moves): the leak's ceiling down by x1 at value 4, where
       they power up and the filters are as they were, to x16 at value 124, so that the resonance
       saturates sooner while the level and the output clip stay. A patch saved by v0.4.1 loads the
       default patch, as the entries have changed

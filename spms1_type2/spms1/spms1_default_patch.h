@@ -249,6 +249,8 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {481,   2},  // Breath CC
   {482,  16},  // General 1 CC
   {483,  17},  // General 2 CC
+  {485,  31},  // Filter 1 Drive CC
+  {486,  31},  // Filter 2 Drive CC
   {512,   4},  // Pitch 1 Glide value
   {513, 124},  // Pitch 1 Out 1 Glide Sw value
   {514, 124},  // Pitch 1 Out 2 Glide Sw value
@@ -415,6 +417,8 @@ static const uint8_t g_spms1_default_cc[][2] = {
   {2,     4},  // Breath
   {16,    4},  // General 1
   {17,    4},  // General 2
+  {31,    4},  // Filter 1 Drive
+  {31,    4},  // Filter 2 Drive
 };
 
 #endif  // SPMS1_DEFAULT_PATCH_H
