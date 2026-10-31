@@ -32,6 +32,8 @@ MIDI Synthesizer SPMS-1 (type-2) v0.4.1
         - GY-PCM5102 (PCM5102A I2S DAC モジュール)
     - または PWM Audio 出力 (DAC 不要、スケッチのデフォルト)
         - L は GP28、R は GP27 で、Pimoroni [Pico VGA Demo Base](https://shop.pimoroni.com/products/pimoroni-pico-vga-demo-base) (PIM553) と同じです
+        - アンプかアクティブスピーカーのライン入力につないでください。ヘッドホンやパッシブスピーカーはつながないでください:
+          大きな電流が流れ、Pico や機器を傷めることがあります
         - PWM のリップルを取り除くため、各出力に RC ローパスフィルタを付けることをお勧めします
             - 矩形波が流れるケーブルからの輻射ノイズ (EMI) も減らせます。ケーブルの先ではなく、ピンの近くに付けてください
         - RC フィルタを付けない場合は、抵抗か接続先の機器の入力ゲイン (ボリューム) でレベルを下げてください:

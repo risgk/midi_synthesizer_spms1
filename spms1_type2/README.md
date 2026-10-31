@@ -32,6 +32,8 @@ Required Hardware
         - GY-PCM5102 (PCM5102A I2S DAC Module)
     - Or PWM Audio output, without a DAC (the default of the sketch)
         - L on GP28 and R on GP27, as on the Pimoroni [Pico VGA Demo Base](https://shop.pimoroni.com/products/pimoroni-pico-vga-demo-base) (PIM553)
+        - Connect them to a line input of an amplifier or an active speaker. Do not connect headphones or a passive
+          speaker: a large current may flow and damage the Pico or the devices
         - An RC low pass filter on each output is recommended, to take out the PWM ripple
             - It also reduces the radio noise (EMI) radiated from the cables carrying the square waves:
               put it close to the pins, not after the cable
