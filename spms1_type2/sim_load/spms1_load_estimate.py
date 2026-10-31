@@ -7,7 +7,7 @@
 #
 #   python3 sim_load/spms1_load_estimate.py ELF [--buffers N] [--skip N] [--note N] [--gate 0|1]
 #                                           [--patch FILE] [--score FILE] [--per-buffer]
-#                                           [--mhz F] [--profile] [--modules]
+#                                           [--mhz F] [--profile] [--modules] [--lines N]
 #
 # --patch and --score take the files sim_render takes (see sim_render/examples): the patch as MIDI
 # bytes in hex, applied before the first buffer, and the score, MIDI bytes in hex at a time in
@@ -15,6 +15,8 @@
 # reach the tables the sketch's MIDI handlers fill (the CC values, the NRPN table and the run
 # order's writes, Pitch Bend) and the note the stubs give, as spms1_midi_state.h handles them; Note
 # On and Off move the note from --note and --gate. --per-buffer prints each measured buffer.
+# --lines N prints the N source lines the measured buffers spend the most cycles in, by the line
+# table of the debug info: the .rb lines Spinel's #line directives name, or the C runtime's.
 #
 # The instruction count is exact for the code as built; the cycles are an estimate, which a
 # measurement on the device can calibrate. Needs: pip install unicorn capstone pyelftools numpy
@@ -37,6 +39,7 @@ ap.add_argument('--per-buffer', action='store_true', help='print the instruction
 ap.add_argument('--mhz', type=float, default=153.6, help='system clock, the sketch\'s 153.6 MHz by default')
 ap.add_argument('--profile', action='store_true', help='print the functions the measured buffers spend the most cycles in')
 ap.add_argument('--modules', action='store_true', help='print the load of each module, also with its share of the common part (from the debug info)')
+ap.add_argument('--lines', type=int, default=0, help='print the N source lines the measured buffers spend the most cycles in (from the debug info)')
 args = ap.parse_args()
 
 f = open(args.elf, 'rb')
@@ -124,7 +127,7 @@ def decode(addr, size):
         insn_cache[addr] = c
     return c
 
-state = {'measuring': False, 'n': 0, 'cyc': 0, 'last_end': None, 'buffers': [], 'prof': {}}
+state = {'measuring': False, 'n': 0, 'cyc': 0, 'last_end': None, 'buffers': [], 'prof': {}, 'lines': {}}
 stubs = {}
 
 def ret(uc, value=None):
@@ -216,6 +219,8 @@ def stub_start_debug(uc):
 def stub_stop_debug(uc):
     state['measuring'] = False
     state['buffers'].append((state['n'], state['cyc'], dict(state['prof'])))
+    if len(state['buffers']) <= args.skip:
+        state['lines'] = {}  # the warm-up left out
     if len(state['buffers']) >= args.buffers:
         uc.emu_stop()
     ret(uc)
@@ -328,6 +333,9 @@ def hook_code(uc, addr, size, _):
         state['last_end'] = addr + size
         if args.modules:
             modules_hook(uc, addr, size, c_taken)
+        if args.lines:
+            lc = state['lines']
+            lc[addr] = lc.get(addr, 0) + c_taken
         if args.profile:
             s = sym_of(addr)
             p = state['prof']
@@ -489,6 +497,89 @@ if args.profile:
     allc = sum(tot.values())
     for k, v in sorted(tot.items(), key=lambda kv: -kv[1])[:15]:
         print('  %5.1f%%  %s' % (100 * v / allc, k))
+
+if args.lines:
+    import os
+    # Each address to the row of the line table it falls in: the rows sorted by address, the last
+    # at or below it.
+    rows = []
+    for cu in elf.get_dwarf_info().iter_CUs():
+        lp = elf.get_dwarf_info().line_program_for_CU(cu)
+        if lp is None:
+            continue
+        files = lp['file_entry']
+        base = 1 if lp.header['version'] < 5 else 0
+        for e in lp.get_entries():
+            st = e.state
+            if st is None:
+                continue
+            if st.end_sequence:
+                rows.append((st.address, None))
+                continue
+            fe = files[st.file - base]
+            rows.append((st.address, '%s:%d' % (os.path.basename(fe.name.decode()), st.line)))
+    rows.sort(key=lambda r: r[0])
+    row_addrs = [r[0] for r in rows]
+    # A line of the runtime (a C header) or of Dsp is told by the .rb line it was inlined at: the
+    # call sites of the inlined subroutines around the address, innermost first, up to the first
+    # in another .rb file.
+    inl = []  # (low, high, the call sites from the innermost out)
+    dwi = elf.get_dwarf_info()
+    rlists = dwi.range_lists()
+    for cu in dwi.iter_CUs():
+        lp = dwi.line_program_for_CU(cu)
+        if lp is None:
+            continue
+        fes = lp['file_entry']
+        fbase = 1 if lp.header['version'] < 5 else 0
+        def walk(die, sites):
+            for ch in die.iter_children():
+                s = sites
+                if ch.tag == 'DW_TAG_inlined_subroutine' and 'DW_AT_call_file' in ch.attributes:
+                    fn = os.path.basename(fes[ch.attributes['DW_AT_call_file'].value - fbase].name.decode())
+                    s = ['%s:%d' % (fn, ch.attributes['DW_AT_call_line'].value)] + sites
+                    a = ch.attributes
+                    spans = []
+                    if 'DW_AT_low_pc' in a and 'DW_AT_high_pc' in a:
+                        lo = a['DW_AT_low_pc'].value
+                        hi = a['DW_AT_high_pc'].value
+                        spans.append((lo, hi if a['DW_AT_high_pc'].form == 'DW_FORM_addr' else lo + hi))
+                    elif 'DW_AT_ranges' in a:
+                        base = cu.get_top_DIE().attributes.get('DW_AT_low_pc')
+                        base = base.value if base else 0
+                        for e in rlists.get_range_list_at_offset(a['DW_AT_ranges'].value, cu=cu):
+                            if hasattr(e, 'base_address'):
+                                base = e.base_address
+                            elif hasattr(e, 'begin_offset'):
+                                spans.append((e.begin_offset + base, e.end_offset + base))
+                    for lo, hi in spans:
+                        inl.append((lo, hi, s))
+                if ch.has_children:
+                    walk(ch, s)
+        walk(cu.get_top_DIE(), [])
+    def caller(a, k):
+        best = None
+        for lo, hi, s in inl:
+            if lo <= a < hi and (best is None or hi - lo < best[1] - best[0]):
+                best = (lo, hi, s)
+        if not best:
+            return k
+        for site in best[2]:
+            if site.endswith('.h', 0, site.rfind(':')) or site.startswith('spms1_dsp.rb') or site.startswith('sp_'):
+                continue
+            return '%s <- %s' % (k, site)
+        return k
+    by_line = {}
+    for a, cc in state['lines'].items():
+        i = bisect.bisect_right(row_addrs, a) - 1
+        k = rows[i][1] if i >= 0 and rows[i][1] else '?'
+        if k.split(':')[0].endswith('.h') or k.startswith('spms1_dsp.rb'):
+            k = caller(a, k)
+        by_line[k] = by_line.get(k, 0) + cc
+    allc = sum(by_line.values())
+    print('source lines, per buffer:')
+    for k, v in sorted(by_line.items(), key=lambda kv: -kv[1])[:args.lines]:
+        print('  %5.1f%% %6.1f us  %s' % (100 * v / allc, v / len(bufs) / args.mhz, k))
 
 if args.modules:
     for a, cc in mstate['pending']:

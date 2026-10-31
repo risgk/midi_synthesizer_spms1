@@ -44,32 +44,32 @@ module Spms1
 
     # Each level is unipolar, [0.0, 1.0], and used as a plain multiplier on its own input.
     def set_level_1(level)
-      @level_1 = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
+      @level_1 = Dsp.clamp(level, 0.0, 1.0)
     end
 
     def set_level_2(level)
-      @level_2 = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
+      @level_2 = Dsp.clamp(level, 0.0, 1.0)
     end
 
     def set_level_3(level)
-      @level_3 = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
+      @level_3 = Dsp.clamp(level, 0.0, 1.0)
     end
 
     def set_level_4(level)
-      @level_4 = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
+      @level_4 = Dsp.clamp(level, 0.0, 1.0)
     end
 
     # Out Level is unipolar, [0.0, 1.0], a plain multiplier on the sum, so one control can take a
     # blend of two sources up and down together. It is applied before the sum is held to its range,
     # so it can also bring a sum that would have been clipped back inside it.
     def set_out_level(level)
-      @out_level = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
+      @out_level = Dsp.clamp(level, 0.0, 1.0)
     end
 
     # The inputs are taken as they are; only the sum is held to a range. A mixer is one
     # of the places on the bus where a value can come out bigger than what went in, and like the
     # others (Amp Gain, Pitch 1 Stretch) it clamps what it puts out -- so this is what keeps every slot finite. That
-    # matters beyond tidiness: a comparison lets a NaN through any clamp, and the only way to make
+    # matters beyond tidiness: a NaN would pass through the modules that read it, and the only way to make
     # one here is to overflow to infinity first, which this makes impossible.
     #
     # One unit is the sum of two full-scale bipolar signals, as much as any destination can use; an
@@ -92,12 +92,7 @@ module Spms1
       end
 
       sum = (((input_1 * @current_1 + input_2 * @current_2) + input_3 * @current_3) + input_4 * @current_4) * @current_out_level
-      # One nested ternary, not two statements. Split in two, each comparison compiles to a vsel
-      # when the method stands alone, which is not how it is built: inside the flattened
-      # Spms1_main the branch count does not move and the extra instructions cost 870/875us a
-      # buffer against 854/856. The same holds for the clamps in Amp#process and Osc#process.
-      # Measured on a Pico 2 at 48 kHz, 2026-09-18.
-      output = (sum < -1.0) ? -1.0 : ((sum > 1.0) ? 1.0 : sum)
+      output = Dsp.clamp(sum, -1.0, 1.0)
       @output = output
       output
     end

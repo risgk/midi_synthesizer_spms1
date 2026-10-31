@@ -50,14 +50,14 @@ module Spms1
     # Level is unipolar, [0.0, 1.0], and used as a plain multiplier, so 1.0 puts out noise filling
     # -0.5 to +0.5, the oscillator's range, as every audio source in the synth is.
     def set_level(level)
-      @level = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
+      @level = Dsp.clamp(level, 0.0, 1.0)
     end
 
     # Color is unipolar, [0.0, 1.0], and crossfades Out in a straight line, from the white alone at
     # 0.0 to the red alone at 1.0. Each end is as its own output is, so the red end is 3 dB down
     # on the white, at the RMS the red's gain gives it.
     def set_color(color)
-      @color = (color < 0.0) ? 0.0 : ((color > 1.0) ? 1.0 : color)
+      @color = Dsp.clamp(color, 0.0, 1.0)
     end
 
     def process(control_tick)
@@ -84,7 +84,7 @@ module Spms1
       # flush_tiny.
       @red += (white - @red) * @red_coef
       red = @red * @red_gain
-      red = (red < -0.5) ? -0.5 : ((red > 0.5) ? 0.5 : red)
+      red = Dsp.clamp(red, -0.5, 0.5)
       @output_red = red * @current_level
       @output_white = white * @current_level
 

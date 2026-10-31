@@ -5,9 +5,10 @@ module Spms1
   module Dsp
     # A dead zone of 1e-20 about zero, so that a state decaying on a silent input lands on exactly
     # zero instead of sinking into denormals, which x86 computes slowly. It shifts every other
-    # value toward zero by 1e-20, which rounds away at any audible level. Built from a + |a| as
-    # Filter#clip_output is, rather than as (s + c) - c: -ffast-math may fold that one to s, while
-    # this is a dead zone in exact arithmetic, so any rewrite it allows still is one. What comes
+    # value toward zero by 1e-20, which rounds away at any audible level. Built from the larger of
+    # each side's distance past 1e-20 and zero, rather than as (s + c) - c: -ffast-math may fold
+    # that one to s, while this is a dead zone in exact arithmetic, so any rewrite it allows still
+    # is one. What comes
     # out is zero or at least 8e-28, the spacing of floats near 1e-20: never a denormal. Rewritten
     # under -ffast-math it rounds at that spacing and may leave a remnant of that size instead of
     # zero, still far above the denormals. A literal, as the vendored Spinel emits a Float constant
@@ -15,7 +16,14 @@ module Spms1
     def self.flush_tiny(state)
       above = state - 1e-20
       below = (0.0 - state) - 1e-20
-      ((above + above.abs) - (below + below.abs)) * 0.5
+      C.float_max(above, 0.0) - C.float_max(below, 0.0)
+    end
+
+    # value held to [low, high], low <= high: a max and a min, one vmaxnm.f32 and one vminnm.f32
+    # on the device (spms1_dsp.h), where a nested ternary, (x < low) ? low : ((x > high) ? high : x),
+    # takes several instructions more and may come out as a branch.
+    def self.clamp(value, low, high)
+      C.float_min(C.float_max(value, low), high)
     end
 
     # One stage of the control-rate parameter smoothing: value moves toward target by the blend,
