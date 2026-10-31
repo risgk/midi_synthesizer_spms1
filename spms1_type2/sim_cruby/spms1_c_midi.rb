@@ -1,7 +1,7 @@
 # The MIDI side of Spms1::C for the CRuby hosts (spms1_sim.rb and spms1_render.rb): the MIDI
 # tables spms1_main.rb reads and the handlers that fill them, as spms1_midi_state.h has them for
-# the sketch and the C hosts, and the signal bus, as spms1_bus.h has it. Each host adds the audio
-# side.
+# the sketch and the C hosts, the signal bus, as spms1_bus.h has it, and the larger and the smaller
+# of two Floats, as spms1_dsp.h has them. Each host adds the audio side.
 require 'yaml'
 
 module Spms1
@@ -112,6 +112,8 @@ module Spms1
       def set_bus_signal(slot, v) = (@bus_signals[slot & 511] = v)
       def get_active_module(slot) = @active_modules[slot & 31]
       def set_active_module(slot, v) = (@active_modules[slot & 31] = v)
+      def float_max(a, b) = (a > b ? a : b)
+      def float_min(a, b) = (a < b ? a : b)
       def set_sample_rate(v) = (@sample_rate = v)
       def get_sample_rate = @sample_rate
       def set_audio_buffers(v) = (@audio_buffers = v)

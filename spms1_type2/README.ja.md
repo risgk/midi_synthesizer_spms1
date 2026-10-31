@@ -73,6 +73,8 @@ MIDI Synthesizer SPMS-1 (type-2) v0.4.1
       ロード 1 つ、ストア 1 つにインライン展開されます。サンプルごとの振り分けがモジュールのたびに読む
       モジュールの実行順も同じく C 配列で、シンセがバッファごとにパラメータのたびに読む CC の値と NRPN の
       テーブルの読み出しも "spms1_midi_read.h" からインライン展開されます
+    - クランプは、同じように読み込む "spms1_dsp.h" の 2 つの Float の大きい方と小さい方で、Ruby なら
+      比較して選ぶところがそれぞれ 1 命令 (`vmaxnm.f32` か `vminnm.f32`) になります
     - "spms1_main.c" は "spms1" で `spinel spms1_main.rb -c --rbs sig` を実行して生成します。"spms1/sig" の
       型シードがフィルタの状態、パラメータのスムージング、バスへの書き込みをボックス化させずに保ちます。
       必要な理由は "spms1/sig/spms1_filter.rbs"、"spms1/sig/spms1_dsp.rbs"、"spms1/sig/spms1_framework.rbs"

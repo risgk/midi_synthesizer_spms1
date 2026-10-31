@@ -173,10 +173,13 @@ keeps to that as far as it can:
 
 - The same work every sample and every buffer, whatever the values: work out each parameter's
   coefficients every buffer or every control tick, never only when it changes
-- No branches on values: clamp with nested ternaries, `(x < 0.0) ? 0.0 : ((x > 1.0) ? 1.0 : x)`,
-  which compile to selects. A branch on `control_tick` is fine, every module taking it on the
-  same samples, all of which the measure includes. Whether a ternary becomes a select is GCC's
-  decision, though (see "Checking the Generated Code"): one choosing between two values it has to
+- No branches on values: clamp with `Dsp.clamp(x, 0.0, 1.0)`, one `vmaxnm.f32` and one
+  `vminnm.f32` on the device (spms1/spms1_dsp.h), and take the larger of a value and zero with
+  `C.float_max(x, 0.0)`. Nested ternaries, `(x < 0.0) ? 0.0 : ((x > 1.0) ? 1.0 : x)`, and the
+  `x + x.abs` they once were built from take more: replacing them all made a buffer about 105 us
+  shorter (emulated Cortex-M33), with the same output bit for bit. A branch on `control_tick` is
+  fine, every module taking it on the same samples, all of which the measure includes. Whether
+  any other ternary becomes a select is GCC's decision, though (see "Checking the Generated Code"): one choosing between two values it has to
   load, such as two instance variables, may come out as a branch, while one choosing between two
   literals and multiplying by the result does not (as Amp's limiter picks its rate). Even that
   is not certain: the oscillators' phase wraps, `x -= (x < 1.0) ? 0.0 : 1.0`, come out as a short
@@ -215,7 +218,9 @@ measures on the device -- with the default patch and a note held.
   the time at 153.6 MHz against the 1333 us a buffer of 64 samples lasts at 48 kHz, which come from a
   first-order cost model and are an estimate (see `cost` in "sim_load/spms1_load_estimate.py")
 - `--profile` lists the functions the cycles go to; `--modules` the load of each module (below), from
-  the debug info of the ELF and the run; `--elf FILE` estimates an ELF built elsewhere, from another
+  the debug info of the ELF and the run; `--lines N` the N source lines that take the most, the .rb
+  lines Spinel's `#line` directives name, a runtime header's line (an Array access, a bus read) told
+  by the .rb line it is inlined at; `--elf FILE` estimates an ELF built elsewhere, from another
   commit say, so two versions can be compared; `--help` shows the rest
 - `--patch FILE` and `--score FILE` play what sim_render plays: a patch as MIDI bytes in hex, applied
   before the first buffer, and MIDI at times in seconds, each applied before the buffer it falls in,
@@ -332,7 +337,7 @@ README names, with the changes for the MCU kept in two places:
   (`SP_INT_OVERFLOW_MODE_WRAP`, as `spinel --int-overflow=wrap` builds it), the float versions of
   the math functions, and, at
   the end of "spinel_rt.h", what binds the generated code to a float runtime (below) and the
-  sketch's "spms1_bus.h", "spms1_midi_read.h" and "spms1_parameters.h".
+  sketch's "spms1_bus.h", "spms1_dsp.h", "spms1_midi_read.h" and "spms1_parameters.h".
   "spinel_rt.h" carries only an `#include` line for each
 - "spinel_mcu/spinel_mcu.patch": what is changed in Spinel's own files -- the runtime written in
   `sp_float` where it said `double` for a Float, the POSIX parts left out with `#if 0` (a release

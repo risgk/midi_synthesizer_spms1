@@ -82,21 +82,21 @@ module Spms1
     # Rate is unipolar, [0.0, 1.0], and read as a note number, so the dial is linear in pitch:
     # 0.215 Hz at 0.0, 6.875 Hz at 0.5, 220 Hz at 1.0.
     def set_rate(rate)
-      @rate = (rate < 0.0) ? 0.0 : ((rate > 1.0) ? 1.0 : rate)
+      @rate = Dsp.clamp(rate, 0.0, 1.0)
     end
 
     # Rate Mod Amt is unipolar, [0.0, 1.0], the depth of Rate Mod In. A unit of modulation input
     # times depth is the whole rate range, ten octaves, so at full depth a bipolar source swings the
     # rate five octaves either way. A modulation the other way up takes an inverted source.
     def set_rate_modulation_amount(amount)
-      @rate_modulation_depth = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
+      @rate_modulation_depth = Dsp.clamp(amount, 0.0, 1.0)
     end
 
     # Level Mod Amt is unipolar, [0.0, 1.0], the depth of Level Mod In, in the same way. A unit of
     # Level Mod In times depth is the whole level, so the mod wheel at its top adds a full level at
     # full depth.
     def set_level_modulation_amount(amount)
-      @level_modulation_depth = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
+      @level_modulation_depth = Dsp.clamp(amount, 0.0, 1.0)
     end
 
     # Reset Sw: Reset In is taken at 0.5 and above, and ignored below.
@@ -108,14 +108,14 @@ module Spms1
     # can take the LFO at less than full scale without a mixer in between. Turning it the other
     # way up is for Out Inv, or a mixer's Out Inv.
     def set_level(level)
-      @level = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
+      @level = Dsp.clamp(level, 0.0, 1.0)
       @amount = @level
     end
 
     # Wave is unipolar, [0.0, 1.0], and crossfades Out in a straight line, from the triangle alone
     # at 0.0 to the square alone at 1.0.
     def set_wave(wave)
-      @wave = (wave < 0.0) ? 0.0 : ((wave > 1.0) ? 1.0 : wave)
+      @wave = Dsp.clamp(wave, 0.0, 1.0)
     end
 
     # The parameters that scale no audio themselves -- rates, depths, times -- smoothed in two
@@ -154,9 +154,9 @@ module Spms1
         # Rate, amount and the two modulation depths are smoothed at the control rate to avoid sudden
         # jumps, and the phase increment is derived here rather than per sample.
         total_amount = @current_amount + (level_modulation_input * @current_level_modulation_depth)
-        @total_amount = (total_amount < 0.0) ? 0.0 : ((total_amount > 1.0) ? 1.0 : total_amount)
+        @total_amount = Dsp.clamp(total_amount, 0.0, 1.0)
         total_rate = @current_rate + (rate_modulation_input * @current_rate_modulation_depth)
-        rate = (total_rate < 0.0) ? 0.0 : ((total_rate > 1.0) ? 1.0 : total_rate)
+        rate = Dsp.clamp(total_rate, 0.0, 1.0)
         @dt = rate_to_freq_fast(rate) * @inv_sample_rate
         # The PolyBLAMP residual is (1 - |x|)^3 / 6 of the slope change for a corner x samples
         # away. The slope changes by 4 * dt at each corner, and with the distance d = |x| * dt in

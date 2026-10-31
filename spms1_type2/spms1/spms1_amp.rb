@@ -71,13 +71,13 @@ module Spms1
     # Range: -∞ dB (0.0), -6 dB (0.354), 0 dB (0.5), +6 dB (0.707), +12 dB (1.0).
     # @gain is an amplitude, so the smoothing below works in the amplitude domain.
     def set_gain_1(gain)
-      clamped_gain = (gain < 0.0) ? 0.0 : ((gain > 1.0) ? 1.0 : gain)
+      clamped_gain = Dsp.clamp(gain, 0.0, 1.0)
       @gain = 4.0 * clamped_gain * clamped_gain
     end
 
     # Gain 2, of Audio In 2, as Gain 1 is of Audio In 1.
     def set_gain_2(gain)
-      clamped_gain = (gain < 0.0) ? 0.0 : ((gain > 1.0) ? 1.0 : gain)
+      clamped_gain = Dsp.clamp(gain, 0.0, 1.0)
       @gain_2 = 4.0 * clamped_gain * clamped_gain
     end
 
@@ -91,7 +91,7 @@ module Spms1
     # from Mod 1 In alone at 0.0 to Mod 2 In alone at 1.0. Smoothed as the gain is, so that a sparse
     # CC does not step it.
     def set_modulation_mix(mix)
-      @modulation_mix = (mix < 0.0) ? 0.0 : ((mix > 1.0) ? 1.0 : mix)
+      @modulation_mix = Dsp.clamp(mix, 0.0, 1.0)
     end
 
     def process(control_tick, audio_input = 0.0, audio_input_2 = 0.0, modulation_1_input = 1.0, modulation_2_input = 1.0)
@@ -110,7 +110,7 @@ module Spms1
       # in: a modulation scales the gain down, and must not be able to scale it up however loud it
       # arrives. Negative still inverts.
       modulation = modulation_1_input * (1.0 - @current_modulation_mix) + modulation_2_input * @current_modulation_mix
-      mod = (modulation < -1.0) ? -1.0 : ((modulation > 1.0) ? 1.0 : modulation)
+      mod = Dsp.clamp(modulation, -1.0, 1.0)
       amplified = (audio_input * @current_gain + audio_input_2 * @current_gain_2) * mod
 
       # The limiter. The gain it wants is the threshold over the peak of the two blocks where that
@@ -139,9 +139,8 @@ module Spms1
       output = @limiter_line[(@limiter_write_index - @limiter_lookahead) & LIMITER_LINE_MASK] * @limiter_gain
 
       # A gain reaches 4.0, so the output is held to -1.0 and +1.0, as a mixer's is: the limiter keeps
-      # it under that, and it is reached with the limiter off. One nested ternary, for the reason
-      # Mixer#process gives.
-      (output < -1.0) ? -1.0 : ((output > 1.0) ? 1.0 : output)
+      # it under that, and it is reached with the limiter off.
+      Dsp.clamp(output, -1.0, 1.0)
     end
   end
 end

@@ -97,20 +97,20 @@ module Spms1
     # Rate is unipolar, [0.0, 1.0], and read as a note number: 0.015 Hz at 0.0, 0.48 Hz at 0.5,
     # 15.4 Hz at 1.0.
     def set_rate(rate)
-      @rate = (rate < 0.0) ? 0.0 : ((rate > 1.0) ? 1.0 : rate)
+      @rate = Dsp.clamp(rate, 0.0, 1.0)
     end
 
     # Depth is unipolar, [0.0, 1.0], how far each tap swings either side of 5.33 ms: not at all at
     # 0.0, 2.63 ms at 0.5, 5.25 ms at 1.0.
     def set_depth(depth)
-      @depth = (depth < 0.0) ? 0.0 : ((depth > 1.0) ? 1.0 : depth)
+      @depth = Dsp.clamp(depth, 0.0, 1.0)
     end
 
     # Mix is unipolar, [0.0, 1.0], the delayed signal's share of each crossfade: the dry input at
     # 0.0, half and half at 0.5, and only
     # the delayed signal at 1.0, a vibrato apart on the two sides.
     def set_mix(mix)
-      @mix = (mix < 0.0) ? 0.0 : ((mix > 1.0) ? 1.0 : mix)
+      @mix = Dsp.clamp(mix, 0.0, 1.0)
     end
 
     # The parameters that scale no audio themselves -- rates, depths, times -- smoothed in two
@@ -148,7 +148,7 @@ module Spms1
       end
 
       # Held to the bus's one unit on the way in, as the delay holds its inputs.
-      input = (audio_input < -1.0) ? -1.0 : ((audio_input > 1.0) ? 1.0 : audio_input)
+      input = Dsp.clamp(audio_input, -1.0, 1.0)
 
       @delay_l += @delay_step_l
       @delay_r += @delay_step_r

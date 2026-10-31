@@ -105,7 +105,7 @@ module Spms1
     # Waveform morph is unipolar, [0.0, 1.0].
     # 0.0 = sawtooth, 0.5 = 50% morph, 1.0 = pulse (square at PW 0.0).
     def set_waveform(waveform)
-      @waveform = (waveform < 0.0) ? 0.0 : ((waveform > 1.0) ? 1.0 : waveform)
+      @waveform = Dsp.clamp(waveform, 0.0, 1.0)
     end
 
     # Pulse width is bipolar, [-0.5, 0.5]: how far the second sawtooth is shifted back from half a
@@ -114,7 +114,7 @@ module Spms1
     # cancel. Between the two ends of the morph it moves the second sawtooth of the blend in the
     # same way.
     def set_pulse_width(pulse_width)
-      @pulse_width = (pulse_width < -0.5) ? -0.5 : ((pulse_width > 0.5) ? 0.5 : pulse_width)
+      @pulse_width = Dsp.clamp(pulse_width, -0.5, 0.5)
     end
 
     # Every Mod Amt is unipolar, [0.0, 1.0], a plain multiplier on its input, and its Mod Pol,
@@ -125,13 +125,13 @@ module Spms1
     # whole pulse width range, so at full depth a bipolar source swings it half the range either
     # way, and a unipolar one across all of it.
     def set_pitch_modulation_1_amount(amount)
-      clamped_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
+      clamped_amount = Dsp.clamp(amount, 0.0, 1.0)
       @pitch_modulation_1_amount = clamped_amount * MODULATION_RANGE
       @pitch_modulation_1_depth = @pitch_modulation_1_amount * @pitch_modulation_1_polarity * @pitch_modulation_1_on
     end
 
     def set_pitch_modulation_2_amount(amount)
-      clamped_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
+      clamped_amount = Dsp.clamp(amount, 0.0, 1.0)
       @pitch_modulation_2_amount = clamped_amount * MODULATION_RANGE
       @pitch_modulation_2_depth = @pitch_modulation_2_amount * @pitch_modulation_2_polarity * @pitch_modulation_2_on
     end
@@ -150,35 +150,35 @@ module Spms1
     end
 
     def set_pitch_modulation_1_polarity(polarity)
-      clamped = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
+      clamped = Dsp.clamp(polarity, -0.5, 0.5)
       @pitch_modulation_1_polarity = clamped + clamped
       @pitch_modulation_1_depth = @pitch_modulation_1_amount * @pitch_modulation_1_polarity * @pitch_modulation_1_on
     end
 
     def set_pitch_modulation_2_polarity(polarity)
-      clamped = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
+      clamped = Dsp.clamp(polarity, -0.5, 0.5)
       @pitch_modulation_2_polarity = clamped + clamped
       @pitch_modulation_2_depth = @pitch_modulation_2_amount * @pitch_modulation_2_polarity * @pitch_modulation_2_on
     end
 
     def set_pw_modulation_1_amount(amount)
-      @pw_modulation_1_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
+      @pw_modulation_1_amount = Dsp.clamp(amount, 0.0, 1.0)
       @pw_modulation_1_depth = @pw_modulation_1_amount * @pw_modulation_1_polarity
     end
 
     def set_pw_modulation_2_amount(amount)
-      @pw_modulation_2_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
+      @pw_modulation_2_amount = Dsp.clamp(amount, 0.0, 1.0)
       @pw_modulation_2_depth = @pw_modulation_2_amount * @pw_modulation_2_polarity
     end
 
     def set_pw_modulation_1_polarity(polarity)
-      clamped = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
+      clamped = Dsp.clamp(polarity, -0.5, 0.5)
       @pw_modulation_1_polarity = clamped + clamped
       @pw_modulation_1_depth = @pw_modulation_1_amount * @pw_modulation_1_polarity
     end
 
     def set_pw_modulation_2_polarity(polarity)
-      clamped = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
+      clamped = Dsp.clamp(polarity, -0.5, 0.5)
       @pw_modulation_2_polarity = clamped + clamped
       @pw_modulation_2_depth = @pw_modulation_2_amount * @pw_modulation_2_polarity
     end
@@ -190,13 +190,13 @@ module Spms1
     # Not smoothed: a semitone step is part of the sound, a Fine step is too small to hear as one,
     # and a step in pitch does not click, as the phase runs on unbroken.
     def set_pitch_coarse(pitch_coarse)
-      clamped = (pitch_coarse < -0.5) ? -0.5 : ((pitch_coarse > 0.5) ? 0.5 : pitch_coarse)
+      clamped = Dsp.clamp(pitch_coarse, -0.5, 0.5)
       @pitch_coarse = (clamped + clamped) * PITCH_COARSE_RANGE
       @tune = @pitch_coarse + @pitch_fine
     end
 
     def set_pitch_fine(pitch_fine)
-      clamped = (pitch_fine < -0.5) ? -0.5 : ((pitch_fine > 0.5) ? 0.5 : pitch_fine)
+      clamped = Dsp.clamp(pitch_fine, -0.5, 0.5)
       @pitch_fine = (clamped + clamped) * PITCH_FINE_RANGE
       @tune = @pitch_coarse + @pitch_fine
     end
@@ -229,7 +229,7 @@ module Spms1
 
       pitch_modulation = (pitch_modulation_1_input * @current_pitch_modulation_1_depth) + (pitch_modulation_2_input * @current_pitch_modulation_2_depth)
       total_pitch = pitch_input + @tune + pitch_modulation
-      pitch = (total_pitch < -0.5) ? -0.5 : ((total_pitch > 0.5) ? 0.5 : total_pitch)
+      pitch = Dsp.clamp(total_pitch, -0.5, 0.5)
       freq = pitch_to_freq_fast(pitch)
       current_dt = freq * @inv_sample_rate
       # Both poly_blep calls below work against this same dt, so its reciprocal is taken once here
@@ -244,7 +244,7 @@ module Spms1
       # shift within one cycle, so that a single wrap below brings phase2 back under 1.0.
       pw_modulation = (pw_modulation_1_input * @current_pw_modulation_1_depth) + (pw_modulation_2_input * @current_pw_modulation_2_depth)
       total_pulse_width = @current_pulse_width + pw_modulation
-      pulse_width = (total_pulse_width < -0.5) ? -0.5 : ((total_pulse_width > 0.5) ? 0.5 : total_pulse_width)
+      pulse_width = Dsp.clamp(total_pulse_width, -0.5, 0.5)
       phase2 = @phase + (0.5 - pulse_width)
       phase2 -= (phase2 < 1.0) ? 0.0 : 1.0
 
@@ -305,14 +305,14 @@ module Spms1
 
       pitch_modulation = (pitch_modulation_1_input * @current_pitch_modulation_1_depth) + (pitch_modulation_2_input * @current_pitch_modulation_2_depth)
       total_pitch = pitch_input + @tune + pitch_modulation
-      pitch = (total_pitch < -0.5) ? -0.5 : ((total_pitch > 0.5) ? 0.5 : total_pitch)
+      pitch = Dsp.clamp(total_pitch, -0.5, 0.5)
       freq = pitch_to_freq_fast(pitch)
       current_dt = freq * @inv_sample_rate
       current_dt_inv = 1.0 / current_dt
 
       pw_modulation = (pw_modulation_1_input * @current_pw_modulation_1_depth) + (pw_modulation_2_input * @current_pw_modulation_2_depth)
       total_pulse_width = @current_pulse_width + pw_modulation
-      pulse_width = (total_pulse_width < -0.5) ? -0.5 : ((total_pulse_width > 0.5) ? 0.5 : total_pulse_width)
+      pulse_width = Dsp.clamp(total_pulse_width, -0.5, 0.5)
       shift = 0.5 - pulse_width
 
       # The crossing, a fraction f past the last sample, since = 1 - f before this one. A step of
