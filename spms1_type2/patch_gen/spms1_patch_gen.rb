@@ -448,7 +448,9 @@ end
 #
 # The dispatch compares against literal ids, and writes to literal bus slots, rather than the
 # MODULE_* and SIGNAL_* constants, which Spinel emits as runtime globals (see spms1_main.rb). Each
-# literal carries its constant's name in a comment at the end of its line.
+# literal carries its constant's name in a comment at the end of its line. The same goes for the
+# NRPN entries, the slots and the MIDI channel (0, MIDI_CH) the sources and the parameters are read
+# by.
 def local_name(item) = SPEC.full_key(item).downcase
 
 # What the loop needs of the spec besides what Spec#check asks of every file written from it.
@@ -491,12 +493,13 @@ def main_sources
   out = []
   s.inputs.each do |i|
     name = "source_#{local_name(i)}"
-    out << "  #{name} = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_#{s.full_key(i)})\n"
+    out << "  #{name} = C.get_midi_nrpn_value(0, #{NRPN_INPUT_BASE + i['entry']}) # NRPN_SOURCE_#{s.full_key(i)}\n"
     # A controller slot's smoothed copy in its place (see spms1_main.rb), but for a gate input or a
     # side of the final output: both differences are at least 0 only in the controllers' run of
     # slots. Written out rather than a function or a table, which cost more as Spinel builds them.
     next unless i['module'] && !i['gate']
-    out << "  #{name} += ((#{name} - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - #{name})) >= 0 ? SMOOTHED_SLOT_OFFSET : 0\n"
+    first = s.controller_slots.first['id']
+    out << "  #{name} += ((#{name} - #{first}) | (#{s.controller_slots.last['id']} - #{name})) >= 0 ? #{s.smoothed_base - first} : 0 # CONTROLLER_SLOT_FIRST, CONTROLLER_SLOT_LAST, SMOOTHED_SLOT_OFFSET\n"
   end
   out.join
 end
@@ -504,7 +507,8 @@ end
 def param_sources
   s = SPEC
   s.params.map do |c|
-    "  source_#{local_name(c)} = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_#{s.full_key(c)}), SLOT_#{s.full_key(c)})\n"
+    key = s.full_key(c)
+    "  source_#{local_name(c)} = source_or_own(C.get_midi_nrpn_value(0, #{NRPN_PARAM_SOURCE_BASE + c['entry']}), #{PARAM_SLOT_BASE + c['entry']}) # NRPN_SOURCE_#{key}, SLOT_#{key}\n"
   end.join
 end
 
@@ -515,20 +519,22 @@ def main_controls
   out = []
   s.params.each do |c|
     name = local_name(c)
-    out << "  cc_#{name} = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_#{s.full_key(c)})\n"
-    out << "  signals[SLOT_#{s.full_key(c)}] = #{converter(c['bipolar'])}(cc_or_nrpn(cc_#{name}, C.get_midi_cc_value(MIDI_CH, cc_#{name}), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_#{s.full_key(c)})))\n"
+    key = s.full_key(c)
+    out << "  cc_#{name} = C.get_midi_nrpn_value(0, #{NRPN_CC_BASE + c['entry']}) # NRPN_CC_#{key}\n"
+    out << "  signals[#{PARAM_SLOT_BASE + c['entry']}] = #{converter(c['bipolar'])}(cc_or_nrpn(cc_#{name}, C.get_midi_cc_value(0, cc_#{name}), C.get_midi_nrpn_value(0, #{NRPN_VALUE_BASE + c['entry']}))) # SLOT_#{key}, NRPN_VALUE_#{key}\n"
   end
   s.controllers.each do |c|
     name = local_name(c)
-    out << "  cc_#{name} = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_#{s.full_key(c)})\n"
-    plain = "signals[SIGNAL_#{s.full_key(c)}]"
+    key = s.full_key(c)
+    out << "  cc_#{name} = C.get_midi_nrpn_value(0, #{NRPN_CC_BASE + c['entry']}) # NRPN_CC_#{key}\n"
+    plain = "signals[#{s.signal(key)['id']}]"
     if c['performance']
-      out << "  #{name} = C.get_midi_cc_value(MIDI_CH, cc_#{name})\n"
+      out << "  #{name} = C.get_midi_cc_value(0, cc_#{name})\n"
       value = "cc_or_zero(cc_#{name}, #{converter(c['bipolar'])}(#{name}))"
       index = "cc_table_index(cc_#{name}, #{name})"
     else
       # With no CC, the value the patch holds for it, as a parameter's.
-      out << "  #{name} = cc_or_nrpn(cc_#{name}, C.get_midi_cc_value(MIDI_CH, cc_#{name}), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_#{s.full_key(c)}))\n"
+      out << "  #{name} = cc_or_nrpn(cc_#{name}, C.get_midi_cc_value(0, cc_#{name}), C.get_midi_nrpn_value(0, #{NRPN_VALUE_BASE + c['entry']})) # NRPN_VALUE_#{key}\n"
       value = "#{converter(c['bipolar'])}(#{name})"
       index = "value_table_index(#{name})"
     end
@@ -539,16 +545,19 @@ def main_controls
              when 'cos' then "QUARTER_SINE_TABLE[120 - #{index}]"
              else form_expr(sig['form'], plain)
              end
-      out << "  signals[SIGNAL_#{sig['key']}] = #{expr}\n"
+      out << "  signals[#{sig['id']}] = #{expr} # SIGNAL_#{sig['key']}#{sig['form'] && !%w[sin cos].include?(sig['form']) ? ", SIGNAL_#{key}" : ''}\n"
     end
   end
   # The smoothed copies, every buffer for every controller whatever reads them, so that what they
   # cost is the same for any patch: the controller's value in two stages, then each form of it.
-  s.controllers.each do |c|
+  offset = s.smoothed_base - s.controller_slots.first['id']
+  s.controllers.each_with_index do |c, n|
     name = local_name(c)
     key = s.full_key(c)
-    out << "  signals[SMOOTHED_STAGE_1_#{key}] = Dsp.smooth(signals[SIGNAL_#{key}], signals[SMOOTHED_STAGE_1_#{key}], CONTROLLER_SMOOTHING_BLEND)\n"
-    out << "  smoothed_#{name} = Dsp.smooth(signals[SMOOTHED_STAGE_1_#{key}], signals[SIGNAL_#{key} + SMOOTHED_SLOT_OFFSET], CONTROLLER_SMOOTHING_BLEND)\n"
+    id = s.signal(key)['id']
+    stage_1 = s.smoothed_base + s.controller_slots.size + n
+    out << "  signals[#{stage_1}] = Dsp.smooth(signals[#{id}], signals[#{stage_1}], CONTROLLER_SMOOTHING_BLEND) # SMOOTHED_STAGE_1_#{key}, SIGNAL_#{key}\n"
+    out << "  smoothed_#{name} = Dsp.smooth(signals[#{stage_1}], signals[#{id + offset}], CONTROLLER_SMOOTHING_BLEND) # SMOOTHED_STAGE_1_#{key}, SIGNAL_#{key} + SMOOTHED_SLOT_OFFSET\n"
     s.slots_of(c).each do |sig|
       expr = case sig['form']
              when nil then "smoothed_#{name}"
@@ -556,7 +565,7 @@ def main_controls
              when 'cos' then "quarter_sine(1.0 - smoothed_#{name})"
              else form_expr(sig['form'], "smoothed_#{name}")
              end
-      out << "  signals[SIGNAL_#{sig['key']} + SMOOTHED_SLOT_OFFSET] = #{expr}\n"
+      out << "  signals[#{sig['id'] + offset}] = #{expr} # SIGNAL_#{sig['key']} + SMOOTHED_SLOT_OFFSET\n"
     end
   end
   out.join

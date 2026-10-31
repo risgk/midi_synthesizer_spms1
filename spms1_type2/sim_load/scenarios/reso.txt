@@ -1,0 +1,2 @@
+; Self-oscillating Filter 2 with Drive at the top, cutoff low
+B0 47 7C B0 1F 7C B0 4A 28

@@ -1,0 +1,3 @@
+; Fast LFO at full level on the pitch, the PW and the cutoff, EG on them too, at the top: the
+; oscillators' pitch and PW and the LFO's amount clamped
+B0 03 7C B0 74 7C B0 01 7C B0 0D 7C B0 59 7C B0 08 7C B0 67 7C B0 18 7C B0 19 7C B0 72 04

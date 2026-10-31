@@ -189,8 +189,9 @@ keeps to that as far as it can:
 - Curves from lookup tables with linear interpolation, worked out once in the class, not library
   calls (`Math.sqrt`, `Math.exp` and the like), whose time depends on the input
 - Nothing allocated while playing: make every array in `initialize`
-- Literals rather than named constants in the per-sample code: Spinel emits a named Integer or
-  Float constant as a runtime global, loaded each time it is read
+- Literals rather than named constants in the per-sample and per-buffer code: Spinel emits a named
+  Integer or Float constant as a runtime global, loaded each time it is read, and a check against
+  it is not folded away
 - A state that decays toward zero through `Dsp.flush_tiny`, so that it lands on zero rather than
   sinking into the denormals
 - If Spinel leaves something untyped and boxes the arithmetic, a type seed in "spms1/sig" fixes it
@@ -216,6 +217,15 @@ measures on the device -- with the default patch and a note held.
 - `--profile` lists the functions the cycles go to; `--modules` the load of each module (below), from
   the debug info of the ELF and the run; `--elf FILE` estimates an ELF built elsewhere, from another
   commit say, so two versions can be compared; `--help` shows the rest
+- `--patch FILE` and `--score FILE` play what sim_render plays: a patch as MIDI bytes in hex, applied
+  before the first buffer, and MIDI at times in seconds, each applied before the buffer it falls in,
+  written into the tables the sketch's MIDI handlers fill; `--per-buffer` prints each buffer. With
+  more buffers (`--buffers 60`) they show how far a buffer moves with the values: the files in
+  "sim_load/scenarios" hold Mixer 2 at its limit, the limiter off, the modulations at the top, a
+  self-oscillating filter, the delay at its shortest, and a note every 10 ms with glide and bend
+  (`--gate 0`). As measured at the commit that added them, the last moves a buffer the most, by
+  about 700 cycles (207599 to 208300; v0.4.1, 208145 to 208676), the envelopes and the glide
+  changing state; the others stay within the default patch's 207366 to 207969
 - Needs Python 3 and `pip install unicorn capstone pyelftools numpy`, installed by you and not shipped
   here: Unicorn's Python binding is under the BSD license and its emulator under the GPLv2, Capstone
   and NumPy under the BSD license, and pyelftools is in the public domain
@@ -330,7 +340,11 @@ README names, with the changes for the MCU kept in two places:
   throughout left out whole with `SPINEL_BARE_METAL` (below), the GC's buffers made to fit
   SRAM, and the in-range path of an Array read or write (`sp_FloatArray_get`/`set`,
   `sp_IntArray_get`) put ahead of the other checks, which go out of line unchanged, so that what
-  an access does is the same and only its cost moves. Each file it
+  an access does is the same and only its cost moves, and Float#to_i (`sp_float_to_i_checked`, in
+  "sp_alloc.h") inline and without its checks, as Integer arithmetic goes without its overflow
+  check: a NaN, an infinity or a Float past the range of Integer no longer raises (a raise stops
+  the sound on the MCU all the same) but comes out as the processor converts it, and the checks no
+  longer take their 31 us of a buffer. Each file it
   changes sits next to its released copy, "NAME.orig"
 - "sp_cold_bare_metal.c" and "spinel_mcu/sp_cold_bare_metal.patch": "sp_cold.c" for a bare-metal
   build (below), kept apart from the released one, which stays as it is but for its being left

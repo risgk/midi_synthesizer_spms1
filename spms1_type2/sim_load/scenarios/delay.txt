@@ -1,0 +1,2 @@
+; Delay 1 Time at its shortest, Feedback, Mix and Chorus 1 Mix, Rate and Depth at the top
+B0 5A 04 B0 5C 7C B0 5E 7C B0 5D 7C B0 3A 7C B0 3B 7C

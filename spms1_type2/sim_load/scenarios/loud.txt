@@ -1,0 +1,2 @@
+; Every source at full into Mixer 2 (its sum held to one unit every sample), Amp 1 Gain 2 at x4
+B0 13 7C B0 14 7C B0 15 7C B0 17 7C B0 0F 7C
