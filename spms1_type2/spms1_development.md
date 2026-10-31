@@ -159,7 +159,11 @@ A module is added without writing anything in the loop:
 patch_gen writes the `require_relative` of the module's file, its instance, the reads of its routing and its CCs, the calls to its
 setters and its `when` in the dispatch into "spms1/spms1_main.rb", as plain straight-line Ruby, the
 same as it would be written by hand, so Spinel compiles it to the same: a module costs what its
-own code costs and no more. The editor and the NRPN tables of "spms1_patching.md" and "spms1_patching.ja.md" take it up as well.
+own code costs and no more. The parameters' part of it -- their sources, the CCs and the setters,
+once per buffer -- goes into a function of its own, `spms1_apply_parameters`, which
+"spms1/spms1_parameters.h", written by patch_gen too, declares out of `Spms1_main` (`noinline`), in
+RAM and flattened itself: inlined into `Spms1_main`, as its `flatten` would have it, what it holds
+in registers crowded the per-sample loop, which ran longer for every parameter added. The editor and the NRPN tables of "spms1_patching.md" and "spms1_patching.ja.md" take it up as well.
 
 ### Writing a Module
 
@@ -311,7 +315,7 @@ README names, with the changes for the MCU kept in two places:
   (`SP_INT_OVERFLOW_MODE_WRAP`, as `spinel --int-overflow=wrap` builds it), the float versions of
   the math functions, and, at
   the end of "spinel_rt.h", what binds the generated code to a float runtime (below) and the
-  sketch's "spms1_bus.h" and "spms1_midi_read.h".
+  sketch's "spms1_bus.h", "spms1_midi_read.h" and "spms1_parameters.h".
   "spinel_rt.h" carries only an `#include` line for each
 - "spinel_mcu/spinel_mcu.patch": what is changed in Spinel's own files -- the runtime written in
   `sp_float` where it said `double` for a Float, the POSIX parts left out with `#if 0` (a release

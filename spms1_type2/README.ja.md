@@ -80,7 +80,8 @@ MIDI Synthesizer SPMS-1 (type-2) v0.4.1
 - Ruby (CRuby): パッチの番号や初期パッチを変えるとき、モジュールを追加するとき。これらは
   "spms1_patch.yaml" にまとめてあり、`ruby patch_gen/spms1_patch_gen.rb` が "spms1/spms1_patch.rb"
   ("spms1/spms1_main.rb" が読み込みます)、"spms1/spms1_default_patch.h" の初期パッチ (Reset 用に
-  "spms1/spms1_midi_state.h" が読み込みます)、"spms1_editor.html" のテーブル、"spms1_patching.ja.md" と
+  "spms1/spms1_midi_state.h" が読み込みます)、"spms1/spms1_parameters.h" (パラメータのバッファごとの関数を、
+  サンプルごとのループの関数の外に置く宣言)、"spms1_editor.html" のテーブル、"spms1_patching.ja.md" と
   "spms1_patching.md" の NRPN の表、"spms1/spms1_main.rb" のループの配線
   ([モジュールの追加](./spms1_development.ja.md#モジュールの追加) を参照) に
   書き出します。実行したあと、"spms1/spms1_main.c" を生成し直してください。`--check` は、ファイルが

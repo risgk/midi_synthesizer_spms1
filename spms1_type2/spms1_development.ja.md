@@ -152,7 +152,11 @@ C のホスト ("sim_spinel"、"sim_render"、"web" の SPMS-1 Web) は、スケ
 patch_gen は、モジュールのファイルの `require_relative`、インスタンス、ルーティングと CC の読み出し、setter の呼び出し、
 ディスパッチの `when` を "spms1/spms1_main.rb" に書きます。手で書いた場合と同じ
 素直な直線的な Ruby なので、Spinel も同じものにコンパイルします。モジュールにかかるのは、
-そのモジュール自身のコードの分だけです。エディタと "spms1_patching.ja.md"、"spms1_patching.md" の NRPN の表にも反映されます。
+そのモジュール自身のコードの分だけです。そのうちパラメータの部分 (ソース、CC、setter。バッファごとに 1 回) は
+独立した関数 `spms1_apply_parameters` に入り、同じく patch_gen が書く "spms1/spms1_parameters.h" が、
+これを `Spms1_main` の外に置き (`noinline`)、RAM に置き、それ自体を flatten します。`Spms1_main` に
+その flatten でインライン展開されると、これがレジスタに抱える値がサンプルごとのループを圧迫し、
+パラメータを足すたびにループが長くなっていました。エディタと "spms1_patching.ja.md"、"spms1_patching.md" の NRPN の表にも反映されます。
 
 ### モジュールの書き方
 
@@ -297,7 +301,7 @@ MCU 向けの変更は 2 か所にまとめてあります:
 - "spinel_rt_mcu_head.h"、"spinel_rt_mcu_libm.h"、"spinel_rt_mcu_cold.h": MCU 向けに足すもの --
   シンセ本体のセクションと pragma、オーバーフロー検査なしの Integer 演算 (`SP_INT_OVERFLOW_MODE_WRAP`。
   `spinel --int-overflow=wrap` と同じ)、数学関数の float 版、そして "spinel_rt.h" の最後で生成コードを
-  float のランタイムにつなぐもの (下記) とスケッチの "spms1_bus.h"、"spms1_midi_read.h"。"spinel_rt.h" にはそれぞれの `#include` 行だけがあります
+  float のランタイムにつなぐもの (下記) とスケッチの "spms1_bus.h"、"spms1_midi_read.h"、"spms1_parameters.h"。"spinel_rt.h" にはそれぞれの `#include` 行だけがあります
 - "spinel_mcu/spinel_mcu.patch": Spinel 自身のファイルへの変更 -- Float を表す `double` を `sp_float`
   で書いたランタイム、POSIX 部分の `#if 0` による除外 (中身がリリースで変わってもパッチが
   当たりやすいように)、全体が POSIX 前提のファイルの `SPINEL_BARE_METAL` による除外 (下記)、

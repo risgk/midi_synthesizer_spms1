@@ -81,7 +81,8 @@ Required Software for Modification
 - Ruby (CRuby), to change the patch's numbers or the default patch, or to add a module: they are
   kept in "spms1_patch.yaml", and `ruby patch_gen/spms1_patch_gen.rb` writes them out to
   "spms1/spms1_patch.rb" (read by "spms1/spms1_main.rb"), the default patch of "spms1/spms1_default_patch.h"
-  (for Reset, read by "spms1/spms1_midi_state.h"), the tables of "spms1_editor.html", the NRPN
+  (for Reset, read by "spms1/spms1_midi_state.h"), "spms1/spms1_parameters.h" (the declaration that
+  keeps the parameters' per-buffer function out of the per-sample loop's), the tables of "spms1_editor.html", the NRPN
   tables of "spms1_patching.md" and "spms1_patching.ja.md", and the wiring of the loop in
   "spms1/spms1_main.rb" (see [Adding a Module](./spms1_development.md#adding-a-module)). Run it, then regenerate "spms1/spms1_main.c"; `--check` only
   says whether the files are up to date
