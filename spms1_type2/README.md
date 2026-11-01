@@ -346,7 +346,7 @@ on the note too.
 The LFO goes straight to the oscillator, on Pitch Mod 2 In and PW Mod 2 In, and to the filters, where Mod 2 Amt (CC#25) powers up at 0.0 and
 leaves the cutoff alone until it is turned up. The envelope moves the cutoff by Mod 1 Amt
 (CC#24), which powers up at 0.2 (value 28), two octaves up from Cutoff (CC#74) at its
-peak; the cutoff powers up at 0.8 (value 100). Osc 1 Pitch Mod 2 Amt (CC#13) takes the
+peak; the cutoff powers up at 0.7 (value 88). Osc 1 Pitch Mod 2 Amt (CC#13) takes the
 LFO to the pitch and powers up at 0.0; at its top, value 124, with Osc 1 Pitch Mod 2 Pol at +0.2,
 the LFO at full level swings the pitch an octave either way. Osc 1 PW Mod 2 Amt (CC#103) takes it
 to the pulse width and powers up at 0.0. LFO 1 Level powers up at 1.0, so CC#13 alone sets the

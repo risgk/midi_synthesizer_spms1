@@ -10,6 +10,14 @@ revised.
       brought down from x1 at value 4, where they power up and the filters are as they were, to
       1/16 at value 124, so that the resonance saturates sooner while the level and the output clip
       stay. A patch saved by v0.4.1 loads the default patch, as the entries have changed
+    - Filters: Cutoff three semitones down, a C every 12 values, C5 (523 Hz) at value 64, from note
+      12 (16.4 Hz) at value 4 to note 132 (16.7 kHz) at value 124 (it was note 15, 19 Hz, to note
+      135, 20 kHz), so that with Pitch Amt at its top the cutoff at value 64 is an octave above the
+      note played; the default patch powers up at value 88, note 96 (C7, 2.1 kHz), rather than value
+      100, note 111 (5.0 kHz)
+    - LFO 1 Rate: a C every 12 values, C-1 (8.18 Hz) at value 64 and middle C (261.6 Hz) at value
+      124, from 0.255 Hz at value 4, three semitones up from 6.875 Hz at value 64 (220 Hz at 124); it
+      powers up at value 60, 6.49 Hz, a slightly slower vibrato than the 6.875 Hz of before
     - Lighter: about 200 us less of the 1333 us of a buffer (estimated), from the clamps (a max
       and a min, one instruction each), the parameters' reads and Float#to_i
 

@@ -270,7 +270,7 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {528, 124},  // EG 2 Release Sw value
   {529, 124},  // EG 2 Level value
   {530,   4},  // LFO 1 Wave value
-  {531,  64},  // LFO 1 Rate value
+  {531,  60},  // LFO 1 Rate value
   {532, 124},  // LFO 1 Level value
   {533, 124},  // LFO 1 Rate Mod Amt value
   {534, 124},  // LFO 1 Level Mod Amt value
@@ -317,7 +317,7 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {575,   4},  // Mixer 2 Level 4 value
   {576, 124},  // Mixer 2 Out Level value
   {577,   4},  // Filter 1 Mode value
-  {578, 100},  // Filter 1 Cutoff value
+  {578,  88},  // Filter 1 Cutoff value
   {579,   4},  // Filter 1 Resonance value
   {580,  64},  // Filter 1 Gain 1 value
   {581,   4},  // Filter 1 Gain 2 value
@@ -328,7 +328,7 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {586,   4},  // Filter 1 Mod 2 Amt value
   {587,  76},  // Filter 1 Mod 2 Pol value
   {588,   4},  // Filter 2 Mode value
-  {589, 100},  // Filter 2 Cutoff value
+  {589,  88},  // Filter 2 Cutoff value
   {590,  64},  // Filter 2 Resonance value
   {591,   4},  // Filter 2 Gain 1 value
   {592,  64},  // Filter 2 Gain 2 value
@@ -371,7 +371,7 @@ static const uint8_t g_spms1_default_cc[][2] = {
   {54,  124},  // EG 2 Sustain
   {105, 124},  // EG 2 Release Sw
   {33,    4},  // LFO 1 Wave
-  {3,    64},  // LFO 1 Rate
+  {3,    60},  // LFO 1 Rate
   {116, 124},  // LFO 1 Level
   {113,   4},  // LFO 1 Reset Sw
   {102,   4},  // Osc 1 Wave
@@ -393,13 +393,13 @@ static const uint8_t g_spms1_default_cc[][2] = {
   {21,    4},  // Mixer 2 Level 3
   {23,    4},  // Mixer 2 Level 4
   {39,    4},  // Filter 1 Mode
-  {74,  100},  // Filter 1 Cutoff
+  {74,   88},  // Filter 1 Cutoff
   {9,     4},  // Filter 1 Pitch Amt
   {24,   28},  // Filter 1 Mod 1 Amt
   {117, 124},  // Filter 1 Mod 1 Pol
   {25,    4},  // Filter 1 Mod 2 Amt
   {39,    4},  // Filter 2 Mode
-  {74,  100},  // Filter 2 Cutoff
+  {74,   88},  // Filter 2 Cutoff
   {71,   64},  // Filter 2 Resonance
   {9,     4},  // Filter 2 Pitch Amt
   {24,   28},  // Filter 2 Mod 1 Amt

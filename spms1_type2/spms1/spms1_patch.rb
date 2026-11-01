@@ -841,7 +841,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_EG_2_RELEASE_SW       , 124)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_EG_2_LEVEL            , 124)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_LFO_1_WAVE            , 4)
-  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_LFO_1_RATE            , 64)
+  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_LFO_1_RATE            , 60)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_LFO_1_LEVEL           , 124)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_LFO_1_RATE_MOD_AMT    , 124)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_LFO_1_LEVEL_MOD_AMT   , 124)
@@ -888,7 +888,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_MIXER_2_LEVEL_4       , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_MIXER_2_OUT_LEVEL     , 124)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_MODE         , 4)
-  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_CUTOFF       , 100)
+  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_CUTOFF       , 88)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_RESONANCE    , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_GAIN_1       , 64)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_GAIN_2       , 4)
@@ -899,7 +899,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_MOD_2_AMT    , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_1_MOD_2_POL    , 76)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_2_MODE         , 4)
-  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_2_CUTOFF       , 100)
+  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_2_CUTOFF       , 88)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_2_RESONANCE    , 64)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_2_GAIN_1       , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_2_GAIN_2       , 64)
@@ -939,7 +939,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 54 , 124) # EG 2 Sustain
   C.set_midi_cc_value(midi_ch, 105, 124) # EG 2 Release Sw
   C.set_midi_cc_value(midi_ch, 33 , 4  ) # LFO 1 Wave
-  C.set_midi_cc_value(midi_ch, 3  , 64 ) # LFO 1 Rate
+  C.set_midi_cc_value(midi_ch, 3  , 60 ) # LFO 1 Rate
   C.set_midi_cc_value(midi_ch, 116, 124) # LFO 1 Level
   C.set_midi_cc_value(midi_ch, 113, 4  ) # LFO 1 Reset Sw
   C.set_midi_cc_value(midi_ch, 102, 4  ) # Osc 1 Wave
@@ -961,13 +961,13 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 21 , 4  ) # Mixer 2 Level 3
   C.set_midi_cc_value(midi_ch, 23 , 4  ) # Mixer 2 Level 4
   C.set_midi_cc_value(midi_ch, 39 , 4  ) # Filter 1 Mode
-  C.set_midi_cc_value(midi_ch, 74 , 100) # Filter 1 Cutoff
+  C.set_midi_cc_value(midi_ch, 74 , 88 ) # Filter 1 Cutoff
   C.set_midi_cc_value(midi_ch, 9  , 4  ) # Filter 1 Pitch Amt
   C.set_midi_cc_value(midi_ch, 24 , 28 ) # Filter 1 Mod 1 Amt
   C.set_midi_cc_value(midi_ch, 117, 124) # Filter 1 Mod 1 Pol
   C.set_midi_cc_value(midi_ch, 25 , 4  ) # Filter 1 Mod 2 Amt
   C.set_midi_cc_value(midi_ch, 39 , 4  ) # Filter 2 Mode
-  C.set_midi_cc_value(midi_ch, 74 , 100) # Filter 2 Cutoff
+  C.set_midi_cc_value(midi_ch, 74 , 88 ) # Filter 2 Cutoff
   C.set_midi_cc_value(midi_ch, 71 , 64 ) # Filter 2 Resonance
   C.set_midi_cc_value(midi_ch, 9  , 4  ) # Filter 2 Pitch Amt
   C.set_midi_cc_value(midi_ch, 24 , 28 ) # Filter 2 Mod 1 Amt

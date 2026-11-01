@@ -168,21 +168,21 @@ module Spms1
       @dc_blocker_coefficient = DC_BLOCKER_COEFFICIENT_BASE * (48000.0 / @sample_rate)
       @self_osc_seed = SELF_OSC_SEED
       # The fade's weight is offset - cutoff * scale, clamped to [0, 1]: one at f_s / 6 and below,
-      # zero at f_s / 4.8 and above. The dial puts MIDI note 15 at 0.0 and 135 at 1.0, 440 Hz at
-      # 0.45. At a sample rate of 96 kHz or more, f_s / 4.8 lies past the top of the dial and the
+      # zero at f_s / 4.8 and above. The dial puts MIDI note 12 at 0.0 and 132 at 1.0, 440 Hz at
+      # 0.475. At a sample rate of 96 kHz or more, f_s / 4.8 lies past the top of the dial and the
       # oscillation never fades out entirely.
-      self_osc_fade_end = 0.45 + Math.log(sample_rate * (1.0 / (4.8 * 440.0))) / (10.0 * Math.log(2.0))
+      self_osc_fade_end = 0.475 + Math.log(sample_rate * (1.0 / (4.8 * 440.0))) / (10.0 * Math.log(2.0))
       @self_osc_fade_scale = 1.0 / SELF_OSC_FADE_WIDTH
       @self_osc_fade_offset = self_osc_fade_end * @self_osc_fade_scale
 
-      # Integrator gain lookup, g = tan(pi * f_0 / f_s), one entry per semitone of MIDI note 15
-      # (19 Hz) to 135 (20 kHz), the cutoff dial's range. It depends on the sample rate, so it is
+      # Integrator gain lookup, g = tan(pi * f_0 / f_s), one entry per semitone of MIDI note 12
+      # (16.4 Hz) to 132 (16.7 kHz), the cutoff dial's range. It depends on the sample rate, so it is
       # built here rather than as a constant. The prewarp puts the cutoff exactly where the note
       # says, all the way up; the guard entry at the end serves as K_TABLE's does.
       @g_table = Array.new(122, 0.0)
       i = 0
       while i < 121
-        freq = 440.0 * (2.0 ** ((i.to_f - 54.0) * (1.0 / 12.0)))
+        freq = 440.0 * (2.0 ** ((i.to_f - 57.0) * (1.0 / 12.0)))
         @g_table[i] = Math.tan(Math::PI * freq * (1.0 / sample_rate))
         i += 1
       end
@@ -282,7 +282,9 @@ module Spms1
 
     # Every parameter but the two Mod Pols is unipolar, [0.0, 1.0], which is what the smoothing, the
     # modulation sum and the table lookups below are written against.
-    # Cutoff range: MIDI note 15 (19 Hz) at 0.0, MIDI note 75 (622 Hz) at 0.5, MIDI note 135 (20 kHz) at 1.0.
+    # Cutoff range: MIDI note 12 (16.4 Hz) at 0.0, MIDI note 72 (C5, 523 Hz) at 0.5, MIDI note 132
+    # (16.7 kHz) at 1.0: a C every 12 values from CC 4, and with Pitch Amt at 1.0 the cutoff at 0.5
+    # an octave above the note played.
     def set_cutoff(cutoff)
       @cutoff = Dsp.clamp(cutoff, 0.0, 1.0)
     end

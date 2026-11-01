@@ -615,8 +615,9 @@ oscillator's range.
 
 LFO 1 puts out a triangle and a square at once, each on an output of its own, Out Triangle and
 Out Square, and the two crossfaded on Out. The triangle has its corners rounded off by PolyBLAMP
-and the square its steps by PolyBLEP, so at the top of the rate range, 220 Hz, where the LFO is an
-audible tone, the square's aliases are 41 dB down on it, rather than 24 dB without. The square is
+and the square its steps by PolyBLEP, so at the top of the rate range, 261.6 Hz (middle C), where
+the LFO is an audible tone, the square's aliases are 40 dB down on it (at 220 Hz 41 dB, rather than
+24 dB without). The square is
 unipolar: 1.0 while the triangle is above zero and 0.0 while it is below, stepping where it
 crosses, so it gates, or trills up from the note on an oscillator's pitch, where the triangle
 swings about zero for a vibrato; its inverted output runs 0.0 and -1.0. LFO 1 Wave (CC#33) crossfades Out in a straight line from the triangle at 0.0 (value 4), where it
@@ -631,6 +632,10 @@ Mod Wheel by default at a depth of 1.0 (Level Mod Amt has no CC and holds 1.0), 
 turned down the wheel brings the LFO in, up to full at its top. Turning the LFO the
 other way up is for Out Inv, Out negated, or for a mixer's Out Inv; the triangle and the square
 have theirs too, Out Triangle Inv and Out Square Inv. The default patch leaves them unrouted.
+
+LFO 1 Rate (CC#3) is read as a note number, a semitone a step: 0.255 Hz at value 4, 8.18 Hz (C-1)
+at value 64 and 261.6 Hz (middle C) at value 124, so a C every 12 values from value 4. It powers up
+at value 60, 6.49 Hz, a vibrato's rate.
 
 LFO 1 Rate Mod In moves the rate by LFO 1 Rate Mod Amt, as Osc 1 Pitch Mod 2 In moves the oscillator's
 pitch: a unit of input times depth is the whole rate range, ten octaves, so 0.1 is an octave.
@@ -792,7 +797,7 @@ frequency, growing to its full level of about 0.5 by value 123 and holding it to
 dial. Low in that range the oscillation builds slowly and shares the filter with the input; at
 the top it takes the input over. Its level holds across the cutoff range down to about 150 Hz
 and falls below that. Near the top of the cutoff range it fades out, before its 3rd harmonic
-folds back as an inharmonic tone: at 48 kHz, from 8 kHz (value 108) to 10 kHz (value 112), modulation
+folds back as an inharmonic tone: at 48 kHz, from 8 kHz (value 111) to 10 kHz (value 115), modulation
 included. Above that the resonance acts as at Q 256. With the cutoff following the keyboard, as
 in the examples below, it plays as a sine voice.
 
@@ -930,11 +935,11 @@ unplugged reads its own CC or value again. A value is the 4 to 124 the editor sh
   at value 124, half way at value 64, and not at all at value 4, where it powers up; Pitch Pol, with
   no CC, turned below value 64 runs it the other way. As MIDI: CC#9; Pitch Pol in category 4
 - The filter as a sine voice, playing its own oscillation in tune: Filter 2 Resonance at 124 makes it
-  oscillate, Filter 2 Pitch Amt at 124 has the cutoff follow the keys, and Cutoff at 49 puts it on
+  oscillate, Filter 2 Pitch Amt at 124 has the cutoff follow the keys, and Cutoff at 52 puts it on
   note 60 at note 60, and so on the note played everywhere; Filter 2 Mod 1 Amt at 4 takes the
   envelope off the cutoff, and Mixer 2 Level 1 at 4 takes the oscillator out, leaving the sine alone.
   It is within 5 cents of the note from middle C up, and 17 cents flat an octave below. As MIDI:
-  CC#71 = 124, CC#9 = 124, CC#74 = 49, CC#24 = 4, CC#19 = 4
+  CC#71 = 124, CC#9 = 124, CC#74 = 52, CC#24 = 4, CC#19 = 4
 - A pitch envelope: wired by default too, the envelope on the oscillator's Pitch Mod 1 input, so
   Osc 1 Pitch Mod 1 Amt sets its depth: the note starts a semitone sharp at value 9, an octave at
   value 64 and two octaves at the top, and with EG 1 Sustain brought down to 4, 0.0, it falls back to
