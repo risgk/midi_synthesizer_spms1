@@ -245,8 +245,11 @@ or not, as the modules are meant to:
 | :-- | --: | --: |
 | v0.4.1 | 208204 / 208204 cycles, 1355 us (102%) | 208556 / 208556 cycles, 1358 us (102%) |
 
-The estimate is about 8% above Debug Print on the device (v0.4.0: min 1253 us, max 1256 us, about 94%),
-so its 102% is not a buffer running over; `underruns` on the device says whether one does.
+The estimate is above Debug Print on the device: about 8% at v0.4.0 (min 1253 us, max 1256 us, about
+94%), and about 11% on the way to v0.4.2 (develop at 5b5dc07, estimated at 1157 us on average and 1159 us
+at most: on the device min 1042 us and max 1045 us with I2S, min 1038 us and max 1043 us with PWM Audio,
+about 78%, which Note On and Off repeated by MIDI moved little). So the table's 102% is not a buffer
+running over; `underruns` on the device says whether one does.
 
 The load of each module, by `--modules` (the same version, a note held): "own" is
 the cycles of its methods (process, its outputs, smooth_parameters), and "with common" adds its share
