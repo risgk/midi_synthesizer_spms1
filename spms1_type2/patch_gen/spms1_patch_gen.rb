@@ -42,18 +42,26 @@ end
 
 # The spec, read and checked: every number unique, every key it names defined.
 class Spec
-  attr_reader :modules, :signals, :inputs, :inputs_in_list_order, :controls, :controls_in_list_order, :default_order,
+  attr_reader :modules, :signals, :inputs, :inputs_in_list_order, :controls, :controls_in_editor_order, :default_order,
               :saved_patch_version
 
   def initialize(yaml)
     @modules  = yaml.fetch('modules')
     @signals  = yaml.fetch('signals')
-    # The list's order is the editor's: an input or a control goes next to its module's others
-    # there, though its entry is appended. Everything else takes them by entry.
+    # Each list is in the order of its numbers (see check). The editor shows the controls in that
+    # order too, but for a control that names another of its module's in `after`, which it shows
+    # just after that one, so that a control appended to keep the numbers before it can still sit
+    # with the controls it belongs with.
     @inputs_in_list_order = yaml.fetch('inputs')
     @inputs = @inputs_in_list_order.sort_by { |i| i['entry'] }
     @controls_in_list_order = yaml.fetch('controls')
     @controls = @controls_in_list_order.sort_by { |c| c['entry'] }
+    @controls_in_editor_order = @controls_in_list_order.reject { |c| c['after'] }
+    @controls_in_list_order.select { |c| c['after'] }.each do |c|
+      at = @controls_in_editor_order.index { |o| o['module'] == c['module'] && o['key'] == c['after'] }
+      fail_spec("control #{full_key(c)} is after #{c['after']}, not a control of #{c['module']} before it") unless at
+      @controls_in_editor_order.insert(at + 1, c)
+    end
     @default_order = yaml.fetch('default_order')
     @saved_patch_version = yaml.fetch('saved_patch_version')
     @module = @modules.to_h { |m| [m['key'], m] }
@@ -358,7 +366,7 @@ def editor_js
     inputs: s.inputs_in_list_order.map do |i|
       { entry: i['entry'], module: i['module'], key: i['key'], label: i['label'], source: i['source'] }
     end,
-    controls: s.controls_in_list_order.map do |c|
+    controls: s.controls_in_editor_order.map do |c|
       h = { entry: c['entry'], module: c['module'], key: c['key'], label: c['label'],
             bipolar: !!c['bipolar'], cc: c['cc'].to_i, value: c['value'], source: c['source'],
             controller: !!c['controller'], performance: !!c['performance'], hint: c['hint'], hintInputs: c['hint_inputs'],
@@ -589,7 +597,7 @@ end
 
 def main_setters
   s = SPEC
-  s.controls_in_list_order.reject { |c| c['controller'] }.map do |c|
+  s.controls.reject { |c| c['controller'] }.map do |c|
     "  #{c['module'].downcase}.#{c.fetch('set')}(signals[source_#{local_name(c)}])\n"
   end.join
 end

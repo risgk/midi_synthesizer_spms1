@@ -296,7 +296,8 @@ inputs:
   - { entry: 44, key: OUTPUT_L,    label: L,              name: Final Output L, name_ja: 最終出力 L, source: DELAY_1_OUTPUT_L }
   - { entry: 45, key: OUTPUT_R,    label: R,              name: Final Output R, name_ja: 最終出力 R, source: DELAY_1_OUTPUT_R }
 
-# Controls, listed in the editor's order, each by its entry: a parameter is one entry of NRPN
+# Controls, listed in the order of their entries, which is the editor's but for a control with
+# `after` (below), each by its entry: a parameter is one entry of NRPN
 # category 2 (where it takes its value), the same entry of category 3 (which CC fills its control
 # slot) and of category 4 (what its control slot holds while it has no CC); a controller control,
 # the mod wheel or a general control, is in category 3 only. `cc` is the CC of the default patch, 0 for none, and `value`, as a CC value,
@@ -306,7 +307,9 @@ inputs:
 # takes a parameter's value each buffer. `hint` is what the editor puts in parentheses after the
 # name; `hint_inputs`, inputs of the same module, puts what feeds them there instead, joined by
 # "to", following the patch's routing. `favorite` marks a parameter as a favorite in the
-# editor's default patch. Why the defaults are what they are is above default_order.
+# editor's default patch. `after`, another control of the same module, has the editor show this one
+# just after it, for a control appended so that no entry before it moves. Why the defaults are
+# what they are is above default_order.
 controls:
   # Pitch 1: Glide is on CC 5, Portamento Time in the MIDI spec, and powers up at CC 4, 0.0, where
   # the portamento is off. Out 1 Glide Sw and Out 2 Glide Sw, both on CC 34, power up on,
@@ -522,9 +525,10 @@ controls:
   # limiter, on at CC 64 and above. It has no CC and powers up on (CC 124); off, the peaks past one
   # unit reach the clamp. Either way the amp's output comes 1 ms late.
   - { entry: 100, module: AMP_1,     key: LIMITER_SW,   label: Limiter Sw,   cc: 0,   value: 124, hint: Off/On, set: set_limiter_switch }
-  # Filter 1 Drive and Filter 2 Drive, after Limiter Sw so that no entry before them moves: the
-  # leak's ceiling down by 2^(4 * drive), x1 to x16, 6 dB every 30 values, which bends the
-  # resonance sooner while the level and the output clip stay. Both on CC 31, as the filters share
-  # their other CCs; they power up at CC 4, x1, where the filters are as they were.
-  - { entry: 101, module: FILTER_1,  key: DRIVE,        label: Drive,        cc: 31,  value: 4, hint: x1 to x16, set: set_drive }
-  - { entry: 102, module: FILTER_2,  key: DRIVE,        label: Drive,        cc: 31,  value: 4, hint: x1 to x16, favorite: true, set: set_drive }
+  # Filter 1 Drive and Filter 2 Drive, after Limiter Sw so that no entry before them moves, and
+  # shown in the editor after each filter's Resonance (`after`): the leak's ceiling down by
+  # 2^(4 * drive), x1 to x16, 6 dB every 30 values, which bends the resonance sooner while the level
+  # and the output clip stay. Both on CC 31, as the filters share their other CCs; they power up at
+  # CC 4, x1, where the filters are as they were.
+  - { entry: 101, module: FILTER_1,  key: DRIVE,        label: Drive,        cc: 31,  value: 4, hint: x1 to x16, after: RESONANCE, set: set_drive }
+  - { entry: 102, module: FILTER_2,  key: DRIVE,        label: Drive,        cc: 31,  value: 4, hint: x1 to x16, favorite: true, after: RESONANCE, set: set_drive }
