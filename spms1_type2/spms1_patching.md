@@ -615,9 +615,9 @@ oscillator's range.
 
 LFO 1 puts out a triangle and a square at once, each on an output of its own, Out Triangle and
 Out Square, and the two crossfaded on Out. The triangle has its corners rounded off by PolyBLAMP
-and the square its steps by PolyBLEP, so at the top of the rate range, 261.6 Hz (middle C), where
-the LFO is an audible tone, the square's aliases are 40 dB down on it (at 220 Hz 41 dB, rather than
-24 dB without). The square is
+and the square its steps by PolyBLEP, so at the top of the rate range, 130.8 Hz (C3), where the
+LFO is an audible tone, the square's aliases are 43 dB down on it (at 220 Hz 41 dB, rather than 24
+dB without). The square is
 unipolar: 1.0 while the triangle is above zero and 0.0 while it is below, stepping where it
 crosses, so it gates, or trills up from the note on an oscillator's pitch, where the triangle
 swings about zero for a vibrato; its inverted output runs 0.0 and -1.0. LFO 1 Wave (CC#33) crossfades Out in a straight line from the triangle at 0.0 (value 4), where it
@@ -633,9 +633,9 @@ turned down the wheel brings the LFO in, up to full at its top. Turning the LFO 
 other way up is for Out Inv, Out negated, or for a mixer's Out Inv; the triangle and the square
 have theirs too, Out Triangle Inv and Out Square Inv. The default patch leaves them unrouted.
 
-LFO 1 Rate (CC#3) is read as a note number, a semitone a step: 0.255 Hz at value 4, 8.18 Hz (C-1)
-at value 64 and 261.6 Hz (middle C) at value 124, so a C every 12 values from value 4. It powers up
-at value 60, 6.49 Hz, a vibrato's rate.
+LFO 1 Rate (CC#3) is read as a note number, a semitone a step: 0.128 Hz at value 4, 4.09 Hz (C-2)
+at value 64 and 130.8 Hz (C3) at value 124, so a C every 12 values from value 4. It powers up at
+value 72, 6.49 Hz, a vibrato's rate.
 
 LFO 1 Rate Mod In moves the rate by LFO 1 Rate Mod Amt, as Osc 1 Pitch Mod 2 In moves the oscillator's
 pitch: a unit of input times depth is the whole rate range, ten octaves, so 0.1 is an octave.

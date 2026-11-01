@@ -4,7 +4,7 @@ module Spms1
   # PolyBLEP rounds off a step. A triangle's harmonics fall off as 1/n^2, so what folds back stays
   # low even without it, but at the top of the rate range, where the LFO is an audible tone, it
   # takes the aliases at 220 Hz from -69 dB to -81 dB, in total against the signal, and holds them
-  # at -79 dB at the top, 261.6 Hz. The square is
+  # at -86 dB at the top, 130.8 Hz. The square is
   # the triangle's side, with each step rounded off by PolyBLEP, and unipolar: 1.0 while the
   # triangle is above zero and 0.0 while it is below, so it gates, or trills up from the note,
   # rather than swinging about zero as the triangle does. It puts out both at once, each on an
@@ -24,13 +24,13 @@ module Spms1
     # constant if both are changed.
     CONTROL_RATE_DIVISOR = 4
 
-    # Rate lookup table, one entry per semitone of MIDI note -60 to 60, so 0.255 Hz to 261.6 Hz
-    # (middle C), and note 0, C-1, 8.18 Hz, at the middle of the dial.
+    # Rate lookup table, one entry per semitone of MIDI note -72 to 48, so 0.128 Hz to 130.8 Hz
+    # (C3), and note -12, C-2, 4.09 Hz, at the middle of the dial.
     # Its own table rather than the oscillator's, which starts at note 0 and cannot reach this low.
     # 122 entries so that a rate of 1.0 still has an entry above it to interpolate against.
     FREQ_TABLE = Array.new(122, 0.0)
     for i in 0...122
-      FREQ_TABLE[i] = 440.0 * (2.0 ** ((i.to_f - 129.0) * (1.0 / 12.0)))
+      FREQ_TABLE[i] = 440.0 * (2.0 ** ((i.to_f - 141.0) * (1.0 / 12.0)))
     end
 
     def initialize(sample_rate)
@@ -82,7 +82,7 @@ module Spms1
     end
 
     # Rate is unipolar, [0.0, 1.0], and read as a note number, so the dial is linear in pitch:
-    # 0.255 Hz at 0.0, 8.18 Hz at 0.5 (C-1), 261.6 Hz at 1.0 (C4): a C every 12 values from CC 4.
+    # 0.128 Hz at 0.0, 4.09 Hz at 0.5 (C-2), 130.8 Hz at 1.0 (C3): a C every 12 values from CC 4.
     def set_rate(rate)
       @rate = Dsp.clamp(rate, 0.0, 1.0)
     end
@@ -163,7 +163,7 @@ module Spms1
         # The PolyBLAMP residual is (1 - |x|)^3 / 6 of the slope change for a corner x samples
         # away. The slope changes by 4 * dt at each corner, and with the distance d = |x| * dt in
         # phase that is (dt - d)^3 * (2/3) / dt^2: the division is taken here, once per update,
-        # and process only multiplies. dt is never 0, the lowest rate being 0.255 Hz.
+        # and process only multiplies. dt is never 0, the lowest rate being 0.128 Hz.
         @blamp_scale = 0.6666667 / (@dt * @dt)
         # The PolyBLEP residual is (1 - |x|)^2 of half the step for a step x samples away, and the
         # square steps by a whole unit, so with d as above it is (dt - d)^2 / dt^2 of the square's

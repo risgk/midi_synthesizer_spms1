@@ -270,7 +270,7 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {528, 124},  // EG 2 Release Sw value
   {529, 124},  // EG 2 Level value
   {530,   4},  // LFO 1 Wave value
-  {531,  60},  // LFO 1 Rate value
+  {531,  72},  // LFO 1 Rate value
   {532, 124},  // LFO 1 Level value
   {533, 124},  // LFO 1 Rate Mod Amt value
   {534, 124},  // LFO 1 Level Mod Amt value
@@ -371,7 +371,7 @@ static const uint8_t g_spms1_default_cc[][2] = {
   {54,  124},  // EG 2 Sustain
   {105, 124},  // EG 2 Release Sw
   {33,    4},  // LFO 1 Wave
-  {3,    60},  // LFO 1 Rate
+  {3,    72},  // LFO 1 Rate
   {116, 124},  // LFO 1 Level
   {113,   4},  // LFO 1 Reset Sw
   {102,   4},  // Osc 1 Wave

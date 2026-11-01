@@ -350,14 +350,14 @@ controls:
   # Reset Sw, on CC 113, which powers up off, at CC 4, so Reset In, Note Gate, is ignored until it
   # is turned on. Wave
   # crossfades Out from the triangle (0.0) to the square (1.0), on CC 33,
-  # and powers up at CC 4, 0.0, the triangle. Rate, on CC 3, is a semitone a step, C-1 (8.18 Hz) at
-  # CC 64, and powers up at CC 60, 6.49 Hz, a vibrato's. Each modulation's Amt, listed in the order of what
+  # and powers up at CC 4, 0.0, the triangle. Rate, on CC 3, is a semitone a step, C-2 (4.09 Hz) at
+  # CC 64, and powers up at CC 72, 6.49 Hz, a vibrato's. Each modulation's Amt, listed in the order of what
   # it moves, has no CC and holds 1.0, a depth of 1.0. Rate Mod In is left unrouted, so
   # routing a source to it is enough; Level Mod In takes the mod wheel, which adds to Level
   # (CC 116) up to its top. Level powers up at CC 124, 1.0, so the LFO runs at full level, and
   # what it moves sets the depth.
   - { entry: 18, module: LFO_1,     key: WAVE,         label: Wave,         cc: 33,  value: 4, hint: Tri to Sq, favorite: true, set: set_wave }
-  - { entry: 19, module: LFO_1,     key: RATE,         label: Rate,         cc: 3,   value: 60, favorite: true, set: set_rate }
+  - { entry: 19, module: LFO_1,     key: RATE,         label: Rate,         cc: 3,   value: 72, favorite: true, set: set_rate }
   - { entry: 20, module: LFO_1,     key: LEVEL,        label: Level,        cc: 116, value: 124, favorite: true, set: set_level }
   - { entry: 21, module: LFO_1,     key: RATE_MOD_AMT, label: Rate Mod Amt, cc: 0,   value: 124, hint_inputs: [RATE_MOD_IN], set: set_rate_modulation_amount }
   - { entry: 22, module: LFO_1,     key: LEVEL_MOD_AMT, label: Level Mod Amt, cc: 0,  value: 124, hint_inputs: [LEVEL_MOD_IN], set: set_level_modulation_amount }
