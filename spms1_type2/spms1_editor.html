@@ -4812,16 +4812,24 @@
     // Z / X shift the octave. Keys go by position (e.code), so any layout or input mode plays the
     // same. A is the C of the middle octave in view. A key held is a pointer of its own, so one
     // released after an octave shift turns off the note it played.
+    // A slider, a button or a check box clicked last keeps the focus, and a key pressed on it would
+    // show its focus ring, as the browser takes a key to mean the keyboard is in use: a key that
+    // plays takes the focus off it instead, as it is not meant for it.
+    function kbReleaseFocus(e) {
+      if (e.target !== document.body && typeof e.target.blur === 'function') e.target.blur();
+    }
     document.addEventListener('keydown', e => {
       if (!kbPcKeyEnabled(e)) return;
       if (e.code === 'KeyZ' || e.code === 'KeyX') {
         e.preventDefault();
+        kbReleaseFocus(e);
         if (!e.repeat) kbShiftOctave(e.code === 'KeyZ' ? -1 : 1);
         return;
       }
       const offset = KB_PC_KEYS.indexOf(e.code);
       if (offset < 0) return;
       e.preventDefault();
+      kbReleaseFocus(e);
       const id = 'key:' + e.code;
       if (e.repeat || kbPointers.has(id)) return;
       const note = Math.round((kbGetCenter() - KB_CENTER_OFFSET) / 12) * 12 + 12 + offset;
