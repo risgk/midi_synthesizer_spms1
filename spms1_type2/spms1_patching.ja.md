@@ -139,6 +139,37 @@ flowchart LR
   class D,LIM nl
 ```
 
+### Amp 1
+
+2 つの音声入力に、それぞれのゲイン (×0 から ×4、+12 dB) を掛けて足し、モジュレーションを掛けます。
+モジュレーションは Mod 1 In と Mod 2 In を Mod 1/2 Mix でクロスフェードしたもので、1 単位の内に
+抑えるので、音を下げることはあっても上げることはありません。そのあとディストーションを通り、
+先読みのリミッターが 1 単位のクランプの手前に収めます。
+
+```mermaid
+flowchart LR
+  IN1([Audio In 1]) --> G1["× Gain 1<br/>×0 から ×4"]
+  IN2([Audio In 2]) --> G2["× Gain 2<br/>×0 から ×4"]
+  G1 --> SUM((Σ))
+  G2 --> SUM
+  SUM --> M["× Mod<br/>±1 の内"]
+  MOD1([Mod 1 In]) -.-> MX["Mod 1/2 Mix<br/>クロスフェード"]
+  MOD2([Mod 2 In]) -.-> MX
+  MX -.-> M
+  M --> DRV["× Distortion<br/>×1 から ×16"]
+  DRV --> SC["ソフトクリップ、ADAA<br/>1.0 まで直線、3.0 で 2.0"]
+  SC --> MU["× 1 / √Distortion"]
+  MU --> LIM["先読みのリミッター<br/>0.9、1 ms (Limiter Sw)"]
+  LIM --> CL["クランプ<br/>±1.0"]
+  CL --> OUT([Out])
+  classDef nl fill:#FAECE7,stroke:#D85A30,color:#712B13
+  class SC,LIM,CL nl
+```
+
+起動時の Distortion ×1 では、1 単位の内の音は肩に届かず、そのまま通ります。ディストーションは、
+下の「知っておきたいレンジ」の Amp 1 Distortion で説明しています。リミッターは先読みのぶん、
+出力を 1 ms 遅らせます。Limiter Sw をオフにすると、出力を抑えるのはクランプだけです。
+
 ### Chorus 1
 
 モノラル入力・ステレオ出力のコーラスです。ディレイと同じくインサート

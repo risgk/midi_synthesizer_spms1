@@ -145,6 +145,37 @@ flowchart LR
   class D,LIM nl
 ```
 
+### Amp 1
+
+Two audio inputs, each with a gain of its own (x0 to x4, +12 dB), summed and scaled by the
+modulation: Mod 1 In and Mod 2 In crossfaded by Mod 1/2 Mix and held within one unit, so that it
+can scale the sound down but never up. What comes out goes through the distortion, and then a
+look-ahead limiter holds it under the one-unit clamp.
+
+```mermaid
+flowchart LR
+  IN1([Audio In 1]) --> G1["× Gain 1<br/>x0 to x4"]
+  IN2([Audio In 2]) --> G2["× Gain 2<br/>x0 to x4"]
+  G1 --> SUM((Σ))
+  G2 --> SUM
+  SUM --> M["× Mod<br/>within ±1"]
+  MOD1([Mod 1 In]) -.-> MX["Mod 1/2 Mix<br/>crossfade"]
+  MOD2([Mod 2 In]) -.-> MX
+  MX -.-> M
+  M --> DRV["× Distortion<br/>x1 to x16"]
+  DRV --> SC["Soft clip, ADAA<br/>linear up to 1.0, 2.0 at 3.0"]
+  SC --> MU["× 1 / √Distortion"]
+  MU --> LIM["Look-ahead limiter<br/>0.9, 1 ms (Limiter Sw)"]
+  LIM --> CL["Clamp<br/>±1.0"]
+  CL --> OUT([Out])
+  classDef nl fill:#FAECE7,stroke:#D85A30,color:#712B13
+  class SC,LIM,CL nl
+```
+
+At Distortion x1, where it powers up, a sound within one unit reaches no shoulder and passes as it
+is; the distortion is described under Amp 1 Distortion in "Ranges worth knowing" below. The limiter
+delays the output by its look-ahead, 1 ms; with Limiter Sw off, only the clamp holds the output.
+
 ### Chorus 1
 
 A mono-in, stereo-out chorus, put in the chain as an insert, as the
