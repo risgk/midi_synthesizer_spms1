@@ -387,39 +387,40 @@ both at the same signal for a mono output.
 
 | CC#98 | Parameter | | CC#98 | Parameter | | CC#98 | Parameter |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | Pitch 1 Glide | | 33 | Osc 1 Pitch Mod 1 Amt | | 66 | Filter 1 Cutoff |
-| 1 | Pitch 1 Out 1 Glide Sw | | 34 | Osc 1 Pitch Mod 1 Pol | | 67 | Filter 1 Resonance |
-| 2 | Pitch 1 Out 2 Glide Sw | | 35 | Osc 1 Pitch Mod 1 Sw | | 68 | Filter 1 Gain 1 |
-| 3 | Pitch 1 Bend Amt | | 36 | Osc 1 Pitch Mod 2 Amt | | 69 | Filter 1 Gain 2 |
-| 4 | Pitch 1 Bend Pol | | 37 | Osc 1 Pitch Mod 2 Pol | | 70 | Filter 1 Pitch Amt |
-| 5 | Pitch 1 Out 1 Bend Sw | | 38 | Osc 1 Pitch Mod 2 Sw | | 71 | Filter 1 Pitch Pol |
-| 6 | Pitch 1 Out 2 Bend Sw | | 39 | Osc 1 PW Mod 1 Amt | | 72 | Filter 1 Mod 1 Amt |
-| 7 | Pitch 1 Stretch | | 40 | Osc 1 PW Mod 1 Pol | | 73 | Filter 1 Mod 1 Pol |
-| 8 | EG 1 Attack | | 41 | Osc 1 PW Mod 2 Amt | | 74 | Filter 1 Mod 2 Amt |
-| 9 | EG 1 Decay | | 42 | Osc 1 PW Mod 2 Pol | | 75 | Filter 1 Mod 2 Pol |
-| 10 | EG 1 Sustain | | 43 | Osc 2 Wave | | 76 | Filter 2 Mode |
-| 11 | EG 1 Release Sw | | 44 | Osc 2 PW | | 77 | Filter 2 Cutoff |
-| 12 | EG 1 Level | | 45 | Osc 2 Pitch Coarse | | 78 | Filter 2 Resonance |
-| 13 | EG 2 Attack | | 46 | Osc 2 Pitch Fine | | 79 | Filter 2 Gain 1 |
-| 14 | EG 2 Decay | | 47 | Osc 2 Pitch Mod 1 Amt | | 80 | Filter 2 Gain 2 |
-| 15 | EG 2 Sustain | | 48 | Osc 2 Pitch Mod 1 Pol | | 81 | Filter 2 Pitch Amt |
-| 16 | EG 2 Release Sw | | 49 | Osc 2 Pitch Mod 1 Sw | | 82 | Filter 2 Pitch Pol |
-| 17 | EG 2 Level | | 50 | Osc 2 Pitch Mod 2 Amt | | 83 | Filter 2 Mod 1 Amt |
-| 18 | LFO 1 Wave | | 51 | Osc 2 Pitch Mod 2 Pol | | 84 | Filter 2 Mod 1 Pol |
-| 19 | LFO 1 Rate | | 52 | Osc 2 Pitch Mod 2 Sw | | 85 | Filter 2 Mod 2 Amt |
-| 20 | LFO 1 Level | | 53 | Osc 2 PW Mod 1 Amt | | 86 | Filter 2 Mod 2 Pol |
-| 21 | LFO 1 Rate Mod Amt | | 54 | Osc 2 PW Mod 1 Pol | | 87 | Amp 1 Gain 1 |
-| 22 | LFO 1 Level Mod Amt | | 55 | Osc 2 PW Mod 2 Amt | | 88 | Amp 1 Gain 2 |
-| 23 | LFO 1 Reset Sw | | 56 | Osc 2 PW Mod 2 Pol | | 89 | Amp 1 Mod 1/2 Mix |
-| 24 | Mixer 1 Level 1 | | 57 | Osc 2 Sync Sw | | 90 | Chorus 1 Mix |
-| 25 | Mixer 1 Level 2 | | 58 | Noise 1 Color | | 91 | Chorus 1 Rate |
-| 26 | Mixer 1 Level 3 | | 59 | Noise 1 Level | | 92 | Chorus 1 Depth |
-| 27 | Mixer 1 Level 4 | | 60 | Mixer 2 Level 1 | | 93 | Delay 1 Mix |
-| 28 | Mixer 1 Out Level | | 61 | Mixer 2 Level 2 | | 94 | Delay 1 Time |
-| 29 | Osc 1 Wave | | 62 | Mixer 2 Level 3 | | 95 | Delay 1 Feedback |
-| 30 | Osc 1 PW | | 63 | Mixer 2 Level 4 | | 100 | Amp 1 Limiter Sw |
-| 31 | Osc 1 Pitch Coarse | | 64 | Mixer 2 Out Level | | 101 | Filter 1 Drive |
-| 32 | Osc 1 Pitch Fine | | 65 | Filter 1 Mode | | 102 | Filter 2 Drive |
+| 0 | Pitch 1 Glide | | 34 | Osc 1 Pitch Mod 1 Pol | | 68 | Filter 1 Gain 1 |
+| 1 | Pitch 1 Out 1 Glide Sw | | 35 | Osc 1 Pitch Mod 1 Sw | | 69 | Filter 1 Gain 2 |
+| 2 | Pitch 1 Out 2 Glide Sw | | 36 | Osc 1 Pitch Mod 2 Amt | | 70 | Filter 1 Pitch Amt |
+| 3 | Pitch 1 Bend Amt | | 37 | Osc 1 Pitch Mod 2 Pol | | 71 | Filter 1 Pitch Pol |
+| 4 | Pitch 1 Bend Pol | | 38 | Osc 1 Pitch Mod 2 Sw | | 72 | Filter 1 Mod 1 Amt |
+| 5 | Pitch 1 Out 1 Bend Sw | | 39 | Osc 1 PW Mod 1 Amt | | 73 | Filter 1 Mod 1 Pol |
+| 6 | Pitch 1 Out 2 Bend Sw | | 40 | Osc 1 PW Mod 1 Pol | | 74 | Filter 1 Mod 2 Amt |
+| 7 | Pitch 1 Stretch | | 41 | Osc 1 PW Mod 2 Amt | | 75 | Filter 1 Mod 2 Pol |
+| 8 | EG 1 Attack | | 42 | Osc 1 PW Mod 2 Pol | | 76 | Filter 2 Mode |
+| 9 | EG 1 Decay | | 43 | Osc 2 Wave | | 77 | Filter 2 Cutoff |
+| 10 | EG 1 Sustain | | 44 | Osc 2 PW | | 78 | Filter 2 Resonance |
+| 11 | EG 1 Release Sw | | 45 | Osc 2 Pitch Coarse | | 79 | Filter 2 Gain 1 |
+| 12 | EG 1 Level | | 46 | Osc 2 Pitch Fine | | 80 | Filter 2 Gain 2 |
+| 13 | EG 2 Attack | | 47 | Osc 2 Pitch Mod 1 Amt | | 81 | Filter 2 Pitch Amt |
+| 14 | EG 2 Decay | | 48 | Osc 2 Pitch Mod 1 Pol | | 82 | Filter 2 Pitch Pol |
+| 15 | EG 2 Sustain | | 49 | Osc 2 Pitch Mod 1 Sw | | 83 | Filter 2 Mod 1 Amt |
+| 16 | EG 2 Release Sw | | 50 | Osc 2 Pitch Mod 2 Amt | | 84 | Filter 2 Mod 1 Pol |
+| 17 | EG 2 Level | | 51 | Osc 2 Pitch Mod 2 Pol | | 85 | Filter 2 Mod 2 Amt |
+| 18 | LFO 1 Wave | | 52 | Osc 2 Pitch Mod 2 Sw | | 86 | Filter 2 Mod 2 Pol |
+| 19 | LFO 1 Rate | | 53 | Osc 2 PW Mod 1 Amt | | 87 | Amp 1 Gain 1 |
+| 20 | LFO 1 Level | | 54 | Osc 2 PW Mod 1 Pol | | 88 | Amp 1 Gain 2 |
+| 21 | LFO 1 Rate Mod Amt | | 55 | Osc 2 PW Mod 2 Amt | | 89 | Amp 1 Mod 1/2 Mix |
+| 22 | LFO 1 Level Mod Amt | | 56 | Osc 2 PW Mod 2 Pol | | 90 | Chorus 1 Mix |
+| 23 | LFO 1 Reset Sw | | 57 | Osc 2 Sync Sw | | 91 | Chorus 1 Rate |
+| 24 | Mixer 1 Level 1 | | 58 | Noise 1 Color | | 92 | Chorus 1 Depth |
+| 25 | Mixer 1 Level 2 | | 59 | Noise 1 Level | | 93 | Delay 1 Mix |
+| 26 | Mixer 1 Level 3 | | 60 | Mixer 2 Level 1 | | 94 | Delay 1 Time |
+| 27 | Mixer 1 Level 4 | | 61 | Mixer 2 Level 2 | | 95 | Delay 1 Feedback |
+| 28 | Mixer 1 Out Level | | 62 | Mixer 2 Level 3 | | 100 | Amp 1 Limiter Sw |
+| 29 | Osc 1 Wave | | 63 | Mixer 2 Level 4 | | 101 | Filter 1 Drive |
+| 30 | Osc 1 PW | | 64 | Mixer 2 Out Level | | 102 | Filter 2 Drive |
+| 31 | Osc 1 Pitch Coarse | | 65 | Filter 1 Mode | | 103 | Amp 1 Distortion |
+| 32 | Osc 1 Pitch Fine | | 66 | Filter 1 Cutoff | |  |  |
+| 33 | Osc 1 Pitch Mod 1 Amt | | 67 | Filter 1 Resonance | |  |  |
 
 <!-- patch_gen end -->
 
@@ -831,6 +832,16 @@ starts to reach it. The filter's output
 clip and a mixer's sum still have the hard limit, past which a sawtooth driven 6 dB over at A6 to
 A7 aliases about -30 dB under 5 kHz; keep the levels before the filters where the peaks only just
 reach one unit, and bring the sound up with the amp instead.
+
+Amp 1 Distortion (CC#95) drives the gained sound into a soft clip ahead of the limiter, from x1 at
+value 4, where it powers up, to x16 at value 124, 6 dB every 30 values: a straight line up to one
+unit, then a quadratic shoulder that lands on two units at three. What comes out is taken back down
+by half the drive in dB, so a sound at one unit saturates without falling away, and the limiter
+holds what is left over. At x1 nothing at the gains' unity reaches the shoulder, and the amp is as
+it was; Gain 1 and Gain 2 turned up drive it too. The curve's part beyond the straight line goes
+through first-order antiderivative anti-aliasing (ADAA), so a sample that reaches no shoulder passes
+exactly, and past it the aliasing is lower: a sine at C5 to C8 driven x16 folds back -89 to -65 dB
+under 5 kHz, against -71 to -25 dB without it.
 
 Amp 1 takes two modulations, Mod 1 In and Mod 2 In, and scales the gain by a crossfade of the
 two: Amp 1 Mod 1/2 Mix (CC#36) runs in a straight line from Mod 1 In alone at 0.0 (value 4) to Mod 2 In

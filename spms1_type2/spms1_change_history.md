@@ -18,6 +18,9 @@ revised.
     - LFO 1 Rate: a C every 12 values, C-2 (4.09 Hz) at value 64 and C3 (130.8 Hz) at value 124,
       from 0.128 Hz at value 4, nine semitones down from 6.875 Hz at value 64 (220 Hz at 124); it
       powers up at value 72, 6.49 Hz, a slightly slower vibrato than the 6.875 Hz of before
+    - Amp: Distortion (CC#95), the gained sound driven x1 to x16 into a soft clip ahead of the
+      limiter and taken back down by half the drive in dB, with its aliasing reduced by first-order
+      ADAA; at x1, where it powers up, the amp is as it was
     - Lighter: about 200 us less of the 1333 us of a buffer (estimated), from the clamps (a max
       and a min, one instruction each), the parameters' reads and Float#to_i
 

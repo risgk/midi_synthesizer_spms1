@@ -36,6 +36,41 @@ module Spms1
     # constant if both are changed.
     CONTROL_RATE_DIVISOR = 4
 
+    # Distortion: what the gain puts out, driven by D = 2^(4 * distortion), x1 to x16 (6 dB every
+    # quarter of the dial), through a curve that is a straight line up to DISTORTION_KNEE and a
+    # quadratic shoulder from there that lands on DISTORTION_LIMIT with zero slope at
+    # DISTORTION_CEILING, and taken back down by 1 / sqrt(D): half the drive in dB, so that a sound at
+    # one unit saturates without falling away, and the limiter after it holds the rest. The knee is
+    # the bus's one unit, which no input reaches at x1 with the gains at unity, so the default patch
+    # passes as it did. The curve's part beyond the straight line, f(u) - u, goes through first-order
+    # antiderivative anti-aliasing (ADAA): the difference of its antiderivative over the step from the
+    # last sample, divided by the step. On the straight line that part is zero, so a sample that
+    # reaches no shoulder, now or a sample ago, passes exactly, neither late nor rounded off in the
+    # highs, as ADAA on the whole curve would leave it; past the knee it is half a sample late against
+    # the straight part. Below DISTORTION_ADAA_MIN_STEP of a step, where the difference loses its
+    # precision in single precision, the part is taken at the sample itself instead. Against the
+    # curve without ADAA, a sine at C5 to C8 driven x16 aliases -61 to -16 dB in total and -71 to
+    # -25 dB under 5 kHz; with it, -70 to -30 dB and -89 to -65 dB.
+    DISTORTION_KNEE     = 1.0
+    DISTORTION_LIMIT    = 2.0
+    DISTORTION_CEILING  = DISTORTION_LIMIT + DISTORTION_LIMIT - DISTORTION_KNEE
+    DISTORTION_SPAN     = DISTORTION_CEILING - DISTORTION_KNEE
+    # 1 / (4 * (limit - knee)), and its third for the antiderivative.
+    DISTORTION_SHOULDER = 1.0 / (4.0 * (DISTORTION_LIMIT - DISTORTION_KNEE))
+    DISTORTION_SHOULDER_THIRD = DISTORTION_SHOULDER / 3.0
+    DISTORTION_FLAT     = DISTORTION_LIMIT - DISTORTION_KNEE
+    DISTORTION_ADAA_MIN_STEP = 0.001
+    # D = 2^(i / 8) and 1 / sqrt(D) = 2^(-i / 16), one entry for each 1/32 of the dial, the last
+    # repeated for the interpolation's upper neighbour.
+    DISTORTION_GAIN_TABLE = Array.new(34, 0.0)
+    DISTORTION_COMP_TABLE = Array.new(34, 0.0)
+    for i in 0...33
+      DISTORTION_GAIN_TABLE[i] = 2.0 ** (i.to_f * (1.0 / 8.0))
+      DISTORTION_COMP_TABLE[i] = 2.0 ** (i.to_f * (-1.0 / 16.0))
+    end
+    DISTORTION_GAIN_TABLE[33] = DISTORTION_GAIN_TABLE[32]
+    DISTORTION_COMP_TABLE[33] = DISTORTION_COMP_TABLE[32]
+
     def initialize(sample_rate)
       @sample_rate = sample_rate
       @smoothing_target_blend = SMOOTHING_TARGET_BLEND_BASE * (48000.0 / @sample_rate) * (CONTROL_RATE_DIVISOR / 4.0)
@@ -63,6 +98,19 @@ module Spms1
       @limiter_last_block_peak = 0.0
       @limiter_gain = 1.0
       @limiter_switch = 1.0
+      @distortion = 0.0
+      @stage_1_distortion = 0.0
+      @current_distortion = 0.0
+      @distortion_gain = 1.0
+      @distortion_comp = 1.0
+      @distortion_last_input = 0.0
+      @distortion_last_antiderivative = 0.0
+    end
+
+    # Distortion is unipolar, [0.0, 1.0], the drive into the curve, x1 at 0.0 to x16 at 1.0 (see
+    # DISTORTION_KNEE). Smoothed as the gains are.
+    def set_distortion(distortion)
+      @distortion = Dsp.clamp(distortion, 0.0, 1.0)
     end
 
     # Gain 1, of Audio In 1, is unipolar, [0.0, 1.0], and squared and taken four times into a multiplier, so that the
@@ -103,6 +151,14 @@ module Spms1
         @current_gain_2 = Dsp.smooth(@stage_1_gain_2, @current_gain_2, @smoothing_target_blend)
         @stage_1_modulation_mix = Dsp.smooth(@modulation_mix, @stage_1_modulation_mix, @smoothing_target_blend)
         @current_modulation_mix = Dsp.smooth(@stage_1_modulation_mix, @current_modulation_mix, @smoothing_target_blend)
+        @stage_1_distortion = Dsp.smooth(@distortion, @stage_1_distortion, @smoothing_target_blend)
+        @current_distortion = Dsp.smooth(@stage_1_distortion, @current_distortion, @smoothing_target_blend)
+        # The drive and its make-up from the tables, every tick whatever the value.
+        position = @current_distortion * 32.0
+        index = position.to_i
+        fraction = position - index.to_f
+        @distortion_gain = DISTORTION_GAIN_TABLE[index] + fraction * (DISTORTION_GAIN_TABLE[index + 1] - DISTORTION_GAIN_TABLE[index])
+        @distortion_comp = DISTORTION_COMP_TABLE[index] + fraction * (DISTORTION_COMP_TABLE[index + 1] - DISTORTION_COMP_TABLE[index])
       end
 
       # Each side weighted on its own, so that at either end of Mod 1/2 Mix the one input
@@ -111,7 +167,29 @@ module Spms1
       # arrives. Negative still inverts.
       modulation = modulation_1_input * (1.0 - @current_modulation_mix) + modulation_2_input * @current_modulation_mix
       mod = Dsp.clamp(modulation, -1.0, 1.0)
-      amplified = (audio_input * @current_gain + audio_input_2 * @current_gain_2) * mod
+      gained = (audio_input * @current_gain + audio_input_2 * @current_gain_2) * mod
+
+      # The distortion (see DISTORTION_KNEE): u is the driven sample, r the curve's part beyond the
+      # straight line by ADAA, and both are taken back down by the make-up. The antiderivative is
+      # worked out once a sample and kept for the next; the part itself, for a short step, from the
+      # same terms, at this sample rather than the middle of the step, which a step that short makes
+      # no measurable difference to. Branchless: each term is clamped into its own range, and the short step is
+      # a weight of 1.0 or 0.0, a select between two literals, which GCC keeps a select.
+      # Written with literals, DISTORTION_* above, as Spinel emits a named Float constant as a
+      # runtime global: the knee 1.0, the ceiling 3.0, the shoulder 0.25 (its third 0.25 / 3.0), and
+      # the flat part's limit - knee 1.0.
+      u = gained * @distortion_gain
+      a = u.abs
+      e = Dsp.clamp(a, 1.0, 3.0) - 1.0
+      d = C.float_max(a - 3.0, 0.0)
+      part = (0.0 - e * e * 0.25 - d) * ((u < 0.0) ? -1.0 : 1.0)
+      antiderivative = 0.0 - e * e * e * (0.25 / 3.0) - d - d * d * 0.5
+      step = u - @distortion_last_input
+      short = (step.abs < 0.001) ? 1.0 : 0.0
+      r = part * short + (antiderivative - @distortion_last_antiderivative) / (step + short) * (1.0 - short)
+      @distortion_last_input = u
+      @distortion_last_antiderivative = antiderivative
+      amplified = (u + r) * @distortion_comp
 
       # The limiter. The gain it wants is the threshold over the peak of the two blocks where that
       # is above it, and 1.0 where not, or always while it is switched off; the one division is

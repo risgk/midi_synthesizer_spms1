@@ -367,39 +367,40 @@ General 1 と 2 も同じで、Mod Wheel のスロットは 0.0 になります�
 
 | CC#98 | パラメータ | | CC#98 | パラメータ | | CC#98 | パラメータ |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | Pitch 1 Glide | | 33 | Osc 1 Pitch Mod 1 Amt | | 66 | Filter 1 Cutoff |
-| 1 | Pitch 1 Out 1 Glide Sw | | 34 | Osc 1 Pitch Mod 1 Pol | | 67 | Filter 1 Resonance |
-| 2 | Pitch 1 Out 2 Glide Sw | | 35 | Osc 1 Pitch Mod 1 Sw | | 68 | Filter 1 Gain 1 |
-| 3 | Pitch 1 Bend Amt | | 36 | Osc 1 Pitch Mod 2 Amt | | 69 | Filter 1 Gain 2 |
-| 4 | Pitch 1 Bend Pol | | 37 | Osc 1 Pitch Mod 2 Pol | | 70 | Filter 1 Pitch Amt |
-| 5 | Pitch 1 Out 1 Bend Sw | | 38 | Osc 1 Pitch Mod 2 Sw | | 71 | Filter 1 Pitch Pol |
-| 6 | Pitch 1 Out 2 Bend Sw | | 39 | Osc 1 PW Mod 1 Amt | | 72 | Filter 1 Mod 1 Amt |
-| 7 | Pitch 1 Stretch | | 40 | Osc 1 PW Mod 1 Pol | | 73 | Filter 1 Mod 1 Pol |
-| 8 | EG 1 Attack | | 41 | Osc 1 PW Mod 2 Amt | | 74 | Filter 1 Mod 2 Amt |
-| 9 | EG 1 Decay | | 42 | Osc 1 PW Mod 2 Pol | | 75 | Filter 1 Mod 2 Pol |
-| 10 | EG 1 Sustain | | 43 | Osc 2 Wave | | 76 | Filter 2 Mode |
-| 11 | EG 1 Release Sw | | 44 | Osc 2 PW | | 77 | Filter 2 Cutoff |
-| 12 | EG 1 Level | | 45 | Osc 2 Pitch Coarse | | 78 | Filter 2 Resonance |
-| 13 | EG 2 Attack | | 46 | Osc 2 Pitch Fine | | 79 | Filter 2 Gain 1 |
-| 14 | EG 2 Decay | | 47 | Osc 2 Pitch Mod 1 Amt | | 80 | Filter 2 Gain 2 |
-| 15 | EG 2 Sustain | | 48 | Osc 2 Pitch Mod 1 Pol | | 81 | Filter 2 Pitch Amt |
-| 16 | EG 2 Release Sw | | 49 | Osc 2 Pitch Mod 1 Sw | | 82 | Filter 2 Pitch Pol |
-| 17 | EG 2 Level | | 50 | Osc 2 Pitch Mod 2 Amt | | 83 | Filter 2 Mod 1 Amt |
-| 18 | LFO 1 Wave | | 51 | Osc 2 Pitch Mod 2 Pol | | 84 | Filter 2 Mod 1 Pol |
-| 19 | LFO 1 Rate | | 52 | Osc 2 Pitch Mod 2 Sw | | 85 | Filter 2 Mod 2 Amt |
-| 20 | LFO 1 Level | | 53 | Osc 2 PW Mod 1 Amt | | 86 | Filter 2 Mod 2 Pol |
-| 21 | LFO 1 Rate Mod Amt | | 54 | Osc 2 PW Mod 1 Pol | | 87 | Amp 1 Gain 1 |
-| 22 | LFO 1 Level Mod Amt | | 55 | Osc 2 PW Mod 2 Amt | | 88 | Amp 1 Gain 2 |
-| 23 | LFO 1 Reset Sw | | 56 | Osc 2 PW Mod 2 Pol | | 89 | Amp 1 Mod 1/2 Mix |
-| 24 | Mixer 1 Level 1 | | 57 | Osc 2 Sync Sw | | 90 | Chorus 1 Mix |
-| 25 | Mixer 1 Level 2 | | 58 | Noise 1 Color | | 91 | Chorus 1 Rate |
-| 26 | Mixer 1 Level 3 | | 59 | Noise 1 Level | | 92 | Chorus 1 Depth |
-| 27 | Mixer 1 Level 4 | | 60 | Mixer 2 Level 1 | | 93 | Delay 1 Mix |
-| 28 | Mixer 1 Out Level | | 61 | Mixer 2 Level 2 | | 94 | Delay 1 Time |
-| 29 | Osc 1 Wave | | 62 | Mixer 2 Level 3 | | 95 | Delay 1 Feedback |
-| 30 | Osc 1 PW | | 63 | Mixer 2 Level 4 | | 100 | Amp 1 Limiter Sw |
-| 31 | Osc 1 Pitch Coarse | | 64 | Mixer 2 Out Level | | 101 | Filter 1 Drive |
-| 32 | Osc 1 Pitch Fine | | 65 | Filter 1 Mode | | 102 | Filter 2 Drive |
+| 0 | Pitch 1 Glide | | 34 | Osc 1 Pitch Mod 1 Pol | | 68 | Filter 1 Gain 1 |
+| 1 | Pitch 1 Out 1 Glide Sw | | 35 | Osc 1 Pitch Mod 1 Sw | | 69 | Filter 1 Gain 2 |
+| 2 | Pitch 1 Out 2 Glide Sw | | 36 | Osc 1 Pitch Mod 2 Amt | | 70 | Filter 1 Pitch Amt |
+| 3 | Pitch 1 Bend Amt | | 37 | Osc 1 Pitch Mod 2 Pol | | 71 | Filter 1 Pitch Pol |
+| 4 | Pitch 1 Bend Pol | | 38 | Osc 1 Pitch Mod 2 Sw | | 72 | Filter 1 Mod 1 Amt |
+| 5 | Pitch 1 Out 1 Bend Sw | | 39 | Osc 1 PW Mod 1 Amt | | 73 | Filter 1 Mod 1 Pol |
+| 6 | Pitch 1 Out 2 Bend Sw | | 40 | Osc 1 PW Mod 1 Pol | | 74 | Filter 1 Mod 2 Amt |
+| 7 | Pitch 1 Stretch | | 41 | Osc 1 PW Mod 2 Amt | | 75 | Filter 1 Mod 2 Pol |
+| 8 | EG 1 Attack | | 42 | Osc 1 PW Mod 2 Pol | | 76 | Filter 2 Mode |
+| 9 | EG 1 Decay | | 43 | Osc 2 Wave | | 77 | Filter 2 Cutoff |
+| 10 | EG 1 Sustain | | 44 | Osc 2 PW | | 78 | Filter 2 Resonance |
+| 11 | EG 1 Release Sw | | 45 | Osc 2 Pitch Coarse | | 79 | Filter 2 Gain 1 |
+| 12 | EG 1 Level | | 46 | Osc 2 Pitch Fine | | 80 | Filter 2 Gain 2 |
+| 13 | EG 2 Attack | | 47 | Osc 2 Pitch Mod 1 Amt | | 81 | Filter 2 Pitch Amt |
+| 14 | EG 2 Decay | | 48 | Osc 2 Pitch Mod 1 Pol | | 82 | Filter 2 Pitch Pol |
+| 15 | EG 2 Sustain | | 49 | Osc 2 Pitch Mod 1 Sw | | 83 | Filter 2 Mod 1 Amt |
+| 16 | EG 2 Release Sw | | 50 | Osc 2 Pitch Mod 2 Amt | | 84 | Filter 2 Mod 1 Pol |
+| 17 | EG 2 Level | | 51 | Osc 2 Pitch Mod 2 Pol | | 85 | Filter 2 Mod 2 Amt |
+| 18 | LFO 1 Wave | | 52 | Osc 2 Pitch Mod 2 Sw | | 86 | Filter 2 Mod 2 Pol |
+| 19 | LFO 1 Rate | | 53 | Osc 2 PW Mod 1 Amt | | 87 | Amp 1 Gain 1 |
+| 20 | LFO 1 Level | | 54 | Osc 2 PW Mod 1 Pol | | 88 | Amp 1 Gain 2 |
+| 21 | LFO 1 Rate Mod Amt | | 55 | Osc 2 PW Mod 2 Amt | | 89 | Amp 1 Mod 1/2 Mix |
+| 22 | LFO 1 Level Mod Amt | | 56 | Osc 2 PW Mod 2 Pol | | 90 | Chorus 1 Mix |
+| 23 | LFO 1 Reset Sw | | 57 | Osc 2 Sync Sw | | 91 | Chorus 1 Rate |
+| 24 | Mixer 1 Level 1 | | 58 | Noise 1 Color | | 92 | Chorus 1 Depth |
+| 25 | Mixer 1 Level 2 | | 59 | Noise 1 Level | | 93 | Delay 1 Mix |
+| 26 | Mixer 1 Level 3 | | 60 | Mixer 2 Level 1 | | 94 | Delay 1 Time |
+| 27 | Mixer 1 Level 4 | | 61 | Mixer 2 Level 2 | | 95 | Delay 1 Feedback |
+| 28 | Mixer 1 Out Level | | 62 | Mixer 2 Level 3 | | 100 | Amp 1 Limiter Sw |
+| 29 | Osc 1 Wave | | 63 | Mixer 2 Level 4 | | 101 | Filter 1 Drive |
+| 30 | Osc 1 PW | | 64 | Mixer 2 Out Level | | 102 | Filter 2 Drive |
+| 31 | Osc 1 Pitch Coarse | | 65 | Filter 1 Mode | | 103 | Amp 1 Distortion |
+| 32 | Osc 1 Pitch Fine | | 66 | Filter 1 Cutoff | |  |  |
+| 33 | Osc 1 Pitch Mod 1 Amt | | 67 | Filter 1 Resonance | |  |  |
 
 <!-- patch_gen end -->
 
@@ -768,6 +769,14 @@ Gain 1 は CC がなく起動時 値 4 で無音なので、Gain 1 を上げる�
 フィルタの出力クリップとミキサーの和にはクリップの上限が残っていて、ノコギリ波を A6〜A7 で 6 dB 超え
 させると 5 kHz 未満で約 -30 dB 折り返します。フィルタより前のレベルはピークが 1 単位にわずかに届く程度に
 して、音量はアンプで上げてください。
+
+Amp 1 Distortion（CC#95）は、ゲインを掛けた音をリミッターの手前でソフトクリップへ入れます。起動時の値 4 で ×1、
+値 124 で ×16、値 30 ごとに 6 dB です。曲線は 1 単位までは直線で、そこから 2 次の肩で 3 単位のところで 2 単位に
+着地します。出てきた音は、ドライブの dB の半分だけ下げるので、1 単位の音は引っ込まずに飽和し、残りはリミッターが
+抑えます。×1 では、ゲインが等倍の音は肩に届かず、アンプは以前のままです。Gain 1 や Gain 2 を上げても駆動されます。
+曲線の直線からはみ出す部分は 1 次の ADAA（原始関数によるエイリアス低減）を通すので、肩に届かないサンプルはそのまま
+通り、届いたときの折り返しは少なくなります。C5〜C8 のサイン波を ×16 で駆動したとき、5 kHz 未満の折り返しは
+-89〜-65 dB です（ADAA なしでは -71〜-25 dB）。
 
 Amp 1 は 2 つのモジュレーション、Mod 1 In と Mod 2 In を受け取り、その 2 つをクロスフェードしたものでゲインを
 スケールします。Amp 1 Mod 1/2 Mix（CC#36）は、0.0（値 4）の Mod 1 In だけから、1.0（値 124）の Mod 2 In だけまで

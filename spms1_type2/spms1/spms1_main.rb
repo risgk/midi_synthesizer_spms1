@@ -280,6 +280,7 @@ def spms1_apply_parameters(signals, pitch_1, eg_1, eg_2, lfo_1, mixer_1, osc_1, 
   source_amp_1_limiter_sw = source_or_own(C.get_midi_nrpn_value(0, 356), 228) # NRPN_SOURCE_AMP_1_LIMITER_SW, SLOT_AMP_1_LIMITER_SW
   source_filter_1_drive = source_or_own(C.get_midi_nrpn_value(0, 357), 229) # NRPN_SOURCE_FILTER_1_DRIVE, SLOT_FILTER_1_DRIVE
   source_filter_2_drive = source_or_own(C.get_midi_nrpn_value(0, 358), 230) # NRPN_SOURCE_FILTER_2_DRIVE, SLOT_FILTER_2_DRIVE
+  source_amp_1_distortion = source_or_own(C.get_midi_nrpn_value(0, 359), 231) # NRPN_SOURCE_AMP_1_DISTORTION, SLOT_AMP_1_DISTORTION
   cc_pitch_1_glide = C.get_midi_nrpn_value(0, 384) # NRPN_CC_PITCH_1_GLIDE
   signals[128] = cc_to_unipolar(cc_or_nrpn(cc_pitch_1_glide, C.get_midi_cc_value(0, cc_pitch_1_glide), C.get_midi_nrpn_value(0, 512))) # SLOT_PITCH_1_GLIDE, NRPN_VALUE_PITCH_1_GLIDE
   cc_pitch_1_out_1_glide_sw = C.get_midi_nrpn_value(0, 385) # NRPN_CC_PITCH_1_OUT_1_GLIDE_SW
@@ -478,6 +479,8 @@ def spms1_apply_parameters(signals, pitch_1, eg_1, eg_2, lfo_1, mixer_1, osc_1, 
   signals[229] = cc_to_unipolar(cc_or_nrpn(cc_filter_1_drive, C.get_midi_cc_value(0, cc_filter_1_drive), C.get_midi_nrpn_value(0, 613))) # SLOT_FILTER_1_DRIVE, NRPN_VALUE_FILTER_1_DRIVE
   cc_filter_2_drive = C.get_midi_nrpn_value(0, 486) # NRPN_CC_FILTER_2_DRIVE
   signals[230] = cc_to_unipolar(cc_or_nrpn(cc_filter_2_drive, C.get_midi_cc_value(0, cc_filter_2_drive), C.get_midi_nrpn_value(0, 614))) # SLOT_FILTER_2_DRIVE, NRPN_VALUE_FILTER_2_DRIVE
+  cc_amp_1_distortion = C.get_midi_nrpn_value(0, 487) # NRPN_CC_AMP_1_DISTORTION
+  signals[231] = cc_to_unipolar(cc_or_nrpn(cc_amp_1_distortion, C.get_midi_cc_value(0, cc_amp_1_distortion), C.get_midi_nrpn_value(0, 615))) # SLOT_AMP_1_DISTORTION, NRPN_VALUE_AMP_1_DISTORTION
   cc_mod_wheel = C.get_midi_nrpn_value(0, 480) # NRPN_CC_MOD_WHEEL
   mod_wheel = C.get_midi_cc_value(0, cc_mod_wheel)
   signals[8] = cc_or_zero(cc_mod_wheel, cc_to_unipolar(mod_wheel)) # SIGNAL_MOD_WHEEL
@@ -661,6 +664,7 @@ def spms1_apply_parameters(signals, pitch_1, eg_1, eg_2, lfo_1, mixer_1, osc_1, 
   amp_1.set_limiter_switch(signals[source_amp_1_limiter_sw])
   filter_1.set_drive(signals[source_filter_1_drive])
   filter_2.set_drive(signals[source_filter_2_drive])
+  amp_1.set_distortion(signals[source_amp_1_distortion])
   0.0
 end
 # patch_gen end

@@ -10,7 +10,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.4.1
 - Envelopes: two ADS envelopes, EG 2 on the amp's Mod 2 In, an organ's at power-up, on CC#52, 53 and 54, with the release switch of both on CC#105
 - LFO: triangle (PolyBLAMP) and unipolar square (PolyBLEP), each on an output of its own, and a main output crossfading from one to the other (Wave, CC#33); a reset input, on Note Gate by default, that restarts it at each note with Reset Sw (CC#113) on
 - Filters: two ZDF/TPT State Variable Filters (with a nonlinear leak on the band pass integrator, solved by the one-step Newton method), each with low pass, high pass and band pass outputs and a main output crossfading from the low pass to the high pass through a notch (Mode, CC#39), and two audio inputs, each with a gain; in series on the same CCs by default, a low pass of the fourth order (24 dB/oct), the first with a resonance of its own, with no CC
-- Amp: two audio inputs, each with a gain of up to +12 dB (CC#15), with a look-ahead limiter that holds the peaks under the one-unit clamp, rounded off rather than cut (Limiter Sw, no CC, on at power-up)
+- Amp: two audio inputs, each with a gain of up to +12 dB (CC#15), with a look-ahead limiter that holds the peaks under the one-unit clamp, rounded off rather than cut (Limiter Sw, no CC, on at power-up), and ahead of it a distortion, x1 to x16 into a soft clip with ADAA, on CC#95
 - Chorus: mono in, stereo out, as a module in the run order
 - Delay: stereo, with feedback, as a module in the run order (up to 340 ms)
 - Pitch: the note's pitch as a module in the run order, with portamento as an exponential lag (CC#5), pitch bend past it (range on CC#57) and a stretch of the keys (CC#22)

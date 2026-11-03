@@ -533,3 +533,8 @@ controls:
   # CC 4, x1, where the filters are as they were.
   - { entry: 101, module: FILTER_1,  key: DRIVE,        label: Drive,        cc: 31,  value: 4, hint: x1 to x16, after: RESONANCE, set: set_drive }
   - { entry: 102, module: FILTER_2,  key: DRIVE,        label: Drive,        cc: 31,  value: 4, hint: x1 to x16, favorite: true, after: RESONANCE, set: set_drive }
+  # Amp 1 Distortion, after the filters' Drive so that no entry before it moves, and shown after
+  # Gain 2: the gained sound driven x1 to x16 into a soft clip with its aliasing reduced by ADAA,
+  # and taken back down by half that in dB, ahead of the limiter. On CC 95; it powers up at CC 4,
+  # x1, where nothing reaches the clip and the amp is as it was.
+  - { entry: 103, module: AMP_1,     key: DISTORTION,   label: Distortion,   cc: 95,  value: 4, hint: x1 to x16, after: GAIN_2, set: set_distortion }
