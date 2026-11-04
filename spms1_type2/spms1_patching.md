@@ -163,8 +163,9 @@ flowchart LR
   MOD2([Mod 2 In]) -.-> MX
   MX -.-> M
   M --> DRV["× Distortion<br/>x1 to x16"]
-  DRV --> SC["Soft clip, ADAA<br/>linear up to 1.0, 2.0 at 3.0"]
-  SC --> MU["× 1 / √Distortion"]
+  DRV --> SC["Soft clip, ADAA<br/>linear up to 1.0,<br/>2.0 at 3.0, -1.5 at -2.0"]
+  SC --> TONE["Tone<br/>Low pass 1-pole<br/>none to 5 kHz"]
+  TONE --> MU["× 1 / √Distortion"]
   MU --> LIM["Look-ahead limiter<br/>0.9, 1 ms (Limiter Sw)"]
   LIM --> CL["Clamp<br/>±1.0"]
   CL --> OUT([Out])
@@ -866,13 +867,16 @@ reach one unit, and bring the sound up with the amp instead.
 
 Amp 1 Distortion (CC#95) drives the gained sound into a soft clip ahead of the limiter, from x1 at
 value 4, where it powers up, to x16 at value 124, 6 dB every 30 values: a straight line up to one
-unit, then a quadratic shoulder that lands on two units at three. What comes out is taken back down
+unit, then a quadratic shoulder that lands on two units at three (below zero, one half as long, to
+minus one and a half at minus two, so that even harmonics come too, with the DC that makes taken
+off). What comes out is taken back down
 by half the drive in dB, so a sound at one unit saturates without falling away, and the limiter
 holds what is left over. At x1 nothing at the gains' unity reaches the shoulder, and the amp is as
 it was; Gain 1 and Gain 2 turned up drive it too. The curve's part beyond the straight line goes
 through first-order antiderivative anti-aliasing (ADAA), so a sample that reaches no shoulder passes
 exactly, and past it the aliasing is lower: a sine at C5 to C8 driven x16 folds back -89 to -65 dB
-under 5 kHz, against -71 to -25 dB without it.
+under 5 kHz, against -71 to -25 dB without it. After the curve, a 1-pole low pass, the tone, takes
+the edge off the harmonics, more with more drive: none at x1, about 10 kHz halfway, 5 kHz at x16.
 
 Amp 1 takes two modulations, Mod 1 In and Mod 2 In, and scales the gain by a crossfade of the
 two: Amp 1 Mod 1/2 Mix (CC#36) runs in a straight line from Mod 1 In alone at 0.0 (value 4) to Mod 2 In

@@ -60,6 +60,13 @@ module Spms1
     DISTORTION_SHOULDER_THIRD = DISTORTION_SHOULDER / 3.0
     DISTORTION_FLAT     = DISTORTION_LIMIT - DISTORTION_KNEE
     DISTORTION_ADAA_MIN_STEP = 0.001
+    # Below zero, the shoulder is half as long, to -1.5 at -2.0, so that the curve is not symmetric
+    # and adds even harmonics too (about 10 to 25 dB under the odd ones); its DC is taken off at
+    # DISTORTION_DC_FREQUENCY. After the curve, the tone, a 1-pole low pass, takes the edge off the
+    # harmonics, more with more drive: none at x1, about 10 kHz halfway, DISTORTION_TONE_FREQUENCY at x16.
+    DISTORTION_SPAN_BELOW     = 1.0
+    DISTORTION_DC_FREQUENCY   = 4.0
+    DISTORTION_TONE_FREQUENCY = 5000.0
     # D = 2^(i / 8) and 1 / sqrt(D) = 2^(-i / 16), one entry for each 1/32 of the dial, the last
     # repeated for the interpolation's upper neighbour.
     DISTORTION_GAIN_TABLE = Array.new(34, 0.0)
@@ -105,6 +112,16 @@ module Spms1
       @distortion_comp = 1.0
       @distortion_last_input = 0.0
       @distortion_last_antiderivative = 0.0
+      # The tone after the curve, a 1-pole low pass: the weight of its last output is
+      # @distortion_tone_rest, from 0.0 at x1 (none) up to that of DISTORTION_TONE_FREQUENCY at x16.
+      @distortion_tone_max_rest = Math.exp(-2.0 * Math::PI * DISTORTION_TONE_FREQUENCY / @sample_rate)
+      @distortion_tone = 1.0
+      @distortion_tone_rest = 0.0
+      @distortion_tone_out = 0.0
+      # The DC of the curve's part (its shoulders are not symmetric), followed by a 1-pole low pass
+      # at DISTORTION_DC_FREQUENCY and taken off.
+      @distortion_dc_rate = 1.0 - Math.exp(-2.0 * Math::PI * DISTORTION_DC_FREQUENCY / @sample_rate)
+      @distortion_dc = 0.0
     end
 
     # Distortion is unipolar, [0.0, 1.0], the drive into the curve, x1 at 0.0 to x16 at 1.0 (see
@@ -159,6 +176,8 @@ module Spms1
         fraction = position - index.to_f
         @distortion_gain = DISTORTION_GAIN_TABLE[index] + fraction * (DISTORTION_GAIN_TABLE[index + 1] - DISTORTION_GAIN_TABLE[index])
         @distortion_comp = DISTORTION_COMP_TABLE[index] + fraction * (DISTORTION_COMP_TABLE[index + 1] - DISTORTION_COMP_TABLE[index])
+        @distortion_tone_rest = @distortion_tone_max_rest * @current_distortion
+        @distortion_tone = 1.0 - @distortion_tone_rest
       end
 
       # Each side weighted on its own, so that at either end of Mod 1/2 Mix the one input
@@ -178,18 +197,34 @@ module Spms1
       # Written with literals, DISTORTION_* above, as Spinel emits a named Float constant as a
       # runtime global: the knee 1.0, the ceiling 3.0, the shoulder 0.25 (its third 0.25 / 3.0), and
       # the flat part's limit - knee 1.0.
+      # Below zero the shoulder is half as long (DISTORTION_SPAN_BELOW), selected by the sign as a
+      # weight of 1.0 or 0.0: its end (the ceiling) 3.0 or 2.0, the shoulder 1 / (2 * span) 0.25 or
+      # 0.5, and the flat part's limit - knee (span / 2) 1.0 or 0.5. The part has the sign of -u,
+      # from the same weight.
       u = gained * @distortion_gain
       a = u.abs
-      e = Dsp.clamp(a, 1.0, 3.0) - 1.0
-      d = C.float_max(a - 3.0, 0.0)
-      part = (0.0 - e * e * 0.25 - d) * ((u < 0.0) ? -1.0 : 1.0)
-      antiderivative = 0.0 - e * e * e * (0.25 / 3.0) - d - d * d * 0.5
+      negative = (u < 0.0) ? 1.0 : 0.0
+      ceiling = 3.0 - negative
+      shoulder = 0.25 + 0.25 * negative
+      flat = 1.0 - 0.5 * negative
+      e = Dsp.clamp(a, 1.0, ceiling) - 1.0
+      d = C.float_max(a - ceiling, 0.0)
+      curved = e * e * shoulder
+      part = (curved + d) * (2.0 * negative - 1.0)
+      antiderivative = 0.0 - curved * e * (1.0 / 3.0) - flat * d - d * d * 0.5
       step = u - @distortion_last_input
       short = (step.abs < 0.001) ? 1.0 : 0.0
       r = part * short + (antiderivative - @distortion_last_antiderivative) / (step + short) * (1.0 - short)
       @distortion_last_input = u
       @distortion_last_antiderivative = antiderivative
-      amplified = (u + r) * @distortion_comp
+      # The DC of the part taken off, and the tone, as the sum of two weights (not a difference):
+      # with nothing past the knee, the part and its DC are zero, and at x1 the weight of the input
+      # is 1.0 and that of the last output 0.0, so that the amp is exactly as it was.
+      dc = @distortion_dc + (r - @distortion_dc) * @distortion_dc_rate
+      @distortion_dc = dc
+      toned = (u + (r - dc)) * @distortion_tone + @distortion_tone_out * @distortion_tone_rest
+      @distortion_tone_out = toned
+      amplified = toned * @distortion_comp
 
       # The limiter. The gain it wants is the threshold over the peak of the two blocks where that
       # is above it, and 1.0 where not, or always while it is switched off; the one division is

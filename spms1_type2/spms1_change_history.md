@@ -20,7 +20,9 @@ revised.
       powers up at value 72, 6.49 Hz, a slightly slower vibrato than the 6.875 Hz of before
     - Amp: Distortion (CC#95), the gained sound driven x1 to x16 into a soft clip ahead of the
       limiter and taken back down by half the drive in dB, with its aliasing reduced by first-order
-      ADAA; at x1, where it powers up, the amp is as it was
+      ADAA, its shoulder below zero half as long (even harmonics too, the DC taken off), and a tone
+      after it, a 1-pole low pass from none at x1 to 5 kHz at x16; at x1, where it powers up, the
+      amp is as it was
     - Lighter: about 200 us less of the 1333 us of a buffer (estimated), from the clamps (a max
       and a min, one instruction each), the parameters' reads and Float#to_i
 
