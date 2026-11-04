@@ -4,7 +4,7 @@ MIDI Synthesizer SPMS-1 (type-2) Change History
 The main changes of each version, newest first, gathered before each release. The format may be
 revised.
 
-- v0.4.2 (2026-??-??):
+- v0.5.0 (2026-??-??):
     - Add **Filter Drive**, of Filter 1 and Filter 2, on CC#31 and among the favorites (NRPN entries 101
       and 102, after Amp 1 Limiter Sw so that no entry before them moves): the leak's ceiling
       brought down from x1 at value 4, where they power up and the filters are as they were, to

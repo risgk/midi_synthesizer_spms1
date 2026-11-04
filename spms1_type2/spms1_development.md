@@ -228,7 +228,7 @@ measures on the device -- with the default patch and a note held.
   more buffers (`--buffers 60`) they show how far a buffer moves with the values: the files in
   "sim_load/scenarios" hold Mixer 2 at its limit, the limiter off, the modulations at the top, a
   self-oscillating filter, the delay at its shortest, and a note every 10 ms with glide and bend
-  (`--gate 0`). Over 60 buffers, as measured on the way to v0.4.2 (with the clamps as a max and a
+  (`--gate 0`). Over 60 buffers, as measured on the way to v0.5.0 (with the clamps as a max and a
   min), every one of them stays within 177503 to 178016 cycles, the range of a note held at a low
   note: the self-oscillating filter, the limiter off and Mixer 2 at its limit take exactly the
   cycles of the default patch (177567 to 177936), nothing in them branching on a value, and what
@@ -243,10 +243,10 @@ or not, as the modules are meant to:
 
 | Version | Note held (avg / max) | No note (avg / max) |
 | :-- | --: | --: |
-| v0.4.2 (develop, 59e3665; replaced at the release) | 185624 / 185946 cycles, 1208 us (91%) | 185228 / 185423 cycles, 1206 us (91%) |
+| v0.5.0 (develop, 59e3665; replaced at the release) | 185624 / 185946 cycles, 1208 us (91%) | 185228 / 185423 cycles, 1206 us (91%) |
 
 The estimate is above Debug Print on the device: about 8% at v0.4.0 (min 1253 us, max 1256 us, about
-94%), and about 10% on the way to v0.4.2 (develop at 59e3665, with Amp 1 Distortion and its tone and
+94%), and about 10% on the way to v0.5.0 (develop at 59e3665, with Amp 1 Distortion and its tone and
 shoulder below zero, estimated at 1208 us on average and 1211 us at most: on the device min 1088 us and max
 1091 us with I2S, about 82%, `underruns` 0; at 3085c13, with the distortion before them, estimated at 1197 us
 and 1199 us, min 1079 us and max 1083 us with I2S, min 1079 us and max 1081 us with PWM Audio; at 5b5dc07,
