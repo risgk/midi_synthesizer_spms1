@@ -313,7 +313,7 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {569,   4},  // Osc 2 Sync Sw value
   {570,   4},  // Noise 1 Color value
   {571, 124},  // Noise 1 Level value
-  {572, 124},  // Mixer 2 Level 1 value
+  {572,  64},  // Mixer 2 Level 1 value
   {573,   4},  // Mixer 2 Level 2 value
   {574,   4},  // Mixer 2 Level 3 value
   {575,   4},  // Mixer 2 Level 4 value
@@ -341,7 +341,7 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {597,   4},  // Filter 2 Mod 2 Amt value
   {598,  76},  // Filter 2 Mod 2 Pol value
   {599,   4},  // Amp 1 Gain 1 value
-  {600,  52},  // Amp 1 Gain 2 value
+  {600,  72},  // Amp 1 Gain 2 value
   {601,   4},  // Amp 1 Mod 1/2 Mix value
   {602,  64},  // Chorus 1 Mix value
   {603,  64},  // Chorus 1 Rate value
@@ -391,7 +391,7 @@ static const uint8_t g_spms1_default_cc[][2] = {
   {13,    4},  // Osc 2 Pitch Mod 2 Amt
   {112,   4},  // Osc 2 Sync Sw
   {115,   4},  // Noise 1 Color
-  {19,  124},  // Mixer 2 Level 1
+  {19,   64},  // Mixer 2 Level 1
   {20,    4},  // Mixer 2 Level 2
   {21,    4},  // Mixer 2 Level 3
   {23,    4},  // Mixer 2 Level 4
@@ -408,7 +408,7 @@ static const uint8_t g_spms1_default_cc[][2] = {
   {24,   28},  // Filter 2 Mod 1 Amt
   {117, 124},  // Filter 2 Mod 1 Pol
   {25,    4},  // Filter 2 Mod 2 Amt
-  {15,   52},  // Amp 1 Gain 2
+  {15,   72},  // Amp 1 Gain 2
   {36,    4},  // Amp 1 Mod 1/2 Mix
   {93,   64},  // Chorus 1 Mix
   {58,   64},  // Chorus 1 Rate

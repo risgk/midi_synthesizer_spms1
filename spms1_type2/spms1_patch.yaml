@@ -87,8 +87,8 @@ modules:
 # (see the controls). Noise 1 runs after the oscillators, as it is mostly a sound of its own (a modulation taking
 # it is a sample late, which it does not hear), at full level: its Level has no CC and holds 1.0.
 # Mixer 2 runs after it, just ahead of the filters, which it feeds: Osc 1 on its In 1, Osc 2 on In 2,
-# Osc 1's sub on In 3 and the noise on In 4. Its Level 1, on CC 19, powers up at 1.0, so
-# Osc 1 sounds at full level, and Level 2 and Level 4, on CC 20 and 23, at 0.0, so Osc 2 and the
+# Osc 1's sub on In 3 and the noise on In 4. Its Level 1, on CC 19, powers up at 0.5, so
+# Osc 1 sounds at half level, and Level 2 and Level 4, on CC 20 and 23, at 0.0, so Osc 2 and the
 # noise are silent until CC 20 and CC 23. Osc 2 plays the note from Pitch 1, as Osc 1 does, tuned by its own
 # Pitch Coarse and Pitch Fine (CC 85 and 76), 10 cents sharp at power-up, and has a Wave of its own on CC
 # 104 (Osc 1's on CC 102); it follows Osc 1 in its pitch modulation: each of its Pitch Mod Amts
@@ -427,14 +427,15 @@ controls:
   - { entry: 59, module: NOISE_1,   key: LEVEL,        label: Level,        cc: 0,   value: 124, set: set_level }
   # Mixer 2, the audio ahead of the filter: Osc 1 on In 1, Osc 2 on In 2, Osc 1's sub on In 3 and
   # the noise on In 4.
-  # Level 1 (CC 19) powers up at CC 124, 1.0, and Level 2 (CC 20) at CC 4, 0.0, so Osc 1 is heard
-  # alone; both at CC 88, 0.7, two saws 10 cents apart come out about as loud as one at 1.0, as 0.7
-  # is about one over the square root of 2. Level 3, on CC 21,
+  # Level 1 (CC 19) powers up at CC 64, 0.5, and Level 2 (CC 20) at CC 4, 0.0, so Osc 1 is heard
+  # alone, reaching the filters at 0.25, which keeps the self-oscillation against it while a note
+  # plays, with Amp 1 Gain 2 up to keep the level; Level 2 brought up to 0.5 too drives the
+  # filters to 0.5, and both at 1.0 to 1.0. Level 3, on CC 21,
   # powers up at 0.0, leaving Osc 1's sub on In 3 silent. Level 4 (CC 23) powers up at 0.0, leaving the noise, at
-  # full level from Noise 1, silent. Out Level has no CC and holds 0.5: how
+  # full level from Noise 1, silent. Out Level has no CC and holds 1.0: how
   # hard the sum drives the filter, the one Mixer 2 feeds, and what keeps two oscillators and the
   # noise all at full level, a sum of 1.5 at most, inside the mixer's range.
-  - { entry: 60, module: MIXER_2,   key: LEVEL_1,      label: Level 1,      cc: 19,  value: 124, hint_inputs: [IN_1], favorite: true, set: set_level_1 }
+  - { entry: 60, module: MIXER_2,   key: LEVEL_1,      label: Level 1,      cc: 19,  value: 64,  hint_inputs: [IN_1], favorite: true, set: set_level_1 }
   - { entry: 61, module: MIXER_2,   key: LEVEL_2,      label: Level 2,      cc: 20,  value: 4,   hint_inputs: [IN_2], favorite: true, set: set_level_2 }
   - { entry: 62, module: MIXER_2,   key: LEVEL_3,      label: Level 3,      cc: 21,  value: 4, hint_inputs: [IN_3], favorite: true, set: set_level_3 }
   - { entry: 63, module: MIXER_2,   key: LEVEL_4,      label: Level 4,      cc: 23,  value: 4, hint_inputs: [IN_4], favorite: true, set: set_level_4 }
@@ -491,14 +492,14 @@ controls:
   # of the second order, on Audio In 1 and Filter 2, the two in series, on Audio In 2: Gain 1 has no
   # CC and powers up at CC 4, 0.0, silent, so the sound is the fourth order's alone until Gain 1
   # brings the second order's in beside it. A gain is squared and taken four times, 1.0 at CC 64
-  # and 4.0, 12 dB up, at CC 124. Gain 2, on CC 15, powers up at CC 52, 0.4, a gain of 0.64, 3.9 dB
-  # down, which brings the default patch's peaks to about -8 dBFS, under the limiter with either oscillator
+  # and 4.0, 12 dB up, at CC 124. Gain 2, on CC 15, powers up at CC 72, 0.57, a gain of 1.28, 2.1 dB
+  # up, which, with Mixer 2 Level 1 at 0.5, brings the default patch's peaks to about -8 dBFS, under the limiter with either oscillator
   # wave; its Limiter Sw, below, holds what goes past 0.9 under the amp's one-unit clamp, so that a
   # higher gain or a louder sound reaches it rounded off rather than cut. Mod 1/2 Mix, on CC 36,
   # crossfades what scales the gain from Mod 1 In, EG 1, at 0.0 (CC 4), where it powers up, to
   # Mod 2 In, EG 2, the organ envelope, at 1.0 (CC 124).
   - { entry: 87, module: AMP_1,     key: GAIN_1,       label: Gain 1,       cc: 0,   value: 4,  hint_inputs: [AUDIO_IN_1], set: set_gain_1 }
-  - { entry: 88, module: AMP_1,     key: GAIN_2,       label: Gain 2,       cc: 15,  value: 52, hint_inputs: [AUDIO_IN_2], favorite: true, set: set_gain_2 }
+  - { entry: 88, module: AMP_1,     key: GAIN_2,       label: Gain 2,       cc: 15,  value: 72, hint_inputs: [AUDIO_IN_2], favorite: true, set: set_gain_2 }
   - { entry: 89, module: AMP_1,     key: MOD_1_2_MIX,  label: Mod 1/2 Mix,  cc: 36,  value: 4, hint_inputs: [MOD_1_IN, MOD_2_IN], favorite: true, set: set_modulation_mix }
   - { entry: 90, module: CHORUS_1,  key: MIX,          label: Mix,          cc: 93,  value: 64, favorite: true, set: set_mix }
   - { entry: 91, module: CHORUS_1,  key: RATE,         label: Rate,         cc: 58,  value: 64, favorite: true, set: set_rate }

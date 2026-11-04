@@ -360,9 +360,11 @@ order is never what makes a patch fit; to leave one out of the sound, route arou
 run unread (see the examples below).
 Mixer 1 has no CC: its levels hold 0.0, so it is silent until a patch turns them up, as its
 category 4 values or by giving them CCs. Mixer 2 has a CC on each level, CC#19 to 21 and 23, of which
-Level 1 powers up at 1.0 and Level 2 to 4 at 0.0, so Osc 1 alone is heard at first. Each mixer's Out Level has no CC: Mixer 1's holds 0.5, and Mixer 2's
-1.0 (value 124), which sets how hard the audio drives the filters (0.5 until v0.4.0; the filters are
-driven 6 dB harder now, and Amp 1 Gain 2 is down by the same, so the level is as it was).
+Level 1 powers up at 0.5 (value 64) and Level 2 to 4 at 0.0, so Osc 1 alone is heard at first. Each mixer's Out Level has no CC: Mixer 1's holds 0.5, and Mixer 2's
+1.0 (value 124), which sets how hard the audio drives the filters. Osc 1 alone reaches them at 0.25,
+as until v0.4.0 (when Out Level held 0.5 and Level 1 powered up at 1.0; in v0.4.1, Level 1 at 1.0
+drove them 6 dB harder), so the self-oscillation holds against it while a note plays, and Amp 1
+Gain 2 brings the level back up.
 
 ### Entries (CC#98), category 1
 
@@ -803,9 +805,9 @@ over a day at 48 kHz, and starts the same every time, so a render comes out the 
 
 How hard the input drives a filter, which is also what decides how far it runs into its own
 saturation, is set by its Gain 1 and Gain 2 and ahead of it: by Mixer 2 Out Level in the default
-patch, which has no CC and holds 1.0, and Filter 1's Gain 1 at unity, so Osc 1 alone reaches 0.5 at
-the filter. Two oscillators at full level on Mixer 2 drive the filter twice as hard as one, to
-1.0, where Filter 1's output clip begins to round the peaks: turn Out Level or Gain 1 down to keep
+patch, which has no CC and holds 1.0, Mixer 2 Level 1 at 0.5, and Filter 1's Gain 1 at unity, so Osc 1
+alone reaches 0.25 at the filter. Osc 1 and Osc 2 both at 0.5 drive it to 0.5, and both at full level
+to 1.0, where Filter 1's output clip begins to round the peaks: turn Out Level or Gain 1 down to keep
 the level, or leave them up to drive the saturation. The saturation sits on the resonance rather than the pass band: a low cutoff
 passes a loud note nearly clean, while turning the drive up rounds off the resonant peak.
 
@@ -838,10 +840,10 @@ Amp 1 Gain 1 and Gain 2, of Audio In 1 and Audio In 2, which the amp sums, are e
 6 dB down, at value 46, unity at value 64, twice, 6 dB up, at value 89, and four times, 12 dB up,
 at value 124, so a quiet sound can be brought well up as well as a loud one taken down. The
 default patch puts Filter 2, the fourth order, on Audio In 2: Gain 2, on CC#15, powers up at value
-52, 0.64 times (3.9 dB down), and the default patch's peaks come to about -8 dBFS, so that the
-Amp 1 Distortion turned up has room before the limiter (until v0.4.1 it powered up at 64, unity,
-and until v0.4.0 at 88, 1.96 times, with Mixer 2 Out Level at 0.5 ahead of the filters: the same
-level as at 64, the filters driven 6 dB less). Filter 1, the
+72, 1.28 times (2.1 dB up), with Mixer 2 Level 1 at 0.5 ahead of the filters, and the default
+patch's peaks come to about -8 dBFS, so that the Amp 1 Distortion turned up has room before the
+limiter (until v0.4.1 it powered up at 64, unity, with Level 1 at 1.0, about 4 dB louder, and until
+v0.4.0 at 88, 1.96 times, with Mixer 2 Out Level at 0.5). Filter 1, the
 second order, is on Audio In 1, and Gain 1, which has no CC, powers up at value 4, silent, so the
 fourth order is heard alone until Gain 1 brings the second order in beside it, through the same
 envelope and limiter.
