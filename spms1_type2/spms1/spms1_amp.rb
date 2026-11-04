@@ -119,6 +119,7 @@ module Spms1
       @distortion_tone = 1.0
       @distortion_tone_rest = 0.0
       @distortion_tone_out = 0.0
+      @distortion_even = 0.0
       # The DC of the curve's part (its shoulders are not symmetric), followed by a 1-pole low pass
       # at DISTORTION_DC_FREQUENCY and taken off.
       @distortion_dc_rate = 1.0 - Math.exp(-2.0 * Math::PI * DISTORTION_DC_FREQUENCY / @sample_rate)
@@ -179,6 +180,8 @@ module Spms1
         @distortion_comp = DISTORTION_COMP_TABLE[index] + fraction * (DISTORTION_COMP_TABLE[index + 1] - DISTORTION_COMP_TABLE[index])
         @distortion_tone_rest = @distortion_tone_max_rest * @current_distortion
         @distortion_tone = 1.0 - @distortion_tone_rest
+        # The even term's c: 0.0 at x1 up to 0.5 at half the dial (x4), and held there.
+        @distortion_even = C.float_min(@current_distortion, 0.5)
       end
 
       # Each side weighted on its own, so that at either end of Mod 1/2 Mix the one input
@@ -211,8 +214,13 @@ module Spms1
       e = Dsp.clamp(a, 1.0, ceiling) - 1.0
       d = C.float_max(a - ceiling, 0.0)
       curved = e * e * shoulder
-      part = (curved + d) * (2.0 * negative - 1.0)
-      antiderivative = 0.0 - curved * e * (1.0 / 3.0) - flat * d - d * d * 0.5
+      # The even term, c * w^2 with w the sample held within one unit, so that a sound below the
+      # knee gets the 2nd harmonic too, more with the drive (its DC is taken off with the part's);
+      # its antiderivative c * (w^3 / 3 + (u - w)): u^3 / 3 within one unit, and on in a line past it.
+      w = Dsp.clamp(u, -1.0, 1.0)
+      w_2 = w * w
+      part = (curved + d) * (2.0 * negative - 1.0) + w_2 * @distortion_even
+      antiderivative = 0.0 - curved * e * (1.0 / 3.0) - flat * d - d * d * 0.5 + (w_2 * w * (1.0 / 3.0) + (u - w)) * @distortion_even
       step = u - @distortion_last_input
       short = (step.abs < 0.001) ? 1.0 : 0.0
       r = part * short + (antiderivative - @distortion_last_antiderivative) / (step + short) * (1.0 - short)
