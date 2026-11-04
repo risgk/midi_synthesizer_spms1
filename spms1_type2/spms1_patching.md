@@ -883,8 +883,8 @@ it was; Gain 1 and Gain 2 turned up drive it too. Below the knee, the curve also
 term, c times the square of the sample held within one unit, with c from 0 at x1 to 0.5 at half the
 dial (x4) and held there, the most that keeps the curve rising: so a little of the dial already
 thickens a sound with the 2nd harmonic, and a chord with its sum and difference tones, before
-anything is clipped. The curve's part beyond the straight line, this term included, goes
-through first-order antiderivative anti-aliasing (ADAA), so at x1 a sample that reaches no shoulder passes
+anything is clipped. The term is added as it is, after the rest, as it is smooth and only doubles the band. The
+curve's part beyond the straight line goes through first-order antiderivative anti-aliasing (ADAA), so at x1 a sample that reaches no shoulder passes
 exactly, and past it the aliasing is lower: a sine at C5 to C8 driven x16 folds back -89 to -65 dB
 under 5 kHz, against -71 to -25 dB without it. After the curve, a 1-pole low pass, the tone, takes
 the edge off the harmonics, more with more drive: none at x1, about 10 kHz halfway, 5 kHz at x16.

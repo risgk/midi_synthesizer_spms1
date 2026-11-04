@@ -4857,13 +4857,12 @@ static sp_float sp_Amp_process(sp_Amp *self, sp_bool lv_control_tick, sp_float l
     sp_float lv_e = 0.0;
     sp_float lv_d = 0.0;
     sp_float lv_curved = 0.0;
-    sp_float lv_w = 0.0;
-    sp_float lv_w_2 = 0.0;
     sp_float lv_part = 0.0;
     sp_float lv_antiderivative = 0.0;
     sp_float lv_step = 0.0;
     sp_float lv_short = 0.0;
     sp_float lv_r = 0.0;
+    sp_float lv_w = 0.0;
     sp_float lv_dc = 0.0;
     sp_float lv_toned = 0.0;
     sp_float lv_amplified = 0.0;
@@ -4933,24 +4932,24 @@ static sp_float sp_Amp_process(sp_Amp *self, sp_bool lv_control_tick, sp_float l
   lv_d = ((sp_float)(float_max(((float)((lv_a - lv_ceiling))), ((float)(0.0)))));
 #line 216 "spms1_amp.rb"
   lv_curved = ((lv_e * lv_e) * lv_shoulder);
-#line 220 "spms1_amp.rb"
-  lv_w = sp_Dsp_s_clamp(lv_u, -1.0, 1.0);
-#line 221 "spms1_amp.rb"
-  lv_w_2 = (lv_w * lv_w);
-#line 222 "spms1_amp.rb"
-  lv_part = (((lv_curved + lv_d) * (((2.0 * lv_negative) - 1.0))) + (lv_w_2 * self->iv_distortion_even));
-#line 223 "spms1_amp.rb"
-  lv_antiderivative = ((((0.0 - ((lv_curved * lv_e) * ((1.0 / 3.0)))) - (lv_flat * lv_d)) - ((lv_d * lv_d) * 0.5)) + ((((lv_w_2 * lv_w) * ((1.0 / 3.0))) + ((lv_u - lv_w))) * self->iv_distortion_even));
-#line 224 "spms1_amp.rb"
+#line 217 "spms1_amp.rb"
+  lv_part = ((lv_curved + lv_d) * (((2.0 * lv_negative) - 1.0)));
+#line 218 "spms1_amp.rb"
+  lv_antiderivative = (((0.0 - ((lv_curved * lv_e) * ((1.0 / 3.0)))) - (lv_flat * lv_d)) - ((lv_d * lv_d) * 0.5));
+#line 219 "spms1_amp.rb"
   lv_step = (lv_u - self->iv_distortion_last_input);
-#line 225 "spms1_amp.rb"
+#line 220 "spms1_amp.rb"
   lv_short = (((fabs(lv_step) < 0.001)) ? 1.0 : 0.0);
-#line 226 "spms1_amp.rb"
+#line 221 "spms1_amp.rb"
   lv_r = ((lv_part * lv_short) + (((lv_antiderivative - self->iv_distortion_last_antiderivative) / ((lv_step + lv_short))) * ((1.0 - lv_short))));
-#line 227 "spms1_amp.rb"
+#line 222 "spms1_amp.rb"
   self->iv_distortion_last_input = lv_u;
-#line 228 "spms1_amp.rb"
+#line 223 "spms1_amp.rb"
   self->iv_distortion_last_antiderivative = lv_antiderivative;
+#line 227 "spms1_amp.rb"
+  lv_w = sp_Dsp_s_clamp(lv_u, -1.0, 1.0);
+#line 228 "spms1_amp.rb"
+  lv_r += ((lv_w * lv_w) * self->iv_distortion_even);
 #line 232 "spms1_amp.rb"
   lv_dc = (self->iv_distortion_dc + ((lv_r - self->iv_distortion_dc) * self->iv_distortion_dc_rate));
 #line 233 "spms1_amp.rb"
@@ -8282,7 +8281,7 @@ int main(int argc,char**argv){
     sp_int lv_source_output_l = 0;
     sp_int lv_source_output_r = 0;
     sp_bool lv_control_tick = 0;
-    sp_int lv_i__bp19915 = 0;
+    sp_int lv_i__bp19885 = 0;
 
 #line 35 "spms1_framework.rb"
 #line 36 "spms1_framework.rb"
@@ -10626,9 +10625,9 @@ int main(int argc,char**argv){
     (stop_debug_measure(), (sp_int)0);
 #line 966 "spms1_main.rb"
     for (sp_int _t2247 = 0; _t2247 < cst_AUDIO_BUFFER_WORDS; _t2247++) {
-      lv_i__bp19915 = _t2247;
+      lv_i__bp19885 = _t2247;
 #line 967 "spms1_main.rb"
-      ({ sp_float _t2248 = sp_FloatArray_get(lv_audio_buffer_l, lv_i__bp19915); sp_float _t2249 = sp_FloatArray_get(lv_audio_buffer_r, lv_i__bp19915); (write_to_audio_buffer(((float)(_t2248)), ((float)(_t2249))), (sp_int)0); });
+      ({ sp_float _t2248 = sp_FloatArray_get(lv_audio_buffer_l, lv_i__bp19885); sp_float _t2249 = sp_FloatArray_get(lv_audio_buffer_r, lv_i__bp19885); (write_to_audio_buffer(((float)(_t2248)), ((float)(_t2249))), (sp_int)0); });
     }
 #line 971 "spms1_main.rb"
     if (lv_saving) {

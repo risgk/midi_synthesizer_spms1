@@ -214,18 +214,18 @@ module Spms1
       e = Dsp.clamp(a, 1.0, ceiling) - 1.0
       d = C.float_max(a - ceiling, 0.0)
       curved = e * e * shoulder
-      # The even term, c * w^2 with w the sample held within one unit, so that a sound below the
-      # knee gets the 2nd harmonic too, more with the drive (its DC is taken off with the part's);
-      # its antiderivative c * (w^3 / 3 + (u - w)): u^3 / 3 within one unit, and on in a line past it.
-      w = Dsp.clamp(u, -1.0, 1.0)
-      w_2 = w * w
-      part = (curved + d) * (2.0 * negative - 1.0) + w_2 * @distortion_even
-      antiderivative = 0.0 - curved * e * (1.0 / 3.0) - flat * d - d * d * 0.5 + (w_2 * w * (1.0 / 3.0) + (u - w)) * @distortion_even
+      part = (curved + d) * (2.0 * negative - 1.0)
+      antiderivative = 0.0 - curved * e * (1.0 / 3.0) - flat * d - d * d * 0.5
       step = u - @distortion_last_input
       short = (step.abs < 0.001) ? 1.0 : 0.0
       r = part * short + (antiderivative - @distortion_last_antiderivative) / (step + short) * (1.0 - short)
       @distortion_last_input = u
       @distortion_last_antiderivative = antiderivative
+      # The even term, c * w^2 with w the sample held within one unit, so that a sound below the
+      # knee gets the 2nd harmonic too, more with the drive; added as it is, not through ADAA
+      # (smooth, it only doubles the band), and its DC taken off with the part's.
+      w = Dsp.clamp(u, -1.0, 1.0)
+      r += w * w * @distortion_even
       # The DC of the part taken off, and the tone, as the sum of two weights (not a difference):
       # with nothing past the knee, the part and its DC are zero, and at x1 the weight of the input
       # is 1.0 and that of the last output 0.0, so that the amp is exactly as it was.
