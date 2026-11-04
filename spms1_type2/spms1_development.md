@@ -243,7 +243,7 @@ or not, as the modules are meant to:
 
 | Version | Note held (avg / max) | No note (avg / max) |
 | :-- | --: | --: |
-| v0.4.1 | 208204 / 208204 cycles, 1355 us (102%) | 208556 / 208556 cycles, 1358 us (102%) |
+| v0.4.2 (develop, 59e3665; replaced at the release) | 185624 / 185946 cycles, 1208 us (91%) | 185228 / 185423 cycles, 1206 us (91%) |
 
 The estimate is above Debug Print on the device: about 8% at v0.4.0 (min 1253 us, max 1256 us, about
 94%), and about 10% on the way to v0.4.2 (develop at 59e3665, with Amp 1 Distortion and its tone and
@@ -251,8 +251,7 @@ shoulder below zero, estimated at 1208 us on average and 1211 us at most: on the
 1091 us with I2S, about 82%, `underruns` 0; at 3085c13, with the distortion before them, estimated at 1197 us
 and 1199 us, min 1079 us and max 1083 us with I2S, min 1079 us and max 1081 us with PWM Audio; at 5b5dc07,
 before the distortion, estimated at 1157 us and 1159 us, min 1042 us and max 1045 us with I2S, min 1038 us
-and max 1043 us with PWM Audio, about 78%, which Note On and Off repeated by MIDI moved little). So the table's 102% is not a buffer running over; `underruns` on
-the device says whether one does.
+and max 1043 us with PWM Audio, about 78%, which Note On and Off repeated by MIDI moved little). So the table is not what a buffer takes on the device; `underruns` on the device says whether one runs over.
 
 The load of each module, by `--modules` (the same version, a note held): "own" is
 the cycles of its methods (process, its outputs, smooth_parameters), and "with common" adds its share
@@ -261,21 +260,21 @@ order, split evenly; the common part left is the loop of the samples, the output
 
 | Module | Own | With common |
 | :-- | --: | --: |
-| Filter 2 | 11.9% (159 us) | 13.7% (182 us) |
-| Filter 1 | 11.9% (158 us) | 13.6% (181 us) |
-| Osc 2 (with Sync) | 9.5% (126 us) | 11.3% (151 us) |
-| Osc 1 | 6.3% (84 us) | 7.8% (105 us) |
-| Delay 1 | 6.5% (86 us) | 7.7% (103 us) |
-| Chorus 1 | 6.4% (85 us) | 7.4% (99 us) |
-| Amp 1 | 4.7% (63 us) | 6.0% (80 us) |
-| LFO 1 | 3.1% (41 us) | 4.0% (53 us) |
-| Pitch 1 | 2.7% (37 us) | 3.9% (53 us) |
-| Mixer 1 | 1.6% (22 us) | 2.9% (39 us) |
-| Mixer 2 | 1.6% (22 us) | 2.9% (39 us) |
-| EG 1 | 2.2% (29 us) | 2.9% (39 us) |
-| EG 2 | 2.2% (29 us) | 2.9% (39 us) |
-| Noise 1 | 1.9% (26 us) | 2.9% (38 us) |
-| The common part left | | 11.7% (156 us) |
+| Osc 2 (with Sync) | 9.3% (124 us) | 10.8% (144 us) |
+| Filter 1 | 9.1% (121 us) | 10.6% (141 us) |
+| Filter 2 | 9.1% (121 us) | 10.6% (141 us) |
+| Amp 1 (with the Distortion) | 8.3% (111 us) | 9.5% (126 us) |
+| Osc 1 | 6.0% (80 us) | 7.4% (99 us) |
+| Delay 1 | 5.6% (74 us) | 6.7% (89 us) |
+| Chorus 1 | 4.7% (63 us) | 5.7% (75 us) |
+| LFO 1 | 3.2% (42 us) | 4.0% (54 us) |
+| Pitch 1 | 2.2% (29 us) | 3.3% (45 us) |
+| Mixer 1 | 1.5% (20 us) | 2.7% (36 us) |
+| Mixer 2 | 1.5% (20 us) | 2.7% (36 us) |
+| Noise 1 | 1.9% (25 us) | 2.6% (35 us) |
+| EG 1 | 1.9% (25 us) | 2.6% (34 us) |
+| EG 2 | 1.9% (25 us) | 2.6% (34 us) |
+| The common part left | | 9.0% (120 us) |
 
 
 ## GitHub Actions
