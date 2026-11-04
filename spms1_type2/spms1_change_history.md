@@ -22,10 +22,9 @@ revised.
       0.25 at value 123 (0.5 before)
     - Default patch: Mixer 2 Level 1 (CC#19) powers up at 0.5 (value 64) instead of 1.0, so that Osc 1
       alone reaches the filters at 0.25, as until v0.4.0, and the self-oscillation holds against it
-      while a note plays (at 1.0 it mostly stopped, or was pulled to a harmonic), and Amp 1 Gain 2
-      (CC#15) at 1.28 times (value 72) instead of unity (value 64), so that the default patch's peaks
-      come to about -8 dBFS, about 4 dB lower than before, and the Distortion turned up keeps the level
-      within about 1 dB up to three quarters of the dial (about 4 dB down at the top)
+      while a note plays (at 1.0 it mostly stopped, or was pulled to a harmonic), with Amp 1 Gain 2
+      (CC#15) still at unity (value 64), so that the default patch's peaks come to about -10 dBFS,
+      about 6 dB lower than before and about as loud as a lead sound of a typical synth
     - Filters: Cutoff three semitones down, a C every 12 values, C5 (523 Hz) at value 64, from note
       12 (16.4 Hz) at value 4 to note 132 (16.7 kHz) at value 124 (it was note 15, 19 Hz, to note
       135, 20 kHz), so that with Pitch Amt at its top the cutoff at value 64 is an octave above the

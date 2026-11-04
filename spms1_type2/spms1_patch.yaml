@@ -492,14 +492,14 @@ controls:
   # of the second order, on Audio In 1 and Filter 2, the two in series, on Audio In 2: Gain 1 has no
   # CC and powers up at CC 4, 0.0, silent, so the sound is the fourth order's alone until Gain 1
   # brings the second order's in beside it. A gain is squared and taken four times, 1.0 at CC 64
-  # and 4.0, 12 dB up, at CC 124. Gain 2, on CC 15, powers up at CC 72, 0.57, a gain of 1.28, 2.1 dB
-  # up, which, with Mixer 2 Level 1 at 0.5, brings the default patch's peaks to about -8 dBFS, under the limiter with either oscillator
+  # and 4.0, 12 dB up, at CC 124. Gain 2, on CC 15, powers up at CC 64, unity,
+  # which, with Mixer 2 Level 1 at 0.5, brings the default patch's peaks to about -10 dBFS, under the limiter with either oscillator
   # wave; its Limiter Sw, below, holds what goes past 0.9 under the amp's one-unit clamp, so that a
   # higher gain or a louder sound reaches it rounded off rather than cut. Mod 1/2 Mix, on CC 36,
   # crossfades what scales the gain from Mod 1 In, EG 1, at 0.0 (CC 4), where it powers up, to
   # Mod 2 In, EG 2, the organ envelope, at 1.0 (CC 124).
   - { entry: 87, module: AMP_1,     key: GAIN_1,       label: Gain 1,       cc: 0,   value: 4,  hint_inputs: [AUDIO_IN_1], set: set_gain_1 }
-  - { entry: 88, module: AMP_1,     key: GAIN_2,       label: Gain 2,       cc: 15,  value: 72, hint_inputs: [AUDIO_IN_2], favorite: true, set: set_gain_2 }
+  - { entry: 88, module: AMP_1,     key: GAIN_2,       label: Gain 2,       cc: 15,  value: 64, hint_inputs: [AUDIO_IN_2], favorite: true, set: set_gain_2 }
   - { entry: 89, module: AMP_1,     key: MOD_1_2_MIX,  label: Mod 1/2 Mix,  cc: 36,  value: 4, hint_inputs: [MOD_1_IN, MOD_2_IN], favorite: true, set: set_modulation_mix }
   - { entry: 90, module: CHORUS_1,  key: MIX,          label: Mix,          cc: 93,  value: 64, favorite: true, set: set_mix }
   - { entry: 91, module: CHORUS_1,  key: RATE,         label: Rate,         cc: 58,  value: 64, favorite: true, set: set_rate }

@@ -843,10 +843,10 @@ Amp 1 Gain 1 and Gain 2, of Audio In 1 and Audio In 2, which the amp sums, are e
 6 dB down, at value 46, unity at value 64, twice, 6 dB up, at value 89, and four times, 12 dB up,
 at value 124, so a quiet sound can be brought well up as well as a loud one taken down. The
 default patch puts Filter 2, the fourth order, on Audio In 2: Gain 2, on CC#15, powers up at value
-72, 1.28 times (2.1 dB up), with Mixer 2 Level 1 at 0.5 ahead of the filters, and the default
-patch's peaks come to about -8 dBFS, so that the Amp 1 Distortion turned up has room before the
-limiter (until v0.4.1 it powered up at 64, unity, with Level 1 at 1.0, about 4 dB louder, and until
-v0.4.0 at 88, 1.96 times, with Mixer 2 Out Level at 0.5). Filter 1, the
+64, unity, with Mixer 2 Level 1 at 0.5 ahead of the filters, and the default patch's peaks come
+to about -10 dBFS, about as loud as a lead sound of a typical synth, so that the Amp 1 Distortion
+turned up has room before the limiter (in v0.4.1, with Level 1 at 1.0, it was about 6 dB louder;
+until v0.4.0 Gain 2 powered up at 88, 1.96 times, with Mixer 2 Out Level at 0.5). Filter 1, the
 second order, is on Audio In 1, and Gain 1, which has no CC, powers up at value 4, silent, so the
 fourth order is heard alone until Gain 1 brings the second order in beside it, through the same
 envelope and limiter.
