@@ -14,8 +14,9 @@ revised.
     - Filters: A high resonance is about as loud as a moderate one, and the self-oscillation is
       quieter (0.25 at most, from 0.5), while it holds against the input as before
     - Default patch: Mixer 2 Level 1 at 0.5 instead of 1.0, so that the self-oscillation holds
-      while a note plays, and the level is about 6 dB lower, about as loud as a lead sound of a
-      typical synth
+      while a note plays, with Amp 1 Gain 2 at value 70 (1.7 dB up), so that the level is about
+      4.5 dB lower, about as loud as a lead sound of a typical synth; and Chorus 1 Depth at value
+      34 (1.31 ms) instead of 64, a gentler chorus
     - Filters: Cutoff three semitones down, a C every 12 values, C5 at value 64; the default patch
       powers up at value 88 (C7)
     - LFO 1 Rate: a C every 12 values, C-2 (4.09 Hz) at value 64; it powers up at 6.49 Hz, a

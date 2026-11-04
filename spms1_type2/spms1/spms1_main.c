@@ -5025,7 +5025,7 @@ static void sp_Chorus_initialize(sp_Chorus *self, sp_int lv_sample_rate) {
 #line 77 "spms1_chorus.rb"
   self->iv_current_rate = 0.0;
 #line 78 "spms1_chorus.rb"
-  self->iv_depth = 0.5;
+  self->iv_depth = 0.25;
 #line 79 "spms1_chorus.rb"
   self->iv_stage_1_depth = 0.0;
 #line 80 "spms1_chorus.rb"
@@ -6030,7 +6030,7 @@ static void sp_spms1_write_default_patch(sp_int lv_midi_ch) {
 #line 918 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_VALUE_AMP_1_GAIN_1)), ((uint8_t)(4LL))), (sp_int)0);
 #line 919 "spms1_patch.rb"
-  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_VALUE_AMP_1_GAIN_2)), ((uint8_t)(64LL))), (sp_int)0);
+  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_VALUE_AMP_1_GAIN_2)), ((uint8_t)(70LL))), (sp_int)0);
 #line 920 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_VALUE_AMP_1_MOD_1_2_MIX)), ((uint8_t)(4LL))), (sp_int)0);
 #line 921 "spms1_patch.rb"
@@ -6038,7 +6038,7 @@ static void sp_spms1_write_default_patch(sp_int lv_midi_ch) {
 #line 922 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_VALUE_CHORUS_1_RATE)), ((uint8_t)(64LL))), (sp_int)0);
 #line 923 "spms1_patch.rb"
-  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_VALUE_CHORUS_1_DEPTH)), ((uint8_t)(64LL))), (sp_int)0);
+  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_VALUE_CHORUS_1_DEPTH)), ((uint8_t)(34LL))), (sp_int)0);
 #line 924 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_VALUE_DELAY_1_MIX)), ((uint8_t)(34LL))), (sp_int)0);
 #line 925 "spms1_patch.rb"
@@ -6156,7 +6156,7 @@ static void sp_spms1_write_default_patch(sp_int lv_midi_ch) {
 #line 982 "spms1_patch.rb"
   (set_midi_cc_value(((uint8_t)(lv_midi_ch)), ((uint8_t)(25LL)), ((uint8_t)(4LL))), (sp_int)0);
 #line 983 "spms1_patch.rb"
-  (set_midi_cc_value(((uint8_t)(lv_midi_ch)), ((uint8_t)(15LL)), ((uint8_t)(64LL))), (sp_int)0);
+  (set_midi_cc_value(((uint8_t)(lv_midi_ch)), ((uint8_t)(15LL)), ((uint8_t)(70LL))), (sp_int)0);
 #line 984 "spms1_patch.rb"
   (set_midi_cc_value(((uint8_t)(lv_midi_ch)), ((uint8_t)(36LL)), ((uint8_t)(4LL))), (sp_int)0);
 #line 985 "spms1_patch.rb"
@@ -6164,7 +6164,7 @@ static void sp_spms1_write_default_patch(sp_int lv_midi_ch) {
 #line 986 "spms1_patch.rb"
   (set_midi_cc_value(((uint8_t)(lv_midi_ch)), ((uint8_t)(58LL)), ((uint8_t)(64LL))), (sp_int)0);
 #line 987 "spms1_patch.rb"
-  (set_midi_cc_value(((uint8_t)(lv_midi_ch)), ((uint8_t)(59LL)), ((uint8_t)(64LL))), (sp_int)0);
+  (set_midi_cc_value(((uint8_t)(lv_midi_ch)), ((uint8_t)(59LL)), ((uint8_t)(34LL))), (sp_int)0);
 #line 988 "spms1_patch.rb"
   (set_midi_cc_value(((uint8_t)(lv_midi_ch)), ((uint8_t)(94LL)), ((uint8_t)(34LL))), (sp_int)0);
 #line 989 "spms1_patch.rb"

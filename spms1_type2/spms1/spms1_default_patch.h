@@ -341,11 +341,11 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {597,   4},  // Filter 2 Mod 2 Amt value
   {598,  76},  // Filter 2 Mod 2 Pol value
   {599,   4},  // Amp 1 Gain 1 value
-  {600,  64},  // Amp 1 Gain 2 value
+  {600,  70},  // Amp 1 Gain 2 value
   {601,   4},  // Amp 1 Mod 1/2 Mix value
   {602,  64},  // Chorus 1 Mix value
   {603,  64},  // Chorus 1 Rate value
-  {604,  64},  // Chorus 1 Depth value
+  {604,  34},  // Chorus 1 Depth value
   {605,  34},  // Delay 1 Mix value
   {606,  64},  // Delay 1 Time value
   {607,  64},  // Delay 1 Feedback value
@@ -408,11 +408,11 @@ static const uint8_t g_spms1_default_cc[][2] = {
   {24,   28},  // Filter 2 Mod 1 Amt
   {117, 124},  // Filter 2 Mod 1 Pol
   {25,    4},  // Filter 2 Mod 2 Amt
-  {15,   64},  // Amp 1 Gain 2
+  {15,   70},  // Amp 1 Gain 2
   {36,    4},  // Amp 1 Mod 1/2 Mix
   {93,   64},  // Chorus 1 Mix
   {58,   64},  // Chorus 1 Rate
-  {59,   64},  // Chorus 1 Depth
+  {59,   34},  // Chorus 1 Depth
   {94,   34},  // Delay 1 Mix
   {90,   64},  // Delay 1 Time
   {92,   64},  // Delay 1 Feedback

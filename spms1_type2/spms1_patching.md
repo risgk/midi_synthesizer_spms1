@@ -843,9 +843,9 @@ Amp 1 Gain 1 and Gain 2, of Audio In 1 and Audio In 2, which the amp sums, are e
 6 dB down, at value 46, unity at value 64, twice, 6 dB up, at value 89, and four times, 12 dB up,
 at value 124, so a quiet sound can be brought well up as well as a loud one taken down. The
 default patch puts Filter 2, the fourth order, on Audio In 2: Gain 2, on CC#15, powers up at value
-64, unity, with Mixer 2 Level 1 at 0.5 ahead of the filters, and the default patch's peaks come
-to about -10 dBFS, about as loud as a lead sound of a typical synth, so that the Amp 1 Distortion
-turned up has room before the limiter (in v0.4.1, with Level 1 at 1.0, it was about 6 dB louder;
+70, 1.21 times (1.7 dB up), with Mixer 2 Level 1 at 0.5 ahead of the filters, and the default
+patch's peaks come to about -8.5 dBFS, about as loud as a lead sound of a typical synth, so that the Amp 1 Distortion
+turned up has room before the limiter (in v0.4.1, at unity with Level 1 at 1.0, it was about 4.5 dB louder;
 until v0.4.0 Gain 2 powered up at 88, 1.96 times, with Mixer 2 Out Level at 0.5). Filter 1, the
 second order, is on Audio In 1, and Gain 1, which has no CC, powers up at value 4, silent, so the
 fourth order is heard alone until Gain 1 brings the second order in beside it, through the same
@@ -922,7 +922,7 @@ number, a semitone a step, as LFO 1 Rate is: 0.015 Hz at value 4, 0.48 Hz at val
 value 124, the default divided and multiplied by 32. Depth is how far each tap swings either side of 5.33 ms, in a straight line from not at
 all at value 4, through 2.63 ms at value 64, to 5.25 ms at value 124. Mix is each tap's share of its side's
 crossfade: the dry input alone at value 4, half and half at value 64, and only the taps at value 124, a vibrato on each side, the two moving opposite ways.
-All three power up at value 64. The halves of the crossfade are what hold the chorus to one unit, so
+Rate and Mix power up at value 64, and Depth at value 34, 1.31 ms, a gentle chorus. The halves of the crossfade are what hold the chorus to one unit, so
 at the default the dry signal is 6 dB down, and the sum with the tap makes up some of it.
 
 The three Delay 1 parameters are unipolar and move in steps of 1/120, as every unipolar dial

@@ -75,7 +75,7 @@ module Spms1
       @rate = 0.5
       @stage_1_rate = 0.0
       @current_rate = 0.0
-      @depth = 0.5
+      @depth = 0.25
       @stage_1_depth = 0.0
       @current_depth = 0.0
       @mix = 0.5
