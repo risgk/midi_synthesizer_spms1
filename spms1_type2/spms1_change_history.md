@@ -5,37 +5,23 @@ The main changes of each version, newest first, gathered before each release. Th
 revised.
 
 - v0.5.0 (2026-??-??):
-    - Add **Filter Drive**, of Filter 1 and Filter 2, on CC#31 and among the favorites (NRPN entries 101
-      and 102, after Amp 1 Limiter Sw so that no entry before them moves): the leak's ceiling
-      brought down from x1 at value 4, where they power up and the filters are as they were, to
-      1/16 at value 124, so that the resonance saturates sooner while the level and the output clip
-      stay. A patch saved by v0.4.1 loads the default patch, as the entries have changed
-    - Add **Amp 1 Distortion** (CC#95, among the favorites): the gained sound driven x1 to x16 into a soft clip ahead of the
-      limiter and taken back down by 15/16 of the drive in dB (the level within about 1.5 dB for a sound below the knee), with its aliasing reduced by first-order
-      ADAA, its shoulder below zero half as long (even harmonics too, the DC taken off), and a tone
-      after it, a 1-pole low pass from none at x1 to 5 kHz at x16; at x1, where it powers up, the
-      amp is as it was
-    - Filters: Their outputs lowered with the resonance above value 76 (Q 5.7), by 2.8 dB at value
-      118 (Q 256) and 6 dB at value 123, as PRA32-U2's at the same Q, so that a high resonance is
-      about as loud as a moderate one (it was up to about 4 dB louder), while the loop is as it was:
-      the self-oscillation holds against the input as before, and comes out at 0.15 at value 119 to
-      0.25 at value 123 (0.5 before)
-    - Default patch: Mixer 2 Level 1 (CC#19) powers up at 0.5 (value 64) instead of 1.0, so that Osc 1
-      alone reaches the filters at 0.25, as until v0.4.0, and the self-oscillation holds against it
-      while a note plays (at 1.0 it mostly stopped, or was pulled to a harmonic), with Amp 1 Gain 2
-      (CC#15) still at unity (value 64), so that the default patch's peaks come to about -10 dBFS,
-      about 6 dB lower than before and about as loud as a lead sound of a typical synth
-    - Filters: Cutoff three semitones down, a C every 12 values, C5 (523 Hz) at value 64, from note
-      12 (16.4 Hz) at value 4 to note 132 (16.7 kHz) at value 124 (it was note 15, 19 Hz, to note
-      135, 20 kHz), so that with Pitch Amt at its top the cutoff at value 64 is an octave above the
-      note played; the default patch powers up at value 88, note 96 (C7, 2.1 kHz), rather than value
-      100, note 111 (5.0 kHz)
-    - LFO 1 Rate: a C every 12 values, C-2 (4.09 Hz) at value 64 and C3 (130.8 Hz) at value 124,
-      from 0.128 Hz at value 4, nine semitones down from 6.875 Hz at value 64 (220 Hz at 124); it
-      powers up at value 72, 6.49 Hz, a slightly slower vibrato than the 6.875 Hz of before
-    - Lighter: about 200 us less of the 1333 us of a buffer (estimated), from the clamps (a max
-      and a min, one instruction each), the parameters' reads and Float#to_i; with the Drive and the Distortion,
-      about 150 us less in all (on the device, 1088 to 1091 us with I2S, about 82%)
+    - Add **Filter Drive**, of Filter 1 and Filter 2 (CC#31, among the favorites): drives the
+      filters harder, x1 to x16, for a saturated resonance, with the level kept. A patch saved by
+      v0.4.1 loads the default patch, as the entries have changed
+    - Add **Amp 1 Distortion** (CC#95, among the favorites): a soft clip with less aliasing (ADAA)
+      and a tone after it, ahead of the limiter, x1 to x16, with the level kept for a sound below
+      the knee; x1 at power-up
+    - Filters: A high resonance is about as loud as a moderate one, and the self-oscillation is
+      quieter (0.25 at most, from 0.5), while it holds against the input as before
+    - Default patch: Mixer 2 Level 1 at 0.5 instead of 1.0, so that the self-oscillation holds
+      while a note plays, and the level is about 6 dB lower, about as loud as a lead sound of a
+      typical synth
+    - Filters: Cutoff three semitones down, a C every 12 values, C5 at value 64; the default patch
+      powers up at value 88 (C7)
+    - LFO 1 Rate: a C every 12 values, C-2 (4.09 Hz) at value 64; it powers up at 6.49 Hz, a
+      slightly slower vibrato
+    - Lighter: about 150 us less of a buffer in all, with the Drive and the Distortion (about 82%
+      on the device)
 - v0.4.1 (2026-10-30):
     - Default patch: Mixer 2 Out Level powers up at 1.0 (value 124) instead of 0.5, and Amp 1 Gain 2
       (CC#15) at unity (value 64) instead of 1.96 times (value 88), so the level is as it was, but the
