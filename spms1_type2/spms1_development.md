@@ -246,11 +246,12 @@ or not, as the modules are meant to:
 | v0.4.1 | 208204 / 208204 cycles, 1355 us (102%) | 208556 / 208556 cycles, 1358 us (102%) |
 
 The estimate is above Debug Print on the device: about 8% at v0.4.0 (min 1253 us, max 1256 us, about
-94%), and about 10% on the way to v0.4.2 (develop at 3085c13, with Amp 1 Distortion, estimated at 1197 us
-on average and 1199 us at most: on the device min 1079 us and max 1083 us with I2S, min 1079 us and max 1081
-us with PWM Audio, about 81%, `underruns` 0; at 5b5dc07, before the distortion, estimated at 1157 us and 1159
-us, min 1042 us and max 1045 us with I2S, min 1038 us and max 1043 us with PWM Audio, about 78%, which Note
-On and Off repeated by MIDI moved little). So the table's 102% is not a buffer running over; `underruns` on
+94%), and about 10% on the way to v0.4.2 (develop at 59e3665, with Amp 1 Distortion and its tone and
+shoulder below zero, estimated at 1208 us on average and 1211 us at most: on the device min 1088 us and max
+1091 us with I2S, about 82%, `underruns` 0; at 3085c13, with the distortion before them, estimated at 1197 us
+and 1199 us, min 1079 us and max 1083 us with I2S, min 1079 us and max 1081 us with PWM Audio; at 5b5dc07,
+before the distortion, estimated at 1157 us and 1159 us, min 1042 us and max 1045 us with I2S, min 1038 us
+and max 1043 us with PWM Audio, about 78%, which Note On and Off repeated by MIDI moved little). So the table's 102% is not a buffer running over; `underruns` on
 the device says whether one does.
 
 The load of each module, by `--modules` (the same version, a note held): "own" is

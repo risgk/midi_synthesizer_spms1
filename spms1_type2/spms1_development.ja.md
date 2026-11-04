@@ -231,8 +231,9 @@ patch_gen は、モジュールのファイルの `require_relative`、インス
 | v0.4.1 | 208204 / 208204 サイクル、1355 us (102%) | 208556 / 208556 サイクル、1358 us (102%) |
 
 見積もりは実機の Debug Print より大きめです。v0.4.0 では 8% ほど (実機は min 1253 us、max 1256 us、約 94%)、
-v0.4.2 に向けた develop (3085c13、Amp 1 Distortion あり。見積もりは平均 1197 us、最大 1199 us) では 10% ほどです
-(実機は I2S で min 1079 us、max 1083 us、PWM Audio で min 1079 us、max 1081 us、約 81%、`underruns` 0。
+v0.4.2 に向けた develop (59e3665、Amp 1 Distortion とそのトーン、ゼロより下の肩あり。見積もりは平均 1208 us、最大 1211 us)
+では 10% ほどです (実機は I2S で min 1088 us、max 1091 us、約 82%、`underruns` 0。トーンと肩を入れる前の 3085c13 では、
+見積もり 1197 us と 1199 us に対して、I2S で min 1079 us、max 1083 us、PWM Audio で min 1079 us、max 1081 us。
 ディストーションを入れる前の 5b5dc07 では、見積もり 1157 us と 1159 us に対して、I2S で min 1042 us、max 1045 us、
 PWM Audio で min 1038 us、max 1043 us、約 78% で、MIDI のノートオン・オフを繰り返してもほとんど動きません)。なので、表の 102% でもバッファが持ち時間を超えているわけではありません。超えているかは実機の `underruns` で分かります。
 
