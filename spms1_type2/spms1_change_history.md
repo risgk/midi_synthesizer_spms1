@@ -15,6 +15,11 @@ revised.
       ADAA, its shoulder below zero half as long (even harmonics too, the DC taken off), and a tone
       after it, a 1-pole low pass from none at x1 to 5 kHz at x16; at x1, where it powers up, the
       amp is as it was
+    - Filters: Their outputs lowered with the resonance above value 76 (Q 5.7), by 2.8 dB at value
+      118 (Q 256) and 6 dB at value 123, as PRA32-U2's at the same Q, so that a high resonance is
+      about as loud as a moderate one (it was up to about 4 dB louder), while the loop is as it was:
+      the self-oscillation holds against the input as before, and comes out at 0.15 at value 119 to
+      0.25 at value 123 (0.5 before)
     - Default patch: Mixer 2 Level 1 (CC#19) powers up at 0.5 (value 64) instead of 1.0, so that Osc 1
       alone reaches the filters at 0.25, as until v0.4.0, and the self-oscillation holds against it
       while a note plays (at 1.0 it mostly stopped, or was pulled to a harmonic), and Amp 1 Gain 2

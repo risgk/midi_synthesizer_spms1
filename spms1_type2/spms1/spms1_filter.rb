@@ -123,6 +123,41 @@ module Spms1
     end
     K_TABLE[121] = K_TABLE[120]
 
+    # The output level by the resonance, one entry per step of the dial as K_TABLE, so that a high
+    # resonance is about as loud as a moderate one, while the loop, and so how readily the
+    # self-oscillation starts and holds against the input, stays as it was. 1.0 up to i = 72 (CC
+    # 76, Q 5.7), then lower in lines in dB, to -2.8 dB at i = 114 (CC 118, Q 256), as PRA32-U2's
+    # at the same Q: what the resonance brings up there is the harmonic near the cutoff. Past that
+    # the self-oscillation takes over, SELF_OSC_LEVEL * sqrt(t) in the loop, and the level is set
+    # so that it comes out at SELF_OSC_OUTPUT_MIN at i = 115 (CC 119), rising in a line to
+    # SELF_OSC_OUTPUT_MAX at i = 119 (CC 123) and held there: still louder with the resonance, but
+    # by less. It scales the three outputs ahead of their clip, so Out, Out LP, Out HP and Out BP
+    # all follow it.
+    SELF_OSC_OUTPUT_MIN = 0.15
+    SELF_OSC_OUTPUT_MAX = 0.25
+    RESONANCE_LEVEL_TABLE = Array.new(122, 1.0)
+    for i in 0...121
+      x = i.to_f
+      if i >= 115
+        t = (x - 114.0) / 5.0
+        t = 1.0 if t > 1.0
+        target = SELF_OSC_OUTPUT_MIN + (SELF_OSC_OUTPUT_MAX - SELF_OSC_OUTPUT_MIN) * (x - 115.0) / 4.0
+        target = SELF_OSC_OUTPUT_MAX if target > SELF_OSC_OUTPUT_MAX
+        RESONANCE_LEVEL_TABLE[i] = target / (0.5 * Math.sqrt(t))  # 0.5: SELF_OSC_LEVEL, below
+      else
+        db = 0.0
+        if i > 110
+          db = -2.5 - 0.3 * (x - 110.0) / 4.0
+        elsif i > 105
+          db = -1.3 - 1.2 * (x - 105.0) / 5.0
+        elsif i > 72
+          db = -1.3 * (x - 72.0) / 33.0
+        end
+        RESONANCE_LEVEL_TABLE[i] = 10.0 ** (db / 20.0)
+      end
+    end
+    RESONANCE_LEVEL_TABLE[121] = RESONANCE_LEVEL_TABLE[120]
+
     # Negative damping at the top of the resonance dial, as k = -t * kappa / g with t the amount
     # dialed in. The leak settles the oscillation where it takes out what the negative damping
     # puts in: g * |k| against h * A^2 / (4 * ceiling^2) for a band pass of amplitude A, with h the
@@ -227,6 +262,7 @@ module Spms1
       @last_g = 0.0
       @last_g_plus_k = 0.0
       @last_one_over_a0 = 1.0
+      @output_level = 1.0
       @g_slope = 0.0
       @g_plus_k_slope = 0.0
       @one_over_a0_slope = 0.0
@@ -452,11 +488,11 @@ module Spms1
       # bias gives the state a DC that reaches every output, so each has a blocker of its own. The
       # band pass is the state itself, unnormalized: its peak at the cutoff is Q times the input.
       @dc_blocker_hp += (high_pass - @dc_blocker_hp) * @dc_blocker_coefficient
-      @output_hp = clip_output(high_pass - @dc_blocker_hp)
+      @output_hp = clip_output((high_pass - @dc_blocker_hp) * @output_level)
       @dc_blocker += (low_pass - @dc_blocker) * @dc_blocker_coefficient
-      @output_lp = clip_output(low_pass - @dc_blocker)
+      @output_lp = clip_output((low_pass - @dc_blocker) * @output_level)
       @dc_blocker_bp += (band_pass - @dc_blocker_bp) * @dc_blocker_coefficient
-      @output_bp = clip_output(band_pass - @dc_blocker_bp)
+      @output_bp = clip_output((band_pass - @dc_blocker_bp) * @output_level)
       # Taken from the two outputs as they leave, so not clipped again: in the pass band one side
       # is all there is, and around the cutoff, where both are, the notch takes them down.
       @output_lp * @current_mode_lp + @output_hp * @current_mode_hp
@@ -537,6 +573,12 @@ module Spms1
       t = resonance * 24.0 - 22.8
       t = Dsp.clamp(t, 0.0, 1.0)
       k = resonance_to_k_fast(resonance) - t * @self_osc_kappa / g
+      # The output level by the resonance after the fade, so that it follows the self-oscillation
+      # out at a high cutoff (see RESONANCE_LEVEL_TABLE).
+      level_position = resonance * 120.0
+      level_index = level_position.to_i
+      level_fraction = level_position - level_index.to_f
+      @output_level = RESONANCE_LEVEL_TABLE[level_index] + level_fraction * (RESONANCE_LEVEL_TABLE[level_index + 1] - RESONANCE_LEVEL_TABLE[level_index])
       k = C.float_max(k, SELF_OSC_K_FLOOR)
       g_plus_k = g + k
       one_over_a0 = 1.0 / (1.0 + g * g_plus_k)

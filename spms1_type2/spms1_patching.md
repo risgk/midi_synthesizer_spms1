@@ -828,8 +828,11 @@ rises.
 Resonance raises the resonant peak 6 dB every 24 CC steps, Q doubling each time, from
 Q 0.71 at value 4 up to Q 9.51 at value 94, and from there Q rises faster and faster, without a sudden
 step, through Q 35 at value 108 to Q 256 at value 118. Filter 2's, on CC#71, powers up at value 64, Q 4.0, and Filter 1's, with no CC, at value 4, Q 0.71. Above value 118 the filter oscillates on its own: a sine at the cutoff
-frequency, growing to its full level of about 0.5 by value 123 and holding it to the top of the
-dial. Low in that range the oscillation builds slowly and shares the filter with the input; at
+frequency, growing to its full level of about 0.5 in the loop by value 123 and holding it to the top of the
+dial. Above value 76 (Q 5.7) the filter's outputs are lowered with the resonance, by 2.8 dB at
+value 118 and 6 dB at value 123, so that a high resonance is about as loud as a moderate one: the
+oscillation comes out at 0.15 at value 119 to 0.25 at value 123, while how readily it holds
+against the input follows its level in the loop. Low in that range the oscillation builds slowly and shares the filter with the input; at
 the top it takes the input over. Its level holds across the cutoff range down to about 150 Hz
 and falls below that. Near the top of the cutoff range it fades out, before its 3rd harmonic
 folds back as an inharmonic tone: at 48 kHz, from 8 kHz (value 111) to 10 kHz (value 115), modulation
