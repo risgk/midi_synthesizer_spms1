@@ -36,8 +36,8 @@ module Spms1
     # constant if both are changed.
     CONTROL_RATE_DIVISOR = 4
 
-    # Distortion: what the gain puts out, driven by D = 2^(4 * distortion), x1 to x16 (6 dB every
-    # quarter of the dial), through a curve that is a straight line up to DISTORTION_KNEE and a
+    # Distortion: what the gain puts out, driven by D = 2^(5 * distortion), x1 to x32 (6 dB every
+    # fifth of the dial), through a curve that is a straight line up to DISTORTION_KNEE and a
     # quadratic shoulder from there that lands on DISTORTION_LIMIT with zero slope at
     # DISTORTION_CEILING, and taken back down by D^(-15/16): 15/16 of the drive in dB, so that the
     # level stays within about 1.5 dB as the drive goes up (a little up halfway, and a little down
@@ -51,7 +51,8 @@ module Spms1
     # the straight part. Below DISTORTION_ADAA_MIN_STEP of a step, where the difference loses its
     # precision in single precision, the part is taken at the sample itself instead. Against the
     # curve without ADAA, a sine at C5 to C8 driven x16 aliases -61 to -16 dB in total and -71 to
-    # -25 dB under 5 kHz; with it, -70 to -30 dB and -89 to -65 dB.
+    # -25 dB under 5 kHz; with it, the tone and the make-up, -83 to -62 dB under 5 kHz at x16, and
+    # -77 to -57 dB at x32.
     DISTORTION_KNEE     = 1.0
     DISTORTION_LIMIT    = 2.0
     DISTORTION_CEILING  = DISTORTION_LIMIT + DISTORTION_LIMIT - DISTORTION_KNEE
@@ -64,17 +65,19 @@ module Spms1
     # Below zero, the shoulder is half as long, to -1.5 at -2.0, so that the curve is not symmetric
     # and adds even harmonics too (about 10 to 25 dB under the odd ones); its DC is taken off at
     # DISTORTION_DC_FREQUENCY. After the curve, the tone, a 1-pole low pass, takes the edge off the
-    # harmonics, more with more drive: none at x1, about 10 kHz halfway, DISTORTION_TONE_FREQUENCY at x16.
+    # harmonics, more with more drive: none at x1, about 10 kHz halfway, DISTORTION_TONE_FREQUENCY at the top.
     DISTORTION_SPAN_BELOW     = 1.0
     DISTORTION_DC_FREQUENCY   = 3.73  # 48000 / (2 * pi * 2048), a rate of 2^-11 at 48 kHz
     DISTORTION_TONE_FREQUENCY = 5000.0
-    # D = 2^(i / 8) and D^(-15/16) = 2^(-i * 15 / 128), one entry for each 1/32 of the dial, the last
-    # repeated for the interpolation's upper neighbour.
+    # D = 2^(i * 5 / 32) and D^(-15/16) = 2^(-i * 75 / 512), one entry for each 1/32 of the dial, the
+    # last repeated for the interpolation's upper neighbour. The make-up is held at x16 (0.8 of the dial,
+    # i = 25.6), where most of a sound is past the shoulder already, which holds the level of what
+    # comes out from there on.
     DISTORTION_GAIN_TABLE = Array.new(34, 0.0)
     DISTORTION_COMP_TABLE = Array.new(34, 0.0)
     for i in 0...33
-      DISTORTION_GAIN_TABLE[i] = 2.0 ** (i.to_f * (1.0 / 8.0))
-      DISTORTION_COMP_TABLE[i] = 2.0 ** (i.to_f * (-15.0 / 128.0))
+      DISTORTION_GAIN_TABLE[i] = 2.0 ** (i.to_f * (5.0 / 32.0))
+      DISTORTION_COMP_TABLE[i] = 2.0 ** (((i.to_f < 25.6) ? i.to_f : 25.6) * (-75.0 / 512.0))
     end
     DISTORTION_GAIN_TABLE[33] = DISTORTION_GAIN_TABLE[32]
     DISTORTION_COMP_TABLE[33] = DISTORTION_COMP_TABLE[32]
@@ -114,7 +117,7 @@ module Spms1
       @distortion_last_input = 0.0
       @distortion_last_antiderivative = 0.0
       # The tone after the curve, a 1-pole low pass: the weight of its last output is
-      # @distortion_tone_rest, from 0.0 at x1 (none) up to that of DISTORTION_TONE_FREQUENCY at x16.
+      # @distortion_tone_rest, from 0.0 at x1 (none) up to that of DISTORTION_TONE_FREQUENCY at the top.
       @distortion_tone_max_rest = Math.exp(-2.0 * Math::PI * DISTORTION_TONE_FREQUENCY / @sample_rate)
       @distortion_tone = 1.0
       @distortion_tone_rest = 0.0
@@ -125,7 +128,7 @@ module Spms1
       @distortion_dc = 0.0
     end
 
-    # Distortion is unipolar, [0.0, 1.0], the drive into the curve, x1 at 0.0 to x16 at 1.0 (see
+    # Distortion is unipolar, [0.0, 1.0], the drive into the curve, x1 at 0.0 to x32 at 1.0 (see
     # DISTORTION_KNEE). Smoothed as the gains are.
     def set_distortion(distortion)
       @distortion = Dsp.clamp(distortion, 0.0, 1.0)

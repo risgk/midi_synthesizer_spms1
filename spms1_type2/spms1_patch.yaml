@@ -529,13 +529,13 @@ controls:
   - { entry: 100, module: AMP_1,     key: LIMITER_SW,   label: Limiter Sw,   cc: 0,   value: 124, hint: Off/On, set: set_limiter_switch }
   # Filter 1 Drive and Filter 2 Drive, after Limiter Sw so that no entry before them moves, and
   # shown in the editor after each filter's Resonance (`after`): the leak's ceiling down by
-  # 2^(4 * drive), x1 to x16, 6 dB every 30 values, which bends the resonance sooner while the level
+  # 2^(5 * drive), x1 to x32, 6 dB every 24 values, which bends the resonance sooner while the level
   # and the output clip stay. Both on CC 31, as the filters share their other CCs; they power up at
   # CC 4, x1, where the filters are as they were.
-  - { entry: 101, module: FILTER_1,  key: DRIVE,        label: Drive,        cc: 31,  value: 4, hint: x1 to x16, after: RESONANCE, set: set_drive }
-  - { entry: 102, module: FILTER_2,  key: DRIVE,        label: Drive,        cc: 31,  value: 4, hint: x1 to x16, favorite: true, after: RESONANCE, set: set_drive }
+  - { entry: 101, module: FILTER_1,  key: DRIVE,        label: Drive,        cc: 31,  value: 4, hint: x1 to x32, after: RESONANCE, set: set_drive }
+  - { entry: 102, module: FILTER_2,  key: DRIVE,        label: Drive,        cc: 31,  value: 4, hint: x1 to x32, favorite: true, after: RESONANCE, set: set_drive }
   # Amp 1 Distortion, after the filters' Drive so that no entry before it moves, and shown after
-  # Gain 2: the gained sound driven x1 to x16 into a soft clip with its aliasing reduced by ADAA,
-  # and taken back down by 15/16 of that in dB, ahead of the limiter. On CC 95; it powers up at CC 4,
+  # Gain 2: the gained sound driven x1 to x32 into a soft clip with its aliasing reduced by ADAA,
+  # and taken back down by 15/16 of that in dB (held from x16 on), ahead of the limiter. On CC 95; it powers up at CC 4,
   # x1, where nothing reaches the clip and the amp is as it was.
-  - { entry: 103, module: AMP_1,     key: DISTORTION,   label: Distortion,   cc: 95,  value: 4, hint: x1 to x16, after: GAIN_2, favorite: true, set: set_distortion }
+  - { entry: 103, module: AMP_1,     key: DISTORTION,   label: Distortion,   cc: 95,  value: 4, hint: x1 to x32, after: GAIN_2, favorite: true, set: set_distortion }

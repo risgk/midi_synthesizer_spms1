@@ -68,18 +68,18 @@ module Spms1
     LEAK_CLIP_OFFSET     = SOFT_CLIP_BIAS_GAIN * SOFT_CLIP_BIAS_OUTPUT
     LEAK_SLOPE_OFFSET    = 1.0 - SOFT_CLIP_BIAS_GAIN
     LEAK_SLOPE_SCALE     = 3.0 * LEAK_CLIP_GAIN_SCALE
-    # Drive brings the leak's ceiling and its bias down by its gain D, 2^(4 * drive), 1.0 to 16.0
-    # (6 dB every quarter of the dial): the same as driving the loop D times harder and taking what
+    # Drive brings the leak's ceiling and its bias down by its gain D, 2^(5 * drive), 1.0 to 32.0
+    # (6 dB every fifth of the dial): the same as driving the loop D times harder and taking what
     # leaves it D times down ahead of the output clip, as the curve is self-similar and the bias
     # comes down with the ceiling. So the leak bends sooner, at the resonance first, while the level
     # stays and the output clip stays where it is. With the ceiling C / D and the bias B / D, the
     # make-up gain G is the same whatever D; the leak's offset comes down by D, and its gain and
     # slope scales, which go as 1 / C^2, go up by D^2. smooth_parameters works these out from the
     # smoothed Drive every 16 samples, whatever it is, so the load is the same; process reads them
-    # where it read the constants. The gain is read from DRIVE_TABLE, 2^(i / 8), between entries.
+    # where it read the constants. The gain is read from DRIVE_TABLE, 2^(i * 5 / 32), between entries.
     DRIVE_TABLE = Array.new(34, 0.0)
     for i in 0...33
-      DRIVE_TABLE[i] = 2.0 ** (i.to_f * (1.0 / 8.0))
+      DRIVE_TABLE[i] = 2.0 ** (i.to_f * (5.0 / 32.0))
     end
     DRIVE_TABLE[33] = DRIVE_TABLE[32]
     # One-pole high pass on the output at f_s * coefficient / (2 * pi), 7.5 Hz at 48 kHz; initialize
@@ -297,7 +297,7 @@ module Spms1
       update_coefficients
     end
 
-    # Drive: unipolar, [0.0, 1.0], the leak's ceiling down by 2^(4 * drive) (see DRIVE_TABLE).
+    # Drive: unipolar, [0.0, 1.0], the leak's ceiling down by 2^(5 * drive) (see DRIVE_TABLE).
     def set_drive(drive)
       @drive = Dsp.clamp(drive, 0.0, 1.0)
     end

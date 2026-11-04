@@ -6,10 +6,10 @@ revised.
 
 - v0.5.0 (2026-??-??):
     - Add **Filter Drive**, of Filter 1 and Filter 2 (CC#31, among the favorites): drives the
-      filters harder, x1 to x16, for a saturated resonance, with the level kept. A patch saved by
+      filters harder, x1 to x32, for a saturated resonance, with the level kept. A patch saved by
       v0.4.1 loads the default patch, as the entries have changed
     - Add **Amp 1 Distortion** (CC#95, among the favorites): a soft clip with less aliasing (ADAA)
-      and a tone after it, ahead of the limiter, x1 to x16, with the level kept for a sound below
+      and a tone after it, ahead of the limiter, x1 to x32, with the level kept for a sound below
       the knee; x1 at power-up
     - Filters: A high resonance is about as loud as a moderate one, and the self-oscillation is
       quieter (0.25 at most, from 0.5), while it holds against the input as before
