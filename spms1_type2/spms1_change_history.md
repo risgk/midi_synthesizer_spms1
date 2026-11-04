@@ -5,11 +5,16 @@ The main changes of each version, newest first, gathered before each release. Th
 revised.
 
 - v0.4.2 (2026-??-??):
-    - Filters: Drive, Filter 1's and Filter 2's, on CC#31 and among the favorites (NRPN entries 101
+    - Add **Filter Drive**, of Filter 1 and Filter 2, on CC#31 and among the favorites (NRPN entries 101
       and 102, after Amp 1 Limiter Sw so that no entry before them moves): the leak's ceiling
       brought down from x1 at value 4, where they power up and the filters are as they were, to
       1/16 at value 124, so that the resonance saturates sooner while the level and the output clip
       stay. A patch saved by v0.4.1 loads the default patch, as the entries have changed
+    - Add **Amp 1 Distortion** (CC#95, among the favorites): the gained sound driven x1 to x16 into a soft clip ahead of the
+      limiter and taken back down by half the drive in dB, with its aliasing reduced by first-order
+      ADAA, its shoulder below zero half as long (even harmonics too, the DC taken off), and a tone
+      after it, a 1-pole low pass from none at x1 to 5 kHz at x16; at x1, where it powers up, the
+      amp is as it was
     - Filters: Cutoff three semitones down, a C every 12 values, C5 (523 Hz) at value 64, from note
       12 (16.4 Hz) at value 4 to note 132 (16.7 kHz) at value 124 (it was note 15, 19 Hz, to note
       135, 20 kHz), so that with Pitch Amt at its top the cutoff at value 64 is an octave above the
@@ -18,14 +23,9 @@ revised.
     - LFO 1 Rate: a C every 12 values, C-2 (4.09 Hz) at value 64 and C3 (130.8 Hz) at value 124,
       from 0.128 Hz at value 4, nine semitones down from 6.875 Hz at value 64 (220 Hz at 124); it
       powers up at value 72, 6.49 Hz, a slightly slower vibrato than the 6.875 Hz of before
-    - Amp: Distortion (CC#95), the gained sound driven x1 to x16 into a soft clip ahead of the
-      limiter and taken back down by half the drive in dB, with its aliasing reduced by first-order
-      ADAA, its shoulder below zero half as long (even harmonics too, the DC taken off), and a tone
-      after it, a 1-pole low pass from none at x1 to 5 kHz at x16; at x1, where it powers up, the
-      amp is as it was
     - Lighter: about 200 us less of the 1333 us of a buffer (estimated), from the clamps (a max
-      and a min, one instruction each), the parameters' reads and Float#to_i
-
+      and a min, one instruction each), the parameters' reads and Float#to_i; with the Drive and the Distortion,
+      about 150 us less in all (on the device, 1088 to 1091 us with I2S, about 82%)
 - v0.4.1 (2026-10-30):
     - Default patch: Mixer 2 Out Level powers up at 1.0 (value 124) instead of 0.5, and Amp 1 Gain 2
       (CC#15) at unity (value 64) instead of 1.96 times (value 88), so the level is as it was, but the
