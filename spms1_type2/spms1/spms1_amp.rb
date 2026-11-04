@@ -39,8 +39,9 @@ module Spms1
     # Distortion: what the gain puts out, driven by D = 2^(4 * distortion), x1 to x16 (6 dB every
     # quarter of the dial), through a curve that is a straight line up to DISTORTION_KNEE and a
     # quadratic shoulder from there that lands on DISTORTION_LIMIT with zero slope at
-    # DISTORTION_CEILING, and taken back down by 1 / sqrt(D): half the drive in dB, so that a sound at
-    # one unit saturates without falling away, and the limiter after it holds the rest. The knee is
+    # DISTORTION_CEILING, and taken back down by D^(-15/16): 15/16 of the drive in dB, so that the
+    # level stays within about 1.5 dB as the drive goes up (a little up halfway, and a little down
+    # where it saturates hard), and the limiter after it holds the rest. The knee is
     # the bus's one unit, which no input reaches at x1 with the gains at unity, so the default patch
     # passes as it did. The curve's part beyond the straight line, f(u) - u, goes through first-order
     # antiderivative anti-aliasing (ADAA): the difference of its antiderivative over the step from the
@@ -67,13 +68,13 @@ module Spms1
     DISTORTION_SPAN_BELOW     = 1.0
     DISTORTION_DC_FREQUENCY   = 4.0
     DISTORTION_TONE_FREQUENCY = 5000.0
-    # D = 2^(i / 8) and 1 / sqrt(D) = 2^(-i / 16), one entry for each 1/32 of the dial, the last
+    # D = 2^(i / 8) and D^(-15/16) = 2^(-i * 15 / 128), one entry for each 1/32 of the dial, the last
     # repeated for the interpolation's upper neighbour.
     DISTORTION_GAIN_TABLE = Array.new(34, 0.0)
     DISTORTION_COMP_TABLE = Array.new(34, 0.0)
     for i in 0...33
       DISTORTION_GAIN_TABLE[i] = 2.0 ** (i.to_f * (1.0 / 8.0))
-      DISTORTION_COMP_TABLE[i] = 2.0 ** (i.to_f * (-1.0 / 16.0))
+      DISTORTION_COMP_TABLE[i] = 2.0 ** (i.to_f * (-15.0 / 128.0))
     end
     DISTORTION_GAIN_TABLE[33] = DISTORTION_GAIN_TABLE[32]
     DISTORTION_COMP_TABLE[33] = DISTORTION_COMP_TABLE[32]

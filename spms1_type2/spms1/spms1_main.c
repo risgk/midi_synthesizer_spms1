@@ -4689,47 +4689,47 @@ static inline __attribute__((always_inline)) sp_float sp_Filter_clip_output(sp_F
   return (lv_clamped - ((lv_excess * fabs(lv_excess)) * cst_OUTPUT_KNEE_SCALE));
   return 0.0;
 }
-#line 81 "spms1_amp.rb"
+#line 82 "spms1_amp.rb"
 static void sp_Amp_initialize(sp_Amp *self, sp_int lv_sample_rate) {
     SP_GC_SAVE();
     sp_int lv_lookahead = 0;
-#line 82 "spms1_amp.rb"
-  self->iv_sample_rate = lv_sample_rate;
 #line 83 "spms1_amp.rb"
-  self->iv_smoothing_target_blend = ((cst_Spms1__Amp__SMOOTHING_TARGET_BLEND_BASE * ((48000.0 / (double)(self->iv_sample_rate)))) * (((double)(cst_Spms1__Amp__CONTROL_RATE_DIVISOR) / 4.0)));
+  self->iv_sample_rate = lv_sample_rate;
 #line 84 "spms1_amp.rb"
-  self->iv_gain = 1.0;
+  self->iv_smoothing_target_blend = ((cst_Spms1__Amp__SMOOTHING_TARGET_BLEND_BASE * ((48000.0 / (double)(self->iv_sample_rate)))) * (((double)(cst_Spms1__Amp__CONTROL_RATE_DIVISOR) / 4.0)));
 #line 85 "spms1_amp.rb"
-  self->iv_stage_1_gain = 0.0;
+  self->iv_gain = 1.0;
 #line 86 "spms1_amp.rb"
-  self->iv_current_gain = 0.0;
+  self->iv_stage_1_gain = 0.0;
 #line 87 "spms1_amp.rb"
-  self->iv_gain_2 = 1.0;
+  self->iv_current_gain = 0.0;
 #line 88 "spms1_amp.rb"
-  self->iv_stage_1_gain_2 = 0.0;
+  self->iv_gain_2 = 1.0;
 #line 89 "spms1_amp.rb"
-  self->iv_current_gain_2 = 0.0;
+  self->iv_stage_1_gain_2 = 0.0;
 #line 90 "spms1_amp.rb"
-  self->iv_modulation_mix = 0.0;
+  self->iv_current_gain_2 = 0.0;
 #line 91 "spms1_amp.rb"
-  self->iv_stage_1_modulation_mix = 0.0;
+  self->iv_modulation_mix = 0.0;
 #line 92 "spms1_amp.rb"
+  self->iv_stage_1_modulation_mix = 0.0;
+#line 93 "spms1_amp.rb"
   self->iv_current_modulation_mix = 0.0;
-#line 94 "spms1_amp.rb"
-  lv_lookahead = ({ double _t196 = ((cst_LIMITER_LOOKAHEAD_TIME * (double)(self->iv_sample_rate))); if (isinf(_t196)) sp_raise_cls("FloatDomainError", _t196 > 0 ? "Infinity" : "-Infinity"); if (isnan(_t196)) sp_raise_cls("FloatDomainError", "NaN"); (sp_int)round(_t196); });
 #line 95 "spms1_amp.rb"
-  self->iv_limiter_lookahead = (((lv_lookahead < cst_LIMITER_LINE_MASK)) ? lv_lookahead : cst_LIMITER_LINE_MASK);
+  lv_lookahead = ({ double _t196 = ((cst_LIMITER_LOOKAHEAD_TIME * (double)(self->iv_sample_rate))); if (isinf(_t196)) sp_raise_cls("FloatDomainError", _t196 > 0 ? "Infinity" : "-Infinity"); if (isnan(_t196)) sp_raise_cls("FloatDomainError", "NaN"); (sp_int)round(_t196); });
 #line 96 "spms1_amp.rb"
-  self->iv_limiter_threshold = cst_LIMITER_THRESHOLD;
+  self->iv_limiter_lookahead = (((lv_lookahead < cst_LIMITER_LINE_MASK)) ? lv_lookahead : cst_LIMITER_LINE_MASK);
 #line 97 "spms1_amp.rb"
-  self->iv_limiter_hold = ({ double _t197 = ((cst_LIMITER_HOLD_TIME * (double)(self->iv_sample_rate))); if (isinf(_t197)) sp_raise_cls("FloatDomainError", _t197 > 0 ? "Infinity" : "-Infinity"); if (isnan(_t197)) sp_raise_cls("FloatDomainError", "NaN"); (sp_int)round(_t197); });
+  self->iv_limiter_threshold = cst_LIMITER_THRESHOLD;
 #line 98 "spms1_amp.rb"
-  self->iv_limiter_hold_left = self->iv_limiter_hold;
+  self->iv_limiter_hold = ({ double _t197 = ((cst_LIMITER_HOLD_TIME * (double)(self->iv_sample_rate))); if (isinf(_t197)) sp_raise_cls("FloatDomainError", _t197 > 0 ? "Infinity" : "-Infinity"); if (isnan(_t197)) sp_raise_cls("FloatDomainError", "NaN"); (sp_int)round(_t197); });
 #line 99 "spms1_amp.rb"
+  self->iv_limiter_hold_left = self->iv_limiter_hold;
+#line 100 "spms1_amp.rb"
   self->iv_limiter_release = (1.0 - exp((sp_float)((-1.0 / ((cst_LIMITER_RELEASE_TIME * (double)(self->iv_sample_rate)))))));
-#line 101 "spms1_amp.rb"
-  self->iv_limiter_attack = (1.0 - (sp_float_pow(0.01, ((1.0 / ({ sp_int _t199 = (self->iv_limiter_lookahead); _t199 == SP_INT_NIL ? 0.0 : ((sp_float)_t199); }))))));
 #line 102 "spms1_amp.rb"
+  self->iv_limiter_attack = (1.0 - (sp_float_pow(0.01, ((1.0 / ({ sp_int _t199 = (self->iv_limiter_lookahead); _t199 == SP_INT_NIL ? 0.0 : ((sp_float)_t199); }))))));
+#line 103 "spms1_amp.rb"
   sp_int _t201 = cst_LIMITER_LINE_SIZE;
   if (_t201 < 0) sp_raise_cls("ArgumentError", "negative array size");
   sp_float _t202 = 0.0;
@@ -4737,85 +4737,85 @@ static void sp_Amp_initialize(sp_Amp *self, sp_int lv_sample_rate) {
   SP_GC_ROOT(_t203);
   for (sp_int _t204 = 0; _t204 < _t201; _t204++) sp_FloatArray_push(_t203, _t202);
   { __typeof__(self) _wb2238 = self; _wb2238->iv_limiter_line = _t203; sp_gc_wb((void *)_wb2238); }
-#line 103 "spms1_amp.rb"
-  self->iv_limiter_write_index = 0LL;
 #line 104 "spms1_amp.rb"
-  self->iv_limiter_block_peak = 0.0;
+  self->iv_limiter_write_index = 0LL;
 #line 105 "spms1_amp.rb"
-  self->iv_limiter_last_block_peak = 0.0;
+  self->iv_limiter_block_peak = 0.0;
 #line 106 "spms1_amp.rb"
-  self->iv_limiter_gain = 1.0;
+  self->iv_limiter_last_block_peak = 0.0;
 #line 107 "spms1_amp.rb"
-  self->iv_limiter_switch = 1.0;
+  self->iv_limiter_gain = 1.0;
 #line 108 "spms1_amp.rb"
-  self->iv_distortion = 0.0;
+  self->iv_limiter_switch = 1.0;
 #line 109 "spms1_amp.rb"
-  self->iv_stage_1_distortion = 0.0;
+  self->iv_distortion = 0.0;
 #line 110 "spms1_amp.rb"
-  self->iv_current_distortion = 0.0;
+  self->iv_stage_1_distortion = 0.0;
 #line 111 "spms1_amp.rb"
-  self->iv_distortion_gain = 1.0;
+  self->iv_current_distortion = 0.0;
 #line 112 "spms1_amp.rb"
-  self->iv_distortion_comp = 1.0;
+  self->iv_distortion_gain = 1.0;
 #line 113 "spms1_amp.rb"
-  self->iv_distortion_last_input = 0.0;
+  self->iv_distortion_comp = 1.0;
 #line 114 "spms1_amp.rb"
+  self->iv_distortion_last_input = 0.0;
+#line 115 "spms1_amp.rb"
   self->iv_distortion_last_antiderivative = 0.0;
-#line 117 "spms1_amp.rb"
-  self->iv_distortion_tone_max_rest = exp((sp_float)((((-2.0 * M_PI) * cst_DISTORTION_TONE_FREQUENCY) / (double)(self->iv_sample_rate))));
 #line 118 "spms1_amp.rb"
-  self->iv_distortion_tone = 1.0;
+  self->iv_distortion_tone_max_rest = exp((sp_float)((((-2.0 * M_PI) * cst_DISTORTION_TONE_FREQUENCY) / (double)(self->iv_sample_rate))));
 #line 119 "spms1_amp.rb"
-  self->iv_distortion_tone_rest = 0.0;
+  self->iv_distortion_tone = 1.0;
 #line 120 "spms1_amp.rb"
+  self->iv_distortion_tone_rest = 0.0;
+#line 121 "spms1_amp.rb"
   self->iv_distortion_tone_out = 0.0;
-#line 123 "spms1_amp.rb"
-  self->iv_distortion_dc_rate = (1.0 - exp((sp_float)((((-2.0 * M_PI) * cst_DISTORTION_DC_FREQUENCY) / (double)(self->iv_sample_rate)))));
 #line 124 "spms1_amp.rb"
+  self->iv_distortion_dc_rate = (1.0 - exp((sp_float)((((-2.0 * M_PI) * cst_DISTORTION_DC_FREQUENCY) / (double)(self->iv_sample_rate)))));
+#line 125 "spms1_amp.rb"
   self->iv_distortion_dc = 0.0;
 }
-#line 129 "spms1_amp.rb"
-static inline __attribute__((always_inline)) sp_float sp_Amp_set_distortion(sp_Amp *self, sp_float lv_distortion) {
 #line 130 "spms1_amp.rb"
+static inline __attribute__((always_inline)) sp_float sp_Amp_set_distortion(sp_Amp *self, sp_float lv_distortion) {
+#line 131 "spms1_amp.rb"
   self->iv_distortion = sp_Dsp_s_clamp(lv_distortion, 0.0, 1.0);
   return self->iv_distortion;
   return 0.0;
 }
-#line 138 "spms1_amp.rb"
+#line 139 "spms1_amp.rb"
 static inline __attribute__((always_inline)) sp_float sp_Amp_set_gain_1(sp_Amp *self, sp_float lv_gain) {
     sp_float lv_clamped_gain = 0.0;
-#line 139 "spms1_amp.rb"
-  lv_clamped_gain = sp_Dsp_s_clamp(lv_gain, 0.0, 1.0);
 #line 140 "spms1_amp.rb"
+  lv_clamped_gain = sp_Dsp_s_clamp(lv_gain, 0.0, 1.0);
+#line 141 "spms1_amp.rb"
   self->iv_gain = ((4.0 * lv_clamped_gain) * lv_clamped_gain);
   return self->iv_gain;
   return 0.0;
 }
-#line 144 "spms1_amp.rb"
+#line 145 "spms1_amp.rb"
 static inline __attribute__((always_inline)) sp_float sp_Amp_set_gain_2(sp_Amp *self, sp_float lv_gain) {
     sp_float lv_clamped_gain = 0.0;
-#line 145 "spms1_amp.rb"
-  lv_clamped_gain = sp_Dsp_s_clamp(lv_gain, 0.0, 1.0);
 #line 146 "spms1_amp.rb"
+  lv_clamped_gain = sp_Dsp_s_clamp(lv_gain, 0.0, 1.0);
+#line 147 "spms1_amp.rb"
   self->iv_gain_2 = ((4.0 * lv_clamped_gain) * lv_clamped_gain);
   return self->iv_gain_2;
   return 0.0;
 }
-#line 151 "spms1_amp.rb"
-static inline __attribute__((always_inline)) sp_float sp_Amp_set_limiter_switch(sp_Amp *self, sp_float lv_switch) {
 #line 152 "spms1_amp.rb"
+static inline __attribute__((always_inline)) sp_float sp_Amp_set_limiter_switch(sp_Amp *self, sp_float lv_switch) {
+#line 153 "spms1_amp.rb"
   self->iv_limiter_switch = (((lv_switch >= 0.5)) ? 1.0 : 0.0);
   return self->iv_limiter_switch;
   return 0.0;
 }
-#line 158 "spms1_amp.rb"
-static inline __attribute__((always_inline)) sp_float sp_Amp_set_modulation_mix(sp_Amp *self, sp_float lv_mix) {
 #line 159 "spms1_amp.rb"
+static inline __attribute__((always_inline)) sp_float sp_Amp_set_modulation_mix(sp_Amp *self, sp_float lv_mix) {
+#line 160 "spms1_amp.rb"
   self->iv_modulation_mix = sp_Dsp_s_clamp(lv_mix, 0.0, 1.0);
   return self->iv_modulation_mix;
   return 0.0;
 }
-#line 162 "spms1_amp.rb"
+#line 163 "spms1_amp.rb"
 static sp_float sp_Amp_process(sp_Amp *self, sp_bool lv_control_tick, sp_float lv_audio_input, sp_float lv_audio_input_2, sp_float lv_modulation_1_input, sp_float lv_modulation_2_input) {
     sp_float lv_position = 0.0;
     sp_int lv_index = 0;
@@ -4847,121 +4847,121 @@ static sp_float sp_Amp_process(sp_Amp *self, sp_bool lv_control_tick, sp_float l
     sp_float lv_falling = 0.0;
     sp_float lv_rate = 0.0;
     sp_float lv_output = 0.0;
-#line 164 "spms1_amp.rb"
-  if (lv_control_tick) {
 #line 165 "spms1_amp.rb"
-    self->iv_stage_1_gain = sp_Dsp_s_smooth(self->iv_gain, self->iv_stage_1_gain, self->iv_smoothing_target_blend);
+  if (lv_control_tick) {
 #line 166 "spms1_amp.rb"
-    self->iv_current_gain = sp_Dsp_s_smooth(self->iv_stage_1_gain, self->iv_current_gain, self->iv_smoothing_target_blend);
+    self->iv_stage_1_gain = sp_Dsp_s_smooth(self->iv_gain, self->iv_stage_1_gain, self->iv_smoothing_target_blend);
 #line 167 "spms1_amp.rb"
-    self->iv_stage_1_gain_2 = sp_Dsp_s_smooth(self->iv_gain_2, self->iv_stage_1_gain_2, self->iv_smoothing_target_blend);
+    self->iv_current_gain = sp_Dsp_s_smooth(self->iv_stage_1_gain, self->iv_current_gain, self->iv_smoothing_target_blend);
 #line 168 "spms1_amp.rb"
-    self->iv_current_gain_2 = sp_Dsp_s_smooth(self->iv_stage_1_gain_2, self->iv_current_gain_2, self->iv_smoothing_target_blend);
+    self->iv_stage_1_gain_2 = sp_Dsp_s_smooth(self->iv_gain_2, self->iv_stage_1_gain_2, self->iv_smoothing_target_blend);
 #line 169 "spms1_amp.rb"
-    self->iv_stage_1_modulation_mix = sp_Dsp_s_smooth(self->iv_modulation_mix, self->iv_stage_1_modulation_mix, self->iv_smoothing_target_blend);
+    self->iv_current_gain_2 = sp_Dsp_s_smooth(self->iv_stage_1_gain_2, self->iv_current_gain_2, self->iv_smoothing_target_blend);
 #line 170 "spms1_amp.rb"
-    self->iv_current_modulation_mix = sp_Dsp_s_smooth(self->iv_stage_1_modulation_mix, self->iv_current_modulation_mix, self->iv_smoothing_target_blend);
+    self->iv_stage_1_modulation_mix = sp_Dsp_s_smooth(self->iv_modulation_mix, self->iv_stage_1_modulation_mix, self->iv_smoothing_target_blend);
 #line 171 "spms1_amp.rb"
-    self->iv_stage_1_distortion = sp_Dsp_s_smooth(self->iv_distortion, self->iv_stage_1_distortion, self->iv_smoothing_target_blend);
+    self->iv_current_modulation_mix = sp_Dsp_s_smooth(self->iv_stage_1_modulation_mix, self->iv_current_modulation_mix, self->iv_smoothing_target_blend);
 #line 172 "spms1_amp.rb"
+    self->iv_stage_1_distortion = sp_Dsp_s_smooth(self->iv_distortion, self->iv_stage_1_distortion, self->iv_smoothing_target_blend);
+#line 173 "spms1_amp.rb"
     self->iv_current_distortion = sp_Dsp_s_smooth(self->iv_stage_1_distortion, self->iv_current_distortion, self->iv_smoothing_target_blend);
-#line 174 "spms1_amp.rb"
-    lv_position = (self->iv_current_distortion * 32.0);
 #line 175 "spms1_amp.rb"
-    lv_index = sp_float_to_i_checked(lv_position);
+    lv_position = (self->iv_current_distortion * 32.0);
 #line 176 "spms1_amp.rb"
-    lv_fraction = (lv_position - ({ sp_int _t219 = (lv_index); _t219 == SP_INT_NIL ? 0.0 : ((sp_float)_t219); }));
+    lv_index = sp_float_to_i_checked(lv_position);
 #line 177 "spms1_amp.rb"
-    self->iv_distortion_gain = ({ sp_float _t222 = sp_FloatArray_get(cst_DISTORTION_GAIN_TABLE, lv_index); sp_float _t223 = (lv_fraction * (({ sp_float _t220 = sp_FloatArray_get(cst_DISTORTION_GAIN_TABLE, sp_int_add(lv_index, 1LL)); sp_float _t221 = sp_FloatArray_get(cst_DISTORTION_GAIN_TABLE, lv_index); (_t220 - _t221); }))); (_t222 + _t223); });
+    lv_fraction = (lv_position - ({ sp_int _t219 = (lv_index); _t219 == SP_INT_NIL ? 0.0 : ((sp_float)_t219); }));
 #line 178 "spms1_amp.rb"
-    self->iv_distortion_comp = ({ sp_float _t226 = sp_FloatArray_get(cst_DISTORTION_COMP_TABLE, lv_index); sp_float _t227 = (lv_fraction * (({ sp_float _t224 = sp_FloatArray_get(cst_DISTORTION_COMP_TABLE, sp_int_add(lv_index, 1LL)); sp_float _t225 = sp_FloatArray_get(cst_DISTORTION_COMP_TABLE, lv_index); (_t224 - _t225); }))); (_t226 + _t227); });
+    self->iv_distortion_gain = ({ sp_float _t222 = sp_FloatArray_get(cst_DISTORTION_GAIN_TABLE, lv_index); sp_float _t223 = (lv_fraction * (({ sp_float _t220 = sp_FloatArray_get(cst_DISTORTION_GAIN_TABLE, sp_int_add(lv_index, 1LL)); sp_float _t221 = sp_FloatArray_get(cst_DISTORTION_GAIN_TABLE, lv_index); (_t220 - _t221); }))); (_t222 + _t223); });
 #line 179 "spms1_amp.rb"
-    self->iv_distortion_tone_rest = (self->iv_distortion_tone_max_rest * self->iv_current_distortion);
+    self->iv_distortion_comp = ({ sp_float _t226 = sp_FloatArray_get(cst_DISTORTION_COMP_TABLE, lv_index); sp_float _t227 = (lv_fraction * (({ sp_float _t224 = sp_FloatArray_get(cst_DISTORTION_COMP_TABLE, sp_int_add(lv_index, 1LL)); sp_float _t225 = sp_FloatArray_get(cst_DISTORTION_COMP_TABLE, lv_index); (_t224 - _t225); }))); (_t226 + _t227); });
 #line 180 "spms1_amp.rb"
+    self->iv_distortion_tone_rest = (self->iv_distortion_tone_max_rest * self->iv_current_distortion);
+#line 181 "spms1_amp.rb"
     self->iv_distortion_tone = (1.0 - self->iv_distortion_tone_rest);
   }
-#line 187 "spms1_amp.rb"
-  lv_modulation = ((lv_modulation_1_input * ((1.0 - self->iv_current_modulation_mix))) + (lv_modulation_2_input * self->iv_current_modulation_mix));
 #line 188 "spms1_amp.rb"
-  lv_mod = sp_Dsp_s_clamp(lv_modulation, -1.0, 1.0);
+  lv_modulation = ((lv_modulation_1_input * ((1.0 - self->iv_current_modulation_mix))) + (lv_modulation_2_input * self->iv_current_modulation_mix));
 #line 189 "spms1_amp.rb"
+  lv_mod = sp_Dsp_s_clamp(lv_modulation, -1.0, 1.0);
+#line 190 "spms1_amp.rb"
   lv_gained = (((lv_audio_input * self->iv_current_gain) + (lv_audio_input_2 * self->iv_current_gain_2)) * lv_mod);
-#line 204 "spms1_amp.rb"
-  lv_u = (lv_gained * self->iv_distortion_gain);
 #line 205 "spms1_amp.rb"
-  lv_a = fabs(lv_u);
+  lv_u = (lv_gained * self->iv_distortion_gain);
 #line 206 "spms1_amp.rb"
-  lv_negative = (((lv_u < 0.0)) ? 1.0 : 0.0);
+  lv_a = fabs(lv_u);
 #line 207 "spms1_amp.rb"
-  lv_ceiling = (3.0 - lv_negative);
+  lv_negative = (((lv_u < 0.0)) ? 1.0 : 0.0);
 #line 208 "spms1_amp.rb"
-  lv_shoulder = (0.25 + (0.25 * lv_negative));
+  lv_ceiling = (3.0 - lv_negative);
 #line 209 "spms1_amp.rb"
-  lv_flat = (1.0 - (0.5 * lv_negative));
+  lv_shoulder = (0.25 + (0.25 * lv_negative));
 #line 210 "spms1_amp.rb"
-  lv_e = (sp_Dsp_s_clamp(lv_a, 1.0, lv_ceiling) - 1.0);
+  lv_flat = (1.0 - (0.5 * lv_negative));
 #line 211 "spms1_amp.rb"
-  lv_d = ((sp_float)(float_max(((float)((lv_a - lv_ceiling))), ((float)(0.0)))));
+  lv_e = (sp_Dsp_s_clamp(lv_a, 1.0, lv_ceiling) - 1.0);
 #line 212 "spms1_amp.rb"
-  lv_curved = ((lv_e * lv_e) * lv_shoulder);
+  lv_d = ((sp_float)(float_max(((float)((lv_a - lv_ceiling))), ((float)(0.0)))));
 #line 213 "spms1_amp.rb"
-  lv_part = ((lv_curved + lv_d) * (((2.0 * lv_negative) - 1.0)));
+  lv_curved = ((lv_e * lv_e) * lv_shoulder);
 #line 214 "spms1_amp.rb"
-  lv_antiderivative = (((0.0 - ((lv_curved * lv_e) * ((1.0 / 3.0)))) - (lv_flat * lv_d)) - ((lv_d * lv_d) * 0.5));
+  lv_part = ((lv_curved + lv_d) * (((2.0 * lv_negative) - 1.0)));
 #line 215 "spms1_amp.rb"
-  lv_step = (lv_u - self->iv_distortion_last_input);
+  lv_antiderivative = (((0.0 - ((lv_curved * lv_e) * ((1.0 / 3.0)))) - (lv_flat * lv_d)) - ((lv_d * lv_d) * 0.5));
 #line 216 "spms1_amp.rb"
-  lv_short = (((fabs(lv_step) < 0.001)) ? 1.0 : 0.0);
+  lv_step = (lv_u - self->iv_distortion_last_input);
 #line 217 "spms1_amp.rb"
-  lv_r = ((lv_part * lv_short) + (((lv_antiderivative - self->iv_distortion_last_antiderivative) / ((lv_step + lv_short))) * ((1.0 - lv_short))));
+  lv_short = (((fabs(lv_step) < 0.001)) ? 1.0 : 0.0);
 #line 218 "spms1_amp.rb"
-  self->iv_distortion_last_input = lv_u;
+  lv_r = ((lv_part * lv_short) + (((lv_antiderivative - self->iv_distortion_last_antiderivative) / ((lv_step + lv_short))) * ((1.0 - lv_short))));
 #line 219 "spms1_amp.rb"
+  self->iv_distortion_last_input = lv_u;
+#line 220 "spms1_amp.rb"
   self->iv_distortion_last_antiderivative = lv_antiderivative;
-#line 223 "spms1_amp.rb"
-  lv_dc = (self->iv_distortion_dc + ((lv_r - self->iv_distortion_dc) * self->iv_distortion_dc_rate));
 #line 224 "spms1_amp.rb"
-  self->iv_distortion_dc = lv_dc;
+  lv_dc = (self->iv_distortion_dc + ((lv_r - self->iv_distortion_dc) * self->iv_distortion_dc_rate));
 #line 225 "spms1_amp.rb"
-  lv_toned = (((lv_u + ((lv_r - lv_dc))) * self->iv_distortion_tone) + (self->iv_distortion_tone_out * self->iv_distortion_tone_rest));
+  self->iv_distortion_dc = lv_dc;
 #line 226 "spms1_amp.rb"
-  self->iv_distortion_tone_out = lv_toned;
+  lv_toned = (((lv_u + ((lv_r - lv_dc))) * self->iv_distortion_tone) + (self->iv_distortion_tone_out * self->iv_distortion_tone_rest));
 #line 227 "spms1_amp.rb"
+  self->iv_distortion_tone_out = lv_toned;
+#line 228 "spms1_amp.rb"
   lv_amplified = (lv_toned * self->iv_distortion_comp);
-#line 233 "spms1_amp.rb"
-  lv_level = fabs(lv_amplified);
 #line 234 "spms1_amp.rb"
-  self->iv_limiter_block_peak = (((lv_level > self->iv_limiter_block_peak)) ? lv_level : self->iv_limiter_block_peak);
+  lv_level = fabs(lv_amplified);
 #line 235 "spms1_amp.rb"
-  self->iv_limiter_hold_left = sp_int_sub(self->iv_limiter_hold_left, 1LL);
+  self->iv_limiter_block_peak = (((lv_level > self->iv_limiter_block_peak)) ? lv_level : self->iv_limiter_block_peak);
 #line 236 "spms1_amp.rb"
-  if ((self->iv_limiter_hold_left == 0LL)) {
+  self->iv_limiter_hold_left = sp_int_sub(self->iv_limiter_hold_left, 1LL);
 #line 237 "spms1_amp.rb"
-    self->iv_limiter_last_block_peak = self->iv_limiter_block_peak;
+  if ((self->iv_limiter_hold_left == 0LL)) {
 #line 238 "spms1_amp.rb"
-    self->iv_limiter_block_peak = 0.0;
+    self->iv_limiter_last_block_peak = self->iv_limiter_block_peak;
 #line 239 "spms1_amp.rb"
+    self->iv_limiter_block_peak = 0.0;
+#line 240 "spms1_amp.rb"
     self->iv_limiter_hold_left = self->iv_limiter_hold;
   }
-#line 241 "spms1_amp.rb"
-  lv_peak = (((self->iv_limiter_block_peak > self->iv_limiter_last_block_peak)) ? self->iv_limiter_block_peak : self->iv_limiter_last_block_peak);
 #line 242 "spms1_amp.rb"
-  lv_over = (((lv_peak > self->iv_limiter_threshold)) ? lv_peak : self->iv_limiter_threshold);
+  lv_peak = (((self->iv_limiter_block_peak > self->iv_limiter_last_block_peak)) ? self->iv_limiter_block_peak : self->iv_limiter_last_block_peak);
 #line 243 "spms1_amp.rb"
+  lv_over = (((lv_peak > self->iv_limiter_threshold)) ? lv_peak : self->iv_limiter_threshold);
+#line 244 "spms1_amp.rb"
   lv_wanted = (1.0 + (((self->iv_limiter_threshold / lv_over) - 1.0) * self->iv_limiter_switch));
-#line 247 "spms1_amp.rb"
-  lv_falling = (((lv_wanted < self->iv_limiter_gain)) ? 1.0 : 0.0);
 #line 248 "spms1_amp.rb"
-  lv_rate = (self->iv_limiter_release + ((self->iv_limiter_attack - self->iv_limiter_release) * lv_falling));
+  lv_falling = (((lv_wanted < self->iv_limiter_gain)) ? 1.0 : 0.0);
 #line 249 "spms1_amp.rb"
-  self->iv_limiter_gain += ((lv_wanted - self->iv_limiter_gain) * lv_rate);
+  lv_rate = (self->iv_limiter_release + ((self->iv_limiter_attack - self->iv_limiter_release) * lv_falling));
 #line 250 "spms1_amp.rb"
-  self->iv_limiter_write_index = (sp_int_add(self->iv_limiter_write_index, 1LL) & cst_LIMITER_LINE_MASK);
+  self->iv_limiter_gain += ((lv_wanted - self->iv_limiter_gain) * lv_rate);
 #line 251 "spms1_amp.rb"
-  sp_FloatArray_set(self->iv_limiter_line, self->iv_limiter_write_index, lv_amplified);
+  self->iv_limiter_write_index = (sp_int_add(self->iv_limiter_write_index, 1LL) & cst_LIMITER_LINE_MASK);
 #line 252 "spms1_amp.rb"
+  sp_FloatArray_set(self->iv_limiter_line, self->iv_limiter_write_index, lv_amplified);
+#line 253 "spms1_amp.rb"
   lv_output = (sp_FloatArray_get(self->iv_limiter_line, (sp_int_sub(self->iv_limiter_write_index, self->iv_limiter_lookahead) & cst_LIMITER_LINE_MASK)) * self->iv_limiter_gain);
-#line 256 "spms1_amp.rb"
+#line 257 "spms1_amp.rb"
   return sp_Dsp_s_clamp(lv_output, -1.0, 1.0);
   return 0.0;
 }
@@ -6010,7 +6010,7 @@ static void sp_spms1_write_default_patch(sp_int lv_midi_ch) {
 #line 918 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_VALUE_AMP_1_GAIN_1)), ((uint8_t)(4LL))), (sp_int)0);
 #line 919 "spms1_patch.rb"
-  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_VALUE_AMP_1_GAIN_2)), ((uint8_t)(64LL))), (sp_int)0);
+  (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_VALUE_AMP_1_GAIN_2)), ((uint8_t)(52LL))), (sp_int)0);
 #line 920 "spms1_patch.rb"
   (set_midi_nrpn_value(((uint8_t)(lv_midi_ch)), ((int32_t)(cst_NRPN_VALUE_AMP_1_MOD_1_2_MIX)), ((uint8_t)(4LL))), (sp_int)0);
 #line 921 "spms1_patch.rb"
@@ -6136,7 +6136,7 @@ static void sp_spms1_write_default_patch(sp_int lv_midi_ch) {
 #line 982 "spms1_patch.rb"
   (set_midi_cc_value(((uint8_t)(lv_midi_ch)), ((uint8_t)(25LL)), ((uint8_t)(4LL))), (sp_int)0);
 #line 983 "spms1_patch.rb"
-  (set_midi_cc_value(((uint8_t)(lv_midi_ch)), ((uint8_t)(15LL)), ((uint8_t)(64LL))), (sp_int)0);
+  (set_midi_cc_value(((uint8_t)(lv_midi_ch)), ((uint8_t)(15LL)), ((uint8_t)(52LL))), (sp_int)0);
 #line 984 "spms1_patch.rb"
   (set_midi_cc_value(((uint8_t)(lv_midi_ch)), ((uint8_t)(36LL)), ((uint8_t)(4LL))), (sp_int)0);
 #line 985 "spms1_patch.rb"
@@ -8524,29 +8524,29 @@ int main(int argc,char**argv){
   cst_Spms1__Amp__SMOOTHING_TARGET_BLEND_BASE = 0.015625;
 #line 37 "spms1_amp.rb"
   cst_Spms1__Amp__CONTROL_RATE_DIVISOR = 4LL;
-#line 54 "spms1_amp.rb"
-  cst_DISTORTION_KNEE = 1.0;
 #line 55 "spms1_amp.rb"
-  cst_DISTORTION_LIMIT = 2.0;
+  cst_DISTORTION_KNEE = 1.0;
 #line 56 "spms1_amp.rb"
-  cst_DISTORTION_CEILING = ((cst_DISTORTION_LIMIT + cst_DISTORTION_LIMIT) - cst_DISTORTION_KNEE);
+  cst_DISTORTION_LIMIT = 2.0;
 #line 57 "spms1_amp.rb"
+  cst_DISTORTION_CEILING = ((cst_DISTORTION_LIMIT + cst_DISTORTION_LIMIT) - cst_DISTORTION_KNEE);
+#line 58 "spms1_amp.rb"
   cst_DISTORTION_SPAN = (cst_DISTORTION_CEILING - cst_DISTORTION_KNEE);
-#line 59 "spms1_amp.rb"
-  cst_DISTORTION_SHOULDER = (1.0 / ((4.0 * ((cst_DISTORTION_LIMIT - cst_DISTORTION_KNEE)))));
 #line 60 "spms1_amp.rb"
-  cst_DISTORTION_SHOULDER_THIRD = (cst_DISTORTION_SHOULDER / 3.0);
+  cst_DISTORTION_SHOULDER = (1.0 / ((4.0 * ((cst_DISTORTION_LIMIT - cst_DISTORTION_KNEE)))));
 #line 61 "spms1_amp.rb"
-  cst_DISTORTION_FLAT = (cst_DISTORTION_LIMIT - cst_DISTORTION_KNEE);
+  cst_DISTORTION_SHOULDER_THIRD = (cst_DISTORTION_SHOULDER / 3.0);
 #line 62 "spms1_amp.rb"
+  cst_DISTORTION_FLAT = (cst_DISTORTION_LIMIT - cst_DISTORTION_KNEE);
+#line 63 "spms1_amp.rb"
   cst_DISTORTION_ADAA_MIN_STEP = 0.001;
-#line 67 "spms1_amp.rb"
-  cst_DISTORTION_SPAN_BELOW = 1.0;
 #line 68 "spms1_amp.rb"
-  cst_DISTORTION_DC_FREQUENCY = 4.0;
+  cst_DISTORTION_SPAN_BELOW = 1.0;
 #line 69 "spms1_amp.rb"
+  cst_DISTORTION_DC_FREQUENCY = 4.0;
+#line 70 "spms1_amp.rb"
   cst_DISTORTION_TONE_FREQUENCY = 5000.0;
-#line 72 "spms1_amp.rb"
+#line 73 "spms1_amp.rb"
   sp_int _t1902 = 34LL;
   if (_t1902 < 0) sp_raise_cls("ArgumentError", "negative array size");
   sp_float _t1903 = 0.0;
@@ -8554,7 +8554,7 @@ int main(int argc,char**argv){
   SP_GC_ROOT(_t1904);
   for (sp_int _t1905 = 0; _t1905 < _t1902; _t1905++) sp_FloatArray_push(_t1904, _t1903);
   cst_DISTORTION_GAIN_TABLE = _t1904;
-#line 73 "spms1_amp.rb"
+#line 74 "spms1_amp.rb"
   sp_int _t1907 = 34LL;
   if (_t1907 < 0) sp_raise_cls("ArgumentError", "negative array size");
   sp_float _t1908 = 0.0;
@@ -8562,18 +8562,18 @@ int main(int argc,char**argv){
   SP_GC_ROOT(_t1909);
   for (sp_int _t1910 = 0; _t1910 < _t1907; _t1910++) sp_FloatArray_push(_t1909, _t1908);
   cst_DISTORTION_COMP_TABLE = _t1909;
-#line 74 "spms1_amp.rb"
+#line 75 "spms1_amp.rb"
   { sp_int _t1911 = 33LL;
     for (lv_i = 0LL; lv_i < _t1911; lv_i++) {
-#line 75 "spms1_amp.rb"
-      sp_FloatArray_set(cst_DISTORTION_GAIN_TABLE, lv_i, sp_float_pow(2.0, ((({ sp_int _t1912 = (lv_i); _t1912 == SP_INT_NIL ? 0.0 : ((sp_float)_t1912); }) * ((1.0 / 8.0))))));
 #line 76 "spms1_amp.rb"
-      sp_FloatArray_set(cst_DISTORTION_COMP_TABLE, lv_i, sp_float_pow(2.0, ((({ sp_int _t1913 = (lv_i); _t1913 == SP_INT_NIL ? 0.0 : ((sp_float)_t1913); }) * ((-1.0 / 16.0))))));
+      sp_FloatArray_set(cst_DISTORTION_GAIN_TABLE, lv_i, sp_float_pow(2.0, ((({ sp_int _t1912 = (lv_i); _t1912 == SP_INT_NIL ? 0.0 : ((sp_float)_t1912); }) * ((1.0 / 8.0))))));
+#line 77 "spms1_amp.rb"
+      sp_FloatArray_set(cst_DISTORTION_COMP_TABLE, lv_i, sp_float_pow(2.0, ((({ sp_int _t1913 = (lv_i); _t1913 == SP_INT_NIL ? 0.0 : ((sp_float)_t1913); }) * ((-15.0 / 128.0))))));
     }
   }
-#line 78 "spms1_amp.rb"
-  sp_FloatArray_set(cst_DISTORTION_GAIN_TABLE, 33LL, sp_FloatArray_get(cst_DISTORTION_GAIN_TABLE, 32LL));
 #line 79 "spms1_amp.rb"
+  sp_FloatArray_set(cst_DISTORTION_GAIN_TABLE, 33LL, sp_FloatArray_get(cst_DISTORTION_GAIN_TABLE, 32LL));
+#line 80 "spms1_amp.rb"
   sp_FloatArray_set(cst_DISTORTION_COMP_TABLE, 33LL, sp_FloatArray_get(cst_DISTORTION_COMP_TABLE, 32LL));
 #line 1 "spms1_chorus.rb"
 #line 14 "spms1_chorus.rb"

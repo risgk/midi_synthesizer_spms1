@@ -165,7 +165,7 @@ flowchart LR
   M --> DRV["× Distortion<br/>x1 to x16"]
   DRV --> SC["Soft clip, ADAA<br/>linear up to 1.0,<br/>2.0 at 3.0, -1.5 at -2.0"]
   SC --> TONE["Tone<br/>Low pass 1-pole<br/>none to 5 kHz"]
-  TONE --> MU["× 1 / √Distortion"]
+  TONE --> MU["× Distortion^(−15/16)"]
   MU --> LIM["Look-ahead limiter<br/>0.9, 1 ms (Limiter Sw)"]
   LIM --> CL["Clamp<br/>±1.0"]
   CL --> OUT([Out])
@@ -838,9 +838,10 @@ Amp 1 Gain 1 and Gain 2, of Audio In 1 and Audio In 2, which the amp sums, are e
 6 dB down, at value 46, unity at value 64, twice, 6 dB up, at value 89, and four times, 12 dB up,
 at value 124, so a quiet sound can be brought well up as well as a loud one taken down. The
 default patch puts Filter 2, the fourth order, on Audio In 2: Gain 2, on CC#15, powers up at value
-64, unity, and the default patch's peaks come to about -7 dBFS (until v0.4.0 it powered up at 88,
-1.96 times, with Mixer 2 Out Level at 0.5 ahead of the filters: the same level, the filters driven
-6 dB less). Filter 1, the
+52, 0.64 times (3.9 dB down), and the default patch's peaks come to about -8 dBFS, so that the
+Amp 1 Distortion turned up has room before the limiter (until v0.4.1 it powered up at 64, unity,
+and until v0.4.0 at 88, 1.96 times, with Mixer 2 Out Level at 0.5 ahead of the filters: the same
+level as at 64, the filters driven 6 dB less). Filter 1, the
 second order, is on Audio In 1, and Gain 1, which has no CC, powers up at value 4, silent, so the
 fourth order is heard alone until Gain 1 brings the second order in beside it, through the same
 envelope and limiter.
@@ -870,8 +871,9 @@ value 4, where it powers up, to x16 at value 124, 6 dB every 30 values: a straig
 unit, then a quadratic shoulder that lands on two units at three (below zero, one half as long, to
 minus one and a half at minus two, so that even harmonics come too, with the DC that makes taken
 off). What comes out is taken back down
-by half the drive in dB, so a sound at one unit saturates without falling away, and the limiter
-holds what is left over. At x1 nothing at the gains' unity reaches the shoulder, and the amp is as
+by 15/16 of the drive in dB, so the level stays within about 1.5 dB as the drive goes up (a
+little up halfway, and a little down where it saturates hard), and the limiter holds what is left
+over. At x1 nothing at the gains' unity reaches the shoulder, and the amp is as
 it was; Gain 1 and Gain 2 turned up drive it too. The curve's part beyond the straight line goes
 through first-order antiderivative anti-aliasing (ADAA), so a sample that reaches no shoulder passes
 exactly, and past it the aliasing is lower: a sine at C5 to C8 driven x16 folds back -89 to -65 dB

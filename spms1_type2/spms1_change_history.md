@@ -11,10 +11,14 @@ revised.
       1/16 at value 124, so that the resonance saturates sooner while the level and the output clip
       stay. A patch saved by v0.4.1 loads the default patch, as the entries have changed
     - Add **Amp 1 Distortion** (CC#95, among the favorites): the gained sound driven x1 to x16 into a soft clip ahead of the
-      limiter and taken back down by half the drive in dB, with its aliasing reduced by first-order
+      limiter and taken back down by 15/16 of the drive in dB (the level within about 1.5 dB for a sound below the knee), with its aliasing reduced by first-order
       ADAA, its shoulder below zero half as long (even harmonics too, the DC taken off), and a tone
       after it, a 1-pole low pass from none at x1 to 5 kHz at x16; at x1, where it powers up, the
       amp is as it was
+    - Default patch: Amp 1 Gain 2 (CC#15) powers up at value 52, 0.64 times (3.9 dB down), instead of
+      unity (value 64), so that the default patch's peaks come to about -8 dBFS and the Distortion
+      turned up keeps the level within about 1 dB up to three quarters of the dial (about 4 dB down
+      at the top)
     - Filters: Cutoff three semitones down, a C every 12 values, C5 (523 Hz) at value 64, from note
       12 (16.4 Hz) at value 4 to note 132 (16.7 kHz) at value 124 (it was note 15, 19 Hz, to note
       135, 20 kHz), so that with Pitch Amt at its top the cutoff at value 64 is an octave above the
