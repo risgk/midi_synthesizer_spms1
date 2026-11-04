@@ -66,7 +66,7 @@ module Spms1
     # DISTORTION_DC_FREQUENCY. After the curve, the tone, a 1-pole low pass, takes the edge off the
     # harmonics, more with more drive: none at x1, about 10 kHz halfway, DISTORTION_TONE_FREQUENCY at x16.
     DISTORTION_SPAN_BELOW     = 1.0
-    DISTORTION_DC_FREQUENCY   = 4.0
+    DISTORTION_DC_FREQUENCY   = 3.73  # 48000 / (2 * pi * 2048), a rate of 2^-11 at 48 kHz
     DISTORTION_TONE_FREQUENCY = 5000.0
     # D = 2^(i / 8) and D^(-15/16) = 2^(-i * 15 / 128), one entry for each 1/32 of the dial, the last
     # repeated for the interpolation's upper neighbour.

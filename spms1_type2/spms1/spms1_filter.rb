@@ -126,8 +126,8 @@ module Spms1
     # The output level by the resonance, one entry per step of the dial as K_TABLE, so that a high
     # resonance is about as loud as a moderate one, while the loop, and so how readily the
     # self-oscillation starts and holds against the input, stays as it was. 1.0 up to i = 72 (CC
-    # 76, Q 5.7), then lower in lines in dB, to -2.8 dB at i = 114 (CC 118, Q 256), as PRA32-U2's
-    # at the same Q: what the resonance brings up there is the harmonic near the cutoff. Past that
+    # 76, Q 5.7), then lower in lines in dB, to -2.8 dB at i = 114 (CC 118, Q 256): what the
+    # resonance brings up there is the harmonic near the cutoff. Past that
     # the self-oscillation takes over, SELF_OSC_LEVEL * sqrt(t) in the loop, and the level is set
     # so that it comes out at SELF_OSC_OUTPUT_MIN at i = 115 (CC 119), rising in a line to
     # SELF_OSC_OUTPUT_MAX at i = 119 (CC 123) and held there: still louder with the resonance, but

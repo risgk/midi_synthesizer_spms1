@@ -8640,7 +8640,7 @@ int main(int argc,char**argv){
 #line 68 "spms1_amp.rb"
   cst_DISTORTION_SPAN_BELOW = 1.0;
 #line 69 "spms1_amp.rb"
-  cst_DISTORTION_DC_FREQUENCY = 4.0;
+  cst_DISTORTION_DC_FREQUENCY = 3.73;
 #line 70 "spms1_amp.rb"
   cst_DISTORTION_TONE_FREQUENCY = 5000.0;
 #line 73 "spms1_amp.rb"
