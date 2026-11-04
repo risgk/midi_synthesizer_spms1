@@ -865,7 +865,7 @@ harmonics back below the audible band, the limiter does not: a sawtooth taken 12
 at A4 to A7 aliases -46 to -53 dB under 5 kHz with it, and -29 to -37 dB on the clamp. Off, the
 output is just as late, and the clamp is reached. Limiting is heard on a loud passage as its peaks
 held level, and the release as the sound coming back up after one. The default patch stays under
-it, with Osc 1 on the sawtooth or on the pulse, and Amp 1 Gain 2 turned up to about value 114
+it, with Osc 1 on the sawtooth or on the pulse, and Amp 1 Gain 2 turned up to about value 86 (about 1.8 times)
 starts to reach it. The filter's output
 clip and a mixer's sum still have the hard limit, past which a sawtooth driven 6 dB over at A6 to
 A7 aliases about -30 dB under 5 kHz; keep the levels before the filters where the peaks only just
