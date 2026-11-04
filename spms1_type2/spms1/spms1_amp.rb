@@ -119,7 +119,6 @@ module Spms1
       @distortion_tone = 1.0
       @distortion_tone_rest = 0.0
       @distortion_tone_out = 0.0
-      @distortion_even = 0.0
       # The DC of the curve's part (its shoulders are not symmetric), followed by a 1-pole low pass
       # at DISTORTION_DC_FREQUENCY and taken off.
       @distortion_dc_rate = 1.0 - Math.exp(-2.0 * Math::PI * DISTORTION_DC_FREQUENCY / @sample_rate)
@@ -180,8 +179,6 @@ module Spms1
         @distortion_comp = DISTORTION_COMP_TABLE[index] + fraction * (DISTORTION_COMP_TABLE[index + 1] - DISTORTION_COMP_TABLE[index])
         @distortion_tone_rest = @distortion_tone_max_rest * @current_distortion
         @distortion_tone = 1.0 - @distortion_tone_rest
-        # The even term's c: 0.0 at x1 up to 0.5 at half the dial (x4), and held there.
-        @distortion_even = C.float_min(@current_distortion, 0.5)
       end
 
       # Each side weighted on its own, so that at either end of Mod 1/2 Mix the one input
@@ -221,11 +218,6 @@ module Spms1
       r = part * short + (antiderivative - @distortion_last_antiderivative) / (step + short) * (1.0 - short)
       @distortion_last_input = u
       @distortion_last_antiderivative = antiderivative
-      # The even term, c * w^2 with w the sample held within one unit, so that a sound below the
-      # knee gets the 2nd harmonic too, more with the drive; added as it is, not through ADAA
-      # (smooth, it only doubles the band), and its DC taken off with the part's.
-      w = Dsp.clamp(u, -1.0, 1.0)
-      r += w * w * @distortion_even
       # The DC of the part taken off, and the tone, as the sum of two weights (not a difference):
       # with nothing past the knee, the part and its DC are zero, and at x1 the weight of the input
       # is 1.0 and that of the last output 0.0, so that the amp is exactly as it was.

@@ -10,8 +10,7 @@ revised.
       v0.4.1 loads the default patch, as the entries have changed
     - Add **Amp 1 Distortion** (CC#95, among the favorites): a soft clip with less aliasing (ADAA)
       and a tone after it, ahead of the limiter, x1 to x16, with the level kept for a sound below
-      the knee, and the 2nd harmonic below the knee too, so that a little of the dial thickens the
-      sound; x1 at power-up
+      the knee; x1 at power-up
     - Filters: A high resonance is about as loud as a moderate one, and the self-oscillation is
       quieter (0.25 at most, from 0.5), while it holds against the input as before
     - Default patch: Mixer 2 Level 1 at 0.5 instead of 1.0, so that the self-oscillation holds
