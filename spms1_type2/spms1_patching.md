@@ -212,8 +212,8 @@ comb filtering where they meet.
 
 A stereo delay with feedback. Each side has a
 delay line and a loop of its own: half its input and its delayed signal at the Feedback gain go
-through a gentle low pass filter into its line, and its output is a crossfade of its input with
-its delayed signal. Time, Feedback and Mix are shared, so the two sides repeat together and keep
+through a gentle low pass filter into its line, and its output is its input and its delayed signal
+mixed by Mix. Time, Feedback and Mix are shared, so the two sides repeat together and keep
 the stereo image they came in with.
 
 ```mermaid
@@ -224,16 +224,19 @@ flowchart LR
   LPF --> DL["Delay line<br/>up to 340 ms"]
   DL --> FB["× Feedback<br/>0 to 0.5"]
   FB --> SUM
-  DL --> X["Crossfade<br/>Mix"]
+  DL --> X["Mix"]
   IN --> X
   X --> OUT([Output L / R])
 ```
 
-The diagram is one side; the other is the same. It needs no limiter and no clip after it. With
+The diagram is one side; the other is the same. The loop needs no limiter and no clip. With
 half the input coming in and at most half the delayed signal going round again, what is written
 back stays within one unit as long as the delayed signal does, and it starts from silence; the
-filter, the reading between two samples and the crossfade are all weighted averages, which cannot
-reach past what they average. The price is that the first repeat comes 6 dB under the dry signal.
+filter and the reading between two samples are weighted averages, which cannot reach past what they
+average. The price is that the first repeat comes 6 dB under the dry signal. The output keeps the
+dry input at full up to the middle of Mix, so that the level does not dip there, and can go past one
+unit where the dry input and the repeats meet in phase: the output's clip holds that, a few samples
+in a thousand at most with the limiter at work and Mix in the middle.
 Each input is held to one unit on the way in, as the amp holds its modulation, so whatever
 is routed to it the bound holds.
 
@@ -932,9 +935,9 @@ clipped to 2.83 ms at the bottom, so it holds 2.83 ms up to value 5; it is 170 m
 it bends the pitch of the repeats, by at most 25%, as a tape delay's would, and they reach the new
 time a moment later. Feedback is the gain from the repeats back into the line, from 0 at value 4, a
 single repeat, to 0.5 at value 124, where each repeat comes back 6 dB down and a little darker; it is
-0.25 at value 64. Mix is the repeats' share of the crossfade, from the dry input alone at value 4 to the
-repeats alone at value 124, half and half at value 64. Time and Feedback power up at value 64 and Mix at
-value 34, 0.25: the dry signal is 2.5 dB down and the first repeat about 16 dB under it.
+0.25 at value 64. Mix brings the repeats up to full at value 64 with the dry input at full, from the dry input alone at value 4,
+and then takes the dry input down to none at value 124, where the repeats are alone. Time and Feedback power up at value 64 and Mix at
+value 34, 0.25: the dry signal at full and the first repeat 12 dB under it.
 
 Pitch 1 Glide is unipolar and moves in steps of 1/120, a semitone of time a step, as EG 1 Decay
 does and over the same range: from about 10 ms at value 5 through 320 ms at value 64 to 10.24 s at value 124,
