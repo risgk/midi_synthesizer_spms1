@@ -4,7 +4,7 @@ MIDI Synthesizer SPMS-1 (type-2) Change History
 The main changes of each version, newest first, gathered before each release. The format may be
 revised.
 
-- v0.5.0 (2026-??-??):
+- v0.5.0 (2026-11-05):
     - Add **Filter Drive**, of Filter 1 and Filter 2 (CC#31, among the favorites): drives the
       filters harder, x1 to x32, for a saturated resonance, with the level kept. A patch saved by
       v0.4.1 loads the default patch, as the entries have changed: the Drives, the Distortion and

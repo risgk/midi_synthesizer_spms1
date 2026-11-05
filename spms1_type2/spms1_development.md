@@ -243,12 +243,15 @@ or not, as the modules are meant to:
 
 | Version | Note held (avg / max) | No note (avg / max) |
 | :-- | --: | --: |
-| v0.5.0 (develop, 59e3665; replaced at the release) | 185624 / 185946 cycles, 1208 us (91%) | 185228 / 185423 cycles, 1206 us (91%) |
+| v0.5.0 | 190454 / 190767 cycles, 1240 us (93%) | 189900 / 190095 cycles, 1236 us (93%) |
 
 The estimate is above Debug Print on the device: about 8% at v0.4.0 (min 1253 us, max 1256 us, about
-94%), and about 10% on the way to v0.5.0 (develop at 59e3665, with Amp 1 Distortion and its tone and
-shoulder below zero, estimated at 1208 us on average and 1211 us at most: on the device min 1088 us and max
-1091 us with I2S, about 82%, `underruns` 0; at 3085c13, with the distortion before them, estimated at 1197 us
+94%), and about 11% on the way to v0.5.0 (develop at 95e0fd1, with the Drive and the Distortion x1 to x16,
+the make-up of 15/16 and the resonance's output level, estimated at 1233 us on average and 1235 us at most:
+on the device min 1101 us and max 1105 us with I2S, about 83%, `underruns` 0; v0.5.0 adds Out Wet and the
+drives up to x32, about 7 us more in the estimate, so about 1108 us on the device; at 59e3665, with Amp 1
+Distortion and its tone and shoulder below zero, estimated at 1208 us and 1211 us, min 1088 us and max
+1091 us with I2S, about 82%; at 3085c13, with the distortion before them, estimated at 1197 us
 and 1199 us, min 1079 us and max 1083 us with I2S, min 1079 us and max 1081 us with PWM Audio; at 5b5dc07,
 before the distortion, estimated at 1157 us and 1159 us, min 1042 us and max 1045 us with I2S, min 1038 us
 and max 1043 us with PWM Audio, about 78%, which Note On and Off repeated by MIDI moved little). So the table is not what a buffer takes on the device; `underruns` on the device says whether one runs over.
@@ -260,21 +263,21 @@ order, split evenly; the common part left is the loop of the samples, the output
 
 | Module | Own | With common |
 | :-- | --: | --: |
-| Osc 2 (with Sync) | 9.3% (124 us) | 10.8% (144 us) |
-| Filter 1 | 9.1% (121 us) | 10.6% (141 us) |
-| Filter 2 | 9.1% (121 us) | 10.6% (141 us) |
-| Amp 1 (with the Distortion) | 8.3% (111 us) | 9.5% (126 us) |
-| Osc 1 | 6.0% (80 us) | 7.4% (99 us) |
-| Delay 1 | 5.6% (74 us) | 6.7% (89 us) |
-| Chorus 1 | 4.7% (63 us) | 5.7% (75 us) |
-| LFO 1 | 3.2% (42 us) | 4.0% (54 us) |
-| Pitch 1 | 2.2% (29 us) | 3.3% (45 us) |
-| Mixer 1 | 1.5% (20 us) | 2.7% (36 us) |
-| Mixer 2 | 1.5% (20 us) | 2.7% (36 us) |
-| Noise 1 | 1.9% (25 us) | 2.6% (35 us) |
-| EG 1 | 1.9% (25 us) | 2.6% (34 us) |
-| EG 2 | 1.9% (25 us) | 2.6% (34 us) |
-| The common part left | | 9.0% (120 us) |
+| Filter 1 | 9.4% (126 us) | 11.0% (147 us) |
+| Filter 2 | 9.4% (126 us) | 11.0% (147 us) |
+| Osc 2 (with Sync) | 9.3% (124 us) | 10.9% (146 us) |
+| Amp 1 (with the Distortion) | 8.3% (111 us) | 9.5% (127 us) |
+| Osc 1 | 6.1% (81 us) | 7.5% (100 us) |
+| Delay 1 | 5.4% (73 us) | 6.8% (91 us) |
+| Chorus 1 | 4.8% (64 us) | 6.0% (80 us) |
+| LFO 1 | 3.2% (42 us) | 4.1% (55 us) |
+| Pitch 1 | 2.2% (29 us) | 3.4% (45 us) |
+| Mixer 1 | 1.5% (20 us) | 2.8% (37 us) |
+| Mixer 2 | 1.5% (20 us) | 2.8% (37 us) |
+| EG 1 | 1.9% (26 us) | 2.7% (36 us) |
+| EG 2 | 1.9% (26 us) | 2.7% (36 us) |
+| Noise 1 | 1.9% (25 us) | 2.7% (35 us) |
+| The common part left | | 9.1% (122 us) |
 
 
 ## GitHub Actions
