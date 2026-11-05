@@ -257,6 +257,11 @@ and 1199 us, min 1079 us and max 1083 us with I2S, min 1079 us and max 1081 us w
 before the distortion, estimated at 1157 us and 1159 us, min 1042 us and max 1045 us with I2S, min 1038 us
 and max 1043 us with PWM Audio, about 78%, which Note On and Off repeated by MIDI moved little). So the table is not what a buffer takes on the device; `underruns` on the device says whether one runs over.
 
+The load is to stay at about 90% on the device at most (1200 us of 1333 us), leaving room for what
+the device adds now and then (core 0, the interrupts, the writes to the output): as the device takes
+about 10% less than the estimate, that is about 100% in the estimate (1333 us), against which a change
+that adds to the load is checked. At v0.5.0 that leaves about 90 us on the device, about 7% of a buffer.
+
 The load of each module, by `--modules` (the same version, a note held): "own" is
 the cycles of its methods (process, its outputs, smooth_parameters), and "with common" adds its share
 of the common part, the bus reads of its inputs and writes of its outputs and the dispatch of the run
