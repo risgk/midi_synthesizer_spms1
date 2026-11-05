@@ -251,7 +251,7 @@ it from anywhere else.
 An edit is three CCs: CC#99 picks a category, 112 plus its number, CC#98 an entry in it, and CC#6 the
 value. To feed Filter 1 Cutoff from the envelope, for example: CC#99 = 114 (category 2, where each
 parameter takes its value from), CC#98 = 66 (Filter 1 Cutoff, in the entry tables below), CC#6 = 44
-(EG 1 Out, in the Signal IDs); then CC#98 = 77 and CC#6 = 44 do the same for Filter 2 Cutoff, the
+(EG 1 Out, in the Signal IDs); then CC#98 = 78 and CC#6 = 44 do the same for Filter 2 Cutoff, the
 category standing. The editor is the easier way to the same end, a wire dragged from EG 1 Out to
 Filter 1 Cutoff on its Patch tab, and it sends exactly these; its Export panel, with the format
 "MIDI bytes (hex)" or "NRPN list" and comments on, shows the whole patch as them, each named, so
@@ -421,38 +421,38 @@ both at the same signal for a mono output.
 
 | CC#98 | Parameter | | CC#98 | Parameter | | CC#98 | Parameter |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | Pitch 1 Glide | | 34 | Osc 1 Pitch Mod 1 Pol | | 68 | Filter 1 Gain 1 |
-| 1 | Pitch 1 Out 1 Glide Sw | | 35 | Osc 1 Pitch Mod 1 Sw | | 69 | Filter 1 Gain 2 |
-| 2 | Pitch 1 Out 2 Glide Sw | | 36 | Osc 1 Pitch Mod 2 Amt | | 70 | Filter 1 Pitch Amt |
-| 3 | Pitch 1 Bend Amt | | 37 | Osc 1 Pitch Mod 2 Pol | | 71 | Filter 1 Pitch Pol |
-| 4 | Pitch 1 Bend Pol | | 38 | Osc 1 Pitch Mod 2 Sw | | 72 | Filter 1 Mod 1 Amt |
-| 5 | Pitch 1 Out 1 Bend Sw | | 39 | Osc 1 PW Mod 1 Amt | | 73 | Filter 1 Mod 1 Pol |
-| 6 | Pitch 1 Out 2 Bend Sw | | 40 | Osc 1 PW Mod 1 Pol | | 74 | Filter 1 Mod 2 Amt |
-| 7 | Pitch 1 Stretch | | 41 | Osc 1 PW Mod 2 Amt | | 75 | Filter 1 Mod 2 Pol |
-| 8 | EG 1 Attack | | 42 | Osc 1 PW Mod 2 Pol | | 76 | Filter 2 Mode |
-| 9 | EG 1 Decay | | 43 | Osc 2 Wave | | 77 | Filter 2 Cutoff |
-| 10 | EG 1 Sustain | | 44 | Osc 2 PW | | 78 | Filter 2 Resonance |
-| 11 | EG 1 Release Sw | | 45 | Osc 2 Pitch Coarse | | 79 | Filter 2 Gain 1 |
-| 12 | EG 1 Level | | 46 | Osc 2 Pitch Fine | | 80 | Filter 2 Gain 2 |
-| 13 | EG 2 Attack | | 47 | Osc 2 Pitch Mod 1 Amt | | 81 | Filter 2 Pitch Amt |
-| 14 | EG 2 Decay | | 48 | Osc 2 Pitch Mod 1 Pol | | 82 | Filter 2 Pitch Pol |
-| 15 | EG 2 Sustain | | 49 | Osc 2 Pitch Mod 1 Sw | | 83 | Filter 2 Mod 1 Amt |
-| 16 | EG 2 Release Sw | | 50 | Osc 2 Pitch Mod 2 Amt | | 84 | Filter 2 Mod 1 Pol |
-| 17 | EG 2 Level | | 51 | Osc 2 Pitch Mod 2 Pol | | 85 | Filter 2 Mod 2 Amt |
-| 18 | LFO 1 Wave | | 52 | Osc 2 Pitch Mod 2 Sw | | 86 | Filter 2 Mod 2 Pol |
-| 19 | LFO 1 Rate | | 53 | Osc 2 PW Mod 1 Amt | | 87 | Amp 1 Gain 1 |
-| 20 | LFO 1 Level | | 54 | Osc 2 PW Mod 1 Pol | | 88 | Amp 1 Gain 2 |
-| 21 | LFO 1 Rate Mod Amt | | 55 | Osc 2 PW Mod 2 Amt | | 89 | Amp 1 Mod 1/2 Mix |
-| 22 | LFO 1 Level Mod Amt | | 56 | Osc 2 PW Mod 2 Pol | | 90 | Chorus 1 Mix |
-| 23 | LFO 1 Reset Sw | | 57 | Osc 2 Sync Sw | | 91 | Chorus 1 Rate |
-| 24 | Mixer 1 Level 1 | | 58 | Noise 1 Color | | 92 | Chorus 1 Depth |
-| 25 | Mixer 1 Level 2 | | 59 | Noise 1 Level | | 93 | Delay 1 Mix |
-| 26 | Mixer 1 Level 3 | | 60 | Mixer 2 Level 1 | | 94 | Delay 1 Time |
-| 27 | Mixer 1 Level 4 | | 61 | Mixer 2 Level 2 | | 95 | Delay 1 Feedback |
-| 28 | Mixer 1 Out Level | | 62 | Mixer 2 Level 3 | | 100 | Amp 1 Limiter Sw |
-| 29 | Osc 1 Wave | | 63 | Mixer 2 Level 4 | | 101 | Filter 1 Drive |
-| 30 | Osc 1 PW | | 64 | Mixer 2 Out Level | | 102 | Filter 2 Drive |
-| 31 | Osc 1 Pitch Coarse | | 65 | Filter 1 Mode | | 103 | Amp 1 Distortion |
+| 0 | Pitch 1 Glide | | 34 | Osc 1 Pitch Mod 1 Pol | | 68 | Filter 1 Drive |
+| 1 | Pitch 1 Out 1 Glide Sw | | 35 | Osc 1 Pitch Mod 1 Sw | | 69 | Filter 1 Gain 1 |
+| 2 | Pitch 1 Out 2 Glide Sw | | 36 | Osc 1 Pitch Mod 2 Amt | | 70 | Filter 1 Gain 2 |
+| 3 | Pitch 1 Bend Amt | | 37 | Osc 1 Pitch Mod 2 Pol | | 71 | Filter 1 Pitch Amt |
+| 4 | Pitch 1 Bend Pol | | 38 | Osc 1 Pitch Mod 2 Sw | | 72 | Filter 1 Pitch Pol |
+| 5 | Pitch 1 Out 1 Bend Sw | | 39 | Osc 1 PW Mod 1 Amt | | 73 | Filter 1 Mod 1 Amt |
+| 6 | Pitch 1 Out 2 Bend Sw | | 40 | Osc 1 PW Mod 1 Pol | | 74 | Filter 1 Mod 1 Pol |
+| 7 | Pitch 1 Stretch | | 41 | Osc 1 PW Mod 2 Amt | | 75 | Filter 1 Mod 2 Amt |
+| 8 | EG 1 Attack | | 42 | Osc 1 PW Mod 2 Pol | | 76 | Filter 1 Mod 2 Pol |
+| 9 | EG 1 Decay | | 43 | Osc 2 Wave | | 77 | Filter 2 Mode |
+| 10 | EG 1 Sustain | | 44 | Osc 2 PW | | 78 | Filter 2 Cutoff |
+| 11 | EG 1 Release Sw | | 45 | Osc 2 Pitch Coarse | | 79 | Filter 2 Resonance |
+| 12 | EG 1 Level | | 46 | Osc 2 Pitch Fine | | 80 | Filter 2 Drive |
+| 13 | EG 2 Attack | | 47 | Osc 2 Pitch Mod 1 Amt | | 81 | Filter 2 Gain 1 |
+| 14 | EG 2 Decay | | 48 | Osc 2 Pitch Mod 1 Pol | | 82 | Filter 2 Gain 2 |
+| 15 | EG 2 Sustain | | 49 | Osc 2 Pitch Mod 1 Sw | | 83 | Filter 2 Pitch Amt |
+| 16 | EG 2 Release Sw | | 50 | Osc 2 Pitch Mod 2 Amt | | 84 | Filter 2 Pitch Pol |
+| 17 | EG 2 Level | | 51 | Osc 2 Pitch Mod 2 Pol | | 85 | Filter 2 Mod 1 Amt |
+| 18 | LFO 1 Wave | | 52 | Osc 2 Pitch Mod 2 Sw | | 86 | Filter 2 Mod 1 Pol |
+| 19 | LFO 1 Rate | | 53 | Osc 2 PW Mod 1 Amt | | 87 | Filter 2 Mod 2 Amt |
+| 20 | LFO 1 Level | | 54 | Osc 2 PW Mod 1 Pol | | 88 | Filter 2 Mod 2 Pol |
+| 21 | LFO 1 Rate Mod Amt | | 55 | Osc 2 PW Mod 2 Amt | | 89 | Amp 1 Gain 1 |
+| 22 | LFO 1 Level Mod Amt | | 56 | Osc 2 PW Mod 2 Pol | | 90 | Amp 1 Gain 2 |
+| 23 | LFO 1 Reset Sw | | 57 | Osc 2 Sync Sw | | 91 | Amp 1 Distortion |
+| 24 | Mixer 1 Level 1 | | 58 | Noise 1 Color | | 92 | Amp 1 Mod 1/2 Mix |
+| 25 | Mixer 1 Level 2 | | 59 | Noise 1 Level | | 93 | Amp 1 Limiter Sw |
+| 26 | Mixer 1 Level 3 | | 60 | Mixer 2 Level 1 | | 94 | Chorus 1 Mix |
+| 27 | Mixer 1 Level 4 | | 61 | Mixer 2 Level 2 | | 95 | Chorus 1 Rate |
+| 28 | Mixer 1 Out Level | | 62 | Mixer 2 Level 3 | | 96 | Chorus 1 Depth |
+| 29 | Osc 1 Wave | | 63 | Mixer 2 Level 4 | | 97 | Delay 1 Mix |
+| 30 | Osc 1 PW | | 64 | Mixer 2 Out Level | | 98 | Delay 1 Time |
+| 31 | Osc 1 Pitch Coarse | | 65 | Filter 1 Mode | | 99 | Delay 1 Feedback |
 | 32 | Osc 1 Pitch Fine | | 66 | Filter 1 Cutoff | |  |  |
 | 33 | Osc 1 Pitch Mod 1 Amt | | 67 | Filter 1 Resonance | |  |  |
 
@@ -469,10 +469,10 @@ have none there. See below.
 
 | CC#98 | CC for | Fills |
 | ----- | ------ | ----- |
-| 96 | Mod Wheel | Mod Wheel, Mod Wheel Rev, Mod Wheel Inv, Mod Wheel Rev Inv |
-| 97 | Breath | Breath, Breath Rev, Breath Inv, Breath Rev Inv |
-| 98 | General 1 | General 1, General 1 Rev, General 1 Inv, General 1 Rev Inv, General 1 Bipolar, General 1 Bipolar Inv, General 1 Cos, General 1 Sin, General 1 Lo, General 1 Hi, General 1 Neg, General 1 Mid, General 1 Pos |
-| 99 | General 2 | General 2, General 2 Rev, General 2 Inv, General 2 Rev Inv, General 2 Bipolar, General 2 Bipolar Inv, General 2 Cos, General 2 Sin, General 2 Lo, General 2 Hi, General 2 Neg, General 2 Mid, General 2 Pos |
+| 100 | Mod Wheel | Mod Wheel, Mod Wheel Rev, Mod Wheel Inv, Mod Wheel Rev Inv |
+| 101 | Breath | Breath, Breath Rev, Breath Inv, Breath Rev Inv |
+| 102 | General 1 | General 1, General 1 Rev, General 1 Inv, General 1 Rev Inv, General 1 Bipolar, General 1 Bipolar Inv, General 1 Cos, General 1 Sin, General 1 Lo, General 1 Hi, General 1 Neg, General 1 Mid, General 1 Pos |
+| 103 | General 2 | General 2, General 2 Rev, General 2 Inv, General 2 Rev Inv, General 2 Bipolar, General 2 Bipolar Inv, General 2 Cos, General 2 Sin, General 2 Lo, General 2 Hi, General 2 Neg, General 2 Mid, General 2 Pos |
 
 <!-- patch_gen end -->
 
@@ -574,7 +574,7 @@ mod wheel.
 
 Slots 16 to 41 are General 1 and General 2, two more control slots that no parameter owns, read
 from CC#16 and CC#17, General Purpose Controllers 1 and 2. With no CC (category 3 at 0), each holds
-its value in category 4 (CC#99 = 116, CC#98 = 98 and 99) instead, as a parameter with no CC does,
+its value in category 4 (CC#99 = 116, CC#98 = 102 and 103) instead, as a parameter with no CC does,
 which the editor's slider sets. Each CC fills thirteen slots at once, each
 a form of its value u, which runs 0.0 to 1.0 from value 4 to value 124: General n itself, Rev
 1 - u, Inv -u, Rev Inv u - 1, Bipolar u - 0.5, Bipolar Inv 0.5 - u, Cos cos(u * pi / 2), Sin
@@ -1006,10 +1006,10 @@ unplugged reads its own CC or value again. A value is the 4 to 124 the editor sh
   CC#98 = 31 and 36, CC#6 = 65 (64 for the white), then CC#25
 - Filter cutoff driven by the envelope instead of its CC: on the Patch tab, wire EG 1 Out to Filter
   1 and Filter 2 Cutoff, the parameter itself. The envelope and the cutoff are both unipolar, so it
-  opens the cutoff from the bottom of its dial to the top. As MIDI: CC#99 = 114, CC#98 = 66 and 77,
+  opens the cutoff from the bottom of its dial to the top. As MIDI: CC#99 = 114, CC#98 = 66 and 78,
   CC#6 = 44
 - Amp gain and filter cutoff share one CC: on the Patch tab, 74 in the CC# field of Amp 1 Gain 2.
-  As MIDI: CC#99 = 115, CC#98 = 88, CC#6 = 74
+  As MIDI: CC#99 = 115, CC#98 = 90, CC#6 = 74
 - Amp at full level with no envelope: on the Patch tab, wire the constant +1.0 to Amp 1 Mod 1 In.
   As MIDI: CC#99 = 113, CC#98 = 39, CC#6 = 1
 - Amp opened and closed by the note as an organ's, while EG 1 still shapes the filter: Amp 1 Mod 1/2
@@ -1066,14 +1066,14 @@ unplugged reads its own CC or value again. A value is the 4 to 124 the editor sh
   ticked, Filter 2 Gain 1 up to 64 and Gain 2 down to 4, so that it takes Mixer 2 rather than Filter
   1, and Amp 1 Gain 1 up to 64 brings Filter 1 in beside it; then, on the Patch tab, 0 in the CC#
   field of Filter 1 Mode takes it off CC#39, and its value at 124 makes it the high pass, so
-  that Cutoff moves a low pass and a high pass at once. As MIDI: CC#99 = 116, CC#98 = 79, CC#6 = 64,
-  CC#98 = 80, CC#6 = 4, CC#98 = 87, CC#6 = 88; CC#99 = 115, CC#98 = 65, CC#6 = 0; CC#99 = 116, CC#98
+  that Cutoff moves a low pass and a high pass at once. As MIDI: CC#99 = 116, CC#98 = 81, CC#6 = 64,
+  CC#98 = 82, CC#6 = 4, CC#98 = 89, CC#6 = 88; CC#99 = 115, CC#98 = 65, CC#6 = 0; CC#99 = 116, CC#98
   = 65, CC#6 = 124
 - Echoes that only come in with the mod wheel: on the Patch tab, wire Mod Wheel to Delay 1 Mix. The
-  wheel powers up at 0.0, so the output is dry until it moves. As MIDI: CC#99 = 114, CC#98 = 93,
+  wheel powers up at 0.0, so the output is dry until it moves. As MIDI: CC#99 = 114, CC#98 = 97,
   CC#6 = 8
 - Chorus that only comes in with the mod wheel: on the Patch tab, wire Mod Wheel to Chorus 1 Mix,
-  so the output stays mono until the wheel moves. As MIDI: CC#99 = 114, CC#98 = 90, CC#6 = 8
+  so the output stays mono until the wheel moves. As MIDI: CC#99 = 114, CC#98 = 94, CC#6 = 8
 - Leave the chorus out of the sound, keeping the delay: on the Patch tab, wire Amp 1 Out to Delay 1
   Audio In L and Audio In R. The chorus keeps running and nothing reads it, and the output is then
   mono. As MIDI: CC#99 = 113, CC#98 = 42 and 43, CC#6 = 76

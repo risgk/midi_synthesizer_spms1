@@ -249,38 +249,38 @@ def spms1_apply_parameters(signals, pitch_1, eg_1, eg_2, lfo_1, mixer_1, osc_1, 
   source_filter_1_mode = source_or_own(C.get_midi_nrpn_value(0, 321), 193) # NRPN_SOURCE_FILTER_1_MODE, SLOT_FILTER_1_MODE
   source_filter_1_cutoff = source_or_own(C.get_midi_nrpn_value(0, 322), 194) # NRPN_SOURCE_FILTER_1_CUTOFF, SLOT_FILTER_1_CUTOFF
   source_filter_1_resonance = source_or_own(C.get_midi_nrpn_value(0, 323), 195) # NRPN_SOURCE_FILTER_1_RESONANCE, SLOT_FILTER_1_RESONANCE
-  source_filter_1_gain_1 = source_or_own(C.get_midi_nrpn_value(0, 324), 196) # NRPN_SOURCE_FILTER_1_GAIN_1, SLOT_FILTER_1_GAIN_1
-  source_filter_1_gain_2 = source_or_own(C.get_midi_nrpn_value(0, 325), 197) # NRPN_SOURCE_FILTER_1_GAIN_2, SLOT_FILTER_1_GAIN_2
-  source_filter_1_pitch_amt = source_or_own(C.get_midi_nrpn_value(0, 326), 198) # NRPN_SOURCE_FILTER_1_PITCH_AMT, SLOT_FILTER_1_PITCH_AMT
-  source_filter_1_pitch_pol = source_or_own(C.get_midi_nrpn_value(0, 327), 199) # NRPN_SOURCE_FILTER_1_PITCH_POL, SLOT_FILTER_1_PITCH_POL
-  source_filter_1_mod_1_amt = source_or_own(C.get_midi_nrpn_value(0, 328), 200) # NRPN_SOURCE_FILTER_1_MOD_1_AMT, SLOT_FILTER_1_MOD_1_AMT
-  source_filter_1_mod_1_pol = source_or_own(C.get_midi_nrpn_value(0, 329), 201) # NRPN_SOURCE_FILTER_1_MOD_1_POL, SLOT_FILTER_1_MOD_1_POL
-  source_filter_1_mod_2_amt = source_or_own(C.get_midi_nrpn_value(0, 330), 202) # NRPN_SOURCE_FILTER_1_MOD_2_AMT, SLOT_FILTER_1_MOD_2_AMT
-  source_filter_1_mod_2_pol = source_or_own(C.get_midi_nrpn_value(0, 331), 203) # NRPN_SOURCE_FILTER_1_MOD_2_POL, SLOT_FILTER_1_MOD_2_POL
-  source_filter_2_mode = source_or_own(C.get_midi_nrpn_value(0, 332), 204) # NRPN_SOURCE_FILTER_2_MODE, SLOT_FILTER_2_MODE
-  source_filter_2_cutoff = source_or_own(C.get_midi_nrpn_value(0, 333), 205) # NRPN_SOURCE_FILTER_2_CUTOFF, SLOT_FILTER_2_CUTOFF
-  source_filter_2_resonance = source_or_own(C.get_midi_nrpn_value(0, 334), 206) # NRPN_SOURCE_FILTER_2_RESONANCE, SLOT_FILTER_2_RESONANCE
-  source_filter_2_gain_1 = source_or_own(C.get_midi_nrpn_value(0, 335), 207) # NRPN_SOURCE_FILTER_2_GAIN_1, SLOT_FILTER_2_GAIN_1
-  source_filter_2_gain_2 = source_or_own(C.get_midi_nrpn_value(0, 336), 208) # NRPN_SOURCE_FILTER_2_GAIN_2, SLOT_FILTER_2_GAIN_2
-  source_filter_2_pitch_amt = source_or_own(C.get_midi_nrpn_value(0, 337), 209) # NRPN_SOURCE_FILTER_2_PITCH_AMT, SLOT_FILTER_2_PITCH_AMT
-  source_filter_2_pitch_pol = source_or_own(C.get_midi_nrpn_value(0, 338), 210) # NRPN_SOURCE_FILTER_2_PITCH_POL, SLOT_FILTER_2_PITCH_POL
-  source_filter_2_mod_1_amt = source_or_own(C.get_midi_nrpn_value(0, 339), 211) # NRPN_SOURCE_FILTER_2_MOD_1_AMT, SLOT_FILTER_2_MOD_1_AMT
-  source_filter_2_mod_1_pol = source_or_own(C.get_midi_nrpn_value(0, 340), 212) # NRPN_SOURCE_FILTER_2_MOD_1_POL, SLOT_FILTER_2_MOD_1_POL
-  source_filter_2_mod_2_amt = source_or_own(C.get_midi_nrpn_value(0, 341), 213) # NRPN_SOURCE_FILTER_2_MOD_2_AMT, SLOT_FILTER_2_MOD_2_AMT
-  source_filter_2_mod_2_pol = source_or_own(C.get_midi_nrpn_value(0, 342), 214) # NRPN_SOURCE_FILTER_2_MOD_2_POL, SLOT_FILTER_2_MOD_2_POL
-  source_amp_1_gain_1 = source_or_own(C.get_midi_nrpn_value(0, 343), 215) # NRPN_SOURCE_AMP_1_GAIN_1, SLOT_AMP_1_GAIN_1
-  source_amp_1_gain_2 = source_or_own(C.get_midi_nrpn_value(0, 344), 216) # NRPN_SOURCE_AMP_1_GAIN_2, SLOT_AMP_1_GAIN_2
-  source_amp_1_mod_1_2_mix = source_or_own(C.get_midi_nrpn_value(0, 345), 217) # NRPN_SOURCE_AMP_1_MOD_1_2_MIX, SLOT_AMP_1_MOD_1_2_MIX
-  source_chorus_1_mix = source_or_own(C.get_midi_nrpn_value(0, 346), 218) # NRPN_SOURCE_CHORUS_1_MIX, SLOT_CHORUS_1_MIX
-  source_chorus_1_rate = source_or_own(C.get_midi_nrpn_value(0, 347), 219) # NRPN_SOURCE_CHORUS_1_RATE, SLOT_CHORUS_1_RATE
-  source_chorus_1_depth = source_or_own(C.get_midi_nrpn_value(0, 348), 220) # NRPN_SOURCE_CHORUS_1_DEPTH, SLOT_CHORUS_1_DEPTH
-  source_delay_1_mix = source_or_own(C.get_midi_nrpn_value(0, 349), 221) # NRPN_SOURCE_DELAY_1_MIX, SLOT_DELAY_1_MIX
-  source_delay_1_time = source_or_own(C.get_midi_nrpn_value(0, 350), 222) # NRPN_SOURCE_DELAY_1_TIME, SLOT_DELAY_1_TIME
-  source_delay_1_feedback = source_or_own(C.get_midi_nrpn_value(0, 351), 223) # NRPN_SOURCE_DELAY_1_FEEDBACK, SLOT_DELAY_1_FEEDBACK
-  source_amp_1_limiter_sw = source_or_own(C.get_midi_nrpn_value(0, 356), 228) # NRPN_SOURCE_AMP_1_LIMITER_SW, SLOT_AMP_1_LIMITER_SW
-  source_filter_1_drive = source_or_own(C.get_midi_nrpn_value(0, 357), 229) # NRPN_SOURCE_FILTER_1_DRIVE, SLOT_FILTER_1_DRIVE
-  source_filter_2_drive = source_or_own(C.get_midi_nrpn_value(0, 358), 230) # NRPN_SOURCE_FILTER_2_DRIVE, SLOT_FILTER_2_DRIVE
-  source_amp_1_distortion = source_or_own(C.get_midi_nrpn_value(0, 359), 231) # NRPN_SOURCE_AMP_1_DISTORTION, SLOT_AMP_1_DISTORTION
+  source_filter_1_drive = source_or_own(C.get_midi_nrpn_value(0, 324), 196) # NRPN_SOURCE_FILTER_1_DRIVE, SLOT_FILTER_1_DRIVE
+  source_filter_1_gain_1 = source_or_own(C.get_midi_nrpn_value(0, 325), 197) # NRPN_SOURCE_FILTER_1_GAIN_1, SLOT_FILTER_1_GAIN_1
+  source_filter_1_gain_2 = source_or_own(C.get_midi_nrpn_value(0, 326), 198) # NRPN_SOURCE_FILTER_1_GAIN_2, SLOT_FILTER_1_GAIN_2
+  source_filter_1_pitch_amt = source_or_own(C.get_midi_nrpn_value(0, 327), 199) # NRPN_SOURCE_FILTER_1_PITCH_AMT, SLOT_FILTER_1_PITCH_AMT
+  source_filter_1_pitch_pol = source_or_own(C.get_midi_nrpn_value(0, 328), 200) # NRPN_SOURCE_FILTER_1_PITCH_POL, SLOT_FILTER_1_PITCH_POL
+  source_filter_1_mod_1_amt = source_or_own(C.get_midi_nrpn_value(0, 329), 201) # NRPN_SOURCE_FILTER_1_MOD_1_AMT, SLOT_FILTER_1_MOD_1_AMT
+  source_filter_1_mod_1_pol = source_or_own(C.get_midi_nrpn_value(0, 330), 202) # NRPN_SOURCE_FILTER_1_MOD_1_POL, SLOT_FILTER_1_MOD_1_POL
+  source_filter_1_mod_2_amt = source_or_own(C.get_midi_nrpn_value(0, 331), 203) # NRPN_SOURCE_FILTER_1_MOD_2_AMT, SLOT_FILTER_1_MOD_2_AMT
+  source_filter_1_mod_2_pol = source_or_own(C.get_midi_nrpn_value(0, 332), 204) # NRPN_SOURCE_FILTER_1_MOD_2_POL, SLOT_FILTER_1_MOD_2_POL
+  source_filter_2_mode = source_or_own(C.get_midi_nrpn_value(0, 333), 205) # NRPN_SOURCE_FILTER_2_MODE, SLOT_FILTER_2_MODE
+  source_filter_2_cutoff = source_or_own(C.get_midi_nrpn_value(0, 334), 206) # NRPN_SOURCE_FILTER_2_CUTOFF, SLOT_FILTER_2_CUTOFF
+  source_filter_2_resonance = source_or_own(C.get_midi_nrpn_value(0, 335), 207) # NRPN_SOURCE_FILTER_2_RESONANCE, SLOT_FILTER_2_RESONANCE
+  source_filter_2_drive = source_or_own(C.get_midi_nrpn_value(0, 336), 208) # NRPN_SOURCE_FILTER_2_DRIVE, SLOT_FILTER_2_DRIVE
+  source_filter_2_gain_1 = source_or_own(C.get_midi_nrpn_value(0, 337), 209) # NRPN_SOURCE_FILTER_2_GAIN_1, SLOT_FILTER_2_GAIN_1
+  source_filter_2_gain_2 = source_or_own(C.get_midi_nrpn_value(0, 338), 210) # NRPN_SOURCE_FILTER_2_GAIN_2, SLOT_FILTER_2_GAIN_2
+  source_filter_2_pitch_amt = source_or_own(C.get_midi_nrpn_value(0, 339), 211) # NRPN_SOURCE_FILTER_2_PITCH_AMT, SLOT_FILTER_2_PITCH_AMT
+  source_filter_2_pitch_pol = source_or_own(C.get_midi_nrpn_value(0, 340), 212) # NRPN_SOURCE_FILTER_2_PITCH_POL, SLOT_FILTER_2_PITCH_POL
+  source_filter_2_mod_1_amt = source_or_own(C.get_midi_nrpn_value(0, 341), 213) # NRPN_SOURCE_FILTER_2_MOD_1_AMT, SLOT_FILTER_2_MOD_1_AMT
+  source_filter_2_mod_1_pol = source_or_own(C.get_midi_nrpn_value(0, 342), 214) # NRPN_SOURCE_FILTER_2_MOD_1_POL, SLOT_FILTER_2_MOD_1_POL
+  source_filter_2_mod_2_amt = source_or_own(C.get_midi_nrpn_value(0, 343), 215) # NRPN_SOURCE_FILTER_2_MOD_2_AMT, SLOT_FILTER_2_MOD_2_AMT
+  source_filter_2_mod_2_pol = source_or_own(C.get_midi_nrpn_value(0, 344), 216) # NRPN_SOURCE_FILTER_2_MOD_2_POL, SLOT_FILTER_2_MOD_2_POL
+  source_amp_1_gain_1 = source_or_own(C.get_midi_nrpn_value(0, 345), 217) # NRPN_SOURCE_AMP_1_GAIN_1, SLOT_AMP_1_GAIN_1
+  source_amp_1_gain_2 = source_or_own(C.get_midi_nrpn_value(0, 346), 218) # NRPN_SOURCE_AMP_1_GAIN_2, SLOT_AMP_1_GAIN_2
+  source_amp_1_distortion = source_or_own(C.get_midi_nrpn_value(0, 347), 219) # NRPN_SOURCE_AMP_1_DISTORTION, SLOT_AMP_1_DISTORTION
+  source_amp_1_mod_1_2_mix = source_or_own(C.get_midi_nrpn_value(0, 348), 220) # NRPN_SOURCE_AMP_1_MOD_1_2_MIX, SLOT_AMP_1_MOD_1_2_MIX
+  source_amp_1_limiter_sw = source_or_own(C.get_midi_nrpn_value(0, 349), 221) # NRPN_SOURCE_AMP_1_LIMITER_SW, SLOT_AMP_1_LIMITER_SW
+  source_chorus_1_mix = source_or_own(C.get_midi_nrpn_value(0, 350), 222) # NRPN_SOURCE_CHORUS_1_MIX, SLOT_CHORUS_1_MIX
+  source_chorus_1_rate = source_or_own(C.get_midi_nrpn_value(0, 351), 223) # NRPN_SOURCE_CHORUS_1_RATE, SLOT_CHORUS_1_RATE
+  source_chorus_1_depth = source_or_own(C.get_midi_nrpn_value(0, 352), 224) # NRPN_SOURCE_CHORUS_1_DEPTH, SLOT_CHORUS_1_DEPTH
+  source_delay_1_mix = source_or_own(C.get_midi_nrpn_value(0, 353), 225) # NRPN_SOURCE_DELAY_1_MIX, SLOT_DELAY_1_MIX
+  source_delay_1_time = source_or_own(C.get_midi_nrpn_value(0, 354), 226) # NRPN_SOURCE_DELAY_1_TIME, SLOT_DELAY_1_TIME
+  source_delay_1_feedback = source_or_own(C.get_midi_nrpn_value(0, 355), 227) # NRPN_SOURCE_DELAY_1_FEEDBACK, SLOT_DELAY_1_FEEDBACK
   cc_pitch_1_glide = C.get_midi_nrpn_value(0, 384) # NRPN_CC_PITCH_1_GLIDE
   signals[128] = cc_to_unipolar(cc_or_nrpn(cc_pitch_1_glide, C.get_midi_cc_value(0, cc_pitch_1_glide), C.get_midi_nrpn_value(0, 512))) # SLOT_PITCH_1_GLIDE, NRPN_VALUE_PITCH_1_GLIDE
   cc_pitch_1_out_1_glide_sw = C.get_midi_nrpn_value(0, 385) # NRPN_CC_PITCH_1_OUT_1_GLIDE_SW
@@ -417,84 +417,84 @@ def spms1_apply_parameters(signals, pitch_1, eg_1, eg_2, lfo_1, mixer_1, osc_1, 
   signals[194] = cc_to_unipolar(cc_or_nrpn(cc_filter_1_cutoff, C.get_midi_cc_value(0, cc_filter_1_cutoff), C.get_midi_nrpn_value(0, 578))) # SLOT_FILTER_1_CUTOFF, NRPN_VALUE_FILTER_1_CUTOFF
   cc_filter_1_resonance = C.get_midi_nrpn_value(0, 451) # NRPN_CC_FILTER_1_RESONANCE
   signals[195] = cc_to_unipolar(cc_or_nrpn(cc_filter_1_resonance, C.get_midi_cc_value(0, cc_filter_1_resonance), C.get_midi_nrpn_value(0, 579))) # SLOT_FILTER_1_RESONANCE, NRPN_VALUE_FILTER_1_RESONANCE
-  cc_filter_1_gain_1 = C.get_midi_nrpn_value(0, 452) # NRPN_CC_FILTER_1_GAIN_1
-  signals[196] = cc_to_unipolar(cc_or_nrpn(cc_filter_1_gain_1, C.get_midi_cc_value(0, cc_filter_1_gain_1), C.get_midi_nrpn_value(0, 580))) # SLOT_FILTER_1_GAIN_1, NRPN_VALUE_FILTER_1_GAIN_1
-  cc_filter_1_gain_2 = C.get_midi_nrpn_value(0, 453) # NRPN_CC_FILTER_1_GAIN_2
-  signals[197] = cc_to_unipolar(cc_or_nrpn(cc_filter_1_gain_2, C.get_midi_cc_value(0, cc_filter_1_gain_2), C.get_midi_nrpn_value(0, 581))) # SLOT_FILTER_1_GAIN_2, NRPN_VALUE_FILTER_1_GAIN_2
-  cc_filter_1_pitch_amt = C.get_midi_nrpn_value(0, 454) # NRPN_CC_FILTER_1_PITCH_AMT
-  signals[198] = cc_to_unipolar(cc_or_nrpn(cc_filter_1_pitch_amt, C.get_midi_cc_value(0, cc_filter_1_pitch_amt), C.get_midi_nrpn_value(0, 582))) # SLOT_FILTER_1_PITCH_AMT, NRPN_VALUE_FILTER_1_PITCH_AMT
-  cc_filter_1_pitch_pol = C.get_midi_nrpn_value(0, 455) # NRPN_CC_FILTER_1_PITCH_POL
-  signals[199] = cc_to_bipolar(cc_or_nrpn(cc_filter_1_pitch_pol, C.get_midi_cc_value(0, cc_filter_1_pitch_pol), C.get_midi_nrpn_value(0, 583))) # SLOT_FILTER_1_PITCH_POL, NRPN_VALUE_FILTER_1_PITCH_POL
-  cc_filter_1_mod_1_amt = C.get_midi_nrpn_value(0, 456) # NRPN_CC_FILTER_1_MOD_1_AMT
-  signals[200] = cc_to_unipolar(cc_or_nrpn(cc_filter_1_mod_1_amt, C.get_midi_cc_value(0, cc_filter_1_mod_1_amt), C.get_midi_nrpn_value(0, 584))) # SLOT_FILTER_1_MOD_1_AMT, NRPN_VALUE_FILTER_1_MOD_1_AMT
-  cc_filter_1_mod_1_pol = C.get_midi_nrpn_value(0, 457) # NRPN_CC_FILTER_1_MOD_1_POL
-  signals[201] = cc_to_bipolar(cc_or_nrpn(cc_filter_1_mod_1_pol, C.get_midi_cc_value(0, cc_filter_1_mod_1_pol), C.get_midi_nrpn_value(0, 585))) # SLOT_FILTER_1_MOD_1_POL, NRPN_VALUE_FILTER_1_MOD_1_POL
-  cc_filter_1_mod_2_amt = C.get_midi_nrpn_value(0, 458) # NRPN_CC_FILTER_1_MOD_2_AMT
-  signals[202] = cc_to_unipolar(cc_or_nrpn(cc_filter_1_mod_2_amt, C.get_midi_cc_value(0, cc_filter_1_mod_2_amt), C.get_midi_nrpn_value(0, 586))) # SLOT_FILTER_1_MOD_2_AMT, NRPN_VALUE_FILTER_1_MOD_2_AMT
-  cc_filter_1_mod_2_pol = C.get_midi_nrpn_value(0, 459) # NRPN_CC_FILTER_1_MOD_2_POL
-  signals[203] = cc_to_bipolar(cc_or_nrpn(cc_filter_1_mod_2_pol, C.get_midi_cc_value(0, cc_filter_1_mod_2_pol), C.get_midi_nrpn_value(0, 587))) # SLOT_FILTER_1_MOD_2_POL, NRPN_VALUE_FILTER_1_MOD_2_POL
-  cc_filter_2_mode = C.get_midi_nrpn_value(0, 460) # NRPN_CC_FILTER_2_MODE
-  signals[204] = cc_to_unipolar(cc_or_nrpn(cc_filter_2_mode, C.get_midi_cc_value(0, cc_filter_2_mode), C.get_midi_nrpn_value(0, 588))) # SLOT_FILTER_2_MODE, NRPN_VALUE_FILTER_2_MODE
-  cc_filter_2_cutoff = C.get_midi_nrpn_value(0, 461) # NRPN_CC_FILTER_2_CUTOFF
-  signals[205] = cc_to_unipolar(cc_or_nrpn(cc_filter_2_cutoff, C.get_midi_cc_value(0, cc_filter_2_cutoff), C.get_midi_nrpn_value(0, 589))) # SLOT_FILTER_2_CUTOFF, NRPN_VALUE_FILTER_2_CUTOFF
-  cc_filter_2_resonance = C.get_midi_nrpn_value(0, 462) # NRPN_CC_FILTER_2_RESONANCE
-  signals[206] = cc_to_unipolar(cc_or_nrpn(cc_filter_2_resonance, C.get_midi_cc_value(0, cc_filter_2_resonance), C.get_midi_nrpn_value(0, 590))) # SLOT_FILTER_2_RESONANCE, NRPN_VALUE_FILTER_2_RESONANCE
-  cc_filter_2_gain_1 = C.get_midi_nrpn_value(0, 463) # NRPN_CC_FILTER_2_GAIN_1
-  signals[207] = cc_to_unipolar(cc_or_nrpn(cc_filter_2_gain_1, C.get_midi_cc_value(0, cc_filter_2_gain_1), C.get_midi_nrpn_value(0, 591))) # SLOT_FILTER_2_GAIN_1, NRPN_VALUE_FILTER_2_GAIN_1
-  cc_filter_2_gain_2 = C.get_midi_nrpn_value(0, 464) # NRPN_CC_FILTER_2_GAIN_2
-  signals[208] = cc_to_unipolar(cc_or_nrpn(cc_filter_2_gain_2, C.get_midi_cc_value(0, cc_filter_2_gain_2), C.get_midi_nrpn_value(0, 592))) # SLOT_FILTER_2_GAIN_2, NRPN_VALUE_FILTER_2_GAIN_2
-  cc_filter_2_pitch_amt = C.get_midi_nrpn_value(0, 465) # NRPN_CC_FILTER_2_PITCH_AMT
-  signals[209] = cc_to_unipolar(cc_or_nrpn(cc_filter_2_pitch_amt, C.get_midi_cc_value(0, cc_filter_2_pitch_amt), C.get_midi_nrpn_value(0, 593))) # SLOT_FILTER_2_PITCH_AMT, NRPN_VALUE_FILTER_2_PITCH_AMT
-  cc_filter_2_pitch_pol = C.get_midi_nrpn_value(0, 466) # NRPN_CC_FILTER_2_PITCH_POL
-  signals[210] = cc_to_bipolar(cc_or_nrpn(cc_filter_2_pitch_pol, C.get_midi_cc_value(0, cc_filter_2_pitch_pol), C.get_midi_nrpn_value(0, 594))) # SLOT_FILTER_2_PITCH_POL, NRPN_VALUE_FILTER_2_PITCH_POL
-  cc_filter_2_mod_1_amt = C.get_midi_nrpn_value(0, 467) # NRPN_CC_FILTER_2_MOD_1_AMT
-  signals[211] = cc_to_unipolar(cc_or_nrpn(cc_filter_2_mod_1_amt, C.get_midi_cc_value(0, cc_filter_2_mod_1_amt), C.get_midi_nrpn_value(0, 595))) # SLOT_FILTER_2_MOD_1_AMT, NRPN_VALUE_FILTER_2_MOD_1_AMT
-  cc_filter_2_mod_1_pol = C.get_midi_nrpn_value(0, 468) # NRPN_CC_FILTER_2_MOD_1_POL
-  signals[212] = cc_to_bipolar(cc_or_nrpn(cc_filter_2_mod_1_pol, C.get_midi_cc_value(0, cc_filter_2_mod_1_pol), C.get_midi_nrpn_value(0, 596))) # SLOT_FILTER_2_MOD_1_POL, NRPN_VALUE_FILTER_2_MOD_1_POL
-  cc_filter_2_mod_2_amt = C.get_midi_nrpn_value(0, 469) # NRPN_CC_FILTER_2_MOD_2_AMT
-  signals[213] = cc_to_unipolar(cc_or_nrpn(cc_filter_2_mod_2_amt, C.get_midi_cc_value(0, cc_filter_2_mod_2_amt), C.get_midi_nrpn_value(0, 597))) # SLOT_FILTER_2_MOD_2_AMT, NRPN_VALUE_FILTER_2_MOD_2_AMT
-  cc_filter_2_mod_2_pol = C.get_midi_nrpn_value(0, 470) # NRPN_CC_FILTER_2_MOD_2_POL
-  signals[214] = cc_to_bipolar(cc_or_nrpn(cc_filter_2_mod_2_pol, C.get_midi_cc_value(0, cc_filter_2_mod_2_pol), C.get_midi_nrpn_value(0, 598))) # SLOT_FILTER_2_MOD_2_POL, NRPN_VALUE_FILTER_2_MOD_2_POL
-  cc_amp_1_gain_1 = C.get_midi_nrpn_value(0, 471) # NRPN_CC_AMP_1_GAIN_1
-  signals[215] = cc_to_unipolar(cc_or_nrpn(cc_amp_1_gain_1, C.get_midi_cc_value(0, cc_amp_1_gain_1), C.get_midi_nrpn_value(0, 599))) # SLOT_AMP_1_GAIN_1, NRPN_VALUE_AMP_1_GAIN_1
-  cc_amp_1_gain_2 = C.get_midi_nrpn_value(0, 472) # NRPN_CC_AMP_1_GAIN_2
-  signals[216] = cc_to_unipolar(cc_or_nrpn(cc_amp_1_gain_2, C.get_midi_cc_value(0, cc_amp_1_gain_2), C.get_midi_nrpn_value(0, 600))) # SLOT_AMP_1_GAIN_2, NRPN_VALUE_AMP_1_GAIN_2
-  cc_amp_1_mod_1_2_mix = C.get_midi_nrpn_value(0, 473) # NRPN_CC_AMP_1_MOD_1_2_MIX
-  signals[217] = cc_to_unipolar(cc_or_nrpn(cc_amp_1_mod_1_2_mix, C.get_midi_cc_value(0, cc_amp_1_mod_1_2_mix), C.get_midi_nrpn_value(0, 601))) # SLOT_AMP_1_MOD_1_2_MIX, NRPN_VALUE_AMP_1_MOD_1_2_MIX
-  cc_chorus_1_mix = C.get_midi_nrpn_value(0, 474) # NRPN_CC_CHORUS_1_MIX
-  signals[218] = cc_to_unipolar(cc_or_nrpn(cc_chorus_1_mix, C.get_midi_cc_value(0, cc_chorus_1_mix), C.get_midi_nrpn_value(0, 602))) # SLOT_CHORUS_1_MIX, NRPN_VALUE_CHORUS_1_MIX
-  cc_chorus_1_rate = C.get_midi_nrpn_value(0, 475) # NRPN_CC_CHORUS_1_RATE
-  signals[219] = cc_to_unipolar(cc_or_nrpn(cc_chorus_1_rate, C.get_midi_cc_value(0, cc_chorus_1_rate), C.get_midi_nrpn_value(0, 603))) # SLOT_CHORUS_1_RATE, NRPN_VALUE_CHORUS_1_RATE
-  cc_chorus_1_depth = C.get_midi_nrpn_value(0, 476) # NRPN_CC_CHORUS_1_DEPTH
-  signals[220] = cc_to_unipolar(cc_or_nrpn(cc_chorus_1_depth, C.get_midi_cc_value(0, cc_chorus_1_depth), C.get_midi_nrpn_value(0, 604))) # SLOT_CHORUS_1_DEPTH, NRPN_VALUE_CHORUS_1_DEPTH
-  cc_delay_1_mix = C.get_midi_nrpn_value(0, 477) # NRPN_CC_DELAY_1_MIX
-  signals[221] = cc_to_unipolar(cc_or_nrpn(cc_delay_1_mix, C.get_midi_cc_value(0, cc_delay_1_mix), C.get_midi_nrpn_value(0, 605))) # SLOT_DELAY_1_MIX, NRPN_VALUE_DELAY_1_MIX
-  cc_delay_1_time = C.get_midi_nrpn_value(0, 478) # NRPN_CC_DELAY_1_TIME
-  signals[222] = cc_to_unipolar(cc_or_nrpn(cc_delay_1_time, C.get_midi_cc_value(0, cc_delay_1_time), C.get_midi_nrpn_value(0, 606))) # SLOT_DELAY_1_TIME, NRPN_VALUE_DELAY_1_TIME
-  cc_delay_1_feedback = C.get_midi_nrpn_value(0, 479) # NRPN_CC_DELAY_1_FEEDBACK
-  signals[223] = cc_to_unipolar(cc_or_nrpn(cc_delay_1_feedback, C.get_midi_cc_value(0, cc_delay_1_feedback), C.get_midi_nrpn_value(0, 607))) # SLOT_DELAY_1_FEEDBACK, NRPN_VALUE_DELAY_1_FEEDBACK
-  cc_amp_1_limiter_sw = C.get_midi_nrpn_value(0, 484) # NRPN_CC_AMP_1_LIMITER_SW
-  signals[228] = cc_to_unipolar(cc_or_nrpn(cc_amp_1_limiter_sw, C.get_midi_cc_value(0, cc_amp_1_limiter_sw), C.get_midi_nrpn_value(0, 612))) # SLOT_AMP_1_LIMITER_SW, NRPN_VALUE_AMP_1_LIMITER_SW
-  cc_filter_1_drive = C.get_midi_nrpn_value(0, 485) # NRPN_CC_FILTER_1_DRIVE
-  signals[229] = cc_to_unipolar(cc_or_nrpn(cc_filter_1_drive, C.get_midi_cc_value(0, cc_filter_1_drive), C.get_midi_nrpn_value(0, 613))) # SLOT_FILTER_1_DRIVE, NRPN_VALUE_FILTER_1_DRIVE
-  cc_filter_2_drive = C.get_midi_nrpn_value(0, 486) # NRPN_CC_FILTER_2_DRIVE
-  signals[230] = cc_to_unipolar(cc_or_nrpn(cc_filter_2_drive, C.get_midi_cc_value(0, cc_filter_2_drive), C.get_midi_nrpn_value(0, 614))) # SLOT_FILTER_2_DRIVE, NRPN_VALUE_FILTER_2_DRIVE
-  cc_amp_1_distortion = C.get_midi_nrpn_value(0, 487) # NRPN_CC_AMP_1_DISTORTION
-  signals[231] = cc_to_unipolar(cc_or_nrpn(cc_amp_1_distortion, C.get_midi_cc_value(0, cc_amp_1_distortion), C.get_midi_nrpn_value(0, 615))) # SLOT_AMP_1_DISTORTION, NRPN_VALUE_AMP_1_DISTORTION
-  cc_mod_wheel = C.get_midi_nrpn_value(0, 480) # NRPN_CC_MOD_WHEEL
+  cc_filter_1_drive = C.get_midi_nrpn_value(0, 452) # NRPN_CC_FILTER_1_DRIVE
+  signals[196] = cc_to_unipolar(cc_or_nrpn(cc_filter_1_drive, C.get_midi_cc_value(0, cc_filter_1_drive), C.get_midi_nrpn_value(0, 580))) # SLOT_FILTER_1_DRIVE, NRPN_VALUE_FILTER_1_DRIVE
+  cc_filter_1_gain_1 = C.get_midi_nrpn_value(0, 453) # NRPN_CC_FILTER_1_GAIN_1
+  signals[197] = cc_to_unipolar(cc_or_nrpn(cc_filter_1_gain_1, C.get_midi_cc_value(0, cc_filter_1_gain_1), C.get_midi_nrpn_value(0, 581))) # SLOT_FILTER_1_GAIN_1, NRPN_VALUE_FILTER_1_GAIN_1
+  cc_filter_1_gain_2 = C.get_midi_nrpn_value(0, 454) # NRPN_CC_FILTER_1_GAIN_2
+  signals[198] = cc_to_unipolar(cc_or_nrpn(cc_filter_1_gain_2, C.get_midi_cc_value(0, cc_filter_1_gain_2), C.get_midi_nrpn_value(0, 582))) # SLOT_FILTER_1_GAIN_2, NRPN_VALUE_FILTER_1_GAIN_2
+  cc_filter_1_pitch_amt = C.get_midi_nrpn_value(0, 455) # NRPN_CC_FILTER_1_PITCH_AMT
+  signals[199] = cc_to_unipolar(cc_or_nrpn(cc_filter_1_pitch_amt, C.get_midi_cc_value(0, cc_filter_1_pitch_amt), C.get_midi_nrpn_value(0, 583))) # SLOT_FILTER_1_PITCH_AMT, NRPN_VALUE_FILTER_1_PITCH_AMT
+  cc_filter_1_pitch_pol = C.get_midi_nrpn_value(0, 456) # NRPN_CC_FILTER_1_PITCH_POL
+  signals[200] = cc_to_bipolar(cc_or_nrpn(cc_filter_1_pitch_pol, C.get_midi_cc_value(0, cc_filter_1_pitch_pol), C.get_midi_nrpn_value(0, 584))) # SLOT_FILTER_1_PITCH_POL, NRPN_VALUE_FILTER_1_PITCH_POL
+  cc_filter_1_mod_1_amt = C.get_midi_nrpn_value(0, 457) # NRPN_CC_FILTER_1_MOD_1_AMT
+  signals[201] = cc_to_unipolar(cc_or_nrpn(cc_filter_1_mod_1_amt, C.get_midi_cc_value(0, cc_filter_1_mod_1_amt), C.get_midi_nrpn_value(0, 585))) # SLOT_FILTER_1_MOD_1_AMT, NRPN_VALUE_FILTER_1_MOD_1_AMT
+  cc_filter_1_mod_1_pol = C.get_midi_nrpn_value(0, 458) # NRPN_CC_FILTER_1_MOD_1_POL
+  signals[202] = cc_to_bipolar(cc_or_nrpn(cc_filter_1_mod_1_pol, C.get_midi_cc_value(0, cc_filter_1_mod_1_pol), C.get_midi_nrpn_value(0, 586))) # SLOT_FILTER_1_MOD_1_POL, NRPN_VALUE_FILTER_1_MOD_1_POL
+  cc_filter_1_mod_2_amt = C.get_midi_nrpn_value(0, 459) # NRPN_CC_FILTER_1_MOD_2_AMT
+  signals[203] = cc_to_unipolar(cc_or_nrpn(cc_filter_1_mod_2_amt, C.get_midi_cc_value(0, cc_filter_1_mod_2_amt), C.get_midi_nrpn_value(0, 587))) # SLOT_FILTER_1_MOD_2_AMT, NRPN_VALUE_FILTER_1_MOD_2_AMT
+  cc_filter_1_mod_2_pol = C.get_midi_nrpn_value(0, 460) # NRPN_CC_FILTER_1_MOD_2_POL
+  signals[204] = cc_to_bipolar(cc_or_nrpn(cc_filter_1_mod_2_pol, C.get_midi_cc_value(0, cc_filter_1_mod_2_pol), C.get_midi_nrpn_value(0, 588))) # SLOT_FILTER_1_MOD_2_POL, NRPN_VALUE_FILTER_1_MOD_2_POL
+  cc_filter_2_mode = C.get_midi_nrpn_value(0, 461) # NRPN_CC_FILTER_2_MODE
+  signals[205] = cc_to_unipolar(cc_or_nrpn(cc_filter_2_mode, C.get_midi_cc_value(0, cc_filter_2_mode), C.get_midi_nrpn_value(0, 589))) # SLOT_FILTER_2_MODE, NRPN_VALUE_FILTER_2_MODE
+  cc_filter_2_cutoff = C.get_midi_nrpn_value(0, 462) # NRPN_CC_FILTER_2_CUTOFF
+  signals[206] = cc_to_unipolar(cc_or_nrpn(cc_filter_2_cutoff, C.get_midi_cc_value(0, cc_filter_2_cutoff), C.get_midi_nrpn_value(0, 590))) # SLOT_FILTER_2_CUTOFF, NRPN_VALUE_FILTER_2_CUTOFF
+  cc_filter_2_resonance = C.get_midi_nrpn_value(0, 463) # NRPN_CC_FILTER_2_RESONANCE
+  signals[207] = cc_to_unipolar(cc_or_nrpn(cc_filter_2_resonance, C.get_midi_cc_value(0, cc_filter_2_resonance), C.get_midi_nrpn_value(0, 591))) # SLOT_FILTER_2_RESONANCE, NRPN_VALUE_FILTER_2_RESONANCE
+  cc_filter_2_drive = C.get_midi_nrpn_value(0, 464) # NRPN_CC_FILTER_2_DRIVE
+  signals[208] = cc_to_unipolar(cc_or_nrpn(cc_filter_2_drive, C.get_midi_cc_value(0, cc_filter_2_drive), C.get_midi_nrpn_value(0, 592))) # SLOT_FILTER_2_DRIVE, NRPN_VALUE_FILTER_2_DRIVE
+  cc_filter_2_gain_1 = C.get_midi_nrpn_value(0, 465) # NRPN_CC_FILTER_2_GAIN_1
+  signals[209] = cc_to_unipolar(cc_or_nrpn(cc_filter_2_gain_1, C.get_midi_cc_value(0, cc_filter_2_gain_1), C.get_midi_nrpn_value(0, 593))) # SLOT_FILTER_2_GAIN_1, NRPN_VALUE_FILTER_2_GAIN_1
+  cc_filter_2_gain_2 = C.get_midi_nrpn_value(0, 466) # NRPN_CC_FILTER_2_GAIN_2
+  signals[210] = cc_to_unipolar(cc_or_nrpn(cc_filter_2_gain_2, C.get_midi_cc_value(0, cc_filter_2_gain_2), C.get_midi_nrpn_value(0, 594))) # SLOT_FILTER_2_GAIN_2, NRPN_VALUE_FILTER_2_GAIN_2
+  cc_filter_2_pitch_amt = C.get_midi_nrpn_value(0, 467) # NRPN_CC_FILTER_2_PITCH_AMT
+  signals[211] = cc_to_unipolar(cc_or_nrpn(cc_filter_2_pitch_amt, C.get_midi_cc_value(0, cc_filter_2_pitch_amt), C.get_midi_nrpn_value(0, 595))) # SLOT_FILTER_2_PITCH_AMT, NRPN_VALUE_FILTER_2_PITCH_AMT
+  cc_filter_2_pitch_pol = C.get_midi_nrpn_value(0, 468) # NRPN_CC_FILTER_2_PITCH_POL
+  signals[212] = cc_to_bipolar(cc_or_nrpn(cc_filter_2_pitch_pol, C.get_midi_cc_value(0, cc_filter_2_pitch_pol), C.get_midi_nrpn_value(0, 596))) # SLOT_FILTER_2_PITCH_POL, NRPN_VALUE_FILTER_2_PITCH_POL
+  cc_filter_2_mod_1_amt = C.get_midi_nrpn_value(0, 469) # NRPN_CC_FILTER_2_MOD_1_AMT
+  signals[213] = cc_to_unipolar(cc_or_nrpn(cc_filter_2_mod_1_amt, C.get_midi_cc_value(0, cc_filter_2_mod_1_amt), C.get_midi_nrpn_value(0, 597))) # SLOT_FILTER_2_MOD_1_AMT, NRPN_VALUE_FILTER_2_MOD_1_AMT
+  cc_filter_2_mod_1_pol = C.get_midi_nrpn_value(0, 470) # NRPN_CC_FILTER_2_MOD_1_POL
+  signals[214] = cc_to_bipolar(cc_or_nrpn(cc_filter_2_mod_1_pol, C.get_midi_cc_value(0, cc_filter_2_mod_1_pol), C.get_midi_nrpn_value(0, 598))) # SLOT_FILTER_2_MOD_1_POL, NRPN_VALUE_FILTER_2_MOD_1_POL
+  cc_filter_2_mod_2_amt = C.get_midi_nrpn_value(0, 471) # NRPN_CC_FILTER_2_MOD_2_AMT
+  signals[215] = cc_to_unipolar(cc_or_nrpn(cc_filter_2_mod_2_amt, C.get_midi_cc_value(0, cc_filter_2_mod_2_amt), C.get_midi_nrpn_value(0, 599))) # SLOT_FILTER_2_MOD_2_AMT, NRPN_VALUE_FILTER_2_MOD_2_AMT
+  cc_filter_2_mod_2_pol = C.get_midi_nrpn_value(0, 472) # NRPN_CC_FILTER_2_MOD_2_POL
+  signals[216] = cc_to_bipolar(cc_or_nrpn(cc_filter_2_mod_2_pol, C.get_midi_cc_value(0, cc_filter_2_mod_2_pol), C.get_midi_nrpn_value(0, 600))) # SLOT_FILTER_2_MOD_2_POL, NRPN_VALUE_FILTER_2_MOD_2_POL
+  cc_amp_1_gain_1 = C.get_midi_nrpn_value(0, 473) # NRPN_CC_AMP_1_GAIN_1
+  signals[217] = cc_to_unipolar(cc_or_nrpn(cc_amp_1_gain_1, C.get_midi_cc_value(0, cc_amp_1_gain_1), C.get_midi_nrpn_value(0, 601))) # SLOT_AMP_1_GAIN_1, NRPN_VALUE_AMP_1_GAIN_1
+  cc_amp_1_gain_2 = C.get_midi_nrpn_value(0, 474) # NRPN_CC_AMP_1_GAIN_2
+  signals[218] = cc_to_unipolar(cc_or_nrpn(cc_amp_1_gain_2, C.get_midi_cc_value(0, cc_amp_1_gain_2), C.get_midi_nrpn_value(0, 602))) # SLOT_AMP_1_GAIN_2, NRPN_VALUE_AMP_1_GAIN_2
+  cc_amp_1_distortion = C.get_midi_nrpn_value(0, 475) # NRPN_CC_AMP_1_DISTORTION
+  signals[219] = cc_to_unipolar(cc_or_nrpn(cc_amp_1_distortion, C.get_midi_cc_value(0, cc_amp_1_distortion), C.get_midi_nrpn_value(0, 603))) # SLOT_AMP_1_DISTORTION, NRPN_VALUE_AMP_1_DISTORTION
+  cc_amp_1_mod_1_2_mix = C.get_midi_nrpn_value(0, 476) # NRPN_CC_AMP_1_MOD_1_2_MIX
+  signals[220] = cc_to_unipolar(cc_or_nrpn(cc_amp_1_mod_1_2_mix, C.get_midi_cc_value(0, cc_amp_1_mod_1_2_mix), C.get_midi_nrpn_value(0, 604))) # SLOT_AMP_1_MOD_1_2_MIX, NRPN_VALUE_AMP_1_MOD_1_2_MIX
+  cc_amp_1_limiter_sw = C.get_midi_nrpn_value(0, 477) # NRPN_CC_AMP_1_LIMITER_SW
+  signals[221] = cc_to_unipolar(cc_or_nrpn(cc_amp_1_limiter_sw, C.get_midi_cc_value(0, cc_amp_1_limiter_sw), C.get_midi_nrpn_value(0, 605))) # SLOT_AMP_1_LIMITER_SW, NRPN_VALUE_AMP_1_LIMITER_SW
+  cc_chorus_1_mix = C.get_midi_nrpn_value(0, 478) # NRPN_CC_CHORUS_1_MIX
+  signals[222] = cc_to_unipolar(cc_or_nrpn(cc_chorus_1_mix, C.get_midi_cc_value(0, cc_chorus_1_mix), C.get_midi_nrpn_value(0, 606))) # SLOT_CHORUS_1_MIX, NRPN_VALUE_CHORUS_1_MIX
+  cc_chorus_1_rate = C.get_midi_nrpn_value(0, 479) # NRPN_CC_CHORUS_1_RATE
+  signals[223] = cc_to_unipolar(cc_or_nrpn(cc_chorus_1_rate, C.get_midi_cc_value(0, cc_chorus_1_rate), C.get_midi_nrpn_value(0, 607))) # SLOT_CHORUS_1_RATE, NRPN_VALUE_CHORUS_1_RATE
+  cc_chorus_1_depth = C.get_midi_nrpn_value(0, 480) # NRPN_CC_CHORUS_1_DEPTH
+  signals[224] = cc_to_unipolar(cc_or_nrpn(cc_chorus_1_depth, C.get_midi_cc_value(0, cc_chorus_1_depth), C.get_midi_nrpn_value(0, 608))) # SLOT_CHORUS_1_DEPTH, NRPN_VALUE_CHORUS_1_DEPTH
+  cc_delay_1_mix = C.get_midi_nrpn_value(0, 481) # NRPN_CC_DELAY_1_MIX
+  signals[225] = cc_to_unipolar(cc_or_nrpn(cc_delay_1_mix, C.get_midi_cc_value(0, cc_delay_1_mix), C.get_midi_nrpn_value(0, 609))) # SLOT_DELAY_1_MIX, NRPN_VALUE_DELAY_1_MIX
+  cc_delay_1_time = C.get_midi_nrpn_value(0, 482) # NRPN_CC_DELAY_1_TIME
+  signals[226] = cc_to_unipolar(cc_or_nrpn(cc_delay_1_time, C.get_midi_cc_value(0, cc_delay_1_time), C.get_midi_nrpn_value(0, 610))) # SLOT_DELAY_1_TIME, NRPN_VALUE_DELAY_1_TIME
+  cc_delay_1_feedback = C.get_midi_nrpn_value(0, 483) # NRPN_CC_DELAY_1_FEEDBACK
+  signals[227] = cc_to_unipolar(cc_or_nrpn(cc_delay_1_feedback, C.get_midi_cc_value(0, cc_delay_1_feedback), C.get_midi_nrpn_value(0, 611))) # SLOT_DELAY_1_FEEDBACK, NRPN_VALUE_DELAY_1_FEEDBACK
+  cc_mod_wheel = C.get_midi_nrpn_value(0, 484) # NRPN_CC_MOD_WHEEL
   mod_wheel = C.get_midi_cc_value(0, cc_mod_wheel)
   signals[8] = cc_or_zero(cc_mod_wheel, cc_to_unipolar(mod_wheel)) # SIGNAL_MOD_WHEEL
   signals[9] = 1.0 - signals[8] # SIGNAL_MOD_WHEEL_REV, SIGNAL_MOD_WHEEL
   signals[10] = 0.0 - signals[8] # SIGNAL_MOD_WHEEL_INV, SIGNAL_MOD_WHEEL
   signals[11] = signals[8] - 1.0 # SIGNAL_MOD_WHEEL_REV_INV, SIGNAL_MOD_WHEEL
-  cc_breath = C.get_midi_nrpn_value(0, 481) # NRPN_CC_BREATH
+  cc_breath = C.get_midi_nrpn_value(0, 485) # NRPN_CC_BREATH
   breath = C.get_midi_cc_value(0, cc_breath)
   signals[12] = cc_or_zero(cc_breath, cc_to_unipolar(breath)) # SIGNAL_BREATH
   signals[13] = 1.0 - signals[12] # SIGNAL_BREATH_REV, SIGNAL_BREATH
   signals[14] = 0.0 - signals[12] # SIGNAL_BREATH_INV, SIGNAL_BREATH
   signals[15] = signals[12] - 1.0 # SIGNAL_BREATH_REV_INV, SIGNAL_BREATH
-  cc_general_1 = C.get_midi_nrpn_value(0, 482) # NRPN_CC_GENERAL_1
-  general_1 = cc_or_nrpn(cc_general_1, C.get_midi_cc_value(0, cc_general_1), C.get_midi_nrpn_value(0, 610)) # NRPN_VALUE_GENERAL_1
+  cc_general_1 = C.get_midi_nrpn_value(0, 486) # NRPN_CC_GENERAL_1
+  general_1 = cc_or_nrpn(cc_general_1, C.get_midi_cc_value(0, cc_general_1), C.get_midi_nrpn_value(0, 614)) # NRPN_VALUE_GENERAL_1
   signals[16] = cc_to_unipolar(general_1) # SIGNAL_GENERAL_1
   signals[17] = 1.0 - signals[16] # SIGNAL_GENERAL_1_REV, SIGNAL_GENERAL_1
   signals[18] = 0.0 - signals[16] # SIGNAL_GENERAL_1_INV, SIGNAL_GENERAL_1
@@ -508,8 +508,8 @@ def spms1_apply_parameters(signals, pitch_1, eg_1, eg_2, lfo_1, mixer_1, osc_1, 
   signals[26] = (signals[16] > 0.5) ? 0.0 : (1.0 - (signals[16] + signals[16])) # SIGNAL_GENERAL_1_NEG, SIGNAL_GENERAL_1
   signals[27] = (signals[16] < 0.5) ? (signals[16] + signals[16]) : (2.0 - (signals[16] + signals[16])) # SIGNAL_GENERAL_1_MID, SIGNAL_GENERAL_1
   signals[28] = (signals[16] < 0.5) ? 0.0 : ((signals[16] + signals[16]) - 1.0) # SIGNAL_GENERAL_1_POS, SIGNAL_GENERAL_1
-  cc_general_2 = C.get_midi_nrpn_value(0, 483) # NRPN_CC_GENERAL_2
-  general_2 = cc_or_nrpn(cc_general_2, C.get_midi_cc_value(0, cc_general_2), C.get_midi_nrpn_value(0, 611)) # NRPN_VALUE_GENERAL_2
+  cc_general_2 = C.get_midi_nrpn_value(0, 487) # NRPN_CC_GENERAL_2
+  general_2 = cc_or_nrpn(cc_general_2, C.get_midi_cc_value(0, cc_general_2), C.get_midi_nrpn_value(0, 615)) # NRPN_VALUE_GENERAL_2
   signals[29] = cc_to_unipolar(general_2) # SIGNAL_GENERAL_2
   signals[30] = 1.0 - signals[29] # SIGNAL_GENERAL_2_REV, SIGNAL_GENERAL_2
   signals[31] = 0.0 - signals[29] # SIGNAL_GENERAL_2_INV, SIGNAL_GENERAL_2
@@ -633,6 +633,7 @@ def spms1_apply_parameters(signals, pitch_1, eg_1, eg_2, lfo_1, mixer_1, osc_1, 
   filter_1.set_mode(signals[source_filter_1_mode])
   filter_1.set_cutoff(signals[source_filter_1_cutoff])
   filter_1.set_resonance(signals[source_filter_1_resonance])
+  filter_1.set_drive(signals[source_filter_1_drive])
   filter_1.set_gain_1(signals[source_filter_1_gain_1])
   filter_1.set_gain_2(signals[source_filter_1_gain_2])
   filter_1.set_pitch_amount(signals[source_filter_1_pitch_amt])
@@ -644,6 +645,7 @@ def spms1_apply_parameters(signals, pitch_1, eg_1, eg_2, lfo_1, mixer_1, osc_1, 
   filter_2.set_mode(signals[source_filter_2_mode])
   filter_2.set_cutoff(signals[source_filter_2_cutoff])
   filter_2.set_resonance(signals[source_filter_2_resonance])
+  filter_2.set_drive(signals[source_filter_2_drive])
   filter_2.set_gain_1(signals[source_filter_2_gain_1])
   filter_2.set_gain_2(signals[source_filter_2_gain_2])
   filter_2.set_pitch_amount(signals[source_filter_2_pitch_amt])
@@ -654,17 +656,15 @@ def spms1_apply_parameters(signals, pitch_1, eg_1, eg_2, lfo_1, mixer_1, osc_1, 
   filter_2.set_modulation_2_polarity(signals[source_filter_2_mod_2_pol])
   amp_1.set_gain_1(signals[source_amp_1_gain_1])
   amp_1.set_gain_2(signals[source_amp_1_gain_2])
+  amp_1.set_distortion(signals[source_amp_1_distortion])
   amp_1.set_modulation_mix(signals[source_amp_1_mod_1_2_mix])
+  amp_1.set_limiter_switch(signals[source_amp_1_limiter_sw])
   chorus_1.set_mix(signals[source_chorus_1_mix])
   chorus_1.set_rate(signals[source_chorus_1_rate])
   chorus_1.set_depth(signals[source_chorus_1_depth])
   delay_1.set_mix(signals[source_delay_1_mix])
   delay_1.set_time(signals[source_delay_1_time])
   delay_1.set_feedback(signals[source_delay_1_feedback])
-  amp_1.set_limiter_switch(signals[source_amp_1_limiter_sw])
-  filter_1.set_drive(signals[source_filter_1_drive])
-  filter_2.set_drive(signals[source_filter_2_drive])
-  amp_1.set_distortion(signals[source_amp_1_distortion])
   0.0
 end
 # patch_gen end
