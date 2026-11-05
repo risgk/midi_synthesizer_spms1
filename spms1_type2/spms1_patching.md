@@ -233,11 +233,10 @@ The diagram is one side; the other is the same. The loop needs no limiter and no
 half the input coming in and at most half the delayed signal going round again, what is written
 back stays within one unit as long as the delayed signal does, and it starts from silence; the
 filter and the reading between two samples are weighted averages, which cannot reach past what they
-average. The price is that the first repeat comes 6 dB under the dry signal, which Mix makes up for at
-the top. The output keeps the dry input at full up to the middle of Mix and takes the repeats on up to
-twice at the top, so that the level does not dip far anywhere, and can go past one unit where the dry
-input and the repeats meet in phase: the output's clip holds that, about one sample in a thousand at
-most with the limiter at work.
+average. The price is that the first repeat comes 6 dB under the dry signal. The output keeps the
+dry input at full up to the middle of Mix, so that the level does not dip there, and can go past one
+unit where the dry input and the repeats meet in phase: the output's clip holds that, a few samples
+in a thousand at most with the limiter at work and Mix in the middle.
 Each input is held to one unit on the way in, as the amp holds its modulation, so whatever
 is routed to it the bound holds.
 
@@ -937,8 +936,7 @@ it bends the pitch of the repeats, by at most 25%, as a tape delay's would, and 
 time a moment later. Feedback is the gain from the repeats back into the line, from 0 at value 4, a
 single repeat, to 0.5 at value 124, where each repeat comes back 6 dB down and a little darker; it is
 0.25 at value 64. Mix brings the repeats up to full at value 64 with the dry input at full, from the dry input alone at value 4,
-and then takes the dry input down to none and the repeats on up to twice at value 124, where the repeats are alone
-and the first is as loud as the dry signal. Time and Feedback power up at value 64 and Mix at
+and then takes the dry input down to none at value 124, where the repeats are alone. Time and Feedback power up at value 64 and Mix at
 value 34, 0.25: the dry signal at full and the first repeat 12 dB under it.
 
 Pitch 1 Glide is unipolar and moves in steps of 1/120, a semitone of time a step, as EG 1 Decay
