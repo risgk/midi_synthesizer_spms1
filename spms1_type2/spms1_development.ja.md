@@ -234,7 +234,8 @@ patch_gen は、モジュールのファイルの `require_relative`、インス
 見積もりは実機の Debug Print より大きめです。v0.4.0 では 8% ほど (実機は min 1253 us、max 1256 us、約 94%)、
 v0.5.0 に向けた develop (95e0fd1、Drive と Distortion が x1〜x16、15/16 のメイクアップ、レゾナンスによる出力レベルあり。
 見積もりは平均 1233 us、最大 1235 us) では 11% ほどです (実機は I2S で min 1101 us、max 1105 us、約 83%、`underruns` 0。
-v0.5.0 では Out Wet と x32 までのドライブが加わり、見積もりで約 7 us 増えるので、実機では 1108 us ほどです。
+v0.5.0 では Out Wet と x32 までのドライブが加わり、見積もりで約 7 us 増えて、実機は I2S で min 1108 us、max 1112 us、
+約 83%、`underruns` 0 です。
 Amp 1 Distortion とそのトーン、ゼロより下の肩を入れた 59e3665 では、見積もり 1208 us と 1211 us に対して、I2S で
 min 1088 us、max 1091 us、約 82%。トーンと肩を入れる前の 3085c13 では、
 見積もり 1197 us と 1199 us に対して、I2S で min 1079 us、max 1083 us、PWM Audio で min 1079 us、max 1081 us。

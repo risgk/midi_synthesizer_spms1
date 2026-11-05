@@ -249,7 +249,8 @@ The estimate is above Debug Print on the device: about 8% at v0.4.0 (min 1253 us
 94%), and about 11% on the way to v0.5.0 (develop at 95e0fd1, with the Drive and the Distortion x1 to x16,
 the make-up of 15/16 and the resonance's output level, estimated at 1233 us on average and 1235 us at most:
 on the device min 1101 us and max 1105 us with I2S, about 83%, `underruns` 0; v0.5.0 adds Out Wet and the
-drives up to x32, about 7 us more in the estimate, so about 1108 us on the device; at 59e3665, with Amp 1
+drives up to x32, about 7 us more in the estimate: on the device min 1108 us and max 1112 us with I2S,
+about 83%, `underruns` 0; at 59e3665, with Amp 1
 Distortion and its tone and shoulder below zero, estimated at 1208 us and 1211 us, min 1088 us and max
 1091 us with I2S, about 82%; at 3085c13, with the distortion before them, estimated at 1197 us
 and 1199 us, min 1079 us and max 1083 us with I2S, min 1079 us and max 1081 us with PWM Audio; at 5b5dc07,
