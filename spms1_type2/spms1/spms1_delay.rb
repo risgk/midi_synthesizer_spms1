@@ -9,10 +9,11 @@ module Spms1
   # signal is within one unit, so is what is written back -- and it starts at silence. The low
   # pass filter in the loop and the reading between two samples are weighted averages, which
   # cannot reach past what they average. The price of the half is that the first repeat is 6 dB
-  # under the dry signal. The output keeps the dry input at full up to the middle of Mix, so that
-  # the level does not dip there, and can go past one unit where the dry input and the repeats
-  # meet in phase; the output's clip after it holds that (with the amp's limiter ahead, only a few
-  # samples in a thousand at most, at a loud level with Mix in the middle).
+  # under the dry signal. The output keeps the dry input at full up to the middle of Mix, and
+  # takes the delayed signal on up to twice at the top, where the first repeat is as loud as the
+  # dry signal was, so that the level does not dip far anywhere; it can go past one unit where the
+  # dry input and the repeats meet in phase, which the output's clip after it holds (with the amp's
+  # limiter ahead, only about one sample in a thousand at most, at a loud level).
   #
   # The outputs are read after process, from output_l and output_r: returning both would build an
   # Array every sample. output_mono, a sub output, is the two averaged, for a mono destination.
@@ -126,8 +127,8 @@ module Spms1
     end
 
     # Mix is unipolar, [0.0, 1.0]: the dry input alone at 0.0, the dry input at full and the
-    # delayed signal coming up to full by 0.5, and the dry input going down to none at 1.0, where
-    # only the repeats are left.
+    # delayed signal coming up to full by 0.5, and then the dry input going down to none and the
+    # delayed signal on up to twice at 1.0, where only the repeats are left.
     def set_mix(mix)
       @mix = Dsp.clamp(mix, 0.0, 1.0)
     end
@@ -148,11 +149,12 @@ module Spms1
         @stage_1_mix = Dsp.smooth(@mix, @stage_1_mix, @smoothing_target_blend)
         @current_mix = Dsp.smooth(@stage_1_mix, @current_mix, @smoothing_target_blend)
         # The dry input stays at full up to the middle of Mix, while the delayed signal comes up
-        # to full, and then goes down to none at the top.
+        # to full, and then goes down to none at the top, while the delayed signal goes on up to
+        # twice, making up for the half that enters the line.
         dry_gain = 2.0 - @current_mix * 2.0
         wet_gain = @current_mix * 2.0
         @dry_gain = (dry_gain > 1.0) ? 1.0 : dry_gain
-        @wet_gain = (wet_gain > 1.0) ? 1.0 : wet_gain
+        @wet_gain = wet_gain
 
         # Where the read position should be by the next update, at most the slew away, and a
         # quarter of the way there each sample.
