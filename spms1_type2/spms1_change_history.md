@@ -6,8 +6,8 @@ revised.
 
 - v0.5.1 (2026-??-??):
     - Delay 1 Mix: The dry input stays at full up to value 64, while the repeats come up to full, and then goes
-      down to none at value 124, so that the level does not dip in the middle (it was a crossfade, 6 dB down
-      at value 64); the default patch (Mix at value 34) is about 2.5 dB louder
+      down to none at value 124, so that the level does not dip in the middle (it was a crossfade, about 5 to
+      7 dB down at value 64); the default patch (Mix at value 34) is about 2.5 dB louder
 - v0.5.0 (2026-11-05):
     - Add **Filter Drive**, of Filter 1 and Filter 2 (CC#31, among the favorites): drives the
       filters harder, x1 to x32, for a saturated resonance, with the level kept. A patch saved by
