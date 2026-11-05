@@ -228,11 +228,11 @@ measures on the device -- with the default patch and a note held.
   more buffers (`--buffers 60`) they show how far a buffer moves with the values: the files in
   "sim_load/scenarios" hold Mixer 2 at its limit, the limiter off, the modulations at the top, a
   self-oscillating filter, the delay at its shortest, and a note every 10 ms with glide and bend
-  (`--gate 0`). Over 60 buffers, as measured on the way to v0.5.0 (with the clamps as a max and a
-  min), every one of them stays within 177503 to 178016 cycles, the range of a note held at a low
-  note: the self-oscillating filter, the limiter off and Mixer 2 at its limit take exactly the
-  cycles of the default patch (177567 to 177936), nothing in them branching on a value, and what
-  moves a buffer at all is the oscillators' phase wraps (see "Writing a Module")
+  (`--gate 0`). Over 60 buffers at v0.5.0, every one of them stays within 190029 to 190883 cycles
+  (1237 to 1243 us), the default patch within 190134 to 190776 (with a note held at 36, 69 or 96,
+  within 190029 to 190776): no more than about 0.5% apart, nothing in them branching on a value
+  (the limiter off takes exactly the cycles of the limiter on), and what moves a buffer at all is
+  the oscillators' phase wraps (see "Writing a Module")
 - Needs Python 3 and `pip install unicorn capstone pyelftools numpy`, installed by you and not shipped
   here: Unicorn's Python binding is under the BSD license and its emulator under the GPLv2, Capstone
   and NumPy under the BSD license, and pyelftools is in the public domain
