@@ -25,7 +25,7 @@ revised.
       powers up at value 88 (C7)
     - LFO 1 Rate: a C every 12 values, C-2 (4.09 Hz) at value 64; it powers up at 6.49 Hz, a
       slightly slower vibrato
-    - Lighter: about 150 us less of a buffer in all, with the Drive and the Distortion (about 82%
+    - Lighter: about 150 us less of a buffer in all, with the Drive and the Distortion (about 83%
       on the device)
 - v0.4.1 (2026-10-30):
     - Default patch: Mixer 2 Out Level powers up at 1.0 (value 124) instead of 0.5, and Amp 1 Gain 2
