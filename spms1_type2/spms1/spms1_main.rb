@@ -942,11 +942,15 @@ while true
         signals[77] = chorus_1.output_l # SIGNAL_CHORUS_1_OUTPUT_L
         signals[78] = chorus_1.output_r # SIGNAL_CHORUS_1_OUTPUT_R
         signals[79] = chorus_1.output_mono # SIGNAL_CHORUS_1_OUTPUT_MONO
+        signals[80] = chorus_1.output_wet_l # SIGNAL_CHORUS_1_OUTPUT_WET_L
+        signals[81] = chorus_1.output_wet_r # SIGNAL_CHORUS_1_OUTPUT_WET_R
       when 14 # MODULE_DELAY_1
         delay_1.process(control_tick, signals[source_delay_1_audio_in_l], signals[source_delay_1_audio_in_r])
-        signals[80] = delay_1.output_l # SIGNAL_DELAY_1_OUTPUT_L
-        signals[81] = delay_1.output_r # SIGNAL_DELAY_1_OUTPUT_R
-        signals[82] = delay_1.output_mono # SIGNAL_DELAY_1_OUTPUT_MONO
+        signals[82] = delay_1.output_l # SIGNAL_DELAY_1_OUTPUT_L
+        signals[83] = delay_1.output_r # SIGNAL_DELAY_1_OUTPUT_R
+        signals[84] = delay_1.output_mono # SIGNAL_DELAY_1_OUTPUT_MONO
+        signals[85] = delay_1.output_wet_l # SIGNAL_DELAY_1_OUTPUT_WET_L
+        signals[86] = delay_1.output_wet_r # SIGNAL_DELAY_1_OUTPUT_WET_R
       # patch_gen end
       end
 

@@ -13,7 +13,7 @@
 
 // The numbers of the patch and saved_patch_version, as one hash (see patch_spec_hash in
 // patch_gen): a saved patch with another is not loaded.
-#define SPMS1_PATCH_SPEC_HASH (0x538AFEEBu)
+#define SPMS1_PATCH_SPEC_HASH (0xAD26385Fu)
 
 // The category 3 entries -- the controls -- whose CCs' values a Save keeps: all but the
 // performance controls', whose CCs are saved at 0.
@@ -87,8 +87,8 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {169,  76},  // Chorus 1 Audio In <- AMP_1_OUTPUT
   {170,  77},  // Delay 1 Audio In L <- CHORUS_1_OUTPUT_L
   {171,  78},  // Delay 1 Audio In R <- CHORUS_1_OUTPUT_R
-  {172,  80},  // L <- DELAY_1_OUTPUT_L
-  {173,  81},  // R <- DELAY_1_OUTPUT_R
+  {172,  82},  // L <- DELAY_1_OUTPUT_L
+  {173,  83},  // R <- DELAY_1_OUTPUT_R
   {256, 127},  // Pitch 1 Glide <- OWN
   {257, 127},  // Pitch 1 Out 1 Glide Sw <- OWN
   {258, 127},  // Pitch 1 Out 2 Glide Sw <- OWN
@@ -343,9 +343,9 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {599,   4},  // Amp 1 Gain 1 value
   {600,  64},  // Amp 1 Gain 2 value
   {601,   4},  // Amp 1 Mod 1/2 Mix value
-  {602,  64},  // Chorus 1 Mix value
+  {602,  34},  // Chorus 1 Mix value
   {603,  64},  // Chorus 1 Rate value
-  {604,  34},  // Chorus 1 Depth value
+  {604,  64},  // Chorus 1 Depth value
   {605,  34},  // Delay 1 Mix value
   {606,  64},  // Delay 1 Time value
   {607,  64},  // Delay 1 Feedback value
@@ -410,9 +410,9 @@ static const uint8_t g_spms1_default_cc[][2] = {
   {25,    4},  // Filter 2 Mod 2 Amt
   {15,   64},  // Amp 1 Gain 2
   {36,    4},  // Amp 1 Mod 1/2 Mix
-  {93,   64},  // Chorus 1 Mix
+  {93,   34},  // Chorus 1 Mix
   {58,   64},  // Chorus 1 Rate
-  {59,   34},  // Chorus 1 Depth
+  {59,   64},  // Chorus 1 Depth
   {94,   34},  // Delay 1 Mix
   {90,   64},  // Delay 1 Time
   {92,   64},  // Delay 1 Feedback

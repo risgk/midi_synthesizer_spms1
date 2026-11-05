@@ -53,6 +53,9 @@ module Spms1
 
     attr_reader :output_l, :output_r
 
+    # The tap (or the repeats) alone, before the crossfade with the dry input.
+    attr_reader :output_wet_l, :output_wet_r
+
     # The average of the two sides, worked out when read, which the loop does every sample.
     def output_mono
       (@output_l + @output_r) * 0.5
@@ -97,6 +100,8 @@ module Spms1
       @delay_step = 0.0
 
       @output_l = 0.0
+      @output_wet_l = 0.0
+      @output_wet_r = 0.0
       @output_r = 0.0
     end
 
@@ -175,6 +180,8 @@ module Spms1
       @filtered_r = loop_input_r + (@filtered_r - loop_input_r) * 0.25
       @delay_line_r[@write_index] = @filtered_r
 
+      @output_wet_l = delayed_l
+      @output_wet_r = delayed_r
       @output_l = input_l + (delayed_l - input_l) * @current_mix
       @output_r = input_r + (delayed_r - input_r) * @current_mix
     end

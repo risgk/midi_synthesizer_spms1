@@ -484,34 +484,35 @@ Level 1 が 1.0 のまま 6 dB 強く駆動していました）。そのため�
 
 | ID | シグナル | | ID | シグナル | | ID | シグナル |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | なし（定数 0.0） | | 28 | General 1 Pos | | 56 | Osc 1 Output ± |
-| 1 | 定数 1.0 | | 29 | General 2 | | 57 | Osc 1 Output Saw ± |
-| 2 | 定数 0.5 | | 30 | General 2 Rev | | 58 | Osc 1 Output Pulse ± |
-| 3 | 定数 -0.5 | | 31 | General 2 Inv | | 59 | Osc 1 Output Sub ± |
-| 4 | 定数 -1.0 | | 32 | General 2 Rev Inv | | 60 | Osc 2 Output ± |
-| 5 | Note Pitch ± | | 33 | General 2 Bipolar ± | | 61 | Osc 2 Output Saw ± |
-| 6 | Note Gate | | 34 | General 2 Bipolar Inv ± | | 62 | Osc 2 Output Pulse ± |
-| 7 | Pitch Bend ± | | 35 | General 2 Cos | | 63 | Noise 1 Output ± |
-| 8 | Mod Wheel | | 36 | General 2 Sin | | 64 | Noise 1 Output White ± |
-| 9 | Mod Wheel Rev | | 37 | General 2 Lo | | 65 | Noise 1 Output Red ± |
-| 10 | Mod Wheel Inv | | 38 | General 2 Hi | | 66 | Mixer 2 Output ± |
-| 11 | Mod Wheel Rev Inv | | 39 | General 2 Neg | | 67 | Mixer 2 Output Inv ± |
-| 12 | Breath | | 40 | General 2 Mid | | 68 | Filter 1 Output ± |
-| 13 | Breath Rev | | 41 | General 2 Pos | | 69 | Filter 1 Output LP ± |
-| 14 | Breath Inv | | 42 | Pitch 1 Output 1 ± | | 70 | Filter 1 Output HP ± |
-| 15 | Breath Rev Inv | | 43 | Pitch 1 Output 2 ± | | 71 | Filter 1 Output BP ± |
-| 16 | General 1 | | 44 | EG 1 Output | | 72 | Filter 2 Output ± |
-| 17 | General 1 Rev | | 45 | EG 1 Output Inv | | 73 | Filter 2 Output LP ± |
-| 18 | General 1 Inv | | 46 | EG 2 Output | | 74 | Filter 2 Output HP ± |
-| 19 | General 1 Rev Inv | | 47 | EG 2 Output Inv | | 75 | Filter 2 Output BP ± |
-| 20 | General 1 Bipolar ± | | 48 | LFO 1 Output ± | | 76 | Amp 1 Output ± |
-| 21 | General 1 Bipolar Inv ± | | 49 | LFO 1 Output Inv ± | | 77 | Chorus 1 Output L ± |
-| 22 | General 1 Cos | | 50 | LFO 1 Output Triangle ± | | 78 | Chorus 1 Output R ± |
-| 23 | General 1 Sin | | 51 | LFO 1 Output Triangle Inv ± | | 79 | Chorus 1 Output Mono ± |
-| 24 | General 1 Lo | | 52 | LFO 1 Output Square | | 80 | Delay 1 Output L ± |
-| 25 | General 1 Hi | | 53 | LFO 1 Output Square Inv | | 81 | Delay 1 Output R ± |
-| 26 | General 1 Neg | | 54 | Mixer 1 Output ± | | 82 | Delay 1 Output Mono ± |
-| 27 | General 1 Mid | | 55 | Mixer 1 Output Inv ± | |  |  |
+| 0 | なし（定数 0.0） | | 29 | General 2 | | 58 | Osc 1 Output Pulse ± |
+| 1 | 定数 1.0 | | 30 | General 2 Rev | | 59 | Osc 1 Output Sub ± |
+| 2 | 定数 0.5 | | 31 | General 2 Inv | | 60 | Osc 2 Output ± |
+| 3 | 定数 -0.5 | | 32 | General 2 Rev Inv | | 61 | Osc 2 Output Saw ± |
+| 4 | 定数 -1.0 | | 33 | General 2 Bipolar ± | | 62 | Osc 2 Output Pulse ± |
+| 5 | Note Pitch ± | | 34 | General 2 Bipolar Inv ± | | 63 | Noise 1 Output ± |
+| 6 | Note Gate | | 35 | General 2 Cos | | 64 | Noise 1 Output White ± |
+| 7 | Pitch Bend ± | | 36 | General 2 Sin | | 65 | Noise 1 Output Red ± |
+| 8 | Mod Wheel | | 37 | General 2 Lo | | 66 | Mixer 2 Output ± |
+| 9 | Mod Wheel Rev | | 38 | General 2 Hi | | 67 | Mixer 2 Output Inv ± |
+| 10 | Mod Wheel Inv | | 39 | General 2 Neg | | 68 | Filter 1 Output ± |
+| 11 | Mod Wheel Rev Inv | | 40 | General 2 Mid | | 69 | Filter 1 Output LP ± |
+| 12 | Breath | | 41 | General 2 Pos | | 70 | Filter 1 Output HP ± |
+| 13 | Breath Rev | | 42 | Pitch 1 Output 1 ± | | 71 | Filter 1 Output BP ± |
+| 14 | Breath Inv | | 43 | Pitch 1 Output 2 ± | | 72 | Filter 2 Output ± |
+| 15 | Breath Rev Inv | | 44 | EG 1 Output | | 73 | Filter 2 Output LP ± |
+| 16 | General 1 | | 45 | EG 1 Output Inv | | 74 | Filter 2 Output HP ± |
+| 17 | General 1 Rev | | 46 | EG 2 Output | | 75 | Filter 2 Output BP ± |
+| 18 | General 1 Inv | | 47 | EG 2 Output Inv | | 76 | Amp 1 Output ± |
+| 19 | General 1 Rev Inv | | 48 | LFO 1 Output ± | | 77 | Chorus 1 Output L ± |
+| 20 | General 1 Bipolar ± | | 49 | LFO 1 Output Inv ± | | 78 | Chorus 1 Output R ± |
+| 21 | General 1 Bipolar Inv ± | | 50 | LFO 1 Output Triangle ± | | 79 | Chorus 1 Output Mono ± |
+| 22 | General 1 Cos | | 51 | LFO 1 Output Triangle Inv ± | | 80 | Chorus 1 Output Wet L ± |
+| 23 | General 1 Sin | | 52 | LFO 1 Output Square | | 81 | Chorus 1 Output Wet R ± |
+| 24 | General 1 Lo | | 53 | LFO 1 Output Square Inv | | 82 | Delay 1 Output L ± |
+| 25 | General 1 Hi | | 54 | Mixer 1 Output ± | | 83 | Delay 1 Output R ± |
+| 26 | General 1 Neg | | 55 | Mixer 1 Output Inv ± | | 84 | Delay 1 Output Mono ± |
+| 27 | General 1 Mid | | 56 | Osc 1 Output ± | | 85 | Delay 1 Output Wet L ± |
+| 28 | General 1 Pos | | 57 | Osc 1 Output Saw ± | | 86 | Delay 1 Output Wet R ± |
 
 <!-- patch_gen end -->
 
@@ -847,8 +848,8 @@ Chorus 1 の 3 つのパラメータはユニポーラで、1/120 刻みで動�
 それぞれのタップが 5.33 ms を挟んで揺れる幅で、値 4 の 0 から、値 64 の 2.63 ms を通って、値 124 の 5.25 ms
 までの直線です。Mix は左右それぞれのクロスフェードのタップの割合で、値 4 でドライ入力だけ、値 64 で半々、
 値 124 でタップだけになり、左右で逆向きに揺れる
-ビブラートになります。起動時は Rate と Mix が値 64、Depth が値 34（1.31 ms）で、穏やかなコーラスです。コーラスを 1.0 に収めているのはクロスフェードの半分ずつ
-なので、デフォルトではドライ信号が 6 dB 下がり、タップとの和がその一部を補います。
+ビブラートになります。起動時は Rate と Depth が値 64、Mix が値 34（0.25）で、軽めのコーラスです。コーラスを 1.0 に収めているのはクロスフェードなので、
+デフォルトではドライ信号が 2.5 dB 下がり、タップとの和がその一部を補います。
 
 Delay 1 の 3 つのパラメータはユニポーラで、ほかのユニポーラのつまみと同じく 1/120 刻みで動きます。Time は
 1 ステップ 2.83 ms の直線で値 4 の 0 から値 124 の 340 ms までを取り、下は 2.83 ms でクリップします。
@@ -991,7 +992,7 @@ Pitch Mod 1 Sw は CC#118 にあり、ほかは CC を持ちません。値 64 �
   Chorus 1 Out L と Out R を最終出力の L と R につなぎます。コーラスはアンプを受け取ったままです。繰り返しもノートと
   同じくフィルタとアンプのエンベロープを通るので、音と一緒に消えていきます。Delay 1 はフィルタの後ろで走った
   ままなので、フィルタは 1 サンプル遅れて読みますが、エコーには関係ありません。MIDI では CC#99 = 113, CC#98 = 42,
-  CC#6 = 56。CC#98 = 27, CC#6 = 80。CC#98 = 44 と 45, CC#6 = 77 と 78
+  CC#6 = 56。CC#98 = 27, CC#6 = 82。CC#98 = 44 と 45, CC#6 = 77 と 78
 
 ### 注意点
 

@@ -506,34 +506,35 @@ have none there. See below.
 
 | ID | Signal | | ID | Signal | | ID | Signal |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | None (constant 0.0) | | 28 | General 1 Pos | | 56 | Osc 1 Output ± |
-| 1 | Constant 1.0 | | 29 | General 2 | | 57 | Osc 1 Output Saw ± |
-| 2 | Constant 0.5 | | 30 | General 2 Rev | | 58 | Osc 1 Output Pulse ± |
-| 3 | Constant -0.5 | | 31 | General 2 Inv | | 59 | Osc 1 Output Sub ± |
-| 4 | Constant -1.0 | | 32 | General 2 Rev Inv | | 60 | Osc 2 Output ± |
-| 5 | Note Pitch ± | | 33 | General 2 Bipolar ± | | 61 | Osc 2 Output Saw ± |
-| 6 | Note Gate | | 34 | General 2 Bipolar Inv ± | | 62 | Osc 2 Output Pulse ± |
-| 7 | Pitch Bend ± | | 35 | General 2 Cos | | 63 | Noise 1 Output ± |
-| 8 | Mod Wheel | | 36 | General 2 Sin | | 64 | Noise 1 Output White ± |
-| 9 | Mod Wheel Rev | | 37 | General 2 Lo | | 65 | Noise 1 Output Red ± |
-| 10 | Mod Wheel Inv | | 38 | General 2 Hi | | 66 | Mixer 2 Output ± |
-| 11 | Mod Wheel Rev Inv | | 39 | General 2 Neg | | 67 | Mixer 2 Output Inv ± |
-| 12 | Breath | | 40 | General 2 Mid | | 68 | Filter 1 Output ± |
-| 13 | Breath Rev | | 41 | General 2 Pos | | 69 | Filter 1 Output LP ± |
-| 14 | Breath Inv | | 42 | Pitch 1 Output 1 ± | | 70 | Filter 1 Output HP ± |
-| 15 | Breath Rev Inv | | 43 | Pitch 1 Output 2 ± | | 71 | Filter 1 Output BP ± |
-| 16 | General 1 | | 44 | EG 1 Output | | 72 | Filter 2 Output ± |
-| 17 | General 1 Rev | | 45 | EG 1 Output Inv | | 73 | Filter 2 Output LP ± |
-| 18 | General 1 Inv | | 46 | EG 2 Output | | 74 | Filter 2 Output HP ± |
-| 19 | General 1 Rev Inv | | 47 | EG 2 Output Inv | | 75 | Filter 2 Output BP ± |
-| 20 | General 1 Bipolar ± | | 48 | LFO 1 Output ± | | 76 | Amp 1 Output ± |
-| 21 | General 1 Bipolar Inv ± | | 49 | LFO 1 Output Inv ± | | 77 | Chorus 1 Output L ± |
-| 22 | General 1 Cos | | 50 | LFO 1 Output Triangle ± | | 78 | Chorus 1 Output R ± |
-| 23 | General 1 Sin | | 51 | LFO 1 Output Triangle Inv ± | | 79 | Chorus 1 Output Mono ± |
-| 24 | General 1 Lo | | 52 | LFO 1 Output Square | | 80 | Delay 1 Output L ± |
-| 25 | General 1 Hi | | 53 | LFO 1 Output Square Inv | | 81 | Delay 1 Output R ± |
-| 26 | General 1 Neg | | 54 | Mixer 1 Output ± | | 82 | Delay 1 Output Mono ± |
-| 27 | General 1 Mid | | 55 | Mixer 1 Output Inv ± | |  |  |
+| 0 | None (constant 0.0) | | 29 | General 2 | | 58 | Osc 1 Output Pulse ± |
+| 1 | Constant 1.0 | | 30 | General 2 Rev | | 59 | Osc 1 Output Sub ± |
+| 2 | Constant 0.5 | | 31 | General 2 Inv | | 60 | Osc 2 Output ± |
+| 3 | Constant -0.5 | | 32 | General 2 Rev Inv | | 61 | Osc 2 Output Saw ± |
+| 4 | Constant -1.0 | | 33 | General 2 Bipolar ± | | 62 | Osc 2 Output Pulse ± |
+| 5 | Note Pitch ± | | 34 | General 2 Bipolar Inv ± | | 63 | Noise 1 Output ± |
+| 6 | Note Gate | | 35 | General 2 Cos | | 64 | Noise 1 Output White ± |
+| 7 | Pitch Bend ± | | 36 | General 2 Sin | | 65 | Noise 1 Output Red ± |
+| 8 | Mod Wheel | | 37 | General 2 Lo | | 66 | Mixer 2 Output ± |
+| 9 | Mod Wheel Rev | | 38 | General 2 Hi | | 67 | Mixer 2 Output Inv ± |
+| 10 | Mod Wheel Inv | | 39 | General 2 Neg | | 68 | Filter 1 Output ± |
+| 11 | Mod Wheel Rev Inv | | 40 | General 2 Mid | | 69 | Filter 1 Output LP ± |
+| 12 | Breath | | 41 | General 2 Pos | | 70 | Filter 1 Output HP ± |
+| 13 | Breath Rev | | 42 | Pitch 1 Output 1 ± | | 71 | Filter 1 Output BP ± |
+| 14 | Breath Inv | | 43 | Pitch 1 Output 2 ± | | 72 | Filter 2 Output ± |
+| 15 | Breath Rev Inv | | 44 | EG 1 Output | | 73 | Filter 2 Output LP ± |
+| 16 | General 1 | | 45 | EG 1 Output Inv | | 74 | Filter 2 Output HP ± |
+| 17 | General 1 Rev | | 46 | EG 2 Output | | 75 | Filter 2 Output BP ± |
+| 18 | General 1 Inv | | 47 | EG 2 Output Inv | | 76 | Amp 1 Output ± |
+| 19 | General 1 Rev Inv | | 48 | LFO 1 Output ± | | 77 | Chorus 1 Output L ± |
+| 20 | General 1 Bipolar ± | | 49 | LFO 1 Output Inv ± | | 78 | Chorus 1 Output R ± |
+| 21 | General 1 Bipolar Inv ± | | 50 | LFO 1 Output Triangle ± | | 79 | Chorus 1 Output Mono ± |
+| 22 | General 1 Cos | | 51 | LFO 1 Output Triangle Inv ± | | 80 | Chorus 1 Output Wet L ± |
+| 23 | General 1 Sin | | 52 | LFO 1 Output Square | | 81 | Chorus 1 Output Wet R ± |
+| 24 | General 1 Lo | | 53 | LFO 1 Output Square Inv | | 82 | Delay 1 Output L ± |
+| 25 | General 1 Hi | | 54 | Mixer 1 Output ± | | 83 | Delay 1 Output R ± |
+| 26 | General 1 Neg | | 55 | Mixer 1 Output Inv ± | | 84 | Delay 1 Output Mono ± |
+| 27 | General 1 Mid | | 56 | Osc 1 Output ± | | 85 | Delay 1 Output Wet L ± |
+| 28 | General 1 Pos | | 57 | Osc 1 Output Saw ± | | 86 | Delay 1 Output Wet R ± |
 
 <!-- patch_gen end -->
 
@@ -922,8 +923,8 @@ number, a semitone a step, as LFO 1 Rate is: 0.015 Hz at value 4, 0.48 Hz at val
 value 124, the default divided and multiplied by 32. Depth is how far each tap swings either side of 5.33 ms, in a straight line from not at
 all at value 4, through 2.63 ms at value 64, to 5.25 ms at value 124. Mix is each tap's share of its side's
 crossfade: the dry input alone at value 4, half and half at value 64, and only the taps at value 124, a vibrato on each side, the two moving opposite ways.
-Rate and Mix power up at value 64, and Depth at value 34, 1.31 ms, a gentle chorus. The halves of the crossfade are what hold the chorus to one unit, so
-at the default the dry signal is 6 dB down, and the sum with the tap makes up some of it.
+Rate and Depth power up at value 64, and Mix at value 34, 0.25, a light chorus. The halves of the crossfade are what hold the chorus to one unit, so
+at the default the dry signal is 2.5 dB down, and the sum with the tap makes up some of it.
 
 The three Delay 1 parameters are unipolar and move in steps of 1/120, as every unipolar dial
 does. Time runs in a straight line, 2.83 ms a step, from 0 at value 4 to 340 ms at value 124, and is
@@ -1081,7 +1082,7 @@ unplugged reads its own CC or value again. A value is the 4 to 124 the editor sh
   still taking the amp. The repeats then go through the filters and the amp's envelope as the note
   does, so they die away with it. Delay 1 still runs after the filters, which read it a sample
   late; for an echo that does not matter. As MIDI: CC#99 = 113, CC#98 = 42, CC#6 = 56; CC#98 = 27,
-  CC#6 = 80; CC#98 = 44 and 45, CC#6 = 77 and 78
+  CC#6 = 82; CC#98 = 44 and 45, CC#6 = 77 and 78
 
 ### Notes
 

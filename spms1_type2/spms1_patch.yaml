@@ -234,13 +234,19 @@ signals:
   - { key: FILTER_2_OUTPUT_HP, id: 74, module: FILTER_2, output: Out HP, label: Filter 2 Output HP, bipolar: true, get: output_hp }
   - { key: FILTER_2_OUTPUT_BP, id: 75, module: FILTER_2, output: Out BP, label: Filter 2 Output BP, bipolar: true, get: output_bp }
   - { key: AMP_1_OUTPUT,       id: 76, module: AMP_1,    output: Out,    label: Amp 1 Output,       bipolar: true }
-  # Out Mono, of the chorus and of the delay, is the average of the two sides, a sub output.
+  # Out Mono, of the chorus and of the delay, is the average of the two sides, a sub output. Out Wet L
+  # and Out Wet R are the tap (the chorus) and the repeats (the delay) alone, without the dry input,
+  # whatever Mix is: to mix them with the dry signal elsewhere, as a send would.
   - { key: CHORUS_1_OUTPUT_L,  id: 77, module: CHORUS_1, output: Out L,  label: Chorus 1 Output L,  bipolar: true, get: output_l }
   - { key: CHORUS_1_OUTPUT_R,  id: 78, module: CHORUS_1, output: Out R,  label: Chorus 1 Output R,  bipolar: true, get: output_r }
   - { key: CHORUS_1_OUTPUT_MONO, id: 79, module: CHORUS_1, output: Out Mono, label: Chorus 1 Output Mono, bipolar: true, get: output_mono }
-  - { key: DELAY_1_OUTPUT_L,   id: 80, module: DELAY_1,  output: Out L,  label: Delay 1 Output L,   bipolar: true, get: output_l }
-  - { key: DELAY_1_OUTPUT_R,   id: 81, module: DELAY_1,  output: Out R,  label: Delay 1 Output R,   bipolar: true, get: output_r }
-  - { key: DELAY_1_OUTPUT_MONO,  id: 82, module: DELAY_1,  output: Out Mono, label: Delay 1 Output Mono,  bipolar: true, get: output_mono }
+  - { key: CHORUS_1_OUTPUT_WET_L, id: 80, module: CHORUS_1, output: Out Wet L, label: Chorus 1 Output Wet L, bipolar: true, get: output_wet_l }
+  - { key: CHORUS_1_OUTPUT_WET_R, id: 81, module: CHORUS_1, output: Out Wet R, label: Chorus 1 Output Wet R, bipolar: true, get: output_wet_r }
+  - { key: DELAY_1_OUTPUT_L,   id: 82, module: DELAY_1,  output: Out L,  label: Delay 1 Output L,   bipolar: true, get: output_l }
+  - { key: DELAY_1_OUTPUT_R,   id: 83, module: DELAY_1,  output: Out R,  label: Delay 1 Output R,   bipolar: true, get: output_r }
+  - { key: DELAY_1_OUTPUT_MONO,  id: 84, module: DELAY_1,  output: Out Mono, label: Delay 1 Output Mono,  bipolar: true, get: output_mono }
+  - { key: DELAY_1_OUTPUT_WET_L, id: 85, module: DELAY_1,  output: Out Wet L, label: Delay 1 Output Wet L, bipolar: true, get: output_wet_l }
+  - { key: DELAY_1_OUTPUT_WET_R, id: 86, module: DELAY_1,  output: Out Wet R, label: Delay 1 Output Wet R, bipolar: true, get: output_wet_r }
 
 # Module inputs, NRPN category 1, listed in the editor's order, each by its entry: what feeds each
 # one in the default patch (`source`, a signal key). `label` is the editor's, on the module; `name`
@@ -501,9 +507,9 @@ controls:
   - { entry: 87, module: AMP_1,     key: GAIN_1,       label: Gain 1,       cc: 0,   value: 4,  hint_inputs: [AUDIO_IN_1], set: set_gain_1 }
   - { entry: 88, module: AMP_1,     key: GAIN_2,       label: Gain 2,       cc: 15,  value: 64, hint_inputs: [AUDIO_IN_2], favorite: true, set: set_gain_2 }
   - { entry: 89, module: AMP_1,     key: MOD_1_2_MIX,  label: Mod 1/2 Mix,  cc: 36,  value: 4, hint_inputs: [MOD_1_IN, MOD_2_IN], favorite: true, set: set_modulation_mix }
-  - { entry: 90, module: CHORUS_1,  key: MIX,          label: Mix,          cc: 93,  value: 64, favorite: true, set: set_mix }
+  - { entry: 90, module: CHORUS_1,  key: MIX,          label: Mix,          cc: 93,  value: 34, favorite: true, set: set_mix }
   - { entry: 91, module: CHORUS_1,  key: RATE,         label: Rate,         cc: 58,  value: 64, favorite: true, set: set_rate }
-  - { entry: 92, module: CHORUS_1,  key: DEPTH,        label: Depth,        cc: 59,  value: 34, favorite: true, set: set_depth }
+  - { entry: 92, module: CHORUS_1,  key: DEPTH,        label: Depth,        cc: 59,  value: 64, favorite: true, set: set_depth }
   - { entry: 93, module: DELAY_1,   key: MIX,          label: Mix,          cc: 94,  value: 34, favorite: true, set: set_mix }
   - { entry: 94, module: DELAY_1,   key: TIME,         label: Time,         cc: 90,  value: 64, favorite: true, set: set_time }
   - { entry: 95, module: DELAY_1,   key: FEEDBACK,     label: Feedback,     cc: 92,  value: 64, favorite: true, set: set_feedback }

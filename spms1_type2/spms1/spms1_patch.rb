@@ -99,9 +99,13 @@ SIGNAL_AMP_1_OUTPUT              = 76
 SIGNAL_CHORUS_1_OUTPUT_L         = 77
 SIGNAL_CHORUS_1_OUTPUT_R         = 78
 SIGNAL_CHORUS_1_OUTPUT_MONO      = 79
-SIGNAL_DELAY_1_OUTPUT_L          = 80
-SIGNAL_DELAY_1_OUTPUT_R          = 81
-SIGNAL_DELAY_1_OUTPUT_MONO       = 82
+SIGNAL_CHORUS_1_OUTPUT_WET_L     = 80
+SIGNAL_CHORUS_1_OUTPUT_WET_R     = 81
+SIGNAL_DELAY_1_OUTPUT_L          = 82
+SIGNAL_DELAY_1_OUTPUT_R          = 83
+SIGNAL_DELAY_1_OUTPUT_MONO       = 84
+SIGNAL_DELAY_1_OUTPUT_WET_L      = 85
+SIGNAL_DELAY_1_OUTPUT_WET_R      = 86
 
 # A parameter source of SIGNAL_OWN is the parameter's own control slot, at PARAM_SLOT_BASE + its
 # entry, off the bus: the slots below.
@@ -918,9 +922,9 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_AMP_1_GAIN_1          , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_AMP_1_GAIN_2          , 64)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_AMP_1_MOD_1_2_MIX     , 4)
-  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_CHORUS_1_MIX          , 64)
+  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_CHORUS_1_MIX          , 34)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_CHORUS_1_RATE         , 64)
-  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_CHORUS_1_DEPTH        , 34)
+  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_CHORUS_1_DEPTH        , 64)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_DELAY_1_MIX           , 34)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_DELAY_1_TIME          , 64)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_DELAY_1_FEEDBACK      , 64)
@@ -982,9 +986,9 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 25 , 4  ) # Filter 2 Mod 2 Amt
   C.set_midi_cc_value(midi_ch, 15 , 64 ) # Amp 1 Gain 2
   C.set_midi_cc_value(midi_ch, 36 , 4  ) # Amp 1 Mod 1/2 Mix
-  C.set_midi_cc_value(midi_ch, 93 , 64 ) # Chorus 1 Mix
+  C.set_midi_cc_value(midi_ch, 93 , 34 ) # Chorus 1 Mix
   C.set_midi_cc_value(midi_ch, 58 , 64 ) # Chorus 1 Rate
-  C.set_midi_cc_value(midi_ch, 59 , 34 ) # Chorus 1 Depth
+  C.set_midi_cc_value(midi_ch, 59 , 64 ) # Chorus 1 Depth
   C.set_midi_cc_value(midi_ch, 94 , 34 ) # Delay 1 Mix
   C.set_midi_cc_value(midi_ch, 90 , 64 ) # Delay 1 Time
   C.set_midi_cc_value(midi_ch, 92 , 64 ) # Delay 1 Feedback
