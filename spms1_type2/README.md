@@ -1,4 +1,4 @@
-MIDI Synthesizer SPMS-1 (type-2) v0.4.1
+MIDI Synthesizer SPMS-1 (type-2) v0.5.0
 =======================================
 
 - Monophonic semi-modular MIDI Synthesizer for Raspberry Pi Pico 2, made with Spinel (Ruby AOT Compiler)
@@ -10,7 +10,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.4.1
 - Envelopes: two ADS envelopes, EG 2 on the amp's Mod 2 In, an organ's at power-up, on CC#52, 53 and 54, with the release switch of both on CC#105
 - LFO: triangle (PolyBLAMP) and unipolar square (PolyBLEP), each on an output of its own, and a main output crossfading from one to the other (Wave, CC#33); a reset input, on Note Gate by default, that restarts it at each note with Reset Sw (CC#113) on
 - Filters: two ZDF/TPT State Variable Filters (with a nonlinear leak on the band pass integrator, solved by the one-step Newton method), each with low pass, high pass and band pass outputs and a main output crossfading from the low pass to the high pass through a notch (Mode, CC#39), and two audio inputs, each with a gain; in series on the same CCs by default, a low pass of the fourth order (24 dB/oct), the first with a resonance of its own, with no CC
-- Amp: two audio inputs, each with a gain of up to +12 dB (CC#15), with a look-ahead limiter that holds the peaks under the one-unit clamp, rounded off rather than cut (Limiter Sw, no CC, on at power-up)
+- Amp: two audio inputs, each with a gain of up to +12 dB (CC#15), with a look-ahead limiter that holds the peaks under the one-unit clamp, rounded off rather than cut (Limiter Sw, no CC, on at power-up), and ahead of it a distortion, x1 to x16 into a soft clip with ADAA, not symmetric, and a tone that follows the drive, on CC#95
 - Chorus: mono in, stereo out, as a module in the run order
 - Delay: stereo, with feedback, as a module in the run order (up to 340 ms)
 - Pitch: the note's pitch as a module in the run order, with portamento as an exponential lag (CC#5), pitch bend past it (range on CC#57) and a stretch of the keys (CC#22)
@@ -32,6 +32,11 @@ Required Hardware
         - GY-PCM5102 (PCM5102A I2S DAC Module)
     - Or PWM Audio output, without a DAC (the default of the sketch)
         - L on GP28 and R on GP27, as on the Pimoroni [Pico VGA Demo Base](https://shop.pimoroni.com/products/pimoroni-pico-vga-demo-base) (PIM553)
+        - Connect the pins to a line input of an amplifier or an active speaker. Do not connect headphones or a
+          passive speaker to the pins: a large current may flow and damage the Pico or the devices
+            - The audio jack of the Pico VGA Demo Base comes after the circuit of "PWM audio" in
+              [Hardware design with RP2040](https://datasheets.raspberrypi.com/rp2040/hardware-design-with-rp2040.pdf)
+              (a buffer, an analogue filter and AC coupling), which can be connected to an amplifier or headphones
         - An RC low pass filter on each output is recommended, to take out the PWM ripple
             - It also reduces the radio noise (EMI) radiated from the cables carrying the square waves:
               put it close to the pins, not after the cable
@@ -74,6 +79,8 @@ Required Software for Modification
       rather than going through a checked Spinel Array; so is the run order of the modules, which the
       per-sample dispatch reads for every module, and the reads of the CC values and the NRPN table
       that the synth makes for every parameter once a buffer inline from "spms1_midi_read.h"
+    - The clamps are the larger and the smaller of two Floats, from "spms1_dsp.h", included the same
+      way, each one instruction (`vmaxnm.f32` or `vminnm.f32`) where Ruby would compare and select
     - "spms1_main.c" is generated in "spms1" with `spinel spms1_main.rb -c --rbs sig`. The type seeds
       in "spms1/sig" keep the filter states, the parameter smoothing and the bus writes unboxed;
       "spms1/sig/spms1_filter.rbs", "spms1/sig/spms1_dsp.rbs" and "spms1/sig/spms1_framework.rbs" say
@@ -81,7 +88,8 @@ Required Software for Modification
 - Ruby (CRuby), to change the patch's numbers or the default patch, or to add a module: they are
   kept in "spms1_patch.yaml", and `ruby patch_gen/spms1_patch_gen.rb` writes them out to
   "spms1/spms1_patch.rb" (read by "spms1/spms1_main.rb"), the default patch of "spms1/spms1_default_patch.h"
-  (for Reset, read by "spms1/spms1_midi_state.h"), the tables of "spms1_editor.html", the NRPN
+  (for Reset, read by "spms1/spms1_midi_state.h"), "spms1/spms1_parameters.h" (the declaration that
+  keeps the parameters' per-buffer function out of the per-sample loop's), the tables of "spms1_editor.html", the NRPN
   tables of "spms1_patching.md" and "spms1_patching.ja.md", and the wiring of the loop in
   "spms1/spms1_main.rb" (see [Adding a Module](./spms1_development.md#adding-a-module)). Run it, then regenerate "spms1/spms1_main.c"; `--check` only
   says whether the files are up to date
@@ -104,10 +112,10 @@ A path from the sound the synth powers up with to a patch of your own, a step at
 editor's Controls tab and the nodes of its Patch tab. Open "spms1_editor.html" (see
 [Web Editor](#web-editor)) and choose the synth, or SPMS-1 Web (Built-in), in "MIDI Out".
 
-1. Favorites: the Controls tab opens with "Show favorites only" ticked, showing the 47 parameters
+1. Favorites: the Controls tab opens with "Show favorites only" ticked, showing the 49 parameters
    the default patch marks as favorites:
    Pitch 1 Glide, Out 1 Glide Sw, Out 2 Glide Sw, Bend Amt, Out 1 Bend Sw and Stretch; EG 1 Attack, Decay, Sustain and Release Sw; LFO 1 Wave, Rate, Level and Reset Sw; Osc 1 Wave, PW, Pitch Mod 1 Amt,
-   Pitch Mod 1 Sw, Pitch Mod 2 Amt, PW Mod 1 Amt and PW Mod 2 Amt; Osc 2 Wave, Pitch Coarse, Pitch Fine, Pitch Mod 1 Amt, Pitch Mod 2 Amt and Sync Sw; Noise 1 Color; Mixer 2 Level 1 to 4; Filter 2 Cutoff, Resonance, Mode, Pitch Amt, Mod 1 Amt, Mod 1 Pol and Mod 2 Amt; Amp 1 Gain 2 and Mod 1/2 Mix; Chorus 1 Mix, Rate and Depth; and Delay 1 Mix, Time and Feedback.
+   Pitch Mod 1 Sw, Pitch Mod 2 Amt, PW Mod 1 Amt and PW Mod 2 Amt; Osc 2 Wave, Pitch Coarse, Pitch Fine, Pitch Mod 1 Amt, Pitch Mod 2 Amt and Sync Sw; Noise 1 Color; Mixer 2 Level 1 to 4; Filter 2 Cutoff, Resonance, Drive, Mode, Pitch Amt, Mod 1 Amt, Mod 1 Pol and Mod 2 Amt; Amp 1 Gain 2, Distortion and Mod 1/2 Mix; Chorus 1 Mix, Rate and Depth; and Delay 1 Mix, Time and Feedback.
    Mark more with the star as you find them. Osc 2's Pitch Mod Amts are on Osc 1's CCs, and each
    parameter of Filter 1 on Filter 2's but its Resonance, which has no CC, so a slider of one moves
    the other's with it, whether or not that one is shown
@@ -338,7 +346,7 @@ on the note too.
 The LFO goes straight to the oscillator, on Pitch Mod 2 In and PW Mod 2 In, and to the filters, where Mod 2 Amt (CC#25) powers up at 0.0 and
 leaves the cutoff alone until it is turned up. The envelope moves the cutoff by Mod 1 Amt
 (CC#24), which powers up at 0.2 (value 28), two octaves up from Cutoff (CC#74) at its
-peak; the cutoff powers up at 0.8 (value 100). Osc 1 Pitch Mod 2 Amt (CC#13) takes the
+peak; the cutoff powers up at 0.7 (value 88). Osc 1 Pitch Mod 2 Amt (CC#13) takes the
 LFO to the pitch and powers up at 0.0; at its top, value 124, with Osc 1 Pitch Mod 2 Pol at +0.2,
 the LFO at full level swings the pitch an octave either way. Osc 1 PW Mod 2 Amt (CC#103) takes it
 to the pulse width and powers up at 0.0. LFO 1 Level powers up at 1.0, so CC#13 alone sets the
@@ -353,8 +361,8 @@ whole range of what it moves, so bringing a source down to a musical depth is le
 rather than built into the modules.
 
 Mixer 2 sums the audio ahead of the filters: Osc 1 on In 1, Osc 2 on In 2, Osc 1's sub on In 3 and
-Noise 1's Out on In 4, each at its own level: Level 1 (CC#19) powers up at 1.0, so the default patch plays Osc 1 at full
-level, and Level 2 (CC#20), Level 3 (CC#21) and Level 4 (CC#23) at 0.0, so Osc 2, the sub and the
+Noise 1's Out on In 4, each at its own level: Level 1 (CC#19) powers up at 0.5, so the default patch plays Osc 1 at half
+level, with room for the others, and Level 2 (CC#20), Level 3 (CC#21) and Level 4 (CC#23) at 0.0, so Osc 2, the sub and the
 noise are silent until they are turned up. Osc 2 plays the note from Pitch 1 as Osc
 1 does, tuned against it by its own Pitch Coarse (CC#85) and Pitch Fine (CC#76), 10 cents sharp at
 power-up for a slow beat once it is turned up. Its Wave is its own as well, on CC#104 beside Osc 1's on CC#102. It

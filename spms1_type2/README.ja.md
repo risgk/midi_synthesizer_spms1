@@ -1,4 +1,4 @@
-MIDI Synthesizer SPMS-1 (type-2) v0.4.1
+MIDI Synthesizer SPMS-1 (type-2) v0.5.0
 =======================================
 
 - Spinel (Ruby AOT コンパイラ) で作った、Raspberry Pi Pico 2 用のモノフォニック・セミモジュラー MIDI シンセサイザー
@@ -10,7 +10,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.4.1
 - エンベロープ: ADS エンベロープ 2 つ。EG 2 はアンプの Mod 2 In 用で、起動時はオルガン型。CC#52、53、54。リリースのスイッチは 2 つとも CC#105
 - LFO: 三角波 (PolyBLAMP) とユニポーラの矩形波 (PolyBLEP) の個別出力と、その間をクロスフェードするメイン出力 (Wave、CC#33)。リセット入力付き (デフォルトで Note Gate。Reset Sw、CC#113 をオンにするとノートごとにやり直す)
 - フィルタ: 2 つの ZDF/TPT ステート・バリアブル・フィルタ (BP 積分器の非線形リーク付き、1 ステップ・ニュートン法で解く)。それぞれ LP、HP、BP の 3 出力と、LP と HP の間をノッチを経てクロスフェードするメイン出力 (Mode、CC#39)、ゲイン付きの 2 つのオーディオ入力を持つ。デフォルトでは同じ CC で直列につながり、4 次 (24 dB/oct) のローパスになる。1 つ目のレゾナンスは別 (CC なし)
-- アンプ: 2 つのオーディオ入力と、それぞれ最大 +12 dB のゲイン (CC#15)。先読み型のリミッターで、ピークを 1.0 のクランプの手前に、切らずに丸めて収める (Limiter Sw、CC なし、起動時オン)
+- アンプ: 2 つのオーディオ入力と、それぞれ最大 +12 dB のゲイン (CC#15)。先読み型のリミッターで、ピークを 1.0 のクランプの手前に、切らずに丸めて収める (Limiter Sw、CC なし、起動時オン)。その手前に、ADAA 付きの左右非対称のソフトクリップへ ×1〜×16 で入れ、ドライブに合わせたトーンを通すディストーション (CC#95)
 - コーラス: モノラル入力・ステレオ出力、実行順に入るモジュール
 - ディレイ: ステレオ、フィードバック付き、実行順に入るモジュール (最大 340 ms)
 - ピッチ: ノートのピッチを扱う、実行順に入るモジュール。指数カーブのラグによるポルタメント (CC#5)、その後に足すピッチベンド、鍵盤のストレッチ (ベンドレンジは CC#57、ストレッチは CC#22)
@@ -32,6 +32,10 @@ MIDI Synthesizer SPMS-1 (type-2) v0.4.1
         - GY-PCM5102 (PCM5102A I2S DAC モジュール)
     - または PWM Audio 出力 (DAC 不要、スケッチのデフォルト)
         - L は GP28、R は GP27 で、Pimoroni [Pico VGA Demo Base](https://shop.pimoroni.com/products/pimoroni-pico-vga-demo-base) (PIM553) と同じです
+        - ピンはアンプかアクティブスピーカーのライン入力につないでください。ピンにヘッドホンやパッシブスピーカーはつながないで
+          ください: 大きな電流が流れ、Pico や機器を傷めることがあります
+            - Pico VGA Demo Base のオーディオジャックは、[Hardware design with RP2040](https://datasheets.raspberrypi.com/rp2040/hardware-design-with-rp2040.pdf)
+              の「PWM audio」の回路 (バッファ、アナログフィルタ、AC カップリング) の後にあり、アンプかヘッドホンにつなげます
         - PWM のリップルを取り除くため、各出力に RC ローパスフィルタを付けることをお勧めします
             - 矩形波が流れるケーブルからの輻射ノイズ (EMI) も減らせます。ケーブルの先ではなく、ピンの近くに付けてください
         - RC フィルタを付けない場合は、抵抗か接続先の機器の入力ゲイン (ボリューム) でレベルを下げてください:
@@ -73,6 +77,8 @@ MIDI Synthesizer SPMS-1 (type-2) v0.4.1
       ロード 1 つ、ストア 1 つにインライン展開されます。サンプルごとの振り分けがモジュールのたびに読む
       モジュールの実行順も同じく C 配列で、シンセがバッファごとにパラメータのたびに読む CC の値と NRPN の
       テーブルの読み出しも "spms1_midi_read.h" からインライン展開されます
+    - クランプは、同じように読み込む "spms1_dsp.h" の 2 つの Float の大きい方と小さい方で、Ruby なら
+      比較して選ぶところがそれぞれ 1 命令 (`vmaxnm.f32` か `vminnm.f32`) になります
     - "spms1_main.c" は "spms1" で `spinel spms1_main.rb -c --rbs sig` を実行して生成します。"spms1/sig" の
       型シードがフィルタの状態、パラメータのスムージング、バスへの書き込みをボックス化させずに保ちます。
       必要な理由は "spms1/sig/spms1_filter.rbs"、"spms1/sig/spms1_dsp.rbs"、"spms1/sig/spms1_framework.rbs"
@@ -80,7 +86,8 @@ MIDI Synthesizer SPMS-1 (type-2) v0.4.1
 - Ruby (CRuby): パッチの番号や初期パッチを変えるとき、モジュールを追加するとき。これらは
   "spms1_patch.yaml" にまとめてあり、`ruby patch_gen/spms1_patch_gen.rb` が "spms1/spms1_patch.rb"
   ("spms1/spms1_main.rb" が読み込みます)、"spms1/spms1_default_patch.h" の初期パッチ (Reset 用に
-  "spms1/spms1_midi_state.h" が読み込みます)、"spms1_editor.html" のテーブル、"spms1_patching.ja.md" と
+  "spms1/spms1_midi_state.h" が読み込みます)、"spms1/spms1_parameters.h" (パラメータのバッファごとの関数を、
+  サンプルごとのループの関数の外に置く宣言)、"spms1_editor.html" のテーブル、"spms1_patching.ja.md" と
   "spms1_patching.md" の NRPN の表、"spms1/spms1_main.rb" のループの配線
   ([モジュールの追加](./spms1_development.ja.md#モジュールの追加) を参照) に
   書き出します。実行したあと、"spms1/spms1_main.c" を生成し直してください。`--check` は、ファイルが
@@ -104,10 +111,10 @@ MIDI Synthesizer SPMS-1 (type-2) v0.4.1
 "spms1_editor.html" を開き（[Web エディタ](#web-エディタ)を参照）、"MIDI Out" でシンセか SPMS-1 Web (Built-in) を選びます。
 
 1. お気に入り: Controls タブは "Show favorites only" にチェックが入った状態で開き、デフォルトパッチで
-   お気に入りになっている 47 個のパラメータを表示します:
+   お気に入りになっている 49 個のパラメータを表示します:
    Pitch 1 Glide・Out 1 Glide Sw・Out 2 Glide Sw・Bend Amt・Out 1 Bend Sw・Stretch、EG 1 Attack・Decay・Sustain・Release Sw、LFO 1 Wave・Rate・Level・Reset Sw、Osc 1 Wave・PW・Pitch Mod 1 Amt・Pitch Mod 1 Sw・Pitch Mod 2 Amt・PW Mod 1 Amt・PW Mod 2 Amt、Osc 2 Wave・Pitch Coarse・Pitch Fine・Pitch Mod 1 Amt・Pitch Mod 2 Amt・Sync Sw、Noise 1 Color、Mixer 2 Level 1〜4、
-   Filter 2 Cutoff・Resonance・Mode・Pitch Amt・Mod 1 Amt・Mod 1 Pol・Mod 2 Amt、
-   Amp 1 Gain 2・Mod 1/2 Mix、Chorus 1 Mix・Rate・Depth、Delay 1 Mix・Time・Feedback。
+   Filter 2 Cutoff・Resonance・Drive・Mode・Pitch Amt・Mod 1 Amt・Mod 1 Pol・Mod 2 Amt、
+   Amp 1 Gain 2・Distortion・Mod 1/2 Mix、Chorus 1 Mix・Rate・Depth、Delay 1 Mix・Time・Feedback。
    気に入ったものは星で追加できます。Osc 2 の各 Pitch Mod Amt は Osc 1 と、Filter 1 の Resonance（CC なし）以外の
    各パラメータは Filter 2 と同じ CC なので、片方のスライダーを動かすと、表示されているかどうかに関わらず相手も一緒に動きます
 2. CC のあるパラメータ: "Show favorites only" のチェックを外すと、CC のあるパラメータがすべて表示されます。
@@ -325,7 +332,7 @@ Mixer 2 Level 1 を下げ Level 2 を上げて（CC#19 = 4、CC#20 = 124）ミ�
 LFO はオシレータの Pitch Mod 2 In と PW Mod 2 In に直接入ります。フィルタにも入りますが、Mod 2 Amt
 （CC#25）が起動時 0.0 なので、上げるまでカットオフは動きません。エンベロープは Mod 1 Amt（CC#24）で
 カットオフを動かし、起動時は 0.2（値 28）で、ピークで Cutoff（CC#74）から 2 オクターブ上まで開きます。
-カットオフは起動時 0.8（値 100）です。
+カットオフは起動時 0.7（値 88）です。
 LFO は Osc 1 Pitch Mod 2 Amt（CC#13）でピッチへ入ります。起動時は 0.0 で、最大の値 124 では Osc 1 Pitch Mod 2 Pol の
 起動時の +0.2 と合わせて、フルレベルの LFO がピッチを上下 1 オクターブ振ります。パルス幅へは
 Osc 1 PW Mod 2 Amt（CC#103）で入り、起動時は 0.0 です。LFO 1 Level は起動時 1.0 なので、ビブラートは
@@ -338,7 +345,7 @@ CC のない Pitch Pol は起動時 +1.0 で、値 64 より下にすると追�
 ソースを音楽的な深さまで絞る仕事はモジュールに作り込まず、パッチの側に任せています。
 
 Mixer 2 がフィルタの前でオーディオを足し合わせます。Osc 1 が In 1、Osc 2 が In 2、Osc 1 のサブが In 3、Noise 1 の Out が In 4 です。
-それぞれ自分のレベルで足されます。Level 1（CC#19）は起動時 1.0 なので、デフォルトのパッチは Osc 1 を最大のレベルで鳴らします。Level 2（CC#20）、Level 3（CC#21）、Level 4（CC#23）は起動時 0.0 なので、上げるまで Osc 2、サブ、ノイズは鳴りません。Osc 2 は Osc 1 と同じく Pitch 1 からノートを受け取り、自分の Pitch Coarse（CC#85）と
+それぞれ自分のレベルで足されます。Level 1（CC#19）は起動時 0.5 なので、デフォルトのパッチは Osc 1 を半分のレベルで鳴らし、ほかを足す余裕を残します。Level 2（CC#20）、Level 3（CC#21）、Level 4（CC#23）は起動時 0.0 なので、上げるまで Osc 2、サブ、ノイズは鳴りません。Osc 2 は Osc 1 と同じく Pitch 1 からノートを受け取り、自分の Pitch Coarse（CC#85）と
 Pitch Fine（CC#76）で Osc 1 に対する音程を決めます。起動時は 10 セント高く、上げるとゆっくりうなります。Wave も自分のもので、CC#104 です（Osc 1 は CC#102）。それ以外は
 Osc 1 に従います。各 Pitch Mod Amt には Osc 1 と同じ CC が割り当ててあるので、1 つの CC で両方が動きます。PW と PW Mod Amt には CC がありません。
 

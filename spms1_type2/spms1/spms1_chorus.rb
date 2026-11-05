@@ -49,6 +49,9 @@ module Spms1
 
     attr_reader :output_l, :output_r
 
+    # The tap (or the repeats) alone, before the crossfade with the dry input.
+    attr_reader :output_wet_l, :output_wet_r
+
     # The average of the two sides, worked out when read, which the loop does every sample.
     def output_mono
       (@output_l + @output_r) * 0.5
@@ -78,7 +81,7 @@ module Spms1
       @depth = 0.5
       @stage_1_depth = 0.0
       @current_depth = 0.0
-      @mix = 0.5
+      @mix = 0.25
       @stage_1_mix = 0.0
       @current_mix = 0.0
 
@@ -91,26 +94,28 @@ module Spms1
       @delay_step_r = 0.0
 
       @output_l = 0.0
+      @output_wet_l = 0.0
+      @output_wet_r = 0.0
       @output_r = 0.0
     end
 
     # Rate is unipolar, [0.0, 1.0], and read as a note number: 0.015 Hz at 0.0, 0.48 Hz at 0.5,
     # 15.4 Hz at 1.0.
     def set_rate(rate)
-      @rate = (rate < 0.0) ? 0.0 : ((rate > 1.0) ? 1.0 : rate)
+      @rate = Dsp.clamp(rate, 0.0, 1.0)
     end
 
     # Depth is unipolar, [0.0, 1.0], how far each tap swings either side of 5.33 ms: not at all at
     # 0.0, 2.63 ms at 0.5, 5.25 ms at 1.0.
     def set_depth(depth)
-      @depth = (depth < 0.0) ? 0.0 : ((depth > 1.0) ? 1.0 : depth)
+      @depth = Dsp.clamp(depth, 0.0, 1.0)
     end
 
     # Mix is unipolar, [0.0, 1.0], the delayed signal's share of each crossfade: the dry input at
     # 0.0, half and half at 0.5, and only
     # the delayed signal at 1.0, a vibrato apart on the two sides.
     def set_mix(mix)
-      @mix = (mix < 0.0) ? 0.0 : ((mix > 1.0) ? 1.0 : mix)
+      @mix = Dsp.clamp(mix, 0.0, 1.0)
     end
 
     # The parameters that scale no audio themselves -- rates, depths, times -- smoothed in two
@@ -148,7 +153,7 @@ module Spms1
       end
 
       # Held to the bus's one unit on the way in, as the delay holds its inputs.
-      input = (audio_input < -1.0) ? -1.0 : ((audio_input > 1.0) ? 1.0 : audio_input)
+      input = Dsp.clamp(audio_input, -1.0, 1.0)
 
       @delay_l += @delay_step_l
       @delay_r += @delay_step_r
@@ -171,6 +176,8 @@ module Spms1
       @filtered = input + (@filtered - input) * 0.25
       @delay_line[@write_index] = @filtered
 
+      @output_wet_l = delayed_l
+      @output_wet_r = delayed_r
       @output_l = input + (delayed_l - input) * @current_mix
       @output_r = input + (delayed_r - input) * @current_mix
     end

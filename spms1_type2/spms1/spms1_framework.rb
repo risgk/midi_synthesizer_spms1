@@ -24,9 +24,9 @@
 # note makes a buffer take more work than every module running, which is what is measured, so the
 # time measured is the worst time. Every module in the run order runs every sample and every
 # parameter is worked out every buffer, whether or not it has moved, never only when it changes;
-# branches on values are avoided where they can be (clamps as nested ternaries that compile to
-# selects, curves from lookup tables with interpolation rather than library calls such as a square
-# root), so that no input takes a slower path than the one measured. A module keeps to it as well:
+# branches on values are avoided where they can be (clamps as a max and a min, Dsp.clamp; curves
+# from lookup tables with interpolation rather than library calls such as a square root), so that
+# no input takes a slower path than the one measured. A module keeps to it as well:
 # spms1_development.md's "Writing a Module" says how.
 #
 # Claims about the generated C, here and in the rest of the synth, hold for the Spinel version
@@ -65,6 +65,8 @@ module Spms1
     ffi_func :set_bus_signal,             [:int32, :float],          :void
     ffi_func :get_active_module,          [:int32],                  :int32
     ffi_func :set_active_module,          [:int32, :int32],          :void
+    ffi_func :float_max,                  [:float, :float],          :float
+    ffi_func :float_min,                  [:float, :float],          :float
   end
 
   # The signal bus, indexed as an Array would be. Its slots are a C array of the host's
@@ -95,12 +97,12 @@ end
 # so reassigning which CC a parameter reads cannot change what the value means.
 def cc_to_unipolar(value)
   scaled = (value.to_f - 4.0) * (1.0 / 120.0)
-  (scaled < 0.0) ? 0.0 : ((scaled > 1.0) ? 1.0 : scaled)
+  Spms1::Dsp.clamp(scaled, 0.0, 1.0)
 end
 
 def cc_to_bipolar(value)
   scaled = (value.to_f - 64.0) * (1.0 / 120.0)
-  (scaled < -0.5) ? -0.5 : ((scaled > 0.5) ? 0.5 : scaled)
+  Spms1::Dsp.clamp(scaled, -0.5, 0.5)
 end
 
 # What the mod wheel's slot is filled with. CC number 0 means no CC is assigned, and the slot gets

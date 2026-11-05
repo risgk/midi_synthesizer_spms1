@@ -72,6 +72,15 @@ sample rate. The low pass state stays linear, with a
 clamp at 16 as a guard that ordinary use never reaches. The output clip comes last. At the top of
 the resonance dial k turns negative and the loop oscillates.
 
+Drive, on CC#31 for both filters, brings the leak's ceiling down, from x1 at value 4, where it powers up and the
+filter is as it was, to x32 at value 124, 6 dB every 24 values. That is the same as driving the
+loop that much harder and taking what leaves it down by as much ahead of the output clip: the
+resonance runs into the leak sooner and saturates, with its even harmonics, while the pass band
+stays clean, the level stays and the output clip stays where it is. A signal at the cutoff is held
+down with the peak, so a cutoff on the notes' fundamentals comes out quieter as Drive goes up, and
+the self-oscillation comes out lower by the Drive too. Unlike turning Gain 1 or Gain 2 up, it does
+not drive the output clip, which would bend the whole band past the resonance.
+
 The filter puts out its low pass and high pass at once, as Out LP and Out HP, each through a DC
 blocker and an output clip of its own, and Out, the two crossfaded by Mode (CC#39). Each side stays at full over its own half and falls to nothing over the other.
 At 0.0 (value 4), where it powers up, Out is the low
@@ -135,6 +144,38 @@ flowchart LR
   classDef nl fill:#FAECE7,stroke:#D85A30,color:#712B13
   class D,LIM nl
 ```
+
+### Amp 1
+
+Two audio inputs, each with a gain of its own (x0 to x4, +12 dB), summed and scaled by the
+modulation: Mod 1 In and Mod 2 In crossfaded by Mod 1/2 Mix and held within one unit, so that it
+can scale the sound down but never up. What comes out goes through the distortion, and then a
+look-ahead limiter holds it under the one-unit clamp.
+
+```mermaid
+flowchart LR
+  IN1([Audio In 1]) --> G1["× Gain 1<br/>x0 to x4"]
+  IN2([Audio In 2]) --> G2["× Gain 2<br/>x0 to x4"]
+  G1 --> SUM((Σ))
+  G2 --> SUM
+  SUM --> M["× Mod<br/>within ±1"]
+  MOD1([Mod 1 In]) -.-> MX["Mod 1/2 Mix<br/>crossfade"]
+  MOD2([Mod 2 In]) -.-> MX
+  MX -.-> M
+  M --> DRV["× Distortion<br/>x1 to x32"]
+  DRV --> SC["Soft clip, ADAA<br/>linear up to 1.0,<br/>2.0 at 3.0, -1.5 at -2.0"]
+  SC --> TONE["Tone<br/>Low pass 1-pole<br/>none to 5 kHz"]
+  TONE --> MU["× Distortion^(−15/16)"]
+  MU --> LIM["Look-ahead limiter<br/>0.9, 1 ms (Limiter Sw)"]
+  LIM --> CL["Clamp<br/>±1.0"]
+  CL --> OUT([Out])
+  classDef nl fill:#FAECE7,stroke:#D85A30,color:#712B13
+  class SC,LIM,CL nl
+```
+
+At Distortion x1, where it powers up, a sound within one unit reaches no shoulder and passes as it
+is; the distortion is described under Amp 1 Distortion in "Ranges worth knowing" below. The limiter
+delays the output by its look-ahead, 1 ms; with Limiter Sw off, only the clamp holds the output.
 
 ### Chorus 1
 
@@ -210,7 +251,7 @@ it from anywhere else.
 An edit is three CCs: CC#99 picks a category, 112 plus its number, CC#98 an entry in it, and CC#6 the
 value. To feed Filter 1 Cutoff from the envelope, for example: CC#99 = 114 (category 2, where each
 parameter takes its value from), CC#98 = 66 (Filter 1 Cutoff, in the entry tables below), CC#6 = 44
-(EG 1 Out, in the Signal IDs); then CC#98 = 77 and CC#6 = 44 do the same for Filter 2 Cutoff, the
+(EG 1 Out, in the Signal IDs); then CC#98 = 78 and CC#6 = 44 do the same for Filter 2 Cutoff, the
 category standing. The editor is the easier way to the same end, a wire dragged from EG 1 Out to
 Filter 1 Cutoff on its Patch tab, and it sends exactly these; its Export panel, with the format
 "MIDI bytes (hex)" or "NRPN list" and comments on, shows the whole patch as them, each named, so
@@ -319,9 +360,11 @@ order is never what makes a patch fit; to leave one out of the sound, route arou
 run unread (see the examples below).
 Mixer 1 has no CC: its levels hold 0.0, so it is silent until a patch turns them up, as its
 category 4 values or by giving them CCs. Mixer 2 has a CC on each level, CC#19 to 21 and 23, of which
-Level 1 powers up at 1.0 and Level 2 to 4 at 0.0, so Osc 1 alone is heard at first. Each mixer's Out Level has no CC: Mixer 1's holds 0.5, and Mixer 2's
-1.0 (value 124), which sets how hard the audio drives the filters (0.5 until v0.4.0; the filters are
-driven 6 dB harder now, and Amp 1 Gain 2 is down by the same, so the level is as it was).
+Level 1 powers up at 0.5 (value 64) and Level 2 to 4 at 0.0, so Osc 1 alone is heard at first. Each mixer's Out Level has no CC: Mixer 1's holds 0.5, and Mixer 2's
+1.0 (value 124), which sets how hard the audio drives the filters. Osc 1 alone reaches them at 0.25,
+as until v0.4.0 (when Out Level held 0.5 and Level 1 powered up at 1.0; in v0.4.1, Level 1 at 1.0
+drove them 6 dB harder), so the self-oscillation holds against it while a note plays, and Amp 1
+Gain 2 brings the level back up.
 
 ### Entries (CC#98), category 1
 
@@ -378,39 +421,40 @@ both at the same signal for a mono output.
 
 | CC#98 | Parameter | | CC#98 | Parameter | | CC#98 | Parameter |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | Pitch 1 Glide | | 33 | Osc 1 Pitch Mod 1 Amt | | 66 | Filter 1 Cutoff |
-| 1 | Pitch 1 Out 1 Glide Sw | | 34 | Osc 1 Pitch Mod 1 Pol | | 67 | Filter 1 Resonance |
-| 2 | Pitch 1 Out 2 Glide Sw | | 35 | Osc 1 Pitch Mod 1 Sw | | 68 | Filter 1 Gain 1 |
-| 3 | Pitch 1 Bend Amt | | 36 | Osc 1 Pitch Mod 2 Amt | | 69 | Filter 1 Gain 2 |
-| 4 | Pitch 1 Bend Pol | | 37 | Osc 1 Pitch Mod 2 Pol | | 70 | Filter 1 Pitch Amt |
-| 5 | Pitch 1 Out 1 Bend Sw | | 38 | Osc 1 Pitch Mod 2 Sw | | 71 | Filter 1 Pitch Pol |
-| 6 | Pitch 1 Out 2 Bend Sw | | 39 | Osc 1 PW Mod 1 Amt | | 72 | Filter 1 Mod 1 Amt |
-| 7 | Pitch 1 Stretch | | 40 | Osc 1 PW Mod 1 Pol | | 73 | Filter 1 Mod 1 Pol |
-| 8 | EG 1 Attack | | 41 | Osc 1 PW Mod 2 Amt | | 74 | Filter 1 Mod 2 Amt |
-| 9 | EG 1 Decay | | 42 | Osc 1 PW Mod 2 Pol | | 75 | Filter 1 Mod 2 Pol |
-| 10 | EG 1 Sustain | | 43 | Osc 2 Wave | | 76 | Filter 2 Mode |
-| 11 | EG 1 Release Sw | | 44 | Osc 2 PW | | 77 | Filter 2 Cutoff |
-| 12 | EG 1 Level | | 45 | Osc 2 Pitch Coarse | | 78 | Filter 2 Resonance |
-| 13 | EG 2 Attack | | 46 | Osc 2 Pitch Fine | | 79 | Filter 2 Gain 1 |
-| 14 | EG 2 Decay | | 47 | Osc 2 Pitch Mod 1 Amt | | 80 | Filter 2 Gain 2 |
-| 15 | EG 2 Sustain | | 48 | Osc 2 Pitch Mod 1 Pol | | 81 | Filter 2 Pitch Amt |
-| 16 | EG 2 Release Sw | | 49 | Osc 2 Pitch Mod 1 Sw | | 82 | Filter 2 Pitch Pol |
-| 17 | EG 2 Level | | 50 | Osc 2 Pitch Mod 2 Amt | | 83 | Filter 2 Mod 1 Amt |
-| 18 | LFO 1 Wave | | 51 | Osc 2 Pitch Mod 2 Pol | | 84 | Filter 2 Mod 1 Pol |
-| 19 | LFO 1 Rate | | 52 | Osc 2 Pitch Mod 2 Sw | | 85 | Filter 2 Mod 2 Amt |
-| 20 | LFO 1 Level | | 53 | Osc 2 PW Mod 1 Amt | | 86 | Filter 2 Mod 2 Pol |
-| 21 | LFO 1 Rate Mod Amt | | 54 | Osc 2 PW Mod 1 Pol | | 87 | Amp 1 Gain 1 |
-| 22 | LFO 1 Level Mod Amt | | 55 | Osc 2 PW Mod 2 Amt | | 88 | Amp 1 Gain 2 |
-| 23 | LFO 1 Reset Sw | | 56 | Osc 2 PW Mod 2 Pol | | 89 | Amp 1 Mod 1/2 Mix |
-| 24 | Mixer 1 Level 1 | | 57 | Osc 2 Sync Sw | | 90 | Chorus 1 Mix |
-| 25 | Mixer 1 Level 2 | | 58 | Noise 1 Color | | 91 | Chorus 1 Rate |
-| 26 | Mixer 1 Level 3 | | 59 | Noise 1 Level | | 92 | Chorus 1 Depth |
-| 27 | Mixer 1 Level 4 | | 60 | Mixer 2 Level 1 | | 93 | Delay 1 Mix |
-| 28 | Mixer 1 Out Level | | 61 | Mixer 2 Level 2 | | 94 | Delay 1 Time |
-| 29 | Osc 1 Wave | | 62 | Mixer 2 Level 3 | | 95 | Delay 1 Feedback |
-| 30 | Osc 1 PW | | 63 | Mixer 2 Level 4 | | 100 | Amp 1 Limiter Sw |
-| 31 | Osc 1 Pitch Coarse | | 64 | Mixer 2 Out Level | |  |  |
-| 32 | Osc 1 Pitch Fine | | 65 | Filter 1 Mode | |  |  |
+| 0 | Pitch 1 Glide | | 34 | Osc 1 Pitch Mod 1 Pol | | 68 | Filter 1 Drive |
+| 1 | Pitch 1 Out 1 Glide Sw | | 35 | Osc 1 Pitch Mod 1 Sw | | 69 | Filter 1 Gain 1 |
+| 2 | Pitch 1 Out 2 Glide Sw | | 36 | Osc 1 Pitch Mod 2 Amt | | 70 | Filter 1 Gain 2 |
+| 3 | Pitch 1 Bend Amt | | 37 | Osc 1 Pitch Mod 2 Pol | | 71 | Filter 1 Pitch Amt |
+| 4 | Pitch 1 Bend Pol | | 38 | Osc 1 Pitch Mod 2 Sw | | 72 | Filter 1 Pitch Pol |
+| 5 | Pitch 1 Out 1 Bend Sw | | 39 | Osc 1 PW Mod 1 Amt | | 73 | Filter 1 Mod 1 Amt |
+| 6 | Pitch 1 Out 2 Bend Sw | | 40 | Osc 1 PW Mod 1 Pol | | 74 | Filter 1 Mod 1 Pol |
+| 7 | Pitch 1 Stretch | | 41 | Osc 1 PW Mod 2 Amt | | 75 | Filter 1 Mod 2 Amt |
+| 8 | EG 1 Attack | | 42 | Osc 1 PW Mod 2 Pol | | 76 | Filter 1 Mod 2 Pol |
+| 9 | EG 1 Decay | | 43 | Osc 2 Wave | | 77 | Filter 2 Mode |
+| 10 | EG 1 Sustain | | 44 | Osc 2 PW | | 78 | Filter 2 Cutoff |
+| 11 | EG 1 Release Sw | | 45 | Osc 2 Pitch Coarse | | 79 | Filter 2 Resonance |
+| 12 | EG 1 Level | | 46 | Osc 2 Pitch Fine | | 80 | Filter 2 Drive |
+| 13 | EG 2 Attack | | 47 | Osc 2 Pitch Mod 1 Amt | | 81 | Filter 2 Gain 1 |
+| 14 | EG 2 Decay | | 48 | Osc 2 Pitch Mod 1 Pol | | 82 | Filter 2 Gain 2 |
+| 15 | EG 2 Sustain | | 49 | Osc 2 Pitch Mod 1 Sw | | 83 | Filter 2 Pitch Amt |
+| 16 | EG 2 Release Sw | | 50 | Osc 2 Pitch Mod 2 Amt | | 84 | Filter 2 Pitch Pol |
+| 17 | EG 2 Level | | 51 | Osc 2 Pitch Mod 2 Pol | | 85 | Filter 2 Mod 1 Amt |
+| 18 | LFO 1 Wave | | 52 | Osc 2 Pitch Mod 2 Sw | | 86 | Filter 2 Mod 1 Pol |
+| 19 | LFO 1 Rate | | 53 | Osc 2 PW Mod 1 Amt | | 87 | Filter 2 Mod 2 Amt |
+| 20 | LFO 1 Level | | 54 | Osc 2 PW Mod 1 Pol | | 88 | Filter 2 Mod 2 Pol |
+| 21 | LFO 1 Rate Mod Amt | | 55 | Osc 2 PW Mod 2 Amt | | 89 | Amp 1 Gain 1 |
+| 22 | LFO 1 Level Mod Amt | | 56 | Osc 2 PW Mod 2 Pol | | 90 | Amp 1 Gain 2 |
+| 23 | LFO 1 Reset Sw | | 57 | Osc 2 Sync Sw | | 91 | Amp 1 Distortion |
+| 24 | Mixer 1 Level 1 | | 58 | Noise 1 Color | | 92 | Amp 1 Mod 1/2 Mix |
+| 25 | Mixer 1 Level 2 | | 59 | Noise 1 Level | | 93 | Amp 1 Limiter Sw |
+| 26 | Mixer 1 Level 3 | | 60 | Mixer 2 Level 1 | | 94 | Chorus 1 Mix |
+| 27 | Mixer 1 Level 4 | | 61 | Mixer 2 Level 2 | | 95 | Chorus 1 Rate |
+| 28 | Mixer 1 Out Level | | 62 | Mixer 2 Level 3 | | 96 | Chorus 1 Depth |
+| 29 | Osc 1 Wave | | 63 | Mixer 2 Level 4 | | 97 | Delay 1 Mix |
+| 30 | Osc 1 PW | | 64 | Mixer 2 Out Level | | 98 | Delay 1 Time |
+| 31 | Osc 1 Pitch Coarse | | 65 | Filter 1 Mode | | 99 | Delay 1 Feedback |
+| 32 | Osc 1 Pitch Fine | | 66 | Filter 1 Cutoff | |  |  |
+| 33 | Osc 1 Pitch Mod 1 Amt | | 67 | Filter 1 Resonance | |  |  |
 
 <!-- patch_gen end -->
 
@@ -425,10 +469,10 @@ have none there. See below.
 
 | CC#98 | CC for | Fills |
 | ----- | ------ | ----- |
-| 96 | Mod Wheel | Mod Wheel, Mod Wheel Rev, Mod Wheel Inv, Mod Wheel Rev Inv |
-| 97 | Breath | Breath, Breath Rev, Breath Inv, Breath Rev Inv |
-| 98 | General 1 | General 1, General 1 Rev, General 1 Inv, General 1 Rev Inv, General 1 Bipolar, General 1 Bipolar Inv, General 1 Cos, General 1 Sin, General 1 Lo, General 1 Hi, General 1 Neg, General 1 Mid, General 1 Pos |
-| 99 | General 2 | General 2, General 2 Rev, General 2 Inv, General 2 Rev Inv, General 2 Bipolar, General 2 Bipolar Inv, General 2 Cos, General 2 Sin, General 2 Lo, General 2 Hi, General 2 Neg, General 2 Mid, General 2 Pos |
+| 100 | Mod Wheel | Mod Wheel, Mod Wheel Rev, Mod Wheel Inv, Mod Wheel Rev Inv |
+| 101 | Breath | Breath, Breath Rev, Breath Inv, Breath Rev Inv |
+| 102 | General 1 | General 1, General 1 Rev, General 1 Inv, General 1 Rev Inv, General 1 Bipolar, General 1 Bipolar Inv, General 1 Cos, General 1 Sin, General 1 Lo, General 1 Hi, General 1 Neg, General 1 Mid, General 1 Pos |
+| 103 | General 2 | General 2, General 2 Rev, General 2 Inv, General 2 Rev Inv, General 2 Bipolar, General 2 Bipolar Inv, General 2 Cos, General 2 Sin, General 2 Lo, General 2 Hi, General 2 Neg, General 2 Mid, General 2 Pos |
 
 <!-- patch_gen end -->
 
@@ -462,34 +506,35 @@ have none there. See below.
 
 | ID | Signal | | ID | Signal | | ID | Signal |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | None (constant 0.0) | | 28 | General 1 Pos | | 56 | Osc 1 Output ± |
-| 1 | Constant 1.0 | | 29 | General 2 | | 57 | Osc 1 Output Saw ± |
-| 2 | Constant 0.5 | | 30 | General 2 Rev | | 58 | Osc 1 Output Pulse ± |
-| 3 | Constant -0.5 | | 31 | General 2 Inv | | 59 | Osc 1 Output Sub ± |
-| 4 | Constant -1.0 | | 32 | General 2 Rev Inv | | 60 | Osc 2 Output ± |
-| 5 | Note Pitch ± | | 33 | General 2 Bipolar ± | | 61 | Osc 2 Output Saw ± |
-| 6 | Note Gate | | 34 | General 2 Bipolar Inv ± | | 62 | Osc 2 Output Pulse ± |
-| 7 | Pitch Bend ± | | 35 | General 2 Cos | | 63 | Noise 1 Output ± |
-| 8 | Mod Wheel | | 36 | General 2 Sin | | 64 | Noise 1 Output White ± |
-| 9 | Mod Wheel Rev | | 37 | General 2 Lo | | 65 | Noise 1 Output Red ± |
-| 10 | Mod Wheel Inv | | 38 | General 2 Hi | | 66 | Mixer 2 Output ± |
-| 11 | Mod Wheel Rev Inv | | 39 | General 2 Neg | | 67 | Mixer 2 Output Inv ± |
-| 12 | Breath | | 40 | General 2 Mid | | 68 | Filter 1 Output ± |
-| 13 | Breath Rev | | 41 | General 2 Pos | | 69 | Filter 1 Output LP ± |
-| 14 | Breath Inv | | 42 | Pitch 1 Output 1 ± | | 70 | Filter 1 Output HP ± |
-| 15 | Breath Rev Inv | | 43 | Pitch 1 Output 2 ± | | 71 | Filter 1 Output BP ± |
-| 16 | General 1 | | 44 | EG 1 Output | | 72 | Filter 2 Output ± |
-| 17 | General 1 Rev | | 45 | EG 1 Output Inv | | 73 | Filter 2 Output LP ± |
-| 18 | General 1 Inv | | 46 | EG 2 Output | | 74 | Filter 2 Output HP ± |
-| 19 | General 1 Rev Inv | | 47 | EG 2 Output Inv | | 75 | Filter 2 Output BP ± |
-| 20 | General 1 Bipolar ± | | 48 | LFO 1 Output ± | | 76 | Amp 1 Output ± |
-| 21 | General 1 Bipolar Inv ± | | 49 | LFO 1 Output Inv ± | | 77 | Chorus 1 Output L ± |
-| 22 | General 1 Cos | | 50 | LFO 1 Output Triangle ± | | 78 | Chorus 1 Output R ± |
-| 23 | General 1 Sin | | 51 | LFO 1 Output Triangle Inv ± | | 79 | Chorus 1 Output Mono ± |
-| 24 | General 1 Lo | | 52 | LFO 1 Output Square | | 80 | Delay 1 Output L ± |
-| 25 | General 1 Hi | | 53 | LFO 1 Output Square Inv | | 81 | Delay 1 Output R ± |
-| 26 | General 1 Neg | | 54 | Mixer 1 Output ± | | 82 | Delay 1 Output Mono ± |
-| 27 | General 1 Mid | | 55 | Mixer 1 Output Inv ± | |  |  |
+| 0 | None (constant 0.0) | | 29 | General 2 | | 58 | Osc 1 Output Pulse ± |
+| 1 | Constant 1.0 | | 30 | General 2 Rev | | 59 | Osc 1 Output Sub ± |
+| 2 | Constant 0.5 | | 31 | General 2 Inv | | 60 | Osc 2 Output ± |
+| 3 | Constant -0.5 | | 32 | General 2 Rev Inv | | 61 | Osc 2 Output Saw ± |
+| 4 | Constant -1.0 | | 33 | General 2 Bipolar ± | | 62 | Osc 2 Output Pulse ± |
+| 5 | Note Pitch ± | | 34 | General 2 Bipolar Inv ± | | 63 | Noise 1 Output ± |
+| 6 | Note Gate | | 35 | General 2 Cos | | 64 | Noise 1 Output White ± |
+| 7 | Pitch Bend ± | | 36 | General 2 Sin | | 65 | Noise 1 Output Red ± |
+| 8 | Mod Wheel | | 37 | General 2 Lo | | 66 | Mixer 2 Output ± |
+| 9 | Mod Wheel Rev | | 38 | General 2 Hi | | 67 | Mixer 2 Output Inv ± |
+| 10 | Mod Wheel Inv | | 39 | General 2 Neg | | 68 | Filter 1 Output ± |
+| 11 | Mod Wheel Rev Inv | | 40 | General 2 Mid | | 69 | Filter 1 Output LP ± |
+| 12 | Breath | | 41 | General 2 Pos | | 70 | Filter 1 Output HP ± |
+| 13 | Breath Rev | | 42 | Pitch 1 Output 1 ± | | 71 | Filter 1 Output BP ± |
+| 14 | Breath Inv | | 43 | Pitch 1 Output 2 ± | | 72 | Filter 2 Output ± |
+| 15 | Breath Rev Inv | | 44 | EG 1 Output | | 73 | Filter 2 Output LP ± |
+| 16 | General 1 | | 45 | EG 1 Output Inv | | 74 | Filter 2 Output HP ± |
+| 17 | General 1 Rev | | 46 | EG 2 Output | | 75 | Filter 2 Output BP ± |
+| 18 | General 1 Inv | | 47 | EG 2 Output Inv | | 76 | Amp 1 Output ± |
+| 19 | General 1 Rev Inv | | 48 | LFO 1 Output ± | | 77 | Chorus 1 Output L ± |
+| 20 | General 1 Bipolar ± | | 49 | LFO 1 Output Inv ± | | 78 | Chorus 1 Output R ± |
+| 21 | General 1 Bipolar Inv ± | | 50 | LFO 1 Output Triangle ± | | 79 | Chorus 1 Output Mono ± |
+| 22 | General 1 Cos | | 51 | LFO 1 Output Triangle Inv ± | | 80 | Chorus 1 Output Wet L ± |
+| 23 | General 1 Sin | | 52 | LFO 1 Output Square | | 81 | Chorus 1 Output Wet R ± |
+| 24 | General 1 Lo | | 53 | LFO 1 Output Square Inv | | 82 | Delay 1 Output L ± |
+| 25 | General 1 Hi | | 54 | Mixer 1 Output ± | | 83 | Delay 1 Output R ± |
+| 26 | General 1 Neg | | 55 | Mixer 1 Output Inv ± | | 84 | Delay 1 Output Mono ± |
+| 27 | General 1 Mid | | 56 | Osc 1 Output ± | | 85 | Delay 1 Output Wet L ± |
+| 28 | General 1 Pos | | 57 | Osc 1 Output Saw ± | | 86 | Delay 1 Output Wet R ± |
 
 <!-- patch_gen end -->
 
@@ -529,7 +574,7 @@ mod wheel.
 
 Slots 16 to 41 are General 1 and General 2, two more control slots that no parameter owns, read
 from CC#16 and CC#17, General Purpose Controllers 1 and 2. With no CC (category 3 at 0), each holds
-its value in category 4 (CC#99 = 116, CC#98 = 98 and 99) instead, as a parameter with no CC does,
+its value in category 4 (CC#99 = 116, CC#98 = 102 and 103) instead, as a parameter with no CC does,
 which the editor's slider sets. Each CC fills thirteen slots at once, each
 a form of its value u, which runs 0.0 to 1.0 from value 4 to value 124: General n itself, Rev
 1 - u, Inv -u, Rev Inv u - 1, Bipolar u - 0.5, Bipolar Inv 0.5 - u, Cos cos(u * pi / 2), Sin
@@ -606,8 +651,9 @@ oscillator's range.
 
 LFO 1 puts out a triangle and a square at once, each on an output of its own, Out Triangle and
 Out Square, and the two crossfaded on Out. The triangle has its corners rounded off by PolyBLAMP
-and the square its steps by PolyBLEP, so at the top of the rate range, 220 Hz, where the LFO is an
-audible tone, the square's aliases are 41 dB down on it, rather than 24 dB without. The square is
+and the square its steps by PolyBLEP, so at the top of the rate range, 130.8 Hz (C3), where the
+LFO is an audible tone, the square's aliases are 43 dB down on it (at 220 Hz 41 dB, rather than 24
+dB without). The square is
 unipolar: 1.0 while the triangle is above zero and 0.0 while it is below, stepping where it
 crosses, so it gates, or trills up from the note on an oscillator's pitch, where the triangle
 swings about zero for a vibrato; its inverted output runs 0.0 and -1.0. LFO 1 Wave (CC#33) crossfades Out in a straight line from the triangle at 0.0 (value 4), where it
@@ -622,6 +668,10 @@ Mod Wheel by default at a depth of 1.0 (Level Mod Amt has no CC and holds 1.0), 
 turned down the wheel brings the LFO in, up to full at its top. Turning the LFO the
 other way up is for Out Inv, Out negated, or for a mixer's Out Inv; the triangle and the square
 have theirs too, Out Triangle Inv and Out Square Inv. The default patch leaves them unrouted.
+
+LFO 1 Rate (CC#3) is read as a note number, a semitone a step: 0.128 Hz at value 4, 4.09 Hz (C-2)
+at value 64 and 130.8 Hz (C3) at value 124, so a C every 12 values from value 4. It powers up at
+value 72, 6.49 Hz, a vibrato's rate.
 
 LFO 1 Rate Mod In moves the rate by LFO 1 Rate Mod Amt, as Osc 1 Pitch Mod 2 In moves the oscillator's
 pitch: a unit of input times depth is the whole rate range, ten octaves, so 0.1 is an octave.
@@ -756,9 +806,9 @@ over a day at 48 kHz, and starts the same every time, so a render comes out the 
 
 How hard the input drives a filter, which is also what decides how far it runs into its own
 saturation, is set by its Gain 1 and Gain 2 and ahead of it: by Mixer 2 Out Level in the default
-patch, which has no CC and holds 1.0, and Filter 1's Gain 1 at unity, so Osc 1 alone reaches 0.5 at
-the filter. Two oscillators at full level on Mixer 2 drive the filter twice as hard as one, to
-1.0, where Filter 1's output clip begins to round the peaks: turn Out Level or Gain 1 down to keep
+patch, which has no CC and holds 1.0, Mixer 2 Level 1 at 0.5, and Filter 1's Gain 1 at unity, so Osc 1
+alone reaches 0.25 at the filter. Osc 1 and Osc 2 both at 0.5 drive it to 0.5, and both at full level
+to 1.0, where Filter 1's output clip begins to round the peaks: turn Out Level or Gain 1 down to keep
 the level, or leave them up to drive the saturation. The saturation sits on the resonance rather than the pass band: a low cutoff
 passes a loud note nearly clean, while turning the drive up rounds off the resonant peak.
 
@@ -779,11 +829,14 @@ rises.
 Resonance raises the resonant peak 6 dB every 24 CC steps, Q doubling each time, from
 Q 0.71 at value 4 up to Q 9.51 at value 94, and from there Q rises faster and faster, without a sudden
 step, through Q 35 at value 108 to Q 256 at value 118. Filter 2's, on CC#71, powers up at value 64, Q 4.0, and Filter 1's, with no CC, at value 4, Q 0.71. Above value 118 the filter oscillates on its own: a sine at the cutoff
-frequency, growing to its full level of about 0.5 by value 123 and holding it to the top of the
-dial. Low in that range the oscillation builds slowly and shares the filter with the input; at
+frequency, growing to its full level of about 0.5 in the loop by value 123 and holding it to the top of the
+dial. Above value 76 (Q 5.7) the filter's outputs are lowered with the resonance, by 2.8 dB at
+value 118 and 6 dB at value 123, so that a high resonance is about as loud as a moderate one: the
+oscillation comes out at 0.15 at value 119 to 0.25 at value 123, while how readily it holds
+against the input follows its level in the loop. Low in that range the oscillation builds slowly and shares the filter with the input; at
 the top it takes the input over. Its level holds across the cutoff range down to about 150 Hz
 and falls below that. Near the top of the cutoff range it fades out, before its 3rd harmonic
-folds back as an inharmonic tone: at 48 kHz, from 8 kHz (value 108) to 10 kHz (value 112), modulation
+folds back as an inharmonic tone: at 48 kHz, from 8 kHz (value 111) to 10 kHz (value 115), modulation
 included. Above that the resonance acts as at Q 256. With the cutoff following the keyboard, as
 in the examples below, it plays as a sine voice.
 
@@ -791,9 +844,10 @@ Amp 1 Gain 1 and Gain 2, of Audio In 1 and Audio In 2, which the amp sums, are e
 6 dB down, at value 46, unity at value 64, twice, 6 dB up, at value 89, and four times, 12 dB up,
 at value 124, so a quiet sound can be brought well up as well as a loud one taken down. The
 default patch puts Filter 2, the fourth order, on Audio In 2: Gain 2, on CC#15, powers up at value
-64, unity, and the default patch's peaks come to about -7 dBFS (until v0.4.0 it powered up at 88,
-1.96 times, with Mixer 2 Out Level at 0.5 ahead of the filters: the same level, the filters driven
-6 dB less). Filter 1, the
+64, unity, with Mixer 2 Level 1 at 0.5 ahead of the filters, and the default patch's peaks come
+to about -10 dBFS, about as loud as a lead sound of a typical synth, so that the Amp 1 Distortion
+turned up has room before the limiter (in v0.4.1, with Level 1 at 1.0, it was about 6 dB louder;
+until v0.4.0 Gain 2 powered up at 88, 1.96 times, with Mixer 2 Out Level at 0.5). Filter 1, the
 second order, is on Audio In 1, and Gain 1, which has no CC, powers up at value 4, silent, so the
 fourth order is heard alone until Gain 1 brings the second order in beside it, through the same
 envelope and limiter.
@@ -812,11 +866,26 @@ harmonics back below the audible band, the limiter does not: a sawtooth taken 12
 at A4 to A7 aliases -46 to -53 dB under 5 kHz with it, and -29 to -37 dB on the clamp. Off, the
 output is just as late, and the clamp is reached. Limiting is heard on a loud passage as its peaks
 held level, and the release as the sound coming back up after one. The default patch stays under
-it, with Osc 1 on the sawtooth or on the pulse, and Amp 1 Gain 2 turned up to about value 114
+it, with Osc 1 on the sawtooth or on the pulse, and Amp 1 Gain 2 turned up to about value 86 (about 1.8 times)
 starts to reach it. The filter's output
 clip and a mixer's sum still have the hard limit, past which a sawtooth driven 6 dB over at A6 to
 A7 aliases about -30 dB under 5 kHz; keep the levels before the filters where the peaks only just
 reach one unit, and bring the sound up with the amp instead.
+
+Amp 1 Distortion (CC#95) drives the gained sound into a soft clip ahead of the limiter, from x1 at
+value 4, where it powers up, to x32 at value 124, 6 dB every 24 values: a straight line up to one
+unit, then a quadratic shoulder that lands on two units at three (below zero, one half as long, to
+minus one and a half at minus two, so that even harmonics come too, with the DC that makes taken
+off). What comes out is taken back down
+by 15/16 of the drive in dB up to x16 (value 100), and by as much as there from x16 on, where
+most of a sound is past the shoulder already, so the level stays within about 2 dB as the drive
+goes up (a little up halfway, and a little down where it saturates hard), and the limiter holds what is left
+over. At x1 nothing at the gains' unity reaches the shoulder, and the amp is as
+it was; Gain 1 and Gain 2 turned up drive it too. The curve's part beyond the straight line goes
+through first-order antiderivative anti-aliasing (ADAA), so a sample that reaches no shoulder passes
+exactly, and past it the aliasing is lower: a sine at C5 to C8 driven x32 folds back -77 to -57 dB
+under 5 kHz (-83 to -62 dB at x16, against -71 to -25 dB without it). After the curve, a 1-pole low pass, the tone, takes
+the edge off the harmonics, more with more drive: none at x1, about 10 kHz halfway, 5 kHz at x32.
 
 Amp 1 takes two modulations, Mod 1 In and Mod 2 In, and scales the gain by a crossfade of the
 two: Amp 1 Mod 1/2 Mix (CC#36) runs in a straight line from Mod 1 In alone at 0.0 (value 4) to Mod 2 In
@@ -854,8 +923,8 @@ number, a semitone a step, as LFO 1 Rate is: 0.015 Hz at value 4, 0.48 Hz at val
 value 124, the default divided and multiplied by 32. Depth is how far each tap swings either side of 5.33 ms, in a straight line from not at
 all at value 4, through 2.63 ms at value 64, to 5.25 ms at value 124. Mix is each tap's share of its side's
 crossfade: the dry input alone at value 4, half and half at value 64, and only the taps at value 124, a vibrato on each side, the two moving opposite ways.
-All three power up at value 64. The halves of the crossfade are what hold the chorus to one unit, so
-at the default the dry signal is 6 dB down, and the sum with the tap makes up some of it.
+Rate and Depth power up at value 64, and Mix at value 34, 0.25, a light chorus. The halves of the crossfade are what hold the chorus to one unit, so
+at the default the dry signal is 2.5 dB down, and the sum with the tap makes up some of it.
 
 The three Delay 1 parameters are unipolar and move in steps of 1/120, as every unipolar dial
 does. Time runs in a straight line, 2.83 ms a step, from 0 at value 4 to 340 ms at value 124, and is
@@ -921,11 +990,11 @@ unplugged reads its own CC or value again. A value is the 4 to 124 the editor sh
   at value 124, half way at value 64, and not at all at value 4, where it powers up; Pitch Pol, with
   no CC, turned below value 64 runs it the other way. As MIDI: CC#9; Pitch Pol in category 4
 - The filter as a sine voice, playing its own oscillation in tune: Filter 2 Resonance at 124 makes it
-  oscillate, Filter 2 Pitch Amt at 124 has the cutoff follow the keys, and Cutoff at 49 puts it on
+  oscillate, Filter 2 Pitch Amt at 124 has the cutoff follow the keys, and Cutoff at 52 puts it on
   note 60 at note 60, and so on the note played everywhere; Filter 2 Mod 1 Amt at 4 takes the
   envelope off the cutoff, and Mixer 2 Level 1 at 4 takes the oscillator out, leaving the sine alone.
   It is within 5 cents of the note from middle C up, and 17 cents flat an octave below. As MIDI:
-  CC#71 = 124, CC#9 = 124, CC#74 = 49, CC#24 = 4, CC#19 = 4
+  CC#71 = 124, CC#9 = 124, CC#74 = 52, CC#24 = 4, CC#19 = 4
 - A pitch envelope: wired by default too, the envelope on the oscillator's Pitch Mod 1 input, so
   Osc 1 Pitch Mod 1 Amt sets its depth: the note starts a semitone sharp at value 9, an octave at
   value 64 and two octaves at the top, and with EG 1 Sustain brought down to 4, 0.0, it falls back to
@@ -937,10 +1006,10 @@ unplugged reads its own CC or value again. A value is the 4 to 124 the editor sh
   CC#98 = 31 and 36, CC#6 = 65 (64 for the white), then CC#25
 - Filter cutoff driven by the envelope instead of its CC: on the Patch tab, wire EG 1 Out to Filter
   1 and Filter 2 Cutoff, the parameter itself. The envelope and the cutoff are both unipolar, so it
-  opens the cutoff from the bottom of its dial to the top. As MIDI: CC#99 = 114, CC#98 = 66 and 77,
+  opens the cutoff from the bottom of its dial to the top. As MIDI: CC#99 = 114, CC#98 = 66 and 78,
   CC#6 = 44
 - Amp gain and filter cutoff share one CC: on the Patch tab, 74 in the CC# field of Amp 1 Gain 2.
-  As MIDI: CC#99 = 115, CC#98 = 88, CC#6 = 74
+  As MIDI: CC#99 = 115, CC#98 = 90, CC#6 = 74
 - Amp at full level with no envelope: on the Patch tab, wire the constant +1.0 to Amp 1 Mod 1 In.
   As MIDI: CC#99 = 113, CC#98 = 39, CC#6 = 1
 - Amp opened and closed by the note as an organ's, while EG 1 still shapes the filter: Amp 1 Mod 1/2
@@ -997,14 +1066,14 @@ unplugged reads its own CC or value again. A value is the 4 to 124 the editor sh
   ticked, Filter 2 Gain 1 up to 64 and Gain 2 down to 4, so that it takes Mixer 2 rather than Filter
   1, and Amp 1 Gain 1 up to 64 brings Filter 1 in beside it; then, on the Patch tab, 0 in the CC#
   field of Filter 1 Mode takes it off CC#39, and its value at 124 makes it the high pass, so
-  that Cutoff moves a low pass and a high pass at once. As MIDI: CC#99 = 116, CC#98 = 79, CC#6 = 64,
-  CC#98 = 80, CC#6 = 4, CC#98 = 87, CC#6 = 88; CC#99 = 115, CC#98 = 65, CC#6 = 0; CC#99 = 116, CC#98
+  that Cutoff moves a low pass and a high pass at once. As MIDI: CC#99 = 116, CC#98 = 81, CC#6 = 64,
+  CC#98 = 82, CC#6 = 4, CC#98 = 89, CC#6 = 88; CC#99 = 115, CC#98 = 65, CC#6 = 0; CC#99 = 116, CC#98
   = 65, CC#6 = 124
 - Echoes that only come in with the mod wheel: on the Patch tab, wire Mod Wheel to Delay 1 Mix. The
-  wheel powers up at 0.0, so the output is dry until it moves. As MIDI: CC#99 = 114, CC#98 = 93,
+  wheel powers up at 0.0, so the output is dry until it moves. As MIDI: CC#99 = 114, CC#98 = 97,
   CC#6 = 8
 - Chorus that only comes in with the mod wheel: on the Patch tab, wire Mod Wheel to Chorus 1 Mix,
-  so the output stays mono until the wheel moves. As MIDI: CC#99 = 114, CC#98 = 90, CC#6 = 8
+  so the output stays mono until the wheel moves. As MIDI: CC#99 = 114, CC#98 = 94, CC#6 = 8
 - Leave the chorus out of the sound, keeping the delay: on the Patch tab, wire Amp 1 Out to Delay 1
   Audio In L and Audio In R. The chorus keeps running and nothing reads it, and the output is then
   mono. As MIDI: CC#99 = 113, CC#98 = 42 and 43, CC#6 = 76
@@ -1013,7 +1082,7 @@ unplugged reads its own CC or value again. A value is the 4 to 124 the editor sh
   still taking the amp. The repeats then go through the filters and the amp's envelope as the note
   does, so they die away with it. Delay 1 still runs after the filters, which read it a sample
   late; for an echo that does not matter. As MIDI: CC#99 = 113, CC#98 = 42, CC#6 = 56; CC#98 = 27,
-  CC#6 = 80; CC#98 = 44 and 45, CC#6 = 77 and 78
+  CC#6 = 82; CC#98 = 44 and 45, CC#6 = 77 and 78
 
 ### Notes
 

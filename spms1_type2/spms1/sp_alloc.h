@@ -814,17 +814,17 @@ sp_RbVal sp_float_numerator(sp_float f);
 /* For the MCU: Float#to_i, which the generated code calls every sample in a synth (index =
    pitch.to_i and the like), inline here rather than out of line in sp_cold.c, so that it is
    inlined into the caller instead of called (from flash, on the MCU). sp_cold_bare_metal.c leaves
-   its own out. It also checks the range of sp_int, which is pointer-width: against 2^63 only, a
-   Float from 2^31 up was converted out of range on a 32-bit target (which C leaves undefined)
-   instead of raising. The same two comparisons, so the cost is the same. */
+   its own out. And without the checks the released one makes (a NaN or an infinity raises
+   FloatDomainError, a Float past the range of sp_int RangeError), as Integer arithmetic goes
+   without its overflow check (SP_INT_OVERFLOW_MODE_WRAP, spinel_rt_mcu_head.h): on the MCU a
+   raise stops the sound as surely as a wrong value would, so the checks buy nothing there, and a
+   synth makes several conversions a sample, which with the checks took about 5000 cycles (31 us)
+   of a buffer of SPMS-1's. Such a Float comes out as the processor's conversion makes it, which C
+   leaves undefined (the Cortex-M33's VCVT: 0 for a NaN, the nearest end of the range otherwise;
+   x86's, the lowest value of the range, for the simulators, which build the runtime the same
+   way); an index made from it and read out of an array's range reads nil (0.0), as any index
+   out of range does. */
 static inline sp_int sp_float_to_i_checked(sp_float f) {
-  if (isnan(f) || isinf(f)) sp_raise_cls("FloatDomainError", sp_sprintf("%g", f));
-#if INTPTR_MAX == INT32_MAX
-  if (f >= 2147483648.0 || f < -2147483648.0)
-#else
-  if (f >= 9223372036854775808.0 || f < -9223372036854775808.0)
-#endif
-    sp_raise_cls("RangeError", "float out of Integer range (Bignum promotion pending)");
   return (sp_int)f;
 }
 #else

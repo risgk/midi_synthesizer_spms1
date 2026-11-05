@@ -1,5 +1,5 @@
-# Writes what the sketch reads from spms1_patch.yaml: spms1/spms1_patch.rb and
-# spms1/spms1_default_patch.h whole, the parts of spms1_editor.html, spms1_patching.md,
+# Writes what the sketch reads from spms1_patch.yaml: spms1/spms1_patch.rb,
+# spms1/spms1_default_patch.h and spms1/spms1_parameters.h whole, the parts of spms1_editor.html, spms1_patching.md,
 # spms1_patching.ja.md and spms1/spms1_main.rb between their "patch_gen" markers.
 #
 #   ruby patch_gen/spms1_patch_gen.rb [--check | --renumber]
@@ -42,18 +42,26 @@ end
 
 # The spec, read and checked: every number unique, every key it names defined.
 class Spec
-  attr_reader :modules, :signals, :inputs, :inputs_in_list_order, :controls, :controls_in_list_order, :default_order,
+  attr_reader :modules, :signals, :inputs, :inputs_in_list_order, :controls, :controls_in_editor_order, :default_order,
               :saved_patch_version
 
   def initialize(yaml)
     @modules  = yaml.fetch('modules')
     @signals  = yaml.fetch('signals')
-    # The list's order is the editor's: an input or a control goes next to its module's others
-    # there, though its entry is appended. Everything else takes them by entry.
+    # Each list is in the order of its numbers (see check). The editor shows the controls in that
+    # order too, but for a control that names another of its module's in `after`, which it shows
+    # just after that one, so that a control appended to keep the numbers before it can still sit
+    # with the controls it belongs with.
     @inputs_in_list_order = yaml.fetch('inputs')
     @inputs = @inputs_in_list_order.sort_by { |i| i['entry'] }
     @controls_in_list_order = yaml.fetch('controls')
     @controls = @controls_in_list_order.sort_by { |c| c['entry'] }
+    @controls_in_editor_order = @controls_in_list_order.reject { |c| c['after'] }
+    @controls_in_list_order.select { |c| c['after'] }.each do |c|
+      at = @controls_in_editor_order.index { |o| o['module'] == c['module'] && o['key'] == c['after'] }
+      fail_spec("control #{full_key(c)} is after #{c['after']}, not a control of #{c['module']} before it") unless at
+      @controls_in_editor_order.insert(at + 1, c)
+    end
     @default_order = yaml.fetch('default_order')
     @saved_patch_version = yaml.fetch('saved_patch_version')
     @module = @modules.to_h { |m| [m['key'], m] }
@@ -358,7 +366,7 @@ def editor_js
     inputs: s.inputs_in_list_order.map do |i|
       { entry: i['entry'], module: i['module'], key: i['key'], label: i['label'], source: i['source'] }
     end,
-    controls: s.controls_in_list_order.map do |c|
+    controls: s.controls_in_editor_order.map do |c|
       h = { entry: c['entry'], module: c['module'], key: c['key'], label: c['label'],
             bipolar: !!c['bipolar'], cc: c['cc'].to_i, value: c['value'], source: c['source'],
             controller: !!c['controller'], performance: !!c['performance'], hint: c['hint'], hintInputs: c['hint_inputs'],
@@ -448,7 +456,9 @@ end
 #
 # The dispatch compares against literal ids, and writes to literal bus slots, rather than the
 # MODULE_* and SIGNAL_* constants, which Spinel emits as runtime globals (see spms1_main.rb). Each
-# literal carries its constant's name in a comment at the end of its line.
+# literal carries its constant's name in a comment at the end of its line. The same goes for the
+# NRPN entries, the slots and the MIDI channel (0, MIDI_CH) the sources and the parameters are read
+# by.
 def local_name(item) = SPEC.full_key(item).downcase
 
 # What the loop needs of the spec besides what Spec#check asks of every file written from it.
@@ -491,17 +501,23 @@ def main_sources
   out = []
   s.inputs.each do |i|
     name = "source_#{local_name(i)}"
-    out << "  #{name} = C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_#{s.full_key(i)})\n"
+    out << "  #{name} = C.get_midi_nrpn_value(0, #{NRPN_INPUT_BASE + i['entry']}) # NRPN_SOURCE_#{s.full_key(i)}\n"
     # A controller slot's smoothed copy in its place (see spms1_main.rb), but for a gate input or a
     # side of the final output: both differences are at least 0 only in the controllers' run of
     # slots. Written out rather than a function or a table, which cost more as Spinel builds them.
     next unless i['module'] && !i['gate']
-    out << "  #{name} += ((#{name} - CONTROLLER_SLOT_FIRST) | (CONTROLLER_SLOT_LAST - #{name})) >= 0 ? SMOOTHED_SLOT_OFFSET : 0\n"
-  end
-  s.params.each do |c|
-    out << "  source_#{local_name(c)} = source_or_own(C.get_midi_nrpn_value(MIDI_CH, NRPN_SOURCE_#{s.full_key(c)}), SLOT_#{s.full_key(c)})\n"
+    first = s.controller_slots.first['id']
+    out << "  #{name} += ((#{name} - #{first}) | (#{s.controller_slots.last['id']} - #{name})) >= 0 ? #{s.smoothed_base - first} : 0 # CONTROLLER_SLOT_FIRST, CONTROLLER_SLOT_LAST, SMOOTHED_SLOT_OFFSET\n"
   end
   out.join
+end
+
+def param_sources
+  s = SPEC
+  s.params.map do |c|
+    key = s.full_key(c)
+    "  source_#{local_name(c)} = source_or_own(C.get_midi_nrpn_value(0, #{NRPN_PARAM_SOURCE_BASE + c['entry']}), #{PARAM_SLOT_BASE + c['entry']}) # NRPN_SOURCE_#{key}, SLOT_#{key}\n"
+  end.join
 end
 
 def converter(bipolar) = bipolar ? 'cc_to_bipolar' : 'cc_to_unipolar'
@@ -511,20 +527,22 @@ def main_controls
   out = []
   s.params.each do |c|
     name = local_name(c)
-    out << "  cc_#{name} = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_#{s.full_key(c)})\n"
-    out << "  signals[SLOT_#{s.full_key(c)}] = #{converter(c['bipolar'])}(cc_or_nrpn(cc_#{name}, C.get_midi_cc_value(MIDI_CH, cc_#{name}), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_#{s.full_key(c)})))\n"
+    key = s.full_key(c)
+    out << "  cc_#{name} = C.get_midi_nrpn_value(0, #{NRPN_CC_BASE + c['entry']}) # NRPN_CC_#{key}\n"
+    out << "  signals[#{PARAM_SLOT_BASE + c['entry']}] = #{converter(c['bipolar'])}(cc_or_nrpn(cc_#{name}, C.get_midi_cc_value(0, cc_#{name}), C.get_midi_nrpn_value(0, #{NRPN_VALUE_BASE + c['entry']}))) # SLOT_#{key}, NRPN_VALUE_#{key}\n"
   end
   s.controllers.each do |c|
     name = local_name(c)
-    out << "  cc_#{name} = C.get_midi_nrpn_value(MIDI_CH, NRPN_CC_#{s.full_key(c)})\n"
-    plain = "signals[SIGNAL_#{s.full_key(c)}]"
+    key = s.full_key(c)
+    out << "  cc_#{name} = C.get_midi_nrpn_value(0, #{NRPN_CC_BASE + c['entry']}) # NRPN_CC_#{key}\n"
+    plain = "signals[#{s.signal(key)['id']}]"
     if c['performance']
-      out << "  #{name} = C.get_midi_cc_value(MIDI_CH, cc_#{name})\n"
+      out << "  #{name} = C.get_midi_cc_value(0, cc_#{name})\n"
       value = "cc_or_zero(cc_#{name}, #{converter(c['bipolar'])}(#{name}))"
       index = "cc_table_index(cc_#{name}, #{name})"
     else
       # With no CC, the value the patch holds for it, as a parameter's.
-      out << "  #{name} = cc_or_nrpn(cc_#{name}, C.get_midi_cc_value(MIDI_CH, cc_#{name}), C.get_midi_nrpn_value(MIDI_CH, NRPN_VALUE_#{s.full_key(c)}))\n"
+      out << "  #{name} = cc_or_nrpn(cc_#{name}, C.get_midi_cc_value(0, cc_#{name}), C.get_midi_nrpn_value(0, #{NRPN_VALUE_BASE + c['entry']})) # NRPN_VALUE_#{key}\n"
       value = "#{converter(c['bipolar'])}(#{name})"
       index = "value_table_index(#{name})"
     end
@@ -535,16 +553,19 @@ def main_controls
              when 'cos' then "QUARTER_SINE_TABLE[120 - #{index}]"
              else form_expr(sig['form'], plain)
              end
-      out << "  signals[SIGNAL_#{sig['key']}] = #{expr}\n"
+      out << "  signals[#{sig['id']}] = #{expr} # SIGNAL_#{sig['key']}#{sig['form'] && !%w[sin cos].include?(sig['form']) ? ", SIGNAL_#{key}" : ''}\n"
     end
   end
   # The smoothed copies, every buffer for every controller whatever reads them, so that what they
   # cost is the same for any patch: the controller's value in two stages, then each form of it.
-  s.controllers.each do |c|
+  offset = s.smoothed_base - s.controller_slots.first['id']
+  s.controllers.each_with_index do |c, n|
     name = local_name(c)
     key = s.full_key(c)
-    out << "  signals[SMOOTHED_STAGE_1_#{key}] = Dsp.smooth(signals[SIGNAL_#{key}], signals[SMOOTHED_STAGE_1_#{key}], CONTROLLER_SMOOTHING_BLEND)\n"
-    out << "  smoothed_#{name} = Dsp.smooth(signals[SMOOTHED_STAGE_1_#{key}], signals[SIGNAL_#{key} + SMOOTHED_SLOT_OFFSET], CONTROLLER_SMOOTHING_BLEND)\n"
+    id = s.signal(key)['id']
+    stage_1 = s.smoothed_base + s.controller_slots.size + n
+    out << "  signals[#{stage_1}] = Dsp.smooth(signals[#{id}], signals[#{stage_1}], CONTROLLER_SMOOTHING_BLEND) # SMOOTHED_STAGE_1_#{key}, SIGNAL_#{key}\n"
+    out << "  smoothed_#{name} = Dsp.smooth(signals[#{stage_1}], signals[#{id + offset}], CONTROLLER_SMOOTHING_BLEND) # SMOOTHED_STAGE_1_#{key}, SIGNAL_#{key} + SMOOTHED_SLOT_OFFSET\n"
     s.slots_of(c).each do |sig|
       expr = case sig['form']
              when nil then "smoothed_#{name}"
@@ -552,7 +573,7 @@ def main_controls
              when 'cos' then "quarter_sine(1.0 - smoothed_#{name})"
              else form_expr(sig['form'], "smoothed_#{name}")
              end
-      out << "  signals[SIGNAL_#{sig['key']} + SMOOTHED_SLOT_OFFSET] = #{expr}\n"
+      out << "  signals[#{sig['id'] + offset}] = #{expr} # SIGNAL_#{sig['key']} + SMOOTHED_SLOT_OFFSET\n"
     end
   end
   out.join
@@ -576,7 +597,7 @@ end
 
 def main_setters
   s = SPEC
-  s.controls_in_list_order.reject { |c| c['controller'] }.map do |c|
+  s.controls.reject { |c| c['controller'] }.map do |c|
     "  #{c['module'].downcase}.#{c.fetch('set')}(signals[source_#{local_name(c)}])\n"
   end.join
 end
@@ -600,10 +621,45 @@ def main_dispatch
   out.join
 end
 
+# The instances that spms1_apply_parameters takes, in the order of `modules`.
+def apply_instances = SPEC.modules.map { |m| m['key'].downcase }
+
+# spms1_apply_parameters: the parameters' sources, the control slots and the setters, once per
+# buffer, in a function of its own (see spms1_main.rb and spms1_parameters.h).
+def main_parameters
+  body = param_sources + main_controls + main_setters
+  "def spms1_apply_parameters(#{(['signals'] + apply_instances).join(', ')})\n" + body + "  0.0\nend\n"
+end
+
+def main_apply
+  "  spms1_apply_parameters(#{(['signals'] + apply_instances).join(', ')})\n"
+end
+
+# spms1_parameters.h: the declaration of spms1_apply_parameters as Spinel emits it, with what keeps
+# it out of Spms1_main. Spinel names a class's struct sp_<class>_s and its typedef sp_<class>, and
+# the function sp_ and its Ruby name, with one parameter per argument and sp_float for the 0.0 it
+# returns; a declaration that did not match the one Spinel writes would stop the build.
+def parameters_h
+  s = SPEC
+  classes = s.modules.map { |m| m.fetch('class') }.uniq
+  params = ['struct sp_SignalBus_s *'] + s.modules.map { |m| "struct sp_#{m.fetch('class')}_s *" }
+  out = +''
+  out << "/* Written by patch_gen/spms1_patch_gen.rb from spms1_patch.yaml: do not edit. The declaration of\n"
+  out << "   spms1_apply_parameters (spms1_main.rb), ahead of the one in spms1_main.c, so that it stays a\n"
+  out << "   function of its own rather than flattened into Spms1_main, in RAM as Spms1_main is, and\n"
+  out << "   flattened itself. spinel_rt_mcu_cold.h includes this, at the end of spinel_rt.h. */\n"
+  out << "#ifndef SPMS1_PARAMETERS_H\n#define SPMS1_PARAMETERS_H\n\n"
+  (['SignalBus'] + classes).each { |c| out << "struct sp_#{c}_s;\n" }
+  out << "static sp_float sp_spms1_apply_parameters(#{params.join(', ')})\n"
+  out << "  __attribute__((noinline, flatten, section(\".time_critical\")));\n\n"
+  out << "#endif /* SPMS1_PARAMETERS_H */\n"
+  out
+end
+
 def main_rb(content)
   check_wiring
-  { 'requires' => main_requires, 'instances' => main_instances, 'sources' => main_sources, 'controls' => main_controls,
-    'setters' => main_setters, 'smoothing' => main_smoothing, 'dispatch' => main_dispatch }.each do |name, text|
+  { 'requires' => main_requires, 'instances' => main_instances, 'parameters' => main_parameters, 'sources' => main_sources,
+    'apply' => main_apply, 'smoothing' => main_smoothing, 'dispatch' => main_dispatch }.each do |name, text|
     content = replace_block(content, 'spms1/spms1_main.rb', name, text)
   end
   content
@@ -622,6 +678,7 @@ end
 outputs = {}
 outputs['spms1/spms1_patch.rb'] = patch_rb
 outputs['spms1/spms1_default_patch.h'] = default_patch_h
+outputs['spms1/spms1_parameters.h'] = parameters_h
 outputs['spms1/spms1_main.rb'] = main_rb(File.read(File.join(DIR, 'spms1/spms1_main.rb')))
 editor = File.read(File.join(DIR, 'spms1_editor.html'))
 outputs['spms1_editor.html'] = replace_block(editor, 'spms1_editor.html', 'spec', editor_js)

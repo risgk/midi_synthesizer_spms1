@@ -70,7 +70,7 @@
       gap: 12px;
       flex-wrap: wrap;
     }
-    /* The title as large as PRA32-U2 Editor's, 20px, at every width. */
+    /* The title at 20px, at every width. */
     header h1 {
       font-size: 1.25rem;
       color: var(--primary-color);
@@ -598,7 +598,7 @@
     /* Soft keyboard */
     /* On the Controls tab, kept at the bottom of the window while the page scrolls above it, as on
        a 1280 x 720 screen or a phone, upright or on its side, so the keys stay at hand under the
-       controls, with lower keys in a low window (below), as in PRA32-U2 Editor; on the Patch tab
+       controls, with lower keys in a low window (below); on the Patch tab
        only with Wide, where the canvas ends above it and the side panels scroll behind it, and
        not in one column (a phone), where it would take much of the window over the canvas. */
     body:has(#tab-controls:not([hidden])) #kbd-panel {
@@ -692,7 +692,7 @@
     }
     /* On a phone the bar takes one line from 360px, its heading, buttons and gaps a little
        smaller; and in a window up to 640px high, as a phone upright or on its side under the bars
-       of the browser, the keys are lower, 100px as in PRA32-U2 Editor, so that the keyboard at the
+       of the browser, the keys are lower, 100px, so that the keyboard at the
        bottom leaves more of the window to the controls. */
     @media (max-width: 480px) {
       #kbd-panel .kbd-bar { column-gap: 3px; }
@@ -1563,7 +1563,7 @@
 <body>
 
 <header>
-  <h1>SPMS-1 (type-2) Editor<span class="version">v0.4.1</span><span class="github-link">(<a href="https://github.com/risgk/midi_synthesizer_spms1" target="_blank" rel="noopener">View on GitHub</a>)</span></h1>
+  <h1>SPMS-1 (type-2) Editor<span class="version">v0.5.0</span><span class="github-link">(<a href="https://github.com/risgk/midi_synthesizer_spms1" target="_blank" rel="noopener">View on GitHub</a>)</span></h1>
   <nav class="tabs">
     <button class="tab-btn active" data-tab="controls">Controls</button>
     <button class="tab-btn" data-tab="patch">Patch</button>
@@ -1776,8 +1776,8 @@
       {"key":"FILTER_1","id":10,"label":"Filter 1","outs":[{"sig":"FILTER_1_OUTPUT","label":"Out"},{"sig":"FILTER_1_OUTPUT_LP","label":"Out LP"},{"sig":"FILTER_1_OUTPUT_HP","label":"Out HP"},{"sig":"FILTER_1_OUTPUT_BP","label":"Out BP"}]},
       {"key":"FILTER_2","id":11,"label":"Filter 2","outs":[{"sig":"FILTER_2_OUTPUT","label":"Out"},{"sig":"FILTER_2_OUTPUT_LP","label":"Out LP"},{"sig":"FILTER_2_OUTPUT_HP","label":"Out HP"},{"sig":"FILTER_2_OUTPUT_BP","label":"Out BP"}]},
       {"key":"AMP_1","id":12,"label":"Amp 1","outs":[{"sig":"AMP_1_OUTPUT","label":"Out"}]},
-      {"key":"CHORUS_1","id":13,"label":"Chorus 1","outs":[{"sig":"CHORUS_1_OUTPUT_L","label":"Out L"},{"sig":"CHORUS_1_OUTPUT_R","label":"Out R"},{"sig":"CHORUS_1_OUTPUT_MONO","label":"Out Mono"}]},
-      {"key":"DELAY_1","id":14,"label":"Delay 1","outs":[{"sig":"DELAY_1_OUTPUT_L","label":"Out L"},{"sig":"DELAY_1_OUTPUT_R","label":"Out R"},{"sig":"DELAY_1_OUTPUT_MONO","label":"Out Mono"}]},
+      {"key":"CHORUS_1","id":13,"label":"Chorus 1","outs":[{"sig":"CHORUS_1_OUTPUT_L","label":"Out L"},{"sig":"CHORUS_1_OUTPUT_R","label":"Out R"},{"sig":"CHORUS_1_OUTPUT_MONO","label":"Out Mono"},{"sig":"CHORUS_1_OUTPUT_WET_L","label":"Out Wet L"},{"sig":"CHORUS_1_OUTPUT_WET_R","label":"Out Wet R"}]},
+      {"key":"DELAY_1","id":14,"label":"Delay 1","outs":[{"sig":"DELAY_1_OUTPUT_L","label":"Out L"},{"sig":"DELAY_1_OUTPUT_R","label":"Out R"},{"sig":"DELAY_1_OUTPUT_MONO","label":"Out Mono"},{"sig":"DELAY_1_OUTPUT_WET_L","label":"Out Wet L"},{"sig":"DELAY_1_OUTPUT_WET_R","label":"Out Wet R"}]},
     ],
     inputs: [
       {"entry":0,"module":"PITCH_1","key":"PITCH_IN","label":"Pitch In","source":"NOTE_PITCH"},
@@ -1847,7 +1847,7 @@
       {"entry":16,"module":"EG_2","key":"RELEASE_SW","label":"Release Sw","bipolar":false,"cc":105,"value":124,"controller":false,"performance":false,"hint":"Off/On","slots":[["EG_2_RELEASE_SW","Release Sw",false]]},
       {"entry":17,"module":"EG_2","key":"LEVEL","label":"Level","bipolar":false,"cc":0,"value":124,"controller":false,"performance":false,"slots":[["EG_2_LEVEL","Level",false]]},
       {"entry":18,"module":"LFO_1","key":"WAVE","label":"Wave","bipolar":false,"cc":33,"value":4,"controller":false,"performance":false,"hint":"Tri to Sq","favorite":true,"slots":[["LFO_1_WAVE","Wave",false]]},
-      {"entry":19,"module":"LFO_1","key":"RATE","label":"Rate","bipolar":false,"cc":3,"value":64,"controller":false,"performance":false,"favorite":true,"slots":[["LFO_1_RATE","Rate",false]]},
+      {"entry":19,"module":"LFO_1","key":"RATE","label":"Rate","bipolar":false,"cc":3,"value":72,"controller":false,"performance":false,"favorite":true,"slots":[["LFO_1_RATE","Rate",false]]},
       {"entry":20,"module":"LFO_1","key":"LEVEL","label":"Level","bipolar":false,"cc":116,"value":124,"controller":false,"performance":false,"favorite":true,"slots":[["LFO_1_LEVEL","Level",false]]},
       {"entry":21,"module":"LFO_1","key":"RATE_MOD_AMT","label":"Rate Mod Amt","bipolar":false,"cc":0,"value":124,"controller":false,"performance":false,"hintInputs":["RATE_MOD_IN"],"slots":[["LFO_1_RATE_MOD_AMT","Rate Mod Amt",false]]},
       {"entry":22,"module":"LFO_1","key":"LEVEL_MOD_AMT","label":"Level Mod Amt","bipolar":false,"cc":0,"value":124,"controller":false,"performance":false,"hintInputs":["LEVEL_MOD_IN"],"slots":[["LFO_1_LEVEL_MOD_AMT","Level Mod Amt",false]]},
@@ -1888,47 +1888,50 @@
       {"entry":57,"module":"OSC_2","key":"SYNC_SW","label":"Sync Sw","bipolar":false,"cc":112,"value":4,"controller":false,"performance":false,"hint":"Off/On","favorite":true,"slots":[["OSC_2_SYNC_SW","Sync Sw",false]]},
       {"entry":58,"module":"NOISE_1","key":"COLOR","label":"Color","bipolar":false,"cc":115,"value":4,"controller":false,"performance":false,"hint":"White to Red","favorite":true,"slots":[["NOISE_1_COLOR","Color",false]]},
       {"entry":59,"module":"NOISE_1","key":"LEVEL","label":"Level","bipolar":false,"cc":0,"value":124,"controller":false,"performance":false,"slots":[["NOISE_1_LEVEL","Level",false]]},
-      {"entry":60,"module":"MIXER_2","key":"LEVEL_1","label":"Level 1","bipolar":false,"cc":19,"value":124,"controller":false,"performance":false,"hintInputs":["IN_1"],"favorite":true,"slots":[["MIXER_2_LEVEL_1","Level 1",false]]},
+      {"entry":60,"module":"MIXER_2","key":"LEVEL_1","label":"Level 1","bipolar":false,"cc":19,"value":64,"controller":false,"performance":false,"hintInputs":["IN_1"],"favorite":true,"slots":[["MIXER_2_LEVEL_1","Level 1",false]]},
       {"entry":61,"module":"MIXER_2","key":"LEVEL_2","label":"Level 2","bipolar":false,"cc":20,"value":4,"controller":false,"performance":false,"hintInputs":["IN_2"],"favorite":true,"slots":[["MIXER_2_LEVEL_2","Level 2",false]]},
       {"entry":62,"module":"MIXER_2","key":"LEVEL_3","label":"Level 3","bipolar":false,"cc":21,"value":4,"controller":false,"performance":false,"hintInputs":["IN_3"],"favorite":true,"slots":[["MIXER_2_LEVEL_3","Level 3",false]]},
       {"entry":63,"module":"MIXER_2","key":"LEVEL_4","label":"Level 4","bipolar":false,"cc":23,"value":4,"controller":false,"performance":false,"hintInputs":["IN_4"],"favorite":true,"slots":[["MIXER_2_LEVEL_4","Level 4",false]]},
       {"entry":64,"module":"MIXER_2","key":"OUT_LEVEL","label":"Out Level","bipolar":false,"cc":0,"value":124,"controller":false,"performance":false,"slots":[["MIXER_2_OUT_LEVEL","Out Level",false]]},
       {"entry":65,"module":"FILTER_1","key":"MODE","label":"Mode","bipolar":false,"cc":39,"value":4,"controller":false,"performance":false,"hint":"LP to Notch to HP","slots":[["FILTER_1_MODE","Mode",false]]},
-      {"entry":66,"module":"FILTER_1","key":"CUTOFF","label":"Cutoff","bipolar":false,"cc":74,"value":100,"controller":false,"performance":false,"slots":[["FILTER_1_CUTOFF","Cutoff",false]]},
+      {"entry":66,"module":"FILTER_1","key":"CUTOFF","label":"Cutoff","bipolar":false,"cc":74,"value":88,"controller":false,"performance":false,"slots":[["FILTER_1_CUTOFF","Cutoff",false]]},
       {"entry":67,"module":"FILTER_1","key":"RESONANCE","label":"Resonance","bipolar":false,"cc":0,"value":4,"controller":false,"performance":false,"slots":[["FILTER_1_RESONANCE","Resonance",false]]},
-      {"entry":68,"module":"FILTER_1","key":"GAIN_1","label":"Gain 1","bipolar":false,"cc":0,"value":64,"controller":false,"performance":false,"hintInputs":["AUDIO_IN_1"],"slots":[["FILTER_1_GAIN_1","Gain 1",false]]},
-      {"entry":69,"module":"FILTER_1","key":"GAIN_2","label":"Gain 2","bipolar":false,"cc":0,"value":4,"controller":false,"performance":false,"hintInputs":["AUDIO_IN_2"],"slots":[["FILTER_1_GAIN_2","Gain 2",false]]},
-      {"entry":70,"module":"FILTER_1","key":"PITCH_AMT","label":"Pitch Amt","bipolar":false,"cc":9,"value":4,"controller":false,"performance":false,"hintInputs":["PITCH_IN"],"slots":[["FILTER_1_PITCH_AMT","Pitch Amt",false]]},
-      {"entry":71,"module":"FILTER_1","key":"PITCH_POL","label":"Pitch Pol","bipolar":true,"cc":0,"value":124,"controller":false,"performance":false,"hint":"− to +","slots":[["FILTER_1_PITCH_POL","Pitch Pol",true]]},
-      {"entry":72,"module":"FILTER_1","key":"MOD_1_AMT","label":"Mod 1 Amt","bipolar":false,"cc":24,"value":28,"controller":false,"performance":false,"hintInputs":["MOD_1_IN"],"slots":[["FILTER_1_MOD_1_AMT","Mod 1 Amt",false]]},
-      {"entry":73,"module":"FILTER_1","key":"MOD_1_POL","label":"Mod 1 Pol","bipolar":true,"cc":117,"value":124,"controller":false,"performance":false,"hint":"− to +","slots":[["FILTER_1_MOD_1_POL","Mod 1 Pol",true]]},
-      {"entry":74,"module":"FILTER_1","key":"MOD_2_AMT","label":"Mod 2 Amt","bipolar":false,"cc":25,"value":4,"controller":false,"performance":false,"hintInputs":["MOD_2_IN"],"slots":[["FILTER_1_MOD_2_AMT","Mod 2 Amt",false]]},
-      {"entry":75,"module":"FILTER_1","key":"MOD_2_POL","label":"Mod 2 Pol","bipolar":true,"cc":0,"value":76,"controller":false,"performance":false,"hint":"− to +","slots":[["FILTER_1_MOD_2_POL","Mod 2 Pol",true]]},
-      {"entry":76,"module":"FILTER_2","key":"MODE","label":"Mode","bipolar":false,"cc":39,"value":4,"controller":false,"performance":false,"hint":"LP to Notch to HP","favorite":true,"slots":[["FILTER_2_MODE","Mode",false]]},
-      {"entry":77,"module":"FILTER_2","key":"CUTOFF","label":"Cutoff","bipolar":false,"cc":74,"value":100,"controller":false,"performance":false,"favorite":true,"slots":[["FILTER_2_CUTOFF","Cutoff",false]]},
-      {"entry":78,"module":"FILTER_2","key":"RESONANCE","label":"Resonance","bipolar":false,"cc":71,"value":64,"controller":false,"performance":false,"favorite":true,"slots":[["FILTER_2_RESONANCE","Resonance",false]]},
-      {"entry":79,"module":"FILTER_2","key":"GAIN_1","label":"Gain 1","bipolar":false,"cc":0,"value":4,"controller":false,"performance":false,"hintInputs":["AUDIO_IN_1"],"slots":[["FILTER_2_GAIN_1","Gain 1",false]]},
-      {"entry":80,"module":"FILTER_2","key":"GAIN_2","label":"Gain 2","bipolar":false,"cc":0,"value":64,"controller":false,"performance":false,"hintInputs":["AUDIO_IN_2"],"slots":[["FILTER_2_GAIN_2","Gain 2",false]]},
-      {"entry":81,"module":"FILTER_2","key":"PITCH_AMT","label":"Pitch Amt","bipolar":false,"cc":9,"value":4,"controller":false,"performance":false,"hintInputs":["PITCH_IN"],"favorite":true,"slots":[["FILTER_2_PITCH_AMT","Pitch Amt",false]]},
-      {"entry":82,"module":"FILTER_2","key":"PITCH_POL","label":"Pitch Pol","bipolar":true,"cc":0,"value":124,"controller":false,"performance":false,"hint":"− to +","slots":[["FILTER_2_PITCH_POL","Pitch Pol",true]]},
-      {"entry":83,"module":"FILTER_2","key":"MOD_1_AMT","label":"Mod 1 Amt","bipolar":false,"cc":24,"value":28,"controller":false,"performance":false,"hintInputs":["MOD_1_IN"],"favorite":true,"slots":[["FILTER_2_MOD_1_AMT","Mod 1 Amt",false]]},
-      {"entry":84,"module":"FILTER_2","key":"MOD_1_POL","label":"Mod 1 Pol","bipolar":true,"cc":117,"value":124,"controller":false,"performance":false,"hint":"− to +","favorite":true,"slots":[["FILTER_2_MOD_1_POL","Mod 1 Pol",true]]},
-      {"entry":85,"module":"FILTER_2","key":"MOD_2_AMT","label":"Mod 2 Amt","bipolar":false,"cc":25,"value":4,"controller":false,"performance":false,"hintInputs":["MOD_2_IN"],"favorite":true,"slots":[["FILTER_2_MOD_2_AMT","Mod 2 Amt",false]]},
-      {"entry":86,"module":"FILTER_2","key":"MOD_2_POL","label":"Mod 2 Pol","bipolar":true,"cc":0,"value":76,"controller":false,"performance":false,"hint":"− to +","slots":[["FILTER_2_MOD_2_POL","Mod 2 Pol",true]]},
-      {"entry":87,"module":"AMP_1","key":"GAIN_1","label":"Gain 1","bipolar":false,"cc":0,"value":4,"controller":false,"performance":false,"hintInputs":["AUDIO_IN_1"],"slots":[["AMP_1_GAIN_1","Gain 1",false]]},
-      {"entry":88,"module":"AMP_1","key":"GAIN_2","label":"Gain 2","bipolar":false,"cc":15,"value":64,"controller":false,"performance":false,"hintInputs":["AUDIO_IN_2"],"favorite":true,"slots":[["AMP_1_GAIN_2","Gain 2",false]]},
-      {"entry":89,"module":"AMP_1","key":"MOD_1_2_MIX","label":"Mod 1/2 Mix","bipolar":false,"cc":36,"value":4,"controller":false,"performance":false,"hintInputs":["MOD_1_IN","MOD_2_IN"],"favorite":true,"slots":[["AMP_1_MOD_1_2_MIX","Mod 1/2 Mix",false]]},
-      {"entry":90,"module":"CHORUS_1","key":"MIX","label":"Mix","bipolar":false,"cc":93,"value":64,"controller":false,"performance":false,"favorite":true,"slots":[["CHORUS_1_MIX","Mix",false]]},
-      {"entry":91,"module":"CHORUS_1","key":"RATE","label":"Rate","bipolar":false,"cc":58,"value":64,"controller":false,"performance":false,"favorite":true,"slots":[["CHORUS_1_RATE","Rate",false]]},
-      {"entry":92,"module":"CHORUS_1","key":"DEPTH","label":"Depth","bipolar":false,"cc":59,"value":64,"controller":false,"performance":false,"favorite":true,"slots":[["CHORUS_1_DEPTH","Depth",false]]},
-      {"entry":93,"module":"DELAY_1","key":"MIX","label":"Mix","bipolar":false,"cc":94,"value":34,"controller":false,"performance":false,"favorite":true,"slots":[["DELAY_1_MIX","Mix",false]]},
-      {"entry":94,"module":"DELAY_1","key":"TIME","label":"Time","bipolar":false,"cc":90,"value":64,"controller":false,"performance":false,"favorite":true,"slots":[["DELAY_1_TIME","Time",false]]},
-      {"entry":95,"module":"DELAY_1","key":"FEEDBACK","label":"Feedback","bipolar":false,"cc":92,"value":64,"controller":false,"performance":false,"favorite":true,"slots":[["DELAY_1_FEEDBACK","Feedback",false]]},
-      {"entry":96,"key":"MOD_WHEEL","label":"Mod Wheel","bipolar":false,"cc":1,"value":4,"controller":true,"performance":true,"slots":[["MOD_WHEEL","Mod Wheel",false],["MOD_WHEEL_REV","Mod Wheel Rev",false,"rev"],["MOD_WHEEL_INV","Mod Wheel Inv",false,"inv"],["MOD_WHEEL_REV_INV","Mod Wheel Rev Inv",false,"rev_inv"]]},
-      {"entry":97,"key":"BREATH","label":"Breath","bipolar":false,"cc":2,"value":4,"controller":true,"performance":true,"slots":[["BREATH","Breath",false],["BREATH_REV","Breath Rev",false,"rev"],["BREATH_INV","Breath Inv",false,"inv"],["BREATH_REV_INV","Breath Rev Inv",false,"rev_inv"]]},
-      {"entry":98,"key":"GENERAL_1","label":"General 1","bipolar":false,"cc":16,"value":4,"controller":true,"performance":false,"slots":[["GENERAL_1","General 1",false],["GENERAL_1_REV","General 1 Rev",false,"rev"],["GENERAL_1_INV","General 1 Inv",false,"inv"],["GENERAL_1_REV_INV","General 1 Rev Inv",false,"rev_inv"],["GENERAL_1_BIPOLAR","General 1 Bipolar",true,"bipolar"],["GENERAL_1_BIPOLAR_INV","General 1 Bipolar Inv",true,"bipolar_inv"],["GENERAL_1_COS","General 1 Cos",false,"cos"],["GENERAL_1_SIN","General 1 Sin",false,"sin"],["GENERAL_1_LO","General 1 Lo",false,"lo"],["GENERAL_1_HI","General 1 Hi",false,"hi"],["GENERAL_1_NEG","General 1 Neg",false,"neg"],["GENERAL_1_MID","General 1 Mid",false,"mid"],["GENERAL_1_POS","General 1 Pos",false,"pos"]]},
-      {"entry":99,"key":"GENERAL_2","label":"General 2","bipolar":false,"cc":17,"value":4,"controller":true,"performance":false,"slots":[["GENERAL_2","General 2",false],["GENERAL_2_REV","General 2 Rev",false,"rev"],["GENERAL_2_INV","General 2 Inv",false,"inv"],["GENERAL_2_REV_INV","General 2 Rev Inv",false,"rev_inv"],["GENERAL_2_BIPOLAR","General 2 Bipolar",true,"bipolar"],["GENERAL_2_BIPOLAR_INV","General 2 Bipolar Inv",true,"bipolar_inv"],["GENERAL_2_COS","General 2 Cos",false,"cos"],["GENERAL_2_SIN","General 2 Sin",false,"sin"],["GENERAL_2_LO","General 2 Lo",false,"lo"],["GENERAL_2_HI","General 2 Hi",false,"hi"],["GENERAL_2_NEG","General 2 Neg",false,"neg"],["GENERAL_2_MID","General 2 Mid",false,"mid"],["GENERAL_2_POS","General 2 Pos",false,"pos"]]},
-      {"entry":100,"module":"AMP_1","key":"LIMITER_SW","label":"Limiter Sw","bipolar":false,"cc":0,"value":124,"controller":false,"performance":false,"hint":"Off/On","slots":[["AMP_1_LIMITER_SW","Limiter Sw",false]]},
+      {"entry":68,"module":"FILTER_1","key":"DRIVE","label":"Drive","bipolar":false,"cc":31,"value":4,"controller":false,"performance":false,"hint":"x1 to x32","slots":[["FILTER_1_DRIVE","Drive",false]]},
+      {"entry":69,"module":"FILTER_1","key":"GAIN_1","label":"Gain 1","bipolar":false,"cc":0,"value":64,"controller":false,"performance":false,"hintInputs":["AUDIO_IN_1"],"slots":[["FILTER_1_GAIN_1","Gain 1",false]]},
+      {"entry":70,"module":"FILTER_1","key":"GAIN_2","label":"Gain 2","bipolar":false,"cc":0,"value":4,"controller":false,"performance":false,"hintInputs":["AUDIO_IN_2"],"slots":[["FILTER_1_GAIN_2","Gain 2",false]]},
+      {"entry":71,"module":"FILTER_1","key":"PITCH_AMT","label":"Pitch Amt","bipolar":false,"cc":9,"value":4,"controller":false,"performance":false,"hintInputs":["PITCH_IN"],"slots":[["FILTER_1_PITCH_AMT","Pitch Amt",false]]},
+      {"entry":72,"module":"FILTER_1","key":"PITCH_POL","label":"Pitch Pol","bipolar":true,"cc":0,"value":124,"controller":false,"performance":false,"hint":"− to +","slots":[["FILTER_1_PITCH_POL","Pitch Pol",true]]},
+      {"entry":73,"module":"FILTER_1","key":"MOD_1_AMT","label":"Mod 1 Amt","bipolar":false,"cc":24,"value":28,"controller":false,"performance":false,"hintInputs":["MOD_1_IN"],"slots":[["FILTER_1_MOD_1_AMT","Mod 1 Amt",false]]},
+      {"entry":74,"module":"FILTER_1","key":"MOD_1_POL","label":"Mod 1 Pol","bipolar":true,"cc":117,"value":124,"controller":false,"performance":false,"hint":"− to +","slots":[["FILTER_1_MOD_1_POL","Mod 1 Pol",true]]},
+      {"entry":75,"module":"FILTER_1","key":"MOD_2_AMT","label":"Mod 2 Amt","bipolar":false,"cc":25,"value":4,"controller":false,"performance":false,"hintInputs":["MOD_2_IN"],"slots":[["FILTER_1_MOD_2_AMT","Mod 2 Amt",false]]},
+      {"entry":76,"module":"FILTER_1","key":"MOD_2_POL","label":"Mod 2 Pol","bipolar":true,"cc":0,"value":76,"controller":false,"performance":false,"hint":"− to +","slots":[["FILTER_1_MOD_2_POL","Mod 2 Pol",true]]},
+      {"entry":77,"module":"FILTER_2","key":"MODE","label":"Mode","bipolar":false,"cc":39,"value":4,"controller":false,"performance":false,"hint":"LP to Notch to HP","favorite":true,"slots":[["FILTER_2_MODE","Mode",false]]},
+      {"entry":78,"module":"FILTER_2","key":"CUTOFF","label":"Cutoff","bipolar":false,"cc":74,"value":88,"controller":false,"performance":false,"favorite":true,"slots":[["FILTER_2_CUTOFF","Cutoff",false]]},
+      {"entry":79,"module":"FILTER_2","key":"RESONANCE","label":"Resonance","bipolar":false,"cc":71,"value":64,"controller":false,"performance":false,"favorite":true,"slots":[["FILTER_2_RESONANCE","Resonance",false]]},
+      {"entry":80,"module":"FILTER_2","key":"DRIVE","label":"Drive","bipolar":false,"cc":31,"value":4,"controller":false,"performance":false,"hint":"x1 to x32","favorite":true,"slots":[["FILTER_2_DRIVE","Drive",false]]},
+      {"entry":81,"module":"FILTER_2","key":"GAIN_1","label":"Gain 1","bipolar":false,"cc":0,"value":4,"controller":false,"performance":false,"hintInputs":["AUDIO_IN_1"],"slots":[["FILTER_2_GAIN_1","Gain 1",false]]},
+      {"entry":82,"module":"FILTER_2","key":"GAIN_2","label":"Gain 2","bipolar":false,"cc":0,"value":64,"controller":false,"performance":false,"hintInputs":["AUDIO_IN_2"],"slots":[["FILTER_2_GAIN_2","Gain 2",false]]},
+      {"entry":83,"module":"FILTER_2","key":"PITCH_AMT","label":"Pitch Amt","bipolar":false,"cc":9,"value":4,"controller":false,"performance":false,"hintInputs":["PITCH_IN"],"favorite":true,"slots":[["FILTER_2_PITCH_AMT","Pitch Amt",false]]},
+      {"entry":84,"module":"FILTER_2","key":"PITCH_POL","label":"Pitch Pol","bipolar":true,"cc":0,"value":124,"controller":false,"performance":false,"hint":"− to +","slots":[["FILTER_2_PITCH_POL","Pitch Pol",true]]},
+      {"entry":85,"module":"FILTER_2","key":"MOD_1_AMT","label":"Mod 1 Amt","bipolar":false,"cc":24,"value":28,"controller":false,"performance":false,"hintInputs":["MOD_1_IN"],"favorite":true,"slots":[["FILTER_2_MOD_1_AMT","Mod 1 Amt",false]]},
+      {"entry":86,"module":"FILTER_2","key":"MOD_1_POL","label":"Mod 1 Pol","bipolar":true,"cc":117,"value":124,"controller":false,"performance":false,"hint":"− to +","favorite":true,"slots":[["FILTER_2_MOD_1_POL","Mod 1 Pol",true]]},
+      {"entry":87,"module":"FILTER_2","key":"MOD_2_AMT","label":"Mod 2 Amt","bipolar":false,"cc":25,"value":4,"controller":false,"performance":false,"hintInputs":["MOD_2_IN"],"favorite":true,"slots":[["FILTER_2_MOD_2_AMT","Mod 2 Amt",false]]},
+      {"entry":88,"module":"FILTER_2","key":"MOD_2_POL","label":"Mod 2 Pol","bipolar":true,"cc":0,"value":76,"controller":false,"performance":false,"hint":"− to +","slots":[["FILTER_2_MOD_2_POL","Mod 2 Pol",true]]},
+      {"entry":89,"module":"AMP_1","key":"GAIN_1","label":"Gain 1","bipolar":false,"cc":0,"value":4,"controller":false,"performance":false,"hintInputs":["AUDIO_IN_1"],"slots":[["AMP_1_GAIN_1","Gain 1",false]]},
+      {"entry":90,"module":"AMP_1","key":"GAIN_2","label":"Gain 2","bipolar":false,"cc":15,"value":64,"controller":false,"performance":false,"hintInputs":["AUDIO_IN_2"],"favorite":true,"slots":[["AMP_1_GAIN_2","Gain 2",false]]},
+      {"entry":91,"module":"AMP_1","key":"DISTORTION","label":"Distortion","bipolar":false,"cc":95,"value":4,"controller":false,"performance":false,"hint":"x1 to x32","favorite":true,"slots":[["AMP_1_DISTORTION","Distortion",false]]},
+      {"entry":92,"module":"AMP_1","key":"MOD_1_2_MIX","label":"Mod 1/2 Mix","bipolar":false,"cc":36,"value":4,"controller":false,"performance":false,"hintInputs":["MOD_1_IN","MOD_2_IN"],"favorite":true,"slots":[["AMP_1_MOD_1_2_MIX","Mod 1/2 Mix",false]]},
+      {"entry":93,"module":"AMP_1","key":"LIMITER_SW","label":"Limiter Sw","bipolar":false,"cc":0,"value":124,"controller":false,"performance":false,"hint":"Off/On","slots":[["AMP_1_LIMITER_SW","Limiter Sw",false]]},
+      {"entry":94,"module":"CHORUS_1","key":"MIX","label":"Mix","bipolar":false,"cc":93,"value":34,"controller":false,"performance":false,"favorite":true,"slots":[["CHORUS_1_MIX","Mix",false]]},
+      {"entry":95,"module":"CHORUS_1","key":"RATE","label":"Rate","bipolar":false,"cc":58,"value":64,"controller":false,"performance":false,"favorite":true,"slots":[["CHORUS_1_RATE","Rate",false]]},
+      {"entry":96,"module":"CHORUS_1","key":"DEPTH","label":"Depth","bipolar":false,"cc":59,"value":64,"controller":false,"performance":false,"favorite":true,"slots":[["CHORUS_1_DEPTH","Depth",false]]},
+      {"entry":97,"module":"DELAY_1","key":"MIX","label":"Mix","bipolar":false,"cc":94,"value":34,"controller":false,"performance":false,"favorite":true,"slots":[["DELAY_1_MIX","Mix",false]]},
+      {"entry":98,"module":"DELAY_1","key":"TIME","label":"Time","bipolar":false,"cc":90,"value":64,"controller":false,"performance":false,"favorite":true,"slots":[["DELAY_1_TIME","Time",false]]},
+      {"entry":99,"module":"DELAY_1","key":"FEEDBACK","label":"Feedback","bipolar":false,"cc":92,"value":64,"controller":false,"performance":false,"favorite":true,"slots":[["DELAY_1_FEEDBACK","Feedback",false]]},
+      {"entry":100,"key":"MOD_WHEEL","label":"Mod Wheel","bipolar":false,"cc":1,"value":4,"controller":true,"performance":true,"slots":[["MOD_WHEEL","Mod Wheel",false],["MOD_WHEEL_REV","Mod Wheel Rev",false,"rev"],["MOD_WHEEL_INV","Mod Wheel Inv",false,"inv"],["MOD_WHEEL_REV_INV","Mod Wheel Rev Inv",false,"rev_inv"]]},
+      {"entry":101,"key":"BREATH","label":"Breath","bipolar":false,"cc":2,"value":4,"controller":true,"performance":true,"slots":[["BREATH","Breath",false],["BREATH_REV","Breath Rev",false,"rev"],["BREATH_INV","Breath Inv",false,"inv"],["BREATH_REV_INV","Breath Rev Inv",false,"rev_inv"]]},
+      {"entry":102,"key":"GENERAL_1","label":"General 1","bipolar":false,"cc":16,"value":4,"controller":true,"performance":false,"slots":[["GENERAL_1","General 1",false],["GENERAL_1_REV","General 1 Rev",false,"rev"],["GENERAL_1_INV","General 1 Inv",false,"inv"],["GENERAL_1_REV_INV","General 1 Rev Inv",false,"rev_inv"],["GENERAL_1_BIPOLAR","General 1 Bipolar",true,"bipolar"],["GENERAL_1_BIPOLAR_INV","General 1 Bipolar Inv",true,"bipolar_inv"],["GENERAL_1_COS","General 1 Cos",false,"cos"],["GENERAL_1_SIN","General 1 Sin",false,"sin"],["GENERAL_1_LO","General 1 Lo",false,"lo"],["GENERAL_1_HI","General 1 Hi",false,"hi"],["GENERAL_1_NEG","General 1 Neg",false,"neg"],["GENERAL_1_MID","General 1 Mid",false,"mid"],["GENERAL_1_POS","General 1 Pos",false,"pos"]]},
+      {"entry":103,"key":"GENERAL_2","label":"General 2","bipolar":false,"cc":17,"value":4,"controller":true,"performance":false,"slots":[["GENERAL_2","General 2",false],["GENERAL_2_REV","General 2 Rev",false,"rev"],["GENERAL_2_INV","General 2 Inv",false,"inv"],["GENERAL_2_REV_INV","General 2 Rev Inv",false,"rev_inv"],["GENERAL_2_BIPOLAR","General 2 Bipolar",true,"bipolar"],["GENERAL_2_BIPOLAR_INV","General 2 Bipolar Inv",true,"bipolar_inv"],["GENERAL_2_COS","General 2 Cos",false,"cos"],["GENERAL_2_SIN","General 2 Sin",false,"sin"],["GENERAL_2_LO","General 2 Lo",false,"lo"],["GENERAL_2_HI","General 2 Hi",false,"hi"],["GENERAL_2_NEG","General 2 Neg",false,"neg"],["GENERAL_2_MID","General 2 Mid",false,"mid"],["GENERAL_2_POS","General 2 Pos",false,"pos"]]},
     ],
     signals: [
       {"id":0,"key":"NONE","label":"0.0"},
@@ -2011,12 +2014,16 @@
       {"id":77,"key":"CHORUS_1_OUTPUT_L"},
       {"id":78,"key":"CHORUS_1_OUTPUT_R"},
       {"id":79,"key":"CHORUS_1_OUTPUT_MONO"},
-      {"id":80,"key":"DELAY_1_OUTPUT_L"},
-      {"id":81,"key":"DELAY_1_OUTPUT_R"},
-      {"id":82,"key":"DELAY_1_OUTPUT_MONO"},
+      {"id":80,"key":"CHORUS_1_OUTPUT_WET_L"},
+      {"id":81,"key":"CHORUS_1_OUTPUT_WET_R"},
+      {"id":82,"key":"DELAY_1_OUTPUT_L"},
+      {"id":83,"key":"DELAY_1_OUTPUT_R"},
+      {"id":84,"key":"DELAY_1_OUTPUT_MONO"},
+      {"id":85,"key":"DELAY_1_OUTPUT_WET_L"},
+      {"id":86,"key":"DELAY_1_OUTPUT_WET_R"},
     ],
     defaultOrder: ["PITCH_1","EG_1","EG_2","LFO_1","MIXER_1","OSC_1","OSC_2","NOISE_1","MIXER_2","FILTER_1","FILTER_2","AMP_1","CHORUS_1","DELAY_1"],
-    specHash: 0x4062907C,
+    specHash: 0x9C24DF0F,
   };
   // patch_gen end
 
@@ -2092,7 +2099,7 @@
     NOISE_1:   { x: 1720, y: 762 },
     MIXER_2:   { x: 1720, y: 990 },
     FILTER_1:  { x: 2080, y: 40 },
-    FILTER_2:  { x: 2080, y: 658 },
+    FILTER_2:  { x: 2080, y: 684 },
     AMP_1:     { x: 2440, y: 40 },
     CHORUS_1:  { x: 2440, y: 372 },
     DELAY_1:   { x: 2440, y: 652 },
@@ -4810,16 +4817,24 @@
     // Z / X shift the octave. Keys go by position (e.code), so any layout or input mode plays the
     // same. A is the C of the middle octave in view. A key held is a pointer of its own, so one
     // released after an octave shift turns off the note it played.
+    // A slider, a button or a check box clicked last keeps the focus, and a key pressed on it would
+    // show its focus ring, as the browser takes a key to mean the keyboard is in use: a key that
+    // plays takes the focus off it instead, as it is not meant for it.
+    function kbReleaseFocus(e) {
+      if (e.target !== document.body && typeof e.target.blur === 'function') e.target.blur();
+    }
     document.addEventListener('keydown', e => {
       if (!kbPcKeyEnabled(e)) return;
       if (e.code === 'KeyZ' || e.code === 'KeyX') {
         e.preventDefault();
+        kbReleaseFocus(e);
         if (!e.repeat) kbShiftOctave(e.code === 'KeyZ' ? -1 : 1);
         return;
       }
       const offset = KB_PC_KEYS.indexOf(e.code);
       if (offset < 0) return;
       e.preventDefault();
+      kbReleaseFocus(e);
       const id = 'key:' + e.code;
       if (e.repeat || kbPointers.has(id)) return;
       const note = Math.round((kbGetCenter() - KB_CENTER_OFFSET) / 12) * 12 + 12 + offset;

@@ -83,7 +83,7 @@ module Spms1
     # The share is 1/(time constant in samples), the first-order form of the exact
     # 1 - exp(-1/(time constant in samples)); at the shortest time, 69 samples, it runs 0.7% fast.
     def set_glide(time)
-      @time = (time < 0.0) ? 0.0 : ((time > 1.0) ? 1.0 : time)
+      @time = Dsp.clamp(time, 0.0, 1.0)
       blend = 1.0 / (TIME_BASE * calculate_exp_fast(@time) * @sample_rate)
       @blend = (@time > 0.0) ? blend : 1.0
       @gate_off_blend = (@time > 0.0) ? 0.0 : 1.0
@@ -122,12 +122,12 @@ module Spms1
     # Mod Amt: bipolar, [-0.5, 0.5], doubled, so at +0.5 the bend runs as the wheel does, at -0.5
     # the other way, and at 0.0 not at all. Only their product, the depth, is smoothed.
     def set_bend_amount(amount)
-      @bend_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
+      @bend_amount = Dsp.clamp(amount, 0.0, 1.0)
       @bend_depth = @bend_amount * @bend_polarity
     end
 
     def set_bend_polarity(polarity)
-      clamped = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
+      clamped = Dsp.clamp(polarity, -0.5, 0.5)
       @bend_polarity = clamped + clamped
       @bend_depth = @bend_amount * @bend_polarity
     end
@@ -139,7 +139,7 @@ module Spms1
     # keyboard spread to whole tones are both on the one dial. The factor is smoothed, as a depth
     # is, so that turning it glides the pitch rather than stepping it.
     def set_stretch(stretch)
-      @stretch = (stretch < 0.0) ? 0.0 : ((stretch > 1.0) ? 1.0 : stretch)
+      @stretch = Dsp.clamp(stretch, 0.0, 1.0)
       # calculate_exp_fast spans 1/32 to 32 over the dial, so the stretch reaches 1.0 at its top.
       stretch_factor = 1.0 + calculate_exp_fast(@stretch) * (1.0 / 32.0)
       @stretch_factor = (@stretch > 0.0) ? stretch_factor : 1.0
@@ -195,9 +195,9 @@ module Spms1
       @distance_2 = flushed_2 - flushed_2 * blend_2
       bend = bend_input * @current_bend_depth
       output_2 = ((input + @distance_2) + (bend * @bend_2_on)) * @current_stretch_factor
-      @output_2 = (output_2 < -1.0) ? -1.0 : ((output_2 > 1.0) ? 1.0 : output_2)
+      @output_2 = Dsp.clamp(output_2, -1.0, 1.0)
       output = ((input + @distance_1) + (bend * @bend_1_on)) * @current_stretch_factor
-      (output < -1.0) ? -1.0 : ((output > 1.0) ? 1.0 : output)
+      Dsp.clamp(output, -1.0, 1.0)
     end
 
     def output_2

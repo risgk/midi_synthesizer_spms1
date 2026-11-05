@@ -76,12 +76,12 @@ module Spms1
     # comparisons below are written against.
     # Attack time: see ATTACK_BASE for scaling details.
     def set_attack(attack)
-      @attack = (attack < 0.0) ? 0.0 : ((attack > 1.0) ? 1.0 : attack)
+      @attack = Dsp.clamp(attack, 0.0, 1.0)
     end
 
     # Decay time: see DECAY_BASE for scaling details.
     def set_decay(decay)
-      @decay = (decay < 0.0) ? 0.0 : ((decay > 1.0) ? 1.0 : decay)
+      @decay = Dsp.clamp(decay, 0.0, 1.0)
     end
 
     # Release Sw is unipolar, [0.0, 1.0], and taken as a switch, on from 0.5 (CC 64) up, as a
@@ -94,13 +94,13 @@ module Spms1
 
     # Sustain level: silent at 0.0, full at 1.0.
     def set_sustain(sustain)
-      @sustain = (sustain < 0.0) ? 0.0 : ((sustain > 1.0) ? 1.0 : sustain)
+      @sustain = Dsp.clamp(sustain, 0.0, 1.0)
     end
 
     # The output is scaled by level, as the LFO's is: unipolar, [0.0, 1.0], a plain multiplier.
     # Turning it the other way up is for Out Inv, or a mixer's Out Inv.
     def set_level(level)
-      @level = (level < 0.0) ? 0.0 : ((level > 1.0) ? 1.0 : level)
+      @level = Dsp.clamp(level, 0.0, 1.0)
       @amount = @level
     end
 

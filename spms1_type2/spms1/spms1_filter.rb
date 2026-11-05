@@ -21,7 +21,7 @@ module Spms1
     # OUTPUT_CEILING. The limit is one unit, the widest thing the bus carries. A cubic here would have
     # no linear region and bend everything it passed -- 0.3 dB and a 1% third harmonic at half a
     # unit -- making the output clip, not the loop, the filter's main source of distortion. The
-    # default patch peaks near 0.68, under the knee, so it leaves untouched. The shoulder's curvature
+    # default patch peaks near 0.3 (Osc 1 alone, at Mixer 2 Level 1 0.5), under the knee, so it leaves untouched. The shoulder's curvature
     # steps at the knee, so what crosses it gains odd harmonics of every order rather than just the
     # third, falling as 1/n^3; a hard clamp, stepping in slope, falls as 1/n^2.
     OUTPUT_LIMIT       = 1.0
@@ -68,6 +68,20 @@ module Spms1
     LEAK_CLIP_OFFSET     = SOFT_CLIP_BIAS_GAIN * SOFT_CLIP_BIAS_OUTPUT
     LEAK_SLOPE_OFFSET    = 1.0 - SOFT_CLIP_BIAS_GAIN
     LEAK_SLOPE_SCALE     = 3.0 * LEAK_CLIP_GAIN_SCALE
+    # Drive brings the leak's ceiling and its bias down by its gain D, 2^(5 * drive), 1.0 to 32.0
+    # (6 dB every fifth of the dial): the same as driving the loop D times harder and taking what
+    # leaves it D times down ahead of the output clip, as the curve is self-similar and the bias
+    # comes down with the ceiling. So the leak bends sooner, at the resonance first, while the level
+    # stays and the output clip stays where it is. With the ceiling C / D and the bias B / D, the
+    # make-up gain G is the same whatever D; the leak's offset comes down by D, and its gain and
+    # slope scales, which go as 1 / C^2, go up by D^2. smooth_parameters works these out from the
+    # smoothed Drive every 16 samples, whatever it is, so the load is the same; process reads them
+    # where it read the constants. The gain is read from DRIVE_TABLE, 2^(i * 5 / 32), between entries.
+    DRIVE_TABLE = Array.new(34, 0.0)
+    for i in 0...33
+      DRIVE_TABLE[i] = 2.0 ** (i.to_f * (5.0 / 32.0))
+    end
+    DRIVE_TABLE[33] = DRIVE_TABLE[32]
     # One-pole high pass on the output at f_s * coefficient / (2 * pi), 7.5 Hz at 48 kHz; initialize
     # scales the coefficient with the sample rate to hold that frequency.
     DC_BLOCKER_COEFFICIENT_BASE = 1.0 / 1024.0
@@ -108,6 +122,41 @@ module Spms1
       end
     end
     K_TABLE[121] = K_TABLE[120]
+
+    # The output level by the resonance, one entry per step of the dial as K_TABLE, so that a high
+    # resonance is about as loud as a moderate one, while the loop, and so how readily the
+    # self-oscillation starts and holds against the input, stays as it was. 1.0 up to i = 72 (CC
+    # 76, Q 5.7), then lower in lines in dB, to -2.8 dB at i = 114 (CC 118, Q 256): what the
+    # resonance brings up there is the harmonic near the cutoff. Past that
+    # the self-oscillation takes over, SELF_OSC_LEVEL * sqrt(t) in the loop, and the level is set
+    # so that it comes out at SELF_OSC_OUTPUT_MIN at i = 115 (CC 119), rising in a line to
+    # SELF_OSC_OUTPUT_MAX at i = 119 (CC 123) and held there: still louder with the resonance, but
+    # by less. It scales the three outputs ahead of their clip, so Out, Out LP, Out HP and Out BP
+    # all follow it.
+    SELF_OSC_OUTPUT_MIN = 0.15
+    SELF_OSC_OUTPUT_MAX = 0.25
+    RESONANCE_LEVEL_TABLE = Array.new(122, 1.0)
+    for i in 0...121
+      x = i.to_f
+      if i >= 115
+        t = (x - 114.0) / 5.0
+        t = 1.0 if t > 1.0
+        target = SELF_OSC_OUTPUT_MIN + (SELF_OSC_OUTPUT_MAX - SELF_OSC_OUTPUT_MIN) * (x - 115.0) / 4.0
+        target = SELF_OSC_OUTPUT_MAX if target > SELF_OSC_OUTPUT_MAX
+        RESONANCE_LEVEL_TABLE[i] = target / (0.5 * Math.sqrt(t))  # 0.5: SELF_OSC_LEVEL, below
+      else
+        db = 0.0
+        if i > 110
+          db = -2.5 - 0.3 * (x - 110.0) / 4.0
+        elsif i > 105
+          db = -1.3 - 1.2 * (x - 105.0) / 5.0
+        elsif i > 72
+          db = -1.3 * (x - 72.0) / 33.0
+        end
+        RESONANCE_LEVEL_TABLE[i] = 10.0 ** (db / 20.0)
+      end
+    end
+    RESONANCE_LEVEL_TABLE[121] = RESONANCE_LEVEL_TABLE[120]
 
     # Negative damping at the top of the resonance dial, as k = -t * kappa / g with t the amount
     # dialed in. The leak settles the oscillation where it takes out what the negative damping
@@ -154,21 +203,21 @@ module Spms1
       @dc_blocker_coefficient = DC_BLOCKER_COEFFICIENT_BASE * (48000.0 / @sample_rate)
       @self_osc_seed = SELF_OSC_SEED
       # The fade's weight is offset - cutoff * scale, clamped to [0, 1]: one at f_s / 6 and below,
-      # zero at f_s / 4.8 and above. The dial puts MIDI note 15 at 0.0 and 135 at 1.0, 440 Hz at
-      # 0.45. At a sample rate of 96 kHz or more, f_s / 4.8 lies past the top of the dial and the
+      # zero at f_s / 4.8 and above. The dial puts MIDI note 12 at 0.0 and 132 at 1.0, 440 Hz at
+      # 0.475. At a sample rate of 96 kHz or more, f_s / 4.8 lies past the top of the dial and the
       # oscillation never fades out entirely.
-      self_osc_fade_end = 0.45 + Math.log(sample_rate * (1.0 / (4.8 * 440.0))) / (10.0 * Math.log(2.0))
+      self_osc_fade_end = 0.475 + Math.log(sample_rate * (1.0 / (4.8 * 440.0))) / (10.0 * Math.log(2.0))
       @self_osc_fade_scale = 1.0 / SELF_OSC_FADE_WIDTH
       @self_osc_fade_offset = self_osc_fade_end * @self_osc_fade_scale
 
-      # Integrator gain lookup, g = tan(pi * f_0 / f_s), one entry per semitone of MIDI note 15
-      # (19 Hz) to 135 (20 kHz), the cutoff dial's range. It depends on the sample rate, so it is
+      # Integrator gain lookup, g = tan(pi * f_0 / f_s), one entry per semitone of MIDI note 12
+      # (16.4 Hz) to 132 (16.7 kHz), the cutoff dial's range. It depends on the sample rate, so it is
       # built here rather than as a constant. The prewarp puts the cutoff exactly where the note
       # says, all the way up; the guard entry at the end serves as K_TABLE's does.
       @g_table = Array.new(122, 0.0)
       i = 0
       while i < 121
-        freq = 440.0 * (2.0 ** ((i.to_f - 54.0) * (1.0 / 12.0)))
+        freq = 440.0 * (2.0 ** ((i.to_f - 57.0) * (1.0 / 12.0)))
         @g_table[i] = Math.tan(Math::PI * freq * (1.0 / sample_rate))
         i += 1
       end
@@ -213,6 +262,7 @@ module Spms1
       @last_g = 0.0
       @last_g_plus_k = 0.0
       @last_one_over_a0 = 1.0
+      @output_level = 1.0
       @g_slope = 0.0
       @g_plus_k_slope = 0.0
       @one_over_a0_slope = 0.0
@@ -234,8 +284,22 @@ module Spms1
       @gain_2 = 1.0
       @stage_1_gain_2 = 0.0
       @current_gain_2 = 0.0
+      @drive = 0.0
+      @stage_1_drive = 0.0
+      @current_drive = 0.0
+      @leak_bias = SOFT_CLIP_BIAS
+      @leak_ceiling = SOFT_CLIP_CEILING
+      @leak_floor = SOFT_CLIP_FLOOR
+      @leak_gain_scale = LEAK_CLIP_GAIN_SCALE
+      @leak_offset = LEAK_CLIP_OFFSET
+      @leak_slope_scale = LEAK_SLOPE_SCALE
 
       update_coefficients
+    end
+
+    # Drive: unipolar, [0.0, 1.0], the leak's ceiling down by 2^(5 * drive) (see DRIVE_TABLE).
+    def set_drive(drive)
+      @drive = Dsp.clamp(drive, 0.0, 1.0)
     end
 
     # Gain 1 and Gain 2, of Audio In 1 and Audio In 2, which are summed into the filter: each
@@ -243,32 +307,34 @@ module Spms1
     # the dial is unity and the top drives the filter 12 dB harder. Smoothed at the control rate,
     # as Mode is, being gains on the audio.
     def set_gain_1(gain)
-      clamped_gain = (gain < 0.0) ? 0.0 : ((gain > 1.0) ? 1.0 : gain)
+      clamped_gain = Dsp.clamp(gain, 0.0, 1.0)
       @gain_1 = 4.0 * clamped_gain * clamped_gain
     end
 
     def set_gain_2(gain)
-      clamped_gain = (gain < 0.0) ? 0.0 : ((gain > 1.0) ? 1.0 : gain)
+      clamped_gain = Dsp.clamp(gain, 0.0, 1.0)
       @gain_2 = 4.0 * clamped_gain * clamped_gain
     end
 
     # Every parameter but the two Mod Pols is unipolar, [0.0, 1.0], which is what the smoothing, the
     # modulation sum and the table lookups below are written against.
-    # Cutoff range: MIDI note 15 (19 Hz) at 0.0, MIDI note 75 (622 Hz) at 0.5, MIDI note 135 (20 kHz) at 1.0.
+    # Cutoff range: MIDI note 12 (16.4 Hz) at 0.0, MIDI note 72 (C5, 523 Hz) at 0.5, MIDI note 132
+    # (16.7 kHz) at 1.0: a C every 12 values from CC 4, and with Pitch Amt at 1.0 the cutoff at 0.5
+    # an octave above the note played.
     def set_cutoff(cutoff)
-      @cutoff = (cutoff < 0.0) ? 0.0 : ((cutoff > 1.0) ? 1.0 : cutoff)
+      @cutoff = Dsp.clamp(cutoff, 0.0, 1.0)
     end
 
     # Each modulation amount is unipolar, [0.0, 1.0], a plain multiplier on its input: at 1.0 a
     # unit of input is the whole cutoff range, and at 0.0 the input leaves the cutoff alone. Each
     # modulation's polarity multiplies its amount.
     def set_modulation_1_amount(amount)
-      @modulation_1_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
+      @modulation_1_amount = Dsp.clamp(amount, 0.0, 1.0)
       @modulation_1_depth = @modulation_1_amount * @modulation_1_polarity
     end
 
     def set_modulation_2_amount(amount)
-      @modulation_2_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
+      @modulation_2_amount = Dsp.clamp(amount, 0.0, 1.0)
       @modulation_2_depth = @modulation_2_amount * @modulation_2_polarity
     end
 
@@ -276,13 +342,13 @@ module Spms1
     # its modulation: at +0.5 it moves the cutoff as its amount says, at -0.5 the other way, so the
     # envelope closes the filter, and at 0.0 not at all.
     def set_modulation_1_polarity(polarity)
-      clamped = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
+      clamped = Dsp.clamp(polarity, -0.5, 0.5)
       @modulation_1_polarity = clamped + clamped
       @modulation_1_depth = @modulation_1_amount * @modulation_1_polarity
     end
 
     def set_modulation_2_polarity(polarity)
-      clamped = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
+      clamped = Dsp.clamp(polarity, -0.5, 0.5)
       @modulation_2_polarity = clamped + clamped
       @modulation_2_depth = @modulation_2_amount * @modulation_2_polarity
     end
@@ -295,12 +361,12 @@ module Spms1
     # cutoff follows the note as Pitch Amt says, at -0.5 the other way, and at 0.0 not at all.
     # Only their product, the depth, is smoothed.
     def set_pitch_amount(amount)
-      @pitch_amount = (amount < 0.0) ? 0.0 : ((amount > 1.0) ? 1.0 : amount)
+      @pitch_amount = Dsp.clamp(amount, 0.0, 1.0)
       @pitch_depth = @pitch_amount * @pitch_polarity
     end
 
     def set_pitch_polarity(polarity)
-      clamped = (polarity < -0.5) ? -0.5 : ((polarity > 0.5) ? 0.5 : polarity)
+      clamped = Dsp.clamp(polarity, -0.5, 0.5)
       @pitch_polarity = clamped + clamped
       @pitch_depth = @pitch_amount * @pitch_polarity
     end
@@ -308,7 +374,7 @@ module Spms1
     # Q range: ~0.7 (0.0), 4.0 (0.5), ~9.5 (0.75), ~40 (0.875), 256 (0.95); self-oscillation from there,
     # growing to its full level at ~0.992 and staying there to 1.0, fading out at a high cutoff.
     def set_resonance(resonance)
-      @resonance = (resonance < 0.0) ? 0.0 : ((resonance > 1.0) ? 1.0 : resonance)
+      @resonance = Dsp.clamp(resonance, 0.0, 1.0)
     end
 
     # Mode is unipolar, [0.0, 1.0], and crossfades Out from the low pass to the high pass: each side
@@ -316,7 +382,7 @@ module Spms1
     # the high pass alone, and 0.5 both at 1.0, whose sum is the input less k times the band pass: a
     # notch at the cutoff, the pass band whole. Only the two factors are smoothed.
     def set_mode(mode)
-      clamped = (mode < 0.0) ? 0.0 : ((mode > 1.0) ? 1.0 : mode)
+      clamped = Dsp.clamp(mode, 0.0, 1.0)
       lp = 2.0 - (clamped + clamped)
       hp = clamped + clamped
       @mode_lp = (lp > 1.0) ? 1.0 : lp
@@ -338,6 +404,21 @@ module Spms1
       @current_modulation_2_depth = Dsp.smooth(@stage_1_modulation_2_depth, @current_modulation_2_depth, @smoothing_16_blend)
       @stage_1_pitch_depth = Dsp.smooth(@pitch_depth, @stage_1_pitch_depth, @smoothing_16_blend)
       @current_pitch_depth = Dsp.smooth(@stage_1_pitch_depth, @current_pitch_depth, @smoothing_16_blend)
+      @stage_1_drive = Dsp.smooth(@drive, @stage_1_drive, @smoothing_16_blend)
+      @current_drive = Dsp.smooth(@stage_1_drive, @current_drive, @smoothing_16_blend)
+      # The leak's ceiling, bias, offset and scales at the Drive's gain (see DRIVE_TABLE), every
+      # time, so that the load does not depend on the Drive.
+      position = @current_drive * 32.0
+      index = position.to_i
+      drive_gain = DRIVE_TABLE[index] + (position - index.to_f) * (DRIVE_TABLE[index + 1] - DRIVE_TABLE[index])
+      one_over_drive = 1.0 / drive_gain
+      drive_squared = drive_gain * drive_gain
+      @leak_bias = SOFT_CLIP_BIAS * one_over_drive
+      @leak_ceiling = SOFT_CLIP_CEILING * one_over_drive
+      @leak_floor = SOFT_CLIP_FLOOR * one_over_drive
+      @leak_offset = LEAK_CLIP_OFFSET * one_over_drive
+      @leak_gain_scale = LEAK_CLIP_GAIN_SCALE * drive_squared
+      @leak_slope_scale = LEAK_SLOPE_SCALE * drive_squared
     end
 
     def process(control_tick, audio_input_1 = 0.0, audio_input_2 = 0.0, pitch_input = 0.0, modulation_1_input = 0.0, modulation_2_input = 0.0)
@@ -364,10 +445,8 @@ module Spms1
       # The clamp is a guard that ordinary use never reaches: nothing else bounds the low pass
       # state, and a cutoff thrown across its range every step, as audio on the modulation input
       # at full depth does, with k negative at the top of the resonance dial, is where to expect
-      # it if anywhere. Clamped the way clip_output clamps.
-      s2_over  = @s2 - LOW_PASS_STATE_CEILING
-      s2_under = LOW_PASS_STATE_FLOOR - @s2
-      s2 = @s2 - ((s2_over + s2_over.abs) - (s2_under + s2_under.abs)) * 0.5
+      # it if anywhere.
+      s2 = Dsp.clamp(@s2, LOW_PASS_STATE_FLOOR, LOW_PASS_STATE_CEILING)
 
       # With the high pass x - s2 - (g + k) * y, the band pass y = s1 + g * high_pass - h * leak(y)
       # (the trapezoidal rule on the equation LEAK_RATE describes, h being @leak_step) is
@@ -379,7 +458,7 @@ module Spms1
       # at a high cutoff, where y moves far between samples, and lifts the self-oscillation there.
       # The denominator, a0 + h * leak'(y), is at least a0 - 0.001 * h, since the clip's slope
       # never exceeds its make-up gain, 1.001: well clear of zero, as a0 stays above 0.99 with k
-      # held at SELF_OSC_K_FLOOR. No branch: the clamp is built as clip_output's is.
+      # held at SELF_OSC_K_FLOOR. No branch: Dsp.clamp is a max and a min.
       # This is neither the delayed soft clipping it replaces, which clipped the band pass state of
       # the previous sample before the linear solve, nor the "gain prediction" of the KVR thread,
       # which puts a gain predicted from the previous sample into the linear solve: the leak is
@@ -387,13 +466,11 @@ module Spms1
       b =@s1 + @g * (audio_input - s2)
       a0 = 1.0 + @g * @g_plus_k
       guess = b * @one_over_a0
-      shifted = guess + SOFT_CLIP_BIAS
-      over    = shifted - SOFT_CLIP_CEILING
-      under   = SOFT_CLIP_FLOOR - shifted
-      clamped = shifted - ((over + over.abs) - (under + under.abs)) * 0.5
+      shifted = guess + @leak_bias
+      clamped = Dsp.clamp(shifted, @leak_floor, @leak_ceiling)
       clamped_squared = clamped * clamped
-      leak = guess - clamped * (SOFT_CLIP_BIAS_GAIN - clamped_squared * LEAK_CLIP_GAIN_SCALE) + LEAK_CLIP_OFFSET
-      leak_slope = LEAK_SLOPE_OFFSET + clamped_squared * LEAK_SLOPE_SCALE
+      leak = guess - clamped * (SOFT_CLIP_BIAS_GAIN - clamped_squared * @leak_gain_scale) + @leak_offset
+      leak_slope = LEAK_SLOPE_OFFSET + clamped_squared * @leak_slope_scale
       band_pass = guess - (a0 * guess + @leak_step * leak - b) / (a0 + @leak_step * leak_slope)
 
       # Two trapezoidal integrators in series. Each new state is twice the output less the old
@@ -411,11 +488,11 @@ module Spms1
       # bias gives the state a DC that reaches every output, so each has a blocker of its own. The
       # band pass is the state itself, unnormalized: its peak at the cutoff is Q times the input.
       @dc_blocker_hp += (high_pass - @dc_blocker_hp) * @dc_blocker_coefficient
-      @output_hp = clip_output(high_pass - @dc_blocker_hp)
+      @output_hp = clip_output((high_pass - @dc_blocker_hp) * @output_level)
       @dc_blocker += (low_pass - @dc_blocker) * @dc_blocker_coefficient
-      @output_lp = clip_output(low_pass - @dc_blocker)
+      @output_lp = clip_output((low_pass - @dc_blocker) * @output_level)
       @dc_blocker_bp += (band_pass - @dc_blocker_bp) * @dc_blocker_coefficient
-      @output_bp = clip_output(band_pass - @dc_blocker_bp)
+      @output_bp = clip_output((band_pass - @dc_blocker_bp) * @output_level)
       # Taken from the two outputs as they leave, so not clipped again: in the pass band one side
       # is all there is, and around the cutoff, where both are, the notch takes them down.
       @output_lp * @current_mode_lp + @output_hp * @current_mode_hp
@@ -478,35 +555,31 @@ module Spms1
 
       # The pitch and modulation inputs arrive as they are; clamping total_cutoff below is what holds
       # the table lookup in range, and a source that swings both ways moves the cutoff both ways.
-      # Clamped without a comparison, as clip_output does it.
       modulation = (@current_modulation_1_input * @current_modulation_1_depth) + (@current_modulation_2_input * @current_modulation_2_depth)
       total_cutoff = @current_cutoff + @current_pitch_input * @current_pitch_depth + modulation
-      over  = total_cutoff - 1.0
-      under = 0.0 - total_cutoff
-      clamped_cutoff = total_cutoff - ((over + over.abs) - (under + under.abs)) * 0.5
+      clamped_cutoff = Dsp.clamp(total_cutoff, 0.0, 1.0)
 
       g = cutoff_to_g_fast(clamped_cutoff)
 
       # The resonance past SELF_OSC_START, scaled down toward it by the fade's weight, so that a
-      # high cutoff fades out the self-oscillation as SELF_OSC_FADE_WIDTH describes. Each clamp
-      # is built as clip_output builds its own.
+      # high cutoff fades out the self-oscillation as SELF_OSC_FADE_WIDTH describes.
       weight = @self_osc_fade_offset - clamped_cutoff * @self_osc_fade_scale
-      over  = weight - 1.0
-      under = 0.0 - weight
-      weight = weight - ((over + over.abs) - (under + under.abs)) * 0.5
-      self_osc_over = @current_resonance - SELF_OSC_START
-      self_osc_over = (self_osc_over + self_osc_over.abs) * 0.5
+      weight = Dsp.clamp(weight, 0.0, 1.0)
+      self_osc_over = C.float_max(@current_resonance - SELF_OSC_START, 0.0)
       resonance = @current_resonance - self_osc_over * (1.0 - weight)
 
       # The self-oscillation amount: zero up to r = 114/120 (CC 118), rising to one at 119/120
       # (CC 123) and held there.
       t = resonance * 24.0 - 22.8
-      over  = t - 1.0
-      under = 0.0 - t
-      t = t - ((over + over.abs) - (under + under.abs)) * 0.5
+      t = Dsp.clamp(t, 0.0, 1.0)
       k = resonance_to_k_fast(resonance) - t * @self_osc_kappa / g
-      below_floor = SELF_OSC_K_FLOOR - k
-      k = k + (below_floor + below_floor.abs) * 0.5
+      # The output level by the resonance after the fade, so that it follows the self-oscillation
+      # out at a high cutoff (see RESONANCE_LEVEL_TABLE).
+      level_position = resonance * 120.0
+      level_index = level_position.to_i
+      level_fraction = level_position - level_index.to_f
+      @output_level = RESONANCE_LEVEL_TABLE[level_index] + level_fraction * (RESONANCE_LEVEL_TABLE[level_index + 1] - RESONANCE_LEVEL_TABLE[level_index])
+      k = C.float_max(k, SELF_OSC_K_FLOOR)
       g_plus_k = g + k
       one_over_a0 = 1.0 / (1.0 + g * g_plus_k)
 
@@ -524,23 +597,17 @@ module Spms1
     # Bounds what the module hands to the bus. Separate from the leak, which holds the band pass
     # down inside the loop at a much higher level and has to stay where it is. With only the band
     # pass held, a high Q on a loud input reaches the shoulder here.
-    # No comparisons, so nothing for the compiler to turn into a branch: Spinel emits abs as fabs,
-    # one vabs.f32, and a + |a| is twice a where a is positive and exactly zero where it is not.
-    # Each clamp and the knee are built from two of those, one per side, which is also what keeps
-    # the linear region bit-exact -- a sample inside it has nothing added to it or taken away.
-    # excess is twice the signed distance past the knee; excess * |excess| keeps the shoulder odd
-    # without a sign test. Every subtraction here is exact in single precision below 2^23, far
-    # past anything the filter can produce, so fed past the ceiling the curve lands on exactly
-    # OUTPUT_LIMIT. An infinity would come out as NaN where a comparison would have clamped it;
-    # the filter's input is a bus slot and its states are bounded, so none arrives. Both floors
-    # are stored constants rather than negated ones, for the reason the constants above give.
+    # No comparisons, so nothing for the compiler to turn into a branch: the clamp is a max and a
+    # min, and the knee the larger of each side's distance past it and zero (C.float_max, one
+    # vmaxnm.f32), which keeps the linear region bit-exact -- a sample inside it has nothing added
+    # to it or taken away. excess is twice the signed distance past the knee; excess * |excess|
+    # keeps the shoulder odd without a sign test. Every subtraction here is exact in single
+    # precision below 2^23, far past anything the filter can produce, so fed past the ceiling the
+    # curve lands on exactly OUTPUT_LIMIT. Both floors are stored constants rather than negated
+    # ones, for the reason the constants above give.
     def clip_output(sample)
-      over    = sample - OUTPUT_CEILING
-      under   = OUTPUT_FLOOR - sample
-      clamped = sample - ((over + over.abs) - (under + under.abs)) * 0.5
-      above   = clamped - OUTPUT_KNEE
-      below   = OUTPUT_KNEE_FLOOR - clamped
-      excess  = (above + above.abs) - (below + below.abs)
+      clamped = C.float_min(C.float_max(sample, OUTPUT_FLOOR), OUTPUT_CEILING)
+      excess  = (C.float_max(clamped - OUTPUT_KNEE, 0.0) - C.float_max(OUTPUT_KNEE_FLOOR - clamped, 0.0)) * 2.0
       clamped - (excess * excess.abs) * OUTPUT_KNEE_SCALE
     end
   end

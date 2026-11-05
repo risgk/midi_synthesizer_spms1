@@ -4,6 +4,29 @@ MIDI Synthesizer SPMS-1 (type-2) Change History
 The main changes of each version, newest first, gathered before each release. The format may be
 revised.
 
+- v0.5.0 (2026-11-05):
+    - Add **Filter Drive**, of Filter 1 and Filter 2 (CC#31, among the favorites): drives the
+      filters harder, x1 to x32, for a saturated resonance, with the level kept. A patch saved by
+      v0.4.1 loads the default patch, as the entries have changed: the Drives, the Distortion and
+      Limiter Sw now sit in their modules (entries 68, 80, 91 and 93), and the entries after them
+      are numbered on
+    - Add **Amp 1 Distortion** (CC#95, among the favorites): a soft clip with less aliasing (ADAA)
+      and a tone after it, ahead of the limiter, x1 to x32, with the level kept for a sound below
+      the knee; x1 at power-up
+    - Filters: A high resonance is about as loud as a moderate one, and the self-oscillation is
+      quieter (0.25 at most, from 0.5), while it holds against the input as before
+    - Default patch: Mixer 2 Level 1 at 0.5 instead of 1.0, so that the self-oscillation holds
+      while a note plays, and the level is about 6 dB lower, about as loud as a lead sound of a
+      typical synth; and Chorus 1 Mix at value 34 (0.25) instead of 64, a lighter chorus
+    - Chorus 1 and Delay 1: Out Wet L and Out Wet R, the tap and the repeats alone, whatever Mix
+      is, to mix with the dry signal elsewhere, as a send would (the signals from Delay 1 Out L on
+      are numbered two up)
+    - Filters: Cutoff three semitones down, a C every 12 values, C5 at value 64; the default patch
+      powers up at value 88 (C7)
+    - LFO 1 Rate: a C every 12 values, C-2 (4.09 Hz) at value 64; it powers up at 6.49 Hz, a
+      slightly slower vibrato
+    - Lighter: about 150 us less of a buffer in all, with the Drive and the Distortion (about 83%
+      on the device)
 - v0.4.1 (2026-10-30):
     - Default patch: Mixer 2 Out Level powers up at 1.0 (value 124) instead of 0.5, and Amp 1 Gain 2
       (CC#15) at unity (value 64) instead of 1.96 times (value 88), so the level is as it was, but the

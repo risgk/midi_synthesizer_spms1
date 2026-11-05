@@ -53,6 +53,9 @@ module Spms1
 
     attr_reader :output_l, :output_r
 
+    # The tap (or the repeats) alone, before the crossfade with the dry input.
+    attr_reader :output_wet_l, :output_wet_r
+
     # The average of the two sides, worked out when read, which the loop does every sample.
     def output_mono
       (@output_l + @output_r) * 0.5
@@ -97,27 +100,29 @@ module Spms1
       @delay_step = 0.0
 
       @output_l = 0.0
+      @output_wet_l = 0.0
+      @output_wet_r = 0.0
       @output_r = 0.0
     end
 
     # Time is unipolar, [0.0, 1.0], read as 0 to 340 ms in a straight line and clipped to 2.83 ms
     # at the bottom.
     def set_time(time)
-      @time = (time < 0.0) ? 0.0 : ((time > 1.0) ? 1.0 : time)
+      @time = Dsp.clamp(time, 0.0, 1.0)
     end
 
     # Feedback is unipolar, [0.0, 1.0], and halved into the gain from the delayed signal back
     # into the line: a single repeat at 0.0, and at 1.0 repeats that fall 6 dB each. The half is
     # the ceiling that keeps the loop within one unit; see the class comment.
     def set_feedback(feedback)
-      clamped_feedback = (feedback < 0.0) ? 0.0 : ((feedback > 1.0) ? 1.0 : feedback)
+      clamped_feedback = Dsp.clamp(feedback, 0.0, 1.0)
       @feedback = clamped_feedback * 0.5
     end
 
     # Mix is unipolar, [0.0, 1.0], the delayed signal's share of each crossfade: the dry input at
     # 0.0, only the repeats at 1.0.
     def set_mix(mix)
-      @mix = (mix < 0.0) ? 0.0 : ((mix > 1.0) ? 1.0 : mix)
+      @mix = Dsp.clamp(mix, 0.0, 1.0)
     end
 
     # The parameters that scale no audio themselves -- rates, depths, times -- smoothed in two
@@ -147,8 +152,8 @@ module Spms1
 
       # Held to the bus's one unit on the way in, as the amp holds its modulation: the
       # bound each loop keeps is only as good as what enters it.
-      input_l = (audio_input_l < -1.0) ? -1.0 : ((audio_input_l > 1.0) ? 1.0 : audio_input_l)
-      input_r = (audio_input_r < -1.0) ? -1.0 : ((audio_input_r > 1.0) ? 1.0 : audio_input_r)
+      input_l = Dsp.clamp(audio_input_l, -1.0, 1.0)
+      input_r = Dsp.clamp(audio_input_r, -1.0, 1.0)
 
       @delay += @delay_step
       @write_index = (@write_index + 1) & DELAY_LINE_MASK
@@ -175,6 +180,8 @@ module Spms1
       @filtered_r = loop_input_r + (@filtered_r - loop_input_r) * 0.25
       @delay_line_r[@write_index] = @filtered_r
 
+      @output_wet_l = delayed_l
+      @output_wet_r = delayed_r
       @output_l = input_l + (delayed_l - input_l) * @current_mix
       @output_r = input_r + (delayed_r - input_r) * @current_mix
     end

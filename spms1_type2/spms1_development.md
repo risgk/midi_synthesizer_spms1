@@ -159,7 +159,11 @@ A module is added without writing anything in the loop:
 patch_gen writes the `require_relative` of the module's file, its instance, the reads of its routing and its CCs, the calls to its
 setters and its `when` in the dispatch into "spms1/spms1_main.rb", as plain straight-line Ruby, the
 same as it would be written by hand, so Spinel compiles it to the same: a module costs what its
-own code costs and no more. The editor and the NRPN tables of "spms1_patching.md" and "spms1_patching.ja.md" take it up as well.
+own code costs and no more. The parameters' part of it -- their sources, the CCs and the setters,
+once per buffer -- goes into a function of its own, `spms1_apply_parameters`, which
+"spms1/spms1_parameters.h", written by patch_gen too, declares out of `Spms1_main` (`noinline`), in
+RAM and flattened itself: inlined into `Spms1_main`, as its `flatten` would have it, what it holds
+in registers crowded the per-sample loop, which ran longer for every parameter added. The editor and the NRPN tables of "spms1_patching.md" and "spms1_patching.ja.md" take it up as well.
 
 ### Writing a Module
 
@@ -169,17 +173,28 @@ keeps to that as far as it can:
 
 - The same work every sample and every buffer, whatever the values: work out each parameter's
   coefficients every buffer or every control tick, never only when it changes
-- No branches on values: clamp with nested ternaries, `(x < 0.0) ? 0.0 : ((x > 1.0) ? 1.0 : x)`,
-  which compile to selects. A branch on `control_tick` is fine, every module taking it on the
-  same samples, all of which the measure includes. Whether a ternary becomes a select is GCC's
-  decision, though (see "Checking the Generated Code"): one choosing between two values it has to
+- No branches on values: clamp with `Dsp.clamp(x, 0.0, 1.0)`, one `vmaxnm.f32` and one
+  `vminnm.f32` on the device (spms1/spms1_dsp.h), and take the larger of a value and zero with
+  `C.float_max(x, 0.0)`. Nested ternaries, `(x < 0.0) ? 0.0 : ((x > 1.0) ? 1.0 : x)`, and the
+  `x + x.abs` they once were built from take more: replacing them all made a buffer about 105 us
+  shorter (emulated Cortex-M33), with the same output bit for bit. A branch on `control_tick` is
+  fine, every module taking it on the same samples, all of which the measure includes. Whether
+  any other ternary becomes a select is GCC's decision, though (see "Checking the Generated Code"): one choosing between two values it has to
   load, such as two instance variables, may come out as a branch, while one choosing between two
-  literals and multiplying by the result does not (as Amp's limiter picks its rate)
+  literals and multiplying by the result does not (as Amp's limiter picks its rate). Even that
+  is not certain: the oscillators' phase wraps, `x -= (x < 1.0) ? 0.0 : 1.0`, come out as a short
+  branch over the subtraction in the current build, so a buffer varies by up to about 510 cycles
+  (3.3 us, 0.3%) with where in their cycles the phases are: most at low notes, whose cycles are
+  longer than a buffer, so that a buffer can fall wholly on one side of a wrap or the other, and
+  least at high notes, whose buffers each hold many cycles; the maximum is still what the estimate
+  gives as its max (`--note`, with `--buffers 40` to see enough of them). Written otherwise (`x -= x.to_i.to_f`, or with GCC's branch guesses
+  turned off) they stay the same every buffer but cost 46 us or more, so they are left as they are
 - Curves from lookup tables with linear interpolation, worked out once in the class, not library
   calls (`Math.sqrt`, `Math.exp` and the like), whose time depends on the input
 - Nothing allocated while playing: make every array in `initialize`
-- Literals rather than named constants in the per-sample code: Spinel emits a named Integer or
-  Float constant as a runtime global, loaded each time it is read
+- Literals rather than named constants in the per-sample and per-buffer code: Spinel emits a named
+  Integer or Float constant as a runtime global, loaded each time it is read, and a check against
+  it is not folded away
 - A state that decays toward zero through `Dsp.flush_tiny`, so that it lands on zero rather than
   sinking into the denormals
 - If Spinel leaves something untyped and boxes the arithmetic, a type seed in "spms1/sig" fixes it
@@ -203,8 +218,21 @@ measures on the device -- with the default patch and a note held.
   the time at 153.6 MHz against the 1333 us a buffer of 64 samples lasts at 48 kHz, which come from a
   first-order cost model and are an estimate (see `cost` in "sim_load/spms1_load_estimate.py")
 - `--profile` lists the functions the cycles go to; `--modules` the load of each module (below), from
-  the debug info of the ELF and the run; `--elf FILE` estimates an ELF built elsewhere, from another
+  the debug info of the ELF and the run; `--lines N` the N source lines that take the most, the .rb
+  lines Spinel's `#line` directives name, a runtime header's line (an Array access, a bus read) told
+  by the .rb line it is inlined at; `--elf FILE` estimates an ELF built elsewhere, from another
   commit say, so two versions can be compared; `--help` shows the rest
+- `--patch FILE` and `--score FILE` play what sim_render plays: a patch as MIDI bytes in hex, applied
+  before the first buffer, and MIDI at times in seconds, each applied before the buffer it falls in,
+  written into the tables the sketch's MIDI handlers fill; `--per-buffer` prints each buffer. With
+  more buffers (`--buffers 60`) they show how far a buffer moves with the values: the files in
+  "sim_load/scenarios" hold Mixer 2 at its limit, the limiter off, the modulations at the top, a
+  self-oscillating filter, the delay at its shortest, and a note every 10 ms with glide and bend
+  (`--gate 0`). Over 60 buffers at v0.5.0, every one of them stays within 190029 to 190883 cycles
+  (1237 to 1243 us), the default patch within 190134 to 190776 (with a note held at 36, 69 or 96,
+  within 190029 to 190776): no more than about 0.5% apart, nothing in them branching on a value
+  (the limiter off takes exactly the cycles of the limiter on), and what moves a buffer at all is
+  the oscillators' phase wraps (see "Writing a Module")
 - Needs Python 3 and `pip install unicorn capstone pyelftools numpy`, installed by you and not shipped
   here: Unicorn's Python binding is under the BSD license and its emulator under the GPLv2, Capstone
   and NumPy under the BSD license, and pyelftools is in the public domain
@@ -215,10 +243,18 @@ or not, as the modules are meant to:
 
 | Version | Note held (avg / max) | No note (avg / max) |
 | :-- | --: | --: |
-| v0.4.1 | 208204 / 208204 cycles, 1355 us (102%) | 208556 / 208556 cycles, 1358 us (102%) |
+| v0.5.0 | 190454 / 190767 cycles, 1240 us (93%) | 189900 / 190095 cycles, 1236 us (93%) |
 
-The estimate is about 8% above Debug Print on the device (v0.4.0: min 1253 us, max 1256 us, about 94%),
-so its 102% is not a buffer running over; `underruns` on the device says whether one does.
+The estimate is above Debug Print on the device: about 8% at v0.4.0 (min 1253 us, max 1256 us, about
+94%), and about 11% on the way to v0.5.0 (develop at 95e0fd1, with the Drive and the Distortion x1 to x16,
+the make-up of 15/16 and the resonance's output level, estimated at 1233 us on average and 1235 us at most:
+on the device min 1101 us and max 1105 us with I2S, about 83%, `underruns` 0; v0.5.0 adds Out Wet and the
+drives up to x32, about 7 us more in the estimate, so about 1108 us on the device; at 59e3665, with Amp 1
+Distortion and its tone and shoulder below zero, estimated at 1208 us and 1211 us, min 1088 us and max
+1091 us with I2S, about 82%; at 3085c13, with the distortion before them, estimated at 1197 us
+and 1199 us, min 1079 us and max 1083 us with I2S, min 1079 us and max 1081 us with PWM Audio; at 5b5dc07,
+before the distortion, estimated at 1157 us and 1159 us, min 1042 us and max 1045 us with I2S, min 1038 us
+and max 1043 us with PWM Audio, about 78%, which Note On and Off repeated by MIDI moved little). So the table is not what a buffer takes on the device; `underruns` on the device says whether one runs over.
 
 The load of each module, by `--modules` (the same version, a note held): "own" is
 the cycles of its methods (process, its outputs, smooth_parameters), and "with common" adds its share
@@ -227,21 +263,21 @@ order, split evenly; the common part left is the loop of the samples, the output
 
 | Module | Own | With common |
 | :-- | --: | --: |
-| Filter 2 | 11.9% (159 us) | 13.7% (182 us) |
-| Filter 1 | 11.9% (158 us) | 13.6% (181 us) |
-| Osc 2 (with Sync) | 9.5% (126 us) | 11.3% (151 us) |
-| Osc 1 | 6.3% (84 us) | 7.8% (105 us) |
-| Delay 1 | 6.5% (86 us) | 7.7% (103 us) |
-| Chorus 1 | 6.4% (85 us) | 7.4% (99 us) |
-| Amp 1 | 4.7% (63 us) | 6.0% (80 us) |
-| LFO 1 | 3.1% (41 us) | 4.0% (53 us) |
-| Pitch 1 | 2.7% (37 us) | 3.9% (53 us) |
-| Mixer 1 | 1.6% (22 us) | 2.9% (39 us) |
-| Mixer 2 | 1.6% (22 us) | 2.9% (39 us) |
-| EG 1 | 2.2% (29 us) | 2.9% (39 us) |
-| EG 2 | 2.2% (29 us) | 2.9% (39 us) |
-| Noise 1 | 1.9% (26 us) | 2.9% (38 us) |
-| The common part left | | 11.7% (156 us) |
+| Filter 1 | 9.4% (126 us) | 11.0% (147 us) |
+| Filter 2 | 9.4% (126 us) | 11.0% (147 us) |
+| Osc 2 (with Sync) | 9.3% (124 us) | 10.9% (146 us) |
+| Amp 1 (with the Distortion) | 8.3% (111 us) | 9.5% (127 us) |
+| Osc 1 | 6.1% (81 us) | 7.5% (100 us) |
+| Delay 1 | 5.4% (73 us) | 6.8% (91 us) |
+| Chorus 1 | 4.8% (64 us) | 6.0% (80 us) |
+| LFO 1 | 3.2% (42 us) | 4.1% (55 us) |
+| Pitch 1 | 2.2% (29 us) | 3.4% (45 us) |
+| Mixer 1 | 1.5% (20 us) | 2.8% (37 us) |
+| Mixer 2 | 1.5% (20 us) | 2.8% (37 us) |
+| EG 1 | 1.9% (26 us) | 2.7% (36 us) |
+| EG 2 | 1.9% (26 us) | 2.7% (36 us) |
+| Noise 1 | 1.9% (25 us) | 2.7% (35 us) |
+| The common part left | | 9.1% (122 us) |
 
 
 ## GitHub Actions
@@ -311,7 +347,7 @@ README names, with the changes for the MCU kept in two places:
   (`SP_INT_OVERFLOW_MODE_WRAP`, as `spinel --int-overflow=wrap` builds it), the float versions of
   the math functions, and, at
   the end of "spinel_rt.h", what binds the generated code to a float runtime (below) and the
-  sketch's "spms1_bus.h" and "spms1_midi_read.h".
+  sketch's "spms1_bus.h", "spms1_dsp.h", "spms1_midi_read.h" and "spms1_parameters.h".
   "spinel_rt.h" carries only an `#include` line for each
 - "spinel_mcu/spinel_mcu.patch": what is changed in Spinel's own files -- the runtime written in
   `sp_float` where it said `double` for a Float, the POSIX parts left out with `#if 0` (a release
@@ -319,7 +355,11 @@ README names, with the changes for the MCU kept in two places:
   throughout left out whole with `SPINEL_BARE_METAL` (below), the GC's buffers made to fit
   SRAM, and the in-range path of an Array read or write (`sp_FloatArray_get`/`set`,
   `sp_IntArray_get`) put ahead of the other checks, which go out of line unchanged, so that what
-  an access does is the same and only its cost moves. Each file it
+  an access does is the same and only its cost moves, and Float#to_i (`sp_float_to_i_checked`, in
+  "sp_alloc.h") inline and without its checks, as Integer arithmetic goes without its overflow
+  check: a NaN, an infinity or a Float past the range of Integer no longer raises (a raise stops
+  the sound on the MCU all the same) but comes out as the processor converts it, and the checks no
+  longer take their 31 us of a buffer. Each file it
   changes sits next to its released copy, "NAME.orig"
 - "sp_cold_bare_metal.c" and "spinel_mcu/sp_cold_bare_metal.patch": "sp_cold.c" for a bare-metal
   build (below), kept apart from the released one, which stays as it is but for its being left
