@@ -3535,17 +3535,20 @@
   let midiOutput = null;
   // SPMS-1 Web, a virtual MIDI output listed after the devices; null without spms1_web_synth.js.
   // It works without Web MIDI API too (e.g. on Safari), played from the soft keyboard.
+  // Two of them: as the device sounds, and 6 dB louder.
   const webSynthOutput = window.Spms1WebSynth ? window.Spms1WebSynth.output : null;
+  const webSynthOutputs = window.Spms1WebSynth ? window.Spms1WebSynth.outputs : [];
 
   function outputPorts() {
     const ports = midiAccess ? [...midiAccess.outputs.values()] : [];
-    if (webSynthOutput) ports.push(webSynthOutput);
+    ports.push(...webSynthOutputs);
     return ports;
   }
 
   function outputById(id) {
     if (!id) return null;
-    if (webSynthOutput && id === webSynthOutput.id) return webSynthOutput;
+    const web = webSynthOutputs.find(o => o.id === id);
+    if (web) return web;
     return (midiAccess && midiAccess.outputs.get(id)) || null;
   }
   // What the device was last sent, so that a change sends only what it changed.
@@ -3955,7 +3958,7 @@
   // Whether the whole patch can go to the output as SysEx: SPMS-1 Web takes it always, and a device
   // if SysEx is allowed.
   function outputTakesSysEx() {
-    return midiOutput === webSynthOutput || !!(midiAccess && midiAccess.sysexEnabled);
+    return !!(midiOutput && midiOutput.isSpms1WebSynth) || !!(midiAccess && midiAccess.sysexEnabled);
   }
 
   // The whole patch goes out between Mute on and off, so that it is not heard half sent; Mute off

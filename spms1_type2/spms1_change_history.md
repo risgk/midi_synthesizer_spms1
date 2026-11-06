@@ -11,6 +11,8 @@ revised.
     - Default patch: Amp 1 Gain 2 (CC#15) powers up at **half** (value 46) instead of unity (value
       64), about 6 dB down, for room to bring a sound up
         - With the Delay 1 Mix above, about 3.5 dB lower in all (the peaks at about -13 dBFS)
+    - SPMS-1 Web: Add **"SPMS-1 Web (Built-in, +6 dB)"** to MIDI Out: 6 dB louder, closer to other
+      sounds (the peaks above -2 dBFS rounded off)
     - Editor: While Hold is on, a key pressed again while its note is held turns the note off
 - v0.5.0 (2026-11-05):
     - Add **Filter Drive**, of Filter 1 and Filter 2 (CC#31, among the favorites): drives the
