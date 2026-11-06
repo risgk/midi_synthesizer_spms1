@@ -82,12 +82,13 @@ the self-oscillation comes out lower by the Drive too. Unlike turning Gain 1 or 
 not drive the output clip, which would bend the whole band past the resonance.
 
 The filter puts out its low pass and high pass at once, as Out LP and Out HP, each through a DC
-blocker and an output clip of its own, and Out, the low pass, the high pass and the band pass mixed
-by Mode (CC#39), LP to Notch to HP to BP to LP. At 0.0 (value 4), where it powers up, Out is the low
-pass alone; at 0.25 (value 34) the low pass and the high pass both at full, whose sum, the input less
-k·BP, is a notch at the cutoff with both sides of it passed whole; at 0.5 (value 64) the high pass
+blocker and an output clip of its own, and Out BR, the band reject, the two summed; and Out, the low
+pass, the high pass and the band pass mixed by Mode (CC#39), LP to BR to HP to BP to LP. At 0.0
+(value 4), where it powers up, Out is the low pass alone; at 0.25 (value 34) the band reject (BR), the
+low pass and the high pass both at full, whose sum, the input less k·BP, is a notch at the cutoff
+with both sides of it passed whole; at 0.5 (value 64) the high pass
 alone; at 0.75 (value 94) the band pass alone; and at 1.0 (value 124) the low pass alone again. On
-the way to the notch the high pass comes in, the notch coming down from the top, and on the way
+the way to BR the high pass comes in, the notch coming down from the top, and on the way
 to the high pass the low pass goes out, the notch going on down. The high pass to the band pass,
 and the band pass to the low pass, are crossfades of two that are 90 degrees apart at every
 frequency, so no notch comes in between, and the resonant peak stays as high. Out is the one the
@@ -112,9 +113,10 @@ flowchart LR
   I2 -->|LP| OC["Output clips<br/>linear up to 0.75"]
   SUM -->|HP| OC
   OC -->|LP| OUT_LP([Out LP])
+  OC -->|LP + HP| OUT_BR([Out BR])
   OC -->|HP| OUT_HP([Out HP])
   OC -->|BP| OUT_BP([Out BP])
-  OC -->|LP| XF["Mode<br/>LP / notch / HP / BP / LP"]
+  OC -->|LP| XF["Mode<br/>LP / BR / HP / BP / LP"]
   OC -->|HP| XF
   OC -->|BP| XF
   XF --> OUT([Out])
@@ -140,10 +142,12 @@ flowchart LR
   A3 -->|LP| LIM["Output limiters"]
   A1 -->|HP| LIM
   LIM -->|LP| OUT_LP([Out LP])
+  LIM -->|LP + HP| OUT_BR([Out BR])
   LIM -->|HP| OUT_HP([Out HP])
   LIM -->|BP| OUT_BP([Out BP])
-  LIM -->|LP| XF["Crossfader<br/>Mode"]
+  LIM -->|LP| XF["Mixer<br/>Mode"]
   LIM -->|HP| XF
+  LIM -->|BP| XF
   XF --> OUT([Out])
   A2 -->|"R/k (resonance)"| A1
   A3 -->|R| A1
@@ -515,35 +519,36 @@ have none there. See below.
 
 | ID | Signal | | ID | Signal | | ID | Signal |
 | ----- | ------ | - | ----- | ------ | - | ----- | ------ |
-| 0 | None (constant 0.0) | | 29 | General 2 | | 58 | Osc 1 Output Pulse ± |
-| 1 | Constant 1.0 | | 30 | General 2 Rev | | 59 | Osc 1 Output Sub ± |
-| 2 | Constant 0.5 | | 31 | General 2 Inv | | 60 | Osc 2 Output ± |
-| 3 | Constant -0.5 | | 32 | General 2 Rev Inv | | 61 | Osc 2 Output Saw ± |
-| 4 | Constant -1.0 | | 33 | General 2 Bipolar ± | | 62 | Osc 2 Output Pulse ± |
-| 5 | Note Pitch ± | | 34 | General 2 Bipolar Inv ± | | 63 | Noise 1 Output ± |
-| 6 | Note Gate | | 35 | General 2 Cos | | 64 | Noise 1 Output White ± |
-| 7 | Pitch Bend ± | | 36 | General 2 Sin | | 65 | Noise 1 Output Red ± |
-| 8 | Mod Wheel | | 37 | General 2 Lo | | 66 | Mixer 2 Output ± |
-| 9 | Mod Wheel Rev | | 38 | General 2 Hi | | 67 | Mixer 2 Output Inv ± |
-| 10 | Mod Wheel Inv | | 39 | General 2 Neg | | 68 | Filter 1 Output ± |
-| 11 | Mod Wheel Rev Inv | | 40 | General 2 Mid | | 69 | Filter 1 Output LP ± |
-| 12 | Breath | | 41 | General 2 Pos | | 70 | Filter 1 Output HP ± |
-| 13 | Breath Rev | | 42 | Pitch 1 Output 1 ± | | 71 | Filter 1 Output BP ± |
-| 14 | Breath Inv | | 43 | Pitch 1 Output 2 ± | | 72 | Filter 2 Output ± |
-| 15 | Breath Rev Inv | | 44 | EG 1 Output | | 73 | Filter 2 Output LP ± |
-| 16 | General 1 | | 45 | EG 1 Output Inv | | 74 | Filter 2 Output HP ± |
-| 17 | General 1 Rev | | 46 | EG 2 Output | | 75 | Filter 2 Output BP ± |
-| 18 | General 1 Inv | | 47 | EG 2 Output Inv | | 76 | Amp 1 Output ± |
-| 19 | General 1 Rev Inv | | 48 | LFO 1 Output ± | | 77 | Chorus 1 Output L ± |
-| 20 | General 1 Bipolar ± | | 49 | LFO 1 Output Inv ± | | 78 | Chorus 1 Output R ± |
-| 21 | General 1 Bipolar Inv ± | | 50 | LFO 1 Output Triangle ± | | 79 | Chorus 1 Output Mono ± |
-| 22 | General 1 Cos | | 51 | LFO 1 Output Triangle Inv ± | | 80 | Chorus 1 Output Wet L ± |
-| 23 | General 1 Sin | | 52 | LFO 1 Output Square | | 81 | Chorus 1 Output Wet R ± |
-| 24 | General 1 Lo | | 53 | LFO 1 Output Square Inv | | 82 | Delay 1 Output L ± |
-| 25 | General 1 Hi | | 54 | Mixer 1 Output ± | | 83 | Delay 1 Output R ± |
-| 26 | General 1 Neg | | 55 | Mixer 1 Output Inv ± | | 84 | Delay 1 Output Mono ± |
-| 27 | General 1 Mid | | 56 | Osc 1 Output ± | | 85 | Delay 1 Output Wet L ± |
-| 28 | General 1 Pos | | 57 | Osc 1 Output Saw ± | | 86 | Delay 1 Output Wet R ± |
+| 0 | None (constant 0.0) | | 30 | General 2 Rev | | 60 | Osc 2 Output ± |
+| 1 | Constant 1.0 | | 31 | General 2 Inv | | 61 | Osc 2 Output Saw ± |
+| 2 | Constant 0.5 | | 32 | General 2 Rev Inv | | 62 | Osc 2 Output Pulse ± |
+| 3 | Constant -0.5 | | 33 | General 2 Bipolar ± | | 63 | Noise 1 Output ± |
+| 4 | Constant -1.0 | | 34 | General 2 Bipolar Inv ± | | 64 | Noise 1 Output White ± |
+| 5 | Note Pitch ± | | 35 | General 2 Cos | | 65 | Noise 1 Output Red ± |
+| 6 | Note Gate | | 36 | General 2 Sin | | 66 | Mixer 2 Output ± |
+| 7 | Pitch Bend ± | | 37 | General 2 Lo | | 67 | Mixer 2 Output Inv ± |
+| 8 | Mod Wheel | | 38 | General 2 Hi | | 68 | Filter 1 Output ± |
+| 9 | Mod Wheel Rev | | 39 | General 2 Neg | | 69 | Filter 1 Output LP ± |
+| 10 | Mod Wheel Inv | | 40 | General 2 Mid | | 70 | Filter 1 Output BR ± |
+| 11 | Mod Wheel Rev Inv | | 41 | General 2 Pos | | 71 | Filter 1 Output HP ± |
+| 12 | Breath | | 42 | Pitch 1 Output 1 ± | | 72 | Filter 1 Output BP ± |
+| 13 | Breath Rev | | 43 | Pitch 1 Output 2 ± | | 73 | Filter 2 Output ± |
+| 14 | Breath Inv | | 44 | EG 1 Output | | 74 | Filter 2 Output LP ± |
+| 15 | Breath Rev Inv | | 45 | EG 1 Output Inv | | 75 | Filter 2 Output BR ± |
+| 16 | General 1 | | 46 | EG 2 Output | | 76 | Filter 2 Output HP ± |
+| 17 | General 1 Rev | | 47 | EG 2 Output Inv | | 77 | Filter 2 Output BP ± |
+| 18 | General 1 Inv | | 48 | LFO 1 Output ± | | 78 | Amp 1 Output ± |
+| 19 | General 1 Rev Inv | | 49 | LFO 1 Output Inv ± | | 79 | Chorus 1 Output L ± |
+| 20 | General 1 Bipolar ± | | 50 | LFO 1 Output Triangle ± | | 80 | Chorus 1 Output R ± |
+| 21 | General 1 Bipolar Inv ± | | 51 | LFO 1 Output Triangle Inv ± | | 81 | Chorus 1 Output Mono ± |
+| 22 | General 1 Cos | | 52 | LFO 1 Output Square | | 82 | Chorus 1 Output Wet L ± |
+| 23 | General 1 Sin | | 53 | LFO 1 Output Square Inv | | 83 | Chorus 1 Output Wet R ± |
+| 24 | General 1 Lo | | 54 | Mixer 1 Output ± | | 84 | Delay 1 Output L ± |
+| 25 | General 1 Hi | | 55 | Mixer 1 Output Inv ± | | 85 | Delay 1 Output R ± |
+| 26 | General 1 Neg | | 56 | Osc 1 Output ± | | 86 | Delay 1 Output Mono ± |
+| 27 | General 1 Mid | | 57 | Osc 1 Output Saw ± | | 87 | Delay 1 Output Wet L ± |
+| 28 | General 1 Pos | | 58 | Osc 1 Output Pulse ± | | 88 | Delay 1 Output Wet R ± |
+| 29 | General 2 | | 59 | Osc 1 Output Sub ± | |  |  |
 
 <!-- patch_gen end -->
 
@@ -1086,13 +1091,13 @@ unplugged reads its own CC or value again. A value is the 4 to 124 the editor sh
   so the output stays mono until the wheel moves. As MIDI: CC#99 = 114, CC#98 = 94, CC#6 = 8
 - Leave the chorus out of the sound, keeping the delay: on the Patch tab, wire Amp 1 Out to Delay 1
   Audio In L and Audio In R. The chorus keeps running and nothing reads it, and the output is then
-  mono. As MIDI: CC#99 = 113, CC#98 = 42 and 43, CC#6 = 76
+  mono. As MIDI: CC#99 = 113, CC#98 = 42 and 43, CC#6 = 78
 - Echoes ahead of the filters: on the Patch tab, wire Osc 1 Out to Delay 1 Audio In L, Delay 1 Out L
   to Filter 1 Audio In 1, and Chorus 1 Out L and Out R to the final output's L and R, the chorus
   still taking the amp. The repeats then go through the filters and the amp's envelope as the note
   does, so they die away with it. Delay 1 still runs after the filters, which read it a sample
   late; for an echo that does not matter. As MIDI: CC#99 = 113, CC#98 = 42, CC#6 = 56; CC#98 = 27,
-  CC#6 = 82; CC#98 = 44 and 45, CC#6 = 77 and 78
+  CC#6 = 84; CC#98 = 44 and 45, CC#6 = 79 and 80
 
 ### Notes
 

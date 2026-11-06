@@ -13,7 +13,7 @@
 
 // The numbers of the patch and saved_patch_version, as one hash (see patch_spec_hash in
 // patch_gen): a saved patch with another is not loaded.
-#define SPMS1_PATCH_SPEC_HASH (0x9C24DF0Fu)
+#define SPMS1_PATCH_SPEC_HASH (0x64C594D9u)
 
 // The category 3 entries -- the controls -- whose CCs' values a Save keeps: all but the
 // performance controls', whose CCs are saved at 0.
@@ -81,14 +81,14 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {163,  44},  // Filter 2 Mod 1 In <- EG_1_OUTPUT
   {164,  48},  // Filter 2 Mod 2 In <- LFO_1_OUTPUT
   {165,  68},  // Amp 1 Audio In 1 <- FILTER_1_OUTPUT
-  {166,  72},  // Amp 1 Audio In 2 <- FILTER_2_OUTPUT
+  {166,  73},  // Amp 1 Audio In 2 <- FILTER_2_OUTPUT
   {167,  44},  // Amp 1 Mod 1 In <- EG_1_OUTPUT
   {168,  46},  // Amp 1 Mod 2 In <- EG_2_OUTPUT
-  {169,  76},  // Chorus 1 Audio In <- AMP_1_OUTPUT
-  {170,  77},  // Delay 1 Audio In L <- CHORUS_1_OUTPUT_L
-  {171,  78},  // Delay 1 Audio In R <- CHORUS_1_OUTPUT_R
-  {172,  82},  // L <- DELAY_1_OUTPUT_L
-  {173,  83},  // R <- DELAY_1_OUTPUT_R
+  {169,  78},  // Chorus 1 Audio In <- AMP_1_OUTPUT
+  {170,  79},  // Delay 1 Audio In L <- CHORUS_1_OUTPUT_L
+  {171,  80},  // Delay 1 Audio In R <- CHORUS_1_OUTPUT_R
+  {172,  84},  // L <- DELAY_1_OUTPUT_L
+  {173,  85},  // R <- DELAY_1_OUTPUT_R
   {256, 127},  // Pitch 1 Glide <- OWN
   {257, 127},  // Pitch 1 Out 1 Glide Sw <- OWN
   {258, 127},  // Pitch 1 Out 2 Glide Sw <- OWN

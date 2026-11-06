@@ -3,7 +3,8 @@ module Spms1
   # nonlinear leak on the band pass integrator, solved within the sample by one step of Newton's
   # method. It puts out its low pass, high pass and band pass at once, each through a DC blocker
   # and the output clip of its own, and the three mixed by Mode: process returns the mix, and
-  # output_lp, output_hp and output_bp hold the low pass, the high pass and the band pass. The audio input drives it as it
+  # output_lp, output_br, output_hp and output_bp give the low pass, the band reject (the low pass
+  # and the high pass summed, a notch at the cutoff), the high pass and the band pass. The audio input drives it as it
   # arrives, so how hard is set ahead of it: by Mixer 2 Out Level in the default patch. That is
   # what decides how far the band pass runs into the leak, which the resonant peak reaches first:
   # the pass band itself stays nearly clean.
@@ -380,9 +381,9 @@ module Spms1
     end
 
     # Mode is unipolar, [0.0, 1.0], and mixes Out from the low pass, the high pass and the band
-    # pass, LP to Notch to HP to BP to LP: 0.0 the low pass alone; 0.25 the low pass and the high
-    # pass both at 1.0, whose sum is the input less k times the band pass, a notch at the cutoff,
-    # the pass band whole (on the way the high pass comes in, and the notch comes down from the top);
+    # pass, LP to BR to HP to BP to LP: 0.0 the low pass alone; 0.25 the band reject, the low pass
+    # and the high pass both at 1.0, whose sum is the input less k times the band pass, a notch at
+    # the cutoff, the pass band whole (on the way the high pass comes in, and the notch comes down from the top);
     # 0.5 the high pass alone (on the way the low pass goes out, and the notch goes on down); 0.75
     # the band pass alone; and 1.0 the low pass alone again. The high pass to the band pass and the
     # band pass to the low pass are crossfades of two that are 90 degrees apart at every frequency,
@@ -519,10 +520,15 @@ module Spms1
       @output_lp * @current_mode_lp + @output_hp * @current_mode_hp + @output_bp * @current_mode_bp
     end
 
-    # The low pass, the high pass and the band pass of the last sample process took, read after it
-    # as Chorus's outputs are.
+    # The low pass, the band reject, the high pass and the band pass of the last sample process took,
+    # read after it as Chorus's outputs are. The band reject is the low pass and the high pass as
+    # they leave, summed, as Out at BR, not clipped again.
     def output_lp
       @output_lp
+    end
+
+    def output_br
+      @output_lp + @output_hp
     end
 
     def output_hp
