@@ -4,6 +4,7 @@ MIDI Synthesizer SPMS-1 (type-2) Change History
 The main changes of each version, newest first, gathered before each release. The format may be
 revised.
 
+- v0.5.2 (2026-??-??):
 - v0.5.1 (2026-11-06):
     - Delay 1 Mix: **No dip in the middle**: the dry input stays at full up to value 64, while the
       repeats come up to full, and then goes down to none at value 124 (it was a crossfade, about 5
