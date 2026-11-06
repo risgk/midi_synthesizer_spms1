@@ -82,15 +82,20 @@ the self-oscillation comes out lower by the Drive too. Unlike turning Gain 1 or 
 not drive the output clip, which would bend the whole band past the resonance.
 
 The filter puts out its low pass and high pass at once, as Out LP and Out HP, each through a DC
-blocker and an output clip of its own, and Out, the two crossfaded by Mode (CC#39). Each side stays at full over its own half and falls to nothing over the other.
-At 0.0 (value 4), where it powers up, Out is the low
-pass alone; at 1.0 (value 124) the high pass alone; and at 0.5 (value 64) both at full, whose sum, the
-input less k·BP, is a notch at the cutoff with both sides of it passed whole. In between the notch
-moves off the cutoff, above it toward the low pass and below it toward the high pass, with the
-other side at up to 6 dB down. Out is the one the default patch uses, Filter 1's feeding Filter 2's Audio In 2 (and
-Amp 1's Audio In 1, at a gain of 0.0) and Filter 2's Amp 1's Audio In 2, so it plays the low pass until Mode is turned up. Out is not clipped again: in the pass band one side is all there is, and around the cutoff,
-where both are, the notch takes them down. The two factors are smoothed as the other levels
-are.
+blocker and an output clip of its own, and Out, the low pass, the high pass and the band pass mixed
+by Mode (CC#39), LP to Notch to HP to BP to LP. At 0.0 (value 4), where it powers up, Out is the low
+pass alone; at 0.25 (value 34) the low pass and the high pass both at full, whose sum, the input less
+k·BP, is a notch at the cutoff with both sides of it passed whole; at 0.5 (value 64) the high pass
+alone; at 0.75 (value 94) the band pass alone; and at 1.0 (value 124) the low pass alone again. On
+the way to the notch the high pass comes in, the notch coming down from the top, and on the way
+to the high pass the low pass goes out, the notch going on down. The high pass to the band pass,
+and the band pass to the low pass, are crossfades of two that are 90 degrees apart at every
+frequency, so no notch comes in between, and the resonant peak stays as high. Out is the one the
+default patch uses, Filter 1's feeding Filter 2's Audio In 2 (and Amp 1's Audio In 1, at a gain of
+0.0) and Filter 2's Amp 1's Audio In 2, so it plays the low pass until Mode is turned up. Out is not
+clipped again: in the pass band one side is all there is, and around the cutoff, where two are, the
+notch takes them down or they are 90 degrees apart. The three factors are smoothed as the other
+levels are.
 
 The band pass leaves too, as Out BP, through a DC blocker and an output clip of its own, outside
 the Mode crossfade. It is the integrator's state as it is, not normalized, so its peak at the
@@ -109,8 +114,9 @@ flowchart LR
   OC -->|LP| OUT_LP([Out LP])
   OC -->|HP| OUT_HP([Out HP])
   OC -->|BP| OUT_BP([Out BP])
-  OC -->|LP| XF["Mode<br/>LP / notch / HP"]
+  OC -->|LP| XF["Mode<br/>LP / notch / HP / BP / LP"]
   OC -->|HP| XF
+  OC -->|BP| XF
   XF --> OUT([Out])
   SC["Nonlinear leak<br/>ceiling 4.0, one-step Newton"] -.- I1
   L2["s2 is linear<br/>guard clamp at 16"] -.- I2
@@ -1069,10 +1075,10 @@ unplugged reads its own CC or value again. A value is the 4 to 124 the editor sh
 - The two filters side by side, a low pass and a high pass: with "Show parameters with no CC"
   ticked, Filter 2 Gain 1 up to 64 and Gain 2 down to 4, so that it takes Mixer 2 rather than Filter
   1, and Amp 1 Gain 1 up to 64 brings Filter 1 in beside it; then, on the Patch tab, 0 in the CC#
-  field of Filter 1 Mode takes it off CC#39, and its value at 124 makes it the high pass, so
+  field of Filter 1 Mode takes it off CC#39, and its value at 64 makes it the high pass, so
   that Cutoff moves a low pass and a high pass at once. As MIDI: CC#99 = 116, CC#98 = 81, CC#6 = 64,
   CC#98 = 82, CC#6 = 4, CC#98 = 89, CC#6 = 88; CC#99 = 115, CC#98 = 65, CC#6 = 0; CC#99 = 116, CC#98
-  = 65, CC#6 = 124
+  = 65, CC#6 = 64
 - Echoes that only come in with the mod wheel: on the Patch tab, wire Mod Wheel to Delay 1 Mix. The
   wheel powers up at 0.0, so the output is dry until it moves. As MIDI: CC#99 = 114, CC#98 = 97,
   CC#6 = 8

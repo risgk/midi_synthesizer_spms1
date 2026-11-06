@@ -157,8 +157,8 @@ signals:
   # The general controls, General 1 and 2, each a CC put on the bus as it is and in twelve more
   # shapes: turned round, negated, both, centered on zero either way up, a quarter sine and
   # cosine, an equal-power pair: two levels taking Sin and Cos crossfade with no dip in the
-  # middle, each at 0.707 at CC 64, as their squares sum to one everywhere; Lo and Hi, the pair
-  # a filter's Mode crossfades by, each at 1.0 over its own half and falling to 0.0 over the other;
+  # middle, each at 0.707 at CC 64, as their squares sum to one everywhere; Lo and Hi, a pair
+  # each at 1.0 over its own half and falling to 0.0 over the other;
   # Neg and Pos, the two sides of Bipolar doubled, 0.0 in the middle and rising to 1.0 at either
   # end; and Mid, 1.0 in the middle and 0.0 at both ends, which with Neg and Pos crossfades
   # three things on one knob. A parameter taking one smooths it, as it does its CC, and a
@@ -224,7 +224,7 @@ signals:
   - { key: NOISE_1_OUTPUT_RED,   id: 65, module: NOISE_1, output: Out Red,   label: Noise 1 Output Red,   bipolar: true, get: output_red }
   - { key: MIXER_2_OUTPUT,       id: 66, module: MIXER_2, output: Out,      label: Mixer 2 Output,       bipolar: true }
   - { key: MIXER_2_OUTPUT_INV,   id: 67, module: MIXER_2,  output: Out Inv, label: Mixer 2 Output Inv, bipolar: true, get: output_inverted }
-  # Out is the low pass and the high pass crossfaded by Mode, through a notch.
+  # Out is the low pass, the high pass and the band pass mixed by Mode, LP to Notch to HP to BP to LP.
   - { key: FILTER_1_OUTPUT,    id: 68, module: FILTER_1, output: Out,    label: Filter 1 Output,    bipolar: true }
   - { key: FILTER_1_OUTPUT_LP, id: 69, module: FILTER_1, output: Out LP, label: Filter 1 Output LP, bipolar: true, get: output_lp }
   - { key: FILTER_1_OUTPUT_HP, id: 70, module: FILTER_1, output: Out HP, label: Filter 1 Output HP, bipolar: true, get: output_hp }
@@ -468,10 +468,10 @@ controls:
   # CC 64 to +1.0 at CC 124. Mod 1 Pol, on CC 117, powers up at CC 124, so the envelope moves the
   # cutoff as Mod 1 Amt says, and turned below CC 64 it makes the envelope close the filter. Mod 2
   # Pol has no CC and powers up at CC 76, +0.2, so Mod 2 Amt at its top swings the cutoff an
-  # octave either way with the LFO, a vibrato's depth for a filter. Mode crossfades Out from the
-  # low pass (0.0) through a notch (0.5) to the high pass (1.0), on CC 39, and powers up at CC 4,
-  # 0.0, the low pass. The favorites are Filter 2's, the one heard, which Filter 1 follows.
-  - { entry: 65, module: FILTER_1,  key: MODE,         label: Mode,         cc: 39,  value: 4, hint: LP to Notch to HP, set: set_mode }
+  # octave either way with the LFO, a vibrato's depth for a filter. Mode mixes Out from the
+  # low pass (0.0) through a notch (0.25) to the high pass (0.5), the band pass (0.75) and the low
+  # pass again (1.0), on CC 39, and powers up at CC 4, 0.0, the low pass. The favorites are Filter 2's, the one heard, which Filter 1 follows.
+  - { entry: 65, module: FILTER_1,  key: MODE,         label: Mode,         cc: 39,  value: 4, hint: LP Notch HP BP LP, set: set_mode }
   - { entry: 66, module: FILTER_1,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 88,  set: set_cutoff }
   - { entry: 67, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 0,   value: 4,  set: set_resonance }
   # Filter 1 Drive and Filter 2 Drive, each after its filter's Resonance, here and in the editor
@@ -488,7 +488,7 @@ controls:
   - { entry: 74, module: FILTER_1,  key: MOD_1_POL,      label: Mod 1 Pol, cc: 117, value: 124, bipolar: true, hint: − to +, set: set_modulation_1_polarity }
   - { entry: 75, module: FILTER_1,  key: MOD_2_AMT,    label: Mod 2 Amt,    cc: 25,  value: 4, hint_inputs: [MOD_2_IN], set: set_modulation_2_amount }
   - { entry: 76, module: FILTER_1,  key: MOD_2_POL,      label: Mod 2 Pol, cc: 0,   value: 76, bipolar: true, hint: − to +, set: set_modulation_2_polarity }
-  - { entry: 77, module: FILTER_2,  key: MODE,         label: Mode,         cc: 39,  value: 4, hint: LP to Notch to HP, favorite: true, set: set_mode }
+  - { entry: 77, module: FILTER_2,  key: MODE,         label: Mode,         cc: 39,  value: 4, hint: LP Notch HP BP LP, favorite: true, set: set_mode }
   - { entry: 78, module: FILTER_2,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 88,  favorite: true, set: set_cutoff }
   - { entry: 79, module: FILTER_2,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 64, favorite: true, set: set_resonance }
   - { entry: 80, module: FILTER_2,  key: DRIVE,        label: Drive,        cc: 31,  value: 4, hint: x1 to x32, favorite: true, after: RESONANCE, set: set_drive }

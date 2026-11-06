@@ -5,6 +5,9 @@ The main changes of each version, newest first, gathered before each release. Th
 revised.
 
 - v0.5.2 (2026-??-??):
+    - Filters: **Mode** (CC#39) goes LP, Notch, HP, BP and back to LP (at values 4, 34, 64, 94 and 124),
+      changing smoothly all the way: the high pass to the band pass and the band pass to the low pass
+      with no notch in between. Not compatible: the high pass, at value 124 before, is now at 64
 - v0.5.1 (2026-11-06):
     - Delay 1 Mix: **No dip in the middle**: the dry input stays at full up to value 64, while the
       repeats come up to full, and then goes down to none at value 124 (it was a crossfade, about 5

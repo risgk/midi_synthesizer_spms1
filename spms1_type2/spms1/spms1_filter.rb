@@ -2,9 +2,8 @@ module Spms1
   # ZDF (zero-delay feedback) / TPT (topology-preserving transform) state variable filter, with a
   # nonlinear leak on the band pass integrator, solved within the sample by one step of Newton's
   # method. It puts out its low pass, high pass and band pass at once, each through a DC blocker
-  # and the output clip of its own, and the first two crossfaded by Mode: process returns the
-  # crossfade, and output_lp, output_hp and output_bp hold the low pass, the high pass and the
-  # band pass. The audio input drives it as it
+  # and the output clip of its own, and the three mixed by Mode: process returns the mix, and
+  # output_lp, output_hp and output_bp hold the low pass, the high pass and the band pass. The audio input drives it as it
   # arrives, so how hard is set ahead of it: by Mixer 2 Out Level in the default patch. That is
   # what decides how far the band pass runs into the leak, which the resonant peak reaches first:
   # the pass band itself stays nearly clean.
@@ -238,6 +237,7 @@ module Spms1
       @pitch_depth = 0.0
       @mode_lp = 1.0
       @mode_hp = 0.0
+      @mode_bp = 0.0
 
       # The smoothing starts where the parameters at 0.0 put it, as every module's does: Mode 0.0 is
       # the low pass alone.
@@ -248,6 +248,7 @@ module Spms1
       @stage_1_pitch_depth = 0.0
       @stage_1_mode_lp = 1.0
       @stage_1_mode_hp = 0.0
+      @stage_1_mode_bp = 0.0
       @current_cutoff = 0.0
       @current_resonance = 0.0
       @current_modulation_1_depth = 0.0
@@ -255,6 +256,7 @@ module Spms1
       @current_pitch_depth = 0.0
       @current_mode_lp = 1.0
       @current_mode_hp = 0.0
+      @current_mode_bp = 0.0
 
       @g = 0.0
       @g_plus_k = 0.0
@@ -377,16 +379,34 @@ module Spms1
       @resonance = Dsp.clamp(resonance, 0.0, 1.0)
     end
 
-    # Mode is unipolar, [0.0, 1.0], and crossfades Out from the low pass to the high pass: each side
-    # at 1.0 over its own half and falling to 0.0 over the other, so 0.0 is the low pass alone, 1.0
-    # the high pass alone, and 0.5 both at 1.0, whose sum is the input less k times the band pass: a
-    # notch at the cutoff, the pass band whole. Only the two factors are smoothed.
+    # Mode is unipolar, [0.0, 1.0], and mixes Out from the low pass, the high pass and the band
+    # pass, LP to Notch to HP to BP to LP: 0.0 the low pass alone; 0.25 the low pass and the high
+    # pass both at 1.0, whose sum is the input less k times the band pass, a notch at the cutoff,
+    # the pass band whole (on the way the high pass comes in, and the notch comes down from the top);
+    # 0.5 the high pass alone (on the way the low pass goes out, and the notch goes on down); 0.75
+    # the band pass alone; and 1.0 the low pass alone again. The high pass to the band pass and the
+    # band pass to the low pass are crossfades of two that are 90 degrees apart at every frequency,
+    # so that no notch comes in between, the resonant peak as high (at the cutoff each is Q times).
+    # Only the three factors are smoothed.
     def set_mode(mode)
-      clamped = Dsp.clamp(mode, 0.0, 1.0)
-      lp = 2.0 - (clamped + clamped)
-      hp = clamped + clamped
-      @mode_lp = (lp > 1.0) ? 1.0 : lp
-      @mode_hp = (hp > 1.0) ? 1.0 : hp
+      x = Dsp.clamp(mode, 0.0, 1.0) * 4.0
+      if x <= 1.0
+        @mode_lp = 1.0
+        @mode_hp = x
+        @mode_bp = 0.0
+      elsif x <= 2.0
+        @mode_lp = 2.0 - x
+        @mode_hp = 1.0
+        @mode_bp = 0.0
+      elsif x <= 3.0
+        @mode_lp = 0.0
+        @mode_hp = 3.0 - x
+        @mode_bp = x - 2.0
+      else
+        @mode_lp = x - 3.0
+        @mode_hp = 0.0
+        @mode_bp = 4.0 - x
+      end
     end
 
     # The parameters that scale no audio themselves -- rates, depths, times -- smoothed in two
@@ -493,9 +513,10 @@ module Spms1
       @output_lp = clip_output((low_pass - @dc_blocker) * @output_level)
       @dc_blocker_bp += (band_pass - @dc_blocker_bp) * @dc_blocker_coefficient
       @output_bp = clip_output((band_pass - @dc_blocker_bp) * @output_level)
-      # Taken from the two outputs as they leave, so not clipped again: in the pass band one side
-      # is all there is, and around the cutoff, where both are, the notch takes them down.
-      @output_lp * @current_mode_lp + @output_hp * @current_mode_hp
+      # Taken from the outputs as they leave, so not clipped again: in the pass band one side is all
+      # there is, and around the cutoff, where two are, the notch takes them down or they are 90
+      # degrees apart, adding up to no more than the larger.
+      @output_lp * @current_mode_lp + @output_hp * @current_mode_hp + @output_bp * @current_mode_bp
     end
 
     # The low pass, the high pass and the band pass of the last sample process took, read after it
@@ -548,6 +569,8 @@ module Spms1
       @current_mode_lp = Dsp.smooth(@stage_1_mode_lp, @current_mode_lp, @smoothing_target_blend)
       @stage_1_mode_hp = Dsp.smooth(@mode_hp, @stage_1_mode_hp, @smoothing_target_blend)
       @current_mode_hp = Dsp.smooth(@stage_1_mode_hp, @current_mode_hp, @smoothing_target_blend)
+      @stage_1_mode_bp = Dsp.smooth(@mode_bp, @stage_1_mode_bp, @smoothing_target_blend)
+      @current_mode_bp = Dsp.smooth(@stage_1_mode_bp, @current_mode_bp, @smoothing_target_blend)
       @stage_1_gain_1 = Dsp.smooth(@gain_1, @stage_1_gain_1, @smoothing_target_blend)
       @current_gain_1 = Dsp.smooth(@stage_1_gain_1, @current_gain_1, @smoothing_target_blend)
       @stage_1_gain_2 = Dsp.smooth(@gain_2, @stage_1_gain_2, @smoothing_target_blend)
