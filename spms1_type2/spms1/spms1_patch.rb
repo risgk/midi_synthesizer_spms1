@@ -922,7 +922,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_2_MOD_2_AMT    , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_FILTER_2_MOD_2_POL    , 76)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_AMP_1_GAIN_1          , 4)
-  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_AMP_1_GAIN_2          , 64)
+  C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_AMP_1_GAIN_2          , 46)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_AMP_1_DISTORTION      , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_AMP_1_MOD_1_2_MIX     , 4)
   C.set_midi_nrpn_value(midi_ch, NRPN_VALUE_AMP_1_LIMITER_SW      , 124)
@@ -986,7 +986,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 24 , 28 ) # Filter 2 Mod 1 Amt
   C.set_midi_cc_value(midi_ch, 117, 124) # Filter 2 Mod 1 Pol
   C.set_midi_cc_value(midi_ch, 25 , 4  ) # Filter 2 Mod 2 Amt
-  C.set_midi_cc_value(midi_ch, 15 , 64 ) # Amp 1 Gain 2
+  C.set_midi_cc_value(midi_ch, 15 , 46 ) # Amp 1 Gain 2
   C.set_midi_cc_value(midi_ch, 95 , 4  ) # Amp 1 Distortion
   C.set_midi_cc_value(midi_ch, 36 , 4  ) # Amp 1 Mod 1/2 Mix
   C.set_midi_cc_value(midi_ch, 93 , 34 ) # Chorus 1 Mix
