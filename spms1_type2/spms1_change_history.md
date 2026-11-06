@@ -10,6 +10,8 @@ revised.
       7 dB down at value 64); the default patch (Mix at value 34) is about 2.5 dB louder
     - Default patch: Amp 1 Gain 2 (CC#15) powers up at half (value 46) instead of unity (value 64), about 6 dB
       down, so that it has room to bring a sound up (the peaks at about -13 dBFS)
+    - Editor: While Hold is on, the key of the Software Keyboard whose note is held, pressed again, turns the
+      note off
 - v0.5.0 (2026-11-05):
     - Add **Filter Drive**, of Filter 1 and Filter 2 (CC#31, among the favorites): drives the
       filters harder, x1 to x32, for a saturated resonance, with the level kept. A patch saved by

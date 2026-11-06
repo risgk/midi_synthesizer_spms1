@@ -4598,10 +4598,15 @@
   // note off, so the gate stays open and the envelope does not restart: legato.
   // The synth plays one note, so the notes held by Hold are let go by a new key; their note offs
   // only turn their keys off, the synth ignoring a note off for any pitch but the last, and only
-  // forgetting the note it remembers, which the new key took over from. A key
-  // pressed again takes its held note over with no note off, which would close the gate.
+  // forgetting the note it remembers, which the new key took over from. A key pressed again
+  // turns its held note off, and the press holds nothing; a glide onto it takes the note over
+  // with no note off, which would close the gate.
   function kbPress(id, note) {
     const old = kbPointers.get(id);
+    if (old === undefined && kbHold && kbHeld.delete(note)) {
+      sendNote(0x80, note, 0);
+      return;
+    }
     sendNote(0x90, note, 127);
     kbLast = note;
     kbPointers.set(id, note);
