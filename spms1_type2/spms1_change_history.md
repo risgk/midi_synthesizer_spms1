@@ -5,13 +5,13 @@ The main changes of each version, newest first, gathered before each release. Th
 revised.
 
 - v0.5.1 (2026-??-??):
-    - Delay 1 Mix: The dry input stays at full up to value 64, while the repeats come up to full, and then goes
-      down to none at value 124, so that the level does not dip in the middle (it was a crossfade, about 5 to
-      7 dB down at value 64); the default patch (Mix at value 34) is about 2.5 dB louder
-    - Default patch: Amp 1 Gain 2 (CC#15) powers up at half (value 46) instead of unity (value 64), about 6 dB
-      down, so that it has room to bring a sound up (the peaks at about -13 dBFS)
-    - Editor: While Hold is on, the key of the Software Keyboard whose note is held, pressed again, turns the
-      note off
+    - Delay 1 Mix: **No dip in the middle**: the dry input stays at full up to value 64, while the
+      repeats come up to full, and then goes down to none at value 124 (it was a crossfade, about 5
+      to 7 dB down at value 64)
+    - Default patch: Amp 1 Gain 2 (CC#15) powers up at **half** (value 46) instead of unity (value
+      64), about 6 dB down, for room to bring a sound up
+        - With the Delay 1 Mix above, about 3.5 dB lower in all (the peaks at about -13 dBFS)
+    - Editor: While Hold is on, a key pressed again while its note is held turns the note off
 - v0.5.0 (2026-11-05):
     - Add **Filter Drive**, of Filter 1 and Filter 2 (CC#31, among the favorites): drives the
       filters harder, x1 to x32, for a saturated resonance, with the level kept. A patch saved by
