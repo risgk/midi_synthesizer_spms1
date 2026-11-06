@@ -928,29 +928,31 @@ while true
       when 10 # MODULE_FILTER_1
         signals[68] = filter_1.process(control_tick, signals[source_filter_1_audio_in_1], signals[source_filter_1_audio_in_2], signals[source_filter_1_pitch_in], signals[source_filter_1_mod_1_in], signals[source_filter_1_mod_2_in]) # SIGNAL_FILTER_1_OUTPUT
         signals[69] = filter_1.output_lp # SIGNAL_FILTER_1_OUTPUT_LP
-        signals[70] = filter_1.output_hp # SIGNAL_FILTER_1_OUTPUT_HP
-        signals[71] = filter_1.output_bp # SIGNAL_FILTER_1_OUTPUT_BP
+        signals[70] = filter_1.output_br # SIGNAL_FILTER_1_OUTPUT_BR
+        signals[71] = filter_1.output_hp # SIGNAL_FILTER_1_OUTPUT_HP
+        signals[72] = filter_1.output_bp # SIGNAL_FILTER_1_OUTPUT_BP
       when 11 # MODULE_FILTER_2
-        signals[72] = filter_2.process(control_tick, signals[source_filter_2_audio_in_1], signals[source_filter_2_audio_in_2], signals[source_filter_2_pitch_in], signals[source_filter_2_mod_1_in], signals[source_filter_2_mod_2_in]) # SIGNAL_FILTER_2_OUTPUT
-        signals[73] = filter_2.output_lp # SIGNAL_FILTER_2_OUTPUT_LP
-        signals[74] = filter_2.output_hp # SIGNAL_FILTER_2_OUTPUT_HP
-        signals[75] = filter_2.output_bp # SIGNAL_FILTER_2_OUTPUT_BP
+        signals[73] = filter_2.process(control_tick, signals[source_filter_2_audio_in_1], signals[source_filter_2_audio_in_2], signals[source_filter_2_pitch_in], signals[source_filter_2_mod_1_in], signals[source_filter_2_mod_2_in]) # SIGNAL_FILTER_2_OUTPUT
+        signals[74] = filter_2.output_lp # SIGNAL_FILTER_2_OUTPUT_LP
+        signals[75] = filter_2.output_br # SIGNAL_FILTER_2_OUTPUT_BR
+        signals[76] = filter_2.output_hp # SIGNAL_FILTER_2_OUTPUT_HP
+        signals[77] = filter_2.output_bp # SIGNAL_FILTER_2_OUTPUT_BP
       when 12 # MODULE_AMP_1
-        signals[76] = amp_1.process(control_tick, signals[source_amp_1_audio_in_1], signals[source_amp_1_audio_in_2], signals[source_amp_1_mod_1_in], signals[source_amp_1_mod_2_in]) # SIGNAL_AMP_1_OUTPUT
+        signals[78] = amp_1.process(control_tick, signals[source_amp_1_audio_in_1], signals[source_amp_1_audio_in_2], signals[source_amp_1_mod_1_in], signals[source_amp_1_mod_2_in]) # SIGNAL_AMP_1_OUTPUT
       when 13 # MODULE_CHORUS_1
         chorus_1.process(control_tick, signals[source_chorus_1_audio_in])
-        signals[77] = chorus_1.output_l # SIGNAL_CHORUS_1_OUTPUT_L
-        signals[78] = chorus_1.output_r # SIGNAL_CHORUS_1_OUTPUT_R
-        signals[79] = chorus_1.output_mono # SIGNAL_CHORUS_1_OUTPUT_MONO
-        signals[80] = chorus_1.output_wet_l # SIGNAL_CHORUS_1_OUTPUT_WET_L
-        signals[81] = chorus_1.output_wet_r # SIGNAL_CHORUS_1_OUTPUT_WET_R
+        signals[79] = chorus_1.output_l # SIGNAL_CHORUS_1_OUTPUT_L
+        signals[80] = chorus_1.output_r # SIGNAL_CHORUS_1_OUTPUT_R
+        signals[81] = chorus_1.output_mono # SIGNAL_CHORUS_1_OUTPUT_MONO
+        signals[82] = chorus_1.output_wet_l # SIGNAL_CHORUS_1_OUTPUT_WET_L
+        signals[83] = chorus_1.output_wet_r # SIGNAL_CHORUS_1_OUTPUT_WET_R
       when 14 # MODULE_DELAY_1
         delay_1.process(control_tick, signals[source_delay_1_audio_in_l], signals[source_delay_1_audio_in_r])
-        signals[82] = delay_1.output_l # SIGNAL_DELAY_1_OUTPUT_L
-        signals[83] = delay_1.output_r # SIGNAL_DELAY_1_OUTPUT_R
-        signals[84] = delay_1.output_mono # SIGNAL_DELAY_1_OUTPUT_MONO
-        signals[85] = delay_1.output_wet_l # SIGNAL_DELAY_1_OUTPUT_WET_L
-        signals[86] = delay_1.output_wet_r # SIGNAL_DELAY_1_OUTPUT_WET_R
+        signals[84] = delay_1.output_l # SIGNAL_DELAY_1_OUTPUT_L
+        signals[85] = delay_1.output_r # SIGNAL_DELAY_1_OUTPUT_R
+        signals[86] = delay_1.output_mono # SIGNAL_DELAY_1_OUTPUT_MONO
+        signals[87] = delay_1.output_wet_l # SIGNAL_DELAY_1_OUTPUT_WET_L
+        signals[88] = delay_1.output_wet_r # SIGNAL_DELAY_1_OUTPUT_WET_R
       # patch_gen end
       end
 

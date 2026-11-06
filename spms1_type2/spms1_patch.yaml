@@ -157,8 +157,8 @@ signals:
   # The general controls, General 1 and 2, each a CC put on the bus as it is and in twelve more
   # shapes: turned round, negated, both, centered on zero either way up, a quarter sine and
   # cosine, an equal-power pair: two levels taking Sin and Cos crossfade with no dip in the
-  # middle, each at 0.707 at CC 64, as their squares sum to one everywhere; Lo and Hi, the pair
-  # a filter's Mode crossfades by, each at 1.0 over its own half and falling to 0.0 over the other;
+  # middle, each at 0.707 at CC 64, as their squares sum to one everywhere; Lo and Hi, a pair
+  # each at 1.0 over its own half and falling to 0.0 over the other;
   # Neg and Pos, the two sides of Bipolar doubled, 0.0 in the middle and rising to 1.0 at either
   # end; and Mid, 1.0 in the middle and 0.0 at both ends, which with Neg and Pos crossfades
   # three things on one knob. A parameter taking one smooths it, as it does its CC, and a
@@ -224,29 +224,32 @@ signals:
   - { key: NOISE_1_OUTPUT_RED,   id: 65, module: NOISE_1, output: Out Red,   label: Noise 1 Output Red,   bipolar: true, get: output_red }
   - { key: MIXER_2_OUTPUT,       id: 66, module: MIXER_2, output: Out,      label: Mixer 2 Output,       bipolar: true }
   - { key: MIXER_2_OUTPUT_INV,   id: 67, module: MIXER_2,  output: Out Inv, label: Mixer 2 Output Inv, bipolar: true, get: output_inverted }
-  # Out is the low pass and the high pass crossfaded by Mode, through a notch.
+  # Out is the low pass, the high pass and the band pass mixed by Mode, LP to BR to HP to BP to LP; Out BR
+  # is the band reject (notch), the low pass and the high pass summed, as Out at BR.
   - { key: FILTER_1_OUTPUT,    id: 68, module: FILTER_1, output: Out,    label: Filter 1 Output,    bipolar: true }
   - { key: FILTER_1_OUTPUT_LP, id: 69, module: FILTER_1, output: Out LP, label: Filter 1 Output LP, bipolar: true, get: output_lp }
-  - { key: FILTER_1_OUTPUT_HP, id: 70, module: FILTER_1, output: Out HP, label: Filter 1 Output HP, bipolar: true, get: output_hp }
-  - { key: FILTER_1_OUTPUT_BP, id: 71, module: FILTER_1, output: Out BP, label: Filter 1 Output BP, bipolar: true, get: output_bp }
-  - { key: FILTER_2_OUTPUT,    id: 72, module: FILTER_2, output: Out,    label: Filter 2 Output,    bipolar: true }
-  - { key: FILTER_2_OUTPUT_LP, id: 73, module: FILTER_2, output: Out LP, label: Filter 2 Output LP, bipolar: true, get: output_lp }
-  - { key: FILTER_2_OUTPUT_HP, id: 74, module: FILTER_2, output: Out HP, label: Filter 2 Output HP, bipolar: true, get: output_hp }
-  - { key: FILTER_2_OUTPUT_BP, id: 75, module: FILTER_2, output: Out BP, label: Filter 2 Output BP, bipolar: true, get: output_bp }
-  - { key: AMP_1_OUTPUT,       id: 76, module: AMP_1,    output: Out,    label: Amp 1 Output,       bipolar: true }
+  - { key: FILTER_1_OUTPUT_BR, id: 70, module: FILTER_1, output: Out BR, label: Filter 1 Output BR, bipolar: true, get: output_br }
+  - { key: FILTER_1_OUTPUT_HP, id: 71, module: FILTER_1, output: Out HP, label: Filter 1 Output HP, bipolar: true, get: output_hp }
+  - { key: FILTER_1_OUTPUT_BP, id: 72, module: FILTER_1, output: Out BP, label: Filter 1 Output BP, bipolar: true, get: output_bp }
+  - { key: FILTER_2_OUTPUT,    id: 73, module: FILTER_2, output: Out,    label: Filter 2 Output,    bipolar: true }
+  - { key: FILTER_2_OUTPUT_LP, id: 74, module: FILTER_2, output: Out LP, label: Filter 2 Output LP, bipolar: true, get: output_lp }
+  - { key: FILTER_2_OUTPUT_BR, id: 75, module: FILTER_2, output: Out BR, label: Filter 2 Output BR, bipolar: true, get: output_br }
+  - { key: FILTER_2_OUTPUT_HP, id: 76, module: FILTER_2, output: Out HP, label: Filter 2 Output HP, bipolar: true, get: output_hp }
+  - { key: FILTER_2_OUTPUT_BP, id: 77, module: FILTER_2, output: Out BP, label: Filter 2 Output BP, bipolar: true, get: output_bp }
+  - { key: AMP_1_OUTPUT,       id: 78, module: AMP_1,    output: Out,    label: Amp 1 Output,       bipolar: true }
   # Out Mono, of the chorus and of the delay, is the average of the two sides, a sub output. Out Wet L
   # and Out Wet R are the tap (the chorus) and the repeats (the delay) alone, without the dry input,
   # whatever Mix is: to mix them with the dry signal elsewhere, as a send would.
-  - { key: CHORUS_1_OUTPUT_L,  id: 77, module: CHORUS_1, output: Out L,  label: Chorus 1 Output L,  bipolar: true, get: output_l }
-  - { key: CHORUS_1_OUTPUT_R,  id: 78, module: CHORUS_1, output: Out R,  label: Chorus 1 Output R,  bipolar: true, get: output_r }
-  - { key: CHORUS_1_OUTPUT_MONO, id: 79, module: CHORUS_1, output: Out Mono, label: Chorus 1 Output Mono, bipolar: true, get: output_mono }
-  - { key: CHORUS_1_OUTPUT_WET_L, id: 80, module: CHORUS_1, output: Out Wet L, label: Chorus 1 Output Wet L, bipolar: true, get: output_wet_l }
-  - { key: CHORUS_1_OUTPUT_WET_R, id: 81, module: CHORUS_1, output: Out Wet R, label: Chorus 1 Output Wet R, bipolar: true, get: output_wet_r }
-  - { key: DELAY_1_OUTPUT_L,   id: 82, module: DELAY_1,  output: Out L,  label: Delay 1 Output L,   bipolar: true, get: output_l }
-  - { key: DELAY_1_OUTPUT_R,   id: 83, module: DELAY_1,  output: Out R,  label: Delay 1 Output R,   bipolar: true, get: output_r }
-  - { key: DELAY_1_OUTPUT_MONO,  id: 84, module: DELAY_1,  output: Out Mono, label: Delay 1 Output Mono,  bipolar: true, get: output_mono }
-  - { key: DELAY_1_OUTPUT_WET_L, id: 85, module: DELAY_1,  output: Out Wet L, label: Delay 1 Output Wet L, bipolar: true, get: output_wet_l }
-  - { key: DELAY_1_OUTPUT_WET_R, id: 86, module: DELAY_1,  output: Out Wet R, label: Delay 1 Output Wet R, bipolar: true, get: output_wet_r }
+  - { key: CHORUS_1_OUTPUT_L,  id: 79, module: CHORUS_1, output: Out L,  label: Chorus 1 Output L,  bipolar: true, get: output_l }
+  - { key: CHORUS_1_OUTPUT_R,  id: 80, module: CHORUS_1, output: Out R,  label: Chorus 1 Output R,  bipolar: true, get: output_r }
+  - { key: CHORUS_1_OUTPUT_MONO, id: 81, module: CHORUS_1, output: Out Mono, label: Chorus 1 Output Mono, bipolar: true, get: output_mono }
+  - { key: CHORUS_1_OUTPUT_WET_L, id: 82, module: CHORUS_1, output: Out Wet L, label: Chorus 1 Output Wet L, bipolar: true, get: output_wet_l }
+  - { key: CHORUS_1_OUTPUT_WET_R, id: 83, module: CHORUS_1, output: Out Wet R, label: Chorus 1 Output Wet R, bipolar: true, get: output_wet_r }
+  - { key: DELAY_1_OUTPUT_L,   id: 84, module: DELAY_1,  output: Out L,  label: Delay 1 Output L,   bipolar: true, get: output_l }
+  - { key: DELAY_1_OUTPUT_R,   id: 85, module: DELAY_1,  output: Out R,  label: Delay 1 Output R,   bipolar: true, get: output_r }
+  - { key: DELAY_1_OUTPUT_MONO,  id: 86, module: DELAY_1,  output: Out Mono, label: Delay 1 Output Mono,  bipolar: true, get: output_mono }
+  - { key: DELAY_1_OUTPUT_WET_L, id: 87, module: DELAY_1,  output: Out Wet L, label: Delay 1 Output Wet L, bipolar: true, get: output_wet_l }
+  - { key: DELAY_1_OUTPUT_WET_R, id: 88, module: DELAY_1,  output: Out Wet R, label: Delay 1 Output Wet R, bipolar: true, get: output_wet_r }
 
 # Module inputs, NRPN category 1, listed in the editor's order, each by its entry: what feeds each
 # one in the default patch (`source`, a signal key). `label` is the editor's, on the module; `name`
@@ -468,10 +471,10 @@ controls:
   # CC 64 to +1.0 at CC 124. Mod 1 Pol, on CC 117, powers up at CC 124, so the envelope moves the
   # cutoff as Mod 1 Amt says, and turned below CC 64 it makes the envelope close the filter. Mod 2
   # Pol has no CC and powers up at CC 76, +0.2, so Mod 2 Amt at its top swings the cutoff an
-  # octave either way with the LFO, a vibrato's depth for a filter. Mode crossfades Out from the
-  # low pass (0.0) through a notch (0.5) to the high pass (1.0), on CC 39, and powers up at CC 4,
-  # 0.0, the low pass. The favorites are Filter 2's, the one heard, which Filter 1 follows.
-  - { entry: 65, module: FILTER_1,  key: MODE,         label: Mode,         cc: 39,  value: 4, hint: LP to Notch to HP, set: set_mode }
+  # octave either way with the LFO, a vibrato's depth for a filter. Mode mixes Out from the
+  # low pass (0.0) through the band reject (0.25, a notch) to the high pass (0.5), the band pass (0.75) and the low
+  # pass again (1.0), on CC 39, and powers up at CC 4, 0.0, the low pass. The favorites are Filter 2's, the one heard, which Filter 1 follows.
+  - { entry: 65, module: FILTER_1,  key: MODE,         label: Mode,         cc: 39,  value: 4, hint: LP BR HP BP LP, set: set_mode }
   - { entry: 66, module: FILTER_1,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 88,  set: set_cutoff }
   - { entry: 67, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 0,   value: 4,  set: set_resonance }
   # Filter 1 Drive and Filter 2 Drive, each after its filter's Resonance, here and in the editor
@@ -488,7 +491,7 @@ controls:
   - { entry: 74, module: FILTER_1,  key: MOD_1_POL,      label: Mod 1 Pol, cc: 117, value: 124, bipolar: true, hint: − to +, set: set_modulation_1_polarity }
   - { entry: 75, module: FILTER_1,  key: MOD_2_AMT,    label: Mod 2 Amt,    cc: 25,  value: 4, hint_inputs: [MOD_2_IN], set: set_modulation_2_amount }
   - { entry: 76, module: FILTER_1,  key: MOD_2_POL,      label: Mod 2 Pol, cc: 0,   value: 76, bipolar: true, hint: − to +, set: set_modulation_2_polarity }
-  - { entry: 77, module: FILTER_2,  key: MODE,         label: Mode,         cc: 39,  value: 4, hint: LP to Notch to HP, favorite: true, set: set_mode }
+  - { entry: 77, module: FILTER_2,  key: MODE,         label: Mode,         cc: 39,  value: 4, hint: LP BR HP BP LP, favorite: true, set: set_mode }
   - { entry: 78, module: FILTER_2,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 88,  favorite: true, set: set_cutoff }
   - { entry: 79, module: FILTER_2,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 64, favorite: true, set: set_resonance }
   - { entry: 80, module: FILTER_2,  key: DRIVE,        label: Drive,        cc: 31,  value: 4, hint: x1 to x32, favorite: true, after: RESONANCE, set: set_drive }
