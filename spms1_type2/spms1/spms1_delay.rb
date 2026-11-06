@@ -1,15 +1,18 @@
 module Spms1
   # Stereo delay with feedback: two audio
-  # inputs, left and right, each with a delay line and a loop of its own, and two outputs, each a
-  # crossfade of its dry input with its delayed signal. Time, Feedback and Mix are shared, so the
+  # inputs, left and right, each with a delay line and a loop of its own, and two outputs, each its
+  # dry input and its delayed signal mixed by Mix. Time, Feedback and Mix are shared, so the
   # two sides repeat together and the stereo image going in is the one the repeats keep.
   #
-  # It keeps the bus's one unit without a limiter or a clip. What enters each loop is half its
-  # input, plus its delayed signal at a feedback of at most a half, so as long as the delayed
+  # The loops keep the bus's one unit without a limiter or a clip. What enters each loop is half
+  # its input, plus its delayed signal at a feedback of at most a half, so as long as the delayed
   # signal is within one unit, so is what is written back -- and it starts at silence. The low
   # pass filter in the loop and the reading between two samples are weighted averages, which
-  # cannot reach past what they average, and the output is a crossfade, which cannot either. The
-  # price of the half is that the first repeat is 6 dB under the dry signal.
+  # cannot reach past what they average. The price of the half is that the first repeat is 6 dB
+  # under the dry signal. The output keeps the dry input at full up to the middle of Mix, so that
+  # the level does not dip there, and can go past one unit where the dry input and the repeats
+  # meet in phase; the output's clip after it holds that (with the amp's limiter ahead, only a few
+  # samples in a thousand at most, at a loud level with Mix in the middle).
   #
   # The outputs are read after process, from output_l and output_r: returning both would build an
   # Array every sample. output_mono, a sub output, is the two averaged, for a mono destination.
@@ -93,6 +96,9 @@ module Spms1
       @mix = 0.25
       @stage_1_mix = 0.0
       @current_mix = 0.0
+      # The gains of the dry input and of the delayed signal, from Mix at each control tick.
+      @dry_gain = 1.0
+      @wet_gain = 0.0
 
       # The delay the line is read at, in samples, which follows Time no faster than TIME_SLEW,
       # moved a step every sample so that it arrives at each control-rate update's value on time.
@@ -119,8 +125,9 @@ module Spms1
       @feedback = clamped_feedback * 0.5
     end
 
-    # Mix is unipolar, [0.0, 1.0], the delayed signal's share of each crossfade: the dry input at
-    # 0.0, only the repeats at 1.0.
+    # Mix is unipolar, [0.0, 1.0]: the dry input alone at 0.0, the dry input at full and the
+    # delayed signal coming up to full by 0.5, and the dry input going down to none at 1.0, where
+    # only the repeats are left.
     def set_mix(mix)
       @mix = Dsp.clamp(mix, 0.0, 1.0)
     end
@@ -140,6 +147,12 @@ module Spms1
         @current_feedback = Dsp.smooth(@stage_1_feedback, @current_feedback, @smoothing_target_blend)
         @stage_1_mix = Dsp.smooth(@mix, @stage_1_mix, @smoothing_target_blend)
         @current_mix = Dsp.smooth(@stage_1_mix, @current_mix, @smoothing_target_blend)
+        # The dry input stays at full up to the middle of Mix, while the delayed signal comes up
+        # to full, and then goes down to none at the top.
+        dry_gain = 2.0 - @current_mix * 2.0
+        wet_gain = @current_mix * 2.0
+        @dry_gain = (dry_gain > 1.0) ? 1.0 : dry_gain
+        @wet_gain = (wet_gain > 1.0) ? 1.0 : wet_gain
 
         # Where the read position should be by the next update, at most the slew away, and a
         # quarter of the way there each sample.
@@ -182,8 +195,8 @@ module Spms1
 
       @output_wet_l = delayed_l
       @output_wet_r = delayed_r
-      @output_l = input_l + (delayed_l - input_l) * @current_mix
-      @output_r = input_r + (delayed_r - input_r) * @current_mix
+      @output_l = input_l * @dry_gain + delayed_l * @wet_gain
+      @output_r = input_r * @dry_gain + delayed_r * @wet_gain
     end
   end
 end

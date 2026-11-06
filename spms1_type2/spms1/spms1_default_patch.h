@@ -343,7 +343,7 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {599,   4},  // Filter 2 Mod 2 Amt value
   {600,  76},  // Filter 2 Mod 2 Pol value
   {601,   4},  // Amp 1 Gain 1 value
-  {602,  64},  // Amp 1 Gain 2 value
+  {602,  46},  // Amp 1 Gain 2 value
   {603,   4},  // Amp 1 Distortion value
   {604,   4},  // Amp 1 Mod 1/2 Mix value
   {605, 124},  // Amp 1 Limiter Sw value
@@ -410,7 +410,7 @@ static const uint8_t g_spms1_default_cc[][2] = {
   {24,   28},  // Filter 2 Mod 1 Amt
   {117, 124},  // Filter 2 Mod 1 Pol
   {25,    4},  // Filter 2 Mod 2 Amt
-  {15,   64},  // Amp 1 Gain 2
+  {15,   46},  // Amp 1 Gain 2
   {95,    4},  // Amp 1 Distortion
   {36,    4},  // Amp 1 Mod 1/2 Mix
   {93,   34},  // Chorus 1 Mix

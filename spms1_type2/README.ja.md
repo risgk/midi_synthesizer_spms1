@@ -1,4 +1,4 @@
-MIDI Synthesizer SPMS-1 (type-2) v0.5.0
+MIDI Synthesizer SPMS-1 (type-2) v0.5.1
 =======================================
 
 - Spinel (Ruby AOT コンパイラ) で作った、Raspberry Pi Pico 2 用のモノフォニック・セミモジュラー MIDI シンセサイザー
@@ -195,6 +195,9 @@ Undo で変更を戻せます。Initialize Values は値を戻して配線は保
       3 つとも畳むと、空いた幅まで配線図が広がります
 - SPMS-1 Web: エディタに組み込まれたシンセサイザー本体 ("spms1_web_synth.js")
     - "MIDI Out" で "SPMS-1 Web (Built-in)" を選び、ソフトウェア鍵盤 (または "MIDI In" の MIDI キーボード) で演奏します
+    - "SPMS-1 Web (Built-in, +6 dB)": 6 dB 大きく、他の音源に近い音量です (-2 dBFS を超えるピークは丸めます)
+        - "+6 dB" なしは実機と同じ音です (実機と比べるときなど)
+        - Amp 1 Gain 2 (や Amp 1 Distortion) を大きく上げると、丸めたピークが歪んで聞こえることがあります
     - "spms1_main.c" を WebAssembly として Web ブラウザで動かすので、実機と同じ音がします
     - [web/README.md](./web/README.md) を参照してください
 

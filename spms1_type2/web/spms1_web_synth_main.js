@@ -91,25 +91,42 @@
     console.log(SPMS1_WEB_VERSION + " ready (" + context.sampleRate + " Hz)");
   }
 
-  const output = {
-    id: "spms1-web-synth",
-    name: "SPMS-1 Web (Built-in)",
-    isSpms1WebSynth: true,
-    // The bytes of one or more MIDI messages in a row (an NRPN is sent as three CCs at once)
-    send: function(data) {
-      const message = Array.from(data);
-      if (node) {
-        node.port.postMessage(message);
-      } else if (pendingMessages.length < MAX_PENDING_MESSAGES) {
-        pendingMessages.push(message);
-      }
+  let outputGain = 1;  // That of the output that sent last
 
-      if (!context) {
-        start().catch(function(e) { console.log("Failed to start SPMS-1 Web - " + e); });
-      }
-      resume();
-    },
-  };
+  function post(message) {
+    if (node) {
+      node.port.postMessage(message);
+    } else if (pendingMessages.length < MAX_PENDING_MESSAGES) {
+      pendingMessages.push(message);
+    }
+  }
 
-  window.Spms1WebSynth = { version: SPMS1_WEB_VERSION, output: output };
+  // The outputs for MIDI Out: as the device sounds, and 6 dB louder (x 2, with a soft clip above
+  // -2 dBFS), for a level closer to that of other sounds (e.g. of a Web browser); the one that
+  // sends sets the gain
+  function makeOutput(id, name, gain) {
+    return {
+      id: id,
+      name: name,
+      isSpms1WebSynth: true,
+      // The bytes of one or more MIDI messages in a row (an NRPN is sent as three CCs at once)
+      send: function(data) {
+        if (outputGain !== gain) {
+          outputGain = gain;
+          post({ outputGain: gain });
+        }
+        post(Array.from(data));
+
+        if (!context) {
+          start().catch(function(e) { console.log("Failed to start SPMS-1 Web - " + e); });
+        }
+        resume();
+      },
+    };
+  }
+
+  const output     = makeOutput("spms1-web-synth", "SPMS-1 Web (Built-in)", 1);
+  const outputLoud = makeOutput("spms1-web-synth-6db", "SPMS-1 Web (Built-in, +6 dB)", 2);
+
+  window.Spms1WebSynth = { version: SPMS1_WEB_VERSION, output: output, outputs: [output, outputLoud] };
 })();

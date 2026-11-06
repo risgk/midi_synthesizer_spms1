@@ -1563,7 +1563,7 @@
 <body>
 
 <header>
-  <h1>SPMS-1 (type-2) Editor<span class="version">v0.5.0</span><span class="github-link">(<a href="https://github.com/risgk/midi_synthesizer_spms1" target="_blank" rel="noopener">View on GitHub</a>)</span></h1>
+  <h1>SPMS-1 (type-2) Editor<span class="version">v0.5.1</span><span class="github-link">(<a href="https://github.com/risgk/midi_synthesizer_spms1" target="_blank" rel="noopener">View on GitHub</a>)</span></h1>
   <nav class="tabs">
     <button class="tab-btn active" data-tab="controls">Controls</button>
     <button class="tab-btn" data-tab="patch">Patch</button>
@@ -1918,14 +1918,14 @@
       {"entry":87,"module":"FILTER_2","key":"MOD_2_AMT","label":"Mod 2 Amt","bipolar":false,"cc":25,"value":4,"controller":false,"performance":false,"hintInputs":["MOD_2_IN"],"favorite":true,"slots":[["FILTER_2_MOD_2_AMT","Mod 2 Amt",false]]},
       {"entry":88,"module":"FILTER_2","key":"MOD_2_POL","label":"Mod 2 Pol","bipolar":true,"cc":0,"value":76,"controller":false,"performance":false,"hint":"− to +","slots":[["FILTER_2_MOD_2_POL","Mod 2 Pol",true]]},
       {"entry":89,"module":"AMP_1","key":"GAIN_1","label":"Gain 1","bipolar":false,"cc":0,"value":4,"controller":false,"performance":false,"hintInputs":["AUDIO_IN_1"],"slots":[["AMP_1_GAIN_1","Gain 1",false]]},
-      {"entry":90,"module":"AMP_1","key":"GAIN_2","label":"Gain 2","bipolar":false,"cc":15,"value":64,"controller":false,"performance":false,"hintInputs":["AUDIO_IN_2"],"favorite":true,"slots":[["AMP_1_GAIN_2","Gain 2",false]]},
+      {"entry":90,"module":"AMP_1","key":"GAIN_2","label":"Gain 2","bipolar":false,"cc":15,"value":46,"controller":false,"performance":false,"hintInputs":["AUDIO_IN_2"],"favorite":true,"slots":[["AMP_1_GAIN_2","Gain 2",false]]},
       {"entry":91,"module":"AMP_1","key":"DISTORTION","label":"Distortion","bipolar":false,"cc":95,"value":4,"controller":false,"performance":false,"hint":"x1 to x32","favorite":true,"slots":[["AMP_1_DISTORTION","Distortion",false]]},
       {"entry":92,"module":"AMP_1","key":"MOD_1_2_MIX","label":"Mod 1/2 Mix","bipolar":false,"cc":36,"value":4,"controller":false,"performance":false,"hintInputs":["MOD_1_IN","MOD_2_IN"],"favorite":true,"slots":[["AMP_1_MOD_1_2_MIX","Mod 1/2 Mix",false]]},
       {"entry":93,"module":"AMP_1","key":"LIMITER_SW","label":"Limiter Sw","bipolar":false,"cc":0,"value":124,"controller":false,"performance":false,"hint":"Off/On","slots":[["AMP_1_LIMITER_SW","Limiter Sw",false]]},
-      {"entry":94,"module":"CHORUS_1","key":"MIX","label":"Mix","bipolar":false,"cc":93,"value":34,"controller":false,"performance":false,"favorite":true,"slots":[["CHORUS_1_MIX","Mix",false]]},
+      {"entry":94,"module":"CHORUS_1","key":"MIX","label":"Mix","bipolar":false,"cc":93,"value":34,"controller":false,"performance":false,"hint":"Dry to Wet","favorite":true,"slots":[["CHORUS_1_MIX","Mix",false]]},
       {"entry":95,"module":"CHORUS_1","key":"RATE","label":"Rate","bipolar":false,"cc":58,"value":64,"controller":false,"performance":false,"favorite":true,"slots":[["CHORUS_1_RATE","Rate",false]]},
       {"entry":96,"module":"CHORUS_1","key":"DEPTH","label":"Depth","bipolar":false,"cc":59,"value":64,"controller":false,"performance":false,"favorite":true,"slots":[["CHORUS_1_DEPTH","Depth",false]]},
-      {"entry":97,"module":"DELAY_1","key":"MIX","label":"Mix","bipolar":false,"cc":94,"value":34,"controller":false,"performance":false,"favorite":true,"slots":[["DELAY_1_MIX","Mix",false]]},
+      {"entry":97,"module":"DELAY_1","key":"MIX","label":"Mix","bipolar":false,"cc":94,"value":34,"controller":false,"performance":false,"hint":"Dry to Wet","favorite":true,"slots":[["DELAY_1_MIX","Mix",false]]},
       {"entry":98,"module":"DELAY_1","key":"TIME","label":"Time","bipolar":false,"cc":90,"value":64,"controller":false,"performance":false,"favorite":true,"slots":[["DELAY_1_TIME","Time",false]]},
       {"entry":99,"module":"DELAY_1","key":"FEEDBACK","label":"Feedback","bipolar":false,"cc":92,"value":64,"controller":false,"performance":false,"favorite":true,"slots":[["DELAY_1_FEEDBACK","Feedback",false]]},
       {"entry":100,"key":"MOD_WHEEL","label":"Mod Wheel","bipolar":false,"cc":1,"value":4,"controller":true,"performance":true,"slots":[["MOD_WHEEL","Mod Wheel",false],["MOD_WHEEL_REV","Mod Wheel Rev",false,"rev"],["MOD_WHEEL_INV","Mod Wheel Inv",false,"inv"],["MOD_WHEEL_REV_INV","Mod Wheel Rev Inv",false,"rev_inv"]]},
@@ -2101,9 +2101,9 @@
     FILTER_1:  { x: 2080, y: 40 },
     FILTER_2:  { x: 2080, y: 684 },
     AMP_1:     { x: 2440, y: 40 },
-    CHORUS_1:  { x: 2440, y: 372 },
-    DELAY_1:   { x: 2440, y: 652 },
-    OUT:       { x: 2440, y: 958 },
+    CHORUS_1:  { x: 2440, y: 398 },
+    DELAY_1:   { x: 2440, y: 730 },
+    OUT:       { x: 2440, y: 1088 },
   };
 
   function defaultState() {
@@ -3535,17 +3535,20 @@
   let midiOutput = null;
   // SPMS-1 Web, a virtual MIDI output listed after the devices; null without spms1_web_synth.js.
   // It works without Web MIDI API too (e.g. on Safari), played from the soft keyboard.
+  // Two of them: as the device sounds, and 6 dB louder.
   const webSynthOutput = window.Spms1WebSynth ? window.Spms1WebSynth.output : null;
+  const webSynthOutputs = window.Spms1WebSynth ? window.Spms1WebSynth.outputs : [];
 
   function outputPorts() {
     const ports = midiAccess ? [...midiAccess.outputs.values()] : [];
-    if (webSynthOutput) ports.push(webSynthOutput);
+    ports.push(...webSynthOutputs);
     return ports;
   }
 
   function outputById(id) {
     if (!id) return null;
-    if (webSynthOutput && id === webSynthOutput.id) return webSynthOutput;
+    const web = webSynthOutputs.find(o => o.id === id);
+    if (web) return web;
     return (midiAccess && midiAccess.outputs.get(id)) || null;
   }
   // What the device was last sent, so that a change sends only what it changed.
@@ -3955,7 +3958,7 @@
   // Whether the whole patch can go to the output as SysEx: SPMS-1 Web takes it always, and a device
   // if SysEx is allowed.
   function outputTakesSysEx() {
-    return midiOutput === webSynthOutput || !!(midiAccess && midiAccess.sysexEnabled);
+    return !!(midiOutput && midiOutput.isSpms1WebSynth) || !!(midiAccess && midiAccess.sysexEnabled);
   }
 
   // The whole patch goes out between Mute on and off, so that it is not heard half sent; Mute off
@@ -4598,10 +4601,15 @@
   // note off, so the gate stays open and the envelope does not restart: legato.
   // The synth plays one note, so the notes held by Hold are let go by a new key; their note offs
   // only turn their keys off, the synth ignoring a note off for any pitch but the last, and only
-  // forgetting the note it remembers, which the new key took over from. A key
-  // pressed again takes its held note over with no note off, which would close the gate.
+  // forgetting the note it remembers, which the new key took over from. A key pressed again
+  // turns its held note off, and the press holds nothing; a glide onto it takes the note over
+  // with no note off, which would close the gate.
   function kbPress(id, note) {
     const old = kbPointers.get(id);
+    if (old === undefined && kbHold && kbHeld.delete(note)) {
+      sendNote(0x80, note, 0);
+      return;
+    }
     sendNote(0x90, note, 127);
     kbLast = note;
     kbPointers.set(id, note);

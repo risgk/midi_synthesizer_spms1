@@ -8,6 +8,22 @@
 const SPMS1_SAMPLE_RATE = 48000;  // SAMPLE_RATE in spms1_main.rb
 const SPMS1_BLOCK_SIZE = 128;      // The frames rendered at a time while resampling
 
+// The output gain of the "+6 dB" output: x 2, with a soft clip that leaves the samples below 0.8 (-2 dBFS) as they are,
+// and rounds off those above it toward 1.0 (so that a peak is not cut); x 1 leaves the output as it is
+const SOFT_CLIP_KNEE = 0.8;
+function applyOutputGain(samples, n, gain) {
+  for (let i = 0; i < n; i++) {
+    const x = samples[i] * gain;
+    const a = Math.abs(x);
+    if (a > SOFT_CLIP_KNEE) {
+      const y = SOFT_CLIP_KNEE + (1 - SOFT_CLIP_KNEE) * Math.tanh((a - SOFT_CLIP_KNEE) / (1 - SOFT_CLIP_KNEE));
+      samples[i] = (x < 0) ? -y : y;
+    } else {
+      samples[i] = x;
+    }
+  }
+}
+
 class Spms1WebSynthProcessor extends AudioWorkletProcessor {
   constructor(options) {
     super();
@@ -47,9 +63,16 @@ class Spms1WebSynthProcessor extends AudioWorkletProcessor {
     // sample here, before any MIDI message arrives (and would be overwritten)
     this.renderBlock(1);
 
-    // The MIDI bytes (an array, or several messages in a row) are handled at the beginning of the next block
+    this.outputGain = 1;
+
+    // The MIDI bytes (an array, or several messages in a row) are handled at the beginning of the next block;
+    // { outputGain: gain } sets the output gain (by the output chosen in MIDI Out)
     this.port.onmessage = (event) => {
       const data = event.data;
+      if (!Array.isArray(data)) {
+        this.outputGain = data.outputGain;
+        return;
+      }
       for (let i = 0; i < data.length; i++) {
         this.wasm.spms1_web_midi_byte(data[i] & 0xFF);
       }
@@ -114,6 +137,7 @@ class Spms1WebSynthProcessor extends AudioWorkletProcessor {
           outR.set(this.right.subarray(0, n), offset);
         }
       }
+      this.finishOutput(output, numFrames);
       return true;
     }
 
@@ -139,7 +163,14 @@ class Spms1WebSynthProcessor extends AudioWorkletProcessor {
       }
       this.phase += this.step;
     }
+    this.finishOutput(output, numFrames);
     return true;
+  }
+
+  finishOutput(output, numFrames) {
+    if (this.outputGain !== 1) {
+      output.forEach((channel) => applyOutputGain(channel, numFrames, this.outputGain));
+    }
   }
 }
 
