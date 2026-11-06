@@ -4,6 +4,7 @@ MIDI Synthesizer SPMS-1 (type-2) Change History
 The main changes of each version, newest first, gathered before each release. The format may be
 revised.
 
+- v0.6.1 (2026-??-??):
 - v0.6.0 (2026-11-07):
     - Filters: **Mode** (CC#39) goes LP, BR (band reject, a notch), HP, BP and back to LP (at values 4,
       34, 64, 94 and 124), changing smoothly all the way: the high pass to the band pass and the band
