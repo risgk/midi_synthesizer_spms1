@@ -205,6 +205,8 @@ puts the default patch back. Keep a patch with Save JSON, or in the synth with S
 - SPMS-1 Web: the synth itself, built into the editor ("spms1_web_synth.js")
     - Select "SPMS-1 Web (Built-in)" in "MIDI Out", and play the soft keyboard (or a MIDI keyboard in "MIDI In")
     - "SPMS-1 Web (Built-in, +6 dB)": 6 dB louder, closer to other sounds (the peaks above -2 dBFS rounded off)
+        - Without "+6 dB", it sounds as the device does (e.g. to compare with it)
+        - With Amp 1 Gain 2 (or Amp 1 Distortion) turned well up, the peaks rounded off can be heard as distortion
     - "spms1_main.c" runs in the Web browser as WebAssembly, so it sounds the same as the device
     - See [web/README.md](./web/README.md)
 

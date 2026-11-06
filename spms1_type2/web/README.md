@@ -21,6 +21,8 @@ How to Use
 - Select "SPMS-1 Web (Built-in)" in the list "MIDI Out"
     - Or "SPMS-1 Web (Built-in, +6 dB)": 6 dB louder (x 2), closer to other sounds, with a soft clip that rounds off the
       peaks above -2 dBFS
+        - Without "+6 dB", it sounds as the device does (e.g. to compare with it)
+        - With Amp 1 Gain 2 (or Amp 1 Distortion) turned well up, the peaks rounded off can be heard as distortion
     - The editor sends its whole patch (SysEx and CC values) to SPMS-1 Web when it is selected, and every change as it is made
 - Play the soft keyboard of the editor, or a MIDI keyboard selected in "MIDI In"
     - Web browsers start the audio only after a user operation in the page (e.g. a click, a tap, or a key press),
