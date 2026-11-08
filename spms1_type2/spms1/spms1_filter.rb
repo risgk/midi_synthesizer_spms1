@@ -129,20 +129,28 @@ module Spms1
     # 76, Q 5.7), then lower in lines in dB, to -2.8 dB at i = 114 (CC 118, Q 256): what the
     # resonance brings up there is the harmonic near the cutoff. Past that
     # the self-oscillation takes over, SELF_OSC_LEVEL * sqrt(t) in the loop, and the level is set
-    # so that it comes out at SELF_OSC_OUTPUT_MIN at i = 115 (CC 119), rising in a line to
-    # SELF_OSC_OUTPUT_MAX at i = 119 (CC 123) and held there: still louder with the resonance, but
-    # by less. It scales the three outputs ahead of their clip, so Out, Out LP, Out HP and Out BP
-    # all follow it.
-    SELF_OSC_OUTPUT_MIN = 0.15
-    SELF_OSC_OUTPUT_MAX = 0.25
+    # so that it comes out at 0.15 at i = 115 (CC 119), as the level at i = 114, -2.8 dB, goes on
+    # to -3.5 dB there, 0.21 at i = 116, 0.25 at i = 117 (CC 121), 0.28 at i = 118, and
+    # SELF_OSC_OUTPUT_MAX at i = 119 (CC 123), held there, the level going down with the resonance
+    # all the way, to -4.4 dB: still louder with the resonance, but by less (as PRA32-U2). It scales the three outputs ahead of their clip, so Out, Out LP, Out HP
+    # and Out BP all follow it.
+    SELF_OSC_OUTPUT_MAX = 0.3
     RESONANCE_LEVEL_TABLE = Array.new(122, 1.0)
     for i in 0...121
       x = i.to_f
       if i >= 115
         t = (x - 114.0) / 5.0
         t = 1.0 if t > 1.0
-        target = SELF_OSC_OUTPUT_MIN + (SELF_OSC_OUTPUT_MAX - SELF_OSC_OUTPUT_MIN) * (x - 115.0) / 4.0
-        target = SELF_OSC_OUTPUT_MAX if target > SELF_OSC_OUTPUT_MAX
+        target = SELF_OSC_OUTPUT_MAX
+        if i == 115
+          target = 0.15
+        elsif i == 116
+          target = 0.21
+        elsif i == 117
+          target = 0.25
+        elsif i == 118
+          target = 0.28
+        end
         RESONANCE_LEVEL_TABLE[i] = target / (0.5 * Math.sqrt(t))  # 0.5: SELF_OSC_LEVEL, below
       else
         db = 0.0
@@ -172,11 +180,14 @@ module Spms1
     # oscillation's pitch down; held here, the amplitude falls off there instead.
     SELF_OSC_K_FLOOR = -0.2
     # The loop cannot start oscillating from states of exactly zero. This is added to the band
-    # pass state at every control-rate step with its sign flipped each time, so the states never
-    # rest at zero and never rest on a point that a change of k leaves in place; a constant would
-    # do the latter, as k does not move the loop's DC balance. Well above flush_tiny's dead zone,
-    # and far below anything audible.
-    SELF_OSC_SEED = 1e-6
+    # pass state at every control-rate step with a random sign, from a 16-bit LFSR (a few integer
+    # operations), so the states never rest at zero and never rest on a point that a change of k
+    # leaves in place; a constant would do the latter, as k does not move the loop's DC balance.
+    # A sign flipped each time, as before, is a tone at f_s / 8, and with it the oscillation did not
+    # always start (not at Resonance CC 119, the bottom of it, at any cutoff); a random sign spreads
+    # it over every frequency, the cutoff's included. Well above flush_tiny's dead zone, and far
+    # below anything audible.
+    SELF_OSC_SEED = 1e-7
     # Where the self-oscillation starts on the resonance dial, r = 114/120 (CC 118), where K_TABLE
     # reaches Q 256.
     SELF_OSC_START = 114.0 / 120.0
@@ -201,7 +212,7 @@ module Spms1
       @leak_step = 0.5 * LEAK_RATE / @sample_rate
       @self_osc_kappa = SELF_OSC_KAPPA * (48000.0 / @sample_rate)
       @dc_blocker_coefficient = DC_BLOCKER_COEFFICIENT_BASE * (48000.0 / @sample_rate)
-      @self_osc_seed = SELF_OSC_SEED
+      @self_osc_seed_lfsr = 0xACE1
       # The fade's weight is offset - cutoff * scale, clamped to [0, 1]: one at f_s / 6 and below,
       # zero at f_s / 4.8 and above. The dial puts MIDI note 12 at 0.0 and 132 at 1.0, 440 Hz at
       # 0.475. At a sample rate of 96 kHz or more, f_s / 4.8 lies past the top of the dial and the
@@ -449,12 +460,12 @@ module Spms1
 
       if control_tick
         update_coefficients
-        @s1 = Dsp.flush_tiny(@s1) + @self_osc_seed
+        @self_osc_seed_lfsr = (@self_osc_seed_lfsr >> 1) ^ ((0 - (@self_osc_seed_lfsr & 1)) & 0xB400)
+        @s1 = Dsp.flush_tiny(@s1) + SELF_OSC_SEED * ((@self_osc_seed_lfsr & 2) - 1).to_f
         @s2 = Dsp.flush_tiny(@s2)
         @dc_blocker = Dsp.flush_tiny(@dc_blocker)
         @dc_blocker_hp = Dsp.flush_tiny(@dc_blocker_hp)
         @dc_blocker_bp = Dsp.flush_tiny(@dc_blocker_bp)
-        @self_osc_seed = 0.0 - @self_osc_seed
       end
 
       audio_input = audio_input_1 * @current_gain_1 + audio_input_2 * @current_gain_2
