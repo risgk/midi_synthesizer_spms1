@@ -228,9 +228,9 @@ measures on the device -- with the default patch and a note held.
   more buffers (`--buffers 60`) they show how far a buffer moves with the values: the files in
   "sim_load/scenarios" hold Mixer 2 at its limit, the limiter off, the modulations at the top, a
   self-oscillating filter, the delay at its shortest, and a note every 10 ms with glide and bend
-  (`--gate 0`). Over 60 buffers at v0.6.0, every one of them stays within 191635 to 192421 cycles
-  (1248 to 1253 us), the default patch within 191740 to 192377 (with a note held at 36, 69 or 96,
-  within 191635 to 192377): no more than about 0.5% apart, nothing in them branching on a value
+  (`--gate 0`). Over 60 buffers at v0.6.1, every one of them stays within 192008 to 192826 cycles
+  (1250 to 1255 us), the default patch within 192113 to 192750 (with a note held at 36, 69 or 96,
+  within 192008 to 192750): no more than about 0.5% apart, nothing in them branching on a value
   (the limiter off takes exactly the cycles of the limiter on), and what moves a buffer at all is
   the oscillators' phase wraps (see "Writing a Module")
 - Needs Python 3 and `pip install unicorn capstone pyelftools numpy`, installed by you and not shipped
@@ -243,7 +243,7 @@ or not, as the modules are meant to:
 
 | Version | Note held (avg / max) | No note (avg / max) |
 | :-- | --: | --: |
-| v0.6.0 | 192023 / 192327 cycles, 1250 us (94%) | 191506 / 191701 cycles, 1247 us (94%) |
+| v0.6.1 | 192396 / 192700 cycles, 1253 us (94%) | 191927 / 192122 cycles, 1250 us (94%) |
 
 The estimate is above Debug Print on the device: about 8% at v0.4.0 (min 1253 us, max 1256 us, about
 94%), and about 11% on the way to v0.5.0 (develop at 95e0fd1, with the Drive and the Distortion x1 to x16,
@@ -260,7 +260,7 @@ and max 1043 us with PWM Audio, about 78%, which Note On and Off repeated by MID
 The load is to stay at about 90% on the device at most (1200 us of 1333 us), leaving room for what
 the device adds now and then (core 0, the interrupts, the writes to the output): as the device takes
 about 10% less than the estimate, that is about 100% in the estimate (1333 us), against which a change
-that adds to the load is checked. At v0.6.0 that leaves about 80 us on the device, about 6% of a buffer (v0.5.0, measured on it, and v0.6.0, about 10 us more in the estimate).
+that adds to the load is checked. At v0.6.1 that leaves about 75 us on the device, about 6% of a buffer (v0.5.0, measured on it, and v0.6.1, about 13 us more in the estimate).
 
 The load of each module, by `--modules` (the same version, a note held): "own" is
 the cycles of its methods (process, its outputs, smooth_parameters), and "with common" adds its share
@@ -269,8 +269,8 @@ order, split evenly; the common part left is the loop of the samples, the output
 
 | Module | Own | With common |
 | :-- | --: | --: |
-| Filter 1 | 9.6% (129 us) | 11.4% (151 us) |
-| Filter 2 | 9.7% (129 us) | 11.4% (152 us) |
+| Filter 1 | 9.8% (130 us) | 11.5% (153 us) |
+| Filter 2 | 9.8% (130 us) | 11.5% (153 us) |
 | Osc 2 (with Sync) | 9.3% (124 us) | 10.9% (146 us) |
 | Amp 1 (with the Distortion) | 8.3% (110 us) | 9.5% (127 us) |
 | Osc 1 | 6.1% (81 us) | 7.5% (100 us) |

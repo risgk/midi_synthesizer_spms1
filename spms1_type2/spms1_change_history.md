@@ -4,6 +4,14 @@ MIDI Synthesizer SPMS-1 (type-2) Change History
 The main changes of each version, newest first, gathered before each release. The format may be
 revised.
 
+- v0.6.1 (2026-11-11):
+    - Filters: The self-oscillation comes out at 0.3 at most (0.25 before): 0.15 at Resonance CC 119
+      (as before), 0.21 at CC 120, 0.25 at CC 121, 0.28 at CC 122 and 0.3 at CC 123, as PRA32-U2 v3.21.0,
+      with the outputs lowered less at a high resonance (-4.4 dB at CC 123, from -6.0 dB) and more at
+      each step up
+    - Filters: The self-oscillation starts from silence at any Resonance of it (at CC 119 too, where it did
+      not): the tiny value added to the band pass to start it has a random sign (a 16-bit LFSR), not one
+      flipped each time, and is 1e-7 (1e-6 before); about 3 us more in the load estimate
 - v0.6.0 (2026-11-07):
     - Filters: **Mode** (CC#39) goes LP, BR (band reject, a notch), HP, BP and back to LP (at values 4,
       34, 64, 94 and 124), changing smoothly all the way: the high pass to the band pass and the band
