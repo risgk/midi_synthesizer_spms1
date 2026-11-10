@@ -4,7 +4,7 @@ MIDI Synthesizer SPMS-1 (type-2) Change History
 The main changes of each version, newest first, gathered before each release. The format may be
 revised.
 
-- v0.6.1 (2026-??-??):
+- v0.6.1 (2026-11-11):
     - Filters: The self-oscillation comes out at 0.3 at most (0.25 before): 0.15 at Resonance CC 119
       (as before), 0.21 at CC 120, 0.25 at CC 121, 0.28 at CC 122 and 0.3 at CC 123, as PRA32-U2 v3.21.0,
       with the outputs lowered less at a high resonance (-4.4 dB at CC 123, from -6.0 dB) and more at
