@@ -245,7 +245,8 @@ or not, as the modules are meant to:
 | :-- | --: | --: |
 | v0.6.1 | 192396 / 192700 cycles, 1253 us (94%) | 191927 / 192122 cycles, 1250 us (94%) |
 
-The estimate is above Debug Print on the device: about 8% at v0.4.0 (min 1253 us, max 1256 us, about
+The estimate is above Debug Print on the device: about 10% at v0.6.1 (min 1119 us, max 1122 us with I2S, about
+84%, `underruns` 0, `gc roots` 34), about 8% at v0.4.0 (min 1253 us, max 1256 us, about
 94%), and about 11% on the way to v0.5.0 (develop at 95e0fd1, with the Drive and the Distortion x1 to x16,
 the make-up of 15/16 and the resonance's output level, estimated at 1233 us on average and 1235 us at most:
 on the device min 1101 us and max 1105 us with I2S, about 83%, `underruns` 0; v0.5.0 adds Out Wet and the
@@ -260,7 +261,7 @@ and max 1043 us with PWM Audio, about 78%, which Note On and Off repeated by MID
 The load is to stay at about 90% on the device at most (1200 us of 1333 us), leaving room for what
 the device adds now and then (core 0, the interrupts, the writes to the output): as the device takes
 about 10% less than the estimate, that is about 100% in the estimate (1333 us), against which a change
-that adds to the load is checked. At v0.6.1 that leaves about 75 us on the device, about 6% of a buffer (v0.5.0, measured on it, and v0.6.1, about 13 us more in the estimate).
+that adds to the load is checked. At v0.6.1 that leaves about 78 us on the device (max 1122 us), about 6% of a buffer.
 
 The load of each module, by `--modules` (the same version, a note held): "own" is
 the cycles of its methods (process, its outputs, smooth_parameters), and "with common" adds its share
