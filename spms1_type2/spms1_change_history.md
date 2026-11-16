@@ -4,7 +4,7 @@ MIDI Synthesizer SPMS-1 (type-2) Change History
 The main changes of each version, newest first, gathered before each release. The format may be
 revised.
 
-- v0.7.0 (2026-??-??):
+- v0.7.0 (2026-11-16):
     - Filters: **Filter Drive** shared between the input and the loop, as PRA32-U2's: the input
       soft-clipped (the leak's curve, biased, the even harmonics too), and the leak's ceiling down by
       the square root of the gain, so that the Drive puts in harmonics at any resonance while the
