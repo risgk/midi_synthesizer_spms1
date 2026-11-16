@@ -478,12 +478,11 @@ controls:
   - { entry: 66, module: FILTER_1,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 88,  set: set_cutoff }
   - { entry: 67, module: FILTER_1,  key: RESONANCE,    label: Resonance,    cc: 0,   value: 4,  set: set_resonance }
   # Filter 1 Drive and Filter 2 Drive, each after its filter's Resonance, here and in the editor
-  # (`after`): the gain 2^(3 * drive), x1 to x8, 6 dB every 40 values, shared between an input
-  # clip, which puts in harmonics at any resonance, and the loop, whose leak's ceiling comes down by
-  # its square root, which bends the resonance sooner, while the level and the output clip stay.
-  # Both on CC 31, as the filters share their other CCs; they power up at CC 4, x1, where the
-  # filters are as they were.
-  - { entry: 68, module: FILTER_1,  key: DRIVE,        label: Drive,        cc: 31,  value: 4, hint: x1 to x8, after: RESONANCE, set: set_drive }
+  # (`after`): the leak's ceiling down by
+  # 2^(5 * drive), x1 to x32, 6 dB every 24 values, which bends the resonance sooner while the level
+  # and the output clip stay. Both on CC 31, as the filters share their other CCs; they power up at
+  # CC 4, x1, where the filters are as they were.
+  - { entry: 68, module: FILTER_1,  key: DRIVE,        label: Drive,        cc: 31,  value: 4, hint: x1 to x32, after: RESONANCE, set: set_drive }
   - { entry: 69, module: FILTER_1,  key: GAIN_1,       label: Gain 1,       cc: 0,   value: 64, hint_inputs: [AUDIO_IN_1], set: set_gain_1 }
   - { entry: 70, module: FILTER_1,  key: GAIN_2,       label: Gain 2,       cc: 0,   value: 4,  hint_inputs: [AUDIO_IN_2], set: set_gain_2 }
   - { entry: 71, module: FILTER_1,  key: PITCH_AMT, label: Pitch Amt, cc: 9, value: 4, hint_inputs: [PITCH_IN], set: set_pitch_amount }
@@ -495,7 +494,7 @@ controls:
   - { entry: 77, module: FILTER_2,  key: MODE,         label: Mode,         cc: 39,  value: 4, hint: LP BR HP BP LP, favorite: true, set: set_mode }
   - { entry: 78, module: FILTER_2,  key: CUTOFF,       label: Cutoff,       cc: 74,  value: 88,  favorite: true, set: set_cutoff }
   - { entry: 79, module: FILTER_2,  key: RESONANCE,    label: Resonance,    cc: 71,  value: 64, favorite: true, set: set_resonance }
-  - { entry: 80, module: FILTER_2,  key: DRIVE,        label: Drive,        cc: 31,  value: 4, hint: x1 to x8, favorite: true, after: RESONANCE, set: set_drive }
+  - { entry: 80, module: FILTER_2,  key: DRIVE,        label: Drive,        cc: 31,  value: 4, hint: x1 to x32, favorite: true, after: RESONANCE, set: set_drive }
   - { entry: 81, module: FILTER_2,  key: GAIN_1,       label: Gain 1,       cc: 0,   value: 4,  hint_inputs: [AUDIO_IN_1], set: set_gain_1 }
   - { entry: 82, module: FILTER_2,  key: GAIN_2,       label: Gain 2,       cc: 0,   value: 64, hint_inputs: [AUDIO_IN_2], set: set_gain_2 }
   - { entry: 83, module: FILTER_2,  key: PITCH_AMT, label: Pitch Amt, cc: 9, value: 4, hint_inputs: [PITCH_IN], favorite: true, set: set_pitch_amount }
