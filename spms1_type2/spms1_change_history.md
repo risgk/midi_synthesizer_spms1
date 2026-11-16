@@ -4,6 +4,18 @@ MIDI Synthesizer SPMS-1 (type-2) Change History
 The main changes of each version, newest first, gathered before each release. The format may be
 revised.
 
+- v0.7.0 (2026-11-16):
+    - Filters: **Filter Drive** shared between the input and the loop, as PRA32-U2's: the input
+      soft-clipped (the leak's curve, biased, the even harmonics too), and the leak's ceiling down by
+      the square root of the gain, so that the Drive puts in harmonics at any resonance while the
+      resonance, and the squelch of an envelope on the cutoff, is kept more (with the default patch, a
+      pluck at Resonance CC 100 keeps its peak about 5 dB up at the top, from about 0.6 dB before),
+      with a make-up gain (the level within about 1 dB); x1 to x8 (x1 to x32 before), short of a
+      square wave: a strong distortion is for Amp 1 Distortion
+        - Not compatible: a patch with Filter Drive above x1 sounds otherwise (more harmonics, the
+          resonance less held down); x1 (the default patch) is as before
+        - About 37 us more a buffer (estimated: 1253 us to 1290 us of 1333 us, 94% to 97%, with the
+          default patch)
 - v0.6.1 (2026-11-11):
     - Filters: The self-oscillation comes out at 0.3 at most (0.25 before): 0.15 at Resonance CC 119
       (as before), 0.21 at CC 120, 0.25 at CC 121, 0.28 at CC 122 and 0.3 at CC 123, as PRA32-U2 v3.21.0,

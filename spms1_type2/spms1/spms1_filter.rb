@@ -7,7 +7,7 @@ module Spms1
   # and the high pass summed, a notch at the cutoff), the high pass and the band pass. The audio input drives it as it
   # arrives, so how hard is set ahead of it: by Mixer 2 Out Level in the default patch. That is
   # what decides how far the band pass runs into the leak, which the resonant peak reaches first:
-  # the pass band itself stays nearly clean.
+  # the pass band itself stays nearly clean (with Drive at x1; Drive soft-clips the input too).
   # This implementation is not oversampled; the nonlinear behavior is kept intentionally simple.
   # Reference: https://www.discodsp.net/VAFilterDesign_2.1.2.pdf (The Art of VA Filter Design)
   # Reference: https://www.kvraudio.com/forum/viewtopic.php?t=349859 (Cheap non-linear zero-delay filters)
@@ -68,20 +68,38 @@ module Spms1
     LEAK_CLIP_OFFSET     = SOFT_CLIP_BIAS_GAIN * SOFT_CLIP_BIAS_OUTPUT
     LEAK_SLOPE_OFFSET    = 1.0 - SOFT_CLIP_BIAS_GAIN
     LEAK_SLOPE_SCALE     = 3.0 * LEAK_CLIP_GAIN_SCALE
-    # Drive brings the leak's ceiling and its bias down by its gain D, 2^(5 * drive), 1.0 to 32.0
-    # (6 dB every fifth of the dial): the same as driving the loop D times harder and taking what
-    # leaves it D times down ahead of the output clip, as the curve is self-similar and the bias
-    # comes down with the ceiling. So the leak bends sooner, at the resonance first, while the level
-    # stays and the output clip stays where it is. With the ceiling C / D and the bias B / D, the
-    # make-up gain G is the same whatever D; the leak's offset comes down by D, and its gain and
-    # slope scales, which go as 1 / C^2, go up by D^2. smooth_parameters works these out from the
-    # smoothed Drive every 16 samples, whatever it is, so the load is the same; process reads them
-    # where it read the constants. The gain is read from DRIVE_TABLE, 2^(i * 5 / 32), between entries.
+    # Drive's gain D, 2^(3 * drive), 1.0 to 8.0 (6 dB every third of the dial), is shared between
+    # the input and the loop, as PRA32-U2's Filter Drive is, so that it puts in harmonics at any
+    # resonance while the resonance, and the squelch of an envelope on the cutoff, is kept more:
+    # - The input, times D and 2 (INPUT_CLIP_PRE_GAIN), goes into a soft clip, the leak's own curve
+    #   (biased, the even harmonics too), and is taken back by them; the clip is faded in by the
+    #   dial (none at 0.0, all from INPUT_CLIP_FADE_END), so that at 0.0 the filter is as it was.
+    #   The clip bounds what reaches the loop, so the pass band does not fill the leak's ceiling
+    # - The loop takes the square root of D, D^0.5: the leak's ceiling and its bias come down by
+    #   it, the same as driving the loop D^0.5 times harder and taking what leaves it as many times
+    #   down ahead of the output clip, as the curve is self-similar and the bias comes down with the
+    #   ceiling. So the leak bends sooner, at the resonance first. With the ceiling C / D^0.5 and the
+    #   bias B / D^0.5, the make-up gain G is the same whatever D; the leak's offset comes down by
+    #   D^0.5, and its gain and slope scales, which go as 1 / C^2, go up by D
+    # - The outputs are made up for the level that the input clip takes: 2^(x / 24) in dB terms of
+    #   the dial, x = (72 * drive - 40) * 40 / 256 (none below MAKEUP_START), within about 0.5 dB
+    # The top stops at x 8, short of a square wave: further up the input clip, not oversampled,
+    # folded back much more, and a single note through Chorus would sound broken up, as Chorus
+    # cancels the fundamental from time to time; a strong distortion is for Amp's Distortion.
+    # smooth_parameters works these out from the smoothed Drive every 16 samples, whatever it is,
+    # so the load is the same; process reads them where it read the constants. The gain is read
+    # from DRIVE_TABLE, 2^(i * 3 / 32), between entries, and the loop's at half the position.
     DRIVE_TABLE = Array.new(34, 0.0)
     for i in 0...33
-      DRIVE_TABLE[i] = 2.0 ** (i.to_f * (5.0 / 32.0))
+      DRIVE_TABLE[i] = 2.0 ** (i.to_f * (3.0 / 32.0))
     end
     DRIVE_TABLE[33] = DRIVE_TABLE[32]
+    INPUT_CLIP_PRE_GAIN = 2.0
+    INPUT_CLIP_FADE_END = 1.0 / 3.0
+    MAKEUP_START = 40.0 / 72.0
+    # The make-up's position in DRIVE_TABLE per unit of the dial above MAKEUP_START: x / 24 octaves
+    # is 32 / 3 entries an octave
+    MAKEUP_POSITION_SLOPE = 72.0 * 40.0 / 256.0 / 24.0 * 32.0 / 3.0
     # One-pole high pass on the output at f_s * coefficient / (2 * pi), 7.5 Hz at 48 kHz; initialize
     # scales the coefficient with the sample rate to hold that frequency.
     DC_BLOCKER_COEFFICIENT_BASE = 1.0 / 1024.0
@@ -307,11 +325,18 @@ module Spms1
       @leak_gain_scale = LEAK_CLIP_GAIN_SCALE
       @leak_offset = LEAK_CLIP_OFFSET
       @leak_slope_scale = LEAK_SLOPE_SCALE
+      @input_clip_pre = INPUT_CLIP_PRE_GAIN
+      @input_clip_dry = 1.0
+      @input_clip_gain = 0.0
+      @input_clip_cubic = 0.0
+      @input_clip_offset = 0.0
+      @drive_makeup = 1.0
 
       update_coefficients
     end
 
-    # Drive: unipolar, [0.0, 1.0], the leak's ceiling down by 2^(5 * drive) (see DRIVE_TABLE).
+    # Drive: unipolar, [0.0, 1.0], the gain 2^(3 * drive) shared between the input clip and the
+    # leak's ceiling (see DRIVE_TABLE).
     def set_drive(drive)
       @drive = Dsp.clamp(drive, 0.0, 1.0)
     end
@@ -438,13 +463,30 @@ module Spms1
       @current_pitch_depth = Dsp.smooth(@stage_1_pitch_depth, @current_pitch_depth, @smoothing_16_blend)
       @stage_1_drive = Dsp.smooth(@drive, @stage_1_drive, @smoothing_16_blend)
       @current_drive = Dsp.smooth(@stage_1_drive, @current_drive, @smoothing_16_blend)
-      # The leak's ceiling, bias, offset and scales at the Drive's gain (see DRIVE_TABLE), every
-      # time, so that the load does not depend on the Drive.
+      # The input clip's gains and the leak's ceiling, bias, offset and scales at the Drive's gain
+      # and its square root (see DRIVE_TABLE), every time, so that the load does not depend on the
+      # Drive.
       position = @current_drive * 32.0
       index = position.to_i
       drive_gain = DRIVE_TABLE[index] + (position - index.to_f) * (DRIVE_TABLE[index + 1] - DRIVE_TABLE[index])
-      one_over_drive = 1.0 / drive_gain
-      drive_squared = drive_gain * drive_gain
+      # The clip's output, taken back by D and 2 and faded in, is folded into its own constants
+      # here, and what it does not take, the dry input, into one gain, so that process has the
+      # fewest multiplies: x * dry + c * (gain - c^2 * cubic) - offset
+      @input_clip_pre = drive_gain * INPUT_CLIP_PRE_GAIN
+      clip_mix = C.float_min(@current_drive * (1.0 / INPUT_CLIP_FADE_END), 1.0)
+      clip_wet = clip_mix / @input_clip_pre
+      @input_clip_dry = 1.0 - clip_mix
+      @input_clip_gain = SOFT_CLIP_BIAS_GAIN * clip_wet
+      @input_clip_cubic = LEAK_CLIP_GAIN_SCALE * clip_wet
+      @input_clip_offset = LEAK_CLIP_OFFSET * clip_wet
+      makeup_position = C.float_max(@current_drive - MAKEUP_START, 0.0) * MAKEUP_POSITION_SLOPE
+      makeup_index = makeup_position.to_i
+      @drive_makeup = DRIVE_TABLE[makeup_index] + (makeup_position - makeup_index.to_f) * (DRIVE_TABLE[makeup_index + 1] - DRIVE_TABLE[makeup_index])
+      loop_position = position * 0.5
+      loop_index = loop_position.to_i
+      loop_gain = DRIVE_TABLE[loop_index] + (loop_position - loop_index.to_f) * (DRIVE_TABLE[loop_index + 1] - DRIVE_TABLE[loop_index])
+      one_over_drive = 1.0 / loop_gain
+      drive_squared = loop_gain * loop_gain
       @leak_bias = SOFT_CLIP_BIAS * one_over_drive
       @leak_ceiling = SOFT_CLIP_CEILING * one_over_drive
       @leak_floor = SOFT_CLIP_FLOOR * one_over_drive
@@ -469,6 +511,10 @@ module Spms1
       end
 
       audio_input = audio_input_1 * @current_gain_1 + audio_input_2 * @current_gain_2
+      # The input clip (see DRIVE_TABLE): soft_clip_biased of the input times D and 2, as the leak
+      # writes it, taken back by them, and faded in by the Drive.
+      clip_clamped = Dsp.clamp(audio_input * @input_clip_pre + SOFT_CLIP_BIAS, SOFT_CLIP_FLOOR, SOFT_CLIP_CEILING)
+      audio_input = audio_input * @input_clip_dry + clip_clamped * (@input_clip_gain - clip_clamped * clip_clamped * @input_clip_cubic) - @input_clip_offset
 
       @g += @g_slope
       @g_plus_k += @g_plus_k_slope
@@ -618,7 +664,7 @@ module Spms1
       level_position = resonance * 120.0
       level_index = level_position.to_i
       level_fraction = level_position - level_index.to_f
-      @output_level = RESONANCE_LEVEL_TABLE[level_index] + level_fraction * (RESONANCE_LEVEL_TABLE[level_index + 1] - RESONANCE_LEVEL_TABLE[level_index])
+      @output_level = (RESONANCE_LEVEL_TABLE[level_index] + level_fraction * (RESONANCE_LEVEL_TABLE[level_index + 1] - RESONANCE_LEVEL_TABLE[level_index])) * @drive_makeup
       k = C.float_max(k, SELF_OSC_K_FLOOR)
       g_plus_k = g + k
       one_over_a0 = 1.0 / (1.0 + g * g_plus_k)

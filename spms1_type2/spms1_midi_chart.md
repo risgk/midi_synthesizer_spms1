@@ -1,6 +1,6 @@
 ```
-  [MIDI Synthesizer]                                              Date: 2026-11-11                      
-  Model: SPMS-1 (type-2)          MIDI Implementation Chart       Version: 0.6.1                        
+  [MIDI Synthesizer]                                              Date: 2026-11-16                      
+  Model: SPMS-1 (type-2)          MIDI Implementation Chart       Version: 0.7.0                        
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Function...                   | Transmitted   | Recognized    | Remarks                              |
 +-------------------------------+---------------+---------------+--------------------------------------+
@@ -35,7 +35,7 @@
 |                           112 | x             | o             | Osc 2 Sync Sw [Off|On]               |
 |                            74 | x             | o             | Filter Cutoff                        |
 |                            71 | x             | o             | Filter 2 Resonance                   |
-|                            31 | x             | o             | Filter Drive (x1 to x16)             |
+|                            31 | x             | o             | Filter Drive (x1 to x8)              |
 |                            24 | x             | o             | Filter Mod 1 Amt (EG)                |
 |                            25 | x             | o             | Filter Mod 2 Amt (LFO)               |
 |                           117 | x             | o             | Filter Mod 1 Pol (-1 to +1)          |
@@ -47,7 +47,7 @@
 |                            23 | x             | o             | Mixer 2 Level 4 (Noise Level)        |
 |                           115 | x             | o             | Noise Color (White to Red)           |
 |                            15 | x             | o             | Amp Gain 2                           |
-|                            95 | x             | o             | Amp Distortion (x1 to x16)           |
+|                            95 | x             | o             | Amp Distortion (x1 to x32)           |
 |                            36 | x             | o             | Amp Mod 1/2 Mix (EG 1 to EG 2)       |
 |                            73 | x             | o             | EG 1 Attack (Time)                   |
 |                            75 | x             | o             | EG 1 Decay (Time)                    |
