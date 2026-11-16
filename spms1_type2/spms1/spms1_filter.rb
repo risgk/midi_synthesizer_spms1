@@ -7,7 +7,7 @@ module Spms1
   # and the high pass summed, a notch at the cutoff), the high pass and the band pass. The audio input drives it as it
   # arrives, so how hard is set ahead of it: by Mixer 2 Out Level in the default patch. That is
   # what decides how far the band pass runs into the leak, which the resonant peak reaches first:
-  # the pass band itself stays nearly clean.
+  # the pass band itself stays nearly clean (with Drive at x1; Drive soft-clips the input too).
   # This implementation is not oversampled; the nonlinear behavior is kept intentionally simple.
   # Reference: https://www.discodsp.net/VAFilterDesign_2.1.2.pdf (The Art of VA Filter Design)
   # Reference: https://www.kvraudio.com/forum/viewtopic.php?t=349859 (Cheap non-linear zero-delay filters)

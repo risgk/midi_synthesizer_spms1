@@ -831,7 +831,7 @@ patch, which has no CC and holds 1.0, Mixer 2 Level 1 at 0.5, and Filter 1's Gai
 alone reaches 0.25 at the filter. Osc 1 and Osc 2 both at 0.5 drive it to 0.5, and both at full level
 to 1.0, where Filter 1's output clip begins to round the peaks: turn Out Level or Gain 1 down to keep
 the level, or leave them up to drive the saturation. The saturation sits on the resonance rather than the pass band: a low cutoff
-passes a loud note nearly clean, while turning the drive up rounds off the resonant peak.
+passes a loud note nearly clean, while turning the input up rounds off the resonant peak. Drive, beside that, soft-clips the input itself (see above).
 
 A filter moves the cutoff by each of its two modulations at a depth of its own, Mod 1 Amt and
 Mod 2 Amt, as Osc 1's PW Mod Amts move the pulse width. They are unipolar, on CC#24 and 25: Mod 1 Amt powers up at 0.2 (value 28), two octaves at the
