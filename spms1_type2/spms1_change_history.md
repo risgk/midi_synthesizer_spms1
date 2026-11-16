@@ -4,6 +4,14 @@ MIDI Synthesizer SPMS-1 (type-2) Change History
 The main changes of each version, newest first, gathered before each release. The format may be
 revised.
 
+- v0.7.1 (2026-11-16):
+    - Filters: **Filter Drive** back to v0.6.1: the leak's ceiling down by the gain, x1 to x32, for a saturated
+      resonance, with no input clip (as SPMS-1 type-2 drives a filter harder by its input, Gain 1 and Gain 2 and
+      Mixer 2, and soft-clips the input by Amp 1 Distortion). The input clip of v0.7.0, not oversampled, folded
+      back in the band below 5 kHz (about -46 dB of a saw at C4 at the top, against about -77 dB without it), most of
+      it at Filter 1, the first of the two in series, and more as the input went up
+        - Not compatible with v0.7.0: a patch with Filter Drive above x1 sounds as in v0.6.1 again
+        - The load and the RAM as v0.6.1 (the synth core the same as v0.6.1)
 - v0.7.0 (2026-11-16):
     - Filters: **Filter Drive** shared between the input and the loop, as PRA32-U2's: the input
       soft-clipped (the leak's curve, biased, the even harmonics too), and the leak's ceiling down by
