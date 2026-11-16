@@ -72,21 +72,14 @@ sample rate. The low pass state stays linear, with a
 clamp at 16 as a guard that ordinary use never reaches. The output clip comes last. At the top of
 the resonance dial k turns negative and the loop oscillates.
 
-Drive, on CC#31 for both filters, is a gain D from x1 at value 4, where it powers up and the
-filter is as it was, to x8 at value 124, 6 dB every 40 values, shared between the input and the
-loop, as PRA32-U2's Filter Drive is. The input, times D, goes into a soft clip, the leak's own
-curve (biased, so with its even harmonics), faded in over the first third of the dial: that puts in
-harmonics at any resonance, and bounds what reaches the loop, so the pass band does not fill the
-leak's ceiling. The loop takes the square root of D: the leak's ceiling comes down by it, the same
-as driving the loop that much harder and taking what leaves it down by as much ahead of the output
-clip, so the resonance runs into the leak sooner and saturates, while much of it, and the squelch
-of an envelope on the cutoff, is kept (it went as the whole gain bent the leak, up to v0.6.1). The
-outputs are made up for what the input clip takes, so the level stays within about 1 dB, and the
-output clip stays where it is; the self-oscillation comes out lower by the square root of D. The
-top stops at x8, short of a square wave, which a chorus would break up as it cancels the
-fundamental from time to time, and of the aliasing of the input clip, which is not oversampled: a
-strong distortion is for Amp 1 Distortion. Unlike turning Gain 1 or Gain 2 up, it does not drive
-the output clip, which would bend the whole band past the resonance.
+Drive, on CC#31 for both filters, brings the leak's ceiling down, from x1 at value 4, where it powers up and the
+filter is as it was, to x32 at value 124, 6 dB every 24 values. That is the same as driving the
+loop that much harder and taking what leaves it down by as much ahead of the output clip: the
+resonance runs into the leak sooner and saturates, with its even harmonics, while the pass band
+stays clean, the level stays and the output clip stays where it is. A signal at the cutoff is held
+down with the peak, so a cutoff on the notes' fundamentals comes out quieter as Drive goes up, and
+the self-oscillation comes out lower by the Drive too. Unlike turning Gain 1 or Gain 2 up, it does
+not drive the output clip, which would bend the whole band past the resonance.
 
 The filter puts out its low pass and high pass at once, as Out LP and Out HP, each through a DC
 blocker and an output clip of its own, and Out BR, the band reject, the two summed; and Out, the low
@@ -831,7 +824,7 @@ patch, which has no CC and holds 1.0, Mixer 2 Level 1 at 0.5, and Filter 1's Gai
 alone reaches 0.25 at the filter. Osc 1 and Osc 2 both at 0.5 drive it to 0.5, and both at full level
 to 1.0, where Filter 1's output clip begins to round the peaks: turn Out Level or Gain 1 down to keep
 the level, or leave them up to drive the saturation. The saturation sits on the resonance rather than the pass band: a low cutoff
-passes a loud note nearly clean, while turning the input up rounds off the resonant peak. Drive, beside that, soft-clips the input itself (see above).
+passes a loud note nearly clean, while turning the drive up rounds off the resonant peak.
 
 A filter moves the cutoff by each of its two modulations at a depth of its own, Mod 1 Amt and
 Mod 2 Amt, as Osc 1's PW Mod Amts move the pulse width. They are unipolar, on CC#24 and 25: Mod 1 Amt powers up at 0.2 (value 28), two octaves at the
