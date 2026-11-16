@@ -35,7 +35,7 @@
 |                           112 | x             | o             | Osc 2 Sync Sw [Off|On]               |
 |                            74 | x             | o             | Filter Cutoff                        |
 |                            71 | x             | o             | Filter 2 Resonance                   |
-|                            31 | x             | o             | Filter Drive (x1 to x16)             |
+|                            31 | x             | o             | Filter Drive (x1 to x8)              |
 |                            24 | x             | o             | Filter Mod 1 Amt (EG)                |
 |                            25 | x             | o             | Filter Mod 2 Amt (LFO)               |
 |                           117 | x             | o             | Filter Mod 1 Pol (-1 to +1)          |
