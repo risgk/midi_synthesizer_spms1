@@ -28,6 +28,7 @@ How to Use
     - Web browsers start the audio only after a user operation in the page (e.g. a click, a tap, or a key press),
       so click the page once before playing a MIDI keyboard (clicking the soft keyboard also starts the audio)
     - While the audio is not started, "SPMS-1 Web: Click (or tap) to start the audio" is shown at the bottom of the page
+      (from when SPMS-1 Web is chosen in MIDI Out, e.g. as the editor opens with it chosen)
 - MIDI Channel: 1, as SPMS-1 (type-2) (the other channels are kept but not played)
 - Web browsers
     - Google Chrome, Microsoft Edge (Windows, Mac, Linux, Android): recommended

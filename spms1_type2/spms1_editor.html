@@ -3652,6 +3652,11 @@
     const next = outputById(document.getElementById('midi-out').value);
     if (next !== midiOutput) lastSent = null;
     midiOutput = next;
+    // SPMS-1 Web: the audio prepared first, so that its notice ("Click (or tap) to start the audio") is shown at once
+    // while the Web browser holds the audio (e.g. Chrome, until the page is clicked), whatever is sent below
+    if (midiOutput && midiOutput.isSpms1WebSynth && window.Spms1WebSynth && window.Spms1WebSynth.prepare) {
+      window.Spms1WebSynth.prepare();
+    }
     sendChanges();
   }
 

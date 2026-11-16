@@ -91,6 +91,14 @@
     console.log(SPMS1_WEB_VERSION + " ready (" + context.sampleRate + " Hz)");
   }
 
+  // Prepares the audio without sending anything (e.g. when the editor opens, or MIDI Out is changed, with SPMS-1 Web
+  // chosen in MIDI Out), so that the notice is shown at once while the audio is not started, whatever the editor sends
+  function prepare() {
+    if (!context) {
+      start().catch(function(e) { console.log("Failed to start SPMS-1 Web - " + e); });
+    }
+  }
+
   let outputGain = 1;  // That of the output that sent last
 
   function post(message) {
@@ -117,9 +125,7 @@
         }
         post(Array.from(data));
 
-        if (!context) {
-          start().catch(function(e) { console.log("Failed to start SPMS-1 Web - " + e); });
-        }
+        prepare();
         resume();
       },
     };
@@ -128,5 +134,5 @@
   const output     = makeOutput("spms1-web-synth", "SPMS-1 Web (Built-in)", 1);
   const outputLoud = makeOutput("spms1-web-synth-6db", "SPMS-1 Web (Built-in, +6 dB)", 2);
 
-  window.Spms1WebSynth = { version: SPMS1_WEB_VERSION, output: output, outputs: [output, outputLoud] };
+  window.Spms1WebSynth = { version: SPMS1_WEB_VERSION, output: output, outputs: [output, outputLoud], prepare: prepare };
 })();
