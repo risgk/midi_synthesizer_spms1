@@ -676,7 +676,7 @@ middle of the swing moves up from zero to 0.5. Out is what the default patch rou
 is a triangle until Wave is turned up.
 
 LFO 1 Level scales the LFO's outputs, as a mixer's Level scales its input: from silent at 0.0
-(value 4) to full at 1.0 (value 124). It is on CC#116 and powers up at 1.0, so the LFO runs at
+(value 4) to full at 1.0 (value 124). It is on CC#45 and powers up at 1.0, so the LFO runs at
 full level and what it moves sets the depth. LFO 1 Level Mod In adds to it, held to the same range, by Level Mod Amt, and it takes
 Mod Wheel by default at a depth of 1.0 (Level Mod Amt has no CC and holds 1.0), so with Level
 turned down the wheel brings the LFO in, up to full at its top. Turning the LFO the
@@ -748,7 +748,7 @@ leave the oscillator alone until one is turned up: CC#13 brings the vibrato in.
 Osc 1 PW, the pulse width, shifts the second of the two sawtooths that the morph is made of, either way
 from half a cycle: it is bipolar, -0.5 (value 4) to +0.5 (value 124), and powers up at 0.0 (value 64). At
 the pulse end of Osc 1 Wave that is a pulse of 50% at value 64, 75% at value 94 and 25% at value 34, and
-silence at either end, a pulse of 0% or 100%; it is on CC#114.
+silence at either end, a pulse of 0% or 100%; it is on CC#47.
 The modulations move it by PW Mod 1 Amt (CC#8) and PW Mod 2 Amt (CC#103), which power up at 0.0.
 A unit of input is the whole pulse width range, so with PW Mod 2 Amt at the top the LFO swings
 the pulse width half the range either way: with PW at value 64, from nearly 0% to nearly 100%; and
@@ -985,7 +985,7 @@ unplugged reads its own CC or value again. A value is the 4 to 124 the editor sh
 - A vibrato on the mod wheel, as a GM2 sound module's: LFO 1 Level down to 4, 0.0, so the wheel
   on its Level Mod In brings the LFO in, and Osc 1 Pitch Mod 2 Amt at 9 makes the wheel's top 50
   cents either way, the Modulation Depth Range GM2 powers up at, or at 14 a semitone. As MIDI:
-  CC#116 = 4, CC#13 = 9 or 14
+  CC#45 = 4, CC#13 = 9 or 14
 - A bend range of 2 semitones, as a GM sound module's: Pitch 1 Bend Amt at 8. As MIDI: CC#57 = 8
 - The LFO on the cutoff: wired by default too, on the filters' Mod 2 inputs, so Filter 2 Mod 2 Amt
   sweeps the cutoff with it, on top of the envelope on Mod 1 (Filter 1's follows, on the same CC).

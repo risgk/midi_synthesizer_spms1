@@ -26,7 +26,7 @@
 | Change                    104 | x             | o             | Osc 2 Wave (Saw to Pulse)            |
 |                            89 | x             | o             | Osc Pitch Mod 1 Amt (EG)             |
 |                            13 | x             | o             | Osc Pitch Mod 2 Amt (LFO)            |
-|                           114 | x             | o             | Osc 1 PW (0% to 100%)                |
+|                            47 | x             | o             | Osc 1 PW (0% to 100%)                |
 |                             8 | x             | o             | Osc 1 PW Mod 1 Amt (EG)              |
 |                           103 | x             | o             | Osc 1 PW Mod 2 Amt (LFO)             |
 |                            85 | x             | o             | Osc 2 Pitch Coarse (+-60 Semitones)  |
@@ -57,7 +57,7 @@
 |                            53 | x             | o             | EG 2 Decay (Time)                    |
 |                            54 | x             | o             | EG 2 Sustain (Level)                 |
 |                             3 | x             | o             | LFO Rate                             |
-|                           116 | x             | o             | LFO Level                            |
+|                            45 | x             | o             | LFO Level                            |
 |                            33 | x             | o             | LFO Wave (Triangle to Square)        |
 |                           113 | x             | o             | LFO Reset Sw [Off|On]                |
 |                            93 | x             | o             | Chorus Mix                           |
