@@ -41,7 +41,7 @@
 |                           117 | x             | o             | Filter Mod 1 Pol (-1 to +1)          |
 |                             9 | x             | o             | Filter Pitch Amt                     |
 |                            39 | x             | o             | Filter Mode (LP, Notch, HP)          |
-|                            19 | x             | o             | Mixer 2 Level 1 (Osc 1 Level)        |
+|                            42 | x             | o             | Mixer 2 Level 1 (Osc 1 Level)        |
 |                            20 | x             | o             | Mixer 2 Level 2 (Osc 2 Level)        |
 |                            21 | x             | o             | Mixer 2 Level 3 (Osc 1 Sub Level)    |
 |                            23 | x             | o             | Mixer 2 Level 4 (Noise Level)        |

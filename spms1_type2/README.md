@@ -340,7 +340,7 @@ value 28, where it powers up, and 5 octaves at value 124; Bend Pol, with no CC, 
 +1.0, and set below value 64 runs the bend the other way.
 
 For example, a sync sound swept from the pitch bend wheel, all among the favorites on the editor's
-Controls tab: Mixer 2 Level 1 down and Level 2 up (CC#19 = 4, CC#20 = 124) put Osc 2 alone on the
+Controls tab: Mixer 2 Level 1 down and Level 2 up (CC#42 = 4, CC#20 = 124) put Osc 2 alone on the
 mixer, Osc 2 Sync Sw on (CC#112 = 124) syncs it to Osc 1, and Pitch 1 Out 1 Bend Sw off (CC#119 = 4)
 keeps Osc 1 on the note while the wheel bends Osc 2 alone, an octave up at the top at the power-up
 Bend Amt; Osc 2 Pitch Coarse (CC#85) sets where the sweep starts, and the filters, on Out 1, stay
@@ -364,7 +364,7 @@ whole range of what it moves, so bringing a source down to a musical depth is le
 rather than built into the modules.
 
 Mixer 2 sums the audio ahead of the filters: Osc 1 on In 1, Osc 2 on In 2, Osc 1's sub on In 3 and
-Noise 1's Out on In 4, each at its own level: Level 1 (CC#19) powers up at 0.5, so the default patch plays Osc 1 at half
+Noise 1's Out on In 4, each at its own level: Level 1 (CC#42) powers up at 0.5, so the default patch plays Osc 1 at half
 level, with room for the others, and Level 2 (CC#20), Level 3 (CC#21) and Level 4 (CC#23) at 0.0, so Osc 2, the sub and the
 noise are silent until they are turned up. Osc 2 plays the note from Pitch 1 as Osc
 1 does, tuned against it by its own Pitch Coarse (CC#85) and Pitch Fine (CC#76), 10 cents sharp at

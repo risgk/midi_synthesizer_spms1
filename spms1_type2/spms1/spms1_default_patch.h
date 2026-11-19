@@ -221,7 +221,7 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {434,  13},  // Osc 2 Pitch Mod 2 Amt CC
   {441, 112},  // Osc 2 Sync Sw CC
   {442, 115},  // Noise 1 Color CC
-  {444,  19},  // Mixer 2 Level 1 CC
+  {444,  42},  // Mixer 2 Level 1 CC
   {445,  20},  // Mixer 2 Level 2 CC
   {446,  21},  // Mixer 2 Level 3 CC
   {447,  23},  // Mixer 2 Level 4 CC
@@ -391,7 +391,7 @@ static const uint8_t g_spms1_default_cc[][2] = {
   {13,    4},  // Osc 2 Pitch Mod 2 Amt
   {112,   4},  // Osc 2 Sync Sw
   {115,   4},  // Noise 1 Color
-  {19,   64},  // Mixer 2 Level 1
+  {42,   64},  // Mixer 2 Level 1
   {20,    4},  // Mixer 2 Level 2
   {21,    4},  // Mixer 2 Level 3
   {23,    4},  // Mixer 2 Level 4
