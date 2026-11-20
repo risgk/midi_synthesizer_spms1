@@ -4,6 +4,9 @@ MIDI Synthesizer SPMS-1 (type-2) Change History
 The main changes of each version, newest first, gathered before each release. The format may be
 revised.
 
+- v0.7.3 (2026-??-??):
+    - Editor: No dark line between two keys of the soft keyboard (where the edges of the keys fell between the pixels,
+      e.g. at 125% and 150% of the display scale)
 - v0.7.2 (2026-11-20):
     - The default patch: **Osc 1 PW** on CC 47 (114 before) and **LFO 1 Level** on CC 45 (116 before), as Osc 1 Shape
       and LFO Depth of PRA32-U2 v3.22.0 (CC 16 and 17, General 1 and 2, as its General Purpose Controller 1 and 2),

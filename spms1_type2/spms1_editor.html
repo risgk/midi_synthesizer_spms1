@@ -802,6 +802,12 @@
       height: calc(140px * var(--kbd-scale));
       touch-action: none;
     }
+    /* White behind the keys, so that the dark frame does not show as a line between two keys, where the
+       edges of the keys fall between the pixels (e.g. at 125% and 150% of the display scale); not at the
+       bottom 4px, so that the lower keys keep their rounded corners */
+    #keyboard {
+      background: linear-gradient(#fff, #fff) top / 100% calc(100% - 4px) no-repeat;
+    }
     /* The upper half: the 12 semitones at equal intervals, the black keys as wide as the upper parts
        of the white keys. The lower half: the white keys only, C - E each 5/3 semitones wide and F - B
        each 7/4, so that the lines between E and F and between B and C run straight. A white key is
