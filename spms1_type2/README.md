@@ -1,11 +1,11 @@
-MIDI Synthesizer SPMS-1 (type-2) v0.7.1
+MIDI Synthesizer SPMS-1 (type-2) v0.7.2
 =======================================
 
 - Monophonic semi-modular MIDI Synthesizer for Raspberry Pi Pico 2, made with Spinel (Ruby AOT Compiler)
 - Controlled by MIDI as a sound module
 - Last-note priority with one note of memory: releasing the newest note while the one before it is still held goes back to that one, legato (for trills)
 - 48 kHz audio output: 24 bit through an I2S DAC, or PWM Audio (no DAC needed)
-- Oscillator: a sawtooth-to-pulse morph with pulse width (CC#114), and pulse width modulation (PWM) on two inputs of its own, beside the pitch's two, the envelope and the LFO by default on each pair, on CC#8 and 103; and the sawtooth and the pulse on outputs of their own too, and on Osc 1 a sine sub an octave down
+- Oscillator: a sawtooth-to-pulse morph with pulse width (CC#47), and pulse width modulation (PWM) on two inputs of its own, beside the pitch's two, the envelope and the LFO by default on each pair, on CC#8 and 103; and the sawtooth and the pulse on outputs of their own too, and on Osc 1 a sine sub an octave down
 - Hard sync: Osc 2 restarts where Sync In, Osc 1's sawtooth by default, rises through zero, at the point between two samples it crosses, with the step rounded off by PolyBLEP as a wrap's is (Sync Sw, CC#112)
 - Envelopes: two ADS envelopes, EG 2 on the amp's Mod 2 In, an organ's at power-up, on CC#52, 53 and 54, with the release switch of both on CC#105
 - LFO: triangle (PolyBLAMP) and unipolar square (PolyBLEP), each on an output of its own, and a main output crossfading from one to the other (Wave, CC#33); a reset input, on Note Gate by default, that restarts it at each note with Reset Sw (CC#113) on
@@ -202,7 +202,7 @@ puts the default patch back. Keep a patch with Save JSON, or in the synth with S
       takes the editor's when a device is chosen in "MIDI Out", or by Send Patch, in place of its own
     - The side panels (Patch, Run Order, Export) fold to their headings with a click, each remembered;
       with all three folded, the canvas takes the width they leave
-- SPMS-1 Web: the synth itself, built into the editor ("spms1_web_synth.js")
+- SPMS-1 (type-2) Web (SPMS-1 Web for short): the synth itself, built into the editor ("spms1_web_synth.js")
     - Select "SPMS-1 Web (Built-in)" in "MIDI Out", and play the soft keyboard (or a MIDI keyboard in "MIDI In")
     - "SPMS-1 Web (Built-in, +6 dB)": 6 dB louder, closer to other sounds (the peaks above -2 dBFS rounded off)
         - Without "+6 dB", it sounds as the device does (e.g. to compare with it)
@@ -340,7 +340,7 @@ value 28, where it powers up, and 5 octaves at value 124; Bend Pol, with no CC, 
 +1.0, and set below value 64 runs the bend the other way.
 
 For example, a sync sound swept from the pitch bend wheel, all among the favorites on the editor's
-Controls tab: Mixer 2 Level 1 down and Level 2 up (CC#19 = 4, CC#20 = 124) put Osc 2 alone on the
+Controls tab: Mixer 2 Level 1 down and Level 2 up (CC#42 = 4, CC#20 = 124) put Osc 2 alone on the
 mixer, Osc 2 Sync Sw on (CC#112 = 124) syncs it to Osc 1, and Pitch 1 Out 1 Bend Sw off (CC#119 = 4)
 keeps Osc 1 on the note while the wheel bends Osc 2 alone, an octave up at the top at the power-up
 Bend Amt; Osc 2 Pitch Coarse (CC#85) sets where the sweep starts, and the filters, on Out 1, stay
@@ -364,7 +364,7 @@ whole range of what it moves, so bringing a source down to a musical depth is le
 rather than built into the modules.
 
 Mixer 2 sums the audio ahead of the filters: Osc 1 on In 1, Osc 2 on In 2, Osc 1's sub on In 3 and
-Noise 1's Out on In 4, each at its own level: Level 1 (CC#19) powers up at 0.5, so the default patch plays Osc 1 at half
+Noise 1's Out on In 4, each at its own level: Level 1 (CC#42) powers up at 0.5, so the default patch plays Osc 1 at half
 level, with room for the others, and Level 2 (CC#20), Level 3 (CC#21) and Level 4 (CC#23) at 0.0, so Osc 2, the sub and the
 noise are silent until they are turned up. Osc 2 plays the note from Pitch 1 as Osc
 1 does, tuned against it by its own Pitch Coarse (CC#85) and Pitch Fine (CC#76), 10 cents sharp at

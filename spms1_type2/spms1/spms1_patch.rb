@@ -785,10 +785,10 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_EG_2_RELEASE_SW       , 105)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_WAVE            , 33)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_RATE            , 3)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_LEVEL           , 116)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_LEVEL           , 45)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_LFO_1_RESET_SW        , 113)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_WAVE            , 102)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_PW              , 114)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_PW              , 47)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_PITCH_MOD_1_AMT , 89)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_PITCH_MOD_1_SW  , 118)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_1_PITCH_MOD_2_AMT , 13)
@@ -801,7 +801,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_2_PITCH_MOD_2_AMT , 13)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_OSC_2_SYNC_SW         , 112)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_NOISE_1_COLOR         , 115)
-  C.set_midi_nrpn_value(midi_ch, NRPN_CC_MIXER_2_LEVEL_1       , 19)
+  C.set_midi_nrpn_value(midi_ch, NRPN_CC_MIXER_2_LEVEL_1       , 42)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_MIXER_2_LEVEL_2       , 20)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_MIXER_2_LEVEL_3       , 21)
   C.set_midi_nrpn_value(midi_ch, NRPN_CC_MIXER_2_LEVEL_4       , 23)
@@ -953,10 +953,10 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 105, 124) # EG 2 Release Sw
   C.set_midi_cc_value(midi_ch, 33 , 4  ) # LFO 1 Wave
   C.set_midi_cc_value(midi_ch, 3  , 72 ) # LFO 1 Rate
-  C.set_midi_cc_value(midi_ch, 116, 124) # LFO 1 Level
+  C.set_midi_cc_value(midi_ch, 45 , 124) # LFO 1 Level
   C.set_midi_cc_value(midi_ch, 113, 4  ) # LFO 1 Reset Sw
   C.set_midi_cc_value(midi_ch, 102, 4  ) # Osc 1 Wave
-  C.set_midi_cc_value(midi_ch, 114, 64 ) # Osc 1 PW
+  C.set_midi_cc_value(midi_ch, 47 , 64 ) # Osc 1 PW
   C.set_midi_cc_value(midi_ch, 89 , 4  ) # Osc 1 Pitch Mod 1 Amt
   C.set_midi_cc_value(midi_ch, 118, 124) # Osc 1 Pitch Mod 1 Sw
   C.set_midi_cc_value(midi_ch, 13 , 4  ) # Osc 1 Pitch Mod 2 Amt
@@ -969,7 +969,7 @@ def spms1_write_default_patch(midi_ch)
   C.set_midi_cc_value(midi_ch, 13 , 4  ) # Osc 2 Pitch Mod 2 Amt
   C.set_midi_cc_value(midi_ch, 112, 4  ) # Osc 2 Sync Sw
   C.set_midi_cc_value(midi_ch, 115, 4  ) # Noise 1 Color
-  C.set_midi_cc_value(midi_ch, 19 , 64 ) # Mixer 2 Level 1
+  C.set_midi_cc_value(midi_ch, 42 , 64 ) # Mixer 2 Level 1
   C.set_midi_cc_value(midi_ch, 20 , 4  ) # Mixer 2 Level 2
   C.set_midi_cc_value(midi_ch, 21 , 4  ) # Mixer 2 Level 3
   C.set_midi_cc_value(midi_ch, 23 , 4  ) # Mixer 2 Level 4

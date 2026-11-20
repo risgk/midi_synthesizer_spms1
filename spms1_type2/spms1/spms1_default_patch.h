@@ -205,10 +205,10 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {400, 105},  // EG 2 Release Sw CC
   {402,  33},  // LFO 1 Wave CC
   {403,   3},  // LFO 1 Rate CC
-  {404, 116},  // LFO 1 Level CC
+  {404,  45},  // LFO 1 Level CC
   {407, 113},  // LFO 1 Reset Sw CC
   {413, 102},  // Osc 1 Wave CC
-  {414, 114},  // Osc 1 PW CC
+  {414,  47},  // Osc 1 PW CC
   {417,  89},  // Osc 1 Pitch Mod 1 Amt CC
   {419, 118},  // Osc 1 Pitch Mod 1 Sw CC
   {420,  13},  // Osc 1 Pitch Mod 2 Amt CC
@@ -221,7 +221,7 @@ static const uint16_t g_spms1_default_nrpn[][2] = {
   {434,  13},  // Osc 2 Pitch Mod 2 Amt CC
   {441, 112},  // Osc 2 Sync Sw CC
   {442, 115},  // Noise 1 Color CC
-  {444,  19},  // Mixer 2 Level 1 CC
+  {444,  42},  // Mixer 2 Level 1 CC
   {445,  20},  // Mixer 2 Level 2 CC
   {446,  21},  // Mixer 2 Level 3 CC
   {447,  23},  // Mixer 2 Level 4 CC
@@ -375,10 +375,10 @@ static const uint8_t g_spms1_default_cc[][2] = {
   {105, 124},  // EG 2 Release Sw
   {33,    4},  // LFO 1 Wave
   {3,    72},  // LFO 1 Rate
-  {116, 124},  // LFO 1 Level
+  {45,  124},  // LFO 1 Level
   {113,   4},  // LFO 1 Reset Sw
   {102,   4},  // Osc 1 Wave
-  {114,  64},  // Osc 1 PW
+  {47,   64},  // Osc 1 PW
   {89,    4},  // Osc 1 Pitch Mod 1 Amt
   {118, 124},  // Osc 1 Pitch Mod 1 Sw
   {13,    4},  // Osc 1 Pitch Mod 2 Amt
@@ -391,7 +391,7 @@ static const uint8_t g_spms1_default_cc[][2] = {
   {13,    4},  // Osc 2 Pitch Mod 2 Amt
   {112,   4},  // Osc 2 Sync Sw
   {115,   4},  // Noise 1 Color
-  {19,   64},  // Mixer 2 Level 1
+  {42,   64},  // Mixer 2 Level 1
   {20,    4},  // Mixer 2 Level 2
   {21,    4},  // Mixer 2 Level 3
   {23,    4},  // Mixer 2 Level 4

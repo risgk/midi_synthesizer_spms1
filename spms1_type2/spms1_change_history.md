@@ -4,6 +4,15 @@ MIDI Synthesizer SPMS-1 (type-2) Change History
 The main changes of each version, newest first, gathered before each release. The format may be
 revised.
 
+- v0.7.2 (2026-11-20):
+    - The default patch: **Osc 1 PW** on CC 47 (114 before) and **LFO 1 Level** on CC 45 (116 before), as Osc 1 Shape
+      and LFO Depth of PRA32-U2 v3.22.0 (CC 16 and 17, General 1 and 2, as its General Purpose Controller 1 and 2),
+      and **Mixer 2 Level 1** on CC 42 (19 before, which PRA32-U2 v3.22.0 makes General Purpose Controller 4)
+        - Not compatible: a MIDI controller set to CC 114, 116 or 19 for them is to be set to CC 47, 45 or 42; a patch
+          kept (saved to the device, or exported) keeps its own CCs
+        - The load as v0.7.1 (the synth core the same)
+    - SPMS-1 Web: "Click (or tap) to start the audio" is shown as soon as SPMS-1 Web is chosen in MIDI Out (e.g. as the
+      editor opens with it chosen), before anything is sent to it, whatever the editor sends then
 - v0.7.1 (2026-11-16):
     - Filters: **Filter Drive** back to v0.6.1: the leak's ceiling down by the gain, x1 to x32, for a saturated
       resonance, with no input clip (as SPMS-1 type-2 drives a filter harder by its input, Gain 1 and Gain 2 and

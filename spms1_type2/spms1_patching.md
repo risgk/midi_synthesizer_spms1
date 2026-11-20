@@ -372,7 +372,7 @@ on first. The synth is built to keep time with every module running, so taking o
 order is never what makes a patch fit; to leave one out of the sound, route around it and let it
 run unread (see the examples below).
 Mixer 1 has no CC: its levels hold 0.0, so it is silent until a patch turns them up, as its
-category 4 values or by giving them CCs. Mixer 2 has a CC on each level, CC#19 to 21 and 23, of which
+category 4 values or by giving them CCs. Mixer 2 has a CC on each level, CC#42, 20, 21 and 23, of which
 Level 1 powers up at 0.5 (value 64) and Level 2 to 4 at 0.0, so Osc 1 alone is heard at first. Each mixer's Out Level has no CC: Mixer 1's holds 0.5, and Mixer 2's
 1.0 (value 124), which sets how hard the audio drives the filters. Osc 1 alone reaches them at 0.25,
 as until v0.4.0 (when Out Level held 0.5 and Level 1 powered up at 1.0; in v0.4.1, Level 1 at 1.0
@@ -676,7 +676,7 @@ middle of the swing moves up from zero to 0.5. Out is what the default patch rou
 is a triangle until Wave is turned up.
 
 LFO 1 Level scales the LFO's outputs, as a mixer's Level scales its input: from silent at 0.0
-(value 4) to full at 1.0 (value 124). It is on CC#116 and powers up at 1.0, so the LFO runs at
+(value 4) to full at 1.0 (value 124). It is on CC#45 and powers up at 1.0, so the LFO runs at
 full level and what it moves sets the depth. LFO 1 Level Mod In adds to it, held to the same range, by Level Mod Amt, and it takes
 Mod Wheel by default at a depth of 1.0 (Level Mod Amt has no CC and holds 1.0), so with Level
 turned down the wheel brings the LFO in, up to full at its top. Turning the LFO the
@@ -748,7 +748,7 @@ leave the oscillator alone until one is turned up: CC#13 brings the vibrato in.
 Osc 1 PW, the pulse width, shifts the second of the two sawtooths that the morph is made of, either way
 from half a cycle: it is bipolar, -0.5 (value 4) to +0.5 (value 124), and powers up at 0.0 (value 64). At
 the pulse end of Osc 1 Wave that is a pulse of 50% at value 64, 75% at value 94 and 25% at value 34, and
-silence at either end, a pulse of 0% or 100%; it is on CC#114.
+silence at either end, a pulse of 0% or 100%; it is on CC#47.
 The modulations move it by PW Mod 1 Amt (CC#8) and PW Mod 2 Amt (CC#103), which power up at 0.0.
 A unit of input is the whole pulse width range, so with PW Mod 2 Amt at the top the LFO swings
 the pulse width half the range either way: with PW at value 64, from nearly 0% to nearly 100%; and
@@ -985,7 +985,7 @@ unplugged reads its own CC or value again. A value is the 4 to 124 the editor sh
 - A vibrato on the mod wheel, as a GM2 sound module's: LFO 1 Level down to 4, 0.0, so the wheel
   on its Level Mod In brings the LFO in, and Osc 1 Pitch Mod 2 Amt at 9 makes the wheel's top 50
   cents either way, the Modulation Depth Range GM2 powers up at, or at 14 a semitone. As MIDI:
-  CC#116 = 4, CC#13 = 9 or 14
+  CC#45 = 4, CC#13 = 9 or 14
 - A bend range of 2 semitones, as a GM sound module's: Pitch 1 Bend Amt at 8. As MIDI: CC#57 = 8
 - The LFO on the cutoff: wired by default too, on the filters' Mod 2 inputs, so Filter 2 Mod 2 Amt
   sweeps the cutoff with it, on top of the envelope on Mod 1 (Filter 1's follows, on the same CC).
@@ -994,12 +994,12 @@ unplugged reads its own CC or value again. A value is the 4 to 124 the editor sh
   Level 1 and Level 2 at 88 each put the two at 0.7, about as loud together as one at full level,
   Osc 2 beating slowly against Osc 1 from the 10 cents of its Pitch Fine at power-up. Osc 2 Pitch
   Coarse and Pitch Fine tune it, a semitone a step and 50 cents either way: Coarse at 76 an octave
-  up, at 71 a fifth, and Fine at 64 in unison. As MIDI: CC#19 = 88, CC#20 = 88, CC#85 = 76 or 71,
+  up, at 71 a fifth, and Fine at 64 in unison. As MIDI: CC#42 = 88, CC#20 = 88, CC#85 = 76 or 71,
   CC#76 = 64
 - Noise: wired by default too, its Out on Mixer 2's fourth input beside the oscillators, so Mixer 2
   Level 4 brings it in under the note, at a level of 0.1 at value 16, and Level 1 at 4 takes the
   oscillator out, leaving the noise alone, through the filters; Noise 1 Color turns it from white to
-  red. As MIDI: CC#23 = 16, CC#19 = 4, CC#115
+  red. As MIDI: CC#23 = 16, CC#42 = 4, CC#115
 - Keyboard tracking: wired by default as well, the pitch from Pitch 1 on the filters' Pitch inputs,
   so Filter 2 Pitch Amt sets how far the cutoff follows the keys (Filter 1's follows it): all the way
   at value 124, half way at value 64, and not at all at value 4, where it powers up; Pitch Pol, with
@@ -1009,7 +1009,7 @@ unplugged reads its own CC or value again. A value is the 4 to 124 the editor sh
   note 60 at note 60, and so on the note played everywhere; Filter 2 Mod 1 Amt at 4 takes the
   envelope off the cutoff, and Mixer 2 Level 1 at 4 takes the oscillator out, leaving the sine alone.
   It is within 5 cents of the note from middle C up, and 17 cents flat an octave below. As MIDI:
-  CC#71 = 124, CC#9 = 124, CC#74 = 52, CC#24 = 4, CC#19 = 4
+  CC#71 = 124, CC#9 = 124, CC#74 = 52, CC#24 = 4, CC#42 = 4
 - A pitch envelope: wired by default too, the envelope on the oscillator's Pitch Mod 1 input, so
   Osc 1 Pitch Mod 1 Amt sets its depth: the note starts a semitone sharp at value 9, an octave at
   value 64 and two octaves at the top, and with EG 1 Sustain brought down to 4, 0.0, it falls back to
@@ -1068,12 +1068,12 @@ unplugged reads its own CC or value again. A value is the 4 to 124 the editor sh
   CC#98 = 60, CC#6 = 23 and CC#98 = 61, CC#6 = 22, then CC#16
 - A pitch bend for Osc 2 alone: with Osc 2 brought in (Mixer 2 Level 1 and Level 2 at 88), Pitch 1
   Out 1 Bend Sw off, so the wheel bends Osc 2 against Osc 1, which holds its note with the filter;
-  with Osc 2 Sync Sw on, the wheel sweeps the sync sound. As MIDI: CC#19 = 88, CC#20 = 88, CC#119 =
+  with Osc 2 Sync Sw on, the wheel sweeps the sync sound. As MIDI: CC#42 = 88, CC#20 = 88, CC#119 =
   4, CC#112 = 124
 - A sync sweep: Mixer 2 Level 1 at 4 and Level 2 at 124 put Osc 2 alone on the mixer, Osc 2 Sync Sw
   on syncs it, Osc 1 Pitch Mod 1 Sw off keeps Osc 1 on the note it is synced to, and Osc 1 Pitch Mod
   1 Amt turned up then sweeps Osc 2 alone with the envelope (Osc 2's amount follows it, on the same
-  CC). As MIDI: CC#19 = 4, CC#20 = 124, CC#112 = 124, CC#118 = 4, then CC#89
+  CC). As MIDI: CC#42 = 4, CC#20 = 124, CC#112 = 124, CC#118 = 4, then CC#89
 - Take the filters out of the chain: on the Patch tab, wire Mixer 2 Out to Amp 1 Audio In 2, the
   amp's second audio input, the one heard. The filters keep running and keep their slots; nothing
   reads them. As MIDI: CC#99 = 113, CC#98 = 38, CC#6 = 66

@@ -1,6 +1,6 @@
 ```
-  [MIDI Synthesizer]                                              Date: 2026-11-16                      
-  Model: SPMS-1 (type-2)          MIDI Implementation Chart       Version: 0.7.1                        
+  [MIDI Synthesizer]                                              Date: 2026-11-20                      
+  Model: SPMS-1 (type-2)          MIDI Implementation Chart       Version: 0.7.2                        
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Function...                   | Transmitted   | Recognized    | Remarks                              |
 +-------------------------------+---------------+---------------+--------------------------------------+
@@ -26,7 +26,7 @@
 | Change                    104 | x             | o             | Osc 2 Wave (Saw to Pulse)            |
 |                            89 | x             | o             | Osc Pitch Mod 1 Amt (EG)             |
 |                            13 | x             | o             | Osc Pitch Mod 2 Amt (LFO)            |
-|                           114 | x             | o             | Osc 1 PW (0% to 100%)                |
+|                            47 | x             | o             | Osc 1 PW (0% to 100%)                |
 |                             8 | x             | o             | Osc 1 PW Mod 1 Amt (EG)              |
 |                           103 | x             | o             | Osc 1 PW Mod 2 Amt (LFO)             |
 |                            85 | x             | o             | Osc 2 Pitch Coarse (+-60 Semitones)  |
@@ -41,7 +41,7 @@
 |                           117 | x             | o             | Filter Mod 1 Pol (-1 to +1)          |
 |                             9 | x             | o             | Filter Pitch Amt                     |
 |                            39 | x             | o             | Filter Mode (LP, Notch, HP)          |
-|                            19 | x             | o             | Mixer 2 Level 1 (Osc 1 Level)        |
+|                            42 | x             | o             | Mixer 2 Level 1 (Osc 1 Level)        |
 |                            20 | x             | o             | Mixer 2 Level 2 (Osc 2 Level)        |
 |                            21 | x             | o             | Mixer 2 Level 3 (Osc 1 Sub Level)    |
 |                            23 | x             | o             | Mixer 2 Level 4 (Noise Level)        |
@@ -57,7 +57,7 @@
 |                            53 | x             | o             | EG 2 Decay (Time)                    |
 |                            54 | x             | o             | EG 2 Sustain (Level)                 |
 |                             3 | x             | o             | LFO Rate                             |
-|                           116 | x             | o             | LFO Level                            |
+|                            45 | x             | o             | LFO Level                            |
 |                            33 | x             | o             | LFO Wave (Triangle to Square)        |
 |                           113 | x             | o             | LFO Reset Sw [Off|On]                |
 |                            93 | x             | o             | Chorus Mix                           |
