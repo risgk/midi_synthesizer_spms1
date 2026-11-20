@@ -325,6 +325,11 @@ Basically, a release goes as follows (the dates in JST):
 6. Run the workflow (above) on develop with "commit_package", for the UF2 files and SPMS-1 Web
 7. Merge develop into main by a pull request, "type-2 vX.Y.Z"
 
+- For the maintainer: after a release, update SPMS-1 (type-2) Editor and SPMS-1 (type-2) Web on the official page
+  ([risgk.github.io](https://github.com/risgk/risgk.github.io)): copy "spms1_editor.html" and "spms1_web_synth.js" of main
+  to "midi-synthesizer-spms-1/spms1_type2" there, and the development version too, "spms1_editor_dev.html" (the copy
+  with "spms1_web_synth_dev.js" in place of "spms1_web_synth.js") and "spms1_web_synth_dev.js" (not needed for a fork)
+
 
 ## Where It Departs from Ruby
 

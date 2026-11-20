@@ -304,6 +304,11 @@ PWM Audio で min 1038 us、max 1043 us、約 78% で、MIDI のノートオン�
 6. develop でワークフロー (上記) を "commit_package" 付きで実行し、UF2 ファイルと SPMS-1 Web を更新します
 7. プルリクエスト "type-2 vX.Y.Z" で develop を main にマージします
 
+- 管理者向け: リリース後、公式ページ ([risgk.github.io](https://github.com/risgk/risgk.github.io)) の SPMS-1 (type-2) Editor と
+  SPMS-1 (type-2) Web を更新します。main の "spms1_editor.html" と "spms1_web_synth.js" をそこの "midi-synthesizer-spms-1/spms1_type2"
+  にコピーし、開発版 "spms1_editor_dev.html" ("spms1_web_synth.js" を "spms1_web_synth_dev.js" に替えたもの) と
+  "spms1_web_synth_dev.js" も更新します (フォークでは不要です)
+
 
 ## Ruby と違うところ
 
