@@ -277,7 +277,7 @@ PWM Audio で min 1038 us、max 1043 us、約 78% で、MIDI のノートオン�
 "../.github/workflows/spms1-type2.yml" の "SPMS-1 (type-2) Build (UF2 and Web)" を手動で実行します
 (リリース時など、Actions タブの "Run workflow" で)。毎回、以下をすべて行います:
 
-- UF2: "spms1/spms1.ino" を Arduino-Pico 6.3.0 で PWM Audio 版と I2S 版にコンパイルし、UF2 ファイルを
+- UF2: "spms1/spms1.ino" を Arduino-Pico 6.4.0 で PWM Audio 版と I2S 版にコンパイルし、UF2 ファイルを
   成果物 (artifact) として残します
 - SPMS-1 Web: "spms1_web_synth.js" をビルド・テストし、成果物として残します
 - シミュレーター: "sim_spinel" と "sim_render" を Linux、macOS、Windows でビルドしてレンダリングし、

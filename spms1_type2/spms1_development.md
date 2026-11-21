@@ -294,7 +294,7 @@ order, split evenly; the common part left is the loop of the samples, the output
 "SPMS-1 (type-2) Build (UF2 and Web)" in "../.github/workflows/spms1-type2.yml", run by hand
 ("Run workflow" in the Actions tab, e.g. at a release); every run does all of the following:
 
-- UF2: compiles "spms1/spms1.ino" for PWM Audio and I2S with Arduino-Pico 6.3.0, and keeps the
+- UF2: compiles "spms1/spms1.ino" for PWM Audio and I2S with Arduino-Pico 6.4.0, and keeps the
   UF2 files as an artifact
 - SPMS-1 Web: builds and tests "spms1_web_synth.js", and keeps it as an artifact
 - Simulators: builds "sim_spinel" and "sim_render" on Linux, macOS and Windows, renders, and compares

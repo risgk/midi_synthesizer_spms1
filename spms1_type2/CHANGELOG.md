@@ -5,6 +5,7 @@ The main changes of each version, newest first, gathered before each release. Th
 revised.
 
 - v0.7.3 (2026-??-??):
+    - Built with Arduino-Pico 6.4.0 (6.3.0 before); the same load and RAM in the estimate
     - Editor: No dark line between two keys of the soft keyboard (where the edges of the keys fell between the pixels,
       e.g. at 125% and 150% of the display scale)
 - v0.7.2 (2026-11-20):
