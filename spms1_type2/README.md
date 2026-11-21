@@ -18,7 +18,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.7.2
 - Developed by ISGK Instruments (Ryo Ishigaki)
 - <https://github.com/risgk/midi_synthesizer_spms1>
 - [日本語版 README](./README.ja.md)
-- [Change History](./spms1_change_history.md)
+- [Changelog](./CHANGELOG.md)
 
 
 Required Hardware

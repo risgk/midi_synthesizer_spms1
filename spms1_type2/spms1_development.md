@@ -315,7 +315,7 @@ order, split evenly; the common part left is the loop of the samples, the output
 Basically, a release goes as follows (the dates in JST):
 
 1. Check it on the device, with PWM Audio and with I2S
-2. Gather the main changes of the version in "spms1_change_history.md", newest first
+2. Gather the main changes of the version in "CHANGELOG.md", newest first
 3. Change the version in the first lines of "README.md" and "README.ja.md", in the editor's
    `<span class="version">`, and in "spms1_midi_chart.md" with its Date (at every release, even if
    the MIDI implementation is the same)

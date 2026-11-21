@@ -1,5 +1,5 @@
-MIDI Synthesizer SPMS-1 (type-2) Change History
-===============================================
+MIDI Synthesizer SPMS-1 (type-2) Changelog
+==========================================
 
 The main changes of each version, newest first, gathered before each release. The format may be
 revised.

@@ -296,7 +296,7 @@ PWM Audio で min 1038 us、max 1043 us、約 78% で、MIDI のノートオン�
 基本的に、次の順で行います (日付は JST):
 
 1. 実機で確認します (PWM Audio 版と I2S 版)
-2. その版の主な変更を "spms1_change_history.md" にまとめます (新しい順)
+2. その版の主な変更を "CHANGELOG.md" にまとめます (新しい順)
 3. バージョンを変えます: "README.md" と "README.ja.md" の 1 行目、エディタの `<span class="version">`、
    "spms1_midi_chart.md" の Version と Date (MIDI の仕様が変わらなくても毎回)
 4. 負荷を見積もり (`sh sim_load/estimate.sh`、ノートありと `--gate 0`、`--modules`)、「処理負荷の見積もり」の表を置き換えます
