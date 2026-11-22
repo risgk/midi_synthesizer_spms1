@@ -6,6 +6,9 @@ revised.
 
 - v0.7.3 (2026-??-??):
     - Built with Arduino-Pico 6.4.0 (6.3.0 before); the same load and RAM in the estimate
+    - Filter: The output clip in fewer steps, the same curve (the renders the same), a little lighter
+      (estimated: 1253 us to 1245 us a buffer of 1333 us, the default patch with a note held)
+    - sim_load: "loud.txt" and "loud_nolim.txt" set Mixer 2 Level 1 on CC 42 (on CC 19 before, which it left since v0.7.2)
     - Editor: No dark line between two keys of the soft keyboard (where the edges of the keys fell between the pixels,
       e.g. at 125% and 150% of the display scale)
 - v0.7.2 (2026-11-20):
