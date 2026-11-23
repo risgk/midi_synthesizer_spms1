@@ -3,6 +3,8 @@
 //   (below -40 dB, i.e. no stuck notes) a while after the note off
 // - The output does not depend on the block size (Asyncify unwinds and rewinds Spms1_main at any sample)
 // - A patch sent as NRPN (several messages in one send) is taken
+// - A patch saved as a program (NRPN Program and Save) is put back by Program Change, and one to a
+//   program not saved changes nothing
 // Usage (in this folder): node spms1_web_test.js
 
 "use strict";
@@ -119,6 +121,27 @@ for (const blockSize of [128, 37, 1000]) {
   const before = level(false);
   const after = level(true);
   check((before > 0.01) && (after === 0), "NRPN: peak " + before.toFixed(3) + " (default), " + after.toFixed(3) + " (no output)");
+}
+
+// The programs: a patch with no output (as above) saved as program #3, the default patch put back
+// (Reset), then Program Change #3 brings the silence back, and #5, not saved, changes nothing
+{
+  const processor = createProcessor(48000);
+  const nrpn = (msb, lsb, value) => [0xB0, 99, msb, 0xB0, 98, lsb, 0xB0, 6, value];
+  processor.send([...nrpn(117, 0, 127), ...nrpn(117, 4, 3), ...nrpn(113, 44, 0), ...nrpn(113, 45, 0),
+                  ...nrpn(117, 2, 127), ...nrpn(117, 1, 127), ...nrpn(117, 0, 0), 0xB0, 101, 127, 0xB0, 100, 127]);
+  render(processor, 48000 / 10, 128);                                // 0.1 s: saved while silent
+  processor.send([0x90, 60, 100]);
+  const before = peakOf(render(processor, 48000 / 2, 128));          // 0.5 s: the default patch
+  processor.send([0xC0, 3]);
+  render(processor, 48000 / 10, 128);                                // 0.1 s: faded out, program #3 put back
+  const program3 = peakOf(render(processor, 48000 / 5, 128));        // 0.2 s
+  processor.send([0xC0, 5]);
+  render(processor, 48000 / 10, 128);
+  const program5 = peakOf(render(processor, 48000 / 5, 128));
+  check((before > 0.01) && (program3 === 0) && (program5 === 0),
+        "Programs: peak " + before.toFixed(3) + " (default), " + program3.toFixed(3) + " (Program Change #3, no output), " +
+        program5.toFixed(3) + " (#5, not saved)");
 }
 
 if (failed) {

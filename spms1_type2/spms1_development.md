@@ -39,8 +39,20 @@ MIDI Synthesizer SPMS-1 (type-2): Development
 - Mute (NRPN 117/0) fades the output out and in over 4 ms, and holds it silent for 9 buffers at
   least, which flushes the chorus and the limiter's look-ahead; the modules keep running
 - Save (NRPN 117/2) is written once the output is silent, by core 1: silence for the whole ring,
-  then the EEPROM, committed only if it differs, which stops core 0 for about 50-100 ms. The image
-  and its checks are described in "spms1_midi_state.h"
+  then the program's sector of the flash, erased and written only if it differs, which stops core
+  0 for about 50-100 ms. The 8 programs take a 4 KB sector each, the 32 KB below the file system
+  (none) and the EEPROM's sector at the end of the flash, unused but for the patch Save kept there
+  before v0.8.0, read as program #0 until #0 is saved; the sketch keeps nothing if it reaches them.
+  The image and its checks are described in "spms1_midi_state.h"
+    - Keep the flash as it is built (Flash Size 4MB, no file system: `flash=4194304_0`, the default
+      of the board): the programs are found below the file system, so a build that gives it room
+      looks for them elsewhere and finds none, though the ones saved stay where they were until
+      written over
+- A Program Change #0-7 to a program kept fades the output out, and core 1 puts the program back
+  once it is silent (`load_program_patch`, after the buffer is written), holds it silent for 11 ms
+  and fades it in, as for Mute. Putting it back takes about 115 us at v0.8.0 (`sh sim_load/estimate.sh
+  --program-load`), at most once a buffer, while silent: the buffer after it may start that much
+  later, which the ring absorbs
 
 
 ## PC Simulators
@@ -217,6 +229,7 @@ measures on the device -- with the default patch and a note held.
 - It prints the instructions per buffer, which are exact for the code as built, and the cycles and
   the time at 153.6 MHz against the 1333 us a buffer of 64 samples lasts at 48 kHz, which come from a
   first-order cost model and are an estimate (see `cost` in "sim_load/spms1_load_estimate.py")
+- `--program-load` also counts a Program Change's `load_program_patch` (above), once, after the buffers
 - `--profile` lists the functions the cycles go to; `--modules` the load of each module (below), from
   the debug info of the ELF and the run; `--lines N` the N source lines that take the most, the .rb
   lines Spinel's `#line` directives name, a runtime header's line (an Array access, a bus read) told
@@ -298,7 +311,9 @@ order, split evenly; the common part left is the loop of the samples, the output
   UF2 files as an artifact
 - SPMS-1 Web: builds and tests "spms1_web_synth.js", and keeps it as an artifact
 - Simulators: builds "sim_spinel" and "sim_render" on Linux, macOS and Windows, renders, and compares
-  the renders with CRuby on Linux. On Linux it first checks that the files generated from
+  the renders with CRuby on Linux: the default patch, the example score with and without the example
+  patch, and the programs' score ("sim_render/examples/score_programs_example.txt": Save, and
+  Program Change back, to a program not saved, and in a row). On Linux it first checks that the files generated from
   "spms1_patch.yaml" are up to date ("patch_gen/spms1_patch_gen.rb --check"). On Linux it also checks that every function and variable of the
   runtime has the same type wherever it is declared ("spinel_mcu/lto_type_check.sh"): a function
   declared with float on one side and double on the other goes unnoticed otherwise, which the
@@ -321,6 +336,8 @@ Basically, a release goes as follows (the dates in JST):
    the MIDI implementation is the same)
 4. Estimate the load (`sh sim_load/estimate.sh`, with a note held and with `--gate 0`, and
    `--modules`), and replace the tables under Load Estimate with them
+   If the default patch or the numbering changed, save "patches/Init-spms1_type2.json" again from the editor
+   (Init, then Save JSON)
 5. Commit as "type-2: Version X.Y.Z"
 6. Run the workflow (above) on develop with "commit_package", for the UF2 files and SPMS-1 Web
 7. Merge develop into main by a pull request, "type-2 vX.Y.Z"

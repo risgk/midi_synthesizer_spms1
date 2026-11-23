@@ -8,6 +8,7 @@
 #   python3 sim_load/spms1_load_estimate.py ELF [--buffers N] [--skip N] [--note N] [--gate 0|1]
 #                                           [--patch FILE] [--score FILE] [--per-buffer]
 #                                           [--mhz F] [--profile] [--modules] [--lines N]
+#                                           [--program-load]
 #
 # --patch and --score take the files sim_render takes (see sim_render/examples): the patch as MIDI
 # bytes in hex, applied before the first buffer, and the score, MIDI bytes in hex at a time in
@@ -18,6 +19,10 @@
 # --lines N prints the N source lines the measured buffers spend the most cycles in, by the line
 # table of the debug info: the .rb lines Spinel's #line directives name, or the C runtime's, a line
 # of a runtime header or of Dsp told by the .rb line it is inlined at.
+# --program-load, after the buffers, also counts what a Program Change to a program kept costs core
+# 1 once the output is silent (load_program_patch, outside the measured span, after the buffer is
+# written): the patch the buffers ran, saved as program #0 in the emulated flash and put back, the
+# image read from the flash as if it were in the XIP cache.
 #
 # The instruction count is exact for the code as built; the cycles are an estimate, which a
 # measurement on the device can calibrate. Needs: pip install unicorn capstone pyelftools numpy
@@ -41,6 +46,7 @@ ap.add_argument('--mhz', type=float, default=153.6, help='system clock, the sket
 ap.add_argument('--profile', action='store_true', help='print the functions the measured buffers spend the most cycles in')
 ap.add_argument('--modules', action='store_true', help='print the load of each module, also with its share of the common part (from the debug info)')
 ap.add_argument('--lines', type=int, default=0, help='print the N source lines the measured buffers spend the most cycles in (from the debug info)')
+ap.add_argument('--program-load', action='store_true', help='also count load_program_patch, a Program Change to a program kept, after the buffers')
 args = ap.parse_args()
 
 f = open(args.elf, 'rb')
@@ -55,6 +61,8 @@ for sec in elf.iter_sections():
                 syms[s.name] = s['st_value'] & ~1
                 symlist.append((s['st_value'] & ~1, s['st_size'], s.name))
             elif s['st_info']['type'] == 'STT_OBJECT' and s['st_value']:
+                objs[s.name] = s['st_value']
+            elif s.name in ('_FS_start', '__flash_binary_end'):
                 objs[s.name] = s['st_value']
 symlist.sort()
 symaddrs = [a for a, _, _ in symlist]
@@ -599,3 +607,25 @@ if args.modules:
     for m in sorted(ran, key=lambda m: -with_common(m)):
         print('  %-10s %5.1f%% (%4.0f us)  %5.1f%% (%4.0f us)' % ('%s %s' % (classes[m], m.rsplit('_', 1)[1]), pct(own[m]), us(own[m]), pct(with_common(m)), us(with_common(m))))
     print('  %-10s %5.1f%% (%4.0f us), not of a module (the output, the loop of the samples, MIDI, the CCs)' % ('common', pct(left), us(left)))
+
+# --program-load: the patch the buffers ran, made an image (unmeasured) and written to program #0's
+# sector of the emulated flash, below the file system as the sketch keeps it, then put back by
+# load_program_patch as the synth calls it, counted as a buffer is.
+if args.program_load:
+    PROGRAMS, IMAGE_SIZE = 8, 4096
+    def call(name, *a):
+        mu.reg_write(UC_ARM_REG_SP, STACK_TOP)
+        for r, v in zip((UC_ARM_REG_R0, UC_ARM_REG_R1, UC_ARM_REG_R2, UC_ARM_REG_R3), a):
+            mu.reg_write(r, v)
+        mu.reg_write(UC_ARM_REG_LR, RET_MAGIC | 1)
+        mu.emu_start(syms[name] | 1, RET_MAGIC, count=100_000_000)
+    call('spms1_make_patch_image', 0)
+    image = bytes(mu.mem_read(objs['g_spms1_patch_image'], IMAGE_SIZE))
+    mu.mem_write(objs['_FS_start'] - PROGRAMS * IMAGE_SIZE, image)
+    mem_u8('g_midi_program_pending', 0, 0)
+    state.update(measuring=True, n=0, cyc=0, last_end=None)
+    call('load_program_patch', 0)
+    state['measuring'] = False
+    loaded = bytes(mu.mem_read(objs['g_midi_nrpn_values'], NRPN_SIZE)) == image[32:32 + NRPN_SIZE]
+    print('program load (load_program_patch, once at a Program Change, while silent): %d instructions, %d cycles, %.0f us%s'
+          % (state['n'], state['cyc'], state['cyc'] / args.mhz, '' if loaded else ' (NOT LOADED)'))
