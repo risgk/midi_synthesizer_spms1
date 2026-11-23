@@ -28,10 +28,9 @@ module Spms1
     OUTPUT_KNEE        = 0.75
     OUTPUT_CEILING     = OUTPUT_LIMIT + OUTPUT_LIMIT - OUTPUT_KNEE
     OUTPUT_FLOOR       = -OUTPUT_CEILING
-    OUTPUT_KNEE_FLOOR  = -OUTPUT_KNEE
-    # 1 / (4 * (limit - knee)) for the shoulder, and a further quarter because clip_output's
-    # excess is doubled.
-    OUTPUT_KNEE_SCALE  = 1.0 / (16.0 * (OUTPUT_LIMIT - OUTPUT_KNEE))
+    # 1 / (4 * (limit - knee)) for the shoulder: e^2 / 4 over the excess e past the knee, which at
+    # 2 * (limit - knee) (the ceiling) takes off limit - knee, where the slope is zero.
+    OUTPUT_KNEE_SCALE  = 1.0 / (4.0 * (OUTPUT_LIMIT - OUTPUT_KNEE))
 
     # The band pass integrator leaks at LEAK_RATE * (y - soft_clip_biased(y)) on top of what it
     # integrates, y being the band pass: nothing at small levels, more and more as y bends into the
@@ -638,16 +637,17 @@ module Spms1
     # down inside the loop at a much higher level and has to stay where it is. With only the band
     # pass held, a high Q on a loud input reaches the shoulder here.
     # No comparisons, so nothing for the compiler to turn into a branch: the clamp is a max and a
-    # min, and the knee the larger of each side's distance past it and zero (C.float_max, one
-    # vmaxnm.f32), which keeps the linear region bit-exact -- a sample inside it has nothing added
-    # to it or taken away. excess is twice the signed distance past the knee; excess * |excess|
-    # keeps the shoulder odd without a sign test. Every subtraction here is exact in single
-    # precision below 2^23, far past anything the filter can produce, so fed past the ceiling the
-    # curve lands on exactly OUTPUT_LIMIT. Both floors are stored constants rather than negated
-    # ones, for the reason the constants above give.
+    # min, and the knee the distance past it on each side, the larger of it and zero above and the
+    # smaller below (C.float_max and C.float_min, one vmaxnm.f32 and one vminnm.f32), which keeps
+    # the linear region bit-exact -- a sample inside it has nothing added to it or taken away.
+    # excess is the signed distance past the knee (one side of the two is zero); excess * |excess|
+    # keeps the shoulder odd without a sign test. Every addition and subtraction here is exact in
+    # single precision below 2^23, far past anything the filter can produce, so fed past the
+    # ceiling the curve lands on exactly OUTPUT_LIMIT. The floor is a stored constant rather than a
+    # negated one, for the reason the constants above give.
     def clip_output(sample)
       clamped = C.float_min(C.float_max(sample, OUTPUT_FLOOR), OUTPUT_CEILING)
-      excess  = (C.float_max(clamped - OUTPUT_KNEE, 0.0) - C.float_max(OUTPUT_KNEE_FLOOR - clamped, 0.0)) * 2.0
+      excess  = C.float_max(clamped - OUTPUT_KNEE, 0.0) + C.float_min(clamped + OUTPUT_KNEE, 0.0)
       clamped - (excess * excess.abs) * OUTPUT_KNEE_SCALE
     end
   end

@@ -802,6 +802,12 @@
       height: calc(140px * var(--kbd-scale));
       touch-action: none;
     }
+    /* White behind the keys, so that the dark frame does not show as a line between two keys, where the
+       edges of the keys fall between the pixels (e.g. at 125% and 150% of the display scale); not at the
+       bottom 4px, so that the lower keys keep their rounded corners */
+    #keyboard {
+      background: linear-gradient(#fff, #fff) top / 100% calc(100% - 4px) no-repeat;
+    }
     /* The upper half: the 12 semitones at equal intervals, the black keys as wide as the upper parts
        of the white keys. The lower half: the white keys only, C - E each 5/3 semitones wide and F - B
        each 7/4, so that the lines between E and F and between B and C run straight. A white key is
@@ -1563,7 +1569,7 @@
 <body>
 
 <header>
-  <h1>SPMS-1 (type-2) Editor<span class="version">v0.7.2</span><span class="github-link">(<a href="https://github.com/risgk/midi_synthesizer_spms1" target="_blank" rel="noopener">View on GitHub</a>)</span></h1>
+  <h1>SPMS-1 (type-2) Editor<span class="version">v0.7.3</span><span class="github-link">(<a href="https://github.com/risgk/midi_synthesizer_spms1" target="_blank" rel="noopener">View on GitHub</a>)</span></h1>
   <nav class="tabs">
     <button class="tab-btn active" data-tab="controls">Controls</button>
     <button class="tab-btn" data-tab="patch">Patch</button>
@@ -3915,12 +3921,7 @@
     }
     // The synth already has it, so it must not be sent back.
     if (lastSent) lastSent.set('n' + nrpn, value);
-    renderControls();
-    renderWires();
-    renderOrder();
-    refreshControls();
-    updateExport();
-    saveLocal();
+    scheduleRefresh(true);
   }
 
   function ccInUse(cc) {
@@ -3934,9 +3935,7 @@
     state.values[cc] = value;
     if (send && midiOutput) midiOutput.send([0xB0 | exportOptions().ch, cc, value]);
     if (lastSent) lastSent.set('c' + cc, value);
-    refreshControls();
-    updateExport();
-    saveLocal();
+    scheduleRefresh(false);
   }
 
   // A parameter's value with no CC is part of the patch, but moved like a knob, so it goes out at
@@ -3950,10 +3949,38 @@
       midiOutput.send([st, 99, nrpnMSB(nrpn), st, 98, nrpn & 0x7F, st, 6, value, st, 101, 127, st, 100, 127]);
     }
     if (lastSent) lastSent.set('n' + nrpn, value);
+    scheduleRefresh(false);
+  }
+
+  // The display, the export, and the patch kept in the browser, brought up to date once a frame for
+  // the values that come in streams (a knob sending CCs, NRPN edits, a slider dragged), rather than
+  // at each of them, which took a few milliseconds every time; the state itself and what is sent
+  // are not delayed. rerender: the controls, the wires, and the order are built again too (NRPN).
+  // A hidden page gets no frames, so what is pending is done when it is hidden or left too.
+  let refreshPending = false;
+  let rerenderPending = false;
+  function scheduleRefresh(rerender) {
+    rerenderPending = rerenderPending || rerender;
+    if (refreshPending) return;
+    refreshPending = true;
+    requestAnimationFrame(flushRefresh);
+  }
+
+  function flushRefresh() {
+    if (!refreshPending) return;
+    refreshPending = false;
+    if (rerenderPending) {
+      rerenderPending = false;
+      renderControls();
+      renderWires();
+      renderOrder();
+    }
     refreshControls();
     updateExport();
     saveLocal();
   }
+  document.addEventListener('visibilitychange', () => { if (document.hidden) flushRefresh(); });
+  window.addEventListener('pagehide', flushRefresh);
 
   function snapshotTable() {
     const t = new Map();

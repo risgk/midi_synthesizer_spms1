@@ -229,7 +229,7 @@ patch_gen は、モジュールのファイルの `require_relative`、インス
 
 | 版 | ノートあり (平均 / 最大) | ノートなし (平均 / 最大) |
 | :-- | --: | --: |
-| v0.7.2 | 192396 / 192700 サイクル、1253 us (94%) | 191927 / 192122 サイクル、1250 us (94%) |
+| v0.7.3 | 191276 / 191580 サイクル、1245 us (93%) | 190807 / 191002 サイクル、1242 us (93%) |
 
 見積もりは実機の Debug Print より大きめです。v0.7.2 と v0.7.1 では、シンセ本体が v0.6.1 と同じなので v0.6.1 と同じです。v0.7.0 では 10% ほど (Filter Drive の入力クリップあり。
 見積もりは平均 1290 us、最大 1292 us。実機は I2S で min 1149 us、max 1153 us、約 86%、`underruns` 0、`gc roots` 34)、v0.6.1 では 10% ほど (実機は I2S で min 1119 us、max 1122 us、約 84%、
@@ -255,8 +255,8 @@ PWM Audio で min 1038 us、max 1043 us、約 78% で、MIDI のノートオン�
 
 | モジュール | 単体 | 共通込み |
 | :-- | --: | --: |
-| Filter 1 | 9.8% (130 us) | 11.5% (153 us) |
-| Filter 2 | 9.8% (130 us) | 11.5% (153 us) |
+| Filter 1 | 9.5% (126 us) | 11.2% (149 us) |
+| Filter 2 | 9.5% (127 us) | 11.2% (150 us) |
 | Osc 2 (Sync あり) | 9.3% (124 us) | 10.9% (146 us) |
 | Amp 1 (Distortion あり) | 8.3% (110 us) | 9.5% (127 us) |
 | Osc 1 | 6.1% (81 us) | 7.5% (100 us) |
@@ -277,7 +277,7 @@ PWM Audio で min 1038 us、max 1043 us、約 78% で、MIDI のノートオン�
 "../.github/workflows/spms1-type2.yml" の "SPMS-1 (type-2) Build (UF2 and Web)" を手動で実行します
 (リリース時など、Actions タブの "Run workflow" で)。毎回、以下をすべて行います:
 
-- UF2: "spms1/spms1.ino" を Arduino-Pico 6.3.0 で PWM Audio 版と I2S 版にコンパイルし、UF2 ファイルを
+- UF2: "spms1/spms1.ino" を Arduino-Pico 6.4.0 で PWM Audio 版と I2S 版にコンパイルし、UF2 ファイルを
   成果物 (artifact) として残します
 - SPMS-1 Web: "spms1_web_synth.js" をビルド・テストし、成果物として残します
 - シミュレーター: "sim_spinel" と "sim_render" を Linux、macOS、Windows でビルドしてレンダリングし、
@@ -296,13 +296,18 @@ PWM Audio で min 1038 us、max 1043 us、約 78% で、MIDI のノートオン�
 基本的に、次の順で行います (日付は JST):
 
 1. 実機で確認します (PWM Audio 版と I2S 版)
-2. その版の主な変更を "spms1_change_history.md" にまとめます (新しい順)
+2. その版の主な変更を "CHANGELOG.md" にまとめます (新しい順)
 3. バージョンを変えます: "README.md" と "README.ja.md" の 1 行目、エディタの `<span class="version">`、
    "spms1_midi_chart.md" の Version と Date (MIDI の仕様が変わらなくても毎回)
 4. 負荷を見積もり (`sh sim_load/estimate.sh`、ノートありと `--gate 0`、`--modules`)、「処理負荷の見積もり」の表を置き換えます
 5. "type-2: Version X.Y.Z" としてコミットします
 6. develop でワークフロー (上記) を "commit_package" 付きで実行し、UF2 ファイルと SPMS-1 Web を更新します
 7. プルリクエスト "type-2 vX.Y.Z" で develop を main にマージします
+
+- 管理者向け: リリース後、公式ページ ([risgk.github.io](https://github.com/risgk/risgk.github.io)) の SPMS-1 (type-2) Editor と
+  SPMS-1 (type-2) Web を更新します。main の "spms1_editor.html" と "spms1_web_synth.js" をそこの "midi-synthesizer-spms-1/spms1_type2"
+  にコピーし、開発版 "spms1_editor_dev.html" ("spms1_web_synth.js" を "spms1_web_synth_dev.js" に替えたもの) と
+  "spms1_web_synth_dev.js" も更新します (フォークでは不要です)
 
 
 ## Ruby と違うところ

@@ -1,4 +1,4 @@
-MIDI Synthesizer SPMS-1 (type-2) v0.7.2
+MIDI Synthesizer SPMS-1 (type-2) v0.7.3
 =======================================
 
 - Monophonic semi-modular MIDI Synthesizer for Raspberry Pi Pico 2, made with Spinel (Ruby AOT Compiler)
@@ -18,7 +18,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.7.2
 - Developed by ISGK Instruments (Ryo Ishigaki)
 - <https://github.com/risgk/midi_synthesizer_spms1>
 - [日本語版 README](./README.ja.md)
-- [Change History](./spms1_change_history.md)
+- [Changelog](./CHANGELOG.md)
 
 
 Required Hardware
@@ -58,7 +58,7 @@ Required Software for Modification
       tools stay in this folder, outside it
 - Arduino-Pico = Raspberry Pi Pico/RP2040/RP2350 (by Earle F. Philhower, III) core
     - Additional Board Manager URL: <https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json>
-    - This sketch is tested with version 6.3.0: <https://github.com/earlephilhower/arduino-pico/releases/tag/6.3.0>
+    - This sketch is tested with version 6.4.0: <https://github.com/earlephilhower/arduino-pico/releases/tag/6.4.0>
     - Info: <https://github.com/earlephilhower/arduino-pico>
     - Board: "Raspberry Pi Pico 2", with USB Stack: "Adafruit TinyUSB" in the "Tools" menu
 - Arduino MIDI Library (by Francois Best, lathoub)

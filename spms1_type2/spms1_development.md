@@ -243,7 +243,7 @@ or not, as the modules are meant to:
 
 | Version | Note held (avg / max) | No note (avg / max) |
 | :-- | --: | --: |
-| v0.7.2 | 192396 / 192700 cycles, 1253 us (94%) | 191927 / 192122 cycles, 1250 us (94%) |
+| v0.7.3 | 191276 / 191580 cycles, 1245 us (93%) | 190807 / 191002 cycles, 1242 us (93%) |
 
 The estimate is above Debug Print on the device: at v0.7.2 and v0.7.1 as at v0.6.1, the synth core being the same; about 10% at v0.7.0
 (with the input clip of Filter Drive, estimated at 1290 us on average and 1292 us at most: min 1149 us, max 1153 us with I2S,
@@ -272,8 +272,8 @@ order, split evenly; the common part left is the loop of the samples, the output
 
 | Module | Own | With common |
 | :-- | --: | --: |
-| Filter 1 | 9.8% (130 us) | 11.5% (153 us) |
-| Filter 2 | 9.8% (130 us) | 11.5% (153 us) |
+| Filter 1 | 9.5% (126 us) | 11.2% (149 us) |
+| Filter 2 | 9.5% (127 us) | 11.2% (150 us) |
 | Osc 2 (with Sync) | 9.3% (124 us) | 10.9% (146 us) |
 | Amp 1 (with the Distortion) | 8.3% (110 us) | 9.5% (127 us) |
 | Osc 1 | 6.1% (81 us) | 7.5% (100 us) |
@@ -294,7 +294,7 @@ order, split evenly; the common part left is the loop of the samples, the output
 "SPMS-1 (type-2) Build (UF2 and Web)" in "../.github/workflows/spms1-type2.yml", run by hand
 ("Run workflow" in the Actions tab, e.g. at a release); every run does all of the following:
 
-- UF2: compiles "spms1/spms1.ino" for PWM Audio and I2S with Arduino-Pico 6.3.0, and keeps the
+- UF2: compiles "spms1/spms1.ino" for PWM Audio and I2S with Arduino-Pico 6.4.0, and keeps the
   UF2 files as an artifact
 - SPMS-1 Web: builds and tests "spms1_web_synth.js", and keeps it as an artifact
 - Simulators: builds "sim_spinel" and "sim_render" on Linux, macOS and Windows, renders, and compares
@@ -315,7 +315,7 @@ order, split evenly; the common part left is the loop of the samples, the output
 Basically, a release goes as follows (the dates in JST):
 
 1. Check it on the device, with PWM Audio and with I2S
-2. Gather the main changes of the version in "spms1_change_history.md", newest first
+2. Gather the main changes of the version in "CHANGELOG.md", newest first
 3. Change the version in the first lines of "README.md" and "README.ja.md", in the editor's
    `<span class="version">`, and in "spms1_midi_chart.md" with its Date (at every release, even if
    the MIDI implementation is the same)
@@ -324,6 +324,11 @@ Basically, a release goes as follows (the dates in JST):
 5. Commit as "type-2: Version X.Y.Z"
 6. Run the workflow (above) on develop with "commit_package", for the UF2 files and SPMS-1 Web
 7. Merge develop into main by a pull request, "type-2 vX.Y.Z"
+
+- For the maintainer: after a release, update SPMS-1 (type-2) Editor and SPMS-1 (type-2) Web on the official page
+  ([risgk.github.io](https://github.com/risgk/risgk.github.io)): copy "spms1_editor.html" and "spms1_web_synth.js" of main
+  to "midi-synthesizer-spms-1/spms1_type2" there, and the development version too, "spms1_editor_dev.html" (the copy
+  with "spms1_web_synth_dev.js" in place of "spms1_web_synth.js") and "spms1_web_synth_dev.js" (not needed for a fork)
 
 
 ## Where It Departs from Ruby
