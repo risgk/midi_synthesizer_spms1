@@ -191,8 +191,8 @@ its programs #0-7, which Program Change #0-7 puts back.
     - Saves and loads patches as JSON ("patches/Init-spms1_type2.json" is Init, the default patch, as Save JSON saves it)
     - Keeps 8 patches in the browser, the user presets #0-7 (Presets panel), as PRA32-U2 Editor does: Store (to Browser)
       keeps the patch shown with a name (up to 32 ASCII characters, which the patch takes), and Recall (from
-      Browser) puts one back (an empty one as Init); Undo Store brings back the one the last Store (or Save to Device)
-      replaced, in the browser only (again to redo it); Export All and Import All save them to a file and put them back
+      Browser) puts one back (an empty one as Init); Clear empties one; Undo Store brings back the one the last Store,
+      Clear (or Save to Device) replaced, in the browser only (again to redo it); Export All and Import All save them to a file and put them back
     - A patch saved as JSON or copied keeps a CC that only the Mod Wheel or Breath has at what it
       powers up at, 0.0, as Save to Device does: they are played rather than set; Send Patch sends
       where they are
@@ -212,7 +212,7 @@ its programs #0-7, which Program Change #0-7 puts back.
       since, and with an editor of the same version or one numbered alike), is shown as the synth has it, with nothing sent, so that the patch is edited from there; otherwise the
       patch shown stays as it is, the changes made after it go to that program, and Send Patch, marked with a dashed line
       until it is pressed, puts the patch shown on the synth. With SPMS-1 Web, only the programs saved to it since the
-      page was opened are followed
+      page was opened are followed. Clear (next to it) makes the program selected not kept in the synth (NRPN Clear)
     - It sends the name of the patch (as SysEx) with the whole patch and whenever it changes, so that the synth's,
       which its Debug Print shows, is the one shown; not after a Program Change it does not follow, until Send Patch
     - It does not read the patch from the synth (e.g. the one saved, which the synth loads at power-on): the synth

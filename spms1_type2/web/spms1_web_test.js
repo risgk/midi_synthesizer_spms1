@@ -4,7 +4,7 @@
 // - The output does not depend on the block size (Asyncify unwinds and rewinds Spms1_main at any sample)
 // - A patch sent as NRPN (several messages in one send) is taken
 // - A patch saved as a program (NRPN Program and Save) is put back by Program Change, and one to a
-//   program not saved changes nothing
+//   program not saved, or cleared (NRPN Clear), changes nothing
 // Usage (in this folder): node spms1_web_test.js
 
 "use strict";
@@ -139,9 +139,16 @@ for (const blockSize of [128, 37, 1000]) {
   processor.send([0xC0, 5]);
   render(processor, 48000 / 10, 128);
   const program5 = peakOf(render(processor, 48000 / 5, 128));
-  check((before > 0.01) && (program3 === 0) && (program5 === 0),
+  // Clear (NRPN 117/5) program #3, the default patch put back (Reset): Program Change #3 changes nothing
+  processor.send([...nrpn(117, 0, 127), ...nrpn(117, 4, 3), ...nrpn(117, 5, 127), ...nrpn(117, 1, 127), ...nrpn(117, 0, 0),
+                  0xB0, 101, 127, 0xB0, 100, 127]);
+  render(processor, 48000 / 10, 128);
+  processor.send([0xC0, 3]);
+  render(processor, 48000 / 10, 128);
+  const cleared = peakOf(render(processor, 48000 / 5, 128));
+  check((before > 0.01) && (program3 === 0) && (program5 === 0) && (cleared > 0.01),
         "Programs: peak " + before.toFixed(3) + " (default), " + program3.toFixed(3) + " (Program Change #3, no output), " +
-        program5.toFixed(3) + " (#5, not saved)");
+        program5.toFixed(3) + " (#5, not saved), " + cleared.toFixed(3) + " (#3 after Clear and Reset)");
 }
 
 if (failed) {

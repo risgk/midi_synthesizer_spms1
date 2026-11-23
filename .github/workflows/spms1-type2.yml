@@ -138,7 +138,7 @@ jobs:
         run: sh sim_render/compare_with_cruby.sh --patch sim_render/examples/patch_routing_example.txt --score sim_render/examples/score_example.txt --seconds 3
 
       - name: Compare with CRuby (the programs, Save and Program Change)
-        run: sh sim_render/compare_with_cruby.sh --score sim_render/examples/score_programs_example.txt --seconds 3.5
+        run: sh sim_render/compare_with_cruby.sh --score sim_render/examples/score_programs_example.txt --seconds 4.5
 
   simulators-other-os:
     runs-on: ${{ matrix.os }}

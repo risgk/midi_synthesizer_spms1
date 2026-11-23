@@ -335,7 +335,7 @@ F0 7D 53 31 ch 01 h0 h1 h2 h3 h4 category entry value ... F7
 | 114 (2) | 0-94, 98 | Where a parameter takes its value | Signal ID, or 127 for its own control slot |
 | 115 (3) | 0-98 | Which CC fills a control slot | CC number, or 0 for none |
 | 116 (4) | 0-95, 98-100 | What a control slot holds while it has no CC, but the Mod Wheel's and Breath's | CC value |
-| 117 (5) | 0-4 | System: Mute, Reset, Save, Load, Program (below), not a part of the patch | 0-63 or 64-127; 0-7 for Program |
+| 117 (5) | 0-5 | System: Mute, Reset, Save, Load, Program, Clear (below), not a part of the patch | 0-63 or 64-127; 0-7 for Program |
 
 Category 5 has the system entries, which act on the synth rather than set a part of the patch:
 
@@ -369,7 +369,10 @@ Category 5 has the system entries, which act on the synth rather than set a part
 - Entry 3, Load: 64-127, while Mute is on, puts the program that entry 4 gives back, over the
   default patch, as at power-on; with none saved there, it does nothing
 - Entry 4, Program: 0-7 gives the program that the next Save or Load acts on, #0 without it (at
-  power-on, and again after each Save and Load); send it before each of them. 8-127 are ignored
+  power-on, and again after each Save, Load and Clear); send it before each of them. 8-127 are ignored
+- Entry 5, Clear: 64-127, while Mute is on, makes the program that entry 4 gives not kept: a Program
+  Change to it changes nothing, and #0 cleared leaves the default patch at power-on. It is written
+  as Save writes, once the output is silent, stopping the synth and the MIDI input for about 0.1 s
 
 The run order is read from slot 0 upwards and stops at the first Module ID 0, so a patch shorter
 than 32 modules ends itself. It is separate from the module numbering: a module only sees the

@@ -12,9 +12,11 @@ revised.
         - The patch saved before (one) is read as program #0 until #0 is saved; Save and Load act on the program that
           NRPN 117/4 gives before each (#0 without it, as before); there is no program the synth is "on"
         - Debug Print: the name of the patch, and those of the programs #0-7, one a report in turn
+        - **Clear** (NRPN 117/5): the program that NRPN 117/4 gives not kept
         - The EEPROM's 4 KB in RAM no longer taken (the programs read where they are in the flash)
     - Editor: Save to Device with the program #0-7 to save as, and the name; Program Change sends it to the synth; the
-      name of the patch sent (as SysEx) with the whole patch and whenever it changes
+      name of the patch sent (as SysEx) with the whole patch and whenever it changes; Clear, on the synth and of the
+      user presets
     - Editor: **User presets #0-7** in the browser (Presets panel), as PRA32-U2 Editor: Store (to Browser) and Recall (from
       Browser); Save to Device writes the user preset of the same number too, and a Program Change (sent, or at
       MIDI In) shows it as the synth has it, to edit on from there (otherwise Send Patch is marked); Undo Store, Import

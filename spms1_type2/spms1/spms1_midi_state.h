@@ -67,13 +67,15 @@ uint32_t g_midi_run_order_written[16][SPMS1_RUN_ORDER_SIZE] = {{0}};
 // the patch in the flash at 64-127, as the program that entry 4, Program, gives, and entry 3,
 // Load, puts that program back, both only while Mute is on, so that no stray message saves or
 // loads (see the patch image below); entry 4, Program, gives the program #0-7 that the next Save
-// or Load acts on (0-7; 8-127 are ignored), #0 again after it.
+// or Load acts on (0-7; 8-127 are ignored), #0 again after it; entry 5, Clear, makes that program
+// not kept at 64-127, only while Mute is on, as Save.
 #define SPMS1_NRPN_SYSTEM_MSB     (SPMS1_NRPN_MSB_BASE + 5)
 #define SPMS1_NRPN_SYSTEM_MUTE    (0)
 #define SPMS1_NRPN_SYSTEM_RESET   (1)
 #define SPMS1_NRPN_SYSTEM_SAVE    (2)
 #define SPMS1_NRPN_SYSTEM_LOAD    (3)
 #define SPMS1_NRPN_SYSTEM_PROGRAM (4)
+#define SPMS1_NRPN_SYSTEM_CLEAR   (5)
 // Mute, and how many times Mute on has arrived, which the synth tells apart by the count changing,
 // so that a Mute on is never missed, however soon Mute off follows it.
 uint8_t  g_midi_mute[16]            = {0};
@@ -477,6 +479,14 @@ void handle_midi_nrpn_system(uint8_t midi_ch, uint8_t lsb, uint8_t value) {
     g_midi_program_target[midi_ch] = 0;
   } else if (lsb == SPMS1_NRPN_SYSTEM_PROGRAM && value < SPMS1_PROGRAMS) {
     g_midi_program_target[midi_ch] = value;
+  } else if (lsb == SPMS1_NRPN_SYSTEM_CLEAR && value >= 64 && g_midi_mute[midi_ch]) {
+    // An image of all 0, which no sketch reads, written as a Save writes one.
+    for (int32_t i = 0; i < SPMS1_PATCH_IMAGE_SIZE; ++i) {
+      g_spms1_patch_image[i] = 0;
+    }
+    g_spms1_patch_image_program = g_midi_program_target[midi_ch];
+    g_midi_program_target[midi_ch] = 0;
+    ++g_midi_save_count[midi_ch];
   }
 }
 

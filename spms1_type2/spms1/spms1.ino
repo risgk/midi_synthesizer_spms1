@@ -171,8 +171,10 @@ const uint8_t* spms1_storage_data(int32_t program) {
     return NULL;
   }
   const uint8_t* image = base + (uint32_t)program * SPMS1_PATCH_IMAGE_SIZE;
-  // Program #0 never saved: the patch Save kept in the EEPROM's sector before the programs, if any.
-  if (program == 0 && !spms1_patch_image_valid(image) && spms1_patch_image_valid(&_EEPROM_start)) {
+  // Program #0 never written (erased, not saved nor cleared): the patch Save kept in the EEPROM's
+  // sector before the programs, if any.
+  if (program == 0 && image[0] == 0xFF && image[1] == 0xFF && image[2] == 0xFF && image[3] == 0xFF &&
+      spms1_patch_image_valid(&_EEPROM_start)) {
     return &_EEPROM_start;
   }
   return image;

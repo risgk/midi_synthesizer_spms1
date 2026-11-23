@@ -983,11 +983,17 @@
       padding-left: 6px;
       padding-right: 2px;
     }
-    .device-row .btn {
+    /* The buttons as wide as their labels, a little smaller, so that the four fit on one line. */
+    .device-row .btn, .presets-row .btn {
+      flex: 1 1 auto;
       min-width: 0;
       padding-left: 4px;
       padding-right: 4px;
       white-space: nowrap;
+      font-size: 0.75rem;
+    }
+    .presets-row {
+      flex-wrap: nowrap;
     }
     .check {
       display: flex;
@@ -1698,16 +1704,14 @@
       <div class="btn-row device-row" style="margin-top: 6px;">
         <select id="device-program" aria-label="Program" title="The program of the synth, #0-7, that Save to Device and Program Change act on; the synth loads #0 at power-up"></select>
         <button class="btn" id="btn-save-device" title="Keep the patch in the synth's flash as the program selected (NRPN Program and Save, between Mute on and off), in place of the one kept there, and in the browser as the user preset of the same number. The sound stops for about 0.1 s.">Save to Device</button>
+        <button class="btn" id="btn-clear-device" title="Make the program selected not kept in the synth's flash (NRPN Program and Clear, between Mute on and off): a Program Change to it changes nothing, and #0 cleared leaves the default patch at power-on. The user preset of the number is kept, no longer as on the synth. The sound stops for about 0.1 s.">Clear</button>
         <button class="btn" id="btn-pc-device" title="Send Program Change: the synth puts the program selected back, if it keeps one, fading the sound out and in (wait about 30 ms before sending CCs or NRPN). If Save to Device saved it from here, the user preset of the number, which it wrote too, is shown as the synth has it; otherwise the patch shown stays as it is, the changes made here go to that program, and Send Patch puts the patch shown on the synth.">Program Change</button>
       </div>
       <p class="hint" style="margin-top: 8px;">
-        MIDI In is passed through to the synth, and a CC on the channel above moves every slot
-        assigned to it. Drag from an output (right) to an input (left) to connect; near an edge, the
-        view moves along. Or click the output, move the view, and click the input. Click an input,
-        or what it reads, to pick its source from a list. Drag a
-        connected input away to unplug it; click a wire and press Delete to remove it. An unplugged parameter reads its own
-        control slot. Drag a value up or down to change it, with Shift for fine steps, or turn the
-        wheel over the one being edited. Drag the background to pan, wheel or pinch to zoom.
+        MIDI In goes on to the synth; a CC moves every slot it is assigned to. Connect by dragging (or
+        clicking) from an output to an input; click an input to pick its source. Drag an input away, or
+        a wire and Delete, to unplug: a parameter then reads its own slot. Drag a value (Shift: fine)
+        or wheel over it. Drag the background to pan; wheel or pinch to zoom.
       </p>
       <p class="hint field-key">
         CC#: <span class="cc-key shared">34</span> shared with another parameter,
@@ -1721,8 +1725,9 @@
       <div class="preset-grid" id="preset-recall"></div>
       <div class="field-label">Store (to Browser)</div>
       <div class="preset-grid" id="preset-store"></div>
-      <div class="btn-row">
-        <button class="btn" id="btn-presets-undo" title="Bring back the user preset that the last Store (or Save to Device) replaced, in the browser only (not what the synth keeps); again to redo it" disabled>Undo Store</button>
+      <div class="btn-row presets-row">
+        <button class="btn" id="btn-presets-undo" title="Bring back the user preset that the last Store, Clear (or Save to Device) replaced, in the browser only (not what the synth keeps); again to redo it" disabled>Undo Store</button>
+        <button class="btn" id="btn-presets-clear" title="Make one of the user presets #0-7 empty, asked for its number (Undo Store brings it back)">Clear</button>
         <button class="btn" id="btn-presets-import" title="Put the user presets #0-7 back from a file that Export All saved, in place of all of them">Import All</button>
         <button class="btn" id="btn-presets-export" title="Save the user presets #0-7 to a file, all of them">Export All</button>
         <input type="file" id="file-presets" accept=".json,application/json" hidden>
@@ -3668,7 +3673,7 @@
     const kept = readUndoStore();
     const button = document.getElementById('btn-presets-undo');
     button.disabled = !kept;
-    if (kept) button.title = `Bring back the user preset #${kept.number} as it was before the last Store (or Save to Device), in the browser only (not what the synth keeps); again to redo it`;
+    if (kept) button.title = `Bring back the user preset #${kept.number} as it was before the last Store, Clear (or Save to Device), in the browser only (not what the synth keeps); again to redo it`;
   }
   document.getElementById('btn-presets-undo').addEventListener('click', () => {
     const kept = readUndoStore();
@@ -3736,6 +3741,20 @@
   }
   updatePresetButtons();
   updateUndoStoreButton();
+
+  // Clear: one of the user presets made empty, asked for its number; Undo Store brings it back.
+  document.getElementById('btn-presets-clear').addEventListener('click', () => {
+    const answer = prompt('Clear which user preset? (0-7)', '');
+    if (answer == null) return;
+    const number = parseInt(answer.trim(), 10);
+    if (!(number >= 0 && number <= 7) || String(number) !== answer.trim()) {
+      alert('A number from 0 to 7.');
+      return;
+    }
+    keepForUndoStore(number);
+    try { localStorage.removeItem(PRESET_KEY + number); } catch (e) { /* storage unavailable */ }
+    updatePresetButtons();
+  });
 
   // Export All and Import All: the user presets #0-7 in one file, each as Save JSON writes a patch
   // (with whether Save to Device wrote it, and the spec hash then), or null for an empty one.
@@ -4410,6 +4429,27 @@
     }
     midiOutput.send([0xC0 | exportOptions().ch, devicePrograms.selectedIndex]);
     followProgram(devicePrograms.selectedIndex);
+  });
+
+  // Clear on the synth: the program selected not kept (NRPN Program and Clear, between Mute on and
+  // off; Mute off left out while the Mute button holds the synth silent); the user preset of the
+  // number stays, no longer marked as on the synth.
+  document.getElementById('btn-clear-device').addEventListener('click', () => {
+    if (!midiOutput) {
+      alert('Select the synth in MIDI Out first.');
+      return;
+    }
+    const program = devicePrograms.selectedIndex;
+    if (!confirm(`Clear program #${program} in the synth? It is no longer kept there${program === 0 ? ', and the synth loads the default patch at power-up' : ''}.`)) return;
+    const st = 0xB0 | exportOptions().ch;
+    midiOutput.send([...muteLine(st, true).bytes, st, 98, 4, st, 6, program, st, 98, 5, st, 6, 127,
+                     ...(userMuted ? [] : muteLine(st, false).bytes), st, 101, 127, st, 100, 127]);
+    if (midiOutput.isSpms1WebSynth) webSynthPrograms.delete(program);
+    const saved = readPreset(program);
+    if (saved && saved.onDevice) {
+      try { localStorage.setItem(PRESET_KEY + program, JSON.stringify({ ...saved, onDevice: false, specHash: undefined })); } catch (e) { /* storage unavailable */ }
+      updatePresetButtons();
+    }
   });
 
   // SysEx command 02, the name of the patch (see spms1_patching.md): 32 bytes at most, printable

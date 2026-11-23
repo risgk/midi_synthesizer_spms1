@@ -296,7 +296,7 @@ PWM Audio で min 1038 us、max 1043 us、約 78% で、MIDI のノートオン�
 - シミュレーター: "sim_spinel" と "sim_render" を Linux、macOS、Windows でビルドしてレンダリングし、
   Linux では CRuby とのレンダリングの比較もします (デフォルトのパッチ、例のスコア (例のパッチあり・なし)、プログラムの
   スコア "sim_render/examples/score_programs_example.txt": Save と、それを呼び出すプログラム・チェンジ、保存のない
-  プログラムへのもの、連続したもの)。Linux では最初に、"spms1_patch.yaml" から生成される
+  プログラムへのもの、連続したもの、クリアしたプログラムへのもの)。Linux では最初に、"spms1_patch.yaml" から生成される
   ファイルが最新かを確認します ("patch_gen/spms1_patch_gen.rb --check")。また、ランタイムの関数と変数がどこで宣言されても
   同じ型かも確認します ("spinel_mcu/lto_type_check.sh")。片側で float、もう片側で double と宣言された関数は、
   ほかでは気づけません (MCU 向けに `#define double float` でランタイムを float にしているため、起こりやすい誤りです)

@@ -316,7 +316,7 @@ order, split evenly; the common part left is the loop of the samples, the output
 - Simulators: builds "sim_spinel" and "sim_render" on Linux, macOS and Windows, renders, and compares
   the renders with CRuby on Linux: the default patch, the example score with and without the example
   patch, and the programs' score ("sim_render/examples/score_programs_example.txt": Save, and
-  Program Change back, to a program not saved, and in a row). On Linux it first checks that the files generated from
+  Program Change back, to a program not saved, in a row, and to one cleared). On Linux it first checks that the files generated from
   "spms1_patch.yaml" are up to date ("patch_gen/spms1_patch_gen.rb --check"). On Linux it also checks that every function and variable of the
   runtime has the same type wherever it is declared ("spinel_mcu/lto_type_check.sh"): a function
   declared with float on one side and double on the other goes unnoticed otherwise, which the

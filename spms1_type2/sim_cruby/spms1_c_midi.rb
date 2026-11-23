@@ -213,7 +213,7 @@ module Spms1
         elsif number == 101 || number == 100
           @nrpn_selected[ch] = false
         elsif number == 6 && @nrpn_selected[ch] && @nrpn_msb[ch] == 117
-          # The system entries: Mute (0), Reset (1), Save (2), Load (3) and Program (4).
+          # The system entries: Mute (0), Reset (1), Save (2), Load (3), Program (4) and Clear (5).
           if @nrpn_lsb[ch] == 0
             @mute[ch] = (value >= 64) ? 1 : 0
             @mute_count[ch] += 1 if value >= 64
@@ -229,6 +229,12 @@ module Spms1
             @program[ch] = 0
           elsif @nrpn_lsb[ch] == 4 && value < 8
             @program[ch] = value
+          elsif @nrpn_lsb[ch] == 5 && value >= 64 && @mute[ch] != 0
+            # Clear: the program not kept, written as a Save is.
+            @patch_image = nil
+            @patch_image_program = @program[ch]
+            @program[ch] = 0
+            @save_count[ch] += 1
           end
         elsif number == 6 && @nrpn_selected[ch] && @nrpn_msb[ch] >= 112
           set_midi_nrpn_value(ch, ((@nrpn_msb[ch] - 112) << 7) | @nrpn_lsb[ch], value)
