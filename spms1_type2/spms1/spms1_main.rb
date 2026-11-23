@@ -86,7 +86,10 @@ CONTROLLER_SMOOTHING_BLEND = 1.0 - (1.0 - 0.015625 * (48000.0 / SAMPLE_RATE.to_f
 # synth. A Save (NRPN 117/2), which comes while Mute is on, is written to the flash once the output
 # is silent: writing it stops both cores for up to 100 ms, while the audio plays the silence the
 # host fills its buffer with (see store_patch_image in spms1_midi_state.h). It is written after
-# the buffer is, outside the span that Debug Print measures.
+# the buffer is, outside the span that Debug Print measures. A Program Change to a program kept
+# fades the output out in the same way, and the program is put back once the output is silent
+# (load_program_patch), after the buffer is written, as a Save is; the output is held silent for
+# OUTPUT_HOLD_BUFFERS after it, so that the lines hold nothing of the patch before, and fades in.
 OUTPUT_FADE_SAMPLES = (SAMPLE_RATE * 3 / 1000 + AUDIO_BUFFER_WORDS - 1) / AUDIO_BUFFER_WORDS * AUDIO_BUFFER_WORDS
 OUTPUT_FADE_STEP    = 1.0 / OUTPUT_FADE_SAMPLES.to_f
 OUTPUT_HOLD_BUFFERS = (SAMPLE_RATE * 11 / 1000 + AUDIO_BUFFER_WORDS - 1) / AUDIO_BUFFER_WORDS
@@ -139,6 +142,8 @@ mute_count = 0
 mute_waiting = false
 save_count = 0
 save_waiting = false
+program_count = 0
+program_waiting = false
 output_hold_buffers = 0
 
 audio_buffer_l = Array.new(AUDIO_BUFFER_WORDS, 0.0)
@@ -153,7 +158,7 @@ spms1_fill_constant_signals(signals)
 # The default patch, written into the NRPN table the loop reads it back from. Why it is what it is,
 # spms1_patch.yaml says, above default_order.
 spms1_write_default_patch(MIDI_CH)
-# And over it the patch kept in the flash, if one is.
+# And over it program #0 kept in the flash, if it is.
 C.load_saved_patch(MIDI_CH)
 
 C.set_sample_rate(SAMPLE_RATE)
@@ -697,15 +702,22 @@ while true
     save_count = C.get_midi_save_count(MIDI_CH)
     save_waiting = true
   end
+  if C.get_midi_program_count(MIDI_CH) != program_count
+    program_count = C.get_midi_program_count(MIDI_CH)
+    program_waiting = true
+  end
   muted = C.get_midi_mute(MIDI_CH) != 0
   saving = false
+  loading = false
   if output_fade_position == 0
     mute_waiting = false
     saving = save_waiting
     save_waiting = false
+    loading = program_waiting
+    program_waiting = false
     output_hold_buffers -= (output_hold_buffers > 0) ? 1 : 0
-    output_fade_direction = (!muted && !saving && output_hold_buffers == 0) ? 1 : 0
-  elsif output_fade_position == OUTPUT_FADE_SAMPLES && (muted || mute_waiting || save_waiting)
+    output_fade_direction = (!muted && !saving && !loading && output_hold_buffers == 0) ? 1 : 0
+  elsif output_fade_position == OUTPUT_FADE_SAMPLES && (muted || mute_waiting || save_waiting || program_waiting)
     output_fade_direction = -1
     output_hold_buffers = OUTPUT_HOLD_BUFFERS
   elsif output_fade_position == OUTPUT_FADE_SAMPLES
@@ -976,6 +988,11 @@ while true
   # A Save, with the output silent; the output is held silent as long again after it.
   if saving
     C.store_patch_image(MIDI_CH)
+    output_hold_buffers = OUTPUT_HOLD_BUFFERS
+  end
+  # A Program Change, with the output silent; the output is held silent after it too.
+  if loading
+    C.load_program_patch(MIDI_CH)
     output_hold_buffers = OUTPUT_HOLD_BUFFERS
   end
 end

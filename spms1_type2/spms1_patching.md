@@ -280,10 +280,19 @@ examples below give each edit both ways.
 - CC#38 (Data Entry LSB) is ignored: every value here is 7-bit
 - CC#101 and CC#100 (RPN select) suspend data entry, so an RPN is never taken as a patch edit.
   Send CC#99 or CC#98 again to resume
-- Edits are kept only until power-off, unless the patch is saved (Save, below): at power-on the
-  synth loads the patch saved last, or the default patch if none is. Reset (below) puts the
-  default patch back; to make the default patch the one loaded at power-on again, Reset and then
-  Save
+- Edits are kept only until power-off, unless the patch is saved (Save, below) as one of the
+  programs #0-7: at power-on the synth loads program #0, or the default patch if none is saved
+  there. Reset (below) puts the default patch back; to make the default patch the one loaded at
+  power-on again, Reset and then Save as #0
+- Program Change #0-7 puts the program saved as it back, fading the output out and in (about 20 ms
+  of silence between); one to a program not saved changes no sound. Either way it selects the
+  program for Save and Load (entry 4, below). #8-127 are ignored
+    - Wait about 30 ms after a Program Change before sending CCs or NRPN: the program is put back
+      once the output has faded out, about 5 ms after it, and what arrives before that is replaced
+      by the program's. Notes are kept, but one that starts in the silence is heard only as the
+      output fades in, its attack gone by then
+    - Program Changes in a row put back the last of them only; one that arrives while the output
+      is silent puts its program back too, and holds the output silent longer
 
 ### Sending as SysEx
 
@@ -312,6 +321,10 @@ F0 7D 53 31 ch 01 h0 h1 h2 h3 h4 category entry value ... F7
   114 values at most: the editor sends a message a category, and would split one past 112
 - The system entries (category 5) are NRPN only: send Mute on before the patch and Mute off after
   it, as with NRPN
+- Command `02`, the name of the patch, which Save keeps with it: `F0 7D 53 31 ch 02 h0 h1 h2 h3 h4
+  name ... F7`, the name 0-32 bytes of printable ASCII (20-7E), in place of the name before (none
+  for 0 bytes). Reset and Init clear it, and a program put back brings its own. The synth does not
+  show it; it is kept for a later editor to read
 
 ### Categories (CC#99)
 
@@ -322,7 +335,7 @@ F0 7D 53 31 ch 01 h0 h1 h2 h3 h4 category entry value ... F7
 | 114 (2) | 0-94, 98 | Where a parameter takes its value | Signal ID, or 127 for its own control slot |
 | 115 (3) | 0-98 | Which CC fills a control slot | CC number, or 0 for none |
 | 116 (4) | 0-95, 98-100 | What a control slot holds while it has no CC, but the Mod Wheel's and Breath's | CC value |
-| 117 (5) | 0-3 | System: Mute, Reset, Save, Load (below), not a part of the patch | 0-63 or 64-127 |
+| 117 (5) | 0-4 | System: Mute, Reset, Save, Load, Program (below), not a part of the patch | 0-63 or 64-127; 0-7 for Program |
 
 Category 5 has the system entries, which act on the synth rather than set a part of the patch:
 
@@ -337,21 +350,26 @@ Category 5 has the system entries, which act on the synth rather than set a part
   value, as the sketch has them. The notes, Pitch Bend and Mute are kept, and so is the patch
   saved. Send it between Mute on and off for it to be heard as silence, since the synth may
   otherwise play a buffer of the patch half reset
-- Entry 2, Save: 64-127, while Mute is on, keeps the patch in the flash, every entry of categories
-  0-4 and the values of the CCs the controls have, in place of the one saved before; the synth
-  loads it at power-on. The Mod Wheel and Breath are played rather than set, so a CC that only
+- Entry 2, Save: 64-127, while Mute is on, keeps the patch in the flash as the program that entry 4
+  selects, every entry of categories 0-4, the values of the CCs the controls have and the name, in
+  place of the one saved there before; the synth loads program #0 at power-on, and Program Change
+  the others. The Mod Wheel and Breath are played rather than set, so a CC that only
   one of them has, whichever it is, is saved at 0, and so is every CC no control has; a CC that a parameter or a
   General control has, too or alone, is saved as it is.
   A sketch numbered otherwise -- a version whose module ids, Signal IDs or entries differ -- does
   not load a patch saved by another, which it would read as something else: it starts with the
-  default patch, and the patch saved stays in the flash until the next Save. Copying a UF2 file
+  default patch, and the patch saved stays in the flash until the next Save of it. Copying a UF2 file
   (a new version, say) keeps it too: the UF2 file does not write that part of the flash. It is
   written once the output is silent, which stops the synth and the MIDI input for about 0.1 s:
   MIDI sent meanwhile may be lost, so send Mute off after it and wait before the next. A patch
   the same as the one saved is not written again. Taken only while Mute is on, so that no stray
-  CC#6 saves; the editor's Save to Device sends Mute on, the whole patch, Save and Mute off
-- Entry 3, Load: 64-127, while Mute is on, puts the patch saved back, over the default patch, as at
-  power-on; with none saved, it does nothing
+  CC#6 saves; the editor's Save to Device sends Mute on, the whole patch, the name (as
+  SysEx), Program, Save and Mute off. A patch saved before v0.8.0, which had one, is read as
+  program #0 until #0 is saved
+- Entry 3, Load: 64-127, while Mute is on, puts the program that entry 4 selects back, over the
+  default patch, as at power-on; with none saved there, it does nothing
+- Entry 4, Program: 0-7 selects the program that Save and Load act on (#0 at power-on), as Program
+  Change does; 8-127 are ignored
 
 The run order is read from slot 0 upwards and stops at the first Module ID 0, so a patch shorter
 than 32 modules ends itself. It is separate from the module numbering: a module only sees the

@@ -78,9 +78,13 @@ SPMS1_PWMAudioOutput g_pwm_output(SPMS1_PWM_AUDIO_L_PIN, SPMS1_PWM_AUDIO_R_PIN);
 SPMS1_I2SOutput g_i2s_output;
 #endif  // !defined(SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO)
 
-// The patch kept by Save (NRPN 117/2), in the 4 KB sector the core reserves for EEPROM, at the end
-// of the flash.
-#include <EEPROM.h>
+// The programs kept by Save (NRPN 117/2), each in a 4 KB sector of the flash, below the file
+// system (none, as built here) and the EEPROM's sector at the end of the flash; and the patch that
+// Save kept in the EEPROM's sector before the programs, read as program #0 until #0 is saved.
+#include <hardware/flash.h>
+extern "C" uint8_t _EEPROM_start;
+extern "C" uint8_t _FS_start;
+extern "C" uint8_t __flash_binary_end;
 
 #if defined(SPMS1_USE_DEBUG_PRINT) && defined(SPMS1_DEBUG_PRINT_USE_USB_SERIAL)
 // Collects one report so that it goes to USB CDC whole or not at all. A plain Serial.print would
@@ -121,6 +125,7 @@ uint32_t g_debug_measurement_counted  = 0;  // 0 until the first buffer has been
 void handleNoteOn(byte channel, byte pitch, byte velocity);
 void handleNoteOff(byte channel, byte pitch, byte velocity);
 void handleControlChange(byte channel, byte number, byte value);
+void handleProgramChange(byte channel, byte number);
 void handlePitchBend(byte channel, int bend);
 void handleSystemExclusive(byte* array, unsigned size);
 
@@ -148,22 +153,50 @@ extern int sp_gc_nroots;
 #endif
 
 // The MIDI tables the synth reads, and the handlers that fill them, shared with the simulators.
-// The patch image is kept in the EEPROM here, below, not in RAM.
+// The patch images are kept in the flash here, below, not in RAM.
 #define SPMS1_STORAGE_PROVIDED
 #include "spms1_midi_state.h"
 
-// The EEPROM's copy in RAM, read where it is. getConstDataPtr, not getDataPtr, which marks the
-// EEPROM as changed, so that the next commit would write the flash whether or not anything did.
-const uint8_t* spms1_storage_data(void) {
-  return EEPROM.getConstDataPtr();
+// The programs' sectors, SPMS1_PROGRAMS of them, below the file system: none if the sketch reaches
+// them (then nothing is kept, and Save does nothing). Read where they are, through the XIP cache:
+// only at power-up and at a Program Change or Load, never while the synth plays a buffer. A macro,
+// not a static function, for which arduino-cli's prototypes would come out wrong here.
+#define SPMS1_PROGRAMS_START ((uintptr_t)&_FS_start - (uintptr_t)SPMS1_PROGRAMS * SPMS1_PATCH_IMAGE_SIZE)
+#define spms1_programs_base() \
+  (((uintptr_t)&__flash_binary_end <= SPMS1_PROGRAMS_START) ? (uint8_t*)SPMS1_PROGRAMS_START : (uint8_t*)NULL)
+
+const uint8_t* spms1_storage_data(int32_t program) {
+  uint8_t* base = spms1_programs_base();
+  if (!base || program < 0 || program >= SPMS1_PROGRAMS) {
+    return NULL;
+  }
+  const uint8_t* image = base + (uint32_t)program * SPMS1_PATCH_IMAGE_SIZE;
+  // Program #0 never saved: the patch Save kept in the EEPROM's sector before the programs, if any.
+  if (program == 0 && !spms1_patch_image_valid(image) && spms1_patch_image_valid(&_EEPROM_start)) {
+    return &_EEPROM_start;
+  }
+  return image;
 }
 
-// Called by the synth on core 1, with the output faded out, to write the patch to the flash: the
+// What of an image is written: the header and the payload, in the flash's pages of 256 bytes; the
+// rest of the sector is erased, 0xFF, which an image does not read.
+#define SPMS1_PATCH_IMAGE_WRITTEN \
+  ((SPMS1_PATCH_IMAGE_HEADER + SPMS1_PATCH_IMAGE_CATEGORIES * 128 + SPMS1_PATCH_IMAGE_TAIL + FLASH_PAGE_SIZE - 1) / FLASH_PAGE_SIZE * FLASH_PAGE_SIZE)
+
+// Called by the synth on core 1, with the output faded out, to write a program to the flash: the
 // whole ring buffer and a little more of silence first, since the DMA keeps playing the ring
-// while the flash is written; then the EEPROM, written only where it differs, and committed only
-// if anything did, which stops core 0 (the MIDI) for the erase and the program, about 50-100 ms;
-// and the writer resynced after, as it stopped longer than the ring lasts.
-void spms1_storage_write(const uint8_t* image) {
+// while the flash is written; then the program's sector, erased and written only if it holds
+// another image, which stops core 0 (the MIDI) for the erase and the program, about 50-100 ms, as
+// the EEPROM's commit does; and the writer resynced after, as it stopped longer than the ring lasts.
+void spms1_storage_write(int32_t program, const uint8_t* image) {
+  uint8_t* base = spms1_programs_base();
+  if (!base || program < 0 || program >= SPMS1_PROGRAMS) {
+    return;
+  }
+  uint8_t* sector = base + (uint32_t)program * SPMS1_PATCH_IMAGE_SIZE;
+  if (memcmp(sector, image, SPMS1_PATCH_IMAGE_WRITTEN) == 0) {
+    return;
+  }
 #if !defined(SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO)
   SPMS1_AudioRingBuffer& output = g_pwm_output;
 #else  // !defined(SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO)
@@ -172,10 +205,13 @@ void spms1_storage_write(const uint8_t* image) {
   for (uint32_t i = 0; i < output.getBufferFrames() + 8; ++i) {
     output.writeSilence();
   }
-  for (int32_t i = 0; i < SPMS1_PATCH_IMAGE_SIZE; ++i) {
-    EEPROM.write(i, image[i]);
-  }
-  EEPROM.commit();
+  uint32_t offset = (uint32_t)((uintptr_t)sector - (uintptr_t)XIP_BASE);
+  noInterrupts();
+  rp2040.idleOtherCore();
+  flash_range_erase(offset, SPMS1_PATCH_IMAGE_SIZE);
+  flash_range_program(offset, image, SPMS1_PATCH_IMAGE_WRITTEN);
+  rp2040.resumeOtherCore();
+  interrupts();
   output.resync();
 }
 
@@ -292,9 +328,6 @@ void setup1() {
   __asm volatile("vmrs %0, fpscr" : "=r"(fpscr));
   fpscr |= (1u << 24);  // FZ
   __asm volatile("vmsr fpscr, %0" : : "r"(fpscr));
-
-  // The patch kept, read from the flash before the synth loads it at power-up.
-  EEPROM.begin(SPMS1_PATCH_IMAGE_SIZE);
 }
 
 void loop1() {
@@ -321,6 +354,7 @@ void setup() {
   USB_MIDI.setHandleNoteOn(handleNoteOn);
   USB_MIDI.setHandleNoteOff(handleNoteOff);
   USB_MIDI.setHandleControlChange(handleControlChange);
+  USB_MIDI.setHandleProgramChange(handleProgramChange);
   USB_MIDI.setHandlePitchBend(handlePitchBend);
   USB_MIDI.setHandleSystemExclusive(handleSystemExclusive);
   USB_MIDI.begin(MIDI_CHANNEL_OMNI);
@@ -331,6 +365,7 @@ void setup() {
   UART_MIDI.setHandleNoteOn(handleNoteOn);
   UART_MIDI.setHandleNoteOff(handleNoteOff);
   UART_MIDI.setHandleControlChange(handleControlChange);
+  UART_MIDI.setHandleProgramChange(handleProgramChange);
   UART_MIDI.setHandlePitchBend(handlePitchBend);
   UART_MIDI.setHandleSystemExclusive(handleSystemExclusive);
   UART_MIDI.begin(MIDI_CHANNEL_OMNI);  // Begins the serial too, and only once: SerialPIO cannot take a second begin
@@ -398,6 +433,19 @@ void loop() {
     SPMS1_DEBUG_PRINT_SERIAL.print(g_i2s_output.getUnderruns());
 #endif  // !defined(SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO)
     SPMS1_DEBUG_PRINT_SERIAL.println();
+
+    // The program selected and the name of the patch the synth has (channel 1, as the synth
+    // plays), in every report, the same bytes each time (the name padded to 32 characters), so that
+    // a report costs core 0 the same whatever changed; core 1 is not touched.
+    char program_line[] = "\e[5;1H\e[Kprogram #0 " "                                ";
+    const uint32_t name_at = sizeof(program_line) - 1 - SPMS1_PATCH_NAME_SIZE;
+    program_line[name_at - 2] = (char)('0' + (g_midi_program[0] & 7));
+    for (uint32_t i = 0; i < SPMS1_PATCH_NAME_SIZE; ++i) {
+      uint8_t c = g_spms1_patch_name[0][i];
+      program_line[name_at + i] = (c >= 0x20 && c <= 0x7E) ? (char)c : ' ';
+    }
+    SPMS1_DEBUG_PRINT_SERIAL.print(program_line);
+    SPMS1_DEBUG_PRINT_SERIAL.println();
 #if defined(SPMS1_DEBUG_PRINT_USE_USB_SERIAL)
 #if defined(SPMS1_USE_USB_MIDI)
     mutex_enter_blocking(&__usb_mutex);
@@ -431,6 +479,11 @@ void handleNoteOff(byte channel, byte pitch, byte velocity)
 void handleControlChange(byte channel, byte number, byte value)
 {
   spms1_handle_control_change(channel - 1, number, value);
+}
+
+void handleProgramChange(byte channel, byte number)
+{
+  spms1_handle_program_change(channel - 1, number);
 }
 
 void handlePitchBend(byte channel, int bend)
