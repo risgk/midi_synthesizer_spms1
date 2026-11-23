@@ -61,6 +61,8 @@ Required Software for Modification
     - This sketch is tested with version 6.4.0: <https://github.com/earlephilhower/arduino-pico/releases/tag/6.4.0>
     - Info: <https://github.com/earlephilhower/arduino-pico>
     - Board: "Raspberry Pi Pico 2", with USB Stack: "Adafruit TinyUSB" in the "Tools" menu
+    - Flash Size: "4MB (no FS)", the default: the programs saved are kept below the file system, and a build with one
+      would not find them
 - Arduino MIDI Library (by Francois Best, lathoub)
     - This sketch is tested with version 5.0.2: <https://github.com/FortySevenEffects/arduino_midi_library/releases/tag/5.0.2>
     - Info: <https://github.com/FortySevenEffects/arduino_midi_library>
@@ -129,8 +131,9 @@ editor's Controls tab and the nodes of its Patch tab. Open "spms1_editor.html" (
    included; drag a wire from an output to an input or a parameter to change what feeds it. The
    [Examples](./spms1_patching.md#examples) of Patching give ideas, each with what to wire
 
-Undo takes a change back, Initialize Values puts the values back and keeps the wiring, and Init
-puts the default patch back. Keep a patch with Save JSON, or in the synth with Save to Device.
+Undo takes a change back, Reset Values puts the values back and keeps the wiring, and Init
+puts the default patch (Init) back. Keep a patch with Save JSON, or in the synth with Save to Device, as one of
+its programs #0-7, which Program Change #0-7 puts back.
 
 
 ### Web Editor
@@ -167,8 +170,9 @@ puts the default patch back. Keep a patch with Save JSON, or in the synth with S
       from, node by node, narrowed by what is typed
     - Every value it sets or shows runs from 4 to 124, the range the synth uses; one outside it,
       from MIDI In or a patch file, is drawn in to the nearer end, which reads the same
-    - Its Initialize Values sets each CC value and each parameter's value with no CC back to what it
-      powers up at, and sends them, as every change is sent; the wiring is kept
+    - Its Reset Values sets each CC value and each parameter's value with no CC back to what the patch had as it was
+      loaded or saved last (Load JSON, Recall, a Program Change followed, Store, Save to Device, Init), or with Shift to
+      those of Init (the default patch), and sends them, as every change is sent; the wiring is kept
 - Built-in software keyboard for note input and testing
     - Beside the keys, a pitch bend wheel, from -8192 to +8191, springs back to the center when let go,
       a mod wheel moves the CC that Mod Wheel is on in the patch, and a breath wheel the CC that Breath is on
@@ -184,7 +188,11 @@ puts the default patch back. Keep a patch with Save JSON, or in the synth with S
     - Shows the keyboard's signals, the Mod Wheel and Breath on a Controller node, and General 1 and 2,
       whose values are a part of the patch, on a General node of their own (a General panel on the
       Controls tab), though the synth has no such module
-    - Saves and loads patches as JSON
+    - Saves and loads patches as JSON ("patches/Init-spms1_type2.json" is Init, the default patch, as Save JSON saves it)
+    - Keeps 8 patches in the browser, the user presets #0-7 (Presets panel), as PRA32-U2 Editor does: Store (to Browser)
+      keeps the patch shown with a name (up to 32 ASCII characters, which the patch takes), and Recall (from
+      Browser) puts one back (an empty one as Init); Undo Store brings back the one the last Store (or Save to Device)
+      replaced, in the browser only (again to redo it); Export All and Import All save them to a file and put them back
     - A patch saved as JSON or copied keeps a CC that only the Mod Wheel or Breath has at what it
       powers up at, 0.0, as Save to Device does: they are played rather than set; Send Patch sends
       where they are
@@ -197,7 +205,14 @@ puts the default patch back. Keep a patch with Save JSON, or in the synth with S
       about 0.7 s at 31250 bps and about 0.5 s by USB MIDI
     - Its Mute button mutes the synth (NRPN Mute), to change the patch unheard, and shows a Mute
       arriving at MIDI In; a Reset (NRPN) arriving at MIDI In puts the patch shown back to the default too
-    - Its Save to Device keeps the patch in the synth's flash (NRPN Save), which the synth loads at power-on
+    - Its Save to Device keeps the patch in the synth's flash as the program selected, #0-7 (NRPN Program and Save), with
+      its name (32 characters, as SysEx), and in the browser as the user preset of the same number; the synth loads #0
+      at power-on. Program Change sends Program Change #0-7, which puts the program back on the synth, and so does one
+      arriving at MIDI In: the user preset of the number, if Save to Device wrote it (and Store has not written it
+      since, and with an editor of the same version or one numbered alike), is shown as the synth has it, with nothing sent, so that the patch is edited from there; otherwise the
+      patch shown stays as it is, the changes made after it go to that program, and Send Patch, marked with a dashed line
+      until it is pressed, puts the patch shown on the synth. With SPMS-1 Web, only the programs saved to it since the
+      page was opened are followed
     - It does not read the patch from the synth (e.g. the one saved, which the synth loads at power-on): the synth
       takes the editor's when a device is chosen in "MIDI Out", or by Send Patch, in place of its own
     - The side panels (Patch, Run Order, Export) fold to their headings with a click, each remembered;

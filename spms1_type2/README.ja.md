@@ -59,6 +59,8 @@ MIDI Synthesizer SPMS-1 (type-2) v0.7.3
     - このスケッチはバージョン 6.4.0 で動作確認しています: <https://github.com/earlephilhower/arduino-pico/releases/tag/6.4.0>
     - 情報: <https://github.com/earlephilhower/arduino-pico>
     - ボード: "Raspberry Pi Pico 2"、"ツール" メニューの USB Stack: "Adafruit TinyUSB"
+    - Flash Size: "4MB (no FS)" (デフォルト)。保存したプログラムはファイルシステムの手前に置くので、ファイルシステムの
+      あるビルドでは見つけられません
 - Arduino MIDI Library (by Francois Best, lathoub)
     - このスケッチはバージョン 5.0.2 で動作確認しています: <https://github.com/FortySevenEffects/arduino_midi_library/releases/tag/5.0.2>
     - 情報: <https://github.com/FortySevenEffects/arduino_midi_library>
@@ -106,11 +108,11 @@ MIDI Synthesizer SPMS-1 (type-2) v0.7.3
 
 ### はじめかた
 
-起動時の音から自分のパッチまで、一段ずつ進む道筋です。デフォルトパッチの[ブロック図](#ブロック図)を
+起動時の音から自分のパッチまで、一段ずつ進む道筋です。デフォルトのパッチの[ブロック図](#ブロック図)を
 手元に置いて進めます。図のモジュールは、エディタの Controls タブのパネル、Patch タブのノードと同じです。
 "spms1_editor.html" を開き（[Web エディタ](#web-エディタ)を参照）、"MIDI Out" でシンセか SPMS-1 Web (Built-in) を選びます。
 
-1. お気に入り: Controls タブは "Show favorites only" にチェックが入った状態で開き、デフォルトパッチで
+1. お気に入り: Controls タブは "Show favorites only" にチェックが入った状態で開き、デフォルトのパッチで
    お気に入りになっている 49 個のパラメータを表示します:
    Pitch 1 Glide・Out 1 Glide Sw・Out 2 Glide Sw・Bend Amt・Out 1 Bend Sw・Stretch、EG 1 Attack・Decay・Sustain・Release Sw、LFO 1 Wave・Rate・Level・Reset Sw、Osc 1 Wave・PW・Pitch Mod 1 Amt・Pitch Mod 1 Sw・Pitch Mod 2 Amt・PW Mod 1 Amt・PW Mod 2 Amt、Osc 2 Wave・Pitch Coarse・Pitch Fine・Pitch Mod 1 Amt・Pitch Mod 2 Amt・Sync Sw、Noise 1 Color、Mixer 2 Level 1〜4、
    Filter 2 Cutoff・Resonance・Drive・Mode・Pitch Amt・Mod 1 Amt・Mod 1 Pol・Mod 2 Amt、
@@ -118,7 +120,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.7.3
    気に入ったものは星で追加できます。Osc 2 の各 Pitch Mod Amt は Osc 1 と、Filter 1 の Resonance（CC なし）以外の
    各パラメータは Filter 2 と同じ CC なので、片方のスライダーを動かすと、表示されているかどうかに関わらず相手も一緒に動きます
 2. CC のあるパラメータ: "Show favorites only" のチェックを外すと、CC のあるパラメータがすべて表示されます。
-   デフォルトパッチでの働きと起動時の値は、ブロック図の下に説明があります。MIDI コントローラのつまみでも
+   デフォルトのパッチでの働きと起動時の値は、ブロック図の下に説明があります。MIDI コントローラのつまみでも
    動かせます
 3. CC のないパラメータ: "Show parameters with no CC" にチェックを入れると、残りが青で表示されます
    （Mixer 1 の各レベルや Pitch 1 の Out 2 Bend Sw など）。そのスライダーはスロットが保持する値を設定し、NRPN で
@@ -127,8 +129,8 @@ MIDI Synthesizer SPMS-1 (type-2) v0.7.3
    出力から入力やパラメータへワイヤーをドラッグすると、その供給元が変わります。パッチングの
    [例](./spms1_patching.ja.md#例)に、配線の仕方付きのアイデアがあります
 
-Undo で変更を戻せます。Initialize Values は値を戻して配線は保ち、Init はデフォルトパッチに戻します。
-パッチは Save JSON で、またはシンセ本体に Save to Device で保存できます。
+Undo で変更を戻せます。Reset Values は値を戻して配線は保ち、Init はデフォルトのパッチに戻します。
+パッチは Save JSON で、またはシンセ本体に Save to Device でプログラム #0-7 として保存でき、プログラム・チェンジ #0-7 で呼び出せます。
 
 
 ### Web エディタ
@@ -163,7 +165,9 @@ Undo で変更を戻せます。Initialize Values は値を戻して配線は保
       文字を打つと絞り込めます
     - 設定・表示する値はどれも、シンセが使う範囲の 4〜124 です。MIDI In やパッチファイルから範囲外の値が届いたら、
       近い方の端に寄せます。シンセにとっては同じ値です
-    - Initialize Values は、各 CC の値と、CC のないパラメータの値を起動時の値に戻して送ります。どの変更もすぐ送るのと同じです。結線はそのままです
+    - Reset Values は、各 CC の値と、CC のないパラメータの値を、パッチを最後に読み込んだか保存したとき (Load JSON、Recall、
+      追従したプログラム・チェンジ、Store、Save to Device、Init) の値に戻して送ります。Shift を押しながらなら、Init (デフォルトの
+      パッチ) の値に戻します。どの変更もすぐ送るのと同じです。結線はそのままです
 - 音を出して試すためのソフトウェア鍵盤を内蔵しています
     - 鍵盤の横にピッチベンドホイール（-8192〜+8191、離すと中央に戻ります）と、パッチで Mod Wheel に割り当てた
       CC を動かすモジュレーションホイールと、Breath に割り当てた CC を動かすブレスホイールがあります
@@ -177,7 +181,11 @@ Undo で変更を戻せます。Initialize Values は値を戻して配線は保
       つながります
     - 鍵盤のシグナルと Mod Wheel、Breath は Controller ノードに、値がパッチの一部になる General 1・2 は、シンセにはない
       モジュールですが、便宜上 General ノード（Controls タブでは General パネル）に分けて表示します
-    - パッチを JSON で保存・読み込みします
+    - パッチを JSON で保存・読み込みします ("patches/Init-spms1_type2.json" は、Init (デフォルトのパッチ) を Save JSON で保存したものです)
+    - PRA32-U2 Editor と同じく、ブラウザーにパッチを 8 つ (ユーザー・プリセット #0-7、Presets パネル) 保存できます。
+      Store (to Browser) で名前 (ASCII 32 文字まで、パッチの名前になります) を付けて保存し、Recall (from Browser)
+      で読み込みます (空のものは Init と同じ)。Undo Store で、最後の Store (または Save to Device) で上書きしたものを
+      ブラウザー側だけ戻せます (もう一度でやり直し)。Export All と Import All で、まとめてファイルに保存・読み込みできます
     - JSON で保存したりコピーしたりするパッチでは、Save to Device と同じく、Mod Wheel か Breath だけに割り当てた CC を起動時の値 (0.0) にします。
       どちらも設定するものではなく演奏で動かすものだからです。Send Patch は今の位置を送ります
     - パッチを MIDI バイト列 (NRPN か SysEx) または NRPN リストとしてコピーするか、Web MIDI で送信します
@@ -188,7 +196,13 @@ Undo で変更を戻せます。Initialize Values は値を戻して配線は保
       (31250 bps で約 0.7 秒、USB MIDI で約 0.5 秒) です
     - Mute ボタンでシンセをミュート (NRPN の Mute) して、音を出さずにパッチを変えられます。MIDI In に届いた Mute も
       ボタンに表示します。MIDI In に届いたリセット (NRPN の Reset) では、エディタのパッチもデフォルトに戻ります
-    - Save to Device で、パッチをシンセのフラッシュに保存します (NRPN の Save)。シンセは電源投入時にこれを読み込みます
+    - Save to Device で、パッチをシンセのフラッシュに、選んだプログラム #0-7 として名前 (32 文字、SysEx) と一緒に
+      保存し (NRPN の Program と Save)、ブラウザーにも同じ番号のユーザー・プリセットとして保存します。シンセは電源投入時に
+      #0 を読み込みます。Program Change ボタンでプログラム・チェンジ #0-7 を送ると (MIDI In に届いたときも)、シンセが
+      そのプログラムを呼び出します。その番号のユーザー・プリセットを Save to Device で書いていれば (その後 Store で
+      書き換えていなければ。番号付けの同じ版のエディタのとき)、エディタにもそれを表示し、何も送らずにそこから編集を続けられます。そうでなければエディタの
+      パッチはそのままで、その後の変更は呼び出したプログラムに送られます。エディタのパッチをシンセに送るには Send Patch を
+      押します (押すまで点線で示します)。SPMS-1 Web では、ページを開いてから保存したプログラムだけを表示します
     - エディタはシンセのパッチ (電源投入時に読み込んだ保存パッチなど) を読み出しません。"MIDI Out" でデバイスを選んだときや
       Send Patch で、エディタのパッチがシンセのパッチに置き換わります
     - サイドパネル (Patch、Run Order、Export) は見出しのクリックで畳め、それぞれの状態を覚えておきます。
