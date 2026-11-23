@@ -1697,8 +1697,8 @@
       </div>
       <p class="load-error" id="load-error" role="alert" hidden></p>
       <div class="btn-row">
-        <button class="btn" id="btn-undo" title="Ctrl+Z">Undo</button>
-        <button class="btn" id="btn-redo" title="Ctrl+Y">Redo</button>
+        <button class="btn" id="btn-undo" title="Take back the last change of the patch shown (an edit, Recall, Load JSON, Init, a Program Change followed), sent to the synth too. The user presets in the browser are brought back by Undo Store (Presets). Ctrl+Z">Undo</button>
+        <button class="btn" id="btn-redo" title="Make again the change of the patch shown that Undo took back, sent to the synth too. Ctrl+Y">Redo</button>
         <button class="btn" id="btn-init">Init</button>
       </div>
       <div class="btn-row device-row" style="margin-top: 6px;">
@@ -1726,7 +1726,7 @@
       <div class="field-label">Store (to Browser)</div>
       <div class="preset-grid" id="preset-store"></div>
       <div class="btn-row presets-row">
-        <button class="btn" id="btn-presets-undo" title="Bring back the user preset that the last Store, Clear (or Save to Device) replaced, in the browser only (not what the synth keeps); again to redo it" disabled>Undo Store</button>
+        <button class="btn" id="btn-presets-undo" title="Bring back the user preset that the last Store, Clear (or Save to Device) replaced, in the browser only (not what the synth keeps, nor the patch shown, which Undo in Patch takes back); again to redo it" disabled>Undo Store</button>
         <button class="btn" id="btn-presets-clear" title="Make one of the user presets #0-7 empty, asked for its number (Undo Store brings it back)">Clear</button>
         <button class="btn" id="btn-presets-import" title="Put the user presets #0-7 back from a file that Export All saved, in place of all of them">Import All</button>
         <button class="btn" id="btn-presets-export" title="Save the user presets #0-7 to a file, all of them">Export All</button>
@@ -3673,7 +3673,7 @@
     const kept = readUndoStore();
     const button = document.getElementById('btn-presets-undo');
     button.disabled = !kept;
-    if (kept) button.title = `Bring back the user preset #${kept.number} as it was before the last Store, Clear (or Save to Device), in the browser only (not what the synth keeps); again to redo it`;
+    if (kept) button.title = `Bring back the user preset #${kept.number} as it was before the last Store, Clear (or Save to Device), in the browser only (not what the synth keeps, nor the patch shown, which Undo in Patch takes back); again to redo it`;
   }
   document.getElementById('btn-presets-undo').addEventListener('click', () => {
     const kept = readUndoStore();
