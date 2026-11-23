@@ -24,7 +24,7 @@ revised.
     - Editor: **Reset Values** (Initialize Values before) puts the values back to the patch's as it was loaded or saved
       last, or with Shift to those of Init (the default patch)
     - "patches/Init-spms1_type2.json": the default patch, Init, as the editor's Save JSON saves it
-    - sim_load: `--program-load` counts putting a program back (about 115 us, once, while silent); the tests of the
+    - sim_load: `--program-load` counts putting a program back (about 71 us, once, while silent); the tests of the
       programs in CI (sim_render compared with CRuby, and SPMS-1 Web)
 - v0.7.3 (2026-11-23):
     - Built with Arduino-Pico 6.4.0 (6.3.0 before); the same load and RAM in the estimate

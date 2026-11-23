@@ -53,7 +53,7 @@ MIDI Synthesizer SPMS-1 (type-2): Development
       written over
 - A Program Change #0-7 to a program kept fades the output out, and core 1 puts the program back
   once it is silent (`load_program_patch`, after the buffer is written), holds it silent for 11 ms
-  and fades it in, as for Mute. Putting it back takes about 115 us at v0.8.0 (`sh sim_load/estimate.sh
+  and fades it in, as for Mute. Putting it back takes about 71 us at v0.8.0 (`sh sim_load/estimate.sh
   --program-load`), at most once a buffer, while silent: the buffer after it may start that much
   later, which the ring absorbs
 
@@ -260,6 +260,10 @@ or not, as the modules are meant to:
 | Version | Note held (avg / max) | No note (avg / max) |
 | :-- | --: | --: |
 | v0.7.3 | 191276 / 191580 cycles, 1245 us (93%) | 190807 / 191002 cycles, 1242 us (93%) |
+| develop (e348885) | 191304 / 191608 cycles, 1245 us (93%) | 190787 / 190982 cycles, 1242 us (93%) |
+
+Putting a program back at a Program Change (`--program-load`, once, while silent, outside the buffer's span): develop
+(e348885) 6593 instructions, 10882 cycles, 71 us.
 
 The estimate is above Debug Print on the device: at v0.7.2 and v0.7.1 as at v0.6.1, the synth core being the same; about 10% at v0.7.0
 (with the input clip of Filter Drive, estimated at 1290 us on average and 1292 us at most: min 1149 us, max 1153 us with I2S,
