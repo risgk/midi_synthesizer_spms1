@@ -21,8 +21,8 @@ module Spms1
     # Mute (NRPN 117/0), as in spms1_midi_state.h.
     @mute = Array.new(16, 0)
     @mute_count = Array.new(16, 0)
-    # Save (NRPN 117/2), Load (117/3) and Program (117/4), and Program Change #0-7, as in
-    # spms1_midi_state.h, with the programs kept in RAM: the patch made as Save arrives, with its
+    # Save (NRPN 117/2), Load (117/3) and Program (117/4, the program the next Save or Load acts on,
+    # #0 again after it), and Program Change #0-7, as in spms1_midi_state.h, with the programs kept in RAM: the patch made as Save arrives, with its
     # program, and the ones written when the synth stores them, as [NRPN table, CC values, run
     # order ranks, name], or nil; and the name of the patch, 32 bytes.
     @save_count = Array.new(16, 0)
@@ -84,7 +84,6 @@ module Spms1
 
       def handle_program_change(ch, program)
         return unless program < 8
-        @program[ch] = program
         return unless @stored_images[program]
         @program_pending[ch] = program
         @program_count[ch] += 1
@@ -223,9 +222,11 @@ module Spms1
           elsif @nrpn_lsb[ch] == 2 && value >= 64 && @mute[ch] != 0
             make_patch_image(ch)
             @patch_image_program = @program[ch]
+            @program[ch] = 0
             @save_count[ch] += 1
           elsif @nrpn_lsb[ch] == 3 && value >= 64 && @mute[ch] != 0
             load_saved_patch(ch)
+            @program[ch] = 0
           elsif @nrpn_lsb[ch] == 4 && value < 8
             @program[ch] = value
           end

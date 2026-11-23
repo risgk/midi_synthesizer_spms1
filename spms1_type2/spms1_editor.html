@@ -3544,6 +3544,7 @@
   nameInput.addEventListener('change', () => {
     if (nameBefore && nameBefore !== JSON.stringify(serialize(state))) pushHistory(nameBefore);
     nameBefore = JSON.stringify(serialize(state));
+    sendChanges();  // the name, as SysEx (see sendName)
   });
 
   document.getElementById('btn-save').addEventListener('click', () => {
@@ -3629,6 +3630,7 @@
       state.name = name.trim();
       document.getElementById('patch-name').value = state.name;
       updateExport();
+      sendChanges();  // the name, as SysEx (see sendName)
     }
     writePreset(number, false);
     saveLocal();
@@ -3700,6 +3702,7 @@
     state = deserialize(saved);
     setBaseline();
     if (midiOutput) lastSent = snapshotTable();
+    nameOnSynth = nameBytes(state.name);  // as Save to Device sent it
     markProgramPutBack(false);
     renderAll();
     fitView();
@@ -4269,13 +4272,30 @@
     opts.muteAfter = !userMuted;
     buildMessages(opts).forEach(l => midiOutput.send(l.bytes));
     lastSent = snapshotTable();
+    sendName();
     markProgramPutBack(false);
   }
 
   // After a Program Change the synth has the program put back, not the patch shown: the changes
   // made here still go out as they are made, to that program, and Send Patch, marked meanwhile,
   // puts the whole patch shown on the synth, when the user chooses to.
+  // The name of the patch on the synth, as SysEx command 02 (see nameSysex): sent with the whole
+  // patch and whenever it changes after, so that the synth's (shown by its Debug Print, and kept by
+  // a Save) is the one shown here. nameOnSynth is the name last sent, as its bytes, or null while
+  // the synth has a name the editor does not know (a program put back that is not shown here), when
+  // it is not sent until the whole patch is.
+  let nameOnSynth = null;
+  function nameBytes(name) {
+    return nameSysex(0, name).slice(11, -1).join(',');
+  }
+  function sendName() {
+    if (!midiOutput || !outputTakesSysEx()) return;
+    midiOutput.send(nameSysex(exportOptions().ch, state.name));
+    nameOnSynth = nameBytes(state.name);
+  }
+
   function markProgramPutBack(on) {
+    if (on) nameOnSynth = null;
     const button = document.getElementById('btn-send');
     button.classList.toggle('differs', on);
     button.title = on
@@ -4313,6 +4333,7 @@
       sendAll();
       return;
     }
+    if (nameOnSynth !== null && nameOnSynth !== nameBytes(state.name)) sendName();
     const st = 0xB0 | exportOptions().ch;
     const now = snapshotTable();
     const messages = [];
@@ -4365,7 +4386,10 @@
     lastSent = snapshotTable();
     const program = devicePrograms.selectedIndex;
     // The name goes with it as SysEx; the synth keeps 32 bytes of printable ASCII.
-    if (opts.sysex) midiOutput.send(nameSysex(opts.ch, state.name));
+    if (opts.sysex) {
+      midiOutput.send(nameSysex(opts.ch, state.name));
+      nameOnSynth = nameBytes(state.name);
+    }
     const save = [st, 99, NRPN_SYSTEM_MSB, st, 98, 4, st, 6, program, st, 98, 2, st, 6, 127];
     midiOutput.send([...save, ...(userMuted ? [] : muteLine(st, false).bytes), st, 101, 127, st, 100, 127]);
     // The same patch as the user preset of the number, marked as on the synth, so that a Program

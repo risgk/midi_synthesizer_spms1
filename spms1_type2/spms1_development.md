@@ -20,6 +20,9 @@ MIDI Synthesizer SPMS-1 (type-2): Development
       each while anything sounds; it should stay at 0. The writes to the output come after the span
       `min` and `max` measure, about 40 us a buffer with PWM Audio and less with I2S, so a count
       here is the first sign that a buffer runs over
+    - `patch`: the name of the patch the synth has (channel 1), and `#0`-`#7` on the lines below:
+      those of the programs kept ("---" for none), one a report in turn, all of them in about 2 s;
+      every report prints the same bytes, so that it costs core 0 the same whatever changed
 
 
 ## Runtime

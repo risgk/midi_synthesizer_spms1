@@ -434,15 +434,34 @@ void loop() {
 #endif  // !defined(SPMS1_USE_I2S_INSTEAD_OF_PWM_AUDIO)
     SPMS1_DEBUG_PRINT_SERIAL.println();
 
-    // The program selected and the name of the patch the synth has (channel 1, as the synth
-    // plays), in every report, the same bytes each time (the name padded to 32 characters), so that
-    // a report costs core 0 the same whatever changed; core 1 is not touched.
-    char program_line[] = "\e[5;1H\e[Kprogram #0 " "                                ";
-    const uint32_t name_at = sizeof(program_line) - 1 - SPMS1_PATCH_NAME_SIZE;
-    program_line[name_at - 2] = (char)('0' + (g_midi_program[0] & 7));
+    // The name of the patch the synth has (channel 1, as the synth plays), and that of one of the
+    // programs #0-7 kept, a program a report in turn (all of them in 8 reports, about 2 s), "---" for
+    // one not kept or not readable by this sketch (the magic, the layout and the spec hash, not the
+    // hash of the payload, read from the flash): the same bytes each report (the names padded to 32
+    // characters), so that a report costs core 0 the same whatever changed; core 1 is not touched.
+    char patch_line[] = "\e[5;1H\e[Kpatch " "                                ";
+    const uint32_t patch_name_at = sizeof(patch_line) - 1 - SPMS1_PATCH_NAME_SIZE;
     for (uint32_t i = 0; i < SPMS1_PATCH_NAME_SIZE; ++i) {
       uint8_t c = g_spms1_patch_name[0][i];
-      program_line[name_at + i] = (c >= 0x20 && c <= 0x7E) ? (char)c : ' ';
+      patch_line[patch_name_at + i] = (c >= 0x20 && c <= 0x7E) ? (char)c : ' ';
+    }
+    SPMS1_DEBUG_PRINT_SERIAL.print(patch_line);
+    SPMS1_DEBUG_PRINT_SERIAL.println();
+
+    static uint8_t s_shown_program = 0;
+    s_shown_program = (s_shown_program + 1) & (SPMS1_PROGRAMS - 1);
+    char program_line[] = "\e[06;1H\e[K#0 " "                                ";  // the row in two digits, 06-13
+    const uint32_t program_name_at = sizeof(program_line) - 1 - SPMS1_PATCH_NAME_SIZE;
+    program_line[2] = (char)('0' + (6 + s_shown_program) / 10);
+    program_line[3] = (char)('0' + (6 + s_shown_program) % 10);
+    program_line[program_name_at - 2] = (char)('0' + s_shown_program);
+    const uint8_t* image = spms1_storage_data(s_shown_program);
+    uint32_t readable = image && image[0] == 'S' && image[1] == 'P' && image[2] == 'M' && image[3] == '2' &&
+                        image[4] == SPMS1_PATCH_IMAGE_VERSION && spms1_get_u32(image + 16) == SPMS1_PATCH_SPEC_HASH;
+    const uint8_t* name = image ? image + SPMS1_PATCH_IMAGE_HEADER + SPMS1_NRPN_SIZE + 128 + SPMS1_RUN_ORDER_SIZE : NULL;
+    for (uint32_t i = 0; i < SPMS1_PATCH_NAME_SIZE; ++i) {
+      uint8_t c = readable ? name[i] : (uint8_t)((i < 3) ? '-' : ' ');
+      program_line[program_name_at + i] = (c >= 0x20 && c <= 0x7E) ? (char)c : ' ';
     }
     SPMS1_DEBUG_PRINT_SERIAL.print(program_line);
     SPMS1_DEBUG_PRINT_SERIAL.println();

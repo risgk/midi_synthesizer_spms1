@@ -50,11 +50,12 @@ uint8_t  g_midi_nrpn_selected[16]       = {0};  // 0 until CC 99 or 98 arrives, 
 // last write wins, wherever its slot is. 0 is a slot never written. The count passes the int32 the
 // synth reads it as after 2 billion writes, which no patch editing reaches.
 #define SPMS1_RUN_ORDER_SIZE (32)
-// The program that Save and Load act on (NRPN 117/4, or the last Program Change), #0 at power-up;
-// and the name of the patch, which a SysEx sets (see below) and a Save keeps with it (see the
+// The program that the next Save or Load acts on, as NRPN 117/4 gives it before them, #0 at
+// power-up and again after each (there is no program the synth is "on": a Program Change only puts
+// one back); and the name of the patch, which a SysEx sets (see below) and a Save keeps with it (see the
 // patch image): printable ASCII, 0 after it, all 0 for none.
 #define SPMS1_PATCH_NAME_SIZE (32)
-uint8_t  g_midi_program[16] = {0};
+uint8_t  g_midi_program_target[16] = {0};
 uint8_t  g_spms1_patch_name[16][SPMS1_PATCH_NAME_SIZE] = {{0}};
 uint32_t g_midi_run_order_writes[16]                       = {0};
 uint32_t g_midi_run_order_written[16][SPMS1_RUN_ORDER_SIZE] = {{0}};
@@ -63,10 +64,10 @@ uint32_t g_midi_run_order_written[16][SPMS1_RUN_ORDER_SIZE] = {{0}};
 // so they are not kept in the NRPN table and a patch does not include them. Entry 0, Mute, mutes
 // the output at 64-127 and unmutes it at 0-63, for while a patch is sent; entry 1, Reset, puts the
 // patch back to the default at 64-127, as at power-up (spms1_reset_patch); entry 2, Save, keeps
-// the patch in the flash at 64-127, as the program that entry 4, Program, selects, and entry 3,
+// the patch in the flash at 64-127, as the program that entry 4, Program, gives, and entry 3,
 // Load, puts that program back, both only while Mute is on, so that no stray message saves or
-// loads (see the patch image below); entry 4, Program, selects the program #0-7 (0-7; 8-127 are
-// ignored), as a Program Change does too.
+// loads (see the patch image below); entry 4, Program, gives the program #0-7 that the next Save
+// or Load acts on (0-7; 8-127 are ignored), #0 again after it.
 #define SPMS1_NRPN_SYSTEM_MSB     (SPMS1_NRPN_MSB_BASE + 5)
 #define SPMS1_NRPN_SYSTEM_MUTE    (0)
 #define SPMS1_NRPN_SYSTEM_RESET   (1)
@@ -405,30 +406,28 @@ int32_t spms1_apply_patch_image(uint8_t midi_ch, const uint8_t* image) {
   return 1;
 }
 
-// Load, and power-up: the program selected (#0 at power-up), if it is kept.
+// Load, and power-up: the program given (#0 at power-up), if it is kept.
 void load_saved_patch(uint8_t midi_ch) {
   if (midi_ch >= 16) {
     return;
   }
-  spms1_apply_patch_image(midi_ch, spms1_storage_data(g_midi_program[midi_ch]));
+  spms1_apply_patch_image(midi_ch, spms1_storage_data(g_midi_program_target[midi_ch]));
 }
 
 // The synth, with the output silent after a Save: the image made then goes to the flash, as the
-// program selected when the Save arrived. The host leaves the flash alone if it holds the same
+// program given when the Save arrived. The host leaves the flash alone if it holds the same
 // image already.
 void store_patch_image(uint8_t midi_ch) {
   (void)midi_ch;
   spms1_storage_write(g_spms1_patch_image_program, g_spms1_patch_image);
 }
 
-// A Program Change #0-7 selects the program for Save and Load, and, if the program is kept, has
-// the synth put it back (see g_midi_program_count); one to a program not kept changes no sound,
-// and #8-127 are ignored.
+// A Program Change #0-7 to a program kept has the synth put it back (see g_midi_program_count);
+// one to a program not kept changes nothing, and #8-127 are ignored.
 void spms1_handle_program_change(uint8_t midi_ch, uint8_t program) {
   if (midi_ch >= 16 || program >= SPMS1_PROGRAMS) {
     return;
   }
-  g_midi_program[midi_ch] = program;
   if (spms1_patch_image_valid(spms1_storage_data(program))) {
     g_midi_program_pending[midi_ch] = program;
     ++g_midi_program_count[midi_ch];
@@ -470,12 +469,14 @@ void handle_midi_nrpn_system(uint8_t midi_ch, uint8_t lsb, uint8_t value) {
     spms1_reset_patch(midi_ch);
   } else if (lsb == SPMS1_NRPN_SYSTEM_SAVE && value >= 64 && g_midi_mute[midi_ch]) {
     spms1_make_patch_image(midi_ch);
-    g_spms1_patch_image_program = g_midi_program[midi_ch];
+    g_spms1_patch_image_program = g_midi_program_target[midi_ch];
+    g_midi_program_target[midi_ch] = 0;
     ++g_midi_save_count[midi_ch];
   } else if (lsb == SPMS1_NRPN_SYSTEM_LOAD && value >= 64 && g_midi_mute[midi_ch]) {
     load_saved_patch(midi_ch);
+    g_midi_program_target[midi_ch] = 0;
   } else if (lsb == SPMS1_NRPN_SYSTEM_PROGRAM && value < SPMS1_PROGRAMS) {
-    g_midi_program[midi_ch] = value;
+    g_midi_program_target[midi_ch] = value;
   }
 }
 

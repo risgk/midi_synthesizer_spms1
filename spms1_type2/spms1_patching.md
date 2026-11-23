@@ -285,8 +285,8 @@ examples below give each edit both ways.
   there. Reset (below) puts the default patch back; to make the default patch the one loaded at
   power-on again, Reset and then Save as #0
 - Program Change #0-7 puts the program saved as it back, fading the output out and in (about 20 ms
-  of silence between); one to a program not saved changes no sound. Either way it selects the
-  program for Save and Load (entry 4, below). #8-127 are ignored
+  of silence between); one to a program not saved changes nothing. #8-127 are ignored. There is no
+  program the synth is "on": a program put back is the patch, edited from there as any patch is
     - Wait about 30 ms after a Program Change before sending CCs or NRPN: the program is put back
       once the output has faded out, about 5 ms after it, and what arrives before that is replaced
       by the program's. Notes are kept, but one that starts in the silence is heard only as the
@@ -351,7 +351,7 @@ Category 5 has the system entries, which act on the synth rather than set a part
   saved. Send it between Mute on and off for it to be heard as silence, since the synth may
   otherwise play a buffer of the patch half reset
 - Entry 2, Save: 64-127, while Mute is on, keeps the patch in the flash as the program that entry 4
-  selects, every entry of categories 0-4, the values of the CCs the controls have and the name, in
+  gives, every entry of categories 0-4, the values of the CCs the controls have and the name, in
   place of the one saved there before; the synth loads program #0 at power-on, and Program Change
   the others. The Mod Wheel and Breath are played rather than set, so a CC that only
   one of them has, whichever it is, is saved at 0, and so is every CC no control has; a CC that a parameter or a
@@ -366,10 +366,10 @@ Category 5 has the system entries, which act on the synth rather than set a part
   CC#6 saves; the editor's Save to Device sends Mute on, the whole patch, the name (as
   SysEx), Program, Save and Mute off. A patch saved before v0.8.0, which had one, is read as
   program #0 until #0 is saved
-- Entry 3, Load: 64-127, while Mute is on, puts the program that entry 4 selects back, over the
+- Entry 3, Load: 64-127, while Mute is on, puts the program that entry 4 gives back, over the
   default patch, as at power-on; with none saved there, it does nothing
-- Entry 4, Program: 0-7 selects the program that Save and Load act on (#0 at power-on), as Program
-  Change does; 8-127 are ignored
+- Entry 4, Program: 0-7 gives the program that the next Save or Load acts on, #0 without it (at
+  power-on, and again after each Save and Load); send it before each of them. 8-127 are ignored
 
 The run order is read from slot 0 upwards and stops at the first Module ID 0, so a patch shorter
 than 32 modules ends itself. It is separate from the module numbering: a module only sees the

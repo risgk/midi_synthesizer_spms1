@@ -213,6 +213,8 @@ its programs #0-7, which Program Change #0-7 puts back.
       patch shown stays as it is, the changes made after it go to that program, and Send Patch, marked with a dashed line
       until it is pressed, puts the patch shown on the synth. With SPMS-1 Web, only the programs saved to it since the
       page was opened are followed
+    - It sends the name of the patch (as SysEx) with the whole patch and whenever it changes, so that the synth's,
+      which its Debug Print shows, is the one shown; not after a Program Change it does not follow, until Send Patch
     - It does not read the patch from the synth (e.g. the one saved, which the synth loads at power-on): the synth
       takes the editor's when a device is chosen in "MIDI Out", or by Send Patch, in place of its own
     - The side panels (Patch, Run Order, Export) fold to their headings with a click, each remembered;
