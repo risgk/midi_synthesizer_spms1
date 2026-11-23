@@ -441,7 +441,7 @@ void loop() {
     // one not kept or not readable by this sketch (the magic, the layout and the spec hash, not the
     // hash of the payload, read from the flash): the same bytes each report (the names padded to 32
     // characters), so that a report costs core 0 the same whatever changed; core 1 is not touched.
-    char patch_line[] = "\e[5;1H\e[Kpatch " "                                ";
+    char patch_line[] = "\e[5;1H\e[K\e[6;1H\e[Kpatch " "                                ";  // a blank line before it
     const uint32_t patch_name_at = sizeof(patch_line) - 1 - SPMS1_PATCH_NAME_SIZE;
     for (uint32_t i = 0; i < SPMS1_PATCH_NAME_SIZE; ++i) {
       uint8_t c = g_spms1_patch_name[0][i];
@@ -452,10 +452,10 @@ void loop() {
 
     static uint8_t s_shown_program = 0;
     s_shown_program = (s_shown_program + 1) & (SPMS1_PROGRAMS - 1);
-    char program_line[] = "\e[06;1H\e[K#0 " "                                ";  // the row in two digits, 06-13
+    char program_line[] = "\e[07;1H\e[K#0 " "                                ";  // the row in two digits, 07-14
     const uint32_t program_name_at = sizeof(program_line) - 1 - SPMS1_PATCH_NAME_SIZE;
-    program_line[2] = (char)('0' + (6 + s_shown_program) / 10);
-    program_line[3] = (char)('0' + (6 + s_shown_program) % 10);
+    program_line[2] = (char)('0' + (7 + s_shown_program) / 10);
+    program_line[3] = (char)('0' + (7 + s_shown_program) % 10);
     program_line[program_name_at - 2] = (char)('0' + s_shown_program);
     const uint8_t* image = spms1_storage_data(s_shown_program);
     uint32_t readable = image && image[0] == 'S' && image[1] == 'P' && image[2] == 'M' && image[3] == '2' &&
