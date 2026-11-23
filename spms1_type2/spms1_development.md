@@ -243,7 +243,7 @@ or not, as the modules are meant to:
 
 | Version | Note held (avg / max) | No note (avg / max) |
 | :-- | --: | --: |
-| v0.7.2 | 192396 / 192700 cycles, 1253 us (94%) | 191927 / 192122 cycles, 1250 us (94%) |
+| v0.7.3 | 191276 / 191580 cycles, 1245 us (93%) | 190807 / 191002 cycles, 1242 us (93%) |
 
 The estimate is above Debug Print on the device: at v0.7.2 and v0.7.1 as at v0.6.1, the synth core being the same; about 10% at v0.7.0
 (with the input clip of Filter Drive, estimated at 1290 us on average and 1292 us at most: min 1149 us, max 1153 us with I2S,
@@ -272,8 +272,8 @@ order, split evenly; the common part left is the loop of the samples, the output
 
 | Module | Own | With common |
 | :-- | --: | --: |
-| Filter 1 | 9.8% (130 us) | 11.5% (153 us) |
-| Filter 2 | 9.8% (130 us) | 11.5% (153 us) |
+| Filter 1 | 9.5% (126 us) | 11.2% (149 us) |
+| Filter 2 | 9.5% (127 us) | 11.2% (150 us) |
 | Osc 2 (with Sync) | 9.3% (124 us) | 10.9% (146 us) |
 | Amp 1 (with the Distortion) | 8.3% (110 us) | 9.5% (127 us) |
 | Osc 1 | 6.1% (81 us) | 7.5% (100 us) |

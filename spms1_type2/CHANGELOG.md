@@ -4,13 +4,15 @@ MIDI Synthesizer SPMS-1 (type-2) Changelog
 The main changes of each version, newest first, gathered before each release. The format may be
 revised.
 
-- v0.7.3 (2026-??-??):
+- v0.7.3 (2026-11-23):
     - Built with Arduino-Pico 6.4.0 (6.3.0 before); the same load and RAM in the estimate
     - Filter: The output clip in fewer steps, the same curve (the renders the same), a little lighter
       (estimated: 1253 us to 1245 us a buffer of 1333 us, the default patch with a note held)
     - sim_load: "loud.txt" and "loud_nolim.txt" set Mixer 2 Level 1 on CC 42 (on CC 19 before, which it left since v0.7.2)
     - Editor: No dark line between two keys of the soft keyboard (where the edges of the keys fell between the pixels,
       e.g. at 125% and 150% of the display scale)
+    - Editor: Lighter with a stream of CCs or NRPN received (e.g. a knob turned): the display, the export and the patch
+      kept in the browser brought up to date once a frame, not at each of them
 - v0.7.2 (2026-11-20):
     - The default patch: **Osc 1 PW** on CC 47 (114 before) and **LFO 1 Level** on CC 45 (116 before), as Osc 1 Shape
       and LFO Depth of PRA32-U2 v3.22.0 (CC 16 and 17, General 1 and 2, as its General Purpose Controller 1 and 2),
