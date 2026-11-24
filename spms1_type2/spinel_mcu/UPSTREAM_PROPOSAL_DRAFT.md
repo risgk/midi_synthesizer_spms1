@@ -190,6 +190,40 @@ the compile-only CI job above with float.
   the setjmp (and the volatile) out when the block calls nothing that can raise StopIteration
   would make the two the same.
 
+- **An `ffi_func` to a header's static inline function** (Spinel 2026.10.25). Since 2026.10.25 an
+  `ffi_func` is declared under a private name bound to the symbol by an asm label, so that it
+  cannot conflict with a header's own prototype (`fopen`'s `FILE *` against `:ptr`). That is right
+  for a library call, but it takes away a use 2026.09.12 had: a function the program defines
+  `static inline` in a header read ahead of the generated code (through an `ffi_source` include,
+  or a header the runtime includes) was the very function the `extern` named, and was inlined.
+  For my program these are a read and a write of a plain C array, done some 3000 times an audio
+  buffer, which are one load or one store inline:
+
+  ```c
+  /* spms1_bus.h, read ahead of the generated code */
+  static inline void set_bus_signal(int32_t slot, float value) {
+    spms1_bus_signals[slot & (SPMS1_BUS_SIZE - 1)] = value;
+  }
+  ```
+
+  ```c
+  /* 2026.09.12: the static inline function, inlined */
+  extern void set_bus_signal(int32_t, float);
+  set_bus_signal(((int32_t)(lv_slot)), ((float)(lv_value)));
+
+  /* 2026.10.25: a call to an outside symbol "set_bus_signal", which nothing defines */
+  extern void sp_ffi_f30_set_bus_signal(int32_t, float) __asm__(SP_FFI_SYM("set_bus_signal"));
+  sp_ffi_f30_set_bus_signal(((int32_t)(lv_slot)), ((float)sp_ffi_dbl_of_f(lv_value)));
+  ```
+
+  GCC does not take the asm-labeled declaration for the static inline function of the same name,
+  with `inline`, `gnu_inline` or `always_inline` alike: the link fails, and were the function
+  defined outside, every access would be a call. I now rewrite the generated C after Spinel, back
+  to the plain `extern` and the plain name. An opt-in for the plain form would make that
+  unneeded, e.g. a keyword of `ffi_func` (`ffi_func :set_bus_signal, [:int32, :float], :void,
+  inline: true`), or a module-level `ffi_inline`, which declares the function under its own
+  name, as 2026.09.12 did, for the program that takes on matching the header's types.
+
 I would be glad to send pull requests for any of these, one at a time, and the CI job, and to
 keep them working.
 
