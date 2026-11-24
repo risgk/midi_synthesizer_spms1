@@ -348,6 +348,10 @@ Basically, a release goes as follows (the dates in JST):
 5. Commit as "type-2: Version X.Y.Z"
 6. Run the workflow (above) on develop with "commit_package", for the UF2 files and SPMS-1 Web
 7. Merge develop into main by a pull request, "type-2 vX.Y.Z"
+8. Tag the merge commit on main "type-2-vX.Y.Z" (an annotated tag, "SPMS-1 (type-2) vX.Y.Z"), and push it:
+   `git tag -a type-2-vX.Y.Z -m "SPMS-1 (type-2) vX.Y.Z" origin/main && git push origin type-2-vX.Y.Z`.
+   Each type of SPMS-1 has a version of its own, so a tag names its type (`git tag -l 'type-2-*'` lists those of
+   type-2); a release on GitHub, if one is made, takes the tag, with the UF2 files of the workflow attached
 
 - For the maintainer: after a release, update SPMS-1 (type-2) Editor and SPMS-1 (type-2) Web on the official page
   ([risgk.github.io](https://github.com/risgk/risgk.github.io)): copy "spms1_editor.html" and "spms1_web_synth.js" of main

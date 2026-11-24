@@ -324,6 +324,10 @@ PWM Audio で min 1038 us、max 1043 us、約 78% で、MIDI のノートオン�
 5. "type-2: Version X.Y.Z" としてコミットします
 6. develop でワークフロー (上記) を "commit_package" 付きで実行し、UF2 ファイルと SPMS-1 Web を更新します
 7. プルリクエスト "type-2 vX.Y.Z" で develop を main にマージします
+8. main のそのマージコミットにタグ "type-2-vX.Y.Z" (注釈付きタグ、"SPMS-1 (type-2) vX.Y.Z") を付けてプッシュします:
+   `git tag -a type-2-vX.Y.Z -m "SPMS-1 (type-2) vX.Y.Z" origin/main && git push origin type-2-vX.Y.Z`。
+   SPMS-1 は type ごとにバージョンが別なので、タグに type を入れます (`git tag -l 'type-2-*'` で type-2 のものが
+   一覧できます)。GitHub のリリースを作るときは、このタグに、ワークフローの UF2 ファイルを添付して作ります
 
 - 管理者向け: リリース後、公式ページ ([risgk.github.io](https://github.com/risgk/risgk.github.io)) の SPMS-1 (type-2) Editor と
   SPMS-1 (type-2) Web を更新します。main の "spms1_editor.html" と "spms1_web_synth.js" をそこの "midi-synthesizer-spms-1/spms1_type2"
