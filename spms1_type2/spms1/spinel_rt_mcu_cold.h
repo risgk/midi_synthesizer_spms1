@@ -31,6 +31,21 @@ _Static_assert(!SPINEL_FLOAT32 || sizeof(sp_float) == sizeof(float), "sp_float m
 #define DBL_MIN_EXP FLT_MIN_EXP
 #endif
 
+/* The top level on the stack Spms1_main is on, called directly, so that flatten pulls it into
+   Spms1_main, in RAM, as it did when Spinel wrote it into main itself. There is no stack of its
+   own to map and no fault handler to arm (sp_fiber.c is left out with SPINEL_BARE_METAL). */
+#if SPINEL_BARE_METAL
+#define sp_main_stack_run(body) (body())
+#define sp_stack_guard_init() ((void)0)
+/* No signal ever arrives, so the poll Spinel puts at the back edge of every loop, a load of this
+   volatile flag and a branch, reads a constant 0 and goes. It is the generated code's only use of
+   SP_ATOMIC_LOAD, and with nothing running beside it a plain read is all one could be. */
+static const int sp_sig_pending_flag_mcu = 0;
+#define sp_sig_pending_flag sp_sig_pending_flag_mcu
+#undef SP_ATOMIC_LOAD
+#define SP_ATOMIC_LOAD(p, mo) (*(p))
+#endif
+
 /* The sketch's own functions that are to inline into the generated code, ahead of its extern
    declarations of them. */
 #include "spms1_bus.h"

@@ -15,7 +15,7 @@
  *
  * sp_exc_sym_slot/sp_exc_recover_named (need sp_sym_intern, a REAL
  * program-generated function whose body differs per compiled program --
- * not a hook) and sp_exc_is_a (poly value-dispatch) stay in spinel_rt.h,
+ * not a hook) stay in spinel_rt.h,
  * along with sp_exc_reason_acc/sp_exc_tag_acc (the two accessors that
  * call sp_exc_sym_slot) and the raise/longjmp control flow
  * (sp_raise_exc/sp_raise_cls and friends), which threads through the
@@ -46,9 +46,27 @@ typedef struct sp_Exception_s {
                                  means "no caller ever set one" (CRuby answers
                                  nil for the unset case). The GC mark visits it
                                  alongside the boxed fields. */
+  void *msg_h;                /* the message as a shared String handle (an
+                                 sp_String *), or NULL: a program built
+                                 --share-strings raises with the String it
+                                 was given, which #message answers itself
+                                 (sp_exc_attach_msg). Read the message
+                                 through sp_exc_message / sp_exc_msg_text. */
 } sp_Exception;
+/* No message was given: msg is NULL (a constructor given none, or super(nil)).
+   #message then answers the class name, read when it is asked. */
+static inline int sp_exc_msg_absent(const sp_Exception *e) { return !e->msg; }
 
 extern const char *(*sp_user_exc_parent_fn)(const char *);   /* set by the generated main() */
+/* A program's exception class with ivars of its own, for an instance the
+   runtime allocates by the class's name (sp_exc_new, sp_exc_new_sub_sized):
+   its struct's size and the scan that marks its ivars (0 for any other
+   name), and the seeding of their unset state. */
+extern size_t (*sp_user_exc_layout_fn)(const char *, void (**)(void *));
+extern void (*sp_user_exc_ivinit_fn)(void *);
+/* Copies the ivars the runtime's map holds for one exception onto another
+   (Exception#exception(msg) is a copy), once the program can write one. */
+extern void (*sp_exc_bivar_copy_fn)(void *from, void *to);
 /* The modules a class includes, NULL-terminated, or NULL for none. Ruby's type
    hierarchy is not a chain -- `rescue IO::WaitReadable` and `e.is_a?(Retryable)`
    both ask about a MODULE, which a single-parent walk cannot answer. Same shape
@@ -63,16 +81,44 @@ extern SP_TLS sp_RbVal sp_pending_exc_recv, sp_pending_exc_key, sp_pending_exc_v
 extern SP_TLS unsigned char sp_pending_exc_flags;
 
 int sp_exc_cls_matches(const char *raised, const char *target);
+sp_bool sp_exc_has_acc(sp_Exception *e, const char *acc);   /* has the class-gated accessor */
+int sp_exc_nearest_cls(const char *raised, const char *const *targets, int n);
 SP_COLD void sp_exc_acc_gate(sp_Exception *e, const char *cls, const char *acc);
 int sp_exc_is_standard_error(const char *raised);
 sp_Exception *sp_exc_new_for_catch(const char *cls, const char *msg);
+/* the object an ensure holds for the exception passing through it */
+void *sp_exc_ensure_obj(void **obj, const char **msg, const char *cls);
 /* The message a bare `raise` carries: empty, and distinct from "no message
    given" (which falls back to the class name, as Exception.new does) (#3711). */
 extern const char *const sp_exc_no_msg;
+/* The same for an explicitly given empty literal (`raise C, ""`), whose
+   message CRuby keeps frozen: also "" to every reader of the raw message,
+   and an exception built from it holds a frozen "". */
+extern const char *const sp_exc_no_msg_frozen;
+/* Is m one of the two explicit-empty sentinels? A raise's message is
+   laundered onto the heap unless it is one, which keeps its identity. */
+static inline int sp_exc_msg_empty_given(const char *m) {
+  return m == sp_exc_no_msg || m == sp_exc_no_msg_frozen;
+}
 /* An explicitly given raise message: an empty one stays empty rather than
    falling back to the class name the way a message-less raise does. */
+const char *sp_exc_msg_counted(const char *m, size_t n);   /* lib/sp_exc.c */
+const char *sp_exc_msg_counted_frozen(const char *m, size_t n);   /* the same, for a frozen String */
+const char *sp_exc_msg_plain(const char *m);   /* a frozen counted message as frozen text */
+const char *sp_exc_cat(int n, ...);   /* parts joined by byte length, NULs kept */
+const char *sp_exc_full_text(volatile sp_Exception *e, const char *msg);       /* "Class: msg" */
+const char *sp_exc_detailed_text(volatile sp_Exception *e, const char *msg);   /* "msg (Class)" */
+const char *sp_exc_detailed_highlight(volatile sp_Exception *e, const char *msg);
+/* m is a Spinel String here (the generated code gives only those), so its header's
+   length is safe to read; a NUL inside it travels as a counted message (#7556). */
 static inline const char *sp_exc_msg_given(const char *m) {
-  return (m && !m[0]) ? sp_exc_no_msg : m;
+  if (!m) return m;
+  size_t n = sp_str_byte_len(m);
+  /* a frozen String (a literal) travels counted with its frozen mark, an
+     empty one as the frozen empty sentinel */
+  if (sp_str_is_frozen_val(m)) return n == 0 ? sp_exc_no_msg_frozen : sp_exc_msg_counted_frozen(m, n);
+  if (n == 0) return sp_exc_no_msg;
+  return memchr(m, 0, n) ? sp_exc_msg_counted(m, n) : m;
 }
 void *sp_exc_new_sub_sized(size_t sz, const char *cls_name, const char *msg);
 
@@ -84,21 +130,52 @@ sp_bool sp_exc_eq(sp_Exception *a, sp_Exception *b);
  * and is updated in place. Returns the boxed value so chained assignments
  * (`e = e.set_backtrace(bt)`) work. */
 sp_RbVal sp_Exception_set_backtrace(sp_Exception *e, sp_StrArray *bt);
+
+/* --debug: each line of block code, by the C function it was compiled into,
+   with how many blocks deep it is, so a backtrace frame there reads
+   `block in X` (set by the debug-build main(); defined in lib/sp_cold.c). */
+typedef struct { const char *sym, *file; int line, depth; } sp_bt_block;
+extern const sp_bt_block *sp_bt_blocks;
+extern int sp_bt_nblocks;
 sp_Exception *sp_exc_new_sub(const char *cls_name, const char *parent_cls, const char *msg);
 sp_Exception *sp_exc_dup(sp_Exception *e);
+sp_Exception *sp_exc_clone(sp_Exception *e);
 void *sp_exc_apply_staged(const char *cls, const char *msg, void *obj);
 int sp_exc_exit_status(void *obj);
 sp_Exception *sp_exc_exception(sp_Exception *e, const char *msg);
 const char *sp_exc_class_name(volatile sp_Exception *ve);
+const char *sp_exc_cls_display(const char *cn);   /* how class `cn` prints (a Class.new class: #<Class:0x...>) */
+sp_bool sp_exc_cls_unnamed(const char *shown);   /* an unnamed Class.new class's address form */
 const char *sp_exc_message(volatile sp_Exception *ve);
+/* the message's text now, not to be kept (a handle's live buffer) */
+const char *sp_exc_msg_text(volatile sp_Exception *ve);
+/* e with the String handle h as its message (sp_Exception.msg_h); answers e */
+void *sp_exc_attach_msg(void *e, void *h);
+/* #to_s as #inspect renders it: a user override (the generated program's
+   sp_user_exc_to_s, installed in the hook) else the stored message */
+extern const char *(*sp_user_exc_to_s_fn)(sp_Exception *);
+/* #message the same way (the program's sp_user_exc_message), for the report of
+   an uncaught exception; NULL when no exception class overrides its text */
+extern const char *(*sp_user_exc_message_fn)(sp_Exception *);
+const char *sp_exc_to_s_text(sp_Exception *e);
 const char *sp_exc_inspect(void *p);   /* #<Cls: msg>, for the inspect dispatch */
 sp_Exception *sp_exc_cause(volatile sp_Exception *ve);
 sp_RbVal sp_exc_result(volatile sp_Exception *ve);
+const char *sp_errno_class_name(int e);   /* "Errno::ENOENT" for ENOENT; the parent for an unlisted one */
+sp_RbVal sp_exc_errno_acc(sp_Exception *e);   /* SystemCallError#errno */
+sp_RbVal sp_exc_error_code_acc(sp_Exception *e);   /* Socket::ResolutionError#error_code */
+SP_NORETURN void sp_raise_resolution_error(int code, const char *msg);
+enum { SP_SYSERR_NONE, SP_SYSERR_NUM, SP_SYSERR_BASE, SP_SYSERR_BARE };
+int sp_syserr_kind(const char *cls, sp_int *num);   /* where cls stands in the SystemCallError family */
+const char *sp_syserr_text(int has_num, sp_int num, const char *func, const char *msg);
+void sp_exc_syserr_init(sp_Exception *e);   /* #errno from the class's Errno ancestor */
+sp_int sp_errno_num(const char *cls);   /* Errno::ENOENT::Errno; -1 for a name outside Errno:: */
 const char *sp_exc_parent_of_name(const char *cls);
 sp_RbVal sp_exc_name_acc(sp_Exception *e);
 sp_RbVal sp_exc_key_acc(sp_Exception *e);
 sp_RbVal sp_exc_receiver_acc(sp_Exception *e);
 sp_RbVal sp_exc_args_acc(sp_Exception *e);
+sp_RbVal sp_exc_path_acc(sp_Exception *e);   /* LoadError#path */
 sp_bool sp_exc_private_call_acc(sp_Exception *e);
 sp_RbVal sp_exc_exit_value_acc(sp_Exception *e);
 sp_RbVal sp_exc_throw_value_acc(sp_Exception *e);
@@ -115,5 +192,25 @@ const char *sp_signal_signame(sp_int no);
 sp_Exception *sp_signal_exc_new_m(sp_RbVal sig, const char *msg);
 sp_Exception *sp_signal_exc_new(sp_RbVal sig);
 sp_Exception *sp_interrupt_new(const char *msg);
+
+/* ---- The arity ArgumentError every binder raises: CRuby's words for a
+   positional count the callee cannot take (rb_arity_error_new): `given G,
+   expected N` for an exact count, `N..M` with optionals, `N+` past a rest
+   (max < 0). `kw` is NULL or the "; required keyword(s): a, b" CRuby appends
+   for a callee with required keywords (argument_arity_error, vm_args.c) --
+   a fact of the signature the compiler spells (arity_kw_suffix), so the
+   run-time count and the compile-time one read the same. ---- */
+SP_NORETURN void sp_raise_arity(sp_int given, sp_int min, sp_int max, const char *kw);
+static inline void sp_arity_check(sp_int given, sp_int min, sp_int max, const char *kw) {
+  if (given < min || (max >= 0 && given > max)) sp_raise_arity(given, min, max, kw);
+}
+/* The keyword ArgumentErrors in CRuby's words (argument_kw_error): `kind`
+   "missing" or "unknown", naming the `count` keywords in `names`, each
+   already inspected and joined by ", ". */
+SP_NORETURN void sp_raise_kw_error(const char *kind, sp_int count, const char *names);
+/* Exception#is_a?(ClassName), modules and the user hierarchy included. */
+sp_int sp_exc_is_a(volatile sp_Exception *ve, const char *cn);
+/* A fixed-depth handler stack overflowed: CRuby's words on stderr, then exit. */
+SP_NORETURN SP_COLD void sp_stack_too_deep(void);
 
 #endif

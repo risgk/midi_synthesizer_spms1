@@ -53,6 +53,37 @@ static inline locale_t newlocale(int mask, const char *name, locale_t base) {
 }
 static inline locale_t uselocale(locale_t loc) { (void)loc; return 0; }
 
+/* MinGW's stdio has its own names for the stream lock, which the runtime takes around a puts, and
+   putc does the same as putc_unlocked under it. */
+#include <stdio.h>
+#define flockfile(f) _lock_file(f)
+#define funlockfile(f) _unlock_file(f)
+#define putc_unlocked(c, f) putc(c, f)
+
+/* MinGW has the _s forms of these, with the arguments the other way round. Taken under names of
+   their own, so that a MinGW whose headers have the _r ones too is no different. */
+#include <time.h>
+static inline struct tm *sp_win_localtime_r(const time_t *t, struct tm *tm) { return localtime_s(tm, t) ? NULL : tm; }
+static inline struct tm *sp_win_gmtime_r(const time_t *t, struct tm *tm) { return gmtime_s(tm, t) ? NULL : tm; }
+#define localtime_r sp_win_localtime_r
+#define gmtime_r sp_win_gmtime_r
+
+/* Random seeds for the runtime's Random and SecureRandom, which the simulator does not use. */
+#include <stdlib.h>
+static inline int sp_win_getentropy(void *buf, size_t n) {
+  for (size_t i = 0; i < n; i++) ((unsigned char *)buf)[i] = (unsigned char)rand();
+  return 0;
+}
+#define getentropy sp_win_getentropy
+
+/* Only the runtime's Errno table names these, with Linux's numbers; Windows has neither. */
+#ifndef ESTALE
+#define ESTALE 116
+#endif
+#ifndef EDQUOT
+#define EDQUOT 122
+#endif
+
 /* Only the runtime's Signal.list table names these; Windows defines six signals. */
 #ifndef SIGHUP
 #define SIGHUP    1

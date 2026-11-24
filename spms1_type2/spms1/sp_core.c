@@ -2,6 +2,7 @@
  * libspinel_rt.a. See sp_core.h for the rationale. */
 #include "sp_core.h"
 #include <float.h>
+#include <limits.h>
 #include <string.h>
 #include "sp_alloc.h"   /* sp_str_byte_len: embedded-NUL detection in Integer()/Float() */
 #include "sp_dtoa.h"    /* sp_read_float: locale-independent String#to_f / Float() */
@@ -36,7 +37,7 @@ typedef double  sp_float;
 
 /* Defined in the generated translation unit (spinel_rt.h); referenced
    here and resolved at link time. */
-__attribute__((noreturn)) void sp_raise_cls(const char *cls, const char *msg);
+SP_NORETURN void sp_raise_cls(const char *cls, const char *msg);
 const char *sp_sprintf(const char *fmt, ...);
 
 /* CRuby's `String#to_i` accepts a leading sign, then digits with
@@ -55,14 +56,17 @@ sp_int sp_str_to_i_cruby(const char *s) {SP_GC_ROOT_STR(s);
   int any = 0;
   while (*p) {
     if (*p >= '0' && *p <= '9') {
-      /* Signed-overflow on `v * 10 + digit` is undefined behavior;
-         detect via __builtin_*_overflow. CRuby promotes to Bignum
+      /* Accumulate the signed value: the magnitude of INTPTR_MIN does not
+         fit sp_int, even though the negative value does. Signed-overflow
+         on `v * 10 + digit` is undefined behavior;
+         detect via sp_ckd_*_iptr (sp_compat.h). CRuby promotes to Bignum
          on overflow but spinel's int model is int64-only -- raise
          RangeError instead of silently saturating, so a user-side
          `rescue` can react. */
-      sp_int t;
-      if (__builtin_mul_overflow(v, 10, &t) ||
-          __builtin_add_overflow(t, (sp_int)(*p - '0'), &v)) {
+      sp_int t, digit = (sp_int)(*p - '0');
+      if (neg) digit = -digit;
+      if (sp_ckd_mul_iptr(v, 10, &t) ||
+          sp_ckd_add_iptr(t, digit, &v)) {
         sp_raise_cls("RangeError", sp_sprintf("integer overflow parsing \"%s\"", s));
       }
       any = 1;
@@ -76,7 +80,7 @@ else {
     }
   }
   if (!any) return 0;
-  return neg ? -v : v;
+  return v;
 }
 
 /* `String#to_f`: parse a leading float, tolerating `_` between digits as a
@@ -111,73 +115,143 @@ sp_float sp_str_to_f_cruby(const char *s) {
   return d;
 }
 
-/* `String#to_i(base)` with a non-decimal base. Accepts bases 2..36
-   like MRI; `_` is allowed between digits the same way as base 10.
-   Stops at the first invalid digit and returns what's parsed so
-   far. Issue #883. */
-sp_int sp_str_to_i_base(const char *s, sp_int base) {SP_GC_ROOT_STR(s);
-  if (!s) return 0;
-  /* base 0 = auto-detect from prefix (0x -> 16, 0b -> 2, 0/0o -> 8,
-     otherwise 10). Per CRuby, only base 0 enables prefix-based
-     dispatch -- explicit bases just *accept* the matching prefix. */
-  /* CRuby rejects a radix outside 2..36 rather than falling back to 10 */
-  if (base != 0 && (base < 2 || base > 36))
-    sp_raise_cls("ArgumentError", sp_sprintf("invalid radix %lld", (long long)base));
-  const char *p = s;
+/* Digit value of `c` in bases up to 36, or -1. */
+static int sp_digit36(int c) {
+  if (c >= '0' && c <= '9') return c - '0';
+  if (c >= 'a' && c <= 'z') return c - 'a' + 10;
+  if (c >= 'A' && c <= 'Z') return c - 'A' + 10;
+  return -1;
+}
+
+/* Kernel#Integer's negative radix, as CRuby reads it: a leading 0 (after
+   whitespace and sign) with more text after it selects the prefix (base 0),
+   otherwise -base is the radix, and -1 is base 10. Only Integer() takes it;
+   String#to_i refuses a negative radix before it parses. */
+sp_int sp_int_negative_base(const char *s, sp_int base) {
+  if (base >= 0 || !s) return base;
+  while (isspace((unsigned char)*s)) s++;
+  if (*s == '+' || *s == '-') s++;
+  if (*s == '0' && s[1] != 0) return 0;
+  if (base == -1) return 10;
+  /* CRuby holds the radix in a C int, whose -INT_MIN is INT_MIN again: a
+     radix at or below it keeps its sign, and the range check names it so */
+  return base <= INT32_MIN ? base : -base;
+}
+
+/* Skips leading whitespace and sign, resolves base 0 from the prefix
+   (0x -> 16, 0b -> 2, 0/0o -> 8, 0d -> 10, otherwise 10), and skips a
+   prefix matching the base. Per CRuby, only base 0 enables prefix-based
+   dispatch -- explicit bases just *accept* the matching prefix. A leading
+   0 followed by anything but a prefix letter is octal whatever comes next,
+   so "08" stops at the 8 (Integer() refuses it) rather than reading 8. */
+static const char *sp_int_head(const char *p, sp_int *base, int *neg) {
   while (isspace((unsigned char)*p)) p++;
-  int neg = 0;
+  *neg = 0;
   if (*p == '+') p++;
-  else if (*p == '-') { neg = 1; p++; }
-  if (base == 0) {
+  else if (*p == '-') { *neg = 1; p++; }
+  if (*base == 0) {
+    *base = 10;
     if (*p == '0') {
-      if (p[1] == 'x' || p[1] == 'X') { base = 16; p += 2; }
-      else if (p[1] == 'b' || p[1] == 'B') { base = 2; p += 2; }
-      else if (p[1] == 'o' || p[1] == 'O') { base = 8; p += 2; }
-      else if (p[1] == 'd' || p[1] == 'D') { base = 10; p += 2; }
-      else if (p[1] >= '0' && p[1] <= '7') { base = 8; p++; }
-      else { base = 10; }
-    }
-else {
-      base = 10;
+      char n = p[1];
+      if (n == 'x' || n == 'X') *base = 16;
+      else if (n == 'b' || n == 'B') *base = 2;
+      else if (n == 'o' || n == 'O') *base = 8;
+      else if (n != 0 && n != 'd' && n != 'D') *base = 8;
     }
   }
-else if (*p == '0' && p[1] != 0) {
-    /* Explicit base accepts the matching prefix. */
-    if ((base == 16) && (p[1] == 'x' || p[1] == 'X')) p += 2;
-    else if ((base == 2) && (p[1] == 'b' || p[1] == 'B')) p += 2;
-    else if ((base == 8) && (p[1] == 'o' || p[1] == 'O')) p += 2;
+  if (*p == '0' && p[1] != 0) {
+    char n = p[1];
+    if ((*base == 16) && (n == 'x' || n == 'X')) p += 2;
+    else if ((*base == 2) && (n == 'b' || n == 'B')) p += 2;
+    else if ((*base == 8) && (n == 'o' || n == 'O')) p += 2;
     /* base 10 accepts the explicit decimal prefix too (#3719) */
-    else if ((base == 10) && (p[1] == 'd' || p[1] == 'D')) p += 2;
+    else if ((*base == 10) && (n == 'd' || n == 'D')) p += 2;
   }
-  sp_int v = 0;
-  int any = 0;
-  while (*p) {
-    int d = -1;
-    if (*p >= '0' && *p <= '9') d = *p - '0';
-    else if (*p >= 'a' && *p <= 'z') d = *p - 'a' + 10;
-    else if (*p >= 'A' && *p <= 'Z') d = *p - 'A' + 10;
+  return p;
+}
+
+/* Accumulates digits of `base` into *v, consuming `_` only between
+   digits; *any is set once a digit is read. Returns the stop position,
+   or NULL on sp_int overflow. A negative number (neg) accumulates its
+   signed value, as sp_str_to_i_cruby does: -2**63 fits sp_int where its
+   magnitude does not. */
+static const char *sp_int_scan(const char *p, sp_int base, int neg, sp_int *v, int *any) {
+  *v = 0;
+  *any = 0;
+  for (;; p++) {
+    int d = sp_digit36((unsigned char)*p);
     if (d < 0 || d >= (int)base) {
+      if (*p == '_' && *any) {
+        int n = sp_digit36((unsigned char)p[1]);
+        if (n >= 0 && n < (int)base) continue;
+      }
+      return p;
+    }
+    sp_int t;
+    if (sp_ckd_mul_iptr(*v, base, &t) ||
+        sp_ckd_add_iptr(t, neg ? -(sp_int)d : (sp_int)d, v)) return NULL;
+    *any = 1;
+  }
+}
+
+/* The promote-mode parsers (sp_str_to_i_promote, spinel_rt.h) read the
+   same text as the sp_int ones below, and take a Bignum where the sp_int
+   scan overflows. Whether it does, for `s` in `base` (0 resolves from the
+   prefix): */
+int sp_str_int_overflows(const char *s, intptr_t base) {
+  if (!s) return 0;
+  int neg, any;
+  sp_int v, b = base;
+  const char *p = sp_int_head(s, &b, &neg);
+  if (b < 2 || b > 36) return 0;
+  return sp_int_scan(p, b, neg, &v, &any) == NULL;
+}
+
+/* ...and the digits as the Bignum parser wants them: a '-' for a negative
+   value, then the digits without their `_` separators. *base comes back
+   resolved, *rest just past the last digit. A malloc'd string. */
+char *sp_int_digits_dup(const char *s, intptr_t *base, const char **rest) {
+  int neg, any = 0;
+  sp_int b = *base;
+  const char *p = sp_int_head(s, &b, &neg);
+  size_t k = 0;
+  char *out = (char *)malloc(strlen(p) + 2);
+  if (!out) return NULL;
+  if (neg) out[k++] = '-';
+  for (;; p++) {
+    int d = sp_digit36((unsigned char)*p);
+    if (d < 0 || d >= (int)b) {
       if (*p == '_' && any) {
-        /* Lookahead: only consume `_` between digits. */
-        int n = -1;
-        char c = p[1];
-        if (c >= '0' && c <= '9') n = c - '0';
-        else if (c >= 'a' && c <= 'z') n = c - 'a' + 10;
-        else if (c >= 'A' && c <= 'Z') n = c - 'A' + 10;
-        if (n >= 0 && n < (int)base) { p++; continue; }
+        int n = sp_digit36((unsigned char)p[1]);
+        if (n >= 0 && n < (int)b) continue;
       }
       break;
     }
-    sp_int t;
-    if (__builtin_mul_overflow(v, base, &t) ||
-        __builtin_add_overflow(t, (sp_int)d, &v)) {
-      sp_raise_cls("RangeError", sp_sprintf("integer overflow parsing \"%s\"", s));
-    }
+    out[k++] = *p;
     any = 1;
-    p++;
   }
+  out[k] = 0;
+  *base = b;
+  if (rest) *rest = p;
+  return out;
+}
+
+/* `String#to_i(base)` with a non-decimal base. Accepts bases 2..36
+   like MRI; `_` is allowed between digits the same way as base 10.
+   Stops at the first invalid digit and returns what's parsed so
+   far. Base 0 auto-detects from the prefix. Issue #883. */
+sp_int sp_str_to_i_base(const char *s, sp_int base) {SP_GC_ROOT_STR(s);
+  if (!s) return 0;
+  /* CRuby rejects a radix outside 2..36 rather than falling back to 10 */
+  if (base != 0 && (base < 2 || base > 36))
+    sp_raise_cls("ArgumentError", sp_sprintf("invalid radix %lld", (long long)base));
+  int neg, any;
+  sp_int v;
+  const char *p = sp_int_head(s, &base, &neg);
+  if (!sp_int_scan(p, base, neg, &v, &any))
+    sp_raise_cls("RangeError", sp_sprintf("integer overflow parsing \"%s\"", s));
   if (!any) return 0;
-  return neg ? -v : v;
+  return v;
 }
 
 /* CRuby's `Integer(s)` raises ArgumentError for unparseable input
@@ -203,92 +277,64 @@ sp_int sp_str_to_i_strict(const char *s) {SP_GC_ROOT_STR(s);
    prefix recognition (0x / 0b / 0o when the base matches). Raises
    ArgumentError on invalid input or unsupported base. Issue #887. */
 /* The shared body. `lenient` is Kernel#Integer's `exception: false`: every
-   rejection answers nil (SP_INT_NIL) instead of raising (#3718). */
-static sp_int sp_str_to_i_base_impl(const char *s, sp_int base, int lenient) {SP_GC_ROOT_STR(s);
-#define SP_INT_REJECT(cls, msg) do { if (lenient) return SP_INT_NIL; sp_raise_cls(cls, msg); } while (0)
+   rejection answers nil instead of raising (#3718); `*none` says so. */
+static sp_int sp_str_to_i_base_impl(const char *s, sp_int base, int lenient, int *none) {SP_GC_ROOT_STR(s);
+#define SP_INT_REJECT(cls, msg) do { if (lenient) { *none = 1; return 0; } sp_raise_cls(cls, msg); } while (0)
   if (!s) SP_INT_REJECT("ArgumentError", "invalid value for Integer(): nil");
   /* an embedded NUL makes the Ruby string longer than its C prefix: CRuby
      rejects it, a C-string scan would silently parse the prefix. */
   if (strlen(s) != sp_str_byte_len(s))
     SP_INT_REJECT("ArgumentError", sp_sprintf("invalid value for Integer(): \"%s\"", s));
-  if (base == 0) {
-    /* auto-detect the base from the literal's prefix */
-    const char *q = s;
-    while (isspace((unsigned char)*q)) q++;
-    if (*q == '+' || *q == '-') q++;
-    if (*q == '0') {
-      char n = q[1];
-      if (n == 'x' || n == 'X') base = 16;
-      else if (n == 'b' || n == 'B') base = 2;
-      else if (n == 'o' || n == 'O') base = 8;
-      /* `0d19` is CRuby's explicit decimal prefix (#3719) */
-      else if (n == 'd' || n == 'D') base = 10;
-      else if (n >= '0' && n <= '7') base = 8;
-      else base = 10;
-    }
-    else base = 10;
-  }
+  int neg, any;
+  sp_int v;
+  base = sp_int_negative_base(s, base);
+  const char *p = sp_int_head(s, &base, &neg);
   if (base < 2 || base > 36) SP_INT_REJECT("ArgumentError", sp_sprintf("invalid radix %lld", (long long)base));
-  const char *p = s;
-  while (isspace((unsigned char)*p)) p++;
-  int neg = 0;
-  if (*p == '+') p++;
-  else if (*p == '-') { neg = 1; p++; }
-  if (*p == '0' && p[1] != 0) {
-    if ((base == 16) && (p[1] == 'x' || p[1] == 'X')) p += 2;
-    else if ((base == 2) && (p[1] == 'b' || p[1] == 'B')) p += 2;
-    else if ((base == 8) && (p[1] == 'o' || p[1] == 'O')) p += 2;
-    else if ((base == 10) && (p[1] == 'd' || p[1] == 'D')) p += 2;
-  }
   if (*p == '\0') SP_INT_REJECT("ArgumentError", sp_sprintf("invalid value for Integer(): \"%s\"", s));
-  sp_int v = 0;
-  int any = 0;
-  while (*p) {
-    int d = -1;
-    if (*p >= '0' && *p <= '9') d = *p - '0';
-    else if (*p >= 'a' && *p <= 'z') d = *p - 'a' + 10;
-    else if (*p >= 'A' && *p <= 'Z') d = *p - 'A' + 10;
-    if (d < 0 || d >= (int)base) {
-      if (*p == '_' && any) {
-        int n = -1;
-        char c = p[1];
-        if (c >= '0' && c <= '9') n = c - '0';
-        else if (c >= 'a' && c <= 'z') n = c - 'a' + 10;
-        else if (c >= 'A' && c <= 'Z') n = c - 'A' + 10;
-        if (n >= 0 && n < (int)base) { p++; continue; }
-      }
-      break;
-    }
-    {
-      sp_int t;
-      if (__builtin_mul_overflow(v, base, &t) ||
-          __builtin_add_overflow(t, (sp_int)d, &v)) {
-        SP_INT_REJECT("RangeError", sp_sprintf("integer overflow parsing \"%s\"", s));
-      }
-    }
-    any = 1;
-    p++;
-  }
+  p = sp_int_scan(p, base, neg, &v, &any);
+  if (!p) SP_INT_REJECT("RangeError", sp_sprintf("integer overflow parsing \"%s\"", s));
   if (!any) SP_INT_REJECT("ArgumentError", sp_sprintf("invalid value for Integer(): \"%s\"", s));
   while (isspace((unsigned char)*p)) p++;
   if (*p != '\0') SP_INT_REJECT("ArgumentError", sp_sprintf("invalid value for Integer(): \"%s\"", s));
-  return neg ? -v : v;
+  return v;
 #undef SP_INT_REJECT
 }
 sp_int sp_str_to_i_strict_base(const char *s, sp_int base) {
-  return sp_str_to_i_base_impl(s, base, 0);
+  int none = 0;
+  return sp_str_to_i_base_impl(s, base, 0, &none);
 }
 /* Kernel#Integer(s[, base], exception: false) */
-sp_int sp_str_to_i_lenient_base(const char *s, sp_int base) {
-  return sp_str_to_i_base_impl(s, base, 1);
+sp_oint sp_str_to_i_lenient_base(const char *s, sp_int base) {
+  int none = 0;
+  sp_int n = sp_str_to_i_base_impl(s, base, 1, &none);
+  return none ? sp_oint_nil() : sp_oint_of(n);
+}
+
+/* The decimal text Float() accepts once its underscores are stripped: an
+   optional sign, digits, an optional '.' that may have no digit after it
+   ("5.", "1.e5"; at least one digit in all), and an optional exponent that
+   has a digit of its own. Nothing may follow, so a second point is refused. */
+static int sp_float_text_shape_ok(const char *p) {
+  int nd = 0;
+  if (*p == '+' || *p == '-') p++;
+  while (isdigit((unsigned char)*p)) { p++; nd++; }
+  if (*p == '.') { p++; while (isdigit((unsigned char)*p)) { p++; nd++; } }
+  if (!nd) return 0;
+  if (*p == 'e' || *p == 'E') {
+    p++;
+    if (*p == '+' || *p == '-') p++;
+    if (!isdigit((unsigned char)*p)) return 0;
+    while (isdigit((unsigned char)*p)) p++;
+  }
+  return *p == '\0';
 }
 
 /* Kernel#Float() raises ArgumentError on unparseable input. strtod
    on its own would silently return 0.0 for "abc" or empty input;
    match MRI semantics by validating at-least-one-digit + no-trailing-
    junk. Whitespace flanking is fine. Issue #888. */
-static sp_float sp_str_to_f_impl(const char *s, int lenient) {SP_GC_ROOT_STR(s);
-  if (!s) { if (lenient) return sp_float_nil(); sp_raise_cls("ArgumentError", "invalid value for Float(): nil"); }
+static sp_float sp_str_to_f_impl(const char *s, int lenient, int *none) {SP_GC_ROOT_STR(s);
+  if (!s) { if (lenient) { *none = 1; return 0.0; } sp_raise_cls("ArgumentError", "invalid value for Float(): nil"); }
   /* embedded NUL: the Ruby string extends past its C prefix -- reject rather
      than silently parsing the prefix ("1\\0" is not a float in CRuby). */
   size_t blen = sp_str_byte_len(s);
@@ -296,9 +342,9 @@ static sp_float sp_str_to_f_impl(const char *s, int lenient) {SP_GC_ROOT_STR(s);
   {
     /* Clean into a buffer, enforcing CRuby's shape rules that strtod is looser
        about: an '_' only BETWEEN two digits of the active base (stripped);
-       a '.' only when followed by a digit ("5." and "0x1_1.0" are invalid);
        a hex literal is integral (hex digits only after 0x); at least one real
-       digit must appear (rejects "inf"/"nan", which strtod would parse). */
+       digit must appear (rejects "inf"/"nan", which strtod would parse). A
+       decimal literal's own shape is checked below once it is copied. */
     size_t n = strlen(s);
     char sbuf[256];
     char *buf = n < sizeof sbuf ? sbuf : (char *)malloc(n + 1);
@@ -349,13 +395,6 @@ static sp_float sp_str_to_f_impl(const char *s, int lenient) {SP_GC_ROOT_STR(s);
         sawdigit = 1;
       }
       else {
-        if (ch == '.' && !isdigit((unsigned char)q[1])) {
-          /* a trailing '.' after digits is valid ("5." == 5.0, CRuby 4.0) */
-          const char *t2 = q + 1;
-          while (isspace((unsigned char)*t2)) t2++;
-          if (*t2 || !sawdigit) goto bad;
-          continue;   /* drop the trailing dot for strtod */
-        }
         if (isdigit((unsigned char)ch)) sawdigit = 1;
       }
       buf[o++] = ch;
@@ -363,6 +402,11 @@ static sp_float sp_str_to_f_impl(const char *s, int lenient) {SP_GC_ROOT_STR(s);
     while (isspace((unsigned char)*q)) q++;
     if (*q || !sawdigit) goto bad;        /* junk after spaces / no digits */
     buf[o] = '\0';
+    /* sp_read_float below stops at the first character it cannot use and
+       succeeds, so text after a valid prefix ("1.0foo", "1e", "0b10") has to
+       be refused here: digits, an optional fraction, then an optional exponent
+       with at least one digit of its own. A hex literal was validated above. */
+    if (!hex && !sp_float_text_shape_ok(buf)) goto bad;
     {
       char *endptr;
       double v = 0.0;
@@ -389,12 +433,12 @@ static sp_float sp_str_to_f_impl(const char *s, int lenient) {SP_GC_ROOT_STR(s);
   }
 bad0:
   /* Kernel#Float(s, exception: false) answers nil for everything this rejects */
-  if (lenient) return sp_float_nil();
+  if (lenient) { *none = 1; return 0.0; }
   sp_raise_cls("ArgumentError", sp_sprintf("invalid value for Float(): \"%s\"", s));
   return 0.0;  /* unreachable */
 }
-sp_float sp_str_to_f_strict(const char *s)  { return sp_str_to_f_impl(s, 0); }
-sp_float sp_str_to_f_lenient(const char *s) { return sp_str_to_f_impl(s, 1); }
+sp_float sp_str_to_f_strict(const char *s)  { int none = 0; return sp_str_to_f_impl(s, 0, &none); }
+sp_ofloat sp_str_to_f_lenient(const char *s) { int none = 0; sp_float f = sp_str_to_f_impl(s, 1, &none); return none ? sp_ofloat_nil() : sp_ofloat_of(f); }
 
 /* Kernel#sprintf's float directives (%f/%e/%g/%a with width/flags) are emitted
    by faithfully delegating to libc snprintf, which is locale-sensitive for the
@@ -403,6 +447,11 @@ sp_float sp_str_to_f_lenient(const char *s) { return sp_str_to_f_impl(s, 1); }
    primitives (Float#to_s / to_f) are locale-free via fp_uscale; this is only
    for the printf-compatible field/flag machinery libc handles best. */
 int sp_snprintf_c_float(char *buf, size_t size, const char *fmt, sp_float v) {
+#if defined(_WIN32)
+  /* the UCRT's %a keeps every trailing zero of the mantissa ("0x1.0000000000000p+0");
+     MinGW-w64's own C99 printf trims as glibc does */
+  if (strpbrk(fmt, "aA")) return __mingw_snprintf(buf, size, fmt, v);
+#endif
   static locale_t sp_c_loc = (locale_t)0;
   if (!sp_c_loc) sp_c_loc = newlocale(LC_ALL_MASK, "C", (locale_t)0);
   if (sp_c_loc) {
@@ -414,37 +463,124 @@ int sp_snprintf_c_float(char *buf, size_t size, const char *fmt, sp_float v) {
   return snprintf(buf, size, fmt, v);
 }
 
-/* Ruby's float conversions round the SHORTEST round-trip decimal
-   representation, not the exact binary value: `format("%.2f", 2.675)` answers
-   2.68 where C's printf answers 2.67, since 2.675 is stored as
-   2.67499999999999982 and Ruby's dtoa works from the four digits "2675" that
-   identify that double. Ties there go to even, so 2.345 answers 2.34 where C
-   answers 2.35. Round to `keep` significant digits the same way and rebuild
-   the value, leaving libc to lay out the field. */
-static sp_float sp_float_round_shortest(sp_float v, int keep) {
-  if (!isfinite(v) || v == 0.0 || keep <= 0 || keep > 17) return v;
-  char digs[48];
-  int nd = 0;
-  sp_float a = v < 0 ? -v : v;
-  int dp = sp_float_shortest(a, digs, &nd);
-  /* nothing to re-round: the cut falls before the first digit (where Ruby's
-     own dtoa consults the exact value instead) or past the last one. A value
-     that needs 16 or 17 digits to identify it is left alone as well -- Ruby's
-     dtoa gives up on its own fast path there and rounds the exact binary
-     value, which is what libc does below. */
-  if (nd <= 0 || keep >= nd || nd > 15) return v;
-  long long num = 0;
-  for (int i = 0; i < keep; i++) num = num * 10 + (digs[i] - '0');
-  int rd = digs[keep] - '0', tail = 0;
-  for (int i = keep + 1; i < nd; i++) if (digs[i] != '0') { tail = 1; break; }
-  if (rd > 5 || (rd == 5 && (tail || (num & 1)))) num++;
-  /* num scaled by 10^(dp-keep+1); parse it back for the correctly-rounded
-     double (a carry that lengthened num keeps the same scale) */
+/* Ruby's float conversions go through its BSD__dtoa (missing/dtoa.c), whose
+   fast path generates the digits in double arithmetic and, unlike David
+   Gay's original, settles a remainder within its error bound of one half as
+   a tie, to even: `format("%.2f", 2.675)` answers 2.68 where C's printf
+   answers 2.67 (2.675 is stored as 2.67499999999999982), and
+   `format("%.2f", 0.69 / 6)` (0.11499999999999999112) answers 0.12 (#7270).
+   The fast path is run here as dtoa runs it (mode 3 for %f with the
+   precision as decimals, mode 2 for %e/%g as significant digits), and the
+   digits it settles on are rebuilt into the double libc then lays out. Where
+   dtoa leaves the fast path for its exact arithmetic (more than 14 digits, a
+   cut before the first digit, a denormal), the exact binary value is
+   rounded, which is what libc does. *keep_zeros is set when dtoa answers its
+   digits untrimmed: a tie settled to even whose exact value lies above the
+   half keeps its trailing zeros, which %g then prints (`format("%.5g",
+   7.91905000000000001)` is 7.9190). */
+static double sp_float_round_ruby(double v, int mode, int ndigits, int *keep_zeros) {
+  static const double tens[] = {
+    1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13, 1e14,
+    1e15, 1e16, 1e17, 1e18, 1e19, 1e20, 1e21, 1e22 };
+  static const double bigtens[] = { 1e16, 1e32, 1e64, 1e128, 1e256 };
+  if (!isfinite(v) || v == 0.0) return v;
+  union { double f; uint64_t u; } x, d2, e;
+  double d = v < 0 ? -v : v;
+  x.f = d;
+  int bexp = (int)((x.u >> 52) & 0x7ff);
+  if (bexp == 0) return v;
+  /* k: dtoa's estimate of floor(log10(d)), exact when it can check it */
+  d2.u = (x.u & 0x000fffffffffffffULL) | 0x3ff0000000000000ULL;
+  int i = bexp - 1023;
+  double dsl = (d2.f - 1.5) * 0.289529654602168 + 0.1760912590558 + i * 0.301029995663981;
+  int k = (int)dsl;
+  if (dsl < 0. && dsl != k) k--;
+  int k_check = 1;
+  if (k >= 0 && k <= 22) {
+    if (d < tens[k]) k--;
+    k_check = 0;
+  }
+  int ilim, ilim1;
+  if (mode == 2) {
+    if (ndigits <= 0) ndigits = 1;
+    ilim = ilim1 = ndigits;
+  }
+  else {
+    ilim = ndigits + k + 1;
+    ilim1 = ilim - 1;
+  }
+  if (ilim <= 0 || ilim > 14) return v;
+  int ieps = 2;
+  if (k > 0) {
+    double ds = tens[k & 0xf];
+    int j = k >> 4;
+    if (j & 0x10) { j &= 0xf; d /= bigtens[4]; ieps++; }
+    for (int n = 0; j; j >>= 1, n++)
+      if (j & 1) { ieps++; ds *= bigtens[n]; }
+    d /= ds;
+  }
+  else if (k < 0) {
+    int j1 = -k;
+    d *= tens[j1 & 0xf];
+    for (int j = j1 >> 4, n = 0; j; j >>= 1, n++)
+      if (j & 1) { ieps++; d *= bigtens[n]; }
+  }
+  if (k_check && d < 1.) {
+    if (ilim1 <= 0) return v;
+    ilim = ilim1; k--; d *= 10.; ieps++;
+  }
+  e.f = ieps * d + 7.;
+  e.u -= (uint64_t)52 << 52;
+  double eps = e.f * tens[ilim - 1];
+  char s[24];
+  int n = 0;
+  for (int t = 1;; t++, d *= 10.) {
+    long L = (long)d;
+    if (!(d -= L)) ilim = t;
+    s[n++] = (char)('0' + L);
+    if (t == ilim) {
+      if (d > 0.5 + eps) goto bump_up;
+      if (d < 0.5 - eps) break;
+      /* within the error bound of a half: a tie, to even */
+      if ((s[n - 1] - '0') & 1) goto bump_up;
+      /* dtoa redoes these digits exactly and keeps them whatever the exact
+         remainder; above an exact half it does not trim their zeros */
+      /* an integer below 1e15 is redone by dtoa's small-integer loop, which
+         stops at the last kept digit without trimming */
+      if (keep_zeros && x.f == floor(x.f) && k <= 14) *keep_zeros = 1;
+      else if (keep_zeros && n < 20) {
+        char ex[900];
+        snprintf(ex, sizeof ex, "%.800e", v < 0 ? -v : v);
+        int dpos = n;               /* digit after the kept ones, in ex's mantissa */
+        const char *q = ex; int seen = 0;
+        while (*q && *q != 'e') {
+          if (*q >= '0' && *q <= '9') {
+            if (seen == dpos) break;
+            seen++;
+          }
+          q++;
+        }
+        if (*q >= '0' && *q <= '9') {
+          int above = *q > '5';
+          if (*q == '5') for (const char *t = q + 1; *t && *t != 'e'; t++) if (*t != '0') { above = 1; break; }
+          *keep_zeros = above;
+        }
+      }
+      break;
+    }
+  }
+  goto rebuild;
+bump_up:
+  while (n > 0 && s[n - 1] == '9') n--;
+  if (n == 0) { s[n++] = '1'; k++; }
+  else s[n - 1]++;
+rebuild:
+  s[n] = 0;
   char buf[64];
-  snprintf(buf, sizeof buf, "%llde%d", num, dp - keep + 1);
+  snprintf(buf, sizeof buf, "0.%se%d", s, k + 1);
   char *end = NULL;
   double r = 0;
-  if (!sp_read_float(buf, &end, &r)) return v;
+  if (!sp_read_float(buf, &end, &r) || !isfinite(r)) return v;
   return v < 0 ? -r : r;
 }
 /* sprintf's float directives: the C-locale delegation above, with Ruby's
@@ -463,16 +599,47 @@ int sp_snprintf_ruby_float(char *buf, size_t size, const char *fmt, sp_float v) 
       prec = 0;
       for (const char *q = dot + 1; *q >= '0' && *q <= '9'; q++) prec = prec * 10 + (*q - '0');
     }
-    int keep;
-    if (conv == 'f') {
-      char digs[48];
-      int nd = 0;
-      sp_float a = v < 0 ? -v : v;
-      keep = sp_float_shortest(a, digs, &nd) + prec + 1;
+    int keep_zeros = 0;
+    if (conv == 'f') v = sp_float_round_ruby(v, 3, prec, NULL);
+    else if (conv == 'e' || conv == 'E') v = sp_float_round_ruby(v, 2, prec + 1, NULL);
+    else {
+      v = sp_float_round_ruby(v, 2, prec, &keep_zeros);
+      /* %g with dtoa's digits untrimmed: the alternate form keeps the zeros;
+         a point it adds with no digit after it is not Ruby's */
+      if (keep_zeros && !strchr(fmt, '#') && n + 2 < 48) {
+        /* the flags and the width are laid out here, around the digits */
+        const char *f = fmt + 1;
+        int minus = 0, zero = 0, plus = 0, space = 0, width = 0;
+        for (;; f++) {
+          if (*f == '-') minus = 1;
+          else if (*f == '0') zero = 1;
+          else if (*f == '+') plus = 1;
+          else if (*f == ' ') space = 1;
+          else break;
+        }
+        while (*f >= '0' && *f <= '9' && width < 10000) width = width * 10 + (*f++ - '0');
+        if (width > 1000) return sp_snprintf_c_float(buf, size, fmt, v);
+        char af[64], body[512];
+        snprintf(af, sizeof af, "%%%s%s#%s", plus ? "+" : "", space ? " " : "", f);
+        int w = sp_snprintf_c_float(body, sizeof body, af, v);
+        if (w < 0 || (size_t)w >= sizeof body) return sp_snprintf_c_float(buf, size, fmt, v);
+        char *pt = strchr(body, '.');
+        if (pt && (pt[1] < '0' || pt[1] > '9')) { memmove(pt, pt + 1, strlen(pt + 1) + 1); w--; }
+        int pad = width > w ? width - w : 0;
+        char out[1100]; int o = 0;
+        const char *b0 = body;
+        if (!minus && zero && pad) {
+          if (*b0 == '-' || *b0 == '+' || *b0 == ' ') out[o++] = *b0++;
+          while (pad-- > 0) out[o++] = '0';
+        }
+        else if (!minus) while (pad-- > 0) out[o++] = ' ';
+        while (*b0) out[o++] = *b0++;
+        if (minus) while (pad-- > 0) out[o++] = ' ';
+        out[o] = 0;
+        if (size) { size_t c = (size_t)o < size - 1 ? (size_t)o : size - 1; memcpy(buf, out, c); buf[c] = 0; }
+        return o;
+      }
     }
-    else if (conv == 'g' || conv == 'G') keep = prec ? prec : 1;
-    else keep = prec + 1;
-    v = sp_float_round_shortest(v, keep);
   }
   return sp_snprintf_c_float(buf, size, fmt, v);
 }
@@ -483,8 +650,26 @@ int sp_snprintf_ruby_float(char *buf, size_t size, const char *fmt, sp_float v) 
  * libc + sp_raise_cls only. */
 sp_int sp_gcd(sp_int a,sp_int b){if(a<0)a=-a;if(b<0)b=-b;while(b){sp_int t=b;b=a%b;a=t;}return a;}
 sp_int sp_lcm(sp_int a,sp_int b){if(a==0||b==0)return 0;sp_int g=sp_gcd(a,b);if(a<0)a=-a;if(b<0)b=-b;return (a/g)*b;}
+/* Both operands are normalized residues below a positive sp_int modulus.
+   Reduce their full product, rather than overflowing before the remainder. */
+static sp_int sp_powmod_mul(sp_int a, sp_int b, sp_int mod) {
+  /* below 3037000500 (the square root of 2^63) the product itself fits */
+  if (mod > 0 && mod < 3037000500) return a * b % mod;
+#if SP_HAVE_INT128
+  return (sp_int)(((sp_uint128)a * (sp_uint128)b) % (sp_uint128)mod);
+#else
+  uintptr_t r = 0, x = (uintptr_t)a, y = (uintptr_t)b, m = (uintptr_t)mod;
+  /* Each sum is below 2 * INTPTR_MAX, so it fits uintptr_t. */
+  while (y) {
+    if (y & 1) r = (r + x) % m;
+    y >>= 1;
+    x = (x + x) % m;
+  }
+  return (sp_int)r;
+#endif
+}
 sp_int sp_powmod(sp_int base,sp_int exp,sp_int mod){if(exp<0)sp_raise_cls("RangeError","Integer#pow() 1st argument cannot be negative when 2nd argument specified");if(mod==0)sp_raise_cls("ZeroDivisionError","divided by 0");sp_int r=1;sp_int m=mod<0?-mod:mod;if(m==1){r=0;}
-else{base=base%m;if(base<0)base+=m;while(exp>0){if(exp%2==1)r=r*base%m;exp=exp/2;base=base*base%m;}}if(mod<0&&r>0)r-=m;return r;}
+else{base=base%m;if(base<0)base+=m;while(exp>0){if(exp%2==1)r=sp_powmod_mul(r,base,m);exp=exp/2;base=sp_powmod_mul(base,base,m);}}if(mod<0&&r>0)r-=m;return r;}
 sp_int sp_ceildiv(sp_int a,sp_int b){if(b==0)sp_raise_cls("ZeroDivisionError","divided by 0");if(b==-1)return -a;sp_int q=a/b;if(a%b!=0&&((a^b)>=0))q++;return q;}
 sp_int sp_int_clamp(sp_int v,sp_int lo,sp_int hi){return v<lo?lo:v>hi?hi:v;}
 sp_float sp_float_clamp(sp_float v,sp_float lo,sp_float hi){return v<lo?lo:v>hi?hi:v;}
@@ -499,7 +684,12 @@ sp_int sp_int_sqrt(sp_int n){if(n<0)sp_raise_cls("Math::DomainError","Numerical 
    only for p<=18; p>=19 collapses to 0. Round-up multiply is overflow-
    guarded and falls back to the truncated value. */
 sp_int sp_ipow10(sp_int p){sp_int f=1;sp_int i=0;while(i<p){f*=10;i++;}return f;}
-sp_int sp_int_round(sp_int v,sp_int nd){if(nd>=0)return v;sp_int p=-nd;if(p>=SP_INT_POW10_LIMIT)return 0;sp_int f=sp_ipow10(p);sp_int q=v/f,r=v%f,half=f/2;if(v>=0){if(r>=half&&q<INTPTR_MAX/f)return(q+1)*f;return q*f;}if(-r>=half&&q>INTPTR_MIN/f)return(q-1)*f;return q*f;}
+void sp_int_round_check_ndigits(sp_int nd) {
+  if (nd > INT_MAX || nd < INT_MIN)
+    sp_raise_cls("RangeError", sp_sprintf("integer %lld too %s to convert to 'int'",
+                 (long long)nd, nd < 0 ? "small" : "big"));
+}
+sp_int sp_int_round(sp_int v,sp_int nd){sp_int_round_check_ndigits(nd);if(nd>=0)return v;sp_int p=-nd;if(p>=SP_INT_POW10_LIMIT)return 0;sp_int f=sp_ipow10(p);sp_int q=v/f,r=v%f,half=f/2;if(v>=0){if(r>=half&&q<INTPTR_MAX/f)return(q+1)*f;return q*f;}if(-r>=half&&q>INTPTR_MIN/f)return(q-1)*f;return q*f;}
 sp_int sp_int_ceil(sp_int v,sp_int nd){if(nd>=0)return v;sp_int p=-nd;if(p>=SP_INT_POW10_LIMIT)return 0;sp_int f=sp_ipow10(p);sp_int q=v/f,r=v%f;if(r!=0&&v>0&&q<INTPTR_MAX/f)return(q+1)*f;return q*f;}
 sp_int sp_int_floor(sp_int v,sp_int nd){if(nd>=0)return v;sp_int p=-nd;if(p>=SP_INT_POW10_LIMIT)return 0;sp_int f=sp_ipow10(p);sp_int q=v/f,r=v%f;if(r!=0&&v<0&&q>INTPTR_MIN/f)return(q-1)*f;return q*f;}
 sp_int sp_int_truncate(sp_int v,sp_int nd){if(nd>=0)return v;sp_int p=-nd;if(p>=SP_INT_POW10_LIMIT)return 0;sp_int f=sp_ipow10(p);return(v/f)*f;}
@@ -512,7 +702,7 @@ sp_int sp_int_truncate(sp_int v,sp_int nd){if(nd>=0)return v;sp_int p=-nd;if(p>=
    parsing too); an unparseable string is 0. A value past sp_int raises
    RangeError, like the sibling Integer() parsers. */
 sp_int sp_str_oct(const char*s){SP_GC_ROOT_STR(s);
-  if(!s)return 0;
+  if (SP_UNLIKELY(!s)) sp_nil_recv("oct");
   const char*p=s;
   while(isspace((unsigned char)*p))p++;
   int sign=1;
@@ -537,8 +727,8 @@ sp_int sp_str_oct(const char*s){SP_GC_ROOT_STR(s);
     else break;
     if(d>=base)break;
     sp_int t;
-    if(__builtin_mul_overflow(val,(sp_int)base,&t)||
-       __builtin_add_overflow(t,(sp_int)d,&val))
+    if(sp_ckd_mul_iptr(val,(sp_int)base,&t)||
+       sp_ckd_add_iptr(t,(sp_int)d,&val))
       sp_raise_cls("RangeError",sp_sprintf("integer overflow parsing \"%s\"",s));
     any=1; prev_us=0; p++;
   }

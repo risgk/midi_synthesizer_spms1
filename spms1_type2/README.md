@@ -67,7 +67,7 @@ Required Software for Modification
     - This sketch is tested with version 5.0.2: <https://github.com/FortySevenEffects/arduino_midi_library/releases/tag/5.0.2>
     - Info: <https://github.com/FortySevenEffects/arduino_midi_library>
 - Spinel
-    - Release: 2026.09.12 <https://github.com/matz/spinel/tree/2026.09.12>
+    - Release: 2026.10.25 <https://github.com/matz/spinel/tree/2026.10.25>
     - The Spinel output file "spms1_main.c" needs no editing. "spinel_rt_mcu_head.h" in this sketch,
       included at the top of "spinel_rt.h", carries `#define main __attribute__((section(".time_critical"), flatten)) Spms1_main`,
       which renames it and puts the synth core in RAM at the same time. Renaming it by hand
@@ -83,7 +83,9 @@ Required Software for Modification
       that the synth makes for every parameter once a buffer inline from "spms1_midi_read.h"
     - The clamps are the larger and the smaller of two Floats, from "spms1_dsp.h", included the same
       way, each one instruction (`vmaxnm.f32` or `vminnm.f32`) where Ruby would compare and select
-    - "spms1_main.c" is generated in "spms1" with `spinel spms1_main.rb -c --rbs sig`. The type seeds
+    - "spms1_main.c" is generated in "spms1" with `spinel spms1_main.rb -c --rbs sig`, then changed by
+      `sh spinel_mcu/after_spinel.sh spms1/spms1_main.c` (run from "spms1_type2"; "sim_render/build.sh"
+      does both), which says why. The type seeds
       in "spms1/sig" keep the filter states, the parameter smoothing and the bus writes unboxed;
       "spms1/sig/spms1_filter.rbs", "spms1/sig/spms1_dsp.rbs" and "spms1/sig/spms1_framework.rbs" say
       why they are needed
@@ -451,7 +453,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 ```
 
-- Base Release: 2026.09.12 <https://github.com/matz/spinel/tree/2026.09.12>
+- Base Release: 2026.10.25 <https://github.com/matz/spinel/tree/2026.10.25>
 - Target files: `spms1/spinel_rt*.h*`, `spms1/mruby_shim.h*`, `spms1/sp_*.*`, `spms1/re_*.*`, `spinel_mcu/*`
     - Note: Some files for runtime are modified for MCU by ISGK Instruments (Ryo Ishigaki)
 

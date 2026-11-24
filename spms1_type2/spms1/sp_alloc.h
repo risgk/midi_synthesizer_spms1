@@ -14,13 +14,13 @@
    already uses for the extern sp_gc_heap / sp_gc_bytes object heap. */
 #include "sp_types.h"   /* sp_str_hdr, sp_int, sp_float */
 #include "sp_gc.h"      /* sp_gc_collect, sp_oom_die, sp_gc_str_sweep_hook */
-#include "sp_time.h"    /* sp_Time for sp_box_time */
+#include "sp_time.h"    /* sp_Time for sp_box_timev */
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>      /* snprintf for the int/float formatters below */
 #include <math.h>       /* HUGE_VAL / signbit for sp_float_to_s */
 
-const char *sp_sprintf(const char *fmt, ...);  /* defined in the generated TU */
+const char *sp_sprintf(const char *fmt, ...) SP_PRINTF_FORMAT(1, 2);  /* defined in the generated TU */
 
 /* Global heap lock (Phase 1, design 6.1). Under SP_THREADS one mutex serializes
    the object- and string-heap mutations -- the trigger+collect, the calloc/
@@ -74,9 +74,16 @@ extern pthread_mutex_t sp_heap_lock;
    exists for exactly this reason and its comment calls the padding essential
    -- and the string heap never got the same treatment, which left it the
    dominant cost of allocation-heavy parallel work. */
+/* The young list is SP_STR_YSUB lists, filled round-robin. A sweep task is
+   one list, so a worker that allocated most of a cycle's strings (a busy
+   request handler among idle workers) has its sweep split across the parked
+   workers instead of being the one slot everyone waits on: the longest slot
+   was the whole parallel phase, four milliseconds of thirty workers idle. */
+#define SP_STR_YSUB 4
 typedef struct {
-  sp_str_hdr *young;        /* per-worker young list head */
-  size_t      young_bytes;  /* live bytes on that list */
+  sp_str_hdr *young[SP_STR_YSUB];   /* per-worker young list heads */
+  unsigned    rr;                   /* which young list the next allocation joins */
+  size_t      young_bytes;  /* live bytes on those lists */
   sp_str_hdr *old;          /* per-worker old list head (swept on a major) */
   size_t      old_bytes;
   /* The byte count at which this worker may next ASK for a collection. The
@@ -89,7 +96,7 @@ typedef struct {
      futex storm at eight (#4334). Raising the mark by one threshold on every
      ask bounds it to one per threshold's worth of allocation. */
   size_t      ask_at;
-  char _pad[SP_CACHELINE - 2 * sizeof(sp_str_hdr *) - 3 * sizeof(size_t)];
+  char _pad[2 * SP_CACHELINE - (SP_STR_YSUB + 1) * sizeof(sp_str_hdr *) - sizeof(unsigned) - 3 * sizeof(size_t)];
 } sp_str_wslot_t;
 extern sp_str_wslot_t sp_str_wslot[SP_MAX_WORKERS];
 #else
@@ -112,6 +119,44 @@ void sp_alloc_worker_tune(int workers); /* size the collection budget for N work
 
 extern const char sp_str_empty_data[];
 #define sp_str_empty (sp_str_empty_data + 1)
+/* nil.to_s / true.to_s / false.to_s: frozen, as in CRuby (lib/sp_alloc.c) */
+extern const char *const sp_str_frozen_empty;
+extern const char *const sp_str_frozen_true;
+extern const char *const sp_str_frozen_false;
+/* A chilled String is what CRuby's Symbol#to_s answers: not frozen (frozen?
+   is false, and a mutation goes through), but +@ copies it as it copies a
+   frozen one. Spinel keeps one per symbol (sp_sym_to_s_chilled): static
+   storage with a header, the 0xfb marker, whose `next` link names
+   sp_str_chilled_tag. A static string is on no sweep list, so the link is
+   free to carry the mark, and no marker test -- the collector's included --
+   has to learn a new byte. The symbol rides ahead of the header, so a String
+   handle made from one can name it (sp_String.chilled). */
+extern const sp_str_hdr sp_str_chilled_tag;
+typedef struct { sp_int sym; sp_str_hdr h; unsigned char m; char d[]; } sp_str_chilled_obj;
+static inline int sp_str_is_chilled(const char *s) {
+  return s && ((const unsigned char *)s)[-1] == 0xfb &&
+         (((const sp_str_hdr *)(s - 1)) - 1)->next == &sp_str_chilled_tag;
+}
+static inline sp_int sp_str_chilled_sym(const char *s) {
+  return ((const sp_str_chilled_obj *)(s - offsetof(sp_str_chilled_obj, d)))->sym;
+}
+/* a nullable string (NULL) as the empty string, the standard C spelling of
+   GNU's `s ?: sp_str_empty` */
+static inline const char *sp_str_or_empty(const char *s) { return s ? s : sp_str_empty; }
+
+#if defined(_WIN32)
+/* The length of a path's root on Windows, 0 for a relative path: "/", or a
+   drive's "C:/" (or "C:\\"), the root CRuby there answers paths under. The
+   lexical path helpers (File.expand_path, Dir.glob, File.absolute_path?,
+   File.dirname, the tmpdir package) keep a root as it is and work on what
+   follows; on POSIX they test for "/" as they always have. */
+static inline size_t sp_file_path_root_len(const char *p) {
+  if (!p) return 0;
+  if (((p[0] >= 'A' && p[0] <= 'Z') || (p[0] >= 'a' && p[0] <= 'z')) && p[1] == ':' && (p[2] == '/' || p[2] == '\\'))
+    return 3;
+  return p[0] == '/' ? 1 : 0;
+}
+#endif
 
 /* UTF-8 char-length cache. Shared (extern) so sp_str_sweep flushes the same
    table the length helpers in spinel_rt.h populate: a per-TU split would leave
@@ -152,7 +197,7 @@ static inline unsigned sp_str_lcache_slot(const char *s) {
    0xff is kept by not being added anywhere. */
 static inline int sp_str_has_hdr(const char *s) {
   unsigned char m = ((const unsigned char *)s)[-1];
-  return m == 0xfe || m == 0xfc || m == 0xfd || m == 0xf1 || m == 0xfb;
+  return m == 0xfe || m == 0xfc || m == 0xfd || m == 0xf1 || m == 0xfb || m == 0xfa || m == 0xf8;
 }
 /* "Every byte of this string is below 0x80", verified once and remembered.
    A 7-bit string indexes at fixed width, so #length is its byte length and
@@ -191,8 +236,16 @@ void sp_str_sweep(void);
    workers that own the slots (see sp_alloc.c). */
 int  sp_str_sweep_begin(int *major);
 void sp_str_sweep_end(int major, size_t promoted);
+void sp_str_sweep_end_excluding(int major, size_t promoted, size_t young_exclude);   /* the concurrent sweep's deferred end */
 #ifdef SP_THREADS
-void sp_str_sweep_one(int wid, int major, size_t *promoted);
+void sp_str_sweep_old_one(int wid);
+void sp_str_sweep_young_list(sp_str_hdr **head, sp_str_hdr **keep, sp_str_hdr **tail, size_t *moved, size_t *held);
+size_t sp_str_sweep_old_list(sp_str_hdr **head);
+size_t sp_str_bytes_total(void);   /* every worker's young string bytes */
+void sp_str_sweep_young_one(int wid, int sub, sp_str_hdr **keep, sp_str_hdr **tail,
+                            size_t *moved, size_t *held);
+void sp_str_sweep_young_done(int wid, sp_str_hdr *keep, sp_str_hdr *tail, size_t moved, size_t held,
+                             size_t *promoted);
 extern int sp_str_par_done;
 #endif
 void sp_str_lcache_clear(void);
@@ -227,7 +280,52 @@ void sp_alloc_report_tag(void *scan, const char *name);
    is bounded at 1GB rather than 2. Every reader of `size` masks. */
 #define SP_STR_SIZE_MASK   0x3FFFFFFFu
 
+#ifdef SP_ONE_STRING
+/* One representation, U2 (string-u2-design.md): a heap String is born inside
+   the handle that will hold it, one GC object laid out as an inline handle
+   ([sp_gc_hdr][sp_String][sp_str_hdr][0xfe][bytes][NUL]). To the builtins
+   it is an ordinary fresh heap string (marker 0xfe, the length in the
+   header); its header's link names the handle in front of it, the mark
+   follows that link (sp_gc_mark_str), and a slot that takes the String
+   adopts the handle (sp_String_adopt) instead of copying the bytes. */
+void *sp_gc_alloc(size_t sz, void (*fin)(void *), void (*scn)(void *));
+void *sp_gc_alloc_nogc(size_t sz, void (*fin)(void *), void (*scn)(void *));
+static inline char *sp_str_alloc_born(size_t len, int nogc) {
+  size_t total = sizeof(sp_str_hdr) + 1 + len + 1;
+  struct sp_String_s *r = (struct sp_String_s *)(nogc ? sp_gc_alloc_nogc : sp_gc_alloc)(sizeof(struct sp_String_s) + total, NULL, NULL);
+  sp_str_hdr *h = (sp_str_hdr *)(void *)(r + 1);
+  h->next = (sp_str_hdr *)(void *)r;
+  h->size = (uint32_t)total;
+  h->len = (uint32_t)len;
+  h->hash = 0;
+  char *body = (char *)(h + 1);
+  body[0] = (char)0xfe;
+  body[1 + len] = 0;
+  r->data = body + 1; r->len = (int64_t)len; r->cap = (int64_t)len; r->binary = 0; r->chilled = 0;
+  if (sp_alloc_report_on) sp_alloc_report_str(len);
+  return body + 1;
+}
+/* A heap String the runtime keeps and answers again (`$1`, MatchData#string,
+   File#path, an exception's stored message, ...): a slot that takes it must
+   copy it, as every slot did before U2, or a change through the slot's
+   handle would show in what the runtime keeps. Bit 1 of the header's link
+   to the handle it was born in says so; sp_str_born_owner then answers no
+   handle, and the mark masks it (SP_STR_BORN_LINK). */
+static inline const char *sp_str_retained(const char *s) {
+  if (s && (((const unsigned char *)s)[-1] | 0x04) == 0xfe) {
+    sp_str_hdr *h = ((sp_str_hdr *)(void *)(s - 1)) - 1;
+    char *o = (char *)SP_STR_BORN_LINK(h);
+    if (o && o + sizeof(struct sp_String_s) == (char *)h) h->next = (sp_str_hdr *)(void *)((uintptr_t)o | SP_STR_BORN_KEPT);
+  }
+  return s;
+}
+#else
+#define sp_str_retained(s) (s)
+#endif
 static inline char *sp_str_alloc(size_t len) {
+#ifdef SP_ONE_STRING
+  return sp_str_alloc_born(len, 0);
+#endif
   size_t total = sizeof(sp_str_hdr) + 1 + len + 1;
   sp_str_hdr *h;
   /* String-heap pressure drives its own collection (see sp_str_heap_bytes).
@@ -255,16 +353,19 @@ static inline char *sp_str_alloc(size_t len) {
          allocation later rather than the next allocation. */
       sp_str_wslot[wid].ask_at = SP_GC_CTR_GET(sp_str_wslot[wid].young_bytes) + sp_str_threshold;
     } }
-  h = (sp_str_hdr *)malloc(total);
-  if (!h) sp_oom_die();
+  h = (sp_str_hdr *)sp_slab_alloc_str(total);
   h->size = (uint32_t)total;
   h->len = (uint32_t)len;
   h->hash = 0;
-  /* Publish h->next before the head store so a concurrent GC.stat walk that
+  /* A slab block's generation is a bit in its chunk (lib/sp_slab.c); only
+     a string too large for the slab goes on the worker's young list.
+     Publish h->next before the head store so a concurrent GC.stat walk that
      observes the new head reaches a fully-linked node (only pushes touch the
      head; the sweep runs under stop-the-world). */
-  h->next = sp_str_wslot[wid].young;
-  sp_str_wslot[wid].young = h;
+  if (!sp_slab_owns(h)) {
+    unsigned sub = sp_str_wslot[wid].rr++ & (SP_STR_YSUB - 1);
+    h->next = sp_str_wslot[wid].young[sub];
+    sp_str_wslot[wid].young[sub] = h; }
   SP_GC_CTR_ADD(sp_str_wslot[wid].young_bytes, total);
 #else
   SP_HEAP_LOCK();
@@ -272,13 +373,11 @@ static inline char *sp_str_alloc(size_t len) {
   if (SP_GC_CTR_GET(sp_str_heap_bytes) > sp_str_threshold) {
     sp_str_collect_retune();         /* sp_gc_collect runs sp_str_sweep */
   }
-  h = (sp_str_hdr *)malloc(total);
-  if (!h) sp_oom_die();
-  h->next = sp_str_heap;
+  h = (sp_str_hdr *)sp_slab_alloc_str(total);
   h->size = (uint32_t)total;
   h->len = (uint32_t)len;
   h->hash = 0;
-  sp_str_heap = h;
+  if (!sp_slab_owns(h)) { h->next = sp_str_heap; sp_str_heap = h; }
   SP_GC_CTR_ADD(sp_str_heap_bytes, total);
   SP_HEAP_UNLOCK();
 #endif
@@ -303,21 +402,24 @@ static inline char *sp_str_alloc(size_t len) {
    copies through here. The heap simply runs a little past the threshold; the
    next ordinary allocation collects. */
 static inline char *sp_str_alloc_nogc(size_t len) {
+#ifdef SP_ONE_STRING
+  return sp_str_alloc_born(len, 1);
+#endif
   size_t total = sizeof(sp_str_hdr) + 1 + len + 1;
-  sp_str_hdr *h = (sp_str_hdr *)malloc(total);
-  if (!h) sp_oom_die();
+  sp_str_hdr *h = (sp_str_hdr *)sp_slab_alloc_str(total);
   h->size = (uint32_t)total;
   h->len = (uint32_t)len;
   h->hash = 0;
 #ifdef SP_THREADS
   { int wid = sp_worker_id;
-    h->next = sp_str_wslot[wid].young;
-    sp_str_wslot[wid].young = h;
+    if (!sp_slab_owns(h)) {
+      unsigned sub = sp_str_wslot[wid].rr++ & (SP_STR_YSUB - 1);
+      h->next = sp_str_wslot[wid].young[sub];
+      sp_str_wslot[wid].young[sub] = h; }
     SP_GC_CTR_ADD(sp_str_wslot[wid].young_bytes, total); }
 #else
   SP_HEAP_LOCK();
-  h->next = sp_str_heap;
-  sp_str_heap = h;
+  if (!sp_slab_owns(h)) { h->next = sp_str_heap; sp_str_heap = h; }
   SP_GC_CTR_ADD(sp_str_heap_bytes, total);
   SP_HEAP_UNLOCK();
 #endif
@@ -331,9 +433,37 @@ static inline char *sp_str_alloc_nogc(size_t len) {
 /* Copy a message onto the string heap so it can be held by a string root.
    The source is a bare literal (every raise the runtime and the generated
    code issue passes one) or an unrooted heap string; neither can be rooted
-   across an allocation, so the copy runs with no collection in between. */
+   across an allocation, so the copy runs with no collection in between.
+   The length is strlen's, not sp_str_byte_len's: a bare literal or a static
+   buffer (Process.spawn's sp_err_buf) has no header, and sp_str_byte_len reads
+   the byte before it for one, which for some neighbouring byte looks like a
+   header's marker and answers a made-up length (#7556 did, and a copied
+   message gained NUL bytes in some builds). */
+/* A "counted" message: a raise message that is a Spinel String with a NUL inside it
+   (sp_exc_msg_given builds it, #7556). The one place a message's length survives the
+   const char * the exception path carries it as, and only for a message the generated
+   code gave: it starts with six bytes no C string of ours starts with (a raw buffer's
+   neighbour bytes are never read; these are compared from the pointer on, stopping
+   at the first mismatch, and a NUL ends any shorter string), then the payload's
+   length, then the payload. A bare C string, whose length is strlen's, never matches.
+   The sixth byte is 0x02 for a frozen String's message (a literal's), so the
+   exception's copy is frozen too and `e.message << x` raises FrozenError, as
+   CRuby's message is the literal itself (sp_cmsg_frozen). */
+#define SP_CMSG_HDR 10
+static inline int sp_cmsg_p(const char *m) {
+  return m && (unsigned char)m[0] == 0xff && (unsigned char)m[1] == 0xfe && m[2] == 'C' &&
+         m[3] == 'M' && (unsigned char)m[4] == 0xfd && ((unsigned char)m[5] == 0x01 || (unsigned char)m[5] == 0x02);
+}
+static inline int sp_cmsg_frozen(const char *m) { return (unsigned char)m[5] == 0x02; }
+static inline size_t sp_cmsg_len(const char *m) { uint32_t n; memcpy(&n, m + 6, sizeof n); return n; }
 static inline const char *sp_msg_heapify(const char *m) {
   if (!m) return NULL;
+  if (sp_cmsg_p(m)) {   /* stays counted: a later stage decodes it */
+    size_t total = SP_CMSG_HDR + sp_cmsg_len(m);
+    char *c = sp_str_alloc_nogc(total);
+    memcpy(c, m, total);
+    return c;
+  }
   size_t n = strlen(m);
   char *r = sp_str_alloc_nogc(n);
   memcpy(r, m, n);
@@ -369,7 +499,7 @@ static inline void sp_str_mark_binary(char *s) {
 static inline int sp_str_fixed_width(const char *s, size_t *out) {
   if (!s) { *out = 0; return 0; }
   unsigned char m = ((const unsigned char *)s)[-1];
-  if (m == 0xfe || m == 0xfc || m == 0xfd || m == 0xf1 || m == 0xfb) {
+  if (m == 0xfe || m == 0xfc || m == 0xfd || m == 0xf1 || m == 0xfb || m == 0xfa || m == 0xf8) {
     const sp_str_hdr *h = ((const sp_str_hdr *)(s - 1)) - 1;
     if (h->len != SP_STR_LEN_UNSET &&
         (h->size & (SP_STR_SIZE_BINARY | SP_STR_SIZE_ASCII7))) { *out = h->len; return 1; }
@@ -402,7 +532,7 @@ static inline size_t sp_str_byte_len(const char *s) {
   /* 0xf1 (frozen heap string / frozen literal) also carries a real sp_str_hdr
      whose len is the true byte length, so an embedded NUL survives freezing
      (#2462 dedup, .freeze). */
-  if (marker == 0xfe || marker == 0xfc || marker == 0xfd || marker == 0xf1 || marker == 0xfb) {
+  if (marker == 0xfe || marker == 0xfc || marker == 0xfd || marker == 0xf1 || marker == 0xfb || marker == 0xfa || marker == 0xf8) {
     uint32_t l = (((const sp_str_hdr *)(s - 1)) - 1)->len;
     if (l != SP_STR_LEN_UNSET) return l;
   }
@@ -412,7 +542,7 @@ static inline size_t sp_str_byte_len(const char *s) {
 static inline void sp_str_set_len(char *s, size_t len) {
   if (!s) return;
   unsigned char marker = ((unsigned char *)s)[-1];
-  if (marker == 0xfe || marker == 0xfc || marker == 0xfd || marker == 0xf1 || marker == 0xfb) {
+  if (marker == 0xfe || marker == 0xfc || marker == 0xfd || marker == 0xf1 || marker == 0xfb || marker == 0xfa || marker == 0xf8) {
     sp_str_hdr *hd = ((sp_str_hdr *)(s - 1)) - 1;
     hd->len = (uint32_t)len;
     hd->hash = 0;  /* length change implies content change: invalidate cached hash */
@@ -425,12 +555,24 @@ static inline void sp_str_set_len(char *s, size_t len) {
    `io.read(0)` the binary encoding, and the shared empty string cannot carry
    it -- marking that would tag it for every other holder of the same pointer.
    So these allocate, and only on that path. */
+static inline char *sp_str_bin_like(const char *s, char *r) {
+  if (sp_str_is_binary(s)) sp_str_mark_binary(r);
+  return r;
+}
 static inline char *sp_str_empty_binary(void) {
   char *r = sp_str_alloc_raw(1);
   r[0] = 0;
   sp_str_set_len(r, 0);
   sp_str_mark_binary(r);
   return r;
+}
+/* A new empty String in the encoding of s: the empty fields of a partition
+   that found nothing */
+static inline char *sp_str_empty_like(const char *s) {
+  char *r = sp_str_alloc_raw(1);
+  r[0] = 0;
+  sp_str_set_len(r, 0);
+  return sp_str_bin_like(s, r);
 }
 
 /* Byte count for the binary-safe return modes (FFI `:binstr`, native binding
@@ -461,6 +603,13 @@ static inline const char *sp_str_dup_external(const char *s) {
   return r;
 }
 
+/* ENV copies are frozen but remain collectible, like frozen Hash keys. */
+static inline const char *sp_env_str(const char *s) {
+  char *r = (char *)sp_str_dup_external(s);
+  if (r) ((unsigned char *)r)[-1] = 0xfa;
+  return r;
+}
+
 /* Integer / Float -> decimal string. Shared here (over the string heap) so cold
    readers such as lib/sp_json.c can format numbers without spinel_rt.h. */
 /* Interpolation writers: append one part into a caller-provided buffer and
@@ -469,14 +618,49 @@ static inline const char *sp_str_dup_external(const char *s) {
    pre-evaluated dynamic parts, so one sp_str_alloc_raw serves the whole
    string (previously: one heap string per part + an sp_sprintf pass). */
 #define SP_W_INT_MAX 21  /* -9223372036854775808 */
-static inline char *sp_w_int(char *p, sp_int n) {
-  if (n == SP_INT_NIL) return p;  /* a nil int slot interpolates as "" */
+/* Decimal digits of u, counted up front so the digits can be written in place
+   at their final position -- no scratch buffer and no second copy. */
+static inline int sp_u64_ndigits(uint64_t u) {
+  int d = 1;
+  for (;;) {
+    if (u < 10) return d;
+    if (u < 100) return d + 1;
+    if (u < 1000) return d + 2;
+    if (u < 10000) return d + 3;
+    u /= 10000; d += 4;
+  }
+}
+/* Write u's digits so the last one lands just before `end`, two at a time from
+   a pair table: half the divisions of the digit-at-a-time loop. */
+static inline void sp_u64_write_back(char *end, uint64_t u) {
+  static const char d2[] =
+    "00010203040506070809101112131415161718192021222324252627282930313233343536373839"
+    "40414243444546474849505152535455565758596061626364656667686970717273747576777879"
+    "8081828384858687888990919293949596979899";
+  while (u >= 100) {
+    unsigned r = (unsigned)(u % 100); u /= 100;
+    end -= 2; end[0] = d2[2 * r]; end[1] = d2[2 * r + 1];
+  }
+  if (u >= 10) { end -= 2; end[0] = d2[2 * u]; end[1] = d2[2 * u + 1]; }
+  else *--end = (char)('0' + u);
+}
+/* An Integer the program knows is never nil (the analysis says no nil
+   reaches it). A nil is written through sp_w_oint, so this is sp_w_int:
+   INTPTR_MIN is that number here, not "" (#7612). */
+static inline char *sp_w_int_plain(char *p, sp_int n) {
   uint64_t u;
   if (n < 0) { *p++ = '-'; u = (uint64_t)(-(n + 1)) + 1; }
   else u = (uint64_t)n;
-  char tmp[SP_W_INT_MAX]; int i = 0;
-  do { tmp[i++] = (char)('0' + (u % 10)); u /= 10; } while (u > 0);
-  while (i > 0) *p++ = tmp[--i];
+  p += sp_u64_ndigits(u);
+  sp_u64_write_back(p, u);
+  return p;
+}
+static inline char *sp_w_int(char *p, sp_int n) {
+  uint64_t u;
+  if (n < 0) { *p++ = '-'; u = (uint64_t)(-(n + 1)) + 1; }
+  else u = (uint64_t)n;
+  p += sp_u64_ndigits(u);
+  sp_u64_write_back(p, u);
   return p;
 }
 /* NOTE: s must be a marked spinel string (heap or codegen literal) --
@@ -502,22 +686,18 @@ static inline char *sp_w_bool(char *p, sp_bool v) {
    fixed 32, which is less string-heap pressure per call and so fewer
    collections. */
 static inline const char *sp_int_to_s(sp_int n) {
-  char tmp[24];   /* -9223372036854775808 is 20 characters */
-  int i = (int)sizeof tmp;
   uint64_t u;
   /* negate in unsigned space: -INT64_MIN does not fit in sp_int */
   if (n < 0) u = (uint64_t)(-(n + 1)) + 1; else u = (uint64_t)n;
-  do { tmp[--i] = (char)('0' + (int)(u % 10)); u /= 10; } while (u);
-  if (n < 0) tmp[--i] = '-';
-  size_t len = sizeof tmp - (size_t)i;
-  char *b = sp_str_alloc_raw(len + 1);
-  memcpy(b, tmp + i, len);
-  b[len] = 0;
-  sp_str_set_len(b, len);
-  /* digits and the sign are 7-bit by construction, and set_len clears the
-     flag, so re-assert it: the length and index paths then answer without
-     scanning. */
-  sp_str_mark_ascii7(b);
+  size_t len = (size_t)sp_u64_ndigits(u) + (n < 0);
+  /* sp_str_alloc records the exact length and terminates it, so the digits go
+     straight into the result. */
+  char *b = sp_str_alloc(len);
+  sp_u64_write_back(b + len, u);
+  if (n < 0) b[0] = '-';
+  /* digits and the sign are 7-bit by construction: the length and index paths
+     then answer without scanning. The header is a fresh heap one. */
+  (((sp_str_hdr *)(b - 1)) - 1)->size |= SP_STR_SIZE_ASCII7;
   return b;
 }
 /* Float#to_s (Ruby semantics): the shortest decimal that round-trips, fixed
@@ -527,6 +707,20 @@ static inline const char *sp_int_to_s(sp_int n) {
    large, so it lives out-of-line in sp_alloc.c rather than inlining into every
    TU that formats a float. */
 const char *sp_float_to_s(sp_float f);
+
+/* ---- container payloads: a hash's tables, an array's data ----
+   The blocks a container keeps beside its object (bucket arrays, an
+   element buffer) came from malloc, and a request on campfire made 3,600 of
+   them: a keyword hash is three 128-byte tables, and glibc's arena lock and
+   coalescing were a sixth of the CPU. A block up to the slab's largest
+   class comes from the calling worker's slab instead, lock-free; anything
+   larger, or the slab off, is malloc as before, and sp_slab_free tells the
+   two apart by address. A payload freed by the program (a grow, a rehash)
+   goes into the thread's batched free list like a sweep's would. */
+static inline void *sp_pl_alloc(size_t n) { return sp_slab_alloc_raw(n); }
+static inline void *sp_pl_zalloc(size_t n) { void *p = sp_slab_alloc_raw(n); memset(p, 0, n); return p; }
+static inline void sp_pl_free(void *p) { if (p) sp_slab_free(p); }
+void *sp_pl_realloc(void *p, size_t newn);   /* lib/sp_slab.c: a slab block knows its size class, a malloc block is realloc'd */
 
 /* ---- object construction (shared so lib C files can build values) ----
    The built-in cls_id sentinels, the core sp_box_* constructors, the object
@@ -604,6 +798,16 @@ const char *sp_float_to_s(sp_float f);
                                            that asserts every id is distinct will
                                            flag any future collision at compile
                                            time. */
+#define SP_BUILTIN_RANDOM        (-50)  /* Random (sp_Random *): boxed so a
+                                           generator in an Array or a poly slot
+                                           keeps its identity; it read as nil */
+/* SP_BUILTIN_ARGF (-51) is in sp_gc.h: the collector must not trace it */
+#define SP_BUILTIN_YIELDER       (-49)  /* Enumerator::Yielder: the generator's
+                                          block parameter as a VALUE, for a
+                                          proc inside the body that captures
+                                          it. v.p is the generator's own sp_Fiber;
+                                          `y << v` on it is Fiber.yield (the
+                                          proc runs on that fiber). */
 
 static inline sp_RbVal sp_box_int(sp_int v)    { sp_RbVal r; r.tag = SP_TAG_INT;  r.cls_id = 0; r.v.i = v; return r; }
 /* A NULL char* IS Ruby nil throughout the string paths (the nullable-string
@@ -611,6 +815,22 @@ static inline sp_RbVal sp_box_int(sp_int v)    { sp_RbVal r; r.tag = SP_TAG_INT;
    carries SP_TAG_STR and fails tag-keyed comparisons -- `defined?(x).should
    == nil` compared STR(NULL) against NIL and answered false. */
 static inline sp_RbVal sp_box_str(const char *v){ sp_RbVal r; if (!v) { r.tag = SP_TAG_NIL; r.cls_id = 0; r.v.s = NULL; return r; } r.tag = SP_TAG_STR;  r.cls_id = 0; r.v.s = v; return r; }
+/* A boxed value as the String it holds, for a reader that takes a String
+   by its tag: a shared String's handle (SP_BUILTIN_STRBUF) reads as a box
+   of its bytes, the handle's first field (sp_String.data); any other value
+   is itself. */
+static inline sp_RbVal sp_rbval_str(sp_RbVal v) {
+  if (v.tag == SP_TAG_OBJ && v.cls_id == SP_BUILTIN_STRBUF && v.v.p) {
+    v.tag = SP_TAG_STR;
+    v.cls_id = 0;
+    v.v.s = *(const char **)v.v.p;
+  }
+  return v;
+}
+/* A String mutator's value from a poly arm, which answers the box or the
+   unboxed String by mutator: boxed either way (a NULL String is nil). */
+static inline sp_RbVal sp_box_same(sp_RbVal v){ return v; }
+#define SP_BOX_STR_OR_POLY(x) _Generic((x), sp_RbVal: sp_box_same, default: sp_box_str)(x)
 static inline sp_RbVal sp_box_float(sp_float v){ sp_RbVal r; r.tag = SP_TAG_FLT;  r.cls_id = 0; r.v.f = v; return r; }
 /* Write the full union word, not just the narrow `b` member: hash keys and
    poly equality compare bool values through `v.i`, so bytes left
@@ -621,18 +841,70 @@ static inline sp_RbVal sp_box_obj(void *p, int cls_id) { sp_RbVal r; r.tag = SP_
 static inline sp_RbVal sp_box_sym(sp_sym v)     { if (v == (sp_sym)-1) { sp_RbVal n; n.tag = SP_TAG_NIL; n.cls_id = 0; n.v.i = 0; return n; } sp_RbVal r; r.tag = SP_TAG_SYM;  r.cls_id = 0; r.v.i = (sp_int)v; return r; }  /* (sp_sym)-1 is the nilable-symbol sentinel: box it as nil, never as :"" */
 static inline sp_RbVal sp_box_poly_array(void *p) { return sp_box_obj(p, SP_BUILTIN_POLY_ARRAY); }
 
-/* The inverse of sp_box_int_or_nil / the float sentinel: unbox a poly into a
-   flat int / float slot that may hold nil. Reading `.v.i` straight off a
-   nil-tagged value yields the payload underneath the tag -- 0, an ordinary
-   Integer -- so nil silently becomes 0 (or 0.0). These map the nil tag to the
-   slot's reserved sentinel instead, which is what every nil? / to_s / boxing
-   site on a nullable int or float already tests for. */
-static inline sp_int sp_poly_as_int_or_nil(sp_RbVal v) {
-  return v.tag == SP_TAG_NIL ? SP_INT_NIL : v.v.i;
+/* ---- Nullable Integer / Float in flight (sp_oint / sp_ofloat, sp_types.h) ---- */
+/* A boxed value into a nullable slot, unchecked: the nil tag is the slot's
+   nil, any other tag reads its payload as the slot's kind (the caller has
+   settled the tag). Reading `.v.i` straight off a nil-tagged value would
+   yield the payload underneath the tag -- 0, an ordinary Integer. */
+static inline sp_oint sp_poly_as_int_or_nil(sp_RbVal v) {
+  return v.tag == SP_TAG_NIL ? sp_oint_nil() : sp_oint_of(v.v.i);
 }
-static inline sp_float sp_poly_as_float_or_nil(sp_RbVal v) {
-  return v.tag == SP_TAG_NIL ? sp_float_nil() : v.v.f;
+static inline sp_ofloat sp_poly_as_float_or_nil(sp_RbVal v) {
+  return v.tag == SP_TAG_NIL ? sp_ofloat_nil() : sp_ofloat_of(v.v.f);
 }
+/* ... and out: nil boxes as nil, a value as itself. Inline because every
+   boxed element read goes through here. */
+static inline sp_RbVal sp_box_oint(sp_oint o)     { return o.nil ? sp_box_nil() : sp_box_int(o.v); }
+static inline sp_RbVal sp_box_ofloat(sp_ofloat o) { return o.nil ? sp_box_nil() : sp_box_float(o.v); }
+/* A generic builtin entry's arm whose answer the analysis types boxed but
+   whose emitter writes it unboxed (Integer#gcd on a boxed receiver): boxed
+   by the C type the arm's value has. Expanded only in a program's own C,
+   after every type it names is declared. */
+static inline sp_RbVal sp_bi_box_id(sp_RbVal v) { return v; }
+static inline sp_RbVal sp_bi_box_mstr(char *v) { return sp_box_str(v); }
+#define SP_BI_BOX(x) _Generic((x), sp_RbVal: sp_bi_box_id, sp_int: sp_box_int, sp_float: sp_box_float, \
+  sp_bool: sp_box_bool, const char *: sp_box_str, char *: sp_bi_box_mstr, sp_oint: sp_box_oint, \
+  sp_ofloat: sp_box_ofloat, sp_PolyArray *: sp_box_poly_array, \
+  sp_FloatArray *: sp_box_float_array, sp_StrArray *: sp_box_str_array)(x)
+/* The value of a nullable slot used where CRuby's nil would raise. The three
+   raisers live in lib/sp_str.c and lib/sp_cold.c; SP_COLD, so a check in a
+   hot function keeps its raise path out of the way (optcarrot's CPU#fetch
+   lost 40% of its frame rate to a warm one). */
+SP_NORETURN SP_COLD void sp_nil_recv(const char *meth);          /* NoMethodError "undefined method 'meth' for nil" */
+SP_NORETURN SP_COLD void sp_raise_nil_to_int(int of_wording);    /* TypeError "no implicit conversion from nil to integer" (1: "of nil into Integer") */
+SP_NORETURN SP_COLD void sp_raise_nil_opnd(const char *cls);     /* TypeError "nil can't be coerced into <cls>" */
+SP_NORETURN SP_COLD void sp_raise_nil_cmp(int left_nil, const char *op, const char *cls);  /* ArgumentError "comparison of <cls> with nil failed" (left_nil: NoMethodError) */
+/* The test of a call written under a name its function does not carry (size
+   and count over a length, first over an element read): the receiver, or the
+   NoMethodError for nil under that name. Passed through so the call reads it
+   in place (#9347). */
+static inline void *sp_nil_recv_named(const void *p, const char *meth) { if (SP_UNLIKELY(!p)) sp_nil_recv(meth); return (void *)p; }
+/* the RECEIVER of `op` (`x + 1`, `x.abs`, `x < y`): NoMethodError for nil */
+static inline sp_int    sp_oint_val(sp_oint o, const char *op)     { if (SP_UNLIKELY(o.nil)) sp_nil_recv(op); return o.v; }
+static inline sp_float  sp_ofloat_val(sp_ofloat o, const char *op) { if (SP_UNLIKELY(o.nil)) sp_nil_recv(op); return o.v; }
+/* a strict Integer ARGUMENT (an index, a count, a width): the conversion TypeError */
+static inline sp_int    sp_oint_arg(sp_oint o)                     { if (SP_UNLIKELY(o.nil)) sp_raise_nil_to_int(0); return o.v; }
+static inline sp_int    sp_oint_arg_of(sp_oint o)                  { if (SP_UNLIKELY(o.nil)) sp_raise_nil_to_int(1); return o.v; }
+static inline sp_int    sp_oint_arg_offt(sp_oint o)                { if (SP_UNLIKELY(o.nil)) sp_raise_nil_to_int(2); return o.v; }   /* an off_t argument's wording */
+/* a strict Float argument: TypeError "can't convert nil into Float" */
+SP_NORETURN SP_COLD void sp_raise_nil_to_float(void);
+static inline sp_float  sp_ofloat_arg(sp_ofloat o)                 { if (SP_UNLIKELY(o.nil)) sp_raise_nil_to_float(); return o.v; }
+/* the RIGHT operand of an arithmetic operator (`1 + x`): the coercion TypeError */
+static inline sp_int    sp_oint_opnd(sp_oint o)                    { if (SP_UNLIKELY(o.nil)) sp_raise_nil_opnd("Integer"); return o.v; }
+static inline sp_float  sp_ofloat_opnd(sp_ofloat o)                { if (SP_UNLIKELY(o.nil)) sp_raise_nil_opnd("Float"); return o.v; }
+/* ...whose LEFT operand is of class lcls (`1 + f`: "nil can't be coerced into Integer") */
+static inline sp_float  sp_ofloat_opnd_in(sp_ofloat o, const char *lcls) { if (SP_UNLIKELY(o.nil)) sp_raise_nil_opnd(lcls); return o.v; }
+static inline sp_int    sp_oint_opnd_in(sp_oint o, const char *lcls)     { if (SP_UNLIKELY(o.nil)) sp_raise_nil_opnd(lcls); return o.v; }   /* `1.0 * b`: "into Float" */
+/* the RIGHT operand of a comparison (`1 < x`, `x.clamp(0, y)`): Comparable's
+   ArgumentError, naming the LEFT operand's class */
+static inline sp_int    sp_oint_cmp_opnd(sp_oint o, const char *op, const char *lcls)     { if (SP_UNLIKELY(o.nil)) sp_raise_nil_cmp(0, op, lcls); return o.v; }
+static inline sp_float  sp_ofloat_cmp_opnd(sp_ofloat o, const char *op, const char *lcls) { if (SP_UNLIKELY(o.nil)) sp_raise_nil_cmp(0, op, lcls); return o.v; }
+/* `x == y` / `x.eql?(y)` / `x <=> y` with a nullable side: nil equals only
+   nil, and <=> against nil is nil */
+static inline sp_bool sp_oint_eq(sp_oint a, sp_oint b)     { return a.nil ? b.nil : (!b.nil && a.v == b.v); }
+static inline sp_bool sp_ofloat_eq(sp_ofloat a, sp_ofloat b) { return a.nil ? b.nil : (!b.nil && a.v == b.v); }
+/* interpolation: nil is "" */
+static inline char *sp_w_oint(char *p, sp_oint o) { return o.nil ? p : sp_w_int(p, o.v); }
 
 /* GC object allocator. The threshold/stress state is extern (defined in
    sp_alloc.c) so every TU shares it -- the same model as sp_gc_heap/bytes.
@@ -648,62 +920,131 @@ extern int sp_gc_str_major_sched;
 extern size_t sp_gc_str_majors;
 extern int sp_gc_obj_budget_fixed;
 extern int sp_gc_str_budget_fixed;
+extern int sp_gc_str_budget_mode;
 extern size_t sp_gc_threshold;
 extern size_t sp_gc_threshold_init;
 extern int sp_gc_stress_checked;
 void *sp_gc_alloc(size_t sz, void (*fin)(void *), void (*scn)(void *));
+/* sp_gc_alloc(sz, NULL, scn) for a size that is a constant where it is
+   called: the switch folds to one call, of the front lib/sp_slab.c keeps for
+   that size class (16 bytes apart from 32 to 256, the header included). */
+void *sp_gc_alloc_32(size_t need, void (*scn)(void *));
+void *sp_gc_alloc_48(size_t need, void (*scn)(void *));
+void *sp_gc_alloc_64(size_t need, void (*scn)(void *));
+void *sp_gc_alloc_80(size_t need, void (*scn)(void *));
+void *sp_gc_alloc_96(size_t need, void (*scn)(void *));
+void *sp_gc_alloc_112(size_t need, void (*scn)(void *));
+void *sp_gc_alloc_128(size_t need, void (*scn)(void *));
+void *sp_gc_alloc_144(size_t need, void (*scn)(void *));
+void *sp_gc_alloc_160(size_t need, void (*scn)(void *));
+void *sp_gc_alloc_176(size_t need, void (*scn)(void *));
+void *sp_gc_alloc_192(size_t need, void (*scn)(void *));
+void *sp_gc_alloc_208(size_t need, void (*scn)(void *));
+void *sp_gc_alloc_224(size_t need, void (*scn)(void *));
+void *sp_gc_alloc_240(size_t need, void (*scn)(void *));
+void *sp_gc_alloc_256(size_t need, void (*scn)(void *));
+static inline void *sp_gc_alloc_sized(size_t sz, void (*scn)(void *)) {
+  size_t need = sizeof(sp_gc_hdr) + sz;
+  switch (need <= 32 ? 0 : need > 256 ? -1 : (int)((need + 15) >> 4) - 2) {
+  case 0: return sp_gc_alloc_32(need, scn);
+  case 1: return sp_gc_alloc_48(need, scn);
+  case 2: return sp_gc_alloc_64(need, scn);
+  case 3: return sp_gc_alloc_80(need, scn);
+  case 4: return sp_gc_alloc_96(need, scn);
+  case 5: return sp_gc_alloc_112(need, scn);
+  case 6: return sp_gc_alloc_128(need, scn);
+  case 7: return sp_gc_alloc_144(need, scn);
+  case 8: return sp_gc_alloc_160(need, scn);
+  case 9: return sp_gc_alloc_176(need, scn);
+  case 10: return sp_gc_alloc_192(need, scn);
+  case 11: return sp_gc_alloc_208(need, scn);
+  case 12: return sp_gc_alloc_224(need, scn);
+  case 13: return sp_gc_alloc_240(need, scn);
+  case 14: return sp_gc_alloc_256(need, scn);
+  default: return sp_gc_alloc(sz, NULL, scn);
+  }
+}
 void *sp_gc_alloc_nogc(size_t sz, void (*fin)(void *), void (*scn)(void *));
 
-__attribute__((noreturn)) void sp_raise_cls(const char *cls, const char *msg);  /* lib/sp_core.c */
-__attribute__((noreturn)) void sp_raise_frozen_str(const char *s);              /* lib/sp_str.c */
+SP_NORETURN void sp_raise_cls(const char *cls, const char *msg);  /* lib/sp_core.c */
+SP_NORETURN void sp_raise_frozen_str(const char *s);              /* lib/sp_str.c */
 /* The message carries the rodata marker byte: an in-flight exception's msg is
    marked by the GC (sp_mark_string reads s[-1]), so a bare literal -- whose
    [-1] is out of bounds -- would be UB when it lands at a section edge. */
-static void __attribute__((noinline, cold)) sp_raise_frozen_array(void) { sp_raise_cls("FrozenError", (&("\xff" "can't modify frozen Array")[1])); }
+static SP_NOINLINE SP_COLD void sp_raise_frozen_array(void) { sp_raise_cls("FrozenError", (&("\xff" "can't modify frozen Array")[1])); }
+/* An ENV name or value (value != 0) with an embedded NUL cannot reach the
+   C environment: CRuby raises ArgumentError rather than cut it short. */
+static inline const char *sp_env_chk(const char *s, int value) {
+  if (s && memchr(s, 0, sp_str_byte_len(s)))
+    sp_raise_cls("ArgumentError", value ? (&("\xff" "bad environment variable value: contains null byte")[1])
+                                        : (&("\xff" "bad environment variable name: contains null byte")[1]));
+  return s;
+}
 /* Same, but stages the receiver so FrozenError#receiver answers the frozen
    object itself (identity-preserving boxing of the mutation target) (#3002).
    sp_exc_stage_recv lives in the generated TU; the ctor transfers the staged
    value onto the raised exception's xrecv slot. */
 void sp_exc_stage_recv(sp_RbVal v);
-static void __attribute__((noinline, cold)) sp_raise_frozen_array_at(void *a, int cls_id) {
-  sp_exc_stage_recv(sp_box_obj(a, cls_id));
-  sp_raise_cls("FrozenError", (&("\xff" "can't modify frozen Array")[1]));
+/* the raise itself, in lib/sp_cold.c: the message carries the receiver's
+   inspect, as CRuby's does ("can't modify frozen Array: [1, 2]") */
+SP_NORETURN void sp_raise_frozen_array_rv(sp_RbVal v);
+static SP_NOINLINE SP_COLD void sp_raise_frozen_array_at(void *a, int cls_id) {
+  sp_raise_frozen_array_rv(sp_box_obj(a, cls_id));
 }
 /* boxed-receiver variant (the mutator holds an sp_RbVal, not the raw ptr) */
-static void __attribute__((noinline, cold)) sp_raise_frozen_array_v(sp_RbVal v) {
-  sp_exc_stage_recv(v);
-  sp_raise_cls("FrozenError", (&("\xff" "can't modify frozen Array")[1]));
+static SP_NOINLINE SP_COLD void sp_raise_frozen_array_v(sp_RbVal v) {
+  sp_raise_frozen_array_rv(v);
 }
 
-/* sp_PolyArray: a growable array of boxed values. */
-typedef struct { sp_RbVal *data; sp_int len; sp_int cap; sp_int frozen; } sp_PolyArray;
+/* Top-level self, the main object (#4926): a bare Object allocated on first
+   use, whose to_s / inspect answer "main". sp_main_obj is its pointer, a GC
+   root marked with the runtime globals; lib/sp_cold.c. */
+extern void *sp_main_obj;
+sp_RbVal sp_main_self(void);
+
+/* sp_PolyArray: a growable array of boxed values. The first
+   SP_POLYARR_INLINE elements live in the object itself: an array that never
+   outgrows them has no payload, so no finalizer, so the sweep never touches
+   it dead (lib/sp_slab.c) -- and most arrays never do. Growing past them
+   moves the elements to a payload and installs the finalizer that frees it. */
+#define SP_POLYARR_INLINE 8
+typedef struct { sp_RbVal *data; sp_int len; sp_int cap; sp_int frozen; sp_RbVal inl[SP_POLYARR_INLINE]; } sp_PolyArray;
 static inline void sp_PolyArray_scan(void *p) { sp_PolyArray *a = (sp_PolyArray *)p; for (sp_int i = 0; i < a->len; i++) sp_mark_rbval(a->data[i]); }
-static inline void sp_PolyArray_fin(void *p) { sp_PolyArray *a = (sp_PolyArray *)p; sp_gc_hdr *h = (sp_gc_hdr *)((char *)a - sizeof(sp_gc_hdr)); sp_gc_bytes_sub(sizeof(sp_RbVal) * a->cap); h->size -= sizeof(sp_RbVal) * a->cap; free(a->data); }
+static inline void sp_PolyArray_fin(void *p) { sp_PolyArray *a = (sp_PolyArray *)p; if (a->data == a->inl) return; sp_gc_hdr *h = (sp_gc_hdr *)((char *)a - sizeof(sp_gc_hdr)); sp_gc_bytes_sub(sizeof(sp_RbVal) * a->cap); h->size -= sizeof(sp_RbVal) * a->cap; sp_pl_free(a->data); }
 /* Free-list pool for PolyArray, header AND data buffer kept together. The
    allocation-heaviest programs (per-point tuple building: BabyStark's
    constraint evaluation) churn millions of short-lived PolyArrays; recycling
    them turns the calloc+malloc pair and the sweep-side free into list ops.
-   Pool state lives in sp_alloc.c; the recycle hook runs inside the sweep. */
-extern sp_gc_hdr *sp_polyarr_pool_head;
-extern long sp_polyarr_pool_count;
+   Pool state lives in sp_alloc.c; the recycle hook runs inside the sweep.
+   With the slab on there is no pool: the slab's own allocation is as cheap
+   as a pop, and a pooled header is one the sweep has to touch dead (to run
+   its recycler) where an unpooled one dies in its chunk's bitmap. */
+/* The pool is per thread (sp_alloc.c says why), so the pop is a plain
+   list operation on both builds. */
+extern SP_TLS sp_gc_hdr *sp_polyarr_pool_head;
+extern SP_TLS long sp_polyarr_pool_count;
 void sp_PolyArray_pool_recycle(sp_gc_hdr *h);
+/* An Array subclass instance's embedded Array (#7449, see
+   sp_IntArray_init_embedded): its elements start inline, and the first growth
+   installs the finalizer that frees the payload, as an unpooled one's does. */
+static inline void sp_PolyArray_init_embedded(sp_PolyArray *a) {
+  a->data = a->inl; a->cap = SP_POLYARR_INLINE; a->len = 0;
+}
 static inline sp_PolyArray *sp_PolyArray_new(void) {
-  sp_gc_hdr *ph;
-#ifdef SP_THREADS
-  do { ph = __atomic_load_n(&sp_polyarr_pool_head, __ATOMIC_ACQUIRE);
-  } while (ph && !__atomic_compare_exchange_n(&sp_polyarr_pool_head, &ph, ph->next,
-                                              0, __ATOMIC_ACQ_REL, __ATOMIC_ACQUIRE));
-  if (ph) __atomic_fetch_sub(&sp_polyarr_pool_count, 1, __ATOMIC_RELAXED);
-#else
-  ph = sp_polyarr_pool_head;
+  if (sp_slab_on > 0) {
+    sp_PolyArray *a = (sp_PolyArray *)sp_gc_alloc(sizeof(sp_PolyArray), NULL, sp_PolyArray_scan);
+    a->data = a->inl; a->cap = SP_POLYARR_INLINE; a->len = 0;
+    return a;
+  }
+  sp_gc_hdr *ph = sp_polyarr_pool_head;
   if (ph) { sp_polyarr_pool_head = ph->next; sp_polyarr_pool_count--; }
-#endif
   if (ph) {
-    /* re-link into the live heap (the sweep unhooked it); size still counts
+    /* back into the live heap (the sweep parked it); size still counts
        header + retained data buffer, so the byte accounting stays exact */
     ph->marked = 0; ph->old = 0; ph->dirty = 0;
     ph->recycle = sp_PolyArray_pool_recycle;
-    SP_GC_HEAP_PUSH(ph);
+    if (sp_slab_owns(ph)) sp_slab_relive(ph);
+    else SP_GC_HEAP_PUSH(ph);
     sp_gc_bytes_add(ph->size);
     sp_PolyArray *a = (sp_PolyArray *)((char *)ph + sizeof(sp_gc_hdr));
     a->len = 0;
@@ -711,125 +1052,173 @@ static inline sp_PolyArray *sp_PolyArray_new(void) {
     return a;
   }
   sp_PolyArray *a = (sp_PolyArray *)sp_gc_alloc(sizeof(sp_PolyArray), sp_PolyArray_fin, sp_PolyArray_scan);
-  a->cap = 16; a->data = (sp_RbVal *)malloc(sizeof(sp_RbVal) * a->cap); if (!a->data) sp_oom_die(); a->len = 0;
-  { sp_gc_hdr *h = (sp_gc_hdr *)((char *)a - sizeof(sp_gc_hdr)); h->recycle = sp_PolyArray_pool_recycle; h->size += sizeof(sp_RbVal) * a->cap; sp_gc_bytes_add(sizeof(sp_RbVal) * a->cap); }
+  a->data = a->inl; a->cap = SP_POLYARR_INLINE; a->len = 0;
+  { sp_gc_hdr *h = (sp_gc_hdr *)((char *)a - sizeof(sp_gc_hdr)); h->recycle = sp_PolyArray_pool_recycle; sp_slab_set_fin(h); }
   return a;
 }
-static inline void sp_PolyArray_push(sp_PolyArray *a, sp_RbVal v) { if (!a) return; sp_gc_wb((void*)a); if (a->frozen) { sp_raise_frozen_array(); return; } if (a->len >= a->cap) { sp_gc_hdr *h = (sp_gc_hdr *)((char *)a - sizeof(sp_gc_hdr)); sp_gc_bytes_sub(sizeof(sp_RbVal) * a->cap); h->size -= sizeof(sp_RbVal) * a->cap; a->cap = (a->cap * 2) + 1; void *nd = realloc(a->data, sizeof(sp_RbVal) * a->cap); if (!nd) sp_oom_die(); a->data = (sp_RbVal *)nd; h->size += sizeof(sp_RbVal) * a->cap; sp_gc_bytes_add(sizeof(sp_RbVal) * a->cap); } a->data[a->len++] = v; }
-static inline sp_RbVal sp_PolyArray_get(sp_PolyArray *a, sp_int i) { if (!a) return sp_box_nil(); if (i < 0) i += a->len; if (i < 0 || i >= a->len) return sp_box_nil(); return a->data[i]; }
+/* past the inline elements: the first growth moves them to a payload and
+   gives the object the finalizer that will free it; later growths resize */
+static SP_NOINLINE void sp_PolyArray_grow(sp_PolyArray *a) {
+  sp_gc_hdr *h = (sp_gc_hdr *)((char *)a - sizeof(sp_gc_hdr));
+  sp_int nc = (a->cap * 2) + 1;
+  if (a->data == a->inl) {
+    sp_RbVal *nd = (sp_RbVal *)sp_pl_alloc(sizeof(sp_RbVal) * (size_t)nc);
+    memcpy(nd, a->inl, sizeof(sp_RbVal) * (size_t)a->len);
+    a->data = nd;
+    if (!h->finalize) { h->finalize = sp_PolyArray_fin; sp_slab_set_fin(h); }
+  }
+  else {
+    sp_gc_bytes_sub(sizeof(sp_RbVal) * a->cap); h->size -= sizeof(sp_RbVal) * a->cap;
+    a->data = (sp_RbVal *)sp_pl_realloc(a->data, sizeof(sp_RbVal) * (size_t)nc);
+  }
+  a->cap = nc;
+  h->size += sizeof(sp_RbVal) * a->cap; sp_gc_bytes_add(sizeof(sp_RbVal) * a->cap);
+}
+static inline void sp_PolyArray_push(sp_PolyArray *a, sp_RbVal v) { if (!a) return; sp_gc_wb((void*)a); if (a->frozen) { sp_raise_frozen_array_at(a, SP_BUILTIN_POLY_ARRAY); return; } if (a->len >= a->cap) sp_PolyArray_grow(a); a->data[a->len++] = v; }
+static inline sp_RbVal sp_PolyArray_get(sp_PolyArray *a, sp_int i) { if (!a) return sp_box_nil(); if ((unsigned long long)i < (unsigned long long)a->len) return a->data[i]; if (i < 0) i += a->len; if (i < 0 || i >= a->len) return sp_box_nil(); return a->data[i]; }
+static inline sp_RbVal sp_PolyArray_get_m(sp_PolyArray *a, sp_int i) { if (SP_UNLIKELY(!a)) sp_nil_recv("[]"); return sp_PolyArray_get(a, i); }
 /* ---- relocated from spinel_rt.h: frozen-string check primitives used
    by lib/sp_cold.c's sp_str_setbyte_cow, and the SPL frozen-literal macro
    used by lib/sp_cold.c's sp_gc_stat. Pure textual move (still static
    inline / object-like macro), no codegen change. ---- */
 #define SPL(s) (&("\xff" s)[1])
+/* A String handle's payload (0xfd) is frozen when its owning handle is: the
+   header's `next` is that handle (sp_fd_own), whose GC header has the bit.
+   A Hash keeps a frozen handle's payload as its key (sp_hash_key_str). */
+static inline sp_bool sp_str_fd_owner_frozen(const char *s) {
+  void *owner = (void *)(((const sp_str_hdr *)(s - 1)) - 1)->next;
+  return owner && ((sp_gc_hdr *)((char *)owner - sizeof(sp_gc_hdr)))->frozen;
+}
 /* 0xf1 = heap string frozen by an explicit .freeze call.
    Unlike 0xff (rodata literal) this marker lives in a malloc'd buffer
    so sp_str_freeze_val can set it.  The frozen? predicate and mutation
    guards check for 0xf1; plain rodata 0xff literals are NOT reported
-   as frozen (they behave as immutable value-semantics objects). */
+   as frozen (they behave as immutable value-semantics objects).
+   0xfa is a frozen heap string that is collected like any other where 0xf1
+   is kept for good; 0xf8 is its marked state on a malloc'd string, as 0xfc
+   is 0xfe's (a slab string's mark is a bit in its chunk). */
 static inline sp_bool sp_str_is_frozen_val(const char *s) {
   if (!s) return TRUE;
-  return ((const unsigned char *)s)[-1] == 0xf1;
+  unsigned char m = ((const unsigned char *)s)[-1];
+  /* one test of the frozen marks and 0xfd at once (bits 0, 7, 9 and 12 of
+     m - 0xf1): an unfrozen string pays nothing for the handle's payload */
+  unsigned d = (unsigned)m - 0xf1u;
+  if (d > 12u || !((0x1281u >> d) & 1u)) return FALSE;
+  if (SP_UNLIKELY(m == 0xfd)) return sp_str_fd_owner_frozen(s);
+  return TRUE;
 }
 static inline void sp_str_check_mutable(const char *s) {
   if (sp_str_is_frozen_val(s)) sp_raise_frozen_str(s);
+}
+/* A String a runtime object keeps past the call (a File's path, a
+   MatchData's target): under the one representation, bytes that are a live
+   payload's view (0xfd, of a handle that is not frozen) are copied, since
+   the handle changes under the hold, where CRuby's object keeps what it was
+   given then. Any other bytes are kept as they are. */
+#ifdef SP_ONE_STRING
+const char *sp_str_keep_copy(const char *s);
+static inline const char *sp_str_keep(const char *s) {
+  return s && ((const unsigned char *)s)[-1] == 0xfd && !sp_str_fd_owner_frozen(s) ? sp_str_keep_copy(s) : sp_str_retained(s);
+}
+#else
+#define sp_str_keep(s) (s)
+#endif
+/* A String key as a Hash stores it: a mutable string is copied into a frozen
+   0xfa, so a later `<<` or setbyte on the caller's string cannot move the key
+   (CRuby's rb_hash_key_str). A frozen or literal key is stored as is, and so
+   is the payload of a frozen String handle (0xfd, whose header's `next` is
+   the owning handle, sp_fd_own): nothing can change or move it any more,
+   the mark of the key reaches the handle, and the key is that String itself,
+   as CRuby keys a frozen String. The copy can collect, which clears the
+   write barrier's record of the hash: the caller issues its barrier again
+   before storing. */
+#ifdef SP_ONE_STRING
+const char *sp_hash_key_handle_copy(const char *s);
+#endif
+static inline const char *sp_hash_key_str(const char *s) {
+  unsigned char m = ((const unsigned char *)s)[-1];
+  if (m != 0xfe && m != 0xfc && m != 0xfd) return s;
+  if (m == 0xfd && sp_str_fd_owner_frozen(s)) return s;
+#ifdef SP_ONE_STRING
+  /* (one representation: the copy is a frozen handle's payload, so the
+     key's handle, sp_String_key_handle, is that one String each time) */
+  return sp_hash_key_handle_copy(s);
+#endif
+  char *r = (char *)sp_str_from_bytes(s, sp_str_byte_len(s));
+  if (sp_str_is_binary(s)) sp_str_mark_binary(r);
+  ((unsigned char *)r)[-1] = 0xfa;
+  return r;
 }
 
 /* ---- relocated from spinel_rt.h: integer add/sub/mul overflow-check
    helpers (still static inline, pure textual move) used by lib/sp_cold.c's
    sp_int_pow. ---- */
-#ifndef __has_builtin
-#  define __has_builtin(x) 0
-#endif
-#if (defined(__GNUC__) && __GNUC__ >= 5) || \
-    (__has_builtin(__builtin_add_overflow) && \
-     __has_builtin(__builtin_sub_overflow) && \
-     __has_builtin(__builtin_mul_overflow))
-#  define SP_HAVE_OVERFLOW_BUILTINS 1
-#endif
-
-#ifdef SP_HAVE_OVERFLOW_BUILTINS
+/* the builtin, C23 <stdckdint.h> or a range check, per sp_compat.h */
 static inline sp_bool sp_int_add_overflow_p(sp_int a, sp_int b, sp_int *r) {
-  return __builtin_add_overflow(a, b, r);
+  return sp_ckd_add_iptr(a, b, r);
 }
 static inline sp_bool sp_int_sub_overflow_p(sp_int a, sp_int b, sp_int *r) {
-  return __builtin_sub_overflow(a, b, r);
+  return sp_ckd_sub_iptr(a, b, r);
 }
 static inline sp_bool sp_int_mul_overflow_p(sp_int a, sp_int b, sp_int *r) {
-  return __builtin_mul_overflow(a, b, r);
+  return sp_ckd_mul_iptr(a, b, r);
 }
-#else
-/* Portable fallback for compilers lacking __builtin_*_overflow.
-   sp_int is pointer-width (intptr_t), so compute in uintptr_t --
-   unsigned overflow is well-defined wrap-around in C -- and detect
-   signed overflow via the sign-bit XOR trick at the *correct* width
-   (the sign bit is sp_int's top bit: 63 on 64-bit, 31 on 32-bit).
-   Bounds use INTPTR_MAX/MIN, not the int64 MRB_INT_* macros, so this
-   path is self-contained and width-correct. Mul checks bounds before
-   multiplying because a 2x-width intermediate isn't portable. */
-#define SP_INT_OVF_SIGN ((uintptr_t)1 << (sizeof(sp_int) * 8 - 1))
-static inline sp_bool sp_int_add_overflow_p(sp_int a, sp_int b, sp_int *r) {
-  uintptr_t x = (uintptr_t)a, y = (uintptr_t)b, z = x + y;
-  *r = (sp_int)z;
-  return !!(((x ^ z) & (y ^ z)) & SP_INT_OVF_SIGN);
-}
-static inline sp_bool sp_int_sub_overflow_p(sp_int a, sp_int b, sp_int *r) {
-  uintptr_t x = (uintptr_t)a, y = (uintptr_t)b, z = x - y;
-  *r = (sp_int)z;
-  return !!(((x ^ z) & (~y ^ z)) & SP_INT_OVF_SIGN);
-}
-static inline sp_bool sp_int_mul_overflow_p(sp_int a, sp_int b, sp_int *r) {
-  if (a > 0 && b > 0 && a > INTPTR_MAX / b) { *r = a * b; return TRUE; }
-  if (a < 0 && b > 0 && a < INTPTR_MIN / b) { *r = a * b; return TRUE; }
-  if (a > 0 && b < 0 && b < INTPTR_MIN / a) { *r = a * b; return TRUE; }
-  if (a < 0 && b < 0 && (a <= INTPTR_MIN || b <= INTPTR_MIN || -a > INTPTR_MAX / -b)) {
-    *r = a * b; return TRUE;
-  }
-  *r = a * b;
-  return FALSE;
-}
-#undef SP_INT_OVF_SIGN
-#endif
 
 /* ---- Integer leaf-op prototypes (bodies relocated to lib/sp_cold.c):
    chr/digits/bit_length/bit_range/to_s_base/opt variants/pow. ---- */
 const char *sp_int_chr(sp_int n);
 const char *sp_int_chr_utf8(sp_int n);
 const char *sp_int_codepoint_to_str(sp_int n);
+const char *sp_int_codepoint_to_str_in(const char *recv, sp_int n);
 sp_IntArray *sp_int_digits(sp_int n, sp_int base);
 sp_int sp_int_bit_length(sp_int n);
 sp_int sp_int_bit_range(sp_int n, sp_int start, sp_int len);
-const char *sp_int_interp(sp_int n);
+const char *sp_int_interp(sp_oint n);   /* interpolation: nil is "" */
 const char *sp_int_to_s_base(sp_int n, sp_int base);
-const char *sp_int_opt_inspect(sp_int v);
-const char *sp_int_opt_to_s(sp_int v);
+const char *sp_int_opt_inspect(sp_oint v);   /* "nil" for nil */
+const char *sp_int_opt_to_s(sp_oint v);      /* "" for nil */
 sp_int sp_int_pow(sp_int base, sp_int exp);
 
 /* ---- Float leaf-op prototypes (bodies relocated to lib/sp_cold.c). ---- */
-const char *sp_float_opt_inspect(sp_float v);
-const char *sp_float_opt_to_s(sp_float v);
+const char *sp_float_opt_inspect(sp_ofloat v);
+const char *sp_float_opt_to_s(sp_ofloat v);
 sp_int sp_float_denominator(sp_float f);
 sp_RbVal sp_float_numerator(sp_float f);
+/* Float#to_i: an in-range, non-NaN value is a C truncation, done inline;
+   NaN (which fails both tests), Infinity and an out-of-range value go to the
+   raising body in sp_cold.c. The range is exactly the one that body checks. */
+sp_int sp_float_to_i_checked_slow(sp_float f);
 #if SPINEL_BARE_METAL
 /* For the MCU: Float#to_i, which the generated code calls every sample in a synth (index =
-   pitch.to_i and the like), inline here rather than out of line in sp_cold.c, so that it is
-   inlined into the caller instead of called (from flash, on the MCU). sp_cold_bare_metal.c leaves
-   its own out. And without the checks the released one makes (a NaN or an infinity raises
+   pitch.to_i and the like), without the checks the released one makes (a NaN or an infinity raises
    FloatDomainError, a Float past the range of sp_int RangeError), as Integer arithmetic goes
-   without its overflow check (SP_INT_OVERFLOW_MODE_WRAP, spinel_rt_mcu_head.h): on the MCU a
-   raise stops the sound as surely as a wrong value would, so the checks buy nothing there, and a
-   synth makes several conversions a sample, which with the checks took about 5000 cycles (31 us)
-   of a buffer of SPMS-1's. Such a Float comes out as the processor's conversion makes it, which C
-   leaves undefined (the Cortex-M33's VCVT: 0 for a NaN, the nearest end of the range otherwise;
-   x86's, the lowest value of the range, for the simulators, which build the runtime the same
-   way); an index made from it and read out of an array's range reads nil (0.0), as any index
+   without its overflow check (SP_INT_OVERFLOW_MODE_WRAP, spinel_rt_mcu_head.h): on the MCU a raise
+   stops the sound as surely as a wrong value would, so the checks buy nothing there, and a synth
+   makes several conversions a sample. Such a Float comes out as the processor's conversion makes
+   it, which C leaves undefined (the Cortex-M33's VCVT: 0 for a NaN, the nearest end of the range
+   otherwise; x86's, the lowest value of the range, for the simulators, which build the runtime the
+   same way); an index made from it and read out of an array's range reads nil (0.0), as any index
    out of range does. */
 static inline sp_int sp_float_to_i_checked(sp_float f) {
   return (sp_int)f;
 }
 #else
-sp_int sp_float_to_i_checked(sp_float f);
+static inline sp_int sp_float_to_i_checked(sp_float f) {
+  if (SP_LIKELY(f >= (sp_float)INTPTR_MIN && f < -(sp_float)INTPTR_MIN)) return (sp_int)f;
+  return sp_float_to_i_checked_slow(f);
+}
 #endif
+
+/* Machine-integer arguments use NUM2LONG's RangeError, unlike Float#to_i. */
+SP_NORETURN SP_COLD void sp_float_arg_range_error(sp_float f);
+static inline void sp_float_arg_check(sp_float f) {
+  if (SP_UNLIKELY(!(f >= (sp_float)INTPTR_MIN && f < -(sp_float)INTPTR_MIN)))
+    sp_float_arg_range_error(f);
+}
+static inline sp_int sp_float_arg_i(sp_float f) {
+  sp_float_arg_check(f);
+  return (sp_int)f;
+}
 
 /* ---- forward declarations for pointer-only box params (full types stay
    opaque to lib/sp_alloc.h -- these box functions only store the pointer). ---- */
@@ -876,7 +1265,7 @@ static inline sp_RbVal sp_box_nullable_obj_dyn(void *p, int cls_id) {
   (void)cls_id;
   return p ? sp_box_obj(p, (int)*(sp_int *)p) : sp_box_nil();
 }
-/* Built-in pointer boxes — share SP_TAG_OBJ with a reserved negative
+/* Built-in pointer boxes -- share SP_TAG_OBJ with a reserved negative
    cls_id so the dispatch path is uniform. */
 static inline sp_RbVal sp_box_int_array(void *p)   { return sp_box_obj(p, SP_BUILTIN_INT_ARRAY); }
 static inline sp_RbVal sp_box_float_array(void *p) { return sp_box_obj(p, SP_BUILTIN_FLT_ARRAY); }
@@ -892,26 +1281,56 @@ static inline sp_RbVal sp_box_range(sp_Range v) {
   return sp_box_obj(p, SP_BUILTIN_RANGE);
 }
 static inline const char*sp_encoding_name(sp_Encoding e){return e.name?e.name:sp_str_empty;}
-static inline const char*sp_encoding_inspect(sp_Encoding e){return sp_sprintf("#<Encoding:%s>",sp_encoding_name(e));}
+/* Encoding#inspect: the binary encoding reads "BINARY (ASCII-8BIT)" since Ruby 3.4 */
+static inline const char*sp_encoding_inspect_name(const char*n){return !strcmp(n,"ASCII-8BIT")?sp_sprintf("#<Encoding:BINARY (ASCII-8BIT)>"):sp_sprintf("#<Encoding:%s>",n);}
+static inline const char*sp_encoding_inspect(sp_Encoding e){return sp_encoding_inspect_name(sp_encoding_name(e));}
 static inline sp_bool sp_encoding_eq(sp_Encoding a,sp_Encoding b){const char*an=sp_encoding_name(a);const char*bn=sp_encoding_name(b);return strcmp(an,bn)==0;}
 
 /* ---- Box helper prototypes (0 optcarrot uses; bodies in lib/sp_cold.c). ---- */
-/* An int? / float? value crossing into a poly slot: the sentinel is nil, never
-   a number. Inline because every boxed element read goes through here. */
-static inline sp_RbVal sp_box_int_or_nil(sp_int v) { return v == SP_INT_NIL ? sp_box_nil() : sp_box_int(v); }
-static inline sp_RbVal sp_box_float_or_nil(sp_float v) { return sp_float_is_nil(v) ? sp_box_nil() : sp_box_float(v); }
-sp_RbVal sp_unsentinel(sp_RbVal v);
+/* An element of an Integer or Float array boxed for a poly container: the
+   element, or nil where the array's bitmap says so. `nf` is the array's
+   nilbits pointer read once ahead of the loop (SP_MAY_NIL), so an array that
+   never held a nil boxes its elements as they are; `pi` is the PHYSICAL slot
+   (start + i for an IntArray). */
+#define sp_box_int_nf(nf, pi, v) ((nf) && sp_nilbit_get((nf), (pi)) ? sp_box_nil() : sp_box_int(v))
+#define sp_box_float_nf(nf, pi, v) ((nf) && sp_nilbit_get((nf), (pi)) ? sp_box_nil() : sp_box_float(v))
 sp_RbVal sp_box_bigint(sp_Bigint *b);
+/* A bigint slot's nil is NULL (the compiler's nil_value for TY_BIGINT), so a
+   nilable bigint boxes as nil rather than as a truthy Integer printing 0. */
+static inline sp_RbVal sp_box_bigint_or_nil(sp_Bigint *b) { return b ? sp_box_bigint(b) : sp_box_nil(); }
+/* A 64-bit value as a Ruby Integer: the sp_int when it fits, a Bignum when
+   it does not (a checksum, an unpacked quad, a parsed literal on a 32-bit
+   sp_int). What a package answers as :any for a value that may be wide. */
+sp_RbVal sp_box_i64(int64_t v);
+/* A proven Integer: its own box. A nil is out of band (sp_oint), so no word
+   of an sp_int is reserved for it and the minimum word boxes as any other. */
+static inline sp_RbVal sp_box_int_nn(sp_int v) { return sp_box_int(v); }
+/* the inverse: a boxed Integer (or Float) as a 64-bit value, a Bignum through
+   its low 64 bits, for a package parameter that may be wider than sp_int */
+int64_t sp_unbox_i64(sp_RbVal v);
 sp_RbVal sp_box_encoding(sp_Encoding e);
+sp_RbVal sp_encoding_find(sp_RbVal v);
+sp_PolyArray *sp_encoding_list(void);
+/* force_encoding's tag for an Encoding or a name known at run time */
+int sp_force_encoding_mode(sp_RbVal enc);
 sp_RbVal sp_box_nullable_str(const char *v);
 sp_RbVal sp_box_foreign_ptr(void *p);
 sp_RbVal sp_box_regexp(void *p);
 sp_RbVal sp_box_sym_array(void *p);
 sp_RbVal sp_box_ptr_array(void *p);
+/* Box a pointer array by reference, stamping what its elements are so the poly
+   paths can read, render and refuse stores faithfully (#4486). */
+static inline sp_RbVal sp_box_ptr_array_k(void *p, int kind, int cls) {
+  if (!p) return sp_box_nil();
+  sp_PtrArray *a = (sp_PtrArray *)p;
+  if (a->elem_kind == SP_PTR_ELEM_UNKNOWN) { a->elem_kind = kind; a->elem_cls = cls; }
+  return sp_box_obj(p, SP_BUILTIN_PTR_ARRAY);
+}
 sp_RbVal sp_box_method(void *p);
 sp_RbVal sp_box_complex(sp_Complex v);
 sp_RbVal sp_box_rational(sp_Rational v);
-sp_RbVal sp_box_time(sp_Time v);
+sp_RbVal sp_box_timev(sp_Time v);
+sp_RbVal sp_box_time(sp_Time *p);   /* a Time is boxed as itself */
 sp_RbVal sp_box_tms(sp_Tms v);
 struct sp_ProcessStatus_s;   /* forward decl for the box helper */
 sp_RbVal sp_box_process_status(struct sp_ProcessStatus_s *v);
@@ -938,22 +1357,33 @@ typedef struct { sp_Bigint *num, *den; } sp_BigRational;
 int sp_bigint_sign(sp_Bigint *b);
 sp_Bigint *sp_bigint_sub(sp_Bigint *a, sp_Bigint *b);
 sp_Bigint *sp_bigint_new_int(int64_t v);
+int64_t sp_bigint_to_int(sp_Bigint *b);
+intptr_t sp_bigint_bit_length(sp_Bigint *b);
 sp_Bigint *sp_bigint_gcd(sp_Bigint *a, sp_Bigint *b);
 sp_Bigint *sp_bigint_div(sp_Bigint *a, sp_Bigint *b);
+sp_Bigint *sp_bigint_add(sp_Bigint *a, sp_Bigint *b);
+sp_Bigint *sp_bigint_mul(sp_Bigint *a, sp_Bigint *b);
+int sp_bigint_cmp(sp_Bigint *a, sp_Bigint *b);
 char *sp_str_alloc_ext(size_t len);   /* non-inline sp_str_alloc; see sp_alloc.c */
 const char *sp_bigint_to_s(sp_Bigint *b);
 double sp_bigint_to_double(sp_Bigint *b);   /* for the MCU: double, as sp_bigint.c defines it */
 void sp_brat_scan(void *p);
 sp_RbVal sp_box_brat(sp_Bigint *num, sp_Bigint *den);
+sp_RbVal sp_box_brat_norm(sp_Bigint *num, sp_Bigint *den);   /* promote: small when it fits */
 sp_RbVal sp_brat_from_bigint(sp_Bigint *n);
 const char *sp_brat_to_s(sp_BigRational *r);
 const char *sp_brat_inspect(sp_BigRational *r);
 sp_float sp_brat_to_f(sp_BigRational *r);
+/* the exact integer quotients, each rounding the way its method does */
+sp_Bigint *sp_brat_trunc_b(sp_BigRational *r);
+sp_Bigint *sp_brat_floor_b(sp_BigRational *r);
+sp_Bigint *sp_brat_ceil_b(sp_BigRational *r);
+sp_Bigint *sp_brat_round_b(sp_BigRational *r);
 
 /* ---- Marshal.dump/load helpers (lib/sp_marshal.c calls these): 0
    optcarrot uses. sp_marv_hash_new/set stay in spinel_rt.h instead of
    moving here -- they need sp_PolyPolyHash_new/set, which are hot
-   (called there dozens of times, e.g. via sp_PolyArray_tally) and
+   (called there dozens of times) and
    whose home is the struct's own definition deep in spinel_rt.h, not
    this early header; de-static'ing them in place to reach two
    one-line marv wrappers would grow spinel_rt.h's non-static-body

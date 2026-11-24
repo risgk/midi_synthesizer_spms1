@@ -12,7 +12,7 @@
 
 #include <stdint.h>
 #include <stddef.h>   /* size_t (sp_snprintf_c_float) */
-#include "sp_types.h"  /* for the MCU: the signatures below use sp_float for double */
+#include "sp_types.h" /* sp_oint / sp_ofloat: the nil of Integer() / Float() with exception: false */
 
 /* String -> number parsers (cold, I/O-boundary). */
 intptr_t sp_str_to_i_cruby(const char *s);
@@ -20,9 +20,12 @@ sp_float sp_str_to_f_cruby(const char *s);
 intptr_t sp_str_to_i_base(const char *s, intptr_t base);
 intptr_t sp_str_to_i_strict(const char *s);
 intptr_t sp_str_to_i_strict_base(const char *s, intptr_t base);
-intptr_t sp_str_to_i_lenient_base(const char *s, intptr_t base);
+sp_oint sp_str_to_i_lenient_base(const char *s, intptr_t base);   /* nil for a rejected string (exception: false) */
+intptr_t sp_int_negative_base(const char *s, intptr_t base);   /* Kernel#Integer: the radix a negative one reads as */
+int     sp_str_int_overflows(const char *s, intptr_t base);
+char   *sp_int_digits_dup(const char *s, intptr_t *base, const char **rest);
 sp_float  sp_str_to_f_strict(const char *s);
-sp_float sp_str_to_f_lenient(const char *s);
+sp_ofloat sp_str_to_f_lenient(const char *s);
 int     sp_snprintf_c_float(char *buf, size_t size, const char *fmt, sp_float v);
 int     sp_snprintf_ruby_float(char *buf, size_t size, const char *fmt, sp_float v);
 
@@ -35,6 +38,7 @@ intptr_t sp_int_clamp(intptr_t v, intptr_t lo, intptr_t hi);
 sp_float sp_float_clamp(sp_float v, sp_float lo, sp_float hi);
 intptr_t sp_int_sqrt(intptr_t n);
 intptr_t sp_ipow10(intptr_t p);
+void sp_int_round_check_ndigits(intptr_t nd);
 intptr_t sp_int_round(intptr_t v, intptr_t nd);
 intptr_t sp_int_ceil(intptr_t v, intptr_t nd);
 intptr_t sp_int_floor(intptr_t v, intptr_t nd);

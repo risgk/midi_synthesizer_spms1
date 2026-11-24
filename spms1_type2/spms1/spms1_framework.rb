@@ -80,8 +80,12 @@ module Spms1
       C.get_bus_signal(slot)
     end
 
+    # Answers value, as Ruby's `signals[slot] = value` does whatever []= answers: Spinel 2026.10.25
+    # takes []='s own answer for it, and set_bus_signal's nil made every Float a write reaches one
+    # that may be nil.
     def []=(slot, value)
       C.set_bus_signal(slot, value)
+      value
     end
   end
 end

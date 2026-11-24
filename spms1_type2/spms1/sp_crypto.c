@@ -10,7 +10,9 @@
  * ---------------
  * - SHA-256: compact public-domain implementation; the canonical
  *   FIPS-180-4 reference (Wikipedia pseudocode + Go's crypto/sha256
- *   match this byte-for-byte on the standard test vectors).
+ *   match this byte-for-byte on the standard test vectors). An x86-64
+ *   CPU with the SHA extensions runs the same compression on them, asked
+ *   at run time; every other CPU and build runs the C.
  * - HMAC-SHA256: RFC 2104 / RFC 4231 on top of the SHA-256 above.
  * - PBKDF2-HMAC-SHA256: RFC 8018, dkLen fixed at 32 (one block).
  * - Base64URL: RFC 4648 §5 (URL/filename-safe alphabet), no padding.
@@ -45,6 +47,10 @@
 #if defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
 #  include <stdlib.h>  /* arc4random_buf */
 #endif
+#if SP_HAVE_X86_SHA
+#include <immintrin.h>    /* SHA-256 on the x86 SHA extensions */
+#include <cpuid.h>        /* ... where the CPU says it has them */
+#endif
 
 /* ---------- SHA-256 ----------
  * FIPS-180-4. Compact reference implementation -- public domain.
@@ -69,7 +75,10 @@ static const uint32_t sp_crypto_sha256_k[64] = {
 #define SPC_CH(x,y,z)  (((x) & (y)) ^ (~(x) & (z)))
 #define SPC_MAJ(x,y,z) (((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z)))
 
-static void sp_crypto_sha256_block(uint32_t H[8], const uint8_t b[64]) {
+/* One block in portable C. Kept a function of its own: where the CPU lacks
+ * the SHA extensions below, a build runs this as it did before they were
+ * here, behind one test a call. */
+static SP_NOINLINE void sp_crypto_sha256_block(uint32_t H[8], const uint8_t b[64]) {
     uint32_t w[64], sa, sb, sc, sd, se, sf, sg, sh, t1, t2;
     int i;
     for (i = 0; i < 16; i++) {
@@ -90,6 +99,113 @@ static void sp_crypto_sha256_block(uint32_t H[8], const uint8_t b[64]) {
     H[4]+=se; H[5]+=sf; H[6]+=sg; H[7]+=sh;
 }
 
+#if SP_HAVE_X86_SHA
+/* The same compression on the x86 SHA extensions (FIPS-180-4 unchanged: one
+ * instruction runs two rounds, two more extend the message schedule). The
+ * state is kept as the two halves the round instruction takes, ABEF and
+ * CDGH, and the schedule as four registers of four words. */
+
+/* Four rounds: words w plus their four constants, two rounds a half. */
+SP_TARGET_X86_SHA static SP_INLINE void sp_crypto_sha256_ni_rounds(__m128i *abef, __m128i *cdgh, __m128i w, int i) {
+    __m128i k = _mm_add_epi32(w, _mm_loadu_si128((const __m128i *)&sp_crypto_sha256_k[4 * i]));
+    *cdgh = _mm_sha256rnds2_epu32(*cdgh, *abef, k);
+    *abef = _mm_sha256rnds2_epu32(*abef, *cdgh, _mm_shuffle_epi32(k, 0x0E));
+}
+
+/* The next four schedule words from the sixteen before them, oldest first. */
+SP_TARGET_X86_SHA static SP_INLINE __m128i sp_crypto_sha256_ni_next(__m128i w4, __m128i w3, __m128i w2, __m128i w1) {
+    __m128i w = _mm_add_epi32(_mm_sha256msg1_epu32(w4, w3), _mm_alignr_epi8(w1, w2, 4));
+    return _mm_sha256msg2_epu32(w, w1);
+}
+
+/* n blocks at p into H. The state stays in its two registers from the first
+ * block to the last. */
+SP_TARGET_X86_SHA static void sp_crypto_sha256_blocks_ni(uint32_t H[8], const uint8_t *p, size_t n) {
+    const __m128i be = _mm_set_epi64x(0x0c0d0e0f08090a0bLL, 0x0405060700010203LL);  /* big-endian words */
+    __m128i t = _mm_shuffle_epi32(_mm_loadu_si128((const __m128i *)&H[0]), 0xB1);     /* CDAB */
+    __m128i cdgh = _mm_shuffle_epi32(_mm_loadu_si128((const __m128i *)&H[4]), 0x1B);  /* EFGH */
+    __m128i abef = _mm_alignr_epi8(t, cdgh, 8);
+    cdgh = _mm_blend_epi16(cdgh, t, 0xF0);
+    for (; n > 0; n--, p += 64) {
+        __m128i abef0 = abef, cdgh0 = cdgh;
+        __m128i w0 = _mm_shuffle_epi8(_mm_loadu_si128((const __m128i *)p), be);
+        __m128i w1 = _mm_shuffle_epi8(_mm_loadu_si128((const __m128i *)(p + 16)), be);
+        __m128i w2 = _mm_shuffle_epi8(_mm_loadu_si128((const __m128i *)(p + 32)), be);
+        __m128i w3 = _mm_shuffle_epi8(_mm_loadu_si128((const __m128i *)(p + 48)), be);
+        sp_crypto_sha256_ni_rounds(&abef, &cdgh, w0, 0);
+        sp_crypto_sha256_ni_rounds(&abef, &cdgh, w1, 1);
+        sp_crypto_sha256_ni_rounds(&abef, &cdgh, w2, 2);
+        sp_crypto_sha256_ni_rounds(&abef, &cdgh, w3, 3);
+        for (int i = 4; i < 16; i += 4) {
+            w0 = sp_crypto_sha256_ni_next(w0, w1, w2, w3);
+            sp_crypto_sha256_ni_rounds(&abef, &cdgh, w0, i);
+            w1 = sp_crypto_sha256_ni_next(w1, w2, w3, w0);
+            sp_crypto_sha256_ni_rounds(&abef, &cdgh, w1, i + 1);
+            w2 = sp_crypto_sha256_ni_next(w2, w3, w0, w1);
+            sp_crypto_sha256_ni_rounds(&abef, &cdgh, w2, i + 2);
+            w3 = sp_crypto_sha256_ni_next(w3, w0, w1, w2);
+            sp_crypto_sha256_ni_rounds(&abef, &cdgh, w3, i + 3);
+        }
+        abef = _mm_add_epi32(abef, abef0);
+        cdgh = _mm_add_epi32(cdgh, cdgh0);
+    }
+    t = _mm_shuffle_epi32(abef, 0x1B);        /* FEBA */
+    cdgh = _mm_shuffle_epi32(cdgh, 0xB1);     /* DCHG */
+    _mm_storeu_si128((__m128i *)&H[0], _mm_blend_epi16(t, cdgh, 0xF0));
+    _mm_storeu_si128((__m128i *)&H[4], _mm_alignr_epi8(cdgh, t, 8));
+}
+
+/* Whether this CPU has the SHA extensions, and the SSSE3 and SSE4.1 the
+ * function above is compiled with: CPUID leaf 7 EBX bit 29, leaf 1 ECX bits
+ * 9 and 19. They use the SSE registers, which every x86-64 system saves, so
+ * there is no operating-system side to ask. */
+static SP_NOINLINE SP_COLD int sp_crypto_sha256_ni_probe(void) {
+    unsigned int a, b, c, d;
+    if (__get_cpuid_max(0, 0) < 7) return 0;
+    __cpuid(1, a, b, c, d);
+    if ((c & (1u << 9)) == 0 || (c & (1u << 19)) == 0) return 0;
+    __cpuid_count(7, 0, a, b, c, d);
+    return (int)((b >> 29) & 1);
+}
+
+/* The answer, asked once a process: 0 not asked yet, 1 yes, -1 no. */
+static int sp_crypto_sha256_ni_state;
+
+/* Whether to take the function above. Threads that ask at the same moment
+ * store the same value. */
+static SP_INLINE int sp_crypto_sha256_ni(void) {
+    int s = SP_ATOMIC_LOAD(&sp_crypto_sha256_ni_state, __ATOMIC_RELAXED);
+    if (SP_UNLIKELY(s == 0)) {
+        s = sp_crypto_sha256_ni_probe() ? 1 : -1;
+        SP_ATOMIC_STORE(&sp_crypto_sha256_ni_state, s, __ATOMIC_RELAXED);
+    }
+    return s > 0;
+}
+#endif
+
+/* n whole blocks at p into H: on the SHA extensions where the CPU has them,
+ * by the C above everywhere else. */
+static void sp_crypto_sha256_blocks(uint32_t H[8], const uint8_t *p, size_t n) {
+#if SP_HAVE_X86_SHA
+    if (sp_crypto_sha256_ni()) {
+        sp_crypto_sha256_blocks_ni(H, p, n);
+        return;
+    }
+#endif
+    for (; n > 0; n--, p += 64) sp_crypto_sha256_block(H, p);
+}
+
+static void sp_crypto_store_be32(uint8_t *out, const uint32_t *H, int n) {
+    for (int i = 0; i < n; i++) {
+        out[i*4]   = (uint8_t)(H[i] >> 24);
+        out[i*4+1] = (uint8_t)(H[i] >> 16);
+        out[i*4+2] = (uint8_t)(H[i] >> 8);
+        out[i*4+3] = (uint8_t)(H[i]);
+    }
+}
+
+/* SHA-256 of len bytes: the whole blocks straight from msg, then the padded
+ * tail (one block, or two when the length field does not fit beside it). */
 static void sp_crypto_sha256(const uint8_t *msg, size_t len, uint8_t out[32]) {
     uint32_t H[8] = {
         0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,
@@ -97,13 +213,13 @@ static void sp_crypto_sha256(const uint8_t *msg, size_t len, uint8_t out[32]) {
     };
     uint8_t buf[64];
     size_t i, full = len & ~((size_t)63);
-    for (i = 0; i < full; i += 64) sp_crypto_sha256_block(H, msg + i);
+    if (full) sp_crypto_sha256_blocks(H, msg, full / 64);
     size_t rem = len - full;
     for (i = 0; i < rem; i++) buf[i] = msg[full + i];
     buf[rem] = 0x80;
     if (rem >= 56) {
         for (i = rem + 1; i < 64; i++) buf[i] = 0;
-        sp_crypto_sha256_block(H, buf);
+        sp_crypto_sha256_blocks(H, buf, 1);
         for (i = 0; i < 56; i++) buf[i] = 0;
     }
 else {
@@ -111,13 +227,8 @@ else {
     }
     uint64_t bits = (uint64_t)len * 8;
     for (i = 0; i < 8; i++) buf[56 + i] = (uint8_t)(bits >> (56 - 8*i));
-    sp_crypto_sha256_block(H, buf);
-    for (i = 0; i < 8; i++) {
-        out[i*4]   = (uint8_t)(H[i] >> 24);
-        out[i*4+1] = (uint8_t)(H[i] >> 16);
-        out[i*4+2] = (uint8_t)(H[i] >> 8);
-        out[i*4+3] = (uint8_t)(H[i]);
-    }
+    sp_crypto_sha256_blocks(H, buf, 1);
+    sp_crypto_store_be32(out, H, 8);
 }
 
 /* ---------- SHA-1 ----------
@@ -171,12 +282,7 @@ else {
     uint64_t bits = (uint64_t)len * 8;
     for (i = 0; i < 8; i++) buf[56 + i] = (uint8_t)(bits >> (56 - 8*i));
     sp_crypto_sha1_block(H, buf);
-    for (i = 0; i < 5; i++) {
-        out[i*4]   = (uint8_t)(H[i] >> 24);
-        out[i*4+1] = (uint8_t)(H[i] >> 16);
-        out[i*4+2] = (uint8_t)(H[i] >> 8);
-        out[i*4+3] = (uint8_t)(H[i]);
-    }
+    sp_crypto_store_be32(out, H, 5);
 }
 
 static SP_TLS char sp_crypto_sha256_hex_buf[65];
@@ -236,6 +342,276 @@ const char *sp_crypto_sha1_bin(const char *msg) {SP_GC_ROOT_STR(msg);
     return sp_crypto_sha1_bin_buf;
 }
 
+/* ---------- MD5 (RFC 1321) ----------
+ * Legacy hash, bound for Digest::MD5: Active Storage's direct-upload
+ * protocol checks a blob by the base64 MD5 of its bytes (#4631). Do not use
+ * for new security designs. Compact reference implementation, public domain. */
+
+static const uint32_t sp_crypto_md5_k[64] = {
+    0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee, 0xf57c0faf, 0x4787c62a, 0xa8304613, 0xfd469501,
+    0x698098d8, 0x8b44f7af, 0xffff5bb1, 0x895cd7be, 0x6b901122, 0xfd987193, 0xa679438e, 0x49b40821,
+    0xf61e2562, 0xc040b340, 0x265e5a51, 0xe9b6c7aa, 0xd62f105d, 0x02441453, 0xd8a1e681, 0xe7d3fbc8,
+    0x21e1cde6, 0xc33707d6, 0xf4d50d87, 0x455a14ed, 0xa9e3e905, 0xfcefa3f8, 0x676f02d9, 0x8d2a4c8a,
+    0xfffa3942, 0x8771f681, 0x6d9d6122, 0xfde5380c, 0xa4beea44, 0x4bdecfa9, 0xf6bb4b60, 0xbebfbc70,
+    0x289b7ec6, 0xeaa127fa, 0xd4ef3085, 0x04881d05, 0xd9d4d039, 0xe6db99e5, 0x1fa27cf8, 0xc4ac5665,
+    0xf4292244, 0x432aff97, 0xab9423a7, 0xfc93a039, 0x655b59c3, 0x8f0ccc92, 0xffeff47d, 0x85845dd1,
+    0x6fa87e4f, 0xfe2ce6e0, 0xa3014314, 0x4e0811a1, 0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391
+};
+static const uint8_t sp_crypto_md5_r[64] = {
+    7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22,
+    5,  9, 14, 20, 5,  9, 14, 20, 5,  9, 14, 20, 5,  9, 14, 20,
+    4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23,
+    6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21
+};
+
+static void sp_crypto_md5_block(uint32_t H[4], const uint8_t b[64]) {
+    uint32_t w[16], a, bb, c, d, f, t;
+    int i, g;
+    for (i = 0; i < 16; i++) {
+        w[i] = (uint32_t)b[i*4] | ((uint32_t)b[i*4+1] << 8) |
+               ((uint32_t)b[i*4+2] << 16) | ((uint32_t)b[i*4+3] << 24);
+    }
+    a = H[0]; bb = H[1]; c = H[2]; d = H[3];
+    for (i = 0; i < 64; i++) {
+        if (i < 16)      { f = (bb & c) | (~bb & d); g = i; }
+        else if (i < 32) { f = (d & bb) | (~d & c);  g = (5*i + 1) & 15; }
+        else if (i < 48) { f = bb ^ c ^ d;           g = (3*i + 5) & 15; }
+        else             { f = c ^ (bb | ~d);        g = (7*i) & 15; }
+        t = d; d = c; c = bb;
+        uint32_t x = a + f + sp_crypto_md5_k[i] + w[g];
+        bb = bb + ((x << sp_crypto_md5_r[i]) | (x >> (32 - sp_crypto_md5_r[i])));
+        a = t;
+    }
+    H[0] += a; H[1] += bb; H[2] += c; H[3] += d;
+}
+
+static void sp_crypto_md5(const uint8_t *msg, size_t len, uint8_t out[16]) {
+    uint32_t H[4] = { 0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476 };
+    uint8_t buf[64];
+    size_t i, full = len & ~((size_t)63);
+    for (i = 0; i < full; i += 64) sp_crypto_md5_block(H, msg + i);
+    size_t rem = len - full;
+    for (i = 0; i < rem; i++) buf[i] = msg[full + i];
+    buf[rem] = 0x80;
+    if (rem >= 56) {
+        for (i = rem + 1; i < 64; i++) buf[i] = 0;
+        sp_crypto_md5_block(H, buf);
+        for (i = 0; i < 56; i++) buf[i] = 0;
+    }
+    else {
+        for (i = rem + 1; i < 56; i++) buf[i] = 0;
+    }
+    uint64_t bits = (uint64_t)len * 8;   /* little-endian length, unlike SHA */
+    for (i = 0; i < 8; i++) buf[56 + i] = (uint8_t)(bits >> (8*i));
+    sp_crypto_md5_block(H, buf);
+    for (i = 0; i < 4; i++) {
+        out[i*4]   = (uint8_t)(H[i]);
+        out[i*4+1] = (uint8_t)(H[i] >> 8);
+        out[i*4+2] = (uint8_t)(H[i] >> 16);
+        out[i*4+3] = (uint8_t)(H[i] >> 24);
+    }
+}
+
+static SP_TLS char sp_crypto_md5_hex_buf[33];
+
+const char *sp_crypto_md5_hex(const char *msg) {SP_GC_ROOT_STR(msg);
+    uint8_t out[16];
+    sp_crypto_md5((const uint8_t *)msg, sp_str_byte_len(msg), out);
+    static const char H[] = "0123456789abcdef";
+    int i;
+    for (i = 0; i < 16; i++) {
+        sp_crypto_md5_hex_buf[i*2]   = H[(out[i] >> 4) & 0xf];
+        sp_crypto_md5_hex_buf[i*2+1] = H[out[i] & 0xf];
+    }
+    sp_crypto_md5_hex_buf[32] = '\0';
+    return sp_crypto_md5_hex_buf;
+}
+
+/* MD5(msg) -> the raw 16 digest bytes; see sp_crypto_sha256_bin. */
+static SP_TLS char sp_crypto_md5_bin_buf[16];
+
+const char *sp_crypto_md5_bin(const char *msg) {SP_GC_ROOT_STR(msg);
+    sp_crypto_md5((const uint8_t *)msg, sp_str_byte_len(msg),
+                  (uint8_t *)sp_crypto_md5_bin_buf);
+    sp_ffi_bin_len = 16;
+    return sp_crypto_md5_bin_buf;
+}
+
+/* ---------- Incremental hashing ----------
+ * The three hashes above, fed in pieces: the Init / Update / Final shape of
+ * RFC 1321 (MD5Update) and RFC 6234 (SHA256Input), over the same block
+ * functions and the same padding. A state is the chaining value, the byte
+ * count (8 bytes) and the partial block (64 bytes), copied in and out of a
+ * binary String, so a digest object keeps no more than that between calls.
+ */
+
+static void sp_crypto_sha1_blocks(uint32_t *H, const uint8_t *p, size_t n) {
+    for (; n > 0; n--, p += 64) sp_crypto_sha1_block(H, p);
+}
+
+static void sp_crypto_md5_blocks(uint32_t *H, const uint8_t *p, size_t n) {
+    for (; n > 0; n--, p += 64) sp_crypto_md5_block(H, p);
+}
+
+typedef struct {
+    int words;            /* chaining words: 8, 5 or 4 */
+    uint32_t iv[8];
+    void (*blocks)(uint32_t *H, const uint8_t *p, size_t n);
+    int big_endian;       /* SHA writes the length and the digest big-endian */
+} sp_crypto_stream_alg;
+
+static const sp_crypto_stream_alg sp_crypto_stream_sha256 = {
+    8, { 0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,
+         0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19 },
+    sp_crypto_sha256_blocks, 1
+};
+static const sp_crypto_stream_alg sp_crypto_stream_sha1 = {
+    5, { 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0 },
+    sp_crypto_sha1_blocks, 1
+};
+static const sp_crypto_stream_alg sp_crypto_stream_md5 = {
+    4, { 0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476 },
+    sp_crypto_md5_blocks, 0
+};
+
+#define SP_CRYPTO_STREAM_MAX (8 * 4 + 8 + 64)
+
+static size_t sp_crypto_stream_size(const sp_crypto_stream_alg *a) {
+    return (size_t)a->words * 4 + 8 + 64;
+}
+
+/* The state in `state` into H, the byte count and the partial block; a String
+ * of any other size (the empty one) is the initial state. */
+static void sp_crypto_stream_load(const sp_crypto_stream_alg *a, const char *state,
+                                  uint32_t H[8], uint64_t *count, uint8_t pend[64]) {
+    size_t hw = (size_t)a->words * 4;
+    if (sp_str_byte_len(state) == sp_crypto_stream_size(a)) {
+        memcpy(H, state, hw);
+        memcpy(count, state + hw, 8);
+        memcpy(pend, state + hw + 8, 64);
+    }
+    else {
+        memcpy(H, a->iv, hw);
+        *count = 0;
+        memset(pend, 0, 64);
+    }
+}
+
+static void sp_crypto_stream_store(const sp_crypto_stream_alg *a, char *out,
+                                   const uint32_t H[8], uint64_t count,
+                                   const uint8_t pend[64]) {
+    size_t hw = (size_t)a->words * 4;
+    memcpy(out, H, hw);
+    memcpy(out + hw, &count, 8);
+    memcpy(out + hw + 8, pend, 64);
+    sp_ffi_bin_len = (int)sp_crypto_stream_size(a);
+}
+
+/* `chunk` into the state: the partial block is filled first, the whole blocks
+ * are hashed straight from the chunk, and the rest is the new partial block. */
+static void sp_crypto_stream_update(const sp_crypto_stream_alg *a, const char *state,
+                                    const char *chunk, char *out) {
+    uint32_t H[8];
+    uint64_t count;
+    uint8_t pend[64];
+    sp_crypto_stream_load(a, state, H, &count, pend);
+    const uint8_t *p = (const uint8_t *)chunk;
+    size_t len = sp_str_byte_len(chunk);
+    size_t have = (size_t)(count % 64);
+    count += len;
+    if (have) {
+        size_t take = 64 - have < len ? 64 - have : len;
+        memcpy(pend + have, p, take);
+        p += take;
+        len -= take;
+        if (have + take < 64) {
+            sp_crypto_stream_store(a, out, H, count, pend);
+            return;
+        }
+        a->blocks(H, pend, 1);
+    }
+    size_t full = len & ~((size_t)63);
+    if (full) a->blocks(H, p, full / 64);
+    if (len > full) memcpy(pend, p + full, len - full);
+    sp_crypto_stream_store(a, out, H, count, pend);
+}
+
+/* The digest of what the state has seen, its partial block padded as the
+ * one-shot functions pad their tail. The state does not change. */
+static void sp_crypto_stream_final(const sp_crypto_stream_alg *a, const char *state,
+                                   uint8_t *out) {
+    uint32_t H[8];
+    uint64_t count;
+    uint8_t buf[64];
+    sp_crypto_stream_load(a, state, H, &count, buf);
+    size_t i, rem = (size_t)(count % 64);
+    buf[rem] = 0x80;
+    if (rem >= 56) {
+        for (i = rem + 1; i < 64; i++) buf[i] = 0;
+        a->blocks(H, buf, 1);
+        for (i = 0; i < 56; i++) buf[i] = 0;
+    }
+    else {
+        for (i = rem + 1; i < 56; i++) buf[i] = 0;
+    }
+    uint64_t bits = count * 8;
+    for (i = 0; i < 8; i++)
+        buf[56 + i] = (uint8_t)(a->big_endian ? bits >> (56 - 8*i) : bits >> (8*i));
+    a->blocks(H, buf, 1);
+    if (a->big_endian) {
+        sp_crypto_store_be32(out, H, a->words);
+        return;
+    }
+    for (i = 0; i < (size_t)a->words; i++) {
+        out[i*4]   = (uint8_t)(H[i]);
+        out[i*4+1] = (uint8_t)(H[i] >> 8);
+        out[i*4+2] = (uint8_t)(H[i] >> 16);
+        out[i*4+3] = (uint8_t)(H[i] >> 24);
+    }
+}
+
+static SP_TLS char sp_crypto_sha256_state_buf[SP_CRYPTO_STREAM_MAX];
+static SP_TLS char sp_crypto_sha256_final_buf[32];
+
+const char *sp_crypto_sha256_update(const char *state, const char *chunk) {SP_GC_ROOT_STR(state);SP_GC_ROOT_STR(chunk);
+    sp_crypto_stream_update(&sp_crypto_stream_sha256, state, chunk, sp_crypto_sha256_state_buf);
+    return sp_crypto_sha256_state_buf;
+}
+
+const char *sp_crypto_sha256_final(const char *state) {SP_GC_ROOT_STR(state);
+    sp_crypto_stream_final(&sp_crypto_stream_sha256, state, (uint8_t *)sp_crypto_sha256_final_buf);
+    sp_ffi_bin_len = 32;
+    return sp_crypto_sha256_final_buf;
+}
+
+static SP_TLS char sp_crypto_sha1_state_buf[SP_CRYPTO_STREAM_MAX];
+static SP_TLS char sp_crypto_sha1_final_buf[20];
+
+const char *sp_crypto_sha1_update(const char *state, const char *chunk) {SP_GC_ROOT_STR(state);SP_GC_ROOT_STR(chunk);
+    sp_crypto_stream_update(&sp_crypto_stream_sha1, state, chunk, sp_crypto_sha1_state_buf);
+    return sp_crypto_sha1_state_buf;
+}
+
+const char *sp_crypto_sha1_final(const char *state) {SP_GC_ROOT_STR(state);
+    sp_crypto_stream_final(&sp_crypto_stream_sha1, state, (uint8_t *)sp_crypto_sha1_final_buf);
+    sp_ffi_bin_len = 20;
+    return sp_crypto_sha1_final_buf;
+}
+
+static SP_TLS char sp_crypto_md5_state_buf[SP_CRYPTO_STREAM_MAX];
+static SP_TLS char sp_crypto_md5_final_buf[16];
+
+const char *sp_crypto_md5_update(const char *state, const char *chunk) {SP_GC_ROOT_STR(state);SP_GC_ROOT_STR(chunk);
+    sp_crypto_stream_update(&sp_crypto_stream_md5, state, chunk, sp_crypto_md5_state_buf);
+    return sp_crypto_md5_state_buf;
+}
+
+const char *sp_crypto_md5_final(const char *state) {SP_GC_ROOT_STR(state);
+    sp_crypto_stream_final(&sp_crypto_stream_md5, state, (uint8_t *)sp_crypto_md5_final_buf);
+    sp_ffi_bin_len = 16;
+    return sp_crypto_md5_final_buf;
+}
+
 /* RFC 6455 §1.3 Sec-WebSocket-Accept:
  *     base64(SHA-1(client_key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"))
  * Standard Base64 (RFC 4648 §4, `+/` alphabet, `=` padding) -- NOT
@@ -246,6 +622,7 @@ static const char SPC_B64[64] =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 static SP_TLS char sp_crypto_websocket_accept_buf[29];
+static void sp_crypto_b64_strict(const uint8_t *d, size_t n, char *out);
 
 const char *sp_crypto_websocket_accept(const char *client_key) {
     /* client_key is the 24-char base64 from the request header;
@@ -261,28 +638,66 @@ const char *sp_crypto_websocket_accept(const char *client_key) {
     sp_crypto_sha1((const uint8_t *)in, klen + 36, digest);
     /* base64(20 bytes) = 28 chars: 6 full triplets + 2 leftover bytes
      * -> 3 chars + 1 padding `=`. */
-    int j = 0;
-    for (i = 0; i + 3 <= 20; i += 3) {
-        uint32_t v = ((uint32_t)digest[i] << 16)
-                   | ((uint32_t)digest[i+1] << 8)
-                   |  (uint32_t)digest[i+2];
-        sp_crypto_websocket_accept_buf[j++] = SPC_B64[(v >> 18) & 0x3f];
-        sp_crypto_websocket_accept_buf[j++] = SPC_B64[(v >> 12) & 0x3f];
-        sp_crypto_websocket_accept_buf[j++] = SPC_B64[(v >>  6) & 0x3f];
-        sp_crypto_websocket_accept_buf[j++] = SPC_B64[ v        & 0x3f];
-    }
-    /* 2 leftover bytes -> 3 b64 chars + 1 pad */
-    uint32_t v = ((uint32_t)digest[18] << 16) | ((uint32_t)digest[19] << 8);
-    sp_crypto_websocket_accept_buf[j++] = SPC_B64[(v >> 18) & 0x3f];
-    sp_crypto_websocket_accept_buf[j++] = SPC_B64[(v >> 12) & 0x3f];
-    sp_crypto_websocket_accept_buf[j++] = SPC_B64[(v >>  6) & 0x3f];
-    sp_crypto_websocket_accept_buf[j++] = '=';
-    sp_crypto_websocket_accept_buf[j]   = '\0';
+    sp_crypto_b64_strict(digest, 20, sp_crypto_websocket_accept_buf);
     return sp_crypto_websocket_accept_buf;
+}
+
+/* Digest::X.base64digest: strict base64 (RFC 4648 §4, `=` padded) of the
+   raw digest, which Ruby's Digest::Class defines for every digest. One
+   buffer per digest so the three can be held at once. */
+static void sp_crypto_b64_strict(const uint8_t *d, size_t n, char *out) {
+    size_t i; int j = 0;
+    for (i = 0; i + 3 <= n; i += 3) {
+        uint32_t v = ((uint32_t)d[i] << 16) | ((uint32_t)d[i+1] << 8) | (uint32_t)d[i+2];
+        out[j++] = SPC_B64[(v >> 18) & 0x3f];
+        out[j++] = SPC_B64[(v >> 12) & 0x3f];
+        out[j++] = SPC_B64[(v >>  6) & 0x3f];
+        out[j++] = SPC_B64[ v        & 0x3f];
+    }
+    if (n - i == 2) {
+        uint32_t v = ((uint32_t)d[i] << 16) | ((uint32_t)d[i+1] << 8);
+        out[j++] = SPC_B64[(v >> 18) & 0x3f];
+        out[j++] = SPC_B64[(v >> 12) & 0x3f];
+        out[j++] = SPC_B64[(v >>  6) & 0x3f];
+        out[j++] = '=';
+    }
+    else if (n - i == 1) {
+        uint32_t v = ((uint32_t)d[i] << 16);
+        out[j++] = SPC_B64[(v >> 18) & 0x3f];
+        out[j++] = SPC_B64[(v >> 12) & 0x3f];
+        out[j++] = '=';
+        out[j++] = '=';
+    }
+    out[j] = '\0';
+}
+
+static SP_TLS char sp_crypto_md5_b64_buf[25];
+static SP_TLS char sp_crypto_sha1_b64_buf[29];
+static SP_TLS char sp_crypto_sha256_b64_buf[45];
+
+const char *sp_crypto_md5_b64(const char *msg) {SP_GC_ROOT_STR(msg);
+    uint8_t out[16];
+    sp_crypto_md5((const uint8_t *)msg, sp_str_byte_len(msg), out);
+    sp_crypto_b64_strict(out, 16, sp_crypto_md5_b64_buf);
+    return sp_crypto_md5_b64_buf;
+}
+const char *sp_crypto_sha1_b64(const char *msg) {SP_GC_ROOT_STR(msg);
+    uint8_t out[20];
+    sp_crypto_sha1((const uint8_t *)msg, sp_str_byte_len(msg), out);
+    sp_crypto_b64_strict(out, 20, sp_crypto_sha1_b64_buf);
+    return sp_crypto_sha1_b64_buf;
+}
+const char *sp_crypto_sha256_b64(const char *msg) {SP_GC_ROOT_STR(msg);
+    uint8_t out[32];
+    sp_crypto_sha256((const uint8_t *)msg, sp_str_byte_len(msg), out);
+    sp_crypto_b64_strict(out, 32, sp_crypto_sha256_b64_buf);
+    return sp_crypto_sha256_b64_buf;
 }
 
 /* ---------- HMAC-SHA256 (RFC 2104) ---------- */
 
+/* HMAC-SHA256 of msg under key: the inner hash over the padded key and the
+ * message, the outer one over the padded key and that digest. */
 static void sp_crypto_hmac_sha256(const uint8_t *key, size_t klen,
                                   const uint8_t *msg, size_t mlen,
                                   uint8_t out[32]) {
@@ -307,16 +722,16 @@ else {
             0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,
             0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19
         };
-        sp_crypto_sha256_block(H, ipad);
+        sp_crypto_sha256_blocks(H, ipad, 1);
         uint8_t buf[64];
         size_t full = mlen & ~((size_t)63);
-        for (i = 0; i < full; i += 64) sp_crypto_sha256_block(H, msg + i);
+        if (full) sp_crypto_sha256_blocks(H, msg, full / 64);
         size_t rem = mlen - full;
         for (i = 0; i < rem; i++) buf[i] = msg[full + i];
         buf[rem] = 0x80;
         if (rem >= 56) {
             for (i = rem + 1; i < 64; i++) buf[i] = 0;
-            sp_crypto_sha256_block(H, buf);
+            sp_crypto_sha256_blocks(H, buf, 1);
             for (i = 0; i < 56; i++) buf[i] = 0;
         }
 else {
@@ -324,7 +739,7 @@ else {
         }
         uint64_t bits = (uint64_t)(64 + mlen) * 8;
         for (i = 0; i < 8; i++) buf[56 + i] = (uint8_t)(bits >> (56 - 8*i));
-        sp_crypto_sha256_block(H, buf);
+        sp_crypto_sha256_blocks(H, buf, 1);
         for (i = 0; i < 8; i++) {
             inner[i*4]   = (uint8_t)(H[i] >> 24);
             inner[i*4+1] = (uint8_t)(H[i] >> 16);
@@ -338,20 +753,15 @@ else {
             0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,
             0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19
         };
-        sp_crypto_sha256_block(H, opad);
+        sp_crypto_sha256_blocks(H, opad, 1);
         uint8_t buf[64];
         for (i = 0; i < 32; i++) buf[i] = inner[i];
         buf[32] = 0x80;
         for (i = 33; i < 56; i++) buf[i] = 0;
         uint64_t bits = (uint64_t)(64 + 32) * 8;
         for (i = 0; i < 8; i++) buf[56 + i] = (uint8_t)(bits >> (56 - 8*i));
-        sp_crypto_sha256_block(H, buf);
-        for (i = 0; i < 8; i++) {
-            out[i*4]   = (uint8_t)(H[i] >> 24);
-            out[i*4+1] = (uint8_t)(H[i] >> 16);
-            out[i*4+2] = (uint8_t)(H[i] >> 8);
-            out[i*4+3] = (uint8_t)(H[i]);
-        }
+        sp_crypto_sha256_blocks(H, buf, 1);
+        sp_crypto_store_be32(out, H, 8);
     }
 }
 
@@ -453,12 +863,7 @@ else {
         uint64_t bits = (uint64_t)(64 + 20) * 8;
         for (i = 0; i < 8; i++) buf[56 + i] = (uint8_t)(bits >> (56 - 8*i));
         sp_crypto_sha1_block(H, buf);
-        for (i = 0; i < 5; i++) {
-            out[i*4]   = (uint8_t)(H[i] >> 24);
-            out[i*4+1] = (uint8_t)(H[i] >> 16);
-            out[i*4+2] = (uint8_t)(H[i] >> 8);
-            out[i*4+3] = (uint8_t)(H[i]);
-        }
+        sp_crypto_store_be32(out, H, 5);
     }
 }
 
@@ -496,32 +901,14 @@ static const char SPC_B64U[64] =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 
 static SP_TLS char sp_crypto_hmac_b64url_buf[44];
+static void sp_crypto_b64url_bytes(const uint8_t *src, int n, char *out);
 
 const char *sp_crypto_hmac_sha256_b64url(const char *key, const char *msg) {SP_GC_ROOT_STR(key);SP_GC_ROOT_STR(msg);
     uint8_t out[32];
     sp_crypto_hmac_sha256((const uint8_t *)key, sp_str_byte_len(key),
                           (const uint8_t *)msg, sp_str_byte_len(msg),
                           out);
-    int i, j = 0;
-    for (i = 0; i + 3 <= 32; i += 3) {
-        uint32_t v = ((uint32_t)out[i] << 16)
-                   | ((uint32_t)out[i+1] << 8)
-                   | (uint32_t)out[i+2];
-        sp_crypto_hmac_b64url_buf[j++] = SPC_B64U[(v >> 18) & 0x3f];
-        sp_crypto_hmac_b64url_buf[j++] = SPC_B64U[(v >> 12) & 0x3f];
-        sp_crypto_hmac_b64url_buf[j++] = SPC_B64U[(v >> 6)  & 0x3f];
-        sp_crypto_hmac_b64url_buf[j++] = SPC_B64U[v & 0x3f];
-    }
-    if (i < 32) {
-        uint32_t v = ((uint32_t)out[i] << 16)
-                   | (i + 1 < 32 ? ((uint32_t)out[i+1] << 8) : 0);
-        sp_crypto_hmac_b64url_buf[j++] = SPC_B64U[(v >> 18) & 0x3f];
-        sp_crypto_hmac_b64url_buf[j++] = SPC_B64U[(v >> 12) & 0x3f];
-        if (i + 1 < 32) {
-            sp_crypto_hmac_b64url_buf[j++] = SPC_B64U[(v >> 6) & 0x3f];
-        }
-    }
-    sp_crypto_hmac_b64url_buf[j] = '\0';
+    sp_crypto_b64url_bytes(out, 32, sp_crypto_hmac_b64url_buf);
     return sp_crypto_hmac_b64url_buf;
 }
 
@@ -578,7 +965,7 @@ const char *sp_crypto_b64url_decode(const char *src) {SP_GC_ROOT_STR(src);
     while (n > 0 && src[n - 1] == '=') n--;  /* tolerate padded input */
     size_t i = 0, j = 0;
     if (n / 4 * 3 + 3 > SPC_B64U_BUFSIZE) {
-        sp_crypto_b64u_dec_buf[0] = '\0';
+        sp_crypto_b64u_dec_buf[0] = '\0'; sp_ffi_bin_len = 0;
         return sp_crypto_b64u_dec_buf;
     }
     while (i + 4 <= n) {
@@ -587,7 +974,7 @@ const char *sp_crypto_b64url_decode(const char *src) {SP_GC_ROOT_STR(src);
         int c = sp_crypto_b64u_val(src[i+2]);
         int d = sp_crypto_b64u_val(src[i+3]);
         if (a < 0 || b < 0 || c < 0 || d < 0) {
-            sp_crypto_b64u_dec_buf[0] = '\0';
+            sp_crypto_b64u_dec_buf[0] = '\0'; sp_ffi_bin_len = 0;
             return sp_crypto_b64u_dec_buf;
         }
         uint32_t v = (uint32_t)a << 18 | (uint32_t)b << 12
@@ -601,18 +988,19 @@ const char *sp_crypto_b64url_decode(const char *src) {SP_GC_ROOT_STR(src);
     if (rem == 2) {
         int a = sp_crypto_b64u_val(src[i]);
         int b = sp_crypto_b64u_val(src[i+1]);
-        if (a < 0 || b < 0) { sp_crypto_b64u_dec_buf[0] = '\0'; return sp_crypto_b64u_dec_buf; }
+        if (a < 0 || b < 0) { sp_crypto_b64u_dec_buf[0] = '\0'; sp_ffi_bin_len = 0; return sp_crypto_b64u_dec_buf; }
         sp_crypto_b64u_dec_buf[j++] = (a << 2) | (b >> 4);
     }
 else if (rem == 3) {
         int a = sp_crypto_b64u_val(src[i]);
         int b = sp_crypto_b64u_val(src[i+1]);
         int c = sp_crypto_b64u_val(src[i+2]);
-        if (a < 0 || b < 0 || c < 0) { sp_crypto_b64u_dec_buf[0] = '\0'; return sp_crypto_b64u_dec_buf; }
+        if (a < 0 || b < 0 || c < 0) { sp_crypto_b64u_dec_buf[0] = '\0'; sp_ffi_bin_len = 0; return sp_crypto_b64u_dec_buf; }
         sp_crypto_b64u_dec_buf[j++] = (a << 2) | (b >> 4);
         sp_crypto_b64u_dec_buf[j++] = ((b & 0xf) << 4) | (c >> 2);
     }
     sp_crypto_b64u_dec_buf[j] = '\0';
+    sp_ffi_bin_len = (int)j;   /* the decoded bytes may hold a NUL: bind it `:binstr` */
     return sp_crypto_b64u_dec_buf;
 }
 
@@ -703,6 +1091,10 @@ int sp_crypto_entropy(uint8_t *out, int nbytes) {
 #if defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
     arc4random_buf(out, nbytes);
     return 1;
+#elif defined(__wasi__) || defined(_WIN32)
+    /* the host's entropy, through WASI's random_get or (Windows, lib/win32)
+       BCryptGenRandom; there is no device */
+    return getentropy(out, (size_t)nbytes) == 0;
 #else
     /* getrandom(2) first: kernel-sourced, works where /dev/urandom is not
        even visible (chroot, minimal containers) -- the very environments
@@ -764,29 +1156,6 @@ const char *sp_crypto_random_b64url(int nbytes) {
     if (nbytes > 64) nbytes = 64;
     uint8_t r[64];
     if (!sp_crypto_entropy(r, nbytes)) return NULL;
-    int i, j = 0;
-    for (i = 0; i + 3 <= nbytes; i += 3) {
-        uint32_t v = ((uint32_t)r[i] << 16)
-                   | ((uint32_t)r[i+1] << 8)
-                   | (uint32_t)r[i+2];
-        sp_crypto_random_b64url_buf[j++] = SPC_B64U[(v >> 18) & 0x3f];
-        sp_crypto_random_b64url_buf[j++] = SPC_B64U[(v >> 12) & 0x3f];
-        sp_crypto_random_b64url_buf[j++] = SPC_B64U[(v >> 6)  & 0x3f];
-        sp_crypto_random_b64url_buf[j++] = SPC_B64U[v & 0x3f];
-    }
-    int rem = nbytes - i;
-    if (rem == 1) {
-        uint32_t v = (uint32_t)r[i] << 16;
-        sp_crypto_random_b64url_buf[j++] = SPC_B64U[(v >> 18) & 0x3f];
-        sp_crypto_random_b64url_buf[j++] = SPC_B64U[(v >> 12) & 0x3f];
-    }
-else if (rem == 2) {
-        uint32_t v = ((uint32_t)r[i] << 16)
-                   | ((uint32_t)r[i+1] << 8);
-        sp_crypto_random_b64url_buf[j++] = SPC_B64U[(v >> 18) & 0x3f];
-        sp_crypto_random_b64url_buf[j++] = SPC_B64U[(v >> 12) & 0x3f];
-        sp_crypto_random_b64url_buf[j++] = SPC_B64U[(v >> 6) & 0x3f];
-    }
-    sp_crypto_random_b64url_buf[j] = '\0';
+    sp_crypto_b64url_bytes(r, nbytes, sp_crypto_random_b64url_buf);
     return sp_crypto_random_b64url_buf;
 }

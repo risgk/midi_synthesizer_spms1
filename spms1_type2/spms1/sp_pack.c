@@ -1,5 +1,5 @@
 /*
- * sp_pack.c — Array#pack / String#unpack for Spinel
+ * sp_pack.c -- Array#pack / String#unpack for Spinel
  *
  * Implements the common Perl/Ruby pack format specifiers. Built
  * as a separate translation unit and linked into libspinel_rt.a;
@@ -33,6 +33,7 @@
    directly onto the one shared heap, so no sp_ext_str_* shim is needed. */
 #include "sp_alloc.h"   /* string + object allocation, sp_box_*, sp_PolyArray */
 #include "sp_str.h"     /* sp_nil_recv for the nil-receiver unpack raise */
+#include "sp_string.h"  /* sp_String: a shared String handle element */
 
 /* ---------- Helpers ---------- */
 
@@ -122,6 +123,16 @@ static int64_t pk_parse_count_mods(const char **pp, int *big) {
   *pp = p;
   return n;
 }
+/* `l_` / `l!` (and `L`) are the native long, 8 bytes on LP64, as CRuby packs
+   and unpacks them; the plain `l` stays 32-bit. Answers the directive to use,
+   peeking at the modifiers after it without consuming them. */
+static char pk_native_spec(char spec, const char *p) {
+  if ((spec == 'l' || spec == 'L') && sizeof(long) == 8) {
+    for (const char *q = p; *q == '<' || *q == '>' || *q == '!' || *q == '_'; q++)
+      if (*q == '!' || *q == '_') return spec == 'l' ? 'q' : 'Q';
+  }
+  return spec;
+}
 static int64_t pk_parse_count(const char **pp) {
   return pk_parse_count_mods(pp, NULL);
 }
@@ -186,6 +197,68 @@ static void pk_flt_directive(char spec, double v, char **buf, size_t *len, size_
     }
   }
 }
+/* Pack one integer element for the integer directives. Returns 0 when the
+   directive consumed no element (x emits a NUL without taking one). */
+static int pk_int_directive(char spec, int64_t v, int big, char **buf, size_t *len, size_t *cap) {
+  char tmp[8];
+  switch (spec) {
+    case 'C': case 'c':
+      tmp[0] = (char)(v & 0xff);
+      pk_append(buf, len, cap, tmp, 1);
+      break;
+    case 'n':
+      tmp[0] = (char)((v >> 8) & 0xff); tmp[1] = (char)(v & 0xff);
+      pk_append(buf, len, cap, tmp, 2);
+      break;
+    case 'N':
+      tmp[0] = (char)((v >> 24) & 0xff); tmp[1] = (char)((v >> 16) & 0xff);
+      tmp[2] = (char)((v >> 8) & 0xff);  tmp[3] = (char)(v & 0xff);
+      pk_append(buf, len, cap, tmp, 4);
+      break;
+    case 'v':
+      tmp[0] = (char)(v & 0xff); tmp[1] = (char)((v >> 8) & 0xff);
+      pk_append(buf, len, cap, tmp, 2);
+      break;
+    case 'V':
+      tmp[0] = (char)(v & 0xff);        tmp[1] = (char)((v >> 8) & 0xff);
+      tmp[2] = (char)((v >> 16) & 0xff); tmp[3] = (char)((v >> 24) & 0xff);
+      pk_append(buf, len, cap, tmp, 4);
+      break;
+    case 's': case 'S':
+      pk_put_int(tmp, v, 2, big);
+      pk_append(buf, len, cap, tmp, 2);
+      break;
+    case 'l': case 'L':
+      pk_put_int(tmp, v, 4, big);
+      pk_append(buf, len, cap, tmp, 4);
+      break;
+    case 'q': case 'Q':
+      pk_put_int(tmp, v, 8, big);
+      pk_append(buf, len, cap, tmp, 8);
+      break;
+    case 'i': case 'I': /* native int, as unpack reads it */
+      pk_put_int(tmp, v, (int)sizeof(int), big);
+      pk_append(buf, len, cap, tmp, sizeof(int));
+      break;
+    case 'j': case 'J': /* intptr_t */
+      pk_put_int(tmp, v, (int)sizeof(intptr_t), big);
+      pk_append(buf, len, cap, tmp, sizeof(intptr_t));
+      break;
+    case 'x':
+      tmp[0] = 0;
+      pk_append(buf, len, cap, tmp, 1);
+      return 0;
+    case 'U': {
+      unsigned char ub[6];
+      int ulen = pk_utf8(ub, v);
+      pk_append(buf, len, cap, (const char *)ub, (size_t)ulen);
+      break;
+    }
+    default:
+      break;
+  }
+  return 1;
+}
 /* Decode one float/double element on unpack (4 bytes for f/F/e/g, 8 for
    d/D/E/G -- the caller sizes the read via fsize). */
 static double uk_get_flt(char spec, const unsigned char *u) {
@@ -237,6 +310,51 @@ static const char *pk_val_name(sp_RbVal v) {
 
 int64_t sp_bigint_to_int(sp_Bigint *b);  /* wraps mod 2^64, as pack does */
 
+/* an unpacked integer is a Ruby Integer: sp_int when it fits, a Bignum
+   otherwise (a 64-bit quantity on a 32-bit sp_int), as CRuby answers */
+#define pk_box_i64 sp_box_i64
+
+sp_Bigint *sp_bigint_new_u64(uint64_t v);
+sp_Bigint *sp_bigint_from_le_bytes(int negative, const unsigned char *bytes, size_t n);
+/* The same for an UNSIGNED 64-bit quantity, whose top half no int64 holds:
+   `Q` above 2**63-1 is a Bignum in CRuby, and reading it as a signed value
+   answered a negative number for every such byte pattern. */
+static sp_RbVal pk_box_u64(uint64_t v) {
+  if (v > (uint64_t)INT64_MAX) return sp_box_bigint(sp_bigint_new_u64(v));
+  return pk_box_i64((int64_t)v);
+}
+
+/* A complete BER value fits a uint64 until its next seven-bit shift would
+   overflow. Larger values use the existing magnitude-byte import in one
+   linear pass, rather than repeatedly shifting an ever-growing Bignum. */
+static sp_RbVal uk_ber_value(const unsigned char *src, size_t n) {
+  uint64_t v = 0;
+  size_t i = 0;
+  for (; i < n; i++) {
+    if (v > (UINT64_MAX >> 7)) break;
+    v = (v << 7) | (src[i] & 0x7F);
+  }
+  if (i == n) return pk_box_u64(v);
+  /* Seven-bit digits need at most n bytes; this bound cannot overflow. */
+  unsigned char *bytes = (unsigned char *)malloc(n);
+  if (!bytes) { fprintf(stderr, "spinel: out of memory\n"); exit(1); }
+  unsigned int bits = 0, digit = 0;
+  size_t used = 0;
+  for (i = n; i > 0; i--) {
+    digit |= (unsigned int)(src[i - 1] & 0x7F) << bits;
+    bits += 7;
+    if (bits >= 8) {
+      bytes[used++] = (unsigned char)digit;
+      digit >>= 8;
+      bits -= 8;
+    }
+  }
+  if (bits) bytes[used++] = (unsigned char)digit;
+  sp_Bigint *b = sp_bigint_from_le_bytes(0, bytes, used);
+  free(bytes);
+  return sp_box_bigint(b);
+}
+
 static int64_t pk_poly_to_int(sp_RbVal v) {
   switch (v.tag) {
     case SP_TAG_INT:    return v.v.i;
@@ -247,6 +365,7 @@ static int64_t pk_poly_to_int(sp_RbVal v) {
          bridge); one without the method falls through to CRuby's TypeError */
       if (v.cls_id >= 0 && v.v.p && sp_obj_to_int_fn) {
         int ok = 0;
+        SP_GC_ROOT_RBVAL(v);   /* across the user #to_int */
         int64_t r = sp_obj_to_int_fn((int)v.cls_id, v.v.p, &ok);
         if (ok) return r;
       }
@@ -258,7 +377,68 @@ static int64_t pk_poly_to_int(sp_RbVal v) {
   return 0;
 }
 
-static double pk_poly_to_flt(sp_RbVal v) {
+size_t sp_bigint_byte_len(sp_Bigint *b);
+size_t sp_bigint_to_le_bytes(sp_Bigint *b, unsigned char *out, size_t cap);
+sp_Bigint *sp_bigint_new_double(double d);
+
+static void pk_ber_int(int64_t sv, char **buf, size_t *len, size_t *cap) {
+  if (sv < 0) { free(*buf); sp_raise_cls("ArgumentError", "can't compress negative numbers"); }
+  uint64_t v = (uint64_t)sv;
+  unsigned char tmp[10]; int ti = 0;
+  tmp[ti++] = (unsigned char)(v & 0x7F); v >>= 7;
+  while (v > 0) { tmp[ti++] = (unsigned char)((v & 0x7F) | 0x80); v >>= 7; }
+  for (int j = ti - 1; j >= 0; j--) pk_append(buf, len, cap, (char *)&tmp[j], 1);
+}
+
+/* BER has no fixed width. Read the existing magnitude serialization in
+   seven-bit groups, then reverse just this element's bytes. Unlike the
+   fixed-width directives, w must not narrow a Bignum modulo 2^64. */
+static void pk_ber_bigint(sp_Bigint *b, char **buf, size_t *len, size_t *cap) {
+  if (sp_bigint_sign(b) < 0) { free(*buf); sp_raise_cls("ArgumentError", "can't compress negative numbers"); }
+  size_t n = sp_bigint_byte_len(b);
+  unsigned char *bytes = (unsigned char *)malloc(n ? n : 1);
+  if (!bytes) { fprintf(stderr, "spinel: out of memory\n"); exit(1); }
+  n = sp_bigint_to_le_bytes(b, bytes, n);
+  size_t start = *len;
+  unsigned int v = 0, bits = 0;
+  for (size_t i = 0; i < n; i++) {
+    v |= (unsigned int)bytes[i] << bits;
+    bits += 8;
+    while (bits >= 7) {
+      char digit = (char)((v & 0x7F) | 0x80);
+      pk_append(buf, len, cap, &digit, 1);
+      v >>= 7;
+      bits -= 7;
+    }
+  }
+  if (v || *len == start) {
+    char digit = (char)(v | 0x80);
+    pk_append(buf, len, cap, &digit, 1);
+  }
+  free(bytes);
+  while (*len > start + 1 && (unsigned char)(*buf)[*len - 1] == 0x80) (*len)--;
+  (*buf)[start] &= 0x7F;
+  for (size_t i = start, j = *len - 1; i < j; i++, j--) {
+    char t = (*buf)[i]; (*buf)[i] = (*buf)[j]; (*buf)[j] = t;
+  }
+}
+
+static void pk_ber_poly(sp_RbVal v, char **buf, size_t *len, size_t *cap) {
+  if (v.tag == SP_TAG_BIGINT) {
+    pk_ber_bigint((sp_Bigint *)v.v.p, buf, len, cap);
+    return;
+  }
+  if (v.tag == SP_TAG_FLT && isfinite(v.v.f) &&
+      (v.v.f >= 9223372036854775808.0 || v.v.f < -9223372036854775808.0)) {
+    pk_ber_bigint(sp_bigint_new_double(v.v.f), buf, len, cap);
+    return;
+  }
+  pk_ber_int(pk_poly_to_int(v), buf, len, cap);
+}
+
+/* Keep the ordinary loop's inlined conversion with a second packing entry. */
+static inline double pk_poly_to_flt(sp_RbVal v) {
+  v = sp_rbval_str(v);
   switch (v.tag) {
     case SP_TAG_FLT:  return v.v.f;
     case SP_TAG_INT:  return (double)v.v.i;
@@ -268,12 +448,49 @@ static double pk_poly_to_flt(sp_RbVal v) {
   }
 }
 
-static const char *pk_poly_to_str(sp_RbVal v) {
-  switch (v.tag) {
-    case SP_TAG_STR: return v.v.s ? v.v.s : "";
-    case SP_TAG_NIL: return "";
-    default:         return "";
+const char *sp_poly_class_name(sp_RbVal v);   /* lib/sp_poly_cold.c */
+
+/* The value a conversion TypeError names: nil, true and false by
+   themselves, anything else by its class. */
+static const char *pk_conv_name(sp_RbVal v) {
+  if (v.tag == SP_TAG_NIL) return "nil";
+  if (v.tag == SP_TAG_BOOL) return v.v.b ? "true" : "false";
+  return sp_poly_class_name(v);
+}
+
+/* The bytes one element gives a String directive, as CRuby's pack reads
+   them. M takes any value's #to_s (rb_obj_as_string; nil's is ""). The
+   others take a String, or a user object's #to_str (StringValue); nil is no
+   bytes for a A Z B b H h, which pad it, where m and u have no nil arm.
+   Anything else is CRuby's TypeError ("no implicit conversion of Integer
+   into String"): the element read as no bytes, so `[1].pack("a*")`
+   answered "" and `[1].pack("a")` a NUL. A shared String handle in a poly
+   Array is its live bytes; it too read as none. */
+static const char *pk_str_elem_bytes(char spec, sp_RbVal v, size_t *n) {
+  *n = 0;
+  if (v.tag == SP_TAG_STR && v.v.s) { *n = sp_str_byte_len(v.v.s); return v.v.s; }
+  if (v.tag == SP_TAG_OBJ && v.cls_id == SP_BUILTIN_STRBUF && v.v.p) {
+    sp_String *h = (sp_String *)v.v.p;
+    if (!h->data) return "";
+    *n = (size_t)h->len;
+    return h->data;
   }
+  if (spec == 'M') {
+    const char *s = v.tag == SP_TAG_NIL ? ""
+                  : v.tag == SP_TAG_INT ? sp_int_to_s(v.v.i)
+                  : v.tag == SP_TAG_FLT ? sp_float_to_s(v.v.f)
+                  : sp_poly_to_s_fn ? sp_poly_to_s_fn(v) : "";
+    *n = s ? strlen(s) : 0;
+    return s ? s : "";
+  }
+  if (v.tag == SP_TAG_NIL && spec != 'm' && spec != 'u') return "";
+  if (v.tag == SP_TAG_OBJ && v.cls_id >= 0 && v.v.p && sp_obj_to_str_fn) {
+    SP_GC_ROOT_RBVAL(v);   /* across the user #to_str */
+    const char *r = sp_obj_to_str_fn((int)v.cls_id, v.v.p);
+    if (r) { *n = sp_str_byte_len(r); return r; }
+  }
+  sp_raise_cls("TypeError", sp_sprintf("no implicit conversion of %s into String", pk_conv_name(v)));
+  return "";
 }
 
 /* ---------- Base64 (`m`) and quoted-printable (`M`) encoders ---------- */
@@ -403,10 +620,99 @@ static void pk_str_bytes_directive(char spec, int64_t count, const char *s, size
 }
 
 
+static SP_NORETURN void pk_too_few(char *buf) {
+  free(buf);
+  sp_raise_cls("ArgumentError", "too few arguments");
+}
+
+/* The String directives: each takes one element, its count a width. */
+static int pk_is_str_spec(char spec) {
+  return spec && strchr("aAZmMuHhBb", spec) != NULL;
+}
+
+/* One String directive over element `e` (`have` 0: the elements ran out,
+   which raises), shared by the four pack entry points so a typed
+   Array's element converts as a poly one's does. Even a zero byte count
+   consumes one element. */
+static void pk_str_spec(char spec, int64_t count, sp_RbVal e, int have,
+                        char **buf, size_t *len, size_t *cap) {
+  size_t sl = 0;
+  if (!have) pk_too_few(*buf);
+  const char *s = pk_str_elem_bytes(spec, e, &sl);
+  if (spec == 'a' || spec == 'A' || spec == 'Z') {
+    size_t want = (count < 0) ? sl : (size_t)count;
+    if (spec == 'Z' && count < 0) want = sl + 1;
+    size_t take = sl < want ? sl : want;
+    pk_append(buf, len, cap, s, take);
+    if (take < want) {
+      char pad = (spec == 'A') ? ' ' : 0;
+      for (size_t pi = 0; pi < want - take; pi++) pk_append(buf, len, cap, &pad, 1);
+    }
+  }
+  else if (spec == 'm' || spec == 'M') pk_str_directive(spec, count, s, sl, buf, len, cap);
+  else pk_str_bytes_directive(spec, count, s, sl, buf, len, cap);
+}
+
 /* ---------- Pack entry points ---------- */
 
+/* X backs the output up; @ pads with NUL to (or truncates to) an absolute
+   length. Both were dropped, so the packed bytes came out shifted (#3553).
+   Shared by the four pack entry points, whose prologues are otherwise
+   identical. Returns 1 when it handled the directive (caller should
+   `continue`), 0 for any other spec. A star counts zero for X, @ and x;
+   none of them consumes an array element. */
+static inline int pk_cursor_directive(char spec, int64_t count, char **buf, size_t *len, size_t *cap) {
+  if (spec == 'X') {
+    size_t back = count < 0 ? 0 : (size_t)count;
+    if (back > *len) sp_raise_cls("ArgumentError", "X outside of string");
+    *len -= back;
+    return 1;
+  }
+  if (spec == '@') {
+    size_t abs = count < 0 ? 0 : (size_t)count;
+    if (abs <= *len) *len = abs;
+    else { char _z = 0; while (*len < abs) pk_append(buf, len, cap, &_z, 1); }
+    return 1;
+  }
+  if (spec == 'x') {
+    char z = 0;
+    for (int64_t i = 0; i < count; i++) pk_append(buf, len, cap, &z, 1);
+    return 1;
+  }
+  return 0;
+}
+
+/* A typed array's nil element (its bit in the array's bitmap) converts to
+   neither number: CRuby raises the conversion's TypeError. */
+static int pk_int_directive_consumes(char spec) {
+  return spec && strchr("CcnNvVsSlLqQiIjJU", spec) != NULL;   /* the ones pk_int_directive packs */
+}
+static SP_NOINLINE SP_COLD int64_t pk_missing_int(char spec, char *buf) {
+  if (pk_int_directive_consumes(spec)) pk_too_few(buf);
+  return 0;
+}
+static SP_NORETURN void pk_nil_elem(int flt) {
+  sp_raise_cls("TypeError", flt ? "can't convert nil into Float" : "no implicit conversion of nil into Integer");
+}
+
+/* CRuby's pack result encoding: a template of U directives (m, M and u
+   alongside them too) answers UTF-8 text, and any other directive makes the
+   bytes ASCII-8BIT -- so [233].pack("U") is "\u00e9", one character, where it
+   was marked binary and read as two bytes. */
+static int pk_fmt_utf8(const char *fmt) {
+  int u = 0;
+  for (const char *q = fmt; q && *q; q++) {
+    char d = *q;
+    if (d == ' ' || d == '\t' || d == '\n' || d == '*' || d == '_' || d == '!' ||
+        d == '<' || d == '>' || (d >= '0' && d <= '9')) continue;
+    if (d == 'U') u = 1;
+    else if (d != 'm' && d != 'M' && d != 'u') return 0;
+  }
+  return u;
+}
+
 const char *sp_IntArray_pack(sp_IntArray *arr, const char *fmt) {SP_GC_ROOT(arr);
-  if (!arr || !fmt) return sp_str_empty;
+  if (SP_UNLIKELY(!arr)) sp_nil_recv("pack"); if (!fmt) return sp_str_empty;
   size_t cap = 64;
   char *buf = (char *)malloc(cap);
   if (!buf) { perror("malloc"); exit(1); }
@@ -415,34 +721,26 @@ const char *sp_IntArray_pack(sp_IntArray *arr, const char *fmt) {SP_GC_ROOT(arr)
   const char *p = fmt;
   while (*p) {
     char spec = *p++;
+    spec = pk_native_spec(spec, p);
     if (spec == ' ' || spec == '\t' || spec == '\n') continue;
     int big = 0;
     int64_t count = pk_parse_count_mods(&p, &big);
-    /* X backs the output up; @ pads with NUL to (or truncates to) an absolute
-       length. Both were dropped, so the packed bytes came out shifted (#3553). */
-    if (spec == 'X') {
-      size_t back = count < 0 ? 1 : (size_t)count;
-      if (back > len) sp_raise_cls("ArgumentError", "X outside of string");
-      len -= back;
-      continue;
-    }
-    if (spec == '@') {
-      size_t abs = count < 0 ? len : (size_t)count;
-      if (abs <= len) len = abs;
-      else { char _z = 0; while (len < abs) pk_append(&buf, &len, &cap, &_z, 1); }
+    if (pk_cursor_directive(spec, count, &buf, &len, &cap)) continue;
+    /* a String directive converts the element as CRuby does: an Integer
+       is no String (TypeError), a nil element (its bit) is nil */
+    if (pk_is_str_spec(spec)) {
+      int have = idx < arr->len;
+      pk_str_spec(spec, count, have ? sp_IntArray_box_elem(arr, idx) : sp_box_int(0), have, &buf, &len, &cap);
+      idx++;
       continue;
     }
     /* w: BER-compressed integers (base-128, high bit = continuation). */
     if (spec == 'w') {
       int64_t wc = count < 0 ? arr->len - idx : count;
       for (int64_t k = 0; k < wc; k++) {
-        int64_t sv = (idx < arr->len) ? arr->data[arr->start + idx] : 0; idx++;
-        if (sv < 0) sp_raise_cls("ArgumentError", "can't compress negative numbers");
-        uint64_t v = (uint64_t)sv;
-        unsigned char tmp[10]; int ti = 0;
-        tmp[ti++] = (unsigned char)(v & 0x7F); v >>= 7;
-        while (v > 0) { tmp[ti++] = (unsigned char)((v & 0x7F) | 0x80); v >>= 7; }
-        for (int j = ti - 1; j >= 0; j--) pk_append(&buf, &len, &cap, (char *)&tmp[j], 1);
+        if (idx < arr->len && sp_IntArray_elem_nil(arr, idx)) pk_nil_elem(0);
+        int64_t sv = (idx < arr->len) ? arr->data[arr->start + idx] : (pk_too_few(buf), 0); idx++;
+        pk_ber_int(sv, &buf, &len, &cap);
       }
       continue;
     }
@@ -450,65 +748,18 @@ const char *sp_IntArray_pack(sp_IntArray *arr, const char *fmt) {SP_GC_ROOT(arr)
     if (count < 0) count = 0;
     if (pk_is_flt_spec(spec)) {
       for (int64_t k = 0; k < count; k++) {
-        double dv = (idx < arr->len) ? (double)arr->data[arr->start + idx] : 0.0;
+        if (idx < arr->len && sp_IntArray_elem_nil(arr, idx)) pk_nil_elem(1);
+        double dv = (idx < arr->len) ? (double)arr->data[arr->start + idx] : (pk_too_few(buf), 0.0);
         idx++;
         pk_flt_directive(spec, dv, &buf, &len, &cap);
       }
       continue;
     }
     for (int64_t k = 0; k < count; k++) {
-      int64_t v = (idx < arr->len) ? arr->data[arr->start + idx] : 0;
+      int64_t v = (idx < arr->len) ? arr->data[arr->start + idx] : pk_missing_int(spec, buf);
+      if (idx < arr->len && sp_IntArray_elem_nil(arr, idx) && pk_int_directive_consumes(spec)) pk_nil_elem(0);
       idx++;
-      char tmp[8];
-      switch (spec) {
-        case 'C': case 'c':
-          tmp[0] = (char)(v & 0xff);
-          pk_append(&buf, &len, &cap, tmp, 1);
-          break;
-        case 'n':
-          tmp[0] = (char)((v >> 8) & 0xff); tmp[1] = (char)(v & 0xff);
-          pk_append(&buf, &len, &cap, tmp, 2);
-          break;
-        case 'N':
-          tmp[0] = (char)((v >> 24) & 0xff); tmp[1] = (char)((v >> 16) & 0xff);
-          tmp[2] = (char)((v >> 8) & 0xff);  tmp[3] = (char)(v & 0xff);
-          pk_append(&buf, &len, &cap, tmp, 4);
-          break;
-        case 'v':
-          tmp[0] = (char)(v & 0xff); tmp[1] = (char)((v >> 8) & 0xff);
-          pk_append(&buf, &len, &cap, tmp, 2);
-          break;
-        case 'V':
-          tmp[0] = (char)(v & 0xff);        tmp[1] = (char)((v >> 8) & 0xff);
-          tmp[2] = (char)((v >> 16) & 0xff); tmp[3] = (char)((v >> 24) & 0xff);
-          pk_append(&buf, &len, &cap, tmp, 4);
-          break;
-        case 's': case 'S':
-          pk_put_int(tmp, v, 2, big);
-          pk_append(&buf, &len, &cap, tmp, 2);
-          break;
-        case 'l': case 'L':
-          pk_put_int(tmp, v, 4, big);
-          pk_append(&buf, &len, &cap, tmp, 4);
-          break;
-        case 'q': case 'Q':
-          pk_put_int(tmp, v, 8, big);
-          pk_append(&buf, &len, &cap, tmp, 8);
-          break;
-        case 'x':
-          tmp[0] = 0;
-          pk_append(&buf, &len, &cap, tmp, 1);
-          idx--;
-          break;
-        case 'U': {
-          unsigned char ub[6];
-          int ulen = pk_utf8(ub, v);
-          pk_append(&buf, &len, &cap, (const char *)ub, (size_t)ulen);
-          break;
-        }
-        default:
-          break;
-      }
+      if (!pk_int_directive(spec, v, big, &buf, &len, &cap)) idx--;
     }
   }
   /* Hand back via GC-tracked sp_str_alloc so the main file's GC
@@ -516,7 +767,7 @@ const char *sp_IntArray_pack(sp_IntArray *arr, const char *fmt) {SP_GC_ROOT(arr)
   char *r = sp_str_alloc(len);
   memcpy(r, buf, len);
   sp_str_set_len(r, len);
-  sp_str_mark_binary(r);   /* pack answers ASCII-8BIT bytes: inspect them \xNN */
+  if (!pk_fmt_utf8(fmt)) sp_str_mark_binary(r);   /* pack answers ASCII-8BIT bytes: inspect them \xNN */
   free(buf);
   return r;
 }
@@ -528,7 +779,7 @@ const char *sp_IntArray_pack(sp_IntArray *arr, const char *fmt) {SP_GC_ROOT(arr)
    FloatDomainError). Mirrors sp_IntArray_pack otherwise -- note
    sp_FloatArray has no `start` offset field. */
 const char *sp_FloatArray_pack(sp_FloatArray *arr, const char *fmt) {
-  if (!arr || !fmt) return sp_str_empty;
+  if (SP_UNLIKELY(!arr)) sp_nil_recv("pack"); if (!fmt) return sp_str_empty;
   size_t cap = 64;
   char *buf = (char *)malloc(cap);
   if (!buf) { perror("malloc"); exit(1); }
@@ -537,98 +788,77 @@ const char *sp_FloatArray_pack(sp_FloatArray *arr, const char *fmt) {
   const char *p = fmt;
   while (*p) {
     char spec = *p++;
+    spec = pk_native_spec(spec, p);
     if (spec == ' ' || spec == '\t' || spec == '\n') continue;
     int big = 0;
     int64_t count = pk_parse_count_mods(&p, &big);
-    /* X backs the output up; @ pads with NUL to (or truncates to) an absolute
-       length. Both were dropped, so the packed bytes came out shifted (#3553). */
-    if (spec == 'X') {
-      size_t back = count < 0 ? 1 : (size_t)count;
-      if (back > len) sp_raise_cls("ArgumentError", "X outside of string");
-      len -= back;
+    if (pk_cursor_directive(spec, count, &buf, &len, &cap)) continue;
+    /* a String directive converts the element as CRuby does: a Float is no
+       String (TypeError), a nil element (its bit) is nil */
+    if (pk_is_str_spec(spec)) {
+      int have = idx < arr->len;
+      pk_str_spec(spec, count, have ? sp_FloatArray_box_elem(arr, idx) : sp_box_float(0.0), have, &buf, &len, &cap);
+      idx++;
       continue;
     }
-    if (spec == '@') {
-      size_t abs = count < 0 ? len : (size_t)count;
-      if (abs <= len) len = abs;
-      else { char _z = 0; while (len < abs) pk_append(&buf, &len, &cap, &_z, 1); }
+    if (spec == 'w') {
+      int64_t wc = count < 0 ? arr->len - idx : count;
+      for (int64_t k = 0; k < wc; k++) {
+        if (idx >= arr->len) pk_too_few(buf);
+        if (sp_FloatArray_elem_nil(arr, idx)) pk_nil_elem(0);
+        sp_float v = arr->data[idx++];
+        pk_ber_poly(sp_box_float(v), &buf, &len, &cap);
+      }
       continue;
     }
     if (count < 0) count = arr->len - idx;
     if (count < 0) count = 0;
     if (pk_is_flt_spec(spec)) {
       for (int64_t k = 0; k < count; k++) {
-        double dv = (idx < arr->len) ? arr->data[idx] : 0.0;
+        double dv = (idx < arr->len) ? arr->data[idx] : (pk_too_few(buf), 0.0);
+        if (idx < arr->len && sp_FloatArray_elem_nil(arr, idx)) pk_nil_elem(1);
         idx++;
         pk_flt_directive(spec, dv, &buf, &len, &cap);
       }
       continue;
     }
     for (int64_t k = 0; k < count; k++) {
-      int64_t v = (idx < arr->len) ? pk_flt_to_int(arr->data[idx]) : 0;
+      if (idx < arr->len && sp_FloatArray_elem_nil(arr, idx) && pk_int_directive_consumes(spec)) pk_nil_elem(0);
+      int64_t v = (idx < arr->len) ? pk_flt_to_int(arr->data[idx]) : pk_missing_int(spec, buf);
       idx++;
-      char tmp[8];
-      switch (spec) {
-        case 'C': case 'c':
-          tmp[0] = (char)(v & 0xff);
-          pk_append(&buf, &len, &cap, tmp, 1);
-          break;
-        case 'n':
-          tmp[0] = (char)((v >> 8) & 0xff); tmp[1] = (char)(v & 0xff);
-          pk_append(&buf, &len, &cap, tmp, 2);
-          break;
-        case 'N':
-          tmp[0] = (char)((v >> 24) & 0xff); tmp[1] = (char)((v >> 16) & 0xff);
-          tmp[2] = (char)((v >> 8) & 0xff);  tmp[3] = (char)(v & 0xff);
-          pk_append(&buf, &len, &cap, tmp, 4);
-          break;
-        case 'v':
-          tmp[0] = (char)(v & 0xff); tmp[1] = (char)((v >> 8) & 0xff);
-          pk_append(&buf, &len, &cap, tmp, 2);
-          break;
-        case 'V':
-          tmp[0] = (char)(v & 0xff);        tmp[1] = (char)((v >> 8) & 0xff);
-          tmp[2] = (char)((v >> 16) & 0xff); tmp[3] = (char)((v >> 24) & 0xff);
-          pk_append(&buf, &len, &cap, tmp, 4);
-          break;
-        case 's': case 'S':
-          pk_put_int(tmp, v, 2, big);
-          pk_append(&buf, &len, &cap, tmp, 2);
-          break;
-        case 'l': case 'L':
-          pk_put_int(tmp, v, 4, big);
-          pk_append(&buf, &len, &cap, tmp, 4);
-          break;
-        case 'q': case 'Q':
-          pk_put_int(tmp, v, 8, big);
-          pk_append(&buf, &len, &cap, tmp, 8);
-          break;
-        case 'x':
-          tmp[0] = 0;
-          pk_append(&buf, &len, &cap, tmp, 1);
-          idx--;
-          break;
-        case 'U': {
-          unsigned char ub[6];
-          int ulen = pk_utf8(ub, v);
-          pk_append(&buf, &len, &cap, (const char *)ub, (size_t)ulen);
-          break;
-        }
-        default:
-          break;
-      }
+      if (!pk_int_directive(spec, v, big, &buf, &len, &cap)) idx--;
     }
   }
   char *r = sp_str_alloc(len);
   memcpy(r, buf, len);
   sp_str_set_len(r, len);
-  sp_str_mark_binary(r);   /* pack answers ASCII-8BIT bytes: inspect them \xNN */
+  if (!pk_fmt_utf8(fmt)) sp_str_mark_binary(r);   /* pack answers ASCII-8BIT bytes: inspect them \xNN */
   free(buf);
   return r;
 }
 
+/* p: a count of elements, each a String's address (nil's NULL), a
+   pointer-sized J as CRuby packs it; P: one, its count the length of what
+   it points to (#9349). A boxed element wrote nothing. */
+static void pk_ptr_poly(char spec, int64_t count, sp_PolyArray *arr, sp_int *idx, char **buf, size_t *len,
+                        size_t *cap) {
+  int64_t n = spec == 'P' ? (count == 0 ? 0 : 1) : count < 0 ? arr->len - *idx : count;
+  for (int64_t k = 0; k < n; k++) {
+    if (*idx >= arr->len) pk_too_few(*buf);
+    sp_RbVal e = arr->data[(*idx)++];
+    const char *s = NULL;
+    if (e.tag == SP_TAG_STR) s = e.v.s;
+    else if (e.tag == SP_TAG_OBJ && e.cls_id == SP_BUILTIN_STRBUF && e.v.p) s = ((sp_String *)e.v.p)->data;
+    else if (e.tag != SP_TAG_NIL) {
+      free(*buf);
+      sp_raise_cls("TypeError", sp_sprintf("no implicit conversion of %s into String", pk_conv_name(e)));
+    }
+    pk_int_directive('J', (int64_t)(intptr_t)s, 0, buf, len, cap);
+  }
+}
+
 const char *sp_PolyArray_pack(sp_PolyArray *arr, const char *fmt) {SP_GC_ROOT(arr);
-  if (!arr || !fmt) return sp_str_empty;
+  if (SP_UNLIKELY(!arr)) sp_nil_recv("pack"); if (!fmt) return sp_str_empty;
   size_t cap = 64;
   char *buf = (char *)malloc(cap);
   if (!buf) { perror("malloc"); exit(1); }
@@ -637,136 +867,129 @@ const char *sp_PolyArray_pack(sp_PolyArray *arr, const char *fmt) {SP_GC_ROOT(ar
   const char *p = fmt;
   while (*p) {
     char spec = *p++;
+    spec = pk_native_spec(spec, p);
     if (spec == ' ' || spec == '\t' || spec == '\n') continue;
     int big = 0;
     int64_t count = pk_parse_count_mods(&p, &big);
-    /* X backs the output up; @ pads with NUL to (or truncates to) an absolute
-       length. Both were dropped, so the packed bytes came out shifted (#3553). */
-    if (spec == 'X') {
-      size_t back = count < 0 ? 1 : (size_t)count;
-      if (back > len) sp_raise_cls("ArgumentError", "X outside of string");
-      len -= back;
-      continue;
-    }
-    if (spec == '@') {
-      size_t abs = count < 0 ? len : (size_t)count;
-      if (abs <= len) len = abs;
-      else { char _z = 0; while (len < abs) pk_append(&buf, &len, &cap, &_z, 1); }
-      continue;
-    }
-    if (spec == 'a' || spec == 'A' || spec == 'Z') {
-      const char *s = (idx < arr->len) ? pk_poly_to_str(arr->data[idx]) : "";
+    if (pk_cursor_directive(spec, count, &buf, &len, &cap)) continue;
+    /* a/A/Z, m/M, H/h, B/b, u: consume one element, converted as CRuby
+       converts it (pk_str_elem_bytes) */
+    if (pk_is_str_spec(spec)) {
+      int have = idx < arr->len;
+      pk_str_spec(spec, count, have ? arr->data[idx] : sp_box_nil(), have, &buf, &len, &cap);
       idx++;
-      size_t sl = strlen(s);
-      size_t want = (count < 0) ? sl : (size_t)count;
-      if (spec == 'Z' && count < 0) want = sl + 1;
-      size_t take = sl < want ? sl : want;
-      pk_append(&buf, &len, &cap, s, take);
-      if (take < want) {
-        char pad = (spec == 'A') ? ' ' : 0;
-        for (size_t pi = 0; pi < want - take; pi++) pk_append(&buf, &len, &cap, &pad, 1);
-      }
-      continue;
-    }
-    if (spec == 'm' || spec == 'M') {
-      const char *s = ""; size_t sl = 0;
-      if (idx < arr->len) {
-        sp_RbVal e = arr->data[idx];
-        if (e.tag == SP_TAG_STR && e.v.s) { s = e.v.s; sl = sp_str_byte_len(s); }
-      }
-      idx++;
-      pk_str_directive(spec, count, s, sl, &buf, &len, &cap);
-      continue;
-    }
-    /* H/h (hex), B/b (bit), u (uuencode): consume one string element. */
-    if (spec == 'H' || spec == 'h' || spec == 'B' || spec == 'b' || spec == 'u') {
-      const char *s = (idx < arr->len) ? pk_poly_to_str(arr->data[idx]) : ""; idx++;
-      pk_str_bytes_directive(spec, count, s, strlen(s), &buf, &len, &cap);
       continue;
     }
     /* w: BER-compressed integers (base-128, high bit = continuation). */
     if (spec == 'w') {
       int64_t wc = count < 0 ? arr->len - idx : count;
       for (int64_t k = 0; k < wc; k++) {
-        int64_t sv = (idx < arr->len) ? pk_poly_to_int(arr->data[idx]) : 0; idx++;
-        if (sv < 0) sp_raise_cls("ArgumentError", "can't compress negative numbers");
-        uint64_t v = (uint64_t)sv;
-        unsigned char tmp[10]; int ti = 0;
-        tmp[ti++] = (unsigned char)(v & 0x7F); v >>= 7;
-        while (v > 0) { tmp[ti++] = (unsigned char)((v & 0x7F) | 0x80); v >>= 7; }
-        for (int j = ti - 1; j >= 0; j--) pk_append(&buf, &len, &cap, (char *)&tmp[j], 1);
+        if (idx >= arr->len) pk_too_few(buf);
+        pk_ber_poly(arr->data[idx++], &buf, &len, &cap);
       }
+      continue;
+    }
+    if (spec == 'p' || spec == 'P') {
+      pk_ptr_poly(spec, count, arr, &idx, &buf, &len, &cap);
       continue;
     }
     if (count < 0) count = arr->len - idx;
     if (count < 0) count = 0;
     if (pk_is_flt_spec(spec)) {
       for (int64_t k = 0; k < count; k++) {
-        double dv = (idx < arr->len) ? pk_poly_to_flt(arr->data[idx]) : 0.0;
+        /* a poly array's nil is a tagged one, which pk_poly_to_flt reads as
+           0.0; it raises here as a typed array's nil bit does */
+        if (idx < arr->len && arr->data[idx].tag == SP_TAG_NIL) pk_nil_elem(1);
+        double dv = (idx < arr->len) ? pk_poly_to_flt(arr->data[idx]) : (pk_too_few(buf), 0.0);
         idx++;
         pk_flt_directive(spec, dv, &buf, &len, &cap);
       }
       continue;
     }
     for (int64_t k = 0; k < count; k++) {
-      int64_t v = (idx < arr->len) ? pk_poly_to_int(arr->data[idx]) : 0;
+      /* converted only for a directive that takes the element: `x` packs a
+         NUL and leaves it, so a nil under it (`[1, nil].pack("qx")`) is not
+         converted, as the typed arrays' nil-bit check already skips it */
+      int64_t v = pk_int_directive_consumes(spec)
+                  ? (idx < arr->len ? pk_poly_to_int(arr->data[idx]) : (pk_too_few(buf), 0)) : 0;
       idx++;
-      char tmp[8];
-      switch (spec) {
-        case 'C': case 'c':
-          tmp[0] = (char)(v & 0xff);
-          pk_append(&buf, &len, &cap, tmp, 1);
-          break;
-        case 'n':
-          tmp[0] = (char)((v >> 8) & 0xff); tmp[1] = (char)(v & 0xff);
-          pk_append(&buf, &len, &cap, tmp, 2);
-          break;
-        case 'N':
-          tmp[0] = (char)((v >> 24) & 0xff); tmp[1] = (char)((v >> 16) & 0xff);
-          tmp[2] = (char)((v >> 8) & 0xff);  tmp[3] = (char)(v & 0xff);
-          pk_append(&buf, &len, &cap, tmp, 4);
-          break;
-        case 'v':
-          tmp[0] = (char)(v & 0xff); tmp[1] = (char)((v >> 8) & 0xff);
-          pk_append(&buf, &len, &cap, tmp, 2);
-          break;
-        case 'V':
-          tmp[0] = (char)(v & 0xff);        tmp[1] = (char)((v >> 8) & 0xff);
-          tmp[2] = (char)((v >> 16) & 0xff); tmp[3] = (char)((v >> 24) & 0xff);
-          pk_append(&buf, &len, &cap, tmp, 4);
-          break;
-        case 's': case 'S':
-          pk_put_int(tmp, v, 2, big);
-          pk_append(&buf, &len, &cap, tmp, 2);
-          break;
-        case 'l': case 'L':
-          pk_put_int(tmp, v, 4, big);
-          pk_append(&buf, &len, &cap, tmp, 4);
-          break;
-        case 'q': case 'Q':
-          pk_put_int(tmp, v, 8, big);
-          pk_append(&buf, &len, &cap, tmp, 8);
-          break;
-        case 'x':
-          tmp[0] = 0;
-          pk_append(&buf, &len, &cap, tmp, 1);
-          idx--;
-          break;
-        case 'U': {
-          unsigned char ub[6];
-          int ulen = pk_utf8(ub, v);
-          pk_append(&buf, &len, &cap, (const char *)ub, (size_t)ulen);
-          break;
-        }
-        default:
-          break;
-      }
+      if (!pk_int_directive(spec, v, big, &buf, &len, &cap)) idx--;
     }
   }
   char *r = sp_str_alloc(len);
   memcpy(r, buf, len);
   sp_str_set_len(r, len);
-  sp_str_mark_binary(r);   /* pack answers ASCII-8BIT bytes: inspect them \xNN */
+  if (!pk_fmt_utf8(fmt)) sp_str_mark_binary(r);   /* pack answers ASCII-8BIT bytes: inspect them \xNN */
+  free(buf);
+  return r;
+}
+
+/* Keep ordinary packing on its original entry; only keyword calls seed it. */
+const char *sp_PolyArray_pack_buffer(sp_PolyArray *arr, const char *fmt, const char *initial) {SP_GC_ROOT(arr);
+  if (SP_UNLIKELY(!arr)) sp_nil_recv("pack"); if (!fmt) return sp_str_empty;
+  size_t cap = 64;
+  char *buf = (char *)malloc(cap);
+  if (!buf) { perror("malloc"); exit(1); }
+  size_t len = 0;
+  if (initial) pk_append(&buf, &len, &cap, initial, sp_str_byte_len(initial));
+  sp_int idx = 0;
+  const char *p = fmt;
+  while (*p) {
+    char spec = *p++;
+    spec = pk_native_spec(spec, p);
+    if (spec == ' ' || spec == '\t' || spec == '\n') continue;
+    int big = 0;
+    int64_t count = pk_parse_count_mods(&p, &big);
+    if (pk_cursor_directive(spec, count, &buf, &len, &cap)) continue;
+    /* a/A/Z, m/M, H/h, B/b, u: consume one element, converted as CRuby
+       converts it (pk_str_elem_bytes) */
+    if (pk_is_str_spec(spec)) {
+      int have = idx < arr->len;
+      pk_str_spec(spec, count, have ? arr->data[idx] : sp_box_nil(), have, &buf, &len, &cap);
+      idx++;
+      continue;
+    }
+    /* w: BER-compressed integers (base-128, high bit = continuation). */
+    if (spec == 'w') {
+      int64_t wc = count < 0 ? arr->len - idx : count;
+      for (int64_t k = 0; k < wc; k++) {
+        if (idx >= arr->len) pk_too_few(buf);
+        pk_ber_poly(arr->data[idx++], &buf, &len, &cap);
+      }
+      continue;
+    }
+    if (spec == 'p' || spec == 'P') {
+      pk_ptr_poly(spec, count, arr, &idx, &buf, &len, &cap);
+      continue;
+    }
+    if (count < 0) count = arr->len - idx;
+    if (count < 0) count = 0;
+    if (pk_is_flt_spec(spec)) {
+      for (int64_t k = 0; k < count; k++) {
+        /* a poly array's nil is a tagged one, which pk_poly_to_flt reads as
+           0.0; it raises here as a typed array's nil bit does */
+        if (idx < arr->len && arr->data[idx].tag == SP_TAG_NIL) pk_nil_elem(1);
+        double dv = (idx < arr->len) ? pk_poly_to_flt(arr->data[idx]) : (pk_too_few(buf), 0.0);
+        idx++;
+        pk_flt_directive(spec, dv, &buf, &len, &cap);
+      }
+      continue;
+    }
+    for (int64_t k = 0; k < count; k++) {
+      /* converted only for a directive that takes the element: `x` packs a
+         NUL and leaves it, so a nil under it (`[1, nil].pack("qx")`) is not
+         converted, as the typed arrays' nil-bit check already skips it */
+      int64_t v = pk_int_directive_consumes(spec)
+                  ? (idx < arr->len ? pk_poly_to_int(arr->data[idx]) : (pk_too_few(buf), 0)) : 0;
+      idx++;
+      if (!pk_int_directive(spec, v, big, &buf, &len, &cap)) idx--;
+    }
+  }
+  char *r = sp_str_alloc(len);
+  memcpy(r, buf, len);
+  sp_str_set_len(r, len);
+  /* A supplied buffer keeps its encoding unless the template selects UTF-8. */
+  if (!pk_fmt_utf8(fmt) && (!initial || sp_str_is_binary(initial))) sp_str_mark_binary(r);   /* pack answers ASCII-8BIT bytes: inspect them \xNN */
   free(buf);
   return r;
 }
@@ -776,7 +999,7 @@ const char *sp_PolyArray_pack(sp_PolyArray *arr, const char *fmt) {SP_GC_ROOT(ar
    handle a/A/Z padding and m/M base64/quoted-printable; other directives emit
    nothing. Reads the real byte length (embedded NULs survive base64). */
 const char *sp_StrArray_pack(sp_StrArray *arr, const char *fmt) {
-  if (!arr || !fmt) return sp_str_empty;
+  if (SP_UNLIKELY(!arr)) sp_nil_recv("pack"); if (!fmt) return sp_str_empty;
   size_t cap = 64;
   char *buf = (char *)malloc(cap);
   if (!buf) { perror("malloc"); exit(1); }
@@ -785,42 +1008,36 @@ const char *sp_StrArray_pack(sp_StrArray *arr, const char *fmt) {
   const char *p = fmt;
   while (*p) {
     char spec = *p++;
+    spec = pk_native_spec(spec, p);
     if (spec == ' ' || spec == '\t' || spec == '\n') continue;
     int big = 0;
     int64_t count = pk_parse_count_mods(&p, &big);
-    /* X backs the output up; @ pads with NUL to (or truncates to) an absolute
-       length. Both were dropped, so the packed bytes came out shifted (#3553). */
-    if (spec == 'X') {
-      size_t back = count < 0 ? 1 : (size_t)count;
-      if (back > len) sp_raise_cls("ArgumentError", "X outside of string");
-      len -= back;
+    if (pk_cursor_directive(spec, count, &buf, &len, &cap)) continue;
+    /* a nil element (NULL) is nil to the String directives: padding for
+       a A Z B b H h, "" for M, and the TypeError m and u raise */
+    if (pk_is_str_spec(spec)) {
+      int have = idx < arr->len;
+      pk_str_spec(spec, count, SP_SEBOX(have ? sp_StrArray_get_e(arr, idx) : NULL), have, &buf, &len, &cap);
+      idx++;
       continue;
     }
-    if (spec == '@') {
-      size_t abs = count < 0 ? len : (size_t)count;
-      if (abs <= len) len = abs;
-      else { char _z = 0; while (len < abs) pk_append(&buf, &len, &cap, &_z, 1); }
-      continue;
-    }
-    const char *s = (idx < arr->len) ? sp_StrArray_get(arr, idx) : NULL;
-    size_t sl = s ? sp_str_byte_len(s) : 0;
-    if (!s) s = "";
-    idx++;
-    if (spec == 'a' || spec == 'A' || spec == 'Z') {
-      size_t want = (count < 0) ? sl : (size_t)count;
-      if (spec == 'Z' && count < 0) want = sl + 1;
-      size_t take = sl < want ? sl : want;
-      pk_append(&buf, &len, &cap, s, take);
-      if (take < want) {
-        char pad = (spec == 'A') ? ' ' : 0;
-        for (size_t pi = 0; pi < want - take; pi++) pk_append(&buf, &len, &cap, &pad, 1);
+    if (count == 0 || (count < 0 && idx == arr->len)) continue;
+    /* `p` takes a count of elements, each its string's address, a
+       pointer-sized J as CRuby packs it (nil, NULL); `P`'s count is the
+       length of the one structure it points to (#9349) */
+    if (spec == 'p') {
+      int64_t n = count < 0 ? arr->len - idx : count;
+      for (int64_t k = 0; k < n; k++) {
+        if (idx >= arr->len) pk_too_few(buf);
+        pk_int_directive('J', (int64_t)(intptr_t)sp_StrArray_get(arr, idx), 0, &buf, &len, &cap);
+        idx++;
       }
+      continue;
     }
-    else if (spec == 'm' || spec == 'M') {
-      pk_str_directive(spec, count, s, sl, &buf, &len, &cap);
-    }
-    else if (spec == 'H' || spec == 'h' || spec == 'B' || spec == 'b' || spec == 'u') {
-      pk_str_bytes_directive(spec, count, s, sl, &buf, &len, &cap);
+    if (idx >= arr->len) pk_too_few(buf);
+    idx++;
+    if (spec == 'P') {
+      pk_int_directive('J', (int64_t)(intptr_t)sp_StrArray_get(arr, idx - 1), 0, &buf, &len, &cap);
     }
     else if (strchr("cCsSlLqQnNvVjJiIfdeEgGUw", spec)) {
       /* a numeric directive cannot take a String element: CRuby's TypeError
@@ -831,7 +1048,7 @@ const char *sp_StrArray_pack(sp_StrArray *arr, const char *fmt) {
   char *r = sp_str_alloc(len);
   memcpy(r, buf, len);
   sp_str_set_len(r, len);
-  sp_str_mark_binary(r);   /* pack answers ASCII-8BIT bytes: inspect them \xNN */
+  if (!pk_fmt_utf8(fmt)) sp_str_mark_binary(r);   /* pack answers ASCII-8BIT bytes: inspect them \xNN */
   free(buf);
   return r;
 }
@@ -900,6 +1117,82 @@ static char *uk_qp_decode(const char *src, size_t n) {
   return out;
 }
 
+/* An unpack format byte that is no directive: ArgumentError, as CRuby's
+   unknown_directive words it. The directive shows as itself when printable,
+   else as \xNN; the format as an escaped string (\0, \e, \n, ..., \xNN for
+   a byte, \uNNNN for a UTF-8 character or, in a String that is not binary,
+   another control character). It was skipped, so a typo read on with the
+   directives after it, and a NUL byte ended the format. */
+static SP_NORETURN void uk_unknown_directive(char type, const char *fmt, size_t flen) {
+  size_t cap = flen * 10 + 64, o = 0;
+  char *msg = (char *)malloc(cap);
+  if (!msg) sp_raise_cls("ArgumentError", "unknown unpack directive");
+  unsigned char t = (unsigned char)type;
+  int bin = sp_str_is_binary(fmt);
+  if (t >= 0x20 && t < 0x7f) o += (size_t)snprintf(msg + o, cap - o, "unknown unpack directive '%c' in '", type);
+  else o += (size_t)snprintf(msg + o, cap - o, "unknown unpack directive '\\x%02x' in '", t);
+  /* A format every character of which is printable is shown as it is, as
+     CRuby's rb_str_quote_unprintable leaves it ('Cé'); only one holding an
+     unprintable character is escaped as a whole. */
+  int printable = 1;
+  for (size_t i = 0; i < flen && printable; i++) {
+    unsigned char ch = (unsigned char)fmt[i];
+    if (ch < 0x20 || ch == 0x7f) printable = 0;
+    else if (ch >= 0x80) {
+      int len = bin ? 0 : ch >= 0xC2 && ch < 0xE0 ? 2 : ch >= 0xE0 && ch < 0xF0 ? 3 : ch >= 0xF0 && ch < 0xF5 ? 4 : 0;
+      if (!len || i + (size_t)len > flen) { printable = 0; break; }
+      for (int j = 1; j < len; j++)
+        if (((unsigned char)fmt[i + j] & 0xC0) != 0x80) { printable = 0; break; }
+      i += (size_t)len - 1;
+    }
+  }
+  if (printable) { memcpy(msg + o, fmt, flen); o += flen; }
+  for (size_t i = 0; i < flen && !printable; i++) {
+    unsigned char ch = (unsigned char)fmt[i];
+    const char *esc = NULL;
+    switch (ch) {
+      case 0: esc = "\\0"; break;
+      case '\n': esc = "\\n"; break;
+      case '\t': esc = "\\t"; break;
+      case '\r': esc = "\\r"; break;
+      case '\f': esc = "\\f"; break;
+      case '\v': esc = "\\v"; break;
+      case '\b': esc = "\\b"; break;
+      case '\a': esc = "\\a"; break;
+      case 0x1b: esc = "\\e"; break;
+      case 0x7f: esc = "\\c?"; break;
+      default: break;
+    }
+    if (esc) { o += (size_t)snprintf(msg + o, cap - o, "%s", esc); continue; }
+    if (ch >= 0x20 && ch < 0x7f) { msg[o++] = (char)ch; continue; }
+    /* another control character is a codepoint in a UTF-8 String */
+    if (ch < 0x20 && !bin) { o += (size_t)snprintf(msg + o, cap - o, "\\u%04X", ch); continue; }
+    /* a whole UTF-8 character: \uNNNN (\u{N} past the BMP) */
+    int len = bin ? 0 : ch >= 0xC2 && ch < 0xE0 ? 2 : ch >= 0xE0 && ch < 0xF0 ? 3 : ch >= 0xF0 && ch < 0xF5 ? 4 : 0;
+    if (len && i + (size_t)len <= flen) {
+      uint32_t cp = ch & (0x7F >> len);
+      int ok = 1;
+      for (int j = 1; j < len && ok; j++) {
+        unsigned char cb = (unsigned char)fmt[i + j];
+        if ((cb & 0xC0) != 0x80) ok = 0;
+        else cp = (cp << 6) | (cb & 0x3F);
+      }
+      if (ok) {
+        o += (size_t)snprintf(msg + o, cap - o, cp > 0xFFFF ? "\\u{%X}" : "\\u%04X", (unsigned)cp);
+        i += (size_t)len - 1;
+        continue;
+      }
+    }
+    o += (size_t)snprintf(msg + o, cap - o, "\\x%02X", ch);
+  }
+  msg[o++] = '\'';
+  msg[o] = 0;
+  char *m = sp_str_alloc(o);
+  memcpy(m, msg, o + 1);
+  sp_str_set_len(m, o);
+  free(msg);
+  sp_raise_cls("ArgumentError", m);
+}
 sp_PolyArray *sp_str_unpack_off(const char *str, const char *fmt, sp_int byteoff);
 sp_PolyArray *sp_str_unpack(const char *str, const char *fmt) {SP_GC_ROOT_STR(str);SP_GC_ROOT_STR(fmt); return sp_str_unpack_off(str, fmt, 0); }
 
@@ -927,9 +1220,16 @@ sp_PolyArray *sp_str_unpack_off(const char *str, const char *fmt, sp_int byteoff
   if ((size_t)byteoff > slen) sp_raise_cls("ArgumentError", "offset outside of string");
   size_t off = (size_t)byteoff;
   const char *p = fmt;
-  while (*p) {
+  /* the format's own length: a NUL byte in it is an unknown directive, not
+     its end */
+  size_t flen = sp_str_byte_len(fmt);
+  const char *pend = fmt + flen;
+  while (p < pend) {
     char spec = *p++;
-    if (spec == ' ' || spec == '\t' || spec == '\n') continue;
+    spec = pk_native_spec(spec, p);
+    if (spec == ' ' || spec == '\t' || spec == '\n' || spec == '\v' || spec == '\f' || spec == '\r') continue;
+    /* `#` comments to the end of the line */
+    if (spec == '#') { while (p < pend && *p != '\n') p++; continue; }
     /* `%` prefixes a checksum request, which CRuby 4 no longer accepts (#3553) */
     if (spec == '%') sp_raise_cls("ArgumentError", "% is not supported");
     int big = 0;
@@ -937,7 +1237,8 @@ sp_PolyArray *sp_str_unpack_off(const char *str, const char *fmt, sp_int byteoff
     /* X moves the read position back, @ moves it to an absolute offset; both
        were dropped, so every following directive read from the wrong place */
     if (spec == 'X') {
-      size_t back = count < 0 ? off : (size_t)count;
+      /* `X*` backs up by what remains past the position, as CRuby counts it */
+      size_t back = count < 0 ? slen - off : (size_t)count;
       if (back > off) sp_raise_cls("ArgumentError", "X outside of string");
       off -= back;
       continue;
@@ -956,6 +1257,9 @@ sp_PolyArray *sp_str_unpack_off(const char *str, const char *fmt, sp_int byteoff
       case 'f': case 'F': case 'e': case 'g': fsize = 4; break;
       case 'q': case 'Q': fsize = 8; break;
       case 'd': case 'D': case 'E': case 'G': fsize = 8; break;
+      /* the native int, intptr and pointer sizes */
+      case 'i': case 'I': fsize = 4; break;
+      case 'j': case 'J': case 'p': case 'P': fsize = (int)sizeof(intptr_t); break;
       default: fsize = 0; break;
     }
     if (spec == 'a' || spec == 'A' || spec == 'Z') {
@@ -1096,25 +1400,24 @@ else if (spec == 'Z') {
     if (spec == 'w') {
       int64_t got = 0;
       while ((count < 0 || got < count) && off < slen) {
-        int64_t v = 0;
-        while (off < slen) {
-          unsigned char c = (unsigned char)str[off++];
-          v = (v << 7) | (c & 0x7F);
-          if (!(c & 0x80)) break;
-        }
-        sp_PolyArray_push(out, sp_box_int((sp_int)v));
+        size_t start = off;
+        while (off < slen && ((unsigned char)str[off++] & 0x80)) {}
+        /* A trailing continuation has no value until its final byte arrives. */
+        if ((unsigned char)str[off - 1] & 0x80) break;
+        sp_PolyArray_push(out, uk_ber_value((const unsigned char *)str + start, off - start));
         got++;
       }
       continue;
     }
-    if (fsize == 0) continue;
+    if (fsize == 0) uk_unknown_directive(spec, fmt, flen);
     /* `*` count is exactly what remains; an explicit count that runs off the end
        pads the remaining slots with nil (MRI: "a".unpack("CC") == [97, nil]). */
     int star = count < 0;
     if (star) count = (slen - off) / fsize;
     for (int64_t k = 0; k < count; k++) {
       if (off + fsize > slen) {
-        if (spec != 'x') sp_PolyArray_push(out, sp_box_nil());
+        if (spec == 'x') sp_raise_cls("ArgumentError", "x outside of string");
+        sp_PolyArray_push(out, sp_box_nil());
         continue;
       }
       const unsigned char *u = (const unsigned char *)(str + off);
@@ -1136,11 +1439,28 @@ else if (spec == 'Z') {
         case 'l': v = (int32_t)pk_get_int(u, 4, big); break;
         case 'L': v = (uint32_t)pk_get_int(u, 4, big); break;
         case 'q': v = (int64_t)pk_get_int(u, 8, big); break;
-        case 'Q': v = (int64_t)pk_get_int(u, 8, big); break;
+        case 'i': v = (int32_t)pk_get_int(u, 4, big); break;
+        case 'I': v = (uint32_t)pk_get_int(u, 4, big); break;
+        case 'j': v = (int64_t)(intptr_t)pk_get_int(u, (int)sizeof(intptr_t), big); break;
+        /* a pointer CRuby's own pack did not make: nil for NULL, else it has
+           no object to answer */
+        case 'p': case 'P':
+          if (pk_get_int(u, (int)sizeof(intptr_t), 0)) sp_raise_cls("ArgumentError", "no associated pointer");
+          off += fsize;
+          sp_PolyArray_push(out, sp_box_nil());
+          continue;
+        /* unsigned, so it does not share the signed boxing below */
+        case 'J':
+        case 'Q': {
+          uint64_t uv = pk_get_int(u, spec == 'J' ? (int)sizeof(intptr_t) : 8, big);
+          off += fsize;
+          sp_PolyArray_push(out, pk_box_u64(uv));
+          continue;
+        }
         case 'x': break;
       }
       off += fsize;
-      if (spec != 'x') sp_PolyArray_push(out, sp_box_int((sp_int)v));
+      if (spec != 'x') sp_PolyArray_push(out, pk_box_i64(v));
     }
   }
   return out;

@@ -396,7 +396,9 @@ if args.modules:
             if top.tag == 'DW_TAG_subprogram' and die_name(top) == 'Spms1_main' and die_ranges(top, cu):
                 def walk(die):
                     for ch in die.iter_children():
-                        if ch.tag == 'DW_TAG_inlined_subroutine':
+                        if ch.tag == 'DW_TAG_inlined_subroutine' and die_name(ch) == '_sp_main_body':
+                            walk(ch)  # the top level, which Spinel 2026.10.25 writes apart from main
+                        elif ch.tag == 'DW_TAG_inlined_subroutine':
                             name = die_name(ch)
                             for lo, hi in die_ranges(ch, cu):
                                 for a in range(lo & ~1, hi, 2):

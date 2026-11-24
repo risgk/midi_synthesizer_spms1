@@ -19,7 +19,7 @@ void sp_krand_srand(uint64_t seed);
 sp_int sp_krand_below(sp_int n);        /* uniform [0, n); 0 when n <= 0 */
 sp_float sp_krand_float(void);           /* uniform [0, 1) */
 
-/* Random — per-instance PRNG. CRuby uses MT19937; spinel uses PCG-XSH-RR
+/* Random -- per-instance PRNG. CRuby uses MT19937; spinel uses PCG-XSH-RR
    (above), so the *sequence* differs from MRI -- MT19937 is not part of
    the Ruby spec -- but each Random object keeps its own reproducible
    stream from its seed. The default instance is a window onto the shared
@@ -32,6 +32,7 @@ uint64_t sp_random_next(sp_Random *r);
 sp_Random *sp_Random_new(sp_int seed);
 sp_Random *sp_Random_new_float(sp_float f);
 sp_Random *sp_Random_new_auto(void);
+sp_Random *sp_Random_dup(sp_Random *r);
 sp_int sp_Random_seed(sp_Random *r);
 sp_bool sp_Random_eq(sp_Random *a, sp_Random *b);
 sp_int sp_Random_rand_range(sp_Random *r, sp_Range rg);

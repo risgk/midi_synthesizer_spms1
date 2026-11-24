@@ -53,11 +53,28 @@ int sp_net_shutdown_requested(void);
  *   accept/accept_nb/connect; exposed for fds obtained elsewhere). */
 int sp_net_listen(int port, int reuseport);
 int sp_net_listen_host(const char *host, int port, int backlog);
+int sp_net_listen_all(const char *host, int port, int *fds, int cap, const char **op);
 int sp_net_local_port(int fd);
 int sp_net_sock_ip(int fd, int peer, char *ipbuf, int cap);
+int sp_net_sock_host(int fd, int peer, char *hostbuf, int cap);
+int sp_net_sock_name(int fd, int peer, void *out, int cap);
 int sp_net_accept(int sfd);
+int sp_net_accept_unless(int sfd, const unsigned char *cancel);
 int sp_net_accept_nb(int sfd);
 int sp_net_connect(const char *host, int port);
+/* connect an existing fd to a packed sockaddr, waiting as connect does */
+int sp_net_connect_sa(int fd, const void *sa, int len);
+
+/* connect with a deadline: gives up after timeout_s seconds and returns -1
+ * (a negative timeout_s waits as connect does). The deadline covers every
+ * address the host resolves to; the name lookup itself is not bounded.
+ * Under SP_THREADS the green thread parks with the deadline
+ * (sp_sched_wait_io_timeout), and the returned fd is non-blocking as
+ * connect's is there. take_connect_timeout tells a timeout apart from a
+ * refusal or a failed lookup: 1 when the calling worker's last
+ * connect_timeout gave up on the deadline, else 0. Reading it clears it. */
+int sp_net_connect_timeout(const char *host, int port, double timeout_s);
+int sp_net_take_connect_timeout(void);
 
 /* ---- UDP ----
  * udp_open: an unbound SOCK_DGRAM fd. bind/connect attach it to a local /
@@ -67,7 +84,7 @@ int sp_net_udp_open(int family);
 int sp_net_fd_family(int fd);
 int sp_net_udp_bind(int fd, const char *host, int port);
 int sp_net_udp_connect(int fd, const char *host, int port);
-int sp_net_udp_send_to(int fd, const char *data, int len, const char *host, int port);
+int sp_net_udp_send_to(int fd, const char *data, int len, int flags, const char *host, int port);
 int sp_net_udp_recv_from(int fd, char *buf, int cap, char *ipbuf, int ipcap, int *port_out);
 
 /* ---- UNIX-domain stream sockets ---- */
@@ -79,7 +96,10 @@ int sp_net_unix_path(int fd, int peer, char *buf, int cap);
 int sp_net_gethostname(char *buf, int cap);
 int sp_net_socketpair(int domain, int type, int protocol, int fds[2]);
 int sp_net_socket(int domain, int type, int protocol);
-int sp_net_getaddrinfo_at(const char *host, int port, int socktype, int idx,
+/* The EAI_* code of the lookup a -1 above failed on, or 0 when it was not
+   a lookup that failed; reading it clears it. */
+int sp_net_take_resolution_error(void);
+int sp_net_getaddrinfo_at(const char *host, int port, int want_family, int socktype, int idx,
                           int *family, int *stype, int *proto,
                           char *ipbuf, int ipcap, int *port_out);
 
@@ -109,6 +129,17 @@ void sp_net_set_nodelay(int fd);
  * last recv's byte count. */
 const char *sp_net_recv_some(int fd, int maxlen);
 const char *sp_net_recv_all(int fd, int max_bytes);
+
+/* recv_some with a deadline: waits at most timeout_s seconds for the first
+ * byte (a negative timeout_s waits forever, as recv_some does). It parks the
+ * green thread with the deadline (sp_sched_wait_io_timeout) rather than in a
+ * separate readiness wait before each read, and works the same on a blocking
+ * fd. An empty result is EOF, an error or a timeout; take_recv_timeout tells
+ * them apart: 1 when the calling worker's last recv_some_timeout gave up on
+ * the deadline, else 0. Reading it clears it. */
+const char *sp_net_recv_some_timeout(int fd, int maxlen, double timeout_s);
+int         sp_net_take_recv_timeout(void);
+
 int         sp_net_write_str(int fd, const char *s);
 int         sp_net_write_bytes(int fd, const char *data, int n);
 

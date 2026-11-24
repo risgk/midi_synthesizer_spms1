@@ -260,11 +260,13 @@ or not, as the modules are meant to:
 | Version | Note held (avg / max) | No note (avg / max) |
 | :-- | --: | --: |
 | v0.8.1 | 191304 / 191608 cycles, 1245 us (93%) | 190787 / 190982 cycles, 1242 us (93%) |
+| develop (Spinel 2026.10.25) | 191642 / 191952 cycles, 1248 us (94%) | 191181 / 191376 cycles, 1245 us (93%) |
 
 Putting a program back at a Program Change (`--program-load`, once, while silent, outside the buffer's span): v0.8.1
 6593 instructions, 10882 cycles, 71 us.
 
-The estimate is above Debug Print on the device: at v0.7.2 and v0.7.1 as at v0.6.1, the synth core being the same; about 10% at v0.7.0
+The estimate is above Debug Print on the device: about 11% on develop with Spinel 2026.10.25 (min 1121 us, max
+1124 us with I2S, about 84%, `underruns` 0, `gc roots` 2); at v0.7.2 and v0.7.1 as at v0.6.1, the synth core being the same; about 10% at v0.7.0
 (with the input clip of Filter Drive, estimated at 1290 us on average and 1292 us at most: min 1149 us, max 1153 us with I2S,
 about 86%, `underruns` 0, `gc roots` 34), about 10% at v0.6.1 (min 1119 us, max 1122 us with I2S, about
 84%, `underruns` 0, `gc roots` 34), about 8% at v0.4.0 (min 1253 us, max 1256 us, about

@@ -10,6 +10,9 @@
  *
  * sp_net is a POSIX prefork/poll runtime (sockets, poll(2), fork,
  * sigaction). */
+#if defined(__linux__) && !defined(_GNU_SOURCE)
+#define _GNU_SOURCE   /* accept4 */
+#endif
 #include "sp_net.h"
 #include "sp_alloc.h"   /* sp_ffi_bin_len: the binary-safe return contract */
 
@@ -31,12 +34,70 @@
 #include <signal.h>
 #include <sys/un.h>   /* UNIXSocket / UNIXServer */
 #include <stddef.h>   /* offsetof (sockaddr_un packed length) */
+#include <time.h>     /* clock_gettime: recv_some_timeout's deadline */
+#include "sp_sched.h"  /* sp_native_enter / sp_native_leave */
 
 #define SP_NET_BUFSIZE 65536
+
+/* Every socket is close-on-exec, as CRuby's are. The flag goes in with the
+   call where the platform has it, not by fcntl afterwards: a spawn on another
+   worker in between would inherit the descriptor. */
+static int sp_net_set_cloexec(int fd) {
+    if (fd >= 0) {
+        int fl = fcntl(fd, F_GETFD);
+        if (fl >= 0) fcntl(fd, F_SETFD, fl | FD_CLOEXEC);
+    }
+    return fd;
+}
+static int sp_net_socket_cloexec(int domain, int type, int protocol) {
+#ifdef SOCK_CLOEXEC
+    return socket(domain, type | SOCK_CLOEXEC, protocol);
+#else
+    return sp_net_set_cloexec(socket(domain, type, protocol));
+#endif
+}
+static int sp_net_accept_cloexec(int sfd, struct sockaddr *addr, socklen_t *len) {
+#if defined(__linux__)
+    return SP_SIG_BLOCKING(accept4(sfd, addr, len, SOCK_CLOEXEC));
+#else
+    return sp_net_set_cloexec(SP_SIG_BLOCKING(accept(sfd, addr, len)));
+#endif
+}
 
 /* ---------- graceful shutdown ---------- */
 
 static volatile sig_atomic_t sp_net_term_flag = 0;
+
+/* The EAI_* code of the last lookup on this thread, 0 when it resolved.
+   The helpers below answer -1 for a failed lookup and a failed socket call
+   alike, so the raiser reads this to tell Socket::ResolutionError from an
+   Errno. It is taken (and cleared) by sp_net_take_resolution_error. */
+static SP_TLS int sp_net_gai_error = 0;
+
+int sp_net_take_resolution_error(void) {
+    int rc = sp_net_gai_error;
+    sp_net_gai_error = 0;
+    return rc;
+}
+
+/* A DNS lookup can take seconds, so we leave the world while it runs and
+   the GC doesn't wait for us. The host is copied first, since a GC may
+   run meanwhile and nothing may be rooting it. */
+static int sp_net_resolve(const char *host, const char *port,
+                          const struct addrinfo *hints, struct addrinfo **res) {
+    char buf[NI_MAXHOST];
+    if (host) {
+        if (strlen(host) >= sizeof buf) return sp_net_gai_error = EAI_NONAME;   /* longer than any DNS name */
+        strcpy(buf, host);
+        host = buf;
+    }
+    sp_native_enter();
+    int rc = getaddrinfo(host, port, hints, res);
+    sp_native_leave();
+    sp_net_gai_error = rc;
+    return rc;
+}
+
 /* Self-pipe: the term handler writes a byte here so a blocked accept (via
  * poll) wakes even when the signal lands in the check-then-accept window. */
 static int sp_net_sigpipe[2] = {-1, -1};
@@ -107,10 +168,10 @@ int sp_net_listen_host(const char *host, int port, int backlog) {
     hints.ai_flags    = AI_PASSIVE;
     char portbuf[16];
     snprintf(portbuf, sizeof(portbuf), "%d", port);
-    if (getaddrinfo((host && *host) ? host : NULL, portbuf, &hints, &res) != 0) return -1;
+    if (sp_net_resolve((host && *host) ? host : NULL, portbuf, &hints, &res) != 0) return -1;
     int fd = -1;
     for (struct addrinfo *ai = res; ai; ai = ai->ai_next) {
-        fd = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
+        fd = sp_net_socket_cloexec(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
         if (fd < 0) continue;
         int one = 1;
         setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
@@ -121,6 +182,54 @@ int sp_net_listen_host(const char *host, int port, int backlog) {
     }
     freeaddrinfo(res);
     return fd;
+}
+
+/* Socket.tcp_server_sockets(host, port): one listening fd per address the
+   host resolves to, up to `cap`, into fds; returns how many. An IPv6 socket
+   is IPv6-only so it can sit beside the IPv4 one on the same port, and port
+   0 binds the first address to an ephemeral port that the rest then share.
+   An address that cannot be bound is skipped. With none bound it returns 0
+   and leaves errno and *op (the step that failed: "socket", "bind(2)" or
+   "listen(2)") from the last attempt; -1 when the host does not resolve,
+   with *op the resolver's message. The port goes to the resolver as given,
+   as CRuby passes it, so the resolver decides what an out-of-range one is. */
+int sp_net_listen_all(const char *host, int port, int *fds, int cap, const char **op) {
+    signal(SIGPIPE, SIG_IGN);
+    struct addrinfo hints, *res = NULL;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family   = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags    = AI_PASSIVE;
+    char portbuf[16];
+    snprintf(portbuf, sizeof(portbuf), "%d", port);
+    int rc = sp_net_resolve((host && *host) ? host : NULL, portbuf, &hints, &res);
+    if (rc != 0) { *op = gai_strerror(rc); return -1; }
+    int n = 0, e = 0;
+    *op = "bind(2)";
+    for (struct addrinfo *ai = res; ai && n < cap; ai = ai->ai_next) {
+        int fd = sp_net_socket_cloexec(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
+        if (fd < 0) { e = errno; *op = "socket(2)"; continue; }
+        int one = 1;
+        setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
+#ifdef IPV6_V6ONLY
+        if (ai->ai_family == AF_INET6)
+            setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY, &one, sizeof(one));
+#endif
+        /* port 0: every later address takes the port the first one got */
+        if (n > 0 && port == 0) {
+            int p0 = sp_net_local_port(fds[0]);
+            if (ai->ai_family == AF_INET)
+                ((struct sockaddr_in *)ai->ai_addr)->sin_port = htons((unsigned short)p0);
+            else if (ai->ai_family == AF_INET6)
+                ((struct sockaddr_in6 *)ai->ai_addr)->sin6_port = htons((unsigned short)p0);
+        }
+        if (bind(fd, ai->ai_addr, ai->ai_addrlen) != 0) { e = errno; *op = "bind(2)"; close(fd); continue; }
+        if (listen(fd, SOMAXCONN) != 0) { e = errno; *op = "listen(2)"; close(fd); continue; }
+        fds[n++] = fd;
+    }
+    freeaddrinfo(res);
+    if (n == 0) errno = e ? e : EADDRNOTAVAIL;
+    return n;
 }
 
 /* The local port a bound/listening fd ended up on (port 0 => ephemeral). */
@@ -154,9 +263,46 @@ int sp_net_sock_ip(int fd, int peer, char *ipbuf, int cap) {
     return -1;
 }
 
+/* The local/peer address of a socket fd as the packed sockaddr bytes, into
+   out: their length, or -1 with errno set. peer != 0 reads the remote end. */
+int sp_net_sock_name(int fd, int peer, void *out, int cap) {
+    struct sockaddr_storage ss;
+    socklen_t len = sizeof(ss);
+    int r = peer ? getpeername(fd, (struct sockaddr *)&ss, &len)
+                 : getsockname(fd, (struct sockaddr *)&ss, &len);
+    if (r != 0) return -1;
+    if (len > (socklen_t)sizeof(ss)) len = sizeof(ss);
+    if ((int)len > cap) len = (socklen_t)cap;
+    memcpy(out, &ss, len);
+    return (int)len;
+}
+
+/* The host name the local/peer address of a socket fd reverse-resolves to,
+   into hostbuf: 0, or -1 when it has none (the caller then reports the
+   numeric address, as CRuby does). A lookup may take seconds, so it runs
+   outside the world, as getaddrinfo does. */
+int sp_net_sock_host(int fd, int peer, char *hostbuf, int cap) {
+    struct sockaddr_storage ss;
+    socklen_t len = sizeof(ss);
+    int r = peer ? getpeername(fd, (struct sockaddr *)&ss, &len)
+                 : getsockname(fd, (struct sockaddr *)&ss, &len);
+    if (r != 0) return -1;
+    if (ss.ss_family != AF_INET && ss.ss_family != AF_INET6) return -1;
+#ifdef NI_NAMEREQD
+    sp_native_enter();
+    int rc = getnameinfo((struct sockaddr *)&ss, len, hostbuf, (socklen_t)cap, NULL, 0, NI_NAMEREQD);
+    sp_native_leave();
+    return rc == 0 ? 0 : -1;
+#else
+    /* no reverse lookup on this platform (wasm32-wasi): the numeric address */
+    (void)len; (void)hostbuf; (void)cap;
+    return -1;
+#endif
+}
+
 int sp_net_listen(int port, int reuseport) {
     if (port < 0 || port > 65535) return -1;
-    int fd = socket(AF_INET, SOCK_STREAM, 0);
+    int fd = sp_net_socket_cloexec(AF_INET, SOCK_STREAM, 0);
     if (fd < 0) return -1;
 
     int one = 1;
@@ -183,8 +329,13 @@ int sp_net_listen(int port, int reuseport) {
 
 #ifdef SP_THREADS
 int sp_sched_wait_io(int fd, short events);   /* lib/sp_sched.c: scheduler-aware I/O wait */
+int sp_sched_wait_io_unless(int fd, short events, const unsigned char *cancel);
 #endif
-int sp_net_accept(int sfd) {
+int sp_net_accept(int sfd) { return sp_net_accept_unless(sfd, NULL); }
+/* `cancel` is the listening handle's closed flag (or NULL): a close from
+   another thread ends the wait for a connection, where the retry after
+   EAGAIN parked again on a descriptor the close was waiting to release. */
+int sp_net_accept_unless(int sfd, const unsigned char *cancel) {
     struct sockaddr_in caddr;
     socklen_t clen = sizeof(caddr);
     int fd;
@@ -195,13 +346,14 @@ int sp_net_accept(int sfd) {
     sp_net_set_nonblock(sfd);
     for (;;) {
         if (sp_net_term_flag) return -1;
-        fd = accept(sfd, (struct sockaddr *)&caddr, &clen);
+        if (cancel && SP_ATOMIC_LOAD(cancel, __ATOMIC_RELAXED)) return -1;
+        fd = sp_net_accept_cloexec(sfd, (struct sockaddr *)&caddr, &clen);
         /* The connection fd is non-blocking too, so recv/send on it park the
            green thread (scheduler-aware) instead of blocking the OS worker. */
         if (fd >= 0) { sp_net_set_nodelay(fd); sp_net_set_nonblock(fd); return fd; }
         if (errno == EINTR) continue;
         if (errno == EAGAIN || errno == EWOULDBLOCK) {
-            if (!sp_sched_wait_io(sfd, POLLIN)) return -1;
+            if (!sp_sched_wait_io_unless(sfd, POLLIN, cancel)) return -1;
             continue;
         }
         return -1;
@@ -221,14 +373,14 @@ int sp_net_accept(int sfd) {
             pfds[1].fd = sp_net_sigpipe[0]; pfds[1].events = POLLIN; pfds[1].revents = 0;
             npfd = 2;
         }
-        int pr = poll(pfds, npfd, -1);
+        int pr = SP_SIG_BLOCKING(poll(pfds, npfd, -1));
         if (sp_net_term_flag) return -1;
         if (pr < 0) {
             if (errno == EINTR) continue;
             return -1;
         }
         if (!(pfds[0].revents & POLLIN)) continue;  /* woken by the self-pipe alone */
-        fd = accept(sfd, (struct sockaddr *)&caddr, &clen);
+        fd = sp_net_accept_cloexec(sfd, (struct sockaddr *)&caddr, &clen);
         if (fd >= 0) { sp_net_set_nodelay(fd); return fd; }
         if (errno == EINTR) {
             if (sp_net_term_flag) return -1;
@@ -244,7 +396,7 @@ int sp_net_accept_nb(int sfd) {
     socklen_t clen = sizeof(caddr);
     int fd;
     do {
-        fd = accept(sfd, (struct sockaddr *)&caddr, &clen);
+        fd = sp_net_accept_cloexec(sfd, (struct sockaddr *)&caddr, &clen);
     } while (fd < 0 && errno == EINTR);
     if (fd >= 0) sp_net_set_nodelay(fd);
     return fd;
@@ -255,7 +407,7 @@ int sp_net_accept_nb(int sfd) {
 /* An unbound UDP socket; #bind attaches it to a local address later. */
 int sp_net_udp_open(int family) {
     signal(SIGPIPE, SIG_IGN);
-    return socket(family > 0 ? family : AF_INET, SOCK_DGRAM, 0);
+    return sp_net_socket_cloexec(family > 0 ? family : AF_INET, SOCK_DGRAM, 0);
 }
 /* The family the fd was opened with. An address resolved for the other family
    cannot be bound or sent to, so every UDP call resolves within it. */
@@ -276,7 +428,7 @@ static struct addrinfo *sp_net_udp_resolve(int fd, const char *host, int port,
     char portbuf[16];
     snprintf(portbuf, sizeof(portbuf), "%d", port);
     *head = NULL;
-    if (getaddrinfo((host && *host) ? host : NULL, portbuf, &hints, head) != 0) return NULL;
+    if (sp_net_resolve((host && *host) ? host : NULL, portbuf, &hints, head) != 0) return NULL;
     return *head;
 }
 int sp_net_udp_bind(int fd, const char *host, int port) {SP_GC_ROOT_STR(host);
@@ -294,28 +446,29 @@ int sp_net_udp_connect(int fd, const char *host, int port) {SP_GC_ROOT_STR(host)
     struct addrinfo *head = NULL;
     struct addrinfo *ai = sp_net_udp_resolve(fd, host, port, 0, &head);
     if (!ai) return -1;
-    int rc = connect(fd, ai->ai_addr, ai->ai_addrlen);
+    int rc = SP_SIG_BLOCKING(connect(fd, ai->ai_addr, ai->ai_addrlen));
     freeaddrinfo(head);
     return rc;
 }
-int sp_net_udp_send_to(int fd, const char *data, int len, const char *host, int port) {SP_GC_ROOT_STR(data);SP_GC_ROOT_STR(host);
+int sp_net_udp_send_to(int fd, const char *data, int len, int flags, const char *host, int port) {SP_GC_ROOT_STR(data);SP_GC_ROOT_STR(host);
     if (fd < 0) return -1;
-    if (!host || !*host) return (int)send(fd, data, (size_t)len, 0);
+    if (!host || !*host) return (int)send(fd, data, (size_t)len, flags);
     struct addrinfo *head = NULL;
     struct addrinfo *ai = sp_net_udp_resolve(fd, host, port, 0, &head);
     if (!ai) return -1;
-    int rc = (int)sendto(fd, data, (size_t)len, 0, ai->ai_addr, ai->ai_addrlen);
+    int rc = (int)sendto(fd, data, (size_t)len, flags, ai->ai_addr, ai->ai_addrlen);
     freeaddrinfo(head);
     return rc;
 }
 /* Reads one datagram into `buf`; fills the sender's IP/port when asked.
-   Returns the byte count, or -1. */
+   Returns the byte count, or -1. A cap of 0 still takes the datagram (and
+   discards it), as recvfrom(2) does. */
 int sp_net_udp_recv_from(int fd, char *buf, int cap, char *ipbuf, int ipcap, int *port_out) {
-    if (fd < 0 || cap <= 0) return -1;
+    if (fd < 0 || cap < 0) return -1;
     struct sockaddr_storage ss;
     socklen_t sl = sizeof ss;
     ssize_t n;
-    do { n = recvfrom(fd, buf, (size_t)cap, 0, (struct sockaddr *)&ss, &sl); }
+    do { n = SP_SIG_BLOCKING(recvfrom(fd, buf, (size_t)cap, 0, (struct sockaddr *)&ss, &sl)); }
     while (n < 0 && errno == EINTR);
     if (n < 0) return -1;
     if (ipbuf && ipcap > 0) {
@@ -351,7 +504,7 @@ int sp_net_unix_listen(const char *path, int backlog) {SP_GC_ROOT_STR(path);
     struct sockaddr_un sa;
     if (sp_net_unix_addr(path, &sa) != 0) return -1;
     signal(SIGPIPE, SIG_IGN);
-    int fd = socket(AF_UNIX, SOCK_STREAM, 0);
+    int fd = sp_net_socket_cloexec(AF_UNIX, SOCK_STREAM, 0);
     if (fd < 0) return -1;
     if (bind(fd, (struct sockaddr *)&sa, sizeof sa) != 0) { close(fd); return -1; }
     if (listen(fd, backlog > 0 ? backlog : 128) != 0) { close(fd); return -1; }
@@ -361,9 +514,9 @@ int sp_net_unix_connect(const char *path) {SP_GC_ROOT_STR(path);
     struct sockaddr_un sa;
     if (sp_net_unix_addr(path, &sa) != 0) return -1;
     signal(SIGPIPE, SIG_IGN);
-    int fd = socket(AF_UNIX, SOCK_STREAM, 0);
+    int fd = sp_net_socket_cloexec(AF_UNIX, SOCK_STREAM, 0);
     if (fd < 0) return -1;
-    if (connect(fd, (struct sockaddr *)&sa, sizeof sa) != 0) { close(fd); return -1; }
+    if (SP_SIG_BLOCKING(connect(fd, (struct sockaddr *)&sa, sizeof sa)) != 0) { close(fd); return -1; }
     return fd;
 }
 /* The bound path of a UNIX socket (empty for an unnamed peer). */
@@ -387,26 +540,57 @@ int sp_net_gethostname(char *buf, int cap) {
 /* A connected pair of the given domain/type; fds[0]/fds[1] on success. */
 int sp_net_socketpair(int domain, int type, int protocol, int fds[2]) {
     signal(SIGPIPE, SIG_IGN);
+#ifdef SOCK_CLOEXEC
     return socketpair(domain > 0 ? domain : AF_UNIX,
-                      type > 0 ? type : SOCK_STREAM, protocol, fds);
+                      (type > 0 ? type : SOCK_STREAM) | SOCK_CLOEXEC, protocol, fds);
+#else
+    if (socketpair(domain > 0 ? domain : AF_UNIX,
+                   type > 0 ? type : SOCK_STREAM, protocol, fds) != 0) return -1;
+    sp_net_set_cloexec(fds[0]);
+    sp_net_set_cloexec(fds[1]);
+    return 0;
+#endif
 }
 int sp_net_socket(int domain, int type, int protocol) {
     signal(SIGPIPE, SIG_IGN);
-    return socket(domain, type, protocol);
+    return sp_net_socket_cloexec(domain, type, protocol);
 }
 /* getaddrinfo, one resolution at a time: `idx` selects the entry so the caller
    can walk them without owning the addrinfo list. Fills family/socktype/
    protocol/ip/port; returns 0 on success, -1 past the end or on failure. */
-int sp_net_getaddrinfo_at(const char *host, int port, int socktype, int idx,
+/* The first address +host+ resolves to, as text into ipbuf; getaddrinfo's
+   error text into *err on failure (IPSocket.getaddress). */
+int sp_net_getaddress(const char *host, char *ipbuf, int ipcap, const char **err) {
+    struct addrinfo hints, *res = NULL;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_UNSPEC;
+    int rc = sp_net_resolve((host && *host) ? host : NULL, NULL, &hints, &res);
+    if (rc != 0) { if (err) *err = gai_strerror(rc); return -1; }
+    int ok = -1;
+    ipbuf[0] = '\0';
+    if (res && res->ai_family == AF_INET) {
+        inet_ntop(AF_INET, &((struct sockaddr_in *)res->ai_addr)->sin_addr, ipbuf, (socklen_t)ipcap);
+        ok = 0;
+    }
+    else if (res && res->ai_family == AF_INET6) {
+        inet_ntop(AF_INET6, &((struct sockaddr_in6 *)res->ai_addr)->sin6_addr, ipbuf, (socklen_t)ipcap);
+        ok = 0;
+    }
+    freeaddrinfo(res);
+    if (ok != 0 && err) *err = "no address";
+    return ok;
+}
+
+int sp_net_getaddrinfo_at(const char *host, int port, int want_family, int socktype, int idx,
                           int *family, int *stype, int *proto,
                           char *ipbuf, int ipcap, int *port_out) {
     struct addrinfo hints, *res = NULL, *ai;
     memset(&hints, 0, sizeof(hints));
-    hints.ai_family   = AF_UNSPEC;
+    hints.ai_family   = want_family > 0 ? want_family : AF_UNSPEC;
     hints.ai_socktype = socktype > 0 ? socktype : 0;
     char portbuf[16];
     snprintf(portbuf, sizeof(portbuf), "%d", port);
-    if (getaddrinfo((host && *host) ? host : NULL, portbuf, &hints, &res) != 0) return -1;
+    if (sp_net_resolve((host && *host) ? host : NULL, portbuf, &hints, &res) != 0) return -1;
     int i = 0, rc = -1;
     for (ai = res; ai; ai = ai->ai_next, i++) {
         if (i != idx) continue;
@@ -453,6 +637,31 @@ int sp_net_shutdown(int fd, int how) {
     return shutdown(fd, how);
 }
 
+static double sp_net_now(void);
+static int sp_net_wait_io_until(int fd, short events, double deadline);
+
+/* A connect to a host that doesn't answer can take over a minute. With
+   threads we park until it finishes instead of holding the worker. A
+   signal doesn't cancel a connect, so on EINTR we wait for it too. */
+static int sp_net_connect_wait(int fd, const struct sockaddr *sa, socklen_t len) {
+#ifdef SP_THREADS
+    sp_net_set_nonblock(fd);
+#endif
+    if (SP_SIG_BLOCKING(connect(fd, sa, len)) == 0) return 0;
+    if (errno != EINPROGRESS && errno != EINTR) return -1;
+#ifdef SP_THREADS
+    if (!sp_sched_wait_io(fd, POLLOUT)) return -1;
+#else
+    struct pollfd pf = { fd, POLLOUT, 0 };
+    while (SP_SIG_BLOCKING(poll(&pf, 1, -1)) < 0) if (errno != EINTR) return -1;
+#endif
+    int err = 0;
+    socklen_t elen = sizeof err;
+    if (getsockopt(fd, SOL_SOCKET, SO_ERROR, &err, &elen) != 0) return -1;
+    if (err) { errno = err; return -1; }
+    return 0;
+}
+
 int sp_net_connect(const char *host, int port) {
     if (port < 0 || port > 65535) return -1;
     /* A client that never listens still needs SIGPIPE ignored: a write
@@ -466,28 +675,122 @@ int sp_net_connect(const char *host, int port) {
 
     char portbuf[16];
     snprintf(portbuf, sizeof(portbuf), "%d", port);
-    if (getaddrinfo(host, portbuf, &hints, &res) != 0) return -1;
+    if (sp_net_resolve(host, portbuf, &hints, &res) != 0) return -1;
 
+    /* A Thread#raise or #kill wakes a parked connect, but is held back
+       until the socket and the address list are freed. */
+    sp_fiber_defer_inject();
     int fd = -1;
-    struct addrinfo *ai;
-    for (ai = res; ai != NULL; ai = ai->ai_next) {
-        fd = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
+    for (struct addrinfo *ai = res; ai != NULL; ai = ai->ai_next) {
+        if (sp_fiber_current && sp_fiber_inject_pending(sp_fiber_current)) break;
+        fd = sp_net_socket_cloexec(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
         if (fd < 0) continue;
-        if (connect(fd, ai->ai_addr, ai->ai_addrlen) == 0) break;
+        if (sp_net_connect_wait(fd, ai->ai_addr, ai->ai_addrlen) == 0) break;
         close(fd);
         fd = -1;
     }
     freeaddrinfo(res);
+    sp_fiber_undefer_inject();
+    if (sp_fiber_current && sp_fiber_inject_pending(sp_fiber_current)) {
+        if (fd >= 0) { close(fd); fd = -1; }   /* even if it connected */
+        sp_fiber_fire_inject_if_pending();
+    }
     if (fd < 0) return -1;
 
     int one = 1;
     setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
-#ifdef SP_THREADS
-    /* Non-blocking so recv/send park the green thread instead of blocking the
-       worker (the connect itself stays blocking -- it completes promptly). */
-    sp_net_set_nonblock(fd);
-#endif
     return fd;
+}
+
+/* Socket#connect(sockaddr): an address already packed, connected as
+   sp_net_connect connects each one it resolves (parked with threads). */
+int sp_net_connect_sa(int fd, const void *sa, int len) {
+    return sp_net_connect_wait(fd, (const struct sockaddr *)sa, (socklen_t)len);
+}
+
+/* sp_net_connect_wait with a deadline (an sp_net_now() value). Returns 0 when
+   connected, -1 on failure, and -2 when the deadline passed first. The fd is
+   non-blocking for the connect in every build, since a blocking connect
+   would wait in the kernel past the deadline; the unthreaded build puts
+   blocking back afterwards, so the fd it returns is the kind sp_net_connect
+   returns there. */
+static int sp_net_connect_until(int fd, const struct sockaddr *sa, socklen_t len, double deadline) {
+    int flags = fcntl(fd, F_GETFL, 0);
+    if (flags < 0 || fcntl(fd, F_SETFL, flags | O_NONBLOCK) != 0) return -1;
+    int rc = -1;
+    if (SP_SIG_BLOCKING(connect(fd, sa, len)) == 0) {
+        rc = 0;
+    } else if (errno == EINPROGRESS || errno == EINTR) {
+        int w = sp_net_wait_io_until(fd, POLLOUT, deadline);
+        if (w == 0) {
+            rc = -2;
+        } else if (w > 0) {
+            int err = 0;
+            socklen_t elen = sizeof err;
+            if (getsockopt(fd, SOL_SOCKET, SO_ERROR, &err, &elen) == 0 && err == 0) rc = 0;
+            else if (err) errno = err;
+        }
+    }
+#ifndef SP_THREADS
+    if (rc == 0) fcntl(fd, F_SETFL, flags);
+#endif
+    return rc;
+}
+
+/* Per-worker, like sp_net_recv_timed_out. */
+static SP_TLS int sp_net_connect_timed_out;
+
+/* sp_net_connect with a deadline of timeout_s seconds (see sp_net.h). */
+int sp_net_connect_timeout(const char *host, int port, double timeout_s) {
+    sp_net_connect_timed_out = 0;
+    if (timeout_s < 0) return sp_net_connect(host, port);
+    if (port < 0 || port > 65535) return -1;
+    signal(SIGPIPE, SIG_IGN);
+
+    struct addrinfo hints, *res = NULL;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family   = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+
+    char portbuf[16];
+    snprintf(portbuf, sizeof(portbuf), "%d", port);
+    if (sp_net_resolve(host, portbuf, &hints, &res) != 0) return -1;
+
+    /* One deadline for every address the name resolves to, started after
+       the lookup, so a host with several addresses still answers in time. */
+    double deadline = sp_net_now() + timeout_s;
+    sp_fiber_defer_inject();
+    int fd = -1;
+    for (struct addrinfo *ai = res; ai != NULL; ai = ai->ai_next) {
+        if (sp_fiber_current && sp_fiber_inject_pending(sp_fiber_current)) break;
+        if (sp_net_now() >= deadline) { sp_net_connect_timed_out = 1; break; }
+        fd = sp_net_socket_cloexec(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
+        if (fd < 0) continue;
+        int rc = sp_net_connect_until(fd, ai->ai_addr, ai->ai_addrlen, deadline);
+        if (rc == 0) break;
+        close(fd);
+        fd = -1;
+        if (rc == -2) { sp_net_connect_timed_out = 1; break; }
+    }
+    freeaddrinfo(res);
+    sp_fiber_undefer_inject();
+    if (sp_fiber_current && sp_fiber_inject_pending(sp_fiber_current)) {
+        if (fd >= 0) { close(fd); fd = -1; }
+        sp_fiber_fire_inject_if_pending();
+    }
+    if (fd < 0) return -1;
+    sp_net_connect_timed_out = 0;
+
+    int one = 1;
+    setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
+    return fd;
+}
+
+/* Whether this worker's last timed connect gave up on its deadline; clears it. */
+int sp_net_take_connect_timeout(void) {
+    int t = sp_net_connect_timed_out;
+    sp_net_connect_timed_out = 0;
+    return t;
 }
 
 int sp_net_close(int fd) {
@@ -521,7 +824,7 @@ static int sp_net_wait_io(int fd, short events) {
         if (sp_net_term_flag) return 0;
         struct pollfd pf;
         pf.fd = fd; pf.events = events; pf.revents = 0;
-        int pr = poll(&pf, 1, 1000);
+        int pr = SP_SIG_BLOCKING(poll(&pf, 1, 1000));
         if (pr > 0) return 1;
         if (pr == 0) continue;            /* timeout: recheck term, keep waiting */
         if (errno == EINTR) continue;
@@ -530,23 +833,7 @@ static int sp_net_wait_io(int fd, short events) {
 #endif
 }
 
-int sp_net_write_str(int fd, const char *s) {
-    size_t len = strlen(s);
-    size_t off = 0;
-    while (off < len) {
-        ssize_t n = send(fd, s + off, len - off, 0);
-        if (n <= 0) {
-            if (n < 0 && errno == EINTR) continue;
-            if (n < 0 && (errno == EAGAIN || errno == EWOULDBLOCK) && sp_net_wait_io(fd, POLLOUT)) continue;
-            return -1;
-        }
-        off += (size_t)n;
-    }
-    return 0;
-}
-
-int sp_net_write_bytes(int fd, const char *data, int n) {
-    size_t total = (n < 0) ? 0 : (size_t)n;
+static int sp_net_send_all(int fd, const char *data, size_t total) {
     size_t off = 0;
     while (off < total) {
         ssize_t w = send(fd, data + off, total - off, 0);
@@ -558,6 +845,14 @@ int sp_net_write_bytes(int fd, const char *data, int n) {
         off += (size_t)w;
     }
     return 0;
+}
+
+int sp_net_write_str(int fd, const char *s) {
+    return sp_net_send_all(fd, s, strlen(s));
+}
+
+int sp_net_write_bytes(int fd, const char *data, int n) {
+    return sp_net_send_all(fd, data, (n < 0) ? 0 : (size_t)n);
 }
 
 /* Write what the socket will take right now and answer how much that was,
@@ -613,7 +908,7 @@ const char *sp_net_recv_some(int fd, int maxlen) {
             sp_net_recv_buf[0] = '\0';
             return sp_net_recv_buf;
         }
-        n = recv(fd, sp_net_recv_buf, (size_t)maxlen, 0);
+        n = SP_SIG_BLOCKING(recv(fd, sp_net_recv_buf, (size_t)maxlen, 0));
         if (n >= 0) break;
         if (errno == EINTR) continue;   /* e.g. SIGCHLD in a prefork server */
         /* Non-blocking fd would-block: wait for readability and retry rather
@@ -628,6 +923,99 @@ const char *sp_net_recv_some(int fd, int maxlen) {
     return sp_net_recv_buf;
 }
 
+/* A deadline for sp_net_recv_some_timeout, on a clock that does not jump. */
+static double sp_net_now(void) {
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (double)ts.tv_sec + (double)ts.tv_nsec / 1e9;
+}
+
+#ifdef SP_THREADS
+int sp_sched_wait_io_timeout(int fd, short events, double timeout_s);
+#endif
+
+/* sp_net_wait_io until `deadline` (an sp_net_now() value). Returns 1 to retry
+   the syscall, 0 when the deadline passed first, -1 to give up (term
+   requested, poll error, or a deferred Thread#raise/#kill pending). Rechecks
+   the clock after every wake, so an early return from the wait only waits
+   again for what is left. */
+static int sp_net_wait_io_until(int fd, short events, double deadline) {
+    for (;;) {
+        if (sp_net_term_flag) return -1;
+        /* A deferred inject wakes the park without readiness, and the park
+           returns at once while one is pending: give up so the caller can
+           clean up and let it fire, rather than spin until the deadline. */
+        if (sp_fiber_current && sp_fiber_inject_pending(sp_fiber_current)) return -1;
+        double left = deadline - sp_net_now();
+        if (left <= 0) return 0;
+#ifdef SP_THREADS
+        /* Park with the deadline, as sp_net_wait_io parks without one. */
+        if (sp_sched_wait_io_timeout(fd, events, left)) return 1;
+#else
+        /* 1s slices, so a shutdown still breaks the wait as in sp_net_wait_io. */
+        int ms = left >= 1.0 ? 1000 : (int)(left * 1000.0) + 1;
+        struct pollfd pf;
+        pf.fd = fd; pf.events = events; pf.revents = 0;
+        int pr = SP_SIG_BLOCKING(poll(&pf, 1, ms));
+        if (pr > 0) return 1;
+        if (pr < 0 && errno != EINTR) return -1;
+#endif
+    }
+}
+
+/* Per-call "do not block" for recv(2); 0 where the flag is missing (WASI has
+ * none), and the deadline then holds only through the wait below. */
+#ifdef MSG_DONTWAIT
+#define SP_NET_MSG_DONTWAIT MSG_DONTWAIT
+#else
+#define SP_NET_MSG_DONTWAIT 0
+#endif
+/* Per-worker, like the buffer it describes: a green thread is pinned to its
+ * worker, so it reads the flag its own call set. */
+static SP_TLS int sp_net_recv_timed_out;
+/* sp_net_recv_some with a deadline of timeout_s seconds (see sp_net.h). */
+const char *sp_net_recv_some_timeout(int fd, int maxlen, double timeout_s) {
+    sp_net_recv_timed_out = 0;
+    if (timeout_s < 0) return sp_net_recv_some(fd, maxlen);
+    if (!sp_net_recv_buf && !(sp_net_recv_buf = (char *)malloc(SP_NET_BUFSIZE)))
+        return "";
+    if (maxlen <= 0 || maxlen >= SP_NET_BUFSIZE) maxlen = SP_NET_BUFSIZE - 1;
+    double deadline = sp_net_now() + timeout_s;
+    ssize_t n;
+    for (;;) {
+        if (sp_net_term_flag) { n = 0; break; }
+        /* MSG_DONTWAIT: the deadline holds on a blocking fd too, where a
+           plain recv would wait in the kernel with no way out. */
+        n = SP_SIG_BLOCKING(recv(fd, sp_net_recv_buf, (size_t)maxlen, SP_NET_MSG_DONTWAIT));
+        if (n >= 0) break;
+        n = 0;
+        /* A signal storm must not outlast the deadline. */
+        if (errno == EINTR) {
+            if (sp_net_now() < deadline) continue;
+            sp_net_recv_timed_out = 1;
+            break;
+        }
+        /* A wait that answers ready (1) retries the recv even if the deadline
+           has since passed: the bytes arrived in time, so they are returned. */
+        if (errno == EAGAIN || errno == EWOULDBLOCK) {
+            int w = sp_net_wait_io_until(fd, POLLIN, deadline);
+            if (w > 0) continue;
+            if (w == 0) sp_net_recv_timed_out = 1;
+        }
+        break;
+    }
+    sp_ffi_bin_len = (int)n;
+    sp_net_recv_buf[n] = '\0';
+    return sp_net_recv_buf;
+}
+
+/* Whether this worker's last timed recv gave up on its deadline; clears it. */
+int sp_net_take_recv_timeout(void) {
+    int t = sp_net_recv_timed_out;
+    sp_net_recv_timed_out = 0;
+    return t;
+}
+
 static SP_TLS char *sp_net_recv_all_buf;   /* per-worker, see sp_net_recv_buf */
 const char *sp_net_recv_all(int fd, int max_bytes) {
     if (!sp_net_recv_all_buf && !(sp_net_recv_all_buf = (char *)malloc(SP_NET_BUFSIZE)))
@@ -636,7 +1024,7 @@ const char *sp_net_recv_all(int fd, int max_bytes) {
     int total = 0;
     while (total < max_bytes) {
         if (sp_net_term_flag) break;
-        ssize_t n = recv(fd, sp_net_recv_all_buf + total, (size_t)(max_bytes - total), 0);
+        ssize_t n = SP_SIG_BLOCKING(recv(fd, sp_net_recv_all_buf + total, (size_t)(max_bytes - total), 0));
         if (n < 0) {
             if (errno == EINTR) continue;   /* retry rather than truncate */
             if ((errno == EAGAIN || errno == EWOULDBLOCK) && sp_net_wait_io(fd, POLLIN)) continue;
@@ -705,7 +1093,7 @@ int sp_net_poll_run(int timeout_ms) {
         /* Don't retry into a pending shutdown -- surface it as -1 so a
          * blocked scheduler tick can break and run shutdown hooks. */
         if (sp_net_term_flag) return -1;
-        r = poll(sp_net_poll_set, sp_net_poll_n, timeout_ms);
+        r = SP_SIG_BLOCKING(poll(sp_net_poll_set, sp_net_poll_n, timeout_ms));
         if (r >= 0) return r;
         if (errno == EINTR) {
             if (sp_net_term_flag) return -1;
@@ -835,7 +1223,7 @@ int sp_net_poll_wait(int timeout_ms) {
         /* Don't retry into a pending shutdown -- surface it as -1 so a blocked
          * tick can break and run shutdown hooks, as sp_net_poll_run does. */
         if (sp_net_term_flag) return -1;
-        r = poll(sp_net_reg, (nfds_t)sp_net_reg_n, timeout_ms);
+        r = SP_SIG_BLOCKING(poll(sp_net_reg, (nfds_t)sp_net_reg_n, timeout_ms));
         if (r >= 0) break;
         if (errno == EINTR) {
             if (sp_net_term_flag) return -1;
@@ -898,7 +1286,7 @@ const char *sp_net_shell_capture(const char *cmd, int max_bytes) {
     if (!fp) return sp_net_shell_buf;
     size_t total = 0;
     while (total < (size_t)max_bytes) {
-        size_t n = fread(sp_net_shell_buf + total, 1, (size_t)max_bytes - total, fp);
+        size_t n = SP_SIG_BLOCKING(fread(sp_net_shell_buf + total, 1, (size_t)max_bytes - total, fp));
         if (n == 0) break;
         total += n;
     }
@@ -927,7 +1315,7 @@ int sp_net_pack_sockaddr_in(const char *host, int port, void *out, int cap) {
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
-    if (getaddrinfo((host && *host) ? host : NULL, portbuf, &hints, &res) != 0 || !res)
+    if (sp_net_resolve((host && *host) ? host : NULL, portbuf, &hints, &res) != 0 || !res)
         return -1;
     int len = (int)res->ai_addrlen;
     if (len > cap) { freeaddrinfo(res); return -1; }
@@ -955,16 +1343,43 @@ int sp_net_pack_sockaddr_un(const char *path, void *out, int cap) {
 
 /* Read a packed sockaddr back: the port is the return, the numeric address
  * goes into `ipbuf`. -1 when the buffer is not a sockaddr this understands. */
+/* The path a packed AF_UNIX sockaddr names, into pathbuf: its length, -1
+   when the bytes are not an AF_UNIX sockaddr, -2 when they are longer than a
+   struct sockaddr_un. Only trailing NULs are dropped, so an abstract name
+   ("\0name") keeps its leading NUL. */
+int sp_net_unpack_sockaddr_un(const void *sa, int salen, char *pathbuf, int cap) {
+    int off = (int)offsetof(struct sockaddr_un, sun_path);
+    if (!sa || salen < off || !pathbuf || cap <= 0) return -1;
+    /* the family read out of the bytes, which are a String's and need not
+       be aligned for the struct (as in sp_net_unpack_sockaddr_in) */
+    sa_family_t fam;
+    memcpy(&fam, (const char *)sa + offsetof(struct sockaddr, sa_family), sizeof fam);
+    if (fam != AF_UNIX) return -1;
+    if (salen > (int)sizeof(struct sockaddr_un)) return -2;
+    const char *p = (const char *)sa + off;
+    int n = salen - off;
+    while (n > 0 && p[n - 1] == 0) n--;
+    if (n >= cap) n = cap - 1;
+    memcpy(pathbuf, p, (size_t)n);
+    pathbuf[n] = 0;
+    return n;
+}
+
 int sp_net_unpack_sockaddr_in(const void *sa, int salen, char *ipbuf, int cap) {
     if (!sa || salen < (int)sizeof(struct sockaddr) || !ipbuf || cap <= 0) return -1;
-    const struct sockaddr *s = (const struct sockaddr *)sa;
+    /* The bytes are a String's, at no particular alignment: read as the
+       structs only once copied into storage aligned for them. */
+    struct sockaddr_storage ss;
+    memset(&ss, 0, sizeof ss);
+    memcpy(&ss, sa, salen < (int)sizeof ss ? (size_t)salen : sizeof ss);
+    const struct sockaddr *s = (const struct sockaddr *)&ss;
     if (s->sa_family == AF_INET && salen >= (int)sizeof(struct sockaddr_in)) {
-        const struct sockaddr_in *v4 = (const struct sockaddr_in *)sa;
+        const struct sockaddr_in *v4 = (const struct sockaddr_in *)&ss;
         if (!inet_ntop(AF_INET, &v4->sin_addr, ipbuf, (socklen_t)cap)) return -1;
         return (int)ntohs(v4->sin_port);
     }
     if (s->sa_family == AF_INET6 && salen >= (int)sizeof(struct sockaddr_in6)) {
-        const struct sockaddr_in6 *v6 = (const struct sockaddr_in6 *)sa;
+        const struct sockaddr_in6 *v6 = (const struct sockaddr_in6 *)&ss;
         if (!inet_ntop(AF_INET6, &v6->sin6_addr, ipbuf, (socklen_t)cap)) return -1;
         return (int)ntohs(v6->sin6_port);
     }

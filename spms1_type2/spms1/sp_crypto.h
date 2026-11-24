@@ -73,6 +73,31 @@ const char *sp_crypto_sha256_hex(const char *msg);
 const char *sp_crypto_sha256_bin(const char *msg);
 const char *sp_crypto_sha1_bin(const char *msg);
 
+/* MD5(msg) -> 32-char lowercase hex / the raw 16 digest bytes. Legacy hash,
+ * bound for Digest::MD5 (Active Storage's direct-upload checksum). Do NOT
+ * use for new security designs. */
+const char *sp_crypto_md5_hex(const char *msg);
+const char *sp_crypto_md5_bin(const char *msg);
+
+/* Digest::X.base64digest: strict base64 of the raw digest (24, 28 and 44
+ * chars, `=` padded). */
+const char *sp_crypto_md5_b64(const char *msg);
+const char *sp_crypto_sha1_b64(const char *msg);
+const char *sp_crypto_sha256_b64(const char *msg);
+
+/* Incremental hashing, for a digest object fed in pieces. The state is a
+ * binary String of a fixed size (104, 92 and 88 bytes): the chaining value,
+ * the byte count and the partial block. An empty String is the initial
+ * state. `_update` answers the state after `chunk`; `_final` answers the raw
+ * digest of what the state has seen and leaves it usable. Both lengths ride
+ * sp_ffi_bin_len, as for sp_crypto_sha256_bin. */
+const char *sp_crypto_sha256_update(const char *state, const char *chunk);
+const char *sp_crypto_sha256_final(const char *state);
+const char *sp_crypto_sha1_update(const char *state, const char *chunk);
+const char *sp_crypto_sha1_final(const char *state);
+const char *sp_crypto_md5_update(const char *state, const char *chunk);
+const char *sp_crypto_md5_final(const char *state);
+
 /* Sec-WebSocket-Accept = base64(SHA-1(client_key + GUID)) per
  * RFC 6455 §1.3. Returns a 28-char string ending in `=`. The
  * only modern use case for SHA-1 in this codebase; sugars the
@@ -108,7 +133,9 @@ const char *sp_crypto_hmac_sha1_hex(const char *key, const char *msg);
 
 /* Base64URL (RFC 4648 §5, no padding) encode/decode. Max input
  * length ~12 KiB (encode) / ~16 KiB (decode), bump the buffer in
- * sp_crypto.c if your callers need more. */
+ * sp_crypto.c if your callers need more. The decode answers bytes that
+ * may hold a NUL and sets sp_ffi_bin_len to their count (0 on bad input):
+ * bind it `:binstr`, as a `:str` return stops at the first NUL. */
 const char *sp_crypto_b64url_encode(const char *src);
 const char *sp_crypto_b64url_decode(const char *src);
 

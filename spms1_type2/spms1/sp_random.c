@@ -8,6 +8,7 @@
 #include <math.h>    /* isnan/isinf for the EDOM domain checks */   /* sp_str_alloc / sp_str_set_len / sp_float_to_s / sp_raise_cls / sp_gc_alloc */
 #include "sp_format.h"  /* sp_Range_inspect */
 #include "sp_str.h"     /* sp_sprintf (defined in the generated TU) */
+#include "sp_range.h"   /* sp_range_int_only */
 
 /* PCG-XSH-RR constants (64-bit state, 32-bit output). */
 #define SP_PCG_MULT 6364136223846793005ULL
@@ -83,7 +84,7 @@ sp_float sp_krand_float(void) {
    fiber in sp_fiber.c: the guard array is exactly one alignment unit, so its
    last byte always directly precedes the struct with no padding in between. */
 static SP_TLS struct { char guard[_Alignof(sp_Random)]; sp_Random r; } sp_random_default_box
-    = { .guard = { [_Alignof(sp_Random) - 1] = (char)0xfd } };
+    = { .guard = { [_Alignof(sp_Random) - 1] = (char)SP_STATIC_GUARD } };
 #define sp_random_default (sp_random_default_box.r)
 uint64_t sp_random_next(sp_Random *r) {SP_GC_ROOT(r);
   if (r == &sp_random_default) return sp_krand_next();
@@ -96,12 +97,21 @@ sp_Random *sp_Random_new(sp_int seed) {
   r->seed = seed;
   return r;
 }
+/* Random#dup / #clone: a distinct generator that continues from the same state. */
+sp_Random *sp_Random_dup(sp_Random *r) {
+  if (!r) return NULL;   /* nil.dup is nil */
+  SP_GC_ROOT(r);
+  sp_Random *d = (sp_Random *)sp_gc_alloc(sizeof(sp_Random), NULL, NULL);
+  *d = *r;
+  return d;
+}
 /* Random.new(Float): CRuby truncates the float to an integer seed. A plain
    (sp_int) cast is UB when the truncated value is out of range, so seed from
    the in-range truncation when it fits and from the raw float bits otherwise
    -- always deterministic (same float -> same stream), which is the actual
    contract (the exact sequence is not MT19937 anyway). */
 sp_Random *sp_Random_new_float(sp_float f) {
+  if (!isfinite(f)) (void)sp_float_to_i_checked(f);
   uint64_t s;
   if (f >= -9.2233720368547758e18 && f < 9.2233720368547758e18) {
     s = (uint64_t)(int64_t)f;
@@ -138,6 +148,10 @@ sp_Random *sp_Random_new_auto(void) {
 }
 /* Random#rand(Range): an integer in the (int-endpoint) range, empty raises. */
 sp_int sp_Random_rand_range(sp_Random *r, sp_Range rg) {SP_GC_ROOT(r);
+  sp_range_int_only(rg, "Random#rand");   /* (1..2.5): CRuby answers a Float */
+  /* an open side has no span: CRuby's Errno::EDOM */
+  if (rg.nobeg || rg.noend)
+    sp_raise_cls("Errno::EDOM", "Numerical argument out of domain");
   sp_int lo = rg.first, hi = rg.excl ? rg.last - 1 : rg.last;
   if (hi < lo) sp_raise_cls("ArgumentError", sp_sprintf("invalid argument - %s", sp_Range_inspect(&rg)));
   if (!r) return lo;
@@ -169,7 +183,7 @@ sp_float sp_Random_rand_float_bound(sp_Random *r, sp_float bound) {SP_GC_ROOT(r)
 sp_Random *sp_random_default_get(void) {
   return &sp_random_default;
 }
-/* Random#bytes(n) — n random bytes as a String, tagged ASCII-8BIT as CRuby
+/* Random#bytes(n) -- n random bytes as a String, tagged ASCII-8BIT as CRuby
    does. sp_str_set_len alone was not enough: #length counts UTF-8 units, and a
    short draw is valid UTF-8 by chance often enough that Random.bytes(8).length
    answered less than 8 about three times in a thousand. That is #3474, which
@@ -224,6 +238,9 @@ const char *sp_Random_urandom(sp_int n) {
 /* Random#inspect / #to_s: CRuby's default object rendering (the seed is not
    part of it; the address matches CRuby's zero-padded 16-digit form). */
 const char *sp_Random_inspect(sp_Random *r) {SP_GC_ROOT(r);
+  /* and its instance variables, as CRuby lists an object's */
+  void *t = sp_ivtbl_inspect_fn ? sp_ivtbl_get(r) : NULL;
+  if (t) return sp_sprintf("#<Random:0x%016llx%s>", (unsigned long long)(uintptr_t)r, sp_ivtbl_inspect_fn(t));
   return sp_sprintf("#<Random:0x%016llx>", (unsigned long long)(uintptr_t)r);
 }
 /* Kernel#srand: seed the shared Kernel stream and remember the previous

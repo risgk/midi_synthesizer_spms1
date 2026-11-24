@@ -1,7 +1,7 @@
 #!/bin/sh
 # Keeps the Spinel runtime in the sketch folder in step with a Spinel release.
 #
-# The runtime files (sp_*.[ch], re_*.[ch], spinel_rt.h, mruby_shim.h) are all of Spinel's lib
+# The runtime files (sp_*.[ch], re_*.[ch], unicase.[ch], spinel_rt.h, mruby_shim.h) are all of Spinel's lib
 # (lib/*.[ch] and lib/regexp/*.[ch]) as released. Each one changed for the MCU sits next to its
 # released copy, "NAME.orig", and the changes are kept as one patch, "spinel_mcu/spinel_mcu.patch".
 # The MCU's own additions live in "spinel_rt_mcu_*.h", which spinel_rt.h includes, so the patch
@@ -56,7 +56,7 @@ readme_release() {
 
 # The runtime files of the sketch, without the .orig copies and the derived files
 vendored() {
-  for f in sp_*.c sp_*.h re_*.c re_*.h spinel_rt.h mruby_shim.h; do
+  for f in sp_*.c sp_*.h re_*.c re_*.h unicase.c unicase.h spinel_rt.h mruby_shim.h; do
     [ -f "$f" ] || continue
     case " $DERIVED " in *" $f="*) continue ;; esac
     echo "$f"
