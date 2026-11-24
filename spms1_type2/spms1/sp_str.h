@@ -1,6 +1,7 @@
 #ifndef SP_STR_H
 #define SP_STR_H
-/* sp_str.h -- cold String transforms compiled once in lib/sp_str.c.
+/* sp_str.h -- cold String transforms compiled once in lib/sp_str.c and
+ * lib/sp_str_cold.c.
  *
  * These are leaf `const char*` operations (case, strip, split-family,
  * partition, dump/undump, concat, repeat, ...) that depend only on the
@@ -12,8 +13,11 @@
  * sp_sprintf / sp_raise_cls are provided by the generated TU and resolved
  * at the final link (same as lib/sp_core.c). */
 #include "sp_array.h"   /* sp_StrArray, sp_IntArray + sp_alloc.h / sp_gc.h / sp_types.h */
+#ifdef SP_ONE_STRING
+#include "sp_string.h"   /* sp_String_new_shared, behind SP_SEF (sp_str_split_push) */
+#endif
 
-const char *sp_sprintf(const char *fmt, ...);  /* defined in the generated TU */
+const char *sp_sprintf(const char *fmt, ...) SP_PRINTF_FORMAT(1, 2);  /* defined in the generated TU */
 
 /* ---- hot UTF-8 + length-cache inline core (relocated from spinel_rt.h;
    each generated TU still inlines these identically). Length-cache state
@@ -32,7 +36,7 @@ static inline int sp_utf8_encode(uint32_t cp,char*out){if(cp<0x80){out[0]=(char)
    it a scan loop over a built-up string rewalked the whole buffer per index. */
 static inline int sp_str_cacheable(const char *s) {
   unsigned char m = ((const unsigned char *)s)[-1];
-  return m == 0xfe || m == 0xfc || m == 0xff || m == 0xf1 || m == 0xfd || m == 0xfb;
+  return m == 0xfe || m == 0xfc || m == 0xff || m == 0xf1 || m == 0xfd || m == 0xfb || m == 0xfa || m == 0xf8;
 }
 /* Byte-exact comparison of two heap strings. strcmp stops at the first NUL,
    so two strings that differ only after one compared equal and sorted equal --
@@ -61,17 +65,20 @@ static inline void sp_str_split_push(sp_StrArray*a,const char*p,size_t n){
   /* record the real length: alloc_raw leaves it unset, so a piece holding an
      embedded NUL would answer strlen and read short */
   sp_str_set_len(r,n);
-  sp_StrArray_push(a,r);
+  sp_StrArray_push_e(a,SP_SEF(r));
 }
 
+const char *sp_bytestr(const char *hay, size_t hn, const char *need, size_t nn);   /* byte-wise substring search; lib/sp_str.c, also used by lib/sp_str_cold.c */
 int sp_utf8_set_has(const uint32_t*cps,size_t n,uint32_t cp);
 uint32_t sp_uc_toupper(uint32_t cp);
 uint32_t sp_uc_tolower(uint32_t cp);
 sp_int sp_str_casecmp(const char*a,const char*b);
+sp_bool sp_str_casecmp_p(const char*a,const char*b);
 sp_bool sp_str_valid_encoding(const char*s);
 const char*sp_str_field(const char*s,const char*sep,sp_int n);
 sp_int sp_str_field_count(const char*s,const char*sep);
 const char*sp_str_concat(const char*a,const char*b);
+const char*sp_str_append_bytes(const char*a,const char*b);
 const char*sp_str_concat3(const char*a,const char*b,const char*c);
 const char*sp_str_concat4(const char*a,const char*b,const char*c,const char*d);
 const char*sp_str_concat_arr(const char *const *parts,int n);
@@ -87,10 +94,19 @@ const char*sp_str_upcase_ascii(const char*s);
 const char*sp_str_downcase_ascii(const char*s);
 const char*sp_str_swapcase_ascii(const char*s);
 const char*sp_str_capitalize_ascii(const char*s);
+const char*sp_str_upcase_turkic(const char*s);
+const char*sp_str_downcase_turkic(const char*s);
+const char*sp_str_swapcase_turkic(const char*s);
+const char*sp_str_capitalize_turkic(const char*s);
+const char*sp_str_upcase_turkic_sym(const char*s);
+const char*sp_str_downcase_turkic_sym(const char*s);
+const char*sp_str_swapcase_turkic_sym(const char*s);
+const char*sp_str_capitalize_turkic_sym(const char*s);
 const char*sp_str_dump(const char*s);
 const char*sp_str_delete_prefix(const char*s,const char*p);
 const char*sp_str_substr(const char*s,sp_int start,sp_int len);
 const char *sp_str_append_grow(const char *s, const char *t);
+const char *sp_str_append_grow_n(const char *s, const char *t, size_t lb);   /* the first lb bytes of t */
 const char*sp_str_delete_suffix(const char*s,const char*p);
 const char*sp_str_strip(const char*s);
 const char*sp_str_chomp(const char*s);
@@ -111,9 +127,17 @@ const char*sp_str_byteslice(const char*s,sp_int start,sp_int len);
 const char*sp_str_byteslice1(const char*s,sp_int i);
 const char*sp_str_byteslice_range(const char*s,sp_int lo,sp_int hi,int excl,int lo_none,int hi_none);
 const char*sp_str_bytesplice(const char*s,sp_int start,sp_int len,const char*val);
+const char*sp_str_bytesplice5(const char*s,sp_int start,sp_int len,const char*val,sp_int vstart,sp_int vlen);
 int sp_str_ascii_only(const char*s);
+int sp_str_enc_step(int state, const char *acc, size_t acc_len, const char *part, size_t part_len, int part_bin);
+/* the common step inline: a part in the encoding so far keeps it */
+static inline int sp_str_enc_step_i(int state, const char *acc, size_t acc_len, const char *part, size_t part_len, int part_bin) {
+  if (state == part_bin) return state;
+  return sp_str_enc_step(state, acc, acc_len, part, part_len, part_bin);
+}
 const char*sp_str_format_strarr(const char*fmt,sp_StrArray*a);
 const char*sp_str_sub(const char*s,const char*pat,const char*rep);
+const char*sp_str_remove_first(const char*s,const char*pat);
 const char*sp_str_capitalize(const char*s);
 const char*sp_str_repeat(const char*s,sp_int n);
 sp_IntArray*sp_str_bytes(const char*s);
@@ -121,20 +145,43 @@ const char *sp_str_crypt(const char *s, const char *salt);
 const char*sp_str_lstrip(const char*s);
 const char*sp_str_rstrip(const char*s);
 const char*sp_str_dup(const char*s);
+/* A builtin's answer that is its own String operand, unchanged (a tr with
+   nothing to translate, a sub with no match): CRuby answers a new String.
+   Under the one-String mode the operand's bytes may be a handle's own
+   payload (marker 0xfd), which a sink would take as that handle, so the
+   answer is a copy of it; any other bytes are the fresh String they were. */
+#ifdef SP_ONE_STRING
+static inline const char*sp_str_one_answer(const char*s){return s&&((const unsigned char*)s)[-1]==0xfd?sp_str_dup(s):s;}
+#define SP_ONE_ANSWER(s) sp_str_one_answer(s)
+#else
+#define SP_ONE_ANSWER(s) (s)
+#endif
 const char *sp_plain_char(unsigned char c);
 const char *sp_bin_char(unsigned char c);
 const char*sp_str_b(const char*s);
 
-/* ---- utf8-dependent cold transforms (lib/sp_str.c) ---- */
+/* ---- utf8-dependent cold transforms (lib/sp_str.c, lib/sp_str_cold.c) ---- */
 /* nil-receiver raise: a nullable string carries nil as NULL, and CRuby
    answers NoMethodError. The bare primitives below stay total over NULL
    (runtime internals pass legitimately-nil elements); the _m/_p variants
    carry Ruby receiver semantics at method call sites. */
 SP_NORETURN SP_COLD void sp_nil_recv(const char *meth);
 sp_int sp_str_length_m(const char *s);
+#ifdef SP_ONE_STRING
+/* String#length answered inline for a String whose header knows its width
+   (binary, or 7-bit once a scan proved it): a String is a handle in this
+   mode, so a loop bound on one is measured on every test, where the default
+   build reads it once ahead of the loop (bm_template: 5M calls) */
+static inline sp_int sp_str_length_mi(const char *s) {
+  size_t fb;
+  if (s && sp_str_fixed_width(s, &fb)) return (sp_int)fb;
+  return sp_str_length_m(s);
+}
+#endif
 sp_int sp_str_bytesize_m(const char *s);
 sp_bool sp_str_empty_p(const char *s);
 const char *sp_str_plus(const char *a, const char *b);
+const char *sp_str_plus_lit(const char *a, const char *lit, size_t ll);
 sp_int sp_str_count_chars(const char *s, size_t bl);
 sp_int sp_str_length(const char*s);
 sp_int sp_str_ord(const char*s);
@@ -142,27 +189,33 @@ size_t sp_utf8_byte_offset(const char*s,sp_int char_idx);
 uint32_t*sp_utf8_decode_all(const char*s,size_t*out_n);
 uint32_t*sp_utf8_decode_charset(const char*s,size_t*out_n);
 uint32_t*sp_utf8_decode_charset_n(const char*s,size_t bl,size_t*out_n);
+void sp_str_check_valid(const char*s);
 void sp_str_split_into(sp_StrArray*a,const char*s,const char*sep);
 const char*sp_str_undump(const char*s);
 const char*sp_str_succ_impl(const char*s);
 const char*sp_str_succ(const char*s);
+const char*sp_str_succ_n(const char*s,sp_int n);
 sp_StrArray*sp_str_split(const char*s,const char*sep);
 sp_StrArray*sp_str_split_drop_trailing(const char*s,const char*sep);
 sp_StrArray*sp_str_split_limit(const char*s,const char*sep,sp_int n);
 sp_StrArray*sp_str_split_ws(const char*s);
 sp_StrArray*sp_str_split_ws_limit(const char*s,sp_int n);
 sp_StrArray*sp_str_scan(const char*s,const char*pat);
+sp_int sp_str_scan_at(const char*s,const char*pat,sp_int pos);
 const char*sp_str_gsub(const char*s,const char*pat,const char*rep);
 sp_int sp_str_index(const char*s,const char*sub);
 sp_int sp_str_index_from(const char*s,const char*sub,sp_int start);
 sp_int sp_str_rindex(const char*s,const char*sub);
-sp_int sp_str_rindex_from(const char*s,const char*sub,sp_int pos);
-sp_int sp_str_byteindex(const char*s,const char*sub);
-sp_int sp_str_byteindex_from(const char*s,const char*sub,sp_int start);
-sp_int sp_str_byterindex(const char*s,const char*sub);
-sp_int sp_str_byterindex_from(const char*s,const char*sub,sp_int pos);
+/* the position, nil on a miss */
+sp_oint sp_str_rindex_from(const char*s,const char*sub,sp_int pos);
+sp_oint sp_str_byteindex(const char*s,const char*sub);
+sp_oint sp_str_byteindex_from(const char*s,const char*sub,sp_int start);
+sp_oint sp_str_byterindex(const char*s,const char*sub);
+sp_oint sp_str_byterindex_from(const char*s,const char*sub,sp_int pos);
 const char*sp_str_sub_range(const char*s,sp_int start,sp_int len);
 const char*sp_str_char_at_or_nil(const char*s,sp_int i);
+size_t sp_str_char_width(const char*s,size_t blen,size_t at);
+const char*sp_str_char_step(const char*s,size_t blen,size_t*at);
 const char*sp_str_sub_range_len(const char*s,sp_int cl,sp_int start,sp_int len);
 const char*sp_str_sub_range_r(const char*s,sp_int start,sp_int end_,sp_int excl);
 const char*sp_str_sub_range_len_r(const char*s,sp_int cl,sp_int start,sp_int end_,sp_int excl);
@@ -171,6 +224,7 @@ sp_int sp_str_count(const char*s,const char*chars);
 sp_int sp_str_count_n(const char*s,const char**chars,sp_int n);
 sp_int sp_str_sum_bits(const char*s,sp_int bits);   /* String#sum(bits=16) */
 sp_IntArray*sp_str_codepoints(const char*s);
+sp_IntArray*sp_str_codepoints_all(const char*s);
 sp_StrArray*sp_str_chars(const char*s);
 const char*sp_str_tr(const char*s,const char*from,const char*to);
 const char*sp_str_tr_s(const char*s,const char*from,const char*to);
@@ -178,9 +232,17 @@ const char*sp_str_delete(const char*s,const char*chars);
 const char*sp_str_squeeze(const char*s);
 const char*sp_str_squeeze_chars(const char*s,const char*cs);
 const char*sp_str_delete_n(const char*s,const char**chars,sp_int n);
+const char*sp_str_strip_n(const char*s,const char**chars,sp_int n);
+const char*sp_str_lstrip_n(const char*s,const char**chars,sp_int n);
+const char*sp_str_rstrip_n(const char*s,const char**chars,sp_int n);
 const char*sp_str_squeeze_n(const char*s,const char**chars,sp_int n);
 const char *sp_str_scrub(const char *s, const char *repl);
-const char *sp_str_encode(const char *s, sp_RbVal dst, sp_RbVal src, sp_RbVal invalid, sp_RbVal undef, sp_RbVal replace);
+const char *sp_str_scrub_utf8(const char *s, const char *repl);
+sp_int sp_str_scrub_bad(const char *s, sp_int bl, sp_int from, sp_int *len);
+const char *sp_str_scrub_repl(const char *r);
+const char *sp_str_encode(const char *s, int npos, sp_RbVal dst, sp_RbVal src, sp_RbVal invalid, sp_RbVal undef, sp_RbVal replace);
+const char *sp_str_encode_into(const char *s, const char *t);
+const char *sp_str_encode_slot(const char *s, const char *t);
 const char *sp_str_scrub_bang(const char *s, const char *repl);
 const char*sp_str_ljust(const char*s,sp_int w);
 const char*sp_str_rjust(const char*s,sp_int w);
@@ -188,9 +250,9 @@ const char*sp_str_center(const char*s,sp_int w);
 const char*sp_str_ljust2(const char*s,sp_int w,const char*pad);
 const char*sp_str_rjust2(const char*s,sp_int w,const char*pad);
 const char*sp_str_center2(const char*s,sp_int w,const char*pad);
-sp_int sp_str_index_opt(const char *s, const char *sub);
-sp_int sp_str_index_from_opt(const char *s, const char *sub, sp_int start);
-sp_int sp_str_rindex_opt(const char *s, const char *sub);
+sp_oint sp_str_index_opt(const char *s, const char *sub);
+sp_oint sp_str_index_from_opt(const char *s, const char *sub, sp_int start);
+sp_oint sp_str_rindex_opt(const char *s, const char *sub);
 
 /* ---- relocated from spinel_rt.h: hash key primitives (sp_str_hash /
    sp_str_eq / _sp_istr_idx) used by lib/sp_hash.c's StrInt/StrStr/IntStr/
@@ -221,6 +283,19 @@ static inline int sp_str_eq(const char*a,const char*b){
   for(size_t i=0;i<la;i++)if((unsigned char)a[i]>=0x80)return 0;
   return 1;
 }
+/* `s == "lit"` for a literal of n ASCII bytes, none of them NUL, that the
+   compiler knows: an inline byte loop where sp_str_eq calls strcmp. The loop
+   stops at a's terminator (the literal has no NUL to match it), so it reads
+   no further than strcmp would; only a full match reads a's length, as
+   sp_str_eq does, to tell a longer string with an embedded NUL apart, and a
+   foreign C string without a marker byte gets no header read it did not get
+   before. An ASCII literal equals any string of the same bytes, whatever
+   that string's encoding tag; nil (NULL) equals none. */
+static inline int sp_str_eq_lit(const char*a,const char*lit,size_t n){
+  if(!a)return 0;
+  for(size_t i=0;i<n;i++)if(a[i]!=lit[i])return 0;
+  return a[n]=='\0'&&sp_str_byte_len(a)==n;
+}
 /* Compare a spinel string against a PLAIN C string (a stack buffer, a literal
    with no marker byte). sp_str_eq reads a marker in front of BOTH operands to
    recover a length that can carry an embedded NUL; handing it unmarked memory
@@ -233,7 +308,7 @@ static inline sp_bool sp_str_eq_cstr(const char *marked, const char *plain) {
   return (sp_bool)(sp_str_byte_len(marked) == lp && memcmp(marked, plain, lp) == 0);
 }
 
-/* String#valid_encoding? — walks the buffer and accepts pure ASCII
+/* String#valid_encoding? -- walks the buffer and accepts pure ASCII
    or well-formed UTF-8 (RFC 3629 byte sequences with no overlong
    forms, no surrogate halves, code points <= U+10FFFF). */
 /* A BINARY string hashes apart from its UTF-8 twin, but only when it holds a
@@ -255,7 +330,7 @@ static inline uint64_t sp_str_hash_compute(const char*s){
    hash. Kept out-of-line so sp_str_hash's inline fast path -- a cached-hash
    read -- stays tiny and doesn't bloat every call site's code layout. */
 static SP_NOINLINE uint64_t sp_str_hash_miss(const char*s,unsigned char m){
-  if(m==0xfe||m==0xfc||m==0xf1){
+  if(m==0xfe||m==0xfc||m==0xf1||m==0xfa||m==0xf8){
     sp_str_hdr*hd=((sp_str_hdr*)(s-1))-1;
     uint64_t h=sp_str_hash_compute(s);
     hd->hash=h?h:1;
@@ -270,7 +345,7 @@ static inline uint64_t sp_str_hash(const char*s){
      against NULL, so the probe walks past every occupied slot. */
   if(!s)return 14695981039346656037ULL;
   unsigned char m=((const unsigned char*)s)[-1];
-  if(m==0xfe||m==0xfc||m==0xf1){
+  if(m==0xfe||m==0xfc||m==0xf1||m==0xfa||m==0xf8){
     uint64_t cached=(((sp_str_hdr*)(s-1))-1)->hash;
     if(cached)return cached;
   }

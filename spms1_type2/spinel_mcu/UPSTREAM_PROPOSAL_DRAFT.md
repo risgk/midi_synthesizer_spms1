@@ -3,8 +3,9 @@
 > [!WARNING]
 > **DRAFT -- NOT FILED.** This is a draft of an issue for matz/spinel, kept here as a memo.
 > It has not been posted, and nothing in it has been agreed with the Spinel project.
-> Check it against the Spinel release in use before posting: the numbers and line numbers are
-> those of Spinel 2026.09.12. Check also the name of mruby's option (`MRB_USE_FLOAT32`).
+> Check it against the Spinel release in use before posting: it was checked against Spinel
+> 2026.10.25, and the numbers and line numbers are those of 2026.10.25 unless a release is named
+> with them. Check also the name of mruby's option (`MRB_USE_FLOAT32`).
 
 **Title:** Spinel on bare-metal microcontrollers: an opt-in build without POSIX, and Float as float chosen by the runtime
 
@@ -37,36 +38,41 @@ POSIX, such as FreeRTOS, is in the same place. What the runtime needs there and 
 - `sp_gc.c`: `signal(SIGSEGV/SIGBUS, ...)` for `SPINEL_GC_VERIFY`
 - `sp_alloc.c`: `sigaction` for the allocation report, `clock_gettime` for the GC stats
 - `sp_fiber_ctx.h`: `<ucontext.h>` as the fallback for non-x86_64/aarch64
+- `sp_sched.h`: `<poll.h>`, though `sp_sched.c` is left out whole
+- `sp_slab.c`: `mmap` of the slab's arena, 16 GB of address space (512 MB on a 32-bit host), which
+  a microcontroller does not have even in part. `SPINEL_GC_SLAB=0` turns the slab off, but it is
+  read from the environment when the program runs; the bare-metal build would start with it off
+  (`sp_slab_on = 0`), and every block a `malloc`, as before
 - The inline arms in `spinel_rt.h` that call into `sp_cold.c`/`sp_io.c`/`sp_sched.c` (IO, Dir,
   Thread, Queue, Mutex, BigRational, FloatRange inspect) and need those objects to link
-- `__int128` in `sp_time.h` (absent on 32-bit targets)
+- What the generated code calls of `sp_fiber.c`, which is left out whole: `main` runs the program
+  through `sp_main_stack_run` on a stack it maps, after `sp_stack_guard_init`. On bare metal the
+  body would be called directly, on the stack `main` is on, and nothing armed
 
 The proposal: a macro, say `SPINEL_BARE_METAL`, defined only by those who build for such a target,
 under which the runtime leaves these out, with the IO and thread features simply absent. A
 program that uses none of them does not miss them. Without the macro nothing changes.
 
 My patch takes this shape already, as far as it can from outside: it carries all of `lib`, and
-`SPINEL_BARE_METAL` in `lib/sp_types.h` leaves out whole the eight files that need POSIX
-throughout (`sp_cold.c`, `sp_fiber.c`, `sp_io.c`, `sp_net.c`, `sp_process.c`,
-`sp_process_status.c`, `sp_sched.c`, `sp_system.c`), two lines each; `sp_crypto.c`, `sp_pack.c`
-and `sp_time.c` build as they are. What is still done with `#if 0` is the POSIX inside the files
-that are built (`spinel_rt.h` above all).
+`SPINEL_BARE_METAL` in `lib/sp_types.h` leaves out whole the nine files that need POSIX
+throughout (`sp_cold.c`, `sp_fiber.c`, `sp_io.c`, `sp_iobuffer.c`, `sp_net.c`, `sp_process.c`,
+`sp_process_status.c`, `sp_sched.c`, `sp_system.c`), two lines each, with a few stand-ins for
+what the files that are built still ask of them (`sp_Fiber_inspect`, `sp_io_kind_name`,
+`sp_Queue_size`, ...); `sp_crypto.c`, `sp_pack.c` and `sp_time.c` build as they are. The regexp
+engine (`lib/regexp`) is left out the same way, as it now reads `<mruby.h>` from `lib/regexp/shim`,
+which a build with no include path of its own (the Arduino IDE) cannot add. What is still done
+with `#if 0` is the POSIX inside the files that are built (`spinel_rt.h` above all).
 
 `sp_cold.c` is the hard one. It holds what the generated code needs (`sp_raise_nil_int_op`, the
 GC scan functions of Dir and Enumerator, Float and Integer leaf ops, ...) side by side with
-files, directories, processes and sockets: built for bare metal, about 100 of its functions have
-to be left out one by one, about 1,160 of its 4,200 lines, and the line between them runs
-through the whole file. I build a copy of it with those left out, kept apart as
+files, directories, processes and sockets: built for bare metal, about 110 of its parts have to
+be left out one by one, about 1,400 of its 6,700 lines, and the line between them runs through
+the whole file. I build a copy of it with those left out, kept apart as
 `sp_cold_bare_metal.c`. A split of `sp_cold.c` into what needs an OS and what does not would make
 it two files, one of them left out whole, as the others are.
 
-`sp_float_to_i_checked` (`Float#to_i`) moved into `sp_cold.c` from the header where it was static.
-Out of line in another file, it is a call for every `to_i`, which in a synth is every sample; on
-a microcontroller, a call into flash. I keep it `static inline` in `sp_alloc.h`, where it is
-declared, for the bare-metal build. Back in the header for every build would do as well.
-
-It can come in steps, starting with what is harmless on POSIX as well (for example
-`__has_include` checks for `<execinfo.h>` and `<ucontext.h>`). To keep it from breaking unnoticed,
+It can come in steps, starting with what is harmless on POSIX as well (for example a
+`__has_include` check for `<ucontext.h>`, as `<execinfo.h>` has now). To keep it from breaking unnoticed,
 I would add a compile-only CI job: the runtime compiled with `arm-none-eabi-gcc` and newlib, with
 the macro defined. No hardware is needed for that.
 
@@ -97,7 +103,7 @@ call was to the float version.
 
 The compiler then has no option and emits the same C whatever Float is to be; the runtime's
 headers decide, when the C is compiled. With double, nothing changes: I rewrote the Spinel output
-of my program this way (32 `double`, 898 literals) and compiled it for a Cortex-M33 against the
+of my program this way (Spinel 2026.09.12: 32 `double`, 898 literals) and compiled it for a Cortex-M33 against the
 runtime as released, and the machine code is the same as before, byte for byte.
 
 With float, the runtime defines `sp_float` as float and `SP_FLT(x)` as a float constant, includes
@@ -138,49 +144,22 @@ the compile-only CI job above with float.
 
 ## Smaller, separate
 
-- **A bug on 32-bit targets.** `sp_float_to_i_checked` (`lib/sp_cold.c:3099`) raises RangeError
-  outside +-2^63, the range of a 64-bit `sp_int`. `sp_int` is pointer-width, so on a 32-bit target
-  a Float from 2^31 up passes the check and is converted out of range, which C leaves undefined.
-  Checking against the range of `sp_int` fixes it at the same cost:
-
-  ```c
-  #if INTPTR_MAX == INT32_MAX
-    if (f >= 2147483648.0 || f < -2147483648.0)
-  #else
-    if (f >= 9223372036854775808.0 || f < -9223372036854775808.0)
-  #endif
-  ```
-
-- **`#ifndef` on the remaining table sizes.** `SP_GC_STACK_MAX` and `SP_ALLOC_STATS` can already be
-  overridden. These cannot, and as static tables they take more SRAM than a microcontroller has:
-
-  | Macro | Where | Default | Bytes on 32-bit |
-  |---|---|---|---|
-  | `SP_GC_REMEMBERED_MAX` | `sp_gc.h:126` | 65536 | 256 KB |
-  | `SP_GC_PINNED_MAX` | `sp_gc.h:175` | 16384 | 64 KB |
-  | `SP_STR_SHAPE_MAX` | `sp_alloc.c:114` | 8192 | 32 KB |
-  | `SP_ALLOC_NAMES` | `sp_alloc.c:1037` | 512 | 4 KB |
+- **A place for the settings of a build that passes no `-D`.** The tables a microcontroller has
+  no SRAM for can be made smaller now (`SP_GC_STACK_MAX`, `SP_GC_REMEMBERED_MAX`,
+  `SP_GC_PINNED_MAX` and `SP_STR_SHAPE_MAX` are under `#ifndef`; `SP_ALLOC_NAMES`, 512 entries in
+  `sp_alloc.c`, is not yet), but only by a `-D` for every file of the runtime, which the Arduino
+  IDE has no way to give a sketch. I change the defaults in the patch instead. A header of the
+  program's own, read first by `sp_types.h` when it is there
+  (`#if __has_include("spinel_config.h")`), would carry them, and `SPINEL_BARE_METAL` and
+  `SP_ONE_STRING` with them.
 
 - **`--int-overflow=wrap` with `-c`.** The mode reaches the C only as `-DSP_INT_OVERFLOW_MODE_WRAP`
-  on the command line of the C compiler that `spinel` runs itself (`src/main.c:852`). With `-c`,
+  on the command line of the C compiler that `spinel` runs itself (`src/main.c:838`). With `-c`,
   where the C is compiled elsewhere (here by the Arduino build), nothing in the file says which
   mode it was generated for, and it compiles in the default raise mode. Writing the define at the
   top of the C, ahead of `#include "spinel_rt.h"`, would make the file carry its mode. I define it
   in a header of my own instead (`spinel_rt_mcu_head.h`). The checks it removes were 8% of the
   instructions of my program's per-sample code on a Cortex-M33.
-
-- **The in-range path of an Array access first.** `sp_FloatArray_get`/`set` and `sp_IntArray_get`
-  test null, frozen, a negative index and the length in turn, all inline. Testing
-  `a && (uintptr_t)i < (uintptr_t)a->len` (and `!a->frozen` for set) first, inline, and leaving
-  the rest out of line with the body as it is, keeps what every access does and took 12% of the
-  instructions out of the same code:
-
-  ```c
-  static inline sp_float sp_FloatArray_get(sp_FloatArray*a,sp_int i){
-    if(__builtin_expect(a&&(uintptr_t)i<(uintptr_t)a->len,1))return a->data[i];
-    return sp_FloatArray_get_slow(a,i);  /* the released body, noinline */
-  }
-  ```
 
 - **`loop do` makes every local in it volatile.** `loop` emits a setjmp to rescue StopIteration,
   and the volatile analysis (`begin_volatile_names`, `is_stopiter_loop`) then treats its block as
@@ -189,6 +168,78 @@ the compile-only CI job above with float.
   StopIteration. Writing it as `while true` took 6% of the instructions out of my program. Leaving
   the setjmp (and the volatile) out when the block calls nothing that can raise StopIteration
   would make the two the same.
+
+- **An `ffi_func` to a header's static inline function** (Spinel 2026.10.25). Since 2026.10.25 an
+  `ffi_func` is declared under a private name bound to the symbol by an asm label, so that it
+  cannot conflict with a header's own prototype (`fopen`'s `FILE *` against `:ptr`). That is right
+  for a library call, but it takes away a use 2026.09.12 had: a function the program defines
+  `static inline` in a header read ahead of the generated code (through an `ffi_source` include,
+  or a header the runtime includes) was the very function the `extern` named, and was inlined.
+  For my program these are a read and a write of a plain C array, done some 3000 times an audio
+  buffer, which are one load or one store inline:
+
+  ```c
+  /* spms1_bus.h, read ahead of the generated code */
+  static inline void set_bus_signal(int32_t slot, float value) {
+    spms1_bus_signals[slot & (SPMS1_BUS_SIZE - 1)] = value;
+  }
+  ```
+
+  ```c
+  /* 2026.09.12: the static inline function, inlined */
+  extern void set_bus_signal(int32_t, float);
+  set_bus_signal(((int32_t)(lv_slot)), ((float)(lv_value)));
+
+  /* 2026.10.25: a call to an outside symbol "set_bus_signal", which nothing defines */
+  extern void sp_ffi_f30_set_bus_signal(int32_t, float) __asm__(SP_FFI_SYM("set_bus_signal"));
+  sp_ffi_f30_set_bus_signal(((int32_t)(lv_slot)), ((float)sp_ffi_dbl_of_f(lv_value)));
+  ```
+
+  GCC does not take the asm-labeled declaration for the static inline function of the same name,
+  with `inline`, `gnu_inline` or `always_inline` alike: the link fails, and were the function
+  defined outside, every access would be a call. I now rewrite the generated C after Spinel, back
+  to the plain `extern` and the plain name. An opt-in for the plain form would make that
+  unneeded, e.g. a keyword of `ffi_func` (`ffi_func :set_bus_signal, [:int32, :float], :void,
+  inline: true`), or a module-level `ffi_inline`, which declares the function under its own
+  name, as 2026.09.12 did, for the program that takes on matching the header's types.
+
+- **The value of `obj[i] = v` is v** (Spinel 2026.10.25). In Ruby an index assignment is worth
+  its right-hand side, whatever `[]=` returns; Spinel takes the method's return value instead:
+
+  ```ruby
+  class Bus
+    def initialize; @a = Array.new(4, 0.0); end
+    def []=(i, v)
+      @a[i] = v
+      nil
+    end
+  end
+  b = Bus.new
+  p(b[1] = 2.5)          # CRuby: 2.5, Spinel: nil
+  def f(b) = (b[2] = 1.5)
+  p f(b)                 # CRuby: 1.5, Spinel: nil
+  ```
+
+  In my program `[]=` ends with an `ffi_func` call that returns nothing, so the nil made every Float
+  a bus write reaches one that may be nil, and a method ending in such a write raised TypeError
+  ("can't convert nil into Float") where CRuby returns the Float. I return the value from `[]=`
+  myself.
+
+- **The signal poll at every loop** (Spinel 2026.10.25). Each loop's back edge reads a volatile
+  flag, `if (SP_UNLIKELY(SP_ATOMIC_LOAD(&sp_sig_pending_flag, ...))) sp_sig_poll_raise();`. On a
+  microcontroller no signal ever comes, and the load is not only a load and a branch: being
+  volatile, it held GCC back from the optimization of the per-sample loop, which went from 1245 us
+  to 1401 us a buffer of 1333 us (12%, emulated Cortex-M33). Read as a constant 0 it is 1248 us. I
+  do it by defining `sp_sig_pending_flag` as a `static const int` of 0, and `SP_ATOMIC_LOAD` as a
+  plain read, after the runtime in a header of my own. A macro for the poll (`SP_SIG_POLL()`), which
+  the runtime defines as nothing for bare metal, would do it in the open.
+
+- **`#line` names Spinel's own files by the full path of the machine** (Spinel 2026.10.25). Code
+  from `builtins/` carries `#line 87 "/home/me/spinel/bin/../builtins/comparable.rb"`, so the C that
+  Spinel writes from the same Ruby differs from one machine to the next. I keep the C in the
+  repository and check in CI that Spinel writes the same (as the device's build cannot run Spinel),
+  and so rewrite these to `builtins/comparable.rb` after Spinel. The path from Spinel's folder, as
+  the program's own files are named by the path given, would make the output the same everywhere.
 
 I would be glad to send pull requests for any of these, one at a time, and the CI job, and to
 keep them working.

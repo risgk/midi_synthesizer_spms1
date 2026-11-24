@@ -13,19 +13,78 @@
  typedef int mrb_bool;
  #define TRUE 1
  #define FALSE 0
+--- a/re_compile.c
++++ b/re_compile.c
+@@ -1,3 +1,5 @@
++#include "sp_types.h"   /* for the MCU: SPINEL_BARE_METAL */
++#if !SPINEL_BARE_METAL   /* for the MCU: the regexp engine (mruby-regexp, through its shim headers), which a synth does not use */
+ /*
+ ** re_compile.c - regexp pattern compiler
+ **
+@@ -6283,3 +6285,4 @@
+     mrb_free(mrb, pat);
+   }
+ }
++#endif /* !SPINEL_BARE_METAL */
+--- a/re_exec.c
++++ b/re_exec.c
+@@ -1,3 +1,5 @@
++#include "sp_types.h"   /* for the MCU: SPINEL_BARE_METAL */
++#if !SPINEL_BARE_METAL   /* for the MCU: the regexp engine (mruby-regexp, through its shim headers), which a synth does not use */
+ /*
+ ** re_exec.c - NFA execution engine (Pike VM)
+ **
+@@ -2381,3 +2383,4 @@
+   memcpy(captures, last, sizeof(int) * captures_size);
+   return last_n;
+ }
++#endif /* !SPINEL_BARE_METAL */
+--- a/re_spinel.c
++++ b/re_spinel.c
+@@ -1,3 +1,5 @@
++#include "sp_types.h"   /* for the MCU: SPINEL_BARE_METAL */
++#if !SPINEL_BARE_METAL   /* for the MCU: the regexp engine (mruby-regexp, through its shim headers), which a synth does not use */
+ /*
+ ** re_spinel.c - the regexp engine's entry points for spinel
+ **
+@@ -380,3 +382,10 @@
+   if (o & 4) f |= RE_FLAG_DOTALL;   /* Ruby MULTILINE == "dot matches newline" */
+   return f;
+ }
++#else   /* for the MCU: no regexp engine, so no pattern for these to be asked of */
++#include "sp_re.h"
++const char *sp_re_source(void *pat) { (void)pat; return ""; }
++uint32_t sp_re_source_len(void *pat) { (void)pat; return 0; }
++uint32_t sp_re_raw_flags(void *pat) { (void)pat; return 0; }
++const char *re_group_name(const mrb_regexp_pattern *pat, int group) { (void)pat; (void)group; return NULL; }
++#endif /* !SPINEL_BARE_METAL */
+--- a/re_utf8.c
++++ b/re_utf8.c
+@@ -1,3 +1,5 @@
++#include "sp_types.h"   /* for the MCU: SPINEL_BARE_METAL */
++#if !SPINEL_BARE_METAL   /* for the MCU: the regexp engine (mruby-regexp, through its shim headers), which a synth does not use */
+ /*
+ ** re_utf8.c - case folding, character types and word characters for regexp engine
+ **
+@@ -154,3 +156,4 @@
+   return cp;
+ #endif
+ }
++#endif /* !SPINEL_BARE_METAL */
 --- a/sp_alloc.c
 +++ b/sp_alloc.c
-@@ -111,7 +111,8 @@
+@@ -127,8 +127,9 @@
     Sampling at the sweep removes that limit: the cadence becomes the
     collector's, not the clock's. A ring, so a long run costs no more than a
     short one and the samples are the most recent SP_STR_SHAPE_MAX. */
--#define SP_STR_SHAPE_MAX 8192
 +/* Lowered from Spinel's 8192 for the MCU (32KB of SRAM as shipped). Only the GC report reads it. */
+ #ifndef SP_STR_SHAPE_MAX
+-#define SP_STR_SHAPE_MAX 8192
 +#define SP_STR_SHAPE_MAX 16
+ #endif
  static size_t sp_str_shape[SP_STR_SHAPE_MAX];
  static unsigned sp_str_shape_n = 0;      /* total sweeps seen */
- static int sp_str_shape_cmp(const void *a, const void *b) {
-@@ -305,7 +306,7 @@
+@@ -370,7 +371,7 @@
  static void sp_gc_stats_emit(void);
  static void sp_gc_stats_report(void) {
    static int on = -1;
@@ -34,7 +93,7 @@
    if (on < 0) {
      const char *e = getenv("SPINEL_GC_STATS"); on = (e && *e && *e != '0') ? 1 : 0;
      /* SPINEL_GC_PHASES arms the same reporter on its own, so the breakdown does
-@@ -318,18 +319,18 @@
+@@ -383,8 +384,8 @@
      if (on) atexit(sp_gc_stats_emit);
    }
    if (!on) return;
@@ -45,7 +104,9 @@
    if (now - last < 1.0) return;
    last = now;
    sp_gc_stats_emit();
- }
+@@ -392,11 +393,11 @@
+ /* The `[gc]` line itself, and under SPINEL_GC_PHASES the `[gcph]` breakdown
+    below it. */
  static void sp_gc_stats_emit(void) {
 -  static double first = 0;
 -  struct timespec ts; clock_gettime(CLOCK_MONOTONIC, &ts);
@@ -59,24 +120,26 @@
    unsigned long long n = sp_gc_stat_collections;
  #ifdef SP_THREADS
    int nw = sp_active_workers; if (nw < 1) nw = 1;
-@@ -346,11 +347,11 @@
-           "mark share %.2f\n",
+@@ -413,12 +414,12 @@
+           "mark share %.2f; old obj in str trigger %.2f MB\n",
            n, sp_gc_stat_fulls, sp_gc_stat_seconds, wall,
            wall > 0 ? 100.0 * sp_gc_stat_seconds / wall : 0.0,
 -          n ? 1000.0 * sp_gc_stat_seconds / (double)n : 0.0,
 -          (double)SP_GC_CTR_GET(sp_gc_bytes) / 1048576.0, (double)sbytes / 1048576.0,
 -          (double)SP_GC_CTR_GET(sp_gc_threshold) / 1048576.0,
 -          (double)SP_GC_CTR_GET(sp_str_threshold) / 1048576.0, nw,
--          (double)sp_gc_obj_alpha1024 / 1024.0);
+-          (double)sp_gc_obj_alpha1024 / 1024.0,
+-          (double)sp_str_budget_obj_bytes / 1048576.0);
 +          n ? 1000.0 * sp_gc_stat_seconds / (sp_float)n : 0.0,
 +          (sp_float)SP_GC_CTR_GET(sp_gc_bytes) / 1048576.0, (sp_float)sbytes / 1048576.0,
 +          (sp_float)SP_GC_CTR_GET(sp_gc_threshold) / 1048576.0,
 +          (sp_float)SP_GC_CTR_GET(sp_str_threshold) / 1048576.0, nw,
-+          (sp_float)sp_gc_obj_alpha1024 / 1024.0);
++          (sp_float)sp_gc_obj_alpha1024 / 1024.0,
++          (sp_float)sp_str_budget_obj_bytes / 1048576.0);
    if (!sp_gc_ph_on) return;
    /* Which part of a collection cost that time. The names are the ones the
       collector's own comments use, so a number leads to the code that spent it.
-@@ -364,10 +365,10 @@
+@@ -432,10 +433,10 @@
    fprintf(stderr,
            "[gcph] string live %.1f MB young + %.1f MB old  "
            "(major %s%.1f MB old, %llu so far)\n",
@@ -90,7 +153,7 @@
            (unsigned long long)sp_gc_str_majors);
    /* median / min over the sweeps, and their ratio. One number for the sawtooth
       the per-second line can only show a slice of. */
-@@ -377,11 +378,11 @@
+@@ -445,11 +446,11 @@
      if (cp) {
        memcpy(cp, sp_str_shape, (size_t)n * sizeof *cp);
        qsort(cp, n, sizeof *cp, sp_str_shape_cmp);
@@ -104,7 +167,7 @@
                mn > 0 ? med / mn : 0.0);
        free(cp);
      }
-@@ -978,6 +979,36 @@
+@@ -1215,6 +1216,36 @@
     with no locale dependency (pure integer arithmetic; see sp_dtoa.c); the
     fixed vs scientific layout is Ruby's Float#to_s rule (which differs from
     %g's), preserved from the previous strtod-probe implementation. */
@@ -141,7 +204,7 @@
  const char *sp_float_to_s(sp_float f) {
    if(f!=f){char*r=sp_str_alloc_raw(4);r[0]='N';r[1]='a';r[2]='N';r[3]=0;return r;}
    if(f==HUGE_VAL||f==-HUGE_VAL){if(f<0){char*r=sp_str_alloc_raw(10);memcpy(r,"-Infinity",10);return r;}char*r=sp_str_alloc_raw(9);memcpy(r,"Infinity",9);return r;}
-@@ -985,6 +1016,9 @@
+@@ -1222,6 +1253,9 @@
    int neg = signbit(f);
    char digits[32]; int dlen;
    int exp = sp_float_shortest(neg ? -f : f, digits, &dlen);
@@ -151,7 +214,7 @@
    int decpt = exp + 1;   /* number of digits before the decimal point in fixed form */
    char *out=sp_str_alloc_raw(64);int o=0;
    if(neg)out[o++]='-';
-@@ -1027,14 +1061,17 @@
+@@ -1264,14 +1298,17 @@
     into the home slot -- the one failure mode that would quietly misattribute
     the numbers this feature exists to report. BSS, so the untouched tail costs
     nothing when the report is off. */
@@ -171,7 +234,7 @@
  static sp_AllocName sp_alloc_names[SP_ALLOC_NAMES];
  
  static const char *sp_alloc_name_of(void *key) {
-@@ -1297,11 +1334,13 @@
+@@ -1787,11 +1824,13 @@
  #endif
      /* SA_RESTART: asking for a report must not turn an in-flight read(2) into
         an EINTR the program never expected to handle. */
@@ -187,34 +250,34 @@
  }
 --- a/sp_alloc.h
 +++ b/sp_alloc.h
-@@ -810,7 +810,26 @@
- const char *sp_float_opt_to_s(sp_float v);
- sp_int sp_float_denominator(sp_float f);
- sp_RbVal sp_float_numerator(sp_float f);
+@@ -1188,10 +1188,26 @@
+    NaN (which fails both tests), Infinity and an out-of-range value go to the
+    raising body in sp_cold.c. The range is exactly the one that body checks. */
+ sp_int sp_float_to_i_checked_slow(sp_float f);
 +#if SPINEL_BARE_METAL
 +/* For the MCU: Float#to_i, which the generated code calls every sample in a synth (index =
-+   pitch.to_i and the like), inline here rather than out of line in sp_cold.c, so that it is
-+   inlined into the caller instead of called (from flash, on the MCU). sp_cold_bare_metal.c leaves
-+   its own out. And without the checks the released one makes (a NaN or an infinity raises
++   pitch.to_i and the like), without the checks the released one makes (a NaN or an infinity raises
 +   FloatDomainError, a Float past the range of sp_int RangeError), as Integer arithmetic goes
-+   without its overflow check (SP_INT_OVERFLOW_MODE_WRAP, spinel_rt_mcu_head.h): on the MCU a
-+   raise stops the sound as surely as a wrong value would, so the checks buy nothing there, and a
-+   synth makes several conversions a sample, which with the checks took about 5000 cycles (31 us)
-+   of a buffer of SPMS-1's. Such a Float comes out as the processor's conversion makes it, which C
-+   leaves undefined (the Cortex-M33's VCVT: 0 for a NaN, the nearest end of the range otherwise;
-+   x86's, the lowest value of the range, for the simulators, which build the runtime the same
-+   way); an index made from it and read out of an array's range reads nil (0.0), as any index
++   without its overflow check (SP_INT_OVERFLOW_MODE_WRAP, spinel_rt_mcu_head.h): on the MCU a raise
++   stops the sound as surely as a wrong value would, so the checks buy nothing there, and a synth
++   makes several conversions a sample. Such a Float comes out as the processor's conversion makes
++   it, which C leaves undefined (the Cortex-M33's VCVT: 0 for a NaN, the nearest end of the range
++   otherwise; x86's, the lowest value of the range, for the simulators, which build the runtime the
++   same way); an index made from it and read out of an array's range reads nil (0.0), as any index
 +   out of range does. */
 +static inline sp_int sp_float_to_i_checked(sp_float f) {
 +  return (sp_int)f;
 +}
 +#else
- sp_int sp_float_to_i_checked(sp_float f);
+ static inline sp_int sp_float_to_i_checked(sp_float f) {
+   if (SP_LIKELY(f >= (sp_float)INTPTR_MIN && f < -(sp_float)INTPTR_MIN)) return (sp_int)f;
+   return sp_float_to_i_checked_slow(f);
+ }
 +#endif
  
- /* ---- forward declarations for pointer-only box params (full types stay
-    opaque to lib/sp_alloc.h -- these box functions only store the pointer). ---- */
-@@ -908,8 +927,8 @@
+ /* Machine-integer arguments use NUM2LONG's RangeError, unlike Float#to_i. */
+ SP_NORETURN SP_COLD void sp_float_arg_range_error(sp_float f);
+@@ -1330,8 +1346,8 @@
  sp_bool sp_class_frozen_id(sp_int cls_id);
  
  /* ---- rounding helpers relocated from spinel_rt.h (0 optcarrot uses). ---- */
@@ -225,16 +288,16 @@
  
  /* ---- BigRational (Bignum-denominator Rational, #2469): 0 optcarrot
     uses. sp_Bigint is forward-declared above (box_bigint); the specific
-@@ -923,7 +942,7 @@
- sp_Bigint *sp_bigint_div(sp_Bigint *a, sp_Bigint *b);
+@@ -1350,7 +1366,7 @@
+ int sp_bigint_cmp(sp_Bigint *a, sp_Bigint *b);
  char *sp_str_alloc_ext(size_t len);   /* non-inline sp_str_alloc; see sp_alloc.c */
  const char *sp_bigint_to_s(sp_Bigint *b);
 -double sp_bigint_to_double(sp_Bigint *b);
 +double sp_bigint_to_double(sp_Bigint *b);   /* for the MCU: double, as sp_bigint.c defines it */
  void sp_brat_scan(void *p);
  sp_RbVal sp_box_brat(sp_Bigint *num, sp_Bigint *den);
- sp_RbVal sp_brat_from_bigint(sp_Bigint *n);
-@@ -948,9 +967,9 @@
+ sp_RbVal sp_box_brat_norm(sp_Bigint *num, sp_Bigint *den);   /* promote: small when it fits */
+@@ -1381,9 +1397,9 @@
  /* ---- FFI array data pointers, array-kind length probe, sp_Class
     unboxing: relocated from spinel_rt.h (0 optcarrot uses). ---- */
  const int64_t *sp_ffi_int_array_data(sp_RbVal v);
@@ -248,60 +311,20 @@
  
 --- a/sp_array.c
 +++ b/sp_array.c
-@@ -620,7 +620,7 @@
- sp_RbVal sp_FloatArray_rindex_key(sp_FloatArray *a, sp_RbVal v) {SP_GC_ROOT(a); if (v.tag == SP_TAG_FLT) return sp_FloatArray_rindex_poly(a, v.v.f); if (v.tag == SP_TAG_INT) return sp_FloatArray_rindex_poly(a, (sp_float)v.v.i); return sp_box_nil(); }
- sp_float sp_FloatArray_delete_key(sp_FloatArray *a, sp_RbVal v) {SP_GC_ROOT(a); if (v.tag == SP_TAG_FLT) return sp_FloatArray_delete(a, v.v.f); if (v.tag == SP_TAG_INT) return sp_FloatArray_delete(a, (sp_float)v.v.i); return sp_float_nil(); }
- const int64_t *sp_IntArray_ffi_data(sp_IntArray *a) { return a ? (const int64_t *)(a->data + a->start) : (const int64_t *)0; }
+@@ -1065,7 +1065,7 @@
+   for (sp_int i = 0; i < a->len; i++) buf[i] = (int64_t)a->data[a->start + i];
+   return buf;
+ }
 -const double  *sp_FloatArray_ffi_data(sp_FloatArray *a) { return a ? (const double *)a->data : (const double *)0; }
 +const sp_float  *sp_FloatArray_ffi_data(sp_FloatArray *a) { return a ? (const sp_float *)a->data : (const sp_float *)0; }
- sp_IntArray *sp_IntArray_concat(sp_IntArray *a, sp_IntArray *b) { SP_GC_ROOT(a); SP_GC_ROOT(b); sp_IntArray *r = sp_IntArray_new(); SP_GC_ROOT(r); if (a) for (sp_int i = 0; i < a->len; i++) sp_IntArray_push(r, sp_IntArray_get(a, i)); if (b) for (sp_int i = 0; i < b->len; i++) sp_IntArray_push(r, sp_IntArray_get(b, i)); return r; }
- sp_StrArray *sp_StrArray_concat(sp_StrArray *a, sp_StrArray *b) {SP_GC_ROOT(a);SP_GC_ROOT(b); sp_StrArray *r = sp_StrArray_new(); SP_GC_ROOT(r); if (a) for (sp_int i = 0; i < a->len; i++) sp_StrArray_push(r, sp_StrArray_get(a, i)); if (b) for (sp_int i = 0; i < b->len; i++) sp_StrArray_push(r, sp_StrArray_get(b, i)); return r; }
- sp_FloatArray *sp_FloatArray_concat(sp_FloatArray *a, sp_FloatArray *b) {SP_GC_ROOT(a);SP_GC_ROOT(b); sp_FloatArray *r = sp_FloatArray_new(); SP_GC_ROOT(r); if (a) for (sp_int i = 0; i < a->len; i++) sp_FloatArray_push(r, sp_FloatArray_get(a, i)); if (b) for (sp_int i = 0; i < b->len; i++) sp_FloatArray_push(r, sp_FloatArray_get(b, i)); return r; }
+ sp_IntArray *sp_IntArray_concat(sp_IntArray *a, sp_IntArray *b) { SP_GC_ROOT(a); SP_GC_ROOT(b); sp_IntArray *r = sp_IntArray_new(); SP_GC_ROOT(r); if (SP_UNLIKELY(!a)) sp_nil_recv("+"); for (sp_int i = 0; i < a->len; i++) sp_IntArray_push_o(r, sp_IntArray_oget(a, i)); if (b) for (sp_int i = 0; i < b->len; i++) sp_IntArray_push_o(r, sp_IntArray_oget(b, i)); return r; }
+ sp_StrArray *sp_StrArray_concat(sp_StrArray *a, sp_StrArray *b) {SP_GC_ROOT(a);SP_GC_ROOT(b); sp_StrArray *r = sp_StrArray_new(); SP_GC_ROOT(r); if (SP_UNLIKELY(!a)) sp_nil_recv("+"); for (sp_int i = 0; i < a->len; i++) sp_StrArray_push(r, sp_StrArray_get(a, i)); if (b) for (sp_int i = 0; i < b->len; i++) sp_StrArray_push(r, sp_StrArray_get(b, i)); return r; }
+ sp_FloatArray *sp_FloatArray_concat(sp_FloatArray *a, sp_FloatArray *b) {SP_GC_ROOT(a);SP_GC_ROOT(b); sp_FloatArray *r = sp_FloatArray_new(); SP_GC_ROOT(r); if (SP_UNLIKELY(!a)) sp_nil_recv("+"); for (sp_int i = 0; i < a->len; i++) sp_FloatArray_push_o(r, sp_FloatArray_oget(a, i)); if (b) for (sp_int i = 0; i < b->len; i++) sp_FloatArray_push_o(r, sp_FloatArray_oget(b, i)); return r; }
 --- a/sp_array.h
 +++ b/sp_array.h
-@@ -36,7 +36,12 @@
- static inline sp_int sp_IntArray_shift(sp_IntArray*a){if(!a||a->len<=0)return SP_INT_NIL;if(a->frozen){sp_raise_frozen_array_at(a, SP_BUILTIN_INT_ARRAY);return SP_INT_NIL;}sp_int v=a->data[a->start];a->start++;a->len--;return v;}
- static inline sp_int sp_IntArray_length(sp_IntArray*a){return a->len;}
- static inline sp_bool sp_IntArray_empty(sp_IntArray*a){return a->len==0;}
--static inline sp_int sp_IntArray_get(sp_IntArray*a,sp_int i){if(!a)return SP_INT_NIL;if(i<0)i+=a->len;if(i<0||i>=a->len)return SP_INT_NIL;return a->data[a->start+i];}
-+/* MCU: the in-range access first, inline, and the rest out of line with the released body
-+   unchanged, so what an access does is the same and only its cost moves. Inlined as released, every
-+   read of the run order would pay for all of its checks in turn (null, negative, length); the null
-+   check is taken along with the length's. */
-+static sp_int __attribute__((noinline)) sp_IntArray_get_slow(sp_IntArray*a,sp_int i){if(!a)return SP_INT_NIL;if(i<0)i+=a->len;if(i<0||i>=a->len)return SP_INT_NIL;return a->data[a->start+i];}
-+static inline sp_int sp_IntArray_get(sp_IntArray*a,sp_int i){if(__builtin_expect(a&&(uintptr_t)i<(uintptr_t)a->len,1))return a->data[a->start+i];return sp_IntArray_get_slow(a,i);}
- /* Issue #769: a very-negative i leaves i negative after the `i += a->len`
-    adjustment. CRuby raises IndexError; spinel no-ops as the safest
-    fallback (raising from a typed-array set would need setjmp plumbing
-@@ -101,13 +106,23 @@
- static inline sp_float sp_FloatArray_delete_at(sp_FloatArray*a,sp_int i){if(!a)return 0.0;if(a->frozen){sp_raise_frozen_array_at(a, SP_BUILTIN_FLT_ARRAY);return 0.0;}if(i<0)i+=a->len;if(i<0||i>=a->len)return 0.0;sp_float v=a->data[i];for(sp_int j=i;j+1<a->len;j++)a->data[j]=a->data[j+1];a->len--;return v;}
- static inline sp_int sp_FloatArray_length(sp_FloatArray*a){return a->len;}
- static inline sp_bool sp_FloatArray_empty(sp_FloatArray*a){return a->len==0;}
--static inline sp_float sp_FloatArray_get(sp_FloatArray*a,sp_int i){if(!a)return sp_float_nil();if(i<0)i+=a->len;if(i<0||i>=a->len)return sp_float_nil();return a->data[i];}
-+/* MCU: the in-range access first, inline, and the rest out of line with the released body
-+   unchanged, so what an access does is the same and only its cost moves. Inlined as released, every
-+   read of a table or a delay line in the synth would pay for all of its checks in turn (null,
-+   negative, length); the null check is taken along with the length's. */
-+static sp_float __attribute__((noinline)) sp_FloatArray_get_slow(sp_FloatArray*a,sp_int i){if(!a)return sp_float_nil();if(i<0)i+=a->len;if(i<0||i>=a->len)return sp_float_nil();return a->data[i];}
-+static inline sp_float sp_FloatArray_get(sp_FloatArray*a,sp_int i){if(__builtin_expect(a&&(uintptr_t)i<(uintptr_t)a->len,1))return a->data[i];return sp_FloatArray_get_slow(a,i);}
- /* first/last as float? : nil (sentinel) when empty, else the element.
-    `[i]` stays non-nullable (0.0 for OOB) -- only first/last produce nil. */
- static inline sp_float sp_FloatArray_first_opt(sp_FloatArray*a){return (!a||a->len<=0)?sp_float_nil():sp_FloatArray_get(a,0);}
- static inline sp_float sp_FloatArray_last_opt(sp_FloatArray*a){return (!a||a->len<=0)?sp_float_nil():sp_FloatArray_get(a,a->len-1);}
- /* Issue #769: no-op for negative index after adjustment. */
--static inline void sp_FloatArray_set(sp_FloatArray*a,sp_int i,sp_float v){if(!a)return;if(a->frozen){sp_raise_frozen_array_at(a, SP_BUILTIN_FLT_ARRAY);return;}sp_int orig=i;if(i<0)i+=a->len;if(i<0)sp_raise_cls("IndexError",sp_sprintf("index %lld too small for array; minimum: %lld",(long long)orig,(long long)-a->len));while(i>=a->cap){a->cap=((((((a->cap*2))))))+1;a->data=(sp_float*)realloc(a->data,sizeof(sp_float)*a->cap);}while(i>=a->len){a->data[a->len]=sp_float_nil();a->len++;}a->data[i]=v;}  /* the gap is nil, not 0.0 (#3836) */
-+/* MCU: the in-range access first, inline, and the rest out of line with the released body
-+   unchanged, so what an access does is the same and only its cost moves. Inlined as released, every
-+   write to a delay line in the synth would pay for all of its checks in turn (null, frozen,
-+   negative, capacity, length); the inline part takes the null, frozen and length checks together. */
-+static void __attribute__((noinline)) sp_FloatArray_set_slow(sp_FloatArray*a,sp_int i,sp_float v){if(!a)return;if(a->frozen){sp_raise_frozen_array_at(a, SP_BUILTIN_FLT_ARRAY);return;}sp_int orig=i;if(i<0)i+=a->len;if(i<0)sp_raise_cls("IndexError",sp_sprintf("index %lld too small for array; minimum: %lld",(long long)orig,(long long)-a->len));while(i>=a->cap){a->cap=((((((a->cap*2))))))+1;a->data=(sp_float*)realloc(a->data,sizeof(sp_float)*a->cap);}while(i>=a->len){a->data[a->len]=sp_float_nil();a->len++;}a->data[i]=v;}  /* the gap is nil, not 0.0 (#3836) */
-+static inline void sp_FloatArray_set(sp_FloatArray*a,sp_int i,sp_float v){if(__builtin_expect(a&&!a->frozen&&(uintptr_t)i<(uintptr_t)a->len,1)){a->data[i]=v;return;}sp_FloatArray_set_slow(a,i,v);}
- 
- /* One step of CRuby's compensated summation (array.c ary_sum): Kahan-Babuska-
-    Neumaier, where `comp` collects the low-order bits each add drops and is
-@@ -264,7 +279,7 @@
+@@ -771,7 +771,7 @@
  sp_RbVal sp_FloatArray_rindex_key(sp_FloatArray *a, sp_RbVal v);
- sp_float sp_FloatArray_delete_key(sp_FloatArray *a, sp_RbVal v);
+ sp_ofloat sp_FloatArray_delete_key(sp_FloatArray *a, sp_RbVal v);
  const int64_t *sp_IntArray_ffi_data(sp_IntArray *a);
 -const double *sp_FloatArray_ffi_data(sp_FloatArray *a);
 +const sp_float *sp_FloatArray_ffi_data(sp_FloatArray *a);
@@ -316,14 +339,14 @@
  /* Cold, out-of-line helpers extracted from spinel_rt.h.
   *
   * Functions that are large and not on any hot path were `static` in
-@@ -3993,3 +3995,4 @@
-   if (to == 2) sp_str_mark_binary(res);
-   return res;
+@@ -6701,3 +6703,4 @@
+   sp_exc_stage_recv(v);
+   sp_raise_cls("FrozenError", msg);
  }
 +#endif /* !SPINEL_BARE_METAL */
 --- a/sp_core.c
 +++ b/sp_core.c
-@@ -21,7 +21,11 @@
+@@ -22,7 +22,11 @@
  /* Must match sp_types.h: sp_int is pointer-width (int64 on 64-bit,
     int32 on 32-bit) so this TU's helper ABI agrees with the generated TU. */
  typedef intptr_t sp_int;
@@ -335,7 +358,7 @@
  /* 10^p fits sp_int only up to this exponent (p>= it collapses to 0):
     10^19 > INT64_MAX, 10^10 > INT32_MAX. */
  #if INTPTR_MAX == INT32_MAX
-@@ -79,7 +83,7 @@
+@@ -83,7 +87,7 @@
     separator (CRuby's `"1_000.5".to_f == 1000.5`), returning 0.0 when no
     number leads. Underscores are stripped into a small scratch buffer before
     strtod so the C parser (which stops at `_`) sees clean digits. */
@@ -344,30 +367,16 @@
    if (!s) return 0.0;
    const char *p = s;
    while (isspace((unsigned char)*p)) p++;
-@@ -398,7 +402,7 @@
+@@ -442,7 +446,7 @@
     always uses '.', matching Ruby, regardless of the process locale. The number
     primitives (Float#to_s / to_f) are locale-free via fp_uscale; this is only
     for the printf-compatible field/flag machinery libc handles best. */
 -int sp_snprintf_c_float(char *buf, size_t size, const char *fmt, double v) {
 +int sp_snprintf_c_float(char *buf, size_t size, const char *fmt, sp_float v) {
-   static locale_t sp_c_loc = (locale_t)0;
-   if (!sp_c_loc) sp_c_loc = newlocale(LC_ALL_MASK, "C", (locale_t)0);
-   if (sp_c_loc) {
-@@ -417,11 +421,11 @@
-    identify that double. Ties there go to even, so 2.345 answers 2.34 where C
-    answers 2.35. Round to `keep` significant digits the same way and rebuild
-    the value, leaving libc to lay out the field. */
--static double sp_float_round_shortest(double v, int keep) {
-+static sp_float sp_float_round_shortest(sp_float v, int keep) {
-   if (!isfinite(v) || v == 0.0 || keep <= 0 || keep > 17) return v;
-   char digs[48];
-   int nd = 0;
--  double a = v < 0 ? -v : v;
-+  sp_float a = v < 0 ? -v : v;
-   int dp = sp_float_shortest(a, digs, &nd);
-   /* nothing to re-round: the cut falls before the first digit (where Ruby's
-      own dtoa consults the exact value instead) or past the last one. A value
-@@ -448,7 +452,7 @@
+ #if defined(_WIN32)
+   /* the UCRT's %a keeps every trailing zero of the mantissa ("0x1.0000000000000p+0");
+      MinGW-w64's own C99 printf trims as glibc does */
+@@ -584,7 +588,7 @@
     %f counts them from the decimal point, %e from the first digit, %g is a
     significant-digit count of its own. A `*` precision takes an argument this
     call does not receive, so such a format is left to libc. */
@@ -376,16 +385,7 @@
    size_t n = fmt ? strlen(fmt) : 0;
    char conv = n ? fmt[n - 1] : 0;
    if ((conv == 'f' || conv == 'e' || conv == 'E' || conv == 'g' || conv == 'G') &&
-@@ -463,7 +467,7 @@
-     if (conv == 'f') {
-       char digs[48];
-       int nd = 0;
--      double a = v < 0 ? -v : v;
-+      sp_float a = v < 0 ? -v : v;
-       keep = sp_float_shortest(a, digs, &nd) + prec + 1;
-     }
-     else if (conv == 'g' || conv == 'G') keep = prec ? prec : 1;
-@@ -571,7 +575,7 @@
+@@ -761,7 +765,7 @@
     settle the tie the same way CRuby's rational arithmetic does, which the
     library conversion alone cannot: it breaks exact ties to even, and Ruby's
     default breaks them away from zero. */
@@ -394,7 +394,7 @@
    char buf[512];
    int extra = 25;
    snprintf(buf, sizeof buf, "%.*f", (int)nd + extra, x);
-@@ -582,7 +586,7 @@
+@@ -772,7 +776,7 @@
    int tail_nonzero = 0;
    for (char *q = cut + 1; *q; q++) if (*q != '0') { tail_nonzero = 1; break; }
    *cut = '\0';                        /* the truncation toward zero */
@@ -403,7 +403,7 @@
    int away;
    if (cutd > '5') away = 1;
    else if (cutd < '5') away = 0;
-@@ -594,7 +598,7 @@
+@@ -784,7 +788,7 @@
    }
    else away = 1;                      /* the default: ties leave zero behind */
    if (!away) return r;
@@ -412,7 +412,7 @@
    snprintf(buf, sizeof buf, "%.*f", (int)nd, x < 0.0 ? r - step : r + step);
    return strtod(buf, NULL);
  }
-@@ -604,7 +608,7 @@
+@@ -794,7 +798,7 @@
  static int sp_prec_underflow(intptr_t nd, int binexp) {
    return nd < -(binexp > 0 ? binexp / 3 + 1 : binexp / 4);
  }
@@ -421,7 +421,7 @@
    if (x == 0.0 || !isfinite(x) || nd <= 0) return x;
    if (op == SP_PREC_TRUNC) return sp_float_prec_op(x, nd, signbit(x) ? SP_PREC_CEIL : SP_PREC_FLOOR);
    int binexp = 0;
-@@ -622,14 +626,14 @@
+@@ -812,14 +816,14 @@
       The decimal conversion is the same exact answer. floor and ceil keep the
       scaled form -- that is what CRuby answers for them. */
    if (nd >= DBL_DIG && op != SP_PREC_FLOOR && op != SP_PREC_CEIL) return sp_prec_decimal_round(x, nd, op);
@@ -440,7 +440,7 @@
        return res > x ? f / s : res;
      }
      case SP_PREC_CEIL:
-@@ -637,8 +641,12 @@
+@@ -827,8 +831,12 @@
      case SP_PREC_HALF_EVEN: {
        /* the tie is decided on the fractional part alone, so the integral part
           is split off first and only rejoined at the end */
@@ -456,11 +456,7 @@
          ff = floor(vs); uf = us + ff; d = vs - ff;
 --- a/sp_core.h
 +++ b/sp_core.h
-@@ -12,18 +12,19 @@
- 
- #include <stdint.h>
- #include <stddef.h>   /* size_t (sp_snprintf_c_float) */
-+#include "sp_types.h"  /* for the MCU: the signatures below use sp_float for double */
+@@ -16,7 +16,7 @@
  
  /* String -> number parsers (cold, I/O-boundary). */
  intptr_t sp_str_to_i_cruby(const char *s);
@@ -469,19 +465,21 @@
  intptr_t sp_str_to_i_base(const char *s, intptr_t base);
  intptr_t sp_str_to_i_strict(const char *s);
  intptr_t sp_str_to_i_strict_base(const char *s, intptr_t base);
- intptr_t sp_str_to_i_lenient_base(const char *s, intptr_t base);
+@@ -24,10 +24,10 @@
+ intptr_t sp_int_negative_base(const char *s, intptr_t base);   /* Kernel#Integer: the radix a negative one reads as */
+ int     sp_str_int_overflows(const char *s, intptr_t base);
+ char   *sp_int_digits_dup(const char *s, intptr_t *base, const char **rest);
 -double  sp_str_to_f_strict(const char *s);
--double sp_str_to_f_lenient(const char *s);
++sp_float  sp_str_to_f_strict(const char *s);
+ sp_ofloat sp_str_to_f_lenient(const char *s);
 -int     sp_snprintf_c_float(char *buf, size_t size, const char *fmt, double v);
 -int     sp_snprintf_ruby_float(char *buf, size_t size, const char *fmt, double v);
-+sp_float  sp_str_to_f_strict(const char *s);
-+sp_float sp_str_to_f_lenient(const char *s);
 +int     sp_snprintf_c_float(char *buf, size_t size, const char *fmt, sp_float v);
 +int     sp_snprintf_ruby_float(char *buf, size_t size, const char *fmt, sp_float v);
  
  /* Cold integer-math + String#oct helpers. */
  intptr_t sp_gcd(intptr_t a, intptr_t b);
-@@ -31,7 +32,7 @@
+@@ -35,7 +35,7 @@
  intptr_t sp_powmod(intptr_t base, intptr_t exp, intptr_t mod);
  intptr_t sp_ceildiv(intptr_t a, intptr_t b);
  intptr_t sp_int_clamp(intptr_t v, intptr_t lo, intptr_t hi);
@@ -489,8 +487,8 @@
 +sp_float sp_float_clamp(sp_float v, sp_float lo, sp_float hi);
  intptr_t sp_int_sqrt(intptr_t n);
  intptr_t sp_ipow10(intptr_t p);
- intptr_t sp_int_round(intptr_t v, intptr_t nd);
-@@ -48,6 +49,6 @@
+ void sp_int_round_check_ndigits(intptr_t nd);
+@@ -53,6 +53,6 @@
  #define SP_PREC_TRUNC      3
  #define SP_PREC_HALF_EVEN  4
  #define SP_PREC_HALF_DOWN  5
@@ -506,14 +504,20 @@
  /* sp_fiber.c -- Fiber runtime bodies (POSIX ucontext).
   * See sp_fiber.h. The collector roots, sp_gc_alloc, and sp_raise_cls live
   * in the generated TU and are reached by name; fiber-local storage is
-@@ -388,3 +390,4 @@
- sp_RbVal sp_Fiber_transfer_catch(sp_Fiber*f,sp_RbVal val,int*out_raised,const char**out_cls,const char**out_msg,void**out_obj){SP_GC_ROOT_RBVAL(val);SP_GC_ROOT(f);sp_RbVal r=sp_Fiber_transfer_core(f,val);*out_raised=f->raised;if(f->raised){f->raised=0;*out_cls=f->raised_cls;*out_msg=f->raised_msg;*out_obj=f->raised_obj;f->raised_obj=NULL;}return r;}
+@@ -1074,3 +1076,10 @@
+   *out_raised=f->raised;if(f->raised){f->raised=0;*out_cls=f->raised_cls;*out_msg=f->raised_msg;*out_obj=f->raised_obj;f->raised_obj=NULL;}return r;}
  
- void sp_mark_fiber_root_storage(void){if(sp_fiber_root.storage)sp_gc_mark(sp_fiber_root.storage);}
+ void sp_mark_fiber_root_storage(void){if(sp_fiber_root.storage)sp_gc_mark(sp_fiber_root.storage);if(sp_fiber_root.attrs)sp_gc_mark(sp_fiber_root.attrs);}
++#else   /* for the MCU: no fibers and no fault handler, so nothing for these to do */
++#include "sp_fiber.h"
++void (*sp_stack_overflow_raise_fn)(void);
++void sp_sig_unblock(int a, int b) { (void)a; (void)b; }
++void sp_mark_fiber_root_storage(void) {}
++const char *sp_Fiber_inspect(sp_Fiber *f) { (void)f; return "#<Fiber>"; }
 +#endif /* !SPINEL_BARE_METAL */
 --- a/sp_fiber_ctx.h
 +++ b/sp_fiber_ctx.h
-@@ -1,81 +1,6 @@
+@@ -1,110 +1,6 @@
 -/* sp_fiber_ctx.h -- portable coroutine context switch for sp_fiber.c.
 - *
 - * Replaces POSIX <ucontext.h> (getcontext/makecontext/swapcontext), which
@@ -539,10 +543,28 @@
 -#include <stddef.h>
 -#include <stdint.h>
 -
--#if defined(__x86_64__) || defined(__aarch64__)
+-/* Windows takes the ucontext fallback, which lib/win32 provides: its x64
+-   ABI saves more registers, and a switch there also moves the stack bounds
+-   the thread's TEB holds. */
+-#if (defined(__x86_64__) || defined(__aarch64__)) && !defined(_WIN32)
 -  #define SP_FIBER_ASM 1
 -#else
 -  #define SP_FIBER_ASM 0
+-#endif
+-
+-/* AddressSanitizer keeps its own record of the stack the thread runs on.
+-   The asm switch moves the stack pointer without telling it, so the first
+-   exception after a switch (a longjmp) found the stack out of its bounds,
+-   left the frames it skipped poisoned, and later calls on those addresses
+-   were reported as stack overflows and uses after scope. Under
+-   -fsanitize=address (both the runtime and the program are built with it,
+-   as with ThreadSanitizer's SP_TSAN) a context also carries the bounds of
+-   its stack, and sp_ctx_swap announces each switch (sp_fiber.c). */
+-#ifndef __has_feature
+-#define __has_feature(x) 0
+-#endif
+-#if defined(__SANITIZE_ADDRESS__) || __has_feature(address_sanitizer)
+-#define SP_ASAN 1
 -#endif
 -
 -#if SP_FIBER_ASM
@@ -550,7 +572,11 @@
 -/* The whole machine context is the saved stack pointer; the callee-saved
 -   registers are pushed onto / popped from the coroutine's own stack by
 -   sp_ctx_swap (see the file-scope asm in sp_fiber.c). */
+-#ifdef SP_ASAN
+-typedef struct sp_fiber_ctx { void *sp; const void *asan_lo; size_t asan_size; } sp_fiber_ctx;
+-#else
 -typedef struct sp_fiber_ctx { void *sp; } sp_fiber_ctx;
+-#endif
 -
 -static inline void sp_ctx_make(sp_fiber_ctx *ctx, void *base, size_t size,
 -                               void (*entry)(void)) {
@@ -571,6 +597,9 @@
 -  for (int i = 0; i < 20; i++) s[i] = 0;
 -  s[11] = (void *)entry;                 /* x30 (lr) */
 -  ctx->sp = s;
+-#endif
+-#ifdef SP_ASAN
+-  ctx->asan_lo = base; ctx->asan_size = size;
 -#endif
 -}
 -
@@ -593,12 +622,16 @@
 -/* Defined as file-scope asm in sp_fiber.c (asm backend) or a swapcontext
 -   wrapper (fallback). */
 -void sp_ctx_swap(sp_fiber_ctx *from, sp_fiber_ctx *to);
+-#if SP_FIBER_ASM && defined(SP_ASAN)
+-/* The first code a fresh context runs (sp_fiber.c) */
+-void sp_ctx_entered(void);
+-#endif
 +typedef void* sp_fiber_ctx;
  
  #endif /* SP_FIBER_CTX_H */
 --- a/sp_format.c
 +++ b/sp_format.c
-@@ -340,7 +340,7 @@
+@@ -599,7 +599,7 @@
    if (isnan(f) || isinf(f)) sp_raise_cls("FloatDomainError", isnan(f) ? "NaN" : "Infinity");
    if (f == 0.0) { sp_Rational z; z.num = 0; z.den = 1; return z; }
    int e;
@@ -607,7 +640,7 @@
    for (int i = 0; i < 53 && m != floor(m); i++) { m *= 2.0; e--; }
    sp_rat_wide num = (sp_rat_wide)m;          /* integer mantissa (fits in 54 bits) */
    if (e >= 0) {
-@@ -357,8 +357,8 @@
+@@ -621,8 +621,8 @@
  /* Simplest p/q with lo <= p/q <= hi, for 0 < lo <= hi. Classic continued-fraction
     "simplest rational in an interval" recursion; the convergent depth is bounded by
     the interval, so q stays small for sane epsilons. */
@@ -618,7 +651,7 @@
    if (fl == lo) { *np = (sp_rat_wide)fl; *dp = 1; return; }   /* lo is an integer */
    if (fl == floor(hi)) {                                       /* no integer in (lo,hi) */
      sp_rat_wide n, d;
-@@ -369,14 +369,14 @@
+@@ -633,14 +633,14 @@
    }
    *np = (sp_rat_wide)fl + 1; *dp = 1;                          /* fl+1 lies in [lo,hi] */
  }
@@ -637,7 +670,7 @@
    sp_rat_wide n, d;
    sp_simplest_pos(lo, hi, &n, &d);
    if (neg) n = -n;
-@@ -384,8 +384,8 @@
+@@ -648,8 +648,8 @@
  }
  sp_Rational sp_float_rationalize(sp_float f, sp_float eps) {
    if (isnan(f) || isinf(f)) sp_raise_cls("FloatDomainError", isnan(f) ? "NaN" : "Infinity");
@@ -648,7 +681,7 @@
  }
  /* No-arg rationalize: simplest rational that round-trips to this exact double,
     i.e. lying in the half-ulp interval around f. */
-@@ -400,15 +400,15 @@
+@@ -664,15 +664,15 @@
    if (isnan(f) || isinf(f)) sp_raise_cls("FloatDomainError", isnan(f) ? "NaN" : "Infinity");
    if (f == 0.0) { sp_Rational z; z.num = 0; z.den = 1; return z; }
    int neg = f < 0.0;
@@ -667,7 +700,7 @@
      sp_rat_wide a = (sp_rat_wide)floor(v);
      /* guard the convergent against sp_int overflow before forming it (all in
         integer arithmetic: a*h0 + h1 <= INTPTR_MAX). */
-@@ -418,9 +418,9 @@
+@@ -682,9 +682,9 @@
      sp_rat_wide h = a * h0 + h1;
      sp_rat_wide k = a * k0 + k1;
      num = h; den = k;
@@ -681,31 +714,31 @@
    }
 --- a/sp_gc.c
 +++ b/sp_gc.c
-@@ -27,6 +27,7 @@
- /* ---- Globals shared with the generated TU (declared extern in sp_gc.h) ---- */
- SP_TLS void **sp_gc_roots[SP_GC_STACK_MAX];   /* per-worker (SP_TLS); see sp_gc.h */
+@@ -55,6 +55,7 @@
+   return 1;
+ }
  SP_TLS int sp_gc_nroots = 0;
 +int sp_gc_root_overflow = 0;   /* for the MCU: see sp_gc.h */
  #ifdef SP_THREADS
  sp_gc_wslot_t sp_gc_wslot[SP_MAX_WORKERS];   /* per-worker young head + flush delta, cache-line padded */
  #else
-@@ -164,6 +165,7 @@
+@@ -254,6 +255,7 @@
     Name the root slot the collector was walking, which is what turns an
     unreproducible crash into a variable. Re-raises so the core dump is still
     produced. */
 +#if 0 /* Not on the MCU */
- static void sp_gc_fault_report(int sig) {
+ void sp_gc_fault_report(int sig) {
    static const char hex[] = "0123456789abcdef";
    char buf[256]; size_t o = 0;
-@@ -183,6 +185,7 @@
+@@ -278,6 +280,7 @@
    signal(sig, SIG_DFL);
    raise(sig);
  }
 +#endif
- __attribute__((constructor)) static void sp_gc_debug_env(void){
-   const char *v=getenv("SPINEL_GC_VERIFY"); sp_gc_verify=(v&&*v&&*v!='0');
-   { const char *ph=getenv("SPINEL_GC_PHASES"); sp_gc_ph_on=(ph&&*ph&&*ph!='0'); }
-@@ -229,7 +232,9 @@
+ /* The collector's boot-time modes, read from the environment once, before
+    main. */
+ SP_CONSTRUCTOR static void sp_gc_debug_env(void){
+@@ -340,7 +343,9 @@
      const char *sm = getenv("SPINEL_GC_STR_MAJOR");
      sp_gc_str_major_fixed = (sm && strcmp(sm, "fixed") == 0);
      sp_gc_str_major_sched = !(sm && strcmp(sm, "size") == 0); }
@@ -714,13 +747,13 @@
 +#endif
  }
  
- /* Tag byte preceding `obj`: 0xfe heap-unmarked -> 0xfc; 0xfc/0xff/0xfd/0xf1/
+ /* Tag byte preceding `obj`: 0xfe heap-unmarked -> 0xfc, 0xfa -> 0xf8;
 --- a/sp_gc.h
 +++ b/sp_gc.h
-@@ -65,8 +65,12 @@
-    generated TU -- both consult this for the array and the SP_GC_ROOT bound).
-    Too small overflows silently into a dropped root (UAF), so size it to the
-    program's deepest live-root nesting. */
+@@ -83,8 +83,12 @@
+    string reached it, and the dropped roots were freed under the frames that
+    still held them -- keeps every root; only the fast path's bound is this
+    constant. */
 +/* Lowered from Spinel's 65536 for the MCU, where sp_gc_roots costs 4 bytes a slot of SRAM whether
 +   the slot is used or not: 65536 of them is 262KB. SPMS-1 allocates nothing per sample and
 +   measures 21 roots in use, and the sketch prints the live and peak counts to the debug UART so
@@ -731,52 +764,55 @@
  #endif
  #define SP_GC_FULL_INTERVAL 8
  /* Per-worker root stack (SP_TLS): each OS worker carries the active roots of
-@@ -74,6 +78,12 @@
+@@ -92,6 +96,13 @@
     switch. Plain globals in the single-threaded build. */
  extern SP_TLS void **sp_gc_roots[SP_GC_STACK_MAX];
  extern SP_TLS int sp_gc_nroots;
-+/* For the MCU: set when a root did not fit in sp_gc_roots and was dropped, which upstream leaves
-+   silent and which can free an object still in use. Only with SP_GC_ROOT_OVERFLOW_CHECK, which
-+   sim_render builds with and the sketch does not: the store, at each of the pushes inlined into
-+   Spms1_main, would cost the synth core about 400 bytes of RAM. The synth takes the same paths
-+   in sim_render as on the device, so the check there stands for the device. */
++/* For the MCU: set when a root did not fit in sp_gc_roots and went to the overflow segment, which
++   allocates from the heap, as nothing may while the synth plays. Only with
++   SP_GC_ROOT_OVERFLOW_CHECK, which sim_render builds with and the sketch does not: the store, at
++   each of the pushes inlined into Spms1_main, would cost the synth core about 400 bytes of RAM. The
++   synth takes the same paths in sim_render as on the device, so the check there stands for the
++   device. */
 +extern int sp_gc_root_overflow;
+ extern SP_TLS int sp_gc_in_sweeper;   /* set on a sweeper thread: finalizers skip the per-worker byte accounting */
  
  /* GC root tracking. SP_GC_ROOT registers a stack-resident root with a
-    cleanup-attribute sentinel so it auto-pops when its declaring scope ends.
-@@ -83,6 +93,9 @@
-    stack above, so relocating them is layout-neutral. */
+@@ -110,6 +121,9 @@
+ }
  static inline int _sp_gc_root_push(void **p) {
    if (sp_gc_nroots < SP_GC_STACK_MAX) { sp_gc_roots[sp_gc_nroots++] = p; return 1; }
 +#ifdef SP_GC_ROOT_OVERFLOW_CHECK
 +  sp_gc_root_overflow = 1;
 +#endif
-   return 0;
+   return sp_gc_root_push_slow(p);
  }
  static inline void _sp_gc_root_pop(int *added) { if (*added) sp_gc_nroots--; }
-@@ -123,7 +136,10 @@
+@@ -188,8 +202,11 @@
     assignment inside a larger expression. The statement expression evaluates the
     object once, which a comma form would not. */
  #define SP_WBO(x) ({ __typeof__(x) _sp_wbo = (x); sp_gc_wb((void *)_sp_wbo); _sp_wbo; })
--#define SP_GC_REMEMBERED_MAX 65536
 +/* Lowered from Spinel's 65536 for the MCU, where it is 4 bytes of SRAM a slot (256KB as shipped).
 +   A full set is safe: the next collection marks the whole heap, and SPMS-1 allocates nothing per
 +   sample, so collections are rare to begin with. */
+ #ifndef SP_GC_REMEMBERED_MAX
+-#define SP_GC_REMEMBERED_MAX 65536
 +#define SP_GC_REMEMBERED_MAX 256
+ #endif
  extern void *sp_gc_remembered[SP_GC_REMEMBERED_MAX];
  extern int sp_gc_nremembered;
- extern int sp_gc_rem_overflow;
-@@ -172,7 +188,9 @@
+@@ -240,8 +257,10 @@
  static inline void sp_gc_pin_remembered(void *obj) {
-   if (__builtin_expect(sp_gc_minor_on, 1)) sp_gc_pin_remembered_slow(obj);
+   if (SP_EXPECT(sp_gc_minor_on, 1)) sp_gc_pin_remembered_slow(obj);
  }
--#define SP_GC_PINNED_MAX 16384
 +/* Lowered from Spinel's 16384 for the MCU (64KB of SRAM as shipped). Overflow is safe in the same
 +   way as the remembered set's. */
+ #ifndef SP_GC_PINNED_MAX
+-#define SP_GC_PINNED_MAX 16384
 +#define SP_GC_PINNED_MAX 256
+ #endif
  extern void *sp_gc_pinned[SP_GC_PINNED_MAX];
  extern int sp_gc_npinned;
- extern int sp_gc_pin_overflow;
 --- a/sp_io.c
 +++ b/sp_io.c
 @@ -1,3 +1,5 @@
@@ -785,23 +821,19 @@
  /* sp_io.c -- File / IO handle ops in libspinel_rt.a.
   *
   * The allocation-free handle ops (open / pipe / fdopen / write / close /
-@@ -1321,3 +1323,4 @@
+@@ -2404,3 +2406,9 @@
    f->lineno = 0;
    return f;
  }
++#else   /* for the MCU: no File and no IO, so none of these is ever asked of one */
++#include "sp_io.h"
++const char *sp_File_inspect(sp_File *f) { (void)f; return "#<IO>"; }
++const char *sp_io_kind_name(sp_File *f) { (void)f; return "IO"; }
++sp_bool sp_io_is_a(sp_File *f, const char *cls) { (void)f; (void)cls; return 0; }
 +#endif /* !SPINEL_BARE_METAL */
 --- a/sp_io.h
 +++ b/sp_io.h
-@@ -188,7 +188,7 @@
- sp_int sp_file_do_link(const char *oldp, const char *newp);
- sp_int sp_file_umask(sp_int mask, int have_arg);
- sp_int sp_file_mkfifo(const char *path, sp_int mode);
--sp_int sp_file_utime(double atime, double mtime, const char *path);
-+sp_int sp_file_utime(sp_float atime, sp_float mtime, const char *path);
- const char *sp_file_readlink(const char *path);  /* defined in sp_cold.c */
- void sp_file_delete(const char *path);
- void sp_file_rename(const char *from, const char *to);
-@@ -204,9 +204,11 @@
+@@ -315,9 +315,11 @@
     any syscall sees it; the multi-path File.delete checks every path first. */
  void sp_file_path_check(const char *path);
  
@@ -814,9 +846,22 @@
  /* The Dir counterpart of SP_IO_OPEN: reading or positioning a closed handle
     is IOError "closed directory" in CRuby; #close, #path and #inspect work. */
  SP_NORETURN SP_COLD void sp_dir_raise_closed(void);
+--- a/sp_iobuffer.c
++++ b/sp_iobuffer.c
+@@ -1,3 +1,5 @@
++#include "sp_types.h"   /* for the MCU: SPINEL_BARE_METAL */
++#if !SPINEL_BARE_METAL   /* for the MCU: needs <sys/mman.h> and the file descriptors (IO::Buffer) */
+ /* sp_iobuffer.c -- IO::Buffer, CRuby 4.x semantics (see sp_iobuffer.h for
+    the memory model). Bound through packages/io/io/buffer.rb; that file is
+    spliced into any program referencing `IO::Buffer`, so this object is
+@@ -1104,3 +1106,4 @@
+   b->data = (uint8_t *)m + (offset - page);
+   return b;
+ }
++#endif /* !SPINEL_BARE_METAL */
 --- a/sp_marshal.c
 +++ b/sp_marshal.c
-@@ -66,7 +66,7 @@
+@@ -73,7 +73,7 @@
  }
  /* CRuby's Marshal float text: the shortest %.g that round-trips, exponent
     normalized ("1e+02" -> "1e2"); 0.0 is "0", 100.0 is "1e2", 0.1 is "0.1". */
@@ -825,7 +870,7 @@
    for (int prec = 1; prec <= 17; prec++) {
      sp_format_float(f, buf, bufsz, 'g', prec, '\0');   /* locale-independent */
      double rt = 0.0; sp_read_float(buf, NULL, &rt);
-@@ -114,7 +114,7 @@
+@@ -214,7 +214,7 @@
        sp_float f = v.v.f; const char *fs; char fbuf[64];
        if (isnan(f)) fs = "nan";
        else if (isinf(f)) fs = f < 0 ? "-inf" : "inf";
@@ -842,11 +887,21 @@
  /* sp_net.c -- POSIX TCP / poll / process / shell primitives.
   * See sp_net.h. Pure C, no spinel-runtime dependency; no OpenSSL.
   *
-@@ -968,3 +970,4 @@
+@@ -1383,3 +1385,4 @@
      }
      return -1;
  }
 +#endif /* !SPINEL_BARE_METAL */
+--- a/sp_poly_cold.c
++++ b/sp_poly_cold.c
+@@ -1003,6 +1003,7 @@
+     sp_raise_cls("TypeError", "wrong element type String (expected array)");
+   }
+   sp_raise_nomethod(sp_nomethod_msg("to_h", v));  /* "for true", "for an instance of String", as CRuby words it */
++  return sp_box_nil();   /* for the MCU: unreached, for the sketch build's -Werror=return-type */
+ }
+ 
+ void sp_kwargs_verify_at(sp_RbVal h, const char *const *allowed, const char *const *required, const char *const *lit, const char *const *unk, int nbefore, int check_unknown)
 --- a/sp_process.c
 +++ b/sp_process.c
 @@ -1,3 +1,5 @@
@@ -855,9 +910,9 @@
  /* lib/sp_process.c -- Process.spawn and Process.waitpid2 (CRuby-compatible)
   *
   * Lives in its own TU because the codegen calls sp_process_spawn
-@@ -366,3 +368,4 @@
-   sp_PolyArray_push(pa, sp_box_process_status(sp_process_status_new((sp_int)r, (sp_int)status)));
-   return pa;
+@@ -754,3 +756,4 @@
+   return 0;
+ #endif
  }
 +#endif /* !SPINEL_BARE_METAL */
 --- a/sp_process_status.c
@@ -868,9 +923,9 @@
  /* sp_process_status.c -- Process::Status runtime.
   *
   * The runtime is deliberately tiny: a heap-allocated struct holding
-@@ -181,3 +183,4 @@
-   }
-   return sp_status_buf;
+@@ -207,3 +209,4 @@
+   if (!p) return sp_str_dup_external(is_inspect ? "nil" : "");
+   return sp_str_dup_external(sp_process_status_to_s(p->pid, p->status, is_inspect));
  }
 +#endif /* !SPINEL_BARE_METAL */
 --- a/sp_sched.c
@@ -881,40 +936,84 @@
  /* sp_sched.c -- cooperative M:N thread scheduler bodies, Phase 0 (N=1).
   * See sp_sched.h. Built on the sp_fiber context switch: the main thread runs on
   * the root fiber and pumps a run queue of green threads whenever it blocks. */
-@@ -2482,3 +2484,4 @@
-                       (long long)t->birth_line, st);
-   return sp_sprintf("#<Thread:0x%016llx %s>", (unsigned long long)(uintptr_t)t, st);
+@@ -5781,3 +5783,10 @@
+   return 0;
+ #endif
  }
++#else   /* for the MCU: no Thread, Queue or Mutex, so none of these is ever asked of one */
++#include "sp_sched.h"
++const char *sp_Thread_inspect(sp_thread *t) { (void)t; return "#<Thread>"; }
++sp_int sp_Queue_size(sp_queue *q) { (void)q; return 0; }
++const char *sp_Mutex_class_name(sp_mutex *m) { (void)m; return "Thread::Mutex"; }
++const char *sp_Queue_class_name(sp_queue *q) { (void)q; return "Thread::Queue"; }
 +#endif /* !SPINEL_BARE_METAL */
 --- a/sp_sched.h
 +++ b/sp_sched.h
-@@ -54,7 +54,7 @@
-   struct sp_thread **wait_head;  /* head of that wait list, so #kill/#raise can unpark it */
-   struct sp_thread *all_next, *all_prev;  /* registry of live threads (GC roots) */
-   void             *tls;         /* thread-local storage (Thread#[] / #[]=); lazily allocated */
--  double            wake_deadline; /* CLOCK_MONOTONIC time to wake a sleeping thread (Kernel#sleep) */
-+  sp_float            wake_deadline; /* CLOCK_MONOTONIC time to wake a sleeping thread (Kernel#sleep) */
-   int               io_fd;       /* fd this thread is parked on for I/O (-1 = none, scheduler-aware I/O) */
-   short             io_events;   /* poll events it is waiting for (POLLIN/POLLOUT) */
-   short             io_revents;  /* poll result the monitor delivered when the fd became ready */
-@@ -83,7 +83,7 @@
+@@ -18,7 +18,10 @@
+ #ifndef SP_SCHED_H
+ #define SP_SCHED_H
+ 
++#include "sp_types.h"   /* for the MCU: SPINEL_BARE_METAL */
++#if !SPINEL_BARE_METAL   /* for the MCU: no poll (no threads) */
+ #include <poll.h>
++#endif
+ #include "sp_fiber.h"
+ 
+ typedef enum { SP_TH_RUNNABLE, SP_TH_RUNNING, SP_TH_BLOCKED, SP_TH_DEAD } sp_thread_state;
+@@ -139,7 +142,7 @@
  /* Kernel#sleep(seconds): park the calling thread and free its OS worker for other
     green threads; a monitor thread wakes it after the duration. Falls back to a
     plain blocking sleep only in the single-threaded build (spinel_rt.h). */
 -void       sp_sched_sleep(double seconds);
 +void       sp_sched_sleep(sp_float seconds);
  int        sp_sched_other_threads_live(void);
+ int        sp_sched_threads_started(void);   /* the worker pool is up: Process.daemon refuses to fork */
  int        sp_sched_wait_child(int pid, int *status);
- void       sp_sleep(sp_float s);   /* Kernel#sleep; relocated from spinel_rt.h to lib/sp_cold.c */
-@@ -106,7 +106,7 @@
-    worker; a blocking select(2) here pins the worker for the whole timeout,
-    and with every worker pinned the peer that would make the fd ready never
-    gets to run. */
--int        sp_sched_wait_io_timeout(int fd, short events, double timeout_s);
-+int        sp_sched_wait_io_timeout(int fd, short events, sp_float timeout_s);
- sp_thread *sp_Thread_current(void);       /* Thread.current */
- sp_bool   sp_Thread_alive(sp_thread *t); /* #alive? */
- sp_bool   sp_Thread_set_report_default(sp_bool v);  /* Thread.report_on_exception= */
+--- a/sp_slab.c
++++ b/sp_slab.c
+@@ -73,7 +73,20 @@
+ #include <stdio.h>
+ #include <string.h>
+ #include <stdint.h>
++#include "sp_types.h"   /* for the MCU: SPINEL_BARE_METAL */
++#if !SPINEL_BARE_METAL   /* for the MCU: no mmap, and the slab is off (sp_slab_on) */
+ #include <sys/mman.h>
++#else   /* for the MCU: never reached, the slab being off from the start (sp_slab_on) */
++#define PROT_READ 1
++#define PROT_WRITE 2
++#define MAP_PRIVATE 2
++#define MAP_ANON 0x20
++#define MAP_FAILED ((void *)-1)
++#define MADV_DONTNEED 4
++static inline void *mmap(void *a, size_t n, int p, int f, int fd, long o) { (void)a; (void)n; (void)p; (void)f; (void)fd; (void)o; return MAP_FAILED; }
++static inline int munmap(void *a, size_t n) { (void)a; (void)n; return -1; }
++static inline int madvise(void *a, size_t n, int adv) { (void)a; (void)n; (void)adv; return -1; }
++#endif
+ #include <time.h>
+ #include "sp_gc.h"
+ #include "sp_alloc.h"   /* sp_gc_alloc is here: the collector's bookkeeping around the claim */
+@@ -197,7 +210,11 @@
+ static uintptr_t sp_slab_brk = 0;   /* how much of it is in use */
+ size_t sp_slab_cap = 0;
+ static sp_slab_chunk *sp_slab_empty = NULL;   /* chunks holding no class */
++#if SPINEL_BARE_METAL   /* for the MCU: off, every block a malloc; a slab is a 4 MB arena of 16 KB chunks */
++int sp_slab_on = 0;
++#else
+ int sp_slab_on = -1;                          /* decided once from the environment */
++#endif
+ /* The parity of the epoch new allocations join. The collector flips it under
+    the barrier (sp_slab_epoch_flip), where no mutator runs. */
+ unsigned sp_slab_epoch = 0;
+@@ -1440,7 +1457,8 @@
+    chunks handed back (each one an madvise), and the madvise time itself. */
+ unsigned long long sp_slab_rel_calls = 0, sp_slab_rel_walked = 0, sp_slab_rel_madv = 0;
+ double sp_slab_rel_madv_t = 0, sp_slab_rel_sort_t = 0;
+-static double sp_slab_now(void) { struct timespec ts; clock_gettime(CLOCK_MONOTONIC, &ts); return ts.tv_sec + ts.tv_nsec * 1e-9; }
++static double sp_slab_now(void) { struct timespec ts = {0}; //clock_gettime(CLOCK_MONOTONIC, &ts);   /* for the MCU: no clock (the slab is off) */
++  return ts.tv_sec + ts.tv_nsec * 1e-9; }
+ /* One worker's lists, released by their OWNER (or, for a slot no worker
+    runs, by the collector under the barrier), right after its own sweep: the
+    walk, the sort and the madvise calls that the collector used to do for
 --- a/sp_system.c
 +++ b/sp_system.c
 @@ -1,3 +1,5 @@
@@ -923,8 +1022,8 @@
  /* sp_system.c -- system()/backtick support in libspinel_rt.a.
   * See sp_system.h.
   *
-@@ -56,3 +58,4 @@
-   sp_last_status = status;
+@@ -206,3 +208,4 @@
+   sp_last_pid = (int)pid;
    return (WIFEXITED(status) && WEXITSTATUS(status) == 0) ? TRUE : FALSE;
  }
 +#endif /* !SPINEL_BARE_METAL */
@@ -942,7 +1041,7 @@
  #include <time.h>
 --- a/sp_types.h
 +++ b/sp_types.h
-@@ -88,7 +88,22 @@
+@@ -81,7 +81,27 @@
  #error "spinel: unsupported intptr_t width (need 32- or 64-bit)"
  #endif
  typedef intptr_t sp_int;
@@ -962,9 +1061,14 @@
 +#ifndef SPINEL_BARE_METAL
 +#define SPINEL_BARE_METAL 1
 +#endif
++/* For the MCU: one-String mode in every file of the runtime, as the generated code defines it and
++   as Spinel compiles its own runtime archive (-DSP_ONE_STRING), which a sketch has no flag for. */
++#ifndef SP_ONE_STRING
++#define SP_ONE_STRING 1
++#endif
  typedef bool sp_bool;
  
- /* Sentinel value reserved by the int? (scalar-nullable int) type. An
+ /* CRuby's nil.object_id, false.object_id and true.object_id. */
 --- a/spinel_rt.h
 +++ b/spinel_rt.h
 @@ -2,6 +2,8 @@
@@ -976,7 +1080,7 @@
  /* Platform feature-test macros (_DARWIN_C_SOURCE for MAP_ANON) live at the top
     of sp_types.h so every translation unit that includes it defines them before
     the first system header. Must precede <stdio.h>. */
-@@ -33,6 +35,7 @@
+@@ -63,6 +65,7 @@
  #include <stdlib.h>
  #include <string.h>
  #include <math.h>
@@ -984,9 +1088,9 @@
  #include <stdbool.h>
  #include <stdint.h>
  #include <ctype.h>
-@@ -40,10 +43,12 @@
+@@ -70,10 +73,12 @@
  #include <time.h>
- #include <setjmp.h>
+ #include "sp_setjmp.h"
  #include <errno.h>
 +#if 0 /* Not on the MCU */
  #include <sys/stat.h>
@@ -997,7 +1101,7 @@
  
  /* Opt-in native backtrace (spinel --debug). In a -g, non-inlined build the
     sp_<method> symbols are present, so sp_raise_cls can snapshot the live C
-@@ -52,6 +57,7 @@
+@@ -82,6 +87,7 @@
     generated main() sets sp_bt_enabled (debug builds), so non-debug behaviour
     and cost are unchanged. execinfo is not quite POSIX-ish; it's absent on
     Windows and other platforms. */
@@ -1005,7 +1109,7 @@
  #if defined(__has_include)
  #  if __has_include(<execinfo.h>)
  #    define HAVE_EXECINFO_H 1
-@@ -70,12 +76,16 @@
+@@ -100,6 +106,9 @@
  #define backtrace(buf, sz) 0
  #endif
  #define SP_BT_AVAILABLE 1
@@ -1014,7 +1118,8 @@
 +#endif
  extern int sp_bt_enabled;          /* set to 1 by debug-build main(); defined in lib/sp_cold.c */
  extern const char *sp_bt_srcfile;  /* toplevel .rb path, set by debug main() */
- #if SP_BT_AVAILABLE
+ extern const char *const *sp_bt_files;  /* debug main(): C symbol, .rb file pairs of the methods of a required file, 0 ends */
+@@ -107,6 +116,7 @@
  static void *sp_bt_buf[256];       /* frames captured at the last raise */
  static int sp_bt_n = 0;
  #endif
@@ -1022,15 +1127,15 @@
  #include <unistd.h>
  #include <signal.h>
  #include <sys/resource.h>   /* PRIO_* selectors for Process.getpriority */
-@@ -84,6 +94,7 @@
+@@ -115,6 +125,7 @@
  #include <sys/file.h>
  #include <sys/mman.h>
  #include <sys/wait.h>
 +#endif
- #if !defined(__APPLE__) && !defined(__FreeBSD__)
- #include <malloc.h>
- #else
-@@ -217,21 +228,21 @@
+ /* malloc_trim is glibc's: the collector (sp_gc.c) returns freed arena pages
+    with it after a full cycle, and nowhere else defines it -- not Darwin, not
+    the BSDs, not musl. Nothing here calls it; the no-op keeps any generated
+@@ -326,15 +337,15 @@
  /* float %% with an INTEGER zero divisor raises in CRuby (5.0 %% 0), while a
     float zero divisor yields NaN (5.0 %% 0.0) -- the int-divisor emit routes
     here so the check costs nothing on the float-divisor path. */
@@ -1051,6 +1156,21 @@
    if (r != 0.0 && ((r < 0.0) != (b < 0.0))) r += b;
    return r;
  }
+@@ -344,17 +355,17 @@
+    up to a whole number (1.0.divmod(0.1) answered [10, 0.0] where CRuby has
+    [9, 0.09999999999999995]); then both are moved to the divisor's sign. A
+    zero divisor raises; a NaN one answers NaN for both. */
+-static inline void sp_flo_divmod(double x, double y, double *divp, double *modp) {
++static inline void sp_flo_divmod(sp_float x, sp_float y, sp_float *divp, sp_float *modp) {
+   if (isnan(y)) { *divp = *modp = y; return; }
+   if (y == 0.0) sp_raise_cls("ZeroDivisionError", "divided by 0");
+-  double mod = (x == 0.0 || (isinf(y) && !isinf(x))) ? x : fmod(x, y);
+-  double div = (isinf(x) && !isinf(y)) ? x : round((x - mod) / y);
++  sp_float mod = (x == 0.0 || (isinf(y) && !isinf(x))) ? x : fmod(x, y);
++  sp_float div = (isinf(x) && !isinf(y)) ? x : round((x - mod) / y);
+   if (y * mod < 0) { mod += y; div -= 1.0; }
+   *divp = div; *modp = mod;
+ }
  /* Float#remainder: plain C fmod, but a zero divisor raises the way every other
     Float division-derived operation does (#3649). */
 -static inline double sp_fremainder(double a, double b) {
@@ -1058,8 +1178,8 @@
    if (b == 0) sp_raise_cls("ZeroDivisionError", "divided by 0");
    return fmod(a, b);
  }
-@@ -456,15 +467,17 @@
- static inline const char *sp_ruby_platform_str(void) { return sp_ruby_platform_data + 1; }
+@@ -611,15 +622,17 @@
+    RUBY_PLATFORM: emit_engine_const_str) */
  
  /* Process.ppid wrapper. */
 +#if 0 /* Not on the MCU */
@@ -1078,52 +1198,44 @@
  #else
    return 0.0;
  #endif
-@@ -1101,6 +1114,7 @@
- const char *sp_File_readpartial(sp_File *f, sp_int n);
+@@ -1300,7 +1313,11 @@
+      fiber stack holds none of the line. */
+   char *buf = NULL;
+   size_t cap = 0;
++#if SPINEL_BARE_METAL   /* for the MCU: no getline, and no File to read a line from */
++  ssize_t got = -1; (void)cap;
++#else
+   ssize_t got = SP_SIG_BLOCKING(getline(&buf, &cap, f->fp));
++#endif
+   if (got < 0) { free(buf); return NULL; }
+   size_t n = (size_t)got;
+   char *r = sp_str_alloc(n);
+@@ -1358,6 +1375,7 @@
+ const char *sp_File_readpartial_or_nil(sp_File *f, sp_int n);
  /* IO#pread(len, offset): read without moving the file position. Inline
     because it allocates from this TU's string heap (#3038). */
 +#if 0 /* Not on the MCU */
  static inline const char *sp_File_pread(sp_File *f, sp_int len, sp_int off) {
-   SP_IO_OPEN(f);
+   sp_pread_check(f, len, 0);
    if (len < 0) len = 0;
-@@ -1113,6 +1127,7 @@
-   sp_str_mark_binary(buf);   /* pread answers ASCII-8BIT, as CRuby */
+@@ -1391,6 +1409,7 @@
+   sp_str_mark_binary(buf);
    return buf;
  }
 +#endif
  sp_int sp_File_sysseek(sp_File *f, sp_int off, sp_int whence);
- sp_int sp_File_flock(sp_File *f, sp_int op);
+ sp_RbVal sp_File_flock(sp_File *f, sp_int op);
  sp_int sp_File_fsync(sp_File *f);
-@@ -1322,7 +1337,9 @@
-   sp_mark_string(sp_re_match_post);
-   SP_GLB_PHASE("globals:argv");
-   for (sp_int i = 0; i < sp_argv.len; i++) sp_mark_string(sp_argv.data[i]);
-+#if 0 /* Not on the MCU */
-   if (sp_argv_array_cache) sp_gc_mark(sp_argv_array_cache);
-+#endif
-   SP_GLB_PHASE("globals:exceptions");
-   sp_mark_in_flight_exceptions();
-   SP_GLB_PHASE("globals:proc-homes");
-@@ -1332,7 +1349,9 @@
-   SP_GLB_PHASE("globals:at-exit");
-   sp_mark_at_exit_hooks();
-   SP_GLB_PHASE("globals:fiber-storage");
-+#if 0 /* Not on the MCU */
-   sp_mark_fiber_root_storage();
-+#endif
-   SP_GLB_PHASE("globals");
- #undef SP_GLB_PHASE
- }
-@@ -1430,7 +1449,7 @@
- sp_Bigint *sp_bigint_abs_v(sp_Bigint *b);
+@@ -1758,7 +1777,7 @@
  sp_int sp_bigint_bit_length(sp_Bigint *b);
+ sp_int sp_bigint_int_size(sp_Bigint *b);   /* Integer#size */
  int64_t sp_bigint_to_int(sp_Bigint *b);
 -double sp_bigint_to_double(sp_Bigint *b);
 +double sp_bigint_to_double(sp_Bigint *b);   /* for the MCU: double, as sp_bigint.c defines it */
  int sp_bigint_cmp(sp_Bigint *a, sp_Bigint *b);
  sp_Bigint *sp_bigint_new_int(int64_t v);
- sp_Bigint *sp_bigint_add(sp_Bigint *a, sp_Bigint *b);
-@@ -1580,13 +1599,13 @@
+ sp_Bigint *sp_bigint_new_double(double d);
+@@ -1906,13 +1925,13 @@
     principal branch (ln|base| + i*pi), base==0 is 0. Both result components are
     Float-classed (fl = 3). */
  static sp_Complex sp_real_pow_complex(sp_float base, sp_Complex e) {
@@ -1141,77 +1253,7 @@
    return (sp_Complex){ m * cos(wi), m * sin(wi), 3 };
  }
  /* sp_Range_inspect moved to lib/sp_format.c (cold). */
-@@ -1660,12 +1679,16 @@
-           break;
-         }
-         case SP_BUILTIN_RANGE: puts(sp_Range_inspect((sp_Range *)v.v.p)); break;
-+#if 0 /* Not on the MCU */
-         case SP_BUILTIN_FLOAT_RANGE: puts(sp_frange_inspect(*(sp_FloatRange *)v.v.p)); break;
-+#endif
-         case SP_BUILTIN_TIME: puts(sp_Time_to_s((sp_Time *)v.v.p)); break;
-         case SP_BUILTIN_STRBUF: puts(sp_String_cstr((sp_String *)v.v.p)); break;
-         case SP_BUILTIN_COMPLEX: puts(sp_complex_to_s(*(sp_Complex *)v.v.p)); break;
-         case SP_BUILTIN_RATIONAL: puts(sp_rational_to_s(*(sp_Rational *)v.v.p)); break;
-+#if 0 /* Not on the MCU */
-         case SP_BUILTIN_BIG_RATIONAL: puts(sp_brat_to_s((sp_BigRational *)v.v.p)); break;
-+#endif
-         case SP_BUILTIN_REGEX: puts(sp_re_to_s_str(v.v.p)); break;
-         case SP_BUILTIN_POLY_ARRAY: {
-           /* puts flattens arrays recursively, one element per line -- and one
-@@ -1825,21 +1848,27 @@
-            and fell through to "" (#3007) */
-         case SP_BUILTIN_POLY_ARRAY: return sp_PolyArray_inspect((sp_PolyArray *)v.v.p);
-         case SP_BUILTIN_RANGE: return sp_Range_inspect((sp_Range *)v.v.p);
-+#if 0 /* Not on the MCU */
-         case SP_BUILTIN_FLOAT_RANGE: return sp_frange_inspect(*(sp_FloatRange *)v.v.p);
-+#endif
-         case SP_BUILTIN_TIME: return sp_Time_to_s((sp_Time *)v.v.p);
-         case SP_BUILTIN_STRBUF: return sp_String_cstr((sp_String *)v.v.p);   /* live buffer (#3227) */
-         case SP_BUILTIN_METHOD: return sp_method_desc_cstr((sp_BoundMethod *)v.v.p);
-         case SP_BUILTIN_COMPLEX: return sp_complex_to_s(*(sp_Complex *)v.v.p);
-         case SP_BUILTIN_RATIONAL: return sp_rational_to_s(*(sp_Rational *)v.v.p);
-+#if 0 /* Not on the MCU */
-         case SP_BUILTIN_BIG_RATIONAL: return sp_brat_to_s((sp_BigRational *)v.v.p);
-+#endif
-         case SP_BUILTIN_REGEX: return sp_re_to_s_str(v.v.p);
-         /* MatchData#to_s is the whole match (#3641) */
-         case SP_BUILTIN_MATCHDATA: { const char *_m0 = sp_MatchData_aref((sp_MatchData *)v.v.p, 0); return _m0 ? _m0 : sp_str_empty; }
-         case SP_BUILTIN_EXCEPTION: return sp_exc_message((volatile struct sp_Exception_s *)v.v.p);
-         /* Object#to_s on a boxed handle of the IO family, as the typed arm
-            renders it: a boxed one fell through to "" (`puts [f, d]`) */
-+#if 0 /* Not on the MCU */
-         case SP_BUILTIN_IO: return sp_io_to_s((sp_File *)v.v.p);
-         case SP_BUILTIN_DIR: return sp_Dir_to_s((sp_Dir *)v.v.p);
-+#endif
-         default:
-           if ((v.cls_id >= 0 || v.cls_id == SP_BUILTIN_OBJECT) && v.v.p) {
-             /* a class with a user #to_s renders through the generated
-@@ -1925,6 +1954,7 @@
-         case SP_BUILTIN_METHOD:
-           return ((sp_BoundMethod *)v.v.p)->unbound ? SPL("UnboundMethod") : SPL("Method");   /* (#3692) */
-         case SP_BUILTIN_ENUMERATOR: return SPL("Enumerator");
-+#if 0 /* Not on the MCU */
-         case SP_BUILTIN_IO: {
-           /* the handle kind names the class, through the same authority the
-              typed .class emit uses -- a boxed socket must not report plain IO */
-@@ -1934,13 +1964,16 @@
-             return SPL("File::Stat");
-           return sp_io_kind_name(_iof);
-         }
-+#endif
-         /* The concurrency handles: a boxed one reached the default arm and
-            answered an empty name, so `(:ok && queue).class` printed nothing
-            and a method on it raised NoMethodError with a blank class (#3484).
-            Mutex and Queue name themselves through the same helpers the typed
-            `.class` emit uses, so a Monitor and a SizedQueue stay distinct. */
-+#if 0 /* Not on the MCU */
-         case SP_BUILTIN_MUTEX: return sp_Mutex_class_name((sp_mutex *)v.v.p);
-         case SP_BUILTIN_QUEUE: return sp_Queue_class_name((sp_queue *)v.v.p);
-+#endif
-         case SP_BUILTIN_CONDVAR: return SPL("Thread::ConditionVariable");
-         case SP_BUILTIN_FIBER: return SPL("Fiber");
-         case SP_BUILTIN_THREAD: return SPL("Thread");
-@@ -2083,10 +2116,11 @@
+@@ -2590,10 +2609,11 @@
  }
  /* Process.times -> Process::Tms: four cumulative CPU times in seconds.
     An unboxed value like sp_Range/sp_Class -- there is nothing to mutate. */
@@ -1224,7 +1266,7 @@
    if (hz <= 0) hz = 100.0;
    if (times(&b) == (clock_t)-1) { t.utime = t.stime = t.cutime = t.cstime = 0.0; return t; }
    t.utime  = (sp_float)b.tms_utime  / hz;
-@@ -2095,6 +2129,7 @@
+@@ -2602,6 +2622,7 @@
    t.cstime = (sp_float)b.tms_cstime / hz;
    return t;
  }
@@ -1232,31 +1274,7 @@
  /* Class/Module#freeze / #frozen?: a class value is an unboxed {cls_id, name},
     so the frozen flag lives in a global per-class map -- user ids from 0 up,
     builtins (-100..-163) mapped to the top of the range (#3101). */
-@@ -3001,17 +3036,17 @@
-    codegen path, dispatched on the runtime tag. */
- static sp_RbVal sp_poly_round_n(sp_RbVal v, sp_int n) {
-   if (v.tag == SP_TAG_FLT) {
--    double x = v.v.f;
--    if (n > 0) { double f = pow(10, (double)n); if (isinf(f)) return sp_box_float(x);
--      double r = round(x * f) / f; return sp_box_float((x != 0.0 && r == 0.0) ? 0.0 : r); }  /* +0.0 normalize (#3235) */
-+    sp_float x = v.v.f;
-+    if (n > 0) { sp_float f = pow(10, (sp_float)n); if (isinf(f)) return sp_box_float(x);
-+      sp_float r = round(x * f) / f; return sp_box_float((x != 0.0 && r == 0.0) ? 0.0 : r); }  /* +0.0 normalize (#3235) */
-     sp_poly_flo_domain_ck(x);
--    double f = pow(10, (double)(-n));
-+    sp_float f = pow(10, (sp_float)(-n));
-     return sp_box_int(isinf(f) ? 0 : (sp_int)(round(x / f) * f));
-   }
-   if (v.tag == SP_TAG_INT) {
-     if (n >= 0) return v;
--    double f = pow(10, (double)(-n));
--    return sp_box_int(isinf(f) ? 0 : (sp_int)(round((double)v.v.i / f) * f));
-+    sp_float f = pow(10, (sp_float)(-n));
-+    return sp_box_int(isinf(f) ? 0 : (sp_int)(round((sp_float)v.v.i / f) * f));
-   }
-   if (v.tag == SP_TAG_BIGINT) return v;  /* n < 0 on a bignum is out of scope */
-   /* Rational#round(n): a positive precision keeps the Rational, n <= 0 lands
-@@ -3580,7 +3615,7 @@
+@@ -7488,7 +7509,7 @@
      if (b.tag == SP_TAG_FLT)
        return sp_box_complex(sp_complex_pow_c(ca, (sp_Complex){b.v.f, 0.0, SP_CPLX_RE_F | SP_CPLX_IM_F}));
    }
@@ -1264,21 +1282,8 @@
 +  sp_float r = pow((sp_float)sp_poly_to_f(a), (sp_float)sp_poly_to_f(b));
    return sp_box_float((sp_float)r);
  }
- /* sp_poly_shl is defined after sp_PolyArray_push (below) so the
-@@ -3681,10 +3716,10 @@
-    below carries it to ~1e-15. Gamma(1) and Gamma(2) are exactly 1, so their
-    logs are returned as an exact 0 rather than a rounding-noise residual. */
- /* sp_lgamma_pos: moved to lib/sp_cold.c */
--double sp_lgamma_pos(double x);
-+sp_float sp_lgamma_pos(sp_float x);
- /* Math.lgamma(x) -> [log(|gamma(x)|), sign of gamma(x)]. */
- /* sp_math_lgamma: moved to lib/sp_cold.c */
--sp_PolyArray *sp_math_lgamma(double x);
-+sp_PolyArray *sp_math_lgamma(sp_float x);
- static sp_RbVal sp_PolyArray_shift(sp_PolyArray *a) { if (!a || a->len <= 0) return sp_box_nil(); if (a->frozen) { sp_raise_frozen_array_at(a, SP_BUILTIN_POLY_ARRAY); return sp_box_nil(); } sp_RbVal v = a->data[0]; memmove(a->data, a->data+1, (size_t)(--a->len)*sizeof(sp_RbVal)); return v; }
- static sp_RbVal sp_PolyArray_delete_at(sp_PolyArray *a, sp_int i) {sp_gc_wb((void*)a);  if (!a) return sp_box_nil(); if (i < 0) i += a->len; if (i < 0 || i >= a->len) return sp_box_nil(); sp_RbVal v = a->data[i]; for (sp_int j = i; j < a->len - 1; j++) a->data[j] = a->data[j+1]; a->len--; return v; }
- static void sp_PolyArray_insert(sp_PolyArray *a, sp_int i, sp_RbVal v) {sp_gc_wb((void*)a);  if (!a) return; if (a->frozen) { sp_raise_frozen_array_at(a, SP_BUILTIN_POLY_ARRAY); return; } sp_int orig = i; if (i < 0) i += a->len + 1; if (i < 0) sp_raise_cls("IndexError", sp_sprintf("index %lld too small for array; minimum: %lld", (long long)orig, (long long)(-(a->len + 1)))); while (i > a->len) sp_PolyArray_push(a, sp_box_nil()); /* CRuby pads with nils past the end */ sp_PolyArray_push(a, sp_box_nil()); for (sp_int j = a->len - 1; j > i; j--) a->data[j] = a->data[j-1]; a->data[i] = v; }
-@@ -3775,6 +3810,7 @@
+ /* `**` on a boxed receiver that may hold a value with no `**` (the emitter
+@@ -7898,6 +7919,7 @@
        }
        return sp_poly_binop_bad("<<", a, b);
      }
@@ -1286,7 +1291,7 @@
      if (a.cls_id == SP_BUILTIN_IO && a.v.p) {
        /* IO#<< through a boxed handle writes and chains (#2802) */
        /* A String operand writes its own byte count; only a stringified value
-@@ -3793,6 +3829,7 @@
+@@ -7918,6 +7940,7 @@
        sp_Queue_push((sp_queue *)a.v.p, b);
        return a;
      }
@@ -1294,44 +1299,7 @@
      /* A user object with a `<<` method (a Set held as a Hash value, #3174):
         dispatch through the user-binop hook, which mutates it in place and
         returns the receiver -- not the Integer#<< bit-shift fallback below. */
-@@ -4912,14 +4949,14 @@
-     }
- else if (conv == 'f' || conv == 'e' || conv == 'E' || conv == 'g' || conv == 'G' ||
-          conv == 'a' || conv == 'A') {
--      double dv = 0;
-+      sp_float dv = 0;
-       if (v.tag == SP_TAG_FLT) dv = v.v.f;
--      else if (v.tag == SP_TAG_INT) dv = (double)v.v.i;
-+      else if (v.tag == SP_TAG_INT) dv = (sp_float)v.v.i;
-       else if (sp_poly_is_rational(v)) dv = sp_poly_to_f_with_rational(v);
-       else if (v.tag == SP_TAG_BIGINT) dv = sp_poly_to_f(v);
-       /* a String converts the way Float() does; anything else is not a number
-          and CRuby refuses rather than formatting a zero (#4010) */
--      else if (v.tag == SP_TAG_STR) dv = (double)sp_str_to_f_strict(v.v.s ? v.v.s : sp_str_empty);
-+      else if (v.tag == SP_TAG_STR) dv = (sp_float)sp_str_to_f_strict(v.v.s ? v.v.s : sp_str_empty);
-       else { free(buf); sp_raise_cls("TypeError", sp_sprintf("can't convert %s into Float", sp_convert_src_name(v))); }
-       /* Ruby prints non-finite floats as Inf/-Inf/NaN (C printf lowercases) */
-       if (!isfinite(dv)) wn = snprintf(tmp, sizeof(tmp), "%s", isnan(dv) ? "NaN" : dv > 0 ? "Inf" : "-Inf");
-@@ -5472,14 +5509,18 @@
-         case SP_BUILTIN_PTR_ARRAY: return sp_PtrArray_inspect((sp_PtrArray *)v.v.p);
-         case SP_BUILTIN_POLY_ARRAY: return sp_PolyArray_inspect((sp_PolyArray *)v.v.p);
-         case SP_BUILTIN_RANGE:     return sp_Range_inspect((sp_Range *)v.v.p);
-+#if 0 /* Not on the MCU */
-         case SP_BUILTIN_FLOAT_RANGE: return sp_frange_inspect(*(sp_FloatRange *)v.v.p);
-+#endif
-         case SP_BUILTIN_TIME:      return sp_Time_inspect((sp_Time *)v.v.p);
-       case SP_BUILTIN_STRBUF: return sp_str_inspect(sp_String_cstr((sp_String *)v.v.p));   /* (#3227) */
-       case SP_BUILTIN_METHOD: return sp_method_desc_cstr((sp_BoundMethod *)v.v.p);
-         case SP_BUILTIN_COMPLEX:   return sp_complex_inspect(*(sp_Complex *)v.v.p);
-         case SP_BUILTIN_RATIONAL:  return sp_rational_inspect(*(sp_Rational *)v.v.p);
-+#if 0 /* Not on the MCU */
-         case SP_BUILTIN_BIG_RATIONAL:  return sp_brat_inspect((sp_BigRational *)v.v.p);
-         case SP_BUILTIN_REGEX:     return sp_re_inspect_str(v.v.p);
-+#endif
-         case SP_BUILTIN_MATCHDATA: return sp_MatchData_inspect((sp_MatchData *)v.v.p);
-         case SP_BUILTIN_EXCEPTION: return sp_sprintf("#<%s: %s>", sp_exc_class_name((volatile struct sp_Exception_s *)v.v.p), sp_exc_message((volatile struct sp_Exception_s *)v.v.p));
-         case SP_BUILTIN_STR_INT_HASH:  return sp_StrIntHash_inspect((sp_StrIntHash *)v.v.p);
-@@ -5586,7 +5627,9 @@
+@@ -10339,7 +10362,9 @@
       slot (e.g. `threads.each(&:join)`, where the thread array boxed to poly)
       means Thread#join: run it to completion. Its result (the thread) is almost
       always discarded, so yield the empty string for the const char* surface. */
@@ -1341,7 +1309,7 @@
    switch (a.cls_id) {
      case SP_BUILTIN_STR_ARRAY: return sp_StrArray_join((sp_StrArray *)a.v.p, sep);
      case SP_BUILTIN_POLY_ARRAY: return sp_PolyArray_join((sp_PolyArray *)a.v.p, sep);
-@@ -6000,7 +6043,7 @@
+@@ -10930,7 +10955,7 @@
      }
      /* -0.0 and 0.0 are eql?, so they must hash alike: normalize the sign of
         zero away before hashing the bits (#3651). */
@@ -1350,7 +1318,7 @@
                         uint64_t b; memcpy(&b, &f, sizeof(b)); return (sp_int)b; }
      case SP_TAG_OBJ:
        /* A shared-string handle is `==` to the immediate string with the same
-@@ -6108,7 +6151,7 @@
+@@ -11049,7 +11074,7 @@
          sp_FloatRange *fr = (sp_FloatRange *)v.v.p;
          if (!fr) return 0;
          uint64_t bf, bl;
@@ -1359,8 +1327,8 @@
          memcpy(&bf, &f, sizeof bf); memcpy(&bl, &l, sizeof bl);
          return (sp_int)(((bf * 31u) ^ bl) * 2u + (uint64_t)(fr->excl ? 1 : 0));
        }
-@@ -7957,7 +8000,9 @@
- static sp_int sp_poly_length(sp_RbVal v){if(v.tag==SP_TAG_STR)return v.v.s?(sp_int)sp_str_byte_len(v.v.s):0;   /* the header length, so an embedded NUL counts (#3540) */if(v.tag==SP_TAG_SYM)return sp_sym_name_fn?(sp_int)strlen(sp_sym_name_fn((sp_sym)v.v.i)):0;if(v.tag!=SP_TAG_OBJ)return 0;switch(v.cls_id){case SP_BUILTIN_INT_ARRAY:return sp_IntArray_length((sp_IntArray*)v.v.p);case SP_BUILTIN_FLT_ARRAY:return sp_FloatArray_length((sp_FloatArray*)v.v.p);case SP_BUILTIN_STR_ARRAY:return sp_StrArray_length((sp_StrArray*)v.v.p);case SP_BUILTIN_SYM_ARRAY:return sp_IntArray_length((sp_IntArray*)v.v.p);case SP_BUILTIN_POLY_ARRAY:return sp_PolyArray_length((sp_PolyArray*)v.v.p);case SP_BUILTIN_STR_INT_HASH:return sp_StrIntHash_length((sp_StrIntHash*)v.v.p);case SP_BUILTIN_STR_STR_HASH:return sp_StrStrHash_length((sp_StrStrHash*)v.v.p);case SP_BUILTIN_INT_STR_HASH:return sp_IntStrHash_length((sp_IntStrHash*)v.v.p);case SP_BUILTIN_INT_INT_HASH:return sp_IntIntHash_length((sp_IntIntHash*)v.v.p);case SP_BUILTIN_STR_POLY_HASH:return sp_StrPolyHash_length((sp_StrPolyHash*)v.v.p);case SP_BUILTIN_SYM_POLY_HASH:return sp_SymPolyHash_length((sp_SymPolyHash*)v.v.p);case SP_BUILTIN_POLY_POLY_HASH:return sp_PolyPolyHash_length((sp_PolyPolyHash*)v.v.p);
+@@ -14438,7 +14463,9 @@
+ static sp_int sp_poly_length(sp_RbVal v){if(v.tag==SP_TAG_OBJ&&v.cls_id==SP_BUILTIN_QUEUE&&v.v.p)return sp_Queue_size((sp_queue*)v.v.p);if(v.tag==SP_TAG_STR)return v.v.s?(sp_int)sp_str_byte_len(v.v.s):0;   /* the header length, so an embedded NUL counts (#3540) */if(v.tag==SP_TAG_SYM)return sp_sym_name_fn?(sp_int)strlen(sp_sym_name_fn((sp_sym)v.v.i)):0;if(v.tag!=SP_TAG_OBJ)return 0;switch(v.cls_id){case SP_BUILTIN_INT_ARRAY:return sp_IntArray_length((sp_IntArray*)v.v.p);case SP_BUILTIN_FLT_ARRAY:return sp_FloatArray_length((sp_FloatArray*)v.v.p);case SP_BUILTIN_STR_ARRAY:return sp_StrArray_length((sp_StrArray*)v.v.p);case SP_BUILTIN_SYM_ARRAY:return sp_IntArray_length((sp_IntArray*)v.v.p);case SP_BUILTIN_POLY_ARRAY:return sp_PolyArray_length((sp_PolyArray*)v.v.p);case SP_BUILTIN_PTR_ARRAY:return v.v.p?((sp_PtrArray*)v.v.p)->len:0;case SP_BUILTIN_STR_INT_HASH:return sp_StrIntHash_length((sp_StrIntHash*)v.v.p);case SP_BUILTIN_STR_STR_HASH:return sp_StrStrHash_length((sp_StrStrHash*)v.v.p);case SP_BUILTIN_INT_STR_HASH:return sp_IntStrHash_length((sp_IntStrHash*)v.v.p);case SP_BUILTIN_INT_INT_HASH:return sp_IntIntHash_length((sp_IntIntHash*)v.v.p);case SP_BUILTIN_STR_POLY_HASH:return sp_StrPolyHash_length((sp_StrPolyHash*)v.v.p);case SP_BUILTIN_SYM_POLY_HASH:return sp_SymPolyHash_length((sp_SymPolyHash*)v.v.p);case SP_BUILTIN_POLY_POLY_HASH:return sp_PolyPolyHash_length((sp_PolyPolyHash*)v.v.p);
  /* File#size / File::Stat#size on a boxed handle: the file's byte size via its
     path (a poly-held stat handle's .size read this as container length 0) (#3041) */
 +#if 0 /* Not on the MCU */
@@ -1369,7 +1337,7 @@
  case SP_BUILTIN_STRBUF: return (sp_int)((sp_String *)v.v.p)->len;   /* live length (#3227) */
  /* a user object with #to_a (a container-read Set, #3234): its element count */
  default: if (sp_obj_to_a_fn) { sp_RbVal _a = sp_obj_to_a_fn(v); if (_a.tag == SP_TAG_OBJ && sp_poly_is_array_kind(_a.cls_id)) return sp_poly_length(_a); } return 0;}}
-@@ -8448,8 +8493,10 @@
+@@ -15538,8 +15565,10 @@
     result; join runs it and returns the thread (self). A non-Fiber poly returns
     nil, matching the NoMethodError gate for an unknown poly method. */
  static sp_RbVal sp_poly_fiber_value(sp_RbVal v) {
@@ -1380,16 +1348,7 @@
    if (v.tag == SP_TAG_OBJ && v.cls_id == SP_BUILTIN_FIBER) {
      sp_Fiber *f = (sp_Fiber *)v.v.p;
      if (f->state == 3) return f->yielded_value;   /* already run: cached result, idempotent */
-@@ -8460,7 +8507,7 @@
- /* Forward declarations for sp_sched.c functions used by codegen. The
-    codegen emits direct symbol references (sp_Thread_join_timeout) so
-    the signatures must be visible here. */
--sp_thread *sp_Thread_join_timeout(sp_thread *t, double seconds);
-+sp_thread *sp_Thread_join_timeout(sp_thread *t, sp_float seconds);
- 
- /* `poly.join(<number>)` can only be Thread#join(limit): Array#join with a
-    numeric separator is a TypeError in CRuby, so a numeric argument leaves no
-@@ -8468,7 +8515,7 @@
+@@ -15583,7 +15612,7 @@
     limit and nil when it did not, which is why this returns sp_RbVal where
     sp_poly_join returns the joined string. A non-Thread receiver gets the
     TypeError the separator slot would have raised. */
@@ -1398,9 +1357,9 @@
    if (v.tag == SP_TAG_OBJ && v.cls_id == SP_BUILTIN_THREAD)
      return sp_Thread_join_timeout((sp_thread *)v.v.p, seconds) ? v : sp_box_nil();
    /* the separator slot's own refusal, naming the class the argument was
-@@ -8479,10 +8526,12 @@
+@@ -15832,10 +15861,12 @@
+   return sp_box_str_new(sp_poly_join(v, sep));
  }
- 
  static sp_RbVal sp_poly_fiber_join(sp_RbVal v) {
 +#if 0 /* Not on the MCU */
    if (v.tag == SP_TAG_OBJ && v.cls_id == SP_BUILTIN_THREAD) {
@@ -1411,58 +1370,26 @@
    if (v.tag == SP_TAG_OBJ && v.cls_id == SP_BUILTIN_FIBER) {
      sp_Fiber *f = (sp_Fiber *)v.v.p;
      if (f->state != 3) sp_Fiber_resume(f, sp_box_nil());
-@@ -8683,7 +8732,11 @@
-   return v;
- }
- __attribute__((constructor)) static void sp_json_install_hooks(void) {
-+#if 0 /* Not on the MCU */
-   sp_json_kind_fn = sp_json_kind;
-+#else
-+  sp_json_kind_fn = NULL;
-+#endif
-   sp_json_len_fn = sp_poly_length;
-   sp_json_aref_fn = sp_poly_arr_get;
-   sp_json_hpair_fn = sp_poly_hash_pair;
-@@ -8917,7 +8970,9 @@
- #ifdef SPINEL_EXT_HOST
- SP_NORETURN SP_COLD void sp_raise_cls(const char *cls, const char *msg);
+@@ -16490,7 +16521,9 @@
  #else
+ # define SP_EXC_UNWINDS 1
+ #endif
 -SP_NORETURN SP_COLD void sp_raise_cls(const char *cls, const char *msg) {
 +/* noinline for the MCU: flatten would otherwise put a copy of the raise at every call site in
 +   Spms1_main, which is most of what Spms1_main holds in RAM. Raising is the cold path. */
 +__attribute__((noinline)) SP_NORETURN SP_COLD void sp_raise_cls(const char *cls, const char *msg) {
-   /* Launder the message onto the string heap and root the copy before anything
-      below allocates. `msg` is the caller's own pointer and comes in one of two
-      shapes, neither of which survives a collection here. A raiser that formats
-@@ -9071,7 +9126,7 @@
- 
- /* Float#round(half: mode) where the mode is only known at run time (#3646).
-    A nil mode is the default (round half up, away from zero). */
--static double sp_round_half_mode(double x, sp_sym mode) {
-+static sp_float sp_round_half_mode(sp_float x, sp_sym mode) {
-   const char *m = (mode == (sp_sym)-1) ? NULL : sp_sym_to_s(mode);
-   if (!m || !m[0]) return round(x);
-   if (strcmp(m, "even") == 0) return sp_round_half_even(x);
-@@ -9906,8 +9961,8 @@
- const char *sp_addrinfo_inspect(sp_Addrinfo *a);
- sp_SockOpt *sp_sockopt_new(sp_int family, sp_int level, sp_int optname, sp_int value);
- const char *sp_sockopt_inspect(sp_SockOpt *o);
--sp_File *sp_io_wait_events(sp_File *f, double timeout, sp_int kind);
--sp_RbVal sp_io_select(sp_PolyArray *rd, sp_PolyArray *wr, sp_PolyArray *er, double timeout);
-+sp_File *sp_io_wait_events(sp_File *f, sp_float timeout, sp_int kind);
-+sp_RbVal sp_io_select(sp_PolyArray *rd, sp_PolyArray *wr, sp_PolyArray *er, sp_float timeout);
- sp_int sp_file_size_q(const char *path);
- sp_bool sp_file_pipe(const char *path);
- sp_bool sp_file_identical(const char *a, const char *b);
-@@ -9939,6 +9994,7 @@
+   /* a raise leaves any region a signal may be raised in at once (#9222):
+      what follows allocates */
+   sp_sig_async_ok = 0;
+@@ -18124,6 +18157,7 @@
  const char *sp_stat_ftype(sp_File *f);
  sp_int sp_file_stat_mode(const char *path);
  /* IO#puts with an Array argument: one element per line, recursively (#2813) */
 +#if 0 /* Not on the MCU */
  static void sp_File_puts_val(sp_File *f, sp_RbVal v) {
+   v = sp_poly_strbuf_deref(v);
    if (v.tag == SP_TAG_OBJ && sp_poly_is_array_kind(v.cls_id)) {
-     sp_int n = sp_poly_length(v);
-@@ -9950,6 +10006,7 @@
+@@ -18138,6 +18172,7 @@
      sp_File_puts(f, sv ? sv : "");
    }
  }
@@ -1470,19 +1397,41 @@
  /* A boxed IO handle read back out of a poly slot (an IO.pipe element, a
     poly-widened local): unbox for the IO instance dispatch, NoMethodError on
     any other tag. */
-@@ -11937,7 +11994,7 @@
-    own exact comparison does, rather than true from a lossy double round-trip.
-    Ordering does compare as doubles (sp_poly_cmp does the same); only equality
-    can be decided by a single ulp. */
--static int sp_bigint_eq_f(sp_Bigint *a, double d) {
-+static int sp_bigint_eq_f(sp_Bigint *a, sp_float d) {
-   if (!isfinite(d) || d != floor(d)) return 0;   /* inf/nan/fraction is no integer */
-   char buf[400];
-   snprintf(buf, sizeof buf, "%.0f", d);
-@@ -12012,4 +12069,6 @@
- static sp_sym sp_sym_intern(const char *s) { (void)s; return (sp_sym)0; }
+@@ -20985,6 +21020,9 @@
+ static SP_UNUSED void sp_sig_install_defaults(void) {
+   static const int sigs[] = { SIGINT, SIGTERM };
+   sp_sig_default_raiser = sp_sig_default_raise;
++#if SPINEL_BARE_METAL   /* for the MCU: no signals to take */
++  (void)sigs;
++#else
+   for (int i = 0; i < 2; i++) {
+     int no = sigs[i];
+     if (sp_trap_proc[no] || sp_trap_state[no]) continue;
+@@ -20993,6 +21031,7 @@
+     sigemptyset(&sa.sa_mask);
+     sigaction(no, &sa, NULL);
+   }
++#endif
+ }
+ #endif
+ typedef struct { sp_RbVal obj; int which; int had; sp_RbVal ans; } sp_obj_conv_probe;
+@@ -22670,4 +22709,6 @@
+ }
  #endif
  
 +#include "spinel_rt_mcu_cold.h"
 +
  #endif /* SP_RUNTIME_H */
+--- a/unicase.c
++++ b/unicase.c
+@@ -1,3 +1,5 @@
++#include "sp_types.h"   /* for the MCU: SPINEL_BARE_METAL */
++#if !SPINEL_BARE_METAL   /* for the MCU: the regexp engine (mruby-regexp, through its shim headers), which a synth does not use */
+ /*
+ ** unicase.c - what case a Unicode character has
+ **
+@@ -397,3 +399,4 @@
+ #endif  /* HAVE_MRUBY_REGEXP_GEM */
+ 
+ #endif  /* MRB_UTF8_STRING && !MRB_USE_ASCII_CTYPE */
++#endif /* !SPINEL_BARE_METAL */

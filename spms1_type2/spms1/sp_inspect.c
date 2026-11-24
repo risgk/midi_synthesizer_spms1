@@ -8,6 +8,7 @@
 #include "sp_inspect.h"
 #include "sp_string.h"   /* sp_String, sp_alloc.h, SP_GC_ROOT via sp_gc.h */
 #include "sp_str.h"      /* sp_sym_inspect_key for the symbol hash-key short form */
+#include "sp_array.h"    /* sp_PtrArray_to_poly / sp_PtrArray_inspect for sp_PtrArray_inspect_k */
 #include <stdlib.h>   /* realloc for the growing path below */
 
 /* The walk guard's per-worker path (see sp_inspect.h). It lives here because
@@ -18,6 +19,7 @@
 SP_TLS sp_poly_recur_frame *sp_poly_recur_stack = NULL;
 SP_TLS int sp_poly_recur_top = 0;
 SP_TLS int sp_poly_recur_cap = 0;
+SP_TLS unsigned sp_poly_recur_hash_cycles = 0;
 /* Make room for at least `want` frames, doubling from 64. Off the hot path:
    a walk deep enough to reach the end of the buffer has already paid far more
    in its own recursion than this call costs. */
@@ -194,4 +196,20 @@ const char *sp_inspect_container(sp_RbVal v) {
   sp_String_append(s, "}");
   sp_poly_recur_pop(rmark);
   return sp_str_dup(s->data);
+}
+
+/* Array#inspect for heterogeneous poly arrays. Each element dispatches
+   through sp_poly_inspect, so a mixed `[1, "x", :y]` renders
+   `[1, "x", :y]` byte-for-byte identical to CRuby. NULL renders
+   "nil" so callers that store a nil-returning slot (assoc/rassoc
+   miss, etc.) round-trip cleanly through `.inspect`. */
+const char *sp_PolyArray_inspect(sp_PolyArray *a) {
+  if (!a) { char *r = sp_str_alloc(3); r[0] = 'n'; r[1] = 'i'; r[2] = 'l'; r[3] = 0; sp_str_set_len(r, 3); return r; }
+  return sp_inspect_container(sp_box_poly_array(a));
+}
+/* a pointer array by what it holds (#4486) */
+const char *sp_PtrArray_inspect_k(sp_PtrArray *a) {
+  if (!a) return SPL("nil");
+  if (a->elem_kind == SP_PTR_ELEM_UNKNOWN) return sp_PtrArray_inspect(a);   /* opaque, as the erased id always was */
+  return sp_PolyArray_inspect(sp_PtrArray_to_poly(a));
 }

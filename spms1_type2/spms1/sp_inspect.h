@@ -39,6 +39,10 @@ const char *sp_inspect_container(sp_RbVal v);
    one holding nil. */
 #define SP_POLY_RECUR_HASH_VALUE ((sp_int)0x3f5b9d7e2c1a4d05LL)
 typedef struct { const void *a, *b; int kind; } sp_poly_recur_frame;
+/* How many times a #hash walk has met a container it was already inside
+   (sp_rbval_hash_member compares it before and after a member). It only
+   counts up, per worker. */
+extern SP_TLS unsigned sp_poly_recur_hash_cycles;
 /* The frames grow on demand rather than sitting in a fixed TLS array: a fixed
    cap would leave a cycle whose repeated object is deeper than the cap running
    off the C stack, and kilobytes of TLS shift the layout (and the cost) of

@@ -4,6 +4,16 @@ MIDI Synthesizer SPMS-1 (type-2) Changelog
 The main changes of each version, newest first, gathered before each release. The format may be
 revised.
 
+- v0.9.0 (2026-11-24):
+    - Built with **Spinel 2026.10.25** (2026.09.12 before): the runtime taken in with the MCU's patch carried over;
+      the renders the same, sample for sample; the load about the same (estimated: 1245 us to 1248 us a buffer of
+      1333 us, the default patch with a note held; on the device min 1121 us, max 1124 us with I2S, min 1122 us,
+      max 1127 us with PWM Audio, `underruns` 0)
+        - On the MCU: Spinel's signal poll at each loop read as a constant 0 (it took the load to 1401 us), the
+          slab allocator off, the regexp engine and IO::Buffer left out
+        - `spinel_mcu/after_spinel.sh`, run by the build scripts after Spinel: the ffi_func externs under their own
+          names (for the static inline bus and Dsp functions), and Spinel's own files named without the full path
+        - Windows simulators: the runtime built with -flto
 - v0.8.1 (2026-11-24):
     - Editor: **Save** and **Load** (Save JSON and Load JSON before), **Save All** and **Load All** (Export All and
       Import All before), of JSON files

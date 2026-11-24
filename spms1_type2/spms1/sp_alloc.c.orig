@@ -33,7 +33,7 @@
 sp_str_wslot_t sp_str_wslot[SP_MAX_WORKERS];     /* zero-init: NULL lists, 0 bytes */
 /* Aggregate live string bytes across every worker's list. Called only off the
    fast path (collection trigger uses the per-worker slice; sweep/retune here). */
-static size_t sp_str_bytes_total(void) {
+size_t sp_str_bytes_total(void) {
   size_t s = 0;
   int n = sp_active_workers; if (n < 1) n = 1; if (n > SP_MAX_WORKERS) n = SP_MAX_WORKERS;
   for (int i = 0; i < n; i++) s += SP_GC_CTR_GET(sp_str_wslot[i].young_bytes);
@@ -53,11 +53,27 @@ int sp_gc_obj_budget_mode = 2;
 /* The last gate decision, in 1024ths, so the stats line can report it and a
    test can read it. 1024 is `walk`, 0 is `obj`. */
 size_t sp_gc_obj_alpha1024 = 1024;
+/* The MEASUREMENT that decision starts from -- the mark's share of the last
+   collection -- before SPINEL_GC_OBJ_BUDGET has pinned it at either end. The
+   string budget's gate reads this one: its own knob is what pins it. */
+static size_t sp_gc_mark_share1024 = 1024;
 /* SPINEL_GC_OBJ_BUDGET=fixed / SPINEL_GC_STR_BUDGET=fixed: hold that heap's
    budget at its floor instead of re-aiming it after every collection. Read
    once beside the other boot-time GC modes; see the comment there. */
 int sp_gc_obj_budget_fixed = 0;
 int sp_gc_str_budget_fixed = 0;
+/* SPINEL_GC_STR_BUDGET: what the string collection budget is priced from.
+   0 = the string heap alone (`str`), 1 = plus a share of the object old
+   generation, always (`walk`), 2 = that share gated on what the last
+   collection cost (the default). The three ends SPINEL_GC_OBJ_BUDGET has; see
+   sp_str_retune, which is where the reasoning lives. */
+int sp_gc_str_budget_mode = 2;
+/* That share: one part in this many. An ORDER, like the gate's coefficients. */
+#define SP_STR_BUDGET_OBJ_DIV 8
+/* What the last string retune put into the per-worker trigger for the object
+   old generation, so the stats line can report it and a test can read it.
+   Zero after a retune that put none in. */
+static size_t sp_str_budget_obj_bytes = 0;
 /* SPINEL_GC_STR_MAJOR=fixed: hold the string old generation's gate at its floor
    instead of re-aiming it, adapting nothing. */
 int sp_gc_str_major_fixed = 0;
@@ -111,7 +127,9 @@ static int sp_str_major_forced = 0;
    Sampling at the sweep removes that limit: the cadence becomes the
    collector's, not the clock's. A ring, so a long run costs no more than a
    short one and the samples are the most recent SP_STR_SHAPE_MAX. */
+#ifndef SP_STR_SHAPE_MAX
 #define SP_STR_SHAPE_MAX 8192
+#endif
 static size_t sp_str_shape[SP_STR_SHAPE_MAX];
 static unsigned sp_str_shape_n = 0;      /* total sweeps seen */
 static int sp_str_shape_cmp(const void *a, const void *b) {
@@ -128,15 +146,31 @@ static const char *sp_str_major_label(void) {
   return buf;
 }
 
-/* Live bytes in the old generation, across every worker's list. */
+/* The slab strings' old generation: not a list anybody walks but bits in
+   the chunks (lib/sp_slab.c), so its bytes are what the MARK counted --
+   everything it reached at a major, plus what it promoted at each minor --
+   settled at sp_str_sweep_end. The lists below hold only the strings too
+   large for the slab. */
+static size_t sp_str_old_slab_bytes = 0;
+extern size_t sp_gc_mk_str_bytes, sp_gc_mk_str_young_bytes;   /* lib/sp_gc.c: this cycle's mark */
+/* After every mark (lib/sp_gc.c): a full cycle's mark reached every live
+   slab string, and the sweep of the bitmaps leaves exactly those; a minor's
+   promoted what it reached of the young. Every cycle, whatever the string
+   gate decided for the lists: the chunk sweep frees young slab strings on
+   every cycle and old ones on every full one. */
+void sp_str_mark_settle(int full) {
+  if (full) sp_str_old_slab_bytes = sp_gc_mk_str_bytes;
+  else sp_str_old_slab_bytes += sp_gc_mk_str_young_bytes;
+}
+/* Live bytes in the old generation: the slab's, and every worker's list. */
 static size_t sp_str_old_total(void) {
 #ifdef SP_THREADS
-  size_t t = 0;
+  size_t t = sp_str_old_slab_bytes;
   int n = sp_active_workers; if (n < 1) n = 1; if (n > SP_MAX_WORKERS) n = SP_MAX_WORKERS;
   for (int i = 0; i < n; i++) t += SP_GC_CTR_GET(sp_str_wslot[i].old_bytes);
   return t;
 #else
-  return SP_GC_CTR_GET(sp_str_old_bytes);
+  return sp_str_old_slab_bytes + SP_GC_CTR_GET(sp_str_old_bytes);
 #endif
 }
 
@@ -154,6 +188,25 @@ size_t sp_str_threshold_init = 256 * 1024;
 int sp_str_stress_checked = 0;
 
 const char sp_str_empty_data[] = "\xff";
+/* nil.to_s, true.to_s and false.to_s answer FROZEN Strings in CRuby: a
+   header-carrying static object marked 0xf1, as a frozen literal is */
+#ifdef SP_ONE_STRING
+/* ...with the handle slot a generated literal has (sp_StringLiteral: the
+   handle, then the next slot; the header links it, tagged), so each of them
+   is one String object wherever it is boxed or held, as CRuby's is */
+static struct { void *value, *next; } sp_fz_empty_l, sp_fz_true_l, sp_fz_false_l;
+#define SP_FZ_LINK(l) ((sp_str_hdr *)((char *)&(l) + 1))
+#else
+#define SP_FZ_LINK(l) NULL
+#endif
+static struct { sp_str_hdr h; unsigned char m; char d[1]; } sp_fz_empty_s = { { SP_FZ_LINK(sp_fz_empty_l), 1 | SP_STR_SIZE_ASCII7, 0, 0 }, 0xf1, "" };
+static struct { sp_str_hdr h; unsigned char m; char d[5]; } sp_fz_true_s = { { SP_FZ_LINK(sp_fz_true_l), 5 | SP_STR_SIZE_ASCII7, 4, 0 }, 0xf1, "true" };
+static struct { sp_str_hdr h; unsigned char m; char d[6]; } sp_fz_false_s = { { SP_FZ_LINK(sp_fz_false_l), 6 | SP_STR_SIZE_ASCII7, 5, 0 }, 0xf1, "false" };
+const char *const sp_str_frozen_empty = sp_fz_empty_s.d;
+const char *const sp_str_frozen_true = sp_fz_true_s.d;
+const char *const sp_str_frozen_false = sp_fz_false_s.d;
+/* the link a chilled String's header carries (sp_str_is_chilled) */
+const sp_str_hdr sp_str_chilled_tag = { NULL, 0, 0, 0 };
 
 SP_TLS int sp_ffi_bin_len = 0;   /* see sp_alloc.h: byte count for :binstr / :cbinstr */
 
@@ -258,6 +311,18 @@ void sp_alloc_floors_from_env(void) {
      the string old list (#4407). This sets the floor under the growth backstop,
      and is the control that lets the cadence be measured against a pinned one. */
   sp_alloc_floor_from_env("SPINEL_GC_STR_MAJOR_KB", &sp_str_old_threshold, &sp_str_old_threshold_init);
+  /* SPINEL_GC_STRESS=2 last, over any floor above: the two thresholds are
+     pinned at zero, so every allocation that can collect does. Here because
+     both callers must end on it -- a floor read after it put the trigger
+     back, and the level then collected as seldom as the floor said -- and
+     marked as checked, so the allocators' own one-shot (2048) does not run
+     after it. */
+  { const char *st = getenv("SPINEL_GC_STRESS");
+    if (st && atoi(st) >= 2) {
+      SP_GC_CTR_SET(sp_gc_threshold, 0); sp_gc_threshold_init = 0;
+      SP_GC_CTR_SET(sp_str_threshold, 0); sp_str_threshold_init = 0;
+      sp_gc_stress_pin = 1; sp_gc_stress_checked = 1; sp_str_stress_checked = 1;
+    } }
 }
 #ifdef SP_THREADS
 void sp_alloc_worker_tune(int workers) {
@@ -324,6 +389,8 @@ static void sp_gc_stats_report(void) {
   last = now;
   sp_gc_stats_emit();
 }
+/* The `[gc]` line itself, and under SPINEL_GC_PHASES the `[gcph]` breakdown
+   below it. */
 static void sp_gc_stats_emit(void) {
   static double first = 0;
   struct timespec ts; clock_gettime(CLOCK_MONOTONIC, &ts);
@@ -343,14 +410,15 @@ static void sp_gc_stats_emit(void) {
   fprintf(stderr,
           "[gc] %llu collections (%llu full) in %.2fs of %.1fs wall (%.1f%%), %.2fms avg; "
           "live %.1f MB obj + %.1f MB str; trigger %.1f MB obj + %.2f MB str/worker x %d; "
-          "mark share %.2f\n",
+          "mark share %.2f; old obj in str trigger %.2f MB\n",
           n, sp_gc_stat_fulls, sp_gc_stat_seconds, wall,
           wall > 0 ? 100.0 * sp_gc_stat_seconds / wall : 0.0,
           n ? 1000.0 * sp_gc_stat_seconds / (double)n : 0.0,
           (double)SP_GC_CTR_GET(sp_gc_bytes) / 1048576.0, (double)sbytes / 1048576.0,
           (double)SP_GC_CTR_GET(sp_gc_threshold) / 1048576.0,
           (double)SP_GC_CTR_GET(sp_str_threshold) / 1048576.0, nw,
-          (double)sp_gc_obj_alpha1024 / 1024.0);
+          (double)sp_gc_obj_alpha1024 / 1024.0,
+          (double)sp_str_budget_obj_bytes / 1048576.0);
   if (!sp_gc_ph_on) return;
   /* Which part of a collection cost that time. The names are the ones the
      collector's own comments use, so a number leads to the code that spent it.
@@ -390,11 +458,40 @@ static void sp_gc_stats_emit(void) {
           "[gcph] marked %llu objs  swept %llu slots\n",
           (unsigned long long)SP_GC_CTR_GET(sp_gc_ct_marked), (unsigned long long)SP_GC_CTR_GET(sp_gc_ct_swept));
   fprintf(stderr,
-          "[gcph] mark %.3fs  old sweep %.3fs  slot sweep %.3fs  "
+          "[gcph] mark %.3fs  old sweep %.3fs  slot sweep %.3fs (longest task %.3fs; tasks total %.3fs = obj %.3fs + str old %.3fs + str young %.3fs)  "
           "remembered clear %.3fs  string sweep %.3fs  trim %.3fs  of %.3fs total\n",
-          sp_gc_ph_mark, sp_gc_ph_oldsweep, sp_gc_ph_slotsweep,
+          sp_gc_ph_mark, sp_gc_ph_oldsweep, sp_gc_ph_slotsweep, sp_gc_ph_slot_max,
+          sp_gc_ph_task_sum, sp_gc_ph_task_obj, sp_gc_ph_task_sold, sp_gc_ph_task_syoung,
           sp_gc_ph_rembclear, sp_gc_ph_strsweep, sp_gc_ph_trim,
           sp_gc_stat_seconds);
+  { extern double sp_gc_ph_park_sweeping; extern unsigned long long sp_gc_ph_park_sweeping_n;
+    if (sp_gc_ph_park_sweeping_n > 0)
+      fprintf(stderr, "[gcph] park wait: %.3fs of it on %llu barriers raised while an owner sweep of the previous cycle was still running\n",
+              sp_gc_ph_park_sweeping, sp_gc_ph_park_sweeping_n); }
+  if (sp_gc_ph_barrier > 0)
+    fprintf(stderr, "[gcph] barrier: %.3fs from stop to release, of which %.3fs waiting for the workers to park; parallel mark on %llu drains, %.1f helpers each\n",
+            sp_gc_ph_barrier, sp_gc_ph_park, sp_gc_ph_mk_drains,
+            sp_gc_ph_mk_drains ? (double)sp_gc_ph_mk_helpers / (double)sp_gc_ph_mk_drains : 0.0);
+  { extern unsigned long long sp_gc_ph_mk_by_helpers, sp_gc_ph_mk_spills, sp_gc_ph_mk_takes;
+    if (sp_gc_ph_mk_drains)
+      fprintf(stderr, "[gcph] parallel mark: %llu of %llu objects marked by helpers; %llu chunks spilled, %llu taken; collector drain %.3fs (idle in it %.3fs) join %.3fs\n",
+              sp_gc_ph_mk_by_helpers, (unsigned long long)SP_GC_CTR_GET(sp_gc_ct_marked), sp_gc_ph_mk_spills, sp_gc_ph_mk_takes,
+              sp_gc_ph_mk_drain, sp_gc_ph_mk_idle, sp_gc_ph_mk_join); }
+  if (sp_gc_ph_conc_wall > 0)
+    fprintf(stderr, "[gcph] concurrent sweep: %.3fs wall beside the program (longest task %.3fs); %llu collections waited %.3fs for the previous sweep (not in the total above)\n",
+            sp_gc_ph_conc_wall, sp_gc_ph_slot_max, sp_gc_ph_conc_waits, sp_gc_ph_conc_wait);
+  if (sp_gc_ph_conc_wall > 0)
+    { extern double sp_gc_ph_wait_top;
+      fprintf(stderr, "[gcph] concurrent sweep, applied under the barrier: objects %.3fs  strings %.3fs  slab release %.3fs  (the join at the top of the collection: %.3fs)\n",
+              sp_gc_ph_apply_obj, sp_gc_ph_apply_str, sp_gc_ph_apply_release, sp_gc_ph_wait_top); }
+  { extern unsigned long long sp_gc_ph_trim_req, sp_gc_ph_trim_inline; extern double sp_gc_ph_trim_inline_t;
+    if (sp_gc_ph_trim_req > 0)
+      fprintf(stderr, "[gcph] trim: %llu requests, %llu run inline (%.3fs), trimmer thread %s\n",
+              sp_gc_ph_trim_req, sp_gc_ph_trim_inline, sp_gc_ph_trim_inline_t, sp_gc_trimmer_on ? "on" : "off"); }
+  { extern unsigned long long sp_slab_rel_calls, sp_slab_rel_walked, sp_slab_rel_madv; extern double sp_slab_rel_madv_t, sp_slab_rel_sort_t;
+    if (sp_slab_rel_calls > 0)
+      fprintf(stderr, "[gcph] slab release: %llu releases walked %llu chunks, handed back %llu (madvise %.3fs, sort %.3fs)\n",
+              sp_slab_rel_calls, sp_slab_rel_walked, sp_slab_rel_madv, sp_slab_rel_madv_t, sp_slab_rel_sort_t); }
   /* The mark, one level down, because "mark grew" has two causes that want
      different answers: more ROOTS to scan and more GRAPH to trace. `fibers` is
      every live fiber's saved roots, walked serially, and it grows with the
@@ -408,9 +505,12 @@ static void sp_gc_stats_emit(void) {
           sp_gc_ph_mk_globals, sp_gc_ph_mk_scan);
 }
 
+/* Re-aim the object trigger from what a collection left, and take the
+   measurement both budgets' gates start from: the mark's share of that
+   collection. The reasoning is inline, beside each step. */
 void sp_gc_retune_object(size_t before) {
   sp_gc_stats_report();
-  if (sp_gc_stress_pin || sp_gc_obj_budget_fixed) { sp_gc_threshold = sp_gc_threshold_init; return; }
+  if (sp_gc_stress_pin) { sp_gc_threshold = sp_gc_threshold_init; return; }
   size_t live = sp_gc_bytes;
   /* The budget is what may be ALLOCATED before the next collection, and what
      pays for it is what that collection COSTS. A collection marks BOTH heaps,
@@ -482,6 +582,12 @@ void sp_gc_retune_object(size_t before) {
       if (alpha > 1024) alpha = 1024;
     }
   }
+  /* What was measured, kept before the knobs below decide what the OBJECT
+     budget makes of it. `fixed` leaves here and not at the top for the same
+     reason: a budget held at its floor still has a collection to measure, and
+     the string budget's gate (sp_str_retune) reads the measurement. */
+  sp_gc_mark_share1024 = alpha;
+  if (sp_gc_obj_budget_fixed) { sp_gc_threshold = sp_gc_threshold_init; return; }
   if (sp_gc_obj_budget_mode == 0) alpha = 0;
   else if (sp_gc_obj_budget_mode == 1) alpha = 1024;
   sp_gc_obj_alpha1024 = alpha;
@@ -517,11 +623,20 @@ void sp_gc_retune_object(size_t before) {
    geometrically for long-lived strings. The single-threaded build works in
    absolute bytes (N == 1). */
 static size_t sp_str_gate_old = 0;   /* the old total at the gate, for `before` */
+/* Young bytes to leave out of the retune's "after": the concurrent sweep
+   retunes at the next barrier, by which time the young lists hold a cycle of
+   new allocation that the swept generation never contained. */
+static size_t sp_str_retune_young_exclude = 0;
+/* Re-aim the per-worker string trigger from what a sweep left: twice the live
+   strings plus the object heap's share of it (below), or twice the pre-sweep
+   total when the sweep reclaimed under a quarter of that. */
 static void sp_str_retune(size_t before, size_t promoted) {
   if (sp_gc_stress_pin || sp_gc_str_budget_fixed) { sp_str_threshold = sp_str_threshold_init; return; }
 #ifdef SP_THREADS
   int nw = sp_active_workers; if (nw < 1) nw = 1;
-  size_t after = (sp_str_bytes_total() + sp_str_old_total()) / (size_t)nw;
+  size_t yb = sp_str_bytes_total();
+  yb = yb > sp_str_retune_young_exclude ? yb - sp_str_retune_young_exclude : 0;
+  size_t after = (yb + sp_str_old_total()) / (size_t)nw;
   before = (before + sp_str_gate_old) / (size_t)nw;
   (void)promoted;   /* already inside old_total by the time we run */
 #else
@@ -533,9 +648,64 @@ static void sp_str_retune(size_t before, size_t promoted) {
   before += sp_str_gate_old;
 #endif
   size_t freed = before > after ? before - after : 0;   /* saturating; see sp_gc_retune_object */
-  if (freed < before / 4) { sp_str_threshold = sp_gc_sat_mul(before, 2); }
-  else if (after > 0) { sp_str_threshold = sp_gc_sat_mul(after, 2); if (sp_str_threshold < sp_str_threshold_init) sp_str_threshold = sp_str_threshold_init; }
-  else { sp_str_threshold = sp_str_threshold_init; }
+  /* ---- the object heap's share ----
+
+     The collection this budget pays for is not a string sweep, it is a
+     collection: it marks objects too. Priced off the string live set alone,
+     the budget of a program that keeps OBJECTS and throws its strings away
+     stays at the floor however large the object heap grows, and every 256 KB
+     of dead strings buys a collection whose cost grows with that heap -- a
+     minor re-reads every old container written since the last one from end to
+     end, and one string sweep in SP_STR_MAJOR_INTERVAL is a major, which makes
+     the cycle full. Collections linear in the work, each linear in the heap:
+     appending 1M, 2M, 4M parsed records to one Array took 1.9, 7.9, 31 s.
+     This is sp_gc_retune_object's argument with the two heaps exchanged, and
+     the widening is gated the same way, by the mark's share of the last
+     collection.
+
+     The OLD generation, because that is the part of the object heap a
+     string-triggered collection walks beyond what any collection would, and
+     the one reading that is settled wherever this runs: after the object sweep
+     serially, before the slab promotions are folded in when the workers sweep
+     (so one cycle behind there), at the next barrier for the concurrent sweep.
+     alpha is one cycle behind everywhere -- the object retune runs after this.
+     It is the share that retune MEASURED, not what SPINEL_GC_OBJ_BUDGET made
+     of it: `obj`, `walk` and `fixed` pin the object budget, and this budget
+     has its own knob for the same three ends.
+
+     One part in SP_STR_BUDGET_OBJ_DIV, and not the whole of it, because the
+     whole is mostly memory. Measured from 1 to 1/32: on the Array above and
+     on bm_csv_build wall time is flat from 1 to 1/8 and climbs after it,
+     while the resident set falls by 27-40% over the same range; the whole
+     share also cost bm_str_readonly_param 2.8x its memory for nothing, and
+     1/8 costs it none. A Hash would take more (it is dearer to re-read: 1.4x
+     faster at the whole share than at 1/8). 1/8 is the order of the major's
+     base cadence, which is how often a string sweep buys the full mark. What
+     it allows: dead strings up to a quarter of the object old generation
+     between collections, across all workers.
+
+     Nothing here reads what this budget itself lets accumulate (#4396): the
+     term is live object bytes and a ratio of counts, no string figure. */
+  size_t share = 0;
+  if (sp_gc_str_budget_mode) {
+    size_t obj = sp_gc_old_bytes;
+    size_t alpha = sp_gc_str_budget_mode == 1 ? 1024 : sp_gc_mark_share1024;
+    share = (obj / 1024) * alpha + ((obj % 1024) * alpha) / 1024;
+#ifdef SP_THREADS
+    share /= (size_t)nw;   /* per worker, as `after` is */
+#endif
+    share /= SP_STR_BUDGET_OBJ_DIV;
+  }
+  /* An unproductive sweep doubles the budget as it stands, which already
+     keeps the collections it buys from piling up: the share goes into the
+     other case only. That case is also the empty heap now -- no live string
+     and no share reads as zero and takes the floor. */
+  if (freed < before / 4) { sp_str_threshold = sp_gc_sat_mul(before, 2); sp_str_budget_obj_bytes = 0; }
+  else {
+    sp_str_threshold = sp_gc_sat_mul(after + share, 2);
+    if (sp_str_threshold < sp_str_threshold_init) sp_str_threshold = sp_str_threshold_init;
+    sp_str_budget_obj_bytes = sp_gc_sat_mul(share, 2);
+  }
 }
 
 /* Collect and re-tune. The caller guarantees exclusive heap access: the
@@ -584,48 +754,14 @@ int sp_gc_collection_wanted(void) {
 #endif
 }
 
-void *sp_gc_alloc(size_t sz, void (*fin)(void *), void (*scn)(void *)) {
-#ifdef SP_THREADS
-  /* Lock-free fast path: the list push is a CAS (SP_GC_HEAP_PUSH) and the live-
-     byte counter is atomic, so concurrent allocations need no mutex -- the old
-     sp_heap_lock only serialized them and the string sweep, and both string
-     allocation (per-worker heap) and every collection (stop-the-world) have
-     moved off it. Removals happen only under stop-the-world with every mutator
-     parked, so a push never races the sweep. The stress-threshold one-shot is
-     idempotent under a race. */
-  if (!sp_gc_stress_checked) { sp_gc_stress_checked = 1; const char *e = getenv("SPINEL_GC_STRESS"); if (e && *e && *e != '0') { SP_GC_CTR_SET(sp_gc_threshold, 2048); sp_gc_threshold_init = 2048; sp_gc_stress_pin = 1; } }
-  if (SP_GC_CTR_GET(sp_gc_bytes) > SP_GC_CTR_GET(sp_gc_threshold)) sp_stw_collect();
-  size_t need = sizeof(sp_gc_hdr) + sz;
-  sp_gc_hdr *h = (sp_gc_hdr *)calloc(1, need);
-  if (!h) sp_oom_die();
-  h->finalize = fin; h->scan = scn; h->size = need; h->marked = 0; h->old = 0; h->dirty = 0;
-  if (sp_alloc_report_on) sp_alloc_report_count((void *)scn, sz);
-  SP_GC_HEAP_PUSH(h); sp_gc_bytes_add(need);
-  return (char *)h + sizeof(sp_gc_hdr);
-#else
-  SP_HEAP_LOCK();
-  /* The threshold store is atomic: sp_gc_collection_wanted reads it without
-     the heap lock. threshold_init stays plain -- only retune reads it, under
-     stop-the-world, ordered after this by the writer's park. */
-  if (!sp_gc_stress_checked) { sp_gc_stress_checked = 1; const char *e = getenv("SPINEL_GC_STRESS"); if (e && *e && *e != '0') { SP_GC_CTR_SET(sp_gc_threshold, 2048); sp_gc_threshold_init = 2048; sp_gc_stress_pin = 1; } }
-  if (SP_GC_CTR_GET(sp_gc_bytes) > sp_gc_threshold) {
-    sp_gc_collect_retune();
-  }
-  size_t need = sizeof(sp_gc_hdr) + sz;
-  sp_gc_hdr *h = (sp_gc_hdr *)calloc(1, need);
-  if (!h) sp_oom_die();
-  h->finalize = fin; h->scan = scn; h->size = need; h->marked = 0; h->old = 0; h->dirty = 0;
-  if (sp_alloc_report_on) sp_alloc_report_count((void *)scn, sz);
-  SP_GC_HEAP_PUSH(h); sp_gc_bytes_add(need);
-  SP_HEAP_UNLOCK();
-  return (char *)h + sizeof(sp_gc_hdr);
-#endif
-}
+/* sp_gc_alloc lives in lib/sp_slab.c: the allocation fast path is one
+   function there, the slab's claim and the collector's bookkeeping in one
+   frame. */
 void *sp_gc_alloc_nogc(size_t sz, void (*fin)(void *), void (*scn)(void *)) {
   size_t need = sizeof(sp_gc_hdr) + sz;
-  sp_gc_hdr *h = (sp_gc_hdr *)calloc(1, need);
-  if (!h) sp_oom_die();
+  sp_gc_hdr *h = (sp_gc_hdr *)sp_slab_alloc(need);
   h->finalize = fin; h->scan = scn; h->size = need; h->marked = 0; h->old = 0; h->dirty = 0;
+  if (fin) sp_slab_set_fin(h);
   if (sp_alloc_report_on) sp_alloc_report_count((void *)scn, sz);
   SP_HEAP_LOCK();
   SP_GC_HEAP_PUSH(h); sp_gc_bytes_add(need);
@@ -643,7 +779,8 @@ void sp_str_lcache_clear(void) {
 /* sp_mark_string (sp_gc.h) flips a live string's marker 0xfe->0xfc during the
    mark phase; sweep keeps the marked ones and frees the rest. A frozen heap
    string (0xf1) is kept across sweeps (a live frozen global must survive, and
-   frozen literals are immortal). */
+   frozen literals are immortal). A collectable frozen one goes 0xfa->0xf8 and
+   is swept like 0xfe. */
 /* Sweep one worker's list head (or the single st list). Runs under stop-the-
    world (threaded) or the held heap lock (st), so no concurrent push races it.
    `bytes` is decremented per freed string to keep the live-byte count in step. */
@@ -656,34 +793,62 @@ void sp_str_lcache_clear(void) {
    holding rather than one it is churning through.
    `promoted` accumulates the moved bytes so the caller's threshold retune can
    count them as survivors and not mistake promotion for reclamation. */
-static void sp_str_sweep_young(sp_str_hdr **head, size_t *bytes,
-                               sp_str_hdr **old_head, size_t *old_bytes,
-                               size_t *promoted) {
+/* Sweep one young list into LOCAL results -- the survivors as a list with
+   its tail, the bytes they carry, and the bytes the list held in all -- so
+   that several young lists of one worker can be swept at once by different
+   workers and their results spliced into the slot afterwards
+   (sp_str_sweep_young_apply). */
+static void sp_str_sweep_young(sp_str_hdr **head, sp_str_hdr **keep_head, sp_str_hdr **keep_tail,
+                               size_t *moved_out, size_t *held_out) {
   sp_str_hdr *h = *head;
-  sp_str_hdr *keep = *old_head;
-  size_t moved = 0;
+  sp_str_hdr *keep = NULL, *tail = NULL;
+  size_t moved = 0, held = 0;
   while (h) {
     sp_str_hdr *next = h->next;
+    SP_PREFETCH(next);
     char *body = (char *)(h + 1);
     unsigned char m = (unsigned char)body[0];
-    if (m == 0xfc || m == 0xf1) {
-      if (m == 0xfc) body[0] = (char)0xfe;
+    held += h->size & SP_STR_SIZE_MASK;
+    if (m == 0xfc || m == 0xf1 || m == 0xf8) {
+      /* Beside the mutators (a sweeper thread) the reset is a compare-and-
+         swap: a `freeze` that lands on the same byte in the same moment wins,
+         where a plain store could put its 0xfe over the 0xf1. */
+      if (m == 0xfc) {
+        if (sp_gc_in_sweeper) { unsigned char ex = 0xfc; SP_ATOMIC_CAS((unsigned char *)body, &ex, (unsigned char)0xfe, 0, __ATOMIC_ACQ_REL, __ATOMIC_ACQUIRE); }
+        else body[0] = (char)0xfe;
+      }
+      else if (m == 0xf8) SP_ATOMIC_STORE((unsigned char *)body, (unsigned char)0xfa, __ATOMIC_RELAXED);
       h->next = keep;
+      if (!keep) tail = h;
       keep = h;
       moved += h->size & SP_STR_SIZE_MASK;
     }
     else {
-      *bytes -= h->size & SP_STR_SIZE_MASK;
       sp_str_lcache_drop(body + 1);
-      free(h);
+      sp_slab_free(h);
     }
     h = next;
   }
   *head = NULL;
-  *old_head = keep;
-  *bytes -= moved;
+  *keep_head = keep; *keep_tail = tail;
+  *moved_out = moved; *held_out = held;
+}
+/* Splice one young list's survivors into the slot's old generation and
+   settle the counters. Single-threaded per slot: the caller serializes. */
+static void sp_str_sweep_young_apply(sp_str_hdr *keep, sp_str_hdr *tail, size_t moved, size_t held,
+                                     size_t *bytes, sp_str_hdr **old_head, size_t *old_bytes,
+                                     size_t *promoted) {
+  if (keep) { tail->next = *old_head; *old_head = keep; }
+  *bytes -= held;
   *old_bytes += moved;
   *promoted += moved;
+}
+static void sp_str_sweep_young_into(sp_str_hdr **head, size_t *bytes,
+                                    sp_str_hdr **old_head, size_t *old_bytes,
+                                    size_t *promoted) {
+  sp_str_hdr *keep, *tail; size_t moved, held;
+  sp_str_sweep_young(head, &keep, &tail, &moved, &held);
+  sp_str_sweep_young_apply(keep, tail, moved, held, bytes, old_head, old_bytes, promoted);
 }
 
 /* ---- Generational verifier, string side (SPINEL_GC_VERIFY_GEN=1) ----
@@ -711,11 +876,28 @@ static void sp_str_vscan(sp_str_hdr *h) {
     if ((unsigned char)body[0] == 0xfe) sp_str_vcand_push(body);
   }
 }
+/* a slab string's mark is a bit in its chunk, a list string's the byte */
+static int sp_str_vmarked(const char *body) {
+  const sp_str_hdr *h = ((const sp_str_hdr *)body) - 1;
+  if (sp_slab_owns(h)) return sp_slab_is_marked(h);
+  return (unsigned char)body[0] == 0xfc;
+}
+static void sp_str_vunmark(const char *body) {
+  const sp_str_hdr *h = ((const sp_str_hdr *)body) - 1;
+  if (sp_slab_owns(h)) sp_slab_unmark(h);
+  else ((char *)body)[0] = (char)0xfe;
+}
+static void sp_str_vscan_slab_cb(void *hdr, void *arg) {
+  (void)arg;
+  const char *body = (const char *)((sp_str_hdr *)hdr + 1);
+  if (!sp_str_vmarked(body)) sp_str_vcand_push(body);
+}
 void sp_str_verify_begin(void) {
   sp_str_vcand_n = 0;
+  sp_slab_each_string(1, 0, sp_str_vscan_slab_cb, NULL);
 #ifdef SP_THREADS
   { int n = sp_active_workers; if (n < 1) n = 1; if (n > SP_MAX_WORKERS) n = SP_MAX_WORKERS;
-    for (int i = 0; i < n; i++) sp_str_vscan(sp_str_wslot[i].young); }
+    for (int i = 0; i < n; i++) for (int sub = 0; sub < SP_STR_YSUB; sub++) sp_str_vscan(sp_str_wslot[i].young[sub]); }
 #else
   sp_str_vscan(sp_str_heap);
 #endif
@@ -723,7 +905,7 @@ void sp_str_verify_begin(void) {
 size_t sp_str_verify_end(void) {
   size_t leaked = 0;
   for (size_t i = 0; i < sp_str_vcand_n; i++)
-    if ((unsigned char)sp_str_vcand[i][0] == 0xfc) sp_str_vcand[leaked++] = sp_str_vcand[i];
+    if (sp_str_vmarked(sp_str_vcand[i])) sp_str_vcand[leaked++] = sp_str_vcand[i];
   sp_str_vcand_n = leaked;   /* keep just the leaked ones, for the holder probe */
   return leaked;
 }
@@ -732,11 +914,11 @@ size_t sp_str_verify_end(void) {
    the same limit -- it names the DIRECT holder, since sp_gc_mark is inert
    while the probe is armed. */
 void sp_str_verify_probe_arm(void) {
-  for (size_t i = 0; i < sp_str_vcand_n; i++) ((char *)sp_str_vcand[i])[0] = (char)0xfe;
+  for (size_t i = 0; i < sp_str_vcand_n; i++) sp_str_vunmark(sp_str_vcand[i]);
 }
 int sp_str_verify_probe_hit(void) {
   for (size_t i = 0; i < sp_str_vcand_n; i++)
-    if ((unsigned char)sp_str_vcand[i][0] == 0xfc) return 1;
+    if (sp_str_vmarked(sp_str_vcand[i])) return 1;
   return 0;
 }
 void sp_str_verify_probe_done(void) { sp_str_vcand_n = 0; }
@@ -746,15 +928,21 @@ static void sp_str_sweep_old(sp_str_hdr **head, size_t *bytes) {
   sp_str_hdr **pp = head;
   while (*pp) {
     sp_str_hdr *h = *pp;
+    SP_PREFETCH(h->next);
     char *body = (char *)(h + 1);
     unsigned char m = (unsigned char)body[0];
-    if (m == 0xfc) { body[0] = (char)0xfe; pp = &h->next; }
+    if (m == 0xfc) {
+      if (sp_gc_in_sweeper) { unsigned char ex = 0xfc; SP_ATOMIC_CAS((unsigned char *)body, &ex, (unsigned char)0xfe, 0, __ATOMIC_ACQ_REL, __ATOMIC_ACQUIRE); }
+      else body[0] = (char)0xfe;
+      pp = &h->next;
+    }
     else if (m == 0xf1) { pp = &h->next; }
+    else if (m == 0xf8) { SP_ATOMIC_STORE((unsigned char *)body, (unsigned char)0xfa, __ATOMIC_RELAXED); pp = &h->next; }
     else {
       *pp = h->next;
       *bytes -= h->size & SP_STR_SIZE_MASK;
       sp_str_lcache_drop(body + 1);
-      free(h);
+      sp_slab_free(h);
     }
   }
 }
@@ -767,13 +955,19 @@ static size_t sp_str_sweep_gen(int major) {
   int n = sp_active_workers; if (n < 1) n = 1; if (n > SP_MAX_WORKERS) n = SP_MAX_WORKERS;
   for (int i = 0; i < n; i++) {
     if (major) sp_str_sweep_old(&sp_str_wslot[i].old, &sp_str_wslot[i].old_bytes);
-    sp_str_sweep_young(&sp_str_wslot[i].young, &sp_str_wslot[i].young_bytes,
-                       &sp_str_wslot[i].old, &sp_str_wslot[i].old_bytes, &promoted);
+    for (int sub = 0; sub < SP_STR_YSUB; sub++)
+      sp_str_sweep_young_into(&sp_str_wslot[i].young[sub], &sp_str_wslot[i].young_bytes,
+                              &sp_str_wslot[i].old, &sp_str_wslot[i].old_bytes, &promoted);
+    /* the young counter also carried the slab strings, swept by the chunk
+       sweep of this same stop-the-world cycle: the generation is empty now */
+    SP_GC_CTR_SET(sp_str_wslot[i].young_bytes, 0);
+    sp_str_wslot[i].ask_at = 0;
   }
 #else
   if (major) sp_str_sweep_old(&sp_str_old, &sp_str_old_bytes);
-  sp_str_sweep_young(&sp_str_heap, &sp_str_heap_bytes,
-                     &sp_str_old, &sp_str_old_bytes, &promoted);
+  sp_str_sweep_young_into(&sp_str_heap, &sp_str_heap_bytes,
+                          &sp_str_old, &sp_str_old_bytes, &promoted);
+  SP_GC_CTR_SET(sp_str_heap_bytes, 0);
 #endif
   return promoted;
 }
@@ -787,35 +981,37 @@ void sp_str_sweep(void) {
 /* PolyArray free-list pool (see sp_alloc.h). Bounded so a burst does not pin
    memory forever; an over-cap or oversized-buffer entry frees normally. The
    scan/finalize hooks stay valid on recycled headers -- only `next` and the
-   heap-byte accounting change hands. */
-sp_gc_hdr *sp_polyarr_pool_head = NULL;
-long sp_polyarr_pool_count = 0;
+   heap-byte accounting change hands.
+   PER THREAD. It was one Treiber stack for the process, pushed by every
+   owner's sweep and popped by every allocating worker, and on a 32-core
+   server the exchange on its head was the single hottest symbol (8.6% of
+   the process, ahead of memmove). A worker sweeps its own young list, so
+   what it recycles it can hand back to itself with no atomics at all; the
+   sweeper threads and the barrier helpers recycle into their own, which
+   the cap bounds. The cap is per thread for the same reason. */
+SP_TLS sp_gc_hdr *sp_polyarr_pool_head = NULL;
+SP_TLS long sp_polyarr_pool_count = 0;
+/* The cap is per thread, so threaded it is a fraction of what the one
+   process-wide pool held (up to 64k, which a tree benchmark churning tens
+   of thousands of arrays a cycle leaned on): 8k a worker bounds thirty
+   workers where 64k each would not, and single-threaded the one pool keeps
+   the old cap. */
+#ifdef SP_THREADS
+#define SP_POLYARR_POOL_MAX 8192
+#else
 #define SP_POLYARR_POOL_MAX 65536
+#endif
 #define SP_POLYARR_POOL_KEEP_CAP 64   /* don't retain unusually large buffers */
 void sp_PolyArray_pool_recycle(sp_gc_hdr *h) {
   sp_PolyArray *a = (sp_PolyArray *)((char *)h + sizeof(sp_gc_hdr));
-  long n;
-#ifdef SP_THREADS
-  n = __atomic_load_n(&sp_polyarr_pool_count, __ATOMIC_RELAXED);
-#else
-  n = sp_polyarr_pool_count;
-#endif
-  if (n >= SP_POLYARR_POOL_MAX || a->cap > SP_POLYARR_POOL_KEEP_CAP) {
-    free(a->data);
-    free(h);
+  if (sp_polyarr_pool_count >= SP_POLYARR_POOL_MAX || a->cap > SP_POLYARR_POOL_KEEP_CAP) {
+    if (a->data != a->inl) sp_pl_free(a->data);
+    sp_slab_free(h);
     return;
   }
-#ifdef SP_THREADS
-  sp_gc_hdr *old;
-  do { old = __atomic_load_n(&sp_polyarr_pool_head, __ATOMIC_ACQUIRE); h->next = old;
-  } while (!__atomic_compare_exchange_n(&sp_polyarr_pool_head, &old, h,
-                                        0, __ATOMIC_ACQ_REL, __ATOMIC_ACQUIRE));
-  __atomic_fetch_add(&sp_polyarr_pool_count, 1, __ATOMIC_RELAXED);
-#else
   h->next = sp_polyarr_pool_head;
   sp_polyarr_pool_head = h;
   sp_polyarr_pool_count++;
-#endif
 }
 
 /* String sweep, gated on the string heap's own trigger. The object collector
@@ -884,7 +1080,15 @@ int sp_str_sweep_begin(int *major) {
   }
   return 1;
 }
+void sp_str_sweep_end_excluding(int major, size_t promoted, size_t young_exclude) {
+  sp_str_retune_young_exclude = young_exclude;
+  sp_str_sweep_end(major, promoted);
+  sp_str_retune_young_exclude = 0;
+}
 void sp_str_sweep_end(int major, size_t promoted) {
+  /* the slab strings this cycle's mark promoted joined old too (their
+     generation is swept every cycle, gate or no gate; sp_str_mark_settle) */
+  promoted += sp_gc_mk_str_young_bytes;
   if (major) {
     sp_gc_str_majors++;
     size_t old_after = sp_str_old_total();
@@ -892,12 +1096,23 @@ void sp_str_sweep_end(int major, size_t promoted) {
        the floor put them, which is what makes a policy measurable against
        itself. SPINEL_GC_STR_MAJOR=size turns the schedule off entirely and
        leaves the size test as the whole policy, which is what shipped before. */
+    /* The old set this major walked is what it KEPT: sp_str_old_total() after
+       the sweep also carries what the same sweep promoted out of young, and
+       that is not a survivor of anything yet. Both re-aims below are taken
+       over kept, for the reason the ratio's note gives. */
+    size_t kept = old_after > promoted ? old_after - promoted : 0;
     if (!sp_gc_str_major_fixed) {
-      /* Re-baseline the backstop: twice what this major left. That formula is
-         a ratchet when it is the ONLY gate and harmless behind a schedule,
-         which is the same bound sp_gc_collect keeps for the object old
-         generation. */
-      sp_str_old_threshold = sp_gc_sat_mul(old_after, 2);
+      /* Re-baseline the backstop: twice what this major KEPT, the bound
+         sp_gc_collect keeps for the object old generation. Aiming it at
+         old_after instead let the strings a request had in flight at the sweep
+         set the gate: on Campfire every sweep promotes 50-70 MB of them, they
+         die milliseconds later, and a gate of twice kept-plus-promoted held
+         three sweeps of that garbage (old 290 MB against 20 MB kept) -- and the
+         young trigger, which retunes on the whole string heap, followed it up
+         to 12 MB a worker. Aimed at kept, the next sweep whose promotion
+         outgrows the live set is a major, and the old generation stays within
+         one sweep's promotion of what is live. */
+      sp_str_old_threshold = sp_gc_sat_mul(kept, 2);
       if (sp_str_old_threshold < sp_str_old_threshold_init)
         sp_str_old_threshold = sp_str_old_threshold_init;
       /* Adapt the CADENCE from the survival RATIO. A ratio is scale-free, so
@@ -921,7 +1136,6 @@ void sp_str_sweep_end(int major, size_t promoted) {
            at a 4 MB floor it walked the interval up to 32 and left 61 MB of old
            against a 12 MB live set. */
         size_t before = sp_str_gate_old;
-        size_t kept = old_after > promoted ? old_after - promoted : 0;
         if (kept > before - (before >> 2)) {                /* >75% survived */
           if (sp_str_major_interval < SP_STR_MAJOR_INTERVAL_MAX) sp_str_major_interval *= 2;
         }
@@ -940,10 +1154,33 @@ void sp_str_sweep_end(int major, size_t promoted) {
    the slow path in glibc and in every other thread-caching allocator. Each
    worker also clears its own length cache, whose entries are keyed by the
    addresses this sweep is about to recycle. */
-void sp_str_sweep_one(int wid, int major, size_t *promoted) {
-  if (major) sp_str_sweep_old(&sp_str_wslot[wid].old, &sp_str_wslot[wid].old_bytes);
-  sp_str_sweep_young(&sp_str_wslot[wid].young, &sp_str_wslot[wid].young_bytes,
-                     &sp_str_wslot[wid].old, &sp_str_wslot[wid].old_bytes, promoted);
+/* The list forms, for the concurrent driver (sp_sched.c): the lists were
+   detached from their slots under the barrier, so they arrive as plain
+   pointers, and the old sweep answers the bytes it freed for the slot's
+   counter to take at the next barrier. */
+void sp_str_sweep_young_list(sp_str_hdr **head, sp_str_hdr **keep, sp_str_hdr **tail, size_t *moved, size_t *held) {
+  sp_str_sweep_young(head, keep, tail, moved, held);
+}
+size_t sp_str_sweep_old_list(sp_str_hdr **head) {
+  size_t bytes = (size_t)-1 / 2;   /* a counter the sweep decrements; the difference is what it freed */
+  size_t start = bytes;
+  sp_str_sweep_old(head, &bytes);
+  return start - bytes;
+}
+/* The sweep tasks of one slot, for the parallel driver (sp_sched.c): the old
+   list on a major, and each young list into local results that
+   sp_str_sweep_young_done splices in once every task of the slot is over. */
+void sp_str_sweep_old_one(int wid) {
+  sp_str_sweep_old(&sp_str_wslot[wid].old, &sp_str_wslot[wid].old_bytes);
+}
+void sp_str_sweep_young_one(int wid, int sub, sp_str_hdr **keep, sp_str_hdr **tail,
+                            size_t *moved, size_t *held) {
+  sp_str_sweep_young(&sp_str_wslot[wid].young[sub], keep, tail, moved, held);
+}
+void sp_str_sweep_young_done(int wid, sp_str_hdr *keep, sp_str_hdr *tail, size_t moved, size_t held,
+                             size_t *promoted) {
+  sp_str_sweep_young_apply(keep, tail, moved, held, &sp_str_wslot[wid].young_bytes,
+                           &sp_str_wslot[wid].old, &sp_str_wslot[wid].old_bytes, promoted);
 }
 #endif
 static void sp_str_sweep_gated(void) {
@@ -966,7 +1203,7 @@ char *sp_str_alloc_ext(size_t len) { return sp_str_alloc(len); }
 
 /* Wire string sweep into the object collector. Runs before main, so the hook is
    set before the first allocation can trigger a collection. */
-__attribute__((constructor)) static void sp_alloc_install_hooks(void) {
+SP_CONSTRUCTOR static void sp_alloc_install_hooks(void) {
   sp_gc_str_sweep_hook = sp_str_sweep_gated;
   sp_gc_str_major_due_hook = sp_str_major_due;
   sp_gc_obj_retune_hook = sp_gc_retune_object;
@@ -1108,9 +1345,262 @@ void sp_alloc_report_tag(void *scan, const char *name) {
     if (n->key == scan || n->key == NULL) { n->key = scan; n->name = name; return; }
   }
 }
-/* A site's human name, resolved at dump time. Prefers the symbol name from
-   the dynamic symbol table; falls back to the raw address. Caller frees. */
+/* ---- naming a site ----
+   backtrace_symbols reads only the DYNAMIC symbol table, and user methods are
+   `static` C functions, so on its own it names nothing the user wrote: every
+   site came out as `./app(+0x1bf67) [0x55..]`. The executable's full symbol
+   table (.symtab) does carry the static functions whenever the binary was not
+   stripped -- which --profile and -g builds guarantee and the default build
+   leaves in place -- so on ELF the dump reads it from /proc/self/exe, once,
+   and names the function containing the return address. When `--profile`
+   also wrote `<exe>.symbols.json` beside the binary, that C name is turned
+   into the Ruby name it was emitted for (`sp_Foo_bar` -> `Foo#bar`).
+
+   All of this runs at dump time only and only for a site row: with
+   SPINEL_ALLOC_SITES unset nothing here is ever reached. Every step degrades
+   to the one before it -- no map: the C name; stripped or not ELF: the old
+   backtrace_symbols text; nothing at all: the raw address. */
+#if SP_ALLOC_SITE_AVAILABLE && defined(__linux__) && defined(__has_include)
+#  if __has_include(<elf.h>)
+#    include <elf.h>
+#    include <ctype.h>
+#    define SP_ALLOC_SYMTAB 1
+#  endif
+#endif
+#ifndef SP_ALLOC_SYMTAB
+#  define SP_ALLOC_SYMTAB 0
+#endif
+
+#if SP_ALLOC_SYMTAB
+#if UINTPTR_MAX > 0xffffffffu
+#  define SP_ELF(t) Elf64_##t
+#else
+#  define SP_ELF(t) Elf32_##t
+#endif
+typedef struct { uintptr_t lo, hi; const char *name; } sp_AllocSym;
+typedef struct { char *c, *ruby; } sp_AllocRubyName;
+#ifndef SP_THREADS
+static int sp_alloc_syms_loaded = 0;
+#endif
+static sp_AllocSym *sp_alloc_syms = NULL;      /* FUNC symbols, sorted by lo */
+static size_t sp_alloc_nsyms = 0;
+static char *sp_alloc_symstr = NULL;           /* the .strtab the names point into */
+static uintptr_t sp_alloc_load_bias = 0;
+static sp_AllocRubyName *sp_alloc_rnames = NULL; /* from <exe>.symbols.json, sorted by c */
+static size_t sp_alloc_nrnames = 0;
+
+static int sp_alloc_sym_cmp(const void *a, const void *b) {
+  uintptr_t x = ((const sp_AllocSym *)a)->lo, y = ((const sp_AllocSym *)b)->lo;
+  return x < y ? -1 : x > y;
+}
+static int sp_alloc_rname_cmp(const void *a, const void *b) {
+  return strcmp(((const sp_AllocRubyName *)a)->c, ((const sp_AllocRubyName *)b)->c);
+}
+static int sp_alloc_pread_all(int fd, void *buf, size_t n, off_t off) {
+  char *p = (char *)buf;
+  while (n > 0) {
+    ssize_t r = pread(fd, p, n, off);
+    if (r < 0 && errno == EINTR) continue;
+    if (r <= 0) return 0;
+    p += r; n -= (size_t)r; off += r;
+  }
+  return 1;
+}
+/* A JSON string body starting at `p` (just past the opening quote) into a
+   fresh C string; *end is left past the closing quote. Only the escapes
+   codegen's json_escape_into writes for a name matter here. */
+static char *sp_alloc_json_str(const char *p, const char **end) {
+  size_t cap = 32, n = 0;
+  char *o = (char *)malloc(cap);
+  if (!o) return NULL;
+  while (*p && *p != '"') {
+    char ch = *p++;
+    if (ch == '\\' && *p) {
+      char e = *p++;
+      if (e == 'u') {               /* \u00XX: a control byte, kept as-is */
+        unsigned v = 0; int k;
+        for (k = 0; k < 4 && isxdigit((unsigned char)*p); k++, p++)
+          v = v * 16 + (unsigned)(isdigit((unsigned char)*p) ? *p - '0' : (tolower((unsigned char)*p) - 'a' + 10));
+        ch = (char)v;
+      }
+      else ch = e == 'n' ? '\n' : e == 't' ? '\t' : e == 'r' ? '\r' : e;
+    }
+    if (n + 2 > cap) { char *g = (char *)realloc(o, cap *= 2); if (!g) { free(o); return NULL; } o = g; }
+    o[n++] = ch;
+  }
+  o[n] = 0;
+  *end = *p == '"' ? p + 1 : p;
+  return o;
+}
+/* `<exe>.symbols.json` is what --profile / --emit-symbol-map write: one
+   {"c":"...","ruby":"...",...} object per emitted method. */
+static void sp_alloc_load_ruby_names(const char *exe) {
+  char path[4200];
+  snprintf(path, sizeof path, "%s.symbols.json", exe);
+  FILE *f = fopen(path, "r");
+  if (!f) return;
+  size_t cap = 1 << 16, len = 0;
+  char *buf = (char *)malloc(cap);
+  while (buf) {
+    if (len + 4096 + 1 > cap) { char *g = (char *)realloc(buf, cap *= 2); if (!g) { free(buf); buf = NULL; break; } buf = g; }
+    size_t r = fread(buf + len, 1, cap - len - 1, f);
+    if (r == 0) break;
+    len += r;
+  }
+  fclose(f);
+  if (!buf) return;
+  buf[len] = 0;
+  size_t rcap = 0;
+  for (const char *p = buf; (p = strstr(p, "{\"c\":\"")) != NULL; ) {
+    const char *q;
+    char *c = sp_alloc_json_str(p + 6, &q);
+    if (!c) break;
+    if (strncmp(q, ",\"ruby\":\"", 9) != 0) { free(c); p = q; continue; }
+    char *rb = sp_alloc_json_str(q + 9, &q);
+    p = q;
+    if (!rb || !*c || !*rb) { free(c); free(rb); continue; }
+    if (sp_alloc_nrnames == rcap) {
+      size_t nc = rcap ? rcap * 2 : 256;
+      sp_AllocRubyName *g = (sp_AllocRubyName *)realloc(sp_alloc_rnames, nc * sizeof *g);
+      if (!g) { free(c); free(rb); break; }
+      sp_alloc_rnames = g; rcap = nc;
+    }
+    sp_alloc_rnames[sp_alloc_nrnames].c = c;
+    sp_alloc_rnames[sp_alloc_nrnames].ruby = rb;
+    sp_alloc_nrnames++;
+  }
+  free(buf);
+  if (sp_alloc_nrnames)
+    qsort(sp_alloc_rnames, sp_alloc_nrnames, sizeof *sp_alloc_rnames, sp_alloc_rname_cmp);
+}
+/* Read the executable's .symtab once. Any surprise -- not ELF, another
+   class or byte order, no .symtab (stripped) -- leaves the table empty and
+   the caller falls back. */
+static void sp_alloc_read_symtab(void) {
+  char exe[4096];
+  ssize_t el = readlink("/proc/self/exe", exe, sizeof exe - 1);
+  if (el <= 0) return;
+  exe[el] = 0;
+  int fd = open("/proc/self/exe", O_RDONLY | O_CLOEXEC);
+  if (fd < 0) return;
+  SP_ELF(Ehdr) eh;
+  SP_ELF(Shdr) *sh = NULL;
+  SP_ELF(Sym) *st = NULL;
+  int have_anchor = 0;
+  if (!sp_alloc_pread_all(fd, &eh, sizeof eh, 0)) goto done;
+  if (memcmp(eh.e_ident, ELFMAG, SELFMAG) != 0) goto done;
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+  if (eh.e_ident[EI_DATA] != ELFDATA2LSB) goto done;
+#else
+  if (eh.e_ident[EI_DATA] != ELFDATA2MSB) goto done;
+#endif
+  if (eh.e_ident[EI_CLASS] != (sizeof(void *) == 8 ? ELFCLASS64 : ELFCLASS32)) goto done;
+  if (eh.e_shentsize != sizeof(SP_ELF(Shdr)) || eh.e_shnum == 0 || eh.e_shnum > 65000) goto done;
+  sh = (SP_ELF(Shdr) *)malloc((size_t)eh.e_shnum * sizeof *sh);
+  if (!sh || !sp_alloc_pread_all(fd, sh, (size_t)eh.e_shnum * sizeof *sh, (off_t)eh.e_shoff)) goto done;
+  for (size_t i = 0; i < eh.e_shnum; i++) {
+    if (sh[i].sh_type != SHT_SYMTAB || sh[i].sh_entsize != sizeof(SP_ELF(Sym))) continue;
+    if (sh[i].sh_link >= eh.e_shnum) break;
+    SP_ELF(Shdr) *ss = &sh[sh[i].sh_link];
+    size_t nsym = (size_t)(sh[i].sh_size / sizeof(SP_ELF(Sym)));
+    st = (SP_ELF(Sym) *)malloc(nsym * sizeof *st);
+    sp_alloc_symstr = (char *)malloc((size_t)ss->sh_size + 1);
+    if (!st || !sp_alloc_symstr ||
+        !sp_alloc_pread_all(fd, st, nsym * sizeof *st, (off_t)sh[i].sh_offset) ||
+        !sp_alloc_pread_all(fd, sp_alloc_symstr, (size_t)ss->sh_size, (off_t)ss->sh_offset)) {
+      free(sp_alloc_symstr); sp_alloc_symstr = NULL; break;
+    }
+    sp_alloc_symstr[ss->sh_size] = 0;
+    sp_alloc_syms = (sp_AllocSym *)malloc(nsym * sizeof *sp_alloc_syms);
+    if (!sp_alloc_syms) break;
+    for (size_t k = 0; k < nsym; k++) {
+      if (ELF32_ST_TYPE(st[k].st_info) != STT_FUNC || st[k].st_size == 0 || st[k].st_shndx == SHN_UNDEF) continue;
+      if (st[k].st_name >= ss->sh_size) continue;
+      sp_AllocSym *y = &sp_alloc_syms[sp_alloc_nsyms++];
+      y->lo = (uintptr_t)st[k].st_value;
+      y->hi = y->lo + (uintptr_t)st[k].st_size;
+      y->name = sp_alloc_symstr + st[k].st_name;
+      /* The anchor that gives the load bias: a PIE runs slid from the
+         addresses the file records, by however much this function -- which
+         is in the same executable as every site -- moved. 0 when fixed. */
+      if (!have_anchor && strcmp(y->name, "sp_alloc_report_count") == 0) {
+        sp_alloc_load_bias = (uintptr_t)&sp_alloc_report_count - y->lo;
+        have_anchor = 1;
+      }
+    }
+    qsort(sp_alloc_syms, sp_alloc_nsyms, sizeof *sp_alloc_syms, sp_alloc_sym_cmp);
+    break;
+  }
+  /* Without the anchor the slide is unknown and every lookup would name the
+     wrong function: better to name none. */
+  if (sp_alloc_nsyms && !have_anchor) sp_alloc_nsyms = 0;
+  if (sp_alloc_nsyms) sp_alloc_load_ruby_names(exe);
+done:
+  free(st);
+  free(sh);
+  close(fd);
+}
+/* A dump asked for by signal runs on the reader thread (or on whichever
+   thread allocates next) and can overlap the one atexit writes, so under
+   threads the tables are built under pthread_once: a second dump waits for
+   the first to finish building them instead of reading them half-sorted. */
+static void sp_alloc_load_symtab(void) {
+#ifdef SP_THREADS
+  static pthread_once_t once = PTHREAD_ONCE_INIT;
+  pthread_once(&once, sp_alloc_read_symtab);
+#else
+  if (sp_alloc_syms_loaded) return;
+  sp_alloc_syms_loaded = 1;
+  sp_alloc_read_symtab();
+#endif
+}
+/* The function whose body holds `site`, by its .symtab name; NULL when the
+   address is not inside any (a shared library's frame, a stripped binary). */
+static const char *sp_alloc_symtab_name(void *site) {
+  sp_alloc_load_symtab();
+  if (!sp_alloc_nsyms) return NULL;
+  /* a return address is one past the call, which can be one past the end
+     of a function that ends in a noreturn call: look up the byte before. */
+  uintptr_t a = (uintptr_t)site - sp_alloc_load_bias - 1;
+  size_t lo = 0, hi = sp_alloc_nsyms;
+  while (lo < hi) { size_t m = lo + (hi - lo) / 2; if (sp_alloc_syms[m].lo <= a) lo = m + 1; else hi = m; }
+  /* the innermost of any overlapping entries is the last one starting at or
+     below a; scan back a little for one that actually contains it */
+  for (size_t k = lo, tries = 0; k > 0 && tries < 8; k--, tries++) {
+    sp_AllocSym *y = &sp_alloc_syms[k - 1];
+    if (a >= y->lo && a < y->hi) return y->name;
+  }
+  return NULL;
+}
+/* `sp_Foo_bar` (or a compiler clone of it, `sp_Foo_bar.constprop.0`) to the
+   Ruby name the symbol map gives it; NULL without a map entry. */
+static const char *sp_alloc_ruby_name(const char *cname) {
+  if (!sp_alloc_nrnames) return NULL;
+  char base[512];
+  size_t n = strcspn(cname, ".");
+  if (n >= sizeof base) return NULL;
+  memcpy(base, cname, n); base[n] = 0;
+  sp_AllocRubyName key = { base, NULL };
+  sp_AllocRubyName *hit = (sp_AllocRubyName *)bsearch(&key, sp_alloc_rnames, sp_alloc_nrnames,
+                                                      sizeof *sp_alloc_rnames, sp_alloc_rname_cmp);
+  return hit ? hit->ruby : NULL;
+}
+#endif
+
+/* A site's human name, resolved at dump time: the Ruby method name when the
+   symbol map is beside the binary, else the C function from .symtab, else
+   what the dynamic symbol table knows, else the raw address. Caller frees. */
 static char *sp_alloc_site_name(void *site) {
+#if SP_ALLOC_SYMTAB
+  {
+    const char *cn = sp_alloc_symtab_name(site);
+    if (cn) {
+      const char *rn = sp_alloc_ruby_name(cn);
+      char *r = strdup(rn ? rn : cn);
+      if (r) return r;
+    }
+  }
+#endif
 #if SP_ALLOC_SITE_AVAILABLE
   char **syms = backtrace_symbols(&site, 1);
   if (syms && syms[0]) {
@@ -1241,7 +1731,7 @@ static int sp_resolve_report_signal(void) {
 static void sp_alloc_report_poll(void) {
   if (!sp_alloc_report_pending) return;
 #ifdef SP_THREADS
-  if (!__atomic_exchange_n(&sp_alloc_report_pending, 0, __ATOMIC_SEQ_CST)) return;
+  if (!SP_ATOMIC_EXCHANGE(&sp_alloc_report_pending, 0, __ATOMIC_SEQ_CST)) return;
 #else
   sp_alloc_report_pending = 0;
 #endif
@@ -1286,10 +1776,10 @@ static void sp_alloc_report_start_reader(void) {
 }
 #endif
 
-__attribute__((constructor)) static void sp_alloc_report_boot(void) {
+SP_CONSTRUCTOR static void sp_alloc_report_boot(void) {
   const char *e = getenv("SPINEL_ALLOC_REPORT");
   if (e && *e && strcmp(e, "0") != 0) {
-    sp_alloc_report_on = 1;
+    sp_alloc_report_on = 1; sp_gc_alloc_fast_ok = 0;
     { const char *sv = getenv("SPINEL_ALLOC_SITES");
       sp_alloc_sites_on = (sv && *sv && strcmp(sv, "0") != 0) ? 1 : 0; }
 #ifdef SP_THREADS

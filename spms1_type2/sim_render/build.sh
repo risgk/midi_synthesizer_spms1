@@ -19,6 +19,15 @@ for arg in "$@"; do
   esac
 done
 
+# On Windows (MSYS2 names its shells MINGW64_NT-..., UCRT64_NT-..., ...) the runtime is built and
+# linked with -flto. --gc-sections drops nothing there: the unwind table (.pdata) names every
+# function, and with them the linker kept the calls of the parts SPINEL_BARE_METAL leaves out,
+# which LTO drops before any code is made.
+runtime_flags=
+link_flags=
+case "$(uname -s)" in
+  *_NT*) runtime_flags="-flto"; link_flags="-flto -O2" ;;
+esac
 case "$(uname -s)" in
   MINGW*|MSYS*)
     exe=build/sim_render/spms1_render.exe
@@ -47,6 +56,8 @@ if [ "$use_spinel" = 1 ]; then
     echo "Spinel not found; building the spms1_main.c already in spms1" >&2
   fi
 fi
+# Spinel's output as the sketch takes it (see spinel_mcu/after_spinel.sh).
+sh spinel_mcu/after_spinel.sh spms1/spms1_main.c
 
 cc=${CC:-cc}
 command -v "$cc" > /dev/null || cc=gcc
@@ -59,11 +70,11 @@ newest_header=$(ls -t spms1/*.h sim_spinel/host_compat.h | head -n 1)
 for src in spms1/spms1_main.c spms1/sp_*.c spms1/re_*.c; do
   obj="build/sim_render/$(basename "$src" .c).o"
   if [ "$src" = spms1/spms1_main.c ] || [ ! -f "$obj" ] || [ "$src" -nt "$obj" ] || [ "$newest_header" -nt "$obj" ]; then
-    "$cc" -O2 -w -ffunction-sections -fdata-sections -include sim_spinel/host_compat.h -Ispms1 \
+    "$cc" -O2 -w -ffunction-sections -fdata-sections $runtime_flags -include sim_spinel/host_compat.h -Ispms1 \
       -DSP_GC_ROOT_OVERFLOW_CHECK -c "$src" -o "$obj"
   fi
 done
 "$cc" -O2 -Wall -Ispms1 -c sim_render/spms1_render.c -o build/sim_render/spms1_render_host.o
-"$cc" -o "$exe" build/sim_render/*.o -lm $strip_unused
+"$cc" $link_flags -o "$exe" build/sim_render/*.o -lm $strip_unused
 
 echo "Built $exe"

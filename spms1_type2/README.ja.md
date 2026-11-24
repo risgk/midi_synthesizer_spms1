@@ -1,4 +1,4 @@
-MIDI Synthesizer SPMS-1 (type-2) v0.8.1
+MIDI Synthesizer SPMS-1 (type-2) v0.9.0
 =======================================
 
 - Spinel (Ruby AOT コンパイラ) で作った、Raspberry Pi Pico 2 用のモノフォニック・セミモジュラー MIDI シンセサイザー
@@ -65,7 +65,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.8.1
     - このスケッチはバージョン 5.0.2 で動作確認しています: <https://github.com/FortySevenEffects/arduino_midi_library/releases/tag/5.0.2>
     - 情報: <https://github.com/FortySevenEffects/arduino_midi_library>
 - Spinel
-    - リリース: 2026.09.12 <https://github.com/matz/spinel/tree/2026.09.12>
+    - リリース: 2026.10.25 <https://github.com/matz/spinel/tree/2026.10.25>
     - Spinel の出力ファイル "spms1_main.c" に手を入れる必要はありません。本スケッチの
       "spinel_rt_mcu_head.h" ("spinel_rt.h" の先頭で読み込み) が
       `#define main __attribute__((section(".time_critical"), flatten)) Spms1_main` を持っており、改名と
@@ -81,7 +81,9 @@ MIDI Synthesizer SPMS-1 (type-2) v0.8.1
       テーブルの読み出しも "spms1_midi_read.h" からインライン展開されます
     - クランプは、同じように読み込む "spms1_dsp.h" の 2 つの Float の大きい方と小さい方で、Ruby なら
       比較して選ぶところがそれぞれ 1 命令 (`vmaxnm.f32` か `vminnm.f32`) になります
-    - "spms1_main.c" は "spms1" で `spinel spms1_main.rb -c --rbs sig` を実行して生成します。"spms1/sig" の
+    - "spms1_main.c" は "spms1" で `spinel spms1_main.rb -c --rbs sig` を実行して生成し、"spms1_type2" で
+      `sh spinel_mcu/after_spinel.sh spms1/spms1_main.c` を実行して手を加えます (理由はそのスクリプトに
+      あります。"sim_render/build.sh" は両方を行います)。"spms1/sig" の
       型シードがフィルタの状態、パラメータのスムージング、バスへの書き込みをボックス化させずに保ちます。
       必要な理由は "spms1/sig/spms1_filter.rbs"、"spms1/sig/spms1_dsp.rbs"、"spms1/sig/spms1_framework.rbs"
       にあります
@@ -429,7 +431,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 ```
 
-- ベースリリース: 2026.09.12 <https://github.com/matz/spinel/tree/2026.09.12>
+- ベースリリース: 2026.10.25 <https://github.com/matz/spinel/tree/2026.10.25>
 - 対象ファイル: `spms1/spinel_rt*.h*`, `spms1/mruby_shim.h*`, `spms1/sp_*.*`, `spms1/re_*.*`, `spinel_mcu/*`
     - 注: ランタイムの一部のファイルは、MCU 向けに ISGK Instruments (Ryo Ishigaki) が変更しています
 

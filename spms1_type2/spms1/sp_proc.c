@@ -1,5 +1,6 @@
 /* sp_proc.c -- cold sp_Proc/sp_Curry ops (see sp_proc.h). 0 optcarrot uses. */
 #include "sp_proc.h"
+#include "sp_exc.h"   /* sp_arity_check */
 
 void sp_Proc_scan(void *p) { sp_Proc *pr = (sp_Proc *)p; if (pr->cap && pr->cap_scan) pr->cap_scan(pr->cap); }
 sp_Proc *sp_proc_new_meta(void *fn, void *cap, void (*cap_scan)(void *), sp_int arity, sp_bool lambda_p, sp_int param_count, const sp_sym *param_kinds, const sp_sym *param_names) { sp_Proc *p = (sp_Proc *)sp_gc_alloc(sizeof(sp_Proc), NULL, sp_Proc_scan); p->fn = fn; p->cap = cap; p->cap_scan = cap_scan; p->arity = arity; p->lambda_p = lambda_p; p->param_count = param_count; p->param_kinds = param_kinds; p->param_names = param_names; return p; }
@@ -26,14 +27,6 @@ const char *sp_proc_inspect(sp_Proc *p) {SP_GC_ROOT(p);
   return sp_sprintf(p->lambda_p ? "#<Proc:0x%016llx (lambda)>" : "#<Proc:0x%016llx>",
                     (unsigned long long)(uintptr_t)p);
 }
-/* Lambda strict-arity check: raise ArgumentError if argc is outside
-   [req, req+opt] (no upper bound with a rest param). Procs are lenient. */
-void sp_proc_lambda_arity_check(sp_int argc, sp_int req, sp_int opt, sp_bool has_rest, sp_bool has_kw) {
-  /* a lambda with keyword parameters accepts one extra trailing argument (the
-     keyword hash) beyond its positional maximum. */
-  sp_int max = req + opt + (has_kw ? 1 : 0);
-  if (argc < req || (!has_rest && argc > max)) sp_raise_cls("ArgumentError", "wrong number of arguments");
-}
 /* Proc#parameters with an explicit mode. Kinds are stored canonically
    (lambda-style: a plain positional is "req"); printing for proc mode remaps
    req -> opt, which leaves defaulted positionals (stored "opt") and every
@@ -56,7 +49,7 @@ sp_PolyArray *sp_proc_parameters_ids(sp_Proc *p, int mode, sp_sym req_id, sp_sym
   return r;
 }
 sp_PolyArray *sp_proc_parameters(sp_Proc *p) { SP_GC_ROOT(p); sp_PolyArray *r = sp_PolyArray_new(); if (!p || p->param_count <= 0 || !p->param_kinds) return r; SP_GC_ROOT(r); for (sp_int i = 0; i < p->param_count; i++) { sp_PolyArray *pair = sp_PolyArray_new(); sp_PolyArray_push(pair, sp_box_sym(p->param_kinds[i])); if (p->param_names && p->param_names[i] >= 0) sp_PolyArray_push(pair, sp_box_sym(p->param_names[i])); sp_PolyArray_push(r, sp_box_poly_array(pair)); } return r; }
-void sp_curry_scan(void *p) { sp_Curry *c = (sp_Curry *)p; if (c->target) sp_gc_mark(c->target); for (sp_int i = 0; i < c->nargs && i < 16; i++) sp_mark_rbval(c->args[i]); }
+void sp_curry_scan(void *p) { sp_Curry *c = (sp_Curry *)p; if (c->target) sp_gc_mark(c->target); for (sp_int i = 0; i < c->nargs; i++) sp_mark_rbval(c->args[i]); }
 sp_Curry *sp_curry_new(sp_Proc *p) {
   SP_GC_ROOT(p);  /* the target proc has no other root across this alloc */
   sp_Curry *c = (sp_Curry *)sp_gc_alloc(sizeof(sp_Curry), NULL, sp_curry_scan);
@@ -72,8 +65,6 @@ sp_Curry *sp_curry_new(sp_Proc *p) {
    (an optional widens it, a rest lifts it), so the call site passes it in --
    max < 0 means unlimited-or-unknown, and the message then says "min+". */
 sp_Curry *sp_curry_new_n(sp_Proc *p, sp_int n, sp_int max) {
-  /* an int-typed slot's nil sentinel is CRuby's nil count: no count at all */
-  if (n == SP_INT_NIL) return sp_curry_new(p);
   if (p && p->lambda_p) {
     sp_int min = p->arity < 0 ? -p->arity - 1 : p->arity;
     sp_int mx = max >= 0 ? max : (p->arity >= 0 ? p->arity : -1);
@@ -81,18 +72,7 @@ sp_Curry *sp_curry_new_n(sp_Proc *p, sp_int n, sp_int max) {
        is the target's own truth. A guess below it names a different write of
        the same name -- trust the target, drop the guess. */
     if (mx >= 0 && mx < min) mx = -1;
-    if (n < min || (mx >= 0 && n > mx)) {
-      const char *want = mx < 0 ? sp_sprintf("%lld+", (long long)min)
-                       : mx == min ? sp_sprintf("%lld", (long long)min)
-                       : sp_sprintf("%lld..%lld", (long long)min, (long long)mx);
-      /* both strings live on the collected heap; the second sp_sprintf and
-         the raise path itself allocate, so root them across those */
-      SP_GC_ROOT_STR(want);
-      const char *msg = sp_sprintf("wrong number of arguments (given %lld, expected %s)",
-                                   (long long)n, want);
-      SP_GC_ROOT_STR(msg);
-      sp_raise_cls("ArgumentError", msg);
-    }
+    sp_arity_check(n, min, mx, NULL);
   }
   sp_Curry *c = sp_curry_new(p);
   c->arity = n < 0 ? 0 : n;
@@ -104,16 +84,16 @@ sp_Curry *sp_curry_apply(sp_Curry *c, sp_RbVal arg) {SP_GC_ROOT_RBVAL(arg);
   /* root the source accumulator: in a chained apply it is only referenced
      from a C argument slot, and this allocation can collect */
   SP_GC_ROOT(c);
-  sp_Curry *n = (sp_Curry *)sp_gc_alloc(sizeof(sp_Curry), NULL, sp_curry_scan);
-  *n = *c;
-  if (n->nargs < 16) n->args[n->nargs++] = arg;
+  sp_int k = c->nargs;
+  if ((size_t)k >= (SIZE_MAX - sizeof(sp_Curry)) / sizeof(sp_RbVal)) {
+    fprintf(stderr, "spinel: out of memory\n");
+    abort();
+  }
+  sp_Curry *n = (sp_Curry *)sp_gc_alloc(sizeof(sp_Curry) + sizeof(sp_RbVal) * (size_t)(k + 1), NULL, sp_curry_scan);
+  n->target = c->target; n->arity = c->arity; n->nargs = k + 1;
+  for (sp_int i = 0; i < k; i++) n->args[i] = c->args[i];
+  n->args[k] = arg;
   return n;
-}
-/* Publish the accumulated (boxed) args on the side-channel: a poly-param
-   target reads its arguments back from there, keeping each arg's real type. */
-void sp_curry_publish_args(sp_Curry *c) {
-  for (sp_int i = 0; i < c->nargs && i < 16; i++)
-    _sp_proc_poly_args[i] = c->args[i];
 }
 
 /* Method#to_proc: wrap the bound method in a Proc whose trampoline forwards
@@ -139,14 +119,138 @@ static int sp_bm_sig_scalar_only(const char *sig, sp_int n) {
 }
 sp_int sp_method_proc_tramp(void *cap, sp_int argc, sp_int *args) {
   sp_BoundMethod *m = (sp_BoundMethod *)cap;
-  if (!m || !m->fn) return 0;
+  /* A bind site that could not resolve a target (`self.class.method(:m)`) has
+     no callable address; dereferencing the NULL fn here segfaulted. Decline
+     with the same NoMethodError a resolved-but-incompatible target gets. */
+  if (!m || !m->fn) sp_raise_cls("NoMethodError", "undefined method 'call' for an instance of Method");
+  /* The bind site's thunk, when there is one, takes any count it binds: it
+     reads the boxed side-channel every caller publishes, converts each
+     argument to the parameter's real C type, fills defaults and packs a
+     rest, calls the target with its own signature and publishes the boxed
+     result -- every shape the stamped lanes below accept and the ones they
+     decline (#4542). A count outside its range is CRuby's ArgumentError,
+     raised by the thunk in CRuby's words. The generated call arms try their
+     stamped casts first and reach this trampoline only when those decline,
+     so the thunk is the general lane, not the hot one. It reads an argument
+     past the channel's slots from the call's wide store. */
+  if (m->thunk && !m->unbound)
+    return ((sp_int (*)(void *, sp_int, sp_int *))(uintptr_t)m->thunk)(cap, argc, args);
+  /* A poly-ABI target (every slot an sp_RbVal; stamped at bind time) takes
+     the boxed side-channel values directly -- the same values the scalar
+     checks below read -- and publishes its boxed result. The raw sp_int
+     `args` are the laundered copies and carry no class, so the boxed
+     channel is the argument source here, exactly as in the legacy scalar
+     gate. Beyond eight slots there is no cast spelled below; decline. */
+  if (m->poly_abi) {
+    if (m->unbound || argc != m->poly_fixed || argc > 8)
+      sp_raise_cls("NoMethodError", "undefined method 'call' for an instance of Method");
+    /* The poly ABI shares the legacy stamp's ret kinds: a poly return takes
+       the sp_RbVal cast, a void body the void cast (wasm checks the callee
+       signature at the call), and every register kind the sp_int cast boxed
+       by the stamp -- over BOXED argument slots read from the side-channel
+       every caller publishes (the raw sp_int `args` are the laundered
+       copies and carry no class). */
+    #define PB(i) _sp_proc_poly_args[i]
+    sp_RbVal _pr;
+    if (m->legacy_ret == SP_BM_RET_POLY) {
+      if (m->recv_bound) {
+        switch (argc) {
+          case 0: _pr = ((sp_RbVal (*)(void *))(uintptr_t)m->fn)(m->self); break;
+          case 1: _pr = ((sp_RbVal (*)(void *, sp_RbVal))(uintptr_t)m->fn)(m->self, PB(0)); break;
+          case 2: _pr = ((sp_RbVal (*)(void *, sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(m->self, PB(0), PB(1)); break;
+          case 3: _pr = ((sp_RbVal (*)(void *, sp_RbVal, sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(m->self, PB(0), PB(1), PB(2)); break;
+          case 4: _pr = ((sp_RbVal (*)(void *, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(m->self, PB(0), PB(1), PB(2), PB(3)); break;
+          case 5: _pr = ((sp_RbVal (*)(void *, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(m->self, PB(0), PB(1), PB(2), PB(3), PB(4)); break;
+          case 6: _pr = ((sp_RbVal (*)(void *, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(m->self, PB(0), PB(1), PB(2), PB(3), PB(4), PB(5)); break;
+          case 7: _pr = ((sp_RbVal (*)(void *, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(m->self, PB(0), PB(1), PB(2), PB(3), PB(4), PB(5), PB(6)); break;
+          default: _pr = ((sp_RbVal (*)(void *, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(m->self, PB(0), PB(1), PB(2), PB(3), PB(4), PB(5), PB(6), PB(7)); break;
+        }
+      }
+      else {
+        switch (argc) {
+          case 0: _pr = ((sp_RbVal (*)(void))(uintptr_t)m->fn)(); break;
+          case 1: _pr = ((sp_RbVal (*)(sp_RbVal))(uintptr_t)m->fn)(PB(0)); break;
+          case 2: _pr = ((sp_RbVal (*)(sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(PB(0), PB(1)); break;
+          case 3: _pr = ((sp_RbVal (*)(sp_RbVal, sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(PB(0), PB(1), PB(2)); break;
+          case 4: _pr = ((sp_RbVal (*)(sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(PB(0), PB(1), PB(2), PB(3)); break;
+          case 5: _pr = ((sp_RbVal (*)(sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(PB(0), PB(1), PB(2), PB(3), PB(4)); break;
+          case 6: _pr = ((sp_RbVal (*)(sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(PB(0), PB(1), PB(2), PB(3), PB(4), PB(5)); break;
+          case 7: _pr = ((sp_RbVal (*)(sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(PB(0), PB(1), PB(2), PB(3), PB(4), PB(5), PB(6)); break;
+          default: _pr = ((sp_RbVal (*)(sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(PB(0), PB(1), PB(2), PB(3), PB(4), PB(5), PB(6), PB(7)); break;
+        }
+      }
+    }
+    else if (m->legacy_ret == SP_BM_RET_NIL) {
+      if (m->recv_bound) {
+        switch (argc) {
+          case 0: ((void (*)(void *))(uintptr_t)m->fn)(m->self); break;
+          case 1: ((void (*)(void *, sp_RbVal))(uintptr_t)m->fn)(m->self, PB(0)); break;
+          case 2: ((void (*)(void *, sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(m->self, PB(0), PB(1)); break;
+          case 3: ((void (*)(void *, sp_RbVal, sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(m->self, PB(0), PB(1), PB(2)); break;
+          case 4: ((void (*)(void *, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(m->self, PB(0), PB(1), PB(2), PB(3)); break;
+          case 5: ((void (*)(void *, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(m->self, PB(0), PB(1), PB(2), PB(3), PB(4)); break;
+          case 6: ((void (*)(void *, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(m->self, PB(0), PB(1), PB(2), PB(3), PB(4), PB(5)); break;
+          case 7: ((void (*)(void *, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(m->self, PB(0), PB(1), PB(2), PB(3), PB(4), PB(5), PB(6)); break;
+          default: ((void (*)(void *, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(m->self, PB(0), PB(1), PB(2), PB(3), PB(4), PB(5), PB(6), PB(7)); break;
+        }
+      }
+      else {
+        switch (argc) {
+          case 0: ((void (*)(void))(uintptr_t)m->fn)(); break;
+          case 1: ((void (*)(sp_RbVal))(uintptr_t)m->fn)(PB(0)); break;
+          case 2: ((void (*)(sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(PB(0), PB(1)); break;
+          case 3: ((void (*)(sp_RbVal, sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(PB(0), PB(1), PB(2)); break;
+          case 4: ((void (*)(sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(PB(0), PB(1), PB(2), PB(3)); break;
+          case 5: ((void (*)(sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(PB(0), PB(1), PB(2), PB(3), PB(4)); break;
+          case 6: ((void (*)(sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(PB(0), PB(1), PB(2), PB(3), PB(4), PB(5)); break;
+          case 7: ((void (*)(sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(PB(0), PB(1), PB(2), PB(3), PB(4), PB(5), PB(6)); break;
+          default: ((void (*)(sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(PB(0), PB(1), PB(2), PB(3), PB(4), PB(5), PB(6), PB(7)); break;
+        }
+      }
+      _pr = sp_box_nil();
+    }
+    else {
+      sp_int _ri;
+      if (m->recv_bound) {
+        switch (argc) {
+          case 0: _ri = ((sp_int (*)(void *))(uintptr_t)m->fn)(m->self); break;
+          case 1: _ri = ((sp_int (*)(void *, sp_RbVal))(uintptr_t)m->fn)(m->self, PB(0)); break;
+          case 2: _ri = ((sp_int (*)(void *, sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(m->self, PB(0), PB(1)); break;
+          case 3: _ri = ((sp_int (*)(void *, sp_RbVal, sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(m->self, PB(0), PB(1), PB(2)); break;
+          case 4: _ri = ((sp_int (*)(void *, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(m->self, PB(0), PB(1), PB(2), PB(3)); break;
+          case 5: _ri = ((sp_int (*)(void *, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(m->self, PB(0), PB(1), PB(2), PB(3), PB(4)); break;
+          case 6: _ri = ((sp_int (*)(void *, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(m->self, PB(0), PB(1), PB(2), PB(3), PB(4), PB(5)); break;
+          case 7: _ri = ((sp_int (*)(void *, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(m->self, PB(0), PB(1), PB(2), PB(3), PB(4), PB(5), PB(6)); break;
+          default: _ri = ((sp_int (*)(void *, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(m->self, PB(0), PB(1), PB(2), PB(3), PB(4), PB(5), PB(6), PB(7)); break;
+        }
+      }
+      else {
+        switch (argc) {
+          case 0: _ri = ((sp_int (*)(void))(uintptr_t)m->fn)(); break;
+          case 1: _ri = ((sp_int (*)(sp_RbVal))(uintptr_t)m->fn)(PB(0)); break;
+          case 2: _ri = ((sp_int (*)(sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(PB(0), PB(1)); break;
+          case 3: _ri = ((sp_int (*)(sp_RbVal, sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(PB(0), PB(1), PB(2)); break;
+          case 4: _ri = ((sp_int (*)(sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(PB(0), PB(1), PB(2), PB(3)); break;
+          case 5: _ri = ((sp_int (*)(sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(PB(0), PB(1), PB(2), PB(3), PB(4)); break;
+          case 6: _ri = ((sp_int (*)(sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(PB(0), PB(1), PB(2), PB(3), PB(4), PB(5)); break;
+          case 7: _ri = ((sp_int (*)(sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(PB(0), PB(1), PB(2), PB(3), PB(4), PB(5), PB(6)); break;
+          default: _ri = ((sp_int (*)(sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal, sp_RbVal))(uintptr_t)m->fn)(PB(0), PB(1), PB(2), PB(3), PB(4), PB(5), PB(6), PB(7)); break;
+        }
+      }
+      _pr = sp_bm_box_ret(m, sp_bm_norm_ret(m, _ri));
+    }
+    #undef PB
+    _sp_proc_poly_ret = _pr;
+    return 0;
+  }
   /* A Method read out of a poly slot carries no call-site types, so this
      generic trampoline may only forward to a target whose stamped legacy ABI
      is callable at the exact fixed arity the C signature reads, and whose
      parameters are all scalar. Any other target -- a rest/optional/keyword
      parameter, a float/poly/by-value-struct parameter, a pointer-typed
      parameter (this route cannot check the argument's class), an unbound
-     Method, or a mismatched argument count -- would take the sp_int register
+     Method, or a mismatched argument count (the 16-slot proc ABI caps the
+     count whatever legacy_fixed says) -- would take the sp_int register
      as the wrong C type: the callee prologue roots a garbage rest pointer
      (SP_GC_ROOT(lv_<rest>)) and the next collection dereferences it, or a
      pointer parameter dereferences an Integer, a SIGSEGV (#4395). The typed
@@ -154,10 +258,25 @@ sp_int sp_method_proc_tramp(void *cap, sp_int argc, sp_int *args) {
      so declining here only affects a Method that travelled through a poly
      slot; raise the same NoMethodError the poly-call gate produces instead of
      reading garbage. */
-  if (!m->legacy_int_abi || m->unbound || m->legacy_fixed > 16 || (m->legacy_ret == SP_BM_RET_POLY && m->legacy_fixed > 8) ||
+  if (!m->legacy_int_abi || m->unbound || argc > 16 || m->legacy_fixed > 16 || (m->legacy_ret == SP_BM_RET_POLY && m->legacy_fixed > 8) ||
       (m->legacy_rest ? argc < m->legacy_fixed : argc != m->legacy_fixed) ||
       !sp_bm_sig_scalar_only(m->legacy_sig, m->legacy_fixed))
     sp_raise_cls("NoMethodError", "undefined method 'call' for an instance of Method");
+  /* The raw sp_int slots carry no class, so the trampoline alone cannot tell
+     a pointer/float/string argument from an Integer; the boxed side-channel
+     every caller publishes (the poly spread loop, the generated proc call,
+     the runtime block invokers) can. Reject an argument whose scalar kind
+     does not match its stamped slot, the same way sp_bm_legacy_abi_ok does at
+     a statically-typed call site -- `[obj.method(:m)][0].call(a_string)` and
+     its `.to_proc`/spread forms otherwise fed the String pointer into an
+     sp_int parameter. The exact match is also what keeps a `false` argument
+     from reaching an int-inferred parameter: the raw slot would be 0, which
+     is TRUTHY as a Ruby Integer, so `x ? a : b` would answer the true branch
+     where CRuby answers the false one. Decline the kind change instead of
+     answering it wrong. */
+  for (sp_int i = 0; i < argc && i < m->legacy_fixed; i++)
+    if (!sp_bm_sig_pos_scalar_ok(sp_bm_boxed_scalar_token(_sp_proc_poly_args[i]), m->legacy_sig, i))
+      sp_raise_cls("NoMethodError", "undefined method 'call' for an instance of Method");
   /* A proc publishes its result through the boxed side-channel, which every
      generated proc body writes; this trampoline only returned it, so a caller
      reading the slot saw a stale value (#3692). The casts below already assume
@@ -194,6 +313,39 @@ sp_int sp_method_proc_tramp(void *cap, sp_int argc, sp_int *args) {
     }
   }
   #undef SP_BM_TRAMP_POLY
+  /* A nil-returning target is a C void function: call it as one. The sp_int
+     casts below read a leftover register on a native target and box nil
+     regardless; wasm checks the callee's signature at the call and traps. */
+  if (m->legacy_ret == SP_BM_RET_NIL) {
+    #define SP_BM_TRAMP_VOID(EXPR) do { (EXPR); _sp_proc_poly_ret = sp_box_nil(); return 0; } while (0)
+    #define A(i) args[i]
+    if (!m->recv_bound) {
+      switch (argc) {
+        case 0: SP_BM_TRAMP_VOID(((void (*)(void))(uintptr_t)m->fn)());
+        case 1: SP_BM_TRAMP_VOID(((void (*)(sp_int))(uintptr_t)m->fn)(A(0)));
+        case 2: SP_BM_TRAMP_VOID(((void (*)(sp_int, sp_int))(uintptr_t)m->fn)(A(0), A(1)));
+        case 3: SP_BM_TRAMP_VOID(((void (*)(sp_int, sp_int, sp_int))(uintptr_t)m->fn)(A(0), A(1), A(2)));
+        case 4: SP_BM_TRAMP_VOID(((void (*)(sp_int, sp_int, sp_int, sp_int))(uintptr_t)m->fn)(A(0), A(1), A(2), A(3)));
+        case 5: SP_BM_TRAMP_VOID(((void (*)(sp_int, sp_int, sp_int, sp_int, sp_int))(uintptr_t)m->fn)(A(0), A(1), A(2), A(3), A(4)));
+        case 6: SP_BM_TRAMP_VOID(((void (*)(sp_int, sp_int, sp_int, sp_int, sp_int, sp_int))(uintptr_t)m->fn)(A(0), A(1), A(2), A(3), A(4), A(5)));
+        case 7: SP_BM_TRAMP_VOID(((void (*)(sp_int, sp_int, sp_int, sp_int, sp_int, sp_int, sp_int))(uintptr_t)m->fn)(A(0), A(1), A(2), A(3), A(4), A(5), A(6)));
+        default: SP_BM_TRAMP_VOID(((void (*)(sp_int, sp_int, sp_int, sp_int, sp_int, sp_int, sp_int, sp_int))(uintptr_t)m->fn)(A(0), A(1), A(2), A(3), A(4), A(5), A(6), A(7)));
+      }
+    }
+    switch (argc) {
+      case 0: SP_BM_TRAMP_VOID(((void (*)(void *))(uintptr_t)m->fn)(m->self));
+      case 1: SP_BM_TRAMP_VOID(((void (*)(void *, sp_int))(uintptr_t)m->fn)(m->self, A(0)));
+      case 2: SP_BM_TRAMP_VOID(((void (*)(void *, sp_int, sp_int))(uintptr_t)m->fn)(m->self, A(0), A(1)));
+      case 3: SP_BM_TRAMP_VOID(((void (*)(void *, sp_int, sp_int, sp_int))(uintptr_t)m->fn)(m->self, A(0), A(1), A(2)));
+      case 4: SP_BM_TRAMP_VOID(((void (*)(void *, sp_int, sp_int, sp_int, sp_int))(uintptr_t)m->fn)(m->self, A(0), A(1), A(2), A(3)));
+      case 5: SP_BM_TRAMP_VOID(((void (*)(void *, sp_int, sp_int, sp_int, sp_int, sp_int))(uintptr_t)m->fn)(m->self, A(0), A(1), A(2), A(3), A(4)));
+      case 6: SP_BM_TRAMP_VOID(((void (*)(void *, sp_int, sp_int, sp_int, sp_int, sp_int, sp_int))(uintptr_t)m->fn)(m->self, A(0), A(1), A(2), A(3), A(4), A(5)));
+      case 7: SP_BM_TRAMP_VOID(((void (*)(void *, sp_int, sp_int, sp_int, sp_int, sp_int, sp_int, sp_int))(uintptr_t)m->fn)(m->self, A(0), A(1), A(2), A(3), A(4), A(5), A(6)));
+      default: SP_BM_TRAMP_VOID(((void (*)(void *, sp_int, sp_int, sp_int, sp_int, sp_int, sp_int, sp_int, sp_int))(uintptr_t)m->fn)(m->self, A(0), A(1), A(2), A(3), A(4), A(5), A(6), A(7)));
+    }
+    #undef A
+    #undef SP_BM_TRAMP_VOID
+  }
   /* A top-level method has no self parameter. The self-ful casts below would
      put `m->self` (NULL) in the leading C slot, shifting every argument by
      one -- `[method(:top_add)][0].to_proc.call(1, 2)` answered 1 instead of 3
@@ -242,6 +394,7 @@ sp_int sp_method_proc_tramp(void *cap, sp_int argc, sp_int *args) {
   #undef SP_BM_TRAMP_RET
 }
 sp_Proc *sp_method_to_proc(sp_BoundMethod *m) {
+  SP_GC_ROOT(m);   /* `&method(:m)` hands over a Method nothing else holds */
   return sp_proc_new_meta((void *)sp_method_proc_tramp, m, sp_bm_cap_scan, 1, TRUE, 0, NULL, NULL);
 }
 /* Bound Method object: `obj.method(:foo)` / `method(:foo)`. `self` is the

@@ -2,7 +2,7 @@
 #define SP_RE_H
 /* sp_re.h -- regexp wrappers + MatchData, compiled once in lib/sp_re.c.
  *
- * The regexp ENGINE (re_compile / re_exec / re_free) is the separate
+ * The regexp ENGINE (re_compile / spinel_re_exec / re_free) is the separate
  * build/regexp/*.o library; this layer is spinel's Ruby-facing surface
  * (Regexp#match, gsub/sub/scan/split, the $~/$1.. match registers, and
  * MatchData). The match-register globals are per-process singletons: the
@@ -28,11 +28,15 @@
 typedef struct mrb_regexp_pattern mrb_regexp_pattern;
 mrb_regexp_pattern* re_compile(const char *pattern, int64_t len, uint32_t flags);
 void re_free(mrb_regexp_pattern *pat);
-int re_exec(const mrb_regexp_pattern *pat, const char *str, int64_t len, int64_t start, int *captures, int captures_size, int binary);
+int spinel_re_exec(const mrb_regexp_pattern *pat, const char *str, int64_t len, int64_t start, int *captures, int captures_size, int binary);
+/* spinel_re_exec that also answers where the matching attempt began, which a \K
+   leaves short of group 0's start (lib/regexp/re_spinel.c) */
+int re_exec_attempt(const mrb_regexp_pattern *pat, const char *str, int64_t len, int64_t start, int *captures, int captures_size, int binary, int *attempt);
 /* named-capture introspection (lib/regexp/re_compile.c) */
 int re_num_named(const mrb_regexp_pattern *pat);
 const char *re_named_name(const mrb_regexp_pattern *pat, int i, int *group_out);
 int re_named_group(const mrb_regexp_pattern *pat, const char *name);
+int sp_re_name_group(const mrb_regexp_pattern *pat, const char *name, const int *caps, int ncaps);
 
 /* `caps` holds ncap*2 positions and lives in the SAME block as the struct, so
    a MatchData costs what its match needs rather than what the widest one
@@ -55,6 +59,11 @@ extern SP_TLS const mrb_regexp_pattern *sp_re_last_pat;
 extern SP_TLS const char *sp_re_match_str;
 extern SP_TLS const char *sp_re_match_pre;
 extern SP_TLS const char *sp_re_match_post;
+/* Whether the last sub / gsub (regex or string pattern) found a match: the
+   bang forms answer nil when NO SUBSTITUTION was made, which is not the same
+   as the text being unchanged (`"cats".sub!(/s$/, "s")` matches and answers
+   the string). The emitter clears it before the call and reads it after. */
+extern SP_TLS int sp_re_sub_matched;
 const char *sp_re_pre_match(void);   /* $` , built on demand */
 const char *sp_re_post_match(void);  /* $' , built on demand */
 extern const char *sp_re_startup_err;
@@ -66,8 +75,16 @@ void sp_re_push_match_roots(void);
 /* ---- wrappers (lib/sp_re.c) ---- */
 const char *sp_re_last_paren_match(void);
 void sp_re_set_captures(const char *str, int *caps, int ncaps);
+extern int sp_re_track_last;   /* gsub / sub / scan record `$~` (sp_re.c) */
+void sp_re_clear_last_match(void);
+/* ArgumentError for a UTF-8 subject that is not valid UTF-8, as CRuby's search */
+void sp_re_check_subject(const char *str);
+void sp_re_set_last_match(const mrb_regexp_pattern *pat, const char *str, const int *caps, int n);
+void sp_re_set_lit_match(const char *str, sp_int beg, sp_int end);
 sp_int sp_re_match(mrb_regexp_pattern *pat, const char *str);
 sp_int sp_re_match_at(mrb_regexp_pattern *pat, const char *str, sp_int pos);
+sp_bool sp_re_start_with(mrb_regexp_pattern *pat, const char *str);
+sp_int sp_re_match_next(mrb_regexp_pattern *pat, const char *str, sp_int pos);
 sp_int sp_re_rindex(mrb_regexp_pattern *pat, const char *str);
 sp_StrArray *sp_re_rpartition(mrb_regexp_pattern *pat, const char *str);
 sp_bool sp_re_match_p(mrb_regexp_pattern *pat, const char *str);
@@ -75,16 +92,39 @@ sp_bool sp_re_match_p_at(mrb_regexp_pattern *pat, const char *str, sp_int pos);
 sp_bool sp_re_case_eq(mrb_regexp_pattern *pat, sp_RbVal v);
 /* poly-operand match forms: either side may carry the pattern (#3961) */
 mrb_regexp_pattern *sp_poly_as_pattern(sp_RbVal v);
+/* The literals the program compiled at startup, noted there when an
+   identity Set's value is checked where it arrives (sp_idset_check): a
+   literal is one object per text here, one per literal in CRuby */
+void sp_re_note_literal(const mrb_regexp_pattern *pat);
+int sp_re_noted_literal_p(const void *pat);
 sp_bool sp_poly_match_p(sp_RbVal a, sp_RbVal b);
+sp_bool sp_poly_match_p_at(sp_RbVal a, sp_RbVal b, sp_int pos);
 sp_MatchData *sp_poly_match_data(sp_RbVal a, sp_RbVal b);
-sp_int sp_poly_match_index(sp_RbVal a, sp_RbVal b);
+sp_MatchData *sp_poly_match_data_at(sp_RbVal a, sp_RbVal b, sp_int pos);
+sp_oint sp_poly_match_index(sp_RbVal a, sp_RbVal b);   /* =~: the position, nil on a miss */
+const char *sp_re_operand(sp_RbVal v, int strict);   /* a boxed matcher operand (reg_operand) */
 void sp_re_expand_rep(const mrb_regexp_pattern *pat, char **out_io, size_t *olen_io, size_t *cap_io, const char *rep, size_t rlen, const char *src, int *caps, int ncaps);
 const char *sp_re_gsub(mrb_regexp_pattern *pat, const char *str, const char *rep);
 const char *sp_re_sub(mrb_regexp_pattern *pat, const char *str, const char *rep);
 sp_StrArray *sp_re_scan(mrb_regexp_pattern *pat, const char *str);
+#ifdef SP_ONE_STRING
+/* String#scan with a block, one match a turn over the String as it is then
+   (rb_str_scan): sp_re_scan_next answers the next match, a String of its
+   own, or NULL past the last; a turn that changed the String's length
+   raises CRuby's RuntimeError ("string modified") before the next search,
+   and one that changed bytes in place is searched on. */
+/* (found: a scan that matches nothing leaves `$~` nil, one that matched
+   leaves its last match) */
+typedef struct { struct sp_String_s *h; const char *data; int64_t len, pos; int started, found; } sp_re_scan_it;
+static inline void sp_re_scan_begin(sp_re_scan_it *it, struct sp_String_s *h) {
+  it->h = h; it->data = NULL; it->len = 0; it->pos = 0; it->started = 0; it->found = 0;
+}
+const char *sp_re_scan_next(mrb_regexp_pattern *pat, sp_re_scan_it *it);
+sp_PolyArray *sp_re_scan_next_row(mrb_regexp_pattern *pat, sp_re_scan_it *it);
+#endif
 sp_StrArray *sp_re_split(mrb_regexp_pattern *pat, const char *str);
 sp_StrArray *sp_re_split_limit(mrb_regexp_pattern *pat, const char *str, sp_int limit);
-sp_int sp_re_rindex_opt(mrb_regexp_pattern *pat, const char *str);
+sp_oint sp_re_rindex_opt(mrb_regexp_pattern *pat, const char *str);
 sp_RbVal sp_re_rindex_poly(mrb_regexp_pattern *pat, const char *str);
 sp_RbVal sp_re_index_poly(mrb_regexp_pattern *pat, const char *str);
 const char *sp_str_splice_re(mrb_regexp_pattern *pat, const char *s, const char *val);
@@ -92,6 +132,7 @@ const char *sp_str_slice_re(mrb_regexp_pattern *pat, const char *s, const char *
 const char *sp_re_alt_join(const char *a, const char *b);  /* `a|b`, NUL-safe */
 const char *sp_re_source(void *pat);
 uint32_t sp_re_source_len(void *pat);   /* its byte length (may hold a NUL) */
+sp_int sp_re_source_hash(void *pat);    /* the hash of its bytes, as a String's (lib/sp_re.c) */
 sp_bool sp_re_src_linear_time(const char *src);   /* Regexp.linear_time? on a source string */
 const char *sp_re_inspect_str(void *pat);
 const char *sp_re_to_s_str(void *pat);
@@ -103,10 +144,12 @@ uint32_t sp_re_raw_flags(void *pat);
 uint32_t sp_re_opts_to_flags(sp_int o);
 const char *sp_MatchData_inspect(sp_MatchData *m);
 const char *re_group_name(const mrb_regexp_pattern *pat, int group);
-sp_int sp_re_index_from_opt(mrb_regexp_pattern *pat, const char *str, sp_int start);
-sp_int sp_re_byteindex_opt(mrb_regexp_pattern *pat, const char *str, sp_int start);
-sp_int sp_re_byterindex_opt(mrb_regexp_pattern *pat, const char *str, sp_int start);
-sp_int sp_re_rindex_from_opt(mrb_regexp_pattern *pat, const char *str, sp_int start);
+/* String#index / #rindex / #byteindex / #byterindex with a Regexp: the
+   position, nil on a miss */
+sp_oint sp_re_index_from_opt(mrb_regexp_pattern *pat, const char *str, sp_int start);
+sp_oint sp_re_byteindex_opt(mrb_regexp_pattern *pat, const char *str, sp_int start);
+sp_oint sp_re_byterindex_opt(mrb_regexp_pattern *pat, const char *str, sp_int start);
+sp_oint sp_re_rindex_from_opt(mrb_regexp_pattern *pat, const char *str, sp_int start);
 sp_RbVal sp_re_match_poly(mrb_regexp_pattern *pat, const char *str);
 const char *sp_re_named_capture(const mrb_regexp_pattern *pat, const char *name);
 const char *sp_re_escape(const char *src);
@@ -126,6 +169,9 @@ typedef struct {
   const char *last_str, *match_str, *match_pre, *match_post;
   int last_ncap;
   const mrb_regexp_pattern *last_pat;
+  int last_lit;
+  int pp_span[2];
+  int nroots;   /* sp_gc_nroots before sp_re_frame_push rooted the saved strings */
 } sp_re_frame;
 void sp_re_frame_push(sp_re_frame *f);
 void sp_re_frame_pop(sp_re_frame *f);
@@ -144,18 +190,19 @@ sp_bool sp_MatchData_eq(sp_MatchData *a, sp_MatchData *b);
 sp_int sp_MatchData_hash(sp_MatchData *m);
 sp_PolyArray *sp_MatchData_aref_len(sp_MatchData *m, sp_int start, sp_int len);
 sp_PolyArray *sp_MatchData_aref_range(sp_MatchData *m, sp_int beg, sp_int end, int excl);
-sp_int sp_md_char_off(sp_MatchData *m, int byteoff);
-sp_int sp_MatchData_begin(sp_MatchData *m, sp_int i);
-sp_int sp_MatchData_end(sp_MatchData *m, sp_int i);
+sp_oint sp_md_char_off(sp_MatchData *m, int byteoff);   /* nil for an unmatched group (byteoff < 0) */
+/* MatchData#begin / #end / #bytebegin / #byteend: nil for a group that did not take part */
+sp_oint sp_MatchData_begin(sp_MatchData *m, sp_int i);
+sp_oint sp_MatchData_end(sp_MatchData *m, sp_int i);
 sp_IntArray *sp_MatchData_offset(sp_MatchData *m, sp_int i);
-sp_int sp_MatchData_bytebegin(sp_MatchData *m, sp_int i);
-sp_int sp_MatchData_byteend(sp_MatchData *m, sp_int i);
+sp_oint sp_MatchData_bytebegin(sp_MatchData *m, sp_int i);
+sp_oint sp_MatchData_byteend(sp_MatchData *m, sp_int i);
 sp_IntArray *sp_MatchData_byteoffset(sp_MatchData *m, sp_int i);
-sp_int sp_MatchData_begin_name(sp_MatchData *m, const char *name);
-sp_int sp_MatchData_end_name(sp_MatchData *m, const char *name);
+sp_oint sp_MatchData_begin_name(sp_MatchData *m, const char *name);
+sp_oint sp_MatchData_end_name(sp_MatchData *m, const char *name);
 sp_IntArray *sp_MatchData_offset_name(sp_MatchData *m, const char *name);
-sp_int sp_MatchData_bytebegin_name(sp_MatchData *m, const char *name);
-sp_int sp_MatchData_byteend_name(sp_MatchData *m, const char *name);
+sp_oint sp_MatchData_bytebegin_name(sp_MatchData *m, const char *name);
+sp_oint sp_MatchData_byteend_name(sp_MatchData *m, const char *name);
 sp_IntArray *sp_MatchData_byteoffset_name(sp_MatchData *m, const char *name);
 const char *sp_MatchData_to_s(sp_MatchData *m);
 sp_PolyArray *sp_MatchData_captures(sp_MatchData *m);

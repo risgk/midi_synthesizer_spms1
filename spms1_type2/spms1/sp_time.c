@@ -11,6 +11,7 @@
 #include "sp_core.h"
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
@@ -20,7 +21,7 @@
 /* Time#floor / #ceil / #round, shared by the typed and the boxed receiver so
    the two cannot drift. The no-argument form is ndigits 0: scale is 10^9 and
    every mode lands the value on a whole second. */
-sp_Time sp_time_round_to(sp_Time t, int64_t ndigits, int mode) {
+sp_Time sp_timev_round_to(sp_Time t, int64_t ndigits, int mode) {
   /* CRuby names no number here, and a supported method's message is part of
      what it means to be a subset of it. */
   if (ndigits < 0) sp_raise_cls("ArgumentError", "negative ndigits given");
@@ -36,7 +37,7 @@ sp_Time sp_time_round_to(sp_Time t, int64_t ndigits, int mode) {
   return t;
 }
 
-sp_Time sp_time_now(void) {
+sp_Time sp_timev_now(void) {
   struct timespec ts;
   clock_gettime(CLOCK_REALTIME, &ts);
   return (sp_Time){ ts.tv_sec, (int32_t)ts.tv_nsec, 0 };
@@ -44,7 +45,7 @@ sp_Time sp_time_now(void) {
 
 /* A sub-second argument of a whole unit or more belongs in the seconds
    field, the way CRuby normalises it (#3704). */
-sp_Time sp_time_norm(sp_Time t) {
+sp_Time sp_timev_norm(sp_Time t) {
   int64_t ns = (int64_t)t.tv_nsec;
   if (ns >= 1000000000LL || ns < 0) {
     int64_t carry = ns / 1000000000LL;
@@ -56,24 +57,31 @@ sp_Time sp_time_norm(sp_Time t) {
   return t;
 }
 /* Add a sub-second offset that may exceed a whole second (#3704). */
-sp_Time sp_time_add_nsec(sp_Time t, int64_t ns) {
+sp_Time sp_timev_add_nsec(sp_Time t, int64_t ns) {
   t.tv_sec += ns / 1000000000LL;
   t.tv_nsec = (int32_t)((int64_t)t.tv_nsec + ns % 1000000000LL);
-  return sp_time_norm(t);
+  return sp_timev_norm(t);
 }
-sp_Time sp_time_at_int(int64_t sec) {
+sp_Time sp_timev_at_int(int64_t sec) {
   return (sp_Time){ sec, 0, 0 };
 }
 
 /* Time.at(Rational): the exact num/den epoch, floored to the nanosecond
    (Time.at(-1r/3) is second -1, nanosecond 666666666). den is positive by
    sp_Rational's normalized-sign invariant. */
-sp_Time sp_time_at_div(int64_t num, int64_t den) {
+sp_Time sp_timev_at_div(int64_t num, int64_t den) {
   if (den == 0) sp_raise_cls("ZeroDivisionError", "divided by 0");
   int64_t sec = num / den;
   int64_t rem = num % den;
   if (rem < 0) { sec -= 1; rem += den; }
-  int64_t ns = (int64_t)(((__int128)rem * 1000000000) / den);
+  /* rem < den, so rem * 1e9 needs more than 64 bits only when den does:
+     a 128-bit product where the compiler has one, long double otherwise
+     (a 32-bit build; the quotient is below 1e9 either way) */
+#if SP_HAVE_INT128
+  int64_t ns = (int64_t)(((sp_int128)rem * 1000000000) / den);
+#else
+  int64_t ns = (int64_t)(((long double)rem * 1000000000.0L) / (long double)den);
+#endif
   return (sp_Time){ sec, (int32_t)ns, 0 };
 }
 
@@ -95,16 +103,26 @@ static void sp_time_shift_ns(double secs, int64_t base_sec, int32_t base_ns,
   double m = frexp(secs, &e);
   int64_t mi = (int64_t)(m * 9007199254740992.0); /* m * 2^53, exact */
   e -= 53;
-  __int128 ns = (__int128)mi * 1000000000;
+#if SP_HAVE_INT128
+  sp_int128 ns = (sp_int128)mi * 1000000000;
   if (e > 0) ns = (e > 34) ? (ns < 0 ? INT64_MIN : INT64_MAX) : ns << e;
   /* Floor toward -inf (arithmetic shift), matching CRuby's #nsec/#usec, which
      truncate the exact rational. spinel stores nanosecond resolution, so the
      sub-nanosecond bits CRuby keeps for #to_f round-tripping are lost by
      design (see docs/limitations.md). */
   else if (e < 0) ns = (-e > 126) ? (ns < 0 ? -1 : 0) : ns >> -e;
-  __int128 total = ((__int128)base_sec * 1000000000 + base_ns) + ns;
+  sp_int128 total = ((sp_int128)base_sec * 1000000000 + base_ns) + ns;
   int64_t sec = (int64_t)(total / 1000000000);
   int64_t rem = (int64_t)(total % 1000000000);
+#else
+  /* no 128-bit integer (a 32-bit build): the same in long double, whose
+     64-bit mantissa on x86 holds the nanosecond count of any date a
+     32-bit sp_int can express; the floor is explicit */
+  long double nsd = ldexpl((long double)mi * 1000000000.0L, e);
+  long double totd = ((long double)base_sec * 1000000000.0L + (long double)base_ns) + floorl(nsd);
+  int64_t sec = (int64_t)floorl(totd / 1000000000.0L);
+  int64_t rem = (int64_t)(totd - (long double)sec * 1000000000.0L);
+#endif
   if (rem < 0) { sec -= 1; rem += 1000000000; }
   *out_sec = sec;
   *out_ns = (int32_t)rem;
@@ -112,14 +130,14 @@ static void sp_time_shift_ns(double secs, int64_t base_sec, int32_t base_ns,
 
 /* POSIX convention: keep tv_nsec in [0, 1e9). For negative epoch with
    a non-integer fractional part, decrement tv_sec and roll the fraction
-   into the positive nsec range — so Time.at(-0.5).to_i returns -1, not 0. */
-sp_Time sp_time_at_float(double epoch) {
+   into the positive nsec range -- so Time.at(-0.5).to_i returns -1, not 0. */
+sp_Time sp_timev_at_float(double epoch) {
   sp_Time r = { 0, 0, 0 };
   sp_time_shift_ns(epoch, 0, 0, &r.tv_sec, &r.tv_nsec);
   return r;
 }
 
-/* Time.new(y[,mo[,d[,h[,mi[,s]]]]]) — local construction. mktime
+/* Time.new(y[,mo[,d[,h[,mi[,s]]]]]) -- local construction. mktime
    interprets the broken-down value in the host local zone and resolves
    DST itself (tm_isdst=-1). The fixed-offset 7-arg form is a separate
    issue. */
@@ -134,7 +152,29 @@ static void sp_time_check_args(int64_t mo, int64_t d, int64_t h, int64_t mi, int
   if (s  < 0 || s  > 60) sp_raise_cls("ArgumentError", "sec out of range");
 }
 
-sp_Time sp_time_new(int64_t y, int64_t mo, int64_t d,
+static int64_t sp_time_civil_epoch(int64_t y, int64_t mo, int64_t d,
+                                   int64_t h, int64_t mi, int64_t s);
+
+/* localtime/gmtime may share a process-wide buffer. Copying their result
+   still races with another OS worker; resolve into caller-owned storage.
+   Unlike localtime, POSIX localtime_r need not act as if it called tzset. */
+static struct tm *sp_time_local_tm(time_t s, struct tm *bd) {
+#ifndef __wasi__  /* WASI has no time zone database and no tzset */
+  tzset();
+#endif
+  return localtime_r(&s, bd);
+}
+
+/* Not mktime(gmtime(s)) - s: macOS mktime answers -1 for any year before 1900. */
+static int32_t sp_time_local_offset(time_t s) {
+  struct tm local;
+  struct tm *l = sp_time_local_tm(s, &local);
+  if (!l) return 0;
+  return (int32_t)(sp_time_civil_epoch(l->tm_year + 1900, l->tm_mon + 1, l->tm_mday,
+                                       l->tm_hour, l->tm_min, l->tm_sec) - (int64_t)s);
+}
+
+sp_Time sp_timev_new(int64_t y, int64_t mo, int64_t d,
                     int64_t h, int64_t mi, int64_t s) {
   sp_time_check_args(mo, d, h, mi, s);
   struct tm tm;
@@ -146,7 +186,15 @@ sp_Time sp_time_new(int64_t y, int64_t mo, int64_t d,
   tm.tm_min  = (int)mi;
   tm.tm_sec  = (int)s;
   tm.tm_isdst = -1;
+  tm.tm_wday = -1;
   time_t e = mktime(&tm);
+  if (e == (time_t)-1 && tm.tm_wday == -1) {
+    /* Not the -1 epoch: mktime refused the year (macOS, before 1900); resolve via localtime, twice to settle an offset change. */
+    int64_t guess = sp_time_civil_epoch(y, mo, d, h, mi, s);
+    int64_t epoch = guess - sp_time_local_offset((time_t)guess);
+    epoch = guess - sp_time_local_offset((time_t)epoch);
+    return (sp_Time){ epoch, 0, 0 };
+  }
   return (sp_Time){ (int64_t)e, 0, 0 };
 }
 
@@ -164,7 +212,7 @@ static int64_t sp_time_civil_epoch(int64_t y, int64_t mo, int64_t d,
   return days * 86400 + h * 3600 + mi * 60 + s;
 }
 
-/* Time.utc(y, m, d, h, mi, s) — UTC construction. */
+/* Time.utc(y, m, d, h, mi, s) -- UTC construction. */
 /* The month argument of the civil constructors accepts an English month name
    as well as a number: Time.utc(2020, "feb", 4). A plain strtoll read those as
    zero and the constructor rejected them (#3703). */
@@ -188,46 +236,71 @@ int64_t sp_time_month_arg(const char *s) {
   return (int64_t)sp_str_to_i_strict(s);
 }
 
-sp_Time sp_time_new_utc(int64_t y, int64_t mo, int64_t d,
+sp_Time sp_timev_new_utc(int64_t y, int64_t mo, int64_t d,
                         int64_t h, int64_t mi, int64_t s) {
   sp_time_check_args(mo, d, h, mi, s);
   return (sp_Time){ sp_time_civil_epoch(y, mo, d, h, mi, s), 0, 1 };
 }
 
-/* A zone argument (`in:`, or Time.new's 7th positional): "UTC" / "Z" is UTC,
-   an Integer or a "+HH[:MM[:SS]]" / "+HHMM" string a fixed offset east of
-   UTC. Anything else is CRuby's ArgumentError (#3696, #3697, #3698). */
+/* A zone argument (`in:`, Time.new's 7th positional, or localtime /
+   getlocal's String): CRuby's utc_offset_arg. "UTC" in any case and "Z" are
+   UTC; a military letter is a whole-hour offset ("A".."I" +1..+9, "K".."M"
+   +10..+12, "N".."Y" -1..-12, no "J"); otherwise "+HH", "+HHMM", "+HHMMSS",
+   "+HH:MM" or "+HH:MM:SS", minutes and seconds below 60, where a negative
+   zero ("-00:00") is UTC as well. Any other spelling is CRuby's ArgumentError
+   naming the forms, and an offset of a day or more its "utc_offset out of
+   range" (#3696, #3697, #3698). */
 int64_t sp_time_zone_arg_off(const char *z, int *is_utc_out) {
   *is_utc_out = 0;
   if (!z) sp_raise_cls("ArgumentError", "invalid time zone");
-  if (strcmp(z, "UTC") == 0 || strcmp(z, "utc") == 0 ||
-      strcmp(z, "Z") == 0 || strcmp(z, "GMT") == 0) { *is_utc_out = 1; return 0; }
-  if (z[0] == '+' || z[0] == '-') {
-    int sign = z[0] == '-' ? -1 : 1;
-    const char *p = z + 1;
-    int f[3] = {0, 0, 0}, nf = 0;
-    while (nf < 3) {
-      if (!(p[0] >= '0' && p[0] <= '9') || !(p[1] >= '0' && p[1] <= '9')) break;
-      f[nf++] = (p[0] - '0') * 10 + (p[1] - '0');
-      p += 2;
-      if (*p == ':') p++;
-      else if (nf == 1 && *p) continue;   /* "+HHMM" */
-      else break;
-    }
-    if (nf >= 1 && !*p) return sign * (int64_t)(f[0] * 3600 + f[1] * 60 + f[2]);
+  size_t len = strlen(z);
+  const char *min = NULL, *sec = NULL;
+  int64_t n = 0;
+  switch (len) {
+  case 1:
+    if (z[0] == 'Z') { *is_utc_out = 1; return 0; }
+    if (z[0] >= 'A' && z[0] <= 'I') return (int64_t)(z[0] - 'A' + 1) * 3600;
+    if (z[0] >= 'K' && z[0] <= 'M') return (int64_t)(z[0] - 'A') * 3600;
+    if (z[0] >= 'N' && z[0] <= 'Y') return (int64_t)('M' - z[0]) * 3600;
+    goto invalid;
+  case 3:
+    if ((z[0] | 0x20) == 'u' && (z[1] | 0x20) == 't' && (z[2] | 0x20) == 'c') { *is_utc_out = 1; return 0; }
+    break;                                          /* "+HH" */
+  case 9: if (z[6] != ':') goto invalid; sec = z + 7; /* fall through: "+HH:MM:SS" */
+  case 6: if (z[3] != ':') goto invalid; min = z + 4; break;   /* "+HH:MM" */
+  case 7: sec = z + 5;                              /* fall through: "+HHMMSS" */
+  case 5: min = z + 3; break;                       /* "+HHMM" */
+  default: goto invalid;
   }
+  if (sec) {
+    if (!isdigit((unsigned char)sec[0]) || !isdigit((unsigned char)sec[1]) || sec[0] > '5') goto invalid;
+    n += (sec[0] - '0') * 10 + (sec[1] - '0');
+  }
+  if (min) {
+    if (!isdigit((unsigned char)min[0]) || !isdigit((unsigned char)min[1]) || min[0] > '5') goto invalid;
+    n += ((min[0] - '0') * 10 + (min[1] - '0')) * 60;
+  }
+  if ((z[0] != '+' && z[0] != '-') || !isdigit((unsigned char)z[1]) || !isdigit((unsigned char)z[2])) goto invalid;
+  n += (int64_t)((z[1] - '0') * 10 + (z[2] - '0')) * 3600;
+  if (z[0] == '-') {
+    if (n == 0) { *is_utc_out = 1; return 0; }
+    n = -n;
+  }
+  if (n <= -86400 || n >= 86400) sp_raise_cls("ArgumentError", "utc_offset out of range");
+  return n;
+invalid:
   sp_raise_cls("ArgumentError", sp_sprintf("\"+HH:MM\", \"-HH:MM\", \"UTC\" or \"A\"..\"I\",\"K\"..\"Z\" expected for utc_offset: %s", z));
   return 0;
 }
 
 /* Re-read a Time in the zone the argument names (#3698). */
-sp_Time sp_time_in_zone_i(sp_Time t, int64_t off) {
+sp_Time sp_timev_in_zone_i(sp_Time t, int64_t off) {
   if (off <= -86400 || off >= 86400)
     sp_raise_cls("ArgumentError", "utc_offset out of range");
   t.is_utc = 2; t.utc_off = (int32_t)off;
   return t;
 }
-sp_Time sp_time_in_zone_s(sp_Time t, const char *z) {
+sp_Time sp_timev_in_zone_s(sp_Time t, const char *z) {
   int isu = 0;
   int64_t off = sp_time_zone_arg_off(z, &isu);
   if (isu) { t.is_utc = 1; t.utc_off = 0; }
@@ -235,10 +308,10 @@ sp_Time sp_time_in_zone_s(sp_Time t, const char *z) {
   return t;
 }
 
-/* Time.new(y, mo, d, h, mi, s, utc_offset) — the civil value is read in a
+/* Time.new(y, mo, d, h, mi, s, utc_offset) -- the civil value is read in a
    fixed zone off seconds east of UTC, so the epoch is the UTC epoch of the
    same civil value minus that offset. CRuby bounds the offset to a day. */
-sp_Time sp_time_new_off(int64_t y, int64_t mo, int64_t d,
+sp_Time sp_timev_new_off(int64_t y, int64_t mo, int64_t d,
                         int64_t h, int64_t mi, int64_t s, int64_t off) {
   if (off <= -86400 || off >= 86400)
     sp_raise_cls("ArgumentError", "utc_offset out of range");
@@ -248,16 +321,16 @@ sp_Time sp_time_new_off(int64_t y, int64_t mo, int64_t d,
   return t;
 }
 
-/* Time.utc/local(y, mo, d, h, mi, s, usec) — the 7th positional argument is
+/* Time.utc/local(y, mo, d, h, mi, s, usec) -- the 7th positional argument is
    microseconds of second. */
-sp_Time sp_time_with_usec(sp_Time t, int64_t usec) {
+sp_Time sp_timev_with_usec(sp_Time t, int64_t usec) {
   if (usec < 0 || usec >= 1000000)
     sp_raise_cls("ArgumentError", "subsecx out of range");
   t.tv_nsec = (int32_t)(usec * 1000);
   return t;
 }
 /* a Float microsecond argument carries into the nanosecond field (#3092). */
-sp_Time sp_time_with_usec_f(sp_Time t, double usec) {
+sp_Time sp_timev_with_usec_f(sp_Time t, double usec) {
   if (usec < 0 || usec >= 1000000)
     sp_raise_cls("ArgumentError", "subsecx out of range");
   t.tv_nsec = (int32_t)(usec * 1000.0);
@@ -268,9 +341,22 @@ sp_Time sp_time_with_usec_f(sp_Time t, double usec) {
    an optional " +HH:MM" / " -HH:MM" / " UTC" zone suffix. A date without a
    time and any other shape raise CRuby's ArgumentError messages; anything
    the grammar does not cover must be loud, never a guessed instant. */
-sp_Time sp_time_parse(const char *s) {SP_GC_ROOT_STR(s);
+sp_Time sp_timev_parse(const char *s) {SP_GC_ROOT_STR(s);
   const char *sp_sprintf(const char *fmt, ...);  /* generated TU */
   int y, mo, d, h, mi, sec, n = 0;
+  /* a year alone ("2021", "-44", "+12345") is Time.new(year), as CRuby
+     reads it: four digits at least, local midnight of January 1 */
+  { const char *q = s + (*s == '+' || *s == '-');
+    size_t nd = 0;
+    while (q[nd] >= '0' && q[nd] <= '9') nd++;
+    if (nd > 0 && q[nd] == 0) {
+      if (nd < 4) sp_raise_cls("ArgumentError", sp_sprintf("year must be 4 or more digits: %s", s));
+      int64_t yy = 0;
+      for (size_t i = 0; i < nd && i < 18; i++) yy = yy * 10 + (q[i] - '0');
+      if (*s == '-') yy = -yy;
+      return sp_timev_new(yy, 1, 1, 0, 0, 0);
+    }
+  }
   if (sscanf(s, "%4d-%2d-%2d%n", &y, &mo, &d, &n) != 3 || n == 0)
     sp_raise_cls("ArgumentError", sp_sprintf("can't parse: \"%s\"", s));
   const char *p = s + n;
@@ -295,12 +381,12 @@ sp_Time sp_time_parse(const char *s) {SP_GC_ROOT_STR(s);
   while (*p == ' ') p++;
   if (*p == 0) {
     /* no zone: host-local, like the civil Time.new */
-    sp_Time t = sp_time_new(y, mo, d, h, mi, sec);
+    sp_Time t = sp_timev_new(y, mo, d, h, mi, sec);
     t.tv_nsec = nsec;
     return t;
   }
   if (strcmp(p, "UTC") == 0 || strcmp(p, "Z") == 0) {
-    sp_Time t = sp_time_new_utc(y, mo, d, h, mi, sec);
+    sp_Time t = sp_timev_new_utc(y, mo, d, h, mi, sec);
     t.tv_nsec = nsec;
     return t;
   }
@@ -310,44 +396,26 @@ sp_Time sp_time_parse(const char *s) {SP_GC_ROOT_STR(s);
       n > 0 && p[1 + n] == 0) {
     int64_t off = (int64_t)oh * 3600 + (int64_t)om * 60;
     if (*p == '-') off = -off;
-    sp_Time t = sp_time_new_off(y, mo, d, h, mi, sec, off);
+    sp_Time t = sp_timev_new_off(y, mo, d, h, mi, sec, off);
     t.tv_nsec = nsec;
     return t;
   }
   sp_raise_cls("ArgumentError", sp_sprintf("can't parse: \"%s\"", s));
 }
 
-sp_Time sp_time_utc(sp_Time t) {
+sp_Time sp_timev_utc(sp_Time t) {
   t.is_utc = 1;
   return t;
 }
 
-sp_Time sp_time_localtime(sp_Time t) {
+sp_Time sp_timev_localtime(sp_Time t) {
   t.is_utc = 0;
   return t;
 }
-/* Parse a "+HH:MM"/"-HH:MM"/"+HHMM"/"UTC" utc_offset string to seconds (#3093). */
-int32_t sp_time_offset_from_str(const char *s) {SP_GC_ROOT_STR(s);
-  const char *sp_sprintf(const char *fmt, ...);  /* generated TU */
-  if (!s || strcmp(s, "UTC") == 0 || strcmp(s, "Z") == 0) return 0;
-  char sign = s[0];
-  if (sign != '+' && sign != '-')
-    sp_raise_cls("ArgumentError", sp_sprintf("\"+HH:MM\" or \"-HH:MM\" expected for utc_offset: %s", s));
-  const char *p = s + 1;
-  int oh = 0, om = 0, os = 0;
-  if (strchr(p, ':')) sscanf(p, "%d:%d:%d", &oh, &om, &os);
-  else {
-    size_t len = strlen(p);
-    if (len >= 2) oh = (p[0] - '0') * 10 + (p[1] - '0');
-    if (len >= 4) om = (p[2] - '0') * 10 + (p[3] - '0');
-  }
-  int32_t off = oh * 3600 + om * 60 + os;
-  return sign == '-' ? -off : off;
-}
 /* Time#getlocal(off)/#localtime(off): reinterpret the instant in a fixed zone
    `off` seconds east of UTC, without changing the underlying epoch (#3093). */
-sp_Time sp_time_getlocal_off(sp_Time t, int64_t off) {
-  if (off < -86400 || off > 86400)
+sp_Time sp_timev_getlocal_off(sp_Time t, int64_t off) {
+  if (off <= -86400 || off >= 86400)
     sp_raise_cls("ArgumentError", "utc_offset out of range");
   t.is_utc = 2;
   t.utc_off = (int32_t)off;
@@ -355,57 +423,47 @@ sp_Time sp_time_getlocal_off(sp_Time t, int64_t off) {
 }
 
 /* is_utc selects gmtime vs localtime, off is UTC offset in seconds,
-   zbuf is the timezone abbreviation (8 bytes). mktime(gmtime(s))-s
-   is the portable offset technique (MSVCRT's %z emits the timezone
-   name, not ±HHMM). */
-void sp_time_vtm(sp_Time t, struct tm *bd, int32_t *off, char *zbuf) {
+   zbuf is the timezone abbreviation (8 bytes). The offset is computed
+   (sp_time_local_offset), not read from %z: MSVCRT's %z emits the
+   timezone name, not ±HHMM. */
+void sp_timev_vtm(sp_Time t, struct tm *bd, int32_t *off, char *zbuf) {
   time_t s = (time_t)t.tv_sec;
   if (t.is_utc == 2) {
     /* fixed offset: the civil value is the UTC civil value shifted east */
     time_t sh = s + (time_t)t.utc_off;
-    struct tm *g = gmtime(&sh);
-    if (g) { *bd = *g; }
-else { memset(bd, 0, sizeof(*bd)); }
+    if (!gmtime_r(&sh, bd)) memset(bd, 0, sizeof(*bd));
     if (off) *off = t.utc_off;
     if (zbuf) zbuf[0] = 0;
   }
 else if (t.is_utc) {
-    struct tm *g = gmtime(&s);
-    if (g) { *bd = *g; }
-else { memset(bd, 0, sizeof(*bd)); }
+    if (!gmtime_r(&s, bd)) memset(bd, 0, sizeof(*bd));
     if (off) *off = 0;
     if (zbuf) { zbuf[0]='U'; zbuf[1]='T'; zbuf[2]='C'; zbuf[3]=0; }
   }
 else {
-    struct tm *l = localtime(&s);
-    if (l) { *bd = *l; }
-else { memset(bd, 0, sizeof(*bd)); }
-    if (off) {
-      struct tm gm = *gmtime(&s);
-      gm.tm_isdst = -1;
-      *off = (int32_t)(s - (time_t)mktime(&gm));
-    }
+    if (!sp_time_local_tm(s, bd)) memset(bd, 0, sizeof(*bd));
+    if (off) *off = sp_time_local_offset(s);
     if (zbuf) {
       if (strftime(zbuf, 8, "%Z", bd) == 0) zbuf[0] = 0;
     }
   }
 }
 
-int64_t sp_time_year(sp_Time t){struct tm b;sp_time_vtm(t,&b,NULL,NULL);return (int64_t)(b.tm_year+1900);}
-int64_t sp_time_mon(sp_Time t){struct tm b;sp_time_vtm(t,&b,NULL,NULL);return (int64_t)(b.tm_mon+1);}
-int64_t sp_time_mday(sp_Time t){struct tm b;sp_time_vtm(t,&b,NULL,NULL);return (int64_t)b.tm_mday;}
-int64_t sp_time_hour(sp_Time t){struct tm b;sp_time_vtm(t,&b,NULL,NULL);return (int64_t)b.tm_hour;}
-int64_t sp_time_min(sp_Time t){struct tm b;sp_time_vtm(t,&b,NULL,NULL);return (int64_t)b.tm_min;}
-int64_t sp_time_sec(sp_Time t){struct tm b;sp_time_vtm(t,&b,NULL,NULL);return (int64_t)b.tm_sec;}
-int64_t sp_time_wday(sp_Time t){struct tm b;sp_time_vtm(t,&b,NULL,NULL);return (int64_t)b.tm_wday;}
-int64_t sp_time_yday(sp_Time t){struct tm b;sp_time_vtm(t,&b,NULL,NULL);return (int64_t)(b.tm_yday+1);}
-int64_t sp_time_isdst(sp_Time t){struct tm b;sp_time_vtm(t,&b,NULL,NULL);return (int64_t)(b.tm_isdst>0?1:0);}
-int64_t sp_time_utc_offset(sp_Time t){int32_t o;struct tm b;sp_time_vtm(t,&b,&o,NULL);return (int64_t)o;}
+int64_t sp_timev_year(sp_Time t){struct tm b;sp_timev_vtm(t,&b,NULL,NULL);return (int64_t)(b.tm_year+1900);}
+int64_t sp_timev_mon(sp_Time t){struct tm b;sp_timev_vtm(t,&b,NULL,NULL);return (int64_t)(b.tm_mon+1);}
+int64_t sp_timev_mday(sp_Time t){struct tm b;sp_timev_vtm(t,&b,NULL,NULL);return (int64_t)b.tm_mday;}
+int64_t sp_timev_hour(sp_Time t){struct tm b;sp_timev_vtm(t,&b,NULL,NULL);return (int64_t)b.tm_hour;}
+int64_t sp_timev_min(sp_Time t){struct tm b;sp_timev_vtm(t,&b,NULL,NULL);return (int64_t)b.tm_min;}
+int64_t sp_timev_sec(sp_Time t){struct tm b;sp_timev_vtm(t,&b,NULL,NULL);return (int64_t)b.tm_sec;}
+int64_t sp_timev_wday(sp_Time t){struct tm b;sp_timev_vtm(t,&b,NULL,NULL);return (int64_t)b.tm_wday;}
+int64_t sp_timev_yday(sp_Time t){struct tm b;sp_timev_vtm(t,&b,NULL,NULL);return (int64_t)(b.tm_yday+1);}
+int64_t sp_timev_isdst(sp_Time t){struct tm b;sp_timev_vtm(t,&b,NULL,NULL);return (int64_t)(b.tm_isdst>0?1:0);}
+int64_t sp_timev_utc_offset(sp_Time t){int32_t o;struct tm b;sp_timev_vtm(t,&b,&o,NULL);return (int64_t)o;}
 
 /* Time + Numeric / Time - Numeric. secs may be fractional; the shift is
    exact in the double's binary value (see sp_time_shift_ns). The zone kind
    and offset are inherited from the receiver. */
-sp_Time sp_time_add(sp_Time t, double secs) {
+sp_Time sp_timev_add(sp_Time t, double secs) {
   sp_Time r = t;
   sp_time_shift_ns(secs, t.tv_sec, t.tv_nsec, &r.tv_sec, &r.tv_nsec);
   return r;
@@ -417,14 +475,37 @@ sp_Time sp_time_add(sp_Time t, double secs) {
    for long literal text or wide fields). A pathological field width
    (`"%1000000000F"`, which CRuby rejects with ERANGE) does not fit and
    yields "" -- a graceful empty string rather than a crash. */
-/* The UTC offset (seconds) of a Time, mirroring sp_time_iso8601's manual calc. */
+/* The UTC offset (seconds) of a Time, mirroring sp_timev_iso8601's manual calc. */
 static long sp_time_offset_sec(sp_Time t) {
   if (t.is_utc == 2) return t.utc_off;   /* fixed offset (Time.at in:) */
   if (t.is_utc) return 0;
-  time_t s = (time_t)t.tv_sec;
-  struct tm gm = *gmtime(&s);
-  gm.tm_isdst = -1;
-  return (long)(s - mktime(&gm));
+  return (long)sp_time_local_offset((time_t)t.tv_sec);
+}
+
+/* A year as Ruby writes it: zero-padded to four digits with the sign in
+   front ("0012", "-0012", "10000"); a positive `width` is the whole field,
+   sign included, as in "%4Y" ("-012"). C's %Y is not portable here: glibc
+   does not pad it at all, and macOS pads a negative year inside the sign
+   ("-012" for "-0012"). Returns the length written, as snprintf does. */
+static int sp_time_year_field(char *buf, size_t cap, long yr, int width) {
+  const char *sign = yr < 0 ? "-" : "";
+  unsigned long mag = yr < 0 ? 0UL - (unsigned long)yr : (unsigned long)yr;
+  int digits = width > 0 ? width - (yr < 0) : 4;
+  return snprintf(buf, cap, "%s%0*lu", sign, digits > 0 ? digits : 1, mag);
+}
+
+static int sp_time_year_str(char *buf, size_t cap, long yr) {
+  return sp_time_year_field(buf, cap, yr, -1);
+}
+
+/* buf <- the year, then C strftime of `rest` (fields that carry no year).
+   Returns the length, or 0 if it did not fit, as strftime does. */
+static size_t sp_time_year_then(char *buf, size_t cap, const struct tm *b, const char *rest) {
+  int yn = sp_time_year_str(buf, cap, (long)b->tm_year + 1900);
+  if (yn < 0 || (size_t)yn >= cap) return 0;
+  if (!*rest) return (size_t)yn;
+  size_t r = strftime(buf + yn, cap - (size_t)yn, rest, b);
+  return r ? (size_t)yn + r : 0;
 }
 
 /* Ruby-compatible strftime: C strftime handles the standard directives, but
@@ -432,14 +513,14 @@ static long sp_time_offset_sec(sp_Time t) {
    mktime), %P (lowercase am/pm), the %:z/%::z colon offsets, and width/flag
    modifiers (%3S, %6N, %10Y). Walk the format, compute those directly, and
    pad; delegate a bare standard directive to strftime. (#2635, #2636) */
-const char *sp_time_strftime(sp_Time t, const char *fmt) {SP_GC_ROOT_STR(fmt);
+const char *sp_timev_strftime(sp_Time t, const char *fmt) {SP_GC_ROOT_STR(fmt);
   /* is_utc is a 3-state kind, not a flag: kind 2 is a fixed offset whose
      civil fields are the UTC ones shifted by utc_off. Reading it as a
      boolean sent kind 2 down the gmtime branch, so every field directive
-     rendered UTC under a %z that correctly said otherwise. sp_time_vtm
+     rendered UTC under a %z that correctly said otherwise. sp_timev_vtm
      resolves all three kinds. */
   struct tm tmv;
-  sp_time_vtm(t, &tmv, NULL, NULL);
+  sp_timev_vtm(t, &tmv, NULL, NULL);
   static char out[8192];
   size_t oi = 0;
   for (const char *p = fmt; *p && oi < sizeof(out) - 128; p++) {
@@ -509,11 +590,51 @@ const char *sp_time_strftime(sp_Time t, const char *fmt) {SP_GC_ROOT_STR(fmt);
     else if (d == 'Z' && t.is_utc) { if (t.is_utc == 1) strcpy(val, "UTC"); else val[0] = 0; }
     /* Ruby's %Y is zero-padded to four digits; C's is not, so a year below
        1000 came out "1" where CRuby writes "0001". Ruby keeps the sign
-       outside the padding, so -1 is "-0001". */
-    else if (d == 'Y') {
+       outside the padding, so -1 is "-0001". The directives that contain
+       the year (%F, %c, %v) take it from the same place, and the century
+       and two-digit year round toward minus infinity, as Integer#div and
+       #% do: -12 is century -1, year 88. */
+    else if (d == 'Y' || d == 'G') {
       long yr = (long)tmv.tm_year + 1900;
-      if (yr < 0) snprintf(val, sizeof val, "-%04ld", -yr);
-      else snprintf(val, sizeof val, "%04ld", yr);
+      if (d == 'G') {
+        /* the ISO 8601 week-based year: C computes it, Ruby formats it */
+        char gb[32];
+        if (strftime(gb, sizeof gb, "%G", &tmv)) yr = strtol(gb, NULL, 10);
+      }
+      /* the bare directive pads to four digits; a width, `_` or `-` takes
+         the signed number and the padding below sizes it (the sign counts
+         toward the width, and zeros go after it) */
+      if (width > 0 || padsp || nopad) {
+        snprintf(val, sizeof val, "%ld", yr);
+        if (width <= 0 && padsp) width = 4 + (yr < 0);
+      }
+      else sp_time_year_str(val, sizeof val, yr);
+    }
+    else if (d == 'F') sp_time_year_then(val, sizeof val, &tmv, "-%m-%d");
+    else if (d == 'C' || d == 'y' || d == 'x' || d == 'D') {
+      long yr = (long)tmv.tm_year + 1900;
+      long cen = yr >= 0 ? yr / 100 : -((-yr + 99) / 100);
+      long yy = yr - cen * 100;
+      if (d == 'C') snprintf(val, sizeof val, "%02ld", cen);
+      else if (d == 'y') snprintf(val, sizeof val, "%02ld", yy);
+      else snprintf(val, sizeof val, "%02d/%02d/%02ld", tmv.tm_mon + 1, tmv.tm_mday, yy);
+    }
+    else if (d == 'c') {
+      size_t n = strftime(val, sizeof val, "%a %b %e %H:%M:%S ", &tmv);
+      if (n) sp_time_year_str(val + n, sizeof val - n, (long)tmv.tm_year + 1900);
+    }
+    else if (d == 'v') {
+      /* "%e-%^b-%4Y": the year four wide, sign included */
+      size_t n = strftime(val, sizeof val, "%e-%b-", &tmv);
+      for (size_t k = 0; k < n; k++) val[k] = (char)toupper((unsigned char)val[k]);
+      if (n) sp_time_year_field(val + n, sizeof val - n, (long)tmv.tm_year + 1900, 4);
+    }
+    else if (d == 'g') {
+      /* the ISO week-based year's last two digits, rounded as %y is */
+      char gb[32];
+      long gy = strftime(gb, sizeof gb, "%G", &tmv) ? strtol(gb, NULL, 10) : (long)tmv.tm_year + 1900;
+      long gc = gy >= 0 ? gy / 100 : -((-gy + 99) / 100);
+      snprintf(val, sizeof val, "%02ld", gy - gc * 100);
     }
     else if (strchr("aAbBcCdDeFgGhHIjklmMnprRSTtuUvVwWxXyYzZ", d)) {
       /* a standard Ruby directive: format the bare `%X` (we redo width/case
@@ -558,20 +679,28 @@ const char *sp_time_strftime(sp_Time t, const char *fmt) {SP_GC_ROOT_STR(fmt);
         else for (size_t k = 0; k < z; k++) val[k] = ' ';
       }
     }
-    size_t vl = strlen(val);
+    size_t vl = strlen(val), v0 = 0;
     if (width > 0 && !nopad && vl < (size_t)width) {
-      char pc = padsp ? ' ' : '0';
+      /* CRuby pads a width with zeros for a number and with spaces for
+         text (%A %a %B %b %h %p %P %Z), for the composites (%c %x %X %D %F
+         %T %R %r %v), for the blank-padded numbers (%e %k %l) and for %n
+         %t %%; a `0` or `_` flag picks the character either way. Every
+         directive took zeros, so "%10A" was "000Tuesday". */
+      char pc = padsp ? ' ' : pad0 ? '0' : (strchr("AaBbhpPZcxXDFTRrvektlnt%", d) ? ' ' : '0');
+      /* zeros go after a sign, as CRuby pads "%10s" of -5 to "-000000005"
+         and "%10z" to "+000000000"; spaces go before it */
+      if (pc == '0' && (val[0] == '-' || val[0] == '+') && oi < sizeof(out) - 2) { out[oi++] = val[0]; v0 = 1; }
       for (size_t k = vl; k < (size_t)width && oi < sizeof(out) - 2; k++) out[oi++] = pc;
     }
     (void)tok;
-    for (size_t k = 0; k < vl && oi < sizeof(out) - 2; k++) out[oi++] = val[k];
+    for (size_t k = v0; k < vl && oi < sizeof(out) - 2; k++) out[oi++] = val[k];
   }
   out[oi] = 0;
   return sp_str_dup_external(out);
 }
 
 /* RFC 3339 zone suffix: "Z" for a UTC time, "+HH:MM" otherwise. `off` is
-   the receiver's own offset as sp_time_vtm resolved it, so the fixed-offset
+   the receiver's own offset as sp_timev_vtm resolved it, so the fixed-offset
    kind carries its utc_off here instead of being mistaken for UTC. Returns
    the number of bytes appended (0 if they would not fit). */
 static size_t sp_time_iso_zone(char *buf, size_t n, size_t cap, sp_Time t, int32_t off) {
@@ -594,32 +723,41 @@ static size_t sp_time_iso_zone(char *buf, size_t n, size_t cap, sp_Time t, int32
   return 6;
 }
 
-/* RFC 3339 / iso8601. sp_time_vtm resolves the civil fields and the offset
+/* Time#httpdate (RFC 1123, always GMT) and Time#rfc2822, whose UTC time
+   is written -0000 as CRuby's time.rb does. */
+const char *sp_timev_httpdate(sp_Time t) {
+  return sp_timev_strftime(sp_timev_utc(t), "%a, %d %b %Y %H:%M:%S GMT");
+}
+const char *sp_timev_rfc2822(sp_Time t) {
+  return sp_timev_strftime(t, t.is_utc == 1 ? "%a, %d %b %Y %H:%M:%S -0000" : "%a, %d %b %Y %H:%M:%S %z");
+}
+
+/* RFC 3339 / iso8601. sp_timev_vtm resolves the civil fields and the offset
    for all three zone kinds; the suffix is formatted here because MSVCRT's
    %z renders the timezone name rather than ±HHMM. */
-const char *sp_time_iso8601(sp_Time t) {
+const char *sp_timev_iso8601(sp_Time t) {
   char buf[64];
   size_t cap = sizeof(buf);
   struct tm b;
   int32_t off;
-  sp_time_vtm(t, &b, &off, NULL);
-  size_t n = strftime(buf, cap, "%Y-%m-%dT%H:%M:%S", &b);
+  sp_timev_vtm(t, &b, &off, NULL);
+  size_t n = sp_time_year_then(buf, cap, &b, "-%m-%dT%H:%M:%S");
   if (n == 0) return sp_str_empty;
   sp_time_iso_zone(buf, n, cap, t, off);
   return sp_str_dup_external(buf);
 }
 
-/* iso8601 / xmlschema with a fraction-digits argument: like sp_time_iso8601
+/* iso8601 / xmlschema with a fraction-digits argument: like sp_timev_iso8601
    but inserting `digits` truncated fractional-second places (#3094, #3095). */
-const char *sp_time_iso8601_frac(sp_Time t, int64_t digits) {
-  if (digits <= 0) return sp_time_iso8601(t);
+const char *sp_timev_iso8601_frac(sp_Time t, int64_t digits) {
+  if (digits <= 0) return sp_timev_iso8601(t);
   if (digits > 50) digits = 50;
   char buf[128];
   size_t cap = sizeof(buf);
   struct tm b;
   int32_t off;
-  sp_time_vtm(t, &b, &off, NULL);
-  size_t n = strftime(buf, cap, "%Y-%m-%dT%H:%M:%S", &b);
+  sp_timev_vtm(t, &b, &off, NULL);
+  size_t n = sp_time_year_then(buf, cap, &b, "-%m-%dT%H:%M:%S");
   if (n == 0) return sp_str_empty;
   char fb[16]; snprintf(fb, sizeof fb, "%09ld", (long)t.tv_nsec);
   if (n + 1 + (size_t)digits < cap) {
@@ -631,13 +769,13 @@ const char *sp_time_iso8601_frac(sp_Time t, int64_t digits) {
   return sp_str_dup_external(buf);
 }
 
-const char *sp_time_zone(sp_Time t) {
+const char *sp_timev_zone(sp_Time t) {
   /* a fixed-offset Time has no zone NAME, and CRuby answers nil for it rather
      than the empty string the broken-down form leaves behind (#3701) */
   if (t.is_utc == 2) return NULL;
   char buf[8];
   struct tm b;
-  sp_time_vtm(t, &b, NULL, buf);
+  sp_timev_vtm(t, &b, NULL, buf);
   return sp_str_dup_external(buf);
 }
 
@@ -650,20 +788,10 @@ static const char *sp_time_fmt(sp_Time t, int frac) {
   size_t cap = sizeof(buf);
   struct tm b;
   int32_t off;
-  sp_time_vtm(t, &b, &off, NULL);
-  /* The year is written here rather than by C strftime, whose %Y does not
-     zero-pad below 1000: Time.utc(1,1,1).to_s is "0001-01-01 ..." in CRuby
-     and was "1-01-01 ..." here. The rest still goes through strftime. */
-  size_t n;
-  {
-    long yr = (long)b.tm_year + 1900;
-    int yn = (yr < 0) ? snprintf(buf, cap, "-%04ld", -yr) : snprintf(buf, cap, "%04ld", yr);
-    if (yn < 0 || (size_t)yn >= cap) { n = 0; }
-    else {
-      size_t r = strftime(buf + yn, cap - (size_t)yn, "-%m-%d %H:%M:%S", &b);
-      n = r ? (size_t)yn + r : 0;
-    }
-  }
+  sp_timev_vtm(t, &b, &off, NULL);
+  /* the year by hand (sp_time_year_then): Time.utc(1,1,1).to_s is
+     "0001-01-01 ..." in CRuby, and C's %Y wrote "1-01-01 ..." */
+  size_t n = sp_time_year_then(buf, cap, &b, "-%m-%d %H:%M:%S");
   if (n == 0) {
     snprintf(buf, cap, "Time(%lld)", (long long)t.tv_sec);
     return sp_str_dup_external(buf);
@@ -696,37 +824,475 @@ else {
 }
 
 /* Time#inspect renders fractional seconds; Time#to_s does not. */
-const char *sp_time_inspect_v(sp_Time t) { return sp_time_fmt(t, 1); }
-const char *sp_time_to_s_v(sp_Time t)    { return sp_time_fmt(t, 0); }
+const char *sp_timev_inspect_v(sp_Time t) { return sp_time_fmt(t, 1); }
+const char *sp_timev_to_s_v(sp_Time t)    { return sp_time_fmt(t, 0); }
 
 /* ---- comparison + shifts (moved from spinel_rt.h; cold) ---- */
-int sp_time_cmp(sp_Time a, sp_Time b) {
+int sp_timev_cmp(sp_Time a, sp_Time b) {
   if (a.tv_sec < b.tv_sec) return -1;
   if (a.tv_sec > b.tv_sec) return 1;
   if (a.tv_nsec < b.tv_nsec) return -1;
   if (a.tv_nsec > b.tv_nsec) return 1;
   return 0;
 }
-sp_Time sp_time_add_f(sp_Time t, double secs) {
-  return sp_time_add(t, secs);
+sp_Time sp_timev_add_f(sp_Time t, double secs) {
+  return sp_timev_add(t, secs);
 }
 /* Value hash: equal (tv_sec, tv_nsec) pairs must hash equal regardless of
    zone kind, mirroring Time#== which compares the instant only. */
-int64_t sp_time_hash(sp_Time t) {
+int64_t sp_timev_hash(sp_Time t) {
   uint64_t h = (uint64_t)t.tv_sec * 1000000007ULL + (uint64_t)(uint32_t)t.tv_nsec;
   h ^= h >> 33;
   return (int64_t)(h & 0x3fffffffffffffffULL);
 }
-sp_Time sp_time_add_i(sp_Time t, int64_t secs) {
+sp_Time sp_timev_add_i(sp_Time t, int64_t secs) {
   sp_Time r = t;
   r.tv_sec = t.tv_sec + (time_t)secs;
   return r;
 }
-sp_Time sp_time_sub_i(sp_Time t, int64_t secs) {
+sp_Time sp_timev_sub_i(sp_Time t, int64_t secs) {
   sp_Time r = t;
   r.tv_sec = t.tv_sec - (time_t)secs;
   return r;
 }
-double sp_time_sub_t(sp_Time a, sp_Time b) {
-  return (double)(a.tv_sec - b.tv_sec) + ((double)(a.tv_nsec - b.tv_nsec) / 1e9);
+double sp_timev_sub_t(sp_Time a, sp_Time b) {
+  return sp_time_ns_to_f(a.tv_sec - b.tv_sec, (int64_t)a.tv_nsec - b.tv_nsec);
 }
+
+const char *sp_str_inspect(const char *s);
+const char *sp_sym_inspect_name(const char *name);
+/* The fixed-format parsers' argument as their ArgumentError shows it: the
+   Symbol a call passed (sp_time_s_parse_sym), else the String inspected.
+   Read once, and only for the name it was set with: a raise of another
+   kind inside the parse leaves it set, and a later String's error must
+   not show that Symbol (CodeRabbit on #10010). */
+static SP_TLS const char *tp_sym_arg;
+static const char *tp_inspect_arg(const char *s) {
+  const char *sym = tp_sym_arg;
+  tp_sym_arg = NULL;
+  return sym && sym == s ? sp_sym_inspect_name(sym) : sp_str_inspect(s);
+}
+
+/* ---- require "time": Time.httpdate / rfc2822 / xmlschema (iso8601) ----
+   The strict class-method parsers, each the format its RFC fixes, read the
+   way time.rb's regexps read them: a Time on a match, CRuby's ArgumentError
+   otherwise. (Time.parse and Time.strptime, which guess at free-form text,
+   are not these.) */
+static int tp_ws(char ch) {
+  return ch == ' ' || ch == '\t' || ch == '\n' || ch == '\v' || ch == '\f' || ch == '\r';
+}
+static const char *tp_skip_ws(const char *p) { while (tp_ws(*p)) p++; return p; }
+static int tp_lower(char ch) { return (ch >= 'A' && ch <= 'Z') ? ch - 'A' + 'a' : ch; }
+/* is z (zl bytes) the word w, in any ASCII case? */
+static int tp_ieq(const char *z, size_t zl, const char *w) {
+  size_t l = strlen(w), k = 0;
+  if (l != zl) return 0;
+  while (k < l && tp_lower(z[k]) == tp_lower(w[k])) k++;
+  return k == l;
+}
+/* the word of `words` (ASCII, any case) at p; its index, *end past it, or -1 */
+static int tp_word(const char *p, const char *const *words, int n, const char **end) {
+  for (int i = 0; i < n; i++) {
+    size_t l = strlen(words[i]), k = 0;
+    while (k < l && p[k] && tp_lower(p[k]) == tp_lower(words[i][k])) k++;
+    if (k == l) { *end = p + l; return i; }
+  }
+  return -1;
+}
+/* min..max decimal digits at p: their value, *end past them, or -1. Leading
+   zeros do not count toward the 18 significant digits an int64 holds, so a
+   zero-padded year keeps its value (a longer one, tp_year_fits refuses). */
+static int64_t tp_digits(const char *p, int min, int max, const char **end) {
+  int n = 0, sig = 0; int64_t v = 0;
+  while (n < max && p[n] >= '0' && p[n] <= '9') {
+    if (sig < 18 && (sig > 0 || p[n] != '0')) { v = v * 10 + (p[n] - '0'); sig++; }
+    n++;
+  }
+  if (n < min) return -1;
+  *end = p + n;
+  return v;
+}
+static const char *const tp_wday[7] = { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
+static const char *const tp_wday_long[7] = { "Monday", "Tuesday", "Wednesday", "Thursday",
+                                             "Friday", "Saturday", "Sunday" };
+static const char *const tp_mon[12] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                                        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+/* A year of more digits than an int64 holds: CRuby's Time takes it, sp_Time
+   cannot, so say so rather than answer some other year. */
+static void tp_year_fits(const char *ys, const char *ye) {
+  if (*ys == '-') ys++;
+  while (ys < ye - 1 && *ys == '0') ys++;
+  if (ye - ys > 18) sp_raise_cls("ArgumentError", "year too big to represent");
+}
+/* hh:mm:ss at p, two digits each */
+static int tp_hms(const char *p, int64_t *h, int64_t *mi, int64_t *s, const char **end) {
+  const char *q;
+  if ((*h = tp_digits(p, 2, 2, &q)) < 0 || *q != ':') return 0;
+  if ((*mi = tp_digits(q + 1, 2, 2, &q)) < 0 || *q != ':') return 0;
+  if ((*s = tp_digits(q + 1, 2, 2, &q)) < 0) return 0;
+  *end = q;
+  return 1;
+}
+
+/* time.rb's zone_offset: a zone name or letter, or [+-]HH[[:]MM]. *ok says
+   whether the zone was one. */
+static int64_t tp_zone_offset(const char *z, size_t zl, int *ok) {
+  static const struct { const char *n; int h; } names[] = {
+    {"UTC", 0}, {"Z", 0}, {"UT", 0}, {"GMT", 0},
+    {"EST", -5}, {"EDT", -4}, {"CST", -6}, {"CDT", -5},
+    {"MST", -7}, {"MDT", -6}, {"PST", -8}, {"PDT", -7} };
+  *ok = 1;
+  if (zl >= 3 && (z[0] == '+' || z[0] == '-')) {
+    const char *q;
+    int64_t h = tp_digits(z + 1, 2, 2, &q), m = 0;
+    if (h >= 0) {
+      if (*q == ':') q++;
+      if (q < z + zl) m = tp_digits(q, 2, 2, &q);
+      if (m >= 0 && q == z + zl) return (z[0] == '-' ? -1 : 1) * (h * 3600 + m * 60);
+    }
+  }
+  for (size_t i = 0; i < sizeof names / sizeof names[0]; i++)
+    if (tp_ieq(z, zl, names[i].n)) return (int64_t)names[i].h * 3600;
+  if (zl == 1) {   /* military letters: A..I +1..+9, K..M +10..+12, N..Y -1..-12 */
+    int ch = tp_lower(z[0]) - 'a' + 'A';
+    if (ch >= 'A' && ch <= 'I') return (int64_t)(ch - 'A' + 1) * 3600;
+    if (ch >= 'K' && ch <= 'M') return (int64_t)(ch - 'K' + 10) * 3600;
+    if (ch >= 'N' && ch <= 'Y') return (int64_t)-(ch - 'N' + 1) * 3600;
+  }
+  *ok = 0;
+  return 0;
+}
+/* time.rb's zone_utc?: the spellings that mean "UTC, local offset unknown" */
+static int tp_zone_utc(const char *z, size_t zl) {
+  static const char *const u[] = { "-00:00", "-0000", "-00", "UTC", "Z", "UT" };
+  for (size_t i = 0; i < sizeof u / sizeof u[0]; i++)
+    if (tp_ieq(z, zl, u[i])) return 1;
+  return 0;
+}
+static int64_t tp_month_days(int64_t y, int64_t mo) {
+  static const int md[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+  if (mo < 1 || mo > 12) return 0;
+  if (mo == 2 && ((y % 4 == 0 && y % 100 != 0) || y % 400 == 0)) return 29;
+  return md[mo - 1];
+}
+/* time.rb's apply_offset: the civil fields moved by -off, carrying a day
+   past the month's end to the 1st of the next month (and a day before the
+   1st to the last of the previous one), not on by the overflow */
+static void tp_apply_offset(int64_t *y, int64_t *mo, int64_t *d, int64_t *h, int64_t *mi,
+                            int64_t *s, int64_t off) {
+  if (off == 0) return;
+  int neg = off < 0;
+  int64_t a = neg ? -off : off, o;
+  int64_t *f[3] = { s, mi, h };
+  int64_t base[3] = { 60, 60, 24 };
+  for (int i = 0; i < 3; i++) {
+    o = a % base[i]; a /= base[i];
+    if (o == 0) continue;
+    int64_t v = *f[i] + (neg ? o : -o);
+    int64_t q = v >= 0 ? v / base[i] : -((-v + base[i] - 1) / base[i]);
+    *f[i] = v - q * base[i];
+    a += neg ? q : -q;
+  }
+  if (a == 0) return;
+  if (neg) {
+    *d += a;
+    int64_t days = tp_month_days(*y, *mo);
+    if (days && days < *d) {
+      if (++*mo > 12) { *mo = 1; ++*y; }
+      *d = 1;
+    }
+  }
+  else {
+    *d -= a;
+    if (*d < 1) {
+      if (--*mo < 1) { --*y; *mo = 12; }
+      *d = tp_month_days(*y, *mo);
+    }
+  }
+}
+/* the civil time read in zone z, as time.rb's apply_offset + utc +
+   force_zone! leave it: UTC for a UTC spelling, else the host's own zone
+   when it has that offset at that instant (a real zone beats an artificial
+   one), else that fixed offset */
+static sp_Time tp_in_zone(int64_t y, int64_t mo, int64_t d, int64_t h, int64_t mi, int64_t s,
+                          int64_t nsec, const char *z, size_t zl) {
+  int ok;
+  int64_t off = tp_zone_offset(z, zl, &ok);
+  tp_apply_offset(&y, &mo, &d, &h, &mi, &s, off);
+  sp_Time t = sp_timev_add_nsec(sp_timev_new_utc(y, mo, d, h, mi, s), nsec);
+  if (tp_zone_utc(z, zl)) return t;
+  sp_Time l = sp_timev_localtime(t);
+  if (sp_timev_utc_offset(l) == off) return l;
+  return sp_timev_getlocal_off(t, off);
+}
+
+sp_Time sp_timev_s_rfc2822(const char *date) {SP_GC_ROOT_STR(date);
+  const char *sp_sprintf(const char *fmt, ...);  /* generated TU */
+  if (!date) sp_raise_cls("ArgumentError", "not RFC 2822 compliant date: nil");
+  const char *p = tp_skip_ws(date), *q;
+  /* an optional "Day," */
+  if (tp_word(p, tp_wday, 7, &q) >= 0) {
+    q = tp_skip_ws(q);
+    if (*q == ',') p = tp_skip_ws(q + 1);
+  }
+  int64_t day, mon, year, h, mi, s = 0;
+  const char *ys, *z;
+  if ((day = tp_digits(p, 1, 2, &q)) < 0 || !tp_ws(*q)) goto bad;
+  p = tp_skip_ws(q);
+  if ((mon = tp_word(p, tp_mon, 12, &q)) < 0 || !tp_ws(*q)) goto bad;
+  p = tp_skip_ws(q);
+  ys = p;
+  if ((year = tp_digits(p, 2, 1 << 30, &q)) < 0 || !tp_ws(*q)) goto bad;
+  tp_year_fits(ys, q);
+  if (q - ys <= 3) year += year < 50 ? 2000 : 1900;
+  p = tp_skip_ws(q);
+  if ((h = tp_digits(p, 2, 2, &q)) < 0) goto bad;
+  p = tp_skip_ws(q);
+  if (*p != ':') goto bad;
+  if ((mi = tp_digits(tp_skip_ws(p + 1), 2, 2, &q)) < 0) goto bad;
+  p = q;
+  { const char *r = tp_skip_ws(p);
+    if (*r == ':') {
+      const char *r2;
+      int64_t sv = tp_digits(tp_skip_ws(r + 1), 2, 2, &r2);
+      if (sv >= 0) { s = sv; p = r2; }
+    } }
+  if (!tp_ws(*p)) goto bad;
+  z = tp_skip_ws(p);
+  /* [+-]\d{4} | UT | GMT | EST ... PDT | [A-IK-Z], the longest first, and
+     nothing has to follow it */
+  { size_t zl = 0;
+    if ((z[0] == '+' || z[0] == '-') && tp_digits(z + 1, 4, 4, &q) >= 0) zl = 5;
+    else {
+      static const char *const zn[] = { "GMT", "EST", "EDT", "CST", "CDT", "MST", "MDT",
+                                        "PST", "PDT", "UT" };
+      int zi = tp_word(z, zn, 10, &q);
+      if (zi >= 0) zl = (size_t)(q - z);
+      else if (z[0] && z[0] != 'j' && z[0] != 'J' &&
+               ((z[0] >= 'a' && z[0] <= 'z') || (z[0] >= 'A' && z[0] <= 'Z'))) zl = 1;
+    }
+    if (zl == 0) goto bad;
+    return tp_in_zone(year, mon + 1, day, h, mi, s, 0, z, zl);
+  }
+bad:
+  sp_raise_cls("ArgumentError", sp_sprintf("not RFC 2822 compliant date: %s", tp_inspect_arg(date)));
+  return (sp_Time){0, 0, 1};
+}
+
+sp_Time sp_timev_s_httpdate(const char *date) {SP_GC_ROOT_STR(date);
+  const char *sp_sprintf(const char *fmt, ...);  /* generated TU */
+  if (!date) sp_raise_cls("NoMethodError", "undefined method 'match?' for nil");
+  const char *p = tp_skip_ws(date), *q, *end = date + sp_str_byte_len(date);
+  int64_t day, mon, year, h, mi, s;
+  /* RFC 1123: "Sun, 06 Nov 1994 08:49:37 GMT" */
+  if (tp_word(p, tp_wday, 7, &q) >= 0 && q[0] == ',' && q[1] == ' ' &&
+      (day = tp_digits(q + 2, 2, 2, &q)) >= 0 && *q == ' ' &&
+      (mon = tp_word(q + 1, tp_mon, 12, &q)) >= 0 && *q == ' ' &&
+      (year = tp_digits(q + 1, 4, 4, &q)) >= 0 && *q == ' ' &&
+      tp_hms(q + 1, &h, &mi, &s, &q) && *q == ' ' &&
+      tp_word(q + 1, (const char *const[]){ "GMT" }, 1, &q) >= 0 && tp_skip_ws(q) == end)
+    return sp_timev_utc(sp_timev_s_rfc2822(date));
+  /* RFC 850: "Sunday, 06-Nov-94 08:49:37 GMT" */
+  if (tp_word(p, tp_wday_long, 7, &q) >= 0 && q[0] == ',' && q[1] == ' ' &&
+      (day = tp_digits(q + 2, 2, 2, &q)) >= 0 && *q == '-' &&
+      (mon = tp_word(q + 1, tp_mon, 12, &q)) >= 0 && *q == '-' &&
+      (year = tp_digits(q + 1, 2, 2, &q)) >= 0 && *q == ' ' &&
+      tp_hms(q + 1, &h, &mi, &s, &q) && *q == ' ' &&
+      tp_word(q + 1, (const char *const[]){ "GMT" }, 1, &q) >= 0 && tp_skip_ws(q) == end)
+    return sp_timev_new_utc(year + (year < 50 ? 2000 : 1900), mon + 1, day, h, mi, s);
+  /* asctime: "Sun Nov  6 08:49:37 1994" */
+  if (tp_word(p, tp_wday, 7, &q) >= 0 && *q == ' ' &&
+      (mon = tp_word(q + 1, tp_mon, 12, &q)) >= 0 && *q == ' ') {
+    q++;
+    if (*q == ' ') day = tp_digits(q + 1, 1, 1, &q);
+    else day = tp_digits(q, 2, 2, &q);
+    if (day >= 0 && *q == ' ' && tp_hms(q + 1, &h, &mi, &s, &q) && *q == ' ' &&
+        (year = tp_digits(q + 1, 4, 4, &q)) >= 0 && tp_skip_ws(q) == end)
+      return sp_timev_new_utc(year, mon + 1, day, h, mi, s);
+  }
+  sp_raise_cls("ArgumentError", sp_sprintf("not RFC 2616 compliant date: %s", tp_inspect_arg(date)));
+  return (sp_Time){0, 0, 1};
+}
+
+/* Time.xmlschema / Time.iso8601: "2026-10-11T08:49:37.25+09:00"; with no
+   zone it is the host's local time */
+sp_Time sp_timev_s_xmlschema(const char *str) {SP_GC_ROOT_STR(str);
+  const char *sp_sprintf(const char *fmt, ...);  /* generated TU */
+  if (!str) sp_raise_cls("ArgumentError", "invalid xmlschema format: nil");
+  const char *p = tp_skip_ws(str), *q, *z = NULL, *end = str + sp_str_byte_len(str);
+  int neg = 0;
+  int64_t year, mon, day, h = 0, mi = 0, s = 0, nsec = 0;
+  if (*p == '-') { neg = 1; p++; }
+  if ((year = tp_digits(p, 1, 1 << 30, &q)) < 0 || *q != '-') goto bad;
+  tp_year_fits(p, q);
+  if (neg) year = -year;
+  if ((mon = tp_digits(q + 1, 2, 2, &q)) < 0 || *q != '-') goto bad;
+  if ((day = tp_digits(q + 1, 2, 2, &q)) < 0) goto bad;
+  if (*q != 'T' && *q != 't') goto bad;
+  if (!tp_hms(q + 1, &h, &mi, &s, &q)) goto bad;
+  {
+    if (*q == '.') {
+      int nd = 0;
+      q++;
+      while (q[nd] >= '0' && q[nd] <= '9') { if (nd < 9) nsec = nsec * 10 + (q[nd] - '0'); nd++; }
+      if (nd == 0) goto bad;
+      for (int k = nd; k < 9; k++) nsec *= 10;
+      q += nd;
+    }
+  }
+  size_t zl = 0;
+  if (*q == 'Z' || *q == 'z') { z = q; zl = 1; q++; }
+  else if ((*q == '+' || *q == '-') && tp_digits(q + 1, 2, 2, &p) >= 0) {
+    z = q; q = p;
+    if (*q == ':' && tp_digits(q + 1, 2, 2, &p) >= 0) q = p;
+    else if (tp_digits(q, 2, 2, &p) >= 0) q = p;
+    zl = (size_t)(q - z);
+  }
+  if (tp_skip_ws(q) != end) goto bad;
+  if (z) return tp_in_zone(year, mon, day, h, mi, s, nsec, z, zl);
+  return sp_timev_add_nsec(sp_timev_new(year, mon, day, h, mi, s), nsec);
+bad:
+  sp_raise_cls("ArgumentError", sp_sprintf("invalid xmlschema format: %s", tp_inspect_arg(str)));
+  return (sp_Time){0, 0, 1};
+}
+
+/* Time.parse(str): the numeric ISO 8601 forms, as time.rb reads them through
+   Date._parse: YYYY-MM-DD, optionally a T or blanks and h[h]:mm[:ss[.frac]],
+   then optionally a zone after the time (Z, a name such as UTC / GMT / EST,
+   or +hh, +hh:mm, +hhmm). A zone puts the instant there as force_zone! does
+   (tp_in_zone); without one it is the host local time, a date alone its
+   midnight. A blank string has no time information (CRuby ArgumentError).
+   Date._parse also reads month names, weekdays, RFC 2822, a time without a
+   date and text around a date: those are not read here, and say so with a
+   NotImplementedError rather than as an invalid date. */
+sp_Time sp_timev_s_parse(const char *str) {SP_GC_ROOT_STR(str);
+  const char *sp_sprintf(const char *fmt, ...);  /* generated TU */
+  if (!str) sp_raise_cls("TypeError", "no implicit conversion of nil into String");
+  const char *p = tp_skip_ws(str), *q, *z = NULL, *end = str + sp_str_byte_len(str);
+  if (p == end)
+    sp_raise_cls("ArgumentError", sp_sprintf("no time information in %s", sp_str_inspect(str)));
+  int64_t year, mon, day, h = 0, mi = 0, s = 0, nsec = 0;
+  int timed = 0;
+  const char *ys = p;
+  if ((year = tp_digits(p, 4, 1 << 30, &q)) < 0 || *q != '-') goto unsupported;
+  tp_year_fits(ys, q);
+  if ((mon = tp_digits(q + 1, 1, 2, &q)) < 0 || *q != '-') goto unsupported;
+  if ((day = tp_digits(q + 1, 1, 2, &q)) < 0) goto unsupported;
+  /* the time of day, after a T or blanks */
+  { const char *t = (*q == 'T' || *q == 't') ? q + 1 : tp_skip_ws(q), *r;
+    int64_t hv;
+    if (t > q && (hv = tp_digits(t, 1, 2, &r)) >= 0 && *r == ':' &&
+        (mi = tp_digits(r + 1, 2, 2, &r)) >= 0) {
+      h = hv;
+      q = r;
+      timed = 1;
+      if (*q == ':') {
+        if ((s = tp_digits(q + 1, 2, 2, &q)) < 0) goto unsupported;
+        if (*q == '.') {
+          int nd = 0;
+          q++;
+          while (q[nd] >= '0' && q[nd] <= '9') { if (nd < 9) nsec = nsec * 10 + (q[nd] - '0'); nd++; }
+          for (int k = nd < 9 ? nd : 9; k < 9; k++) nsec *= 10;
+          q += nd;
+        }
+      }
+    }
+    else mi = 0;
+  }
+  /* the zone, if any (Date._parse reads one only after a time of day), then
+     nothing but blanks */
+  q = tp_skip_ws(q);
+  size_t zl = 0;
+  if (timed && (*q == '+' || *q == '-')) {
+    const char *r, *r2;
+    if (tp_digits(q + 1, 2, 2, &r) >= 0) {
+      if (*r == ':' && tp_digits(r + 1, 2, 2, &r2) >= 0) r = r2;
+      else if (tp_digits(r, 2, 2, &r2) >= 0) r = r2;
+      z = q; zl = (size_t)(r - q); q = r;
+    }
+  }
+  else if (timed && ((*q >= 'A' && *q <= 'Z') || (*q >= 'a' && *q <= 'z'))) {
+    size_t n = 0;
+    int ok;
+    while ((q[n] >= 'A' && q[n] <= 'Z') || (q[n] >= 'a' && q[n] <= 'z')) n++;
+    tp_zone_offset(q, n, &ok);
+    if (ok) { z = q; zl = n; q += n; }
+  }
+  if (tp_skip_ws(q) != end) goto unsupported;
+  if (z) return tp_in_zone(year, mon, day, h, mi, s, nsec, z, zl);
+  return sp_timev_add_nsec(sp_timev_new(year, mon, day, h, mi, s), nsec);
+unsupported:
+  sp_raise_cls("NotImplementedError",
+               sp_sprintf("Time.parse: spinel reads the ISO 8601 forms (YYYY-MM-DD, "
+                          "optionally hh:mm[:ss[.frac]] and a zone), not %s", sp_str_inspect(str)));
+  return (sp_Time){0, 0, 1};
+}
+
+/* A fixed-format parser handed a Symbol: time.rb matches its regexp against
+   the Symbol's name, and a failure shows the Symbol itself */
+sp_Time *sp_time_s_parse_sym(sp_Time *(*parse)(const char *), const char *name) {
+  tp_sym_arg = name;
+  sp_Time *t = parse(name);
+  tp_sym_arg = NULL;
+  return t;
+}
+
+sp_Time *sp_time_ref(sp_Time v) {
+  sp_Time *p = (sp_Time *)sp_gc_alloc(sizeof(sp_Time), NULL, NULL);
+  *p = v;
+  return p;
+}
+sp_Time *sp_time_dup(const sp_Time *t) { return sp_time_ref(*t); }
+sp_Time *sp_time_utc_bang(sp_Time *t) { SP_GC_ROOT(t); sp_Time v = sp_timev_utc(*t); *t = v; return t; }
+sp_Time *sp_time_localtime_bang(sp_Time *t) { SP_GC_ROOT(t); sp_Time v = sp_timev_localtime(*t); *t = v; return t; }
+sp_Time *sp_time_getlocal_off_bang(sp_Time *t, int64_t off) { SP_GC_ROOT(t); sp_Time v = sp_timev_getlocal_off(*t, off); *t = v; return t; }
+sp_Time *sp_time_in_zone_s_bang(sp_Time *t, const char *z) { SP_GC_ROOT(t); SP_GC_ROOT_STR(z); sp_Time v = sp_timev_in_zone_s(*t, z); *t = v; return t; }
+sp_Time *sp_time_now(void) { return sp_time_ref(sp_timev_now()); }
+sp_Time *sp_time_at_int(int64_t sec) { return sp_time_ref(sp_timev_at_int(sec)); }
+sp_Time *sp_time_norm(const sp_Time *t) { return sp_time_ref(sp_timev_norm(*t)); }
+sp_Time *sp_time_add_nsec(const sp_Time *t, int64_t ns) { return sp_time_ref(sp_timev_add_nsec(*t, ns)); }
+sp_Time *sp_time_in_zone_i(const sp_Time *t, int64_t off) { return sp_time_ref(sp_timev_in_zone_i(*t, off)); }
+sp_Time *sp_time_in_zone_s(const sp_Time *t, const char *z) { return sp_time_ref(sp_timev_in_zone_s(*t, z)); }
+sp_Time *sp_time_at_float(double epoch) { return sp_time_ref(sp_timev_at_float(epoch)); }
+sp_Time *sp_time_at_div(int64_t num, int64_t den) { return sp_time_ref(sp_timev_at_div(num, den)); }
+sp_Time *sp_time_parse(const char *s) { return sp_time_ref(sp_timev_parse(s)); }
+sp_Time *sp_time_s_httpdate(const char *s) { return sp_time_ref(sp_timev_s_httpdate(s)); }
+sp_Time *sp_time_s_rfc2822(const char *s) { return sp_time_ref(sp_timev_s_rfc2822(s)); }
+sp_Time *sp_time_s_xmlschema(const char *s) { return sp_time_ref(sp_timev_s_xmlschema(s)); }
+sp_Time *sp_time_s_parse(const char *s) { return sp_time_ref(sp_timev_s_parse(s)); }
+sp_Time *sp_time_new(int64_t y, int64_t mo, int64_t d, int64_t h, int64_t mi, int64_t s) { return sp_time_ref(sp_timev_new(y, mo, d, h, mi, s)); }
+sp_Time *sp_time_new_utc(int64_t y, int64_t mo, int64_t d, int64_t h, int64_t mi, int64_t s) { return sp_time_ref(sp_timev_new_utc(y, mo, d, h, mi, s)); }
+sp_Time *sp_time_new_off(int64_t y, int64_t mo, int64_t d, int64_t h, int64_t mi, int64_t s, int64_t off) { return sp_time_ref(sp_timev_new_off(y, mo, d, h, mi, s, off)); }
+sp_Time *sp_time_with_usec(const sp_Time *t, int64_t usec) { return sp_time_ref(sp_timev_with_usec(*t, usec)); }
+sp_Time *sp_time_with_usec_f(const sp_Time *t, double usec) { return sp_time_ref(sp_timev_with_usec_f(*t, usec)); }
+sp_Time *sp_time_utc(const sp_Time *t) { return sp_time_ref(sp_timev_utc(*t)); }
+sp_Time *sp_time_localtime(const sp_Time *t) { return sp_time_ref(sp_timev_localtime(*t)); }
+void sp_time_vtm(const sp_Time *t, struct tm *bd, int32_t *off, char *zbuf) { sp_timev_vtm(*t, bd, off, zbuf); }
+int64_t sp_time_year(const sp_Time *t) { return sp_timev_year(*t); }
+int64_t sp_time_mon(const sp_Time *t) { return sp_timev_mon(*t); }
+int64_t sp_time_mday(const sp_Time *t) { return sp_timev_mday(*t); }
+int64_t sp_time_hour(const sp_Time *t) { return sp_timev_hour(*t); }
+int64_t sp_time_min(const sp_Time *t) { return sp_timev_min(*t); }
+int64_t sp_time_sec(const sp_Time *t) { return sp_timev_sec(*t); }
+int64_t sp_time_wday(const sp_Time *t) { return sp_timev_wday(*t); }
+int64_t sp_time_yday(const sp_Time *t) { return sp_timev_yday(*t); }
+int64_t sp_time_isdst(const sp_Time *t) { return sp_timev_isdst(*t); }
+int64_t sp_time_utc_offset(const sp_Time *t) { return sp_timev_utc_offset(*t); }
+sp_Time *sp_time_round_to(const sp_Time *t, int64_t ndigits, int mode) { return sp_time_ref(sp_timev_round_to(*t, ndigits, mode)); }
+sp_Time *sp_time_add(const sp_Time *t, double secs) { return sp_time_ref(sp_timev_add(*t, secs)); }
+int sp_time_cmp(const sp_Time *a, const sp_Time *b) { return sp_timev_cmp(*a, *b); }
+int64_t sp_time_hash(const sp_Time *t) { return sp_timev_hash(*t); }
+sp_Time *sp_time_add_f(const sp_Time *t, double secs) { return sp_time_ref(sp_timev_add_f(*t, secs)); }
+sp_Time *sp_time_add_i(const sp_Time *t, int64_t secs) { return sp_time_ref(sp_timev_add_i(*t, secs)); }
+sp_Time *sp_time_sub_i(const sp_Time *t, int64_t secs) { return sp_time_ref(sp_timev_sub_i(*t, secs)); }
+double sp_time_sub_t(const sp_Time *a, const sp_Time *b) { return sp_timev_sub_t(*a, *b); }
+const char *sp_time_strftime(const sp_Time *t, const char *fmt) { return sp_timev_strftime(*t, fmt); }
+const char *sp_time_iso8601(const sp_Time *t) { return sp_timev_iso8601(*t); }
+const char *sp_time_httpdate(const sp_Time *t) { return sp_timev_httpdate(*t); }
+const char *sp_time_rfc2822(const sp_Time *t) { return sp_timev_rfc2822(*t); }
+const char *sp_time_iso8601_frac(const sp_Time *t, int64_t digits) { return sp_timev_iso8601_frac(*t, digits); }
+sp_Time *sp_time_getlocal_off(const sp_Time *t, int64_t off) { return sp_time_ref(sp_timev_getlocal_off(*t, off)); }
+const char *sp_time_zone(const sp_Time *t) { return sp_timev_zone(*t); }
+const char *sp_time_inspect_v(const sp_Time *t) { return sp_timev_inspect_v(*t); }
+const char *sp_time_to_s_v(const sp_Time *t) { return sp_timev_to_s_v(*t); }
+

@@ -40,8 +40,10 @@ sp_float sp_complex_abs2(sp_Complex a);
 sp_bool sp_complex_eq(sp_Complex a, sp_Complex b);
 
 sp_Rational sp_rational_new(sp_int n, sp_int d);
+sp_Rational sp_rational_new_i64(int64_t n, int64_t d);   /* reduced before it is narrowed to sp_int: Time#to_r on a 32-bit sp_int */
 sp_Rational sp_str_to_r(const char *s);
 sp_Rational sp_str_to_r_strict(const char *s);   /* Kernel#Rational(String) */
+sp_Rational sp_str_to_r_strict_ex(const char *s, int *ovf);
 /* Kernel's `exception: false`: while set, an unparseable string sets
    sp_convert_failed instead of raising (defined in lib/sp_cold.c). */
 extern sp_bool sp_convert_soft;
@@ -53,12 +55,15 @@ sp_Rational sp_rational_div(sp_Rational a, sp_Rational b);
 sp_Rational sp_rational_neg(sp_Rational a);
 sp_Rational sp_rational_abs(sp_Rational a);
 sp_Rational sp_rational_pow(sp_Rational a, sp_int e);
+int sp_rational_op_ck(int op, sp_Rational a, sp_Rational b, sp_Rational *out);
 sp_int sp_rational_round_i(sp_Rational a);              /* Rational#round (no digits) */
 sp_int sp_rational_round_i_even(sp_Rational a);         /* Rational#round(half: :even) */
 sp_int sp_rational_round_i_down(sp_Rational a);         /* Rational#round(half: :down) */
 sp_int sp_rational_idiv(sp_Rational a, sp_Rational b);  /* Rational#div (floor) */
 sp_int sp_rational_floor_i(sp_Rational a);              /* Rational#floor (no digits) */
 sp_int sp_rational_ceil_i(sp_Rational a);               /* Rational#ceil (no digits) */
+sp_int sp_rational_round_i_mode(sp_Rational a, int md);    /* 0 even / 1 up / 2 down */
+sp_Rational sp_rational_round_prec_mode(sp_Rational a, sp_int nd, int md);
 sp_Rational sp_rational_round_prec(sp_Rational a, sp_int nd);
 sp_Rational sp_rational_truncate_prec(sp_Rational a, sp_int nd);
 sp_Rational sp_rational_mod(sp_Rational a, sp_Rational b);   /* Rational#% (floor) */
