@@ -319,7 +319,7 @@ PWM Audio で min 1038 us、max 1043 us、約 78% で、MIDI のノートオン�
    "spms1_midi_chart.md" の Version と Date (MIDI の仕様が変わらなくても毎回)
 4. 負荷を見積もり (`sh sim_load/estimate.sh`、ノートありと `--gate 0`、`--modules`)、「処理負荷の見積もり」の表を置き換えます
    デフォルトのパッチか番号付けが変わったときは、"patches/Init-spms1_type2.json" をエディタから保存し直します
-   (Init のあと Save JSON)
+   (Init のあと Patch パネルの Save)
 5. "type-2: Version X.Y.Z" としてコミットします
 6. develop でワークフロー (上記) を "commit_package" 付きで実行し、UF2 ファイルと SPMS-1 Web を更新します
 7. プルリクエスト "type-2 vX.Y.Z" で develop を main にマージします

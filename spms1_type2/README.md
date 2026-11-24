@@ -132,7 +132,7 @@ editor's Controls tab and the nodes of its Patch tab. Open "spms1_editor.html" (
    [Examples](./spms1_patching.md#examples) of Patching give ideas, each with what to wire
 
 Undo takes a change back, Reset Values puts the values back and keeps the wiring, and Init
-puts the default patch (Init) back. Keep a patch with Save JSON, or in the synth with Save to Device, as one of
+puts the default patch (Init) back. Keep a patch with Save (a JSON file), or in the synth with Save to Device, as one of
 its programs #0-7, which Program Change #0-7 puts back.
 
 
@@ -171,7 +171,7 @@ its programs #0-7, which Program Change #0-7 puts back.
     - Every value it sets or shows runs from 4 to 124, the range the synth uses; one outside it,
       from MIDI In or a patch file, is drawn in to the nearer end, which reads the same
     - Its Reset Values sets each CC value and each parameter's value with no CC back to what the patch had as it was
-      loaded or saved last (Load JSON, Recall, a Program Change followed, Store, Save to Device, Init), or with Shift to
+      loaded or saved last (Load, Recall, a Program Change followed, Store, Save to Device, Init), or with Shift to
       those of Init (the default patch), and sends them, as every change is sent; the wiring is kept
 - Built-in software keyboard for note input and testing
     - Beside the keys, a pitch bend wheel, from -8192 to +8191, springs back to the center when let go,
@@ -188,11 +188,11 @@ its programs #0-7, which Program Change #0-7 puts back.
     - Shows the keyboard's signals, the Mod Wheel and Breath on a Controller node, and General 1 and 2,
       whose values are a part of the patch, on a General node of their own (a General panel on the
       Controls tab), though the synth has no such module
-    - Saves and loads patches as JSON ("patches/Init-spms1_type2.json" is Init, the default patch, as Save JSON saves it)
+    - Saves and loads patches as JSON ("patches/Init-spms1_type2.json" is Init, the default patch, as the editor's Save saves it)
     - Keeps 8 patches in the browser, the user presets #0-7 (Presets panel), as PRA32-U2 Editor does: Store (to Browser)
       keeps the patch shown with a name (up to 32 ASCII characters, which the patch takes), and Recall (from
       Browser) puts one back (an empty one as Init); Clear empties one; Undo Store brings back the one the last Store,
-      Clear (or Save to Device) replaced, in the browser only (again to redo it); Export All and Import All save them to a file and put them back
+      Clear (or Save to Device) replaced, in the browser only (again to redo it); Save All and Load All save them to a JSON file and put them back
     - A patch saved as JSON or copied keeps a CC that only the Mod Wheel or Breath has at what it
       powers up at, 0.0, as Save to Device does: they are played rather than set; Send Patch sends
       where they are

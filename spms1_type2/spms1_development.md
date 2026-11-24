@@ -343,7 +343,7 @@ Basically, a release goes as follows (the dates in JST):
 4. Estimate the load (`sh sim_load/estimate.sh`, with a note held and with `--gate 0`, and
    `--modules`), and replace the tables under Load Estimate with them
    If the default patch or the numbering changed, save "patches/Init-spms1_type2.json" again from the editor
-   (Init, then Save JSON)
+   (Init, then Save in the Patch panel)
 5. Commit as "type-2: Version X.Y.Z"
 6. Run the workflow (above) on develop with "commit_package", for the UF2 files and SPMS-1 Web
 7. Merge develop into main by a pull request, "type-2 vX.Y.Z"

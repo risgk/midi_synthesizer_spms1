@@ -130,7 +130,7 @@ MIDI Synthesizer SPMS-1 (type-2) v0.8.0
    [例](./spms1_patching.ja.md#例)に、配線の仕方付きのアイデアがあります
 
 Undo で変更を戻せます。Reset Values は値を戻して配線は保ち、Init はデフォルトのパッチに戻します。
-パッチは Save JSON で、またはシンセ本体に Save to Device でプログラム #0-7 として保存でき、プログラム・チェンジ #0-7 で呼び出せます。
+パッチは Save (JSON ファイル) で、またはシンセ本体に Save to Device でプログラム #0-7 として保存でき、プログラム・チェンジ #0-7 で呼び出せます。
 
 
 ### Web エディタ
@@ -165,7 +165,7 @@ Undo で変更を戻せます。Reset Values は値を戻して配線は保ち�
       文字を打つと絞り込めます
     - 設定・表示する値はどれも、シンセが使う範囲の 4〜124 です。MIDI In やパッチファイルから範囲外の値が届いたら、
       近い方の端に寄せます。シンセにとっては同じ値です
-    - Reset Values は、各 CC の値と、CC のないパラメータの値を、パッチを最後に読み込んだか保存したとき (Load JSON、Recall、
+    - Reset Values は、各 CC の値と、CC のないパラメータの値を、パッチを最後に読み込んだか保存したとき (Load、Recall、
       追従したプログラム・チェンジ、Store、Save to Device、Init) の値に戻して送ります。Shift を押しながらなら、Init (デフォルトの
       パッチ) の値に戻します。どの変更もすぐ送るのと同じです。結線はそのままです
 - 音を出して試すためのソフトウェア鍵盤を内蔵しています
@@ -181,11 +181,11 @@ Undo で変更を戻せます。Reset Values は値を戻して配線は保ち�
       つながります
     - 鍵盤のシグナルと Mod Wheel、Breath は Controller ノードに、値がパッチの一部になる General 1・2 は、シンセにはない
       モジュールですが、便宜上 General ノード（Controls タブでは General パネル）に分けて表示します
-    - パッチを JSON で保存・読み込みします ("patches/Init-spms1_type2.json" は、Init (デフォルトのパッチ) を Save JSON で保存したものです)
+    - パッチを JSON で保存・読み込みします ("patches/Init-spms1_type2.json" は、Init (デフォルトのパッチ) をエディタの Save で保存したものです)
     - PRA32-U2 Editor と同じく、ブラウザーにパッチを 8 つ (ユーザー・プリセット #0-7、Presets パネル) 保存できます。
       Store (to Browser) で名前 (ASCII 32 文字まで、パッチの名前になります) を付けて保存し、Recall (from Browser)
       で読み込みます (空のものは Init と同じ)。Clear で 1 つを空にできます。Undo Store で、最後の Store、Clear (または Save to Device) で上書きしたものを
-      ブラウザー側だけ戻せます (もう一度でやり直し)。Export All と Import All で、まとめてファイルに保存・読み込みできます
+      ブラウザー側だけ戻せます (もう一度でやり直し)。Save All と Load All で、まとめて JSON ファイルに保存・読み込みできます
     - JSON で保存したりコピーしたりするパッチでは、Save to Device と同じく、Mod Wheel か Breath だけに割り当てた CC を起動時の値 (0.0) にします。
       どちらも設定するものではなく演奏で動かすものだからです。Send Patch は今の位置を送ります
     - パッチを MIDI バイト列 (NRPN か SysEx) または NRPN リストとしてコピーするか、Web MIDI で送信します
