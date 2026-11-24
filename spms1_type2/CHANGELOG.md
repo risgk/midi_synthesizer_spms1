@@ -4,6 +4,29 @@ MIDI Synthesizer SPMS-1 (type-2) Changelog
 The main changes of each version, newest first, gathered before each release. The format may be
 revised.
 
+- v0.8.0 (2026-11-24):
+    - **Programs #0-7**: Save keeps the patch as the program that NRPN 117/4 (Program) selects, each in a 4 KB sector of
+      the flash of its own, with its name (SysEx command 02, 32 bytes of ASCII); **Program Change #0-7** puts a program
+      back, fading the output out and in (about 20 ms of silence); program #0 is loaded at power-on
+        - Wait about 30 ms after a Program Change before CCs or NRPN, which the program replaces until it is put back
+        - The patch saved before (one) is read as program #0 until #0 is saved; Save and Load act on the program that
+          NRPN 117/4 gives before each (#0 without it, as before); there is no program the synth is "on"
+        - Debug Print: the name of the patch, and those of the programs #0-7, one a report in turn
+        - **Clear** (NRPN 117/5): the program that NRPN 117/4 gives not kept
+        - The EEPROM's 4 KB in RAM no longer taken (the programs read where they are in the flash)
+    - Editor: Save to Device with the program #0-7 to save as, and the name; Program Change sends it to the synth; the
+      name of the patch sent (as SysEx) with the whole patch and whenever it changes; Clear, on the synth and of the
+      user presets
+    - Editor: **User presets #0-7** in the browser (Presets panel), as PRA32-U2 Editor: Store (to Browser) and Recall (from
+      Browser); Save to Device writes the user preset of the same number too, and a Program Change (sent, or at
+      MIDI In) shows it as the synth has it, to edit on from there (otherwise Send Patch is marked); Undo Store, Import
+      All and Export All of them
+    - Editor: **Reset Values** (Initialize Values before) puts the values back to the patch's as it was loaded or saved
+      last, or with Shift to those of Init (the default patch)
+    - "patches/Init-spms1_type2.json": the default patch, Init, as the editor's Save JSON saves it
+    - sim_load: `--program-load` counts putting a program back (about 71 us, once, while silent); the tests of the
+      programs in CI (sim_render compared with CRuby, and SPMS-1 Web)
+    - The same load as v0.7.3 in the estimate (1245 us a buffer of 1333 us, the default patch with a note held)
 - v0.7.3 (2026-11-23):
     - Built with Arduino-Pico 6.4.0 (6.3.0 before); the same load and RAM in the estimate
     - Filter: The output clip in fewer steps, the same curve (the renders the same), a little lighter

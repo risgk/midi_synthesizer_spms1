@@ -50,6 +50,13 @@ uint8_t  g_midi_nrpn_selected[16]       = {0};  // 0 until CC 99 or 98 arrives, 
 // last write wins, wherever its slot is. 0 is a slot never written. The count passes the int32 the
 // synth reads it as after 2 billion writes, which no patch editing reaches.
 #define SPMS1_RUN_ORDER_SIZE (32)
+// The program that the next Save or Load acts on, as NRPN 117/4 gives it before them, #0 at
+// power-up and again after each (there is no program the synth is "on": a Program Change only puts
+// one back); and the name of the patch, which a SysEx sets (see below) and a Save keeps with it (see the
+// patch image): printable ASCII, 0 after it, all 0 for none.
+#define SPMS1_PATCH_NAME_SIZE (32)
+uint8_t  g_midi_program_target[16] = {0};
+uint8_t  g_spms1_patch_name[16][SPMS1_PATCH_NAME_SIZE] = {{0}};
 uint32_t g_midi_run_order_writes[16]                       = {0};
 uint32_t g_midi_run_order_written[16][SPMS1_RUN_ORDER_SIZE] = {{0}};
 
@@ -57,13 +64,18 @@ uint32_t g_midi_run_order_written[16][SPMS1_RUN_ORDER_SIZE] = {{0}};
 // so they are not kept in the NRPN table and a patch does not include them. Entry 0, Mute, mutes
 // the output at 64-127 and unmutes it at 0-63, for while a patch is sent; entry 1, Reset, puts the
 // patch back to the default at 64-127, as at power-up (spms1_reset_patch); entry 2, Save, keeps
-// the patch in the flash at 64-127, and entry 3, Load, puts the patch kept back, both only while
-// Mute is on, so that no stray message saves or loads (see the patch image below).
-#define SPMS1_NRPN_SYSTEM_MSB   (SPMS1_NRPN_MSB_BASE + 5)
-#define SPMS1_NRPN_SYSTEM_MUTE  (0)
-#define SPMS1_NRPN_SYSTEM_RESET (1)
-#define SPMS1_NRPN_SYSTEM_SAVE  (2)
-#define SPMS1_NRPN_SYSTEM_LOAD  (3)
+// the patch in the flash at 64-127, as the program that entry 4, Program, gives, and entry 3,
+// Load, puts that program back, both only while Mute is on, so that no stray message saves or
+// loads (see the patch image below); entry 4, Program, gives the program #0-7 that the next Save
+// or Load acts on (0-7; 8-127 are ignored), #0 again after it; entry 5, Clear, makes that program
+// not kept at 64-127, only while Mute is on, as Save.
+#define SPMS1_NRPN_SYSTEM_MSB     (SPMS1_NRPN_MSB_BASE + 5)
+#define SPMS1_NRPN_SYSTEM_MUTE    (0)
+#define SPMS1_NRPN_SYSTEM_RESET   (1)
+#define SPMS1_NRPN_SYSTEM_SAVE    (2)
+#define SPMS1_NRPN_SYSTEM_LOAD    (3)
+#define SPMS1_NRPN_SYSTEM_PROGRAM (4)
+#define SPMS1_NRPN_SYSTEM_CLEAR   (5)
 // Mute, and how many times Mute on has arrived, which the synth tells apart by the count changing,
 // so that a Mute on is never missed, however soon Mute off follows it.
 uint8_t  g_midi_mute[16]            = {0};
@@ -178,7 +190,7 @@ SPMS1_RAM_FUNC int32_t get_midi_mute_count(uint8_t midi_ch) {
 
 // Puts the NRPN table, the times the run order was written and the CC values back as they are at
 // power-up: every entry and CC to 0, and then the default patch and the values its CCs power up at.
-// The notes, Pitch Bend, the NRPN selection and Mute are kept. The synth may read the tables while
+// The name to none. The notes, Pitch Bend, the NRPN selection, Mute and the program are kept. The synth may read the tables while
 // they are rewritten, so a reset is sent between Mute and unmute to be heard as silence.
 void spms1_reset_patch(uint8_t midi_ch) {
   if (midi_ch >= 16) {
@@ -195,6 +207,9 @@ void spms1_reset_patch(uint8_t midi_ch) {
   for (int32_t i = 0; i < 128; ++i) {
     g_midi_cc_values[midi_ch][i] = 0;
   }
+  for (int32_t i = 0; i < SPMS1_PATCH_NAME_SIZE; ++i) {
+    g_spms1_patch_name[midi_ch][i] = 0;
+  }
 
   for (uint32_t i = 0; i < sizeof(g_spms1_default_nrpn) / sizeof(g_spms1_default_nrpn[0]); ++i) {
     set_midi_nrpn_value(midi_ch, g_spms1_default_nrpn[i][0], (uint8_t)g_spms1_default_nrpn[i][1]);
@@ -204,10 +219,12 @@ void spms1_reset_patch(uint8_t midi_ch) {
   }
 }
 
-// ---- The patch kept in the flash ----
+// ---- The programs kept in the flash ----
 //
-// One patch, the last saved, kept by the host in a 4 KB sector as the patch image, and loaded at
-// power-up over the default patch. The image, little-endian:
+// Eight patches, the programs #0-7, each kept by the host in a 4 KB sector of its own as a patch
+// image. Program #0 is loaded at power-up over the default patch, and a Program Change #0-7 puts
+// another back while the synth fades the output out and in (load_program_patch). The image,
+// little-endian:
 //   0-3    "SPM2", the magic
 //   4      the version of the layout, 1
 //   5      how many NRPN categories follow, 5 (0-4)
@@ -219,36 +236,51 @@ void spms1_reset_patch(uint8_t midi_ch) {
 //   32-    the payload: the NRPN table, 128 entries a category; the 128 CC values, those of the
 //          CCs the controls have, but a performance control's (the Mod Wheel's and Breath's), and 0 for the
 //          rest; for each of the 32 run order slots, when it was written as a rank (1 the first, 0
-//          never); and 32 bytes for a name, reserved, 0
+//          never); and the name, 32 bytes, printable ASCII, 0 after it (see the SysEx below)
 // The rest of the 4 KB is 0, room for a later layout. An image is loaded only by a sketch with the
 // same layout and the same SPMS1_PATCH_SPEC_HASH, which a sketch numbered otherwise does not have:
 // its numbers would read the patch as another. Such a sketch starts with the default patch, and
-// the image stays in the flash until the next Save.
+// the image stays in the flash until the next Save of that program.
 #define SPMS1_PATCH_IMAGE_SIZE       (4096)
 #define SPMS1_PATCH_IMAGE_VERSION    (1)
 #define SPMS1_PATCH_IMAGE_HEADER     (32)
 #define SPMS1_PATCH_IMAGE_CATEGORIES (SPMS1_NRPN_SIZE / 128)
-#define SPMS1_PATCH_IMAGE_TAIL       (128 + SPMS1_RUN_ORDER_SIZE + 32)
+#define SPMS1_PATCH_IMAGE_TAIL       (128 + SPMS1_RUN_ORDER_SIZE + SPMS1_PATCH_NAME_SIZE)
+#define SPMS1_PROGRAMS               (8)
 
-// The image of the patch to save, made as Save arrives, and how many times Save has arrived,
-// which the synth tells apart by the count changing: it writes the image when the output is
-// silent, through spms1_storage_write (store_patch_image), as writing the flash stops both cores.
+// The image of the patch to save, made as Save arrives, with its program, and how many times Save
+// has arrived, which the synth tells apart by the count changing: it writes the image when the
+// output is silent, through spms1_storage_write (store_patch_image), as writing the flash stops
+// both cores.
 uint8_t  g_spms1_patch_image[SPMS1_PATCH_IMAGE_SIZE] = {0};
+uint8_t  g_spms1_patch_image_program = 0;
 uint32_t g_midi_save_count[16] = {0};
 
-// The host keeps the image: the sketch in its EEPROM (the flash), the simulators in RAM, below,
-// unless the host says it has its own. spms1_storage_data is the image kept, read where it is, or
-// NULL while there is none to read.
-const uint8_t* spms1_storage_data(void);
-void spms1_storage_write(const uint8_t* image);
+// A Program Change to a program kept: which, and how many have arrived, which the synth tells
+// apart by the count changing: it fades the output out, puts the program back with the output
+// silent (load_program_patch), and fades it in again. A later one before that wins.
+uint8_t  g_midi_program_pending[16] = {0};
+uint32_t g_midi_program_count[16]   = {0};
+
+// The host keeps the images: the sketch in sectors of the flash of its own, the simulators in RAM,
+// below, unless the host says it has its own. spms1_storage_data is the image of a program kept,
+// read where it is, or NULL while there is none to read.
+const uint8_t* spms1_storage_data(int32_t program);
+void spms1_storage_write(int32_t program, const uint8_t* image);
 #if !defined(SPMS1_STORAGE_PROVIDED)
-static uint8_t s_spms1_storage[SPMS1_PATCH_IMAGE_SIZE] = {0};
-const uint8_t* spms1_storage_data(void) {
-  return s_spms1_storage;
+static uint8_t s_spms1_storage[SPMS1_PROGRAMS][SPMS1_PATCH_IMAGE_SIZE] = {{0}};
+const uint8_t* spms1_storage_data(int32_t program) {
+  if (program < 0 || program >= SPMS1_PROGRAMS) {
+    return 0;
+  }
+  return s_spms1_storage[program];
 }
-void spms1_storage_write(const uint8_t* image) {
+void spms1_storage_write(int32_t program, const uint8_t* image) {
+  if (program < 0 || program >= SPMS1_PROGRAMS) {
+    return;
+  }
   for (int32_t i = 0; i < SPMS1_PATCH_IMAGE_SIZE; ++i) {
-    s_spms1_storage[i] = image[i];
+    s_spms1_storage[program][i] = image[i];
   }
 }
 #endif  // !defined(SPMS1_STORAGE_PROVIDED)
@@ -302,7 +334,9 @@ void spms1_make_patch_image(uint8_t midi_ch) {
     }
     *p++ = rank;
   }
-  p += 32;  // the name, reserved
+  for (int32_t i = 0; i < SPMS1_PATCH_NAME_SIZE; ++i) {
+    *p++ = g_spms1_patch_name[midi_ch][i];
+  }
   uint32_t payload = (uint32_t)(p - (image + SPMS1_PATCH_IMAGE_HEADER));
   image[0] = 'S';
   image[1] = 'P';
@@ -315,19 +349,25 @@ void spms1_make_patch_image(uint8_t midi_ch) {
   spms1_put_u32(image + 16, SPMS1_PATCH_SPEC_HASH);
 }
 
-// Puts the patch in an image on a channel, over the default patch, and says whether the image was
-// one this sketch can read: a patch never saved, an image damaged, or one saved by a sketch
-// numbered otherwise, leaves the patch as it was.
-int32_t spms1_apply_patch_image(uint8_t midi_ch, const uint8_t* image) {
+// Whether an image is one this sketch can read: not a patch never saved, an image damaged, or one
+// saved by a sketch numbered otherwise.
+int32_t spms1_patch_image_valid(const uint8_t* image) {
   uint32_t payload = SPMS1_PATCH_IMAGE_CATEGORIES * 128 + SPMS1_PATCH_IMAGE_TAIL;
-  if (midi_ch >= 16 || image[0] != 'S' || image[1] != 'P' || image[2] != 'M' || image[3] != '2' ||
-      image[4] != SPMS1_PATCH_IMAGE_VERSION || image[5] != SPMS1_PATCH_IMAGE_CATEGORIES ||
-      spms1_get_u32(image + 8) != payload || spms1_get_u32(image + 16) != SPMS1_PATCH_SPEC_HASH ||
-      spms1_get_u32(image + 12) != spms1_fnv1a(image + SPMS1_PATCH_IMAGE_HEADER, payload)) {
+  return image && image[0] == 'S' && image[1] == 'P' && image[2] == 'M' && image[3] == '2' &&
+         image[4] == SPMS1_PATCH_IMAGE_VERSION && image[5] == SPMS1_PATCH_IMAGE_CATEGORIES &&
+         spms1_get_u32(image + 8) == payload && spms1_get_u32(image + 16) == SPMS1_PATCH_SPEC_HASH &&
+         spms1_get_u32(image + 12) == spms1_fnv1a(image + SPMS1_PATCH_IMAGE_HEADER, payload);
+}
+
+// Puts the patch in an image on a channel, over the default patch, and says whether the image was
+// one this sketch can read: one that is not leaves the patch as it was.
+int32_t spms1_apply_patch_image(uint8_t midi_ch, const uint8_t* image) {
+  if (midi_ch >= 16 || !spms1_patch_image_valid(image)) {
     return 0;
   }
 
-  spms1_reset_patch(midi_ch);
+  // The whole table, the CC values and the name come from the image, so the default patch is not
+  // written first: the result is the same as over it, at a little more than half the cost.
   const uint8_t* nrpn = image + SPMS1_PATCH_IMAGE_HEADER;
   const uint8_t* tail = nrpn + SPMS1_NRPN_SIZE;
   // The table as it is, and the CC values; the run order written again by rank, below.
@@ -345,29 +385,71 @@ int32_t spms1_apply_patch_image(uint8_t midi_ch, const uint8_t* image) {
   for (int32_t slot = 0; slot < SPMS1_RUN_ORDER_SIZE; ++slot) {
     g_midi_run_order_written[midi_ch][slot] = 0;
   }
-  for (int32_t rank = 1; rank <= SPMS1_RUN_ORDER_SIZE; ++rank) {
-    for (int32_t slot = 0; slot < SPMS1_RUN_ORDER_SIZE; ++slot) {
-      if (ranks[slot] == rank) {
-        set_midi_nrpn_value(midi_ch, slot, nrpn[slot]);
-      }
+  // The slot of each rank first, in one pass (a Save gives each slot written a rank of its own;
+  // of two slots with the same rank, the later is written), then the slots in the order of rank.
+  int8_t slot_of_rank[SPMS1_RUN_ORDER_SIZE + 1];
+  for (int32_t rank = 0; rank <= SPMS1_RUN_ORDER_SIZE; ++rank) {
+    slot_of_rank[rank] = -1;
+  }
+  for (int32_t slot = 0; slot < SPMS1_RUN_ORDER_SIZE; ++slot) {
+    if (ranks[slot] >= 1 && ranks[slot] <= SPMS1_RUN_ORDER_SIZE) {
+      slot_of_rank[ranks[slot]] = (int8_t)slot;
     }
+  }
+  for (int32_t rank = 1; rank <= SPMS1_RUN_ORDER_SIZE; ++rank) {
+    if (slot_of_rank[rank] >= 0) {
+      set_midi_nrpn_value(midi_ch, slot_of_rank[rank], nrpn[slot_of_rank[rank]]);
+    }
+  }
+  const uint8_t* name = ranks + SPMS1_RUN_ORDER_SIZE;
+  for (int32_t i = 0; i < SPMS1_PATCH_NAME_SIZE; ++i) {
+    g_spms1_patch_name[midi_ch][i] = name[i];
   }
   return 1;
 }
 
-// Load, and power-up: the patch kept, if one is.
+// Load, and power-up: the program given (#0 at power-up), if it is kept.
 void load_saved_patch(uint8_t midi_ch) {
-  const uint8_t* image = spms1_storage_data();
-  if (image) {
-    spms1_apply_patch_image(midi_ch, image);
+  if (midi_ch >= 16) {
+    return;
+  }
+  spms1_apply_patch_image(midi_ch, spms1_storage_data(g_midi_program_target[midi_ch]));
+}
+
+// The synth, with the output silent after a Save: the image made then goes to the flash, as the
+// program given when the Save arrived. The host leaves the flash alone if it holds the same
+// image already.
+void store_patch_image(uint8_t midi_ch) {
+  (void)midi_ch;
+  spms1_storage_write(g_spms1_patch_image_program, g_spms1_patch_image);
+}
+
+// A Program Change #0-7 to a program kept has the synth put it back (see g_midi_program_count);
+// one to a program not kept changes nothing, and #8-127 are ignored.
+void spms1_handle_program_change(uint8_t midi_ch, uint8_t program) {
+  if (midi_ch >= 16 || program >= SPMS1_PROGRAMS) {
+    return;
+  }
+  if (spms1_patch_image_valid(spms1_storage_data(program))) {
+    g_midi_program_pending[midi_ch] = program;
+    ++g_midi_program_count[midi_ch];
   }
 }
 
-// The synth, with the output silent after a Save: the image made then goes to the flash. The
-// host leaves the flash alone if it holds the same image already.
-void store_patch_image(uint8_t midi_ch) {
-  (void)midi_ch;
-  spms1_storage_write(g_spms1_patch_image);
+SPMS1_RAM_FUNC int32_t get_midi_program_count(uint8_t midi_ch) {
+  if (midi_ch >= 16) {
+    return 0;
+  }
+
+  return (int32_t)g_midi_program_count[midi_ch];
+}
+
+// The synth, with the output silent after a Program Change: the program it asked for, put back.
+void load_program_patch(uint8_t midi_ch) {
+  if (midi_ch >= 16) {
+    return;
+  }
+  spms1_apply_patch_image(midi_ch, spms1_storage_data(g_midi_program_pending[midi_ch]));
 }
 
 SPMS1_RAM_FUNC int32_t get_midi_save_count(uint8_t midi_ch) {
@@ -389,9 +471,22 @@ void handle_midi_nrpn_system(uint8_t midi_ch, uint8_t lsb, uint8_t value) {
     spms1_reset_patch(midi_ch);
   } else if (lsb == SPMS1_NRPN_SYSTEM_SAVE && value >= 64 && g_midi_mute[midi_ch]) {
     spms1_make_patch_image(midi_ch);
+    g_spms1_patch_image_program = g_midi_program_target[midi_ch];
+    g_midi_program_target[midi_ch] = 0;
     ++g_midi_save_count[midi_ch];
   } else if (lsb == SPMS1_NRPN_SYSTEM_LOAD && value >= 64 && g_midi_mute[midi_ch]) {
     load_saved_patch(midi_ch);
+    g_midi_program_target[midi_ch] = 0;
+  } else if (lsb == SPMS1_NRPN_SYSTEM_PROGRAM && value < SPMS1_PROGRAMS) {
+    g_midi_program_target[midi_ch] = value;
+  } else if (lsb == SPMS1_NRPN_SYSTEM_CLEAR && value >= 64 && g_midi_mute[midi_ch]) {
+    // An image of all 0, which no sketch reads, written as a Save writes one.
+    for (int32_t i = 0; i < SPMS1_PATCH_IMAGE_SIZE; ++i) {
+      g_spms1_patch_image[i] = 0;
+    }
+    g_spms1_patch_image_program = g_midi_program_target[midi_ch];
+    g_midi_program_target[midi_ch] = 0;
+    ++g_midi_save_count[midi_ch];
   }
 }
 
@@ -439,11 +534,38 @@ void handle_midi_nrpn_cc(uint8_t midi_ch, uint8_t number, uint8_t value) {
 // message is taken whole or not at all: one with another hash, for a sketch numbered otherwise,
 // one that runs past its category, and one cut short are ignored. The MIDI library the sketch
 // uses takes a SysEx of 128 bytes at most, F0 and F7 included, so 114 values at most a message.
+// Command 02, the name of the patch: F0 7D 53 31, ch, 02, the hash as above, and the name, 0-32
+// bytes of printable ASCII (20-7E), and F7; it replaces the name, which a Save keeps (none for 0).
 #define SPMS1_SYSEX_HEADER     (13)
+#define SPMS1_SYSEX_NAME_HEADER (11)
 #define SPMS1_SYSEX_SIZE_MAX   (128)
 #define SPMS1_SYSEX_CMD_NRPN   (1)
+#define SPMS1_SYSEX_CMD_NAME   (2)
+
+static void spms1_handle_sysex_name(const uint8_t* data, uint32_t size) {
+  uint8_t midi_ch = data[4];
+  uint32_t hash = (uint32_t)data[6] | ((uint32_t)data[7] << 7) | ((uint32_t)data[8] << 14) |
+                  ((uint32_t)data[9] << 21) | ((uint32_t)data[10] << 28);
+  uint32_t count = size - 1 - SPMS1_SYSEX_NAME_HEADER;
+  if (midi_ch >= 16 || hash != SPMS1_PATCH_SPEC_HASH || count > SPMS1_PATCH_NAME_SIZE) {
+    return;
+  }
+  for (uint32_t i = 0; i < count; ++i) {
+    if (data[SPMS1_SYSEX_NAME_HEADER + i] < 0x20 || data[SPMS1_SYSEX_NAME_HEADER + i] > 0x7E) {
+      return;
+    }
+  }
+  for (uint32_t i = 0; i < SPMS1_PATCH_NAME_SIZE; ++i) {
+    g_spms1_patch_name[midi_ch][i] = (i < count) ? data[SPMS1_SYSEX_NAME_HEADER + i] : 0;
+  }
+}
 
 void spms1_handle_sysex(const uint8_t* data, uint32_t size) {
+  if (size >= SPMS1_SYSEX_NAME_HEADER + 1 && data[0] == 0xF0 && data[size - 1] == 0xF7 &&
+      data[1] == 0x7D && data[2] == 0x53 && data[3] == 0x31 && data[5] == SPMS1_SYSEX_CMD_NAME) {
+    spms1_handle_sysex_name(data, size);
+    return;
+  }
   if (size < SPMS1_SYSEX_HEADER + 1 || data[0] != 0xF0 || data[size - 1] != 0xF7 ||
       data[1] != 0x7D || data[2] != 0x53 || data[3] != 0x31) {
     return;
@@ -561,6 +683,9 @@ static inline void spms1_handle_midi_message(uint8_t status, uint8_t data_1, uin
     break;
   case 0xB0:
     spms1_handle_control_change(midi_ch, data_1, data_2);
+    break;
+  case 0xC0:
+    spms1_handle_program_change(midi_ch, data_1);
     break;
   case 0xE0:
     spms1_handle_pitch_bend(midi_ch, ((((int32_t)data_2) << 7) | data_1) - 8192);

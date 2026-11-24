@@ -21,16 +21,22 @@ module Spms1
     # Mute (NRPN 117/0), as in spms1_midi_state.h.
     @mute = Array.new(16, 0)
     @mute_count = Array.new(16, 0)
-    # Save (NRPN 117/2) and Load (117/3), as in spms1_midi_state.h, with the patch kept in RAM: the
-    # patch made as Save arrives, and the one written when the synth stores it, as [NRPN table, CC
-    # values, run order ranks], or nil.
+    # Save (NRPN 117/2), Load (117/3) and Program (117/4, the program the next Save or Load acts on,
+    # #0 again after it), and Program Change #0-7, as in spms1_midi_state.h, with the programs kept in RAM: the patch made as Save arrives, with its
+    # program, and the ones written when the synth stores them, as [NRPN table, CC values, run
+    # order ranks, name], or nil; and the name of the patch, 32 bytes.
     @save_count = Array.new(16, 0)
+    @program = Array.new(16, 0)
+    @program_pending = Array.new(16, 0)
+    @program_count = Array.new(16, 0)
+    @patch_name = Array.new(16) { Array.new(32, 0) }
+    @patch_image_program = 0
     # The controls whose CCs' values a Save keeps, by entry: all but the performance controls', as
     # g_spms1_saved_cc_entries in spms1_default_patch.h has them.
     @saved_cc_entries = YAML.load_file(File.expand_path('../spms1_patch.yaml', __dir__))
                             .fetch('controls').reject { |c| c['performance'] }.map { |c| c['entry'] }
     @patch_image = nil
-    @stored_image = nil
+    @stored_images = Array.new(8)
 
     # The signal bus SignalBus reads and writes, as spms1_bus.h has it for the C builds.
     @bus_signals = Array.new(512, 0.0)
@@ -72,7 +78,16 @@ module Spms1
       def get_midi_mute(ch) = @mute[ch]
       def get_midi_mute_count(ch) = @mute_count[ch]
       def get_midi_save_count(ch) = @save_count[ch]
-      def store_patch_image(_ch) = (@stored_image = @patch_image)
+      def store_patch_image(_ch) = (@stored_images[@patch_image_program] = @patch_image)
+      def get_midi_program_count(ch) = @program_count[ch]
+      def load_program_patch(ch) = apply_patch_image(ch, @stored_images[@program_pending[ch]])
+
+      def handle_program_change(ch, program)
+        return unless program < 8
+        return unless @stored_images[program]
+        @program_pending[ch] = program
+        @program_count[ch] += 1
+      end
 
       # The patch as spms1_make_patch_image takes it: the CC values of the controls but the
       # performance ones, and each run order slot's time as a rank, 1 the first written, 0 never.
@@ -84,19 +99,23 @@ module Spms1
           number = @nrpn_values[ch][384 + entry]
           cc[number] = @cc_values[ch][number] if number > 0 && number < 128
         end
-        @patch_image = [@nrpn_values[ch].dup, cc, ranks]
+        @patch_image = [@nrpn_values[ch].dup, cc, ranks, @patch_name[ch].dup]
       end
 
+      # Load, and power-up: the program selected, if it is kept.
+      def load_saved_patch(ch) = apply_patch_image(ch, @stored_images[@program[ch]])
+
       # As spms1_apply_patch_image, over the default patch.
-      def load_saved_patch(ch)
-        return unless @stored_image
-        nrpn, cc, ranks = @stored_image
+      def apply_patch_image(ch, image)
+        return unless image
+        nrpn, cc, ranks, name = image
         reset_patch(ch)
         @nrpn_values[ch] = nrpn.dup
         @cc_values[ch] = cc.dup
         @run_order_writes[ch] = 0
         @run_order_written[ch].fill(0)
         (1..32).each { |rank| 32.times { |slot| set_midi_nrpn_value(ch, slot, nrpn[slot]) if ranks[slot] == rank } }
+        @patch_name[ch] = name.dup
       end
 
       # The reset NRPN, as spms1_reset_patch: every entry, the times the run order was written and
@@ -106,6 +125,7 @@ module Spms1
         @run_order_writes[ch] = 0
         @run_order_written[ch].fill(0)
         @cc_values[ch].fill(0)
+        @patch_name[ch].fill(0)
         spms1_write_default_patch(ch)
       end
       def get_bus_signal(slot) = @bus_signals[slot & 511]
@@ -147,6 +167,8 @@ module Spms1
             @cc_values[ch][d1] = d2
             handle_midi_nrpn_cc(ch, d1, d2)
           end
+        when 0xC0
+          handle_program_change(ch, d1)
         when 0xE0
           @pitch_bend[ch] = ((d2 << 7) | d1) - 8192
         end
@@ -191,7 +213,7 @@ module Spms1
         elsif number == 101 || number == 100
           @nrpn_selected[ch] = false
         elsif number == 6 && @nrpn_selected[ch] && @nrpn_msb[ch] == 117
-          # The system entries: Mute (0), Reset (1), Save (2) and Load (3).
+          # The system entries: Mute (0), Reset (1), Save (2), Load (3), Program (4) and Clear (5).
           if @nrpn_lsb[ch] == 0
             @mute[ch] = (value >= 64) ? 1 : 0
             @mute_count[ch] += 1 if value >= 64
@@ -199,9 +221,20 @@ module Spms1
             reset_patch(ch)
           elsif @nrpn_lsb[ch] == 2 && value >= 64 && @mute[ch] != 0
             make_patch_image(ch)
+            @patch_image_program = @program[ch]
+            @program[ch] = 0
             @save_count[ch] += 1
           elsif @nrpn_lsb[ch] == 3 && value >= 64 && @mute[ch] != 0
             load_saved_patch(ch)
+            @program[ch] = 0
+          elsif @nrpn_lsb[ch] == 4 && value < 8
+            @program[ch] = value
+          elsif @nrpn_lsb[ch] == 5 && value >= 64 && @mute[ch] != 0
+            # Clear: the program not kept, written as a Save is.
+            @patch_image = nil
+            @patch_image_program = @program[ch]
+            @program[ch] = 0
+            @save_count[ch] += 1
           end
         elsif number == 6 && @nrpn_selected[ch] && @nrpn_msb[ch] >= 112
           set_midi_nrpn_value(ch, ((@nrpn_msb[ch] - 112) << 7) | @nrpn_lsb[ch], value)
@@ -210,7 +243,16 @@ module Spms1
 
       # A SysEx of NRPN values, as spms1_handle_sysex: F0 7D 53 31, the channel, 01, the spec
       # hash in five bytes, the category, the first entry, the values and F7, whole or not at all.
+      # And the name, command 02: the channel, 02, the hash, and 0-32 bytes of printable ASCII.
       def handle_sysex(data)
+        if data.size >= 12 && data[0] == 0xF0 && data[-1] == 0xF7 && data[1, 3] == [0x7D, 0x53, 0x31] && data[5] == 2
+          ch = data[4]
+          hash = (0...5).sum { |i| data[6 + i] << (7 * i) }
+          name = data[11...-1]
+          return unless ch < 16 && hash == @patch_spec_hash && name.size <= 32 && name.all? { |b| b >= 0x20 && b <= 0x7E }
+          @patch_name[ch] = name + Array.new(32 - name.size, 0)
+          return
+        end
         return unless data.size >= 14 && data[0] == 0xF0 && data[-1] == 0xF7 && data[1, 3] == [0x7D, 0x53, 0x31]
         ch, cmd = data[4], data[5]
         hash = (0...5).sum { |i| data[6 + i] << (7 * i) }

@@ -1,6 +1,6 @@
 ```
-  [MIDI Synthesizer]                                              Date: 2026-11-23                      
-  Model: SPMS-1 (type-2)          MIDI Implementation Chart       Version: 0.7.3                        
+  [MIDI Synthesizer]                                              Date: 2026-11-24                      
+  Model: SPMS-1 (type-2)          MIDI Implementation Chart       Version: 0.8.0                        
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Function...                   | Transmitted   | Recognized    | Remarks                              |
 +-------------------------------+---------------+---------------+--------------------------------------+
@@ -80,10 +80,10 @@
 |                             6 | x             | o             | Data Entry MSB (NRPN value)          |
 |                       101,100 | x             | o             | RPN select: suspends NRPN data entry |
 +-------------------------------+---------------+---------------+--------------------------------------+
-| Program                       | x             | x             |                                      |
-| Change       : True #         | ************* | ************* |                                      |
+| Program                       | x             | o             | 0-7: the programs kept (Save)        |
+| Change       : True #         | ************* | 0-7           |                                      |
 +-------------------------------+---------------+---------------+--------------------------------------+
-| System Exclusive              | x             | o             | Patch (see Patching)                 |
+| System Exclusive              | x             | o             | Patch and name (see Patching)        |
 +-------------------------------+---------------+---------------+--------------------------------------+
 | System       : Song Pos       | x             | x             |                                      |
 | Common       : Song Sel       | x             | x             |                                      |
