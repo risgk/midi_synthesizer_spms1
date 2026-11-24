@@ -259,9 +259,9 @@ or not, as the modules are meant to:
 
 | Version | Note held (avg / max) | No note (avg / max) |
 | :-- | --: | --: |
-| v0.8.0 | 191304 / 191608 cycles, 1245 us (93%) | 190787 / 190982 cycles, 1242 us (93%) |
+| v0.8.1 | 191304 / 191608 cycles, 1245 us (93%) | 190787 / 190982 cycles, 1242 us (93%) |
 
-Putting a program back at a Program Change (`--program-load`, once, while silent, outside the buffer's span): v0.8.0
+Putting a program back at a Program Change (`--program-load`, once, while silent, outside the buffer's span): v0.8.1
 6593 instructions, 10882 cycles, 71 us.
 
 The estimate is above Debug Print on the device: at v0.7.2 and v0.7.1 as at v0.6.1, the synth core being the same; about 10% at v0.7.0
@@ -343,7 +343,7 @@ Basically, a release goes as follows (the dates in JST):
 4. Estimate the load (`sh sim_load/estimate.sh`, with a note held and with `--gate 0`, and
    `--modules`), and replace the tables under Load Estimate with them
    If the default patch or the numbering changed, save "patches/Init-spms1_type2.json" again from the editor
-   (Init, then Save JSON)
+   (Init, then Save in the Patch panel)
 5. Commit as "type-2: Version X.Y.Z"
 6. Run the workflow (above) on develop with "commit_package", for the UF2 files and SPMS-1 Web
 7. Merge develop into main by a pull request, "type-2 vX.Y.Z"

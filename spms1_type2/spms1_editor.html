@@ -138,7 +138,7 @@
     .midi-bar .form-group.narrow {
       flex: 0 0 auto;
     }
-    /* Why a patch file could not be loaded, under Save JSON and Load JSON, until the next load. */
+    /* Why a patch file could not be loaded, under Save and Load, until the next load. */
     .load-error {
       margin: 0 0 6px;
       font-size: 0.85rem;
@@ -1615,7 +1615,7 @@
 <body>
 
 <header>
-  <h1>SPMS-1 (type-2) Editor<span class="version">v0.8.0</span><span class="github-link">(<a href="https://github.com/risgk/midi_synthesizer_spms1" target="_blank" rel="noopener">View on GitHub</a>)</span></h1>
+  <h1>SPMS-1 (type-2) Editor<span class="version">v0.8.1</span><span class="github-link">(<a href="https://github.com/risgk/midi_synthesizer_spms1" target="_blank" rel="noopener">View on GitHub</a>)</span></h1>
   <nav class="tabs">
     <button class="tab-btn active" data-tab="controls">Controls</button>
     <button class="tab-btn" data-tab="patch">Patch</button>
@@ -1657,7 +1657,7 @@
       </div>
       <button class="btn" id="reset-layout" title="Put the panels back where they were at first. A panel is moved by dragging its heading, with the columns two or four to a row, or by its arrows in one column; where they are is kept in this browser, for every patch. Undo puts them back as they were.">Reset Layout</button>
     </div>
-    <button class="btn primary" id="init-values" title="Set each CC value and each value of a parameter with no CC back to what the patch had as it was loaded or saved last (Load JSON, Recall, a Program Change followed, Store, Save to Device, Init), and send them; the wiring is kept. With Shift, to those of Init (the default patch)">Reset Values</button>
+    <button class="btn primary" id="init-values" title="Set each CC value and each value of a parameter with no CC back to what the patch had as it was loaded or saved last (Load, Recall, a Program Change followed, Store, Save to Device, Init), and send them; the wiring is kept. With Shift, to those of Init (the default patch)">Reset Values</button>
   </div>
 </div>
 
@@ -1691,13 +1691,13 @@
         <input type="text" id="patch-name" maxlength="64" title="The synth keeps 32 characters of it with a program, printable ASCII (others as ?)">
       </div>
       <div class="btn-row" style="margin-bottom: 6px;">
-        <button class="btn" id="btn-save">Save JSON</button>
-        <button class="btn" id="btn-load">Load JSON</button>
+        <button class="btn" id="btn-save" title="Save the patch shown to a JSON file, named after it">Save</button>
+        <button class="btn" id="btn-load" title="Put a patch back from a JSON file that Save saved">Load</button>
         <input type="file" id="file-load" accept=".json,application/json" hidden>
       </div>
       <p class="load-error" id="load-error" role="alert" hidden></p>
       <div class="btn-row">
-        <button class="btn" id="btn-undo" title="Take back the last change of the patch shown (an edit, Recall, Load JSON, Init, a Program Change followed), sent to the synth too. The user presets in the browser are brought back by Undo Store (Presets). Ctrl+Z">Undo</button>
+        <button class="btn" id="btn-undo" title="Take back the last change of the patch shown (an edit, Recall, Load, Init, a Program Change followed), sent to the synth too. The user presets in the browser are brought back by Undo Store (Presets). Ctrl+Z">Undo</button>
         <button class="btn" id="btn-redo" title="Make again the change of the patch shown that Undo took back, sent to the synth too. Ctrl+Y">Redo</button>
         <button class="btn" id="btn-init">Init</button>
       </div>
@@ -1728,8 +1728,8 @@
       <div class="btn-row presets-row">
         <button class="btn" id="btn-presets-undo" title="Bring back the user preset that the last Store, Clear (or Save to Device) replaced, in the browser only (not what the synth keeps, nor the patch shown, which Undo in Patch takes back); again to redo it" disabled>Undo Store</button>
         <button class="btn" id="btn-presets-clear" title="Make one of the user presets #0-7 empty, asked for its number (Undo Store brings it back)">Clear</button>
-        <button class="btn" id="btn-presets-import" title="Put the user presets #0-7 back from a file that Export All saved, in place of all of them">Import All</button>
-        <button class="btn" id="btn-presets-export" title="Save the user presets #0-7 to a file, all of them">Export All</button>
+        <button class="btn" id="btn-presets-export" title="Save the user presets #0-7 to a JSON file, all of them">Save All</button>
+        <button class="btn" id="btn-presets-import" title="Put the user presets #0-7 back from a JSON file that Save All saved, in place of all of them">Load All</button>
         <input type="file" id="file-presets" accept=".json,application/json" hidden>
       </div>
       <p class="load-error" id="presets-error" role="alert" hidden></p>
@@ -2204,7 +2204,7 @@
   // What a parameter's control slot holds while it has no CC, as a CC value: NRPN category 4.
   const paramValue = key => (state.paramValues[key] ?? CONTROL[key].defaultValue);
 
-  // As a patch file has it with `saved` (Save JSON), its performance CCs at what they power up at;
+  // As a patch file has it with `saved` (Save), its performance CCs at what they power up at;
   // otherwise as it is, for the history and the browser's copy.
   function serialize(s, saved = false) {
     const used = {};
@@ -3589,7 +3589,7 @@
 
   // Eight patches kept in the browser, #0-7, as the user presets of PRA32-U2 Editor: Store keeps
   // the patch shown as one, with a name asked for (that of the patch, which it becomes), and User
-  // Preset puts one back as Load JSON does (an empty one as Init does, keeping the layout).
+  // Preset puts one back as Load does (an empty one as Init does, keeping the layout).
   const PRESET_KEY = 'spms1-type2-editor-preset-';
   const PRESET_NAME_LENGTH_MAX = 32;  // as the synth keeps a name
   const PRESET_ORDER = [4, 5, 6, 7, 0, 1, 2, 3];
@@ -3756,7 +3756,7 @@
     updatePresetButtons();
   });
 
-  // Export All and Import All: the user presets #0-7 in one file, each as Save JSON writes a patch
+  // Save All and Load All: the user presets #0-7 in one file, each as Save writes a patch
   // (with whether Save to Device wrote it, and the spec hash then), or null for an empty one.
   const PRESETS_FORMAT = 'spms1-type2-presets';
   document.getElementById('btn-presets-export').addEventListener('click', () => {

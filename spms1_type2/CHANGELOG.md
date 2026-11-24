@@ -4,6 +4,10 @@ MIDI Synthesizer SPMS-1 (type-2) Changelog
 The main changes of each version, newest first, gathered before each release. The format may be
 revised.
 
+- v0.8.1 (2026-11-24):
+    - Editor: **Save** and **Load** (Save JSON and Load JSON before), **Save All** and **Load All** (Export All and
+      Import All before), of JSON files
+    - The synth the same as v0.8.0 (the load the same)
 - v0.8.0 (2026-11-24):
     - **Programs #0-7**: Save keeps the patch as the program that NRPN 117/4 (Program) selects, each in a 4 KB sector of
       the flash of its own, with its name (SysEx command 02, 32 bytes of ASCII); **Program Change #0-7** puts a program
