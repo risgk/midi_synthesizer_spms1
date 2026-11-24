@@ -259,11 +259,10 @@ or not, as the modules are meant to:
 
 | Version | Note held (avg / max) | No note (avg / max) |
 | :-- | --: | --: |
-| v0.7.3 | 191276 / 191580 cycles, 1245 us (93%) | 190807 / 191002 cycles, 1242 us (93%) |
-| develop (e348885) | 191304 / 191608 cycles, 1245 us (93%) | 190787 / 190982 cycles, 1242 us (93%) |
+| v0.8.0 | 191304 / 191608 cycles, 1245 us (93%) | 190787 / 190982 cycles, 1242 us (93%) |
 
-Putting a program back at a Program Change (`--program-load`, once, while silent, outside the buffer's span): develop
-(e348885) 6593 instructions, 10882 cycles, 71 us.
+Putting a program back at a Program Change (`--program-load`, once, while silent, outside the buffer's span): v0.8.0
+6593 instructions, 10882 cycles, 71 us.
 
 The estimate is above Debug Print on the device: at v0.7.2 and v0.7.1 as at v0.6.1, the synth core being the same; about 10% at v0.7.0
 (with the input clip of Filter Drive, estimated at 1290 us on average and 1292 us at most: min 1149 us, max 1153 us with I2S,

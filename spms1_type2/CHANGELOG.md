@@ -4,7 +4,7 @@ MIDI Synthesizer SPMS-1 (type-2) Changelog
 The main changes of each version, newest first, gathered before each release. The format may be
 revised.
 
-- v0.8.0 (2026-??-??):
+- v0.8.0 (2026-11-24):
     - **Programs #0-7**: Save keeps the patch as the program that NRPN 117/4 (Program) selects, each in a 4 KB sector of
       the flash of its own, with its name (SysEx command 02, 32 bytes of ASCII); **Program Change #0-7** puts a program
       back, fading the output out and in (about 20 ms of silence); program #0 is loaded at power-on
@@ -26,6 +26,7 @@ revised.
     - "patches/Init-spms1_type2.json": the default patch, Init, as the editor's Save JSON saves it
     - sim_load: `--program-load` counts putting a program back (about 71 us, once, while silent); the tests of the
       programs in CI (sim_render compared with CRuby, and SPMS-1 Web)
+    - The same load as v0.7.3 in the estimate (1245 us a buffer of 1333 us, the default patch with a note held)
 - v0.7.3 (2026-11-23):
     - Built with Arduino-Pico 6.4.0 (6.3.0 before); the same load and RAM in the estimate
     - Filter: The output clip in fewer steps, the same curve (the renders the same), a little lighter
