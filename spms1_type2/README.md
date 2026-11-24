@@ -1,7 +1,17 @@
 MIDI Synthesizer SPMS-1 (type-2) v0.9.0
 =======================================
 
-- Monophonic semi-modular MIDI Synthesizer for Raspberry Pi Pico 2, made with Spinel (Ruby AOT Compiler)
+- MIDI Synthesizer made with Spinel (Ruby AOT Compiler)
+- Developed by ISGK Instruments (Ryo Ishigaki)
+- <https://github.com/risgk/midi_synthesizer_spms1/tree/main/spms1_type2>
+- [日本語版 README](./README.ja.md)
+- [Changelog](./CHANGELOG.md)
+
+
+Features
+--------
+
+- Monophonic semi-modular MIDI Synthesizer for Raspberry Pi Pico 2
 - Controlled by MIDI as a sound module
 - Last-note priority with one note of memory: releasing the newest note while the one before it is still held goes back to that one, legato (for trills)
 - 48 kHz audio output: 24 bit through an I2S DAC, or PWM Audio (no DAC needed)
@@ -15,10 +25,6 @@ MIDI Synthesizer SPMS-1 (type-2) v0.9.0
 - Delay: stereo, with feedback, as a module in the run order (up to 340 ms)
 - Pitch: the note's pitch as a module in the run order, with portamento as an exponential lag (CC#5), pitch bend past it (range on CC#57) and a stretch of the keys (CC#22)
 - Stereo output: the chorus spreads the mono voice into a left and a right, and the delay keeps them apart
-- Developed by ISGK Instruments (Ryo Ishigaki)
-- <https://github.com/risgk/midi_synthesizer_spms1>
-- [日本語版 README](./README.ja.md)
-- [Changelog](./CHANGELOG.md)
 
 
 Required Hardware

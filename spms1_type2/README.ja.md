@@ -1,7 +1,17 @@
 MIDI Synthesizer SPMS-1 (type-2) v0.9.0
 =======================================
 
-- Spinel (Ruby AOT コンパイラ) で作った、Raspberry Pi Pico 2 用のモノフォニック・セミモジュラー MIDI シンセサイザー
+- Spinel (Ruby AOT コンパイラ) で作った MIDI シンセサイザー
+- 開発: ISGK Instruments (Ryo Ishigaki)
+- <https://github.com/risgk/midi_synthesizer_spms1/tree/main/spms1_type2>
+- [English README](./README.md) (英語版が正です)
+- [変更履歴 (Changelog)](./CHANGELOG.md) (英語)
+
+
+特徴
+----
+
+- Raspberry Pi Pico 2 用のモノフォニック・セミモジュラー MIDI シンセサイザー
 - 音源モジュールとして MIDI で制御します
 - 後着優先で 1 ノート分を記憶: 前のノートを押さえたまま新しいノートを離すと、前のノートにレガートで戻ります (トリルなどに)
 - 48 kHz オーディオ出力: I2S DAC による 24 bit、または PWM Audio (DAC 不要)
@@ -15,10 +25,6 @@ MIDI Synthesizer SPMS-1 (type-2) v0.9.0
 - ディレイ: ステレオ、フィードバック付き、実行順に入るモジュール (最大 340 ms)
 - ピッチ: ノートのピッチを扱う、実行順に入るモジュール。指数カーブのラグによるポルタメント (CC#5)、その後に足すピッチベンド、鍵盤のストレッチ (ベンドレンジは CC#57、ストレッチは CC#22)
 - ステレオ出力: コーラスがモノラルの音を左右に広げ、ディレイが左右を分けたまま運びます
-- 開発: ISGK Instruments (Ryo Ishigaki)
-- <https://github.com/risgk/midi_synthesizer_spms1>
-- [English README](./README.md) (英語版が正です)
-- [変更履歴 (Changelog)](./CHANGELOG.md) (英語)
 
 
 必要なハードウェア
