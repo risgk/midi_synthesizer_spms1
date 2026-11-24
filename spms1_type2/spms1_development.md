@@ -259,9 +259,9 @@ or not, as the modules are meant to:
 
 | Version | Note held (avg / max) | No note (avg / max) |
 | :-- | --: | --: |
-| v0.8.0 | 191304 / 191608 cycles, 1245 us (93%) | 190787 / 190982 cycles, 1242 us (93%) |
+| v0.8.1 | 191304 / 191608 cycles, 1245 us (93%) | 190787 / 190982 cycles, 1242 us (93%) |
 
-Putting a program back at a Program Change (`--program-load`, once, while silent, outside the buffer's span): v0.8.0
+Putting a program back at a Program Change (`--program-load`, once, while silent, outside the buffer's span): v0.8.1
 6593 instructions, 10882 cycles, 71 us.
 
 The estimate is above Debug Print on the device: at v0.7.2 and v0.7.1 as at v0.6.1, the synth core being the same; about 10% at v0.7.0
