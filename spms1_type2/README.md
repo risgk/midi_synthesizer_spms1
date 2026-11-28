@@ -223,8 +223,9 @@ its programs #0-7, which Program Change #0-7 puts back.
       page was opened are followed. Clear (next to it) makes the program selected not kept in the synth (NRPN Clear)
     - It sends the name of the patch (as SysEx) with the whole patch and whenever it changes, so that the synth's,
       which its Debug Print shows, is the one shown; not after a Program Change it does not follow, until Send Patch
-    - It does not read the patch from the synth (e.g. the one saved, which the synth loads at power-on): the synth
-      takes the editor's when a device is chosen in "MIDI Out", or by Send Patch, in place of its own
+    - Get Patch gets the patch that the synth has (e.g. the one saved, which the synth loads at power-on, or after a
+      Program Change) by MIDI In (NRPN Dump; the name by SysEx, where the browser allows it); Undo goes back, and sends it.
+      Otherwise the synth takes the editor's when a device is chosen in "MIDI Out", or by Send Patch, in place of its own
     - The side panels (Patch, Run Order, Export) fold to their headings with a click, each remembered;
       with all three folded, the canvas takes the width they leave
 - SPMS-1 (type-2) Web (SPMS-1 Web for short): the synth itself, built into the editor ("spms1_web_synth.js")

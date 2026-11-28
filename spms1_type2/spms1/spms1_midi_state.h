@@ -68,7 +68,8 @@ uint32_t g_midi_run_order_written[16][SPMS1_RUN_ORDER_SIZE] = {{0}};
 // Load, puts that program back, both only while Mute is on, so that no stray message saves or
 // loads (see the patch image below); entry 4, Program, gives the program #0-7 that the next Save
 // or Load acts on (0-7; 8-127 are ignored), #0 again after it; entry 5, Clear, makes that program
-// not kept at 64-127, only while Mute is on, as Save.
+// not kept at 64-127, only while Mute is on, as Save; entry 6, Dump, sends the patch of the channel
+// back at 64-127 (see spms1_request_dump below), by the host that can.
 #define SPMS1_NRPN_SYSTEM_MSB     (SPMS1_NRPN_MSB_BASE + 5)
 #define SPMS1_NRPN_SYSTEM_MUTE    (0)
 #define SPMS1_NRPN_SYSTEM_RESET   (1)
@@ -76,6 +77,7 @@ uint32_t g_midi_run_order_written[16][SPMS1_RUN_ORDER_SIZE] = {{0}};
 #define SPMS1_NRPN_SYSTEM_LOAD    (3)
 #define SPMS1_NRPN_SYSTEM_PROGRAM (4)
 #define SPMS1_NRPN_SYSTEM_CLEAR   (5)
+#define SPMS1_NRPN_SYSTEM_DUMP    (6)
 // Mute, and how many times Mute on has arrived, which the synth tells apart by the count changing,
 // so that a Mute on is never missed, however soon Mute off follows it.
 uint8_t  g_midi_mute[16]            = {0};
@@ -460,6 +462,20 @@ SPMS1_RAM_FUNC int32_t get_midi_save_count(uint8_t midi_ch) {
   return (int32_t)g_midi_save_count[midi_ch];
 }
 
+// Dump (NRPN 117/6): the host sends the patch of the channel back, as the editor sends a patch,
+// so that the editor can get it: the run order, the slots never written first and then the others
+// in the order that they were written (so that the last write still wins where two name one module),
+// the other entries of the patch (g_spms1_patch_entries) by NRPN, the values of the CCs that the
+// controls have (but those of the NRPN and the Channel Mode), and the name by SysEx. The sketch
+// sends them by the port that Dump came from (see spms1.ino); the simulators and SPMS-1 Web, which
+// send no MIDI, do nothing.
+void spms1_request_dump(uint8_t midi_ch);
+#if !defined(SPMS1_DUMP_PROVIDED)
+void spms1_request_dump(uint8_t midi_ch) {
+  (void)midi_ch;
+}
+#endif  // !defined(SPMS1_DUMP_PROVIDED)
+
 // The system entries of NRPN category 5.
 void handle_midi_nrpn_system(uint8_t midi_ch, uint8_t lsb, uint8_t value) {
   if (lsb == SPMS1_NRPN_SYSTEM_MUTE) {
@@ -487,6 +503,8 @@ void handle_midi_nrpn_system(uint8_t midi_ch, uint8_t lsb, uint8_t value) {
     g_spms1_patch_image_program = g_midi_program_target[midi_ch];
     g_midi_program_target[midi_ch] = 0;
     ++g_midi_save_count[midi_ch];
+  } else if (lsb == SPMS1_NRPN_SYSTEM_DUMP && value >= 64) {
+    spms1_request_dump(midi_ch);
   }
 }
 

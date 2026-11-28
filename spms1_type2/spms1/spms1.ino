@@ -155,7 +155,23 @@ extern int sp_gc_nroots;
 // The MIDI tables the synth reads, and the handlers that fill them, shared with the simulators.
 // The patch images are kept in the flash here, below, not in RAM.
 #define SPMS1_STORAGE_PROVIDED
+#define SPMS1_DUMP_PROVIDED
 #include "spms1_midi_state.h"
+
+// Dump (NRPN 117/6, see spms1_midi_state.h): asked here, by the port that it came from (1: USB MIDI,
+// 2: UART MIDI, as the handlers of each set g_spms1_midi_rx_port before they pass a message on), and
+// sent by loop(), a part a loop (spms1ProcessDump). One asked while one is being sent is ignored.
+uint8_t g_spms1_midi_rx_port = 0;
+uint8_t g_spms1_dump_ports   = 0;  // 0 while none is being sent
+uint8_t g_spms1_dump_ch      = 0;
+
+void spms1_request_dump(uint8_t midi_ch) {
+  if (g_spms1_dump_ports != 0 || midi_ch >= 16) {
+    return;
+  }
+  g_spms1_dump_ch    = midi_ch;
+  g_spms1_dump_ports = g_spms1_midi_rx_port ? g_spms1_midi_rx_port : 3;
+}
 
 // The programs' sectors, SPMS1_PROGRAMS of them, below the file system: none if the sketch reaches
 // them (then nothing is kept, and Save does nothing). Read where they are, through the XIP cache:
@@ -322,6 +338,134 @@ SPMS1_RAM_FUNC void stop_debug_measure(void) {
 
 }
 
+// The parts of a Dump, a part a loop (about 1 ms): the run order (32 slots), the other entries of
+// the patch (g_spms1_patch_entries), each as NRPN (CC 99 only when the category changes, CC 98 and
+// CC 6), then the values of the CCs that the controls have, a CC each, then the name, a SysEx.
+// Each part waits while UART MIDI has no room for it (9 bytes), so that loop() never waits for it.
+#define SPMS1_DUMP_RUN_ORDER (SPMS1_RUN_ORDER_SIZE)
+#define SPMS1_DUMP_ENTRIES   (SPMS1_DUMP_RUN_ORDER + (int32_t)(sizeof(g_spms1_patch_entries) / sizeof(g_spms1_patch_entries[0])))
+#define SPMS1_DUMP_CCS       (SPMS1_DUMP_ENTRIES + 128)
+
+void spms1SendControlChange(uint8_t number, uint8_t value) {
+#if defined(SPMS1_USE_USB_MIDI)
+  if (g_spms1_dump_ports & 1) {
+    USB_MIDI.sendControlChange(number, value, g_spms1_dump_ch + 1);
+  }
+#endif  // defined(SPMS1_USE_USB_MIDI)
+#if defined(SPMS1_USE_UART_MIDI)
+  if (g_spms1_dump_ports & 2) {
+    UART_MIDI.sendControlChange(number, value, g_spms1_dump_ch + 1);
+  }
+#endif  // defined(SPMS1_USE_UART_MIDI)
+}
+
+void spms1ProcessDump() {
+  static int32_t s_part = 0;
+  static uint8_t s_msb = 0xFF;
+  static uint8_t s_order[SPMS1_RUN_ORDER_SIZE];
+  static uint8_t s_ccs_sent[128 / 8];
+  if (g_spms1_dump_ports == 0) {
+    return;
+  }
+#if defined(SPMS1_USE_UART_MIDI)
+  if ((g_spms1_dump_ports & 2) && (SPMS1_UART_MIDI_SERIAL.availableForWrite() < 9)) {
+    return;
+  }
+#endif  // defined(SPMS1_USE_UART_MIDI)
+  const uint8_t ch = g_spms1_dump_ch;
+
+  if (s_part == 0) {
+    // The run order slots never written (0) first, and then the others in the order they were written
+    uint32_t n = 0;
+    for (int32_t slot = 0; slot < SPMS1_RUN_ORDER_SIZE; ++slot) {
+      if (g_midi_run_order_written[ch][slot] == 0) {
+        s_order[n++] = (uint8_t)slot;
+      }
+    }
+    uint32_t last = 0;
+    while (n < SPMS1_RUN_ORDER_SIZE) {
+      uint32_t next = UINT32_MAX;
+      int32_t next_slot = -1;
+      for (int32_t slot = 0; slot < SPMS1_RUN_ORDER_SIZE; ++slot) {
+        uint32_t written = g_midi_run_order_written[ch][slot];
+        if (written > last && written < next) {
+          next = written;
+          next_slot = slot;
+        }
+      }
+      if (next_slot < 0) {
+        break;
+      }
+      s_order[n++] = (uint8_t)next_slot;
+      last = next;
+    }
+    s_msb = 0xFF;
+    for (uint32_t i = 0; i < sizeof(s_ccs_sent); ++i) {
+      s_ccs_sent[i] = 0;
+    }
+  }
+
+  if (s_part < SPMS1_DUMP_ENTRIES) {
+    int32_t nrpn = (s_part < SPMS1_DUMP_RUN_ORDER) ? s_order[s_part] : g_spms1_patch_entries[s_part - SPMS1_DUMP_RUN_ORDER];
+    uint8_t msb = (uint8_t)(SPMS1_NRPN_MSB_BASE + (nrpn >> 7));
+    if (msb != s_msb) {
+      spms1SendControlChange(99, msb);
+      s_msb = msb;
+    }
+    spms1SendControlChange(98, (uint8_t)(nrpn & 0x7F));
+    spms1SendControlChange(6, g_midi_nrpn_values[ch][nrpn]);
+    ++s_part;
+    return;
+  }
+
+  // The CCs of the controls (category 3), each once, but those of the NRPN and the Channel Mode
+  while (s_part < SPMS1_DUMP_CCS) {
+    int32_t i = s_part - SPMS1_DUMP_ENTRIES;
+    ++s_part;
+    if (i >= 128) {
+      break;
+    }
+    uint8_t cc = g_midi_nrpn_values[ch][384 + i];
+    if (cc == 0 || cc >= 120 || cc == 6 || cc == 38 || cc == 98 || cc == 99 || cc == 100 || cc == 101 ||
+        (s_ccs_sent[cc >> 3] & (1 << (cc & 7)))) {
+      continue;
+    }
+    s_ccs_sent[cc >> 3] |= (uint8_t)(1 << (cc & 7));
+    spms1SendControlChange(cc, g_midi_cc_values[ch][cc]);
+    return;
+  }
+
+  // The name, as the SysEx of command 02 (see spms1_midi_state.h)
+  uint8_t sysex[SPMS1_SYSEX_NAME_HEADER + SPMS1_PATCH_NAME_SIZE + 1] = {
+    0xF0, 0x7D, 0x53, 0x31, ch, SPMS1_SYSEX_CMD_NAME,
+    (uint8_t)(SPMS1_PATCH_SPEC_HASH & 0x7F), (uint8_t)((SPMS1_PATCH_SPEC_HASH >> 7) & 0x7F),
+    (uint8_t)((SPMS1_PATCH_SPEC_HASH >> 14) & 0x7F), (uint8_t)((SPMS1_PATCH_SPEC_HASH >> 21) & 0x7F),
+    (uint8_t)((SPMS1_PATCH_SPEC_HASH >> 28) & 0x7F),
+  };
+  uint32_t size = SPMS1_SYSEX_NAME_HEADER;
+  for (uint32_t i = 0; i < SPMS1_PATCH_NAME_SIZE; ++i) {
+    uint8_t c = g_spms1_patch_name[ch][i];
+    if (c < 0x20 || c > 0x7E) {
+      break;
+    }
+    sysex[size++] = c;
+  }
+  sysex[size++] = 0xF7;
+#if defined(SPMS1_USE_USB_MIDI)
+  if (g_spms1_dump_ports & 1) {
+    USB_MIDI.sendSysEx(size, sysex, true);
+  }
+#endif  // defined(SPMS1_USE_USB_MIDI)
+#if defined(SPMS1_USE_UART_MIDI)
+  if (g_spms1_dump_ports & 2) {
+    UART_MIDI.sendSysEx(size, sysex, true);
+  }
+#endif  // defined(SPMS1_USE_UART_MIDI)
+
+  s_part = 0;
+  g_spms1_dump_ports = 0;
+}
+
 void setup1() {
   // The synth runs on this core, with flush-to-zero: a denormal result is 0.0, so a smoothing stage
   // or a decaying state heading for 0.0 lands on it rather than sinking into the denormals (see
@@ -389,6 +533,7 @@ void loop() {
   // 1 byte per read(), as UART_MIDI below: 4 bytes per loop (1 ms or a little more) keep up with
   // what 31250 bps brings, about 3.2 bytes, so USB MIDI is at least as fast as the UART
   mutex_enter_blocking(&__usb_mutex);
+  g_spms1_midi_rx_port = 1;
   for (uint32_t i = 0; i < 4; i++) {
     USB_MIDI.read();
   }
@@ -398,10 +543,21 @@ void loop() {
 #if defined(SPMS1_USE_UART_MIDI)
   // The MIDI Library parses 1 byte per read(), and up to about 3.2 bytes arrive per loop (1 ms or
   // a little more) at 31250 bps, so read 8 bytes per loop not to overflow the receive FIFO
+  g_spms1_midi_rx_port = 2;
   for (uint32_t i = 0; i < 8; i++) {
     UART_MIDI.read();
   }
 #endif  // defined(SPMS1_USE_UART_MIDI)
+  g_spms1_midi_rx_port = 0;
+
+  // A Dump asked (see spms1ProcessDump), a part a loop
+#if defined(SPMS1_USE_USB_MIDI)
+  mutex_enter_blocking(&__usb_mutex);
+#endif  // defined(SPMS1_USE_USB_MIDI)
+  spms1ProcessDump();
+#if defined(SPMS1_USE_USB_MIDI)
+  mutex_exit(&__usb_mutex);
+#endif  // defined(SPMS1_USE_USB_MIDI)
 
 #if defined(SPMS1_USE_DEBUG_PRINT)
   static uint8_t s_loop_counter = 0;

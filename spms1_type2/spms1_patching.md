@@ -335,7 +335,7 @@ F0 7D 53 31 ch 01 h0 h1 h2 h3 h4 category entry value ... F7
 | 114 (2) | 0-94, 98 | Where a parameter takes its value | Signal ID, or 127 for its own control slot |
 | 115 (3) | 0-98 | Which CC fills a control slot | CC number, or 0 for none |
 | 116 (4) | 0-95, 98-100 | What a control slot holds while it has no CC, but the Mod Wheel's and Breath's | CC value |
-| 117 (5) | 0-5 | System: Mute, Reset, Save, Load, Program, Clear (below), not a part of the patch | 0-63 or 64-127; 0-7 for Program |
+| 117 (5) | 0-6 | System: Mute, Reset, Save, Load, Program, Clear, Dump (below), not a part of the patch | 0-63 or 64-127; 0-7 for Program |
 
 Category 5 has the system entries, which act on the synth rather than set a part of the patch:
 
@@ -373,6 +373,14 @@ Category 5 has the system entries, which act on the synth rather than set a part
 - Entry 5, Clear: 64-127, while Mute is on, makes the program that entry 4 gives not kept: a Program
   Change to it changes nothing, and #0 cleared leaves the default patch at power-on. It is written
   as Save writes, once the output is silent, stopping the synth and the MIDI input for about 0.1 s
+- Entry 6, Dump: 64-127 sends the patch of the channel back, by the port that it came from (USB MIDI
+  or UART MIDI), as the editor sends a patch, so that the editor's Get Patch takes it: the run order
+  (the slots never written first, and then the others in the order that they were written, so that
+  the last write still wins), every other entry of categories 0-4 by NRPN, the values of the CCs
+  that the controls have (not CC#6, 38 and 98-101, nor 120-127), and the name (SysEx command 02),
+  a part a loop of the sketch (about 1 ms; about 0.5 s in all, more by UART MIDI, which it waits
+  for). No Mute: what comes back to the synth (through the editor's MIDI Out) is the same patch,
+  which changes nothing. One asked while one is being sent is ignored; SPMS-1 Web sends none
 
 The run order is read from slot 0 upwards and stops at the first Module ID 0, so a patch shorter
 than 32 modules ends itself. It is separate from the module numbering: a module only sees the

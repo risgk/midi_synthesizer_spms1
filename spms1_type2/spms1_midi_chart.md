@@ -100,6 +100,9 @@
 |              : Reset          | x             | x             |                                      |
 +-------------------------------+---------------+---------------+--------------------------------------+
 | Notes                         | Control Change 4-124, centered on 64. NRPN is 7-bit, CC 6 only.      |
+|                               | Dump (NRPN 117/6) transmits the patch as the editor sends one: NRPN  |
+|                               | (CC 99, 98 and 6), the CC values and the name (SysEx), by the port   |
+|                               | that it came from (see Patching)                                     |
 +-------------------------------+----------------------------------------------------------------------+
   Mode 1: Omni On,  Poly          Mode 2: Omni On,  Mono          o: Yes                                
   Mode 3: Omni Off, Poly          Mode 4: Omni Off, Mono          x: No                                 

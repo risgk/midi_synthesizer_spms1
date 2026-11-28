@@ -4,6 +4,10 @@ MIDI Synthesizer SPMS-1 (type-2) Changelog
 The main changes of each version, newest first, gathered before each release. The format may be
 revised.
 
+- v0.9.1 (2026-??-??):
+    - **Dump** (NRPN 117/6): the synth sends its patch back (the NRPN entries, the CC values and the name), by the port
+      that it came from; **Get Patch** of the editor gets it by MIDI In (Undo goes back)
+
 - v0.9.0 (2026-11-24):
     - Built with **Spinel 2026.10.25** (2026.09.12 before): the runtime taken in with the MCU's patch carried over;
       the renders the same, sample for sample; the load about the same (estimated: 1245 us to 1248 us a buffer of

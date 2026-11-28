@@ -318,6 +318,13 @@ def default_patch_h
   s.valued.each { |c| nrpn << [NRPN_VALUE_BASE + c['entry'], c['value'], "#{s.full_label(c)} value"] }
   out = []
   saved_cc = s.controls.reject { |c| c['performance'] }.map { |c| c['entry'] }
+  # The entries of the patch but the run order's, as the editor sends them: each input's, each
+  # parameter's source, each control's CC and each value
+  entries = s.inputs.map { |i| NRPN_INPUT_BASE + i['entry'] } +
+            s.params.map { |c| NRPN_PARAM_SOURCE_BASE + c['entry'] } +
+            s.controls.map { |c| NRPN_CC_BASE + c['entry'] } +
+            s.valued.map { |c| NRPN_VALUE_BASE + c['entry'] }
+  entries = entries.uniq.sort
   out << <<~C
     /*
      * Generated from spms1_patch.yaml by patch_gen/spms1_patch_gen.rb. Do not edit; change the YAML
@@ -340,6 +347,12 @@ def default_patch_h
     // performance controls', whose CCs are saved at 0.
     static const uint8_t g_spms1_saved_cc_entries[] = {
     #{saved_cc.each_slice(16).map { |row| '  ' + row.join(', ') }.join(",\n")}
+    };
+
+    // The NRPN parameter numbers (category << 7 | LSB) of the patch but the run order's (categories
+    // 1-4): those that Dump sends (see spms1_midi_state.h)
+    static const uint16_t g_spms1_patch_entries[] = {
+    #{entries.each_slice(12).map { |row| '  ' + row.join(', ') }.join(",\n")}
     };
 
     // NRPN parameter number (category << 7 | LSB), value

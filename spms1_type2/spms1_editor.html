@@ -1641,6 +1641,7 @@
       </select>
     </div>
     <button class="btn primary" id="btn-send" title="Send the whole patch again: NRPN and CC values, between Mute on and off. Every change is sent as it is made.">Send Patch</button>
+    <button class="btn" id="btn-get" title="Get the patch that the synth has by MIDI In (NRPN Dump): the NRPN entries, the CC values and the name (the name by SysEx only, if the browser allows it). Undo goes back (and sends it)">Get Patch</button>
     <button class="btn" id="btn-mute" aria-pressed="false" title="Mute the synth (NRPN Mute), to change its patch unheard; turned off, it sounds again about 15 ms later">Mute</button>
   </div>
   <div class="midi-note" id="midi-note" hidden></div>
@@ -4084,6 +4085,10 @@
   function onMIDIMessage(event) {
     const data = event.data;
     if (midiOutput) midiOutput.send(data);
+    if (data[0] === 0xF0) {
+      receiveName(data);
+      return;
+    }
     const cmd = data[0] & 0xF0;
     if (cmd >= 0x80 && cmd <= 0xE0) trackNote(data[0] & 0x0F, data[0], data[1], data[2]);
     if ((data[0] & 0x0F) !== exportOptions().ch) return;
@@ -4125,6 +4130,48 @@
   // spms1_midi_state.h, so the patch shown stays the one the synth was passed.
   const nrpnSelect = { msb: 0, lsb: 0, selected: false };
 
+  // Get Patch: NRPN Dump (117/6) to the synth, which sends its patch back as the editor sends one
+  // (the NRPN entries and the CC values, which come in as any others, below, and the name by SysEx);
+  // a message if none comes in a second (e.g. no MIDI In from the synth, or SPMS-1 Web, which sends none).
+  let dumpWaiting = false;
+  let dumpTimer = null;
+  function getPatch() {
+    if (!midiOutput || !midiInput) {
+      alert('Select MIDI In and MIDI Out of the synth.');
+      return;
+    }
+    pushHistory(undefined, true);
+    dumpWaiting = true;
+    clearTimeout(dumpTimer);
+    dumpTimer = setTimeout(() => {
+      if (dumpWaiting) {
+        dumpWaiting = false;
+        alert('No answer from the synth: check MIDI In and the MIDI channel.');
+      }
+    }, 1000);
+    const st = 0xB0 | exportOptions().ch;
+    midiOutput.send([st, 99, NRPN_SYSTEM_MSB, st, 98, 6, st, 6, 127]);
+  }
+  function dumpArrived() {
+    if (!dumpWaiting) return;
+    dumpWaiting = false;
+    markProgramPutBack(false);  // The patch shown is the synth's
+  }
+
+  // The name of the patch from MIDI In (SysEx command 02, e.g. by Get Patch), for this sketch's numbers
+  function receiveName(data) {
+    const ch = exportOptions().ch;
+    const hash = SPEC.specHash;
+    const head = [0xF0, 0x7D, 0x53, 0x31, ch, 0x02, hash & 0x7F, (hash >>> 7) & 0x7F, (hash >>> 14) & 0x7F, (hash >>> 21) & 0x7F, (hash >>> 28) & 0x7F];
+    if (data.length < head.length + 1 || data[data.length - 1] !== 0xF7 || head.some((b, i) => data[i] !== b)) return;
+    const name = String.fromCharCode(...data.slice(head.length, -1));
+    state.name = name;
+    nameInput.value = name;
+    nameOnSynth = nameBytes(name);
+    updateExport();
+    saveLocal();
+  }
+
   function receiveNRPN(cc, value) {
     if (cc === 99) {
       nrpnSelect.msb = value;
@@ -4141,6 +4188,7 @@
       else if (nrpnSelect.lsb === 1 && value >= 64) receiveReset();
       else if (nrpnSelect.lsb === 4 && value < 8) devicePrograms.selectedIndex = value;
     } else if (cc === 6 && nrpnSelect.selected && nrpnSelect.msb >= NRPN_MSB_BASE) {
+      dumpArrived();
       applyNRPN(((nrpnSelect.msb - NRPN_MSB_BASE) << 7) | nrpnSelect.lsb, value);
     }
   }
@@ -4382,6 +4430,7 @@
   document.getElementById('midi-out').addEventListener('change', () => { handleDeviceChange(); saveMIDISettings(); });
   chSelect.addEventListener('change', () => { lastSent = null; nrpnSelect.selected = false; updateExport(); refreshNoteNode(); saveMIDISettings(); sendChanges(); });
   document.getElementById('btn-send').addEventListener('click', sendAll);
+  document.getElementById('btn-get').addEventListener('click', getPatch);
   document.getElementById('btn-mute').addEventListener('click', () => setUserMute(!userMuted, true));
 
   // Save to Device: the patch shown, kept in the synth's flash. The whole patch goes first, as
