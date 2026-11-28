@@ -219,7 +219,8 @@ its programs #0-7, which Program Change #0-7 puts back.
       arriving at MIDI In: the user preset of the number, if Save to Device wrote it (and Store has not written it
       since, and with an editor of the same version or one numbered alike), is shown as the synth has it, with nothing sent, so that the patch is edited from there; otherwise the
       patch shown stays as it is, the changes made after it go to that program, and Send Patch, marked with a dashed line
-      until it is pressed, puts the patch shown on the synth. With SPMS-1 Web, only the programs saved to it since the
+      until it is pressed, puts the patch shown on the synth; Get Patch gets the synth's instead, also where the patch shown
+      may not be the synth's (e.g. saved there from another editor). With SPMS-1 Web, only the programs saved to it since the
       page was opened are followed. Clear (next to it) makes the program selected not kept in the synth (NRPN Clear)
     - It sends the name of the patch (as SysEx) with the whole patch and whenever it changes, so that the synth's,
       which its Debug Print shows, is the one shown; not after a Program Change it does not follow, until Send Patch

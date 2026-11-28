@@ -1706,7 +1706,7 @@
         <select id="device-program" aria-label="Program" title="The program of the synth, #0-7, that Save to Device and Program Change act on; the synth loads #0 at power-up"></select>
         <button class="btn" id="btn-save-device" title="Keep the patch in the synth's flash as the program selected (NRPN Program and Save, between Mute on and off), in place of the one kept there, and in the browser as the user preset of the same number. The sound stops for about 0.1 s.">Save to Device</button>
         <button class="btn" id="btn-clear-device" title="Make the program selected not kept in the synth's flash (NRPN Program and Clear, between Mute on and off): a Program Change to it changes nothing, and #0 cleared leaves the default patch at power-on. The user preset of the number is kept, no longer as on the synth. The sound stops for about 0.1 s.">Clear</button>
-        <button class="btn" id="btn-pc-device" title="Send Program Change: the synth puts the program selected back, if it keeps one, fading the sound out and in (wait about 30 ms before sending CCs or NRPN). If Save to Device saved it from here, the user preset of the number, which it wrote too, is shown as the synth has it; otherwise the patch shown stays as it is, the changes made here go to that program, and Send Patch puts the patch shown on the synth.">Program Change</button>
+        <button class="btn" id="btn-pc-device" title="Send Program Change: the synth puts the program selected back, if it keeps one, fading the sound out and in (wait about 30 ms before sending CCs or NRPN). If Save to Device saved it from here, the user preset of the number, which it wrote too, is shown as the synth has it; otherwise the patch shown stays as it is, the changes made here go to that program, and Send Patch puts the patch shown on the synth. Get Patch gets the program put back, as the synth has it.">Program Change</button>
       </div>
       <p class="hint" style="margin-top: 8px;">
         MIDI In goes on to the synth; a CC moves every slot it is assigned to. Connect by dragging (or
@@ -4366,7 +4366,7 @@
     const button = document.getElementById('btn-send');
     button.classList.toggle('differs', on);
     button.title = on
-      ? 'The synth has the program put back by Program Change, not the patch shown: changes made here go to that program. Send the whole patch shown to the synth: NRPN and CC values, between Mute on and off.'
+      ? 'The synth has the program put back by Program Change, not the patch shown: changes made here go to that program. Send the whole patch shown to the synth: NRPN and CC values, between Mute on and off. Get Patch gets the synth\'s instead.'
       : 'Send the whole patch again: NRPN and CC values, between Mute on and off. Every change is sent as it is made.';
   }
 
