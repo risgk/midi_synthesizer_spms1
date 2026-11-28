@@ -224,7 +224,7 @@ its programs #0-7, which Program Change #0-7 puts back.
     - It sends the name of the patch (as SysEx) with the whole patch and whenever it changes, so that the synth's,
       which its Debug Print shows, is the one shown; not after a Program Change it does not follow, until Send Patch
     - Get Patch gets the patch that the synth has (e.g. the one saved, which the synth loads at power-on, or after a
-      Program Change) by MIDI In (NRPN Dump; the name by SysEx, where the browser allows it); Undo goes back, and sends it.
+      Program Change) by MIDI In (NRPN Dump, and the name by SysEx); Undo goes back, and sends it.
       Otherwise the synth takes the editor's when a device is chosen in "MIDI Out", or by Send Patch, in place of its own
     - The side panels (Patch, Run Order, Export) fold to their headings with a click, each remembered;
       with all three folded, the canvas takes the width they leave
